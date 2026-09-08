@@ -340,6 +340,10 @@ describe("w10-7 §5.3 — pinned asymmetry: the worker-board need is REDUCED", (
       // of the gated RPC row it builds from.
       "languageRequirementUnknown",
       "needSource",
+      // 2026-09-04 (owner contract §15): the DECLARED opportunity type rides
+      // the board need for DISCOVERY ("kur galiu atlikti praktiką?" → only
+      // internships). Carried, never a matching input; null when not stated.
+      "opportunityType",
       "professionSlug",
       "skillIds",
       "structuredV2",

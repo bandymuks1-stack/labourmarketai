@@ -11,8 +11,28 @@ import type { DemandLifecycleResult } from "@/lib/demand/demand-lifecycle";
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction } from "@/lib/projects/actions";
-import { inviteClientAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
+import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionResult } from "@/lib/projects/actions";
+import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
+import { inviteCompanyWorkerAction } from "@/lib/company/actions";
+import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
+import { updateStageStatusAction } from "@/lib/projects/stages-actions";
+import { seedReadinessItemsAction, upsertReadinessItemAction } from "@/lib/projects/operations-actions";
+import { getProjectOperations } from "@/lib/projects/operations";
+import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { sendWorkInstructionAction } from "@/lib/instructions/actions";
+import { quickConfirmEntry } from "@/lib/journal/quick-confirm-actions";
+import { setEngagementJournalReview } from "@/lib/operations/org-membership";
+import { getTranslations } from "next-intl/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import {
+  createCohortAction,
+  createProgramAction,
+  setCohortMemberAction,
+  type ProgramActionState,
+} from "@/lib/education/program-actions";
+import { createAndSendInvitations } from "@/lib/invitations/actions";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { z } from "zod";
 
 import {
@@ -74,6 +94,10 @@ function mapLifecycle(r: DemandLifecycleResult): ExecResult {
   if (r.kind === "ok") {
     return { ok: true, data: r.status ? { status: r.status } : undefined };
   }
+  if (r.kind === "over-limit") {
+    // The same honest codes the create path uses (upgrade / individual plan).
+    return { ok: false, code: r.next === "individual_plan" ? "over_open_need_limit_individual" : "over_open_need_limit_upgrade" };
+  }
   return {
     ok: false,
     code: mapKind(r.kind),
@@ -130,6 +154,8 @@ export const COMPANY_EXECUTORS: {
           // Sent as a string because the draft payload is string-only.
           teamSize:
             input.teamSize == null ? undefined : String(input.teamSize),
+          // The declared opportunity type survives the draft leg too.
+          opportunityType: input.opportunityType ?? undefined,
           notes: input.notes ?? undefined,
         });
         return row
@@ -151,11 +177,33 @@ export const COMPANY_EXECUTORS: {
       teamSize: input.teamSize ?? undefined,
       accommodation: input.accommodation ?? undefined,
       transport: input.transport ?? undefined,
+      // Declared opportunity type → the structured cluster the worker board
+      // and the Learning Compass read (`payload.structured_v2`). Absent when
+      // the employer stated none — nothing is inferred.
+      structuredV2:
+        input.opportunityType || input.startDate || input.endDate
+          ? {
+              ...(input.opportunityType ? { opportunity_type: input.opportunityType } : {}),
+              ...(input.startDate || input.endDate
+                ? {
+                    time: {
+                      ...(input.startDate ? { start_earliest: input.startDate } : {}),
+                      ...(input.endDate ? { end_date: input.endDate } : {}),
+                    },
+                  }
+                : {}),
+            }
+          : undefined,
     });
     // The REAL id + status come from the canonical action — never invented.
-    return r.ok
-      ? { ok: true, data: { requestId: r.requestId, status: "submitted" } }
-      : { ok: false, code: r.code };
+    if (r.ok) return { ok: true, data: { requestId: r.requestId, status: "submitted" } };
+    // Owner launch pricing 2026-09-05: the open-needs ceiling names the honest
+    // way forward — the €99 plan, or the individual plan above the paid
+    // ceiling. Nothing is charged, upgraded or created on the person's behalf.
+    if (r.code === "over_open_need_limit") {
+      return { ok: false, code: r.next === "individual_plan" ? "over_open_need_limit_individual" : "over_open_need_limit_upgrade" };
+    }
+    return { ok: false, code: r.code };
   },
 
   "company.confirm-need": async (input, ctx) =>
@@ -226,13 +274,212 @@ export const COMPANY_EXECUTORS: {
       : { ok: false, code: r.code, message: r.message };
   },
 
-  "agency.invite-client": async (input) =>
-    mapBridge(
-      await inviteClientAction(
-        { status: "idle" },
-        fd({ agencyCompanyId: input.agencyCompanyId, email: input.email }),
-      ),
-    ),
+  "company.move-worker": async (input) => {
+    // §11 WHAT-IF → COMMIT: two canonical writes, in the safe order — the
+    // person is assigned to the destination FIRST (`assign_worker_to_project`
+    // re-checks project management + roster), and only then the source
+    // assignment is ended (`end_worker_project_assignment`, audit trail, no
+    // delete). If the second step fails the person is on BOTH projects and
+    // the result says so — never "moved" for a half-done move.
+    const r = await assignWorkerToProjectAction(
+      null,
+      fd({ project_id: input.toProjectId, worker_profile_id: input.workerProfileId }),
+    );
+    if (!r.ok) return { ok: false, code: r.code, message: r.message };
+    const ended = await endAssignmentAction(input.fromProjectId, input.workerProfileId);
+    return { ok: true, data: { assigned: true, ended: ended.ok } };
+  },
+
+  "company.invite-worker": async (input) => {
+    // The canonical roster invite (lib/company/actions → invite_company_worker):
+    // workspace-gated + capability-checked there, never here. Outcomes are the
+    // RPC's own words; only `invited` is a new row — the others are honest
+    // no-ops reported as such (never "saved" for something that already was).
+    const r = await inviteCompanyWorkerAction(null, fd({ email: input.email, note: input.note ?? "" }));
+    if (!r.ok) {
+      return {
+        ok: false,
+        code: r.code === "needs_migration" ? "needs_migration" : r.code === "no_company" ? "not_authorized" : "error",
+        message: "message" in r ? r.message : undefined,
+      };
+    }
+    const recorded = r.ok && (r.outcome === "invited" || r.outcome === "already_pending" || r.outcome === "already_linked");
+    return recorded
+      ? { ok: true, data: { outcome: r.outcome } }
+      : { ok: false, code: r.outcome === "not_owner" ? "not_authorized" : "invalid" };
+  },
+
+  "company.create-project": async (input, ctx) => {
+    // F2 — the SITE as a project object, by sentence. The ONE project-create
+    // core (`insertProjectForCompany`) sits behind the canonical server action
+    // the company page uses; RLS `projects_insert` (owns_company) gates the
+    // row. Never a second insert path.
+    const r = await createProjectAction(null, fd({ title: input.title, city: input.city ?? "" }));
+    if (!r.ok) return mapProjectCreate(r);
+    emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+      source: "projects-chat",
+      route: `/${ctx.locale}/dashboard`,
+      metadata: { surface: "projects", step: "project_created", role_context: "company", entity_type: "project" },
+    });
+    return { ok: true, data: { projectId: r.id ?? null } };
+  },
+
+  "company.create-task": async (input, ctx) => {
+    // THE ONE task create (lib/tasks/create-task-core.ts) — the tasks page's
+    // form inserts through the same core; `create_work_task_v2` re-checks the
+    // project and the caller. Outcome names map to the dispatcher's codes.
+    const r = await createWorkTaskForChatAction({
+      title: input.title,
+      description: input.description ?? "",
+      priority: input.priority,
+      dueDate: input.dueDate ?? "",
+      projectId: input.projectId ?? "",
+    });
+    if (r.kind === "created") {
+      emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+        source: "tasks-chat",
+        route: `/${ctx.locale}/dashboard`,
+        metadata: { surface: "tasks", step: "task_created", role_context: "company", entity_type: "work_task" },
+      });
+      return { ok: true, data: { taskId: r.id, projectId: input.projectId ?? null } };
+    }
+    if (r.kind === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
+    if (r.kind === "invalid" || r.kind === "not_found" || r.kind === "limit_reached" || r.kind === "cycle") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error" };
+  },
+
+  "company.update-stage-status": async (input) => {
+    // PROGRESS is a real status on a real stage — the SAME action the
+    // operations page's stage panel calls; the RPC re-checks project
+    // management and refuses `blocked` without a reason.
+    const r = await updateStageStatusAction({
+      stageId: input.stageId,
+      status: input.status,
+      blockedReason: input.blockedReason ?? undefined,
+    });
+    if (r.ok) return { ok: true, data: { status: input.status } };
+    if (r.code === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.code === "auth" || r.code === "not_authorized") return { ok: false, code: "not_authorized" };
+    if (r.code === "invalid") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error", message: r.message };
+  },
+
+  "company.update-task-status": async (input) => {
+    // RESULT is a real status on a real task — the SAME core the tasks page's
+    // status control calls; the RPC re-checks creator / assignee / manager and
+    // refuses to leave `done` / `cancelled`.
+    const r = await setWorkTaskStatusForChatAction({ taskId: input.taskId, status: input.status });
+    if (r.kind === "updated") return { ok: true, data: { taskId: r.taskId, status: r.status } };
+    if (r.kind === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
+    if (r.kind === "invalid" || r.kind === "invalid_transition" || r.kind === "not_found") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error", message: r.message };
+  },
+
+  "company.set-readiness-item": async (input) => {
+    // READINESS is the manager-kept checklist row — the SAME write the
+    // operations page's checklist control calls; the RPC re-checks the gate.
+    const r = await upsertReadinessItemAction({
+      projectId: input.projectId,
+      workerProfileId: input.workerProfileId,
+      itemKey: input.itemKey,
+      label: input.label,
+      status: input.status,
+    });
+    if (r.ok) return { ok: true, data: { status: input.status } };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.seed-readiness-checklist": async (input, ctx) => {
+    // Start the standard checklist for EVERY person on the project — the same
+    // seed the operations page runs per person, with the same default labels
+    // (`projectOps.defaults`, in the caller's locale). The people come from the
+    // operations centre's own read (RLS: null = not the caller's project).
+    const ops = await getProjectOperations(input.projectId);
+    if (!ops) return { ok: false, code: "not_authorized" };
+    const t = await getTranslations({ locale: ctx.locale, namespace: "projectOps.defaults" });
+    const items = DEFAULT_READINESS_ITEM_KEYS.map((itemKey) => ({ itemKey, label: t(itemKey) }));
+    let seeded = 0;
+    for (const w of ops.workers) {
+      if (w.readinessItems.length > 0) continue;
+      const r = await seedReadinessItemsAction({ projectId: input.projectId, workerProfileId: w.workerProfileId, items });
+      if (!r.ok) return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+      seeded += 1;
+    }
+    return { ok: true, data: { seeded, items: items.length } };
+  },
+
+  "company.request-readiness": async (input) => {
+    // "Ask the person" = a WORK INSTRUCTION in the project's thread — the same
+    // canonical send the instructions page uses; the RPC requires an ACTIVE
+    // assignment on the project and that the caller manages the worker.
+    const r = await sendWorkInstructionAction(
+      null,
+      fd({ worker_profile_id: input.workerProfileId, body: input.body, project_id: input.projectId }),
+    );
+    if (r.ok) return { ok: true };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.confirm-work": async (input, ctx) => {
+    // THE PROOF STEP — the inbox's own one-tap confirm: approve the entry and
+    // verify the declared skills it proves through the gated RPC chain (the
+    // only path that can flip a worker's skill to verified). Same form the
+    // inbox posts; the exceptions pyramid and the review flag are re-checked
+    // inside.
+    const f = new FormData();
+    f.set("entry_id", input.entryId);
+    f.set("locale", ctx.locale);
+    for (const id of input.skillIds) f.append("skill_id", id);
+    const r = await quickConfirmEntry(null, f);
+    if (r.ok) return { ok: true, data: { verifiedSkills: r.verifiedSkills } };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.enable-journal-review": async (input) => {
+    // Journal review ON for one employee engagement — the membership RPC the
+    // inbox's toggle calls; it re-checks that the caller manages the
+    // organization and that the engagement is an active employee one.
+    const r = await setEngagementJournalReview(input.engagementId, true);
+    if (r.ok) return { ok: true, data: { code: r.code } };
+    return { ok: false, code: r.code === "not_authorized" ? "not_authorized" : "error", message: r.message };
+  },
+
+  "company.respond-offer": async (input) => {
+    // The CLIENT's decision on an agency's offer — the SAME canonical action
+    // the scouting page's buttons call; `respond_agency_candidate_offer_v1`
+    // re-checks demand ownership and that the offer is still open. On
+    // acceptance the RPC proposes the canonical booking to the worker.
+    const r = await respondCandidateOfferAction(
+      { status: "idle" },
+      fd({ offerId: input.offerId, decision: input.decision, note: input.note ?? "" }),
+    );
+    if (r.status === "ok") return { ok: true, data: { decision: input.decision } };
+    if (r.status === "needs-migration") return { ok: false, code: "needs_migration" };
+    if (r.status === "forbidden") return { ok: false, code: "not_authorized" };
+    if (r.status === "not-found" || r.status === "invalid") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error", message: r.status === "error" ? r.reason : undefined };
+  },
+
+  "agency.invite-client": async (input) => {
+    // The chat never carries a company id: the ACTIVE workspace's company is
+    // the agency (M-P0-3 — the one employer resolver). A fail-closed resolve
+    // becomes the dispatcher's honest `not_authorized`, never a guess.
+    let agencyCompanyId = input.agencyCompanyId ?? null;
+    if (!agencyCompanyId) {
+      const company = await requireEmployerCompany();
+      if (!company.ok) return { ok: false, code: "not_authorized" };
+      agencyCompanyId = company.companyId;
+    }
+    const r = await inviteClientAction(
+      { status: "idle" },
+      fd({ agencyCompanyId, email: input.email }),
+    );
+    // Readback for the conversation: the connection is PENDING until the
+    // client accepts — the real state, stated as such.
+    return r.status === "ok" ? { ok: true, data: { status: "pending" } } : mapBridge(r);
+  },
 
   "agency.propose-candidate": async (input) =>
     mapBridge(
@@ -241,4 +488,108 @@ export const COMPANY_EXECUTORS: {
         fd({ shareId: input.shareId, workerId: input.workerId, note: input.note ?? "" }),
       ),
     ),
+
+  // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
+  // The institution's commands by sentence. The organization is the ACTIVE
+  // workspace's (membership-validated resolver — never client-supplied); the
+  // RPCs re-check manager authority and the training_provider capability, so
+  // a company that is not an institution is refused THERE with a named
+  // reason, which the dispatcher reports honestly. Each first real write
+  // emits `first_real_action` server-side (the institution's TTFV).
+  "company.create-programme": async (input, ctx) => {
+    const org = await requireEmployerCompany();
+    if (!org.ok) return { ok: false, code: "not_authorized" };
+    const r = await createProgramAction(
+      { status: "idle" },
+      fd({
+        organizationId: org.organizationId,
+        name: input.name,
+        targetProfessionSlug: input.targetProfessionSlug ?? "",
+        educationTypeSlug: input.educationTypeSlug ?? "",
+        description: input.description ?? "",
+      }),
+    );
+    if (r.status === "ok") emitEducationFirstAction("programme_created", "education_program", ctx.locale);
+    return r.status === "ok" ? { ok: true, data: { programId: r.id ?? null } } : mapProgram(r);
+  },
+
+  "company.create-cohort": async (input, ctx) => {
+    const r = await createCohortAction(
+      { status: "idle" },
+      fd({
+        programId: input.programId,
+        name: input.name,
+        startsOn: input.startsOn ?? "",
+        endsOn: input.endsOn ?? "",
+      }),
+    );
+    if (r.status === "ok") emitEducationFirstAction("cohort_created", "education_cohort", ctx.locale);
+    return r.status === "ok" ? { ok: true, data: { cohortId: r.id ?? null } } : mapProgram(r);
+  },
+
+  "company.assign-learner": async (input, ctx) => {
+    const r = await setCohortMemberAction(
+      { status: "idle" },
+      fd({ cohortId: input.cohortId, profileId: input.profileId, status: "active" }),
+    );
+    if (r.status === "ok") emitEducationFirstAction("learner_assigned", "education_cohort_member", ctx.locale);
+    return r.status === "ok" ? { ok: true, data: { status: "active" } } : mapProgram(r);
+  },
+
+  "company.invite-learner": async (input, ctx) => {
+    // The SAME invitation the network panel sends for a learner: a
+    // `join_organization` invitation carrying the `student` relationship —
+    // accepted by the person, it becomes the institution↔learner link
+    // (engagement_contexts, relationship student). The RPC validates the
+    // capability (`training_provider`) and the relationship's invitability.
+    const org = await requireEmployerCompany();
+    if (!org.ok) return { ok: false, code: "not_authorized" };
+    const r = await createAndSendInvitations({
+      emails: input.email,
+      invitationType: "join_organization",
+      locale: ctx.locale,
+      recipientLocale: ctx.locale,
+      organizationId: org.organizationId,
+      invitedName: input.name ?? null,
+      relationshipSlug: "student",
+    });
+    // Readback states the REAL delivery: `sent` = provider acknowledged;
+    // `created` = stored, no e-mail configured (share the link) — never a
+    // fabricated "e-mail sent".
+    if (r.status !== "ok") return { ok: false, code: "not_authorized" };
+    const first = r.results[0];
+    if (!first) return { ok: false, code: r.invalid.length > 0 ? "invalid" : "error" };
+    if (r.status === "ok" && (first.outcome === "created" || first.outcome === "sent")) {
+      emitEducationFirstAction("learner_invited", "invitation", ctx.locale);
+      return { ok: true, data: { outcome: first.outcome, emailConfigured: r.emailConfigured } };
+    }
+    return { ok: false, code: first.outcome === "invalid_email" ? "invalid" : "error", message: first.outcome };
+  },
 });
+
+/** The canonical project-create result → the dispatcher's honest codes. */
+function mapProjectCreate(r: Extract<ProjectActionResult, { ok: false }>): ExecResult {
+  if (r.code === "needs_migration") return { ok: false, code: "needs_migration" };
+  if (r.code === "invalid") return { ok: false, code: "invalid" };
+  if (r.code === "error") return { ok: false, code: "error", message: r.message };
+  return { ok: false, code: "not_authorized" };
+}
+
+function mapProgram(r: ProgramActionState): ExecResult {
+  if (r.status === "forbidden") return { ok: false, code: "not_authorized" };
+  if (r.status === "invalid") return { ok: false, code: "invalid" };
+  return { ok: false, code: "error", message: r.status === "error" ? r.reason : undefined };
+}
+
+function emitEducationFirstAction(step: string, entityType: string, locale: string): void {
+  emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+    source: "education-chat",
+    route: `/${locale}/dashboard`,
+    metadata: {
+      surface: "education",
+      step,
+      role_context: "company",
+      entity_type: entityType,
+    },
+  });
+}

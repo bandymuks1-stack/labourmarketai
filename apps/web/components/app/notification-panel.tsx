@@ -23,7 +23,8 @@ import { RoleIcon } from "@/components/app/role-icon";
 export function NotificationPanel() {
   const t = useTranslations("auth.notifications");
   const tRole = useTranslations("auth.signup.role");
-  const { notifications, activeRole, switchRole, markAllRead } = useAuth();
+  const { notifications, activeRole, switchRole, markAllRead, markAsRead } =
+    useAuth();
   const [open, setOpen] = useState(false);
   const unread = notifications.filter((n) => !n.read_at).length;
 
@@ -110,11 +111,17 @@ export function NotificationPanel() {
             activeRole={activeRole}
             switchRole={switchRole}
             markAllRead={markAllRead}
+            markAsRead={markAsRead}
           />
         </div>
       </AnchoredOverlay>
 
-      <MobileSheet open={open} onClose={() => setOpen(false)} title={t("label")}>
+      <MobileSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("label")}
+        closeLabel={t("close")}
+      >
         <NotificationsBody
           label={t("label")}
           emptyTitle={t("emptyTitle")}
@@ -125,6 +132,7 @@ export function NotificationPanel() {
           activeRole={activeRole}
           switchRole={switchRole}
           markAllRead={markAllRead}
+          markAsRead={markAsRead}
           chromeless
         />
       </MobileSheet>
@@ -137,6 +145,15 @@ type Notif = {
   role: Role;
   type: string;
   read_at: string | null;
+  /**
+   * WHEN it happened — a real stored timestamp for durable rows, and the
+   * empty string for derived signals, which are live counts with no event
+   * time at all (`spine-signals.ts` sets `""` deliberately). Rendering it
+   * only when it is non-empty keeps UNKNOWN out of the "0" bucket (SEP-7).
+   */
+  created_at?: string;
+  /** The stored row's safe render hints — country / roleSlug / startDate. */
+  payload?: Record<string, unknown>;
   /** Derived signals carry a real count + the surface that clears them. */
   count?: number;
   href?: string;
@@ -158,6 +175,7 @@ function NotificationsBody({
   activeRole,
   switchRole,
   markAllRead,
+  markAsRead,
   chromeless = false,
 }: {
   label: string;
@@ -169,11 +187,15 @@ function NotificationsBody({
   activeRole: Role | null;
   switchRole: (r: Role) => void;
   markAllRead: () => void;
+  markAsRead: (id: string) => void;
   chromeless?: boolean;
 }) {
   // Localized notification-type labels (dead-UI repair: never the raw enum).
   const tTypes = useTranslations("auth.notifications.types");
   const tPanel = useTranslations("auth.notifications");
+  // Country NAMES, never the raw ISO code — the same catalogue every other
+  // authenticated surface reads.
+  const tLm = useTranslations("labourMarket");
   return (
     <>
       {!chromeless && (
@@ -215,20 +237,48 @@ function NotificationsBody({
         <ul className="flex flex-col">
           {notifications.map((n) => {
             const crossRole = activeRole !== n.role;
+            // WHEN + IN WHICH CONTEXT (owner window 11 §28). Production showed
+            // two identical "Darbuotojas pareiškė susidomėjimą jūsų poreikiu"
+            // rows; nothing on either said when it happened or which market it
+            // belonged to, so they read as one duplicated line. Both facts were
+            // already on the stored row — `created_at` was carried all the way
+            // into this component and never rendered, and `/dashboard/activity`
+            // has printed the timestamp for the same rows since completion v1.
+            // This is the bell catching up with its own data, not new data.
+            const country =
+              typeof n.payload?.country === "string" ? n.payload.country : null;
+            const when = n.created_at ? n.created_at.slice(0, 16).replace("T", " ") : null;
             const rowBody = (
-              <p className="flex items-center gap-2 text-xs text-text-secondary">
-                <RoleIcon role={n.role} className="h-4 w-4" />
-                {/* Dead-UI repair: never print the raw type enum — map to a
-                    localized label, neutral fallback for unknown types. */}
-                <span className="text-text-primary">
-                  {tTypes.has(n.type) ? tTypes(n.type as never) : tTypes("generic")}
+              <span className="flex flex-col gap-0.5">
+                <span className="flex items-center gap-2 text-xs text-text-secondary">
+                  <RoleIcon role={n.role} className="h-4 w-4" />
+                  {/* Dead-UI repair: never print the raw type enum — map to a
+                      localized label, neutral fallback for unknown types. */}
+                  <span className="text-text-primary">
+                    {tTypes.has(n.type) ? tTypes(n.type as never) : tTypes("generic")}
+                  </span>
+                  {typeof n.count === "number" && (
+                    <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white tabular-nums">
+                      {n.count}
+                    </span>
+                  )}
                 </span>
-                {typeof n.count === "number" && (
-                  <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white tabular-nums">
-                    {n.count}
+                {(when || country) && (
+                  <span
+                    data-testid={`notification-context-${n.id}`}
+                    className="flex items-center gap-2 pl-6 font-mono text-meta uppercase tracking-label text-text-muted"
+                  >
+                    {when && <span className="tabular-nums">{when}</span>}
+                    {country && (
+                      <span>
+                        {tLm.has(`countryNames.${country}`)
+                          ? tLm(`countryNames.${country}` as never)
+                          : country}
+                      </span>
+                    )}
                   </span>
                 )}
-              </p>
+              </span>
             );
             return (
               <li
@@ -240,10 +290,15 @@ function NotificationsBody({
               >
                 {n.href ? (
                   // A derived signal IS a next action — the row navigates to
-                  // the exact surface that clears it (audit PR5).
+                  // the exact surface that clears it (audit PR5). A DURABLE
+                  // row additionally persists its read marker on the click
+                  // (completion v1): opening the entity is the read event,
+                  // and the mark survives the next hydration. Derived rows
+                  // pass no id — their clearing stays the visit itself.
                   <Link
                     href={n.href as "/dashboard"}
                     data-testid={`notification-signal-${n.id}`}
+                    onClick={n.durable ? () => markAsRead(n.id) : undefined}
                     className="block px-3 py-3 transition-colors hover:bg-ink-800/70"
                   >
                     {rowBody}

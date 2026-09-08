@@ -25,7 +25,17 @@ export type CriteriaSnapshot = {
   preferredContractType: string | null;
   /** worker_documents rows the worker owns. */
   documentsCount: number;
+  /** workers.current_location_country ISO-2 (W6: the work-card prefill reads
+   *  it; matching does not, so it is no criterion and stays optional). */
+  locationCountry?: string | null;
 };
+
+/** W6: the current card as form state for `worker.save-work-card`, or the
+ *  NAMED reason there is none — the form then opens blank, and a blank field
+ *  is "keep", so nothing recorded is lost either way. */
+export type WorkCardPrefillResult =
+  | { kind: "prefill"; values: Record<string, string | boolean> }
+  | { kind: "unavailable"; reason: "no_worker" | "not_authed" };
 
 /** The criteria the matching engine actually consumes, in report order. A key
  *  is "missing" only when its absence genuinely weakens matching — mirrors the

@@ -90,6 +90,56 @@ describe("tools", () => {
     });
   });
 
+  it("tools/list emits declared annotations verbatim (and omits the key when absent)", async () => {
+    const annotated = {
+      ...TOOLS[0],
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    };
+    const r = await handleMcpMessage(req("tools/list"), deps({ tools: [annotated] }));
+    expect(r?.result).toEqual({
+      tools: [
+        {
+          name: "profile_get",
+          title: "My profile",
+          description: "Own profile facts.",
+          inputSchema: TOOLS[0].inputSchema,
+          annotations: annotated.annotations,
+        },
+      ],
+    });
+    // Without annotations the key is absent, not null — the first assertion
+    // in this file already pins that shape.
+  });
+
+  it("tools/call leads with humanText when provided, keeping the FULL payload in both channels", async () => {
+    const payload = { ok: true, data: { entryId: "e-1" } };
+    const r = await handleMcpMessage(
+      req("tools/call", { name: "profile_get", arguments: {} }),
+      deps({
+        callTool: async () => ({
+          isError: false,
+          payload,
+          humanText: "Žurnalo įrašas išsaugotas.",
+        }),
+      }),
+    );
+    expect(r?.result).toEqual({
+      content: [
+        {
+          type: "text",
+          text: `Žurnalo įrašas išsaugotas.\n\n${JSON.stringify(payload)}`,
+        },
+      ],
+      structuredContent: payload,
+      isError: false,
+    });
+  });
+
   it("tools/call runs the tool and wraps the payload as text + structuredContent", async () => {
     const r = await handleMcpMessage(
       req("tools/call", { name: "profile_get", arguments: {} }),

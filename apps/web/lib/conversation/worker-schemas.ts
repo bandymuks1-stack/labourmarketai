@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { isJournalMetaRequest } from "./worklog-extract";
 
 /**
  * Zod input schemas for the executable worker conversation actions (Phase B).
@@ -32,6 +33,18 @@ export const workerAddWorkHistorySchema = z
     path: ["endYear"],
   });
 
+/** Record a document (owner contract §12/§14): the closed `document_types`
+ *  slug + the closed country set are validated by the canonical upsert
+ *  (`upsert_worker_document`); this is the shape gate only. */
+export const workerAddDocumentSchema = z.object({
+  typeSlug: z.string().trim().min(1).max(80),
+  country: z.string().trim().length(2).nullable().optional(),
+  status: z.enum(["ready", "missing", "blocked"]).default("ready"),
+  validFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  note: z.string().trim().max(500).nullable().optional(),
+});
+
 export const workerAddLanguageSchema = z.object({
   lang: z.string().trim().min(2).max(40),
   level: z.string().trim().min(1).max(8),
@@ -53,15 +66,19 @@ export const workerAddAchievementSchema = z.object({
   kind: z.enum(["achievement", "declared_certificate"]).default("achievement"),
 });
 
-export const workerSaveWorkCardSchema = z
-  .object({
-    availabilityStatus: z.enum(["available", "busy", "unavailable"]).nullable().optional(),
-    availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
-    salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
-    salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
-    locationCountry: z.string().trim().length(2).nullable().optional(),
-    preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
-  })
+/** The bare field object — exported so the capability layer can `.extend()`
+ *  it (a refined schema cannot be extended); the refined schema below stays
+ *  the one the dispatcher validates against. */
+export const workerSaveWorkCardFields = z.object({
+  availabilityStatus: z.enum(["available", "busy", "unavailable"]).nullable().optional(),
+  availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
+  salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
+  salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
+  locationCountry: z.string().trim().length(2).nullable().optional(),
+  preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
+});
+
+export const workerSaveWorkCardSchema = workerSaveWorkCardFields
   .refine(
     (v) =>
       v.salaryMin == null || v.salaryMax == null || v.salaryMin <= v.salaryMax,
@@ -78,6 +95,19 @@ export const workerSavePreferencesSchema = z.object({
   preferredContractType: z.string().trim().max(40).nullable().optional(),
   availabilityNote: z.string().trim().max(500).nullable().optional(),
 });
+
+/** Accept an invitation addressed to the caller (owner contract 4D). The ref
+ *  is the shared `InvitationRef` (lib/invitations/model): a canonical
+ *  `invitations` row by id, or a company / agency ROSTER invitation by the
+ *  organisation id the roster accept RPC takes. `accepted` is the only
+ *  canonical in-app decision — decline exists by mailed token only
+ *  (`decline_invitation_v1`) and not at all for the roster — so the schema
+ *  says so rather than inventing one. */
+export const workerRespondInvitationSchema = z.discriminatedUnion("source", [
+  z.object({ source: z.literal("invitation"), invitationId: uuid, decision: z.literal("accepted") }),
+  z.object({ source: z.literal("company_roster"), orgId: uuid, decision: z.literal("accepted") }),
+  z.object({ source: z.literal("agency_roster"), orgId: uuid, decision: z.literal("accepted") }),
+]);
 
 export const workerRespondBookingSchema = z.object({
   bookingId: uuid,
@@ -98,10 +128,19 @@ export const workerExpressInterestSchema = z.object({
  * `create_journal_entry_full` RPC). `workDate`/`siteName` become real metrics.
  * Times/hours are NOT sent as separate claims — they already live in the notes;
  * the client shows them only as a parse preview to confirm.
+ *
+ * A sentence that only ASKS for the journal ("Užpildyk darbo žurnalą") is a
+ * request, not evidence — refused here, at the floor every write crosses, so
+ * no client path can turn the request into the record (prod 2026-09-06).
  */
 export const workerLogWorkSchema = z.object({
   engagementContextId: uuid,
-  notes: z.string().trim().min(3).max(4000),
+  notes: z
+    .string()
+    .trim()
+    .min(3)
+    .max(4000)
+    .refine((v) => !isJournalMetaRequest(v), { message: "journal_meta_request" }),
   workDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
   siteName: z.string().trim().max(200).nullable().optional(),
 });
@@ -110,11 +149,13 @@ export const workerLogWorkSchema = z.object({
 export const WORKER_ACTION_SCHEMAS = {
   "worker.add-work-history": workerAddWorkHistorySchema,
   "worker.add-language": workerAddLanguageSchema,
+  "worker.add-document": workerAddDocumentSchema,
   "worker.add-education": workerAddEducationSchema,
   "worker.add-achievement": workerAddAchievementSchema,
   "worker.save-work-card": workerSaveWorkCardSchema,
   "worker.save-preferences": workerSavePreferencesSchema,
   "worker.respond-booking": workerRespondBookingSchema,
+  "worker.respond-invitation": workerRespondInvitationSchema,
   "worker.express-interest": workerExpressInterestSchema,
   "worker.log-work": workerLogWorkSchema,
 } as const;

@@ -191,3 +191,21 @@ export function relationshipChoiceBlocked(
     !capabilities.includes(choice.requiresOrganizationRole)
   );
 }
+
+/**
+ * WHICH invitation addressed to me — the argument the matching canonical
+ * accept takes (owner contract §4D: the person answers from the attention
+ * item over the ONE dispatcher). `invitation` → `acceptInvitationByIdAction`
+ * (`accept_invitation_by_id_v1`, by id); the roster kinds → the dashboard
+ * card's own accept action (`accept_{company,agency}_worker_invitation`, by
+ * the company / agency id — exactly what that card submits). Pure so the
+ * server read, the zod schema and the chat card share one definition.
+ */
+export type InvitationRef =
+  | { readonly source: "invitation"; readonly invitationId: string }
+  | { readonly source: "company_roster"; readonly orgId: string }
+  | { readonly source: "agency_roster"; readonly orgId: string };
+
+/** How many invitations the attention surfaces show at once (the real total is
+ *  reported beside them). */
+export const INVITATIONS_ATTENTION_LIMIT = 5;

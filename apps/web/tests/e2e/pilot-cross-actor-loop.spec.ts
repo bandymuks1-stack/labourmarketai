@@ -281,7 +281,9 @@ test.describe("pilot — the loop closes across institution, learner and employe
       const capacity = page.locator('[data-testid="invite-capacity"]');
       await expect(capacity).toBeVisible({ timeout: 60_000 });
       await capacity.selectOption("student");
-      await page.locator("textarea").first().fill(LEARNER.email);
+      // The panel's OWN stable testid — `.locator("textarea").first()` rotted
+      // when the page grew an earlier textarea (2026-08-31 journey pass).
+      await page.getByTestId("invite-emails").fill(LEARNER.email);
       await page.locator('[data-testid="invite-submit"]').click();
       await expect(page.locator('[data-testid="invite-result"]')).toBeVisible({
         timeout: 60_000,

@@ -275,3 +275,43 @@ Admin and back-office screens do **not** gate a language.
    languages 6–24.
 4. Promote catalog-only locales (`lv et da no sv pl`) to routed only after
    their *understanding* layers, not just their strings, reach core-journey.
+
+---
+
+## 8. LAUNCH LOCALE POLICY (FINAL COMPLETION Train J1, 2026-09-02)
+
+**Launch locales = the five routed ones: `lt en ru nl de`.** No locale is added to `activeLocales` before it
+meets the completeness model below; the other 21 required languages stay recorded as debt in §1/§3, not as
+"almost done".
+
+### 8.1 What FULL means, per surface class
+
+| Surface class | FULL requires | Measured by |
+|---|---|---|
+| **Critical flows** — auth (login, signup, confirm, reset, consent), onboarding, account/connected apps, payments & entitlement copy, legal (privacy, terms, first-layer notices) | every key present with a human-reviewed translation (no `[EN]` markers, no machine placeholders); the e-mail templates of the flow; error/outcome vocabularies (`auth.errors.*`, `?error=` outcomes, `?plan=`/`?apps=` outcomes) | catalog parity (§2.1) + the flow guards that enumerate their keys (e.g. `oauth-trace-and-safe-diagnostics`, `connected-apps-surface`, `work-plan-primitive`) |
+| **Daily surfaces** — home brief, journal, calendar, documents, network, company zone | every key present; `[EN]` allowed ONLY behind the i18n-debt ratchet (`lib/guards/i18n-debt.test.ts`) and never in a heading, button or outcome line | debt inventory (`pnpm -F web check:i18n-debt`) |
+| **Understanding layers** — journal recognition, extraction, matching explanation, need structuring | at least core-journey (C in §3): recognition pack + transversal capabilities; FULL only when the pack passes the offline recognition train for that locale | §3 matrix + offline recognition train |
+| **Public / SEO pages** | title, description, canonical + alternates, OG copy in the locale | `fixing-metadata` audit per locale |
+
+A locale may be ROUTED only when its critical flows are FULL; it may be advertised as a product language only
+when daily surfaces are FULL and understanding is at least C.
+
+### 8.2 The language switch and persistence (what already holds, proven in code)
+
+- The switch is always available in the shell (locale pill) and on the public site.
+- Preference persists in the `NEXT_LOCALE` cookie and, once onboarded, in `profiles.locale`; the auth callback
+  applies the account language on a device without an explicit choice (`lib/auth/locale-preference.ts`,
+  pinned by `lib/auth/locale-preference.test.ts` + `callback-route.test.ts`); a not-yet-onboarded account
+  never has its URL locale overridden.
+- E-mail templates follow the recipient's locale (`recipientLocale` on invitations; auth mails follow the
+  Supabase template language — owner gate G-1 pack).
+
+### 8.3 Adding a locale (checklist, in this order)
+
+1. catalog at 100 % parity for the critical-flow namespaces, human-reviewed;
+2. `[EN]` debt for daily surfaces under the ratchet;
+3. recognition pack + transversal capabilities (or an explicit "taxonomy-only" ruling as for `fi`);
+4. add to `activeLocales`, `routing`, the sitemap alternates and the CI e2e locale smoke;
+5. re-run the per-locale metadata audit and the auth e2e legs (`social-auth-matrix`, `auth-field-touch-floor`).
+
+Georgian (`ka`) and the remaining EU languages start at step 1; nothing is machine-expanded before launch.

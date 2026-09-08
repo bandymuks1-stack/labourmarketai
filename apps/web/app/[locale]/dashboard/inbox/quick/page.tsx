@@ -1,12 +1,8 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { EmptyState } from "@/components/app/empty-state";
-import {
-  QuickConfirmCard,
-  type QuickConfirmEntryView,
-} from "@/components/app/quick-confirm-card";
-import { QuickConfirmBatch } from "@/components/app/quick-confirm-batch";
+import type { QuickConfirmEntryView } from "@/components/app/quick-confirm-card";
+import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +37,7 @@ export default async function QuickConfirmPage({
     originalText: e.originalText,
     recognizedNames: e.recognizedSlugs.map((slug) => tSkill(slug)),
     skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: tSkill(s.slug) })),
+    confirmScope: e.confirmScope,
   }));
 
   // "Confirm all of today" — strictly the entries created today. "Today" is
@@ -74,25 +71,10 @@ export default async function QuickConfirmPage({
         </Link>
       </header>
 
-      {entries.length === 0 ? (
-        <EmptyState
-          testId="quick-empty-state"
-          title={t("inbox.emptyTitle")}
-          why={t("inbox.empty")}
-          next={t("inbox.emptyNext")}
-        />
-      ) : (
-        <>
-          {todays.length > 1 ? (
-            <QuickConfirmBatch entries={todays} exceptions={exceptions} />
-          ) : null}
-          <ul className="flex flex-col gap-3">
-            {entries.map((e) => (
-              <QuickConfirmCard key={e.id} entry={e} />
-            ))}
-          </ul>
-        </>
-      )}
+      {/* One client boundary that stays mounted across the post-tap
+          revalidation, so the manager's receipt survives the queue emptying
+          (empty state + batch + cards all live inside it). */}
+      <QuickConfirmQueue entries={entries} todays={todays} exceptions={exceptions} />
     </div>
   );
 }

@@ -71,14 +71,39 @@ describe("the chain capabilities live on their canonical surfaces", () => {
     );
   });
 
-  it("the accept action still has exactly ONE caller and ONE write path", () => {
+  it("the accept action still has exactly ONE write path — two callers, one action, one core", () => {
     // The reason this row was cheap: unlike row 5 there was no second write
     // path to collapse. Moving the control must not have created one — so the
     // whole tree is scanned, not a hand-written file list.
+    //
+    // Owner contract 2026-09-04 §1a / ARCHITECTURE §5.5 (2026-09-05): the
+    // chat's attention item accepts the SAME roster invitation over the ONE
+    // dispatcher (`worker.respond-invitation`). That is a second CALLER of
+    // the one action, not a second write path — and the two assertions below
+    // keep it that way: nobody but the action reaches the accept core, and
+    // nobody but the dashboard card and the conversation executor reaches
+    // the action. A third name here is a regression to explain, never to add.
     const callers = sourceFiles()
       .filter((rel) => rel !== "lib/worker/invitation-actions.ts")
       .filter((rel) => read(rel).includes("acceptWorkerInvitationAction"));
-    expect(callers.sort()).toEqual(["components/app/worker-invitations.tsx"]);
+    expect(callers.sort()).toEqual([
+      "components/app/worker-invitations.tsx",
+      "lib/conversation/worker-executors.ts",
+    ]);
+    // ONE core behind the action: the SECURITY DEFINER accept RPCs are
+    // reached only through lib/worker/invitations.ts, and that core only
+    // through the action — the executor may not shortcut either.
+    const coreCallers = sourceFiles()
+      .filter((rel) => rel !== "lib/worker/invitations.ts")
+      .filter((rel) => /accept(Company|Agency)WorkerInvitation\b/.test(read(rel)));
+    expect(coreCallers.sort()).toEqual(["lib/worker/invitation-actions.ts"]);
+    const rpcCallers = sourceFiles()
+      .filter((rel) => rel !== "lib/worker/invitations.ts")
+      .filter((rel) => /["']accept_(company|agency)_worker_invitation["']/.test(read(rel)))
+      // The canonical-RPC allowlist and the generated DB types NAME every
+      // authenticated RPC; neither calls one.
+      .filter((rel) => rel !== "lib/security/canonical-authenticated-rpcs.ts" && rel !== "lib/supabase/types.ts");
+    expect(rpcCallers).toEqual([]);
   });
 });
 

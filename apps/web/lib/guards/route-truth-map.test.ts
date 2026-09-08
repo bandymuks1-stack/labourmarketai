@@ -32,6 +32,12 @@ const CLASSIFICATION: Record<string, string> = {
   // Commercial CRM (Wagon 10) — owner-scoped proposals + contracts; invoices/
   // payments link to the canonical finance layer (not duplicated).
   "dashboard/commercial": "REAL_LAUNCH_SURFACE",
+  // Work-hours quick entry (Ramūnas pilot) — a manager records who worked, on
+  // which date, on which object, for how many hours, from a phone. Writes real
+  // work_hour_allocations rows with entered_by kept separate from worker_id.
+  // The migration ships UNAPPLIED and is owner-gated, so the page degrades
+  // honestly until it is applied; the surface itself is real, not a preview.
+  "dashboard/hours": "REAL_LAUNCH_SURFACE",
   "dashboard/account": "REAL_LAUNCH_SURFACE",
   // Unified activity centre (control room PR C) — spine-only aggregation.
   "dashboard/activity": "REAL_LAUNCH_SURFACE",

@@ -78,9 +78,11 @@ describe("the chat routes it to a surface that exists", () => {
     const chat = read(
       "components", "app", "conversation", "chat", "conversation-chat.tsx",
     );
+    // G2: routing is registry-dispatched — the branch is the component's
+    // `needService` handler (order pinned by the handlers object).
     const branch = chat.slice(
-      chat.indexOf('case "need-service":'),
-      chat.indexOf('case "offer-value":'),
+      chat.indexOf("needService: () =>"),
+      chat.indexOf("offerValue: () =>"),
     );
     expect(branch.length).toBeGreaterThan(0);
     expect(branch).toMatch(/link:\/dashboard\/service-requests/);

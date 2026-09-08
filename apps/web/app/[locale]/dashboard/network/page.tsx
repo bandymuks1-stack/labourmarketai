@@ -1,9 +1,11 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { workspaceDisplayLabels } from "@/lib/company/organization-switch";
 import { redirect } from "next/navigation";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
+import { getGovernedOrganizations } from "@/lib/company/managed-organizations";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
@@ -59,6 +61,9 @@ export default async function NetworkPage({
     type?: string;
     org?: string;
     project?: string;
+    /** Pre-selects the relationship in the invite panel (e.g. `student` from
+     *  the institution's "Invite learners"); validated inside the panel. */
+    relationship?: string;
     wf?: string;
     req?: string;
     reqStatus?: string;
@@ -74,7 +79,7 @@ export default async function NetworkPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, wf, req, reqStatus, reqType, rev, dec, area } =
+  const { q, type, org, project, relationship, wf, req, reqStatus, reqType, rev, dec, area } =
     await searchParams;
   // Approvals-area outcome notice (Workflow & Approval Engine v1) —
   // validated against the closed notice vocabulary, never rendered raw.
@@ -140,6 +145,9 @@ export default async function NetworkPage({
   // dead namespace (title "Marketplace", map/offers/shop cards, prepareBadge)
   // was deleted; the user reads exactly the same sentences.
   const t = await getTranslations("network");
+  // The unnamed-organization phrases live with the switcher's vocabulary so
+  // both surfaces say the same thing (owner walk 2026-09-07).
+  const tChat = await getTranslations("conversation.chat");
   const supabase = await createClient();
   const {
     data: { user },
@@ -153,7 +161,15 @@ export default async function NetworkPage({
   // must not pay for the relationship reads, and the relationship screen must
   // not pay for the governance stack (which is the regression this whole
   // change exists to remove).
-  const orgsResult = await getOwnedOrganizations();
+  // Approvals additionally needs the GOVERNED set (owner OR admin
+  // membership — the exact authority the engine's RPCs re-check), because
+  // gating that panel on ownership alone hid it from admin members the
+  // server would have accepted. Read ONLY when the approvals area is open —
+  // the relationship screen must not pay for the governance stack.
+  const [orgsResult, governedOrganizations] = await Promise.all([
+    getOwnedOrganizations(),
+    openArea === "approvals" ? getGovernedOrganizations() : Promise.resolve([]),
+  ]);
   /**
    * ONE LABEL, RESOLVED ONCE, FOR EVERY CONSUMER OF THIS LIST.
    *
@@ -173,20 +189,53 @@ export default async function NetworkPage({
    * appeared to show "duplicated approval templates". The rows were never
    * duplicates; the two owners of them were indistinguishable.
    */
+  /**
+   * ONE resolver, not a second copy of the rule (owner walk 2026-09-07).
+   *
+   * This block used to hand-roll the switcher's positional suffix —
+   * `${unnamed} ${n}` — which is the same invented identity the owner read on
+   * production as "Įmonės erdvė 1 / 2". Two surfaces, one lie, and only one of
+   * them would ever have been fixed. It now calls `workspaceDisplayLabels`,
+   * so the honest type-aware phrase and the id-fragment tiebreak are defined
+   * in exactly one place.
+   */
   const organizations =
     orgsResult.kind === "ok"
-      ? orgsResult.organizations.map((o, i, all) => ({
-          id: o.id,
-          name:
-            o.name ||
-            // Numbered only when more than one is unnamed, so a single
-            // nameless company reads plainly. Same rule as the workspace
-            // switcher (workspaceDisplayLabels).
-            (all.filter((x) => !x.name).length > 1
-              ? `${t("organizations.unnamed")} ${all.filter((x, j) => !x.name && j <= i).length}`
-              : t("organizations.unnamed")),
-        }))
+      ? (() => {
+          const infos = orgsResult.organizations.map((o) => ({
+            id: o.id,
+            name: o.name,
+            kind: "organization" as const,
+            organizationType: o.organizationType,
+            accentIndex: 0,
+          }));
+          const byId = workspaceDisplayLabels(infos, {
+            personal: "",
+            unnamedOrganization: {
+              company: tChat("workspaceUnnamedCompany"),
+              agency: tChat("workspaceUnnamedAgency"),
+              team: tChat("workspaceUnnamedTeam"),
+              other: tChat("workspaceUnnamed"),
+            },
+          });
+          return infos.map((o) => ({ id: o.id, name: byId.get(o.id) ?? o.name }));
+        })()
       : [];
+
+  /**
+   * The approvals area is parameterised by the orgs the caller GOVERNS, not
+   * only the orgs they OWN: the engine's authoring/install/mark-overdue RPCs
+   * authorize owner OR admin membership (`membership_actor_role_v1`), so an
+   * admin member must see the same panel the server would already act for.
+   * Owners keep exactly the labeled list they had; governed extras append
+   * with the same honest unnamed fallback.
+   */
+  const approvalOrganizations = [
+    ...organizations,
+    ...governedOrganizations
+      .filter((g) => !organizations.some((o) => o.id === g.id))
+      .map((g) => ({ id: g.id, name: g.name || t("organizations.unnamed") })),
+  ];
 
   /**
    * What each organization has DECLARED it does, for the invite panel's
@@ -240,7 +289,7 @@ export default async function NetworkPage({
           <ApprovalsSection
             locale={locale}
             notice={workflowNotice}
-            organizations={organizations}
+            organizations={approvalOrganizations}
           />
         )}
         {openArea === "requests" && (
@@ -423,6 +472,7 @@ export default async function NetworkPage({
         defaultType={type}
         defaultOrganizationId={org}
         defaultProjectId={project}
+        defaultRelationshipSlug={relationship}
       />
 
       {/* My sent invitations with the real lifecycle. */}

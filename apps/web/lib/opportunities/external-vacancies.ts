@@ -100,12 +100,24 @@ export async function loadExternalVacancyCards(
   >,
 ): Promise<ExternalVacanciesResultV1> {
   const explicitProfession = options.professionSlug ?? null;
+  // A FAILED external read is an UNAVAILABLE source, never a broken board.
+  // On production (2026-09-06) the search timed out (57014) and the throw
+  // reached the server action: the whole worker board — and every sentence
+  // that reads it, "kas man trūksta?" included — answered the not-understood
+  // menu. The platform's own demand does not depend on a public feed, so the
+  // feed degrades to "not available" (the same honest state as an
+  // unprovisioned store) and the rest of the board stands.
   const result = await searchPublicVacancies(client, {
     country: options.country ?? null,
     professionSlug: explicitProfession,
     query: options.query ?? null,
     limit: BOARD_LIMIT,
     nowIso: options.nowIso,
+  }).catch((e: unknown) => {
+    if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
+      return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
+    }
+    throw e;
   });
 
   if (result.status === "not_provisioned") {
@@ -150,6 +162,13 @@ export async function loadExternalVacancyCards(
       query: null,
       limit: PROFILE_POOL_LIMIT,
       nowIso: options.nowIso,
+    }).catch((e: unknown) => {
+      // The deeper pool is an enrichment; a failed read leaves the board as
+      // the first page answered it, never breaks it.
+      if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
+        return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
+      }
+      throw e;
     });
     if (extra.status === "ok") profilePool = [...extra.vacancies];
   }

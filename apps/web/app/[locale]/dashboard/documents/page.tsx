@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -26,6 +27,7 @@ import {
 } from "@/lib/documents/document-centre-model";
 import { WorkerDocumentVerifyRequestButton } from "@/components/app/worker-document-verify-request-button";
 import { WorkerDocumentFileSlot } from "@/components/app/worker-document-file-slot";
+import { DocumentJournalDraftReview } from "@/components/app/document-journal-draft-review";
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
@@ -77,6 +79,18 @@ const VERIFICATION_TONE: Record<DocumentVerificationState, string> = {
   pending: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
   verified: "border-state-success/40 bg-state-success/5 text-state-success",
   rejected: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+};
+
+/** Train E1 — current-validity tones. Same palette as the other badges;
+ *  revoked is the only danger tone: a credential that WAS valid and is not. */
+const VALIDITY_TONE: Record<CredentialValidityState, string> = {
+  active: "border-state-success/40 bg-state-success/5 text-state-success",
+  expired: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+  revoked: "border-state-danger/50 bg-state-danger/10 text-state-danger",
+  pending: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  rejected: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+  unverified: "border-ink-500 bg-ink-800/40 text-text-muted",
+  unknown: "border-ink-500 bg-ink-800/40 text-text-muted",
 };
 
 const OVERALL_TONE: Record<WorkerCountryReadinessStatus, string> = {
@@ -172,6 +186,8 @@ export default async function WorkerDocumentsPage({
     regObject?: string;
     regRetention?: string;
     regQ?: string;
+    /** C2b — document → journal draft review (searchParams only, no route). */
+    draftFrom?: string;
     /** Training & Certification v1 outcome notice (closed vocabulary,
      *  validated inside the section — never rendered raw). */
     trn?: string;
@@ -367,6 +383,16 @@ export default async function WorkerDocumentsPage({
       <Header t={t} />
       <DocNoticeBanner notice={sp.docNotice} tf={tf} />
 
+      {/* C2b — document → journal draft review. Mounted ONLY under
+          ?draftFrom= (searchParams only, no route — this page's stated
+          pattern); the seam re-answers ownership under the caller's RLS. */}
+      {sp.draftFrom ? (
+        <DocumentJournalDraftReview
+          locale={locale}
+          documentFileId={sp.draftFrom}
+        />
+      ) : null}
+
       {/* (a) Attention strip — counts of REAL field states only (derived
           valid_until status; stored verification), each resolving into the
           inventory below. Zero everywhere → one calm line, no fake urgency. */}
@@ -540,8 +566,33 @@ export default async function WorkerDocumentsPage({
                           {t("fields.validUntil")}: {d.validUntil}
                         </span>
                       ) : null}
+                      {/* Train E1: the reviewer's decision date is a fact of
+                          the history; shown as a date, never as a score. */}
+                      {d.verifiedAt ? (
+                        <span
+                          className="font-mono text-meta uppercase tracking-label text-text-muted"
+                          data-testid="doc-centre-reviewed-on"
+                        >
+                          {tc("validity.reviewedOn", { date: d.verifiedAt.slice(0, 10) })}
+                        </span>
+                      ) : null}
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
+                      {/* Train E1 — CURRENT validity, derived by the pure rule
+                          (lib/documents/credential-validity) from the stored
+                          row + the append-only history. Rendered only when the
+                          verification axis is readable; the stored verification
+                          below stays VERBATIM next to it — current state and
+                          history are shown apart, never merged. */}
+                      {d.validity ? (
+                        <span
+                          className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${VALIDITY_TONE[d.validity.state]}`}
+                          data-testid="doc-centre-validity"
+                          data-validity={d.validity.state}
+                        >
+                          {tc(`validity.${d.validity.state}`)}
+                        </span>
+                      ) : null}
                       {/* Verification VERBATIM — rendered only when the axis
                           is really readable; no claim otherwise. */}
                       {inv.verificationAvailable && d.verification ? (

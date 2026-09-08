@@ -17,15 +17,26 @@
  * record: that combination made Stripe stop retrying while replays were
  * skipped as duplicates — the event was lost forever (the pre-fix defect).
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("@/lib/billing/provider", () => ({ getBillingProvider: vi.fn() }));
+// D3: the route reads the adapter STATE to match the event's mode. Every test
+// that predates D3 runs under `stripe_test` (the historical behaviour).
+const billingCfg = vi.hoisted(() => ({ state: "stripe_test" as string, testMode: true }));
+vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => billingCfg }));
 vi.mock("@/lib/billing/subscription-store", () => ({
   recordWebhookEvent: vi.fn(),
   markWebhookProcessed: vi.fn(),
   markWebhookFailed: vi.fn(),
   upsertSubscription: vi.fn(),
   applyInvoicePayment: vi.fn(),
+}));
+// Billing safety v1: the route also books the server-side checkout operation
+// (checkout.session.completed / expired). Mocked so no service-role client is
+// constructed here; the behaviour is pinned in webhook-route-safety.test.ts.
+vi.mock("@/lib/billing/checkout-operations-store", () => ({
+  completeCheckoutOperationBySession: vi.fn(async () => "ok"),
+  expireCheckoutOperationBySession: vi.fn(async () => "ok"),
 }));
 
 import { getBillingProvider } from "@/lib/billing/provider";
@@ -181,11 +192,94 @@ describe("webhook route — processing outcomes", () => {
   });
 
   it("unhandled event type → acknowledged, recorded processed (ignored)", async () => {
-    withEvent({ id: "evt_x", type: "charge.refunded", testMode: true, object: {} });
+    withEvent({ id: "evt_x", type: "payout.paid", testMode: true, object: {} });
     const res = await post();
     expect(res.status).toBe(200);
     expect((await res.json()).ignored).toBe(true);
     expect(processed).toHaveBeenCalledWith("evt_x");
+  });
+});
+
+describe("webhook route — refund/dispute ingestion (record-only)", () => {
+  const REFUND_EVENT = {
+    id: "evt_ref",
+    type: "charge.refunded",
+    testMode: true,
+    object: {
+      id: "ch_1",
+      payment_intent: "pi_1",
+      invoice: "in_1",
+      amount_refunded: 2900,
+      currency: "eur",
+      refunded: true,
+    },
+  };
+
+  it("charge.refunded is recorded WITH its parsed summary and marked processed", async () => {
+    withEvent(REFUND_EVENT);
+    const res = await post();
+    expect(res.status).toBe(200);
+    expect((await res.json()).recordOnly).toBe(true);
+    expect(record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId: "evt_ref",
+        eventType: "charge.refunded",
+        payload: expect.objectContaining({
+          summary: expect.objectContaining({
+            chargeId: "ch_1",
+            amountRefundedCents: 2900,
+            fullyRefunded: true,
+          }),
+        }),
+      }),
+    );
+    expect(processed).toHaveBeenCalledWith("evt_ref");
+  });
+
+  it("a FULL refund never auto-cancels: no subscription/invoice state write", async () => {
+    withEvent(REFUND_EVENT);
+    await post();
+    expect(upsert).not.toHaveBeenCalled();
+    expect(invoicePay).not.toHaveBeenCalled();
+  });
+
+  it("charge.dispute.created/closed are recorded with the dispute summary, no state write", async () => {
+    for (const [id, type, status] of [
+      ["evt_dp1", "charge.dispute.created", "needs_response"],
+      ["evt_dp2", "charge.dispute.closed", "won"],
+    ] as const) {
+      vi.clearAllMocks();
+      record.mockResolvedValue("ok");
+      processed.mockResolvedValue();
+      withEvent({
+        id,
+        type,
+        testMode: true,
+        object: { id: "dp_1", charge: "ch_1", status, reason: "fraudulent", amount: 100, currency: "eur" },
+      });
+      const res = await post();
+      expect(res.status).toBe(200);
+      expect(record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: type,
+          payload: expect.objectContaining({
+            summary: expect.objectContaining({ disputeId: "dp_1", status }),
+          }),
+        }),
+      );
+      expect(processed).toHaveBeenCalledWith(id);
+      expect(upsert).not.toHaveBeenCalled();
+      expect(invoicePay).not.toHaveBeenCalled();
+    }
+  });
+
+  it("a duplicate-processed refund replay is skipped, not re-recorded as processed", async () => {
+    withEvent(REFUND_EVENT);
+    record.mockResolvedValue("duplicate-processed");
+    const res = await post();
+    expect(res.status).toBe(200);
+    expect((await res.json()).duplicate).toBe(true);
+    expect(processed).not.toHaveBeenCalled();
   });
 });
 
@@ -197,23 +291,25 @@ describe("webhook route — invoice.paid parity", () => {
     object: { parent: { subscription_details: { subscription: "sub_9" } } },
   });
 
+  // Billing safety v1: the route now also passes the event {id, created} for
+  // ordering — the payment-status mapping under test is unchanged.
   it("invoice.paid applies a SUCCEEDED payment (same as invoice.payment_succeeded)", async () => {
     withEvent(invoice("invoice.paid"));
     const res = await post();
     expect(res.status).toBe(200);
-    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded");
+    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded", expect.objectContaining({ id: "evt_invoice.paid" }));
   });
 
   it("invoice.payment_succeeded still applies SUCCEEDED", async () => {
     withEvent(invoice("invoice.payment_succeeded"));
     await post();
-    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded");
+    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded", expect.objectContaining({ id: "evt_invoice.payment_succeeded" }));
   });
 
   it("invoice.payment_failed applies FAILED", async () => {
     withEvent(invoice("invoice.payment_failed"));
     await post();
-    expect(invoicePay).toHaveBeenCalledWith("sub_9", "failed");
+    expect(invoicePay).toHaveBeenCalledWith("sub_9", "failed", expect.objectContaining({ id: "evt_invoice.payment_failed" }));
   });
 
   it("checkout.session.completed links owner+plan as incomplete (unchanged)", async () => {
@@ -237,5 +333,34 @@ describe("webhook route — invoice.paid parity", () => {
         status: "incomplete",
       }),
     );
+  });
+});
+
+describe("webhook route — D3 mode match under stripe_live", () => {
+  beforeEach(() => {
+    billingCfg.state = "stripe_live";
+    billingCfg.testMode = false;
+  });
+  afterEach(() => {
+    billingCfg.state = "stripe_test";
+    billingCfg.testMode = true;
+  });
+
+  it("a TEST event under a LIVE adapter → 400 test_event_rejected, nothing recorded", async () => {
+    withEvent({ ...SUB_EVENT, testMode: true });
+    const res = await post();
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ ok: false, reason: "test_event_rejected" });
+    expect(record).not.toHaveBeenCalled();
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it("a LIVE event under a LIVE adapter is recorded and processed", async () => {
+    withEvent({ ...SUB_EVENT, testMode: false });
+    const res = await post();
+    expect(res.status).toBe(200);
+    expect(record).toHaveBeenCalledTimes(1);
+    expect(upsert).toHaveBeenCalledTimes(1);
+    expect(processed).toHaveBeenCalledTimes(1);
   });
 });

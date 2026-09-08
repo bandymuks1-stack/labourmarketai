@@ -27,7 +27,8 @@ export const DOCUMENT_FILE_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ] as const;
 
-/** 5 MB — the repo's established upload cap (journal photos, CV extract). */
+/** 5 MB — the repo's established upload cap (journal photos; CV extract now
+ *  allows 25 MB input, see lib/cv/extract.ts MAX_CV_BYTES). */
 export const DOCUMENT_FILE_MAX_BYTES = 5 * 1024 * 1024;
 
 /** Mirrors the migration's version CHECK (1..50). */

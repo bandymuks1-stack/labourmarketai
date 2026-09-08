@@ -33,17 +33,27 @@ export function DemandLifecycleControls({
     reopen: string;
     closedNote: string;
     error: string;
+    /** Owner launch pricing 2026-09-05: reopening past the plan ceiling. */
+    limitUpgrade: string;
+    limitIndividual: string;
   };
 }) {
   const [currentStatus, setCurrentStatus] = useState(status);
   const [confirmed, setConfirmed] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [limit, setLimit] = useState<"upgrade" | "individual_plan" | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const run = (fn: () => Promise<{ kind: string; status?: string }>) =>
+  const run = (fn: () => Promise<{ kind: string; status?: string; next?: "upgrade" | "individual_plan" }>) =>
     startTransition(async () => {
       setFailed(false);
+      setLimit(null);
       const r = await fn();
+      if (r.kind === "over-limit") {
+        // The plan ceiling, said honestly: nothing reopened, nothing charged.
+        setLimit(r.next ?? "upgrade");
+        return;
+      }
       if (r.kind !== "ok") {
         setFailed(true);
         return;
@@ -109,6 +119,11 @@ export function DemandLifecycleControls({
         </>
       ) : null}
       {failed ? <span className="text-meta text-state-warning">{labels.error}</span> : null}
+      {limit ? (
+        <span className="text-meta text-state-warning" data-testid="demand-reopen-limit" data-next={limit}>
+          {limit === "individual_plan" ? labels.limitIndividual : labels.limitUpgrade}
+        </span>
+      ) : null}
     </div>
   );
 }

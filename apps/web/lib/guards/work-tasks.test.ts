@@ -57,7 +57,15 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 const MODEL = read("lib/tasks/task-model.ts");
 const READS = read("lib/tasks/tasks.ts");
-const ACTIONS = read("lib/tasks/task-actions.ts");
+// THE ONE task create moved into lib/tasks/create-task-core.ts (the page action
+// and the chat action both insert through it); the RPC-shape assertions read
+// the whole write layer, which is still exactly these three files.
+const ACTIONS =
+  read("lib/tasks/task-actions.ts") +
+  read("lib/tasks/create-task-core.ts") +
+  // §14 / §5.5: the ONE status write, shared by the page action and the chat
+  read("lib/tasks/set-task-status-core.ts") +
+  read("lib/tasks/task-chat-actions.ts");
 const PAGE_REL = "app/[locale]/dashboard/tasks/page.tsx";
 const PAGE = read(PAGE_REL);
 const SPINE = read("lib/notifications/spine.ts");
@@ -162,6 +170,18 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
      *   defines no task RPC — the existing task RPCs stay the only writers.
      */
     "20260820070000_workflow_work_task_definition_v1",
+    /**
+     *   20260831170000 — M3 compute wiring (owner 2026-08-31 closure-session
+     *   sequence): re-issues timesheet_compute_lines_v1 with the 20260819220000
+     *   journal half copied VERBATIM — so it inherits, unchanged, that body's
+     *   task_link CTE (a read of public.work_tasks for attribution + title,
+     *   tenant-scoped) — and adds only the work_hour_allocations source. Its
+     *   rollback restores the 20260819220000 body verbatim, with the same
+     *   read. It creates, alters, drops, writes and policies nothing on
+     *   work_tasks, and defines no task RPC — the existing task RPCs stay the
+     *   only writers.
+     */
+    "20260831170000_timesheet_compute_allocations_v1",
   ];
 
   it("only the D2 + train-D migration pairs DEFINE work_tasks or the task RPCs", () => {

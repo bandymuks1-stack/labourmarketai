@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { resolveEntitlements, entitlementAllows } from "./entitlements-v1";
+import { limitFor } from "./entitlements";
+import { getPlan } from "./plans";
 
 const base = {
   billingActive: true,
@@ -88,8 +90,15 @@ describe("entitlementAllows — enforcement", () => {
     expect(entitlementAllows(c, "readiness_checklist_countries")).toBe(true);
   });
 
-  it("cancelled subscription loses the paid feature (enforced)", () => {
+  it("cancelled subscription falls back to ORGANIZATION FREE (enforced): 1 active position, not 10", () => {
     const c = resolveEntitlements({ ...base, subscriptionPlanKey: "company_pilot", subscriptionStatus: "cancelled", audience: "company" });
-    expect(entitlementAllows(c, "booking_requests")).toBe(false);
+    expect(c.effectivePlanKey).toBe("free_organization");
+    expect(c.source).toBe("free");
+    expect(c.active).toBe(false);
+    expect(limitFor(getPlan(c.effectivePlanKey)!, "company_create_needs")).toBe(1);
+    expect(limitFor(getPlan("company_pilot")!, "company_create_needs")).toBe(10);
+    // the free organization plan still allows a booking (1-position scale) —
+    // the ceiling, not the capability, is what the subscription bought
+    expect(entitlementAllows(c, "booking_requests")).toBe(true);
   });
 });

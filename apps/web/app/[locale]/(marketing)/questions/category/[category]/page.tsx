@@ -55,7 +55,7 @@ export default async function CategoryPage({
   void activeLocales;
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10" id="main-content">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -92,6 +92,6 @@ export default async function CategoryPage({
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

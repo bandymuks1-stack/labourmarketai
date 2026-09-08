@@ -116,6 +116,48 @@ export type NotificationEntityType =
   | "weekly_digest";
 
 /**
+ * The canonical RUNTIME list of the code-side event types — the union above,
+ * kept in sync by the `satisfies` check (adding a type without listing it
+ * here, or listing a slug the union does not know, is a compile error).
+ * Consumers: the notification-preferences settings surface (one toggle row
+ * per type) and slug validation in the preference write action. Never a
+ * second taxonomy — the union stays the single source.
+ */
+export const NOTIFICATION_EVENT_TYPES = [
+  "booking_proposed",
+  "booking_accepted",
+  "booking_declined",
+  "booking_withdrawn",
+  "absence_requested",
+  "absence_approved",
+  "absence_rejected",
+  "engagement_created",
+  "engagement_ended",
+  "workflow_step_pending",
+  "workflow_decided",
+  "workflow_delegated",
+  "workflow_escalated",
+  "document_ack_assigned",
+  "document_ack_completed",
+  "document_expiring",
+  "work_task_assigned",
+  "demand_interest_expressed",
+  "demand_interest_reviewed",
+  "weekly_digest",
+] as const satisfies readonly NotificationEventType[];
+
+/** Compile-time exhaustiveness: a union member missing from the runtime list
+ *  turns this alias into a named error type and the assignment fails. */
+type EventTypesNotListed = Exclude<
+  NotificationEventType,
+  (typeof NOTIFICATION_EVENT_TYPES)[number]
+>;
+const _everyEventTypeListed: [EventTypesNotListed] extends [never]
+  ? true
+  : EventTypesNotListed = true;
+void _everyEventTypeListed;
+
+/**
  * Where a durable event TAKES YOU.
  *
  * A stored event states something that already happened — "your absence was
@@ -206,10 +248,41 @@ export function notificationDedupeKey(
 const FEATURE_ABSENT_CODES = new Set(["42P01", "42883", "PGRST202", "PGRST205"]);
 const UNIQUE_VIOLATION = "23505";
 
+/**
+ * `42501 insufficient_privilege`: the store EXISTS but the writer role holds
+ * no INSERT grant on it. Production has answered every emit this way since
+ * 2026-07-05 (the GRANT is the owner's RED draft, PR #1566). Measured
+ * 2026-09-06: 40 identical `emit failed unexpectedly (weekly_digest): 42501`
+ * lines in 12 h of Vercel runtime logs — one per dashboard render, each
+ * preceded by three reads that only exist to feed the write.
+ *
+ * NAMED STATE, not a retry loop: after one sighting the process skips emits
+ * for `STORE_WRITE_BLOCKED_TTL_MS` and reports `write_blocked` instead of
+ * repeating a write that cannot succeed. The TTL keeps it honest — once the
+ * grant lands, a warm instance resumes within the window and a fresh one
+ * immediately. Nothing about the missing grant is hidden: the log line still
+ * fires, once per window, naming the state.
+ */
+const INSUFFICIENT_PRIVILEGE = "42501";
+const STORE_WRITE_BLOCKED_TTL_MS = 15 * 60 * 1000;
+let storeWriteBlockedUntil = 0;
+
+/** True while the store is known to refuse writes (42501 seen within the TTL). */
+export function isNotificationStoreWriteBlocked(now: number = Date.now()): boolean {
+  return now < storeWriteBlockedUntil;
+}
+
+/** Test seam — clears the process-scoped block. */
+export function resetNotificationStoreWriteBlock(): void {
+  storeWriteBlockedUntil = 0;
+}
+
 export type NotificationWriteOutcome =
   | { readonly kind: "written" }
   | { readonly kind: "duplicate" }
   | { readonly kind: "feature_unavailable" }
+  /** Store present, writer unprivileged (42501) — skipped, not retried. */
+  | { readonly kind: "write_blocked"; readonly code: string }
   | { readonly kind: "unexpected_error"; readonly code: string };
 
 function sanitizeMetadata(
@@ -234,6 +307,9 @@ export async function emitNotificationEvent(
   admin: DbClient,
   input: NotificationEventInput,
 ): Promise<NotificationWriteOutcome> {
+  if (isNotificationStoreWriteBlocked()) {
+    return { kind: "write_blocked", code: INSUFFICIENT_PRIVILEGE };
+  }
   try {
     const { error } = await admin.from("notification_events").insert({
       recipient_profile_id: input.recipientProfileId,
@@ -248,6 +324,13 @@ export async function emitNotificationEvent(
     if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
       return { kind: "feature_unavailable" };
     }
+    if (error.code === INSUFFICIENT_PRIVILEGE) {
+      storeWriteBlockedUntil = Date.now() + STORE_WRITE_BLOCKED_TTL_MS;
+      console.error(
+        `[notifications] store refuses writes (42501 insufficient_privilege) — emits skipped for ${STORE_WRITE_BLOCKED_TTL_MS / 60000} min; the INSERT grant is owner-gated (#1566)`,
+      );
+      return { kind: "write_blocked", code: INSUFFICIENT_PRIVILEGE };
+    }
     return { kind: "unexpected_error", code: error.code ?? "unknown" };
   } catch {
     return { kind: "unexpected_error", code: "thrown" };
@@ -261,8 +344,9 @@ export function emitNotificationEventInBackground(
 ): void {
   void emitNotificationEvent(admin, input).then((outcome) => {
     if (outcome.kind === "unexpected_error") {
-      // Not swallowed silently — the approved degradation (absent store)
-      // never reaches here, so this line only fires on something real.
+      // Not swallowed silently — the approved degradations (absent store,
+      // unprivileged writer) never reach here, so this line only fires on
+      // something real.
       console.error(
         `[notifications] emit failed unexpectedly (${input.eventType}): ${outcome.code}`,
       );
@@ -292,17 +376,25 @@ export type NotificationFeedResult =
   | { readonly kind: "unexpected_error"; readonly code: string };
 
 const FEED_LIMIT = 20;
+/** Hard ceiling for callers that ask for more (the activity page's full
+ *  list) — a page is not an export; larger reads stay a deliberate API. */
+const FEED_LIMIT_MAX = 200;
 
-/** The recipient's own feed, newest first, with the true unread count. */
+/** The recipient's own feed, newest first, with the true unread count.
+ *  `limit` defaults to the bell's 20; the activity page passes a higher
+ *  value (clamped to FEED_LIMIT_MAX) so stored facts older than the bell
+ *  window stay reachable. */
 export async function readMyNotificationEvents(
   client: DbClient,
+  limit: number = FEED_LIMIT,
 ): Promise<NotificationFeedResult> {
+  const rowLimit = Math.max(1, Math.min(Math.floor(limit), FEED_LIMIT_MAX));
   try {
     const { data, error } = await client
       .from("notification_events")
       .select("id, event_type, entity_type, entity_id, created_at, read_at, metadata")
       .order("created_at", { ascending: false })
-      .limit(FEED_LIMIT);
+      .limit(rowLimit);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
         return { kind: "feature_unavailable" };
@@ -349,6 +441,38 @@ export async function markAllNotificationEventsRead(
     const { error } = await client
       .from("notification_events")
       .update({ read_at: nowIso } as never)
+      .is("read_at", null);
+    if (error) {
+      if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
+        return { kind: "feature_unavailable" };
+      }
+      return { kind: "unexpected_error", code: error.code ?? "unknown" };
+    }
+    return { kind: "persisted" };
+  } catch {
+    return { kind: "unexpected_error", code: "thrown" };
+  }
+}
+
+/**
+ * Mark ONE of the caller's events read — the per-row sibling of the
+ * mark-all above (completion v1). Same authority: the applied store's
+ * update policy (`notification_events_mark_read_own`) plus the
+ * column-level `grant update (read_at)` mean this can only ever stamp the
+ * caller's own read marker on the named row, whatever id a crafted client
+ * sends — a stranger's id simply matches zero rows. Idempotent: an
+ * already-read row is filtered out and the call still reports `persisted`.
+ */
+export async function markNotificationEventRead(
+  client: DbClient,
+  eventId: string,
+  nowIso: string,
+): Promise<MarkReadOutcome> {
+  try {
+    const { error } = await client
+      .from("notification_events")
+      .update({ read_at: nowIso } as never)
+      .eq("id", eventId)
       .is("read_at", null);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {

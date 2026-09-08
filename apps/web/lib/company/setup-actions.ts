@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { saveCompanySetup } from "./company-setup";
+import { getActiveOrganizationContext } from "./active-organization";
+import { declareOrganizationCapabilities } from "@/lib/organizations/capability-actions";
 
 /**
  * Company setup server action (tagged-return convention, mirrors
@@ -11,7 +13,16 @@ import { saveCompanySetup } from "./company-setup";
  * in prod (project memory: labourmarketai-server-action-digest).
  */
 export type CompanySetupFormState =
-  | { ok: true; companyId: string; submitted: boolean }
+  | {
+      ok: true;
+      companyId: string;
+      submitted: boolean;
+      /** First-run router preset (`capability=training_provider`): `true` when
+       *  the declaration landed, `false` when it did not (the form then points
+       *  at the capability card instead of pretending), `undefined` when no
+       *  preset was requested. Never a fake "declared". */
+      capabilityDeclared?: boolean;
+    }
   | {
       ok: false;
       code:
@@ -66,6 +77,32 @@ export async function saveCompanySetupAction(
   // no raw technical message crosses the boundary.
   if (r.kind === "error") return { ok: false, code: "error" };
 
+  // First-run router: an education institution declares its capability the
+  // moment its organisation exists, so the institution home (invite learners)
+  // is reachable without a second screen. Closed vocabulary; the declaration
+  // path is the same self-declarable one the company page's capability card
+  // uses. Best-effort: the card still offers it if the organisation cannot
+  // be resolved yet — never a fake "declared".
+  const capability = String(formData.get("capability") ?? "").trim();
+  let capabilityDeclared: boolean | undefined;
+  if (capability === "training_provider") {
+    capabilityDeclared = false;
+    try {
+      const ctx = await getActiveOrganizationContext();
+      const orgId =
+        ctx.organizations.find((o) => o.legacyCompanyId === r.companyId)?.id ??
+        null;
+      if (orgId) {
+        await declareOrganizationCapabilities(orgId, [capability]);
+        capabilityDeclared = true;
+      }
+    } catch (e) {
+      console.error("[saveCompanySetupAction] capability preset failed", {
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
   revalidatePath("/", "layout");
-  return { ok: true, companyId: r.companyId, submitted };
+  return { ok: true, companyId: r.companyId, submitted, capabilityDeclared };
 }

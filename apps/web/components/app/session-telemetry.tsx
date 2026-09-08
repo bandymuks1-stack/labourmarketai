@@ -17,7 +17,22 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  *
  * No continuous listeners; runs exactly once on mount.
  */
-export function SessionTelemetry() {
+type SessionTelemetryProps = {
+  /** Which authed surface mounts this beacon. Every genuinely NEW account is
+   *  routed through /onboarding by the auth callback (and the middleware)
+   *  BEFORE any dashboard mounts, so ONLY the onboarding surface may EMIT
+   *  `signup_completed`. Both auth surfaces are account-creating for a new
+   *  Google identity and both optimistically mark a pending signup at press
+   *  time — so a marker that first reaches the dashboard belongs to a
+   *  RETURNING login whose signup never was: it is cleared silently, never
+   *  emitted. Default "dashboard" (the non-emitting surface) so a future
+   *  mount point cannot overcount by omission. */
+  surface?: "onboarding" | "dashboard";
+};
+
+export function SessionTelemetry({
+  surface = "dashboard",
+}: SessionTelemetryProps) {
   const ran = useRef(false);
   useEffect(() => {
     if (ran.current) return;
@@ -36,12 +51,14 @@ export function SessionTelemetry() {
     }
 
     // signup_completed — fires exactly once, only when THIS session is a
-    // fresh signup (a one-shot flag set by the signup surfaces). A returning
-    // login never set the flag, so it is never mis-counted as a signup.
-    // Read-and-clear guarantees single emission across dashboard/onboarding
-    // mounts. surface = 'email' | 'google' (bounded label, no PII).
+    // fresh signup (a one-shot flag set by the account-creating surfaces) AND
+    // this mount is the onboarding surface — the only surface a brand-new
+    // account can reach first. Read-and-clear guarantees single emission;
+    // the dashboard read clears a stale marker (a returning Google login)
+    // WITHOUT emitting. signupSurface = 'email' | 'google' (bounded label,
+    // no PII).
     const signupSurface = consumeSignupPending();
-    if (signupSurface) {
+    if (signupSurface && surface === "onboarding") {
       trackFunnel(FUNNEL_EVENTS.signupCompleted, { surface: signupSurface });
     }
 

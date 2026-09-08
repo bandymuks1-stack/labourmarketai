@@ -80,3 +80,83 @@ export async function getManagedOrganizationIds(): Promise<string[]> {
 
   return [...ids];
 }
+
+export type GovernedOrganization = { id: string; name: string };
+
+/**
+ * Organizations the current user GOVERNS — the app-side mirror of
+ * `membership_actor_role_v1` returning owner/admin (the authority the
+ * workflow engine's authoring/install RPCs re-check server-side), widened
+ * by `organizations.owner_profile_id` (which the owner-membership seed
+ * mirrors into an owner membership).
+ *
+ * Deliberately NARROWER than `getManagedOrganizationIds`: manager /
+ * external_manager may act operationally but may NOT author or install
+ * approval templates, so surfacing governance panels on the managed set
+ * would render buttons the server must refuse. UI-shaping only — every
+ * write re-derives authority in SQL. Names come through the SAME
+ * organizations join the membership RLS already allows; a missing name is
+ * the empty string (absence reported as absence, localized by the render
+ * site). Feature-detected like the read above.
+ */
+export async function getGovernedOrganizations(): Promise<
+  GovernedOrganization[]
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const out = new Map<string, GovernedOrganization>();
+
+  const [owned, memberships] = await Promise.all([
+    asAny(supabase)
+      .from("organizations")
+      .select("id, display_name, legal_name")
+      .eq("owner_profile_id", user.id)
+      .limit(200),
+    asAny(supabase)
+      .from("company_memberships")
+      .select("organization_id, organizations(display_name, legal_name)")
+      .eq("profile_id", user.id)
+      .eq("status", "active")
+      .in("role", ["owner", "admin"])
+      .limit(200),
+  ]);
+
+  if (!owned.error) {
+    for (const row of (owned.data ?? []) as {
+      id?: string | null;
+      display_name?: string | null;
+      legal_name?: string | null;
+    }[]) {
+      if (typeof row.id === "string" && row.id) {
+        out.set(row.id, {
+          id: row.id,
+          name: row.display_name?.trim() || row.legal_name?.trim() || "",
+        });
+      }
+    }
+  }
+  if (!memberships.error) {
+    for (const row of (memberships.data ?? []) as {
+      organization_id?: string | null;
+      organizations?: {
+        display_name?: string | null;
+        legal_name?: string | null;
+      } | null;
+    }[]) {
+      const id = row.organization_id;
+      if (typeof id !== "string" || !id || out.has(id)) continue;
+      out.set(id, {
+        id,
+        name:
+          row.organizations?.display_name?.trim() ||
+          row.organizations?.legal_name?.trim() ||
+          "",
+      });
+    }
+  }
+  return [...out.values()];
+}

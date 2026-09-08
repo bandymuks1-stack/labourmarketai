@@ -69,6 +69,11 @@ export interface OpportunityNeed {
    *  present only after the transport RPC recreate is applied; the board
    *  degrades honestly ("—") while it is absent. Never free text. */
   readonly transport?: string | null;
+  /** DECLARED opportunity type from the demand's structured public cluster
+   *  (internship / apprenticeship / employment / …) — the World State
+   *  dimension "kur galiu atlikti praktiką?" filters on (owner contract
+   *  2026-09-04 §4A, §15). `null` = the employer stated none; never inferred. */
+  readonly opportunityType?: string | null;
   /** Required tools/equipment from the RPC's strict slug whitelist (§8.6) —
    *  a closed list of EXISTING canonical taxonomy skill slugs (hand-tools,
    *  excavator-operator, ...). Optional: present only after the

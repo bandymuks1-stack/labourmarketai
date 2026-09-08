@@ -63,11 +63,11 @@ const INTRO: Record<string, L> = {
     de: "Jeder Beruf, nicht eine Plattform für ein einzelnes Gewerk",
   },
   subcopy: {
-    en: "LabourMarket.ai is a broad labour-market platform. Construction is one important sector among many — alongside logistics, manufacturing, hospitality, care, cleaning, agriculture, office and sales. Here are the professions, teams and employers it is built for.",
-    lt: "LabourMarket.ai — plati darbo rinkos platforma. Statyba yra vienas svarbus sektorius tarp kitų — kartu su logistika, gamyba, apgyvendinimu, priežiūra, valymu, žemės ūkiu, biuru ir pardavimais. Štai profesijos, brigados ir darbdaviai, kuriems ji skirta.",
-    ru: "LabourMarket.ai — широкая платформа рынка труда. Строительство — один из важных секторов среди многих: логистика, производство, гостеприимство, уход, уборка, сельское хозяйство, офис и продажи. Вот профессии, бригады и работодатели, для которых она создана.",
-    nl: "LabourMarket.ai is een breed arbeidsmarktplatform. De bouw is één belangrijke sector van vele — naast logistiek, productie, horeca, zorg, schoonmaak, landbouw, kantoor en verkoop. Dit zijn de beroepen, teams en werkgevers waarvoor het is gebouwd.",
-    de: "LabourMarket.ai ist eine breite Arbeitsmarktplattform. Der Bau ist eine wichtige Branche unter vielen — neben Logistik, Produktion, Gastgewerbe, Pflege, Reinigung, Landwirtschaft, Büro und Vertrieb. Hier sind die Berufe, Teams und Arbeitgeber, für die sie gebaut wurde.",
+    en: "LabourMarket.ai is a broad labour-market platform for every profession — construction and logistics as much as accounting, law, engineering, IT, sales, education and design. It also covers services: when you need someone to do a job, or you offer yours. Here are the professions, teams and employers it is built for.",
+    lt: "LabourMarket.ai — plati darbo rinkos platforma visoms profesijoms: statybai ir logistikai lygiai taip pat, kaip buhalterijai, teisei, inžinerijai, IT, pardavimams, švietimui ir dizainui. Ji apima ir paslaugas — kai reikia, kad kas nors atliktų darbą, arba kai siūlote savo. Štai profesijos, brigados ir darbdaviai, kuriems ji skirta.",
+    ru: "LabourMarket.ai — широкая платформа рынка труда для всех профессий: строительство и логистика так же, как бухгалтерия, право, инженерия, IT, продажи, образование и дизайн. Она охватывает и услуги — когда нужно, чтобы кто-то выполнил работу, или когда вы предлагаете свою. Вот профессии, бригады и работодатели, для которых она создана.",
+    nl: "LabourMarket.ai is een breed arbeidsmarktplatform voor elk beroep — bouw en logistiek net zo goed als boekhouding, recht, engineering, IT, verkoop, onderwijs en design. Het omvat ook diensten: wanneer je iemand nodig hebt voor een klus, of je eigen dienst aanbiedt. Dit zijn de beroepen, teams en werkgevers waarvoor het is gebouwd.",
+    de: "LabourMarket.ai ist eine breite Arbeitsmarktplattform für jeden Beruf — Bau und Logistik genauso wie Buchhaltung, Recht, Ingenieurwesen, IT, Vertrieb, Bildung und Design. Sie umfasst auch Dienstleistungen: wenn Sie jemanden für eine Arbeit brauchen oder Ihre eigene anbieten. Hier sind die Berufe, Teams und Arbeitgeber, für die sie gebaut wurde.",
   },
   profTitle: {
     en: "Professions we cover",

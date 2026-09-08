@@ -111,10 +111,11 @@ describe("employer headcount survives the employer's language", () => {
   });
 
   it("NEGATIVE CONTROL: a number next to an UNRECOGNISED occupation is not a headcount", () => {
-    // "betonuotojas" (concreter) is genuinely absent from the closed work-type
-    // taxonomy. The engine must say so rather than borrow the number — an
-    // unrecognised occupation may not lend its noun to a count.
-    const s = structureNeed({ description: "Ieškome 6 betonuotojų Norvegijoje." });
+    // "šaltkalvis" (fitter/locksmith) is genuinely absent from the closed
+    // work-type taxonomy ("betonuotojas" joined it 2026-09-04). The engine
+    // must say so rather than borrow the number — an unrecognised occupation
+    // may not lend its noun to a count.
+    const s = structureNeed({ description: "Ieškome 6 šaltkalvių Norvegijoje." });
     expect(s.workType).toBeNull();
     expect(s.needsReview).toBe(true);
     // The demand verb still legitimately carries the count — that path is

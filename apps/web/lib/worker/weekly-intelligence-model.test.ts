@@ -52,6 +52,7 @@ function rec(over: Partial<JobRecommendation> = {}): JobRecommendation {
     locationLabel: null,
     startPeriod: null,
     companyName: null,
+    opportunityType: null,
     status: "possible",
     basis: { pct: 80, matchedTotal: 16, needTotal: 20, matchedConfirmed: 9 },
     topReasonCodes: [],

@@ -25,6 +25,7 @@ import {
   type AdvancedDemandFormState,
 } from "@/lib/demand/structured-demand-form";
 import {
+  OPPORTUNITY_TYPES,
   deriveCompensationHonestyFlags,
   requiresTalentPoolDisclosure,
   sanitizeStructuredDemandV2,
@@ -160,7 +161,7 @@ export function DemandRequestButton({
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration">(
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual">(
     "idle",
   );
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
@@ -202,6 +203,10 @@ export function DemandRequestButton({
         location,
         timing: urgency,
         accommodation,
+        // The declared opportunity type used to be discarded by "save as
+        // draft" while the UI reported success (same class as the teamSize
+        // loss fixed earlier).
+        opportunityType: adv.opportunityType || undefined,
         notes,
       });
       setDraftSource(true);
@@ -346,7 +351,13 @@ export function DemandRequestButton({
           ? "done"
           : res.code === "needs_migration"
             ? "needsMigration"
-            : "error",
+            : res.code === "over_open_need_limit"
+              // Owner launch pricing 2026-09-05: the plan ceiling, said honestly —
+              // the €99 plan, or the individual plan above it. Nothing charged.
+              ? res.next === "individual_plan"
+                ? "limitIndividual"
+                : "limitUpgrade"
+              : "error",
       );
       // Canonical-journey P3: the submitted request supersedes the draft it
       // was continued from — close the draft (draft→closed, guard-allowed)
@@ -675,6 +686,22 @@ export function DemandRequestButton({
               testId="demand-transport"
             />
           </label>
+          {/* What KIND of opportunity — internship, apprenticeship, temporary
+              assignment … Promoted out of the collapsed "advanced" cluster so
+              an employer can DECLARE it in the normal flow (0 of 17 production
+              demands carried a type while it was buried). Untouched = omitted
+              from the structured cluster; nothing is defaulted or inferred. */}
+          <label className="flex flex-col gap-1.5">
+            <Label>{tsd("opportunityTypeLabel")}</Label>
+            <DarkListbox
+              value={adv.opportunityType}
+              onChange={(v) => patchAdv({ opportunityType: v })}
+              options={OPPORTUNITY_TYPES.map((v) => ({ value: v, label: tsd(`opportunityType.${v}`) }))}
+              ariaLabel={tsd("opportunityTypeLabel")}
+              placeholder="—"
+              testId="demand-opportunity-type"
+            />
+          </label>
           {/* Required tools / equipment (§8.6) — optional toggle chips over the
               CLOSED taxonomy slug set (same real-control pattern as the profile
               skill picker; labels from the existing skillNames catalogue). No
@@ -937,6 +964,11 @@ export function DemandRequestButton({
       {state === "error" && (
         <p className="text-xs text-state-danger" role="alert" data-testid="demand-error">
           {t("error")}
+        </p>
+      )}
+      {(state === "limitUpgrade" || state === "limitIndividual") && (
+        <p className="text-xs text-state-warning" role="alert" data-testid="demand-open-need-limit" data-next={state === "limitIndividual" ? "individual_plan" : "upgrade"}>
+          {state === "limitIndividual" ? t("errorOpenNeedLimitIndividual") : t("errorOpenNeedLimitUpgrade")}
         </p>
       )}
       {state === "needsMigration" && (

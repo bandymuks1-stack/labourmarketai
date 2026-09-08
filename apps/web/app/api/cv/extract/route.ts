@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  *
  * Security:
  *   - requires an authenticated session (401 otherwise);
- *   - hard 5 MB size cap (413 otherwise) — checked before reading the body fully;
+ *   - hard 25 MB size cap (MAX_CV_BYTES, 413 otherwise) — checked before reading the body fully;
  *   - never logs the CV text (only a coarse error code);
  *   - returns a typed error code, never the underlying parser message;
  *   - per-user rate limit (SEC-16): each call runs a PDF/DOCX parser, which is

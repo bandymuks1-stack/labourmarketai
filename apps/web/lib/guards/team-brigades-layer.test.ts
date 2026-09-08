@@ -296,7 +296,10 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(lib).toMatch(/RPC_NOT_FOUND_CODE = "42883"/);
     expect(lib).toMatch(/applied: false/);
     expect(page).toMatch(/teamBrigades\.applied \?/);
-    expect(page).toMatch(/<TeamRosterEmptyState variant="company" \/>/);
+    // The empty roster card picks the agency vocabulary for a staffing
+    // agency ("candidate bench") and the company one otherwise — one
+    // component, one page, the variant is data.
+    expect(page).toMatch(/<TeamRosterEmptyState variant=\{isStaffingAgency \? "agency" : "company"\} \/>/);
     expect(page).toMatch(/<TeamBrigadesPanel/);
     expect(page).toMatch(/teams=\{teamBrigades\.teams\}/);
     // Trust Connect layers degrade independently and honestly.

@@ -35,10 +35,18 @@ export function InlineActionForm({
   onClose,
   continueLabel,
   initialValues,
+  onDone,
 }: {
   spec: WorkerFormSpec;
   locale: string;
   onClose: () => void;
+  /**
+   * Real recruiter pilot (2026-09-04): the conversation states the REAL
+   * persisted state right after the write ("the invitation waits for the
+   * client"), not only a generic "saved" — so the caller receives the
+   * executor's result the moment it lands. Purely informational.
+   */
+  onDone?: (res: { ok: true; data?: Record<string, unknown> }) => void;
   /**
    * Beta audit W-J1. `onClose` is not merely "dismiss" — for several flows it
    * IS the next step (find-work runs the actual search through it). The done
@@ -131,6 +139,7 @@ export function InlineActionForm({
           success: true,
         });
         setPhase({ kind: "done" });
+        onDone?.(res);
         router.refresh();
       } else {
         const message =
@@ -140,7 +149,11 @@ export function InlineActionForm({
               ? t("conversation.forms.ui.errorNeedsMigration")
               : res.code === "conflict"
                 ? t("conversation.forms.ui.errorConflict")
-                : t("conversation.forms.ui.errorGeneric");
+                : res.code === "over_open_need_limit_upgrade"
+                  ? t("conversation.forms.ui.errorOpenNeedLimitUpgrade")
+                  : res.code === "over_open_need_limit_individual"
+                    ? t("conversation.forms.ui.errorOpenNeedLimitIndividual")
+                    : t("conversation.forms.ui.errorGeneric");
         setPhase({ kind: "error", message });
       }
     });

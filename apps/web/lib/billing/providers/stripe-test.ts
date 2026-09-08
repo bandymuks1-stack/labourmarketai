@@ -3,7 +3,8 @@ import "server-only";
 import Stripe from "stripe";
 
 import {
-  requireStripeTestSecret,
+  getBillingConfig,
+  requireStripeSecret,
   requireStripeWebhookSecret,
 } from "@/lib/billing/config";
 import type {
@@ -13,16 +14,22 @@ import type {
   CheckoutSessionResult,
   CreateCustomerInput,
   CreateCustomerResult,
+  ListSubscriptionsResult,
   PortalSessionInput,
   PortalSessionResult,
+  ProviderSubscriptionView,
+  RetrieveSubscriptionResult,
 } from "@/lib/billing/provider";
 
 /**
- * Stripe TEST-mode adapter (Stripe sprint PR1) — the ONLY module that imports
- * the Stripe SDK. It is constructed exclusively with a sk_test_ secret
- * (requireStripeTestSecret throws on anything else), so a live key can never be
- * used here. Created lazily by getBillingProvider() only when the config is
- * `stripe_test`.
+ * The Stripe adapter — the ONLY module that imports the Stripe SDK. Since D3
+ * (2026-09-02) it serves BOTH adapter states: `stripe_test` (sk_test_) and
+ * `stripe_live` (sk_live_, reachable only after the owner arms live mode —
+ * see config-core.ts). `requireStripeSecret` refuses any key whose shape
+ * disagrees with the active state, so a live key can never be used under a
+ * test config and vice versa. Created lazily by getBillingProvider() only when
+ * one of the two states is active. The file keeps its historical name because
+ * three guards pin it as the single SDK import site.
  */
 
 /**
@@ -42,8 +49,8 @@ export const STRIPE_PINNED_API_VERSION: NonNullable<
 > = "2026-05-27.dahlia";
 
 function client(): Stripe {
-  // requireStripeTestSecret enforces sk_test_ and that test mode is active.
-  return new Stripe(requireStripeTestSecret(), {
+  // requireStripeSecret enforces the key shape that matches the active state.
+  return new Stripe(requireStripeSecret(), {
     apiVersion: STRIPE_PINNED_API_VERSION,
   });
 }
@@ -52,9 +59,39 @@ function reasonFrom(e: unknown): string {
   return e instanceof Error ? e.message.slice(0, 200) : "stripe_error";
 }
 
-export function createStripeTestProvider(): BillingProvider {
+/** Stripe's "no such object" — a read that finds nothing is an ANSWER, not an error. */
+function isResourceMissing(e: unknown): boolean {
+  return Boolean(e && typeof e === "object" && (e as { code?: unknown }).code === "resource_missing");
+}
+
+/** Normalize a Stripe subscription object into the provider-neutral read view. */
+function viewOf(sub: Stripe.Subscription): ProviderSubscriptionView {
+  const item = sub.items?.data?.[0];
+  const price = item?.price;
   return {
-    id: "stripe_test",
+    id: sub.id,
+    customerId: typeof sub.customer === "string" ? sub.customer : sub.customer?.id ?? null,
+    rawStatus: sub.status,
+    priceId: price?.id ?? null,
+    unitAmountCents: typeof price?.unit_amount === "number" ? price.unit_amount : null,
+    currency: price?.currency ?? null,
+    livemode: sub.livemode,
+    cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
+  };
+}
+
+export function createStripeProvider(): BillingProvider {
+  const cfg = getBillingConfig();
+  const live = cfg.state === "stripe_live";
+  const testMode = !live;
+  // Billing safety v1 (evidence): every object this adapter creates says which
+  // Stripe environment it belongs to. metadata-core's constant predates live
+  // mode and always said "test"; the adapter is the one place that KNOWS the
+  // mode, so it stamps the truth (a live customer/session/subscription is
+  // never labelled test).
+  const environmentStamp = { environment: live ? "live" : "test", test_mode: String(testMode) };
+  return {
+    id: live ? "stripe_live" : "stripe_test",
     active: true,
 
     async createCheckoutSession(
@@ -63,14 +100,14 @@ export function createStripeTestProvider(): BillingProvider {
       try {
         const metadata: Record<string, string> = {
           ...(input.metadata ?? { plan_key: input.planKey }),
-          test_mode: "true",
+          ...environmentStamp,
         };
         const session = await client().checkout.sessions.create(
           {
             mode: "subscription",
             line_items: [{ price: input.priceId, quantity: 1 }],
             client_reference_id: input.clientReferenceId,
-            // Reuse the stored TEST customer when we have one; fall back to
+            // Reuse the stored customer when we have one; fall back to
             // email prefill for first-time checkouts without a mapping.
             customer: input.providerCustomerId ?? undefined,
             customer_email: input.providerCustomerId
@@ -78,18 +115,33 @@ export function createStripeTestProvider(): BillingProvider {
               : (input.customerEmail ?? undefined),
             success_url: input.successUrl,
             cancel_url: input.cancelUrl,
+            // VAT (owner decision 2026-09-05: price is tax-EXCLUSIVE, Stripe Tax
+            // computes it by the customer's country — EU B2B reverse charge via
+            // the collected VAT id). Without `automatic_tax` the dashboard's
+            // Tax setting is inert for Checkout. Address is required for the
+            // computation; a reused customer must allow Stripe to store it.
+            automatic_tax: { enabled: true },
+            billing_address_collection: "required",
+            tax_id_collection: { enabled: true },
+            ...(input.providerCustomerId
+              ? { customer_update: { address: "auto", name: "auto" } }
+              : {}),
             metadata,
             // The SAME canonical metadata rides on the subscription object, so
             // customer.subscription.* events carry owner/plan/org linkage even
             // when they arrive before (or without) the session event.
             subscription_data: { metadata },
+            // Billing safety v1: the hosted session dies with the server-side
+            // checkout operation's window — at most one payable session per
+            // subject + plan at any instant.
+            ...(input.expiresAt ? { expires_at: input.expiresAt } : {}),
           },
           input.idempotencyKey
             ? { idempotencyKey: input.idempotencyKey }
             : undefined,
         );
         if (!session.url) return { ok: false, reason: "no_session_url" };
-        return { ok: true, url: session.url, sessionId: session.id, testMode: true };
+        return { ok: true, url: session.url, sessionId: session.id, testMode };
       } catch (e) {
         return { ok: false, reason: reasonFrom(e) };
       }
@@ -102,12 +154,12 @@ export function createStripeTestProvider(): BillingProvider {
         const customer = await client().customers.create(
           {
             email: input.email ?? undefined,
-            metadata: { ...input.metadata, test_mode: "true" },
+            metadata: { ...input.metadata, ...environmentStamp },
           },
           // One customer per profile — a retry must not mint a second one.
           { idempotencyKey: `cus1_${input.ownerId}` },
         );
-        return { ok: true, customerId: customer.id, testMode: true };
+        return { ok: true, customerId: customer.id, testMode };
       } catch (e) {
         return { ok: false, reason: reasonFrom(e) };
       }
@@ -133,7 +185,7 @@ export function createStripeTestProvider(): BillingProvider {
       signature: string,
     ): Promise<BillingWebhookEvent> {
       // Throws on an invalid/forged signature — business logic never runs
-      // without a verified test webhook secret.
+      // without a verified webhook secret.
       const event = client().webhooks.constructEvent(
         payload,
         signature,
@@ -143,8 +195,46 @@ export function createStripeTestProvider(): BillingProvider {
         id: event.id,
         type: event.type,
         testMode: event.livemode === false,
+        created: event.created,
         object: (event.data?.object ?? {}) as unknown as Record<string, unknown>,
       };
     },
+
+    // ── READ-ONLY provider views (billing safety v1) ──────────────────────
+    // Consulted by checkout admission (is the local "blocking" row still live
+    // in Stripe?) and by reconciliation. Neither creates, updates, cancels or
+    // charges anything — a missing object is an answer, not a failure.
+    async retrieveSubscription(
+      providerSubscriptionId: string,
+    ): Promise<RetrieveSubscriptionResult> {
+      try {
+        const sub = await client().subscriptions.retrieve(providerSubscriptionId);
+        return { ok: true, subscription: viewOf(sub) };
+      } catch (e) {
+        if (isResourceMissing(e)) return { ok: true, subscription: null };
+        return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    async listCustomerSubscriptions(
+      providerCustomerId: string,
+    ): Promise<ListSubscriptionsResult> {
+      try {
+        const page = await client().subscriptions.list({
+          customer: providerCustomerId,
+          status: "all",
+          limit: 100,
+        });
+        return { ok: true, subscriptions: page.data.map(viewOf) };
+      } catch (e) {
+        if (isResourceMissing(e)) return { ok: true, subscriptions: [] };
+        return { ok: false, reason: reasonFrom(e) };
+      }
+    },
   };
+}
+
+/** Historical name (Stripe sprint PR1); the adapter is mode-aware since D3. */
+export function createStripeTestProvider(): BillingProvider {
+  return createStripeProvider();
 }

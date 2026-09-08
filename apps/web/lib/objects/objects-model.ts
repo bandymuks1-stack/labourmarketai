@@ -55,6 +55,10 @@ export type WorkObject = {
   readonly longitude: number | null;
   readonly responsibleProfileId: string | null;
   readonly status: WorkObjectStatus;
+  /** UX-only tint (#RRGGBB) for telling objects apart in lists and grids.
+   *  Never an input to a business rule. Null until an operator sets one; the
+   *  surface falls back to a deterministic palette. */
+  readonly colorHex: string | null;
   readonly createdAt: string;
 };
 

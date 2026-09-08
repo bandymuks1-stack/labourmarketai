@@ -54,6 +54,35 @@ describe("Guard: quick confirm reuses ONLY the existing write chain", () => {
     expect(queue).not.toMatch(/\.insert\(|\.update\(|\.delete\(/);
   });
 
+  it("the confirm set is SCOPED to the entry's own linked skills (window 6 honesty rule)", () => {
+    // The read model reads the entry ↔ skill links, bounded to the reviewable ids …
+    expect(queue).toMatch(/from\("journal_entry_skills"\)[\s\S]{0,200}\.in\("journal_entry_id",\s*entryIds\)/);
+    // … and hands BOTH the links and the worker list to the pure scope rule.
+    expect(queue).toContain("scopeSkillsToConfirm({");
+    expect(queue).toContain("skillsToConfirm: scoped.skills");
+    expect(queue).toContain("confirmScope: scoped.scope");
+    // The RPC verifies exactly the ids it is given — the card's list IS the
+    // RPC input (hidden skill_id fields come from entry.skills only).
+    expect(card).toMatch(/entry\.skills\.map\(\(s\) => \(\s*<input key=\{s\.id\} type="hidden" name="skill_id" value=\{s\.id\} \/>/);
+    expect(actions).toContain('.getAll("skill_id")');
+  });
+
+  it("both reads check `error` — a failed read is a NAMED state, never `data ?? []`", () => {
+    expect(queue).toMatch(/if \(wsRes\.error\)\s*\{\s*skillsUnavailable = true;/);
+    expect(queue).toMatch(/if \(linkRes\.error\)\s*\{\s*linksByEntry = null;/);
+    const model = readFileSync(
+      join(APP_ROOT, "lib", "journal", "quick-confirm-model.ts"),
+      "utf8",
+    );
+    for (const scope of ["entry_links", "worker_declared", "skills_unavailable"]) {
+      expect(model).toContain(`"${scope}"`);
+    }
+    // The card names the failed-read state instead of claiming "no unconfirmed skills".
+    expect(card).toContain('entry.confirmScope === "skills_unavailable"');
+    expect(card).toContain("inbox.quick.skillsUnavailable");
+    expect(card).toContain("data-confirm-scope={entry.confirmScope}");
+  });
+
   it("batch input is bounded and validated (no unbounded loop)", () => {
     expect(actions).toContain("BATCH_LIMIT");
     expect(actions).toMatch(/invalid_payload/);
@@ -97,6 +126,44 @@ describe("Guard: no auto-confirm, no default-checked, explicit confirm set", () 
   it("batch failures are surfaced, never swallowed", () => {
     expect(batch).toContain("batchFailed");
     expect(actions).toContain("failed.push");
+  });
+});
+
+describe("Guard: the manager sees a receipt after the tap (window 6 prod finding)", () => {
+  const queueView = readFileSync(
+    join(APP_ROOT, "components", "app", "quick-confirm-queue.tsx"),
+    "utf8",
+  );
+  const page = readFileSync(
+    join(APP_ROOT, "app", "[locale]", "dashboard", "inbox", "quick", "page.tsx"),
+    "utf8",
+  );
+
+  it("the page renders ONE client boundary that owns empty state + batch + cards", () => {
+    // Measured: revalidatePath emptied the queue and the page swapped the
+    // list for the empty state, unmounting the confirmed card — no receipt.
+    expect(page).toContain("<QuickConfirmQueue");
+    expect(page).not.toContain("<EmptyState");
+    expect(page).not.toContain("<QuickConfirmCard");
+    expect(queueView).toContain('"use client"');
+    expect(queueView).toContain("quick-empty-state");
+    expect(queueView).toContain("<QuickConfirmBatch");
+    expect(queueView).toContain("<QuickConfirmCard");
+  });
+
+  it("a receipt is created ONLY from a card's successful action state", () => {
+    expect(card).toMatch(/if \(!confirmed \|\| reported\.current\) return;/);
+    expect(card).toContain("onConfirmed?.({");
+    expect(queueView).toContain("onConfirmed={onConfirmed}");
+    expect(queueView).toContain("quick-receipt-");
+    expect(queueView).toContain("inbox.quick.receipt");
+    expect(queueView).toContain("inbox.quick.receiptSkills");
+    // The receipt line is the entry's own text, never invented.
+    expect(queueView).toContain("receiptTitle(r.originalText)");
+  });
+
+  it("the batch result outlives the revalidation too", () => {
+    expect(batch).toMatch(/if \(entries\.length < 2 && !done\) return null;/);
   });
 });
 
@@ -179,6 +246,10 @@ describe("Guard: inbox.quick copy exists in all 10 locales", () => {
     "batchConfirm",
     "batchDone",
     "batchFailed",
+    // window 6: receipt after the tap + named failed-read state
+    "receipt",
+    "receiptSkills",
+    "skillsUnavailable",
   ];
 
   for (const locale of LOCALES) {

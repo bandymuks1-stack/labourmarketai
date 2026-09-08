@@ -1,0 +1,41 @@
+name: health-probe
+
+# FINAL COMPLETION Train L (2026-09-02): an INTERNAL uptime probe that needs no
+# external account. Every 15 minutes GitHub calls the production health route
+# (auth + database probes; 200 only when both answer). A failed scheduled run
+# e-mails the repository owner — GitHub's default notification for scheduled
+# workflow failures — so an outage is noticed without a third-party monitor.
+# Secret-free: the route is public and returns booleans + latencies only.
+# The external monitor (register L2) remains recommended for a second vantage
+# point; this closes the "nobody is watching" gap on its own.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: health-probe
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: GET /api/health (3 attempts, 20 s apart — a single cold-start 503 is not an outage)
+        shell: bash
+        run: |
+          set -u
+          for attempt in 1 2 3; do
+            code=$(curl -sS -o body.json -w '%{http_code}' --max-time 25 "https://labourmarket.ai/api/health" || echo "000")
+            echo "attempt $attempt → HTTP $code"
+            cat body.json 2>/dev/null | head -c 600; echo
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 20
+          done
+          echo "::error::production /api/health did not answer 200 in 3 attempts (last HTTP $code)"
+          exit 1

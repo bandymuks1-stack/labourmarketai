@@ -41,12 +41,15 @@ export function QuickConfirmBatch({
     FormData
   >(batchQuickConfirm, null);
 
-  if (entries.length === 0) return null;
+  const done = state?.ok === true;
+  // Shown only when there is a batch to confirm (≥2 of today's entries) — OR
+  // when a batch just completed: the route revalidation empties `entries`,
+  // and the result line must outlive that (same receipt rule as the queue).
+  if (entries.length < 2 && !done) return null;
 
   const payload = JSON.stringify(
     entries.map((e) => ({ entryId: e.id, skillIds: e.skills.map((s) => s.id) })),
   );
-  const done = state?.ok === true;
   const exceptedCount = entries.filter((e) => exceptions[e.id]?.length).length;
   const unackedCount = entries.filter(
     (e) => exceptions[e.id]?.length && !acked.has(e.id),

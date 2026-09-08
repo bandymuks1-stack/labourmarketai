@@ -25,6 +25,12 @@ import { openaiCompletionProvider } from "./runtime/providers/openai";
 import { geminiCompletionProvider } from "./runtime/providers/gemini";
 import { xaiCompletionProvider } from "./runtime/providers/xai";
 import { AI_MODEL_CANDIDATES } from "./runtime/model-candidates";
+import {
+  computeActualCostUsd,
+  estimateCostUsd,
+  estimateTokensFromText,
+} from "./runtime/model-pricing";
+import { TASK_POLICIES } from "./runtime/task-routing";
 
 const MOCK = resolveAiRuntimeConfig({
   mode: "mock", provider: undefined, apiKey: undefined, model: undefined,
@@ -220,5 +226,134 @@ describe("(f) env-gated adapters are honestly inert without env", () => {
     const r = await provider.complete(req, MOCK);
     expect(r.status).toBe("disabled");
     if (r.status === "disabled") expect(r.reason).toBe("mode_disabled");
+  });
+});
+
+describe("(g) the persisted estimate is re-priced from the SERVING candidate", () => {
+  // The exact token shape run-agent prices with: system prompt + validated
+  // input, and the output bound the ceiling was judged on.
+  const expectedInputTokens =
+    estimateTokensFromText(matchingExplanationEntry.system) +
+    estimateTokensFromText(
+      JSON.stringify(matchingExplanationEntry.inputSchema.parse(input)),
+    );
+  const outputBound = Math.max(
+    TASK_POLICIES.explain_match.expectedOutputTokens,
+    600,
+  );
+  const servedBy =
+    (
+      provider: "mock" | "anthropic" | "openai" | "gemini",
+      model: string,
+    ): AiDispatcher =>
+    async () => ({
+      status: "ok",
+      provider,
+      model,
+      raw: validMock,
+      usage: { inputTokens: 1000, outputTokens: 500 },
+    });
+
+  it("a chain candidate from another vendor re-prices estimate AND actual on ITS rate card", async () => {
+    // Primary is anthropic (sonnet tier); the chain serves from the priced
+    // gemini candidate. Before the fix the estimate stayed anthropic-priced
+    // beside a gemini-priced actual — two ledgers disagreeing about one run.
+    const out = await runAiAgentCore(matchingExplanationEntry, input, MOCK, {
+      locale: "en",
+      mock: validMock,
+      maxOutputTokens: 600,
+      dispatchOverride: servedBy("gemini", "gemini-3.5-flash-lite"),
+    });
+    expect(out.status).toBe("suggestion");
+    const geminiEstimate = estimateCostUsd(
+      "gemini-3.5-flash-lite",
+      expectedInputTokens,
+      outputBound,
+    );
+    const primaryEstimate = estimateCostUsd(
+      AI_MODEL_CANDIDATES.anthropic.sonnet,
+      expectedInputTokens,
+      outputBound,
+    );
+    expect(geminiEstimate).not.toBeNull();
+    expect(out.routing?.estimatedCostUsd).toBe(geminiEstimate);
+    expect(out.routing?.estimatedCostUsd).not.toBe(primaryEstimate);
+    expect(out.routing?.actualCostUsd).toBe(
+      computeActualCostUsd("gemini-3.5-flash-lite", 1000, 500),
+    );
+  });
+
+  it("the latency-fallback tier's model prices the estimate, not the original tier's", async () => {
+    let calls = 0;
+    const dispatcher: AiDispatcher = async (req) => {
+      calls += 1;
+      if (calls === 1) {
+        return { status: "error", code: "timeout", message: "simulated hang" };
+      }
+      return {
+        status: "ok",
+        provider: "anthropic",
+        model: req.model ?? "unknown",
+        raw: validMock,
+        usage: { inputTokens: 1000, outputTokens: 500 },
+      };
+    };
+    const out = await runAiAgentCore(matchingExplanationEntry, input, MOCK, {
+      locale: "en",
+      mock: validMock,
+      maxOutputTokens: 600,
+      dispatchOverride: dispatcher,
+    });
+    expect(out.status).toBe("suggestion");
+    expect(out.routing?.modelAlias).toBe("haiku");
+    // auditBase read the ORIGINAL (sonnet) decision's estimate; the served
+    // model is the haiku candidate and the persisted estimate must say so.
+    expect(out.routing?.estimatedCostUsd).toBe(
+      estimateCostUsd(
+        AI_MODEL_CANDIDATES.anthropic.haiku,
+        expectedInputTokens,
+        outputBound,
+      ),
+    );
+  });
+
+  it("an UNPRICED serving model yields an honest null, never another vendor's number", async () => {
+    const out = await runAiAgentCore(matchingExplanationEntry, input, MOCK, {
+      locale: "en",
+      mock: validMock,
+      maxOutputTokens: 600,
+      dispatchOverride: servedBy("openai", "gpt-5.2-mini"),
+    });
+    expect(out.status).toBe("suggestion");
+    expect(out.routing?.estimatedCostUsd).toBeNull();
+  });
+
+  it("a caller-supplied estimate stays authoritative (it is what the ceiling enforced)", async () => {
+    const out = await runAiAgentCore(matchingExplanationEntry, input, MOCK, {
+      locale: "en",
+      mock: validMock,
+      maxOutputTokens: 600,
+      route: { attempt: 1, estimatedCostUsd: 0.01 },
+      dispatchOverride: servedBy("gemini", "gemini-3.5-flash-lite"),
+    });
+    expect(out.status).toBe("suggestion");
+    expect(out.routing?.estimatedCostUsd).toBe(0.01);
+  });
+
+  it("a mock result keeps the router's estimate (deterministic, never persisted)", async () => {
+    const out = await runAiAgentCore(matchingExplanationEntry, input, MOCK, {
+      locale: "en",
+      mock: validMock,
+      maxOutputTokens: 600,
+      dispatchOverride: servedBy("mock", "mock-model"),
+    });
+    expect(out.status).toBe("suggestion");
+    expect(out.routing?.estimatedCostUsd).toBe(
+      estimateCostUsd(
+        AI_MODEL_CANDIDATES.anthropic.sonnet,
+        expectedInputTokens,
+        outputBound,
+      ),
+    );
   });
 });

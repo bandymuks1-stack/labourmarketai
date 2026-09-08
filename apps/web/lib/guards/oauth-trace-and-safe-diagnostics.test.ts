@@ -163,6 +163,16 @@ describe("Guard: callback route includes trace id + safe logging", () => {
     expect(violations).toEqual([]);
   });
 
+  it("never logs the provider's free-form error_description", () => {
+    // `error` + `error_code` are bounded identifiers and safe; the
+    // description is provider-authored prose and stays out of the logs.
+    for (const call of consoleCalls(route)) {
+      expect(call, `error_description leaked in: ${call.slice(0, 200)}`).not.toMatch(
+        /error_description/,
+      );
+    }
+  });
+
   it("never logs auth tokens, cookies, or the raw request URL inside any console.X", () => {
     // `code: exchangeError.code` (a non-secret SDK error tag) is allowed
     // because the value side is `exchangeError.code`, NOT the local auth
@@ -199,9 +209,27 @@ describe("Guard: login form surfaces ?error + ?trace and preview notice", () => 
       "exchange_failed",
       "no_user",
       "callback",
+      "cancelled",
+      // Train A slice 1 (2026-09-02): e-mail confirmation outcomes.
+      "link_expired",
+      "confirmed_sign_in",
     ]) {
       expect(form).toMatch(new RegExp(`${code}:\\s*["']oauth\\.${code}["']`));
     }
+  });
+
+  it("renders a CANCEL (and 'confirmed elsewhere, sign in here') as a neutral status, never a red system-fault alert", () => {
+    // The person pressed Cancel/Deny at the provider — a deliberate choice.
+    // A confirmation link opened on another device is likewise an outcome,
+    // not a fault: the address IS confirmed, the person only signs in here.
+    expect(form).toMatch(/NEUTRAL_OAUTH_OUTCOMES\s*=\s*new Set\(\[[^\]]*"cancelled"[^\]]*"confirmed_sign_in"/);
+    expect(form).toMatch(/oauthNeutral \? "status" : "alert"/);
+  });
+
+  it("offers a RESEND for an unconfirmed address and a dead link — never a dead end", () => {
+    expect(form).toMatch(/supabase\.auth\.resend\(\s*\{[^}]*type:\s*["']signup["']/);
+    expect(form).toMatch(/buildEmailConfirmRedirectTo\(/);
+    expect(form).toMatch(/emailNotConfirmed/);
   });
 
   it("renders the trace id as a font-mono label below the error", () => {
@@ -222,14 +250,39 @@ describe("Guard: LT + EN auth.errors.oauth + auth.login.preview_host_notice pres
   const en = JSON.parse(read("messages/en.json"));
 
   it("LT exposes oauth.* error keys", () => {
-    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "unknown"]) {
+    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown", "link_expired", "confirmed_sign_in"]) {
       expect(lt.auth?.errors?.oauth?.[k]).toBeTruthy();
     }
   });
 
   it("EN exposes oauth.* error keys", () => {
-    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "unknown"]) {
+    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown", "link_expired", "confirmed_sign_in"]) {
       expect(en.auth?.errors?.oauth?.[k]).toBeTruthy();
+    }
+  });
+
+  it("every catalog carries the e-mail confirmation outcomes + resend copy (all 11 locales)", () => {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "da", "lv", "et", "no", "sv", "pl"]) {
+      const cat = JSON.parse(read(`messages/${locale}.json`));
+      for (const k of ["link_expired", "confirmed_sign_in"]) {
+        expect(cat.auth?.errors?.oauth?.[k], `${locale} auth.errors.oauth.${k}`).toBeTruthy();
+      }
+      expect(cat.auth?.errors?.emailNotConfirmed, `${locale} emailNotConfirmed`).toBeTruthy();
+      expect(cat.auth?.login?.resend_confirmation, `${locale} login.resend_confirmation`).toBeTruthy();
+      expect(cat.auth?.login?.resend_sent, `${locale} login.resend_sent`).toBeTruthy();
+      for (const k of ["resend_label", "resend_sent", "resend_wait"]) {
+        expect(cat.auth?.signup?.[k], `${locale} signup.${k}`).toBeTruthy();
+      }
+    }
+  });
+
+  it("every catalog carries the honest cancel copy (all 11 locales, doctrine §2.4)", () => {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "da", "lv", "et", "no", "sv", "pl"]) {
+      const cat = JSON.parse(read(`messages/${locale}.json`));
+      expect(
+        cat.auth?.errors?.oauth?.cancelled,
+        `messages/${locale}.json auth.errors.oauth.cancelled`,
+      ).toBeTruthy();
     }
   });
 

@@ -2,6 +2,7 @@
 
 import { useActionState, useRef } from "react";
 
+import { Link } from "@/lib/i18n/navigation";
 import {
   saveCompanySetupAction,
   type CompanySetupFormState,
@@ -62,6 +63,10 @@ export interface CompanySetupFormLabels {
   readonly submitRequest: string;
   readonly statusDraftSaved: string;
   readonly statusSubmitted: string;
+  /** The door after a successful save — the company workspace. */
+  readonly goToWorkspace: string;
+  /** Shown when the first-run education preset could not be recorded. */
+  readonly capabilityNotDeclared: string;
   readonly statusNeedsMigration: string;
   readonly statusInvalid: string;
   /** M-P0-2: same creator already has a company with this canonical name. */
@@ -81,6 +86,9 @@ export function CompanySetupForm({
   existing,
   labels,
   targetCompanyId,
+  presetCompanyType,
+  presetCapability,
+  firstSetup = false,
 }: {
   readonly existing: CompanyRow | null;
   readonly labels: CompanySetupFormLabels;
@@ -90,6 +98,15 @@ export function CompanySetupForm({
    *  behaviour. Editing pages pass `existing.id`; the create entry passes
    *  "new" so a second organization NEVER renames the first. */
   readonly targetCompanyId?: string;
+  /** First-run router presets: pre-select the company type (agency intent)
+   *  and carry a capability to declare once the company exists (education
+   *  intent). Presets never override an EXISTING company's stored type. */
+  readonly presetCompanyType?: CompanyType;
+  readonly presetCapability?: "training_provider";
+  /** The row being edited is an unnamed SHELL from onboarding (first setup):
+   *  the first-run preset is the person's actual choice, the shell's stored
+   *  default type is not — so the preset wins here and only here. */
+  readonly firstSetup?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<
     CompanySetupFormState | null,
@@ -144,6 +161,9 @@ export function CompanySetupForm({
       data-testid="company-setup-form"
     >
       <input type="hidden" name="intent" ref={intentRef} defaultValue="draft" />
+      {presetCapability ? (
+        <input type="hidden" name="capability" value={presetCapability} readOnly />
+      ) : null}
       {targetCompanyId !== undefined ? (
         <input type="hidden" name="company_id" value={targetCompanyId} readOnly />
       ) : null}
@@ -200,7 +220,11 @@ export function CompanySetupForm({
         <OptionCards
           name="company_type"
           ariaLabel={labels.companyType}
-          defaultValue={existing?.companyType ?? "other"}
+          defaultValue={
+            (firstSetup
+              ? (presetCompanyType ?? existing?.companyType)
+              : (existing?.companyType ?? presetCompanyType)) ?? "other"
+          }
           testId="company-setup-company-type"
           options={COMPANY_TYPES.map((type) => ({
             value: type,
@@ -359,6 +383,26 @@ export function CompanySetupForm({
         >
           {banner.text}
         </p>
+      ) : null}
+      {/* "Company saved" used to be a dead end — the person had to find the
+          workspace themselves. Offer the one next door, and say plainly when
+          the education preset did not land (the capability card in the
+          workspace is where it is declared; nothing is faked). */}
+      {state?.ok ? (
+        <div className="flex flex-col gap-2" data-testid="company-setup-next">
+          {state.capabilityDeclared === false ? (
+            <p className="text-xs leading-relaxed text-state-warning" role="status">
+              {labels.capabilityNotDeclared}
+            </p>
+          ) : null}
+          <Link
+            href="/dashboard/company"
+            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            data-testid="company-setup-go-workspace"
+          >
+            {labels.goToWorkspace} →
+          </Link>
+        </div>
       ) : null}
     </form>
   );

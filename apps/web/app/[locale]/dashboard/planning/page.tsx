@@ -194,6 +194,12 @@ export default async function PlanningPage({
     ? result.items.filter((i) => i.sourceType === sourceFilter)
     : result.items;
 
+  // I2 (2026-09-02): the filter chips name only the sources PRESENT in the
+  // model (plus the one currently selected). A worker with nothing planned no
+  // longer meets nine technical type names for rows that do not exist; the
+  // filter row disappears entirely when there is nothing to filter.
+  const presentSources = new Set(result.items.map((i) => i.sourceType));
+
   // W12 slice 3 — a filter changes what is SHOWN, never what is TRUE.
   // Conflicts are derived from the FULL model (`result.items`) and only the
   // rendering is filtered. Deriving them from `visibleItems` meant
@@ -542,6 +548,7 @@ export default async function PlanningPage({
       </div>
 
       {/* Source filter — plain searchParams links. */}
+      {result.items.length > 0 && (
       <nav
         className="flex flex-wrap items-center gap-2"
         aria-label={t("filters.label")}
@@ -558,7 +565,9 @@ export default async function PlanningPage({
         >
           {t("filters.all")}
         </Link>
-        {PLANNING_SOURCE_TYPES.map((s) => (
+        {PLANNING_SOURCE_TYPES.filter(
+          (s) => presentSources.has(s) || s === sourceFilter,
+        ).map((s) => (
           <Link
             key={s}
             href={planningHref({ view, date: anchor, source: s, today }) as "/dashboard"}
@@ -570,6 +579,7 @@ export default async function PlanningPage({
           </Link>
         ))}
       </nav>
+      )}
 
       {/* ---------------- WORKLOAD (week + agenda) ---------------- */}
       {showWorkload && workloadHasSignal(workloadWeeks) ? (

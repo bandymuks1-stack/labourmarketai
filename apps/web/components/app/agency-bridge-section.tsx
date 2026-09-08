@@ -16,6 +16,8 @@ import {
   withdrawOfferAction,
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Agency side of the REAL two-subject bridge (issue #859). The staffing agency
@@ -39,6 +41,10 @@ export interface AgencyBridgeLabels {
   readonly workerPlaceholder: string;
   readonly offerButton: string;
   readonly noRoster: string;
+  /** Link text beside `noRoster` — jumps to the roster section. */
+  readonly goToRoster: string;
+  /** Shown when an action rejected its input (e.g. a malformed client e-mail). */
+  readonly invalidLabel: string;
   readonly progressHeading: string;
   readonly noOffers: string;
   readonly withdrawButton: string;
@@ -89,8 +95,23 @@ export function AgencyBridgeSection({
   const progressRows = progress.kind === "ok" ? progress.rows : [];
   const stageByWorker = new Map(progressRows.map((p) => [`${p.requestId}:${p.workerId}`, p]));
 
+  // TIME_TO_EXTERNAL_HUMAN_RESPONSE for the agency: another person acted on
+  // what the agency did - a client accepted the connection, shared a request
+  // or decided on a candidate - and the agency is looking at it now. Emitted
+  // once per tab session (TelemetryView dedup), no ids.
+  const humanResponseVisible =
+    connRows.some((c) => c.status === "active") ||
+    sharedRows.length > 0 ||
+    progressRows.some((p) => p.offerStatus === "accepted" || p.offerStatus === "declined");
+
   return (
     <section className="card-border flex flex-col gap-4 p-5" data-testid="agency-bridge-section">
+      {humanResponseVisible ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.firstRealResult}
+          metadata={{ surface: "agency_bridge", step: "human", role_context: "agency" }}
+        />
+      ) : null}
       <header className="flex flex-col gap-1">
         <h2 className="inline-flex items-center gap-2 font-display text-lg font-semibold text-text-primary">
           <Link2 className="h-4 w-4 text-brand-blue" aria-hidden />
@@ -157,7 +178,12 @@ export function AgencyBridgeSection({
                   <li key={s.shareId} className="card-border flex flex-col gap-2 p-3" data-testid="agency-bridge-shared-row">
                     <span className="truncate text-sm font-semibold text-text-primary">{s.title}</span>
                     {roster.length === 0 ? (
-                      <p className="text-xs text-text-muted">{labels.noRoster}</p>
+                      <p className="text-xs text-text-muted">
+                        {labels.noRoster}{" "}
+                        <a href="#company-team" className="text-brand-blue hover:underline" data-testid="agency-bridge-no-roster-link">
+                          {labels.goToRoster} →
+                        </a>
+                      </p>
                     ) : (
                       <form action={offerAction} className="flex flex-col gap-2 sm:flex-row sm:items-end" data-testid="agency-bridge-offer-form">
                         <input type="hidden" name="shareId" value={s.shareId} />
@@ -199,6 +225,22 @@ export function AgencyBridgeSection({
                       <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE[reviewStageTone(p.reviewStage)]}`}>
                         {labels.stageLabels[p.reviewStage] ?? p.reviewStage}
                       </span>
+                      {/* The CLIENT's explicit decision on this candidate
+                          (migration 20260903101000): accepted → a booking was
+                          proposed to the worker; declined → closed. Shown
+                          beside the derived review stage, never instead of it. */}
+                      {p.offerStatus === "accepted" || p.offerStatus === "declined" ? (
+                        <span
+                          className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
+                            p.offerStatus === "accepted"
+                              ? "border-state-success/40 bg-state-success/10 text-text-primary"
+                              : "border-ink-500 bg-ink-800 text-text-muted"
+                          }`}
+                          data-testid={`agency-bridge-decision-${p.offerStatus}`}
+                        >
+                          {labels.stageLabels[`decision_${p.offerStatus}`] ?? p.offerStatus}
+                        </span>
+                      ) : null}
                       <a href={`/${locale}/dashboard/company/scouting?request=${p.requestId}`}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline">
                         {labels.openScouting} <ArrowUpRight className="h-3 w-3" aria-hidden />
@@ -218,8 +260,15 @@ export function AgencyBridgeSection({
               </ul>
             )}
           </div>
-          {(inviteState.status === "error" || offerState.status === "error" || inviteState.status === "forbidden" || offerState.status === "forbidden") && (
-            <p className="text-xs text-state-danger" role="alert">{labels.errorLabel}</p>
+          {/* Every non-ok outcome the actions can return is surfaced — an
+              invalid client e-mail or a vanished share used to produce no
+              feedback at all. */}
+          {(["error", "forbidden", "invalid", "not-found"] as const).some(
+            (s) => inviteState.status === s || offerState.status === s,
+          ) && (
+            <p className="text-xs text-state-danger" role="alert">
+              {inviteState.status === "invalid" || offerState.status === "invalid" ? labels.invalidLabel : labels.errorLabel}
+            </p>
           )}
         </>
       )}

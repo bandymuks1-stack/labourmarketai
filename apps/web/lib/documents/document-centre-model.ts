@@ -1,3 +1,4 @@
+import type { CredentialValidity } from "@/lib/documents/credential-validity";
 import type { DerivedDocumentStatus } from "@/lib/documents/readiness";
 
 /**
@@ -51,6 +52,12 @@ export type CentreDocumentRow = {
   readonly storedStatus: "missing" | "ready" | "blocked";
   readonly derivedStatus: DerivedDocumentStatus;
   readonly verification: DocumentVerificationState | null;
+  /** Latest reviewer decision time (ISO), when the axis is readable. */
+  readonly verifiedAt?: string | null;
+  /** CURRENT validity (Train E1) — derived by lib/documents/credential-validity
+   *  from the stored row + the append-only history; null = axis unreadable,
+   *  nothing claimed. History itself is never touched by this model. */
+  readonly validity?: CredentialValidity | null;
 };
 
 /** Pure eligibility rule for the worker-side "send for verification"

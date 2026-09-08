@@ -235,5 +235,30 @@ export const DE_PACK: LanguagePack = {
     translation: {
       exact: ["ubersetzt", "übersetzt", "ubersetzung", "übersetzung", "dolmetsch"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["präsentierte", "präsentation", "hielt einen vortrag"],
+    },
+    "stakeholder-engagement": {
+      exact: ["interessenvertreter", "traf vertreter", "treffen mit vertretern"],
+    },
+    "partnership-development": {
+      exact: ["partnerschaft", "kooperationsmöglichkeiten", "zusammenarbeit aufgebaut"],
+    },
+    negotiation: {
+      exact: ["verhandelte", "verhandlung"],
+    },
+    "project-coordination": {
+      exact: ["projektleitung", "projektkoordination", "koordinierte das projekt"],
+    },
+    "report-writing": {
+      exact: ["schrieb einen bericht", "berichte verfasst", "berichterstellung"],
+    },
+    teamwork: {
+      exact: ["teamarbeit", "im team gearbeitet", "gruppenarbeit"],
+    },
+    research: {
+      exact: ["forschung", "recherche durchgeführt", "literaturrecherche"],
+    },
   },
 };

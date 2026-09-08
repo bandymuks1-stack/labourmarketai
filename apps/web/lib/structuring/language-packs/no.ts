@@ -226,5 +226,30 @@ export const NO_PACK: LanguagePack = {
     translation: {
       exact: ["oversatte", "oversettelse", "tolket"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["presenterte", "presentasjon", "holdt innlegg"],
+    },
+    "stakeholder-engagement": {
+      exact: ["interessentene", "møtte representanter", "møte med representanter"],
+    },
+    "partnership-development": {
+      exact: ["partnerskap", "samarbeidsmuligheter", "inngikk samarbeid"],
+    },
+    negotiation: {
+      exact: ["forhandlet", "forhandlinger"],
+    },
+    "project-coordination": {
+      exact: ["koordinerte prosjekt", "prosjektledelse", "prosjektstyring"],
+    },
+    "report-writing": {
+      exact: ["skrev rapport", "rapportskriving", "utarbeidet rapport"],
+    },
+    teamwork: {
+      exact: ["teamarbeid", "jobbet i team", "gruppearbeid"],
+    },
+    research: {
+      exact: ["forskning", "gjennomførte undersøkelse", "litteraturstudie"],
+    },
   },
 };

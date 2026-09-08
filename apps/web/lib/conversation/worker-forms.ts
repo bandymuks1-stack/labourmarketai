@@ -140,17 +140,31 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
     titleKey: "conversation.actions.worker.saveWorkCard.label",
     fields: [
       { name: "availabilityStatus", kind: "select", labelKey: "conversation.forms.fields.availability", options: [{ value: "", labelKey: "conversation.forms.fields.notStated" }, ...availabilityOptions] },
+      // "galiu dirbti nuo spalio 1 d." — the FROM date the card already
+      // stores (`available_from`; the schema and executor carried it, the
+      // form did not). Prefilled from the sentence, editable, ISO day.
+      { name: "availableFrom", kind: "text", labelKey: "conversation.forms.fields.availableFrom", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
       { name: "locationCountry", kind: "text", labelKey: "conversation.forms.fields.locationCountry", placeholderKey: "conversation.forms.fields.countryCodePlaceholder", maxLength: 2 },
       { name: "preferredCountries", kind: "text", labelKey: "conversation.forms.fields.preferredCountries", placeholderKey: "conversation.forms.fields.preferredCountriesPlaceholder" },
       { name: "salaryMin", kind: "number", labelKey: "conversation.forms.fields.salaryMin", placeholderKey: "conversation.forms.fields.salaryMinPlaceholder", min: 0, max: 100000 },
       { name: "salaryMax", kind: "number", labelKey: "conversation.forms.fields.salaryMax", placeholderKey: "conversation.forms.fields.salaryMaxPlaceholder", min: 0, max: 100000 },
     ],
+    // Partial save (W6): every field the person leaves blank is OMITTED —
+    // `null` for the scalars, `undefined` for the country list — and the
+    // canonical `save_worker_card` keeps the recorded value for an omitted
+    // field. A blank country field is therefore "keep", never "clear": this
+    // form used to send `[]` for a blank field, which the executor now treats
+    // as the explicit clear (`worker-executors.ts`), so an empty form must
+    // not produce it. The form opens PREFILLED from the current card
+    // (`workCardPrefillFromCard`), so what the person edits is the whole
+    // list, never an empty box whose one new entry replaces the rest.
     build: (st) => ({
       availabilityStatus: s(st.availabilityStatus) || null,
+      availableFrom: /^\d{4}-\d{2}-\d{2}$/.test(s(st.availableFrom)) ? s(st.availableFrom) : null,
       locationCountry: s(st.locationCountry).toUpperCase() || null,
       preferredCountries: s(st.preferredCountries)
         ? s(st.preferredCountries).split(",").map((c) => c.trim().toUpperCase()).filter((c) => c.length === 2)
-        : [],
+        : undefined,
       salaryMin: numOrNull(st.salaryMin),
       salaryMax: numOrNull(st.salaryMax),
     }),
@@ -173,6 +187,61 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
   },
 ] as const;
 
+/** "Record a document" — BUILT per turn from the canonical catalogues the
+ *  server read returns (types + countries), never a list of its own. */
+export function workerAddDocumentForm(
+  types: ReadonlyArray<{ value: string; label: string }>,
+  countries: ReadonlyArray<{ value: string; label: string }>,
+): WorkerFormSpec {
+  return {
+    actionId: "worker.add-document",
+    titleKey: "conversation.actions.worker.addDocument.label",
+    fields: [
+      { name: "typeSlug", kind: "select", labelKey: "conversation.forms.fields.documentType", required: true, options: types.map((o) => ({ value: o.value, label: o.label })) },
+      { name: "country", kind: "select", labelKey: "conversation.forms.fields.documentCountry", options: [{ value: "", label: "—" }, ...countries.map((o) => ({ value: o.value, label: o.label }))] },
+      { name: "validUntil", kind: "text", labelKey: "conversation.forms.fields.validUntil", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
+      { name: "note", kind: "text", labelKey: "conversation.forms.fields.documentNote", maxLength: 500 },
+    ],
+    build: (st) => ({
+      typeSlug: s(st.typeSlug),
+      country: s(st.country) || null,
+      status: "ready",
+      validUntil: s(st.validUntil) || null,
+      note: s(st.note) || null,
+    }),
+  };
+}
+
 export function getWorkerForm(actionId: string): WorkerFormSpec | undefined {
   return WORKER_FORMS.find((f) => f.actionId === actionId);
+}
+
+/** The current work card as the ONE canonical worker read model returns it
+ *  (`getWorkerCriteriaSnapshot`, workers row under the person's own RLS). */
+export type WorkCardPrefillSource = {
+  availabilityStatus: string | null;
+  availableFrom: string | null;
+  locationCountry?: string | null;
+  preferredCountries: string[];
+  salaryMinEur: number | null;
+  salaryMaxEur: number | null;
+};
+
+/**
+ * W6 prefill: the `worker.save-work-card` form ALWAYS opens showing what the
+ * card already holds, whichever chip or sentence opened it — so a person who
+ * came to add one country edits the full list, and saving the form as-is
+ * changes nothing. Only recorded values become field state; an unset field
+ * stays absent (blank = keep, see `build`). Pure: a caller's own prefill
+ * (`?preferredCountries=…`, a parsed `availableFrom`) is spread OVER this.
+ */
+export function workCardPrefillFromCard(card: WorkCardPrefillSource): FormState {
+  const out: FormState = {};
+  if (card.availabilityStatus) out.availabilityStatus = card.availabilityStatus;
+  if (card.availableFrom) out.availableFrom = card.availableFrom.slice(0, 10);
+  if (card.locationCountry) out.locationCountry = card.locationCountry;
+  if (card.preferredCountries.length > 0) out.preferredCountries = card.preferredCountries.join(", ");
+  if (card.salaryMinEur != null) out.salaryMin = String(card.salaryMinEur);
+  if (card.salaryMaxEur != null) out.salaryMax = String(card.salaryMaxEur);
+  return out;
 }

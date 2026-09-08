@@ -81,7 +81,12 @@ export default defineConfig({
          * code. A wrong target must never be able to look like a bug.
          */
         reuseExistingServer: !LOCAL_STACK,
-        timeout: 120_000,
+        // Boot patience, not test patience: on a shared/loaded workstation the
+        // dev server's cold boot + first root compile has been measured well
+        // past 120s while the SAME boot takes ~12s quiet (2026-08-31 journey
+        // pass — two runs timed out here with the product healthy). Readiness
+        // is still required; only the wait is longer.
+        timeout: 300_000,
       },
   projects: [
     {

@@ -24,8 +24,13 @@ import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-bu
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
 import { FeatureNote } from "@/components/app/feature-note";
+import { AvailableSupplySection } from "@/components/app/available-supply-section";
+import { listAvailableSupplyForEmployer } from "@/lib/supply/employer-supply-discovery";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
+import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { TelemetryView } from "@/components/app/telemetry-view";
 import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
 import {
   deriveCandidatePipelineStage,
@@ -125,9 +130,13 @@ export default async function CompanyScoutingPage({
   const tPipe = await getTranslations("candidatePipeline");
   // Localized skill names for the bounded facet chips (Wagon 1).
   const tSkill = await getTranslations("skillNames");
-  const [demands, pendingInterest] = await Promise.all([
+  const [demands, pendingInterest, availableSupply] = await Promise.all([
     listCompanyDemands(),
     listPendingInterestCountsForCompany(),
+    // The supply half of discovery. In the SAME batch as the demand reads —
+    // it depends on nothing they produce, so a serial await would cost a
+    // render stage for nothing.
+    listAvailableSupplyForEmployer({ limit: 50 }),
   ]);
   /**
    * SOMEBODY WAITING OUTRANKS EVERY OTHER DEFAULT.
@@ -263,6 +272,13 @@ export default async function CompanyScoutingPage({
           {t("privacy.profileSafe")}
         </p>
       </section>
+
+      {/* AVAILABLE WORKFORCE (2026-09-07) — the supply half of discovery, beside
+          the candidate half rather than in a separate product. Until this
+          landed, an agency's declared capacity was readable only by that agency
+          and an admin: the supply side of the market was written and
+          undiscoverable. */}
+      <AvailableSupplySection state={availableSupply} />
 
       {/* Honest visibility: based on readiness/trust/permissions — NOT payment.
           Paid wider access is inert while billing is disabled; no fake unlock. */}
@@ -470,6 +486,8 @@ export default async function CompanyScoutingPage({
             reopen: t("lifecycle.reopen"),
             closedNote: t("lifecycle.closedNote"),
             error: t("lifecycle.error"),
+            limitUpgrade: t("lifecycle.limitUpgrade"),
+            limitIndividual: t("lifecycle.limitIndividual"),
           }}
         />
       ) : null}
@@ -506,11 +524,28 @@ export default async function CompanyScoutingPage({
               {t("filters.clear")} →
             </Link>
           ) : null}
+          {/* The copy says "broaden the need" — this is the door to do it.
+              Rendered in every empty case, so the page never ends without a
+              next action. */}
+          <Link
+            href={`/${locale}/dashboard/company#demand-intake`}
+            className="text-xs font-medium text-brand-blue hover:text-brand-cyan"
+            data-testid="scouting-empty-edit-need"
+          >
+            {t("editNeedCta")} →
+          </Link>
         </div>
       ) : null}
 
       {selected && offeredCandidates.length > 0 ? (
         <section className="card-border flex flex-col gap-3 p-4" data-testid="scouting-agency-offers">
+          {/* TIME_TO_EXTERNAL_HUMAN_RESPONSE for the client company: a real
+              agency proposed a real candidate for this need, and the client
+              is looking at it. Once per tab session; no ids. */}
+          <TelemetryView
+            event={FUNNEL_EVENTS.firstRealResult}
+            metadata={{ surface: "agency_offers", step: "human", role_context: "company" }}
+          />
           <header className="flex flex-col gap-1">
             <h2 className="font-display text-base font-semibold text-text-primary">
               {tOffered("title")}
@@ -525,8 +560,28 @@ export default async function CompanyScoutingPage({
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
                   </span>
                   <span className="text-xs text-text-muted">{tOffered("via")}: {oc.agencyName}</span>
+                  <span
+                    className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+                    data-testid={`scout-offer-status-${oc.offerStatus}`}
+                  >
+                    {tOffered(`status.${oc.offerStatus}`)}
+                  </span>
                   {oc.note ? <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">{oc.note}</span> : null}
                 </div>
+                {/* The client's decision on THIS candidate (agency first value):
+                    accept proposes the canonical booking to the worker, decline
+                    closes the offer. Renders only while the offer is open. */}
+                {oc.offerStatus === "offered" ? (
+                  <OfferDecisionButtons
+                    offerId={oc.offerId}
+                    labels={{
+                      accept: tOffered("decision.accept"), decline: tOffered("decision.decline"),
+                      accepted: tOffered("decision.accepted"), declined: tOffered("decision.declined"),
+                      notReady: tOffered("decision.notReady"), forbidden: tOffered("decision.forbidden"),
+                      closed: tOffered("decision.closed"), error: tOffered("decision.error"),
+                    }}
+                  />
+                ) : null}
                 <div className="flex flex-col gap-2">
                   <RequestCommunicationButton
                     locale={locale}

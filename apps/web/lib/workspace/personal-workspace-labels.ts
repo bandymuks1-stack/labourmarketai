@@ -92,7 +92,13 @@ export function resolvePersonalWorkspaceLabels(
     readinessLabel: t("readiness.label"),
     readinessKnown: t("readiness.known"),
     readinessNext: t("readiness.next"),
-    readinessComplete: t("readiness.complete"),
+    // SCOPED, not universal (owner window 11 §24). This line used to read
+    // "Viskas, kas svarbiausia, jau nurodyta" — everything that matters is
+    // already set — on a screen that ALSO said one instruction was waiting
+    // and nine documents were missing. The claim was never about everything;
+    // it is about these readiness pillars, and now it counts them and says
+    // out loud that documents and requests are a separate tally.
+    readinessComplete: t("readiness.complete", { count: PILLAR_KEYS.length }),
     readinessUnavailable: t("readiness.unavailable"),
     pillar,
     action,

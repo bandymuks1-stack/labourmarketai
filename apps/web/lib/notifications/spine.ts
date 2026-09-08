@@ -24,6 +24,7 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import {
   notificationEventHref,
   readMyNotificationEvents,
+  type NotificationEventMetadata,
 } from "@/lib/notifications/events";
 
 /**
@@ -111,8 +112,11 @@ export function buildNavBadges(
  *
  * While the owner-gated notification_events store is unapplied this returns
  * [] and the product renders exactly what it rendered before.
+ *
+ * `limit` (default: the bell's FEED_LIMIT of 20) lets the activity page
+ * show the longer history the bell truncates — the reader clamps it.
  */
-export async function getDurableNotifications(): Promise<
+export async function getDurableNotifications(limit?: number): Promise<
   readonly {
     id: string;
     type: string;
@@ -120,10 +124,20 @@ export async function getDurableNotifications(): Promise<
     read_at: string | null;
     /** Canonical surface for the entity this event is about. */
     href?: string;
+    /**
+     * The stored row's own safe render hints (`SAFE_METADATA_KEYS`: country,
+     * roleSlug, startDate). Carried through so the bell can say WHICH market
+     * an event belongs to (owner window 11 §28) — production showed two
+     * "Darbuotojas pareiškė susidomėjimą jūsų poreikiu" rows that were
+     * indistinguishable, because everything the row knew beyond its type was
+     * dropped here. Never free text; the write side gates the keys.
+     */
+    metadata: NotificationEventMetadata;
   }[]
 > {
   const supabase = await createServerClient();
-  const feed = await readMyNotificationEvents(supabase);
+  // `undefined` falls through to the reader's own FEED_LIMIT default.
+  const feed = await readMyNotificationEvents(supabase, limit);
   if (feed.kind !== "ready") return [];
   return feed.events.map((e) => ({
     id: e.id,
@@ -134,5 +148,6 @@ export async function getDurableNotifications(): Promise<
     // into somewhere the reader can actually go. Clearing still happens by
     // marking read, not by visiting — see NOTIFICATION_ENTITY_HREF.
     href: notificationEventHref(e.entityType),
+    metadata: e.metadata,
   }));
 }

@@ -1,0 +1,77 @@
+# Documents answered in the conversation (2026-09-04)
+
+> Owner Master Execution Contract §12 (documents first-class: have / valid /
+> expires / missing / required / who can issue / what next) and §16
+> (matching continues after "no"). Verification used a bounded E2E worker
+> identity on production (its preferred countries were set to NL + DE for
+> the probe); never the real user.
+
+## Measured before (#1469)
+
+"Show my documents" / "kas baigia galioti?" answered with a route chip
+only. The document centre and the country-readiness join existed but no
+conversation reader called them. "Ko man trūksta?" (bare) was unknown, and
+the skills-gap answer ended at "log work".
+
+## The fix (#1469, GREEN, prod `2076d727`)
+
+`lib/conversation/documents-gap.ts` (pure) + `documents-gap-server.ts` (the
+ONE use case over the same document-centre read and country-readiness join
+the documents page renders); `runDocumentsReadiness` workflow; the skill-gap
+answer continues to the document gap; router phrasing in five locales; 14
+keys × 11 locales. The route to the centre is emitted by the chat (W4
+guard), never by the workflow layer.
+
+## Production verification (E2E worker identity, 390 px, `2076d727`)
+
+| Step | Observed |
+|---|---|
+| "kas baigia galioti?" with NO stated country | "Dokumentai: 0 paruošti, 0 baigia galioti, 0 trūksta. Nenurodei, kur nori dirbti, todėl negaliu pasakyti, kokių dokumentų ten reikia." + chips **Dokumentai · Kur nori dirbti?** — the honest ask, never an invented country |
+| preferred countries NL + DE | "kokių dokumentų man reikia?" → "Dokumentai: 0 paruošti, 0 baigia galioti, 6 trūksta." then per country: "— A1 pažymėjimas: reikalingas Nyderlandai. Išduoda / tvirtina: Your Europe — Social security forms (A1 / posted workers)", "— Komandiravimo pranešimas …", "— Asmens dokumentas …", the same for Vokietija; why-line "Iš tavo dokumentų ir Nyderlandai, Vokietija reikalavimų sąrašo."; chip **Dokumentai** (screenshot `walk-documents/43-documents-answer.png`) |
+| "ko man trūksta?" | skills: "Nieko netrūksta: turi visus įgūdžius, kurių prašo 9 matomi poreikiai." — the document gap was NOT appended on this branch (the no-skill-missing branch returned early) → fixed in the follow-up PR: the answer continues to the document gap in every branch |
+| never | the worker fallback; a route-only answer |
+
+Known limits (honest): the country name renders in the nominative
+("reikalingas Nyderlandai"); the skills gap still names only "log work" as
+the closing step — training suggestions need a public projection of
+programmes by profession (privacy decision recorded in the checkpoint queue).
+
+## Attention from the documents gap (prod `6fc477d9`, #1485 + #1487)
+
+Worker two (preferred NL + DE, 6 required documents missing) opens the dashboard: the
+opening brief now carries **"Trūksta 6 dokumentų jūsų šalims."** with the "Mano
+dokumentai" chip (`walk-attention-prod.cjs`, 10.6 s). The first walk on `2fc998ee`
+found the line never reached an active worker (the cap of three lines was filled by
+matches / unlogged work / unread) — an EXPIRING document now sits right after the
+offer rung as a deadline; a MISSING document (for a stated country) stays lower and
+was reached here.
+
+Next: a document RECORDED by sentence ("turiu naują A1 iki 2027-03-31", #1488) so the
+gap can close from the same conversation.
+
+## A document RECORDED by sentence (prod `a726b2ce`, #1488)
+
+`walk-add-document-prod.cjs`, worker two, 40.2 s: "turiu naują A1 pažymą iki
+2027-03-31" → the one form `worker.add-document` opened with the intro line; **type
+pre-filled `a1_certificate`** from the sentence; continue → review → save →
+"Dokumentas užrašytas. Štai jūsų pasiruošimas dabar:" and the readiness answer
+re-ran. DB: `worker_documents` row `65dc3c3c…` (a1_certificate, ready) — deleted
+afterwards so the E2E baseline (6 missing) stays stable for future walks.
+
+**Defect found:** `valid until` stayed empty — `parseEndDate` read only "iki spalio
+20"-style dates, not a WRITTEN date ("iki 2027-03-31", "until 31.03.2027"), the way a
+person copies it off a certificate. Fixed on `fix/cc/end-date-written-iso` (ISO and
+d.m.yyyy forms; an impossible day is null, never "corrected").
+
+**Re-walk on `461326d2` (#1491):** "turiu naują A1 pažymą iki 2027-03-31" → type
+`a1_certificate` AND `valid until 2027-03-31` pre-filled → saved → readiness re-answered;
+DB row `85158bc2…` with `valid_until 2027-03-31` (deleted afterwards). Journey stage
+"documents completed where required" is now proven from the sentence to the row.
+
+## The CV sheet by sentence (prod `0bd1c542`, #1490)
+
+`walk-cv-sheet-prod.cjs`, E2E Worker Two, 23.8 s: "parodyk mano CV" → the hint ("Jūsų
+patvirtintas CV — vienas lapas iš to, ką sistema tikrai žino…") with ONE chip "Atidaryti
+CV lapą" (the import flow did NOT open) → `/lt/cv`: "MANO CV · E2E Worker Two · žurnalo
+įrašai 1" — the entry logged on the chat-created project is already on the sheet.
+Work/evidence returned to the professional identity, by sentence.

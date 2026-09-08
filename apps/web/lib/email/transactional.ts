@@ -27,6 +27,10 @@ export type TransactionalEmail = {
 
 export type TransactionalSendResult =
   | { status: "sent" }
+  /** The dev/test LOG provider accepted the message — nothing left the
+   *  machine. Distinct from "sent" by design: no caller may ever render a
+   *  "logged" outcome as a delivered email. */
+  | { status: "logged" }
   | { status: "not_configured" }
   | { status: "failed"; reason: string };
 
@@ -44,16 +48,52 @@ function config():
   return { provider, apiKey, from };
 }
 
-/** True when a real provider is fully configured (env-only check). */
+/**
+ * The OFFLINE "log" provider (completion v1): `INVITE_EMAIL_PROVIDER=log`
+ * exercises the whole email path without vendor keys — the adapter accepts
+ * the message and returns `logged` (the caller decides what, if anything, to
+ * write to the server log; this module stays free of logging so it can never
+ * leak an address or a key). DELIBERATELY TEST/DEV-ONLY: in production the
+ * log provider is ignored entirely (not_configured), because a provider that
+ * swallows mail while preferences say "email on" would be a silent delivery
+ * kill. `isTransactionalEmailConfigured()` NEVER counts it — the invitation
+ * UI's "email sent vs copy-link" fork keys off that check and must not offer
+ * a send that goes nowhere.
+ */
+function logProviderActive(): boolean {
+  return (
+    (process.env.INVITE_EMAIL_PROVIDER ?? "").trim().toLowerCase() === "log" &&
+    process.env.NODE_ENV !== "production"
+  );
+}
+
+/** True when a real provider is fully configured (env-only check).
+ *  The dev/test log provider deliberately does NOT count: this is the
+ *  "a real email can reach a real inbox" fact the UI keys off. */
 export function isTransactionalEmailConfigured(): boolean {
   return config() !== null;
+}
+
+/** True when the adapter can produce any outcome other than not_configured —
+ *  a real provider OR the dev/test log provider. Callers that only need the
+ *  path exercised (the notification email dispatcher's tests) gate on this;
+ *  callers that promise delivery to a person gate on
+ *  `isTransactionalEmailConfigured()`. */
+export function isTransactionalEmailPathActive(): boolean {
+  return config() !== null || logProviderActive();
 }
 
 export async function sendTransactionalEmail(
   message: TransactionalEmail,
 ): Promise<TransactionalSendResult> {
   const cfg = config();
-  if (!cfg) return { status: "not_configured" };
+  if (!cfg) {
+    // Log provider (dev/test only): accept without sending. No console use
+    // here — the invitations-network guard pins this file log-free so an
+    // address or key can never leak; the caller logs what it needs.
+    if (logProviderActive()) return { status: "logged" };
+    return { status: "not_configured" };
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SEND_TIMEOUT_MS);

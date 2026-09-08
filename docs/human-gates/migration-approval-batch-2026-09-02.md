@@ -1,0 +1,21 @@
+# ONE owner approval batch — four reversible production migrations (2026-09-02)
+
+Re-verified against production `gorgitwvdzxbnaxhrsrw` on 2026-09-02 (ledger read via Supabase MCP; last
+applied version `20260901135820_labour_economics_metric_widening_v1`). Each item: exact migration, blast
+radius, rollback, current production compatibility, tests, newer-conflicting-migration check. Apply order =
+the order below (independent of each other; any subset may be approved).
+
+**One reply approves the batch:** "Apply batch 2026-09-02: 1430, 1436, 1426, 1440" (or list the subset).
+The agent then applies each via Supabase MCP `apply_migration`, verifies the object list, runs the
+rolled-back DB proof for each, marks the PR ready, and updates the register.
+
+| # | PR | Migration | What it changes | Blast radius | Rollback | Prod compatibility (re-verified) | Tests | Newer conflict? |
+|---|---|---|---|---|---|---|---|---|
+| 1 | **#1430** (K2-1, P1) | `20260902210000_companies_contact_minimization_v1` | `companies`: revoke table SELECT from `authenticated`, grant SELECT on 13 public columns only; two SECURITY DEFINER readers (`list_own_companies_private_v1`, `admin_list_companies_private_v1`) return the 7 private columns to the owner / admins | Read path only. Every signed-in user loses access to other companies' `registration_code, address, contact_email, contact_phone, requester_role, verification_note, requested_at`. App readers (`company-setup.ts`, `admin/company-verification.ts`) already use the RPCs with a fallback while the RPC is absent | `…down.sql`: re-grant full SELECT, drop the two functions | Prod today: `authenticated` holds SELECT on all 20 columns; neither RPC exists; all 13 granted columns exist | quality/migration-safety/e2e-smoke green; guard `companies-contact-minimization.test.ts` | none (no migration after 20260901135820 touches `companies`) |
+| 2 | **#1436** (G-15, F4-1) | `20260902230000_accept_invitation_binds_org_membership_v1` | `accept_company_worker_invitation(uuid)`: same behaviour + inserts the `employee` engagement context for the organisation whose `legacy_company_id` is the invited company (idempotent; best-effort when no organisation row) | Write path of ONE RPC; adds rows only to `engagement_contexts` + `audit_logs`, the same shape `add_org_member` writes | `supabase/rollbacks/…down.sql` = the 20260829120000 body verbatim | Prod function body = the 20260829120000 version (`auth.jwt()` e-mail identity, no organisation binding) — confirmed by `pg_get_functiondef` | green; DB proof planned: accept → context exists → rollback | none |
+| 3 | **#1426** (G-13, F1) | `20260902200000_work_plan_entries_v1` | NEW table `work_plan_entries` + 3 indexes + touch trigger + RLS (org managers + the planned worker) + `work_plan_worker_in_scope_v1`, `create_work_plan_entry_v1`, `cancel_work_plan_entry_v1` (SECURITY DEFINER); grants: select to authenticated, writes only via RPC, nothing to anon | Additive only; no existing table or policy changed. UI already merged and dormant until the table exists | `supabase/rollbacks/…down.sql`: drop the three functions, the trigger fn and the table | Prod: `work_plan_entries` absent; referenced tables (`organizations, workers, projects, work_objects, profiles`) exist | green; guard `work-plan-primitive.test.ts` | none |
+| 4 | **#1440** (port of #1046, REQUIRED_FOR_LAUNCH) | `20260902233000_worker_demand_org_attribution_v2` | `list_open_demand_for_workers()`: attributes a demand by `customer_requests.organization_id` → `organizations.legacy_company_id` (profile fallback for legacy rows) instead of joining every verified company of the owner | Read path of the worker board RPC; same signature and columns. Fixes the live fan-out (one owner holds several verified companies today) | `supabase/rollbacks/…down.sql` = the live body verbatim | Prod body still `join companies c on c.profile_id = cr.profile_id` (confirmed); `customer_requests.organization_id` exists | green (count guards 253→254) | none |
+
+Not in the batch (kept gated on purpose): **#1421** (DB lifecycle: retention run, index drop, ESCO prune —
+reclaim/destructive class, see `db-lifecycle-gate.md`; not a launch blocker at 795 MB) and the Stripe live
+draft (billing RED, gate G-7/G-8).

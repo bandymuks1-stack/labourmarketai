@@ -1007,7 +1007,11 @@ describe("auth session re-entry honours `next` (PR #43)", () => {
     // The hardcoded /dashboard redirect must be gone — replaced by an
     // assign to the sanitised return path.
     expect(txt).not.toMatch(/router\.replace\("\/dashboard"\)/);
-    expect(txt).toMatch(/window\.location\.assign\(nextPath\)/);
+    // Window 6 (2026-09-06): the sanitised path now goes through the pure
+    // `postLoginDestination` helper (a not-yet-onboarded person is routed to
+    // /onboarding?next=... so the landing sentence survives) — still a
+    // full-document assign, still built from `nextPath`.
+    expect(txt).toMatch(/window\.location\.assign\(\s*postLoginDestination\(\{\s*locale,\s*nextParam,\s*nextPath,\s*onboardedAt\s*\}\)/);
   });
 
   it("signup form reads `next` + carries it into onboarding", () => {
@@ -2263,15 +2267,189 @@ describe("no migration files added by this sprint", () => {
     // touched; the surfaces stay open. RED by classification (grant-adjacent):
     // ships UNAPPLIED, production apply owner-gated. RECOUNTED from the
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 247.
-    // Bumped 247 -> 248 for the ESCO canonical linkage 67
-    // (20260830100000_esco_canonical_linkage_67, paired rollback) — the
-    // write-if-null esco_uri curation for the mapping artifact's EXACT/HIGH
-    // rows. RED by classification (data migration), @human-gate-approved as
-    // acknowledgement only; ships UNAPPLIED, production apply owner-gated
-    // after docs/taxonomy/esco-apply-review-2026-08-30.md review. RECOUNTED
-    // from the tree, never summed: `ls supabase/migrations/*.sql | wc -l`
-    // = 248.
-    const SPRINT_BASELINE = 248;
+    // Bumped 247 -> 248 for the work-hour allocations foundation
+    // (20260829140000_work_hour_allocations_v1, paired rollback). The
+    // canonical row a timesheet aggregates: one row per worker/date/object,
+    // deliberately WITHOUT a uniqueness constraint on (worker, date) or
+    // (worker, date, object), because two objects in one day — and even two
+    // shifts on one object — are legitimate facts, not conflicts. entered_by
+    // stays distinct from worker_id so a manager recording a colleague is
+    // never stored as that colleague's self-entry. No DELETE policy: history
+    // is correction_of/superseded_by. RED by classification (grant/revoke +
+    // drop-policy-if-exists + create-trigger): ships UNAPPLIED, production
+    // apply owner-gated. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 248.
+    // Bumped 248 -> 249 for the M3 compute wiring
+    // (20260831170000_timesheet_compute_allocations_v1, paired rollback).
+    // Wires timesheet_compute_lines_v1 to read the now-applied
+    // work_hour_allocations (ledger 20260831161725) ALONGSIDE
+    // journal_entry_metrics, with an allocation-wins dedupe so one hour fact
+    // never counts twice, a combined 500-line cap, and the journal half
+    // copied VERBATIM from 20260819220000. RED by classification (SECURITY
+    // DEFINER body replace + revoke re-assertion), human-gate-annotated under
+    // the owner's 2026-08-31 closure-session sequence ("wire the actual
+    // timesheet compute path" — the follow-up slice recorded in
+    // docs/DECISIONS/0010 and the APPLIED_LEDGER row for 20260831161725);
+    // merge and production apply stay with the main session. RECOUNTED from
+    // the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
+    // Bumped 249 -> 250 for the agency disclosure-revocation package
+    // (20260901052300_agency_disclosure_revocation_v1, paired rollback):
+    // active-connection filters on two list RPCs, offer cascade on revoke,
+    // and one TIGHTENED RLS policy, closing the leak where a severed client
+    // keeps the agency's candidate identities. Narrowing only; ships
+    // UNAPPLIED with merge and production apply owner-gated.
+    // Bumped 249 -> 250 for the relationship-visibility least-privilege
+    // ruling (20260901060000_relationship_visibility_least_privilege_v1,
+    // paired rollback) — the slice 20260827210000 deferred by name in its
+    // own header. Three rows of relationship_types (volunteer, viewer,
+    // unemployed) move from grants_worker_visibility true to false, closing
+    // the invitable `volunteer` path to employer-grade worker-record reads.
+    // DATA-only, narrowing only, measured-zero blast radius (production has
+    // no engagement context on those slugs). Ships UNAPPLIED; merge and
+    // production apply stay owner-gated (draft + needs-human-gate).
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 250.
+    // RE-COUNTED 2026-09-01 after #1395 landed on main first: that PR
+    // took slot 250 for the agency disclosure-revocation package, so this
+    // ruling is the 251st file, not the 250th. Both are declared above.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 251.
+    // Bumped 251 -> 252 for the public-schema CREATE revoke
+    // (20260901100000_revoke_public_schema_create_v1, paired rollback):
+    // `revoke create on schema public from public`, closing the inherited
+    // CREATE that anon/authenticated/service_role held via PUBLIC. USAGE is
+    // deliberately preserved. Narrowing only; owner-approved 2026-09-01 as
+    // the minimal current-equivalent extraction of #879.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 252.
+    // Bumped 252 -> 253 for the labour-economics metric widening
+    // (20260901140000_labour_economics_metric_widening_v1, paired rollback):
+    // five published Eurostat labour-cost/productivity keys onto the eurostat
+    // source, and the DERIVED value-to-cost ratio onto
+    // internal_platform_aggregates so it is never attributed to Eurostat.
+    // Permission-only; imports nothing. Owner-approved 2026-09-01.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 253.
+    // Bumped 253 -> 254 for the P0-1 anon read-path fix
+    // (20260903070000_public_vacancy_board_index_and_count_work_mem_v1, paired
+    // rollback) — GREEN: one partial index in board order over active
+    // public_vacancies rows + function-scoped work_mem on
+    // count_public_vacancies_v1. No grant, no policy, no definer swap, no
+    // data change. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 254.
+        // Bumped 254 -> 255 for the P0-1 covering index
+    // (20260903090000_public_vacancy_supply_cover_index_v1, paired rollback)
+    // — GREEN: one covering partial index (expires_at include employer_name,
+    // last_seen_at where is_active) so count_public_vacancies_v1 is an
+    // index-only scan (2,821 ms warm seq scan -> 640 ms on prod). No grant,
+    // no policy, no function change. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 255.
+    // Bumped 255 -> 256 for the P0-1 autovacuum tuning
+    // (20260903110000_public_vacancies_autovacuum_v1, paired rollback) — GREEN:
+    // per-table autovacuum thresholds only, so the nightly importer's updates
+    // are vacuumed and the covering index stays index-only. No grant, no
+    // policy, no function, no data change. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
+    // Bumped 256 -> 257 for internship / apprenticeship as canonical
+    // opportunity types (20260903130000_opportunity_type_internship_
+    // apprenticeship_v1, paired rollback) — GREEN: re-declares the plain
+    // IMMUTABLE projection demand_structured_v2_public with two more allowed
+    // values; no definer, no grant, no data change. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
+    // Re-based after main reached 257: bumped 257 -> 259 for RED batch 2026-09-03 A
+    // (20260903100000 supply-counts row, 20260903101000 agency offer decision),
+    // owner-gated drafts, UNAPPLIED, no marker. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 259.
+    // Bumped 261 -> 262 for the education RLS recursion FIX
+    // (20260903150000_education_rls_recursion_fix_v1, paired rollback) — RED:
+    // DROP/CREATE of the three batch-B SELECT policies (same readers, evaluated
+    // through three SECURITY DEFINER helpers so the policies no longer re-enter
+    // each other — prod-verified 42P17 on every authenticated read today) +
+    // helper grants to authenticated only. Owner-gated draft, UNAPPLIED until
+    // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
+    // Bumped 262 -> 263 for owns_company governance membership (Lane A real
+    // recruiter, 2026-09-04, RED draft).
+    // Bumped 263 -> 265 for public_plans_v1 (#1548, applied) + billing safety invariants v1 (2026-09-05, RED
+    // billing, draft + needs-human-gate, UNAPPLIED until owner approval):
+    // additive evidence columns + billing_checkout_operations table + the
+    // billing_customers (owner, provider, test_mode) key. No data loss.
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
+    // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
+    // window 6, 2026-09-06, GREEN additive: one partial index for the board
+    // supply-freshness read measured 270.8 ms mean / 6,747 ms max; paired
+    // rollback; applied by the orchestrator via MCP). RECOUNTED from the
+    // tree: `ls supabase/migrations/*.sql | wc -l` = 266.
+    // Bumped 266 -> 267 for worker_board_excludes_supply_v1 (owner window 7
+    // §4, 2026-09-06): the worker board's gated read had NO `kind` filter, so
+    // agency SUPPLY offers (kind='agency_offer') were served to every worker
+    // as open jobs — measured 2 of 9 rows on production. RED class
+    // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
+    // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06):
+    // list_open_demand_for_agencies had no `kind` filter either, so an agency
+    // browsing for work to staff was served OTHER agencies' offers as demand —
+    // measured on production as 2 of 12 rows, through the real RPC under the
+    // agency's own auth. RED class (SECURITY DEFINER body replace).
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 273 files.
+    //
+    // 269 -> 270: the two 2026-09-07 owner-approved migrations
+    // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
+    // are now APPLIED (ledger 20260907180944 and 20260907180546) and both
+    // carry `@human-gate-approved` naming the decisions EVID-1 / DEM-9. The
+    // comments that stood here called them "NOT applied" and said they carry
+    // "NO marker"; that was true when written and is false now, so it is
+    // corrected rather than carried forward. They remain RED class - a marker
+    // acknowledges risk, it never reclassifies a file to GREEN.
+    //
+    // 270 -> 271: the notification-spine service_role grant (20260906060000,
+    // #1566). Two additive grants - select/insert/update on
+    // notification_events, select on notification_preferences - so the
+    // emitters and the email dispatcher's consent read stop failing 42501.
+    // Measured on production 2026-09-07: service_role holds NO privilege on
+    // either table, and `rolbypassrls` is true, so RLS is not the blocker -
+    // the missing GRANT is. RED (privilege surface), owner-gated. The line
+    // here once said "NOT applied"; the owner approved it and it went to
+    // production 2026-09-08 as ledger 20260908061619, so that is corrected
+    // rather than carried forward. RED class is unchanged by having applied.
+    //
+    // 271 -> 272: the recipient-discovery reads (20260908070000, same PR).
+    // The write grant alone did NOT fix the cron. The first real invocation
+    // after it landed still returned HTTP 503 - not 401, so auth was fine and
+    // the function ran ~930 ms before failing. The digest sweep opens by
+    // reading journal_entries.worker_id and then workers(id, profile_id), and
+    // service_role held no privilege on EITHER, so PostgREST answered 42501
+    // and `if (error) return { kind: "unavailable" }` became the 503 before a
+    // single row could be written (notification_events was still 2 rows / 0
+    // digests afterwards - nothing was half-delivered). Reproduced under
+    // `set local role service_role` in a deliberately aborted transaction:
+    // journal_entries=BLOCKED_42501 workers=BLOCKED_42501. SELECT ONLY on
+    // both; no write privilege, because the spine reads domain rows and never
+    // writes them. It also un-breaks `workerProfileId()`, which discards its
+    // error and so reported a denied read as "row_unreadable" - the booking
+    // and absence emitters were silently dead for the same reason. Email is
+    // NOT implicated: the email hop runs only after a successful insert, is
+    // wholly try/caught, and stops at `channel_disabled` with 0 opt-ins.
+    // RED (privilege surface), owner-approved, APPLIED to production
+    // 2026-09-08 as ledger 20260908065654.
+    //
+    // 272 -> 273: the evidence-parties recursion repair (20260907220000,
+    // #1618). Owner decision EVID-1, approved 2026-09-08 and applied via
+    // Supabase MCP apply_migration as ledger 20260908080950. It breaks the
+    // mutual organization_evidence_records <-> _parties policy cycle with a
+    // SECURITY DEFINER boolean holding the predicate the policy used to
+    // inline. Verified after the apply: all four formerly-recursing tables
+    // read under a real manager, a full write chain ran in a rolled-back
+    // transaction (records + parties INSERT ... RETURNING), a person who
+    // manages nothing read 0 with no error, anon is REFUSED EXECUTE on the
+    // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
+    // + policy replace) - applying it does not make it GREEN.
+    //
+    // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
+    // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
+    // the two ambiguous cases stay UNMAPPED on purpose, because generic
+    // "teacher" had mapped to a tertiary POLITICS LECTURER and generic
+    // "caregiver" to COMPANIONS/VALETS. UNKNOWN is the correct answer for an
+    // ambiguous occupation; confidently wrong is the defect this removes.
+    // Verified by fingerprint match between production and the file.
+const SPRINT_BASELINE = 274;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

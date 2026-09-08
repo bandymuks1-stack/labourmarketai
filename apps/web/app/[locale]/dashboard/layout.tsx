@@ -113,7 +113,14 @@ export default async function DashboardLayout({
     ms: Date.now() - layoutStart,
   });
 
-  if (!profile?.onboarded_at) redirect(`/${locale}/onboarding`);
+  // A FAILED profile read is not "not onboarded" (W6 honesty, 2026-09-06):
+  // sending an onboarded person to /onboarding on a timed-out read is the
+  // same silent misroute the root fixes. The root renders the NAMED degrade
+  // state (or keeps the person's own durable workspace choice); the shell
+  // carries on with what it does know — nothing below fabricates a role.
+  if (session.profileRead !== "failed" && !profile?.onboarded_at) {
+    redirect(`/${locale}/onboarding`);
+  }
 
   const roles = (rolesRows ?? [])
     .map((r) => r.role)
@@ -121,12 +128,12 @@ export default async function DashboardLayout({
   // Admin is NOT a workspace role — it lives on a separate signal so switching
   // workspaces never strips admin in the UI. See `deriveIsAdmin`.
   const isAdmin = deriveIsAdmin({
-    activeRole: profile.active_role,
+    activeRole: profile?.active_role ?? null,
     profileRoles: rolesRows ?? [],
   });
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
-  const activeRole = ROLES.has(profile.active_role as Role)
-    ? (profile.active_role as Role)
+  const activeRole = ROLES.has(profile?.active_role as Role)
+    ? (profile?.active_role as Role)
     : (roles[0] ?? null);
 
   // Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
@@ -262,8 +269,8 @@ export default async function DashboardLayout({
         initial={{
           user: { id: user.id, email: user.email ?? null },
           profile: {
-            full_name: profile.full_name,
-            email: profile.email,
+            full_name: profile?.full_name ?? null,
+            email: profile?.email ?? null,
           },
           activeRole,
           roles,

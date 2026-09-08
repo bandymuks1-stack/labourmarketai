@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { resolveMyVerifiers } from "@/lib/journal/verifier-read";
 
 import { getLocale, getTranslations } from "next-intl/server";
 
@@ -12,6 +13,16 @@ import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
 import { visibleRange } from "@/lib/planning/planning-model";
+import {
+  DOCUMENT_GAP_LINE_CAP,
+  groupMissingDocumentsByType,
+  type DocumentGap,
+} from "@/lib/conversation/documents-gap";
+import { loadWorkerDocumentGap } from "@/lib/conversation/documents-gap-server";
+import { readLearningCompass } from "@/lib/learning/learning-compass";
+import { loadUnchosenCountryNextSteps } from "@/lib/conversation/country-next-steps-server";
+import { mergeFilters as mergeCarriedFilters } from "@/lib/conversation/conversation-goal";
+import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import { loadAiWorkspaceContext } from "./ai-context";
 import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
 import { readWorldState, type WorldStateMatch } from "./world-state-language";
@@ -59,7 +70,15 @@ const ANSWER_LIMIT = 5;
  * honestly — with the countries that ARE there — rather than filtered to an
  * unexplained empty list.
  */
-export async function runFindWork(text: string): Promise<WorkflowResult> {
+export async function runFindWork(
+  text: string,
+  /**
+   * What earlier turns of the SAME goal already narrowed (owner P0 §4). The
+   * caller — the chat's conversation goal — owns this; a new goal hands
+   * nothing, so a fresh search starts in an unnarrowed world.
+   */
+  carry?: DiscoveryFilterState,
+): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const ctx = await loadAiWorkspaceContext();
   if (!ctx.hasWorkerProfile) {
@@ -76,37 +95,90 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
   const missed = reading.matches.filter((m) => !m.available);
 
   // Named something the world does not have: say what it DOES have. This is
-  // the difference between "no results" and an answer.
+  // the difference between "no results" and an answer. What it DOES have is
+  // listed on the SAME dimension the person named: an absent opportunity
+  // type is answered with the types that are visible, an absent country
+  // with the countries — never "no internships; visible: LT, NL".
   if (applied.length === 0 && missed.length > 0) {
-    const countries = facets.countries.join(", ");
-    return {
-      kind: "answer",
-      text: countries
-        ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: countries })
-        : t("noSuchValue", { asked: missed[0].matchedText }),
-      explanation: {
-        why: t("whyFromYourBoard"),
-        unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
-      },
+    const missedDimension = missed[0].dimension;
+    const alternatives =
+      missedDimension === "country"
+        ? facets.countries.join(", ")
+        : terms
+            .filter((v) => v.dimension === missedDimension && v.available)
+            .map((v) => v.terms[0])
+            .filter((label): label is string => typeof label === "string" && label.length > 0)
+            .join(", ");
+    const honest = alternatives
+      ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
+      : t("noSuchValue", { asked: missed[0].matchedText });
+    const explanation = {
+      why: t("whyFromYourBoard"),
+      unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
     };
+    // MATCHING CONTINUES AFTER "NO" (owner contract §16; prod walk 2026-09-05,
+    // gap G-C2): a student asking for an internship when none is visible is
+    // told so honestly — and then handed the EXISTING next steps (choose a
+    // direction, ask the institution, the compass, the whole board), never a
+    // dead end. The decision and its reads live in the education domain.
+    if (missedDimension === "opportunityType") {
+      const { loadInternshipNextSteps } = await import("@/lib/conversation/education-next-steps-server");
+      const next = await loadInternshipNextSteps();
+      return { kind: "answer", text: [honest, ...next.lines].join("\n"), explanation: explanation, chips: next.chips };
+    }
+    // A COUNTRY THE PERSON HAS NOT CHOSEN YET (real-person join walk,
+    // production ca96605b, 2026-09-06): "ieškau darbo Norvegijoje" from a
+    // worker whose countries were NL ended in "nothing visible there. Visible:
+    // NL." — a dead end with no chip, on the very sentence the landing
+    // advertises. The answer now carries the two doors that already exist:
+    // the work card, where the person adds the country to their own list
+    // (prefilled: their current countries plus the one they just named), and
+    // the documents readiness ("what do I lack for that country?"). It also
+    // says, honestly and from a bounded indexed read, whether public ads from
+    // official sources exist there at all — no manufactured listing either
+    // way; a failed read is named as a failed read, never as "none". The
+    // reads live in the conversation domain (`country-next-steps-server`).
+    if (missedDimension === "country") {
+      const country = await loadUnchosenCountryNextSteps(missed[0].value);
+      const supplyLine =
+        country.supply === "yes"
+          ? t("countryNotChosenListings")
+          : country.supply === "no"
+            ? t("countryNotChosenNoListings")
+            : t("countryNotChosenSupplyUnknown");
+      return {
+        kind: "answer",
+        text: [honest, supplyLine, t("countryNotChosenDoors")].join("\n"),
+        explanation: explanation,
+        chips: [
+          {
+            id: `f:worker.save-work-card?preferredCountries=${country.nextCountries.join(",")}`,
+            label: t("chipAddCountry"),
+          },
+          { id: "documents-gap", label: t("chipDocsGap") },
+        ],
+      };
+    }
+    return { kind: "answer", text: honest, explanation: explanation };
   }
 
   /**
-   * ── W6 EXTENSION POINT (persistent filters) ──────────────────────────────
-   * `reading.filters` is the World State the person just expressed. Today it is
-   * applied to THIS search only and then forgotten, so a later sentence starts
-   * from an unnarrowed world.
+   * ── PERSISTENT FILTERS, wired at the seam this comment reserved ──────────
+   * `reading.filters` is the World State THIS sentence expressed. Until the
+   * owner's P0 of 2026-09-06 it was applied to this search only and then
+   * forgotten, so "gerai, tada ieškok visoje Europoje" started from an
+   * unnarrowed world and the profession stated one turn earlier was lost.
    *
-   * When the owner approves persistence, this is the seam: the caller dispatches
-   * `change_world_state` per entry of `reading.filters` before searching, and
-   * the search reads `state.activeFilters` instead of this local value. The
-   * reducer transition already exists and is unit-tested; the map subscribes to
-   * the same slot in W6. See docs/product/AI_WORKSPACE_W4_V1.md §7.
-   *
-   * NOT wired here on purpose: persistence changes behaviour across turns
-   * (when do filters clear?), which is a product decision, not a refactor.
+   * The product decision this was waiting on ("when do filters clear?") has
+   * been made and lives in `lib/conversation/conversation-goal.ts`: they
+   * accumulate for as long as ONE goal is in flight, a later mention of the
+   * same dimension replaces it (that is what a correction is), and an
+   * asserted NEW goal starts from nothing. This function stays stateless —
+   * the goal is the caller's, handed in as `carry` and handed back as
+   * `worldState`.
    */
-  const result = await findWorkForChat(reading.filters);
+  const effective = carry ? mergeCarriedFilters(carry, reading.filters) : reading.filters;
+  const result = await findWorkForChat(effective);
   const dimensionLabel = async (m: WorldStateMatch): Promise<string> =>
     t(`dimension.${m.dimension}` as never) as string;
 
@@ -123,6 +195,7 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
     appliedFilters: await Promise.all(
       applied.map(async (m) => ({ label: await dimensionLabel(m), matchedText: m.matchedText })),
     ),
+    worldState: effective,
   };
 }
 
@@ -148,11 +221,24 @@ export async function runSkillGap(): Promise<WorkflowResult> {
   if (!board.capabilities.boardAvailable) {
     return blocked(t("blockedNoAccess"), t("whyNoAccess"));
   }
+  // MATCHING CONTINUES AFTER "NO" (owner contract 2026-09-04 §16): a gap
+  // answer names the closing step. Skills close through real work in the
+  // journal; documents close through the document centre — so the same
+  // "what am I missing?" also states the required documents the person does
+  // not hold for the countries they want to work in (own rows, same join the
+  // documents page renders) — INCLUDING when no skill is missing (prod walk
+  // 2026-09-04: "Nieko netrūksta" ended the answer while six required
+  // documents were absent). A degraded document read adds NOTHING.
+  const docs = await readDocumentGapForAnswer();
+  const docTail = docs && docs.missing.length > 0 ? [await documentGapSentence(docs, t)] : [];
+  const docChips = docs && docs.missing.length > 0 ? [{ id: "documents-centre", label: t("chipDocuments") }] : [];
+
   if (board.opportunities.length === 0) {
     return {
       kind: "answer",
-      text: t("skillGapNoDemands"),
+      text: [t("skillGapNoDemands"), ...docTail].join("\n"),
       explanation: { why: t("whyFromYourBoard") },
+      chips: docChips,
     };
   }
 
@@ -166,8 +252,9 @@ export async function runSkillGap(): Promise<WorkflowResult> {
   if (demandsPerSkill.size === 0) {
     return {
       kind: "answer",
-      text: t("skillGapNone", { demands: board.opportunities.length }),
+      text: [t("skillGapNone", { demands: board.opportunities.length }), ...docTail].join("\n"),
       explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
+      chips: docChips,
     };
   }
 
@@ -184,10 +271,220 @@ export async function runSkillGap(): Promise<WorkflowResult> {
 
   return {
     kind: "answer",
-    text: [t("skillGapIntro", { count: demandsPerSkill.size }), ...lines].join("\n"),
+    text: [t("skillGapIntro", { count: demandsPerSkill.size }), ...lines, ...docTail].join("\n"),
     explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
     // The journal is where a skill becomes real — never a self-declaration.
-    chips: [{ id: "logwork", label: t("chipLogWork") }],
+    chips: [{ id: "logwork", label: t("chipLogWork") }, ...docChips],
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2b. Documents — "what documents am I missing / what expires?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The person's own documents against the requirements of the countries they
+ * said they want to work in (owner contract 2026-09-04 §12). Before this the
+ * `documents` sentence answered with a route chip; the document centre and
+ * the country-readiness join were never read by the conversation.
+ *
+ * HONESTY: countries come from the person's own preferences — none stated ⇒
+ * the answer ASKS where they want to work instead of inventing a country; a
+ * country the matrix does not know is named as such; a degraded read is a
+ * `blocked` answer, never "you have no documents".
+ */
+async function readDocumentGapForAnswer(): Promise<DocumentGap | null> {
+  const res = await loadWorkerDocumentGap();
+  return res.kind === "ok" ? res.gap : null;
+}
+
+async function documentGapSentence(
+  gap: DocumentGap,
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): Promise<string> {
+  const tDocs = await getTranslations("documents");
+  // One name per document TYPE, the countries beside it when there are
+  // several — never the same name repeated per country.
+  const list = groupMissingDocumentsByType(gap.missing, DOCUMENT_GAP_LINE_CAP)
+    .map((g) => {
+      const name = tDocs.has(`types.${g.documentTypeSlug}`)
+        ? (tDocs(`types.${g.documentTypeSlug}` as never) as string)
+        : g.documentTypeSlug;
+      return g.countries.length > 1 ? `${name} (${g.countries.join(", ")})` : name;
+    })
+    .join(", ");
+  return t("docsGapTail", { count: gap.missing.length, list });
+}
+
+export async function runDocumentsReadiness(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const res = await loadWorkerDocumentGap();
+  if (res.kind === "no-worker") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+  if (res.kind !== "ok") return blocked(t("docsBlocked"), t("whyDocsBlocked"));
+  const { gap, countries } = res;
+
+  const tDocs = await getTranslations("documents");
+  const tLm = await getTranslations("labourMarket");
+  const docName = (slug: string) =>
+    tDocs.has(`types.${slug}`) ? (tDocs(`types.${slug}` as never) as string) : slug;
+  const countryName = (code: string) =>
+    tLm.has(`countryNames.${code}`) ? (tLm(`countryNames.${code}` as never) as string) : code;
+
+  const lines: string[] = [
+    t("docsIntro", { ready: gap.ready, expiring: gap.expiring.length, missing: gap.missing.length }),
+  ];
+  for (const e of gap.expiring.slice(0, DOCUMENT_GAP_LINE_CAP)) {
+    lines.push(t("docsExpiringLine", { doc: docName(e.documentTypeSlug), date: e.validUntil }));
+  }
+  for (const m of gap.missing.slice(0, DOCUMENT_GAP_LINE_CAP)) {
+    lines.push(
+      m.sourceTitle
+        ? t("docsMissingLineWithSource", { doc: docName(m.documentTypeSlug), country: countryName(m.country), source: m.sourceTitle })
+        : t("docsMissingLine", { doc: docName(m.documentTypeSlug), country: countryName(m.country) }),
+    );
+  }
+  if (countries.length === 0) lines.push(t("docsNoCountry"));
+  else if (gap.missing.length === 0 && gap.countriesKnown.length > 0) {
+    lines.push(t("docsAllGood", { countries: gap.countriesKnown.map(countryName).join(", ") }));
+  }
+  if (gap.countriesUnknown.length > 0) {
+    lines.push(t("docsCountryUnknown", { countries: gap.countriesUnknown.map(countryName).join(", ") }));
+  }
+
+  const chips = [{ id: "documents-centre", label: t("chipDocuments") }];
+  // The work card is where the person states WHERE they want to work — the
+  // same inline form the search opens when the criteria are missing.
+  if (countries.length === 0) chips.push({ id: "f:worker.save-work-card", label: t("chipWhereToWork") });
+
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: {
+      why:
+        countries.length > 0
+          ? t("whyDocs", { countries: countries.map(countryName).join(", ") })
+          : t("whyDocsNoCountry"),
+    },
+    chips,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2c. Learning Compass — "what should I learn / what fits me / what am I becoming?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The student's five answers IN THE CHAT (owner contract 2026-09-04 §15):
+ * becoming · evidence · fits now · missing · next step — composed from the
+ * SAME canonical read the profile's compass section renders
+ * (`readLearningCompass` → `buildLearningCompass`). The compass was a route
+ * chip; a student asked "ką man mokytis?" and was sent to a page.
+ *
+ * Copy: the compass vocabulary (`learningCompass.*`) exists in the five
+ * routed locales; where a catalog does not carry it the answer says so and
+ * hands over the compass chip — never a half-translated answer.
+ */
+export async function runLearningCompass(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const read = await readLearningCompass();
+  if (read.status === "no-worker") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+  if (read.status !== "ok") return blocked(t("compassBlocked"), t("whyCompassBlocked"));
+
+  const tc = await getTranslations("learningCompass");
+  if (!tc.has("becoming")) {
+    return {
+      kind: "answer",
+      text: t("compassLocaleGap"),
+      explanation: { why: t("whyCompass") },
+      chips: [{ id: "compass-page", label: t("chipCompassPage") }],
+    };
+  }
+  const tProf = await getTranslations("professions");
+  const tSkill = await getTranslations("skillNames");
+  const tLm = await getTranslations("labourMarket");
+  const tsd = await getTranslations("structuredDemand");
+  const prof = (slug: string) => (tProf.has(slug as never) ? (tProf(slug as never) as string) : slug.replace(/-/g, " "));
+  const skill = (slug: string) => (tSkill.has(slug as never) ? (tSkill(slug as never) as string) : slug);
+  const country = (code: string | null) =>
+    code && tLm.has(`countryNames.${code}` as never) ? (tLm(`countryNames.${code}` as never) as string) : (code ?? "—");
+
+  const { becoming, evidence, fitsNow, missing, nextSteps } = read.compass;
+  const lines: string[] = [];
+
+  // BECOMING
+  lines.push(`${tc("becoming")}: ${becoming.professionSlug ? prof(becoming.professionSlug) : tc("becomingNone")}`);
+  if (becoming.studyingAt) {
+    lines.push(
+      tc("studyingAt", { institution: becoming.studyingAt }) +
+        (becoming.currentEducation?.programOrField ? ` · ${tc("program", { program: becoming.currentEducation.programOrField })}` : ""),
+    );
+  }
+  for (const c of becoming.cohorts.slice(0, 2)) {
+    lines.push(tc("cohortLine", { program: c.programName, cohort: c.cohortName }));
+  }
+  // EVIDENCE
+  lines.push(
+    `${tc("evidence")}: ${tc("skills", { count: evidence.skillsTotal })} · ${tc("confirmed", { count: evidence.skillsConfirmed })} · ${tc("journalEntries", { count: evidence.journalEntries })}`,
+  );
+  // FITS NOW
+  lines.push(`${tc("fits")}:`);
+  if (fitsNow.length === 0) lines.push(tc("fitsNone"));
+  for (const o of fitsNow.slice(0, ANSWER_LIMIT)) {
+    // Facts joined with separators — no sentence to translate; every word
+    // in the line is a localized label.
+    const type =
+      o.opportunityType && tsd.has(`opportunityType.${o.opportunityType}` as never)
+        ? (tsd(`opportunityType.${o.opportunityType}` as never) as string)
+        : null;
+    const fit = o.status === "strong" ? tc("fitStrong") : tc("fitPossible");
+    lines.push(
+      `• ${[`${o.roleSlug ? prof(o.roleSlug) : "—"} — ${o.companyName ?? "—"}`, country(o.country), type, fit]
+        .filter(Boolean)
+        .join(" · ")}`,
+    );
+  }
+  // MISSING → the closing step is named, never "gap found" alone (§16)
+  lines.push(`${tc("missing")}:`);
+  if (missing.skills.length === 0) lines.push(tc("missingNone"));
+  else {
+    lines.push(
+      missing.source === "opportunities"
+        ? tc("missingFromOpportunities")
+        : missing.source === "program"
+          ? tc("missingFromProgram")
+          : tc("missingFromProfession"),
+    );
+    for (const m of missing.skills.slice(0, ANSWER_LIMIT)) {
+      lines.push(t("compassMissingLine", { skill: skill(m.slug), count: m.askedBy }));
+    }
+  }
+
+  // NEXT — each step is a real chat action (the same doors the section links).
+  const STEP_CHIP: Record<string, string> = {
+    choose_direction: "profile",
+    declare_skills: "cv",
+    add_current_education: "f:worker.add-education",
+    log_first_entry: "logwork",
+    set_availability: "f:worker.save-work-card",
+    express_interest: "jobs",
+    gain_evidence_for_missing: "logwork",
+  };
+  const chips = nextSteps
+    .slice(0, 2)
+    .map((step) => ({ id: STEP_CHIP[step] ?? "compass-page", label: tc(`step_${step}` as never) as string }));
+  chips.push({ id: "compass-page", label: t("chipCompassPage") });
+
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why: t("whyCompass") },
+    chips,
   };
 }
 
@@ -298,10 +595,21 @@ export async function runFigures(): Promise<WorkflowResult> {
   if (parts.length === 0) {
     return blocked(t("figuresOrgUnavailable"), t("whyFigures"));
   }
+  // §19 EXPORT / DOWNLOAD by sentence: the report a manager can take away is
+  // the project operations CSV the operations page already serves (the ONE
+  // route, manager-gated + RLS there). Offered for the projects the person
+  // really manages — bounded, never a report store of its own.
+  const locale = await getLocale();
+  const managed = await listManagedProjects();
+  const chips = managed.slice(0, 3).map((p) => ({
+    id: `download:/${locale}/dashboard/projects/${p.id}/operations/report`,
+    label: t("chipProjectCsv", { title: p.title ?? p.id.slice(0, 8) }),
+  }));
   return {
     kind: "answer",
     text: [t("figuresOrgIntro"), ...parts].join("\n"),
     explanation: { why: t("whyFigures") },
+    ...(chips.length > 0 ? { chips } : {}),
   };
 }
 
@@ -521,4 +829,101 @@ function matchByName(
     if (hay.includes(name)) out.push({ id: o.id, name: o.name, matchedText: o.name });
   }
   return out;
+}
+
+/**
+ * "KAM PATEIKTI ATLIKTĄ DARBĄ?" — who can verify the work this person already
+ * did (owner P0, 2026-09-06).
+ *
+ * THE DEFECT: this sentence matched `find-work` on the bare noun `darbą` and
+ * the person was shown job adverts. They had not asked for work; they had
+ * asked who RECEIVES work they had already done.
+ *
+ * Window 8 refused to route it somewhere plausible, because guessing a
+ * direction was that window's entire defect class. The product decision was
+ * made instead, and this implements it literally:
+ *
+ *   exactly one valid verifier → name it and say whether it can confirm today
+ *   several                    → present the legitimate choices, choose none
+ *   none                       → say so plainly; the work stays real,
+ *                                self-reported evidence, and the next step is
+ *                                to identify the responsible person
+ *
+ * A VERIFIER IS NEVER INVENTED. Every organization named here is one the
+ * person genuinely holds an active relationship with, read under their own
+ * RLS. `none` is a real answer, not a failure to compute one.
+ *
+ * UNKNOWN IS NOT "NOBODY" (§54). When the contexts cannot be read, this says
+ * it could not check — never "nobody can confirm your work", which would be a
+ * lie produced by an outage.
+ */
+export async function runWhoVerifiesWork(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const answer = await resolveMyVerifiers();
+
+  // The read failed. Say that, and nothing else.
+  if (answer.unavailable) {
+    return blocked(t("verifierUnavailable"), t("whyVerifierUnavailable"));
+  }
+
+  const nameOf = (organizationId: string): string => {
+    const hit = answer.options.find((o) => o.organizationId === organizationId);
+    // An organization with neither display nor legal name is real and common
+    // on production. "your employer" is honest; an empty string is not.
+    return hit?.organizationName?.trim() || t("verifierUnnamedOrganization");
+  };
+  const canConfirm = (organizationId: string): boolean =>
+    answer.options.find((o) => o.organizationId === organizationId)?.confirmationEnabled === true;
+
+  // NO CHIP. W4 (`w4-ai-workspace.test.ts`): a workspace answer never offers a
+  // chip that navigates out of the workspace — the answer IS the answer. The
+  // first draft of this handed over a `link:/dashboard/journal` chip, which is
+  // the old "here is a page, go figure it out" reflex the chat exists to
+  // replace. Every branch below therefore says the whole thing in words,
+  // including the next step.
+
+  switch (answer.resolution.kind) {
+    case "organization": {
+      const id = answer.resolution.organizationId;
+      // Two different truths, never merged: someone can confirm today, or the
+      // employer is known but nobody there is set up to confirm yet.
+      return {
+        kind: "answer",
+        text: canConfirm(id)
+          ? t("verifierOne", { organization: nameOf(id) })
+          : t("verifierOneNotEnabled", { organization: nameOf(id) }),
+        explanation: { why: t("whyVerifier") },
+      };
+    }
+    case "choice": {
+      const names = answer.resolution.organizationIds.map(nameOf).join(" · ");
+      // Several are legitimate, so NOTHING is preselected — the same rule
+      // `resolveEngagementContext` follows when it refuses to guess a context.
+      return {
+        kind: "answer",
+        text: t("verifierChoice", { organizations: names }),
+        explanation: { why: t("whyVerifierChoice") },
+      };
+    }
+    case "self": {
+      return {
+        kind: "answer",
+        text: t("verifierSelf", { organization: nameOf(answer.resolution.organizationId) }),
+        explanation: { why: t("whyVerifierSelf") },
+      };
+    }
+    case "none":
+    default: {
+      // The 15 orphaned records' answer. The work is NOT dismissed: it stays
+      // the person's own recorded evidence, and the honest next step is named.
+      return {
+        kind: "answer",
+        text: t("verifierNone"),
+        explanation: { why: t("whyVerifierNone") },
+      };
+    }
+  }
 }

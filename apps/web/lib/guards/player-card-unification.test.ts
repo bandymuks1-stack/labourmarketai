@@ -25,12 +25,16 @@ describe("Player Card reuses the shared premium scouting visual language", () =>
     // links inside it (stat tiles). Pinned by clickability-actionability.
     expect(card).not.toMatch(/hover:shadow-card-hover/);
   });
-  it("carries NO gold confirmation trust ring (silent-trust rule)", () => {
-    // The self-view card must not advertise confirmation as a public trust
-    // badge: no gold trust ring, no gold trust accent, no gold tier.
+  it("carries NO gold confirmation trust ring; gold only as the derived provenance edge (P6)", () => {
+    // The card chrome must not advertise confirmation as a badge: no gold
+    // trust ring, no gold class spelled here, no gold tier. The ONE gold a
+    // person may carry is the provenance EDGE (components/app/provenance),
+    // whose class is DERIVED from real confirmation rows — pinned by
+    // provenance-edge-derived.test.ts.
     expect(card).not.toMatch(/trust-ring/);
     expect(card).not.toMatch(/trust-accent/);
     expect(card).not.toMatch(/tier-gold/);
+    expect(card).toMatch(/ProvenanceEdge/);
   });
   it("mounts the readiness status ring", () => {
     expect(card).toMatch(/ReadinessRing/);

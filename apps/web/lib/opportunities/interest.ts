@@ -9,9 +9,10 @@ import {
   emitDemandInterestNotification,
   emitDemandInterestResponseNotification,
 } from "@/lib/notifications/event-emitters";
+import type { DomainCaller } from "@/lib/domain/caller";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
-import { buildOwnWorkerContext } from "./worker-subject";
+import { buildOwnWorkerContext, buildOwnWorkerContextCore } from "./worker-subject";
 import {
   buildInterestCvStash,
   buildMatchSnapshot,
@@ -62,8 +63,69 @@ export type InterestWriteResult =
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
 
+/**
+ * The caller's currently VISIBLE demand rows — the exact board pipeline
+ * (list_open_demand_for_workers RPC + the default-closed approved-route
+ * filter), shared by the write gate below and the capability draft's
+ * labeled-options list (G4 tail wagon 1). ONE visibility implementation.
+ * `null` = the board could not be read (never mistaken for "no demands").
+ */
+export async function listVisibleDemandsForCaller(
+  caller: DomainCaller,
+): Promise<Record<string, unknown>[] | null> {
+  try {
+    const { data, error } = await asAny(caller.supabase).rpc(
+      "list_open_demand_for_workers",
+    );
+    if (error || !Array.isArray(data)) return null;
+    return (data as Record<string, unknown>[]).filter(isApprovedRouteRow);
+  } catch {
+    return null;
+  }
+}
+
+/** One visible demand by id, through the SAME gate — or null (unknown,
+ *  foreign, closed and unreadable board all look identical: no oracle). */
+export async function findVisibleDemandForCaller(
+  caller: DomainCaller,
+  requestId: string,
+): Promise<Record<string, unknown> | null> {
+  const rows = await listVisibleDemandsForCaller(caller);
+  if (!rows) return null;
+  return rows.find((r) => String(r.id) === requestId) ?? null;
+}
+
+/**
+ * THE express-interest state fingerprint (G4 tail wagon 1) — extracted from
+ * the conversation dispatcher so the web confirmation flow and the
+ * capability draft→confirm flow bind their tokens to the SAME state fact:
+ * the caller's own signal status for this demand. A successful express moves
+ * `none` → `interested`, so a token minted before the write dies as
+ * stale_state on replay. (An already-`interested` re-express is idempotent
+ * by DOMAIN design — the fingerprint does not pretend otherwise.)
+ */
+export async function interestStateFingerprint(
+  caller: DomainCaller,
+  requestId: string,
+): Promise<string> {
+  const { data: worker } = await caller.supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", caller.userId)
+    .maybeSingle();
+  if (!worker?.id) return "interest:no-worker";
+  const { data } = await asAny(caller.supabase)
+    .from("demand_interest_signals")
+    .select("status")
+    .eq("worker_id", worker.id)
+    .eq("request_id", requestId)
+    .maybeSingle();
+  return `interest:${(data?.status as string) ?? "none"}`;
+}
+
 /** Express interest in a worker-visible demand. Idempotent: repeating the
- *  action refreshes the snapshot and keeps status=interested. */
+ *  action refreshes the snapshot and keeps status=interested. Cookie-session
+ *  wrapper over the transport-neutral core below. */
 export async function expressInterest(input: {
   requestId: string;
   note?: string | null;
@@ -71,28 +133,37 @@ export async function expressInterest(input: {
    *  C). Unknown/absent → the default registry template. */
   cvTemplate?: string | null;
 }): Promise<InterestWriteResult> {
-  if (!input.requestId) return { kind: "invalid" };
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "no-worker" };
+  return expressInterestCore({ supabase, userId: user.id }, input);
+}
 
-  const ctx = await buildOwnWorkerContext(supabase, user.id);
+/**
+ * THE express-interest DOMAIN core (G4 tail wagon 1) — the same operation as
+ * an explicit caller, so web chat, the MCP capability, and future bearer
+ * clients run ONE implementation. Every precondition is unchanged: own
+ * worker context, board-gate visibility re-check at write time, RLS-scoped
+ * idempotent upsert, post-write notification emission.
+ */
+export async function expressInterestCore(
+  caller: DomainCaller,
+  input: {
+    requestId: string;
+    note?: string | null;
+    cvTemplate?: string | null;
+  },
+): Promise<InterestWriteResult> {
+  if (!input.requestId) return { kind: "invalid" };
+  const supabase = caller.supabase;
+
+  const ctx = await buildOwnWorkerContextCore(caller);
   if (!ctx) return { kind: "no-worker" };
 
   // The demand must be visible through the SAME gate the board uses.
-  let visibleRow: Record<string, unknown> | null = null;
-  try {
-    const { data, error } = await asAny(supabase).rpc("list_open_demand_for_workers");
-    if (error || !Array.isArray(data)) return { kind: "not-visible" };
-    visibleRow =
-      (data as Record<string, unknown>[]).find(
-        (r) => String(r.id) === input.requestId && isApprovedRouteRow(r),
-      ) ?? null;
-  } catch {
-    return { kind: "not-visible" };
-  }
+  const visibleRow = await findVisibleDemandForCaller(caller, input.requestId);
   if (!visibleRow) return { kind: "not-visible" };
 
   // Canonical match at click time — the ONE shared pipeline.

@@ -18,23 +18,24 @@ describe("pre-payment plan boundary", () => {
     expect(isPaymentEnabled()).toBe(false);
   });
 
-  it("plan slugs are unique and cover all five tiers", () => {
+  it("plan slugs are unique and cover the launch registry (owner pricing 2026-09-05)", () => {
     const slugs = PRE_PAYMENT_PLANS.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
     expect(slugs).toEqual([
       "free_worker",
       "worker_plus",
+      "free_organization",
       "company_pilot",
       "agency_pilot",
       "admin_internal",
     ]);
   });
 
-  it("no paid tier claims free access (paid tiers are payment_not_enabled)", () => {
+  it("no paid tier claims free access; only the sellable launch plan keeps the pilot CTA, deferred plans point to contact", () => {
     for (const p of PRE_PAYMENT_PLANS) {
-      if (p.slug === "free_worker" || p.slug === "admin_internal") continue;
+      if (p.slug === "free_worker" || p.slug === "free_organization" || p.slug === "admin_internal") continue;
       expect(p.accessState, `${p.slug}`).toBe("payment_not_enabled");
-      expect(p.cta).toBe("request_pilot_access");
+      expect(p.cta).toBe(p.launch === "sellable" ? "request_pilot_access" : "contact");
     }
   });
 

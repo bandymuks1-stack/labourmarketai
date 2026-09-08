@@ -18,7 +18,14 @@ import { join } from "node:path";
  * arms (switch and clear).
  */
 
+// G4: the pointer UPDATE and its feature detection moved into THE shared
+// workspace-switch core; the actions delegate (guarded below), so the
+// regression pin follows the code.
 const SRC = readFileSync(
+  join(__dirname, "..", "company", "workspace-switch-core.ts"),
+  "utf8",
+);
+const ACTIONS = readFileSync(
   join(__dirname, "..", "company", "organization-actions.ts"),
   "utf8",
 );
@@ -30,15 +37,29 @@ describe("workspace switch tolerates the absent durable-pointer column", () => {
     expect(SRC).toMatch(/isAbsentColumn/);
   });
 
-  it("both actions use the shared absence predicate, never the single code", () => {
-    const uses = SRC.match(/isAbsentColumn\(error\.code\)/g) ?? [];
-    expect(uses.length).toBeGreaterThanOrEqual(2);
+  it("the ONE pointer write uses the shared absence predicate, never the single code", () => {
+    expect(SRC).toMatch(/isAbsentColumn\(error\.code\)/);
     // The single-code comparison must not survive anywhere in error handling.
     expect(SRC).not.toMatch(/error\.code !== UNDEFINED_COLUMN_CODE/);
+    // BOTH actions run through the core — no second copy of the UPDATE
+    // (and no second place for the 2026-08-06 regression to come back).
+    const delegations = ACTIONS.match(/switchActiveWorkspaceCore\(/g) ?? [];
+    expect(delegations.length).toBeGreaterThanOrEqual(2);
+    expect(ACTIONS).not.toMatch(/from\("profiles"\)/);
   });
 
-  it("the not-member DB veto (42501) still rolls the pointer back", () => {
+  it("the not-member DB veto (42501) can never leave a stale pointer", () => {
     expect(SRC).toContain('const NOT_MEMBER_CODE = "42501"');
-    expect(SRC).toMatch(/NOT_MEMBER_CODE[\s\S]{0,200}jar\.delete\(ACTIVE_WORKSPACE_COOKIE\)/);
+    // The core refuses BEFORE the action writes the cookie: in the org-switch
+    // arm the cookie is set only after the core answered ok/needs-migration,
+    // so there is nothing to roll back on a DB veto.
+    const switchArm = ACTIONS.slice(
+      ACTIONS.indexOf("export async function switchActiveOrganization"),
+      ACTIONS.indexOf("export async function clearActiveOrganization"),
+    );
+    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeGreaterThan(-1);
+    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeLessThan(
+      switchArm.indexOf("jar.set(ACTIVE_WORKSPACE_COOKIE"),
+    );
   });
 });

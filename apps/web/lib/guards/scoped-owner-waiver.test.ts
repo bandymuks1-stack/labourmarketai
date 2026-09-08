@@ -296,14 +296,46 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // PROPERTY that must never become "yes": the step where a person grants
     // an external agent access must not itself be agent-drivable. It is also
     // the first record to cover an A-09 code, for exactly that one finding.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(5);
+    // The SIXTH record exists because a sixth owner ruling exists — the
+    // 2026-08-31 closure-session decision, verbatim: "M3_MIGRATION_APPROVAL:
+    // APPROVE / HOURS_PRODUCT_GATE_WAIVER: APPROVE. Approval scope is limited
+    // strictly to the fresh #1344 / package 0010 implementation." It follows
+    // the /jobs precedent exactly: the surface declared its three honest
+    // "no" answers and refused to waive itself; the waiver record arrived
+    // WITH the owner approval, in the same commit that carries the
+    // @human-gate-approved annotation on the RED migration.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(6);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
       "public-acquisition-route-landing-v1",
       "organization-multi-capability-card",
       "oauth-consent-auth-infrastructure",
+      "work-hours-allocation-surface",
     ]);
+
+    // The 2026-08-31 boundary, executable rather than trusted: three codes,
+    // one route (plus its page path for diff matching), one PR, A-01 only.
+    const hours = SCOPED_OWNER_WAIVERS[5];
+    expect(hours.axioms).toEqual(["A-01"]);
+    expect(hours.pullRequests).toEqual([1344]);
+    expect(hours.files).toEqual([
+      "/dashboard/hours",
+      "apps/web/app/[locale]/dashboard/hours/page.tsx",
+    ]);
+    expect(hours.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "requires_new_page",
+    ]);
+    for (const f of hours.expectedFindings) {
+      expect(f.file).toBe("/dashboard/hours");
+    }
+    // The debt names its own removal: the surface reaching the map and an
+    // AI/chat write path deletes the record.
+    expect(hours.resolvedBy).toMatch(/map/i);
+    expect(hours.resolvedBy).toMatch(/chat/i);
+    expect(hours.owner).toMatch(/HOURS_PRODUCT_GATE_WAIVER: APPROVE/);
 
     // The 2026-08-29 boundary, executable rather than trusted: seven codes,
     // one route (plus its page path for diff matching), one PR, and A-09
@@ -487,7 +519,10 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // approvals 2026-08-22). Whichever arm renders, the six answers below are
     // the same honest no — the finding set is unchanged, which is what keeps
     // these extensions rather than a broadening.
-    expect(landing.pullRequests).toEqual([1221, 1231, 1232]);
+    // #1380 (2026-08-31): the owner's P0 fresh-visit order — the FOCUS
+    // default became static/CDN-cached, the LIVE choice a middleware
+    // rewrite; same route, same six honest answers.
+    expect(landing.pullRequests).toEqual([1221, 1231, 1232, 1380]);
     expect(landing.owner).toMatch(/SHIP THIS LANDING AS V1/);
     expect(landing.files).toEqual(["/", "apps/web/app/[locale]/page.tsx"]);
     expect(landing.expectedFindings).toHaveLength(6);

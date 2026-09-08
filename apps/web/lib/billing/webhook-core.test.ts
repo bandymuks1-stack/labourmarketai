@@ -1,10 +1,14 @@
 import { describe, it, expect } from "vitest";
 import {
   isHandledEventType,
+  isRecordOnlyEventType,
   mapStripeStatus,
   parseSubscriptionObject,
   parseCheckoutSessionObject,
   parseInvoiceObject,
+  parseChargeRefundObject,
+  parseDisputeObject,
+  summarizeRecordedEvent,
   assertTestEvent,
 } from "./webhook-core";
 
@@ -18,8 +22,26 @@ describe("webhook-core — event mapping", () => {
       "invoice.payment_succeeded",
       "invoice.paid",
       "invoice.payment_failed",
+      // Refund/dispute ingestion (commercial safe-prep v1) — record-only.
+      "charge.refunded",
+      "charge.dispute.created",
+      "charge.dispute.closed",
     ]) expect(isHandledEventType(t)).toBe(true);
-    expect(isHandledEventType("charge.refunded")).toBe(false);
+    expect(isHandledEventType("charge.succeeded")).toBe(false);
+    expect(isHandledEventType("payout.paid")).toBe(false);
+  });
+
+  it("refund/dispute events are RECORD-ONLY — subscription events are not", () => {
+    for (const t of [
+      "charge.refunded",
+      "charge.dispute.created",
+      "charge.dispute.closed",
+    ]) expect(isRecordOnlyEventType(t)).toBe(true);
+    for (const t of [
+      "checkout.session.completed",
+      "customer.subscription.updated",
+      "invoice.payment_failed",
+    ]) expect(isRecordOnlyEventType(t)).toBe(false);
   });
 
   it("maps Stripe statuses → our enum (active grants, canceled limits, etc.)", () => {
@@ -163,5 +185,68 @@ describe("webhook-core — event mapping", () => {
   it("a live event is rejected (test-only chain)", () => {
     expect(assertTestEvent({ testMode: true })).toBe(true);
     expect(assertTestEvent({ testMode: false })).toBe(false);
+  });
+
+  it("parses a charge.refunded object into the persisted record shape", () => {
+    const r = parseChargeRefundObject({
+      id: "ch_1",
+      payment_intent: "pi_1",
+      invoice: { id: "in_1" },
+      amount_refunded: 2900,
+      currency: "eur",
+      refunded: true,
+    });
+    expect(r).toEqual({
+      chargeId: "ch_1",
+      paymentIntentId: "pi_1",
+      invoiceId: "in_1",
+      amountRefundedCents: 2900,
+      currency: "eur",
+      fullyRefunded: true,
+    });
+    // Partial refund: refunded=false, cumulative amount still recorded.
+    const partial = parseChargeRefundObject({
+      id: "ch_2",
+      amount_refunded: 500,
+      refunded: false,
+    });
+    expect(partial?.fullyRefunded).toBe(false);
+    expect(partial?.amountRefundedCents).toBe(500);
+    expect(partial?.invoiceId).toBeNull();
+    expect(parseChargeRefundObject(null)).toBeNull();
+  });
+
+  it("parses a dispute object with Stripe's own status/reason verbatim", () => {
+    const d = parseDisputeObject({
+      id: "dp_1",
+      charge: "ch_1",
+      payment_intent: { id: "pi_1" },
+      status: "needs_response",
+      reason: "product_not_received",
+      amount: 2900,
+      currency: "eur",
+    });
+    expect(d).toEqual({
+      disputeId: "dp_1",
+      chargeId: "ch_1",
+      paymentIntentId: "pi_1",
+      status: "needs_response",
+      reason: "product_not_received",
+      amountCents: 2900,
+      currency: "eur",
+    });
+    expect(parseDisputeObject(null)).toBeNull();
+  });
+
+  it("summarizeRecordedEvent yields a summary ONLY for record-only types", () => {
+    expect(
+      summarizeRecordedEvent("charge.refunded", { id: "ch_1", refunded: true }),
+    ).toMatchObject({ chargeId: "ch_1", fullyRefunded: true });
+    expect(
+      summarizeRecordedEvent("charge.dispute.closed", { id: "dp_1", status: "won" }),
+    ).toMatchObject({ disputeId: "dp_1", status: "won" });
+    // Subscription/invoice events keep their lean {id, type} record.
+    expect(summarizeRecordedEvent("customer.subscription.updated", { id: "sub_1" })).toBeNull();
+    expect(summarizeRecordedEvent("invoice.paid", {})).toBeNull();
   });
 });

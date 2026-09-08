@@ -31,10 +31,52 @@ const HANDLED = new Set([
   // pair for one invoice is harmless.
   "invoice.paid",
   "invoice.payment_failed",
+  // Refund/dispute ingestion (commercial safe-prep v1): these are RECORDED,
+  // signature-verified, test-only — see RECORD_ONLY below for why they do not
+  // mutate subscription state.
+  "charge.refunded",
+  "charge.dispute.created",
+  "charge.dispute.closed",
+  // Billing safety v1: bookkeeping for the server-side checkout operation —
+  // an expired hosted session closes its operation row early (no subscription
+  // state is touched). Delivered only if the endpoint subscribes to it; the
+  // local window closes the operation regardless.
+  "checkout.session.expired",
 ]);
 
 export function isHandledEventType(type: string): boolean {
   return HANDLED.has(type);
+}
+
+/**
+ * Events that are INGESTED AS RECORDS ONLY (persisted to the webhook-events
+ * store with a parsed summary) and deliberately cause NO subscription state
+ * transition. The semantics are not unambiguous enough to automate:
+ *
+ *   - `charge.refunded` — a full refund of the latest invoice does NOT mean
+ *     the subscription is cancelled: Stripe keeps the subscription billing
+ *     unless it is cancelled separately, and a partial/goodwill refund means
+ *     even less. Auto-cancelling here would silently strip an entitlement the
+ *     provider still considers live. The refund is recorded; any state change
+ *     is an operator decision (or a later `customer.subscription.*` event,
+ *     which this chain already applies).
+ *   - `charge.dispute.created` / `charge.dispute.closed` — a dispute's effect
+ *     depends on its outcome and on how the account is configured; Stripe
+ *     itself emits the authoritative subscription/invoice events that follow.
+ *     The dispute lifecycle is recorded for the operator; state stays
+ *     conservative.
+ *
+ * When ANY billing state change is warranted, it arrives through the
+ * subscription/invoice events above — never inferred from a charge event.
+ */
+const RECORD_ONLY = new Set([
+  "charge.refunded",
+  "charge.dispute.created",
+  "charge.dispute.closed",
+]);
+
+export function isRecordOnlyEventType(type: string): boolean {
+  return RECORD_ONLY.has(type);
 }
 
 /** Stripe subscription.status → our enum (conservative). */
@@ -66,6 +108,23 @@ export interface SubscriptionUpsert {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   testMode: boolean;
+  /**
+   * Billing safety v1 — ORDERING + EVIDENCE (optional: legacy callers omit).
+   *   eventId / eventCreated — the Stripe event carrying this state (unix s);
+   *     the store refuses an event OLDER than the one that last moved the row.
+   *   providerPriceId / unitAmountCents / currency — what the subscription
+   *     bills, from the signature-verified object (reconciliation evidence).
+   */
+  eventId?: string | null;
+  eventCreated?: number | null;
+  providerPriceId?: string | null;
+  unitAmountCents?: number | null;
+  currency?: string | null;
+  /**
+   * "link" = checkout.session.completed (knows ids, not state — never
+   * regresses an existing row's status); default "subscription".
+   */
+  transitionKind?: "link" | "subscription";
 }
 
 function isoFromUnix(v: unknown): string | null {
@@ -130,13 +189,40 @@ function subscriptionIdFromInvoice(
   return idFrom(details?.subscription) ?? idFrom(obj.subscription);
 }
 
+/**
+ * The FIRST subscription item's price — id, unit amount (smallest currency
+ * unit) and currency — as Stripe reports it on the subscription object.
+ * Evidence for reconciliation; never a price source.
+ */
+export function parseSubscriptionPrice(
+  obj: Record<string, unknown> | null | undefined,
+): { priceId: string | null; unitAmountCents: number | null; currency: string | null } {
+  const none = { priceId: null, unitAmountCents: null, currency: null };
+  if (!obj) return none;
+  const items = (obj.items as { data?: unknown[] } | null | undefined)?.data;
+  const first = Array.isArray(items) ? items[0] : undefined;
+  if (!first || typeof first !== "object") return none;
+  const price = (first as Record<string, unknown>).price;
+  if (typeof price === "string") return { priceId: price, unitAmountCents: null, currency: null };
+  if (!price || typeof price !== "object") return none;
+  const p = price as Record<string, unknown>;
+  return {
+    priceId: asString(p.id),
+    unitAmountCents:
+      typeof p.unit_amount === "number" && Number.isFinite(p.unit_amount) ? p.unit_amount : null,
+    currency: asString(p.currency),
+  };
+}
+
 /** Parse a customer.subscription.* event object → SubscriptionUpsert. */
 export function parseSubscriptionObject(
   obj: Record<string, unknown> | null | undefined,
   testMode: boolean,
+  event?: { id: string; created?: number | null },
 ): SubscriptionUpsert | null {
   if (!obj || typeof obj.id !== "string") return null;
   const meta = (obj.metadata as Record<string, unknown> | undefined) ?? {};
+  const price = parseSubscriptionPrice(obj);
   return {
     providerSubscriptionId: obj.id,
     providerCustomerId: idFrom(obj.customer),
@@ -148,7 +234,68 @@ export function parseSubscriptionObject(
     currentPeriodEnd: periodFromSubscription(obj, "current_period_end"),
     cancelAtPeriodEnd: Boolean(obj.cancel_at_period_end),
     testMode,
+    eventId: event?.id ?? null,
+    eventCreated: typeof event?.created === "number" ? event.created : null,
+    providerPriceId: price.priceId,
+    unitAmountCents: price.unitAmountCents,
+    currency: price.currency,
   };
+}
+
+// ─── Ordering — the ONE subscription state machine's transition guard ───────
+
+/** Terminal provider states: a Stripe subscription is never un-cancelled. */
+export function isTerminalSubStatus(s: SubStatus | string | null | undefined): boolean {
+  return s === "cancelled" || s === "expired";
+}
+
+export interface ExistingRowSnapshot {
+  readonly status: SubStatus | string;
+  /** ISO timestamp of the event that last moved the row (null = legacy/unknown). */
+  readonly lastEventCreatedAt: string | null;
+}
+
+export type TransitionDecision =
+  /** Apply the incoming state (and record it as the row's latest event). */
+  | { readonly apply: true; readonly keepStatus: false }
+  /**
+   * checkout.session.completed is a LINK event — it knows the ids, not the
+   * state. On an existing row it may fill linkage but must keep the status a
+   * real subscription event already set (never regress active → incomplete).
+   */
+  | { readonly apply: true; readonly keepStatus: true }
+  | { readonly apply: false; readonly reason: "stale_event" | "terminal_state" };
+
+/**
+ * Out-of-order protection. Rules, in order:
+ *   1. no existing row → apply;
+ *   2. a LINK event on an existing row → apply linkage, keep status;
+ *   3. the incoming event is OLDER than the row's last event → stale, skip;
+ *   4. the row is terminal (cancelled/expired) and the incoming state is not
+ *      → skip: Stripe never revives a subscription id, so this can only be a
+ *      late delivery without a usable timestamp;
+ *   5. otherwise apply.
+ * Equal timestamps apply (Stripe emits several events within one second; the
+ * later HTTP delivery is then the later state in practice, and the terminal
+ * rule still protects the one irreversible transition).
+ */
+export function decideSubscriptionTransition(
+  existing: ExistingRowSnapshot | null,
+  incoming: { readonly kind: "link" | "subscription" | "invoice"; readonly status: SubStatus | null; readonly eventCreated: number | null },
+): TransitionDecision {
+  if (!existing) return { apply: true, keepStatus: false };
+  if (incoming.kind === "link") return { apply: true, keepStatus: true };
+  if (
+    existing.lastEventCreatedAt !== null &&
+    incoming.eventCreated !== null &&
+    incoming.eventCreated * 1000 < Date.parse(existing.lastEventCreatedAt)
+  ) {
+    return { apply: false, reason: "stale_event" };
+  }
+  if (isTerminalSubStatus(existing.status) && !isTerminalSubStatus(incoming.status)) {
+    return { apply: false, reason: "terminal_state" };
+  }
+  return { apply: true, keepStatus: false };
 }
 
 /** Parse a checkout.session.completed object → the initial link. */
@@ -182,7 +329,105 @@ export function parseInvoiceObject(
   };
 }
 
+/**
+ * Parsed summary of a charge.refunded event — the persisted RECORD (nothing
+ * here drives a state machine). `fullyRefunded` mirrors Stripe's own
+ * `refunded` boolean; `amountRefundedCents` is the cumulative refunded total
+ * in the charge's smallest currency unit, exactly as Stripe reports it.
+ */
+export interface ChargeRefundRecord {
+  chargeId: string | null;
+  paymentIntentId: string | null;
+  invoiceId: string | null;
+  amountRefundedCents: number | null;
+  currency: string | null;
+  fullyRefunded: boolean;
+}
+
+export function parseChargeRefundObject(
+  obj: Record<string, unknown> | null | undefined,
+): ChargeRefundRecord | null {
+  if (!obj) return null;
+  return {
+    chargeId: asString(obj.id),
+    paymentIntentId: idFrom(obj.payment_intent),
+    invoiceId: idFrom(obj.invoice),
+    amountRefundedCents:
+      typeof obj.amount_refunded === "number" && Number.isFinite(obj.amount_refunded)
+        ? obj.amount_refunded
+        : null,
+    currency: asString(obj.currency),
+    fullyRefunded: obj.refunded === true,
+  };
+}
+
+/** Parsed summary of a charge.dispute.* event — the persisted RECORD. */
+export interface DisputeRecord {
+  disputeId: string | null;
+  chargeId: string | null;
+  paymentIntentId: string | null;
+  /** Stripe's own dispute status string (e.g. needs_response, won, lost). */
+  status: string | null;
+  /** Stripe's own dispute reason string (e.g. fraudulent, product_not_received). */
+  reason: string | null;
+  amountCents: number | null;
+  currency: string | null;
+}
+
+export function parseDisputeObject(
+  obj: Record<string, unknown> | null | undefined,
+): DisputeRecord | null {
+  if (!obj) return null;
+  return {
+    disputeId: asString(obj.id),
+    chargeId: idFrom(obj.charge),
+    paymentIntentId: idFrom(obj.payment_intent),
+    status: asString(obj.status),
+    reason: asString(obj.reason),
+    amountCents:
+      typeof obj.amount === "number" && Number.isFinite(obj.amount)
+        ? obj.amount
+        : null,
+    currency: asString(obj.currency),
+  };
+}
+
+/**
+ * The summary a record-only event persists alongside {id, type} in the
+ * webhook-events store. Returns null for every other event type (their record
+ * stays the lean {id, type} shape it always was).
+ */
+export function summarizeRecordedEvent(
+  type: string,
+  obj: Record<string, unknown> | null | undefined,
+): Record<string, unknown> | null {
+  if (type === "charge.refunded") {
+    const r = parseChargeRefundObject(obj);
+    return r ? { ...r } : null;
+  }
+  if (type === "charge.dispute.created" || type === "charge.dispute.closed") {
+    const d = parseDisputeObject(obj);
+    return d ? { ...d } : null;
+  }
+  return null;
+}
+
 /** A test event MUST be test-mode — a live event is rejected. */
 export function assertTestEvent(event: { testMode: boolean }): boolean {
   return event.testMode === true;
+}
+
+/**
+ * D3 (2026-09-02): the event's mode must match the ADAPTER state — a live
+ * event is rejected under `stripe_test` (the historical rule, unchanged) and
+ * a test event is rejected under `stripe_live` (a test-mode replay can never
+ * touch a live entitlement). Any other state accepts nothing.
+ */
+export function eventModeMatches(
+  state: "disabled" | "stripe_test" | "stripe_live" | "stripe_live_blocked",
+  event: { testMode: boolean },
+): boolean {
+  if (state === "stripe_test") return assertTestEvent(event);
+  if (state === "stripe_live") return event.testMode === false;
+  return false;
 }

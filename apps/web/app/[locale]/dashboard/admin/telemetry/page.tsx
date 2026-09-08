@@ -8,6 +8,7 @@ import {
   formatDurationMs,
   getTimeToValueSummary,
 } from "@/lib/admin/pilot-metrics";
+import { getTimeToFirstValueByActor } from "@/lib/admin/ttfv-by-actor";
 import {
   formatEurCents,
   formatUsd,
@@ -89,6 +90,11 @@ export default async function AdminTelemetryPage({
   // limits (per-tab sessions, no unique-visitor claims, no cohort slicing
   // without the pilots migration) are stated in the section copy.
   const ttv = await getTimeToValueSummary(supabase);
+
+  // Time to FIRST REAL VALUE per actor (FIRST REAL ECOSYSTEM USE, 2026-09-03):
+  // keyed by profile, actor from the first-run intent, start → first real
+  // action → first real result. The owner's key pilot metric.
+  const ttfv = await getTimeToFirstValueByActor(supabase);
 
   // AI cost & usage (W14 Pilot Analytics slice v1) — caller's RLS client
   // over ai_runs + usage_cost_events. Production has 0 rows while
@@ -644,6 +650,79 @@ export default async function AdminTelemetryPage({
           </table>
         )}
       </section>
+
+      <Card compact>
+      <section
+        className="flex flex-col gap-3"
+        data-testid="telemetry-ttfv-by-actor"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            Time to first real value — per actor
+          </h2>
+          <p className="text-meta text-text-muted">
+            Keyed by person (not tab session). Start = signup or onboarding
+            completed; first real action = the first state-changing event
+            (journal entry, CV import, demand, service request, booking
+            proposal, contact request, or the dedicated first_real_action).
+            Two results, measured separately: <strong>system</strong> = the
+            product produced value with nobody else involved (match preview
+            for an employer; a board showing at least one fitting opportunity
+            for a worker or student; first_real_result step=system);
+            <strong> human</strong> = another person had to act (contact
+            disclosed, booking accepted, engagement created;
+            first_real_result step=human). Actor comes from the first-run
+            intent (work / hire / agency / student / education), falling back
+            to the coarse identity. Medians over the last {8000} events; a
+            bucket with one person shows that person&apos;s value, not a
+            median. Preview-host and anonymous rows excluded
+            {ttfv.excludedPreview > 0 ? ` (${ttfv.excludedPreview} excluded)` : ""}.
+          </p>
+        </div>
+        {!ttfv.available ? (
+          <p className="text-sm text-text-secondary">Not readable from this session.</p>
+        ) : ttfv.usersWithStart === 0 ? (
+          <p className="text-sm text-text-secondary">
+            No person has completed signup or onboarding in the window yet.
+          </p>
+        ) : (
+          <table className="w-full text-left text-sm" data-testid="telemetry-ttfv-table">
+            <thead className="text-meta uppercase tracking-label text-text-muted">
+              <tr>
+                <th className="py-1 pr-3 font-normal">Actor</th>
+                <th className="py-1 pr-3 font-normal">People</th>
+                <th className="py-1 pr-3 font-normal">Reached action</th>
+                <th className="py-1 pr-3 font-normal">Median to action</th>
+                <th className="py-1 pr-3 font-normal">System result (n)</th>
+                <th className="py-1 pr-3 font-normal">Median to system result</th>
+                <th className="py-1 pr-3 font-normal">Human response (n)</th>
+                <th className="py-1 pr-3 font-normal">Median to human response</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ttfv.byActor.map((b) => (
+                <tr key={b.actor} className="border-t border-ink-600" data-testid={`ttfv-actor-${b.actor}`}>
+                  <td className="py-1.5 pr-3 text-text-primary">{b.actor}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.users}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedAction}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">
+                    {b.medianToActionMs === null ? "—" : formatDurationMs(b.medianToActionMs)}
+                  </td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedSystemResult}</td>
+                  <td className="py-1.5 pr-3 tabular-nums" data-testid={`ttfv-system-${b.actor}`}>
+                    {b.medianToSystemResultMs === null ? "—" : formatDurationMs(b.medianToSystemResultMs)}
+                  </td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedHumanResult}</td>
+                  <td className="py-1.5 pr-3 tabular-nums" data-testid={`ttfv-human-${b.actor}`}>
+                    {b.medianToHumanResultMs === null ? "—" : formatDurationMs(b.medianToHumanResultMs)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+      </Card>
 
       <section className="card-border flex flex-col gap-2 p-4">
         <h2 className="font-display text-base font-semibold text-text-primary">

@@ -110,3 +110,55 @@ describe("no live payments (Stripe test-mode guard)", () => {
     expect(c.reason).toBe("payments_disabled");
   });
 });
+
+// ─── D3 (2026-09-02): live is reachable ONLY through the owner-armed path ───
+// Every assertion above still holds: with no `liveActivation` input a live
+// signal is blocked exactly as before. What is new is the NAMED path that
+// activates it — and the proof that production cannot take it from env alone.
+describe("live activation is owner-armed, never implicit", () => {
+  const LIVE_SK = ["sk", "live", "ABC123456"].join("_");
+  const LIVE_PK = ["pk", "live", "ABC123456"].join("_");
+  const base = {
+    paymentsEnabled: "true", provider: "stripe", mode: "live",
+    secretKey: LIVE_SK, webhookSecret: "whsec_abc", publishableKey: LIVE_PK,
+  };
+
+  it("without the activation input every live signal is blocked (all callers before D3)", () => {
+    expect(resolveBillingConfig(base).state).toBe("stripe_live_blocked");
+  });
+
+  it("the token alone does not activate: the price table must be owner-confirmed in code", () => {
+    const c = resolveBillingConfig({
+      ...base,
+      liveActivation: { pricingConfirmed: false, token: "approved-by-owner" },
+    });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.paymentsEnabled).toBe(false);
+  });
+
+  it("PRICING_READINESS_STATE is owner-confirmed (approval 2026-09-05) — live still needs the env token + complete live keys", async () => {
+    const { PRICING_READINESS_STATE } = await import("../billing/readiness");
+    expect(PRICING_READINESS_STATE).toBe("owner_confirmed");
+    const c = resolveBillingConfig({
+      ...base,
+      publishableKey: undefined,
+      liveActivation: { pricingConfirmed: true, token: "approved-by-owner" },
+    });
+    // confirmed table + token, but an incomplete live key set → still blocked
+    // (the keys are the owner's env action)
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_keys_incomplete");
+  });
+
+  it("the resolver's live branch names every requirement", () => {
+    const src = readFileSync(join(webRoot, "lib/billing/config-core.ts"), "utf8");
+    for (const needle of [
+      "LIVE_ACTIVATION_TOKEN",
+      "pricingConfirmed",
+      "live_keys_incomplete",
+      "missing_webhook_secret",
+    ]) {
+      expect(src).toContain(needle);
+    }
+  });
+});

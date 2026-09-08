@@ -191,14 +191,43 @@ exists to prevent.
 
 ## 6. HONEST STATUS
 
+*Updated 2026-08-29 by the mobile foundation slice — see
+[`docs/MOBILE_ARCHITECTURE.md`](MOBILE_ARCHITECTURE.md).*
+
 | | |
 |---|---|
 | `AUTH_CORE_API_READY` | **YES** — implemented, 10 negative controls, cookie path regression-proven |
-| `APP_SHARED_CORE_READY` | **PARTIAL** — the transport exists; 257 of 892 `lib/` modules still resolve their own cookie client, so only 4 of 9 routes can honestly use it |
-| `ANDROID_IMPLEMENTATION_READY` | **NO** — no longer blocked on the seam. Blocked on there being no client, which is a build decision, not an architecture one |
-| `IOS_IMPLEMENTATION_READY` | **NO** — same |
-| `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and three canonical capabilities are reachable over it; the rest wait on the same shared-core refactor |
+| `APP_SHARED_CORE_READY` | **PARTIAL** — `packages/client-core` exists (config, session, locale, transport contract, actor context; zero dependencies, zero framework imports) and the transport exists; but 257 of 892 `lib/` modules still resolve their own cookie client, so only 4 of 9 routes can honestly use it |
+| `ANDROID_CLIENT_SCAFFOLD` | **BUILT** — `apps/mobile`, Expo SDK 57. Registration, sign-in, session, sign-out, language and the navigation shell are real. A Hermes bundle compiles for both platforms |
+| `ANDROID_IMPLEMENTATION_READY` | **NO** — no longer blocked on the seam (§5.1 opened with auth-core). Product data waits on the shared-core refactor coverage above; the scaffold ships every blocked surface as an honest refusal, never an empty screen |
+| `ANDROID_NATIVE_BUILD_PROVEN` | **YES (build level, 2026-08-30)** — `gradlew assembleDebug` BUILD SUCCESSFUL, `app-debug.apk` produced (`ai.labourmarket.app` v0.1.0); hoisted linker + Expo SDK 57 bundled pins, see `docs/mobile/NATIVE_READINESS_2026-08-29.md`. Runtime install+launch still unproven: no emulator/device on the build machine |
+| `IOS_BUILD_PROVEN` | **YES (simulator, 2026-08-30)** — `ios.yml` on GitHub `macos-26` runners: prebuild → pod install → xcodebuild (scheme `LabourMarketai`, Xcode 26.6, unsigned) → BUILD SUCCEEDED → simulator install+launch, process alive 15s ("IOS_SIM_LAUNCH_PROVEN"). Toolchain floor: Xcode 26.4+/Swift 6.3 (expo/expo#46242). NOT claimed: device builds, signing, store readiness, real-backend auth/deep-link E2E |
+| `IOS_RUNTIME_JOURNEY_PROVEN` | **YES (CI simulator, 2026-08-31)** — `ios.yml` run 33405199015 (PR #1372): Release build with embedded Hermes bundle (ad-hoc signed so the keychain works), Maestro flow `apps/mobile/.maestro/auth-failure-journey.yaml` — auth screen rendered, real sign-in attempt against deterministic bad-network config, failure surfaced (`testID="auth-failure"`, honest "could not reach the server" copy), app interactive after; screenshots uploaded as run artifacts. NOT claimed: device builds, signing for distribution, store readiness, real-backend authenticated session |
+| `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and four canonical capabilities are reachable over it (`profile.get`, `living_cv.skills.get`, `journal.create_draft`, `journal.confirm`; real-client OAuth + read PROVEN 2026-08-30, see `docs/integrations/CHATGPT_MCP_CLIENT_V1.md`); the rest wait on the same shared-core refactor |
 
-The gate is closed. What remains is not a decision — it is the mechanical work
-of letting domain helpers accept the caller's client instead of fetching their
+Nothing left here is a decision — what remains is the mechanical work of
+letting domain helpers accept the caller's client instead of fetching their
 own.
+
+### 6.1 WHY A CLIENT WAS SCAFFOLDED BEFORE THE GATE OPENED
+
+§5 says *do not build an Android client before (1)*, because it would either
+reimplement authentication or scrape the web client. The scaffold does neither,
+and the reason is a distinction §5 did not draw:
+
+**Authentication is not behind the blocked seam.** Supabase Auth accepts a
+token directly and has never needed a cookie, so registration, sign-in, refresh
+and sign-out work today against the platform's own auth server — no second
+identity system, no reimplementation, nothing scraped.
+
+Everything the seam blocked — journal, hours, Living CV, opportunities — was
+built as a refusal that names its cause, and `DOMAIN_TRANSPORT_STATUS` in
+`packages/client-core/src/transport.ts` shipped closed.
+
+**Update 2026-08-31: the gate is OPEN.** The bearer seam merged 2026-08-29
+(#1331) and the capability boundary `/api/mcp` serves the domain behind it;
+the constant's closed claim had gone stale and was corrected. The mobile tabs
+(Today / Work journal / Profile) now read `profile.get`, `journal.list` and
+`living_cv.skills.get` for real. The guard in the required merge gate now pins
+the gate OPEN and fails if either side of that truth drifts. Still open:
+mobile writes, context holdings, and on-device runtime proof.

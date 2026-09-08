@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 
 import { getBillingProvider } from "@/lib/billing/provider";
+import { getBillingConfig } from "@/lib/billing/config";
 import {
   isHandledEventType,
+  isRecordOnlyEventType,
   parseSubscriptionObject,
   parseCheckoutSessionObject,
   parseInvoiceObject,
+  summarizeRecordedEvent,
   assertTestEvent,
+  eventModeMatches,
 } from "@/lib/billing/webhook-core";
 import {
   recordWebhookEvent,
@@ -15,6 +19,10 @@ import {
   upsertSubscription,
   applyInvoicePayment,
 } from "@/lib/billing/subscription-store";
+import {
+  completeCheckoutOperationBySession,
+  expireCheckoutOperationBySession,
+} from "@/lib/billing/checkout-operations-store";
 
 /**
  * Stripe TEST webhook (Stripe sprint PR4). Verifies the signature (via the
@@ -40,19 +48,37 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "invalid_signature" }, { status: 400 });
   }
 
-  // Reject a live event outright — this chain is test-only.
-  if (!assertTestEvent(event)) {
-    return NextResponse.json({ ok: false, reason: "live_event_rejected" }, { status: 400 });
+  // The event's mode must match the adapter state: under `stripe_test` a
+  // live event is rejected outright (assertTestEvent — the historical rule);
+  // under `stripe_live` (D3, owner-armed) a TEST event is rejected, so a
+  // test-mode replay can never touch a live entitlement.
+  const billing = getBillingConfig();
+  if (!eventModeMatches(billing.state, event)) {
+    const reason =
+      billing.state === "stripe_live" && assertTestEvent(event)
+        ? "test_event_rejected"
+        : "live_event_rejected";
+    return NextResponse.json({ ok: false, reason }, { status: 400 });
   }
 
   // Idempotency: record first. Only a duplicate whose FIRST delivery finished
   // processing is short-circuited; an unprocessed duplicate is a Stripe retry
   // after our earlier non-2xx and MUST be reprocessed.
+  // Record-only events (charge.refunded / charge.dispute.*) persist a parsed
+  // summary with the record — that summary IS their processing outcome, so the
+  // operator can read what was refunded/disputed without replaying Stripe.
+  const summary = summarizeRecordedEvent(event.type, event.object);
+  // Billing safety v1: Stripe's own `created` rides with the record (ordering
+  // + incident forensics: which delivery moved which row, in what order).
+  const created = typeof event.created === "number" ? event.created : null;
+  const lean: Record<string, unknown> = { id: event.id, type: event.type };
+  if (created !== null) lean.created = created;
   const recorded = await recordWebhookEvent({
     eventId: event.id,
     eventType: event.type,
     testMode: event.testMode,
-    payload: { id: event.id, type: event.type },
+    eventCreated: created,
+    payload: summary ? { ...lean, summary } : lean,
   });
   if (recorded === "duplicate-processed") {
     return NextResponse.json({ ok: true, received: true, duplicate: true });
@@ -75,6 +101,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, received: true, ignored: true });
   }
 
+  // Refund/dispute ingestion is RECORD-ONLY (commercial safe-prep v1): the
+  // event + parsed summary are persisted above, and NO subscription state
+  // transition happens here — a full refund of the latest invoice does NOT
+  // auto-cancel (Stripe keeps the subscription billing unless it is cancelled
+  // separately), and a dispute's effect depends on its outcome. Any warranted
+  // state change arrives via the customer.subscription.* / invoice.* events
+  // this route already applies conservatively. See webhook-core RECORD_ONLY.
+  if (isRecordOnlyEventType(event.type)) {
+    await markWebhookProcessed(event.id);
+    return NextResponse.json({ ok: true, received: true, processed: true, recordOnly: true });
+  }
+
   let result: string = "ok";
   try {
     if (event.type === "checkout.session.completed") {
@@ -91,10 +129,29 @@ export async function POST(req: Request) {
           currentPeriodEnd: null,
           cancelAtPeriodEnd: false,
           testMode: link.testMode,
+          // Billing safety v1: a LINK event knows ids, not state — on an
+          // existing row it fills linkage and keeps the status a real
+          // subscription event already set (never active → incomplete).
+          transitionKind: "link",
+          eventId: event.id,
+          eventCreated: created,
         });
+        // Bookkeeping: the server-side checkout operation behind this session
+        // is complete. Best-effort — the operation's window closes it anyway.
+        const sessionId = typeof event.object.id === "string" ? event.object.id : null;
+        if (sessionId && (result === "ok" || result === "stale-event")) {
+          await completeCheckoutOperationBySession({
+            sessionId,
+            providerSubscriptionId: link.providerSubscriptionId,
+          });
+        }
       }
+    } else if (event.type === "checkout.session.expired") {
+      // Operation bookkeeping only — no subscription state exists to change.
+      const sessionId = typeof event.object.id === "string" ? event.object.id : null;
+      if (sessionId) await expireCheckoutOperationBySession(sessionId);
     } else if (event.type.startsWith("customer.subscription.")) {
-      const sub = parseSubscriptionObject(event.object, event.testMode);
+      const sub = parseSubscriptionObject(event.object, event.testMode, { id: event.id, created });
       if (sub) {
         if (event.type === "customer.subscription.deleted") {
           result = await upsertSubscription({ ...sub, status: "cancelled" });
@@ -111,7 +168,10 @@ export async function POST(req: Request) {
       // same invoice (distinct event ids) — applying "succeeded" twice is a
       // no-op on the subscription row.
       const inv = parseInvoiceObject(event.object, event.type !== "invoice.payment_failed");
-      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus);
+      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus, {
+        id: event.id,
+        created,
+      });
     }
   } catch (e) {
     // Keep the idempotency record OPEN (processed=false) and answer non-2xx so
@@ -123,7 +183,10 @@ export async function POST(req: Request) {
     );
   }
 
-  if (result === "ok") {
+  if (result === "ok" || result === "stale-event") {
+    // "stale-event" (billing safety v1): the event is OLDER than the one that
+    // last moved the row, or the row is terminal — skipped ON PURPOSE and
+    // acknowledged as processed, so a replay does not re-apply it either.
     await markWebhookProcessed(event.id);
     return NextResponse.json({ ok: true, received: true, processed: true, result });
   }

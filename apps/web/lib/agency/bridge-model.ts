@@ -13,7 +13,10 @@ import { isMissingRpcCode, isMissingTableCode } from "@/lib/agency/clients-model
 
 export type ConnectionStatus = "pending" | "active" | "declined" | "revoked";
 export type ShareStatus = "active" | "revoked";
-export type OfferStatus = "offered" | "withdrawn";
+/** `accepted` / `declined` are written by the CLIENT company owner through
+ *  respond_agency_candidate_offer_v1 (migration 20260903101000); `accepted`
+ *  also carries the canonical booking proposed to the worker. */
+export type OfferStatus = "offered" | "withdrawn" | "accepted" | "declined";
 /** Derived (never stored) client-review stage the agency may see. */
 export type OfferReviewStage =
   | "offered"
@@ -70,6 +73,12 @@ export interface OfferedCandidateRow {
   readonly agencyName: string;
   readonly note: string | null;
   readonly createdAt: string;
+  /** The client's decision state. Before 20260903101000 is applied the v1 read
+   *  only returns open offers, so this is always `offered` there. */
+  readonly offerStatus: OfferStatus;
+  /** Canonical booking proposed on acceptance; null otherwise / before apply. */
+  readonly bookingId: string | null;
+  readonly decidedAt: string | null;
 }
 
 export type AgencyConnectionsState =

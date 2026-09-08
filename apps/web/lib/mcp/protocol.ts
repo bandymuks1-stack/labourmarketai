@@ -27,18 +27,35 @@ export const MCP_PROTOCOL_VERSION = "2025-06-18";
 /** Versions this server can answer for. Echo the client's if we support it. */
 const SUPPORTED_VERSIONS = new Set(["2024-11-05", "2025-03-26", "2025-06-18"]);
 
+/** MCP tool behavior hints (spec-optional, honesty-required here): clients
+ *  use these to distinguish reads from writes without parsing prose. */
+export type McpToolAnnotations = {
+  readonly readOnlyHint?: boolean;
+  readonly destructiveHint?: boolean;
+  readonly idempotentHint?: boolean;
+  readonly openWorldHint?: boolean;
+};
+
 export type McpToolDef = {
   readonly name: string;
   readonly title?: string;
   readonly description: string;
   /** JSON Schema (draft 2020-12) for the tool's arguments. */
   readonly inputSchema: Record<string, unknown>;
+  readonly annotations?: McpToolAnnotations;
 };
 
 export type McpToolOutcome = {
   readonly isError: boolean;
   /** JSON-serializable payload shown to the model. */
   readonly payload: unknown;
+  /**
+   * Optional localized human presentation of a SUCCESSFUL payload. When
+   * present it leads the text content so the client's model presents the
+   * result as language, not JSON — the structured payload is still included
+   * in full (both in the text and as `structuredContent`), never destroyed.
+   */
+  readonly humanText?: string;
 };
 
 export type McpServerDeps = {
@@ -131,6 +148,7 @@ export async function handleMcpMessage(
             ...(t.title ? { title: t.title } : {}),
             description: t.description,
             inputSchema: t.inputSchema,
+            ...(t.annotations ? { annotations: t.annotations } : {}),
           })),
         },
       };
@@ -148,11 +166,20 @@ export async function handleMcpMessage(
       const outcome = await deps.callTool(name, args);
       // Tool-level failures are RESULTS with isError, not protocol errors —
       // the model is supposed to read them and adjust.
+      const jsonText = JSON.stringify(outcome.payload);
       return {
         jsonrpc: "2.0",
         id,
         result: {
-          content: [{ type: "text", text: JSON.stringify(outcome.payload) }],
+          content: [
+            {
+              type: "text",
+              // Human summary FIRST (when the capability provides one), full
+              // structured payload after — presentation is added, structure
+              // is never removed.
+              text: outcome.humanText ? `${outcome.humanText}\n\n${jsonText}` : jsonText,
+            },
+          ],
           structuredContent: outcome.payload,
           isError: outcome.isError,
         },

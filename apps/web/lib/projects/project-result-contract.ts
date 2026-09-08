@@ -63,13 +63,41 @@ export interface ProjectStageRow {
   readonly id: string;
   readonly name: string;
   readonly status: string;
+  /** The canonical order — the company home derives "now / next" from it
+   *  (QA Q-3: carried so the home need not read the stages a second time). */
+  readonly stageOrder: number;
   readonly plannedStart: string | null;
   readonly plannedEnd: string | null;
   readonly actualStart: string | null;
   readonly actualEnd: string | null;
+  /** Why a blocked stage is blocked, as the canonical row says it; null otherwise. */
+  readonly blockedReason: string | null;
 }
 
 /** The panel's view of ONE project. */
+/**
+ * The project's PULSE (owner contract 2026-09-04 §11 — the living project:
+ * what is happening now, what exists, what is missing). Every number is the
+ * SAME canonical read the operations centre renders — journal entries on
+ * this project, its tasks, the roster's readiness checklist — never a
+ * second count. `null` = the reads were not available (not "zero").
+ */
+export interface ProjectPulse {
+  /** Journal entries written TODAY by assigned workers. */
+  readonly entriesToday: number;
+  /** Journal entries / photos on this project, all time. */
+  readonly evidenceEntries: number;
+  readonly evidencePhotos: number;
+  /** Open tasks (todo / in progress / blocked) and how many are overdue. */
+  readonly tasksOpen: number;
+  readonly tasksOverdue: number;
+  /** Roster readiness checklist: items checked / items total (0/0 = none kept). */
+  readonly readinessChecked: number;
+  readonly readinessTotal: number;
+  /** Assigned workers with at least one missing / needed document item. */
+  readonly workersWithMissingDocs: number;
+}
+
 export interface ProjectDetail {
   readonly projectId: string;
   readonly title: string;
@@ -89,9 +117,18 @@ export interface ProjectDetail {
    * here" is not "this project has no stages" — and the panel says so.
    */
   readonly stages: readonly ProjectStageRow[] | null;
+  /**
+   * How many stages the canonical read returned BEFORE `PROJECT_STAGE_LIMIT`
+   * cut `stages` for the panel; null exactly when `stages` is null. A reader
+   * that needs the WHOLE list (the company home's done/total) compares the
+   * two and reads again only when they differ — never a total over a slice.
+   */
+  readonly stageTotal: number | null;
   /** Whether the viewer may run lifecycle writes. Server-derived from the same
    *  authority the RPC enforces; the client never decides this. */
   readonly canManage: boolean;
+  /** See `ProjectPulse`; null when its reads are unavailable here. */
+  readonly pulse: ProjectPulse | null;
 }
 
 export type ProjectDetailResult =

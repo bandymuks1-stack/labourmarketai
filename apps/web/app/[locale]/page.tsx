@@ -1,12 +1,5 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import {
-  LANDING_MODE_COOKIE,
-  isLandingMode,
-  type LandingMode,
-} from "@/lib/telemetry/landing-experience";
-import { LiveMarketLanding } from "./live-market-review/live-market-page";
 import { FocusLanding } from "./focus-landing/focus-landing";
 
 /**
@@ -18,27 +11,32 @@ import { FocusLanding } from "./focus-landing/focus-landing";
  *   LIVE  — the living European labour-market surface. OPTIONAL: it opens
  *           only after the visitor explicitly selects it.
  *
- * DEFAULT = FOCUS (owner command 2026-08-22 §2). The fallback below is the
- * whole mechanism: no cookie means no explicit choice, and no explicit choice
- * means FOCUS. Nothing else is consulted — no device class, no locale, no
- * geography, no user agent — so no heuristic can ever silently land a fresh
- * visitor in LIVE.
+ * DEFAULT = FOCUS (owner command 2026-08-22 §2). No cookie means no explicit
+ * choice, and no explicit choice means FOCUS. Nothing else is consulted — no
+ * device class, no locale, no geography, no user agent — so no heuristic can
+ * ever silently land a fresh visitor in LIVE.
  *
- * They are different component trees with different chrome, so the choice is
- * resolved HERE, on the server. That keeps the response to ONE landing rather
- * than shipping both and hiding one, and removes the flash a client-side swap
- * would cause.
+ * WHERE THE ARM IS RESOLVED — P0 entry-point fix, 2026-08-31. This route used
+ * to read the mode cookie itself (forced dynamic rendering), which made EVERY
+ * fresh visit invoke a serverless function: `cache-control: no-store`, zero
+ * CDN caching, and after a deploy the first visitors paid the full cold-start +
+ * SSR chain (measured 7.6 s of serial document time on a cold hit; the owner
+ * observed ~60 s inside the post-deploy window). The arm is still resolved
+ * on the SERVER and only one tree is shipped — but in MIDDLEWARE now: a
+ * visitor whose cookie records the explicit LIVE choice is rewritten to the
+ * cookie-gated LIVE route before rendering, and everyone else gets THIS
+ * page, which is statically generated and CDN-cached. A fresh visitor's
+ * first paint no longer depends on a function being warm.
  *
- * The cookie is written ONLY by an explicit switcher click (see
- * `persistLandingMode`), so its presence IS the proof of an explicit choice.
- * Ambiguous or absent state therefore resolves to FOCUS, exactly as §3 asks.
+ * `revalidate = 300` matches the market snapshot's own `unstable_cache`
+ * freshness window (owner command §9/§12: one market truth, one freshness
+ * window) — the static page can never be staler than the data layer already
+ * allowed the dynamic one to be.
  *
- * SEO is deliberately unaffected: metadata is built identically for both arms
- * and the canonical stays `/{locale}`. A crawler sends no cookie, so it gets
- * the same FOCUS landing a fresh human gets — one indexed landing, no
- * cloaking, no second surface, and no factual difference between the two.
+ * SEO is unaffected: a crawler sends no cookie, so it gets this FOCUS page —
+ * one indexed landing, no cloaking, and the canonical stays `/{locale}`.
  */
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -49,21 +47,10 @@ export async function generateMetadata({
   return buildPageMetadata({ locale, path: "" });
 }
 
-async function resolveLandingMode(): Promise<LandingMode> {
-  const store = await cookies();
-  const value = store.get(LANDING_MODE_COOKIE)?.value;
-  return isLandingMode(value) ? value : "focus";
-}
-
 export default async function LandingPage({
   params,
 }: {
   readonly params: Promise<{ locale: string }>;
 }) {
-  const mode = await resolveLandingMode();
-  return mode === "focus" ? (
-    <FocusLanding params={params} />
-  ) : (
-    <LiveMarketLanding params={params} />
-  );
+  return <FocusLanding params={params} />;
 }

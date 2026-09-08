@@ -218,7 +218,10 @@
       "ackDone": "Vahvistetaan ✓",
       "excludedNote": "{count, plural, =0 {Kaikki poikkeukset tarkastettu — koko lista vahvistetaan.} one {# kirjausta, jossa on poikkeus, EI vahvisteta ennen kuin merkitset sen tarkastetuksi.} other {# kirjausta, joissa on poikkeuksia, EI vahvisteta ennen kuin merkitset ne tarkastetuiksi.}}",
       "outcomeNotAcknowledged": "ei vahvistettu — poikkeus jäi tarkastamatta",
-      "outcomeBlocked": "ei vahvistettu ({code})"
+      "outcomeBlocked": "ei vahvistettu ({code})",
+      "receipt": "Vahvistettu: {title}",
+      "receiptSkills": "{count, plural, one {# taito} other {# taitoa}}",
+      "skillsUnavailable": "Taitoluetteloa ei voitu lukea — napautus vahvistaa vain itse merkinnän."
     }
   },
   "listEmpty": "Sinulla ei ole vielä työtietoja — kirjauksesi näkyvät täällä.",

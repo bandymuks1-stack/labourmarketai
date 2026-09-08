@@ -76,6 +76,7 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "surface", // source surface, e.g. 'dashboard' | 'profile' | 'google'
   "step", // coarse step label inside a multi-step flow, e.g. 'compose'
   "role_context", // coarse role: 'worker' | 'company' | 'agency' | 'customer'
+  "intent", // first-run intent: 'work' | 'hire' | 'agency' | 'student' | 'education' (or a comma-joined set)
   "entity_type", // anonymous entity type, e.g. 'company_request'
   "success", // bool — coarse success/failure of an attempted action
   // ── Public acquisition funnel + first-touch attribution (Pre-Advertising

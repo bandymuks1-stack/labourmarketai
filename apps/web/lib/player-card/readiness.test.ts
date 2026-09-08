@@ -24,6 +24,7 @@ const EMPTY: WorkerPlayerCard = {
   documents: null,
   evidenceTimeline: [],
   skillEvidence: [],
+  provenance: { class: "SELF_DECLARED" },
 };
 
 describe("deriveWorkerReadiness — honest signals, never a fabricated score", () => {

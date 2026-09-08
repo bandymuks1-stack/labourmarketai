@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { classifyIntent, isExplicitJournalRequest } from "./intent-router";
+import type { RoutedIntent } from "./intent-registry";
 
 /**
  * The deterministic intent router is the always-on floor of the conversation
@@ -47,6 +48,44 @@ describe("classifyIntent — brief example sentences", () => {
     expect(classifyIntent("vakar dirbau 8 valandas").intent).toBe("log-work");
     // Seeking verb tips to find-work.
     expect(classifyIntent("noriu rasti darbą Vokietijoje").intent).toBe("find-work");
+  });
+});
+
+/**
+ * ONE ACTIVE CONTEXT by sentence (chat-first audit 2026-08-30, gap G1): the
+ * switching sentences from the audit brief reach `switch-context` in all five
+ * routed locales — and the "work as X" family stays ROLE-gated so a
+ * profession statement never routes here.
+ */
+describe("switch-context — the active context is reachable by sentence", () => {
+  const cases: Array<[string, string]> = [
+    ["Perjunk į Nonstop Group.", "switch-context"],
+    ["Perjunk į įmonę X.", "switch-context"],
+    ["perjunk mane i imone", "switch-context"], // diacritic-free
+    ["Grįžk į mano asmeninį profilį.", "switch-context"],
+    ["Dirbu dabar kaip darbuotojas.", "switch-context"],
+    ["Switch to Nonstop Group", "switch-context"],
+    ["go back to my personal space", "switch-context"],
+    ["change my workspace", "switch-context"],
+    ["I want to act as a company now", "switch-context"],
+    ["Переключи меня на компанию Nonstop", "switch-context"],
+    ["вернись в личное пространство", "switch-context"],
+    ["schakel over naar mijn bedrijf", "switch-context"],
+    ["terug naar mijn persoonlijke ruimte", "switch-context"],
+    ["wechsle zu meiner Firma", "switch-context"],
+    ["zurück zu meinem persönlichen Bereich", "switch-context"],
+  ];
+  for (const [text, expected] of cases) {
+    it(`"${text}" → ${expected}`, () => {
+      expect(classifyIntent(text).intent).toBe(expected);
+    });
+  }
+
+  it("a profession statement is NOT a context switch (role-noun gate)", () => {
+    // "I work as a tiler" — a fact about the person, not a workspace request.
+    expect(classifyIntent("dirbu kaip plytelių klojėjas").intent).not.toBe("switch-context");
+    expect(classifyIntent("I work as a tiler in Oslo").intent).not.toBe("switch-context");
+    expect(classifyIntent("работаю как плиточник").intent).not.toBe("switch-context");
   });
 });
 
@@ -221,7 +260,11 @@ describe("classifyIntent — the six §13 workflow sentences", () => {
     ["Įrašyti šiandienos darbą", "log-work"],
     ["Reikia 4 suvirintojų Vokietijoje nuo rugsėjo", "need-workers"],
     ["Rask man darbą", "find-work"],
-    ["Parodyk mano CV", "cv"],
+    // SEEING the CV is neither the import nor the export (owner window 11
+    // §5/§30). It was `cv-export` while "show" and "download" shared one
+    // rule; they no longer do, and the page reached is the same `/cv` either
+    // way — only the sentence the product answers with changes.
+    ["Parodyk mano CV", "cv-view"],
     ["Sukurk įmonės profilį", "create-organization"],
     ["Parodyk mano rytojaus planą", "calendar-view"],
   ];
@@ -333,5 +376,747 @@ describe("classifyIntent — recording work in its other grammatical forms", () 
     expect(classifyIntent("Rask man darbą Nyderlanduose.").intent).toBe(
       "find-work",
     );
+  });
+});
+
+/**
+ * G8 (chat-first audit 2026-08-30): the chip surfaces, reachable by SENTENCE.
+ *
+ * `startEmployerCandidates` and `startProjects` were reachable ONLY via chips:
+ * typing "show my candidates" ran `find-workers` — a different engine for the
+ * same request — and "mano projektai" ran `open-project`, whose nameless
+ * branch answers with a text list while the chip opened the real panel. Both
+ * requests now route to the SAME handler their chip runs.
+ */
+describe("G8 — candidates and projects route to the chip handlers", () => {
+  const cases: Array<[string, string]> = [
+    // candidates — all five locales
+    ["parodyk kandidatus", "candidates"],
+    ["mano kandidatai", "candidates"],
+    ["show my candidates", "candidates"],
+    ["покажи кандидатов", "candidates"],
+    ["toon de kandidaten", "candidates"],
+    ["zeig die Kandidaten", "candidates"],
+    ["wer wartet auf eine Antwort?", "candidates"],
+    ["wie wacht er nog?", "candidates"],
+    // projects — all five locales
+    ["parodyk mano projektus", "projects"],
+    ["mano projektai", "projects"],
+    ["show my projects", "projects"],
+    ["покажи мои проекты", "projects"],
+    ["mijn projecten", "projects"],
+    ["meine Projekte", "projects"],
+    ["kur mano projektai?", "projects"],
+  ];
+  for (const [text, expected] of cases) {
+    it(`"${text}" → ${expected}`, () => {
+      expect(classifyIntent(text).intent).toBe(expected);
+    });
+  }
+
+  it("candidate phrasing NEVER falls through to find-workers (negative control)", () => {
+    for (const s of [
+      "show my candidates",
+      "parodyk kandidatus",
+      "покажи кандидатов",
+      "toon de kandidaten",
+      "zeig die Kandidaten",
+      "compare these candidates",
+    ]) {
+      expect(classifyIntent(s).intent, s).not.toBe("find-workers");
+      expect(classifyIntent(s).intent, s).toBe("candidates");
+    }
+  });
+
+  it("scouting and targeted project-open keep their own doors", () => {
+    // The SEARCH-FOR-PEOPLE framing is still scouting…
+    expect(classifyIntent("surask darbuotojų").intent).toBe("find-workers");
+    expect(classifyIntent("find workers").intent).toBe("find-workers");
+    expect(classifyIntent("finde passende Leute").intent).toBe("find-workers");
+    expect(classifyIntent("vind geschikte mensen").intent).toBe("find-workers");
+    // …and naming ONE project is still the targeted open.
+    expect(classifyIntent("atidaryk šį projektą").intent).toBe("open-project");
+    expect(classifyIntent("Open this project").intent).toBe("open-project");
+    expect(classifyIntent("Open dit project").intent).toBe("open-project");
+    expect(classifyIntent("Öffne dieses Projekt").intent).toBe("open-project");
+    expect(classifyIntent("kas vyksta mano objekte?").intent).toBe("open-project");
+  });
+});
+
+/**
+ * G3 — FIVE-LOCALE PARITY RATCHET (chat-first audit 2026-08-30).
+ *
+ * nl/de are fully routed locales (complete UI catalogues), yet the router
+ * understood only ~12 of the intents in German or Dutch — two-thirds of the
+ * product answered fluent UI users with the generic fallback. This matrix is
+ * the ratchet that keeps that from regressing: ONE natural sentence per
+ * routed intent per ACTIVE locale, every one asserted against the classifier.
+ *
+ * `Record<RoutedIntent, …>` makes it exhaustive at COMPILE time: a future
+ * intent added to the union without a five-locale row here refuses to build —
+ * a new capability can never ship reachable in three languages and silently
+ * unreachable in the other two.
+ */
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+type ActiveLocale = (typeof ACTIVE_LOCALES)[number];
+
+const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>> = {
+  "log-work": {
+    lt: "Šiandien dirbau nuo 8 iki 17",
+    en: "Today I worked from 8 to 17",
+    ru: "Сегодня работал с 8 до 17",
+    nl: "Vandaag heb ik 8 uur gewerkt",
+    de: "Heute habe ich von 8 bis 17 gearbeitet",
+  },
+  "find-work": {
+    lt: "Rask man darbą Nyderlanduose",
+    en: "Find me a job",
+    ru: "Найди мне работу",
+    nl: "Ik zoek werk in Nederland",
+    de: "Ich suche Arbeit in Deutschland",
+  },
+  "write-employer": {
+    lt: "Parašyk šiai įmonei",
+    en: "Write to this employer",
+    ru: "Напиши работодателю",
+    nl: "Schrijf naar deze werkgever",
+    de: "Schreib dem Arbeitgeber",
+  },
+  translate: {
+    lt: "Išversk žinutę į olandų kalbą",
+    en: "Translate this message",
+    ru: "Переведи сообщение",
+    nl: "Vertaal dit bericht",
+    de: "Übersetze diese Nachricht",
+  },
+  "calendar-view": {
+    lt: "Kada turiu kitą susitikimą?",
+    en: "When is my next meeting?",
+    ru: "Что у меня сегодня",
+    nl: "Wanneer is mijn volgende afspraak?",
+    de: "Wann ist mein nächster Termin?",
+  },
+  reminder: {
+    lt: "Primink rytoj 8 valandą paskambinti",
+    en: "Remind me tomorrow",
+    ru: "Напомни мне завтра",
+    nl: "Herinner me er morgen aan",
+    de: "Erinnere mich morgen daran",
+  },
+  cv: {
+    lt: "Įkelk mano CV",
+    en: "Upload my resume",
+    ru: "Загрузи моё резюме",
+    nl: "Upload mijn cv",
+    de: "Meinen Lebenslauf hochladen",
+  },
+  profile: {
+    lt: "Pridėk kalbą",
+    en: "Update my profile",
+    ru: "Покажи мой профиль",
+    nl: "Voeg een taal toe aan mijn profiel",
+    de: "Zeig mein Profil",
+  },
+  offers: {
+    lt: "Ką man siūlo?",
+    en: "Show my offers",
+    ru: "Какие предложения у меня есть",
+    nl: "Welke aanbiedingen heb ik?",
+    de: "Zeig meine Angebote",
+  },
+  "need-workers": {
+    lt: "Reikia darbuotojų",
+    en: "We need workers next month",
+    ru: "Нужны сварщики",
+    nl: "Wij zoeken personeel",
+    de: "Wir brauchen Mitarbeiter",
+  },
+  criteria: {
+    lt: "Kokie kriterijai pas mane nurodyti?",
+    en: "What are my search criteria?",
+    ru: "Какие критерии у меня указаны",
+    nl: "Wat zijn mijn zoekcriteria?",
+    de: "Meine Suchkriterien",
+  },
+  "next-action": {
+    lt: "Ką dar turiu padaryti?",
+    en: "What should I do next?",
+    ru: "Что дальше?",
+    nl: "Wat moet ik nog doen?",
+    de: "Was soll ich als Nächstes tun?",
+  },
+  resume: {
+    lt: "Kur sustojau?",
+    en: "Where did I stop?",
+    ru: "На чём я остановился?",
+    nl: "Waar was ik gebleven?",
+    de: "Wo war ich stehengeblieben?",
+  },
+  "skill-gap": {
+    lt: "Kokių įgūdžių man trūksta?",
+    en: "What skills am I missing?",
+    ru: "Каких навыков мне не хватает?",
+    nl: "Welke vaardigheden mis ik?",
+    de: "Welche Fähigkeiten fehlen mir?",
+  },
+  "journal-recent": {
+    lt: "Parodyk paskutinius žurnalo įrašus",
+    en: "Show my latest journal entries",
+    ru: "Покажи мой дневник",
+    nl: "Toon mijn dagboek",
+    de: "Zeig mein Tagebuch",
+  },
+  figures: {
+    lt: "Paruošk ataskaitą",
+    en: "Show my approved hours",
+    ru: "Подготовь отчёт",
+    nl: "Toon mijn bevestigde uren",
+    de: "Zeig meine bestätigten Stunden",
+  },
+  "open-project": {
+    lt: "Atidaryk šį projektą",
+    en: "Open this project",
+    ru: "Открой этот проект",
+    nl: "Open dit project",
+    de: "Öffne dieses Projekt",
+  },
+  projects: {
+    lt: "Mano projektai",
+    en: "Show my projects",
+    ru: "Покажи мои проекты",
+    nl: "Mijn projecten",
+    de: "Meine Projekte",
+  },
+  candidates: {
+    lt: "Parodyk kandidatus",
+    en: "Show my candidates",
+    ru: "Покажи кандидатов",
+    nl: "Toon de kandidaten",
+    de: "Zeig die Kandidaten",
+  },
+  "find-workers": {
+    lt: "Surask darbuotojų",
+    en: "Find workers",
+    ru: "Найди работников",
+    nl: "Vind geschikte mensen",
+    de: "Finde passende Leute",
+  },
+  "need-service": {
+    lt: "Reikia, kad kas nors sutaisytų stogą",
+    en: "Need someone to repair the roof",
+    ru: "Нужен кто-нибудь, чтобы починить кран",
+    nl: "Iemand nodig om het dak te repareren",
+    de: "Jemand, der das Dach repariert",
+  },
+  context: {
+    lt: "Ką tu apie mane žinai?",
+    en: "What do you know about me?",
+    ru: "Что ты знаешь обо мне?",
+    nl: "Wat weet je over mij?",
+    de: "Was weißt du über mich?",
+  },
+  "switch-context": {
+    lt: "Perjunk į įmonę",
+    en: "Switch to my company",
+    ru: "Переключи меня на компанию",
+    nl: "Schakel over naar mijn bedrijf",
+    de: "Wechsle zu meiner Firma",
+  },
+  opportunities: {
+    lt: "Kokias galimybes man gali pasiūlyti?",
+    en: "What opportunities do I have?",
+    ru: "Какие возможности у меня есть?",
+    nl: "Welke mogelijkheden heb ik?",
+    de: "Welche Möglichkeiten habe ich?",
+  },
+  "interest-inbox": {
+    lt: "Kas susidomėjo mano poreikiu?",
+    en: "Who showed interest in my demand?",
+    ru: "Кто заинтересовался?",
+    nl: "Wie heeft interesse in mijn aanvraag?",
+    de: "Wer hat Interesse gezeigt?",
+  },
+  "admin-approvals": {
+    lt: "Ką turiu patvirtinti?",
+    en: "What do I need to approve?",
+    ru: "Что мне нужно утвердить?",
+    nl: "Wat wacht op mijn goedkeuring?",
+    de: "Was muss ich genehmigen?",
+  },
+  "admin-requests": {
+    lt: "Noriu pateikti atostogų prašymą",
+    en: "Leave request",
+    ru: "Хочу подать заявление на отпуск",
+    nl: "Ik wil verlof aanvragen",
+    de: "Ich möchte Urlaub beantragen",
+  },
+  timesheets: {
+    lt: "Parodyk mano tabelį",
+    en: "Open my timesheet",
+    ru: "Покажи мой табель",
+    nl: "Open mijn urenstaat",
+    de: "Zeig meinen Stundenzettel",
+  },
+  "hours-import": {
+    lt: "Įkelk tabelį",
+    en: "Import a timesheet",
+    ru: "Загрузи табель",
+    nl: "Urenstaat importeren",
+    de: "Stundenzettel importieren",
+  },
+  "work-hours": {
+    lt: "Atidaryk darbo valandas",
+    en: "Open work hours",
+    ru: "Открой рабочие часы",
+    nl: "Open de werkuren",
+    de: "Öffne die Arbeitsstunden",
+  },
+  absences: {
+    lt: "Kiek atostogų dienų man liko?",
+    en: "How many holiday days do I have left?",
+    ru: "Сколько дней отпуска у меня осталось?",
+    nl: "Hoeveel verlofdagen heb ik nog?",
+    de: "Wie viele Urlaubstage habe ich noch?",
+  },
+  documents: {
+    lt: "Parodyk mano dokumentus",
+    en: "Show my documents",
+    ru: "Покажи мои документы",
+    nl: "Toon mijn documenten",
+    de: "Zeig meine Dokumente",
+  },
+  "market-map": {
+    lt: "Parodyk rinkos žemėlapį",
+    en: "Show me the market map",
+    ru: "Покажи карту рынка труда",
+    nl: "Toon de arbeidsmarktkaart",
+    de: "Öffne die Arbeitsmarktkarte",
+  },
+  activity: {
+    lt: "Parodyk pranešimus",
+    en: "Show my notifications",
+    ru: "Покажи уведомления",
+    nl: "Toon mijn meldingen",
+    de: "Zeig meine Benachrichtigungen",
+  },
+  "messages-view": {
+    lt: "Parodyk žinutes",
+    en: "Show my messages",
+    ru: "Покажи мои сообщения",
+    nl: "Toon mijn berichten",
+    de: "Zeig meine Nachrichten",
+  },
+  invitations: {
+    lt: "Mano kvietimai",
+    en: "Show my invitations",
+    ru: "Мои приглашения",
+    nl: "Mijn uitnodigingen",
+    de: "Meine Einladungen",
+  },
+  "player-card": {
+    lt: "Parodyk mano kortelę",
+    en: "Show my card",
+    ru: "Покажи мою карточку",
+    nl: "Toon mijn kaart",
+    de: "Zeig meine Karte",
+  },
+  experiences: {
+    lt: "Patirtys apie mane",
+    en: "I want to leave an experience",
+    ru: "Оставить отзыв о взаимодействии",
+    nl: "Ik wil een ervaring achterlaten",
+    de: "Eine Erfahrung hinterlassen",
+  },
+  engagements: {
+    lt: "Su kuo aš dirbu?",
+    en: "Who do I work with?",
+    ru: "Рабочие отношения",
+    nl: "Met wie werk ik?",
+    de: "Mit wem arbeite ich?",
+  },
+  "company-overview": {
+    lt: "Kas vyksta mano įmonėje?",
+    en: "What is happening in my company?",
+    ru: "Что происходит в моей компании?",
+    nl: "Wat gebeurt er in mijn bedrijf?",
+    de: "Was passiert in meiner Firma?",
+  },
+  "create-organization": {
+    lt: "Sukurk įmonės profilį",
+    en: "Create a company",
+    ru: "Создать компанию",
+    nl: "Bedrijf aanmaken",
+    de: "Firma anlegen",
+  },
+  lmc: {
+    lt: "Kiek turiu LMC?",
+    en: "How much LMC do I have?",
+    ru: "Сколько у меня LMC?",
+    nl: "Hoeveel LMC heb ik?",
+    de: "Wie viel LMC habe ich?",
+  },
+  "offer-value": {
+    lt: "Turiu 30 kg agurkų ir noriu parduoti",
+    en: "I want to sell 500 wooden pallets",
+    ru: "Продам огурцы",
+    nl: "Ik wil 30 kg komkommers verkopen",
+    de: "Ich möchte 500 Paletten verkaufen",
+  },
+  // Window 6 (2026-09-06): the person names their profession — measured on
+  // production, "esu programuotojas" answered nothing at all.
+  "profession-statement": {
+    lt: "Esu buhalteris",
+    en: "I am an accountant",
+    ru: "Я инженер",
+    nl: "Ik ben boekhouder",
+    de: "Ich bin Buchhalter",
+  },
+  // Window 6 follow-up: the person states from WHEN they can work — measured
+  // on production, "galiu dirbti nuo spalio 1 d." was a search with no criteria.
+  availability: {
+    lt: "Galiu dirbti nuo spalio 1 d.",
+    en: "I am available from October",
+    ru: "Могу работать с 1 октября",
+    nl: "Ik kan vanaf oktober werken",
+    de: "Ich kann ab Oktober arbeiten",
+  },
+  // ── AGENCY (real recruiter pilot, 2026-09-04) — the first row is the exact
+  //    sentence the first real recruiter typed and the product did not
+  //    understand. ────────────────────────────────────────────────────────────
+  "invite-client": {
+    lt: "Noriu pakviesti klientą",
+    en: "Invite a client",
+    ru: "Пригласить клиента",
+    nl: "Klant uitnodigen",
+    de: "Kunden einladen",
+  },
+  "invite-candidate": {
+    lt: "Pakviesk darbuotoją į komandą",
+    en: "Invite a worker to my roster",
+    ru: "Пригласить работника",
+    nl: "Medewerker uitnodigen",
+    de: "Mitarbeiter einladen",
+  },
+  "client-demand": {
+    lt: "Parodyk kliento poreikį",
+    en: "Show me the client requests",
+    ru: "Запрос клиента",
+    nl: "Aanvraag van de klant",
+    de: "Kundenanfrage anzeigen",
+  },
+  "propose-candidate": {
+    lt: "Pasiūlyk kandidatą",
+    en: "Propose a candidate",
+    ru: "Предложить кандидата",
+    nl: "Kandidaat voorstellen",
+    de: "Kandidaten vorschlagen",
+  },
+  "proposal-status": {
+    lt: "Pasiūlymų būsena",
+    en: "Proposal status",
+    ru: "Статус предложений",
+    nl: "Status van mijn voorstellen",
+    de: "Stand der Vorschläge",
+  },
+  // ── STUDENT / INSTITUTION (route-class) ──────────────────────────────────
+  "learning-compass": {
+    lt: "Parodyk mano mokymosi kompasą",
+    en: "Show my learning compass",
+    ru: "Покажи мой учебный компас",
+    nl: "Toon mijn leerkompas",
+    de: "Zeig meinen Lernkompass",
+  },
+  "invite-student": {
+    lt: "Pakviesk studentą",
+    en: "Invite a learner",
+    ru: "Пригласить студента",
+    nl: "Leerling uitnodigen",
+    de: "Schüler einladen",
+  },
+  programmes: {
+    lt: "Sukurk programą",
+    en: "Create a cohort",
+    ru: "Создать программу",
+    nl: "Nieuwe opleiding aanmaken",
+    de: "Programm anlegen",
+  },
+  "create-project": {
+    lt: "Sukurk projektą Roterdame",
+    en: "Create a new project in Rotterdam",
+    ru: "Создай проект в Роттердаме",
+    nl: "Nieuw project aanmaken",
+    de: "Neues Projekt anlegen",
+  },
+  // SUPPLY (owner window 7 §4) — the speaker HAS people and offers them.
+  // Each sentence carries both halves the rule requires: a count or a word
+  // for people, and the market-facing clause that makes it an offer.
+  "offer-capacity": {
+    lt: "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose.",
+    en: "We have 30 welders and we are looking for work for them.",
+    ru: "Мы имеем 20 сварщиков и ищем для них работу.",
+    nl: "Wij hebben 20 lassers beschikbaar.",
+    de: "Wir haben 20 Schweisser verfuegbar.",
+  },
+  "agency-offers": {
+    lt: "Kokius kandidatus pasiūlė agentūra?",
+    en: "Which candidates did the agency offer?",
+    ru: "Каких кандидатов предложило агентство?",
+    nl: "Welke kandidaten heeft het bureau aangeboden?",
+    de: "Welche Kandidaten hat die Agentur vorgeschlagen?",
+  },
+  "add-document": {
+    lt: "Turiu naują A1 pažymą iki 2027-03-31",
+    en: "I have a new VCA certificate",
+    ru: "Получил новое разрешение на работу",
+    nl: "Ik heb een nieuwe vergunning",
+    de: "Ich habe einen neuen Ausweis",
+  },
+  "cv-export": {
+    lt: "Atsisiųsk mano CV",
+    en: "Download my CV",
+    ru: "Скачай моё резюме",
+    nl: "Download mijn cv",
+    de: "Meinen Lebenslauf herunterladen",
+  },
+  "cv-view": {
+    lt: "Noriu pamatyti savo CV",
+    en: "I want to see my CV",
+    ru: "Хочу посмотреть своё резюме",
+    nl: "Ik wil mijn cv bekijken",
+    de: "Ich möchte meinen Lebenslauf ansehen",
+  },
+  "cv-choose": {
+    lt: "Mano CV",
+    en: "My CV",
+    ru: "Моё резюме",
+    nl: "Mijn cv",
+    de: "Mein Lebenslauf",
+  },
+  "add-task": {
+    lt: "Pridėk užduotį projektui: sumontuoti pastolius",
+    en: "Add a task to the project: erect the scaffold",
+    ru: "Добавь задачу в проект: собрать леса",
+    nl: "Nieuwe taak voor het project: steiger opbouwen",
+    de: "Neue Aufgabe für das Projekt: Gerüst aufbauen",
+  },
+  "who-available": {
+    lt: "Kas laisvas šią savaitę?",
+    en: "Who is available this week?",
+    ru: "Кто свободен на этой неделе?",
+    nl: "Wie is deze week beschikbaar?",
+    de: "Wer ist diese Woche frei?",
+  },
+  "stage-status": {
+    lt: "Etapas pamatai baigtas",
+    en: "Stage foundations is done",
+    ru: "Этап фундамент завершён",
+    nl: "Fase fundering afgerond",
+    de: "Phase Rohbau fertig",
+  },
+  "move-worker": {
+    lt: "Perkelk Joną į projektą Vilnius",
+    en: "Move John to project Riga",
+    ru: "Переведи Ивана на проект Рига",
+    nl: "Verplaats Jan naar project Utrecht",
+    de: "Versetze Jan in das Projekt Berlin",
+  },
+  "task-status": {
+    lt: "Užduotis sumontuoti pastolius atlikta",
+    en: "Task install scaffolding is done",
+    ru: "Задача смонтировать леса выполнена",
+    nl: "Taak steiger opbouwen is klaar",
+    de: "Aufgabe Gerüst aufbauen erledigt",
+  },
+  "project-risk": {
+    lt: "Kuris projektas rizikoje?",
+    en: "Which project is at risk?",
+    ru: "Какой проект под угрозой?",
+    nl: "Welk project loopt risico?",
+    de: "Welches Projekt ist gefährdet?",
+  },
+  "project-readiness": {
+    lt: "Kas trūksta projektui Vilnius?",
+    en: "What is missing for the project?",
+    ru: "Чего не хватает проекту?",
+    nl: "Is het team klaar?",
+    de: "Was fehlt dem Projekt?",
+  },
+  "confirm-work": {
+    lt: "Patvirtink Jono darbą",
+    en: "Confirm John's work",
+    ru: "Подтверди работу Ивана",
+    nl: "Bevestig het werk van Jan",
+    de: "Bestätige Jans Arbeit",
+  },
+  "who-verifies-work": {
+    lt: "Kam pateikti atliktą darbą?",
+    en: "Who can confirm my work?",
+    ru: "Кто может подтвердить мою работу?",
+    nl: "Wie kan mijn werk bevestigen?",
+    de: "Wer kann meine Arbeit bestätigen?",
+  },
+};
+
+/**
+ * §9 CHAT-FIRST COVERAGE — the ambiguity proofs.
+ *
+ * Six route-class intents were added over vocabulary that six EXISTING rules
+ * already read (the timesheet noun, the hour noun, the leave stems, the card
+ * noun, the German Nachrichten substring). Adding coverage must never cost
+ * coverage, so every sentence the older rule owns is asserted here to still
+ * reach it. These are the tests that would fail first if a future widening
+ * quietly stole a working intent.
+ */
+describe("§9 coverage never steals a sentence an existing intent already owned", () => {
+  it("the timesheet AREA still wins without an import verb", () => {
+    expect(classifyIntent("Parodyk mano tabelį").intent).toBe("timesheets");
+    expect(classifyIntent("Open my timesheet").intent).toBe("timesheets");
+    expect(classifyIntent("Покажи мой табель").intent).toBe("timesheets");
+    expect(classifyIntent("Open mijn urenstaat").intent).toBe("timesheets");
+    expect(classifyIntent("Zeig meinen Stundenzettel").intent).toBe("timesheets");
+    // …and the SAME noun with an import verb is the import surface.
+    expect(classifyIntent("Įkelk tabelį").intent).toBe("hours-import");
+    expect(classifyIntent("Stundenzettel importieren").intent).toBe("hours-import");
+    expect(classifyIntent("Urenstaat importeren").intent).toBe("hours-import");
+  });
+
+  it("a QUESTION about hours is still a journal read, not the hours screen", () => {
+    expect(classifyIntent("Kiek valandų dirbau šiandien?").intent).toBe("journal-recent");
+    expect(classifyIntent("How many hours did I work?").intent).toBe("journal-recent");
+    // …and confirmed-hours phrasing is still the figures workflow.
+    expect(classifyIntent("Show my approved hours").intent).toBe("figures");
+    expect(classifyIntent("Zeig meine bestätigten Stunden").intent).toBe("figures");
+    // …and recording work is still the work log.
+    expect(classifyIntent("Šiandien dirbau nuo 8 iki 17").intent).toBe("log-work");
+    expect(classifyIntent("Uren invoeren").intent).toBe("log-work");
+  });
+
+  it("FILING a leave request still opens the requests area, not the balance", () => {
+    expect(classifyIntent("Noriu pateikti atostogų prašymą").intent).toBe("admin-requests");
+    expect(classifyIntent("Leave request").intent).toBe("admin-requests");
+    expect(classifyIntent("Хочу подать заявление на отпуск").intent).toBe("admin-requests");
+    expect(classifyIntent("Ik wil verlof aanvragen").intent).toBe("admin-requests");
+    expect(classifyIntent("Ich möchte Urlaub beantragen").intent).toBe("admin-requests");
+  });
+
+  it("a bare CARD is still the player card — only the market compound is the map", () => {
+    expect(classifyIntent("Zeig meine Karte").intent).toBe("player-card");
+    expect(classifyIntent("Toon mijn kaart").intent).toBe("player-card");
+    expect(classifyIntent("Покажи мою карточку").intent).toBe("player-card");
+    expect(classifyIntent("Show my card").intent).toBe("player-card");
+  });
+
+  it("de: Nachrichten is still the message thread, Benachrichtigungen is the activity centre", () => {
+    // The measured trap: "Benachrichtigungen" CONTAINS "Nachrichten".
+    expect(classifyIntent("Zeig meine Nachrichten").intent).toBe("messages-view");
+    expect(classifyIntent("Zeig meine Benachrichtigungen").intent).toBe("activity");
+    expect(classifyIntent("Toon mijn berichten").intent).toBe("messages-view");
+    expect(classifyIntent("Toon mijn meldingen").intent).toBe("activity");
+  });
+
+  it("a 'what is new' question that NAMES its subject still reaches that subject", () => {
+    expect(classifyIntent("Kas naujo mano įmonėje?").intent).toBe("company-overview");
+    expect(classifyIntent("Kas vyksta mano objekte?").intent).toBe("open-project");
+    // Only the unqualified form is the activity centre.
+    expect(classifyIntent("Kas naujo?").intent).toBe("activity");
+  });
+});
+
+/**
+ * Prod walk D1 (2026-09-05, `169df06f`): two ordinary company sentences were
+ * over-matched by bare weight-1 / weight-4 stems before the Gemini proposer
+ * could run (the chat gate is score-blind — any non-unknown intent
+ * dispatches). The fix widens the SPECIFIC rules so they outscore the bare
+ * stems; the bare stems themselves are untouched, and the four boundary
+ * sentences that motivated them keep their intents.
+ */
+describe("prod walk D1 — a company question outscores the bare site / worker stems", () => {
+  it("\"kuriems mano objektams gresia problemos\" is project risk, not a work-log entry", () => {
+    const m = classifyIntent("Norėčiau sužinoti, kuriems mano objektams gresia problemos");
+    expect(m.intent).toBe("project-risk");
+    // Was: log-work 1 (bare "objekt" site stem), project-risk 0.
+    expect(m.score).toBe(11);
+  });
+
+  it("\"kurie darbuotojai nebus užimti per artimiausias dienas\" is availability, not demand intake", () => {
+    const m = classifyIntent("Sužinok, kurie darbuotojai nebus užimti per artimiausias dienas");
+    expect(m.intent).toBe("who-available");
+    // Was: need-workers 4 (bare "darbuotoj" stem), who-available 0.
+    expect(m.score).toBe(9);
+  });
+
+  it("the boundary sentences keep their intents", () => {
+    // The bare site stem still tips a recorded day to the work log…
+    expect(classifyIntent("Šiandien objekte Roterdame dirbau nuo 8 iki 17, 45 min pietūs, montavau langus.").intent).toBe("log-work");
+    // …a "what is happening" question about the site is still the project…
+    expect(classifyIntent("Kas vyksta mano objekte?").intent).toBe("open-project");
+    // …and the bare worker stem still reads demand intake vs scouting.
+    expect(classifyIntent("ieškau darbuotojų").intent).toBe("need-workers");
+    expect(classifyIntent("surask darbuotojų").intent).toBe("find-workers");
+  });
+});
+
+describe("G3 — every routed intent is reachable in all five active locales", () => {
+  for (const [intent, sentences] of Object.entries(PARITY_MATRIX) as Array<
+    [RoutedIntent, Record<ActiveLocale, string>]
+  >) {
+    for (const locale of ACTIVE_LOCALES) {
+      it(`${intent} [${locale}]: "${sentences[locale]}"`, () => {
+        expect(classifyIntent(sentences[locale]).intent).toBe(intent);
+      });
+    }
+  }
+});
+
+/**
+ * Prod walk OPS (2026-09-06, `273bf208`): two of the owner's own §31
+ * operations sentences reached the WRONG SIDE of the product. Neither hit the
+ * generic fallback, so nothing in the suite could see it — both were answered
+ * confidently, and wrongly, by a bare noun stem.
+ *
+ * Both are the same inversion the supply defect was: a question about OTHER
+ * people, or about the company's work, answered as a personal action by the
+ * asker.
+ */
+describe("prod walk OPS — a company's coordination question is not a personal action", () => {
+  it('"Kas rytoj dirba objekte X?" asks who is on site, not for the asker\'s own hours', () => {
+    const m = classifyIntent("Kas rytoj dirba objekte X?");
+    // Was: log-work 1 (bare "objekt" site stem) → the company was asked
+    // "Kurią dieną ir kiek laiko dirbai?" — its own work record.
+    expect(m.intent).toBe("who-available");
+    expect(m.score).toBe(9);
+  });
+
+  it('"Kokie darbai vėluoja?" is a delay question, not a job hunt', () => {
+    const m = classifyIntent("Kokie darbai vėluoja?");
+    // Was: find-work 2 (plural "darbai") → "Darbo paieška yra tavo asmeninis
+    // veiksmas — persijunk į asmeninę erdvę."
+    expect(m.intent).toBe("project-risk");
+    expect(m.score).toBe(11);
+  });
+
+  it("the same two questions route the same way in the other launch languages", () => {
+    expect(classifyIntent("Who works on site tomorrow?").intent).toBe("who-available");
+    expect(classifyIntent("Wer arbeitet morgen auf der Baustelle?").intent).toBe("who-available");
+    expect(classifyIntent("Wie werkt er morgen op de bouwplaats?").intent).toBe("who-available");
+    expect(classifyIntent("Кто работает завтра на объекте?").intent).toBe("who-available");
+    expect(classifyIntent("Which tasks are late?").intent).toBe("project-risk");
+    expect(classifyIntent("Welche Arbeiten sind verzögert?").intent).toBe("project-risk");
+    expect(classifyIntent("Какие работы отстают?").intent).toBe("project-risk");
+  });
+
+  it("neither new rule steals the sentence it must not take", () => {
+    // A PAST-TENSE day is still a work-log entry — the new verb group is
+    // present/future only, so "dirbau"/"dirbome"/"worked" never reach it.
+    expect(classifyIntent("Šiandien 8 valandas montavome pastolius objekte X.").intent).toBe("log-work");
+    expect(classifyIntent("Šiandien dirbau nuo 8 iki 17.").intent).toBe("log-work");
+    expect(classifyIntent("Vakar dirbome objekte Roterdame.").intent).toBe("log-work");
+    // A real job search is still a job search — the delay rule carries no
+    // seeking verb, and the who-rule needs a which-word before the verb.
+    expect(classifyIntent("Ieškau darbo").intent).toBe("find-work");
+    expect(classifyIntent("Rask man darbą Nyderlanduose.").intent).toBe("find-work");
+    expect(classifyIntent("Surask man tinkamus darbus").intent).toBe("find-work");
+    // And the availability question the D1 walk fixed is untouched.
+    expect(classifyIntent("Sužinok, kurie darbuotojai nebus užimti per artimiausias dienas").intent).toBe("who-available");
   });
 });

@@ -14,10 +14,13 @@ import type { AdminVerificationStatus } from "@/lib/admin/company-verification";
  * Three explicit, boring actions — Approve (verified), Keep unverified, Return
  * to pending — plus an optional note. No fake trust badge, no auto-verify.
  *
- * The chosen action is carried to the server through a hidden `status` field
- * set on click: in React 19 a submit button's name/value is NOT delivered to a
- * function `formAction`, so a hidden input is the reliable channel (same fix as
- * the company setup form).
+ * The chosen action reaches the server through TWO channels (P0 fix):
+ * a hidden `status` input set on click — in React 19 a submit button's
+ * name/value is NOT delivered to a function `formAction` (same fix as the
+ * company setup form) — AND each button's own `name="status" value=…`, which
+ * is what a pre-hydration NATIVE submit posts (onClick never ran, so the
+ * hidden input would arrive empty and the action answered `invalid`). The
+ * action reads all entries and takes the last non-empty one.
  */
 export interface CompanyVerificationReviewLabels {
   readonly approve: string;
@@ -95,6 +98,8 @@ export function CompanyVerificationReview({
       <div className="flex flex-wrap gap-2">
         <button
           type="submit"
+          name="status"
+          value="verified"
           onClick={() => setStatus("verified")}
           disabled={isPending}
           className="rounded-md bg-state-success/90 px-3 py-1.5 text-xs font-semibold text-ink-900 hover:bg-state-success disabled:opacity-50"
@@ -104,6 +109,8 @@ export function CompanyVerificationReview({
         </button>
         <button
           type="submit"
+          name="status"
+          value="unverified"
           onClick={() => setStatus("unverified")}
           disabled={isPending}
           className="rounded-md border border-state-warning/50 px-3 py-1.5 text-xs font-semibold text-state-warning hover:border-state-warning disabled:opacity-50"
@@ -113,6 +120,8 @@ export function CompanyVerificationReview({
         </button>
         <button
           type="submit"
+          name="status"
+          value="pending_verification"
           onClick={() => setStatus("pending_verification")}
           disabled={isPending}
           className="rounded-md border border-border-default px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-blue disabled:opacity-50"

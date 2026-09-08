@@ -35,7 +35,11 @@ describe("the gate is closed by default", () => {
     // Adding a row here permits real user content to leave the platform. It is
     // an owner act. If this ever becomes non-empty without a deliberate,
     // reviewed decision, this test is where it should be noticed.
-    expect(AI_EGRESS_GRANTS).toEqual([]);
+    // 2026-09-05: exactly ONE row — the owner's dated, sourced, TASK-SCOPED
+    // Gemini grant for the conversation intent proposer. Every other task is
+    // refused for Gemini exactly as before (llm-proposal.test.ts pins it).
+    expect(AI_EGRESS_GRANTS).toHaveLength(1);
+    expect(AI_EGRESS_GRANTS[0]).toMatchObject({ provider: "gemini", tasks: ["propose_conversation_intent"], grantedOn: "2026-09-05" });
   });
 
   it("an external provider with no grant may receive PUBLIC only", () => {

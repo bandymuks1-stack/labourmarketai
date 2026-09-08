@@ -48,10 +48,18 @@ describe("Guard: personal journal is profile-scoped, not company-scoped", () => 
     expect(journal).toMatch(/\.eq\(\s*["']profile_id["']\s*,\s*user\.id\s*\)/);
   });
   it("journal entries are keyed to that worker (worker_id), not a company", () => {
-    expect(journal).toMatch(/from\(\s*["']journal_entries["']\s*\)/);
-    expect(journal).toMatch(/\.eq\(\s*["']worker_id["']\s*,\s*worker\.id\s*\)/);
+    // G4: the entries read lives in THE journal-list core; the page hands it
+    // the caller's OWN worker row.
+    expect(journal).toMatch(/listJournalEntries\(/);
+    expect(journal).toMatch(/workerId: worker\.id/);
+    const core = read("lib/journal/journal-list-core.ts");
+    expect(core).toMatch(/from\(\s*["']journal_entries["']\s*\)/);
+    expect(core).toMatch(/\.eq\(\s*["']worker_id["']\s*,\s*workerId\s*\)/);
   });
   it("journal never scopes its entries by an active company / org id", () => {
     expect(journal).not.toMatch(/\.eq\(\s*["']company_id["']/);
+    expect(read("lib/journal/journal-list-core.ts")).not.toMatch(
+      /\.eq\(\s*["']company_id["']/,
+    );
   });
 });

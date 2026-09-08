@@ -30,8 +30,9 @@ const PAID_CLOUD = { id: "anthropic", costClass: "paid", locality: "cloud" } as 
 const FREE_CLOUD = { id: "gemini", costClass: "free_tier", locality: "cloud" } as const;
 
 describe("every task is classified, and the table matches the shipped profiles", () => {
-  it("covers all 11 task types", () => {
-    expect(AI_TASK_TYPES.length).toBe(11);
+  it("covers all 12 task types", () => {
+    // 11 → 12 on 2026-09-05: `propose_conversation_intent`, SENSITIVE_FREE_TEXT.
+    expect(AI_TASK_TYPES.length).toBe(12);
     for (const t of AI_TASK_TYPES) {
       expect(TASK_SENSITIVITY[t], `missing sensitivity for ${t}`).toBeDefined();
       expect(AI_DATA_SENSITIVITY_CLASSES).toContain(TASK_SENSITIVITY[t]);

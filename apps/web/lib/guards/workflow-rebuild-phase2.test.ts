@@ -71,7 +71,10 @@ describe("W4 — employer demand intake shares the ONE form pipeline", () => {
 
   it("every company form dispatches through the ONE InlineActionForm", () => {
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
-    expect(chat).toMatch(/getWorkerForm\(actionId\) \?\? getCompanyForm\(actionId\)/);
+    // 2026-09-04: `openForm` also accepts a spec BUILT for the turn (the
+    // agency candidate offer lists the roster just read) — the id path still
+    // resolves through the two registries, in this order.
+    expect(chat).toMatch(/getWorkerForm\(actionOrSpec\) \?\? getCompanyForm\(actionOrSpec\)/);
     // No parallel employer form component exists in the conversation tree.
     expect(COMPANY_FORMS.length).toBeGreaterThanOrEqual(1);
   });
@@ -86,10 +89,17 @@ describe("W4 — employer demand intake shares the ONE form pipeline", () => {
   it("the chat greeting is role-aware — employer starters for the company identity", () => {
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
     expect(chat).toMatch(/baseIdentityForRole/);
-    expect(chat).toMatch(/f:company\.create-demand/);
-    // Contextual navigation chips route to REAL canonical surfaces only.
-    expect(chat).toMatch(/link:\/dashboard\/company\/scouting/);
+    // 2026-09-04: the greeting row is DERIVED (lib/conversation/starters.ts)
+    // from the workspace's capabilities — the employer's demand intake is the
+    // employer track's first step there, still the ONE inline form.
+    expect(read("lib/conversation/starters.ts")).toMatch(/f:company\.create-demand/);
+    expect(chat).toMatch(/starters \?\? personStarters\(/);
+    // Contextual navigation chips route to REAL canonical surfaces only —
+    // candidates are an in-chat ANSWER (W8); the full screen stays one action
+    // away inside the result panel.
+    expect(read("lib/conversation/starters.ts")).toMatch(/id: "candidates"/);
     expect(chat).not.toMatch(/link:\/dashboard\/(buyer|agency|marketplace)\b/);
+    expect(read("lib/conversation/starters.ts")).not.toMatch(/link:\/dashboard\/(buyer|agency|marketplace)\b/);
   });
 });
 

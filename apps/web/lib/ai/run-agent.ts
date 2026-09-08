@@ -30,6 +30,7 @@ import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } f
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
 import {
   computeActualCostUsd,
+  estimateCostUsd,
   estimateTokensFromText,
 } from "./runtime/model-pricing";
 import {
@@ -244,6 +245,13 @@ export async function runAiAgentCore<T = unknown>(
   };
   const decision = resolveTaskRoute(taskType, routeCtx);
   const policy = TASK_POLICIES[taskType];
+  // The output size the router priced the ceiling with (task-routing.ts):
+  // what the run is PERMITTED to emit, not merely what we expect. Kept here so
+  // the post-run re-pricing below quotes the same token shape the ceiling saw.
+  const estimateOutputBound = Math.max(
+    policy.expectedOutputTokens,
+    routeCtx.maxOutputTokens ?? 0,
+  );
   const dataCategoriesSent = dataCategoriesOf(parsedInput.data);
   const auditBase: Omit<
     AiRoutingRunOutcome,
@@ -401,6 +409,32 @@ export async function runAiAgentCore<T = unknown>(
   ): AiRoutingAuditRecord =>
     buildRoutingAuditRecord(effectiveDecision, {
       ...auditBase,
+      // FALLBACK RE-PRICING. `auditBase.estimatedCostUsd` was priced against
+      // the PRIMARY provider's candidate model on the ORIGINAL decision's
+      // tier, but the run may be SERVED elsewhere — a different chain
+      // candidate (run-core walks the free-first chain) or the latency
+      // fallback tier. `actualCostUsd` below is already priced from
+      // `result.model`; persisting the primary's estimate beside it made the
+      // two ledgers disagree about the same run. So on a served run the
+      // estimate is re-priced from the model that actually answered, with the
+      // same token shape the ceiling was judged on. A caller-supplied
+      // estimate stays authoritative (it is the number the router enforced);
+      // mock results keep the router figure (never persisted, tests stay
+      // deterministic); `local` mirrors the router's free-by-construction 0;
+      // an unpriced serving model yields an honest null, never another
+      // vendor's number.
+      estimatedCostUsd:
+        result.status === "ok" &&
+        result.provider !== "mock" &&
+        routeCtx.estimatedCostUsd === undefined
+          ? result.provider === "local"
+            ? 0
+            : estimateCostUsd(
+                result.model,
+                expectedInputTokens,
+                estimateOutputBound,
+              )
+          : auditBase.estimatedCostUsd,
       // Which adapter ACTUALLY handled it. On the chain path a failure can come
       // from a candidate several places down the list, and `result.provider`
       // carries that — falling back to `cfg.provider` would have recorded the

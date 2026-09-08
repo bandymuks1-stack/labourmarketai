@@ -4,6 +4,7 @@ import { classifyIntent } from "@/lib/conversation/intent-router";
 import {
   PERSONAL_WORKSPACE_ID,
   workspaceDisplayLabels,
+  isUnnamedOrganizationLabel,
   type WorkspaceInfo,
 } from "@/lib/company/organization-switch";
 
@@ -40,11 +41,14 @@ const MUST_ROUTE: readonly (readonly [string, string])[] = [
   ["какие возможности у меня есть", "opportunities"],
   ["welche möglichkeiten habe ich", "opportunities"],
 
-  // ── Projects, asked for rather than opened (audit defect D) ──────────────
-  ["parodyk mano projektus", "open-project"],
-  ["mano projektai", "open-project"],
-  ["show my projects", "open-project"],
-  ["покажи мои проекты", "open-project"],
+  // ── Projects, asked for rather than opened (audit defect D; G8 moved the
+  //    LIST reading to the `projects` chip's own handler) ───────────────────
+  ["parodyk mano projektus", "projects"],
+  ["mano projektai", "projects"],
+  ["show my projects", "projects"],
+  ["покажи мои проекты", "projects"],
+  ["meine Projekte", "projects"],
+  ["mijn projecten", "projects"],
 
   // ── Who raised a hand (audit defect C) ───────────────────────────────────
   ["kas susidomėjo mano poreikiu?", "interest-inbox"],
@@ -105,7 +109,9 @@ describe("widening the worker vocabulary steals no employer sentence", () => {
     ["reikia darbuotojų", "need-workers"],
     ["ieškau darbuotojų", "need-workers"],
     ["surask darbuotojų", "find-workers"],
-    ["parodyk kandidatus", "find-workers"],
+    // G8: the candidate noun means the REVIEW surface now (the same handler
+    // the `candidates` chip runs), no longer the scouting workflow.
+    ["parodyk kandidatus", "candidates"],
     ["ieškau darbo", "find-work"],
   ];
   for (const [sentence, intent] of UNCHANGED) {
@@ -119,8 +125,12 @@ describe("widening the worker vocabulary steals no employer sentence", () => {
 // The switcher must answer "where am I?"
 // ═══════════════════════════════════════════════════════════════════════════
 
-function org(id: string, name: string): WorkspaceInfo {
-  return { id, name, kind: "organization", accentIndex: 0 };
+function org(
+  id: string,
+  name: string,
+  organizationType: "company" | "agency" | "team" | "other" = "company",
+): WorkspaceInfo {
+  return { id, name, kind: "organization", organizationType, accentIndex: 0 };
 }
 const PERSONAL: WorkspaceInfo = {
   id: PERSONAL_WORKSPACE_ID,
@@ -128,7 +138,13 @@ const PERSONAL: WorkspaceInfo = {
   kind: "personal",
   accentIndex: 0,
 };
-const LABELS = { personal: "Asmeninė erdvė", unnamedOrganization: "Įmonės erdvė" };
+const UNNAMED = {
+  company: "Imone be pavadinimo",
+  agency: "Agentura be pavadinimo",
+  team: "Komanda be pavadinimo",
+  other: "Organizacija be pavadinimo",
+} as const;
+const LABELS = { personal: "Asmenine erdve", unnamedOrganization: UNNAMED };
 
 describe("workspace labels are never ambiguous", () => {
   /**
@@ -144,7 +160,7 @@ describe("workspace labels are never ambiguous", () => {
 
   it("a single unnamed organization keeps the plain fallback (no stray number)", () => {
     const labels = workspaceDisplayLabels([PERSONAL, org("a", "")], LABELS);
-    expect(labels.get("a")).toBe("Įmonės erdvė");
+    expect(labels.get("a")).toBe(UNNAMED.company);
   });
 
   it("real names are never renumbered or rewritten", () => {
@@ -153,7 +169,74 @@ describe("workspace labels are never ambiguous", () => {
       LABELS,
     );
     expect(labels.get("a")).toBe("UAB NONSTOP GROUP");
-    expect(labels.get("b")).toBe("Įmonės erdvė");
+    expect(labels.get("b")).toBe(UNNAMED.company);
+  });
+
+  /**
+   * ── UNKNOWN ≠ INVENTED DISPLAY IDENTITY (owner human walk, 2026-09-07) ────
+   *
+   * Production showed the owner:
+   *
+   *     Asmeninė erdvė · Įmonės erdvė 1 · Labour market ai Sp. z o.o · Įmonės erdvė 2
+   *
+   * and they could not tell whether the numbered rows were real companies,
+   * incomplete records, placeholders or orphaned test data. They are real
+   * organizations whose name was never provided (5 of 17 in production, every
+   * one from the `0013_work_journal_m1` legacy backfill, whose source rows were
+   * themselves NULL — no name was lost).
+   *
+   * The defect was the LABEL: a counter appended to "company space" reads as a
+   * company called that. These assertions pin the replacement rule.
+   */
+  it("an unnamed organization is labelled by its TYPE, and says it has no name", () => {
+    const labels = workspaceDisplayLabels(
+      [PERSONAL, org("a", "", "company"), org("b", "", "agency")],
+      LABELS,
+    );
+    // The owner's exact production case: type alone tells them apart, with no
+    // counter and nothing invented.
+    expect(labels.get("a")).toBe(UNNAMED.company);
+    expect(labels.get("b")).toBe(UNNAMED.agency);
+    expect(labels.get("a")).not.toMatch(/\d/);
+    expect(labels.get("b")).not.toMatch(/\d/);
+  });
+
+  it("NO label ever ends in a bare positional counter", () => {
+    // The exact shape the owner read as a name. Whatever the collision, a
+    // trailing " 1" / " 2" may never be produced again.
+    for (const set of [
+      [PERSONAL, org("a", "", "company"), org("b", "", "company")],
+      [PERSONAL, org("a", "", "agency"), org("b", "", "agency"), org("c", "", "agency")],
+      [org("a", "Nonstop"), org("b", "Nonstop")],
+    ]) {
+      for (const label of workspaceDisplayLabels(set, LABELS).values()) {
+        expect(label, `"${label}" ends in a positional counter`).not.toMatch(/\s\d+$/);
+      }
+    }
+  });
+
+  it("two unnamed organizations of the SAME type fall back to an id reference", () => {
+    const labels = workspaceDisplayLabels(
+      [org("aaaaaaaa-1111", "", "company"), org("bbbbbbbb-2222", "", "company")],
+      LABELS,
+    );
+    expect(labels.get("aaaaaaaa-1111")).not.toBe(labels.get("bbbbbbbb-2222"));
+    // A hex fragment behind a separator is self-evidently a reference, not a
+    // name — which a counter is not.
+    expect(labels.get("aaaaaaaa-1111")).toBe(`${UNNAMED.company} · aaaaaaaa`);
+    expect(labels.get("bbbbbbbb-2222")).toBe(`${UNNAMED.company} · bbbbbbbb`);
+  });
+
+  it("every unnamed label is recognisable AS unnamed by the surfaces", () => {
+    // Surfaces need to render these differently (muted, with a "name this
+    // organization" action). If this drifts, they silently stop being able to.
+    const labels = workspaceDisplayLabels(
+      [org("a", "", "company"), org("b", "", "company"), org("c", "Real UAB")],
+      LABELS,
+    );
+    expect(isUnnamedOrganizationLabel(labels.get("a")!, UNNAMED)).toBe(true);
+    expect(isUnnamedOrganizationLabel(labels.get("b")!, UNNAMED)).toBe(true);
+    expect(isUnnamedOrganizationLabel(labels.get("c")!, UNNAMED)).toBe(false);
   });
 
   it("two organizations that genuinely share a name are still distinguishable", () => {

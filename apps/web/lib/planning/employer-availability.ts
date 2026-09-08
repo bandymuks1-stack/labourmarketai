@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { createClient } from "@/lib/supabase/server";
 import {
   effectiveEndDay,
@@ -107,12 +109,23 @@ const UNDEFINED_COLUMN = "42703";
  * this process computed would be a weaker guarantee than the database's own
  * `caller_manages_worker`.
  */
-export async function getEmployerWorkerAvailability(): Promise<EmployerAvailabilityResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { status: "not-authed" };
+export async function getEmployerWorkerAvailability(
+  /** OPTIONAL explicit caller (G4 bridge). Absent = the cookie session, which
+   *  is every existing call site and is unchanged. Present = a bearer or agent
+   *  transport handing in ITS OWN RLS-scoped client. Never service-role: the
+   *  privacy minimisation above is enforced by the SELECT list, and RLS still
+   *  decides which workers the caller may see at all. */
+  caller?: { readonly supabase: SupabaseClient; readonly userId: string },
+): Promise<EmployerAvailabilityResult> {
+  const supabase = caller?.supabase ?? (await createClient());
+  let userId = caller?.userId ?? null;
+  if (!userId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    userId = user?.id ?? null;
+  }
+  if (!userId) return { status: "not-authed" };
 
   const workersRes = await (supabase as AnyClient)
     .from("company_workers")
@@ -133,12 +146,13 @@ export async function getEmployerWorkerAvailability(): Promise<EmployerAvailabil
   // MINIMISED SELECT — `note` and `absence_type` are never requested. See the
   // module header: this is the enforcement point, not the component.
   //
-  // DEFENCE IN DEPTH, when the database offers it. `worker_absence_scheduling`
-  // (migration 20260808120000, OWNER-GATED — not applied yet) is a relation
-  // that has no reason column at all, so the guarantee stops depending on this
-  // module's discipline. Until it exists the base table is read exactly as
-  // before, with the same minimised column list; the fallback is what makes
-  // this change inert until the migration is approved and applied.
+  // DEFENCE IN DEPTH, and the database now offers it. `worker_absence_scheduling`
+  // (migration 20260808120000) is a relation with no reason column at all, so
+  // the guarantee no longer depends on this module's discipline alone. It is
+  // APPLIED — verified on production 2026-09-07; this comment said "not applied
+  // yet" until then, which under-reported a privacy guarantee that was already
+  // in force. The base-table fallback below is kept for environments without
+  // it, and reads the same minimised column list either way.
   const SCHEDULING_COLUMNS = "id, worker_id, start_date, end_date, status";
   const readAbsences = (relation: string) =>
     (supabase as AnyClient)

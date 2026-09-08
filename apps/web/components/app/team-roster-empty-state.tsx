@@ -22,13 +22,12 @@ export async function TeamRosterEmptyState({
       className="card-border flex flex-col gap-2 p-4"
       data-testid={`team-roster-empty-${variant}`}
     >
+      {/* No "Empty state" badge: that is an engineering label, not something a
+          person should read on their first visit. */}
       <header className="flex items-baseline justify-between gap-2">
         <h2 className="font-display text-base font-semibold text-text-primary">
           {t("title")}
         </h2>
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("scope")}
-        </span>
       </header>
       <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
       <p className="text-meta leading-relaxed text-text-muted">

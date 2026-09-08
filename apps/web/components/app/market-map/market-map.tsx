@@ -2,12 +2,14 @@
 
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type * as LeafletTypes from "leaflet";
 
 import {
   EUROPE_CENTER,
   EUROPE_ZOOM,
   MODE_HEIGHT,
+  anchorFit,
   anchorsForLayer,
   type MarketAnchor,
   type MarketMapLayer,
@@ -50,6 +52,8 @@ export function MarketMap({
   onSelectAnchor,
   className = "",
   revealCount,
+  onViewportChange,
+  autoFly = true,
 }: {
   view: MarketMapView;
   mode?: MarketMapMode;
@@ -81,12 +85,33 @@ export function MarketMap({
    * everything at once (the authenticated surfaces do).
    */
   revealCount?: number;
+  /**
+   * The viewport the person is actually looking at (P8 World). Fires once when
+   * the map is ready and after every pan/zoom (`moveend`), so a caller can run
+   * a viewport-BOUNDED read instead of drawing the whole market. Kept in a ref
+   * inside — passing a new function each render never re-binds the listener.
+   */
+  onViewportChange?: (viewport: MarketMapViewport) => void;
+  /**
+   * Whether the map flies to the selected region (and back to Europe when the
+   * selection clears) whenever `view.regions` changes. The default keeps the
+   * result/landing behaviour; a viewport-following surface passes `false`,
+   * because flying home after every bounded refresh would fight the person's
+   * own panning.
+   */
+  autoFly?: boolean;
 }) {
+  // Origin labels live in the small `map` namespace — the one root every
+  // surface that mounts this component (marketing landing, dashboard,
+  // workspace) already ships to the client (client-messages allowlists).
+  const tOrigin = useTranslations("map.origin");
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletTypes.Map | null>(null);
   const layerGroupRef = useRef<LeafletTypes.LayerGroup | null>(null);
   const LRef = useRef<typeof LeafletTypes | null>(null);
   const [ready, setReady] = useState(false);
+  const viewportRef = useRef(onViewportChange);
+  viewportRef.current = onViewportChange;
 
   // ── mount the map once (via the ONE Leaflet engine, W3 row 28) ────────────
   useEffect(() => {
@@ -115,6 +140,24 @@ export function MarketMap({
       LRef.current = L;
       layerGroupRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
+      // Report the REAL viewport (container-dependent) once, then on every
+      // settled move. Leaflet fires `moveend` after zoom as well.
+      const emitViewport = () => {
+        const cb = viewportRef.current;
+        if (!cb) return;
+        const b = map.getBounds();
+        cb({
+          bounds: {
+            south: b.getSouth(),
+            west: b.getWest(),
+            north: b.getNorth(),
+            east: b.getEast(),
+          },
+          zoom: map.getZoom(),
+        });
+      };
+      map.on("moveend", emitViewport);
+      emitViewport();
       setReady(true);
     })();
 
@@ -170,7 +213,13 @@ export function MarketMap({
         // Kept deliberately small: at country zoom the Randstad cities sit
         // within ~50km, so generous radii merge Rotterdam/Den Haag/Amsterdam
         // into one blob and the map stops showing WHERE the demand is.
-        const radius = 4 + Math.sqrt(Math.max(a.weight, 1)) * 1.7;
+        // An anchor with NO weight stands for a place, not a quantity (the
+        // public coverage map). It draws at a fixed radius and its label
+        // carries no number — see the note on `MarketAnchor.weight`.
+        const hasWeight = typeof a.weight === "number";
+        const radius = hasWeight
+          ? 4 + Math.sqrt(Math.max(a.weight as number, 1)) * 1.7
+          : 7;
         // An APPROXIMATE country aggregate must not look like a city pin.
         // Dashed and hollow, so precision is legible without reading the
         // tooltip — and it is never colour alone that carries the difference.
@@ -184,10 +233,13 @@ export function MarketMap({
           fillOpacity: dimmed ? 0.15 : approx ? 0.14 : 0.55,
           opacity: dimmed ? 0.35 : 0.95,
         });
-        circle.bindTooltip(`${a.label} · ${a.weight}${approx ? " ~" : ""}`, {
-          direction: "top",
-          offset: [0, -radius],
-        });
+        circle.bindTooltip(
+          hasWeight ? `${a.label} · ${a.weight}${approx ? " ~" : ""}` : a.label,
+          {
+            direction: "top",
+            offset: [0, -radius],
+          },
+        );
         circle.addTo(group);
 
         if (onSelectRegion || onSelectAnchor) {
@@ -208,7 +260,10 @@ export function MarketMap({
             el.setAttribute("role", "button");
             el.setAttribute("data-anchor-id", a.id);
             el.setAttribute("data-anchor-precision", a.precision ?? "city");
-            el.setAttribute("aria-label", `${a.label} · ${a.weight}`);
+            el.setAttribute(
+              "aria-label",
+              hasWeight ? `${a.label} · ${a.weight}` : a.label,
+            );
             el.addEventListener("keydown", (ev) => {
               const key = (ev as KeyboardEvent).key;
               if (key !== "Enter" && key !== " ") return;
@@ -222,12 +277,41 @@ export function MarketMap({
     }
   }, [ready, view, layer, selectedCode, onSelectRegion, onSelectAnchor, revealCount]);
 
-  // ── fly to the selected region ────────────────────────────────────────────
+  // ── frame the market: the anchors drawn, or Europe when there are none ────
+  //
+  // A FIXED FRAME MADE REAL DEMAND UNREACHABLE. This used to fly to a constant
+  // Europe centre/zoom whenever nothing was selected. That constant was chosen
+  // for a large map; the dashboard result map is ~319x288, and at that size
+  // Lithuania sits outside the viewport while the Netherlands sits inside it.
+  // Leaflet draws an out-of-bounds circleMarker as `d="M0 0"` — the anchor is
+  // in the DOM, announced, focusable and keyboard-activatable, and has NO
+  // geometry, so a pointer can never hit it. A production walk found exactly
+  // that: a real LT need whose marker no mouse user could open (evidence:
+  // `probe-anchor-geometry-8be8502c.log` — NL drew a 36x36 circle, LT drew
+  // nothing at all). Framing what we actually drew is the fix.
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map) return;
+    const L = LRef.current;
+    if (!ready || !map || !L || !autoFly) return;
+
     if (!selectedCode) {
-      map.flyTo([...EUROPE_CENTER] as [number, number], EUROPE_ZOOM, {
+      // The landing is a FROZEN composition (owner-gated design contract); its
+      // framing is deliberate and staged, so it keeps the constant view.
+      const fit = mode === "landing" ? null : anchorFit(view, layer, revealCount);
+      if (!fit || fit.points.length === 0) {
+        // Nothing drawn — there is no market to frame, so the honest default
+        // stands rather than a frame invented around no data.
+        map.flyTo([...EUROPE_CENTER] as [number, number], EUROPE_ZOOM, {
+          duration: 0.9,
+        });
+        return;
+      }
+      map.flyToBounds(L.latLngBounds(fit.points as [number, number][]), {
+        // Padding keeps an edge anchor off the container border, where half a
+        // circle is as unclickable as none of it.
+        padding: [32, 32],
+        // Never closer than the data's own precision allows — see `anchorFit`.
+        maxZoom: fit.maxZoom,
         duration: 0.9,
       });
       return;
@@ -236,7 +320,7 @@ export function MarketMap({
     const first = region?.anchors[0];
     if (!first) return;
     map.flyTo([first.lat, first.lng], 7, { duration: 1.1 });
-  }, [ready, selectedCode, view.regions]);
+  }, [ready, selectedCode, view, layer, revealCount, mode, autoFly]);
 
   return (
     <div
@@ -246,7 +330,36 @@ export function MarketMap({
       data-map-layer={layer}
       data-map-origin={view.origin}
     >
-      <div ref={hostRef} className="market-map-host size-full" />
+      {/* `isolate z-0` keeps Leaflet's internal z-indexes (panes 400–700,
+          controls 1000) PRIVATE to the map host — the same fix .wsmap applies
+          in globals.css — so the positioned siblings below (badge, loading
+          veil) paint above it in plain DOM order, with no arbitrary z-[n]. */}
+      <div ref={hostRef} className="market-map-host isolate z-0 size-full" />
+      {/* THE ORIGIN IS PART OF THE MAP, not a caller courtesy. `data-map-origin`
+          alone relied on every caller remembering to render a visible label —
+          the /dashboard/market-map page never did. The badge lives INSIDE the
+          component so no origin can ever render unlabelled: real rows say
+          "live", the landing's scripted scenario and local fixtures say
+          "preview" (doctrine §18 vocabulary — never "demo"). Pointer events
+          off so it steals no map click. */}
+      <span
+        data-testid="map-origin-badge"
+        className={`pointer-events-none absolute right-2 top-2 rounded-sm border px-1.5 py-0.5 font-mono text-meta uppercase tracking-label ${
+          view.origin === "live" || view.origin === "coverage"
+            ? "border-ink-500 bg-ink-900/80 text-text-secondary"
+            : "border-state-amber/40 bg-state-amber/15 text-state-amber"
+        }`}
+      >
+        {/* `coverage` is neither live activity nor a preview of made-up data:
+            the countries are real and the map claims nothing about what is
+            happening in them. Labelling it "preview" would say the places are
+            invented; labelling it "live" would say the market is drawn. */}
+        {view.origin === "live"
+          ? tOrigin("live")
+          : view.origin === "coverage"
+            ? tOrigin("coverage")
+            : tOrigin("preview")}
+      </span>
       {!ready ? (
         <div className="absolute inset-0 grid place-items-center bg-ink-900/60">
           <span className="text-meta text-text-muted">…</span>
@@ -254,6 +367,17 @@ export function MarketMap({
       ) : null}
     </div>
   );
+}
+
+/** What `onViewportChange` reports: the settled map bounds + zoom (WGS84). */
+export interface MarketMapViewport {
+  readonly bounds: {
+    readonly south: number;
+    readonly west: number;
+    readonly north: number;
+    readonly east: number;
+  };
+  readonly zoom: number;
 }
 
 /** Layer colours. Distinct hues so a layer switch is legible at a glance. */

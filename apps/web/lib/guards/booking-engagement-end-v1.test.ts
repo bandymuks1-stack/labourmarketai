@@ -1110,13 +1110,163 @@ describe("the migration set is exactly what this slice declared", () => {
       // RPC recreated). Its header says OWNER APPROVAL: PENDING — the marker
       // is not approval, and the file ships UNAPPLIED.
       "20260829130000_anon_write_bounds_v1.sql",
-      // 2026-08-30: the 67-row ESCO canonical linkage carries the marker as
-      // the doctrine ACKNOWLEDGEMENT that a data migration (UPDATE of
-      // skills/professions.esco_uri) is RED by classification. Write-if-null,
-      // corpus-asserted, paired rollback; the marker is not approval — the
-      // owner reviews docs/taxonomy/esco-apply-review-2026-08-30.md and the
-      // file ships UNAPPLIED.
+      // 2026-08-31: work-hour allocations v1 (M3, PR #1344) gained its marker
+      // under the owner's closure-session decision, recorded VERBATIM in the
+      // migration header and .github/scripts/owner-waivers.mjs:
+      // "M3_MIGRATION_APPROVAL: APPROVE / HOURS_PRODUCT_GATE_WAIVER: APPROVE.
+      // Approval scope is limited strictly to the fresh #1344 / package 0010
+      // implementation." The marker acknowledges the three intentional RED
+      // findings (grant-or-revoke incl. anon revoke, RLS policies on the new
+      // table, updated_at trigger) reviewed in
+      // docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md,
+      // and was added in the same commit as the scoped /dashboard/hours
+      // waiver that same decision approved.
+      "20260829140000_work_hour_allocations_v1.sql",
+      // 2026-08-31: M3 compute wiring (20260831170000) carries the marker
+      // under the owner's 2026-08-31 closure-session approval sequence
+      // ("wire the actual timesheet compute path"), the follow-up slice the
+      // repo records verbatim in docs/DECISIONS/0010 ("Wiring
+      // `timesheet_compute_lines_v1` to aggregate from allocations is the
+      // follow-up slice after the table exists") and in the APPLIED_LEDGER
+      // row for ledger 20260831161725 ("timesheets stay honest-empty until
+      // the compute-wiring follow-up (same owner-approved sequence) lands").
+      // RED by route — it replaces the timesheet_compute_lines_v1 SECURITY
+      // DEFINER body (the established re-issue idiom of 20260818150000 and
+      // 20260819220000) — while creating and dropping nothing and running no
+      // DML. The journal half is copied VERBATIM from 20260819220000; the
+      // additions are the allocation source, the allocation-wins dedupe and
+      // the combined 500-line cap. The marker lets CI classify it; merge and
+      // production apply stay with the main session after review.
+      // 2026-08-30, APPROVED AND APPLIED 2026-09-08 (owner decision on #1635).
+      // The 67-row ESCO canonical linkage. The marker began as the doctrine
+      // ACKNOWLEDGEMENT that a data migration (UPDATE of
+      // skills/professions.esco_uri) is RED by classification; the owner then
+      // approved it by name and it was applied via Supabase MCP
+      // apply_migration as ledger 20260908082301. Write-if-null,
+      // corpus-asserted, paired rollback - it can only fill a NULL and refuses
+      // to overwrite a different esco_uri. Verified after the apply by
+      // FINGERPRINT rather than by eye: the applied rows and this file both
+      // hash to 4a86d46c3701871e06d8c355d76173f4 over 65 sorted
+      // type|slug|uri triples, so no transcription error exists. RED class is
+      // unchanged by having been applied.
       "20260830100000_esco_canonical_linkage_67.sql",
+      "20260831170000_timesheet_compute_allocations_v1.sql",
+      // 2026-09-01: the agency disclosure-revocation package
+      // (20260901052300) carries the marker because its RED content is the
+      // point of the change: it replaces two SECURITY DEFINER list RPCs and
+      // the revoke RPC, and recreates one RLS policy. Every edit NARROWS —
+      // the list functions gain active-connection/active-share predicates,
+      // revoke cascades live offers to withdrawn, and the policy's client
+      // arm gains an active-connection requirement; the agency and admin
+      // arms are byte-identical. It closes the leak where a client whose
+      // connection was severed keeps permanent read on the agency's
+      // candidate identities and notes. The marker lets CI classify it;
+      // merge and production apply stay owner-gated (draft +
+      // needs-human-gate).
+      "20260901052300_agency_disclosure_revocation_v1.sql",
+      // 2026-09-01: the relationship-visibility least-privilege ruling
+      // (20260901060000) carries the marker because it is the slice
+      // 20260827210000 deferred BY NAME — that migration's header records
+      // "rule on volunteer / viewer / unemployed, which are preserved here
+      // only because narrowing them is outside this ruling". RED by route
+      // (`data-dml` on the registry that governs an authorization
+      // predicate) while creating, dropping and replacing nothing: three
+      // rows of relationship_types move from true to false, plus a column
+      // comment. Direction is NARROWING only, and the blast radius is
+      // measured zero — production holds no volunteer/viewer/unemployed
+      // engagement context. The marker lets CI classify it; merge and
+      // production apply stay owner-gated (draft + needs-human-gate).
+      "20260901060000_relationship_visibility_least_privilege_v1.sql",
+      // 2026-09-01: the public-schema CREATE revoke (20260901100000)
+      // carries the marker because a REVOKE is a grant-surface change by
+      // classification. It is narrowing only: ONE statement,
+      // `revoke create on schema public from public`, removing the CREATE
+      // that anon/authenticated/service_role inherited via PUBLIC (none
+      // held a direct grant). USAGE stays, so every read, RPC and auth path
+      // is untouched. Minimal current-equivalent extraction of the
+      // still-live half of #879, owner-approved 2026-09-01.
+      "20260901100000_revoke_public_schema_create_v1.sql",
+      // 2026-09-01: the labour-economics metric widening (20260901140000)
+      // carries the marker because it is `data-dml` on the registry that
+      // governs which metrics an importer may write. That DML is the whole
+      // point: the fail-closed allowlist is what keeps the labour-economics
+      // spec inert, so widening it is the activation. It creates, drops and
+      // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
+      // docs/intelligence/labour-economics-metrics-v1.md §6.
+      "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-03: RED batch A: supply-counts row (definer swap + grants); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903100000_public_vacancy_supply_counts_v1.sql",
+      // 2026-09-03: RED batch A: agency offer decision (CHECK widening + definer + grants); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903101000_agency_candidate_offer_decision_v1.sql",
+      // 2026-09-03: RED batch B: education programmes/cohorts (tables + definer + grants); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903120000_education_programs_cohorts_v1.sql",
+      // 2026-09-03: RED batch C: institution learner outcomes (definer + grant); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903140000_institution_learner_outcomes_v1.sql",
+      // 2026-09-03: RED batch D: education RLS recursion fix (drop/create the three batch-B SELECT policies + 3 definer helpers + grants); owner approval "Apply batch 2026-09-03 D" (2026-09-03); APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903150000_education_rls_recursion_fix_v1.sql",
+      // 2026-09-04: owns_company widened to active owner/admin MEMBERSHIP so
+      // the first real recruiter account can represent the existing verified
+      // agency without a creator transfer. Marker added with the draft PR;
+      // approval sentence "Apply Lane A ownership 2026-09-04" pending — the
+      // marker records the RED classification, not a granted approval.
+      "20260904060000_owns_company_governance_membership_v1.sql",
+      "20260905190000_public_plans_v1.sql", // 2026-09-05: public_plans_v1 — anon-safe price catalogue RPC (RED, owner-approved, APPLIED to prod 2026-09-05, #1548 merged)
+      // 2026-09-05: billing safety invariants v1 (owner directive "BILLING
+      // SAFETY — MANDATORY BEFORE REAL CUSTOMERS"). RED (billing): additive
+      // ordering/amount evidence columns, event_created_at, the
+      // billing_customers key widened by test_mode (drop + add in one file),
+      // and the billing_checkout_operations table with admin SELECT +
+      // service-role grants. Owner approval "apply billing safety 2026-09-05"
+      // (chat); APPLIED TO PROD 2026-09-05 18:49 UTC as ledger
+      // 20260905184921, readback recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260905200000_billing_safety_invariants_v1.sql",
+      // 2026-09-06: notification_events service-role write grant (RED: GRANT =
+      // privilege-surface change, gate rule h). The emitters run through the
+      // admin client and have failed 42501 since July; marker records the RED
+      // classification, owner applies via MCP apply_migration (#1566).
+      "20260906060000_notification_events_service_role_grant.sql",
+      // 2026-09-06 (owner window 7 §4): the worker board's gated read
+      // served agency SUPPLY offers to workers as open jobs — measured 2 of
+      // 9 rows on production. The fix is a SECURITY DEFINER body replace =
+      // RED class, so it carries the acknowledgement marker and ships as a
+      // DRAFT with needs-human-gate. APPLIED 2026-09-06 as ledger
+      // 20260906194911 (verified live 2026-09-07: the function body now
+      // carries the closed allow-list).
+      "20260906140000_worker_board_excludes_supply_v1.sql",
+      // 2026-09-06: the SAME defect on the agency board — found by sweeping
+      // every SECURITY DEFINER reader of customer_requests for a body that
+      // never mentions `kind`. list_open_demand_for_agencies served an agency
+      // 12 rows, 2 of them OTHER agencies' offers presented as demand it could
+      // staff. RED class (SECURITY DEFINER body replace).
+      "20260906200000_agency_board_excludes_supply_v1.sql",
+      // 2026-09-07 (owner decisions EVID-1 and DEM-9, gate HG-2026-09-07).
+      // The owner approved BOTH by name and set the apply order: supply
+      // discovery first, then the evidence import. Both were applied via
+      // Supabase MCP apply_migration as ledger 20260907180546 and
+      // 20260907180944, and both were verified against production
+      // afterwards under real users' auth contexts. Each marker was added
+      // in the same commit that records its decision, per the procedure
+      // this list exists to enforce - the approval did not spread from
+      // anywhere. Both stay RED class: a SECURITY DEFINER reader and eight
+      // new tables with explicit GRANTs are not made GREEN by a marker.
+      "20260907114500_organization_evidence_import_v1.sql",
+      "20260907153000_employer_supply_discovery_v1.sql",
+
+      // 2026-09-07, APPROVED AND APPLIED 2026-09-08 (owner decision EVID-1).
+      // The marker began as a risk ACKNOWLEDGEMENT with no decision behind it;
+      // the owner then approved it by name and it was applied via Supabase MCP
+      // apply_migration as ledger 20260908080950. Verified afterwards against
+      // production: all four formerly-recursing tables read, a full write chain
+      // ran in a rolled-back transaction, and residue was re-counted at 0. RED
+      // (SECURITY DEFINER + policy replace) - a marker never makes it GREEN.
+      "20260907220000_evidence_parties_recursion_fix_v1.sql",
+      // 2026-09-08: the recipient-discovery half of the same repair (RED:
+      // GRANT = privilege-surface change, gate rule h). The write grant alone
+      // left the cron returning 503 - the sweep could not READ
+      // journal_entries or workers to find a recipient, so it failed 42501
+      // before any insert. SELECT only on both; owner-approved and applied
+      // via MCP apply_migration (#1566).
+      "20260908070000_notification_recipient_discovery_service_role_select.sql",
 ]);
   });
 

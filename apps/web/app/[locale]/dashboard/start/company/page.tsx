@@ -3,8 +3,10 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { COMPANY_TYPES, type CompanyType } from "@/lib/company/company-profile-shared";
 import {
   COMPANY_COUNTRY_CODES,
+  getOwnedCompanyById,
   listOwnedCompanies,
   type CompanyRow,
   type CompanyVerificationStatus,
@@ -54,10 +56,20 @@ export default async function CompanyStartPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ new?: string }>;
+  searchParams?: Promise<{ new?: string; type?: string; capability?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Universal first-run router presets (lib/onboarding/first-run-intent.ts):
+  // an agency intent pre-selects the staffing_agency company TYPE, an
+  // education intent declares the training_provider CAPABILITY once the
+  // company exists. Both are validated against the closed vocabularies; an
+  // unknown value is simply ignored.
+  const sp = (await searchParams) ?? {};
+  const presetCompanyType = (COMPANY_TYPES as readonly string[]).includes(sp.type ?? "")
+    ? (sp.type as CompanyType)
+    : undefined;
+  const presetCapability = sp.capability === "training_provider" ? "training_provider" : undefined;
 
   const supabase = await createClient();
   const {
@@ -79,15 +91,37 @@ export default async function CompanyStartPage({
   const migrationNeeded = owned.kind === "needs-migration";
   const ownedRows: readonly CompanyRow[] = owned.kind === "ok" ? owned.rows : [];
 
+  // A SHELL is a company row that exists but was never given an identity:
+  // `complete_onboarding` (company intent) and `add_role` insert one with no
+  // legal name before this form is ever seen. It is the person's unfinished
+  // FIRST organisation, so it is the row this form completes — never a reason
+  // to insert a second one. Real pilot 2026-09-02: shell + `?new=1` produced
+  // two organisations, and the workspace resolver (fail-closed on ambiguity)
+  // then showed "no company profile" on the dashboard.
+  const isShellRow = (r: CompanyRow) => r.legalName === null;
+  const shell = ownedRows.find(isShellRow) ?? null;
+
   let company: CompanyRow | null = null;
   let targetCompanyId: string = "new";
   let ambiguous = false;
-  if (!createRequested && !migrationNeeded) {
+  if (createRequested && !migrationNeeded && shell) {
+    company = shell;
+    targetCompanyId = shell.id;
+  } else if (!createRequested && !migrationNeeded) {
     const workspace = await resolveEmployerCompanyContext();
-    const workspaceCompany =
+    // The active workspace's company: one the caller CREATED (in the owned
+    // list) or one they GOVERN as an active owner/admin member (read by id,
+    // membership re-checked inside getOwnedCompanyById). A governed company
+    // is edited, never re-created — a member who reached this form must not
+    // be offered a blank "create" that would duplicate their organisation.
+    let workspaceCompany: CompanyRow | null =
       workspace.kind === "ok"
         ? (ownedRows.find((r) => r.id === workspace.companyId) ?? null)
         : null;
+    if (!workspaceCompany && workspace.kind === "ok") {
+      const governed = await getOwnedCompanyById(workspace.companyId);
+      workspaceCompany = governed.kind === "ok" ? governed.row : null;
+    }
     if (workspaceCompany) {
       company = workspaceCompany;
       targetCompanyId = workspaceCompany.id;
@@ -99,6 +133,10 @@ export default async function CompanyStartPage({
     }
   }
 
+  // First setup of a shell: the form CREATES the identity (title, presets)
+  // even though it technically edits an existing row.
+  const firstSetup = company !== null && isShellRow(company);
+
   const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
   const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
@@ -106,7 +144,7 @@ export default async function CompanyStartPage({
     // Dead-UI rule C (owner smoke 2026-07-05): one route serves create AND
     // edit — the heading must say WHICH, so an existing company is never
     // tricked into thinking it is creating a second one.
-    title: company ? t("formTitleEdit") : t("formTitleCreate"),
+    title: company && !firstSetup ? t("formTitleEdit") : t("formTitleCreate"),
     subtitle: t("formSubtitle"),
     legalName: t("legalName"),
     legalNameHelp: t("legalNameHelp"),
@@ -150,6 +188,8 @@ export default async function CompanyStartPage({
     submitRequest: t("submitRequest"),
     statusDraftSaved: t("statusDraftSaved"),
     statusSubmitted: t("statusSubmitted"),
+    goToWorkspace: t("goToWorkspace"),
+    capabilityNotDeclared: t("capabilityNotDeclared"),
     statusNeedsMigration: t("statusNeedsMigration"),
     statusInvalid: t("statusInvalid"),
     statusDuplicateCompany: t("statusDuplicateCompany"),
@@ -191,7 +231,7 @@ export default async function CompanyStartPage({
         </section>
       ) : null}
 
-      {company ? (
+      {company && !firstSetup ? (
         <section
           className="card-border flex flex-col gap-3 p-5"
           data-testid="company-start-existing"
@@ -307,7 +347,7 @@ export default async function CompanyStartPage({
           className="card-border flex flex-col gap-4 p-5"
           data-testid="company-start-form-section"
         >
-          {company === null ? null : (
+          {company === null || firstSetup ? null : (
             <Link
               href={"/dashboard/start/company?new=1" as "/dashboard"}
               className="self-start text-sm text-brand-blue hover:underline"
@@ -320,6 +360,9 @@ export default async function CompanyStartPage({
             existing={company}
             labels={formLabels}
             targetCompanyId={targetCompanyId}
+            presetCompanyType={presetCompanyType}
+            presetCapability={presetCapability}
+            firstSetup={firstSetup}
           />
         </section>
       ) : null}

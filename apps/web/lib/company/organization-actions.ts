@@ -3,14 +3,10 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
-import {
-  ACTIVE_WORKSPACE_COOKIE,
-  getWorkspaceContext,
-} from "@/lib/company/active-organization";
+import { ACTIVE_WORKSPACE_COOKIE } from "@/lib/company/active-organization";
+import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 
 /**
@@ -29,24 +25,10 @@ import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
  * the single-company behaviour (no fake switch).
  */
 
-const UNDEFINED_COLUMN_CODE = "42703";
-// PostgREST reports an unknown column in an UPDATE payload as its OWN
-// schema-cache miss code, NOT Postgres 42703 — the same pair every other
-// feature-detected consumer tolerates (see entry-skill-link-write.ts).
-// Missing it here made production workspace switching DELETE the freshly
-// set session pointer: the first PROD_QA multi-org journey (2026-08-06)
-// observed `lm_active_workspace=; Expires=1970` on every org switch.
-const SCHEMA_CACHE_MISS_CODE = "PGRST204";
-const NOT_MEMBER_CODE = "42501";
-const isAbsentColumn = (code: string | undefined): boolean =>
-  code === UNDEFINED_COLUMN_CODE || code === SCHEMA_CACHE_MISS_CODE;
-
-// active_organization_id ships in the owner-gated migration 20260714210000 —
-// not in the generated DB types until applied (owned-organizations pattern).
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function asAny(supabase: SupabaseClient): any {
-  return supabase;
-}
+// The feature-detection codes (42703 / PGRST204 — see the PROD_QA 2026-08-06
+// note) and the pointer UPDATE itself moved into the shared domain core
+// (lib/company/workspace-switch-core.ts, G4): these actions own only the
+// session cookie + revalidation on top of it.
 
 export type SwitchOrganizationResult =
   | { ok: true }
@@ -64,28 +46,26 @@ export async function switchActiveOrganization(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "not-authenticated" };
 
-  // App-level membership check first — a foreign org id never reaches the
-  // DB or the cookie. EVERY membership counts (owner audit P0.1): owned
-  // organizations AND active engagement memberships — the same list the
-  // workspace chip renders, so a row it offers can always be switched to.
-  const [owned, workspace] = await Promise.all([
-    getOwnedOrganizations(),
-    getWorkspaceContext(null),
-  ]);
-  const isMember =
-    (owned.kind === "ok" &&
-      owned.organizations.some((o) => o.id === organizationId)) ||
-    workspace.workspaces.some(
-      (w) => w.kind === "organization" && w.id === organizationId,
-    );
-  if (!isMember) {
+  // G4: membership validation + the durable pointer write are THE shared
+  // domain core (same list the workspace chip renders — owned + governance
+  // + engagement memberships). A foreign org id never reaches the DB or the
+  // cookie; the DB trigger stays as the second layer underneath.
+  const core = await switchActiveWorkspaceCore(
+    { supabase, userId: user.id },
+    organizationId,
+  );
+  if (!core.ok && core.code === "not-member") {
     return { ok: false, code: "not-member" };
   }
+  if (!core.ok && core.code === "error") {
+    return { ok: false, code: "error" };
+  }
 
-  // The SERVER-SIDE session pointer (owner audit P0.1): an httpOnly cookie,
-  // set only after membership validation, read back server-side on every
-  // request. This makes switching REAL today; the owner-gated migration
-  // 20260714210000 adds the durable cross-device pointer on top of it.
+  // core.ok — or `needs-migration` (the durable pointer column is not
+  // applied yet), which is NOT a failure for a browser session: the
+  // SERVER-SIDE session pointer below makes the switch real today (owner
+  // audit P0.1) — an httpOnly cookie, set only after membership validation,
+  // read back server-side on every request.
   const jar = await cookies();
   jar.set(ACTIVE_WORKSPACE_COOKIE, organizationId, {
     httpOnly: true,
@@ -94,27 +74,6 @@ export async function switchActiveOrganization(
     path: "/",
     maxAge: 60 * 60 * 24 * 180,
   });
-
-  const { error } = await asAny(supabase)
-    .from("profiles")
-    .update({ active_organization_id: organizationId })
-    .eq("id", user.id);
-  if (error && !isAbsentColumn(error.code)) {
-    if (error.code === NOT_MEMBER_CODE) {
-      // The DB trigger disagrees with the app-level check — trust the DB and
-      // roll the session pointer back.
-      jar.delete(ACTIVE_WORKSPACE_COOKIE);
-      return { ok: false, code: "not-member" };
-    }
-    console.error("[switchActiveOrganization] update failed", {
-      code: error.code,
-      message: error.message,
-    });
-    jar.delete(ACTIVE_WORKSPACE_COOKIE);
-    return { ok: false, code: "error" };
-  }
-  // 42703 (column not applied yet) is NOT a failure any more: the validated
-  // session pointer is set, so the switch is real for this session.
 
   revalidatePath("/", "layout");
   return { ok: true };
@@ -154,15 +113,15 @@ export async function clearActiveOrganization(): Promise<SwitchOrganizationResul
     maxAge: 60 * 60 * 24 * 180,
   });
 
-  const { error } = await asAny(supabase)
-    .from("profiles")
-    .update({ active_organization_id: null })
-    .eq("id", user.id);
-  if (error && !isAbsentColumn(error.code)) {
-    console.error("[clearActiveOrganization] update failed", {
-      code: error.code,
-      message: error.message,
-    });
+  // G4: the durable pointer clear goes through the SAME core the org switch
+  // uses (the personal sentinel maps to a NULL pointer there). An absent
+  // column is not a failure for a browser session — the cookie above is the
+  // real mechanism, exactly as before the extraction.
+  const core = await switchActiveWorkspaceCore(
+    { supabase, userId: user.id },
+    PERSONAL_WORKSPACE_ID,
+  );
+  if (!core.ok && core.code !== "needs-migration") {
     return { ok: false, code: "error" };
   }
 

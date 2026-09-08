@@ -1068,7 +1068,12 @@ export function invitationEventDay(
 export function projectSentInvitationItem(
   row: SentInvitationPlanningInput,
 ): PlanningItem {
-  const name = row.invitedName?.trim() ? row.invitedName : row.invitedEmail;
+  // A NAME or nothing — never the raw address (G-H1, window 6). An e-mail is
+  // an identifier, not a label: the calendar and the context panel already
+  // render the honest fallback noun ("Kvietimas") + the lifecycle status for a
+  // null label, and the address stays on the network surface this item links
+  // to. `invitedEmail` is part of the row subset but is never projected.
+  const name = row.invitedName?.trim() ? row.invitedName.trim() : null;
   // The invited person IS the counterpart on this row (the caller invited
   // them, so the name is already theirs to see).
   const meta = planningMeta({ counterpart: name });

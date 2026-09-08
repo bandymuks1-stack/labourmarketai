@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
@@ -92,6 +93,7 @@ export function ProjectResult({
   onBack,
   onOpenFull,
   onAssignWorker,
+  onStageStatus,
 }: {
   /** Which project the panel is showing, or null for the project list. */
   projectId: string | null;
@@ -105,6 +107,7 @@ export function ProjectResult({
    * own — the same rule the Context Panel follows for every chip.
    */
   onAssignWorker: (projectId: string) => void;
+  onStageStatus: (projectId: string, stageId: string, status: "done") => void;
 }) {
   return projectId === null ? (
     <ProjectPicker onSelectProject={onSelectProject} onOpenFull={onOpenFull} />
@@ -115,6 +118,7 @@ export function ProjectResult({
       onBack={onBack}
       onOpenFull={onOpenFull}
       onAssignWorker={onAssignWorker}
+      onStageStatus={onStageStatus}
     />
   );
 }
@@ -230,12 +234,14 @@ function ProjectDetailView({
   onBack,
   onOpenFull,
   onAssignWorker,
+  onStageStatus,
 }: {
   projectId: string;
   locale: string;
   onBack: () => void;
   onOpenFull: (route: string) => void;
   onAssignWorker: (projectId: string) => void;
+  onStageStatus: (projectId: string, stageId: string, status: "done") => void;
 }) {
   const t = useTranslations("conversation.results");
   const [phase, setPhase] = useState<DetailPhase>({ kind: "loading" });
@@ -258,6 +264,10 @@ function ProjectDetailView({
    * outcome is still on screen next to the state it produced.
    */
   const [outcome, setOutcome] = useState<{ text: string; error: boolean } | null>(null);
+  // The opener stamps `pr` when it re-addresses the same project after a
+  // write; a changed stamp is a changed question, so the detail re-reads.
+  const searchParams = useSearchParams();
+  const refreshStamp = searchParams?.get("pr") ?? null;
 
   // A different project is a different question — never carry an answer over.
   useEffect(() => {
@@ -277,7 +287,7 @@ function ProjectDetailView({
     return () => {
       cancelled = true;
     };
-  }, [projectId, attempt]);
+  }, [projectId, attempt, refreshStamp]);
 
   const back = (
     <button
@@ -407,7 +417,8 @@ function ProjectDetailView({
         </div>
       )}
 
-      <Stages stages={p.stages} />
+      <Pulse pulse={p.pulse} assignmentTotal={p.assignmentTotal} />
+      <Stages stages={p.stages} canManage={p.canManage} onMarkDone={(stageId) => onStageStatus(p.projectId, stageId, "done")} />
 
       {/* ASSIGNMENT. Offered only where the canonical rule allows it, and only
           to someone the server says may manage the project. A completed
@@ -587,8 +598,56 @@ function LifecycleControls({
   );
 }
 
-function Stages({ stages }: { stages: ProjectDetail["stages"] }) {
+/**
+ * The living project (owner contract §11): what is happening now, what
+ * evidence exists, what is open or overdue, how ready the roster is — and
+ * ONE honest "next" line derived from those same numbers. Unavailable reads
+ * render nothing (no zero pretending to be a fact).
+ */
+function Pulse({ pulse, assignmentTotal }: { pulse: ProjectDetail["pulse"]; assignmentTotal: number }) {
   const t = useTranslations("conversation.results");
+  if (!pulse) return null;
+  const next =
+    assignmentTotal === 0
+      ? t("pulseNextAssign")
+      : pulse.tasksOverdue > 0
+        ? t("pulseNextOverdue", { count: pulse.tasksOverdue })
+        : pulse.workersWithMissingDocs > 0
+          ? t("pulseNextDocs", { count: pulse.workersWithMissingDocs })
+          : pulse.evidenceEntries === 0
+            ? t("pulseNextNoWork")
+            : null;
+  return (
+    <div className="flex flex-col gap-1" data-testid="project-pulse">
+      <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("pulseTitle")}</h3>
+      <dl className="flex flex-col gap-1 text-support">
+        <Row label={t("pulseToday")} value={String(pulse.entriesToday)} />
+        <Row label={t("pulseEvidence")} value={t("pulseEvidenceValue", { entries: pulse.evidenceEntries, photos: pulse.evidencePhotos })} />
+        <Row label={t("pulseTasks")} value={t("pulseTasksValue", { open: pulse.tasksOpen, overdue: pulse.tasksOverdue })} />
+        {pulse.readinessTotal > 0 && (
+          <Row label={t("pulseReadiness")} value={`${pulse.readinessChecked}/${pulse.readinessTotal}`} />
+        )}
+      </dl>
+      {next && (
+        <p className="text-support text-text-secondary" data-testid="project-pulse-next">
+          {next}
+        </p>
+      )}
+    </div>
+  );
+}
+function Stages({
+  stages,
+  canManage,
+  onMarkDone,
+}: {
+  stages: ProjectDetail["stages"];
+  canManage: boolean;
+  onMarkDone: (stageId: string) => void;
+}) {
+  const t = useTranslations("conversation.results");
+  // The five stored statuses, worded by the same catalogue the operations page uses.
+  const ts = useTranslations("projectStages");
   // `null` = the stage source is not readable here. That is NOT "no stages",
   // and saying so is the whole point of carrying the distinction this far.
   if (stages === null) {
@@ -619,9 +678,25 @@ function Stages({ stages }: { stages: ProjectDetail["stages"] }) {
               ? [s.actualStart, s.actualEnd].filter(Boolean).join(" — ")
               : [s.plannedStart, s.plannedEnd].filter(Boolean).join(" — ");
           return (
-            <li key={s.id} className="flex items-center justify-between gap-2 py-1.5 text-support">
-              <span className="text-text-primary">{s.name}</span>
-              <span className="font-mono text-meta text-text-muted">{span}</span>
+            <li key={s.id} className="flex items-center justify-between gap-2 py-1.5 text-support" data-testid={`project-stage-${s.id}`}>
+              <span className="min-w-0 truncate text-text-primary">{s.name}</span>
+              <span className="flex shrink-0 items-center gap-2">
+                <span className="font-mono text-meta text-text-muted">{span}</span>
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted" data-testid={`project-stage-status-${s.id}`}>{ts(`statuses.${s.status}`)}</span>
+                {/* PROGRESS is a stored status the manager sets — never derived, never a bar (§11). The same
+                    dispatch the sentence "etapas X baigtas" runs; the operations page's stage panel calls
+                    the same action. Terminal stages carry no control. */}
+                {canManage && s.status !== "done" && s.status !== "cancelled" && (
+                  <button
+                    type="button"
+                    onClick={() => onMarkDone(s.id)}
+                    data-testid={`project-stage-done-${s.id}`}
+                    className="rounded-full border border-ink-500 px-2.5 py-0.5 text-meta font-semibold text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    {t("projectStageMarkDone")}
+                  </button>
+                )}
+              </span>
             </li>
           );
         })}

@@ -128,13 +128,26 @@ const W1_CANONICAL_REDIRECTS = [
   { source: "/:locale/dashboard/start/agency", destination: "/:locale/dashboard/start/company", permanent: true },
 ] as const;
 
+/**
+ * Entry shortcuts for links handed to real people (pilot runbooks, the G-1
+ * owner test, a recruiter's phone). `/lt/signup` and `/lt/login` were being
+ * quoted as the entry URL and returned a 404 on production (found 2026-09-03
+ * at mobile width). The canonical pages live under `/auth/…`; these keep the
+ * short, human-typed form working. 308 so the method and locale are kept.
+ */
+const ENTRY_SHORTCUT_REDIRECTS = [
+  { source: "/:locale/signup", destination: "/:locale/auth/signup", permanent: true },
+  { source: "/:locale/login", destination: "/:locale/auth/login", permanent: true },
+  { source: "/:locale/register", destination: "/:locale/auth/signup", permanent: true },
+] as const;
+
 const nextConfig: NextConfig = {
   // Cross-platform safety: Vercel builds on Linux. Keep config minimal.
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
   async redirects() {
-    return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS];
+    return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS, ...ENTRY_SHORTCUT_REDIRECTS];
   },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];

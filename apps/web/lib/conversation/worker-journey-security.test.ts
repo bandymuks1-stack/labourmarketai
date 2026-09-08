@@ -90,9 +90,46 @@ describe("company executors delegate only — canonical modules, no DB access (P
       "@/lib/communication/request-worker-conversation",
       "@/lib/booking/booking-actions",
       "@/lib/projects/actions",
+      "@/lib/tasks/task-chat-actions", // THE ONE task create, no redirect
+      "@/lib/projects/stages-actions", // stage status — the operations page's own action
       "@/lib/agency/bridge-actions",
+      // Real recruiter pilot (2026-09-04): the canonical ROSTER invite
+      // (invite_company_worker via lib/company/actions) and the ONE employer
+      // resolver — the chat never knows a company id, so the agency invite
+      // resolves the ACTIVE workspace's company the way every employer write
+      // does (M-P0-3). Reads only; the write stays in the canonical action.
+      "@/lib/company/actions",
+      "@/lib/company/employer-company-context",
       "@/lib/conversation/company-schemas",
       "@/lib/conversation/executor-contract",
+      // Owner contract 2026-09-04 §15 — the education institution's commands
+      // by sentence: the SAME canonical programme/cohort/member server
+      // actions the company page's forms call, and the SAME invitation layer
+      // the network panel uses (student relationship). The two telemetry
+      // modules emit the institution's `first_real_action` server-side (no
+      // write of their own). Added consciously.
+      "@/lib/education/program-actions",
+      "@/lib/invitations/actions",
+      "@/lib/telemetry/server-funnel",
+      "@/lib/telemetry/funnel-events",
+      // Owner correction 2026-09-05 (§11/§12/§16 — readiness must end in a
+      // corrective ACTION, not a read): the operations page's OWN checklist
+      // writes (upsert / seed, both over `upsert_worker_readiness_item`), the
+      // operations centre's own read to list the people a seed covers (RLS:
+      // null = not the caller's project), the default checklist KEYS (labels
+      // come from `projectOps.defaults` in the caller's locale — hence
+      // next-intl server), and the instructions page's own send (a work
+      // instruction in the project's thread). Added consciously; no RPC here.
+      "@/lib/projects/operations-actions",
+      "@/lib/projects/operations",
+      "@/lib/projects/readiness-items",
+      "@/lib/instructions/actions",
+      "next-intl/server",
+      // Owner contract §14 (2026-09-05): the inbox's one-tap confirm (approve +
+      // verify skills through the gated RPC chain) and the membership RPC
+      // wrapper that switches a person's journal review on. Added consciously.
+      "@/lib/journal/quick-confirm-actions",
+      "@/lib/operations/org-membership",
     ]);
     const imports = [...src.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]);
     expect(imports.length).toBeGreaterThan(5);

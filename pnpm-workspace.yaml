@@ -1,2 +1,7 @@
 packages:
+  # apps/* is the existing glob: apps/web (Next.js) and apps/mobile (Expo).
   - "apps/*"
+  # packages/* is NEW (mobile foundation v1). Client-agnostic code that more
+  # than one client consumes lives here, so a second client never has to
+  # reimplement it — see docs/MOBILE_ARCHITECTURE.md and docs/APP_READINESS_MAP.md.
+  - "packages/*"

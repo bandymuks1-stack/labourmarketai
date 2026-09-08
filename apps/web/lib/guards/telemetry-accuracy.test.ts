@@ -9,7 +9,9 @@ import { join } from "node:path";
  * Contract:
  *   - SessionTelemetry is mounted on the onboarding page, not only the
  *     dashboard layout — new users onboard BEFORE any dashboard mounts, so
- *     login_succeeded must not invert with onboarding_started.
+ *     login_succeeded must not invert with onboarding_started. The mount
+ *     carries surface="onboarding": that is the ONE surface allowed to emit
+ *     signup_completed from the pending marker (google-new-user honesty).
  *   - Failure branches fire success:false (a broken save path must be
  *     distinguishable from user disinterest).
  *   - Demand-draft failures go through errorTask (result='error'), never
@@ -24,7 +26,10 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf-8");
 describe("login_succeeded covers onboarding (F-T4)", () => {
   it("SessionTelemetry is mounted on the onboarding page", () => {
     const page = read("app/[locale]/onboarding/page.tsx");
-    expect(page).toMatch(/<SessionTelemetry \/>/);
+    // The onboarding mount is also the ONE signup_completed-emitting surface
+    // (see lib/guards/google-same-tab-redirect.test.ts), so the guard pins
+    // the surface prop, not just the bare mount.
+    expect(page).toMatch(/<SessionTelemetry surface="onboarding" \/>/);
   });
 });
 
@@ -73,11 +78,13 @@ describe("W5 pilot measurement stays PII-free", () => {
     );
     expect(stepCalls.length).toBe(2);
     for (const call of stepCalls) {
-      // Only the two bounded, allowlisted keys — never a name / email /
-      // country / free-text value.
+      // Only bounded, allowlisted keys — never a name / email / country /
+      // free-text value. `intent` (2026-09-03, universal first-run router)
+      // is a closed enum from lib/onboarding/first-run-intent.ts, joined by
+      // commas; it is allowlisted in lib/telemetry/actions.ts.
       const metaKeys = [...call.matchAll(/(\w+):/g)].map((m) => m[1]);
       for (const key of metaKeys) {
-        expect(["step", "role_context"]).toContain(key);
+        expect(["step", "role_context", "intent"]).toContain(key);
       }
     }
   });

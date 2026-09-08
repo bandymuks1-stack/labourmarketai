@@ -233,12 +233,23 @@ export function trackFunnel(
 // surface, so `login_succeeded` alone cannot tell them apart. The signup
 // surfaces set this one-shot flag; SessionTelemetry consumes it exactly once
 // when the user first reaches an authed page and emits `signup_completed`.
-// The value is a bounded surface label ('email' | 'google') — never PII.
+// The value is a bounded surface label (see SIGNUP_SURFACES) — never PII.
 const SIGNUP_PENDING_KEY = "lm.funnel.signup_pending";
+
+/** The CLOSED set of signup surfaces — email plus the Supabase OAuth provider
+ *  ids the shared same-tab button can start (google-button.tsx). Bounded
+ *  labels only, so the marker in localStorage can never carry PII. */
+const SIGNUP_SURFACES = [
+  "email",
+  "google",
+  "linkedin_oidc",
+  "facebook",
+] as const;
+export type SignupSurface = (typeof SIGNUP_SURFACES)[number];
 
 /** Mark that the current session is a fresh signup, so the next authed
  *  surface can emit `signup_completed`. Bounded surface label only. */
-export function markSignupPending(surface: "email" | "google"): void {
+export function markSignupPending(surface: SignupSurface): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(SIGNUP_PENDING_KEY, surface);
@@ -247,15 +258,29 @@ export function markSignupPending(surface: "email" | "google"): void {
   }
 }
 
+/** Clear a pending-signup marker WITHOUT emitting anything. Used when an
+ *  OAuth attempt bounces back to /auth/login with an `?error=` (the person
+ *  cancelled at the provider, or the handoff failed): the marked signup never
+ *  happened, so the flag must not survive in localStorage to mislabel a
+ *  much-later ordinary login as a completed signup. */
+export function clearSignupPending(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(SIGNUP_PENDING_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Read-and-clear the signup-pending flag. Returns the surface label if a
  *  signup is pending (fires `signup_completed` once), else null. */
-export function consumeSignupPending(): "email" | "google" | null {
+export function consumeSignupPending(): SignupSurface | null {
   if (typeof window === "undefined") return null;
   try {
     const v = window.localStorage.getItem(SIGNUP_PENDING_KEY);
-    if (v === "email" || v === "google") {
+    if ((SIGNUP_SURFACES as readonly string[]).includes(v ?? "")) {
       window.localStorage.removeItem(SIGNUP_PENDING_KEY);
-      return v;
+      return v as SignupSurface;
     }
   } catch {
     /* ignore */

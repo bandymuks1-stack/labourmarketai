@@ -45,6 +45,14 @@ export const FUNNEL_EVENTS = {
   onboardingStepRoleCompleted: "onboarding_step_role_completed",
   onboardingStepProfileCompleted: "onboarding_step_profile_completed",
   onboardingCompleted: "onboarding_completed",
+  // ── Time-to-first-value (FIRST REAL ECOSYSTEM USE, 2026-09-03). The key
+  //    metric is not a page view: it is the moment a person performs their
+  //    first REAL state-changing action and the moment they receive a real
+  //    result for it. Emitted at the action points of each actor's first
+  //    value chain; `role_context` carries the actor, `intent` the first-run
+  //    choice, `surface` the chain. Bounded scalars only, never ids/PII.
+  firstRealAction: "first_real_action",
+  firstRealResult: "first_real_result",
   dashboardViewed: "dashboard_viewed",
   firstActionCardViewed: "first_action_card_viewed",
   firstActionCardClicked: "first_action_card_clicked",
@@ -82,6 +90,12 @@ export const FUNNEL_EVENTS = {
   bookingViewed: "booking_viewed",
   bookingAccepted: "booking_accepted",
   bookingDeclined: "booking_declined",
+  //    Owner contract §4D (2026-09-05): an invitation addressed to the person
+  //    was ACCEPTED from the chat's attention item — server-emitted by the
+  //    conversation executor only on a real `accepted` / `linked` outcome
+  //    (the SAME accept RPCs the network page and the dashboard card call).
+  //    Bounded scalars only (surface / entity_type / success); no PII.
+  invitationAccepted: "invitation_accepted",
   // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
   //    The gap between "booking_*" and nothing: the stages where a demand
   //    actually turns into work — match preview → shortlist → contact →
@@ -137,6 +151,30 @@ export const FUNNEL_EVENTS = {
   professionRecoveryPromptSeen: "profession_recovery_prompt_seen",
   professionRecoveryPromptOpened: "profession_recovery_prompt_opened",
   professionRecoveryPromptDismissed: "profession_recovery_prompt_dismissed",
+  // ── Chat-first execution funnel (real recruiter pilot, 2026-09-04). The
+  //    first real recruiter typed a valid agency sentence and fell through to
+  //    the generic fallback — and nothing measured it. These five make the
+  //    conversational operating layer measurable end-to-end: was the sentence
+  //    understood (`step` = the routed intent id, never the sentence), did the
+  //    chat have to ask for one missing fact, was a canonical action
+  //    attempted, did it persist (server-side, in the ONE dispatcher). Bounded
+  //    scalars only: intent/action ids and the coarse role — never text, ids
+  //    or e-mails. `first_real_action` / `first_real_result` stay the
+  //    value events; these are the mechanics that lead to them.
+  chatIntentRecognized: "chat_intent_recognized",
+  chatIntentUnrecognized: "chat_intent_unrecognized",
+  chatMissingDataAsked: "chat_missing_data_asked",
+  chatActionAttempted: "chat_action_attempted",
+  chatActionPersisted: "chat_action_persisted",
+  // ── Public entry (frozen design contract 2026-09-05, package P1). An
+  //    anonymous visitor types a sentence on the landing and the SAME
+  //    deterministic router reads it before any account exists. One event,
+  //    fired through the anon-insert path (profile_id NULL) with the chat
+  //    funnel's own shape: `step` = the routed intent id, "unrecognised", or
+  //    "chip" (the two-chip answer to the one question), `intent` = the
+  //    first-run family it belongs to, `resolution` = "deterministic". The
+  //    sentence itself is NEVER recorded.
+  landingIntent: "landing_intent",
 } as const;
 
 export type FunnelEventName =
@@ -158,6 +196,15 @@ export type FunnelMetadata = {
   step?: string;
   /** Coarse role context: 'worker' | 'company' | 'agency' | 'customer' | 'person'. */
   role_context?: string;
+  /** How a chat sentence was resolved: 'deterministic' (the always-on
+   *  router), 'goal' (the ACTIVE CONVERSATION GOAL — a continuation such as
+   *  "Nuo spalio." that the router alone reads as unknown; owner P0
+   *  2026-09-06) or 'llm' (the Gemini proposer, owner approval 2026-09-05).
+   *  Never the sentence. */
+  resolution?: "deterministic" | "goal" | "llm";
+  /** First-run intent: 'work' | 'hire' | 'agency' | 'student' | 'education',
+   *  or a comma-joined set of them. Never free text. */
+  intent?: string;
   /** Anonymous entity type, e.g. 'company_request' | 'agency_offer'. Never an id. */
   entity_type?: string;
   /** Coarse success/failure flag for an attempted action. */

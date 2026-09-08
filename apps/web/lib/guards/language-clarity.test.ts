@@ -233,7 +233,13 @@ describe("UI language status stays honest and discoverable", () => {
     expect(header).toContain('mobile ? "hidden" : "hidden md:flex"');
 
     // below md: the avatar menu, which the header renders at every width.
-    expect(menu).toContain("<LocaleSwitcher />");
+    // `inline` since window 11 (§25): every OTHER header dropdown escapes
+    // the header's backdrop-blur stacking context through the overlay
+    // portal, and the switcher now does too — except HERE, where it is
+    // already inside the account menu's own portal. What this guard cares
+    // about is unchanged: exactly one language control below `md`, and it is
+    // this one. See lib/guards/header-overlays-escape-the-map.test.ts.
+    expect(menu).toMatch(/<LocaleSwitcher\s+inline\s*\/>/);
     expect(menu).toContain('data-testid="account-menu-locale"');
     expect(menu).toContain("md:hidden");
     expect(header).toContain("<AccountMenu />");

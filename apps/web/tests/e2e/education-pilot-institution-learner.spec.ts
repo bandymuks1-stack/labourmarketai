@@ -184,9 +184,11 @@ test.describe("education pilot — an institution connects a learner", () => {
       "the institution declared education and is still being refused",
     ).toHaveCount(0);
 
-    // The address list is the panel's FIRST textarea (the optional personal
-    // message is the second) — same order the panel renders them in.
-    await page.locator("textarea").first().fill(LEARNER.email);
+    // The panel's OWN stable testid — `.locator("textarea").first()` broke
+    // when the page grew an earlier textarea (2026-08-31 journey pass): the
+    // spec then filled the wrong control and the submit stayed disabled, which
+    // read as a product failure. Selector-rot class, pinned to the testid now.
+    await page.getByTestId("invite-emails").fill(LEARNER.email);
     await page.locator('[data-testid="invite-submit"]').click();
 
     await expect(

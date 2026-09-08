@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    // DOM is here for TYPES ONLY — `fetch`, `Response`, `Headers`, `atob`.
+    // Those exist on every runtime this package targets (a browser, Node 20+,
+    // Hermes on a phone), and typing them any other way would mean either a
+    // dependency on @types/node (wrong for a device) or hand-written ambient
+    // declarations that could drift from the real signatures.
+    //
+    // Nothing in src/ may USE a browser-only global (`window`, `document`,
+    // `localStorage`): this package runs on a phone. Storage is reached
+    // through the injected `SessionStore` in session.ts, never a global.
+    "lib": ["ES2022", "DOM"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "types": []
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import {
   CalendarDays,
   FolderKanban,
@@ -17,6 +18,9 @@ import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
+import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
+import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
+import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
@@ -42,6 +46,7 @@ import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { WorkObjectsSection } from "@/components/app/work-objects-section";
+import { EvidenceImportSection } from "@/components/app/evidence-import-section";
 import { CompanyGallerySection } from "@/components/app/company-gallery-section";
 import { getOrgWorkObjects } from "@/lib/objects/objects";
 import { listOrganizationMembers } from "@/lib/company/memberships";
@@ -77,6 +82,11 @@ import {
   CompanyNoProfileGuide,
 } from "@/components/app/company-next-actions";
 import { CompanyReadinessSummary } from "@/components/app/company-readiness-summary";
+// P5/C1 (frozen design §2.6, §5 P5): the organisation's home field — projects
+// in time × who is free — composed from the reads the chat already answers
+// with, actionable through the same pages/actions, no conversation needed.
+import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
+import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 
 // W3 rows 7/8/25: the light COMPANY_FIELDS draft form is absorbed by the full
 // demand wizard below (its private save-draft leg writes the same canonical
@@ -98,6 +108,12 @@ export default async function CompanyDashboardPage({
   // `?wf=` precedent) — unknown values are dropped, never rendered raw.
   const sp = (await searchParams) ?? {};
   const rawLc = typeof sp.lc === "string" ? sp.lc : "";
+  // The staged evidence-import source under review, if any. A query param on
+  // THIS workspace rather than a route of its own — see the section's header.
+  const evidenceSession =
+    typeof sp.evidenceSession === "string" && sp.evidenceSession.trim() !== ""
+      ? sp.evidenceSession.trim()
+      : undefined;
   const lifecycleNotice = isLifecycleNotice(rawLc) ? rawLc : null;
   await requireRoleOrRedirect(locale, "company");
 
@@ -120,12 +136,21 @@ export default async function CompanyDashboardPage({
       : employerCtx.reason === "needs-migration"
         ? { kind: "needs-migration" }
         : { kind: "ok", row: null };
-  if (companyProfile.kind === "ok" && companyProfile.row === null) {
+  // A company row with NO legal name is the unnamed shell `complete_onboarding`
+  // / `add_role` inserted before the setup form ran (the person left setup
+  // unfinished). A nameless workspace is not a workspace - send them back to
+  // the ONE setup form, which completes that same row. Measured as its own
+  // step so an abandoned first setup is distinguishable from "no company".
+  const setupIncomplete =
+    companyProfile.kind === "ok" &&
+    companyProfile.row !== null &&
+    companyProfile.row.legalName === null;
+  if (companyProfile.kind === "ok" && (companyProfile.row === null || setupIncomplete)) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-dashboard">
         <TelemetryView
           event={FUNNEL_EVENTS.companyDashboardViewed}
-          metadata={{ surface: "company", step: "no_profile" }}
+          metadata={{ surface: "company", step: setupIncomplete ? "setup_incomplete" : "no_profile" }}
         />
         <header className="flex flex-col gap-1">
           <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
@@ -203,6 +228,12 @@ export default async function CompanyDashboardPage({
    * settings, org members for objects, the gallery summaries) stay after
    * their input, in their own second batch.
    */
+  // The roster read is the ONE member two consumers share (the roster section
+  // and the home field's who-is-free answer — QA Q-3), so it is created here
+  // and both subscribe to the same promise. Still the same tick as the
+  // `Promise.all` below (no `await` in between), so the unhandled-rejection
+  // window described above never opens.
+  const rosterRead = ownCompany ? listActiveCompanyWorkers(ownCompany.id) : null;
   const [
     rAgencyClients,
     rAgencyDemands,
@@ -219,6 +250,7 @@ export default async function CompanyDashboardPage({
     rWorkObjects,
     rManagedProjects,
     rPendingInterest,
+    rHomeField,
   ] = await Promise.all([
     isStaffingAgency ? listAgencyClients() : null,
     isStaffingAgency ? listAgencyDemands() : null,
@@ -229,7 +261,7 @@ export default async function CompanyDashboardPage({
     isStaffingAgency ? listAgencyOfferProgress() : null,
     isCompanyOwner && !isStaffingAgency ? listMyConnectionInvites() : null,
     isCompanyOwner && !isStaffingAgency ? listAgencyDemands() : null,
-    ownCompany ? listActiveCompanyWorkers(ownCompany.id) : null,
+    rosterRead,
     ownCompany ? listCompanyWorkerInvitations(ownCompany.id) : null,
     ownCompany ? getOrgMembersData("company", ownCompany.id) : null,
     getOrgWorkObjects(),
@@ -238,6 +270,12 @@ export default async function CompanyDashboardPage({
     // session, so it depends on nothing above and joins this batch rather
     // than adding a round trip to a page that already reads fourteen.
     listPendingInterestCountsForCompany(),
+    // P5/C1 — the home field: the chat's project-risk, who-is-free and
+    // opening-brief reads; stages/assignments per shown project (≤ 6) come
+    // from the risk read itself (QA Q-3). Resolves its own company context
+    // from the session, so it joins this batch instead of adding a round
+    // trip — and it is handed `rosterRead` so the roster is queried once.
+    ownCompany ? loadCompanyHomeField({ roster: rosterRead }) : null,
   ] as const);
 
   // P5 agency client management — staffing-agency mode ONLY. Reads the
@@ -266,6 +304,8 @@ export default async function CompanyDashboardPage({
   const tWow = await getTranslations("auth.dashboard.wow");
   const tFlow = await getTranslations("auth.dashboard.wow.flow");
   const tReadback = await getTranslations("demandReadback");
+  // Declared opportunity-type labels — the same catalogue the demand form uses.
+  const tStructured = await getTranslations("structuredDemand");
   const tReqStatus = await getTranslations(
     "roleDashboards.buyer.requests.understanding.requestStatus",
   );
@@ -299,6 +339,10 @@ export default async function CompanyDashboardPage({
     },
     heading: tReadback("heading"),
     note: tReadback("note"),
+    // The supply half of the same readback — capacity this organisation has
+    // OFFERED, which is the opposite direction to what it asked for.
+    supplyHeading: tReadback("supplyHeading"),
+    supplyNote: tReadback("supplyNote"),
     workerVisibilityNote: tReadback("workerVisibilityNote"),
     empty: tReadback("empty"),
     created: tReadback("created"),
@@ -321,7 +365,11 @@ export default async function CompanyDashboardPage({
       skills: tReadback("fields.skills"),
       urgency: tReadback("fields.urgency"),
       notes: tReadback("fields.notes"),
+      opportunityType: tReadback("fields.opportunityType"),
     },
+    opportunityTypeValues: Object.fromEntries(
+      OPPORTUNITY_TYPES.map((v) => [v, tStructured(`opportunityType.${v}`)]),
+    ),
     urgencyValues: {
       flexible: tWow("demand.form.urgencyFlexible"),
       this_week: tWow("demand.form.urgencyThisWeek"),
@@ -464,7 +512,8 @@ export default async function CompanyDashboardPage({
         noConnections: tAB("noConnections"), sharedHeading: tAB("sharedHeading"),
         noShared: tAB("noShared"), workerLabel: tAB("workerLabel"),
         workerPlaceholder: tAB("workerPlaceholder"), offerButton: tAB("offerButton"),
-        noRoster: tAB("noRoster"), progressHeading: tAB("progressHeading"),
+        noRoster: tAB("noRoster"), goToRoster: tAB("goToRoster"), invalidLabel: tAB("invalidLabel"),
+        progressHeading: tAB("progressHeading"),
         noOffers: tAB("noOffers"), withdrawButton: tAB("withdrawButton"),
         openScouting: tAB("openScouting"), errorLabel: tAB("errorLabel"),
         statusLabels: {
@@ -475,6 +524,9 @@ export default async function CompanyDashboardPage({
           offered: tAB("stage.offered"), reviewed: tAB("stage.reviewed"),
           contacted: tAB("stage.contacted"), rejected: tAB("stage.rejected"),
           booking_started: tAB("stage.booking_started"), accepted: tAB("stage.accepted"),
+          // the client's explicit decision on a candidate (20260903101000)
+          decision_accepted: tAB("stage.decision_accepted"),
+          decision_declined: tAB("stage.decision_declined"),
         },
       }
     : null;
@@ -812,6 +864,48 @@ export default async function CompanyDashboardPage({
         ) : null}
       </header>
 
+      {/* P5/C1 — THE ORGANISATION'S HOME (frozen design §2.6 C1, §5 P5;
+          design system §I): capabilities strip → each active project as one
+          row [now | next DERIVED | risk] → who is free now · missing within
+          4 weeks · needs you · partners. Every object leads to the SAME
+          page/action the chat dispatches; the chat itself stays on demand. */}
+      {rHomeField ? (
+        <CompanyHomeFieldSection
+          locale={locale}
+          capabilities={declaredCapabilities}
+          field={rHomeField}
+          needs={
+            demandReadback.kind === "ok"
+              ? {
+                  kind: "ok",
+                  // NEEDS, not every request the organisation owns. An agency's
+                  // own `agency_offer` is capacity it HAS; counting it here made
+                  // the home field answer "what are we missing" with a row that
+                  // said the opposite.
+                  rows: demandReadback.rows.filter((r) => r.direction === "demand"),
+                }
+              : demandReadback.kind === "needs-migration"
+                ? { kind: "needs-migration" }
+                : { kind: "error" }
+          }
+          partners={{
+            agencies:
+              clientInvites && clientInvites.kind === "ok" ? clientInvites.rows : null,
+            clients:
+              agencyClientsState && agencyClientsState.kind === "ok"
+                ? agencyClientsState.rows
+                : null,
+            teams: teamBrigades.applied
+              ? teamBrigades.teams.map((tm) => ({
+                  id: tm.id,
+                  name: tm.name,
+                  members: tm.members.length,
+                }))
+              : null,
+          }}
+        />
+      ) : null}
+
       {/* F3 (production UX repair v2): compact icon-led control bar — every
           core company area is one glance + one tap away, with real counters.
           Long explanations stay inside their sections, never up here. */}
@@ -954,10 +1048,33 @@ export default async function CompanyDashboardPage({
           block because that is what it is — what this organization DOES — and
           not buried in an administration console. */}
       {capabilityOrgId ? (
-        <OrganizationCapabilitiesCard
-          organizationId={capabilityOrgId}
-          declared={declaredCapabilities}
-        />
+        <div id="company-capabilities" className="scroll-mt-20">
+          <OrganizationCapabilitiesCard
+            organizationId={capabilityOrgId}
+            declared={declaredCapabilities}
+          />
+        </div>
+      ) : null}
+
+      {/* Education institution (training_provider capability): participation
+          state of its learners — connected count + the invitations it sent.
+          Least-privilege by ruling: never a learner's journal or profile. */}
+      {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
+        <InstitutionLearnersSection organizationId={capabilityOrgId} />
+      ) : null}
+
+      {/* Programmes → cohorts → learners, each programme pointed at a work
+          direction with its live public demand (RED batch B; honest
+          needs-migration state until applied). */}
+      {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
+        <InstitutionProgramsSection organizationId={capabilityOrgId} />
+      ) : null}
+
+      {/* Real market demand on the first session (never an empty marketplace):
+          the public vacancy pool for staffing agencies and education
+          institutions, with its provenance stated on the card. */}
+      {isStaffingAgency || declaredCapabilities.includes("training_provider") ? (
+        <PublicDemandSection audience={isStaffingAgency ? "agency" : "institution"} />
       ) : null}
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
@@ -995,7 +1112,7 @@ export default async function CompanyDashboardPage({
           kind='agency_offer' to customer_requests), and scouting. Renders
           strictly when companyRow.companyType === "staffing_agency". */}
       {companyRow && companyRow.companyType === "staffing_agency" ? (
-        <>
+        <div id="company-agency" className="flex flex-col gap-6 scroll-mt-20">
         <section
           className="card-border flex flex-col gap-3 p-5"
           data-testid="company-agency-mode"
@@ -1083,19 +1200,32 @@ export default async function CompanyDashboardPage({
             locale={locale}
           />
         ) : null}
-        </>
+        </div>
       ) : null}
 
       {/* REAL two-subject bridge — client side: a real (non-agency) company
           accepts a staffing agency's connection, shares specific OWN requests,
           and reviews proposed candidates on its OWN scouting surface. */}
-      {companyRow && companyRow.companyType !== "staffing_agency" && clientInvites && clientBridgeLabels && ownCompany ? (
-        <ClientAgencyBridgeSection
-          invites={clientInvites}
-          clientCompanyId={ownCompany.id}
-          demands={clientBridgeDemands}
-          labels={clientBridgeLabels}
-        />
+      {/* Only an agency can initiate a connection, so a company with no
+          pending invite and no connection has nothing to do here — showing
+          two "nothing yet" lines on a first visit (to an employer, or to a
+          school) is noise, not information. The section appears the moment
+          an agency invites this company. */}
+      {companyRow &&
+      companyRow.companyType !== "staffing_agency" &&
+      clientInvites &&
+      clientInvites.kind === "ok" &&
+      clientInvites.rows.length > 0 &&
+      clientBridgeLabels &&
+      ownCompany ? (
+        <div id="company-partners-bridge" className="scroll-mt-20">
+          <ClientAgencyBridgeSection
+            invites={clientInvites}
+            clientCompanyId={ownCompany.id}
+            demands={clientBridgeDemands}
+            labels={clientBridgeLabels}
+          />
+        </div>
       ) : null}
 
       {companyRow ? (
@@ -1318,7 +1448,7 @@ export default async function CompanyDashboardPage({
           enquiriesApplied={teamBrigades.enquiriesApplied}
         />
       ) : (
-        <TeamRosterEmptyState variant="company" />
+        <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />
       )}
 
       {/* Canonical Pakviesti (core-network area B): every invite context
@@ -1345,6 +1475,17 @@ export default async function CompanyDashboardPage({
           (membership-based authority; supersedes the never-applied
           company_locations draft per the Train M verdict). Honest gated
           state until the LEAD applies the migration. */}
+      {/* ORGANIZATION EVIDENCE IMPORT (owner P0, 2026-09-07) — the company's
+          own history entering the platform as evidence. It sits INSIDE this
+          workspace rather than at a route of its own: the Product Gate is
+          right that a new screen would have to answer the five World-State
+          questions, and four of the honest answers were "no". Nothing about
+          the engine changed — same core, same RLS, same commit gate, same
+          eleven capabilities an authorized assistant drives. */}
+      <div id="evidence-import-zone" className="scroll-mt-20">
+        <EvidenceImportSection locale={locale} sessionId={evidenceSession} />
+      </div>
+
       <div id="company-locations" className="scroll-mt-20">
         <WorkObjectsSection
           state={

@@ -59,9 +59,11 @@ describe("employer capability is read from HELD roles, not the active one", () =
 
 describe("a sentence about hiring never dead-ends for an employer", () => {
   it("need-workers bridges instead of falling back", () => {
+    // G2: routing is registry-dispatched — the branch is the component's
+    // `needWorkers` handler (order pinned by the handlers object).
     const branch = CHAT.slice(
-      CHAT.indexOf('case "need-workers":'),
-      CHAT.indexOf('case "offer-value":'),
+      CHAT.indexOf("needWorkers: () =>"),
+      CHAT.indexOf("needService: () =>"),
     );
     expect(branch.length).toBeGreaterThan(0);
     // The active-workspace employer still gets the real intake form.
@@ -70,27 +72,38 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
     expect(branch).toMatch(/else if \(canActAsEmployer\)/);
     expect(branch).toMatch(/employerBridgeHint/);
     expect(branch).toMatch(/link:\/dashboard\/company#demand-intake/);
-    // And somebody who genuinely holds no company role still gets the honest
-    // fallback — this must NOT become a chip everybody sees.
-    expect(branch).toMatch(/labels\.fallback/);
+    // And somebody who genuinely holds no company role must NOT see the
+    // employer chip — the demand-intake door is for employers only. Since
+    // 2026-09-06 (real-user fitness walk) that person is no longer shrugged
+    // at either: the sentence named a trade, so the PERSON's doors are
+    // offered — the service-request loop and the company-setup door — both
+    // of which already existed. The employer door stays out of that branch.
+    const personBranch = branch.slice(branch.lastIndexOf("} else {"));
+    expect(personBranch).not.toMatch(/demand-intake/);
+    expect(personBranch).toMatch(/link:\/dashboard\/service-requests/);
+    expect(personBranch).toMatch(/link:\/dashboard\/start\/company/);
+    expect(personBranch).not.toMatch(/assistant\(fallbackText/);
   });
 
   it("company-overview answers an owner in any workspace", () => {
     const branch = CHAT.slice(
-      CHAT.indexOf('case "company-overview":'),
-      CHAT.indexOf('case "admin-approvals":'),
+      CHAT.indexOf("companyOverview: () =>"),
+      CHAT.indexOf("createOrganization: () =>"),
     );
     expect(branch.length).toBeGreaterThan(0);
     expect(branch).toMatch(/identity === "company" \|\| canActAsEmployer/);
-    expect(branch).toMatch(/labels\.fallback/);
+    // 2026-09-04: the not-understood answer is the context-aware
+    // `fallbackText` (worker / employer / agency / education), never the
+    // worker copy read directly.
+    expect(branch).toMatch(/fallbackText/);
   });
 
   it("nothing is switched on the person's behalf", () => {
     // The chip IS the confirmation (§36). A silent switchRole here would be
     // the product changing someone's workspace because of a sentence.
     const branch = CHAT.slice(
-      CHAT.indexOf('case "need-workers":'),
-      CHAT.indexOf('case "offer-value":'),
+      CHAT.indexOf("needWorkers: () =>"),
+      CHAT.indexOf("needService: () =>"),
     );
     expect(branch).not.toMatch(/switchRole|switchWorkspace|switchOrganization/);
   });

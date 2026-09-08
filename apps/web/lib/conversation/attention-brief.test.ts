@@ -1,0 +1,121 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * ATTENTION — "what needs me now" for the workspace's OTHER capabilities
+ * (owner contract 2026-09-04 §4D). The employer opening brief carried the
+ * operations loop only (reviews · absences · absent today · unread); an
+ * agency's daily loop is its clients and offers, an institution's is its
+ * learners. These rungs join the SAME brief, from the SAME canonical reads.
+ */
+
+const APP = join(__dirname, "..", "..");
+const SRC = readFileSync(join(__dirname, "opening-brief.ts"), "utf8");
+const FN = SRC.slice(SRC.indexOf("export async function loadEmployerOpeningBrief"));
+
+describe("the employer brief carries agency and institution attention", () => {
+  it("reads the capability flags from the ONE starter-context read, then the canonical bridge / learner reads", () => {
+    expect(FN).toMatch(/loadCompanyStarterContext\(\)/);
+    expect(FN).toMatch(/ws\.signals\.staffingAgency/);
+    expect(FN).toMatch(/listAgencyOfferProgress\(\), listSharedRequestsForAgency\(\)/);
+    expect(FN).toMatch(/ws\.signals\.capabilities\.includes\("training_provider"\)/);
+    expect(FN).toMatch(/readInstitutionLearners\(ws\.organizationId\)/);
+  });
+
+  it("names the three agency states and the learner state, each a real count, each with its chat action", () => {
+    expect(FN).toMatch(/r\.offerStatus === "offered"/);
+    expect(FN).toMatch(/briefAgencyOffersAwaiting/);
+    expect(FN).toMatch(/addChip\("agency:progress"/);
+    expect(FN).toMatch(/!offeredFor\.has\(s\.requestId\)/);
+    expect(FN).toMatch(/briefAgencySharedWithoutOffer/);
+    expect(FN).toMatch(/addChip\("agency:demand"/);
+    expect(FN).toMatch(/clientConnectionsPending/);
+    expect(FN).toMatch(/briefAgencyClientsPending/);
+    expect(FN).toMatch(/learners\.counts\.pending > 0/);
+    expect(FN).toMatch(/briefEduLearnerInvitesPending/);
+  });
+
+  it("the attention rungs sit BEFORE the operations ladder and inside their own try (a failed read invents nothing)", () => {
+    expect(FN.indexOf("loadCompanyStarterContext")).toBeLessThan(FN.indexOf("fetchQuickReviewQueue"));
+    const rung = FN.slice(FN.indexOf("// 0 ── ATTENTION"), FN.indexOf("// 1 ── work entries"));
+    expect(rung).toMatch(/^\s*try \{/m);
+    expect(rung).toMatch(/\} catch \{/);
+    expect(rung).toMatch(/lines\.length < MAX_LINES/);
+  });
+
+  it("the employer brief names the candidates still waiting for an answer, from the ONE pending-interest read, with the in-chat candidates chip", () => {
+    expect(FN).toMatch(/listPendingInterestCountsForCompany\(\)/);
+    expect(FN).toMatch(/briefEmployerInterestWaiting/);
+    expect(FN).toMatch(/addChip\("candidates", t\("chipInterestOnMyNeeds"\)\)/);
+    expect(FN.indexOf("listPendingInterestCountsForCompany")).toBeLessThan(FN.indexOf("fetchQuickReviewQueue"));
+  });
+
+  it("the employer brief names agency offers awaiting the client's decision, from the SAME chat read, with the in-chat offers chip", () => {
+    expect(FN).toMatch(/loadClientOffersForChat\(\)/);
+    expect(FN).toMatch(/briefEmployerAgencyOffersWaiting/);
+    expect(FN).toMatch(/addChip\("agency-offers", t\("chipAgencyOffers"\)\)/);
+    expect(FN).toMatch(/!ws\.signals\.staffingAgency && lines\.length < MAX_LINES/);
+  });
+
+  it("the worker brief names companies that answered the person's OWN interest with contacted — from the board read, above the match count", () => {
+    const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
+    expect(worker).toMatch(/Object\.values\(view\.interestStatusByRequestId\)\.filter\(\(status\) => status === "contacted"\)/);
+    expect(worker).toMatch(/briefInterestContacted/);
+    expect(worker).toMatch(/addChip\("jobs", t\("chipMyOwnInterest"\)\)/);
+    expect(worker.indexOf("briefInterestContacted")).toBeLessThan(worker.indexOf("briefNewMatches"));
+  });
+
+  it("the worker brief names expiring / missing documents from the SAME documents-gap derivation the chat answers with", () => {
+    const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
+    expect(worker).toMatch(/loadWorkerDocumentGap\(\)/);
+    expect(worker).toMatch(/docGap\.gap\.expiring\.length > 0/);
+    // A deadline outranks the passive lines: the expiring rung sits BEFORE matches.
+    expect(worker.indexOf("briefDocumentsExpiring")).toBeLessThan(worker.indexOf("briefNewMatches"));
+    expect(worker).toMatch(/briefDocumentsExpiring/);
+    // A missing-document line needs a stated country — the brief never guesses one.
+    expect(worker).toMatch(/docGap\.gap\.missing\.length > 0 && docGap\.countries\.length > 0/);
+    expect(worker).toMatch(/addChip\("documents-centre", t\("documentsChip"\)\)/);
+    // Inside its own try, and before the learner-identity block the guard slices.
+    expect(worker.indexOf("loadWorkerDocumentGap")).toBeLessThan(worker.indexOf("learner identity (M10"));
+  });
+
+  it("the worker brief says when the employer CONFIRMED their work (§14, the person's side) — from the canonical evidence rows, bounded, with the card chip", () => {
+    const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
+    expect(worker).toMatch(/const workerId = await getOwnWorkerId\(\);/);
+    expect(worker).toMatch(/loadOwnRecentConfirmations\(workerId\)/);
+    expect(worker).toMatch(/fresh\.approvedEntries > 0/);
+    expect(worker).toMatch(/briefWorkConfirmed", \{ count: fresh\.approvedEntries, skills: fresh\.skillsConfirmed \}/);
+    expect(worker).toMatch(/addChip\("player-card", t\("chipMyCard"\)\)/);
+    // After the instruction rung (a manager waiting outranks good news), inside its own try, gated by the cap.
+    expect(worker.indexOf("listAttentionInstructions()")).toBeLessThan(worker.indexOf("loadOwnRecentConfirmations"));
+    const rung = worker.slice(worker.indexOf("// 3a' ──"), worker.indexOf("// 3b ── unread human messages"));
+    expect(rung).toMatch(/^\s*try \{/m);
+    expect(rung).toMatch(/\} catch \{/);
+    expect(rung).toMatch(/lines\.length < MAX_LINES/);
+    // No parallel notification truth: the brief imports the journal read, not a notifications table.
+    expect(SRC).toMatch(/from "@\/lib\/journal\/own-recent-confirmations"/);
+    expect(SRC).not.toMatch(/notifications/);
+  });
+
+  it("the chat routes the card chip to the SAME card the sentence opens, and the copy exists in all 11 locales", () => {
+    const chat = readFileSync(join(APP, "components", "app", "conversation", "chat", "conversation-chat.tsx"), "utf8");
+    const kase = chat.slice(chat.indexOf('case "player-card":'), chat.indexOf('case "logwork":'));
+    expect(kase).toMatch(/startPlayerCard\(\);/);
+    for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
+      const c = JSON.parse(readFileSync(join(APP, "messages", locale + ".json"), "utf8")).conversation.chat as Record<string, string>;
+      expect(c.briefWorkConfirmed, locale).toMatch(/\{count, plural/);
+      expect(c.briefWorkConfirmed, locale).toMatch(/\{skills\}/);
+      expect(c.chipMyCard, locale).toBeTruthy();
+    }
+  });
+
+  it("the brief copy exists in the five routed locales (same parity as the existing brief keys)", () => {
+    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+      const chat = JSON.parse(readFileSync(join(APP, "messages", `${locale}.json`), "utf8")).conversation.chat as Record<string, string>;
+      for (const key of ["briefAgencyOffersAwaiting", "briefAgencySharedWithoutOffer", "briefAgencyClientsPending", "briefEduLearnerInvitesPending", "briefDocumentsExpiring", "briefDocumentsMissing", "briefEmployerInterestWaiting", "briefEmployerAgencyOffersWaiting", "briefInterestContacted"]) {
+        expect(chat[key], `${locale}.${key}`).toMatch(/\{count, plural/);
+      }
+    }
+  });
+});

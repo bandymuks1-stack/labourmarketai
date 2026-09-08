@@ -8,12 +8,13 @@ import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { MarketingFunnelBeacon } from "@/components/app/marketing-funnel-beacon";
 import { SiteFooter } from "@/components/layouts/site-footer";
 import { SiteNav } from "@/components/layouts/site-nav";
-import { HeroLiveDemo } from "@/components/marketing/hero-live-demo";
+import { PublicEntry } from "@/components/marketing/public-entry";
 import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { TrustBand } from "@/components/marketing/trust-band";
-import { FinalCtaBand } from "@/components/marketing/final-cta-band";
+import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
+import { PublicMarketMapBand } from "@/components/marketing/public-market-map-band";
 import {
   MARKETING_CLIENT_MESSAGE_ROOTS,
   pickMessages,
@@ -37,13 +38,15 @@ import { LandingModeSwitcher } from "./landing-mode-switcher";
  * and `git log --diff-filter=D` shows 5c78ac5 deleted it, so 7179882 is its
  * final production state by definition rather than by judgement.
  *
- * The composition below is that file's, node for node: hero copy + the
- * cinematic <HeroLiveDemo> over the canonical <MarketMap>, then the product
- * chain carrying the #how-it-works anchor, the market proof band, the Player
- * Card showcase, the trust band and the final CTA band — same order, same
- * wrapper classes, same anchor. All six components are the ORIGINALS: they
- * survived #1221 untouched (`git diff 7179882 main -- components/marketing/`
- * is empty) and this change does not modify any of them.
+ * The composition below is that file's, node for node, with ONE section
+ * replaced under the owner's frozen design contract (2026-09-05, package P1):
+ * hero copy + <PublicEntry> — the visitor's own sentence read by the ONE
+ * deterministic router — where the scripted <HeroLiveDemo> scenario used to
+ * play; then the product chain carrying the #how-it-works anchor, the market
+ * proof band, the Player Card showcase, the trust band and the final CTA
+ * band — same order, same wrapper classes, same anchor. The five other
+ * components are the ORIGINALS: they survived #1221 untouched and P1 does
+ * not modify any of them.
  *
  * ── COMPATIBILITY ONLY — NO MODERNISATION ─────────────────────────────────
  * The original rendered inside the (marketing) route group, whose layout
@@ -94,9 +97,13 @@ export async function FocusLanding({
         <main id="main-content" className="relative">
           {/* ── The restored landing body, verbatim from 7179882 ────────── */}
           <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
-            {/* ── Hero: the first screen IS a session — question, AI, map
-                   reaction, result — on the SAME canonical <MarketMap> the
-                   authenticated ResultPanel mounts. ───────────────────── */}
+            {/* ── Entry: the first screen understands a REAL sentence
+                   (frozen design contract 2026-09-05, package P1). The
+                   scripted hero scenario is gone: the visitor's own words go
+                   through the ONE deterministic router, the page says what it
+                   understood, and the auth doors carry the sentence. The
+                   public numbers are the SAME canonical snapshot the market
+                   proof band prints, omitted when the reader cannot answer. */}
             <section className="flex flex-col gap-5">
               <div className="max-w-3xl">
                 <h1 className="font-display text-hero font-bold tracking-tightest text-text-primary">
@@ -106,31 +113,65 @@ export async function FocusLanding({
                   {tHero("sub")}
                 </p>
               </div>
-              <HeroLiveDemo />
+              <PublicEntry
+                supply={
+                  market.activeVacancies !== null && market.distinctEmployers !== null
+                    ? {
+                        vacancies: market.activeVacancies,
+                        employers: market.distinctEmployers,
+                        refreshedAt: market.lastRefreshedAt,
+                      }
+                    : null
+                }
+              />
             </section>
 
+            {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
+                   Second, directly under the entry, because it answers the
+                   question a visitor has immediately after "what is this?" —
+                   *does it work where I am?* The canonical <MarketMap> draws
+                   the markets this product operates in, at real centroids,
+                   and says in words what it is NOT showing.
+
+                   The market PROOF renders INSIDE it. That is the §16 move:
+                   46k vacancies and 8k employers used to be a section of their
+                   own, which made the counts read as the product's definition.
+                   As evidence under the map they support the story instead of
+                   being it. Nothing was removed — same band, same canonical
+                   snapshot, same figures. ─────────────────────────────── */}
+            <PublicMarketMapBand>
+              <MarketProofBand market={market} locale={locale} />
+            </PublicMarketMapBand>
+
+            {/* ── §20 STARTING CONTEXTS ─────────────────────────────────
+                   Moved UP, from the very bottom of a 4,967px page to the
+                   third screen. A visitor who does not want to type a sentence
+                   had to scroll past everything to find a door; §19 asks how
+                   long it takes before someone understands how to start, and
+                   the honest answer was "too long". Same five real
+                   destinations, reframed as contexts (§20). ────────────── */}
+            <StartingContextsBand />
+
             {/* ── The product chain — six links, journal as pivot. Carries
-                   the #how-it-works nav anchor. ─────────────────────────── */}
+                   the #how-it-works nav anchor.
+
+                   Now BELOW the map and the doors (§19). All six steps and all
+                   six bodies are intact — this is a change of order, not of
+                   content: the chain explains the product to someone who has
+                   decided to care, and it was standing between the entry and
+                   the reason to use it. ─────────────────────────────────── */}
             <div id="how-it-works" className="scroll-mt-24">
               <ProductChainBand />
             </div>
 
-            {/* ── Market proof — the CURRENT verified counts from the
-                   canonical public vacancy contract, the same projection the
-                   LIVE panel renders, plus the data-derived top-profession
-                   ranking. Coverage framing only; Sweden is named as the
-                   source of the figures, never as the product's scope. ──── */}
-            <MarketProofBand market={market} locale={locale} />
-
-            {/* ── Player Card + the proof system: fact vs proven skill vs
-                   opinion, and the source-backed market evidence. ──────── */}
+            {/* ── Player Card: the real card, the real component (§19 — kept
+                   in full, moved down). It is the densest thing on the page and
+                   it belongs after the explanation it illustrates, not before
+                   it. ─────────────────────────────────────────────────── */}
             <PlayerCardShowcase />
 
             {/* ── Trust & security — verifiable claims only ─────────────── */}
             <TrustBand />
-
-            {/* ── Final CTA band — four real doors, no dead links ───────── */}
-            <FinalCtaBand />
           </div>
         </main>
         <SiteFooter />

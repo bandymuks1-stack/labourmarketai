@@ -231,6 +231,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    service_role grants posture; the owner resolution moved into the
     //    gated SECURITY DEFINER RPC contact_demand_owner_v1, so the action
     //    no longer touches the admin client at all.)
+    //  - lib/lmc/compensation.ts — typed caller for the production-applied
+    //    lmc_compensate_spend_v1 RPC (commercial safe-prep v1). Service role
+    //    is genuinely required, not convenient: the human-gated migration
+    //    20260828090000 grants EXECUTE on the RPC to service_role ONLY
+    //    (revoked from public/anon/authenticated) — a deliberate posture for
+    //    a credit-creating SECURITY DEFINER function. The wrapper is
+    //    server-only, REQUIRES an explicit actorProfileId, and the RPC
+    //    re-checks that the actor owns the affected account or is an admin —
+    //    the service key opens the front door, never the authority check. It
+    //    calls exactly one RPC, reads/writes no table directly, touches no
+    //    chat table, sends nothing outbound. No product call site yet (no
+    //    spend caller exists); it is the prepared seam for spend-failure
+    //    compensation.
     //  - lib/ai/runtime/audit-store.ts — AI Router v1 append-only run audit.
     //    Best-effort INSERT of one ai_runs row per LIVE AI run + a head-only
     //    COUNT for the daily-run budget. ai_runs by design carries NO
@@ -293,6 +306,37 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    the row carries NO metadata (§19(d): computed fit values are never
     //    persisted), and the same fire-and-forget/service-role posture
     //    applies — no new caller file, no new bypass.
+    //    Completion v1 (notifications) updates the "sends nothing outbound"
+    //    clause for THIS file only: after a successful durable insert the
+    //    awaited deliver path MAY send one notification email through the
+    //    audited transactional adapter (lib/email/transactional.ts) — but
+    //    ONLY where the recipient stored an explicit per-type email opt-in
+    //    (consent-first, default OFF) and the owner configured a real
+    //    provider; otherwise it is a tagged no-op. The same file also gained
+    //    the weekly-digest cron sweep (service-role reads of journal_entries
+    //    / workers to resolve recipients) — still no chat table, still the
+    //    one audited emitter home.
+    //
+    //  - lib/billing/checkout-operations-store.ts — billing safety v1 (owner
+    //    directive 2026-09-05): the SERVER-side checkout-operation identity
+    //    (`billing_checkout_operations`) behind every Checkout Session — the
+    //    row the Stripe idempotency key is derived from, so a double click /
+    //    two tabs / a retry reuse one session. Same billing-table posture as
+    //    subscription-store.ts: the table carries NO authenticated write
+    //    policy by design (admin SELECT only — it is an evidence record), the
+    //    checkout route and the webhook write it with no user-session write
+    //    path. Writes ONLY that table; touches no chat table; sends nothing
+    //    outbound.
+    //  - lib/billing/reconcile.ts — billing safety v1 READ-ONLY reconciliation
+    //    (superadmin-gated by an explicit isSuperadmin() re-check; the
+    //    launch-readiness pattern). Reads billing_subscriptions /
+    //    billing_customers / payment_webhook_events /
+    //    billing_checkout_operations — the last three are admin-SELECT via
+    //    public.is_admin() (active_role only) while the app's admin signal is
+    //    dual, so the service role is the only read path that agrees with the
+    //    app gate. Writes NOTHING (the report states writesPerformed: 0);
+    //    provider access is the adapter's read-only methods; never a charge;
+    //    touches no chat table; sends nothing outbound.
     //
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
@@ -307,9 +351,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
       "lib/ai/runtime/audit-store.ts",
+      "lib/billing/checkout-operations-store.ts",
       "lib/billing/customer-store.ts",
+      "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
+      "lib/lmc/compensation.ts",
       "lib/notifications/event-emitters.ts",
       "lib/sales/lead-intake.ts",
       "lib/usage/usage-cost-store.ts",

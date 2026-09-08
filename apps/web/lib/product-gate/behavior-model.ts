@@ -381,8 +381,38 @@ export const BEHAVIOR_CONFORMANCE = {
   // stays `special_case_per_actor_type` because one action out of 34 does not
   // make a layer — and overstating it here is exactly what this census exists
   // to prevent.
-  conversationActions: 34,
-  actionsAnchoredToAPage: 34,
+  // 2026-09-04: +1 — `company.invite-worker` (roster invitation by sentence,
+  // real recruiter pilot). Still anchored to a page; still keyed to an actor
+  // type, so the verdict below is unchanged.
+  // 2026-09-04 (owner contract §15): +4 — `company.create-programme`,
+  // `company.create-cohort`, `company.assign-learner`,
+  // `company.invite-learner` (the institution's commands by sentence over
+  // the ONE dispatcher). Still anchored to a page; still keyed to an actor
+  // type (the company holding `training_provider`), so the verdict stands.
+  // 2026-09-05 (owner contract §11): +1 — `company.move-worker`, the what-if
+  // move's confirmed commit over the two canonical assignment RPCs. Anchored
+  // to the projects page; keyed to the company actor type; verdict unchanged.
+  // 2026-09-05 (owner contract §14): +1 — `company.update-task-status`, a
+  // task moved to a real status by sentence over the ONE status core. Its
+  // role gate is the union company / agency / worker because the RPC
+  // re-derives the row authority (creator / assignee / project manager) —
+  // still keyed to actor TYPES, not to a relationship; anchored to the tasks
+  // page; verdict unchanged.
+  // 2026-09-05 (owner contract §11/§12/§16): +3 — the READINESS journey's
+  // corrective actions offered right after "kas trūksta projektui X?":
+  // `company.set-readiness-item`, `company.seed-readiness-checklist` (the
+  // operations page's own checklist writes) and `company.request-readiness`
+  // (a work instruction in the project's thread). Anchored to the projects
+  // page; keyed to the company actor type; verdict unchanged.
+  // 2026-09-05 (owner contract §14): +2 — `company.confirm-work` (the inbox's
+  // one-tap confirm by chip) and `company.enable-journal-review` (the
+  // membership RPC). Anchored to the inbox; keyed to the company actor
+  // type; verdict unchanged.
+  // 2026-09-05 (owner contract 4D): +1 `worker.respond-invitation` (the network
+  // page's own accept, from the attention item). Anchored to the network page;
+  // keyed to the worker actor type; verdict unchanged.
+  conversationActions: 52,
+  actionsAnchoredToAPage: 52,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

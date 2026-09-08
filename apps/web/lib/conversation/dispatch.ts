@@ -30,8 +30,13 @@ import {
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { interestStateFingerprint } from "@/lib/opportunities/interest";
+import { invitationStateFingerprint } from "@/lib/invitations/attention";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { roleContextForAction } from "@/lib/conversation/action-role-context";
 
 /**
  * Server dispatcher (Phase B; employer executors added in PR-E) — the ONLY
@@ -136,20 +141,27 @@ async function stateFingerprint(
       .maybeSingle();
     return `booking:${(data?.status as string) ?? "missing"}`;
   }
+  if (actionId === "worker.respond-invitation") {
+    // Owner contract §4D: THE shared fingerprint (lib/invitations/attention)
+    // — the same domain read the brief and the chat list answer from. Pending
+    // in the caller's own list = acceptable; anything else (accepted, expired,
+    // revoked, addressed to another e-mail, unreadable) reads as absent, so a
+    // token minted while pending goes stale the moment the row leaves that
+    // state. The dispatcher asks the domain, it does not query.
+    return invitationStateFingerprint(
+      input.source === "invitation"
+        ? { source: "invitation", invitationId: String(input.invitationId) }
+        : { source: input.source === "agency_roster" ? "agency_roster" : "company_roster", orgId: String(input.orgId) },
+    );
+  }
   if (actionId === "worker.express-interest") {
-    const { data: worker } = await supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", userId)
-      .maybeSingle();
-    if (!worker?.id) return "interest:no-worker";
-    const { data } = await supabase
-      .from("demand_interest_signals")
-      .select("status")
-      .eq("worker_id", worker.id)
-      .eq("request_id", String(input.requestId))
-      .maybeSingle();
-    return `interest:${(data?.status as string) ?? "none"}`;
+    // G4 tail wagon 1: THE shared fingerprint (lib/opportunities/interest) —
+    // the capability draft→confirm flow binds its tokens to the same fact,
+    // so the two transports can never disagree about staleness.
+    return interestStateFingerprint(
+      { supabase, userId },
+      String(input.requestId),
+    );
   }
   if (actionId === "engagement.end") {
     /**
@@ -350,5 +362,21 @@ export async function dispatchWorkerAction(
   // the own-property key check), so this is the id-matched input by
   // construction; `never` is the safe common parameter type, not a cast away
   // from validation.
-  return executor(parsed.data as never, { locale: opts?.locale ?? "lt", workspace });
+  // Chat-first execution funnel (2026-09-04): the attempt and the persisted
+  // result are recorded HERE, in the one dispatcher every conversation write
+  // passes through — so a surface cannot claim an action it never dispatched
+  // and a dispatched action cannot go uncounted. Bounded: action id + coarse
+  // role; fire-and-forget; never on the result path.
+  emitServerFunnelEvent(FUNNEL_EVENTS.chatActionAttempted, {
+    source: "conversation-dispatch",
+    metadata: { surface: "conversation", step: actionId.slice(0, 64), role_context: roleContextForAction(actionId) },
+  });
+  const result = await executor(parsed.data as never, { locale: opts?.locale ?? "lt", workspace });
+  if (result.ok) {
+    emitServerFunnelEvent(FUNNEL_EVENTS.chatActionPersisted, {
+      source: "conversation-dispatch",
+      metadata: { surface: "conversation", step: actionId.slice(0, 64), role_context: roleContextForAction(actionId) },
+    });
+  }
+  return result;
 }

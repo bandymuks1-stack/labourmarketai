@@ -154,6 +154,8 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 | `lib/billing/subscription-store.ts` | **runtime** | **No** — billing tables only (Stripe TEST webhook; no user session exists) | ✅ legitimate; billing tables carry no authenticated write policy by design |
 | `lib/billing/customer-store.ts` | **runtime** | **No** — `billing_customers` only (Stripe TEST multi-subject v2: per-billing-subject customer mapping; webhook/checkout write side has no user session) | ✅ legitimate; same billing-table design — no authenticated write policy, service-role is the only write path; no chat table, nothing outbound |
 | `lib/admin/billing-actions.ts` | **runtime** | **No** — billing tables only (admin manual pilot override, `isSuperadmin`-gated) | ✅ legitimate; same billing-table design |
+| `lib/billing/checkout-operations-store.ts` | **runtime** | **No** — `billing_checkout_operations` only (billing safety v1: the server-side checkout-operation identity the Stripe idempotency key derives from; written by the checkout route and the webhook, neither of which has a user-session write path) | ✅ legitimate; same billing-table design — admin SELECT only, no authenticated write policy, service role is the only write path; no chat table, nothing outbound |
+| `lib/billing/reconcile.ts` | **runtime** | **No** — READ-ONLY over `billing_subscriptions` / `billing_customers` / `payment_webhook_events` / `billing_checkout_operations` (billing safety v1 reconciliation report, `isSuperadmin`-gated) | ✅ legitimate; the last three are admin-SELECT via `public.is_admin()` (active_role only) while the app admin signal is dual, so the service role is the only read path that agrees with the app gate; writes nothing (`writesPerformed: 0`), never charges; no chat table, nothing outbound |
 | `lib/admin/company-need-intakes.ts` | **runtime** | **No** — reads/updates `company_need_public_intakes` only (Public Intake Owner Queue v1, `isSuperadmin`-gated) | ✅ legitimate; the table has no anon/authenticated RLS policy by design (PR #678: write-only via anon RPC, read-only via service role); status update only, writes nothing outbound |
 | `lib/sales/lead-intake.ts` | **runtime** | **No** — READ-ONLY `waitlist` SELECT (§8.14 intake panel, `isSuperadmin`-gated) | ✅ legitimate; `waitlist` has no authenticated read policy by design (0005: anon INSERT only, reads service-role only); writes nothing |
 | `lib/env.ts` | env plumbing (`requireSupabaseServiceEnv`) | No | ✅ |
@@ -280,3 +282,20 @@ audit.
   the runner itself regardless of the admin's wishes. No chat table is read
   or written; nothing is sent outbound. Pinned in the
   `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-09-01 — `lib/lmc/compensation.ts`** (commercial safe-prep v1: typed
+  caller for the production-applied `lmc_compensate_spend_v1` RPC). Service
+  role is genuinely required rather than convenient: the human-gated applied
+  migration `20260828090000_lmc_spend_compensation_v1.sql` (prod ledger
+  `20260828155923`) grants EXECUTE on the RPC to `service_role` ONLY —
+  revoked from `public` and `anon`, never granted to `authenticated` — a
+  deliberate posture for a credit-creating SECURITY DEFINER function. The
+  wrapper is `server-only`, REQUIRES an explicit `actorProfileId`, and the
+  RPC itself re-checks that the actor owns the affected account or is an
+  admin (`lmc_actor_not_authorized` otherwise), enforces idempotency by key
+  and refuses over-compensation — the service key opens the front door,
+  never the authority check. The module calls exactly one RPC and touches no
+  table directly, no chat table, nothing outbound. It has NO product call
+  site yet (the product never calls `lmc_spend_v1`); it is the prepared seam
+  so the first spend caller can pair its failure path with compensation.
+  Pinned in the `chat-visibility-rls.test.ts` caller inventory.

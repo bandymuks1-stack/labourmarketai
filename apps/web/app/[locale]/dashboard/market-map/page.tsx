@@ -12,6 +12,14 @@ import { MarketMapCapture } from "@/components/app/market-map-capture";
 import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readiness";
 import { MapLayersLegend } from "@/components/app/map-layers-legend";
 import { MarketMapEntityLayers } from "@/components/app/market-map-entity-layers";
+import { MarketMap } from "@/components/app/market-map/market-map";
+import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
+import { loadWorldView } from "@/lib/market-map/world-read";
+import {
+  DEFAULT_WORLD_BOUNDS,
+  DEFAULT_WORLD_ZOOM,
+} from "@/lib/market-map/world-model";
+import { loadVacancyVolume } from "@/lib/market-map/vacancy-volume";
 import { getOwnSpatialCollections } from "@/lib/market-map/spatial-read";
 import { emptySpatialCollections } from "@/lib/market-map/spatial-entities";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
@@ -51,6 +59,13 @@ export default async function MarketMapPage({
 
   const tNote = await getTranslations("featureNotes");
   const tMap = await getTranslations("marketMap");
+  // The vacancy layer reuses the market panel's profession +
+  // derived-occupation lexicon — one vocabulary per fact.
+  const tExplanation = await getTranslations("marketExplanation");
+  const tProfessions = await getTranslations("professions");
+  // Marketplace loop reachability (M7): the OFFER half reuses the loop's own
+  // canonical labels (marketplace.hubOffer*) — no parallel copy source.
+  const tMarketplace = await getTranslations("marketplace");
   const tLayers = await getTranslations("mapLayers");
   const tRec = await getTranslations("marketRecognition");
   const tCountries = await getTranslations("labourMarket");
@@ -79,6 +94,25 @@ export default async function MarketMapPage({
   // presence (aggregate-only, §20), company territory, project locations —
   // composed from the caller's own RLS-scoped rows only.
   const spatial = await getOwnSpatialCollections();
+  // THE REAL MARKET on the page named "market map" (this page previously
+  // mounted only self-signal surfaces, while the conversation registry's
+  // "advanced" link for the market result points here — a promise this page
+  // did not keep). Two clearly separated layers, both origin:"live":
+  //  - the WORLD (P8 subset, stage H2): the canonical demand / people /
+  //    projects reads, VIEWPORT-BOUNDED, clustered, capped at 60 places with
+  //    the folded remainder counted — first rendered here for the default
+  //    Europe viewport, then re-read by the client for the real viewport
+  //    on every pan/zoom (`lib/market-map/world-read.ts`); and
+  //  - public vacancy volume for the caller's occupation, projected from the
+  //    EXISTING authenticated `getPublicMarketFacts` aggregate.
+  const [initialWorld, vacancyVolume] = await Promise.all([
+    loadWorldView({
+      bounds: DEFAULT_WORLD_BOUNDS,
+      zoom: DEFAULT_WORLD_ZOOM,
+      layer: "demand",
+    }),
+    loadVacancyVolume(),
+  ]);
   const spatialCollections = spatial?.collections ?? emptySpatialCollections();
   const companyTerritorySource = spatial?.companyTerritorySource ?? "error";
   const countryNames = Object.fromEntries(
@@ -206,6 +240,77 @@ export default async function MarketMapPage({
           exists; the active context only changes the focused layer/panel below,
           never whether a separate map exists. */}
       <MarketMapBase identity={mapIdentity} />
+      {/* ── THE WORLD ────────────────────────────────────────────────────
+          The canonical demand / people / projects layers on the canonical
+          <MarketMap>, viewport-bounded and clustered (≤60 places on screen,
+          the rest COUNTED — "N more places, zoom in"), FACT / DERIVED named
+          in words, honest per-layer states (error ≠ empty ≠ no known places),
+          and the same places as a list (design S). Replaces the unbounded
+          live-demand map this section used to draw; the conversation's own
+          market result (`loadMarketResult`) is untouched. */}
+      <WorldDiscovery initial={initialWorld} />
+      {/* Public vacancy volume for the caller's occupation — the
+          `getPublicMarketFacts` aggregate (imported public advertisements,
+          authenticated read) projected onto the same canonical map as its own
+          layer. The covered countries are DERIVED from the data and named in
+          the copy: the source's true current scope, never a product boundary.
+          No profession and no data render nothing; an advertised-nothing
+          market renders as words, never as an empty-looking map. */}
+      {vacancyVolume.kind === "ok" ? (
+        <section
+          className="flex flex-col gap-2"
+          data-testid="market-map-vacancy-volume"
+        >
+          <h2 className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+            {tMap("vacancyVolume.title")}
+          </h2>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {tMap("vacancyVolume.scope", {
+              count: vacancyVolume.data.activeAds,
+              profession: tProfessions.has(vacancyVolume.data.professionSlug)
+                ? tProfessions(vacancyVolume.data.professionSlug)
+                : vacancyVolume.data.professionSlug,
+              countries: vacancyVolume.data.countries
+                .map((code) =>
+                  tCountries.has(`countryNames.${code}`)
+                    ? tCountries(`countryNames.${code}`)
+                    : code,
+                )
+                .join(", "),
+            })}
+          </p>
+          {vacancyVolume.data.derived ? (
+            <p
+              className="text-xs leading-relaxed text-text-muted"
+              data-testid="market-map-vacancy-volume-derived"
+            >
+              {tExplanation("derivedFromWork")}
+            </p>
+          ) : null}
+          <MarketMap view={vacancyVolume.data.view} mode="result" layer="jobs" />
+          {!vacancyVolume.data.rankingWindowCoversAll ? (
+            <p
+              className="text-xs leading-relaxed text-text-muted"
+              data-testid="market-map-vacancy-volume-window"
+            >
+              {tMap("vacancyVolume.window", {
+                window: vacancyVolume.data.rankingWindowAds,
+              })}
+            </p>
+          ) : null}
+        </section>
+      ) : vacancyVolume.kind === "empty" ? (
+        <p
+          className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-secondary"
+          data-testid="market-map-vacancy-volume-none"
+        >
+          {tExplanation("noneOpen", {
+            profession: tProfessions.has(vacancyVolume.professionSlug)
+              ? tProfessions(vacancyVolume.professionSlug)
+              : vacancyVolume.professionSlug,
+          })}
+        </p>
+      ) : null}
       {/* Unified layers panel — the real visible-now layers WITH state on the
           SAME map: my person signal (active), the selected company (incomplete
           when it has no confirmed location), own needs (off-map until
@@ -252,13 +357,25 @@ export default async function MarketMapPage({
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tMap("connections.title")}
         </span>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2">
           {[
             {
               key: "marketplace",
               href: "/dashboard/service-requests",
               label: tMap("connections.marketplace"),
               note: tMap("connections.marketplaceNote"),
+            },
+            {
+              // Marketplace loop reachability (M7): the loop's OFFER half.
+              // Until this link the only door to /dashboard/services was the
+              // cross-link inside /dashboard/service-requests itself — a
+              // provider could not discover where to publish an offering.
+              // Existing route + existing i18n keys; every identity may offer
+              // services (registry: services.roles = ALL_ROLES).
+              key: "services",
+              href: "/dashboard/services",
+              label: tMarketplace("hubOffer"),
+              note: tMarketplace("hubOfferNote"),
             },
             {
               key: "opportunities",

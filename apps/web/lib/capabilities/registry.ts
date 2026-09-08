@@ -1,19 +1,51 @@
 import "server-only";
 
 import { z } from "zod";
-import { createHash } from "node:crypto";
 import { getTranslations } from "next-intl/server";
 
-import { env } from "@/lib/env";
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
 import { fd } from "@/lib/conversation/executor-contract";
+import { readProfileRow } from "@/lib/auth/session-profile";
+import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
+import { listJournalEntries } from "@/lib/journal/journal-list-core";
+import { listWorkspaceMemberships } from "@/lib/company/active-organization";
+import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
+import {
+  expressInterestCore,
+  interestStateFingerprint,
+  listVisibleDemandsForCaller,
+} from "@/lib/opportunities/interest";
+import { safeApprovedCompanyName } from "@/lib/opportunities/opportunity-fit";
 
 import {
-  canonicalInputHash,
-  issueConfirmationToken,
-  verifyConfirmationToken,
-} from "@/lib/conversation/confirmation-token";
-import { workerLogWorkSchema } from "@/lib/conversation/worker-schemas";
+  mintCapabilityConfirmation,
+  verifyCapabilityConfirmation,
+} from "./confirmable";
+import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
+import {
+  workerExpressInterestSchema,
+  workerLogWorkSchema,
+  workerSaveWorkCardFields,
+  workerSaveWorkCardSchema,
+} from "@/lib/conversation/worker-schemas";
+import {
+  normalizeCountryList,
+  saveWorkerCardCore,
+  workCardStateFingerprint,
+} from "@/lib/worker/work-card-core";
+import {
+  demandStateFingerprint,
+  submitDemandRequestCore,
+} from "@/lib/demand/demand-request";
+import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
+import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
+import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
+import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { orgDisplayName } from "@/lib/company/org-display";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
 import type {
   CapabilityCaller,
@@ -43,26 +75,29 @@ const profileGet: CapabilityDescriptor = {
     "state, and whether a worker profile exists. Facts as recorded — no " +
     "derived scores.",
   exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: z.object({}).strict(),
   run: async (caller): Promise<ExecResult> => {
-    const { data: profile, error } = await caller.supabase
-      .from("profiles")
-      .select("id, full_name, email, locale, country, onboarded, active_role")
-      .eq("id", caller.userId)
-      .maybeSingle();
-    if (error) {
+    // G4 bridge: the SAME profile-row core the web session shell reads
+    // (`getSessionProfile` → readProfileRow) and the SAME workers-row core
+    // every web navigation reads (`getWorkerCoreRow` → readWorkerCoreRow) —
+    // one query contract per table, no capability-side re-implementation.
+    const read = await readProfileRow(caller);
+    if (!read.ok) {
       // A failed read is "unavailable", never "you have no profile" (#1314).
       return { ok: false, code: "unavailable", message: "Profile read failed." };
     }
+    const profile = read.value;
     if (!profile) {
       return { ok: false, code: "not_found", message: "No profile row for this account." };
     }
 
-    const { data: worker, error: workerError } = await caller.supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", caller.userId)
-      .maybeSingle();
+    const workerRead = await readWorkerCoreRow(caller);
 
     return {
       ok: true,
@@ -77,10 +112,10 @@ const profileGet: CapabilityDescriptor = {
           activeRole: profile.active_role,
         },
         // Three-valued on purpose: unknown ≠ absent.
-        worker: workerError
+        worker: !workerRead.ok
           ? { status: "unavailable" as const }
-          : worker
-            ? { status: "exists" as const, workerId: worker.id }
+          : workerRead.value
+            ? { status: "exists" as const, workerId: workerRead.value.id }
             : { status: "none" as const },
       },
     };
@@ -97,16 +132,20 @@ const livingCvSkillsGet: CapabilityDescriptor = {
     "The caller's own declared and journal-backed skills with their " +
     "verification state and source — the same rows the web Living CV reads.",
   exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: z.object({}).strict(),
   run: async (caller): Promise<ExecResult> => {
-    const { data: worker, error: workerError } = await caller.supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", caller.userId)
-      .maybeSingle();
-    if (workerError) {
+    // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
       return { ok: false, code: "unavailable", message: "Worker read failed." };
     }
+    const worker = workerRead.value;
     if (!worker) {
       return {
         ok: false,
@@ -115,13 +154,10 @@ const livingCvSkillsGet: CapabilityDescriptor = {
       };
     }
 
-    // The identical read GET /api/workers/:id/skills serves, joined to the
-    // catalogue slug so the rows are meaningful outside the web UI.
-    const { data, error } = await caller.supabase
-      .from("worker_skills")
-      .select("skill_id, verified, source, verified_at, skills(slug)")
-      .eq("worker_id", worker.id);
-    if (error) {
+    // G4 bridge: THE canonical worker_skills core — the same rows every web
+    // navigation reads through `getWorkerSkillRows` (and the web Living CV).
+    const skillsRead = await readWorkerSkillRows(caller, worker.id);
+    if (!skillsRead.ok) {
       return { ok: false, code: "unavailable", message: "Skills read failed." };
     }
 
@@ -129,9 +165,9 @@ const livingCvSkillsGet: CapabilityDescriptor = {
       ok: true,
       data: {
         workerId: worker.id,
-        skills: (data ?? []).map((r) => ({
+        skills: skillsRead.value.map((r) => ({
           skillId: r.skill_id,
-          slug: (r.skills as { slug: string | null } | null)?.slug ?? null,
+          slug: r.skills?.slug ?? null,
           verified: r.verified,
           source: r.source,
           verifiedAt: r.verified_at,
@@ -141,23 +177,71 @@ const livingCvSkillsGet: CapabilityDescriptor = {
   },
 };
 
-// ── journal.create_draft / journal.confirm ─────────────────────────────────
+// ── journal.list ───────────────────────────────────────────────────────────
 
-/**
- * Domain-separated signing secret for CAPABILITY confirmation tokens. Same
- * derivation pattern as the conversation dispatcher's, different purpose
- * string — a token minted for one surface can never be replayed on the other.
- */
-function capabilityTokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!material) {
-    throw new Error(
-      "capability confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
-    );
-  }
-  return createHash("sha256").update(`capability-confirmation:v1:${material}`).digest("hex");
-}
+const journalListInput = z
+  .object({
+    limit: z.number().int().min(1).max(50).optional(),
+  })
+  .strict();
+
+const journalList: CapabilityDescriptor = {
+  id: "journal.list",
+  kind: "read",
+  title: "My Work Journal entries",
+  description:
+    "The caller's own most recent Work Journal entries — the same live rows " +
+    "the web journal page shows: entry text, creation time, recorded metrics " +
+    "(including the work_date metric), and confirmation count. Newest first. " +
+    "`limit` bounds the read (default 20, max 50); a page may carry fewer " +
+    "live rows than the limit when older revisions were superseded.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: journalListInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = journalListInput.parse(input);
+    // G4 bridge: THE canonical journal-list core — the exact read the web
+    // journal page performs (v3 lifecycle select + legacy fallback).
+    const read = await listJournalEntries(caller, { limit: parsed.limit ?? 20 });
+    if (!read.ok) {
+      return read.code === "no_worker"
+        ? {
+            ok: false,
+            code: "no_worker_profile",
+            message: "This account has no worker profile, so it has no Work Journal.",
+          }
+        : { ok: false, code: "unavailable", message: "Journal read failed." };
+    }
+    return {
+      ok: true,
+      data: {
+        workerId: read.workerId,
+        entries: read.entries.map((e) => ({
+          entryId: e.id,
+          text: e.original_text,
+          createdAt: e.created_at,
+          engagementContextId: e.engagement_context_id ?? null,
+          metrics: (e.journal_entry_metrics ?? []).map((m) => ({
+            slug: m.metric_slug,
+            valueText: m.value_text,
+            valueNumeric: m.value_numeric,
+            unitSlug: m.unit_slug,
+          })),
+          confirmations: (e.journal_entry_confirmations ?? []).length,
+        })),
+      },
+    };
+  },
+};
+
+// ── journal.create_draft / journal.confirm ─────────────────────────────────
+// (Confirmation wiring lives in ./confirmable — ONE minting/verification
+// semantics for every bridged write capability, G4 tail wagon 1.)
 
 /**
  * The confirmation token's state fingerprint is the caller's JOURNAL CHAIN
@@ -170,17 +254,15 @@ function capabilityTokenSecret(): string {
 async function journalChainFingerprint(
   caller: CapabilityCaller,
 ): Promise<{ ok: true; fingerprint: string } | { ok: false; result: ExecResult }> {
-  const { data: worker, error: workerError } = await caller.supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", caller.userId)
-    .maybeSingle();
-  if (workerError) {
+  // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
+  const workerRead = await readWorkerCoreRow(caller);
+  if (!workerRead.ok) {
     return {
       ok: false,
       result: { ok: false, code: "unavailable", message: "Worker read failed." },
     };
   }
+  const worker = workerRead.value;
   if (!worker) {
     return {
       ok: false,
@@ -210,6 +292,195 @@ async function journalChainFingerprint(
   };
 }
 
+/**
+ * A CONFIRMATION HASH MUST NOT DEPEND ON null-vs-absent. The draft side may
+ * receive `siteName` as absent while the confirming client copies the
+ * preview's explicit `null` back (that is exactly what an MCP model does) —
+ * JSON drops the absent key and keeps the null one, so the same draft would
+ * hash differently and every confirm would die as `input_mismatch`. Both
+ * sides hash THIS normalized shape.
+ */
+function normalizedDraftForHash(draft: {
+  engagementContextId: string;
+  notes: string;
+  workDate: string;
+  siteName?: string | null;
+}): Record<string, unknown> {
+  return {
+    engagementContextId: draft.engagementContextId,
+    notes: draft.notes,
+    workDate: draft.workDate,
+    siteName: draft.siteName ?? null,
+  };
+}
+
+/**
+ * WHICH ENGAGEMENT CONTEXT — capability edition (§18 of the chat-first
+ * audit: a user must never need an internal UUID to get value).
+ *
+ * `engagementContextId` is an internal id no external client can discover, so
+ * the draft capability resolves it the SAME way the web work-log flow does:
+ * the caller's own active professional contexts under their own RLS, decided
+ * by the canonical rule hierarchy (`resolveEngagementContext`, rules B/C/D).
+ * On real ambiguity (rule C) it returns the labeled options and mints NO
+ * token — the client must ask the human, exactly like the web flow. A
+ * requested id that is NOT one of the caller's own contexts gets the same
+ * labeled-options answer, never a token: the write core would refuse the
+ * draft anyway, and a token for an unconfirmable draft is a lie in waiting.
+ */
+type DraftEngagementOutcome =
+  | { kind: "selected"; id: string; label: string | null }
+  | {
+      kind: "choice";
+      reason: "ambiguous" | "unknown_requested_id";
+      options: { id: string; label: string }[];
+    }
+  | { kind: "refused"; result: ExecResult };
+
+async function resolveDraftEngagementContext(
+  caller: CapabilityCaller,
+  workDate: string,
+  requestedId: string | undefined,
+): Promise<DraftEngagementOutcome> {
+  const { data: rows, error } = await caller.supabase
+    .from("engagement_contexts")
+    .select(
+      "id, relationship_slug, title, is_primary, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)",
+    )
+    .eq("profile_id", caller.userId)
+    .eq("status", "active")
+    .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS])
+    .order("is_primary", { ascending: false });
+  if (error) {
+    return {
+      kind: "refused",
+      result: { ok: false, code: "unavailable", message: "Engagement context read failed." },
+    };
+  }
+
+  const tRelationships = await getTranslations({
+    locale: caller.locale,
+    namespace: "relationshipTypes",
+  });
+  const relationshipLabel = (slug: string): string =>
+    tRelationships.has(slug) ? tRelationships(slug) : slug;
+
+  type Row = {
+    id: string;
+    relationship_slug: string;
+    title: string | null;
+    is_primary: boolean | null;
+    organization_id: string | null;
+    status: string | null;
+    started_at: string | null;
+    ended_at: string | null;
+    organizations: { display_name: string | null; legal_name: string | null } | null;
+  };
+  const contexts = (rows ?? []) as unknown as Row[];
+
+  // Same qualification rule as the web work-log selector
+  // (lib/conversation/worklog-engagements.ts): a base label that occurs more
+  // than once is qualified by its relationship, a unique one is left as-is.
+  // Without it, two contexts at the same organization (or two org-less ones
+  // sharing a relationship) render as the identical word and the choice the
+  // options exist to offer cannot actually be made.
+  const withBase = contexts.map((row) => ({
+    row,
+    base:
+      orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name) ??
+      row.title ??
+      relationshipLabel(row.relationship_slug),
+  }));
+  const baseCounts = new Map<string, number>();
+  for (const { base } of withBase) {
+    baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+  }
+  const labelById = new Map<string, string>();
+  for (const { row, base } of withBase) {
+    const duplicated = (baseCounts.get(base) ?? 0) > 1;
+    labelById.set(
+      row.id,
+      duplicated ? `${base} — ${relationshipLabel(row.relationship_slug)}` : base,
+    );
+  }
+
+  // An explicitly named context must be one of the caller's OWN — the real
+  // ChatGPT write E2E (2026-08-30) showed a model fabricating a nil-UUID id,
+  // and passing it through minted a confirmation token for a draft the write
+  // core could never accept. A fabricated/foreign id gets the caller's real
+  // labeled options back instead of a dead-end token.
+  if (requestedId) {
+    const named = contexts.find((r) => r.id === requestedId);
+    if (named) {
+      return {
+        kind: "selected",
+        id: requestedId,
+        label: labelById.get(named.id) ?? null,
+      };
+    }
+    if (contexts.length > 0) {
+      return {
+        kind: "choice",
+        reason: "unknown_requested_id",
+        options: contexts.map((r) => ({ id: r.id, label: labelById.get(r.id)! })),
+      };
+    }
+    return {
+      kind: "refused",
+      result: {
+        ok: false,
+        code: "no_engagement_context",
+        message:
+          "The given engagementContextId does not belong to this account, and the account has no active work context to offer instead.",
+      },
+    };
+  }
+
+  const candidates: EngagementCandidate[] = contexts.map((r) => ({
+    id: r.id,
+    relationshipSlug: r.relationship_slug,
+    organizationId: r.organization_id,
+    status: r.status ?? "active",
+    startedAt: r.started_at,
+    endedAt: r.ended_at,
+    isPrimary: r.is_primary === true,
+  }));
+  const resolution = resolveEngagementContext({ candidates, workDay: workDate });
+  if (resolution.selectedId) {
+    return {
+      kind: "selected",
+      id: resolution.selectedId,
+      label: labelById.get(resolution.selectedId) ?? null,
+    };
+  }
+  if (resolution.rule === "C") {
+    const applicable = new Set(resolution.candidateIds);
+    return {
+      kind: "choice",
+      reason: "ambiguous",
+      options: contexts
+        .filter((r) => applicable.has(r.id))
+        .map((r) => ({ id: r.id, label: labelById.get(r.id)! })),
+    };
+  }
+  return {
+    kind: "refused",
+    result: {
+      ok: false,
+      code: "no_engagement_context",
+      message:
+        "No active engagement context can hold this entry — the account has no usable work context.",
+    },
+  };
+}
+
+/** Capability-level draft input: `engagementContextId` becomes OPTIONAL here
+ *  (and only here) — when absent the capability resolves it by the canonical
+ *  rule hierarchy above. The conversation dispatcher's contract is untouched. */
+const journalDraftInput = workerLogWorkSchema.extend({
+  engagementContextId: z.uuid().optional(),
+});
+
 const journalCreateDraft: CapabilityDescriptor = {
   id: "journal.create_draft",
   kind: "draft",
@@ -217,31 +488,73 @@ const journalCreateDraft: CapabilityDescriptor = {
   description:
     "Validates a Work Journal entry and returns the exact preview that " +
     "would be saved, plus a one-time confirmation token. NOTHING is written. " +
+    "engagementContextId may be omitted: the entry's work context is then " +
+    "resolved from the caller's own active contexts, and on real ambiguity " +
+    "the labeled options are returned so the user can choose by name. " +
     "Uses the same input contract as the web chat work-log form.",
   // Exposed since the journal-write extraction landed (owner-approved
   // 2026-08-29 §6): journal.confirm now performs the real canonical write,
   // so the draft it prepares leads somewhere true.
   exposed: true,
-  inputSchema: workerLogWorkSchema,
+  // Read-only is HONEST here: a draft mints a token and writes NOTHING —
+  // the write happens only in journal.confirm.
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: journalDraftInput,
   run: async (caller, input): Promise<ExecResult> => {
-    const draft = workerLogWorkSchema.parse(input);
+    const draft = journalDraftInput.parse(input);
+    const engagement = await resolveDraftEngagementContext(
+      caller,
+      draft.workDate,
+      draft.engagementContextId,
+    );
+    if (engagement.kind === "refused") return engagement.result;
+    if (engagement.kind === "choice") {
+      // NOTHING preselected, NO token minted — the client must ask the human,
+      // exactly like the web work-log flow. Two ways here: real ambiguity
+      // (rule C) or a requested id that is not one of the caller's own.
+      return {
+        ok: true,
+        data: {
+          status: "engagement_choice_required",
+          options: engagement.options,
+          note:
+            engagement.reason === "unknown_requested_id"
+              ? "The given engagementContextId is not one of this account's active work contexts — nothing was drafted. Ask the user to choose one of these options, then draft again with the chosen engagementContextId."
+              : "This entry could belong to more than one work context. Ask the user to choose, then draft again with the chosen engagementContextId.",
+        },
+      };
+    }
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
-    const token = issueConfirmationToken(capabilityTokenSecret(), {
+    const resolved = {
+      engagementContextId: engagement.id,
+      notes: draft.notes,
+      workDate: draft.workDate,
+      siteName: draft.siteName ?? null,
+    };
+    const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
-      inputHash: canonicalInputHash(draft),
+      input: normalizedDraftForHash(resolved),
       userId: caller.userId,
       stateFingerprint: state.fingerprint,
-      issuedAtMs: Date.now(),
     });
     return {
       ok: true,
       data: {
         preview: {
-          workDate: draft.workDate,
-          siteName: draft.siteName ?? null,
-          notes: draft.notes,
-          engagementContextId: draft.engagementContextId,
+          workDate: resolved.workDate,
+          siteName: resolved.siteName,
+          notes: resolved.notes,
+          engagementContextId: resolved.engagementContextId,
+          // The RESOLVED context, named — the human must SEE which context
+          // the entry will land in before confirming (preselect-and-show,
+          // never silently assign).
+          engagementLabel: engagement.label,
         },
         confirmationToken: token,
         note: "Nothing was saved. Confirming requires journal.confirm with this exact draft and token.",
@@ -268,18 +581,28 @@ const journalConfirm: CapabilityDescriptor = {
   // the caller's RLS, with the identical FormData mapping the conversation
   // executor uses (worker-executors.ts "worker.log-work"). No fork.
   exposed: true,
+  // A real write — but APPEND-ONLY (never destroys data) and one-time-token
+  // gated, so a duplicate retry with the same arguments cannot write twice.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: journalConfirmInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = journalConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
-    const verdict = verifyConfirmationToken(capabilityTokenSecret(), confirmationToken, {
+    const verdict = verifyCapabilityConfirmation({
       actionId: "journal.confirm",
-      input: draft,
+      token: confirmationToken,
+      // Same null-vs-absent normalization the draft hashed — see
+      // normalizedDraftForHash.
+      input: normalizedDraftForHash(draft),
       userId: caller.userId,
       currentStateFingerprint: state.fingerprint,
-      nowMs: Date.now(),
     });
     if (!verdict.ok) {
       return {
@@ -324,13 +647,884 @@ const journalConfirm: CapabilityDescriptor = {
   },
 };
 
+// ── interest.express_draft / interest.express_confirm ──────────────────────
+// G4 tail wagon 1: the FIRST schema'd conversation write bridged through the
+// capability architecture. `conversationActionId` links both halves to
+// `worker.express-interest` — same zod schema, same confirmation tier
+// (important_write → draft/confirm), same state fingerprint, same domain
+// core (`expressInterestCore`). No parallel implementation anywhere.
+
+/** Capability-level draft input: `requestId` becomes OPTIONAL here (and only
+ *  here) — when absent or unknown the caller's VISIBLE demands come back as
+ *  labeled options, so no external client ever needs to invent a UUID
+ *  (#1360 lesson, applied before the defect this time). */
+const interestDraftInput = workerExpressInterestSchema.extend({
+  requestId: z.uuid().optional(),
+});
+
+/** The confirmation hash must not depend on null-vs-absent `note` — the
+ *  journal pair's normalizedDraftForHash lesson, same rule here. */
+function normalizedInterestForHash(draft: {
+  requestId: string;
+  note?: string | null;
+}): Record<string, unknown> {
+  return { requestId: draft.requestId, note: draft.note ?? null };
+}
+
+/** Human label for a board row — approved facts only (role text, the safe
+ *  approved company name, the safe location label). Never free text from a
+ *  non-approved route. */
+function demandOptionLabel(row: Record<string, unknown>): string {
+  const role =
+    typeof row.role_text === "string" && row.role_text.trim() !== ""
+      ? row.role_text.trim()
+      : String(row.id);
+  const company = safeApprovedCompanyName(row);
+  const location =
+    typeof row.location_label === "string" && row.location_label.trim() !== ""
+      ? row.location_label.trim()
+      : typeof row.country === "string" && row.country.trim() !== ""
+        ? row.country.trim()
+        : null;
+  const suffix = [company, location].filter((v): v is string => v !== null);
+  return suffix.length > 0 ? `${role} — ${suffix.join(", ")}` : role;
+}
+
+const interestExpressDraft: CapabilityDescriptor = {
+  id: "interest.express_draft",
+  kind: "draft",
+  conversationActionId: "worker.express-interest",
+  title: "Draft expressing interest in a demand",
+  description:
+    "Validates expressing interest in a demand the caller can currently SEE " +
+    "on their own opportunity board and returns a human-readable preview " +
+    "plus a one-time confirmation token. NOTHING is sent or stored. " +
+    "requestId may be omitted or unknown — the caller's visible demands " +
+    "come back as labeled options to choose from. The signal is " +
+    "internal-only: the demand's owner sees it on their own view; no email " +
+    "or message leaves the platform.",
+  exposed: true,
+  // Read-only is HONEST: a draft reads the board and mints a token — the
+  // write happens only in interest.express_confirm.
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: interestDraftInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const draft = interestDraftInput.parse(input);
+    // THE board pipeline — the same visibility gate the write re-checks.
+    const rows = await listVisibleDemandsForCaller(caller);
+    if (rows === null) {
+      return { ok: false, code: "unavailable", message: "Opportunity board read failed." };
+    }
+    const row = draft.requestId
+      ? (rows.find((r) => String(r.id) === draft.requestId) ?? null)
+      : null;
+    if (!row) {
+      if (rows.length === 0) {
+        return {
+          ok: false,
+          code: "no_visible_demand",
+          message:
+            "No demands are visible to this account right now, so there is nothing to express interest in.",
+        };
+      }
+      // Unknown, foreign, or omitted id — identical answer (no oracle):
+      // the caller's own options, and NO token.
+      return {
+        ok: true,
+        data: {
+          status: "demand_choice_required",
+          options: rows
+            .slice(0, 20)
+            .map((r) => ({ id: String(r.id), label: demandOptionLabel(r) })),
+          note: "The given requestId is not one of the demands this account can see — nothing was drafted. Ask the user to choose one of these options, then draft again with the chosen id.",
+        },
+      };
+    }
+
+    // Eligibility: an account without a worker profile gets an honest
+    // refusal, never a token for an unconfirmable draft.
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
+      return { ok: false, code: "unavailable", message: "Worker read failed." };
+    }
+    if (!workerRead.value) {
+      return {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it cannot express interest.",
+      };
+    }
+
+    const requestId = draft.requestId as string;
+    // THE shared fingerprint — the same fact the conversation dispatcher
+    // binds its confirmation to (lib/opportunities/interest).
+    const fingerprint = await interestStateFingerprint(caller, requestId);
+    const normalized = normalizedInterestForHash({ requestId, note: draft.note });
+    const token = mintCapabilityConfirmation({
+      actionId: "interest.express_confirm",
+      input: normalized,
+      userId: caller.userId,
+      stateFingerprint: fingerprint,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          requestId,
+          demandLabel: demandOptionLabel(row),
+          note: draft.note ?? null,
+          // HONEST idempotency note: the domain treats a repeat express as a
+          // snapshot refresh, and the human should know it is a repeat.
+          alreadyExpressed: fingerprint === "interest:interested",
+        },
+        confirmationToken: token,
+        note: "Nothing was sent. Confirming requires interest.express_confirm with this exact draft and token.",
+      },
+    };
+  },
+};
+
+const interestConfirmInput = workerExpressInterestSchema.extend({
+  confirmationToken: z.string().min(10),
+});
+
+const interestExpressConfirm: CapabilityDescriptor = {
+  id: "interest.express_confirm",
+  kind: "confirm",
+  conversationActionId: "worker.express-interest",
+  title: "Confirm expressing interest in a demand",
+  description:
+    "Verifies the confirmation token against the exact draft, then performs " +
+    "the canonical express-interest write as the caller. Idempotent by " +
+    "domain design: re-expressing refreshes the stored snapshot and keeps " +
+    "the status. The demand's visibility is re-checked at write time.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: interestConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = interestConfirmInput.parse(input);
+    const { confirmationToken, ...draft } = parsed;
+    const fingerprint = await interestStateFingerprint(caller, draft.requestId);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "interest.express_confirm",
+      token: confirmationToken,
+      input: normalizedInterestForHash(draft),
+      userId: caller.userId,
+      currentStateFingerprint: fingerprint,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). Draft again.`,
+      };
+    }
+
+    // THE canonical core — the identical write the web chat confirmation and
+    // the board button perform. Every precondition re-runs inside it.
+    const result = await expressInterestCore(caller, {
+      requestId: draft.requestId,
+      note: draft.note ?? null,
+    });
+    if (result.kind !== "ok") {
+      const code =
+        result.kind === "no-worker"
+          ? "no_worker_profile"
+          : result.kind === "not-visible"
+            ? "not_visible"
+            : result.kind === "needs-migration"
+              ? "needs_migration"
+              : result.kind === "invalid"
+                ? "invalid"
+                : "unavailable";
+      const message =
+        result.kind === "not-visible"
+          ? "That demand is not visible to this account (it may have closed)."
+          : result.kind === "no-worker"
+            ? "This account has no worker profile, so it cannot express interest."
+            : result.kind === "needs-migration"
+              ? "The interest signal store is not enabled on this environment."
+              : result.kind === "invalid"
+                ? "Invalid request."
+                : "Express-interest failed.";
+      return { ok: false, code, message };
+    }
+    return {
+      ok: true,
+      data: {
+        status: result.status,
+        // Where the richer UI shows the same fact (the action registry's
+        // advanced route for worker.express-interest).
+        structuredDestination: "/dashboard/opportunities",
+      },
+    };
+  },
+};
+
+// ── context.switch ─────────────────────────────────────────────────────────
+
+const contextSwitchInput = z
+  .object({
+    /** "personal", a workspace id, or an organization name from the
+     *  caller's own memberships. */
+    workspace: z.string().min(1).max(200),
+  })
+  .strict();
+
+const contextSwitch: CapabilityDescriptor = {
+  id: "context.switch",
+  kind: "execute",
+  title: "Switch my active workspace",
+  description:
+    "Switches the caller's DURABLE active-workspace pointer — the default " +
+    "new sessions and bearer clients resolve against. An already-open " +
+    "browser session keeps its own in-session choice until changed there. " +
+    "`workspace` is 'personal', a workspace id, or an organization name " +
+    "from the caller's own memberships; an unknown or ambiguous value " +
+    "returns the labeled options and switches NOTHING.",
+  exposed: true,
+  // A real write (the pointer row) — reversible, never destructive, and
+  // repeating the same switch is a no-op.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: contextSwitchInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = contextSwitchInput.parse(input);
+    // G4 bridge: the SAME membership list the web workspace chip renders,
+    // and the SAME switch core the web server actions run.
+    const memberships = await listWorkspaceMemberships(caller);
+
+    const t = await getTranslations({
+      locale: caller.locale,
+      namespace: "capabilities",
+    });
+    const tRelationships = await getTranslations({
+      locale: caller.locale,
+      namespace: "relationshipTypes",
+    });
+    const relationshipLabel = (slug: string): string =>
+      tRelationships.has(slug) ? tRelationships(slug) : slug;
+    // Same duplicate-qualification rule as the work-log selector (#1360):
+    // a base label that occurs more than once gains its relationship.
+    const baseOf = (w: (typeof memberships)[number]): string =>
+      w.kind === "personal" ? t("workspacePersonal") : w.name.trim() || t("notSet");
+    const baseCounts = new Map<string, number>();
+    for (const w of memberships) {
+      const base = baseOf(w);
+      baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+    }
+    const labelOf = (w: (typeof memberships)[number]): string => {
+      const base = baseOf(w);
+      const duplicated = (baseCounts.get(base) ?? 0) > 1;
+      return duplicated && w.kind === "organization" && w.relationship
+        ? `${base} — ${relationshipLabel(w.relationship)}`
+        : base;
+    };
+
+    // Resolution is deliberately EXACT (id, the personal sentinel, or a
+    // full case-insensitive name) — fuzzy sentence matching stays the web
+    // chat's own presentation concern; anything else gets the options.
+    const needle = parsed.workspace.trim().toLowerCase();
+    const matches = memberships.filter(
+      (w) =>
+        w.id.toLowerCase() === needle ||
+        (w.kind === "organization" && w.name.trim().toLowerCase() === needle),
+    );
+    if (matches.length !== 1) {
+      return {
+        ok: true,
+        data: {
+          status: "workspace_choice_required",
+          options: memberships.map((w) => ({ id: w.id, label: labelOf(w) })),
+          note: "The given workspace is not exactly one of the caller's own — nothing was switched. Ask the user to choose, then call again with the chosen workspace id.",
+        },
+      };
+    }
+
+    const target = matches[0];
+    const result = await switchActiveWorkspaceCore(caller, target.id);
+    if (!result.ok) {
+      if (result.code === "needs-migration") {
+        return {
+          ok: false,
+          code: "needs_migration",
+          message:
+            "The durable workspace pointer is not enabled on this environment, so a bearer client cannot switch yet. The web workspace switcher still works.",
+        };
+      }
+      if (result.code === "not-member") {
+        return {
+          ok: false,
+          code: "not_authorized",
+          message: "Not a member of that workspace.",
+        };
+      }
+      return { ok: false, code: "unavailable", message: "Workspace switch failed." };
+    }
+    return {
+      ok: true,
+      data: {
+        status: "switched",
+        workspaceId: target.id,
+        label: labelOf(target),
+        durablePointer: true,
+      },
+    };
+  },
+};
+
+// ── work_card.save draft → confirm (G4 tail wagon 2) ──────────────────────
+//
+// The worker's availability/location/salary card — the SAME
+// `save_worker_card` RPC the web form and the chat `worker.save-work-card`
+// form submit, through ONE domain core (`lib/worker/work-card-core`). The
+// capability adds nothing of its own: partial saves stay the domain rule
+// (an omitted field keeps its value), and the write happens only in the
+// confirm leg after an explicit human confirmation.
+
+/** Which of the card fields this draft actually provides — `undefined` means
+ *  "keep the current value" and must survive the round trip untouched. */
+const WORK_CARD_FIELDS = [
+  "availabilityStatus",
+  "availableFrom",
+  "salaryMin",
+  "salaryMax",
+  "locationCountry",
+  "preferredCountries",
+] as const;
+
+type WorkCardDraft = z.infer<typeof workerSaveWorkCardSchema>;
+
+function providedWorkCardFields(draft: WorkCardDraft): string[] {
+  return WORK_CARD_FIELDS.filter((f) => draft[f] !== undefined);
+}
+
+/** The confirmation hash must not depend on null-vs-absent — absent fields
+ *  are normalized to a sentinel that cannot collide with a real value, so
+ *  "clear this field" (null) and "keep this field" (absent) stay DIFFERENT
+ *  drafts (they are different writes). */
+function normalizedWorkCardForHash(draft: WorkCardDraft): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const f of WORK_CARD_FIELDS) {
+    out[f] = draft[f] === undefined ? "__keep__" : (draft[f] ?? null);
+  }
+  return out;
+}
+
+const workCardSaveDraft: CapabilityDescriptor = {
+  id: "work_card.save_draft",
+  kind: "draft",
+  conversationActionId: "worker.save-work-card",
+  title: "Draft a work-card update",
+  description:
+    "Validates an update to the caller's own work card (availability, " +
+    "available-from date, salary range, location country, preferred " +
+    "countries) and returns a preview of exactly what would change plus a " +
+    "one-time confirmation token. NOTHING is saved. Omitted fields keep " +
+    "their current values; a field sent as null clears it. Confirming " +
+    "requires work_card.save_confirm with this exact draft and token.",
+  exposed: true,
+  // Read-only is HONEST: the draft reads the current card and mints a token —
+  // the write happens only in work_card.save_confirm.
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: workerSaveWorkCardSchema,
+  run: async (caller, input): Promise<ExecResult> => {
+    const draft = workerSaveWorkCardSchema.parse(input);
+    const provided = providedWorkCardFields(draft);
+    if (provided.length === 0) {
+      return {
+        ok: false,
+        code: "nothing_to_save",
+        message:
+          "No card field was provided, so there is nothing to draft. Send at least one field.",
+      };
+    }
+
+    // Eligibility + current values through THE canonical workers-row core.
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
+      return { ok: false, code: "unavailable", message: "Worker read failed." };
+    }
+    if (!workerRead.value) {
+      return {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it has no work card to update.",
+      };
+    }
+    const current = workerRead.value;
+
+    // The honest change preview — current recorded value → drafted value,
+    // only for the fields this draft provides. (Salary currently has no
+    // caller-readable column in the core row; its `from` is honestly null.)
+    const currentByField: Record<string, unknown> = {
+      availabilityStatus: current.availability_status,
+      availableFrom: current.available_from,
+      salaryMin: null,
+      salaryMax: null,
+      locationCountry: current.current_location_country,
+      preferredCountries: current.preferred_countries,
+    };
+    const changes = provided.map((field) => ({
+      field,
+      from: currentByField[field] ?? null,
+      to:
+        field === "preferredCountries"
+          ? normalizeCountryList(draft.preferredCountries ?? null)
+          : field === "locationCountry"
+            ? (draft.locationCountry?.toUpperCase() ?? null)
+            : (draft[field as keyof WorkCardDraft] ?? null),
+    }));
+
+    const fingerprint = await workCardStateFingerprint(caller);
+    const token = mintCapabilityConfirmation({
+      actionId: "work_card.save_confirm",
+      input: normalizedWorkCardForHash(draft),
+      userId: caller.userId,
+      stateFingerprint: fingerprint,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: { changes },
+        confirmationToken: token,
+        note: "Nothing was saved. Confirming requires work_card.save_confirm with this exact draft and token. Omitted fields keep their current values.",
+      },
+    };
+  },
+};
+
+const workCardConfirmInput = workerSaveWorkCardFields.extend({
+  confirmationToken: z.string().min(10),
+});
+
+const workCardSaveConfirm: CapabilityDescriptor = {
+  id: "work_card.save_confirm",
+  kind: "confirm",
+  conversationActionId: "worker.save-work-card",
+  title: "Confirm the work-card update",
+  description:
+    "Verifies the confirmation token against the exact draft, then performs " +
+    "the canonical work-card save as the caller (the same save_worker_card " +
+    "write path as the web form). Partial by design: omitted fields keep " +
+    "their current values.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: workCardConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = workCardConfirmInput.parse(input);
+    const { confirmationToken, ...draft } = parsed;
+    const fingerprint = await workCardStateFingerprint(caller);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "work_card.save_confirm",
+      token: confirmationToken,
+      input: normalizedWorkCardForHash(draft),
+      userId: caller.userId,
+      currentStateFingerprint: fingerprint,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). Draft again.`,
+      };
+    }
+
+    // THE canonical core — the identical write the web form performs. The
+    // token's field set maps 1:1 (absent = keep, the core's own rule).
+    const result = await saveWorkerCardCore(caller, {
+      availabilityStatus: draft.availabilityStatus,
+      availableFrom: draft.availableFrom,
+      salaryMin: draft.salaryMin,
+      salaryMax: draft.salaryMax,
+      locationCountry: draft.locationCountry,
+      preferredCountries: draft.preferredCountries ?? null,
+    });
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message:
+          result.code === "needs_migration"
+            ? "The work-card store is not enabled on this environment."
+            : (result.message ?? "Work-card save failed."),
+      };
+    }
+    return {
+      ok: true,
+      data: {
+        status: "saved",
+        savedFields: providedWorkCardFields(draft),
+        structuredDestination: "/dashboard/profile",
+      },
+    };
+  },
+};
+
+// ── demand.create draft → confirm (G4 wagon 3) ────────────────────────────
+//
+// The employer's structured need onto the ONE canonical intake
+// (`customer_requests`, doctrine §17) — the same `submitDemandRequestCore`
+// write the web form and the chat `company.create-demand` action run,
+// gated by the SAME employer-workspace chain (`requireEmployerCompanyForCaller`
+// → `resolveEmployerCompanyCore`) the web resolves through. The capability
+// "draft" is a token preview and persists NOTHING — the web chat's persisted
+// `customer_requests` draft row (mode:"draft") stays a chat/web concern.
+
+type DemandDraftInput = z.infer<typeof companyCreateDemandFields>;
+
+const DEMAND_FIELDS = [
+  "intent",
+  "description",
+  "role",
+  "location",
+  "skills",
+  "urgency",
+  "notes",
+  "workType",
+  "country",
+  "teamSize",
+  "accommodation",
+  "transport",
+  "opportunityType",
+] as const;
+
+/** null-vs-absent must not change the hash for optional fields — absent and
+ *  null both mean "not stated" to the canonical submit. */
+function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const f of DEMAND_FIELDS) out[f] = draft[f] ?? null;
+  return out;
+}
+
+/** Employer-context refusal → an honest capability failure. `context.switch`
+ *  is named because it is the caller's own way out of the personal space. */
+function demandContextRefusal(reason: string): ExecResult {
+  if (reason === "personal-workspace") {
+    return {
+      ok: false,
+      code: "personal_workspace",
+      message:
+        "The caller is acting in their personal space. A structured need belongs to an organization — switch with context.switch first.",
+    };
+  }
+  if (reason === "no-organization") {
+    return {
+      ok: false,
+      code: "no_organization",
+      message: "This account belongs to no organization, so it cannot create a demand.",
+    };
+  }
+  if (reason === "needs-migration") {
+    return {
+      ok: false,
+      code: "needs_migration",
+      message: "The organization store is not enabled on this environment.",
+    };
+  }
+  return {
+    ok: false,
+    code: "no_company_context",
+    message:
+      "No employer company resolves for this caller right now (workspace not company-bound, membership missing, or the read failed).",
+  };
+}
+
+const demandCreateDraft: CapabilityDescriptor = {
+  id: "demand.create_draft",
+  kind: "draft",
+  conversationActionId: "company.create-demand",
+  title: "Draft a worker-need (demand) request",
+  description:
+    "Validates a structured worker-need for the organization the caller is " +
+    "ACTING FOR (their active workspace), and returns a human-readable " +
+    "preview naming that organization plus a one-time confirmation token. " +
+    "NOTHING is created or sent. `description` is the need in the caller's " +
+    "own words (required); role/location/skills/urgency/notes are optional " +
+    "free text; workType/country/teamSize/accommodation/transport are " +
+    "structured facts a worker's board may later see. Confirming requires " +
+    "demand.create_confirm with this exact draft and token.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: companyCreateDemandFields,
+  run: async (caller, input): Promise<ExecResult> => {
+    const draft = companyCreateDemandFields.parse(input);
+    // THE employer-workspace gate — same chain as the web (wagon 3 core).
+    const employer = await requireEmployerCompanyForCaller(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+
+    const fingerprint = await demandStateFingerprint(caller);
+    const token = mintCapabilityConfirmation({
+      actionId: "demand.create_confirm",
+      input: normalizedDemandForHash(draft),
+      userId: caller.userId,
+      stateFingerprint: fingerprint,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          actingFor: employer.organizationName,
+          intent: draft.intent,
+          role: draft.role ?? null,
+          description: draft.description,
+          teamSize: draft.teamSize ?? null,
+          country: draft.country ?? null,
+          workType: draft.workType ?? null,
+          urgency: draft.urgency ?? null,
+        },
+        confirmationToken: token,
+        note: "Nothing was created. Confirming requires demand.create_confirm with this exact draft and token; the demand will be created for the named organization.",
+      },
+    };
+  },
+};
+
+const demandConfirmInput = companyCreateDemandFields.extend({
+  confirmationToken: z.string().min(10),
+});
+
+const demandCreateConfirm: CapabilityDescriptor = {
+  id: "demand.create_confirm",
+  kind: "confirm",
+  conversationActionId: "company.create-demand",
+  title: "Confirm creating the worker-need (demand) request",
+  description:
+    "Verifies the confirmation token against the exact draft, re-resolves " +
+    "the caller's employer organization at write time, then performs the " +
+    "canonical demand submit (status becomes 'submitted' on the one " +
+    "canonical intake). NOT idempotent by nature — the one-time token is " +
+    "what prevents a replay from creating a second demand.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    // Honest: a demand submit is not idempotent; replay safety comes from the
+    // one-time state-fingerprinted token, not from the write itself.
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+  inputSchema: demandConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = demandConfirmInput.parse(input);
+    const { confirmationToken, ...draft } = parsed;
+    const fingerprint = await demandStateFingerprint(caller);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "demand.create_confirm",
+      token: confirmationToken,
+      input: normalizedDemandForHash(draft),
+      userId: caller.userId,
+      currentStateFingerprint: fingerprint,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). Draft again.`,
+      };
+    }
+
+    // Employer context is re-resolved at WRITE time — a workspace switch
+    // between draft and confirm must not create the demand for the old org
+    // silently. (The fingerprint does not bind the org; this re-check plus
+    // the preview's actingFor name is the honest contract.)
+    const employer = await requireEmployerCompanyForCaller(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+
+    const result = await submitDemandRequestCore(
+      caller,
+      { organizationId: employer.organizationId },
+      draft.intent,
+      {
+        description: draft.description,
+        role: draft.role ?? undefined,
+        location: draft.location ?? undefined,
+        skills: draft.skills ?? undefined,
+        urgency: draft.urgency ?? undefined,
+        notes: draft.notes ?? undefined,
+        workType: draft.workType ?? undefined,
+        country: draft.country ?? undefined,
+        teamSize: draft.teamSize ?? undefined,
+        accommodation: draft.accommodation ?? undefined,
+        transport: draft.transport ?? undefined,
+        // Declared opportunity type → structured cluster (same as the web
+        // and chat legs); absent when not stated.
+        structuredV2: draft.opportunityType ? { opportunity_type: draft.opportunityType } : undefined,
+      },
+    );
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message:
+          result.code === "needs_migration"
+            ? "The demand intake is not enabled on this environment."
+            : result.code === "no_company_context"
+              ? "No employer company resolves for this caller."
+              : result.code === "over_open_need_limit"
+                ? result.next === "individual_plan"
+                  ? "This organization has reached the 10 active positions of the Organization plan. Nothing was charged. For more than 10, contact LabourMarket.ai for an individual plan."
+                  : "This organization's free plan allows 1 active position. Close one, or activate the Organization plan in the organization account."
+                : "Demand submit failed.",
+      };
+    }
+    return {
+      ok: true,
+      data: {
+        status: "submitted",
+        requestId: result.requestId,
+        actingFor: employer.organizationName,
+        structuredDestination: "/dashboard/company",
+      },
+    };
+  },
+};
+
+
+// ── workforce.availability ────────────────────────────────────────────────
+//
+// "Kas laisvas kitą savaitę?" — the FIRST of the owner's company questions to
+// become an authorized canonical action rather than a chat-only answer.
+//
+// It is the SAME `whoIsAvailableCore` the chat calls, over the same three
+// reads (roster, approved absences, committed work), under the caller's own
+// RLS. That matters more here than anywhere: the defect this module carries a
+// scar from was one surface disagreeing with another about who is free, and a
+// second capacity implementation for agents would recreate it by construction.
+
+const workforceAvailabilityInput = z.object({}).strict();
+
+const workforceAvailability: CapabilityDescriptor = {
+  id: "workforce.availability",
+  kind: "read",
+  title: "Who on my roster is free",
+  description:
+    "The caller's own active roster over the next 7 days, in three honest " +
+    "states: free, committed (an accepted booking or an active project " +
+    "assignment), or unavailable (approved leave — the reason is never " +
+    "carried). COMMITTED IS NOT UNAVAILABLE: each row carries `constraint` " +
+    "(none / commitment / hard_constraint) and `overridable`, because a " +
+    "project booked A to B does not consume a person A to B — work runs at " +
+    "variable rates and in parallel, so an overlap is a warning an authorized " +
+    "actor may accept, not a refusal. Reports which of its inputs actually " +
+    "answered, so an unread source is never presented as 'nobody is busy'. " +
+    "Writes nothing.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: workforceAvailabilityInput,
+  run: async (caller): Promise<ExecResult> => {
+    // The employer context is resolved by the caller's OWN chain — the same
+    // gate the demand capabilities pass, never an id from the client.
+    const employer = await requireEmployerCompanyForCaller(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+
+    const result = await whoIsAvailableCore(employer.companyId, {
+      supabase: caller.supabase,
+      userId: caller.userId,
+    });
+    if (result.kind === "empty") {
+      return {
+        ok: true,
+        data: {
+          actingFor: employer.organizationName,
+          rosterTotal: 0,
+          rows: [],
+          note: "This organization has no active roster members, so there is nobody to report on.",
+        },
+      };
+    }
+    if (result.kind !== "ok") {
+      return result.kind === "no-company"
+        ? demandContextRefusal("no-company-binding")
+        : { ok: false, code: "unavailable", message: "The availability read failed." };
+    }
+    return {
+      ok: true,
+      data: {
+        actingFor: employer.organizationName,
+        from: result.from,
+        to: result.to,
+        rosterTotal: result.rosterTotal,
+        rows: result.rows.map((r) => ({
+          label: r.label,
+          state: r.state,
+          // WHAT KIND of thing this is, and whether a legitimate actor may go
+          // ahead anyway. `committed` is real accepted work and is NOT a bar
+          // to more: a project booked A→B does not consume a person A→B, so an
+          // overlap is a warning to weigh, never an automatic refusal.
+          constraint: r.constraint,
+          overridable: r.overridable,
+          notFreeUntil: r.unavailableUntil,
+          committedTo: r.committedTo,
+        })),
+        // WHICH INPUTS ANSWERED. Reported rather than assumed: production
+        // carried zero absence rows and three real commitments, so
+        // "everybody is free" was once produced entirely from signals nobody
+        // had checked. A client must be able to qualify the answer.
+        absencesKnown: result.absencesKnown,
+        commitmentsKnown: result.commitmentsKnown,
+        structuredDestination: "/dashboard/company/planning",
+      },
+    };
+  },
+};
+
 // ── the registry ───────────────────────────────────────────────────────────
 
 const CAPABILITIES: readonly CapabilityDescriptor[] = [
   profileGet,
   livingCvSkillsGet,
+  journalList,
   journalCreateDraft,
   journalConfirm,
+  interestExpressDraft,
+  interestExpressConfirm,
+  workCardSaveDraft,
+  workCardSaveConfirm,
+  demandCreateDraft,
+  demandCreateConfirm,
+  contextSwitch,
+  workforceAvailability,
+  // Organization evidence import — the ELEVEN capabilities that give an
+  // authorized assistant the same historical-import flow the web UI performs,
+  // over the same domain core (`lib/organization-evidence/import-core.ts`).
+  // Declared as a group because they are one flow, not eleven unrelated
+  // actions; each descriptor is still reviewed individually in its own file.
+  ...EVIDENCE_IMPORT_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

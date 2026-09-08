@@ -62,6 +62,8 @@ import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
+import { LearningCompassSection } from "@/components/app/learning-compass-section";
+import { readLearningCompass, type LearningCompassRead } from "@/lib/learning/learning-compass";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
   getOwnWorkerEducation,
@@ -71,16 +73,29 @@ import {
   getOwnWorkerAchievements,
   type WorkerAchievementsRead,
 } from "@/lib/worker/worker-achievements";
+import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
+import { OrganizationEvidenceSection } from "@/components/app/organization-evidence-section";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
-const WORKER_RELATIONSHIPS = [
-  "employee",
-  "freelancer",
-  "consultant",
-  "owner",
-  "collaborator",
-];
+/**
+ * WHICH RELATIONSHIPS THE PROFILE'S HISTORY SHOWS.
+ *
+ * This used to be a LOCAL copy of `WORKER_RELATIONSHIPS`, which is the PAID /
+ * CONTRACTED list — so a study placement or volunteering was filtered out of
+ * the person's own profile. `save_self_declared_work_history_v1` has accepted
+ * `student` and `volunteer` in production since 2026-08-27, and the CV, the
+ * read model and the onboarding student step already render them; only this
+ * page dropped them, because it kept its own list.
+ *
+ * The canonical list is `PROFESSIONAL_HISTORY_RELATIONSHIPS` (employment +
+ * practice, `manager` deliberately excluded — an administrative relationship
+ * to an organisation is not the person's own work). Every history surface
+ * filters by that one, and each renders practice under its own heading:
+ * "this happened, and it was a placement" — never "this was a job".
+ */
+const HISTORY_RELATIONSHIPS = [...PROFESSIONAL_HISTORY_RELATIONSHIPS];
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
@@ -199,6 +214,7 @@ export default async function ProfilePage({
     workerRes,
     profRowsRes,
     avatar,
+    myOrgEvidence,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -226,6 +242,21 @@ export default async function ProfilePage({
       .maybeSingle(),
     supabase.from("professions").select("id, slug").eq("is_active", true),
     getOwnAvatar(),
+    /**
+     * The SUBJECT'S side of the organization evidence import (2026-09-07).
+     *
+     * Keyed on `user.id` alone, so it belongs in THIS batch and not after it —
+     * a standalone await would add a serial stage to the render for a read
+     * that depends on nothing the batch produces (W7-S3 ratchet).
+     *
+     * It is outside the worker branch on purpose: a pending offer is about a
+     * PERSON, and someone still deciding whether to accept it must be able to
+     * see it. RLS shows only rows already naming this caller, and only a link
+     * they confirmed produces records — the core does that filtering, not this
+     * page. The migration ships owner-gated, so `needs-migration` renders the
+     * card's honest note rather than a silently empty list.
+     */
+    listMyOrganizationEvidence({ supabase, userId: user.id, locale }, { limit: 100 }),
   ]);
   const profile = profileRes.data;
   const worker = workerRes.data;
@@ -275,19 +306,23 @@ export default async function ProfilePage({
   // here (server component) so the form gets real saved values, null = "not
   // stated" (never rendered as a fabricated "no").
   let availabilityPrefs: AvailabilityPrefsRead | null = null;
-  // Self-stated languages (P2-PR3) — worker_languages from DRAFT migration
-  // 20260711250000 (PR #720). Until the owner applies it the read reports
-  // needs-migration and the section renders its honest explanation state.
+  // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
+  // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
+  // branch is kept for fresh/local databases, not because production lacks it.
   let workerLanguages: WorkerLanguagesRead | null = null;
-  // External profile links (Labour Market OS P6) — worker_external_profiles
-  // from DRAFT migration 20260713210000. Until the owner applies it the read
-  // reports needs-migration and the section renders its honest explanation
-  // state. No automatic import exists — links are worker-added only.
+  // External profile links (Labour Market OS P6) — `worker_external_profiles`
+  // from migration 20260713210000, which is genuinely **NOT applied** (checked
+  // against production 2026-09-07: the table does not exist). This section
+  // therefore renders its honest "not enabled yet" state to every real user,
+  // and has since it shipped. Owner decision 2 in
+  // docs/CAPABILITY_INVENTORY.md §6.3: apply it, or retire the section.
+  // No automatic import exists — links are worker-added only.
   let externalProfiles: ExternalProfilesRead | null = null;
   // Full CV System v1: education + achievements (DRAFT migration
   // 20260714160000 — needs-migration until the owner applies it) and the
   // count of project-linked journal entries powering the completeness grid.
   let workerEducation: WorkerEducationRead | null = null;
+  let learningCompass: LearningCompassRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
   let projectLinkedEntryCount = 0;
   let certificateDocCount = 0;
@@ -313,6 +348,7 @@ export default async function ProfilePage({
      */
     const [
       prefsRes,
+      compassRes,
       langsRes,
       extRes,
       eduRes,
@@ -326,6 +362,9 @@ export default async function ProfilePage({
       trust,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
+      // Learning Compass (Track C): own records + the board's match results;
+      // any failure is `null` → the section simply does not render.
+      readLearningCompass().catch((): LearningCompassRead | null => null),
       getOwnWorkerLanguages(),
       getOwnExternalProfiles(),
       getOwnWorkerEducation(),
@@ -371,7 +410,7 @@ export default async function ProfilePage({
           "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
-        .in("relationship_slug", WORKER_RELATIONSHIPS)
+        .in("relationship_slug", HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
         .order("started_at", { ascending: false, nullsFirst: false }),
       // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),
@@ -383,6 +422,7 @@ export default async function ProfilePage({
     workerLanguages = langsRes;
     externalProfiles = extRes;
     workerEducation = eduRes;
+    learningCompass = compassRes;
     workerAchievements = achRes;
     projectLinkedEntryCount = projCountRes.count ?? 0;
     certificateDocCount = certDocsRes.count ?? 0;
@@ -744,6 +784,12 @@ export default async function ProfilePage({
           // chip they would be discoverable only by scrolling past the skills
           // composer. `DetailsHashOpener` opens the disclosure on the jump.
           { href: "#cv-details", label: tQuick("details") },
+          // Student path (Track C): the Learning Compass is the student's
+          // home and sits far down this page — without a chip it is
+          // reachable only by scrolling past every other section.
+          ...(learningCompass?.status === "ok" && learningCompass.student
+            ? [{ href: "#learning-compass", label: tQuick("compass") }]
+            : []),
         ]}
       />
 
@@ -783,7 +829,9 @@ export default async function ProfilePage({
           counts three times, ≈1350 px before the first editable field. Nothing
           was dropped: the old→new map is in
           `docs/audits/W7_S1_PROFILE_HUB_OVERVIEW.md` §5, and the hub inherits
-          the `#setup-journey` anchor `completeOnboarding` deep-links to. */}
+          the `#setup-journey` deep-link anchor (the chat's profile chip and
+          older links reach it; since 2026-09-06 `completeOnboarding` lands a
+          fresh worker in the conversation instead). */}
 
       {/* THE ONE OVERVIEW (W7-S1). Identity, status, what is missing and the
           single next action — with completed steps, work history, evidence
@@ -1056,6 +1104,24 @@ export default async function ProfilePage({
           initial={workerEducation.kind === "ok" ? workerEducation.entries : []}
           needsMigration={workerEducation.kind === "needs-migration"}
         />
+      ) : null}
+
+      {/* What organizations have recorded about me (2026-09-07) — the subject
+          side of the evidence import. It sits beside education because it is
+          the same question from the other direction: what is on record, who
+          put it there, and in what capacity. Never shown as verified. */}
+      <OrganizationEvidenceSection
+        records={myOrgEvidence.kind === "ok" ? myOrgEvidence.records : []}
+        pendingOffers={myOrgEvidence.kind === "ok" ? myOrgEvidence.pendingOffers : []}
+        needsMigration={myOrgEvidence.kind === "needs-migration"}
+      />
+
+      {/* Learning Compass (Track C, 2026-09-03) — the student home's five
+          answers, rendered only on the student path (a current education row
+          or an active learner link). Reads the person's own records and the
+          same match engine the opportunity board uses; nothing generated. */}
+      {learningCompass?.status === "ok" && learningCompass.student ? (
+        <LearningCompassSection compass={learningCompass.compass} />
       ) : null}
       {workerId && workerAchievements ? (
         <WorkerAchievementsSection

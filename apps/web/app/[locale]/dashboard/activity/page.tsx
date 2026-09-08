@@ -9,7 +9,10 @@ import {
   type ActivityStateFilter,
 } from "@/lib/dashboard/activity-centre";
 import { getDashboardModule } from "@/lib/dashboard/dashboard-module-registry";
-import { getSpineCounts } from "@/lib/notifications/spine";
+import {
+  getDurableNotifications,
+  getSpineCounts,
+} from "@/lib/notifications/spine";
 
 /**
  * Unified activity centre (control room PR C) — ONE cross-module surface
@@ -68,8 +71,13 @@ export default async function ActivityCentrePage({
   const t = await getTranslations();
 
   // The ONE spine read — request-cached, shared with the layout's bell and
-  // nav badges, so this page adds zero extra count queries.
+  // nav badges, so this page adds zero extra count queries. The durable feed
+  // beside it is the OTHER honest row kind (stored facts, persisted read
+  // state) — the same source the bell renders, read once with a page-sized
+  // limit so events older than the bell's 20-row window stay reachable here
+  // (completion v1: the "view all" landing finally shows all).
   const counts = await getSpineCounts();
+  const durable = await getDurableNotifications(100);
   const rows = buildActivityRows(counts);
   const visible = filterActivityRows(rows, { moduleId: moduleFilter, state });
 
@@ -189,6 +197,83 @@ export default async function ActivityCentrePage({
           ))}
         </ul>
       )}
+
+      {/* DURABLE EVENTS (completion v1) — the stored "this happened to you"
+          facts from notification_events, the second honest row kind beside
+          the derived signals above. Same source as the bell, higher limit.
+          Links only (a stored row carries its entity's canonical surface);
+          the persisted read state is managed from the bell — this page keeps
+          its no-control read model. While the store is unapplied or empty
+          the section shows its honest empty line. */}
+      <section
+        className="flex flex-col gap-2"
+        data-testid="activity-stored-events"
+      >
+        <h2 className="font-display text-xl font-bold tracking-tightest text-text-primary">
+          {tA("storedTitle")}
+        </h2>
+        <p className="text-xs leading-relaxed text-text-muted">
+          {tA("storedIntro")}
+        </p>
+        {durable.length === 0 ? (
+          <p
+            className="rounded-md border border-dashed border-ink-500 p-5 text-sm text-text-secondary"
+            data-testid="activity-stored-empty"
+          >
+            {tA("storedEmpty")}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2" data-testid="activity-stored-list">
+            {durable.map((e) => {
+              const body = (
+                <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="text-sm font-semibold text-text-primary">
+                      {tTypes.has(e.type as never)
+                        ? tTypes(e.type as never)
+                        : tTypes("generic")}
+                    </span>
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {e.created_at.slice(0, 16).replace("T", " ")}
+                    </span>
+                  </span>
+                  {e.read_at === null ? (
+                    <span
+                      aria-hidden
+                      className="h-2 w-2 shrink-0 rounded-full bg-state-live"
+                      data-testid={`activity-stored-unread-${e.id}`}
+                    />
+                  ) : null}
+                </span>
+              );
+              return (
+                <li key={e.id}>
+                  {e.href ? (
+                    <Link
+                      href={e.href as "/dashboard"}
+                      data-testid={`activity-stored-event-${e.id}`}
+                      className={`flex items-center rounded-md border border-ink-500 px-4 py-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                        e.read_at === null ? "bg-ink-800/40" : "bg-ink-800/10"
+                      }`}
+                    >
+                      {body}
+                    </Link>
+                  ) : (
+                    <div
+                      data-testid={`activity-stored-event-${e.id}`}
+                      className={`flex items-center rounded-md border border-ink-500 px-4 py-3 ${
+                        e.read_at === null ? "bg-ink-800/40" : "bg-ink-800/10"
+                      }`}
+                    >
+                      {body}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

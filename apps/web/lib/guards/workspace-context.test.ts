@@ -87,8 +87,18 @@ describe("workspace chip — always-visible context beside the conversation", ()
     expect(actions).toMatch(/ACTIVE_WORKSPACE_COOKIE/);
     expect(actions).toMatch(/httpOnly: true/);
     expect(actions).not.toMatch(/localStorage\.(get|set|remove)Item|window\.localStorage/);
-    // Membership is validated BEFORE the cookie is written.
-    expect(actions).toMatch(/isMember/);
+    // Membership is validated BEFORE the cookie is written: the org-switch
+    // arm runs the shared core (G4) first and only then sets the pointer.
+    const switchArm = actions.slice(
+      actions.indexOf("export async function switchActiveOrganization"),
+      actions.indexOf("export async function clearActiveOrganization"),
+    );
+    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeGreaterThan(-1);
+    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeLessThan(
+      switchArm.indexOf("jar.set(ACTIVE_WORKSPACE_COOKIE"),
+    );
+    const core = read("lib/company/workspace-switch-core.ts");
+    expect(core).toMatch(/isMember/);
     const resolver = read("lib/company/active-organization.ts");
     expect(resolver).toMatch(/readSessionWorkspacePointer/);
   });

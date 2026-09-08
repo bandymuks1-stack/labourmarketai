@@ -18,6 +18,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { gateOpenNeeds } from "@/lib/billing/open-needs-gate";
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import { serverEventLocale } from "@/lib/telemetry/server-locale";
 import {
@@ -27,6 +28,7 @@ import {
 } from "@/lib/estimate/estimate";
 import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
 import { isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+import type { DomainCaller } from "@/lib/domain/caller";
 import {
   readStructuredDemandV2,
   sanitizeStructuredDemandV2,
@@ -137,7 +139,15 @@ export type DemandRequestResult =
         // W8 slice 1: the caller is not acting for a company right now
         // (personal workspace, unbound organization, company not owned…).
         | "no_company_context"
-        | "invalid_estimate";
+        | "invalid_estimate"
+        // Owner launch pricing 2026-09-05: the organization's concurrent
+        // active open needs are at its plan's ceiling (FREE 1 / ORGANIZATION
+        // 10). `next` names the honest way forward — the €99 plan, or the
+        // individual plan (contact) above the paid ceiling. Nothing is charged.
+        | "over_open_need_limit";
+      limit?: number;
+      used?: number;
+      next?: "upgrade" | "individual_plan";
     };
 
 /**
@@ -191,11 +201,6 @@ export async function submitDemandRequest(
   intent: DemandIntent,
   fields?: DemandFields,
 ): Promise<DemandRequestResult> {
-  // Block meaningless creation up-front (defence in depth — the client also
-  // disables the create action until a description exists).
-  const description = clamp(fields?.description, MAX_TEXT);
-  if (description.length === 0) return { ok: false, code: "empty_description" };
-
   const supabase = await createClient();
   const {
     data: { user },
@@ -209,6 +214,36 @@ export async function submitDemandRequest(
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { ok: false, code: "no_company_context" };
 
+  const result = await submitDemandRequestCore(
+    { supabase, userId: user.id },
+    { organizationId: employer.organizationId },
+    intent,
+    fields,
+  );
+  if (result.ok) revalidatePath("/", "layout");
+  return result;
+}
+
+/**
+ * THE demand submit DOMAIN core (G4 wagon 3) — the same canonical write as an
+ * explicit caller, so the web form, the chat executor, and the MCP capability
+ * run ONE implementation. The transport resolves the employer context (cookie:
+ * `requireEmployerCompany`; bearer: `requireEmployerCompanyForCaller`) and
+ * passes only the VALIDATED organization id; every closed-set validation, the
+ * v2→v1 RPC fallback, and the structured-column follow-up stay here unchanged.
+ */
+export async function submitDemandRequestCore(
+  caller: DomainCaller,
+  employer: { organizationId: string },
+  intent: DemandIntent,
+  fields?: DemandFields,
+): Promise<DemandRequestResult> {
+  // Block meaningless creation up-front (defence in depth — the client also
+  // disables the create action until a description exists).
+  const description = clamp(fields?.description, MAX_TEXT);
+  if (description.length === 0) return { ok: false, code: "empty_description" };
+
+  const supabase = caller.supabase;
   const kind = INTENT_KIND[intent];
   const role = clamp(fields?.role, MAX_TITLE);
   // The request title reads from the user's role/work text; falls back to an
@@ -309,6 +344,17 @@ export async function submitDemandRequest(
     p_payload: payload,
     p_original_language: "lt",
   };
+  // OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05): FREE
+  // organization = 1 concurrent active need, ORGANIZATION €99 = up to 10,
+  // above → the individual-plan path. `hasFeature("company_create_needs")`
+  // is the plan boundary; the numeric ceiling is decided by the ONE gate over
+  // the organization's real count. Permissive while billing is disabled
+  // (pilot preserved — the same rule the booking gate follows); enforced the
+  // moment a Stripe adapter state is active. Never a silent charge or tier.
+  const needsGate = await gateOpenNeeds(supabase, employer.organizationId, caller.userId);
+  if (!needsGate.allowed) {
+    return { ok: false, code: "over_open_need_limit", limit: needsGate.limit, used: needsGate.used, next: needsGate.next };
+  }
   let { data, error } = await (supabase as unknown as DemandRpc).rpc(
     "submit_demand_request_v2",
     { ...rpcArgs, p_organization_id: employer.organizationId },
@@ -346,7 +392,7 @@ export async function submitDemandRequest(
         start_period: startPeriod,
       })
       .eq("id", requestId)
-      .eq("profile_id", user.id);
+      .eq("profile_id", caller.userId);
     if (upErr) {
       console.error("[demand-request] structured-field update failed:", upErr.message);
       // Observable drift signal (audit F-E3): if RLS/columns ever drift, the
@@ -369,8 +415,33 @@ export async function submitDemandRequest(
     }
   }
 
-  revalidatePath("/", "layout");
   return { ok: true, requestId };
+}
+
+/**
+ * THE demand-creation state fingerprint (G4 wagon 3) — the caller's own most
+ * recent `customer_requests` row + own-row count, read under the caller's RLS.
+ * A successful submit adds a row, so a confirmation token minted before the
+ * write dies as stale_state on replay — genuinely one-time, which matters
+ * here because demand creation is NOT idempotent (a replay would create a
+ * second demand).
+ */
+export async function demandStateFingerprint(caller: DomainCaller): Promise<string> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = caller.supabase as any;
+    const { data, error } = await sb
+      .from("customer_requests")
+      .select("id, created_at")
+      .eq("profile_id", caller.userId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "demand:unreadable";
+    const rows = (data ?? []) as { id: string }[];
+    return rows.length === 0 ? "demand:none" : `demand:latest:${rows[0].id}`;
+  } catch {
+    return "demand:unreadable";
+  }
 }
 
 /** Duplicate-and-edit prefill (Capability E/G repeat action): the owner's own
@@ -514,6 +585,14 @@ export async function getOwnLastDemandPrefill(
           : null,
       requiredTools,
     },
-    structuredV2: readStructuredDemandV2(payload),
+    // A submitted request carries its structured cluster; a DRAFT stores the
+    // light form's `opportunityType` string instead — re-validated through
+    // the same sanitizer (closed set), so a declared type survives
+    // draft → continue and nothing near-valid is salvaged.
+    structuredV2:
+      readStructuredDemandV2(payload) ??
+      (isDraft && typeof payload.opportunityType === "string"
+        ? sanitizeStructuredDemandV2({ opportunity_type: payload.opportunityType })
+        : null),
   };
 }

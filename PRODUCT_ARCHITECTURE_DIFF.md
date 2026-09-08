@@ -7,9 +7,7 @@
 
 ## What appeared
 
-| What appeared | Kind | Why it appeared | Why it cannot be a conversation | Permitting axiom | Declared |
-|---|---|---|---|---|---|
-| `/oauth/consent` | screen | The one screen where a signed-in person approves or denies an external OAuth client | Deliberate security property, not a limitation: granting an external agent standing access to the account is the ONE decision an assistant must never make or be able to make on a person | A-04 | yes |
+_No new product surface was added by this PR._
 
 ## Axiom checks
 
@@ -42,6 +40,9 @@
 | `requires_new_page` | A-01 | `/` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `components/app/organization-capabilities-card.tsx` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `components/app/organization-capabilities-card.tsx` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `/dashboard/hours` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `/dashboard/hours` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `/dashboard/hours` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
 | `not_world_state_driven` | A-01 | `/oauth/consent` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `/oauth/consent` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `/oauth/consent` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |

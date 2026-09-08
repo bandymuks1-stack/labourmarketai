@@ -9,7 +9,10 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { markAllNotificationEventsReadAction } from "@/lib/notifications/events-actions";
+import {
+  markAllNotificationEventsReadAction,
+  markNotificationEventReadAction,
+} from "@/lib/notifications/events-actions";
 import {
   addRole as addRoleAction,
   switchActiveRole as switchActiveRoleAction,
@@ -114,8 +117,10 @@ type AuthContextValue = AuthState & {
   switchOrganization: (organizationId: string) => Promise<void>;
   /** Switch the ACTIVE workspace — PERSONAL_WORKSPACE_ID clears the pointer,
    *  an org id delegates to switchOrganization. Server-validated, honest
-   *  no-op on failure. */
-  switchWorkspace: (workspaceId: string) => Promise<void>;
+   *  no-op on failure. Returns whether the server ACCEPTED the switch, so a
+   *  caller that reports the outcome (the chat) never claims a switch that
+   *  did not happen. */
+  switchWorkspace: (workspaceId: string) => Promise<boolean>;
   markAsRead: (id: string) => void;
   markAllRead: () => void;
   /** Streamed-spine hydration hook (SpineHydrator only). */
@@ -181,7 +186,7 @@ export function AuthProvider({
         workspaceId === PERSONAL_WORKSPACE_ID
           ? await clearActiveOrganizationAction()
           : await switchActiveOrganizationAction(workspaceId);
-      if (!result.ok) return;
+      if (!result.ok) return false;
       // The workspace IS the acting context (owner audit P0.1): choosing an
       // organization means acting as that organization, so the base identity
       // follows — the chat greeting, CTAs, and company surfaces all switch
@@ -200,17 +205,30 @@ export function AuthProvider({
         await switchActiveRoleAction(wanted);
       }
       router.refresh();
+      return true;
     },
     [router, initial.roles, initial.activeRole],
   );
 
-  const markAsRead = useCallback((id: string) => {
-    setNotifications((cur) =>
-      cur.map((n) =>
-        n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
-      ),
-    );
-  }, []);
+  const markAsRead = useCallback(
+    (id: string) => {
+      // PERSIST for durable events only (completion v1): a stored row's read
+      // marker survives the next hydration; derived signals clear by visiting
+      // their surface and get the optimistic client state only (persisting
+      // them is impossible — they are counts, not rows). Fire-and-forget:
+      // the action is idempotent and an unapplied store is an honest no-op.
+      const target = notifications.find((n) => n.id === id);
+      if (target?.durable && !target.read_at) {
+        void markNotificationEventReadAction(id).catch(() => {});
+      }
+      setNotifications((cur) =>
+        cur.map((n) =>
+          n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
+        ),
+      );
+    },
+    [notifications],
+  );
 
   const markAllRead = useCallback(() => {
     const now = new Date().toISOString();

@@ -6,6 +6,7 @@ import {
   type DocumentFileRow,
 } from "@/lib/documents/document-file-model";
 import type { WorkerDocumentFileInfo } from "@/lib/documents/document-files";
+import { isExtractableDocumentMime } from "@/lib/journal/document-journal-draft-model";
 
 /**
  * Per-document file controls on the worker documents page (Document &
@@ -72,6 +73,18 @@ export async function WorkerDocumentFileSlot({
             {formatBytes(info.current.byteSize)}
           </span>
           <DownloadLink file={info.current} label={t("download")} />
+          {/* C2b — structure this document into a journal draft. Rendered
+              only for types the deterministic extractor can honestly read
+              (pdf/docx); images get no dead link — no OCR exists (§18). */}
+          {isExtractableDocumentMime(info.current.mimeType) ? (
+            <a
+              href={`/${locale}/dashboard/documents?draftFrom=${info.current.id}#doc-journal-draft`}
+              className="font-mono text-meta uppercase tracking-label text-brand-blue underline-offset-2 hover:underline"
+              data-testid="doc-file-journal-draft"
+            >
+              {t("journalDraft.action")}
+            </a>
+          ) : null}
         </span>
       ) : (
         <span className="text-meta text-text-muted" data-testid="doc-file-none">

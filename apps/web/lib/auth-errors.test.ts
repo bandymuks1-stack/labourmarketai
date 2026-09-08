@@ -30,6 +30,15 @@ describe("mapAuthError", () => {
     ).toBe("invalidEmail");
   });
 
+  it("maps an unconfirmed e-mail (Confirm email ON in production) by code and by message", () => {
+    expect(mapAuthError({ code: "email_not_confirmed", status: 400 }).key).toBe(
+      "emailNotConfirmed",
+    );
+    expect(mapAuthError({ message: "Email not confirmed" }).key).toBe(
+      "emailNotConfirmed",
+    );
+  });
+
   it("falls back to generic for unknown / empty errors", () => {
     expect(mapAuthError({ message: "kaboom" }).key).toBe("generic");
     expect(mapAuthError(null).key).toBe("generic");

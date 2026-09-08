@@ -75,15 +75,24 @@ describe("toCanonicalDemand — nothing is invented", () => {
     expect(req({ id: undefined })).toBeNull();
   });
 
-  it("carries no salary, fit, confidence or company field at all", () => {
+  it("carries no salary, fit, confidence or contact field at all", () => {
     // Absence is structural: a surface cannot fabricate what the type has no
     // slot for. This is the guard against a map marker growing a fake claim.
+    //
+    // 2026-09-05: `organizationName` was added and `companyName` dropped from
+    // this list. The rule did NOT loosen — it got precise. What was banned is
+    // an identity the read INVENTS or infers; what is now carried is the exact
+    // column `list_open_demand_for_workers` already returns, and only for a
+    // company whose verification_status is verified. Everything genuinely
+    // fabricable (salary, fit, score, confidence) and every contact detail
+    // stays banned, and the own-rows branch still contributes null rather than
+    // borrowing the viewer's workspace name.
     const row = req() as unknown as Record<string, unknown>;
-    for (const forbidden of ["salary", "pay", "rate", "fit", "score", "confidence", "companyName", "contact", "email", "phone"]) {
+    for (const forbidden of ["salary", "pay", "rate", "fit", "score", "confidence", "contact", "email", "phone", "companyId", "profileId"]) {
       expect(row).not.toHaveProperty(forbidden);
     }
     expect(Object.keys(row).sort()).toEqual(
-      ["actionable", "cityLabel", "country", "createdAt", "id", "key", "quantity", "roleText", "source"],
+      ["actionable", "cityLabel", "country", "createdAt", "id", "key", "organizationName", "ownedByViewer", "quantity", "roleText", "source"],
     );
   });
 });
@@ -158,5 +167,73 @@ describe("placeableDemand", () => {
     const rows = placeableDemand([req({ country: null })!, req({ country: "NL" })!]);
     expect(rows).toHaveLength(1);
     expect(rows[0]!.country).toBe("NL");
+  });
+});
+
+describe("the organisation name — carried when disclosed, absent otherwise", () => {
+  const A = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+
+  it("carries the name the disclosing branch already returned", () => {
+    expect(req({ organizationName: "Bouwbedrijf De Vries BV" })?.organizationName).toBe(
+      "Bouwbedrijf De Vries BV",
+    );
+  });
+
+  it("an absent name stays null — never an empty label a surface would render", () => {
+    expect(req({ organizationName: null })?.organizationName).toBeNull();
+    expect(req({ organizationName: undefined })?.organizationName).toBeNull();
+    expect(req({ organizationName: "   " })?.organizationName).toBeNull();
+  });
+
+  it("dedup MERGES the name in, whichever copy carried it", () => {
+    // An employer who is also a worker reaches their own request through BOTH
+    // branches: the worker RPC names the verified company, the own-rows read has
+    // no company column. Without this the name would appear or vanish depending
+    // on branch order. It discloses nothing new — same row, same permission.
+    const named = req({ id: A, organizationName: "Verified BV" })!;
+    const unnamed = req({ id: A, organizationName: null })!;
+    for (const input of [
+      [unnamed, named],
+      [named, unnamed],
+    ]) {
+      const rows = dedupeCanonicalDemand(input);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]!.organizationName).toBe("Verified BV");
+    }
+  });
+
+  it("actionability comes from the actionable copy; the FACTS merge from both", () => {
+    // Two entries under one key are the same row in the same store, seen
+    // through two already-authorized paths. Merging their facts discloses
+    // nothing new — but the STATUS must still come from the copy that grants a
+    // real next step, so a name can never promote a dead row.
+    const rows = dedupeCanonicalDemand([
+      req({ id: A, actionable: true, organizationName: null })!,
+      req({ id: A, actionable: false, organizationName: "Historic BV" })!,
+    ]);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.actionable).toBe(true);
+    expect(rows[0]!.organizationName).toBe("Historic BV");
+  });
+
+  it("ownership merges too — the own-rows branch is the only one that knows it", () => {
+    // The worker RPC returns the verified name and says nothing about
+    // ownership; the own-rows read knows the row is the viewer's own and has no
+    // company column. Keeping one copy would throw away half of what the two
+    // authorized paths returned.
+    for (const input of [
+      [req({ id: A, organizationName: "Verified BV", ownedByViewer: false })!, req({ id: A, ownedByViewer: true })!],
+      [req({ id: A, ownedByViewer: true })!, req({ id: A, organizationName: "Verified BV", ownedByViewer: false })!],
+    ]) {
+      const rows = dedupeCanonicalDemand(input);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]!.organizationName).toBe("Verified BV");
+      expect(rows[0]!.ownedByViewer).toBe(true);
+    }
+  });
+
+  it("ownership is never invented — it defaults to false", () => {
+    expect(req({})!.ownedByViewer).toBe(false);
+    expect(req({ ownedByViewer: false })!.ownedByViewer).toBe(false);
   });
 });

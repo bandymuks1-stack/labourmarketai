@@ -43,36 +43,45 @@ describe("the sentence still classifies as the interest inbox", () => {
 });
 
 describe("the dual-role reading is asked, never guessed", () => {
-  it("the workflow map no longer answers the ambiguous case", () => {
-    // The employer workspace keeps the employer reading; a person with no
-    // company role keeps the worker reading. The map is entered only for
-    // those two, so the ambiguous person cannot silently reach `runFindWork`.
+  it("the workflow arm answers ONLY the two decided cases", () => {
+    // G2: routing is registry-dispatched — the whole decision now lives in
+    // the component's ONE `interestInbox` handler. The employer workspace
+    // keeps the employer reading; a person with no company role keeps the
+    // worker reading; the workflow arm is gated to exactly those two.
     expect(CHAT).toMatch(
-      /identity === "company" \|\| !canActAsEmployer[\s\S]{0,200}"interest-inbox": \(\) =>/,
+      /interestInbox: \(\) => \{[\s\S]{0,700}identity === "company" \|\| !canActAsEmployer/,
     );
   });
 
   it("the ambiguous case offers BOTH real surfaces", () => {
     const branch = CHAT.slice(
-      CHAT.indexOf('case "interest-inbox":'),
-      CHAT.indexOf('case "need-service":'),
+      CHAT.indexOf("interestInbox: () =>"),
+      CHAT.indexOf("switchContext: () =>"),
     );
     expect(branch.length).toBeGreaterThan(0);
-    expect(branch).toMatch(/interestInboxAmbiguous/);
+    // The two decided readings return EARLY inside the gate; everything from
+    // `withTyping` on is the ambiguous dual-role person's arm.
+    const gateAt = branch.indexOf('identity === "company" || !canActAsEmployer');
+    const ambiguousAt = branch.indexOf("withTyping");
+    expect(gateAt).toBeGreaterThan(-1);
+    expect(ambiguousAt).toBeGreaterThan(gateAt);
+    const ambiguousArm = branch.slice(ambiguousAt);
+    expect(ambiguousArm).toMatch(/interestInboxAmbiguous/);
     // Both readings answer INSIDE the workspace. `w8-employer-chat-workspace`
     // refuses `link:/dashboard/company/scouting` by name — the employer's
     // second step must not navigate out of the chat — so these are the
     // existing in-chat results, not routes.
-    expect(branch).toMatch(/\{ id: "candidates", label: labels\.chipInterestOnMyNeeds \}/);
-    expect(branch).toMatch(/\{ id: "jobs", label: labels\.chipMyOwnInterest \}/);
+    expect(ambiguousArm).toMatch(/\{ id: "candidates", label: labels\.chipInterestOnMyNeeds \}/);
+    expect(ambiguousArm).toMatch(/\{ id: "jobs", label: labels\.chipMyOwnInterest \}/);
     // Comments stripped: the note above explains WHY `link:` is refused here,
     // so asserting on raw text would fail on its own explanation.
-    const code = branch
+    const code = ambiguousArm
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/\/\/.*$/gm, "");
     expect(code).not.toMatch(/link:/);
-    // And it must not quietly run a search instead of answering.
-    expect(branch).not.toMatch(/runFindWork\(/);
+    // And the ambiguous person must not quietly get a search instead of the
+    // question — `runFindWork` may appear only inside the gated arm above.
+    expect(ambiguousArm).not.toMatch(/runFindWork\(/);
   });
 
   it("both chips are ids the handler actually understands", () => {

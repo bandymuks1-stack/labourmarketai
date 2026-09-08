@@ -24,6 +24,31 @@ import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
+import { baseIdentityForRole } from "@/lib/config/roles";
+import { listMyEngagements } from "@/lib/invitations/network";
+import {
+  loadCompanyStarterContext,
+  loadPersonStarterFacts,
+  personStarterContext,
+  type WorkspaceStarterContext,
+} from "@/lib/conversation/starter-signals";
+import {
+  capabilityPhraseKeys,
+  deriveStarters,
+  personHasUsableProfile,
+} from "@/lib/conversation/starters";
+import { listMyPins } from "@/lib/workspace/pins";
+import { Link } from "@/lib/i18n/navigation";
+import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
+import {
+  getWorkspaceContext,
+  readSessionWorkspacePointer,
+} from "@/lib/company/active-organization";
+import {
+  classifyDurablePointer,
+  decideDashboardRole,
+  type DurablePointerKind,
+} from "@/lib/auth/dashboard-role-decision";
 
 /**
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
@@ -51,7 +76,50 @@ export default async function DashboardHomePage({
   if (!user) redirect(`/${locale}/auth/login`);
 
   const session = await getSessionProfile();
-  const activeRole = (session.profile?.active_role as Role | null) ?? "worker";
+  // WHICH ROLE OPENS THIS SCREEN (W6 honesty, 2026-09-06). The old null-to-
+  // worker fallback swallowed a FAILED profile read: a company owner whose row read timed
+  // out was greeted in the personal space as a person, and nothing said so.
+  // The pure decision trusts the row when it was read, falls back to the
+  // person's OWN durable workspace pointer (membership-validated) when it
+  // was not, and otherwise NAMES the failure — the real workspace chooser
+  // plus retry — never a silently chosen workspace.
+  let pointer: DurablePointerKind = null;
+  if (session.profileRead === "failed") {
+    const [stored, ws] = await Promise.all([
+      readSessionWorkspacePointer(),
+      getWorkspaceContext(null),
+    ]);
+    pointer = classifyDurablePointer(
+      stored,
+      ws.workspaces.filter((w) => w.kind === "organization").map((w) => w.id),
+    );
+  }
+  const decision = decideDashboardRole({
+    profileRead: session.profileRead,
+    activeRole: session.profile?.active_role ?? null,
+    pointer,
+  });
+  if (decision.kind === "read-failed") {
+    const tRead = await getTranslations("workspace.readFailed");
+    return (
+      <section
+        data-testid="dashboard-profile-read-failed"
+        role="status"
+        className="mx-auto flex min-h-[60dvh] w-full max-w-content flex-col items-center justify-center gap-4 px-4 py-16 text-center"
+      >
+        <p className="text-sm text-text-primary">{tRead("body")}</p>
+        <p className="text-xs text-text-secondary">{tRead("choose")}</p>
+        <WorkspaceChip />
+        <Link
+          href="/dashboard"
+          className="text-sm font-medium text-brand-blue underline-offset-4 hover:underline"
+        >
+          {tRead("retry")}
+        </Link>
+      </section>
+    );
+  }
+  const activeRole: Role = decision.role;
 
   // "Mano erdvė" (S2) — resolved on the server from the readers this request
   // already runs (session profile, workspace context, worker activity, the
@@ -71,7 +139,41 @@ export default async function DashboardHomePage({
   // block appears the moment it is known.
   const personalIntroPayload: Promise<PersonalIntroPayload> =
     loadPersonalIntroPayload();
-  const { offers, labels: bookingLabels } = await loadBookingOffers(activeRole);
+  // STARTERS ARE SUGGESTIONS, NOT A ROLE MENU (owner contract 2026-09-04
+  // §5–§6, ARCHITECTURE §5.5). The company greeting used to branch on ONE
+  // flag (education | agency | employer) and show that role's three chips —
+  // the real recruiter's workspace, an agency that also holds needs, a roster
+  // and projects, opened as "Agency Mode". Now the server resolves the ACTIVE
+  // workspace's capabilities and the few facts that decide each track's next
+  // real step, and the pure resolver returns a small MIX. For a person, one
+  // RLS-scoped read answers whether an ACTIVE learner link exists, so the
+  // opening can acknowledge the real learning context. Every read degrades to
+  // the plain greeting — nothing is fabricated.
+  const identity = baseIdentityForRole(activeRole) ?? "person";
+  // KNOWN-STATE-FIRST (owner P0 §3, 2026-09-06): the person's suggestions
+  // are derived from what the product already holds about them, so an
+  // account with real skills, history or journal entries is no longer told
+  // its first step is to upload a CV. Read in the SAME parallel batch as the
+  // rest — three bounded head-counts, each degrading to "unknown".
+  const [{ offers, labels: bookingLabels }, learnerLink, starterContext, personFacts] =
+    await Promise.all([
+      loadBookingOffers(activeRole),
+      identity === "person" ? loadActiveLearnerLink() : null,
+      identity === "company"
+        ? loadCompanyStarterContext()
+        : Promise.resolve<WorkspaceStarterContext | null>(null),
+      identity === "person" ? loadPersonStarterFacts() : null,
+    ]);
+  const workspace: WorkspaceStarterContext =
+    starterContext ??
+    personStarterContext(Boolean(learnerLink), personFacts ?? undefined);
+  const { agencyWorkspace, educationWorkspace } = workspace;
+  const starters = deriveStarters(workspace.signals);
+  // MY SPACE (owner contract 2026-09-04 §4C): the person's own pins for
+  // THIS workspace, under RLS. Unavailable (migration unapplied / read
+  // failed) → `null` → no row, no ask.
+  const pinsRead = await listMyPins(identity === "company" ? workspace.organizationId : null);
+  const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
   const labels = resolveChatLabels(await getTranslations("conversation.chat"));
   const workLogLabels = resolveWorkLogLabels(
     await getTranslations("conversation.worklog"),
@@ -93,6 +195,29 @@ export default async function DashboardHomePage({
   const countryLabels = Object.fromEntries(
     MARKET_COUNTRIES.map((c) => [c, tCountryNames(`countryNames.${c}`)]),
   ) as Record<string, string>;
+
+  // The learner's institution is named ONCE, by the opening brief
+  // (`briefLearner`, lib/conversation/opening-brief.ts). Measured on
+  // production 2026-09-06: this page ALSO composed its own intro line (the
+  // `{institution}` greeting key) from the same engagement, so the learner's
+  // first screen said "Mokotės su X" twice. The engagement read above still
+  // decides the person's starters.
+  const tChat = await getTranslations("conversation.chat");
+  // The not-understood answer and the opening line describe the world the
+  // person stands in, composed from the capability tracks the workspace
+  // genuinely holds — an agency that is also an employer hears BOTH. Phrases
+  // are joined here, on the server, so the composed sentence is one
+  // localized string (no client-side grammar).
+  const phraseKeys = capabilityPhraseKeys(workspace.signals);
+  const capabilityList = phraseKeys.map((k) => tChat(k)).join(", ");
+  const contextFallback =
+    identity === "company" && phraseKeys.length > 0
+      ? tChat("fallbackComposed", { list: capabilityList })
+      : null;
+  const workspaceContextLine =
+    identity === "company" && workspace.organizationName && phraseKeys.length > 0
+      ? tChat("workspaceIntro", { company: workspace.organizationName, list: capabilityList })
+      : null;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
@@ -116,9 +241,35 @@ export default async function DashboardHomePage({
         bookingLabels={bookingLabels}
         personalIntroPayload={personalIntroPayload}
         countryLabels={countryLabels}
+        educationWorkspace={educationWorkspace}
+        agencyWorkspace={agencyWorkspace}
+        starters={starters}
+        personHasProfileData={
+          personFacts ? personHasUsableProfile(personFacts) : null
+        }
+        contextFallback={contextFallback}
+        workspaceContextLine={workspaceContextLine}
+        pins={pins}
       />
     </>
   );
+}
+
+/**
+ * M10 — the person's ACTIVE learner link, as the linked institution's real
+ * name (`engagement_contexts` relationship `student`, the row an accepted
+ * learner invitation creates — institution↔learner link v1). Reuses the
+ * network page's own RLS-scoped read; `null` on no link, an unnamed
+ * institution, or any degraded read — the greeting then stands unchanged.
+ */
+async function loadActiveLearnerLink(): Promise<string | null> {
+  try {
+    const engagements = await listMyEngagements();
+    const link = engagements.find((e) => e.relationshipSlug === "student");
+    return link?.organizationName?.trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 /**

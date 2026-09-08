@@ -114,12 +114,18 @@ export default async function OpportunitiesPage({
   // chip narrows what the external-supply retrieval FETCHES (closed-set
   // values), not merely what the page hides afterwards.
   const { filters, sort, view } = parseDiscoveryParams(sp);
-  const result = await loadWorkerOpportunityBoard("opportunities_board", {
-    externalDiscovery: {
-      professionSlug: filters.profession,
-      country: filters.country,
-    },
-  });
+  // Board + salary benchmark + weekly digest are independent reads — one
+  // combined await so TTFB pays the slowest of the three, not their sum.
+  const [result, salaryIntel, weekly] = await Promise.all([
+    loadWorkerOpportunityBoard("opportunities_board", {
+      externalDiscovery: {
+        professionSlug: filters.profession,
+        country: filters.country,
+      },
+    }),
+    getWorkerSalaryIntelligence(),
+    getWeeklyPersonalIntelligence(),
+  ]);
 
   // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
   //    never more than 5 items before the person asks for more. Pure
@@ -158,7 +164,6 @@ export default async function OpportunitiesPage({
   // Root translator — provenance/attribution codes are FULL key paths
   // (vacancySources.*), stored as codes on the record, resolved only here.
   const tRoot = await getTranslations();
-  const salaryIntel = await getWorkerSalaryIntelligence();
   const marketContextCards = buildOpportunityInsightRow(
     salaryIntel.kind === "ok"
       ? {
@@ -172,7 +177,7 @@ export default async function OpportunitiesPage({
   // Weekly personal intelligence (C-r1): the SAME request-cached read the
   // digest emitter uses — the bell row's href lands here, so this is where
   // the summary it points at finally renders. No second derivation.
-  const weekly = await getWeeklyPersonalIntelligence();
+  // (Loaded in the combined await above.)
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
@@ -240,6 +245,9 @@ export default async function OpportunitiesPage({
         return transportLabel(value);
       case "tool":
         return skillLabel(value);
+      case "opportunityType":
+        // The same catalogue the row badge uses (structuredDemand.opportunityType).
+        return sd(`opportunityType.${value}` as never);
     }
   };
 
@@ -368,9 +376,18 @@ export default async function OpportunitiesPage({
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      {/* `candidate_count` = how many fitting opportunities this view showed
+          (0 when the board is not available or empty). A board with fits is
+          the worker's first SYSTEM result; an empty one is not value — the
+          admin TTFV section reads exactly this number. */}
       <TelemetryView
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
-        metadata={{ surface: "opportunities", role_context: "worker" }}
+        metadata={{
+          surface: "opportunities",
+          role_context: "worker",
+          candidate_count:
+            result.kind === "ready" && result.capabilities.boardAvailable ? result.opportunities.length : 0,
+        }}
       />
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
@@ -466,6 +483,16 @@ export default async function OpportunitiesPage({
               <p className="mt-1 text-sm leading-relaxed text-text-secondary">
                 {t("needsAccessBody")}
               </p>
+              {/* The body already tells the person what to do (complete the
+                  profile); give them the door — same link the sibling empty
+                  state offers, so this branch is no longer a dead end. */}
+              <Link
+                href={`/${locale}/dashboard/profile`}
+                data-testid="opportunities-pending-cta"
+                className="mt-3 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue"
+              >
+                {t("approvedEmptyCta")} →
+              </Link>
             </section>
           ) : result.opportunities.length === 0 ? (
             <section
@@ -779,6 +806,20 @@ export default async function OpportunitiesPage({
                                   </span>
                                 ) : null}
                                 <span className="min-w-0">{roleLabel(need.roleText)}</span>
+                                {/* Declared opportunity type (internship /
+                                    apprenticeship / temporary assignment …)
+                                    from the demand's structured projection —
+                                    stated by the employer, never inferred.
+                                    Plain employment is the default and gets
+                                    no chip; the full row stays in details. */}
+                                {structured?.opportunity_type && structured.opportunity_type !== "employment" ? (
+                                  <span
+                                    className="shrink-0 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
+                                    data-testid="opportunity-type-chip"
+                                  >
+                                    {sd(`opportunityType.${structured.opportunity_type}`)}
+                                  </span>
+                                ) : null}
                               </p>
                               {/* Compact scan line — full facts in details. */}
                               <p className="text-xs text-text-secondary">

@@ -15,6 +15,8 @@ import {
   type EmployerContextReason,
 } from "./employer-company-context";
 import { hasOrganizationCapability } from "./role-capabilities";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import type { AssignRoleActionState } from "@/lib/operations/assign-operations-role";
 import type {
   ProvisionEngagementActionState,
@@ -80,6 +82,17 @@ export async function inviteCompanyWorkerAction(
   const r = await inviteCompanyWorker(company.companyId, email, note);
   if (r.kind === "needs-migration") return { ok: false, code: "needs_migration" };
   if (r.kind === "error") return { ok: false, code: "error", message: r.message };
+
+  // TTFV: a NEW roster invitation is a real state-changing act by the company
+  // (or agency) — only the `invited` outcome writes a row; the honest no-ops
+  // (already pending / already linked) emit nothing.
+  if (r.outcome === "invited") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+      source: "roster",
+      route: "/dashboard/company",
+      metadata: { surface: "roster", step: "invite_worker", role_context: "company", entity_type: "company_worker_invitation" },
+    });
+  }
 
   revalidatePath("/", "layout");
   return { ok: true, outcome: r.outcome };

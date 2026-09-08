@@ -56,6 +56,13 @@ export type CompanyRequestPayload = {
    * number the request is about while the UI reported success.
    */
   teamSize?: string;
+  /**
+   * The DECLARED opportunity type (`structured_v2.opportunity_type` vocabulary:
+   * employment / internship / apprenticeship / …). Kept on the draft so "save
+   * as draft" no longer discards what the employer picked; re-validated on
+   * prefill against the closed set, never inferred.
+   */
+  opportunityType?: string;
   /** Organisation's role ON THIS need — situational, not a permanent identity. */
   projectRole?:
     | "client"
@@ -121,6 +128,7 @@ const ALLOWED_KEYS: Record<DraftType, ReadonlySet<string>> = {
     "timing",
     "teamSize",
     "projectRole",
+    "opportunityType",
     "accommodation",
     "languages",
     "notes",

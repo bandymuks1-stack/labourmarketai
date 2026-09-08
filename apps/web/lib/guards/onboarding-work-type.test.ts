@@ -64,7 +64,15 @@ describe("onboarding asks what work the person does", () => {
     // did not state. A defaulted first option would put a profession on 100%
     // of profiles and make the field worthless as evidence.
     const src = read(WIZARD);
-    expect(src).toMatch(/useState<string>\(""\);\s*\n[\s\S]{0,400}?setProfessionSlug/);
+    // The ONLY seed is the profession the person named in their own landing
+    // sentence (lib/onboarding/landing-handoff — exactly one registry
+    // profession, else null); with no sentence the select starts EMPTY.
+    // That is the person's statement shown back in a select they still
+    // submit — not a platform default (walk-real-person-join, 2026-09-06).
+    expect(src).toMatch(
+      /useState<string>\(\s*\(\) =>\s*defaultProfessionSlug && PROFESSION_SLUGS\.includes\(defaultProfessionSlug\)\s*\? defaultProfessionSlug\s*: "",?\s*\)/,
+    );
+    expect(src).not.toMatch(/useState<string>\(professionOptions\[0\]/);
     expect(src).toContain("profession_placeholder");
   });
 

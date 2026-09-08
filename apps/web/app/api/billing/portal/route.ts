@@ -59,5 +59,5 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return NextResponse.json({ ok: false, reason: result.reason }, { status: 400 });
   }
-  return NextResponse.json({ ok: true, url: result.url, testMode: true });
+  return NextResponse.json({ ok: true, url: result.url, testMode: config.testMode });
 }

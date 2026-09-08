@@ -385,7 +385,9 @@ describe("both new sources appear in every planning view", () => {
   });
 
   it("the page renders filter chips and tones for every registered source", () => {
-    expect(PAGE).toMatch(/PLANNING_SOURCE_TYPES\.map\(/);
+    // I2 (2026-09-02): the chips are filtered to the sources PRESENT in the
+    // model before mapping — the registered set is still the source of truth.
+    expect(PAGE).toMatch(/PLANNING_SOURCE_TYPES(?:\.filter\([\s\S]*?\))?\.map\(/);
     expect(PAGE).toMatch(/finance: "border-state-warning\/40 text-state-warning"/);
     expect(PAGE).toMatch(/invitation: "border-brand-purple\/40 text-brand-purple"/);
   });

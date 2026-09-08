@@ -42,6 +42,12 @@ import { LIVE_ROLE_IDS, type LiveRoleId } from "@/lib/config/roles";
  */
 export type Role = LiveRoleId;
 
+import {
+  asksForCurrentEducation,
+  parseFirstRunIntents,
+} from "@/lib/onboarding/first-run-intent";
+import { validateEducationInput } from "@/lib/worker/worker-education-model";
+
 const ONBOARDING_ROLES = new Set<Role>(LIVE_ROLE_IDS);
 
 /** CANONICAL PRIORITY, not merely the list: the first role in this order
@@ -84,6 +90,9 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       ? rawProfession
       : null;
   const locale = String(formData.get("locale") ?? "lt");
+  // Universal first-run router: what the person came to do. Optional — a
+  // legacy submit without it behaves exactly as before.
+  const intents = parseFirstRunIntents(String(formData.get("intents") ?? ""));
 
   // First-login bootstrap resilience (auth-owner-access-bootstrap-p0): ensure
   // the caller's OWN profile shell exists before the RPC. handle_new_user
@@ -106,9 +115,14 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     });
   }
 
-  // company/agency entity rows seed a draft name from role_data.name.
+  // Legacy submits (no first-run intents) seed a draft company/agency name
+  // from role_data.name. The first-run router NEVER does: `display_name` is
+  // the PERSON's name there, and "<person> UAB" is a legal entity nobody
+  // stated (doctrine §7 — no fabricated data). The company row stays an
+  // unnamed shell for the few seconds until the canonical setup form, which
+  // onboarding opens next, gives it its real identity.
   const roleData = (r: Role): Record<string, string> =>
-    (r === "company" || r === "agency") && display_name
+    (r === "company" || r === "agency") && display_name && intents.length === 0
       ? { name: `${display_name} UAB` }
       : {};
 
@@ -176,6 +190,40 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       .eq("id", user.id);
   }
 
+  // Student intent: "I am studying" is a real, canonical state — a CURRENT
+  // worker_education row, the same table the profile and the verified CV
+  // read and the row an institution link later sits beside. Written under
+  // the caller's own RLS (profile_id = auth.uid()); validated by the same
+  // model as the profile's education editor, never coerced. A failure here
+  // is logged, not fatal: onboarding stands and the profile offers the same
+  // entry — an honest gap, never a silent invention.
+  if (asksForCurrentEducation(intents) && roles.includes("worker")) {
+    const edu = validateEducationInput({
+      institutionName: String(formData.get("institution_name") ?? ""),
+      programOrField: String(formData.get("program_or_field") ?? ""),
+      educationTypeSlug: String(formData.get("education_type_slug") ?? "other"),
+      isCurrent: true,
+    });
+    if (edu) {
+      const { error: eduErr } = await supabase.from("worker_education").insert({
+        profile_id: user.id,
+        institution_name: edu.institutionName,
+        program_or_field: edu.programOrField,
+        education_type_slug: edu.educationTypeSlug,
+        start_year: edu.startYear,
+        end_year: edu.endYear,
+        is_current: true,
+        note: edu.note,
+      });
+      if (eduErr) {
+        console.error("[completeOnboarding] student education insert failed", {
+          code: eduErr.code,
+          message: eduErr.message,
+        });
+      }
+    }
+  }
+
   revalidatePath(`/${locale}/dashboard`);
   // Deep-link continuity (core-network area B): a safe ?next= carried
   // through login -> onboarding (e.g. an invitation link) wins over the
@@ -188,12 +236,17 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   // just picked their primary role should land on THEIR workspace, not
   // the generic /dashboard cockpit (which surfaces worker-shaped
   // prompts like "Profession / Skills / Journal"). A fresh WORKER lands
-  // on the guided setup journey (Wagon 4: registration → work goal →
-  // experience → review → location → availability → profile ready) —
-  // the guide over the canonical profile surface, so their first screen
-  // tells them exactly what to do next.
+  // in the conversation (`/dashboard`): the owner contract 2026-09-04
+  // §3/§4A/§7 makes the conversation the primary control layer with ONE
+  // clear next action, and the chat's first turn already greets the
+  // person, names what the profile still lacks and offers the profile as
+  // a chip. The Wagon 4 setup journey still renders on
+  // `/dashboard/profile#setup-journey` — one click away, not the wall the
+  // person hits first (window 6 real-person walk, 2026-09-06, measured the
+  // wall as the first screen and the chat as the screen that said what to
+  // do next).
   const ROLE_DASHBOARD: Record<Role, string> = {
-    worker: `/${locale}/dashboard/profile#setup-journey`,
+    worker: `/${locale}/dashboard`,
     company: `/${locale}/dashboard/company`,
     agency: `/${locale}/dashboard/company`,
     customer: `/${locale}/dashboard/buyer`,

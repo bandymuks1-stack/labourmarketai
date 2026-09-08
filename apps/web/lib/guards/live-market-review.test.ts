@@ -54,9 +54,14 @@ describe("live market owner-review surface", () => {
     expect(commandSource).toContain("/company-need");
   });
 
-  it("ships the approved command surface as the canonical indexed landing", () => {
+  it("ships the approved command surface as the explicit-choice landing arm", () => {
+    // Owner command 2026-08-22 §2 made FOCUS the default; the 2026-08-31 P0
+    // entry-point fix made the default arm static and moved the LIVE choice
+    // to a middleware rewrite. The approved command surface is still shipped
+    // — mounted by the cookie-gated review route — and a visitor without the
+    // explicit choice is still redirected to the one canonical landing URL.
     expect(homeSource).toContain("buildPageMetadata");
-    expect(homeSource).toContain("LiveMarketLanding");
+    expect(pageSource).toContain("LiveMarketLanding");
     expect(pageSource).toContain("redirect(`/${locale}`)");
   });
 

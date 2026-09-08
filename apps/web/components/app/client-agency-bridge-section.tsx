@@ -55,9 +55,9 @@ export function ClientAgencyBridgeSection({
   demands: readonly { id: string; title: string }[];
   labels: ClientBridgeLabels;
 }) {
-  const [, acceptAction, acceptPending] = useActionState(acceptConnectionAction, IDLE);
-  const [, declineAction] = useActionState(declineConnectionAction, IDLE);
-  const [, revokeAction] = useActionState(revokeConnectionAction, IDLE);
+  const [acceptState, acceptAction, acceptPending] = useActionState(acceptConnectionAction, IDLE);
+  const [declineState, declineAction] = useActionState(declineConnectionAction, IDLE);
+  const [revokeState, revokeAction] = useActionState(revokeConnectionAction, IDLE);
   const [shareState, shareAction, sharePending] = useActionState(shareRequestAction, IDLE);
 
   const gated = invites.kind === "needs-migration" || shareState.status === "needs-migration";
@@ -160,7 +160,11 @@ export function ClientAgencyBridgeSection({
               </ul>
             )}
           </div>
-          {(shareState.status === "error" || shareState.status === "forbidden" || shareState.status === "invalid") && (
+          {/* A failed accept / decline / revoke used to be silent (the action
+              state was discarded); every non-ok outcome now shows the error. */}
+          {[shareState, acceptState, declineState, revokeState].some(
+            (s) => s.status === "error" || s.status === "forbidden" || s.status === "invalid" || s.status === "not-found",
+          ) && (
             <p className="text-xs text-state-danger" role="alert">{labels.errorLabel}</p>
           )}
         </>

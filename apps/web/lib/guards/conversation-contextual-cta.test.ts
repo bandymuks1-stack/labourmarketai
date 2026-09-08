@@ -26,8 +26,9 @@ describe("generic starter chips appear only where a menu belongs", () => {
       "translateBlocked",
       "writeEmployerHint",
     ]) {
-      // assistant(labels.X) with no second argument.
-      expect(CHAT, key).toMatch(new RegExp(`assistant\\(labels\\.${key}\\);`));
+      // assistant(labels.X) with no second argument — as a statement (`;`)
+      // or as a registry handler's arrow-expression body (`,`).
+      expect(CHAT, key).toMatch(new RegExp(`assistant\\(labels\\.${key}\\)[;,]`));
       expect(CHAT, key).not.toMatch(
         new RegExp(`assistant\\(labels\\.${key},\\s*starterChips\\)`),
       );
@@ -58,7 +59,9 @@ describe("generic starter chips appear only where a menu belongs", () => {
 
   it("the menu still exists where it belongs: greeting and fallback", () => {
     expect(CHAT).toMatch(/chips: starterChips,?\s*\}\s*as ChatMessage/);
-    expect(CHAT).toMatch(/assistant\(labels\.fallback, starterChips\)/);
+    // 2026-09-04: the not-understood answer is the context-aware `fallbackText`
+    // (worker / employer / agency / education) — still with the starter menu.
+    expect(CHAT).toMatch(/assistant\(fallbackText, starterChips\)/);
   });
 });
 

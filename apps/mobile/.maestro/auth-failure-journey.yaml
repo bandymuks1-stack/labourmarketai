@@ -1,0 +1,81 @@
+# iOS runtime JOURNEY proof — the flow behind IOS_RUNTIME_JOURNEY_PROVEN.
+#
+# Runs in CI (.github/workflows/ios.yml) against a Release simulator build
+# whose bundle was compiled with deterministic bad-network configuration
+# (EXPO_PUBLIC_SUPABASE_URL=https://example.supabase.co, placeholder key,
+# EXPO_PUBLIC_API_BASE_URL=https://example.invalid). No real backend is ever
+# reached; no secret exists anywhere in this proof.
+#
+# What each stage proves, beyond the old process-liveness smoke:
+#   1. The auth screen actually RENDERS — a blank white screen used to pass
+#      the launchctl liveness check; it cannot pass an assertVisible.
+#   2. A real sign-in attempt runs the real code path (supabase-js →
+#      auth-context.tsx failure mapping).
+#   3. The failure SURFACES honestly: the NotAvailable block
+#      (testID "auth-failure" in src/screens/credentials-form.tsx) appears —
+#      "unreachable" or "rejected", never a silent spinner or a crash.
+#   4. The app survives the failure: the form is still on screen and
+#      interactive afterwards (no crash, no dead end).
+appId: ai.labourmarket.app
+name: auth-failure-journey
+---
+# --- 1. Fresh launch; the auth gate must land on a RENDERED sign-in form ---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- assertVisible:
+    id: "password"
+- assertVisible:
+    id: "submit"
+- takeScreenshot: ios-artifacts/journey-01-auth-screen
+
+# --- 2. A real sign-in attempt with syntactically valid credentials ---
+# No hideKeyboard here: on iOS Maestro implements it as mid-screen swipes,
+# and run 2 proved one of those swipes lands on the "Create an account" link
+# (mid-screen), navigating away. The KeyboardAvoidingView keeps the submit
+# button reachable with the keyboard up.
+- tapOn:
+    id: "email"
+- inputText: "ci-journey@example.com"
+- tapOn:
+    id: "password"
+- inputText: "not-a-real-password-1"
+- tapOn:
+    id: "submit"
+
+# --- 3. The failure state must SURFACE (NotAvailable block) ---
+# iOS may raise the system "Save Password?" dialog when the password field's
+# context ends (run 2 met it); it hides the app's hierarchy, so dismiss it
+# whenever it shows up. First wait is optional so the dismissal between the
+# two waits can run even if the dialog delays the failure block.
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "auth-failure"
+    timeout: 20000
+    optional: true
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "auth-failure"
+    timeout: 45000
+- takeScreenshot: ios-artifacts/journey-02-auth-failure
+
+# --- 4. No crash: the form is still there and still interactive ---
+- assertVisible:
+    id: "email"
+- assertVisible:
+    id: "submit"
+- tapOn:
+    id: "email"

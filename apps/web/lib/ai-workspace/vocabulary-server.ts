@@ -1,9 +1,10 @@
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { countryDisplayName } from "@/lib/location/country-model";
 import { collectDiscoveryFacets, type DiscoveryFacets } from "@/lib/opportunities/discovery-filters";
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import type { OpportunityNeed } from "@/lib/opportunities/opportunity-fit";
 import { activeLocales } from "@/lib/i18n/config";
 import { buildWorkTypeLabelMap, MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
@@ -133,6 +134,52 @@ export async function buildWorkspaceVocabulary(
     }
     if (names.size > 0) {
       terms.push({ dimension: "tool", value: slug, terms: [...names], available: true });
+    }
+  }
+
+  // ── opportunity types ────────────────────────────────────────────────────
+  // Owner contract 2026-09-04 §4A/§15: "Where can I do an internship?" must
+  // narrow the board to internships. Values are the DECLARED types present on
+  // the board; the words are the catalogue labels in every active language
+  // plus the everyday stems a person actually types ("praktika", "stažuotė",
+  // "стажировка", "stage", "Praktikum", "pameistrystė", "apprenticeship").
+  const currentLocale = await getLocale();
+  const typeCatalogues = await Promise.all(
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "structuredDemand.opportunityType" }),
+    })),
+  );
+  const EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
+    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
+    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle"],
+  };
+  // EVERY type of the closed set is a term, marked available only when a
+  // demand of that type is on the person's board. Prod walk 2026-09-04: with
+  // no internship on the board the word "praktiką" was simply unknown and
+  // the student got the whole board — the honest answer is "I understood
+  // internships; none is visible to you right now" (same rule as a country
+  // that is not on the board).
+  // Term order matters for DISPLAY only: the first term is what the answer
+  // shows when it lists what IS visible ("Matoma: darbas, pameistrystė"), so
+  // the person's own language comes first, then the other catalogues, then
+  // the everyday stems.
+  for (const value of OPPORTUNITY_TYPES) {
+    const names = new Set<string>();
+    for (const { locale, t } of typeCatalogues) {
+      if (locale === currentLocale && t.has(value)) names.add(t(value) as string);
+    }
+    for (const { t } of typeCatalogues) {
+      if (t.has(value)) names.add(t(value) as string);
+    }
+    for (const word of EVERYDAY_TYPE_WORDS[value] ?? []) names.add(word);
+    if (names.size > 0) {
+      terms.push({
+        dimension: "opportunityType",
+        value,
+        terms: [...names],
+        available: facets.opportunityTypes.includes(value),
+      });
     }
   }
 

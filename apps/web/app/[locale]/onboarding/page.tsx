@@ -8,6 +8,8 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
+import { DOOR_WORDS_KEY, readLandingHandoff } from "@/lib/onboarding/landing-handoff";
 
 /** Unified onboarding shell. Role is picked here (Step 1), so we no longer
  *  pre-read active_role. Display name is prefilled from the auth identity:
@@ -26,6 +28,23 @@ export default async function OnboardingPage({
   // first-time registration — onboarding completion returns to it.
   const { next } = await searchParams;
   const safeNext = isSafeReturnPath(next) ? (next as string) : null;
+  // The landing sentence (`/dashboard?say=…` inside `next`) becomes the
+  // wizard's DEFAULTS — the family the router read is pre-ticked and a
+  // profession the sentence names is pre-chosen. Read on the server: the
+  // recogniser's lexicon never ships in the wizard's client bundle.
+  const handoff = readLandingHandoff(safeNext);
+  // The landing DOOR (`/dashboard/start/company?capability=…` inside `next`)
+  // ticks the card it routes to; its plain words — the button the person
+  // pressed on the landing — are shown back from the landing catalogue,
+  // resolved here so the wizard's client bundle keeps the auth allowlist.
+  const tDoors = handoff.door.length > 0 ? await getTranslations("landing.cta") : null;
+  const doorWords = tDoors
+    ? handoff.door
+        .map((intent) => DOOR_WORDS_KEY[intent])
+        .filter((key): key is NonNullable<typeof key> => key !== undefined)
+        .map((key) => tDoors(key))
+        .join(" · ") || null
+    : null;
 
   const supabase = await createClient();
   const {
@@ -49,6 +68,14 @@ export default async function OnboardingPage({
   // real pending invitation so they aren't confused by a bare role-start screen.
   const pendingInvites = await listMyPendingWorkerInvitations();
   const tOnboard = await getTranslations("auth.onboarding");
+  // Student step (universal first-run router): the education-type registry
+  // labels, resolved here on the server from the CV namespace so the wizard's
+  // client bundle keeps the auth allowlist (no `cvSections` root shipped).
+  const tEducationTypes = await getTranslations("cvSections.educationTypes");
+  const educationTypeOptions = EDUCATION_TYPE_SLUGS.map((slug) => ({
+    slug,
+    label: tEducationTypes(slug),
+  }));
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const metaFullName =
@@ -66,8 +93,11 @@ export default async function OnboardingPage({
           without this, login_succeeded fires after onboarding_started
           (funnel order inversion) and onboarding drop-offs count as
           "never logged in" (audit F-T4). Dedup key prevents double-fire
-          once the user later reaches the dashboard in the same tab. */}
-      <SessionTelemetry />
+          once the user later reaches the dashboard in the same tab.
+          surface="onboarding": this is the ONE surface allowed to emit
+          `signup_completed` from the pending marker — every genuinely new
+          account passes through here first. */}
+      <SessionTelemetry surface="onboarding" />
       <AmbientGlow />
       {/* V8 W4-B: language stays switchable DURING onboarding — the wizard
           writes profiles.locale from the URL locale at completion, so the
@@ -94,7 +124,16 @@ export default async function OnboardingPage({
             </p>
           </div>
         )}
-        <OnboardingWizard defaultName={defaultName} returnTo={safeNext} />
+        <OnboardingWizard
+          defaultName={defaultName}
+          returnTo={safeNext}
+          educationTypeOptions={educationTypeOptions}
+          saidSentence={handoff.sentence || null}
+          defaultIntents={handoff.intents}
+          defaultProfessionSlug={handoff.professionSlug}
+          doorIntents={handoff.door}
+          doorWords={doorWords}
+        />
       </main>
     </div>
   );

@@ -48,7 +48,11 @@ describe("the journal page surfaces the review origin (via the timeline)", () =>
   const timeline = read("components/app/evidence-decision-timeline.tsx");
 
   it("reads confirmer_role and derives the decision history", () => {
-    expect(page).toMatch(/confirmation_scope, created_at, confirmer_role/);
+    // G4: the confirmations ride the journal-list core's select; the page
+    // consumes them through it.
+    const core = read("lib/journal/journal-list-core.ts");
+    expect(core).toMatch(/confirmation_scope, created_at, confirmer_role/);
+    expect(page).toMatch(/listJournalEntries\(/);
     // The single latest-wins origin line was superseded by the full Evidence
     // Decision Timeline v1, which is derived from the same append-only rows.
     // Whitespace/newline-tolerant so a prettier line-wrap can't break the guard.

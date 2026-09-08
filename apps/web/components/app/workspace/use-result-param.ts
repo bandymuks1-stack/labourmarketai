@@ -267,10 +267,21 @@ export function useResultParam(): {
     // ONE write, for the same reason `selectDemand` uses one: two calls would
     // both read the not-yet-updated query string and the second would clobber
     // the first, opening the panel at the wrong depth.
+    // Re-opening the SAME project after a write (an assignment just made) must
+    // show the state the write produced, not the panel's cached answer — the
+    // prod walk 2026-09-04 read "Priskirta projektui." beside "Priskirta 0".
+    // A fresh `pr` token makes the address differ, so the detail re-reads.
     openProjectResult: useCallback(
       (projectId: string) =>
         write(
-          { result: "project", geo: null, interaction: null, demand: null, project: projectId },
+          {
+            result: "project",
+            geo: null,
+            interaction: null,
+            demand: null,
+            project: projectId,
+            pr: Date.now().toString(36),
+          },
           "push",
         ),
       [write],

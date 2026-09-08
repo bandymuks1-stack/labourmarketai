@@ -233,5 +233,30 @@ export const FI_PACK: LanguagePack = {
     translation: {
       exact: ["käänsin tekstejä", "kääntäjä", "tulkkasin", "käännösty"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["esittelin", "pidin esityksen", "esittelin projektin"],
+    },
+    "stakeholder-engagement": {
+      exact: ["sidosryhm", "tapasin edustajia", "tapaaminen edustajien kanssa"],
+    },
+    "partnership-development": {
+      exact: ["kumppanuus", "yhteistyömahdollisuuksia", "solmin yhteistyön"],
+    },
+    negotiation: {
+      exact: ["neuvottelin", "neuvottelut"],
+    },
+    "project-coordination": {
+      exact: ["koordinoin projektia", "projektinhallinta", "projektin koordinointi"],
+    },
+    "report-writing": {
+      exact: ["kirjoitin raportin", "raporttien kirjoittaminen", "laadin raportin"],
+    },
+    teamwork: {
+      exact: ["tiimityö", "työskentelin tiimissä", "ryhmätyö"],
+    },
+    research: {
+      exact: ["tein tutkimuksen", "tutkimustyö", "kirjallisuuskatsaus"],
+    },
   },
 };

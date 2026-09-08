@@ -43,6 +43,10 @@ const EXPECTED_EVENTS = [
   "onboarding_step_role_completed",
   "onboarding_step_profile_completed",
   "onboarding_completed",
+  // Time-to-first-value (FIRST REAL ECOSYSTEM USE, 2026-09-03): the first
+  // real state-changing action and its real result, per actor.
+  "first_real_action",
+  "first_real_result",
   "dashboard_viewed",
   "first_action_card_viewed",
   "first_action_card_clicked",
@@ -73,6 +77,10 @@ const EXPECTED_EVENTS = [
   "booking_viewed",
   "booking_accepted",
   "booking_declined",
+  // Owner contract §4D (2026-09-05): an invitation addressed to the person
+  // accepted from the chat's attention item — emitted server-side by the
+  // conversation executor on a real accepted / linked outcome only.
+  "invitation_accepted",
   // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
   //    Server-emitted at the real action points via
   //    lib/telemetry/server-funnel.ts (fire-and-forget, profile_id derived
@@ -107,6 +115,15 @@ const EXPECTED_EVENTS = [
   "profession_recovery_prompt_seen",
   "profession_recovery_prompt_opened",
   "profession_recovery_prompt_dismissed",
+  // Chat-first execution funnel (real recruiter pilot, 2026-09-04).
+  "chat_intent_recognized",
+  "chat_intent_unrecognized",
+  "chat_missing_data_asked",
+  "chat_action_attempted",
+  "chat_action_persisted",
+  // Public entry (frozen design contract 2026-09-05, P1): the anonymous
+  // visitor's sentence read by the deterministic router before any account.
+  "landing_intent",
 ] as const;
 
 describe("activation funnel — event registry", () => {
@@ -391,6 +408,22 @@ describe("activation funnel — key surfaces emit their events", () => {
     {
       file: "lib/company/company-setup.ts",
       mustContain: ["organizationCreated"],
+    },
+    // Time-to-first-value (real recruiter pilot, 2026-09-04): the agency
+    // bridge is the first chain that emits the dedicated events. Actions
+    // are server-side (both subjects); each side's RESULT is emitted where
+    // the other side's response becomes visible to it.
+    {
+      file: "lib/agency/bridge-actions.ts",
+      mustContain: ["firstRealAction"],
+    },
+    {
+      file: "components/app/agency-bridge-section.tsx",
+      mustContain: ["firstRealResult"],
+    },
+    {
+      file: "app/[locale]/dashboard/company/scouting/page.tsx",
+      mustContain: ["firstRealResult"],
     },
     {
       file: "lib/company/team-brigade-actions.ts",

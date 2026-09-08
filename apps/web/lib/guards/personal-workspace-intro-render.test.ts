@@ -38,11 +38,19 @@ function scoped(loc: string, ns: string) {
       (o, k) => (o?.[k] ?? {}) as Record<string, unknown>,
       catalog(loc),
     );
-  const fn = (key: string) => {
+  const fn = (key: string, values?: Record<string, string | number>) => {
     const v = key
       .split(".")
       .reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], root);
-    return typeof v === "string" ? v : `MISSING:${ns}.${key}`;
+    if (typeof v !== "string") return `MISSING:${ns}.${key}`;
+    // Substitute simple `{name}` placeholders. Without this the stub happily
+    // rendered a literal "{count}" into the HTML and every assertion still
+    // passed — a translator stub that ignores its values proves the copy
+    // renders, not that it renders READABLY.
+    if (!values) return v;
+    return v.replace(/\{(\w+)\}/g, (whole, name: string) =>
+      name in values ? String(values[name]) : whole,
+    );
   };
   return fn as unknown as Parameters<typeof resolvePersonalWorkspaceLabels>[0];
 }
@@ -139,7 +147,12 @@ describe("what each kind of account actually sees", () => {
 
   it("a COMPLETE profile is never offered a completion CTA", () => {
     const html = render(model({ readiness: deriveWorkerReadiness(card(FULL)) }));
-    expect(html).toContain("Viskas, kas svarbiausia, jau nurodyta.");
+    // The completion line NAMES the set it counts (owner window 11 §24): it
+    // used to read "Viskas, kas svarbiausia, jau nurodyta" on a screen that
+    // also said an instruction was waiting and nine documents were missing.
+    expect(html).toContain("Visos 6 darbo kortelės sritys nurodytos.");
+    expect(html).toContain("skaičiuojami atskirai");
+    expect(html).not.toContain("Viskas, kas svarbiausia");
     expect(html).toContain("Peržiūrėti mano darbo profilį");
     expect(html).not.toContain("Papildyti mano darbo profilį");
     expect(html).not.toContain("Svarbiausia dabar:");

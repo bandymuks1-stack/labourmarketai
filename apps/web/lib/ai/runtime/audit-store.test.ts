@@ -76,6 +76,16 @@ describe("buildAiRunRow (pure mapping)", () => {
     expect(row.request_context).toBe("translation_copy");
   });
 
+  it("a supplied runId becomes the row's primary key; absent = DB default", () => {
+    const withKey = buildAiRunRow(sampleRecord(), {
+      runId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeef",
+    });
+    expect(withKey.id).toBe("aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeef");
+    const withoutKey = buildAiRunRow(sampleRecord());
+    // No fabricated id: the column must be ABSENT so gen_random_uuid() applies.
+    expect("id" in withoutKey).toBe(false);
+  });
+
   it("bounds the output excerpt to the migration CHECK limit", () => {
     const row = buildAiRunRow(
       sampleRecord({ outputExcerpt: "x".repeat(AI_RUN_OUTPUT_EXCERPT_MAX + 500) }),

@@ -42,6 +42,9 @@ import {
   setProjectResponsibleAction,
 } from "@/lib/projects/project-admin-actions";
 import { getProjectsProgress } from "@/lib/projects/progress";
+import { ProjectField } from "@/components/app/project-field";
+import { buildProjectField } from "@/lib/projects/field-model";
+import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { getProjectManageFacts } from "@/lib/projects/responsible";
 import { listOrganizationMembers } from "@/lib/company/memberships";
 
@@ -148,7 +151,7 @@ export default async function ProjectOperationsPage({
    * the responsible pointer (gated migration → null pre-apply) and the org
    * member list for the responsible select.
    */
-  const [progressById, manageFacts, stages, economics, projectAssets, defects] =
+  const [progressById, manageFacts, stages, economics, projectAssets, defects, capacity] =
     await Promise.all([
       getProjectsProgress([id]),
       getProjectManageFacts(id),
@@ -156,6 +159,9 @@ export default async function ProjectOperationsPage({
       getProjectEconomics(id),
       getProjectAssets(id),
       getProjectDefects(id),
+      // P4 — the ready edge: the SAME capacity read the chat answers
+      // "who is available" with (roster vs approved absences, WHEN only).
+      loadWhoIsAvailableForChat(),
     ]);
   const progress = progressById[id] ?? null;
   const projectOrgId: string | null = manageFacts?.organizationId ?? null;
@@ -189,6 +195,21 @@ export default async function ProjectOperationsPage({
   const gantt: StageGantt = stages.applied
     ? buildStageGantt(stages.stages, new Date().toISOString().slice(0, 10))
     : { hasTimeline: false };
+
+  // P4 — THE FIELD (frozen design §5, §1.5): a pure projection over the reads
+  // above — stages as lanes in time, the people on the project as tokens,
+  // open unassigned work as dashed slots, the capacity read as the ready
+  // edge. Nothing below is removed; the Field is added on top of it.
+  const readAt = new Date().toISOString();
+  const field = buildProjectField({
+    stages: stages.applied ? stages.stages : [],
+    stagesApplied: stages.applied,
+    workers: ops.workers,
+    tasks: tasks.status === "ok" ? tasks.tasks : [],
+    tasksApplied: tasks.status === "ok",
+    capacity,
+    todayIso: readAt.slice(0, 10),
+  });
   const tAssets = await getTranslations("assets");
 
   const labels: OperationsBoardLabels = {
@@ -350,6 +371,21 @@ export default async function ProjectOperationsPage({
       {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
           pulse — the real gated reviewable count, one tap to confirm. */}
       <ConfirmPulse />
+
+      {/* P4 — the Field: the primary operational view, ADDED on the page
+          (§1.5). Every control is a registered canonical action the chat
+          already executes, with a readback; the sections below stay. */}
+      <ProjectField
+        field={field}
+        tasks={tasks.status === "ok" ? tasks.tasks.filter((x) => x.status !== "done" && x.status !== "cancelled") : []}
+        projectId={id}
+        locale={locale}
+        readAt={readAt}
+        labels={{
+          readinessStatus: labels.readinessStatusLabels,
+          operationalStatus: labels.statusLabels,
+        }}
+      />
 
       {/* ── PR G header strip: real project facts + real counts only.
             Status is the stored enum VERBATIM; every number is a raw count

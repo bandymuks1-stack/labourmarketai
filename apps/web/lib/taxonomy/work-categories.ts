@@ -65,6 +65,14 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
       { slug: "tiler", lt: "Plytelių klojėjas", en: "Tiler", ru: "Плиточник" },
       { slug: "welder", lt: "Suvirintojas", en: "Welder", ru: "Сварщик" },
       { slug: "roofer", lt: "Stogdengys", en: "Roofer", ru: "Кровельщик" },
+      // Owner contract 2026-09-04 §9 — "I need 12 scaffolders in Rotterdam
+      // from 5 October" classified as UNKNOWN because the intake could not
+      // name the trade. Five construction trades employers actually ask for.
+      { slug: "scaffolder", lt: "Pastolininkas", en: "Scaffolder", ru: "Монтажник строительных лесов" },
+      { slug: "concrete_worker", lt: "Betonuotojas", en: "Concrete worker", ru: "Бетонщик" },
+      { slug: "plasterer", lt: "Tinkuotojas", en: "Plasterer", ru: "Штукатур" },
+      { slug: "steel_fixer", lt: "Armatūrininkas", en: "Steel fixer", ru: "Арматурщик" },
+      { slug: "insulation_worker", lt: "Izoliuotojas", en: "Insulation worker", ru: "Изолировщик" },
     ],
   },
   {

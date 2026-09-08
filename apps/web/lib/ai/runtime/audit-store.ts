@@ -2,9 +2,14 @@
  * ai_runs audit store — SERVER-ONLY, best-effort persistence (AI Router v1).
  *
  * Persists the routing audit record built by task-routing.ts into the
- * append-only `ai_runs` table (gated draft migration
- * 20260714150000_ai_runs_audit_v1.sql) and supplies the persisted daily-run
- * counter for the AI_DAILY_RUN_BUDGET guard.
+ * append-only `ai_runs` table (migration 20260714150000_ai_runs_audit_v1.sql
+ * — APPLIED; verified on production 2026-09-07, 47 rows) and supplies the
+ * persisted daily-run counter for the AI_DAILY_RUN_BUDGET guard.
+ *
+ * Until 2026-09-07 this header described the migration as still awaiting the
+ * owner, while the table had been live and collecting real runs since
+ * 2026-08-28. The absent-table handling below is kept — it is what makes a
+ * fresh environment safe — but it is a fallback, not the state of production.
  *
  * INVARIANTS:
  *   - NEVER throws: any failure (missing service key, table not applied,
@@ -60,10 +65,22 @@ export interface AiRunPersistExtras {
    * money (see below); `synthetic` never reaches this builder at all.
    */
   readonly disposition?: AiRunDisposition;
+  /**
+   * Deterministic idempotency key for THIS run — becomes the row's primary
+   * key (`ai_runs.id`). The server wrapper generates exactly one per
+   * `runAiAgent` invocation, so a retry layer re-attempting the persist can
+   * only ever land ONE row for the run: a duplicate key resolves as
+   * already-persisted, never as a second count (the LMC ledger's
+   * idempotency-key rule, applied to this ledger). Absent → the DB default
+   * `gen_random_uuid()` applies and the insert is NOT idempotent.
+   */
+  readonly runId?: string | null;
 }
 
 /** Row shape for public.ai_runs — kept in sync with the gated migration. */
 export interface AiRunRow {
+  /** Caller-supplied idempotency key (see AiRunPersistExtras.runId). */
+  readonly id?: string;
   readonly task_type: string;
   readonly provider: string;
   readonly model_alias: string;
@@ -107,6 +124,7 @@ export function buildAiRunRow(
 ): AiRunRow {
   const vendorless = (extras.disposition ?? "vendor_run") === "vendorless_route";
   return {
+    ...(extras.runId ? { id: extras.runId } : {}),
     task_type: record.taskType.slice(0, 64),
     provider: record.providerAdapter.slice(0, 32),
     model_alias: (record.modelAlias ?? "none").slice(0, 32),
@@ -162,7 +180,7 @@ export function buildAiRunRow(
 interface MinimalAuditDb {
   from(table: "ai_runs"): {
     insert(values: Record<string, unknown>): PromiseLike<{
-      error: { message?: string } | null;
+      error: { message?: string; code?: string } | null;
     }>;
     select(
       columns: string,
@@ -211,6 +229,10 @@ export async function persistAiRunAudit(
       buildAiRunRow(record, extras) as unknown as Record<string, unknown>,
     );
     if (error) {
+      // Unique violation on the deterministic run id = the row from THIS run
+      // already landed (a retried persist). Idempotent success, not a
+      // failure: the append-only ledger holds exactly one row for the run.
+      if (extras.runId && error.code === "23505") return true;
       console.error("[ai/audit-store] persist failed", {
         message: (error.message ?? "unknown").slice(0, 200),
       });

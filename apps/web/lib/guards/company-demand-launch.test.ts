@@ -131,8 +131,11 @@ describe("UI honesty + reachability", () => {
       };
       const help = (j.demandReadback?.manageHelp ?? "").toLowerCase();
       expect(help.length).toBeGreaterThan(20);
-      // must affirmatively point closing/confirming at the scouting view…
-      expect(help).toMatch(/scouting/);
+      // must affirmatively point closing/confirming at the scouting view —
+      // in the locale's own word for it (LT "kandidatų atranka", RU
+      // "подбор"/"скаут…"); a raw English "(scouting)" inside Lithuanian copy
+      // was the defect the 2026-09-03 pilot walk removed.
+      expect(help).toMatch(/scouting|atrank|скаут|подбор|отбор/);
       // …and must still be honest that submitted-text EDITING is unavailable.
       expect(help).toMatch(/edit|redagav|редактир/);
     }

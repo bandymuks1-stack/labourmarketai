@@ -22,7 +22,10 @@ import {
   listWorkLogEngagements,
   type WorkLogEngagement,
 } from "@/lib/conversation/worklog-engagements";
-import type { WorkLogParse } from "@/lib/conversation/worklog-extract";
+import {
+  journalDraftReadiness,
+  type WorkLogParse,
+} from "@/lib/conversation/worklog-extract";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -61,6 +64,10 @@ export type WorkLogLabels = {
    *  skills are recomputed into recommendations (read-time, never pushed). */
   viewOpportunities: string;
   pipelineFailedNote: string;
+  /** The evidence text carries no work (no time, no place, no activity) —
+   *  e.g. the request "Užpildyk darbo žurnalą" typed into the field. The
+   *  flow asks for the work instead of saving the request (prod 2026-09-06). */
+  errorNoWorkContent: string;
 };
 
 /** The subset of the awaited server pipeline result the chat surface shows.
@@ -327,6 +334,14 @@ export function WorkerWorkLogFlow({
       setPhase({ kind: "error", message: labels.errorGeneric });
       return;
     }
+    // The evidence must BE work: a time span, a place, or a recognised
+    // activity — the same deterministic rule the chat applied when it opened
+    // this flow and the server schema applies to the write. A request
+    // sentence ("Užpildyk darbo žurnalą") never becomes the record.
+    if (journalDraftReadiness(notes) !== "ok") {
+      setPhase({ kind: "error", message: labels.errorNoWorkContent });
+      return;
+    }
     start(async () => {
       const prep = await prepareConfirmationAction("worker.log-work", input());
       if (!prep.ok) {
@@ -568,6 +583,7 @@ export function WorkerWorkLogFlow({
       <input
         ref={photoInputRef}
         type="file"
+        aria-label={tPhoto("label")}
         accept="image/jpeg,image/png,image/webp"
         disabled={confirming || pending}
         data-testid="worklog-photo-input"
@@ -662,6 +678,7 @@ export function WorkerWorkLogFlow({
         <Field label={labels.labelDate}>
           <input
             type="date"
+            aria-label={labels.labelDate}
             value={workDate}
             disabled={confirming || pending}
             onChange={(e) => setWorkDate(e.target.value)}

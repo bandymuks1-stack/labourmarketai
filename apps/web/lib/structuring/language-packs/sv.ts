@@ -226,5 +226,30 @@ export const SV_PACK: LanguagePack = {
     translation: {
       exact: ["översatte", "översättare", "tolkade"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["presenterade", "höll presentation", "presentation av projektet"],
+    },
+    "stakeholder-engagement": {
+      exact: ["intressenter", "träffade representanter", "möte med representanter"],
+    },
+    "partnership-development": {
+      exact: ["partnerskap", "samarbetsmöjligheter", "inledde samarbete"],
+    },
+    negotiation: {
+      exact: ["förhandlade", "förhandling"],
+    },
+    "project-coordination": {
+      exact: ["samordnade projekt", "projektledning", "projektstyrning"],
+    },
+    "report-writing": {
+      exact: ["skrev rapport", "rapportskrivning", "tog fram rapport"],
+    },
+    teamwork: {
+      exact: ["teamarbete", "arbetade i team", "grupparbete"],
+    },
+    research: {
+      exact: ["forskning", "genomförde undersökning", "litteraturstudie"],
+    },
   },
 };

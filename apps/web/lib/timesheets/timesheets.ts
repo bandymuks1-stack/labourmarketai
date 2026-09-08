@@ -87,6 +87,14 @@ export type TimesheetWorkflowState = {
 export type TimesheetOrgOption = {
   readonly organizationId: string;
   readonly name: string | null;
+  /** True iff the caller holds GOVERNANCE authority there — an active
+   *  company_memberships row with role owner/admin (the exact truth
+   *  `membership_actor_role_v1` re-checks inside the engine's authoring
+   *  RPCs) or `organizations.owner_profile_id`. UI-shaping only: the
+   *  template-install offer is rendered ONLY where the server would accept
+   *  it, so a worker never meets a button that can only answer
+   *  not_authorized. */
+  readonly canGovern: boolean;
 };
 
 /** Per-org timesheet approval template state (the honest-degradation seam:
@@ -234,22 +242,28 @@ async function readOrgOptions(
   const [ecRes, cmRes] = await Promise.all([
     asAny(supabase)
       .from("engagement_contexts")
-      .select("organization_id, organizations(display_name, legal_name)")
+      .select(
+        "organization_id, organizations(display_name, legal_name, owner_profile_id)",
+      )
       .eq("profile_id", userId)
       .eq("status", "active")
       .limit(TIMESHEET_READ_LIMIT),
     asAny(supabase)
       .from("company_memberships")
-      .select("organization_id, organizations(display_name, legal_name)")
+      .select(
+        "organization_id, role, organizations(display_name, legal_name, owner_profile_id)",
+      )
       .eq("profile_id", userId)
       .eq("status", "active")
       .limit(TIMESHEET_READ_LIMIT),
   ]);
   type OrgJoin = {
     organization_id: string | null;
+    role?: string | null;
     organizations: {
       display_name: string | null;
       legal_name: string | null;
+      owner_profile_id: string | null;
     } | null;
   };
   const options = new Map<string, TimesheetOrgOption>();
@@ -258,29 +272,54 @@ async function readOrgOptions(
     ...((cmRes.error ? [] : (cmRes.data ?? [])) as OrgJoin[]),
   ]) {
     if (!row.organization_id) continue;
-    if (options.has(row.organization_id)) continue;
+    // Governance mirrors `membership_actor_role_v1` (owner/admin membership),
+    // widened by the org-owner column the seed migration mirrors into it.
+    const governs =
+      row.role === "owner" ||
+      row.role === "admin" ||
+      row.organizations?.owner_profile_id === userId;
+    const existing = options.get(row.organization_id);
+    if (existing) {
+      // Presence rows never LOWER an authority already established — the
+      // engagement arm carries no role and must not mask the membership arm.
+      if (governs && !existing.canGovern) {
+        options.set(row.organization_id, { ...existing, canGovern: true });
+      }
+      continue;
+    }
     options.set(row.organization_id, {
       organizationId: row.organization_id,
       name:
         row.organizations?.display_name?.trim() ||
         row.organizations?.legal_name?.trim() ||
         null,
+      canGovern: governs,
     });
   }
   return [...options.values()];
 }
 
-/** Timesheet approval templates visible to the caller (definitions RLS =
- *  active org members), keyed by org id. */
+/** Timesheet approval templates for the caller's OWN organizations
+ *  (definitions RLS = active org members), keyed by org id.
+ *
+ *  SAME MODEL AS THE SUBMIT PATH: submit accepts ANY active definition with
+ *  a published version, so this read reports published=true iff ANY active
+ *  definition for the org has one. (It used to answer from only the NEWEST
+ *  active definition across an UNSCOPED 50-row window — an org whose newest
+ *  definition was an unpublished draft, or which fell off the global window
+ *  entirely, was shown "no template" while its submit would have worked.) */
 async function readTemplateStates(
   supabase: SupabaseClient,
+  organizationIds: readonly string[],
 ): Promise<Map<string, TimesheetTemplateState>> {
   const out = new Map<string, TimesheetTemplateState>();
+  if (organizationIds.length === 0) return out;
   const defRes = await asAny(supabase)
     .from("workflow_definitions")
     .select("id, organization_id, is_active, context_entity_type, created_at")
     .eq("context_entity_type", "timesheet")
     .eq("is_active", true)
+    .in("organization_id", organizationIds)
     .order("created_at", { ascending: false })
     .limit(TIMESHEET_READ_LIMIT);
   if (defRes.error) return out;
@@ -304,12 +343,15 @@ async function readTemplateStates(
     }
   }
   for (const d of defs) {
-    // Newest active definition per org wins (list is newest-first).
-    if (out.has(d.organization_id)) continue;
-    out.set(d.organization_id, {
-      definitionId: d.id,
-      published: publishedDefs.has(d.id),
-    });
+    // Newest-first: the FIRST published definition per org is the one the
+    // submit path would start against; a draft is only reported while no
+    // published sibling exists.
+    const prev = out.get(d.organization_id);
+    if (prev?.published) continue;
+    const isPublished = publishedDefs.has(d.id);
+    if (!prev || isPublished) {
+      out.set(d.organization_id, { definitionId: d.id, published: isPublished });
+    }
   }
   return out;
 }
@@ -417,10 +459,16 @@ export async function getTimesheetsOverview(): Promise<TimesheetsOverviewResult>
     }
   }
 
-  const [templates, orgOptions] = await Promise.all([
-    readTemplateStates(supabase),
-    readOrgOptions(supabase, user.id),
-  ]);
+  const orgOptions = await readOrgOptions(supabase, user.id);
+  // Template states are asked ONLY for the orgs on this page (the caller's
+  // options plus every visible document's org) — never a global window.
+  const templateOrgIds = [
+    ...new Set([
+      ...orgOptions.map((o) => o.organizationId),
+      ...sheets.map((s) => s.organizationId),
+    ]),
+  ];
+  const templates = await readTemplateStates(supabase, templateOrgIds);
 
   // Re-read engine state only if a stale sync changed nothing structural —
   // the map built above already covers every visible instance.

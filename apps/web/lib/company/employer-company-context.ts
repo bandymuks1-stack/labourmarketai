@@ -4,10 +4,15 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getSessionProfile, readProfileRow } from "@/lib/auth/session-profile";
 import { baseIdentityForRole } from "@/lib/config/roles";
-import { getWorkspaceContext } from "@/lib/company/active-organization";
+import {
+  getWorkspaceContext,
+  resolveActiveWorkspaceForCaller,
+  type WorkspaceContext,
+} from "@/lib/company/active-organization";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import type { DomainCaller } from "@/lib/domain/caller";
 import {
   isEmployerSurfaceRole,
   isGovernanceRole,
@@ -163,21 +168,41 @@ export const resolveEmployerCompanyContext = cache(
       ? baseIdentityForRole(session.profile.active_role)
       : null;
 
+    // Cookie transport: the session-aware workspace resolution (session
+    // pointer wins over the durable pointer); the gate chain below is THE
+    // shared core (G4 wagon 3).
     const workspace = await getWorkspaceContext(identity);
-    const activeId = workspace.activeWorkspaceId;
-    if (activeId === PERSONAL_WORKSPACE_ID) return unavailable("personal-workspace");
+    return resolveEmployerCompanyCore({ supabase, userId: user.id }, workspace);
+  },
+);
 
-    // MEMBERSHIP GATE. `workspace.workspaces` is the membership-validated list
-    // (owned organizations + active engagement contexts). An org that is not in
-    // it can never be resolved, whatever a cookie or a client says.
-    const active = workspace.workspaces.find(
-      (w) => w.kind === "organization" && w.id === activeId,
-    );
-    if (!active) {
-      const hasAnyOrg = workspace.workspaces.some((w) => w.kind === "organization");
-      return unavailable(hasAnyOrg ? "not-a-member" : "no-organization");
-    }
-    const label = active.name || null;
+/**
+ * THE employer-company gate chain as an explicit caller (G4 wagon 3) —
+ * workspace membership gate → org row → legacy company binding → governance
+ * role — extracted VERBATIM from the cookie resolver so the web surfaces,
+ * the MCP capability layer, and mobile resolve "which company am I acting
+ * for" through ONE implementation. The transport decides only how the
+ * workspace context was resolved (session cookie vs durable pointer).
+ */
+export async function resolveEmployerCompanyCore(
+  caller: DomainCaller,
+  workspace: WorkspaceContext,
+): Promise<EmployerCompanyContext> {
+  const supabase = caller.supabase;
+  const activeId = workspace.activeWorkspaceId;
+  if (activeId === PERSONAL_WORKSPACE_ID) return unavailable("personal-workspace");
+
+  // MEMBERSHIP GATE. `workspace.workspaces` is the membership-validated list
+  // (owned organizations + active engagement contexts). An org that is not in
+  // it can never be resolved, whatever a cookie or a client says.
+  const active = workspace.workspaces.find(
+    (w) => w.kind === "organization" && w.id === activeId,
+  );
+  if (!active) {
+    const hasAnyOrg = workspace.workspaces.some((w) => w.kind === "organization");
+    return unavailable(hasAnyOrg ? "not-a-member" : "no-organization");
+  }
+  const label = active.name || null;
 
     // The org row itself. The membership gate above already ran, which is what
     // makes this read legitimate: after 20260802170000 (W9 slice 2)
@@ -261,7 +286,7 @@ export const resolveEmployerCompanyContext = cache(
       .from("company_memberships")
       .select("role")
       .eq("organization_id", org.id)
-      .eq("profile_id", user.id)
+      .eq("profile_id", caller.userId)
       .eq("status", "active")
       .limit(1);
     if (memRes.error) {
@@ -279,7 +304,7 @@ export const resolveEmployerCompanyContext = cache(
       const memberRole = (memRes.data ?? [])[0]?.role as string | undefined;
       if (isGovernanceRole(memberRole)) role = memberRole;
     }
-    if (role === null && company.profile_id === user.id) role = "owner";
+    if (role === null && company.profile_id === caller.userId) role = "owner";
     if (role === null || !isEmployerSurfaceRole(role)) {
       return unavailable("company-not-owned", organizationName || label);
     }
@@ -291,8 +316,45 @@ export const resolveEmployerCompanyContext = cache(
       organizationName,
       role,
     };
-  },
-);
+}
+
+/**
+ * Bearer-transport guard (G4 wagon 3): resolve the employer company the
+ * caller is acting for from the DURABLE workspace pointer — the same gate
+ * chain as `requireEmployerCompany`, through the SAME core, without a
+ * session cookie. The identity default mirrors the cookie path: the
+ * caller's recorded `active_role` decides whether a single organization may
+ * be inferred when no pointer is stored.
+ */
+export async function requireEmployerCompanyForCaller(
+  caller: DomainCaller,
+): Promise<
+  | {
+      ok: true;
+      companyId: string;
+      organizationId: string;
+      organizationName: string;
+      role: GovernanceRole;
+    }
+  | { ok: false; reason: EmployerContextReason }
+> {
+  const profileRead = await readProfileRow(caller);
+  if (!profileRead.ok) return { ok: false, reason: "error" };
+  const identity = profileRead.value?.active_role
+    ? baseIdentityForRole(profileRead.value.active_role)
+    : null;
+  const workspace = await resolveActiveWorkspaceForCaller(caller, identity);
+  const ctx = await resolveEmployerCompanyCore(caller, workspace);
+  return ctx.kind === "ok"
+    ? {
+        ok: true,
+        companyId: ctx.companyId,
+        organizationId: ctx.organizationId,
+        organizationName: ctx.organizationName,
+        role: ctx.role,
+      }
+    : { ok: false, reason: ctx.reason };
+}
 
 /**
  * Guard form for the employer entry points: `ok` carries the ids, everything

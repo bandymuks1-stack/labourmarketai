@@ -48,6 +48,20 @@ function importsOf(webRoot: string, rel: string, src: string): string[] {
 export const LANDING_PAGE = "app/[locale]/page.tsx";
 
 /**
+ * THE LANDING HAS TWO ARMS (owner command 2026-08-22 §2 + P0 entry-point fix
+ * 2026-08-31): the canonical page statically renders FOCUS for every visitor
+ * without an explicit choice, and the middleware rewrites the locale root to
+ * the cookie-gated LIVE route for visitors who explicitly chose it. "The
+ * landing, as the browser sees it" is therefore the union of both trees —
+ * a CTA or baseline component is still shipped if EITHER arm renders it,
+ * and genuinely deleting it from the arm that owns it still fails the guard.
+ */
+export const LANDING_ARM_PAGES: readonly string[] = [
+  LANDING_PAGE,
+  "app/[locale]/live-market-review/page.tsx",
+];
+
+/**
  * Every file in the landing's render tree, page first, deduped and depth-capped.
  *
  * The cap keeps a guard from silently becoming a whole-repo grep the day
@@ -56,7 +70,7 @@ export const LANDING_PAGE = "app/[locale]/page.tsx";
  */
 export function landingTreeFiles(webRoot: string, maxDepth = 3): string[] {
   const seen = new Set<string>();
-  let frontier = [LANDING_PAGE];
+  let frontier = [...LANDING_ARM_PAGES];
   for (let depth = 0; depth <= maxDepth && frontier.length > 0; depth += 1) {
     const next: string[] = [];
     for (const rel of frontier) {

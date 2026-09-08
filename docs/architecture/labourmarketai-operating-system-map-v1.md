@@ -1,5 +1,14 @@
 # Labourmarket.ai Operating System Map v1
 
+> **Canonical architecture decision:** every layer below is subordinate to
+> [`docs/owner-decisions/work-journal-conversation-architecture-v1.md`](../owner-decisions/work-journal-conversation-architecture-v1.md)
+> (owner canonical decision, 2026-07-25; registry entry
+> [`ADR 0014`](../DECISIONS/0014-work-journal-first-conversation-architecture.md)).
+> The conversation window is the primary work journal; the journal route, the
+> CV, the opportunity board and the candidate filter are structured secondary
+> projections of it. Where this map and the canonical decision disagree, the
+> canonical decision wins.
+
 > The technical layer-by-layer view of the product. Companion to
 > `docs/product/labourmarketai-supergrand-vision-os-v1.md` (the
 > narrative) and the public `/[locale]/vision` page (the user-facing

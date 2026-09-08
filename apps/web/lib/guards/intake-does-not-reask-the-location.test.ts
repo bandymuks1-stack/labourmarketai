@@ -35,7 +35,10 @@ describe("the prefill carries the location", () => {
       CHAT.indexOf("lastValueRef"),
     );
     expect(fn.length).toBeGreaterThan(0);
-    expect(fn).toMatch(/out\.location = countryLabel/);
+    // 2026-09-04 (owner contract §9): the CITY the person named stays beside
+    // the country name — "Rotterdam, Nyderlandai" — never the country alone
+    // when a site was stated, and never the ISO code.
+    expect(fn).toMatch(/out\.location = v\.city \? `\$\{v\.city\}, \$\{countryLabel\}` : countryLabel/);
   });
 
   it("puts the NAME in the field, never the ISO code", () => {
@@ -54,7 +57,9 @@ describe("the prefill carries the location", () => {
       CHAT.indexOf("const demandPrefill"),
       CHAT.indexOf("lastValueRef"),
     );
-    expect(fn).toMatch(/if \(countryLabel\) out\.location = countryLabel;/);
+    expect(fn).toMatch(/if \(countryLabel\) out\.location = v\.city \? /);
+    // A city with no resolvable country still names the site, nothing more.
+    expect(fn).toMatch(/else if \(v\.city\) out\.location = v\.city;/);
   });
 });
 
