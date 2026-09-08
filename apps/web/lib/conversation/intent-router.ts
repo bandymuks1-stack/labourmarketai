@@ -336,6 +336,33 @@ const RULES: IntentRule[] = [
         `(laisv|available|\\bfree|beschikba|verfügbar|verfuegbar|\\bfrei|\\bvrij|свобод)\\w*\\s*.{0,12}[0-9]{1,4}\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
         9,
       ),
+      // ── WE HAVE WORKERS **FOR** A COUNTRY ───────────────────────────────
+      //
+      // "turim sandėlio darbuotojų Vokietijai" measured `need-workers` on
+      // 2026-09-08 — WE HAVE warehouse workers FOR Germany read as an
+      // employer NEEDING them. It carried no seek verb at all: it scored 4 on
+      // the bare `darbuotoj` noun, which the demand side weights on its own.
+      // A noun-only rule cannot tell a direction, and this is what that costs.
+      //
+      // The HAVE verb is the discriminator, and the destination is what makes
+      // it market-facing: supply is offered INTO a place. "reikia sandėlio
+      // darbuotojų Vokietijoje" keeps the same country and stays demand,
+      // because it opens with a need verb rather than a have verb.
+      //
+      // Weight 6 — above the bare noun's 4, and deliberately BELOW the
+      // employer's own roster question: "turime laisvų darbuotojų" scores 8
+      // on `who-available` and must keep it, because a company asking who is
+      // free on its own bench is not offering anyone to the market.
+      p(
+        "(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)" +
+          "\\w*\\s*.{0,30}(darbuotoj|worker|werknemer|medewerk|mitarbeit|arbeitskr|работник|людей)" +
+          "\\w*\\s*.{0,24}(vokietij|nyderland|olandij|belgij|švedij|svedij|norvegij|danij|lenkij|" +
+          "suomij|airij|prancūzij|prancuzij|germany|netherlands|holland|belgium|sweden|norway|" +
+          "denmark|poland|finland|ireland|france|deutschland|niederlande|schweden|norwegen|" +
+          "belgien|polen|frankreich|германи|нидерланд|швеци|норвеги|польш|duitsland|zweden|" +
+          "noorwegen|belgie|polen)",
+        6,
+      ),
       // …AND THE WAY AN AGENCY ACTUALLY INTRODUCES ITSELF (measured
       // 2026-09-08 on the public entry). The rule above requires a HAVE verb,
       // but nobody writes "we are an agency and we have 30 workers" — they
@@ -1252,6 +1279,28 @@ const RULES: IntentRule[] = [
   {
     intent: "who-available",
     patterns: [
+      // ── A HAVE VERB PLUS A WORKER NOUN IS NEVER EMPLOYER DEMAND ─────────
+      //
+      // "Turime 20 darbuotojų" measured `need-workers` on 2026-09-08: WE HAVE
+      // 20 employees read as WE NEED 20. There is no seek verb anywhere in
+      // that sentence — it scored 4 on the bare `darbuotoj` noun, which the
+      // demand side weights on its own. A noun-only rule cannot carry a
+      // direction, and this is the second inversion it produced.
+      //
+      // It lands HERE rather than on the supply side on purpose. Who those
+      // people are is genuinely ambiguous — a company describing its own
+      // payroll and an agency describing its bench write the same sentence —
+      // and the roster is the reading that assumes least: it shows the
+      // speaker their own people rather than publishing an offer they did not
+      // make. Naming a destination is what turns it into an offer, and that
+      // rule sits on `offer-capacity` at a higher weight.
+      //
+      // Weight 5: above the bare noun's 4, below every real capacity rule.
+      p(
+        "(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)" +
+          "\\w*\\s*.{0,30}(darbuotoj|worker|werknemer|medewerk|mitarbeit|arbeitskr|работник)",
+        5,
+      ),
       // CAPACITY: "kas laisvas šią savaitę?", "kas gali dirbti rytoj?", "kas
       // atostogauja?", "who is available / free", "who can work", "wer ist
       // frei / verfügbar", "wie is beschikbaar / vrij", "кто свободен".
@@ -1620,7 +1669,12 @@ const RULES: IntentRule[] = [
       // "work"/"job" are deliberately absent, because "I need work" is the
       // opposite direction and belongs to find-work.
       p(
-        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих)`,
+        // `žmoni` joins the list 2026-09-08. Lithuanian was already covered
+        // — but by `\breikia\s+žmoni`, bound to ONE verb. "ieškome 10 žmonių
+        // klientui" (an agency buying for a client) uses a different verb and
+        // measured `unknown`. Reading the shared seek vocabulary instead of a
+        // single hard-coded verb is the point of this rule.
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|žmoni|zmoni)`,
         5,
       ),
       // DUTCH PUTS THE VERB LAST. "wij hebben 12 lassers nodig" is the
@@ -1640,6 +1694,28 @@ const RULES: IntentRule[] = [
       // pattern it would otherwise be mistaken for. Caught by the supply
       // guard's cross-check, not in production.
       p("\\bhebben\\b\\s*.{0,30}\\bnodig\\b", 10),
+      // ── A NEED VERB AND A HEADCOUNT, WHATEVER THE TRADE IS CALLED ───────
+      //
+      // "reikia 12 TIG kitai savaitei" measured `unknown` on 2026-09-08. TIG
+      // is a welding PROCESS, not a job title, so no trade stem matched and
+      // an employer stating a real order got nothing back. The product cannot
+      // hold every trade, process, certificate and local word people use for
+      // the work — but a NUMBER after a need verb is a headcount, and that is
+      // enough to know the direction and open the demand form, which then
+      // asks what the 12 are.
+      //
+      // Weight 3, deliberately low: this is the weakest reading of the
+      // sentence and must lose to every rule that actually recognises the
+      // work. It exists to replace SILENCE, not to overrule knowledge.
+      //
+      // The time units are excluded, because "reikia 12 valandų" (12 hours),
+      // "2 dienų" (2 days) and their translations are a duration, not people.
+      // Without that exclusion this rule would confidently answer a question
+      // about time with an employer demand form.
+      p(
+        `(?:${SEEK_VERB_SOURCE})\\s+[0-9]{1,4}\\s+(?!(?:val|valand|dien|savait|men|metu|hour|day|week|month|year|час|дн|недел|месяц|год|stunde|tag|woche|monat|jahr|uur|dag|week|maand|jaar)\\w*\\b)`,
+        3,
+      ),
       p("(darbuotojų\\s+)?poreik", 2), // "darbuotojų poreikis"
       p("\\bbrigad", 2), // team/brigade need
       // V9 audit finding: "kitą mėnesį trūks keturių suvirintojų" carried no
