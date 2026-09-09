@@ -176,6 +176,8 @@
     "empty": "Keine wartenden Einträge.",
     "emptyTitle": "Derzeit nichts zu überprüfen",
     "emptyNext": "Einträge erscheinen hier, wenn eine von Ihnen betreute Arbeitskraft einen Eintrag zur Überprüfung einreicht.",
+    "unavailableTitle": "Die Prüfwarteschlange konnte gerade nicht gelesen werden",
+    "unavailable": "Das ist ein fehlgeschlagener Lesevorgang, keine leere Warteschlange. Nichts Wartendes ist verloren — laden Sie die Seite gleich neu.",
     "hideOriginal": "Original ausblenden",
     "metrics": "Kennzahlen",
     "reject": "Ablehnen",

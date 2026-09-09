@@ -176,6 +176,8 @@
     "empty": "Geen items in de wachtrij.",
     "emptyTitle": "Momenteel niets te beoordelen",
     "emptyNext": "Items verschijnen hier wanneer een werknemer die je beheert er een indient voor beoordeling.",
+    "unavailableTitle": "De beoordelingswachtrij kon nu niet worden gelezen",
+    "unavailable": "Dit is een mislukte leesactie, geen lege wachtrij. Niets dat wacht is verloren — laad de pagina zo opnieuw.",
     "hideOriginal": "Origineel verbergen",
     "metrics": "Metrieken",
     "reject": "Afwijzen",

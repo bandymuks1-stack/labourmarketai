@@ -176,6 +176,8 @@
     "empty": "Nėra laukiančių įrašų.",
     "emptyTitle": "Šiuo metu nėra ko peržiūrėti",
     "emptyNext": "Įrašai atsiras čia, kai jūsų valdomas darbuotojas pateiks įrašą peržiūrai.",
+    "unavailableTitle": "Peržiūros eilės dabar nepavyko perskaityti",
+    "unavailable": "Tai nepavykęs nuskaitymas, o ne tuščia eilė. Laukiantys įrašai niekur nedingo — po akimirkos atnaujinkite puslapį.",
     "hideOriginal": "Slėpti originalą",
     "metrics": "Rodikliai",
     "reject": "Atmesti",
