@@ -9,7 +9,16 @@ import { nextPathForIntents } from "@/lib/onboarding/first-run-intent";
  * by lib/guards/global-landing.test.ts — existence-checked on every CI run):
  *   worker      → /auth/signup     (worker signup)
  *   employer    → /company-need    (canonical §17 demand entry)
- *   agency      → /auth/signup     (agencies sign up through the same door)
+ *   agency      → /auth/signup?next=<organisation setup, staffing_agency
+ *                 preset> — owner readiness window (2026-09-09): this door
+ *                 alone still dropped its visitor at a BARE signup. The
+ *                 institution's door was named in window 6 (G-C1) and the
+ *                 agency's was not, so a staffing agency arriving from the
+ *                 landing had to re-answer, in the generic first-run
+ *                 question, the thing it had just told us by choosing this
+ *                 door — and picking "hire" there makes a plain employer,
+ *                 not a `staffing_agency`. Same mechanism as G-C1, derived
+ *                 from the same router.
  *   institution → /auth/signup?next=<organisation setup, training_provider
  *                 preset> — window 6 (2026-09-06), gap G-C1: a school /
  *                 college / university IS an organisation with the
@@ -35,6 +44,20 @@ import { nextPathForIntents } from "@/lib/onboarding/first-run-intent";
  */
 export const INSTITUTION_DOOR_NEXT: string =
   nextPathForIntents(["education"]) ?? "/dashboard/start/company";
+
+/**
+ * The agency door's post-auth destination, derived exactly like the
+ * institution's — `nextPathForIntents(["agency"])` →
+ * `/dashboard/start/company?type=staffing_agency`. An agency is a company
+ * TYPE (see `first-run-intent.ts`), never a root role, so this opens the ONE
+ * canonical organisation setup with that type pre-selected rather than a
+ * second agency product.
+ *
+ * Derived, not retyped: the door can never point somewhere onboarding itself
+ * would not, and if the router's agency path ever moves, this moves with it.
+ */
+export const AGENCY_DOOR_NEXT: string =
+  nextPathForIntents(["agency"]) ?? "/dashboard/start/company";
 
 export type FinalDoorKey = "worker" | "employer" | "agency" | "institution" | "partner";
 
@@ -66,7 +89,12 @@ export const STARTING_CONTEXTS: ReadonlyArray<{
 }> = [
   { key: "worker", href: "/auth/signup", variant: "primary", learnMore: "/for-workers" },
   { key: "employer", href: "/company-need", variant: "secondary", learnMore: "/for-companies" },
-  { key: "agency", href: "/auth/signup", variant: "secondary", learnMore: "/for-agencies" },
+  {
+    key: "agency",
+    href: `/auth/signup?next=${encodeURIComponent(AGENCY_DOOR_NEXT)}`,
+    variant: "secondary",
+    learnMore: "/for-agencies",
+  },
   {
     key: "institution",
     href: `/auth/signup?next=${encodeURIComponent(INSTITUTION_DOOR_NEXT)}`,

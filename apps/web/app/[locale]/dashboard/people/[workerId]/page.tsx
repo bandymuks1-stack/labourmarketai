@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  availabilityDateLabel,
+  countryLabel,
+  mobilityLabels,
+} from "@/lib/people/person-page-labels";
 import {
   BadgeCheck,
   CalendarDays,
@@ -52,6 +57,11 @@ export default async function PersonPage({
   setRequestLocale(locale);
   const t = await getTranslations("people");
   const tSkillNames = await getTranslations("skillNames");
+  // Countries and dates are FACTS ABOUT A PERSON that an employer reads on
+  // the one page where they judge them. Both were rendered raw here — see
+  // `countryName` and the availability chip below.
+  const tCountries = await getTranslations("labourMarket");
+  const format = await getFormatter();
 
   const supabase = await createClient();
   const {
@@ -123,8 +133,30 @@ export default async function PersonPage({
   const recordedWork = await readRecordedWorkFor(
     (worker.profile_id as string | null) ?? "",
   );
-  const mobility = ((worker.preferred_countries as string[] | null) ?? []).filter(
-    (c) => typeof c === "string" && c.trim().length > 0,
+  /**
+   * ── A COUNTRY CODE IS NOT A COUNTRY NAME (owner readiness window, §5B/§24)
+   *
+   * Read back from production today, this page rendered a real worker's
+   * location as "LT" and their mobility as "NL, DK, NO, SE" — the stored
+   * ISO-3166 alpha-2 codes, printed straight onto the ONE cross-person page
+   * an employer uses to decide about someone. §24 bans raw internal
+   * identifiers in the product's surfaces, and for a visitor reading in
+   * Russian or Dutch these two-letter tokens are not even a weak label.
+   *
+   * The catalogue that fixes it already exists and every other surface uses
+   * it (`labourMarket.countryNames`, all 17 markets × 5 active locales). The
+   * fallback is the CODE, never a blank and never a guess: a worker whose
+   * stored country is outside the market set — the column is free text and
+   * the location model deliberately spans all of ISO — still shows something
+   * true rather than vanishing. UNKNOWN is not EMPTY (SEP-7).
+   */
+  const countries = {
+    has: (key: string) => tCountries.has(key),
+    get: (key: string) => tCountries(key),
+  };
+  const mobility = mobilityLabels(
+    worker.preferred_countries as string[] | null,
+    countries,
   );
 
   // REAL WORK and WHAT THEY OFFER. Both already existed and were rendered
@@ -201,13 +233,23 @@ export default async function PersonPage({
           {worker.available_from ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
-              {t("availableFrom", { date: worker.available_from as string })}
+              {/* A stored `date` column arrives as "2026-07-31" and was
+                  interpolated verbatim. Formatted in the reader's locale —
+                  and parsed defensively, because a value the formatter
+                  cannot read must degrade to the stored string, never to
+                  "Invalid Date". */}
+              {t("availableFrom", {
+                date: availabilityDateLabel(
+                  worker.available_from as string,
+                  format,
+                ),
+              })}
             </span>
           ) : null}
           {worker.current_location_country ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <MapPin className="h-3 w-3" aria-hidden />
-              {worker.current_location_country as string}
+              {countryLabel(worker.current_location_country as string, countries)}
             </span>
           ) : null}
           {typeof worker.experience_years === "number" &&
