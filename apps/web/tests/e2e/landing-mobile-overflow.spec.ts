@@ -19,9 +19,10 @@ import { join } from "node:path";
  *     -> the hero grid track was sized 325 inside a 272px container
  *
  * Everything the audit listed as an offender — the suggestion-chip row, the
- * "Klausti" submit, `.market-map-host`, the "Demonstracija" badge, the map
- * caption — was a CONSEQUENCE of that over-wide track, not an independent bug.
- * The fix is `w-0` on the ask input (see hero-live-demo.tsx).
+ * submit, the map host, the badge, the map caption — was a CONSEQUENCE of that
+ * over-wide track, not an independent bug. The fix is `w-0` on the sentence
+ * input; since the frozen design contract (2026-09-05, P1) that input lives in
+ * components/marketing/public-entry.tsx and the same rule holds there.
  *
  * The public header is NOT this spec's subject: it was fixed separately in
  * PR #1098 and is covered by mobile-marketing-nav.spec.ts. This spec measures
@@ -158,15 +159,15 @@ for (const width of MOBILE_WIDTHS) {
        * overflow assertion is trivially satisfiable by a blank document, so the
        * spec states what must be on screen BEFORE it measures anything.
        */
-      await expect(page.getByTestId("hero-live-demo")).toBeVisible();
-      await expect(page.getByTestId("hero-ask-input")).toBeVisible();
-      await expect(page.getByTestId("hero-ask-submit")).toBeVisible();
-      await expect(page.getByTestId("market-map")).toBeVisible();
-      // The hero auto-plays once on mount; the chips and the result card are
-      // the widest things it renders, so measuring before it settles would miss
-      // them. Waiting on the card is the settled-state signal.
-      await expect(page.getByTestId("hero-result-card")).toBeVisible();
-      await expect(page.getByTestId("hero-scenario-chip").first()).toBeVisible();
+      await expect(page.getByTestId("public-entry")).toBeVisible();
+      await expect(page.getByTestId("entry-input")).toBeVisible();
+      await expect(page.getByTestId("entry-submit")).toBeVisible();
+      await expect(page.getByTestId("entry-example").first()).toBeVisible();
+      // The understanding card (with its two door links) is the widest thing
+      // the entry renders, so it is produced — by routing the first example
+      // sentence live — BEFORE anything is measured.
+      await page.getByTestId("entry-example").first().click();
+      await expect(page.getByTestId("entry-understanding")).toBeVisible();
 
       const offenders = await pageOverflow(page);
       expect(
@@ -183,13 +184,12 @@ for (const width of MOBILE_WIDTHS) {
        * — so a future regression reads as itself rather than as a statistic.
        */
       const named: ReadonlyArray<readonly [string, string]> = [
-        ["hero suggestion chips", "[data-testid='hero-scenario-chip']"],
-        ["hero Klausti submit", "[data-testid='hero-ask-submit']"],
-        ["market map host", ".market-map-host"],
-        // The origin badge moved INSIDE <MarketMap> (intrinsic labelling);
-        // it is absolutely positioned within the map container, but stays
-        // named here so a regression reads as itself.
-        ["map origin badge", "[data-testid='map-origin-badge']"],
+        ["entry example chips", "[data-testid='entry-example']"],
+        ["entry Suprasti submit", "[data-testid='entry-submit']"],
+        ["entry understanding card", "[data-testid='entry-understanding']"],
+        // Scoped to the entry: the header carries its own (mobile-hidden)
+        // auth links, whose null boxes are not this spec's subject.
+        ["entry door links", "[data-testid='public-entry'] [data-testid='auth-cta-link']"],
       ];
       for (const [name, selector] of named) {
         for (const el of await page.locator(selector).all()) {
@@ -205,53 +205,52 @@ for (const width of MOBILE_WIDTHS) {
         }
       }
 
-      // The map caption is the last element in the hero's right column and was
-      // the widest offender (right edge 349 at a 320px viewport).
-      const caption = page.getByTestId("hero-map-hint");
-      const capBox = await caption.boundingBox();
-      expect(capBox, `map caption bounding box at ${width}px`).not.toBeNull();
-      expect(
-        capBox!.x + capBox!.width,
-        `map caption right edge at ${width}px`,
-      ).toBeLessThanOrEqual(width + 0.5);
+      // The public-numbers line is the last element of the entry; when the
+      // canonical reader answered it is the widest single line, so its edge
+      // is asserted individually. When the reader could not answer the line
+      // is honestly absent, and that is not an overflow.
+      const numbers = page.getByTestId("entry-numbers");
+      if ((await numbers.count()) > 0) {
+        const numBox = await numbers.boundingBox();
+        expect(numBox, `numbers line bounding box at ${width}px`).not.toBeNull();
+        expect(
+          numBox!.x + numBox!.width,
+          `numbers line right edge at ${width}px`,
+        ).toBeLessThanOrEqual(width + 0.5);
+      }
 
       await page.screenshot({
         path: join(SHOTS, `landing-${width}.png`),
         fullPage: false,
       });
-      // The named offenders sit BELOW the fold, so the shot above does not
-      // show them. Second frame, scrolled to the map, so the evidence actually
+      // The understanding card may sit BELOW the fold, so the shot above does
+      // not show it. Second frame, scrolled to it, so the evidence actually
       // pictures the boxes this spec is about.
-      await page.getByTestId("hero-map-hint").scrollIntoViewIfNeeded();
+      await page.getByTestId("entry-understanding").scrollIntoViewIfNeeded();
       await page.screenshot({
-        path: join(SHOTS, `landing-${width}-map.png`),
+        path: join(SHOTS, `landing-${width}-entry.png`),
         fullPage: false,
       });
     });
 
-    test(`the hero ask row stays usable at ${width}px`, async ({ page }) => {
+    test(`the entry row stays usable at ${width}px`, async ({ page }) => {
       /**
-       * The fix works by giving the ask input `w-0` and letting `flex-1` grow
-       * it. That is only correct if the field still ends up a real, typable
-       * control — a 0px input that never grows would "fix" the overflow by
-       * destroying the one interactive element on the landing.
+       * The fix works by giving the sentence input `w-0` and letting `flex-1`
+       * grow it. That is only correct if the field still ends up a real,
+       * typable control — a 0px input that never grows would "fix" the
+       * overflow by destroying the one interactive element on the landing.
        */
       await page.goto("/lt");
 
-      const input = page.getByTestId("hero-ask-input");
+      const input = page.getByTestId("entry-input");
       await expect(input).toBeVisible();
       /**
-       * WAIT FOR THE DEMO TO SETTLE BEFORE MEASURING.
-       *
-       * While the hero auto-plays, the submit button renders an extra pending
-       * dot and is therefore WIDER, which makes the `flex-1` input narrower.
-       * Two separate `boundingBox()` calls straddling that transition produced
-       * a 5.5px phantom overlap on the first run of this spec — the layout was
-       * fine, the measurement was not. The result card is the settled signal
-       * (phase `decided`), and both boxes are then read in ONE evaluate so they
-       * cannot come from different frames.
+       * Both boxes are read in ONE evaluate so they cannot come from different
+       * frames — two separate `boundingBox()` calls straddling a layout
+       * transition once produced a 5.5px phantom overlap (the layout was fine,
+       * the measurement was not).
        */
-      await expect(page.getByTestId("hero-result-card")).toBeVisible();
+      await expect(page.getByTestId("entry-submit")).toBeVisible();
 
       const row = await page.evaluate(() => {
         const rect = (sel: string) => {
@@ -261,8 +260,8 @@ for (const width of MOBILE_WIDTHS) {
           return { x: r.x, y: r.y, width: r.width };
         };
         return {
-          input: rect("[data-testid='hero-ask-input']"),
-          submit: rect("[data-testid='hero-ask-submit']"),
+          input: rect("[data-testid='entry-input']"),
+          submit: rect("[data-testid='entry-submit']"),
         };
       });
       expect(row.input, "ask input bounding box").not.toBeNull();
@@ -294,16 +293,15 @@ for (const width of MOBILE_WIDTHS) {
 test.describe("@1280px desktop", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
-  test("the desktop hero is unchanged and still fits", async ({ page }) => {
+  test("the desktop entry still fits", async ({ page }) => {
     /**
-     * `w-0 flex-1` must be invisible above the breakpoint. At 1280 the hero is
-     * a two-column grid and the ask input should still be a wide field.
+     * `w-0 flex-1` must be invisible above the breakpoint. At 1280 the
+     * sentence input should still be a wide field.
      */
     await page.goto("/lt");
-    await expect(page.getByTestId("hero-live-demo")).toBeVisible();
-    await expect(page.getByTestId("market-map")).toBeVisible();
+    await expect(page.getByTestId("public-entry")).toBeVisible();
 
-    const inputBox = await page.getByTestId("hero-ask-input").boundingBox();
+    const inputBox = await page.getByTestId("entry-input").boundingBox();
     expect(inputBox, "ask input bounding box at 1280px").not.toBeNull();
     expect(
       inputBox!.width,

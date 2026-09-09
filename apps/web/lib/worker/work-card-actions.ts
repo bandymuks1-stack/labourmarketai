@@ -87,7 +87,13 @@ export async function saveWorkerCardAction(
       salaryMin: parseIntOrNull(formData.get("salary_min")),
       salaryMax: parseIntOrNull(formData.get("salary_max")),
       locationCountry: locationRaw === "" ? null : locationRaw,
-      preferredCountries: parseCountries(formData.get("preferred_countries")),
+      // A blank list is "keep" (the RPC coalesces null). The explicit clear
+      // is a separate flag (W6): the chat executor sets it only for an
+      // explicit empty list, so no blank form field can empty the list.
+      preferredCountries:
+        String(formData.get("preferred_countries_clear") ?? "") === "1"
+          ? []
+          : parseCountries(formData.get("preferred_countries")),
     },
   );
   if (!result.ok) return result;

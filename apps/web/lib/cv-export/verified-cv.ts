@@ -79,6 +79,27 @@ export type VerifiedCvProofRow = {
   /** W6 slice 1: true when the confirmation was written by the policy-gated
    *  auto-confirm RPC — rendered with a factual qualifier, never hidden. */
   automatic: boolean;
+  /**
+   * TRUE when the confirmer IS the person the entry belongs to (EVID-2).
+   *
+   * This CV is the document a person shows an employer, and until 2026-09-08
+   * a self-confirmation reached it indistinguishable from an employer's:
+   * the row carried only `confirmer_role`, every production row carries
+   * `owner`, and 3 of the 13 confirmations on production are the worker
+   * confirming their own entry. So "Confirmed work proof" silently included
+   * work nobody but the worker had attested.
+   *
+   * SEP-3 (EVIDENCE ≠ VERIFICATION) is the rule being kept here. The row is
+   * NOT hidden and NOT deleted — self-reported work is still real work, and
+   * the register's own history says an import may never quietly reclassify
+   * what a human wrote. It is LABELLED, exactly as `automatic` is, so the
+   * reader can tell an external confirmation from an internal one.
+   *
+   * Derived, never stored: `confirmer_id === the CV subject's profile id`.
+   * That keeps the existing 3 rows untouched while making their provenance
+   * legible, which is what the owner asked for before any data change.
+   */
+  selfConfirmed: boolean;
 };
 
 export type VerifiedCvLanguage = { lang: string; level: string };
@@ -417,6 +438,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       confirmedAt: string;
       confirmerRole: string;
       automatic: boolean;
+      selfConfirmed: boolean;
     }[] = [];
     for (const c of confs ?? []) {
       const scope = c.confirmation_scope as {
@@ -434,9 +456,40 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         // W6 slice 1: policy-written rows carry their honest marker through
         // to the render — automatic never looks identical to hand-confirmed.
         automatic: scope?.action === "auto_confirm",
+        // EVID-2: filled below, from a query that FILTERS on confirmer_id
+        // without ever selecting it.
+        selfConfirmed: false,
       });
       const pid = entryById.get(c.entry_id)?.projectId;
       if (pid) projectIds.add(pid);
+    }
+
+    // EVID-2 — WHICH of these confirmations did the CV's own subject write?
+    //
+    // The confirmer's identity must never be FETCHED into this path: the
+    // confirmed-proof query carries the ROLE only, and a guard pins that
+    // (`verified-cv-honesty`). So this asks the narrower question instead —
+    // it FILTERS on `confirmer_id` and selects only the row's own coordinates.
+    // No identity is returned, and the only id involved is the subject's own,
+    // which they already know. This fetches strictly LESS than reading the
+    // column would.
+    //
+    // Matched on (entry_id, created_at) rather than entry_id alone, because an
+    // entry can carry more than one confirmation and only the LATEST one is
+    // rendered above. Marking by entry would label a manager-confirmed row as
+    // self-confirmed whenever an older self-confirmation also existed.
+    if (confirmedRows.length > 0) {
+      const { data: selfRows } = await supabase
+        .from("journal_entry_confirmations")
+        .select("entry_id, created_at")
+        .eq("confirmer_id", user.id)
+        .in("entry_id", confirmedRows.map((r) => r.entryId));
+      const selfKeys = new Set(
+        (selfRows ?? []).map((r) => `${r.entry_id}|${r.created_at}`),
+      );
+      for (const row of confirmedRows) {
+        row.selfConfirmed = selfKeys.has(`${row.entryId}|${row.confirmedAt}`);
+      }
     }
 
     // Project titles the worker's own entries link to — graceful null when
@@ -461,6 +514,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         projectTitle: pid ? (projectTitleById.get(pid) ?? null) : null,
         confirmerRole: row.confirmerRole,
         automatic: row.automatic,
+        selfConfirmed: row.selfConfirmed,
       });
     }
     proof.sort((a, b) => (a.confirmedAt < b.confirmedAt ? 1 : -1));

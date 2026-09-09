@@ -566,8 +566,19 @@ export async function getBookingRequestsSeenAt(): Promise<string | null> {
  * absent — never a fabricated badge (audit PR5: booking responses were
  * silent for the proposing company).
  */
-export async function getBookingResponsesNewCount(): Promise<number> {
-  const seenAt = await getBookingRequestsSeenAt();
+export async function getBookingResponsesNewCount(opts?: {
+  /** When the bookings surface was NEVER opened, count responses inside this
+   *  many days instead of answering 0 — the opening brief's "what changed"
+   *  must not stay silent for a company that only ever worked in the chat.
+   *  Absent → the badge semantics stay exactly as before (0 until seen). */
+  fallbackDays?: number;
+}): Promise<number> {
+  const seen = await getBookingRequestsSeenAt();
+  const fallback =
+    opts?.fallbackDays && opts.fallbackDays > 0
+      ? new Date(Date.now() - opts.fallbackDays * 86400000).toISOString()
+      : null;
+  const seenAt = seen ?? fallback;
   if (!seenAt) return 0;
   const result = await listMyBookings();
   if (result.kind !== "ok") return 0;

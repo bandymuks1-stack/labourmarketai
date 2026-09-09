@@ -196,6 +196,7 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       "translate_message",
       "draft_follow_up",
       "explain_market_demand",
+      "propose_conversation_intent",
     ],
     structuredOutput: true,
     priority: 10,
@@ -350,7 +351,7 @@ export function resolveProviderChain(
   // Pass 1 — the privacy veto. Ineligible providers leave the chain entirely;
   // they are not candidates for the first attempt OR for a later retry.
   for (const p of ordered) {
-    const verdict = providerEligibleForSensitivity(p, sensitivity, grants);
+    const verdict = providerEligibleForSensitivity(p, sensitivity, grants, decision.taskType);
     if (verdict.eligible) {
       eligible.push(p);
     } else {

@@ -13,6 +13,7 @@
  */
 
 import {
+  FREE_ORGANIZATION_PLAN_KEY,
   PRE_PAYMENT_PLANS,
   getPlan,
   type FeatureKey,
@@ -44,10 +45,11 @@ export interface EntitlementContext {
 function freePlanFor(audience: PlanAudience): string {
   if (audience === "worker") return "free_worker";
   if (audience === "admin") return "admin_internal";
-  // company/agency have no free tier — base context is their pilot plan but
-  // INACTIVE (so `active` stays false unless a subscription/override exists).
-  if (audience === "company") return "company_pilot";
-  return "agency_pilot";
+  // Owner launch pricing 2026-09-05: ONE organization plan family — an
+  // organization without a subscription is ORGANIZATION FREE (a real free
+  // plan: 1 active position) whether it acts as employer, staffing provider,
+  // contractor or training provider.
+  return FREE_ORGANIZATION_PLAN_KEY;
 }
 
 export interface ResolveEntitlementsInput {

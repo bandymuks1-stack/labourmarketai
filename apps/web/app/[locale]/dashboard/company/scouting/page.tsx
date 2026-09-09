@@ -24,6 +24,8 @@ import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-bu
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
 import { FeatureNote } from "@/components/app/feature-note";
+import { AvailableSupplySection } from "@/components/app/available-supply-section";
+import { listAvailableSupplyForEmployer } from "@/lib/supply/employer-supply-discovery";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
@@ -128,9 +130,13 @@ export default async function CompanyScoutingPage({
   const tPipe = await getTranslations("candidatePipeline");
   // Localized skill names for the bounded facet chips (Wagon 1).
   const tSkill = await getTranslations("skillNames");
-  const [demands, pendingInterest] = await Promise.all([
+  const [demands, pendingInterest, availableSupply] = await Promise.all([
     listCompanyDemands(),
     listPendingInterestCountsForCompany(),
+    // The supply half of discovery. In the SAME batch as the demand reads —
+    // it depends on nothing they produce, so a serial await would cost a
+    // render stage for nothing.
+    listAvailableSupplyForEmployer({ limit: 50 }),
   ]);
   /**
    * SOMEBODY WAITING OUTRANKS EVERY OTHER DEFAULT.
@@ -208,6 +214,12 @@ export default async function CompanyScoutingPage({
   const poolIncomplete =
     result?.kind === "ok" &&
     (result.retrieval.capped || result.retrieval.truncatedStages.length > 0);
+  // A DIFFERENT statement from poolIncomplete, and it must not be folded into
+  // it: there the pool was short, here the pool was whole and the facts under
+  // the ranking could not be read. A worker with skills can then be ranked as
+  // a worker with none, so the ranking itself is what is untrustworthy.
+  const factsUnreadable =
+    result?.kind === "ok" && result.retrieval.unreadableFacts.length > 0;
 
   const statusLabels = {
     strong: t("status.strong"),
@@ -266,6 +278,13 @@ export default async function CompanyScoutingPage({
           {t("privacy.profileSafe")}
         </p>
       </section>
+
+      {/* AVAILABLE WORKFORCE (2026-09-07) — the supply half of discovery, beside
+          the candidate half rather than in a separate product. Until this
+          landed, an agency's declared capacity was readable only by that agency
+          and an admin: the supply side of the market was written and
+          undiscoverable. */}
+      <AvailableSupplySection state={availableSupply} />
 
       {/* Honest visibility: based on readiness/trust/permissions — NOT payment.
           Paid wider access is inert while billing is disabled; no fake unlock. */}
@@ -361,6 +380,15 @@ export default async function CompanyScoutingPage({
           {poolIncomplete
             ? t("pool.capped", { count: result.retrieval.poolSize })
             : t("pool.complete", { count: result.retrieval.poolSize })}
+        </p>
+      ) : null}
+
+      {factsUnreadable ? (
+        <p
+          className="rounded-md border border-state-warning/40 bg-state-warning/10 px-4 py-3 text-xs leading-relaxed text-text-secondary"
+          data-testid="scouting-facts-unreadable"
+        >
+          {t("pool.factsUnreadable")}
         </p>
       ) : null}
 
@@ -473,6 +501,8 @@ export default async function CompanyScoutingPage({
             reopen: t("lifecycle.reopen"),
             closedNote: t("lifecycle.closedNote"),
             error: t("lifecycle.error"),
+            limitUpgrade: t("lifecycle.limitUpgrade"),
+            limitIndividual: t("lifecycle.limitIndividual"),
           }}
         />
       ) : null}

@@ -25,8 +25,9 @@ import { ALL_AGENT_KEYS } from "../registry/registry";
 const GAP_TASKS: AiTaskType[] = ["detect_capacity_gap", "detect_skill_gap"];
 
 describe("TASK_POLICIES completeness", () => {
-  it("covers all 11 program task types", () => {
-    expect(AI_TASK_TYPES).toHaveLength(11);
+  it("covers all 12 program task types", () => {
+    // 11 → 12 on 2026-09-05: `propose_conversation_intent` (owner approval).
+    expect(AI_TASK_TYPES).toHaveLength(12);
     for (const t of AI_TASK_TYPES) {
       expect(TASK_POLICIES[t], t).toBeDefined();
       expect(TASK_POLICIES[t].taskType).toBe(t);

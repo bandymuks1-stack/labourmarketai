@@ -80,6 +80,36 @@ describe("the employer brief carries agency and institution attention", () => {
     expect(worker.indexOf("loadWorkerDocumentGap")).toBeLessThan(worker.indexOf("learner identity (M10"));
   });
 
+  it("the worker brief says when the employer CONFIRMED their work (§14, the person's side) — from the canonical evidence rows, bounded, with the card chip", () => {
+    const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
+    expect(worker).toMatch(/const workerId = await getOwnWorkerId\(\);/);
+    expect(worker).toMatch(/loadOwnRecentConfirmations\(workerId\)/);
+    expect(worker).toMatch(/fresh\.approvedEntries > 0/);
+    expect(worker).toMatch(/briefWorkConfirmed", \{ count: fresh\.approvedEntries, skills: fresh\.skillsConfirmed \}/);
+    expect(worker).toMatch(/addChip\("player-card", t\("chipMyCard"\)\)/);
+    // After the instruction rung (a manager waiting outranks good news), inside its own try, gated by the cap.
+    expect(worker.indexOf("listAttentionInstructions()")).toBeLessThan(worker.indexOf("loadOwnRecentConfirmations"));
+    const rung = worker.slice(worker.indexOf("// 3a' ──"), worker.indexOf("// 3b ── unread human messages"));
+    expect(rung).toMatch(/^\s*try \{/m);
+    expect(rung).toMatch(/\} catch \{/);
+    expect(rung).toMatch(/lines\.length < MAX_LINES/);
+    // No parallel notification truth: the brief imports the journal read, not a notifications table.
+    expect(SRC).toMatch(/from "@\/lib\/journal\/own-recent-confirmations"/);
+    expect(SRC).not.toMatch(/notifications/);
+  });
+
+  it("the chat routes the card chip to the SAME card the sentence opens, and the copy exists in all 11 locales", () => {
+    const chat = readFileSync(join(APP, "components", "app", "conversation", "chat", "conversation-chat.tsx"), "utf8");
+    const kase = chat.slice(chat.indexOf('case "player-card":'), chat.indexOf('case "logwork":'));
+    expect(kase).toMatch(/startPlayerCard\(\);/);
+    for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
+      const c = JSON.parse(readFileSync(join(APP, "messages", locale + ".json"), "utf8")).conversation.chat as Record<string, string>;
+      expect(c.briefWorkConfirmed, locale).toMatch(/\{count, plural/);
+      expect(c.briefWorkConfirmed, locale).toMatch(/\{skills\}/);
+      expect(c.chipMyCard, locale).toBeTruthy();
+    }
+  });
+
   it("the brief copy exists in the five routed locales (same parity as the existing brief keys)", () => {
     for (const locale of ["lt", "en", "ru", "nl", "de"]) {
       const chat = JSON.parse(readFileSync(join(APP, "messages", `${locale}.json`), "utf8")).conversation.chat as Record<string, string>;

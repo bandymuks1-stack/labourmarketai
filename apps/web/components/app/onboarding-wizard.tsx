@@ -59,11 +59,32 @@ export function OnboardingWizard({
   defaultName,
   returnTo,
   educationTypeOptions,
+  saidSentence = null,
+  defaultIntents = [],
+  defaultProfessionSlug = null,
+  doorIntents = [],
+  doorWords = null,
 }: {
   defaultName: string;
   /** Safe internal path (e.g. an invite deep link) that onboarding
    *  completion returns to instead of the role dashboard. */
   returnTo?: string | null;
+  /** The person's own landing sentence when it travelled here inside
+   *  `returnTo` (`/dashboard?say=…`) — shown back to them, never re-typed. */
+  saidSentence?: string | null;
+  /** Cards to pre-tick from that sentence (lib/onboarding/landing-handoff):
+   *  a DEFAULT the person sees and can untick, not a fact declared for them. */
+  defaultIntents?: readonly FirstRunIntent[];
+  /** Registry profession the sentence named (exactly one), else null. */
+  defaultProfessionSlug?: string | null;
+  /** The landing DOOR the person came through, when `returnTo` is exactly
+   *  the path the first-run router hands these intents (lib/onboarding/
+   *  landing-handoff, `nextPathForIntents` inverted). A door is a default,
+   *  not an invitation: the person's final choice decides the destination. */
+  doorIntents?: readonly FirstRunIntent[];
+  /** That door's plain words (the landing button the person pressed),
+   *  resolved on the server — shown back, like the sentence. */
+  doorWords?: string | null;
   /** Education-type registry labels, resolved on the SERVER (the
    *  `cvSections.educationTypes` namespace is not part of the auth client
    *  message allowlist, and must not be — the wizard ships ~31 KB, not the
@@ -85,7 +106,11 @@ export function OnboardingWizard({
     })).sort((a, b) => collator.compare(a.label, b.label));
   }, [locale, tProfession]);
   const [step, setStep] = useState<1 | 2>(1);
-  const [intents, setIntents] = useState<Set<FirstRunIntent>>(() => new Set());
+  // Pre-ticked from the landing sentence when one travelled here; the person
+  // still sees the tick, can remove it, and must press Continue.
+  const [intents, setIntents] = useState<Set<FirstRunIntent>>(
+    () => new Set(defaultIntents),
+  );
   // The identities the chosen intents open — the DB Role contract stays
   // worker / company; nothing else is ever submitted as a role.
   const roles = useMemo<Set<Role>>(
@@ -96,10 +121,18 @@ export function OnboardingWizard({
   const [displayName, setDisplayName] = useState(defaultName);
   // No pre-selected country — the user chooses (placeholder until they do).
   const [country, setCountry] = useState<string>("");
-  // Same rule for the work type: no default, because a defaulted profession
-  // would be a fact nobody stated (§7 — nothing is auto-declared on a person's
-  // behalf). Asked only of a worker; a company-only signup never sees it.
-  const [professionSlug, setProfessionSlug] = useState<string>("");
+  // Same rule for the work type: no silent default, because a defaulted
+  // profession would be a fact nobody stated (§7 — nothing is auto-declared
+  // on a person's behalf). The ONE exception is the profession the person
+  // themselves named in their landing sentence ("esu suvirintojas…") — that
+  // is their statement, pre-chosen in a select they still see and submit.
+  // Asked only of a worker; a company-only signup never sees it.
+  const [professionSlug, setProfessionSlug] = useState<string>(
+    () =>
+      defaultProfessionSlug && PROFESSION_SLUGS.includes(defaultProfessionSlug)
+        ? defaultProfessionSlug
+        : "",
+  );
   // Student intent: WHERE the person studies becomes a real, current
   // education record (the canonical "I am studying" state) — asked only when
   // that intent is picked, never declared on anyone's behalf.
@@ -175,7 +208,13 @@ export function OnboardingWizard({
     }
     // A deep link (invitation) still wins; otherwise a company identity goes
     // straight to the one canonical setup form with the intent's presets.
-    if (returnTo) form.set("next", returnTo);
+    // A landing DOOR is not a deep link (window 6, lanes F + C): its path is
+    // exactly what its pre-ticked card routes to, so the person's final
+    // choice decides — keeping the tick lands on the door's own path, and a
+    // corrected choice ("Ieškau darbo" after the institution door) is not
+    // dragged back to the organisation setup.
+    const cameThroughDoor = doorIntents.length > 0;
+    if (returnTo && !cameThroughDoor) form.set("next", returnTo);
     else {
       const routedNext = nextPathForIntents(intentList);
       if (routedNext) form.set("next", routedNext);
@@ -250,6 +289,46 @@ export function OnboardingWizard({
           >
             {t("rolePicker.intentNote")}
           </p>
+          {/* The landing sentence, shown back (walk-real-person-join,
+              2026-09-06): the person is not asked again what they just
+              wrote — the matching card is ticked below, and they can change
+              it. Nothing is submitted until Continue → Finish. */}
+          {saidSentence && (
+            <p
+              className="text-sm leading-relaxed text-text-secondary"
+              data-testid="onboarding-said"
+              data-preselected={defaultIntents.length > 0 ? "1" : "0"}
+            >
+              <span className="text-text-muted">{t("rolePicker.saidLabel")}</span>{" "}
+              <span className="font-medium text-text-primary">
+                &bdquo;{saidSentence}&ldquo;
+              </span>
+              {defaultIntents.length > 0 && (
+                <>
+                  {" "}
+                  <span className="text-text-muted">{t("rolePicker.saidHint")}</span>
+                </>
+              )}
+            </p>
+          )}
+          {/* The landing door, shown back (lanes F + C, 2026-09-06): the
+              person who pressed "Atstovauju mokyklai, kolegijai ar
+              universitetui" is not asked to guess which card is theirs —
+              the card that door routes to is ticked below, with the same
+              hint, and they can change it. */}
+          {!saidSentence && doorWords && defaultIntents.length > 0 && (
+            <p
+              className="text-sm leading-relaxed text-text-secondary"
+              data-testid="onboarding-door"
+              data-preselected="1"
+            >
+              <span className="text-text-muted">{t("rolePicker.doorLabel")}</span>{" "}
+              <span className="font-medium text-text-primary">
+                &bdquo;{doorWords}&ldquo;
+              </span>{" "}
+              <span className="text-text-muted">{t("rolePicker.saidHint")}</span>
+            </p>
+          )}
         </header>
 
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2" data-testid="onboarding-intents">

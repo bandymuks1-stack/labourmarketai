@@ -56,6 +56,7 @@ import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
 import {
   emitNotificationEvent,
   emitNotificationEventInBackground,
+  isNotificationStoreWriteBlocked,
   type NotificationEventInput,
   type NotificationEventType,
 } from "./events";
@@ -118,6 +119,9 @@ type DeliverOutcome =
   | "written"
   | "duplicate"
   | "feature_unavailable"
+  /** Store present, writer unprivileged (42501) — skipped for a bounded
+   *  window, not retried (Lane H 2026-09-06; owner GRANT pending, #1566). */
+  | "write_blocked"
   | "unexpected_error"
   /** The recipient stored an explicit in-app opt-out for this type. */
   | "suppressed_preference";
@@ -144,6 +148,9 @@ async function deliver(
   admin: AdminClient,
   input: NotificationEventInput,
 ): Promise<DeliverOutcome> {
+  // The store refused the last write (42501): the preference read only
+  // exists to feed the insert, so neither runs while the block holds.
+  if (isNotificationStoreWriteBlocked()) return "write_blocked";
   const prefRows = await readPrefRowsFailOpen(admin, input.recipientProfileId);
   if (!resolveChannelEnabled(prefRows, input.eventType, "in_app")) {
     // APPROVED silence: the recipient turned this type off themselves.
@@ -1223,6 +1230,13 @@ export function maybeEmitWeeklyDigestInBackground(
     try {
       const todayIso = new Date().toISOString().slice(0, 10);
       if (hasCurrentWeekDigest(durable, todayIso)) return;
+      // The store refused the last write (42501, owner GRANT pending —
+      // #1566): the three reads below exist only to feed that write, so
+      // they are skipped too while the block holds. Measured 2026-09-06:
+      // 273 `permission denied for table notification_preferences` +
+      // 272 `... notification_events` in 24 h of Postgres logs, one pair per
+      // dashboard render.
+      if (isNotificationStoreWriteBlocked()) return;
 
       const worker = await getWorkerCoreRow();
       if (!worker?.profile_id) return;
@@ -1344,8 +1358,12 @@ export async function emitWeeklyDigestNotificationsForCron(): Promise<
       else if (outcome === "suppressed_preference") summary.suppressed += 1;
       else if (outcome === "unexpected_error") summary.failures += 1;
       // feature_unavailable: the store is unapplied — every later recipient
-      // would fail identically, so stop and report honestly.
-      else if (outcome === "feature_unavailable") return { kind: "unavailable" };
+      // would fail identically, so stop and report honestly. write_blocked
+      // (42501, writer unprivileged) is the same shape: nothing can be
+      // written for anyone until the grant lands.
+      else if (outcome === "feature_unavailable" || outcome === "write_blocked") {
+        return { kind: "unavailable" };
+      }
     }
     return { kind: "ran", ...summary };
   } catch {

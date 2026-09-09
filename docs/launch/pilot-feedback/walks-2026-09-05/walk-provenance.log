@@ -1,0 +1,8 @@
+{"step":"health","build":"c893557b"}
+{"step":"W1_card","briefLine":null,"facts":{"card":false},"resultPresent":false,"rawIdFragments":0}
+{"step":"W1_journal_same_card","facts":{"card":true,"provenance":"EMPLOYER_CONFIRMED","edge":"EMPLOYER_CONFIRMED","line":""},"sameLine":false}
+{"step":"W1_en","facts":{"card":true,"provenance":"EMPLOYER_CONFIRMED","edge":"EMPLOYER_CONFIRMED","line":""}}
+{"step":"W2_control","control":{"card":true,"provenance":"SELF_DECLARED","edge":"SELF_DECLARED","line":""}}
+{"step":"M1_object_language","freeRawIds":0,"freeExcerpt":"kas laisvas? L Tavo darbas dabar + − Leaflet | © OpenStreetMap contributors Realios galimybės ir projektai, sugrupuoti pagal vietą Tavo rinka dar 10 galimybių be nurodytos vietos — jos matomos pokalbio paieškoje","readyDerivedMarker":false,"readyExcerpt":null}
+{"step":"R1_company_home","attentionLines":2,"attentionUnavailable":0,"attentionNone":0}
+{"step":"done","totalMs":81532}

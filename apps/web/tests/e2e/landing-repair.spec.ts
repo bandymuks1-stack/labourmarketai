@@ -32,7 +32,7 @@ const expect = baseExpect.configure({ timeout: 15_000 });
 test.use({ viewport: { width: 1440, height: 900 } });
 test.beforeAll(() => mkdirSync(SHOTS, { recursive: true }));
 
-test("the hero's ask is not a silent submit", async ({ page }) => {
+test("the entry's submit is not a silent submit — a real sentence is understood", async ({ page }) => {
   const consoleErrors: string[] = [];
   page.on("console", (m) => {
     if (m.type() === "error" && !/upgrade-insecure-requests/i.test(m.text())) {
@@ -41,41 +41,49 @@ test("the hero's ask is not a silent submit", async ({ page }) => {
   });
 
   await page.goto("/lt");
-  const submit = page.getByTestId("hero-ask-submit");
+  const submit = page.getByTestId("entry-submit");
   await expect(submit).toBeVisible();
 
-  // The hero auto-plays once on mount; wait for it to settle so the assertion
-  // below is about OUR submit and not the intro.
-  await expect(submit).toHaveAttribute("aria-busy", "false", { timeout: 30_000 });
-
-  await page.getByTestId("hero-ask-input").fill("ieškau elektriko Rotterdame");
+  // P1 (frozen design contract 2026-09-05): the sentence goes through the ONE
+  // deterministic router; the page says what it understood, announced.
+  await page.getByTestId("entry-input").fill("Reikia 12 pastolininkų Roterdame");
   await submit.click();
 
-  // BUSY IS VISIBLE AND ANNOUNCED — the defect was that neither was true.
-  await expect(submit).toHaveAttribute("aria-busy", "true");
-  await expect(page.getByTestId("hero-ask-pending")).toBeVisible();
-  await page.screenshot({ path: join(SHOTS, "hero-ask-busy-1440.png") });
-
-  // …and it comes back when the answer lands, so "busy" means something.
-  await expect(submit).toHaveAttribute("aria-busy", "false", { timeout: 30_000 });
-  await expect(page.getByTestId("hero-ask-pending")).toHaveCount(0);
+  const understanding = page.getByTestId("entry-understanding");
+  await expect(understanding).toBeVisible();
+  await expect(understanding).toHaveAttribute("role", "status");
+  await expect(understanding).toHaveAttribute("data-intent", "need-workers");
+  // The sentence travels with the auth doors through the EXISTING `?next=`.
+  const signup = page.getByTestId("entry-signup").locator("a");
+  await expect(signup).toHaveAttribute("href", /\/lt\/auth\/signup\?next=/);
+  expect(decodeURIComponent((await signup.getAttribute("href")) ?? "")).toContain(
+    "/dashboard?say=",
+  );
+  await page.screenshot({ path: join(SHOTS, "entry-understood-1440.png") });
 
   expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
 });
 
-test("an unanswerable question is announced, not swallowed", async ({ page }) => {
+test("an unreadable sentence gets ONE question with two chips, not a guessed answer", async ({ page }) => {
   await page.goto("/lt");
-  const submit = page.getByTestId("hero-ask-submit");
-  await expect(submit).toHaveAttribute("aria-busy", "false", { timeout: 30_000 });
+  const submit = page.getByTestId("entry-submit");
+  await expect(submit).toBeVisible();
 
-  await page.getByTestId("hero-ask-input").fill("zzzz qqqq vvvv");
+  await page.getByTestId("entry-input").fill("zzzz qqqq vvvv");
   await submit.click();
 
-  const unmatched = page.getByTestId("hero-unmatched");
-  await expect(unmatched).toBeVisible();
+  const question = page.getByTestId("entry-question");
+  await expect(question).toBeVisible();
   // A result the visitor cannot have announced to them is a silent submit.
-  await expect(unmatched).toHaveAttribute("role", "status");
-  await page.screenshot({ path: join(SHOTS, "hero-unmatched-1440.png") });
+  await expect(question).toHaveAttribute("role", "status");
+  await expect(page.getByTestId("entry-chip")).toHaveCount(2);
+  await expect(page.getByTestId("entry-understanding")).toHaveCount(0);
+  await page.screenshot({ path: join(SHOTS, "entry-question-1440.png") });
+
+  // Answering the question opens the same doors.
+  await page.getByTestId("entry-chip").first().click();
+  await expect(page.getByTestId("entry-understanding")).toBeVisible();
+  await expect(page.getByTestId("entry-signup").locator("a")).toBeVisible();
 });
 
 test("every public nav item goes somewhere real", async ({ page }) => {

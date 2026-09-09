@@ -40,7 +40,19 @@ export async function PlayerCardShowcase() {
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>
-        <h2 className="mt-5 font-display text-4xl font-bold leading-[1.06] tracking-tightest sm:text-5xl">
+        {/* §19 PROMINENCE, not content. This heading was `text-4xl sm:text-5xl`
+            — larger than the page's own <h1> at some widths, and the only
+            section shouting above every other. It now uses the same
+            `text-3xl sm:text-4xl` scale as the market, contexts and chain
+            headings, so the page has ONE type hierarchy instead of a second
+            hero two thirds of the way down.
+
+            The CARD below is deliberately unchanged and still full size: it is
+            the real `WorkerPlayerCard` the product renders, and shrinking it
+            here would make the landing show something the signed-in surface
+            does not. On a 375px phone it is ~2,500px tall, which is what the
+            real card costs. That is a measured trade, not an oversight. */}
+        <h2 className="mt-5 font-display text-3xl font-bold leading-[1.08] tracking-tightest sm:text-4xl">
           {t("headline.line1")}
           <br />
           <span className="text-gradient-accent">{t("headline.line2")}</span>

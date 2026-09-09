@@ -75,6 +75,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "documents",
   "draft",
   "errorBoundary",
+  /** Organization evidence import (2026-09-07): the import workspace's forms
+   *  and the subject-side "what organizations have recorded about me" card are
+   *  both client components reading `evidenceImport.*`. */
+  "evidenceImport",
   "features",
   "finance",
   "followUp",
@@ -109,6 +113,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "professions",
   "profileAvatar",
   "projectEconomics",
+  // P4 — the Field on the operations page (client scene, list equivalent,
+  // context panel). Small namespace; the projectOps labels it also needs
+  // travel as props from the page, exactly as the operations board does.
+  "projectField",
   "projectStages",
   "projects",
   "relationshipTypes",

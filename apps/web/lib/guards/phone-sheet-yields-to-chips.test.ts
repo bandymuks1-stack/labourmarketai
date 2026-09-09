@@ -16,7 +16,11 @@ const read = (rel: string) => readFileSync(join(WEB, rel), "utf8");
 describe("on a phone the bottom sheet yields to a question the thread just asked", () => {
   it("the chat stamps the moment a message with chips is posted and hands it to the panel", () => {
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
-    expect(chat).toContain("if (chips && chips.length > 0) setChipsPostedAt(Date.now());");
+    // `shown` (not the raw `chips`) is the row that actually reached the
+    // thread after the anti-loop filter dropped anything already refused —
+    // stamping the raw row would mark a question that was never asked.
+    expect(chat).toContain("if (shown && shown.length > 0) {");
+    expect(chat).toContain("setChipsPostedAt(Date.now());");
     expect(chat).toContain("chipsPostedAt={chipsPostedAt}");
   });
 

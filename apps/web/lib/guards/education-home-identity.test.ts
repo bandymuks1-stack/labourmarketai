@@ -156,14 +156,17 @@ describe("3. the page threads the flag from the canonical capability read", () =
     expect(PAGE).toMatch(/relationshipSlug === "student"/);
   });
 
-  it("the learner line renders only with a REAL institution name", () => {
-    // No name → null → nothing rendered. Never a placeholder on screen.
+  it("the learner's institution is named ONCE — by the opening brief, never also by this page", () => {
+    // W6 honesty (2026-09-06), measured on production: the learner's first
+    // screen said "Mokotės su X" twice — this page's own intro line AND the
+    // opening brief. The brief (`briefLearner`) is the one source; the page
+    // keeps the engagement read only for the starters, and still renders a
+    // name only when it is REAL (no placeholder on screen).
     expect(PAGE).toMatch(/organizationName\?\.trim\(\) \|\| null/);
-    expect(PAGE).toMatch(/learnerGreetingContext.*institution/);
-  });
-
-  it("the chat renders the learner line only for the person identity", () => {
-    expect(CHAT).toMatch(/learnerContextLine && identity === "person"/);
+    expect(PAGE).not.toMatch(/learnerGreetingContext/);
+    expect(PAGE).not.toMatch(/learnerContextLine=/);
+    const BRIEF = read("lib/conversation/opening-brief.ts");
+    expect(BRIEF).toMatch(/t\("briefLearner", \{ organization: learner\.organizationName \}\)/);
   });
 });
 

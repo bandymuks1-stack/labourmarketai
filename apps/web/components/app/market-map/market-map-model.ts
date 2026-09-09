@@ -48,8 +48,17 @@ export interface MarketAnchor {
   readonly precision?: AnchorPrecision;
   readonly lat: number;
   readonly lng: number;
-  /** Aggregate magnitude — headcount needed, people available, project count. */
-  readonly weight: number;
+  /**
+   * Aggregate magnitude — headcount needed, people available, project count.
+   *
+   * OPTIONAL since the public landing map (owner window 11 §17). An anchor
+   * that stands for a PLACE rather than a quantity has no honest number to
+   * carry, and `0` is not that number: SEP-7 forbids rendering UNKNOWN as
+   * ZERO, and "Lietuva · 0" on a coverage map states that nothing is
+   * happening in Lithuania. Absent means the map draws the place at a fixed
+   * radius and labels it with its name alone.
+   */
+  readonly weight?: number;
   readonly layer: MarketMapLayer;
   /** Country ISO-2, used to tie an anchor to a highlighted region. */
   readonly country: string;
@@ -73,8 +82,17 @@ export interface MarketRegion {
  *                   ONLY on the public landing, and always labelled. It shows
  *                   what the product does; it never claims to be today's market.
  *  - `acceptance` — deterministic local fixtures.
+ *  - `coverage`   — REAL geography, no activity claim at all: the markets the
+ *                   product operates in, drawn at real centroids. Added for the
+ *                   public landing map (owner window 11 §17). It exists because
+ *                   the two honest alternatives were both wrong: `live` would
+ *                   claim these places hold today's market, and `demo`/`preview`
+ *                   would imply the countries are made up. They are not — the
+ *                   set is `MARKET_COUNTRIES`. What is genuinely unavailable to
+ *                   an anonymous visitor is per-place ACTIVITY, and the surface
+ *                   says that in words rather than drawing a guess.
  */
-export type MarketDataOrigin = "live" | "demo" | "acceptance";
+export type MarketDataOrigin = "live" | "demo" | "acceptance" | "coverage";
 
 export interface MarketMapView {
   readonly regions: readonly MarketRegion[];
@@ -120,4 +138,69 @@ export function anchorsForLayer(
   layer: MarketMapLayer,
 ): readonly MarketAnchor[] {
   return region.anchors.filter((a) => a.layer === layer);
+}
+
+/**
+ * WHERE THE MAP MUST LOOK so that every anchor it drew can actually be reached.
+ *
+ * THE DEFECT THIS EXISTS FOR (2026-09-05, found by a production walk). The map
+ * mounted — and `autoFly` flew back — to a FIXED Europe centre and zoom, chosen
+ * for a large container. The dashboard result map is ~319x288. At that size the
+ * Netherlands falls inside the viewport and Lithuania does not, so a real LT
+ * need rendered an anchor that Leaflet drew as `d="M0 0"`: present in the DOM,
+ * announced with `role="button"` and an aria-label, focusable and activatable by
+ * KEYBOARD — and with no geometry at all, so a pointer could never hit it.
+ * Demand existed, the marker existed, and no mouse user could open it.
+ *
+ * A fixed frame is a claim that the demand is where we guessed it would be.
+ * This computes the frame from the anchors the map ACTUALLY drew instead.
+ *
+ * HONESTY BOUNDS THE ZOOM. Fitting a single anchor would otherwise zoom to
+ * street level, and a country-precision aggregate rendered at city zoom claims a
+ * precision the row does not have — the same lie the dashed marker exists to
+ * avoid. So an approximate anchor in the set clamps the fit to a country-wide
+ * zoom; only an all-city set may go closer.
+ */
+export const ANCHOR_FIT_MAX_ZOOM = 8;
+export const APPROX_FIT_MAX_ZOOM = 5;
+
+export interface AnchorFit {
+  /** Every drawn anchor's coordinate. Empty when the map drew nothing. */
+  readonly points: readonly (readonly [number, number])[];
+  /** True when any fitted anchor is a country-level aggregate. */
+  readonly anyApprox: boolean;
+  /** The zoom the fit may not exceed — see the honesty note above. */
+  readonly maxZoom: number;
+}
+
+/**
+ * The anchors a fit must cover, for the layer currently drawn.
+ *
+ * `revealCount` mirrors the draw loop's own cap so the frame covers exactly
+ * what is on screen — fitting anchors that were never drawn would frame empty
+ * space and, during the landing's staged reveal, fight the animation.
+ */
+export function anchorFit(
+  view: MarketMapView,
+  layer: MarketMapLayer,
+  revealCount?: number,
+): AnchorFit {
+  const limit = revealCount ?? Number.POSITIVE_INFINITY;
+  const points: (readonly [number, number])[] = [];
+  let anyApprox = false;
+  let drawn = 0;
+  for (const region of view.regions) {
+    for (const a of anchorsForLayer(region, layer)) {
+      if (drawn >= limit) break;
+      drawn += 1;
+      points.push([a.lat, a.lng] as const);
+      if (a.precision === "country") anyApprox = true;
+    }
+    if (drawn >= limit) break;
+  }
+  return {
+    points,
+    anyApprox,
+    maxZoom: anyApprox ? APPROX_FIT_MAX_ZOOM : ANCHOR_FIT_MAX_ZOOM,
+  };
 }

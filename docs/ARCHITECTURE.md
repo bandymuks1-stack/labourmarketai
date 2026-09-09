@@ -203,6 +203,8 @@ document stated as a binding rule:
 | **Communication translation ≠ language capability** | a translated conversation never satisfies a language requirement in matching. |
 | **Agentai OS boundary** | external discovery / radar / outreach / provider routing live in Agentai OS behind an explicit bridge; LabourMarket.ai owns identity, evidence, demand, matching, journeys and product interaction. `DEMAND VALIDITY ≠ OUTREACH ELIGIBILITY`. |
 | **Execution engine** | RECOVER → CONNECT → IMPLEMENT → TEST → DEPLOY → PROD VERIFY → OBSERVE → FIX → CONTINUE, driven by a completion queue; owner gates only for genuine owner-only decisions (§31); the checkpoint of §35 is `docs/launch/RESUME_CHECKPOINT_<date>.md`. |
+| **Scale is a permanent, system-wide constraint** (owner, 2026-09-05 — contract §1b) | Every layer must be able to grow to ≥1M people and the far larger graph they create (millions of records, relationships, history) WITHOUT rebuilding the canonical Person / Company / Project / security / action / evidence / matching / conversation architecture: bounded reads, indexable paths, pagination / cursors, no N+1, no platform-scale client filtering, default-deny RLS never traded for speed, LLMs given only the minimum authorized context, scoped realtime, object storage, observability. Applied silently in design and review (question C beside A and B in §7); no speculative infrastructure, no separate scale module; escalate only a genuine redesign-level blocker or a paid capacity decision. |
+| **Conversation → Gemini proposer** (owner approval 2026-09-05) | The deterministic router stays the floor. ONLY a sentence it cannot read goes to the approved Gemini runtime under ONE task-scoped egress grant, which may propose ONLY an existing `INTENT_REGISTRY` id; the proposal runs the SAME handler, so context resolution, authorization, the dispatcher, executors and readback are unchanged. Telemetry names the resolution (deterministic / llm), never the sentence. |
 
 ```
                          ┌─ CONVERSATION            natural language → intent/context
@@ -236,6 +238,52 @@ Where this contract and an older owner text differ in **reach**, the broader
 requirement stands (§6). Where they differ in an **interaction or execution
 rule**, the 2026-09-04 text governs. `PLATFORM_DOCTRINE` remains supreme for
 technical/legal safety.
+
+---
+
+### 5.6 Delegated authority · bulk import · contribution/evidence graph · AI-agent Living CV (owner direction, window 6, 2026-09-06)
+
+Owner direction recorded in `product/OWNER_MASTER_EXECUTION_CONTRACT_2026-09-04.md` §1c.
+Full inventory (scope matrix, pipeline stages, reuse tables, SQL sketches, RED list):
+[`product/delegated-authority-and-evidence-graph-contract-v1.md`](product/delegated-authority-and-evidence-graph-contract-v1.md).
+This section is the canonical direction; it EXTENDS §5.1–5.3 (nothing removed) and
+composes with `audits/external-assistant-gateway-gap-audit-2026-09-02.md`.
+
+**Principles (binding for every stage):**
+
+| Principle | Meaning |
+|---|---|
+| One person, many contexts | one `profiles` identity acts in many organizations / projects / roles; delegation never creates a second identity or a per-client datastore |
+| Real activity only | every fact enters as a recorded action of a named actor; suggestions (CV extraction, recognition, LLM proposals) are never facts until confirmed (`confirmed-suggestions-foundation.md`) |
+| Living Profile = derivation | the profile is read from evidence rows (journal, allocations, confirmations, documents); nothing writes "the profile" directly |
+| Actor ≠ recorder | who the fact is ABOUT, who RECORDED it, and THROUGH WHAT (browser, connected assistant, import, agent) are three columns, never one. Today only `work_hour_allocations.entered_by` and `journal_entry_metrics.source` separate them; delegated writes record the user alone (contract §A) |
+| Work Unit | GOAL → CONTRIBUTION → DELIVERABLE → OUTCOME → EVIDENCE → BENEFICIARIES, mapped onto `work_tasks` · `journal_entries` / `work_items` / `allocations` · `journal_entry_tasks` · `project_clients` (contract §C) — no new evidence store |
+| Company → worker authority | a company records, corrects and confirms only inside its own engagement / membership (RLS `manages_organization`); it never edits a person's own words (`original_text` is immutable; corrections supersede) |
+| Delegated AI is vendor-neutral | ChatGPT, Claude, any MCP host, a future agent = equal adapters over ONE capability registry; identity from ONE resolver; capability scopes (not client names) decide what may be written; `SEND_EXTERNAL_MESSAGE` stays DENY |
+| Bulk historical import has no side effects | SOURCE (immutable file, sha256) → DRAFT → NORMALIZE → RECONCILE (human decides ambiguity) → PREVIEW → COMMIT (one atomic batch) → REVERSIBLE (batch superseded, never deleted). No invitation, e-mail, approval request or automation may fire from an import — proven for the XLSX importer today (contract §B) and to be pinned by a guard |
+| Corrections / merge / rollback | non-destructive only: `correction_of` / `superseded_by`, batch supersede, alias records; a merge keeps both originals |
+| AI data-quality assistance | AI may flag duplicates, gaps, inconsistencies and propose; a human confirms; AI never raises an evidence class (`provenance.ts` rule 2) |
+| AI / agent Living CV | an agent is an `ai_agent` actor owned by one organization; CAPABILITY ≠ IDENTITY — provider / model / version are run provenance (`ai_runs`), competence comes only from reviewed tasks (contract §D); no agent marketplace |
+| Multi-contributor attribution | PRIMARY / CONTRIBUTORS / SUPERVISOR / APPROVER / BENEFICIARY per Work Unit; today one worker per entry |
+| Privacy / visibility | `visibility_scope` vocabulary exists (`closed|team|org|client_report|public_proof_link`) and RLS forces `closed` on insert — widening is an explicit, per-row, human act; a manager never reads worker documents |
+| Natural opportunity discovery | evidence feeds matching (`worker_skills` roll-up); no scoring of people, no rating system |
+| Research direction | PRODUCT · LONGITUDINAL DATA · RESEARCH · FORECAST · COUNTERFACTUAL stay separate artefacts; only the first two exist (contract §F); research reads redacted rows under a named consent purpose |
+
+**Staged roadmap (each stage is a journey PR; GREEN/RED per the merge envelope; none of it before launch week closes except Stage 0):**
+
+| Stage | Deliverable | Class | Reuses |
+|---|---|---|---|
+| 0 — now | direction recorded (this section); ONE safe action: stamp `recorded_via` on delegated journal writes (contract §A precedent `source_document_file` / `extractor_version`) | GREEN, no migration | `journal_entry_metrics` (free `metric_slug`) |
+| 1 — recorder everywhere | `caller.transport` / client id threaded to every capability write; `work_hour_allocations.source='assistant'` (open vocabulary); conversation dispatcher passes the same | GREEN | existing columns |
+| 2 — capability scopes | OAuth consent lists capability scopes (`profile:read`, `journal:write`, …) mapped to registry ids; connected-apps page shows them; a client without the scope is refused at the door | RED (auth-core) | `auth.oauth_consents.scopes`, `connected-apps.ts` |
+| 3 — reversible import batches | workbook registered as `document_files` (sha256) before preview; `import_batches` + `import_batch_id`; batch supersede; alias records for people/sites; guard: importer imports no emitter | RED (new table + RLS) + GREEN column | `register_document_file_v1`, `resolve-entities.ts`, `correction_of` |
+| 4 — Work Unit + attribution | `work_tasks.deliverable_text/outcome_text/significance` (GREEN); `journal_entry_contributors` (RED); roll-up as a bounded READ | GREEN + RED | `work_tasks`, `journal_entry_tasks`, `review_evidence_links` |
+| 5 — AI agent actor | `profiles.actor_type`; agent membership; agent journal + human confirmation; Living CV shows last validation | RED | `ai_runs`, `usage_cost_events`, `entity-model.ts` |
+| 6 — company operational assistant | read capabilities first (workers, projects, document status), then writes behind Stage 2 scopes; timesheets only through Stage 3 | GREEN (reads) / RED (scoped writes) | capability registry bridges (`conversationActionId`) |
+| 7 — research export | consent purpose row; redacted longitudinal export; forecast / counterfactual only as labelled derived artefacts, never in product rows | RED (consent) | `privacy_consent_*`, `ai_runs` retention |
+
+Review questions A and B (§7) apply to every stage; question C (scale, §5.5) is
+answered by bounded reads and indexed batch / entry keys in the sketches.
 
 ---
 
@@ -300,6 +348,7 @@ architect them out of existence.
 Before any change:
 
 ```
+0. RUN  node .github/scripts/product-truth.mjs   ← the agent bootstrap
 1. READ THIS FILE + the authority it points to
 2. IDENTIFY affected domains
 3. IMPACT / DEPENDENCY analysis
@@ -309,7 +358,7 @@ Before any change:
 7. REGRESSION test  (question A)
 8. NARROWING review (question B, §6.1)
 9. E2E where the change is materially user-facing
-10. UPDATE the capability map (§8)
+10. UPDATE the capability register — BOTH halves (§8)
 ```
 
 **No local task may silently redefine global product architecture.**
@@ -321,13 +370,45 @@ capability, record the decision here, update the gap map. *Canonical* means
 
 ---
 
-## 8. CAPABILITY INVENTORY & GAP MAP
+## 8. CAPABILITY INVENTORY & GAP MAP — EXECUTABLE (2026-09-07)
 
-Maintained in [`docs/CAPABILITY_INVENTORY.md`](CAPABILITY_INVENTORY.md) —
-derived from code and production, not from documentation.
+The register has **two halves of one thing**, and they may not drift:
 
-Classification: `IMPLEMENTED+PROVEN` · `IMPLEMENTED+UNPROVEN` · `PARTIAL` ·
-`MISSING` · `DEFERRED` · `OWNER-GATED` · `ENVIRONMENT-GATED`.
+| half | file | carries |
+|---|---|---|
+| human | [`docs/CAPABILITY_INVENTORY.md`](CAPABILITY_INVENTORY.md) §6 | reasoning, the production snapshot, the owner queue, the nine-migration matrix |
+| machine | `apps/web/lib/product-gate/capability-register.ts` | the CI-enforced claims |
+
+Beside it: `product-graph.ts` (the 24 canonical nodes, §14 of the Product
+Constitution), `journey-register.ts` (the six permanent chains, §16) and
+`semantic-separations.ts` (the eight distinctions, §15).
+
+**Status** (the owner's six values): `BUILT_AND_USABLE` ·
+`BUILT_NOT_CONNECTED` · `PARTIAL` · `ARCHITECTURE_ONLY` · `MISSING` ·
+`BLOCKED`. **Evidence** (strongest level ACTUALLY reached): `NONE` ·
+`CODE_PROVEN` · `TEST_PROVEN` · `PRODUCTION_RPC_PROVEN` ·
+`PRODUCTION_DATA_PATH_PROVEN` · `PRODUCTION_PERSISTENCE_PROVEN` ·
+`HUMAN_UI_PROVEN`. **No test may raise a row to `HUMAN_UI_PROVEN`.**
+
+What CI enforces (`lib/guards/capability-register.test.ts`,
+`product-graph-journeys.test.ts`, `agent-bootstrap.test.ts`, and the
+`Product truth` step in `quality.yml`):
+
+- every claimed implementation and surface **exists**;
+- a capability claimed usable is **reachable** from a real route or component
+  through the import graph — and one claimed disconnected is not;
+- a capability claimed usable is **navigable**: something links to its route.
+  Imported is not reachable, and reachable is not visible — a
+  `BUILT_NOT_CONNECTED` row must say WHICH kind of path is missing, or the
+  claim cannot be falsified;
+- **evidence never outruns status**;
+- the id lists of the two halves are **identical in both directions**, so a
+  capability cannot leave the product by being dropped from one file;
+- a graph node cannot lose its last live capability without a dated record;
+- a journey link cannot be greener than the capability under it;
+- the agent bootstrap itself cannot be removed or unwired.
+
+What it does not enforce is written down, not implied: Product Constitution §17.
 
 ---
 

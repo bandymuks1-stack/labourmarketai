@@ -225,7 +225,10 @@
       "ackDone": "Wordt bevestigd ✓",
       "excludedNote": "{count, plural, =0 {Alle uitzonderingen beoordeeld — de hele lijst wordt bevestigd.} one {# item met een uitzondering wordt NIET bevestigd totdat je het als beoordeeld markeert.} other {# items met uitzonderingen worden NIET bevestigd totdat je ze als beoordeeld markeert.}}",
       "outcomeNotAcknowledged": "niet bevestigd — de uitzondering is niet beoordeeld",
-      "outcomeBlocked": "niet bevestigd ({code})"
+      "outcomeBlocked": "niet bevestigd ({code})",
+      "receipt": "Bevestigd: {title}",
+      "receiptSkills": "{count, plural, one {# vaardigheid} other {# vaardigheden}}",
+      "skillsUnavailable": "De vaardighedenlijst kon niet worden gelezen — de tik bevestigt alleen de invoer zelf."
     }
   },
   "listEmpty": "Je hebt nog geen werkregistraties — je items verschijnen hier.",

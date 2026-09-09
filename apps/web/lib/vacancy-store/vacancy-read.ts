@@ -131,8 +131,20 @@ export async function searchPublicVacancies(
 
   // One row past the page so "is there more" is answered by evidence rather
   // than by a second count query.
+  //
+  // ORDER DIRECTION IS THE INDEX (production, 2026-09-06). The generic path
+  // (no country, no profession) is served by
+  // `public_vacancies_active_published_idx (published_at DESC NULLS LAST, id)
+  // WHERE is_active`; a plain `DESC` means NULLS FIRST, which that index
+  // cannot deliver, so the planner seq-scanned 47k rows and top-N sorted them:
+  // measured 6,947 ms — mean 2.85 s over 897 calls, max 7.9 s against the
+  // 8 s statement timeout, i.e. the worker board and every sentence that
+  // reads it ("kas man trūksta?") were failing with 57014. With NULLS LAST
+  // the same query walks the index: 2.8 ms. The country and profession
+  // indexes are plain `published_at DESC`, so those paths keep the default.
+  const genericPath = !filters.country && !filters.professionSlug;
   const { data, error } = await q
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: !genericPath })
     .range(offset, offset + limit);
 
   if (error) {
@@ -477,8 +489,17 @@ export async function readSupplyLastRefreshedAt(
     q = q.eq("country", filters.country.trim().toUpperCase());
   }
 
+  // ORDER DIRECTION IS THE INDEX (Lane H, 2026-09-06) — the same trap the
+  // board listing above fell into. `last_seen_at` is NOT NULL, so DESC NULLS
+  // LAST returns exactly what plain DESC did; the difference is that
+  // `public_vacancies_active_last_seen_idx (last_seen_at DESC NULLS LAST, id)
+  // WHERE is_active` (migration 20260906070000) can only serve an ORDER BY
+  // whose null placement matches. Measured before: 869 calls, mean 270.8 ms,
+  // max 6,747 ms — an index-only scan over every live row plus a top-N sort
+  // to find ONE value, on every board render. Walked from the top, the read
+  // stops at the first live row.
   const { data, error } = await q
-    .order("last_seen_at", { ascending: false })
+    .order("last_seen_at", { ascending: false, nullsFirst: false })
     .limit(1);
 
   if (error) {

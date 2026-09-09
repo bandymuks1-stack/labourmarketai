@@ -7,12 +7,21 @@ import type { WorkerEducationEntry } from "./worker-education-model";
 
 /**
  * Read service for the user's own self-declared education entries —
- * worker_education from DRAFT migration 20260714160000 (human-gated, NOT
- * applied yet). Owner-scoped: RLS restricts to profile_id = auth.uid().
+ * `worker_education`, **APPLIED in production 2026-07-16** (ledger
+ * `20260716195418`, verified against `schema_migrations` on 2026-09-07; 4 real
+ * rows). Owner-scoped: RLS restricts to `profile_id = auth.uid()`.
  *
- * Graceful degradation: until the owner applies the draft the table answers
- * 42P01 (or PGRST205) — surfaced as `kind: "needs-migration"` so the section
- * explains itself honestly instead of crashing SSR or faking an empty list.
+ * This header said "DRAFT ... NOT applied yet" for seven weeks after the
+ * migration shipped, and that sentence is why the capability kept being
+ * re-reported as missing. Apply status belongs to the database, not to a
+ * comment: read `supabase_migrations.schema_migrations` (or
+ * `docs/migrations/production-ledger-snapshot.json`) before believing any
+ * line like the one this replaced.
+ *
+ * Graceful degradation is KEPT, not because the table is missing here, but
+ * because it may be on a fresh or local database: 42P01 (or PGRST205) is
+ * surfaced as `kind: "needs-migration"` so the section explains itself instead
+ * of crashing SSR or faking an empty list.
  */
 
 const NOT_APPLIED_CODES = new Set(["42P01", "PGRST205"]);

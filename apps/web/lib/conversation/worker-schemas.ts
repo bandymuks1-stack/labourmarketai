@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { isJournalMetaRequest } from "./worklog-extract";
 
 /**
  * Zod input schemas for the executable worker conversation actions (Phase B).
@@ -95,6 +96,19 @@ export const workerSavePreferencesSchema = z.object({
   availabilityNote: z.string().trim().max(500).nullable().optional(),
 });
 
+/** Accept an invitation addressed to the caller (owner contract 4D). The ref
+ *  is the shared `InvitationRef` (lib/invitations/model): a canonical
+ *  `invitations` row by id, or a company / agency ROSTER invitation by the
+ *  organisation id the roster accept RPC takes. `accepted` is the only
+ *  canonical in-app decision — decline exists by mailed token only
+ *  (`decline_invitation_v1`) and not at all for the roster — so the schema
+ *  says so rather than inventing one. */
+export const workerRespondInvitationSchema = z.discriminatedUnion("source", [
+  z.object({ source: z.literal("invitation"), invitationId: uuid, decision: z.literal("accepted") }),
+  z.object({ source: z.literal("company_roster"), orgId: uuid, decision: z.literal("accepted") }),
+  z.object({ source: z.literal("agency_roster"), orgId: uuid, decision: z.literal("accepted") }),
+]);
+
 export const workerRespondBookingSchema = z.object({
   bookingId: uuid,
   decision: z.enum(["accepted", "declined"]),
@@ -114,10 +128,19 @@ export const workerExpressInterestSchema = z.object({
  * `create_journal_entry_full` RPC). `workDate`/`siteName` become real metrics.
  * Times/hours are NOT sent as separate claims — they already live in the notes;
  * the client shows them only as a parse preview to confirm.
+ *
+ * A sentence that only ASKS for the journal ("Užpildyk darbo žurnalą") is a
+ * request, not evidence — refused here, at the floor every write crosses, so
+ * no client path can turn the request into the record (prod 2026-09-06).
  */
 export const workerLogWorkSchema = z.object({
   engagementContextId: uuid,
-  notes: z.string().trim().min(3).max(4000),
+  notes: z
+    .string()
+    .trim()
+    .min(3)
+    .max(4000)
+    .refine((v) => !isJournalMetaRequest(v), { message: "journal_meta_request" }),
   workDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
   siteName: z.string().trim().max(200).nullable().optional(),
 });
@@ -132,6 +155,7 @@ export const WORKER_ACTION_SCHEMAS = {
   "worker.save-work-card": workerSaveWorkCardSchema,
   "worker.save-preferences": workerSavePreferencesSchema,
   "worker.respond-booking": workerRespondBookingSchema,
+  "worker.respond-invitation": workerRespondInvitationSchema,
   "worker.express-interest": workerExpressInterestSchema,
   "worker.log-work": workerLogWorkSchema,
 } as const;

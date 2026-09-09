@@ -1,0 +1,32 @@
+{"step":"health","build":"10dee91e","region":"dub1"}
+{"turn":"O1","sentence":"Kas rytoj dirba objekte X?","text":"L LabourMarket AI Komanda 2026-09-06 – 2026-09-12 (1 žm.): • E2E Worker Two — laisvas Projektai Pridėti užduotį","chips":["Projektai","Pridėti užduotį"],"formId":null,"results":0,"role":null,"worklogOpen":false,"worklogDate":null,"worklogSite":null,"worklogNotes":null,"fallback":false,"rawKey":null}
+{"check":"O1 understood — not the generic fallback","ok":true,"detail":"L LabourMarket AI Komanda 2026-09-06 – 2026-09-12 (1 žm.): • E2E Worker Two — laisvas Projektai Pridėti užduotį"}
+{"check":"O1 something was actually answered","ok":true,"detail":{"len":111,"results":0,"formId":null}}
+{"check":"O1 no raw translation key in the answer","ok":true,"detail":null}
+{"turn":"O2","sentence":"Kur turime laisvų žmonių kitą savaitę?","text":"L LabourMarket AI Komanda 2026-09-06 – 2026-09-12 (1 žm.): • E2E Worker Two — laisvas Projektai Pridėti užduotį","chips":["Projektai","Pridėti užduotį"],"formId":null,"results":0,"role":null,"worklogOpen":false,"worklogDate":null,"worklogSite":null,"worklogNotes":null,"fallback":false,"rawKey":null}
+{"check":"O2 understood — not the generic fallback","ok":true,"detail":"L LabourMarket AI Komanda 2026-09-06 – 2026-09-12 (1 žm.): • E2E Worker Two — laisvas Projektai Pridėti užduotį"}
+{"check":"O2 something was actually answered","ok":true,"detail":{"len":111,"results":0,"formId":null}}
+{"check":"O2 no raw translation key in the answer","ok":true,"detail":null}
+{"turn":"O3","sentence":"Kokie darbai vėluoja?","text":"L LabourMarket AI Projektų būklė (2 aktyv.): • E2E Vilniaus objektas (testinis) — 1 žm.; užduočių atvirų 1, vėluoja 0; blokuotų etapų 0; dokumentų trūksta 1 žm.; parengtis 0/7 • E2E Kauno objektas (testinis) — rizikos signalų nėra (0 žm., 0 atvirų užduočių) Atidaryti: E2E Vilniaus objektas (testinis) Atidaryti: E2E Kauno objektas (testinis)","chips":["Atidaryti: E2E Vilniaus objektas (testinis)","Atidaryti: E2E Kauno objektas (testinis)"],"formId":null,"results":0,"role":null,"worklogOpen":false,"worklogDate":null,"worklogSite":null,"worklogNotes":null,"fallback":false,"rawKey":null}
+{"check":"O3 understood — not the generic fallback","ok":true,"detail":"L LabourMarket AI Projektų būklė (2 aktyv.): • E2E Vilniaus objektas (testinis) — 1 žm.; užduočių atvirų 1, vėluoja 0; blokuotų etapų 0; dokumentų trūksta 1 žm.; parengtis 0/7 • E2E Kauno objektas (te"}
+{"check":"O3 something was actually answered","ok":true,"detail":{"len":342,"results":0,"formId":null}}
+{"check":"O3 no raw translation key in the answer","ok":true,"detail":null}
+{"turn":"O4","sentence":"Kiek žmonių trūksta projektui?","text":"L LabourMarket AI Kuris projektas? Pasirinkite: Parengtis: E2E Kauno objektas (testinis) Parengtis: E2E Vilniaus objektas (testinis)","chips":["Parengtis: E2E Kauno objektas (testinis)","Parengtis: E2E Vilniaus objektas (testinis)"],"formId":null,"results":0,"role":null,"worklogOpen":false,"worklogDate":null,"worklogSite":null,"worklogNotes":null,"fallback":false,"rawKey":null}
+{"check":"O4 understood — not the generic fallback","ok":true,"detail":"L LabourMarket AI Kuris projektas? Pasirinkite: Parengtis: E2E Kauno objektas (testinis) Parengtis: E2E Vilniaus objektas (testinis)"}
+{"check":"O4 something was actually answered","ok":true,"detail":{"len":132,"results":0,"formId":null}}
+{"check":"O4 no raw translation key in the answer","ok":true,"detail":null}
+{"check":"OPS no failed requests","ok":true,"detail":[]}
+{"turn":"R1","sentence":"Šiandien 8 valandas montavome pastolius objekte Kaune.","text":"","chips":["Išsaugoti","Taisyti"],"formId":null,"results":0,"role":null,"worklogOpen":true,"worklogDate":"2026-09-06","worklogSite":"Kaune","worklogNotes":"Šiandien 8 valandas montavome pastolius objekte Kaune.","fallback":false,"rawKey":null}
+{"check":"R1 understood — not the generic fallback","ok":true,"detail":""}
+{"check":"R1 the work-log door opened","ok":true,"detail":{"worklogOpen":true,"formId":null,"results":0}}
+{"turn":"R1 carried","date":"2026-09-06","site":"Kaune","notes":"Šiandien 8 valandas montavome pastolius objekte Kaune."}
+{"check":"R1 the site the person named arrives filled in","ok":true,"detail":"Kaune"}
+{"check":"R1 the sentence is kept verbatim as the evidence","ok":true,"detail":"Šiandien 8 valandas montavome pastolius objekte Kaune."}
+{"check":"R1 the date resolved from \"šiandien\"","ok":true,"detail":"2026-09-06"}
+{"check":"R1 no raw translation key","ok":true,"detail":null}
+{"turn":"R2","sentence":"Kam pateikti atliktą darbą?","text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":["Išsaugoti","Taisyti"],"formId":null,"results":0,"role":null,"worklogOpen":true,"worklogDate":"2026-09-06","worklogSite":"Kaune","worklogNotes":"Šiandien 8 valandas montavome pastolius objekte Kaune.","fallback":false,"rawKey":null}
+{"check":"R2 understood — not the generic fallback","ok":true,"detail":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai."}
+{"check":"R2 no raw translation key","ok":true,"detail":null}
+{"check":"REPORT read-only: the journal row count is unchanged","ok":true,"detail":{"before":1,"after":1}}
+{"check":"REPORT no failed requests","ok":true,"detail":[]}
+{"result":"PASS","failed":[]}

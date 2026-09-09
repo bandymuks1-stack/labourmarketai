@@ -53,12 +53,15 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
   if (companyRead.row.companyType !== "staffing_agency") return { kind: "not-agency" };
   const agencyCompanyId = companyRead.row.id;
 
-  const [connections, shared, progress, roster, tBridge] = await Promise.all([
+  const [connections, shared, progress, roster, tBridge, tChat] = await Promise.all([
     listAgencyConnections(agencyCompanyId),
     listSharedRequestsForAgency(),
     listAgencyOfferProgress(),
     listActiveCompanyWorkers(agencyCompanyId),
     getTranslations("agencyBridge"),
+    // P2 object language (L1): a person or a need the rows cannot name is
+    // said in ordinary words, never as a raw id fragment.
+    getTranslations("conversation.chat"),
   ]);
 
   if (
@@ -77,7 +80,7 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
     .filter((w) => w.status === "active")
     .map((w) => ({
       workerId: w.workerId,
-      label: w.displayName ?? (w.email ? w.email.split("@")[0] : `#${w.workerId.slice(0, 6)}`),
+      label: w.displayName ?? (w.email ? w.email.split("@")[0] : tChat("unnamedPerson")),
     }));
   const rosterLabel = new Map(rosterRows.map((w) => [w.workerId, w.label]));
 
@@ -98,8 +101,8 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
   const progressRows: AgencyChatProgressRow[] = progress.rows.slice(0, AGENCY_CHAT_LIST_LIMIT).map((p) => ({
     offerId: p.offerId,
     requestId: p.requestId,
-    title: titleByRequest.get(p.requestId) ?? `#${p.requestId.slice(0, 6)}`,
-    workerLabel: rosterLabel.get(p.workerId) ?? `#${p.workerId.slice(0, 6)}`,
+    title: titleByRequest.get(p.requestId) ?? tChat("unnamedNeed"),
+    workerLabel: rosterLabel.get(p.workerId) ?? tChat("unnamedPerson"),
     stageLabel: stage(p.reviewStage),
     decisionLabel:
       p.offerStatus === "accepted" || p.offerStatus === "declined"

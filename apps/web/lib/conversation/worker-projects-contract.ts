@@ -3,6 +3,8 @@
  * "where people are assigned", from the person's side). Types + constants
  * only (a "use server" module exports async functions alone).
  */
+import type { WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
+
 export const WORKER_PROJECTS_CHAT_LIMIT = 5;
 
 export interface WorkerChatProject {
@@ -10,9 +12,23 @@ export interface WorkerChatProject {
   readonly title: string;
   readonly place: string | null;
   readonly assignmentStatus: "active" | "ended";
+  /** The manager's open checklist rows for THIS person on this project,
+   *  joined with the person's own documents (§12: what the project still
+   *  needs from me). Empty when nothing is open or nothing is tracked. */
+  readonly asks: readonly WorkerProjectAsk[];
+  /** The manager's latest instruction for this project (the instructions
+   *  page's own read: only threads the person participates in), so the person
+   *  can ANSWER it from the chat after recording what was asked. */
+  readonly instruction: { readonly conversationId: string; readonly authorName: string | null; readonly text: string } | null;
 }
 
 export type WorkerProjectsChatResult =
-  | { readonly kind: "ok"; readonly projects: readonly WorkerChatProject[]; readonly activeCount: number }
+  | {
+      readonly kind: "ok";
+      readonly projects: readonly WorkerChatProject[];
+      readonly activeCount: number;
+      /** The first ask the person can close by recording a document: the chip. */
+      readonly recordable: { readonly documentTypeSlug: string; readonly label: string; readonly projectId: string } | null;
+    }
   | { readonly kind: "empty" }
   | { readonly kind: "error" };

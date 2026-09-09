@@ -11,7 +11,9 @@
       "agencyPartnership": "Sadarbības piedāvājums"
     },
     "interestWaiting": "{count, plural, zero {# cilvēku gaida atbildi} one {# cilvēks gaida atbildi} other {# cilvēki gaida atbildi}}",
-    "untitledInquiry": "Pieprasījums bez nosaukuma"
+    "untitledInquiry": "Pieprasījums bez nosaukuma",
+    "supplyHeading": "Jūsu piedāvātā kapacitāte",
+    "supplyNote": "Šie ir cilvēki, kurus jūs tirgum norādījāt kā PIEEJAMUS, nevis tie, kurus meklējat. Tie ir saglabāti un redzami jums. Darba devēji pagaidām nevar meklēt piedāvāto kapacitāti, tāpēc par tiem vēl neviens nav sazinājies."
   },
   "journey": {
     "eyebrow": "Kā tas darbojas",
@@ -216,7 +218,9 @@
           "sending": "[EN] Sending...",
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
-          "progressHelper": "[EN] These steps show progress. Active actions are shown below."
+          "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
+          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
         }
       },
       "account": {
@@ -944,20 +948,20 @@
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
-        "a": "[EN] We're pre-launch. Setting a price we can't yet stand behind would be dishonest, so tiers show their scope and the price is confirmed before launch.",
-        "q": "[EN] Why is there no price shown yet?"
+        "q": "Why only one paid plan?",
+        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
       },
       {
-        "a": "[EN] Yes. The Free tier is meant to get workers and small employers onto the market with no cost.",
-        "q": "[EN] Will the Free tier stay free?"
+        "q": "Will the Free tier stay free?",
+        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
       },
       {
-        "a": "[EN] Billing integration is planned for a later milestone. In M0 you can only join a waitlist — no card is collected.",
-        "q": "[EN] How is billing handled?"
+        "q": "How is billing handled?",
+        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
       },
       {
-        "a": "[EN] Yes. Tiers are meant to follow your needs; you'll be able to move up or down.",
-        "q": "[EN] Can I change tiers later?"
+        "q": "What happens above 10 active positions?",
+        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
       }
     ],
     "faqTitle": "[EN] Pricing FAQ",
@@ -975,14 +979,14 @@
         "tagline": "[EN] For staffing partners."
       },
       "business": {
+        "name": "Organization",
+        "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "[EN] 10 projects",
-          "[EN] 25 job demands",
-          "[EN] Worker search",
-          "[EN] Email support"
-        ],
-        "name": "[EN] Business",
-        "tagline": "[EN] For active employers."
+          "Up to 10 active positions",
+          "Everything in Free, at operating scale",
+          "One plan for every organization capability",
+          "Project operations, readiness, reports and CSV"
+        ]
       },
       "enterprise": {
         "features": [
@@ -995,18 +999,34 @@
         "tagline": "[EN] For scale and control."
       },
       "free": {
+        "name": "Free",
+        "tagline": "For getting started",
         "features": [
-          "[EN] 1 project",
-          "[EN] 1 job demand",
-          "[EN] Community support"
-        ],
-        "name": "[EN] Free",
-        "tagline": "[EN] Get on the market."
+          "1 active position",
+          "Matching shortlist and candidate contact",
+          "Bookings, projects, instructions",
+          "Work confirmation by the employer"
+        ]
       }
     },
+    "subcopyLive": "Cenas ir apstiprinājis īpašnieks, un tās ir spēkā. Aktivizācija notiek organizācijas kontā ar drošu Stripe maksājumu; šajā lapā nekas netiek ieturēts.",
     "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "title": "[EN] Simple tiers,",
-    "titleAccent": "[EN] set fairly."
+    "titleAccent": "[EN] set fairly.",
+    "individual": {
+      "name": "Individual plan",
+      "tagline": "For more than 10 active positions",
+      "question": "Need more?",
+      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
+      "cta": "Contact us"
+    },
+    "priceFree": "€0",
+    "pricePerMonth": "€{price}/month",
+    "ctaStartFree": "Start free in your organization account",
+    "ctaSubscribe": "Activate in your organization account",
+    "priceState": {
+      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+    }
   },
   "secondary": {
     "comm": {
@@ -1678,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Daļu no tā tikko neizdevās saskaitīt, un tā tiek rādīta kā “—”. Tas nenozīmē, ka jums to nav — vienkārši neizdevās nolasīt skaitļus. Pārlādējiet pēc brīža.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
@@ -2190,6 +2211,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Daļu no tā, ko šie cilvēki ir fiksējuši, tikko neizdevās nolasīt, tāpēc šī secība nav uzticama. Neviens šeit netiek rādīts ar mazāk, nekā viņam ir — vienkārši trūkst faktu, pēc kuriem salīdzināt. Pārlādējiet pēc brīža.",
+      "capped": "Ne visi tika salīdzināti. Šai vajadzībai atbilst vairāk redzamu darbinieku, nekā ietilpst vienā sarakstā, tāpēc vispirms tika iegūti tie {count}, kuru prasmes, profesija un valsts atbilst vistiešāk — nekad jaunākie reģistrējumi. Sašauriniet vajadzību, lai būtu droši, ka tiek salīdzināti īstie cilvēki.",
+      "complete": "Visi {count} redzamie darbinieki tika salīdzināti ar šo vajadzību."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
@@ -2274,7 +2300,9 @@
       "close": "[EN] Close this need",
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
-      "error": "[EN] Could not save. Try again."
+      "error": "[EN] Could not save. Try again.",
+      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
     },
     "verdict": {
       "eligible": "Atbilst norādītajām prasībām",
@@ -2671,7 +2699,24 @@
     "skillVerified": "[EN] Confirmed by a manager's record",
     "skillWorkBacked": "[EN] Backed by work journal entries",
     "skillDeclared": "[EN] Self-declared",
-    "skillsLegend": "Apstiprināts — apstiprinājis vadītājs. Pamatots ar darbu — redzams no darba žurnāla ierakstiem. Paša norādīts — pievienojusi pati persona, vēl nav pārbaudīts."
+    "skillsLegend": "Apstiprināts — apstiprinājis vadītājs. Pamatots ar darbu — redzams no darba žurnāla ierakstiem. Paša norādīts — pievienojusi pati persona, vēl nav pārbaudīts.",
+    "workTitle": "Reģistrētais darbs",
+    "workEmpty": "Vēl nav reģistrēta darba",
+    "workUnavailable": "Neizdevās ielādēt reģistrēto darbu",
+    "workScopeNote": "Rāda tikai to darbu, ko jums ir atļauts redzēt.",
+    "workCurrent": "Tagad",
+    "kindEmployment": "Nodarbinātība",
+    "kindPractice": "Prakse",
+    "mobility": "Var strādāt",
+    "photosTitle": "Reāls darbs",
+    "photosEmpty": "Nav darba fotoattēlu, ko rādīt",
+    "photosUnavailable": "Neizdevās ielādēt darba fotoattēlus",
+    "photosPreviewsUnavailable": "Fotoattēlu priekšskatījumi pašlaik nav pieejami",
+    "servicesTitle": "Ko šī persona prot",
+    "servicesEmpty": "Vēl nekas nav piedāvāts",
+    "servicesUnavailable": "Neizdevās ielādēt piedāvātos pakalpojumus",
+    "serviceRemote": "Attālināti",
+    "photoAlt": "Paveiktā darba fotoattēls"
   },
   "marketMapBase": {
     "previewTitle": "Izvēlēta jauna vieta — vēl nav saglabāta",
@@ -3345,6 +3390,10 @@
         "reviewEngagements": {
           "label": "Manas darba attiecības",
           "description": "Redzi, ar ko strādā, un beidz darba attiecības."
+        },
+        "respondInvitation": {
+          "label": "Pieņemt ielūgumu",
+          "description": "Pieņemšana izveido reālu saikni ar organizāciju — svarīgs solis."
         }
       },
       "company": {
@@ -3408,9 +3457,40 @@
           "label": "Iestatīt posma statusu",
           "description": "Projekta posms saņem īsto statusu — notiek, pabeigts, bloķēts."
         },
+        "updateTaskStatus": {
+          "label": "Mainīt uzdevuma statusu",
+          "description": "Uzdevums tiek atzīmēts ar reālu statusu — izpildē, paveikts, bloķēts."
+        },
+        "setReadinessItem": {
+          "label": "Atzīmēt saraksta punktu",
+          "description": "Projekta darbinieka saraksta punkts tiek atzīmēts ar reālu statusu — nepieciešams, saņemts, pārbaudīts."
+        },
+        "seedReadinessChecklist": {
+          "label": "Sākt dokumentu sarakstu",
+          "description": "Visiem projekta cilvēkiem tiek sākts standarta gatavības / dokumentu saraksts."
+        },
+        "requestReadiness": {
+          "label": "Pieprasīt trūkstošo",
+          "description": "Darbinieks saņem darba norādījumu ar to, kas projektam no viņa vēl trūkst."
+        },
+        "confirmWork": {
+          "label": "Apstiprināt darba ierakstu",
+          "description": "Vadītājs apstiprina darbinieka darba ierakstu un ar to pierādītās prasmes — tās kļūst apstiprinātas."
+        },
+        "enableJournalReview": {
+          "label": "Ieslēgt darbu pārskatīšanu",
+          "description": "Darbinieka darba ieraksti kļūst redzami un apstiprināmi vadītājam."
+        },
         "respondOffer": {
           "label": "Atbildēt uz aģentūras piedāvājumu",
           "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
+        },
+        "moveWorker": {
+          "label": "Pārcelt cilvēku uz citu projektu",
+          "description": "Piesaista jaunajam projektam un beidz iepriekšējo piesaisti — pēc seku pārskata."
+        },
+        "offerCapacity": {
+          "label": "Pierakstīt jūsu piedāvājumu"
         }
       },
       "education": {
@@ -3508,6 +3588,7 @@
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
         "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "availableFrom": "Pieejams no (GGGG-MM-DD)",
         "demandDescription": "Aprakstiet vajadzību",
         "demandDescriptionPlaceholder": "Piem.: vajadzīgi 4 mūrnieki Kauņā no augusta, darbs 3 mēneši, nepieciešama pieredze",
         "demandRole": "Loma",
@@ -3553,7 +3634,13 @@
         "projectCity": "Pilsēta (nav obligāti)",
         "projectCityPlaceholder": "piem. Roterdama",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Ko piedāvājat",
+        "supplyDescriptionPlaceholder": "Piem., 20 metinātāju ar VCA, brīvi no oktobra, Nīderlande vai Beļģija",
+        "supplyRole": "Kāda profesija",
+        "supplyRolePlaceholder": "Piem., metinātājs",
+        "supplyTeamSize": "Cik cilvēku jums ir",
+        "supplyLocation": "Kur viņi var strādāt"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3581,7 +3668,9 @@
         "errorGeneric": "[EN] Could not save. Please try again.",
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
-        "errorConflict": "[EN] This value already differs. Open advanced mode to replace it."
+        "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
+        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
       },
       "urgency": {
         "flexible": "Elastīgi",
@@ -3700,7 +3789,7 @@
       "candidatesNoDemands": "[EN] Your company has not described a need yet, so there is nobody to match.",
       "candidatesNoCompany": "[EN] You are in your personal space right now, so there are no company needs here. Switch space to work as your company.",
       "candidatesUnavailable": "[EN] I could not read your company's needs right now.",
-      "chipProjects": "[EN] Projects",
+      "chipProjects": "Projekti",
       "userProjects": "[EN] Show me my projects",
       "projectsOpened": "[EN] Here is your running work.",
       "projectsNone": "[EN] There is no project yet.",
@@ -3709,6 +3798,7 @@
       "assignPickWorker": "[EN] Who should work on it?",
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
+      "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
       "assignFailed": "[EN] The assignment could not be made.",
       "chipEngagements": "Ar ko es strādāju",
@@ -3718,6 +3808,23 @@
       "engagementsNoCompany": "Pašlaik tu nerīkojies organizācijas vārdā, tāpēc nav saraksta, ko parādīt.",
       "engagementsUnavailable": "Darba attiecības pašlaik nav nolasāmas. Tas nenozīmē, ka to nav.",
       "employerBridgeHint": "To vari publicēt kā savs uzņēmums — atvēršu pieprasījuma formu.",
+      "professionStatement": {
+        "understood": "Sapratu: {label}.",
+        "inCatalogue": "Varu to iestatīt kā jūsu profesiju profilā — tad saraksts rādīs jūsu tirgu.",
+        "notInCatalogue": "Šādas profesijas izvēles sarakstā vēl nav — ierakstiet to saviem vārdiem darba pieredzē: tā būs redzama jūsu kartītē un CV.",
+        "pastJob": "Sapratu: {label}. Ierakstīsim to darba pieredzē — nosaukums jau ir aizpildīts, aizpildiet pārējo.",
+        "readBesideSearch": "Sapratu: {label}. Kad profesija būs ierakstīta profilā, saraksts rādīs jūsu tirgu, nevis visus sludinājumus.",
+        "chipSetProfession": "Iestatīt profesiju",
+        "chipRecordExperience": "Ierakstīt darba pieredzi"
+      },
+      "availability": {
+        "understood": "Sapratu — vari strādāt. Ierakstīsim to tavā darba kartē: norādi datumu, no kura.",
+        "understoodFrom": "Sapratu: vari strādāt no {date}. Ierakstīsim to tavā darba kartē — datums jau ir ierakstīts, pārskati un saglabā.",
+        "notInCompany": "Kad vari strādāt — tas ir tavs paša fakts, ne uzņēmuma. Pārslēdzies uz personīgo telpu un pasaki vēlreiz."
+      },
+      "findWorkInCompanyContext": "Darba meklēšana ir tava paša darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personīgo telpu un pajautā vēlreiz.",
+      "findWorkInCompanyWhy": "Darbu meklē cilvēks, ne uzņēmums — atbildu no tavas personīgās telpas.",
+      "journalAskWhatYouDid": "Ko tu šodien darīji? Ieraksti laukā „Ko darīji“ saviem vārdiem — piem. „montēju logus Kauņas objektā no 8 līdz 17“. Pats pieprasījums žurnālā netiek saglabāts.",
       "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
       "chipServiceRequests": "Atrast pakalpojumu",
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlies redzēt?",
@@ -3779,6 +3886,10 @@
       "eduAssignDone": "Audzēknis piešķirts grupai.",
       "eduNotInstitution": "Šī organizācija vēl nav atzīmēta kā mācību iestāde. Atzīmējiet to uzņēmuma sadaļā.",
       "eduUnavailable": "Programmas pašlaik nevar nolasīt. Tas nenozīmē, ka to nav.",
+      "eduOutcomesConnected": "Pievienotie studenti: {count}.",
+      "eduOutcomesUnavailable": "Rezultātus šobrīd neizdodas nolasīt. Tas nenozīmē, ka to nav.",
+      "eduStudentsPrivacy": "Iestāde neredz studentu prasmes, dokumentus vai žurnālu — tie ir viņu pašu dati. Jūs redzat dalību un rezultātu skaitļus; kurš der, redz pats darba devējs savai vajadzībai.",
+      "eduPracticeHow": "Prakses vietas publicē darba devēji: partneris izveido uzņēmuma kontu un publicē vajadzību ar tipu “prakse” (viena vajadzība bez maksas). Jūsu studenti to redz savā dēlī, kad darba devējs ir apstiprināts.",
       "eduNext": "Kas tālāk?",
       "chipCreateProgramme": "Izveidot programmu",
       "chipCreateCohort": "Izveidot grupu",
@@ -3804,7 +3915,7 @@
       "offerAccepted": "Pieņemts. Kandidātam nosūtīts rezervācijas piedāvājums — viņa atbildi redzēsiet šeit.",
       "offerDeclined": "Noraidīts. Aģentūra redzēs jūsu lēmumu.",
       "offerDecisionFailed": "Lēmumu neizdevās saglabāt — piedāvājums, iespējams, jau slēgts. Pārbaudiet kandidātu sarakstu.",
-      "documentAddIntro": "Reģistrēsim dokumentu: veids, valsts un derīgums. Failu varēsiet pievienot dokumentu centrā.",
+      "documentAddIntro": "Ierakstīsim dokumentu: tips, valsts un derīguma termiņš. Failu varēsiet pievienot uzreiz pēc saglabāšanas.",
       "documentAddDone": "Dokuments reģistrēts. Lūk, jūsu gatavība tagad:",
       "documentAddUnavailable": "Dokumentu katalogu šobrīd neizdevās ielādēt — reģistrējiet dokumentu dokumentu centrā.",
       "cvExportHint": "Jūsu apstiprinātais CV — viena lapa ar to, ko sistēma patiešām zina. Atveriet un izdrukājiet PDF.",
@@ -3817,11 +3928,17 @@
       "capacityAbsencesUnknown": "Prombūtņu dati šajā vidē nav pieejami — rādīts tikai saraksts.",
       "capacityEmpty": "Komandā vēl nav neviena — uzaiciniet cilvēkus.",
       "capacityUnavailable": "Komandas pieejamību šobrīd neizdevās nolasīt.",
-      "chipProjects": "Projekti",
       "chipAddTask": "Pievienot uzdevumu",
       "workerProjectsIntro": "Jūsu projekti ({count} aktīvi):",
       "workerProjectsEnded": "beigts",
       "chipOpenProjectPrefix": "Atvērt",
+      "workerProjectAsks": "Vadītājs gaida: {items}",
+      "askOwnReady": "jums ir",
+      "askOwnExpiring": "drīz beidzas",
+      "askOwnNone": "nav ierakstīts",
+      "chipRecordDocument": "Ierakstīt: {label}",
+      "askReplyIntro": "{name} lūdza šo dokumentu — varat atbildēt šeit (nosūta tikai pēc apstiprināšanas):",
+      "askReplyIntroUnnamed": "Vadītājs lūdza šo dokumentu — varat atbildēt šeit (nosūta tikai pēc apstiprināšanas):",
       "stageAsk": "Kurš posms? Izvēlieties:",
       "stageNotFound": "Šādu posmu starp jūsu atvērtajiem posmiem neatrodu. Kuru domājāt?",
       "stageNone": "Atvērtu posmu vēl nav — posmus ievada projekta vadībā.",
@@ -3830,8 +3947,117 @@
       "stageBlocked": "Posms atzīmēts kā bloķēts.",
       "stageFailed": "Posma statusu neizdevās mainīt.",
       "chipStagePrefix": "Posms",
+      "taskAsk": "Kurš uzdevums? Izvēlieties:",
+      "taskNotFound": "Tādu uzdevumu starp atvērtajiem neatrodu. Kuru domājāt?",
+      "taskNone": "Atvērtu uzdevumu pagaidām nav.",
+      "taskUnavailable": "Uzdevumus šobrīd neizdevās nolasīt.",
+      "taskDone": "Uzdevums atzīmēts kā paveikts.",
+      "taskStarted": "Uzdevums atzīmēts kā izpildē.",
+      "taskBlocked": "Uzdevums atzīmēts kā bloķēts.",
+      "taskFailed": "Uzdevuma statusu neizdevās mainīt.",
+      "chipTaskPrefix": "Uzdevums",
+      "riskIntro": "Projektu stāvoklis ({count} aktīvi):",
+      "riskLine": "• {title} — {people} cilv.; uzdevumi atvērti {open}, kavējas {overdue}; bloķēti posmi {blocked}; dokumentu trūkst {docs} cilv.; gatavība {checked}/{total}",
+      "riskOkLine": "• {title} — riska signālu nav ({people} cilv., {open} atvērti uzdevumi)",
+      "riskUnknownLine": "• {title} — stāvokli šobrīd neizdevās nolasīt",
+      "riskNobody": "aktīvs projekts bez cilvēkiem",
+      "riskNone": "Aktīvu projektu pagaidām nav — izveidojiet pirmo.",
+      "riskUnavailable": "Projektu stāvokli šobrīd neizdevās nolasīt.",
+      "chipCreateProject": "Izveidot projektu",
+      "readinessIntro": "Gatavība „{title}“ — gatavi {ready} no {people}:",
+      "readinessReadyLine": "• {name} — gatavs ({checked}/{total})",
+      "readinessGapLine": "• {name} — trūkst: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Dokumentu saraksts vēl netiek uzturēts — sāciet to projekta pārvaldībā.",
+      "readinessNoPeople": "Projektā vēl nav cilvēku.",
+      "readinessAsk": "Kurš projekts? Izvēlieties:",
+      "readinessNotFound": "Tādu projektu starp aktīvajiem neatrodu. Kuru domājāt?",
+      "readinessRepliedSuffix": "atbildēja {date}: “{text}”",
+      "readinessUnavailable": "Gatavību šobrīd neizdevās nolasīt.",
+      "chipReadinessPrefix": "Gatavība",
+      "chipOpenOperations": "Atvērt projekta pārvaldību",
+      "missingName": "vārda",
+      "missingDeclaredSkills": "norādīto prasmju",
+      "missingEvidence": "darba pierādījumu",
+      "blockedSuffix": "(noraidīts / beidzies)",
+      "readinessSeedChip": "Sākt dokumentu sarakstu ({count} cilv.)",
+      "readinessSeeded": "Saraksts sākts: {count} cilv. × {items} punkti — visi „nepieciešams“.",
+      "readinessGotChip": "Saņemts: {label} ({name})",
+      "readinessGotDone": "Atzīmēts kā saņemts: {label} ({name}).",
+      "readinessCheckedChip": "Pārbaudīts: {label} ({name})",
+      "readinessCheckedDone": "Atzīmēts kā pārbaudīts: {label} ({name}).",
+      "readinessAskChip": "Pieprasīt: {name}",
+      "readinessAskDone": "Norādījums nosūtīts: {name} to redzēs savās ziņās.",
+      "readinessRequestBody": "Projektam „{title}“ lūdzam iesniegt: {items}.",
+      "readinessWriteFailed": "Izmaiņu neizdevās veikt.",
+      "briefInstructions": "Gaida norādījumi: {count}.",
+      "chipInstructions": "Norādījumi",
+      "briefWorkConfirmed": "Darba devējs pēdējo 7 dienu laikā apstiprināja {count, plural, one {# jūsu darba ierakstu} other {# jūsu darba ierakstus}} — apstiprinātas prasmes: {skills}.",
+      "chipMyCard": "Mana kartīte",
+      "confirmIntro": "Gaida jūsu apstiprinājumu: {count} ieraksti.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} prasmes)",
+      "confirmChip": "Apstiprināt: {name} · {date}",
+      "confirmDone": "Apstiprināts: {name} — apstiprinātas prasmes: {count}.",
+      "confirmNone": "Gaidošu darba ierakstu nav.",
+      "confirmNotEnabled": "Darbu pārskatīšana vēl nav ieslēgta: {names}. Ieslēdziet, un viņu ieraksti parādīsies šeit.",
+      "confirmEnableChip": "Ieslēgt pārskatīšanu: {name}",
+      "confirmEnabled": "Pārskatīšana ieslēgta: {name} — darba ieraksti gaida jūsu apstiprinājumu.",
+      "confirmFailed": "Apstiprināt neizdevās.",
+      "confirmUnavailable": "Apstiprinājumus šobrīd neizdevās nolasīt.",
+      "chipOpenInbox": "Atvērt apstiprinājumu iesūtni",
       "pinFirstPrefix": "Uz priekšu",
-      "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
+      "reorderDone": "Gatavs: “{label}” tagad ir pirmais.",
+      "documentFileOffer": "Dokuments ierakstīts. Failu varat pievienot šeit — PDF, Word vai foto līdz 5 MB.",
+      "documentFileChoose": "Izvēlieties failu",
+      "documentFileSubmit": "Augšupielādēt failu",
+      "documentFileUploading": "Augšupielādē…",
+      "documentFileSkip": "Vēlāk",
+      "documentFileUploaded": "Fails pievienots dokumentam. Lūk, jūsu gatavība tagad:",
+      "documentFileTooLarge": "Fails ir lielāks par 5 MB — nekas netika saglabāts.",
+      "documentFileUnsupported": "Šis faila tips netiek atbalstīts — izmantojiet PDF, Word vai foto.",
+      "documentFileFailed": "Failu neizdevās augšupielādēt — nekas netika saglabāts. Mēģiniet dokumentu centrā.",
+      "moveNotFound": "Neatrodu šo cilvēku tajā projektā — izvēlieties no saraksta.",
+      "moveNoOptions": "Nav ko pārcelt: vajadzīgi vismaz divi projekti un viens piesaistīts cilvēks.",
+      "moveAskWorker": "Ko pārcelt? Izvēlieties:",
+      "moveAskProject": "Kur pārcelt {name}? Izvēlieties:",
+      "moveWhatIfTitle": "Ja {name} pārietu no „{from}“ uz „{to}“:",
+      "moveFromLine": "• „{from}“: cilvēku {before} → {after}; viņa atvērto darba pakotņu tur paliek {tasks}; gatavības saraksts tur: {checked}/{total}.",
+      "moveToLine": "• „{to}“: cilvēku {before} → {after}; gatavības saraksts tur sāksies no 0/{total}.",
+      "moveCountryLine": "• Mainās valsts: {from} → {to} — citas dokumentu prasības.",
+      "moveNoDatesLine": "• „{to}“ nav datumu — prombūtnes nevar pārbaudīt.",
+      "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas — atvaļinājumu modelis šeit neatbild.",
+      "moveAvailabilityLine": "• Laikā {start}–{end} viņam ir {count} prombūtnes ieraksti.",
+      "moveAvailabilityFreeLine": "• „{to}“ datumos prombūtņu nav.",
+      "moveOnlyConfirmLine": "Pagaidām nekas nav mainīts — mainīs tikai jūsu apstiprinājums.",
+      "moveConfirmChip": "Pārcelt",
+      "moveCancelChip": "Atstāt kā ir",
+      "moveDone": "Pārcelts: piesaistīts jaunajam projektam, iepriekšējā piesaiste beigta.",
+      "moveDonePartial": "Piesaistīts jaunajam projektam, bet iepriekšējo piesaisti neizdevās beigt — viņš ir abos; pabeidziet projekta panelī.",
+      "moveFailed": "Pārcelt neizdevās — nekas nemainījās.",
+      "chipMovePrefix": "Pārcelt uz",
+      "briefInvitations": "{who} {count, plural, one {aicina jūs (# ielūgums)} other {aicina jūs (# ielūgumi)}}.",
+      "chipInvitations": "Ielūgumi",
+      "invitationSomeone": "Kāds",
+      "invitationsIntro": "Jums adresētie ielūgumi: {count}.",
+      "invitationsEmpty": "Šobrīd nav jums adresētu ielūgumu.",
+      "invitationsUnavailable": "Ielūgumus šobrīd neizdevās nolasīt.",
+      "userInvitations": "Mani ielūgumi",
+      "chipNetwork": "Tīkls",
+      "invAccept": "Pieņemt",
+      "invLater": "Vēlāk",
+      "invConfirmTitle": "Apstiprinājums",
+      "invConfirmNote": "Pieņemot jūs kļūstat par šīs organizācijas dalībnieku — reāla saikne, ko tā redz.",
+      "invConfirm": "Jā, pieņemu",
+      "invCancel": "Atcelt",
+      "invWorking": "Notiek…",
+      "invDone": "Pieņemts — tagad esat saistīti.",
+      "invAlreadyAnswered": "Šis ielūgums vairs nav atvērts vai jau ir atbildēts.",
+      "invErrorStale": "Stāvoklis mainījās — atsvaidziniet un mēģiniet vēlreiz.",
+      "invErrorGeneric": "Neizdevās pieņemt. Mēģiniet vēlreiz.",
+      "knownState": {
+        "usingProfile": "Nekas nav jāaugšupielādē — meklēju pēc tā, kas jau ir tavā profilā.",
+        "usingProfileNarrowed": "Nekas nav jāaugšupielādē — meklēju pēc tava profila un tā, ko jau esi norādījis.",
+        "profileEmpty": "Tavā profilā pagaidām nekā nav, tāpēc pēc tā meklēt nevaru. Pieraksti vienu darbu vai nosauc savu profesiju — un es uzreiz meklēšu."
+      }
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3856,6 +4082,7 @@
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
       "minutesUnit": "[EN] min",
+      "errorNoWorkContent": "Ierakstam vajadzīgs darbs: ko darīji, kur vai cik ilgi. Uzraksti saviem vārdiem, piem. „montēju logus no 8 līdz 17“.",
       "addedSkillPrefix": "Pievienota prasme",
       "strengthenedSkillPrefix": "Nostiprināta prasme",
       "pendingConfirmPrefix": "Gaida tavu apstiprinājumu",
@@ -4076,11 +4303,12 @@
     },
     "cta": {
       "title": "Sāciet tur, kur esat",
-      "subcopy": "Četras durvis uz vienu platformu — izvēlieties savas.",
+      "subcopy": "Piecas durvis uz vienu platformu — izvēlieties savas.",
       "worker": "Esmu darbinieks",
       "employer": "Esmu darba devējs",
       "agency": "Pārstāvu aģentūru",
-      "partner": "Vēlos kļūt par partneri"
+      "partner": "Vēlos kļūt par partneri",
+      "institution": "Pārstāvu skolu vai augstskolu"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",
@@ -4207,6 +4435,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Jūsu kontu šobrīd neizdevās nolasīt, tāpēc mēs neizvēlējāmies telpu jūsu vietā.",
+      "choose": "Izvēlieties telpu vai mēģiniet vēlreiz.",
+      "retry": "Mēģināt vēlreiz"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",
@@ -4274,7 +4507,11 @@
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tool",
-        "opportunityType": "Iespējas veids"
+        "opportunityType": "Iespējas veids",
+        "salary": "atalgojuma",
+        "language": "valodas",
+        "employment": "nodarbinātības veida",
+        "radius": "attāluma"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
@@ -4300,6 +4537,11 @@
       "unsupportedDimension": "Pēc {dimension} filtrēt vēl nevaru.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
+      "internshipChooseDirection": "Vispirms izvēlies darba virzienu — bez tā prakses meklēšanu nevar sašaurināt.",
+      "internshipAskInstitution": "Jautā savai mācību iestādei ({institution}): tā redz programmas pieprasījumu tirgū un var uzaicināt darba devēju publicēt prakses vietu.",
+      "internshipCompass": "Kompass rāda, kas tev der tagad un kā trūkst.",
+      "chipChooseDirection": "Izvēlēties virzienu",
+      "chipAllOpportunities": "Visas iespējas",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
       "skillGapLine": "[EN] — {skill}: required by {demands} of them",
       "skillGapNone": "[EN] Nothing is missing: you hold every skill the {demands} visible demands ask for.",
@@ -4323,12 +4565,19 @@
       "whyDocs": "No jūsu dokumentiem un {countries} prasību saraksta.",
       "whyDocsNoCountry": "No jūsu dokumentiem; bez izvēlētas valsts nav ar ko salīdzināt.",
       "chipWhereToWork": "Kur vēlaties strādāt?",
+      "countryNotChosenListings": "Tur ir publiski sludinājumi no oficiāliem avotiem — pievieno valsti savām vēlmēm, un rādīšu arī tos.",
+      "countryNotChosenNoListings": "Publisku sludinājumu no oficiāliem avotiem tur pašlaik nav.",
+      "countryNotChosenSupplyUnknown": "Publisko sludinājumu avotu pašlaik neizdevās nolasīt — nevaru pateikt, vai tur ir sludinājumi.",
+      "countryNotChosenDoors": "Vari pievienot šo valsti savām valstīm — vajadzības tur redzēsi, tiklīdz tās parādīsies — un pārbaudīt, kādi dokumenti tur vajadzīgi.",
+      "chipAddCountry": "Pievienot valsti manām vēlmēm",
+      "chipDocsGap": "Kādu dokumentu man trūkst?",
       "skillGapNoDemands": "[EN] There are no demands visible to you yet, so there is no gap to measure.",
       "journalIntro": "[EN] Your last {count} journal entries:",
       "journalLine": "[EN] — {day}: {what}",
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "Saglabātas prasmes: {skills}, apstiprinātas: {confirmed}. Tikko neizdevās nolasīt tavu dienasgrāmatas ierakstu un apstiprinājumu skaitu — tas nav tas pats, kas to neesamība. Pajautā vēlreiz pēc brīža.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",
@@ -4357,7 +4606,24 @@
       "unnamedOrganization": "[EN] (unnamed organization)",
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
-      "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace."
+      "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
+      "chipProjectCsv": "Lejupielādēt CSV: {title}",
+      "offerCapacity": {
+        "needsCompany": "Darbinieku piedāvāšana pieder organizācijai, bet tu pašlaik esi savā personīgajā telpā. Izvēlies uzņēmumu — un es uzreiz pierakstīšu piedāvājumu.",
+        "personalSpace": "Lai piedāvātu cilvēkus vai komandu, vajadzīga organizācija, un tev tādas vēl nav. Vari izveidot uzņēmumu vai piedāvāt savu pakalpojumu."
+      },
+      "verifierOne": "{organization} var apstiprināt tavu paveikto darbu. Ieraksti jau gaida apstiprinājumu.",
+      "verifierOneNotEnabled": "Tavs darba devējs ir {organization}, bet tur vēl nevienam nav ieslēgta darbu apstiprināšana. Palūdz uzņēmumam to ieslēgt — tad varēs apstiprināt.",
+      "verifierChoice": "Tavu darbu varētu apstiprināt vairāk nekā viena organizācija: {organizations}. Izvēlies, kurai darbs pieder — es par tevi neminēšu.",
+      "verifierSelf": "{organization} pieder tev, tāpēc nav neviena, kas apstiprinātu tavu paša darbu. Ieraksti paliek tavā vēsturē kā tavs paša pieraksts.",
+      "verifierNone": "Pagaidām nav neviena, kas varētu apstiprināt šo darbu — tu neesi saistīts ar organizāciju, kas to varētu izdarīt. Darbs nepazūd: tas paliek tavā vēsturē kā tavs paša, neapstiprināts pierādījums. Kad norādīsi atbildīgo personu vai darba devēju, to varēs apstiprināt.",
+      "verifierUnavailable": "Neizdevās pārbaudīt, kas var apstiprināt tavu darbu.",
+      "verifierUnnamedOrganization": "tavs darba devējs",
+      "whyVerifier": "Rādu tikai organizācijas, ar kurām tev patiešām ir aktīvas attiecības.",
+      "whyVerifierChoice": "Vairākas organizācijas der vienlīdz labi, tāpēc es neminu — izvēlies tu.",
+      "whyVerifierSelf": "Savu paša darbu apstiprināt nevari — apstiprinājumam jānāk no kāda cita.",
+      "whyVerifierNone": "Neviena no tavām aktīvajām attiecībām nenorāda uz organizāciju, kas var apstiprināt darbu.",
+      "whyVerifierUnavailable": "Tas nozīmē, ka datus neizdevās nolasīt — nevis to, ka nav kam apstiprināt."
     },
     "project": {
       "fieldStatus": "[EN] Status",
@@ -4385,6 +4651,7 @@
     "workJournal": "[EN] Backed by work journal entries",
     "selfDeclared": "[EN] Self-declared",
     "autoConfirmQualifier": "[EN] confirmed by a preset rule",
+    "selfConfirmQualifier": "apstiprināja tas pats cilvēks, kurš veica darbu",
     "binLegendTitle": "[EN] Evidence assurance",
     "binLegendRed": "[EN] no records yet",
     "binLegendGreen": "[EN] first records",
@@ -4523,7 +4790,10 @@
         "invalid_transition": "[EN] That step is not possible from the current state.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "[EN] Reply from the person this is about",
+      "notPublicYet": "[EN] This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "[EN] Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "[EN] Your experience with {name}",
@@ -6028,6 +6298,96 @@
         "notAuthorized": "Jūs nevarat ierakstīt šīs stundas.",
         "generic": "Neizdevās apstrādāt. Mēģiniet vēlreiz."
       }
+    }
+  },
+  "companyHome": {
+    "eyebrow": "Jūsu organizācija tagad",
+    "title": "Projekti laikā un kurš ir brīvs",
+    "rolesLabel": "Ko organizācija dara",
+    "rolesNone": "Vēl nav norādīts, ko organizācija dara.",
+    "rolesDeclare": "Norādiet, ko darāt",
+    "projects": {
+      "heading": "Projekti laikā",
+      "more": "{count, plural, zero {vēl # projektu} one {vēl # projekts} other {vēl # projekti}}",
+      "empty": "Projektu vēl nav. Projektā satiekas cilvēki, posmi un dokumenti.",
+      "emptyCta": "Izveidot pirmo projektu",
+      "noCompany": "Izvēlieties organizāciju, kuras vārdā rīkojaties, lai redzētu tās projektus.",
+      "error": "Projektus šobrīd neizdevās nolasīt.",
+      "now": "Tagad",
+      "next": "Tālāk",
+      "risk": "Risks",
+      "nowNone": "Neviens posms nenotiek",
+      "nowBlocked": "Bloķēts: {name}",
+      "stagesUnavailable": "Posmi šeit vēl nav pieejami",
+      "stagesDone": "Pabeigti {done} no {total} posmiem",
+      "nextNone": "Nākamais posms nav ieplānots",
+      "nextDerived": "izsecināts no posmu secības",
+      "nextFrom": "no {date}",
+      "peopleCount": "{count, plural, =0 {neviens nav piešķirts} zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+      "riskNone": "Signālu nav",
+      "riskUnknown": "Šobrīd nav nolasāms",
+      "riskOverdue": "{count, plural, zero {# nokavētu uzdevumu} one {# nokavēts uzdevums} other {# nokavēti uzdevumi}}",
+      "riskBlocked": "{count, plural, zero {# bloķētu posmu} one {# bloķēts posms} other {# bloķēti posmi}}",
+      "riskDocs": "{count, plural, zero {# cilvēkiem trūkst dokumentu} one {# cilvēkam trūkst dokumentu} other {# cilvēkiem trūkst dokumentu}}",
+      "riskNobody": "Notiekošs projekts bez cilvēkiem",
+      "operations": "Atvērt operācijas",
+      "invite": "Uzaicināt cilvēkus",
+      "status": {
+        "unknown": "Statuss nav zināms"
+      }
+    },
+    "capacity": {
+      "heading": "Kurš tagad ir brīvs",
+      "free": "brīvs",
+      "away": "prombūtnē",
+      "awayUntil": "prombūtnē līdz {date}",
+      "absencesUnknown": "Prombūtnes vēl netiek reģistrētas — brīvs nozīmē, ka neviens nav teicis citādi.",
+      "more": "{count, plural, zero {vēl # cilvēku plānošanas lapā} one {vēl # cilvēks plānošanas lapā} other {vēl # cilvēki plānošanas lapā}}",
+      "assign": "Piešķirt projektam",
+      "plan": "Atvērt plānošanu",
+      "empty": "Komandā vēl neviena nav.",
+      "emptyCta": "Uzaicināt cilvēkus",
+      "error": "Pieejamību šobrīd neizdevās nolasīt."
+    },
+    "missing": {
+      "heading": "Trūkst 4 nedēļu laikā",
+      "nothing": "Šobrīd nekā netrūkst.",
+      "people": "{count, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+      "from": "no {period}",
+      "status": {
+        "draft": "Melnraksts",
+        "submitted": "Iesniegts",
+        "in_review": "Tiek izskatīts",
+        "needs_followup": "Nepieciešama jūsu atbilde",
+        "approved": "Apstiprināts",
+        "closed": "Slēgts"
+      },
+      "continueDraft": "Turpināt melnrakstu",
+      "openNeed": "Atvērt vajadzību",
+      "gapsRow": "{count, plural, zero {# cilvēkiem projektā „{project}” trūkst dokumentu} one {# cilvēkam projektā „{project}” trūkst dokumentu} other {# cilvēkiem projektā „{project}” trūkst dokumentu}}",
+      "gapsCta": "Pārbaudīt dokumentus",
+      "needsCta": "Aprakstīt vajadzību"
+    },
+    "attention": {
+      "heading": "Vajadzīgs jūs",
+      "unavailable": "Šobrīd neizdevās nolasīt — nekas šeit nav apstiprināts kā kārtībā.",
+      "none": "Viss kārtībā — nekas jūs negaida."
+    },
+    "partners": {
+      "heading": "Partneri",
+      "empty": "Partneru vēl nav.",
+      "agency": "Aģentūra",
+      "client": "Klients",
+      "team": "Komanda",
+      "members": "{count, plural, zero {# dalībnieku} one {# dalībnieks} other {# dalībnieki}}",
+      "pending": "gaida jūsu atbildi",
+      "status": {
+        "active": "savienots",
+        "declined": "noraidīts",
+        "revoked": "pārtraukts"
+      },
+      "answer": "Atbildēt uz uzaicinājumu",
+      "invite": "Uzaicināt partneri"
     }
   }
 }

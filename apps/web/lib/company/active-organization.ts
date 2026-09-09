@@ -56,7 +56,7 @@ export const ACTIVE_WORKSPACE_COOKIE = "lm_active_workspace";
 
 /** Read the validated-at-write session pointer; resolution still membership-
  *  validates it against the live workspace list before it can win. */
-async function readSessionWorkspacePointer(): Promise<string | null> {
+export async function readSessionWorkspacePointer(): Promise<string | null> {
   try {
     const jar = await cookies();
     const v = jar.get(ACTIVE_WORKSPACE_COOKIE)?.value?.trim();

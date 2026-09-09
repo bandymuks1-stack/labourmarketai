@@ -99,6 +99,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Same NULLed title/attribution boundary as the search function since 20260824120000. No JobPosting JSON-LD is emitted on the page, because that schema requires hiringOrganization and jobLocation, which are restricted fields.",
   },
   {
+    name: "public_plans_v1",
+    identityArgs: "",
+    mutates: false,
+    publicCaller:
+      "Public /pricing page (and the signed-in organisation account). Renders the price FIGURE from plans.price_eur_monthly — the one home of the figure (owner-approved 2026-09-05: FREE 0, ORGANIZATION 99).",
+    authorization:
+      "Returns the catalogue columns only — slug, name_lt, name_en, price_eur_monthly — for active plans. No profile, organisation, subscription or customer data is reachable through it.",
+    inputValidation:
+      "No parameters, so there is no input surface.",
+    abuseControls:
+      "Read-only; returns at most the handful of active catalogue rows. Nothing to enumerate beyond the public price list.",
+    definerJustification:
+      "`plans` has no anon/authenticated table privilege since the 2026-07-22 revoke pass (RLS plans_select is true, but the GRANT is absent), so the public page could not render a price. DEFINER exposes the catalogue without widening the table grant.",
+    residualRisk:
+      "Discloses the published price list, which is the purpose of the page.",
+  },
+  {
     name: "count_public_vacancies_v1",
     identityArgs: "",
     mutates: false,

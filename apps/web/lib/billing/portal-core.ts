@@ -28,7 +28,7 @@ export function evaluatePortalRequest(input: {
   if (input.config.state === "stripe_live_blocked") {
     return { ok: false, status: 403, reason: "live_blocked" };
   }
-  if (input.config.state !== "stripe_test") {
+  if (input.config.state !== "stripe_test" && input.config.state !== "stripe_live") {
     return { ok: false, status: 400, reason: "payments_disabled" };
   }
   if (!input.authenticated) {

@@ -44,8 +44,33 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 53 → 54 with `cv-export` (the verified CV sheet, route); 54 → 55 with
     // `add-task` (a work package on the project, write); 55 → 56 with
     // `who-available` (capacity from the roster + absences, read); 56 → 57
-    // with `stage-status` (a stage moved to a real status, write).
-    expect(entries.length).toBe(57);
+    // with `stage-status` (a stage moved to a real status, write); 57 → 58
+    // with `move-worker` (§11 what-if move between projects, write); 58 → 60
+    // with `task-status` (§14 a task moved to a real status, write) and
+    // `project-risk` (every live project's real signals, read); 60 → 61 with
+    // `project-readiness` (the people on a live project and what each still
+    // needs, read); 61 → 62 with `confirm-work` (§14 the employer confirms a
+    // work entry; verified skills follow, write).
+    // 62 -> 63 with `invitations` (4D the invitations addressed to me, read).
+    // 63 -> 64 with `profession-statement` (window 6: "esu buhalteris" /
+    // "dirbau projektų vadovu 5 metus" — the person names a profession or a
+    // past job; reads the sentence, offers the existing doors, read).
+    // 64 -> 65 with `availability` ("galiu dirbti nuo spalio 1 d." — the
+    // person states from when they can work; opens the work card with the
+    // date in it, write).
+    // 65 -> 66 with `offer-capacity` (owner window 7 §4: "turime 20
+    // suvirintojų, ieškome jiems darbo" — the SUPPLY side of the market,
+    // which until now was routed as a personal job search or, worse,
+    // inverted into "we need 20 welders"; opens the same canonical intake
+    // stamped intent "partner" → kind agency_offer, write).
+    // 66 -> 67: `who-verifies-work` (owner P0 2026-09-06). The WORKER's side
+    // of the confirmation loop — "Kam pateikti atliktą darbą?" used to match
+    // `find-work` on the bare noun `darbą` and was answered with job adverts.
+    // 67 -> 69: `cv-view` and `cv-choose` (owner window 11 §5/§30). VIEW ≠
+    // UPLOAD ≠ EDIT ≠ EXPORT, and the bare noun no longer resolves to any of
+    // them — it asks. Measured before the split: 11 of 22 ordinary CV
+    // sentences, including "noriu pamatyti savo CV", opened the IMPORT flow.
+    expect(entries.length).toBe(69);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -67,6 +92,10 @@ describe("the intent registry is the enumerable routing contract", () => {
       "add-document",
       // PROJECT → WORK: a work package by sentence.
       "add-task",
+      // "galiu dirbti nuo spalio 1 d." — the work card opened with the date.
+      "availability",
+      // §14 EMPLOYER CONFIRMATION: approve an entry + verify the declared skills it proves.
+      "confirm-work",
       // F2 — the site as a project object, by sentence.
       "create-project",
       "invite-candidate",
@@ -77,12 +106,17 @@ describe("the intent registry is the enumerable routing contract", () => {
       // dispatcher.
       "invite-student",
       "log-work",
+      "move-worker",
       "need-workers",
+      // SUPPLY — the same canonical intake as a need, stamped "partner".
+      "offer-capacity",
       "programmes",
       "propose-candidate",
       // PROJECT → PROGRESS: a stage moved to a real status, by sentence.
       "stage-status",
       "switch-context",
+      // §14 WORK PERFORMED → RESULT: a task moved to a real status, by sentence.
+      "task-status",
     ]);
   });
 
@@ -98,7 +132,13 @@ describe("the intent registry is the enumerable routing contract", () => {
       "admin-requests",
       "company-overview",
       "create-organization",
+      // The three CV doors are all route-class on purpose: each hands over a
+      // chip to `/cv` (or, for `cv-choose`, to the three real doors) and none
+      // of them can become a second write path. The IMPORT intent (`cv`) is
+      // deliberately NOT here — it is the only one that writes.
+      "cv-choose",
       "cv-export",
+      "cv-view",
       "documents",
       "hours-import",
       "lmc",

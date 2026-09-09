@@ -50,6 +50,36 @@ export interface DocumentGap {
 export const DOCUMENT_GAP_LINE_CAP = 5;
 
 /**
+ * The same document TYPE required by two countries is ONE name with both
+ * countries beside it — never the name twice. On production (2026-09-06)
+ * "kas man trūksta?" answered "trūksta 4 (Asmens dokumentas, Komandiravimo
+ * pranešimas, Asmens dokumentas, Komandiravimo pranešimas)": four real rows
+ * (2 types × 2 countries) rendered as a stutter. The COUNT stays the number
+ * of rows (they are genuinely separate documents per country); the LIST is
+ * grouped by type, in first-seen order, capped by `DOCUMENT_GAP_LINE_CAP`
+ * TYPES. Pure; the caller localizes the type names.
+ */
+export function groupMissingDocumentsByType(
+  missing: readonly DocumentGapItem[],
+  cap: number = DOCUMENT_GAP_LINE_CAP,
+): { documentTypeSlug: string; countries: string[] }[] {
+  const order: string[] = [];
+  const byType = new Map<string, string[]>();
+  for (const m of missing) {
+    let countries = byType.get(m.documentTypeSlug);
+    if (!countries) {
+      countries = [];
+      byType.set(m.documentTypeSlug, countries);
+      order.push(m.documentTypeSlug);
+    }
+    if (m.country && !countries.includes(m.country)) countries.push(m.country);
+  }
+  return order
+    .slice(0, cap)
+    .map((slug) => ({ documentTypeSlug: slug, countries: byType.get(slug) ?? [] }));
+}
+
+/**
  * Join own documents × the requirements of the countries the person named.
  * `countries` are the person's stated preferences (ISO-2), already limited by
  * the caller; an empty list means the answer must ASK where they want to work

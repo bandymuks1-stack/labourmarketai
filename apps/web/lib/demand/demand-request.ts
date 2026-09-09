@@ -18,6 +18,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { gateOpenNeeds } from "@/lib/billing/open-needs-gate";
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import { serverEventLocale } from "@/lib/telemetry/server-locale";
 import {
@@ -138,7 +139,15 @@ export type DemandRequestResult =
         // W8 slice 1: the caller is not acting for a company right now
         // (personal workspace, unbound organization, company not owned…).
         | "no_company_context"
-        | "invalid_estimate";
+        | "invalid_estimate"
+        // Owner launch pricing 2026-09-05: the organization's concurrent
+        // active open needs are at its plan's ceiling (FREE 1 / ORGANIZATION
+        // 10). `next` names the honest way forward — the €99 plan, or the
+        // individual plan (contact) above the paid ceiling. Nothing is charged.
+        | "over_open_need_limit";
+      limit?: number;
+      used?: number;
+      next?: "upgrade" | "individual_plan";
     };
 
 /**
@@ -335,6 +344,17 @@ export async function submitDemandRequestCore(
     p_payload: payload,
     p_original_language: "lt",
   };
+  // OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05): FREE
+  // organization = 1 concurrent active need, ORGANIZATION €99 = up to 10,
+  // above → the individual-plan path. `hasFeature("company_create_needs")`
+  // is the plan boundary; the numeric ceiling is decided by the ONE gate over
+  // the organization's real count. Permissive while billing is disabled
+  // (pilot preserved — the same rule the booking gate follows); enforced the
+  // moment a Stripe adapter state is active. Never a silent charge or tier.
+  const needsGate = await gateOpenNeeds(supabase, employer.organizationId, caller.userId);
+  if (!needsGate.allowed) {
+    return { ok: false, code: "over_open_need_limit", limit: needsGate.limit, used: needsGate.used, next: needsGate.next };
+  }
   let { data, error } = await (supabase as unknown as DemandRpc).rpc(
     "submit_demand_request_v2",
     { ...rpcArgs, p_organization_id: employer.organizationId },

@@ -26,12 +26,41 @@ export interface CheckoutSessionInput {
   readonly metadata?: Readonly<Record<string, string>>;
   /** Deterministic retry key — a retry replays the session, not a new one. */
   readonly idempotencyKey?: string;
+  /**
+   * Billing safety v1: the hosted session's expiry (unix seconds) — the
+   * server-side checkout operation's window, so the session is unpayable the
+   * moment the operation closes. Stripe accepts 30 min … 24 h from creation.
+   */
+  readonly expiresAt?: number;
   readonly successUrl: string;
   readonly cancelUrl: string;
 }
 
+/** Normalized READ of one provider subscription (reconciliation / admission). */
+export interface ProviderSubscriptionView {
+  readonly id: string;
+  readonly customerId: string | null;
+  /** Stripe's raw status string (mapped by webhook-core's mapStripeStatus). */
+  readonly rawStatus: string;
+  readonly priceId: string | null;
+  readonly unitAmountCents: number | null;
+  readonly currency: string | null;
+  readonly livemode: boolean;
+  readonly cancelAtPeriodEnd: boolean;
+}
+
+export type RetrieveSubscriptionResult =
+  | { ok: true; subscription: ProviderSubscriptionView }
+  /** The provider has no such subscription (resource_missing). */
+  | { ok: true; subscription: null }
+  | { ok: false; reason: string };
+
+export type ListSubscriptionsResult =
+  | { ok: true; subscriptions: readonly ProviderSubscriptionView[] }
+  | { ok: false; reason: string };
+
 export type CheckoutSessionResult =
-  | { ok: true; url: string; sessionId: string; testMode: true }
+  | { ok: true; url: string; sessionId: string; testMode: boolean }
   | { ok: false; reason: string };
 
 export interface CreateCustomerInput {
@@ -41,7 +70,7 @@ export interface CreateCustomerInput {
 }
 
 export type CreateCustomerResult =
-  | { ok: true; customerId: string; testMode: true }
+  | { ok: true; customerId: string; testMode: boolean }
   | { ok: false; reason: string };
 
 export interface PortalSessionInput {
@@ -58,12 +87,14 @@ export interface BillingWebhookEvent {
   readonly id: string;
   readonly type: string;
   readonly testMode: boolean;
+  /** Stripe's own `created` (unix seconds) — ordering evidence (billing safety v1). */
+  readonly created?: number;
   /** The event.data.object payload. */
   readonly object: Record<string, unknown>;
 }
 
 export interface BillingProvider {
-  readonly id: "noop" | "stripe_test";
+  readonly id: "noop" | "stripe_test" | "stripe_live";
   readonly active: boolean;
   createCheckoutSession(
     input: CheckoutSessionInput,
@@ -77,20 +108,30 @@ export interface BillingProvider {
     payload: string,
     signature: string,
   ): Promise<BillingWebhookEvent>;
+  /**
+   * READ-ONLY (billing safety v1): the provider's current view of one
+   * subscription — the authority checkout admission and reconciliation
+   * consult. Never creates, updates or charges anything.
+   */
+  retrieveSubscription(providerSubscriptionId: string): Promise<RetrieveSubscriptionResult>;
+  /** READ-ONLY: every subscription (any status) of one provider customer. */
+  listCustomerSubscriptions(providerCustomerId: string): Promise<ListSubscriptionsResult>;
 }
 
 /**
- * Returns the active provider. `stripe_test` → the Stripe test adapter (lazily
- * imported so the SDK never loads in the disabled path); anything else → NOOP.
- * Live is never reachable (config blocks it before this point).
+ * Returns the active provider. `stripe_test` → the Stripe adapter in test
+ * mode, `stripe_live` → the same adapter with the live secret (lazily imported
+ * so the SDK never loads in the disabled path); anything else → NOOP. Live is
+ * reachable ONLY once the owner armed it (config-core: token + confirmed price
+ * table + complete live keys); until then config blocks it before this point.
  */
 export async function getBillingProvider(): Promise<BillingProvider> {
   const cfg = getBillingConfig();
-  if (cfg.state === "stripe_test") {
-    const { createStripeTestProvider } = await import(
+  if (cfg.state === "stripe_test" || cfg.state === "stripe_live") {
+    const { createStripeProvider } = await import(
       "@/lib/billing/providers/stripe-test"
     );
-    return createStripeTestProvider();
+    return createStripeProvider();
   }
   const { noopProvider } = await import("@/lib/billing/providers/noop");
   return noopProvider();

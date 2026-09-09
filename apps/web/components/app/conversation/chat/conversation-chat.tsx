@@ -28,6 +28,7 @@ import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
 import type { ChatMessage, ChoiceChip } from "./types";
 import { InlineActionForm } from "@/components/app/conversation/inline-action-form";
+import { DocumentFileEmbed } from "./document-file-embed";
 import { WorkerCvFlow } from "@/components/app/conversation/worker-cv-flow";
 import {
   WorkerBookingAction,
@@ -44,19 +45,53 @@ import {
   educationAssignLearnerForm,
   educationCreateCohortForm,
   getCompanyForm,
+  supplyOfferFormSpec,
 } from "@/lib/conversation/company-forms";
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
+import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
+import {
+  educationQuestionKind,
+  isEducationQuestionKind,
+  type EducationQuestionKind,
+} from "@/lib/conversation/education-question";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
+import { loadDocumentFileTargetForChat } from "@/lib/conversation/document-file-chat";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
+import { loadOpenTasksForChat } from "@/lib/conversation/company-tasks";
+import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
+import { loadProjectReadinessForChat } from "@/lib/conversation/project-readiness";
+import { loadConfirmWorkForChat } from "@/lib/conversation/confirm-work";
+import type { ConfirmWorkChatResult } from "@/lib/conversation/confirm-work-contract";
+import { proposeConversationIntentAction } from "@/lib/conversation/llm-proposal";
+import {
+  advanceGoal,
+  classifyTurn,
+  EVIDENCE_BEARING_INTENTS,
+  declineOutstandingOffers,
+  goalSentence,
+  noteOffered,
+  statedConstraintCount,
+  withoutDeclined,
+  type ConversationGoal,
+} from "@/lib/conversation/conversation-goal";
+import { evidenceFromSuggestions } from "@/lib/conversation/evidence-goal";
+import { worklogDraftFromEvidence } from "@/lib/conversation/evidence-to-worklog";
+import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import type { ConversationIntent } from "@/lib/conversation/intent-router";
+import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
+import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
+import type { WorkTaskStatus } from "@/lib/tasks/task-model";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
+import type { WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
+import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
 import type { StageStatus } from "@/lib/projects/stages-model";
-import { parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
+import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -73,11 +108,12 @@ import {
   type IntentHandlers,
 } from "@/lib/conversation/intent-registry";
 import type { WorkspaceInfo } from "@/lib/company/organization-switch";
-import { extractWorkLog } from "@/lib/conversation/worklog-extract";
+import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
-import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
+import { loadMessagesForChat, type ChatInboxThread } from "@/lib/conversation/messages-chat";
+import { loadInvitationsForChat } from "@/lib/conversation/invitations-chat";
 import { loadEmployerDemandsForChat } from "@/lib/conversation/employer-workspace";
 import { loadEngagementsForResult } from "@/lib/engagements/engagements-result";
 import {
@@ -89,7 +125,8 @@ import {
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
-import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
+import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
+import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
   appendAssistantTurn,
@@ -114,6 +151,7 @@ import {
   runSkillGap,
   runDocumentsReadiness,
   runLearningCompass,
+  runWhoVerifiesWork,
 } from "@/lib/ai-workspace/workflows";
 import type { WorkflowResult } from "@/lib/ai-workspace/workflow-contract";
 import { HistoryBlock } from "./history-block";
@@ -123,6 +161,7 @@ import {
   structureValueStatement,
   type ValueStatement,
 } from "@/lib/structuring/value-statement";
+import { readProfessionStatement } from "@/lib/structuring/role-label";
 import { applyCorrection } from "@/lib/structuring/apply-correction";
 import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -164,8 +203,13 @@ function PersonalWorkspaceIntroStream({
  */
 /** Which of the institution's commands a "programmes" sentence asks for —
  *  create / cohort / assign, else a plain list. Folded, five locales. */
-function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" {
+function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
   const q = (text ?? "").toLowerCase();
+  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
+  // fits, what skills are missing, where to do practice) is answered from the
+  // institution's real reads — never routed to the owner's own worker answer.
+  const question = educationQuestionKind(q);
+  if (question) return question;
   if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
   const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
   if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
@@ -224,6 +268,23 @@ export type ChatLabels = {
   chipCard: string;
   chipPrefs: string;
   offersEmpty: string;
+  invitationsIntro: string;
+  invitationsEmpty: string;
+  invitationsUnavailable: string;
+  invitationSomeone: string;
+  userInvitations: string;
+  chipNetwork: string;
+  invAccept: string;
+  invLater: string;
+  invConfirmTitle: string;
+  invConfirmNote: string;
+  invConfirm: string;
+  invCancel: string;
+  invWorking: string;
+  invDone: string;
+  invAlreadyAnswered: string;
+  invErrorStale: string;
+  invErrorGeneric: string;
   /** P0.5 (owner audit): the search dialog's opening line — what we know,
    *  before asking for what is missing. */
   searchAskCriteria: string;
@@ -329,6 +390,10 @@ export type ChatLabels = {
   assignNoWorkers: string;
   /** The roster could not be read, or its source is not available here. */
   assignUnavailable: string;
+  /** Chip suffix for a person assignable through an ACCEPTED BOOKING
+   *  (agency placement) rather than the roster — the chat's equivalent of the
+   *  page picker's "accepted-offer candidates" group (D5 walk, 2026-09-06). */
+  assignEngagementCandidate: string;
   /** The assignment landed. Followed by the real project result. */
   assignDone: string;
   /** The assignment was refused by the server. The reason is the server's. */
@@ -384,20 +449,43 @@ export type ChatLabels = {
   documentAddIntro: string;
   documentAddDone: string;
   documentAddUnavailable: string;
+  documentFileOffer: string;
+  documentFileChoose: string;
+  documentFileSubmit: string;
+  documentFileUploading: string;
+  documentFileSkip: string;
+  documentFileUploaded: string;
+  documentFileTooLarge: string;
+  documentFileUnsupported: string;
+  documentFileFailed: string;
   cvExportHint: string;
   chipCvSheet: string;
+  /** VIEW, not export and not import (owner window 11 §5/§30). */
+  cvViewHint: string;
+  /** The CV named without saying which of the five actions is meant. */
+  cvChooseAsk: string;
   taskCreateIntro: string;
   taskCreatedNext: string;
   capacityIntro: string;
   capacityFree: string;
   capacityBusyUntil: string;
+  capacityCommittedUntil: string;
+  capacityCommittedToUntil: string;
   capacityAbsencesUnknown: string;
+  capacityCommitmentsUnknown: string;
   capacityEmpty: string;
   capacityUnavailable: string;
   chipAddTask: string;
   workerProjectsIntro: string;
   workerProjectsEnded: string;
   chipOpenProjectPrefix: string;
+  workerProjectAsks: string;
+  askOwnReady: string;
+  askOwnExpiring: string;
+  askOwnNone: string;
+  askReplyIntro: string;
+  askReplyIntroUnnamed: string;
+  chipRecordDocument: string;
   stageAsk: string;
   stageNotFound: string;
   stageNone: string;
@@ -406,6 +494,69 @@ export type ChatLabels = {
   stageBlocked: string;
   stageFailed: string;
   chipStagePrefix: string;
+  taskAsk: string;
+  taskNotFound: string;
+  taskNone: string;
+  taskUnavailable: string;
+  taskDone: string;
+  taskStarted: string;
+  taskBlocked: string;
+  taskFailed: string;
+  chipTaskPrefix: string;
+  riskIntro: string;
+  riskLine: string;
+  riskOkLine: string;
+  riskUnknownLine: string;
+  riskNobody: string;
+  riskNone: string;
+  riskUnavailable: string;
+  chipCreateProject: string;
+  readinessIntro: string;
+  readinessRepliedSuffix: string;
+  readinessReadyLine: string;
+  readinessGapLine: string;
+  readinessNoChecklist: string;
+  readinessNoPeople: string;
+  /** P2 FACT/DERIVED marking (frozen design §1.7, K): the readiness ratio is
+   *  a computation over records, and the answer says so. */
+  readinessDerivedNote: string;
+  readinessAsk: string;
+  readinessNotFound: string;
+  readinessUnavailable: string;
+  chipReadinessPrefix: string;
+  chipOpenOperations: string;
+  missingName: string;
+  missingDeclaredSkills: string;
+  missingEvidence: string;
+  blockedSuffix: string;
+  readinessSeedChip: string;
+  readinessSeeded: string;
+  readinessGotChip: string;
+  readinessGotDone: string;
+  readinessCheckedChip: string;
+  readinessCheckedDone: string;
+  readinessAskChip: string;
+  readinessAskDone: string;
+  readinessRequestBody: string;
+  readinessWriteFailed: string;
+  confirmIntro: string;
+  confirmLine: string;
+  confirmChip: string;
+  confirmDone: string;
+  confirmNone: string;
+  confirmNotEnabled: string;
+  confirmEnableChip: string;
+  confirmEnabled: string;
+  confirmFailed: string;
+  confirmUnavailable: string;
+  chipOpenInbox: string;
+  moveNotFound: string;
+  moveNoOptions: string;
+  moveAskWorker: string;
+  moveConfirmChip: string;
+  moveCancelChip: string;
+  moveFailed: string;
+  chipMovePrefix: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -482,6 +633,43 @@ function daysUntil(iso: string): number {
 }
 
 /**
+ * QA Q-4 — did this page load come through OUR OWN door?
+ *
+ * The `?say=` hand-off is produced only by our auth surfaces
+ * (`getSafeReturnPath` over the `next` the landing built), and the last hop
+ * of the real journey is a navigation FROM this origin: the login form's
+ * `window.location.assign(nextPath)`. Our Referrer-Policy is
+ * `strict-origin-when-cross-origin` (next.config), which sends the FULL
+ * referrer same-origin, so that arrival reports `document.referrer` =
+ * our own `/auth/login?next=…` URL. A `/dashboard?say=<X>` link pasted
+ * anywhere else arrives with a foreign referrer — or with an EMPTY one
+ * (messaging apps, mail clients, `rel="noreferrer"`, the address bar).
+ * Empty is exactly what a hostile link can arrange, so empty is NOT trusted.
+ *
+ * Verified consequences for the real journeys: password login → same-origin
+ * → the sentence is sent as before. E-mail-confirmation signup (the link is
+ * opened from a mail client; the callback 302-chains into onboarding, and
+ * the onboarding action's redirect is a client-side navigation that keeps
+ * the document's referrer) and the Google callback (arrives from Google's
+ * origin) report a foreign or empty referrer and take the fallback: the
+ * sentence is placed in the composer for the person to send — never
+ * dropped, never sent for them. What this rule cannot tell apart is a
+ * person who deliberately types their password after following a crafted
+ * `/auth/login?next=/dashboard?say=…` link — that is the same shape as the
+ * landing hand-off itself and needs the person's own credentials; recorded,
+ * not closed here.
+ */
+function referrerIsOurOwnDoor(): boolean {
+  try {
+    const ref = document.referrer;
+    if (!ref) return false;
+    return new URL(ref).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * The real conversation window (Real Conversation UI). The WHOLE surface is one
  * chat: a message stream + a bottom composer. The empty state greets the user
  * and offers a few conversation starters; picking one becomes a user message
@@ -506,6 +694,7 @@ export function ConversationChat({
   agencyWorkspace = false,
   learnerContextLine = null,
   starters = null,
+  personHasProfileData = null,
   contextFallback = null,
   workspaceContextLine = null,
   pins = null,
@@ -554,6 +743,18 @@ export function ConversationChat({
    *  from the ONE chat label bag; ids are the existing `handleChip`
    *  vocabulary. */
   starters?: readonly StarterChipSpec[] | null;
+  /**
+   * KNOWN-STATE-FIRST (owner P0 §3, 2026-09-06): does the product already
+   * hold something real about this person — skills, work history or journal
+   * entries? Read on the server in the SAME batch as the starters.
+   *
+   * `null` is UNKNOWN and must stay distinguishable from `false`. When the
+   * person says "tu jau turi mano duomenis" the answer depends on this: with
+   * `true` we say we will use it, with `false` we say honestly that there is
+   * nothing to use yet, and with `null` we claim neither (§10 — never assert
+   * we hold data that canonical state has not proven).
+   */
+  personHasProfileData?: boolean | null;
   /** The not-understood answer, composed on the server from the same
    *  capability tracks ("I can help with needs, candidates, projects,
    *  clients…"). `null` = the identity's plain fallback. */
@@ -646,8 +847,13 @@ export function ConversationChat({
   /** V9 value-intent: slug → localized work-type label for honest readbacks
    *  and demand-form prefill (the ONE taxonomy label map, not a new list). */
   const workTypeLabels = useMemo(() => buildWorkTypeLabelMap(locale), [locale]);
+  /** The ONE profession catalogue (49 rows, `professions.json`) — the role
+   *  label offered when a sentence names a profession outside the closed
+   *  work-type set ("reikia 2 mechanikų" → "Automechanikas"). */
+  const tProfessions = useTranslations("professions");
   /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
   const tAi = useTranslations("workspace.ai");
+  const tRelationships = useTranslations("relationshipTypes");
   /** The AI's hand on World State, published by the bridge inside the provider. */
   const worldRef = useRef<AiWorldStateHandle | null>(null);
   const auth = useAuthOptional();
@@ -717,6 +923,9 @@ export function ConversationChat({
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);
+  /** QA Q-4: a `?say=` sentence that did NOT arrive through our own door is
+   *  handed to the composer for the person to send — see `referrerIsOurOwnDoor`. */
+  const [sayPrefill, setSayPrefill] = useState("");
 
   /**
    * Transcript persistence (owner-gated schema). While the RED migration is
@@ -804,16 +1013,43 @@ export function ConversationChat({
    *  thing — prod walk 2026-09-04: "Kas turėtų jame dirbti?" and its chips
    *  sat under the open project sheet and could not be tapped. */
   const [chipsPostedAt, setChipsPostedAt] = useState<number | null>(null);
+
+  /**
+   * THE ACTIVE CONVERSATION GOAL (owner P0 §1/§5, 2026-09-06).
+   *
+   * A ref, not state: every answer in this component reads it through stable
+   * callbacks, and re-rendering the whole thread because a constraint was
+   * remembered would be a regression of its own. It survives every action —
+   * opening a form, a panel, the World — which is the §5 requirement that a
+   * visual action must not destroy the goal a sentence set.
+   */
+  const goalRef = useRef<ConversationGoal | null>(null);
+
   const assistant = useCallback(
     (text: string, chips?: ChoiceChip[]) => {
-      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips });
+      // ANTI-LOOP, at the ONE place chips reach the thread (owner §6). An
+      // action the person has already refused cannot be re-offered by ANY
+      // answer — including the many written long before the goal existed.
+      // This is deliberately not a CV-specific guard: the ledger is keyed on
+      // the action id, so it covers every offer the product makes.
+      const shown = withoutDeclined(goalRef.current, chips) as ChoiceChip[] | undefined;
+      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips: shown });
       persistTurn("assistant", text);
-      if (chips && chips.length > 0) setChipsPostedAt(Date.now());
+      if (shown && shown.length > 0) {
+        setChipsPostedAt(Date.now());
+        // Remember what is on the table, so the next turn can tell whether
+        // the person is refusing it.
+        goalRef.current = noteOffered(goalRef.current, shown.map((c) => c.id));
+      }
     },
     [pushMessage, persistTurn],
   );
+  /** True once the person has sent their first message — the opening brief
+   *  (a slow read) must never land AFTER it and take the answer's chip row. */
+  const userSpokeRef = useRef(false);
   const user = useCallback(
     (text: string) => {
+      userSpokeRef.current = true;
       pushMessage({ id: nid(), role: "user", kind: "text", text });
       persistTurn("user", text);
     },
@@ -870,13 +1106,13 @@ export function ConversationChat({
         const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
-        pushEmbed(
+        const render = (values?: Record<string, string | boolean>) => pushEmbed(
           <InlineActionForm
             spec={spec}
             locale={locale}
             // V9 value-intent: what the person already SAID pre-fills the
             // fields — visible, editable, still reviewed before any write.
-            initialValues={initialValues}
+            initialValues={values}
             onDone={onDone}
             // Closing a form shows the contextual next step, never a generic
             // menu: worker forms re-read the REAL profile state; the employer
@@ -894,6 +1130,20 @@ export function ConversationChat({
             continueLabel={continueLabel}
           />,
         );
+        // W6: the work card ALWAYS opens showing what it already holds —
+        // whichever chip or sentence opened it — read through the ONE
+        // canonical worker snapshot; what the caller stated (a parsed date,
+        // `?preferredCountries=…`) is laid OVER the current values. Its
+        // country list is saved whole, so an empty box would have let one
+        // new entry replace the rest (measured, #1579). A failed read opens
+        // the form blank: a blank field is "keep", so nothing is lost.
+        if (actionId === "worker.save-work-card") {
+          loadWorkCardPrefillForChat()
+            .then((r) => render({ ...(r.kind === "prefill" ? r.values : {}), ...(initialValues ?? {}) }))
+            .catch(() => render(initialValues));
+          return;
+        }
+        render(initialValues);
       }
     },
     [locale, pushEmbed, companyFollowup],
@@ -938,6 +1188,12 @@ export function ConversationChat({
           ].filter(Boolean);
 
           if (res.kind === "matches") {
+            // The world the search actually ran in comes back from the server
+            // and is carried on the goal, so the NEXT turn narrows further
+            // instead of starting over (owner §4, constraint accumulation).
+            if (res.worldState && goalRef.current) {
+              goalRef.current = { ...goalRef.current, filters: res.worldState };
+            }
             const applied = res.appliedFilters
               .map((f) => `${f.label}: ${f.matchedText}`)
               .join(" · ");
@@ -1141,6 +1397,34 @@ export function ConversationChat({
   startProfileSummaryRef.current = startProfileSummary;
 
   /**
+   * "Ką man daryti toliau?" asked while ACTING FOR AN ORGANISATION. The
+   * profile summary is the PERSON's ladder (profession, availability, card);
+   * on production (2026-09-06) the company workspace answered exactly that —
+   * "Profesija · Prieinamumas · Darbo kortelė" — to a manager who had asked
+   * about the company. The company's next step is the manager's own ladder
+   * the opening already composes (`loadEmployerOpeningBrief`: reviews,
+   * absences, unread, needs); nothing to report → the company hub door.
+   * Same reads, same honesty, no second brief.
+   */
+  const startCompanyNextStep = useCallback(() => {
+    setTyping(true);
+    const hub = () =>
+      assistant(labels.adminRouteHint, [
+        { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+      ]);
+    loadEmployerOpeningBrief()
+      .then((brief) => {
+        setTyping(false);
+        if (brief.kind === "brief") assistant(brief.lines.join("\n"), brief.chips);
+        else hub();
+      })
+      .catch(() => {
+        setTyping(false);
+        hub();
+      });
+  }, [assistant, labels.adminRouteHint, labels.chipCompanyHub]);
+
+  /**
    * State-aware opening (owner ruling 2026-07-29, W2): the first paint must
    * not be an empty greeting when the product already KNOWS this user
    * (doctrine §18). One server action composes the OPENING BRIEF from the
@@ -1163,6 +1447,12 @@ export function ConversationChat({
     (identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief())
       .then((brief) => {
         if (brief.kind !== "brief") return; // honest: nothing to report
+        // The brief is a slow read. On production (2026-09-06) it landed
+        // AFTER the person's first sentence and took the answer's chip row —
+        // the worker who asked "kas man trūksta?" saw the brief's chips, not
+        // the answer's. Once the person has spoken, their question owns the
+        // thread; the brief's items keep surfacing through Attention.
+        if (userSpokeRef.current) return;
         pushMessage({
           id: nid(),
           role: "assistant",
@@ -1541,6 +1831,8 @@ export function ConversationChat({
    * AND ACTS. One project opens directly; several offer one chip each; the
    * three ways there can be nothing to show stay three different sentences.
    */
+  /** Instruction threads the projects answer read (keyed by conversation id) — for the reply after recording. */
+  const askReplyThreadsRef = useRef(new Map<string, ChatInboxThread>());
   const startProjects = useCallback(() => {
     setTyping(true);
     loadProjectsForResult()
@@ -1559,15 +1851,43 @@ export function ConversationChat({
                 assistant(labels.projectsNoCompany);
                 return;
               }
-              const lines = mine.projects.map((pr) =>
-                `• ${pr.title}${pr.place ? ` — ${pr.place}` : ""}${pr.assignmentStatus === "ended" ? ` · ${labels.workerProjectsEnded}` : ""}`,
+              // §12 — what each project still needs from THIS person: the
+              // manager's open checklist rows (verbatim labels) with the
+              // person's own document state next to each document row; the
+              // chip closes the first recordable gap over the SAME add-document
+              // flow the sentence uses.
+              const askWord = (a: WorkerProjectAsk) => {
+                const base = a.status === "rejected" || a.status === "expired" ? `${a.label} ${labels.blockedSuffix}` : a.label;
+                if (a.own === null) return base;
+                return `${base} (${a.own === "ready" ? labels.askOwnReady : a.own === "expiring" ? labels.askOwnExpiring : labels.askOwnNone})`;
+              };
+              const lines = mine.projects.flatMap((pr) => {
+                const head = `• ${pr.title}${pr.place ? ` — ${pr.place}` : ""}${pr.assignmentStatus === "ended" ? ` · ${labels.workerProjectsEnded}` : ""}`;
+                if (pr.asks.length === 0) return [head];
+                return [head, `  ${labels.workerProjectAsks.replace("{items}", pr.asks.map(askWord).join(" · "))}`];
+              });
+              // The manager's instruction thread per project (the SAME direct
+              // conversation `send_work_instruction_to_project` wrote into) —
+              // kept for the reply the person may send after recording.
+              askReplyThreadsRef.current = new Map(
+                mine.projects.flatMap((pr) =>
+                  pr.instruction
+                    ? [[pr.instruction.conversationId, { conversationId: pr.instruction.conversationId, counterpart: pr.instruction.authorName, preview: pr.instruction.text, waitingHours: null, overdue: false } satisfies ChatInboxThread]]
+                    : [],
+                ),
               );
+              const recordable = mine.recordable;
+              const replyConversationId = recordable ? (mine.projects.find((pr) => pr.projectId === recordable.projectId)?.instruction?.conversationId ?? null) : null;
+              const chips = [
+                ...(recordable ? [{ id: `add-document:${recordable.documentTypeSlug}${replyConversationId ? `:${replyConversationId}` : ""}`, label: labels.chipRecordDocument.replace("{label}", recordable.label) }] : []),
+                ...mine.projects
+                  .filter((pr) => pr.assignmentStatus === "active")
+                  .slice(0, recordable ? 2 : 3)
+                  .map((pr) => ({ id: `link:/dashboard/projects/${pr.projectId}`, label: `${labels.chipOpenProjectPrefix}: ${pr.title}` })),
+              ];
               assistant(
                 [labels.workerProjectsIntro.replace("{count}", String(mine.activeCount)), ...lines].join("\n"),
-                mine.projects
-                  .filter((pr) => pr.assignmentStatus === "active")
-                  .slice(0, 3)
-                  .map((pr) => ({ id: `link:/dashboard/projects/${pr.projectId}`, label: `${labels.chipOpenProjectPrefix}: ${pr.title}` })),
+                chips,
               );
             })
             .catch(() => {
@@ -1629,8 +1949,13 @@ export function ConversationChat({
    *
    * The panel asks; this flow answers. It offers ONE CHIP PER REAL PERSON the
    * server would actually accept — `loadAssignableWorkersForProject` reads the
-   * same population the RPC's second gate (`caller_manages_worker`) allows — so
-   * there is never a control that looks like it works and is then refused.
+   * same population the RPC's two gates allow (the roster via
+   * `caller_manages_worker` AND accepted-booking engagements via
+   * `caller_has_booking_engagement_for_project`), through the same two reads
+   * the projects page uses — so there is never a control that looks like it
+   * works and is then refused, and never a person the page offers that the
+   * chat hides (D5 agency-chain walk, 2026-09-06). An engagement candidate's
+   * chip says so, the way the page's optgroup does.
    *
    * The chip carries `projectId:workerProfileId` and NOTHING else. It is a
    * request, not a permission: the dispatcher re-checks the role, the schema
@@ -1648,7 +1973,10 @@ export function ConversationChat({
               labels.assignPickWorker,
               res.workers.slice(0, 4).map((w) => ({
                 id: `assign:${projectId}:${w.profileId}`,
-                label: w.name,
+                label:
+                  w.source === "engagement"
+                    ? `${w.name} · ${labels.assignEngagementCandidate}`
+                    : w.name,
               })),
             );
             return;
@@ -1673,6 +2001,7 @@ export function ConversationChat({
       labels.assignPickWorker,
       labels.assignNoWorkers,
       labels.assignUnavailable,
+      labels.assignEngagementCandidate,
       labels.projectsNoCompany,
     ],
   );
@@ -1755,6 +2084,60 @@ export function ConversationChat({
    * threads that genuinely await this person, and offers a reply that is
    * SENT ONLY AFTER an explicit confirmation of the exact text.
    */
+  /**
+   * INVITATIONS ADDRESSED TO ME (owner contract §4D — someone is waiting on
+   * you; §15 the learner's invitation, §9 the employer's). Transactional
+   * e-mail is an owner gate, so the chat is where a signed-in person learns
+   * that an institution, employer or agency invited them. The read is the
+   * ONE domain read (`lib/invitations/attention`: the network page's
+   * canonical invitations + the dashboard card's roster invitations, the
+   * caller's verified e-mail); accepting runs the ONE dispatcher (strong
+   * tier, explicit confirm) through the SAME accept those pages call. The
+   * network page stays one chip away.
+   */
+  const startInvitations = useCallback(() => {
+    setTyping(true);
+    loadInvitationsForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind !== "ok") {
+          assistant(res.kind === "empty" ? labels.invitationsEmpty : labels.invitationsUnavailable, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+          return;
+        }
+        assistant(labels.invitationsIntro.replace("{count}", String(res.total)), [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+        for (const inv of res.items) {
+          const who = inv.organizationName ?? inv.inviterName ?? labels.invitationSomeone;
+          // The relationship word comes from the ONE localized vocabulary the
+          // CV prints; " · " is layout, not language, so it is composed here.
+          const role = inv.relationshipSlug ? (tRelationships.has(inv.relationshipSlug) ? String(tRelationships(inv.relationshipSlug as never)) : inv.relationshipSlug) : null;
+          pushEmbed(
+            <WorkerInvitationAction
+              invitationRef={inv.ref}
+              locale={locale}
+              title={role ? `${who} · ${role}` : who}
+              subtitle={[inv.projectTitle, inv.personalMessage].filter(Boolean).join(" · ") || null}
+              labels={{
+                accept: labels.invAccept,
+                later: labels.invLater,
+                confirmTitle: labels.invConfirmTitle,
+                confirmNote: labels.invConfirmNote,
+                confirm: labels.invConfirm,
+                cancel: labels.invCancel,
+                working: labels.invWorking,
+                done: labels.invDone,
+                alreadyAnswered: labels.invAlreadyAnswered,
+                errorStale: labels.invErrorStale,
+                errorGeneric: labels.invErrorGeneric,
+              }}
+            />,
+          );
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.invitationsUnavailable, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+      });
+  }, [assistant, pushEmbed, locale, labels, tRelationships]);
   const startMessages = useCallback(() => {
     setTyping(true);
     loadMessagesForChat()
@@ -1789,7 +2172,30 @@ export function ConversationChat({
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
     (text: string, opts?: { photoFirst?: boolean; explicit?: boolean }) => {
-      const draft = extractWorkLog(text, todayIso());
+      // ASK -> PREFILL -> THE EXISTING SAVE FLOW.
+      //
+      // When a work-evidence conversation is in flight, the form opens filled
+      // from EVERYTHING the person already said - all their sentences as the
+      // evidence text, plus the site and duration they gave in answers. Nobody
+      // should have to type again what they just told the chat.
+      //
+      // With no conversation this is byte-for-byte `extractWorkLog`, so a
+      // chip, the journal hand-off and a plain sentence behave exactly as they
+      // did. And `hasSignal` can only rise, never fall, so the clarify
+      // question can never come back after the person has answered it - the
+      // loop the form was built to end stays ended.
+      const evidenceGoal =
+        goalRef.current?.evidence && goalRef.current.intent === "log-work"
+          ? goalRef.current
+          : null;
+      const draft = evidenceGoal
+        ? worklogDraftFromEvidence({
+            said: evidenceGoal.said,
+            evidence: evidenceGoal.evidence,
+            today: todayIso(),
+            latest: text,
+          })
+        : extractWorkLog(text, todayIso());
       // A photo-led log is a deliberate request to attach evidence, so the
       // flow opens even with nothing parsed — the short text stays required
       // inside it. A TYPED sentence with no signal still gets the one clarify
@@ -1809,10 +2215,23 @@ export function ConversationChat({
         assistant(labels.clarifyWorkLog);
         return;
       }
+      // THE REQUEST IS NOT THE WORK (production 2026-09-06): "Užpildyk darbo
+      // žurnalą" opened the flow with the request sentence as the entry's
+      // evidence, and two taps later it was persisted as `original_text`.
+      // A sentence with no work content (no time span, no place, no
+      // recognised activity — `journalDraftReadiness`, the same rule the
+      // flow and the schema apply) opens the flow with the evidence field
+      // EMPTY and asks what was done. The flow's own guard and the server
+      // schema refuse to save such a sentence even if it is typed back in.
+      const readiness = journalDraftReadiness(text);
+      const carriesWork = readiness === "ok";
+      if (opts?.explicit && text.trim() !== "" && !carriesWork) {
+        assistant(t("journalAskWhatYouDid"));
+      }
       attachContextRef.current = "worklog";
       pushEmbed(
         <WorkerWorkLogFlow
-          draft={draft}
+          draft={carriesWork ? draft : { ...draft, notes: "" }}
           locale={locale}
           labels={workLogLabels}
           photoFirst={opts?.photoFirst ?? false}
@@ -1824,7 +2243,7 @@ export function ConversationChat({
         />,
       );
     },
-    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.playerCardAfterLog],
+    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.playerCardAfterLog, t],
   );
 
   /**
@@ -2136,14 +2555,17 @@ export function ConversationChat({
       const input = { stageId, status, blockedReason: blockedReason ?? null };
       prepareConfirmationAction("company.update-stage-status", input)
         .then((prep) => {
-          if (!prep.ok) {
+          // `reversible_write` needs no token: the dispatcher honestly answers
+          // `no_confirmation_needed` and the write proceeds without one. Any
+          // other refusal is a real one (prod defect 2026-09-04, stage walk).
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
             setTyping(false);
             assistant(labels.stageFailed);
             return;
           }
           return dispatchWorkerAction("company.update-stage-status", input, {
             locale,
-            confirmationToken: prep.token,
+            confirmationToken: prep.ok ? prep.token : undefined,
           }).then((res) => {
             setTyping(false);
             assistant(
@@ -2164,6 +2586,137 @@ export function ConversationChat({
         });
     },
     [assistant, locale, labels.stageDone, labels.stageBlocked, labels.stageStarted, labels.stageFailed],
+  );
+
+  /** §11 WHAT-IF (owner contract 2026-09-04): the consequences of moving ONE
+   *  person from project X to project Y, from the operations centre's own
+   *  reads, shown BEFORE anything changes. Only the confirm chip (strong
+   *  tier, token) commits — assign to Y, then end X, both canonical. */
+  const runMoveWhatIf = useCallback(
+    (workerProfileId: string, fromProjectId: string, toProjectId: string) => {
+      setTyping(true);
+      loadProjectMoveWhatIfForChat({ workerProfileId, fromProjectId, toProjectId })
+        .then((res) => {
+          setTyping(false);
+          if (res.kind !== "ok") {
+            assistant(res.kind === "not-found" ? labels.moveNotFound : labels.projectsUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+            return;
+          }
+          const w = res.whatIf;
+          const out: string[] = [
+            t("moveWhatIfTitle", { name: w.workerName, from: w.from.title, to: w.to.title }),
+            t("moveFromLine", { from: w.from.title, before: w.from.headcountBefore, after: w.from.headcountAfter, tasks: w.from.openTasksForWorker, checked: w.from.readinessChecked, total: w.from.readinessTotal }),
+            t("moveToLine", { to: w.to.title, before: w.to.headcountBefore, after: w.to.headcountAfter, total: w.to.readinessTotal }),
+          ];
+          if (w.countryChanges) out.push(t("moveCountryLine", { from: w.from.country ?? "—", to: w.to.country ?? "—" }));
+          if (!w.to.startDate || !w.to.endDate) out.push(t("moveNoDatesLine", { to: w.to.title }));
+          else if (w.to.unavailabilitySpans === null) out.push(t("moveAvailabilityUnknownLine"));
+          else if (w.to.unavailabilitySpans > 0) out.push(t("moveAvailabilityLine", { count: w.to.unavailabilitySpans, start: w.to.startDate, end: w.to.endDate }));
+          else out.push(t("moveAvailabilityFreeLine", { to: w.to.title }));
+          out.push(t("moveOnlyConfirmLine"));
+          assistant(out.join("\n"), [
+            { id: `move-confirm:${w.workerProfileId}:${w.from.projectId}:${w.to.projectId}`, label: labels.moveConfirmChip },
+            { id: "projects", label: labels.moveCancelChip },
+          ]);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.projectsUnavailable);
+        });
+    },
+    [assistant, t, labels.moveNotFound, labels.projectsUnavailable, labels.chipProjects, labels.moveConfirmChip, labels.moveCancelChip],
+  );
+
+  /** The confirmed commit — strong tier: a fresh token, then the ONE
+   *  dispatcher runs `company.move-worker` (assign to Y, then end X). The
+   *  answer is the executor's: a half-done move is said as such. */
+  const runMoveCommit = useCallback(
+    (workerProfileId: string, fromProjectId: string, toProjectId: string) => {
+      setTyping(true);
+      const input = { workerProfileId, fromProjectId, toProjectId };
+      prepareConfirmationAction("company.move-worker", input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.moveFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.move-worker", input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.moveFailed);
+              return;
+            }
+            const ended = (res.data as { ended?: boolean } | undefined)?.ended === true;
+            assistant(ended ? t("moveDone") : t("moveDonePartial"));
+            selectProjectRef.current(toProjectId);
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.moveFailed);
+        });
+    },
+    [assistant, locale, t, labels.moveFailed],
+  );
+
+  /** "perkelk Joną į projektą Y": the person and the destination are
+   *  resolved against the company's REAL projects and active assignments;
+   *  what the sentence leaves open is asked with chips built from those rows.
+   *  Company identity only. */
+  const startMoveWorker = useCallback(
+    (sentence: string, picked?: { workerProfileId: string; fromProjectId: string }) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      setTyping(true);
+      loadProjectMoveOptionsForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind !== "ok") {
+            assistant(res.kind === "no-company" ? labels.projectsNoCompany : labels.projectsUnavailable);
+            return;
+          }
+          if (res.projects.length < 2 || res.workers.length === 0) {
+            assistant(labels.moveNoOptions, [{ id: "projects", label: labels.chipProjects }]);
+            return;
+          }
+          const lower = sentence.toLowerCase();
+          const nameHit = (name: string) => {
+            const n = name.toLowerCase().trim();
+            if (n.length >= 3 && lower.includes(n)) return true;
+            const first = n.split(/\s+/)[0] ?? "";
+            return first.length >= 3 && new RegExp(`(^|[^\\p{L}])${first.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u").test(lower);
+          };
+          const who = picked
+            ? res.workers.filter((w) => w.workerProfileId === picked.workerProfileId && w.projectId === picked.fromProjectId)
+            : res.workers.filter((w) => nameHit(w.name));
+          const dest = res.projects.filter((p) => p.title.length >= 3 && lower.includes(p.title.toLowerCase()));
+          if (who.length === 1) {
+            const from = who[0];
+            const targets = dest.filter((p) => p.projectId !== from.projectId);
+            if (targets.length === 1) {
+              runMoveWhatIf(from.workerProfileId, from.projectId, targets[0].projectId);
+              return;
+            }
+            const others = res.projects.filter((p) => p.projectId !== from.projectId).slice(0, 4);
+            assistant(t("moveAskProject", { name: from.name }), others.map((p) => ({ id: `move:${from.workerProfileId}:${from.projectId}:${p.projectId}`, label: `${labels.chipMovePrefix}: ${p.title}` })));
+            return;
+          }
+          const candidates = (who.length > 1 ? who : res.workers).slice(0, 4);
+          assistant(labels.moveAskWorker, candidates.map((w) => ({ id: `move-who:${w.workerProfileId}:${w.projectId}`, label: `${w.name} (${w.projectTitle})` })));
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.projectsUnavailable);
+        });
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, t, runMoveWhatIf],
   );
 
   /** "Kokius kandidatus pasiūlė agentūra?" — the offers on the company's OWN
@@ -2213,7 +2766,7 @@ export function ConversationChat({
    *  editable, confirmed. After the save the readiness answer re-runs, so the
    *  person sees the gap close (or not). Person identity only. */
   const startAddDocument = useCallback(
-    (sentence: string) => {
+    (sentence: string, explicit?: { typeSlug?: string; thenReply?: ChatInboxThread }) => {
       if (identity !== "person") {
         assistant(labels.adminRouteHint, [{ id: "link:/dashboard/documents", label: labels.documentsChip }]);
         return;
@@ -2227,9 +2780,11 @@ export function ConversationChat({
             return;
           }
           const typeSlug = guessDocumentType(sentence);
+          // An explicit type (the project-asks chip) wins over the sentence guess.
+          const chosenSlug = explicit?.typeSlug ?? typeSlug;
           const validUntil = parseEndDate(sentence, todayIso(), null);
           const prefill: Record<string, string> = {};
-          if (typeSlug && opts.types.some((o) => o.value === typeSlug)) prefill.typeSlug = typeSlug;
+          if (chosenSlug && opts.types.some((o) => o.value === chosenSlug)) prefill.typeSlug = chosenSlug;
           if (validUntil) prefill.validUntil = validUntil;
           assistant(labels.documentAddIntro);
           openForm(
@@ -2237,9 +2792,61 @@ export function ConversationChat({
             undefined,
             undefined,
             Object.keys(prefill).length > 0 ? prefill : undefined,
-            () => {
-              assistant(labels.documentAddDone);
-              runWorkflow(() => runDocumentsReadiness());
+            (res) => {
+              // §5.5 one backbone: the FILE is offered right here, over the
+              // same write the documents page uses — only when that page's
+              // file layer really answers for the row just recorded.
+              const data = res.data ?? {};
+              const savedSlug = typeof data.typeSlug === "string" ? data.typeSlug : "";
+              const savedCountry = typeof data.country === "string" && data.country !== "" ? data.country : null;
+              // §11/§12 — the instruction that asked for this document: the
+              // person may ANSWER it here, in their own words, sent only after
+              // the confirm step (ChatMessageReply → the canonical sendMessage).
+              // The chat never drafts the text for them (§7).
+              const thenReply = explicit?.thenReply;
+              const offerInstructionReply = () => {
+                if (!thenReply) return;
+                assistant(thenReply.counterpart ? labels.askReplyIntro.replace("{name}", thenReply.counterpart) : labels.askReplyIntroUnnamed);
+                pushEmbed(<ChatMessageReply threads={[thenReply]} locale={locale} />);
+              };
+              const finishWithReadiness = () => {
+                assistant(labels.documentAddDone);
+                runWorkflow(() => runDocumentsReadiness());
+                offerInstructionReply();
+              };
+              if (savedSlug === "") {
+                finishWithReadiness();
+                return;
+              }
+              loadDocumentFileTargetForChat({ typeSlug: savedSlug, country: savedCountry })
+                .then((target) => {
+                  if (target.kind !== "ready") {
+                    finishWithReadiness();
+                    return;
+                  }
+                  assistant(labels.documentFileOffer);
+                  pushEmbed(
+                    <DocumentFileEmbed
+                      documentId={target.documentId}
+                      labels={{
+                        choose: labels.documentFileChoose,
+                        submit: labels.documentFileSubmit,
+                        uploading: labels.documentFileUploading,
+                        skip: labels.documentFileSkip,
+                        tooLarge: labels.documentFileTooLarge,
+                        unsupported: labels.documentFileUnsupported,
+                        failed: labels.documentFileFailed,
+                      }}
+                      onUploaded={() => {
+                        assistant(labels.documentFileUploaded);
+                        runWorkflow(() => runDocumentsReadiness());
+                        offerInstructionReply();
+                      }}
+                      onSkip={finishWithReadiness}
+                    />,
+                  );
+                })
+                .catch(() => finishWithReadiness());
             },
           );
         })
@@ -2248,7 +2855,7 @@ export function ConversationChat({
           assistant(labels.documentAddUnavailable, [{ id: "documents-centre", label: labels.documentsChip }]);
         });
     },
-    [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, openForm, runWorkflow],
+    [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, labels.documentFileOffer, labels.documentFileChoose, labels.documentFileSubmit, labels.documentFileUploading, labels.documentFileSkip, labels.documentFileUploaded, labels.documentFileTooLarge, labels.documentFileUnsupported, labels.documentFileFailed, labels.askReplyIntro, labels.askReplyIntroUnnamed, openForm, runWorkflow, pushEmbed, locale],
   );
 
   /** PROJECT → WORK (§11): "pridėk užduotį projektui: …" — the one form over
@@ -2269,8 +2876,10 @@ export function ConversationChat({
           setTyping(false);
           const projects = res.kind === "projects" ? res.projects.map((p) => ({ value: p.projectId, label: p.title })) : [];
           const colon = sentence.indexOf(":");
-          const title = colon >= 0 ? sentence.slice(colon + 1).trim() : "";
           const dueDate = parseEndDate(sentence, todayIso(), null) ?? parseStartDate(sentence, todayIso());
+          // the deadline the sentence stated is its own field — not a title tail
+          const rawTitle = colon >= 0 ? sentence.slice(colon + 1).trim() : "";
+          const title = dueDate ? stripEndDatePhrase(rawTitle) : rawTitle;
           const lower = sentence.toLowerCase();
           const named = projects.find((p) => p.label.length >= 4 && lower.includes(p.label.toLowerCase()));
           const prefill: Record<string, string> = {};
@@ -2301,6 +2910,401 @@ export function ConversationChat({
   /** CAPACITY (§11): "kas laisvas šią savaitę?" — the company's roster against
    *  approved absences (when, never why) for the next days, answered in the
    *  chat with the projects chip beside it. Company identity only. */
+  /** §11 READINESS / §12 / §16: "kas trūksta projektui X?" — the people on
+   *  the named live project with what each still needs, from the operations
+   *  centre's OWN per-person read: the derived reason codes (name / declared
+   *  skills / work evidence), the manager-kept checklist rows still needed or
+   *  missing (labels verbatim), the rejected / expired rows, checked/total.
+   *  Ends with the way forward: the operations page; people when there are
+   *  none. Nothing is scored; nothing is written. Company identity only. */
+  /** §14 EMPLOYER CONFIRMATION: what awaits the manager's confirmation — the
+   *  inbox's own one-tap queue — and who is not reviewable yet. The chips run
+   *  the SAME writes the inbox runs (confirm = approve the entry and verify
+   *  the declared skills it proves; enable review = the membership RPC), then
+   *  the same read again. Company identity only. */
+  const lastConfirmRef = useRef<Extract<ConfirmWorkChatResult, { kind: "ok" }> | null>(null);
+  const startConfirmWork = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      setTyping(true);
+      loadConfirmWorkForChat(sentence)
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "no-company") {
+            assistant(labels.projectsNoCompany);
+            return;
+          }
+          if (res.kind !== "ok") {
+            assistant(labels.confirmUnavailable);
+            return;
+          }
+          lastConfirmRef.current = res;
+          const lines: string[] = [];
+          const chips: { id: string; label: string }[] = [];
+          if (res.entries.length > 0) {
+            lines.push(labels.confirmIntro.replace("{count}", String(res.entryTotal)));
+            for (const e of res.entries) {
+              lines.push(
+                labels.confirmLine
+                  .replace("{name}", e.workerName)
+                  .replace("{date}", e.createdAt.slice(0, 10))
+                  .replace("{text}", e.excerpt)
+                  .replace("{skills}", String(e.skillsToConfirm.length)),
+              );
+            }
+            for (const e of res.entries.slice(0, 4)) {
+              chips.push({
+                id: `confirm:${e.entryId}:${e.skillsToConfirm.map((s) => s.id).join(",")}`,
+                label: labels.confirmChip.replace("{name}", e.workerName).replace("{date}", e.createdAt.slice(0, 10)),
+              });
+            }
+          } else {
+            lines.push(labels.confirmNone);
+          }
+          if (res.notEnabled.length > 0) {
+            lines.push(labels.confirmNotEnabled.replace("{names}", res.notEnabled.map((m) => m.name).join(", ")));
+            for (const m of res.notEnabled) chips.push({ id: `review-on:${m.engagementId}`, label: labels.confirmEnableChip.replace("{name}", m.name) });
+          }
+          chips.push({ id: "link:/dashboard/inbox/quick", label: labels.chipOpenInbox });
+          assistant(lines.join("\n"), chips);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.confirmUnavailable);
+        });
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips],
+  );
+
+  /** The confirmation writes over the ONE dispatcher (confirm = important tier,
+   *  the chip is the explicit confirmation; enabling review = reversible, no
+   *  token), then the SAME read again so the answer says what still awaits. */
+  const runConfirmWrite = useCallback(
+    (
+      actionId: "company.confirm-work" | "company.enable-journal-review",
+      input: Record<string, unknown>,
+      said: (data: Record<string, unknown> | undefined) => string,
+    ) => {
+      setTyping(true);
+      prepareConfirmationAction(actionId, input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.confirmFailed);
+            return;
+          }
+          return dispatchWorkerAction(actionId, input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.confirmFailed);
+              return;
+            }
+            assistant(said(res.data));
+            // READBACK — what still awaits, from the same canonical read
+            startConfirmWork("");
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.confirmFailed);
+        });
+    },
+    [assistant, locale, labels.confirmFailed, startConfirmWork],
+  );
+
+  const lastReadinessRef = useRef<Extract<ProjectReadinessChatResult, { kind: "ok" }> | null>(null);
+  const readinessCodeLabel = useCallback(
+    (c: ReadinessMissingCode) => (c === "name" ? labels.missingName : c === "declared_skills" ? labels.missingDeclaredSkills : labels.missingEvidence),
+    [labels.missingName, labels.missingDeclaredSkills, labels.missingEvidence],
+  );
+  const runProjectReadiness = useCallback(
+    (projectId: string | null, sentence: string) => {
+      setTyping(true);
+      loadProjectReadinessForChat({ projectId, sentence })
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "no-company") {
+            assistant(labels.projectsNoCompany);
+            return;
+          }
+          if (res.kind === "empty") {
+            assistant(labels.riskNone, [{ id: "f:company.create-project", label: labels.chipCreateProject }]);
+            return;
+          }
+          if (res.kind === "error") {
+            assistant(labels.readinessUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+            return;
+          }
+          if (res.kind === "ask" || res.kind === "not-found") {
+            assistant(
+              res.kind === "ask" ? labels.readinessAsk : labels.readinessNotFound,
+              res.projects.map((p) => ({ id: `ready:${p.projectId}`, label: `${labels.chipReadinessPrefix}: ${p.title}` })),
+            );
+            return;
+          }
+          lastReadinessRef.current = res;
+          // §11/§12 — the person's own answer to the instruction (the SAME
+          // direct thread `send_work_instruction_to_project` wrote into, read
+          // by the instruction channel's own read) sits on their line, so the
+          // manager can mark the row received without leaving the chat.
+          const replied = (w: (typeof res.workers)[number]) =>
+            w.reply ? ` · ${labels.readinessRepliedSuffix.replace("{date}", w.reply.at.slice(0, 10)).replace("{text}", w.reply.text)}` : "";
+          const lines = res.workers.map((w) => {
+            if (w.ready) {
+              return labels.readinessReadyLine.replace("{name}", w.name).replace("{checked}", String(w.checked)).replace("{total}", String(w.total)) + replied(w);
+            }
+            const gaps = [...w.missing.map(readinessCodeLabel), ...w.itemsMissing.map((i) => i.label), ...w.itemsBlocked.map((i) => `${i.label} ${labels.blockedSuffix}`)];
+            return labels.readinessGapLine
+              .replace("{name}", w.name)
+              .replace("{gaps}", gaps.join(", "))
+              .replace("{checked}", String(w.checked))
+              .replace("{total}", String(w.total)) + replied(w);
+          });
+          const head = labels.readinessIntro.replace("{title}", res.title).replace("{ready}", String(res.readyCount)).replace("{people}", String(res.workerTotal));
+          // P2 — the ratio lines above are DERIVED (checklist rows + profile
+          // records), not a rating; the design marks a derivation as such.
+          const tail = res.workerTotal === 0 ? [labels.readinessNoPeople] : res.checklistTracked ? [labels.readinessDerivedNote] : [labels.readinessNoChecklist];
+          // §12 / §16 — the gap continues into the corrective action that EXISTS:
+          // start the checklist when nothing is tracked; mark the first person's
+          // first missing row received; ask that person (a work instruction);
+          // the operations page; people when there are none. Bounded chips.
+          const chips: { id: string; label: string }[] = [];
+          const first = res.workers.find((w) => !w.ready);
+          if (res.workerTotal > 0 && !res.checklistTracked) {
+            chips.push({ id: `ready-seed:${res.projectId}`, label: labels.readinessSeedChip.replace("{count}", String(res.workerTotal)) });
+          }
+          if (first && first.itemsMissing.length > 0) {
+            const it = first.itemsMissing[0];
+            chips.push({ id: `ready-got:${res.projectId}:${first.workerProfileId}:${it.key}`, label: labels.readinessGotChip.replace("{label}", it.label).replace("{name}", first.name) });
+          }
+          // §12 REVIEW — a row the manager marked received awaits their check; the
+          // SAME executor as "Gauta" with status `checked` (the operations page's own
+          // transition). checked/total is what readiness recalculates from.
+          const withReceived = res.workers.find((w) => w.itemsReceived.length > 0);
+          if (withReceived) {
+            const it = withReceived.itemsReceived[0];
+            chips.push({ id: `ready-checked:${res.projectId}:${withReceived.workerProfileId}:${it.key}`, label: labels.readinessCheckedChip.replace("{label}", it.label).replace("{name}", withReceived.name) });
+          }
+          if (first && (first.itemsMissing.length > 0 || first.missing.length > 0)) {
+            chips.push({ id: `ready-ask:${res.projectId}:${first.workerProfileId}`, label: labels.readinessAskChip.replace("{name}", first.name) });
+          }
+          chips.push({ id: `link:/dashboard/projects/${res.projectId}/operations`, label: labels.chipOpenOperations });
+          if (res.workerTotal === 0) chips.push({ id: "f:company.invite-worker", label: labels.chipInviteCandidate });
+          assistant([head, ...lines, ...tail].join("\n"), chips);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.readinessUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+        });
+    },
+    [assistant, labels, readinessCodeLabel],
+  );
+
+  /** The corrective action a readiness chip names, over the ONE dispatcher
+   *  (reversible tier without a token; the instruction is important tier and
+   *  the chip is its explicit confirmation), then the SAME readiness read
+   *  again — the person sees what changed, in the same words. */
+  const runReadinessWrite = useCallback(
+    (
+      actionId: "company.set-readiness-item" | "company.seed-readiness-checklist" | "company.request-readiness",
+      input: Record<string, unknown>,
+      projectId: string,
+      said: (data: Record<string, unknown> | undefined) => string,
+    ) => {
+      setTyping(true);
+      prepareConfirmationAction(actionId, input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.readinessWriteFailed);
+            return;
+          }
+          return dispatchWorkerAction(actionId, input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.readinessWriteFailed);
+              return;
+            }
+            assistant(said(res.data));
+            // READBACK — the same canonical read, so the answer and the
+            // operations page agree on what just changed.
+            runProjectReadiness(projectId, "");
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.readinessWriteFailed);
+        });
+    },
+    [assistant, locale, labels.readinessWriteFailed, runProjectReadiness],
+  );
+
+  const startProjectReadiness = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      runProjectReadiness(null, sentence);
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, fallbackText, starterChips, runProjectReadiness],
+  );
+
+  /** §14 WORK PERFORMED → RESULT: a task moved to a real status — the SAME
+   *  token-less reversible dispatch the stage flow uses, over the tasks page's
+   *  own status write (`set_work_task_status_v2` re-checks creator / assignee /
+   *  project manager). Reached by sentence ("užduotis sumontuoti pastolius
+   *  atlikta") and by the pick chip. A company re-opens the project so its
+   *  pulse shows the change; a person who finished is offered to write the
+   *  work down (WORK → JOURNAL → EVIDENCE). */
+  const runTaskStatus = useCallback(
+    (projectId: string | null, taskId: string, status: WorkTaskStatus) => {
+      setTyping(true);
+      const input = { taskId, status };
+      prepareConfirmationAction("company.update-task-status", input)
+        .then((prep) => {
+          // `reversible_write` needs no token: the dispatcher honestly answers
+          // `no_confirmation_needed` and the write proceeds without one.
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.taskFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.update-task-status", input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.taskFailed);
+              return;
+            }
+            const said = status === "done" ? labels.taskDone : status === "blocked" ? labels.taskBlocked : labels.taskStarted;
+            if (identity === "company") {
+              assistant(said);
+              if (projectId) selectProjectRef.current(projectId);
+            } else {
+              assistant(said, status === "done" ? [{ id: "logwork", label: labels.chipLogWork }] : undefined);
+            }
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.taskFailed);
+        });
+    },
+    [assistant, identity, locale, labels.taskDone, labels.taskBlocked, labels.taskStarted, labels.taskFailed, labels.chipLogWork],
+  );
+
+  /** "Užduotis sumontuoti pastolius atlikta" — the status the sentence names,
+   *  resolved against the REAL open tasks the person may close (their own
+   *  and, for a company, its projects'): one match runs it, several ask with
+   *  one chip each, none is said honestly. Both identities. */
+  const startTaskStatus = useCallback(
+    (sentence: string) => {
+      const lower = sentence.toLowerCase();
+      const status: WorkTaskStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok/.test(lower)
+        ? "blocked"
+        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz/.test(lower)
+          ? "in_progress"
+          : "done";
+      setTyping(true);
+      loadOpenTasksForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind !== "ok") {
+            assistant(labels.taskUnavailable);
+            return;
+          }
+          if (res.tasks.length === 0) {
+            assistant(labels.taskNone, identity === "company" ? [{ id: "f:company.create-task", label: labels.chipAddTask }] : undefined);
+            return;
+          }
+          const named = res.tasks.filter((t) => t.title.length >= 3 && lower.includes(t.title.toLowerCase()));
+          const chip = (t: (typeof res.tasks)[number]) => ({
+            id: `task:${t.projectId ?? "-"}:${t.taskId}:${status}`,
+            label: `${labels.chipTaskPrefix}: ${t.title}${t.projectTitle ? ` (${t.projectTitle})` : ""}`,
+          });
+          if (named.length === 1) {
+            runTaskStatus(named[0].projectId, named[0].taskId, status);
+            return;
+          }
+          assistant(named.length > 1 ? labels.taskAsk : labels.taskNotFound, (named.length > 1 ? named : res.tasks).slice(0, 4).map(chip));
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.taskUnavailable);
+        });
+    },
+    [identity, assistant, labels, runTaskStatus],
+  );
+
+  /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
+   *  facts the panel's pulse shows — overdue tasks, blocked stages, people with
+   *  missing documents, a live project with nobody on it — most signals first,
+   *  then the chips that continue: open the project, add people. Nothing here
+   *  is a score. Company identity only. */
+  const startProjectRisk = useCallback(() => {
+    if (identity !== "company") {
+      if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+      else assistant(fallbackText, starterChips);
+      return;
+    }
+    setTyping(true);
+    loadProjectRiskForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "no-company") {
+          assistant(labels.projectsNoCompany);
+          return;
+        }
+        if (res.kind === "empty") {
+          assistant(labels.riskNone, [{ id: "f:company.create-project", label: labels.chipCreateProject }]);
+          return;
+        }
+        if (res.kind !== "ok") {
+          assistant(labels.riskUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+          return;
+        }
+        const fill = (tpl: string, r: ProjectRiskRow) =>
+          tpl
+            .replace("{title}", r.title)
+            .replace("{people}", String(r.people))
+            .replace("{open}", String(r.tasksOpen))
+            .replace("{overdue}", String(r.tasksOverdue))
+            .replace("{blocked}", r.stagesBlocked === null ? "—" : String(r.stagesBlocked))
+            .replace("{docs}", String(r.workersWithMissingDocs))
+            .replace("{checked}", String(r.readinessChecked))
+            .replace("{total}", String(r.readinessTotal));
+        const lines = res.rows.map((r) => {
+          if (!r.pulseKnown) return fill(labels.riskUnknownLine, r);
+          const base = fill(r.signals === 0 ? labels.riskOkLine : labels.riskLine, r);
+          return r.nobodyOnLiveProject ? `${base}; ${labels.riskNobody}` : base;
+        });
+        const chips = res.rows.slice(0, PROJECT_RISK_CHIP_LIMIT).map((r) => ({
+          id: `link:/dashboard/projects/${r.projectId}`,
+          label: `${labels.chipOpenProjectPrefix}: ${r.title}`,
+        }));
+        if (res.rows.some((r) => r.nobodyOnLiveProject)) chips.push({ id: "f:company.invite-worker", label: labels.chipInviteCandidate });
+        assistant([labels.riskIntro.replace("{count}", String(res.total)), ...lines].join("\n"), chips);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.riskUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+      });
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+
   const startWhoAvailable = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
@@ -2319,13 +3323,31 @@ export function ConversationChat({
           assistant(labels.capacityUnavailable, [{ id: "projects", label: labels.chipProjects }]);
           return;
         }
-        const lines = res.rows.map((r) =>
-          r.state === "free"
-            ? `• ${r.label} — ${labels.capacityFree}`
-            : `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", r.unavailableUntil ?? res.to)}`,
-        );
+        // THREE ANSWERS, NOT TWO. "Away until Friday" and "on the Vilnius
+        // site until Friday" are different facts an employer plans around
+        // differently; saying "busy" for both would trade a false "free" for
+        // a vague one.
+        const lines = res.rows.map((r) => {
+          const until = r.unavailableUntil ?? res.to;
+          if (r.state === "free") return `• ${r.label} — ${labels.capacityFree}`;
+          if (r.state === "unavailable") {
+            return `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", until)}`;
+          }
+          // A real title when the source carries one, the plain phrasing when
+          // it does not — never an invented name for the work.
+          return r.committedTo
+            ? `• ${r.label} — ${labels.capacityCommittedToUntil.replace("{what}", r.committedTo).replace("{date}", until)}`
+            : `• ${r.label} — ${labels.capacityCommittedUntil.replace("{date}", until)}`;
+        });
         const head = labels.capacityIntro.replace("{from}", res.from).replace("{to}", res.to).replace("{count}", String(res.rosterTotal));
-        assistant([head, ...lines, ...(res.absencesKnown ? [] : [labels.capacityAbsencesUnknown])].join("\n"), [
+        // An input that did not answer is named. Production carried ZERO
+        // absence rows and three real commitments, so "everybody is free" was
+        // once produced entirely from signals nobody had checked.
+        const caveats = [
+          ...(res.absencesKnown ? [] : [labels.capacityAbsencesUnknown]),
+          ...(res.commitmentsKnown ? [] : [labels.capacityCommitmentsUnknown]),
+        ];
+        assistant([head, ...lines, ...caveats].join("\n"), [
           { id: "projects", label: labels.chipProjects },
           { id: "f:company.create-task", label: labels.chipAddTask },
         ]);
@@ -2485,13 +3507,48 @@ export function ConversationChat({
   );
 
   const runEducationProgrammes = useCallback(
-    (mode: "list" | "create" | "cohort" | "assign", programId?: string) => {
+    (mode: "list" | "create" | "cohort" | "assign" | EducationQuestionKind, programId?: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
           assistant(fallbackText, starterChips);
         }
+        return;
+      }
+      if (isEducationQuestionKind(mode)) {
+        // The institution's QUESTION about its students (window 6, lane C):
+        // answered from its real reads (outcomes) or the stated privacy
+        // boundary — localised in the education adapter, same degraded
+        // kinds as the programmes read. Never the owner's own worker answer.
+        setTyping(true);
+        loadEducationAnswerForChat(mode)
+          .then((res) => {
+            setTyping(false);
+            if (res.kind === "no-company") {
+              assistant(labels.engagementsNoCompany, workspaceChips);
+              return;
+            }
+            if (res.kind === "not-institution") {
+              assistant(labels.eduNotInstitution, [
+                { id: "link:/dashboard/company", label: labels.chipEduCapabilities },
+              ]);
+              return;
+            }
+            if (res.kind !== "ok") {
+              assistant(res.line, [
+                { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+              ]);
+              return;
+            }
+            assistant(res.lines.join("\n"), educationChips);
+          })
+          .catch(() => {
+            setTyping(false);
+            assistant(labels.eduUnavailable, [
+              { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+            ]);
+          });
         return;
       }
       if (mode === "create") {
@@ -2780,6 +3837,20 @@ export function ConversationChat({
             { id: "link:/dashboard/documents", label: labels.documentsChip },
           ]);
           return;
+        case "documents-gap":
+          // "Kokių dokumentų man trūksta?" as a chip — the SAME readiness
+          // answer the `documents` sentence runs (have / expiring / missing
+          // per chosen country), offered from a search that named a country
+          // the person has not chosen yet.
+          user(chip.label);
+          runWorkflow(() => runDocumentsReadiness());
+          return;
+        case "player-card":
+          // The confirmation line in the opening brief ("the employer
+          // confirmed N of your entries") — the SAME card the sentence
+          // "mano kortelė" opens; the verified skills live there, nowhere else.
+          startPlayerCard();
+          return;
         case "logwork":
           user(labels.userLogWork);
           // Opens the SAME deterministic work-log flow the typed sentence
@@ -2816,6 +3887,11 @@ export function ConversationChat({
           // Real state first, then the actions — not a blind menu.
           startProfileSummary("profile");
           break;
+        case "invitations":
+          // The brief invitation line: the same in-chat decision the sentence reaches.
+          user(labels.userInvitations);
+          startInvitations();
+          return;
         case "offers":
           user(labels.userOffers);
           withTyping(() => {
@@ -2923,6 +3999,100 @@ export function ConversationChat({
             const [, projectId, stageId, status] = chip.id.split(":");
             user(chip.label);
             runStageStatus(projectId || null, stageId, status as StageStatus);
+          } else if (chip.id.startsWith("confirm:")) {
+            // `confirm:<entryId>:<skillId,skillId…>` — the inbox's one-tap confirm
+            const [, entryId, ids] = chip.id.split(":");
+            const skillIds = ids ? ids.split(",").filter(Boolean) : [];
+            const e = lastConfirmRef.current?.entries.find((x) => x.entryId === entryId);
+            user(chip.label);
+            runConfirmWrite("company.confirm-work", { entryId, skillIds }, (d) =>
+              labels.confirmDone.replace("{name}", e?.workerName ?? "").replace("{count}", String(d?.verifiedSkills ?? 0)),
+            );
+          } else if (chip.id.startsWith("review-on:")) {
+            // `review-on:<engagementId>` — journal review ON for that person
+            const engagementId = chip.id.slice(10);
+            const m = lastConfirmRef.current?.notEnabled.find((x) => x.engagementId === engagementId);
+            user(chip.label);
+            runConfirmWrite("company.enable-journal-review", { engagementId }, () => labels.confirmEnabled.replace("{name}", m?.name ?? ""));
+          } else if (chip.id.startsWith("ready-seed:")) {
+            // `ready-seed:<projectId>` — start the standard checklist for everyone
+            const projectId = chip.id.slice(11);
+            user(chip.label);
+            runReadinessWrite("company.seed-readiness-checklist", { projectId }, projectId, (d) =>
+              labels.readinessSeeded.replace("{count}", String(d?.seeded ?? 0)).replace("{items}", String(d?.items ?? 0)),
+            );
+          } else if (chip.id.startsWith("ready-got:")) {
+            // `ready-got:<projectId>:<workerProfileId>:<itemKey>` — the SAME row
+            // the answer named (key + stored label), marked received
+            const [, projectId, workerProfileId, itemKey] = chip.id.split(":");
+            const w = lastReadinessRef.current?.workers.find((x) => x.workerProfileId === workerProfileId);
+            const item = w?.itemsMissing.find((i) => i.key === itemKey);
+            user(chip.label);
+            if (!w || !item) assistant(labels.readinessWriteFailed);
+            else
+              runReadinessWrite(
+                "company.set-readiness-item",
+                { projectId, workerProfileId, itemKey, label: item.label, status: "received" },
+                projectId,
+                () => labels.readinessGotDone.replace("{label}", item.label).replace("{name}", w.name),
+              );
+          } else if (chip.id.startsWith("ready-checked:")) {
+            // `ready-checked:<projectId>:<workerProfileId>:<itemKey>` — the SAME received
+            // row the answer named, marked checked (the manager's review, §12)
+            const [, projectId, workerProfileId, itemKey] = chip.id.split(":");
+            const w = lastReadinessRef.current?.workers.find((x) => x.workerProfileId === workerProfileId);
+            const item = w?.itemsReceived.find((i) => i.key === itemKey);
+            user(chip.label);
+            if (!w || !item) assistant(labels.readinessWriteFailed);
+            else
+              runReadinessWrite(
+                "company.set-readiness-item",
+                { projectId, workerProfileId, itemKey, label: item.label, status: "checked" },
+                projectId,
+                () => labels.readinessCheckedDone.replace("{label}", item.label).replace("{name}", w.name),
+              );
+          } else if (chip.id.startsWith("ready-ask:")) {
+            // `ready-ask:<projectId>:<workerProfileId>` — a work instruction whose
+            // body is the REAL gap list, in the project's thread
+            const [, projectId, workerProfileId] = chip.id.split(":");
+            const last = lastReadinessRef.current;
+            const w = last?.workers.find((x) => x.workerProfileId === workerProfileId);
+            user(chip.label);
+            if (!last || !w) assistant(labels.readinessWriteFailed);
+            else {
+              const gaps = [...w.missing.map(readinessCodeLabel), ...w.itemsMissing.map((i) => i.label)];
+              const body = labels.readinessRequestBody.replace("{title}", last.title).replace("{items}", gaps.join(", "));
+              runReadinessWrite("company.request-readiness", { projectId, workerProfileId, body }, projectId, () =>
+                labels.readinessAskDone.replace("{name}", w.name),
+              );
+            }
+          } else if (chip.id.startsWith("ready:")) {
+            // `ready:<projectId>` — the person picked which live project the
+            // readiness question meant; the read is RLS-scoped.
+            user(chip.label);
+            runProjectReadiness(chip.id.slice(6), "");
+          } else if (chip.id.startsWith("task:")) {
+            // `task:<projectId|->:<taskId>:<status>` — the person picked which
+            // real task the sentence meant; the RPC re-checks who may close it.
+            const [, projectId, taskId, status] = chip.id.split(":");
+            user(chip.label);
+            runTaskStatus(projectId && projectId !== "-" ? projectId : null, taskId, status as WorkTaskStatus);
+          } else if (chip.id.startsWith("move-who:")) {
+            // `move-who:<workerProfileId>:<fromProjectId>` — the person picked; the
+            // destination is asked next from the real project list.
+            const [, workerProfileId, fromProjectId] = chip.id.split(":");
+            user(chip.label);
+            startMoveWorker("", { workerProfileId, fromProjectId });
+          } else if (chip.id.startsWith("move:")) {
+            // `move:<workerProfileId>:<from>:<to>` — the what-if, nothing written.
+            const [, workerProfileId, fromProjectId, toProjectId] = chip.id.split(":");
+            user(chip.label);
+            runMoveWhatIf(workerProfileId, fromProjectId, toProjectId);
+          } else if (chip.id.startsWith("move-confirm:")) {
+            // The ONLY chip that changes canonical state — strong tier, token.
+            const [, workerProfileId, fromProjectId, toProjectId] = chip.id.split(":");
+            user(chip.label);
+            runMoveCommit(workerProfileId, fromProjectId, toProjectId);
           } else if (chip.id.startsWith("offer-accept:") || chip.id.startsWith("offer-decline:")) {
             // The client's decision: the chip carries the offer id and nothing
             // else; the RPC re-checks the demand is theirs and the offer open.
@@ -2937,8 +4107,35 @@ export function ConversationChat({
             // worker is on THIS agency's roster before any row exists.
             user(chip.label);
             openProposeForm(chip.id.slice(15));
+          } else if (chip.id.startsWith("add-document:")) {
+            // "Įrašyti: <the manager's row>" from the worker's project answer:
+            // the SAME add-document flow the sentence reaches, the type
+            // prefilled from the readiness-item to document-type map.
+            user(chip.label);
+            // `add-document:<type>[:<instruction conversation>]` — the thread
+            // id only selects a thread the projects answer ALREADY read under
+            // the person's RLS; an unknown id offers no reply.
+            const [, chipType, chipConversation] = chip.id.split(":");
+            startAddDocument("", { typeSlug: chipType, thenReply: chipConversation ? askReplyThreadsRef.current.get(chipConversation) : undefined });
           } else if (chip.id.startsWith("f:")) {
-            openForm(chip.id.slice(2));
+            // `f:<action>[?field=value&…]` — a chip may carry PREFILL for the
+            // form it opens (the answer that names a country the person has
+            // not chosen offers the work card with that country already in
+            // the list). Visible, editable, still reviewed before any write;
+            // the same `initialValues` path the sentence prefills use.
+            const [formAction, query] = chip.id.slice(2).split("?");
+            openForm(
+              formAction,
+              undefined,
+              undefined,
+              query ? Object.fromEntries(new URLSearchParams(query)) : undefined,
+            );
+          } else if (chip.id.startsWith("download:")) {
+            // §19 EXPORT: a canonical file route (Content-Disposition: attachment)
+            // — a full navigation so the browser saves it; `router.push` would
+            // fetch it as a page. The route re-checks manager role + RLS.
+            user(chip.label);
+            window.location.assign(chip.id.slice(9));
           } else if (chip.id.startsWith("link:")) {
             // Contextual navigation to a REAL canonical surface (rebuild W4)
             // — the chat routes to the one existing screen, it never grows a
@@ -2947,7 +4144,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
@@ -3033,6 +4230,23 @@ export function ConversationChat({
       const out: Record<string, string | boolean> = { description: original };
       const roleLabel = v.workType ? workTypeLabels[v.workType] : undefined;
       if (roleLabel) out.role = roleLabel;
+      // Real-user walk 2026-09-06: "mano autoservisui reikia 2 mechanikų"
+      // opened the form with the role EMPTY. When the closed work-type set
+      // misses but the profession lexicon hits, the person reads the
+      // profession's name in the field and confirms or edits it — a
+      // suggestion (§7), never a canonical column set behind their back.
+      else if (v.professionSlug && tProfessions.has(v.professionSlug)) {
+        out.role = tProfessions(v.professionSlug as never);
+      }
+      // Window 6 (production 2026-09-06): an accountant, a lawyer, an
+      // engineer, a designer, a project manager, a sales specialist — none
+      // is in either closed catalogue, and six of eleven employer sentences
+      // opened the form with the role EMPTY. The person's OWN word, in the
+      // nominative, is the honest free-text label; no canonical column is
+      // set from it (`workType` / `professionSlug` stay null).
+      else if (v.roleLabel) {
+        out.role = v.roleLabel;
+      }
       // The structurer already read the country out of the sentence; without
       // this the form asked for a location the person had just given. The NAME
       // goes in, never the ISO code — the field is something they are about to
@@ -3056,11 +4270,15 @@ export function ConversationChat({
           out.urgency = daysUntil(v.window.startIso) <= 7 ? "this_week" : "flexible";
         } else {
           out.urgency = v.window.kind === "next_month" ? "flexible" : "this_week";
+          // A coarse window ("kitą mėnesį", "kitą savaitę") has a first day:
+          // it goes into the editable start field as the suggestion it is
+          // (production 2026-09-06 left the start empty for "kitą mėnesį").
+          if (v.window.startIso) out.startDate = v.window.startIso;
         }
       }
       return out;
     },
-    [workTypeLabels, countryLabels],
+    [workTypeLabels, countryLabels, tProfessions],
   );
 
   /** V10 §36: the LAST value interpretation, held for explicit corrections.
@@ -3261,8 +4479,18 @@ export function ConversationChat({
   );
 
   const handleSend = useCallback(
-    (text: string) => {
-      user(text);
+    /**
+     * `sent` is the RAW sentence exactly as typed. It is what the person
+     * sees in the thread, what the router classifies and what the goal
+     * records. Below, `text` becomes the sentence the HANDLERS see — the
+     * same thing for a new goal, and the whole goal so far for a
+     * continuation (see the comment where it is derived).
+     */
+    (sent: string) => {
+      user(sent);
+      // QA Q-4: whatever is sent, a pending hand-off is consumed — the composer
+      // that mounts after the first turn must not offer the sentence again.
+      setSayPrefill("");
 
       // V10 §36: an explicit correction ("Ne 30, o 300 kg") of the LAST
       // interpretation replaces exactly the corrected fact and re-renders
@@ -3273,7 +4501,7 @@ export function ConversationChat({
       if (last) {
         const corrected = applyCorrection(
           last.statement,
-          text,
+          sent,
           new Date().toISOString().slice(0, 10),
         );
         if (corrected) {
@@ -3291,20 +4519,122 @@ export function ConversationChat({
             // The OLD value is named as replaced — never silently swapped.
             assistant(t("valueIntent.corrected", { changes }));
             renderValueStatement(corrected.statement, last.text);
+            // A corrected value statement is still the same goal in flight —
+            // the early return must not leave it un-aged.
+            goalRef.current = advanceGoal({
+              goal: goalRef.current,
+              kind: "correction",
+              routedIntent: goalRef.current?.intent ?? "unknown",
+              text: sent,
+            });
           });
           return;
         }
       }
 
-      const { intent } = classifyIntent(text);
-      // Chat-first execution funnel: was the sentence understood at all? The
-      // intent id and the coarse role only — never the sentence.
-      trackFunnel(
-        intent === "unknown"
-          ? FUNNEL_EVENTS.chatIntentUnrecognized
-          : FUNNEL_EVENTS.chatIntentRecognized,
-        { surface: "chat", step: intent, role_context: roleContextNow },
-      );
+      const { intent: routedIntent, score: routedScore } = classifyIntent(sent);
+
+      /**
+       * ── WHAT KIND OF TURN IS THIS? (owner P0 §4, 2026-09-06) ─────────────
+       *
+       * The deterministic router stays the floor and has just run. This asks
+       * the second question it never asked: is this sentence a CONTINUATION
+       * of what we were already doing?
+       *
+       * The observed failure was the absence of this step. "tu jau turi mano
+       * duomenis" scored 0, fell to the generic fallback, and the fallback's
+       * chip row offered the same import again — twice in a row, because
+       * nothing in the loop knew there had been a first time.
+       */
+      const priorGoal = goalRef.current;
+      const turnKind = classifyTurn({
+        text: sent,
+        routedIntent,
+        routedScore,
+        goal: priorGoal,
+      });
+      // WORK EVIDENCE ACROSS TURNS (addendum §5). A work-logging goal
+      // accumulates an EVIDENCE payload beside the discovery filters, so a
+      // second sentence about the same day enriches one account instead of
+      // re-classifying from scratch. Facts are read with the journal's OWN
+      // recognizer — no second parser — and a discovery goal is unaffected
+      // because `advanceGoal` only merges into a payload that exists.
+      const evidenceTurn =
+        EVIDENCE_BEARING_INTENTS.has(routedIntent) || priorGoal?.evidence
+          ? evidenceFromSuggestions(extractJournalSuggestions(sent), sent)
+          : undefined;
+      goalRef.current = advanceGoal({
+        goal: priorGoal,
+        kind: turnKind,
+        routedIntent,
+        text: sent,
+        evidence: evidenceTurn,
+      });
+
+      // A refusal, or a statement that the product already holds what it was
+      // asking for, retires EVERY offer that was on the table. Both are the
+      // person saying "not this" — the difference is only whether they also
+      // told us why, and neither may be answered by repeating the offer.
+      if (turnKind === "rejection" || turnKind === "use-known-state") {
+        goalRef.current = declineOutstandingOffers(goalRef.current);
+      }
+
+      /**
+       * A CONTINUATION RE-ENTERS THE GOAL, not the router (owner §1/§4).
+       *
+       * "gerai, tada ieškok visoje Europoje", "Ne, 12.", "Nuo spalio.",
+       * "tu jau turi mano duomenis" — none of these name their destination,
+       * and three of the four scored 0. Routed on their own they became a
+       * fallback; routed against the goal they are what they actually are:
+       * the same goal, with one more thing known about it.
+       *
+       * Execution is unchanged. This re-enters the SAME handler the goal's
+       * intent already had — one dispatcher, one registry, one set of
+       * executors — so nothing here can reach a write the sentence could not
+       * have reached on its own.
+       */
+      const continuing =
+        goalRef.current !== null &&
+        (turnKind === "follow-up" ||
+          turnKind === "correction" ||
+          turnKind === "use-known-state");
+
+      const intent: ConversationIntent = continuing
+        ? goalRef.current!.intent
+        : routedIntent;
+
+      /**
+       * THE SENTENCE THE HANDLERS SEE.
+       *
+       * For a new goal it is exactly what the person just typed. For a
+       * continuation it is everything said about THIS goal, latest last —
+       * because the handlers that prefill a form read facts out of words, not
+       * out of `filters`. Without this, "Ne, 12." reopened the employer's
+       * intake carrying only "12" and lost the trade named a turn earlier: a
+       * correction that destroyed the thing it was correcting (owner §9 F —
+       * the canonical state must end up 12 mechanics, not two demands and not
+       * ten). A reader that lets the LAST mention win therefore sees the
+       * correction, and the rest of the goal survives it.
+       */
+      const text = continuing ? goalSentence(goalRef.current, sent) : sent;
+      // Chat-first execution funnel: was the sentence understood, and by WHOM —
+      // the deterministic router (the always-on floor), the ACTIVE GOAL (a
+      // continuation the router alone reads as `unknown`), or, failing both,
+      // the Gemini proposer (owner approval 2026-09-05). The intent id, the
+      // coarse role and the resolution only — never the sentence. "goal" is
+      // its own value so the owner can measure how much of the conversation
+      // the new memory is actually carrying.
+      const trackResolution = (
+        resolved: ConversationIntent,
+        resolution: "deterministic" | "goal" | "llm",
+      ) =>
+        trackFunnel(
+          resolved === "unknown" ? FUNNEL_EVENTS.chatIntentUnrecognized : FUNNEL_EVENTS.chatIntentRecognized,
+          { surface: "chat", step: resolved, role_context: roleContextNow, resolution },
+        );
+      if (intent !== "unknown") {
+        trackResolution(intent, continuing ? "goal" : "deterministic");
+      }
 
       // MY SPACE §4C — the typed sentence is a use of the SAME reference its
       // chip carries ("užrašyk darbą" three times = the log-work chip three
@@ -3335,7 +4665,139 @@ export function ConversationChat({
          * handler in the registry: one matching pipeline, one result surface,
          * no second stack.
          */
-        findWork: () => runWorkflow(() => runFindWork(text)),
+        findWork: () => runWorkflow(async () => {
+          // THE COMPANY CONTEXT NEVER RUNS THE PERSON'S JOB SEARCH (company
+          // walk 2026-09-06, lane G): "ieškau darbo" in the company space
+          // answered "5 public ads… searched your whole list" while the panel
+          // said the result was unavailable in this context. A job search is
+          // the person's own act; the honest answer here is one line and the
+          // door to the personal space (the same membership-validated `ws:`
+          // switch the context chips run) — rendered through the workflow
+          // contract, so the WHY is stated like every other answer.
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            return {
+              kind: "answer" as const,
+              text: t("findWorkInCompanyContext"),
+              explanation: { why: t("findWorkInCompanyWhy") },
+              chips: personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            };
+          }
+          // Window 6 (production 2026-09-06): "esu buhalteris, ieškau darbo"
+          // ran the search over an unnarrowed board and never read the
+          // profession the person had just stated. The search still runs;
+          // the ONE fact that would narrow the list is read back FIRST, with
+          // the door that records it — before any foreign listing (G-A1).
+          /**
+           * "tu jau turi mano duomenis" (owner P0 §3/§7/§10, 2026-09-06).
+           *
+           * The person is not asking for an import — they are telling us to
+           * stop asking for one. The answer says what will be used, and it
+           * says it from CANONICAL STATE: `true` promises the profile, and
+           * `false` admits honestly that there is nothing in it yet rather
+           * than claiming to hold data we do not. `null` (the read degraded)
+           * claims neither and simply searches.
+           */
+          if (goalRef.current?.useKnownState) {
+            if (personHasProfileData === true) {
+              assistant(
+                statedConstraintCount(goalRef.current) > 0
+                  ? t("knownState.usingProfileNarrowed")
+                  : t("knownState.usingProfile"),
+              );
+            } else if (personHasProfileData === false) {
+              assistant(t("knownState.profileEmpty"), [
+                { id: "logwork", label: labels.chipLogWork },
+              ]);
+            }
+          }
+          const stated = readProfessionStatement(text);
+          if (stated) {
+            const label =
+              stated.professionSlug && tProfessions.has(stated.professionSlug)
+                ? tProfessions(stated.professionSlug as never)
+                : stated.label;
+            assistant(t("professionStatement.readBesideSearch", { label }), [
+              stated.professionSlug
+                ? { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }
+                : { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
+            ]);
+          }
+          // The world earlier turns of THIS goal already narrowed travels
+          // with the search; a new goal carries nothing (owner §4).
+          return runFindWork(text, goalRef.current?.filters);
+        }),
+        /**
+         * "esu buhalteris" / "dirbu inžinieriumi" / "dirbau projektų vadovu
+         * 5 metus" (window 6). The sentence is READ (`readProfessionStatement`,
+         * the same reader the router's pattern is built from) and answered
+         * with the doors that already exist: the profile screen sets a
+         * catalogue profession; work history takes any title in the person's
+         * own words (the honest carry for a profession the catalogue lacks);
+         * the board searches. A past-tense job opens the work-history form
+         * with the title already in it. Nothing is persisted here.
+         */
+        professionStatement: () => {
+          const stated = readProfessionStatement(text);
+          if (!stated) {
+            assistant(fallbackText, starterChips);
+            return;
+          }
+          const inCatalogue = Boolean(stated.professionSlug && tProfessions.has(stated.professionSlug));
+          const label = inCatalogue ? tProfessions(stated.professionSlug as never) : stated.label;
+          if (identity === "company") {
+            assistant(t("professionStatement.understood", { label }), [
+              { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") },
+            ]);
+            return;
+          }
+          if (stated.tense === "past") {
+            assistant(t("professionStatement.pastJob", { label }));
+            openForm("worker.add-work-history", undefined, undefined, { title: stated.label });
+            return;
+          }
+          assistant(
+            [
+              t("professionStatement.understood", { label }),
+              inCatalogue ? t("professionStatement.inCatalogue") : t("professionStatement.notInCatalogue"),
+            ].join("\n"),
+            [
+              ...(inCatalogue
+                ? [{ id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }]
+                : []),
+              { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
+              { id: "jobs", label: labels.chipJobs },
+            ],
+          );
+        },
+        /**
+         * "galiu dirbti nuo spalio 1 d." (production 2026-09-06: answered as a
+         * search with no criteria). The person stated WHEN they can work — the
+         * availability fact the work card holds. The ONE work-card form opens
+         * (the same `worker.save-work-card` the chip "Nurodyti, kada galiu
+         * dirbti" opens) with the status set to available and the parsed
+         * date in `availableFrom` (`parseStartDate`, the same reader the
+         * demand intake uses for "nuo spalio 5"). Editable, reviewed, then
+         * saved by the form — nothing is persisted from the sentence itself.
+         * In the company space the fact belongs to the person, so the answer
+         * is the door to the personal space.
+         */
+        availabilityStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("availability.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const from = parseStartDate(text, todayIso());
+          assistant(from ? t("availability.understoodFrom", { date: from }) : t("availability.understood"));
+          openForm("worker.save-work-card", undefined, undefined, {
+            availabilityStatus: "available",
+            ...(from ? { availableFrom: from } : {}),
+          });
+        },
         skillGap: () => runWorkflow(() => runSkillGap()),
         recentJournal: () => runWorkflow(() => runRecentJournal()),
         figures: () => runWorkflow(() => runFigures()),
@@ -3379,7 +4841,10 @@ export function ConversationChat({
         switchContext: () => startSwitchContext(text),
         // These run a real async server read with their own typing cue.
         profileSummary: () => startProfileSummary("profile"),
-        nextActionSummary: () => startProfileSummary("next"),
+        // The COMPANY workspace asks about the company, never about the
+        // person behind it (see `startCompanyNextStep`).
+        nextActionSummary: () =>
+          identity === "company" ? startCompanyNextStep() : startProfileSummary("next"),
         resumeSummary: () => startProfileSummary("resume"),
         criteria: () => startCriteria(),
         // The canonical card, rendered IN the conversation (§5.1).
@@ -3406,6 +4871,46 @@ export function ConversationChat({
         // workers gets the honest fallback, never a wrong-audience form.
         // V9: what the sentence already SAID pre-fills the form (visible,
         // editable, still reviewed — nothing submitted on their behalf).
+        /**
+         * SUPPLY — "AŠ TURIU / GALIU" (owner window 7 §4, 2026-09-06).
+         *
+         * "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose."
+         * Before this handler that sentence reached `find-work`: a staffing
+         * agency with twenty welders was answered as one person hunting for a
+         * job. The market has two sides and the product only heard one.
+         *
+         * It opens the SAME canonical intake a need uses, in its supply
+         * wording, stamped `intent: "partner"` → `customer_requests` with
+         * `kind = 'agency_offer'`. One intake, one schema, one confirmation
+         * token, one executor — the door was the only thing missing.
+         */
+        offerCapacity: () => {
+          if (identity === "company") {
+            openForm(
+              supplyOfferFormSpec(),
+              undefined,
+              undefined,
+              demandPrefill(structureValueStatement(text), text),
+            );
+            return;
+          }
+          if (canActAsEmployer && workspaceChips.length > 0) {
+            // They DO represent a company — just not in this space. Capacity
+            // belongs to an organisation, never to a personal profile, so the
+            // honest answer is the real switch, not a refusal.
+            withTyping(() => assistant(t("offerCapacity.needsCompany"), workspaceChips));
+            return;
+          }
+          // A person with no organisation. Offering other people's capacity
+          // is an organisation's act; what this person CAN do is offer their
+          // own service or start the organisation — both already exist.
+          withTyping(() =>
+            assistant(t("offerCapacity.personalSpace"), [
+              { id: "f:company.create-organization", label: labels.chipCreateOrganization },
+              { id: "link:/dashboard/services", label: t("valueIntent.chipServices") },
+            ]),
+          );
+        },
         needWorkers: () => {
           if (identity === "company") {
             openForm(
@@ -3425,7 +4930,23 @@ export function ConversationChat({
               },
             ]);
           } else {
-            assistant(fallbackText, starterChips);
+            // A private person who is an employer nowhere. The sentence NAMED a
+            // trade ("reikia santechniko"), so the router scored it as employer
+            // demand — but for a private person that is a JOB TO BE DONE (§33),
+            // and the door for it already exists (the service-request loop);
+            // the door to become an employer exists too. On production
+            // (2026-09-06) this branch answered the not-understood menu for a
+            // sentence the product had understood perfectly.
+            assistant(labels.serviceNeedHint, [
+              {
+                id: "link:/dashboard/service-requests",
+                label: labels.chipServiceRequests,
+              },
+              {
+                id: "link:/dashboard/start/company",
+                label: labels.chipCreateOrganization,
+              },
+            ]);
           }
         },
         // §33 — "reikia, kad kas nors sutaisytų stogą" is a request for a
@@ -3607,6 +5128,14 @@ export function ConversationChat({
             : assistant(labels.learningCompassHint, [
                 { id: "link:/dashboard/profile#learning-compass", label: labels.chipLearningCompass },
               ]),
+        // ── "KAM PATEIKTI ATLIKTĄ DARBĄ?" (owner P0 2026-09-06) ───────────
+        // The WORKER's side of the confirmation loop. This sentence used to
+        // match `find-work` on the bare noun `darbą` and was answered with job
+        // adverts — the person had asked who RECEIVES work they already did.
+        // The workflow names a real verifier, presents a choice when several
+        // are legitimate, and says "nobody yet" plainly when none resolves.
+        // It never invents one.
+        whoVerifiesWork: () => runWorkflow(() => runWhoVerifiesWork()),
         // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────
         // The institution's commands by SENTENCE over the ONE dispatcher:
         // "pakviesk studentą" → one question (e-mail) → canonical invitation
@@ -3622,12 +5151,37 @@ export function ConversationChat({
         addTask: () => startCreateTask(text),
         whoAvailable: () => startWhoAvailable(),
         stageStatus: () => startStageStatus(text),
-        // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
-        // not the import flow the bare "cv" chip starts. One chip to the one
-        // canonical output; a company identity has no own CV to show.
+        taskStatus: () => startTaskStatus(text),
+        projectRisk: () => startProjectRisk(),
+        projectReadiness: () => startProjectReadiness(text),
+        confirmWork: () => startConfirmWork(text),
+        moveWorker: () => startMoveWorker(text),
+        // "Atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF), not the
+        // import flow the bare "cv" chip starts. One chip to the one canonical
+        // output; a company identity has no own CV to show.
         cvExport: () =>
           identity === "person"
             ? assistant(labels.cvExportHint, [{ id: "link:/cv", label: labels.chipCvSheet }])
+            : assistant(fallbackText, starterChips),
+        // "Noriu pamatyti savo CV" — the SAME `/cv` page, said as a read.
+        // Before this it reached `cvChip` and opened the import: the person
+        // asked to see what the product holds and was told to upload it
+        // (owner window 11 §30, the exact production journey).
+        cvView: () =>
+          identity === "person"
+            ? assistant(labels.cvViewHint, [{ id: "link:/cv", label: labels.chipCvSheet }])
+            : assistant(fallbackText, starterChips),
+        // The sentence named the CV and stopped. Three real doors, no guess
+        // and no write — owner §5: "If uncertain, ask." The third door is the
+        // profile because the CV is DERIVED from it: "pakeisk mano CV" has no
+        // document to edit, it has a professional history to add to.
+        cvChoose: () =>
+          identity === "person"
+            ? assistant(labels.cvChooseAsk, [
+                { id: "link:/cv", label: labels.chipCvSheet },
+                { id: "cv", label: labels.chipCv },
+                { id: "profile", label: labels.chipProfile },
+              ])
             : assistant(fallbackText, starterChips),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.
@@ -3635,14 +5189,81 @@ export function ConversationChat({
         // §8.1: the chat SHOWS the waiting threads, drafts a reply and
         // sends it after confirmation — the full inbox stays one tap away.
         messages: () => startMessages(),
+        invitations: () => startInvitations(),
         writeEmployer: () => assistant(labels.writeEmployerHint),
       };
-      dispatchIntent(intent, handlers, withTyping, () =>
-        assistant(fallbackText, starterChips),
-      );
+      const fallback = () => assistant(fallbackText, starterChips);
+      if (intent !== "unknown") {
+        dispatchIntent(intent, handlers, withTyping, fallback);
+        return;
+      }
+      // THE GEMINI PROPOSER (owner approval 2026-09-05): asked ONLY about a
+      // sentence the deterministic router could not read. Only an EXISTING
+      // intent id can come back (re-validated server-side against the
+      // registry); it then runs the SAME handler the deterministic path would
+      // have run — the handler asks for what is missing from real rows, and
+      // every write still goes through the dispatcher. Low confidence is
+      // honestly "not understood", never a guess.
+      setTyping(true);
+      proposeConversationIntentAction({ sentence: text, locale, identity })
+        .then((res) => {
+          setTyping(false);
+          const resolved: ConversationIntent = res.kind === "proposal" && res.confidence !== "low" ? res.intent : "unknown";
+          trackResolution(resolved, res.kind === "proposal" ? "llm" : "deterministic");
+          dispatchIntent(resolved, handlers, withTyping, fallback);
+        })
+        .catch(() => {
+          setTyping(false);
+          trackResolution("unknown", "deterministic");
+          dispatchIntent("unknown", handlers, withTyping, fallback);
+        });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, startStageStatus, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
+
+  /**
+   * Public entry hand-off (frozen design contract §5 P1, #1528): the landing
+   * carries the visitor's OWN sentence through signup / login as
+   * `/dashboard?say=<sentence>` (built by `buildReturnValue`, sanitised by
+   * `getSafeReturnPath`). The chat consumes it ONCE per mount — the sentence
+   * appears as the person's own turn and runs through the SAME `handleSend`
+   * path as the composer (the one router, the one dispatcher, no second
+   * mechanism) — then strips it from the URL so Back / refresh never re-sends
+   * it. Bounded to the same 500 characters the proposer accepts. Consumed for
+   * every identity: an organisation's "Reikia 12 pastolininkų" must land in
+   * the demand flow exactly as if typed.
+   *
+   * QA Q-4: it is SENT only when the page load came through our own door
+   * (`referrerIsOurOwnDoor` — same-origin referrer). Otherwise a link anyone
+   * could paste would persist a turn in the person's name and spend a
+   * proposer call; then the sentence is PREFILLED in the composer for the
+   * person to send — never silently dropped.
+   */
+  const sayConsumedRef = useRef(false);
+  useEffect(() => {
+    if (sayConsumedRef.current) return;
+    if (!auth?.profile) return;
+    let say = "";
+    try {
+      say = (new URLSearchParams(window.location.search).get("say") ?? "").trim();
+    } catch {
+      say = "";
+    }
+    if (!say) return;
+    sayConsumedRef.current = true;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("say");
+      window.history.replaceState(null, "", url.toString());
+    } catch {
+      /* URL cleanup is cosmetic — never block the sentence on it. */
+    }
+    if (referrerIsOurOwnDoor()) {
+      handleSend(say.slice(0, 500));
+    } else {
+      setSayPrefill(say.slice(0, 500));
+    }
+  }, [auth?.profile, handleSend]);
 
   const nav = {
     chat: labels.navChat,
@@ -3706,9 +5327,14 @@ export function ConversationChat({
   selectInteractionRef.current = selectInteraction;
   selectDemandRef.current = selectDemand;
   selectProjectRef.current = openProjectResult;
-  const resultContext: ResultContext = auth0?.activeOrgName
-    ? "organization"
-    : "personal";
+  // The acting context is the organisation WORKSPACE, keyed by its id - never
+  // by its display name: a fresh organisation that has not named itself yet
+  // (legal_name/display_name null) is still acting as an organisation. Keying
+  // on the name made "parodyk kandidatus" fall back to "unavailable in this
+  // context" for exactly the newest organisations (full-spine prod walk,
+  // 2026-09-05). The name stays a label for the header only.
+  const resultContext: ResultContext =
+    auth0?.activeOrganizationId || auth0?.activeOrgName ? "organization" : "personal";
   const openFullScreen = useCallback(
     // The locale-aware router already in this component — the fallback route
     // is a REAL screen the person keeps, not a dead end.
@@ -3859,6 +5485,7 @@ export function ConversationChat({
                   sendLabel={labels.send}
                   onSend={handleSend}
                   onAttach={handleAttach}
+                  prefill={sayPrefill}
                 />
               }
             />
@@ -3869,6 +5496,7 @@ export function ConversationChat({
                 sendLabel={labels.send}
                 onSend={handleSend}
                 onAttach={handleAttach}
+                prefill={sayPrefill}
               />
             )}
           </div>

@@ -24,8 +24,14 @@ const variants: Record<Variant, string> = {
   pill: "min-h-11 rounded-full font-medium border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue",
 };
 
+// Mobile tap floor (window 6, P0-G): `sm` is 36px of padding+line-height, the
+// measured height of every small Button on production at 390px. Below `md`
+// the padding grows to 40px (`max-md:py-2.5`); desktop keeps the exact 36px.
+// Padding, not `max-md:min-h-10`, because a responsive min-height would be
+// emitted AFTER the `min-h-11` that buttonLinkClassName adds and win over it
+// on phones (44 → 40). Guard: lib/guards/mobile-tap-targets.test.ts.
 const sizes: Record<Size, string> = {
-  sm: "px-4 py-2 text-sm",
+  sm: "px-4 py-2 max-md:py-2.5 text-sm",
   md: "px-6 py-3 text-sm",
 };
 

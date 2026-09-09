@@ -239,6 +239,118 @@ import { join } from "node:path";
  * qualifier check in public-no-fabricated-confidence.test.ts, so the freeze
  * is not the only thing standing between the landing and the banned framing
  * coming back.
+ *
+ * Owner directive 2026-09-05 (Gemini runtime check, item 8) — "the public
+ * landing must never pretend a canned scenario is the user's answer". The
+ * hero routed a visitor's OWN typed question to one of three scripted
+ * scenarios and rendered that scenario's reasoning under "AI SPRENDIMAS"
+ * with the visitor's words in the bubble — a worked example presented as
+ * their answer. Repair: the section is labelled an EXAMPLE conversation /
+ * decision (the landing runs no model — `data-egress.ts` keeps free text
+ * from leaving the platform), and a visitor's own question now shows the
+ * `ownQuestionNote` line before any reasoning is read as theirs. The
+ * regeneration touched the hero-live-demo.tsx hash (one state flag + one
+ * status line) and the five `*.landing` namespace hashes (copy honesty
+ * only). Permanently guarded by `landing-own-question-honesty.test.ts`.
+ *
+ * P1 — THE PUBLIC ENTRY UNDERSTANDS A REAL SENTENCE (owner's FROZEN DESIGN
+ * CONTRACT 2026-09-05, package P1 "Viešas įėjimas su tikru intent'u", P0
+ * SAFE PILOT; audit finding FUN-1 "the hero answers with a staged
+ * scenario"). The scripted hero — `hero-live-demo.tsx` and its data module
+ * `components/app/market-map/landing-scenario.ts` — was REMOVED, not
+ * relabelled: no scenario, no worked example, no "illustrative" copy is left
+ * on the entry. In its place `components/marketing/public-entry.tsx` reads
+ * the visitor's own sentence through the ONE deterministic conversation
+ * router (read-only, via the pure `lib/marketing/public-entry.ts`), says
+ * what it understood in ordinary words, asks ONE question with two chips
+ * (work / hire — the first-run families) when it cannot read the sentence,
+ * carries the sentence to the conversation root through the existing
+ * `lib/auth/redirect.ts` return path (`/dashboard?say=…`), and prints the
+ * public counts from the SAME canonical snapshot the market proof band
+ * prints — omitted when the reader cannot answer. The frozen file set swaps
+ * the deleted hero for the two entry modules; the `landing.hero` namespace
+ * keeps only `headline` and `sub` (the 26 scenario keys were deleted in the
+ * five routed locales, none of which is rendered any more) and gains
+ * `landing.entry`. The regeneration therefore touched the focus-landing
+ * hash, the two entry hashes (new) and the three frozen `*.landing`
+ * namespace hashes. Permanently guarded by
+ * `public-entry-real-intent.test.ts` (no scenario module, one router, two
+ * chips, the sentence never in telemetry) and `lib/marketing/
+ * public-entry.test.ts` (three sentences → three recognitions in every
+ * routed locale; the sentence survives the auth sanitiser).
+ *
+ * WINDOW 6 — PUBLIC DOORS (owner mission 2026-09-06: real launch for real
+ * people, real companies, a real college; window-5 checkpoint gaps G-C1 and
+ * G-D1, both "P0 FRICTION, PUBLIC domain, copy + one door"). Measured
+ * anonymously on production build ca96605b before the change (log +
+ * screenshots in docs/launch/pilot-feedback/walks-2026-09-06/
+ * walk-public-doors/before/): the first screen said "Paklausk. Pamatyk.
+ * Įdarbink." over an internal-vocabulary lead ("AI darbo rinkos operacinė
+ * sistema…"), the three examples read as manual labour, and the final band
+ * had four doors — none for an education institution, so a lecturer had to
+ * guess that "Esu darbdavys" leads to an organisation with the
+ * `training_provider` capability. Three changes, no redesign: (1) a FIFTH
+ * door, "Atstovauju mokyklai ar universitetui →", whose href is DERIVED from
+ * `nextPathForIntents(["education"])` — the existing organisation setup with
+ * the capability preset — carried in `?next=` through the existing return
+ * path; the doors moved into the pure registry `lib/marketing/public-doors.ts`
+ * (frozen with the band) so guard, walk and band read one list; (2) three
+ * more example sentences per routed locale — a professional worker, a
+ * service need, a service offer — every one routed LIVE through the one
+ * router and pinned per intent in `lib/marketing/public-entry.test.ts`;
+ * (3) the hero aligned to the canonical public axis "Parodyk, ką moki.
+ * Atrask, kur esi reikalingas." — still one headline + one lead + the
+ * sentence box. Zero overflow at 390/320 and zero 4xx/5xx were measured
+ * before and are re-verified by the post-merge walk
+ * (walk-public-doors-prod.cjs). The regeneration touched the band hash, the
+ * entry component hash (its example-key list grew from three to six), the
+ * new registry (added to the frozen set) and the three frozen `*.landing`
+ * namespace hashes (cta.institution + cta.subcopy in all 11 catalogs;
+ * hero + entry.examples in the five routed ones). Nothing else moved.
+ *
+ * Cold-start doors + the map's last line (OWNER DIRECTIVE 2026-09-09, product
+ * readiness session §15 and §32) — two changes, both authorised by name in
+ * the directive, and both derivations rather than new copy or new data.
+ *
+ *   1. THE AGENCY DOOR NAMES ITSELF. Window 6 named the institution's door
+ *      (gap G-C1) and left the agency's pointing at a bare `/auth/signup`.
+ *      §32 requires credible readiness for a real staffing agency today, and
+ *      a supplier that had just chosen "I represent an agency" was asked the
+ *      same question again on the next screen — where the nearest wrong
+ *      answer, "hire", produces a plain employer rather than a
+ *      `staffing_agency`. `AGENCY_DOOR_NEXT` is derived from
+ *      `nextPathForIntents(["agency"])`, exactly as the institution's is, so
+ *      `public-doors.ts` (frozen with the band) moved by one href.
+ *      NO new machinery: `doorIntentsFromReturnPath` already inverts the
+ *      router over EVERY company-intent subset, and `DOOR_WORDS_KEY` already
+ *      carried `agency`. The round trip is pinned in
+ *      `cold-start-doors-and-markets.test.ts`, together with the negative
+ *      control that the door is never read as `hire` — so the freeze is not
+ *      the only thing standing between an agency and being onboarded as an
+ *      employer.
+ *
+ *   2. THE MAP'S LAST LINE INVITES INSTEAD OF APOLOGISING. §15 removed the
+ *      sentence "…we do not publish that data, so there is not a single
+ *      guessed dot on this map. Signed in, you see your market's real state."
+ *      and replaced it with "Prisijunkite ir plėskite savo galimybes darbo
+ *      rinkoje." The key was renamed `notPublished` → `invite` in all five
+ *      active catalogs, which moved the three frozen `*.landing` hashes.
+ *
+ *      THE HONESTY DID NOT MOVE WITH IT. The negation a visitor needs — that
+ *      the markers are markets and NOT today's activity — has always lived in
+ *      the `shows` line above it, and that line is byte-identical. The guard
+ *      in `landing-tells-the-whole-product.test.ts` was RE-ANCHORED onto
+ *      `shows` rather than relaxed, and it now asserts the negation word
+ *      itself per locale (with a control proving a caption that lost the
+ *      negation fails). And no map DATA changed to match the shorter copy:
+ *      `publicCoverageView()` still emits no `weight` on any anchor, so a
+ *      per-place quantity remains unpublished — the new line is additionally
+ *      pinned to contain no digit at all.
+ *
+ * The regeneration touched EXACTLY FOUR hashes — `public-doors.ts` and the
+ * three `*.landing` namespaces. `market-proof-band.tsx`, the page, the hero
+ * and every other frozen artefact are untouched, which is the proof that this
+ * stayed two named corrections and did not become a landing edit.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -256,17 +368,23 @@ export const FROZEN_LANDING_FILES = [
   "lib/market/live-market-landing.ts",
   "lib/telemetry/landing-experience.ts",
   // Owner approval 2026-08-22: FOCUS is the RESTORED previous production
-  // landing, so its composition, its switcher and the six original
-  // components it renders are part of the landing render tree again.
+  // landing, so its composition, its switcher and the original components
+  // it renders are part of the landing render tree again.
   "app/[locale]/focus-landing/focus-landing.tsx",
   "app/[locale]/focus-landing/landing-mode-switcher.tsx",
   "app/[locale]/focus-landing/landing-mode-switcher.module.css",
-  "components/marketing/hero-live-demo.tsx",
+  // Frozen design contract 2026-09-05, P1: the public entry (component + the
+  // pure read-only hook into the conversation router) replaces the scripted
+  // hero scenario at the top of the render tree.
+  "components/marketing/public-entry.tsx",
+  "lib/marketing/public-entry.ts",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-proof-band.tsx",
   "components/marketing/player-card-showcase.tsx",
   "components/marketing/trust-band.tsx",
   "components/marketing/final-cta-band.tsx",
+  // Window 6, 2026-09-06: the pure door registry the band renders from.
+  "lib/marketing/public-doors.ts",
 ] as const;
 
 /**

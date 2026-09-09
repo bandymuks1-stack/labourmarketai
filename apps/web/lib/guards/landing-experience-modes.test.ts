@@ -206,28 +206,50 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
     expect(focus).not.toMatch(/world-(desktop|tablet|mobile)\.webp/);
   });
 
-  it("restores the previous production landing rather than recreating it", () => {
-    // The six components of `(marketing)/page.tsx` at 7179882, in its order.
+  it("keeps every restored section, in the owner's window-11 order", () => {
+    /**
+     * THE SECTIONS ARE THE CONTRACT; THE ORDER IS A PRODUCT DECISION.
+     *
+     * This guard was written to prove FOCUS RESTORED the pre-#1221 landing
+     * rather than recreating it from a screenshot, and the section list is
+     * still exactly that guarantee: none of the restored bands may quietly
+     * disappear. What changed on 2026-09-07 is that the owner opened the
+     * frozen-landing contract for §§16–20, and the ORDER moved:
+     *
+     *   before  entry → chain → proof → card → trust → doors
+     *   after   entry → MAP(+proof) → doors → chain → card → trust
+     *
+     * Two bands are new — `PublicMarketMapBand` (§17) and
+     * `StartingContextsBand` (§20, the former `FinalCtaBand` reframed over the
+     * SAME five doors from the same registry) — and `MarketProofBand` now
+     * renders INSIDE the map band as its supporting evidence rather than as a
+     * section of its own (§16). Every original component is still imported and
+     * still rendered.
+     */
     for (const original of [
-      "HeroLiveDemo",
+      "PublicEntry",
       "ProductChainBand",
       "MarketProofBand",
       "PlayerCardShowcase",
       "TrustBand",
-      "FinalCtaBand",
+      "StartingContextsBand",
+      "PublicMarketMapBand",
     ]) {
       expect(focus).toContain(
         `import { ${original} } from "@/components/marketing/`,
       );
     }
+    // Code only — the file's own history may NAME the retired hero in prose.
+    expect(code(focus)).not.toContain("HeroLiveDemo");
     const order = [
-      "HeroLiveDemo",
-      "ProductChainBand",
+      "PublicEntry",
+      "PublicMarketMapBand",
       "MarketProofBand",
+      "StartingContextsBand",
+      "ProductChainBand",
       "PlayerCardShowcase",
       "TrustBand",
-      "FinalCtaBand",
-    ].map((c) => focus.indexOf(`<${c} `));
+    ].map((c) => focus.search(new RegExp(`<${c}[\\s/>]`)));
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.

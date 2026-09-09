@@ -58,6 +58,22 @@ describe("journal surfaces name the worker from a column the manager may read", 
     },
   );
 
+  it("the employer's confirm-work roster names people from `workers`, never from a profiles embed or a raw id", () => {
+    // Production walk 2026-09-05 (`169df06f`, defect D2): the manager saw
+    // "Darbų peržiūra dar neįjungta: #8cda64" — a profile-id fragment — because
+    // `engagement_contexts … profiles(full_name, email)` is null under
+    // `profiles` RLS. The read must go through the manager-readable column.
+    const src = read("lib/company/org-employee-engagements.ts");
+    expect(src, "must select the shared WORKER_NAME_FIELDS from `workers`").toMatch(
+      /from\("workers"\)[\s\S]{0,120}select\(`profile_id, \$\{WORKER_NAME_FIELDS\}`\)/,
+    );
+    expect(src, "must resolve through resolveWorkerName").toMatch(/resolveWorkerName\(/);
+    // Negative controls — the exact shapes that produced the id fragment.
+    expect(src, "no profiles(...) embed on engagement_contexts").not.toMatch(/journal_review_enabled, profiles\(/);
+    expect(src, "no raw id fallback").not.toMatch(/#\$\{[^}]*slice\(/);
+    expect(src, "no hand-rolled email fallback").not.toMatch(/email\?\.split\("@"\)\[0\]/);
+  });
+
   it("the shared embed actually asks for display_name", () => {
     // Negative control for the two assertions above: if WORKER_NAME_FIELDS
     // stopped naming display_name they would both still pass while every

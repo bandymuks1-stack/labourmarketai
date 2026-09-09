@@ -7,8 +7,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
+  DISCOVERY_READ_LIMIT,
   RESPOND_DECISIONS,
   computeNewCounts,
+  normalizeDiscoveryCountry,
   type DiscoverableOfferingRow,
   type DiscoveryListResult,
   type IncomingListResult,
@@ -83,18 +85,30 @@ async function requesterDisplayNames(
   return out;
 }
 
-/** Active offerings the caller can DISCOVER — excludes the caller's own. */
-export async function listDiscoverableOfferings(): Promise<DiscoveryListResult> {
+/**
+ * Active offerings the caller can DISCOVER — excludes the caller's own.
+ * BOUNDED (DISCOVERY_READ_LIMIT, newest first) and optionally narrowed by an
+ * exact country code (G-E1, window 6) — the only server-side filter, because
+ * it is an equality an index can serve; category is matched in memory over
+ * the page (see `filterByCategory`).
+ */
+export async function listDiscoverableOfferings(
+  filter: { country?: string | null } = {},
+): Promise<DiscoveryListResult> {
   const ctx = await uid();
   if (!ctx) return { kind: "not-authed" };
-  const { data, error } = await asAny(ctx.supabase)
+  const country = normalizeDiscoveryCountry(filter.country);
+  let query = asAny(ctx.supabase)
     .from("service_offerings")
     .select(
       "id, title, description, category_slug, location_country, remote, rate_text, provider_id, created_at",
     )
     .eq("status", "active")
-    .neq("provider_id", ctx.userId)
-    .order("created_at", { ascending: false });
+    .neq("provider_id", ctx.userId);
+  if (country) query = query.eq("location_country", country);
+  const { data, error } = await query
+    .order("created_at", { ascending: false })
+    .limit(DISCOVERY_READ_LIMIT);
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "ok", rows: [] };

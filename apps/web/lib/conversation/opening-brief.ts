@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { listAttentionInstructions } from "@/lib/instructions/instructions";
 
 import { getTranslations } from "next-intl/server";
 
@@ -11,9 +12,16 @@ import { buildWorkContext } from "@/lib/conversation/context-intelligence";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
 import { listMyEngagements } from "@/lib/invitations/network";
+import { listInvitationsAddressedToMe } from "@/lib/invitations/attention";
 import type { WorkerDocumentGapResult } from "@/lib/conversation/documents-gap-server";
+import {
+  DOCUMENT_GAP_LINE_CAP,
+  groupMissingDocumentsByType,
+} from "@/lib/conversation/documents-gap";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
+import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
 
 /**
  * THE OPENING BRIEF (owner ruling 2026-07-29, W2).
@@ -80,6 +88,27 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     }
   } catch {
     /* no line — a failed read never invents an offer */
+  }
+
+  // 0a ── an invitation addressed to THIS person (owner contract §4D: someone
+  // is waiting on you; §15 the learner's invitation, §9 the employer's).
+  // Transactional e-mail is an owner gate — until it opens, this line is how
+  // a signed-in person learns they were invited at all. The ONE domain read
+  // (lib/invitations/attention: the network page's canonical invitations +
+  // the dashboard card's roster invitations, pending, the caller's verified
+  // e-mail); the chip opens the in-chat decision over the SAME accept those
+  // pages call. Names the inviter when known, never invents one.
+  try {
+    if (lines.length < MAX_LINES) {
+      const inv = await listInvitationsAddressedToMe();
+      if (inv.status === "ok" && inv.total > 0) {
+        const first = inv.items[0];
+        lines.push(t("briefInvitations", { count: inv.total, who: first.organizationName ?? first.inviterName ?? t("invitationSomeone") }));
+        addChip("invitations", t("chipInvitations"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents an invitation */
   }
 
   // 0b ── a document about to expire (owner contract 2026-09-04 §4D/§14).
@@ -157,6 +186,41 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     /* no line */
   }
 
+  // 3a ── work instructions waiting — a manager asked for something (e.g. a
+  // readiness document, §11/§12): the canonical unread-instruction read and
+  // the one chip to the instructions page. Never a count that is not real.
+  try {
+    if (lines.length < MAX_LINES) {
+      const waiting = await listAttentionInstructions();
+      if (waiting.length > 0) {
+        lines.push(t("briefInstructions", { count: waiting.length }));
+        addChip("link:/dashboard/instructions", t("chipInstructions"));
+      }
+    }
+  } catch {
+    /* no line */
+  }
+
+  // 3a' ── the employer CONFIRMED this person's work (owner contract §14 —
+  // WORK → EVIDENCE → EMPLOYER CONFIRMATION → VERIFIED CAPABILITY → LIVING
+  // IDENTITY, read back on the PERSON's side). The line is derived from the
+  // canonical evidence rows themselves (journal_entry_confirmations inside a
+  // trailing window) — the SAME rows the journal list and the card derive
+  // from; no parallel notification truth, no "seen" table. The chip opens
+  // the one surface that shows the verified state: the person's card.
+  try {
+    if (lines.length < MAX_LINES) {
+      const workerId = await getOwnWorkerId();
+      const fresh = workerId ? await loadOwnRecentConfirmations(workerId) : null;
+      if (fresh && fresh.approvedEntries > 0) {
+        lines.push(t("briefWorkConfirmed", { count: fresh.approvedEntries, skills: fresh.skillsConfirmed }));
+        addChip("player-card", t("chipMyCard"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents a confirmation */
+  }
+
   // 3b ── unread human messages (owner audit §4.4/§8: with the tab row gone,
   // Messages is a conversation-driven projection — the brief is where a real
   // unread thread announces itself, with the one chip that opens it).
@@ -174,9 +238,32 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
 
   // 3b ── documents missing for the person's OWN stated countries. No
   // country stated → no line (the chat asks, the brief never guesses).
+  //
+  // NAMED, NOT COUNTED (owner window 11 §24). Production said "Trūksta 9
+  // dokumentų jūsų šalims." and nothing else: not which document, not which
+  // country, not whether it is required or merely conditional. The product
+  // already knew all three — `deriveDocumentGap` carries `documentTypeSlug`,
+  // `country` and `requirementLevel` per row, and `runDocumentsReadiness`
+  // renders them — so the brief was the ONE surface throwing the answer away.
+  // It now reuses the SAME `groupMissingDocumentsByType` the workflow uses
+  // (one name per type, its countries beside it), so the two can never
+  // disagree. `missing` never contains a `recommended` row, so naming these
+  // as things the countries require is a fact, not an inference.
   try {
     if (docGap && docGap.kind === "ok" && docGap.gap.expiring.length === 0 && docGap.gap.missing.length > 0 && docGap.countries.length > 0 && lines.length < MAX_LINES) {
-      lines.push(t("briefDocumentsMissing", { count: docGap.gap.missing.length }));
+      const tDocs = await getTranslations("documents");
+      const tLm = await getTranslations("labourMarket");
+      const countryName = (code: string) =>
+        tLm.has(`countryNames.${code}`) ? (tLm(`countryNames.${code}` as never) as string) : code;
+      const list = groupMissingDocumentsByType(docGap.gap.missing, DOCUMENT_GAP_LINE_CAP)
+        .map((g) => {
+          const name = tDocs.has(`types.${g.documentTypeSlug}`)
+            ? (tDocs(`types.${g.documentTypeSlug}` as never) as string)
+            : g.documentTypeSlug;
+          return `${name} (${g.countries.map(countryName).join(", ")})`;
+        })
+        .join("; ");
+      lines.push(t("briefDocumentsMissing", { count: docGap.gap.missing.length, list }));
       addChip("documents-centre", t("documentsChip"));
     }
   } catch {
@@ -325,6 +412,19 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
       if (waiting > 0) {
         lines.push(t("briefEmployerInterestWaiting", { count: waiting }));
         addChip("candidates", t("chipInterestOnMyNeeds"));
+      }
+    }
+    // Workers who ANSWERED the company's own booking proposals — accepted or
+    // declined — since the bookings surface was last opened (or inside the
+    // last 14 days when it never was). Prod walk 2026-09-05: a worker's
+    // decline in the chat left the employer's next greeting silent. Same
+    // read the bookings badge uses; the caller's own moves never count.
+    if (lines.length < MAX_LINES) {
+      const { getBookingResponsesNewCount } = await import("@/lib/booking/booking-actions");
+      const answered = await getBookingResponsesNewCount({ fallbackDays: 14 });
+      if (answered > 0) {
+        lines.push(t("briefEmployerBookingResponses", { count: answered }));
+        addChip("link:/dashboard/bookings", t("chipEmployerBookings"));
       }
     }
   } catch {

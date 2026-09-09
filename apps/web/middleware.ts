@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/lib/i18n/routing";
+import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
 import { LANDING_MODE_COOKIE } from "@/lib/telemetry/landing-experience";
 import { env } from "@/lib/env";
 import { buildReturnValue } from "@/lib/auth/redirect";
@@ -67,6 +68,25 @@ function maybeForwardStrayOauthCode(
   const target = request.nextUrl.clone();
   target.pathname = `/${locale}/auth/callback`;
   return NextResponse.redirect(target, 307);
+}
+
+/** A language code we do not route is not a page name.
+ *
+ *  `/sv` currently resolves to `/lt/sv` — next-intl does not recognise `sv`,
+ *  so it prefixes the default locale and a Swedish reader following Swedish
+ *  acquisition copy lands on a Lithuanian page. Runs BEFORE `intl` because
+ *  after it the language code has already become a path segment. 307, not 308:
+ *  the condition ends the day the Swedish catalog reaches parity, and a cached
+ *  permanent redirect would outlive it. Reasoning and measurements in
+ *  lib/i18n/unsupported-language.ts. */
+function maybeRedirectUnroutedLanguage(
+  request: NextRequest,
+): NextResponse | undefined {
+  const target = unsupportedLanguageRedirectPath(request.nextUrl.pathname);
+  if (target === null) return undefined;
+  const url = request.nextUrl.clone();
+  url.pathname = target;
+  return NextResponse.redirect(url, 307);
 }
 
 /** Locale-stripped pathname, e.g. "/lt/dashboard" → "/dashboard". */
@@ -148,6 +168,12 @@ export async function middleware(request: NextRequest) {
   // 0b. Stray OAuth code on the root (Site-URL fallback) → locale callback.
   const codeForward = maybeForwardStrayOauthCode(request);
   if (codeForward) return codeForward;
+
+  // 0c. An unrouted LANGUAGE code (`/sv`, `/pl`, `/uk`) → the English product.
+  //     Must precede intl: intl would turn the language code into a path
+  //     segment under the default locale and the information is then gone.
+  const languageRedirect = maybeRedirectUnroutedLanguage(request);
+  if (languageRedirect) return languageRedirect;
 
   // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite. When intl
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+
+import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
 import {
@@ -15,6 +17,10 @@ import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { buildEmailConfirmRedirectTo } from "@/lib/auth/email-confirm";
+import {
+  needsOnboardingCheck,
+  postLoginDestination,
+} from "@/lib/auth/post-login-destination";
 import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
 import { clearSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -181,15 +187,34 @@ export function LoginForm({
     trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "password" });
     try {
       const supabase = createClient();
-      const { error: err } = await supabase.auth.signInWithPassword({
+      const { data, error: err } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
       if (err) throw err;
+      // A destination is at stake (`?next=` — the landing sentence, an
+      // invitation, a pending authorization): a person who has not finished
+      // onboarding must reach the wizard WITH it, exactly as the OAuth /
+      // e-mail-link callback already does. Without this read the dashboard
+      // layout bounced to a bare /onboarding and the sentence was lost
+      // (measured on production 2026-09-06). Own row under RLS; a failed
+      // read falls back to today's navigation (lib/auth/post-login-destination).
+      let onboardedAt: string | null | undefined;
+      const userId = data.user?.id;
+      if (needsOnboardingCheck(nextParam) && userId) {
+        const { data: prof, error: profErr } = await supabase
+          .from("profiles")
+          .select("onboarded_at")
+          .eq("id", userId)
+          .maybeSingle();
+        if (!profErr && prof) onboardedAt = prof.onboarded_at ?? null;
+      }
       // `next` already includes the locale prefix (or got one from
       // `getSafeReturnPath`), so use the raw `window.location` navigation
       // route instead of the locale-aware Link.
-      window.location.assign(nextPath);
+      window.location.assign(
+        postLoginDestination({ locale, nextParam, nextPath, onboardedAt }),
+      );
     } catch (e) {
       console.error("[login] signInWithPassword failed:", e);
       setStatus("error");
@@ -229,6 +254,10 @@ export function LoginForm({
           {t("subcopy")}
         </p>
       </header>
+
+      {/* Owner window 11 §21 — the sentence the visitor typed on the
+          landing travels in `?next=`; this is where they can see that it did. */}
+      <AuthCarriedIntent next={nextParam} />
 
       {passwordWasReset && (
         // Confirms the reset actually saved, in the place the reset flow

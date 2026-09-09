@@ -63,6 +63,8 @@ const READS = read("lib/tasks/tasks.ts");
 const ACTIONS =
   read("lib/tasks/task-actions.ts") +
   read("lib/tasks/create-task-core.ts") +
+  // §14 / §5.5: the ONE status write, shared by the page action and the chat
+  read("lib/tasks/set-task-status-core.ts") +
   read("lib/tasks/task-chat-actions.ts");
 const PAGE_REL = "app/[locale]/dashboard/tasks/page.tsx";
 const PAGE = read(PAGE_REL);

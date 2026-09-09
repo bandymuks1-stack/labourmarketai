@@ -4,6 +4,7 @@ import {
   deriveEvidenceTimeline,
   deriveSkillEvidence,
 } from "@/lib/player-card/evidence-visuals";
+import { deriveProvenance } from "@/lib/evidence/provenance";
 
 /**
  * THE one public sample Player Card (S3 player-card honesty).
@@ -118,5 +119,15 @@ export function buildSampleWorkerPlayerCard(opts: {
         { slug: "customer-service", verified: false, source: "self" },
       ],
     ),
+    /**
+     * P6 — the sample's provenance goes through THE SAME derivation the
+     * signed-in card uses, from the sample's own declared facts (no confirmation
+     * rows exist for a sample, so the class comes from its verified skills
+     * only and renders without a confirmer or a date — never an invented one).
+     */
+    provenance: deriveProvenance({
+      journalEntries: 23,
+      skill: { verified: true, source: "work_journal" },
+    }),
   };
 }

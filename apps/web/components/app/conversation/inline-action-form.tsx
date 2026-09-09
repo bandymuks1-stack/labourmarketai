@@ -149,7 +149,11 @@ export function InlineActionForm({
               ? t("conversation.forms.ui.errorNeedsMigration")
               : res.code === "conflict"
                 ? t("conversation.forms.ui.errorConflict")
-                : t("conversation.forms.ui.errorGeneric");
+                : res.code === "over_open_need_limit_upgrade"
+                  ? t("conversation.forms.ui.errorOpenNeedLimitUpgrade")
+                  : res.code === "over_open_need_limit_individual"
+                    ? t("conversation.forms.ui.errorOpenNeedLimitIndividual")
+                    : t("conversation.forms.ui.errorGeneric");
         setPhase({ kind: "error", message });
       }
     });

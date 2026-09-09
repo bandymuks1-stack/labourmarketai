@@ -782,14 +782,124 @@ describe("NO new DB migration in this PR", () => {
     // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
     // Bumped 262 -> 263 for owns_company governance membership (Lane A real
     // recruiter, 2026-09-04, RED draft).
-    // summed: `ls supabase/migrations/*.sql | wc -l` = 263.
-    // Bumped 263 -> 264 for the first-party supply bridge
-    // (20260904120000_first_party_supply_representation_v1, paired rollback) —
-    // RED draft: new consent purpose + declaration table + six SECURITY
-    // DEFINER functions, one of them service_role-only. Additive; no existing
-    // table, policy or column altered. UNAPPLIED. RECOUNTED from the tree,
-    // never summed: `ls supabase/migrations/*.sql | wc -l` = 264.
-expect(count).toBeLessThanOrEqual(264);
+    // Bumped 263 -> 265 for public_plans_v1 (#1548, applied) + billing safety invariants v1 (2026-09-05, RED
+    // billing, draft + needs-human-gate, UNAPPLIED until owner approval):
+    // additive ordering/amount evidence columns on billing_subscriptions,
+    // event_created_at on payment_webhook_events, billing_customers key
+    // widened by test_mode, new billing_checkout_operations table (admin
+    // SELECT, service-role writes). No data loss.
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
+    // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
+    // window 6, 2026-09-06, GREEN additive partial index for the board
+    // supply-freshness read; paired rollback). RECOUNTED from the tree:
+    // `ls supabase/migrations/*.sql | wc -l` = 266.
+    // Bumped 266 -> 267 for worker_board_excludes_supply_v1 (owner window 7
+    // §4, 2026-09-06): the worker board's gated read had NO `kind` filter, so
+    // agency SUPPLY offers (kind='agency_offer') were served to every worker
+    // as open jobs — measured 2 of 9 rows on production. RED class
+    // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
+    // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06) —
+    // the fifth surface of the market-direction defect class, found by
+    // sweeping every SECURITY DEFINER reader of customer_requests.
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 273 files.
+    //
+    // 269 -> 270: the two 2026-09-07 owner-approved migrations
+    // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
+    // are now APPLIED (ledger 20260907180944 and 20260907180546) and both
+    // carry `@human-gate-approved` naming the decisions EVID-1 / DEM-9. The
+    // comments that stood here called them "NOT applied" and said they carry
+    // "NO marker"; that was true when written and is false now, so it is
+    // corrected rather than carried forward. They remain RED class - a marker
+    // acknowledges risk, it never reclassifies a file to GREEN.
+    //
+    // 270 -> 271: the notification-spine service_role grant (20260906060000,
+    // #1566). Two additive grants - select/insert/update on
+    // notification_events, select on notification_preferences - so the
+    // emitters and the email dispatcher's consent read stop failing 42501.
+    // Measured on production 2026-09-07: service_role holds NO privilege on
+    // either table, and `rolbypassrls` is true, so RLS is not the blocker -
+    // the missing GRANT is. RED (privilege surface), owner-gated. The line
+    // here once said "NOT applied"; the owner approved it and it went to
+    // production 2026-09-08 as ledger 20260908061619, so that is corrected
+    // rather than carried forward. RED class is unchanged by having applied.
+    //
+    // 271 -> 272: the recipient-discovery reads (20260908070000, same PR).
+    // The write grant alone did NOT fix the cron. The first real invocation
+    // after it landed still returned HTTP 503 - not 401, so auth was fine and
+    // the function ran ~930 ms before failing. The digest sweep opens by
+    // reading journal_entries.worker_id and then workers(id, profile_id), and
+    // service_role held no privilege on EITHER, so PostgREST answered 42501
+    // and `if (error) return { kind: "unavailable" }` became the 503 before a
+    // single row could be written (notification_events was still 2 rows / 0
+    // digests afterwards - nothing was half-delivered). Reproduced under
+    // `set local role service_role` in a deliberately aborted transaction:
+    // journal_entries=BLOCKED_42501 workers=BLOCKED_42501. SELECT ONLY on
+    // both; no write privilege, because the spine reads domain rows and never
+    // writes them. It also un-breaks `workerProfileId()`, which discards its
+    // error and so reported a denied read as "row_unreadable" - the booking
+    // and absence emitters were silently dead for the same reason. Email is
+    // NOT implicated: the email hop runs only after a successful insert, is
+    // wholly try/caught, and stops at `channel_disabled` with 0 opt-ins.
+    // RED (privilege surface), owner-approved, APPLIED to production
+    // 2026-09-08 as ledger 20260908065654.    //
+    // 272 -> 273: the evidence-parties recursion repair (20260907220000,
+    // #1618). Owner decision EVID-1, approved 2026-09-08 and applied via
+    // Supabase MCP apply_migration as ledger 20260908080950. It breaks the
+    // mutual organization_evidence_records <-> _parties policy cycle with a
+    // SECURITY DEFINER boolean holding the predicate the policy used to
+    // inline. Verified after the apply: all four formerly-recursing tables
+    // read under a real manager, a full write chain ran in a rolled-back
+    // transaction (records + parties INSERT ... RETURNING), a person who
+    // manages nothing read 0 with no error, anon is REFUSED EXECUTE on the
+    // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
+    // + policy replace) - applying it does not make it GREEN.
+
+        //
+    // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
+    // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
+    // the two ambiguous cases stay UNMAPPED on purpose, because generic
+    // "teacher" had mapped to a tertiary POLITICS LECTURER and generic
+    // "caregiver" to COMPANIONS/VALETS. UNKNOWN is the correct answer for an
+    // ambiguous occupation; confidently wrong is the defect this removes.
+    // Verified by fingerprint match between production and the file.
+    //
+    // 274 -> 275: the anonymous board's total_count (20260906080000, #1572).
+    // Owner-approved 2026-09-08 WITH A CONDITION (a dedicated guard, which is
+    // lib/guards/jobs-count-secdef-v2.test.ts). `count(*) over ()` window-
+    // counted every live row on every anon call; measured on production with
+    // both bodies timed back-to-back in one transaction, warmed: unfiltered
+    // 97/90 ms warm and 3351 ms COLD -> 1/1 ms, against anon's
+    // statement_timeout=3s. The profession filter costs ~14 ms more because
+    // the filtered total became a second scan - a real regression, far below
+    // the timeout, recorded rather than hidden. RED (SECURITY DEFINER body
+    // replace); body only - same signature, same projection, no GRANT.
+    //
+    // 275 -> 276: the accepted-worker organization binding (20260902230000,
+    // #1436, port). REPRODUCED on production 2026-09-08: the legacy roster
+    // accept links a worker into company_workers and writes NO
+    // engagement_contexts row, so `belongs_to_organization` is false for them
+    // and SIX RLS policies lock them out of their own employer - including the
+    // `organizations` row itself. Four of seven active company_workers are in
+    // that state today. It binds a RELATIONSHIP, never a governance seat:
+    // company_memberships is deliberately untouched, because a membership row
+    // would hand demand-shaped access to every accepted employee and collapse
+    // the multi-actor model. Body re-derived from the LIVE function rather than
+    // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
+    // UNAPPLIED and owner-gated.
+    //
+    // 276 -> 277: the first-party supply bridge
+    // (20260904120000_first_party_supply_representation_v1, paired rollback).
+    // A new consent purpose, the partner_supply_representation declaration
+    // table with three owner-only policies and no delete policy, and six
+    // SECURITY DEFINER functions — one of them (first_party_supply_feed_v1)
+    // revoked from authenticated and granted to service_role ONLY. Additive:
+    // no existing table, policy or column is altered and nothing is dropped.
+    // RED class; owner approval given 2026-09-09 for THIS migration only.
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 277 files.
+expect(count).toBeLessThanOrEqual(277);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

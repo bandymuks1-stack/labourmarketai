@@ -25,6 +25,10 @@ import { groupLinkedSkillIdsByEntry } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
 import {
+  deriveWorkVerificationState,
+  type VerifierContextFacts,
+} from "@/lib/journal/work-verification-state";
+import {
   listJournalEntries,
   type JournalEntryListRow,
 } from "@/lib/journal/journal-list-core";
@@ -115,6 +119,10 @@ export default async function JournalPage({
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tQuick = await getTranslations("quickNav");
+  // "Kam pateikti atliktą darbą?" — the verification-state vocabulary. One
+  // key per canonical state and per next action; the page never spells the
+  // words itself.
+  const tVerify = await getTranslations("journal.verification");
   // The COLLAPSED card row is now the only thing naming the card on this page,
   // so it names it the way every other entry point does. `quickNav.identity`
   // stays shared with the profile hub's own `#profile-identity` anchor — one
@@ -262,6 +270,53 @@ export default async function JournalPage({
       isPrimary: e.is_primary,
     };
   });
+
+  /**
+   * "KAM PATEIKTI ATLIKTĄ DARBĄ?" — the worker's own question, answered.
+   * (Owner P0; the orphaned-work-records defect, connected 2026-09-07.)
+   *
+   * ── THE GAP THIS CLOSES ────────────────────────────────────────────────
+   * `deriveWorkVerificationState` shipped on 2026-09-06 with the full state
+   * model — and NOT ONE consumer. So the model existed and the worker was
+   * still told nothing. Measured on production today: of 34 live journal
+   * entries, **17 sit in an active `employee` engagement context that has no
+   * organization at all**, and every one of them is unconfirmed. There are 56
+   * such contexts. Half of all recorded work on this platform can reach no
+   * verifier, and until now the product rendered that as an ordinary blank.
+   *
+   * This is the whole fix: the facts were already loaded (the contexts query
+   * above already selects `organization_id`, `journal_review_enabled`,
+   * `relationship_slug` and `status`), so connecting them costs one map and
+   * no new read.
+   *
+   * It never invents a verifier and never marks anything verified — `verified`
+   * is reachable only from a real recorded confirmation row.
+   */
+  const contextFacts = new Map<string, VerifierContextFacts>(
+    (ecRows ?? []).map((r) => {
+      const row = r as {
+        id: string;
+        organization_id?: string | null;
+        journal_review_enabled?: boolean | null;
+        relationship_slug?: string | null;
+        status?: string | null;
+      };
+      return [
+        row.id,
+        {
+          organizationId: row.organization_id ?? null,
+          journalReviewEnabled: row.journal_review_enabled === true,
+          relationshipSlug: row.relationship_slug ?? "employee",
+          status: row.status ?? "active",
+        },
+      ];
+    }),
+  );
+
+  /** Where the worker goes to name the employer this work was done for. The
+   *  self-declared work-history editor writes the engagement context that a
+   *  confirmation can then reach. */
+  const IDENTIFY_VERIFIER_HREF = "/dashboard/profile#capabilities";
 
   // Workspace context chips (real-user workflow rebuild W1): a worker with
   // SEVERAL engagements reads their mixed stream with an explicit per-entry
@@ -1163,6 +1218,23 @@ export default async function JournalPage({
                       const timeline = deriveReviewTimeline(
                         e.journal_entry_confirmations,
                       );
+                      /**
+                       * The answer to "who can confirm this?", per entry.
+                       *
+                       * The recorded decision always wins; the context only
+                       * decides what the honest WAITING state is. A row with no
+                       * organization behind it is `self_reported` — real,
+                       * permanent, legitimate evidence that simply nobody has
+                       * verified — never a blank pretending to be fine.
+                       */
+                      const verification = deriveWorkVerificationState({
+                        reviewResult: deriveReviewResult(
+                          e.journal_entry_confirmations,
+                        ),
+                        context: e.engagement_context_id
+                          ? (contextFacts.get(e.engagement_context_id) ?? null)
+                          : null,
+                      });
                       const metrics = e.journal_entry_metrics ?? [];
                       const area =
                         metrics.find((m) => m.metric_slug === "quantity") ??
@@ -1353,6 +1425,37 @@ export default async function JournalPage({
                                   {engagementChips.get(e.engagement_context_id)!.label}
                                 </p>
                               )}
+                            {/* WHO CAN CONFIRM THIS. Shown on every entry that
+                                is not already decided, because "nobody yet" is
+                                the answer a worker most needs and the one the
+                                product used to withhold. The next action is a
+                                real destination, never advice. */}
+                            {verification.nextAction !== "none" && (
+                              <p
+                                className="flex flex-wrap items-center gap-1.5 text-meta text-text-muted"
+                                data-testid={`journal-entry-verification-${e.id}`}
+                                data-verification-state={verification.state}
+                                data-next-action={verification.nextAction}
+                              >
+                                <span className="text-text-secondary">
+                                  {tVerify(`state.${verification.state}`)}
+                                </span>
+                                {verification.nextAction ===
+                                "identify_verifier" ? (
+                                  <Link
+                                    href={IDENTIFY_VERIFIER_HREF as "/dashboard"}
+                                    className="underline underline-offset-2 hover:text-text-primary"
+                                    data-testid={`journal-entry-identify-verifier-${e.id}`}
+                                  >
+                                    {tVerify("action.identify_verifier")}
+                                  </Link>
+                                ) : (
+                                  <span>
+                                    {tVerify(`action.${verification.nextAction}`)}
+                                  </span>
+                                )}
+                              </p>
+                            )}
                           </div>
                           {/* 2 · Sistema suprato — current signals from the current
                         text. Plain labelled values, never a badge wall. */}

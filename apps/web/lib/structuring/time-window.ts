@@ -86,6 +86,7 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
     kind: "next_month",
     res: [
       /kita\s+men/u, // kitą mėnesį (folded "kita menesi")
+      /kito\s+men/u, // "nuo kito mėnesio" — from next month
       /ateinanti\s+men/u,
       /next\s+month/u,
       /следующ[\p{L}]*\s+месяц/u,
@@ -173,6 +174,25 @@ export function parseStartDate(text: string, todayIso: string): string | null {
     const month = monthOf(monthFirst[1]);
     if (month) return nextOccurrence(todayIso, month, Number.parseInt(monthFirst[2], 10));
   }
+  // A bare month after the from-word — "nuo spalio", "from October", "с
+  // октября" — is how an employer states a start most of the time
+  // (production 2026-09-06: "reikia suvirintojo nuo spalio" left the start
+  // empty). The FIRST of that month is the coarsest honest day; the month
+  // already running means "from now". Never a guess at a later day.
+  const bareMonth = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${FROM_WORD}\\s+([\\p{L}]+)(?![\\p{L}])`, "u"),
+  );
+  if (bareMonth) {
+    const month = monthOf(bareMonth[1]);
+    if (month) {
+      if (utc(todayIso).getUTCMonth() + 1 === month) return todayIso;
+      return nextOccurrence(todayIso, month, 1);
+    }
+  }
+  // "rytoj" / "nuo rytojaus" / "tomorrow" / "завтра" / "morgen" / "jutro".
+  if (/(?:^|[^\p{L}])(?:rytoj|tomorrow|завтра|morgen|jutro)/u.test(folded)) {
+    return plusDays(todayIso, 1);
+  }
   return null;
 }
 
@@ -215,6 +235,37 @@ export function parseEndDate(text: string, todayIso: string, startIso: string | 
     if (month) return nextOccurrence(anchor, month, Number.parseInt(monthFirst[2], 10));
   }
   return null;
+}
+
+/**
+ * The deadline phrase parseEndDate read, removed from the ORIGINAL text so a
+ * title pre-filled from the same sentence does not keep it as a tail
+ * (prod polish 2026-09-04: "pridėk užduotį projektui: sumontuoti pastolius
+ * iki 2026-10-03" pre-filled the title WITH "iki 2026-10-03" while the due
+ * date was already its own field). Only a phrase this module recognises is
+ * removed — a month word must be a real month; anything else stays.
+ */
+export function stripEndDatePhrase(text: string): string {
+  const src = text ?? "";
+  const forms = [
+    `${UNTIL_WORD}\\s+\\d{4}-\\d{2}-\\d{2}(?!\\d)`,
+    `${UNTIL_WORD}\\s+\\d{1,2}[./]\\d{1,2}[./]\\d{4}(?!\\d)`,
+    `${UNTIL_WORD}\\s+\\d{1,2}\\.?\\s+[\\p{L}]+`,
+    `${UNTIL_WORD}\\s+[\\p{L}]+\\s+\\d{1,2}(?!\\d)`,
+  ];
+  for (const form of forms) {
+    const rx = new RegExp(`(^|[^\\p{L}])(${form})`, "iu");
+    const m = src.match(rx);
+    if (!m || m.index === undefined) continue;
+    const phrase = m[2];
+    // month-word forms: the word must be a month this module knows
+    const word = phrase.match(/[\p{L}]+\s*$/u)?.[0] ?? phrase.match(/\s([\p{L}]+)\s+\d{1,2}$/u)?.[1];
+    const numeric = /\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}[./]\d{4}/.test(phrase);
+    if (!numeric && (!word || !monthOf(foldText(word)))) continue;
+    const start = m.index + m[1].length;
+    return (src.slice(0, start) + src.slice(start + phrase.length)).replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
+  }
+  return src.trim();
 }
 
 /** "2027-3-31" → "2027-03-31" when it is a real calendar day, else null (a

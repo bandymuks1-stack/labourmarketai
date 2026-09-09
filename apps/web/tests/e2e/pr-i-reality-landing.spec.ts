@@ -57,10 +57,11 @@ async function assertLandingSections(page: Page, _locale: string) {
   await expect(page.getByTestId("market-moment")).toBeVisible();
   await expect(page.locator('svg[viewBox="0 0 1000 389"]')).toHaveCount(0);
 
-  // Final CTA band: the one section that carries all four doors.
+  // Final CTA band: the one section that carries all five doors (worker,
+  // employer, agency, institution — window 6 G-C1 — and partner).
   const band = finalCtaBand(page);
   await expect(band).toBeVisible();
-  await expect(band.locator("a")).toHaveCount(4);
+  await expect(band.locator("a")).toHaveCount(5);
 }
 
 /** The final CTA band is the only section containing BOTH the /about door and

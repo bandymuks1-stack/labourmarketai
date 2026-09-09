@@ -61,6 +61,10 @@ export function MobileSheet({
       role="dialog"
       aria-label={title}
       aria-modal="true"
+      // Portalled to <body>, so the shell's `[data-chrome]` mobile tap floor
+      // (globals.css) would not reach the sheet's controls; this attribute is
+      // the second anchor of that floor.
+      data-mobile-sheet=""
       className="fixed inset-0 z-50 flex flex-col justify-end md:hidden"
     >
       <button

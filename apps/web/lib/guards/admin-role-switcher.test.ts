@@ -58,7 +58,7 @@ describe("Guard: dashboard layout derives isAdmin from a DUAL signal", () => {
 
   it("calls deriveIsAdmin with both profile.active_role and rolesRows", () => {
     expect(layout).toMatch(
-      /deriveIsAdmin\(\s*\{[\s\S]{0,200}activeRole:\s*profile\.active_role[\s\S]{0,200}profileRoles:\s*rolesRows\s*\?\?\s*\[\]/,
+      /deriveIsAdmin\(\s*\{[\s\S]{0,200}activeRole:\s*profile\??\.active_role\s*(\?\?\s*null)?[\s\S]{0,200}profileRoles:\s*rolesRows\s*\?\?\s*\[\]/,
     );
   });
 

@@ -144,11 +144,16 @@ export default async function VerifiedCvPage({
     })),
   ];
 
+  // A count we could not read is null (see lib/profile/trust-signals.ts). It
+  // must never reach the page as a raw value: React renders null as an empty
+  // box, and the compact path INTERPOLATES it, which printed the literal word
+  // "null" onto a person's CV. An em dash in both places, and never a 0 -
+  // this document is what they hand to an employer.
   const summary = [
     { key: "verifiedSkills", value: cv.signals.verifiedSkills },
     { key: "managerConfirmations", value: cv.signals.managerConfirmations },
     { key: "journalEntries", value: cv.signals.journalEntries },
-  ] as const;
+  ].map((s) => ({ ...s, text: s.value === null ? "—" : String(s.value) }));
 
   // ONE guard-pinned visibility decision — a section with no data does not
   // exist on the export (no empty headers on a printed CV).
@@ -434,7 +439,7 @@ export default async function VerifiedCvPage({
                     {t(`summary.${s.key}`)}
                   </dt>
                   <dd className="mt-1 font-display text-2xl font-bold">
-                    {s.value}
+                    {s.text}
                   </dd>
                 </div>
               ))}
@@ -442,7 +447,7 @@ export default async function VerifiedCvPage({
           ) : (
             <p className="mt-3 text-xs text-zinc-600" data-testid="cv-summary">
               {summary
-                .map((s) => `${t(`summary.${s.key}`)}: ${s.value}`)
+                .map((s) => `${t(`summary.${s.key}`)}: ${s.text}`)
                 .join(" · ")}
             </p>
           )}
@@ -752,6 +757,18 @@ export default async function VerifiedCvPage({
                           data-testid="cv-proof-auto-confirm-qualifier"
                         >
                           {" "}· {tTier("autoConfirmQualifier")}
+                        </span>
+                      ) : null}
+                      {/* EVID-2: a self-confirmation is real, and it is not an
+                          employer's word. It is labelled here rather than
+                          hidden, so this document cannot present the worker's
+                          own attestation as somebody else's. */}
+                      {row.selfConfirmed ? (
+                        <span
+                          className="text-zinc-500"
+                          data-testid="cv-proof-self-confirm-qualifier"
+                        >
+                          {" "}· {tTier("selfConfirmQualifier")}
                         </span>
                       ) : null}
                     </td>

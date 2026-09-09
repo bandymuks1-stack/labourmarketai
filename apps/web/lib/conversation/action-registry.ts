@@ -42,6 +42,7 @@ export type ActionPrecondition =
   | "has_worker_row"
   | "has_worker_direction" // profession/direction set (skills need it)
   | "has_open_booking" // an incoming proposed booking exists
+  | "has_pending_invitation" // an invitation addressed to the caller is pending
   | "has_visible_demand" // a currently-visible approved demand exists
   | "has_company"
   | "has_agency"
@@ -309,6 +310,22 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "respondBookingAction" },
   },
   {
+    // Owner contract 4D / 15 / 9: an invitation addressed to the person,
+    // answered from the attention item. Accepting creates a real relationship
+    // (an engagement), hence the strong tier; the network page's own accept.
+    id: "worker.respond-invitation",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.respondInvitation.label",
+    descriptionKey: "conversation.actions.worker.respondInvitation.description",
+    confirmation: "strong_irreversible",
+    precondition: "has_pending_invitation",
+    migrationSensitive: true,
+    telemetryEvent: E.invitationAccepted,
+    advancedRoute: "/dashboard/network",
+    handler: { kind: "server_action", ref: "acceptInvitationByIdAction" },
+  },
+  {
     id: "worker.express-interest",
     subject: "worker",
     allowedRoles: ["worker"],
@@ -555,6 +572,25 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "assignWorkerToProjectAction" },
   },
   {
+    /**
+     * §11 (owner contract 2026-09-04) — the WHAT-IF move: a person leaves
+     * project X for project Y. The chat shows the consequences on both sides
+     * from canonical reads first; this action is the confirmed commit — two
+     * canonical RPCs in the safe order (assign to Y, then end X).
+     */
+    id: "company.move-worker",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.moveWorker.label",
+    descriptionKey: "conversation.actions.company.moveWorker.description",
+    confirmation: "strong_irreversible", // binds + ends assignments
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "assignWorkerToProjectAction" },
+  },
+  {
     // §7.1 — the EMPLOYER's door to the `engagements` result. The mirror of
     // `worker.review-engagements`; see that entry for why there are two doors
     // and one result.
@@ -689,6 +725,125 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     telemetryEvent: E.companyDemandActionClicked,
     advancedRoute: "/dashboard/projects",
     handler: { kind: "server_action", ref: "updateStageStatusAction" },
+  },
+  {
+    /**
+     * WORK PERFORMED → RESULT (owner contract 2026-09-04 §14): a task moved
+     * to a real status — "užduotis sumontuoti pastolius atlikta" by
+     * sentence, or the task row's own control on the tasks page. Both enter
+     * the ONE status core. A WORKER may close the task they were given: the
+     * RPC (`set_work_task_status_v2`) re-checks creator / assignee / project
+     * manager, so the role gate here is deliberately the union of the three
+     * and the row-level authority stays in SQL. Result is a stored status.
+     */
+    id: "company.update-task-status",
+    subject: "company",
+    allowedRoles: ["company", "agency", "worker"],
+    labelKey: "conversation.actions.company.updateTaskStatus.label",
+    descriptionKey: "conversation.actions.company.updateTaskStatus.description",
+    confirmation: "reversible_write",
+    precondition: "authenticated",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/tasks",
+    handler: { kind: "server_action", ref: "setWorkTaskStatusAction" },
+  },
+  {
+    /**
+     * READINESS → CORRECTIVE ACTION (owner contract 2026-09-04 §11, §12 "what
+     * is missing → who / what can help → action", §16): a manager-kept
+     * checklist row moved to a real status — "Gauta: A1 (Jonas)" by chip
+     * right after the readiness answer, or the row's own control on the
+     * operations page. Both call the ONE write; the RPC re-checks the gate.
+     */
+    id: "company.set-readiness-item",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.setReadinessItem.label",
+    descriptionKey: "conversation.actions.company.setReadinessItem.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "upsertReadinessItemAction" },
+  },
+  {
+    /**
+     * READINESS → CORRECTIVE ACTION: start the standard document checklist
+     * for every person on the project (the operations page's own seed, per
+     * person, with the same default labels) — offered when nothing is
+     * tracked yet, so "kas trūksta?" has real rows to answer from.
+     */
+    id: "company.seed-readiness-checklist",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.seedReadinessChecklist.label",
+    descriptionKey: "conversation.actions.company.seedReadinessChecklist.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "seedReadinessItemsAction" },
+  },
+  {
+    /**
+     * READINESS → WHO CAN HELP → ACTION: ask the person for what is missing —
+     * a WORK INSTRUCTION in the project's thread (the instructions page's own
+     * send; the RPC requires an active assignment and that the caller manages
+     * the worker). The body is composed from the REAL gap labels, never
+     * invented. Important tier: the chip is the explicit confirmation.
+     */
+    id: "company.request-readiness",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.requestReadiness.label",
+    descriptionKey: "conversation.actions.company.requestReadiness.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "sendWorkInstructionAction" },
+  },
+  {
+    /**
+     * WORK → EVIDENCE → EMPLOYER CONFIRMATION → VERIFIED CAPABILITY (owner
+     * contract 2026-09-04 §14): "patvirtink Jono darbą" — the inbox's
+     * one-tap confirm by chip: approve the entry and verify the declared
+     * skills it proves. Important tier: a trust act on a person's identity;
+     * the chip is the explicit confirmation.
+     */
+    id: "company.confirm-work",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.confirmWork.label",
+    descriptionKey: "conversation.actions.company.confirmWork.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/inbox",
+    handler: { kind: "server_action", ref: "quickConfirmEntry" },
+  },
+  {
+    /**
+     * The one action that makes a person's work confirmable: journal review
+     * switched on for their employee engagement (the membership RPC). The
+     * inbox's toggle and this chip are the same write.
+     */
+    id: "company.enable-journal-review",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.enableJournalReview.label",
+    descriptionKey: "conversation.actions.company.enableJournalReview.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/inbox",
+    handler: { kind: "server_action", ref: "setEngagementJournalReview" },
   },
 
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────

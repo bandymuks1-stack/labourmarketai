@@ -13,7 +13,12 @@ import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readi
 import { MapLayersLegend } from "@/components/app/map-layers-legend";
 import { MarketMapEntityLayers } from "@/components/app/market-map-entity-layers";
 import { MarketMap } from "@/components/app/market-map/market-map";
-import { loadMarketResult } from "@/lib/market-map/market-result";
+import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
+import { loadWorldView } from "@/lib/market-map/world-read";
+import {
+  DEFAULT_WORLD_BOUNDS,
+  DEFAULT_WORLD_ZOOM,
+} from "@/lib/market-map/world-model";
 import { loadVacancyVolume } from "@/lib/market-map/vacancy-volume";
 import { getOwnSpatialCollections } from "@/lib/market-map/spatial-read";
 import { emptySpatialCollections } from "@/lib/market-map/spatial-entities";
@@ -54,10 +59,8 @@ export default async function MarketMapPage({
 
   const tNote = await getTranslations("featureNotes");
   const tMap = await getTranslations("marketMap");
-  // The live-demand map reuses the conversation result's OWN honesty copy
-  // (error ≠ empty), and the vacancy layer reuses the market panel's
-  // profession + derived-occupation lexicon — one vocabulary per fact.
-  const tResults = await getTranslations("conversation.results");
+  // The vacancy layer reuses the market panel's profession +
+  // derived-occupation lexicon — one vocabulary per fact.
   const tExplanation = await getTranslations("marketExplanation");
   const tProfessions = await getTranslations("professions");
   // Marketplace loop reachability (M7): the OFFER half reuses the loop's own
@@ -95,12 +98,19 @@ export default async function MarketMapPage({
   // mounted only self-signal surfaces, while the conversation registry's
   // "advanced" link for the market result points here — a promise this page
   // did not keep). Two clearly separated layers, both origin:"live":
-  //  - the canonical demand read (`loadMarketResult` — the SAME source the
-  //    conversation's market result renders), and
+  //  - the WORLD (P8 subset, stage H2): the canonical demand / people /
+  //    projects reads, VIEWPORT-BOUNDED, clustered, capped at 60 places with
+  //    the folded remainder counted — first rendered here for the default
+  //    Europe viewport, then re-read by the client for the real viewport
+  //    on every pan/zoom (`lib/market-map/world-read.ts`); and
   //  - public vacancy volume for the caller's occupation, projected from the
   //    EXISTING authenticated `getPublicMarketFacts` aggregate.
-  const [marketResult, vacancyVolume] = await Promise.all([
-    loadMarketResult(),
+  const [initialWorld, vacancyVolume] = await Promise.all([
+    loadWorldView({
+      bounds: DEFAULT_WORLD_BOUNDS,
+      zoom: DEFAULT_WORLD_ZOOM,
+      layer: "demand",
+    }),
     loadVacancyVolume(),
   ]);
   const spatialCollections = spatial?.collections ?? emptySpatialCollections();
@@ -230,40 +240,15 @@ export default async function MarketMapPage({
           exists; the active context only changes the focused layer/panel below,
           never whether a separate map exists. */}
       <MarketMapBase identity={mapIdentity} />
-      {/* ── THE REAL MARKET ──────────────────────────────────────────────
-          Live demand from the ONE canonical demand read, on the canonical
-          <MarketMap> (same engine + data as the conversation's market
-          result). Honest states are kept apart: a failed read is an error,
-          zero rows is emptiness — neither borrows the other's sentence, and
-          the map's intrinsic origin badge labels the data as live. */}
-      <section
-        className="flex flex-col gap-2"
-        data-testid="market-map-live-demand"
-      >
-        <h2 className="font-mono text-meta uppercase tracking-label text-brand-cyan">
-          {tMap("liveDemand.title")}
-        </h2>
-        <p className="text-sm leading-relaxed text-text-secondary">
-          {tMap("liveDemand.lead")}
-        </p>
-        {marketResult.failed ? (
-          <p
-            className="rounded-md border border-state-danger/40 bg-state-danger/5 p-3 text-sm text-state-danger"
-            data-testid="market-map-live-demand-error"
-          >
-            {tResults("marketError")}
-          </p>
-        ) : marketResult.empty ? (
-          <p
-            className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-secondary"
-            data-testid="market-map-live-demand-empty"
-          >
-            {tResults("marketEmpty")}
-          </p>
-        ) : (
-          <MarketMap view={marketResult.view} mode="result" layer="demand" />
-        )}
-      </section>
+      {/* ── THE WORLD ────────────────────────────────────────────────────
+          The canonical demand / people / projects layers on the canonical
+          <MarketMap>, viewport-bounded and clustered (≤60 places on screen,
+          the rest COUNTED — "N more places, zoom in"), FACT / DERIVED named
+          in words, honest per-layer states (error ≠ empty ≠ no known places),
+          and the same places as a list (design S). Replaces the unbounded
+          live-demand map this section used to draw; the conversation's own
+          market result (`loadMarketResult`) is untouched. */}
+      <WorldDiscovery initial={initialWorld} />
       {/* Public vacancy volume for the caller's occupation — the
           `getPublicMarketFacts` aggregate (imported public advertisements,
           authenticated read) projected onto the same canonical map as its own

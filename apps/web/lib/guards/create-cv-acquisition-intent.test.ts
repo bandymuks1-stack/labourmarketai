@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 
@@ -98,19 +98,56 @@ describe("PageHero opts in — no other hero's CTA changed", () => {
     expect(hero()).toMatch(/ctaNext\?: string/);
   });
 
-  it("create-cv is the ONLY marketing page passing ctaNext", () => {
-    // A generic page has no single destination to promise; if another page
-    // wants one it must add its own guard rather than inherit this silently.
+  /**
+   * EVERY page that promises a destination declares it HERE and is covered by
+   * its own guard.
+   *
+   * This assertion used to read `toHaveLength(1)`, and the rule it was
+   * protecting is the comment it carried: *"A generic page has no single
+   * destination to promise; if another page wants one it must add its own
+   * guard rather than inherit this silently."* That rule is unchanged. The
+   * count was only ever a way of enforcing it while exactly one page
+   * qualified — an allowlist enforces the same thing without going stale, and
+   * keeps the property that a page cannot pick up a post-signup destination
+   * unnoticed.
+   *
+   * `/for-agencies` joined it in the owner readiness window (2026-09-09): its
+   * two CTAs read "Create an AGENCY account" and dropped the visitor at a
+   * bare signup, so an agency had to re-answer on the next screen what it had
+   * already said — and the nearest wrong answer there produces a plain
+   * employer rather than a `staffing_agency`.
+   */
+  const CTA_NEXT_PAGES: ReadonlyArray<{ page: string; guardedBy: string }> = [
+    { page: "create-cv/page.tsx", guardedBy: "this file" },
+    {
+      page: "for-agencies/page.tsx",
+      guardedBy: "lib/guards/cold-start-doors-and-markets.test.ts",
+    },
+  ];
+
+  it("only pages with their own guard pass ctaNext", () => {
     const root = join(APP_ROOT, "app", "[locale]", "(marketing)");
     const walk = (dir: string): string[] =>
       readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
         const p = join(dir, e.name);
         return e.isDirectory() ? walk(p) : e.name.endsWith(".tsx") ? [p] : [];
       });
-    const withCtaNext = walk(root).filter((p) =>
-      readFileSync(p, "utf8").includes("ctaNext"),
-    );
-    expect(withCtaNext).toHaveLength(1);
-    expect(withCtaNext[0].replace(/\\/g, "/")).toContain("create-cv/page.tsx");
+    const withCtaNext = walk(root)
+      .filter((p) => readFileSync(p, "utf8").includes("ctaNext"))
+      .map((p) => p.replace(/\\/g, "/"));
+
+    expect(withCtaNext).toHaveLength(CTA_NEXT_PAGES.length);
+    for (const { page } of CTA_NEXT_PAGES) {
+      expect(
+        withCtaNext.some((p) => p.endsWith(page)),
+        `${page} stopped promising its destination`,
+      ).toBe(true);
+    }
+    // And the guard each one names really exists, so "covered by its own
+    // guard" is a fact rather than a claim in a comment.
+    for (const { guardedBy } of CTA_NEXT_PAGES) {
+      if (guardedBy === "this file") continue;
+      expect(existsSync(join(APP_ROOT, guardedBy)), guardedBy).toBe(true);
+    }
   });
 });

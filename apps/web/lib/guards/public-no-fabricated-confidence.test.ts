@@ -23,8 +23,9 @@ import { join, relative } from "node:path";
  *      — the shape the defect actually took, whatever it gets called next;
  *   3. no `confidence`-style key left in the landing i18n namespace of any
  *      locale that ships the landing;
- *   4. the honest replacement is present: the result card names its BASIS and
- *      carries the demonstration qualifier adjacent to the claim.
+ *   4. the public entry (frozen design contract 2026-09-05, P1 — the
+ *      scripted scenario is gone) states what it understood and NEVER how
+ *      sure it is: no certainty key, no percentage, in any routed locale.
  *
  * If a real, explainable confidence value ever exists, this guard should be
  * changed deliberately in the PR that introduces it — together with the product
@@ -39,8 +40,8 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const stripComments = (s: string) =>
   s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
 
-const SCENARIO = "components/app/market-map/landing-scenario.ts";
-const HERO = "components/marketing/hero-live-demo.tsx";
+const ENTRY = "components/marketing/public-entry.tsx";
+const ENTRY_HOOK = "lib/marketing/public-entry.ts";
 const MARKETING_DIR = join(APP, "components", "marketing");
 
 /** Every .ts/.tsx file under components/marketing, recursively. */
@@ -59,7 +60,7 @@ function marketingFiles(): string[] {
 
 /**
  * Locales that ship the landing. Derived, not hard-coded: any locale whose
- * catalog carries the hero decision label renders this card, so a newly
+ * catalog carries the public entry namespace renders it, so a newly
  * activated locale is covered the day it is added.
  */
 function landingLocales(): Array<[string, Record<string, unknown>]> {
@@ -72,9 +73,9 @@ function landingLocales(): Array<[string, Record<string, unknown>]> {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
-    const hero = json?.landing?.hero;
-    if (hero && typeof hero === "object" && "decisionLabel" in hero) {
-      out.push([f.replace(/\.json$/, ""), hero as Record<string, unknown>]);
+    const entry = json?.landing?.entry;
+    if (entry && typeof entry === "object" && "understoodLabel" in entry) {
+      out.push([f.replace(/\.json$/, ""), entry as Record<string, unknown>]);
     }
   }
   return out;
@@ -84,24 +85,25 @@ function landingLocales(): Array<[string, Record<string, unknown>]> {
 const CERTAINTY_TERMS =
   /\b(confidence|certainty|accuracy|reliability|trustScore|trust_score|matchScore|match_score|patikimum|увереннос|достоверност|betrouwbaarheid|zuverlässigkeit|vertrouwensscore)/i;
 
-describe("landing scenario data states no self-certainty", () => {
-  const src = stripComments(read(SCENARIO));
+describe("the public entry source states no self-certainty", () => {
+  for (const rel of [ENTRY, ENTRY_HOOK]) {
+    const src = stripComments(read(rel));
 
-  it("carries no confidence/certainty field or value", () => {
-    const hit = src.match(CERTAINTY_TERMS);
-    expect(
-      hit?.[0] ?? null,
-      `landing-scenario.ts must not state how sure it is — found "${hit?.[0]}"`,
-    ).toBeNull();
-  });
+    it(`${rel} carries no confidence/certainty field or value`, () => {
+      const hit = src.match(CERTAINTY_TERMS);
+      expect(
+        hit?.[0] ?? null,
+        `${rel} must not state how sure it is — found "${hit?.[0]}"`,
+      ).toBeNull();
+    });
 
-  it("carries no bare 0..1 score literal on a scenario", () => {
-    // The defect shape: `someKey: 0.86,` inside the scenario list.
-    const hits = [...src.matchAll(/^\s*[A-Za-z_$][\w$]*:\s*0\.\d+\s*,/gm)].map(
-      (m) => m[0].trim(),
-    );
-    expect(hits, hits.join("\n")).toEqual([]);
-  });
+    it(`${rel} carries no bare 0..1 score literal`, () => {
+      const hits = [...src.matchAll(/^\s*[A-Za-z_$][\w$]*:\s*0\.\d+\s*,/gm)].map(
+        (m) => m[0].trim(),
+      );
+      expect(hits, hits.join("\n")).toEqual([]);
+    });
+  }
 });
 
 describe("marketing render tree renders no fabricated percentage", () => {
@@ -156,73 +158,51 @@ describe("marketing render tree renders no fabricated percentage", () => {
 describe("landing i18n carries no confidence label", () => {
   const locales = landingLocales();
 
-  it("found the locales that ship the landing hero", () => {
+  it("found the locales that ship the public entry", () => {
     expect(locales.length).toBeGreaterThanOrEqual(5);
   });
 
   it("no locale keeps a confidence-style key", () => {
     const hits: string[] = [];
-    for (const [locale, hero] of locales) {
-      for (const key of Object.keys(hero)) {
-        if (CERTAINTY_TERMS.test(key)) hits.push(`${locale}: landing.hero.${key}`);
+    for (const [locale, entry] of locales) {
+      for (const key of Object.keys(entry)) {
+        if (CERTAINTY_TERMS.test(key)) hits.push(`${locale}: landing.entry.${key}`);
       }
     }
     expect(hits, hits.join("\n")).toEqual([]);
   });
 });
 
-describe("the honest replacement is actually rendered", () => {
-  const hero = read(HERO);
+describe("the entry says WHAT it understood, never HOW SURE it is", () => {
+  const entry = read(ENTRY);
   const locales = landingLocales();
 
-  it("the result card names its basis instead of scoring itself", () => {
-    expect(hero).toContain('data-testid="hero-basis"');
-    expect(hero).toContain('t("basisLabel")');
-    expect(hero).toContain('t("basisNote"');
+  it("renders the understanding line and the per-intent / family copy", () => {
+    expect(entry).toContain('data-testid="entry-understanding"');
+    expect(entry).toContain('t("understoodLabel")');
+    expect(entry).toContain("t(`family.${");
   });
 
-  it("every landing locale translates the basis row", () => {
-    const missing: string[] = [];
-    for (const [locale, h] of locales) {
-      for (const key of ["basisLabel", "basisNote"]) {
-        const v = h[key];
-        if (typeof v !== "string" || v.trim().length === 0) {
-          missing.push(`${locale}: landing.hero.${key}`);
+  it("no routed locale carries a percentage or a certainty term in the entry copy", () => {
+    const hits: string[] = [];
+    const walk = (node: unknown, path: string) => {
+      if (typeof node === "string") {
+        if (/\d\s*%/.test(node)) hits.push(`${path}: "${node}"`);
+        if (CERTAINTY_TERMS.test(node)) hits.push(`${path}: "${node}"`);
+      } else if (node && typeof node === "object") {
+        for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+          walk(v, `${path}.${k}`);
         }
       }
-    }
-    expect(missing, missing.join("\n")).toEqual([]);
-  });
-
-  it("the basis note states it is a concept scenario, in every locale", () => {
-    // The W14 finding was that the only qualifier sat ~180 lines away in the
-    // DOM. The qualifier now has to travel WITH the claim — in the doctrine
-    // §18 vocabulary (concept/preview family), since the "demonstration"
-    // wording itself is the banned framing product-copy-forbidden-terms
-    // now catches.
-    const weak: string[] = [];
-    for (const [locale, h] of locales) {
-      const note = String(h.basisNote ?? "");
-      if (!/koncep|concept|Konzept|концеп|preview|peržiūr|vorschau|voorbeeld|предпросмотр/i.test(note)) {
-        weak.push(`${locale}: landing.hero.basisNote does not carry the concept/preview qualifier`);
-      }
-    }
-    expect(weak, weak.join("\n")).toEqual([]);
-  });
-
-  it("the basis note contains no percentage", () => {
-    const hits: string[] = [];
-    for (const [locale, h] of locales) {
-      const note = String(h.basisNote ?? "");
-      if (/\d\s*%/.test(note)) hits.push(`${locale}: "${note}"`);
-    }
+    };
+    for (const [locale, e] of locales) walk(e, `${locale}: landing.entry`);
     expect(hits, hits.join("\n")).toEqual([]);
   });
 });
 
 describe("guard covers the files it claims to cover", () => {
-  it("both source files exist at the pinned paths", () => {
-    expect(existsSync(join(APP, SCENARIO))).toBe(true);
-    expect(existsSync(join(APP, HERO))).toBe(true);
+  it("both entry source files exist at the pinned paths", () => {
+    expect(existsSync(join(APP, ENTRY))).toBe(true);
+    expect(existsSync(join(APP, ENTRY_HOOK))).toBe(true);
   });
 });

@@ -61,6 +61,9 @@ export type IntentAccess = "read" | "write" | "route" | "blocked";
  *  share one handler (one question, one engine — never two stacks). */
 export type IntentHandlerId =
   | "findWork"
+  | "offerCapacity"
+  | "professionStatement"
+  | "availabilityStatement"
   | "skillGap"
   | "recentJournal"
   | "figures"
@@ -100,6 +103,7 @@ export type IntentHandlerId =
   | "reminderBlocked"
   | "translateBlocked"
   | "messages"
+  | "invitations"
   | "writeEmployer"
   // Agency (real recruiter pilot, 2026-09-04) — the canonical bridge actions,
   // reachable by sentence; student / institution route handlers.
@@ -115,9 +119,20 @@ export type IntentHandlerId =
   | "clientOffers"
   | "addDocument"
   | "cvExport"
+  // The other two halves of the CV (owner window 11 §5/§30): looking at the
+  // one that exists, and the question asked when the sentence does not say
+  // which of the five CV actions is meant.
+  | "cvView"
+  | "cvChoose"
   | "addTask"
   | "whoAvailable"
-  | "stageStatus";
+  | "stageStatus"
+  | "taskStatus"
+  | "projectRisk"
+  | "projectReadiness"
+  | "confirmWork"
+  | "whoVerifiesWork"
+  | "moveWorker";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -179,6 +194,14 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // V9/V10: reads the statement, runs channel discovery, renders honest
   // options — state only, nothing persisted.
   "offer-value": { domain: "value", access: "read", handler: "offerValue", ownTyping: false },
+  // "esu buhalteris" / "dirbau projektų vadovu 5 metus" — the person names
+  // their profession or a past job. Reads the sentence, offers the doors
+  // that already exist (profile, work history, the board); persists nothing.
+  "profession-statement": { domain: "profile", access: "read", handler: "professionStatement", ownTyping: false },
+  // "galiu dirbti nuo spalio 1 d." — the person states WHEN they can work.
+  // Opens the ONE work-card form (`worker.save-work-card`) with the parsed
+  // date in it; the write stays behind the form's own review.
+  availability: { domain: "profile", access: "write", handler: "availabilityStatement", ownTyping: false },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
   lmc: { domain: "money", access: "route", handler: "lmc", ownTyping: false },
@@ -199,6 +222,7 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "market-map": { domain: "market", access: "route", handler: "marketMap", ownTyping: false },
   activity: { domain: "activity", access: "route", handler: "activityCentre", ownTyping: false },
   "messages-view": { domain: "communication", access: "read", handler: "messages", ownTyping: false },
+  invitations: { domain: "communication", access: "read", handler: "invitations", ownTyping: false },
 
   // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────────────
   // The three writes open the ONE inline form over the canonical dispatcher
@@ -228,12 +252,25 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The CLIENT's side of the agency bridge: the offers made on the company's
   // own demands, decided in the chat (accept → canonical booking proposed).
   "agency-offers": { domain: "company", access: "read", handler: "clientOffers", ownTyping: true },
+  // SUPPLY (owner window 7 §4): "turime 20 suvirintojų, ieškome jiems
+  // darbo" — capacity offered to the market. Same canonical intake as a
+  // need (`company.create-demand`, intent "partner" → kind agency_offer),
+  // so it is a company-domain WRITE behind the same confirmation token.
+  "offer-capacity": { domain: "company", access: "write", handler: "offerCapacity", ownTyping: false },
   // Documents first-class (§12/§14): a document RECORDED by sentence through
   // the one inline form over the canonical upsert; readiness re-answers.
   "add-document": { domain: "documents", access: "write", handler: "addDocument", ownTyping: true },
   // The verified CV SHEET (print-to-PDF, outside the shell so no chrome
   // prints) — a route, because the sheet IS the canonical output (§19).
   "cv-export": { domain: "cv", access: "route", handler: "cvExport", ownTyping: false },
+  // LOOKING at the CV that already exists — the SAME `/cv` surface, framed
+  // as a read rather than an export. Separate intent because owner §5 makes
+  // VIEW ≠ EXPORT a distinction the person must hear, not one the product
+  // may quietly collapse just because both open the same page.
+  "cv-view": { domain: "cv", access: "route", handler: "cvView", ownTyping: false },
+  // The sentence named the CV and nothing more. Route, not write: the answer
+  // is a question with the three real doors and no side effect.
+  "cv-choose": { domain: "cv", access: "route", handler: "cvChoose", ownTyping: false },
   // PROJECT → WORK (§11): a work package on the company's project through
   // the one inline form over the one task create.
   "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },
@@ -242,6 +279,18 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // PROGRESS (§11): a stage moved to a real status, by sentence — resolved
   // against the company's real stages, token-confirmed like every write.
   "stage-status": { domain: "project", access: "write", handler: "stageStatus", ownTyping: true },
+  // §11 WHAT-IF: a person moved between two projects — consequences on both
+  // sides shown first, the commit behind the strong-tier confirmation.
+  "move-worker": { domain: "project", access: "write", handler: "moveWorker", ownTyping: true },
+  "task-status": { domain: "project", access: "write", handler: "taskStatus", ownTyping: true },
+  "project-risk": { domain: "project", access: "read", handler: "projectRisk", ownTyping: true },
+  "project-readiness": { domain: "project", access: "read", handler: "projectReadiness", ownTyping: true },
+  "confirm-work": { domain: "journal", access: "write", handler: "confirmWork", ownTyping: true },
+  // The WORKER's side of the confirmation loop (owner P0 2026-09-06). `read`,
+  // not `write`: it answers who could verify the work already recorded and
+  // never confirms anything itself. Its whole reason to exist is that the
+  // honest answer includes "nobody yet" — see work-verification-state.ts.
+  "who-verifies-work": { domain: "journal", access: "read", handler: "whoVerifiesWork", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

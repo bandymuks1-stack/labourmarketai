@@ -141,6 +141,16 @@ export const companyAssignWorkerSchema = z.object({
   workerProfileId: uuid,
 });
 
+/** §11 what-if MOVE: the person leaves project X for project Y. Both ids are
+ *  re-checked by the two canonical RPCs (assign, end); X ≠ Y here. */
+export const companyMoveWorkerSchema = z
+  .object({
+    workerProfileId: uuid,
+    fromProjectId: uuid,
+    toProjectId: uuid,
+  })
+  .refine((v) => v.fromProjectId !== v.toProjectId, { message: "same project" });
+
 export const agencyInviteClientSchema = z.object({
   /** Optional since 2026-09-04: the chat never knows the company id — the
    *  executor resolves the ACTIVE workspace's company (M-P0-3, the same
@@ -227,6 +237,56 @@ export const companyUpdateStageStatusSchema = z.object({
   blockedReason: z.string().trim().max(500).nullable().optional(),
 });
 
+/** §14 WORK PERFORMED → RESULT: a task moved to a real status — "užduotis
+ *  sumontuoti pastolius atlikta". `set_work_task_status_v2` re-checks that
+ *  the caller created the task, is its assignee, or manages its project;
+ *  `cancelled` stays a page decision, not a sentence. */
+export const companyUpdateTaskStatusSchema = z.object({
+  taskId: uuid,
+  status: z.enum(["in_progress", "blocked", "done"]),
+});
+
+/** §11 READINESS — the corrective actions offered right after "kas trūksta
+ *  projektui X?": the operations page's OWN writes. `upsert_worker_readiness_item`
+ *  re-checks that the caller manages the project; the seed runs that same
+ *  write per person; the request is a WORK INSTRUCTION in the project's thread
+ *  (`send_work_instruction_to_project` requires an ACTIVE assignment and that
+ *  the caller manages the worker). Nothing here is invented: the label is the
+ *  stored row's label, the body is composed from the real gap labels. */
+export const companySetReadinessItemSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  itemKey: z.string().trim().min(1).max(80),
+  label: z.string().trim().min(1).max(160),
+  status: z.enum(["needed", "missing", "received", "checked", "not_required"]),
+});
+
+export const companySeedReadinessChecklistSchema = z.object({
+  projectId: uuid,
+});
+
+export const companyRequestReadinessSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  body: z.string().trim().min(1).max(2000),
+});
+
+/** §14 EMPLOYER CONFIRMATION — the inbox's one-tap confirm: approve a
+ *  journal entry AND verify the declared skills it proves
+ *  (`confirm_entry_and_verify_skills`, the ONLY path that flips a skill to
+ *  verified; re-checks manager authority + the person's review flag). */
+export const companyConfirmWorkSchema = z.object({
+  entryId: uuid,
+  skillIds: z.array(uuid).max(20),
+});
+
+/** Switch a person's journal review on — the membership RPC
+ *  (`set_engagement_journal_review`: an active employee engagement of an
+ *  organization the caller manages). Reversible (the same RPC turns it off). */
+export const companyEnableJournalReviewSchema = z.object({
+  engagementId: uuid,
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -256,10 +316,17 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.contact-worker": companyContactWorkerSchema,
   "company.propose-booking": companyProposeBookingSchema,
   "company.assign-worker": companyAssignWorkerSchema,
+  "company.move-worker": companyMoveWorkerSchema,
   "company.create-project": companyCreateProjectSchema,
   "company.respond-offer": companyRespondOfferSchema,
   "company.create-task": companyCreateTaskSchema,
   "company.update-stage-status": companyUpdateStageStatusSchema,
+  "company.update-task-status": companyUpdateTaskStatusSchema,
+  "company.set-readiness-item": companySetReadinessItemSchema,
+  "company.seed-readiness-checklist": companySeedReadinessChecklistSchema,
+  "company.request-readiness": companyRequestReadinessSchema,
+  "company.confirm-work": companyConfirmWorkSchema,
+  "company.enable-journal-review": companyEnableJournalReviewSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

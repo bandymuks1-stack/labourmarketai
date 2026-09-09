@@ -9,5 +9,12 @@
       "path": "/api/cron/weekly-digest",
       "schedule": "0 7 * * 1"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "**": false,
+      "*": false
+    }
+  }
 }

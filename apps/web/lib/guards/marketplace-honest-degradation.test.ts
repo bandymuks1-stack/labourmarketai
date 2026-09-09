@@ -60,7 +60,9 @@ describe("the marketplace UI surfaces an honest not-available state", () => {
   it("page passes the real needs-migration flag from the action results", () => {
     const p = read(PAGE);
     expect(p).toMatch(/=== "needs-migration"/);
-    expect(p).toMatch(/listDiscoverableOfferings\(\)/);
+    // Since window 6 the discovery read takes the (bounded, normalized)
+    // country filter — the call shape may carry an argument.
+    expect(p).toMatch(/listDiscoverableOfferings\(/);
     expect(p).toMatch(/listIncomingRequests\(\)/);
   });
 });

@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { gateOpenNeeds } from "@/lib/billing/open-needs-gate";
 import { deriveNeedSkills } from "@/lib/market/need-skills";
 import {
   canCloseFrom,
@@ -26,6 +27,10 @@ export type DemandLifecycleResult =
   | { kind: "invalid" }
   | { kind: "not-owner" }
   | { kind: "nothing-to-confirm" }
+  // Owner launch pricing 2026-09-05: reopening would exceed the organization's
+  // concurrent active open needs (FREE 1 / ORGANIZATION 10). The way forward is
+  // the paid plan or the individual plan; nothing is charged or reopened.
+  | { kind: "over-limit"; limit: number; next: "upgrade" | "individual_plan" }
   | { kind: "error"; message: string };
 
 async function ownRequest(requestId: string) {
@@ -33,12 +38,13 @@ async function ownRequest(requestId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { supabase, user: null, req: null };
+  if (!user) return { supabase, user: null, req: null, organizationId: null };
   // W8 slice 1 — the ONE workspace gate for all three lifecycle writes
   // (confirm / close / reopen). Not acting for a company ⇒ `not-owner`, which
   // is what every caller already renders honestly.
-  if ((await resolveEmployerCompanyContext()).kind !== "ok") {
-    return { supabase, user: null, req: null };
+  const employer = await resolveEmployerCompanyContext();
+  if (employer.kind !== "ok") {
+    return { supabase, user: null, req: null, organizationId: null };
   }
   const { data: req } = await asAny(supabase)
     .from("customer_requests")
@@ -46,7 +52,7 @@ async function ownRequest(requestId: string) {
     .eq("id", requestId)
     .eq("profile_id", user.id)
     .maybeSingle();
-  return { supabase, user, req };
+  return { supabase, user, req, organizationId: employer.organizationId };
 }
 
 /**
@@ -115,9 +121,13 @@ export async function closeDemand(requestId: string): Promise<DemandLifecycleRes
  *  again through the same verified-company gate). */
 export async function reopenDemand(requestId: string): Promise<DemandLifecycleResult> {
   if (!requestId) return { kind: "invalid" };
-  const { supabase, user, req } = await ownRequest(requestId);
-  if (!user || !req) return { kind: "not-owner" };
+  const { supabase, user, req, organizationId } = await ownRequest(requestId);
+  if (!user || !req || !organizationId) return { kind: "not-owner" };
   if (!canReopenFrom(req.status)) return { kind: "invalid" };
+  // A reopened need is an ACTIVE need again: the SAME ceiling as creating one
+  // (owner launch pricing 2026-09-05), decided by the ONE open-needs gate.
+  const needsGate = await gateOpenNeeds(supabase, organizationId, user.id);
+  if (!needsGate.allowed) return { kind: "over-limit", limit: needsGate.limit, next: needsGate.next };
   const { error } = await asAny(supabase)
     .from("customer_requests")
     .update({ status: "submitted", updated_at: new Date().toISOString() })

@@ -26,12 +26,17 @@ export async function RoleEnrichment({
   preview,
   ctaSource,
   ctaKind,
+  ctaNext,
 }: {
   root: "workers" | "companies" | "agencies";
   previewKey: "profile" | "demand" | "pool";
   preview: React.ReactNode;
   ctaSource: string;
   ctaKind: "signup" | "waitlist";
+  /** Same opt-in as `PageHero.ctaNext`: an internal path the signup CTA
+   *  carries through `?next=`, so a page that promises ONE thing does not
+   *  drop the visitor on the generic dashboard. Omitted = the default. */
+  ctaNext?: string;
 }) {
   const t = await getTranslations(root);
   const sh = await getTranslations("shared");
@@ -120,6 +125,7 @@ export async function RoleEnrichment({
           ctaKind={ctaKind}
           ctaLabel={t("cta.button")}
           ctaSource={ctaSource}
+          ctaNext={ctaNext}
         />
       </div>
     </div>

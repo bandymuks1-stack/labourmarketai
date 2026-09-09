@@ -70,6 +70,27 @@ export async function WorkerReadinessPanel({ card }: { card: WorkerPlayerCard })
             ))}
           </ul>
         </details>
+
+        {/* OWNER-REPORTED CONTRADICTION, fixed at the root (2026-09-07).
+            Production showed this panel saying the profile was complete while
+            another surface reported missing documents. Both statements were
+            true of their OWN scope and neither said so: `deriveWorkerReadiness`
+            measures six PROFILE-CARD pillars (profession, availability, skills,
+            journal, evidence, work card) and documents are not among them.
+
+            The wording now names its scope, and the country-fit line below is
+            rendered HERE TOO. It used to appear only in the incomplete branch,
+            so the one sentence that explains documents disappeared at exactly
+            the moment the panel made its strongest claim - which is what made
+            two honest surfaces read as a contradiction. A caveat is needed most
+            where the claim is largest. */}
+        <div
+          className="flex items-start gap-2 rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-meta leading-relaxed text-text-secondary"
+          data-testid="readiness-country-fit"
+        >
+          <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-muted" aria-hidden />
+          <span>{t("readinessPanel.countryFit")}</span>
+        </div>
       </section>
     );
   }

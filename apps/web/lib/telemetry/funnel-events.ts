@@ -90,6 +90,12 @@ export const FUNNEL_EVENTS = {
   bookingViewed: "booking_viewed",
   bookingAccepted: "booking_accepted",
   bookingDeclined: "booking_declined",
+  //    Owner contract §4D (2026-09-05): an invitation addressed to the person
+  //    was ACCEPTED from the chat's attention item — server-emitted by the
+  //    conversation executor only on a real `accepted` / `linked` outcome
+  //    (the SAME accept RPCs the network page and the dashboard card call).
+  //    Bounded scalars only (surface / entity_type / success); no PII.
+  invitationAccepted: "invitation_accepted",
   // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
   //    The gap between "booking_*" and nothing: the stages where a demand
   //    actually turns into work — match preview → shortlist → contact →
@@ -160,6 +166,15 @@ export const FUNNEL_EVENTS = {
   chatMissingDataAsked: "chat_missing_data_asked",
   chatActionAttempted: "chat_action_attempted",
   chatActionPersisted: "chat_action_persisted",
+  // ── Public entry (frozen design contract 2026-09-05, package P1). An
+  //    anonymous visitor types a sentence on the landing and the SAME
+  //    deterministic router reads it before any account exists. One event,
+  //    fired through the anon-insert path (profile_id NULL) with the chat
+  //    funnel's own shape: `step` = the routed intent id, "unrecognised", or
+  //    "chip" (the two-chip answer to the one question), `intent` = the
+  //    first-run family it belongs to, `resolution` = "deterministic". The
+  //    sentence itself is NEVER recorded.
+  landingIntent: "landing_intent",
 } as const;
 
 export type FunnelEventName =
@@ -181,6 +196,12 @@ export type FunnelMetadata = {
   step?: string;
   /** Coarse role context: 'worker' | 'company' | 'agency' | 'customer' | 'person'. */
   role_context?: string;
+  /** How a chat sentence was resolved: 'deterministic' (the always-on
+   *  router), 'goal' (the ACTIVE CONVERSATION GOAL — a continuation such as
+   *  "Nuo spalio." that the router alone reads as unknown; owner P0
+   *  2026-09-06) or 'llm' (the Gemini proposer, owner approval 2026-09-05).
+   *  Never the sentence. */
+  resolution?: "deterministic" | "goal" | "llm";
   /** First-run intent: 'work' | 'hire' | 'agency' | 'student' | 'education',
    *  or a comma-joined set of them. Never free text. */
   intent?: string;

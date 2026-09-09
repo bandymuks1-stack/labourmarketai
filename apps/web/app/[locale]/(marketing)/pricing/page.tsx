@@ -13,6 +13,8 @@ export async function generateMetadata({
 }
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
+import { getBillingConfig } from "@/lib/billing/config";
+import { isStripeActive } from "@/lib/billing/config-core";
 import {
   ConciergeAccessBanner,
   ConciergeOfferSection,
@@ -36,6 +38,9 @@ export default async function PricingPage({
   // states only what is true (nothing charged, nothing changed); it never
   // implies a purchase was possible.
   const { billing } = await searchParams;
+  // LIVE Stripe (owner-armed) changes the page's own words: the hero no longer
+  // says prices are not final, and the pre-payment boundary is not shown.
+  const billingLive = isStripeActive(getBillingConfig());
   setRequestLocale(locale);
   const t = await getTranslations("pricing");
   const faq = t.raw("faq") as { q: string; a: string }[];
@@ -46,7 +51,7 @@ export default async function PricingPage({
         eyebrow={t("eyebrow")}
         title={t("title")}
         accent={t("titleAccent")}
-        subcopy={t("subcopy")}
+        subcopy={billingLive ? t("subcopyLive") : t("subcopy")}
         ctaKind="waitlist"
         ctaLabel={t("planCta")}
         ctaSource="pricing_hero"
@@ -67,7 +72,10 @@ export default async function PricingPage({
       <ConciergeAccessBanner />
       <ConciergeOfferSection />
       <PricingTable />
-      <PrePaymentPlanBoundary />
+      {/* The pre-payment boundary explained "payments not enabled"; once the
+          Stripe adapter is LIVE that sentence would be false, so the block is
+          not rendered — the canonical PricingTable above is the truth. */}
+      {billingLive ? null : <PrePaymentPlanBoundary />}
       {/* M7 (beta foundation audit 2026-08-08): <ServiceOffers /> — the
           AI-automation agency offer list (€900–€1,900) — is NOT rendered on
           the beta labour-market pricing page. Concrete service prices next to

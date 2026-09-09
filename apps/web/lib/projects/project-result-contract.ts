@@ -63,10 +63,15 @@ export interface ProjectStageRow {
   readonly id: string;
   readonly name: string;
   readonly status: string;
+  /** The canonical order — the company home derives "now / next" from it
+   *  (QA Q-3: carried so the home need not read the stages a second time). */
+  readonly stageOrder: number;
   readonly plannedStart: string | null;
   readonly plannedEnd: string | null;
   readonly actualStart: string | null;
   readonly actualEnd: string | null;
+  /** Why a blocked stage is blocked, as the canonical row says it; null otherwise. */
+  readonly blockedReason: string | null;
 }
 
 /** The panel's view of ONE project. */
@@ -112,6 +117,13 @@ export interface ProjectDetail {
    * here" is not "this project has no stages" — and the panel says so.
    */
   readonly stages: readonly ProjectStageRow[] | null;
+  /**
+   * How many stages the canonical read returned BEFORE `PROJECT_STAGE_LIMIT`
+   * cut `stages` for the panel; null exactly when `stages` is null. A reader
+   * that needs the WHOLE list (the company home's done/total) compares the
+   * two and reads again only when they differ — never a total over a slice.
+   */
+  readonly stageTotal: number | null;
   /** Whether the viewer may run lifecycle writes. Server-derived from the same
    *  authority the RPC enforces; the client never decides this. */
   readonly canManage: boolean;

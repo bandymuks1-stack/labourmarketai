@@ -11,11 +11,18 @@ import type { DemandLifecycleResult } from "@/lib/demand/demand-lifecycle";
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction, createProjectAction, type ProjectActionResult } from "@/lib/projects/actions";
+import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionResult } from "@/lib/projects/actions";
 import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
-import { createWorkTaskForChatAction } from "@/lib/tasks/task-chat-actions";
+import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
+import { seedReadinessItemsAction, upsertReadinessItemAction } from "@/lib/projects/operations-actions";
+import { getProjectOperations } from "@/lib/projects/operations";
+import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { sendWorkInstructionAction } from "@/lib/instructions/actions";
+import { quickConfirmEntry } from "@/lib/journal/quick-confirm-actions";
+import { setEngagementJournalReview } from "@/lib/operations/org-membership";
+import { getTranslations } from "next-intl/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   createCohortAction,
@@ -86,6 +93,10 @@ type Infer<Id extends CompanyActionId> = z.infer<(typeof COMPANY_ACTION_SCHEMAS)
 function mapLifecycle(r: DemandLifecycleResult): ExecResult {
   if (r.kind === "ok") {
     return { ok: true, data: r.status ? { status: r.status } : undefined };
+  }
+  if (r.kind === "over-limit") {
+    // The same honest codes the create path uses (upgrade / individual plan).
+    return { ok: false, code: r.next === "individual_plan" ? "over_open_need_limit_individual" : "over_open_need_limit_upgrade" };
   }
   return {
     ok: false,
@@ -185,9 +196,14 @@ export const COMPANY_EXECUTORS: {
           : undefined,
     });
     // The REAL id + status come from the canonical action — never invented.
-    return r.ok
-      ? { ok: true, data: { requestId: r.requestId, status: "submitted" } }
-      : { ok: false, code: r.code };
+    if (r.ok) return { ok: true, data: { requestId: r.requestId, status: "submitted" } };
+    // Owner launch pricing 2026-09-05: the open-needs ceiling names the honest
+    // way forward — the €99 plan, or the individual plan above the paid
+    // ceiling. Nothing is charged, upgraded or created on the person's behalf.
+    if (r.code === "over_open_need_limit") {
+      return { ok: false, code: r.next === "individual_plan" ? "over_open_need_limit_individual" : "over_open_need_limit_upgrade" };
+    }
+    return { ok: false, code: r.code };
   },
 
   "company.confirm-need": async (input, ctx) =>
@@ -256,6 +272,22 @@ export const COMPANY_EXECUTORS: {
     return r.ok
       ? { ok: true, data: r.id ? { id: r.id } : undefined }
       : { ok: false, code: r.code, message: r.message };
+  },
+
+  "company.move-worker": async (input) => {
+    // §11 WHAT-IF → COMMIT: two canonical writes, in the safe order — the
+    // person is assigned to the destination FIRST (`assign_worker_to_project`
+    // re-checks project management + roster), and only then the source
+    // assignment is ended (`end_worker_project_assignment`, audit trail, no
+    // delete). If the second step fails the person is on BOTH projects and
+    // the result says so — never "moved" for a half-done move.
+    const r = await assignWorkerToProjectAction(
+      null,
+      fd({ project_id: input.toProjectId, worker_profile_id: input.workerProfileId }),
+    );
+    if (!r.ok) return { ok: false, code: r.code, message: r.message };
+    const ended = await endAssignmentAction(input.fromProjectId, input.workerProfileId);
+    return { ok: true, data: { assigned: true, ended: ended.ok } };
   },
 
   "company.invite-worker": async (input) => {
@@ -331,6 +363,87 @@ export const COMPANY_EXECUTORS: {
     if (r.code === "auth" || r.code === "not_authorized") return { ok: false, code: "not_authorized" };
     if (r.code === "invalid") return { ok: false, code: "invalid" };
     return { ok: false, code: "error", message: r.message };
+  },
+
+  "company.update-task-status": async (input) => {
+    // RESULT is a real status on a real task — the SAME core the tasks page's
+    // status control calls; the RPC re-checks creator / assignee / manager and
+    // refuses to leave `done` / `cancelled`.
+    const r = await setWorkTaskStatusForChatAction({ taskId: input.taskId, status: input.status });
+    if (r.kind === "updated") return { ok: true, data: { taskId: r.taskId, status: r.status } };
+    if (r.kind === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
+    if (r.kind === "invalid" || r.kind === "invalid_transition" || r.kind === "not_found") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error", message: r.message };
+  },
+
+  "company.set-readiness-item": async (input) => {
+    // READINESS is the manager-kept checklist row — the SAME write the
+    // operations page's checklist control calls; the RPC re-checks the gate.
+    const r = await upsertReadinessItemAction({
+      projectId: input.projectId,
+      workerProfileId: input.workerProfileId,
+      itemKey: input.itemKey,
+      label: input.label,
+      status: input.status,
+    });
+    if (r.ok) return { ok: true, data: { status: input.status } };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.seed-readiness-checklist": async (input, ctx) => {
+    // Start the standard checklist for EVERY person on the project — the same
+    // seed the operations page runs per person, with the same default labels
+    // (`projectOps.defaults`, in the caller's locale). The people come from the
+    // operations centre's own read (RLS: null = not the caller's project).
+    const ops = await getProjectOperations(input.projectId);
+    if (!ops) return { ok: false, code: "not_authorized" };
+    const t = await getTranslations({ locale: ctx.locale, namespace: "projectOps.defaults" });
+    const items = DEFAULT_READINESS_ITEM_KEYS.map((itemKey) => ({ itemKey, label: t(itemKey) }));
+    let seeded = 0;
+    for (const w of ops.workers) {
+      if (w.readinessItems.length > 0) continue;
+      const r = await seedReadinessItemsAction({ projectId: input.projectId, workerProfileId: w.workerProfileId, items });
+      if (!r.ok) return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+      seeded += 1;
+    }
+    return { ok: true, data: { seeded, items: items.length } };
+  },
+
+  "company.request-readiness": async (input) => {
+    // "Ask the person" = a WORK INSTRUCTION in the project's thread — the same
+    // canonical send the instructions page uses; the RPC requires an ACTIVE
+    // assignment on the project and that the caller manages the worker.
+    const r = await sendWorkInstructionAction(
+      null,
+      fd({ worker_profile_id: input.workerProfileId, body: input.body, project_id: input.projectId }),
+    );
+    if (r.ok) return { ok: true };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.confirm-work": async (input, ctx) => {
+    // THE PROOF STEP — the inbox's own one-tap confirm: approve the entry and
+    // verify the declared skills it proves through the gated RPC chain (the
+    // only path that can flip a worker's skill to verified). Same form the
+    // inbox posts; the exceptions pyramid and the review flag are re-checked
+    // inside.
+    const f = new FormData();
+    f.set("entry_id", input.entryId);
+    f.set("locale", ctx.locale);
+    for (const id of input.skillIds) f.append("skill_id", id);
+    const r = await quickConfirmEntry(null, f);
+    if (r.ok) return { ok: true, data: { verifiedSkills: r.verifiedSkills } };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.enable-journal-review": async (input) => {
+    // Journal review ON for one employee engagement — the membership RPC the
+    // inbox's toggle calls; it re-checks that the caller manages the
+    // organization and that the engagement is an active employee one.
+    const r = await setEngagementJournalReview(input.engagementId, true);
+    if (r.ok) return { ok: true, data: { code: r.code } };
+    return { ok: false, code: r.code === "not_authorized" ? "not_authorized" : "error", message: r.message };
   },
 
   "company.respond-offer": async (input) => {

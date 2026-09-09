@@ -91,8 +91,13 @@ export function isCleaningFloorContext(foldedText: string): boolean {
 // power-tool forms (folded) alongside LT/EN/RU. Genuine electrical WORK words
 // per language live in ELECTRICAL_WORK_RE so real electricians never lose the
 // suggestion.
+//
+// The welding ELECTRODE (journal walk 2026-09-06, lane D): "Virinau
+// elektrodu…" suggested `electrical-install` from the `elektr` stem inside
+// "elektrodu" — a welder's consumable, not electrical work. Same guard, same
+// rule: the stem alone is not the trade.
 const POWER_TOOL_RE =
-  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrili[a-z]* toorii|elektroinstrument|sahkotyokalu|elektronik|электроник/;
+  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrili[a-z]* toorii|elektroinstrument|sahkotyokalu|elektronik|электроник|elektrod|электрод|electrode|elektrode/;
 const ELECTRICAL_WORK_RE =
   /instaliac|rozet|jungikl|kabel|elektros darb|elektros mont|elektrik|wiring|rewir|electrical install|electrical work|проводк|розетк|электромонтаж|выключател|кабел|электрик|bedrading|stopcontact|groepenkast|elektra aangelegd|steckdose|verkabelt|verdrahtet|elektroinstallation|gniazdk|instalacje elektryczne|elektryk|ukladalem przewody|eluttag|stikkontakt|stopselkontakt|ledninger trukket|elinstallation|elarbete|elektriker|elektroniker|pistorasi|sahkoasennu|sahkotoi|rozete|elektroinstalac|vadus|elektrivarust|pistikup|elektritoo/;
 

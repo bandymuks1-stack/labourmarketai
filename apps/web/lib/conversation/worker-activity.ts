@@ -85,7 +85,7 @@ export async function getWorkerCriteriaSnapshot(
     const { data: worker } = await supabase
       .from("workers")
       .select(
-        "id, availability_status, available_from, preferred_countries, salary_min_eur, salary_max_eur, willing_to_relocate, preferred_contract_type",
+        "id, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, salary_max_eur, willing_to_relocate, preferred_contract_type",
       )
       .eq("profile_id", userId)
       .maybeSingle();
@@ -115,6 +115,7 @@ export async function getWorkerCriteriaSnapshot(
       willingToRelocate: (worker.willing_to_relocate as boolean | null) ?? null,
       preferredContractType: (worker.preferred_contract_type as string | null) ?? null,
       documentsCount: documents.count ?? 0,
+      locationCountry: (worker.current_location_country as string | null) ?? null,
     };
   } catch {
     return null;

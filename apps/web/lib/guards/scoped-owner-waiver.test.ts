@@ -476,13 +476,26 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // addresses; attribution stops naming the source country; search stops
     // matching the hidden title. Same surfaces, strictly less exposure.
     //
+    // #1649 (2026-09-08) is the sixth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1649 ... This is NOT general authority to
+    // self-approve future waivers. Do not broaden, weaken or change the waiver
+    // criteria/scope." It makes a FAILURE honest rather than the surface more
+    // permissive — a statement timeout (57014) stops re-throwing into an HTTP
+    // 500 and stops being renderable as a genuine zero, becoming a named
+    // `unavailable` state instead (SEP-7). No new route, page, component or
+    // auth change, and nothing about what an anonymous visitor may see.
+    // Verified by running the gate on the same head twice, differing only in
+    // the number: 1649 produced 18 violations, every one rejected for
+    // `pr-not-covered` and no other reason, while 1255 passed.
+    //
     // Widening the PR binding is the ONLY change each time: same axiom, same
     // six codes, same three surfaces, same expiry, same reason. Each PR's
     // finding set is byte-identical to `expectedFindings`, so the subset rule
     // still bites. This stays an EXACT list — a `toContain` here would let the
     // next number drift in without a decision, which is the whole thing this
-    // pin exists to prevent.
-    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255]);
+    // pin exists to prevent. THIS ASSERTION FAILING IS THE FEATURE: it caught
+    // the 1649 extension and forced it to be deliberate.
+    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255, 1649]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");

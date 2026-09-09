@@ -61,6 +61,10 @@ const WIRED_AGENT_SENSITIVITY = {
   company_need: "LOW_RISK_PROJECT_DATA",
   // Aggregate counts of published job ads — the ONE PUBLIC surface.
   market_explanation: "PUBLIC",
+  // ONE typed chat sentence the deterministic router could not read —
+  // unbounded human text. The only surface with an egress grant (owner
+  // approval 2026-09-05), scoped to its task; see llm-proposal.test.ts.
+  conversation_intent: "SENSITIVE_FREE_TEXT",
 } as const satisfies Partial<Record<AiAgentKey, AiDataSensitivity>>;
 
 // ── The wired list is derived from source, not maintained by hand ──────────
@@ -114,7 +118,7 @@ describe("the wired set and its classification stay in lockstep", () => {
     },
   );
 
-  it("exactly three wired surfaces describe a person, and stay refused", () => {
+  it("exactly four wired surfaces describe a person; three stay refused, the granted one only for its own task", () => {
     // This is the sentence the gate makes to the owner, expressed as a check:
     // the surfaces that read a person are refused by a free-tier ceiling —
     // and by any ungranted provider — by exactly the rule that refused them
@@ -123,7 +127,7 @@ describe("the wired set and its classification stay in lockstep", () => {
       .filter(([, s]) => carriesPersonalData(s))
       .map(([agent]) => agent)
       .sort();
-    expect(personal).toEqual(["matching_explanation", "work_journal", "worker_profile"]);
+    expect(personal).toEqual(["conversation_intent", "matching_explanation", "work_journal", "worker_profile"]);
     for (const agent of personal) {
       const sensitivity = sensitivityForTask(taskTypeForAgent(agent as AiAgentKey));
       expect(sensitivity).not.toBe(MAX_GRANTABLE_FOR_FREE_TIER);

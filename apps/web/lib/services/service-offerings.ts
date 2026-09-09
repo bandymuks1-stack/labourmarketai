@@ -125,6 +125,66 @@ export async function listOwnServiceOfferings(): Promise<ServiceOfferingListResu
   return { kind: "ok", rows };
 }
 
+/**
+ * ANOTHER PROVIDER'S ACTIVE OFFERINGS — what this person can concretely do.
+ *
+ * The person page could name a profession and list skills, and could not say
+ * what work the person actually offers to do. These rows already existed and
+ * were rendered on the provider's own surfaces and on the ORGANIZATION public
+ * page; a person's own were never shown on a person's own page.
+ *
+ * PERMISSION IS THE DATABASE'S. `service_offerings` carries a
+ * `status = 'active'` discovery policy alongside the owner policy, so an
+ * active offering is already discoverable and a draft or paused one is not.
+ * This adds no policy and no grant: the `status` filter below matches the
+ * policy rather than widening past it, so a draft cannot leak even if this
+ * filter were removed.
+ *
+ * A failed read is `unavailable`, never an empty list — "this person offers
+ * nothing" is a claim, and a broken query has not earned it.
+ */
+export type ProviderOfferingsRead =
+  | { readonly kind: "ok"; readonly rows: readonly ServiceOfferingRow[] }
+  | { readonly kind: "unavailable" };
+
+export async function listActiveOfferingsByProvider(
+  providerId: string,
+  limit = 6,
+): Promise<ProviderOfferingsRead> {
+  if (!providerId) return { kind: "ok", rows: [] };
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase)
+    .from("service_offerings")
+    .select(
+      "id, title, description, category_slug, location_country, remote, rate_text, status, created_at, updated_at",
+    )
+    .eq("provider_id", providerId)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    // The table not existing yet is an ENVIRONMENT fact, not a person fact:
+    // report nothing rather than an alarming failure on someone's profile.
+    if (isAbsent(error)) return { kind: "ok", rows: [] };
+    return { kind: "unavailable" };
+  }
+  const rows: ServiceOfferingRow[] = (
+    (data ?? []) as Record<string, unknown>[]
+  ).map((r) => ({
+    id: String(r.id),
+    title: String(r.title ?? ""),
+    description: (r.description as string | null) ?? null,
+    categorySlug: (r.category_slug as string | null) ?? null,
+    locationCountry: (r.location_country as string | null) ?? null,
+    remote: r.remote === true,
+    rateText: (r.rate_text as string | null) ?? null,
+    status: (r.status as ServiceOfferingStatus) ?? "draft",
+    createdAt: String(r.created_at ?? ""),
+    updatedAt: String(r.updated_at ?? ""),
+  }));
+  return { kind: "ok", rows };
+}
+
 export async function createServiceOffering(
   input: ServiceOfferingInput,
 ): Promise<ServiceOfferingMutateResult> {

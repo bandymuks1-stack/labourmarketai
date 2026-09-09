@@ -664,3 +664,44 @@ a {
 :root[data-theme="dark"] .market-map-host .leaflet-control-attribution {
   background: rgb(0 0 0 / 0.6);
 }
+
+/*
+ * Mobile tap floor (window 6, P0-G, 2026-09-06). Measured on production at
+ * 390 px: 86 primary controls under 40 px across journal / opportunities /
+ * documents / services / inbox/quick / company home (13x13 checkboxes,
+ * 24-32 px chips, 16 px flex links). They are hand-typed class strings in ~40
+ * files, so the floor lives ONCE here, scoped to the authenticated shell
+ * (`[data-chrome]` — components/app/dashboard-chrome.tsx) and the portal
+ * mobile sheet (`[data-mobile-sheet]` — components/ui/MobileSheet.tsx), below
+ * the `md` breakpoint only. Desktop is unchanged.
+ *
+ *  - `min-height`/`min-width` beat any `h-*`/`w-*` utility by CSS definition,
+ *    and the attribute+element selector (0,1,1) beats a single `min-h-9`
+ *    utility (0,1,0), so no call site can fall under the floor by accident.
+ *  - `align-content: center` keeps the text vertically centred inside a
+ *    blockified flex-child <a> (buttons centre natively; inline links in
+ *    running prose are display:inline and ignore min-height — by design).
+ *  - A checkbox's tap area is its wrapping <label> (the visual box may stay
+ *    small); the label gets the same floor.
+ *  - Third-party map chrome keeps its own geometry.
+ *  - Opt-out for a control that must stay visually tiny: data-tap-floor="off".
+ * Guard: lib/guards/mobile-tap-targets.test.ts. Walk:
+ * docs/launch/pilot-feedback/walks-2026-09-06/walk-tap-targets/walk-tap-targets-prod.cjs
+ */
+@media (max-width: 767.98px) {
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href]):not(
+      p *,
+      .leaflet-container *,
+      [data-tap-floor="off"]
+    ) {
+    min-height: 2.5rem;
+    min-width: 2.5rem;
+    align-content: center;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    label:has(> input[type="checkbox"], > input[type="radio"]) {
+    min-height: 2.5rem;
+    align-content: center;
+  }
+}

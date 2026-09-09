@@ -1,0 +1,93 @@
+-- @human-gate-approved
+--
+-- ── SCOPE OF THE HUMAN GATE ────────────────────────────────────────────────
+-- SAFETY CLASS: RED (a GRANT is a privilege-surface change, doctrine-guard §4).
+-- Draft PR + `needs-human-gate`; applied ONLY via Supabase MCP
+-- `apply_migration` after explicit owner approval. Never `supabase db push`.
+-- The annotation acknowledges the `grant-or-revoke` finding the static gate
+-- emits for this file — an acknowledgement, not an auto-merge pass.
+--
+-- APPLIED TO PRODUCTION 2026-09-08 as ledger 20260908065654
+-- (`notification_recipient_discovery_service_role_select`), owner-approved in
+-- the same session that approved 20260906060000. Readback below.
+--
+-- 20260908070000 — the notification spine's RECIPIENT-DISCOVERY reads. The
+-- sibling of 20260906060000: that file granted the spine its own two tables,
+-- this one grants the two DOMAIN tables the spine must READ to learn who a
+-- notification is for. ADDITIVE; SELECT ONLY; NO DATA CHANGE; NO RLS CHANGE;
+-- nothing for anon or authenticated.
+--
+-- ── WHY (measured on production 2026-09-08) ────────────────────────────────
+--
+-- 20260906060000 fixed the write half and the cron still failed. The first
+-- real invocation after that grant landed — Vercel Cron → Run, deployment
+-- dpl_ELF9eH55ANFeUdRCqqPSNTWXsSfs, request fwqdk-1788849716604-6eb95a4cf750 —
+-- executed ~930 ms and returned HTTP 503, NOT 401: the request reached the
+-- function, the firewall allowed it, and `authorizeCronRequest` passed.
+--
+-- The 503 comes from ONE branch. `emitWeeklyDigestNotificationsForCron`
+-- (lib/notifications/event-emitters.ts) opens with the recipient query:
+--
+--     const { data, error } = await admin
+--       .from("journal_entries").select("worker_id") ...
+--     if (error) return { kind: "unavailable" };     // ← here
+--
+-- and the route maps `unavailable` to 503. `service_role` held NO privilege on
+-- journal_entries or workers, so PostgREST returned 42501 and the sweep died
+-- before it could write anything.
+--
+-- REPRODUCED on production under `set local role service_role`, in a
+-- transaction aborted on purpose (zero residue):
+--     PROBE_RESULT journal_entries=BLOCKED_42501 workers=BLOCKED_42501
+--
+-- CORROBORATION that the failure precedes every write: notification_events
+-- still held 2 rows, latest 2026-07-05, and 0 weekly_digest rows. Nothing was
+-- half-delivered.
+--
+-- EMAIL IS NOT INVOLVED, and was ruled out three ways rather than assumed:
+-- the email hop runs only AFTER a successful insert; execution never reached
+-- it; `maybeDispatchNotificationEmail` is wholly try/caught and returns
+-- `not_configured` for a missing provider, so it can neither throw nor report
+-- `unavailable`; and with 0 opt-in rows it short-circuits at
+-- `channel_disabled` before the provider gate is consulted. Missing
+-- INVITE_EMAIL_* does not and must not block in-app delivery.
+--
+-- ── WHAT (the minimum each caller actually reads) ──────────────────────────
+--   journal_entries  SELECT only — `worker_id`, filtered on created_at and
+--                    deleted_at, to find recently-active workers.
+--   workers          SELECT only — `id`, `profile_id`, to resolve a worker to
+--                    the profile that receives the notification. Also what
+--                    `workerProfileId()` reads for the booking and absence
+--                    emitters.
+--
+-- NO INSERT, NO UPDATE, NO DELETE on either table. The notification spine
+-- observes domain rows; it never writes them. Both tables keep every existing
+-- policy, and `authenticated` / `anon` are untouched.
+--
+-- ── A WIDER REPAIR THAN THE DIGEST ─────────────────────────────────────────
+-- `workerProfileId()` destructures only `data` and DISCARDS `error`, so a
+-- denied read is indistinguishable from "no such worker": it returns null and
+-- the caller logs `row_unreadable`. booking_proposed / booking_accepted /
+-- booking_declined and the absence emitters have therefore been silently
+-- dead for the same missing grant. The `workers` grant repairs those too.
+--
+-- ── NEXT PREREQUISITE, DELIBERATELY NOT GRANTED HERE ───────────────────────
+--   has_table_privilege('service_role','public.profiles','SELECT') = FALSE.
+--   `maybeDispatchNotificationEmail` reads profiles.email for the delivery
+--   address — but only after an explicit email opt-in. Production holds 0
+--   opt-in rows and no transactional provider, so the email hop stops at
+--   `channel_disabled` and this grant is NOT needed for in-app delivery.
+--   Grant it when email delivery is actually turned on, in its own gated
+--   migration, and not one moment before. Recorded here so the next reader
+--   finds it as a known fact rather than rediscovering it from a 503.
+--
+-- ── READBACK AFTER APPLY (production 2026-09-08) ───────────────────────────
+--   journal_entries SELECT true · workers SELECT true
+--   journal_entries INSERT/UPDATE/DELETE false · workers INSERT/UPDATE/DELETE false
+--   anon SELECT on both false
+--   service_role selectable public tables 27 → 29 (exactly +2, no broadening)
+--
+-- ROLLBACK: supabase/rollbacks/20260908070000_notification_recipient_discovery_service_role_select.down.sql
+
+grant select on public.journal_entries to service_role;
+grant select on public.workers to service_role;

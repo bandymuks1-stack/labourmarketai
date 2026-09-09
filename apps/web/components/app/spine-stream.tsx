@@ -59,7 +59,10 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
         ? "company"
         : "worker",
     type: d.type,
-    payload: {},
+    // The stored row's own safe render hints travel to the bell (owner
+    // window 11 §28). Two events of the same type were indistinguishable
+    // because everything except the type label was dropped here.
+    payload: { ...d.metadata },
     read_at: d.read_at,
     created_at: d.created_at,
     href: d.href,

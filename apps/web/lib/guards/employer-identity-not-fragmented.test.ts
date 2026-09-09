@@ -72,10 +72,17 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
     expect(branch).toMatch(/else if \(canActAsEmployer\)/);
     expect(branch).toMatch(/employerBridgeHint/);
     expect(branch).toMatch(/link:\/dashboard\/company#demand-intake/);
-    // And somebody who genuinely holds no company role still gets the honest
-    // fallback — this must NOT become a chip everybody sees. Since 2026-09-04
-    // the fallback is the context-aware `fallbackText`.
-    expect(branch).toMatch(/fallbackText/);
+    // And somebody who genuinely holds no company role must NOT see the
+    // employer chip — the demand-intake door is for employers only. Since
+    // 2026-09-06 (real-user fitness walk) that person is no longer shrugged
+    // at either: the sentence named a trade, so the PERSON's doors are
+    // offered — the service-request loop and the company-setup door — both
+    // of which already existed. The employer door stays out of that branch.
+    const personBranch = branch.slice(branch.lastIndexOf("} else {"));
+    expect(personBranch).not.toMatch(/demand-intake/);
+    expect(personBranch).toMatch(/link:\/dashboard\/service-requests/);
+    expect(personBranch).toMatch(/link:\/dashboard\/start\/company/);
+    expect(personBranch).not.toMatch(/assistant\(fallbackText/);
   });
 
   it("company-overview answers an owner in any workspace", () => {
