@@ -170,7 +170,7 @@ export function Composer({
           disabled={disabled || value.trim().length === 0}
           aria-label={sendLabel}
           data-testid="composer-send"
-          className="ua-press flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          className="ua-press flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-text-on-brand transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
         >
           <ArrowUp {...iconControl()} aria-hidden />
         </button>

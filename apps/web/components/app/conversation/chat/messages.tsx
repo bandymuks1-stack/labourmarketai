@@ -34,7 +34,7 @@ function Chips({ chips, onChip }: { chips: ChoiceChip[]; onChip: (c: ChoiceChip)
           className={`ua-press min-h-11 rounded-full px-4 text-support font-medium ${
             c.recommended
               ? // The ONE solid choice, and only when the server named a real gap.
-                "bg-brand-blue font-semibold text-white shadow-cta-glow hover:bg-brand-blue/90"
+                "bg-brand-blue font-semibold text-text-on-brand shadow-cta-glow hover:bg-brand-blue/90"
               : "border border-ink-500 bg-ink-800 text-text-primary hover:border-brand-blue hover:text-brand-blue"
           }`}
         >

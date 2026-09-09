@@ -215,7 +215,7 @@ function NotificationsBody({
             <button
               type="button"
               onClick={markAllRead}
-              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
             >
               {markAllReadLabel}
             </button>
@@ -329,7 +329,7 @@ function NotificationsBody({
         <Link
           href={"/dashboard/activity" as "/dashboard"}
           data-testid="notification-panel-view-all"
-          className="rounded-sm font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          className="rounded-sm font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           {tPanel("viewAll")} →
         </Link>

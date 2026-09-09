@@ -65,7 +65,7 @@ export async function AvailableSupplySection({ state }: { state: EmployerSupplyS
                 {row.roleText ?? t("unstatedRole")}
               </span>
               {row.teamSize !== null && (
-                <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("people", { count: row.teamSize })}
                 </span>
               )}

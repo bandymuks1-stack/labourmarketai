@@ -312,7 +312,7 @@ export function WorkerPlayerCard({
             </span>
           )}
           <div className="min-w-0 flex-col">
-            <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {labels.title}
             </span>
             <h2 className="truncate font-display text-xl font-bold tracking-tightest text-text-primary">

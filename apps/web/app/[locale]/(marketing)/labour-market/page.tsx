@@ -34,7 +34,7 @@ export default async function CountryIndexPage({
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12" id="main-content">
       <section>
-        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span className="live-dot" aria-hidden />
           {t("countryIndexEyebrow")}
         </p>

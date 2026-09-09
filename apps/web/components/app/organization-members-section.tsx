@@ -278,7 +278,7 @@ export function OrganizationMembersSection({
             <button
               type="submit"
               disabled={invitePending}
-              className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand disabled:opacity-50"
               data-testid="org-members-invite-submit"
             >
               {labels.inviteSubmit}

@@ -111,7 +111,7 @@ export function ProfessionRecoveryPrompt({
           // requires of a real action, and the primary action of a prompt aimed
           // at phone users is the last place to miss it. inline-flex so the
           // label stays centred once the box is taller than the text.
-          className="inline-flex min-h-11 items-center rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80"
+          className="inline-flex min-h-11 items-center rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80"
           data-testid="opportunities-no-work-type-cta"
         >
           {labels.cta} →

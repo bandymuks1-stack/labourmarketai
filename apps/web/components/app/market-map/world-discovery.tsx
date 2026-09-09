@@ -160,7 +160,7 @@ export function WorldDiscovery({
   return (
     <section className="flex flex-col gap-2" data-testid="market-map-world" data-world-layer={layer}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("title")}
         </h2>
         <div

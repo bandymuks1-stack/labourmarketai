@@ -272,7 +272,7 @@ export function CandidateDraftsManager({
   return (
     <div className="flex flex-col gap-6" data-testid="candidate-drafts-manager">
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.eyebrow}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

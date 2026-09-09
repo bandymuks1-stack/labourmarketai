@@ -87,7 +87,7 @@ export function MembershipInvitationsPanel({
                 <button
                   type="submit"
                   disabled={pending}
-                  className="rounded-md bg-brand-blue px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                  className="rounded-md bg-brand-blue px-3 py-1 text-xs font-semibold text-text-on-brand disabled:opacity-50"
                   data-testid={`membership-accept-${inv.membershipId}`}
                 >
                   {labels.accept}

@@ -341,7 +341,7 @@ function MatchRow({
         </span>
         {claimNovelty && match.isNew && (
           <span
-            className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan"
+            className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
             data-testid="opportunities-match-new"
           >
             {tRec("newBadge")}

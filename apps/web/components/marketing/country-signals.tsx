@@ -54,7 +54,7 @@ export async function CountrySignals({ country }: { country: CountryCode }) {
                   href={s.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="text-brand-blue hover:text-brand-cyan"
+                  className="text-brand-blue hover:text-brand-champagne"
                 >
                   {t(`sourceLabel.${s.sourceId}`)}
                 </a>

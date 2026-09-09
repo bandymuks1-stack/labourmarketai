@@ -55,7 +55,7 @@ export async function CompanyActionNextActions({
         <Link
           href={primaryHref as "/dashboard"}
           data-testid="company-action-primary"
-          className="mt-1 inline-flex items-center gap-1.5 self-start rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-white shadow-cta-glow transition-opacity hover:opacity-95"
+          className="mt-1 inline-flex items-center gap-1.5 self-start rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand shadow-cta-glow transition-opacity hover:opacity-95"
         >
           {t("primaryLabel")}
           <ArrowRight className="h-4 w-4" strokeWidth={2} aria-hidden />
