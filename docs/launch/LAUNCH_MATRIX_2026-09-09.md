@@ -297,8 +297,8 @@ understates coverage in copy.
 ## 8. FINAL MATRIX
 
 ```
-CURRENT_MAIN_SHA              33d47f68
-CURRENT_PRODUCTION_SHA        33d47f68
+CURRENT_MAIN_SHA              2be8c51e   (was 33d47f68 at audit start; #1680, #1681, #1648 merged since)
+CURRENT_PRODUCTION_SHA        2be8c51e
 MAIN_PRODUCTION_MATCH         YES
 
 SECURITY_CRITICAL             PASS
@@ -318,9 +318,9 @@ HUMAN_UI_PROVEN               PARTIAL (anonymous landing EN: 10/10; signed-in: n
 PERSON_READY                  PARTIAL
 COMPANY_READY                 PARTIAL
 AGENCY_READY                  PARTIAL
-INSTITUTION_READY             NO
+INSTITUTION_READY             PARTIAL (was NO — #1648 applied; write + read chain proven at data level; 0 learners ever; not human-walked; see §13)
 
-#1648                         OWNER_DECISION_REQUIRED (premise re-verified today; branch rebased onto a0b8abf7, packet in §10)
+#1648                         RESOLVED — APPLIED on "Apply #1648" (ledger 20260909105602_20260908120000_education_program_correction_v1), merged as 2be8c51e, served; evidence §13
 G-1_EMAIL_DELIVERY            UNKNOWN — 0 real e-mail signups since confirmation went on; no delivery evidence exists yet (§11)
 CROSS_PERSON_QUALIFICATIONS   UNAVAILABLE — no safe projection exists; spec in §6
 LIVE_CLOCK_BADGE              OWNER_DECISION_REQUIRED (frozen namespace; bounded regeneration)
@@ -329,7 +329,7 @@ LIVE_CLOCK_BADGE              OWNER_DECISION_REQUIRED (frozen namespace; bounded
 SAFE_TO_INVITE_WORKERS        YES (after G-1 once)
 SAFE_TO_INVITE_COMPANIES      YES (trades)
 SAFE_TO_INVITE_AGENCIES       YES (individual supply)
-SAFE_TO_INVITE_INSTITUTIONS   NO
+SAFE_TO_INVITE_INSTITUTIONS   NOT YET — the blocker is gone; one human walk of programme → cohort → learner → outcomes (§12 E) is what remains before a school is invited
 ```
 
 ---
@@ -461,3 +461,29 @@ pass of dashboard + profile + need form; notifications bell; three empty
 states and one error/unknown state read as sentences, not as zero; context
 switching back and forth; navigation names match what the pages do; one
 visual language (typography, cards, buttons, status, forms).
+
+---
+
+## 13. #1648 APPLIED — evidence (2026-09-09, owner sentence "Apply #1648")
+
+Executed in the packet's order; nothing else rode along.
+
+| step | evidence |
+|---|---|
+| Branch current | `gh pr update-branch` → `d752ad35` on top of `6006b53e`; all 6 checks green (quality, migration-safety, e2e-smoke, mobile, CodeQL, Analyze) |
+| Applied | Supabase MCP `apply_migration`, name `20260908120000_education_program_correction_v1`; **ledger head now `20260909105602_20260908120000_education_program_correction_v1`** |
+| Readback | `update_education_program_v1` exists, `SECURITY DEFINER`, `search_path=public`; EXECUTE: `authenticated` true, `anon` false (grants: postgres, authenticated only); `education_programs` policies unchanged (`education_programs_select` only) |
+| Write proven | As the E2E Walker manager (JWT claims set, role `authenticated`): programme `8b8cae97…` corrected from `target=NULL / type=NULL` to **`target=builder`, `type=vocational`**; `organization_id` and `created_by` unchanged. Left corrected — it is E2E data and the correction is the intended state. |
+| Negative controls | no JWT → `42501 Not authenticated`; manager of a DIFFERENT organization → `42501 not_manager` (same refusal as "not found"); institution manager with an unknown slug → `22023 unknown_profession`. Each rolled back. |
+| Institution read chain | As the institution manager: programme visible (1), cohorts visible (1), `institution_learner_outcomes_v1` executes (1 row), demand RPC executes (20 professions counted). `builder` has no row in the public-vacancy grouping, so the surface will show **0 (counted, none)** — `null`/"no direction" only when the slug is NULL or the RPC fails (`lib/education/programs.ts`). |
+| Merge | PR marked ready → squash auto-merge → **`2be8c51e`**; production serves `2be8c51e` (health ok) |
+| Regression guards | full suite on merged `main`: **850 files / 15,093 tests pass** (was 849 / 15,082 — the new guard file added 11) |
+| Owner gates | #1646, #1641, #1577, #1421 and the other RED drafts untouched; no policy, grant or table beyond the one function changed |
+
+**INSTITUTION_READY: NO → PARTIAL.** What changed: the one permanent
+mis-pointing is gone and an institution can now re-aim a programme at the
+labour market. What has not changed: no learner has ever been added to a
+cohort (the writer exists and is executable; nobody has used it), and no
+human has walked programme → cohort → learner → outcomes on the rendered
+surface. Both are §12 E of the walk, not engineering. SAFE_TO_INVITE_INSTITUTIONS
+stays "not yet" until that walk is done in this window.
