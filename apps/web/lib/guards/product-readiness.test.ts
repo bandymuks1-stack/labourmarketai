@@ -2442,6 +2442,8 @@ describe("no migration files added by this sprint", () => {
     // + policy replace) - applying it does not make it GREEN.
     //
     // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // 274 -> 275: EVID-7, the subject of an imported evidence record can
+    //   contest it (20260908110000). RED, owner-gated, UNAPPLIED.
     // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
     // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
     // the two ambiguous cases stay UNMAPPED on purpose, because generic
@@ -2473,7 +2475,10 @@ describe("no migration files added by this sprint", () => {
     // the multi-actor model. Body re-derived from the LIVE function rather than
     // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
     // UNAPPLIED and owner-gated.
-const SPRINT_BASELINE = 276;
+    //
+    // 276 -> 277: EVID-7, the subject of an imported evidence record can
+    //   contest it (20260908110000). RED, owner-gated, UNAPPLIED.
+const SPRINT_BASELINE = 277;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

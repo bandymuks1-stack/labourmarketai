@@ -15465,6 +15465,13 @@
       "confirmation_unavailable": "Freigaben können in dieser Umgebung nicht signiert werden, daher wurde nichts festgehalten."
     },
     "mine": {
+      "contest": "Das stimmt nicht",
+      "contestHint": "Ein Widerspruch löscht nicht, was die Organisation geschrieben hat. Ihr Einwand wird daneben festgehalten, beides bleibt am Eintrag, und wer ihn liest, sieht, dass Sie widersprochen haben. Sie können ihn später zurücknehmen.",
+      "contestNote": "Was ist daran falsch? (optional)",
+      "withdrawContest": "Einwand zurücknehmen",
+      "contested": "Sie haben dem widersprochen",
+      "contestFailed": "Das konnte nicht gespeichert werden. Nichts hat sich geändert.",
+      "contestNotEnabled": "Das Widersprechen eines Eintrags ist in dieser Umgebung noch nicht aktiviert.",
       "title": "Was Organisationen über mich festgehalten haben",
       "intro": "Arbeit, Weiterbildung und Studium, die eine Organisation aus ihren eigenen Aufzeichnungen übernommen hat. Sie sehen immer, wer es geschickt hat, was diese Stelle damals für Sie war und wann.",
       "notEnabled": "Das ist in dieser Umgebung noch nicht eingeschaltet. In Ihrem Profil fehlt nichts — der Speicher ist schlicht nicht da, um gelesen zu werden.",
