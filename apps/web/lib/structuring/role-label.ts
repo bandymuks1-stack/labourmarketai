@@ -102,6 +102,29 @@ export const ROLE_SUFFIX_GENITIVE_SOURCE =
 export const TRADE_STEM_SOURCE =
   "suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa";
 
+/**
+ * TIME UNITS, as people write them (folded stems).
+ *
+ * A NUMBER FOLLOWED BY ONE OF THESE IS A DURATION, NEVER A HEADCOUNT — and
+ * that single distinction is what separates a person describing themselves
+ * from an organisation describing its workforce:
+ *
+ *   "turime 20 pastolininku"                 20 = how many people → SUPPLY
+ *   "turiu 3 metus patirties suvirintoju"     3 = how long        → the PERSON
+ *
+ * The employer-demand rule has excluded these since 2026-09-08 — "reikia 12
+ * valandu" is a question about time, not about people. The supply rules added
+ * the same day copied that rule's SHAPE but not this guard, so "I have 3 years
+ * experience as a welder" was read as an agency offering welders.
+ *
+ * It lives here beside `TRADE_STEM_SOURCE` for the same reason that one does:
+ * a vocabulary only one direction can read is how the two directions drift
+ * apart. Stems, not words — `fold()` strips diacritics before matching, so
+ * `men` covers "mėnesius" and `god` covers "года".
+ */
+export const DURATION_UNIT_SOURCE =
+  "val|valand|dien|savait|men|metu|hour|day|week|month|year|yr|час|дн|недел|месяц|год|stunde|tag|woche|monat|jahr|uur|dag|week|maand|jaar";
+
 /** Nominative endings after "esu" (masc./fem.). */
 export const ROLE_SUFFIX_NOMINATIVE_SOURCE =
   "ininkas|ininke|tojas|toja|ejas|eja|eris|ere|istas|iste|ierius|iere|orius|ore|ovas|ove|ikas|ike|antas|ante|ologas|ologe";
