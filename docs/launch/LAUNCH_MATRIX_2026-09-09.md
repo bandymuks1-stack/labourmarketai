@@ -320,7 +320,8 @@ COMPANY_READY                 PARTIAL
 AGENCY_READY                  PARTIAL
 INSTITUTION_READY             NO
 
-#1648                         OWNER_DECISION_REQUIRED (premise re-verified today)
+#1648                         OWNER_DECISION_REQUIRED (premise re-verified today; branch rebased onto a0b8abf7, packet in §10)
+G-1_EMAIL_DELIVERY            UNKNOWN — 0 real e-mail signups since confirmation went on; no delivery evidence exists yet (§11)
 CROSS_PERSON_QUALIFICATIONS   UNAVAILABLE — no safe projection exists; spec in §6
 LIVE_CLOCK_BADGE              OWNER_DECISION_REQUIRED (frozen namespace; bounded regeneration)
 #1577                         OWNER_DECISION_REQUIRED (49 live vs 58 seeded; still valid)
@@ -347,3 +348,116 @@ SAFE_TO_INVITE_INSTITUTIONS   NO
 
 Nothing in this window touched a migration, an RLS policy, a grant or a
 production row. No owner decision was resolved by an agent.
+
+---
+
+## 10. #1648 — OWNER DECISION PACKET (after the 2026-09-09 rebase)
+
+State on 2026-09-09 after #1680: `main` = production = `a0b8abf7`. The
+#1648 branch was **8 commits behind** and its two migration-count ratchets
+conflicted with the supply bridge (277). It was rebased onto `a0b8abf7`,
+the ratchets moved 277 → 278 (recounted from the tree: 278 files), and the
+result was force-pushed to the same PR branch as `913198a8`. It is still a
+**draft** with `needs-human-gate`, **no auto-merge**, **not applied**.
+
+| field | answer |
+|---|---|
+| WHAT EXACTLY CHANGES | ONE new function `public.update_education_program_v1(uuid, text, text, text, text)` (SECURITY DEFINER, `search_path = public`), one server action, one edit form rendered on every programme card, copy in 5 locales. Nothing else in the schema is touched. |
+| WHY IT IS NEEDED | `education_programs` has one policy (SELECT) and one writer (`create_…`). The single live programme has `target_profession_slug = NULL`, so its employer-demand direction reads "no direction" forever and no actor can correct it. Verified live today: function absent, policy list unchanged, row unchanged. |
+| WHO GAINS WRITE AUTHORITY | A signed-in user who `manages_organization(v_org)` **where `v_org` is read from the programme row**, and only if that organization holds `organization_roles.role_slug = 'training_provider'`. |
+| WHAT THEY CAN WRITE | `name`, `target_profession_slug`, `education_type_slug`, `description` of a programme their own organization created. Slugs are validated against the ACTIVE `professions` / `education_types` catalogues (49 / 9 rows today). |
+| WHAT THEY CANNOT WRITE | `organization_id`, `created_by`, `id` (not in the UPDATE list) — a programme cannot be moved or re-attributed; nobody else's programme (org comes from the row, one refusal for "not found" and "not yours"); nothing on any other table. |
+| RLS / SECURITY EFFECT | No policy added, changed or loosened. No grant to `anon` or `public` (both revoked by name); EXECUTE to `authenticated` only. The function re-checks `auth.uid()` and the two authorization predicates itself. |
+| DATA MIGRATION EFFECT | None at apply time — no row is read or written by the migration. Rows change only when an authorized manager submits the form. |
+| ROLLBACK / RECOVERY | `supabase/rollbacks/20260908120000_education_program_correction_v1.down.sql` drops the one function; corrections already made stay as ordinary column values. Complete inverse; prefer fixing forward. |
+| TEST EVIDENCE | Guard `education-program-correction-v1.test.ts` (11 assertions: org from the row, three refusals mirror the create path, slug validation against the same catalogues, only four fields updatable, anon/public revoked by name, complete inverse, RED acknowledgement is not an approval, form rendered for every programme, empty direction explained). After the rebase: those 5 guard files pass locally (148 tests), typecheck passes, `migration-safety` STRUCTURAL-GREEN with the 4 expected RED findings (secdef function, grant/revoke, UPDATE in body ×2) acknowledged, not waived. CI on `913198a8` is running at write time. |
+| CONCURRENCY / LEDGER | Version `20260908120000` is NOT in the production ledger (head `20260909061411_…`). No other open PR touches `education_programs`, the education functions, or the same version. The only file overlap with `main` since the branch point was the three ratchet guards and the five message catalogues; resolved. |
+| RECOMMENDATION | **APPLY.** Smallest possible writer, same authorization shape as the create path it mirrors, additive, reversible, no policy change. It is the one decision between an institution and a correct programme. |
+
+**Exact owner sentence:** `Apply #1648`. On that sentence only: update-branch if
+`main` moved again, `apply_migration` via Supabase MCP from the branch head,
+read back `update_education_program_v1` exists + policies unchanged, then
+mark ready and merge. Nothing else rides along.
+
+---
+
+## 11. G-1 — real e-mail delivery: status and the smallest action
+
+Facts (read today, no mail generated):
+
+* Auth mail leaves production through **Resend custom SMTP**
+  (`smtp.resend.com:465`, sender `noreply@labourmarket.ai`, domain verified —
+  owner-verified 2026-09-02). Confirmation is required (`mailer_autoconfirm =
+  false`).
+* Since confirmation went on (2026-09-02 12:40 UTC): **0 real e-mail/password
+  signups** (all real accounts are Google), so **no delivery evidence exists**
+  — not a failure, an absence of measurement. One unconfirmed `e2e-*` signup
+  is residue (its mail bounced, as expected for a non-mailbox).
+* No Resend credential is available to an agent (nothing mail-related in
+  Vercel env), so provider acceptance / delivery events cannot be read from
+  here. Only the Supabase auth log (`user_confirmation_requested`) is visible,
+  and that is SENT, not DELIVERED.
+
+**Status: UNKNOWN.** SENT is provable from the auth log; ACCEPTED /
+DELIVERED / BOUNCED need either the Resend dashboard or a real inbox.
+
+**Smallest exact owner action (2 minutes):** sign up on
+`https://labourmarket.ai/lt/auth/signup` with one real mailbox you can open
+(a Hostinger `@labourmarket.ai` box or a personal one), then either click the
+link or just say "the mail arrived at hh:mm". The agent then reads the auth
+log for that signup (SENT) and records DELIVERED from your word; if nothing
+arrives in 10 minutes, the agent reads the auth log for the send attempt and
+you check the Resend dashboard for the bounce reason.
+
+Also owner-only, from the same audit: turn on **leaked-password protection**
+in Supabase Auth (dashboard toggle; no code).
+
+---
+
+## 12. HUMAN WALK SCRIPT — for the owner's return (execute in this window)
+
+Ground rules: production only; ordinary human path; the owner signs in
+themselves; for every screen the questions are *what is this, what can I do,
+where do I click, what happens next*. A capability a normal user cannot find
+is a defect even if the backend has it. Each defect is captured as route ·
+context · intent · expected · actual · screenshot · severity · smallest fix.
+
+**A. Anonymous (5 min)** — landing in LT and EN: understand it in 10 seconds;
+type "Esu suvirintojas" / "Ieškau darbo" / "Turime 20 suvirintojų" / "Ieškome
+projekto savo brigadai" / "Reikia 6 montuotojų kitą savaitę" / "Atstovauju
+agentūrai" / "Atstovauju kolegijai"; check each reading and door; nearest
+opposites (need vs have; my history vs our data); language switch over the
+map; mobile width once; sign up / log in.
+
+**B. Person (10 min)** — first screen after login: is the sentence carried?
+dashboard: what is it telling me? profile: WHO / WHAT I DO / WHAT I DID /
+evidence / qualifications / where / when available / services / actions;
+CV and history import ("Noriu įkelti savo seną darbo istoriją" → does it land
+on MY import, not a company one?); Work Journal entry → recognized skills →
+"who can confirm this?"; availability + preferred countries; jobs/matching
+for my profession; messages/notifications; log out.
+
+**C. Company (10 min)** — enter the company context (chip, not a second
+account); "Reikia 20 suvirintojų nuo spalio Vilniuje" → is the need written
+down with role, headcount, place, date, and what happens next?; own workforce
+/ people; project/team/work planning; "Norime įkelti savo senus darbo
+duomenis" → organization import as ORGANIZATION; candidates for my need;
+confirm a worker's journal entry (quick inbox, incl. the new *could not be
+read* state only if it ever shows).
+
+**D. Agency (7 min)** — enter as agency (door + context); represent workforce;
+"Turime laisvų 7 elektrikų nuo pirmadienio" → supply, not demand; see client
+demand; offer people to a need; client/workforce lists; the agency is never
+treated as a plain employer.
+
+**E. Institution (7 min, after #1648 is applied)** — enter as
+school/college; programme (create, then CORRECT its profession — the #1648
+path); cohort; add a learner; learner's practice/evidence; outcomes read;
+employer demand for the programme's profession; what the institution cannot
+see about a student (privacy boundary).
+
+**F. Cross-cutting (5 min)** — language selector on every surface; one mobile
+pass of dashboard + profile + need form; notifications bell; three empty
+states and one error/unknown state read as sentences, not as zero; context
+switching back and forth; navigation names match what the pages do; one
+visual language (typography, cards, buttons, status, forms).
