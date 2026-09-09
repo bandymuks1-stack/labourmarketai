@@ -5066,13 +5066,36 @@ export function ConversationChat({
         // "Įkelk tabelį" lands on the hours screen in its import mode: the
         // historical grid and today's quick entry produce the same canonical
         // allocations, so they are one surface, not two.
+        //
+        // ── BUT ONLY FOR THE ACTOR WHOSE SURFACE THAT IS ─────────────────
+        // (owner readiness window 2026-09-09, Priority 6)
+        //
+        // `hours-import` is reached by BOTH actors: #1670 made it the front
+        // door for "I want to upload my old work history", which is §7's
+        // foundational PERSON journey, and it is also the employer's
+        // timesheet import. One chip served both, and it pointed at
+        // `/dashboard/hours`, whose own page header calls it "the operator's
+        // daily surface" and which answers `states.noCompany` to anyone
+        // without a company. So a person asking to bring their history in was
+        // sent to a screen that tells them they have no company.
+        //
+        // #1678 fixed the IDENTITY (they are no longer signed up as an
+        // organisation); this fixes the DESTINATION. Both chips already
+        // exist and are exactly what `cvChoose` offers a person — the CV
+        // import flow and their profile. No new route, no new label, no
+        // second import model.
         timesheetImport: () =>
-          assistant(labels.adminRouteHint, [
-            {
-              id: "link:/dashboard/hours?import=1",
-              label: labels.timesheetImportChip,
-            },
-          ]),
+          identity === "person"
+            ? assistant(labels.adminRouteHint, [
+                { id: "cv", label: labels.chipCv },
+                { id: "profile", label: labels.chipProfile },
+              ])
+            : assistant(labels.adminRouteHint, [
+                {
+                  id: "link:/dashboard/hours?import=1",
+                  label: labels.timesheetImportChip,
+                },
+              ]),
         workHours: () =>
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/hours", label: labels.workHoursChip },

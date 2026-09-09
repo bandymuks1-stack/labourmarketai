@@ -399,3 +399,191 @@ only with a company and work objects. **Whether a person importing their own
 history belongs there or on `/dashboard/profile` is a product question this
 slice deliberately did not answer** — it fixed the identity, which is wrong
 under every answer to that question.
+
+---
+
+## 9. SECOND ROUND — priorities 1, 2, 4 and 6
+
+Both earlier slices were **verified on the deployed build** before this round
+started: `/api/health` reported `86ea5102`, then `5b717879`, and the deployed
+bundle was exercised for all four readings, in both directions:
+
+| sentence | live reading on production |
+|---|---|
+| "I want to upload my old work history" | *your work and professional path* — PERSON |
+| "we want to upload our old work data" | *as an employer or a company* — ORG |
+| "I am a welder" | *your work and professional path* |
+| "We have 20 welders" | *you have people or capacity free* — SUPPLY |
+
+Also production-verified: 17/17 markets selectable on `/company-need`; the
+agency door carrying `?next=…type=staffing_agency` on `/en` and `/lt` and on
+both `/for-agencies` CTAs; and the §15 map line reading
+`Prisijunkite ir plėskite savo galimybes darbo rinkoje.` with the negation
+still in `shows` and the old apology gone.
+
+**A harness limit, stated plainly.** The Browser pane reports
+`document.hidden = true` with a 0×0 viewport, so synthetic key events are
+dropped — real typing reported "18 chars typed" and left the field empty. The
+readings above were obtained by driving the DEPLOYED bundle (native value
+setter + `requestSubmit`), which exercises the real router and the real render.
+That is **PRODUCTION_PROVEN, not HUMAN_UI_PROVEN**, and the difference is not
+being blurred.
+
+### 9.1 Priority 1 — the pricing page denied a capability the product has
+
+Two blocks on one public page said opposite things to a buyer:
+
+* `pricing.plans.free.features` → "Matching shortlist and candidate contact"
+* `conciergeOffer.note` → "There is no automatic job board and no automatic
+  matching here yet"
+
+**Audited before any copy moved, and the DENIAL was the false half:**
+
+* `/jobs` is a live public board — 48,265 vacancies, honest provenance.
+* `/match-preview` is live, **public, and needs no account**: it computes fit
+  from a worker's facts and a company need and explains the result.
+* "Need → matching → ranked shortlist" is `PROVEN` in
+  `docs/CAPABILITY_INVENTORY.md` (browser, 2026-08-27).
+
+So the Free-plan feature was TRUE and **was not weakened** — the guard pins
+that it still names matching, because deleting it would have "resolved" the
+contradiction by removing a true statement. Only the note changed, and it now
+answers the five questions Priority 1 asks: what is free, what matching
+exists, what is automatic, what needs a human, what is not yet available.
+
+**Not a billing change**: no price, plan, entitlement or payment provider is
+touched. The concierge STEPS are untouched and pinned as such — they describe
+the paid human service accurately, and it was only the note that lied.
+
+Two guards refused the first drafts, both correctly: the note used the LEGACY
+inquiry nouns in four locales (`poreikis` / `потребность` / `behoefte` /
+`Bedarf` — the mapping is the reverse of what it looks like), and the first
+assertion about the Lithuanian Free plan used the wrong stem: Lithuanian says
+`atrankos sąrašas`, not `atitikimas`, so the guard failed on TRUE copy.
+
+### 9.2 Priority 2 — a brigade could not offer itself
+
+**The audit came first, and it inverted the premise.** The directive recorded
+team/brigade as NOT_BUILT. Measured on production 2026-09-09, the layer is
+**applied and live**, on the canonical spine and not a parallel model:
+
+| piece | live |
+|---|---|
+| team = `organizations` row | `organization_type='team'` is in the live CHECK constraint |
+| create | `create_team_v1` EXISTS, `authenticated` **has execute** |
+| members = consent | `invitation_type` admits `join_team` in BOTH CHECK constraints; membership is the existing `engagement_contexts` — **80 rows in real use** |
+| collective capability | `get_team_capability_summary_v1` EXISTS |
+| availability / location | `team_details` EXISTS |
+| a company contacting a team | `team_enquiries` EXISTS |
+| team ↔ need matching | `matchTeamToNeed` complete — **admin route only** |
+| assign a team as a UNIT | **genuinely missing** — no FK |
+| usage | **0 teams, 0 details, 0 enquiries, 0 join_team invitations** |
+
+So "NOT_BUILT" conflated *nobody has created one* with *it cannot be created*.
+Both `WRK-6` and `DEM-6` register notes are corrected in place.
+
+**What WAS a real defect: the front door.** The `offer-capacity` rule had two
+patterns, each with its own copy of the own-people vocabulary, and the copies
+had drifted — the collective noun was the only difference between understood
+and not:
+
+| sentence | before |
+|---|---|
+| "Looking for work for our PEOPLE" | offer-capacity (correct) |
+| "Looking for work for our CREW" | **find-work** |
+| "Ieškome darbo mūsų BRIGADAI" | **need-workers** — a brigade read as an EMPLOYER |
+| "Zoek werk voor onze PLOEG" | **find-work** |
+| "Suchen Arbeit für unsere KOLONNE" | **unknown** |
+| "Ищем проект для нашей БРИГАДЫ" | **unknown** |
+| "Rask projektą mūsų 12 žmonių brigadai" | **find-work** |
+| "Find a project for our 12-person crew" | **unknown** |
+
+`Ieškome darbo mūsų brigadai → need-workers` is the worst reading in the set:
+a complete SEP-4 inversion — the exact defect window 7 built the supply
+direction to fix — surviving for the brigade noun alone, because that noun was
+in only one of the two copies. **The #1669 lesson for the third time in one
+file.**
+
+Fixed at the root: ONE `OWN_PEOPLE_SOURCE` read by both patterns, plus the
+imperative seek verbs (`rask` / `surask` / `find` / `найди`) nobody had added,
+plus `fitter` / `installer` / `montuotoj`, because "We need a team of 6
+FITTERS" measured `unknown` while the same sentence with "welders" worked.
+
+All ten collective-supply sentences now read SUPPLY in all five locales, and
+every negative control holds: asking FOR a crew stays `find-workers` (5/5), a
+team-shaped headcount need stays `need-workers` (6/6), and one person stays
+`find-work` (5/5) — including "Find me a job" and "Rask man darbą", which is
+exactly what the imperative widening risked.
+
+### 9.3 Priority 3 — and why QUALIFICATIONS stopped here
+
+The person page was re-verified against current `main`, not the old PR.
+Present: identity, availability, location, mobility, experience years,
+services, work photos, skills with evidence tiers, real work, message action.
+
+**Slice 8 (QUALIFICATIONS) is NOT authorized and was not built.** Measured:
+
+```
+worker_documents_select  →  the worker themselves (w.profile_id = auth.uid())
+                            OR is_admin()
+```
+
+There is no cross-person read. Showing qualifications on the page an employer
+looks at would require **widening RLS**, which Priority 3 explicitly forbids
+doing for visual completeness. Reported, not built.
+
+### 9.4 Priority 4 — a listed service with no way to ask for it
+
+The services section rendered a person's active offerings as text with no
+action. Priority 4 cuts both ways: no dead buttons, and no decorative lists.
+
+The button calls the SAME `requestServiceOffering` action the marketplace
+calls, through the SAME `request_service_offering` DEFINER RPC — verified live:
+the function exists and `authenticated` has execute. Its copy comes from the
+existing `marketplace` namespace, so a second entry point grew no second
+vocabulary. All five outcomes say something different, and a permanent "no"
+(inactive / not-enabled) **removes the button** rather than leaving one that
+cannot succeed. No self-request guard is needed, and the guard records why:
+the page already redirects a viewer looking at their own row.
+
+Also fixed here: the offering's `locationCountry` was another raw ISO code.
+
+### 9.5 Priority 6
+
+* **The hours-import chip now branches by actor.** `hours-import` is reached by
+  both actors, and one chip sent everyone to `/dashboard/hours?import=1` —
+  "the operator's daily surface", which answers `states.noCompany` to anyone
+  without a company. #1678 fixed the identity; this fixes the destination. A
+  person gets the two chips `cvChoose` already offers them. No new route, no
+  new label.
+* **`audience="workers"` was hard-coded** on every `PageHero` signup CTA, so
+  `/for-agencies` and `/for-companies` clicks were reported as WORKER-funnel
+  events. Now a per-page `ctaAudience`, passed explicitly by all four signup
+  callers rather than relying on the default that caused the defect.
+  **First-touch attribution is untouched** — `TrackedCta` still merges
+  `getFirstTouchAttribution()` exactly as before.
+* **"Baltic + Nordic" was not one string.** A sweep found four public coverage
+  claims naming a stale region; three are fixed and pinned by a guard on the
+  CLASS (coverage copy names no region and no digit — the map band derives its
+  count from `coverageCountryCount()` rather than typing it). The fourth,
+  `live.clock.badge`, is in a **FROZEN** namespace and is left alone; the guard
+  asserts it still carries the stale text, so the omission is visible instead
+  of looking like an oversight. **Owner decision.**
+* **43 vs 49 professions** — `#1577` owns it and stays owner-gated. Untouched.
+* **"I can work on cars" → availability** — pre-existing (`on` is both a
+  temporal and an ordinary preposition). Verified NOT worsened by the
+  availability fix; a correct fix needs a temporal-token rule, not a longer
+  word list, and is deliberately not attempted here.
+
+### 9.6 Priority 5 — institution
+
+Audited in full in `INSTITUTION_AUDIT_2026-09-09.md`, including a correction to
+the 2026-09-08 handoff (the outcomes **report** is not absent — it exists, is
+executable, and is connected to a rendered surface) and the exact `#1648`
+owner decision. **No institution code, schema, policy or grant was changed.**
+
+### 9.7 Concurrency
+
+`#1496` (the Agentai supply bridge) was **not** touched, rebased, merged or
+read into any change here. Nothing in this round emits a supply feed, and the
+brigade work stops at the router and the register.

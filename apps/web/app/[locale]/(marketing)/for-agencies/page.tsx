@@ -38,6 +38,7 @@ export default async function ForAgenciesPage({
         ctaLabel={t("cta")}
         ctaSource="agencies_hero"
         ctaNext={AGENCY_DOOR_NEXT}
+        ctaAudience="agencies"
       />
       <BenefitCards items={benefits} />
       <RoleEnrichment

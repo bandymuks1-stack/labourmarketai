@@ -21,6 +21,7 @@
  */
 import {
   OCCUPATION_STEM_SOURCE,
+  OWN_PEOPLE_SOURCE,
   DURATION_UNIT_SOURCE,
   TRADE_STEM_SOURCE,
   PROFESSION_STATEMENT_ANCHOR_SOURCE,
@@ -339,11 +340,21 @@ const RULES: IntentRule[] = [
       // "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose."
       // "We have workers and we are looking for employers."
       // "Мы имеем 20 сварщиков и ищем для них работу."
-      p("(turim|turiu|disponuoj|have|hebben|haben|имеем|располага)\\w*\\s*.{0,20}([0-9]{1,4}|darbuotoj|žmoni|žmon|komand|specialist|brigad|worker|people|staff|team|crew|medewerk|mensen|ploeg|mitarbeit|leute|работник|люд|специалист|бригад)\\w*\\s*.{0,40}(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу|reikia|nodig|brauch|нужн)\\w*\\s*.{0,30}(darb|work|job|projekt|project|employer|užsakym|werk|opdracht|werkgever|arbeit|auftrag|arbeitgeb|работ|проект|заказ)", 10),
+      p(`(turim|turiu|disponuoj|have|hebben|haben|имеем|располага)\\w*\\s*.{0,20}([0-9]{1,4}|${OWN_PEOPLE_SOURCE})\\w*\\s*.{0,40}(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу|reikia|nodig|brauch|нужн)\\w*\\s*.{0,30}(darb|work|job|projekt|project|employer|užsakym|werk|opdracht|werkgever|arbeit|auftrag|arbeitgeb|работ|проект|заказ)`, 10),
       // SEEKING WORK **FOR OUR PEOPLE** — the possessive is what makes it
       // supply. "Ieškome darbo savo darbuotojams", "looking for work for our
       // people", "Arbeit für unsere Mitarbeiter".
-      p("(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу)\\w*\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|auftrag|работ|проект)\\w*\\s*.{0,20}(savo|mūsų|our|onze|unser|наш|для\\s+наш)\\w*\\s*.{0,20}(darbuotoj|žmon|komand|specialist|worker|people|staff|medewerk|mensen|mitarbeit|leute|работник|люд|специалист)", 10),
+      p(
+        // THE SEEK VERB INCLUDES THE IMPERATIVE. "Rask projektą mūsų 12
+        // žmonių brigadai" and "Find a project for our 12-person crew" are
+        // how someone actually asks, and neither `rask`/`surask` nor `find`
+        // was here — the first measured `find-work` (one person job-hunting)
+        // and the second `unknown`. The possessive + own-people clause below
+        // is what keeps this SUPPLY, so widening the verb cannot turn "find
+        // me a job" into an offer: that sentence has no "our <people>".
+        `(ieško|ieškau|ieškom|paieška|rask|surask|looking|search|seeking|\\bfind\\b|zoek|such|ищем|ищу|найди|найти)\\w*\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|auftrag|работ|проект)\\w*\\s*.{0,24}(savo|mūsų|our|onze|unser|наш|для\\s+наш)\\w*\\s*.{0,24}(${OWN_PEOPLE_SOURCE})`,
+        10,
+      ),
       // WORK **FOR THEM** — the pronoun carries the same possession.
       // "turim 20 suvirintoju, reikia jiems projektu".
       p("(jiems|joms|them|voor\\s+hen|für\\s+sie|ihnen|для\\s+них|им)\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|работ|проект)", 10),

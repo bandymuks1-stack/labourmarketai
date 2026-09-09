@@ -3688,7 +3688,7 @@
       "active_markets": "Core directions (9)",
       "expansion_candidates": "Expansion candidates"
     },
-    "caption": "Work directions across the Baltics and Northern Europe",
+    "caption": "Work directions across the markets we operate in",
     "world": {
       "caption": "Concept view — market directions, not live data",
       "legendTarget": "Market directions",
@@ -4760,7 +4760,7 @@
         },
         {
           "title": "Cross-border worker pool",
-          "desc": "Baltic + Nordic supply in one place."
+          "desc": "Supply from every market we operate in, in one place."
         },
         {
           "title": "No opaque middlemen",
@@ -4870,7 +4870,7 @@
         },
         {
           "title": "Cross-border reach",
-          "desc": "Baltic + Nordic clients and workers."
+          "desc": "Clients and workers across every market we operate in."
         },
         {
           "title": "Grow your desk",
@@ -4982,7 +4982,7 @@
     "successRate": "Fit success rate"
   },
   "trusted": {
-    "title": "Built for industry leaders across the Baltic & Northern Europe"
+    "title": "Built for industry leaders across the markets we operate in"
   },
   "heroCards": {
     "worker": {
@@ -8594,7 +8594,7 @@
         "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
       }
     ],
-    "note": "There is no automatic job board and no automatic matching here yet — during early access, selection is coordinated by a person. What you see is what really runs.",
+    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. Offering or assigning a whole crew as one unit is not built yet — today a crew is matched person by person.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {

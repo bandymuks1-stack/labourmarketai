@@ -6,6 +6,10 @@ import {
   mobilityLabels,
 } from "@/lib/people/person-page-labels";
 import {
+  PersonServiceRequestButton,
+  type PersonServiceRequestLabels,
+} from "@/components/app/person-service-request-button";
+import {
   BadgeCheck,
   CalendarDays,
   Globe2,
@@ -61,6 +65,18 @@ export default async function PersonPage({
   // the one page where they judge them. Both were rendered raw here — see
   // `countryName` and the availability chip below.
   const tCountries = await getTranslations("labourMarket");
+  // Priority 4: the action on a listed service. Copy comes from the
+  // EXISTING `marketplace` namespace the service-requests page reads, so
+  // this entry point carries no vocabulary of its own.
+  const tMarket = await getTranslations("marketplace");
+  const serviceRequestLabels: PersonServiceRequestLabels = {
+    request: tMarket("request"),
+    requested: tMarket("requested"),
+    duplicate: tMarket("duplicate"),
+    offeringInactive: tMarket("offeringInactive"),
+    notAvailable: tMarket("notAvailable"),
+    errorGeneric: tMarket("errorGeneric"),
+  };
   const format = await getFormatter();
 
   const supabase = await createClient();
@@ -315,7 +331,9 @@ export default async function PersonPage({
                     {o.locationCountry ? (
                       <span className="inline-flex items-center gap-1 font-mono text-meta text-text-muted">
                         <MapPin className="h-3 w-3" aria-hidden />
-                        {o.locationCountry}
+                        {/* Named, not printed as an ISO code — the same
+                            correction as the person's own country above. */}
+                        {countryLabel(o.locationCountry, countries)}
                       </span>
                     ) : null}
                     {/* The provider's OWN words for what it costs. Never a
@@ -329,6 +347,16 @@ export default async function PersonPage({
                   {o.description ? (
                     <p className="text-sm text-text-secondary">{o.description}</p>
                   ) : null}
+                  {/* THE NEXT ACTION. A listed service with no way to ask for
+                      it is a decorative list; this is the canonical request
+                      loop's own action, reached from where the visitor is
+                      actually looking. */}
+                  <div className="mt-1 flex justify-end">
+                    <PersonServiceRequestButton
+                      offeringId={o.id}
+                      labels={serviceRequestLabels}
+                    />
+                  </div>
                 </Card>
               </li>
             ))}
