@@ -888,7 +888,18 @@ describe("NO new DB migration in this PR", () => {
     // the multi-actor model. Body re-derived from the LIVE function rather than
     // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
     // UNAPPLIED and owner-gated.
-expect(count).toBeLessThanOrEqual(276);
+    //
+    // 276 -> 277: the first-party supply bridge
+    // (20260904120000_first_party_supply_representation_v1, paired rollback).
+    // A new consent purpose, the partner_supply_representation declaration
+    // table with three owner-only policies and no delete policy, and six
+    // SECURITY DEFINER functions — one of them (first_party_supply_feed_v1)
+    // revoked from authenticated and granted to service_role ONLY. Additive:
+    // no existing table, policy or column is altered and nothing is dropped.
+    // RED class; owner approval given 2026-09-09 for THIS migration only.
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 277 files.
+expect(count).toBeLessThanOrEqual(277);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

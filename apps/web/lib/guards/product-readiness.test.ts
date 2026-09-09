@@ -2473,7 +2473,18 @@ describe("no migration files added by this sprint", () => {
     // the multi-actor model. Body re-derived from the LIVE function rather than
     // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
     // UNAPPLIED and owner-gated.
-const SPRINT_BASELINE = 276;
+    //
+    // 276 -> 277: the first-party supply bridge
+    // (20260904120000_first_party_supply_representation_v1, paired rollback).
+    // A new consent purpose, the partner_supply_representation declaration
+    // table with three owner-only policies and no delete policy, and six
+    // SECURITY DEFINER functions — one of them (first_party_supply_feed_v1)
+    // revoked from authenticated and granted to service_role ONLY. Additive:
+    // no existing table, policy or column is altered and nothing is dropped.
+    // RED class; owner approval given 2026-09-09 for THIS migration only.
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 277 files.
+const SPRINT_BASELINE = 277;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

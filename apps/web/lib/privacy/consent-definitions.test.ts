@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { readdirSync } from "node:fs";
+
 import {
   CONSENT_DEFINITIONS,
   CONSENT_LOCALES,
@@ -17,7 +19,7 @@ import {
  * consent event provably records which wording was in force.
  */
 
-const CURRENT_PIN_MIGRATION = join(
+const MIGRATIONS_DIR = join(
   __dirname,
   "..",
   "..",
@@ -25,8 +27,36 @@ const CURRENT_PIN_MIGRATION = join(
   "..",
   "supabase",
   "migrations",
-  "20260711170000_privacy_consent_text_v2_controller_identity.sql",
 );
+
+/**
+ * THE PURPOSE REGISTRY, STATED HERE ON PURPOSE.
+ *
+ * A purpose is a recipient category plus a use, and adding one is a legal act,
+ * not a refactor. Listing them here means a new purpose cannot arrive by being
+ * appended to `CONSENT_DEFINITIONS` — someone has to come to this file and say
+ * which version they intend, exactly as the api-auth-boundary table forces a
+ * decision about a new route.
+ *
+ * `partner_supply_representation` was added 2026-09-04 for the first-party
+ * supply bridge. It is deliberately NOT a reuse of `profile_discoverability`:
+ * that purpose names its recipients as companies and agencies ON
+ * LabourMarket.ai, and representing someone to employers outside the product is
+ * a different recipient category.
+ */
+const EXPECTED_PURPOSE_VERSIONS: Readonly<Record<string, string>> = {
+  profile_discoverability: "2026-07-11.v2",
+  employer_data_disclosure: "2026-07-11.v2",
+  partner_supply_representation: "2026-09-04.v1",
+};
+
+/** Every migration file, so a pin may live in whichever migration introduced
+ *  or last bumped its purpose rather than in one hard-coded file. */
+function migrationSources(): { name: string; sql: string }[] {
+  return readdirSync(MIGRATIONS_DIR)
+    .filter((f) => f.endsWith(".sql"))
+    .map((f) => ({ name: f, sql: readFileSync(join(MIGRATIONS_DIR, f), "utf8") }));
+}
 
 describe("all five active locales have complete consent texts (test 23)", () => {
   it.each(CONSENT_DEFINITIONS.map((d) => [d.purpose, d] as const))(
@@ -65,24 +95,40 @@ describe("hash pinning (registry ⇄ DB, tests 19 + Phase 3)", () => {
     );
   });
 
-  it("the pin migration carries EXACTLY the registry's current (version, hash) pairs", () => {
-    const sql = readFileSync(CURRENT_PIN_MIGRATION, "utf8");
+  it("a migration pins EXACTLY the registry's current (version, hash) for every purpose", () => {
+    // The DB is the enforcement point: the grant RPCs compare the caller's
+    // (version, hash) against `privacy_consent_purposes` and refuse a stale
+    // pair. A registry entry no migration pins is therefore a purpose nobody
+    // can ever consent to, which fails silently at runtime — hence a test.
+    //
+    // The pair may be pinned by an UPDATE (a version bump) or by the INSERT
+    // that introduced the purpose. Both forms are searched, and both halves
+    // must appear in the SAME file so a version from one migration cannot be
+    // paired with a hash from another.
+    const sources = migrationSources();
     for (const def of CONSENT_DEFINITIONS) {
-      expect(sql, `${def.purpose} version`).toContain(
-        `current_version = '${def.version}'`,
+      const hash = consentTextHash(def);
+      const pinning = sources.filter(
+        ({ sql }) =>
+          sql.includes(def.purpose)
+          && (sql.includes(`current_version = '${def.version}'`)
+            || sql.includes(`'${def.version}'`))
+          && (sql.includes(`current_text_hash = '${hash}'`)
+            || sql.includes(`'${hash}'`)),
       );
-      expect(sql, `${def.purpose} hash`).toContain(
-        `current_text_hash = '${consentTextHash(def)}'`,
-      );
-      expect(sql, `${def.purpose} where`).toContain(
-        `where purpose = '${def.purpose}'`,
-      );
+      expect(
+        pinning.map((p) => p.name),
+        `${def.purpose} @ ${def.version} / ${hash.slice(0, 12)} is pinned by no migration`,
+      ).not.toHaveLength(0);
     }
   });
 
-  it("v2 names the data controller in every locale (GDPR Art. 13(1)(a))", () => {
+  it("every purpose names the data controller in every locale (GDPR Art. 13(1)(a))", () => {
     for (const def of CONSENT_DEFINITIONS) {
-      expect(def.version).toBe("2026-07-11.v2");
+      // The version is asserted against the declared registry above rather than
+      // against one literal, so a bump is a deliberate two-place edit and a new
+      // purpose still cannot ship at an undeclared version.
+      expect(EXPECTED_PURPOSE_VERSIONS[def.purpose], def.purpose).toBe(def.version);
       for (const locale of CONSENT_LOCALES) {
         const c = def.texts[locale].controller;
         expect(c, `${def.purpose}/${locale}`).toContain("Nonstop Group");
@@ -108,11 +154,28 @@ describe("hash pinning (registry ⇄ DB, tests 19 + Phase 3)", () => {
 });
 
 describe("purpose separation (test 4 + Phase 1)", () => {
-  it("exactly two purposes exist; marketing is NOT created (no marketing sends exist)", () => {
-    expect(CONSENT_DEFINITIONS.map((d) => d.purpose).sort()).toEqual([
-      "employer_data_disclosure",
-      "profile_discoverability",
-    ]);
+  it("exactly the declared purposes exist; marketing is NOT created (no marketing sends exist)", () => {
+    expect(CONSENT_DEFINITIONS.map((d) => d.purpose).sort()).toEqual(
+      Object.keys(EXPECTED_PURPOSE_VERSIONS).sort(),
+    );
+  });
+
+  it("no purpose is a marketing purpose", () => {
+    // The original invariant, kept as its own assertion rather than riding on a
+    // count: the product sends no optional marketing messages, so a marketing
+    // consent surface would be asking for a permission nothing uses.
+    for (const def of CONSENT_DEFINITIONS) {
+      expect(def.purpose).not.toMatch(/marketing|newsletter|promo/i);
+      expect(def.recipientCategory).not.toMatch(/marketing/i);
+    }
+  });
+
+  it("each purpose names a DIFFERENT recipient category", () => {
+    // The reason there is more than one purpose at all. Two purposes sharing a
+    // recipient category means one of them is doing the other's work, which is
+    // how a consent quietly widens.
+    const categories = CONSENT_DEFINITIONS.map((d) => d.recipientCategory);
+    expect(new Set(categories).size).toBe(categories.length);
   });
 
   it("discoverability text never claims contact/CV transfer rights", () => {
