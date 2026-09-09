@@ -8,6 +8,7 @@ import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
 import {
   AssignLearnerForm,
+  EditProgramForm,
   CreateCohortForm,
   CreateProgramForm,
   RemoveMemberButton,
@@ -36,6 +37,9 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
     noType: t("form.noType"),
     description: t("form.description"),
     createProgram: t("form.createProgram"),
+    editProgram: t("form.editProgram"),
+    saveProgram: t("form.saveProgram"),
+    setDirectionHint: t("form.setDirectionHint"),
     cohortName: t("form.cohortName"),
     startsOn: t("form.startsOn"),
     endsOn: t("form.endsOn"),
@@ -97,6 +101,23 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                           </span>
                         ) : null}
                       </div>
+
+                      {/* Correcting a programme was impossible before this: the
+                          table had one writer and no update path, so a target
+                          profession skipped at creation could never be added —
+                          and that field is what turns the demand count on. */}
+                      <EditProgramForm
+                        program={{
+                          id: p.id,
+                          name: p.name,
+                          targetProfessionSlug: p.targetProfessionSlug,
+                          educationTypeSlug: p.educationTypeSlug,
+                          description: p.description,
+                        }}
+                        professions={professions}
+                        educationTypes={educationTypes}
+                        labels={labels}
+                      />
 
                       {p.cohorts.length > 0 ? (
                         <ul className="flex flex-col gap-2">

@@ -1846,6 +1846,9 @@
         "members": "{count} lerenden",
         "noLearnersYet": "Nog geen verbonden lerenden om toe te wijzen — nodig eerst studenten uit.",
         "form": {
+          "editProgram": "Dit programma corrigeren",
+          "saveProgram": "Wijzigingen opslaan",
+          "setDirectionHint": "Kies het beroep waartoe dit programma leidt, en naast het programma verschijnt hoeveel vacatures daarvoor nu openstaan. Zonder dat is er niets om tegen te tellen.",
           "programName": "Naam opleiding",
           "targetProfession": "Leidt naar (werkrichting)",
           "noProfession": "— niet ingesteld —",

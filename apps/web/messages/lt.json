@@ -1846,6 +1846,9 @@
         "members": "{count} besimokantieji",
         "noLearnersYet": "Dar nėra prisijungusių besimokančiųjų, kuriuos būtų galima priskirti — pirmiausia pakvieskite studentus.",
         "form": {
+          "editProgram": "Taisyti šią programą",
+          "saveProgram": "Išsaugoti pakeitimus",
+          "setDirectionHint": "Pasirinkite profesiją, į kurią veda ši programa, ir šalia programos atsiras, kiek šiuo metu yra atvirų darbo vietų. Be jos nėra su kuo palyginti.",
           "programName": "Programos pavadinimas",
           "targetProfession": "Veda į (darbo kryptis)",
           "noProfession": "— nenurodyta —",
