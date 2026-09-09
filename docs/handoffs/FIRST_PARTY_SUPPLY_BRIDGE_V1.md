@@ -421,3 +421,61 @@ tests (`--list` verified). Command and prerequisites: integration checklist §10
    `FIRST_PARTY_SUPPLY_BRIDGE_INTEGRATION_CHECKLIST.md`.
 
 Merge is additionally held by the parallel full-project train — see the PR.
+
+---
+
+## Reconciliation and owner approval — 2026-09-09
+
+The branch was 159 commits behind when the owner approved activation. It has
+been reconciled onto `origin/main` by MERGE (not rebase, so no force push while
+a parallel implementation train is active; the PR squash-merges anyway).
+
+**Conflicts: exactly 3, all migration-count ratchets, resolved from the real
+tree rather than from an expected number.** The value moved twice while this was
+in flight — the earlier estimate of 266 was already wrong by the time it was
+written, because main had reached 276. Resolution took MAIN's evolved comment
+blocks and added the bridge's contribution on top:
+
+| guard | resolved to |
+|---|---|
+| `market-map-read-layer-v1.test.ts` | `expect(count).toBeLessThanOrEqual(277)` |
+| `product-readiness.test.ts` | `SPRINT_BASELINE = 277` |
+| `booking-engagement-end-v1.test.ts` | main's marker list **plus** the bridge entry — both sides kept |
+
+`ls supabase/migrations/*.sql | wc -l` = **277** in the merged tree, recounted,
+never summed.
+
+### No duplicate architecture, re-checked against current main
+
+Two supply-named migrations landed on main while this branch waited:
+`agency_board_excludes_supply_v1` and `employer_supply_discovery_v1`. Both are
+**internal board readers** over `customer_requests` where `kind='agency_offer'`
+— an agency posting capacity to employers *inside* the product. This bridge is a
+**person's consented representation outside** it. Different table, different
+actor, different recipient. `origin/main` still contains nothing named
+`partner_supply_representation` or `first_party_supply`, so this remains the only
+implementation and no second availability model was created.
+
+### Added on reconciliation
+
+`describe("being employed is not the same fact as being closed to offers")` in
+`first-party-supply-emitter.test.ts`. The owner's headline promise had no named
+guard: the emitted row is asserted to survive the real vendored consumer as
+`allowed` **and** `mayDiscloseIdentity: false`, to carry no employment-status
+field in either direction, and to be treated identically to
+`LOOKING_FOR_WORK`. The failure this prevents is not a crash — it is a future
+reader adding one sensible-looking `availability_status <> 'busy'` filter and
+silently deleting the proposition for everyone who has a job.
+
+### Still owner-gated — see §Owner gates
+
+The migration is **UNAPPLIED**. This session had **no Supabase MCP
+`apply_migration` tooling available**, and `supabase db push` is forbidden, so
+the apply was not attempted. `SUPPLY_FEED_BEARER_TOKEN` is likewise unset.
+
+Merging this branch is safe with the migration unapplied: every RPC caller
+treats `42883 / 42P01 / PGRST202 / PGRST204` as `needs-migration` and the privacy
+screen renders one plain sentence instead of an error, while the pull route
+answers 401 with no token. The feature is inert, not broken, until both gates
+close.
+

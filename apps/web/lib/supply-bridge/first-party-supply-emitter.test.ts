@@ -390,3 +390,61 @@ describe("every emitted row survives the consumer Agentai actually runs", () => 
     });
   });
 });
+
+/**
+ * THE OWNER'S HEADLINE PROMISE, AS A TEST.
+ *
+ * "Nešvaistykite laiko nuolatinei darbo paieškai" only means anything if a
+ * person who ALREADY HAS A JOB can still be found. The failure this guards is
+ * not a crash — it is a future reader deciding that a `busy` worker obviously
+ * should not appear in a supply feed, adding one sensible-looking filter, and
+ * silently deleting the entire product proposition for everyone who is
+ * employed.
+ *
+ * Employment status and market intent are DIFFERENT FACTS with different
+ * owners: `workers.availability_status` is operational and set by the work,
+ * `first_party_supply_declarations.intent_state` is a declaration the person
+ * made about their own future. The feed reads the second and must never
+ * consult the first.
+ */
+describe("being employed is not the same fact as being closed to offers", () => {
+  it("emits a person whose declared state is OPEN_TO_OFFERS", () => {
+    const out = emitSignals([row({ currentState: "OPEN_TO_OFFERS", availableFromIso: null })]);
+    expect(out.rejected).toHaveLength(0);
+    const signal = out.signals[0]!;
+    expect(signal.currentState).toBe("OPEN_TO_OFFERS");
+    // And the REAL consumer must accept it, not merely parse it: an employed
+    // person who is open to offers has to survive Agentai's own validator and
+    // come out matchable, or the promise dies one layer downstream.
+    const parsed = validateFirstPartySignal(JSON.parse(serialiseSignal(signal)));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.currentState).toBe("OPEN_TO_OFFERS");
+    const decision = decideMatchability(parsed!);
+    expect(decision.allowed).toBe(true);
+    expect(decision.refusals).toEqual([]);
+    // Matchable is NOT nameable. The same decision that lets an employed
+    // person be matched still refuses to disclose who they are.
+    expect(decision.mayDiscloseIdentity).toBe(false);
+  });
+
+  it("carries no employment-status field at all, in either direction", () => {
+    // There is nowhere in the emitted row to put "busy", which is why no
+    // downstream filter can be written against it.
+    const signal = emitSignals([row({ currentState: "OPEN_TO_OFFERS" })]).signals[0]!;
+    const keys = Object.keys(signal as unknown as Record<string, unknown>);
+    for (const forbidden of ["availabilityStatus", "availability_status", "employmentStatus", "employed", "busy"]) {
+      expect(keys).not.toContain(forbidden);
+    }
+    expect(serialiseSignal(signal)).not.toContain("availability_status");
+  });
+
+  it("treats OPEN_TO_OFFERS exactly like the states with no job behind them", () => {
+    // If a future change starts rejecting or downgrading OPEN_TO_OFFERS while
+    // still accepting LOOKING_FOR_WORK, the employed half of the market has
+    // been quietly dropped and only this comparison would show it.
+    const openToOffers = emitSignals([row({ currentState: "OPEN_TO_OFFERS", availableFromIso: null })]);
+    const lookingForWork = emitSignals([row({ currentState: "LOOKING_FOR_WORK", availableFromIso: null })]);
+    expect(openToOffers.rejected).toEqual(lookingForWork.rejected);
+    expect(openToOffers.signals).toHaveLength(lookingForWork.signals.length);
+  });
+});
