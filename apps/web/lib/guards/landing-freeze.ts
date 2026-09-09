@@ -351,6 +351,35 @@ import { join } from "node:path";
  * three `*.landing` namespaces. `market-proof-band.tsx`, the page, the hero
  * and every other frozen artefact are untouched, which is the proof that this
  * stayed two named corrections and did not become a landing edit.
+ *
+ * A person is not a company (OWNER DIRECTIVE 2026-09-09 §3/§7/§32, follow-up
+ * slice) — `lib/marketing/public-entry.ts` only, ONE hash, zero namespaces.
+ *
+ * Traced end to end before the change: an anonymous visitor typing "I want to
+ * upload my old work history" (or its lt/de/nl/ru equivalents) was read as
+ * intent `hours-import`, whose handler `timesheetImport` sits in
+ * `HIRE_HANDLERS` — so the family came back `hire`, onboarding pre-ticked the
+ * employer card, `identitiesForIntents` returned `["company"]`, and the person
+ * was routed to `/dashboard/start/company` to create an organisation. That is
+ * SEP-5 (IDENTITY ≠ ROLE) on §7's foundational journey, and #1670 — which
+ * built this door two days earlier — was thinking of a person throughout.
+ *
+ * `familyOfIntent` keeps its meaning AND its signature: it is still a pure
+ * projection of the registry. The new `familyForSentence` refines it by
+ * grammatical person, and only for `ACTOR_AMBIGUOUS_HANDLERS` (today exactly
+ * one), because `hours-import` is honestly both actors' surface — §7 lists
+ * timesheets among what a PERSON brings and among what an ORGANISATION
+ * brings. Flipping the constant to `work` would only have moved the error
+ * onto the employer typing "import our old timesheets".
+ *
+ * NO COPY, NO LAYOUT, NO DATA AND NO VOCABULARY entered the frozen set. The
+ * possessive markers live beside `PROFESSION_STATEMENT_ANCHOR_SOURCE` in
+ * `lib/structuring/role-label.ts` — the first draft put them in this frozen
+ * module and `public-entry-real-intent.test.ts` refused it, which is the
+ * guard working exactly as intended. The behaviour is pinned permanently, in
+ * both directions and in all five routed locales, by
+ * `a-person-is-not-a-company-on-import.test.ts`, so the freeze is not the
+ * only thing standing between a person and a company they never asked for.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

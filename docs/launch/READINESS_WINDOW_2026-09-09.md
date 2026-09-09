@@ -271,9 +271,10 @@ landing edit. Recorded in `landing-freeze.ts`, per the convention.
    made deliberately. Changing that on the last hour of a window, and merging
    it on unit tests alone, is exactly how #1669 became the #1675 regression.
 
-   **Next slice, first item.** Not an owner gate — an engineering decision
-   that needs its own verification, and the evidence above is complete enough
-   to start from.
+   **FIXED in the follow-up slice** (`fix/cc/a-person-is-not-a-company-on-import`)
+   — see §8 below. The resolution was neither of the two options above: the
+   sentence decides, by grammatical person, inside `readPublicEntry`, which
+   already holds it. `familyOfIntent` keeps its meaning and its signature.
 2. **`"I can work on cars"` → `availability`.** Pre-existing: `on` is in the
    from-word list for "on Monday" and is also an ordinary preposition. Not
    touched by this window (verified: the new gap does not widen it), and
@@ -311,3 +312,90 @@ such.
 No migration. No RLS. No grant. No production write. No data change. No
 permission widened. No owner-gated PR merged or applied. `#1646`, `#1648`,
 `#1641` and `#1421` are exactly where they were.
+
+---
+
+## 8. FOLLOW-UP SLICE — a person is not a company
+
+Branch `fix/cc/a-person-is-not-a-company-on-import`, stacked on the above.
+
+§5.1's defect, resolved. The two obvious options were both wrong:
+
+* **Flip `timesheetImport` out of `HIRE_HANDLERS`.** Moves the error onto the
+  employer who types "import our old timesheets" into the same box.
+* **Split the intent.** `hours-import` is genuinely both actors' surface —
+  §7 lists timesheets among what a PERSON brings *and* among what an
+  ORGANISATION brings — and #1670's routing was right.
+
+**The sentence carries the answer.** Grammatical person is the same structural
+signal the router already trusts for `profession-statement`, and
+`readPublicEntry` — the only consumer of `familyOfIntent` — already holds the
+sentence. So `familyOfIntent(intent)` keeps its meaning and its signature, and
+`familyForSentence(intent, sentence)` refines it for the handlers listed in
+`ACTOR_AMBIGUOUS_HANDLERS` (today: exactly one).
+
+### The result, measured in all five locales
+
+| | person's sentence | organisation's sentence |
+|---|---|---|
+| intent | `hours-import` (unchanged) | `hours-import` (unchanged) |
+| family | **`work`** | `hire` |
+| identity | **`["worker"]`** | `["company"]` |
+| lands on | worker default | `/dashboard/start/company` |
+
+### Two things this got right only because both directions were probed
+
+1. **`savo` is REFLEXIVE.** Lithuanian "savo" means *one's own* and belongs to
+   whoever the subject is, so it appears in a company's sentence too —
+   "mūsų komanda nori įkelti **savo** senus darbo duomenis". A one-sided
+   "mine" test reads that as a person. An explicit organisational possessive
+   (`our` / `mūsų` / `unsere` / `onze` / `наши`) therefore **always wins**.
+2. **A script bug in the first draft.** The Cyrillic branch was written
+   `mo(?:…)` with a **Latin** `mo`, so "хочу загрузить **мои** старые данные о
+   работе" still came out as an employer. Four of five locales passed and
+   Russian did not — caught only by probing all five, which is the whole
+   lesson of §2.1 arriving a second time in one window.
+
+### A guard refused this slice's first draft, and was right
+
+`public-entry-real-intent.test.ts` asserts that the entry module **owns no
+regex vocabulary** — it must classify through the one router. The first draft
+put both possessive patterns straight into `lib/marketing/public-entry.ts`,
+which is precisely the second keyword table that guard exists to stop, and
+precisely the drift that produced #1669.
+
+They now live beside `PROFESSION_STATEMENT_ANCHOR_SOURCE` in
+`lib/structuring/role-label.ts`. That constant answers *who is speaking*;
+`speaksOfOwnWork` answers *whose thing is being spoken about* — the same kind
+of fact, so the same home. The entry module holds no `.test(`, `.match(`,
+`matchAll(` or `new RegExp(`, asserted explicitly.
+
+**The guard was not stale and was not bumped.** That is twice in this window
+that a guard nobody here wrote caught a real mistake in this window's own work
+— the other being `ctaNext` exclusivity, where the guard's comment named a rule
+this window had satisfied without noticing. Neither needed its baseline
+raised; §28's warning held both times.
+
+### Freeze, second regeneration
+
+`lib/marketing/public-entry.ts` is in the frozen set, so this slice carries its
+own recorded regeneration: **exactly one file hash, ZERO namespaces**, verified
+by diffing the baseline against `HEAD`. No copy, no layout, no data and no
+vocabulary entered the frozen set.
+
+**Silence is not a claim.** A sentence with no possessive at all keeps the
+registry's own answer, asserted directly against `familyOfIntent`. And the
+refinement cannot reach anything else: `need-workers`, `find-workers` and
+`create-project` stay `hire` even when the sentence says "my workers", and the
+`agency` / `student` / `education` families are returned untouched.
+
+Nothing about the intent, the chip, the destination or any signed-in surface
+changed — a signed-in employer's timesheet import never calls this module.
+
+**Still true and worth saying:** the person's chip still points at
+`/dashboard/hours?import=1`. That surface has a real import mode (read
+client-side in `work-hours-quick-entry.tsx`), but its page reaches `kind: "ok"`
+only with a company and work objects. **Whether a person importing their own
+history belongs there or on `/dashboard/profile` is a product question this
+slice deliberately did not answer** — it fixed the identity, which is wrong
+under every answer to that question.
