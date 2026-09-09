@@ -150,6 +150,51 @@ export const SEEK_VERB_SOURCE =
 export const PROFESSION_STATEMENT_ANCHOR_SOURCE =
   "esu|dirbu|dirbau|i\\s+am|i'm|я|работаю|работал|работала|ik\\s+ben|ik\\s+werk\\s+als|ich\\s+bin|ich\\s+arbeite\\s+als";
 
+/**
+ * WHOSE WORK IS IT — the possessive half of grammatical person.
+ *
+ * `PROFESSION_STATEMENT_ANCHOR_SOURCE` above answers *who is speaking*
+ * ("esu", "i am", "я"). These two answer *whose thing is being spoken about*,
+ * and they live here for the same reason that one does: a vocabulary kept in
+ * the surface that happens to need it first is how the two directions drift
+ * apart (#1669). `lib/marketing/public-entry.ts` reads `speaksOfOwnWork` from
+ * here and defines no patterns of its own — its
+ * `public-entry-real-intent.test.ts` guard enforces exactly that, and it
+ * caught the first draft of this doing it wrong.
+ *
+ * TWO lists, and the second is what makes the reading safe. Lithuanian `savo`
+ * is a REFLEXIVE possessive — it means "one's own" and belongs to whichever
+ * subject the sentence has, so it appears in "noriu įkelti **savo** istoriją"
+ * (a person) and in "mūsų komanda įkelia **savo** tabelius" (a company)
+ * alike. A one-sided "mine" test reads the second as a person, so an explicit
+ * ORGANISATIONAL possessive always wins.
+ *
+ * Written in the right SCRIPT, which the first draft got wrong: `мо` is
+ * Cyrillic and cannot be spelled with a Latin `mo`. That bug let "хочу
+ * загрузить **мои** старые данные о работе" read as an organisation, and only
+ * probing all five routed locales found it — four passed. Bounded with
+ * `\p{L}` look-arounds and the `u` flag, never `\b`, which is ASCII-only and
+ * cannot bound a Cyrillic or Lithuanian word at all.
+ */
+const MINE_RE =
+  /(?:^|[^\p{L}])(?:mano|savo|my|mine|mein(?:e|em|en|er|es)?|mijn|мо(?:й|я|е|ё|и|ю|его|ей|их|ими)|сво(?:й|я|е|ё|и|ю|его|ей|их|ими))(?![\p{L}])/iu;
+
+const OURS_RE =
+  /(?:^|[^\p{L}])(?:musu|mūsų|our|ours|unser(?:e|em|en|er|es)?|onze|ons|наш(?:е|а|и|его|ей|их|ими)?)(?![\p{L}])/iu;
+
+/**
+ * Does the sentence claim the thing as the SPEAKER'S OWN, rather than the
+ * organisation's?
+ *
+ * `false` when it says neither — silence is not a claim, so a caller must
+ * keep whatever default it had. Never infer a person from the absence of
+ * "our".
+ */
+export function speaksOfOwnWork(sentence: string): boolean {
+  if (OURS_RE.test(sentence)) return false;
+  return MINE_RE.test(sentence);
+}
+
 // ── Internals ───────────────────────────────────────────────────────────────
 
 const STEM_RE = new RegExp(`^(?:${OCCUPATION_STEM_SOURCE})`, "u");

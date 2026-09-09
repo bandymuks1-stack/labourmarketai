@@ -5,6 +5,9 @@ import {
   type RoutedIntent,
 } from "@/lib/conversation/intent-registry";
 import { classifyIntent } from "@/lib/conversation/intent-router";
+// The possessive vocabulary lives with the other shared grammatical sources,
+// never here: this module owns NO patterns (public-entry-real-intent.test.ts).
+import { speaksOfOwnWork } from "@/lib/structuring/role-label";
 import type { FirstRunIntent } from "@/lib/onboarding/first-run-intent";
 
 /**
@@ -108,6 +111,61 @@ export function familyOfIntent(intent: RoutedIntent): FirstRunIntent {
   return "work";
 }
 
+/**
+ * ── SOME HANDLERS BELONG TO BOTH ACTORS (owner readiness window, 2026-09-09)
+ *
+ * `familyOfIntent` is a projection of the REGISTRY, so it can only answer per
+ * intent. For most intents that is exactly right — `find-workers` is an
+ * employer's whatever the wording. `timesheetImport` is not: importing work
+ * that already happened is §7's foundational journey for a PERSON *and* a
+ * real employer task, and one constant cannot be true for both.
+ *
+ * Traced end to end before this existed, in both languages:
+ *
+ *   "I want to upload my old work history"      → hours-import
+ *   "Noriu įkelti savo seną darbo istoriją"     → family `hire`
+ *                                               → pre-tick ["hire"]
+ *                                               → identity ["company"]
+ *                                               → /dashboard/start/company
+ *
+ * So a person who says **MY** old work history was signed up as an
+ * organisation and asked to create a company — and the chip they were then
+ * offered points at `/dashboard/hours?import=1`, whose own page header calls
+ * it *"the operator's daily surface"* and which answers `states.noCompany`
+ * to anyone without one. That is SEP-5 (IDENTITY ≠ ROLE) on the very first
+ * thing the product does with them.
+ *
+ * #1670, which built this front door two days earlier, was thinking of a
+ * person throughout — three of the five sentences in its own docblock carry a
+ * first-person possessive ("my", "meine", "mijn"), and its comment reads *"a
+ * person asking to UPLOAD their history was shown JOB ADVERTS"*. The DOOR was
+ * right and the actor behind it was mislabelled.
+ *
+ * WHY THE SENTENCE DECIDES, AND WHY HERE. Flipping the constant to `work`
+ * would only move the error onto the employer who types "import our old
+ * timesheets" into the same box. The sentence itself carries the answer, in
+ * the same structural signal the router already trusts for
+ * `profession-statement`: grammatical person. `familyOfIntent` keeps its
+ * meaning and its signature — this refinement lives in `readPublicEntry`,
+ * which is the ONLY consumer and which already holds the sentence.
+ *
+ * NOTHING ELSE MOVES. The intent, the chip and the destination are untouched;
+ * a signed-in employer's timesheet import never calls this module at all.
+ * What changes is which first-run card is pre-ticked for an anonymous visitor
+ * — and therefore whether a person is handed a company they did not ask for.
+ *
+ * AND THE VOCABULARY IS NOT HERE. `speaksOfOwnWork` lives beside
+ * `PROFESSION_STATEMENT_ANCHOR_SOURCE` in `lib/structuring/role-label.ts`,
+ * because this module is guarded to own no patterns of its own — the first
+ * draft of this fix put two regexes here and
+ * `public-entry-real-intent.test.ts` refused it, correctly. A keyword table
+ * kept in whichever surface needed it first is how two readings of the same
+ * words drift apart (#1669).
+ */
+const ACTOR_AMBIGUOUS_HANDLERS: ReadonlySet<IntentHandlerId> =
+  new Set<IntentHandlerId>(["timesheetImport"]);
+
+
 /** Read one sentence through the canonical router. Never throws. */
 export function readPublicEntry(raw: string | null | undefined): PublicEntryReading {
   const sentence = normaliseEntrySentence(raw);
@@ -118,8 +176,31 @@ export function readPublicEntry(raw: string | null | undefined): PublicEntryRead
     kind: "recognised",
     sentence,
     intent: match.intent,
-    family: familyOfIntent(match.intent),
+    family: familyForSentence(match.intent, sentence),
   };
+}
+
+/**
+ * The family for THIS sentence — `familyOfIntent`, refined by grammatical
+ * person for the handlers that genuinely belong to both actors. See
+ * `ACTOR_AMBIGUOUS_HANDLERS` for the measurement that made this necessary.
+ *
+ * Exported so the guard can assert the refinement directly rather than only
+ * through the reading.
+ */
+export function familyForSentence(
+  intent: RoutedIntent,
+  sentence: string,
+): FirstRunIntent {
+  const family = familyOfIntent(intent);
+  if (family !== "hire") return family;
+  if (!ACTOR_AMBIGUOUS_HANDLERS.has(INTENT_REGISTRY[intent].handler)) {
+    return family;
+  }
+  // Only a first-person claim moves it. No possessive at all keeps the
+  // registry's answer, so an employer's "import the old timesheets" is
+  // unchanged and nothing is guessed from silence.
+  return speaksOfOwnWork(sentence) ? "work" : family;
 }
 
 /**
