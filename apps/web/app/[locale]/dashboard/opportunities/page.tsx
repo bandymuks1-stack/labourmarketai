@@ -401,7 +401,7 @@ export default async function OpportunitiesPage({
           <p className="text-sm text-text-secondary">{t("noWorkerBody")}</p>
           <Link
             href={profileHref}
-            className="mt-3 inline-block rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-blue/80"
+            className="mt-3 inline-block rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80"
           >
             {t("ctaProfile")} →
           </Link>
@@ -458,7 +458,7 @@ export default async function OpportunitiesPage({
               </p>
               <Link
                 href={`/${locale}/dashboard/journal`}
-                className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80"
+                className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80"
                 data-testid="opportunities-no-skills-cta"
               >
                 {result.readiness.hasRecordedWork
@@ -668,7 +668,7 @@ export default async function OpportunitiesPage({
                         <Link
                           href={boardHref}
                           data-testid="opportunities-filters-reset"
-                          className="text-xs font-medium text-brand-blue hover:text-brand-cyan"
+                          className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
                         >
                           {t("discovery.filters.reset")}
                         </Link>
@@ -1317,7 +1317,7 @@ export default async function OpportunitiesPage({
           <Link
             href={`/${locale}/dashboard/market-map`}
             data-testid="opportunities-market-map-link"
-            className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-cyan"
+            className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-champagne"
           >
             {t("marketMapLink")} →
           </Link>
@@ -1375,7 +1375,7 @@ export default async function OpportunitiesPage({
                 </ul>
                 <Link
                   href={profileHref}
-                  className="inline-block w-fit rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-blue/80"
+                  className="inline-block w-fit rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80"
                 >
                   {t("ctaProfile")} →
                 </Link>

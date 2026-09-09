@@ -55,8 +55,8 @@ const TIER_ORDER: CvSkillTier[] = ["confirmed", "evidence", "declared"];
 // as a neutral "with records" signal, not a public confirmation badge.
 const TIER_STYLES: Record<CvSkillTier, string> = {
   confirmed: "border-slate-400 bg-slate-50 text-slate-800",
-  evidence: "border-sky-500 bg-sky-50 text-sky-900",
-  declared: "border-zinc-300 bg-zinc-50 text-zinc-600",
+  evidence: "border-brand-cyan/60 bg-brand-cyan/10 text-brand-cyan",
+  declared: "border-ink-500 bg-ink-700 text-text-muted",
 };
 
 /** A person's CV render: private surface, never indexable. robots.txt
@@ -101,14 +101,14 @@ export default async function VerifiedCvPage({
     // Honest worker-only gate: the Verified CV is built from the worker's
     // journal/skills chain; other roles have no such data to export.
     return (
-      <div className="min-h-screen bg-white px-6 py-10 text-zinc-900">
+      <div className="cv-doc min-h-screen bg-ink-900 px-6 py-10 text-text-primary">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
-          <p className="text-sm text-zinc-600" data-testid="cv-not-worker">
+          <p className="text-sm text-text-secondary" data-testid="cv-not-worker">
             {t("notWorker")}
           </p>
           <Link
             href="/dashboard/profile"
-            className="w-fit text-sm font-medium text-sky-700 hover:underline"
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
           >
             {t("back")}
           </Link>
@@ -270,53 +270,50 @@ export default async function VerifiedCvPage({
       return (
         <li
           key={`${e.relationship}-${i}`}
-          className="flex flex-col border-l-2 border-zinc-300 pl-3"
+          className="flex flex-col border-l-2 border-ink-600 pl-3"
         >
           <span className={`font-semibold ${bodyText}`}>{orgDisplay}</span>
-          <span className="text-xs text-zinc-600">
+          <span className="text-xs text-text-secondary">
             {roleLabel}
             {range ? ` · ${range}` : ""}
           </span>
           {e.title && e.title !== orgDisplay ? (
-            <span className="text-xs text-zinc-500">{e.title}</span>
+            <span className="text-xs text-text-muted">{e.title}</span>
           ) : null}
         </li>
       );
     });
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 text-zinc-900 print:p-0">
+    <div className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
         {/* Screen-only toolbar — never printed. */}
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <Link
             href="/dashboard/profile"
-            className="text-sm font-medium text-sky-700 hover:underline"
+            className="text-sm font-medium text-brand-blue hover:underline"
             data-testid="cv-back-link"
           >
             {t("back")}
           </Link>
           <div className="flex flex-wrap items-center gap-2">
             {/* Template registry (§10): one link per registered template. */}
-            <span className="text-xs text-zinc-500">{t("templates.label")}:</span>
+            <span className="text-xs text-text-muted">{t("templates.label")}:</span>
             {CV_TEMPLATES.map((tpl) => (
               <a
                 key={tpl.id}
                 href={templateHref(tpl.id)}
                 className={`rounded-md border px-2.5 py-1 text-xs ${
                   template === tpl.id
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-300 text-zinc-700 hover:border-zinc-500"
+                    ? "border-brand-blue bg-brand-blue text-text-on-brand"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
                 }`}
                 data-testid={`cv-template-${tpl.id}`}
               >
                 {t(`templates.${tpl.id}`)}
               </a>
             ))}
-            <PrintButton
-              label={t("print")}
-              className="border-zinc-300 bg-zinc-900 px-4 py-2 text-sm text-white hover:bg-zinc-700"
-            />
+            <PrintButton label={t("print")} tone="primary" />
           </div>
         </div>
 
@@ -324,7 +321,7 @@ export default async function VerifiedCvPage({
             in fallback IS the standard CV; no note needed on paper). */}
         {tailored && tailored.kind === "not-visible" ? (
           <p
-            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 print:hidden"
+            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
             data-testid="cv-tailored-not-visible"
           >
             {t("tailored.notVisible")}
@@ -332,7 +329,7 @@ export default async function VerifiedCvPage({
         ) : null}
         {tailored && tailored.kind === "no-structure" ? (
           <p
-            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 print:hidden"
+            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
             data-testid="cv-tailored-no-structure"
           >
             {t("tailored.noStructure")}
@@ -387,21 +384,21 @@ export default async function VerifiedCvPage({
         ) : (
           <>
         {/* Player-card style header — identity + honest counters. */}
-        <header className={`rounded-xl border-2 border-zinc-900 ${compact ? "p-4" : "p-6"}`}>
-          <p className="font-mono text-meta uppercase tracking-widest text-zinc-500">
+        <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
+          <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
             {t("pageTitle")}
           </p>
           <h1 className={`mt-1 font-display font-bold tracking-tight ${compact ? "text-2xl" : "text-3xl"}`}>
             {cv.personName.trim() && cv.personName.trim() !== "—" ? (
               cv.personName
             ) : (
-              <span className="italic text-zinc-400" data-testid="cv-name-missing">
+              <span className="italic text-text-muted" data-testid="cv-name-missing">
                 {t("nameNotProvided")}
               </span>
             )}
           </h1>
           {cv.professionSlugs.length > 0 ? (
-            <p className="mt-1 text-sm text-zinc-600" data-testid="cv-professions">
+            <p className="mt-1 text-sm text-text-secondary" data-testid="cv-professions">
               {cv.professionSlugs
                 .map(
                   (p) => `${tProf(p.slug)}${p.isPrimary ? ` · ${t("primary")}` : ""}`,
@@ -413,13 +410,13 @@ export default async function VerifiedCvPage({
               highlight may never appear without its basis). */}
           {tailoredOk ? (
             <div className="mt-2 flex flex-col gap-0.5" data-testid="cv-tailored-basis">
-              <p className="font-mono text-meta uppercase tracking-widest text-zinc-500">
+              <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
                 {t("tailored.badge")}
                 {tailoredOk.roleText
                   ? ` — ${t("tailored.forNeed", { role: tailoredOk.roleText })}`
                   : ""}
               </p>
-              <p className="text-xs text-zinc-600">
+              <p className="text-xs text-text-secondary">
                 {t("tailored.basis", {
                   matched: tailoredOk.fit.matchedTotal,
                   needTotal: tailoredOk.fit.needTotal,
@@ -433,9 +430,9 @@ export default async function VerifiedCvPage({
               {summary.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-lg border border-zinc-200 p-3 text-center"
+                  className="rounded-lg border border-ink-600 p-3 text-center"
                 >
-                  <dt className="text-meta uppercase tracking-wide text-zinc-500">
+                  <dt className="text-meta uppercase tracking-wide text-text-muted">
                     {t(`summary.${s.key}`)}
                   </dt>
                   <dd className="mt-1 font-display text-2xl font-bold">
@@ -445,7 +442,7 @@ export default async function VerifiedCvPage({
               ))}
             </dl>
           ) : (
-            <p className="mt-3 text-xs text-zinc-600" data-testid="cv-summary">
+            <p className="mt-3 text-xs text-text-secondary" data-testid="cv-summary">
               {summary
                 .map((s) => `${t(`summary.${s.key}`)}: ${s.text}`)
                 .join(" · ")}
@@ -457,16 +454,16 @@ export default async function VerifiedCvPage({
             compact template keeps the screen dense too). */}
         {!compact ? (
           <section
-            className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 print:hidden"
+            className="rounded-lg border border-ink-600 bg-ink-800 p-4 print:hidden"
             data-testid="cv-built-from"
           >
-            <p className="text-sm text-zinc-700">{t("builtFrom.lead")}</p>
-            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-zinc-600">
+            <p className="text-sm text-text-secondary">{t("builtFrom.lead")}</p>
+            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-text-secondary">
               <li>{t("builtFrom.profile")}</li>
               <li>{t("builtFrom.skills")}</li>
               <li>{t("builtFrom.records")}</li>
             </ul>
-            <p className="mt-2 text-xs text-zinc-500" data-testid="cv-built-from-privacy">
+            <p className="mt-2 text-xs text-text-muted" data-testid="cv-built-from-privacy">
               {t("builtFrom.privacy")}
             </p>
           </section>
@@ -478,7 +475,7 @@ export default async function VerifiedCvPage({
         {cv.professionalSummary ? (
           <section className="flex flex-col gap-2" data-testid="cv-summary-section">
             <h2 className={sectionTitle}>{t("summaryTitle")}</h2>
-            <p className={`whitespace-pre-wrap leading-relaxed text-zinc-700 ${bodyText}`}>
+            <p className={`whitespace-pre-wrap leading-relaxed text-text-secondary ${bodyText}`}>
               {cv.professionalSummary}
             </p>
           </section>
@@ -525,11 +522,11 @@ export default async function VerifiedCvPage({
                     ? `${e.startYear ?? ""}–${e.isCurrent ? t("present") : (e.endYear ?? "")}`
                     : null;
                 return (
-                  <li key={i} className="flex flex-col border-l-2 border-zinc-300 pl-3">
+                  <li key={i} className="flex flex-col border-l-2 border-ink-600 pl-3">
                     <span className={`font-semibold ${bodyText}`}>
                       {e.institutionName}
                     </span>
-                    <span className="text-xs text-zinc-600">
+                    <span className="text-xs text-text-secondary">
                       {tEduTypes(e.educationTypeSlug)}
                       {e.programOrField ? ` · ${e.programOrField}` : ""}
                       {range ? ` · ${range}` : ""}
@@ -549,13 +546,13 @@ export default async function VerifiedCvPage({
               {cv.languages.map((l) => (
                 <span
                   key={l.lang}
-                  className="rounded-full border border-zinc-300 bg-zinc-50 px-2.5 py-0.5 text-xs text-zinc-700"
+                  className="rounded-full border border-ink-500 bg-ink-700 px-2.5 py-0.5 text-xs text-text-secondary"
                 >
                   {l.lang.toUpperCase()} · {l.level}
                 </span>
               ))}
             </div>
-            <p className="text-meta text-zinc-500">{t("languagesSelfStated")}</p>
+            <p className="text-meta text-text-muted">{t("languagesSelfStated")}</p>
           </section>
         ) : null}
 
@@ -570,10 +567,10 @@ export default async function VerifiedCvPage({
                 <li key={`doc-${i}`} className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}>
                   <span className="font-medium">{tDocTypes(d.typeSlug)}</span>
                   {d.country ? (
-                    <span className="text-xs text-zinc-600">{d.country}</span>
+                    <span className="text-xs text-text-secondary">{d.country}</span>
                   ) : null}
                   {d.validUntil ? (
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-text-muted">
                       {t("validUntil")}: {formatUtcDate(d.validUntil, locale)}
                     </span>
                   ) : null}
@@ -582,7 +579,7 @@ export default async function VerifiedCvPage({
               {cv.drivingLicenceCategories.length > 0 ? (
                 <li className={`flex flex-wrap items-baseline gap-2 ${bodyText}`} data-testid="cv-driving-licences">
                   <span className="font-medium">{t("drivingLicences")}</span>
-                  <span className="text-xs text-zinc-600">
+                  <span className="text-xs text-text-secondary">
                     {cv.drivingLicenceCategories.join(", ")}
                   </span>
                 </li>
@@ -591,11 +588,11 @@ export default async function VerifiedCvPage({
                 <li key={`decl-${i}`} className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}>
                   <span className="font-medium">{c.title}</span>
                   {c.achievedAt ? (
-                    <span className="text-xs text-zinc-600">
+                    <span className="text-xs text-text-secondary">
                       {formatUtcDate(c.achievedAt, locale, { year: "numeric" })}
                     </span>
                   ) : null}
-                  <span className="text-meta uppercase tracking-wide text-zinc-500">
+                  <span className="text-meta uppercase tracking-wide text-text-muted">
                     {t("declaredCertHint")}
                   </span>
                 </li>
@@ -613,7 +610,7 @@ export default async function VerifiedCvPage({
               if (declaredAll.length === 0) return null;
               return (
                 <div key={tier} className="flex flex-col gap-1.5" data-testid={`cv-tier-${tier}`}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {t(`tiers.${tier}`)}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -625,7 +622,7 @@ export default async function VerifiedCvPage({
                         {name}
                         {fromJournal ? (
                           <span
-                            className="ml-1 text-meta text-zinc-500"
+                            className="ml-1 text-meta text-text-muted"
                             data-testid="cv-claim-from-journal"
                           >
                             · {t("claimFromJournal")}
@@ -645,7 +642,7 @@ export default async function VerifiedCvPage({
             if (ordered.length === 0) return null;
             return (
               <div key={tier} className="flex flex-col gap-1.5" data-testid={`cv-tier-${tier}`}>
-                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
+                <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                   {t(`tiers.${tier}`)}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -655,7 +652,7 @@ export default async function VerifiedCvPage({
                       <span
                         key={slug}
                         className={`rounded-full border px-2.5 py-0.5 text-xs ${TIER_STYLES[tier]} ${
-                          matched ? "ring-2 ring-zinc-900" : ""
+                          matched ? "ring-2 ring-brand-blue" : ""
                         }`}
                         data-testid={matched ? "cv-skill-matched" : undefined}
                         title={matched ? t("tailored.matchedTag") : undefined}
@@ -671,7 +668,7 @@ export default async function VerifiedCvPage({
           {declaredAll.length === 0 &&
           tierSlugs.confirmed.length === 0 &&
           tierSlugs.evidence.length === 0 ? (
-            <p className={`text-zinc-500 ${bodyText}`}>{t("skillsEmpty")}</p>
+            <p className={`text-text-muted ${bodyText}`}>{t("skillsEmpty")}</p>
           ) : null}
         </section>
 
@@ -679,12 +676,12 @@ export default async function VerifiedCvPage({
         {visibility.projects ? (
           <section className="flex flex-col gap-2" data-testid="cv-projects">
             <h2 className={sectionTitle}>{t("projectsTitle")}</h2>
-            <p className="text-meta text-zinc-500">{t("projectsHint")}</p>
+            <p className="text-meta text-text-muted">{t("projectsHint")}</p>
             <ul className="flex flex-col gap-1">
               {cv.projects.map((p) => (
                 <li key={p.title} className={`flex items-baseline gap-2 ${bodyText}`}>
                   <span className="font-medium">{p.title}</span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-text-muted">
                     {formatUtcDate(p.lastConfirmedAt, locale)}
                   </span>
                 </li>
@@ -704,13 +701,13 @@ export default async function VerifiedCvPage({
                   <span className={`font-medium ${bodyText}`}>
                     {a.title}
                     {a.confirmedByManager ? (
-                      <span className="ml-2 text-meta uppercase tracking-wide text-zinc-600">
+                      <span className="ml-2 text-meta uppercase tracking-wide text-text-secondary">
                         {t("confirmedByManager")}
                       </span>
                     ) : null}
                   </span>
                   {a.achievedAt || a.description ? (
-                    <span className="text-xs text-zinc-600">
+                    <span className="text-xs text-text-secondary">
                       {[
                         formatUtcDate(a.achievedAt, locale),
                         a.description,
@@ -729,11 +726,11 @@ export default async function VerifiedCvPage({
         <section className="flex flex-col gap-2" data-testid="cv-proof">
           <h2 className={sectionTitle}>{t("proofTitle")}</h2>
           {cv.proof.length === 0 ? (
-            <p className={`text-zinc-500 ${bodyText}`}>{t("proofEmpty")}</p>
+            <p className={`text-text-muted ${bodyText}`}>{t("proofEmpty")}</p>
           ) : (
             <table className={`w-full border-collapse ${bodyText}`}>
               <thead>
-                <tr className="border-b-2 border-zinc-900 text-left">
+                <tr className="border-b-2 border-ink-500 text-left">
                   <th className="py-1.5 pr-3 font-semibold">{t("proofDate")}</th>
                   <th className="py-1.5 pr-3 font-semibold">{t("proofProject")}</th>
                   <th className="py-1.5 font-semibold">{t("proofRole")}</th>
@@ -741,7 +738,7 @@ export default async function VerifiedCvPage({
               </thead>
               <tbody>
                 {cv.proof.map((row, i) => (
-                  <tr key={`${row.confirmedAt}-${i}`} className="border-b border-zinc-200">
+                  <tr key={`${row.confirmedAt}-${i}`} className="border-b border-ink-600">
                     <td className="py-1.5 pr-3">
                       {formatUtcDate(row.entryDate, locale)}
                     </td>
@@ -753,7 +750,7 @@ export default async function VerifiedCvPage({
                       {/* W6 slice 1: automatic never renders identically. */}
                       {row.automatic ? (
                         <span
-                          className="text-zinc-500"
+                          className="text-text-muted"
                           data-testid="cv-proof-auto-confirm-qualifier"
                         >
                           {" "}· {tTier("autoConfirmQualifier")}
@@ -765,7 +762,7 @@ export default async function VerifiedCvPage({
                           own attestation as somebody else's. */}
                       {row.selfConfirmed ? (
                         <span
-                          className="text-zinc-500"
+                          className="text-text-muted"
                           data-testid="cv-proof-self-confirm-qualifier"
                         >
                           {" "}· {tTier("selfConfirmQualifier")}
@@ -789,7 +786,7 @@ export default async function VerifiedCvPage({
         />
 
         {/* Footer — generation date only (quiet UI: no verification process note). */}
-        <footer className="mt-2 border-t border-zinc-300 pt-3 text-xs text-zinc-500">
+        <footer className="mt-2 border-t border-ink-600 pt-3 text-xs text-text-muted">
           <p>
             {t("generatedAt")}: {generatedAt}
           </p>

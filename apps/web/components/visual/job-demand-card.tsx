@@ -80,10 +80,10 @@ export function JobDemandCard({
           <Glyph className="h-5 w-5" />
         </div>
         <div className="flex flex-1 flex-col">
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <h3 className="text-sm font-semibold text-text-primary">
             {job.title}
           </h3>
-          <p className="flex flex-wrap items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="flex flex-wrap items-center gap-1 text-xs text-text-muted">
             <span>{job.companyName}</span>
             <span aria-hidden="true">·</span>
             <span className="inline-flex items-center gap-0.5">
@@ -107,16 +107,16 @@ export function JobDemandCard({
         </ul>
       )}
 
-      <footer className="flex items-center justify-between gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+      <footer className="flex items-center justify-between gap-2 text-xs text-text-muted">
         <span className="inline-flex items-center gap-1">
           <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
           {job.postedAtLabel}
         </span>
-        <span className="inline-flex items-center gap-1 text-zinc-700 dark:text-zinc-300">
+        <span className="inline-flex items-center gap-1 text-text-secondary">
           {job.ownerApprovedBy ? (
             <>✓ {job.ownerApprovedBy}</>
           ) : (
-            <span className="italic text-zinc-500 dark:text-zinc-400">
+            <span className="italic text-text-muted">
               {awaitingApprovalLabel}
             </span>
           )}

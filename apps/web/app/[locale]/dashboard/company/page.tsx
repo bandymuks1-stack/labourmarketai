@@ -840,7 +840,7 @@ export default async function CompanyDashboardPage({
         {companyRow ? (
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span
-              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan"
+              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
               data-testid="company-dashboard-type-chip"
             >
               {t(`setup.companyTypeOptions.${companyRow.companyType}`)}
@@ -1578,7 +1578,7 @@ export default async function CompanyDashboardPage({
           className="flex flex-col gap-5 scroll-mt-20"
         >
           <div className="flex flex-col gap-1">
-            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
               <span className="live-dot" aria-hidden />
               {tFlow("company.eyebrow")}
             </span>

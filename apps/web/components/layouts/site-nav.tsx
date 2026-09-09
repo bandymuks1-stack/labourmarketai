@@ -5,6 +5,7 @@ import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 
 // `/vision` is gated by `lib/config/vision-publication.ts`. While the
@@ -112,9 +113,14 @@ export async function SiteNav() {
       <div className="mx-auto flex max-w-container items-center gap-2 px-4 py-4 sm:gap-6 sm:px-12">
         <Link
           href="/"
-          className="min-w-0 shrink truncate font-display text-base font-bold tracking-tightest text-text-primary sm:text-lg"
+          className="flex min-w-0 shrink items-center gap-2 font-display text-base font-bold tracking-tightest text-text-primary sm:text-lg"
         >
-          LabourMarket<span className="text-gradient-accent">.ai</span>
+          {/* The mark is decorative here — the wordmark beside it already
+              names the product, so announcing both would read it twice. */}
+          <LmLogo title="" className="h-6 w-auto shrink-0 sm:h-7" />
+          <span className="truncate">
+            LabourMarket<span className="text-gradient-accent">.ai</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">

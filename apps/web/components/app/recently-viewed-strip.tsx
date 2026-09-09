@@ -63,7 +63,7 @@ export function RecentlyViewedStrip({
         <button
           type="button"
           onClick={onClear}
-          className="inline-flex min-h-[2.75rem] items-center rounded-md px-2 text-xs font-medium text-brand-blue hover:text-brand-cyan"
+          className="inline-flex min-h-[2.75rem] items-center rounded-md px-2 text-xs font-medium text-brand-blue hover:text-brand-champagne"
           data-testid="opportunities-recently-viewed-clear"
         >
           {labels.clear}

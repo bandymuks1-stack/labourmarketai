@@ -26,11 +26,11 @@ export function ThemeToggleIcon({
   className?: string;
 }) {
   // LIGHT is the product default, so an absent attribute means light.
-  const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
     const current = document.documentElement.dataset.theme;
-    setTheme(current === "dark" ? "dark" : "light");
+    setTheme(current === "light" ? "light" : "dark");
   }, []);
 
   const next: "dark" | "light" = theme === "light" ? "dark" : "light";

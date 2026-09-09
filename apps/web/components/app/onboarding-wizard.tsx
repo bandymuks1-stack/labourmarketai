@@ -548,7 +548,7 @@ export function OnboardingWizard({
         className="card-border flex flex-col gap-3 p-4"
         data-testid="onboarding-next-steps"
       >
-        <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("nextSteps.eyebrow")}
         </p>
         <ul className="flex flex-col gap-2">

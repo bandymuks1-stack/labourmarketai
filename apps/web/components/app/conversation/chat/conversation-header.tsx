@@ -63,7 +63,7 @@ export function ConversationHeader({
             <ArrowLeft {...iconControl()} aria-hidden />
           </Link>
         )}
-        <span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-white">L</span>
+        <span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-text-on-brand">L</span>
         <span className={`font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden lg:inline"}`}>{title}</span>
         {/* The ACTIVE WORKSPACE, always visible beside the conversation —
             the user must never have to guess which work context they are in.

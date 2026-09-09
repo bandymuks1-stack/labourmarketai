@@ -385,7 +385,7 @@ export function LoginForm({
           {t("password_label")}
           <Link
             href="/auth/forgot-password"
-            className="text-brand-blue hover:text-brand-cyan"
+            className="text-brand-blue hover:text-brand-champagne"
           >
             {t("forgot_password")}
           </Link>
@@ -466,7 +466,7 @@ export function LoginForm({
                 ? `/auth/signup?next=${encodeURIComponent(nextPath)}`
                 : "/auth/signup"
             }
-            className="text-brand-blue hover:text-brand-cyan"
+            className="text-brand-blue hover:text-brand-champagne"
             data-testid="login-signup-link"
           >
             {t("signup_link")}
@@ -483,7 +483,7 @@ export function LoginForm({
       >
         <Link
           href="/auth/forgot-password"
-          className="text-sm font-semibold text-brand-blue hover:text-brand-cyan"
+          className="text-sm font-semibold text-brand-blue hover:text-brand-champagne"
           data-testid="login-recover-link"
         >
           {t("reset_password_cta")}

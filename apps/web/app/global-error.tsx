@@ -28,15 +28,15 @@ export default function GlobalError({
           gap: "16px",
           padding: "24px",
           textAlign: "center",
-          background: "#0B1014",
-          color: "#E8EEF2",
+          background: "#000000",
+          color: "#FFFFFF",
           font: "15px/1.6 ui-sans-serif, system-ui, sans-serif",
         }}
       >
         <p style={{ maxWidth: "26rem" }} data-testid="global-error-message">
           Įvyko klaida. Jūsų duomenys išsaugoti — bandykite dar kartą.
           <br />
-          <span style={{ color: "#A9B4BD" }}>
+          <span style={{ color: "#C9C9C9" }}>
             Something went wrong. Your data is safe — try again.
           </span>
         </p>
@@ -45,9 +45,9 @@ export default function GlobalError({
           onClick={() => reset()}
           data-testid="global-error-retry"
           style={{
-            border: "1px solid #3B82F6",
+            border: "1px solid #D4AF37",
             background: "transparent",
-            color: "#E8EEF2",
+            color: "#FFFFFF",
             borderRadius: "8px",
             padding: "10px 20px",
             font: "600 14px/1 ui-sans-serif, system-ui, sans-serif",

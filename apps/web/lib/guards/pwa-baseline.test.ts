@@ -23,8 +23,8 @@ describe("web app manifest", () => {
     expect(manifest).toMatch(/short_name: "LabourMarket"/);
     expect(manifest).toMatch(/start_url: "\/"/);
     expect(manifest).toMatch(/display: "standalone"/);
-    expect(manifest).toMatch(/background_color: "#06070D"/);
-    expect(manifest).toMatch(/theme_color: "#06070D"/);
+    expect(manifest).toMatch(/background_color: "#000000"/);
+    expect(manifest).toMatch(/theme_color: "#000000"/);
   });
 
   it("carries the store taxonomy (readiness v2) — descriptive only", () => {
@@ -52,7 +52,10 @@ describe("layout viewport + apple metadata", () => {
   it("exports a safe-area-aware viewport with scheme-aware theme color", () => {
     expect(layout).toMatch(/export const viewport: Viewport/);
     expect(layout).toMatch(/viewportFit: "cover"/);
-    expect(layout).toMatch(/prefers-color-scheme: dark[^}]*#06070D/);
+    // #06070D → #000000 with the black + metallic-gold system: the browser
+    // chrome follows the ink-900 page token, and a near-black status bar over
+    // a true-black page is a visible seam on mobile.
+    expect(layout).toMatch(/prefers-color-scheme: dark[^}]*#000000/);
     expect(layout).toMatch(/prefers-color-scheme: light[^}]*#F4F6FB/);
   });
 

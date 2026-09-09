@@ -142,7 +142,7 @@ export function JournalEntrySkillLinks({
           {t("none")}{" "}
           <Link
             href="/dashboard/profile"
-            className="text-brand-blue hover:text-brand-cyan"
+            className="text-brand-blue hover:text-brand-champagne"
           >
             {t("profileLink")} →
           </Link>
@@ -351,7 +351,7 @@ export function JournalEntrySkillLinks({
             </button>
             <Link
               href={`/dashboard/journal?editing=${entryId}#journal-composer`}
-              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
               data-testid={`entry-skill-review-again-${entryId}`}
             >
               {t("reviewAgain")}

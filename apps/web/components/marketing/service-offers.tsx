@@ -32,7 +32,7 @@ export async function ServiceOffers() {
   return (
     <section className="mx-auto max-w-container px-6 pb-16 sm:px-12">
       <div className="card-border wow-card p-6 sm:p-10">
-        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>

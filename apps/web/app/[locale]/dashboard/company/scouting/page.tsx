@@ -455,7 +455,7 @@ export default async function CompanyScoutingPage({
               <Link
                 href={filterHref({ skill: null, country: null, availableNow: false })}
                 data-testid="scout-filter-clear"
-                className="rounded-full border border-transparent px-3 py-1.5 text-xs font-medium text-brand-blue hover:text-brand-cyan"
+                className="rounded-full border border-transparent px-3 py-1.5 text-xs font-medium text-brand-blue hover:text-brand-champagne"
               >
                 {t("filters.clear")}
               </Link>
@@ -534,7 +534,7 @@ export default async function CompanyScoutingPage({
           {hasActiveScoutFilters(result.filters) ? (
             <Link
               href={filterHref({ skill: null, country: null, availableNow: false })}
-              className="text-xs font-medium text-brand-blue hover:text-brand-cyan"
+              className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
             >
               {t("filters.clear")} →
             </Link>
@@ -544,7 +544,7 @@ export default async function CompanyScoutingPage({
               next action. */}
           <Link
             href={`/${locale}/dashboard/company#demand-intake`}
-            className="text-xs font-medium text-brand-blue hover:text-brand-cyan"
+            className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
             data-testid="scouting-empty-edit-need"
           >
             {t("editNeedCta")} →
@@ -737,7 +737,7 @@ export default async function CompanyScoutingPage({
                   </span>
                   <Link
                     href={nextAction.href}
-                    className="text-meta font-medium text-brand-blue hover:text-brand-cyan"
+                    className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
                     data-testid={`scout-pipeline-next-${c.workerId}`}
                   >
                     {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →

@@ -42,10 +42,10 @@ export function AccountMenu() {
   // "theme" — a shared, never locale-keyed key; the no-flash bootstrap in
   // app/[locale]/layout.tsx replays it) — same mechanism, one more surface.
   // LIGHT is the product default, so an absent attribute means light.
-  const [theme, setThemeState] = useState<"dark" | "light">("light");
+  const [theme, setThemeState] = useState<"dark" | "light">("dark");
   useEffect(() => {
     const current = document.documentElement.dataset.theme;
-    setThemeState(current === "dark" ? "dark" : "light");
+    setThemeState(current === "light" ? "light" : "dark");
   }, []);
   const nextTheme: "dark" | "light" = theme === "light" ? "dark" : "light";
   function toggleTheme() {

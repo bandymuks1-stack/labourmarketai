@@ -1716,14 +1716,14 @@ export function JournalEntryComposer({
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               <a
                 href="#journal-entries"
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-see-entries"
               >
                 {t("savedSeeEntries")} →
               </a>
               <Link
                 href="/dashboard/profile#capabilities"
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-open-profile"
               >
                 {t("savedOpenProfile")} →
@@ -1733,7 +1733,7 @@ export function JournalEntryComposer({
                   the change becomes visible one tap away. */}
               <Link
                 href={"/cv" as "/dashboard"}
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-open-cv"
               >
                 {t("savedOpenCv")} →
@@ -2130,7 +2130,7 @@ export function JournalEntryComposer({
           </p>
           <Link
             href="/dashboard/profile#capabilities"
-            className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+            className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-champagne"
             data-testid="manual-fallback-link"
           >
             {t("addManuallyCta")} →
@@ -2394,7 +2394,7 @@ export function JournalEntryComposer({
                   newSkillSuggestions.length === 0 && (
                     <Link
                       href="/dashboard/profile#capabilities"
-                      className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                      className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-champagne"
                       data-testid="skill-add-manually-link"
                     >
                       {t("addManuallyCta")} →

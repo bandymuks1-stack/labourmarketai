@@ -95,7 +95,7 @@ export function ClaimPublicIntakeCard({
                   type="button"
                   onClick={() => onClaim(intake.id)}
                   disabled={pending}
-                  className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+                  className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
                   data-testid={`intake-claim-${intake.id}`}
                 >
                   {labels.claimCta}
