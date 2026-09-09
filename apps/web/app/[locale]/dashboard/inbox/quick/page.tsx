@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { EmptyState } from "@/components/app/empty-state";
 import type { QuickConfirmEntryView } from "@/components/app/quick-confirm-card";
 import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
@@ -85,15 +84,12 @@ export default async function QuickConfirmPage({
       {/* One client boundary that stays mounted across the post-tap
           revalidation, so the manager's receipt survives the queue emptying
           (empty state + batch + cards all live inside it). */}
-      {queue === null ? (
-        <EmptyState
-          testId="quick-unavailable"
-          title={t("inbox.unavailableTitle")}
-          why={t("inbox.unavailable")}
-        />
-      ) : (
-        <QuickConfirmQueue entries={entries} todays={todays} exceptions={exceptions} />
-      )}
+      <QuickConfirmQueue
+        entries={entries}
+        todays={todays}
+        exceptions={exceptions}
+        unavailable={queue === null}
+      />
     </div>
   );
 }
