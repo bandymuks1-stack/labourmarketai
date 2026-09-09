@@ -123,8 +123,15 @@ update function. A programme is immutable from creation — and the target
 profession is the field that switches on the employer-demand count. Production's
 single programme has a null slug, so it reads "no direction" **permanently**.
 
-**Merge-order note:** each bumps the three migration-count ratchets 275 → 276.
-Whichever lands second needs a one-line bump to 277.
+**Merge-order note, recounted 2026-09-09.** Both drafts were rebased onto
+`10f19dec` after #1658 landed a migration and #1662-#1673 shipped; they had gone
+CONFLICTING on the three ratchets and five locale files, never on the migrations
+themselves. Each now bumps the ratchets **276 → 277** against a main of 276, so
+**whichever merges second needs a one-line bump to 278** - not 277 as this file
+first said. Their premises were re-verified against production at the same time
+and both still hold: neither function exists, `organization_evidence_events`
+still has two INSERT policies that cannot admit a subject, `education_programs`
+still has one policy, and the single programme still has a null profession slug.
 
 ---
 
