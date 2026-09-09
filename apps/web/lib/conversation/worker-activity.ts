@@ -124,14 +124,22 @@ export async function getWorkerCriteriaSnapshot(
 
 export async function getWorkerActivity(userId: string): Promise<WorkerActivity> {
   const supabase = await createClient();
+  // The worker row decides `hasWorkerProfile`, which the chat says to a person
+  // as "this account has no worker profile". A FAILED read must never become
+  // that sentence (SEP-7): it is thrown, and every caller already treats a
+  // thrown read as unknown — the first screen hides its block, the chat falls
+  // back, the opening brief adds no line. Only a successful read may say that
+  // there is no worker row.
+  const { data: worker, error: workerError } = await supabase
+    .from("workers")
+    .select("id, availability_status")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (workerError) {
+    throw new Error(`worker_activity_unavailable:${workerError.code ?? "unknown"}`);
+  }
+  const workerId = worker?.id as string | undefined;
   try {
-    const { data: worker } = await supabase
-      .from("workers")
-      .select("id, availability_status")
-      .eq("profile_id", userId)
-      .maybeSingle();
-    const workerId = worker?.id as string | undefined;
-
     const { data: profile } = await supabase
       .from("profiles")
       .select("profile_text")

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { EmptyState } from "@/components/app/empty-state";
 import type { QuickConfirmEntryView } from "@/components/app/quick-confirm-card";
 import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
@@ -29,8 +30,15 @@ export default async function QuickConfirmPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const queue = await fetchQuickReviewQueue();
-  const entries: QuickConfirmEntryView[] = queue.map((e) => ({
+  // FAILED ≠ EMPTY (SEP-7): a read that failed gets its own named state below,
+  // never the "nothing to review" empty state.
+  let queue: Awaited<ReturnType<typeof fetchQuickReviewQueue>> | null;
+  try {
+    queue = await fetchQuickReviewQueue();
+  } catch {
+    queue = null;
+  }
+  const entries: QuickConfirmEntryView[] = (queue ?? []).map((e) => ({
     id: e.id,
     workerName: e.workerName,
     createdAt: e.createdAt,
@@ -50,7 +58,10 @@ export default async function QuickConfirmPage({
   // Exceptions pyramid (DESIGN_SOUL §3): the REAL server-flagged exceptions
   // for the batch candidates, surfaced BEFORE the confirm click. RPC absent
   // → empty map (the write side then enforces nothing extra either).
-  const exceptionMap = await fetchBatchExceptions(todays.map((e) => e.id));
+  const exceptionMap =
+    queue === null
+      ? new Map<string, never>()
+      : await fetchBatchExceptions(todays.map((e) => e.id));
   const exceptions = Object.fromEntries(exceptionMap);
 
   return (
@@ -74,7 +85,15 @@ export default async function QuickConfirmPage({
       {/* One client boundary that stays mounted across the post-tap
           revalidation, so the manager's receipt survives the queue emptying
           (empty state + batch + cards all live inside it). */}
-      <QuickConfirmQueue entries={entries} todays={todays} exceptions={exceptions} />
+      {queue === null ? (
+        <EmptyState
+          testId="quick-unavailable"
+          title={t("inbox.unavailableTitle")}
+          why={t("inbox.unavailable")}
+        />
+      ) : (
+        <QuickConfirmQueue entries={entries} todays={todays} exceptions={exceptions} />
+      )}
     </div>
   );
 }

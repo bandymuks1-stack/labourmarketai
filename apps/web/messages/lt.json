@@ -3305,6 +3305,7 @@
     "administrative": "Administraciniai / verslo gebėjimai"
   },
   "skills": {
+    "profileReadUnavailable": "Jūsų išsaugotų įgūdžių arba darbo istorijos dabar nepavyko perskaityti. Tai, kas rodoma žemiau, nėra visas jūsų įrašas — po akimirkos atnaujinkite puslapį; niekas, ką išsaugojote, nedingo.",
     "workDirectionsTitle": "Darbo kryptys",
     "editingDirection": "Redaguojate kryptį",
     "skillsForDirection": "Šios krypties įgūdžiai",

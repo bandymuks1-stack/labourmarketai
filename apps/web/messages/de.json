@@ -3305,6 +3305,7 @@
     "administrative": "Administrative / geschäftliche Fähigkeiten"
   },
   "skills": {
+    "profileReadUnavailable": "Ihre gespeicherten Fähigkeiten oder Ihre Arbeitshistorie konnten gerade nicht gelesen werden. Was unten steht, ist nicht Ihr vollständiger Eintrag — laden Sie die Seite gleich neu; nichts Gespeichertes ist verloren.",
     "workDirectionsTitle": "Arbeitsrichtungen",
     "editingDirection": "Richtung wird bearbeitet",
     "skillsForDirection": "Fähigkeiten für diese Richtung",

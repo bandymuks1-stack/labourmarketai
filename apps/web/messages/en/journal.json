@@ -176,6 +176,8 @@
     "empty": "No entries waiting.",
     "emptyTitle": "Nothing to review right now",
     "emptyNext": "Entries appear here when a worker you manage submits one for review.",
+    "unavailableTitle": "The review queue could not be read right now",
+    "unavailable": "This is a failed read, not an empty queue. Nothing waiting has been lost — reload the page in a moment.",
     "hideOriginal": "Hide original",
     "metrics": "Metrics",
     "reject": "Reject",

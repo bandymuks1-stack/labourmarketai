@@ -3305,6 +3305,7 @@
     "administrative": "Administratieve / zakelijke capaciteiten"
   },
   "skills": {
+    "profileReadUnavailable": "Je opgeslagen vaardigheden of werkgeschiedenis konden nu niet worden gelezen. Wat hieronder staat is niet je volledige dossier — laad de pagina zo opnieuw; niets wat je hebt opgeslagen is verloren.",
     "workDirectionsTitle": "Werkrichtingen",
     "editingDirection": "Richting bewerken",
     "skillsForDirection": "Vaardigheden voor deze richting",

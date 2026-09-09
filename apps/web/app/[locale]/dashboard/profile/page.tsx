@@ -294,6 +294,10 @@ export default async function ProfilePage({
   let savedSkills: CvSkill[] = [];
   let skillDots: SkillDot[] = [];
   let engagementCards: EngagementCard[] = [];
+  // FAILED ≠ EMPTY (SEP-7): true when the saved-skills or work-history read
+  // failed. The rows stay empty (nothing is invented), the CV section cards are
+  // withheld (they would read "not filled"), and one notice names the state.
+  let recordReadUnavailable = false;
   let professionIconSlug: string | null = null;
   // Per-skill evidence-support inputs (provenance + DURABLE journal links).
   let skillEvidenceInputs: SkillEvidenceInput[] = [];
@@ -489,6 +493,7 @@ export default async function ProfilePage({
     const coreMap = new Map<string, boolean>();
     for (const r of coreRes?.data ?? []) coreMap.set(r.skill_id, r.is_core);
 
+    recordReadUnavailable = Boolean(wsRes.error) || Boolean(ecRes.error);
     const rows = wsRes.data ?? [];
     initialSkillIds = rows
       .map((r) => r.skill_id)
@@ -598,7 +603,7 @@ export default async function ProfilePage({
     : undefined;
 
   const cvSectionCards: CvSectionCard[] | undefined = (() => {
-    if (!workerId) return undefined;
+    if (!workerId || recordReadUnavailable) return undefined;
     const eduCount =
       workerEducation?.kind === "ok" ? workerEducation.entries.length : 0;
     const achEntries =
@@ -1200,6 +1205,15 @@ export default async function ProfilePage({
       {/* Deep links (#capabilities) must land on an OPEN disclosure — six
           senders across work-card, journal composer, player card and readiness
           steps link this anchor (audit PR4). */}
+      {recordReadUnavailable ? (
+        <p
+          role="status"
+          data-testid="profile-record-read-unavailable"
+          className="rounded-md border border-border-subtle bg-surface-1/40 px-4 py-3 text-sm leading-relaxed text-text-secondary"
+        >
+          {t("profileReadUnavailable")}
+        </p>
+      ) : null}
       <DetailsHashOpener targetId="capabilities" />
       <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
         <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">

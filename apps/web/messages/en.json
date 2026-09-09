@@ -3305,6 +3305,7 @@
     "administrative": "Administrative / business abilities"
   },
   "skills": {
+    "profileReadUnavailable": "Your saved skills or work history could not be read right now. What is shown below is not your full record — reload the page in a moment; nothing you saved is lost.",
     "workDirectionsTitle": "Work directions",
     "editingDirection": "Editing direction",
     "skillsForDirection": "Skills for this direction",
