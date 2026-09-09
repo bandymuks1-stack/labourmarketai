@@ -3688,7 +3688,7 @@
       "active_markets": "Kernrichtingen (9)",
       "expansion_candidates": "Uitbreidingskandidaten"
     },
-    "caption": "Werkrichtingen in de Baltische staten en Noord-Europa",
+    "caption": "Werkrichtingen in de markten waarin we actief zijn",
     "world": {
       "caption": "Conceptweergave — marktrichtingen, geen live gegevens",
       "legendTarget": "Marktrichtingen",
@@ -4760,7 +4760,7 @@
         },
         {
           "title": "Werknemerspool over de grens",
-          "desc": "Baltisch + Noords aanbod op één plek."
+          "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
         },
         {
           "title": "Geen ondoorzichtige tussenpersonen",
@@ -4870,7 +4870,7 @@
         },
         {
           "title": "Grensoverschrijdend bereik",
-          "desc": "Baltische + Noordse klanten en werknemers."
+          "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
         },
         {
           "title": "Laat je desk groeien",
@@ -4982,7 +4982,7 @@
     "successRate": "Slagingspercentage van matches"
   },
   "trusted": {
-    "title": "Gebouwd voor marktleiders in de Baltische staten & Noord-Europa"
+    "title": "Gebouwd voor marktleiders in de markten waarin we actief zijn"
   },
   "heroCards": {
     "worker": {
@@ -8594,7 +8594,7 @@
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
     ],
-    "note": "Er is hier nog geen automatische vacaturebank en geen automatische matching — tijdens de vroege toegang wordt de selectie door een mens gecoördineerd. Wat je ziet is wat er echt draait.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg als één geheel aanbieden of inzetten is nog niet gebouwd — vandaag wordt een ploeg persoon per persoon gematcht.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {

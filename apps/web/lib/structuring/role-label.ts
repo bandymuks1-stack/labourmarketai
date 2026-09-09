@@ -100,7 +100,55 @@ export const ROLE_SUFFIX_GENITIVE_SOURCE =
  * Stems, not words: they must match every case ending the languages use.
  */
 export const TRADE_STEM_SOURCE =
-  "suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa";
+  "suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa|" +
+  // 2026-09-09: "We need a team of 6 FITTERS for next week" measured
+  // `unknown` while the same sentence with "welders" was understood — the
+  // English word for `montuotoj` / `монтажник` was simply absent. `fitter` is
+  // bounded so it cannot open on "fitted" / "fitting"; `installer` and
+  // `montuotoj` cover the other ordinary forms.
+  "fitter\\b|fitters\\b|installer|montuotoj";
+
+/**
+ * THE PEOPLE A SENTENCE CAN OFFER — one person, several, or a whole brigade.
+ *
+ * ── WHY THIS EXISTS (owner readiness window, 2026-09-09, Priority 2) ───────
+ *
+ * The `offer-capacity` rule had TWO patterns that each carried their own copy
+ * of this list, and the copies had drifted. Pattern 1 ("we have N X and are
+ * looking for work") knew `brigad`, `team`, `crew`, `ploeg`, `komand`.
+ * Pattern 2 ("looking for work FOR OUR people") knew only the individual
+ * nouns. Measured on the real router, the collective noun was the ONLY
+ * difference between being understood and not:
+ *
+ *   "Looking for work for our PEOPLE"      → offer-capacity   (in the list)
+ *   "Looking for work for our CREW"        → find-work        (not in it)
+ *   "Ieškome darbo mūsų BRIGADAI"          → need-workers     (!!)
+ *   "Ieškome projekto mūsų KOMANDAI"       → offer-capacity   (in the list)
+ *   "Zoek werk voor onze PLOEG"            → find-work
+ *   "Suchen Arbeit für unsere KOLONNE"     → unknown
+ *   "Ищем проект для нашей БРИГАДЫ"        → unknown
+ *
+ * The middle one is the worst reading in the set: a brigade offering ITSELF
+ * was read as an employer NEEDING workers — a complete SEP-4 inversion, which
+ * is the exact defect owner window 7 created the supply direction to fix. It
+ * survived for the brigade noun alone, because the brigade noun was in only
+ * one of the two copies.
+ *
+ * This is the #1669 lesson for the third time in this file: a vocabulary kept
+ * in two places drifts, and the half nobody re-reads is the half that breaks.
+ * ONE list, read by both patterns.
+ *
+ * Individual and collective are deliberately in ONE source, not two: for the
+ * question these patterns ask — *are these the speaker's own people?* — a
+ * crew and a person are the same kind of answer. What a brigade additionally
+ * IS (a unit with a headcount, a shared availability and a location) is
+ * modelled downstream on the org spine, not here.
+ */
+export const OWN_PEOPLE_SOURCE =
+  // individual / generic person nouns
+  "darbuotoj|žmon|specialist|worker|people|staff|medewerk|mensen|mitarbeit|leute|работник|люд|специалист|" +
+  // the collective ones — a team, a brigade, a crew, a gang, a shift
+  "komand|brigad|team|crew|gang|ploeg|kolonne|equipe|équipe|бригад|команд|смен";
 
 /**
  * TIME UNITS, as people write them (folded stems).

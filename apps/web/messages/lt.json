@@ -3688,7 +3688,7 @@
       "active_markets": "Pagrindinės kryptys (9)",
       "expansion_candidates": "Plėtros kandidatės"
     },
-    "caption": "Baltijos ir Šiaurės Europos darbo kryptys",
+    "caption": "Darbo kryptys rinkose, kuriose veikiame",
     "world": {
       "caption": "Koncepcinis vaizdas — rinkos kryptys, ne gyvi duomenys",
       "legendTarget": "Rinkos kryptys",
@@ -4760,7 +4760,7 @@
         },
         {
           "title": "Tarpvalstybinis darbuotojų rezervas",
-          "desc": "Baltijos ir Šiaurės pasiūla vienoje vietoje."
+          "desc": "Pasiūla iš visų rinkų, kuriose veikiame, vienoje vietoje."
         },
         {
           "title": "Be neskaidrių tarpininkų",
@@ -4870,7 +4870,7 @@
         },
         {
           "title": "Tarpvalstybinis pasiekiamumas",
-          "desc": "Baltijos ir Šiaurės klientai ir darbuotojai."
+          "desc": "Klientai ir darbuotojai visose rinkose, kuriose veikiame."
         },
         {
           "title": "Auginkite biurą",
@@ -4982,7 +4982,7 @@
     "successRate": "Atitikimo sėkmė"
   },
   "trusted": {
-    "title": "Kuriama rinkos lyderiams Baltijos ir Šiaurės Europoje"
+    "title": "Sukurta pramonės lyderiams rinkose, kuriose veikiame"
   },
   "heroCards": {
     "worker": {
@@ -8594,7 +8594,7 @@
         "body": "Fiksuotas sėkmės mokestis taikomas už įdarbintą darbuotoją, brigadą ar įmonę. Atskiras koordinavimo mokestis taikomas tik tada, kai realiai atliekamas dokumentų ar įvedimo koordinavimas. Galutinė kaina patvirtinama prieš pradedant mokamą darbą."
       }
     ],
-    "note": "Čia dar nėra automatinės darbo biržos ir automatinio parinkimo — ankstyvos prieigos metu atranką koordinuoja žmogus. Ką matai, tas realiai ir veikia.",
+    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito jūsų užklausą, susisiekia su jumis ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visos brigados pasiūlymas ar priskyrimas kaip vieno vieneto dar nėra sukurtas — šiandien brigada atrenkama žmogus po žmogaus.",
     "ctaLabel": "Pateikti darbuotojų užklausą →"
   },
   "adminLaunchReadiness": {

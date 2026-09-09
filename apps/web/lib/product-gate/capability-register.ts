@@ -678,7 +678,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: [],
     coreModule: null,
     surfaces: [],
-    note: "No FK exists anywhere; teams are `organizations` rows with `organization_type='team'` and 0 of them exist.",
+    note: "ASSIGNMENT is genuinely missing: no FK ties a team to a project assignment, so a brigade cannot be assigned as a UNIT. The rest of the team layer is NOT missing, and this note used to imply it was — re-measured against production 2026-09-09: `organization_type='team'` is in the live CHECK constraint, `create_team_v1` and `get_team_capability_summary_v1` both EXIST, `team_details` and `team_enquiries` both EXIST, `invitations.invitation_type` carries `join_team`, and `authenticated` HAS execute on `create_team_v1` — so a team can be created, given members by consent (the existing `engagement_contexts`, 80 rows in real use), described with availability/location, and enquired about. What is 0 is USAGE: 0 teams, 0 team_details, 0 team_enquiries, 0 join_team invitations. Nobody has created one, which is a human fact and not a code gap (the same distinction the institution's `members 0` needed). The sentence front door was the real reachability defect and is fixed (see `a-brigade-can-offer-itself.test.ts`).",
   },
   {
     id: "WRK-7",
@@ -915,7 +915,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/market/match-team-v1.ts"],
     coreModule: "lib/market/match-team-v1.ts",
     surfaces: ["app/[locale]/dashboard/admin"],
-    note: "Admin route only, and no team exists to match (WRK-6). Registered as DISCONNECTED until the reachability guard proved the admin route does reach it.",
+    note: "Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`.",
   },
   {
     id: "DEM-7",

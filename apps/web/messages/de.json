@@ -3688,7 +3688,7 @@
       "active_markets": "Kernrichtungen (9)",
       "expansion_candidates": "Expansionskandidaten"
     },
-    "caption": "Arbeitsrichtungen im Baltikum und in Nordeuropa",
+    "caption": "Arbeitsrichtungen in den Märkten, in denen wir tätig sind",
     "world": {
       "caption": "Konzeptansicht — Marktrichtungen, keine Live-Daten",
       "legendTarget": "Marktrichtungen",
@@ -4760,7 +4760,7 @@
         },
         {
           "title": "Grenzüberschreitender Arbeitskräftepool",
-          "desc": "Baltisches + nordisches Angebot an einem Ort."
+          "desc": "Angebot aus jedem Markt, in dem wir tätig sind — an einem Ort."
         },
         {
           "title": "Keine undurchsichtigen Zwischenhändler",
@@ -4870,7 +4870,7 @@
         },
         {
           "title": "Grenzüberschreitende Reichweite",
-          "desc": "Kunden und Arbeitskräfte aus dem Baltikum und Nordeuropa."
+          "desc": "Auftraggeber und Arbeitskräfte in jedem Markt, in dem wir tätig sind."
         },
         {
           "title": "Ihren Desk ausbauen",
@@ -4982,7 +4982,7 @@
     "successRate": "Fit-Erfolgsquote"
   },
   "trusted": {
-    "title": "Entwickelt für Branchenführer im Baltikum & Nordeuropa"
+    "title": "Für Branchenführer in den Märkten, in denen wir tätig sind"
   },
   "heroCards": {
     "worker": {
@@ -8594,7 +8594,7 @@
         "body": "Pro eingestellter Arbeitskraft, Kolonne oder Unternehmensvermittlung gilt eine feste Erfolgsgebühr. Eine separate Koordinationsgebühr fällt nur an, wenn Dokumenten- oder Onboarding-Koordination tatsächlich erbracht wird. Der endgültige Preis wird bestätigt, bevor bezahlte Arbeit beginnt."
       }
     ],
-    "note": "Es gibt hier noch keine automatische Jobbörse und kein automatisches Matching — während des Early Access wird die Auswahl von einem Menschen koordiniert. Was Sie sehen, ist das, was wirklich läuft.",
+    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine aktive Position kostenfrei. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne als eine Einheit anzubieten oder einzusetzen ist noch nicht gebaut — heute wird eine Kolonne Person für Person gematcht.",
     "ctaLabel": "Personalanfrage einreichen →"
   },
   "adminLaunchReadiness": {

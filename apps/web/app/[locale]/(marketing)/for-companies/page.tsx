@@ -38,6 +38,7 @@ export default async function ForCompaniesPage({
         ctaKind="companyNeed"
         ctaLabel={t("cta")}
         ctaSource="companies_hero"
+        ctaAudience="companies"
       />
       <BenefitCards items={benefits} />
       <RoleEnrichment
