@@ -21,6 +21,7 @@
  */
 import {
   OCCUPATION_STEM_SOURCE,
+  DURATION_UNIT_SOURCE,
   TRADE_STEM_SOURCE,
   PROFESSION_STATEMENT_ANCHOR_SOURCE,
   ROLE_NOUN_EXCLUSION_SOURCE,
@@ -325,15 +326,35 @@ const RULES: IntentRule[] = [
       // matched: it is as likely to be an employer describing its own payroll
       // as an agency offering people, and `darbuotoj` is absent from this
       // vocabulary for that reason.
+      //
+      // THE COUNT MUST BE A HEADCOUNT, NOT A DURATION (2026-09-09). As first
+      // written this rule asked only for HAVE, a number and a trade within 24
+      // characters — and "I have 3 years experience as a welder" satisfies all
+      // three. It was answered as an agency offering welders: a PERSON
+      // describing themselves, read as an organisation describing its
+      // workforce. `turiu 3 metus patirties suvirintoju` did the same in
+      // Lithuanian. The demand rule below has excluded time units since the
+      // day before this rule was written; this one copied its shape and not
+      // its guard, so the exclusion is now SHARED vocabulary
+      // (`DURATION_UNIT_SOURCE`) rather than a second list that can drift.
+      //
+      // Two lookaheads, and BOTH are load-bearing. `(?![0-9])` forbids a
+      // partial digit run: without it the engine matches "1" of "10", leaving
+      // the time-unit test looking at "0 metu" where it finds nothing and
+      // passes. The second swallows its own whitespace, so the `\s*` after it
+      // cannot backtrack past the unit either. The first dodge was caught by
+      // the control for "turiu 10 metu patirties elektriku", not by reading.
       p(
-        `(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)\\w*\\s*.{0,16}[0-9]{1,4}\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
+        `(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)\\w*\\s*.{0,16}[0-9]{1,4}(?![0-9])(?!\\s*(?:${DURATION_UNIT_SOURCE})\\w*\\b)\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
         9,
       ),
       // …and the same capacity stated as AVAILABILITY, with no verb at all:
       // "nuo spalio 5 d. laisvi 3 elektrikai". A date, an availability word, a
-      // count and a trade — no "we have" anywhere.
+      // count and a trade — no "we have" anywhere. Same duration guard, for
+      // the same reason: "laisvas 3 menesius, suvirintojas" is one person
+      // saying how long they are free, not three welders on offer.
       p(
-        `(laisv|available|\\bfree|beschikba|verfügbar|verfuegbar|\\bfrei|\\bvrij|свобод)\\w*\\s*.{0,12}[0-9]{1,4}\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
+        `(laisv|available|\\bfree|beschikba|verfügbar|verfuegbar|\\bfrei|\\bvrij|свобод)\\w*\\s*.{0,12}[0-9]{1,4}(?![0-9])(?!\\s*(?:${DURATION_UNIT_SOURCE})\\w*\\b)\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
         9,
       ),
       // ── WE HAVE WORKERS **FOR** A COUNTRY ───────────────────────────────
@@ -1713,7 +1734,7 @@ const RULES: IntentRule[] = [
       // Without that exclusion this rule would confidently answer a question
       // about time with an employer demand form.
       p(
-        `(?:${SEEK_VERB_SOURCE})\\s+[0-9]{1,4}\\s+(?!(?:val|valand|dien|savait|men|metu|hour|day|week|month|year|час|дн|недел|месяц|год|stunde|tag|woche|monat|jahr|uur|dag|week|maand|jaar)\\w*\\b)`,
+        `(?:${SEEK_VERB_SOURCE})\\s+[0-9]{1,4}\\s+(?!(?:${DURATION_UNIT_SOURCE})\\w*\\b)`,
         3,
       ),
       p("(darbuotojų\\s+)?poreik", 2), // "darbuotojų poreikis"
