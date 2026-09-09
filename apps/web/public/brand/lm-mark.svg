@@ -5,7 +5,7 @@
 
     GEOMETRY IS UNCHANGED. Every coordinate below is copied verbatim from that
     file; the viewBox is the original 700.27 x 660.2. The ONLY differences are:
-      1. the original's `fill:#FFA100` becomes the metallic-gold gradient, and
+      1. the original's ORANGE fill becomes the metallic-gold gradient, and
       2. the original's opaque black background <rect> is dropped, so the mark
          sits on whatever surface hosts it (the product ground is #000 anyway,
          and a baked-in rect would show as a black box on any other surface).

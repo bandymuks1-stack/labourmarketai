@@ -4,7 +4,7 @@
  * The geometry is the owner's original CorelDRAW vector, verbatim:
  * `docs/brand/source/LM_Color Single.svg` (md5 eafd130e9820d6e9df12cc075229d0b5),
  * viewBox 700.27 x 660.2. Nothing was redrawn or re-traced. The only change is
- * the fill: the original's `#FFA100` orange becomes the metallic-gold ramp
+ * the fill: the original's ORANGE becomes the metallic-gold ramp
  * (#8C6A16 → #D4AF37 → #F2D675 → #D4AF37 → #8C6A16), and the original's opaque
  * black background rect is dropped so the mark sits on whatever surface hosts
  * it. `public/brand/lm-mark.svg` is the same artwork as a static file, for

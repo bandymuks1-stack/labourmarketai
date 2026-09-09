@@ -420,17 +420,18 @@ describe("the LM mark is the owner's original geometry", () => {
   }
 
   it("the orange original is gone from every production asset", () => {
-    // Each asset DOCUMENTS the colour it was derived from, so the check has to
-    // read the markup and not the prose — otherwise the provenance comment
-    // ("the original's fill:#FFA100 becomes gold") fails the guard that exists
-    // to prove exactly what that comment says.
-    const stripComments = (s: string): string =>
-      s.replace(/<!--[\s\S]*?-->/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+    // A WHOLE-FILE check, deliberately. This used to strip comments first,
+    // because each asset's provenance note quoted the source colour literally
+    // and tripped its own guard. CodeQL flagged that stripper as incomplete
+    // multi-character sanitisation (js/incomplete-multi-character-sanitization,
+    // high) — correctly: removing `<!--…-->` in one pass can reintroduce `<!--`.
+    // It was only ever reading files off disk in a test, so it was not
+    // exploitable, but the fix is better than a suppression: the asset comments
+    // now describe the original colour in words instead of quoting the hex, so
+    // no sanitising is needed and the guard is STRICTER — the literal may not
+    // appear anywhere in a production asset, prose included.
     for (const file of ["public/brand/lm-mark.svg", "app/icon.svg", "public/app-icon.svg"]) {
-      expect(
-        stripComments(read(file)),
-        `${file} must not fill with the legacy orange`,
-      ).not.toMatch(/#FFA100/i);
+      expect(read(file), `${file} must not carry the legacy orange`).not.toMatch(/#FFA100/i);
     }
   });
 
