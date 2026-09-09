@@ -161,7 +161,48 @@ export type IntentMatch = {
   matched: string[];
 };
 
-type Pattern = { re: RegExp; weight: number };
+type Pattern = {
+  re: RegExp;
+  weight: number;
+  /**
+   * "…unless the sentence also asks for work or for workers." Evaluated ONCE
+   * per sentence by `classifyIntent`, not folded into the pattern.
+   *
+   * ── WHY THIS IS NOT A LOOKAHEAD (measured 2026-09-09) ──────────────────
+   *
+   * It used to be written inline, as
+   * `^(?![^]*(?:SEEK_GUARD_SOURCE))[^]*?…`. That form is correct and very
+   * expensive to WARM UP, in the exact case that matters: when the sentence
+   * does NOT contain a seek verb, the lookahead has to walk the whole
+   * alternation at every position of `[^]*` and fail at all of them — and
+   * `SEEK_GUARD_SOURCE` contains `\b`, which `p()` expands into the long
+   * `UNICODE_WORD_BOUNDARY` look-around group. A sentence WITH a seek verb
+   * is fast, because the lookahead fails immediately.
+   *
+   * Measured on the FIRST `classifyIntent` call in a fresh process:
+   *
+   *   "ieškau darbo Norvegijoje"              1 ms  (seek verb → fails fast)
+   *   "Parodyk ką šiandien turiu padaryti"  3937 ms  ← no seek verb
+   *   "pakviesk studentą į programą"        1457 ms  ←
+   *   "I am a welder"                       1017 ms  ←
+   *
+   * BE PRECISE ABOUT WHAT THIS COST IS, because the first reading of it was
+   * wrong. It is cold-start regex compilation and JIT, NOT a per-message
+   * price: the same three sentences measured 46/0.3/0.6 ms on the second
+   * call and ~1/0.3/0.5 ms on the third. Steady-state classification is well
+   * under a millisecond and always was, so there is no production latency
+   * defect here and none is being claimed.
+   *
+   * What it DID break is test processes, which pay cold start once and get
+   * 5 s. Three rules already carried the inline guard, so most of this cost
+   * predates today (`main` measures 1857 ms for the first sentence);
+   * extending it to the twelve availability patterns pushed three unrelated
+   * unit tests over their timeout. A flag checked once means exactly the
+   * same thing, restores the previous cold start, and removes the trap for
+   * whoever adds the next guarded pattern.
+   */
+  noSeek?: true;
+};
 type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
 
 /**
@@ -211,6 +252,13 @@ function p(source: string, weight = 1): Pattern {
   return { re: new RegExp(fold(source).replace(/\\b/g, UB), "iu"), weight };
 }
 
+/** `p()`, but the pattern only counts when the sentence is NOT also asking
+ *  for work or for workers — see `Pattern.noSeek` for why this is a flag and
+ *  not a lookahead. */
+function pNoSeek(source: string, weight = 1): Pattern {
+  return { ...p(source, weight), noSeek: true };
+}
+
 /**
  * Rule table. Ordered by specificity of the *signal*, not by intent priority —
  * scoring resolves overlaps (e.g. the word "darbas"/"work" appears in both
@@ -229,6 +277,37 @@ function p(source: string, weight = 1): Pattern {
  */
 const SEEK_GUARD_SOURCE =
   "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch";
+
+/**
+ * AN OPTIONAL PLACE PHRASE, between a verb and the time word after it.
+ *
+ * "I can work IN GERMANY from Monday" — one sentence carrying both mobility
+ * and availability, which is exactly how people state them together. Every
+ * non-Lithuanian availability pattern required the time word to follow the
+ * verb immediately, so naming the country silenced the whole rule (owner
+ * readiness window 2026-09-09; the measurements are on the `availability`
+ * rule below).
+ *
+ * A PLACE PHRASE, NOT A WILDCARD. It admits only a locative preposition plus
+ * a token or two — `in Germany`, `в Германии`, `in Duitsland`. A bare
+ * `.{0,20}` would have read "I can work WITH PEOPLE from Poland" as a stated
+ * availability, which is a fluent wrong answer (§14) and the kind of quiet
+ * over-match that turns a fix into the next regression.
+ *
+ * Prepositions only from the routed locales, and only ones that introduce a
+ * PLACE: lt `-` (Lithuanian marks the locative in the ending, so no
+ * preposition is needed — the LT patterns never had this problem), en
+ * `in/at`, de `in/bei`, nl `in/bij`, ru `в/во/на`.
+ */
+const WHERE_GAP = "(?:(?:in|at|bei|bij|в|во|на)\\s+[^\\s]+\\s+){0,2}";
+
+/** Does the sentence ask for work or for workers? Compiled once, tested once
+ *  per `classifyIntent` call — the cheap half of what used to be an inline
+ *  negative lookahead on every guarded pattern (`Pattern.noSeek`). */
+const SEEK_GUARD_RE = new RegExp(
+  fold(SEEK_GUARD_SOURCE).replace(/\\b/g, UB),
+  "iu",
+);
 
 const RULES: IntentRule[] = [
   /**
@@ -1574,25 +1653,58 @@ const RULES: IntentRule[] = [
      * Weight 5 beats the bare `galiu` capacity reading (3) and the `darbo`
      * noun (1); a sentence that also SEEKS ("galiu dirbti, ieškau darbo")
      * keeps find-work through the guard.
+     *
+     * ── SAYING WHERE BROKE SAYING WHEN (owner readiness window, 2026-09-09)
+     *
+     * §5A's probe is "I can work in Germany from Monday." — one sentence
+     * carrying BOTH facts §5B asks a person for, mobility and availability.
+     * Measured on this router before the change:
+     *
+     *   lt "Galiu dirbti Vokietijoje nuo pirmadienio"    → availability
+     *   en "I can work in Germany from Monday"           → UNKNOWN
+     *   de "Ich kann in Deutschland ab Montag arbeiten"  → find-work (!)
+     *   nl "Ik kan in Duitsland vanaf maandag werken"    → UNKNOWN
+     *   ru "Могу работать в Германии с понедельника"     → UNKNOWN
+     *
+     * Drop the country and all five worked. The Lithuanian pattern binds
+     * `galiu … dirbti` with no from-word, so a place between them is free;
+     * every other locale required the time word to sit IMMEDIATELY after the
+     * verb, and naming a country pushed it out of reach. German was the worst
+     * of the five: it did not fall silent, it answered a person stating their
+     * availability with a JOB SEARCH.
+     *
+     * `WHERE_GAP` (above) is the fix, and it is deliberately a PLACE phrase
+     * rather than a wildcard: a bare `.{0,20}` would have swallowed "I can
+     * work with people from Poland" as an availability statement. Pinned,
+     * both directions, in `lib/guards/availability-survives-a-place.test.ts`.
      */
     intent: "availability",
     patterns: [
-      p(
-        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(galiu|galeciau|galesiu|galiu\\s+pradeti|galesiu\\s+pradeti)\\s+(pradeti\\s+)?dirbti\\b`,
+      pNoSeek(
+        `\\b(galiu|galeciau|galesiu|galiu\\s+pradeti|galesiu\\s+pradeti)\\s+(pradeti\\s+)?dirbti\\b`,
         5,
       ),
-      p("\\b(galiu|galesiu|galeciau)\\s+(pradeti|pradeciau)\\s+(nuo|kita|sia|rytoj|poryt|po|iki)\\b", 5),
-      p("\\b(esu|busiu)\\s+laisv[a-z]{0,4}\\s+(nuo|iki|rytoj|ryt|kita|sia|po|visa)\\b", 5),
-      p("\\b(i\\s+am|i'm|i\\s+will\\s+be)\\s+(available|free)\\s+(from|starting|on|next|this|after|until)\\b", 5),
-      p("\\b(available|can\\s+start|can\\s+work)\\s+(from|starting|on|next|this|after)\\b", 5),
-      p("могу\\s+(начать\\s+)?работать\\s+(с|со|после|через)\\b", 5),
-      p("могу\\s+(выйти|приступить|начать)\\s+(с|со|после|через)\\b", 5),
-      p("(свободен|свободна)\\s+(с|со|после|до)\\b", 5),
-      p("\\bkann\\s+(ab|von|nach)\\b.{0,20}(arbeiten|anfangen|beginnen)", 5),
-      p("\\b(bin|ware)\\s+(ab|von)\\s*.{0,20}\\b(verfugbar|frei)\\b", 5),
-      p("\\bverfugbar\\s+(ab|von)\\b", 5),
-      p("\\bkan\\s+(vanaf|per|na)\\b.{0,20}(werken|beginnen|starten)", 5),
-      p("\\bbeschikbaar\\s+(vanaf|per)\\b", 5),
+      // ── THE SEEK GUARD BELONGS ON ALL OF THEM (2026-09-09) ──────────────
+      //
+      // Only the FIRST pattern carried it, so "galiu dirbti nuo pirmadienio,
+      // ieškau darbo" correctly ran the search while its English, German,
+      // Dutch and Russian equivalents answered with a bare acknowledgement of
+      // the availability — the person asked for work and was told what they
+      // had just told us. `pNoSeek` applies the same guard uniformly: it can
+      // only ever NARROW a pattern, so no sentence changes meaning, and the
+      // five locales finally behave the same way.
+      pNoSeek(`\\b(galiu|galesiu|galeciau)\\s+(pradeti|pradeciau)\\s+(nuo|kita|sia|rytoj|poryt|po|iki)\\b`, 5),
+      pNoSeek(`\\b(esu|busiu)\\s+laisv[a-z]{0,4}\\s+(nuo|iki|rytoj|ryt|kita|sia|po|visa)\\b`, 5),
+      pNoSeek(`\\b(i\\s+am|i'm|i\\s+will\\s+be)\\s+(available|free)\\s+${WHERE_GAP}(from|starting|on|next|this|after|until)\\b`, 5),
+      pNoSeek(`\\b(available|can\\s+start|can\\s+work)\\s+${WHERE_GAP}(from|starting|on|next|this|after)\\b`, 5),
+      pNoSeek(`могу\\s+(начать\\s+)?работать\\s+${WHERE_GAP}(с|со|после|через)\\b`, 5),
+      pNoSeek(`могу\\s+(выйти|приступить|начать)\\s+${WHERE_GAP}(с|со|после|через)\\b`, 5),
+      pNoSeek(`(свободен|свободна)\\s+${WHERE_GAP}(с|со|после|до)\\b`, 5),
+      pNoSeek(`\\bkann\\s+${WHERE_GAP}(ab|von|nach)\\b.{0,20}(arbeiten|anfangen|beginnen)`, 5),
+      pNoSeek(`\\b(bin|ware)\\s+${WHERE_GAP}(ab|von)\\s*.{0,20}\\b(verfugbar|frei)\\b`, 5),
+      pNoSeek(`\\bverfugbar\\s+${WHERE_GAP}(ab|von)\\b`, 5),
+      pNoSeek(`\\bkan\\s+${WHERE_GAP}(vanaf|per|na)\\b.{0,20}(werken|beginnen|starten)`, 5),
+      pNoSeek(`\\bbeschikbaar\\s+${WHERE_GAP}(vanaf|per)\\b`, 5),
     ],
   },
   {
@@ -1608,8 +1720,8 @@ const RULES: IntentRule[] = [
       // is a stated SERVICE — the ONE verb list the value structurer reads,
       // so the router and the reader cannot drift. A sentence that also
       // seeks ("remontuoju automobilius, ieškau darbo") keeps find-work.
-      p(
-        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(?:${PRESENT_ACTIVITY_VERB_SOURCE})\\b`,
+      pNoSeek(
+        `\\b(?:${PRESENT_ACTIVITY_VERB_SOURCE})\\b`,
         5,
       ),
       p("parduo", 4), // parduodu / parduoti / noriu parduoti
@@ -1936,13 +2048,53 @@ const RULES: IntentRule[] = [
      * the profession beside it — so the guard below excludes seek verbs.
      * The suffix / stem / exclusion sources are shared with the reader in
      * `lib/structuring/role-label.ts`.
+     *
+     * ── A TRADE COULD ONLY INTRODUCE ITSELF IN LITHUANIAN ─────────────────
+     * (owner readiness window, 2026-09-09 — §5A's probe "I am a welder.")
+     *
+     * Measured on this router before the change, one sentence per language:
+     *
+     *   "I am an accountant"   → profession-statement    "I am a welder"     → UNKNOWN
+     *   "Ich bin Buchhalter"   → profession-statement    "Ich bin Schweisser"→ UNKNOWN
+     *   "Ik ben boekhouder"    → profession-statement    "Ik ben lasser"     → UNKNOWN
+     *   "Я бухгалтер"          → profession-statement    "Я сварщик"         → UNKNOWN
+     *   "Esu buhalteris"       → profession-statement    "Esu suvirintojas"  → OK
+     *
+     * The office professions live in `OCCUPATION_STEM_SOURCE`, which this
+     * rule read. The manual trades live in `TRADE_STEM_SOURCE`, which it did
+     * not — so a welder, electrician, plumber, carpenter, painter, driver,
+     * cook, cleaner or scaffolder could not say what they were in four of the
+     * five routed languages. Lithuanian passed only by ACCIDENT OF GRAMMAR:
+     * "suvirintojas" ends in `-tojas`, so it matched the nominative suffix,
+     * not any vocabulary. The moment the ending is not Lithuanian the person
+     * disappears — and these are the professions this product is for.
+     *
+     * It is the #1669 defect exactly one layer up. There the trades were
+     * readable by DEMAND and not by SUPPLY; here they are readable by both
+     * market directions and not by a PERSON describing themselves. The fix is
+     * the same fix: read the ONE shared list instead of a second copy.
+     *
+     * WHY THIS CANNOT BECOME A SUPPLY OR DEMAND SENTENCE (§13/§28, and the
+     * regression #1675 fixed). Three independent guards, none added here:
+     *   · EVERY anchor in `PROFESSION_STATEMENT_ANCHOR_SOURCE` is FIRST
+     *     PERSON SINGULAR — "esu", "dirbu", "i am", "i'm", "я", "ich bin",
+     *     "ik ben". "We have 20 welders" and "we need welders" contain no
+     *     anchor and cannot reach this rule at all.
+     *   · `SEEK_GUARD_SOURCE` still fails the whole pattern when the sentence
+     *     also asks for work or for workers.
+     *   · `offer-capacity` requires a DIGIT that is not followed by a
+     *     duration unit; a bare self-introduction carries no number, and
+     *     "I have 3 years of experience as a welder" carries one that is a
+     *     duration — which is what #1675 settled and this does not touch.
+     * The opposite-direction controls are pinned in
+     * `lib/guards/a-trade-can-say-what-it-is.test.ts`.
      */
     intent: "profession-statement",
     patterns: [
-      p(
-        // NB `[^]` (anything), never `[\s\S]`: pattern sources are lower-cased
-        // and `\S` would silently become `\s`.
-        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE}))`,
+      pNoSeek(
+        // NB `[^\s]`, never `\S`: pattern sources are lower-cased and `\S`
+        // would silently become `\s`.
+        `\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE})|(?:${TRADE_STEM_SOURCE}))`,
         6,
       ),
     ],
@@ -2284,11 +2436,15 @@ export function classifyIntent(text: string): IntentMatch {
   const q = fold(text ?? "");
   if (!q.trim()) return { intent: "unknown", score: 0, matched: [] };
 
+  // Asked ONCE, then answered in O(1) for every `noSeek` pattern below.
+  const seeks = SEEK_GUARD_RE.test(q);
+
   let best: IntentMatch = { intent: "unknown", score: 0, matched: [] };
   for (const rule of RULES) {
     let score = 0;
     const matched: string[] = [];
-    for (const { re, weight } of rule.patterns) {
+    for (const { re, weight, noSeek } of rule.patterns) {
+      if (noSeek && seeks) continue;
       if (re.test(q)) {
         score += weight;
         matched.push(re.source);

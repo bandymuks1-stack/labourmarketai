@@ -13423,7 +13423,7 @@
       "title": "Darbo rinka egzistuoja tikrose vietose.",
       "lead": "Žmonės, darbai ir poreikiai yra kažkur. Žemėlapis yra produkto dalis, o ne paveikslėlis prie teksto.",
       "shows": "Žemėlapyje {count, plural, one {pažymėta # rinka} few {pažymėtos # rinkos} other {pažymėta # rinkų}}, kuriose LabourMarket.ai veikia šiandien. Tai rinkos, ne šios dienos veikla.",
-      "notPublished": "Kiek darbo ar žmonių yra konkrečioje vietoje, neprisijungusiems kol kas nerodome — tokių duomenų viešai neskelbiame, todėl žemėlapyje nėra nė vieno spėto taško. Prisijungę matote realią savo rinkos būklę."
+      "invite": "Prisijunkite ir plėskite savo galimybes darbo rinkoje."
     },
     "contexts": {
       "eyebrow": "Nuo kur pradėti",

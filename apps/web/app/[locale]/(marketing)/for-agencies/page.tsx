@@ -15,6 +15,7 @@ import { PageHero } from "@/components/marketing/page-hero";
 import { RoleEnrichment } from "@/components/marketing/role-enrichment";
 import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
 import { AgencyPoolPreview } from "@/components/app/agency-pool-preview";
+import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
 
 export default async function ForAgenciesPage({
   params,
@@ -36,6 +37,7 @@ export default async function ForAgenciesPage({
         ctaKind="signup"
         ctaLabel={t("cta")}
         ctaSource="agencies_hero"
+        ctaNext={AGENCY_DOOR_NEXT}
       />
       <BenefitCards items={benefits} />
       <RoleEnrichment
@@ -48,6 +50,7 @@ export default async function ForAgenciesPage({
         }
         ctaSource="agencies_cta"
         ctaKind="signup"
+        ctaNext={AGENCY_DOOR_NEXT}
       />
     </>
   );

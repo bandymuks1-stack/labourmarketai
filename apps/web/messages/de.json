@@ -13423,7 +13423,7 @@
       "title": "Der Arbeitsmarkt existiert an echten Orten.",
       "lead": "Menschen, Arbeit und Bedarf sind irgendwo. Die Karte gehört zum Produkt, sie ist kein Bild neben dem Text.",
       "shows": "Die Karte zeigt {count, plural, one {den # Markt} other {die # Märkte}}, in denen LabourMarket.ai heute tätig ist. Das sind Märkte, nicht die heutige Aktivität.",
-      "notPublished": "Wie viel Arbeit oder wie viele Menschen an einem Ort sind, zeigen wir Besuchern noch nicht — diese Daten veröffentlichen wir nicht, deshalb steht auf dieser Karte kein einziger geratener Punkt. Angemeldet sehen Sie den echten Stand Ihres Marktes."
+      "invite": "Melden Sie sich an und erweitern Sie Ihre Chancen auf dem Arbeitsmarkt."
     },
     "contexts": {
       "eyebrow": "Wo anfangen",

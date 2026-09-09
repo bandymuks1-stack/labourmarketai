@@ -13423,7 +13423,7 @@
       "title": "De arbeidsmarkt bestaat op echte plekken.",
       "lead": "Mensen, werk en behoeften zijn ergens. De kaart hoort bij het product, het is geen plaatje naast de tekst.",
       "shows": "De kaart toont de {count, plural, one {# markt} other {# markten}} waarin LabourMarket.ai vandaag actief is. Dat zijn markten, geen activiteit van vandaag.",
-      "notPublished": "Hoeveel werk of hoeveel mensen er op één plek zijn, tonen we bezoekers nog niet — die gegevens publiceren we niet, dus staat er geen enkele geraden stip op deze kaart. Ingelogd zie je de echte stand van jouw markt."
+      "invite": "Meld je aan en vergroot je kansen op de arbeidsmarkt."
     },
     "contexts": {
       "eyebrow": "Waar te beginnen",

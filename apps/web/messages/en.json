@@ -13423,7 +13423,7 @@
       "title": "The labour market exists in real places.",
       "lead": "People, work and needs are somewhere. The map is part of the product, not a picture beside the text.",
       "shows": "The map marks the {count, plural, one {# market} other {# markets}} LabourMarket.ai operates in today. These are markets, not today's activity.",
-      "notPublished": "How much work or how many people are in any one place is not shown to visitors yet — we do not publish that data, so there is not a single guessed dot on this map. Signed in, you see your market's real state."
+      "invite": "Sign in and widen your opportunities in the labour market."
     },
     "contexts": {
       "eyebrow": "Where to start",

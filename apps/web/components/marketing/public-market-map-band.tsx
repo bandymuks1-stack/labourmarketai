@@ -91,7 +91,28 @@ export async function PublicMarketMapBand({
           <MarketMap view={view} mode="landing" layer="demand" autoFly={false} />
           {/* THE CAPTION IS NOT DECORATION — it is the difference between an
               honest map and a misleading one. It names what the markers are
-              and, in the same breath, what the map is not showing. */}
+              and, in the same breath, what the map is not showing.
+
+              THE NEGATION LIVES IN `shows` (owner directive 2026-09-09 §15).
+              That line reads "…the N markets LabourMarket.ai operates in
+              today. These are markets, not today's activity." — it is the
+              sentence that stops a visitor reading a marker as a job, and it
+              is untouched.
+
+              A SECOND sentence used to follow the country list, spelling out
+              that per-place counts are not published "so there is not a
+              single guessed dot on this map". The owner removed it: it
+              re-explained, in the negative, what `shows` had already settled,
+              and it spent the last line of the band's most-read block on an
+              apology. That line now INVITES ("prisijunkite ir plėskite savo
+              galimybes") instead.
+
+              WHAT DID NOT CHANGE: the map's data. `publicCoverageView()` still
+              carries no `weight` on any anchor and still draws only
+              `MARKET_COUNTRIES` centroids — no per-place quantity was
+              published to match the shorter copy, and the anon boundary is
+              exactly where it was. This is a copy change on top of unchanged
+              data, which is the only kind that is safe to make. */}
           <div
             data-testid="market-map-honesty"
             className="mt-3 flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-3.5 py-3"
@@ -106,7 +127,7 @@ export async function PublicMarketMapBand({
               {marketNames.join(" · ")}
             </p>
             <p className="text-xs leading-relaxed text-text-muted">
-              {t("notPublished")}
+              {t("invite")}
             </p>
           </div>
         </div>

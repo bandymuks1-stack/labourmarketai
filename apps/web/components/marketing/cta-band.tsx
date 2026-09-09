@@ -10,6 +10,7 @@ export function CtaBand({
   accent,
   subtitle,
   ctaKind,
+  ctaNext,
   ctaLabel,
   ctaSource,
 }: {
@@ -17,6 +18,9 @@ export function CtaBand({
   accent?: string;
   subtitle: string;
   ctaKind: "signup" | "waitlist";
+  /** Same opt-in as `PageHero.ctaNext` — the internal path the signup CTA
+   *  carries through `?next=`. Omitted = the generic dashboard. */
+  ctaNext?: string;
   ctaLabel: string;
   ctaSource: string;
 }) {
@@ -37,7 +41,14 @@ export function CtaBand({
         </p>
         <div className="mt-8 flex justify-center">
           {ctaKind === "signup" ? (
-            <Link href="/auth/signup" className={buttonLinkClassName()}>
+            <Link
+              href={
+                ctaNext
+                  ? `/auth/signup?next=${encodeURIComponent(ctaNext)}`
+                  : "/auth/signup"
+              }
+              className={buttonLinkClassName()}
+            >
               {ctaLabel} →
             </Link>
           ) : (

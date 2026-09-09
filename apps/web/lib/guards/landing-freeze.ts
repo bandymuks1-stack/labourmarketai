@@ -307,6 +307,50 @@ import { join } from "node:path";
  * new registry (added to the frozen set) and the three frozen `*.landing`
  * namespace hashes (cta.institution + cta.subcopy in all 11 catalogs;
  * hero + entry.examples in the five routed ones). Nothing else moved.
+ *
+ * Cold-start doors + the map's last line (OWNER DIRECTIVE 2026-09-09, product
+ * readiness session §15 and §32) — two changes, both authorised by name in
+ * the directive, and both derivations rather than new copy or new data.
+ *
+ *   1. THE AGENCY DOOR NAMES ITSELF. Window 6 named the institution's door
+ *      (gap G-C1) and left the agency's pointing at a bare `/auth/signup`.
+ *      §32 requires credible readiness for a real staffing agency today, and
+ *      a supplier that had just chosen "I represent an agency" was asked the
+ *      same question again on the next screen — where the nearest wrong
+ *      answer, "hire", produces a plain employer rather than a
+ *      `staffing_agency`. `AGENCY_DOOR_NEXT` is derived from
+ *      `nextPathForIntents(["agency"])`, exactly as the institution's is, so
+ *      `public-doors.ts` (frozen with the band) moved by one href.
+ *      NO new machinery: `doorIntentsFromReturnPath` already inverts the
+ *      router over EVERY company-intent subset, and `DOOR_WORDS_KEY` already
+ *      carried `agency`. The round trip is pinned in
+ *      `cold-start-doors-and-markets.test.ts`, together with the negative
+ *      control that the door is never read as `hire` — so the freeze is not
+ *      the only thing standing between an agency and being onboarded as an
+ *      employer.
+ *
+ *   2. THE MAP'S LAST LINE INVITES INSTEAD OF APOLOGISING. §15 removed the
+ *      sentence "…we do not publish that data, so there is not a single
+ *      guessed dot on this map. Signed in, you see your market's real state."
+ *      and replaced it with "Prisijunkite ir plėskite savo galimybes darbo
+ *      rinkoje." The key was renamed `notPublished` → `invite` in all five
+ *      active catalogs, which moved the three frozen `*.landing` hashes.
+ *
+ *      THE HONESTY DID NOT MOVE WITH IT. The negation a visitor needs — that
+ *      the markers are markets and NOT today's activity — has always lived in
+ *      the `shows` line above it, and that line is byte-identical. The guard
+ *      in `landing-tells-the-whole-product.test.ts` was RE-ANCHORED onto
+ *      `shows` rather than relaxed, and it now asserts the negation word
+ *      itself per locale (with a control proving a caption that lost the
+ *      negation fails). And no map DATA changed to match the shorter copy:
+ *      `publicCoverageView()` still emits no `weight` on any anchor, so a
+ *      per-place quantity remains unpublished — the new line is additionally
+ *      pinned to contain no digit at all.
+ *
+ * The regeneration touched EXACTLY FOUR hashes — `public-doors.ts` and the
+ * three `*.landing` namespaces. `market-proof-band.tsx`, the page, the hero
+ * and every other frozen artefact are untouched, which is the proof that this
+ * stayed two named corrections and did not become a landing edit.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
