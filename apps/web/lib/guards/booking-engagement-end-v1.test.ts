@@ -1221,6 +1221,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval sentence "Apply Lane A ownership 2026-09-04" pending — the
       // marker records the RED classification, not a granted approval.
       "20260904060000_owns_company_governance_membership_v1.sql",
+      // 2026-09-04, OWNER-APPROVED 2026-09-09 for this migration only: the
+      // first-party supply bridge — a new consent purpose, the
+      // partner_supply_representation declaration table, and six SECURITY
+      // DEFINER functions (first_party_supply_feed_v1 granted to service_role
+      // ONLY). RED by classification; the approval is recorded here, and a
+      // marker never reclassifies a file to GREEN.
+      "20260904120000_first_party_supply_representation_v1.sql",
       "20260905190000_public_plans_v1.sql", // 2026-09-05: public_plans_v1 — anon-safe price catalogue RPC (RED, owner-approved, APPLIED to prod 2026-09-05, #1548 merged)
       // 2026-09-05: billing safety invariants v1 (owner directive "BILLING
       // SAFETY — MANDATORY BEFORE REAL CUSTOMERS"). RED (billing): additive
@@ -1288,13 +1295,6 @@ describe("the migration set is exactly what this slice declared", () => {
       // before any insert. SELECT only on both; owner-approved and applied
       // via MCP apply_migration (#1566).
       "20260908070000_notification_recipient_discovery_service_role_select.sql",
-      // 2026-09-04, OWNER-APPROVED 2026-09-09 for this migration only: the
-      // first-party supply bridge — a new consent purpose, the
-      // partner_supply_representation declaration table, and six SECURITY
-      // DEFINER functions (first_party_supply_feed_v1 granted to service_role
-      // ONLY). RED by classification; the approval is recorded here, and a
-      // marker never reclassifies a file to GREEN.
-      "20260904120000_first_party_supply_representation_v1.sql",
 ]);
   });
 
