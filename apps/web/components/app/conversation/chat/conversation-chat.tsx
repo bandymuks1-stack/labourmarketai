@@ -348,6 +348,8 @@ export type ChatLabels = {
   workHoursChip: string;
   absencesChip: string;
   documentsChip: string;
+  /** The roster importer's own chip. It is not the documents centre. */
+  chipPeopleImport: string;
   marketMapChip: string;
   activityChip: string;
   writeEmployerHint: string;
@@ -2086,12 +2088,25 @@ export function ConversationChat({
           // where a file of names can actually complete: parse → preview →
           // resolve → confirm → commit → receipt. Work EVIDENCE about those
           // people is the neighbouring import on the same page.
+          //
+          // THE ROUTE WAS ALREADY RIGHT AND THE WORDS WERE WRONG. Both
+          // branches shared one sentence — which named the work-evidence
+          // import — and one chip label, `documentsChip` ("My documents").
+          // So a manager attaching a workforce list was told, twice, that
+          // they were going somewhere they were not. Two destinations, two
+          // sentences, two labels.
+          if (intent.kind === "workforce_table") {
+            assistant(t("fileOrgPeople"), [
+              {
+                id: "link:/dashboard/company#people-import-section",
+                label: labels.chipPeopleImport,
+              },
+            ]);
+            return;
+          }
           assistant(t("fileOrgEvidence"), [
             {
-              id:
-                intent.kind === "workforce_table"
-                  ? "link:/dashboard/company#people-import-section"
-                  : "link:/dashboard/company#evidence-import",
+              id: "link:/dashboard/company#evidence-import",
               label: labels.documentsChip,
             },
           ]);
@@ -2113,7 +2128,7 @@ export function ConversationChat({
         }
       }
     },
-    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, starterChips, t],
+    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, labels.chipPeopleImport, starterChips, t],
   );
 
   /**

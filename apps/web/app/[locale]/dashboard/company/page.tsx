@@ -19,6 +19,7 @@ import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
 import { PeopleImportPanel } from "@/components/app/people-import-panel";
+import { OrganizationRosterSection } from "@/components/app/organization-roster-section";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
@@ -1079,6 +1080,12 @@ export default async function CompanyDashboardPage({
           />
         </div>
       ) : null}
+
+      {/* THE ROSTER, READ BACK — directly under the panel that fills it.
+          Without this the import's only evidence was an in-memory receipt
+          that died on the next page load, so a manager could bring forty
+          people in and have no way to see that anything had happened. */}
+      {capabilityOrgId ? <OrganizationRosterSection locale={locale} /> : null}
 
       {/* Education institution (training_provider capability): participation
           state of its learners — connected count + the invitations it sent.

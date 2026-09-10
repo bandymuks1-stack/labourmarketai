@@ -112,6 +112,10 @@ const CHAT_KEYS = [
   "workHoursChip",
   "absencesChip",
   "documentsChip",
+  // The ROSTER importer is not the documents centre. Sharing one chip label
+  // told a manager attaching a workforce list that they were opening "My
+  // documents" - a different page for a different subject.
+  "chipPeopleImport",
   "marketMapChip",
   "activityChip",
   "writeEmployerHint",

@@ -12533,6 +12533,7 @@
       "workHoursChip": "Arbeitsstunden",
       "absencesChip": "Urlaub & Abwesenheit",
       "documentsChip": "Meine Dokumente",
+      "chipPeopleImport": "Personen einbringen",
       "marketMapChip": "Marktkarte",
       "activityChip": "Aktivität",
       "employerBridgeHint": "Das kannst du als dein Unternehmen einstellen — ich öffne das Bedarfsformular.",
@@ -12677,6 +12678,7 @@
       "fileSelfCv": "Verstanden: Ihr eigener Lebenslauf. Öffnen Sie den Lebenslauf-Import, dann gehen wir ihn gemeinsam Abschnitt für Abschnitt durch — nichts wird gespeichert, bevor Sie jeden Teil bestätigen.",
       "fileSelfDocument": "Verstanden: Ihr eigenes Dokument. Erfassen Sie es in Ihren Dokumenten und hängen Sie die Datei dort an.",
       "fileOrgEvidence": "Verstanden: Menschen Ihrer Organisation. Das läuft über den Arbeitsnachweis-Import: jede Person wird zugeordnet, Sie sehen eine Vorschau, und bei Unklarem wird nachgefragt — nichts wird geschrieben, bevor Sie bestätigen.",
+      "fileOrgPeople": "Verstanden: die Personen Ihrer Organisation. Das läuft über den Personenimport: Er liest die Namen, zeigt Ihnen eine Vorschau, fragt zu allen nach, die er nicht zuordnen kann, und schreibt nichts, bis Sie bestätigen. Es werden keine Konten angelegt.",
       "fileNeedsOrganization": "Das gehört zu einer Organisation, und Sie sind gerade in Ihrem persönlichen Bereich. Wechseln Sie zuerst zur Organisation, dann kann ich es dort annehmen.",
       "fileNotYetOther": "Verstanden: das ist das Dokument einer anderen Person, nicht Ihres. Ich habe es an nichts angehängt — und Dokumente einer anderen Person kann ich noch nicht annehmen. Deren eigenes Konto oder eine Einladung von Ihnen ist heute der einzige ehrliche Weg.",
       "fileNotYetCohort": "Verstanden: eine Liste von Lernenden. Ich habe sie nicht importiert — Lernende kommen heute über eine Einladung dazu, einen Dateiimport für eine Gruppe gibt es noch nicht.",
@@ -15489,6 +15491,7 @@
       "unlinkedNote": "Eine hier hinzugefügte Person ist ein Eintrag Ihrer Organisation. Es ist kein Konto und sagt nichts darüber aus, wer sie ist — die reale Person kann ihn später beanspruchen."
     },
     "relationship": {
+      "candidate": "Kandidat",
       "employee": "Beschäftigte Person",
       "former_employee": "Ehemals beschäftigte Person",
       "agency_worker": "Zeitarbeitskraft",
@@ -15601,6 +15604,31 @@
       "unnamedOrganization": "Eine Organisation"
     }
   },
+    "organizationRoster": {
+      "title": "Personen, die diese Organisation erfasst hat",
+      "intro": "Alle, die über einen Import hinzugekommen sind oder beim Abgleich einer Quelle ergänzt wurden. Das ist, was Ihre Organisation erfasst hat — es ist keine Liste von Plattformkonten.",
+      "actingFor": "Sie handeln für",
+      "count": "{count, plural, one {# Person} other {# Personen}} auf der Liste.",
+      "truncated": "Die ersten {limit} werden angezeigt.",
+      "empty": "Es steht noch niemand auf der Liste. Das Lesen hat funktioniert — die Liste ist wirklich leer.",
+      "emptyAction": "Bringen Sie Ihre Leute herein",
+      "meaning": "Ein Name hier bedeutet, dass Ihre Organisation für diese Person einsteht. Er bedeutet nicht, dass sie ein Konto hat, und nicht, dass sie irgendetwas zugestimmt hat.",
+      "linkState": {
+        "unlinked": "Kein Konto verknüpft",
+        "link_proposed": "Verknüpfung vorgeschlagen",
+        "linked": "Mit ihrem Konto verknüpft"
+      },
+      "context": {
+        "unauthenticated": "Melden Sie sich an, um die Personen dieser Organisation zu sehen.",
+        "personalWorkspace": "Sie sind in Ihrem persönlichen Bereich. Wechseln Sie zu einer Organisation, um ihre Personen zu sehen.",
+        "noOrganization": "Sie gehören noch zu keiner Organisation.",
+        "notAMember": "Sie sind kein Mitglied dieser Organisation.",
+        "chooseOrganization": "Sie verwalten mehr als eine Organisation. Wählen Sie, für welche Sie handeln.",
+        "notAuthorized": "Sie haben in dieser Organisation keine Rolle, die ihre Personen sehen darf.",
+        "needsMigration": "Der Personenspeicher ist in dieser Umgebung noch nicht aktiviert.",
+        "unavailable": "Die Personenliste konnte nicht gelesen werden. Das ist nicht dasselbe wie eine leere Liste — versuchen Sie es gleich erneut."
+      }
+    },
   "peopleImport": {
     "alreadyThere": "{count} stehen bereits auf Ihrer Liste",
     "ambiguousLead": "Diese Namen passen zu mehr als einer Person, die Sie bereits haben. Wir raten nicht.",

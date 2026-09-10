@@ -12533,6 +12533,7 @@
       "workHoursChip": "Darbo valandos",
       "absencesChip": "Atostogos ir nebuvimas",
       "documentsChip": "Mano dokumentai",
+      "chipPeopleImport": "Įkelti žmones",
       "marketMapChip": "Rinkos žemėlapis",
       "activityChip": "Veikla",
       "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą.",
@@ -12677,6 +12678,7 @@
       "fileSelfCv": "Supratau: jūsų pačių CV. Atidarykite CV įkėlimą — perskaitysiu jį kartu su jumis dalį po dalies; niekas neįrašoma, kol kiekvienos dalies nepatvirtinate.",
       "fileSelfDocument": "Supratau: jūsų pačių dokumentas. Užrašykite jį savo dokumentuose ir ten prisekite failą.",
       "fileOrgEvidence": "Supratau: jūsų organizacijos žmonės. Tai eina per atlikto darbo įrodymų įkėlimą: kiekvienas žmogus sugretinamas, parodoma peržiūra, o dėl neįvardytų paklausiama — niekas neįrašoma, kol nepatvirtinate.",
+      "fileOrgPeople": "Supratau: jūsų organizacijos žmonės. Tai eina per žmonių įkėlimą: jis perskaito vardus, parodo peržiūrą, paklausia apie tuos, kurių negali priskirti, ir nieko neįrašo, kol nepatvirtinsite. Paskyros nekuriamos.",
       "fileNeedsOrganization": "Tai priklauso organizacijai, o dabar esate asmeninėje erdvėje. Persijunkite į organizaciją — tada galėsiu tai priimti.",
       "fileNotYetOther": "Supratau: tai kito žmogaus dokumentas, ne jūsų. Nieko neprisegiau — ir kito žmogaus dokumentų kol kas priimti negaliu. Šiandien sąžiningas kelias yra jo paties paskyra arba jūsų kvietimas.",
       "fileNotYetCohort": "Supratau: besimokančiųjų sąrašas. Neįkėliau jo — šiandien besimokantieji prisijungia pagal kvietimą, o sąrašo įkėlimo iš failo dar nėra.",
@@ -15489,6 +15491,7 @@
       "unlinkedNote": "Čia pridėtas asmuo yra jūsų organizacijos įrašas. Tai nėra paskyra ir tai nieko neteigia apie tai, kas jis yra — tikrasis asmuo galės jį prisiimti vėliau."
     },
     "relationship": {
+      "candidate": "Kandidatas",
       "employee": "Darbuotojas",
       "former_employee": "Buvęs darbuotojas",
       "agency_worker": "Agentūros darbuotojas",
@@ -15601,6 +15604,31 @@
       "unnamedOrganization": "Organizacija"
     }
   },
+    "organizationRoster": {
+      "title": "Žmonės, kuriuos ši organizacija užrašė",
+      "intro": "Visi, kurie pateko per įkėlimą arba buvo pridėti gretinant šaltinį. Tai, ką užrašė jūsų organizacija — tai nėra platformos paskyrų sąrašas.",
+      "actingFor": "Veikiate kaip",
+      "count": "Sąraše {count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}.",
+      "truncated": "Rodomi pirmieji {limit}.",
+      "empty": "Sąraše kol kas nieko nėra. Skaitymas pavyko — sąrašas tikrai tuščias.",
+      "emptyAction": "Įkelkite savo žmones",
+      "meaning": "Vardas čia reiškia, kad jūsų organizacija už tą žmogų laiduoja. Tai nereiškia, kad jis turi paskyrą, ir nereiškia, kad jis dėl ko nors sutiko.",
+      "linkState": {
+        "unlinked": "Paskyra nesusieta",
+        "link_proposed": "Pasiūlyta susieti",
+        "linked": "Susieta su jo paskyra"
+      },
+      "context": {
+        "unauthenticated": "Prisijunkite, kad matytumėte šios organizacijos žmones.",
+        "personalWorkspace": "Esate savo asmeninėje erdvėje. Perjunkite į organizaciją, kad matytumėte jos žmones.",
+        "noOrganization": "Kol kas nepriklausote jokiai organizacijai.",
+        "notAMember": "Nesate tos organizacijos narys.",
+        "chooseOrganization": "Valdote daugiau nei vieną organizaciją. Pasirinkite, kurios vardu veikiate.",
+        "notAuthorized": "Šioje organizacijoje neturite vaidmens, leidžiančio matyti jos žmones.",
+        "needsMigration": "Žmonių saugykla šioje aplinkoje dar neįjungta.",
+        "unavailable": "Žmonių sąrašo nepavyko perskaityti. Tai nėra tas pat, kas tuščias sąrašas — pabandykite netrukus."
+      }
+    },
   "peopleImport": {
     "alreadyThere": "Jau yra jūsų sąraše: {count}",
     "ambiguousLead": "Šie vardai atitinka daugiau nei vieną jūsų turimą žmogų. Spėlioti nežaisime.",
