@@ -130,7 +130,7 @@ describe("Guard: confirmed-proof rows are role-only (no confirmer identity)", ()
     );
     // The unqualified row is the defect; the hint is what makes it honest.
     expect(page).toMatch(/d\.reviewerVerified \? null : \(/);
-    expect(page).toContain('t("documentUnverifiedHint")');
+    expect(page).toContain('t("documentSelfSuppliedHint")');
   });
 });
 

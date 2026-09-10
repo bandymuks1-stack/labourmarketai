@@ -580,7 +580,7 @@ export default async function VerifiedCvPage({
                       claimed a review that may never have happened. */}
                   {d.reviewerVerified ? null : (
                     <span className="text-meta uppercase tracking-wide text-text-muted">
-                      {t("documentUnverifiedHint")}
+                      {t("documentSelfSuppliedHint")}
                     </span>
                   )}
                 </li>
