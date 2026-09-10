@@ -2488,7 +2488,10 @@ describe("no migration files added by this sprint", () => {
     // RED class; owner approval given 2026-09-09 for THIS migration only.
     // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
     // = 277 files.
-const SPRINT_BASELINE = 278;
+    // 278 -> 279: `candidate` added to organization_people.relationship_kind
+    //   (owner approval 2026-09-10). ONE additive CHECK widening — a strict
+    //   superset, 0 rows in the table, no policy/grant/function touched.
+const SPRINT_BASELINE = 279;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

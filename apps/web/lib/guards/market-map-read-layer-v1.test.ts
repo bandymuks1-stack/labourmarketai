@@ -903,7 +903,10 @@ describe("NO new DB migration in this PR", () => {
     // RED class; owner approval given 2026-09-09 for THIS migration only.
     // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
     // = 277 files.
-expect(count).toBeLessThanOrEqual(278);
+    // 278 -> 279: `candidate` added to organization_people.relationship_kind
+    //   (owner approval 2026-09-10). ONE additive CHECK widening — a strict
+    //   superset, 0 rows in the table, no policy/grant/function touched.
+expect(count).toBeLessThanOrEqual(279);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
