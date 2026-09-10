@@ -58,6 +58,7 @@ import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
+import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { loadDocumentFileTargetForChat } from "@/lib/conversation/document-file-chat";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
@@ -1513,6 +1514,90 @@ export function ConversationChat({
    * It still runs right after a work log lands, so the person sees their card
    * grow the moment their record changed — the card is simply in the panel.
    */
+  /**
+   * "Noriu pamatyti savo CV" — ANSWERED FROM THE REAL RECORD.
+   *
+   * The previous handler asserted "Here is your CV — what the system knows
+   * about you today" as a CONSTANT: it read nothing, so for a person with no
+   * CV the product's first sentence about their working life was false, and
+   * for a person WITH one the fallback chips offered to upload it again. That
+   * is the defect the owner walked into — the product offering to CREATE what
+   * it never checked whether it already HAS.
+   *
+   * Three things change, and only these three:
+   *
+   *  1. IT READS FIRST. `readMyCvState` calls the SAME builder the printed CV
+   *     page renders from (`buildVerifiedCv`), so the chat can never disagree
+   *     with the document. No second CV reader, no second CV truth.
+   *
+   *  2. A FAILED READ IS NOT AN EMPTY CV (SEP-7). `unreadable` gets its own
+   *     sentence that says the fault is ours. Rendering a failed read as an
+   *     empty record is the class the 2026-09-09 honesty sweep closed
+   *     elsewhere; it is not being re-introduced here.
+   *
+   *  3. THE CV BELONGS TO THE HUMAN, NOT TO THE ACTIVE WORKSPACE (SEP-5,
+   *     IDENTITY != ROLE). The old gate was `identity === "person"`, so the
+   *     same person sitting in their company workspace was refused their own
+   *     CV and dropped into the generic fallback. `identity` is the ACTIVE
+   *     WORKSPACE, never who the person is — the file header two thousand
+   *     lines up says exactly that about `canActAsEmployer`. A person with no
+   *     personal work record still gets an honest, specific answer
+   *     (`not_a_worker`), which is why removing the gate cannot invent a CV
+   *     for a company-only account.
+   *
+   * Read-only. Nothing here writes, dispatches or confirms.
+   */
+  const startCvState = useCallback(() => {
+    setTyping(true);
+    readMyCvState()
+      .then((state) => {
+        setTyping(false);
+        const openCv = { id: "link:/cv", label: labels.chipCvSheet };
+        const openProfile = { id: "profile", label: labels.chipProfile };
+        const importCv = { id: "cv", label: labels.chipCv };
+        switch (state.presence) {
+          case "substantive":
+            assistant(
+              t("cvStateSubstantive", {
+                work: state.workHistory,
+                skills: state.skills,
+                confirmed: state.confirmedSkills,
+                proof: state.confirmedProof,
+              }),
+              [openCv, openProfile],
+            );
+            return;
+          case "started":
+            assistant(
+              t("cvStateStarted", {
+                skills: state.skills,
+                education: state.education,
+                certificates: state.certificates,
+                languages: state.languages,
+              }),
+              [openCv, openProfile],
+            );
+            return;
+          case "empty":
+            // The ONLY branch where offering to build one is honest.
+            assistant(t("cvStateEmpty"), [importCv, openProfile]);
+            return;
+          case "not_a_worker":
+            assistant(t("cvStateNotWorker"), [openProfile]);
+            return;
+          default:
+            // `unreadable` and `unauthenticated`: our failure, said plainly,
+            // and deliberately WITHOUT an import chip — we have not
+            // established that there is nothing to import.
+            assistant(t("cvStateUnreadable"));
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("cvStateUnreadable"));
+      });
+  }, [assistant, labels.chipCv, labels.chipCvSheet, labels.chipProfile, t]);
+
   const startPlayerCard = useCallback(
     (opts?: { intro?: string }) => {
       assistant(opts?.intro ?? labels.playerCardOpened);
@@ -5190,10 +5275,10 @@ export function ConversationChat({
         // Before this it reached `cvChip` and opened the import: the person
         // asked to see what the product holds and was told to upload it
         // (owner window 11 §30, the exact production journey).
-        cvView: () =>
-          identity === "person"
-            ? assistant(labels.cvViewHint, [{ id: "link:/cv", label: labels.chipCvSheet }])
-            : assistant(fallbackText, starterChips),
+        //
+        // It now READS the record before saying anything about it, for the
+        // person whatever workspace they are sitting in — see `startCvState`.
+        cvView: () => startCvState(),
         // The sentence named the CV and stopped. Three real doors, no guess
         // and no write — owner §5: "If uncertain, ask." The third door is the
         // profile because the CV is DERIVED from it: "pakeisk mano CV" has no
@@ -5241,7 +5326,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**

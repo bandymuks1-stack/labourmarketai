@@ -157,6 +157,25 @@ describe("the CV domain has exactly one write door", () => {
   });
 });
 
+/** The body of the `startCvState` handler — the CV read's whole answer. */
+function cvStateBody(chat: string): string {
+  const start = chat.indexOf("const startCvState = useCallback");
+  expect(start, "startCvState must exist").toBeGreaterThan(-1);
+  const end = chat.indexOf("const startPlayerCard", start);
+  expect(end, "startCvState must be followed by startPlayerCard").toBeGreaterThan(start);
+  return chat.slice(start, end);
+}
+
+/** One `case "<name>":` arm of the presence switch inside `startCvState`. */
+function cvStateBranch(chat: string, name: string): string {
+  const body = cvStateBody(chat);
+  const start = body.indexOf(`case "${name}":`);
+  expect(start, `startCvState must answer the ${name} state`).toBeGreaterThan(-1);
+  const rest = body.slice(start + 1);
+  const nextCase = rest.search(/\n\s+(case "|default:)/);
+  return nextCase === -1 ? rest : rest.slice(0, nextCase);
+}
+
 describe("the three doors the ambiguous answer offers are real", () => {
   const CHAT = readFileSync(
     join(APP_ROOT, "components", "app", "conversation", "chat", "conversation-chat.tsx"),
@@ -170,8 +189,20 @@ describe("the three doors the ambiguous answer offers are real", () => {
   it("cvView hands over the CV sheet, and cvChoose hands over all three doors", () => {
     // Anchored on the handler bodies rather than on copy, so rewording the
     // question never silently drops a door.
+    //
+    // RE-ANCHORED (takeover 2026-09-10): `cvView` no longer answers inline. It
+    // delegates to `startCvState`, which READS the person's record before
+    // saying anything about it — the old handler asserted "here is your CV"
+    // as a constant, which was false for anyone who had none. The door it must
+    // hand over is unchanged, so this check MOVED to where the door now lives
+    // instead of being dropped.
     const view = CHAT.slice(CHAT.indexOf("cvView: () =>"), CHAT.indexOf("cvChoose: () =>"));
-    expect(view).toMatch(/link:\/cv/);
+    expect(view, "the CV read must delegate to the state-reading handler").toMatch(
+      /startCvState\(\)/,
+    );
+    expect(cvStateBody(CHAT), "the read must still hand over the CV sheet").toMatch(
+      /link:\/cv/,
+    );
     const choose = CHAT.slice(CHAT.indexOf("cvChoose: () =>"));
     const body = choose.slice(0, choose.indexOf("reminderBlocked"));
     expect(body, "the ask must offer the CV itself").toMatch(/link:\/cv/);
@@ -186,5 +217,90 @@ describe("the three doors the ambiguous answer offers are real", () => {
     const body = choose.slice(0, choose.indexOf("reminderBlocked"));
     // No flow started, no embed pushed — only an assistant message with chips.
     expect(body).not.toMatch(/pushEmbed|WorkerCvFlow|handleChip\(/);
+  });
+});
+
+/**
+ * THE CV READ ANSWERS FROM THE RECORD, NEVER FROM A CONSTANT.
+ *
+ * Added by the 2026-09-10 takeover. The handler this pins replaced one that
+ * asserted "Here is your CV — what the system knows about you today" without
+ * reading anything: false for a person with no CV, and — because the old gate
+ * was `identity === "person"` — unreachable for the same human sitting in
+ * their company workspace, who was dropped into a fallback offering to UPLOAD
+ * the CV they already had.
+ *
+ * Three invariants, each of which the old code violated.
+ */
+describe("a CV read answers from the person's real record", () => {
+  const CHAT = readFileSync(
+    join(APP_ROOT, "components", "app", "conversation", "chat", "conversation-chat.tsx"),
+    "utf8",
+  );
+
+  it("it READS before it answers, through the one canonical CV reader", () => {
+    expect(cvStateBody(CHAT), "the answer must come from a read").toMatch(
+      /readMyCvState\(\)/,
+    );
+    // And that reader must be the one that wraps `buildVerifiedCv` — the same
+    // builder the printed CV renders from. A second CV reader would let the
+    // chat and the document disagree about the same person.
+    const server = readFileSync(
+      join(APP_ROOT, "lib", "conversation", "cv-state-server.ts"),
+      "utf8",
+    );
+    expect(server).toMatch(/buildVerifiedCv/);
+  });
+
+  it("ONLY the empty branch offers to build a CV", () => {
+    // The whole defect in one line: offering to create what we never checked
+    // whether the person already has.
+    expect(cvStateBranch(CHAT, "empty"), "an empty record may offer the import").toMatch(
+      /importCv/,
+    );
+    for (const present of ["substantive", "started"]) {
+      expect(
+        cvStateBranch(CHAT, present),
+        `a person who HAS a CV must never be offered the import (${present})`,
+      ).not.toMatch(/importCv/);
+    }
+  });
+
+  it("a failed read is never rendered as an empty CV (SEP-7)", () => {
+    const body = cvStateBody(CHAT);
+    // The four zero-row situations must reach four different sentences.
+    for (const key of [
+      "cvStateEmpty",
+      "cvStateNotWorker",
+      "cvStateUnreadable",
+      "cvStateSubstantive",
+    ]) {
+      expect(body, `${key} must be a distinct answer`).toMatch(new RegExp(key));
+    }
+    // The `default:` arm is the unreadable/unauthenticated answer. Asserting
+    // only that `cvStateUnreadable` appears SOMEWHERE in the handler is an
+    // assertion that cannot fail — the `.catch()` also uses it, so collapsing
+    // this arm into the empty answer would still pass. Negative-controlled
+    // 2026-09-10: this is checked on the arm itself.
+    const tail = body.slice(body.indexOf("default:"), body.indexOf(".catch("));
+    expect(tail, "an unreadable read must say so").toMatch(/cvStateUnreadable/);
+    expect(
+      tail,
+      "a failed read must never be answered as an empty CV (SEP-7)",
+    ).not.toMatch(/cvStateEmpty/);
+    // …and it must NOT offer the import: we have not established that there
+    // is nothing to import.
+    expect(tail, "an unreadable read must not offer to build a CV").not.toMatch(
+      /importCv/,
+    );
+  });
+
+  it("the CV belongs to the human, not to the active workspace (SEP-5)", () => {
+    const view = CHAT.slice(CHAT.indexOf("cvView: () =>"), CHAT.indexOf("cvChoose: () =>"));
+    // `identity` is the ACTIVE WORKSPACE. Gating a person's own CV on it is
+    // what refused the CV to a person sitting in their company space.
+    expect(view, "the CV read must not be gated on the active workspace").not.toMatch(
+      /identity === "person"/,
+    );
   });
 });
