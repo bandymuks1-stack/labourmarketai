@@ -12533,6 +12533,7 @@
       "workHoursChip": "Work hours",
       "absencesChip": "Leave & absence",
       "documentsChip": "My documents",
+      "chipPeopleImport": "Bring people in",
       "marketMapChip": "Market map",
       "activityChip": "Activity",
       "employerBridgeHint": "You can post this as your company — I will open the need form.",
@@ -12677,6 +12678,7 @@
       "fileSelfCv": "Understood: your own CV. Open the CV import and I will read it with you, section by section — nothing is saved until you confirm each part.",
       "fileSelfDocument": "Understood: your own document. Record it in your documents and attach the file there.",
       "fileOrgEvidence": "Understood: your organisation's people. That goes through the work-evidence import, which matches each person, shows you a preview and asks about anything it cannot place — nothing is written until you commit it.",
+      "fileOrgPeople": "Understood: your organisation's people. That goes through the people import, which reads the names, shows you a preview, asks about anyone it cannot place, and writes nothing until you confirm. It creates no accounts.",
       "fileNeedsOrganization": "That belongs to an organisation, and you are in your personal space right now. Switch to the organisation first and I can take it there.",
       "fileNotYetOther": "Understood: this is another person's document, not yours. I have not attached it to anything — and I cannot take another person's documents yet. Their own account, or an invitation from you, is the only honest route today.",
       "fileNotYetCohort": "Understood: a list of learners. I have not imported it — learners join by invitation today, and there is no file import for a cohort yet.",
@@ -15489,6 +15491,7 @@
       "unlinkedNote": "A person added here is a record your organization keeps. It is not an account and claims nothing about who they are — the real person can claim it later."
     },
     "relationship": {
+      "candidate": "Candidate",
       "employee": "Employee",
       "former_employee": "Former employee",
       "agency_worker": "Agency worker",
@@ -15601,6 +15604,31 @@
       "unnamedOrganization": "An organization"
     }
   },
+    "organizationRoster": {
+      "title": "People this organisation has recorded",
+      "intro": "Everyone brought in through an import or added while matching a source. This is what your organisation recorded — it is not a list of platform accounts.",
+      "actingFor": "Acting for",
+      "count": "{count, plural, one {# person} other {# people}} on the roster.",
+      "truncated": "Showing the first {limit}.",
+      "empty": "Nobody is on the roster yet. The read worked — the roster really is empty.",
+      "emptyAction": "Bring your people in",
+      "meaning": "A name here means your organisation vouches for that person. It does not mean they have an account, and it does not mean they have agreed to anything.",
+      "linkState": {
+        "unlinked": "No account linked",
+        "link_proposed": "Link proposed",
+        "linked": "Linked to their account"
+      },
+      "context": {
+        "unauthenticated": "Sign in to see this organisation's people.",
+        "personalWorkspace": "You are in your personal space. Switch to an organisation to see its people.",
+        "noOrganization": "You do not belong to an organisation yet.",
+        "notAMember": "You are not a member of that organisation.",
+        "chooseOrganization": "You manage more than one organisation. Choose which one you are acting for.",
+        "notAuthorized": "You do not have a role in this organisation that may see its people.",
+        "needsMigration": "The people store is not enabled in this environment yet.",
+        "unavailable": "The people list could not be read. This is not the same as an empty roster — try again shortly."
+      }
+    },
   "peopleImport": {
     "alreadyThere": "{count} are already on your list",
     "ambiguousLead": "These names match more than one person you already have. We will not guess.",

@@ -12533,6 +12533,7 @@
       "workHoursChip": "Gewerkte uren",
       "absencesChip": "Verlof & afwezigheid",
       "documentsChip": "Mijn documenten",
+      "chipPeopleImport": "Mensen toevoegen",
       "marketMapChip": "Marktkaart",
       "activityChip": "Activiteit",
       "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier.",
@@ -12677,6 +12678,7 @@
       "fileSelfCv": "Begrepen: je eigen cv. Open de cv-import, dan lezen we het samen door, deel voor deel — er wordt niets opgeslagen tot je elk deel bevestigt.",
       "fileSelfDocument": "Begrepen: je eigen document. Leg het vast in je documenten en voeg het bestand daar toe.",
       "fileOrgEvidence": "Begrepen: mensen van je organisatie. Dat gaat via de werkbewijs-import: elke persoon wordt gematcht, je krijgt een voorbeeld te zien en over wat niet te plaatsen is wordt gevraagd — er wordt niets weggeschreven tot jij bevestigt.",
+      "fileOrgPeople": "Begrepen: de mensen van uw organisatie. Dat gaat via de personenimport: die leest de namen, toont u een voorbeeld, vraagt naar iedereen die niet te plaatsen is, en schrijft niets tot u bevestigt. Er worden geen accounts aangemaakt.",
       "fileNeedsOrganization": "Dat hoort bij een organisatie en je zit nu in je persoonlijke ruimte. Schakel eerst over naar de organisatie, dan kan ik het daar aannemen.",
       "fileNotYetOther": "Begrepen: dit is het document van iemand anders, niet van jou. Ik heb het nergens aan gekoppeld — en documenten van iemand anders kan ik nog niet aannemen. Hun eigen account of een uitnodiging van jou is vandaag de enige eerlijke weg.",
       "fileNotYetCohort": "Begrepen: een lijst met studenten. Ik heb hem niet geïmporteerd — studenten sluiten zich vandaag aan via een uitnodiging, en een bestandsimport voor een groep bestaat nog niet.",
@@ -15489,6 +15491,7 @@
       "unlinkedNote": "Een hier toegevoegde persoon is een registratie van uw organisatie. Het is geen account en zegt niets over wie hij is — de echte persoon kan hem later opeisen."
     },
     "relationship": {
+      "candidate": "Kandidaat",
       "employee": "Werknemer",
       "former_employee": "Voormalig werknemer",
       "agency_worker": "Uitzendkracht",
@@ -15601,6 +15604,31 @@
       "unnamedOrganization": "Een organisatie"
     }
   },
+    "organizationRoster": {
+      "title": "Mensen die deze organisatie heeft vastgelegd",
+      "intro": "Iedereen die via een import binnenkwam of is toegevoegd bij het matchen van een bron. Dit is wat uw organisatie heeft vastgelegd — het is geen lijst met platformaccounts.",
+      "actingFor": "U handelt namens",
+      "count": "{count, plural, one {# persoon} other {# personen}} op de lijst.",
+      "truncated": "De eerste {limit} worden getoond.",
+      "empty": "Er staat nog niemand op de lijst. Het lezen is gelukt — de lijst is echt leeg.",
+      "emptyAction": "Breng uw mensen binnen",
+      "meaning": "Een naam hier betekent dat uw organisatie voor die persoon instaat. Het betekent niet dat zij een account hebben, en niet dat zij ergens mee hebben ingestemd.",
+      "linkState": {
+        "unlinked": "Geen account gekoppeld",
+        "link_proposed": "Koppeling voorgesteld",
+        "linked": "Gekoppeld aan hun account"
+      },
+      "context": {
+        "unauthenticated": "Meld u aan om de mensen van deze organisatie te zien.",
+        "personalWorkspace": "U bent in uw persoonlijke ruimte. Schakel naar een organisatie om haar mensen te zien.",
+        "noOrganization": "U hoort nog bij geen enkele organisatie.",
+        "notAMember": "U bent geen lid van die organisatie.",
+        "chooseOrganization": "U beheert meer dan één organisatie. Kies namens welke u handelt.",
+        "notAuthorized": "U hebt in deze organisatie geen rol die haar mensen mag zien.",
+        "needsMigration": "De personenopslag is in deze omgeving nog niet ingeschakeld.",
+        "unavailable": "De lijst met mensen kon niet worden gelezen. Dat is iets anders dan een lege lijst — probeer het zo meteen opnieuw."
+      }
+    },
   "peopleImport": {
     "alreadyThere": "{count} staan al op je lijst",
     "ambiguousLead": "Deze namen passen bij meer dan één persoon die je al hebt. Wij gokken niet.",
