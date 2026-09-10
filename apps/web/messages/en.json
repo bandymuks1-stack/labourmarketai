@@ -7804,6 +7804,7 @@
     "languagesSelfStated": "Languages as stated by the worker.",
     "certificatesTitle": "Certificates & licences",
     "declaredCertHint": "Listed by the worker",
+    "documentSelfSuppliedHint": "Document supplied by the worker",
     "validUntil": "Valid until",
     "drivingLicences": "Driving licence categories",
     "educationTitle": "Education",
@@ -15581,8 +15582,9 @@
       "too_many_rows": "That is more rows than one import can hold. Split the source, for example by year.",
       "no_source_supplied": "No file and no pasted rows — there is nothing to read.",
       "file_too_large": "That file is too large to read here.",
-      "file_unreadable": "That file could not be read as text.",
+      "file_unreadable": "That file could not be read. Supported: .xlsx, .xlsm, .csv, .tsv, .txt.",
       "nothing_parsed": "No usable row was found. The source needs a header row naming at least a person and a date.",
+      "month_not_stated": "That timesheet does not say which month it covers, so every date would be a guess. Write the month on the sheet - for example “2026-05” in a heading - and upload it again.",
       "confirmation_rejected": "This import changed after you looked at it, so it was not recorded. Read it again and approve the new version.",
       "confirmation_unavailable": "Approvals cannot be signed in this environment, so nothing was recorded."
     },

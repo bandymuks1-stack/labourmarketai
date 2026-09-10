@@ -7804,6 +7804,7 @@
     "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",
     "certificatesTitle": "Sertifikatai ir pažymėjimai",
     "declaredCertHint": "Nurodyta pačių",
+    "documentSelfSuppliedHint": "Dokumentą pateikė pats darbuotojas",
     "validUntil": "Galioja iki",
     "drivingLicences": "Vairuotojo pažymėjimo kategorijos",
     "educationTitle": "Išsilavinimas",
@@ -15581,8 +15582,9 @@
       "too_many_rows": "Tai daugiau eilučių, nei telpa į vieną importą. Padalykite šaltinį, pavyzdžiui, pagal metus.",
       "no_source_supplied": "Nėra nei failo, nei įklijuotų eilučių — nėra ko skaityti.",
       "file_too_large": "Šis failas per didelis, kad būtų perskaitytas čia.",
-      "file_unreadable": "Šio failo nepavyko perskaityti kaip teksto.",
+      "file_unreadable": "Šio failo nepavyko perskaityti. Tinka: .xlsx, .xlsm, .csv, .tsv, .txt.",
       "nothing_parsed": "Nerasta nė vienos tinkamos eilutės. Šaltinyje reikia antraštės eilutės, nurodančios bent asmenį ir datą.",
+      "month_not_stated": "Šiame darbo laiko žiniaraštyje neparodyta, kurio mėnesio jis yra, todėl kiekviena data būtų spėjimas. Įrašykite mėnesį lape – pavyzdžiui, „2026-05“ antraštėje – ir įkelkite iš naujo.",
       "confirmation_rejected": "Šis importas pasikeitė po to, kai jį peržiūrėjote, todėl nebuvo užfiksuotas. Peržiūrėkite iš naujo ir patvirtinkite naują versiją.",
       "confirmation_unavailable": "Šioje aplinkoje patvirtinimų pasirašyti negalima, todėl nieko neužfiksuota."
     },

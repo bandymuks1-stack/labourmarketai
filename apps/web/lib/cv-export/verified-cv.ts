@@ -255,7 +255,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       tolerant(
         sb
           .from("worker_documents")
-          .select("document_type_slug, country, status, valid_until")
+          .select("document_type_slug, country, status, verification, valid_until")
           .eq("worker_id", workerId),
       ),
       tolerant(
@@ -533,12 +533,16 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         document_type_slug: string;
         country: string | null;
         status: string;
+        verification: string | null;
         valid_until: string | null;
       }>
     ).map((d) => ({
       documentTypeSlug: d.document_type_slug,
       country: d.country,
       storedStatus: d.status,
+      // A row predating the column, or a tolerated read that lost it, is
+      // UNVERIFIED - never silently promoted to verified.
+      verification: d.verification ?? "unverified",
       validUntil: d.valid_until,
     })),
     new Date(),
