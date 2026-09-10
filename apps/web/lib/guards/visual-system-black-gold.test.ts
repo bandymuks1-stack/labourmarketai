@@ -445,3 +445,79 @@ describe("the LM mark is the owner's original geometry", () => {
     expect(source).toContain("158.18,123.09 89.02,123.09 89.02,533.46");
   });
 });
+
+/**
+ * THE BRAND REACHES EXTERNAL CLIENTS TOO.
+ *
+ * The LabourMarket.ai app inside ChatGPT was showing a generic letter avatar,
+ * because the MCP server declared a bare machine name and no identity. That is
+ * the host's fallback, not our mark. The server now declares the CANONICAL
+ * asset — the same files these tests already pin to the owner's original
+ * geometry — so a host that renders a server-supplied icon renders ours.
+ *
+ * What this cannot do, and does not pretend to: whether a given host actually
+ * uses a server-declared icon is the HOST's decision. This guard proves we
+ * declare the right asset, never that ChatGPT drew it.
+ */
+describe("the ChatGPT / MCP surface carries the canonical brand", () => {
+  const MCP_ROUTE = read("app/api/mcp/route.ts");
+
+  it("declares the canonical mark, not a new or placeholder one", () => {
+    expect(MCP_ROUTE, "the MCP server declares no identity").toContain("title:");
+    expect(MCP_ROUTE).toContain("LabourMarket.ai");
+    expect(MCP_ROUTE).toContain("icons");
+    // The EXACT canonical assets, both of which the geometry guard above pins
+    // to the owner's original vector.
+    expect(MCP_ROUTE).toContain("/brand/lm-mark.svg");
+    expect(MCP_ROUTE).toContain("/app-icon.svg");
+  });
+
+  it("introduces no second logo asset for the integration to use", () => {
+    // A "ChatGPT-sized" copy is how a brand quietly forks. Every mark the
+    // product serves is one of these, and each is checked above for the
+    // owner's untouched geometry.
+    const CANONICAL_MARKS = new Set([
+      "lm-mark.svg",
+      "app-icon.svg",
+      "icon.svg",
+      "favicon.ico",
+      "logo-mark.svg", // the explicitly-labelled placeholder set
+    ]);
+    const svgsIn = (dir: string): string[] => {
+      try {
+        return readdirSync(join(APP_ROOT, dir), { withFileTypes: true })
+          .filter((e) => e.isFile())
+          .map((e) => e.name)
+          .filter((n) => /\.(svg|ico|png)$/i.test(n));
+      } catch {
+        return [];
+      }
+    };
+    for (const dir of ["public/brand", "public", "app"]) {
+      for (const file of svgsIn(dir)) {
+        expect(
+          CANONICAL_MARKS.has(file) || !/logo|mark|icon|brand/i.test(file),
+          `${dir}/${file} looks like a second logo asset — the ChatGPT app must ` +
+            "reuse the canonical mark, never a new or resized copy of it",
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("the declared icon paths resolve to real assets carrying the original geometry", () => {
+    // A declared URL that 404s brands nothing. Both paths must exist AND be
+    // the owner's mark — a broken or substituted asset fails here, not in a
+    // screenshot somebody takes weeks later.
+    for (const [declared, onDisk] of [
+      ["/brand/lm-mark.svg", "public/brand/lm-mark.svg"],
+      ["/app-icon.svg", "public/app-icon.svg"],
+    ] as const) {
+      expect(MCP_ROUTE, `${declared} is not declared`).toContain(declared);
+      const src = read(onDisk);
+      expect(src, `${onDisk}: the original LM geometry`).toContain(
+        "158.18,123.09 89.02,123.09 89.02,533.46",
+      );
+      expect(src, `${onDisk}: the ".ai" dot`).toMatch(/cx="614\.05"/);
+    }
+  });
+});

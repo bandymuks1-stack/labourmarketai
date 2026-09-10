@@ -35,6 +35,12 @@ const read = (rel: string): string =>
 const CORE = read("lib/organization-people/ingest-core.ts");
 const SOURCES = read("lib/organization-people/ingest-sources.ts");
 const ACTIONS = read("lib/organization-people/ingest-actions.ts");
+/** The SHARED domain service both transports call. The preview/commit
+ *  implementation lives here, so the invariants about writing live here too. */
+const SERVICE = read("lib/organization-people/ingest-service.ts");
+/** The assistant/MCP transport over that same service. */
+const CAPS = read("lib/capabilities/people-ingest-capabilities.ts");
+const FILE_READER = read("lib/organization-people/ingest-file.ts");
 const WRITER = read("lib/organization-evidence/import-core.ts");
 
 const code = (src: string): string =>
@@ -82,7 +88,7 @@ describe("no second people subsystem", () => {
     ];
     for (const c of columns) {
       expect(single, `${c} missing from the one-person writer`).toContain(c);
-      expect(ACTIONS, `${c} missing from the batch writer`).toContain(c);
+      expect(SERVICE, `${c} missing from the batch writer`).toContain(c);
     }
   });
 });
@@ -147,16 +153,18 @@ describe("a person is never invented", () => {
 describe("governance and accounts are untouched", () => {
   it("nothing here writes memberships, profiles or auth users", () => {
     for (const forbidden of ["company_memberships", "auth.users", "from(\"profiles\")", "signUp", "admin.createUser"]) {
-      expect(code(ACTIONS), `${forbidden} in the people ingestion path`).not.toContain(forbidden);
+      for (const [label, src] of [["actions", ACTIONS], ["service", SERVICE], ["capabilities", CAPS]] as const) {
+        expect(code(src), `${forbidden} in the people ingestion path (${label})`).not.toContain(forbidden);
+      }
       expect(code(CORE), `${forbidden} in the ingestion core`).not.toContain(forbidden);
     }
   });
 
   it("every row starts UNLINKED — recording a person is not their consent", () => {
-    expect(ACTIONS).toMatch(/link_state:\s*"unlinked"/);
+    expect(SERVICE).toMatch(/link_state:\s*"unlinked"/);
     // …and nothing here advances the lifecycle on the person's behalf.
     for (const forbidden of ["link_proposed", "\"linked\"", "linked_profile_id", "linked_worker_id"]) {
-      expect(code(ACTIONS), `${forbidden} written by an import`).not.toContain(forbidden);
+      expect(code(SERVICE), `${forbidden} written by an import`).not.toContain(forbidden);
     }
   });
 
@@ -169,14 +177,34 @@ describe("governance and accounts are untouched", () => {
 
 describe("authorization is reused, never re-invented", () => {
   it("the organization comes from the caller's own memberships", () => {
+    expect(SERVICE).toContain("resolveEvidenceOrganization");
     expect(ACTIONS).toContain("resolveEvidenceOrganization");
-    // The client may not name an organization: no id is accepted as input.
-    expect(ACTIONS).not.toMatch(/organizationId:\s*string;?\s*\n\s*}\): Promise<IngestPreview/);
+
+    // An organization id a client supplies is a SELECTOR among the caller's
+    // OWN memberships, never a grant: it may only ever reach the resolver,
+    // which validates it against those memberships. The write must therefore
+    // use the RESOLVED id — a client that names a target it does not belong
+    // to gets that target's options back, not that target's roster.
+    expect(SERVICE, "the requested id must go through the resolver").toMatch(
+      /resolveEvidenceOrganization\(\s*caller,\s*organizationId/,
+    );
+    expect(SERVICE, "the insert must use the RESOLVED organization id").toMatch(
+      /organization_id:\s*org\.id/,
+    );
+    expect(
+      SERVICE,
+      "a client-supplied organization id must never be written directly",
+    ).not.toMatch(/organization_id:\s*input\.organizationId/);
   });
 
   it("the caller is re-derived on every action — server actions are endpoints", () => {
     expect(ACTIONS).toContain("supabase.auth.getUser()");
     expect(ACTIONS).toMatch(/not-authorized/);
+    // The service authenticates NOBODY: it takes an already-authenticated
+    // caller. A transport that forgot to establish one cannot slip through.
+    expect(code(SERVICE), "the shared service must not derive identity").not.toContain(
+      "auth.getUser",
+    );
   });
 
   it("a missing migration is NOT reported as a generic failure", () => {
@@ -186,9 +214,9 @@ describe("authorization is reused, never re-invented", () => {
     // SCOPED TO THE BRANCH. An earlier draft asserted the identifier appeared
     // anywhere in the file and stayed GREEN when the actual test was replaced
     // with `false` — the import line alone satisfied it.
-    const branch = ACTIONS.slice(
-      ACTIONS.indexOf("code === CHECK_VIOLATION"),
-      ACTIONS.indexOf("return { kind: \"error\" };", ACTIONS.indexOf("code === CHECK_VIOLATION")),
+    const branch = SERVICE.slice(
+      SERVICE.indexOf("code === CHECK_VIOLATION"),
+      SERVICE.indexOf("return { kind: \"error\" };", SERVICE.indexOf("code === CHECK_VIOLATION")),
     );
     expect(branch.length, "the CHECK-violation branch is missing").toBeGreaterThan(20);
     expect(branch, "the branch no longer consults the migration-gated list").toContain(
@@ -215,5 +243,133 @@ describe("relationships stay truthful", () => {
     ]) {
       expect(code(CORE), `a relationship was defaulted: ${bad}`).not.toContain(bad);
     }
+  });
+});
+
+/**
+ * THE ASSISTANT TRANSPORT (ChatGPT / any MCP client) IS AN ADAPTER, NOT A
+ * SECOND PRODUCT.
+ *
+ * Everything an assistant can do to a roster, a person in the building can do
+ * through the web panel, through the same service, under the same
+ * authorization. These assertions exist so that stays true the next time
+ * somebody is in a hurry.
+ */
+describe("people ingestion through an assistant", () => {
+  it("the capability layer calls the SHARED service, never the database", () => {
+    expect(CAPS).toContain("@/lib/organization-people/ingest-service");
+    expect(CAPS).toContain("previewPeopleIngest");
+    expect(CAPS).toContain("commitPeopleIngest");
+
+    // No table reaches the MCP surface. An assistant gets domain actions, not
+    // CRUD: there is no shape of argument that makes it a database client.
+    for (const forbidden of [
+      "from(\"organization_people\")",
+      ".insert(",
+      ".update(",
+      ".delete(",
+      ".upsert(",
+      ".rpc(",
+      "service_role",
+      "SUPABASE_SERVICE_ROLE_KEY",
+    ]) {
+      expect(code(CAPS), `${forbidden} on the assistant surface`).not.toContain(forbidden);
+    }
+  });
+
+  it("a file arriving is NOT a commit", () => {
+    // The preview is the only tool that accepts a file, and it is declared a
+    // read: it may not write.
+    const preview = CAPS.slice(
+      CAPS.indexOf('id: "people.ingest.preview"'),
+      CAPS.indexOf('id: "people.ingest.commit"'),
+    );
+    expect(preview.length, "the preview capability is missing").toBeGreaterThan(200);
+    expect(preview).toContain("readOnly");
+    expect(preview).toContain("previewPeopleIngest");
+    expect(preview, "the preview must not commit").not.toContain("commitPeopleIngest");
+
+    // …and the commit tool does not accept a file at all, so "attach" and
+    // "commit" cannot collapse into one call.
+    const commit = CAPS.slice(CAPS.indexOf('id: "people.ingest.commit"'));
+    expect(commit, "the commit tool must not take a file").not.toContain("fileSchema");
+  });
+
+  it("a commit REQUIRES a token bound to what the preview showed", () => {
+    expect(CAPS).toContain("verifyPeopleCommitToken");
+    expect(CAPS).toContain("confirmationToken");
+
+    // The verification must come BEFORE the write, or it is decoration.
+    const commit = CAPS.slice(CAPS.indexOf('id: "people.ingest.commit"'));
+    const verifyAt = commit.indexOf("verifyPeopleCommitToken");
+    const writeAt = commit.indexOf("commitPeopleIngest(");
+    expect(verifyAt, "the commit never verifies a token").toBeGreaterThan(-1);
+    expect(writeAt, "the commit never writes").toBeGreaterThan(-1);
+    expect(verifyAt, "the token is verified AFTER the write").toBeLessThan(writeAt);
+
+    // A rejected token must refuse, not warn and continue.
+    expect(commit).toContain("confirmation_rejected");
+  });
+
+  it("a token is minted only when nothing is left to ask", () => {
+    const preview = CAPS.slice(
+      CAPS.indexOf('id: "people.ingest.preview"'),
+      CAPS.indexOf('id: "people.ingest.commit"'),
+    );
+    expect(preview).toContain("needsReconciliation");
+    expect(preview).toContain("needsRelationship");
+    // The mint is guarded by that readiness, not unconditional.
+    expect(preview).toMatch(/ready\s*&&[\s\S]{0,80}mintPeopleCommitToken/);
+  });
+
+  it("a multi-person workforce file never becomes a personal CV import", () => {
+    // The roster reader and the CV/self-profile paths are different products.
+    for (const forbidden of ["cv/extract", "personFromCvText", "worker_documents", "living_cv"]) {
+      expect(code(CAPS), `${forbidden} reached from a workforce list`).not.toContain(forbidden);
+    }
+    // PDF/DOCX are refused BY NAME rather than half-imported.
+    expect(FILE_READER).not.toMatch(/\.(pdf|docx)\$?\/i\.test/);
+    expect(CAPS).toContain("not_supported");
+  });
+
+  it("deterministic people work calls NO AI provider", () => {
+    // ChatGPT already supplies the conversational layer. Sending roster names
+    // to our own model would cost money and decide identity probabilistically.
+    for (const forbidden of [
+      "runAiAgent",
+      "lib/ai/",
+      "gemini",
+      "generateText",
+      "openai",
+      "anthropic",
+    ]) {
+      for (const [label, src] of [
+        ["capabilities", CAPS],
+        ["service", SERVICE],
+        ["core", CORE],
+        ["file reader", FILE_READER],
+      ] as const) {
+        expect(
+          code(src).toLowerCase(),
+          `${forbidden} on the deterministic people path (${label})`,
+        ).not.toContain(forbidden);
+      }
+    }
+  });
+
+  it("a failed read is never reported as an empty roster", () => {
+    // Each failure class keeps its own name all the way to the client.
+    for (const named of [
+      "not_authorized",
+      "needs_migration",
+      "unavailable",
+      "too_many_rows",
+      "unresolved",
+      "organization_choice_required",
+    ]) {
+      expect(CAPS, `${named} is not distinguishable to a client`).toContain(named);
+    }
+    // The honesty is stated where a model will read it.
+    expect(CAPS).toMatch(/NOT an empty roster/);
   });
 });
