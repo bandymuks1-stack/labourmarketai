@@ -7804,6 +7804,7 @@
     "languagesSelfStated": "Talen zoals opgegeven door de werker.",
     "certificatesTitle": "Certificaten en licenties",
     "declaredCertHint": "Zelf opgegeven",
+    "documentUnverifiedHint": "Niet geverifieerd",
     "validUntil": "Geldig tot",
     "drivingLicences": "Rijbewijscategorieën",
     "educationTitle": "Opleiding",

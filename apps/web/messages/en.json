@@ -7804,6 +7804,7 @@
     "languagesSelfStated": "Languages as stated by the worker.",
     "certificatesTitle": "Certificates & licences",
     "declaredCertHint": "Listed by the worker",
+    "documentUnverifiedHint": "Not verified",
     "validUntil": "Valid until",
     "drivingLicences": "Driving licence categories",
     "educationTitle": "Education",

@@ -7804,6 +7804,7 @@
     "languagesSelfStated": "Языки, как их указал работник.",
     "certificatesTitle": "Сертификаты и удостоверения",
     "declaredCertHint": "Указано работником",
+    "documentUnverifiedHint": "Не подтверждено",
     "validUntil": "Действительно до",
     "drivingLicences": "Категории водительского удостоверения",
     "educationTitle": "Образование",

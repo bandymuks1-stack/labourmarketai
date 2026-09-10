@@ -7804,6 +7804,7 @@
     "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",
     "certificatesTitle": "Sertifikatai ir pažymėjimai",
     "declaredCertHint": "Nurodyta pačių",
+    "documentUnverifiedHint": "Nepatvirtinta",
     "validUntil": "Galioja iki",
     "drivingLicences": "Vairuotojo pažymėjimo kategorijos",
     "educationTitle": "Išsilavinimas",

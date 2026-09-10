@@ -35,6 +35,13 @@ export interface CvCertificateDocInput {
   documentTypeSlug: string;
   country: string | null;
   storedStatus: string;
+  /**
+   * `worker_documents.verification` — a SEPARATE axis from `status`
+   * (`unverified | pending | verified | rejected`). `status` is where the
+   * WORKER put the file; this is what a REVIEWER decided about it. They are
+   * two different questions and the CHECK constraints keep them apart.
+   */
+  verification: string;
   validUntil: string | null; // ISO date
 }
 
@@ -42,11 +49,34 @@ export interface CvCertificateDoc {
   typeSlug: string;
   country: string | null;
   validUntil: string | null;
+  /**
+   * TRUE only for `verification === "verified"`. Everything else — including
+   * the `unverified` default — is false, so the CV can say what it knows
+   * instead of letting a document row imply a review that never happened.
+   */
+  reviewerVerified: boolean;
 }
 
-/** Keep only certificate/licence-type rows the worker marked READY and whose
- *  validity has not passed at `now` — an expired or missing certificate must
- *  never print as held. */
+/**
+ * Keep only certificate/licence-type rows the worker marked READY, whose
+ * validity has not passed at `now`, and which a reviewer has NOT rejected.
+ *
+ * SEP-3, EVIDENCE != VERIFICATION. `worker_documents` carries two independent
+ * columns and this section used to read only the first: `status`
+ * (`missing | ready | blocked`) is the worker's own storage state, while
+ * `verification` (`unverified | pending | verified | rejected`) is the
+ * reviewer's judgement. Filtering on `status` alone meant a credential a
+ * reviewer had REJECTED printed on the CV exactly like a verified one — and
+ * it printed with no qualifier at all, directly beneath text-declared
+ * certificates that ARE labelled "declared, never verified". The contrast
+ * told the reader the document-backed rows were the trusted ones.
+ *
+ * A rejected credential is therefore dropped (a reviewer said it does not
+ * hold, so it must not print as held), and every surviving row now carries
+ * whether a reviewer actually verified it. `pending` and `unverified` still
+ * print — the person genuinely has the document — but they no longer borrow
+ * a verification that does not exist.
+ */
 export function certificateDocsForCv(
   rows: readonly CvCertificateDocInput[],
   now: Date,
@@ -54,6 +84,7 @@ export function certificateDocsForCv(
   return rows
     .filter((r) => CERTIFICATE_DOC_TYPE_SLUGS.includes(r.documentTypeSlug))
     .filter((r) => r.storedStatus === "ready")
+    .filter((r) => r.verification !== "rejected")
     .filter((r) => {
       if (!r.validUntil) return true;
       return new Date(`${r.validUntil}T23:59:59Z`).getTime() >= now.getTime();
@@ -62,6 +93,7 @@ export function certificateDocsForCv(
       typeSlug: r.documentTypeSlug,
       country: r.country,
       validUntil: r.validUntil,
+      reviewerVerified: r.verification === "verified",
     }));
 }
 

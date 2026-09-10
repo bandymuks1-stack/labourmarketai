@@ -574,6 +574,15 @@ export default async function VerifiedCvPage({
                       {t("validUntil")}: {formatUtcDate(d.validUntil, locale)}
                     </span>
                   ) : null}
+                  {/* A held document is not a reviewed one. Without this the
+                      row sat unqualified directly above declared certificates
+                      that ARE labelled unverified, and the contrast alone
+                      claimed a review that may never have happened. */}
+                  {d.reviewerVerified ? null : (
+                    <span className="text-meta uppercase tracking-wide text-text-muted">
+                      {t("documentUnverifiedHint")}
+                    </span>
+                  )}
                 </li>
               ))}
               {cv.drivingLicenceCategories.length > 0 ? (

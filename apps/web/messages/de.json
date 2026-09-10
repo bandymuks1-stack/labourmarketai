@@ -7804,6 +7804,7 @@
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
     "certificatesTitle": "Zertifikate & Lizenzen",
     "declaredCertHint": "Selbst angegeben",
+    "documentUnverifiedHint": "Nicht verifiziert",
     "validUntil": "Gültig bis",
     "drivingLicences": "Führerscheinklassen",
     "educationTitle": "Ausbildung",
