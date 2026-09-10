@@ -59,6 +59,11 @@ import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
+import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
+import {
+  introMessageKey,
+  outcomeMessageKey,
+} from "@/lib/conversation/capability-answer";
 import { loadDocumentFileTargetForChat } from "@/lib/conversation/document-file-chat";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
@@ -1514,6 +1519,65 @@ export function ConversationChat({
    * It still runs right after a work log lands, so the person sees their card
    * grow the moment their record changed — the card is simply in the panel.
    */
+  /**
+   * "KĄ GALIU PADARYTI ŠIOJE PASKYROJE?" — ANSWERED FROM THE ACTIVE CONTEXT.
+   *
+   * The owner asked this of a signed-in agency workspace and was told, in
+   * effect, "Įmonės erdvė". The sentence scored 0 in the deterministic
+   * router, so it reached the generic fallback — whose composed capability
+   * sentence answers a PERSON with nothing at all, ignores current state
+   * entirely, and is frozen at page load so it describes the workspace the
+   * person may already have switched away from.
+   *
+   * Nothing a person hears here is written in this component. The server
+   * reads the ACTIVE context and the workspace's real counts through the SAME
+   * loaders the suggestion chips use, the pure resolver turns those into a
+   * short ordered list of OUTCOMES, and this renders one localized line each.
+   * Change what the workspace holds and the answer changes; no capability id,
+   * route, table or role name ever reaches the person.
+   *
+   * Read at ASK time, not at page load, because switching context is a
+   * CONVERSATION act ("perjunk į įmonę X") — a page-load snapshot would
+   * answer for the previous workspace.
+   *
+   * Read-only. Nothing here writes, dispatches or confirms.
+   */
+  const startCapabilities = useCallback(() => {
+    setTyping(true);
+    readCapabilityAnswer()
+      .then((answer) => {
+        setTyping(false);
+        if (answer.kind !== "outcomes" || answer.outcomes.length === 0) {
+          // OUR failure, said plainly. "You have nothing available" is a
+          // claim about the person's account and may not be produced by a
+          // read that did not complete (SEP-7).
+          assistant(t("capUnreadable"));
+          return;
+        }
+        const lines: string[] = [];
+        if (answer.organizationName) {
+          lines.push(t("capWorkspaceNamed", { company: answer.organizationName }));
+        }
+        lines.push(t(introMessageKey(answer.context)));
+        for (const outcome of answer.outcomes) {
+          lines.push(
+            `• ${t(outcomeMessageKey(outcome), { count: outcome.count ?? 0 })}`,
+          );
+        }
+        // Said only when a read that COULD have contributed a number did not
+        // come back — so a missing figure is visibly missing, not silently
+        // absent.
+        if (answer.degraded) lines.push(t("capPartial"));
+        // The answer is a starting point for a conversation, not a menu.
+        lines.push(t("capContinue"));
+        assistant(lines.join("\n"));
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("capUnreadable"));
+      });
+  }, [assistant, t]);
+
   /**
    * "Noriu pamatyti savo CV" — ANSWERED FROM THE REAL RECORD.
    *
@@ -5279,6 +5343,8 @@ export function ConversationChat({
         // It now READS the record before saying anything about it, for the
         // person whatever workspace they are sitting in — see `startCvState`.
         cvView: () => startCvState(),
+        // Derived at ask time from the active context — see `startCapabilities`.
+        capabilities: () => startCapabilities(),
         // The sentence named the CV and stopped. Three real doors, no guess
         // and no write — owner §5: "If uncertain, ask." The third door is the
         // profile because the CV is DERIVED from it: "pakeisk mano CV" has no
@@ -5326,7 +5392,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**

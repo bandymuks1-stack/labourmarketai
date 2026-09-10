@@ -124,6 +124,16 @@ export type IntentHandlerId =
   // which of the five CV actions is meant.
   | "cvView"
   | "cvChoose"
+  /**
+   * "Ką galiu padaryti šioje paskyroje?" — the capability question.
+   *
+   * This handler is a SEAM, not an answer. Everything a person hears is
+   * derived at ask time from the active context and the workspace's real
+   * state (`lib/conversation/capability-answer.ts`); nothing about the
+   * outcomes, their order or their wording is decided here. See the router
+   * entry for why the vocabulary needs an id at all.
+   */
+  | "capabilities"
   | "addTask"
   | "whoAvailable"
   | "stageStatus"
@@ -165,6 +175,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   candidates: { domain: "matching", access: "read", handler: "employerCandidates", ownTyping: true },
   "find-workers": { domain: "matching", access: "read", handler: "findWorkers", ownTyping: true },
   context: { domain: "context", access: "read", handler: "contextReadback", ownTyping: true },
+  // "What do you know about me" (`context`) answers with STATE. This answers
+  // with what the person can ACHIEVE from where they stand — a different
+  // question, and merging them would collapse a real distinction.
+  capabilities: { domain: "context", access: "read", handler: "capabilities", ownTyping: true },
   // Routed by IDENTITY inside the handler; the ambiguous dual-role case is
   // ASKED, never guessed (guard: interest-inbox-asks-not-guesses).
   "interest-inbox": { domain: "matching", access: "read", handler: "interestInbox", ownTyping: true },

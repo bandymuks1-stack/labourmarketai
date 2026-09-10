@@ -70,7 +70,14 @@ describe("the intent registry is the enumerable routing contract", () => {
     // UPLOAD ≠ EDIT ≠ EXPORT, and the bare noun no longer resolves to any of
     // them — it asks. Measured before the split: 11 of 22 ordinary CV
     // sentences, including "noriu pamatyti savo CV", opened the IMPORT flow.
-    expect(entries.length).toBe(69);
+    // 69 -> 70: `capabilities` (takeover 2026-09-10). "Ką galiu padaryti
+    // šioje paskyroje?" scored 0 and reached the generic fallback — and the
+    // Gemini proposer could not rescue it either, because `llm-proposal.ts`
+    // re-validates the model's answer against THIS registry. A question with
+    // no id here is unanswerable by both routers, permanently. The id is the
+    // seam; the answer itself is derived from the active context and the
+    // workspace's real state (`lib/conversation/capability-answer.ts`).
+    expect(entries.length).toBe(70);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

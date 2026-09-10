@@ -64,6 +64,23 @@ export type ConversationIntent =
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "need-service" // "reikia, kad kas nors sutaisytų stogą" — a JOB done, not a job
   | "context" // "ką tu apie mane žinai?"
+  /**
+   * "Ką galiu padaryti šioje paskyroje?" — WHAT CAN I ACHIEVE FROM HERE.
+   *
+   * Distinct from `context` ("what do you know about me" — state) and from
+   * `next-action` ("ką dar TURIU padaryti" — obligation). This is CAN, and it
+   * is the question a person asks when they do not yet know the product.
+   *
+   * WHY THIS ID HAS TO EXIST AT ALL. The sentence scored 0, so it fell to the
+   * generic fallback — and the LLM proposer could not rescue it either,
+   * because `llm-proposal.ts` re-validates the model's answer against
+   * `INTENT_REGISTRY` and returns "not understood" for anything else. A
+   * question with no id in this vocabulary is therefore unanswerable by BOTH
+   * routers, forever. The id is the seam; the ANSWER is derived entirely from
+   * the active context and the workspace's real state, and nothing about it
+   * is written down here.
+   */
+  | "capabilities"
   | "switch-context" // "perjunk į įmonę X" / "grįžk į asmeninį" — ONE ACTIVE CONTEXT
   | "opportunities" // "kokias galimybes man gali pasiūlyti?" — the OWN board
   | "interest-inbox" // "kas susidomėjo mano poreikiu?" — who raised a hand
@@ -907,6 +924,42 @@ const RULES: IntentRule[] = [
       p("(was\\s+wei(ß|ss)t\\s+du|wat\\s+weet\\s+je)", 5),
       p("(kokiame\\s+kontekst|current\\s+context|мой\\s+контекст|mein\\s+kontext|mijn\\s+context)", 4),
       p("(kur\\s+aš\\s+dabar\\s+esu|where\\s+am\\s+i\\s+now)", 4),
+    ],
+  },
+  {
+    // WHAT CAN I ACHIEVE FROM HERE — the question a person asks before they
+    // know the product. It scored 0 and fell to the generic fallback, whose
+    // composed capability sentence answers a PERSON with nothing at all.
+    //
+    // Deliberately narrower than it looks. EVERY form pairs a CAN verb
+    // ("galiu", "can i", "могу", "kan ik", "kann ich") with a DO verb. That
+    // is what keeps it out of `next-action` ("ką dar TURIU padaryti" —
+    // obligation, not capability) and out of the value-intent family ("ką
+    // galiu PASIŪLYTI" — an offer, not a question about the account).
+    // Diacritics are folded on both sides, so the undiacriticked spellings
+    // people actually type match without separate variants.
+    //
+    // THE "POSSIBILITIES" FAMILY IS DELIBERATELY ABSENT, in all five locales.
+    // "Kokias galimybes man gali pasiūlyti?" / "Какие возможности у меня
+    // есть?" / "Welche Möglichkeiten habe ich?" already mean the OPPORTUNITY
+    // BOARD in this product — the first of those is an owner-pinned phrase
+    // contract (`owner-phrase-contract.test.ts`). A first draft of this rule
+    // claimed that family and silently re-routed three locales away from the
+    // owner's own recorded meaning; the guards caught it. It is dropped
+    // UNIFORMLY rather than in the three locales that happened to fail, so
+    // the vocabulary cannot become reachable by a phrasing in one language
+    // and not the others.
+    intent: "capabilities",
+    patterns: [
+      p("(ką|kas)\\s+(aš\\s+)?galiu\\s+(čia\\s+|šioje\\s+|šitoje\\s+|dabar\\s+)?[^.]{0,24}(padaryti|daryti|nuveikti)", 6),
+      p("(ką|kas)\\s+(čia|šioje\\s+paskyroje|šioje\\s+sistemoje)\\s+galima\\s+(pa)?daryti", 6),
+      p("kam\\s+skirta\\s+(ši|šita)\\s+(paskyra|sistema|platforma)", 4),
+      p("what\\s+can\\s+i\\s+do", 6),
+      p("what\\s+can\\s+(this|the|my)\\s+(account|workspace|platform|system|space)\\s+do", 5),
+      p("что\\s+я\\s+могу\\s+[^.]{0,20}(сделать|делать)", 6),
+      p("что\\s+(здесь|тут)\\s+можно\\s+(с)?делать", 6),
+      p("wat\\s+kan\\s+ik\\s+(hier\\s+)?doen", 6),
+      p("was\\s+kann\\s+ich\\s+(hier\\s+)?(machen|tun)", 6),
     ],
   },
   {
