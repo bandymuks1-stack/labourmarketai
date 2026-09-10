@@ -1965,7 +1965,7 @@
         "legalNameHelp": "Privaloma. 2–200 simbolių.",
         "legalNamePlaceholder": "pvz. UAB / MB pavadinimas",
         "companyType": "Pagrindinė veiklos sritis",
-        "companyTypeHelp": "Tai tik pagrindinė veikla — ji jūsų neužrakina. Konkrečią rolę (užsakovas, rangovas, subrangovas ir kt.) pasirinksite kurdami kiekvieną poreikį.",
+        "companyTypeHelp": "Tai jūsų PAGRINDINĖ VEIKLA — sritis, kurioje dirbate. Ji jūsų neužrakina: konkrečią rolę (užsakovas, rangovas, subrangovas) pasirinksite kurdami kiekvieną poreikį, o ką jūsų organizacija DARO (įdarbina, teikia darbuotojus, vykdo atranką, moko, valdo projektus) — atskiras klausimas, į kurį galite atsakyti keliais atsakymais iš karto, įmonės profilyje.",
         "companyTypeOptions": {
           "construction": "Statybos įmonė",
           "staffing_agency": "Personalo agentūra",

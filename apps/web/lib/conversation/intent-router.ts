@@ -954,6 +954,15 @@ const RULES: IntentRule[] = [
       p("(ką|kas)\\s+(aš\\s+)?galiu\\s+(čia\\s+|šioje\\s+|šitoje\\s+|dabar\\s+)?[^.]{0,24}(padaryti|daryti|nuveikti)", 6),
       p("(ką|kas)\\s+(čia|šioje\\s+paskyroje|šioje\\s+sistemoje)\\s+galima\\s+(pa)?daryti", 6),
       p("kam\\s+skirta\\s+(ši|šita)\\s+(paskyra|sistema|platforma)", 4),
+      // ── AND THE SAME QUESTION ASKED ABOUT THE ORGANIZATION (E, 2026-09-10).
+      // "Ką gali mūsų agentūra?" scored 0. The capability answer already
+      // reads the ACTIVE organization, so this needed a way in, not a second
+      // answer. A CAN verb plus an organisation noun, same shape as above.
+      p("(ką|ka)\\s+gali\\s+(mūsų|musu|ši|si|šita|šios|mano)\\s+[^.]{0,16}(agentūra|agentura|įmonė|imone|imon|organizacij|mokykl|bendrov|kompanij)", 6),
+      p("what\\s+can\\s+(our|this|my)\\s+[^.]{0,16}(agency|company|organi[sz]ation|school|business|firm)\\s+do", 6),
+      p("что\\s+может\\s+(наше|наша|наш|эта|это)\\s+[^.]{0,16}(агентство|компани|организаци|школа|фирма)", 6),
+      p("wat\\s+kan\\s+(ons|onze|dit|deze)\\s+[^.]{0,16}(bureau|bedrijf|organisatie|school)\\s+doen", 6),
+      p("was\\s+kann\\s+(unser|unsere|diese|dieses)\\s+[^.]{0,16}(agentur|firma|unternehmen|organisation|schule)", 6),
       p("what\\s+can\\s+i\\s+do", 6),
       p("what\\s+can\\s+(this|the|my)\\s+(account|workspace|platform|system|space)\\s+do", 5),
       p("что\\s+я\\s+могу\\s+[^.]{0,20}(сделать|делать)", 6),

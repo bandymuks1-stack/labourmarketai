@@ -1965,7 +1965,7 @@
         "legalNameHelp": "Erforderlich. 2–200 Zeichen.",
         "legalNamePlaceholder": "z. B. Acme Ltd",
         "companyType": "Haupttätigkeitsbereich",
-        "companyTypeHelp": "Dies ist nur Ihre Haupttätigkeit — sie legt Sie nicht fest. Die konkrete Rolle (Auftraggeber, Auftragnehmer, Subunternehmer usw.) wählen Sie beim Erstellen jedes Bedarfs.",
+        "companyTypeHelp": "Das ist Ihre HAUPTTÄTIGKEIT — die Branche, in der Sie arbeiten. Sie legt Sie nicht fest: die konkrete Rolle (Auftraggeber, Auftragnehmer, Subunternehmer) wählen Sie bei jedem Bedarf, und was Ihre Organisation TUT (beschäftigen, Personal bereitstellen, rekrutieren, ausbilden, Projekte führen) ist eine eigene Frage, die Sie mit mehreren Antworten zugleich beantworten können, im Unternehmensprofil.",
         "companyTypeOptions": {
           "construction": "Bauunternehmen",
           "staffing_agency": "Personalagentur",

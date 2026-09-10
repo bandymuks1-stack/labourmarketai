@@ -1965,7 +1965,7 @@
         "legalNameHelp": "Required. 2–200 characters.",
         "legalNamePlaceholder": "e.g. Acme Ltd",
         "companyType": "Primary activity area",
-        "companyTypeHelp": "This is just your main activity — it doesn't lock you in. You'll pick the specific role (client, contractor, subcontractor, etc.) when you create each need.",
+        "companyTypeHelp": "This is your MAIN ACTIVITY — the industry you work in. It does not lock you in: you pick the specific role (client, contractor, subcontractor) when you create each need, and what your organisation DOES (employs, supplies people, recruits, trains, runs projects) is a separate question you can answer with several answers at once, in your company profile.",
         "companyTypeOptions": {
           "construction": "Construction company",
           "staffing_agency": "Staffing agency",

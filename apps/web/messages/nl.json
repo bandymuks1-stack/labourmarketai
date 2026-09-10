@@ -1965,7 +1965,7 @@
         "legalNameHelp": "Verplicht. 2–200 tekens.",
         "legalNamePlaceholder": "bijv. Acme Ltd",
         "companyType": "Primaire activiteit",
-        "companyTypeHelp": "Dit is alleen je hoofdactiviteit — het legt je niet vast. Je kiest de specifieke rol (opdrachtgever, aannemer, onderaannemer, enz.) wanneer je elke behoefte aanmaakt.",
+        "companyTypeHelp": "Dit is je HOOFDACTIVITEIT — de branche waarin je werkt. Het legt je niet vast: de specifieke rol (opdrachtgever, aannemer, onderaannemer) kies je bij elke aanvraag, en wat je organisatie DOET (in dienst nemen, mensen leveren, werven, opleiden, projecten uitvoeren) is een aparte vraag die je met meerdere antwoorden tegelijk kunt beantwoorden, in je bedrijfsprofiel.",
         "companyTypeOptions": {
           "construction": "Bouwbedrijf",
           "staffing_agency": "Uitzendbureau",

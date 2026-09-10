@@ -99,7 +99,13 @@ describe("2. the education workspace gets education-shaped starters", () => {
   const SIGNALS = read("lib/conversation/starter-signals.ts");
 
   it("the education track exists and is decided by the canonical capability read", () => {
-    expect(STARTERS).toMatch(/capabilities\.includes\("training_provider"\)/);
+    // RE-ANCHORED (E/F/G, 2026-09-10): `companyTracks` now reads ALL the
+    // capability rows rather than this one, so the membership test moved from
+    // `capabilities.includes(...)` to a Set built from the same field. The
+    // rule is unchanged and still checked — the education track is decided by
+    // the canonical capability read, never by the legacy column.
+    expect(STARTERS).toMatch(/const held = new Set\(signals\.capabilities\)/);
+    expect(STARTERS).toMatch(/held\.has\("training_provider"\)/);
     expect(SIGNALS).toMatch(/isEducationFirstWorkspace\(/);
     expect(SIGNALS).toMatch(/readOrganizationCapabilities\(/);
   });
