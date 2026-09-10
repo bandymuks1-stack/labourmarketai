@@ -107,6 +107,8 @@ export const CLIENT_MESSAGE_ROOTS = [
   // Client-reachable because the card is interactive; the labels are the only
   // thing the reader ever sees — the stored slug never leaves the server.
   "organizationCapabilities",
+  // Roster ingestion panel on /dashboard/company (people-import-panel).
+  "peopleImport",
   "opportunities",
   "playercards",
   "productivityUnits",

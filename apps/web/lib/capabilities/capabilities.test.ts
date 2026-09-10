@@ -170,6 +170,12 @@ describe("the registry itself", () => {
       "evidence.records.list",
       "evidence.record.attest",
       "evidence.import.withdraw",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -203,6 +209,12 @@ describe("the registry itself", () => {
       "evidence.records.list",
       "evidence.record.attest",
       "evidence.import.withdraw",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
     ]);
   });
 

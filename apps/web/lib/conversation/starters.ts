@@ -213,17 +213,69 @@ export function personStarters(
  * its client chain; an education-first institution's is its learners; a plain
  * employer's is its need. After that, round-robin.
  */
+/**
+ * Roles that mean "this organization supplies or introduces PEOPLE" — the
+ * agency track. Three of the owner's ten roles say it, and reading only one
+ * column said it for none of them.
+ *
+ * Taken from `ORGANIZATION_ROLES`, the single owner-locked list; no second
+ * vocabulary is defined here (guard: organization-capabilities.test.ts).
+ */
+const AGENCY_ROLES = ["workforce_provider", "talent_provider", "recruitment_partner"] as const;
+
+/**
+ * WHICH TRACKS DOES THIS ORGANIZATION ACTUALLY HOLD?
+ *
+ * ── The defect (owner walkthrough E + F, 2026-09-10) ──────────────────────
+ * This read ONE capability (`training_provider`) out of the ten the owner
+ * named, took "is this an agency?" from a DIFFERENT column
+ * (`companies.company_type`), and assumed `employer` for everybody.
+ *
+ * Production says why that is wrong. `organization_roles` is applied and IN
+ * USE — 15 rows over 14 organizations — carrying `employer` (10),
+ * `workforce_provider` (3) and `training_provider` (2), and at least one
+ * organization holds two roles at once. Meanwhile `companies.company_type`
+ * holds `construction` (6), `staffing_agency` (4) and `other` (4): a single
+ * exclusive field mixing a SECTOR with a RELATIONSHIP. A construction firm
+ * that also supplies people had to pick one, picked `construction`, and was
+ * then framed as a plain employer with its agency work invisible.
+ *
+ * ── What changed ──────────────────────────────────────────────────────────
+ * Tracks are derived from the CAPABILITY rows, and the legacy column is kept
+ * as an ADDITIONAL agency signal rather than the only one — production has
+ * four `staffing_agency` companies but three `workforce_provider`
+ * organizations, so dropping either source would erase a real agency.
+ *
+ * ── WHAT DELIBERATELY DID NOT CHANGE ──────────────────────────────────────
+ * `employer` and `operations` stay UNIVERSAL. A first draft of this fix gated
+ * `employer` on the declared role, which reads as more honest and is an
+ * architecture regression: a school or an agency may perfectly well hire, and
+ * the previous behaviour let them. That is review question B — "did we make
+ * impossible something the architecture allowed?" — and the answer was yes.
+ * Any organization may state a need and may run work; what E is about is that
+ * an agency was never RECOGNISED as one, not that employers were over-served.
+ *
+ * The change is therefore strictly ADDITIVE: no organization loses a track,
+ * and one whose capability rows say it supplies people finally gains the
+ * agency track and the agency frame.
+ */
 export function companyTracks(
   signals: Pick<StarterSignals, "capabilities" | "staffingAgency" | "educationFirst">,
 ): CapabilityTrack[] {
-  const hasEducation = signals.capabilities.includes("training_provider");
-  const primary: CapabilityTrack = signals.staffingAgency
+  const held = new Set(signals.capabilities);
+  const hasEducation = held.has("training_provider");
+  // UNION, not replacement. Production carries four `staffing_agency`
+  // companies and three `workforce_provider` organizations; reading either
+  // source alone erases a real agency.
+  const hasAgency = signals.staffingAgency || AGENCY_ROLES.some((r) => held.has(r));
+
+  const primary: CapabilityTrack = hasAgency
     ? "agency"
     : signals.educationFirst && hasEducation
       ? "education"
       : "employer";
   const all: CapabilityTrack[] = ["employer", "operations"];
-  if (signals.staffingAgency) all.push("agency");
+  if (hasAgency) all.push("agency");
   if (hasEducation) all.push("education");
   return [primary, ...all.filter((t) => t !== primary)];
 }

@@ -58,6 +58,19 @@ import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
+import { readMyCvState } from "@/lib/conversation/cv-state-server";
+import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
+import { understand } from "@/lib/conversation/utterance-understanding";
+import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import {
+  readFileIntent,
+  routeFileIntent,
+  type FileIntent,
+} from "@/lib/conversation/file-subject";
+import {
+  introMessageKey,
+  outcomeMessageKey,
+} from "@/lib/conversation/capability-answer";
 import { loadDocumentFileTargetForChat } from "@/lib/conversation/document-file-chat";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
@@ -67,7 +80,7 @@ import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
 import { loadProjectReadinessForChat } from "@/lib/conversation/project-readiness";
 import { loadConfirmWorkForChat } from "@/lib/conversation/confirm-work";
 import type { ConfirmWorkChatResult } from "@/lib/conversation/confirm-work-contract";
-import { proposeConversationIntentAction } from "@/lib/conversation/llm-proposal";
+import { proposeUnderstandingAction } from "@/lib/conversation/llm-proposal";
 import {
   advanceGoal,
   classifyTurn,
@@ -692,6 +705,10 @@ export function ConversationChat({
   personalIntroPayload = null,
   countryLabels,
   agencyWorkspace = false,
+  // Declared in the props type since the education slice but never read here
+  // until slice C: a cohort file may only be taken by a workspace that
+  // actually holds the education capability.
+  educationWorkspace = false,
   learnerContextLine = null,
   starters = null,
   personHasProfileData = null,
@@ -1513,6 +1530,149 @@ export function ConversationChat({
    * It still runs right after a work log lands, so the person sees their card
    * grow the moment their record changed — the card is simply in the panel.
    */
+  /**
+   * "KĄ GALIU PADARYTI ŠIOJE PASKYROJE?" — ANSWERED FROM THE ACTIVE CONTEXT.
+   *
+   * The owner asked this of a signed-in agency workspace and was told, in
+   * effect, "Įmonės erdvė". The sentence scored 0 in the deterministic
+   * router, so it reached the generic fallback — whose composed capability
+   * sentence answers a PERSON with nothing at all, ignores current state
+   * entirely, and is frozen at page load so it describes the workspace the
+   * person may already have switched away from.
+   *
+   * Nothing a person hears here is written in this component. The server
+   * reads the ACTIVE context and the workspace's real counts through the SAME
+   * loaders the suggestion chips use, the pure resolver turns those into a
+   * short ordered list of OUTCOMES, and this renders one localized line each.
+   * Change what the workspace holds and the answer changes; no capability id,
+   * route, table or role name ever reaches the person.
+   *
+   * Read at ASK time, not at page load, because switching context is a
+   * CONVERSATION act ("perjunk į įmonę X") — a page-load snapshot would
+   * answer for the previous workspace.
+   *
+   * Read-only. Nothing here writes, dispatches or confirms.
+   */
+  const startCapabilities = useCallback(() => {
+    setTyping(true);
+    readCapabilityAnswer()
+      .then((answer) => {
+        setTyping(false);
+        if (answer.kind !== "outcomes" || answer.outcomes.length === 0) {
+          // OUR failure, said plainly. "You have nothing available" is a
+          // claim about the person's account and may not be produced by a
+          // read that did not complete (SEP-7).
+          assistant(t("capUnreadable"));
+          return;
+        }
+        const lines: string[] = [];
+        if (answer.organizationName) {
+          lines.push(t("capWorkspaceNamed", { company: answer.organizationName }));
+        }
+        lines.push(t(introMessageKey(answer.context)));
+        for (const outcome of answer.outcomes) {
+          lines.push(
+            `• ${t(outcomeMessageKey(outcome), { count: outcome.count ?? 0 })}`,
+          );
+        }
+        // Said only when a read that COULD have contributed a number did not
+        // come back — so a missing figure is visibly missing, not silently
+        // absent.
+        if (answer.degraded) lines.push(t("capPartial"));
+        // The answer is a starting point for a conversation, not a menu.
+        lines.push(t("capContinue"));
+        assistant(lines.join("\n"));
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("capUnreadable"));
+      });
+  }, [assistant, t]);
+
+  /**
+   * "Noriu pamatyti savo CV" — ANSWERED FROM THE REAL RECORD.
+   *
+   * The previous handler asserted "Here is your CV — what the system knows
+   * about you today" as a CONSTANT: it read nothing, so for a person with no
+   * CV the product's first sentence about their working life was false, and
+   * for a person WITH one the fallback chips offered to upload it again. That
+   * is the defect the owner walked into — the product offering to CREATE what
+   * it never checked whether it already HAS.
+   *
+   * Three things change, and only these three:
+   *
+   *  1. IT READS FIRST. `readMyCvState` calls the SAME builder the printed CV
+   *     page renders from (`buildVerifiedCv`), so the chat can never disagree
+   *     with the document. No second CV reader, no second CV truth.
+   *
+   *  2. A FAILED READ IS NOT AN EMPTY CV (SEP-7). `unreadable` gets its own
+   *     sentence that says the fault is ours. Rendering a failed read as an
+   *     empty record is the class the 2026-09-09 honesty sweep closed
+   *     elsewhere; it is not being re-introduced here.
+   *
+   *  3. THE CV BELONGS TO THE HUMAN, NOT TO THE ACTIVE WORKSPACE (SEP-5,
+   *     IDENTITY != ROLE). The old gate was `identity === "person"`, so the
+   *     same person sitting in their company workspace was refused their own
+   *     CV and dropped into the generic fallback. `identity` is the ACTIVE
+   *     WORKSPACE, never who the person is — the file header two thousand
+   *     lines up says exactly that about `canActAsEmployer`. A person with no
+   *     personal work record still gets an honest, specific answer
+   *     (`not_a_worker`), which is why removing the gate cannot invent a CV
+   *     for a company-only account.
+   *
+   * Read-only. Nothing here writes, dispatches or confirms.
+   */
+  const startCvState = useCallback(() => {
+    setTyping(true);
+    readMyCvState()
+      .then((state) => {
+        setTyping(false);
+        const openCv = { id: "link:/cv", label: labels.chipCvSheet };
+        const openProfile = { id: "profile", label: labels.chipProfile };
+        const importCv = { id: "cv", label: labels.chipCv };
+        switch (state.presence) {
+          case "substantive":
+            assistant(
+              t("cvStateSubstantive", {
+                work: state.workHistory,
+                skills: state.skills,
+                confirmed: state.confirmedSkills,
+                proof: state.confirmedProof,
+              }),
+              [openCv, openProfile],
+            );
+            return;
+          case "started":
+            assistant(
+              t("cvStateStarted", {
+                skills: state.skills,
+                education: state.education,
+                certificates: state.certificates,
+                languages: state.languages,
+              }),
+              [openCv, openProfile],
+            );
+            return;
+          case "empty":
+            // The ONLY branch where offering to build one is honest.
+            assistant(t("cvStateEmpty"), [importCv, openProfile]);
+            return;
+          case "not_a_worker":
+            assistant(t("cvStateNotWorker"), [openProfile]);
+            return;
+          default:
+            // `unreadable` and `unauthenticated`: our failure, said plainly,
+            // and deliberately WITHOUT an import chip — we have not
+            // established that there is nothing to import.
+            assistant(t("cvStateUnreadable"));
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("cvStateUnreadable"));
+      });
+  }, [assistant, labels.chipCv, labels.chipCvSheet, labels.chipProfile, t]);
+
   const startPlayerCard = useCallback(
     (opts?: { intro?: string }) => {
       assistant(opts?.intro ?? labels.playerCardOpened);
@@ -1794,20 +1954,13 @@ export function ConversationChat({
         // Full-name inclusion first; then a single ≥4-char name token. Real
         // entity names only (§6 of the train: no "Workspace 1" labels) — and
         // anything short/ambiguous falls through to the explicit question.
-        const byFullName = organizations.filter((w) => {
-          const name = fold(w.name).trim();
-          return name.length >= 3 && folded.includes(name);
-        });
-        if (byFullName.length === 1) {
-          target = byFullName[0];
-        } else if (byFullName.length === 0) {
-          const byToken = organizations.filter((w) =>
-            fold(w.name)
-              .split(/\s+/)
-              .some((token) => token.length >= 4 && folded.includes(token)),
-          );
-          if (byToken.length === 1) target = byToken[0];
-        }
+        //
+        // The matcher moved to `lib/conversation/workspace-reference.ts`
+        // (unchanged) so that slice A's bare-name path recognises exactly the
+        // same organisations this does. Two matchers would eventually
+        // disagree about the same word.
+        const candidates = matchWorkspacesByName(organizations, text, fold);
+        if (candidates.length === 1) target = candidates[0];
       }
       if (!target) {
         assistant(
@@ -1822,6 +1975,184 @@ export function ConversationChat({
       performContextSwitch(target);
     },
     [assistant, auth, performContextSwitch, t, withTyping],
+  );
+
+  /**
+   * A NAME WAS TYPED ON ITS OWN (takeover slice A, 2026-09-10).
+   *
+   * "Baltic Staffing Group" used to score 3 on the single keyword "staffing"
+   * and open the employer DEMAND intake — an `access: "write"` intent, reached
+   * from a company's own name. `understand` now labels that shape a
+   * REFERENCE, and this is what happens instead.
+   *
+   * RESOLVE FIRST, ASK SECOND, NEVER ACT.
+   *   1. Is it one of the caller's OWN workspaces? That is real resolution
+   *      against real state, using the list the session already read under
+   *      their RLS and the SAME matcher `startSwitchContext` uses. Exactly one
+   *      match is OFFERED, never performed: switching context changes what
+   *      every later answer means, so it stays the person's decision.
+   *   2. Several matches → ask which.
+   *   3. Otherwise → say plainly that it reads like a name, that nothing was
+   *      done, and ask what they want. The suggestion row is already derived
+   *      from their real context, so the question is not a dead end.
+   *
+   * WHY THE MODEL PROPOSER IS NOT ASKED HERE. `proposeConversationIntentAction`
+   * can only return an id that already exists in `INTENT_REGISTRY`, and every
+   * id in it is an OPERATION. Handing it a bare company name could only ever
+   * produce another operational guess — the exact jump this slice exists to
+   * stop. Making that safe needs the proposer to be able to answer "this is an
+   * entity" or "ask this question", which is a change to its output contract,
+   * not to this call site. Recorded as the next architectural step.
+   *
+   * Nothing here writes, dispatches or confirms.
+   */
+  const handleReference = useCallback(
+    (name: string) => {
+      const workspaces = auth?.workspaces ?? [];
+      const candidates = matchWorkspacesByName(
+        workspaces.filter((w) => w.kind === "organization" && w.name.trim() !== ""),
+        name,
+        fold,
+      );
+      if (candidates.length === 1) {
+        const only = candidates[0];
+        assistant(t("refWorkspaceAsk", { name: only.name }), [
+          { id: `ws:${only.id}`, label: only.name },
+        ]);
+        return;
+      }
+      if (candidates.length > 1) {
+        assistant(
+          t("refWorkspaceMany"),
+          candidates.map((w) => ({ id: `ws:${w.id}`, label: w.name })),
+        );
+        return;
+      }
+      assistant(t("refLooksLikeName"), starterChips);
+    },
+    [assistant, auth?.workspaces, starterChips, t],
+  );
+
+  /**
+   * WHOSE FILE IS THIS? (slice C, 2026-09-10.)
+   *
+   * The conversation's file vocabulary said WHICH SURFACE a document belonged
+   * to and never WHOSE IT WAS, so "Įkeliu 20 kandidatų CV" reached `cv` — the
+   * uploader's OWN import — and the English equivalent reached the demand
+   * surface instead. Every CV confirm action binds to the caller, so the
+   * Lithuanian reading pointed a bulk candidate import straight at the
+   * uploader's own professional history.
+   *
+   * `readFileIntent` reads the two things the person actually stated (whose,
+   * and what kind) and `routeFileIntent` names the EXISTING door — or says
+   * honestly that there is none. NOTHING here parses, uploads or attaches;
+   * it decides which door the file is standing at.
+   *
+   * Three answers matter more than the rest:
+   *   · an UNSTATED owner ASKS. It never defaults to the uploader.
+   *   · another person's document is understood and REFUSED, because no
+   *     candidate-CV import exists — saying so is the only safe answer.
+   *   · an organisation's file needs an organisation context, or it is
+   *     refused for want of authority rather than quietly retargeted.
+   */
+  const handleFileIntent = useCallback(
+    (intent: FileIntent) => {
+      const route = routeFileIntent(intent, {
+        identity,
+        educationWorkspace: Boolean(educationWorkspace),
+      });
+      switch (route.kind) {
+        case "ask_subject":
+          assistant(t("fileAskSubject"));
+          return;
+        case "needs_organization":
+          // The honest door is the context switch, and the copy names it.
+          // No chip is invented for it: `handleChip` has no generic intent
+          // fallthrough, so an unrecognised id would render a dead button.
+          assistant(t("fileNeedsOrganization"));
+          return;
+        case "capability":
+          if (route.capability === "self_cv_import") {
+            assistant(t("fileSelfCv"), [{ id: "cv", label: labels.chipCv }]);
+            return;
+          }
+          if (route.capability === "self_document") {
+            assistant(t("fileSelfDocument"), [
+              { id: "documents-centre", label: labels.documentsChip },
+            ]);
+            return;
+          }
+          // The organization's PEOPLE go to the roster importer, which is
+          // where a file of names can actually complete: parse → preview →
+          // resolve → confirm → commit → receipt. Work EVIDENCE about those
+          // people is the neighbouring import on the same page.
+          assistant(t("fileOrgEvidence"), [
+            {
+              id:
+                intent.kind === "workforce_table"
+                  ? "link:/dashboard/company#people-import-section"
+                  : "link:/dashboard/company#evidence-import",
+              label: labels.documentsChip,
+            },
+          ]);
+          return;
+        default: {
+          // Understood, and honestly not yet servable. EACH SUBJECT GETS ITS
+          // OWN SENTENCE, because they are different situations. A first
+          // draft used one line for all of them and rendering caught it: it
+          // told an agency uploading twenty CVs about "another person's CV" —
+          // singular, and naming the wrong document for a certificate.
+          const notYet: Record<string, string> = {
+            cohort: "fileNotYetCohort",
+            self: "fileNotYetSelf",
+            many_people: "fileNotYetManyPeople",
+            organization: "fileNotYetOrganization",
+          };
+          assistant(t(notYet[route.subject] ?? "fileNotYetOther"), starterChips);
+          return;
+        }
+      }
+    },
+    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, starterChips, t],
+  );
+
+  /**
+   * A QUESTION (owner approval 2026-09-10 — understanding contract widening).
+   *
+   * Questions are first-class: the model may now answer `question` instead of
+   * being forced to name an operation. What the product does with one is
+   * bounded by what it can actually READ.
+   *
+   * If the question names something that resolves to one of the caller's own
+   * workspaces, that is answered from the session's own authorized read —
+   * real data, and explicitly bounded ("that is everything I know about it
+   * from your own data"). Anything else is answered honestly as not-yet-
+   * answerable. NOTHING is invented, and a question NEVER becomes a write
+   * because an operation sounded related.
+   */
+  const handleQuestion = useCallback(
+    (text: string, reference: string | null) => {
+      const workspaces = auth?.workspaces ?? [];
+      if (reference) {
+        const candidates = matchWorkspacesByName(
+          workspaces.filter((w) => w.kind === "organization" && w.name.trim() !== ""),
+          reference,
+          fold,
+        );
+        if (candidates.length === 1) {
+          const only = candidates[0];
+          assistant(t("questionWorkspaceKnown", { name: only.name }), [
+            { id: `ws:${only.id}`, label: only.name },
+          ]);
+          return;
+        }
+        assistant(t("questionUnansweredAbout", { name: reference }), starterChips);
+        return;
+      }
+      void text;
+      assistant(t("questionUnanswered"), starterChips);
+    },
+    [assistant, auth?.workspaces, starterChips, t],
   );
 
   /**
@@ -4532,6 +4863,58 @@ export function ConversationChat({
         }
       }
 
+      /**
+       * ── IS THIS A COMMAND AT ALL? (takeover slice A, 2026-09-10) ─────────
+       *
+       * A staffing agency typed its OWN NAME and the product opened an
+       * employer demand intake:
+       *
+       *     "Baltic Staffing Group"  →  need-workers  (score 3, one keyword)
+       *
+       * `understand` is a layer ABOVE the router, so nothing that already
+       * routed correctly changes: it only re-labels a WEAK match on a
+       * REFERENCE-SHAPED utterance. A name is then resolved against the
+       * person's own world before anything else happens — never turned into
+       * an operation, and never used to create anything.
+       */
+      /**
+       * ── IS THE PERSON HANDING US A FILE, AND WHOSE IS IT? (slice C) ──────
+       *
+       * Checked BEFORE the intent path, because the intent path is exactly
+       * what got this wrong: a bulk candidate import scored as the uploader's
+       * own CV. `readFileIntent` requires a DEPOSIT signal ("čia", "įkeliu",
+       * "here is", "загружаю"), so a question about a file — "Noriu pamatyti
+       * savo CV", "rodyk CV" — is untouched and slice D still runs.
+       */
+      const fileIntent = readFileIntent(sent);
+      if (fileIntent) {
+        handleFileIntent(fileIntent);
+        goalRef.current = advanceGoal({
+          goal: goalRef.current,
+          kind: "new-goal",
+          routedIntent: "unknown",
+          text: sent,
+        });
+        return;
+      }
+
+      const reading = understand(sent);
+      if (reading.kind === "reference") {
+        handleReference(reading.text);
+        // The goal still AGES on this turn — the loop must know a turn
+        // happened, which is the bug the turn-kind machinery exists for.
+        // `unrelated` is the honest kind: a bare name did not advance
+        // whatever we were pursuing, and it did not start a new goal either,
+        // because we have not established what it is for yet.
+        goalRef.current = advanceGoal({
+          goal: goalRef.current,
+          kind: "unrelated",
+          routedIntent: "unknown",
+          text: sent,
+        });
+        return;
+      }
+
       const { intent: routedIntent, score: routedScore } = classifyIntent(sent);
 
       /**
@@ -5190,10 +5573,12 @@ export function ConversationChat({
         // Before this it reached `cvChip` and opened the import: the person
         // asked to see what the product holds and was told to upload it
         // (owner window 11 §30, the exact production journey).
-        cvView: () =>
-          identity === "person"
-            ? assistant(labels.cvViewHint, [{ id: "link:/cv", label: labels.chipCvSheet }])
-            : assistant(fallbackText, starterChips),
+        //
+        // It now READS the record before saying anything about it, for the
+        // person whatever workspace they are sitting in — see `startCvState`.
+        cvView: () => startCvState(),
+        // Derived at ask time from the active context — see `startCapabilities`.
+        capabilities: () => startCapabilities(),
         // The sentence named the CV and stopped. Three real doors, no guess
         // and no write — owner §5: "If uncertain, ask." The third door is the
         // profile because the CV is DERIVED from it: "pakeisk mano CV" has no
@@ -5220,20 +5605,50 @@ export function ConversationChat({
         dispatchIntent(intent, handlers, withTyping, fallback);
         return;
       }
-      // THE GEMINI PROPOSER (owner approval 2026-09-05): asked ONLY about a
-      // sentence the deterministic router could not read. Only an EXISTING
-      // intent id can come back (re-validated server-side against the
-      // registry); it then runs the SAME handler the deterministic path would
-      // have run — the handler asks for what is missing from real rows, and
-      // every write still goes through the dispatcher. Low confidence is
-      // honestly "not understood", never a guess.
+      // THE MODEL HALF OF UNDERSTANDING (owner approval 2026-09-05, contract
+      // widened 2026-09-10). Asked ONLY about a message the deterministic
+      // layer could not read — so a message it already understands costs
+      // nothing and this call rate is unchanged by the widening.
+      //
+      // It now returns the SAME typed union the deterministic layer produces,
+      // so a message can come back as a NAME, a QUESTION or a CORRECTION
+      // instead of being forced into an operation. An `intent` is still only
+      // ever an id the registry already owns, re-validated server-side, and
+      // it still runs the SAME handler the deterministic path would have run;
+      // every write still goes through the dispatcher. Low confidence on an
+      // action is honestly "not understood", never a guess.
+      //
+      // No provider is named here or in the server action, which routes by
+      // TASK through the cost-aware chain (free-local → free-tier → paid).
+      // The client never calls a model — a guard in llm-proposal.test.ts
+      // pins that this file contains no runtime AI import at all.
       setTyping(true);
-      proposeConversationIntentAction({ sentence: text, locale, identity })
+      proposeUnderstandingAction({ sentence: text, locale, identity })
         .then((res) => {
           setTyping(false);
-          const resolved: ConversationIntent = res.kind === "proposal" && res.confidence !== "low" ? res.intent : "unknown";
-          trackResolution(resolved, res.kind === "proposal" ? "llm" : "deterministic");
-          dispatchIntent(resolved, handlers, withTyping, fallback);
+          switch (res.kind) {
+            case "intent":
+              trackResolution(res.intent, "llm");
+              dispatchIntent(res.intent, handlers, withTyping, fallback);
+              return;
+            case "reference":
+              // Resolve against the caller's own world — never an operation.
+              trackResolution("unknown", "llm");
+              handleReference(res.text);
+              return;
+            case "question":
+              trackResolution("unknown", "llm");
+              handleQuestion(res.text, res.reference);
+              return;
+            case "clarification":
+              // A correction or a fragment. Ask; do not guess an operation.
+              trackResolution("unknown", "llm");
+              assistant(t("understandClarify"), starterChips);
+              return;
+            default:
+              trackResolution("unknown", "deterministic");
+              dispatchIntent("unknown", handlers, withTyping, fallback);
+          }
         })
         .catch(() => {
           setTyping(false);
@@ -5241,7 +5656,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**

@@ -22,6 +22,7 @@ import {
   verifyCapabilityConfirmation,
 } from "./confirmable";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
+import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -87,7 +88,23 @@ const profileGet: CapabilityDescriptor = {
     // (`getSessionProfile` → readProfileRow) and the SAME workers-row core
     // every web navigation reads (`getWorkerCoreRow` → readWorkerCoreRow) —
     // one query contract per table, no capability-side re-implementation.
-    const read = await readProfileRow(caller);
+    //
+    // CONCURRENT, because they are independent: both are keyed on the
+    // caller's own id (`profiles.id` and `workers.profile_id`), so neither
+    // read's query depends on the other's result. Run sequentially they cost
+    // two round trips — measured at 417 ms of pure waiting in the real
+    // ChatGPT trace of 2026-09-10 (profiles 10:29:59.952 → workers
+    // 10:30:00.369), which was most of this capability's server time.
+    //
+    // Authorization is untouched: both still execute under the caller's own
+    // RLS-scoped client. The only behavioural difference is that the workers
+    // read is also issued when the profile turns out to be missing or
+    // unreadable — a wasted query in a rare case, never a disclosed one,
+    // because RLS answers it exactly as before.
+    const [read, workerRead] = await Promise.all([
+      readProfileRow(caller),
+      readWorkerCoreRow(caller),
+    ]);
     if (!read.ok) {
       // A failed read is "unavailable", never "you have no profile" (#1314).
       return { ok: false, code: "unavailable", message: "Profile read failed." };
@@ -96,8 +113,6 @@ const profileGet: CapabilityDescriptor = {
     if (!profile) {
       return { ok: false, code: "not_found", message: "No profile row for this account." };
     }
-
-    const workerRead = await readWorkerCoreRow(caller);
 
     return {
       ok: true,
@@ -1525,6 +1540,12 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // Declared as a group because they are one flow, not eleven unrelated
   // actions; each descriptor is still reviewed individually in its own file.
   ...EVIDENCE_IMPORT_CAPABILITIES,
+  // Organization people ingestion — the roster half of the same architecture.
+  // The evidence import READS the roster; this is what puts people on it, for
+  // a company's employees, an agency's candidates and an institution's
+  // learners alike. One flow (preview → answer → commit), one domain service
+  // shared with the web import panel.
+  ...PEOPLE_INGEST_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

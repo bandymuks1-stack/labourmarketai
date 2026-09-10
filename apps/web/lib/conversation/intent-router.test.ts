@@ -615,6 +615,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat weet je over mij?",
     de: "Was weißt du über mich?",
   },
+  capabilities: {
+    lt: "Ką galiu padaryti šioje paskyroje?",
+    en: "What can I do in this account?",
+    ru: "Что я могу сделать в этом аккаунте?",
+    nl: "Wat kan ik hier doen?",
+    de: "Was kann ich hier machen?",
+  },
   "switch-context": {
     lt: "Perjunk į įmonę",
     en: "Switch to my company",

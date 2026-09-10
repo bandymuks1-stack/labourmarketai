@@ -45,6 +45,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "company-overview": "overview of the company workspace",
   "create-organization": "create a company or organization",
   context: "which company or role the user is acting for (context readback)",
+  capabilities:
+    "what the user can achieve from where they are standing right now — asked when they do not yet know the product ('what can I do here?'). Not what they still have to do, and not what we know about them.",
   "switch-context": "switch the company or role the user acts for",
   projects: "list the company's projects (or the person's projects)",
   "open-project": "open one specific project",

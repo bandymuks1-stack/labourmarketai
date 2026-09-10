@@ -18,6 +18,7 @@ import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
+import { PeopleImportPanel } from "@/components/app/people-import-panel";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
@@ -1052,6 +1053,29 @@ export default async function CompanyDashboardPage({
           <OrganizationCapabilitiesCard
             organizationId={capabilityOrgId}
             declared={declaredCapabilities}
+          />
+        </div>
+      ) : null}
+
+      {/* BRINGING PEOPLE IN. Beside the capability question because it is the
+          same subject — who this organization works with — and because the
+          evidence import next door MATCHES against this roster and had no way
+          to fill it. The relationship that LEADS follows what the workspace
+          declared; every other truthful relationship stays available, because
+          an agency still employs people and a school still hires. */}
+      {capabilityOrgId ? (
+        <div id="people-import-section" className="scroll-mt-20">
+          <PeopleImportPanel
+            organizationName={(companyRow?.displayName || companyRow?.legalName || "").trim()}
+            suggested={
+              declaredCapabilities.includes("training_provider")
+                ? "student"
+                : isStaffingAgency ||
+                    declaredCapabilities.includes("workforce_provider") ||
+                    declaredCapabilities.includes("recruitment_partner")
+                  ? "candidate"
+                  : "employee"
+            }
           />
         </div>
       ) : null}
