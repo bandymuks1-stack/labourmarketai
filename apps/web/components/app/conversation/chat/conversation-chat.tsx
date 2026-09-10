@@ -60,6 +60,8 @@ import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-for
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
+import { understand } from "@/lib/conversation/utterance-understanding";
+import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
 import {
   introMessageKey,
   outcomeMessageKey,
@@ -1943,20 +1945,13 @@ export function ConversationChat({
         // Full-name inclusion first; then a single ≥4-char name token. Real
         // entity names only (§6 of the train: no "Workspace 1" labels) — and
         // anything short/ambiguous falls through to the explicit question.
-        const byFullName = organizations.filter((w) => {
-          const name = fold(w.name).trim();
-          return name.length >= 3 && folded.includes(name);
-        });
-        if (byFullName.length === 1) {
-          target = byFullName[0];
-        } else if (byFullName.length === 0) {
-          const byToken = organizations.filter((w) =>
-            fold(w.name)
-              .split(/\s+/)
-              .some((token) => token.length >= 4 && folded.includes(token)),
-          );
-          if (byToken.length === 1) target = byToken[0];
-        }
+        //
+        // The matcher moved to `lib/conversation/workspace-reference.ts`
+        // (unchanged) so that slice A's bare-name path recognises exactly the
+        // same organisations this does. Two matchers would eventually
+        // disagree about the same word.
+        const candidates = matchWorkspacesByName(organizations, text, fold);
+        if (candidates.length === 1) target = candidates[0];
       }
       if (!target) {
         assistant(
@@ -1971,6 +1966,62 @@ export function ConversationChat({
       performContextSwitch(target);
     },
     [assistant, auth, performContextSwitch, t, withTyping],
+  );
+
+  /**
+   * A NAME WAS TYPED ON ITS OWN (takeover slice A, 2026-09-10).
+   *
+   * "Baltic Staffing Group" used to score 3 on the single keyword "staffing"
+   * and open the employer DEMAND intake — an `access: "write"` intent, reached
+   * from a company's own name. `understand` now labels that shape a
+   * REFERENCE, and this is what happens instead.
+   *
+   * RESOLVE FIRST, ASK SECOND, NEVER ACT.
+   *   1. Is it one of the caller's OWN workspaces? That is real resolution
+   *      against real state, using the list the session already read under
+   *      their RLS and the SAME matcher `startSwitchContext` uses. Exactly one
+   *      match is OFFERED, never performed: switching context changes what
+   *      every later answer means, so it stays the person's decision.
+   *   2. Several matches → ask which.
+   *   3. Otherwise → say plainly that it reads like a name, that nothing was
+   *      done, and ask what they want. The suggestion row is already derived
+   *      from their real context, so the question is not a dead end.
+   *
+   * WHY THE MODEL PROPOSER IS NOT ASKED HERE. `proposeConversationIntentAction`
+   * can only return an id that already exists in `INTENT_REGISTRY`, and every
+   * id in it is an OPERATION. Handing it a bare company name could only ever
+   * produce another operational guess — the exact jump this slice exists to
+   * stop. Making that safe needs the proposer to be able to answer "this is an
+   * entity" or "ask this question", which is a change to its output contract,
+   * not to this call site. Recorded as the next architectural step.
+   *
+   * Nothing here writes, dispatches or confirms.
+   */
+  const handleReference = useCallback(
+    (name: string) => {
+      const workspaces = auth?.workspaces ?? [];
+      const candidates = matchWorkspacesByName(
+        workspaces.filter((w) => w.kind === "organization" && w.name.trim() !== ""),
+        name,
+        fold,
+      );
+      if (candidates.length === 1) {
+        const only = candidates[0];
+        assistant(t("refWorkspaceAsk", { name: only.name }), [
+          { id: `ws:${only.id}`, label: only.name },
+        ]);
+        return;
+      }
+      if (candidates.length > 1) {
+        assistant(
+          t("refWorkspaceMany"),
+          candidates.map((w) => ({ id: `ws:${w.id}`, label: w.name })),
+        );
+        return;
+      }
+      assistant(t("refLooksLikeName"), starterChips);
+    },
+    [assistant, auth?.workspaces, starterChips, t],
   );
 
   /**
@@ -4679,6 +4730,37 @@ export function ConversationChat({
           });
           return;
         }
+      }
+
+      /**
+       * ── IS THIS A COMMAND AT ALL? (takeover slice A, 2026-09-10) ─────────
+       *
+       * A staffing agency typed its OWN NAME and the product opened an
+       * employer demand intake:
+       *
+       *     "Baltic Staffing Group"  →  need-workers  (score 3, one keyword)
+       *
+       * `understand` is a layer ABOVE the router, so nothing that already
+       * routed correctly changes: it only re-labels a WEAK match on a
+       * REFERENCE-SHAPED utterance. A name is then resolved against the
+       * person's own world before anything else happens — never turned into
+       * an operation, and never used to create anything.
+       */
+      const reading = understand(sent);
+      if (reading.kind === "reference") {
+        handleReference(reading.text);
+        // The goal still AGES on this turn — the loop must know a turn
+        // happened, which is the bug the turn-kind machinery exists for.
+        // `unrelated` is the honest kind: a bare name did not advance
+        // whatever we were pursuing, and it did not start a new goal either,
+        // because we have not established what it is for yet.
+        goalRef.current = advanceGoal({
+          goal: goalRef.current,
+          kind: "unrelated",
+          routedIntent: "unknown",
+          text: sent,
+        });
+        return;
       }
 
       const { intent: routedIntent, score: routedScore } = classifyIntent(sent);
