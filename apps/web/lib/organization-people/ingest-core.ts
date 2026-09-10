@@ -342,6 +342,59 @@ export type RowResolution =
   | { readonly index: number; readonly choice: "existing"; readonly personId: string }
   | { readonly index: number; readonly choice: "new" };
 
+/**
+ * THE NUMBER THE HUMAN IS APPROVING, once they have answered the questions.
+ *
+ * `planPeopleIngest` already folds resolutions in — but it needs the roster,
+ * which only the server has. The review panel therefore held the counts from
+ * the FIRST preview and never moved them, with two consequences a person met
+ * directly:
+ *
+ *   · "N people will be added" stayed at its pre-answer value, so the number
+ *     approved was not the number written;
+ *   · the confirm button is disabled while `toCreate === 0`, so a file whose
+ *     rows were ALL ambiguous could never be committed. Answering every
+ *     question with "add as new" left the button dead — and the explanatory
+ *     "nothing to add" line is suppressed while questions exist, so the
+ *     person got a dead control and no reason for it.
+ *
+ * This projects the original plan through the answers, reproducing exactly
+ * what `planPeopleIngest` will do with the same resolutions: an ambiguous row
+ * answered `new` becomes a creation, answered `existing` becomes an
+ * already-on-roster row. Nothing else moves, and an answer naming a candidate
+ * that was never offered for that row is not an answer — the same rule the
+ * server applies when an id is not on its roster.
+ *
+ * PURE, so the panel can call it on every keystroke and the projection stays
+ * testable against the planner it is mirroring.
+ */
+export function countsAfterResolutions(
+  rows: readonly IngestPlanRow[],
+  counts: IngestCounts,
+  resolutions: readonly RowResolution[],
+): IngestCounts {
+  const answered = new Map<number, RowResolution>(resolutions.map((r) => [r.index, r]));
+  let { toCreate, alreadyOnRoster, ambiguous } = counts;
+
+  for (const row of rows) {
+    if (row.disposition.kind !== "ambiguous") continue;
+    const answer = answered.get(row.index);
+    if (!answer) continue;
+    if (answer.choice === "new") {
+      ambiguous -= 1;
+      toCreate += 1;
+      continue;
+    }
+    // Only a candidate actually offered for THIS row settles it.
+    const offered = row.disposition.candidates.some((c) => c.id === answer.personId);
+    if (!offered) continue;
+    ambiguous -= 1;
+    alreadyOnRoster += 1;
+  }
+
+  return { ...counts, toCreate, alreadyOnRoster, ambiguous };
+}
+
 /** One row as it would be written. The ONLY shape the writer accepts. */
 export interface PersonToCreate {
   readonly displayName: string;

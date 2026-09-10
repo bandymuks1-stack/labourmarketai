@@ -8,11 +8,12 @@ import {
   previewPeopleFileAction,
   type PeopleFilePreview,
 } from "@/lib/organization-people/ingest-actions";
-import type {
-  IngestPlan,
-  IngestRelationship,
-  PersonSource,
-  RowResolution,
+import {
+  countsAfterResolutions,
+  type IngestPlan,
+  type IngestRelationship,
+  type PersonSource,
+  type RowResolution,
 } from "@/lib/organization-people/ingest-core";
 
 /**
@@ -142,7 +143,13 @@ export function PeopleImportPanel({
   }
 
   const plan: IngestPlan | null = stage.kind === "preview" ? stage.preview.plan : null;
-  const counts = plan?.kind === "plan" ? plan.counts : null;
+  // The counts as they stand AFTER the human's answers, not as the first
+  // preview left them: this is the number they are approving, and it is what
+  // the server will act on when it re-plans with the same resolutions.
+  const counts =
+    plan?.kind === "plan"
+      ? countsAfterResolutions(plan.rows, plan.counts, Object.values(resolutions))
+      : null;
   const ambiguous =
     plan?.kind === "plan"
       ? plan.rows.filter((r) => r.disposition.kind === "ambiguous")
@@ -291,7 +298,7 @@ export function PeopleImportPanel({
               {t("cancel")}
             </button>
           </div>
-          {counts.toCreate === 0 && ambiguous.length === 0 ? (
+          {counts.toCreate === 0 && answered ? (
             <p className="mt-2 text-meta text-text-muted">{t("nothingToAdd")}</p>
           ) : null}
         </div>
