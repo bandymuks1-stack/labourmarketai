@@ -63,6 +63,11 @@ import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-serve
 import { understand } from "@/lib/conversation/utterance-understanding";
 import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
 import {
+  readFileIntent,
+  routeFileIntent,
+  type FileIntent,
+} from "@/lib/conversation/file-subject";
+import {
   introMessageKey,
   outcomeMessageKey,
 } from "@/lib/conversation/capability-answer";
@@ -700,6 +705,10 @@ export function ConversationChat({
   personalIntroPayload = null,
   countryLabels,
   agencyWorkspace = false,
+  // Declared in the props type since the education slice but never read here
+  // until slice C: a cohort file may only be taken by a workspace that
+  // actually holds the education capability.
+  educationWorkspace = false,
   learnerContextLine = null,
   starters = null,
   personHasProfileData = null,
@@ -2022,6 +2031,79 @@ export function ConversationChat({
       assistant(t("refLooksLikeName"), starterChips);
     },
     [assistant, auth?.workspaces, starterChips, t],
+  );
+
+  /**
+   * WHOSE FILE IS THIS? (slice C, 2026-09-10.)
+   *
+   * The conversation's file vocabulary said WHICH SURFACE a document belonged
+   * to and never WHOSE IT WAS, so "Įkeliu 20 kandidatų CV" reached `cv` — the
+   * uploader's OWN import — and the English equivalent reached the demand
+   * surface instead. Every CV confirm action binds to the caller, so the
+   * Lithuanian reading pointed a bulk candidate import straight at the
+   * uploader's own professional history.
+   *
+   * `readFileIntent` reads the two things the person actually stated (whose,
+   * and what kind) and `routeFileIntent` names the EXISTING door — or says
+   * honestly that there is none. NOTHING here parses, uploads or attaches;
+   * it decides which door the file is standing at.
+   *
+   * Three answers matter more than the rest:
+   *   · an UNSTATED owner ASKS. It never defaults to the uploader.
+   *   · another person's document is understood and REFUSED, because no
+   *     candidate-CV import exists — saying so is the only safe answer.
+   *   · an organisation's file needs an organisation context, or it is
+   *     refused for want of authority rather than quietly retargeted.
+   */
+  const handleFileIntent = useCallback(
+    (intent: FileIntent) => {
+      const route = routeFileIntent(intent, {
+        identity,
+        educationWorkspace: Boolean(educationWorkspace),
+      });
+      switch (route.kind) {
+        case "ask_subject":
+          assistant(t("fileAskSubject"));
+          return;
+        case "needs_organization":
+          // The honest door is the context switch, and the copy names it.
+          // No chip is invented for it: `handleChip` has no generic intent
+          // fallthrough, so an unrecognised id would render a dead button.
+          assistant(t("fileNeedsOrganization"));
+          return;
+        case "capability":
+          if (route.capability === "self_cv_import") {
+            assistant(t("fileSelfCv"), [{ id: "cv", label: labels.chipCv }]);
+            return;
+          }
+          if (route.capability === "self_document") {
+            assistant(t("fileSelfDocument"), [
+              { id: "documents-centre", label: labels.documentsChip },
+            ]);
+            return;
+          }
+          assistant(t("fileOrgEvidence"), [
+            { id: "link:/dashboard/company#evidence-import", label: labels.documentsChip },
+          ]);
+          return;
+        default: {
+          // Understood, and honestly not yet servable. EACH SUBJECT GETS ITS
+          // OWN SENTENCE, because they are different situations. A first
+          // draft used one line for all of them and rendering caught it: it
+          // told an agency uploading twenty CVs about "another person's CV" —
+          // singular, and naming the wrong document for a certificate.
+          const notYet: Record<string, string> = {
+            cohort: "fileNotYetCohort",
+            self: "fileNotYetSelf",
+            many_people: "fileNotYetManyPeople",
+            organization: "fileNotYetOrganization",
+          };
+          assistant(t(notYet[route.subject] ?? "fileNotYetOther"), starterChips);
+          return;
+        }
+      }
+    },
+    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, starterChips, t],
   );
 
   /**
@@ -4785,6 +4867,27 @@ export function ConversationChat({
        * person's own world before anything else happens — never turned into
        * an operation, and never used to create anything.
        */
+      /**
+       * ── IS THE PERSON HANDING US A FILE, AND WHOSE IS IT? (slice C) ──────
+       *
+       * Checked BEFORE the intent path, because the intent path is exactly
+       * what got this wrong: a bulk candidate import scored as the uploader's
+       * own CV. `readFileIntent` requires a DEPOSIT signal ("čia", "įkeliu",
+       * "here is", "загружаю"), so a question about a file — "Noriu pamatyti
+       * savo CV", "rodyk CV" — is untouched and slice D still runs.
+       */
+      const fileIntent = readFileIntent(sent);
+      if (fileIntent) {
+        handleFileIntent(fileIntent);
+        goalRef.current = advanceGoal({
+          goal: goalRef.current,
+          kind: "new-goal",
+          routedIntent: "unknown",
+          text: sent,
+        });
+        return;
+      }
+
       const reading = understand(sent);
       if (reading.kind === "reference") {
         handleReference(reading.text);
@@ -5543,7 +5646,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**
