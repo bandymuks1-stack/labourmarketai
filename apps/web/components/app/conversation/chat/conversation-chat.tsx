@@ -75,7 +75,7 @@ import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
 import { loadProjectReadinessForChat } from "@/lib/conversation/project-readiness";
 import { loadConfirmWorkForChat } from "@/lib/conversation/confirm-work";
 import type { ConfirmWorkChatResult } from "@/lib/conversation/confirm-work-contract";
-import { proposeConversationIntentAction } from "@/lib/conversation/llm-proposal";
+import { proposeUnderstandingAction } from "@/lib/conversation/llm-proposal";
 import {
   advanceGoal,
   classifyTurn,
@@ -2020,6 +2020,45 @@ export function ConversationChat({
         return;
       }
       assistant(t("refLooksLikeName"), starterChips);
+    },
+    [assistant, auth?.workspaces, starterChips, t],
+  );
+
+  /**
+   * A QUESTION (owner approval 2026-09-10 — understanding contract widening).
+   *
+   * Questions are first-class: the model may now answer `question` instead of
+   * being forced to name an operation. What the product does with one is
+   * bounded by what it can actually READ.
+   *
+   * If the question names something that resolves to one of the caller's own
+   * workspaces, that is answered from the session's own authorized read —
+   * real data, and explicitly bounded ("that is everything I know about it
+   * from your own data"). Anything else is answered honestly as not-yet-
+   * answerable. NOTHING is invented, and a question NEVER becomes a write
+   * because an operation sounded related.
+   */
+  const handleQuestion = useCallback(
+    (text: string, reference: string | null) => {
+      const workspaces = auth?.workspaces ?? [];
+      if (reference) {
+        const candidates = matchWorkspacesByName(
+          workspaces.filter((w) => w.kind === "organization" && w.name.trim() !== ""),
+          reference,
+          fold,
+        );
+        if (candidates.length === 1) {
+          const only = candidates[0];
+          assistant(t("questionWorkspaceKnown", { name: only.name }), [
+            { id: `ws:${only.id}`, label: only.name },
+          ]);
+          return;
+        }
+        assistant(t("questionUnansweredAbout", { name: reference }), starterChips);
+        return;
+      }
+      void text;
+      assistant(t("questionUnanswered"), starterChips);
     },
     [assistant, auth?.workspaces, starterChips, t],
   );
@@ -5453,20 +5492,50 @@ export function ConversationChat({
         dispatchIntent(intent, handlers, withTyping, fallback);
         return;
       }
-      // THE GEMINI PROPOSER (owner approval 2026-09-05): asked ONLY about a
-      // sentence the deterministic router could not read. Only an EXISTING
-      // intent id can come back (re-validated server-side against the
-      // registry); it then runs the SAME handler the deterministic path would
-      // have run — the handler asks for what is missing from real rows, and
-      // every write still goes through the dispatcher. Low confidence is
-      // honestly "not understood", never a guess.
+      // THE MODEL HALF OF UNDERSTANDING (owner approval 2026-09-05, contract
+      // widened 2026-09-10). Asked ONLY about a message the deterministic
+      // layer could not read — so a message it already understands costs
+      // nothing and this call rate is unchanged by the widening.
+      //
+      // It now returns the SAME typed union the deterministic layer produces,
+      // so a message can come back as a NAME, a QUESTION or a CORRECTION
+      // instead of being forced into an operation. An `intent` is still only
+      // ever an id the registry already owns, re-validated server-side, and
+      // it still runs the SAME handler the deterministic path would have run;
+      // every write still goes through the dispatcher. Low confidence on an
+      // action is honestly "not understood", never a guess.
+      //
+      // No provider is named here or in the server action, which routes by
+      // TASK through the cost-aware chain (free-local → free-tier → paid).
+      // The client never calls a model — a guard in llm-proposal.test.ts
+      // pins that this file contains no runtime AI import at all.
       setTyping(true);
-      proposeConversationIntentAction({ sentence: text, locale, identity })
+      proposeUnderstandingAction({ sentence: text, locale, identity })
         .then((res) => {
           setTyping(false);
-          const resolved: ConversationIntent = res.kind === "proposal" && res.confidence !== "low" ? res.intent : "unknown";
-          trackResolution(resolved, res.kind === "proposal" ? "llm" : "deterministic");
-          dispatchIntent(resolved, handlers, withTyping, fallback);
+          switch (res.kind) {
+            case "intent":
+              trackResolution(res.intent, "llm");
+              dispatchIntent(res.intent, handlers, withTyping, fallback);
+              return;
+            case "reference":
+              // Resolve against the caller's own world — never an operation.
+              trackResolution("unknown", "llm");
+              handleReference(res.text);
+              return;
+            case "question":
+              trackResolution("unknown", "llm");
+              handleQuestion(res.text, res.reference);
+              return;
+            case "clarification":
+              // A correction or a fragment. Ask; do not guess an operation.
+              trackResolution("unknown", "llm");
+              assistant(t("understandClarify"), starterChips);
+              return;
+            default:
+              trackResolution("unknown", "deterministic");
+              dispatchIntent("unknown", handlers, withTyping, fallback);
+          }
         })
         .catch(() => {
           setTyping(false);
@@ -5474,7 +5543,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**

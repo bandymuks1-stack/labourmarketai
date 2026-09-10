@@ -138,16 +138,67 @@ export function looksLikeReference(text: string): boolean {
  *                                    resolves to nothing and the model layer
  *                                    cannot place it either.
  */
+/** Which layer produced the reading. Both normalise onto ONE union. */
+export type UnderstandingSource = "deterministic" | "model";
+
+/** Why nothing usable came back. `none` is not one of these — see below. */
+export type UnsupportedReason =
+  | "unauthenticated"
+  | "empty"
+  | "rate_limited"
+  | "ai_unavailable"
+  | "not_understood";
+
 export type Understanding =
-  | { readonly kind: "intent"; readonly intent: Exclude<ConversationIntent, "unknown">; readonly score: number }
+  | {
+      readonly kind: "intent";
+      readonly intent: Exclude<ConversationIntent, "unknown">;
+      readonly score: number;
+      readonly source: UnderstandingSource;
+    }
   | {
       readonly kind: "reference";
       /** Exactly what the person typed — the caller resolves it, never this module. */
       readonly text: string;
       readonly score: number;
       /** What the weak match WOULD have fired, kept for telemetry and tests. */
-      readonly suppressed: Exclude<ConversationIntent, "unknown">;
+      readonly suppressed: Exclude<ConversationIntent, "unknown"> | null;
+      readonly source: UnderstandingSource;
     }
+  | {
+      /**
+       * They are asking ABOUT something rather than asking for it to be done.
+       * Only the model produces this: the deterministic router has no way to
+       * tell a question from a command except by the ids it already owns.
+       */
+      readonly kind: "question";
+      readonly text: string;
+      /** A name the question is about, copied verbatim — unresolved. */
+      readonly reference: string | null;
+      readonly source: "model";
+    }
+  | {
+      /**
+       * A real message that is not yet a request — a correction ("ne, čia ne
+       * mano CV"), a fragment, or something genuinely ambiguous. The product
+       * ASKS. It does not guess, and it does not force the message into an
+       * operation.
+       */
+      readonly kind: "clarification";
+      readonly text: string;
+      readonly source: "model";
+    }
+  | {
+      /**
+       * We asked and got nothing usable. DISTINCT from `none`: this one means
+       * a real attempt was made and failed, which is a different sentence to
+       * the person and a different fact for telemetry.
+       */
+      readonly kind: "unsupported";
+      readonly reason: UnsupportedReason;
+      readonly source: UnderstandingSource;
+    }
+  /** The deterministic layer found nothing. The model has NOT been asked yet. */
   | { readonly kind: "none" };
 
 /**
@@ -160,7 +211,13 @@ export function understand(text: string): Understanding {
   if (match.intent === "unknown" || match.score <= 0) return { kind: "none" };
   const intent = match.intent as Exclude<ConversationIntent, "unknown">;
   if (match.score < ACTION_FLOOR && looksLikeReference(text)) {
-    return { kind: "reference", text: text.trim(), score: match.score, suppressed: intent };
+    return {
+      kind: "reference",
+      text: text.trim(),
+      score: match.score,
+      suppressed: intent,
+      source: "deterministic",
+    };
   }
-  return { kind: "intent", intent, score: match.score };
+  return { kind: "intent", intent, score: match.score, source: "deterministic" };
 }
