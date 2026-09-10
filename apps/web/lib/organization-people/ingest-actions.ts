@@ -12,10 +12,12 @@ import {
   MAX_PEOPLE_PER_BATCH,
   peopleToCreate,
   planPeopleIngest,
+  INGEST_RELATIONSHIPS,
   RELATIONSHIPS_NEEDING_MIGRATION,
   type IngestPlan,
   type IngestRelationship,
   type PersonSource,
+  type RowResolution,
 } from "./ingest-core";
 
 /**
@@ -163,6 +165,8 @@ export async function previewPeopleIngestAction(input: {
 export async function commitPeopleIngestAction(input: {
   readonly sources: readonly PersonSource[];
   readonly relationship: IngestRelationship;
+  /** Answers the human gave to ambiguities in the preview. */
+  readonly resolutions?: readonly RowResolution[];
 }): Promise<IngestCommitResult> {
   try {
     const caller = await callerOrNull();
@@ -183,6 +187,7 @@ export async function commitPeopleIngestAction(input: {
       sources: input.sources ?? [],
       roster,
       relationship: input.relationship,
+      resolutions: input.resolutions,
     });
     if (plan.kind !== "plan") return { kind: "too-many-rows", limit: MAX_PEOPLE_PER_BATCH };
     const rows = peopleToCreate(plan);
@@ -230,7 +235,19 @@ export async function commitPeopleIngestAction(input: {
         }
         return { kind: "error" };
       }
-      created = (data ?? []).length;
+      const insertedIds = ((data ?? []) as { id: string }[]).map((r) => r.id);
+      // READBACK. "The write returned without an exception" is not evidence
+      // that anything persisted (#1314 / SEP-7). Count the rows that are
+      // actually there, by id, under the caller's own RLS.
+      const back = await db(caller.supabase)
+        .from("organization_people")
+        .select("id")
+        .eq("organization_id", org.organizationId)
+        .in("id", insertedIds.length > 0 ? insertedIds : ["00000000-0000-0000-0000-000000000000"]);
+      if (back.error) return { kind: "error" };
+      created = ((back.data ?? []) as unknown[]).length;
+      // A short write is a real failure, not a smaller success.
+      if (created !== insertedIds.length) return { kind: "error" };
     }
 
     return {
@@ -244,4 +261,105 @@ export async function commitPeopleIngestAction(input: {
   } catch {
     return { kind: "error" };
   }
+}
+
+// ── THE HUMAN ENTRY: a file an authorized person attached ───────────────────
+
+/** What a person may attach. Deliberately short — see `readPeopleFile`. */
+export const PEOPLE_FILE_MAX_BYTES = 5 * 1024 * 1024;
+
+export type PeopleFilePreview =
+  | {
+      readonly kind: "ok";
+      readonly organizationId: string;
+      readonly sourceLabel: string;
+      /** The parsed people, echoed so the confirm step commits what was SHOWN. */
+      readonly sources: readonly PersonSource[];
+      readonly plan: IngestPlan;
+    }
+  | { readonly kind: "no-name-column"; readonly headers: readonly string[] }
+  | { readonly kind: "unsupported-file"; readonly filename: string }
+  | { readonly kind: "file-too-large"; readonly limit: number }
+  | { readonly kind: "nothing-parsed" }
+  | IngestFailure;
+
+const isXlsxName = (n: string): boolean => /\.(xlsx|xlsm)$/i.test(n);
+const isDelimitedName = (n: string): boolean => /\.(csv|tsv|txt)$/i.test(n);
+
+/**
+ * FILE → PEOPLE, on the server, through the AUDITED readers.
+ *
+ * XLSX goes through `readTimesheetXlsx` — the only module that touches
+ * exceljs, with its magic-byte check, byte cap, cell cap and parse timeout.
+ * CSV/TSV/TXT goes through `parseDelimited`. Neither reader is re-implemented
+ * and no new file format is invented here.
+ *
+ * NOTHING IS WRITTEN. This is the "see what we understood" step, and it is
+ * the whole reason a commit is a second, separate act.
+ */
+export async function previewPeopleFileAction(form: FormData): Promise<PeopleFilePreview> {
+  try {
+    const caller = await callerOrNull();
+    if (!caller) return { kind: "not-authorized", reason: "not-signed-in" };
+    const org = await resolveEvidenceOrganization(caller);
+    if (!org.ok) {
+      return org.reason === "choice-required" || org.reason === "not-a-member"
+        ? { kind: "choice-required", options: (org.options ?? []).map((o) => ({ id: o.id, name: o.name })) }
+        : { kind: "not-authorized", reason: org.reason };
+    }
+
+    const file = form.get("file");
+    if (!(file instanceof File) || file.size === 0) return { kind: "nothing-parsed" };
+    if (file.size > PEOPLE_FILE_MAX_BYTES) {
+      return { kind: "file-too-large", limit: PEOPLE_FILE_MAX_BYTES };
+    }
+    const filename = file.name || "file";
+
+    let grid: readonly (readonly string[])[] = [];
+    if (isXlsxName(filename)) {
+      const { readTimesheetXlsx } = await import("@/lib/timesheet-import/xlsx-read");
+      const read = await readTimesheetXlsx(Buffer.from(await file.arrayBuffer()));
+      if (read.kind !== "ok") return { kind: "unsupported-file", filename };
+      grid = read.sheets[0]?.rows ?? [];
+    } else if (isDelimitedName(filename)) {
+      const { parseDelimited } = await import("@/lib/organization-evidence/parse-tabular");
+      grid = parseDelimited(await file.text());
+    } else {
+      // A PDF/DOCX CV is a different, incomplete path (professional data has
+      // nowhere honest to land yet). Saying so beats importing a name and
+      // silently dropping the rest of a person's career.
+      return { kind: "unsupported-file", filename };
+    }
+
+    const { peopleFromGrid } = await import("./ingest-sources");
+    const read = peopleFromGrid(grid, filename);
+    if (read.kind === "empty") return { kind: "nothing-parsed" };
+    if (read.kind === "no_name_column") {
+      return { kind: "no-name-column", headers: read.headers };
+    }
+    if (read.people.length > MAX_PEOPLE_PER_BATCH) {
+      return { kind: "too-many-rows", limit: MAX_PEOPLE_PER_BATCH };
+    }
+
+    const roster = await loadRoster(caller, org.organizationId);
+    if (roster === null) return { kind: "error" };
+    const relationship = readRelationship(form.get("relationship"));
+
+    return {
+      kind: "ok",
+      organizationId: org.organizationId,
+      sourceLabel: filename,
+      sources: read.people,
+      plan: planPeopleIngest({ sources: read.people, roster, relationship }),
+    };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+function readRelationship(v: FormDataEntryValue | null): IngestRelationship | null {
+  const s = typeof v === "string" ? v.trim() : "";
+  return (INGEST_RELATIONSHIPS as readonly string[]).includes(s)
+    ? (s as IngestRelationship)
+    : null;
 }

@@ -172,7 +172,12 @@ export function planPeopleIngest(input: {
   readonly sources: readonly PersonSource[];
   readonly roster: readonly RosterPerson[];
   readonly relationship: IngestRelationship | null;
+  /** Answers a human has already given to earlier ambiguities. */
+  readonly resolutions?: readonly RowResolution[];
 }): IngestPlan {
+  const answered = new Map<number, RowResolution>(
+    (input.resolutions ?? []).map((r) => [r.index, r]),
+  );
   const sources = input.sources ?? [];
   if (sources.length > MAX_PEOPLE_PER_BATCH) {
     return {
@@ -250,6 +255,40 @@ export function planPeopleIngest(input: {
       continue;
     }
     if (match.kind === "ambiguous") {
+      // A HUMAN MAY HAVE ALREADY ANSWERED THIS. Their answer settles which
+      // reading was meant; it never merges two people and never widens to
+      // rows they were not asked about.
+      const answer = answered.get(index);
+      if (answer?.choice === "existing") {
+        const chosen = input.roster.find((p) => p.id === answer.personId);
+        if (chosen) {
+          rows.push({
+            index,
+            source,
+            normalizedName,
+            disposition: {
+              kind: "already_on_roster",
+              personId: chosen.id,
+              displayName: chosen.displayName,
+              method: "exact_name",
+              confidence: 1,
+            },
+            relationship: null,
+          });
+          continue;
+        }
+        // An id that is not on this organization's roster is not an answer.
+      }
+      if (answer?.choice === "new") {
+        rows.push({
+          index,
+          source,
+          normalizedName,
+          disposition: { kind: "new" },
+          relationship: input.relationship,
+        });
+        continue;
+      }
       rows.push({
         index,
         source,
@@ -289,6 +328,19 @@ export function planPeopleIngest(input: {
     needsRelationship: input.relationship === null && counts.toCreate > 0,
   };
 }
+
+/**
+ * A HUMAN'S ANSWER to one ambiguity.
+ *
+ * `existing` says "this row is that roster person" — it creates nothing.
+ * `new` says "this is a different human who happens to share a name" — the
+ * commonest real case, and the reason auto-merging on similarity is banned.
+ * A resolution NEVER merges two people; it only says which of the two
+ * possible readings the human meant.
+ */
+export type RowResolution =
+  | { readonly index: number; readonly choice: "existing"; readonly personId: string }
+  | { readonly index: number; readonly choice: "new" };
 
 /** One row as it would be written. The ONLY shape the writer accepts. */
 export interface PersonToCreate {

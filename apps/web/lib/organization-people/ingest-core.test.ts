@@ -277,3 +277,57 @@ describe("CV text as a source — conservative by design", () => {
     expect(p.counts.duplicateInBatch).toBe(1);
   });
 });
+
+describe("ambiguity resolution — the human settles it, nothing merges", () => {
+  const twins = roster(["Jonas Petraitis"], ["Jonas Petraitis"]);
+
+  it("choosing an EXISTING person creates nothing", () => {
+    const p = planPeopleIngest({
+      sources: named("Jonas Petraitis"),
+      roster: twins,
+      relationship: "employee",
+      resolutions: [{ index: 0, choice: "existing", personId: "p1" }],
+    });
+    if (p.kind !== "plan") throw new Error("unreachable");
+    expect(p.needsReconciliation).toBe(false);
+    expect(p.counts.alreadyOnRoster).toBe(1);
+    expect(peopleToCreate(p)).toHaveLength(0);
+  });
+
+  it("choosing NEW records a distinct person — a shared name is not one human", () => {
+    const p = planPeopleIngest({
+      sources: named("Jonas Petraitis"),
+      roster: twins,
+      relationship: "employee",
+      resolutions: [{ index: 0, choice: "new" }],
+    });
+    if (p.kind !== "plan") throw new Error("unreachable");
+    expect(p.needsReconciliation).toBe(false);
+    expect(peopleToCreate(p)).toHaveLength(1);
+  });
+
+  it("an id that is NOT on this organization's roster is not an answer", () => {
+    const p = planPeopleIngest({
+      sources: named("Jonas Petraitis"),
+      roster: twins,
+      relationship: "employee",
+      resolutions: [{ index: 0, choice: "existing", personId: "someone-elses-org" }],
+    });
+    if (p.kind !== "plan") throw new Error("unreachable");
+    expect(p.needsReconciliation, "a foreign id settled an ambiguity").toBe(true);
+    expect(peopleToCreate(p)).toHaveLength(0);
+  });
+
+  it("an answer to ONE row does not settle another", () => {
+    const p = planPeopleIngest({
+      sources: named("Jonas Petraitis", "Jonas Petraitis "),
+      roster: twins,
+      relationship: "employee",
+      resolutions: [{ index: 0, choice: "new" }],
+    });
+    if (p.kind !== "plan") throw new Error("unreachable");
+    // Row 1 is a duplicate of row 0 in the same batch, so it creates nothing
+    // and asks nothing — the answer did not leak, and nor did a second person.
+    expect(peopleToCreate(p)).toHaveLength(1);
+  });
+});

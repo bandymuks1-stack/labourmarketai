@@ -2082,8 +2082,18 @@ export function ConversationChat({
             ]);
             return;
           }
+          // The organization's PEOPLE go to the roster importer, which is
+          // where a file of names can actually complete: parse → preview →
+          // resolve → confirm → commit → receipt. Work EVIDENCE about those
+          // people is the neighbouring import on the same page.
           assistant(t("fileOrgEvidence"), [
-            { id: "link:/dashboard/company#evidence-import", label: labels.documentsChip },
+            {
+              id:
+                intent.kind === "workforce_table"
+                  ? "link:/dashboard/company#people-import-section"
+                  : "link:/dashboard/company#evidence-import",
+              label: labels.documentsChip,
+            },
           ]);
           return;
         default: {
