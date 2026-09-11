@@ -584,12 +584,12 @@
       "subtitle": "What this person's work recorded against your organization adds up to: hours, days, kinds of work and the skills the hours reach. Only entries logged for your organization's engagements — nothing recorded elsewhere.",
       "emptyNoEntries": "No work recorded against your organization yet. Entries this person logs for your engagements will add up here.",
       "emptyNoHours": "{count, plural, one {# entry for your organization, none with a duration.} other {# entries for your organization, none with a duration.}}",
-      "evidenceStrength": "{entries, plural, one {# entry} other {# entries}}: {confirmed} confirmed by your organization or a client · {photos} with photos · {documents} from an original document · {selfOnly} the person's own record only",
+      "evidenceStrength": "{entries, plural, one {# entry} other {# entries}}: {confirmed} confirmed by a manager of your organization or a client · {photos} with photos · {documents} from an original document · {selfOnly} the person's own record only",
       "skillsHint": "Hours reach a skill only when the entry is linked to one skill, or when the person's own timed phrase names that skill. When several took part and the phrase does not tell them apart, involvement is shown, not an invented split.",
       "unattributedHours": "{hours} h across {count, plural, one {# entry} other {# entries}} are not linked to any skill yet. Only the person can link one; the hours are still counted in the totals above.",
       "provenance": "Where the hours come from: {worker} h entered by the person, {extracted} h recognised from their text, {corrected} h corrected by a manager.",
       "provenanceRule": "Each entry is counted once; an hour is attributed to a skill only when the entry is linked to a single skill, or when the person's own phrase names that skill.",
-      "scopeNote": "This is the part of the person's record your organization is entitled to see — work logged against your own engagements. It is not their complete history, and it is not a rating. Confirming an entry in your inbox turns its hours into confirmed hours here and on the person's CV."
+      "scopeNote": "This is the part of the person's record your organization is entitled to see — work logged against your own engagements. It is not their complete history, and it is not a rating. A manager's confirmation from your inbox turns an entry's hours into manager-confirmed hours here and on the person's CV."
     }
   }
 }

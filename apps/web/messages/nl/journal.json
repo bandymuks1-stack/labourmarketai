@@ -584,12 +584,12 @@
       "subtitle": "Wat het werk dat deze persoon voor uw organisatie heeft vastgelegd optelt: uren, dagen, soorten werk en de vaardigheden die de uren bereiken. Alleen invoer voor de samenwerkingen van uw organisatie — niets dat elders is vastgelegd.",
       "emptyNoEntries": "Er is nog geen werk voor uw organisatie vastgelegd. Invoer van deze persoon voor uw samenwerkingen telt hier op.",
       "emptyNoHours": "{count, plural, one {# invoer voor uw organisatie, geen enkele met een duur.} other {# invoeren voor uw organisatie, geen enkele met een duur.}}",
-      "evidenceStrength": "{entries, plural, one {# invoer} other {# invoeren}}: {confirmed} bevestigd door uw organisatie of een klant · {photos} met foto's · {documents} uit een origineel document · {selfOnly} alleen de eigen registratie van de persoon",
+      "evidenceStrength": "{entries, plural, one {# invoer} other {# invoeren}}: {confirmed} bevestigd door een leidinggevende van uw organisatie of een klant · {photos} met foto's · {documents} uit een origineel document · {selfOnly} alleen de eigen registratie van de persoon",
       "skillsHint": "Uren bereiken een vaardigheid alleen als de invoer aan één vaardigheid is gekoppeld, of als de eigen getimede zin van de persoon die vaardigheid noemt. Als er meerdere bij betrokken waren en de zin ze niet onderscheidt, tonen we betrokkenheid, geen verzonnen verdeling.",
       "unattributedHours": "{hours} u in {count, plural, one {# invoer} other {# invoeren}} zijn nog aan geen enkele vaardigheid gekoppeld. Alleen de persoon kan er een koppelen; de uren tellen wel mee in de totalen hierboven.",
       "provenance": "Waar de uren vandaan komen: {worker} u door de persoon ingevoerd, {extracted} u herkend uit diens tekst, {corrected} u gecorrigeerd door een leidinggevende.",
       "provenanceRule": "Elke invoer telt één keer; een uur wordt alleen aan een vaardigheid toegerekend als de invoer aan één vaardigheid is gekoppeld, of als de eigen zin van de persoon die vaardigheid noemt.",
-      "scopeNote": "Dit is het deel van de registratie van de persoon dat uw organisatie mag zien — werk dat voor uw eigen samenwerkingen is vastgelegd. Het is niet de volledige geschiedenis en geen beoordeling. Bevestigt u een invoer in uw inbox, dan worden de uren hier en op het cv van de persoon bevestigde uren."
+      "scopeNote": "Dit is het deel van de registratie van de persoon dat uw organisatie mag zien — werk dat voor uw eigen samenwerkingen is vastgelegd. Het is niet de volledige geschiedenis en geen beoordeling. De bevestiging van een leidinggevende uit uw inbox maakt de uren van een invoer hier en op het cv van de persoon door een leidinggevende bevestigde uren."
     }
   }
 }
