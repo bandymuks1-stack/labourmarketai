@@ -23,6 +23,11 @@ export type JournalMetricRow = {
   value_text: string | null;
   value_numeric: number | null;
   unit_slug: string | null;
+  /** `journal_entry_metrics.source` — the provenance of the row itself
+   *  (`worker_input` | `ai_extracted` | `manager_corrected`). Carried so a
+   *  derived hour can say where it came from (work-intelligence); absent on
+   *  callers that project their own shape. */
+  source?: string | null;
 };
 
 export type JournalConfirmationRow = {
@@ -47,10 +52,10 @@ export type JournalListResult =
   | { ok: false; code: "no_worker" | "unavailable" };
 
 const V3_SELECT =
-  "id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
+  "id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
 
 const LEGACY_SELECT =
-  "id, original_text, created_at, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
+  "id, original_text, created_at, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
 
 export async function listJournalEntries(
   caller: DomainCaller,

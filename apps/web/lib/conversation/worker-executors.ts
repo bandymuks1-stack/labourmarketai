@@ -14,6 +14,7 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { expressInterestAction } from "@/lib/opportunities/interest-actions";
 import { createJournalEntry } from "@/lib/journal/actions";
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { z } from "zod";
 
 import {
@@ -228,6 +229,11 @@ export const WORKER_EXECUTORS: {
     // append-only + hash-chained). `notes` is the evidence text; date + site
     // become metrics. Skills are recognized from the notes by the journal's own
     // pipeline — this executor declares nothing.
+    //
+    // The TIME the person stated becomes time on the record (issue #1689):
+    // the same deterministic parse the composer persists as fragments, with
+    // machine-extraction provenance. Without this every chat-logged day read
+    // 0 h downstream (lib/journal/intake-work-time.ts).
     const r = await createJournalEntry(
       fd({
         locale: ctx.locale,
@@ -235,6 +241,7 @@ export const WORKER_EXECUTORS: {
         notes: input.notes,
         work_date: input.workDate,
         site_name: input.siteName ?? "",
+        ...intakeWorkTimeFields(input.notes, input.workDate),
       }),
     );
     if (!r.ok) return { ok: false, code: r.code, message: r.message };

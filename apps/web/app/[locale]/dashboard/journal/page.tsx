@@ -67,6 +67,17 @@ import { formatUtcDate, utcDayKey } from "@/lib/time/display";
 // calendar (lib/planning/planning-model.ts) so a record cannot sit on one day
 // here and another day there.
 import { journalStartDay } from "@/lib/planning/planning-model";
+import { deriveEntryWorkTime } from "@/lib/journal/work-time";
+import {
+  WORK_PERIOD_KEYS,
+  type WorkPeriodKey,
+} from "@/lib/journal/work-intelligence";
+import {
+  assembleWorkIntelligence,
+  readPhotoCountsByEntry,
+  type WorkerSkillSourceRow,
+} from "@/lib/journal/work-intelligence-read";
+import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -90,6 +101,7 @@ export default async function JournalPage({
     editing?: string | string[];
     date?: string | string[];
     skill?: string | string[];
+    period?: string | string[];
   }>;
 }) {
   const { locale } = await params;
@@ -111,6 +123,13 @@ export default async function JournalPage({
     typeof sp.skill === "string" && /^[a-z0-9_-]{1,80}$/.test(sp.skill)
       ? sp.skill
       : null;
+  // "Work in numbers" period (issue #1689): ?period=week|month|all scopes the
+  // intelligence section. Anything else → all time. Same shape as ?date=.
+  const periodKey: WorkPeriodKey =
+    typeof sp.period === "string" &&
+    (WORK_PERIOD_KEYS as readonly string[]).includes(sp.period)
+      ? (sp.period as WorkPeriodKey)
+      : "all";
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tSpaces = await getTranslations("spaces");
@@ -462,7 +481,7 @@ export default async function JournalPage({
         .order("is_primary", { ascending: false }),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, skills(slug)")
+        .select("skill_id, verified, source, skills(slug)")
         .eq("worker_id", worker.id),
       readWorkerEntrySkillLinks(supabase, worker.id),
       // G4 bridge: THE canonical journal-list core (v3 select + legacy
@@ -694,20 +713,20 @@ export default async function JournalPage({
   for (const e of diaryEntriesByDay) {
     const isoKey = isoDayOf(e);
     const label = formatUtcDate(isoKey, locale) ?? "";
-    // Day total = sum of each entry's time metric (hours/minutes only). "days"
-    // and non-time quantities are never summed, so the figure is real, not
-    // invented; days with no time entry simply show no hours.
-    const timeMetric = (e.journal_entry_metrics ?? []).find(
-      (m) =>
-        (m.metric_slug === "quantity" || m.metric_slug === "area_done") &&
-        (m.unit_slug === "hours" || m.unit_slug === "minutes"),
+    // Day total through THE canonical work-time rule (owner ruling
+    // 2026-08-18). This used to read only the entry-level `quantity` metric,
+    // so an entry recorded as per-activity fragments ("3 val. plyteles, 2 val.
+    // glaistas") showed NO hours here while the calendar and the timesheet
+    // showed 5 — the exact three-answers defect `work-time.ts` was written to
+    // end. `days`-unit and non-time quantities still never become hours.
+    const mins = Math.round(
+      deriveEntryWorkTime({
+        entryId: e.id,
+        createdAt: e.created_at,
+        originalText: e.original_text,
+        metrics: e.journal_entry_metrics ?? [],
+      }).totalHours * 60,
     );
-    const mins =
-      timeMetric?.value_numeric != null
-        ? timeMetric.unit_slug === "hours"
-          ? timeMetric.value_numeric * 60
-          : timeMetric.value_numeric
-        : 0;
     const last = entryDayGroups[entryDayGroups.length - 1];
     // Keyed by the ISO day, not by the formatted label: two different days can
     // format identically in some locales, and the key is what `?date=` filters
@@ -762,6 +781,52 @@ export default async function JournalPage({
   for (const ids of linksByEntry.values()) {
     for (const id of ids) evidencedSkillIds.add(id);
   }
+
+  // "Work in numbers" (issue #1689): derived from EXACTLY the entries, links
+  // and declared skills loaded above — no second read, so the figures can
+  // never disagree with the diary beneath them. Unreadable entries or links
+  // → the section is withheld rather than rendered as zero hours (SEP-7).
+  const workIntelligence =
+    entries && skillLinksReady
+      ? assembleWorkIntelligence({
+          entries,
+          linksByEntry,
+          provenanceByEntry,
+          skillRows: (skillIdRows ?? []) as unknown as WorkerSkillSourceRow[],
+          todayIso: new Date().toISOString().slice(0, 10),
+          focus: periodKey,
+          // Evidence strength needs to know which entries carry photos —
+          // one bounded read over the live ids already in hand.
+          photoCountByEntry: await readPhotoCountsByEntry(
+            supabase,
+            entries.map((e) => e.id),
+          ),
+        })
+      : null;
+  const primaryProfessionRow = (dirRows ?? []).find(
+    (r) => (r as { is_primary?: boolean | null }).is_primary === true,
+  );
+  const primaryProfessionSlug =
+    (primaryProfessionRow?.professions as { slug: string } | null | undefined)
+      ?.slug ?? null;
+  const professionNameOf = (slug: string): string | null => {
+    try {
+      const v = tProf(slug);
+      return v && v !== slug && v !== `professions.${slug}` ? v : null;
+    } catch {
+      return null;
+    }
+  };
+  const contextLabelOf = (id: string | null): string =>
+    (id ? engagementChips.get(id)?.label : null) ?? t("personalEntry");
+  const unitNameOf = (slug: string): string | null => {
+    try {
+      const v = tUnit(slug);
+      return v && v !== slug && v !== `productivityUnits.${slug}` ? v : null;
+    } catch {
+      return null;
+    }
+  };
 
   // Mano CV identity lead — the player-card/avatar identity that opens the Mano
   // CV surface, above the work records. Worker-scoped real data only (null for
@@ -818,6 +883,9 @@ export default async function JournalPage({
         items={[
           { href: "#mano-cv-top", label: tQuick("top") },
           { href: "#mano-cv-identity", label: tTabs("playerCard") },
+          ...(workIntelligence
+            ? [{ href: "#work-intelligence", label: t("intelligence.title") }]
+            : []),
           { href: "#journal-entries", label: tQuick("records") },
           // §6.1: "add entry" is the conversation's job now; the quick nav
           // keeps only the projection's own regions.
@@ -960,6 +1028,26 @@ export default async function JournalPage({
           </div>
         )}
       </div>
+
+      {/* "Work in numbers" (issue #1689) — what the diary beneath adds up
+          to. Sits between the intake door and the records: the person sees
+          the total, the skills the hours reached and where they lead BEFORE
+          scrolling the raw days. Withheld (not zeroed) when unreadable. */}
+      {workIntelligence && (
+        <div className="order-2">
+          <JournalWorkIntelligence
+            wi={workIntelligence}
+            locale={locale}
+            labels={{
+              skillName: skillNameOf,
+              professionName: professionNameOf,
+              unitName: unitNameOf,
+              contextLabel: contextLabelOf,
+              primaryProfessionSlug,
+            }}
+          />
+        </div>
+      )}
 
       {/* Entry list — compact recent history AFTER the composer (Wagon 5
           first-view order). Newest day open, older days collapsed. Visual

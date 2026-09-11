@@ -7853,7 +7853,11 @@
       "noStructure": "Deze aanvraag heeft geen gestructureerde vaardigheidseisen — het standaard-cv wordt getoond.",
       "matchedTag": "Sluit aan op de aanvraag"
     },
-    "claimFromJournal": "uit het werkjournaal"
+    "claimFromJournal": "uit het werkjournaal",
+    "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
+    "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
+    "skillHours": "{hours} u",
+    "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn"
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -12600,6 +12604,8 @@
       "userProposalStatus": "Hoe staat het met mijn voorstellen?",
       "learningCompassHint": "Je leerkompas — richting, ontbrekende vaardigheden en passende kansen:",
       "chipLearningCompass": "Leerkompas",
+      "journalNumbersHint": "Je werk in cijfers — uren, hoofdactiviteit, vaardigheden en richtingen — staat in het werkjournaal:",
+      "chipJournalNumbers": "Werk in cijfers",
       "inviteStudentHint": "Een leerling nodig je uit met een persoonlijke link vanuit het netwerkgedeelte (relatie ‘Student’):",
       "chipInviteStudent": "Leerling uitnodigen",
       "programmesHint": "Opleidingen en groepen beheer je in de bedrijfswerkruimte — maak daar een opleiding en een groep aan en wijs leerlingen toe:",
@@ -13701,6 +13707,13 @@
       "journalLine": "— {day}: {what}",
       "journalUnlabelled": "(geen omschrijving)",
       "journalEmpty": "Je hebt geen dagboekregels in de afgelopen {days} dagen.",
+      "journalHoursTotal": "Totaal over {days} dagen: {hours} u over {entries, plural, one {# registratie} other {# registraties}} (elke registratie één keer geteld).",
+      "journalDayUnits": "Nog {days} d in dagen vastgelegd — niet naar uren omgerekend.",
+      "journalHoursNone": "{entries, plural, =0 {Geen registraties met een duur.} one {# registratie, maar zonder duur — voeg uren toe en ze worden geteld.} other {# registraties, maar zonder duur — voeg uren toe en ze worden geteld.}}",
+      "chipJournalNumbers": "Werk in cijfers",
+      "figuresWorkerHours": "Vastgelegd werk: {total} u in totaal, waarvan {confirmed} u bevestigd; {month} u in de laatste 30 dagen.",
+      "figuresWorkerHoursNone": "{entries, plural, =0 {Nog geen registraties met een duur — uren komen uit je eigen registraties.} one {# registratie, geen enkele met een duur — voeg uren toe aan de registratie.} other {# registraties, geen enkele met een duur — voeg uren toe aan een registratie.}}",
+      "figuresWorkerHoursUnread": "Ik kon je uren nu niet lezen — dat is niet hetzelfde als geen uren hebben. Vraag het zo nog eens.",
       "figuresWorker": "{entries} dagboekregels, waarvan {confirmations} bevestigd door een leidinggevende. {skills} vaardigheden opgeslagen, {confirmed} bevestigd.",
       "figuresWorkerUnread": "{skills} vaardigheden opgeslagen, {confirmed} bevestigd. Ik kon je aantal journaalregels en bevestigingen zojuist niet lezen — dat is niet hetzelfde als er geen hebben. Vraag het zo meteen opnieuw.",
       "figuresNoHoursLedger": "Het platform houdt geen register van goedgekeurde uren bij, dus een urencijfer kan ik niet geven — het legt bevestigde regels vast.",

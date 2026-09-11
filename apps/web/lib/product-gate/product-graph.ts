@@ -101,7 +101,7 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
       "What somebody actually did. Historical and new work converge on one record — an imported timesheet and a journal entry written today are the same kind of fact.",
     worldElement: "work_journal",
     domains: ["evidence", "work_execution"],
-    capabilities: ["EVID-0", "EVID-4", "EVID-5", "PER-6", "PER-7", "EVID-1", "PER-4"],
+    capabilities: ["EVID-0", "EVID-4", "EVID-5", "EVID-7", "PER-6", "PER-7", "EVID-1", "PER-4"],
   },
   {
     id: "skills",
@@ -119,7 +119,7 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
       "The accumulated history of a person across organizations, with the other side's right of reply.",
     worldElement: "reputation",
     domains: ["evidence", "person"],
-    capabilities: ["EVID-6", "PER-6", "PER-7"],
+    capabilities: ["EVID-6", "EVID-7", "PER-6", "PER-7"],
   },
   {
     id: "evidence",

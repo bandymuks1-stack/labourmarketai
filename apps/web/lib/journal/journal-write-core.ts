@@ -87,6 +87,12 @@ export type ParsedFragmentInput = {
    *  be skill-linked by the save; the composer's parser-derived slugs never
    *  set it, so confirming a time parse can't silently declare a skill. */
   selected?: boolean;
+  /** Provenance of the fragment's rows. `worker_input` (default) when the
+   *  person reviewed the parse fragment by fragment (the composer);
+   *  `ai_extracted` when a transport persisted the deterministic parse of the
+   *  person's sentence after a summary-level confirmation (conversation, MCP —
+   *  `lib/journal/intake-work-time.ts`). Never a vendor-AI claim. */
+  source?: "worker_input" | "ai_extracted";
 };
 
 export type RpcMetricRow = {
@@ -153,6 +159,7 @@ export function parseFragments(raw: string | null): ParsedFragmentInput[] {
             ? r.userLabel.trim().slice(0, 200)
             : null,
         selected: r.selected === true,
+        source: r.source === "ai_extracted" ? "ai_extracted" : "worker_input",
       });
     }
     return out;
@@ -288,6 +295,13 @@ export async function createJournalEntryCore(
   const workDirection = String(formData.get("work_direction") ?? "").trim();
   const quantityRaw = String(formData.get("quantity") ?? "").trim();
   const unitSlug = String(formData.get("unit_slug") ?? "square_meters").trim();
+  // Provenance of the entry-level quantity: a transport that derived it from
+  // the sentence (intake-work-time) says so; the composer's own field is the
+  // person's input.
+  const quantitySource: RpcMetricRow["source"] =
+    String(formData.get("quantity_source") ?? "") === "ai_extracted"
+      ? "ai_extracted"
+      : "worker_input";
   const notes = String(formData.get("notes") ?? "").trim();
   const workDate = String(formData.get("work_date") ?? "").trim();
   // v3 — free-text review-only metadata. Capped lengths so a runaway paste
@@ -443,7 +457,7 @@ export async function createJournalEntryCore(
             metric_slug: "quantity",
             value_numeric: quantity,
             unit_slug: unitSlug,
-            source: "worker_input" as const,
+            source: quantitySource,
           },
         ]
       : []),
@@ -475,11 +489,12 @@ export async function createJournalEntryCore(
         ]
       : []),
     ...fragments.flatMap((f, idx): RpcMetricRow[] => {
+      const fragmentSource: RpcMetricRow["source"] = f.source ?? "worker_input";
       const rows: RpcMetricRow[] = [
         {
           metric_slug: "parsed_fragment",
           value_text: `${idx + 1}|${f.rawPhrase}`,
-          source: "worker_input" as const,
+          source: fragmentSource,
         },
       ];
       if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
@@ -488,7 +503,7 @@ export async function createJournalEntryCore(
           value_numeric: f.timeValue,
           unit_slug: f.timeUnit,
           value_text: String(idx + 1),
-          source: "worker_input" as const,
+          source: fragmentSource,
         });
       }
       const activityLabel = f.activitySlug ?? f.activityLabel;
@@ -496,7 +511,7 @@ export async function createJournalEntryCore(
         rows.push({
           metric_slug: "fragment_activity",
           value_text: `${idx + 1}|${activityLabel}`,
-          source: "worker_input" as const,
+          source: fragmentSource,
         });
       }
       // v3 — when the parser flagged the fragment as unknown AND the worker

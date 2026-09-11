@@ -7853,7 +7853,11 @@
       "noStructure": "This request has no structured skill requirements — showing the standard CV.",
       "matchedTag": "Matches the request"
     },
-    "claimFromJournal": "from work journal"
+    "claimFromJournal": "from work journal",
+    "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
+    "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
+    "skillHours": "{hours} h",
+    "skillHoursHint": "hours from work-journal entries linked to this skill alone"
   },
   "todayScreen": {
     "eyebrow": "Today",
@@ -12600,6 +12604,8 @@
       "userProposalStatus": "How are my proposals doing?",
       "learningCompassHint": "Your Learning Compass — direction, missing skills and fitting opportunities:",
       "chipLearningCompass": "Learning Compass",
+      "journalNumbersHint": "Your work in numbers — hours, main activity, skills and directions — lives in the work journal:",
+      "chipJournalNumbers": "Work in numbers",
       "inviteStudentHint": "A learner is invited with a personal link from the network area (relationship “Student”):",
       "chipInviteStudent": "Invite a learner",
       "programmesHint": "Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
@@ -13701,6 +13707,13 @@
       "journalLine": "— {day}: {what}",
       "journalUnlabelled": "(no description)",
       "journalEmpty": "You have no journal entries in the last {days} days.",
+      "journalHoursTotal": "Total over {days} days: {hours} h across {entries, plural, one {# entry} other {# entries}} (each entry counted once).",
+      "journalDayUnits": "A further {days} d recorded in days — not converted to hours.",
+      "journalHoursNone": "{entries, plural, =0 {No entries with a duration.} one {# entry, but without a duration — add hours and they will be counted.} other {# entries, but without a duration — add hours and they will be counted.}}",
+      "chipJournalNumbers": "Work in numbers",
+      "figuresWorkerHours": "Recorded work: {total} h all time, {confirmed} h of it confirmed; {month} h in the last 30 days.",
+      "figuresWorkerHoursNone": "{entries, plural, =0 {No entries with a duration yet — hours come from your own entries.} one {# entry, none with a duration — add hours to the entry.} other {# entries, none with a duration — add hours to an entry.}}",
+      "figuresWorkerHoursUnread": "I could not read your hours just now — that is not the same as having none. Ask again in a moment.",
       "figuresWorker": "{entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
       "figuresWorkerUnread": "{skills} skills saved, {confirmed} confirmed. I could not read your journal entry and confirmation counts just now — that is not the same as having none. Ask again in a moment.",
       "figuresNoHoursLedger": "The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",

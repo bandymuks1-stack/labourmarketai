@@ -285,6 +285,16 @@ composes with `audits/external-assistant-gateway-gap-audit-2026-09-02.md`.
 Review questions A and B (§7) apply to every stage; question C (scale, §5.5) is
 answered by bounded reads and indexed batch / entry keys in the sketches.
 
+### 5.7 One Work Journal for the full world of work (owner direction, issue #1689, 2026-09-11)
+
+Design evidence + live contract: [`product/WORK_JOURNAL_UNIVERSAL_MODEL_V1.md`](product/WORK_JOURNAL_UNIVERSAL_MODEL_V1.md);
+machine form `apps/web/lib/journal/work-evidence-archetypes.ts` (31 archetypes, ISCO-08 map
+covering all 43 sub-major groups, `composeJournal`), guarded. The universal record is
+`journal_entry_metrics` (free `metric_slug`); adaptive modules are metric-slug groups, never
+columns or forms. Four kinds of time stay apart — ENTRY WORKED TIME · ACTIVITY TIME · SKILL
+INVOLVEMENT · ATTRIBUTABLE PRACTICE TIME (`work-intelligence.ts`); an entry with several
+linked skills is never split by guessing. ESCO is interoperability, never ranking.
+
 ---
 
 ## 6. THE EXTENSIBILITY CONTRACT (binding, owner directive §62–71)

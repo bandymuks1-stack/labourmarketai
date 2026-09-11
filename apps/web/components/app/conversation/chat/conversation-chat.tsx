@@ -614,6 +614,8 @@ export type ChatLabels = {
   userProposalStatus: string;
   learningCompassHint: string;
   chipLearningCompass: string;
+  journalNumbersHint: string;
+  chipJournalNumbers: string;
   inviteStudentHint: string;
   chipInviteStudent: string;
   programmesHint: string;
@@ -4165,6 +4167,14 @@ export function ConversationChat({
           // The attention chip ("N agentūros pasiūlymai laukia…") — the SAME
           // in-chat offers answer the sentence runs.
           startClientOffers();
+          return;
+        case "journal-numbers":
+          // "Work in numbers" (issue #1689) — the journal's own totals, skill
+          // hours and directions. The workflow layer names the step; the
+          // route is emitted here, as for every other route chip (W4).
+          assistant(labels.journalNumbersHint, [
+            { id: "link:/dashboard/journal#work-intelligence", label: labels.chipJournalNumbers },
+          ]);
           return;
         case "compass-page":
           // The compass answer names its next steps as chat actions; the

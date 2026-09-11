@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 
 vi.mock("@/lib/env", () => ({
   env: {
@@ -991,14 +992,21 @@ describe("journal draft → confirm", () => {
     ];
     expect(deps.userId).toBe("00000000-0000-4000-8000-0000000000aa");
     // Byte-for-byte the mapping worker-executors.ts "worker.log-work" uses —
-    // one write contract, no ChatGPT-specific fork.
+    // one write contract, no ChatGPT-specific fork. Since #1689 that mapping
+    // also carries the time the person stated ("6 valandos") as the same
+    // fragment rows the composer would persist (intake-work-time), so the
+    // canonical work-time rule sees it — with machine-extraction provenance.
     expect(Object.fromEntries(formData.entries())).toEqual({
       locale: "lt",
       engagement_context_id: DRAFT.engagementContextId,
       notes: DRAFT.notes,
       work_date: DRAFT.workDate,
       site_name: DRAFT.siteName,
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
     });
+    const fragments = JSON.parse(String(formData.get("fragments_json")));
+    expect(fragments).toHaveLength(1);
+    expect(fragments[0]).toMatchObject({ timeValue: 6, timeUnit: "hours", source: "ai_extracted", selected: false });
   });
 
   it("a write failure maps through with its real code — never invented success", async () => {

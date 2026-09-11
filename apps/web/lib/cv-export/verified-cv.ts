@@ -13,6 +13,11 @@ import {
 } from "@/lib/profile/trust-signals";
 import { groupCvSkillTiers, type CvSkillTiers } from "./skill-tiers";
 import {
+  attributedHoursBySlug,
+  type WorkIntelligence,
+} from "@/lib/journal/work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import {
   certificateDocsForCv,
   projectsFromProof,
   splitAchievementsForCv,
@@ -162,6 +167,19 @@ export type VerifiedCvData = {
   achievements: CvAchievementInput[];
   /** Projects DERIVED from the confirmed-proof rows below — same truth. */
   projects: CvProject[];
+  /**
+   * Hours the worker's OWN journal attributes to each catalogued skill —
+   * the SAME figures the journal's "work in numbers" shows (issue #1689),
+   * through the one canonical work-time rule. Attributed only: an entry
+   * linked to several skills is never split by guessing, so those hours
+   * appear on neither chip. `null` when the journal could not be read —
+   * the chip then shows no figure rather than a zero (SEP-7).
+   */
+  recordedHoursBySkill: Record<string, number> | null;
+  /** All-time recorded hours (every entry once), or null when unreadable. */
+  recordedHoursTotal: number | null;
+  /** Of the total, hours a manager/client confirmed. */
+  recordedHoursConfirmed: number | null;
   privateDetails: VerifiedCvPrivateDetails;
   signals: OwnTrustSignals;
   proof: VerifiedCvProofRow[];
@@ -195,6 +213,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     signals,
     entriesRes,
     ecRes,
+    workIntelligence,
   ] = await Promise.all([
       supabase
         .from("profiles")
@@ -231,6 +250,12 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         .in("relationship_slug", PROFESSIONAL_HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
         .order("started_at", { ascending: false, nullsFirst: false }),
+      // Recorded hours per skill — the journal's own derivation, read through
+      // the canonical journal-list core under the worker's RLS. Best-effort:
+      // an unreadable journal yields `null`, never invented zeros.
+      loadWorkIntelligence({ supabase, userId: user.id }, workerId).catch(
+        (): WorkIntelligence | null => null,
+      ),
     ]);
 
   // ── Full CV System v1 sections — ALL best-effort/graceful reads. A table
@@ -621,6 +646,13 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       education,
       achievements,
       projects: projectsFromProof(proof),
+      recordedHoursBySkill: workIntelligence
+        ? Object.fromEntries(attributedHoursBySlug(workIntelligence))
+        : null,
+      recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
+      recordedHoursConfirmed: workIntelligence
+        ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)
+        : null,
       privateDetails: {
         salaryMinEur: privBase?.salary_min_eur ?? null,
         salaryMaxEur: privBase?.salary_max_eur ?? null,

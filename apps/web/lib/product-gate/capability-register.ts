@@ -838,6 +838,28 @@ const EVIDENCE: readonly CapabilityRow[] = [
     ownerDecision:
       "The v1 select policy compares an unqualified `moderation_status` inside a subquery over `experience_records`, so it resolves to the RECORD's status and hands the experience author a reply moderation has not published. The surface now withholds it; correcting the policy is a schema change (RED).",
   },
+  {
+    id: "EVID-7",
+    domain: "evidence",
+    title: "Work intelligence: hours · activities · skill practice · evidence strength",
+    worldElement: "work_journal",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: [
+      "lib/journal/work-intelligence.ts",
+      "lib/journal/work-intelligence-read.ts",
+      "lib/journal/work-evidence-archetypes.ts",
+    ],
+    coreModule: "lib/journal/work-intelligence.ts",
+    surfaces: [
+      "app/[locale]/dashboard/journal",
+      "app/[locale]/cv",
+      "components/app/journal-work-intelligence.tsx",
+    ],
+    note:
+      "Issue #1689 (2026-09-11). ONE attribution layer over the canonical work-time rule answers, from persisted rows only: hours today / 7 / 30 / 365 days / all time (every entry once), main activity, hours per activity with a 30-vs-30 trend, per-skill ATTRIBUTED practice time (only when the entry links ONE skill) kept apart from INVOLVEMENT (entries · days · contexts · shared hours, never summed — an 8 h entry with four skills is 8 h, not 32), confirmed hours from approved confirmations only, evidence strength (confirmed / photos / original document / self-only), outputs in their recorded units, contexts, months, adjacent directions from EVIDENCED skills only, and the provenance of every hour. The SAME model reaches the Living CV (hours on skill chips) and the conversation (`journal-recent` now looks BACK 14 days and states the total; `figures` states recorded hours instead of denying a ledger). Also FIXED on the way: the journal's own day totals read only the entry-level metric and showed 0 h for fragment-recorded days while the calendar showed the real figure. " +
+      "The universal-journal extension path is data, not forms: `work-evidence-archetypes.ts` carries 31 work-evidence archetypes and an ISCO-08 map covering all 43 sub-major groups (3,039 ESCO occupations resolve through ~50 rows), with `composeJournal` as the assembly contract; guarded against occupation switches and core-slug collisions. PARTIAL because the composer does not yet render archetype modules and no human has walked the section on production; it never manufactures precision the rows do not hold.",
+  },
 ];
 
 // ── F. DEMAND · SUPPLY · MATCHING ───────────────────────────────────────────

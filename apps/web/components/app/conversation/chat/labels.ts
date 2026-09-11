@@ -194,6 +194,8 @@ const CHAT_KEYS = [
   "userProposalStatus",
   "learningCompassHint",
   "chipLearningCompass",
+  "journalNumbersHint",
+  "chipJournalNumbers",
   "inviteStudentHint",
   "chipInviteStudent",
   "programmesHint",
