@@ -578,6 +578,18 @@
       "ackError": "Nepavyko įrašyti — pabandykite dar kartą.",
       "ackDone": "Paaiškinimas įrašytas.",
       "openInJournal": "Peržiūrėti žurnale"
+    },
+    "org": {
+      "title": "Darbas skaičiais — jūsų organizacijos įrašuose",
+      "subtitle": "Ką sudaro šio žmogaus darbas, užfiksuotas jūsų organizacijai: valandos, dienos, darbo rūšys ir įgūdžiai, kuriuos pasiekia valandos. Tik įrašai, priskirti jūsų organizacijos bendradarbiavimui — nieko, kas užfiksuota kitur.",
+      "emptyNoEntries": "Jūsų organizacijai užfiksuoto darbo dar nėra. Šio žmogaus įrašai jūsų bendradarbiavimui kaupsis čia.",
+      "emptyNoHours": "{count, plural, one {# įrašas jūsų organizacijai, nė vieno su trukme.} few {# įrašai jūsų organizacijai, nė vieno su trukme.} many {# įrašo jūsų organizacijai, nė vieno su trukme.} other {# įrašų jūsų organizacijai, nė vieno su trukme.}}",
+      "evidenceStrength": "{entries, plural, one {# įrašas} few {# įrašai} many {# įrašo} other {# įrašų}}: {confirmed} patvirtino jūsų organizacija ar klientas · {photos} su nuotraukomis · {documents} iš originalaus dokumento · {selfOnly} tik paties žmogaus įrašas",
+      "skillsHint": "Valandos pasiekia įgūdį tik tada, kai įrašas susietas su vienu įgūdžiu arba kai paties žmogaus frazė su laiku įvardija tą įgūdį. Kai dalyvavo keli ir frazė jų neišskiria, rodomas dalyvavimas, o ne išgalvotas padalijimas.",
+      "unattributedHours": "{hours} val. per {count, plural, one {# įrašą} few {# įrašus} many {# įrašo} other {# įrašų}} dar nesusietos su jokiu įgūdžiu. Susieti gali tik pats žmogus; valandos vis tiek įskaičiuotos į sumas aukščiau.",
+      "provenance": "Iš kur valandos: {worker} val. įvedė žmogus, {extracted} val. atpažinta iš jo teksto, {corrected} val. pataisė vadovas.",
+      "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda priskiriama įgūdžiui tik tada, kai įrašas susietas su vienu įgūdžiu arba kai paties žmogaus frazė įvardija tą įgūdį.",
+      "scopeNote": "Tai ta žmogaus įrašų dalis, kurią jūsų organizacija turi teisę matyti — darbas, užfiksuotas jūsų pačių bendradarbiavimui. Tai nėra visa jo istorija ir nėra įvertinimas. Patvirtinę įrašą savo gautuosiuose, jo valandas paversite patvirtintomis čia ir žmogaus CV."
     }
   }
 }

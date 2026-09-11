@@ -120,9 +120,23 @@ export function workIntelligenceToday(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/**
+ * The same three reads for ANY caller the database lets see the rows.
+ *
+ * ORGANIZATION VIEW (issue #1689, owner §14): a manager of an organization
+ * calls this for a member's `workerId`, and RLS — not this function — decides
+ * what comes back: `journal_entries` / `_metrics` / `_skills` /
+ * `_confirmations` / `_photos` each carry an org-manager branch
+ * (`manages_organization(engagement_contexts.organization_id)`), so the
+ * manager's model is built from EXACTLY the entries logged against their own
+ * organization's engagements, and the worker's personal or other-employer
+ * entries never enter it. No second timesheet universe, no admin client,
+ * no widened policy: one reader, two audiences, the database's scope.
+ */
 export async function loadWorkIntelligence(
   caller: DomainCaller,
   workerId: string,
+  opts: { focus?: WorkPeriodKey } = {},
 ): Promise<WorkIntelligence | null> {
   const [entriesRead, linkRead, skillsRead] = await Promise.all([
     listJournalEntries(caller, { workerId }),
@@ -150,6 +164,7 @@ export async function loadWorkIntelligence(
     provenanceByEntry: linkRead.provenanceByEntry,
     skillRows: (skillsRead.data ?? []) as unknown as WorkerSkillSourceRow[],
     todayIso: workIntelligenceToday(),
+    focus: opts.focus,
     photoCountByEntry,
   });
 }

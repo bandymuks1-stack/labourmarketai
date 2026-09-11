@@ -66,7 +66,24 @@ import { formatUtcDate } from "@/lib/time/display";
  *
  * No internal vocabulary reaches the person: no `journal_entry_skills`, no
  * `fragment_time`, no provenance enum names — every word is an i18n key.
+ *
+ * ── TWO AUDIENCES, ONE MODEL (owner §14) ──────────────────────────────────
+ * `audience: "organization"` renders the SAME derived model for a manager
+ * looking at a member on the person page. The figures are the database's
+ * scope (RLS hands the manager only the entries logged against their own
+ * organization's engagements — see `loadWorkIntelligence`), so nothing here
+ * filters or re-derives. What the organization view deliberately does NOT
+ * show: the person's plausibility checks and their acknowledgements (a
+ * subset of someone's days cannot be judged as their day), the adjacent
+ * directions (the person's own growth reading, never an employer's ranking
+ * input), the CV / opportunities consequence links and the diary deep links
+ * (the diary is the person's). Copy addressed to "you" switches to the
+ * organization's wording under `org.*` keys; the rest is shared.
  */
+
+/** Who is reading: the person about their own work (default), or a manager
+ *  of an organization about a member's work logged against it. */
+export type WorkIntelligenceAudience = "self" | "organization";
 
 export type WorkIntelligenceLabels = {
   /** Catalogue skill slug → localized name (null when the locale has none). */
@@ -80,6 +97,9 @@ export type WorkIntelligenceLabels = {
   contextLabel: (id: string | null) => string;
   /** The worker's declared primary profession slug, if any. */
   primaryProfessionSlug: string | null;
+  /** Where a period tile points. Defaults to the person's own journal; the
+   *  organization view passes the person page it sits on. */
+  periodHref?: (key: WorkPeriodKey) => string;
 };
 
 const MAX_SKILLS = 8;
@@ -118,13 +138,22 @@ export async function JournalWorkIntelligence({
   wi,
   locale,
   labels,
+  audience = "self",
 }: {
   wi: WorkIntelligence;
   locale: string;
   labels: WorkIntelligenceLabels;
+  audience?: WorkIntelligenceAudience;
 }) {
   const t = await getTranslations("journal.intelligence");
   const tTier = await getTranslations("evidenceTier");
+  const org = audience === "organization";
+  /** Organization wording where the sentence addressed the person ("you"). */
+  const tk = (key: string, values?: Record<string, string | number>) =>
+    org && t.has(`org.${key}`) ? t(`org.${key}`, values) : t(key, values);
+  const periodHref = (key: WorkPeriodKey): string =>
+    labels.periodHref?.(key) ??
+    `/dashboard/journal?period=${key}#work-intelligence`;
   const period =
     wi.periods.find((p) => p.key === wi.focus) ??
     wi.periods[wi.periods.length - 1]!;
@@ -138,7 +167,7 @@ export async function JournalWorkIntelligence({
   // ── growth: adjacent directions from EVIDENCED skills only ────────────
   const evidenced = evidencedSkillSlugs(wi);
   const adjacency = computeAdjacentDirections({
-    workerSkillSlugs: evidenced,
+    workerSkillSlugs: org ? [] : evidenced,
     primaryProfessionSlug: labels.primaryProfessionSlug,
   });
   const directions = adjacency.directions
@@ -185,14 +214,15 @@ export async function JournalWorkIntelligence({
       data-testid="journal-work-intelligence"
       data-period={wi.focus}
       data-total-hours={wi.totalHours}
+      data-audience={audience}
     >
       <Card compact className="flex flex-col gap-5">
         <header className="flex flex-col gap-1">
           <h2 className="font-display text-lg font-semibold text-text-primary">
-            {t("title")}
+            {tk("title")}
           </h2>
           <p className="text-meta leading-relaxed text-text-muted">
-            {t("subtitle")}
+            {tk("subtitle")}
           </p>
         </header>
 
@@ -201,7 +231,7 @@ export async function JournalWorkIntelligence({
             className="text-sm leading-relaxed text-text-secondary"
             data-testid="wi-empty"
           >
-            {t("emptyNoEntries")}
+            {tk("emptyNoEntries")}
           </p>
         ) : (
           <>
@@ -218,9 +248,7 @@ export async function JournalWorkIntelligence({
                 return (
                   <Link
                     key={key}
-                    href={
-                      `/dashboard/journal?period=${key}#work-intelligence` as "/dashboard"
-                    }
+                    href={periodHref(key) as "/dashboard"}
                     aria-current={active ? "page" : undefined}
                     data-testid={`wi-period-${key}`}
                     data-hours={p.hours}
@@ -257,7 +285,7 @@ export async function JournalWorkIntelligence({
 
             {/* 1a · plausibility checks (owner §13) — warn, never corrupt:
               every figure above and below is exactly what was recorded. */}
-            {wi.checks.length > 0 && (
+            {!org && wi.checks.length > 0 && (
               <div
                 className="flex flex-col gap-2"
                 data-testid="wi-checks"
@@ -326,7 +354,7 @@ export async function JournalWorkIntelligence({
                 className="text-sm leading-relaxed text-text-secondary"
                 data-testid="wi-empty-hours"
               >
-                {t("emptyNoHours", { count: wi.totalEntries })}
+                {tk("emptyNoHours", { count: wi.totalEntries })}
               </p>
             )}
 
@@ -413,7 +441,7 @@ export async function JournalWorkIntelligence({
                     className="text-meta leading-relaxed text-text-muted"
                     data-testid="wi-evidence-strength"
                   >
-                    {t("evidenceStrength", {
+                    {tk("evidenceStrength", {
                       entries: wi.evidence.entries,
                       confirmed: wi.evidence.confirmed,
                       photos: wi.evidence.withPhotos,
@@ -435,7 +463,7 @@ export async function JournalWorkIntelligence({
                   {t("skillsTitle")}
                 </h3>
                 <p className="text-meta leading-relaxed text-text-muted">
-                  {t("skillsHint")}
+                  {tk("skillsHint")}
                 </p>
                 {skills.length > 0 && (
                   <ul className="flex flex-col gap-1.5">
@@ -451,15 +479,24 @@ export async function JournalWorkIntelligence({
                           data-shared-hours={s.sharedHours}
                         >
                           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                            <Link
-                              href={
-                                `/dashboard/journal?skill=${s.slug}#journal-entries` as "/dashboard"
-                              }
-                              className="text-sm font-medium text-text-primary underline-offset-2 hover:underline"
-                              data-testid={`wi-skill-link-${s.slug}`}
-                            >
-                              {name}
-                            </Link>
+                            {org ? (
+                              <span
+                                className="text-sm font-medium text-text-primary"
+                                data-testid={`wi-skill-name-${s.slug}`}
+                              >
+                                {name}
+                              </span>
+                            ) : (
+                              <Link
+                                href={
+                                  `/dashboard/journal?skill=${s.slug}#journal-entries` as "/dashboard"
+                                }
+                                className="text-sm font-medium text-text-primary underline-offset-2 hover:underline"
+                                data-testid={`wi-skill-link-${s.slug}`}
+                              >
+                                {name}
+                              </Link>
+                            )}
                             <span className="flex flex-wrap items-baseline gap-x-2 text-meta tabular-nums text-text-muted">
                               {s.attributedHours > 0 ? (
                                 <span className="font-medium text-text-primary">
@@ -556,7 +593,7 @@ export async function JournalWorkIntelligence({
                     className="text-meta leading-relaxed text-text-muted"
                     data-testid="wi-unattributed-hours"
                   >
-                    {t("unattributedHours", {
+                    {tk("unattributedHours", {
                       hours: fmtHours(wi.unattributedHours, locale),
                       count: wi.unattributedEntries,
                     })}
@@ -772,7 +809,16 @@ export async function JournalWorkIntelligence({
               </div>
             )}
 
-            {/* 8 · what the evidence feeds */}
+            {/* 8 · what the evidence feeds — the person's own consequence;
+              the organization instead reads what its view is scoped to */}
+            {org ? (
+              <p
+                className="border-t border-border/40 pt-3 text-meta leading-relaxed text-text-muted"
+                data-testid="wi-org-scope"
+              >
+                {t("org.scopeNote")}
+              </p>
+            ) : (
             <div
               className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border/40 pt-3 text-meta text-text-muted"
               data-testid="wi-consequence"
@@ -793,6 +839,7 @@ export async function JournalWorkIntelligence({
                 {t("openOpportunities")} →
               </Link>
             </div>
+            )}
 
             {/* 9 · provenance — where every hour came from */}
             {hasAnyHours && (
@@ -800,12 +847,12 @@ export async function JournalWorkIntelligence({
                 className="text-meta leading-relaxed text-text-muted"
                 data-testid="wi-provenance"
               >
-                {t("provenance", {
+                {tk("provenance", {
                   worker: fmtHours(wi.provenance.workerInput, locale),
                   extracted: fmtHours(wi.provenance.aiExtracted, locale),
                   corrected: fmtHours(wi.provenance.managerCorrected, locale),
                 })}{" "}
-                {t("provenanceRule")}
+                {tk("provenanceRule")}
               </p>
             )}
           </>

@@ -144,5 +144,11 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    section (`wi-checks`) and right after a save in the chat flow and the composer. What stays
    an extension point: a SPAN overlap check — the journal persists durations, not clock spans,
    so nothing compares "08:00–12:00" across entries until spans become persisted evidence.
-6. Organization views (owner §14) compose the same reader under `manages_organization` — no
-   second timesheet universe.
+6. ~~Organization views (owner §14)~~ — LIVE 2026-09-11: the person page
+   (`/dashboard/people/[workerId]`) composes `loadWorkIntelligence` for a member and renders
+   the same section with `audience="organization"`. Scope is the database's org-manager RLS
+   branch on every journal table (entries logged against the organization's own engagements),
+   never a filter or an admin client; confirmed hours come from the organization's own approved
+   confirmations. The organization sees no plausibility checks, no adjacent directions and no
+   diary links — those are the person's. What stays an extension point: a per-member roll-up
+   on `/dashboard/reports` (today an entry-count report) over the same reader.

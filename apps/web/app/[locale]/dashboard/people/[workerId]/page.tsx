@@ -25,6 +25,12 @@ import { createClient } from "@/lib/supabase/server";
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
 import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
+import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import {
+  WORK_PERIOD_KEYS,
+  type WorkPeriodKey,
+} from "@/lib/journal/work-intelligence";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
@@ -54,13 +60,23 @@ const UUID_RE =
  */
 export default async function PersonPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; workerId: string }>;
+  searchParams?: Promise<{ period?: string }>;
 }) {
   const { locale, workerId } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("people");
   const tSkillNames = await getTranslations("skillNames");
+  // The organization's "work in numbers" period switch — the same keys and
+  // the same default the person's own journal section uses.
+  const sp = (await searchParams) ?? {};
+  const periodKey: WorkPeriodKey =
+    typeof sp.period === "string" &&
+    (WORK_PERIOD_KEYS as readonly string[]).includes(sp.period)
+      ? (sp.period as WorkPeriodKey)
+      : "all";
   // Countries and dates are FACTS ABOUT A PERSON that an employer reads on
   // the one page where they judge them. Both were rendered raw here — see
   // `countryName` and the availability chip below.
@@ -183,6 +199,45 @@ export default async function PersonPage({
     readWorkPhotosFor((worker.profile_id as string | null) ?? ""),
     listActiveOfferingsByProvider((worker.profile_id as string | null) ?? ""),
   ]);
+
+  /**
+   * ── WORK IN NUMBERS, FOR THE ORGANIZATION (issue #1689, owner §14) ──────
+   *
+   * The same reader and the same rendering the person's own journal uses —
+   * no second timesheet universe. What differs is the SCOPE, and the
+   * database sets it: every journal table carries an org-manager branch
+   * (`manages_organization` on the entry's engagement organization), so a
+   * manager receives exactly the entries logged against their own
+   * organization's engagements and nothing recorded for anyone else.
+   *
+   * Composed only when the viewer already sees an engagement with this
+   * person (`recordedWork` above is RLS-scoped the same way): a viewer with
+   * no standing is never shown "no recorded work" about someone — that
+   * sentence would be a claim about a record they cannot read (SEP-8: DATA
+   * EXISTS ≠ VISIBLE). A failed read withholds the section (null), never a
+   * zero that reads as "this person did nothing" (SEP-7).
+   */
+  const orgWorkIntelligence =
+    recordedWork.status === "ok" && recordedWork.entries.length > 0
+      ? await loadWorkIntelligence(
+          { supabase, userId: user.id },
+          worker.id as string,
+          { focus: periodKey },
+        )
+      : null;
+  const tProfessions = await getTranslations("professions");
+  const tUnits = await getTranslations("productivityUnits");
+  const catalogueName =
+    (tr: { has: (k: string) => boolean; (k: string): string }) =>
+    (slug: string): string | null =>
+      tr.has(slug) ? tr(slug) : null;
+  const engagementLabels = new Map<string, string>();
+  if (recordedWork.status === "ok") {
+    for (const e of recordedWork.entries) {
+      const label = e.title ?? e.organizationName;
+      if (label) engagementLabels.set(e.id, label);
+    }
+  }
 
   const name =
     (worker.display_name as string | null)?.trim() ||
@@ -419,6 +474,28 @@ export default async function PersonPage({
           </>
         )}
       </section>
+
+      {/* WHAT THEIR RECORDED WORK ADDS UP TO — in this organization's own
+          records. Hours, kinds of work, the skills the hours reach and what
+          backs them, from the one work-time rule; confirmed hours light up
+          from this organization's own approved confirmations. */}
+      {orgWorkIntelligence && (
+        <JournalWorkIntelligence
+          wi={orgWorkIntelligence}
+          locale={locale}
+          audience="organization"
+          labels={{
+            skillName: catalogueName(tSkillNames),
+            professionName: catalogueName(tProfessions),
+            unitName: catalogueName(tUnits),
+            contextLabel: (id) =>
+              (id ? engagementLabels.get(id) : null) ?? t("workTitle"),
+            primaryProfessionSlug: null,
+            periodHref: (key) =>
+              `/dashboard/people/${workerId}?period=${key}#work-intelligence`,
+          }}
+        />
+      )}
 
       <section className="flex flex-col gap-3">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">

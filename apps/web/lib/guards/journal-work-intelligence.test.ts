@@ -23,7 +23,13 @@ import { describe, expect, it } from "vitest";
  *     module is pure and reads the canonical lines, no figure depends on a
  *     check, an acknowledgement is one append-only worker row with a reason,
  *     an acknowledged check stays visible, and both intake surfaces show
- *     the saved record's day check.
+ *     the saved record's day check;
+ *  8. the organization view (owner §14) composes the SAME reader and the
+ *     SAME component for a member on the person page — scope is the
+ *     database's org-manager RLS branch, never a filter, an admin client or
+ *     a second timesheet read — and shows the organization nothing that is
+ *     the person's own: no checks / acknowledgements, no adjacent
+ *     directions, no diary deep links, no CV consequence links.
  */
 
 const root = join(__dirname, "..", "..");
@@ -41,6 +47,8 @@ const writeCore = read("lib/journal/journal-write-core.ts");
 const worklogFlow = read("components/app/conversation/worker-worklog-flow.tsx");
 const composer = read("components/app/journal-entry-composer.tsx");
 const ackForm = read("components/app/journal-work-time-check-ack.tsx");
+const reader = read("lib/journal/work-intelligence-read.ts");
+const personPage = read("app/[locale]/dashboard/people/[workerId]/page.tsx");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
@@ -252,5 +260,57 @@ describe("7 · plausibility checks warn, never corrupt (owner §13)", () => {
     expect(plausibilityRead).toContain("deriveEntryWorkTime({");
     expect(worklogFlow).toContain('data-testid="worklog-day-check"');
     expect(composer).toContain('data-testid="journal-saved-day-check"');
+  });
+});
+
+describe("8 · the organization view composes the same reader (owner §14)", () => {
+  it("the person page loads the member's model through loadWorkIntelligence — no second hours read", () => {
+    expect(personPage).toContain('import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read"');
+    expect(personPage).toContain('import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence"');
+    expect(personPage).toContain('audience="organization"');
+    expect(personPage).not.toMatch(/journal_entry_metrics|fragment_time|deriveEntryWorkTime|work_hour_allocations|timesheets/);
+  });
+  it("scope is the database's: the reader filters by worker id only and uses no admin client", () => {
+    expect(reader).toContain('listJournalEntries(caller, { workerId })');
+    expect(reader).not.toMatch(/service_role|createAdminClient|createServiceClient|engagement_context_id\s*[,)]/);
+    expect(personPage).not.toMatch(/service_role|createAdminClient|createServiceClient/);
+  });
+  it("the section is composed only for a viewer who already sees an engagement with the person — never 'no work' about a stranger", () => {
+    expect(personPage).toMatch(/recordedWork\.status === "ok" && recordedWork\.entries\.length > 0\s*\?\s*await loadWorkIntelligence\(/);
+  });
+  it("the organization sees no checks, no acknowledgements, no directions, no diary links and no CV consequence", () => {
+    expect(component).toContain('export type WorkIntelligenceAudience = "self" | "organization";');
+    expect(component).toContain('const org = audience === "organization";');
+    expect(component).toContain("{!org && wi.checks.length > 0 && (");
+    expect(component).toContain("workerSkillSlugs: org ? [] : evidenced,");
+    expect(component).toMatch(/\{org \? \(\s*<span[^>]*data-testid=\{`wi-skill-name-\$\{s\.slug\}`\}/);
+    expect(component).toMatch(/\{org \? \(\s*<p[\s\S]*?data-testid="wi-org-scope"/);
+    expect(component).toContain('t("org.scopeNote")');
+    // the period tiles point at the surface they sit on, never at someone else's diary by default
+    expect(component).toContain("periodHref?: (key: WorkPeriodKey) => string;");
+    expect(personPage).toMatch(/periodHref: \(key\) =>\s*`\/dashboard\/people\/\$\{workerId\}\?period=\$\{key\}#work-intelligence`/);
+  });
+  it("the organization wording exists in every active locale, addressed to the organization, not to 'you' the worker", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as Record<string, unknown>;
+      const org = (j.intelligence as Record<string, unknown>).org as Record<string, unknown>;
+      for (const key of [
+        "title",
+        "subtitle",
+        "emptyNoEntries",
+        "emptyNoHours",
+        "evidenceStrength",
+        "skillsHint",
+        "unattributedHours",
+        "provenance",
+        "provenanceRule",
+        "scopeNote",
+      ]) {
+        expect(typeof org?.[key] === "string" && (org[key] as string).trim().length > 0, `${loc}.intelligence.org.${key}`).toBe(true);
+      }
+    }
+    const en = JSON.parse(read("messages/en/journal.json")) as { intelligence: { org: Record<string, string> } };
+    expect(en.intelligence.org.provenance).not.toMatch(/\bby you\b/);
+    expect(en.intelligence.org.scopeNote).toMatch(/not a rating/);
   });
 });
