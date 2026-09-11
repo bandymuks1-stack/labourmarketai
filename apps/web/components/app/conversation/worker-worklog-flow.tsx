@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import {
   ChatAction,
@@ -26,6 +26,7 @@ import {
   journalDraftReadiness,
   type WorkLogParse,
 } from "@/lib/conversation/worklog-extract";
+import { deriveIntakeWorkTime } from "@/lib/journal/intake-work-time";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { formatUtcDate } from "@/lib/time/display";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -69,6 +70,18 @@ export type WorkLogLabels = {
    *  e.g. the request "Užpildyk darbo žurnalą" typed into the field. The
    *  flow asks for the work instead of saving the request (prod 2026-09-06). */
   errorNoWorkContent: string;
+  /** What the save will RECORD as work time (issue #1689): the timed phrases
+   *  the executor persists as fragments, in the person's own words, and the
+   *  stated day total beside them. The person confirms figures, not a
+   *  sentence — before this the preview showed the parser's day figure while
+   *  the record received the itemised phrases. */
+  recordTitle: string;
+  recordNoActivity: string;
+  recordTotalStated: string;
+  recordPartsSum: string;
+  recordTotalDiffers: string;
+  recordNone: string;
+  hoursUnit: string;
 };
 
 /** The subset of the awaited server pipeline result the chat surface shows.
@@ -200,7 +213,9 @@ const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
  * the SAME deterministic parse is persisted by the executor as duration
  * metrics with machine-extraction provenance (`lib/journal/intake-work-time`),
  * so the hours the person stated reach the canonical work-time rule instead
- * of staying hidden in the evidence text.
+ * of staying hidden in the evidence text — and the preview lists EXACTLY
+ * those figures (`RecordedTimePreview`, derived from the notes as edited),
+ * so what the person confirms is what the record receives.
  */
 export function WorkerWorkLogFlow({
   draft,
@@ -761,6 +776,8 @@ export function WorkerWorkLogFlow({
         {draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />}
       </dl>
 
+      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} />
+
       <label className="flex flex-col gap-1 text-support">
         <span className="text-text-muted">{labels.labelSite}</span>
         <input
@@ -869,6 +886,83 @@ export function WorkerWorkLogFlow({
           {phase.message}
         </p>
       )}
+    </div>
+  );
+}
+
+/** One line per figure the save will record, in the person's own words. */
+function fragmentTimeLabel(
+  value: number,
+  unit: string,
+  labels: Pick<WorkLogLabels, "hoursUnit" | "minutesUnit">,
+): string {
+  if (unit === "minutes") return `${value} ${labels.minutesUnit}`;
+  if (unit === "hours") return `${value} ${labels.hoursUnit}`;
+  return `${value} ${unit}`;
+}
+
+function RecordedTimePreview({
+  notes,
+  workDate,
+  labels,
+}: {
+  notes: string;
+  workDate: string;
+  labels: WorkLogLabels;
+}) {
+  // The SAME derivation the executor runs on save, over the notes as the
+  // person has edited them — never a second parser, never a cached figure.
+  const record = useMemo(() => {
+    const anchor = /^\d{4}-\d{2}-\d{2}$/.test(workDate)
+      ? workDate
+      : new Date().toISOString().slice(0, 10);
+    const t = deriveIntakeWorkTime(notes, anchor);
+    const partsMinutes = t.fragments.reduce((sum, f) => {
+      if (f.timeUnit === "hours") return sum + f.timeValue * 60;
+      if (f.timeUnit === "minutes") return sum + f.timeValue;
+      return sum;
+    }, 0);
+    return { ...t, partsMinutes };
+  }, [notes, workDate]);
+
+  if (record.fragments.length === 0 && record.quantityMinutes === null) {
+    return (
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="worklog-record-none">
+        {labels.recordNone}
+      </p>
+    );
+  }
+  const hours = (minutes: number) =>
+    `${Math.round((minutes / 60) * 100) / 100} ${labels.hoursUnit}`;
+  return (
+    <div
+      className="flex flex-col gap-1 rounded-control border border-ink-500 bg-ink-800/60 px-3 py-2 text-support"
+      data-testid="worklog-record"
+    >
+      <p className="text-meta text-text-muted">{labels.recordTitle}</p>
+      {record.fragments.length > 0 ? (
+        <ul className="flex flex-col gap-0.5">
+          {record.fragments.map((f, i) => (
+            <li key={`${i}-${f.rawPhrase}`} className="flex justify-between gap-3">
+              <span className="min-w-0 truncate text-text-primary">„{f.rawPhrase}“</span>
+              <span className="shrink-0 text-right font-medium text-text-primary">
+                {fragmentTimeLabel(f.timeValue, f.timeUnit, labels)}
+                {f.activitySlug === null && f.activityLabel === null ? (
+                  <span className="ml-1 font-normal text-text-muted">· {labels.recordNoActivity}</span>
+                ) : null}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-text-primary">{hours(record.quantityMinutes ?? 0)}</p>
+      )}
+      {record.statedTotalMinutes !== null ? (
+        <p className="text-meta leading-relaxed text-state-warning" data-testid="worklog-record-total-differs">
+          {labels.recordTotalStated} {hours(record.statedTotalMinutes)} · {labels.recordPartsSum}{" "}
+          {hours(record.partsMinutes)} — {labels.recordTotalDiffers}
+        </p>
+      ) : null}
     </div>
   );
 }

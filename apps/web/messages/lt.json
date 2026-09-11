@@ -12873,6 +12873,13 @@
       "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
       "minutesUnit": "min",
       "errorNoWorkContent": "Įrašui reikia darbo: ką dirbai, kur arba kiek laiko. Parašyk savais žodžiais, pvz. „montavau langus nuo 8 iki 17“.",
+      "recordTitle": "Bus įrašyta kaip darbo laikas",
+      "recordNoActivity": "veikla neatpažinta",
+      "recordTotalStated": "Nurodyta iš viso",
+      "recordPartsSum": "dalys sudaro",
+      "recordTotalDiffers": "skirtumas bus parodytas kaip patikra, prie valandų nepridedamas",
+      "recordNone": "Laiko tekste nerasta — įrašas bus suskaičiuotas, bet be trukmės. Įrašyk, kiek valandų, jei nori, kad jos būtų sumuojamos.",
+      "hoursUnit": "val.",
       "relationship": {
         "employee": "Darbuotojas",
         "freelancer": "Laisvai samdomas",

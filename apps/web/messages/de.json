@@ -12873,6 +12873,13 @@
       "errorGeneric": "Speichern fehlgeschlagen. Bitte versuche es erneut.",
       "minutesUnit": "Min",
       "errorNoWorkContent": "Ein Eintrag braucht die Arbeit: was du getan hast, wo oder wie lange. Schreib es in deinen Worten, z. B. „Fenster von 8 bis 17 montiert“.",
+      "recordTitle": "Wird als Arbeitszeit erfasst",
+      "recordNoActivity": "Art der Arbeit nicht erkannt",
+      "recordTotalStated": "Angegeben insgesamt",
+      "recordPartsSum": "die Teile ergeben",
+      "recordTotalDiffers": "die Differenz wird als Prüfung angezeigt, nie zu deinen Stunden addiert",
+      "recordNone": "Keine Zeit im Text gefunden — der Eintrag wird gezählt, aber ohne Dauer. Gib die Stunden an, wenn sie in deine Summen sollen.",
+      "hoursUnit": "Std.",
       "relationship": {
         "employee": "Angestellter",
         "freelancer": "Freiberufler",

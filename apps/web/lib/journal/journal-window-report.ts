@@ -7,6 +7,7 @@ import {
   requireEmployerCompany,
 } from "@/lib/company/employer-company-context";
 import { createClient } from "@/lib/supabase/server";
+import { countedOnce } from "@/lib/journal/counted-once";
 import {
   JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
   JOURNAL_ENTRY_METRICS_EMBED,
@@ -197,6 +198,9 @@ export type JournalWindowEntryRow = {
   id: string;
   worker_id: string | null;
   created_at: string;
+  /** The confirmed original this row corrects (0018) — the roll-up counts
+   *  each correction chain once (`lib/journal/counted-once.ts`). */
+  correction_of?: string | null;
   engagement_context_id: string | null;
   workers: {
     display_name: string | null;
@@ -301,7 +305,11 @@ export function rollUpJournalWindow(
     lastEntryAtIso: string;
   };
   const byWorker = new Map<string, Bucket>();
-  for (const row of rows) {
+  // A confirmed entry the member corrected is one day of work, not two: the
+  // live correction replaces the original it points at (audit F1). Its
+  // approval belongs to the withdrawn figure and is not carried over.
+  const counted = countedOnce(rows);
+  for (const row of counted) {
     const key = row.worker_id ?? "—";
     const bucket = byWorker.get(key) ?? {
       name: workerName(row),
@@ -336,7 +344,7 @@ export function rollUpJournalWindow(
   return {
     workers,
     totals: {
-      entries: rows.length,
+      entries: counted.length,
       awaitingReview: workers.reduce((n, w) => n + w.awaitingReview, 0),
       confirmed: workers.reduce((n, w) => n + w.confirmed, 0),
       returned: workers.reduce((n, w) => n + w.returned, 0),
@@ -409,7 +417,7 @@ export async function getJournalWindowReport(
   // table decides what comes back — nothing here widens it.
   const { gteIso, ltIso } = windowCreatedAtBounds(window);
   const select = [
-    `id, worker_id, created_at, engagement_context_id, workers(${WORKER_NAME_FIELDS})`,
+    `id, worker_id, created_at, correction_of, engagement_context_id, workers(${WORKER_NAME_FIELDS})`,
     JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
     ...(opts.workTime ? [JOURNAL_ENTRY_METRICS_EMBED] : []),
   ].join(", ");

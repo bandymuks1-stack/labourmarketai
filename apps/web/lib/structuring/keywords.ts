@@ -1871,6 +1871,10 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
       needles: [
         "bendradarbiavimo galimyb",
         "partneryst",
+        // "ieškojau partnerių" (folded: partneriu) — the owner's own phrase.
+        "ieskojau partner",
+        "partneriu paiesk",
+        "partneriu",
         "partnership",
         "cooperation opportunit",
         "explore cooperation",
@@ -3042,6 +3046,30 @@ export const ACTIVITY_HINTS_LT: {
       "стриг газон",
       "косил трав",
       "сажал",
+    ],
+  },
+  // ── Partner search (issue #1689, the owner's own day) ────────────────────
+  // "5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių": the
+  // programming phrase was recognised, the other two timed phrases were not.
+  // Label-only (slug null): the hours get a kind of work; the matching
+  // `partnership-development` SKILL needle offers the link. A bare
+  // "testavau" deliberately gets NO activity row: the recognition tiers
+  // treat any activity label as a confident signal, and "Testavau
+  // aplikaciją" must stay a qa-testing CANDIDATE the person chooses
+  // (recognition-tiers.test.ts) — its hours are counted, honestly unlabelled.
+  // Placed last so every specific row keeps winning.
+  {
+    slug: null,
+    sector: "other",
+    label: "Partnerių paieška / bendradarbiavimas",
+    needles: [
+      "partneri",
+      "partneryst",
+      "partnership",
+      "partners",
+      "bendradarbiavimo galimyb",
+      "партнер",
+      "сотрудничеств",
     ],
   },
 ];
