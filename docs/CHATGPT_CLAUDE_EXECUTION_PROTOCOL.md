@@ -42,11 +42,28 @@ OWNER INTENT
 → local verification
 → commit/push/PR according to repository policy
 → CI/evidence receipt
-→ ChatGPT review against owner intent + architecture
+→ review against owner intent + architecture
 → correction/next highest-value broken link
-→ repeat
+→ repeat.
 
-The loop ends only when the objective's acceptance criteria are evidenced or a genuine human/owner gate is reached. A passing build alone is not product completion.
+The loop ends only when the objective's acceptance criteria are evidenced or a genuine human/owner/external gate is reached. A passing build, merge, deployment, receipt, PR closure, or intermediate production proof alone is not product completion.
+
+### Non-stall invariant
+
+For an owner-authorized autonomous objective, Claude Code MUST NOT stop merely because an intermediate PR was merged, CI passed, a receipt was emitted, or a useful production slice was proven.
+
+Evaluate the receipt state as follows:
+
+- `REMAINING = NONE` and all objective acceptance gates are evidenced → the objective may complete.
+- `REMAINING != NONE` and `BLOCKER = NONE` → the objective is still ACTIVE. Continue automatically with the highest-value safe remaining link inside the same authorized objective.
+- `BLOCKER` is a genuine RED/human/external dependency → stop and request only the minimum decision/input required.
+- A remaining item outside the authorized objective → record it without broadening scope.
+
+`BLOCKER = NONE` + non-empty `REMAINING` is therefore a continuation signal, not a handoff to the owner and not permission to wait for another prompt.
+
+Do not write or imply `awaiting the next objective`, `awaiting instructions`, `DONE`, or equivalent while the current authorized objective still has safe in-scope remaining acceptance work.
+
+Closing an issue or writing `Closes #...` is allowed only when the objective acceptance criteria are actually complete. A PR that delivers one slice of an objective must not close the objective when `REMAINING` is non-empty.
 
 ## Execution rules
 
@@ -59,6 +76,9 @@ The loop ends only when the objective's acceptance criteria are evidenced or a g
 - RED-class operations remain governed by existing repository human-gate policy.
 - Production evidence and historical Work Journal evidence are not scratch data.
 - Keep provenance and the distinctions between user claim, inference, verified evidence, credential/document evidence and employer/client confirmation.
+- Optimize for owner-visible product outcomes, not PR count, commit count, document count or agent activity.
+- Prefer one working branch and one coherent final PR per bounded objective when technically and safely practical.
+- Do not create `HANDOFF_*`, `CHECKPOINT_*`, `REPORT_*`, `zz-*`, probe, scratch or similar repository files merely to record progress. Temporary investigation artifacts stay outside the repository and are removed when finished.
 
 ## Work Journal / professional intelligence quality bar
 
@@ -99,6 +119,8 @@ NEXT — highest-value safe next step
 
 Do not write `DONE` when REMAINING is non-empty.
 
+A receipt is a checkpoint/evidence object, not automatically a stop signal. After emitting an intermediate receipt, continue when the non-stall invariant requires continuation.
+
 ## ChatGPT review contract
 
 ChatGPT reviews receipts and repository evidence using two separate gates:
@@ -107,6 +129,24 @@ ChatGPT reviews receipts and repository evidence using two separate gates:
 2. Product gate: does a real user now receive the owner-intended end-to-end outcome, with real data/evidence and understandable UX?
 
 If engineering is green but product is incomplete, the next instruction is a correction/continuation, not acceptance.
+
+## Local continuous-worker requirement
+
+GitHub is the coordination/evidence surface, but GitHub alone cannot type into a local Claude Code terminal. True unattended continuation therefore requires a local worker/orchestrator running on the owner's machine (or another explicitly authorized execution host).
+
+That worker should:
+
+1. identify the currently owner-authorized objective;
+2. invoke Claude Code in the correct repository/worktree;
+3. require the bootstrap and execution protocol;
+4. let Claude implement/test/commit/PR under repository policy;
+5. parse the execution receipt;
+6. if `REMAINING != NONE` and `BLOCKER = NONE`, invoke the next iteration automatically within the same objective;
+7. stop on RED/human/external blocker or completed acceptance gates;
+8. enforce a bounded iteration/time/failure budget so infrastructure failures cannot create an infinite retry loop;
+9. never bypass repository safety, owner gates, secrets policy, spending authorization, migration rules or outreach authorization.
+
+The local worker is orchestration only. It must not duplicate product truth, invent priorities, or become a second product architecture authority. Agentai OS is the preferred cross-project home for this orchestration capability; LabourMarket.ai keeps only the minimal project-side execution contract/integration required to participate.
 
 ## Handoff command
 
