@@ -77,14 +77,21 @@ describe("the journal surface actually asks the question", () => {
 });
 
 describe("the vocabulary is complete in every active locale", () => {
-  type Catalog = { journal?: { verification?: { state?: Record<string, string>; action?: Record<string, string> } } };
+  // READ THE FILE THE RUNTIME LOADS. `lib/i18n/request.ts` REPLACES the base
+  // catalogue's `journal` block with `messages/<locale>/journal.json`, so a
+  // `journal.*` key that lives only in `<locale>.json` is unreachable: this
+  // block sat there from 2026-09-07 to 2026-09-11 and every entry on
+  // production rendered "journal.verification.state.self_reported" as its
+  // trust line — while this guard passed, because it read the wrong file.
+  // Guard `i18n-namespace-shadow.test.ts` now forbids the shadow itself.
+  type Catalog = { verification?: { state?: Record<string, string>; action?: Record<string, string> } };
   const catalogs: Record<string, Catalog> = Object.fromEntries(
-    ACTIVE_LOCALES.map((l) => [l, JSON.parse(read(`messages/${l}.json`)) as Catalog]),
+    ACTIVE_LOCALES.map((l) => [l, JSON.parse(read(`messages/${l}/journal.json`)) as Catalog]),
   );
 
   for (const locale of ACTIVE_LOCALES) {
     it(`${locale}: every canonical state has a real string`, () => {
-      const states = catalogs[locale].journal?.verification?.state ?? {};
+      const states = catalogs[locale].verification?.state ?? {};
       for (const state of WORK_VERIFICATION_STATES) {
         expect((states[state] ?? "").trim(), `${locale} journal.verification.state.${state}`)
           .not.toBe("");
@@ -94,7 +101,7 @@ describe("the vocabulary is complete in every active locale", () => {
     });
 
     it(`${locale}: every next action has a real string`, () => {
-      const actions = catalogs[locale].journal?.verification?.action ?? {};
+      const actions = catalogs[locale].verification?.action ?? {};
       for (const key of [
         "await_verifier",
         "ask_employer_to_enable_confirmation",

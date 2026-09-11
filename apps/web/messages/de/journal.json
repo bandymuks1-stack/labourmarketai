@@ -615,5 +615,25 @@
       "provenanceRule": "Jeder Eintrag zählt einmal; eine Stunde wird einer Fähigkeit nur zugeordnet, wenn der Eintrag mit einer einzigen Fähigkeit verknüpft ist oder die eigene Formulierung der Person diese Fähigkeit nennt.",
       "scopeNote": "Das ist der Teil der Aufzeichnungen der Person, den Ihre Organisation sehen darf — Arbeit, die zu Ihren eigenen Engagements erfasst wurde. Es ist weder die vollständige Historie noch eine Bewertung. Die Bestätigung einer Führungskraft aus Ihrem Posteingang macht die Stunden eines Eintrags hier und im Lebenslauf der Person zu von einer Führungskraft bestätigten Stunden."
     }
+  },
+  "verification": {
+    "state": {
+      "self_reported": "Ihre eigene Aufzeichnung — noch keine Bestätigung durch eine Führungskraft",
+      "verifier_not_identified": "Noch nicht angegeben, für wen diese Arbeit geleistet wurde",
+      "verifier_available": "Ihre Führungskraft hat die Arbeitsbestätigung noch nicht eingeschaltet",
+      "verification_pending": "An Ihre Führungskraft gesendet — noch nicht bestätigt",
+      "verified": "Von Ihrer Führungskraft bestätigt",
+      "self_confirmed": "Von Ihnen selbst bestätigt — nicht von einer Führungskraft",
+      "returned": "Zur Änderung zurückgegeben",
+      "disputed": "Bestritten",
+      "not_applicable": "Hier steht niemand über Ihnen"
+    },
+    "action": {
+      "await_verifier": "Nichts zu tun — es liegt in einer Warteschlange",
+      "ask_employer_to_enable_confirmation": "Bitten Sie Ihre Führungskraft, die Bestätigung einzuschalten",
+      "identify_verifier": "Nennen Sie, für wen Sie das getan haben",
+      "respond_to_decision": "Lesen Sie die Entscheidung und antworten Sie",
+      "none": "Es fehlt nichts"
+    }
   }
 }

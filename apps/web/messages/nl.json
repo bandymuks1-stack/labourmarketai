@@ -7129,26 +7129,6 @@
     "cv": {
       "verified": "Bevestigd",
       "declared": "Opgegeven"
-    },
-    "verification": {
-      "state": {
-        "self_reported": "Uw eigen registratie — niemand heeft die bevestigd",
-        "verifier_not_identified": "Nog niemand kan dit bevestigen",
-        "verifier_available": "Uw werkgever kan werk nog niet bevestigen",
-        "verification_pending": "Wacht op bevestiging",
-        "verified": "Bevestigd",
-        "self_confirmed": "Door uzelf bevestigd — niet onafhankelijk",
-        "returned": "Teruggestuurd voor wijziging",
-        "disputed": "Betwist",
-        "not_applicable": "Hier staat niemand boven u"
-      },
-      "action": {
-        "await_verifier": "Niets te doen — het staat in iemands wachtrij",
-        "ask_employer_to_enable_confirmation": "Vraag om bevestiging aan te zetten",
-        "identify_verifier": "Geef aan voor wie u dit deed",
-        "respond_to_decision": "Lees het besluit en reageer",
-        "none": "Er ontbreekt niets"
-      }
     }
   },
   "orgMembers": {
@@ -15625,31 +15605,31 @@
       "unnamedOrganization": "Een organisatie"
     }
   },
-    "organizationRoster": {
-      "title": "Mensen die deze organisatie heeft vastgelegd",
-      "intro": "Iedereen die via een import binnenkwam of is toegevoegd bij het matchen van een bron. Dit is wat uw organisatie heeft vastgelegd — het is geen lijst met platformaccounts.",
-      "actingFor": "U handelt namens",
-      "count": "{count, plural, one {# persoon} other {# personen}} op de lijst.",
-      "truncated": "De eerste {limit} worden getoond.",
-      "empty": "Er staat nog niemand op de lijst. Het lezen is gelukt — de lijst is echt leeg.",
-      "emptyAction": "Breng uw mensen binnen",
-      "meaning": "Een naam hier betekent dat uw organisatie voor die persoon instaat. Het betekent niet dat zij een account hebben, en niet dat zij ergens mee hebben ingestemd.",
-      "linkState": {
-        "unlinked": "Geen account gekoppeld",
-        "link_proposed": "Koppeling voorgesteld",
-        "linked": "Gekoppeld aan hun account"
-      },
-      "context": {
-        "unauthenticated": "Meld u aan om de mensen van deze organisatie te zien.",
-        "personalWorkspace": "U bent in uw persoonlijke ruimte. Schakel naar een organisatie om haar mensen te zien.",
-        "noOrganization": "U hoort nog bij geen enkele organisatie.",
-        "notAMember": "U bent geen lid van die organisatie.",
-        "chooseOrganization": "U beheert meer dan één organisatie. Kies namens welke u handelt.",
-        "notAuthorized": "U hebt in deze organisatie geen rol die haar mensen mag zien.",
-        "needsMigration": "De personenopslag is in deze omgeving nog niet ingeschakeld.",
-        "unavailable": "De lijst met mensen kon niet worden gelezen. Dat is iets anders dan een lege lijst — probeer het zo meteen opnieuw."
-      }
+  "organizationRoster": {
+    "title": "Mensen die deze organisatie heeft vastgelegd",
+    "intro": "Iedereen die via een import binnenkwam of is toegevoegd bij het matchen van een bron. Dit is wat uw organisatie heeft vastgelegd — het is geen lijst met platformaccounts.",
+    "actingFor": "U handelt namens",
+    "count": "{count, plural, one {# persoon} other {# personen}} op de lijst.",
+    "truncated": "De eerste {limit} worden getoond.",
+    "empty": "Er staat nog niemand op de lijst. Het lezen is gelukt — de lijst is echt leeg.",
+    "emptyAction": "Breng uw mensen binnen",
+    "meaning": "Een naam hier betekent dat uw organisatie voor die persoon instaat. Het betekent niet dat zij een account hebben, en niet dat zij ergens mee hebben ingestemd.",
+    "linkState": {
+      "unlinked": "Geen account gekoppeld",
+      "link_proposed": "Koppeling voorgesteld",
+      "linked": "Gekoppeld aan hun account"
     },
+    "context": {
+      "unauthenticated": "Meld u aan om de mensen van deze organisatie te zien.",
+      "personalWorkspace": "U bent in uw persoonlijke ruimte. Schakel naar een organisatie om haar mensen te zien.",
+      "noOrganization": "U hoort nog bij geen enkele organisatie.",
+      "notAMember": "U bent geen lid van die organisatie.",
+      "chooseOrganization": "U beheert meer dan één organisatie. Kies namens welke u handelt.",
+      "notAuthorized": "U hebt in deze organisatie geen rol die haar mensen mag zien.",
+      "needsMigration": "De personenopslag is in deze omgeving nog niet ingeschakeld.",
+      "unavailable": "De lijst met mensen kon niet worden gelezen. Dat is iets anders dan een lege lijst — probeer het zo meteen opnieuw."
+    }
+  },
   "peopleImport": {
     "alreadyThere": "{count} staan al op je lijst",
     "ambiguousLead": "Deze namen passen bij meer dan één persoon die je al hebt. Wij gokken niet.",

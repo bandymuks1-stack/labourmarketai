@@ -615,5 +615,25 @@
       "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda priskiriama įgūdžiui tik tada, kai įrašas susietas su vienu įgūdžiu arba kai paties žmogaus frazė įvardija tą įgūdį.",
       "scopeNote": "Tai ta žmogaus įrašų dalis, kurią jūsų organizacija turi teisę matyti — darbas, užfiksuotas jūsų pačių bendradarbiavimui. Tai nėra visa jo istorija ir nėra įvertinimas. Vadovo patvirtinimas iš jūsų gautųjų įrašo valandas paverčia vadovo patvirtintomis valandomis čia ir žmogaus CV."
     }
+  },
+  "verification": {
+    "state": {
+      "self_reported": "Jūsų pačių įrašas — vadovo patvirtinimo dar nėra",
+      "verifier_not_identified": "Dar nenurodyta, kam šis darbas atliktas",
+      "verifier_available": "Jūsų vadovas dar neįjungė darbų patvirtinimo",
+      "verification_pending": "Išsiųsta vadovui — dar nepatvirtinta",
+      "verified": "Vadovo patvirtinta",
+      "self_confirmed": "Patvirtinote patys — ne vadovas",
+      "returned": "Grąžinta pataisyti",
+      "disputed": "Ginčijama",
+      "not_applicable": "Čia virš jūsų nieko nėra"
+    },
+    "action": {
+      "await_verifier": "Nieko daryti nereikia — jau kažkieno eilėje",
+      "ask_employer_to_enable_confirmation": "Paprašykite vadovo įjungti patvirtinimą",
+      "identify_verifier": "Nurodykite, kam tai dirbote",
+      "respond_to_decision": "Perskaitykite sprendimą ir atsakykite",
+      "none": "Nieko netrūksta"
+    }
   }
 }

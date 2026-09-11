@@ -615,5 +615,25 @@
       "provenanceRule": "Each entry is counted once; an hour is attributed to a skill only when the entry is linked to a single skill, or when the person's own phrase names that skill.",
       "scopeNote": "This is the part of the person's record your organization is entitled to see — work logged against your own engagements. It is not their complete history, and it is not a rating. A manager's confirmation from your inbox turns an entry's hours into manager-confirmed hours here and on the person's CV."
     }
+  },
+  "verification": {
+    "state": {
+      "self_reported": "Your own record — no manager confirmation yet",
+      "verifier_not_identified": "No one named yet for whom this work was done",
+      "verifier_available": "Your manager has not switched on work confirmation yet",
+      "verification_pending": "Sent to your manager — not confirmed yet",
+      "verified": "Confirmed by your manager",
+      "self_confirmed": "Self-confirmed — not by a manager",
+      "returned": "Returned for changes",
+      "disputed": "Disputed",
+      "not_applicable": "Nobody stands above you here"
+    },
+    "action": {
+      "await_verifier": "Nothing to do — it is in someone's queue",
+      "ask_employer_to_enable_confirmation": "Ask your manager to switch confirmation on",
+      "identify_verifier": "Name who you did this for",
+      "respond_to_decision": "Read the decision and reply",
+      "none": "Nothing is missing"
+    }
   }
 }
