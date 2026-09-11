@@ -558,6 +558,26 @@
     },
     "outputsTitle": "Atlikta",
     "multiActivityHours": "{hours} val. iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} aprašo kelių rūšių darbą — padalyta pagal darbų rūšis, o ne pagal įgūdį (susieti tik su vienu įgūdžiu).",
-    "trendNewShort": "nauja"
+    "trendNewShort": "nauja",
+    "checks": {
+      "title": "Verta patikrinti",
+      "hint": "Skaičiai lieka tokie, kokius užfiksavote — nieko nekeičiame ir nenurašome. Čia tik tai, kas neįprasta: patikrinkite įrašus arba paaiškinkite, kodėl taip yra.",
+      "day_over_24h": "{day}: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} — daugiau nei para. Greičiausiai tas pats darbas užfiksuotas du kartus arba klaida skaičiuje.",
+      "long_day": "{day}: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} — ilga diena. Patikrinkite, ar du įrašai neaprašo to paties darbo.",
+      "line_over_24h": "{day}: „{title}“ — {hours} val. viename įraše, ilgiau nei para. Jei tai kelių dienų darbas, nurodykite dienas.",
+      "entry_duration_ignored": "{day}: įrašas nurodo ir laiką prie frazių ({hours} val.), ir bendrą trukmę ({ignored}). Skaičiuojame laiką prie frazių; bendra trukmė nesumuojama.",
+      "untitled": "įrašas",
+      "openRecords": "Peržiūrėti {entries, plural, one {# įrašą} few {# įrašus} other {# įrašų}}",
+      "acknowledged": "Jūsų paaiškinimas: {reason}",
+      "ackOpen": "Viskas teisinga — paaiškinti",
+      "ackLabel": "Kodėl taip yra?",
+      "ackPlaceholder": "pvz., dvi pamainos — dieninė ir naktinė",
+      "ackSubmit": "Įrašyti paaiškinimą",
+      "ackWorking": "Įrašoma…",
+      "ackCancel": "Atšaukti",
+      "ackError": "Nepavyko įrašyti — pabandykite dar kartą.",
+      "ackDone": "Paaiškinimas įrašytas.",
+      "openInJournal": "Peržiūrėti žurnale"
+    }
   }
 }

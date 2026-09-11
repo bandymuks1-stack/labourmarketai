@@ -264,6 +264,10 @@ export const WORKER_EXECUTORS: {
           })),
           cvUpdated: r.skills.cvUpdated,
         },
+        // Owner §13: the day-level plausibility check the saved entry now
+        // takes part in (read-through of the canonical result; null = none
+        // or not readable — never invented).
+        dayCheck: r.dayCheck ?? null,
       },
     };
   },

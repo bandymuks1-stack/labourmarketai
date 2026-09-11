@@ -18,7 +18,12 @@ import { describe, expect, it } from "vitest";
  *  5. the universal journal model stays data: no profession/ISCO switch
  *     statement in lib/journal, and the ISCO map covers every sub-major
  *     group (the full world of work, not the professions we happen to see);
- *  6. the i18n namespace exists in every active locale.
+ *  6. the i18n namespace exists in every active locale;
+ *  7. plausibility checks (owner §13) WARN and never corrupt: the check
+ *     module is pure and reads the canonical lines, no figure depends on a
+ *     check, an acknowledgement is one append-only worker row with a reason,
+ *     an acknowledged check stays visible, and both intake surfaces show
+ *     the saved record's day check.
  */
 
 const root = join(__dirname, "..", "..");
@@ -29,6 +34,13 @@ const component = read("components/app/journal-work-intelligence.tsx");
 const model = read("lib/journal/work-intelligence.ts");
 const cv = read("lib/cv-export/verified-cv.ts");
 const workflows = read("lib/ai-workspace/workflows.ts");
+const plausibility = read("lib/journal/work-time-plausibility.ts");
+const plausibilityAction = read("lib/journal/work-time-plausibility-actions.ts");
+const plausibilityRead = read("lib/journal/work-time-plausibility-read.ts");
+const writeCore = read("lib/journal/journal-write-core.ts");
+const worklogFlow = read("components/app/conversation/worker-worklog-flow.tsx");
+const composer = read("components/app/journal-entry-composer.tsx");
+const ackForm = read("components/app/journal-work-time-check-ack.tsx");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
@@ -176,6 +188,15 @@ describe("6 · i18n in every active locale", () => {
     "skillsHint",
     "directionsHint",
     "provenanceRule",
+    "checks.title",
+    "checks.hint",
+    "checks.day_over_24h",
+    "checks.long_day",
+    "checks.line_over_24h",
+    "checks.entry_duration_ignored",
+    "checks.acknowledged",
+    "checks.ackOpen",
+    "checks.openInJournal",
   ];
   for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
     it(`${loc}: journal.intelligence carries the required keys with real text`, () => {
@@ -191,4 +212,45 @@ describe("6 · i18n in every active locale", () => {
       expect(typeof base.conversation!.chat!.chipJournalNumbers).toBe("string");
     });
   }
+});
+
+describe("7 · plausibility checks warn, never corrupt (owner §13)", () => {
+  it("the check module is pure and reads only the canonical lines", () => {
+    expect(plausibility).not.toMatch(/from "@\/lib\/supabase|server-only|fetch\(|new Date\(\)/);
+    expect(plausibility).toContain('import type { EntryWorkTime, WorkTimeMetricRow } from "@/lib/journal/work-time"');
+    // the thresholds are named facts, not buried numbers
+    expect(plausibility).toContain("export const HOURS_IN_A_DAY = 24");
+    expect(plausibility).toMatch(/export const LONG_DAY_HOURS = \d+/);
+  });
+  it("no figure in the model depends on a check — checks are derived last, from the same scoped lines", () => {
+    const checksAt = model.indexOf("const checks = deriveWorkTimeChecks(");
+    expect(checksAt).toBeGreaterThan(model.indexOf("const periods: WorkPeriodTotals[]"));
+    expect(checksAt).toBeGreaterThan(model.indexOf("const provenance = {"));
+    expect(model).toMatch(/checks,\s*totalHours: all\.hours/);
+    // nothing caps, drops or rescales a line because of a check
+    expect(model).not.toMatch(/HOURS_IN_A_DAY|LONG_DAY_HOURS|Math\.min\([^)]*hours/);
+  });
+  it("an acknowledgement is ONE append-only worker row with a reason — never an update, delete or figure change", () => {
+    expect(plausibilityAction).toContain('"use server"');
+    expect(plausibilityAction).toContain("metric_slug: WORK_TIME_OVERRIDE_METRIC_SLUG");
+    expect(plausibilityAction).toContain('source: "worker_input"');
+    expect(plausibilityAction).toContain("normalizeOverrideReason(");
+    expect(plausibilityAction).not.toMatch(/\.update\(|\.delete\(|\.upsert\(|value_numeric/);
+    expect(plausibilityAction).not.toMatch(/service_role|createAdminClient|admin/i);
+    // only the worker's own row acknowledges; the pipeline cannot wave a check through
+    expect(plausibility).toContain('if (m.source !== "worker_input") continue;');
+  });
+  it("an acknowledged check stays visible with its reason — the section never hides it", () => {
+    expect(component).toContain("ackedChecks.map((c) =>");
+    expect(component).toContain('t("checks.acknowledged"');
+    expect(component).toContain("data-open-checks={openChecks.length}");
+    expect(ackForm).toContain("acknowledgeWorkTimeCheck(");
+  });
+  it("both intake surfaces show the saved record's day check, read AFTER the save from the same journal read", () => {
+    expect(writeCore).toContain("readSavedEntryDayCheck(");
+    expect(plausibilityRead).toContain("listJournalEntries(caller, { workerId })");
+    expect(plausibilityRead).toContain("deriveEntryWorkTime({");
+    expect(worklogFlow).toContain('data-testid="worklog-day-check"');
+    expect(composer).toContain('data-testid="journal-saved-day-check"');
+  });
 });

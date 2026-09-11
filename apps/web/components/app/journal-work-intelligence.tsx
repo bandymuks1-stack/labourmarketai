@@ -13,6 +13,7 @@ import {
   type WorkPeriodKey,
   type WorkTrend,
 } from "@/lib/journal/work-intelligence";
+import { JournalWorkTimeCheckAck } from "@/components/app/journal-work-time-check-ack";
 import { computeAdjacentDirections } from "@/lib/opportunities/adjacent-directions";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 import { formatUtcDate } from "@/lib/time/display";
@@ -40,6 +41,14 @@ import { formatUtcDate } from "@/lib/time/display";
  *   7. Where could it lead?     adjacent directions from EVIDENCED skills only
  *   8. What does it feed?       the Living CV and the opportunities board
  *   9. Where do the numbers come from?  provenance footnote
+ *   1a. Does anything need a look?  plausibility checks (owner §13) right
+ *                               under the strip: a day above 24 h, a long
+ *                               day, one duration longer than a day, an
+ *                               entry-level figure the rule set aside —
+ *                               warnings beside unchanged figures; the
+ *                               person fixes the record or stands by it with
+ *                               a reason, and an acknowledged check stays
+ *                               listed with that reason
  *
  * ── HONESTY ───────────────────────────────────────────────────────────────
  *   · a skill's hours are the entries where it was the ONLY linked skill;
@@ -155,6 +164,18 @@ export async function JournalWorkIntelligence({
   const monthMax = Math.max(0, ...months.map((m) => m.hours));
   const hasAnyHours = wi.totalHours > 0;
   const noEntriesAtAll = wi.totalEntries === 0;
+  const openChecks = wi.checks.filter((c) => c.acknowledged === null);
+  const ackedChecks = wi.checks.filter((c) => c.acknowledged !== null);
+  const checkSentence = (c: (typeof wi.checks)[number]) =>
+    t(`checks.${c.code}`, {
+      hours: fmtHours(c.hours, locale),
+      day: day(c.day) ?? c.day,
+      entries: c.entryIds.length,
+      title: c.title ?? t("checks.untitled"),
+      ignored: c.ignored
+        ? `${fmtHours(c.ignored.value, locale)} ${labels.unitName(c.ignored.unit) ?? c.ignored.unit}`
+        : "",
+    });
   const periodHasEntries = period.entries > 0;
 
   return (
@@ -233,6 +254,72 @@ export async function JournalWorkIntelligence({
                 );
               })}
             </nav>
+
+            {/* 1a · plausibility checks (owner §13) — warn, never corrupt:
+              every figure above and below is exactly what was recorded. */}
+            {wi.checks.length > 0 && (
+              <div
+                className="flex flex-col gap-2"
+                data-testid="wi-checks"
+                data-open-checks={openChecks.length}
+              >
+                <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                  {t("checks.title")}
+                </h3>
+                <p className="text-meta leading-relaxed text-text-muted">
+                  {t("checks.hint")}
+                </p>
+                <ul className="flex flex-col gap-1.5">
+                  {openChecks.map((c) => (
+                    <li
+                      key={c.key}
+                      className="flex flex-col gap-1.5 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2"
+                      data-testid={`wi-check-${c.code}`}
+                      data-check-key={c.key}
+                      data-check-day={c.day}
+                    >
+                      <span className="text-sm leading-relaxed text-text-primary">
+                        {checkSentence(c)}
+                      </span>
+                      <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <Link
+                          href={
+                            `/dashboard/journal?date=${c.day}#journal-entries` as "/dashboard"
+                          }
+                          className="text-meta font-medium text-brand-blue hover:underline"
+                          data-testid={`wi-check-open-${c.code}`}
+                        >
+                          {t("checks.openRecords", { entries: c.entryIds.length })} →
+                        </Link>
+                        <JournalWorkTimeCheckAck
+                          entryId={c.entryIds[0]!}
+                          code={c.code}
+                          day={c.day}
+                          checkKey={c.key}
+                        />
+                      </span>
+                    </li>
+                  ))}
+                  {ackedChecks.map((c) => (
+                    <li
+                      key={c.key}
+                      className="flex flex-col gap-0.5 rounded-md border border-border-subtle bg-surface-1/40 px-3 py-2"
+                      data-testid={`wi-check-acked-${c.code}`}
+                      data-check-key={c.key}
+                    >
+                      <span className="text-meta leading-relaxed text-text-muted">
+                        {checkSentence(c)}
+                      </span>
+                      <span className="text-meta text-text-secondary">
+                        {t("checks.acknowledged", {
+                          reason: c.acknowledged!.reason,
+                        })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {!hasAnyHours && (
               <p

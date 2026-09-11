@@ -225,6 +225,7 @@ export const UNIVERSAL_CORE_SLUGS = [
   "unknown_phrase",
   "skill_claim",
   "fragment_skill",
+  "work_time_override",
   "source_document_file",
   "extractor_version",
   "pipeline_version",

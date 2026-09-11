@@ -558,6 +558,26 @@
     },
     "outputsTitle": "Afgerond",
     "multiActivityHours": "{hours} u over {count, plural, one {# registratie} other {# registraties}} beschrijven meerdere soorten werk — verdeeld per soort werk, niet per vaardigheid (aan één vaardigheid gekoppeld).",
-    "trendNewShort": "nieuw"
+    "trendNewShort": "nieuw",
+    "checks": {
+      "title": "Even nakijken",
+      "hint": "De cijfers blijven precies zoals je ze hebt vastgelegd — er wordt niets gewijzigd of geschrapt. Dit is alleen wat ongewoon lijkt: controleer de registraties of leg uit waarom het klopt.",
+      "day_over_24h": "{day}: {hours} u in {entries, plural, one {# registratie} other {# registraties}} — meer dan een dag. Waarschijnlijk hetzelfde werk twee keer vastgelegd, of een typefout in het getal.",
+      "long_day": "{day}: {hours} u in {entries, plural, one {# registratie} other {# registraties}} — een lange dag. Controleer of twee registraties hetzelfde werk beschrijven.",
+      "line_over_24h": "{day}: “{title}” — {hours} u in één registratie, langer dan een dag. Gaat het om meerdere dagen, leg dan de dagen vast.",
+      "entry_duration_ignored": "{day}: de registratie noemt zowel tijd per zin ({hours} u) als een totale duur ({ignored}). De tijd per zin telt; de totale duur komt er niet bovenop.",
+      "untitled": "registratie",
+      "openRecords": "{entries, plural, one {# registratie} other {# registraties}} openen",
+      "acknowledged": "Jouw toelichting: {reason}",
+      "ackOpen": "Dit klopt — toelichten",
+      "ackLabel": "Waarom klopt dit?",
+      "ackPlaceholder": "bv. twee diensten — dag en nacht",
+      "ackSubmit": "Toelichting opslaan",
+      "ackWorking": "Opslaan…",
+      "ackCancel": "Annuleren",
+      "ackError": "Opslaan mislukt — probeer het opnieuw.",
+      "ackDone": "Toelichting opgeslagen.",
+      "openInJournal": "Bekijken in het logboek"
+    }
   }
 }

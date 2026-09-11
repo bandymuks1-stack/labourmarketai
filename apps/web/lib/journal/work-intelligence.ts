@@ -67,6 +67,10 @@ import {
 } from "@/lib/evidence/evidence-tier";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
 import { fragmentSkillsByIndex } from "@/lib/journal/fragment-skill-evidence";
+import {
+  deriveWorkTimeChecks,
+  type WorkTimeCheck,
+} from "@/lib/journal/work-time-plausibility";
 import { SOURCE_DOCUMENT_METRIC_SLUG } from "@/lib/journal/document-journal-draft-model";
 
 const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
@@ -263,6 +267,11 @@ export type WorkIntelligence = {
   /** Sum of every skill's attributed hours — the denominator of `share`. */
   readonly attributedHours: number;
   readonly provenance: ProvenanceSplit;
+  /** Plausibility checks over the focus period's lines (owner §13): a day
+   *  above 24 h, a long day, a single duration longer than a day, an entry-
+   *  level duration the rule set aside. Warnings only — no figure above is
+   *  changed by them; acknowledged checks stay listed with their reason. */
+  readonly checks: readonly WorkTimeCheck[];
   /** All-time hours, for callers that want the one headline figure. */
   readonly totalHours: number;
   readonly totalEntries: number;
@@ -741,6 +750,11 @@ export function deriveWorkIntelligence(
     }
   }
 
+  // ── plausibility checks (warn, never corrupt) ─────────────────────────
+  const checks = deriveWorkTimeChecks(
+    scoped.map((d) => ({ time: d.time, metrics: d.entry.metrics })),
+  );
+
   const all = periods.find((p) => p.key === "all")!;
   return {
     focus,
@@ -764,6 +778,7 @@ export function deriveWorkIntelligence(
       managerCorrected: round2(provenance.managerCorrected),
       unknown: round2(provenance.unknown),
     },
+    checks,
     totalHours: all.hours,
     totalEntries: all.entries,
   };
