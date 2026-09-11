@@ -33,6 +33,7 @@ const baseEntry: JournalEditingEntry = {
   topic: null,
   skillSlugs: [],
   activities: [],
+  moduleFields: {},
 };
 
 const skills = [
@@ -206,9 +207,41 @@ function input(overrides: Partial<CompactSaveInput>): CompactSaveInput {
     siteName: "",
     institutionName: "",
     topic: "",
+    moduleFields: {},
     ...overrides,
   };
 }
+
+describe("archetype module fields (owner §12)", () => {
+  it("ships non-empty module values as ONE json field, trimmed", () => {
+    const fields = buildCompactSaveFields(
+      input({
+        moduleFields: {
+          supervision_level: "  meistras Jonas, šalia visą dieną ",
+          learning_outcome: "",
+        },
+      }),
+    );
+    expect(JSON.parse(fields.module_metrics_json!)).toEqual({
+      supervision_level: "meistras Jonas, šalia visą dieną",
+    });
+  });
+  it("omits the field entirely when every value is empty", () => {
+    const fields = buildCompactSaveFields(
+      input({ moduleFields: { supervision_level: "   " } }),
+    );
+    expect("module_metrics_json" in fields).toBe(false);
+  });
+  it("a changed module value makes the edit dirty; an untouched preload does not", () => {
+    const base = input({ moduleFields: { crew: "3 žmonės" } });
+    expect(compactStateFingerprint(base)).toBe(
+      compactStateFingerprint(input({ moduleFields: { crew: "3 žmonės" } })),
+    );
+    expect(compactStateFingerprint(base)).not.toBe(
+      compactStateFingerprint(input({ moduleFields: { crew: "4 žmonės" } })),
+    );
+  });
+});
 
 function row(overrides: Partial<CompactActivityRow>): CompactActivityRow {
   return {

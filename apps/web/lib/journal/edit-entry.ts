@@ -15,6 +15,11 @@
  * `work_direction`, `site_name`, `institution_name`, `topic`.
  */
 
+import {
+  readModuleFieldValues,
+  type ModuleFieldValues,
+} from "./journal-module-fields";
+
 export type EditEntryMetricRow = {
   metric_slug: string;
   value_text: string | null;
@@ -67,6 +72,11 @@ export type JournalEditingEntry = {
   skillSlugs: string[];
   /** Persisted activity fragments with their OWN times (index-grouped). */
   activities: EditEntryActivity[];
+  /** Owner §12 — archetype module fields the entry carries (slug → the
+   *  person's text), preloaded so an untouched edit re-sends them: the
+   *  supersede rebuilds metrics from the form, so anything not here would
+   *  be silently lost. Empty for an entry with none. */
+  moduleFields: ModuleFieldValues;
 };
 
 /** Units that mean the `quantity` metric is a DURATION, not a productivity count. */
@@ -110,6 +120,7 @@ export function buildEditingEntry(args: {
     topic: textOf("topic"),
     skillSlugs: [...new Set((args.linkedSkillSlugs ?? []).filter(Boolean))],
     activities: buildActivities(metrics),
+    moduleFields: readModuleFieldValues(metrics),
   };
 }
 

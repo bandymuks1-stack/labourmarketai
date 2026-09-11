@@ -14,6 +14,12 @@ import {
   readSavedEntryDayCheck,
   type WorkDayCheck,
 } from "@/lib/journal/work-time-plausibility-read";
+import {
+  allowedModuleSlugsForRelationship,
+  MODULE_METRICS_FIELD,
+  moduleMetricRows,
+  parseModuleFields,
+} from "@/lib/journal/journal-module-fields";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -80,7 +86,12 @@ export type JournalSaveErrorCode =
   | "entry_superseded"
   /** W0 — a selected taxonomy slug failed server-side validation (unknown /
    *  inactive / malformed). The atomic RPC rolled the whole save back. */
-  | "skill_selection_invalid";
+  | "skill_selection_invalid"
+  /** Owner §12 — a module field was posted that the ENTRY's own engagement
+   *  relationship does not compose (or the engagement is not the caller's).
+   *  Refused, never silently dropped: the composition decides which fields
+   *  an entry may carry, not the request. */
+  | "module_field_invalid";
 
 export type ParsedFragmentInput = {
   rawPhrase: string;
@@ -201,6 +212,42 @@ export async function runSkillPipeline(opts: {
     );
     return failedPipelineResult();
   }
+}
+
+/**
+ * Owner §12 — archetype module fields → metric rows, accepted by the
+ * ENGAGEMENT's own relationship. The relationship is read under the caller's
+ * RLS (their own context; a foreign or unknown id reads as no relationship
+ * and therefore allows nothing). No field posted → no read, no rows.
+ */
+export async function resolveModuleMetricRows(
+  supabase: ServerSupabase,
+  t: Translator,
+  engagementId: string,
+  raw: string | null | undefined,
+): Promise<
+  | { ok: true; rows: RpcMetricRow[] }
+  | { ok: false; code: "module_field_invalid"; message: string }
+> {
+  const values = parseModuleFields(raw);
+  if (Object.keys(values).length === 0) return { ok: true, rows: [] };
+  const { data: ctx } = await supabase
+    .from("engagement_contexts")
+    .select("relationship_slug")
+    .eq("id", engagementId)
+    .maybeSingle();
+  const result = moduleMetricRows(
+    values,
+    allowedModuleSlugsForRelationship(ctx?.relationship_slug ?? null),
+  );
+  if (!result.ok) {
+    return {
+      ok: false,
+      code: "module_field_invalid",
+      message: t("moduleFieldInvalid", { fields: result.refused.join(", ") }),
+    };
+  }
+  return { ok: true, rows: result.rows };
 }
 
 export function collectUnitSlugs(args: {
@@ -420,6 +467,15 @@ export async function createJournalEntryCore(
   const hasStructured =
     quantity !== null || workDirection !== "" || fragments.length > 0;
 
+  // Owner §12 — module fields, accepted by the engagement's own composition.
+  const moduleRows = await resolveModuleMetricRows(
+    supabase,
+    t,
+    engagementId,
+    String(formData.get(MODULE_METRICS_FIELD) ?? ""),
+  );
+  if (!moduleRows.ok) return moduleRows;
+
   // Pre-validate the unit_slug FK so we fail BEFORE any insert if the
   // worker's productivity unit isn't registered in `productivity_units`.
   // This is what surfaced after PR #61: the legacy seed only covered
@@ -545,6 +601,9 @@ export async function createJournalEntryCore(
     ...(sourceDocumentFileId
       ? documentProvenanceMetrics(sourceDocumentFileId)
       : []),
+    // Owner §12 — one metric row per archetype module field the person
+    // filled, under the same atomic save (never a core slug, guarded).
+    ...moduleRows.rows,
   ];
 
   // Atomic save — the RPC inserts the entry and all metric rows inside one

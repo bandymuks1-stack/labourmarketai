@@ -77,11 +77,22 @@ import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
 import { formatUtcDate } from "@/lib/time/display";
+import { JournalModuleFields } from "@/components/app/journal-module-fields";
+import {
+  MODULE_METRICS_FIELD,
+  serializeModuleFields,
+  type ModuleFieldValues,
+} from "@/lib/journal/journal-module-fields";
 
 export type JournalEngagement = {
   id: string;
   label: string;
   isPrimary: boolean;
+  /** The worker's relationship to the context (`employee`, `student`,
+   *  `volunteer`, …) — what decides which archetype module fields the
+   *  editors compose for an entry logged against it (owner §12). Optional
+   *  so older callers keep working; absent → no module fields. */
+  relationshipSlug?: string;
 };
 
 /** How the entry's engagement context was decided — see
@@ -385,7 +396,19 @@ export function JournalEntryComposer({
     editingEntry?.topic ? "confirmed" : "pending",
   );
   const [topic, setTopic] = useState<string>(editingEntry?.topic ?? "");
-  const [engagementId, setEngagementId] = useState<string>(primaryId);
+  // An edit keeps the entry's OWN engagement (the compact editor already
+  // did; this path defaulted to the primary and could silently move the
+  // work). A legacy entry with no stored engagement falls back as before.
+  const [engagementId, setEngagementId] = useState<string>(
+    editingEntry?.engagementContextId ?? primaryId,
+  );
+  // Owner §12 — archetype module fields for the selected engagement's
+  // relationship, preloaded on edit so they are re-sent, not lost.
+  const [moduleFields, setModuleFields] = useState<ModuleFieldValues>(
+    editingEntry?.moduleFields ?? {},
+  );
+  const selectedRelationship =
+    engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
   // Preserve the entry's saved work date on edit (do NOT reset to today).
   const [workDate, setWorkDate] = useState<string>(
     editingEntry?.workDate ?? today,
@@ -914,6 +937,10 @@ export function JournalEntryComposer({
         fd.set("institution_name", institutionName.trim());
       if (topicStatus === "confirmed" && topic.trim())
         fd.set("topic", topic.trim());
+      // Owner §12 — module fields, one metric row each server-side, accepted
+      // by the engagement's own composition.
+      const moduleJson = serializeModuleFields(moduleFields);
+      if (moduleJson) fd.set(MODULE_METRICS_FIELD, moduleJson);
       if (confirmedFragments.length > 0) {
         fd.set("fragments_json", JSON.stringify(confirmedFragments));
       }
@@ -2079,6 +2106,15 @@ export function JournalEntryComposer({
             </p>
           ) : null}
         </label>
+
+        {/* Owner §12 — the relationship's own module fields (a placement's
+            supervision, a volunteer's field project); nothing renders for a
+            context whose composition adds no module. */}
+        <JournalModuleFields
+          relationshipSlug={selectedRelationship}
+          values={moduleFields}
+          onChange={setModuleFields}
+        />
 
         {mode === "photo" && !editingEntry && photoField}
 

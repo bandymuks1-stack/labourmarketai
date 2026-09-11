@@ -16,6 +16,11 @@ import type {
   EditEntryAmount,
   JournalEditingEntry,
 } from "@/lib/journal/edit-entry";
+import {
+  MODULE_METRICS_FIELD,
+  serializeModuleFields,
+  type ModuleFieldValues,
+} from "@/lib/journal/journal-module-fields";
 
 export type CompactTimeUnit = "hours" | "minutes" | "days";
 
@@ -190,6 +195,9 @@ export type CompactSaveInput = {
   siteName: string;
   institutionName: string;
   topic: string;
+  /** Owner §12 — archetype module fields (slug → text) for the entry's
+   *  engagement relationship. Empty values are not sent. */
+  moduleFields: ModuleFieldValues;
 };
 
 /**
@@ -214,6 +222,10 @@ export function buildCompactSaveFields(
   if (input.institutionName.trim())
     fields.institution_name = input.institutionName.trim();
   if (input.topic.trim()) fields.topic = input.topic.trim();
+  // Module fields → one JSON field; the server turns each into a metric row
+  // after checking the engagement's own composition allows the slug.
+  const moduleJson = serializeModuleFields(input.moduleFields);
+  if (moduleJson) fields[MODULE_METRICS_FIELD] = moduleJson;
 
   // Activity rows → fragments_json (index association preserved by order).
   // A row that originates from a taxonomy selection keeps ITS `skillSlug` as

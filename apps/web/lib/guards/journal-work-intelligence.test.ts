@@ -1,6 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { moduleGroupsForRelationship } from "../journal/journal-module-fields";
+import { RELATIONSHIP_ARCHETYPES } from "../journal/work-evidence-archetypes";
 
 /**
  * WORK INTELLIGENCE + UNIVERSAL JOURNAL GUARD (issue #1689).
@@ -376,5 +378,99 @@ describe("9 · the organization's per-member roll-up rides the same model (owner
     const en = JSON.parse(read("messages/en.json")) as { reports: { journalWindow: { basis: string } } };
     expect(en.reports.journalWindow.basis).toMatch(/counted once/);
     expect(en.reports.journalWindow.basis).toMatch(/approved/);
+  });
+});
+
+describe("10 · archetype module fields — composed from the relationship, one metric row each (owner §12)", () => {
+  /**
+   * The universal journal's modules reach the person through the ONE
+   * composition contract: the engagement RELATIONSHIP resolves archetypes,
+   * `composeJournal` unions their modules, both editors render exactly those
+   * fields behind their existing disclosure, and the server accepts a slug
+   * only when the SAVED engagement's own composition allows it. No second
+   * form, no profession switch, no client-declared field list, and no
+   * vocabulary (archetype / module / ISCO) reaches the person.
+   */
+  const fields = read("lib/journal/journal-module-fields.ts");
+  const fieldsComponent = read("components/app/journal-module-fields.tsx");
+  const compactEditor = read("components/app/journal-entry-compact-editor.tsx");
+  const actions = read("lib/journal/actions.ts");
+  const editEntry = read("lib/journal/edit-entry.ts");
+
+  it("the field model composes through composeJournal + archetypesForRelationship — no list of its own", () => {
+    expect(fields).toContain("composeJournal(archetypesForRelationship(relationshipSlug))");
+    expect(fields).not.toMatch(/switch\s*\(/);
+    expect(fields).not.toMatch(/"student"|"volunteer"|"employee"/);
+  });
+  it("both editors render the ONE module-fields block and ship the ONE wire field", () => {
+    for (const [name, src] of [["composer", composer], ["compact editor", compactEditor]] as const) {
+      expect(src, name).toContain("<JournalModuleFields");
+      expect(src, name).toMatch(/relationshipSlug=\{selectedRelationship\}/);
+    }
+    expect(composer).toContain("serializeModuleFields(moduleFields)");
+    expect(read("lib/journal/compact-edit-model.ts")).toContain("serializeModuleFields(input.moduleFields)");
+  });
+  it("the server accepts module slugs by the SAVED engagement's relationship, on create and on supersede alike", () => {
+    expect(writeCore).toContain("export async function resolveModuleMetricRows(");
+    expect(writeCore).toMatch(/from\("engagement_contexts"\)\s*\.select\("relationship_slug"\)\s*\.eq\("id", engagementId\)/);
+    expect(writeCore).toContain("allowedModuleSlugsForRelationship(ctx?.relationship_slug ?? null)");
+    expect(writeCore).toContain("...moduleRows.rows,");
+    expect(actions).toContain("resolveModuleMetricRows(");
+    expect(actions).toContain("...moduleRows.rows,");
+    // A refused field is a named failure before any write — never a silent drop.
+    expect(writeCore).toContain('code: "module_field_invalid"');
+    expect(writeCore).toMatch(/if \(!moduleRows\.ok\) return moduleRows;/);
+    expect(actions).toMatch(/if \(!moduleRows\.ok\) return moduleRows;/);
+  });
+  it("an edit preloads the entry's module rows so the supersede re-sends them (no data loss)", () => {
+    expect(editEntry).toContain("moduleFields: readModuleFieldValues(metrics)");
+    expect(compactEditor).toContain("entry.moduleFields");
+    expect(composer).toContain("editingEntry?.moduleFields");
+  });
+  it("the journal page hands the editors the relationship and filters contexts by the canonical list — no local copy", () => {
+    expect(page).toContain("relationshipSlug: e.relationship_slug");
+    expect(page).toMatch(/import \{ PROFESSIONAL_HISTORY_RELATIONSHIPS \} from "@\/lib\/player-card\/work-history-model"/);
+    expect(page).not.toMatch(/const WORKER_RELATIONSHIPS = \[/);
+    // and shows the saved fields back on the entry, in plain words
+    expect(page).toContain("journal-entry-module-fields-");
+    expect(page).toContain("readModuleFieldValues(metrics)");
+  });
+  it("the component shows the person plain words only — no archetype, module or ISCO vocabulary", () => {
+    // JSX text nodes (`>text<`) and string literals inside JSX attributes are
+    // what the person can read; identifiers and comments are not.
+    const visible = fieldsComponent.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
+    const textNodes = [...visible.matchAll(/>\s*([^<>{}]+?)\s*<\//g)].map((m) => m[1]!);
+    for (const node of textNodes) expect(node).not.toMatch(/archetype|module|isco|esco/i);
+    expect(visible).toContain('useTranslations("journal.moduleFields")');
+  });
+  it("every module field a relationship can compose has a label in every active locale, and the error names the fields in all 11", () => {
+    const groups = moduleGroupsForRelationship;
+    const reachable = new Map<string, Set<string>>();
+    for (const rel of Object.keys(RELATIONSHIP_ARCHETYPES)) {
+      for (const g of groups(rel)) {
+        if (!reachable.has(g.moduleId)) reachable.set(g.moduleId, new Set());
+        for (const s of g.slugs) reachable.get(g.moduleId)!.add(s);
+      }
+    }
+    expect(reachable.size).toBeGreaterThan(0);
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        moduleFields: { title: string; hint: string; modules: Record<string, string>; fields: Record<string, string> };
+      };
+      const mf = j.moduleFields;
+      expect(typeof mf.title === "string" && mf.title.trim().length > 0, `${loc}.moduleFields.title`).toBe(true);
+      expect(typeof mf.hint === "string" && mf.hint.trim().length > 0, `${loc}.moduleFields.hint`).toBe(true);
+      for (const [moduleId, slugs] of reachable) {
+        expect(typeof mf.modules[moduleId] === "string" && mf.modules[moduleId]!.trim().length > 0, `${loc}.moduleFields.modules.${moduleId}`).toBe(true);
+        for (const s of slugs) {
+          expect(typeof mf.fields[s] === "string" && mf.fields[s]!.trim().length > 0, `${loc}.moduleFields.fields.${s}`).toBe(true);
+          expect(mf.fields[s]!, `${loc}.moduleFields.fields.${s}`).not.toMatch(/_/);
+        }
+      }
+    }
+    for (const loc of ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"]) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { errors: Record<string, string> };
+      expect(j.errors.moduleFieldInvalid, `${loc}.errors.moduleFieldInvalid`).toContain("{fields}");
+    }
   });
 });

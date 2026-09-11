@@ -119,6 +119,7 @@ describe("buildEditingEntry — text-only edit does not drop structured metrics"
       topic: null,
       skillSlugs: [],
       activities: [],
+      moduleFields: {},
     });
   });
 });

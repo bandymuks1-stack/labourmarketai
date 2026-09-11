@@ -473,6 +473,29 @@
     "conflictNote": "Deze registratie is al gewijzigd in een ander tabblad of een andere sessie. Wilt u de hier ingevoerde wijzigingen bewaren, kopieer dan eerst uw tekst — bij het herladen van de pagina gaan ze verloren en bewerkt u daarna de nieuwste versie.",
     "conflictReload": "Pagina herladen"
   },
+  "moduleFields": {
+    "title": "Meer over dit werk",
+    "hint": "Optioneel. Elk veld wordt bewaard als een feit in je eigen woorden — er wordt niets afgeleid of beoordeeld.",
+    "modules": {
+      "supervision": "Begeleiding en leren",
+      "site_zone": "Plek en ploeg",
+      "materials_tools": "Materialen en gereedschap",
+      "weather_safety": "Omstandigheden en veiligheid"
+    },
+    "fields": {
+      "supervision_level": "Wie begeleidde, en hoe",
+      "competency_practiced": "Wat je hebt geoefend",
+      "learning_outcome": "Wat je hebt geleerd",
+      "work_zone": "Werkzone",
+      "crew": "Ploeg",
+      "materials": "Materialen",
+      "tools": "Gereedschap",
+      "equipment": "Apparatuur",
+      "weather": "Weer",
+      "safety_observation": "Veiligheidsopmerking",
+      "delay_blocker": "Wat het ophield"
+    }
+  },
   "errors": {
     "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
     "noWorkerProfile": "Werknemersprofiel niet gevonden. Open je accountinstellingen en activeer de werknemersrol.",
@@ -498,7 +521,8 @@
     "cannotSupersedeDeleted": "Een verwijderde registratie kan niet worden gewijzigd.",
     "cannotRestoreSuperseded": "Deze registratie kan niet worden hersteld — een nieuwere versie heeft deze al vervangen.",
     "cannotRestoreCorrectionConflict": "Deze registratie kan niet worden hersteld — voor hetzelfde werk bestaat al een andere actuele gecorrigeerde versie.",
-    "metricsInsertFailed": "De registratie is niet volledig opgeslagen: {reason}. De registratie is verworpen — probeer het opnieuw."
+    "metricsInsertFailed": "De registratie is niet volledig opgeslagen: {reason}. De registratie is verworpen — probeer het opnieuw.",
+    "moduleFieldInvalid": "Deze gegevens horen niet bij dit soort betrokkenheid: {fields}. Er is niets opgeslagen — verwijder ze en probeer het opnieuw."
   },
   "intelligence": {
     "title": "Werk in cijfers",

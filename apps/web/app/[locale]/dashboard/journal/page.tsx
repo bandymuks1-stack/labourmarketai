@@ -36,6 +36,8 @@ import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals"
 import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
+import { readModuleFieldValues } from "@/lib/journal/journal-module-fields";
+import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
   deriveReviewResult,
   deriveReviewTimeline,
@@ -81,13 +83,15 @@ import { JournalWorkIntelligence } from "@/components/app/journal-work-intellige
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
-const WORKER_RELATIONSHIPS = [
-  "employee",
-  "freelancer",
-  "consultant",
-  "owner",
-  "collaborator",
-];
+//
+// The CANONICAL list, imported rather than re-declared: this page kept its own
+// copy of the paid/contracted five, so a placement context (`student`,
+// `volunteer`) that the chat work-log flow happily writes into was invisible
+// here — the person's own entries rendered without their context and the
+// editors could not name it (production 2026-09-11: one active student
+// placement). A second list is exactly how the CV, the profile card and the
+// chat selector drifted apart before (reconciliation 2026-09-07).
+const HISTORY_RELATIONSHIPS = [...PROFESSIONAL_HISTORY_RELATIONSHIPS];
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')
@@ -178,7 +182,7 @@ export default async function JournalPage({
       )
       .eq("profile_id", user.id)
       .eq("status", "active")
-      .in("relationship_slug", WORKER_RELATIONSHIPS)
+      .in("relationship_slug", HISTORY_RELATIONSHIPS)
       .order("is_primary", { ascending: false }),
     getWorkspaceContext("person"),
   ]);
@@ -287,6 +291,8 @@ export default async function JournalPage({
       id: e.id,
       label,
       isPrimary: e.is_primary,
+      // Owner §12 — the editors compose archetype module fields from this.
+      relationshipSlug: e.relationship_slug,
     };
   });
 
@@ -1333,6 +1339,13 @@ export default async function JournalPage({
                       const dir = metrics.find(
                         (m) => m.metric_slug === "work_direction",
                       );
+                      // Owner §12 — the entry's own module fields (a
+                      // placement's supervision, a volunteer's field
+                      // project), shown back in plain words. Read from the
+                      // rows already loaded; nothing for an entry without.
+                      const moduleValues = Object.entries(
+                        readModuleFieldValues(metrics),
+                      );
                       // v3 — Delete control is offered only when the entry has no
                       // external confirmations yet. The RPC re-enforces the same
                       // rule server-side, so a stale client can't escalate.
@@ -1476,6 +1489,19 @@ export default async function JournalPage({
                             {/* Entry location — the entry's own saved snapshot only.
                                 No snapshot → honest "Vieta nenurodyta" (never the
                                 worker's current or profile location). */}
+                            {moduleValues.length > 0 && (
+                              <p
+                                className="text-meta leading-relaxed text-text-muted"
+                                data-testid={`journal-entry-module-fields-${e.id}`}
+                              >
+                                {moduleValues
+                                  .map(
+                                    ([slug, value]) =>
+                                      `${t(`moduleFields.fields.${slug}`)}: ${value}`,
+                                  )
+                                  .join(" · ")}
+                              </p>
+                            )}
                             <p
                               className="text-meta text-text-muted"
                               data-testid={`journal-entry-location-${e.id}`}

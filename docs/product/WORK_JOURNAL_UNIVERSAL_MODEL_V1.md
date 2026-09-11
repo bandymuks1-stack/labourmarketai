@@ -22,6 +22,7 @@ skill-hours. `ESCO/ISCO → OCCUPATION → ARCHETYPE(S) → UNIVERSAL RECORD →
 | `journal_entry_skills` (+ `provenance`), `journal_entry_confirmations`, `journal_entry_photos`, `source_document_file` metric | skill involvement, human confirmation, photo evidence, immutable original document | Evidence/verification layer exists |
 | `fragment_skill` metric (`"<index>\|<slug>"`, added 2026-09-11) | the skill pipeline / the worker's candidate confirmation record WHICH persisted fragment a link was recognised on (`fragment-skill-evidence.ts`); append-only, inert without the link | Fragment-level attribution is evidence, not a guess |
 | `work_time_override` metric (`"<code>\|<day>\|<reason>"`, source `worker_input`, added 2026-09-11) | the worker's acknowledgement of a plausibility check (`work-time-plausibility.ts`, owner §13); append-only, one per check; only the worker's own row counts | A warning is answered with a reason, never by editing a figure; the check stays listed as acknowledged |
+| archetype module rows (`journal-module-fields.ts`, added 2026-09-11) | `metric_slug` ∈ `JOURNAL_MODULES` (never a core slug), `value_text` = the person's words, `source = worker_input`; accepted only inside the saved engagement's composition | The adaptive modules are rows in the same table — no column, no form registry, no second write path |
 | `journal_profession_templates` (migration 20260714180000) | **not applied** (owner-gated draft) | The template registry is not live; archetype data lives in code until it is |
 | Recognition chain (`skill-pipeline.ts`, accept / reject / correct, append-only markers) | live, measured on production 2026-09-08 | Unchanged by this model |
 
@@ -128,8 +129,20 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
 
 ## 7. Extension path (preserved, not built here)
 
-1. Composer modules: render `composeJournal(...)` modules behind progressive disclosure in the
-   ONE composer (`journal-entry-composer.tsx`); each field = one metric row.
+1. ~~Composer modules~~ — LIVE 2026-09-11 for RELATIONSHIP-resolved archetypes
+   (`journal-module-fields.ts`): the entry's engagement `relationship_slug` →
+   `archetypesForRelationship` → `composeJournal` → module groups, rendered behind the
+   existing "more" disclosure in BOTH editors (the compact drawer and
+   `journal-entry-composer.tsx`) as plain-word fields; each field = one `worker_input`
+   `journal_entry_metrics` row under the same atomic save (create and supersede), accepted
+   server-side only when the SAVED engagement's own composition allows the slug (refused
+   by name — `module_field_invalid` — never dropped), preloaded on edit, shown back on the
+   entry. A `student` placement shows supervision level / competency practised / learning
+   outcome; `volunteer` the field-project modules. What stays an extension point: the
+   OCCUPATION path (`employee` composes nothing today) — it needs the owner-gated slug↔ESCO
+   bridge (#1355) before `archetypesForIsco` has a live resolver for the platform's
+   professions; labels for the remaining modules land with that resolver (guarded: every
+   relationship-reachable slug is labelled in every active locale).
 2. Units: add registry rows for km / covers / cases / pallets (`productivity_units`, additive).
 3. ESCO occupation → archetype resolution surface (`iscoGroupForEscoOccupation` exists); the
    platform's own 49 professions map through their ESCO occupation once #1355 (bridge) is

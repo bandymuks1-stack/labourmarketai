@@ -473,6 +473,29 @@
     "conflictNote": "Šis įrašas jau buvo pakeistas kitame lange ar sesijoje. Jei norite išsaugoti čia įvestus pakeitimus, pirmiausia nusikopijuokite tekstą — perkrovus puslapį jie bus prarasti, o redaguoti galėsite naujausią versiją.",
     "conflictReload": "Perkrauti puslapį"
   },
+  "moduleFields": {
+    "title": "Papildoma informacija apie šį darbą",
+    "hint": "Neprivaloma. Kiekvienas laukas išsaugomas kaip jūsų pačių įrašytas faktas — niekas neišvedama ir nevertinama.",
+    "modules": {
+      "supervision": "Priežiūra ir mokymasis",
+      "site_zone": "Vieta ir komanda",
+      "materials_tools": "Medžiagos ir įrankiai",
+      "weather_safety": "Sąlygos ir sauga"
+    },
+    "fields": {
+      "supervision_level": "Kas prižiūrėjo ir kaip",
+      "competency_practiced": "Ką praktikavote",
+      "learning_outcome": "Ko išmokote",
+      "work_zone": "Darbo zona",
+      "crew": "Komanda",
+      "materials": "Medžiagos",
+      "tools": "Įrankiai",
+      "equipment": "Įranga",
+      "weather": "Oro sąlygos",
+      "safety_observation": "Saugos pastaba",
+      "delay_blocker": "Kas stabdė ar vėlino"
+    }
+  },
   "errors": {
     "sessionExpired": "Sesija nutrūko. Prisijunkite iš naujo.",
     "noWorkerProfile": "Nerastas darbuotojo profilis. Atidarykite paskyros nustatymus ir įjunkite darbuotojo vaidmenį.",
@@ -498,7 +521,8 @@
     "cannotSupersedeDeleted": "Negalima keisti pašalinto įrašo.",
     "cannotRestoreSuperseded": "Šio įrašo atkurti negalima — jį jau pakeitė naujesnė versija.",
     "cannotRestoreCorrectionConflict": "Šio įrašo atkurti negalima — tam pačiam darbui jau yra kita aktuali pataisyta versija.",
-    "metricsInsertFailed": "Įrašas nebuvo išsaugotas pilnai: {reason}. Įrašas atmestas — bandykite dar kartą."
+    "metricsInsertFailed": "Įrašas nebuvo išsaugotas pilnai: {reason}. Įrašas atmestas — bandykite dar kartą.",
+    "moduleFieldInvalid": "Šie laukai netinka šio tipo įsitraukimui: {fields}. Niekas neišsaugota — pašalinkite juos ir bandykite dar kartą."
   },
   "intelligence": {
     "title": "Darbas skaičiais",
