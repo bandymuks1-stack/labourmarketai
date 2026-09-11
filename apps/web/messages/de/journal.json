@@ -558,6 +558,26 @@
     },
     "outputsTitle": "Erledigt",
     "multiActivityHours": "{hours} Std. aus {count, plural, one {# Eintrag} other {# Einträgen}} beschreiben mehrere Arten von Arbeit — nach Art der Arbeit aufgeteilt, nicht nach Fähigkeit (mit nur einer Fähigkeit verknüpft).",
-    "trendNewShort": "neu"
+    "trendNewShort": "neu",
+    "checks": {
+      "title": "Einen Blick wert",
+      "hint": "Die Zahlen bleiben genau so, wie du sie erfasst hast — nichts wird geändert oder gestrichen. Hier steht nur, was ungewöhnlich aussieht: prüfe die Einträge oder erkläre, warum es stimmt.",
+      "day_over_24h": "{day}: {hours} h in {entries, plural, one {# Eintrag} other {# Einträgen}} — mehr als ein Tag. Wahrscheinlich dieselbe Arbeit zweimal erfasst oder ein Zahlendreher.",
+      "long_day": "{day}: {hours} h in {entries, plural, one {# Eintrag} other {# Einträgen}} — ein langer Tag. Prüfe, ob zwei Einträge dieselbe Arbeit beschreiben.",
+      "line_over_24h": "{day}: „{title}“ — {hours} h in einem Eintrag, länger als ein Tag. Erstreckt sich die Arbeit über mehrere Tage, erfasse die Tage.",
+      "entry_duration_ignored": "{day}: der Eintrag nennt sowohl Zeit je Satz ({hours} h) als auch eine Gesamtdauer ({ignored}). Gezählt wird die Zeit je Satz; die Gesamtdauer kommt nicht obendrauf.",
+      "untitled": "Eintrag",
+      "openRecords": "{entries, plural, one {# Eintrag} other {# Einträge}} öffnen",
+      "acknowledged": "Deine Erklärung: {reason}",
+      "ackOpen": "Das stimmt so — erklären",
+      "ackLabel": "Warum stimmt das?",
+      "ackPlaceholder": "z. B. zwei Schichten — Tag und Nacht",
+      "ackSubmit": "Erklärung speichern",
+      "ackWorking": "Wird gespeichert…",
+      "ackCancel": "Abbrechen",
+      "ackError": "Speichern fehlgeschlagen — bitte erneut versuchen.",
+      "ackDone": "Erklärung gespeichert.",
+      "openInJournal": "Im Tagebuch prüfen"
+    }
   }
 }

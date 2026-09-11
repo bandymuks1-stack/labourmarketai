@@ -511,6 +511,35 @@ describe("deriveWorkIntelligence — skills, activities, contexts, months", () =
     expect(wi.periods.map((p) => p.key)).toEqual(["today", "week", "month", "year", "all"]);
   });
 
+  it("plausibility checks (owner §13) ride along, scoped to the focus, and change NO figure", () => {
+    const entries = [
+      entry("a", "2026-09-10", { hours: 20 }),
+      entry("b", "2026-09-10", { hours: 20 }),
+      entry("c", "2026-08-01", { hours: 17 }),
+    ];
+    const all = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries });
+    expect(all.checks.map((c) => c.key)).toEqual(["day_over_24h|2026-09-10", "long_day|2026-08-01"]);
+    // warned, not corrected: every recorded hour is still counted
+    expect(all.totalHours).toBe(57);
+    expect(all.periods.find((p) => p.key === "week")!.hours).toBe(40);
+    const week = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries, focus: "week" });
+    expect(week.checks.map((c) => c.key)).toEqual(["day_over_24h|2026-09-10"]);
+    // an acknowledged check stays listed, with the worker's reason
+    const acked = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        ...entries.slice(0, 1),
+        entry("b", "2026-09-10", {
+          hours: 20,
+          metrics: [metric("work_time_override", { t: "day_over_24h|2026-09-10|two shifts, both real" })],
+        }),
+      ],
+    });
+    expect(acked.checks[0]!.acknowledged).toEqual({ reason: "two shifts, both real", entryId: "b" });
+    expect(acked.totalHours).toBe(40);
+  });
+
   it("produces no person-level score, rating, rank or tier", () => {
     const wi = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries });
     const keys = JSON.stringify(Object.keys(wi));

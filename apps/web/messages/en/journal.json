@@ -558,6 +558,26 @@
     },
     "outputsTitle": "Completed",
     "multiActivityHours": "{hours} h across {count, plural, one {# entry} other {# entries}} describe several kinds of work — split by kind of work, not by skill (linked to one skill only).",
-    "trendNewShort": "new"
+    "trendNewShort": "new",
+    "checks": {
+      "title": "Worth a look",
+      "hint": "The figures stay exactly as you recorded them — nothing is changed or written off. This is only what looks unusual: check the records, or explain why it is right.",
+      "day_over_24h": "{day}: {hours} h across {entries, plural, one {# record} other {# records}} — more than a day. Most likely the same work recorded twice, or a typo in the number.",
+      "long_day": "{day}: {hours} h across {entries, plural, one {# record} other {# records}} — a long day. Check whether two records describe the same work.",
+      "line_over_24h": "{day}: “{title}” — {hours} h in one record, longer than a day. If this spans several days, record the days.",
+      "entry_duration_ignored": "{day}: the record states both time per phrase ({hours} h) and a total duration ({ignored}). The time per phrase counts; the total is not added on top.",
+      "untitled": "record",
+      "openRecords": "Open {entries, plural, one {# record} other {# records}}",
+      "acknowledged": "Your explanation: {reason}",
+      "ackOpen": "This is right — explain",
+      "ackLabel": "Why is this right?",
+      "ackPlaceholder": "e.g. two shifts — day and night",
+      "ackSubmit": "Save explanation",
+      "ackWorking": "Saving…",
+      "ackCancel": "Cancel",
+      "ackError": "Could not save — please try again.",
+      "ackDone": "Explanation saved.",
+      "openInJournal": "Review in the journal"
+    }
   }
 }

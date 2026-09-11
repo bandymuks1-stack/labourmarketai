@@ -10,6 +10,10 @@ import {
   processJournalEntrySkills,
   type JournalSkillPipelineResult,
 } from "@/lib/journal/skill-pipeline";
+import {
+  readSavedEntryDayCheck,
+  type WorkDayCheck,
+} from "@/lib/journal/work-time-plausibility-read";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -46,7 +50,16 @@ export type JournalWriteCaller = {
 };
 
 export type CreateJournalEntryResult =
-  | { ok: true; entryId: string; skills: JournalSkillPipelineResult }
+  | {
+      ok: true;
+      entryId: string;
+      skills: JournalSkillPipelineResult;
+      /** Owner §13: the open day-level plausibility check the saved entry
+       *  takes part in (its day now above 24 h / a long day), so the intake
+       *  surface can say so right away. `null` = none, or not readable —
+       *  the save itself is unaffected either way. */
+      dayCheck?: WorkDayCheck | null;
+    }
   | { ok: false; code: JournalSaveErrorCode; message: string };
 
 export type JournalSaveErrorCode =
@@ -608,7 +621,16 @@ export async function createJournalEntryCore(
       caller: { supabase, userId },
     });
     revalidatePath(`/${locale}/dashboard/journal`);
-    return { ok: true, entryId: legacy.entryId, skills: legacySkills };
+    return {
+      ok: true,
+      entryId: legacy.entryId,
+      skills: legacySkills,
+      dayCheck: await readSavedEntryDayCheck(
+        { supabase, userId },
+        worker.id,
+        legacy.entryId,
+      ),
+    };
   }
 
   const skills = await runSkillPipeline({
@@ -619,5 +641,13 @@ export async function createJournalEntryCore(
     caller: { supabase, userId },
   });
   revalidatePath(`/${locale}/dashboard/journal`);
-  return { ok: true, entryId: rpcEntryId, skills };
+  // Owner §13 — the day check is read AFTER the save from the same journal
+  // read every surface uses; a failed read leaves the save reported as the
+  // success it is, with the check unknown (never invented).
+  const dayCheck = await readSavedEntryDayCheck(
+    { supabase, userId },
+    worker.id,
+    rpcEntryId,
+  );
+  return { ok: true, entryId: rpcEntryId, skills, dayCheck };
 }

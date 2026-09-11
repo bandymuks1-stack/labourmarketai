@@ -21,6 +21,7 @@ skill-hours. `ESCO/ISCO → OCCUPATION → ARCHETYPE(S) → UNIVERSAL RECORD →
 | Canonical work-time rule `work-time.ts` (+ SQL mirror) | fragments win, entry quantity fallback, never summed; `days` never hours; provenance per line | Time is already first-class and counted once |
 | `journal_entry_skills` (+ `provenance`), `journal_entry_confirmations`, `journal_entry_photos`, `source_document_file` metric | skill involvement, human confirmation, photo evidence, immutable original document | Evidence/verification layer exists |
 | `fragment_skill` metric (`"<index>\|<slug>"`, added 2026-09-11) | the skill pipeline / the worker's candidate confirmation record WHICH persisted fragment a link was recognised on (`fragment-skill-evidence.ts`); append-only, inert without the link | Fragment-level attribution is evidence, not a guess |
+| `work_time_override` metric (`"<code>\|<day>\|<reason>"`, source `worker_input`, added 2026-09-11) | the worker's acknowledgement of a plausibility check (`work-time-plausibility.ts`, owner §13); append-only, one per check; only the worker's own row counts | A warning is answered with a reason, never by editing a figure; the check stays listed as acknowledged |
 | `journal_profession_templates` (migration 20260714180000) | **not applied** (owner-gated draft) | The template registry is not live; archetype data lives in code until it is |
 | Recognition chain (`skill-pipeline.ts`, accept / reject / correct, append-only markers) | live, measured on production 2026-09-08 | Unchanged by this model |
 
@@ -135,7 +136,13 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    owner-approved.
 4. Template registry migration (draft 20260714180000) may carry the same archetype data when
    the owner applies it — the code stays canonical until then.
-5. Overlap / implausible-duration detection (owner §13) over `work-time.ts` lines — warn, never
-   silently corrupt; overrides recorded with reason.
+5. ~~Overlap / implausible-duration detection (owner §13)~~ — LIVE 2026-09-11 as
+   `work-time-plausibility.ts` over `work-time.ts` lines: `day_over_24h` (arithmetic), `long_day`
+   (> 16 h, a prompt to look again), `line_over_24h`, `entry_duration_ignored` (the rule's
+   `conflict`, recorded before but shown to nobody). Warn, never corrupt: no figure changes;
+   acknowledged with a reason via `work_time_override` rows and kept visible. Shown in the
+   section (`wi-checks`) and right after a save in the chat flow and the composer. What stays
+   an extension point: a SPAN overlap check — the journal persists durations, not clock spans,
+   so nothing compares "08:00–12:00" across entries until spans become persisted evidence.
 6. Organization views (owner §14) compose the same reader under `manages_organization` — no
    second timesheet universe.

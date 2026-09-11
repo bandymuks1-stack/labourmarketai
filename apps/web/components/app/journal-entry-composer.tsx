@@ -75,6 +75,8 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { reviewUnconfirmedWorkTime } from "@/lib/journal/unconfirmed-work-time";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
+import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
+import { formatUtcDate } from "@/lib/time/display";
 
 export type JournalEngagement = {
   id: string;
@@ -194,6 +196,7 @@ export function JournalEntryComposer({
   const tUnit = useTranslations("productivityUnits");
   const tProf = useTranslations("professions");
   const tSkill = useTranslations("skillNames");
+  const tCheck = useTranslations("journal.intelligence.checks");
   const locale = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -325,6 +328,12 @@ export function JournalEntryComposer({
   // P1 recall repair: the saved entry id (candidate confirm/reject targets it)
   // + per-candidate action state for the one-tap confirm/reject buttons.
   const [savedEntryId, setSavedEntryId] = useState<string | null>(null);
+  /** Owner §13 — the open day-level plausibility check the saved record
+   *  takes part in (its day now above 24 h / a long day). null = none or
+   *  not readable: nothing is shown, no figure is touched. */
+  const [savedDayCheck, setSavedDayCheck] = useState<WorkDayCheck | null>(
+    null,
+  );
   const [candidateStates, setCandidateStates] = useState<
     Record<string, "idle" | "working" | "confirmed" | "rejected" | "error">
   >({});
@@ -952,6 +961,7 @@ export function JournalEntryComposer({
       // is the real outcome — no fire-and-forget call that can silently die.
       setSavedPipeline(result.skills);
       setSavedEntryId(result.entryId);
+      setSavedDayCheck(result.dayCheck ?? null);
       setCandidateStates({});
       setRenameDrafts({});
       setUnresolvedStates({});
@@ -1212,6 +1222,36 @@ export function JournalEntryComposer({
                   {t("savedSkillsLine", savedSkillsSummary)}
                 </p>
               )}
+            {/* Owner §13 — this record pushed its day above 24 h / into a
+                long day. A warning beside the save, never a changed figure:
+                the person checks for a duplicate or stands by the record
+                with a reason in the "work in numbers" section. */}
+            {savedDayCheck !== null && (
+              <p
+                className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-state-warning"
+                data-testid="journal-saved-day-check"
+                data-check-code={savedDayCheck.code}
+              >
+                {tCheck(savedDayCheck.code, {
+                  hours: new Intl.NumberFormat(locale, {
+                    maximumFractionDigits: 1,
+                  }).format(savedDayCheck.hours),
+                  day:
+                    formatUtcDate(savedDayCheck.day, locale, {
+                      month: "short",
+                      day: "numeric",
+                    }) ?? savedDayCheck.day,
+                  entries: savedDayCheck.entries,
+                })}{" "}
+                <Link
+                  href={"/dashboard/journal#work-intelligence" as "/dashboard"}
+                  className="font-semibold underline underline-offset-2"
+                  data-testid="journal-saved-day-check-link"
+                >
+                  {tCheck("openInJournal")}
+                </Link>
+              </p>
+            )}
             {/* P0 Track B: honest SERVER-side pipeline outcome — real counts
                 from the awaited recognition→evidence→CV run, or the failure
                 line with its trace id (never a silent death). */}

@@ -27,6 +27,7 @@ import {
   type WorkLogParse,
 } from "@/lib/conversation/worklog-extract";
 import { trackFunnel } from "@/lib/telemetry/task";
+import { formatUtcDate } from "@/lib/time/display";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 export type WorkLogLabels = {
@@ -90,6 +91,28 @@ function parseEntryId(data: unknown): string | null {
   return typeof id === "string" && id.length > 0 ? id : null;
 }
 
+/** Owner §13 — the open day-level plausibility check the saved entry takes
+ *  part in, straight off the dispatcher result. Parsed defensively: anything
+ *  malformed means "no check shown", never an invented warning. */
+type WorkLogDayCheck = {
+  code: "day_over_24h" | "long_day";
+  day: string;
+  hours: number;
+  entries: number;
+};
+
+function parseDayCheck(data: unknown): WorkLogDayCheck | null {
+  if (typeof data !== "object" || data === null) return null;
+  const c = (data as { dayCheck?: unknown }).dayCheck;
+  if (typeof c !== "object" || c === null) return null;
+  const o = c as Record<string, unknown>;
+  if (o.code !== "day_over_24h" && o.code !== "long_day") return null;
+  if (typeof o.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(o.day)) return null;
+  if (typeof o.hours !== "number" || !Number.isFinite(o.hours)) return null;
+  if (typeof o.entries !== "number" || !Number.isFinite(o.entries)) return null;
+  return { code: o.code, day: o.day, hours: o.hours, entries: o.entries };
+}
+
 function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
   if (typeof data !== "object" || data === null) return null;
   const s = (data as { skills?: unknown }).skills;
@@ -136,6 +159,8 @@ type Phase =
   | {
       kind: "done";
       skills: WorkLogSkillsOutcome | null;
+      /** null = no open day check (or not readable) — nothing is shown. */
+      dayCheck: WorkLogDayCheck | null;
       /** null = no photo was attached; otherwise the REAL upload outcome. */
       photo: JournalPhotoUploadResult | null;
     }
@@ -211,6 +236,7 @@ export function WorkerWorkLogFlow({
    * ONE write path across both surfaces. Nothing about photos is re-decided here.
    */
   const tPhoto = useTranslations("journal.photo");
+  const tCheck = useTranslations("journal.intelligence.checks");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoPrep, setPhotoPrep] = useState<PhotoPrep>("idle");
@@ -377,6 +403,7 @@ export function WorkerWorkLogFlow({
       });
       const skills = parseSkillsOutcome(res.data);
       const entryId = parseEntryId(res.data);
+      const dayCheck = parseDayCheck(res.data);
 
       // ORDER MATTERS, and it is the journal composer's order: the entry is
       // saved FIRST and the photo is attached to it afterwards. A storage
@@ -391,7 +418,7 @@ export function WorkerWorkLogFlow({
           // A thrown uploader is a FAILED upload, never a silent success.
           outcome = "failed";
         }
-        setPhase({ kind: "done", skills, photo: outcome });
+        setPhase({ kind: "done", skills, dayCheck, photo: outcome });
         router.refresh();
         return;
       }
@@ -400,6 +427,7 @@ export function WorkerWorkLogFlow({
       setPhase({
         kind: "done",
         skills,
+        dayCheck,
         photo: photoFile ? "failed" : null,
       });
       router.refresh();
@@ -549,6 +577,38 @@ export function WorkerWorkLogFlow({
           >
             {labels.viewOpportunities} →
           </Link>
+        )}
+        {/* OWNER §13 — the saved record pushed its day above 24 h / into a
+            long day. A warning next to the save, never a changed figure:
+            the hours stay exactly as recorded; the person decides whether
+            a record is a duplicate (edit it in the journal) or stands
+            (acknowledge it there with a reason). */}
+        {phase.dayCheck && (
+          <p
+            className="rounded-control border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-state-warning"
+            role="status"
+            data-testid="worklog-day-check"
+            data-check-code={phase.dayCheck.code}
+          >
+            {tCheck(phase.dayCheck.code, {
+              hours: new Intl.NumberFormat(locale, {
+                maximumFractionDigits: 1,
+              }).format(phase.dayCheck.hours),
+              day:
+                formatUtcDate(phase.dayCheck.day, locale, {
+                  month: "short",
+                  day: "numeric",
+                }) ?? phase.dayCheck.day,
+              entries: phase.dayCheck.entries,
+            })}{" "}
+            <Link
+              href="/dashboard/journal#work-intelligence"
+              className="font-semibold underline underline-offset-2"
+              data-testid="worklog-day-check-link"
+            >
+              {tCheck("openInJournal")}
+            </Link>
+          </p>
         )}
         {/* PHOTO OUTCOME — the real result of the real upload, one sentence per
             state. `uploaded` is the ONLY line that claims evidence is attached;

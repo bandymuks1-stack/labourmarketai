@@ -295,7 +295,12 @@ columns or forms. Four kinds of time stay apart — ENTRY WORKED TIME · ACTIVIT
 INVOLVEMENT · ATTRIBUTABLE PRACTICE TIME (`work-intelligence.ts`); an entry with several
 linked skills is never split by guessing — it is split only where the link itself names the
 fragment (`fragment_skill` rows, `fragment-skill-evidence.ts`, written by the skill pipeline
-and the worker's confirmation). ESCO is interoperability, never ranking.
+and the worker's confirmation). ESCO is interoperability, never ranking. Plausibility checks
+(owner §13, `work-time-plausibility.ts`) WARN over the canonical lines — a day above 24 h, a
+long day, one duration longer than a day, an entry-level figure the rule set aside — and never
+change a figure; the worker fixes the record or stands by it with a reason, recorded as an
+append-only `work_time_override` row (`work-time-plausibility-actions.ts`) that keeps the check
+visible as acknowledged. The same check reaches both intake surfaces right after a save.
 
 ---
 
