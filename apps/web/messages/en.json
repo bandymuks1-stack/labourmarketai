@@ -12873,6 +12873,13 @@
       "errorGeneric": "Couldn't save. Please try again.",
       "minutesUnit": "min",
       "errorNoWorkContent": "An entry needs the work: what you did, where, or for how long. Write it in your own words, e.g. “installed windows from 8 to 17”.",
+      "recordTitle": "Will be recorded as work time",
+      "recordNoActivity": "kind of work not recognised",
+      "recordTotalStated": "Stated total",
+      "recordPartsSum": "the parts add up to",
+      "recordTotalDiffers": "the difference is shown as a check, never added to your hours",
+      "recordNone": "No time found in the text — the entry will be counted, but not timed. Add the hours if you want them in your totals.",
+      "hoursUnit": "h",
       "relationship": {
         "employee": "Employee",
         "freelancer": "Freelancer",

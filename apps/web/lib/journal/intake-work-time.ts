@@ -20,8 +20,23 @@
  *   2. when no fragment carries a duration but the sentence states a span
  *      ("nuo 8 iki 17, 30 min pertrauka") the work-log parser already turns
  *      into worked minutes, an entry-level `quantity` in minutes.
- * A and B are never both emitted (the canonical rule would ignore B anyway
- * and record a conflict). Nothing is invented: no time in the text → nothing.
+ * A and B are never both emitted for the SAME figure (the canonical rule would
+ * ignore B anyway and record a conflict). Nothing is invented: no time in the
+ * text → nothing.
+ *
+ * ── THE STATED TOTAL IS NOT ONE MORE ITEM (owner's sentence, 2026-09-11) ──
+ * "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val.
+ * testavau, 2 val. ieškojau partnerių." states the day ONCE and itemises it.
+ * The recognizer now returns the 9 h as `statedTotal`, outside `fragments`
+ * (before, it was a fourth fragment: 18 h for a 9 h day). When the items add
+ * up to it nothing more is recorded — the items ARE the day. When they do
+ * not ("9 valandas … : 5 val. X, 2 val. Y" — 2 h never itemised) the stated
+ * figure goes to the entry-level `quantity` slot in minutes BESIDE the
+ * fragments: the canonical rule counts the items, sets the entry figure
+ * aside as a visible `conflict`, and the §13 check names it to the person.
+ * Never summed, never dropped. The slot is one: a stated OUTPUT (below)
+ * keeps it when both occur in one sentence, because an output has no other
+ * place on the record while the itemised hours are already counted.
  *
  * ── PROVENANCE ────────────────────────────────────────────────────────────
  * Every row this produces carries `source: "ai_extracted"` — the DB's
@@ -47,12 +62,33 @@ import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-sug
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { isWorkTimeUnit } from "@/lib/journal/work-time";
 
+export type IntakeFragment = {
+  readonly rawPhrase: string;
+  readonly timeValue: number;
+  readonly timeUnit: "hours" | "minutes" | "days";
+  readonly activitySlug: string | null;
+  readonly activityLabel: string | null;
+  readonly isUnknown: false;
+  readonly selected: false;
+  readonly source: "ai_extracted";
+};
+
 export type IntakeWorkTime = {
   /** The `fragments_json` FormData value, or null when no fragment carries a
    *  duration. */
   readonly fragmentsJson: string | null;
+  /** The same fragments as objects — for the confirm preview, which lists
+   *  exactly what the save will record (issue #1689). Empty when
+   *  `fragmentsJson` is null. */
+  readonly fragments: readonly IntakeFragment[];
   /** Entry-level worked minutes when only a span was stated, else null. */
   readonly quantityMinutes: number | null;
+  /** The day's total the person stated beside the itemised fragments when
+   *  the items do NOT add up to it — in minutes, for the entry-level slot the
+   *  canonical rule sets aside and the §13 check names. Null when no total
+   *  was stated, when the items add up to it, or when there are no
+   *  fragments (a lone total is then simply the entry's time). */
+  readonly statedTotalMinutes: number | null;
 };
 
 const MAX_FRAGMENTS = 20;
@@ -63,7 +99,7 @@ const BREAK_RX = /pertrauk|break|перерыв|обед|pietų|pietu|lunch/i;
 
 export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWorkTime {
   const text = String(notes ?? "").trim();
-  if (!text) return { fragmentsJson: null, quantityMinutes: null };
+  if (!text) return NOTHING;
 
   const parsed = extractWorkLog(text, todayIso);
   const worked = parsed.workedMinutes;
@@ -73,11 +109,12 @@ export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWor
   // worked time, break already subtracted by the parser. Fragments inside such
   // a sentence would count the break as work — so the span wins outright.
   if (parsed.start && parsed.end && hasWorked) {
-    return { fragmentsJson: null, quantityMinutes: Math.round(worked) };
+    return { ...NOTHING, quantityMinutes: Math.round(worked) };
   }
 
-  const timed = extractJournalSuggestions(text)
-    .fragments.filter(
+  const suggestions = extractJournalSuggestions(text);
+  const timed = suggestions.fragments
+    .filter(
       (f) =>
         f.time !== null &&
         Number.isFinite(f.time.value) &&
@@ -88,27 +125,48 @@ export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWor
     .slice(0, MAX_FRAGMENTS);
 
   if (timed.length > 0) {
+    const fragments: IntakeFragment[] = timed.map((f) => ({
+      rawPhrase: f.rawPhrase.trim().slice(0, 200),
+      timeValue: f.time!.value,
+      timeUnit: f.time!.unitSlug,
+      activitySlug: f.activitySlug ?? null,
+      activityLabel: f.activityLabel ?? null,
+      isUnknown: false,
+      selected: false,
+      source: "ai_extracted",
+    }));
     return {
-      fragmentsJson: JSON.stringify(
-        timed.map((f) => ({
-          rawPhrase: f.rawPhrase.trim().slice(0, 200),
-          timeValue: f.time!.value,
-          timeUnit: f.time!.unitSlug,
-          activitySlug: f.activitySlug ?? null,
-          activityLabel: f.activityLabel ?? null,
-          isUnknown: false,
-          selected: false,
-          source: "ai_extracted",
-        })),
-      ),
+      fragmentsJson: JSON.stringify(fragments),
+      fragments,
       quantityMinutes: null,
+      statedTotalMinutes: statedTotalMinutes(suggestions.statedTotal),
     };
   }
 
   // Explicit hours the fragment recognizer does not read (e.g. English
   // "for 4 hours") but the work-log parser does.
-  if (hasWorked) return { fragmentsJson: null, quantityMinutes: Math.round(worked) };
-  return { fragmentsJson: null, quantityMinutes: null };
+  if (hasWorked) return { ...NOTHING, quantityMinutes: Math.round(worked) };
+  return NOTHING;
+}
+
+const NOTHING: IntakeWorkTime = {
+  fragmentsJson: null,
+  fragments: [],
+  quantityMinutes: null,
+  statedTotalMinutes: null,
+};
+
+/** The stated total in minutes when the items do not add up to it; a total
+ *  in `days` has no minute value (no approved workday length) and is left to
+ *  the person's own words. */
+function statedTotalMinutes(
+  total: ReturnType<typeof extractJournalSuggestions>["statedTotal"],
+): number | null {
+  if (!total || total.matchesFragments) return null;
+  if (!Number.isFinite(total.value) || total.value <= 0) return null;
+  if (total.unitSlug === "hours") return Math.round(total.value * 60);
+  if (total.unitSlug === "minutes") return Math.round(total.value);
+  return null;
 }
 
 /**
@@ -125,7 +183,19 @@ export function intakeWorkTimeFields(
   const anchor = /^\d{4}-\d{2}-\d{2}$/.test(String(workDate ?? "")) ? String(workDate) : today;
   const t = deriveIntakeWorkTime(notes, anchor);
   if (t.fragmentsJson) {
-    return { fragments_json: t.fragmentsJson, ...intakeOutputFields(notes) };
+    const output = intakeOutputFields(notes);
+    if (Object.keys(output).length > 0 || t.statedTotalMinutes === null) {
+      return { fragments_json: t.fragmentsJson, ...output };
+    }
+    // The items do not add up to the total the person stated: the stated
+    // figure is recorded where the canonical rule sets it aside visibly
+    // (`conflict` → §13 `entry_duration_ignored`), never where it would add.
+    return {
+      fragments_json: t.fragmentsJson,
+      quantity: String(t.statedTotalMinutes),
+      unit_slug: "minutes",
+      quantity_source: "ai_extracted",
+    };
   }
   if (t.quantityMinutes !== null) {
     // The quantity slot carries the day's minutes; a stated output has no

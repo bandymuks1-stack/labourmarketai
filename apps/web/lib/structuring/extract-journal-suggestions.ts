@@ -46,6 +46,20 @@ export type JournalSuggestions = {
    *  one entry ("1h driver, 3h cashier, 5h roofing"). Each fragment keeps the
    *  raw phrase so the UI can show evidence next to the interpretation. */
   fragments: JournalFragmentSuggestion[];
+  /** The day's total the person stated BESIDE the itemised fragments —
+   *  "Šiandien 9 valandas dirbau: 5 val. X, 2 val. Y, 2 val. Z". It is the
+   *  sum of the items, not one more item, so it is kept OUT of `fragments`
+   *  (issue #1689: persisted as a fragment it doubled a 9 h day to 18 h).
+   *  `matchesFragments` says whether the items add up to it; when they do
+   *  not, the intake records the stated figure as the entry-level duration
+   *  the canonical work-time rule sets aside and names (§13), never as
+   *  hours. Null when nothing beside the items states a total. */
+  statedTotal: {
+    value: number;
+    unitSlug: "hours" | "days" | "minutes";
+    rawPhrase: string;
+    matchesFragments: boolean;
+  } | null;
   /** Explicit self-declared capabilities/specializations the worker NAMED in
    *  the text (e.g. "lietuviškos virtuvės gamyba", "vairavimas", "pardavimai",
    *  "sutarčių ruošimas"). Reuses the SAME dictionary as the profile composer
@@ -133,6 +147,7 @@ const EMPTY: JournalSuggestions = {
   institutionName: null,
   topic: null,
   fragments: [],
+  statedTotal: null,
   capabilitySuggestions: [],
   hasAny: false,
 };
@@ -404,21 +419,73 @@ function detectFragmentTime(
   return null;
 }
 
+/**
+ * A dot that is NOT a sentence boundary (issue #1689, the owner's own
+ * sentence "5 val. programavau, 2 val. testavau" split into "5 val" +
+ * "programavau" — the hours lost their activity and the activity its hours):
+ *   - the abbreviation dot of a unit followed by a lower-case continuation
+ *     ("5 val. programavau", "30 min. pertrauka", "2 ч. тестировал"). An
+ *     upper-case continuation ("6 val. Glaisčiau sienas") still ends the
+ *     sentence, so two items each stating their own time stay two items;
+ *   - a dot or comma between two digits ("3.5 val.", "1,5 h");
+ *   - a dot inside one token with no whitespace after it ("LabourMarket.ai",
+ *     "www.imone.lt") — the name is one word, not two sentences.
+ * Written against the ORIGINAL text (case matters for the first rule).
+ */
+const UNIT_ABBREVIATION_RX =
+  /((?:^|[^\p{L}])(?:val|min|h|d|ч|мин|vnt|kv|kg|m|м|шт)\.)(?=[ \t]+\p{Ll})/gu;
+const PROTECTED_DOT = "##DOT##";
+const PROTECTED_COMMA = "##COMMA##";
+
+function protectNonBoundaryDots(text: string): string {
+  return text
+    .replace(UNIT_ABBREVIATION_RX, (m) => m.replace(".", PROTECTED_DOT))
+    .replace(/(\d)\.(\d)/g, `$1${PROTECTED_DOT}$2`)
+    .replace(/(\d),(\d)/g, `$1${PROTECTED_COMMA}$2`)
+    .replace(/(\p{L})\.(\p{L})/gu, `$1${PROTECTED_DOT}$2`);
+}
+
+function restoreProtected(fragment: string): string {
+  return fragment
+    .split(PROTECTED_DOT)
+    .join(".")
+    .split(PROTECTED_COMMA)
+    .join(",")
+    .replace(/##TEMA##/g, ",");
+}
+
+/**
+ * The colon that introduces an itemisation — "dirbau 9 val.: 5 val. X, 2
+ * val. Y" — closes the header phrase. Only a colon followed by whitespace and
+ * a digit splits (so "tema: sienos" stays whole); the header is returned
+ * separately so the multi-fragment pass can read it as the STATED TOTAL of
+ * the items that follow, never as one more item.
+ */
+const ITEMISING_COLON_RX = /:\s+(?=\d)/u;
+
 /** Split a free-text entry into discrete work fragments. */
-function splitFragments(text: string): string[] {
+function splitFragments(text: string): { parts: string[]; headerCount: number } {
   // RU «и» joins work items the same way LT "ir"/"bei" do.
-  const normalized = text
-    .replace(/\r/g, "")
+  const normalized = protectNonBoundaryDots(text.replace(/\r/g, ""))
     .replace(/,\s*(ir|bei|и)\s+/gi, " | ")
     .replace(/\s+(ir|bei|и)\s+/gi, " | ");
   // Do not split on plain commas if the next chunk introduces a `tema:`
   // (theme) qualifier — the theme is metadata for the previous fragment,
   // not a new fragment. We protect it with a placeholder first.
   const protectedText = normalized.replace(/,\s*(tema\s*:)/giu, " ##TEMA## $1");
-  return protectedText
-    .split(/[.;!?\n|,]+/)
-    .map((s) => s.replace(/##TEMA##/g, ",").trim())
-    .filter((s) => s.length > 0);
+  const colonAt = protectedText.search(ITEMISING_COLON_RX);
+  const header = colonAt > 0 ? protectedText.slice(0, colonAt) : "";
+  const body = colonAt > 0 ? protectedText.slice(colonAt + 1) : protectedText;
+  const toParts = (chunk: string): string[] =>
+    chunk
+      .split(/[.;!?\n|,]+/)
+      // A protected abbreviation dot left LAST in its part ("Mūrijau sieną
+      // 5 val. | klojau…") is trailing punctuation again — dropped, so the
+      // persisted phrase reads exactly as it did before the protection.
+      .map((s) => restoreProtected(s).trim().replace(/[.]+$/, ""))
+      .filter((s) => s.length > 0);
+  const headerParts = header ? toParts(header) : [];
+  return { parts: [...headerParts, ...toParts(body)], headerCount: headerParts.length };
 }
 
 /** True when every word in the fragment is part of a time/numeric idiom
@@ -517,6 +584,87 @@ function mergeContinuationFragments(
     i += 1;
   }
   return out;
+}
+
+/** Minutes of a fragment time, for comparing a stated total with its items.
+ *  `days` never converts (no approved workday length), so a total in days is
+ *  never matched against items in hours. */
+function timeInMinutes(t: {
+  value: number;
+  unitSlug: "hours" | "minutes" | "days";
+}): number | null {
+  if (t.unitSlug === "hours") return t.value * 60;
+  if (t.unitSlug === "minutes") return t.value;
+  return null;
+}
+
+/**
+ * Take the STATED TOTAL out of the fragment list (issue #1689). A fragment is
+ * the total — not one more work item — when the entry has at least two other
+ * timed fragments and either:
+ *   - it stood before the itemising colon ("Šiandien 9 valandas dirbau
+ *     LabourMarket.ai: …", "9 val. klijavau plyteles: 5 val. virtuvėje, 4
+ *     val. vonioje") — the colon says the items ARE that time. When such a
+ *     header names an activity, the items that name none inherit it: the
+ *     header described the work, the items described where or how; or
+ *   - it names no activity and its time equals the sum of the other timed
+ *     fragments ("Dirbau 9 val. 5 val. programavau, 2 val. testavau, 2 val.
+ *     ieškojau partnerių" — the person restated the day, then itemised it).
+ * Without a colon a timed fragment WITH an activity is always an item: "9
+ * val. klijavau plyteles, 5 val. …" is work, whatever follows it. Nothing
+ * here changes a figure — the total is returned beside the fragments with
+ * whether the items add up.
+ */
+function separateStatedTotal(
+  fragments: JournalFragmentSuggestion[],
+  headerPhrases: ReadonlySet<string>,
+): {
+  fragments: JournalFragmentSuggestion[];
+  statedTotal: JournalSuggestions["statedTotal"];
+} {
+  const timed = fragments.filter((f) => f.time !== null);
+  if (timed.length < 3) return { fragments, statedTotal: null };
+  const noActivity = (f: JournalFragmentSuggestion) =>
+    f.activitySlug === null && f.activityLabel === null;
+  const sumOthers = (self: JournalFragmentSuggestion): number | null => {
+    let sum = 0;
+    for (const f of timed) {
+      if (f === self) continue;
+      const m = timeInMinutes(f.time!);
+      if (m === null) return null;
+      sum += m;
+    }
+    return sum;
+  };
+  const addsUp = (f: JournalFragmentSuggestion): boolean => {
+    const own = timeInMinutes(f.time!);
+    const others = sumOthers(f);
+    return own !== null && others !== null && Math.abs(own - others) < 1;
+  };
+  const header = timed.find((f) => headerPhrases.has(f.rawPhrase)) ?? null;
+  const total = header ?? timed.find((f) => noActivity(f) && addsUp(f)) ?? null;
+  if (!total) return { fragments, statedTotal: null };
+  const inherit = header && !noActivity(header) ? header : null;
+  return {
+    fragments: fragments
+      .filter((f) => f !== total)
+      .map((f) =>
+        inherit && noActivity(f) && f.time !== null
+          ? {
+              ...f,
+              activitySlug: inherit.activitySlug,
+              activityLabel: inherit.activityLabel,
+              isUnknown: false,
+            }
+          : f,
+      ),
+    statedTotal: {
+      value: total.time!.value,
+      unitSlug: total.time!.unitSlug,
+      rawPhrase: total.rawPhrase,
+      matchesFragments: addsUp(total),
+    },
+  };
 }
 
 /** Pick the strongest activity hint for one fragment. */
@@ -642,7 +790,11 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
 
   // 6) Multi-fragment pass.
   const initialFragments: JournalFragmentSuggestion[] = [];
-  const rawParts = splitFragments(text);
+  const { parts: rawParts, headerCount } = splitFragments(text);
+  // The raw phrases that stood BEFORE an itemising colon — candidates for
+  // the stated total below (a header without a time is simply a fragment
+  // like any other, or nothing).
+  const headerPhrases = new Set(rawParts.slice(0, headerCount));
   for (const raw of rawParts) {
     const localTime = detectFragmentTime(raw);
     const activity = detectActivity(raw);
@@ -673,7 +825,14 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   }
   // Collapse "Dvi valandas | penkiolika minučių glaiščiau sienas" into one
   // card — fragment-to-time pairing was wrong before this pass.
-  const fragments = mergeContinuationFragments(initialFragments);
+  // The stated total leaves the list BEFORE the continuation merge, so a
+  // bare header ("9 val.: 5 val. X, 4 val. Y") can never be glued onto its
+  // own first item as "9 val ir 5 val. X".
+  const { fragments: items, statedTotal } = separateStatedTotal(
+    initialFragments,
+    headerPhrases,
+  );
+  const fragments = mergeContinuationFragments(items);
 
   // 7) Explicit named capabilities / specializations. Same dictionary as the
   //    profile composer so e.g. "lietuviškos virtuvės gamyba" surfaces BOTH
@@ -702,6 +861,7 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     institutionName,
     topic,
     fragments,
+    statedTotal,
     capabilitySuggestions,
     hasAny,
   };

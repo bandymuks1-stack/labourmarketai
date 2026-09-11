@@ -12873,6 +12873,13 @@
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
       "minutesUnit": "min",
       "errorNoWorkContent": "Een invoer heeft het werk nodig: wat je deed, waar of hoe lang. Schrijf het in je eigen woorden, bijv. „ramen gemonteerd van 8 tot 17“.",
+      "recordTitle": "Wordt vastgelegd als werktijd",
+      "recordNoActivity": "soort werk niet herkend",
+      "recordTotalStated": "Opgegeven totaal",
+      "recordPartsSum": "de delen tellen op tot",
+      "recordTotalDiffers": "het verschil wordt als controle getoond, nooit bij je uren opgeteld",
+      "recordNone": "Geen tijd in de tekst gevonden — de invoer wordt geteld, maar zonder duur. Voeg de uren toe als je ze in je totalen wilt.",
+      "hoursUnit": "u",
       "relationship": {
         "employee": "Werknemer",
         "freelancer": "Freelancer",

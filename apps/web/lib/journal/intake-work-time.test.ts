@@ -6,6 +6,77 @@ import { deriveEntryWorkTime } from "./work-time";
 
 const TODAY = "2026-09-11";
 
+/** The owner's own day (2026-09-11): the total is stated ONCE and itemised. */
+const OWNER_DAY =
+  "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių.";
+
+const toMetrics = (fragmentsJson: string | null) =>
+  parseFragments(fragmentsJson).flatMap((f, i) => [
+    { metric_slug: "parsed_fragment", value_text: `${i + 1}|${f.rawPhrase}`, value_numeric: null, unit_slug: null, source: f.source ?? null },
+    { metric_slug: "fragment_time", value_text: String(i + 1), value_numeric: f.timeValue ?? null, unit_slug: f.timeUnit ?? null, source: f.source ?? null },
+  ]);
+
+describe("deriveIntakeWorkTime — the stated total is not one more fragment (P0, 2026-09-11)", () => {
+  it("the owner's day records 5 + 2 + 2 — the 9 h header is NOT a fourth fragment", () => {
+    const t = deriveIntakeWorkTime(OWNER_DAY, TODAY);
+    expect(t.fragments.map((f) => [f.timeValue, f.timeUnit, f.rawPhrase])).toEqual([
+      [5, "hours", "5 val. programavau"],
+      [2, "hours", "2 val. testavau"],
+      [2, "hours", "2 val. ieškojau partnerių"],
+    ]);
+    expect(t.quantityMinutes).toBeNull();
+    // the items add up to the stated 9 h → nothing else is recorded
+    expect(t.statedTotalMinutes).toBeNull();
+    expect(intakeWorkTimeFields(OWNER_DAY, TODAY)).toEqual({ fragments_json: t.fragmentsJson });
+  });
+
+  it("the canonical rule then reads 9 h once, with every phrase's kind of work", () => {
+    const t = deriveIntakeWorkTime(OWNER_DAY, TODAY);
+    const time = deriveEntryWorkTime({ entryId: "e", createdAt: `${TODAY}T10:00:00Z`, metrics: toMetrics(t.fragmentsJson) });
+    expect(time.totalHours).toBe(9);
+    expect(time.conflict).toBeNull();
+    expect(t.fragments.map((f) => f.activitySlug ?? f.activityLabel)).toEqual([
+      "software_developer",
+      null,
+      "Partnerių paieška / bendradarbiavimas",
+    ]);
+  });
+
+  it("when the items do NOT add up, the stated total goes to the slot the rule sets aside and names — never added", () => {
+    const text = "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau.";
+    const t = deriveIntakeWorkTime(text, TODAY);
+    expect(t.fragments.map((f) => f.timeValue)).toEqual([5, 2]);
+    expect(t.statedTotalMinutes).toBe(540);
+    const fields = intakeWorkTimeFields(text, TODAY);
+    expect(fields).toEqual({
+      fragments_json: t.fragmentsJson,
+      quantity: "540",
+      unit_slug: "minutes",
+      quantity_source: "ai_extracted",
+    });
+    const metrics = [
+      ...toMetrics(t.fragmentsJson),
+      { metric_slug: "quantity", value_text: null, value_numeric: 540, unit_slug: "minutes", source: "ai_extracted" },
+    ];
+    const time = deriveEntryWorkTime({ entryId: "e", createdAt: `${TODAY}T10:00:00Z`, metrics });
+    expect(time.totalHours).toBe(7);
+    expect(time.conflict).toEqual({ reason: "entry_quantity_ignored_fragments_present", value: 540, unit: "minutes" });
+  });
+
+  it("a stated output keeps the one entry-level slot; the mismatched total is then not written as anything", () => {
+    const text = "Šiandien 9 val. dirbau: 5 val. klojau plyteles, 2 val. glaisčiau, 30 m².";
+    const fields = intakeWorkTimeFields(text, TODAY);
+    expect(fields.unit_slug).toBe("square_meters");
+    expect(fields.quantity).toBe("30");
+  });
+
+  it("the same day in Russian", () => {
+    const t = deriveIntakeWorkTime("Сегодня 9 часов работал: 5 ч. программировал, 2 ч. тестировал, 2 ч. искал партнеров.", TODAY);
+    expect(t.fragments.map((f) => f.timeValue)).toEqual([5, 2, 2]);
+    expect(t.statedTotalMinutes).toBeNull();
+  });
+});
+
 describe("deriveIntakeWorkTime — the stated time becomes time on the record", () => {
   it("per-fragment durations become fragments the write core understands, with machine provenance", () => {
     const t = deriveIntakeWorkTime("Klijavau plyteles 6 val., glaisčiau sienas 2 val.", TODAY);
@@ -43,7 +114,12 @@ describe("deriveIntakeWorkTime — the stated time becomes time on the record", 
   });
 
   it("no time in the text → nothing is invented", () => {
-    expect(deriveIntakeWorkTime("Montavau langus objekte", TODAY)).toEqual({ fragmentsJson: null, quantityMinutes: null });
+    expect(deriveIntakeWorkTime("Montavau langus objekte", TODAY)).toEqual({
+      fragmentsJson: null,
+      fragments: [],
+      quantityMinutes: null,
+      statedTotalMinutes: null,
+    });
     expect(intakeWorkTimeFields("Montavau langus objekte", TODAY)).toEqual({});
     expect(intakeWorkTimeFields("", TODAY)).toEqual({});
   });
@@ -53,7 +129,7 @@ describe("deriveIntakeWorkTime — the stated time becomes time on the record", 
     const ru = deriveIntakeWorkTime("Клал плитку 3 часа", TODAY);
     // English explicit hours: the fragment recognizer is LT/RU-lexicon based,
     // the work-log parser still reads them → entry-level minutes.
-    expect(en).toEqual({ fragmentsJson: null, quantityMinutes: 240 });
+    expect(en).toEqual({ fragmentsJson: null, fragments: [], quantityMinutes: 240, statedTotalMinutes: null });
     expect(parseFragments(ru.fragmentsJson).map((f) => [f.timeValue, f.timeUnit])).toEqual([[3, "hours"]]);
   });
 });

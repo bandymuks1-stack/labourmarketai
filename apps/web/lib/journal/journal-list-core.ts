@@ -2,6 +2,7 @@ import "server-only";
 
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { countedOnce } from "@/lib/journal/counted-once";
 
 /**
  * THE canonical Work Journal LIST read (G4 bridge; audit gap G6's "journal
@@ -12,6 +13,16 @@ import type { DomainCaller } from "@/lib/domain/caller";
  * legacy fallback, newest first, live rows only on the v3 path. The page and
  * the `journal.list` capability both read THIS — one projection of the
  * caller's own append-only journal, never a second one.
+ *
+ * COUNTED ONCE (issue #1689, audit F1): a CONFIRMED original that a live
+ * correction points at (`correction_of`, 0018) keeps `superseded_by` NULL by
+ * design, so the live filter alone returned BOTH rows and every number built
+ * on this list — the work-in-numbers section, the CV, the organization's
+ * member view, the §13 checks, the conversation — counted an edited day
+ * twice and kept calling the withdrawn figure "confirmed". `entries` now
+ * carries each correction chain once, by its live correction
+ * (`lib/journal/counted-once.ts`); the replaced originals ride along in
+ * `correctedOriginals` for any surface that shows the audit trail.
  *
  * RLS-scoped as the caller: `worker_id` is resolved from the caller's OWN
  * worker row (or passed in by a consumer that already holds it — same row,
@@ -42,13 +53,24 @@ export type JournalEntryListRow = {
   created_at: string;
   deleted_at?: string | null;
   superseded_by?: string | null;
+  /** The confirmed original this row corrects (0018), when it is one. */
+  correction_of?: string | null;
   engagement_context_id?: string | null;
   journal_entry_metrics: JournalMetricRow[] | null;
   journal_entry_confirmations: JournalConfirmationRow[] | null;
 };
 
 export type JournalListResult =
-  | { ok: true; workerId: string; entries: JournalEntryListRow[] }
+  | {
+      ok: true;
+      workerId: string;
+      /** Live rows, each correction chain counted once by its live
+       *  correction — the rows every number is built on. */
+      entries: JournalEntryListRow[];
+      /** Live originals that a row in `entries` corrects: still real,
+       *  still confirmed, no longer counted. Empty on the legacy path. */
+      correctedOriginals: JournalEntryListRow[];
+    }
   | { ok: false; code: "no_worker" | "unavailable" };
 
 /** The metric rows an entry carries, as every work-time consumer reads them
@@ -63,7 +85,7 @@ export const JOURNAL_ENTRY_METRICS_EMBED =
 export const JOURNAL_ENTRY_CONFIRMATIONS_EMBED =
   "journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
 
-const V3_SELECT = `id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
+const V3_SELECT = `id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
 
 const LEGACY_SELECT = `id, original_text, created_at, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
 
@@ -99,10 +121,14 @@ export async function listJournalEntries(
   const v3 = await (opts.limit ? v3Query.limit(opts.limit) : v3Query);
   if (!v3.error) {
     const rows = (v3.data ?? []) as JournalEntryListRow[];
+    const live = rows.filter((e) => !e.deleted_at && !e.superseded_by);
+    const entries = countedOnce(live);
+    const counted = new Set(entries.map((e) => e.id));
     return {
       ok: true,
       workerId,
-      entries: rows.filter((e) => !e.deleted_at && !e.superseded_by),
+      entries,
+      correctedOriginals: live.filter((e) => !counted.has(e.id)),
     };
   }
 
@@ -119,5 +145,6 @@ export async function listJournalEntries(
     ok: true,
     workerId,
     entries: (legacy.data ?? []) as unknown as JournalEntryListRow[],
+    correctedOriginals: [],
   };
 }

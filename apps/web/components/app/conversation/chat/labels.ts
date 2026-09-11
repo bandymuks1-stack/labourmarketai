@@ -389,6 +389,14 @@ const WORKLOG_KEYS = [
   "pipelineFailedNote",
   // The evidence carries no work content — ask, never save the request.
   "errorNoWorkContent",
+  // What the save will record as work time (issue #1689).
+  "recordTitle",
+  "recordNoActivity",
+  "recordTotalStated",
+  "recordPartsSum",
+  "recordTotalDiffers",
+  "recordNone",
+  "hoursUnit",
 ] as const;
 
 /** Resolve the flat chat label bag from a `conversation.chat`-scoped translator.
