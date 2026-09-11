@@ -20,6 +20,7 @@ skill-hours. `ESCO/ISCO → OCCUPATION → ARCHETYPE(S) → UNIVERSAL RECORD →
 | `esco_skills`, `esco_occupation_skills`, `esco_labels` | 13,939 skills (10,715 competence / 3,219 knowledge), 126,051 relations, 1.05 M labels / 28 locales | Semantic layer exists; slug↔ESCO bridge for the platform's 161 skills is EMPTY and owner-gated (#1355) — ESCO stays interoperability, never ranking |
 | Canonical work-time rule `work-time.ts` (+ SQL mirror) | fragments win, entry quantity fallback, never summed; `days` never hours; provenance per line | Time is already first-class and counted once |
 | `journal_entry_skills` (+ `provenance`), `journal_entry_confirmations`, `journal_entry_photos`, `source_document_file` metric | skill involvement, human confirmation, photo evidence, immutable original document | Evidence/verification layer exists |
+| `fragment_skill` metric (`"<index>\|<slug>"`, added 2026-09-11) | the skill pipeline / the worker's candidate confirmation record WHICH persisted fragment a link was recognised on (`fragment-skill-evidence.ts`); append-only, inert without the link | Fragment-level attribution is evidence, not a guess |
 | `journal_profession_templates` (migration 20260714180000) | **not applied** (owner-gated draft) | The template registry is not live; archetype data lives in code until it is |
 | Recognition chain (`skill-pipeline.ts`, accept / reject / correct, append-only markers) | live, measured on production 2026-09-08 | Unchanged by this model |
 
@@ -30,9 +31,14 @@ skill-hours. `ESCO/ISCO → OCCUPATION → ARCHETYPE(S) → UNIVERSAL RECORD →
 | ENTRY WORKED TIME | the entry's canonical duration, counted once | `deriveEntryWorkTime` |
 | ACTIVITY TIME | hours on the same fragment as an activity label, or the entry's own direction for an entry-level duration | `work-intelligence.ts` → `activities` |
 | SKILL INVOLVEMENT | a skill was linked to an entry: entries · days · contexts · `sharedHours` (shown, never summed across skills) | `work-intelligence.ts` → `skills` |
-| ATTRIBUTABLE PRACTICE TIME | hours a skill can claim: only entries where it is the ONLY linked skill | `work-intelligence.ts` → `attributedHours` |
+| ATTRIBUTABLE PRACTICE TIME | hours a skill can claim: entries where it is the ONLY linked skill, plus fragments where a `fragment_skill` row names it as the ONE linked skill on that fragment's own duration | `work-intelligence.ts` → `attributedHours` |
 
 An 8-hour entry linked to four skills = 8 h of work, four involvements, 0 h attributed each — never 32.
+"Klijavau plyteles 6 val., glaisčiau sienas 2 val." with both skills linked on their own fragments = 8 h of work,
+6 h tiling + 2 h skim-coating attributed, 0 h shared — from the worker's own split. A fragment two linked skills
+sit on, a row whose skill the worker unlinked, and an entry-level duration all stay involvement. Every hour once:
+attributed + shared + multi-activity + unattributed = total. Entries saved before this rule gain the rows on the
+next pipeline pass (reprocess) or when the worker confirms a candidate.
 
 ## 3. Archetype matrix
 

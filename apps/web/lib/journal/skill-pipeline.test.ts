@@ -325,6 +325,73 @@ describe("processJournalEntrySkills (v2)", () => {
     );
   });
 
+  it("FRAGMENT EVIDENCE: a linked skill is recorded ON the persisted fragment it was recognised from (fragment_skill row)", async () => {
+    // Lexicon mocked per fragment: tiles on fragment 1, skim-coating on 2.
+    recognizeSkillsMock.mockImplementation((text: string) => {
+      if (/plytel/i.test(text)) return [{ slug: "tiling", confidence: "high", via: "exact", matchedText: "plyteles" }];
+      if (/glais/i.test(text)) return [{ slug: "skim-coating", confidence: "high", via: "exact", matchedText: "glaisčiau" }];
+      return [];
+    });
+    const result = await run(
+      baseHandler({
+        skills: [
+          { id: "s1", slug: "tiling", is_active: true },
+          { id: "s2", slug: "skim-coating", is_active: true },
+        ],
+        declared: [{ id: "s1", slug: "tiling" }],
+        existingLinks: [],
+        entryMetrics: [
+          { metric_slug: "parsed_fragment", value_text: "1|Klijavau plyteles 6 val" },
+          { metric_slug: "parsed_fragment", value_text: "2|glaisčiau sienas 2 val" },
+          // one row already there (idempotent reprocess) → not re-written
+          { metric_slug: "fragment_skill", value_text: "1|tiling" },
+        ],
+      }),
+      { text: "Klijavau plyteles 6 val., glaisčiau sienas 2 val." },
+    );
+    expect(result.status).toBe("completed");
+    expect(result.strengthened).toBe(1); // tiling (declared) gained a link
+    expect(result.added).toBe(1); // skim-coating added self_declared
+    const rows = metricWrites("fragment_skill");
+    expect(rows).toEqual([
+      { entry_id: "e1", metric_slug: "fragment_skill", source: "worker_input", value_text: "2|skim-coating" },
+    ]);
+    expectSummaryConsistency(result);
+  });
+
+  it("FRAGMENT EVIDENCE: no persisted fragments → no fragment_skill row; a candidate (fuzzy) never gets one", async () => {
+    recognizeSkillsMock.mockImplementation((text: string) => {
+      if (/plytel/i.test(text)) return [{ slug: "tiling", confidence: "high", via: "exact", matchedText: "plyteles" }];
+      if (/glais/i.test(text)) return [{ slug: "skim-coating", confidence: "low", via: "fuzzy", matchedText: "glaisčiau" }];
+      return [];
+    });
+    await run(
+      baseHandler({
+        skills: [{ id: "s1", slug: "tiling", is_active: true }, { id: "s2", slug: "skim-coating", is_active: true }],
+        declared: [],
+        existingLinks: [],
+      }),
+      { text: "Klijavau plyteles 6 val., glaisčiau sienas 2 val." },
+    );
+    expect(metricWrites("fragment_skill")).toEqual([]);
+    writePayloads = [];
+    const result = await run(
+      baseHandler({
+        skills: [{ id: "s1", slug: "tiling", is_active: true }, { id: "s2", slug: "skim-coating", is_active: true }],
+        declared: [],
+        existingLinks: [],
+        entryMetrics: [
+          { metric_slug: "parsed_fragment", value_text: "1|Klijavau plyteles 6 val" },
+          { metric_slug: "parsed_fragment", value_text: "2|glaisčiau sienas 2 val" },
+        ],
+      }),
+      { text: "Klijavau plyteles 6 val., glaisčiau sienas 2 val." },
+    );
+    // tiling (exact, linked) → row on fragment 1; skim-coating stayed a candidate → no row
+    expect(metricWrites("fragment_skill").map((r) => r.value_text)).toEqual(["1|tiling"]);
+    expect(result.candidates.some((c) => c.kind === "fuzzy_skill" && c.slug === "skim-coating")).toBe(true);
+  });
+
   it("fuzzy NEW skill → visible candidate, NOT added, NOT linked", async () => {
     recognizeSkillsMock.mockReturnValue([
       { slug: "tiling", confidence: "low", via: "fuzzy", matchedText: "plytelms" },

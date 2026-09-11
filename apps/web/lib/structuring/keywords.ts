@@ -77,9 +77,14 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     },
     { slug: "partition-walls", needles: ["pertvar", "перегородк"] },
     { slug: "plastering", needles: ["tinkav", "tinkov", "штукатур"] },
+    // "glaisč" — the LT 1st-person past of glaistyti ("glaisčiau sienas",
+    // the commonest way a worker writes it) palatalises the stem's t → č,
+    // so the bare "glaist" stem never matched it exactly; it fell to the
+    // fuzzy tier and, being undeclared, stayed a candidate instead of a
+    // linked skill (production walk, issue #1689).
     {
       slug: "skim-coating",
-      needles: ["glaist", "шпаклев", "шпаклёв", "шпатлев"],
+      needles: ["glaist", "glaisč", "шпаклев", "шпаклёв", "шпатлев"],
     },
     {
       slug: "painting",

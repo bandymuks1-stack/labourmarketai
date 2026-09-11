@@ -540,7 +540,7 @@
     "openCv": "Lebenslauf öffnen",
     "openOpportunities": "Chancen aus Ihren Einträgen",
     "provenance": "Woher die Stunden stammen: {worker} Std. von Ihnen eingegeben, {extracted} Std. aus Ihrem Text erkannt, {corrected} Std. von einer Führungskraft korrigiert.",
-    "provenanceRule": "Jeder Eintrag zählt einmal; eine Stunde wird einer Fähigkeit nur zugeordnet, wenn der Eintrag mit genau einer Fähigkeit verknüpft ist.",
+    "provenanceRule": "Jeder Eintrag zählt einmal; eine Stunde wird einer Fähigkeit nur zugeordnet, wenn der Eintrag mit genau einer Fähigkeit verknüpft ist oder Ihre eigene Formulierung („6 h Fliesen gelegt“) diese Fähigkeit nennt.",
     "glance": "{days, plural, one {# Tag} other {# Tage}} · {entries, plural, one {# Eintrag} other {# Einträge}}",
     "glanceNone": "keine Einträge",
     "periodEmpty": "Keine Einträge im Zeitraum „{period}“ — wählen Sie oben einen anderen Zeitraum.",
@@ -548,7 +548,7 @@
     "mainActivityNone": "Noch keine Art von Arbeit erfasst — ein Eintrag mit Dauer und Art der Arbeit zeigt sie.",
     "otherActivities": "Weitere belegte Tätigkeit",
     "evidenceStrength": "{entries, plural, one {# Eintrag} other {# Einträge}}: {confirmed} von Führungskraft oder Kunde bestätigt · {photos} mit Fotos · {documents} aus einem Originaldokument · {selfOnly} nur Ihr eigener Eintrag",
-    "skillsHint": "Stunden erreichen eine Fähigkeit nur, wenn der Eintrag mit genau einer Fähigkeit verknüpft ist. Bei mehreren zeigen wir Beteiligung, keine erfundene Aufteilung.",
+    "skillsHint": "Stunden erreichen eine Fähigkeit nur, wenn der Eintrag mit genau einer Fähigkeit verknüpft ist oder Ihre eigene Formulierung mit Zeitangabe diese Fähigkeit nennt. Bei mehreren ohne solche Angabe zeigen wir Beteiligung, keine erfundene Aufteilung.",
     "activityMeta": "{entries, plural, one {# Eintrag} other {# Einträge}} · {contexts, plural, one {# Kontext} other {# Kontexte}}",
     "trend": {
       "up": "steigend (letzte 30 Tage gegenüber den 30 davor)",

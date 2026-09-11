@@ -540,7 +540,7 @@
     "openCv": "Atidaryti CV",
     "openOpportunities": "Galimybės pagal įrašus",
     "provenance": "Iš kur valandos: {worker} val. įvedėte patys, {extracted} val. atpažinta iš jūsų teksto, {corrected} val. patikslino vadovas.",
-    "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda įgūdžiui priskiriama tik tada, kai įrašas susietas su vienu įgūdžiu.",
+    "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda įgūdžiui priskiriama tik tada, kai įrašas susietas su vienu įgūdžiu arba kai jūsų pačių frazė („klijavau plyteles 6 val.“) įvardija tą įgūdį.",
     "glance": "{days, plural, one {# diena} few {# dienos} other {# dienų}} · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
     "glanceNone": "įrašų nėra",
     "periodEmpty": "Laikotarpiu „{period}“ įrašų nėra — žemiau rodomas visas laikas pasirinkus jį viršuje.",
@@ -548,7 +548,7 @@
     "mainActivityNone": "Veiklos rūšis dar neužfiksuota — įrašas su trukme ir darbo rūšimi ją parodys.",
     "otherActivities": "Kita pagrįsta veikla",
     "evidenceStrength": "{entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}: {confirmed} patvirtinta vadovo ar kliento · {photos} su nuotraukomis · {documents} iš originalaus dokumento · {selfOnly} tik jūsų pačių įrašas",
-    "skillsHint": "Valandos priskiriamos įgūdžiui tik tada, kai įrašas susietas su vienu įgūdžiu. Kai dalyvavo keli — rodome dalyvavimą, o ne išgalvotą padalijimą.",
+    "skillsHint": "Valandos priskiriamos įgūdžiui tik tada, kai įrašas susietas su vienu įgūdžiu arba kai jūsų pačių frazė su laiku įvardija tą įgūdį. Kai dalyvavo keli ir frazė neišskiria — rodome dalyvavimą, o ne išgalvotą padalijimą.",
     "activityMeta": "{entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} · {contexts, plural, one {# kontekstas} few {# kontekstai} other {# kontekstų}}",
     "trend": {
       "up": "daugėja (paskutinės 30 d. lyginant su ankstesnėmis 30 d.)",

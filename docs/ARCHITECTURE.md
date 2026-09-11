@@ -293,7 +293,9 @@ covering all 43 sub-major groups, `composeJournal`), guarded. The universal reco
 `journal_entry_metrics` (free `metric_slug`); adaptive modules are metric-slug groups, never
 columns or forms. Four kinds of time stay apart — ENTRY WORKED TIME · ACTIVITY TIME · SKILL
 INVOLVEMENT · ATTRIBUTABLE PRACTICE TIME (`work-intelligence.ts`); an entry with several
-linked skills is never split by guessing. ESCO is interoperability, never ranking.
+linked skills is never split by guessing — it is split only where the link itself names the
+fragment (`fragment_skill` rows, `fragment-skill-evidence.ts`, written by the skill pipeline
+and the worker's confirmation). ESCO is interoperability, never ranking.
 
 ---
 

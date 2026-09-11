@@ -540,7 +540,7 @@
     "openCv": "Cv openen",
     "openOpportunities": "Kansen uit je registraties",
     "provenance": "Waar de uren vandaan komen: {worker} u door jou ingevoerd, {extracted} u uit je tekst herkend, {corrected} u door een leidinggevende gecorrigeerd.",
-    "provenanceRule": "Elke registratie telt één keer; een uur wordt alleen aan een vaardigheid toegewezen als de registratie aan één vaardigheid gekoppeld is.",
+    "provenanceRule": "Elke registratie telt één keer; een uur wordt alleen aan een vaardigheid toegewezen als de registratie aan één vaardigheid gekoppeld is of als uw eigen zin (“6 u getegeld”) die vaardigheid noemt.",
     "glance": "{days, plural, one {# dag} other {# dagen}} · {entries, plural, one {# registratie} other {# registraties}}",
     "glanceNone": "geen registraties",
     "periodEmpty": "Geen registraties in “{period}” — kies hierboven een andere periode.",
@@ -548,7 +548,7 @@
     "mainActivityNone": "Nog geen soort werk vastgelegd — een registratie met duur en soort werk laat het zien.",
     "otherActivities": "Andere onderbouwde activiteit",
     "evidenceStrength": "{entries, plural, one {# registratie} other {# registraties}}: {confirmed} bevestigd door leidinggevende of klant · {photos} met foto's · {documents} uit een origineel document · {selfOnly} alleen je eigen registratie",
-    "skillsHint": "Uren bereiken een vaardigheid alleen als de registratie aan één vaardigheid gekoppeld is. Bij meerdere tonen we betrokkenheid, geen verzonnen verdeling.",
+    "skillsHint": "Uren bereiken een vaardigheid alleen als de registratie aan één vaardigheid gekoppeld is of als uw eigen zin met tijd die vaardigheid noemt. Bij meerdere zonder zo'n zin tonen we betrokkenheid, geen verzonnen verdeling.",
     "activityMeta": "{entries, plural, one {# registratie} other {# registraties}} · {contexts, plural, one {# context} other {# contexten}}",
     "trend": {
       "up": "stijgend (laatste 30 dagen t.o.v. de 30 ervoor)",

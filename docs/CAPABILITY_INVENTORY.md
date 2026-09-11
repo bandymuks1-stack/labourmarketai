@@ -561,7 +561,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | EVID-4 | Photos / task evidence | `journal_entry_photos`, `journal_entry_tasks` | PROD_DATA (8 photos) | — | 2 | — |
 | EVID-5 | Hours: journal metrics · allocations · timesheets | 3 stores + 1 dead | PARTIAL | — | 1 | reconciled inside ONE SQL function; no TS reader unions them |
 | EVID-6 | Experience records + disputes + right of reply | `experience_records`, `experience_responses` | PROD_DATA (2) | — | 2 | **`experience_responses` is write-only — no surface renders a reply** |
-| EVID-7 | Work intelligence: hours · activities · skill practice · evidence strength | `journal_entry_metrics` + `journal_entry_skills` + confirmations + photos, ONE pure model over the canonical work-time rule | PARTIAL | — | 1 | #1689: journal section + Living CV chips + conversation; archetype map covers all 43 ISCO sub-major groups; composer modules and a human walk remain |
+| EVID-7 | Work intelligence: hours · activities · skill practice · evidence strength | `journal_entry_metrics` (+ `fragment_skill` rows) + `journal_entry_skills` + confirmations + photos, ONE pure model over the canonical work-time rule | PARTIAL | — | 1 | #1689: journal section + Living CV chips + conversation; fragment-level skill attribution from the worker's own split (#1692); archetype map covers all 43 ISCO sub-major groups; composer modules, §13 overlap warnings, §14 org views and a human walk remain |
 
 #### F. DEMAND · SUPPLY · MATCHING
 
