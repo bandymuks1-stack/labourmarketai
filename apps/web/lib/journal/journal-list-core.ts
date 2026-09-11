@@ -51,11 +51,21 @@ export type JournalListResult =
   | { ok: true; workerId: string; entries: JournalEntryListRow[] }
   | { ok: false; code: "no_worker" | "unavailable" };
 
-const V3_SELECT =
-  "id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
+/** The metric rows an entry carries, as every work-time consumer reads them
+ *  (`work-time.ts` needs slug / values / unit; `source` is the row's own
+ *  provenance). ONE projection — the org window report embeds the same
+ *  fragment so its hours come from the rows the diary and the CV read. */
+export const JOURNAL_ENTRY_METRICS_EMBED =
+  "journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source)";
 
-const LEGACY_SELECT =
-  "id, original_text, created_at, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
+/** The confirmation rows `deriveReviewResult` needs — the same fragment on
+ *  every surface that turns them into a review result. */
+export const JOURNAL_ENTRY_CONFIRMATIONS_EMBED =
+  "journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
+
+const V3_SELECT = `id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
+
+const LEGACY_SELECT = `id, original_text, created_at, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
 
 export async function listJournalEntries(
   caller: DomainCaller,

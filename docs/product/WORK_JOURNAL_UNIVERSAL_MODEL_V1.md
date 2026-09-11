@@ -144,5 +144,17 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    section (`wi-checks`) and right after a save in the chat flow and the composer. What stays
    an extension point: a SPAN overlap check — the journal persists durations, not clock spans,
    so nothing compares "08:00–12:00" across entries until spans become persisted evidence.
-6. Organization views (owner §14) compose the same reader under `manages_organization` — no
-   second timesheet universe.
+6. ~~Organization views (owner §14)~~ — LIVE 2026-09-11: the person page
+   (`/dashboard/people/[workerId]`) composes `loadWorkIntelligence` for a member and renders
+   the same section with `audience="organization"`. Scope is the database's org-manager RLS
+   branch on every journal table (entries logged against the organization's own engagements),
+   never a filter or an admin client; confirmed hours come from the organization's own approved
+   confirmations. The organization sees no plausibility checks, no adjacent directions and no
+   diary links — those are the person's. The per-member roll-up on `/dashboard/reports`
+   (the windowed journal report, `journal-window-report.ts`) is LIVE the same day: with
+   `workTime` the report embeds the list core's metric projection and derives every member's
+   hours, confirmed hours (approved only), days worked and main kind of work through
+   `deriveWorkIntelligence` over the window's own rows — no skills read, no second hours
+   arithmetic; each member's name opens the person page. Its review counts were corrected in
+   the same slice: confirmed = approved, returned = rejected / changes requested, the rest
+   await review (any confirmation row used to count as confirmed, hub tile included).

@@ -71,8 +71,15 @@ function durationLabel(mins: number): string {
 }
 
 // "nuo 8 iki 17", "from 8:30 to 17", "с 8 до 17", or a bare "8-17" / "8:00–17:00".
+// A clock span is a number PAIR standing on its own: a digit run glued to a
+// letter, another digit or a connector is a reference, a date or a code, not
+// a working day — measured on production (2026-09-11), "QA-S13-1789111905948"
+// was read as 13:00–17:00 and became four worked hours. So the first number
+// may not follow a letter / digit / connector, and the last may not run on
+// into more digits or a further "-NN" segment ("2026-09-11", "12-13-14",
+// "A-7-12" are none of them spans).
 const SPAN_RE =
-  /(?:nuo|from|с|von|van)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?/iu;
+  /(?<![\p{L}\p{N}_\-–—/.:])(?:nuo|from|с|von|van)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
 // "45 min", "45 minučių", "45 мин", optionally near a break word.
 const BREAK_RE =
   /(\d{1,3})\s*(?:min|минут|мин)\w*/iu;

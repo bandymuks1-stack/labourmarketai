@@ -744,7 +744,7 @@
     },
     "journalWindow": {
       "title": "Werkjournaalrapport",
-      "intro": "Aantallen vastgelegde werkregistraties per werker over een vast kalendervenster. Alleen aantallen en datums — geen tekst van registraties, geen beoordeling.",
+      "intro": "Werktijd en vastgelegde registraties per lid over een vast kalendervenster – uit de eigen gegevens van deze organisatie. Alleen uren, aantallen en datums – geen tekst van registraties, geen beoordeling.",
       "windowLabel": "Rapportvenster",
       "window": {
         "today": "Vandaag",
@@ -761,11 +761,19 @@
         "entries": "Registraties",
         "awaitingReview": "Wacht op beoordeling",
         "confirmed": "Bevestigd",
-        "lastEntry": "Laatste registratie"
+        "lastEntry": "Laatste registratie",
+        "hours": "Uren",
+        "confirmedHours": "Bevestigde uren",
+        "days": "Dagen",
+        "returned": "Teruggestuurd"
       },
       "totals": "{count, plural, one {Totaal · # werker} other {Totaal · # werkers}}",
       "basisLabel": "Basis",
-      "basis": "Geteld uit werkregistraties die werkers in de dienstverbanden van deze organisatie binnen het gekozen venster hebben vastgelegd. De beoordelingsstatus komt uit bevestigingen van managers. Het ontbreken van registraties is geen bewijs van afwezigheid van werk, en niets hier beoordeelt of scoort iemand.",
+      "basis": "Geteld uit werkregistraties die leden binnen de arbeidsrelaties van deze organisatie in het gekozen venster hebben vastgelegd. Uren zijn de eigen vastgelegde duur van elke registratie, één keer geteld; bevestigde uren het deel op registraties die een manager heeft goedgekeurd; dagen zijn kalenderdagen met minstens één registratie met duur (in het totaal liddagen). „Bevestigd“ telt goedgekeurde registraties, „teruggestuurd“ afgewezen of teruggestuurde, de rest wacht op beoordeling. Het ontbreken van registraties bewijst niet dat er geen werk was, en niets hier beoordeelt of scoort iemand.",
+      "hours": "{hours} u",
+      "dayUnits": "+ {days} d in dagen vastgelegd",
+      "mainly": "vooral {activity} · {hours} u",
+      "withoutDuration": "{count, plural, one {# registratie in dit venster heeft geen duur – die telt mee, maar niet in uren.} other {# registraties in dit venster hebben geen duur – die tellen mee, maar niet in uren.}}",
       "collapse": "Gedetailleerd rapport verbergen"
     }
   },

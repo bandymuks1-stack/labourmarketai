@@ -65,3 +65,36 @@ describe("extractWorkLog — variants + honest ambiguity", () => {
     expect(p.end).toBe("16:00");
   });
 });
+
+describe("extractWorkLog — a digit run inside a code, a date or a list is not a clock span", () => {
+  // Measured on production (2026-09-11): the reference token below was read
+  // as 13:00–17:00 and became four worked hours on a real record.
+  it("a reference token with hyphenated digit runs yields no span and no worked time", () => {
+    const p = extractWorkLog("QA-S13-1789111905948 klojau plyteles", TODAY);
+    expect(p.start).toBeNull();
+    expect(p.end).toBeNull();
+    expect(p.workedMinutes).toBeNull();
+  });
+  it("an ISO date is a date, never a span of its own digits", () => {
+    const p = extractWorkLog("2026-09-11 klojau plyteles", TODAY);
+    expect(p.date).toBe("2026-09-11");
+    expect(p.start).toBeNull();
+    expect(p.workedMinutes).toBeNull();
+  });
+  it("a three-part number list and an object code are not spans", () => {
+    expect(extractWorkLog("nr. 12-13-14 patikrinau", TODAY).start).toBeNull();
+    expect(extractWorkLog("Objektas A-7-12, montavau", TODAY).start).toBeNull();
+  });
+  it("a real span next to a date still parses", () => {
+    const p = extractWorkLog("2026-09-11 dirbau 9-18", TODAY);
+    expect(p.date).toBe("2026-09-11");
+    expect(p.start).toBe("09:00");
+    expect(p.end).toBe("18:00");
+    expect(p.workedMinutes).toBe(9 * 60);
+  });
+  it("a dotted span still parses", () => {
+    const p = extractWorkLog("dirbau nuo 7.30 iki 16.00", TODAY);
+    expect(p.start).toBe("07:30");
+    expect(p.end).toBe("16:00");
+  });
+});

@@ -744,7 +744,7 @@
     },
     "journalWindow": {
       "title": "Arbeitsjournal-Bericht",
-      "intro": "Anzahl erfasster Arbeitseinträge je Beschäftigtem über ein festes Kalenderzeitfenster. Nur Zahlen und Daten — kein Eintragstext, keine Bewertung.",
+      "intro": "Arbeitszeit und erfasste Einträge je Mitglied über ein festes Kalenderfenster – aus den eigenen Aufzeichnungen dieser Organisation. Nur Stunden, Zahlen und Daten – kein Eintragstext, keine Bewertung.",
       "windowLabel": "Berichtszeitfenster",
       "window": {
         "today": "Heute",
@@ -761,11 +761,19 @@
         "entries": "Einträge",
         "awaitingReview": "Wartet auf Prüfung",
         "confirmed": "Bestätigt",
-        "lastEntry": "Letzter Eintrag"
+        "lastEntry": "Letzter Eintrag",
+        "hours": "Stunden",
+        "confirmedHours": "Bestätigte Stunden",
+        "days": "Tage",
+        "returned": "Zurückgegeben"
       },
       "totals": "{count, plural, one {Gesamt · # Beschäftigte/r} other {Gesamt · # Beschäftigte}}",
       "basisLabel": "Grundlage",
-      "basis": "Gezählt aus Arbeitseinträgen, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation innerhalb des gewählten Zeitfensters erfasst haben. Der Prüfstatus stammt aus Bestätigungen von Führungskräften. Fehlende Einträge sind kein Beleg für fehlende Arbeit, und niemand wird hier bewertet oder benotet.",
+      "basis": "Gezählt aus Arbeitseinträgen, die Mitglieder in den Arbeitsverhältnissen dieser Organisation im gewählten Fenster erfasst haben. Stunden sind die selbst erfasste Dauer jedes Eintrags, einmal gezählt; bestätigte Stunden der Teil auf Einträgen, die eine Führungskraft freigegeben hat; Tage sind Kalendertage mit mindestens einem Eintrag mit Dauer (in der Summe Mitgliedstage). „Bestätigt“ zählt freigegebene Einträge, „zurückgegeben“ abgelehnte oder zur Überarbeitung zurückgeschickte, der Rest wartet auf Prüfung. Fehlende Einträge sind kein Beleg dafür, dass keine Arbeit stattfand, und nichts hier bewertet oder benotet jemanden.",
+      "hours": "{hours} Std.",
+      "dayUnits": "+ {days} T. in Tagen erfasst",
+      "mainly": "vor allem {activity} · {hours} Std.",
+      "withoutDuration": "{count, plural, one {# Eintrag in diesem Fenster hat keine Dauer – er wird gezählt, aber nicht in Stunden.} other {# Einträge in diesem Fenster haben keine Dauer – sie werden gezählt, aber nicht in Stunden.}}",
       "collapse": "Detailbericht ausblenden"
     }
   },

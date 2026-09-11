@@ -578,6 +578,18 @@
       "ackError": "Speichern fehlgeschlagen — bitte erneut versuchen.",
       "ackDone": "Erklärung gespeichert.",
       "openInJournal": "Im Tagebuch prüfen"
+    },
+    "org": {
+      "title": "Arbeit in Zahlen — in den Aufzeichnungen Ihrer Organisation",
+      "subtitle": "Was die für Ihre Organisation erfasste Arbeit dieser Person ergibt: Stunden, Tage, Arbeitsarten und die Fähigkeiten, die die Stunden erreichen. Nur Einträge zu den Engagements Ihrer Organisation — nichts, was anderswo erfasst wurde.",
+      "emptyNoEntries": "Für Ihre Organisation ist noch keine Arbeit erfasst. Einträge dieser Person zu Ihren Engagements sammeln sich hier.",
+      "emptyNoHours": "{count, plural, one {# Eintrag für Ihre Organisation, keiner mit Dauer.} other {# Einträge für Ihre Organisation, keiner mit Dauer.}}",
+      "evidenceStrength": "{entries, plural, one {# Eintrag} other {# Einträge}}: {confirmed} von einer Führungskraft Ihrer Organisation oder einem Kunden bestätigt · {photos} mit Fotos · {documents} aus einem Originaldokument · {selfOnly} nur die eigene Aufzeichnung der Person",
+      "skillsHint": "Stunden erreichen eine Fähigkeit nur, wenn der Eintrag mit einer Fähigkeit verknüpft ist oder die eigene zeitlich benannte Formulierung der Person diese Fähigkeit nennt. Waren mehrere beteiligt und die Formulierung unterscheidet sie nicht, wird Beteiligung gezeigt, keine erfundene Aufteilung.",
+      "unattributedHours": "{hours} h in {count, plural, one {# Eintrag} other {# Einträgen}} sind noch mit keiner Fähigkeit verknüpft. Nur die Person kann eine verknüpfen; die Stunden zählen trotzdem in den Summen oben.",
+      "provenance": "Woher die Stunden stammen: {worker} h von der Person eingegeben, {extracted} h aus ihrem Text erkannt, {corrected} h von einer Führungskraft korrigiert.",
+      "provenanceRule": "Jeder Eintrag zählt einmal; eine Stunde wird einer Fähigkeit nur zugeordnet, wenn der Eintrag mit einer einzigen Fähigkeit verknüpft ist oder die eigene Formulierung der Person diese Fähigkeit nennt.",
+      "scopeNote": "Das ist der Teil der Aufzeichnungen der Person, den Ihre Organisation sehen darf — Arbeit, die zu Ihren eigenen Engagements erfasst wurde. Es ist weder die vollständige Historie noch eine Bewertung. Die Bestätigung einer Führungskraft aus Ihrem Posteingang macht die Stunden eines Eintrags hier und im Lebenslauf der Person zu von einer Führungskraft bestätigten Stunden."
     }
   }
 }

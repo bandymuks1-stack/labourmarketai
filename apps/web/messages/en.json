@@ -744,7 +744,7 @@
     },
     "journalWindow": {
       "title": "Work journal report",
-      "intro": "Counts of recorded work entries per worker over a fixed calendar window. Counts and dates only — no entry text, no rating.",
+      "intro": "Work time and recorded entries per member over a fixed calendar window, from this organisation's own records. Hours, counts and dates only — no entry text, no rating.",
       "windowLabel": "Report window",
       "window": {
         "today": "Today",
@@ -761,11 +761,19 @@
         "entries": "Entries",
         "awaitingReview": "Awaiting review",
         "confirmed": "Confirmed",
-        "lastEntry": "Last entry"
+        "lastEntry": "Last entry",
+        "hours": "Hours",
+        "confirmedHours": "Confirmed hours",
+        "days": "Days",
+        "returned": "Returned"
       },
       "totals": "{count, plural, one {Total · # worker} other {Total · # workers}}",
       "basisLabel": "Basis",
-      "basis": "Counted from work entries recorded by workers in this organisation's engagements within the selected window. Review state comes from manager confirmations. Absence of entries is not evidence of absence of work, and nothing here rates or scores anyone.",
+      "basis": "Counted from work entries recorded by members in this organisation's engagements within the selected window. Hours are each entry's own recorded duration, counted once; confirmed hours are the part on entries a manager approved; days are calendar days with at least one timed entry (member-days in the total). Confirmed counts approved entries, returned counts rejected or sent-back ones, the rest await review. Absence of entries is not evidence of absence of work, and nothing here rates or scores anyone.",
+      "hours": "{hours} h",
+      "dayUnits": "+ {days} d recorded in days",
+      "mainly": "mainly {activity} · {hours} h",
+      "withoutDuration": "{count, plural, one {# entry in this window records no duration — it is counted, not timed.} other {# entries in this window record no duration — they are counted, not timed.}}",
       "collapse": "Hide the detailed report"
     }
   },
