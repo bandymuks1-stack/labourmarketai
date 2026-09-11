@@ -580,18 +580,35 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   const sqm = lower.match(
     /(\d+(?:[.,]\d+)?)\s*(?:m\s*2|m²|kv\.?\s*m|kvadrat|м\s*2|м²|кв\.?\s*м|квадрат)/iu,
   );
-  const meters = sqm
-    ? null
-    : lower.match(/(\d+(?:[.,]\d+)?)\s*(?:m\b(?!²)|м(?=\s|[.,!?]|$))/iu);
+  // Distance (issue #1689, registry row 20260911130000): "320 km" / "320 км".
+  // Read BEFORE plain metres — `\d+\s*m\b` never matches "km", but a
+  // kilometre reading must win over any later metre figure in the sentence.
+  const km = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:km\b|км(?=\s|[.,!?]|$))/iu);
+  const meters =
+    sqm || km
+      ? null
+      : lower.match(/(\d+(?:[.,]\d+)?)\s*(?:m\b(?!²)|м(?=\s|[.,!?]|$))/iu);
   const pieces = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:vnt\.?|štuk|шт\.?)/iu);
   const kg = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:kg\b|кг(?=\s|[.,!?]|$))/iu);
   const pkg = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:pakuo|упак)/iu);
+  // Pallets (logistics): LT "paletės / palečių / padėklai", EN "pallets",
+  // RU "паллеты / поддоны". Covers and cases have no safe textual reading —
+  // they stay picker-only rather than guessed.
+  const pallets = lower.match(
+    /(\d+(?:[.,]\d+)?)\s*(?:pal+e[tč]|pad[ėe]kl|паллет|палет|поддон)/iu,
+  );
   if (sqm) {
     const v = toNumber(sqm[1]);
     if (v !== null) quantity = { value: v, unitSlug: "square_meters" };
+  } else if (km) {
+    const v = toNumber(km[1]);
+    if (v !== null) quantity = { value: v, unitSlug: "kilometers" };
   } else if (meters) {
     const v = toNumber(meters[1]);
     if (v !== null) quantity = { value: v, unitSlug: "meters" };
+  } else if (pallets) {
+    const v = toNumber(pallets[1]);
+    if (v !== null) quantity = { value: v, unitSlug: "pallets" };
   } else if (pieces) {
     const v = toNumber(pieces[1]);
     if (v !== null) quantity = { value: v, unitSlug: "pieces" };

@@ -58,6 +58,27 @@ import type { EditEntryMetricRow } from "@/lib/journal/edit-entry";
 export const WORK_TIME_UNIT_SLUGS = ["hours", "minutes", "days"] as const;
 export type WorkTimeUnit = (typeof WORK_TIME_UNIT_SLUGS)[number];
 
+/** Units that mean a number is OUTPUT — what the work produced, in the unit
+ *  it comes in. Mirrors the platform-scoped NON-time rows of
+ *  `productivity_units` (0013 area/length/count/mass, 0017, and
+ *  20260911130000 kilometers / pallets / covers / cases). The ONE list both
+ *  editors' quantity pickers offer; the write core still validates every slug
+ *  against the live registry, so a row missing on a database is refused by
+ *  name, never silently dropped. Output is never converted, never summed
+ *  across units and never work time (issue #1689). */
+export const PLATFORM_OUTPUT_UNIT_SLUGS = [
+  "square_meters",
+  "meters",
+  "kilometers",
+  "pieces",
+  "kilograms",
+  "packages",
+  "pallets",
+  "covers",
+  "cases",
+] as const;
+export type PlatformOutputUnit = (typeof PLATFORM_OUTPUT_UNIT_SLUGS)[number];
+
 const TIME_UNITS = new Set<string>(WORK_TIME_UNIT_SLUGS);
 const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
 const INDEX_RX = /^[1-9][0-9]*$/;

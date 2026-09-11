@@ -8,5 +8,9 @@
   "kilograms": "кг",
   "packages": "упаковки",
   "box_per_day": "упак./день",
-  "square_meters_per_day": "м²/день"
+  "square_meters_per_day": "м²/день",
+  "kilometers": "км",
+  "pallets": "паллеты",
+  "covers": "гости",
+  "cases": "случаи"
 }

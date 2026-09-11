@@ -64,6 +64,7 @@ import {
 } from "@/lib/journal/photo-upload";
 import { compressImageFile } from "@/lib/browser/image-compress";
 import { formatDuration } from "@/lib/journal/format-duration";
+import { PLATFORM_OUTPUT_UNIT_SLUGS, WORK_TIME_UNIT_SLUGS } from "@/lib/journal/work-time";
 import {
   completeTask,
   errorTask,
@@ -125,16 +126,10 @@ export type ComposerNewSkillSuggestion = {
 };
 type NewSkillAddStatus = "idle" | "adding" | "added" | "error";
 
-const UNIT_OPTIONS = [
-  "hours",
-  "minutes",
-  "days",
-  "square_meters",
-  "meters",
-  "pieces",
-  "kilograms",
-  "packages",
-] as const;
+/** The quantity picker: time units first (a confirmed quantity can still be
+ *  a duration when no fragment carries it), then every platform OUTPUT unit
+ *  the registry knows — the ONE list shared with the compact editor. */
+const UNIT_OPTIONS = [...WORK_TIME_UNIT_SLUGS, ...PLATFORM_OUTPUT_UNIT_SLUGS] as const;
 
 type Stage = "compose" | "review";
 

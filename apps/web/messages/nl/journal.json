@@ -615,5 +615,25 @@
       "provenanceRule": "Elke invoer telt één keer; een uur wordt alleen aan een vaardigheid toegerekend als de invoer aan één vaardigheid is gekoppeld, of als de eigen zin van de persoon die vaardigheid noemt.",
       "scopeNote": "Dit is het deel van de registratie van de persoon dat uw organisatie mag zien — werk dat voor uw eigen samenwerkingen is vastgelegd. Het is niet de volledige geschiedenis en geen beoordeling. De bevestiging van een leidinggevende uit uw inbox maakt de uren van een invoer hier en op het cv van de persoon door een leidinggevende bevestigde uren."
     }
+  },
+  "verification": {
+    "state": {
+      "self_reported": "Uw eigen registratie — nog geen bevestiging van een manager",
+      "verifier_not_identified": "Nog niet aangegeven voor wie dit werk is gedaan",
+      "verifier_available": "Uw manager heeft werkbevestiging nog niet aangezet",
+      "verification_pending": "Naar uw manager gestuurd — nog niet bevestigd",
+      "verified": "Bevestigd door uw manager",
+      "self_confirmed": "Door uzelf bevestigd — niet door een manager",
+      "returned": "Teruggestuurd voor wijziging",
+      "disputed": "Betwist",
+      "not_applicable": "Hier staat niemand boven u"
+    },
+    "action": {
+      "await_verifier": "Niets te doen — het staat in iemands wachtrij",
+      "ask_employer_to_enable_confirmation": "Vraag uw manager om bevestiging aan te zetten",
+      "identify_verifier": "Geef aan voor wie u dit deed",
+      "respond_to_decision": "Lees het besluit en reageer",
+      "none": "Er ontbreekt niets"
+    }
   }
 }

@@ -906,7 +906,14 @@ describe("NO new DB migration in this PR", () => {
     // 278 -> 279: `candidate` added to organization_people.relationship_kind
     //   (owner approval 2026-09-10). ONE additive CHECK widening — a strict
     //   superset, 0 rows in the table, no policy/grant/function touched.
-expect(count).toBeLessThanOrEqual(279);
+    // 279 -> 280: four platform rows in the `productivity_units` registry —
+    //   kilometers / pallets / covers / cases
+    //   (20260911130000_productivity_units_universal_v1, paired guarded
+    //   rollback; issue #1689). INSERT … ON CONFLICT DO NOTHING only: no
+    //   table, column, policy, grant or function touched. GREEN class;
+    //   self-applied via MCP under the conditional prod-apply rule.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
+expect(count).toBeLessThanOrEqual(280);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
