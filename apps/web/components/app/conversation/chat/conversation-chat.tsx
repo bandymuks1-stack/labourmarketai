@@ -5207,7 +5207,7 @@ export function ConversationChat({
           });
         },
         skillGap: () => runWorkflow(() => runSkillGap()),
-        recentJournal: () => runWorkflow(() => runRecentJournal()),
+        recentJournal: () => runWorkflow(() => runRecentJournal(text)),
         figures: () => runWorkflow(() => runFigures()),
         openProject: () => runWorkflow(() => runOpenProject(text)),
         // G8: the typed sentence runs the SAME functions the `projects` and
