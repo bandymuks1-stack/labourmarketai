@@ -473,6 +473,29 @@
     "conflictNote": "This entry was already updated in another tab or session. If you want to keep the changes typed here, copy your text first — reloading the page will discard them and open the latest version for editing.",
     "conflictReload": "Reload page"
   },
+  "moduleFields": {
+    "title": "More about this work",
+    "hint": "Optional. Each field is saved as a fact in your own words — nothing is inferred or scored.",
+    "modules": {
+      "supervision": "Supervision and learning",
+      "site_zone": "Place and crew",
+      "materials_tools": "Materials and tools",
+      "weather_safety": "Conditions and safety"
+    },
+    "fields": {
+      "supervision_level": "Who supervised, and how",
+      "competency_practiced": "What you practised",
+      "learning_outcome": "What you learned",
+      "work_zone": "Work zone",
+      "crew": "Crew",
+      "materials": "Materials",
+      "tools": "Tools",
+      "equipment": "Equipment",
+      "weather": "Weather",
+      "safety_observation": "Safety observation",
+      "delay_blocker": "What held things up"
+    }
+  },
   "errors": {
     "sessionExpired": "Your session has expired. Please sign in again.",
     "noWorkerProfile": "Worker profile not found. Open your account settings and enable the worker role.",
@@ -498,7 +521,8 @@
     "cannotSupersedeDeleted": "A removed entry cannot be edited.",
     "cannotRestoreSuperseded": "This entry cannot be restored — a newer version has already replaced it.",
     "cannotRestoreCorrectionConflict": "This entry cannot be restored — another live corrected version already exists for the same work.",
-    "metricsInsertFailed": "The entry was not saved completely: {reason}. The entry was discarded — please try again."
+    "metricsInsertFailed": "The entry was not saved completely: {reason}. The entry was discarded — please try again.",
+    "moduleFieldInvalid": "These details do not belong to this kind of engagement: {fields}. Nothing was saved — remove them and try again."
   },
   "intelligence": {
     "title": "Work in numbers",

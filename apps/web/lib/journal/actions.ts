@@ -11,11 +11,13 @@ import {
   createJournalEntryCore,
   parseFragments,
   parseRejectedSlugs,
+  resolveModuleMetricRows,
   runSkillPipeline,
   type CreateJournalEntryResult,
   type ParsedFragmentInput,
   type RpcMetricRow,
 } from "@/lib/journal/journal-write-core";
+import { MODULE_METRICS_FIELD } from "@/lib/journal/journal-module-fields";
 
 // The write implementation and its whole vocabulary moved to
 // `journal-write-core.ts` (owner-approved transport extraction, 2026-08-29
@@ -228,16 +230,31 @@ export async function supersedeJournalEntry(
   const hasStructured =
     quantity !== null || workDirection !== "" || fragments.length > 0;
 
-  const metrics = buildMetricsForSave({
-    workDirection,
-    siteName,
-    quantity,
-    unitSlug,
-    workDate,
-    institutionName,
-    topic,
-    fragments,
-  });
+  // Owner §12 — module fields ride the supersede exactly as the create:
+  // accepted by the engagement's own composition, one metric row each. An
+  // edit that re-sends the preloaded values keeps them; a refused slug
+  // fails the save before any write, with every edit still in the form.
+  const moduleRows = await resolveModuleMetricRows(
+    supabase,
+    t,
+    engagementId,
+    String(formData.get(MODULE_METRICS_FIELD) ?? ""),
+  );
+  if (!moduleRows.ok) return moduleRows;
+
+  const metrics = [
+    ...buildMetricsForSave({
+      workDirection,
+      siteName,
+      quantity,
+      unitSlug,
+      workDate,
+      institutionName,
+      topic,
+      fragments,
+    }),
+    ...moduleRows.rows,
+  ];
 
   // Slugs the worker EXPLICITLY selected in this save (compact-editor rows
   // only — see ParsedFragmentInput.selected). Slug-shaped values only — the

@@ -41,6 +41,8 @@ import type {
   JournalEngagement,
   JournalSkill,
 } from "@/components/app/journal-entry-composer";
+import { JournalModuleFields } from "@/components/app/journal-module-fields";
+import type { ModuleFieldValues } from "@/lib/journal/journal-module-fields";
 
 /**
  * COMPACT edit surface for an existing journal entry (journal compact edit
@@ -133,6 +135,16 @@ export function JournalEntryCompactEditor({
     entry.institutionName ?? "",
   );
   const [topic, setTopic] = useState(entry.topic ?? "");
+  // Owner §12 — archetype module fields, preloaded from the entry's own rows
+  // so an untouched edit re-sends them. Which fields RENDER follows the
+  // selected engagement's relationship; values typed under one context stay
+  // in state if the person switches and back, and the server accepts only
+  // what the saved engagement's composition allows.
+  const [moduleFields, setModuleFields] = useState<ModuleFieldValues>(
+    entry.moduleFields ?? {},
+  );
+  const selectedRelationship =
+    engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
 
   // Addition flow (small inline autocomplete over ACTIVE taxonomy skills via
   // the existing `searchTaxonomySkills` server action + free-text fallback).
@@ -174,6 +186,7 @@ export function JournalEntryCompactEditor({
     siteName,
     institutionName,
     topic,
+    moduleFields,
   };
   // Dirty = the ONE save payload differs from the baseline taken at open (or
   // at the last successful save). Never silently reset.
@@ -196,6 +209,7 @@ export function JournalEntryCompactEditor({
       siteName: entry.siteName ?? "",
       institutionName: entry.institutionName ?? "",
       topic: entry.topic ?? "",
+      moduleFields: entry.moduleFields ?? {},
     }),
   );
   const dirty = compactStateFingerprint(saveInput) !== baseline;
@@ -692,6 +706,17 @@ export function JournalEntryCompactEditor({
               onChange={(e) => setTopic(e.target.value)}
             />
           </label>
+          {/* Owner §12 — the relationship's own module fields (a placement's
+              supervision, a volunteer's field project); nothing for a
+              context whose composition adds no module. */}
+          <div className="sm:col-span-2">
+            <JournalModuleFields
+              relationshipSlug={selectedRelationship}
+              values={moduleFields}
+              onChange={setModuleFields}
+              testId="journal-compact-module-fields"
+            />
+          </div>
         </div>
       </details>
 
