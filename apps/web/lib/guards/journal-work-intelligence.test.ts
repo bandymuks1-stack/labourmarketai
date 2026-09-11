@@ -79,7 +79,8 @@ describe("2 · the model is honest by construction", () => {
     const typeBlock = model.slice(model.indexOf("export type WorkIntelligence = {"));
     const fieldNames = [...typeBlock.matchAll(/readonly (\w+):/g)].map((m) => m[1]!.toLowerCase());
     for (const f of fieldNames) {
-      expect(f, f).not.toMatch(/(?:score|rating|rank|ovr)|(?:strength)$/);
+      expect(f, f).not.toMatch(/score|rating|rank|ovr/);
+      expect(f, f).not.toMatch(/strength$/);
     }
   });
   it("days-unit durations are kept apart from hours in every period row", () => {
