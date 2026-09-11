@@ -34,6 +34,7 @@ import {
   LT_MINUTE_FORMS,
 } from "@/lib/i18n/lt-plural";
 import { formatDuration } from "@/lib/journal/format-duration";
+import { PLATFORM_OUTPUT_UNIT_SLUGS } from "@/lib/journal/work-time";
 import { recordEvent } from "@/lib/telemetry/task";
 import { cn } from "@/lib/utils";
 import type {
@@ -653,15 +654,10 @@ export function JournalEntryCompactEditor({
                 <DarkListbox
                   value={quantityUnit}
                   onChange={setQuantityUnit}
-                  options={(
-                    [
-                      "square_meters",
-                      "meters",
-                      "pieces",
-                      "kilograms",
-                      "packages",
-                    ] as const
-                  ).map((u) => ({ value: u, label: tUnit(u) }))}
+                  options={PLATFORM_OUTPUT_UNIT_SLUGS.map((u) => ({
+                    value: u,
+                    label: tUnit(u),
+                  }))}
                   ariaLabel={t("compactEdit.quantityLabel")}
                 />
               </span>

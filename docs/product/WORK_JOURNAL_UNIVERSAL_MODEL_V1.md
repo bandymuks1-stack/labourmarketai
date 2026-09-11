@@ -15,7 +15,7 @@ skill-hours. `ESCO/ISCO → OCCUPATION → ARCHETYPE(S) → UNIVERSAL RECORD →
 
 | Structure | Finding | Consequence |
 |---|---|---|
-| `journal_entries` + `journal_entry_metrics` | `metric_slug` is free TEXT (no CHECK, no FK); `value_numeric` / `value_text` / `unit_slug → productivity_units` (10 units in 5 categories) / `source ∈ worker_input, ai_extracted, manager_corrected` | **The universal record is already extensible.** Every archetype field is a metric slug; no column, no table, no migration for fields. New UNITS (km, covers, cases) need registry rows (§10 slug registry) |
+| `journal_entries` + `journal_entry_metrics` | `metric_slug` is free TEXT (no CHECK, no FK); `value_numeric` / `value_text` / `unit_slug → productivity_units` (14 units in 5 categories since 20260911130000) / `source ∈ worker_input, ai_extracted, manager_corrected` | **The universal record is already extensible.** Every archetype field is a metric slug; no column, no table, no migration for fields. New UNITS are registry rows (§10 slug registry): km / pallets / covers / cases LIVE 2026-09-11 |
 | `esco_occupations` | 3,039 active, **all** with a 4-digit ISCO-08 code; 42 of 43 sub-major groups populated (63 has no ESCO rows) | ISCO group is the resolution key; the map needs ≈50 rows, not 3,039 |
 | `esco_skills`, `esco_occupation_skills`, `esco_labels` | 13,939 skills (10,715 competence / 3,219 knowledge), 126,051 relations, 1.05 M labels / 28 locales | Semantic layer exists; slug↔ESCO bridge for the platform's 161 skills is EMPTY and owner-gated (#1355) — ESCO stays interoperability, never ranking |
 | Canonical work-time rule `work-time.ts` (+ SQL mirror) | fragments win, entry quantity fallback, never summed; `days` never hours; provenance per line | Time is already first-class and counted once |
@@ -143,7 +143,16 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    bridge (#1355) before `archetypesForIsco` has a live resolver for the platform's
    professions; labels for the remaining modules land with that resolver (guarded: every
    relationship-reachable slug is labelled in every active locale).
-2. Units: add registry rows for km / covers / cases / pallets (`productivity_units`, additive).
+2. ~~Units: add registry rows for km / covers / cases / pallets~~ — LIVE 2026-09-11
+   (`20260911130000_productivity_units_universal_v1`, four additive platform rows, guarded
+   rollback). One list in code (`PLATFORM_OUTPUT_UNIT_SLUGS`, `work-time.ts`) feeds both
+   editors' quantity pickers; the recognizer reads "320 km" / "36 palečių" the way it read
+   m²; the chat and MCP intake write the stated output as the entry-level `quantity` in its
+   recorded unit (machine provenance) beside the fragments' time — never where the slot
+   already carries a span's minutes, never as time. Covers and cases are picker-only: no
+   safe prose reading exists, so nothing is guessed. Work intelligence shows each unit on
+   its own line, unconverted. Still extension points: `orders`, `contacts`, `tonnes` and
+   org-scoped units — seeded only when a surface actually records them.
 3. ESCO occupation → archetype resolution surface (`iscoGroupForEscoOccupation` exists); the
    platform's own 49 professions map through their ESCO occupation once #1355 (bridge) is
    owner-approved.

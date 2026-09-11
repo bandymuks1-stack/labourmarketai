@@ -30,10 +30,22 @@
  * fragment the way the composer allows, so the rows must not claim to be
  * `worker_input`. `selected` stays false: confirming a time parse never
  * declares a skill (P1-A).
+ *
+ * ── OUTPUT STATED IN THE SAME SENTENCE (registry 20260911130000) ──────────
+ * "Nuvažiavau 320 km, 8 val." states two facts: the time AND what the work
+ * produced. The composer records the output as the entry-level `quantity`
+ * metric in its recorded unit (km, pallets, m², …); the chat and MCP intake
+ * recorded only the time, so a driver's kilometres and a warehouse worker's
+ * pallets were lost the moment they were said. `intakeOutputFields` reads the
+ * same recognizer's quantity and sends it the same way — ONLY while the
+ * entry-level quantity slot is not already carrying the day's minutes (the
+ * span case above): time wins that slot, the canonical work-time rule owns
+ * it, and an output is never written where it would read as a duration.
  */
 
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
+import { isWorkTimeUnit } from "@/lib/journal/work-time";
 
 export type IntakeWorkTime = {
   /** The `fragments_json` FormData value, or null when no fragment carries a
@@ -112,13 +124,38 @@ export function intakeWorkTimeFields(
   const today = new Date().toISOString().slice(0, 10);
   const anchor = /^\d{4}-\d{2}-\d{2}$/.test(String(workDate ?? "")) ? String(workDate) : today;
   const t = deriveIntakeWorkTime(notes, anchor);
-  if (t.fragmentsJson) return { fragments_json: t.fragmentsJson };
+  if (t.fragmentsJson) {
+    return { fragments_json: t.fragmentsJson, ...intakeOutputFields(notes) };
+  }
   if (t.quantityMinutes !== null) {
+    // The quantity slot carries the day's minutes; a stated output has no
+    // second slot on the entry and is NOT written as if it were time.
     return {
       quantity: String(t.quantityMinutes),
       unit_slug: "minutes",
       quantity_source: "ai_extracted",
     };
   }
-  return {};
+  return intakeOutputFields(notes);
+}
+
+/**
+ * The stated OUTPUT — "320 km", "12 palečių", "35 m²" — as the entry-level
+ * `quantity` FormData fields in its recorded unit, with machine provenance.
+ * The same recognizer reading the composer shows for confirmation; the write
+ * core still validates the unit against the live `productivity_units`
+ * registry and refuses an unknown one by name. Never a time unit: a duration
+ * is time, handled by `deriveIntakeWorkTime`. Nothing stated → nothing.
+ */
+export function intakeOutputFields(notes: string): Record<string, string> {
+  const text = String(notes ?? "").trim();
+  if (!text) return {};
+  const q = extractJournalSuggestions(text).quantity;
+  if (!q || !Number.isFinite(q.value) || q.value <= 0) return {};
+  if (isWorkTimeUnit(q.unitSlug)) return {};
+  return {
+    quantity: String(q.value),
+    unit_slug: q.unitSlug,
+    quantity_source: "ai_extracted",
+  };
 }

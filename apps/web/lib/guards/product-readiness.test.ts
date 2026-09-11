@@ -2491,7 +2491,14 @@ describe("no migration files added by this sprint", () => {
     // 278 -> 279: `candidate` added to organization_people.relationship_kind
     //   (owner approval 2026-09-10). ONE additive CHECK widening — a strict
     //   superset, 0 rows in the table, no policy/grant/function touched.
-const SPRINT_BASELINE = 279;
+    // 279 -> 280: four platform rows in the `productivity_units` registry —
+    //   kilometers / pallets / covers / cases
+    //   (20260911130000_productivity_units_universal_v1, paired guarded
+    //   rollback; issue #1689). INSERT … ON CONFLICT DO NOTHING only: no
+    //   table, column, policy, grant or function touched. GREEN class;
+    //   self-applied via MCP under the conditional prod-apply rule.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
+const SPRINT_BASELINE = 280;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
