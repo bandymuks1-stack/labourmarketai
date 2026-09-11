@@ -77,7 +77,16 @@ describe("the intent registry is the enumerable routing contract", () => {
     // no id here is unanswerable by both routers, permanently. The id is the
     // seam; the answer itself is derived from the active context and the
     // workspace's real state (`lib/conversation/capability-answer.ts`).
-    expect(entries.length).toBe(70);
+    // 70 -> 74: the work-intelligence doors (issue #1689, re-audit
+    // 2026-09-11, owner chat lines 2–5 and 7). "Kiek programavau?" scored 0,
+    // "Kur naudojau programavimo įgūdį?" and "Kokius įgūdžius naudoju
+    // daugiausia?" reached `profile` (the completeness answer), "Kokia
+    // veikla užima daugiausia laiko?" and "Kas patvirtinta?" scored 0 —
+    // while every figure they ask for already sat in the work-in-numbers
+    // model. Four read intents (journal-skill, journal-skills-top,
+    // journal-activities-top, journal-confirmed), ONE handler over the ONE
+    // model.
+    expect(entries.length).toBe(74);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

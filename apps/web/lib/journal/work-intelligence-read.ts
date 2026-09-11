@@ -175,7 +175,9 @@ export async function loadWorkIntelligence(
  * one core worker read; a person without a worker profile, or any failed
  * read, yields `null` (UNKNOWN), never an empty model that reads as "no work".
  */
-export async function loadOwnWorkIntelligence(): Promise<WorkIntelligence | null> {
+export async function loadOwnWorkIntelligence(
+  opts: { focus?: WorkPeriodKey } = {},
+): Promise<WorkIntelligence | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -184,5 +186,5 @@ export async function loadOwnWorkIntelligence(): Promise<WorkIntelligence | null
   const caller: DomainCaller = { supabase, userId: user.id };
   const worker = await readWorkerCoreRow(caller);
   if (!worker.ok || !worker.value) return null;
-  return loadWorkIntelligence(caller, worker.value.id);
+  return loadWorkIntelligence(caller, worker.value.id, opts);
 }
