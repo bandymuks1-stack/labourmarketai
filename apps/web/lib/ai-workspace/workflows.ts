@@ -13,6 +13,7 @@ import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
 import { loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
 import { isWorkTimeUnit, workTimeHours } from "@/lib/journal/work-time";
 import {
   DOCUMENT_GAP_LINE_CAP,
@@ -496,6 +497,14 @@ export async function runLearningCompass(): Promise<WorkflowResult> {
 /** "Recent" for the journal answer: the last two weeks INCLUDING today. */
 const RECENT_JOURNAL_DAYS = 14;
 
+/** Inclusive UTC calendar-day window the section's period keys describe —
+ *  the SAME numbers as `PERIOD_DAYS` in work-intelligence.ts (7 / 30 / 365). */
+const PERIOD_WINDOW_DAYS: Record<Exclude<JournalPeriodPhrase, "all" | "today" | "yesterday">, number> = {
+  week: 7,
+  month: 30,
+  year: 365,
+};
+
 /**
  * The person's most recent real journal entries, from the canonical Time Engine
  * projection (the same rows the calendar shows). No second journal read.
@@ -508,17 +517,50 @@ const RECENT_JOURNAL_DAYS = 14;
  * `RECENT_JOURNAL_DAYS - 1` days earlier, and the answer carries the hours
  * those entries add up to — each entry's own canonical duration label, the
  * same one the calendar shows, summed once per entry.
+ *
+ * THE WINDOW IS THE ONE THE PERSON ASKED ABOUT (issue #1689, outcome 1 —
+ * production 2026-09-11: "kiek valandų dirbau šiandien?" answered "Iš viso
+ * per 13 d.: 27 val." while the section showed today as 20 h). When the
+ * sentence names a period, the figure comes from `loadOwnWorkIntelligence`'s
+ * `periods` — the SAME model and the SAME number the work-in-numbers section
+ * shows for that tab (today / 7 / 30 / 365 days / all, confirmed hours told
+ * apart) — and the entry lines are read over that window. "Yesterday" is a
+ * single-day window the section has no tab for; it is summed the recent way.
+ * No period word → the recent window, as before. Every answer names its
+ * window, so nothing is silently reinterpreted.
  */
-export async function runRecentJournal(): Promise<WorkflowResult> {
+export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const locale = await getLocale();
   const todayIso = new Date().toISOString().slice(0, 10);
-  const range = { start: isoDayMinus(todayIso, RECENT_JOURNAL_DAYS - 1), end: todayIso };
+  const period = parseJournalPeriodPhrase(text);
+  const range =
+    period === null
+      ? { start: isoDayMinus(todayIso, RECENT_JOURNAL_DAYS - 1), end: todayIso }
+      : period === "today"
+        ? { start: todayIso, end: todayIso }
+        : period === "yesterday"
+          ? { start: isoDayMinus(todayIso, 1), end: isoDayMinus(todayIso, 1) }
+          : period === "all"
+            ? // The lines are bounded to the year; the FIGURE below is all-time.
+              { start: isoDayMinus(todayIso, PERIOD_WINDOW_DAYS.year - 1), end: todayIso }
+            : { start: isoDayMinus(todayIso, PERIOD_WINDOW_DAYS[period] - 1), end: todayIso };
   const planning = await getPlanning({ rangeStart: range.start, rangeEnd: range.end });
   if (planning.status !== "ok") return blocked(t("blockedNoPlan"), t("whyNoPlan"));
 
+  // The planning read also returns entries CREATED in the range whose work
+  // day lies outside it (D-13 keeps them for the calendar, which places each
+  // on its own day). An answer about a WINDOW keeps only the entries worked
+  // inside it — measured 2026-09-11: "today" listed yesterday's entry, typed
+  // today, under a figure that (correctly) did not count it.
   const journalItems = planning.items
-    .filter((it) => it.sourceType === "journal" && it.startDate !== null)
+    .filter(
+      (it) =>
+        it.sourceType === "journal" &&
+        it.startDate !== null &&
+        it.startDate >= range.start &&
+        it.startDate <= range.end,
+    )
     .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1));
   const entries = journalItems.slice(0, ANSWER_LIMIT);
 
@@ -533,11 +575,27 @@ export async function runRecentJournal(): Promise<WorkflowResult> {
   }
   windowHours = Math.round(windowHours * 100) / 100;
 
-  if (entries.length === 0) {
+  const periodLabel = period === null ? null : t(`journalPeriod_${period}`);
+  const why =
+    periodLabel === null
+      ? t("whyJournalWindow", { days: rangeDays(range.start, range.end) })
+      : t("whyJournalPeriod", { period: periodLabel });
+
+  // A named section period: the section's own figure for that tab.
+  const sectionPeriod =
+    period !== null && period !== "yesterday"
+      ? ((await loadOwnWorkIntelligence().catch(() => null))?.periods.find((p) => p.key === period) ?? null)
+      : null;
+  const periodEntries = sectionPeriod?.entries ?? journalItems.length;
+
+  if (periodEntries === 0 && entries.length === 0) {
     return {
       kind: "answer",
-      text: t("journalEmpty", { days: rangeDays(range.start, range.end) }),
-      explanation: { why: t("whyJournalWindow", { days: rangeDays(range.start, range.end) }) },
+      text:
+        periodLabel === null
+          ? t("journalEmpty", { days: rangeDays(range.start, range.end) })
+          : t("journalEmptyPeriod", { period: periodLabel }),
+      explanation: { why },
       chips: [{ id: "logwork", label: t("chipLogWork") }],
     };
   }
@@ -554,19 +612,44 @@ export async function runRecentJournal(): Promise<WorkflowResult> {
     }),
   );
 
+  const dayUnits = sectionPeriod?.dayUnits ?? windowDayUnits;
+  const dayUnitsLine = dayUnits > 0 ? " " + t("journalDayUnits", { days: fmtHours(dayUnits, locale) }) : "";
   const hoursLine =
-    windowHours > 0 || windowDayUnits > 0
-      ? t("journalHoursTotal", {
-          hours: fmtHours(windowHours, locale),
-          days: rangeDays(range.start, range.end),
-          entries: journalItems.length,
-        }) + (windowDayUnits > 0 ? " " + t("journalDayUnits", { days: fmtHours(windowDayUnits, locale) }) : "")
-      : t("journalHoursNone", { entries: journalItems.length });
+    periodLabel === null
+      ? windowHours > 0 || windowDayUnits > 0
+        ? t("journalHoursTotal", {
+            hours: fmtHours(windowHours, locale),
+            days: rangeDays(range.start, range.end),
+            entries: journalItems.length,
+          }) + dayUnitsLine
+        : t("journalHoursNone", { entries: journalItems.length })
+      : sectionPeriod !== null
+        ? sectionPeriod.hours > 0 || sectionPeriod.dayUnits > 0
+          ? t("journalHoursPeriod", {
+              period: periodLabel,
+              hours: fmtHours(sectionPeriod.hours, locale),
+              confirmed: fmtHours(sectionPeriod.confirmedHours, locale),
+              entries: sectionPeriod.entries,
+            }) + dayUnitsLine
+          : t("journalHoursNonePeriod", { period: periodLabel, entries: sectionPeriod.entries })
+        : windowHours > 0 || windowDayUnits > 0
+          ? t("journalHoursPeriodPlain", {
+              period: periodLabel,
+              hours: fmtHours(windowHours, locale),
+              entries: journalItems.length,
+            }) + dayUnitsLine
+          : t("journalHoursNonePeriod", { period: periodLabel, entries: journalItems.length });
+
+  // A period question is answered with its FIGURE first, then the entries.
+  const body =
+    periodLabel === null
+      ? [t("journalIntro", { count: entries.length }), ...lines, hoursLine]
+      : [hoursLine, ...(lines.length > 0 ? [t("journalPeriodLines"), ...lines] : [])];
 
   return {
     kind: "answer",
-    text: [t("journalIntro", { count: entries.length }), ...lines, hoursLine].join("\n"),
-    explanation: { why: t("whyJournalWindow", { days: rangeDays(range.start, range.end) }) },
+    text: body.join("\n"),
+    explanation: { why },
     chips: [
       { id: "logwork", label: t("chipLogWork") },
       { id: "journal-numbers", label: t("chipJournalNumbers") },
