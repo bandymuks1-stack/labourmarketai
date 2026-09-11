@@ -26,14 +26,19 @@ const metric = (
 const entry = (
   id: string,
   day: string,
-  o: Partial<WorkIntelligenceEntry> & { hours?: number; frags?: [number, string | null][] } = {},
+  o: Partial<WorkIntelligenceEntry> & {
+    hours?: number;
+    /** [hours, activity label, skill slugs the link was recognised ON this fragment] */
+    frags?: [number, string | null, string[]?][];
+  } = {},
 ): WorkIntelligenceEntry => {
   const metrics = [metric("work_date", { t: day })];
   if (o.hours !== undefined) metrics.push(metric("quantity", { n: o.hours, unit: "hours" }));
-  (o.frags ?? []).forEach(([h, activity], i) => {
+  (o.frags ?? []).forEach(([h, activity, fragmentSkills], i) => {
     metrics.push(metric("parsed_fragment", { t: `${i + 1}|phrase ${i + 1}` }));
     metrics.push(metric("fragment_time", { n: h, unit: "hours", t: String(i + 1) }));
     if (activity) metrics.push(metric("fragment_activity", { t: `${i + 1}|${activity}` }));
+    for (const slug of fragmentSkills ?? []) metrics.push(metric("fragment_skill", { t: `${i + 1}|${slug}` }));
   });
   return {
     entryId: id,
@@ -162,6 +167,90 @@ describe("deriveWorkIntelligence — totals never double count", () => {
       entries: [entry("o", "2026-09-10", { frags: [[6, "tiler"], [2, "tiler"]], linkedSkillIds: ["s-tiling"] })],
     });
     expect(one.skills.find((s) => s.slug === "tiling")!.attributedHours).toBe(8);
+  });
+
+  it("FRAGMENT EVIDENCE: '6 h tiles, 2 h plaster' with both skills linked ON their fragments → 6 h tiling, 2 h plastering, nothing shared", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("f", "2026-09-10", {
+          frags: [[6, "tiler", ["tiling"]], [2, "plasterer", ["plastering"]]],
+          linkedSkillIds: ["s-tiling", "s-plaster"],
+          reviewResult: "approved",
+        }),
+      ],
+    });
+    expect(wi.totalHours).toBe(8);
+    expect(wi.attributedHours).toBe(8);
+    expect(wi.sharedHours).toBe(0);
+    expect(wi.sharedEntries).toBe(0);
+    expect(wi.multiActivityHours).toBe(0);
+    const tiling = wi.skills.find((s) => s.slug === "tiling")!;
+    const plaster = wi.skills.find((s) => s.slug === "plastering")!;
+    expect([tiling.attributedHours, tiling.confirmedHours, tiling.sharedHours]).toEqual([6, 6, 0]);
+    expect([plaster.attributedHours, plaster.confirmedHours, plaster.sharedHours]).toEqual([2, 2, 0]);
+    expect(tiling.share).toBe(0.75);
+    expect(plaster.share).toBe(0.25);
+    expect(wi.attributedHours + wi.sharedHours + wi.multiActivityHours + wi.unattributedHours).toBe(wi.totalHours);
+  });
+
+  it("FRAGMENT EVIDENCE: one linked skill on one of two fragments → that fragment attributed, the other stays multi-activity", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("g", "2026-09-10", {
+          frags: [[6, "tiler", ["tiling"]], [2, "Sienų glaistymas"]],
+          linkedSkillIds: ["s-tiling"],
+        }),
+      ],
+    });
+    expect(wi.totalHours).toBe(8);
+    const tiling = wi.skills.find((s) => s.slug === "tiling")!;
+    expect(tiling.attributedHours).toBe(6);
+    expect(tiling.sharedHours).toBe(2);
+    expect(wi.attributedHours).toBe(6);
+    expect(wi.multiActivityHours).toBe(2);
+    expect(wi.multiActivityEntries).toBe(1);
+    expect(wi.attributedHours + wi.sharedHours + wi.multiActivityHours + wi.unattributedHours).toBe(wi.totalHours);
+  });
+
+  it("FRAGMENT EVIDENCE never guesses: two linked skills on the SAME fragment, an unlinked skill's row, or an entry-level duration all stay involvement", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        // both skills recognised on fragment 1 → nobody can claim it
+        entry("h1", "2026-09-10", {
+          frags: [[5, "tiler", ["tiling", "plastering"]]],
+          linkedSkillIds: ["s-tiling", "s-plaster"],
+        }),
+        // the row names painting, which the worker UNLINKED → inert
+        entry("h2", "2026-09-09", {
+          frags: [[3, "painter", ["painting"]], [1, "tiler", ["tiling"]]],
+          linkedSkillIds: ["s-tiling", "s-plaster"],
+        }),
+        // entry-level duration, two skills, a stray row → the row has no fragment to sit on
+        entry("h3", "2026-09-08", {
+          hours: 4,
+          linkedSkillIds: ["s-tiling", "s-plaster"],
+          metrics: [metric("fragment_skill", { t: "1|tiling" })],
+        }),
+      ],
+    });
+    expect(wi.totalHours).toBe(13);
+    const tiling = wi.skills.find((s) => s.slug === "tiling")!;
+    const plaster = wi.skills.find((s) => s.slug === "plastering")!;
+    // only h2's fragment 2 (1 h, tiling alone) is attributable
+    expect(tiling.attributedHours).toBe(1);
+    expect(plaster.attributedHours).toBe(0);
+    expect(wi.attributedHours).toBe(1);
+    expect(wi.sharedHours).toBe(12);
+    expect(wi.sharedEntries).toBe(3);
+    expect(tiling.sharedHours).toBe(12);
+    expect(plaster.sharedHours).toBe(12);
+    expect(wi.attributedHours + wi.sharedHours + wi.multiActivityHours + wi.unattributedHours).toBe(wi.totalHours);
   });
 
   it("a non-time quantity is not time, and counts as an entry without duration", () => {

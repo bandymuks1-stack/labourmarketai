@@ -17,6 +17,12 @@ import {
 } from "@/lib/journal/journal-recognition";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
+import {
+  FRAGMENT_SKILL_METRIC_SLUG,
+  formatFragmentSkillValue,
+  mapRecognitionToPersistedFragments,
+  type PersistedFragment,
+} from "@/lib/journal/fragment-skill-evidence";
 import { normalizeSkillLabel } from "@/lib/skills/candidate-skills";
 import { normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
 import { foldText } from "@/lib/structuring/normalize";
@@ -218,6 +224,10 @@ type OwnEntryDerivation = {
   workerId: string;
   entryId: string;
   recognition: JournalRecognitionResult;
+  /** The entry's persisted phrases + existing `fragment_skill` values, so a
+   *  confirmation can record WHICH phrase the confirmed skill sits on. */
+  persistedFragments: readonly PersistedFragment[];
+  existingFragmentSkillSet: ReadonlySet<string>;
 };
 
 /** Auth + own-LIVE-entry + server-side re-derivation from the STORED text.
@@ -286,7 +296,43 @@ async function ownEntryDerivation(
     workerId: worker.id,
     entryId,
     recognition,
+    persistedFragments: inputs.persistedFragments,
+    existingFragmentSkillSet: inputs.existingFragmentSkillSet,
   };
+}
+
+/**
+ * After a confirmed link: record the persisted fragment(s) the candidate was
+ * recognised on as append-only `fragment_skill` rows (same join the pipeline
+ * uses; fails closed to "no row" when the phrases do not line up). A write
+ * failure here never undoes the link — the link is the evidence, the row
+ * only says where it came from — so it is reported, not fatal.
+ */
+async function recordFragmentSkillEvidence(
+  ctx: OwnEntryDerivation,
+  slug: string,
+  fragmentIds: readonly string[],
+): Promise<void> {
+  if (fragmentIds.length === 0 || ctx.persistedFragments.length === 0) return;
+  const rows = mapRecognitionToPersistedFragments({
+    persisted: ctx.persistedFragments,
+    derivationFragments: ctx.recognition.fragments,
+    skills: [{ slug, fragmentIds }],
+  }).filter((row) => !ctx.existingFragmentSkillSet.has(formatFragmentSkillValue(row)));
+  if (rows.length === 0) return;
+  const ins = await ctx.sb.from("journal_entry_metrics").insert(
+    rows.map((row) => ({
+      entry_id: ctx.entryId,
+      metric_slug: FRAGMENT_SKILL_METRIC_SLUG,
+      source: "worker_input",
+      value_text: formatFragmentSkillValue(row),
+    })),
+  );
+  if (ins.error) {
+    console.error("[journal-pipeline] fragment_skill write failed", {
+      code: (ins.error as { code?: string }).code ?? null,
+    });
+  }
 }
 
 /** The honest self-declared add + evidence link (shared by every confirm). */
@@ -406,12 +452,14 @@ export async function confirmJournalSkillCandidate(
   const ctx = await ownEntryDerivation(entryId, pipelineVersion);
   if (!ctx.ok) return { ok: false, code: ctx.code };
 
-  const member = ctx.recognition.candidates.some(
+  const member = ctx.recognition.candidates.find(
     (c) => c.kind === "fuzzy_skill" && c.slug === slug,
   );
   if (!member) return { ok: false, code: "candidate_not_found" };
 
-  return addSkillAndLink(ctx.sb, ctx.workerId, ctx.entryId, slug);
+  const res = await addSkillAndLink(ctx.sb, ctx.workerId, ctx.entryId, slug);
+  if (res.ok) await recordFragmentSkillEvidence(ctx, slug, member.fragmentIds);
+  return res;
 }
 
 /**
@@ -448,6 +496,7 @@ export async function confirmJournalAmbiguousChoice(
     chosenSlug,
   );
   if (!res.ok) return res;
+  await recordFragmentSkillEvidence(ctx, chosenSlug, candidate.fragmentIds);
 
   // P2 integrity fix: persist the worker's DECISION as an entry-scoped
   // append-only marker so reprocess / restore / pipeline upgrades never

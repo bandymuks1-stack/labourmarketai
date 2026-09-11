@@ -540,7 +540,7 @@
     "openCv": "Open CV",
     "openOpportunities": "Opportunities from your entries",
     "provenance": "Where the hours come from: {worker} h entered by you, {extracted} h recognised from your text, {corrected} h corrected by a manager.",
-    "provenanceRule": "Each entry is counted once; an hour is attributed to a skill only when the entry is linked to a single skill.",
+    "provenanceRule": "Each entry is counted once; an hour is attributed to a skill only when the entry is linked to a single skill, or when your own phrase (“tiled 6 h”) names that skill.",
     "glance": "{days, plural, one {# day} other {# days}} · {entries, plural, one {# entry} other {# entries}}",
     "glanceNone": "no entries",
     "periodEmpty": "No entries in “{period}” — pick another period above.",
@@ -548,7 +548,7 @@
     "mainActivityNone": "No kind of work recorded yet — an entry with a duration and a kind of work will show it.",
     "otherActivities": "Other evidenced activity",
     "evidenceStrength": "{entries, plural, one {# entry} other {# entries}}: {confirmed} confirmed by a manager or client · {photos} with photos · {documents} from an original document · {selfOnly} your own record only",
-    "skillsHint": "Hours reach a skill only when the entry is linked to one skill. When several took part, we show involvement, not an invented split.",
+    "skillsHint": "Hours reach a skill only when the entry is linked to one skill, or when your own timed phrase names that skill. When several took part and the phrase does not tell them apart, we show involvement, not an invented split.",
     "activityMeta": "{entries, plural, one {# entry} other {# entries}} · {contexts, plural, one {# context} other {# contexts}}",
     "trend": {
       "up": "increasing (last 30 days vs the 30 before)",

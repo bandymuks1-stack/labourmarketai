@@ -69,11 +69,26 @@ describe("1 · one hours rule", () => {
 });
 
 describe("2 · the model is honest by construction", () => {
-  it("attributes hours to a skill ONLY when it is the single linked skill", () => {
+  it("attributes hours to a skill ONLY when it is the single linked skill, or the link names the fragment", () => {
     expect(model).toMatch(/if \(n > 1\) return "shared";/);
     expect(model).toMatch(/if \(n === 0\) return "none";/);
     // one linked skill but several kinds of work in the fragments → involvement
     expect(model).toMatch(/activities\.size > 1 \? "multi_activity" : "attributed"/);
+    // a fragment is claimed only when EXACTLY ONE linked skill sits on it
+    // (`fragment_skill` rows) — never split by guess, never by an unlinked row
+    expect(model).toMatch(/if \(claimants\.size === 1\)/);
+    expect(model).toMatch(/if \(id && linked\.has\(id\)\) claimants\.add\(id\);/);
+    expect(model).toContain("fragmentSkillsByIndex(entry.metrics)");
+  });
+  it("the fragment → skill evidence is written by the pipeline and the worker's confirmation, never by the model", () => {
+    // the model stays pure: it reads the rows, it never writes anything
+    expect(model).not.toMatch(/\.from\(|\.insert\(|\.upsert\(|createClient/);
+    const pipeline = read("lib/journal/skill-pipeline.ts");
+    const actions = read("lib/journal/skill-pipeline-actions.ts");
+    expect(pipeline).toContain("mapRecognitionToPersistedFragments(");
+    expect(actions).toContain("recordFragmentSkillEvidence(ctx,");
+    // the row states where a link came from — it is never a link itself
+    expect(pipeline).not.toMatch(/fragment_skill[\s\S]{0,400}journal_entry_skills/);
   });
   it("never emits a person score, rating, rank or tier field", () => {
     const typeBlock = model.slice(model.indexOf("export type WorkIntelligence = {"));

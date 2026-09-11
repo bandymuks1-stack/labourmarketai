@@ -25,17 +25,25 @@
  *                          entries / days / contexts, and as `involvedHours`
  *                          (the worked time of entries it took part in —
  *                          shown as involvement, never summed across skills);
- *   ATTRIBUTABLE PRACTICE  hours a skill can actually claim: only entries
- *                          where it is the ONLY linked skill.
+ *   ATTRIBUTABLE PRACTICE  hours a skill can actually claim: entries where
+ *                          it is the ONLY linked skill, plus — on any other
+ *                          entry — the fragments whose OWN duration the
+ *                          link was recognised on (`fragment_skill` rows,
+ *                          written by the skill pipeline / the worker's
+ *                          confirmation; see fragment-skill-evidence.ts)
+ *                          when exactly one linked skill sits on that
+ *                          fragment.
  *
  * An 8-hour entry linked to four skills is 8 hours of work, four skills
  * involved, and ZERO attributable hours for each — never 32. There is no
  * evidence for the split and the product refuses to guess one. The same
  * caution runs the other way: an entry whose OWN fragments describe several
  * kinds of work ("6 h tiles, 2 h plaster") but carries one linked skill is
- * not 8 h of that skill either — the evidence says the time was split, the
- * link does not say where, so those hours stay involvement (MULTI_ACTIVITY)
- * and are split by ACTIVITY only.
+ * not 8 h of that skill either — the evidence says the time was split, so
+ * unless the link says WHERE (a `fragment_skill` row on the 6 h fragment →
+ * 6 h of tiling, the 2 h stay MULTI_ACTIVITY) those hours stay involvement
+ * and are split by ACTIVITY only. Every hour is still counted once:
+ * attributed + shared + multi-activity + unattributed = total.
  *
  * ── WHAT THIS IS NOT ──────────────────────────────────────────────────────
  * Nothing here is a score, a rating, a rank or a tier OF THE PERSON. A share
@@ -58,6 +66,7 @@ import {
   type EvidenceTier,
 } from "@/lib/evidence/evidence-tier";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
+import { fragmentSkillsByIndex } from "@/lib/journal/fragment-skill-evidence";
 import { SOURCE_DOCUMENT_METRIC_SLUG } from "@/lib/journal/document-journal-draft-model";
 
 const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
@@ -141,7 +150,8 @@ export type SkillWorkTime = {
   /** The evidence ladder of the skill row itself — never a person tier. */
   readonly tier: EvidenceTier;
   /** ATTRIBUTABLE PRACTICE: hours from entries where this was the ONLY
-   *  linked skill. */
+   *  linked skill, plus fragments the link was recognised on (see the
+   *  module header). */
   readonly attributedHours: number;
   /** Of `attributedHours`, the part on approved entries. */
   readonly confirmedHours: number;
@@ -277,10 +287,19 @@ export function workPeriodBounds(
   };
 }
 
+/** How one entry's hours divide between its linked skills and the rest. */
+type EntryAttribution = {
+  /** Hours a single linked skill can claim, by skill id. */
+  readonly bySkill: ReadonlyMap<string, number>;
+  /** Hours no single linked skill can claim (kept as involvement). */
+  readonly remainderHours: number;
+};
+
 type DerivedEntry = {
   readonly entry: WorkIntelligenceEntry;
   readonly time: EntryWorkTime;
   readonly basis: SkillTimeBasis;
+  readonly attribution: EntryAttribution;
 };
 
 function inPeriod(
@@ -303,6 +322,52 @@ function skillBasis(entry: WorkIntelligenceEntry, time: EntryWorkTime): SkillTim
       .filter((k) => k !== ""),
   );
   return activities.size > 1 ? "multi_activity" : "attributed";
+}
+
+/**
+ * Divide an entry's hours between its linked skills. `attributed` basis:
+ * the one linked skill claims everything. Otherwise ONLY a fragment line
+ * whose `fragment_skill` rows name exactly ONE linked skill is claimed by
+ * that skill; every other hour (entry-level lines, fragments with no row,
+ * fragments two linked skills sit on) stays in the remainder. A row naming a
+ * skill that is no longer linked is inert — the link is the evidence.
+ */
+function attributeEntry(
+  entry: WorkIntelligenceEntry,
+  time: EntryWorkTime,
+  basis: SkillTimeBasis,
+  idBySlug: ReadonlyMap<string, string>,
+): EntryAttribution {
+  const ids = [...new Set(entry.linkedSkillIds)];
+  if (basis === "none" || time.totalHours <= 0) {
+    return { bySkill: new Map(), remainderHours: time.totalHours };
+  }
+  if (basis === "attributed") {
+    return { bySkill: new Map([[ids[0]!, time.totalHours]]), remainderHours: 0 };
+  }
+  const linked = new Set(ids);
+  const byIndex = fragmentSkillsByIndex(entry.metrics);
+  const bySkill = new Map<string, number>();
+  let remainder = 0;
+  for (const line of time.lines) {
+    if (line.hours <= 0) continue;
+    const slugs =
+      line.derivedFrom === "fragment_time" && line.fragmentIndex !== null
+        ? byIndex.get(line.fragmentIndex)
+        : undefined;
+    const claimants = new Set<string>();
+    for (const slug of slugs ?? []) {
+      const id = idBySlug.get(slug);
+      if (id && linked.has(id)) claimants.add(id);
+    }
+    if (claimants.size === 1) {
+      const id = [...claimants][0]!;
+      bySkill.set(id, (bySkill.get(id) ?? 0) + line.hours);
+    } else {
+      remainder += line.hours;
+    }
+  }
+  return { bySkill, remainderHours: remainder };
 }
 
 /** The entry's own `work_direction` (a profession slug), latest row wins. */
@@ -363,6 +428,23 @@ function trendOf(recent: number, prior: number): WorkTrend {
 export function deriveWorkIntelligence(
   input: WorkIntelligenceInput,
 ): WorkIntelligence {
+  // Declared rows carry the tier and the slug; a skill that appears only
+  // through a link (slug unknown here) is skipped rather than invented.
+  const rowsById = new Map<string, { slug: string; tier: EvidenceTier }>();
+  for (const s of input.skills) {
+    const slug = (s.slug ?? "").trim();
+    if (!slug || !s.skillId) continue;
+    const tier = deriveEvidenceTier({ verified: s.verified, source: s.source });
+    const existing = rowsById.get(s.skillId);
+    // Several rows for one skill: the strongest REAL tier wins, never an
+    // averaged one.
+    if (!existing || EVIDENCE_TIER_RANK[tier] > EVIDENCE_TIER_RANK[existing.tier]) {
+      rowsById.set(s.skillId, { slug, tier });
+    }
+  }
+  const idBySlug = new Map<string, string>();
+  for (const [id, row] of rowsById) idBySlug.set(row.slug, id);
+
   const derived: DerivedEntry[] = input.entries.map((entry) => {
     const time = deriveEntryWorkTime({
       entryId: entry.entryId,
@@ -370,7 +452,8 @@ export function deriveWorkIntelligence(
       originalText: entry.originalText ?? null,
       metrics: entry.metrics,
     });
-    return { entry, time, basis: skillBasis(entry, time) };
+    const basis = skillBasis(entry, time);
+    return { entry, time, basis, attribution: attributeEntry(entry, time, basis, idBySlug) };
   });
 
   // ── periods ───────────────────────────────────────────────────────────
@@ -467,36 +550,27 @@ export function deriveWorkIntelligence(
       else a.prov.unrecorded += 1;
     }
     if (d.time.totalHours <= 0) continue;
-    if (d.basis === "attributed") {
-      const a = accFor(ids[0]!);
-      a.attributed += d.time.totalHours;
-      if (d.entry.reviewResult === "approved") a.confirmed += d.time.totalHours;
-    } else if (d.basis === "shared") {
-      sharedHours += d.time.totalHours;
-      sharedEntries += 1;
-      for (const id of ids) accFor(id).shared += d.time.totalHours;
-    } else if (d.basis === "multi_activity") {
-      multiActivityHours += d.time.totalHours;
-      multiActivityEntries += 1;
-      accFor(ids[0]!).shared += d.time.totalHours;
-    } else {
-      unattributedHours += d.time.totalHours;
-      unattributedEntries += 1;
+    // Hours a single linked skill can claim — the whole entry (single
+    // skill, one kind of work) or the fragments its link was recognised on.
+    for (const [id, hours] of d.attribution.bySkill) {
+      const a = accFor(id);
+      a.attributed += hours;
+      if (d.entry.reviewResult === "approved") a.confirmed += hours;
     }
-  }
-
-  // Declared rows carry the tier and the slug; a skill that appears only
-  // through a link (slug unknown here) is skipped rather than invented.
-  const rowsById = new Map<string, { slug: string; tier: EvidenceTier }>();
-  for (const s of input.skills) {
-    const slug = (s.slug ?? "").trim();
-    if (!slug || !s.skillId) continue;
-    const tier = deriveEvidenceTier({ verified: s.verified, source: s.source });
-    const existing = rowsById.get(s.skillId);
-    // Several rows for one skill: the strongest REAL tier wins, never an
-    // averaged one.
-    if (!existing || EVIDENCE_TIER_RANK[tier] > EVIDENCE_TIER_RANK[existing.tier]) {
-      rowsById.set(s.skillId, { slug, tier });
+    // The rest stays involvement, named by why it could not be attributed.
+    const remainder = d.attribution.remainderHours;
+    if (remainder <= 0) continue;
+    if (d.basis === "shared") {
+      sharedHours += remainder;
+      sharedEntries += 1;
+      for (const id of ids) accFor(id).shared += remainder;
+    } else if (d.basis === "multi_activity") {
+      multiActivityHours += remainder;
+      multiActivityEntries += 1;
+      accFor(ids[0]!).shared += remainder;
+    } else if (d.basis === "none") {
+      unattributedHours += remainder;
+      unattributedEntries += 1;
     }
   }
 
