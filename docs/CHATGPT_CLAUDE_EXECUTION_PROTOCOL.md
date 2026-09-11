@@ -121,6 +121,34 @@ Do not write `DONE` when REMAINING is non-empty.
 
 A receipt is a checkpoint/evidence object, not automatically a stop signal. After emitting an intermediate receipt, continue when the non-stall invariant requires continuation.
 
+### Receipt classification fields (v2, optional but expected under the worker)
+
+`REMAINING` mixes three kinds of work that the continuation state machine must
+keep apart. When a slice runs under the Agentai OS objective worker, also fill:
+
+REMAINING_SAFE — items an agent can do now under repository policy, or NONE
+REMAINING_GATED — items that need an owner decision, each with the EXACT decision the owner must make, or NONE
+HUMAN_ACCEPTANCE — items only a human can verify (a real-user walk, a visual acceptance), or NONE
+BLOCKER_CLASS — NONE | OWNER_GATE | EXTERNAL | RETRYABLE
+
+State consequences (kept by the worker, not by the owner): `REMAINING_SAFE`
+non-empty → the objective stays ACTIVE and resumable, whatever else is listed.
+`REMAINING_SAFE = NONE` with `HUMAN_ACCEPTANCE` non-empty → ACCEPTANCE_PENDING,
+never COMPLETE. `REMAINING_SAFE = NONE` with `REMAINING_GATED` non-empty →
+OWNER_GATE. A `RETRYABLE` blocker (transient API/CI/tooling failure) is retried
+with backoff and is never reported as an owner decision.
+
+### Stale-gate rule
+
+Before recording any owner gate or blocker, verify it against the live state it
+depends on (the migration ledger, merged PRs, applied migrations, existing
+identities, existing files). A gate that was resolved elsewhere is not a gate.
+Budget, context size, CI still running, a missing test, a missing readback or a
+disconnected UI are never owner gates. On 2026-09-11 seven receipts carried
+"#1355 owner-gated slug↔ESCO bridge" three days after the linkage had been
+applied to production (ledger `20260908082301`); that class of error is what
+this rule prevents.
+
 ## ChatGPT review contract
 
 ChatGPT reviews receipts and repository evidence using two separate gates:
@@ -144,7 +172,8 @@ That worker should:
 6. if `REMAINING != NONE` and `BLOCKER = NONE`, invoke the next iteration automatically within the same objective;
 7. stop on RED/human/external blocker or completed acceptance gates;
 8. enforce a bounded iteration/time/failure budget so infrastructure failures cannot create an infinite retry loop;
-9. never bypass repository safety, owner gates, secrets policy, spending authorization, migration rules or outreach authorization.
+9. never bypass repository safety, owner gates, secrets policy, spending authorization, migration rules or outreach authorization;
+10. keep a durable per-objective state (ACTIVE / CONTINUE / RETRYABLE_FAILURE / EXTERNAL_BLOCKER / OWNER_GATE / ACCEPTANCE_PENDING / COMPLETE / STOPPED_BY_SAFETY_BUDGET / STOPPED_BY_OWNER) so that a budget stop with safe work remaining is RESUMABLE and is never recorded as "waiting for the owner"; the next approved worker invocation resumes from that state without the owner restating the objective.
 
 The local worker is orchestration only. It must not duplicate product truth, invent priorities, or become a second product architecture authority. Agentai OS is the preferred cross-project home for this orchestration capability; LabourMarket.ai keeps only the minimal project-side execution contract/integration required to participate.
 
