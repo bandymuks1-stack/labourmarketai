@@ -55,6 +55,12 @@ export type ConversationIntent =
   // ── AI workspace (W4): goals stated in words, executed as workflows ──────
   | "skill-gap" // "kokių įgūdžių man trūksta?"
   | "journal-recent" // "parodyk paskutinius žurnalo įrašus"
+  // ── Work intelligence by sentence (issue #1689, owner lines 2–7): the
+  //    questions the work-in-numbers section answers, asked in words. ──────
+  | "journal-skill" // "kiek programavau?" / "kur naudojau programavimo įgūdį?"
+  | "journal-skills-top" // "kokius įgūdžius naudoju daugiausia?"
+  | "journal-activities-top" // "kokia veikla užima daugiausia mano laiko?"
+  | "journal-confirmed" // "kas patvirtinta?"
   | "figures" // "parodyk patvirtintas valandas" / "paruošk ataskaitą"
   | "open-project" // "atidaryk šį projektą"
   // ── G8 (chat-first audit 2026-08-30): the chip surfaces, reachable by
@@ -593,6 +599,100 @@ const RULES: IntentRule[] = [
       p(
         "\\b(ką|what|что|was|wat)\\b\\s*.{0,24}(dariau|dirbau|dirbome|nuveikiau|did\\s+i\\s+do|делал|сделал|gemacht|getan|gedaan|gewerkt|gearbeitet)",
         7,
+      ),
+    ],
+  },
+  /**
+   * WORK INTELLIGENCE BY SENTENCE (issue #1689, re-audit 2026-09-11, owner
+   * chat lines 2–7). Measured through this router before the rules below:
+   * "Kiek programavau?" → unknown; "Kur naudojau programavimo įgūdį?" →
+   * `profile` (profile COMPLETENESS — the wrong answer); "Kokia veikla užima
+   * daugiausia mano laiko?" → unknown; "Kokius įgūdžius naudoju daugiausia?"
+   * → `profile`; "Kas patvirtinta?" → unknown. The data behind every one of
+   * them already existed in the work-in-numbers model; only the door did
+   * not. Each rule outweighs `profile` (2) and `skill-gap` (5) by design —
+   * a question about RECORDED work is a journal read, not a profile edit.
+   *
+   * The SUBJECT of a "how much did I <verb>" question ("programavau",
+   * "klojau plyteles") is not read here: the journal recognizer reads it in
+   * the handler, the same way it reads an intake sentence. A subject it
+   * cannot recognise falls back to the plain period answer — so a broad
+   * verb rule costs nothing wrong. The "dirb-" verbs are excluded so "kiek
+   * dirbau šiandien?" keeps its own intent (journal-recent).
+   */
+  {
+    intent: "journal-skill",
+    patterns: [
+      // lt — "Kiek programavau?", "Kiek klojau plyteles?", "kiek valandų
+      // klojau plyteles šį mėnesį?" — an interrogative + a first-person
+      // past-tense verb (-au) other than dirbau/uždirbau. Folded text, so
+      // `[^\s]` not `\S` (the folder lower-cases pattern sources).
+      p("^\\s*kiek\\s+(?:valand[^\\s]*\\s+)?(?:[^\\s]+\\s+){0,2}?(?!dirb|uzdirb|gav|turej|siunt|issiunt|mokej|sumokej)[^\\s]+au\\b", 8),
+      // en — "How much did I program?", "how often did I do tiling"
+      p("^\\s*how\\s+(much|many|often|long)\\s+(did|have)\\s+i\\s+(?!work)[^\\s]+", 8),
+      // ru — "Сколько я программировал?"
+      p("^\\s*сколько\\s+(я\\s+)?(?!работал|отработал)[^\\s]+(л|ла)\\b", 8),
+      // de — "Wie viel habe ich programmiert?"
+      p("^\\s*wie\\s+(viel|oft|lange)\\s+habe\\s+ich\\s+(?!gearbeitet)[^\\s]+", 8),
+      // nl — "Hoeveel heb ik geprogrammeerd?"
+      p("^\\s*hoeveel\\s+heb\\s+ik\\s+(?!gewerkt)[^\\s]+", 8),
+      // WHERE was a skill used — the contexts / entries it sits on. The
+      // en/de/nl shapes carry the past-tense auxiliary ("where did I use",
+      // "wo habe ich … verwendet"), so "where can I use my skills" — a
+      // question about the future — is not pulled into a journal read.
+      p("(kur|где)\\s*.{0,24}(naudoj|использ)", 8),
+      p("(where|wo|waar)\\s+(did|have|habe|heb)\\s+(i|ich|ik)\\b.{0,24}(use|verwend|benutz|eingesetzt|gebruik|ingezet)", 8),
+      p("(kur|где)\\s*.{0,30}(įgūd|навык)", 4),
+      p("(where|wo|waar)\\s+(did|have|habe|heb)\\s+(i|ich|ik)\\b.{0,30}(skill|fähigkeit|vaardigh)", 4),
+    ],
+  },
+  {
+    intent: "journal-skills-top",
+    patterns: [
+      // "Kokius įgūdžius naudoju daugiausia?" / "Which skills do I use most?"
+      // / "Какие навыки я использую больше всего?" / "Welche Fähigkeiten
+      // nutze ich am meisten?" / "Welke vaardigheden gebruik ik het meest?"
+      // Interrogative-gated, so "use my skills in Germany" stays a search.
+      p(
+        "(kokius|kokiu|kurius|kuriu|which|what|какие|каких|welche|welke)\\s+.{0,12}(įgūd|skill|навык|fähigkeit|kompetenz|vaardigh|competent)[^\\s]*\\s*.{0,20}(naudoj|use|использ|nutze|benutze|verwende|gebruik)",
+        8,
+      ),
+    ],
+  },
+  {
+    intent: "journal-activities-top",
+    patterns: [
+      // "Kokia veikla užima daugiausia mano laiko?" / "Which activity takes
+      // most of my time?" / "Какая деятельность занимает больше всего
+      // времени?" / "Welche Tätigkeit nimmt die meiste Zeit?" / "Welke
+      // activiteit kost de meeste tijd?"
+      p(
+        "(veikl|activit|деятельност|занят|tätigkeit|activiteit|bezigheid)[^\\s]*\\s*.{0,40}(daugiausia|most|больше\\s+всего|meiste|meest)",
+        8,
+      ),
+      // "Kur praleidžiu daugiausia laiko?" / "Womit verbringe ich die meiste
+      // Zeit?" / "Waar besteed ik de meeste tijd aan?"
+      p("(daugiausia|most\\s+of|больше\\s+всего|meiste|meeste)\\s*.{0,24}(laik|time|времен|zeit|tijd)", 8),
+      // "Ką daugiausia dirbau?" — outweighs journal-recent's ką…dirbau (7).
+      p(
+        "\\b(ką|what|что|was|wat)\\b\\s*.{0,16}(daugiausia|most|больше\\s+всего|meisten|meest)\\s*.{0,16}(dirbau|dariau|did|делал|gemacht|gedaan)",
+        8,
+      ),
+    ],
+  },
+  {
+    intent: "journal-confirmed",
+    patterns: [
+      // "Kas patvirtinta?" / "What is confirmed?" / "Что подтверждено?" /
+      // "Was ist bestätigt?" / "Wat is bevestigd?"
+      p("^\\s*(kas|what|что|was|wat)\\s+(yra\\s+|is\\s+|ist\\s+)?(jau\\s+|already\\s+|уже\\s+|schon\\s+|al\\s+)?(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)", 8),
+      // "kiek valandų patvirtinta?" — outweighs journal-recent's kiek…valand
+      // (7); "show my approved hours" stays `figures` (no interrogative).
+      p("(kiek|how\\s+(much|many)|сколько|wie\\s+viel|hoeveel)\\s*.{0,24}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)", 8),
+      // "kurie įrašai patvirtinti?" / "which entries are confirmed?"
+      p(
+        "(kurie|kuriuos|which|какие|welche|welke)\\s*.{0,16}(įraš|entr|запис|eintr|invoer|registr)[^\\s]*\\s*.{0,12}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)",
+        8,
       ),
     ],
   },

@@ -566,6 +566,35 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn dagboek",
     de: "Zeig mein Tagebuch",
   },
+  // Work intelligence by sentence (issue #1689, owner chat lines 2–7).
+  "journal-skill": {
+    lt: "Kiek programavau?",
+    en: "Where did I use tiling?",
+    ru: "Сколько я программировал?",
+    nl: "Hoeveel heb ik geprogrammeerd?",
+    de: "Wie viel habe ich programmiert?",
+  },
+  "journal-skills-top": {
+    lt: "Kokius įgūdžius naudoju daugiausia?",
+    en: "Which skills do I use most?",
+    ru: "Какие навыки я использую больше всего?",
+    nl: "Welke vaardigheden gebruik ik het meest?",
+    de: "Welche Fähigkeiten nutze ich am meisten?",
+  },
+  "journal-activities-top": {
+    lt: "Kokia veikla užima daugiausia mano laiko šį mėnesį?",
+    en: "Which activity takes most of my time this month?",
+    ru: "Какая деятельность занимает больше всего времени?",
+    nl: "Welke activiteit kost de meeste tijd?",
+    de: "Welche Tätigkeit nimmt die meiste Zeit?",
+  },
+  "journal-confirmed": {
+    lt: "Kas patvirtinta?",
+    en: "What is confirmed?",
+    ru: "Что подтверждено?",
+    nl: "Wat is bevestigd?",
+    de: "Was ist bestätigt?",
+  },
   figures: {
     lt: "Paruošk ataskaitą",
     en: "Show my approved hours",

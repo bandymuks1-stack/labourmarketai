@@ -161,6 +161,7 @@ import {
   runFindWorkers,
   runOpenProject,
   runRecentJournal,
+  runWorkIntelligenceQuestion,
   runSkillGap,
   runDocumentsReadiness,
   runLearningCompass,
@@ -4492,6 +4493,16 @@ export function ConversationChat({
             // fetch it as a page. The route re-checks manager role + RLS.
             user(chip.label);
             window.location.assign(chip.id.slice(9));
+          } else if (chip.id.startsWith("journal-entries:")) {
+            // `journal-entries:<skill slug>:<period>` — the SOURCE ENTRIES
+            // behind a work-intelligence answer ("kiek programavau?"), via
+            // the journal's EXISTING skill + period drill-down (W5 slice 3 /
+            // issue #1689). The workflow hands over the slug and the period;
+            // the route is emitted here, as for every other route chip (W4).
+            const [, slug, period] = chip.id.split(":");
+            if (slug && /^[a-z0-9_-]{1,80}$/.test(slug) && period && /^[a-z]{1,8}$/.test(period)) {
+              router.push(`/dashboard/journal?skill=${slug}&period=${period}#journal-entries` as "/dashboard");
+            }
           } else if (chip.id.startsWith("link:")) {
             // Contextual navigation to a REAL canonical surface (rebuild W4)
             // — the chat routes to the one existing screen, it never grows a
@@ -5208,6 +5219,9 @@ export function ConversationChat({
         },
         skillGap: () => runWorkflow(() => runSkillGap()),
         recentJournal: () => runWorkflow(() => runRecentJournal(text)),
+        // Work intelligence by sentence (issue #1689, owner lines 2–7): the
+        // intent names the facet, ONE workflow reads the ONE model.
+        workIntelligence: () => runWorkflow(() => runWorkIntelligenceQuestion(text, routedIntent)),
         figures: () => runWorkflow(() => runFigures()),
         openProject: () => runWorkflow(() => runOpenProject(text)),
         // G8: the typed sentence runs the SAME functions the `projects` and

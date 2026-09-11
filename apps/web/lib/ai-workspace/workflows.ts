@@ -13,7 +13,10 @@ import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
 import { loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import type { WorkIntelligence, WorkPeriodKey } from "@/lib/journal/work-intelligence";
 import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
+import type { ConversationIntent } from "@/lib/conversation/intent-router";
+import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import { isWorkTimeUnit, workTimeHours } from "@/lib/journal/work-time";
 import {
   DOCUMENT_GAP_LINE_CAP,
@@ -581,11 +584,13 @@ export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
       ? t("whyJournalWindow", { days: rangeDays(range.start, range.end) })
       : t("whyJournalPeriod", { period: periodLabel });
 
-  // A named section period: the section's own figure for that tab.
-  const sectionPeriod =
-    period !== null && period !== "yesterday"
-      ? ((await loadOwnWorkIntelligence().catch(() => null))?.periods.find((p) => p.key === period) ?? null)
-      : null;
+  // A named section period: the section's own figure for that tab. The
+  // model is FOCUSED on that period so its outputs (below) describe the
+  // same window the figure does; "yesterday" and the recent default have
+  // no section tab, so their outputs are read over all time and say so.
+  const focus: WorkPeriodKey | null = period !== null && period !== "yesterday" ? period : null;
+  const wi = await loadOwnWorkIntelligence({ focus: focus ?? "all" }).catch(() => null);
+  const sectionPeriod = focus !== null ? (wi?.periods.find((p) => p.key === focus) ?? null) : null;
   const periodEntries = sectionPeriod?.entries ?? journalItems.length;
 
   if (periodEntries === 0 && entries.length === 0) {
@@ -640,11 +645,21 @@ export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
             }) + dayUnitsLine
           : t("journalHoursNonePeriod", { period: periodLabel, entries: journalItems.length });
 
+  // WHAT WAS PRODUCED (issue #1689, owner line 6 — "ką padariau per tą
+  // laiką?"): the completed outputs in their recorded units, from the same
+  // model, over the same window as the figure (all time when the question
+  // named none — the line says which). Never converted, never time.
+  const outputsLine = wi === null ? null : await formatOutputsLine(wi, focus ?? "all", locale);
+
   // A period question is answered with its FIGURE first, then the entries.
   const body =
     periodLabel === null
-      ? [t("journalIntro", { count: entries.length }), ...lines, hoursLine]
-      : [hoursLine, ...(lines.length > 0 ? [t("journalPeriodLines"), ...lines] : [])];
+      ? [t("journalIntro", { count: entries.length }), ...lines, hoursLine, ...(outputsLine ? [outputsLine] : [])]
+      : [
+          hoursLine,
+          ...(outputsLine ? [outputsLine] : []),
+          ...(lines.length > 0 ? [t("journalPeriodLines"), ...lines] : []),
+        ];
 
   return {
     kind: "answer",
@@ -679,6 +694,271 @@ function parseDurationLabel(
 
 function fmtHours(hours: number, locale: string): string {
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(hours);
+}
+
+function fmtPct(share: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(share);
+}
+
+/** The model's focus-period outputs as one sentence naming its window, or
+ *  null when nothing was produced in a non-time unit. Unit names come from
+ *  the ONE `productivityUnits` catalogue the section and the pickers use. */
+async function formatOutputsLine(
+  wi: WorkIntelligence,
+  focus: WorkPeriodKey,
+  locale: string,
+): Promise<string | null> {
+  if (wi.outputs.length === 0) return null;
+  const t = await getTranslations("workspace.ai");
+  const tUnit = await getTranslations("productivityUnits");
+  const list = wi.outputs
+    .slice(0, ANSWER_LIMIT)
+    .map((o) =>
+      t("wiOutputItem", {
+        value: fmtHours(o.value, locale),
+        unit: tUnit.has(o.unit) ? tUnit(o.unit) : o.unit,
+        entries: o.entries,
+      }),
+    )
+    .join("; ");
+  return t("wiOutputs", { period: t(`journalPeriod_${focus}`), list });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3b. Work intelligence by sentence — "kiek programavau?", "kokius įgūdžius
+//     naudoju daugiausia?", "kokia veikla užima daugiausia laiko?", "kas
+//     patvirtinta?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The questions the work-in-numbers section answers, asked in words (issue
+ * #1689, re-audit 2026-09-11, owner chat lines 2–5 and 7). Measured before
+ * this: every one of them fell to the generic fallback or to the PROFILE
+ * answer. The data was there — `loadOwnWorkIntelligence` carries hours per
+ * skill (attributed / confirmed / shared), activities, contexts and
+ * confirmations — only the door was missing.
+ *
+ * ONE MODEL, ONE READER. Nothing is re-derived here: every figure is a field
+ * of the same `WorkIntelligence` the section renders, focused on the period
+ * the sentence names (`parseJournalPeriodPhrase`; none → all time). Every
+ * answer NAMES ITS WINDOW AND ITS DENOMINATOR — "5 h attributed of 36 h
+ * recorded", "38 % of the 13 h attributed to skills" — because a share of an
+ * unstated base is the F3 defect the re-audit found on the section itself.
+ *
+ * THE SUBJECT IS READ BY THE JOURNAL RECOGNIZER. "Kiek programavau?" names
+ * its skill the way an intake sentence does, so the SAME recognizer
+ * (`extractJournalSuggestions`) reads it: `programming` as the skill,
+ * `software_developer` as the kind of work. A subject it cannot recognise
+ * falls back to the plain period answer (`runRecentJournal`) — an honest
+ * total, never a guess at which skill was meant.
+ *
+ * SOURCE ENTRIES are one chip away through the journal's EXISTING
+ * drill-down (`?skill=<slug>&period=<key>`), emitted by the chat as a route;
+ * this layer hands over the slug and the period, never a path (W4).
+ *
+ * NO LLM. Deterministic floor; every figure is a real row or an honest
+ * "could not read" (never a zero nobody counted — SEP-7).
+ */
+export async function runWorkIntelligenceQuestion(
+  text: string,
+  intent: ConversationIntent,
+): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const locale = await getLocale();
+  const phrase = parseJournalPeriodPhrase(text);
+  // "Yesterday" is a single day the model has no window for: answered over
+  // all time, and the answer says so (the window is always named).
+  const focus: WorkPeriodKey = phrase === null || phrase === "yesterday" ? "all" : phrase;
+  const periodLabel = t(`journalPeriod_${focus}`);
+  const why = t("whyWi", { period: periodLabel });
+
+  const wi = await loadOwnWorkIntelligence({ focus }).catch(() => null);
+  if (wi === null) return blocked(t("wiUnread"), why);
+  const totals = wi.periods.find((p) => p.key === focus) ?? null;
+  if (totals === null) return blocked(t("wiUnread"), why);
+
+  const tSkill = await getTranslations("skillNames");
+  const tProf = await getTranslations("professions");
+  const skillName = (slug: string): string => (tSkill.has(slug) ? tSkill(slug) : slug);
+  const activityName = (key: string): string => (tProf.has(key) ? tProf(key) : key);
+  const fmtDay = new Intl.DateTimeFormat(locale, { month: "2-digit", day: "2-digit", timeZone: "UTC" });
+  const dayOf = (iso: string | null): string => (iso ? fmtDay.format(new Date(`${iso}T00:00:00Z`)) : "—");
+  const chips = [{ id: "journal-numbers", label: t("chipJournalNumbers") }];
+  const totalHours = fmtHours(totals.hours, locale);
+
+  if (totals.entries === 0) {
+    return {
+      kind: "answer",
+      text: t("journalEmptyPeriod", { period: periodLabel }),
+      explanation: { why },
+      chips: [{ id: "logwork", label: t("chipLogWork") }],
+    };
+  }
+
+  if (intent === "journal-skill") {
+    const read = extractJournalSuggestions(text);
+    const skill =
+      read.skillSlugs.map((slug) => wi.skills.find((s) => s.slug === slug)).find((s) => s !== undefined) ?? null;
+    if (skill) {
+      const name = skillName(skill.slug);
+      const lines = [
+        t("wiSkillHours", {
+          skill: name,
+          hours: fmtHours(skill.attributedHours, locale),
+          total: totalHours,
+          period: periodLabel,
+          confirmed: fmtHours(skill.confirmedHours, locale),
+        }),
+      ];
+      if (skill.sharedHours > 0) lines.push(t("wiSkillShared", { hours: fmtHours(skill.sharedHours, locale) }));
+      lines.push(
+        skill.entries > 0
+          ? t("wiSkillWhere", {
+              entries: skill.entries,
+              days: skill.days,
+              contexts: skill.contexts,
+              day: dayOf(skill.lastWorkedDay),
+            })
+          : t("wiSkillNoEntries", { period: periodLabel }),
+      );
+      return {
+        kind: "answer",
+        text: lines.join("\n"),
+        explanation: { why },
+        chips: [
+          ...(skill.entries > 0
+            ? [{ id: `journal-entries:${skill.slug}:${focus}`, label: t("chipSkillEntries", { skill: name }) }]
+            : []),
+          ...chips,
+        ],
+      };
+    }
+    // No catalogue skill — perhaps a kind of work ("Kiek klojau plyteles?"
+    // → tiler) the activity list carries under its slug or its own label.
+    const keys = read.fragments
+      .flatMap((f) => [f.activitySlug, f.activityLabel])
+      .filter((k): k is string => Boolean(k));
+    const activity = keys.map((k) => wi.activities.find((a) => a.key === k)).find((a) => a !== undefined) ?? null;
+    if (activity) {
+      return {
+        kind: "answer",
+        text: t("wiActivityHours", {
+          activity: activityName(activity.key),
+          hours: fmtHours(activity.hours, locale),
+          total: totalHours,
+          period: periodLabel,
+          entries: activity.entries,
+          day: dayOf(activity.lastWorkedDay),
+        }),
+        explanation: { why },
+        chips,
+      };
+    }
+    const subject = read.skillSlugs[0] ? skillName(read.skillSlugs[0]) : keys[0] ? activityName(keys[0]) : null;
+    if (subject) {
+      // Recognised, but nothing recorded under it in this window.
+      return {
+        kind: "answer",
+        text: t("wiSubjectNone", { subject, period: periodLabel, total: totalHours, entries: totals.entries }),
+        explanation: { why },
+        chips,
+      };
+    }
+    // No subject the recognizer knows: the plain period answer, unchanged.
+    return runRecentJournal(text);
+  }
+
+  if (intent === "journal-skills-top") {
+    const top = wi.skills.filter((s) => s.attributedHours > 0 || s.sharedHours > 0).slice(0, ANSWER_LIMIT);
+    if (top.length === 0) {
+      return {
+        kind: "answer",
+        text: t("wiSkillsNone", { period: periodLabel, total: totalHours, entries: totals.entries }),
+        explanation: { why },
+        chips,
+      };
+    }
+    const attributed = fmtHours(wi.attributedHours, locale);
+    const lines = [
+      t("wiSkillsIntro", { period: periodLabel, attributed, total: totalHours, entries: totals.entries }),
+      ...top.map((s) =>
+        t("wiSkillLine", {
+          skill: skillName(s.slug),
+          hours: fmtHours(s.attributedHours, locale),
+          pct: fmtPct(s.share, locale),
+          attributed,
+          confirmed: fmtHours(s.confirmedHours, locale),
+          shared: fmtHours(s.sharedHours, locale),
+        }),
+      ),
+    ];
+    if (wi.sharedHours + wi.multiActivityHours + wi.unattributedHours > 0) {
+      lines.push(
+        t("wiSkillsRemainder", {
+          shared: fmtHours(wi.sharedHours + wi.multiActivityHours, locale),
+          unlinked: fmtHours(wi.unattributedHours, locale),
+        }),
+      );
+    }
+    return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
+  }
+
+  if (intent === "journal-activities-top") {
+    const top = wi.activities.filter((a) => a.hours > 0).slice(0, ANSWER_LIMIT);
+    if (top.length === 0) {
+      return {
+        kind: "answer",
+        text: t("wiActivitiesNone", { period: periodLabel, total: totalHours, entries: totals.entries }),
+        explanation: { why },
+        chips,
+      };
+    }
+    const labelled = wi.activities.reduce((sum, a) => sum + a.hours, 0);
+    const unlabelled = Math.max(0, Math.round((totals.hours - labelled) * 100) / 100);
+    const lines = [
+      t("wiActivitiesIntro", { period: periodLabel, labelled: fmtHours(labelled, locale), total: totalHours }),
+      ...top.map((a) =>
+        t("wiActivityLine", {
+          activity: activityName(a.key),
+          hours: fmtHours(a.hours, locale),
+          pct: fmtPct(totals.hours > 0 ? a.hours / totals.hours : 0, locale),
+          entries: a.entries,
+        }),
+      ),
+    ];
+    if (unlabelled > 0) lines.push(t("wiActivitiesUnlabelled", { hours: fmtHours(unlabelled, locale) }));
+    return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
+  }
+
+  // journal-confirmed
+  const confirmedSkills = wi.skills.filter((s) => s.confirmedHours > 0).slice(0, ANSWER_LIMIT);
+  if (totals.confirmedHours <= 0 && wi.evidence.confirmed === 0) {
+    return {
+      kind: "answer",
+      text: t("wiConfirmedNone", { period: periodLabel, total: totalHours, entries: totals.entries }),
+      explanation: { why },
+      chips,
+    };
+  }
+  const lines = [
+    t("wiConfirmedHours", {
+      period: periodLabel,
+      confirmed: fmtHours(totals.confirmedHours, locale),
+      total: totalHours,
+      confirmedEntries: wi.evidence.confirmed,
+      entries: totals.entries,
+    }),
+  ];
+  if (confirmedSkills.length > 0) {
+    lines.push(
+      t("wiConfirmedSkills", {
+        list: confirmedSkills
+          .map((s) => t("wiConfirmedSkillItem", { skill: skillName(s.slug), hours: fmtHours(s.confirmedHours, locale) }))
+          .join(", "),
+      }),
+    );
+  }
+  return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

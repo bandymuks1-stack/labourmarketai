@@ -66,6 +66,7 @@ export type IntentHandlerId =
   | "availabilityStatement"
   | "skillGap"
   | "recentJournal"
+  | "workIntelligence"
   | "figures"
   | "openProject"
   | "projectsList"
@@ -166,6 +167,12 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   opportunities: { domain: "matching", access: "read", handler: "findWork", ownTyping: true },
   "skill-gap": { domain: "profile", access: "read", handler: "skillGap", ownTyping: true },
   "journal-recent": { domain: "journal", access: "read", handler: "recentJournal", ownTyping: true },
+  // Work intelligence by sentence (issue #1689, owner lines 2–7): ONE
+  // handler over the ONE work-in-numbers model; the intent names the facet.
+  "journal-skill": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-skills-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-activities-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-confirmed": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
   figures: { domain: "journal", access: "read", handler: "figures", ownTyping: true },
   "open-project": { domain: "project", access: "read", handler: "openProject", ownTyping: true },
   // G8: the chip surfaces by SENTENCE — each routes to the SAME component
