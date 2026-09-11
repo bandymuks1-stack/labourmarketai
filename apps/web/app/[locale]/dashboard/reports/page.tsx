@@ -39,6 +39,11 @@ export const dynamic = "force-dynamic";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
+/** A member row links to the person page only on a real worker id — the
+ *  report keys an entry with no worker on "—". */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const SECTION_CLASS =
   "flex flex-col gap-3 rounded-md border border-ink-500 bg-ink-800/30 p-4";
 const LINK_CLASS =
@@ -144,10 +149,20 @@ export default async function ReportsHubPage({
   // invalid `?journalWindow=` renders the collapsed summary only.
   const sp = (await searchParams) ?? {};
   const journalWindowKey = journalWindowKeyFrom(sp.journalWindow);
+  // `workTime` — the per-member hours roll-up (issue #1689, owner §14) rides
+  // the same read; the collapsed tile above stays count-sized.
   const journalDetail =
     view.kind === "org" && journalWindowKey !== null
-      ? await getJournalWindowReport(journalWindowKey)
+      ? await getJournalWindowReport(journalWindowKey, undefined, {
+          workTime: true,
+        })
       : null;
+  // Activity labels recorded as a profession slug read in the viewer's
+  // language; anything else is the member's own wording, shown as recorded.
+  const tProfessions =
+    journalDetail !== null ? await getTranslations("professions") : null;
+  const activityName = (key: string): string =>
+    tProfessions !== null && tProfessions.has(key) ? tProfessions(key) : key;
 
   return (
     <div className="flex flex-col gap-6" data-testid="reports-hub">
@@ -309,6 +324,7 @@ export default async function ReportsHubPage({
           locale={locale}
           journalWindowKey={journalWindowKey}
           journalDetail={journalDetail}
+          activityName={activityName}
         />
       )}
     </div>
@@ -321,6 +337,7 @@ function OrgSections({
   locale,
   journalWindowKey,
   journalDetail,
+  activityName,
 }: {
   view: OrgReportsView;
   t: Translate;
@@ -328,6 +345,7 @@ function OrgSections({
   /** Non-null = the journal detail is expanded on this window. */
   journalWindowKey: JournalWindowKey | null;
   journalDetail: JournalWindowReport | null;
+  activityName: (key: string) => string;
 }): ReactNode {
   const { demand, projects, tasks, documents, finance, journal } = view;
   return (
@@ -583,6 +601,7 @@ function OrgSections({
             locale={locale}
             windowKey={journalWindowKey}
             report={journalDetail}
+            activityName={activityName}
           />
         )}
       </section>
@@ -645,28 +664,41 @@ const DETAIL_HEAD_CELL_CLASS =
 
 /**
  * The windowed journal detail (V8 GAP 4), expanded INSIDE the journal
- * section: per-worker counts of recorded work entries over a fixed UTC
- * calendar window, with review state. Window switching is plain links back
- * to this page (?journalWindow=…#journal) — no client JS, no new route.
- * Counts and timestamps only; the basis line states that absence of entries
- * is not evidence of absence of work. No rating, no score.
+ * section: per-member WORK TIME and counts of recorded work entries over a
+ * fixed UTC calendar window, with review state. Window switching is plain
+ * links back to this page (?journalWindow=…#journal) — no client JS, no new
+ * route.
+ *
+ * The hours (issue #1689, owner §14) come from the one work-intelligence
+ * model over the window's own rows — the same figures the person page shows
+ * the organization for one member, so the roll-up and the person view can
+ * never disagree. Each member's name opens that person page. Counts,
+ * durations and timestamps only; the basis line states that absence of
+ * entries is not evidence of absence of work. No rating, no score.
  */
 function JournalWindowDetail({
   t,
   locale,
   windowKey,
   report,
+  activityName,
 }: {
   t: Translate;
   locale: string;
   windowKey: JournalWindowKey;
   report: JournalWindowReport;
+  activityName: (key: string) => string;
 }): ReactNode {
   const dayFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+  const numFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const hours = (n: number) => t("journalWindow.hours", { hours: numFmt.format(n) });
+  /** Work time was measured for this report (the hours columns render only
+   *  then — an unmeasured report shows counts, never "0 h"). */
+  const measured = report.applied && report.totals.work !== null;
 
   return (
     <div className="flex flex-col gap-3" data-testid="journal-window-report">
@@ -715,6 +747,21 @@ function JournalWindowDetail({
             })}
           </p>
 
+          {/* Entries that carry no usable duration are named, not folded into
+              the hours as zero — the count column still holds them. */}
+          {measured &&
+          report.totals.work &&
+          report.totals.work.entriesWithoutDuration > 0 ? (
+            <p
+              className="text-xs text-text-muted"
+              data-testid="journal-window-without-duration"
+            >
+              {t("journalWindow.withoutDuration", {
+                count: report.totals.work.entriesWithoutDuration,
+              })}
+            </p>
+          ) : null}
+
           {report.totals.entries === 0 ? (
             <div
               className="flex flex-col gap-1 rounded-md border border-dashed border-ink-500 p-5"
@@ -730,7 +777,7 @@ function JournalWindowDetail({
           ) : (
             <div className="overflow-x-auto rounded-md border border-ink-500">
               <table
-                className="w-full min-w-[36rem] border-collapse"
+                className="w-full min-w-[56rem] border-collapse"
                 data-testid="journal-window-table"
               >
                 <thead className="border-b border-ink-500 bg-ink-800/40">
@@ -738,6 +785,28 @@ function JournalWindowDetail({
                     <th scope="col" className={DETAIL_HEAD_CELL_CLASS}>
                       {t("journalWindow.table.worker")}
                     </th>
+                    {measured && (
+                      <>
+                        <th
+                          scope="col"
+                          className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                        >
+                          {t("journalWindow.table.hours")}
+                        </th>
+                        <th
+                          scope="col"
+                          className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                        >
+                          {t("journalWindow.table.confirmedHours")}
+                        </th>
+                        <th
+                          scope="col"
+                          className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                        >
+                          {t("journalWindow.table.days")}
+                        </th>
+                      </>
+                    )}
                     <th
                       scope="col"
                       className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
@@ -756,6 +825,12 @@ function JournalWindowDetail({
                     >
                       {t("journalWindow.table.confirmed")}
                     </th>
+                    <th
+                      scope="col"
+                      className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                    >
+                      {t("journalWindow.table.returned")}
+                    </th>
                     <th scope="col" className={DETAIL_HEAD_CELL_CLASS}>
                       {t("journalWindow.table.lastEntry")}
                     </th>
@@ -768,10 +843,64 @@ function JournalWindowDetail({
                       className="border-b border-ink-600/60 last:border-b-0"
                       data-testid={`journal-window-worker-${w.workerId}`}
                     >
-                      <td className={DETAIL_CELL_CLASS}>{w.name}</td>
+                      <td className={DETAIL_CELL_CLASS}>
+                        {/* The member's name opens the person page — the
+                            organization's full reading of this one person
+                            (hours by period, kinds of work, skills, evidence)
+                            over the same model. */}
+                        {UUID_RE.test(w.workerId) ? (
+                          <Link
+                            href={`/dashboard/people/${w.workerId}` as "/dashboard"}
+                            className="font-medium text-text-primary underline-offset-2 hover:text-brand-blue hover:underline"
+                            data-testid={`journal-window-person-${w.workerId}`}
+                          >
+                            {w.name}
+                          </Link>
+                        ) : (
+                          w.name
+                        )}
+                        {w.work?.mainActivity ? (
+                          <span
+                            className="mt-0.5 block text-meta text-text-muted"
+                            data-testid={`journal-window-activity-${w.workerId}`}
+                          >
+                            {t("journalWindow.mainly", {
+                              activity: activityName(w.work.mainActivity.key),
+                              hours: numFmt.format(w.work.mainActivity.hours),
+                            })}
+                          </span>
+                        ) : null}
+                      </td>
+                      {measured && (
+                        <>
+                          <td
+                            className={DETAIL_NUM_CELL_CLASS}
+                            data-testid={`journal-window-hours-${w.workerId}`}
+                          >
+                            {w.work ? hours(w.work.hours) : "—"}
+                            {w.work && w.work.dayUnits > 0 ? (
+                              <span className="block text-meta text-text-muted">
+                                {t("journalWindow.dayUnits", {
+                                  days: numFmt.format(w.work.dayUnits),
+                                })}
+                              </span>
+                            ) : null}
+                          </td>
+                          <td
+                            className={DETAIL_NUM_CELL_CLASS}
+                            data-testid={`journal-window-confirmed-hours-${w.workerId}`}
+                          >
+                            {w.work ? hours(w.work.confirmedHours) : "—"}
+                          </td>
+                          <td className={DETAIL_NUM_CELL_CLASS}>
+                            {w.work ? w.work.daysWorked : "—"}
+                          </td>
+                        </>
+                      )}
                       <td className={DETAIL_NUM_CELL_CLASS}>{w.entries}</td>
                       <td className={DETAIL_NUM_CELL_CLASS}>{w.awaitingReview}</td>
                       <td className={DETAIL_NUM_CELL_CLASS}>{w.confirmed}</td>
+                      <td className={DETAIL_NUM_CELL_CLASS}>{w.returned}</td>
                       <td
                         className={`${DETAIL_CELL_CLASS} font-mono text-meta text-text-muted`}
                       >
@@ -790,6 +919,32 @@ function JournalWindowDetail({
                         count: report.totals.workers,
                       })}
                     </td>
+                    {measured && report.totals.work && (
+                      <>
+                        <td
+                          className={DETAIL_NUM_CELL_CLASS}
+                          data-testid="journal-window-total-hours"
+                        >
+                          {hours(report.totals.work.hours)}
+                          {report.totals.work.dayUnits > 0 ? (
+                            <span className="block text-meta font-normal text-text-muted">
+                              {t("journalWindow.dayUnits", {
+                                days: numFmt.format(report.totals.work.dayUnits),
+                              })}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td
+                          className={DETAIL_NUM_CELL_CLASS}
+                          data-testid="journal-window-total-confirmed-hours"
+                        >
+                          {hours(report.totals.work.confirmedHours)}
+                        </td>
+                        <td className={DETAIL_NUM_CELL_CLASS}>
+                          {report.totals.work.daysWorked}
+                        </td>
+                      </>
+                    )}
                     <td className={DETAIL_NUM_CELL_CLASS}>
                       {report.totals.entries}
                     </td>
@@ -798,6 +953,9 @@ function JournalWindowDetail({
                     </td>
                     <td className={DETAIL_NUM_CELL_CLASS}>
                       {report.totals.confirmed}
+                    </td>
+                    <td className={DETAIL_NUM_CELL_CLASS}>
+                      {report.totals.returned}
                     </td>
                     <td className={DETAIL_CELL_CLASS} />
                   </tr>

@@ -150,5 +150,11 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    branch on every journal table (entries logged against the organization's own engagements),
    never a filter or an admin client; confirmed hours come from the organization's own approved
    confirmations. The organization sees no plausibility checks, no adjacent directions and no
-   diary links — those are the person's. What stays an extension point: a per-member roll-up
-   on `/dashboard/reports` (today an entry-count report) over the same reader.
+   diary links — those are the person's. The per-member roll-up on `/dashboard/reports`
+   (the windowed journal report, `journal-window-report.ts`) is LIVE the same day: with
+   `workTime` the report embeds the list core's metric projection and derives every member's
+   hours, confirmed hours (approved only), days worked and main kind of work through
+   `deriveWorkIntelligence` over the window's own rows — no skills read, no second hours
+   arithmetic; each member's name opens the person page. Its review counts were corrected in
+   the same slice: confirmed = approved, returned = rejected / changes requested, the rest
+   await review (any confirmation row used to count as confirmed, hub tile included).

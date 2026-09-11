@@ -49,6 +49,9 @@ const composer = read("components/app/journal-entry-composer.tsx");
 const ackForm = read("components/app/journal-work-time-check-ack.tsx");
 const reader = read("lib/journal/work-intelligence-read.ts");
 const personPage = read("app/[locale]/dashboard/people/[workerId]/page.tsx");
+const reportsPage = read("app/[locale]/dashboard/reports/page.tsx");
+const windowReport = read("lib/journal/journal-window-report.ts");
+const listCore = read("lib/journal/journal-list-core.ts");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
@@ -312,5 +315,66 @@ describe("8 · the organization view composes the same reader (owner §14)", () 
     const en = JSON.parse(read("messages/en/journal.json")) as { intelligence: { org: Record<string, string> } };
     expect(en.intelligence.org.provenance).not.toMatch(/\bby you\b/);
     expect(en.intelligence.org.scopeNote).toMatch(/not a rating/);
+  });
+});
+
+describe("9 · the organization's per-member roll-up rides the same model (owner §14)", () => {
+  it("the window report derives hours through deriveWorkIntelligence — no second hours arithmetic", () => {
+    expect(windowReport).toContain('import { deriveReviewResult } from "@/lib/journal/review-status";');
+    expect(windowReport).toMatch(/deriveWorkIntelligence,\s*type WorkIntelligenceEntry,\s*\} from "@\/lib\/journal\/work-intelligence"/);
+    expect(windowReport).toContain("export function deriveWindowWorkTime(");
+    expect(windowReport).toContain("export function rollUpJournalWindow(");
+    // the rule's inputs are never re-implemented here
+    expect(windowReport).not.toMatch(/fragment_time|"quantity"|unit_slug === "hours"|deriveEntryWorkTime/);
+  });
+  it("it embeds the list core's metric and confirmation projection — one select, not a hand-written one", () => {
+    expect(listCore).toContain("export const JOURNAL_ENTRY_METRICS_EMBED =");
+    expect(listCore).toContain("export const JOURNAL_ENTRY_CONFIRMATIONS_EMBED =");
+    expect(listCore).toMatch(/const V3_SELECT = `[^`]*\$\{JOURNAL_ENTRY_METRICS_EMBED\}, \$\{JOURNAL_ENTRY_CONFIRMATIONS_EMBED\}`/);
+    expect(windowReport).toMatch(/JOURNAL_ENTRY_CONFIRMATIONS_EMBED,\s*\.\.\.\(opts\.workTime \? \[JOURNAL_ENTRY_METRICS_EMBED\] : \[\]\)/);
+    expect(windowReport).not.toMatch(/journal_entry_metrics\(/);
+  });
+  it("it reads no skills and no links — an org roll-up answers how much / on what / backed by what", () => {
+    expect(windowReport).not.toMatch(/worker_skills|journal_entry_skills|readWorkerEntrySkillLinks/);
+    expect(windowReport).toContain("linkedSkillIds: [],");
+    expect(windowReport).toContain("skills: [],");
+  });
+  it("confirmed counts APPROVED entries only; a rejection is returned, never confirmed", () => {
+    expect(windowReport).toMatch(/if \(result === "approved"\) bucket\.confirmed \+= 1;\s*else if \(result === "submitted"\) bucket\.awaitingReview \+= 1;\s*else bucket\.returned \+= 1;/);
+    // the pre-fix shape: any confirmation row → confirmed
+    expect(windowReport).not.toMatch(/confirmedIds/);
+  });
+  it("work time is null when not measured — the hub tile and the daily panel stay count-sized", () => {
+    expect(windowReport).toContain("readonly work: JournalWindowWorkTime | null;");
+    expect(windowReport).toMatch(/work: opts\.workTime \? deriveWindowWorkTime\(b\.rows, opts\.todayIso\) : null/);
+    expect(read("lib/reports/reports-hub.ts")).toMatch(/getJournalWindowReport\("week"\)/);
+    expect(read("lib/planning/organization-today.ts")).toMatch(/getJournalWindowReport\("today", todayIso\)/);
+  });
+  it("the reports page asks for work time, renders it only when measured, and opens the person page per member", () => {
+    expect(reportsPage).toMatch(/getJournalWindowReport\(journalWindowKey, undefined, \{\s*workTime: true,\s*\}\)/);
+    expect(reportsPage).toContain("const measured = report.applied && report.totals.work !== null;");
+    expect(reportsPage).toMatch(/href=\{`\/dashboard\/people\/\$\{w\.workerId\}` as "\/dashboard"\}/);
+    expect(reportsPage).toContain('data-testid="journal-window-total-hours"');
+    expect(reportsPage).toContain('data-testid="journal-window-without-duration"');
+    expect(reportsPage).not.toMatch(/journal_entry_metrics|fragment_time|deriveEntryWorkTime|original_text/);
+  });
+  it("the roll-up wording exists in every active locale and names hours, confirmed hours and the returned state", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const base = JSON.parse(read(`messages/${loc}.json`)) as { reports: { journalWindow: Record<string, unknown> } };
+      const jw = base.reports.journalWindow;
+      const table = jw.table as Record<string, string>;
+      for (const key of ["hours", "confirmedHours", "days", "returned"]) {
+        expect(typeof table[key] === "string" && table[key]!.trim().length > 0, `${loc}.reports.journalWindow.table.${key}`).toBe(true);
+      }
+      for (const key of ["hours", "dayUnits", "mainly", "withoutDuration", "basis"]) {
+        expect(typeof jw[key] === "string" && (jw[key] as string).trim().length > 0, `${loc}.reports.journalWindow.${key}`).toBe(true);
+      }
+      expect(jw.hours as string).toContain("{hours}");
+      expect(jw.mainly as string).toContain("{activity}");
+      expect(jw.withoutDuration as string).toContain("{count, plural,");
+    }
+    const en = JSON.parse(read("messages/en.json")) as { reports: { journalWindow: { basis: string } } };
+    expect(en.reports.journalWindow.basis).toMatch(/counted once/);
+    expect(en.reports.journalWindow.basis).toMatch(/approved/);
   });
 });

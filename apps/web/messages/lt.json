@@ -744,7 +744,7 @@
     },
     "journalWindow": {
       "title": "Darbo žurnalo ataskaita",
-      "intro": "Užfiksuotų darbo įrašų skaičiai pagal darbuotoją per pasirinktą kalendorinį langą. Tik skaičiai ir datos — be įrašų teksto, be vertinimų.",
+      "intro": "Darbo laikas ir užfiksuoti įrašai pagal narį per pasirinktą kalendorinį langą – iš šios organizacijos įrašų. Tik valandos, skaičiai ir datos – be įrašų teksto, be vertinimų.",
       "windowLabel": "Ataskaitos langas",
       "window": {
         "today": "Šiandien",
@@ -761,11 +761,19 @@
         "entries": "Įrašai",
         "awaitingReview": "Laukia peržiūros",
         "confirmed": "Patvirtinta",
-        "lastEntry": "Paskutinis įrašas"
+        "lastEntry": "Paskutinis įrašas",
+        "hours": "Valandos",
+        "confirmedHours": "Patvirtintos val.",
+        "days": "Dienos",
+        "returned": "Grąžinta"
       },
       "totals": "{count, plural, one {Iš viso · # darbuotojas} few {Iš viso · # darbuotojai} other {Iš viso · # darbuotojų}}",
       "basisLabel": "Pagrindas",
-      "basis": "Skaičiuojama iš darbo įrašų, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per pasirinktą langą. Peržiūros būsena — iš vadovų patvirtinimų. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko, ir niekas čia darbuotojų nevertina balais.",
+      "basis": "Skaičiuojama iš darbo įrašų, kuriuos nariai užfiksavo šios organizacijos darbo santykiuose per pasirinktą langą. Valandos – kiekvieno įrašo paties užfiksuota trukmė, skaičiuojama vieną kartą; patvirtintos valandos – ta dalis, kuri tenka vadovo patvirtintiems įrašams; dienos – kalendorinės dienos su bent vienu įrašu su trukme (sumoje – nario dienos). „Patvirtinta“ – patvirtinti įrašai, „grąžinta“ – atmesti arba grąžinti taisyti, likę laukia peržiūros. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko, ir niekas čia darbuotojų nevertina balais.",
+      "hours": "{hours} val.",
+      "dayUnits": "+ {days} d. užfiksuota dienomis",
+      "mainly": "daugiausia {activity} · {hours} val.",
+      "withoutDuration": "{count, plural, one {# įrašas šiame lange neturi trukmės – jis suskaičiuotas, bet ne valandomis.} few {# įrašai šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.} many {# įrašo šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.} other {# įrašų šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.}}",
       "collapse": "Slėpti detalią ataskaitą"
     }
   },
