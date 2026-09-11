@@ -231,3 +231,29 @@ export async function skillsForEscoOccupation(
     })),
   };
 }
+
+/**
+ * The ISCO-08 group an ESCO occupation belongs to — the ONE key the Work
+ * Journal's archetype model resolves on (`lib/journal/work-evidence-
+ * archetypes.ts`). Every active occupation carries a 4-digit code (measured
+ * 2026-09-11: 3,039 of 3,039). Unknown id → `null` value, never a guessed
+ * family. Read-only; the caller's own client and RLS.
+ */
+export async function iscoGroupForEscoOccupation(
+  occupationId: string,
+  client?: SupabaseClient,
+): Promise<EscoRead<string | null>> {
+  const supabase = client ?? (await createClient());
+  const { data, error } = await asAny(supabase)
+    .from("esco_occupations")
+    .select("isco_group")
+    .eq("id", occupationId)
+    .maybeSingle();
+
+  if (error) {
+    if (isMissingTable(error)) return { status: "unavailable", reason: "not_imported" };
+    return { status: "unavailable", reason: "error" };
+  }
+  const code = (data as { isco_group?: string | null } | null)?.isco_group ?? null;
+  return { status: "ok", value: typeof code === "string" && code.trim() ? code.trim() : null };
+}

@@ -171,8 +171,11 @@ const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
  *      with a one-time token → the canonical `createJournalEntry`;
  *   4. shows the REAL server outcome (never a fabricated success — §7).
  *
- * Times/break/hours are shown as a read-only parse summary: they already live
- * in the evidence notes, so they are not persisted as separate claims.
+ * Times/break/hours are shown as a read-only parse summary. Since issue #1689
+ * the SAME deterministic parse is persisted by the executor as duration
+ * metrics with machine-extraction provenance (`lib/journal/intake-work-time`),
+ * so the hours the person stated reach the canonical work-time rule instead
+ * of staying hidden in the evidence text.
  */
 export function WorkerWorkLogFlow({
   draft,

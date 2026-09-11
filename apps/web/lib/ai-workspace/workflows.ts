@@ -12,7 +12,8 @@ import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
-import { visibleRange } from "@/lib/planning/planning-model";
+import { loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { isWorkTimeUnit, workTimeHours } from "@/lib/journal/work-time";
 import {
   DOCUMENT_GAP_LINE_CAP,
   groupMissingDocumentsByType,
@@ -492,22 +493,45 @@ export async function runLearningCompass(): Promise<WorkflowResult> {
 // 3. Journal — "show my latest journal"
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** "Recent" for the journal answer: the last two weeks INCLUDING today. */
+const RECENT_JOURNAL_DAYS = 14;
+
 /**
  * The person's most recent real journal entries, from the canonical Time Engine
  * projection (the same rows the calendar shows). No second journal read.
+ *
+ * THE WINDOW LOOKS BACK (issue #1689). This used to read the calendar's
+ * `agenda` range — today and the 13 days AFTER it — while its copy said "in
+ * the last N days". The journal is FACT: what really happened, so nearly
+ * every entry sat before the window and "kiek valandų dirbau šiandien?" was
+ * answered from tomorrow onward. The range now ends today and starts
+ * `RECENT_JOURNAL_DAYS - 1` days earlier, and the answer carries the hours
+ * those entries add up to — each entry's own canonical duration label, the
+ * same one the calendar shows, summed once per entry.
  */
 export async function runRecentJournal(): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const locale = await getLocale();
   const todayIso = new Date().toISOString().slice(0, 10);
-  const range = visibleRange("agenda", todayIso);
+  const range = { start: isoDayMinus(todayIso, RECENT_JOURNAL_DAYS - 1), end: todayIso };
   const planning = await getPlanning({ rangeStart: range.start, rangeEnd: range.end });
   if (planning.status !== "ok") return blocked(t("blockedNoPlan"), t("whyNoPlan"));
 
-  const entries = planning.items
+  const journalItems = planning.items
     .filter((it) => it.sourceType === "journal" && it.startDate !== null)
-    .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1))
-    .slice(0, ANSWER_LIMIT);
+    .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1));
+  const entries = journalItems.slice(0, ANSWER_LIMIT);
+
+  // Hours over the whole window, one canonical label per entry ("<value>|<unit>").
+  let windowHours = 0;
+  let windowDayUnits = 0;
+  for (const it of journalItems) {
+    const parsed = parseDurationLabel(it.duration);
+    if (!parsed) continue;
+    if (parsed.unit === "days") windowDayUnits += parsed.value;
+    else windowHours += workTimeHours(parsed.value, parsed.unit);
+  }
+  windowHours = Math.round(windowHours * 100) / 100;
 
   if (entries.length === 0) {
     return {
@@ -530,12 +554,48 @@ export async function runRecentJournal(): Promise<WorkflowResult> {
     }),
   );
 
+  const hoursLine =
+    windowHours > 0 || windowDayUnits > 0
+      ? t("journalHoursTotal", {
+          hours: fmtHours(windowHours, locale),
+          days: rangeDays(range.start, range.end),
+          entries: journalItems.length,
+        }) + (windowDayUnits > 0 ? " " + t("journalDayUnits", { days: fmtHours(windowDayUnits, locale) }) : "")
+      : t("journalHoursNone", { entries: journalItems.length });
+
   return {
     kind: "answer",
-    text: [t("journalIntro", { count: entries.length }), ...lines].join("\n"),
+    text: [t("journalIntro", { count: entries.length }), ...lines, hoursLine].join("\n"),
     explanation: { why: t("whyJournalWindow", { days: rangeDays(range.start, range.end) }) },
-    chips: [{ id: "logwork", label: t("chipLogWork") }],
+    chips: [
+      { id: "logwork", label: t("chipLogWork") },
+      { id: "journal-numbers", label: t("chipJournalNumbers") },
+    ],
   };
+}
+
+/** ISO day `days` before `todayIso` (UTC calendar days — never local time). */
+function isoDayMinus(todayIso: string, days: number): string {
+  const d = new Date(`${todayIso}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** The planning strip's canonical `"<value>|<unit>"` duration label. */
+function parseDurationLabel(
+  label: string | null,
+): { value: number; unit: "hours" | "minutes" | "days" } | null {
+  if (!label) return null;
+  const sep = label.indexOf("|");
+  if (sep <= 0) return null;
+  const value = Number(label.slice(0, sep));
+  const unit = label.slice(sep + 1);
+  if (!Number.isFinite(value) || value <= 0 || !isWorkTimeUnit(unit)) return null;
+  return { value, unit };
+}
+
+function fmtHours(hours: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(hours);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -578,6 +638,25 @@ export async function runFigures(): Promise<WorkflowResult> {
     const entriesUnread =
       view.evidence.journalEntries === null ||
       view.evidence.confirmations === null;
+    // HOURS, at last (issue #1689). The old line said the platform keeps no
+    // hours figure. Since the canonical work-time rule (owner ruling
+    // 2026-08-18) it does: every entry's recorded duration, counted once,
+    // with the confirmed part told apart. An unreadable journal says so —
+    // it never states a zero nobody counted.
+    const locale = await getLocale();
+    const wi = await loadOwnWorkIntelligence().catch(() => null);
+    const month = wi?.periods.find((p) => p.key === "month") ?? null;
+    const all = wi?.periods.find((p) => p.key === "all") ?? null;
+    const hoursLine =
+      wi === null || all === null || month === null
+        ? t("figuresWorkerHoursUnread")
+        : all.hours > 0
+          ? t("figuresWorkerHours", {
+              total: fmtHours(all.hours, locale),
+              confirmed: fmtHours(all.confirmedHours, locale),
+              month: fmtHours(month.hours, locale),
+            })
+          : t("figuresWorkerHoursNone", { entries: all.entries });
     return {
       kind: "answer",
       text: [
@@ -592,9 +671,10 @@ export async function runFigures(): Promise<WorkflowResult> {
               skills: view.evidence.totalSkills,
               confirmed: view.evidence.confirmed,
             }),
-        t("figuresNoHoursLedger"),
+        hoursLine,
       ].join("\n"),
       explanation: { why: t("whyFigures") },
+      chips: [{ id: "journal-numbers", label: t("chipJournalNumbers") }],
     };
   }
 

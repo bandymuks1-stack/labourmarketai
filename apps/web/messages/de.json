@@ -7853,7 +7853,11 @@
       "noStructure": "Diese Anfrage hat keine strukturierten Anforderungen — der Standard-Lebenslauf wird angezeigt.",
       "matchedTag": "Passt zur Anfrage"
     },
-    "claimFromJournal": "aus dem Arbeitsjournal"
+    "claimFromJournal": "aus dem Arbeitsjournal",
+    "recordedHours": "Erfasste Arbeit: {hours} Std. aus dem Arbeitsjournal, davon {confirmed} Std. bestätigt.",
+    "recordedHoursNone": "Noch keine Journaleinträge mit Dauer — Stunden neben Fähigkeiten stammen aus Ihren eigenen Einträgen.",
+    "skillHours": "{hours} Std.",
+    "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind"
   },
   "todayScreen": {
     "eyebrow": "Heute",
@@ -12600,6 +12604,8 @@
       "userProposalStatus": "Wie steht es um meine Vorschläge?",
       "learningCompassHint": "Ihr Lernkompass — Richtung, fehlende Fähigkeiten und passende Möglichkeiten:",
       "chipLearningCompass": "Lernkompass",
+      "journalNumbersHint": "Ihre Arbeit in Zahlen — Stunden, Haupttätigkeit, Fähigkeiten und Richtungen — steht im Arbeitsjournal:",
+      "chipJournalNumbers": "Arbeit in Zahlen",
       "inviteStudentHint": "Ein Lernender wird mit einem persönlichen Link aus dem Netzwerkbereich eingeladen (Beziehung „Student“):",
       "chipInviteStudent": "Lernenden einladen",
       "programmesHint": "Programme und Kohorten werden im Unternehmensbereich verwaltet — dort legen Sie ein Programm und eine Kohorte an und weisen Lernende zu:",
@@ -13701,6 +13707,13 @@
       "journalLine": "— {day}: {what}",
       "journalUnlabelled": "(ohne Beschreibung)",
       "journalEmpty": "In den letzten {days} Tagen hast du keine Einträge.",
+      "journalHoursTotal": "Gesamt über {days} Tage: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}} (jeder Eintrag einmal gezählt).",
+      "journalDayUnits": "Weitere {days} Tg. in Tagen erfasst — nicht in Stunden umgerechnet.",
+      "journalHoursNone": "{entries, plural, =0 {Keine Einträge mit Dauer.} one {# Eintrag, aber ohne Dauer — fügen Sie Stunden hinzu, dann werden sie gezählt.} other {# Einträge, aber ohne Dauer — fügen Sie Stunden hinzu, dann werden sie gezählt.}}",
+      "chipJournalNumbers": "Arbeit in Zahlen",
+      "figuresWorkerHours": "Erfasste Arbeit: {total} Std. insgesamt, davon {confirmed} Std. bestätigt; {month} Std. in den letzten 30 Tagen.",
+      "figuresWorkerHoursNone": "{entries, plural, =0 {Noch keine Einträge mit Dauer — Stunden stammen aus Ihren eigenen Einträgen.} one {# Eintrag, keiner mit Dauer — fügen Sie dem Eintrag Stunden hinzu.} other {# Einträge, keiner mit Dauer — fügen Sie einem Eintrag Stunden hinzu.}}",
+      "figuresWorkerHoursUnread": "Ich konnte Ihre Stunden gerade nicht lesen — das ist nicht dasselbe wie keine zu haben. Fragen Sie gleich noch einmal.",
       "figuresWorker": "{entries} Einträge, davon {confirmations} von einer Führungskraft bestätigt. {skills} Fähigkeiten gespeichert, {confirmed} bestätigt.",
       "figuresWorkerUnread": "{skills} Fähigkeiten gespeichert, {confirmed} bestätigt. Die Anzahl deiner Journaleinträge und Bestätigungen konnte ich gerade nicht lesen — das ist nicht dasselbe wie keine zu haben. Frag gleich noch einmal.",
       "figuresNoHoursLedger": "Die Plattform führt kein Register genehmigter Stunden, deshalb kann ich keine Stundenzahl nennen — sie erfasst bestätigte Einträge.",

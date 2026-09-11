@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
 import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
@@ -639,6 +640,9 @@ const journalConfirm: CapabilityDescriptor = {
         notes: draft.notes,
         work_date: draft.workDate,
         site_name: draft.siteName ?? "",
+        // The stated time becomes time on the record — the same derivation
+        // the conversation executor applies (issue #1689).
+        ...intakeWorkTimeFields(draft.notes, draft.workDate),
       }),
     );
     if (!result.ok) {

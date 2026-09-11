@@ -7853,7 +7853,11 @@
       "noStructure": "Šis poreikis neturi struktūruotų įgūdžių reikalavimų — rodomas standartinis CV.",
       "matchedTag": "Atitinka poreikį"
     },
-    "claimFromJournal": "iš darbo įrašo"
+    "claimFromJournal": "iš darbo įrašo",
+    "recordedHours": "Užfiksuota darbo: {hours} val. iš darbo žurnalo, iš jų patvirtinta {confirmed} val.",
+    "recordedHoursNone": "Darbo žurnale dar nėra įrašų su trukme — valandos prie įgūdžių atsiras iš jūsų įrašų.",
+    "skillHours": "{hours} val.",
+    "skillHoursHint": "valandos iš darbo žurnalo įrašų, susietų tik su šiuo įgūdžiu"
   },
   "todayScreen": {
     "eyebrow": "Šiandien",
@@ -12600,6 +12604,8 @@
       "userProposalStatus": "Kaip sekasi mano pasiūlymams?",
       "learningCompassHint": "Jūsų mokymosi kompasas — kryptis, trūkstami įgūdžiai ir tinkamos galimybės:",
       "chipLearningCompass": "Mokymosi kompasas",
+      "journalNumbersHint": "Jūsų darbas skaičiais — valandos, pagrindinė veikla, įgūdžiai ir kryptys — yra darbo žurnale:",
+      "chipJournalNumbers": "Darbas skaičiais",
       "inviteStudentHint": "Studentas pakviečiamas asmenine nuoroda iš tinklo skilties (ryšys „Studentas“):",
       "chipInviteStudent": "Pakviesti studentą",
       "programmesHint": "Programos ir grupės tvarkomos įmonės erdvėje — čia sukursite programą, grupę ir priskirsite besimokančius:",
@@ -13701,6 +13707,13 @@
       "journalLine": "— {day}: {what}",
       "journalUnlabelled": "(be aprašymo)",
       "journalEmpty": "Per paskutines {days} dienas žurnalo įrašų neturi.",
+      "journalHoursTotal": "Iš viso per {days} d.: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} (kiekvienas įrašas skaičiuojamas kartą).",
+      "journalDayUnits": "Dar {days} d. užfiksuota dienomis — į valandas neverčiama.",
+      "journalHoursNone": "{entries, plural, =0 {Įrašų su trukme nėra.} one {# įrašas, bet be trukmės — pridėkite valandas, ir jos bus suskaičiuotos.} few {# įrašai, bet be trukmės — pridėkite valandas, ir jos bus suskaičiuotos.} other {# įrašų, bet be trukmės — pridėkite valandas, ir jos bus suskaičiuotos.}}",
+      "chipJournalNumbers": "Darbas skaičiais",
+      "figuresWorkerHours": "Užfiksuota darbo: {total} val. iš viso, iš jų patvirtinta {confirmed} val.; per paskutines 30 d. — {month} val.",
+      "figuresWorkerHoursNone": "{entries, plural, =0 {Įrašų su trukme dar nėra — valandos atsiras iš jūsų įrašų.} one {# įrašas, bet nė vienas su trukme — pridėkite valandas prie įrašo.} few {# įrašai, bet nė vienas su trukme — pridėkite valandas prie įrašo.} other {# įrašų, bet nė vienas su trukme — pridėkite valandas prie įrašo.}}",
+      "figuresWorkerHoursUnread": "Valandų dabar perskaityti nepavyko — tai ne tas pats, kas jų neturėti. Paklauskite dar kartą po akimirkos.",
       "figuresWorker": "{entries} žurnalo įrašai, iš jų {confirmations} patvirtinti vadovo. Įrašyti {skills} įgūdžiai, patvirtinti {confirmed}.",
       "figuresWorkerUnread": "Išsaugota įgūdžių: {skills}, patvirtinta: {confirmed}. Dabar nepavyko perskaityti tavo dienoraščio įrašų ir patvirtinimų skaičiaus — tai nėra tas pats, kaip jų neturėti. Paklausk dar kartą po akimirkos.",
       "figuresNoHoursLedger": "Platforma nekaupia patvirtintų valandų registro, todėl valandų skaičiaus pateikti negaliu — kaupiami patvirtinti įrašai.",

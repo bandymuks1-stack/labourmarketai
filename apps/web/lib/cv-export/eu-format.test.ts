@@ -27,6 +27,9 @@ const EMPTY: VerifiedCvData = {
   education: [],
   achievements: [],
   projects: [],
+  recordedHoursBySkill: null,
+  recordedHoursTotal: null,
+  recordedHoursConfirmed: null,
   privateDetails: {
     salaryMinEur: null,
     salaryMaxEur: null,

@@ -81,6 +81,8 @@ export default async function VerifiedCvPage({
   const tSkill = await getTranslations("skillNames");
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
+  const fmtHours = (h: number) =>
+    new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
   const tDocTypes = await getTranslations("documents.types");
   const tEduTypes = await getTranslations("cvSections.educationTypes");
@@ -614,6 +616,20 @@ export default async function VerifiedCvPage({
             first) and highlights; nothing is added or hidden. */}
         <section className="flex flex-col gap-4" data-testid="cv-skills">
           <h2 className={sectionTitle}>{t("skills")}</h2>
+          {/* Recorded work behind the skills (issue #1689): the SAME figures
+              the journal's "work in numbers" shows, through the one canonical
+              work-time rule. Null (unreadable) renders nothing — never a zero
+              that reads as "no work". */}
+          {cv.recordedHoursTotal !== null && (
+            <p className="text-meta text-text-muted" data-testid="cv-recorded-hours">
+              {cv.recordedHoursTotal > 0
+                ? t("recordedHours", {
+                    hours: fmtHours(cv.recordedHoursTotal),
+                    confirmed: fmtHours(cv.recordedHoursConfirmed ?? 0),
+                  })
+                : t("recordedHoursNone")}
+            </p>
+          )}
           {TIER_ORDER.map((tier) => {
             if (tier === "declared") {
               if (declaredAll.length === 0) return null;
@@ -667,6 +683,15 @@ export default async function VerifiedCvPage({
                         title={matched ? t("tailored.matchedTag") : undefined}
                       >
                         {tSkill(slug)}
+                        {(cv.recordedHoursBySkill?.[slug] ?? 0) > 0 ? (
+                          <span
+                            className="ml-1 tabular-nums text-text-muted"
+                            title={t("skillHoursHint")}
+                            data-testid={`cv-skill-hours-${slug}`}
+                          >
+                            · {t("skillHours", { hours: fmtHours(cv.recordedHoursBySkill![slug]!) })}
+                          </span>
+                        ) : null}
                       </span>
                     );
                   })}
