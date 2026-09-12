@@ -17,6 +17,12 @@
  *   2. curated ambiguity table → choice candidates (worker picks a reading);
  *   3. capability claims (deterministic lexicon — NOT AI, doctrine §7);
  *   4. per-entry worker rejections → outcomes stay VISIBLE as `rejected`;
+ *   4b. catalogue OFFER for a fragment no lane read (issue #1689): the
+ *      whole-labour-market catalogue the intake side already consults
+ *      (`recognizeNewSkillSuggestions`, recognition-tiers tier 2) names a
+ *      possible skill for THAT fragment ("2 val. testavau" → qa-testing) as
+ *      a `fuzzy_skill` candidate — the worker's word links it through the
+ *      existing confirm/reject actions; never auto-linked, declared or not;
  *   5. zero-outcome meaningful fragment → `unresolved` (fragment text as the
  *      label). Silent loss is structurally impossible: every meaningful
  *      fragment lands in exactly one of covered / unresolved.
@@ -43,6 +49,7 @@ import {
   type SkillMatchVia,
 } from "@/lib/structuring/skill-recognition";
 import { extractAmbiguousCandidates } from "@/lib/structuring/ambiguous-journal-candidates";
+import { recognizeNewSkillSuggestions } from "@/lib/structuring/new-skill-suggestions";
 import {
   extractProfileSkillClaims,
   getJournalClaimRowMeta,
@@ -379,6 +386,39 @@ export function deriveJournalRecognition(
           prior.fragmentIds.add(f.id);
         }
         outcomes.push({ kind: "claim", ref: c.normalizedLabel });
+      }
+
+      // ── Lane 4b: catalogue offer for a fragment nothing read ────────────
+      // The intake side offers the catalogue's "possible skill" ONLY when no
+      // confident signal exists (the owner's tier-2 rule, recognition-tiers).
+      // The same rule at fragment grain: a meaningful fragment with no
+      // outcome — no recognised slug, no ambiguity, no claim, no rejection —
+      // gets the catalogue's reading of ITS OWN text as `fuzzy_skill`
+      // candidates, so its hours can be linked by the worker's word
+      // (confirmJournalSkillCandidate → worker_skills self_declared + the
+      // fragment evidence row). A weak needle is an offer, not a reading:
+      // a DECLARED slug is offered the same way, never auto-linked (unlike
+      // lane 1's fuzzy tier, whose declared-slug rule stays as it was). The
+      // declared set is therefore NOT passed to the catalogue. Slugs the
+      // worker rejected on this entry stay visible as rejected.
+      if (outcomes.length === 0) {
+        for (const s of recognizeNewSkillSuggestions(f.text)) {
+          if (rejectedSlugSet.has(s.slug)) {
+            pushRejected("skill", s.slug, s.slug, "user_rejected", f.id);
+            outcomes.push({ kind: "rejected", ref: s.slug });
+            continue;
+          }
+          const prior = fuzzyMap.get(s.slug);
+          if (!prior) {
+            fuzzyMap.set(s.slug, {
+              reason: s.matchedText,
+              fragmentIds: new Set([f.id]),
+            });
+          } else {
+            prior.fragmentIds.add(f.id);
+          }
+          outcomes.push({ kind: "fuzzy_candidate", ref: s.slug });
+        }
       }
 
       // ── Lane 5: unresolved fallback — silent loss is impossible ─────────

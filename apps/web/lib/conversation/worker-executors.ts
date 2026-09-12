@@ -262,6 +262,11 @@ export const WORKER_EXECUTORS: {
             slug: c.slug ?? null,
             kind: c.kind,
           })),
+          // The derivation version the candidates belong to — every
+          // confirm/reject action re-derives server-side and refuses a
+          // stale one (trust boundary), so the chat's offer controls carry
+          // it exactly as the journal composer does.
+          pipelineVersion: r.skills.recognition.pipelineVersion,
           cvUpdated: r.skills.cvUpdated,
         },
         // Owner §13: the day-level plausibility check the saved entry now

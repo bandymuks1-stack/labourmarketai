@@ -27,6 +27,10 @@ import {
   type WorkLogParse,
 } from "@/lib/conversation/worklog-extract";
 import { deriveIntakeWorkTime } from "@/lib/journal/intake-work-time";
+import {
+  confirmJournalSkillCandidate,
+  rejectJournalSkillCandidate,
+} from "@/lib/journal/skill-pipeline-actions";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { formatUtcDate } from "@/lib/time/display";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -92,8 +96,14 @@ type WorkLogSkillsOutcome = {
   addedSkills: string[];
   strengthenedSkills: string[];
   pendingCandidates: { label: string; slug: string | null; kind: string }[];
+  /** Derivation version of the candidates (the actions refuse a stale one);
+   *  null = not readable → the offers are listed, not decidable here. */
+  pipelineVersion: number | null;
   cvUpdated: boolean;
 };
+
+/** One-tap decision state per offered skill (keyed by slug). */
+type CandidateDecision = "idle" | "working" | "confirmed" | "rejected" | "error";
 
 /** The saved entry's id, straight off the dispatcher result. The photo can only
  *  be attached once a REAL entry exists, so a missing id means no upload is
@@ -156,6 +166,10 @@ function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
     addedSkills: strings(o.addedSkills),
     strengthenedSkills: strings(o.strengthenedSkills),
     pendingCandidates: candidates,
+    pipelineVersion:
+      typeof o.pipelineVersion === "number" && Number.isFinite(o.pipelineVersion)
+        ? o.pipelineVersion
+        : null,
     cvUpdated: o.cvUpdated === true,
   };
 }
@@ -171,6 +185,8 @@ type Phase =
   | { kind: "uploading" }
   | {
       kind: "done";
+      /** The saved entry's id (null = not readable → offers are not decidable). */
+      entryId: string | null;
       skills: WorkLogSkillsOutcome | null;
       /** null = no open day check (or not readable) — nothing is shown. */
       dayCheck: WorkLogDayCheck | null;
@@ -252,6 +268,14 @@ export function WorkerWorkLogFlow({
    */
   const tPhoto = useTranslations("journal.photo");
   const tCheck = useTranslations("journal.intelligence.checks");
+  // The offered-skill decision rides the journal composer's OWN copy and
+  // actions (issue #1689): a fragment nothing read may carry a catalogue
+  // OFFER ("2 val. testavau" → software testing) that only the worker's word
+  // links — and the worker typed it here, so the decision is made here.
+  const tCandidate = useTranslations("journal");
+  const [candidateDecisions, setCandidateDecisions] = useState<
+    Record<string, CandidateDecision>
+  >({});
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoPrep, setPhotoPrep] = useState<PhotoPrep>("idle");
@@ -433,7 +457,7 @@ export function WorkerWorkLogFlow({
           // A thrown uploader is a FAILED upload, never a silent success.
           outcome = "failed";
         }
-        setPhase({ kind: "done", skills, dayCheck, photo: outcome });
+        setPhase({ kind: "done", entryId, skills, dayCheck, photo: outcome });
         router.refresh();
         return;
       }
@@ -441,6 +465,7 @@ export function WorkerWorkLogFlow({
       // honestly and say the photo did not attach, rather than implying it did.
       setPhase({
         kind: "done",
+        entryId,
         skills,
         dayCheck,
         photo: photoFile ? "failed" : null,
@@ -517,6 +542,48 @@ export function WorkerWorkLogFlow({
       (skills?.addedSkills.length ?? 0) +
         (skills?.strengthenedSkills.length ?? 0) >
       0;
+    // A taxonomy offer (`fuzzy_skill`) is decidable right here through the
+    // SAME server actions the journal composer uses — the server re-derives
+    // from the stored text and checks membership + version; nothing is
+    // trusted from this client. Ambiguous readings keep their curated
+    // choices in the journal, so they stay listed, not decided, here.
+    const decidable = (c: { slug: string | null; kind: string }): c is {
+      slug: string;
+      kind: "fuzzy_skill";
+    } =>
+      c.kind === "fuzzy_skill" &&
+      typeof c.slug === "string" &&
+      phase.entryId !== null &&
+      skills?.pipelineVersion !== null;
+    const decide = async (slug: string, decision: "confirm" | "reject") => {
+      if (!phase.entryId || skills?.pipelineVersion == null) return;
+      setCandidateDecisions((prev) => ({ ...prev, [slug]: "working" }));
+      try {
+        const res =
+          decision === "confirm"
+            ? await confirmJournalSkillCandidate(
+                phase.entryId,
+                slug,
+                skills.pipelineVersion,
+              )
+            : await rejectJournalSkillCandidate(
+                phase.entryId,
+                slug,
+                skills.pipelineVersion,
+              );
+        setCandidateDecisions((prev) => ({
+          ...prev,
+          [slug]: res.ok
+            ? decision === "confirm"
+              ? "confirmed"
+              : "rejected"
+            : "error",
+        }));
+        if (res.ok) router.refresh();
+      } catch {
+        setCandidateDecisions((prev) => ({ ...prev, [slug]: "error" }));
+      }
+    };
     return (
       <div
         className="flex flex-col gap-2 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support"
@@ -544,16 +611,72 @@ export function WorkerWorkLogFlow({
                   {labels.strengthenedSkillPrefix}: {skillName(slug)}
                 </li>
               ))}
-              {awaiting.map((c) => (
-                <li
-                  key={`pend-${c.slug ?? c.label}`}
-                  className="text-text-muted"
-                  data-testid="worklog-pending-candidate"
-                >
-                  {labels.pendingConfirmPrefix}:{" "}
-                  {c.slug ? skillName(c.slug) : c.label}
-                </li>
-              ))}
+              {awaiting.map((c) => {
+                const state: CandidateDecision = c.slug
+                  ? (candidateDecisions[c.slug] ?? "idle")
+                  : "idle";
+                return (
+                  <li
+                    key={`pend-${c.slug ?? c.label}`}
+                    className="text-text-muted"
+                    data-testid="worklog-pending-candidate"
+                    data-candidate-slug={c.slug ?? undefined}
+                    data-candidate-state={state}
+                  >
+                    {labels.pendingConfirmPrefix}:{" "}
+                    {c.slug ? skillName(c.slug) : c.label}
+                    {state === "confirmed" && (
+                      <span
+                        className="ml-2 font-semibold text-state-success"
+                        data-testid="worklog-candidate-confirmed"
+                      >
+                        ✓ {tCandidate("candidateConfirmed")}
+                      </span>
+                    )}
+                    {state === "rejected" && (
+                      <span
+                        className="ml-2"
+                        data-testid="worklog-candidate-rejected"
+                      >
+                        {tCandidate("candidateRejected")}
+                      </span>
+                    )}
+                    {state === "error" && (
+                      <span
+                        role="alert"
+                        className="ml-2 text-state-danger"
+                        data-testid="worklog-candidate-error"
+                      >
+                        {tCandidate("candidateError")}
+                      </span>
+                    )}
+                    {decidable(c) &&
+                      state !== "confirmed" &&
+                      state !== "rejected" && (
+                        <ChatActionRow>
+                          <ChatAction
+                            tone="primary"
+                            loading={state === "working"}
+                            testId="worklog-candidate-confirm"
+                            onClick={() => void decide(c.slug, "confirm")}
+                          >
+                            {state === "working"
+                              ? tCandidate("candidateConfirming")
+                              : tCandidate("candidateConfirm")}
+                          </ChatAction>
+                          <ChatAction
+                            tone="secondary"
+                            disabled={state === "working"}
+                            testId="worklog-candidate-reject"
+                            onClick={() => void decide(c.slug, "reject")}
+                          >
+                            {tCandidate("candidateReject")}
+                          </ChatAction>
+                        </ChatActionRow>
+                      )}
+                  </li>
+                );
+              })}
               {skills.status === "failed" && (
                 <li className="text-text-muted">{labels.pipelineFailedNote}</li>
               )}
