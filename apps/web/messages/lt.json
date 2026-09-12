@@ -7846,6 +7846,8 @@
     "recordedHours": "Užfiksuota darbo: {hours} val. iš darbo žurnalo, iš jų patvirtinta {confirmed} val.",
     "recordedHoursNone": "Darbo žurnale dar nėra įrašų su trukme — valandos prie įgūdžių atsiras iš jūsų įrašų.",
     "skillHours": "{hours} val.",
+    "skillHoursOwn": "{hours} val., jūsų pačių įrašas",
+    "skillHoursConfirmed": "{hours} val., iš jų vadovo patvirtinta {confirmed} val.",
     "skillHoursHint": "valandos iš darbo žurnalo įrašų, susietų tik su šiuo įgūdžiu",
     "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui."
   },
@@ -13723,6 +13725,7 @@
       "wiUnread": "Šiuo metu nepavyko perskaityti jūsų užfiksuoto darbo — tai ne tas pats, kas jo neturėti. Paklauskite dar kartą po akimirkos.",
       "wiOutputs": "{period} atlikta: {list}.",
       "wiOutputItem": "{value} {unit} ({entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
+      "wiOutputItemActivity": "{value} {unit} · {activity} ({entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
       "wiSkillHours": "{skill}: {hours} val. priskirta šiam įgūdžiui iš {total} val. užfiksuoto darbo ({period}); iš jų vadovo patvirtinta {confirmed} val.",
       "wiSkillShared": "Dar {hours} val. dirbta kartu su kitais įgūdžiais — rodoma kaip dalyvavimas, į skaičių nesumuojama.",
       "wiSkillWhere": "Naudota {entries, plural, one {# įraše} few {# įrašuose} other {# įrašų}} per {days, plural, one {# dieną} few {# dienas} other {# dienų}}, {contexts, plural, =0 {be įvardyto konteksto} one {# kontekste} few {# kontekstuose} other {# kontekstų}}; paskutinį kartą {day}.",

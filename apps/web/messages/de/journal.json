@@ -662,6 +662,7 @@
     "openOpportunities": "Chancen aus Ihren Einträgen",
     "provenance": "Woher die Stunden stammen: {worker} Std. von Ihnen eingegeben, {extracted} Std. aus Ihrem Text erkannt, {corrected} Std. von einer Führungskraft korrigiert.",
     "provenanceRule": "Jeder Eintrag zählt einmal; eine Stunde wird einer Fähigkeit nur zugeordnet, wenn der Eintrag mit genau einer Fähigkeit verknüpft ist oder Ihre eigene Formulierung („6 h Fliesen gelegt“) diese Fähigkeit nennt.",
+    "dayInferred": "{count, plural, one {# Eintrag hat keinen angegebenen Arbeitstag und ist dem Speichertag zugeordnet.} other {# Einträge haben keinen angegebenen Arbeitstag und sind dem Speichertag zugeordnet.}}",
     "glance": "{days, plural, one {# Tag} other {# Tage}} · {entries, plural, one {# Eintrag} other {# Einträge}}",
     "glanceNone": "keine Einträge",
     "periodEmpty": "Keine Einträge im Zeitraum „{period}“ — wählen Sie oben einen anderen Zeitraum.",

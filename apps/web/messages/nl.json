@@ -7846,6 +7846,8 @@
     "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
     "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
     "skillHours": "{hours} u",
+    "skillHoursOwn": "{hours} u, uw eigen registratie",
+    "skillHoursConfirmed": "{hours} u, waarvan {confirmed} u bevestigd door een manager",
     "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn",
     "organizationRecordedHours": "Registratie van de organisatie: {hours} u op {days, plural, one {# dag} other {# dagen}} in urenstaten of geïmporteerde documenten ({imported} u geïmporteerd, {approved} u goedgekeurd) — gescheiden van het journaalcijfer en aan geen enkele vaardigheid toegewezen."
   },
@@ -13723,6 +13725,7 @@
       "wiUnread": "Ik kon uw geregistreerde werk nu niet lezen — dat is niet hetzelfde als geen werk hebben. Vraag het zo nog eens.",
       "wiOutputs": "{period} gedaan: {list}.",
       "wiOutputItem": "{value} {unit} ({entries, plural, one {# registratie} other {# registraties}})",
+      "wiOutputItemActivity": "{value} {unit} · {activity} ({entries, plural, one {# registratie} other {# registraties}})",
       "wiSkillHours": "{skill}: {hours} u toegewezen aan deze vaardigheid van {total} u geregistreerd werk ({period}); daarvan {confirmed} u bevestigd door een leidinggevende.",
       "wiSkillShared": "Nog {hours} u gewerkt samen met andere vaardigheden — getoond als betrokkenheid, niet bij het cijfer opgeteld.",
       "wiSkillWhere": "Gebruikt in {entries, plural, one {# registratie} other {# registraties}} op {days, plural, one {# dag} other {# dagen}} in {contexts, plural, =0 {geen genoemde context} one {# context} other {# contexten}}; laatst op {day}.",

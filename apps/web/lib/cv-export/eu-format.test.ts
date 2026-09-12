@@ -28,6 +28,7 @@ const EMPTY: VerifiedCvData = {
   achievements: [],
   projects: [],
   recordedHoursBySkill: null,
+  confirmedHoursBySkill: null,
   recordedHoursTotal: null,
   recordedHoursConfirmed: null,
   organizationRecordedHours: null,

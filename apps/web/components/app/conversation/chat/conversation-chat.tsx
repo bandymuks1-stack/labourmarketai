@@ -186,6 +186,7 @@ import {
 import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 /** The S2 payload the page streams to the chat without awaiting (#1011):
  *  the intro model plus its server-resolved label bag, as one promise. */
@@ -237,11 +238,10 @@ function extractEmail(sentence: string): string | null {
 }
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
- *  takes `today` as a param so it stays pure). */
+ *  takes `today` as a param so it stays pure) — the PERSON's calendar day,
+ *  the one rule every journal intake shares (re-audit F10). */
 function todayIso(): string {
-  const d = new Date();
-  const p = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  return personCalendarDay();
 }
 
 export type ChatLabels = {

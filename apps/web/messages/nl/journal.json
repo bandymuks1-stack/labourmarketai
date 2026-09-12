@@ -662,6 +662,7 @@
     "openOpportunities": "Kansen uit je registraties",
     "provenance": "Waar de uren vandaan komen: {worker} u door jou ingevoerd, {extracted} u uit je tekst herkend, {corrected} u door een leidinggevende gecorrigeerd.",
     "provenanceRule": "Elke registratie telt één keer; een uur wordt alleen aan een vaardigheid toegewezen als de registratie aan één vaardigheid gekoppeld is of als uw eigen zin (“6 u getegeld”) die vaardigheid noemt.",
+    "dayInferred": "{count, plural, one {# registratie heeft geen opgegeven werkdag en is geplaatst op de dag van opslaan.} other {# registraties hebben geen opgegeven werkdag en zijn geplaatst op de dag van opslaan.}}",
     "glance": "{days, plural, one {# dag} other {# dagen}} · {entries, plural, one {# registratie} other {# registraties}}",
     "glanceNone": "geen registraties",
     "periodEmpty": "Geen registraties in “{period}” — kies hierboven een andere periode.",

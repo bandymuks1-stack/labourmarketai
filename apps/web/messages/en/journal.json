@@ -662,6 +662,7 @@
     "openOpportunities": "Opportunities from your entries",
     "provenance": "Where the hours come from: {worker} h entered by you, {extracted} h recognised from your text, {corrected} h corrected by a manager.",
     "provenanceRule": "Each entry is counted once; an hour is attributed to a skill only when the entry is linked to a single skill, or when your own phrase (“tiled 6 h”) names that skill.",
+    "dayInferred": "{count, plural, one {# entry has no stated work day and is placed by the day it was saved.} other {# entries have no stated work day and are placed by the day they were saved.}}",
     "glance": "{days, plural, one {# day} other {# days}} · {entries, plural, one {# entry} other {# entries}}",
     "glanceNone": "no entries",
     "periodEmpty": "No entries in “{period}” — pick another period above.",

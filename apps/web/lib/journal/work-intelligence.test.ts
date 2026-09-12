@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   attributedHoursBySlug,
+  confirmedHoursBySlug,
   deriveWorkIntelligence,
   evidencedSkillSlugs,
   workPeriodBounds,
@@ -595,8 +596,8 @@ describe("deriveWorkIntelligence — skills, activities, contexts, months", () =
       ],
     });
     expect(wi.outputs).toEqual([
-      { unit: "square_meters", value: 40, entries: 2 },
-      { unit: "pieces", value: 5, entries: 1 },
+      { unit: "square_meters", activity: null, value: 40, entries: 2 },
+      { unit: "pieces", activity: null, value: 5, entries: 1 },
     ]);
     expect(wi.totalHours).toBe(6);
   });
@@ -840,5 +841,169 @@ describe("the organization's hour records — a ledger beside the journal, never
       organizationRecords: [...imported].reverse(),
     });
     expect(b.organizationRecords).toEqual(a.organizationRecords);
+  });
+});
+
+describe("the five rules the re-audit pinned (2026-09-11, F8–F12)", () => {
+  it("F8 · involvement is never a total: five skills on one 8 h entry each show 8 h, the person's shared figure is 8, and every hour is still counted once", () => {
+    const five: WorkIntelligenceSkillRow[] = ["a", "b", "c", "d", "e"].map((k) => ({
+      skillId: `s-${k}`,
+      slug: `skill-${k}`,
+      verified: false,
+      source: "work_journal",
+    }));
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: five,
+      entries: [entry("x", "2026-09-10", { hours: 8, linkedSkillIds: five.map((s) => s.skillId) })],
+    });
+    for (const s of wi.skills) {
+      expect(s.sharedHours).toBe(8);
+      expect(s.attributedHours).toBe(0);
+    }
+    // the naive sum a consumer must never make
+    expect(wi.skills.reduce((n, s) => n + s.sharedHours, 0)).toBe(40);
+    expect(wi.sharedHours).toBe(8);
+    expect(wi.totalHours).toBe(8);
+    expect(wi.attributedHours + wi.sharedHours + wi.multiActivityHours + wi.unattributedHours).toBe(wi.totalHours);
+    expect(attributedHoursBySlug(wi).size).toBe(0);
+  });
+
+  it("F9 · every output an entry recorded counts, one per unit: 40 m² and 12 m are two outputs, not \"12 m\"", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("o1", TODAY, {
+          metrics: [
+            metric("area_done", { n: 40, unit: "square_meters", created: "2026-09-11T08:00:00Z" }),
+            metric("quantity", { n: 12, unit: "meters", created: "2026-09-11T08:00:01Z" }),
+          ],
+        }),
+      ],
+    });
+    expect(wi.outputs).toEqual([
+      { unit: "meters", activity: null, value: 12, entries: 1 },
+      { unit: "square_meters", activity: null, value: 40, entries: 1 },
+    ]);
+  });
+
+  it("F9 · a figure sent twice in the same unit is counted once (the latest row for that unit)", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("o1", TODAY, {
+          metrics: [
+            metric("quantity", { n: 40, unit: "square_meters", created: "2026-09-11T08:00:00Z" }),
+            metric("area_done", { n: 42, unit: "square_meters", created: "2026-09-11T08:05:00Z" }),
+          ],
+        }),
+      ],
+    });
+    expect(wi.outputs).toEqual([{ unit: "square_meters", activity: null, value: 42, entries: 1 }]);
+  });
+
+  it("F9 · a unit is totalled only inside one kind of work: km driven and km of cable never add up to 320 km", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("d1", TODAY, {
+          metrics: [metric("work_direction", { t: "driver" }), metric("quantity", { n: 300, unit: "kilometers" })],
+        }),
+        entry("c1", "2026-09-10", {
+          metrics: [metric("work_direction", { t: "electrician" }), metric("quantity", { n: 20, unit: "kilometers" })],
+        }),
+        entry("d2", "2026-09-09", {
+          metrics: [metric("work_direction", { t: "driver" }), metric("quantity", { n: 50, unit: "kilometers" })],
+        }),
+        entry("n1", "2026-09-08", { metrics: [metric("quantity", { n: 7, unit: "kilometers" })] }),
+      ],
+    });
+    expect(wi.outputs).toEqual([
+      { unit: "kilometers", activity: "driver", value: 350, entries: 2 },
+      { unit: "kilometers", activity: null, value: 7, entries: 1 },
+      { unit: "kilometers", activity: "electrician", value: 20, entries: 1 },
+    ]);
+    expect(wi.outputs.some((o) => o.value === 320 || o.value === 377)).toBe(false);
+  });
+
+  it("F10 · an entry without a stated work day is placed by its UTC save day and COUNTED as placed, not silently a fact", () => {
+    const late: WorkIntelligenceEntry = {
+      ...entry("late", "2026-09-10", { hours: 3 }),
+      // no work_date row at all — only the duration
+      metrics: [metric("quantity", { n: 3, unit: "hours" })],
+      createdAt: "2026-09-10T22:30:00Z",
+    };
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [entry("stated", "2026-09-10", { hours: 5 }), late],
+    });
+    const all = wi.periods.find((p) => p.key === "all")!;
+    expect(all.hours).toBe(8);
+    expect(all.entries).toBe(2);
+    expect(all.entriesDayInferred).toBe(1);
+    // a stated day is never "inferred", whatever the save time
+    const onlyStated = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [{ ...entry("s", "2026-09-10", { hours: 5 }), createdAt: "2026-09-09T23:59:00Z" }],
+    });
+    expect(onlyStated.periods.find((p) => p.key === "all")!.entriesDayInferred).toBe(0);
+  });
+
+  it("F11 · two skill rows for one slug are ONE skill: strongest real tier, listed once, and a link to either id never demotes the entry to shared", () => {
+    const twoRows: WorkIntelligenceSkillRow[] = [
+      { skillId: "s-tiling-2", slug: "tiling", verified: false, source: "self_declared" },
+      { skillId: "s-tiling", slug: "tiling", verified: true, source: "manager_confirmed" },
+      { skillId: "s-plaster", slug: "plastering", verified: false, source: "work_journal" },
+    ];
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: twoRows,
+      entries: [
+        entry("a", "2026-09-10", { hours: 8, linkedSkillIds: ["s-tiling", "s-tiling-2"], reviewResult: "approved" }),
+        entry("b", "2026-09-09", { hours: 4, linkedSkillIds: ["s-tiling-2"] }),
+      ],
+    });
+    const tiling = wi.skills.filter((s) => s.slug === "tiling");
+    expect(tiling).toHaveLength(1);
+    expect(tiling[0]!.tier).toBe("manager_confirmed");
+    expect(tiling[0]!.attributedHours).toBe(12);
+    expect(tiling[0]!.confirmedHours).toBe(8);
+    expect(tiling[0]!.sharedHours).toBe(0);
+    expect(tiling[0]!.entries).toBe(2);
+    expect(wi.sharedHours).toBe(0);
+    expect(wi.sharedEntries).toBe(0);
+    expect(wi.skills).toHaveLength(2);
+    // independent of the order the rows arrive in
+    const reversed = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: [...twoRows].reverse(),
+      entries: [
+        entry("a", "2026-09-10", { hours: 8, linkedSkillIds: ["s-tiling-2", "s-tiling"], reviewResult: "approved" }),
+        entry("b", "2026-09-09", { hours: 4, linkedSkillIds: ["s-tiling-2"] }),
+      ],
+    });
+    expect(reversed.skills).toEqual(wi.skills);
+    expect(attributedHoursBySlug(reversed).get("tiling")).toBe(12);
+  });
+
+  it("F12 · confirmed hours travel with attributed hours per slug — present at 0, never missing, never a hover-only qualifier", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("a", "2026-09-10", { hours: 8, linkedSkillIds: ["s-tiling"], reviewResult: "approved" }),
+        entry("b", "2026-09-09", { hours: 4, linkedSkillIds: ["s-tiling"] }),
+        entry("c", "2026-09-08", { hours: 2, linkedSkillIds: ["s-plaster"] }),
+      ],
+    });
+    expect([...attributedHoursBySlug(wi)]).toEqual([["tiling", 12], ["plastering", 2]]);
+    expect([...confirmedHoursBySlug(wi)]).toEqual([["tiling", 8], ["plastering", 0]]);
+    // the same slugs on both maps — a chip can always state its base
+    expect([...confirmedHoursBySlug(wi).keys()]).toEqual([...attributedHoursBySlug(wi).keys()]);
   });
 });

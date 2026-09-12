@@ -735,14 +735,24 @@ async function formatOutputsLine(
   if (wi.outputs.length === 0) return null;
   const t = await getTranslations("workspace.ai");
   const tUnit = await getTranslations("productivityUnits");
+  const tProf = await getTranslations("professions");
+  // one unit is totalled only inside one kind of work (re-audit F9) — the
+  // kind is named so "km driven" and "km of cable" read as two outputs
   const list = wi.outputs
     .slice(0, ANSWER_LIMIT)
     .map((o) =>
-      t("wiOutputItem", {
-        value: fmtHours(o.value, locale),
-        unit: tUnit.has(o.unit) ? tUnit(o.unit) : o.unit,
-        entries: o.entries,
-      }),
+      o.activity
+        ? t("wiOutputItemActivity", {
+            value: fmtHours(o.value, locale),
+            unit: tUnit.has(o.unit) ? tUnit(o.unit) : o.unit,
+            activity: tProf.has(o.activity) ? tProf(o.activity) : o.activity,
+            entries: o.entries,
+          })
+        : t("wiOutputItem", {
+            value: fmtHours(o.value, locale),
+            unit: tUnit.has(o.unit) ? tUnit(o.unit) : o.unit,
+            entries: o.entries,
+          }),
     )
     .join("; ");
   return t("wiOutputs", { period: t(`journalPeriod_${focus}`), list });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
@@ -78,6 +78,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
 import { formatUtcDate } from "@/lib/time/display";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 import { JournalModuleFields } from "@/components/app/journal-module-fields";
 import {
   MODULE_METRICS_FIELD,
@@ -415,6 +416,14 @@ export function JournalEntryComposer({
   const [workDate, setWorkDate] = useState<string>(
     editingEntry?.workDate ?? today,
   );
+  // A NEW entry defaults to the PERSON's calendar day, not the server's UTC
+  // day (re-audit F10): at 01:30 in Vilnius the UTC key still says
+  // yesterday. Applied after mount so server and client hydrate the same
+  // markup; an already-edited date is left alone.
+  useEffect(() => {
+    if (editingEntry?.workDate) return;
+    setWorkDate((d) => (d === today ? personCalendarDay() : d));
+  }, [editingEntry?.workDate, today]);
 
   const existingSkillRefs = useMemo(
     () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),

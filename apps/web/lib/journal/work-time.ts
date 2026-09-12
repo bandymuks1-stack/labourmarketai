@@ -137,9 +137,20 @@ export type WorkTimeConflict = {
   readonly unit: WorkTimeUnit;
 };
 
+/** Where an entry's `day` came from: the worker's own stated `work_date`
+ *  (a FACT), or the UTC day the row was saved (a placement, SEP-1). */
+export type WorkDayBasis = "stated" | "created";
+
 export type EntryWorkTime = {
   readonly entryId: string;
   readonly day: string;
+  /** `stated` when `day` is the worker's own `work_date`; `created` when
+   *  no usable `work_date` exists and the UTC save day stands in for it.
+   *  Every intake surface that records time sends a `work_date` from the
+   *  person's own calendar, so `created` is the exception a reader may
+   *  name — never a second timezone rule (W12: storage and display are
+   *  UTC; a viewer-local model would be an owner decision). */
+  readonly dayBasis: WorkDayBasis;
   readonly lines: readonly WorkTimeLine[];
   readonly totalHours: number;
   readonly totalDayUnits: number;
@@ -176,6 +187,14 @@ export function resolveWorkDay(
   metrics: readonly WorkTimeMetricRow[],
   createdAt: string,
 ): string {
+  return resolveWorkDayDetail(metrics, createdAt).day;
+}
+
+/** `resolveWorkDay` with its basis named — the same rule, nothing added. */
+export function resolveWorkDayDetail(
+  metrics: readonly WorkTimeMetricRow[],
+  createdAt: string,
+): { readonly day: string; readonly basis: WorkDayBasis } {
   const candidates = metrics
     .filter(
       (m) =>
@@ -185,8 +204,8 @@ export function resolveWorkDay(
     )
     .sort(cmpLatestFirst);
   const stated = candidates[0]?.value_text?.trim();
-  if (stated && DAY_RX.test(stated)) return stated;
-  return String(createdAt ?? "").slice(0, 10);
+  if (stated && DAY_RX.test(stated)) return { day: stated, basis: "stated" };
+  return { day: String(createdAt ?? "").slice(0, 10), basis: "created" };
 }
 
 /** Newest first, ties broken by id then by nothing else — deterministic. */
@@ -227,7 +246,7 @@ function firstLineOf(text: string | null | undefined): string {
  */
 export function deriveEntryWorkTime(entry: WorkTimeEntryInput): EntryWorkTime {
   const metrics = entry.metrics ?? [];
-  const day = resolveWorkDay(metrics, entry.createdAt);
+  const { day, basis: dayBasis } = resolveWorkDayDetail(metrics, entry.createdAt);
 
   // ── evidence + activity, index-grouped (first row per index wins) ──
   const evidenceByIndex = new Map<number, string>();
@@ -322,6 +341,7 @@ export function deriveEntryWorkTime(entry: WorkTimeEntryInput): EntryWorkTime {
   return {
     entryId: entry.entryId,
     day,
+    dayBasis,
     lines,
     totalHours: round2(lines.reduce((sum, l) => sum + l.hours, 0)),
     totalDayUnits: round2(lines.reduce((sum, l) => sum + l.dayUnits, 0)),

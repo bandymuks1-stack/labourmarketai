@@ -840,13 +840,21 @@ export async function JournalWorkIntelligence({
                       <ul className="flex flex-col gap-1">
                         {wi.outputs.map((o) => (
                           <li
-                            key={o.unit}
+                            key={`${o.unit}|${o.activity ?? ""}`}
                             className="flex items-baseline justify-between gap-3 text-sm"
                             data-testid="wi-output"
+                            data-unit={o.unit}
+                            data-activity={o.activity ?? ""}
                           >
                             <span className="min-w-0 truncate text-text-primary">
                               {fmtHours(o.value, locale)}{" "}
                               {labels.unitName(o.unit) ?? o.unit}
+                              {/* one unit is totalled only inside one kind of
+                                  work (re-audit F9) — the kind is named so two
+                                  "km" lines read as two different outputs */}
+                              {o.activity ? (
+                                <span className="text-text-muted"> · {activityName(o.activity)}</span>
+                              ) : null}
                             </span>
                             <span className="shrink-0 text-meta tabular-nums text-text-muted">
                               {t("entriesCount", { count: o.entries })}
@@ -1032,6 +1040,16 @@ export async function JournalWorkIntelligence({
                   corrected: fmtHours(wi.provenance.managerCorrected, locale),
                 })}{" "}
                 {tk("provenanceRule")}
+                {/* an entry with no stated work day is placed by the UTC day
+                    it was saved — said, never silently a fact (re-audit F10) */}
+                {period.entriesDayInferred > 0 ? (
+                  <>
+                    {" "}
+                    <span data-testid="wi-day-inferred">
+                      {t("dayInferred", { count: period.entriesDayInferred })}
+                    </span>
+                  </>
+                ) : null}
               </p>
             )}
           </>

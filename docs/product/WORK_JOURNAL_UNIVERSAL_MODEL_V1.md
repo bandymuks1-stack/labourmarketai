@@ -201,3 +201,24 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    a journal entry is named as already counted; unlinked overlap is NOT guessed — when the import
    path starts linking rows to entries, `linkedHours` will say how much of the ledger the journal
    already describes.
+8. ~~Five model rules the re-audit found unpinned (F8–F12)~~ — PINNED 2026-09-12. **F8** a
+   skill's involvement (`sharedHours`) is the whole remainder of every entry it shares, so five
+   skills on one 8 h entry each show 8 h and the person's figure is 8 — no consumer may add
+   per-skill involvement (guard block 13 forbids the sum in every surface that reads the model).
+   **F9** every completed quantity an entry recorded in a non-time unit counts, one per unit
+   within the entry (latest row per unit — a re-sent figure never doubles), and a unit is
+   totalled only inside one kind of work (`OutputTotal.activity`, the entry's `work_direction`):
+   40 m² + 12 m are two outputs, km driven and km of cable stay two lines; the section and the
+   chat name the kind of work on the line. **F10** the work day is the person's stated day on
+   every intake — the chat and the MCP capability require `work_date`, and the composer, the
+   compact editor and the chat default it from the person's own calendar
+   (`lib/time/person-calendar-day.ts`, client input only; display stays UTC per W12). An entry
+   with no usable `work_date` is placed by its UTC save day and COUNTED as placed
+   (`EntryWorkTime.dayBasis`, `WorkPeriodTotals.entriesDayInferred`, `wi-day-inferred`) — a
+   placement is not a fact (SEP-1). Production 2026-09-12: 38 live entries, 34 stated, 4
+   without a day, none of them timed. **F11** skill rows are collapsed by slug (the canonical
+   skill identity), a link to any alias id is a link to the one skill — it can never demote an
+   entry to "shared" or list a skill twice; order-independent. **F12** per-skill
+   `confirmedHours` travels with `attributedHours` (`confirmedHoursBySlug` → the CV's
+   `confirmedHoursBySkill`), so the CV chip says in words "12 h, 8 h of it confirmed by a
+   manager" or "4 h, your own record" — never a bare figure with the qualifier in a hover title.

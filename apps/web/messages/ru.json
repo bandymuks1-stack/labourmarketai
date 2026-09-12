@@ -7846,6 +7846,8 @@
     "recordedHours": "Записанная работа: {hours} ч из рабочего журнала, из них подтверждено {confirmed} ч.",
     "recordedHoursNone": "В журнале пока нет записей с длительностью — часы рядом с навыками появятся из ваших записей.",
     "skillHours": "{hours} ч",
+    "skillHoursOwn": "{hours} ч, ваша собственная запись",
+    "skillHoursConfirmed": "{hours} ч, из них подтверждено руководителем {confirmed} ч",
     "skillHoursHint": "часы из записей рабочего журнала, связанных только с этим навыком",
     "organizationRecordedHours": "В учёте организации: {hours} ч за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}} в табелях или импортированных документах ({imported} ч импортировано, {approved} ч утверждено) — учитываются отдельно от цифры журнала и не относятся ни к одному навыку."
   },
@@ -13723,6 +13725,7 @@
       "wiUnread": "Сейчас не удалось прочитать вашу записанную работу — это не то же самое, что её нет. Спросите ещё раз через минуту.",
       "wiOutputs": "{period} сделано: {list}.",
       "wiOutputItem": "{value} {unit} ({entries, plural, one {# запись} few {# записи} many {# записей} other {# записей}})",
+      "wiOutputItemActivity": "{value} {unit} · {activity} ({entries, plural, one {# запись} few {# записи} many {# записей} other {# записей}})",
       "wiSkillHours": "{skill}: {hours} ч отнесено к этому навыку из {total} ч записанной работы ({period}); из них подтверждено руководителем {confirmed} ч.",
       "wiSkillShared": "Ещё {hours} ч отработано вместе с другими навыками — показано как участие, в цифру не суммируется.",
       "wiSkillWhere": "Использован в {entries, plural, one {# записи} few {# записях} many {# записях} other {# записях}} за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}}, {contexts, plural, =0 {без названного контекста} one {# контекст} few {# контекста} many {# контекстов} other {# контекстов}}; последний раз {day}.",
