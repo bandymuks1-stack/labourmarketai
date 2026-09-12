@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { classifyEntryRecognition } from "./recognition-tiers";
+import { extractJournalSuggestions } from "./extract-journal-suggestions";
 import { CONSTRUCTION_SKILL_HINT_SLUGS } from "./keywords";
 import {
   buildEntryDetectedSignals,
@@ -170,6 +171,27 @@ describe("multi-activity entries surface ALL activities", () => {
 });
 
 describe("negative guards — no wrong defaults", () => {
+  it("'instaliacija' is not a carpenter and not automatically electrical (#1689, measured 2026-09-12)", () => {
+    // "stali" (stalius = carpenter) sat inside "in-STALI-acija": every
+    // electrical installation read as carpentry beside electrical-install.
+    for (const text of [
+      "4 val. montavau elektros instaliaciją",
+      "Elektros instaliacijos montavimas",
+      "Vandentiekio instaliacija",
+    ]) {
+      expect(signalsOf(text).all, text).not.toMatch(/carpentr|carpenter|stali/i);
+    }
+    expect(signalsOf("4 val. montavau elektros instaliaciją").slugs).toContain("electrical-install");
+    // the carpenter's own forms still read as carpentry
+    for (const text of ["Dirbau staliumi 5 val.", "Staliaus darbai 3 val.", "Padėjau staliui"]) {
+      expect(signalsOf(text).slugs, text).toContain("carpentry");
+    }
+    // "instaliac" alone was an ELECTRICIAN work-direction needle: a water
+    // installation is not electrical work
+    expect(extractJournalSuggestions("Vandentiekio instaliacija").workDirectionSlug).toBeNull();
+    expect(extractJournalSuggestions("Elektros instaliacijos montavimas").workDirectionSlug).toBe("electrician");
+  });
+
   it("'kraną' as a faucet (repair) never becomes crane operation", () => {
     const s = signalsOf("remontavau kraną");
     expect(s.all).toMatch(/remont/i);

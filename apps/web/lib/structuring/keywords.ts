@@ -104,7 +104,10 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     { slug: "electrical-install", needles: ["elektr", "электр"] },
     {
       slug: "carpentry",
-      needles: ["stali", "medien", "столярн", "плотник", "плотниц"],
+      // the carpenter's own forms, never the bare stem "stali" — it sat
+      // inside "in-STALI-acija" and read every electrical installation as
+      // carpentry (#1689, measured 2026-09-12)
+      needles: ["stalius", "staliaus", "staliui", "staliu", "staliai", "staliams", "staliais", "medien", "столярн", "плотник", "плотниц"],
     },
     {
       slug: "insulation",
@@ -1999,7 +2002,7 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   {
     slug: "carpenter",
     needles: [
-      "stali",
+      "stalius", "staliaus", "staliui", "staliu", "staliai", "staliams", "staliais",
       "medien",
       "плотник",
       "столяр",
@@ -2370,7 +2373,9 @@ export const WORK_DIRECTION_HINTS_LT: { slug: string; needles: string[] }[] = [
   },
   {
     slug: "electrician",
-    needles: ["elektros darb", "instaliac", "электромонтаж"],
+    // "instaliac" alone read a water or gas installation as electrical work
+    // (#1689, measured 2026-09-12) — the electrical forms only
+    needles: ["elektros darb", "elektros instaliac", "elektrin", "электромонтаж"],
   },
   { slug: "plumber", needles: ["santechnik darb", "сантехнические работ"] },
   {
@@ -2692,7 +2697,7 @@ export const ACTIVITY_HINTS_LT: {
   {
     slug: "carpenter",
     label: "Staliaus darbai",
-    needles: ["stali", "medien", "столярн", "плотник", "плотниц"],
+    needles: ["stalius", "staliaus", "staliui", "staliu", "staliai", "staliams", "staliais", "medien", "столярн", "плотник", "плотниц"],
   },
   {
     slug: "mason",
