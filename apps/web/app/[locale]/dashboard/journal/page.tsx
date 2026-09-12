@@ -37,6 +37,7 @@ import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
 import { readModuleFieldValues } from "@/lib/journal/journal-module-fields";
+import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
   deriveReviewResult,
@@ -470,7 +471,7 @@ export default async function JournalPage({
   // selecting `skills(slug)` and once selecting `skill_id, verified,
   // skills(slug)`. The second is a strict superset of the first, so both the
   // composer's suggestion list and the entry↔skill link UI are derived from
-  // it. Both reads depend only on `worker.id`, so they batch with `dirRows`.
+  // it. Both reads depend only on `worker.id`, so they batch with the directions read.
   //
   // The entry-skill link read and the entries read below depend only on
   // `worker.id` too, so they ride in this same round trip. Both used to await
@@ -478,13 +479,16 @@ export default async function JournalPage({
   // where two suffice: this batch, then the templates read that genuinely
   // needs `directions`. Read ORDER is unchanged where it matters — the links
   // are still read before the lazy heal writes to `journal_entry_skills`.
-  const [{ data: dirRows }, { data: skillIdRows }, linkRead, entriesRead] =
+  //
+  // The directions read is the occupation path of the universal journal
+  // (owner §12): each of the worker's professions with the ISCO-08 group its
+  // ESCO occupation belongs to (`professions.esco_uri` →
+  // `esco_occupations.isco_group`), so the editors compose exactly the module
+  // fields that family logs. Two bounded reads inside one batch slot; an
+  // unmapped profession carries null and composes nothing.
+  const [ownPath, { data: skillIdRows }, linkRead, entriesRead] =
     await Promise.all([
-      supabase
-        .from("worker_professions")
-        .select("is_primary, professions(slug)")
-        .eq("worker_id", worker.id)
-        .order("is_primary", { ascending: false }),
+      readOwnOccupationPath(supabase, worker.id),
       supabase
         .from("worker_skills")
         .select("skill_id, verified, source, skills(slug)")
@@ -498,10 +502,11 @@ export default async function JournalPage({
         { workerId: worker.id },
       ),
     ]);
-  const directions = (dirRows ?? [])
-    .map((r) => (r.professions as { slug: string } | null)?.slug ?? null)
-    .filter((s): s is string => s !== null)
-    .map((slug) => ({ slug, name: tProf(slug) }));
+  const directions = ownPath.directions.map((d) => ({
+    slug: d.slug,
+    name: tProf(d.slug),
+    iscoGroup: d.iscoGroup,
+  }));
 
   // Journal Proof Engine v1 (§10): ACTIVE profession templates from the
   // journal_profession_templates registry (owner-gated draft migration
@@ -809,12 +814,8 @@ export default async function JournalPage({
           ),
         })
       : null;
-  const primaryProfessionRow = (dirRows ?? []).find(
-    (r) => (r as { is_primary?: boolean | null }).is_primary === true,
-  );
   const primaryProfessionSlug =
-    (primaryProfessionRow?.professions as { slug: string } | null | undefined)
-      ?.slug ?? null;
+    ownPath.directions.find((d) => d.isPrimary)?.slug ?? null;
   const professionNameOf = (slug: string): string | null => {
     try {
       const v = tProf(slug);

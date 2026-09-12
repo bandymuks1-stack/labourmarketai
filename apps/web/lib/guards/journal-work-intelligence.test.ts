@@ -1,8 +1,12 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { moduleGroupsForRelationship } from "../journal/journal-module-fields";
-import { RELATIONSHIP_ARCHETYPES } from "../journal/work-evidence-archetypes";
+import { moduleGroupsFor } from "../journal/journal-module-fields";
+import {
+  ISCO_ARCHETYPES,
+  JOURNAL_MODULES,
+  RELATIONSHIP_ARCHETYPES,
+} from "../journal/work-evidence-archetypes";
 
 /**
  * WORK INTELLIGENCE + UNIVERSAL JOURNAL GUARD (issue #1689).
@@ -407,23 +411,58 @@ describe("10 · archetype module fields — composed from the relationship, one 
   const actions = read("lib/journal/actions.ts");
   const editEntry = read("lib/journal/edit-entry.ts");
 
-  it("the field model composes through composeJournal + archetypesForRelationship — no list of its own", () => {
-    expect(fields).toContain("composeJournal(archetypesForRelationship(relationshipSlug))");
+  it("the field model composes through composeJournal over BOTH sources — the occupation's ISCO group and the relationship — with no list of its own", () => {
+    expect(fields).toContain("composeJournal(archetypesForSources(sources))");
+    expect(fields).toMatch(/for \(const code of sources\.iscoGroups \?\? \[\]\) ids\.push\(\.\.\.archetypesForIsco\(code\)\);/);
+    expect(fields).toContain("ids.push(...archetypesForRelationship(sources.relationshipSlug));");
     expect(fields).not.toMatch(/switch\s*\(/);
     expect(fields).not.toMatch(/"student"|"volunteer"|"employee"/);
+    // no ISCO code is spelled out here either — the map lives in the archetype catalogue
+    expect(fields).not.toMatch(/"\d{2,4}"/);
+  });
+  it("the occupation path is resolved SERVER-SIDE from the worker's own professions: esco_uri → esco_occupations.isco_group, under the caller's RLS", () => {
+    const path = read("lib/journal/journal-occupation-path.ts");
+    expect(path).toMatch(/^import "server-only";/m);
+    expect(path).toMatch(/from\("worker_professions"\)\s*\.select\("is_primary, professions\(slug, esco_uri\)"\)\s*\.eq\("worker_id", workerId\)/);
+    expect(path).toContain("iscoGroupsForEscoUris(uris, supabase as SupabaseClient)");
+    expect(path).not.toMatch(/createAdminClient|service_role|SUPABASE_SERVICE_ROLE_KEY/);
+    // the ESCO reader is ONE bounded read on esco_uri, and lib/esco now has a product consumer
+    const lookup = read("lib/esco/esco-lookup.ts");
+    expect(lookup).toContain("export async function iscoGroupsForEscoUris(");
+    expect(lookup).toMatch(/from\("esco_occupations"\)\s*\.select\("esco_uri, isco_group"\)\s*\.in\("esco_uri", uris\)\s*\.limit\(ESCO_URI_BATCH_LIMIT\)/);
+    // an unmapped profession is null, never a guessed family
+    expect(path).toContain("iscoGroup: d.escoUri ? (byUri.get(d.escoUri) ?? null) : null");
+    // the journal page composes its directions THROUGH the path (no second worker_professions read)
+    expect(page).toContain("readOwnOccupationPath(supabase, worker.id)");
+    expect(page).not.toMatch(/from\("worker_professions"\)/);
+    expect(page).toContain("iscoGroup: d.iscoGroup");
   });
   it("both editors render the ONE module-fields block and ship the ONE wire field", () => {
     for (const [name, src] of [["composer", composer], ["compact editor", compactEditor]] as const) {
       expect(src, name).toContain("<JournalModuleFields");
       expect(src, name).toMatch(/relationshipSlug=\{selectedRelationship\}/);
+      // the occupation source: the named direction's ISCO group, else the primary profession's
+      expect(src, name).toMatch(/iscoGroup=\{selectedIscoGroup\}/);
+      expect(src, name).toMatch(/: directions\[0\]\s*\)?\?\.iscoGroup \?\? null/);
     }
+    expect(fieldsComponent).toContain("moduleGroupsFor({ relationshipSlug, iscoGroups: [iscoGroup] })");
     expect(composer).toContain("serializeModuleFields(moduleFields)");
     expect(read("lib/journal/compact-edit-model.ts")).toContain("serializeModuleFields(input.moduleFields)");
   });
-  it("the server accepts module slugs by the SAVED engagement's relationship, on create and on supersede alike", () => {
+  it("the server accepts module slugs by the SAVED engagement's relationship AND the worker's OWN professions — never a client slug — on create and on supersede alike", () => {
     expect(writeCore).toContain("export async function resolveModuleMetricRows(");
     expect(writeCore).toMatch(/from\("engagement_contexts"\)\s*\.select\("relationship_slug"\)\s*\.eq\("id", engagementId\)/);
-    expect(writeCore).toContain("allowedModuleSlugsForRelationship(ctx?.relationship_slug ?? null)");
+    expect(writeCore).toContain("readOwnOccupationPathForUser(supabase, userId)");
+    expect(writeCore).toMatch(/allowedModuleSlugsFor\(\{\s*relationshipSlug: ctx\?\.relationship_slug \?\? null,\s*iscoGroups: own\.iscoGroups,\s*\}\)/);
+    // the request's work_direction / any posted profession never reaches the accept set
+    const resolver = writeCore.slice(
+      writeCore.indexOf("export async function resolveModuleMetricRows("),
+      writeCore.indexOf("export function collectUnitSlugs"),
+    );
+    expect(resolver).not.toMatch(/work_direction|workDirection|formData|profession_id/);
+    // both callers hand the resolver the signed-in user, not a form value
+    expect(writeCore).toMatch(/String\(formData\.get\(MODULE_METRICS_FIELD\) \?\? ""\),\s*userId,\s*\);/);
+    expect(actions).toMatch(/String\(formData\.get\(MODULE_METRICS_FIELD\) \?\? ""\),\s*user\.id,\s*\);/);
     expect(writeCore).toContain("...moduleRows.rows,");
     expect(actions).toContain("resolveModuleMetricRows(");
     expect(actions).toContain("...moduleRows.rows,");
@@ -453,16 +492,19 @@ describe("10 · archetype module fields — composed from the relationship, one 
     for (const node of textNodes) expect(node).not.toMatch(/archetype|module|isco|esco/i);
     expect(visible).toContain('useTranslations("journal.moduleFields")');
   });
-  it("every module field a relationship can compose has a label in every active locale, and the error names the fields in all 11", () => {
-    const groups = moduleGroupsForRelationship;
+  it("every module field ANY occupation family or relationship can compose has a label in every active locale, and the error names the fields in all 11", () => {
     const reachable = new Map<string, Set<string>>();
-    for (const rel of Object.keys(RELATIONSHIP_ARCHETYPES)) {
-      for (const g of groups(rel)) {
+    const collect = (sources: Parameters<typeof moduleGroupsFor>[0]) => {
+      for (const g of moduleGroupsFor(sources)) {
         if (!reachable.has(g.moduleId)) reachable.set(g.moduleId, new Set());
         for (const s of g.slugs) reachable.get(g.moduleId)!.add(s);
       }
-    }
-    expect(reachable.size).toBeGreaterThan(0);
+    };
+    for (const rel of Object.keys(RELATIONSHIP_ARCHETYPES)) collect({ relationshipSlug: rel });
+    for (const code of Object.keys(ISCO_ARCHETYPES)) collect({ iscoGroups: [code] });
+    // the occupation path makes the WHOLE catalogue reachable — a family that
+    // composed a module with no label would show the person a raw key
+    expect([...reachable.keys()].sort()).toEqual(Object.keys(JOURNAL_MODULES).sort());
     for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         moduleFields: { title: string; hint: string; modules: Record<string, string>; fields: Record<string, string> };

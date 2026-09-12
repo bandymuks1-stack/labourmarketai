@@ -104,7 +104,14 @@ export type JournalContextResolution = {
   rule: "A" | "B" | "C" | "D" | "NONE";
   selectedId: string | null;
 };
-export type JournalDirection = { slug: string; name: string };
+export type JournalDirection = {
+  slug: string;
+  name: string;
+  /** ISCO-08 group of the profession's ESCO occupation (server-resolved from
+   *  `professions.esco_uri`); null for an unmapped profession. Decides which
+   *  archetype module fields the entry composes (owner §12). */
+  iscoGroup?: string | null;
+};
 export type JournalSkill = { slug: string; name: string };
 /** A worker skill matched to the entry, carrying why it was suggested and how
  *  strong the evidence is (Recognition v1). */
@@ -421,6 +428,11 @@ export function JournalEntryComposer({
     () => new Map(directions.map((d) => [d.slug, d])),
     [directions],
   );
+  // Occupation path (owner §12): the ISCO group of the direction this entry
+  // names, else of the worker's primary profession (`directions` arrives
+  // primary-first); null when unmapped, so no family is guessed.
+  const selectedIscoGroup =
+    (dirSlug ? directionBySlug.get(dirSlug) : directions[0])?.iscoGroup ?? null;
 
   function analyse(raw: string) {
     setError(null);
@@ -2102,11 +2114,14 @@ export function JournalEntryComposer({
           ) : null}
         </label>
 
-        {/* Owner §12 — the relationship's own module fields (a placement's
-            supervision, a volunteer's field project); nothing renders for a
-            context whose composition adds no module. */}
+        {/* Owner §12 — the module fields the entry's OCCUPATION (the named
+            direction, else the worker's primary profession, through its
+            ISCO group) and the relationship compose — a tiler's inspection
+            fields, a placement's supervision, a volunteer's field project;
+            nothing renders when neither source adds a module. */}
         <JournalModuleFields
           relationshipSlug={selectedRelationship}
+          iscoGroup={selectedIscoGroup}
           values={moduleFields}
           onChange={setModuleFields}
         />

@@ -239,6 +239,7 @@ export async function supersedeJournalEntry(
     t,
     engagementId,
     String(formData.get(MODULE_METRICS_FIELD) ?? ""),
+    user.id,
   );
   if (!moduleRows.ok) return moduleRows;
 

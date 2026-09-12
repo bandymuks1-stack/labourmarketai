@@ -6,40 +6,48 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import {
   MODULE_VALUE_MAX_LENGTH,
-  moduleGroupsForRelationship,
+  moduleGroupsFor,
   type ModuleFieldValues,
 } from "@/lib/journal/journal-module-fields";
 
 /**
  * ARCHETYPE MODULE FIELDS (owner §12) — the ONE block both journal editors
  * render behind their existing "more" disclosure. Which fields appear is
- * decided by the entry's ENGAGEMENT relationship through `composeJournal`:
- * a placement (`student`) shows supervision level / competency practised /
- * learning outcome; volunteering shows the field-project modules; an
- * employee context composes nothing today, so this renders nothing — no
- * generic form, no "nothing found" box (honest absence).
+ * decided by `composeJournal` over two sources: the OCCUPATION the entry
+ * names (the work direction's ISCO-08 group, resolved server-side from the
+ * worker's own profession's `esco_uri` and handed down as data) and the
+ * entry's ENGAGEMENT relationship. A tiler's entry shows place and crew,
+ * materials and tools, conditions and safety, inspection; a placement adds
+ * supervision level / competency practised / learning outcome; a worker
+ * whose profession has no ESCO mapping under an employee context sees
+ * nothing here — no generic form, no "nothing found" box (honest absence).
  *
  * Every field is one `journal_entry_metrics` row of the person's own text;
- * the server accepts a slug only when the engagement's own composition
- * allows it. The person never sees archetype or module vocabulary — group
- * and field names are plain words from `journal.moduleFields`.
+ * the server accepts a slug only when the engagement's relationship or one
+ * of the worker's OWN professions composes it. The person never sees
+ * archetype, module or ISCO vocabulary — group and field names are plain
+ * words from `journal.moduleFields`.
  */
 export function JournalModuleFields({
   relationshipSlug,
+  iscoGroup = null,
   values,
   onChange,
   testId = "journal-module-fields",
 }: {
   /** The selected engagement's relationship (`student`, `volunteer`, …). */
   relationshipSlug: string | null | undefined;
+  /** ISCO-08 group of the entry's work direction (the worker's own
+   *  profession), or null when none is named or the profession is unmapped. */
+  iscoGroup?: string | null;
   values: ModuleFieldValues;
   onChange: (next: ModuleFieldValues) => void;
   testId?: string;
 }) {
   const t = useTranslations("journal.moduleFields");
   const groups = useMemo(
-    () => moduleGroupsForRelationship(relationshipSlug),
-    [relationshipSlug],
+    () => moduleGroupsFor({ relationshipSlug, iscoGroups: [iscoGroup] }),
+    [relationshipSlug, iscoGroup],
   );
   if (groups.length === 0) return null;
   return (

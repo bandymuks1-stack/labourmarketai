@@ -138,11 +138,16 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    server-side only when the SAVED engagement's own composition allows the slug (refused
    by name — `module_field_invalid` — never dropped), preloaded on edit, shown back on the
    entry. A `student` placement shows supervision level / competency practised / learning
-   outcome; `volunteer` the field-project modules. What stays an extension point: the
-   OCCUPATION path (`employee` composes nothing today) — it needs the owner-gated slug↔ESCO
-   bridge (#1355) before `archetypesForIsco` has a live resolver for the platform's
-   professions; labels for the remaining modules land with that resolver (guarded: every
-   relationship-reachable slug is labelled in every active locale).
+   outcome; `volunteer` the field-project modules. The OCCUPATION path is LIVE 2026-09-12:
+   `journal-occupation-path.ts` resolves the worker's OWN professions → `professions.esco_uri`
+   → `esco_occupations.isco_group` server-side (the linkage was applied 2026-09-08, ledger
+   `20260908082301`, 34 of 49 professions), both editors compose `archetypesForIsco` ∪
+   `archetypesForRelationship` (a tiler, 7122 → 71, sees place and crew, materials and tools,
+   conditions and safety, inspection; a software developer, 2512 → 25, software delivery and
+   client/matter), and the server's accept set is the worker's own families ∪ the engagement's
+   relationship — never a client-posted slug. All 25 modules / 87 field slugs are labelled in
+   the five journal locales (guarded: every ISCO- or relationship-reachable slug). A profession
+   without an `esco_uri` composes nothing on this path — UNKNOWN, never a guessed family.
 2. ~~Units: add registry rows for km / covers / cases / pallets~~ — LIVE 2026-09-11
    (`20260911130000_productivity_units_universal_v1`, four additive platform rows, guarded
    rollback). One list in code (`PLATFORM_OUTPUT_UNIT_SLUGS`, `work-time.ts`) feeds both
@@ -153,9 +158,10 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    safe prose reading exists, so nothing is guessed. Work intelligence shows each unit on
    its own line, unconverted. Still extension points: `orders`, `contacts`, `tonnes` and
    org-scoped units — seeded only when a surface actually records them.
-3. ESCO occupation → archetype resolution surface (`iscoGroupForEscoOccupation` exists); the
-   platform's own 49 professions map through their ESCO occupation once #1355 (bridge) is
-   owner-approved.
+3. ~~ESCO occupation → archetype resolution surface~~ — LIVE 2026-09-12 (item 1 above;
+   `iscoGroupsForEscoUris` is the batched reader). Still an extension point: the composition's
+   `timeModel` / `skillTimeAttribution` are computed but not yet read by the analytics layer,
+   and the 15 unmapped professions stay unmapped until a correct URI exists for each.
 4. Template registry migration (draft 20260714180000) may carry the same archetype data when
    the owner applies it — the code stays canonical until then.
 5. ~~Overlap / implausible-duration detection (owner §13)~~ — LIVE 2026-09-11 as
