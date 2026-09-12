@@ -101,7 +101,13 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     },
     { slug: "floor-screeding", needles: ["išlygin", "isl ygin", "стяжк"] },
     { slug: "plumbing", needles: ["santechn", "сантехник"] },
-    { slug: "electrical-install", needles: ["elektr", "электр"] },
+    {
+      slug: "electrical-install",
+      // the electrical forms, never the bare stems "elektr" / "электр" — they
+      // sat inside "elektroninis paštas" / "электронная почта" (e-mail) and
+      // read every office worker's mail as electrical work (#1689, 2026-09-12)
+      needles: ["elektros", "elektrik", "elektrin", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"],
+    },
     {
       slug: "carpentry",
       // the carpenter's own forms, never the bare stem "stali" — it sat
@@ -1998,7 +2004,7 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
     slug: "plumber",
     needles: ["santechn", "сантехник", "rörmokare", "vvs-montör"],
   },
-  { slug: "electrician", needles: ["elektr", "электр"] },
+  { slug: "electrician", needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"] },
   {
     slug: "carpenter",
     needles: [
@@ -2375,7 +2381,7 @@ export const WORK_DIRECTION_HINTS_LT: { slug: string; needles: string[] }[] = [
     slug: "electrician",
     // "instaliac" alone read a water or gas installation as electrical work
     // (#1689, measured 2026-09-12) — the electrical forms only
-    needles: ["elektros darb", "elektros instaliac", "elektrin", "электромонтаж"],
+    needles: ["elektros darb", "elektros instaliac", "elektrine instaliac", "elektrinė instaliac", "электромонтаж"],
   },
   { slug: "plumber", needles: ["santechnik darb", "сантехнические работ"] },
   {
@@ -2693,7 +2699,11 @@ export const ACTIVITY_HINTS_LT: {
     needles: ["daž", "dazym", "красил", "покраск", "маляр"],
   },
   { slug: "plumber", label: "Santechnika", needles: ["santechn", "сантехник"] },
-  { slug: "electrician", label: "Elektra", needles: ["elektr", "электр"] },
+  {
+    slug: "electrician",
+    label: "Elektra",
+    needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"],
+  },
   {
     slug: "carpenter",
     label: "Staliaus darbai",

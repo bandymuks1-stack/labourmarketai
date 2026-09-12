@@ -192,6 +192,37 @@ describe("negative guards — no wrong defaults", () => {
     expect(extractJournalSuggestions("Elektros instaliacijos montavimas").workDirectionSlug).toBe("electrician");
   });
 
+  it("e-mail, e-commerce and an electronic signature are not electrical work (#1689, measured 2026-09-12)", () => {
+    // the bare stems "elektr" / "электр" sat inside "elektroninis paštas" /
+    // "электронная почта": every office worker's mail line read
+    // electrical-install:exact with the electrician activity on the intake side
+    for (const text of [
+      "2 val. tvarkiau elektroninį paštą",
+      "Atsakinėjau į elektroninius laiškus",
+      "Pasirašiau elektroniniu parašu",
+      "Elektroninių dokumentų archyvavimas",
+      "Работал с электронной почтой 2 часа",
+      "Elektriniai įrankiai: šlifavau 2 val.",
+    ]) {
+      expect(signalsOf(text).slugs, text).not.toContain("electrical-install");
+      const s = extractJournalSuggestions(text);
+      expect(s.workDirectionSlug, text).not.toBe("electrician");
+      expect(s.fragments.map((f) => f.activitySlug), text).not.toContain("electrician");
+    }
+    // real electrical work in both languages still reads as such
+    for (const text of [
+      "Elektrikas keitė rozetes",
+      "Montavau elektros skydą",
+      "3 val. dirbau prie elektros instaliacijos",
+      "Электрик 5 часов",
+      "Электромонтажные работы",
+    ]) {
+      expect(signalsOf(text).slugs, text).toContain("electrical-install");
+    }
+    expect(extractJournalSuggestions("Elektros darbai").workDirectionSlug).toBe("electrician");
+    expect(extractJournalSuggestions("Elektrinė instaliacija name").workDirectionSlug).toBe("electrician");
+  });
+
   it("'kraną' as a faucet (repair) never becomes crane operation", () => {
     const s = signalsOf("remontavau kraną");
     expect(s.all).toMatch(/remont/i);

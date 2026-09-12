@@ -97,11 +97,14 @@ export function isCleaningFloorContext(foldedText: string): boolean {
 // "elektrodu" — a welder's consumable, not electrical work. Same guard, same
 // rule: the stem alone is not the trade.
 const POWER_TOOL_RE =
-  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrili[a-z]* toorii|elektroinstrument|sahkotyokalu|elektronik|электроник|elektrod|электрод|electrode|elektrode/;
+  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrili[a-z]* toorii|elektroinstrument|sahkotyokalu|elektronik|электроник|elektronin|электронн|elektrod|электрод|electrode|elektrode/;
 const ELECTRICAL_WORK_RE =
   /instaliac|rozet|jungikl|kabel|elektros darb|elektros mont|elektrik|wiring|rewir|electrical install|electrical work|проводк|розетк|электромонтаж|выключател|кабел|электрик|bedrading|stopcontact|groepenkast|elektra aangelegd|steckdose|verkabelt|verdrahtet|elektroinstallation|gniazdk|instalacje elektryczne|elektryk|ukladalem przewody|eluttag|stikkontakt|stopselkontakt|ledninger trukket|elinstallation|elarbete|elektriker|elektroniker|pistorasi|sahkoasennu|sahkotoi|rozete|elektroinstalac|vadus|elektrivarust|pistikup|elektritoo/;
 
-/** True when electricity is named ONLY through a power-tool mention. */
+/** True when electricity is named ONLY through a power-tool or electronics
+ *  mention — "elektroninis paštas" / "электронная почта" (e-mail),
+ *  "elektroninė prekyba", an electronic signature — never through electrical
+ *  WORK (#1689, 2026-09-12: the fuzzy tier sat one edit from "elektros"). */
 export function isPowerToolOnlyElectricalContext(foldedText: string): boolean {
   return POWER_TOOL_RE.test(foldedText) && !ELECTRICAL_WORK_RE.test(foldedText);
 }
