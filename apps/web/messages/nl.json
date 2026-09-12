@@ -13763,6 +13763,7 @@
       "wiGrowthExpand": "Waar uw geregistreerde werk al heen wijst (richtingen waar uw registraties al bij passen):\n{list}",
       "wiGrowthExpandItem": "— {direction}: uw registraties onderbouwen {shared, plural, one {# vaardigheid} other {# vaardigheden}}; nog niet onderbouwd: {missing}",
       "wiGrowthDemandUnread": "Wat de echte vraag zoekt, kon deze keer niet worden gelezen — dat staat op uw kansenbord.",
+      "wiGrowthMore": "en nog {count} — alle tellen mee in de totalen",
       "wiGrowthDemandNone": "Uw zichtbare aanvragen zoeken geen vaardigheid die uw registraties niet al onderbouwen.",
       "wiGrowthDemand": "Wat uw zichtbare aanvragen zoeken en uw registraties nog niet onderbouwen: {list}.",
       "wiGrowthDemandItem": "{skill} ({demands, plural, one {# aanvraag} other {# aanvragen}})",

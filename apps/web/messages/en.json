@@ -13763,6 +13763,7 @@
       "wiGrowthExpand": "Where your recorded work already points (directions your entries already fit):\n{list}",
       "wiGrowthExpandItem": "— {direction}: your entries back {shared, plural, one {# skill} other {# skills}}; not evidenced yet: {missing}",
       "wiGrowthDemandUnread": "What real demand asks for could not be read this time — it is on your opportunities board.",
+      "wiGrowthMore": "and {count} more — all of them count toward the totals",
       "wiGrowthDemandNone": "Your visible demands ask for no skill your entries do not already back.",
       "wiGrowthDemand": "What your visible demands ask for that your entries do not back yet: {list}.",
       "wiGrowthDemandItem": "{skill} ({demands, plural, one {# demand} other {# demands}})",

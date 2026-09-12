@@ -106,9 +106,15 @@ export type GrowthReading = {
   };
   /** READING block. */
   readonly deepen: readonly GrowthDeepen[];
+  /** How many evidenced skills HAD a deepen reason before the list was
+   *  capped at MAX_DEEPEN — so a surface can say "6 of 9", never imply the
+   *  six are all (#1689, 2026-09-12). */
+  readonly deepenTotal: number;
   readonly expand: readonly AdjacentDirection[];
   /** `null` = demand was not read for this reading (UNKNOWN, not zero). */
   readonly demand: readonly GrowthDemand[] | null;
+  /** Demand rows before the MAX_DEMAND cap; `null` when demand was not read. */
+  readonly demandTotal: number | null;
   readonly limitation: GrowthLimitation;
 };
 
@@ -174,36 +180,40 @@ export function deriveGrowthReading(
       kind: "derived",
       basis,
       deepen: [],
+      deepenTotal: 0,
       expand: [],
       demand: demandRead === null ? null : [],
+      demandTotal: demandRead === null ? null : 0,
       limitation: "insufficient_skills",
     };
   }
 
   // deepen — listed in the person's own hours order (the section's), never
   // re-ranked by the number of reasons
-  const deepen: GrowthDeepen[] = evidenced
+  const deepenAll: GrowthDeepen[] = evidenced
     .map((s) => ({ slug: s.slug, reasons: deepenReasons(s, dormantBefore) }))
-    .filter((d) => d.reasons.length > 0)
-    .slice(0, MAX_DEEPEN);
+    .filter((d) => d.reasons.length > 0);
+  const deepen = deepenAll.slice(0, MAX_DEEPEN);
 
   // demand — only skills the person's evidence does NOT cover, by the
   // board's own count, then slug; the board's figures, never re-derived
-  const demand: readonly GrowthDemand[] | null =
+  const demandAll: readonly GrowthDemand[] | null =
     demandRead === null
       ? null
       : [...demandRead.entries()]
           .filter(([slug, n]) => n > 0 && !evidencedSlugs.has(slug))
           .map(([slug, n]) => ({ slug, demands: n }))
-          .sort((a, b) => b.demands - a.demands || a.slug.localeCompare(b.slug))
-          .slice(0, MAX_DEMAND);
+          .sort((a, b) => b.demands - a.demands || a.slug.localeCompare(b.slug));
+  const demand = demandAll === null ? null : demandAll.slice(0, MAX_DEMAND);
 
   return {
     kind: "derived",
     basis,
     deepen,
+    deepenTotal: deepenAll.length,
     expand: adjacency.directions,
     demand,
+    demandTotal: demandAll === null ? null : demandAll.length,
     limitation: adjacency.limitationState,
   };
 }
