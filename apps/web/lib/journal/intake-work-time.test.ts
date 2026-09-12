@@ -155,6 +155,17 @@ describe("deriveIntakeWorkTime — the stated time becomes time on the record", 
     ]);
     expect(nl.statedTotalMinutes).toBeNull(); // 5 + 4 = 9 — the items add up
     expect(timed("5 Std. Fliesen verlegt und 4 Std. gestrichen")).toEqual([[5, "hours"], [4, "hours"]]);
+    // The kind of work is read in every routed language: when the LT activity
+    // lexicon and the capability dictionary read nothing, a STRONG skill
+    // reading is the activity key (#1689); the fuzzy tier never is.
+    const activityOf = (text: string) =>
+      deriveIntakeWorkTime(text, TODAY).fragments.map((f) => f.activitySlug);
+    expect(activityOf("5 uur getegeld")).toEqual(["tiling"]);
+    expect(activityOf("5 Std. Fliesen verlegt")).toEqual(["tiling"]);
+    expect(activityOf("5 hours tiling")).toEqual(["tiling"]);
+    expect(activityOf("3 val. konsultavau klientus telefonu")).toEqual(["customer-service"]);
+    expect(activityOf("5 val. programavau")).toEqual(["software_developer"]); // the LT lexicon keeps precedence
+    expect(activityOf("2 val. testavau")).toEqual([null]); // qa-testing is a fuzzy OFFER, not a kind of work
     // Quantities that begin with a unit letter are never durations.
     expect(timed("Sumontavau 5 duris")).toEqual([]);
     expect(timed("Pakroviau 5 dėžes")).toEqual([]);

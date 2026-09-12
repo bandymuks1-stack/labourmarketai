@@ -840,7 +840,9 @@ export async function runWorkIntelligenceQuestion(
   const tSkill = await getTranslations("skillNames");
   const tProf = await getTranslations("professions");
   const skillName = (slug: string): string => (tSkill.has(slug) ? tSkill(slug) : slug);
-  const activityName = (key: string): string => (tProf.has(key) ? tProf(key) : key);
+  // profession slug (LT lexicon) or skill slug (compact editor / intake's strong skill reading) — #1689
+  const activityName = (key: string): string =>
+    tProf.has(key) ? tProf(key) : tSkill.has(key) ? tSkill(key) : key;
   const fmtDay = new Intl.DateTimeFormat(locale, { month: "2-digit", day: "2-digit", timeZone: "UTC" });
   const dayOf = (iso: string | null): string => (iso ? fmtDay.format(new Date(`${iso}T00:00:00Z`)) : "—");
   const chips = [{ id: "journal-numbers", label: t("chipJournalNumbers") }];

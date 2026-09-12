@@ -91,6 +91,7 @@ export function JournalEntryCompactEditor({
   const t = useTranslations("journal");
   const tUnit = useTranslations("productivityUnits");
   const tProf = useTranslations("professions");
+  const tSkillName = useTranslations("skillNames");
   const locale = useLocale();
 
   const derived = useMemo(
@@ -245,13 +246,21 @@ export function JournalEntryCompactEditor({
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty]);
 
-  /** Canonical stored labels may be slugs — localize for DISPLAY only. A
-   *  free-text label is not a key: `has` first, so next-intl never logs
-   *  `MISSING_MESSAGE: professions.<label>` for the worker's own words (#1689). */
+  /** Canonical stored labels may be slugs — a profession slug (the LT
+   *  activity lexicon) or a skill slug (a saved selection, or the intake's
+   *  strong skill reading — #1689) — localize for DISPLAY only. A free-text
+   *  label is not a key: `has` first, so next-intl never logs
+   *  `MISSING_MESSAGE: professions.<label>` for the worker's own words. */
   function displayLabel(label: string): string {
-    if (!tProf.has(label)) return label;
-    const v = tProf(label);
-    return v && v !== label ? v : label;
+    if (tProf.has(label)) {
+      const v = tProf(label);
+      if (v && v !== label) return v;
+    }
+    if (tSkillName.has(label)) {
+      const v = tSkillName(label);
+      if (v && v !== label) return v;
+    }
+    return label;
   }
 
   function patchRow(key: string, patch: Partial<CompactActivityRow>): void {

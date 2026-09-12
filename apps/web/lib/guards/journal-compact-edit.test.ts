@@ -330,7 +330,9 @@ describe("provenance survives a compact re-save; a free-text label is not a mess
   });
 
   it("profession lookups ask `has` first — no try/catch around a translation, no MISSING_MESSAGE for the worker's own words", () => {
-    expect(EDITOR).toMatch(/if \(!tProf\.has\(label\)\) return label;/);
+    expect(EDITOR).toMatch(/if \(tProf\.has\(label\)\) \{/);
+    // a skill-slug activity key (compact selection / intake's strong skill reading) is named, never raw
+    expect(EDITOR).toMatch(/if \(tSkillName\.has\(label\)\) \{/);
     expect(EDITOR).not.toMatch(/try \{\s*const v = tProf\(/);
     expect(COMPOSER).toMatch(/if \(tProf\.has\(slug\)\) \{/);
     expect(COMPOSER).not.toMatch(/try \{\s*const v = tProf\(/);

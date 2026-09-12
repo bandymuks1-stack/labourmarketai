@@ -186,7 +186,11 @@ export async function JournalWorkIntelligence({
     iso
       ? (formatUtcDate(iso, locale, { month: "short", day: "numeric" }) ?? iso)
       : null;
-  const activityName = (key: string) => labels.professionName(key) ?? key;
+  // an activity key is a profession slug (the LT lexicon) OR a skill slug
+  // (a compact-editor selection, or the intake's strong skill reading when
+  // the lexicon read nothing — #1689); a raw key never reaches the person
+  const activityName = (key: string) =>
+    labels.professionName(key) ?? labels.skillName(key) ?? key;
 
   // ── 7 · growth reading: FACT block + DERIVED block, from the ONE pure
   //    derivation the chat answers with too (`growth-reading.ts`); the

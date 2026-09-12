@@ -975,7 +975,7 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   for (const raw of rawParts) {
     const localTime = detectFragmentTime(raw);
     const activity = detectActivity(raw);
-    const slug = activity.slug;
+    let slug = activity.slug;
     let label = activity.label;
     // Cross-sector fallback (full-text recognition, P0): when the per-fragment
     // ACTIVITY lexicon has no match, consult the SAME capability dictionary the
@@ -988,6 +988,20 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     if (slug === null && label === null) {
       const cap = extractProfileSkillClaims(raw)[0];
       if (cap) label = cap.label;
+    }
+    // Multilingual fallback (#1689, measured 2026-09-12): the activity
+    // lexicon and the capability dictionary are Lithuanian-first, so "5 uur
+    // getegeld" / "5 Std. Fliesen verlegt" / "5 hours tiling" carried their
+    // hours with "kind of work not recognised" while the skill recognizer —
+    // which reads all five routed languages — knew the work exactly. A STRONG
+    // (exact / synonym) skill reading becomes the fragment's activity key; the
+    // surfaces name a skill slug as they name a profession slug. Never the
+    // fuzzy tier: a guess is an offer for the worker, not a kind of work.
+    if (slug === null && label === null) {
+      const strong = recognizeSkills(raw, 3).find(
+        (m) => m.via === "exact" || m.via === "synonym",
+      );
+      if (strong) slug = strong.slug;
     }
     const isUnknown = localTime !== null && slug === null && label === null;
     if (localTime || slug || label) {

@@ -455,6 +455,19 @@ describe("the duration-unit vocabulary (#1689, measured 2026-09-12) — ONE list
     expect(FRAGMENTER).not.toContain("UNIT_TOKEN_RE");
   });
 
+  it("a fragment's activity falls back to a STRONG skill reading only, after the lexicon and the capability dictionary (#1689)", () => {
+    const start = EXTRACTOR.indexOf("const cap = extractProfileSkillClaims(raw)[0];");
+    const fallback = EXTRACTOR.slice(start, EXTRACTOR.indexOf("const isUnknown =", start));
+    expect(fallback).toMatch(/const strong = recognizeSkills\(raw, 3\)\.find\(\s*\(m\) => m\.via === "exact" \|\| m\.via === "synonym",\s*\);/);
+    expect(fallback).toMatch(/if \(strong\) slug = strong\.slug;/);
+    expect(fallback).not.toMatch(/"fuzzy"/);
+    // the surfaces name a skill-slug key as they name a profession slug — never raw
+    const SECTION = read("components/app/journal-work-intelligence.tsx");
+    const CHAT = read("lib/ai-workspace/workflows.ts");
+    expect(SECTION).toMatch(/labels\.professionName\(key\) \?\? labels\.skillName\(key\) \?\? key/);
+    expect(CHAT).toMatch(/tProf\.has\(key\) \? tProf\(key\) : tSkill\.has\(key\) \? tSkill\(key\) : key/);
+  });
+
   it("the lists carry every routed language and bound the one-letter abbreviations", () => {
     const list = (name: string): string =>
       EXTRACTOR.slice(
