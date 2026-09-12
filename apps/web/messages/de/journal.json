@@ -653,6 +653,8 @@
     "contextsTitle": "Gearbeitet für",
     "monthsTitle": "Wie es sich verändert",
     "monthsLegend": "Stunden pro Monat nach Arbeitstag. Der grüne Teil sind von der Führungskraft bestätigte Stunden. Ein Monat ohne Einträge ist eine echte Null.",
+    "listCap": "{shown} von {total} angezeigt — alle Zeilen zählen in den Summen.",
+    "monthsCap": "Die letzten {shown} von {total} Monaten angezeigt — alle zählen in den Summen.",
     "directionsTitle": "Wohin Ihre erfasste Arbeit bereits zeigt",
     "directionsHint": "Nur aus Fähigkeiten abgeleitet, die Ihre Einträge belegen — keine Bewertung und keine Qualifikation, sondern Richtungen, zu denen Ihre Arbeit bereits passt.",
     "directionCoverage": "Ihre Einträge belegen {shared} von {total} Fähigkeiten dieser Richtung",

@@ -653,6 +653,8 @@
     "contextsTitle": "Kam dirbta",
     "monthsTitle": "Kaip keičiasi",
     "monthsLegend": "Valandos per mėnesį pagal darbo dieną. Žalia dalis — vadovo patvirtintos valandos. Mėnuo be įrašų yra tikras nulis.",
+    "listCap": "Rodoma {shown} iš {total} — į sumas skaičiuojamos visos eilutės.",
+    "monthsCap": "Rodomi paskutiniai {shown} mėn. iš {total} — į sumas skaičiuojami visi.",
     "directionsTitle": "Kur jau veda užfiksuotas darbas",
     "directionsHint": "Išvesta tik iš įgūdžių, kuriuos remia jūsų įrašai — tai ne įvertinimas ir ne kvalifikacija, o kryptys, kurioms jūsų darbas jau tinka.",
     "directionCoverage": "jūsų įrašai remia {shared} iš {total} šios krypties įgūdžių",

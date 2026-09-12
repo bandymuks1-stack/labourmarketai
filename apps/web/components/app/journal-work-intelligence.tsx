@@ -210,13 +210,35 @@ export async function JournalWorkIntelligence({
     .filter((d) => d.name !== null)
     .slice(0, MAX_DIRECTIONS);
 
-  const skills = wi.skills
-    .filter((s) => s.attributedHours > 0 || s.sharedHours > 0 || s.entries > 0)
-    .slice(0, MAX_SKILLS);
+  // Every list below is CAPPED for the page; the totals above them are not.
+  // Where a cap cuts, the surface says so ("Rodoma 8 iš 12") — a silent cut
+  // read as "these are all my skills" (#1689, REMAINING 2 of the receipts).
+  const skillsAll = wi.skills.filter(
+    (s) => s.attributedHours > 0 || s.sharedHours > 0 || s.entries > 0,
+  );
+  const skills = skillsAll.slice(0, MAX_SKILLS);
   const activities = wi.activities.slice(0, MAX_ACTIVITIES);
   const mainActivity = activities[0] ?? null;
   const otherActivities = activities.slice(1);
   const months = wi.months.slice(-MAX_MONTHS);
+  const directionsTotal = (growth?.expand ?? []).filter(
+    (d) => labels.professionName(d.professionId) !== null,
+  ).length;
+  const capLine = (
+    kind: "skills" | "activities" | "months" | "directions",
+    shown: number,
+    total: number,
+  ) =>
+    total > shown ? (
+      <p
+        className="text-meta leading-relaxed text-text-muted"
+        data-testid={`wi-cap-${kind}`}
+        data-shown={shown}
+        data-total={total}
+      >
+        {t(kind === "months" ? "monthsCap" : "listCap", { shown, total })}
+      </p>
+    ) : null;
   const monthMax = Math.max(0, ...months.map((m) => m.hours));
   // Work recorded in DAYS is a duration too — "no entry with a duration"
   // was false for a 2-day entry (re-audit F5).
@@ -747,6 +769,7 @@ export async function JournalWorkIntelligence({
                     })}
                   </ul>
                 )}
+                {capLine("skills", skills.length, skillsAll.length)}
                 {/* the honest remainder — what no skill can claim yet */}
                 {wi.sharedHours > 0 && (
                   <p
@@ -844,6 +867,7 @@ export async function JournalWorkIntelligence({
                         </li>
                       ))}
                     </ul>
+                    {capLine("activities", activities.length, wi.activities.length)}
                   </div>
                 )}
                 <div className="flex flex-col gap-4">
@@ -974,6 +998,7 @@ export async function JournalWorkIntelligence({
                   })}
                 </ol>
                 <p className="text-meta text-text-muted">{t("monthsLegend")}</p>
+                {capLine("months", months.length, wi.months.length)}
               </div>
             )}
 
@@ -1082,6 +1107,7 @@ export async function JournalWorkIntelligence({
                     </li>
                   ))}
                 </ul>
+                {capLine("directions", directions.length, directionsTotal)}
               </div>
                   )}
                   {/* demand is not read on this page — the board is where

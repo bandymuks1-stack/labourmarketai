@@ -653,6 +653,8 @@
     "contextsTitle": "Gewerkt voor",
     "monthsTitle": "Hoe het verandert",
     "monthsLegend": "Uren per maand op de gewerkte dag. Het groene deel zijn door de leidinggevende bevestigde uren. Een maand zonder registraties is een echte nul.",
+    "listCap": "{shown} van {total} getoond — alle rijen tellen mee in de totalen.",
+    "monthsCap": "De laatste {shown} van {total} maanden getoond — alle tellen mee in de totalen.",
     "directionsTitle": "Waar je vastgelegde werk al naartoe wijst",
     "directionsHint": "Alleen afgeleid uit vaardigheden die je registraties onderbouwen — geen beoordeling en geen kwalificatie, maar richtingen waar je werk al bij past.",
     "directionCoverage": "je registraties onderbouwen {shared} van {total} vaardigheden van deze richting",
