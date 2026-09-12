@@ -89,6 +89,25 @@ describe("work intelligence by sentence — the owner's lines reach their door",
     }
   });
 
+  it("line 8 — where could I grow (the growth reading, owner line 8)", () => {
+    for (const s of [
+      "Kur yra didžiausias augimo potencialas?",
+      "kur galėčiau augti?",
+      "Ką galėčiau gilinti?",
+      "Where is my biggest growth potential?",
+      "Where could I grow?",
+      "What could I deepen?",
+      "Где мой потенциал роста?",
+      "Где я могу расти?",
+      "Wo liegt mein Wachstumspotenzial?",
+      "Wo kann ich wachsen?",
+      "Waar zit mijn groeipotentieel?",
+      "Waar kan ik groeien?",
+    ]) {
+      expect(classifyIntent(s).intent, s).toBe("journal-growth");
+    }
+  });
+
   it("line 6 — 'what did I do' stays the journal read (outputs are added in the answer)", () => {
     expect(classifyIntent("Ką padariau per tą laiką?").intent).toBe("journal-recent");
     expect(classifyIntent("Ką šiandien dariau?").intent).toBe("journal-recent");
@@ -108,6 +127,14 @@ describe("the neighbours keep their own doors", () => {
     ]) {
       expect(classifyIntent(s).intent, s).toBe("journal-recent");
     }
+  });
+
+  it("the learning question stays learning-compass, the future-use question stays out of the growth door", () => {
+    expect(classifyIntent("Ką man mokytis?").intent).toBe("learning-compass");
+    expect(classifyIntent("Parodyk mano mokymosi kompasą").intent).toBe("learning-compass");
+    expect(classifyIntent("What should I learn?").intent).toBe("learning-compass");
+    expect(classifyIntent("Where can I use my skills?").intent).not.toBe("journal-growth");
+    expect(classifyIntent("the company grows fast").intent).not.toBe("journal-growth");
   });
 
   it("the GAP question stays skill-gap, the profile edit stays profile", () => {
@@ -135,7 +162,7 @@ describe("the neighbours keep their own doors", () => {
 });
 
 describe("the doors are READ intents of the journal domain with a proposer hint", () => {
-  it.each(["journal-skill", "journal-skills-top", "journal-activities-top", "journal-confirmed"] as const)(
+  it.each(["journal-skill", "journal-skills-top", "journal-activities-top", "journal-confirmed", "journal-growth"] as const)(
     "%s",
     (intent) => {
       expect(INTENT_REGISTRY[intent].domain).toBe("journal");

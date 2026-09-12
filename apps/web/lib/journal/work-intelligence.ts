@@ -255,6 +255,12 @@ export type SkillWorkTime = {
   readonly lastWorkedDay: string | null;
   /** Share of the person's own ATTRIBUTED hours, 0..1 (0 when none). */
   readonly share: number;
+  /** Direction of the person's own USE of this skill — the hours of the
+   *  entries it is linked to (attributed or involvement alike, this is a
+   *  direction, not a total) in the focus window's last 30 days against
+   *  the 30 days before them. Same windows as an activity's trend; never a
+   *  forecast. Read by the growth reading (`growth-reading.ts`). */
+  readonly trend: WorkTrend;
   /** How many of the linked entries were RECOGNIZED from the text, the
    *  worker's MANUAL link, or confirmed — the provenance behind the link. */
   readonly provenance: {
@@ -696,9 +702,14 @@ export function deriveWorkIntelligence(
     days: Set<string>;
     contexts: Set<string>;
     last: string | null;
+    recent: number;
+    prior: number;
     prov: { recognized: number; manual: number; confirmed: number; unrecorded: number };
   };
   const skillAcc = new Map<string, SkillAcc>();
+  // the same two 30-day windows an activity's trend compares
+  const recentStart = isoDayMinus(focusBounds.endIso, 29);
+  const priorStart = isoDayMinus(focusBounds.endIso, 59);
   const accFor = (skillId: string): SkillAcc => {
     let a = skillAcc.get(skillId);
     if (!a) {
@@ -710,6 +721,8 @@ export function deriveWorkIntelligence(
         days: new Set(),
         contexts: new Set(),
         last: null,
+        recent: 0,
+        prior: 0,
         prov: { recognized: 0, manual: 0, confirmed: 0, unrecorded: 0 },
       };
       skillAcc.set(skillId, a);
@@ -733,6 +746,9 @@ export function deriveWorkIntelligence(
       if (DAY_RX.test(d.time.day)) {
         a.days.add(d.time.day);
         if (a.last === null || d.time.day > a.last) a.last = d.time.day;
+        // use = the linked entry's own hours; a direction, never a total
+        if (d.time.day >= recentStart) a.recent += d.time.totalHours;
+        else if (d.time.day >= priorStart) a.prior += d.time.totalHours;
       }
       const p = d.entry.linkProvenance?.get(id) ?? null;
       if (p === "recognized") a.prov.recognized += 1;
@@ -784,6 +800,7 @@ export function deriveWorkIntelligence(
       contexts: a?.contexts.size ?? 0,
       lastWorkedDay: a?.last ?? null,
       share: attributedHours > 0 ? round2(attributed / attributedHours) : 0,
+      trend: trendOf(a?.recent ?? 0, a?.prior ?? 0),
       provenance: a?.prov ?? { recognized: 0, manual: 0, confirmed: 0, unrecorded: 0 },
     };
   });
@@ -797,8 +814,6 @@ export function deriveWorkIntelligence(
 
   // ── activities (direct evidence relation: same fragment, or the entry's
   //    own direction for an entry-level duration) ────────────────────────
-  const recentStart = isoDayMinus(focusBounds.endIso, 29);
-  const priorStart = isoDayMinus(focusBounds.endIso, 59);
   type ActAcc = {
     hours: number;
     entries: Set<string>;

@@ -122,9 +122,15 @@ skills) · HOW LONG (today / 7 / 30 / 365 days / all time) · HOW OFTEN (entries
 WHERE / CONTEXT (per engagement, context diversity) · WHAT PRODUCED (outputs in recorded units) ·
 WHAT SKILLS WERE INVOLVED (involvement vs attributed) · WHAT EVIDENCE (confirmed / photos /
 original document / self-only) · WHO CONFIRMED (approved confirmations only) · HOW IT CHANGED
-(months, 30-vs-30 trend) · WHAT OCCUPIES MOST · WHAT ADJACENT CAPABILITY (evidenced skills →
-existing profession/skill map, named as derived) · WHAT DEMAND (opportunities board from
-journal-linked skills). Tools/systems used and ESCO occupation mapping are extension points
+(months, 30-vs-30 trend) · WHAT OCCUPIES MOST · WHERE TO GROW (owner line 8, LIVE 2026-09-12:
+`growth-reading.ts`, ONE pure derivation the section renders and the chat answers — a FACT block
+(the skills the entries back, in hours; the declared-only skills left out, counted) kept apart
+from a block labelled DERIVED: deepen (a closed set of facts per evidenced skill — used only
+alongside others / never confirmed / rising 30-vs-30 / no entry for 90 days), expand (the existing
+adjacency over EVIDENCED slugs only), demand (the board's own missing-skill counts in the chat,
+UNKNOWN on the page — never an empty list that reads as "nothing asks"); never a score, a rank or
+a tier of the person; withheld from the organization view) · WHAT DEMAND (opportunities board
+from journal-linked skills). Tools/systems used and ESCO occupation mapping are extension points
 (§7) — nothing is manufactured for them.
 
 ## 7. Extension path (preserved, not built here)

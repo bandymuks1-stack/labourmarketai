@@ -7,14 +7,13 @@ import {
   type EvidenceTier,
 } from "@/lib/evidence/evidence-tier";
 import {
-  evidencedSkillSlugs,
   WORK_PERIOD_KEYS,
   type WorkIntelligence,
   type WorkPeriodKey,
   type WorkTrend,
 } from "@/lib/journal/work-intelligence";
+import { deriveGrowthReading } from "@/lib/journal/growth-reading";
 import { JournalWorkTimeCheckAck } from "@/components/app/journal-work-time-check-ack";
-import { computeAdjacentDirections } from "@/lib/opportunities/adjacent-directions";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 import { formatUtcDate } from "@/lib/time/display";
 
@@ -38,7 +37,16 @@ import { formatUtcDate } from "@/lib/time/display";
  *                               / unlinked remainder, named
  *   5. What kind, for whom?     activities with trend · outputs · contexts
  *   6. How is it changing?      months
- *   7. Where could it lead?     adjacent directions from EVIDENCED skills only
+ *   7. Where could I grow?     the growth reading (owner line 8): a FACT
+ *                               block — the skills the entries back, in
+ *                               hours, and how many declared skills are
+ *                               left out — and, apart from it, a block
+ *                               labelled DERIVED: skills whose own evidence
+ *                               is thin or moving (deepen), adjacent
+ *                               directions from EVIDENCED skills only
+ *                               (expand), and a pointer to the board for
+ *                               what real demand asks (demand is not read
+ *                               here — the chat's answer reads it)
  *   8. What does it feed?       the Living CV and the opportunities board
  *   9. Where do the numbers come from?  provenance footnote
  *   1b. What did my organization record?  the second hour ledger (owner
@@ -67,7 +75,9 @@ import { formatUtcDate } from "@/lib/time/display";
  *     no rating, no rank, no person tier (the tier word is the skill row's
  *     evidence ladder, from the one `evidenceTier` namespace);
  *   · a direction is "your recorded work already covers N of M skills of X",
- *     never "you are qualified for X";
+ *     never "you are qualified for X"; a "deepen" line is a fact about the
+ *     person's own rows (used only alongside others / never confirmed /
+ *     rising / not used for 90 days), never a judgement of the person;
  *   · confirmed hours light up ONLY from an approved confirmation row; zero
  *     is shown as zero of the total, never hidden;
  *   · an unreadable model renders nothing (the caller passes null) — it never
@@ -173,13 +183,21 @@ export async function JournalWorkIntelligence({
       : null;
   const activityName = (key: string) => labels.professionName(key) ?? key;
 
-  // ── growth: adjacent directions from EVIDENCED skills only ────────────
-  const evidenced = evidencedSkillSlugs(wi);
-  const adjacency = computeAdjacentDirections({
-    workerSkillSlugs: org ? [] : evidenced,
-    primaryProfessionSlug: labels.primaryProfessionSlug,
-  });
-  const directions = adjacency.directions
+  // ── 7 · growth reading: FACT block + DERIVED block, from the ONE pure
+  //    derivation the chat answers with too (`growth-reading.ts`); the
+  //    organization view gets none of it (the person's own reading, never
+  //    an employer's ranking input)
+  const growth = org
+    ? null
+    : deriveGrowthReading(wi, { primaryProfessionSlug: labels.primaryProfessionSlug });
+  const growthBasis = (growth?.basis.skills ?? [])
+    .map((s) => ({ ...s, name: labels.skillName(s.slug) }))
+    .filter((s): s is typeof s & { name: string } => s.name !== null)
+    .slice(0, MAX_SKILLS);
+  const deepen = (growth?.deepen ?? [])
+    .map((d) => ({ ...d, name: labels.skillName(d.slug) }))
+    .filter((d): d is typeof d & { name: string } => d.name !== null);
+  const directions = (growth?.expand ?? [])
     .map((d) => ({
       ...d,
       name: labels.professionName(d.professionId),
@@ -959,15 +977,82 @@ export async function JournalWorkIntelligence({
               </div>
             )}
 
-            {/* 7 · where the evidenced work already points */}
-            {directions.length > 0 && (
+            {/* 7 · where could I grow — the FACT block (what the entries
+                back) and, apart from it, the DERIVED block (deepen / expand);
+                withheld entirely for the organization view */}
+            {growth !== null && growthBasis.length > 0 && (
+              <div
+                className="flex flex-col gap-3"
+                data-testid="wi-growth"
+                data-kind={growth.kind}
+                data-limitation={growth.limitation}
+              >
+                <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                  {t("growthTitle")}
+                </h3>
+                {/* FACT — the person's own rows this reading stands on */}
+                <p
+                  className="text-meta leading-relaxed text-text-secondary"
+                  data-testid="wi-growth-basis"
+                  data-declared-only={growth.basis.declaredOnly}
+                >
+                  {t("growthBasis", {
+                    count: growth.basis.skills.length,
+                    hours: fmtHours(growth.basis.recordedHours, locale),
+                    entries: growth.basis.entries,
+                    period: t(`period.${wi.focus}`),
+                  })}{" "}
+                  {growthBasis
+                    .map((s) =>
+                      s.attributedHours > 0
+                        ? t("growthBasisSkill", { skill: s.name, hours: fmtHours(s.attributedHours, locale) })
+                        : t("growthBasisSkillInvolved", { skill: s.name, hours: fmtHours(s.sharedHours, locale) }),
+                    )
+                    .join(" · ")}
+                  {growth.basis.declaredOnly > 0
+                    ? ` ${t("growthDeclaredOnly", { count: growth.basis.declaredOnly })}`
+                    : ""}
+                </p>
+                {/* DERIVED — a reading of those rows, said to be one */}
+                <div
+                  className="flex flex-col gap-2 rounded-md border border-dashed border-border-subtle px-3 py-2"
+                  data-testid="wi-growth-reading"
+                >
+                  <p className="text-meta leading-relaxed text-text-muted">
+                    {t("growthDerivedHint")}
+                  </p>
+                  {growth.limitation === "insufficient_skills" && (
+                    <p className="text-meta text-text-muted" data-testid="wi-growth-insufficient">
+                      {t("growthInsufficient")}
+                    </p>
+                  )}
+                  {deepen.length > 0 && (
+                    <div className="flex flex-col gap-1" data-testid="wi-growth-deepen">
+                      <h4 className="text-meta font-medium text-text-secondary">{t("deepenTitle")}</h4>
+                      <ul className="flex flex-col gap-1">
+                        {deepen.map((d) => (
+                          <li
+                            key={d.slug}
+                            className="text-meta text-text-muted"
+                            data-testid={`wi-deepen-${d.slug}`}
+                            data-reasons={d.reasons.join(" ")}
+                          >
+                            <span className="font-medium text-text-primary">{d.name}</span>
+                            {" — "}
+                            {d.reasons.map((r) => t(`deepen.${r}`)).join("; ")}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {directions.length > 0 && (
               <div
                 className="flex flex-col gap-1.5"
                 data-testid="wi-directions"
               >
-                <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                <h4 className="text-meta font-medium text-text-secondary">
                   {t("directionsTitle")}
-                </h3>
+                </h4>
                 <p className="text-meta leading-relaxed text-text-muted">
                   {t("directionsHint")}
                 </p>
@@ -993,6 +1078,20 @@ export async function JournalWorkIntelligence({
                     </li>
                   ))}
                 </ul>
+              </div>
+                  )}
+                  {/* demand is not read on this page — the board is where
+                      real needs are; said, not implied (UNKNOWN ≠ ZERO) */}
+                  <p className="text-meta text-text-muted" data-testid="wi-growth-demand-note">
+                    {t("growthDemandNote")}{" "}
+                    <Link
+                      href={"/dashboard/opportunities" as "/dashboard"}
+                      className="font-medium text-brand-blue hover:underline"
+                    >
+                      {t("openOpportunities")} →
+                    </Link>
+                  </p>
+                </div>
               </div>
             )}
 

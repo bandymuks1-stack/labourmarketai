@@ -595,6 +595,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat is bevestigd?",
     de: "Was ist bestätigt?",
   },
+  "journal-growth": {
+    lt: "Kur yra didžiausias augimo potencialas?",
+    en: "Where could I grow?",
+    ru: "Где мой потенциал роста?",
+    nl: "Waar kan ik groeien?",
+    de: "Wo kann ich wachsen?",
+  },
   figures: {
     lt: "Paruošk ataskaitą",
     en: "Show my approved hours",

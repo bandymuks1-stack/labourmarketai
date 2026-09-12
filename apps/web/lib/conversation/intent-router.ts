@@ -61,6 +61,7 @@ export type ConversationIntent =
   | "journal-skills-top" // "kokius įgūdžius naudoju daugiausia?"
   | "journal-activities-top" // "kokia veikla užima daugiausia mano laiko?"
   | "journal-confirmed" // "kas patvirtinta?"
+  | "journal-growth" // "kur yra didžiausias augimo potencialas?" (owner line 8)
   | "figures" // "parodyk patvirtintas valandas" / "paruošk ataskaitą"
   | "open-project" // "atidaryk šį projektą"
   // ── G8 (chat-first audit 2026-08-30): the chip surfaces, reachable by
@@ -694,6 +695,26 @@ const RULES: IntentRule[] = [
         "(kurie|kuriuos|which|какие|welche|welke)\\s*.{0,16}(įraš|entr|запис|eintr|invoer|registr)[^\\s]*\\s*.{0,12}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)",
         8,
       ),
+    ],
+  },
+  {
+    intent: "journal-growth",
+    patterns: [
+      // Owner line 8 — "Kur yra didžiausias augimo potencialas?" / "Where
+      // is my biggest growth potential?" / "Где потенциал роста?" / "Wo
+      // liegt mein Wachstumspotenzial?" / "Waar zit mijn groeipotentieel?"
+      // The noun alone is enough: a person asking about growth potential is
+      // asking for the reading of their own evidence, not for a course
+      // (learning-compass) and not for a gap list (skill-gap, 5).
+      p("(augimo|growth|роста|wachstums|groei)[^\\s]*\\s*.{0,6}(potencial|potential|потенциал|potenzial|potentieel)", 8),
+      p("(potencial|potential|потенциал|potenzial|potentieel)[^\\s]*\\s*.{0,10}(aug|grow|рост|wachs|groei)", 8),
+      // "Kur galėčiau augti / tobulėti?", "Where could I grow?", "Где я
+      // могу расти?", "Wo kann ich wachsen?", "Waar kan ik groeien?" — an
+      // interrogative + a first-person modal + the growth verb, so
+      // "augalai" and "the company grows" never land here.
+      p("(kur|kaip|kame|where|how|где|куда|как|wo|wie|waar|hoe)\\s*.{0,24}(galėčiau|galiu|galėsiu|could\\s+i|can\\s+i|might\\s+i|могу|мог\\s+бы|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik)\\s*.{0,16}(augti|tobulėti|gilinti|plėsti|grow|deepen|expand|develop|расти|углуб|развива|wachsen|vertiefen|erweitern|groeien|verdiepen|uitbreiden)", 8),
+      // "Ką galėčiau gilinti / plėsti?", "What could I deepen?"
+      p("(ką|ka|what|что|was|wat)\\s*.{0,10}(galėčiau|galiu|could\\s+i|can\\s+i|могу|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik)\\s*.{0,10}(gilinti|plėsti|deepen|expand|углуб|расшир|vertiefen|erweitern|verdiepen|uitbreiden)", 8),
     ],
   },
   {
