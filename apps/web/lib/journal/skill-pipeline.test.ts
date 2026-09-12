@@ -39,10 +39,17 @@ vi.mock("@/lib/journal/skill-source-apply", () => ({
 const recognizeSkillsMock = vi.fn(
   (_text: string, _limit?: number): unknown[] => [],
 );
-vi.mock("@/lib/structuring/skill-recognition", () => ({
-  recognizeSkills: (...args: [string, number?]) =>
-    recognizeSkillsMock(...args),
-}));
+// The derivation reads the suggestion extractor's stated-total rule (lane
+// 4c), and the extractor imports more than `recognizeSkills` from this
+// module — keep the real exports, stub only the recogniser.
+vi.mock("@/lib/structuring/skill-recognition", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    recognizeSkills: (...args: [string, number?]) =>
+      recognizeSkillsMock(...args),
+  };
+});
 
 type ClaimStub = {
   label: string;

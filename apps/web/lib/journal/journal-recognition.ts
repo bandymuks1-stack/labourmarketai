@@ -23,6 +23,20 @@
  *      possible skill for THAT fragment ("2 val. testavau" → qa-testing) as
  *      a `fuzzy_skill` candidate — the worker's word links it through the
  *      existing confirm/reject actions; never auto-linked, declared or not;
+ *   4c. the STATED TOTAL (issue #1689): the suggestion extractor's ONE rule
+ *      (`separateStatedTotal`) says which phrase is the day's total rather
+ *      than one more item — the header before the itemising colon
+ *      ("Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. …") or a bare
+ *      restated total the items add up to. That fragment is marked
+ *      `stated_total` (covered by construction — the items describe it; it
+ *      is never a "name it yourself" hint). When the header names the work
+ *      ("9 val. klijavau plyteles: 5 val. salone, 4 val. vonioje") every
+ *      TIMED item nothing read inherits the header's readings — the header
+ *      described the work, the items described where or how — exactly as
+ *      the extractor lets items inherit the header's activity. Inheritance
+ *      adds fragment provenance to the header's own outcomes; it never
+ *      creates a reading, and a reading the worker rejected is not passed
+ *      on (the items then ask to be named);
  *   5. zero-outcome meaningful fragment → `unresolved` (fragment text as the
  *      label). Silent loss is structurally impossible: every meaningful
  *      fragment lands in exactly one of covered / unresolved.
@@ -50,6 +64,7 @@ import {
 } from "@/lib/structuring/skill-recognition";
 import { extractAmbiguousCandidates } from "@/lib/structuring/ambiguous-journal-candidates";
 import { recognizeNewSkillSuggestions } from "@/lib/structuring/new-skill-suggestions";
+import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import {
   extractProfileSkillClaims,
   getJournalClaimRowMeta,
@@ -67,10 +82,12 @@ export type JournalOutcomeKind =
   | "ambiguous"
   | "claim"
   | "rejected"
+  | "stated_total"
   | "unresolved";
 
 /** Reference from a fragment to the derived item it produced:
- *  slug (skills), normalized label (claims/ambiguous) or fragment id. */
+ *  slug (skills), normalized label (claims/ambiguous) or fragment id
+ *  (`stated_total` / `unresolved`). */
 export type OutcomeRef = { kind: JournalOutcomeKind; ref: string };
 
 /** 'resolved' = the worker answered an ambiguity card for THIS entry
@@ -171,6 +188,16 @@ function slugAsClaimLabel(slug: string): string {
   return normalizeClaimLabel(slug.replace(/[_-]+/g, " "));
 }
 
+/** Join key between this derivation's fragment text and the extractor's
+ *  raw phrase: folded, trailing separators/dots dropped (the extractor
+ *  strips a trailing abbreviation dot, the fragmenter keeps it). */
+function phraseKey(phrase: string): string {
+  return foldText(phrase)
+    .replace(/[\s.,;:–—-]+$/u, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Empty result (used by the pipeline's fail-closed paths). */
 export function emptyJournalRecognition(): JournalRecognitionResult {
   return {
@@ -232,6 +259,32 @@ export function deriveJournalRecognition(
   const unresolved: JournalUnresolvedFragment[] = [];
   const fragmentsOut: JournalRecognitionFragment[] = [];
 
+  // ── Stated total: the extractor's ONE rule, read, not re-implemented ──
+  // `separateStatedTotal` (extract-journal-suggestions) decides which phrase
+  // is the day's total and which items are timed work; this derivation only
+  // finds those phrases among its own fragments (the two fragmenters share
+  // the dot + colon rules, so the phrases agree; where they do not, the join
+  // fails CLOSED and nothing here changes). The header always stands before
+  // its items (the colon cut), so its outcomes are known when they run.
+  const statedTotal = extractJournalSuggestions(text ?? "");
+  const headerIndex = statedTotal.statedTotal
+    ? fragments.findIndex(
+        (f) =>
+          f.meaningful &&
+          phraseKey(f.text) === phraseKey(statedTotal.statedTotal!.rawPhrase),
+      )
+    : -1;
+  const timedItemKeys = new Set(
+    headerIndex >= 0
+      ? statedTotal.fragments
+          .filter((f) => f.time !== null)
+          .map((f) => phraseKey(f.rawPhrase))
+      : [],
+  );
+  /** The header's own readings the timed items may inherit (never a
+   *  rejected one — a rejection reopens the question for the items). */
+  let headerOutcomes: OutcomeRef[] = [];
+
   const pushRejected = (
     kind: "skill" | "claim",
     label: string,
@@ -255,7 +308,7 @@ export function deriveJournalRecognition(
     }
   };
 
-  for (const f of fragments) {
+  for (const [index, f] of fragments.entries()) {
     const outcomes: OutcomeRef[] = [];
     if (f.meaningful) {
       const folded = foldText(f.text);
@@ -418,6 +471,43 @@ export function deriveJournalRecognition(
             prior.fragmentIds.add(f.id);
           }
           outcomes.push({ kind: "fuzzy_candidate", ref: s.slug });
+        }
+      }
+
+      // ── Lane 4c: the stated total and the items it describes ────────────
+      // The header keeps every reading of its own and is marked as the
+      // total: covered by construction, never a "name it yourself" hint (the
+      // extractor already keeps it out of the work items, so its hours are
+      // never counted twice). A TIMED item nothing read inherits the
+      // header's readings — provenance only: the item's id joins the
+      // header's own recognized / candidate / ambiguous / claim entries, so
+      // the worker's one decision on the header links the item's hours.
+      if (index === headerIndex) {
+        headerOutcomes = outcomes.filter(
+          (o) => o.kind !== "rejected" && o.kind !== "unresolved",
+        );
+        outcomes.push({ kind: "stated_total", ref: f.id });
+      } else if (
+        outcomes.length === 0 &&
+        headerIndex >= 0 &&
+        index > headerIndex &&
+        headerOutcomes.length > 0 &&
+        timedItemKeys.has(phraseKey(f.text))
+      ) {
+        for (const o of headerOutcomes) {
+          const entry =
+            o.kind === "recognized"
+              ? recognizedMap.get(o.ref)
+              : o.kind === "fuzzy_candidate"
+                ? fuzzyMap.get(o.ref)
+                : o.kind === "ambiguous"
+                  ? ambiguousMap.get(o.ref)
+                  : o.kind === "claim"
+                    ? claimMap.get(o.ref)
+                    : undefined;
+          if (!entry) continue;
+          entry.fragmentIds.add(f.id);
+          outcomes.push(o);
         }
       }
 
