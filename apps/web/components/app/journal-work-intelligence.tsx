@@ -13,6 +13,7 @@ import {
   type WorkTrend,
 } from "@/lib/journal/work-intelligence";
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
+import { deriveAttributionExpectation } from "@/lib/journal/attribution-expectation";
 import { JournalWorkTimeCheckAck } from "@/components/app/journal-work-time-check-ack";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 import { formatUtcDate } from "@/lib/time/display";
@@ -116,6 +117,10 @@ export type WorkIntelligenceLabels = {
   contextLabel: (id: string | null) => string;
   /** The worker's declared primary profession slug, if any. */
   primaryProfessionSlug: string | null;
+  /** ISCO groups of the person's own occupation path — the ONE composition
+   *  (`composeJournal`) tells which skill-time attribution this kind of work
+   *  can support; absent / empty → no reading (UNKNOWN, never a default). */
+  iscoGroups?: readonly string[];
   /** Where a period tile points. Defaults to the person's own journal; the
    *  organization view passes the person page it sits on. */
   periodHref?: (key: WorkPeriodKey) => string;
@@ -190,6 +195,13 @@ export async function JournalWorkIntelligence({
   const growth = org
     ? null
     : deriveGrowthReading(wi, { primaryProfessionSlug: labels.primaryProfessionSlug });
+  // what the person's KIND OF WORK can attribute (owner matrix column
+  // `skillTimeAttribution`, read here for the first time — #1689): a
+  // sentence only when the figures show the pattern; the person's own
+  // reading, withheld from the organization view
+  const attribution = org
+    ? null
+    : deriveAttributionExpectation(labels.iscoGroups ?? [], wi);
   const growthBasis = (growth?.basis.skills ?? [])
     .map((s) => ({ ...s, name: labels.skillName(s.slug) }))
     .filter((s): s is typeof s & { name: string } => s.name !== null)
@@ -649,6 +661,16 @@ export async function JournalWorkIntelligence({
                 {/* the base every % below is a share OF — stated in words,
                   not only in an aria-label: "5 h · 100 %" over 95 unlinked
                   hours was a full bar with no visible base (re-audit F3) */}
+                {attribution?.reason && (
+                  <p
+                    className="text-meta leading-relaxed text-text-secondary"
+                    data-testid="wi-attribution-note"
+                    data-attribution={attribution.attribution}
+                    data-reason={attribution.reason}
+                  >
+                    {t(`attribution.${attribution.reason}`)}
+                  </p>
+                )}
                 {period.hours > 0 && (
                   <p
                     className="text-meta leading-relaxed text-text-secondary"

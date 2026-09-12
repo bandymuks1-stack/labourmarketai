@@ -1012,3 +1012,45 @@ describe("15b · the reading's own caps and the chat's lists say what they leave
     }
   });
 });
+
+describe("16 · the owner's `skillTimeAttribution` column is READ by the analytics layer (#1689, 2026-09-12)", () => {
+  const attribution = read("lib/journal/attribution-expectation.ts");
+  const archetypes = read("lib/journal/work-evidence-archetypes.ts");
+
+  it("ONE pure reading over the ONE composition and the ONE model; nothing else reads the flag ad hoc", () => {
+    expect(attribution).toMatch(/import \{\s*archetypesForIsco,\s*composeJournal,/);
+    expect(attribution).toMatch(/const composition = composeJournal\(archetypes\);/);
+    expect(attribution).toMatch(/composition\.skillTimeAttribution === "involvement"/);
+    expect(attribution).toMatch(/composition\.skillTimeAttribution === "precise"/);
+    // the flag was declared for exactly this consumer
+    expect(archetypes).toMatch(/tells the analytics layer which attribution the evidence CAN support/);
+    // no archetype → null (UNKNOWN), nothing recorded → null
+    expect(attribution).toMatch(/if \(archetypes\.length === 0\) return null;/);
+    expect(attribution).toMatch(/if \(unclaimedHours \+ attributedHours <= 0\) return null;/);
+    // pure
+    expect(attribution).not.toMatch(/supabase|server-only|fetch\(/);
+    // the component is the only reader, through the derivation
+    expect(component).toMatch(/deriveAttributionExpectation\(labels\.iscoGroups \?\? \[\], wi\)/);
+    // (the component names the column only in its comment, never reads it)
+    expect(component).not.toMatch(/\.skillTimeAttribution|composeJournal\(|archetypesForIsco\(/);
+  });
+
+  it("the section says it once, beside the skills coverage, for the person only — never to the organization, never a score", () => {
+    expect(component).toMatch(/const attribution = org\s*\?\s*null\s*:\s*deriveAttributionExpectation/);
+    expect(component).toContain('data-testid="wi-attribution-note"');
+    expect(component).toContain("{t(`attribution.${attribution.reason}`)}");
+    // the page feeds the person's own occupation path
+    const page = read("app/[locale]/dashboard/journal/page.tsx");
+    expect(page).toContain("iscoGroups: ownPath.iscoGroups,");
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: { attribution: Record<string, string> };
+      };
+      for (const key of ["involvement_expected", "precise_possible"]) {
+        const s = j.intelligence.attribution[key];
+        expect(typeof s, `${loc}.intelligence.attribution.${key}`).toBe("string");
+        expect(s).not.toMatch(/archetype|isco|involvement_expected|precise_possible|skillTimeAttribution|score|rating|rank/i);
+      }
+    }
+  });
+});
