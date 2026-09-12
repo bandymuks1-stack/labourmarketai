@@ -275,6 +275,112 @@ describe("declared-slug handling", () => {
   });
 });
 
+describe("catalogue OFFER per fragment — lane 4b (#1689, the owner's '2 val. testavau')", () => {
+  const OWNER_DAY =
+    "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių.";
+  const fragmentOf = (r: JournalRecognitionResult, text: string) => {
+    const f = r.fragments.find((x) => x.text === text);
+    expect(f, text).toBeDefined();
+    return f!;
+  };
+
+  it("a timed fragment no lane read gets the catalogue's reading as a fuzzy_skill OFFER on THAT fragment", () => {
+    const r = derive(OWNER_DAY);
+    const testavau = fragmentOf(r, "2 val. testavau");
+    expect(testavau.outcomes).toEqual([
+      { kind: "fuzzy_candidate", ref: "qa-testing" },
+    ]);
+    const offers = r.candidates.filter((c) => c.kind === "fuzzy_skill");
+    expect(offers).toEqual([
+      {
+        kind: "fuzzy_skill",
+        slug: "qa-testing",
+        label: "qa-testing",
+        reason: "testav",
+        fragmentIds: [testavau.id],
+      },
+    ]);
+    // the offer is not a reading: nothing links until the worker says so
+    expect(r.recognizedSkills.map((x) => x.slug)).not.toContain("qa-testing");
+    // the hours' fragment is now COVERED (an offer awaits the worker), the
+    // stated-total header is the one unresolved fragment, nothing is lost
+    expect(r.unresolvedFragments.map((u) => u.text)).toEqual([
+      "Šiandien 9 valandas dirbau LabourMarket.ai",
+    ]);
+    expect(r.coverage).toEqual({
+      fragmentCount: 4,
+      meaningfulFragmentCount: 4,
+      coveredFragmentCount: 3,
+      unresolvedFragmentCount: 1,
+      silentlyLostFragmentCount: 0,
+    });
+    // the other items keep exactly the outcomes they had (no extra offers on
+    // a fragment another lane already read)
+    expect(fragmentOf(r, "5 val. programavau").outcomes).toEqual([
+      { kind: "recognized", ref: "programming" },
+    ]);
+    expect(fragmentOf(r, "2 val. ieškojau partnerių").outcomes).toEqual([
+      { kind: "recognized", ref: "partnership-development" },
+    ]);
+  });
+
+  it("a DECLARED slug is offered the same way — a weak needle never auto-links, declared or not", () => {
+    const r = derive(OWNER_DAY, { declaredSlugs: new Set(["qa-testing"]) });
+    expect(r.recognizedSkills.map((x) => x.slug)).not.toContain("qa-testing");
+    expect(
+      r.candidates.filter((c) => c.kind === "fuzzy_skill").map((c) => c.slug),
+    ).toEqual(["qa-testing"]);
+  });
+
+  it("a slug the worker rejected on this entry stays VISIBLE as rejected on the fragment, never re-offered", () => {
+    const r = derive(OWNER_DAY, { rejectedSlugs: new Set(["qa-testing"]) });
+    expect(fragmentOf(r, "2 val. testavau").outcomes).toEqual([
+      { kind: "rejected", ref: "qa-testing" },
+    ]);
+    expect(r.candidates).toEqual([]);
+    expect(r.rejected.map((x) => x.slug)).toEqual(["qa-testing"]);
+    expect(r.unresolvedFragments.map((u) => u.text)).not.toContain(
+      "2 val. testavau",
+    );
+  });
+
+  it("an exact recognition of the same slug on ANOTHER fragment absorbs the offer (provenance merges, one slug once)", () => {
+    const r = derive("3 val. programos testavimas, 2 val. testavau");
+    const qa = r.recognizedSkills.filter((x) => x.slug === "qa-testing");
+    expect(qa).toHaveLength(1);
+    expect(qa[0].via).toBe("exact");
+    expect(qa[0].fragmentIds).toHaveLength(2);
+    expect(r.candidates).toEqual([]);
+    expect(r.coverage.unresolvedFragmentCount).toBe(0);
+  });
+
+  it("is the intake side's tier-2 rule at fragment grain: the tier-2 text offers, the tier-3 texts invent nothing", () => {
+    // recognition-tiers.test.ts: tier 2 → candidate qa-testing
+    const tier2 = derive("Testavau aplikaciją, radau klaidas");
+    expect(
+      tier2.candidates.filter((c) => c.kind === "fuzzy_skill").map((c) => c.slug),
+    ).toEqual(["qa-testing"]);
+    expect(tier2.recognizedSkills).toEqual([]);
+    // recognition-tiers.test.ts: tier 3 → manual only. Here: unresolved,
+    // with NO offer — the catalogue is silent, so the fragment stays the
+    // worker's to name.
+    for (const text of [
+      "dirbau visa diena, labai pavargau",
+      "buvo daug darbo, padariau ka reikejo",
+      "tvarkiau reikalus",
+      "objektas Vilniuje, Kalvarijų g. 125",
+      "Žaidžiau šachmatais turnyre",
+    ]) {
+      const r = derive(text);
+      expect(r.candidates, text).toEqual([]);
+      expect(r.recognizedSkills, text).toEqual([]);
+      expect(r.coverage.unresolvedFragmentCount, text).toBe(
+        r.coverage.meaningfulFragmentCount,
+      );
+    }
+  });
+});
+
 describe("INCIDENT PIN — full derivation of the production text", () => {
   const INCIDENT_TEXT =
     "Ploviau mašiną - 1 h. Kodavau programą su chat gpt ir claude code - 6h, tvarkiau namus - 2h";

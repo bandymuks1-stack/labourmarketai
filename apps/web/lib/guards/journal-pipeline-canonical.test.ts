@@ -294,3 +294,58 @@ describe("Universal Journal Recall v2 — fragment pipeline source guards", () =
     expect(page).toMatch(/\.slice\(0, 5\)/); // bounded per request
   });
 });
+
+describe("catalogue OFFER per fragment (#1689) — lane 4b rides the ONE candidate lane", () => {
+  const WORKLOG_FLOW = read("components/app/conversation/worker-worklog-flow.tsx");
+  const EXECUTORS = read("lib/conversation/worker-executors.ts");
+
+  it("the derivation consults the intake side's catalogue (no second lexicon) only for a fragment nothing read", () => {
+    expect(RECOGNITION).toMatch(
+      /import \{ recognizeNewSkillSuggestions \} from "@\/lib\/structuring\/new-skill-suggestions"/,
+    );
+    // gated on an EMPTY outcome list — the tier-2 rule at fragment grain
+    expect(RECOGNITION).toMatch(
+      /if \(outcomes\.length === 0\) \{\s*for \(const s of recognizeNewSkillSuggestions\(f\.text\)\)/,
+    );
+    // an offer, never a reading: the catalogue result feeds the fuzzy
+    // candidate map, never the recognized map
+    const lane = RECOGNITION.slice(
+      RECOGNITION.indexOf("Lane 4b"),
+      RECOGNITION.indexOf("Lane 5"),
+    );
+    expect(lane).toMatch(/fuzzyMap\.set\(s\.slug/);
+    expect(lane).not.toMatch(/recognizedMap\.set/);
+    // the declared set is NOT passed: declared or not, a weak needle asks
+    expect(lane).not.toMatch(/recognizeNewSkillSuggestions\(f\.text,\s*declaredSlugs/);
+    // the worker's rejection stays visible on the fragment
+    expect(lane).toMatch(/pushRejected\("skill", s\.slug, s\.slug, "user_rejected", f\.id\)/);
+  });
+
+  it("the chat's done card decides the offer through the SAME server actions the composer uses", () => {
+    expect(WORKLOG_FLOW).toMatch(
+      /import \{\s*confirmJournalSkillCandidate,\s*rejectJournalSkillCandidate,\s*\} from "@\/lib\/journal\/skill-pipeline-actions"/,
+    );
+    // only a taxonomy offer is decidable here; ambiguous readings keep
+    // their curated choices in the journal
+    expect(WORKLOG_FLOW).toMatch(/c\.kind === "fuzzy_skill" &&/);
+    expect(WORKLOG_FLOW).toMatch(/testId="worklog-candidate-confirm"/);
+    expect(WORKLOG_FLOW).toMatch(/testId="worklog-candidate-reject"/);
+    // the decision carries the derivation version the server refuses when
+    // stale — read through from the awaited pipeline result, never assumed
+    expect(EXECUTORS).toMatch(/pipelineVersion: r\.skills\.recognition\.pipelineVersion/);
+    expect(WORKLOG_FLOW).not.toMatch(/JOURNAL_PIPELINE_VERSION/);
+    // the copy is the composer's own (journal.candidate*) — no second wording
+    for (const key of [
+      "candidateConfirm",
+      "candidateConfirming",
+      "candidateReject",
+      "candidateConfirmed",
+      "candidateRejected",
+      "candidateError",
+    ]) {
+      expect(WORKLOG_FLOW).toContain(`tCandidate("${key}")`);
+    }
+    // never a fake result: the state shown is the RETURNED result
+    expect(WORKLOG_FLOW).toMatch(/\[slug\]: res\.ok\s*\?/);
+  });
+});
