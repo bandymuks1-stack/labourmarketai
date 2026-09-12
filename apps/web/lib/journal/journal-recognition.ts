@@ -36,7 +36,10 @@
  *      the extractor lets items inherit the header's activity. Inheritance
  *      adds fragment provenance to the header's own outcomes; it never
  *      creates a reading, and a reading the worker rejected is not passed
- *      on (the items then ask to be named);
+ *      on (the items then ask to be named). An item that says only WHERE
+ *      ("5 val. virtuvėje" — `describesWhereOnly`, the extractor's rule)
+ *      inherits the same way INSTEAD of its own place-noun reading: the
+ *      tiler's kitchen is not cooking;
  *   5. zero-outcome meaningful fragment → `unresolved` (fragment text as the
  *      label). Silent loss is structurally impossible: every meaningful
  *      fragment lands in exactly one of covered / unresolved.
@@ -64,7 +67,10 @@ import {
 } from "@/lib/structuring/skill-recognition";
 import { extractAmbiguousCandidates } from "@/lib/structuring/ambiguous-journal-candidates";
 import { recognizeNewSkillSuggestions } from "@/lib/structuring/new-skill-suggestions";
-import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import {
+  describesWhereOnly,
+  extractJournalSuggestions,
+} from "@/lib/structuring/extract-journal-suggestions";
 import {
   extractProfileSkillClaims,
   getJournalClaimRowMeta,
@@ -284,6 +290,9 @@ export function deriveJournalRecognition(
   /** The header's own readings the timed items may inherit (never a
    *  rejected one — a rejection reopens the question for the items). */
   let headerOutcomes: OutcomeRef[] = [];
+  /** Whether the header named any work at all (a rejected reading counts:
+   *  the header described work, the worker only refused that name). */
+  let headerNamedWork = false;
 
   const pushRejected = (
     kind: "skill" | "claim",
@@ -313,9 +322,26 @@ export function deriveJournalRecognition(
     if (f.meaningful) {
       const folded = foldText(f.text);
 
+      // An item under a header that names the work, saying only WHERE
+      // ("9 val. klijavau plyteles: 5 val. virtuvėje") describes the
+      // header's work, not a second one: its own lanes are skipped and lane
+      // 4c hands it the header's readings — the extractor's rule
+      // (`describesWhereOnly`), read here, not re-implemented. When the
+      // worker rejected the header's reading the item asks to be named
+      // (lane 5) rather than falling back to the place noun's trade.
+      // Without a header, or when the header named nothing ("Dirbau 9
+      // val.: 5 val. virtuvėje"), the item is read as ever — the place is
+      // then the only signal there is.
+      const describesWhere =
+        headerIndex >= 0 &&
+        index > headerIndex &&
+        headerNamedWork &&
+        timedItemKeys.has(phraseKey(f.text)) &&
+        describesWhereOnly(f.text);
+
       // ── Lane 1: taxonomy recognition ────────────────────────────────────
       const recognizedInFragment = new Set<string>();
-      for (const r of recognizeSkills(f.text, 8)) {
+      for (const r of describesWhere ? [] : recognizeSkills(f.text, 8)) {
         if (rejectedSlugSet.has(r.slug)) {
           pushRejected("skill", r.slug, r.slug, "user_rejected", f.id);
           outcomes.push({ kind: "rejected", ref: r.slug });
@@ -354,7 +380,7 @@ export function deriveJournalRecognition(
       }
 
       // ── Lane 2: curated ambiguity → choice candidates ───────────────────
-      for (const a of extractAmbiguousCandidates(f.text)) {
+      for (const a of describesWhere ? [] : extractAmbiguousCandidates(f.text)) {
         const choiceSlugs = a.choices.map((c) => c.slug);
         // Duplicate suppression: an EXPLICIT reading in the same fragment
         // resolves the ambiguity (the recognized slug represents it). A
@@ -406,7 +432,7 @@ export function deriveJournalRecognition(
       }
 
       // ── Lane 3: capability claims (deterministic lexicon) ───────────────
-      for (const c of extractProfileSkillClaims(f.text)) {
+      for (const c of describesWhere ? [] : extractProfileSkillClaims(f.text)) {
         if (c.ambiguous === true) continue; // clarification-only reading
         const meta = getJournalClaimRowMeta(c.label);
         if (
@@ -454,7 +480,7 @@ export function deriveJournalRecognition(
       // lane 1's fuzzy tier, whose declared-slug rule stays as it was). The
       // declared set is therefore NOT passed to the catalogue. Slugs the
       // worker rejected on this entry stay visible as rejected.
-      if (outcomes.length === 0) {
+      if (outcomes.length === 0 && !describesWhere) {
         for (const s of recognizeNewSkillSuggestions(f.text)) {
           if (rejectedSlugSet.has(s.slug)) {
             pushRejected("skill", s.slug, s.slug, "user_rejected", f.id);
@@ -483,6 +509,7 @@ export function deriveJournalRecognition(
       // header's own recognized / candidate / ambiguous / claim entries, so
       // the worker's one decision on the header links the item's hours.
       if (index === headerIndex) {
+        headerNamedWork = outcomes.length > 0;
         headerOutcomes = outcomes.filter(
           (o) => o.kind !== "rejected" && o.kind !== "unresolved",
         );

@@ -529,18 +529,127 @@ function isTimeOnlyFragment(fragment: string): boolean {
     .filter(Boolean);
   if (words.length === 0) return false;
   for (const w of words) {
-    if (/^\d+(?:[.,]\d+)?$/.test(w)) continue;
-    if (/^valand[\p{L}]*$/u.test(w)) continue;
-    if (/^minu[čt][\p{L}]*$/u.test(w)) continue;
-    if (/^dien[\p{L}]*$/u.test(w)) continue;
-    // RU duration nouns: час/часа/часов, мин/минут, дн/дня/дней, день, ч.
-    if (/^час[\p{L}]*$/u.test(w)) continue;
-    if (/^мин[\p{L}]*$/u.test(w)) continue;
-    if (/^дн[\p{L}]*$/u.test(w)) continue;
-    if (/^день$/u.test(w)) continue;
-    if (/^ч\.?$/u.test(w)) continue;
-    if (TIME_TOKENS.has(w)) continue;
+    if (isTimeToken(w, TIME_TOKENS)) continue;
     return false;
+  }
+  return true;
+}
+
+/** One lower-cased word that belongs to a time expression: a digit, a
+ *  duration noun (the LT / RU vocabulary `findAllTimes` reads) or an idiom
+ *  token. Exactly the per-word test `isTimeOnlyFragment` always applied. */
+function isTimeToken(w: string, idiom: ReadonlySet<string>): boolean {
+  if (/^\d+(?:[.,]\d+)?$/.test(w)) return true;
+  if (/^valand[\p{L}]*$/u.test(w)) return true;
+  if (/^minu[čt][\p{L}]*$/u.test(w)) return true;
+  if (/^dien[\p{L}]*$/u.test(w)) return true;
+  // RU duration nouns: час/часа/часов, мин/минут, дн/дня/дней, день, ч.
+  if (/^час[\p{L}]*$/u.test(w)) return true;
+  if (/^мин[\p{L}]*$/u.test(w)) return true;
+  if (/^дн[\p{L}]*$/u.test(w)) return true;
+  if (/^день$/u.test(w)) return true;
+  if (/^ч\.?$/u.test(w)) return true;
+  return idiom.has(w);
+}
+
+const WHERE_IDIOM_TOKENS: ReadonlySet<string> = new Set([
+  "su",
+  "puse",
+  "с",
+  "половиной",
+  ...Object.keys(LT_NUMBER_WORDS),
+]);
+/** Unit abbreviations and EN / NL / DE unit words that the place rule strips
+ *  beside the LT / RU vocabulary ("5 val. virtuvėje", "5 h in the kitchen",
+ *  "5 uur in de keuken", "5 Std. im Lager"). */
+const WHERE_UNIT_WORD_RX = /^(?:val|min|h|hrs?|hours?|uur|std|stunden?)$/u;
+/** The bare work verb names no trade: "dirbau virtuvėje" is still only a
+ *  place. First-person and plural past forms, lt/en/ru/nl/de. */
+const GENERIC_WORK_VERB_RX =
+  /^(?:dirbau|dirbome|dirbom|worked|working|работал|работала|работали|gewerkt|werkte|gearbeitet)$/u;
+/** LT place prepositions that take a noun after them: "ant stogo", "prie
+ *  kasos", "pas klientą", "po tiltu". */
+const LT_PLACE_PREPOSITION_RX = /^(?:ant|prie|pas|po|virš|virs|šalia|salia|už|uz|tarp)$/u;
+/** LT verb endings that can never be a locative noun — 1st person past
+ *  ("klijavau", "glaisčiau") and the plural past / present forms ("dirbome",
+ *  "dažėme", "dirbate", "klojame"). The plural check needs length so that
+ *  "kieme" (in the yard) and "name" (in the house) stay places. */
+const LT_VERB_ENDING_RX = /(?:au|iau)$/u;
+const LT_PLURAL_VERB_ENDING_RX = /(?:ome|ėme|eme|ote|ėte|ete|ate|iate|ime|ite|ame)$/u;
+/** LT genitive endings a modifier carries before a locative noun: "sporto
+ *  salėje", "mokyklos virtuvėje", "kliento bute", "prekybos centre". */
+const LT_GENITIVE_ENDING_RX = /(?:o|os|ų|u|io|ios|ies|aus|iaus|ės|es|ių)$/u;
+
+/**
+ * An item that says only WHERE (issue #1689, measured 2026-09-12). Under a
+ * header that names the work — "9 val. klijavau plyteles: 5 val. virtuvėje,
+ * 4 val. vonioje" — an item that is nothing but a time and a place phrase
+ * describes where the header's work happened, not a second kind of work.
+ * Measured over 238 locative place phrases (lt / en / ru / nl / de): about
+ * fifty of them are ALSO lexicon needles for a trade (kitchen → cooking,
+ * warehouse, factory, garden, stable, till, roof, barbershop …), so the
+ * tiler's 5 h in the kitchen were 5 h of cooking on both the intake and
+ * the recognition side. The rule is structural — the shape of the phrase,
+ * never a list of banned place words:
+ *   - after the time tokens (and an optional bare work verb, which names no
+ *     trade) only letters remain, one to four words;
+ *   - LT: a place preposition + one or two words ("ant stogo", "prie
+ *     kasos"), or a locative noun — every LT locative ends in -e
+ *     ("virtuvėje", "sandėlyje", "salone", "namuose") — alone or behind one
+ *     genitive modifier ("sporto salėje", "mokyklos virtuvėje"). A verb
+ *     form ("glaisčiau", "klijavome") is never a place, so an item that
+ *     names its own work keeps its own reading;
+ *   - EN / RU / NL / DE: a place preposition, an optional article, one to
+ *     three words ("in the kitchen", «на складе», "in de keuken", "im
+ *     Lager", "at the till", "on site").
+ * Only the two stated-total rules read this (the extractor's inheritance
+ * and the recognition side's lane 4c): a bare place item with NO header —
+ * "Dirbau virtuvėje 5 val." — is untouched, because nothing else says what
+ * was done there.
+ */
+export function describesWhereOnly(phrase: string): boolean {
+  const words = phrase
+    .replace(/[.,;:!?]+/gu, " ")
+    .trim()
+    .split(/\s+/u)
+    .filter(Boolean)
+    .map((w) => w.toLowerCase())
+    .filter(
+      (w) => !isTimeToken(w, WHERE_IDIOM_TOKENS) && !WHERE_UNIT_WORD_RX.test(w),
+    );
+  if (words.length === 0) return false;
+  if (words.some((w) => !/^\p{L}+$/u.test(w))) return false;
+  if (GENERIC_WORK_VERB_RX.test(words[0])) words.shift();
+  if (words.length === 0 || words.length > 4) return false;
+  const [first, ...tail] = words;
+  const last = words[words.length - 1];
+
+  // EN / RU / NL / DE: preposition-led phrase.
+  const en = /^(?:in|at|on|inside|outside)$/u;
+  const ru = /^(?:в|во|на|у)$/u;
+  const nl = /^(?:in|op|bij|achter|aan)$/u;
+  const de1 = /^(?:im|am|beim)$/u;
+  const de2 = /^(?:in|an|auf|bei)$/u;
+  if (en.test(first) || ru.test(first) || nl.test(first) || de1.test(first)) {
+    const rest = tail.filter((w, i) => !(i === 0 && /^(?:the|a|an|de|het|een)$/u.test(w)));
+    return rest.length >= 1 && rest.length <= 3;
+  }
+  if (de2.test(first) && tail.length >= 2 && /^(?:der|den|dem)$/u.test(tail[0])) {
+    return tail.length - 1 <= 3;
+  }
+
+  // LT: preposition + noun, or a locative noun with at most one modifier.
+  if (LT_PLACE_PREPOSITION_RX.test(first)) {
+    return tail.length >= 1 && tail.length <= 2;
+  }
+  if (words.length > 2) return false;
+  if (last.length < 4 || !last.endsWith("e")) return false;
+  if (LT_VERB_ENDING_RX.test(last)) return false;
+  if (last.length >= 6 && LT_PLURAL_VERB_ENDING_RX.test(last)) return false;
+  if (words.length === 2) {
+    if (LT_VERB_ENDING_RX.test(first)) return false;
+    if (first.length >= 6 && LT_PLURAL_VERB_ENDING_RX.test(first)) return false;
+    if (!LT_GENITIVE_ENDING_RX.test(first)) return false;
   }
   return true;
 }
@@ -660,11 +769,17 @@ function separateStatedTotal(
   const total = header ?? timed.find((f) => noActivity(f) && addsUp(f)) ?? null;
   if (!total) return { fragments, statedTotal: null };
   const inherit = header && !noActivity(header) ? header : null;
+  // A timed item that names no activity inherits the header's; so does one
+  // that says only WHERE ("5 val. virtuvėje" under "9 val. klijavau
+  // plyteles") — the place noun's own lexicon reading (cooking) is the
+  // wrong kind of work for a tiler's kitchen (`describesWhereOnly`).
+  const describesHeaderWork = (f: JournalFragmentSuggestion): boolean =>
+    f.time !== null && (noActivity(f) || describesWhereOnly(f.rawPhrase));
   return {
     fragments: fragments
       .filter((f) => f !== total)
       .map((f) =>
-        inherit && noActivity(f) && f.time !== null
+        inherit && describesHeaderWork(f)
           ? {
               ...f,
               activitySlug: inherit.activitySlug,

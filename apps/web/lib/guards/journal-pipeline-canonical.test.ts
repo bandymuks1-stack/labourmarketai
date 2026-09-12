@@ -304,8 +304,10 @@ describe("catalogue OFFER per fragment (#1689) — lane 4b rides the ONE candida
       /import \{ recognizeNewSkillSuggestions \} from "@\/lib\/structuring\/new-skill-suggestions"/,
     );
     // gated on an EMPTY outcome list — the tier-2 rule at fragment grain
+    // (and never for an item that only says WHERE under a header, whose
+    // own lanes are skipped so lane 4c can hand it the header's readings)
     expect(RECOGNITION).toMatch(
-      /if \(outcomes\.length === 0\) \{\s*for \(const s of recognizeNewSkillSuggestions\(f\.text\)\)/,
+      /if \(outcomes\.length === 0 && !describesWhere\) \{\s*for \(const s of recognizeNewSkillSuggestions\(f\.text\)\)/,
     );
     // an offer, never a reading: the catalogue result feeds the fuzzy
     // candidate map, never the recognized map
@@ -355,7 +357,7 @@ describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, n
 
   it("the derivation asks the extractor which phrase is the total (one rule, two grains)", () => {
     expect(RECOGNITION).toMatch(
-      /import \{ extractJournalSuggestions \} from "@\/lib\/structuring\/extract-journal-suggestions"/,
+      /import \{\s*describesWhereOnly,\s*extractJournalSuggestions,\s*\} from "@\/lib\/structuring\/extract-journal-suggestions"/,
     );
     expect(RECOGNITION).toMatch(/extractJournalSuggestions\(text \?\? ""\)/);
     expect(RECOGNITION).toMatch(/statedTotal\.statedTotal!\.rawPhrase/);
@@ -363,6 +365,32 @@ describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, n
     expect(EXTRACTOR).toMatch(/function separateStatedTotal\(/);
     expect(RECOGNITION).not.toMatch(/function separateStatedTotal/);
     expect(RECOGNITION).not.toMatch(/ITEMISING_COLON/);
+  });
+
+  it("an item that says only WHERE is decided by the extractor's ONE rule on both sides (#1689, measured 2026-09-12)", () => {
+    // the rule lives in the extractor and is exported once
+    expect(EXTRACTOR).toMatch(/export function describesWhereOnly\(phrase: string\): boolean/);
+    // the extractor's inheritance reads it beside the no-activity rule
+    expect(EXTRACTOR).toMatch(/noActivity\(f\) \|\| describesWhereOnly\(f\.rawPhrase\)/);
+    // the recognition side reads it — never a second place grammar
+    expect(RECOGNITION).toMatch(/describesWhereOnly\(f\.text\)/);
+    expect(RECOGNITION).not.toMatch(/function describesWhereOnly/);
+    expect(RECOGNITION).not.toMatch(/LT_PLACE_PREPOSITION|LT_VERB_ENDING|endsWith\("e"\)/);
+    // gated on a header that NAMED work (a rejected reading counts) and on
+    // the item being one of the extractor's timed items — never on a bare
+    // place item with no header, whose place is the only signal
+    expect(RECOGNITION).toMatch(
+      /const describesWhere =\s*headerIndex >= 0 &&\s*index > headerIndex &&\s*headerNamedWork &&\s*timedItemKeys\.has\(phraseKey\(f\.text\)\) &&\s*describesWhereOnly\(f\.text\)/,
+    );
+    expect(RECOGNITION).toMatch(/headerNamedWork = outcomes\.length > 0/);
+    // every own lane yields to it: taxonomy, ambiguity, claims, the offer
+    expect(RECOGNITION).toMatch(/for \(const r of describesWhere \? \[\] : recognizeSkills\(f\.text, 8\)\)/);
+    expect(RECOGNITION).toMatch(/for \(const a of describesWhere \? \[\] : extractAmbiguousCandidates\(f\.text\)\)/);
+    expect(RECOGNITION).toMatch(/for \(const c of describesWhere \? \[\] : extractProfileSkillClaims\(f\.text\)\)/);
+    // the rule is structural: the function body names no place word
+    const start = EXTRACTOR.indexOf("export function describesWhereOnly(");
+    const body = EXTRACTOR.slice(start, EXTRACTOR.indexOf("return true;", start));
+    expect(body).not.toMatch(/virtuv|kitchen|sandėl|warehouse|kuch|keuken|küche/i);
   });
 
   it("the header is marked as the total and inheritance is provenance only (never a new reading)", () => {
