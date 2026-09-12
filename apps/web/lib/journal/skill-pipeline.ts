@@ -19,7 +19,6 @@ import {
   FRAGMENT_SKILL_METRIC_SLUG,
   formatFragmentSkillValue,
   mapRecognitionToPersistedFragments,
-  parseFragmentSkillValue,
   parsePersistedFragments,
   type PersistedFragment,
 } from "@/lib/journal/fragment-skill-evidence";
@@ -127,35 +126,17 @@ const MAX_CLAIMS_PER_RUN = 12;
 /** Safety cap on unresolved_fragment rows persisted per run. */
 const MAX_UNRESOLVED_PER_RUN = 12;
 
-/** Entry-scoped marker/metric slugs the pipeline reads and appends. */
-export const ENTRY_MARKER_SLUGS = {
-  skillRejected: "skill_rejected",
-  claimRejected: "skill_claim_rejected",
-  claim: "skill_claim",
-  unresolvedFragment: "unresolved_fragment",
-  unresolvedDismissed: "unresolved_dismissed",
-  pipelineVersion: "pipeline_version",
-  /** Worker's ambiguity decision (P2 integrity fix): entry-scoped,
-   *  append-only. value_text = `<normalized candidate label>=><chosen slug>`,
-   *  value_numeric = pipeline version at decision time, source =
-   *  worker_input (the worker's own decision on their own entry). The
-   *  derivation reads it so a resolved ambiguity is never re-offered on
-   *  reprocess/restore/upgrade — and a decision on one entry can never
-   *  leak into another (it lives in that entry's metrics only). */
-  ambiguousResolved: "ambiguous_resolved",
-} as const;
-
-/** Parse an ambiguous_resolved marker value into [normalizedLabel, slug]. */
-export function parseAmbiguousResolvedMarker(
-  valueText: string,
-): { normalizedLabel: string; slug: string } | null {
-  const idx = valueText.indexOf("=>");
-  if (idx <= 0) return null;
-  const normalizedLabel = valueText.slice(0, idx).trim();
-  const slug = valueText.slice(idx + 2).trim();
-  if (!normalizedLabel || !slug) return null;
-  return { normalizedLabel, slug };
-}
+/** Entry-scoped marker/metric slugs the pipeline reads and appends, and the
+ *  ONE pure reader of them — shared with the journal page (render-time
+ *  pending candidates), see `entry-recognition-markers.ts`. */
+export {
+  ENTRY_MARKER_SLUGS,
+  parseAmbiguousResolvedMarker,
+} from "@/lib/journal/entry-recognition-markers";
+import {
+  ENTRY_MARKER_SLUGS,
+  readEntryRecognitionMarkers,
+} from "@/lib/journal/entry-recognition-markers";
 
 function newTrace(): string {
   return randomBytes(6).toString("hex");
@@ -280,77 +261,29 @@ export async function loadEntryRecognitionInputs(
     }
   }
 
-  const rejectedSlugs = new Set<string>();
-  const rejectedClaims = new Set<string>();
-  const existingClaimSet = new Set<string>();
-  const existingUnresolvedSet = new Set<string>();
-  const dismissedUnresolvedSet = new Set<string>();
-  const entryResolutions = new Map<string, string>();
-  const existingFragmentSkillSet = new Set<string>();
-  let latestPipelineVersion = 0;
   const metricRows = (metricsRes.data ?? []) as {
     metric_slug: string | null;
     value_text: string | null;
     value_numeric: number | null;
   }[];
-  for (const r of metricRows) {
-    switch (r.metric_slug) {
-      case FRAGMENT_SKILL_METRIC_SLUG: {
-        const parsed = parseFragmentSkillValue(r.value_text);
-        if (parsed) existingFragmentSkillSet.add(formatFragmentSkillValue(parsed));
-        break;
-      }
-      case ENTRY_MARKER_SLUGS.skillRejected:
-        if (r.value_text) rejectedSlugs.add(r.value_text.trim());
-        break;
-      case ENTRY_MARKER_SLUGS.claimRejected:
-        if (r.value_text) rejectedClaims.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.claim:
-        if (r.value_text) existingClaimSet.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.unresolvedFragment:
-        if (r.value_text)
-          existingUnresolvedSet.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.unresolvedDismissed:
-        if (r.value_text)
-          dismissedUnresolvedSet.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.ambiguousResolved: {
-        const parsed = r.value_text
-          ? parseAmbiguousResolvedMarker(r.value_text)
-          : null;
-        if (parsed) {
-          entryResolutions.set(
-            normalizeClaimLabel(parsed.normalizedLabel),
-            parsed.slug,
-          );
-        }
-        break;
-      }
-      case ENTRY_MARKER_SLUGS.pipelineVersion:
-        if (
-          typeof r.value_numeric === "number" &&
-          r.value_numeric > latestPipelineVersion
-        ) {
-          latestPipelineVersion = r.value_numeric;
-        }
-        break;
-    }
-  }
+  // ONE reader of the entry's markers — the journal page reads the same one
+  // at render time for the entry card's pending candidates.
+  const markers = readEntryRecognitionMarkers(metricRows);
 
   return {
     declaredSlugs,
     declaredIdBySlug,
     persistedFragments: parsePersistedFragments(metricRows),
-    existingFragmentSkillSet,
-    entryRejections: { slugs: rejectedSlugs, claimLabels: rejectedClaims },
-    existingClaimSet,
-    existingUnresolvedSet,
-    dismissedUnresolvedSet,
-    entryResolutions,
-    latestPipelineVersion,
+    existingFragmentSkillSet: markers.existingFragmentSkillSet,
+    entryRejections: {
+      slugs: markers.rejectedSlugs,
+      claimLabels: markers.rejectedClaims,
+    },
+    existingClaimSet: markers.existingClaimSet,
+    existingUnresolvedSet: markers.existingUnresolvedSet,
+    dismissedUnresolvedSet: markers.dismissedUnresolvedSet,
+    entryResolutions: markers.entryResolutions,
+    latestPipelineVersion: markers.latestPipelineVersion,
   };
 }
 

@@ -10,6 +10,8 @@ import {
   type EntrySkillSource,
 } from "@/lib/journal/entry-skill-source";
 import { detectedSectionState } from "@/lib/journal/entry-detected-signals";
+import type { EntryPendingCandidate } from "@/lib/journal/entry-pending-candidates";
+import { JournalEntryCandidateDecision } from "@/components/app/journal-entry-candidate-decision";
 
 /**
  * Per-entry skill-link control (Journal Entry ↔ Skill links v1 + stale-skill
@@ -40,6 +42,7 @@ export function JournalEntrySkillLinks({
   linkedSkillIds,
   skillSources,
   detected,
+  candidates,
 }: {
   entryId: string;
   availableSkills: { id: string; name: string }[];
@@ -54,6 +57,11 @@ export function JournalEntrySkillLinks({
    *  `labels` are display-only detected capability labels. Suggestions only,
    *  never facts. Omitted → the detected section is not rendered. */
   detected?: { skills: { id: string; name: string }[]; labels: string[] };
+  /** PENDING candidates of this saved entry (the ONE derivation's
+   *  `fuzzy_skill` rows, `lib/journal/entry-pending-candidates`), decidable
+   *  in place through the same server actions the composer's result card
+   *  uses. Omitted / empty → nothing is offered. */
+  candidates?: EntryPendingCandidate[];
 }) {
   const t = useTranslations("journalSkillLinks");
   const [selected, setSelected] = useState<Set<string>>(
@@ -100,8 +108,12 @@ export function JournalEntrySkillLinks({
     (s) => !selected.has(s.id),
   );
   const linkedNames = new Set(linkedSelected.map((s) => s.name));
+  const candidateNames = new Set((candidates ?? []).map((c) => c.name));
   const detectedLabels = (detected?.labels ?? []).filter(
-    (l) => !linkedNames.has(l) && !detectedLinkable.some((s) => s.name === l),
+    (l) =>
+      !linkedNames.has(l) &&
+      !detectedLinkable.some((s) => s.name === l) &&
+      !candidateNames.has(l),
   );
   // ONE rule (lib/journal/entry-detected-signals) decides what Section A may
   // say: chips / "already linked above" / "nothing recognized". An entry whose
@@ -111,8 +123,28 @@ export function JournalEntrySkillLinks({
     detectedLabels: detected?.labels ?? [],
     selectedIds: selected,
     linkedNames,
+    candidateNames,
   });
   const hasDetected = detectedState === "chips";
+  // The chip list proper; candidate rows render above it. A "chips" state
+  // carried only by candidates has no chip list — and no sentence either.
+  const hasDetectedChips =
+    detectedLinkable.length > 0 || detectedLabels.length > 0;
+  const candidateRows =
+    (candidates ?? []).length > 0 ? (
+      <ul
+        className="flex flex-col gap-1"
+        data-testid={`entry-candidates-${entryId}`}
+      >
+        {(candidates ?? []).map((c) => (
+          <JournalEntryCandidateDecision
+            key={c.slug}
+            entryId={entryId}
+            candidate={c}
+          />
+        ))}
+      </ul>
+    ) : null;
 
   if (availableSkills.length === 0) {
     return (
@@ -125,6 +157,7 @@ export function JournalEntrySkillLinks({
             <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
               {t("detectedHeading")}
             </p>
+            {candidateRows}
             {detectedLabels.length > 0 ? (
               <ul className="flex flex-wrap gap-1">
                 {detectedLabels.map((label) => (
@@ -138,7 +171,7 @@ export function JournalEntrySkillLinks({
                   </li>
                 ))}
               </ul>
-            ) : (
+            ) : detectedState === "chips" ? null : (
               <p
                 className="text-meta leading-relaxed text-text-muted"
                 data-testid={
@@ -189,7 +222,10 @@ export function JournalEntrySkillLinks({
     persist(next);
   }
 
-  function chip(s: { id: string; name: string }, tone: "on" | "off" | "review") {
+  function chip(
+    s: { id: string; name: string },
+    tone: "on" | "off" | "review",
+  ) {
     const on = selected.has(s.id);
     const labelKey = SOURCE_LABEL_KEY[sourceOf(s.id)];
     return (
@@ -246,7 +282,10 @@ export function JournalEntrySkillLinks({
         ) : null}
       </div>
 
-      <ul className="flex flex-wrap gap-1" data-testid={`entry-skill-links-${entryId}`}>
+      <ul
+        className="flex flex-wrap gap-1"
+        data-testid={`entry-skill-links-${entryId}`}
+      >
         {/* Clean current evidence ONLY: recognized-from-text / confirmed /
             honest manual links. The full profile-skill catalogue renders in
             its own labelled section below — never inside this chip list, so a
@@ -268,20 +307,23 @@ export function JournalEntrySkillLinks({
           <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("detectedHeading")}
           </p>
+          {candidateRows}
           {hasDetected ? (
-            <ul className="flex flex-wrap gap-1">
-              {detectedLinkable.map((s) => chip(s, "off"))}
-              {detectedLabels.map((label) => (
-                <li key={label}>
-                  <span
-                    className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-meta text-text-secondary"
-                    data-testid={`entry-skill-detected-label-${entryId}`}
-                  >
-                    {label}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            hasDetectedChips ? (
+              <ul className="flex flex-wrap gap-1">
+                {detectedLinkable.map((s) => chip(s, "off"))}
+                {detectedLabels.map((label) => (
+                  <li key={label}>
+                    <span
+                      className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-meta text-text-secondary"
+                      data-testid={`entry-skill-detected-label-${entryId}`}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null
           ) : (
             <p
               className="text-meta leading-relaxed text-text-muted"
