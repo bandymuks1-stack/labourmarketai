@@ -71,9 +71,22 @@ export function buildEntryDetectedSignals(input: {
     }
   }
 
+  // A capability label that merely rewords a skill already on the card
+  // ("Sienų glaistymas / lyginimas" beside the chip "Sienų glaistymas") is the
+  // same signal twice (#1689, observed 2026-09-12 on one card): one name
+  // contained in the other, folded, is one signal.
+  const fold = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+  const overlapsSeen = (display: string): boolean => {
+    const d = fold(display);
+    for (const name of seen) {
+      const n = fold(name);
+      if (n.length >= 4 && (d.includes(n) || n.includes(d))) return true;
+    }
+    return false;
+  };
   for (const ltLabel of recognition.autoCapabilityLabels) {
     const display = localizeCapabilityLabel(ltLabel, input.locale);
-    if (display && !seen.has(display)) {
+    if (display && !seen.has(display) && !overlapsSeen(display)) {
       seen.add(display);
       labels.push(display);
     }
