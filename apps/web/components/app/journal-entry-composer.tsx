@@ -2717,17 +2717,17 @@ export function JournalEntryComposer({
 /** Resolve a profession slug to its localized label, falling back to the
  *  raw LT label when the taxonomy doesn't have an entry yet (rule-based
  *  matches outside the construction set, e.g. cashier — surfaced via the
- *  free-text label rather than a fake taxonomy entry). */
+ *  free-text label rather than a fake taxonomy entry). Asks `has` first: a
+ *  missing key is an expected outcome here, not an error — next-intl logged
+ *  `MISSING_MESSAGE: professions.<label>` on every such render (#1689). */
 function tProfSafe(
-  tProf: (key: string) => string,
+  tProf: { (key: string): string; has: (key: string) => boolean },
   slug: string,
   fallback: string | null,
 ): string {
-  try {
+  if (tProf.has(slug)) {
     const v = tProf(slug);
     if (v && v !== slug) return v;
-  } catch {
-    /* fall through */
   }
   return fallback ?? slug;
 }

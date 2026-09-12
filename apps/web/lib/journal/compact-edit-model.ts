@@ -38,7 +38,23 @@ export type CompactActivityRow = {
   timeUnit: CompactTimeUnit;
   /** persisted = from the saved entry; added = local, UNSAVED until save. */
   origin: "persisted" | "added";
+  /** Provenance of the persisted fragment rows this row came from (null for
+   *  an added row, or when the rows carried none). */
+  source?: "worker_input" | "ai_extracted" | null;
+  /** `label|timeValue|timeUnit` as PERSISTED — the save compares the row to
+   *  it: an untouched row keeps its provenance, an edited one is the
+   *  worker's input. */
+  persistedFingerprint?: string | null;
 };
+
+/** The ONE comparison both the derive and the save use. */
+export function rowFingerprint(row: {
+  label: string;
+  timeValue: string;
+  timeUnit: CompactTimeUnit;
+}): string {
+  return `${foldLabel(row.label)}|${row.timeValue.trim()}|${row.timeUnit}`;
+}
 
 const TIME_UNITS: readonly CompactTimeUnit[] = ["hours", "minutes", "days"];
 
@@ -83,7 +99,7 @@ export function deriveCompactRows(
     const label =
       a.userLabel ?? a.activityLabel ?? a.rawPhrase ?? "";
     if (!label.trim()) continue;
-    rows.push({
+    const row: CompactActivityRow = {
       key: `frag-${a.index}`,
       label: label.trim(),
       skillSlug: null,
@@ -91,7 +107,11 @@ export function deriveCompactRows(
       timeValue: a.time ? amountToInput(a.time.value) : "",
       timeUnit: toTimeUnit(a.time?.unitSlug),
       origin: "persisted",
-    });
+      source: a.source,
+      persistedFingerprint: null,
+    };
+    row.persistedFingerprint = rowFingerprint(row);
+    rows.push(row);
   }
 
   // Durable skill links → their own rows, unless a fragment row already
@@ -133,6 +153,19 @@ export function deriveCompactRows(
     rows,
     looseTime: !anyRowTime && entry.time ? entry.time : null,
   };
+}
+
+/** The provenance a re-saved fragment row ships with — see `source` on
+ *  `CompactActivityRow`. Unknown persisted provenance defaults to the
+ *  worker's input, as the write core always did. */
+export function fragmentProvenance(
+  row: CompactActivityRow,
+): "worker_input" | "ai_extracted" {
+  if (row.origin !== "persisted") return "worker_input";
+  if (!row.source || !row.persistedFingerprint) return "worker_input";
+  return rowFingerprint(row) === row.persistedFingerprint
+    ? row.source
+    : "worker_input";
 }
 
 /** Parse a row's time input; null when empty/invalid/negative. */
@@ -249,6 +282,10 @@ export function buildCompactSaveFields(
         // so its parser-derived slugs keep their pre-existing metric-only
         // behaviour (no silent self-declaration from a time confirm).
         selected: r.skillSlug !== null,
+        // PROVENANCE (issue #1689): a persisted fragment the worker did not
+        // touch keeps the source it was saved with (`ai_extracted` stays a
+        // machine reading); a row the worker edited or added is their input.
+        source: fragmentProvenance(r),
       };
     });
   if (fragments.length > 0) {

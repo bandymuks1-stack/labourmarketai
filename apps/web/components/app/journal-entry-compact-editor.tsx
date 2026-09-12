@@ -245,15 +245,13 @@ export function JournalEntryCompactEditor({
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty]);
 
-  /** Canonical stored labels may be slugs — localize for DISPLAY only. */
+  /** Canonical stored labels may be slugs — localize for DISPLAY only. A
+   *  free-text label is not a key: `has` first, so next-intl never logs
+   *  `MISSING_MESSAGE: professions.<label>` for the worker's own words (#1689). */
   function displayLabel(label: string): string {
-    try {
-      const v = tProf(label);
-      if (v && v !== label && !v.includes(`professions.${label}`)) return v;
-    } catch {
-      /* fall through */
-    }
-    return label;
+    if (!tProf.has(label)) return label;
+    const v = tProf(label);
+    return v && v !== label ? v : label;
   }
 
   function patchRow(key: string, patch: Partial<CompactActivityRow>): void {
