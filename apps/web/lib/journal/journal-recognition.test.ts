@@ -303,15 +303,13 @@ describe("catalogue OFFER per fragment — lane 4b (#1689, the owner's '2 val. t
     // the offer is not a reading: nothing links until the worker says so
     expect(r.recognizedSkills.map((x) => x.slug)).not.toContain("qa-testing");
     // the hours' fragment is now COVERED (an offer awaits the worker), the
-    // stated-total header is the one unresolved fragment, nothing is lost
-    expect(r.unresolvedFragments.map((u) => u.text)).toEqual([
-      "Šiandien 9 valandas dirbau LabourMarket.ai",
-    ]);
+    // stated-total header is the day's total (lane 4c), nothing is lost
+    expect(r.unresolvedFragments).toEqual([]);
     expect(r.coverage).toEqual({
       fragmentCount: 4,
       meaningfulFragmentCount: 4,
-      coveredFragmentCount: 3,
-      unresolvedFragmentCount: 1,
+      coveredFragmentCount: 4,
+      unresolvedFragmentCount: 0,
       silentlyLostFragmentCount: 0,
     });
     // the other items keep exactly the outcomes they had (no extra offers on
@@ -378,6 +376,152 @@ describe("catalogue OFFER per fragment — lane 4b (#1689, the owner's '2 val. t
         r.coverage.meaningfulFragmentCount,
       );
     }
+  });
+});
+
+describe("the stated total — lane 4c (#1689, the extractor's ONE rule read at fragment grain)", () => {
+  const OWNER_DAY =
+    "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių.";
+  const TILING_DAY = "9 val. klijavau plyteles: 5 val. salone, 4 val. vonioje";
+  const fragmentOf = (r: JournalRecognitionResult, text: string) => {
+    const f = r.fragments.find((x) => x.text === text);
+    expect(f, text).toBeDefined();
+    return f!;
+  };
+
+  it("a header that names no work is the day's total — covered, never a 'name it yourself' hint", () => {
+    const r = derive(OWNER_DAY);
+    const header = fragmentOf(r, "Šiandien 9 valandas dirbau LabourMarket.ai");
+    expect(header.outcomes).toEqual([{ kind: "stated_total", ref: header.id }]);
+    expect(r.unresolvedFragments).toEqual([]);
+    // the items keep exactly their own readings — a header without a
+    // reading passes nothing down
+    expect(fragmentOf(r, "5 val. programavau").outcomes).toEqual([
+      { kind: "recognized", ref: "programming" },
+    ]);
+    expect(fragmentOf(r, "2 val. testavau").outcomes).toEqual([
+      { kind: "fuzzy_candidate", ref: "qa-testing" },
+    ]);
+    expect(r.recognizedSkills.map((s) => s.slug).sort()).toEqual([
+      "partnership-development",
+      "programming",
+    ]);
+    expect(r.coverage).toEqual({
+      fragmentCount: 4,
+      meaningfulFragmentCount: 4,
+      coveredFragmentCount: 4,
+      unresolvedFragmentCount: 0,
+      silentlyLostFragmentCount: 0,
+    });
+  });
+
+  it("a bare restated total the items add up to (no colon) is the total the same way", () => {
+    const r = derive(
+      "Dirbau 9 val. 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių",
+    );
+    const header = fragmentOf(r, "Dirbau 9 val");
+    expect(header.outcomes).toEqual([{ kind: "stated_total", ref: header.id }]);
+    expect(r.unresolvedFragments).toEqual([]);
+  });
+
+  it("a header that names the work passes its reading to the timed items nothing read (provenance, not a new reading)", () => {
+    const r = derive(TILING_DAY);
+    const header = fragmentOf(r, "9 val. klijavau plyteles");
+    const salon = fragmentOf(r, "5 val. salone");
+    const bath = fragmentOf(r, "4 val. vonioje");
+    expect(header.outcomes).toEqual([
+      { kind: "recognized", ref: "tiling" },
+      { kind: "stated_total", ref: header.id },
+    ]);
+    expect(salon.outcomes).toEqual([{ kind: "recognized", ref: "tiling" }]);
+    expect(bath.outcomes).toEqual([{ kind: "recognized", ref: "tiling" }]);
+    // ONE skill, three fragments of provenance — the items carry the hours
+    expect(r.recognizedSkills).toEqual([
+      {
+        slug: "tiling",
+        via: "exact",
+        confidence: expect.any(String),
+        fragmentIds: [header.id, salon.id, bath.id],
+      },
+    ]);
+    expect(r.unresolvedFragments).toEqual([]);
+    expect(r.coverage.coveredFragmentCount).toBe(3);
+    expect(r.coverage.silentlyLostFragmentCount).toBe(0);
+  });
+
+  it("a header the catalogue only OFFERS passes the offer down — one candidate, the items' ids on it, still no reading", () => {
+    const r = derive("9 val. testavau: 5 val. mobilią programėlę, 4 val. svetainę");
+    const header = fragmentOf(r, "9 val. testavau");
+    expect(header.outcomes).toEqual([
+      { kind: "fuzzy_candidate", ref: "qa-testing" },
+      { kind: "stated_total", ref: header.id },
+    ]);
+    expect(fragmentOf(r, "4 val. svetainę").outcomes).toEqual([
+      { kind: "fuzzy_candidate", ref: "qa-testing" },
+    ]);
+    expect(r.candidates).toEqual([
+      {
+        kind: "fuzzy_skill",
+        slug: "qa-testing",
+        label: "qa-testing",
+        reason: "testav",
+        fragmentIds: [
+          header.id,
+          fragmentOf(r, "5 val. mobilią programėlę").id,
+          fragmentOf(r, "4 val. svetainę").id,
+        ],
+      },
+    ]);
+    expect(r.recognizedSkills).toEqual([]);
+    expect(r.unresolvedFragments).toEqual([]);
+  });
+
+  it("a header reading the worker REJECTED is not passed down — the items ask to be named", () => {
+    const r = derive(TILING_DAY, { rejectedSlugs: new Set(["tiling"]) });
+    const header = fragmentOf(r, "9 val. klijavau plyteles");
+    expect(header.outcomes).toEqual([
+      { kind: "rejected", ref: "tiling" },
+      { kind: "stated_total", ref: header.id },
+    ]);
+    expect(r.rejected).toEqual([
+      {
+        kind: "skill",
+        label: "tiling",
+        slug: "tiling",
+        reason: "user_rejected",
+        fragmentIds: [header.id],
+      },
+    ]);
+    expect(r.unresolvedFragments.map((u) => u.text)).toEqual([
+      "5 val. salone",
+      "4 val. vonioje",
+    ]);
+    expect(r.recognizedSkills).toEqual([]);
+  });
+
+  it("an item with a reading of its own keeps it; only the items nothing read inherit", () => {
+    const r = derive("9 val. klijavau plyteles: 5 val. salone, 4 val. glaisčiau");
+    expect(fragmentOf(r, "5 val. salone").outcomes).toEqual([
+      { kind: "recognized", ref: "tiling" },
+    ]);
+    expect(fragmentOf(r, "4 val. glaisčiau").outcomes).toEqual([
+      { kind: "recognized", ref: "skim-coating" },
+    ]);
+    expect(r.recognizedSkills.map((s) => s.slug).sort()).toEqual([
+      "skim-coating",
+      "tiling",
+    ]);
+  });
+
+  it("NEGATIVE CONTROL: without a stated total nothing is a header and nothing inherits", () => {
+    // 4 + 2 + 2 = 8 but "8 val. klijavau plyteles" is work, not a header
+    // (the extractor's own rule) — the unread item stays a hint
+    const r = derive(
+      "8 val. klijavau plyteles, 4 val. glaisčiau, 2 val. gruntavau, 2 val. dažiau.",
+    );
+    expect(r.fragments.every((f) => !f.outcomes.some((o) => o.kind === "stated_total"))).toBe(true);
+    expect(r.unresolvedFragments.map((u) => u.text)).toEqual(["2 val. gruntavau"]);
+    expect(r.recognizedSkills.find((s) => s.slug === "tiling")?.fragmentIds.length).toBe(1);
   });
 });
 

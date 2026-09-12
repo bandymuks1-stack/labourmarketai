@@ -148,6 +148,28 @@ describe("mapRecognitionToPersistedFragments — the join between the two fragme
     }
   });
 
+  it("a header that names the work: its hours sit on the persisted items, never on the header (#1689, lane 4c)", () => {
+    const text = "9 val. klijavau plyteles: 5 val. salone, 4 val. vonioje";
+    const rec = deriveJournalRecognition(text, {
+      declaredSlugs: new Set(),
+      entryRejections: NO_REJECTIONS,
+    });
+    const persisted = parsePersistedFragments(persistedFor(text));
+    // the extractor persists the two items — the 9 h header is the total
+    expect(persisted.map((p) => p.phrase)).toEqual(["5 val. salone", "4 val. vonioje"]);
+    const rows = mapRecognitionToPersistedFragments({
+      persisted,
+      derivationFragments: rec.fragments,
+      skills: rec.recognizedSkills,
+    });
+    // tiling on BOTH items (5 h + 4 h = the 9 h the header stated), one row
+    // each; the header has no persisted item, so nothing is counted twice
+    expect(rows).toEqual([
+      { index: 1, slug: "tiling" },
+      { index: 2, slug: "tiling" },
+    ]);
+  });
+
   it("a skill recognised on NO persisted phrase yields no row (fails closed, never guesses)", () => {
     const rows = mapRecognitionToPersistedFragments({
       persisted: [{ index: 1, phrase: "Klijavau plyteles 6 val" }],

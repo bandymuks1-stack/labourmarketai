@@ -349,3 +349,40 @@ describe("catalogue OFFER per fragment (#1689) — lane 4b rides the ONE candida
     expect(WORKLOG_FLOW).toMatch(/\[slug\]: res\.ok\s*\?/);
   });
 });
+
+describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, never re-implements it", () => {
+  const EXTRACTOR = read("lib/structuring/extract-journal-suggestions.ts");
+
+  it("the derivation asks the extractor which phrase is the total (one rule, two grains)", () => {
+    expect(RECOGNITION).toMatch(
+      /import \{ extractJournalSuggestions \} from "@\/lib\/structuring\/extract-journal-suggestions"/,
+    );
+    expect(RECOGNITION).toMatch(/extractJournalSuggestions\(text \?\? ""\)/);
+    expect(RECOGNITION).toMatch(/statedTotal\.statedTotal!\.rawPhrase/);
+    // the rule itself lives in ONE place
+    expect(EXTRACTOR).toMatch(/function separateStatedTotal\(/);
+    expect(RECOGNITION).not.toMatch(/function separateStatedTotal/);
+    expect(RECOGNITION).not.toMatch(/ITEMISING_COLON/);
+  });
+
+  it("the header is marked as the total and inheritance is provenance only (never a new reading)", () => {
+    const lane = RECOGNITION.slice(
+      RECOGNITION.indexOf("Lane 4c"),
+      RECOGNITION.indexOf("Lane 5"),
+    );
+    expect(lane).toMatch(/outcomes\.push\(\{ kind: "stated_total", ref: f\.id \}\)/);
+    // only a TIMED item nothing read inherits, after the header
+    expect(lane).toMatch(/outcomes\.length === 0 &&/);
+    expect(lane).toMatch(/index > headerIndex/);
+    expect(lane).toMatch(/timedItemKeys\.has\(phraseKey\(f\.text\)\)/);
+    // inheritance adds the item's id to the header's OWN entries
+    expect(lane).toMatch(/entry\.fragmentIds\.add\(f\.id\)/);
+    expect(lane).not.toMatch(/recognizedMap\.set|fuzzyMap\.set|ambiguousMap\.set|claimMap\.set/);
+    // a rejected header reading is never passed down
+    expect(RECOGNITION).toMatch(
+      /headerOutcomes = outcomes\.filter\(\s*\(o\) => o\.kind !== "rejected" && o\.kind !== "unresolved",\s*\)/,
+    );
+    // the outcome kind exists in the closed set
+    expect(RECOGNITION).toMatch(/\| "stated_total"/);
+  });
+});
