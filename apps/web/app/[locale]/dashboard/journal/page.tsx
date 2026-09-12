@@ -33,6 +33,7 @@ import {
   type JournalEntryListRow,
 } from "@/lib/journal/journal-list-core";
 import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals";
+import { pendingEntryCandidates } from "@/lib/journal/entry-pending-candidates";
 import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
@@ -567,6 +568,7 @@ export default async function JournalPage({
   // recognizer's full known-skill slug set — a linked skill INSIDE it that the
   // entry text does not support is the stale/suspicious case ("Reikia peržiūrėti").
   const idToSlug = new Map<string, string>();
+  const declaredSlugSet = new Set(availableSkillsForLinks.map((s) => s.slug));
   const verifiedSkillIds = new Set<string>();
   for (const r of skillIdRows ?? []) {
     const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
@@ -1393,6 +1395,23 @@ export default async function JournalPage({
                         skillNameOf,
                       });
                       const recognizedSlugs = detectedForEntry.recognizedSlugs;
+                      // PENDING candidates of this saved entry — the ONE
+                      // derivation over the saved text and the entry's own
+                      // markers, decidable on the card (#1689, 2026-09-12);
+                      // before, a candidate could be decided only right after
+                      // the save. Pure, no write; the server re-derives and
+                      // membership-checks every decision.
+                      const candidatesForEntry = pendingEntryCandidates({
+                        text: e.original_text ?? "",
+                        metrics: e.journal_entry_metrics,
+                        declaredSlugs: declaredSlugSet,
+                        linkedSlugs: new Set(
+                          linkedForEntry
+                            .map((id) => idToSlug.get(id))
+                            .filter((x): x is string => !!x),
+                        ),
+                        skillNameOf,
+                      });
                       const skillSources = buildEntrySkillSources({
                         linkedSkillIds: linkedForEntry,
                         idToSlug,
@@ -1439,6 +1458,7 @@ export default async function JournalPage({
                                     skills: detectedForEntry.skills,
                                     labels: detectedForEntry.labels,
                                   },
+                                  candidates: candidatesForEntry,
                                 }
                               : undefined
                           }

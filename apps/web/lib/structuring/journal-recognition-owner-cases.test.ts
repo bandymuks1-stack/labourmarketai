@@ -541,8 +541,46 @@ describe("production walk 2026-09-12 (#1689) — a fully linked entry never read
     ).toBe("chips");
   });
 
+  it("a candidate of the entry (pending or just decided) is recognition content → chips, never a sentence (#1689)", () => {
+    // The rows carry their own result ("✓ Pridėta" / "Atmesta"); Section A
+    // must not say "nothing recognized" or "already linked above" under them.
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: [],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+        candidateNames: new Set(["Programinės įrangos testavimas"]),
+      }),
+    ).toBe("chips");
+    // A display-only label that names the candidate IS the candidate.
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: ["Programinės įrangos testavimas"],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+        candidateNames: new Set(["Programinės įrangos testavimas"]),
+      }),
+    ).toBe("chips");
+    // No candidates → the three-way rule is unchanged.
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: [],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+        candidateNames: new Set(),
+      }),
+    ).toBe("none");
+  });
+
   it("the component reads the ONE rule and renders the truthful sentence in both branches", () => {
     expect(links).toContain("detectedSectionState({");
+    expect(links).toContain("candidateNames,");
+    // the candidate rows render in BOTH branches, through the shared row
+    expect(links.match(/\{candidateRows\}/g)?.length).toBe(2);
+    expect(links).toContain('from "@/components/app/journal-entry-candidate-decision"');
     expect(links).toMatch(/const hasDetected = detectedState === "chips"/);
     // Both the no-declared-skills branch and the main branch carry the
     // three-way sentence; `detectedEmpty` is never the only alternative.

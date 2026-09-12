@@ -491,3 +491,64 @@ describe("the duration-unit vocabulary (#1689, measured 2026-09-12) — ONE list
     expect(FRAGMENTER).toContain(String.raw`ir|bei|taip\s+pat|and|also|en|und|и`);
   });
 });
+
+describe("a candidate on a SAVED entry is decidable on its card (#1689, 2026-09-12) — ONE derivation, ONE marker reader, the same actions", () => {
+  const PAGE = read("app/[locale]/dashboard/journal/page.tsx");
+  const PENDING = read("lib/journal/entry-pending-candidates.ts");
+  const MARKERS = read("lib/journal/entry-recognition-markers.ts");
+  const ROW = read("components/app/journal-entry-candidate-decision.tsx");
+  const LINKS = read("components/app/journal-entry-skill-links.tsx");
+
+  it("the page derives the saved entry's pending candidates through the canonical derivation and its own markers", () => {
+    expect(PAGE).toContain('import { pendingEntryCandidates } from "@/lib/journal/entry-pending-candidates"');
+    expect(PAGE).toContain("const candidatesForEntry = pendingEntryCandidates({");
+    expect(PAGE).toContain("metrics: e.journal_entry_metrics,");
+    expect(PAGE).toContain("candidates: candidatesForEntry,");
+    // the derivation is THE derivation — never the display-only classifier
+    expect(PENDING).toContain("deriveJournalRecognition(text, {");
+    expect(PENDING).toContain("readEntryRecognitionMarkers(input.metrics ?? [])");
+    expect(PENDING).not.toContain("classifyEntryRecognition");
+    // only the rows the decision actions accept: fuzzy_skill, not yet linked here, named
+    expect(PENDING).toContain('if (c.kind !== "fuzzy_skill" || !c.slug) continue;');
+    expect(PENDING).toContain("if (linkedSlugs.has(c.slug) || seen.has(c.slug)) continue;");
+    expect(PENDING).toMatch(/const name = skillNameOf\(c\.slug\);\r?\n\s+if \(!name\) continue;/);
+    // pure: no IO, no server import
+    expect(PENDING).not.toMatch(/supabase|import "server-only"|next\/cache|"use server"/);
+  });
+
+  it("the pipeline and the page read the entry's markers through the ONE pure reader", () => {
+    expect(MARKERS).toContain("export function readEntryRecognitionMarkers(");
+    expect(MARKERS).not.toMatch(/import "server-only"|from "node:crypto"|from "next\/cache"|supabase/);
+    expect(PIPELINE).toContain("const markers = readEntryRecognitionMarkers(metricRows);");
+    expect(PIPELINE).toContain("slugs: markers.rejectedSlugs,");
+    expect(PIPELINE).toContain("entryResolutions: markers.entryResolutions,");
+    // the inline switch is gone from the pipeline; the constants are re-exported, not re-declared
+    expect(PIPELINE).not.toContain("case ENTRY_MARKER_SLUGS.skillRejected:");
+    expect(PIPELINE).not.toMatch(/export const ENTRY_MARKER_SLUGS = \{/);
+    expect(PIPELINE).toContain('} from "@/lib/journal/entry-recognition-markers";');
+    expect(MARKERS).toContain('ambiguousResolved: "ambiguous_resolved",');
+  });
+
+  it("the card's decision row goes through the same two server actions the composer uses, with the current pipeline version, and the composer's own strings", () => {
+    expect(ROW).toContain('"use client"');
+    expect(ROW).toMatch(/confirmJournalSkillCandidate\(\s+entryId,\s+candidate\.slug,\s+JOURNAL_PIPELINE_VERSION,/);
+    expect(ROW).toMatch(/rejectJournalSkillCandidate\(\s+entryId,\s+candidate\.slug,\s+JOURNAL_PIPELINE_VERSION,/);
+    // the row shows the RETURNED result, never an optimistic one
+    expect(ROW).toContain('setState(res.ok ? decision : "error");');
+    // no other write path, no fetch, no direct DB
+    expect(ROW).not.toMatch(/setJournalEntrySkillLinks|supabase|fetch\(/);
+    // strings: the journal namespace's candidate keys — no new i18n keys for this
+    expect(ROW).toContain('useTranslations("journal")');
+    for (const key of ["resultNeedsConfirm", "candidateConfirm", "candidateConfirming", "candidateReject", "candidateConfirmed", "candidateRejected", "candidateError"]) {
+      expect(ROW).toContain(`t("${key}")`);
+      for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+        const journal = JSON.parse(read(`messages/${loc}/journal.json`)) as Record<string, unknown>;
+        expect(typeof journal[key], `${loc}.journal.${key}`).toBe("string");
+      }
+    }
+    // the card renders the rows in both branches through the shared row component
+    expect(LINKS).toContain('import { JournalEntryCandidateDecision } from "@/components/app/journal-entry-candidate-decision"');
+    expect(LINKS.match(/\{candidateRows\}/g)?.length).toBe(2);
+    expect(LINKS).toContain("candidateNames,");
+  });
+});

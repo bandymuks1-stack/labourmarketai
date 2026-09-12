@@ -9,6 +9,7 @@ import { reprocessJournalEntrySkills } from "@/lib/journal/skill-pipeline-action
 import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
 import { JournalEntrySkillLinks } from "@/components/app/journal-entry-skill-links";
 import type { EntrySkillSource } from "@/lib/journal/entry-skill-source";
+import type { EntryPendingCandidate } from "@/lib/journal/entry-pending-candidates";
 import { recordEvent } from "@/lib/telemetry/task";
 
 /**
@@ -46,6 +47,9 @@ export function JournalEntryRow({
     /** Render-time detected signals from THIS entry's text (display-only
      *  suggestions computed by the server page — no DB write). */
     detected?: { skills: { id: string; name: string }[]; labels: string[] };
+    /** PENDING candidates of this saved entry, decidable on the card
+     *  (`lib/journal/entry-pending-candidates`). */
+    candidates?: EntryPendingCandidate[];
   };
   /** Status zone (decision timeline + date) shown at the BOTTOM of the card —
    *  secondary to the entry text + understood signals, so the worker scans
@@ -154,6 +158,7 @@ export function JournalEntryRow({
           linkedSkillIds={skillLinks.linkedSkillIds}
           skillSources={skillLinks.skillSources}
           detected={skillLinks.detected}
+          candidates={skillLinks.candidates}
         />
       )}
       {/* Status zone — secondary, below the signals. */}

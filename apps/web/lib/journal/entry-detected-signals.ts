@@ -87,7 +87,11 @@ export function buildEntryDetectedSignals(input: {
  * linked chips above it have been taken out of the detected set.
  *
  *   chips       — something recognized is NOT yet linked: show it (linkable
- *                 declared skill / display-only label).
+ *                 declared skill / display-only label), or the entry has a
+ *                 CANDIDATE the worker decides on the card (#1689,
+ *                 2026-09-12: decidable here now, not only right after the
+ *                 save) — an offer is recognition waiting on a person, never
+ *                 "nothing recognized".
  *   all_linked  — recognition DID read this entry, and every recognized skill
  *                 already sits in the linked list above. Saying "nothing was
  *                 recognized" here would be false: measured on production
@@ -110,12 +114,22 @@ export function detectedSectionState(input: {
   selectedIds: ReadonlySet<string>;
   /** Names of the linked chips rendered above Section A. */
   linkedNames: ReadonlySet<string>;
+  /** Names of this entry's candidates — pending or decided on this card.
+   *  Their rows carry their own result ("✓ Pridėta" / "Atmesta"), so while
+   *  any exist Section A shows them and never a sentence beneath them; a
+   *  display-only label that names a candidate is the candidate, not a
+   *  second signal. */
+  candidateNames?: ReadonlySet<string>;
 }): DetectedSectionState {
+  if ((input.candidateNames?.size ?? 0) > 0) return "chips";
   const unlinkedSkills = input.detectedSkills.filter(
     (s) => !input.selectedIds.has(s.id),
   );
   const unlinkedLabels = input.detectedLabels.filter(
-    (l) => !input.linkedNames.has(l) && !unlinkedSkills.some((s) => s.name === l),
+    (l) =>
+      !input.linkedNames.has(l) &&
+      !unlinkedSkills.some((s) => s.name === l) &&
+      !(input.candidateNames?.has(l) ?? false),
   );
   if (unlinkedSkills.length > 0 || unlinkedLabels.length > 0) return "chips";
   const anyRecognized =
