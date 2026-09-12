@@ -1005,6 +1005,10 @@ export async function runWorkIntelligenceQuestion(
       readDemandBySkillForGrowth(),
     ]);
     const growth = deriveGrowthReading(wi, { primaryProfessionSlug, demandBySkill });
+    // every list below is capped at ANSWER_LIMIT; what the cap leaves out is
+    // SAID ("… ir dar 3"), never implied to be all (#1689, 2026-09-12)
+    const withMore = (list: string, shown: number, total: number, sep: string): string =>
+      total > shown ? `${list}${sep}${t("wiGrowthMore", { count: total - shown })}` : list;
     const basisList = growth.basis.skills
       .slice(0, ANSWER_LIMIT)
       .map((s) =>
@@ -1025,7 +1029,7 @@ export async function runWorkIntelligenceQuestion(
         count: growth.basis.skills.length,
         total: totalHours,
         entries: totals.entries,
-        list: basisList,
+        list: withMore(basisList, Math.min(ANSWER_LIMIT, growth.basis.skills.length), growth.basis.skills.length, " · "),
       }),
     ];
     if (growth.basis.declaredOnly > 0) lines.push(t("wiGrowthDeclaredOnly", { count: growth.basis.declaredOnly }));
@@ -1036,31 +1040,41 @@ export async function runWorkIntelligenceQuestion(
       if (growth.deepen.length > 0) {
         lines.push(
           t("wiGrowthDeepen", {
-            list: growth.deepen
-              .slice(0, ANSWER_LIMIT)
-              .map((d) =>
-                t("wiGrowthDeepenItem", {
-                  skill: skillName(d.slug),
-                  reasons: d.reasons.map((r) => t(`wiGrowthReason_${r}`)).join("; "),
-                }),
-              )
-              .join("\n"),
+            list: withMore(
+              growth.deepen
+                .slice(0, ANSWER_LIMIT)
+                .map((d) =>
+                  t("wiGrowthDeepenItem", {
+                    skill: skillName(d.slug),
+                    reasons: d.reasons.map((r) => t(`wiGrowthReason_${r}`)).join("; "),
+                  }),
+                )
+                .join("\n"),
+              Math.min(ANSWER_LIMIT, growth.deepen.length),
+              growth.deepenTotal,
+              "\n",
+            ),
           }),
         );
       }
       if (growth.expand.length > 0) {
         lines.push(
           t("wiGrowthExpand", {
-            list: growth.expand
-              .slice(0, ANSWER_LIMIT)
-              .map((d) =>
-                t("wiGrowthExpandItem", {
-                  direction: activityName(d.professionId),
-                  shared: d.sharedCount,
-                  missing: d.missingSkills.map(skillName).join(", "),
-                }),
-              )
-              .join("\n"),
+            list: withMore(
+              growth.expand
+                .slice(0, ANSWER_LIMIT)
+                .map((d) =>
+                  t("wiGrowthExpandItem", {
+                    direction: activityName(d.professionId),
+                    shared: d.sharedCount,
+                    missing: d.missingSkills.map(skillName).join(", "),
+                  }),
+                )
+                .join("\n"),
+              Math.min(ANSWER_LIMIT, growth.expand.length),
+              growth.expand.length,
+              "\n",
+            ),
           }),
         );
       }
@@ -1070,10 +1084,15 @@ export async function runWorkIntelligenceQuestion(
     else {
       lines.push(
         t("wiGrowthDemand", {
-          list: growth.demand
-            .slice(0, ANSWER_LIMIT)
-            .map((d) => t("wiGrowthDemandItem", { skill: skillName(d.slug), demands: d.demands }))
-            .join(", "),
+          list: withMore(
+            growth.demand
+              .slice(0, ANSWER_LIMIT)
+              .map((d) => t("wiGrowthDemandItem", { skill: skillName(d.slug), demands: d.demands }))
+              .join(", "),
+            Math.min(ANSWER_LIMIT, growth.demand.length),
+            growth.demandTotal ?? growth.demand.length,
+            ", ",
+          ),
         }),
       );
     }

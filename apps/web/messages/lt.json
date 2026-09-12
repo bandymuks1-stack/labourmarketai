@@ -13763,6 +13763,7 @@
       "wiGrowthExpand": "Kur jau veda užfiksuotas darbas (kryptys, kurioms jūsų įrašai jau tinka):\n{list}",
       "wiGrowthExpandItem": "— {direction}: jūsų įrašai remia {shared, plural, one {# įgūdį} few {# įgūdžius} other {# įgūdžių}}; dar nepagrįsta: {missing}",
       "wiGrowthDemandUnread": "Ko prašo reali paklausa, šį kartą nepavyko perskaityti — tai matoma galimybių lentoje.",
+      "wiGrowthMore": "ir dar {count} — į sumas skaičiuojami visi",
       "wiGrowthDemandNone": "Jūsų matomi poreikiai neprašo nė vieno įgūdžio, kurio jūsų įrašai neremtų.",
       "wiGrowthDemand": "Ko prašo jūsų matomi poreikiai, o jūsų įrašai dar neremia: {list}.",
       "wiGrowthDemandItem": "{skill} ({demands, plural, one {# poreikis} few {# poreikiai} other {# poreikių}})",

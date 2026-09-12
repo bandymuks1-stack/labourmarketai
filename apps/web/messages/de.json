@@ -13763,6 +13763,7 @@
       "wiGrowthExpand": "Wohin Ihre erfasste Arbeit bereits zeigt (Richtungen, zu denen Ihre Einträge schon passen):\n{list}",
       "wiGrowthExpandItem": "— {direction}: Ihre Einträge belegen {shared, plural, one {# Fähigkeit} other {# Fähigkeiten}}; noch nicht belegt: {missing}",
       "wiGrowthDemandUnread": "Was die echte Nachfrage verlangt, konnte diesmal nicht gelesen werden — das zeigt Ihr Chancenboard.",
+      "wiGrowthMore": "und {count} weitere — alle zählen in den Summen",
       "wiGrowthDemandNone": "Ihre sichtbaren Bedarfe verlangen keine Fähigkeit, die Ihre Einträge nicht schon belegen.",
       "wiGrowthDemand": "Was Ihre sichtbaren Bedarfe verlangen und Ihre Einträge noch nicht belegen: {list}.",
       "wiGrowthDemandItem": "{skill} ({demands, plural, one {# Bedarf} other {# Bedarfe}})",

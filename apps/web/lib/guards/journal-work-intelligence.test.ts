@@ -985,3 +985,30 @@ describe("15 · a capped list says it is capped (#1689, REMAINING 2 of the recei
     }
   });
 });
+
+describe("15b · the reading's own caps and the chat's lists say what they leave out (#1689, 2026-09-12)", () => {
+  it("the growth reading exposes the totals before its caps; the section says when deepen is cut", () => {
+    expect(growth).toMatch(/readonly deepenTotal: number;/);
+    expect(growth).toMatch(/readonly demandTotal: number \| null;/);
+    expect(growth).toMatch(/const deepen = deepenAll\.slice\(0, MAX_DEEPEN\)/);
+    expect(growth).toMatch(/deepenTotal: deepenAll\.length,/);
+    expect(growth).toMatch(/demandTotal: demandAll === null \? null : demandAll\.length,/);
+    expect(component).toContain('{capLine("deepen", deepen.length, growth?.deepenTotal ?? deepen.length)}');
+  });
+
+  it("every capped list in the chat's growth answer carries the '… and N more' suffix from ONE helper, in every published locale", () => {
+    expect(workflows).toMatch(/const withMore = \(list: string, shown: number, total: number, sep: string\): string =>/);
+    expect(workflows).toMatch(/total > shown \? `\$\{list\}\$\{sep\}\$\{t\("wiGrowthMore", \{ count: total - shown \}\)\}` : list/);
+    expect(workflows).toContain("withMore(basisList, Math.min(ANSWER_LIMIT, growth.basis.skills.length), growth.basis.skills.length,");
+    expect(workflows).toMatch(/Math\.min\(ANSWER_LIMIT, growth\.deepen\.length\),\s+growth\.deepenTotal,/);
+    expect(workflows).toMatch(/Math\.min\(ANSWER_LIMIT, growth\.expand\.length\),\s+growth\.expand\.length,/);
+    expect(workflows).toMatch(/Math\.min\(ANSWER_LIMIT, growth\.demand\.length\),\s+growth\.demandTotal \?\? growth\.demand\.length,/);
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const j = JSON.parse(read(`messages/${loc}.json`)) as { workspace: { ai: Record<string, string> } };
+      const s = j.workspace.ai.wiGrowthMore;
+      expect(typeof s, `${loc}.workspace.ai.wiGrowthMore`).toBe("string");
+      expect(s).toContain("{count}");
+      expect(s).not.toMatch(/slice|ANSWER_LIMIT|limit/i);
+    }
+  });
+});

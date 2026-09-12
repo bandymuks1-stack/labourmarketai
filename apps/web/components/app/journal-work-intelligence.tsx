@@ -225,7 +225,7 @@ export async function JournalWorkIntelligence({
     (d) => labels.professionName(d.professionId) !== null,
   ).length;
   const capLine = (
-    kind: "skills" | "activities" | "months" | "directions",
+    kind: "skills" | "activities" | "months" | "directions" | "deepen",
     shown: number,
     total: number,
   ) =>
@@ -1072,6 +1072,7 @@ export async function JournalWorkIntelligence({
                           </li>
                         ))}
                       </ul>
+                      {capLine("deepen", deepen.length, growth?.deepenTotal ?? deepen.length)}
                     </div>
                   )}
                   {directions.length > 0 && (
