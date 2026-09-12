@@ -525,6 +525,98 @@ describe("the stated total — lane 4c (#1689, the extractor's ONE rule read at 
   });
 });
 
+describe("an item that says only WHERE describes the header's work (#1689, measured 2026-09-12)", () => {
+  // Across 238 locative place phrases (lt/en/ru/nl/de) about fifty are also
+  // trade needles: "5 val. virtuvėje" under a tiling header read as 5 h of
+  // COOKING on this side too (lane 1 exact), so the tiler's day split into
+  // tiling + cooking. The extractor's ONE rule (`describesWhereOnly`) is
+  // read here: such an item skips its own lanes and inherits (lane 4c).
+  const KITCHEN_DAY = "9 val. klijavau plyteles: 5 val. virtuvėje, 4 val. vonioje";
+  const fragmentOf = (r: JournalRecognitionResult, text: string) => {
+    const f = r.fragments.find((x) => x.text === text);
+    expect(f, text).toBeDefined();
+    return f!;
+  };
+
+  it("the tiler's kitchen is tiling — cooking appears nowhere, the hours reach the header's skill", () => {
+    const r = derive(KITCHEN_DAY);
+    const header = fragmentOf(r, "9 val. klijavau plyteles");
+    const kitchen = fragmentOf(r, "5 val. virtuvėje");
+    const bath = fragmentOf(r, "4 val. vonioje");
+    expect(kitchen.outcomes).toEqual([{ kind: "recognized", ref: "tiling" }]);
+    expect(bath.outcomes).toEqual([{ kind: "recognized", ref: "tiling" }]);
+    expect(r.recognizedSkills).toEqual([
+      {
+        slug: "tiling",
+        via: "exact",
+        confidence: expect.any(String),
+        fragmentIds: [header.id, kitchen.id, bath.id],
+      },
+    ]);
+    expect(r.claims).toEqual([]);
+    expect(r.candidates).toEqual([]);
+    expect(r.unresolvedFragments).toEqual([]);
+    expect(r.coverage.silentlyLostFragmentCount).toBe(0);
+  });
+
+  it("every place-noun trade yields the same way: warehouse, roof, till, salon, the client's flat", () => {
+    const r = derive(
+      "10 val. klijavau plyteles: 2 val. sandėlyje, 2 val. ant stogo, 2 val. prie kasos, 2 val. sporto salėje, 2 val. kliento bute",
+    );
+    expect(r.recognizedSkills.map((s) => s.slug)).toEqual(["tiling"]);
+    expect(r.recognizedSkills[0].fragmentIds).toHaveLength(6);
+    expect(r.claims).toEqual([]);
+    expect(r.unresolvedFragments).toEqual([]);
+  });
+
+  it("the same day in Russian and in English", () => {
+    for (const text of [
+      "9 ч клал плитку: 5 ч на кухне, 4 ч в ванной",
+      "9 h laid tiles: 5 h in the kitchen, 4 h in the corridor",
+    ]) {
+      const r = derive(text);
+      expect(r.recognizedSkills.map((s) => s.slug), text).toEqual(["tiling"]);
+      expect(r.recognizedSkills[0].fragmentIds, text).toHaveLength(3);
+      expect(r.unresolvedFragments, text).toEqual([]);
+    }
+  });
+
+  it("an item that names its OWN work keeps it — a verb is never a place", () => {
+    const r = derive("9 val. klijavau plyteles: 5 val. virtuvėje, 4 val. gaminau maistą");
+    expect(fragmentOf(r, "5 val. virtuvėje").outcomes).toEqual([
+      { kind: "recognized", ref: "tiling" },
+    ]);
+    expect(fragmentOf(r, "4 val. gaminau maistą").outcomes).toContainEqual({
+      kind: "recognized",
+      ref: "cooking",
+    });
+  });
+
+  it("a REJECTED header reading is not replaced by the place noun's trade — the item asks to be named", () => {
+    const r = derive(KITCHEN_DAY, { rejectedSlugs: new Set(["tiling"]) });
+    expect(r.recognizedSkills).toEqual([]);
+    expect(r.candidates).toEqual([]);
+    expect(r.unresolvedFragments.map((u) => u.text)).toEqual([
+      "5 val. virtuvėje",
+      "4 val. vonioje",
+    ]);
+  });
+
+  it("NEGATIVE CONTROL: a header that names no work passes nothing — the place is then the only signal", () => {
+    const r = derive("Dirbau 9 val.: 5 val. virtuvėje, 4 val. sandėlyje");
+    expect(r.recognizedSkills.map((s) => s.slug).sort()).toEqual([
+      "cooking",
+      "warehouse-operations",
+    ]);
+  });
+
+  it("NEGATIVE CONTROL: without a header a bare place item reads as it always did", () => {
+    expect(derive("Dirbau virtuvėje 5 val.").recognizedSkills.map((s) => s.slug)).toEqual([
+      "cooking",
+    ]);
+  });
+});
+
 describe("INCIDENT PIN — full derivation of the production text", () => {
   const INCIDENT_TEXT =
     "Ploviau mašiną - 1 h. Kodavau programą su chat gpt ir claude code - 6h, tvarkiau namus - 2h";
