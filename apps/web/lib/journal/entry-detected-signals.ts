@@ -81,3 +81,44 @@ export function buildEntryDetectedSignals(input: {
 
   return { skills, labels, recognizedSlugs };
 }
+
+/**
+ * What Section A ("skills recognized from this entry") may say once the
+ * linked chips above it have been taken out of the detected set.
+ *
+ *   chips       — something recognized is NOT yet linked: show it (linkable
+ *                 declared skill / display-only label).
+ *   all_linked  — recognition DID read this entry, and every recognized skill
+ *                 already sits in the linked list above. Saying "nothing was
+ *                 recognized" here would be false: measured on production
+ *                 2026-09-12 (build 5e5c2aaf, QA worker) four of six entry
+ *                 cards — tiling entries whose pipeline rows read `1|tiling` —
+ *                 said "Iš šio įrašo teksto įgūdžių atpažinti nepavyko".
+ *   none        — the recognizer read nothing from the text (a manual link may
+ *                 still exist above; that is not recognition).
+ *
+ * Pure, so the component and its guard read ONE rule.
+ */
+export type DetectedSectionState = "chips" | "all_linked" | "none";
+
+export function detectedSectionState(input: {
+  /** Detected skills the worker has declared (`EntryDetectedSignals.skills`). */
+  detectedSkills: readonly { id: string; name: string }[];
+  /** Display-only detected labels (`EntryDetectedSignals.labels`). */
+  detectedLabels: readonly string[];
+  /** Skill ids currently linked to the entry (live client state). */
+  selectedIds: ReadonlySet<string>;
+  /** Names of the linked chips rendered above Section A. */
+  linkedNames: ReadonlySet<string>;
+}): DetectedSectionState {
+  const unlinkedSkills = input.detectedSkills.filter(
+    (s) => !input.selectedIds.has(s.id),
+  );
+  const unlinkedLabels = input.detectedLabels.filter(
+    (l) => !input.linkedNames.has(l) && !unlinkedSkills.some((s) => s.name === l),
+  );
+  if (unlinkedSkills.length > 0 || unlinkedLabels.length > 0) return "chips";
+  const anyRecognized =
+    input.detectedSkills.length > 0 || input.detectedLabels.length > 0;
+  return anyRecognized ? "all_linked" : "none";
+}

@@ -9,6 +9,7 @@ import {
   needsReview,
   type EntrySkillSource,
 } from "@/lib/journal/entry-skill-source";
+import { detectedSectionState } from "@/lib/journal/entry-detected-signals";
 
 /**
  * Per-entry skill-link control (Journal Entry ↔ Skill links v1 + stale-skill
@@ -102,7 +103,16 @@ export function JournalEntrySkillLinks({
   const detectedLabels = (detected?.labels ?? []).filter(
     (l) => !linkedNames.has(l) && !detectedLinkable.some((s) => s.name === l),
   );
-  const hasDetected = detectedLinkable.length > 0 || detectedLabels.length > 0;
+  // ONE rule (lib/journal/entry-detected-signals) decides what Section A may
+  // say: chips / "already linked above" / "nothing recognized". An entry whose
+  // recognized skills are ALL linked above must never read as unrecognized.
+  const detectedState = detectedSectionState({
+    detectedSkills: detected?.skills ?? [],
+    detectedLabels: detected?.labels ?? [],
+    selectedIds: selected,
+    linkedNames,
+  });
+  const hasDetected = detectedState === "chips";
 
   if (availableSkills.length === 0) {
     return (
@@ -131,9 +141,15 @@ export function JournalEntrySkillLinks({
             ) : (
               <p
                 className="text-meta leading-relaxed text-text-muted"
-                data-testid={`entry-skill-detected-empty-${entryId}`}
+                data-testid={
+                  detectedState === "all_linked"
+                    ? `entry-skill-detected-linked-${entryId}`
+                    : `entry-skill-detected-empty-${entryId}`
+                }
               >
-                {t("detectedEmpty")}
+                {detectedState === "all_linked"
+                  ? t("detectedAllLinked")
+                  : t("detectedEmpty")}
               </p>
             )}
           </div>
@@ -269,9 +285,15 @@ export function JournalEntrySkillLinks({
           ) : (
             <p
               className="text-meta leading-relaxed text-text-muted"
-              data-testid={`entry-skill-detected-empty-${entryId}`}
+              data-testid={
+                detectedState === "all_linked"
+                  ? `entry-skill-detected-linked-${entryId}`
+                  : `entry-skill-detected-empty-${entryId}`
+              }
             >
-              {t("detectedEmpty")}
+              {detectedState === "all_linked"
+                ? t("detectedAllLinked")
+                : t("detectedEmpty")}
             </p>
           )}
         </div>

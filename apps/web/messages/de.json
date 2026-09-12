@@ -1585,7 +1585,8 @@
     "linkDone": "Liste schließen",
     "pickerHint": "Ihre Profil-Fähigkeiten — verknüpfen Sie sie manuell, wenn sie zu diesem Eintrag passen. Diese wurden nicht aus diesem Eintrag erkannt.",
     "detectedHeading": "Aus diesem Eintrag erkannte Fähigkeiten",
-    "detectedEmpty": "Aus dem Text dieses Eintrags wurden keine Fähigkeiten erkannt. Sie können eine Fähigkeit manuell verknüpfen."
+    "detectedEmpty": "Aus dem Text dieses Eintrags wurden keine Fähigkeiten erkannt. Sie können eine Fähigkeit manuell verknüpfen.",
+    "detectedAllLinked": "Die erkannten Fähigkeiten sind bereits mit diesem Eintrag verknüpft — sie stehen oben."
   },
   "reviewReport": {
     "title": "Prüfbericht",
