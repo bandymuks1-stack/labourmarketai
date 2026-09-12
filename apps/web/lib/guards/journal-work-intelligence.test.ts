@@ -97,8 +97,15 @@ describe("2 · the model is honest by construction", () => {
   it("attributes hours to a skill ONLY when it is the single linked skill, or the link names the fragment", () => {
     expect(model).toMatch(/if \(n > 1\) return "shared";/);
     expect(model).toMatch(/if \(n === 0\) return "none";/);
-    // one linked skill but several kinds of work in the fragments → involvement
-    expect(model).toMatch(/activities\.size > 1 \? "multi_activity" : "attributed"/);
+    // one linked skill, but the entry's OWN timed fragments say the time was
+    // split → involvement. The brake keys on the TIMED PARTS, not on the
+    // labels: three timed parts with no kind of work named are still three
+    // parts (re-audit 2026-09-11 F4 — the unlabelled path is the majority
+    // case in production).
+    expect(model).toMatch(/const fragments = time\.lines\.filter\(\(l\) => l\.hours > 0 && l\.derivedFrom === "fragment_time"\);/);
+    expect(model).toMatch(/if \(fragments\.length > 1\) \{/);
+    expect(model).toMatch(/const oneKindOfWork = labels\.size === 1 && !labels\.has\(""\);/);
+    expect(model).toMatch(/if \(!oneKindOfWork\) return "multi_activity";/);
     // a fragment is claimed only when EXACTLY ONE linked skill sits on it
     // (`fragment_skill` rows) — never split by guess, never by an unlinked row
     expect(model).toMatch(/if \(claimants\.size === 1\)/);
@@ -333,7 +340,10 @@ describe("9 · the organization's per-member roll-up rides the same model (owner
     expect(listCore).toContain("export const JOURNAL_ENTRY_METRICS_EMBED =");
     expect(listCore).toContain("export const JOURNAL_ENTRY_CONFIRMATIONS_EMBED =");
     expect(listCore).toMatch(/const V3_SELECT = `[^`]*\$\{JOURNAL_ENTRY_METRICS_EMBED\}, \$\{JOURNAL_ENTRY_CONFIRMATIONS_EMBED\}`/);
-    expect(windowReport).toMatch(/JOURNAL_ENTRY_CONFIRMATIONS_EMBED,\s*\.\.\.\(opts\.workTime \? \[JOURNAL_ENTRY_METRICS_EMBED\] : \[\]\)/);
+    // ONE projection, always the list core's — a count-sized read narrows it
+    // with a query-time filter, never with a second hand-written embed.
+    expect(windowReport).toMatch(/JOURNAL_ENTRY_CONFIRMATIONS_EMBED,\s*JOURNAL_ENTRY_METRICS_EMBED,\s*\]\.join\(", "\)/);
+    expect(windowReport).toMatch(/opts\.workTime \? q : q\.eq\("journal_entry_metrics\.metric_slug", "work_date"\)/);
     expect(windowReport).not.toMatch(/journal_entry_metrics\(/);
   });
   it("it reads no skills and no links — an org roll-up answers how much / on what / backed by what", () => {
@@ -471,6 +481,108 @@ describe("10 · archetype module fields — composed from the relationship, one 
     for (const loc of ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"]) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { errors: Record<string, string> };
       expect(j.errors.moduleFieldInvalid, `${loc}.errors.moduleFieldInvalid`).toContain("{fields}");
+    }
+  });
+});
+
+/**
+ * 11 · COVERAGE SEMANTICS — every share names the base it is a share OF, no
+ * recorded hour vanishes from the reading it belongs to, and the window is
+ * the day the work happened (re-audit 2026-09-11, F2/F3/F4/F5/F6).
+ *
+ * These are the ways an honest set of figures still told a wrong story:
+ * a "main activity" chosen from only the labelled hours; "5 h - 100 %" over
+ * 95 unattributed hours; "no confirmations" above "1 confirmed"; last
+ * month's hours under "Today".
+ */
+describe("11 · coverage semantics: shares name their base, hours never vanish", () => {
+  it("F2 · the model states the coverage of the activity reading and the share is of ALL recorded hours", () => {
+    expect(model).toContain("readonly activityHours: number;");
+    expect(model).toContain("readonly unlabelledHours: number;");
+    expect(model).toContain("readonly unlabelledEntries: number;");
+    // the base is the focus period's own hours — the same figure the
+    // period tile shows, not the sum of the labelled ones
+    expect(model).toMatch(/const focusHours = periods\.find\(\(p\) => p\.key === focus\)\?\.hours \?\? 0;/);
+    expect(model).toMatch(/share: focusHours > 0 \? round2\(a\.hours \/ focusHours\) : 0,/);
+    // an unlabelled timed part is counted in the denominator, never dropped
+    expect(model).toMatch(/unlabelledHours \+= line\.hours;/);
+  });
+
+  it("F2 · the section names the unlabelled hours instead of hiding them", () => {
+    expect(component).toContain('data-testid="wi-unlabelled-hours"');
+    expect(component).toContain('data-testid="wi-activities-coverage"');
+    expect(component).toMatch(/t\("unlabelledHours", \{/);
+    expect(component).toMatch(/t\("activitiesCoverage", \{/);
+  });
+
+  it("F3 · the skill share states its base in WORDS, not only in an aria-label", () => {
+    expect(component).toContain('data-testid="wi-skills-coverage"');
+    expect(component).toMatch(/t\("skillsCoverage", \{/);
+    expect(component).toMatch(/t\("shareOf", \{/);
+    // the bare percentage with no base beside it is the pre-fix shape
+    expect(component).not.toMatch(/\? ` · \$\{fmtPct\(s\.share, locale\)\}`/);
+  });
+
+  it("F5 · work recorded in days has its own confirmed figure, and the headline reads the same state as the count below it", () => {
+    expect(model).toContain("readonly confirmedDayUnits: number;");
+    expect(model).toMatch(/confirmedDayUnits: round2\(confirmedDayUnits\),/);
+    // a days-unit duration is a duration: the day counts as worked
+    expect(model).toMatch(/if \(d\.time\.totalHours > 0 \|\| d\.time\.totalDayUnits > 0\) days\.add\(d\.time\.day\);/);
+    expect(component).toMatch(/t\("confirmedOfDays", \{/);
+    expect(component).toMatch(/t\("confirmedNoDuration", \{/);
+    // "no entry with a duration" was false for an entry recorded in days
+    expect(component).toMatch(/const hasAnyHours = wi\.totalHours > 0 \|\| allPeriod\.dayUnits > 0;/);
+  });
+
+  it("F6 · the org window report decides membership by the WORK day, from two bounded reads", () => {
+    expect(windowReport).toContain('import { resolveWorkDay } from "@/lib/journal/work-time";');
+    expect(windowReport).toMatch(/export function inWorkWindow\(/);
+    expect(windowReport).toMatch(/const day = resolveWorkDay\(row\.journal_entry_metrics \?\? \[\], row\.created_at\);/);
+    // (B) the entries whose STATED work day falls in the window
+    expect(windowReport).toMatch(/\.eq\("metric_slug", "work_date"\)\s*\.gte\("value_text", window\.startIso\)\s*\.lte\("value_text", window\.endIso\)/);
+    // both reads stay bounded and stay inside the org's own contexts
+    expect(windowReport).toMatch(/\.in\("engagement_context_id", contextIds\)/);
+    expect(windowReport).not.toMatch(/service_role|createAdminClient|createServiceClient/);
+    // a failed work-day read degrades the whole report — it never silently
+    // falls back to the created_at-only defect
+    expect(windowReport).toMatch(/if \(createdRes\.error \|\| workedRes\.error\) return \{ applied: false, reason: "error" \};/);
+    expect(windowReport).toMatch(/\.filter\(\(row\) => inWorkWindow\(row, window\)\)/);
+  });
+
+  it("the chat answers from the model's coverage figures — it never re-derives them", () => {
+    expect(workflows).toContain("wi.activityHours");
+    expect(workflows).toContain("wi.unlabelledHours");
+    expect(workflows).toMatch(/pct: fmtPct\(a\.share, locale\)/);
+    // the pre-fix shape: the chat subtracting its own labelled total
+    expect(workflows).not.toMatch(/const labelled = wi\.activities\.reduce/);
+  });
+
+  it("every coverage line has copy in each locale the section is published in", () => {
+    const keys = [
+      "activityShareOf",
+      "unlabelledHours",
+      "skillsCoverage",
+      "shareOf",
+      "activitiesCoverage",
+      "confirmedOfDays",
+      "confirmedNoDuration",
+    ];
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: Record<string, string>;
+      };
+      for (const k of keys) {
+        const v = j.intelligence[k];
+        expect(typeof v === "string" && v.trim().length > 0, `${loc}.intelligence.${k}`).toBe(true);
+        // a share sentence that names no base is the defect itself
+        expect(v!, `${loc}.intelligence.${k}`).not.toMatch(/\{[a-zA-Z]+\}%/);
+      }
+      // the report row's "mainly X" gains its base in the same locales
+      const rootJson = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
+      const reports = (rootJson.reports ?? {}) as { journalWindow?: Record<string, string> };
+      const mainlyShare = reports.journalWindow?.mainlyShare;
+      expect(typeof mainlyShare === "string" && mainlyShare.includes("{percent}"), `${loc}.reports.journalWindow.mainlyShare`).toBe(true);
+      expect(mainlyShare!, `${loc}.reports.journalWindow.mainlyShare`).toContain("{total}");
     }
   });
 });

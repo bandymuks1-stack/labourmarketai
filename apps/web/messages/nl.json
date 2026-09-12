@@ -773,6 +773,7 @@
       "hours": "{hours} u",
       "dayUnits": "+ {days} d in dagen vastgelegd",
       "mainly": "vooral {activity} · {hours} u",
+      "mainlyShare": "vooral {activity} · {hours} u ({percent} van {total} u)",
       "withoutDuration": "{count, plural, one {# registratie in dit venster heeft geen duur – die telt mee, maar niet in uren.} other {# registraties in dit venster hebben geen duur – die tellen mee, maar niet in uren.}}",
       "collapse": "Gedetailleerd rapport verbergen"
     }

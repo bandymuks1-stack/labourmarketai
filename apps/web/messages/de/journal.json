@@ -581,7 +581,7 @@
       "new": "neu in den letzten 30 Tagen"
     },
     "outputsTitle": "Erledigt",
-    "multiActivityHours": "{hours} Std. aus {count, plural, one {# Eintrag} other {# Einträgen}} beschreiben mehrere Arten von Arbeit — nach Art der Arbeit aufgeteilt, nicht nach Fähigkeit (mit nur einer Fähigkeit verknüpft).",
+    "multiActivityHours": "{hours} Std. aus {count, plural, one {# Eintrag} other {# Einträgen}} wurden als mehrere Zeitabschnitte erfasst (verschiedene Arten von Arbeit oder keine benannt) — nach Art der Arbeit aufgeteilt, nicht nach Fähigkeit (mit nur einer Fähigkeit verknüpft).",
     "trendNewShort": "neu",
     "checks": {
       "title": "Einen Blick wert",
@@ -614,7 +614,14 @@
       "provenance": "Woher die Stunden stammen: {worker} h von der Person eingegeben, {extracted} h aus ihrem Text erkannt, {corrected} h von einer Führungskraft korrigiert.",
       "provenanceRule": "Jeder Eintrag zählt einmal; eine Stunde wird einer Fähigkeit nur zugeordnet, wenn der Eintrag mit einer einzigen Fähigkeit verknüpft ist oder die eigene Formulierung der Person diese Fähigkeit nennt.",
       "scopeNote": "Das ist der Teil der Aufzeichnungen der Person, den Ihre Organisation sehen darf — Arbeit, die zu Ihren eigenen Engagements erfasst wurde. Es ist weder die vollständige Historie noch eine Bewertung. Die Bestätigung einer Führungskraft aus Ihrem Posteingang macht die Stunden eines Eintrags hier und im Lebenslauf der Person zu von einer Führungskraft bestätigten Stunden."
-    }
+    },
+    "confirmedOfDays": "{confirmed} von {total} T. durch einen Eintrag der Führungskraft bestätigt",
+    "confirmedNoDuration": "{confirmed} von {entries, plural, one {# Eintrag} other {# Einträgen}} von Führungskraft oder Kunde bestätigt — ohne Dauer erfasst, daher keine Stunden anzuzeigen",
+    "activityShareOf": "{percent} aller {total} erfassten Std.",
+    "unlabelledHours": "{hours} Std. aus {count, plural, one {# Eintrag} other {# Einträgen}} ohne benannte Art der Arbeit — in der Summe gezählt, nicht in dieser Liste",
+    "skillsCoverage": "{attributed} von {total} erfassten Std. ({period}) sind einer Fähigkeit zugeordnet. Jedes % unten ist ein Anteil dieser {attributed} Std., nicht der gesamten erfassten Zeit.",
+    "shareOf": "{percent} von {base} zugeordneten Std.",
+    "activitiesCoverage": "Eine Art der Arbeit ist für {labelled} von {total} Std. benannt; jedes % ist ein Anteil aller {total} Std."
   },
   "verification": {
     "state": {
