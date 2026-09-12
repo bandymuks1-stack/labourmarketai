@@ -127,10 +127,40 @@ describe("deriveIntakeWorkTime — the stated time becomes time on the record", 
   it("works in the other served languages", () => {
     const en = deriveIntakeWorkTime("Laid tiles for 4 hours", TODAY);
     const ru = deriveIntakeWorkTime("Клал плитку 3 часа", TODAY);
-    // English explicit hours: the fragment recognizer is LT/RU-lexicon based,
-    // the work-log parser still reads them → entry-level minutes.
-    expect(en).toEqual({ fragmentsJson: null, fragments: [], quantityMinutes: 240, statedTotalMinutes: null });
+    // English explicit hours are a TIMED PHRASE like the LT / RU ones (issue
+    // #1689, measured 2026-09-12): before, "4 hours" reached only the
+    // entry-level minutes and the skill the phrase names could claim nothing.
+    expect(parseFragments(en.fragmentsJson).map((f) => [f.rawPhrase, f.timeValue, f.timeUnit])).toEqual([
+      ["Laid tiles for 4 hours", 4, "hours"],
+    ]);
+    expect(en.quantityMinutes).toBeNull();
     expect(parseFragments(ru.fragmentsJson).map((f) => [f.timeValue, f.timeUnit])).toEqual([[3, "hours"]]);
+  });
+
+  it("reads the unit forms of every routed language, and a bare `d` is never a day (#1689)", () => {
+    const timed = (text: string) =>
+      deriveIntakeWorkTime(text, TODAY).fragments.map((f) => [f.timeValue, f.timeUnit]);
+    expect(timed("5 hrs laying tiles")).toEqual([[5, "hours"]]);
+    expect(timed("5 uur tegels gelegd")).toEqual([[5, "hours"]]);
+    expect(timed("5 Std. Fliesen verlegt")).toEqual([[5, "hours"]]);
+    expect(timed("5 Stunden Fliesen verlegt")).toEqual([[5, "hours"]]);
+    expect(timed("2 Tage gestrichen")).toEqual([[2, "days"]]);
+    expect(timed("2 dagen geschilderd")).toEqual([[2, "days"]]);
+    expect(timed("30 Minuten geputzt")).toEqual([[30, "minutes"]]);
+    // A header in Dutch / German / English is the day's total, its items the work.
+    const nl = deriveIntakeWorkTime("Vandaag 9 uur gewerkt: 5 uur getegeld, 4 uur geschilderd", TODAY);
+    expect(nl.fragments.map((f) => [f.rawPhrase, f.timeValue])).toEqual([
+      ["5 uur getegeld", 5],
+      ["4 uur geschilderd", 4],
+    ]);
+    expect(nl.statedTotalMinutes).toBeNull(); // 5 + 4 = 9 — the items add up
+    expect(timed("5 Std. Fliesen verlegt und 4 Std. gestrichen")).toEqual([[5, "hours"], [4, "hours"]]);
+    // Quantities that begin with a unit letter are never durations.
+    expect(timed("Sumontavau 5 duris")).toEqual([]);
+    expect(timed("Pakroviau 5 dėžes")).toEqual([]);
+    expect(timed("Installed 5 doors")).toEqual([]);
+    expect(timed("5 Stühle repariert")).toEqual([]);
+    expect(timed("Išvežiau 5 užsakymus")).toEqual([]);
   });
 });
 
