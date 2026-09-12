@@ -70,6 +70,7 @@ import { recognizeNewSkillSuggestions } from "@/lib/structuring/new-skill-sugges
 import {
   describesWhereOnly,
   extractJournalSuggestions,
+  workPartOf,
 } from "@/lib/structuring/extract-journal-suggestions";
 import {
   extractProfileSkillClaims,
@@ -341,7 +342,10 @@ export function deriveJournalRecognition(
 
       // ── Lane 1: taxonomy recognition ────────────────────────────────────
       const recognizedInFragment = new Set<string>();
-      for (const r of describesWhere ? [] : recognizeSkills(f.text, 8)) {
+      // the WORK part of the phrase: a trailing where-phrase is context, never
+      // a second trade (#1689 — "5 hours tiling in the kitchen" is tiling)
+      const workText = workPartOf(f.text);
+      for (const r of describesWhere ? [] : recognizeSkills(workText, 8)) {
         if (rejectedSlugSet.has(r.slug)) {
           pushRejected("skill", r.slug, r.slug, "user_rejected", f.id);
           outcomes.push({ kind: "rejected", ref: r.slug });

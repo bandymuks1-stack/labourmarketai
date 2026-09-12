@@ -701,6 +701,39 @@ export function describesWhereOnly(phrase: string): boolean {
   return true;
 }
 
+/**
+ * The part of a phrase that names the WORK, with a trailing where-phrase
+ * taken off (issue #1689, measured on production 2026-09-12: "5 hours tiling
+ * in the kitchen" auto-added `cooking` to the CV beside tiling — the kitchen
+ * is where the tiling happened, not a second trade; the same for "Klijavau
+ * plyteles virtuvėje", "4 Std. gestrichen im Lager", «клал плитку на кухне»).
+ * The #1711 rule (`describesWhereOnly`) decides place-only ITEMS under a
+ * header; this is the same grammar read at the END of one phrase.
+ *
+ * The rule is cautious by construction: the shortest trailing chunk (one to
+ * four words) that `describesWhereOnly` accepts is taken off ONLY when the
+ * head already names work at a strong tier (exact / synonym). A bare place
+ * ("Dirbau virtuvėje 5 val.") keeps its whole phrase — the place is the only
+ * signal and the lexicon reads it as the kitchen's work by design; a head
+ * that names nothing ("Dėjau plytelę" written without the ę) keeps its
+ * object. Time tokens inside the tail are ignored by `describesWhereOnly`, so
+ * "Programavau ofise 5 val." → "Programavau" for recognition; the extractor
+ * reads the time from the full phrase as before.
+ */
+export function workPartOf(phrase: string): string {
+  const words = phrase.trim().split(/\s+/u).filter(Boolean);
+  for (let n = 1; n <= 4 && n < words.length; n++) {
+    const tail = words.slice(-n).join(" ");
+    if (!describesWhereOnly(tail)) continue;
+    const head = words.slice(0, -n).join(" ");
+    const strong = recognizeSkills(head, 8).some(
+      (m) => m.via === "exact" || m.via === "synonym",
+    );
+    if (strong) return head;
+  }
+  return phrase;
+}
+
 /** Sum two duration values, normalising to minutes when one of them is in
  *  minutes (so 2h + 15min becomes 135 minutes). */
 function addTimes(
@@ -949,7 +982,17 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   //    on folded text — LT without diacritics, RU, EN; capped + ordered so a
   //    short entry never surfaces a broad, illogical skill cloud, and each
   //    suggestion carries a reason + confidence (Recognition v1).
-  const skillSuggestions = recognizeSkills(text, RECOGNITION_LIMIT);
+  // over the WORK part of each phrase — a trailing where-phrase is context,
+  // never a second trade (`workPartOf`); the same reading the fragment pass
+  // and the recognition side make, so the card and the pipeline agree
+  const split = splitFragments(text);
+  const workText = split.parts
+    // a place-only ITEM under a header describes where the header's work
+    // happened (#1711) — it names no trade of its own for the whole text either
+    .filter((part, i) => !(split.headerCount > 0 && i >= split.headerCount && describesWhereOnly(part)))
+    .map(workPartOf)
+    .join(". ");
+  const skillSuggestions = recognizeSkills(workText || text, RECOGNITION_LIMIT);
   const skillSlugs = skillSuggestions.map((m) => m.slug);
   const dirs = pickSlug(lower, WORK_DIRECTION_HINTS_LT);
   const workDirectionSlug = dirs[0] ?? null;
@@ -974,7 +1017,9 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   const headerPhrases = new Set(rawParts.slice(0, headerCount));
   for (const raw of rawParts) {
     const localTime = detectFragmentTime(raw);
-    const activity = detectActivity(raw);
+    // the kind of work is read off the WORK part — the time off the whole
+    const work = workPartOf(raw);
+    const activity = detectActivity(work);
     let slug = activity.slug;
     let label = activity.label;
     // Cross-sector fallback (full-text recognition, P0): when the per-fragment
@@ -986,7 +1031,7 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     // fake taxonomy is invented; if the dictionary is also silent the fragment
     // legitimately stays unknown for the worker to clarify.
     if (slug === null && label === null) {
-      const cap = extractProfileSkillClaims(raw)[0];
+      const cap = extractProfileSkillClaims(work)[0];
       if (cap) label = cap.label;
     }
     // Multilingual fallback (#1689, measured 2026-09-12): the activity
@@ -998,7 +1043,7 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     // surfaces name a skill slug as they name a profession slug. Never the
     // fuzzy tier: a guess is an offer for the worker, not a kind of work.
     if (slug === null && label === null) {
-      const strong = recognizeSkills(raw, 3).find(
+      const strong = recognizeSkills(work, 3).find(
         (m) => m.via === "exact" || m.via === "synonym",
       );
       if (strong) slug = strong.slug;
