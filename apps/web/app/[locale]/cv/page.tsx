@@ -630,6 +630,24 @@ export default async function VerifiedCvPage({
                 : t("recordedHoursNone")}
             </p>
           )}
+          {/* The organization's own hour records (owner §19) — the second
+              ledger, named beside the journal figure and added to nothing:
+              an hour record proves attendance, not a skill. Shown only when
+              it holds hours; null (unreadable) renders nothing. */}
+          {cv.organizationRecordedHours !== null && cv.organizationRecordedHours.hours > 0 && (
+            <p
+              className="text-meta text-text-muted"
+              data-testid="cv-organization-recorded-hours"
+              data-hours={cv.organizationRecordedHours.hours}
+            >
+              {t("organizationRecordedHours", {
+                hours: fmtHours(cv.organizationRecordedHours.hours),
+                days: cv.organizationRecordedHours.days,
+                imported: fmtHours(cv.organizationRecordedHours.importedHours),
+                approved: fmtHours(cv.organizationRecordedHours.approvedHours),
+              })}
+            </p>
+          )}
           {TIER_ORDER.map((tier) => {
             if (tier === "declared") {
               if (declaredAll.length === 0) return null;

@@ -698,7 +698,8 @@
       "ackCancel": "Cancel",
       "ackError": "Could not save — please try again.",
       "ackDone": "Explanation saved.",
-      "openInJournal": "Review in the journal"
+      "openInJournal": "Review in the journal",
+      "organizationHours": "{hours} h of this day come from your organization's records (a timesheet or an import), not from your journal — check whether both describe the same work."
     },
     "org": {
       "title": "Work in numbers — in your organization's records",
@@ -710,7 +711,13 @@
       "unattributedHours": "{hours} h across {count, plural, one {# entry} other {# entries}} are not linked to any skill yet. Only the person can link one; the hours are still counted in the totals above.",
       "provenance": "Where the hours come from: {worker} h entered by the person, {extracted} h recognised from their text, {corrected} h corrected by a manager.",
       "provenanceRule": "Each entry is counted once; an hour is attributed to a skill only when the entry is linked to a single skill, or when the person's own phrase names that skill.",
-      "scopeNote": "This is the part of the person's record your organization is entitled to see — work logged against your own engagements. It is not their complete history, and it is not a rating. A manager's confirmation from your inbox turns an entry's hours into manager-confirmed hours here and on the person's CV."
+      "scopeNote": "This is the part of the person's record your organization is entitled to see — work logged against your own engagements. It is not their complete history, and it is not a rating. A manager's confirmation from your inbox turns an entry's hours into manager-confirmed hours here and on the person's CV.",
+      "orgRecords": {
+        "title": "Recorded by your organization",
+        "body": "{hours} h on {days, plural, one {# day} other {# days}} ({period}) — attendance hours your organization entered in a timesheet or imported from a document. Kept apart from the journal figures above and not added to them.",
+        "periodEmpty": "Nothing in this window ({period}); {hours} h on {days, plural, one {# day} other {# days}} all time. Kept apart from the journal figures above and not added to them.",
+        "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only the person's journal entry does that."
+      }
     },
     "confirmedOfDays": "{confirmed} of {total} d. confirmed by a manager's record",
     "confirmedNoDuration": "{confirmed} of {entries, plural, one {# entry} other {# entries}} confirmed by a manager or client — recorded without a duration, so no hours to show",
@@ -718,7 +725,17 @@
     "unlabelledHours": "{hours} h across {count, plural, one {# entry} other {# entries}} name no kind of work — counted in the total, not in this list",
     "skillsCoverage": "{attributed} of {total} h recorded ({period}) are attributed to a skill. Every % below is a share of those {attributed} h, not of all recorded time.",
     "shareOf": "{percent} of {base} h attributed",
-    "activitiesCoverage": "A kind of work is named for {labelled} of {total} h; each % is a share of all {total} h."
+    "activitiesCoverage": "A kind of work is named for {labelled} of {total} h; each % is a share of all {total} h.",
+    "orgRecords": {
+      "title": "Recorded by your organization",
+      "body": "{hours} h on {days, plural, one {# day} other {# days}} ({period}) — attendance hours {organizations, plural, one {an organization} other {# organizations}} entered in a timesheet or imported from a document. Kept apart from the journal figures above and not added to them.",
+      "periodEmpty": "Nothing in this window ({period}); {hours} h on {days, plural, one {# day} other {# days}} all time. Kept apart from the journal figures above and not added to them.",
+      "imported": "{hours} h imported from a document",
+      "approved": "{hours} h approved in a timesheet",
+      "linked": "{hours} h describe journal entries already counted above",
+      "rejected": "{hours} h rejected in a timesheet — counted nowhere",
+      "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only a journal entry does that."
+    }
   },
   "verification": {
     "state": {

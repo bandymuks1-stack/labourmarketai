@@ -698,7 +698,8 @@
       "ackCancel": "Atšaukti",
       "ackError": "Nepavyko įrašyti — pabandykite dar kartą.",
       "ackDone": "Paaiškinimas įrašytas.",
-      "openInJournal": "Peržiūrėti žurnale"
+      "openInJournal": "Peržiūrėti žurnale",
+      "organizationHours": "{hours} val. šios dienos yra iš jūsų organizacijos apskaitos (žiniaraščio ar importo), ne iš jūsų žurnalo — patikrinkite, ar abu aprašo tą patį darbą."
     },
     "org": {
       "title": "Darbas skaičiais — jūsų organizacijos įrašuose",
@@ -710,7 +711,13 @@
       "unattributedHours": "{hours} val. per {count, plural, one {# įrašą} few {# įrašus} many {# įrašo} other {# įrašų}} dar nesusietos su jokiu įgūdžiu. Susieti gali tik pats žmogus; valandos vis tiek įskaičiuotos į sumas aukščiau.",
       "provenance": "Iš kur valandos: {worker} val. įvedė žmogus, {extracted} val. atpažinta iš jo teksto, {corrected} val. pataisė vadovas.",
       "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda priskiriama įgūdžiui tik tada, kai įrašas susietas su vienu įgūdžiu arba kai paties žmogaus frazė įvardija tą įgūdį.",
-      "scopeNote": "Tai ta žmogaus įrašų dalis, kurią jūsų organizacija turi teisę matyti — darbas, užfiksuotas jūsų pačių bendradarbiavimui. Tai nėra visa jo istorija ir nėra įvertinimas. Vadovo patvirtinimas iš jūsų gautųjų įrašo valandas paverčia vadovo patvirtintomis valandomis čia ir žmogaus CV."
+      "scopeNote": "Tai ta žmogaus įrašų dalis, kurią jūsų organizacija turi teisę matyti — darbas, užfiksuotas jūsų pačių bendradarbiavimui. Tai nėra visa jo istorija ir nėra įvertinimas. Vadovo patvirtinimas iš jūsų gautųjų įrašo valandas paverčia vadovo patvirtintomis valandomis čia ir žmogaus CV.",
+      "orgRecords": {
+        "title": "Jūsų organizacijos apskaitoje",
+        "body": "{hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ({period}) — darbo laiko valandos, kurias jūsų organizacija įvedė žiniaraštyje arba importavo iš dokumento. Skaičiuojamos atskirai nuo žurnalo skaičių aukščiau ir prie jų nepridedamos.",
+        "periodEmpty": "Šiame lange ({period}) nieko; per visą laiką {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}}. Skaičiuojamos atskirai nuo žurnalo skaičių aukščiau ir prie jų nepridedamos.",
+        "rule": "Valandų įrašas sako kada ir kiek, bet ne kas buvo daroma — todėl šios valandos nepasiekia jokio įgūdžio ir jokios darbo rūšies. Tai daro tik paties žmogaus žurnalo įrašas."
+      }
     },
     "confirmedOfDays": "{confirmed} iš {total} d. patvirtinta vadovo įrašu",
     "confirmedNoDuration": "{confirmed} iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} patvirtinta vadovo ar kliento — užfiksuota be trukmės, todėl valandų rodyti nėra",
@@ -718,7 +725,17 @@
     "unlabelledHours": "{hours} val. iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} be įvardytos darbo rūšies — įskaičiuotos į bendrą sumą, į šį sąrašą nepatenka",
     "skillsCoverage": "Įgūdžiams priskirta {attributed} val. iš {total} val. užfiksuotų ({period}). Kiekvienas % žemiau yra dalis iš tų {attributed} val., o ne iš viso užfiksuoto laiko.",
     "shareOf": "{percent} iš {base} val. priskirtų",
-    "activitiesCoverage": "Darbo rūšis įvardyta {labelled} val. iš {total} val.; kiekvienas % yra dalis iš visų {total} val."
+    "activitiesCoverage": "Darbo rūšis įvardyta {labelled} val. iš {total} val.; kiekvienas % yra dalis iš visų {total} val.",
+    "orgRecords": {
+      "title": "Organizacijos apskaitoje",
+      "body": "{hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ({period}) — darbo laiko valandos, kurias {organizations, plural, one {organizacija} other {# organizacijos}} įvedė darbo laiko žiniaraštyje arba importavo iš dokumento. Skaičiuojamos atskirai nuo žurnalo skaičių aukščiau ir prie jų nepridedamos.",
+      "periodEmpty": "Šiame lange ({period}) nieko; per visą laiką {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}}. Skaičiuojamos atskirai nuo žurnalo skaičių aukščiau ir prie jų nepridedamos.",
+      "imported": "{hours} val. importuota iš dokumento",
+      "approved": "{hours} val. vadovo patvirtinta žiniaraštyje",
+      "linked": "{hours} val. aprašo žurnalo įrašus, kurie jau suskaičiuoti aukščiau",
+      "rejected": "{hours} val. atmesta žiniaraštyje — niekur neskaičiuojama",
+      "rule": "Valandų įrašas sako kada ir kiek, bet ne ką darėte — todėl šios valandos nepasiekia jokio įgūdžio ir jokios darbo rūšies. Tai daro tik žurnalo įrašas."
+    }
   },
   "verification": {
     "state": {

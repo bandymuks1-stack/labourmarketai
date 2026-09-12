@@ -213,3 +213,47 @@ describe("deriveWorkTimeChecks", () => {
     expect(openDayCheckFor(checks, "zzz")).toBeNull();
   });
 });
+
+describe("the organization's own records on top of a live journal day (owner §19, re-audit F7)", () => {
+  const orgHours = (pairs: [string, number][]) => new Map(pairs);
+
+  it("an imported timesheet on top of a live record is caught by arithmetic, and the ledger is named", () => {
+    // 9 h journaled, 8 h imported for the same day → 17 h: a long day to look at
+    const checks = deriveWorkTimeChecks([entry("a", "2026-09-10", [hours(9)])], {
+      organizationHoursByDay: orgHours([["2026-09-10", 8]]),
+    });
+    expect(checks.map((c) => c.key)).toEqual(["long_day|2026-09-10"]);
+    expect(checks[0]).toMatchObject({ hours: 17, organizationHours: 8, entryIds: ["a"] });
+    // 20 h journaled + 8 h recorded → more than a day
+    const over = deriveWorkTimeChecks([entry("a", "2026-09-10", [hours(20)])], {
+      organizationHoursByDay: orgHours([["2026-09-10", 8]]),
+    });
+    expect(over[0]).toMatchObject({ code: "day_over_24h", hours: 28, organizationHours: 8 });
+  });
+
+  it("a day the organization recorded and the person never journaled yields NO check — there is no record here to fix", () => {
+    const checks = deriveWorkTimeChecks([entry("a", "2026-09-10", [hours(8)])], {
+      organizationHoursByDay: orgHours([["2026-09-11", 30]]),
+    });
+    expect(checks).toEqual([]);
+  });
+
+  it("without organization hours nothing changes: a plain 9 h day stays silent and every check carries organizationHours 0", () => {
+    expect(deriveWorkTimeChecks([entry("a", "2026-09-10", [hours(9)])])).toEqual([]);
+    const checks = deriveWorkTimeChecks([entry("a", "2026-09-10", [hours(30)])], {
+      organizationHoursByDay: orgHours([["2026-09-10", 0]]),
+    });
+    expect(checks.map((c) => [c.code, c.organizationHours])).toEqual([
+      ["day_over_24h", 0],
+      ["line_over_24h", 0],
+    ]);
+  });
+
+  it("an acknowledgement covers the day check whichever ledger doubled it", () => {
+    const checks = deriveWorkTimeChecks(
+      [entry("a", "2026-09-10", [hours(9), override("long_day|2026-09-10|the timesheet is the same shift")])],
+      { organizationHoursByDay: orgHours([["2026-09-10", 8]]) },
+    );
+    expect(checks[0]?.acknowledged).toEqual({ reason: "the timesheet is the same shift", entryId: "a" });
+  });
+});

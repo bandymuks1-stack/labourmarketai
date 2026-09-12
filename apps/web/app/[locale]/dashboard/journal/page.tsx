@@ -77,6 +77,7 @@ import {
 } from "@/lib/journal/work-intelligence";
 import {
   assembleWorkIntelligence,
+  readOrganizationRecords,
   readPhotoCountsByEntry,
   type WorkerSkillSourceRow,
 } from "@/lib/journal/work-intelligence-read";
@@ -486,7 +487,7 @@ export default async function JournalPage({
   // `esco_occupations.isco_group`), so the editors compose exactly the module
   // fields that family logs. Two bounded reads inside one batch slot; an
   // unmapped profession carries null and composes nothing.
-  const [ownPath, { data: skillIdRows }, linkRead, entriesRead] =
+  const [ownPath, { data: skillIdRows }, linkRead, entriesRead, organizationRecords] =
     await Promise.all([
       readOwnOccupationPath(supabase, worker.id),
       supabase
@@ -501,6 +502,11 @@ export default async function JournalPage({
         { supabase, userId: user.id },
         { workerId: worker.id },
       ),
+      // The organization's own hour records about this person (owner §19:
+      // timesheet lines, imported documents) — read beside the diary so
+      // "work in numbers" can name the second ledger instead of hiding it.
+      // RLS: the person's own rows. A failed read is null (UNKNOWN).
+      readOrganizationRecords(supabase, worker.id),
     ]);
   const directions = ownPath.directions.map((d) => ({
     slug: d.slug,
@@ -812,6 +818,7 @@ export default async function JournalPage({
             supabase,
             entries.map((e) => e.id),
           ),
+          organizationRecords,
         })
       : null;
   const primaryProfessionSlug =

@@ -180,6 +180,20 @@ export type VerifiedCvData = {
   recordedHoursTotal: number | null;
   /** Of the total, hours a manager/client confirmed. */
   recordedHoursConfirmed: number | null;
+  /**
+   * The SECOND hour ledger (owner §19): hours an organization recorded
+   * about the person in its own timesheets or imported documents
+   * (`work_hour_allocations`), read by the same model and kept apart from
+   * `recordedHoursTotal` — never added to it, never attributed to a skill
+   * (an hour record carries no description of the work). `null` when the
+   * ledger could not be read; zero hours when it holds nothing.
+   */
+  organizationRecordedHours: {
+    hours: number;
+    days: number;
+    importedHours: number;
+    approvedHours: number;
+  } | null;
   privateDetails: VerifiedCvPrivateDetails;
   signals: OwnTrustSignals;
   proof: VerifiedCvProofRow[];
@@ -653,6 +667,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       recordedHoursConfirmed: workIntelligence
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)
         : null,
+      organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),
       privateDetails: {
         salaryMinEur: privBase?.salary_min_eur ?? null,
         salaryMaxEur: privBase?.salary_max_eur ?? null,
@@ -664,6 +679,21 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       signals,
       proof,
     },
+  };
+}
+
+/** The all-time organization ledger as the CV states it — the model's own
+ *  figure, no arithmetic here; null when the model or the ledger is unread. */
+function organizationRecordedHoursOf(
+  wi: WorkIntelligence | null,
+): VerifiedCvData["organizationRecordedHours"] {
+  const all = wi?.organizationRecords?.find((p) => p.key === "all") ?? null;
+  if (!all) return null;
+  return {
+    hours: all.hours,
+    days: all.daysWorked,
+    importedHours: all.importedHours,
+    approvedHours: all.approvedHours,
   };
 }
 
