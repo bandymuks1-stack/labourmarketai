@@ -223,6 +223,15 @@ describe("negative guards — no wrong defaults", () => {
     expect(extractJournalSuggestions("Elektrinė instaliacija name").workDirectionSlug).toBe("electrician");
   });
 
+  it("lifting and tightening are not cooking or translation — the fuzzy tier's LT blocklist (#1689, measured over 49 work verbs)", () => {
+    for (const text of ["2 val. kėliau prekes", "Veržiau varžtus 3 val.", "Varžtų veržimas"]) {
+      expect(signalsOf(text).all, text).not.toMatch(/cooking|translation|maist|vertim/i);
+    }
+    // the stems themselves still read: baking is cooking, translating is translation
+    expect(signalsOf("Kepiau duoną 2 val.").all).toMatch(/cooking|maist/i);
+    expect(signalsOf("Verčiau dokumentus 2 val.").all).toMatch(/translation|vertim/i);
+  });
+
   it("'kraną' as a faucet (repair) never becomes crane operation", () => {
     const s = signalsOf("remontavau kraną");
     expect(s.all).toMatch(/remont/i);

@@ -114,7 +114,17 @@ export function isPowerToolOnlyElectricalContext(foldedText: string): boolean {
  *  hallucinated construction skills in ordinary sentences — "filled" (invoices)
  *  → "filler" (skim-coating), "helped" (around the house) → "helper"
  *  (general-labour). Exact/synonym tiers are unaffected. */
-const FUZZY_TOKEN_BLOCKLIST: ReadonlySet<string> = new Set(["filled", "helped"]);
+const FUZZY_TOKEN_BLOCKLIST: ReadonlySet<string> = new Set([
+  "filled",
+  "helped",
+  // LT (measured 2026-09-12 over 49 common work verbs, #1689): "kėliau"
+  // (lifted) is one edit from "kepiau" (baked) → cooking; "veržiau" /
+  // "veržimas" (tightened / tightening) one edit from "verčiau" (translated)
+  // → translation. Folded forms.
+  "keliau",
+  "verziau",
+  "verzimas",
+]);
 
 type Term = {
   slug: string;
