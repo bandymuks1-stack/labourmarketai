@@ -1585,7 +1585,8 @@
     "linkDone": "Lijst sluiten",
     "pickerHint": "Je profielvaardigheden — koppel handmatig als ze bij deze vermelding passen. Deze zijn niet uit deze vermelding gedetecteerd.",
     "detectedHeading": "Vaardigheden herkend uit deze vermelding",
-    "detectedEmpty": "Er zijn geen vaardigheden herkend uit de tekst van deze vermelding. Je kunt handmatig een vaardigheid koppelen."
+    "detectedEmpty": "Er zijn geen vaardigheden herkend uit de tekst van deze vermelding. Je kunt handmatig een vaardigheid koppelen.",
+    "detectedAllLinked": "De herkende vaardigheden zijn al aan deze registratie gekoppeld — ze staan hierboven."
   },
   "reviewReport": {
     "title": "Beoordelingsrapport",

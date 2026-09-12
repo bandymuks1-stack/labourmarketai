@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { classifyEntryRecognition } from "./recognition-tiers";
 import { CONSTRUCTION_SKILL_HINT_SLUGS } from "./keywords";
-import { buildEntryDetectedSignals } from "../journal/entry-detected-signals";
+import {
+  buildEntryDetectedSignals,
+  detectedSectionState,
+} from "../journal/entry-detected-signals";
 
 /**
  * Work-Journal recognition guards — root-cause fix + maximal activity layer
@@ -465,6 +468,100 @@ describe("owner smoke follow-up 2026-07-02 — profile catalogue collapsed, dete
       expect(messages.journalSkillLinks.linkMore).toBe(linkMore);
       expect(messages.journalSkillLinks.detectedHeading).toBeTruthy();
       expect(messages.journalSkillLinks.detectedEmpty).toBeTruthy();
+    }
+  });
+});
+
+describe("production walk 2026-09-12 (#1689) — a fully linked entry never reads as unrecognized", () => {
+  // Measured on build 5e5c2aaf with the QA worker: four of six entry cards —
+  // tiling entries whose pipeline rows read `fragment_skill 1|tiling` and whose
+  // linked chip sat right above — said "Iš šio įrašo teksto įgūdžių atpažinti
+  // nepavyko". The recognized skills were merely filtered out of Section A
+  // because they were already linked. ONE pure rule now decides the section's
+  // sentence; the component reads it.
+  const ROOT = join(__dirname, "..", "..");
+  const links = readFileSync(
+    join(ROOT, "components/app/journal-entry-skill-links.tsx"),
+    "utf8",
+  );
+  const tiling = { id: "s-tiling", name: "Plytelių klojimas" };
+  const skim = { id: "s-skim", name: "Sienų glaistymas" };
+
+  it("recognized + all already linked → all_linked (never 'none')", () => {
+    expect(
+      detectedSectionState({
+        detectedSkills: [tiling],
+        detectedLabels: ["Plytelių klojimas"],
+        selectedIds: new Set([tiling.id]),
+        linkedNames: new Set([tiling.name]),
+      }),
+    ).toBe("all_linked");
+  });
+
+  it("recognized and NOT yet linked → chips (a declared skill or a label)", () => {
+    expect(
+      detectedSectionState({
+        detectedSkills: [tiling, skim],
+        detectedLabels: [],
+        selectedIds: new Set([tiling.id]),
+        linkedNames: new Set([tiling.name]),
+      }),
+    ).toBe("chips");
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: ["Sandėlio / logistikos darbai"],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+      }),
+    ).toBe("chips");
+  });
+
+  it("nothing recognized → none, even when a manual link exists above", () => {
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: [],
+        selectedIds: new Set([tiling.id]),
+        linkedNames: new Set([tiling.name]),
+      }),
+    ).toBe("none");
+  });
+
+  it("a label that only duplicates a chip about to render is not a second chip", () => {
+    // Detected label == the name of a detected declared skill (unlinked): the
+    // skill chip renders, the label is dropped — still "chips", counted once.
+    expect(
+      detectedSectionState({
+        detectedSkills: [skim],
+        detectedLabels: [skim.name],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+      }),
+    ).toBe("chips");
+  });
+
+  it("the component reads the ONE rule and renders the truthful sentence in both branches", () => {
+    expect(links).toContain("detectedSectionState({");
+    expect(links).toMatch(/const hasDetected = detectedState === "chips"/);
+    // Both the no-declared-skills branch and the main branch carry the
+    // three-way sentence; `detectedEmpty` is never the only alternative.
+    const linkedOccurrences = links.match(
+      /entry-skill-detected-linked-\$\{entryId\}/g,
+    );
+    expect(linkedOccurrences?.length).toBe(2);
+    expect(links.match(/t\("detectedAllLinked"\)/g)?.length).toBe(2);
+  });
+
+  it("the sentence exists in every catalogue that carries the namespace", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const messages = JSON.parse(
+        readFileSync(join(ROOT, `messages/${loc}.json`), "utf8"),
+      ) as { journalSkillLinks: Record<string, string> };
+      expect(messages.journalSkillLinks.detectedAllLinked).toBeTruthy();
+      expect(messages.journalSkillLinks.detectedAllLinked).not.toBe(
+        messages.journalSkillLinks.detectedEmpty,
+      );
     }
   });
 });

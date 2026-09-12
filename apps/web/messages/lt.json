@@ -1585,7 +1585,8 @@
     "linkDone": "Uždaryti sąrašą",
     "pickerHint": "Jūsų profilio gebėjimai — susiekite ranka, jei tinka šiam įrašui. Tai nėra iš šio įrašo atpažinti įgūdžiai.",
     "detectedHeading": "Pagal šį įrašą atpažinti įgūdžiai",
-    "detectedEmpty": "Iš šio įrašo teksto įgūdžių atpažinti nepavyko. Galite susieti įgūdį ranka."
+    "detectedEmpty": "Iš šio įrašo teksto įgūdžių atpažinti nepavyko. Galite susieti įgūdį ranka.",
+    "detectedAllLinked": "Atpažinti įgūdžiai jau susieti su šiuo įrašu — jie rodomi aukščiau."
   },
   "reviewReport": {
     "title": "Peržiūros ataskaita",
