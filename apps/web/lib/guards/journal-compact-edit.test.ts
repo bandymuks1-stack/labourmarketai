@@ -307,9 +307,26 @@ describe("provenance survives a compact re-save; a free-text label is not a mess
     expect(MODEL).toMatch(/export function fragmentProvenance\(/);
     expect(MODEL).toMatch(/source: fragmentProvenance\(r\),/);
     expect(MODEL).toMatch(/return rowFingerprint\(row\) === row\.persistedFingerprint\s+\? row\.source\s+: "worker_input";/);
-    // the write core honours the shipped source (it always did; pinned so the lane stays open)
+    // the write core honours the shipped source…
     expect(WRITE_CORE).toMatch(/source: r\.source === "ai_extracted" \? "ai_extracted" : "worker_input",/);
+    // …through ONE fragment-row builder that BOTH writers use. The compact
+    // editor saves through the SUPERSEDE action, which carried its own copy
+    // hardcoding `worker_input` — the production walk of #1716 (2026-09-12)
+    // showed 2 h of `ai_extracted` becoming the worker's input on a
+    // site-name edit while every unit test was green. Pinned at the lane's
+    // real end: no fragment row is ever built outside the builder.
+    expect(WRITE_CORE).toMatch(/export function fragmentMetricRows\(/);
     expect(WRITE_CORE).toMatch(/const fragmentSource: RpcMetricRow\["source"\] = f\.source \?\? "worker_input";/);
+    expect(WRITE_CORE).toContain("...fragmentMetricRows(fragments),");
+    expect(ACTIONS).toContain("...fragmentMetricRows(fragments),");
+    for (const src of [ACTIONS, WRITE_CORE]) {
+      // a fragment row with a hardcoded source can exist only inside the builder (unknown_phrase)
+      const outsideBuilder = src.replace(
+        /export function fragmentMetricRows\([\s\S]*?\r?\n\}\r?\n/,
+        "",
+      );
+      expect(outsideBuilder).not.toMatch(/metric_slug: "(?:parsed_fragment|fragment_time|fragment_activity)"/);
+    }
   });
 
   it("profession lookups ask `has` first — no try/catch around a translation, no MISSING_MESSAGE for the worker's own words", () => {

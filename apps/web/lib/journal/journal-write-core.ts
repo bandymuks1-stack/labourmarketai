@@ -193,6 +193,62 @@ export function parseFragments(raw: string | null): ParsedFragmentInput[] {
   }
 }
 
+/**
+ * The index-paired metric rows ONE fragment list becomes — `parsed_fragment`,
+ * `fragment_time`, `fragment_activity` (+ `unknown_phrase` for a clarified
+ * unknown). The ONE builder for both writers: the create path
+ * (`createJournalEntryCore`) and the supersede path (`actions.ts`). Each
+ * fragment's rows carry the fragment's OWN provenance (`ai_extracted` when a
+ * transport persisted the deterministic parse; `worker_input` when the
+ * person typed or edited it) — a re-save that leaves a fragment untouched
+ * keeps what it was saved with (#1689, measured on production 2026-09-12:
+ * the supersede writer hardcoded `worker_input` and turned 2 h of
+ * `ai_extracted` into the worker's own input on a site-name edit).
+ */
+export function fragmentMetricRows(
+  fragments: readonly ParsedFragmentInput[],
+): RpcMetricRow[] {
+  return fragments.flatMap((f, idx): RpcMetricRow[] => {
+    const fragmentSource: RpcMetricRow["source"] = f.source ?? "worker_input";
+    const rows: RpcMetricRow[] = [
+      {
+        metric_slug: "parsed_fragment",
+        value_text: `${idx + 1}|${f.rawPhrase}`,
+        source: fragmentSource,
+      },
+    ];
+    if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
+      rows.push({
+        metric_slug: "fragment_time",
+        value_numeric: f.timeValue,
+        unit_slug: f.timeUnit,
+        value_text: String(idx + 1),
+        source: fragmentSource,
+      });
+    }
+    const activityLabel = f.activitySlug ?? f.activityLabel;
+    if (activityLabel) {
+      rows.push({
+        metric_slug: "fragment_activity",
+        value_text: `${idx + 1}|${activityLabel}`,
+        source: fragmentSource,
+      });
+    }
+    // v3 — when the parser flagged the fragment as unknown AND the worker
+    // typed a clarification, persist that as a review-only label. Stored
+    // for future admin / agent dictionary review (no auto-promotion). The
+    // clarification is the worker's word whatever the parse's provenance.
+    if (f.isUnknown && f.userLabel) {
+      rows.push({
+        metric_slug: "unknown_phrase",
+        value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
+        source: "worker_input" as const,
+      });
+    }
+    return rows;
+  });
+}
+
 /** Run the canonical skill pipeline for a saved entry AS THE CALLER. A
  *  pipeline throw must NEVER fail the already-persisted save — it degrades to
  *  an honest `failed` result the UI can show (with a trace id + reprocess
@@ -570,44 +626,7 @@ export async function createJournalEntryCore(
           },
         ]
       : []),
-    ...fragments.flatMap((f, idx): RpcMetricRow[] => {
-      const fragmentSource: RpcMetricRow["source"] = f.source ?? "worker_input";
-      const rows: RpcMetricRow[] = [
-        {
-          metric_slug: "parsed_fragment",
-          value_text: `${idx + 1}|${f.rawPhrase}`,
-          source: fragmentSource,
-        },
-      ];
-      if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
-        rows.push({
-          metric_slug: "fragment_time",
-          value_numeric: f.timeValue,
-          unit_slug: f.timeUnit,
-          value_text: String(idx + 1),
-          source: fragmentSource,
-        });
-      }
-      const activityLabel = f.activitySlug ?? f.activityLabel;
-      if (activityLabel) {
-        rows.push({
-          metric_slug: "fragment_activity",
-          value_text: `${idx + 1}|${activityLabel}`,
-          source: fragmentSource,
-        });
-      }
-      // v3 — when the parser flagged the fragment as unknown AND the worker
-      // typed a clarification, persist that as a review-only label. Stored
-      // for future admin / agent dictionary review (no auto-promotion).
-      if (f.isUnknown && f.userLabel) {
-        rows.push({
-          metric_slug: "unknown_phrase",
-          value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
-          source: "worker_input" as const,
-        });
-      }
-      return rows;
-    }),
+    ...fragmentMetricRows(fragments),
     // C2a — document-import provenance: the verified source file id + the
     // server-stamped extractor identity (deterministic-structuring@…) ride
     // the same atomic save, so an imported entry stays attributable forever.
