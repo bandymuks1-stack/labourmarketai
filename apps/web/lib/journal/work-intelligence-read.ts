@@ -21,6 +21,7 @@ import {
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
 import { readAllocationsForWorker } from "@/lib/work-hours/allocations";
+import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 
 /**
  * Read side of work intelligence — ONE assembly over the canonical reads.
@@ -233,4 +234,25 @@ export async function loadOwnWorkIntelligence(
   const worker = await readWorkerCoreRow(caller);
   if (!worker.ok || !worker.value) return null;
   return loadWorkIntelligence(caller, worker.value.id, opts);
+}
+
+/**
+ * The signed-in person's declared PRIMARY profession slug (their first one
+ * when none is marked primary), through the ONE occupation-path read the
+ * journal page composes with — for the growth reading, which excludes it
+ * from the adjacent directions (it is not an *adjacent* one). `null` when
+ * the person declared none or the read did not answer: a reading built
+ * without it lists every direction, never a guessed profession.
+ */
+export async function loadOwnPrimaryProfessionSlug(): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const worker = await readWorkerCoreRow({ supabase, userId: user.id });
+  if (!worker.ok || !worker.value) return null;
+  const path = await readOwnOccupationPath(supabase, worker.value.id).catch(() => null);
+  if (!path) return null;
+  return path.directions.find((d) => d.isPrimary)?.slug ?? path.directions[0]?.slug ?? null;
 }

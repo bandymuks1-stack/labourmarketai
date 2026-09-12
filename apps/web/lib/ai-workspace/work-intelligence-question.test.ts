@@ -41,6 +41,8 @@ vi.mock("next-intl/server", () => ({
 
 vi.mock("@/lib/journal/work-intelligence-read", () => ({
   loadOwnWorkIntelligence: (...a: unknown[]) => wiMock(...a),
+  // no declared profession in these fixtures — every direction is a candidate
+  loadOwnPrimaryProfessionSlug: async () => null,
 }));
 
 // The plain period answer the skill door falls back to. Stubbed by spying on

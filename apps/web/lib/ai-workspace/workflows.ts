@@ -12,11 +12,9 @@ import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
-import { loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { loadOwnPrimaryProfessionSlug, loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import type { WorkIntelligence, WorkPeriodKey } from "@/lib/journal/work-intelligence";
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
-import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
-import { createClient } from "@/lib/supabase/server";
 import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
@@ -791,22 +789,6 @@ async function readDemandBySkillForGrowth(): Promise<ReadonlyMap<string, number>
   }
 }
 
-/** The person's declared PRIMARY profession slug (excluded from the adjacent
- *  directions — it is not an *adjacent* one), through the one occupation
- *  path read the journal page uses; null when none or unreadable. */
-async function readPrimaryProfessionSlugForGrowth(): Promise<string | null> {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
-    const path = await readOwnOccupationPathForUser(supabase, user.id);
-    return path.directions.find((d) => d.isPrimary)?.slug ?? path.directions[0]?.slug ?? null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * The questions the work-in-numbers section answers, asked in words (issue
@@ -1015,8 +997,11 @@ export async function runWorkIntelligenceQuestion(
     // block first (the skills the entries back, in hours, and the declared
     // skills left out), then the reading, said to be derived — deepen /
     // expand / what real demand asks. Never a score, a rank or a tier.
+    // the declared primary profession is excluded from the adjacent
+    // directions (it is not an *adjacent* one) — read through the ONE
+    // work-intelligence reader, never a query here (W4)
     const [primaryProfessionSlug, demandBySkill] = await Promise.all([
-      readPrimaryProfessionSlugForGrowth(),
+      loadOwnPrimaryProfessionSlug().catch(() => null),
       readDemandBySkillForGrowth(),
     ]);
     const growth = deriveGrowthReading(wi, { primaryProfessionSlug, demandBySkill });
