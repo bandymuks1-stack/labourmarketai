@@ -186,3 +186,18 @@ journal-linked skills). Tools/systems used and ESCO occupation mapping are exten
    arithmetic; each member's name opens the person page. Its review counts were corrected in
    the same slice: confirmed = approved, returned = rejected / changes requested, the rest
    await review (any confirmation row used to count as confirmed, hub tile included).
+7. ~~The second hour ledger (owner §19)~~ — BRIDGED 2026-09-12. Imported XLSX timesheets and
+   operator-entered attendance land in `work_hour_allocations`, never in `journal_entry_metrics`;
+   until this date that ledger was invisible to the section, the CV and the day check (re-audit
+   F7). The ONE work-intelligence reader now reads it beside the journal (`readAllocationsForWorker`
+   → `readOrganizationRecords`, the caller's RLS: own worker OR manages the organization) and the
+   model carries it as `organizationRecords` per period — hours, days, imported / approved /
+   linked-to-a-live-entry / rejected — **added to no journal figure and reaching no skill** (an
+   hour record says when and how long, not what was done). The section (`wi-org-records`), the
+   CV (`cv-organization-recorded-hours`) and the chat's period answer name it beside the journal
+   figure with that rule in words. The day check now includes the organization's hours on days
+   that carry a journal line, so "an imported timesheet on top of a live record" is arithmetic
+   (`organizationHours` on the check), not a comment. Extension points: a row explicitly linked to
+   a journal entry is named as already counted; unlinked overlap is NOT guessed — when the import
+   path starts linking rows to entries, `linkedHours` will say how much of the ledger the journal
+   already describes.

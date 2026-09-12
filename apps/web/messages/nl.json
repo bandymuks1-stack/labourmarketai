@@ -7846,7 +7846,8 @@
     "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
     "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
     "skillHours": "{hours} u",
-    "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn"
+    "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn",
+    "organizationRecordedHours": "Registratie van de organisatie: {hours} u op {days, plural, one {# dag} other {# dagen}} in urenstaten of geïmporteerde documenten ({imported} u geïmporteerd, {approved} u goedgekeurd) — gescheiden van het journaalcijfer en aan geen enkele vaardigheid toegewezen."
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -13792,7 +13793,8 @@
       "whyVerifierChoice": "Meerdere organisaties passen even goed, dus ik gok niet — jij kiest.",
       "whyVerifierSelf": "Je kunt je eigen werk niet bevestigen — bevestiging moet van iemand anders komen.",
       "whyVerifierNone": "Geen van je actieve relaties wijst naar een organisatie die werk kan bevestigen.",
-      "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen."
+      "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen.",
+      "journalOrgRecords": "Ook in de registratie van uw organisatie ({period}): {hours} u op {days, plural, one {# dag} other {# dagen}} — uren uit een urenstaat of import, apart gehouden en niet bij het cijfer hierboven opgeteld."
     },
     "project": {
       "fieldStatus": "Status",

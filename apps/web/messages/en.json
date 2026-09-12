@@ -7846,7 +7846,8 @@
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
-    "skillHoursHint": "hours from work-journal entries linked to this skill alone"
+    "skillHoursHint": "hours from work-journal entries linked to this skill alone",
+    "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill."
   },
   "todayScreen": {
     "eyebrow": "Today",
@@ -13792,7 +13793,8 @@
       "whyVerifierChoice": "Several organizations fit equally, so I do not guess — you choose.",
       "whyVerifierSelf": "You cannot confirm your own work — confirmation has to come from someone else.",
       "whyVerifierNone": "None of your active relationships points to an organization that can confirm work.",
-      "whyVerifierUnavailable": "That means the data could not be read — not that nobody can confirm it."
+      "whyVerifierUnavailable": "That means the data could not be read — not that nobody can confirm it.",
+      "journalOrgRecords": "Also in your organization's records ({period}): {hours} h on {days, plural, one {# day} other {# days}} — timesheet or imported hours, kept apart and not added to the figure above."
     },
     "project": {
       "fieldStatus": "Status",

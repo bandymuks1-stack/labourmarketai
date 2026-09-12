@@ -698,7 +698,8 @@
       "ackCancel": "Annuleren",
       "ackError": "Opslaan mislukt — probeer het opnieuw.",
       "ackDone": "Toelichting opgeslagen.",
-      "openInJournal": "Bekijken in het logboek"
+      "openInJournal": "Bekijken in het logboek",
+      "organizationHours": "{hours} u van deze dag komen uit de registratie van uw organisatie (een urenstaat of een import), niet uit uw journaal — controleer of beide hetzelfde werk beschrijven."
     },
     "org": {
       "title": "Werk in cijfers — in de registratie van uw organisatie",
@@ -710,7 +711,13 @@
       "unattributedHours": "{hours} u in {count, plural, one {# invoer} other {# invoeren}} zijn nog aan geen enkele vaardigheid gekoppeld. Alleen de persoon kan er een koppelen; de uren tellen wel mee in de totalen hierboven.",
       "provenance": "Waar de uren vandaan komen: {worker} u door de persoon ingevoerd, {extracted} u herkend uit diens tekst, {corrected} u gecorrigeerd door een leidinggevende.",
       "provenanceRule": "Elke invoer telt één keer; een uur wordt alleen aan een vaardigheid toegerekend als de invoer aan één vaardigheid is gekoppeld, of als de eigen zin van de persoon die vaardigheid noemt.",
-      "scopeNote": "Dit is het deel van de registratie van de persoon dat uw organisatie mag zien — werk dat voor uw eigen samenwerkingen is vastgelegd. Het is niet de volledige geschiedenis en geen beoordeling. De bevestiging van een leidinggevende uit uw inbox maakt de uren van een invoer hier en op het cv van de persoon door een leidinggevende bevestigde uren."
+      "scopeNote": "Dit is het deel van de registratie van de persoon dat uw organisatie mag zien — werk dat voor uw eigen samenwerkingen is vastgelegd. Het is niet de volledige geschiedenis en geen beoordeling. De bevestiging van een leidinggevende uit uw inbox maakt de uren van een invoer hier en op het cv van de persoon door een leidinggevende bevestigde uren.",
+      "orgRecords": {
+        "title": "Vastgelegd door uw organisatie",
+        "body": "{hours} u op {days, plural, one {# dag} other {# dagen}} ({period}) — aanwezigheidsuren die uw organisatie in een urenstaat invoerde of uit een document importeerde. Gescheiden gehouden van de journaalcijfers hierboven en er niet bij opgeteld.",
+        "periodEmpty": "Niets in dit venster ({period}); {hours} u op {days, plural, one {# dag} other {# dagen}} in totaal. Gescheiden gehouden van de journaalcijfers hierboven en er niet bij opgeteld.",
+        "rule": "Een urenregistratie zegt wanneer en hoe lang, niet wat er is gedaan — daarom bereiken deze uren geen enkele vaardigheid en geen enkel soort werk. Alleen de journaalregistratie van de persoon doet dat."
+      }
     },
     "confirmedOfDays": "{confirmed} van {total} d. bevestigd door een registratie van de leidinggevende",
     "confirmedNoDuration": "{confirmed} van {entries, plural, one {# registratie} other {# registraties}} bevestigd door leidinggevende of klant — geregistreerd zonder duur, dus geen uren om te tonen",
@@ -718,7 +725,17 @@
     "unlabelledHours": "{hours} u over {count, plural, one {# registratie} other {# registraties}} zonder benoemde soort werk — meegeteld in het totaal, niet in deze lijst",
     "skillsCoverage": "{attributed} van {total} u geregistreerd ({period}) zijn aan een vaardigheid toegerekend. Elk % hieronder is een aandeel van die {attributed} u, niet van alle geregistreerde tijd.",
     "shareOf": "{percent} van {base} u toegerekend",
-    "activitiesCoverage": "Een soort werk is benoemd voor {labelled} van {total} u; elk % is een aandeel van alle {total} u."
+    "activitiesCoverage": "Een soort werk is benoemd voor {labelled} van {total} u; elk % is een aandeel van alle {total} u.",
+    "orgRecords": {
+      "title": "Vastgelegd door uw organisatie",
+      "body": "{hours} u op {days, plural, one {# dag} other {# dagen}} ({period}) — aanwezigheidsuren die {organizations, plural, one {een organisatie} other {# organisaties}} in een urenstaat invoerde of uit een document importeerde. Gescheiden gehouden van de journaalcijfers hierboven en er niet bij opgeteld.",
+      "periodEmpty": "Niets in dit venster ({period}); {hours} u op {days, plural, one {# dag} other {# dagen}} in totaal. Gescheiden gehouden van de journaalcijfers hierboven en er niet bij opgeteld.",
+      "imported": "{hours} u geïmporteerd uit een document",
+      "approved": "{hours} u goedgekeurd in een urenstaat",
+      "linked": "{hours} u beschrijven journaalregistraties die hierboven al zijn geteld",
+      "rejected": "{hours} u afgewezen in een urenstaat — nergens geteld",
+      "rule": "Een urenregistratie zegt wanneer en hoe lang, niet wat er is gedaan — daarom bereiken deze uren geen enkele vaardigheid en geen enkel soort werk. Alleen een journaalregistratie doet dat."
+    }
   },
   "verification": {
     "state": {

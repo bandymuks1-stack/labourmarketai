@@ -16,7 +16,19 @@
  *                           up to MORE than 24 h — arithmetic, impossible for
  *                           one person; almost always the same work recorded
  *                           twice (chat + composer, or an imported timesheet
- *                           on top of a live record) or a typo (80 h for 8 h);
+ *                           on top of a live record) or a typo (80 h for 8 h).
+ *                           The day sum includes the organization's own hour
+ *                           records for that day (`work_hour_allocations`:
+ *                           timesheet lines entered by an operator or
+ *                           imported from a document — passed in by the
+ *                           caller as `organizationHoursByDay`), so "an
+ *                           imported timesheet on top of a live record" is
+ *                           actually caught, not merely claimed. Only days
+ *                           that carry a journal line are checked: a day the
+ *                           organization recorded and the person never
+ *                           journaled has no record here to fix or stand by,
+ *                           and the timesheet surface carries its own
+ *                           duplicate warning;
  *   long_day                the same sum is above LONG_DAY_HOURS but within a
  *                           day — possible, worth a second look; the threshold
  *                           is a prompt to check, not a rule about work;
@@ -124,6 +136,11 @@ export type WorkTimeCheck = {
   /** The figure the check is about: the day's summed hours, the line's
    *  hours, or the set-aside entry-level duration's hours. */
   readonly hours: number;
+  /** For a day check: how many of `hours` come from the organization's own
+   *  hour records (timesheet lines / imports) rather than from the journal
+   *  — named so the person can see WHICH ledger doubled the day. 0 for an
+   *  entry check and when no organization record fell on that day. */
+  readonly organizationHours: number;
   /** The entries involved — every entry with an hour line on that day for a
    *  day check; the one entry for an entry check. Sorted, deduplicated. */
   readonly entryIds: readonly string[];
@@ -166,8 +183,17 @@ function overridesOf(metrics: readonly WorkTimeMetricRow[]): WorkTimeOverride[] 
  * the same entries in any order yield the same checks in the same order
  * (open before acknowledged, then newest day first, then by severity).
  */
+export type PlausibilityOptions = {
+  /** Hours the organization recorded per calendar day (`YYYY-MM-DD` →
+   *  hours) — live `work_hour_allocations` rows for the same person. Added
+   *  to the day sum of days that carry a journal line; never a line, never
+   *  an entry, never attributed to anything. */
+  readonly organizationHoursByDay?: ReadonlyMap<string, number>;
+};
+
 export function deriveWorkTimeChecks(
   entries: readonly PlausibilityEntryInput[],
+  options: PlausibilityOptions = {},
 ): readonly WorkTimeCheck[] {
   const overridesByEntry = new Map<string, WorkTimeOverride[]>();
   for (const e of entries) overridesByEntry.set(e.time.entryId, overridesOf(e.metrics));
@@ -205,7 +231,11 @@ export function deriveWorkTimeChecks(
     acc.entryIds.add(e.time.entryId);
   }
   for (const [day, acc] of byDay) {
-    const hours = round2(acc.hours);
+    // The organization's own records for the SAME day sit on top of the
+    // journal's lines — the "imported timesheet over a live record" case.
+    const orgRaw = options.organizationHoursByDay?.get(day) ?? 0;
+    const organizationHours = Number.isFinite(orgRaw) && orgRaw > 0 ? round2(orgRaw) : 0;
+    const hours = round2(acc.hours + organizationHours);
     const code: WorkTimeCheckCode | null =
       hours > HOURS_IN_A_DAY ? "day_over_24h" : hours > LONG_DAY_HOURS ? "long_day" : null;
     if (!code) continue;
@@ -215,6 +245,7 @@ export function deriveWorkTimeChecks(
       key: `${code}|${day}`,
       day,
       hours,
+      organizationHours,
       entryIds,
       title: null,
       ignored: null,
@@ -233,6 +264,7 @@ export function deriveWorkTimeChecks(
         key: `line_over_24h|${entryId}`,
         day,
         hours: round2(tooLong.hours),
+        organizationHours: 0,
         entryIds: [entryId],
         title: tooLong.title || null,
         ignored: null,
@@ -246,6 +278,7 @@ export function deriveWorkTimeChecks(
         key: `entry_duration_ignored|${entryId}`,
         day,
         hours: round2(e.time.totalHours),
+        organizationHours: 0,
         entryIds: [entryId],
         title: null,
         ignored: { value, unit },

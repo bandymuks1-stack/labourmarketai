@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { createClient } from "@/lib/supabase/server";
@@ -14,9 +16,11 @@ import {
   deriveWorkIntelligence,
   type WorkIntelligence,
   type WorkIntelligenceEntry,
+  type WorkIntelligenceOrganizationRecord,
   type WorkIntelligenceSkillRow,
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
+import { readAllocationsForWorker } from "@/lib/work-hours/allocations";
 
 /**
  * Read side of work intelligence — ONE assembly over the canonical reads.
@@ -36,6 +40,14 @@ import {
  * Honest degradation: a failed read returns `null`, and the consumer renders
  * NOTHING for the figures rather than a zero that reads as "no work" (SEP-7:
  * UNKNOWN ≠ ZERO).
+ *
+ * THE SECOND HOUR LEDGER (owner §19): the organization's own hour records
+ * about the person (`work_hour_allocations` — timesheet lines, imported
+ * documents) are read by the SAME reader, through the one allocation read
+ * (`readAllocationsForWorker`, RLS-scoped), and handed to the model as
+ * `organizationRecords`. They are never merged into the journal's figures
+ * and never reach a skill; a failed ledger read hands the model `null`
+ * (UNKNOWN) while the journal figures still render.
  */
 
 /** A `worker_skills` row as the page and the CV already select it. */
@@ -56,6 +68,9 @@ export function assembleWorkIntelligence(input: {
   /** Uploaded photos per entry id (from `readPhotoCountsByEntry`); omitted
    *  when the caller did not read photos. */
   photoCountByEntry?: ReadonlyMap<string, number>;
+  /** The organization's hour records (from `readOrganizationRecords`);
+   *  `null` / omitted when the ledger could not be read. */
+  organizationRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
 }): WorkIntelligence {
   const entries: WorkIntelligenceEntry[] = input.entries.map((e) => ({
     entryId: e.id,
@@ -84,7 +99,33 @@ export function assembleWorkIntelligence(input: {
     skills,
     todayIso: input.todayIso,
     focus: input.focus,
+    organizationRecords: input.organizationRecords ?? null,
   });
+}
+
+/**
+ * The organization's hour records about one person, as the model reads
+ * them — ONE bounded read over `work_hour_allocations` under the caller's
+ * RLS (the person's own rows; a manager's, the rows of their organization).
+ * A table that is not installed is an EMPTY ledger (read, none); a failed
+ * read is `null` (UNKNOWN) — the journal figures still render either way.
+ */
+export async function readOrganizationRecords(
+  supabase: SupabaseClient,
+  workerId: string,
+): Promise<readonly WorkIntelligenceOrganizationRecord[] | null> {
+  const res = await readAllocationsForWorker(supabase, workerId);
+  if (res.kind === "error") return null;
+  if (res.kind === "needs-migration") return [];
+  return res.rows.map((r) => ({
+    id: r.id,
+    workDate: r.workDate,
+    hours: r.hours,
+    source: r.source,
+    status: r.status,
+    organizationId: r.organizationId,
+    journalEntryId: r.journalEntryId,
+  }));
 }
 
 /**
@@ -130,21 +171,25 @@ export function workIntelligenceToday(): string {
  * (`manages_organization(engagement_contexts.organization_id)`), so the
  * manager's model is built from EXACTLY the entries logged against their own
  * organization's engagements, and the worker's personal or other-employer
- * entries never enter it. No second timesheet universe, no admin client,
- * no widened policy: one reader, two audiences, the database's scope.
+ * entries never enter it. The organization's hour records come through the
+ * same RLS branch (`work_hour_allocations_select`: own worker OR manages the
+ * organization) and stay a ledger beside the journal, never a second hours
+ * derivation. No admin client, no widened policy: one reader, two
+ * audiences, the database's scope.
  */
 export async function loadWorkIntelligence(
   caller: DomainCaller,
   workerId: string,
   opts: { focus?: WorkPeriodKey } = {},
 ): Promise<WorkIntelligence | null> {
-  const [entriesRead, linkRead, skillsRead] = await Promise.all([
+  const [entriesRead, linkRead, skillsRead, organizationRecords] = await Promise.all([
     listJournalEntries(caller, { workerId }),
     readWorkerEntrySkillLinks(caller.supabase, workerId),
     caller.supabase
       .from("worker_skills")
       .select("skill_id, verified, source, skills(slug)")
       .eq("worker_id", workerId),
+    readOrganizationRecords(caller.supabase, workerId),
   ]);
   if (!entriesRead.ok || !linkRead.ok || skillsRead.error) return null;
   const photoCountByEntry = await readPhotoCountsByEntry(
@@ -166,6 +211,7 @@ export async function loadWorkIntelligence(
     todayIso: workIntelligenceToday(),
     focus: opts.focus,
     photoCountByEntry,
+    organizationRecords,
   });
 }
 

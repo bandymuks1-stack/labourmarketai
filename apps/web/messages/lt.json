@@ -7846,7 +7846,8 @@
     "recordedHours": "Užfiksuota darbo: {hours} val. iš darbo žurnalo, iš jų patvirtinta {confirmed} val.",
     "recordedHoursNone": "Darbo žurnale dar nėra įrašų su trukme — valandos prie įgūdžių atsiras iš jūsų įrašų.",
     "skillHours": "{hours} val.",
-    "skillHoursHint": "valandos iš darbo žurnalo įrašų, susietų tik su šiuo įgūdžiu"
+    "skillHoursHint": "valandos iš darbo žurnalo įrašų, susietų tik su šiuo įgūdžiu",
+    "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui."
   },
   "todayScreen": {
     "eyebrow": "Šiandien",
@@ -13792,7 +13793,8 @@
       "whyVerifierChoice": "Kelios organizacijos vienodai tinka, todėl nespėlioju — renkiesi tu.",
       "whyVerifierSelf": "Savo paties darbo patvirtinti negali — patvirtinimas turi ateiti iš kito asmens.",
       "whyVerifierNone": "Nė vienas tavo aktyvus ryšys nenurodo organizacijos, galinčios patvirtinti darbą.",
-      "whyVerifierUnavailable": "Tai reiškia, kad nepavyko perskaityti duomenų — ne tai, kad patvirtinti nėra kam."
+      "whyVerifierUnavailable": "Tai reiškia, kad nepavyko perskaityti duomenų — ne tai, kad patvirtinti nėra kam.",
+      "journalOrgRecords": "Dar jūsų organizacijos apskaitoje ({period}): {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} — žiniaraščio ar importo valandos, skaičiuojamos atskirai ir prie skaičiaus aukščiau nepridedamos."
     },
     "project": {
       "fieldStatus": "Būsena",

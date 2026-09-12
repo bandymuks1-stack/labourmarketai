@@ -7846,7 +7846,8 @@
     "recordedHours": "Erfasste Arbeit: {hours} Std. aus dem Arbeitsjournal, davon {confirmed} Std. bestätigt.",
     "recordedHoursNone": "Noch keine Journaleinträge mit Dauer — Stunden neben Fähigkeiten stammen aus Ihren eigenen Einträgen.",
     "skillHours": "{hours} Std.",
-    "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind"
+    "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind",
+    "organizationRecordedHours": "Erfassung der Organisation: {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} in Stundenzetteln oder importierten Dokumenten ({imported} Std. importiert, {approved} Std. genehmigt) — getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet."
   },
   "todayScreen": {
     "eyebrow": "Heute",
@@ -13792,7 +13793,8 @@
       "whyVerifierChoice": "Mehrere Organisationen passen gleich gut, deshalb rate ich nicht — du entscheidest.",
       "whyVerifierSelf": "Du kannst deine eigene Arbeit nicht bestätigen — die Bestätigung muss von jemand anderem kommen.",
       "whyVerifierNone": "Keine deiner aktiven Beziehungen verweist auf eine Organisation, die Arbeit bestätigen kann.",
-      "whyVerifierUnavailable": "Das heißt, die Daten konnten nicht gelesen werden — nicht, dass niemand bestätigen kann."
+      "whyVerifierUnavailable": "Das heißt, die Daten konnten nicht gelesen werden — nicht, dass niemand bestätigen kann.",
+      "journalOrgRecords": "Außerdem in der Erfassung Ihrer Organisation ({period}): {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} — Stunden aus Stundenzettel oder Import, getrennt geführt und nicht zur Zahl oben addiert."
     },
     "project": {
       "fieldStatus": "Status",

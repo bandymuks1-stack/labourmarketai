@@ -35,7 +35,15 @@ import {
  *     database's org-manager RLS branch, never a filter, an admin client or
  *     a second timesheet read — and shows the organization nothing that is
  *     the person's own: no checks / acknowledgements, no adjacent
- *     directions, no diary deep links, no CV consequence links.
+ *     directions, no diary deep links, no CV consequence links;
+ *  9. the SECOND hour ledger (owner §19, re-audit F7) — the organization's
+ *     timesheet lines and imported documents in `work_hour_allocations` —
+ *     is read by the SAME reader through the one RLS-scoped allocation
+ *     read, kept apart from every journal figure (never summed into a
+ *     period, never attributed to a skill), named by provenance on the
+ *     section, the CV and the chat, and fed into the day check so "an
+ *     imported timesheet on top of a live record" is caught by arithmetic
+ *     rather than claimed in a comment.
  */
 
 const root = join(__dirname, "..", "..");
@@ -58,6 +66,8 @@ const personPage = read("app/[locale]/dashboard/people/[workerId]/page.tsx");
 const reportsPage = read("app/[locale]/dashboard/reports/page.tsx");
 const windowReport = read("lib/journal/journal-window-report.ts");
 const listCore = read("lib/journal/journal-list-core.ts");
+const allocations = read("lib/work-hours/allocations.ts");
+const cvPage = read("app/[locale]/cv/page.tsx");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
@@ -625,6 +635,109 @@ describe("11 · coverage semantics: shares name their base, hours never vanish",
       const mainlyShare = reports.journalWindow?.mainlyShare;
       expect(typeof mainlyShare === "string" && mainlyShare.includes("{percent}"), `${loc}.reports.journalWindow.mainlyShare`).toBe(true);
       expect(mainlyShare!, `${loc}.reports.journalWindow.mainlyShare`).toContain("{total}");
+    }
+  });
+});
+
+describe("12 · the second hour ledger is bridged, not merged (owner §19, re-audit F7)", () => {
+  it("the organization's records reach the model through the ONE reader and the ONE allocation read — RLS-scoped, no admin client", () => {
+    expect(allocations).toMatch(/export async function readAllocationsForWorker\(/);
+    // worker-scoped, live rows only, bounded — no employer context, no org filter
+    expect(allocations).toMatch(/\.eq\("worker_id", workerId\)\s*\.is\("superseded_by", null\)\s*\.order\("work_date", \{ ascending: false \}\)\s*\.limit\(ALLOCATION_READ_LIMIT\)/);
+    expect(allocations).not.toMatch(/service_role|createAdminClient|createServiceClient/);
+    expect(reader).toContain('import { readAllocationsForWorker } from "@/lib/work-hours/allocations";');
+    expect(reader).toMatch(/export async function readOrganizationRecords\(/);
+    expect(reader).toMatch(/readOrganizationRecords\(caller\.supabase, workerId\),/);
+    // the journal page reads the ledger in the same batch and hands it to the same assembly
+    expect(page).toMatch(/readOrganizationRecords\(supabase, worker\.id\),/);
+    expect(page).toMatch(/organizationRecords,\s*\}\)\s*: null;/);
+    // nothing else in the app reads the table for a person's figures
+    expect(component).not.toMatch(/\.from\("|createClient|readAllocationsForWorker/);
+    expect(cv).not.toMatch(/\.from\("work_hour_allocations"|readAllocationsForWorker/);
+    expect(workflows).not.toMatch(/\.from\("work_hour_allocations"|readAllocationsForWorker/);
+  });
+
+  it("UNKNOWN ≠ ZERO on the ledger: a failed read is null, an absent table is an empty ledger", () => {
+    expect(reader).toMatch(/if \(res\.kind === "error"\) return null;\s*if \(res\.kind === "needs-migration"\) return \[\];/);
+    expect(model).toContain("readonly organizationRecords: readonly OrganizationRecordTotals[] | null;");
+  });
+
+  it("the model keeps the ledger apart: derived AFTER every journal figure, never inside a period total or a skill", () => {
+    const ledgerAt = model.indexOf("const orgRows = input.organizationRecords ?? null;");
+    expect(ledgerAt).toBeGreaterThan(model.indexOf("const provenance = {"));
+    expect(ledgerAt).toBeGreaterThan(model.indexOf("const periods: WorkPeriodTotals[]"));
+    expect(ledgerAt).toBeLessThan(model.indexOf("const checks = deriveWorkTimeChecks("));
+    // the period totals loop never sees a record; the skill accumulator never sees one
+    const periodsBlock = model.slice(model.indexOf("const periods: WorkPeriodTotals[]"), model.indexOf("const focus: WorkPeriodKey"));
+    expect(periodsBlock).not.toMatch(/organizationRecords|orgRows/);
+    const skillsBlock = model.slice(model.indexOf("// ── skills"), model.indexOf("// ── the organization's hour records"));
+    expect(skillsBlock).not.toMatch(/organizationRecords|orgRows/);
+    // a rejected row is kept visible and counted nowhere
+    expect(model).toMatch(/if \(r\.status === "rejected"\) \{\s*rejectedHours \+= r\.hours;\s*continue;/);
+    expect(model).toMatch(/readonly rejectedHours: number;/);
+  });
+
+  it("the day check reads the ledger — the plausibility claim is code, not a comment", () => {
+    expect(plausibility).toMatch(/readonly organizationHoursByDay\?: ReadonlyMap<string, number>;/);
+    expect(plausibility).toMatch(/const hours = round2\(acc\.hours \+ organizationHours\);/);
+    expect(plausibility).toContain("readonly organizationHours: number;");
+    expect(model).toMatch(/deriveWorkTimeChecks\(\s*scoped\.map\(\(d\) => \(\{ time: d\.time, metrics: d\.entry\.metrics \}\)\),\s*\{ organizationHoursByDay \},\s*\)/);
+    // the check module stays pure
+    expect(plausibility).not.toMatch(/from "@\/lib\/supabase|server-only|fetch\(|new Date\(\)/);
+  });
+
+  it("the section, the CV and the chat NAME the ledger beside the journal figure and state it is added to nothing", () => {
+    expect(component).toContain('data-testid="wi-org-records"');
+    expect(component).toContain('data-testid="wi-org-records-provenance"');
+    expect(component).toContain('data-testid="wi-org-records-rule"');
+    expect(component).toMatch(/tk\("orgRecords\.rule"\)/);
+    expect(component).toMatch(/t\("checks\.organizationHours", \{/);
+    // the ledger figure is the model's own — the component adds nothing to a journal figure
+    expect(component).not.toMatch(/orgPeriod\.hours \+|\+ orgPeriod\.hours|orgAll\.hours \+|\+ orgAll\.hours/);
+    expect(cv).toContain("organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),");
+    expect(cvPage).toContain('data-testid="cv-organization-recorded-hours"');
+    expect(cvPage).toMatch(/t\("organizationRecordedHours", \{/);
+    expect(workflows).toMatch(/t\("journalOrgRecords", \{/);
+    expect(workflows).toMatch(/wi\?\.organizationRecords\?\.find\(\(p\) => p\.key === \(focus \?\? "all"\)\)/);
+  });
+
+  it("every ledger sentence has copy in each locale the section is published in, and none of it sums the two ledgers", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: {
+          orgRecords: Record<string, string>;
+          checks: Record<string, string>;
+          org: { orgRecords: Record<string, string> };
+        };
+      };
+      for (const k of ["title", "body", "periodEmpty", "imported", "approved", "linked", "rejected", "rule"]) {
+        const v = j.intelligence.orgRecords[k];
+        expect(typeof v === "string" && v.trim().length > 0, `${loc}.intelligence.orgRecords.${k}`).toBe(true);
+      }
+      for (const k of ["title", "body", "periodEmpty", "rule"]) {
+        const v = j.intelligence.org.orgRecords[k];
+        expect(typeof v === "string" && v.trim().length > 0, `${loc}.intelligence.org.orgRecords.${k}`).toBe(true);
+      }
+      expect(j.intelligence.checks.organizationHours, `${loc}.intelligence.checks.organizationHours`).toContain("{hours}");
+      // no internal vocabulary reaches the person
+      for (const v of [...Object.values(j.intelligence.orgRecords), ...Object.values(j.intelligence.org.orgRecords)]) {
+        expect(v).not.toMatch(/work_hour_allocations|allocation|journal_entry|_id\b/i);
+      }
+      const root = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
+      const find = (o: unknown, key: string): string | null => {
+        if (!o || typeof o !== "object") return null;
+        const rec = o as Record<string, unknown>;
+        if (typeof rec[key] === "string") return rec[key] as string;
+        for (const v of Object.values(rec)) {
+          const hit = find(v, key);
+          if (hit) return hit;
+        }
+        return null;
+      };
+      const cvLine = find(root, "organizationRecordedHours");
+      expect(cvLine, `${loc}.cv.organizationRecordedHours`).toContain("{hours}");
+      const chatLine = find(root, "journalOrgRecords");
+      expect(chatLine, `${loc}.chat.journalOrgRecords`).toContain("{hours}");
     }
   });
 });

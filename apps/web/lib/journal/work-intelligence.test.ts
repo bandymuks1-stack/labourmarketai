@@ -6,6 +6,7 @@ import {
   evidencedSkillSlugs,
   workPeriodBounds,
   type WorkIntelligenceEntry,
+  type WorkIntelligenceOrganizationRecord,
   type WorkIntelligenceSkillRow,
 } from "./work-intelligence";
 
@@ -693,5 +694,151 @@ describe("deriveWorkIntelligence — skills, activities, contexts, months", () =
     const wi = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries });
     const keys = JSON.stringify(Object.keys(wi));
     expect(keys).not.toMatch(/score|rating|rank/i);
+  });
+});
+
+describe("the organization's hour records — a ledger beside the journal, never inside it (owner §19, re-audit F7)", () => {
+  const rec = (
+    id: string,
+    workDate: string,
+    hours: number,
+    o: Partial<WorkIntelligenceOrganizationRecord> = {},
+  ): WorkIntelligenceOrganizationRecord => ({
+    id,
+    workDate,
+    hours,
+    source: o.source ?? "manual",
+    status: o.status ?? "recorded",
+    organizationId: o.organizationId ?? "org-a",
+    journalEntryId: o.journalEntryId ?? null,
+  });
+  // the production shape: five imported rows, 38 h, one organization
+  const imported = [
+    rec("r1", "2026-09-01", 8, { source: "import" }),
+    rec("r2", "2026-09-02", 8, { source: "import" }),
+    rec("r3", "2026-09-03", 6, { source: "import" }),
+    rec("r4", "2026-09-04", 8, { source: "import" }),
+    rec("r5", "2026-09-07", 8, { source: "import" }),
+  ];
+  const journal = [
+    entry("e1", "2026-09-10", { frags: [[6, "tiler", ["tiling"]]], linkedSkillIds: ["s-tiling"] }),
+    entry("e2", "2026-09-02", { hours: 8, linkedSkillIds: ["s-tiling"] }),
+  ];
+
+  it("is read beside the journal: every journal figure is byte-identical with and without the ledger", () => {
+    const without = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries: journal });
+    const withLedger = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: journal,
+      organizationRecords: imported,
+    });
+    const { organizationRecords: a, checks: ca, ...restA } = without;
+    const { organizationRecords: b, checks: cb, ...restB } = withLedger;
+    expect(restB).toEqual(restA);
+    expect(a).toBeNull();
+    expect(withLedger.totalHours).toBe(14);
+    expect(withLedger.periods.find((p) => p.key === "all")!.hours).toBe(14);
+    // the skill reading is untouched: 38 recorded hours reach no skill
+    expect(withLedger.skills.find((s) => s.slug === "tiling")!.attributedHours).toBe(14);
+    expect(withLedger.attributedHours).toBe(14);
+    expect(withLedger.activities.map((x) => x.hours)).toEqual(without.activities.map((x) => x.hours));
+    // no check fired: 8 h journaled + 8 h recorded on 09-02 is 16 h, within a day
+    expect(ca).toEqual([]);
+    expect(cb).toEqual([]);
+    expect(b!.find((p) => p.key === "all")).toMatchObject({
+      hours: 38,
+      rows: 5,
+      daysWorked: 5,
+      importedHours: 38,
+      approvedHours: 0,
+      linkedHours: 0,
+      rejectedHours: 0,
+      organizations: 1,
+    });
+  });
+
+  it("per period, by the organization's stated work day; provenance named, never summed into the journal", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: journal,
+      organizationRecords: [
+        ...imported,
+        rec("r6", "2026-09-11", 4, { status: "approved", organizationId: "org-b" }),
+        rec("r7", "2026-09-10", 6, { journalEntryId: "e1" }),
+        rec("r8", "2026-09-09", 5, { status: "rejected" }),
+        rec("r9", "2026-09-09", 3, { journalEntryId: "gone-entry" }),
+      ],
+    });
+    const week = wi.organizationRecords!.find((p) => p.key === "week")!;
+    // 09-05..09-11: r5 (8) + r6 (4) + r7 (6) + r9 (3) = 21; r8 rejected apart
+    expect(week).toMatchObject({
+      hours: 21,
+      rows: 4,
+      daysWorked: 4,
+      importedHours: 8,
+      approvedHours: 4,
+      linkedHours: 6,
+      rejectedHours: 5,
+      organizations: 2,
+    });
+    expect(wi.organizationRecords!.find((p) => p.key === "today")).toMatchObject({ hours: 4, rows: 1, approvedHours: 4 });
+    expect(wi.organizationRecords!.find((p) => p.key === "all")!.hours).toBe(51);
+    // the journal total is still the journal's
+    expect(wi.totalHours).toBe(14);
+    expect(wi.periods.find((p) => p.key === "week")!.hours).toBe(6);
+  });
+
+  it("feeds the DAY check: an imported timesheet on top of a live record is arithmetic, and the ledger is named", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [entry("e1", "2026-09-10", { hours: 9 })],
+      organizationRecords: [
+        rec("r1", "2026-09-10", 8, { source: "import" }),
+        rec("r2", "2026-09-10", 5, { status: "rejected" }), // rejected: not on the day
+        rec("r3", "2026-09-09", 30), // no journal line that day: no check
+      ],
+    });
+    expect(wi.checks.map((c) => c.key)).toEqual(["long_day|2026-09-10"]);
+    expect(wi.checks[0]).toMatchObject({ hours: 17, organizationHours: 8, entryIds: ["e1"] });
+    // warned, not corrected
+    expect(wi.totalHours).toBe(9);
+    // the focus scopes the day check like every other check
+    const month = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [entry("e1", "2026-07-10", { hours: 9 })],
+      organizationRecords: [rec("r1", "2026-07-10", 8)],
+      focus: "month",
+    });
+    expect(month.checks).toEqual([]);
+  });
+
+  it("UNKNOWN ≠ ZERO: an unread ledger is null, an empty one is every period at zero; malformed rows are skipped", () => {
+    const unread = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries: journal, organizationRecords: null });
+    expect(unread.organizationRecords).toBeNull();
+    const empty = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries: journal, organizationRecords: [] });
+    expect(empty.organizationRecords!.map((p) => p.hours)).toEqual([0, 0, 0, 0, 0]);
+    const odd = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: journal,
+      organizationRecords: [rec("x", "not-a-day", 8), rec("y", "2026-09-10", Number.NaN), rec("z", "2026-09-10", 0)],
+    });
+    expect(odd.organizationRecords!.find((p) => p.key === "all")!.hours).toBe(0);
+    expect(odd.checks).toEqual([]);
+  });
+
+  it("is deterministic — record order changes no figure", () => {
+    const a = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries: journal, organizationRecords: imported });
+    const b = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: journal,
+      organizationRecords: [...imported].reverse(),
+    });
+    expect(b.organizationRecords).toEqual(a.organizationRecords);
   });
 });

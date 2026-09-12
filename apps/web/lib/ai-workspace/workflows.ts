@@ -651,12 +651,36 @@ export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
   // named none — the line says which). Never converted, never time.
   const outputsLine = wi === null ? null : await formatOutputsLine(wi, focus ?? "all", locale);
 
+  // THE ORGANIZATION'S OWN RECORDS (owner §19): when an organization
+  // recorded hours about the person in the same window (timesheet lines,
+  // imported documents), the answer names that ledger beside the journal
+  // figure — the model's own figure, added to nothing. A window the model
+  // has no tab for ("yesterday", the recent default) reads the all-time
+  // ledger and says so.
+  const orgLedger =
+    wi?.organizationRecords?.find((p) => p.key === (focus ?? "all")) ?? null;
+  const orgLine =
+    orgLedger !== null && orgLedger.hours > 0
+      ? t("journalOrgRecords", {
+          period: t(`journalPeriod_${focus ?? "all"}`),
+          hours: fmtHours(orgLedger.hours, locale),
+          days: orgLedger.daysWorked,
+        })
+      : null;
+
   // A period question is answered with its FIGURE first, then the entries.
   const body =
     periodLabel === null
-      ? [t("journalIntro", { count: entries.length }), ...lines, hoursLine, ...(outputsLine ? [outputsLine] : [])]
+      ? [
+          t("journalIntro", { count: entries.length }),
+          ...lines,
+          hoursLine,
+          ...(orgLine ? [orgLine] : []),
+          ...(outputsLine ? [outputsLine] : []),
+        ]
       : [
           hoursLine,
+          ...(orgLine ? [orgLine] : []),
           ...(outputsLine ? [outputsLine] : []),
           ...(lines.length > 0 ? [t("journalPeriodLines"), ...lines] : []),
         ];

@@ -46,6 +46,26 @@
  * and are split by ACTIVITY only. Every hour is still counted once:
  * attributed + shared + multi-activity + unattributed = total.
  *
+ * ── THE SECOND HOUR LEDGER, BRIDGED, NOT MERGED (owner §19, re-audit F7) ──
+ * An organization records attendance hours about a person too:
+ * `work_hour_allocations` — a timesheet line an operator typed, or a row an
+ * imported document produced. Those hours are a FACT about the person's
+ * work and used to be invisible here (a second hour universe the section,
+ * the CV and the day check never saw). They are now read into this model
+ * as `organizationRecords`, a ledger of their own:
+ *   · NEVER added to `periods` / `totalHours` — the journal total stays the
+ *     journal's; the same day recorded by both is two records, not 16 h;
+ *   · NEVER attributed to a skill, an activity or a context — an hour
+ *     record carries no description of the work, so it proves no skill
+ *     (the table's own contract);
+ *   · named by provenance: entered by the organization, imported from a
+ *     document, approved in a timesheet, linked to a journal entry the
+ *     journal already counts;
+ *   · fed into the DAY check, so an imported timesheet on top of a live
+ *     record is caught by arithmetic rather than claimed in a comment.
+ * `null` means the ledger could not be read (UNKNOWN); an empty array means
+ * it was read and holds nothing (ZERO). SEP-7 keeps the two apart.
+ *
  * ── WHAT THIS IS NOT ──────────────────────────────────────────────────────
  * Nothing here is a score, a rating, a rank or a tier OF THE PERSON. A share
  * is a fraction of that person's own attributed hours; a tier is the evidence
@@ -105,6 +125,26 @@ export type WorkIntelligenceSkillRow = {
   readonly source: string | null;
 };
 
+/** One live organization hour record (`work_hour_allocations`, not
+ *  superseded) as the reader hands it over: a (worker, day, object, hours)
+ *  fact with its provenance. No text, no skill — by the table's contract. */
+export type WorkIntelligenceOrganizationRecord = {
+  readonly id: string;
+  /** The organization's stated work day (`YYYY-MM-DD`). */
+  readonly workDate: string;
+  readonly hours: number;
+  /** Open by convention: `manual` (an operator typed it), `import` (an
+   *  imported document), … — the same shape `worker_skills.source` uses. */
+  readonly source: string;
+  /** `recorded` | `submitted` | `approved` | `rejected` — the timesheet's
+   *  decision about the row, when one exists. */
+  readonly status: string;
+  readonly organizationId: string;
+  /** Set only when the organization explicitly tied the row to a journal
+   *  entry — the journal then already counts that work. */
+  readonly journalEntryId: string | null;
+};
+
 export type WorkPeriodKey = "today" | "week" | "month" | "year" | "all";
 export const WORK_PERIOD_KEYS = ["today", "week", "month", "year", "all"] as const;
 
@@ -117,6 +157,9 @@ export type WorkIntelligenceInput = {
    *  sections describe. `periods` and `months` are always computed over
    *  everything. Defaults to `all`. */
   readonly focus?: WorkPeriodKey;
+  /** The organization's own hour records about this person (owner §19).
+   *  `undefined` / `null` = not read (UNKNOWN); `[]` = read, none. */
+  readonly organizationRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
 };
 
 /** Inclusive UTC calendar-day windows ending today (W12 doctrine: dates are
@@ -252,10 +295,38 @@ export type EvidenceStrength = {
   readonly selfOnly: number;
 };
 
+/** The organization's hour records over one period — a ledger of its own,
+ *  never summed into `WorkPeriodTotals` and never reaching a skill. */
+export type OrganizationRecordTotals = {
+  readonly key: WorkPeriodKey;
+  readonly startIso: string | null;
+  readonly endIso: string;
+  /** Hours on live rows the organization has not rejected. */
+  readonly hours: number;
+  readonly rows: number;
+  readonly daysWorked: number;
+  /** Of `hours`: rows whose `source` is `import` (an imported document). */
+  readonly importedHours: number;
+  /** Of `hours`: rows an approved timesheet covers (`status = approved`). */
+  readonly approvedHours: number;
+  /** Of `hours`: rows explicitly tied to a LIVE journal entry — work the
+   *  journal figures already count; the rest may or may not overlap, and
+   *  the model says so rather than guessing. */
+  readonly linkedHours: number;
+  /** Hours on rows a timesheet rejected — kept visible, counted nowhere. */
+  readonly rejectedHours: number;
+  /** Distinct organizations that recorded in the period. */
+  readonly organizations: number;
+};
+
 export type WorkIntelligence = {
   /** The period every section below `periods` / `months` describes. */
   readonly focus: WorkPeriodKey;
   readonly periods: readonly WorkPeriodTotals[];
+  /** The organization's own hour records per period (owner §19) — read
+   *  beside the journal, shown beside it, added to nothing. `null` when the
+   *  ledger could not be read; every period at zero when it holds nothing. */
+  readonly organizationRecords: readonly OrganizationRecordTotals[] | null;
   /** Every declared skill, hours desc (declared-only skills at zero). */
   readonly skills: readonly SkillWorkTime[];
   readonly activities: readonly ActivityWorkTime[];
@@ -801,15 +872,73 @@ export function deriveWorkIntelligence(
     }
   }
 
+  // ── the organization's hour records — a ledger beside, never inside ──
+  // Derived after every journal figure is final: nothing above can see it.
+  const orgRows = input.organizationRecords ?? null;
+  const liveEntryIds = new Set(derived.map((d) => d.entry.entryId));
+  const organizationRecords: readonly OrganizationRecordTotals[] | null =
+    orgRows === null
+      ? null
+      : WORK_PERIOD_KEYS.map((key) => {
+          const bounds = workPeriodBounds(key, input.todayIso);
+          let hours = 0;
+          let rows = 0;
+          let importedHours = 0;
+          let approvedHours = 0;
+          let linkedHours = 0;
+          let rejectedHours = 0;
+          const days = new Set<string>();
+          const orgs = new Set<string>();
+          for (const r of orgRows) {
+            if (!Number.isFinite(r.hours) || r.hours <= 0) continue;
+            if (!inPeriod(r.workDate, bounds)) continue;
+            if (r.status === "rejected") {
+              rejectedHours += r.hours;
+              continue;
+            }
+            rows += 1;
+            hours += r.hours;
+            days.add(r.workDate);
+            orgs.add(r.organizationId);
+            if (r.source === "import") importedHours += r.hours;
+            if (r.status === "approved") approvedHours += r.hours;
+            if (r.journalEntryId && liveEntryIds.has(r.journalEntryId)) linkedHours += r.hours;
+          }
+          return {
+            key,
+            startIso: bounds.startIso,
+            endIso: bounds.endIso,
+            hours: round2(hours),
+            rows,
+            daysWorked: days.size,
+            importedHours: round2(importedHours),
+            approvedHours: round2(approvedHours),
+            linkedHours: round2(linkedHours),
+            rejectedHours: round2(rejectedHours),
+            organizations: orgs.size,
+          };
+        });
+
+  // The same records per day, for the DAY check only: an imported
+  // timesheet on top of a live journal record is then arithmetic.
+  const organizationHoursByDay = new Map<string, number>();
+  for (const r of orgRows ?? []) {
+    if (!Number.isFinite(r.hours) || r.hours <= 0 || r.status === "rejected") continue;
+    if (!inPeriod(r.workDate, focusBounds)) continue;
+    organizationHoursByDay.set(r.workDate, (organizationHoursByDay.get(r.workDate) ?? 0) + r.hours);
+  }
+
   // ── plausibility checks (warn, never corrupt) ─────────────────────────
   const checks = deriveWorkTimeChecks(
     scoped.map((d) => ({ time: d.time, metrics: d.entry.metrics })),
+    { organizationHoursByDay },
   );
 
   const all = periods.find((p) => p.key === "all")!;
   return {
     focus,
     periods,
+    organizationRecords,
     skills,
     activities,
     contexts,

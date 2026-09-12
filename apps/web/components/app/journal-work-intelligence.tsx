@@ -41,6 +41,15 @@ import { formatUtcDate } from "@/lib/time/display";
  *   7. Where could it lead?     adjacent directions from EVIDENCED skills only
  *   8. What does it feed?       the Living CV and the opportunities board
  *   9. Where do the numbers come from?  provenance footnote
+ *   1b. What did my organization record?  the second hour ledger (owner
+ *                               §19): timesheet lines and imported documents
+ *                               in `work_hour_allocations`, read beside the
+ *                               journal and shown beside it — hours, days,
+ *                               how much was imported / approved / already
+ *                               described by a journal entry — and stated
+ *                               plainly as NOT added to the figures above
+ *                               and reaching no skill (an hour record
+ *                               carries no description of the work)
  *   1a. Does anything need a look?  plausibility checks (owner §13) right
  *                               under the strip: a day above 24 h, a long
  *                               day, one duration longer than a day, an
@@ -207,8 +216,23 @@ export async function JournalWorkIntelligence({
       ignored: c.ignored
         ? `${fmtHours(c.ignored.value, locale)} ${labels.unitName(c.ignored.unit) ?? c.ignored.unit}`
         : "",
-    });
+    }) +
+    // which ledger doubled the day — the organization's records on top of
+    // the journal's lines are named, so the person knows what to compare
+    (c.organizationHours > 0
+      ? ` ${t("checks.organizationHours", { hours: fmtHours(c.organizationHours, locale) })}`
+      : "");
   const periodHasEntries = period.entries > 0;
+
+  // ── 1b · the organization's own hour records (owner §19) ──────────────
+  // A ledger beside the journal: shown when it holds anything at all, with
+  // the focus period's figure (and the all-time one when the period is
+  // empty). `null` = the ledger could not be read → nothing is claimed.
+  const orgRecords = wi.organizationRecords;
+  const orgPeriod = orgRecords?.find((p) => p.key === wi.focus) ?? null;
+  const orgAll = orgRecords?.find((p) => p.key === "all") ?? null;
+  const showOrgRecords =
+    orgAll !== null && (orgAll.hours > 0 || orgAll.rejectedHours > 0);
 
   return (
     <section
@@ -349,6 +373,72 @@ export async function JournalWorkIntelligence({
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* 1b · the organization's hour records — the second ledger,
+              named beside the journal, added to nothing, reaching no skill */}
+            {showOrgRecords && orgPeriod && orgAll && (
+              <div
+                className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/50 px-3 py-2.5"
+                data-testid="wi-org-records"
+                data-hours={orgPeriod.hours}
+                data-all-hours={orgAll.hours}
+                data-imported-hours={orgPeriod.importedHours}
+                data-linked-hours={orgPeriod.linkedHours}
+              >
+                <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                  {tk("orgRecords.title")}
+                </span>
+                <span
+                  className="text-sm leading-relaxed text-text-primary"
+                  data-testid="wi-org-records-hours"
+                >
+                  {orgPeriod.hours > 0
+                    ? tk("orgRecords.body", {
+                        hours: fmtHours(orgPeriod.hours, locale),
+                        days: orgPeriod.daysWorked,
+                        period: t(`period.${wi.focus}`),
+                        organizations: orgPeriod.organizations,
+                      })
+                    : tk("orgRecords.periodEmpty", {
+                        period: t(`period.${wi.focus}`),
+                        hours: fmtHours(orgAll.hours, locale),
+                        days: orgAll.daysWorked,
+                      })}
+                </span>
+                {(orgPeriod.importedHours > 0 ||
+                  orgPeriod.approvedHours > 0 ||
+                  orgPeriod.linkedHours > 0 ||
+                  orgPeriod.rejectedHours > 0) && (
+                  <span
+                    className="text-meta leading-relaxed text-text-muted"
+                    data-testid="wi-org-records-provenance"
+                  >
+                    {[
+                      orgPeriod.importedHours > 0
+                        ? t("orgRecords.imported", { hours: fmtHours(orgPeriod.importedHours, locale) })
+                        : null,
+                      orgPeriod.approvedHours > 0
+                        ? t("orgRecords.approved", { hours: fmtHours(orgPeriod.approvedHours, locale) })
+                        : null,
+                      orgPeriod.linkedHours > 0
+                        ? t("orgRecords.linked", { hours: fmtHours(orgPeriod.linkedHours, locale) })
+                        : null,
+                      orgPeriod.rejectedHours > 0
+                        ? t("orgRecords.rejected", { hours: fmtHours(orgPeriod.rejectedHours, locale) })
+                        : null,
+                    ]
+                      .filter((x): x is string => x !== null)
+                      .join(" · ")}
+                  </span>
+                )}
+                <span
+                  className="text-meta leading-relaxed text-text-muted"
+                  data-testid="wi-org-records-rule"
+                >
+                  {tk("orgRecords.rule")}
+                </span>
               </div>
             )}
 
