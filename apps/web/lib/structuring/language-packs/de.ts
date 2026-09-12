@@ -200,7 +200,10 @@ export const DE_PACK: LanguagePack = {
       exact: ["dachdecker", "dach gedeckt", "dacher gedeckt", "dächer gedeckt", "dacharbeiten"],
     },
     "electrical-install": {
-      exact: ["steckdosen", "verkabelt", "elektroinstallation", "verdrahtet"],
+      // "elektriker" / "elektroniker" were carried by the LT base stem
+      // "elektr" until it was anchored (#1689, 2026-09-12) — the DE forms
+      // belong here
+      exact: ["steckdosen", "verkabelt", "elektroinstallation", "verdrahtet", "elektriker", "elektroniker"],
     },
     plumbing: {
       exact: ["klempner", "installateur", "rohre verlegt", "wasserleitung", "sanitarinstallation", "sanitärinstallation"],
