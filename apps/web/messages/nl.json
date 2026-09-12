@@ -13752,7 +13752,7 @@
       "wiGrowthDerived": "Lezing (afgeleid uit die feiten — geen beoordeling, geen rangorde, geen kwalificatie):",
       "wiGrowthInsufficient": "Een lezing vraagt minstens twee vaardigheden die uw registraties onderbouwen — voorlopig alleen de feiten.",
       "wiGrowthDeepen": "Wat u zou kunnen verdiepen:\n{list}",
-      "wiGrowthDeepenItem": "— {skill}: {reasons}",
+      "wiGrowthDeepenItem": "— {skill} — {reasons}",
       "wiGrowthReason_involvement_only": "tot nu toe alleen naast andere vaardigheden — geen registratie waarin dit het hoofdwerk was",
       "wiGrowthReason_unconfirmed": "door u geregistreerd, nog niet bevestigd door een leidinggevende of klant",
       "wiGrowthReason_rising": "de laatste 30 dagen meer gebruikt dan de 30 dagen ervoor",

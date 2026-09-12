@@ -667,7 +667,7 @@
     "deepenTitle": "Ką galėtumėte gilinti",
     "deepen": {
       "involvement_only": "kol kas tik dalyvauta kartu su kitais įgūdžiais — nėra įrašo, kuriame tai būtų buvęs pagrindinis darbas",
-      "unconfirmed": "užfiksuota jūsų pačių, vadovas ar klientas dar nepatvirtino",
+      "unconfirmed": "užfiksuota jūsų pačių, vadovo patvirtinimo dar nėra",
       "rising": "paskutines 30 d. naudota daugiau nei ankstesnes 30 d.",
       "dormant": "90 dienų be įrašo"
     },
