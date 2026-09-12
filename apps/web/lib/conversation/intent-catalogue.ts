@@ -37,6 +37,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "journal-skills-top": "which skills the person's recorded work uses most (hours per skill)",
   "journal-activities-top": "which activity or kind of work takes most of the person's recorded time",
   "journal-confirmed": "which of the person's recorded hours and entries a manager or client has confirmed",
+  "journal-growth": "where the person's own recorded work indicates potential to deepen a skill or expand into an adjacent direction ('kur galėčiau augti?') — a derived reading, never a score",
   figures: "confirmed hours, figures or a report (also a CSV export)",
   documents: "the person's documents and certificates: what is valid, expiring or missing",
   "add-document": "record a new document or certificate the person holds",

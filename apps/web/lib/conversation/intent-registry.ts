@@ -173,6 +173,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "journal-skills-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
   "journal-activities-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
   "journal-confirmed": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  // Owner line 8 — the growth reading over the SAME model: a fact block and
+  // a block said to be derived; never a score.
+  "journal-growth": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
   figures: { domain: "journal", access: "read", handler: "figures", ownTyping: true },
   "open-project": { domain: "project", access: "read", handler: "openProject", ownTyping: true },
   // G8: the chip surfaces by SENTENCE — each routes to the SAME component

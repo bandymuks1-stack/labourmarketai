@@ -86,7 +86,10 @@ describe("the intent registry is the enumerable routing contract", () => {
     // model. Four read intents (journal-skill, journal-skills-top,
     // journal-activities-top, journal-confirmed), ONE handler over the ONE
     // model.
-    expect(entries.length).toBe(74);
+    // 74 -> 75: owner line 8, "Kur yra didžiausias augimo potencialas?"
+    // scored 0 — the growth reading (journal-growth) over the SAME model,
+    // the same handler; a fact block and a block said to be derived.
+    expect(entries.length).toBe(75);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

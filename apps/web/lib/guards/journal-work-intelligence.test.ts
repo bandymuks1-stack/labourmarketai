@@ -49,7 +49,15 @@ import {
  *     work and every recorded output counts; the work day is the person's
  *     stated day on every intake, and a save-day placement is counted and
  *     said; two skill rows for one slug are one skill; a CV chip names its
- *     base (confirmed vs own record) in words.
+ *     base (confirmed vs own record) in words;
+ * 11. the growth reading (owner line 8) is ONE pure derivation over the
+ *     model (`growth-reading.ts`), rendered by the section and answered by
+ *     the chat from the same function: a FACT block (the evidenced skills,
+ *     the declared-only count) kept apart from a block labelled DERIVED
+ *     (deepen / expand / demand); adjacency runs over EVIDENCED slugs only;
+ *     demand is the board's own count or UNKNOWN (never an empty list that
+ *     reads as "nothing asks"); no field or copy turns it into a score, a
+ *     rank or a tier of the person; the organization view never sees it.
  */
 
 const root = join(__dirname, "..", "..");
@@ -81,6 +89,9 @@ const workerSchemas = read("lib/conversation/worker-schemas.ts");
 const chat = read("components/app/conversation/chat/conversation-chat.tsx");
 const compactEditor = read("components/app/journal-entry-compact-editor.tsx");
 const capabilities = read("lib/capabilities/registry.ts");
+const growth = read("lib/journal/growth-reading.ts");
+const intentRouter = read("lib/conversation/intent-router.ts");
+const intentRegistry = read("lib/conversation/intent-registry.ts");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
@@ -321,7 +332,8 @@ describe("8 · the organization view composes the same reader (owner §14)", () 
     expect(component).toContain('export type WorkIntelligenceAudience = "self" | "organization";');
     expect(component).toContain('const org = audience === "organization";');
     expect(component).toContain("{!org && wi.checks.length > 0 && (");
-    expect(component).toContain("workerSkillSlugs: org ? [] : evidenced,");
+    // the growth reading (directions included) is not composed at all for the organization
+    expect(component).toMatch(/const growth = org\s*\? null\s*: deriveGrowthReading\(/);
     expect(component).toMatch(/\{org \? \(\s*<span[^>]*data-testid=\{`wi-skill-name-\$\{s\.slug\}`\}/);
     expect(component).toMatch(/\{org \? \(\s*<p[\s\S]*?data-testid="wi-org-scope"/);
     expect(component).toContain('t("org.scopeNote")');
@@ -849,6 +861,81 @@ describe("13 · the five rules the re-audit pinned (2026-09-11, F8–F12)", () =
       expect(root.cvExport.skillHoursConfirmed).toContain("{confirmed}");
       expect(root.workspace.ai.wiOutputItemActivity, `${loc}.workspace.ai.wiOutputItemActivity`).toContain("{activity}");
       expect(root.workspace.ai.wiOutputItemActivity).toContain("{unit}");
+    }
+  });
+});
+
+describe("14 · the growth reading (owner line 8): one derivation, fact apart from reading, never a score", () => {
+  it("is ONE pure module over the model, composed by the section AND answered by the chat — no second adjacency read", () => {
+    expect(growth).toMatch(/export function deriveGrowthReading\(/);
+    expect(growth).toContain('readonly kind: "derived";');
+    // pure: reads the model, never the database
+    expect(growth).not.toMatch(/\.from\(|\.insert\(|createClient|server-only/);
+    // adjacency runs over EVIDENCED slugs only — never the declared list
+    expect(growth).toMatch(/const evidencedSlugs = new Set\(evidencedSkillSlugs\(wi\)\);/);
+    expect(growth).toMatch(/workerSkillSlugs: \[\.\.\.evidencedSlugs\],/);
+    expect(growth).not.toMatch(/loadWorkerSkillSlugs|loadAdjacentDirectionsForWorker/);
+    // both consumers call the ONE function; the section no longer composes adjacency itself
+    expect(component).toMatch(/deriveGrowthReading\(wi, \{ primaryProfessionSlug: labels\.primaryProfessionSlug \}\)/);
+    expect(component).not.toMatch(/computeAdjacentDirections\(/);
+    expect(workflows).toMatch(/const growth = deriveGrowthReading\(wi, \{ primaryProfessionSlug, demandBySkill \}\);/);
+    expect(workflows).not.toMatch(/computeAdjacentDirections\(/);
+  });
+
+  it("the FACT block and the DERIVED block are two elements on the section, the reading labelled derived, withheld from the organization", () => {
+    expect(component).toContain('data-testid="wi-growth-basis"');
+    expect(component).toContain('data-testid="wi-growth-reading"');
+    expect(component).toMatch(/data-kind=\{growth\.kind\}/);
+    expect(component).toMatch(/\{t\("growthDerivedHint"\)\}/);
+    expect(component).toMatch(/const growth = org\s*\? null\s*: deriveGrowthReading\(/);
+    // the declared-only count is said when non-zero — a reading never hides what it left out
+    expect(component).toMatch(/growth\.basis\.declaredOnly > 0\s*\? ` \$\{t\("growthDeclaredOnly", \{ count: growth\.basis\.declaredOnly \}\)\}`/);
+    // demand is NOT read on the page and the page says so (UNKNOWN ≠ ZERO)
+    expect(component).toContain('data-testid="wi-growth-demand-note"');
+    expect(component).not.toMatch(/loadWorkerOpportunityBoard|demandBySkill/);
+  });
+
+  it("the chat states the facts before the derived label, and demand is the board's count or UNKNOWN — never zero by default", () => {
+    const block = workflows.slice(workflows.indexOf('if (intent === "journal-growth")'), workflows.indexOf("// journal-confirmed"));
+    expect(block.indexOf('t("wiGrowthBasis"')).toBeGreaterThan(-1);
+    expect(block.indexOf('t("wiGrowthBasis"')).toBeLessThan(block.indexOf('t("wiGrowthDerived")'));
+    expect(block.indexOf('t("wiGrowthDerived")')).toBeLessThan(block.indexOf('t("wiGrowthDeepen"'));
+    expect(block).toMatch(/if \(growth\.demand === null\) lines\.push\(t\("wiGrowthDemandUnread"\)\);/);
+    expect(workflows).toMatch(/async function readDemandBySkillForGrowth\(\): Promise<ReadonlyMap<string, number> \| null>/);
+    expect(workflows).toMatch(/if \(board\.kind !== "ready" \|\| !board\.capabilities\.boardAvailable\) return null;/);
+    // the door: a journal READ intent on the SAME handler as lines 2–7
+    expect(intentRouter).toContain('| "journal-growth"');
+    expect(intentRegistry).toMatch(/"journal-growth": \{ domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true \}/);
+  });
+
+  it("no field of the reading and no word of its copy is a score, rating, rank or tier of the person", () => {
+    const typeBlock = growth.slice(growth.indexOf("export type DeepenReason"), growth.indexOf("function isoDayMinus"));
+    for (const m of typeBlock.matchAll(/readonly (\w+)[?]?:/g)) {
+      expect(m[1]!.toLowerCase(), m[1]).not.toMatch(/score|rating|rank|tier|level|ovr|grade/);
+    }
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: Record<string, string> & { deepen: Record<string, string> };
+      };
+      for (const key of ["growthTitle", "growthBasis", "growthBasisSkill", "growthBasisSkillInvolved", "growthDeclaredOnly", "growthDerivedHint", "growthInsufficient", "deepenTitle", "growthDemandNote"]) {
+        expect(typeof j.intelligence[key] === "string" && j.intelligence[key]!.trim().length > 0, `${loc}.intelligence.${key}`).toBe(true);
+      }
+      for (const r of ["involvement_only", "unconfirmed", "rising", "dormant"]) {
+        expect(typeof j.intelligence.deepen[r] === "string" && j.intelligence.deepen[r]!.trim().length > 0, `${loc}.intelligence.deepen.${r}`).toBe(true);
+      }
+      const root = JSON.parse(read(`messages/${loc}.json`)) as { workspace: { ai: Record<string, string> } };
+      for (const key of ["wiGrowthBasis", "wiGrowthDerived", "wiGrowthInsufficient", "wiGrowthDeepen", "wiGrowthDeepenItem", "wiGrowthExpand", "wiGrowthExpandItem", "wiGrowthDemandUnread", "wiGrowthDemandNone", "wiGrowthDemand", "wiGrowthDemandItem", "whyWiGrowth", "wiGrowthReason_involvement_only", "wiGrowthReason_unconfirmed", "wiGrowthReason_rising", "wiGrowthReason_dormant"]) {
+        expect(typeof root.workspace.ai[key] === "string" && root.workspace.ai[key]!.trim().length > 0, `${loc}.workspace.ai.${key}`).toBe(true);
+      }
+      // the copy names itself derived and disclaims the score in every locale
+      const en = loc === "en";
+      if (en) {
+        expect(j.intelligence.growthDerivedHint).toMatch(/not a rating/);
+        expect(root.workspace.ai.wiGrowthDerived).toMatch(/not a rating/);
+      }
+      // no internal vocabulary reaches the person
+      const all = [...Object.values(j.intelligence).filter((v): v is string => typeof v === "string"), ...Object.values(j.intelligence.deepen), ...Object.keys(root.workspace.ai).filter((k) => k.startsWith("wiGrowth")).map((k) => root.workspace.ai[k]!)].join(" ");
+      expect(all).not.toMatch(/sharedHours|attributedHours|evidencedSkillSlugs|missingUris|worker_skills|skillFit/);
     }
   });
 });

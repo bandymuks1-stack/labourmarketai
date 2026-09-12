@@ -54,6 +54,13 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({ auth: { getUser: async () => ({ data: { user: null } }) } }),
 }));
 
+// The opportunities board the growth reading's DEMAND overlay reads (the
+// same read the skill-gap answer makes). Per test: a board, or a failure.
+const boardMock = vi.fn();
+vi.mock("@/lib/marketplace/worker-opportunities", () => ({
+  loadWorkerOpportunityBoard: (...a: unknown[]) => boardMock(...a),
+}));
+
 const { runWorkIntelligenceQuestion } = await import("./workflows");
 
 const TODAY = "2026-09-11";
@@ -140,6 +147,8 @@ function model(focus: WorkPeriodKey = "all"): WorkIntelligence {
 beforeEach(() => {
   wiMock.mockReset();
   recentMock.mockReset();
+  boardMock.mockReset();
+  boardMock.mockRejectedValue(new Error("board not read"));
   wiMock.mockImplementation(async (opts?: { focus?: WorkPeriodKey }) => model(opts?.focus ?? "all"));
 });
 
@@ -268,6 +277,78 @@ describe("line 7 — 'kas patvirtinta?' names confirmed hours and entries of the
     const r = await runWorkIntelligenceQuestion("Kas patvirtinta šį mėnesį?", "journal-confirmed");
     const text = r.kind === "answer" ? r.text : "";
     expect(text).toContain('workspace.ai.wiConfirmedNone({"period":"workspace.ai.journalPeriod_month","total":"9","entries":1})');
+  });
+});
+
+describe("line 8 — 'kur galėčiau augti?' states the facts first, then a reading said to be derived", () => {
+  it("fact block: the evidenced skills with the model's figures, the declared-only count; then the derived label; demand UNKNOWN when the board failed", async () => {
+    const r = await runWorkIntelligenceQuestion("Kur yra didžiausias augimo potencialas?", "journal-growth");
+    expect(r.kind).toBe("answer");
+    const text = r.kind === "answer" ? r.text : "";
+    const lines = text.split("\n");
+    // FACTS first — three evidenced skills out of 17 h / 2 entries, all time
+    expect(lines[0]).toContain("workspace.ai.wiGrowthBasis(");
+    expect(lines[0]).toContain('"count":3');
+    expect(lines[0]).toContain('"total":"17"');
+    expect(lines[0]).toContain('"entries":2');
+    expect(lines[0]).toContain('wiGrowthBasisSkill({\\"skill\\":\\"tiling\\",\\"hours\\":\\"8\\"})');
+    expect(lines[0]).toContain('wiGrowthBasisSkill({\\"skill\\":\\"skillNames.programming\\",\\"hours\\":\\"5\\"})');
+    // nothing declared-only in this fixture → no left-out sentence
+    expect(text).not.toContain("wiGrowthDeclaredOnly");
+    // the READING is labelled derived before any of it is said
+    const derivedAt = lines.indexOf("workspace.ai.wiGrowthDerived");
+    expect(derivedAt).toBeGreaterThan(0);
+    expect(text.indexOf("wiGrowthDeepen")).toBeGreaterThan(text.indexOf("wiGrowthDerived"));
+    // deepen: tiling is confirmed → never "unconfirmed"; programming is the person's own record
+    expect(text).toContain('wiGrowthDeepenItem({\\"skill\\":\\"skillNames.programming\\",\\"reasons\\":\\"workspace.ai.wiGrowthReason_unconfirmed; workspace.ai.wiGrowthReason_rising\\"})');
+    expect(text).not.toMatch(/tiling[^\n]*wiGrowthReason_unconfirmed/);
+    // demand: the board failed → UNKNOWN, said — never "nothing asks for anything"
+    expect(text).toContain("workspace.ai.wiGrowthDemandUnread");
+    expect(text).not.toContain("wiGrowthDemandNone");
+    expect(r.kind === "answer" ? r.explanation?.why : "").toContain("workspace.ai.whyWiGrowth(");
+    const chips = r.kind === "answer" ? (r.chips ?? []).map((c) => c.id) : [];
+    expect(chips).toEqual(["journal-numbers", "logwork"]);
+  });
+
+  it("demand overlay: the board's missing-skill counts, only for skills the entries do not back", async () => {
+    boardMock.mockResolvedValue({
+      kind: "ready",
+      capabilities: { boardAvailable: true },
+      opportunities: [
+        { match: { skillFit: { missingUris: ["qa-testing", "programming"] } } },
+        { match: { skillFit: { missingUris: ["qa-testing"] } } },
+        { match: { skillFit: null } },
+      ],
+    });
+    const r = await runWorkIntelligenceQuestion("Where could I grow?", "journal-growth");
+    const text = r.kind === "answer" ? r.text : "";
+    // programming is evidenced (5 h) → not a gap; qa-testing asked by 2 demands
+    expect(text).toContain('workspace.ai.wiGrowthDemand({"list":"workspace.ai.wiGrowthDemandItem({\\"skill\\":\\"qa-testing\\",\\"demands\\":2})"})');
+    expect(text).not.toContain("wiGrowthDemandUnread");
+  });
+
+  it("a read board with no gap is ZERO, apart from UNKNOWN", async () => {
+    boardMock.mockResolvedValue({ kind: "ready", capabilities: { boardAvailable: true }, opportunities: [] });
+    const r = await runWorkIntelligenceQuestion("Where could I grow?", "journal-growth");
+    const text = r.kind === "answer" ? r.text : "";
+    expect(text).toContain("workspace.ai.wiGrowthDemandNone");
+  });
+
+  it("one evidenced skill: the facts are stated, the reading says it needs two", async () => {
+    wiMock.mockImplementation(async () =>
+      deriveWorkIntelligence({
+        todayIso: TODAY,
+        focus: "all",
+        skills: [{ skillId: "s-tile", slug: "tiling", verified: true, source: null }],
+        entries: [entry("e-tile", "2026-08-02", [time(1, 8), activity(1, "tiler")], ["s-tile"], "approved")],
+      }),
+    );
+    const r = await runWorkIntelligenceQuestion("kur galėčiau augti?", "journal-growth");
+    const text = r.kind === "answer" ? r.text : "";
+    expect(text).toContain('"count":1');
+    expect(text).toContain("workspace.ai.wiGrowthInsufficient");
+    expect(text).not.toContain("wiGrowthDeepen(");
+    expect(text).not.toContain("wiGrowthExpand(");
   });
 });
 

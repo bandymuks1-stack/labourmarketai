@@ -14,6 +14,9 @@ import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-co
 import { getPlanning } from "@/lib/planning/planning";
 import { loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import type { WorkIntelligence, WorkPeriodKey } from "@/lib/journal/work-intelligence";
+import { deriveGrowthReading } from "@/lib/journal/growth-reading";
+import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
+import { createClient } from "@/lib/supabase/server";
 import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
@@ -761,8 +764,49 @@ async function formatOutputsLine(
 // ═══════════════════════════════════════════════════════════════════════════
 // 3b. Work intelligence by sentence — "kiek programavau?", "kokius įgūdžius
 //     naudoju daugiausia?", "kokia veikla užima daugiausia laiko?", "kas
-//     patvirtinta?"
+//     patvirtinta?", "kur galėčiau augti?"
 // ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The demand side of the growth reading (owner line 8): how many of the
+ * person's VISIBLE demands ask for each skill their profile lacks — the
+ * SAME `skillFit.missingUris` aggregation the skill-gap answer makes, over
+ * the same board read. `null` when the board could not be read or the
+ * person has no board (UNKNOWN, not zero — the answer says demand was not
+ * read rather than "nothing asks for anything").
+ */
+async function readDemandBySkillForGrowth(): Promise<ReadonlyMap<string, number> | null> {
+  try {
+    const board = await loadWorkerOpportunityBoard("conversation");
+    if (board.kind !== "ready" || !board.capabilities.boardAvailable) return null;
+    const demandsPerSkill = new Map<string, number>();
+    for (const card of board.opportunities) {
+      for (const slug of card.match.skillFit?.missingUris ?? []) {
+        demandsPerSkill.set(slug, (demandsPerSkill.get(slug) ?? 0) + 1);
+      }
+    }
+    return demandsPerSkill;
+  } catch {
+    return null;
+  }
+}
+
+/** The person's declared PRIMARY profession slug (excluded from the adjacent
+ *  directions — it is not an *adjacent* one), through the one occupation
+ *  path read the journal page uses; null when none or unreadable. */
+async function readPrimaryProfessionSlugForGrowth(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    const path = await readOwnOccupationPathForUser(supabase, user.id);
+    return path.directions.find((d) => d.isPrimary)?.slug ?? path.directions[0]?.slug ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * The questions the work-in-numbers section answers, asked in words (issue
@@ -963,6 +1007,92 @@ export async function runWorkIntelligenceQuestion(
     ];
     if (wi.unlabelledHours > 0) lines.push(t("wiActivitiesUnlabelled", { hours: fmtHours(wi.unlabelledHours, locale) }));
     return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
+  }
+
+  if (intent === "journal-growth") {
+    // Owner line 8 — "kur yra didžiausias augimo potencialas?". ONE pure
+    // derivation shared with the section (`deriveGrowthReading`): the FACT
+    // block first (the skills the entries back, in hours, and the declared
+    // skills left out), then the reading, said to be derived — deepen /
+    // expand / what real demand asks. Never a score, a rank or a tier.
+    const [primaryProfessionSlug, demandBySkill] = await Promise.all([
+      readPrimaryProfessionSlugForGrowth(),
+      readDemandBySkillForGrowth(),
+    ]);
+    const growth = deriveGrowthReading(wi, { primaryProfessionSlug, demandBySkill });
+    const basisList = growth.basis.skills
+      .slice(0, ANSWER_LIMIT)
+      .map((s) =>
+        s.attributedHours > 0
+          ? t("wiGrowthBasisSkill", { skill: skillName(s.slug), hours: fmtHours(s.attributedHours, locale) })
+          : t("wiGrowthBasisSkillInvolved", { skill: skillName(s.slug), hours: fmtHours(s.sharedHours, locale) }),
+      )
+      .join(", ");
+    const lines = [
+      t("wiGrowthBasis", {
+        period: periodLabel,
+        count: growth.basis.skills.length,
+        total: totalHours,
+        entries: totals.entries,
+        list: basisList,
+      }),
+    ];
+    if (growth.basis.declaredOnly > 0) lines.push(t("wiGrowthDeclaredOnly", { count: growth.basis.declaredOnly }));
+    lines.push(t("wiGrowthDerived"));
+    if (growth.limitation === "insufficient_skills") {
+      lines.push(t("wiGrowthInsufficient"));
+    } else {
+      if (growth.deepen.length > 0) {
+        lines.push(
+          t("wiGrowthDeepen", {
+            list: growth.deepen
+              .slice(0, ANSWER_LIMIT)
+              .map((d) =>
+                t("wiGrowthDeepenItem", {
+                  skill: skillName(d.slug),
+                  reasons: d.reasons.map((r) => t(`wiGrowthReason_${r}`)).join("; "),
+                }),
+              )
+              .join("\n"),
+          }),
+        );
+      }
+      if (growth.expand.length > 0) {
+        lines.push(
+          t("wiGrowthExpand", {
+            list: growth.expand
+              .slice(0, ANSWER_LIMIT)
+              .map((d) =>
+                t("wiGrowthExpandItem", {
+                  direction: activityName(d.professionId),
+                  shared: d.sharedCount,
+                  missing: d.missingSkills.map(skillName).join(", "),
+                }),
+              )
+              .join("\n"),
+          }),
+        );
+      }
+    }
+    if (growth.demand === null) lines.push(t("wiGrowthDemandUnread"));
+    else if (growth.demand.length === 0) lines.push(t("wiGrowthDemandNone"));
+    else {
+      lines.push(
+        t("wiGrowthDemand", {
+          list: growth.demand
+            .slice(0, ANSWER_LIMIT)
+            .map((d) => t("wiGrowthDemandItem", { skill: skillName(d.slug), demands: d.demands }))
+            .join(", "),
+        }),
+      );
+    }
+    return {
+      kind: "answer",
+      text: lines.join("\n"),
+      explanation: { why: t("whyWiGrowth", { period: periodLabel }) },
+      // the journal is where a reading becomes evidence — never a self-declaration
+      chips: [...chips, { id: "logwork", label: t("chipLogWork") }],
+    };
   }
 
   // journal-confirmed
