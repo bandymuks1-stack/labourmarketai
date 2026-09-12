@@ -662,6 +662,7 @@
     "openOpportunities": "Galimybės pagal įrašus",
     "provenance": "Iš kur valandos: {worker} val. įvedėte patys, {extracted} val. atpažinta iš jūsų teksto, {corrected} val. patikslino vadovas.",
     "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda įgūdžiui priskiriama tik tada, kai įrašas susietas su vienu įgūdžiu arba kai jūsų pačių frazė („klijavau plyteles 6 val.“) įvardija tą įgūdį.",
+    "dayInferred": "{count, plural, one {# įrašas neturi nurodytos darbo dienos ir priskirtas išsaugojimo dienai.} few {# įrašai neturi nurodytos darbo dienos ir priskirti išsaugojimo dienai.} other {# įrašų neturi nurodytos darbo dienos ir priskirti išsaugojimo dienai.}}",
     "glance": "{days, plural, one {# diena} few {# dienos} other {# dienų}} · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
     "glanceNone": "įrašų nėra",
     "periodEmpty": "Laikotarpiu „{period}“ įrašų nėra — žemiau rodomas visas laikas pasirinkus jį viršuje.",

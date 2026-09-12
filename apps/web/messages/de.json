@@ -7846,6 +7846,8 @@
     "recordedHours": "Erfasste Arbeit: {hours} Std. aus dem Arbeitsjournal, davon {confirmed} Std. bestätigt.",
     "recordedHoursNone": "Noch keine Journaleinträge mit Dauer — Stunden neben Fähigkeiten stammen aus Ihren eigenen Einträgen.",
     "skillHours": "{hours} Std.",
+    "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
+    "skillHoursConfirmed": "{hours} Std., davon {confirmed} Std. vom Vorgesetzten bestätigt",
     "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind",
     "organizationRecordedHours": "Erfassung der Organisation: {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} in Stundenzetteln oder importierten Dokumenten ({imported} Std. importiert, {approved} Std. genehmigt) — getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet."
   },
@@ -13723,6 +13725,7 @@
       "wiUnread": "Ich konnte Ihre erfasste Arbeit gerade nicht lesen — das ist nicht dasselbe wie keine zu haben. Fragen Sie gleich noch einmal.",
       "wiOutputs": "{period} erledigt: {list}.",
       "wiOutputItem": "{value} {unit} ({entries, plural, one {# Eintrag} other {# Einträge}})",
+      "wiOutputItemActivity": "{value} {unit} · {activity} ({entries, plural, one {# Eintrag} other {# Einträge}})",
       "wiSkillHours": "{skill}: {hours} Std. dieser Fähigkeit zugeordnet von {total} Std. erfasster Arbeit ({period}); davon {confirmed} Std. von einer Führungskraft bestätigt.",
       "wiSkillShared": "Weitere {hours} Std. wurden zusammen mit anderen Fähigkeiten gearbeitet — als Beteiligung gezeigt, nicht zur Zahl addiert.",
       "wiSkillWhere": "Verwendet in {entries, plural, one {# Eintrag} other {# Einträgen}} an {days, plural, one {# Tag} other {# Tagen}} in {contexts, plural, =0 {keinem benannten Kontext} one {# Kontext} other {# Kontexten}}; zuletzt am {day}.",

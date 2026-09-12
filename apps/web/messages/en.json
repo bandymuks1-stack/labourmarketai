@@ -7846,6 +7846,8 @@
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
+    "skillHoursOwn": "{hours} h, your own record",
+    "skillHoursConfirmed": "{hours} h, {confirmed} h of it confirmed by a manager",
     "skillHoursHint": "hours from work-journal entries linked to this skill alone",
     "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill."
   },
@@ -13723,6 +13725,7 @@
       "wiUnread": "I could not read your recorded work just now — that is not the same as having none. Ask again in a moment.",
       "wiOutputs": "{period}, produced: {list}.",
       "wiOutputItem": "{value} {unit} ({entries, plural, one {# entry} other {# entries}})",
+      "wiOutputItemActivity": "{value} {unit} · {activity} ({entries, plural, one {# entry} other {# entries}})",
       "wiSkillHours": "{skill}: {hours} h attributed to this skill out of {total} h recorded ({period}); {confirmed} h of it confirmed by a manager.",
       "wiSkillShared": "A further {hours} h were worked alongside other skills — shown as involvement, not added to the figure.",
       "wiSkillWhere": "Used in {entries, plural, one {# entry} other {# entries}} on {days, plural, one {# day} other {# days}} across {contexts, plural, =0 {no named context} one {# context} other {# contexts}}; last on {day}.",

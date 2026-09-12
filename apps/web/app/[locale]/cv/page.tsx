@@ -702,12 +702,25 @@ export default async function VerifiedCvPage({
                       >
                         {tSkill(slug)}
                         {(cv.recordedHoursBySkill?.[slug] ?? 0) > 0 ? (
+                          // The chip names its base in words (re-audit F12):
+                          // which of the hours a manager confirmed and which
+                          // are the person's own record — a tier chip must
+                          // not read as "7 confirmed hours" on a hover title.
                           <span
                             className="ml-1 tabular-nums text-text-muted"
                             title={t("skillHoursHint")}
                             data-testid={`cv-skill-hours-${slug}`}
+                            data-confirmed-hours={cv.confirmedHoursBySkill?.[slug] ?? 0}
                           >
-                            · {t("skillHours", { hours: fmtHours(cv.recordedHoursBySkill![slug]!) })}
+                            ·{" "}
+                            {(cv.confirmedHoursBySkill?.[slug] ?? 0) > 0
+                              ? t("skillHoursConfirmed", {
+                                  hours: fmtHours(cv.recordedHoursBySkill![slug]!),
+                                  confirmed: fmtHours(cv.confirmedHoursBySkill![slug]!),
+                                })
+                              : t("skillHoursOwn", {
+                                  hours: fmtHours(cv.recordedHoursBySkill![slug]!),
+                                })}
                           </span>
                         ) : null}
                       </span>

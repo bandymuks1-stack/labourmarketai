@@ -44,6 +44,7 @@ import type {
 } from "@/components/app/journal-entry-composer";
 import { JournalModuleFields } from "@/components/app/journal-module-fields";
 import type { ModuleFieldValues } from "@/lib/journal/journal-module-fields";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 /**
  * COMPACT edit surface for an existing journal entry (journal compact edit
@@ -116,6 +117,12 @@ export function JournalEntryCompactEditor({
   // Advanced (collapsed) fields — preloaded from the persisted entry so an
   // untouched edit re-submits them unchanged.
   const [workDate, setWorkDate] = useState(entry.workDate ?? today);
+  // An entry with no saved day defaults to the PERSON's calendar day, not
+  // the server's UTC day (re-audit F10) — after mount, so hydration matches.
+  useEffect(() => {
+    if (entry.workDate) return;
+    setWorkDate((d) => (d === today ? personCalendarDay() : d));
+  }, [entry.workDate, today]);
   // Default to the entry's OWN engagement (preloaded) so a text-only edit never
   // silently reassigns the work to the worker's primary engagement. Falls back
   // to the primary only for a legacy entry with no stored engagement.

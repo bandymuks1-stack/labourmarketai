@@ -66,6 +66,36 @@
  * `null` means the ledger could not be read (UNKNOWN); an empty array means
  * it was read and holds nothing (ZERO). SEP-7 keeps the two apart.
  *
+ * ── FIVE RULES THE RE-AUDIT PINNED (2026-09-11, F8–F12) ───────────────────
+ *   F8  INVOLVEMENT IS NEVER A TOTAL. A skill's `sharedHours` is the whole
+ *       remainder of every entry it shares — five skills on one 8 h entry
+ *       each show 8 h of involvement, and the person's `sharedHours` is 8,
+ *       not 40. No consumer may add per-skill involvement; the guard
+ *       (`lib/guards/journal-work-intelligence.test.ts`, block 13) forbids
+ *       the sum in every surface that reads this model.
+ *   F9  OUTPUT IS COUNTED PER UNIT × KIND OF WORK. Every completed quantity
+ *       an entry recorded in a NON-time unit counts — one per unit within
+ *       the entry (the latest row for that unit, so a re-sent figure never
+ *       doubles), so "40 m² tiles and 12 m skirting" is two outputs, not
+ *       "12 m". Across entries a unit is totalled only inside one kind of
+ *       work: km driven and km of cable laid stay two lines, never 320 km.
+ *   F10 THE WORK DAY IS THE PERSON'S STATED DAY. Every intake surface that
+ *       records time sends `work_date` from the person's own calendar; the
+ *       UTC save day is only a fallback, and an entry placed by it is
+ *       counted as `entriesDayInferred` so the section can say so (SEP-1:
+ *       a placement is not a fact). Storage and display stay UTC (W12) —
+ *       a viewer-local model would be an owner decision, not a fix here.
+ *   F11 ONE SKILL, ONE ROW. Skill rows are collapsed by SLUG (the canonical
+ *       skill identity everywhere else — matching, recognition, the CV):
+ *       two rows for one slug are one skill with its strongest REAL tier,
+ *       and a link to either id is a link to that one skill — it can never
+ *       demote an entry to "shared" or list the skill twice.
+ *   F12 A CHIP NAMES ITS BASE. Per-skill `confirmedHours` travels with
+ *       `attributedHours` to every consumer (`confirmedHoursBySlug`), so a
+ *       chip inside a verification tier states in words which of its hours
+ *       a manager confirmed and which are the person's own record — never
+ *       only in a hover title.
+ *
  * ── WHAT THIS IS NOT ──────────────────────────────────────────────────────
  * Nothing here is a score, a rating, a rank or a tier OF THE PERSON. A share
  * is a fraction of that person's own attributed hours; a tier is the evidence
@@ -188,6 +218,10 @@ export type WorkPeriodTotals = {
   readonly entries: number;
   /** Entries in the period that record no usable duration at all. */
   readonly entriesWithoutDuration: number;
+  /** Entries in the period whose day is NOT the person's stated `work_date`
+   *  but the UTC day the row was saved (re-audit F10) — a placement the
+   *  reader may name, never silently a fact. */
+  readonly entriesDayInferred: number;
   /** Distinct calendar days that carry at least one duration line — an
    *  hour line or a `days`-unit line. */
   readonly daysWorked: number;
@@ -269,9 +303,14 @@ export type MonthWorkTime = {
 };
 
 /** OUTPUT — completed quantities in their RECORDED unit (m², pieces, …).
- *  Never converted, never mixed across units, never time. */
+ *  Never converted, never mixed across units, never time — and never mixed
+ *  across kinds of work either (re-audit F9): a unit is totalled only
+ *  inside one `activity` (the entry's own kind of work, the same key
+ *  `activities` uses; null when the entry names none). */
 export type OutputTotal = {
   readonly unit: string;
+  /** The kind of work the output belongs to (a profession slug), or null. */
+  readonly activity: string | null;
   readonly value: number;
   readonly entries: number;
 };
@@ -491,11 +530,14 @@ function directionOf(metrics: readonly WorkTimeMetricRow[]): string | null {
   return v || null;
 }
 
-/** The entry's completed OUTPUT: its latest `quantity` / `area_done` row in
- *  a NON-time unit, or null. A time unit is work time, handled elsewhere. */
-function outputOf(
+/** The entry's completed OUTPUTS: every `quantity` / `area_done` row in a
+ *  NON-time unit, ONE per unit — the latest row for that unit wins, so a
+ *  figure sent twice (a header quantity and a module field carrying the
+ *  same 40 m²) is counted once, while 40 m² and 12 m are both kept
+ *  (re-audit F9). A time unit is work time, handled elsewhere. */
+function outputsOf(
   metrics: readonly WorkTimeMetricRow[],
-): { unit: string; value: number } | null {
+): readonly { unit: string; value: number }[] {
   const rows = metrics
     .filter(
       (m) =>
@@ -508,8 +550,14 @@ function outputOf(
         !isWorkTimeUnit(m.unit_slug),
     )
     .sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
-  const row = rows[0];
-  return row ? { unit: row.unit_slug!.trim(), value: row.value_numeric as number } : null;
+  const byUnit = new Map<string, number>();
+  for (const row of rows) {
+    const unit = row.unit_slug!.trim();
+    if (!byUnit.has(unit)) byUnit.set(unit, row.value_numeric as number);
+  }
+  return [...byUnit.entries()]
+    .map(([unit, value]) => ({ unit, value }))
+    .sort((a, b) => a.unit.localeCompare(b.unit));
 }
 
 function hasDocumentSource(metrics: readonly WorkTimeMetricRow[]): boolean {
@@ -540,22 +588,47 @@ export function deriveWorkIntelligence(
 ): WorkIntelligence {
   // Declared rows carry the tier and the slug; a skill that appears only
   // through a link (slug unknown here) is skipped rather than invented.
-  const rowsById = new Map<string, { slug: string; tier: EvidenceTier }>();
-  for (const s of input.skills) {
+  // ONE SKILL, ONE ROW (re-audit F11): rows are collapsed by SLUG — the
+  // canonical skill identity — so two rows for one slug (whatever their
+  // ids) are one skill with its strongest REAL tier, and every id that
+  // carried the slug is an alias of the one canonical id (the smallest,
+  // so the result is independent of input order).
+  const canonicalIdBySlug = new Map<string, string>();
+  const canonicalIdByAlias = new Map<string, string>();
+  const tierBySlug = new Map<string, EvidenceTier>();
+  for (const s of [...input.skills].sort((a, b) => a.skillId.localeCompare(b.skillId))) {
     const slug = (s.slug ?? "").trim();
     if (!slug || !s.skillId) continue;
     const tier = deriveEvidenceTier({ verified: s.verified, source: s.source });
-    const existing = rowsById.get(s.skillId);
+    const canonical = canonicalIdBySlug.get(slug) ?? s.skillId;
+    canonicalIdBySlug.set(slug, canonical);
+    canonicalIdByAlias.set(s.skillId, canonical);
+    const existing = tierBySlug.get(slug);
     // Several rows for one skill: the strongest REAL tier wins, never an
     // averaged one.
-    if (!existing || EVIDENCE_TIER_RANK[tier] > EVIDENCE_TIER_RANK[existing.tier]) {
-      rowsById.set(s.skillId, { slug, tier });
+    if (!existing || EVIDENCE_TIER_RANK[tier] > EVIDENCE_TIER_RANK[existing]) {
+      tierBySlug.set(slug, tier);
     }
   }
+  const rowsById = new Map<string, { slug: string; tier: EvidenceTier }>();
+  for (const [slug, id] of canonicalIdBySlug) rowsById.set(id, { slug, tier: tierBySlug.get(slug)! });
   const idBySlug = new Map<string, string>();
   for (const [id, row] of rowsById) idBySlug.set(row.slug, id);
+  // A link to an alias id is a link to the one skill; an id no declared
+  // row carries stays as it is (a link is evidence even before the slug
+  // is known here — it is skipped in the skill list, never invented).
+  const canonicalLinkIds = (ids: readonly string[]): string[] => [
+    ...new Set(ids.map((id) => canonicalIdByAlias.get(id) ?? id)),
+  ];
 
-  const derived: DerivedEntry[] = input.entries.map((entry) => {
+  const derived: DerivedEntry[] = input.entries.map((raw) => {
+    const linkedSkillIds = canonicalLinkIds(raw.linkedSkillIds);
+    const linkProvenance = raw.linkProvenance
+      ? new Map(
+          [...raw.linkProvenance].map(([id, p]) => [canonicalIdByAlias.get(id) ?? id, p] as const),
+        )
+      : raw.linkProvenance;
+    const entry: WorkIntelligenceEntry = { ...raw, linkedSkillIds, linkProvenance };
     const time = deriveEntryWorkTime({
       entryId: entry.entryId,
       createdAt: entry.createdAt,
@@ -575,10 +648,12 @@ export function deriveWorkIntelligence(
     let confirmedDayUnits = 0;
     let entries = 0;
     let entriesWithoutDuration = 0;
+    let entriesDayInferred = 0;
     const days = new Set<string>();
     for (const d of derived) {
       if (!inPeriod(d.time.day, bounds)) continue;
       entries += 1;
+      if (d.time.dayBasis === "created") entriesDayInferred += 1;
       if (d.time.lines.length === 0) {
         entriesWithoutDuration += 1;
         continue;
@@ -601,6 +676,7 @@ export function deriveWorkIntelligence(
       confirmedDayUnits: round2(confirmedDayUnits),
       entries,
       entriesWithoutDuration,
+      entriesDayInferred,
       daysWorked: days.size,
     };
   });
@@ -833,19 +909,30 @@ export function deriveWorkIntelligence(
     }))
     .sort((x, y) => x.month.localeCompare(y.month));
 
-  // ── outputs (completed quantities in their recorded unit) ─────────────
-  const outAcc = new Map<string, { value: number; entries: number }>();
+  // ── outputs (completed quantities in their recorded unit, per unit ×
+  //    kind of work — re-audit F9) ─────────────────────────────────────
+  const outAcc = new Map<
+    string,
+    { unit: string; activity: string | null; value: number; entries: number }
+  >();
   for (const d of scoped) {
-    const o = outputOf(d.entry.metrics);
-    if (!o) continue;
-    const a = outAcc.get(o.unit) ?? { value: 0, entries: 0 };
-    a.value += o.value;
-    a.entries += 1;
-    outAcc.set(o.unit, a);
+    const activity = directionOf(d.entry.metrics);
+    for (const o of outputsOf(d.entry.metrics)) {
+      const key = `${o.unit}|${activity ?? ""}`;
+      const a = outAcc.get(key) ?? { unit: o.unit, activity, value: 0, entries: 0 };
+      a.value += o.value;
+      a.entries += 1;
+      outAcc.set(key, a);
+    }
   }
-  const outputs: OutputTotal[] = [...outAcc.entries()]
-    .map(([unit, a]) => ({ unit, value: round2(a.value), entries: a.entries }))
-    .sort((x, y) => y.entries - x.entries || x.unit.localeCompare(y.unit));
+  const outputs: OutputTotal[] = [...outAcc.values()]
+    .map((a) => ({ unit: a.unit, activity: a.activity, value: round2(a.value), entries: a.entries }))
+    .sort(
+      (x, y) =>
+        y.entries - x.entries ||
+        x.unit.localeCompare(y.unit) ||
+        String(x.activity ?? "").localeCompare(String(y.activity ?? "")),
+    );
 
   // ── evidence strength ─────────────────────────────────────────────────
   const evidence = { entries: 0, confirmed: 0, withPhotos: 0, fromDocument: 0, selfOnly: 0 };
@@ -984,6 +1071,17 @@ export function evidencedSkillSlugs(wi: WorkIntelligence): string[] {
 export function attributedHoursBySlug(wi: WorkIntelligence): Map<string, number> {
   const out = new Map<string, number>();
   for (const s of wi.skills) if (s.attributedHours > 0) out.set(s.slug, s.attributedHours);
+  return out;
+}
+
+/** CONFIRMED hours per skill slug — of `attributedHoursBySlug`, the part a
+ *  manager/client approved (re-audit F12). Travels with the attributed
+ *  figure so a chip can say which of its hours are confirmed and which are
+ *  the person's own record; a slug with attributed hours and no confirmed
+ *  ones is present at 0 (ZERO, not UNKNOWN). */
+export function confirmedHoursBySlug(wi: WorkIntelligence): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const s of wi.skills) if (s.attributedHours > 0) out.set(s.slug, s.confirmedHours);
   return out;
 }
 

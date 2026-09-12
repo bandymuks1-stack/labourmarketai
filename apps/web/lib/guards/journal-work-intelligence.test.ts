@@ -43,7 +43,13 @@ import {
  *     period, never attributed to a skill), named by provenance on the
  *     section, the CV and the chat, and fed into the day check so "an
  *     imported timesheet on top of a live record" is caught by arithmetic
- *     rather than claimed in a comment.
+ *     rather than claimed in a comment;
+ * 10. the five rules the re-audit pinned (2026-09-11, F8–F12): no consumer
+ *     sums per-skill involvement; output is counted per unit × kind of
+ *     work and every recorded output counts; the work day is the person's
+ *     stated day on every intake, and a save-day placement is counted and
+ *     said; two skill rows for one slug are one skill; a CV chip names its
+ *     base (confirmed vs own record) in words.
  */
 
 const root = join(__dirname, "..", "..");
@@ -68,6 +74,13 @@ const windowReport = read("lib/journal/journal-window-report.ts");
 const listCore = read("lib/journal/journal-list-core.ts");
 const allocations = read("lib/work-hours/allocations.ts");
 const cvPage = read("app/[locale]/cv/page.tsx");
+const workTime = read("lib/journal/work-time.ts");
+const display = read("lib/time/display.ts");
+const personDay = read("lib/time/person-calendar-day.ts");
+const workerSchemas = read("lib/conversation/worker-schemas.ts");
+const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+const compactEditor = read("components/app/journal-entry-compact-editor.tsx");
+const capabilities = read("lib/capabilities/registry.ts");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
@@ -738,6 +751,104 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
       expect(cvLine, `${loc}.cv.organizationRecordedHours`).toContain("{hours}");
       const chatLine = find(root, "journalOrgRecords");
       expect(chatLine, `${loc}.chat.journalOrgRecords`).toContain("{hours}");
+    }
+  });
+});
+
+describe("13 · the five rules the re-audit pinned (2026-09-11, F8–F12)", () => {
+  const consumers: Record<string, string> = {
+    component,
+    workflows,
+    cv,
+    cvPage,
+    reader,
+    windowReport,
+    personPage,
+    reportsPage,
+    listCore,
+  };
+
+  it("F8 · no consumer sums per-skill involvement — `sharedHours` is never reduced, added or accumulated outside the model", () => {
+    for (const [name, src] of Object.entries(consumers)) {
+      // a reduce / += / a + b over a skill's sharedHours is the 8 h × 5 = 40 h lie
+      expect(src, `${name}: reduce over sharedHours`).not.toMatch(/reduce\([^;]*\.sharedHours/);
+      expect(src, `${name}: += sharedHours`).not.toMatch(/\+=\s*[\w.]*\.sharedHours/);
+      expect(src, `${name}: skill.sharedHours + …`).not.toMatch(/\b(s|skill|sk|row|x|y)\.sharedHours\s*\+/);
+      expect(src, `${name}: … + skill.sharedHours`).not.toMatch(/\+\s*\b(s|skill|sk|row|x|y)\.sharedHours\b/);
+    }
+    // the model's own once-counted figure is the entry remainder, summed once per ENTRY
+    expect(model).toMatch(/if \(d\.basis === "shared"\) \{\s*sharedHours \+= remainder;\s*sharedEntries \+= 1;\s*for \(const id of ids\) accFor\(id\)\.shared \+= remainder;/);
+    expect(model).toContain("F8  INVOLVEMENT IS NEVER A TOTAL");
+  });
+
+  it("F9 · every recorded output counts, one per unit within the entry, totalled per unit × kind of work — the latest-row-only rule is gone", () => {
+    expect(model).not.toMatch(/function outputOf\(/);
+    expect(model).toMatch(/function outputsOf\(/);
+    expect(model).toMatch(/const byUnit = new Map<string, number>\(\);\s*for \(const row of rows\) \{\s*const unit = row\.unit_slug!\.trim\(\);\s*if \(!byUnit\.has\(unit\)\) byUnit\.set\(unit, row\.value_numeric as number\);/);
+    expect(model).toContain("readonly activity: string | null;");
+    expect(model).toMatch(/const activity = directionOf\(d\.entry\.metrics\);\s*for \(const o of outputsOf\(d\.entry\.metrics\)\) \{\s*const key = `\$\{o\.unit\}\|\$\{activity \?\? ""\}`;/);
+    // the section and the chat NAME the kind of work on the output line
+    expect(component).toMatch(/key=\{`\$\{o\.unit\}\|\$\{o\.activity \?\? ""\}`\}/);
+    expect(component).toMatch(/\{o\.activity \? \(\s*<span className="text-text-muted"> · \{activityName\(o\.activity\)\}<\/span>/);
+    expect(workflows).toMatch(/o\.activity\s*\? t\("wiOutputItemActivity", \{/);
+  });
+
+  it("F10 · the work day is the PERSON's stated day on every intake, and a save-day placement is counted and said", () => {
+    // the rule names its basis; the model counts the fallback per period
+    expect(workTime).toMatch(/export type WorkDayBasis = "stated" \| "created";/);
+    expect(workTime).toMatch(/export function resolveWorkDayDetail\(/);
+    expect(workTime).toMatch(/return \{ day: String\(createdAt \?\? ""\)\.slice\(0, 10\), basis: "created" \};/);
+    expect(model).toMatch(/if \(d\.time\.dayBasis === "created"\) entriesDayInferred \+= 1;/);
+    expect(component).toContain('data-testid="wi-day-inferred"');
+    expect(component).toMatch(/t\("dayInferred", \{ count: period\.entriesDayInferred \}\)/);
+    // every intake that records time carries a work_date: the chat and the MCP
+    // capability REQUIRE it at the floor every write crosses …
+    expect(workerSchemas).toMatch(/workDate: z\.string\(\)\.trim\(\)\.regex\(\/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\/\),/);
+    expect(capabilities).toMatch(/const journalDraftInput = workerLogWorkSchema\.extend\(\{/);
+    expect(writeCore).toMatch(/metric_slug: "work_date",\s*value_text: workDate,/);
+    // … and its default is the PERSON's calendar day, from the one helper
+    expect(personDay).toMatch(/export function personCalendarDay\(now: Date = new Date\(\)\): string \{\s*const p = [^\n]*\n\s*return `\$\{now\.getFullYear\(\)\}-\$\{p\(now\.getMonth\(\) \+ 1\)\}-\$\{p\(now\.getDate\(\)\)\}`;/);
+    expect(chat).toMatch(/function todayIso\(\): string \{\s*return personCalendarDay\(\);\s*\}/);
+    expect(composer).toMatch(/setWorkDate\(\(d\) => \(d === today \? personCalendarDay\(\) : d\)\);/);
+    expect(compactEditor).toMatch(/setWorkDate\(\(d\) => \(d === today \? personCalendarDay\(\) : d\)\);/);
+    // the ambient zone is read for INPUT only — never by the pure rule, the model or the reader
+    for (const [name, src] of Object.entries({ workTime, model, reader, windowReport, plausibility, display })) {
+      const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      expect(code, `${name} reads the ambient zone`).not.toMatch(/personCalendarDay|getTimezoneOffset|toLocaleDateString/);
+    }
+  });
+
+  it("F11 · two skill rows for one slug are ONE skill — collapsed by slug, aliases folded into the links, order-independent", () => {
+    expect(model).toMatch(/const canonicalIdBySlug = new Map<string, string>\(\);\s*const canonicalIdByAlias = new Map<string, string>\(\);/);
+    expect(model).toMatch(/for \(const s of \[\.\.\.input\.skills\]\.sort\(\(a, b\) => a\.skillId\.localeCompare\(b\.skillId\)\)\) \{/);
+    expect(model).toMatch(/const canonicalLinkIds = \(ids: readonly string\[\]\): string\[\] => \[\s*\.\.\.new Set\(ids\.map\(\(id\) => canonicalIdByAlias\.get\(id\) \?\? id\)\),\s*\];/);
+    expect(model).toMatch(/const linkedSkillIds = canonicalLinkIds\(raw\.linkedSkillIds\);/);
+  });
+
+  it("F12 · a CV chip names its base in words — confirmed hours travel with attributed hours, the qualifier is text, not a hover title", () => {
+    expect(model).toMatch(/export function confirmedHoursBySlug\(wi: WorkIntelligence\): Map<string, number>/);
+    expect(cv).toContain("confirmedHoursBySkill: Record<string, number> | null;");
+    expect(cv).toMatch(/confirmedHoursBySkill: workIntelligence\s*\? Object\.fromEntries\(confirmedHoursBySlug\(workIntelligence\)\)\s*: null,/);
+    expect(cvPage).toMatch(/t\("skillHoursConfirmed", \{/);
+    expect(cvPage).toMatch(/t\("skillHoursOwn", \{/);
+    // the bare "{hours} h" chip — its base only in a title — is no longer rendered
+    expect(cvPage).not.toMatch(/t\("skillHours", \{/);
+  });
+
+  it("every F9/F10/F12 sentence has copy in each locale the surfaces are published in, and none of it exposes internal vocabulary", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { intelligence: Record<string, string> };
+      expect(j.intelligence.dayInferred, `${loc}.intelligence.dayInferred`).toContain("{count, plural,");
+      expect(j.intelligence.dayInferred).not.toMatch(/work_date|created_at|UTC|timezone/i);
+      const root = JSON.parse(read(`messages/${loc}.json`)) as {
+        cvExport: Record<string, string>;
+        workspace: { ai: Record<string, string> };
+      };
+      expect(root.cvExport.skillHoursOwn, `${loc}.cvExport.skillHoursOwn`).toContain("{hours}");
+      expect(root.cvExport.skillHoursConfirmed, `${loc}.cvExport.skillHoursConfirmed`).toContain("{hours}");
+      expect(root.cvExport.skillHoursConfirmed).toContain("{confirmed}");
+      expect(root.workspace.ai.wiOutputItemActivity, `${loc}.workspace.ai.wiOutputItemActivity`).toContain("{activity}");
+      expect(root.workspace.ai.wiOutputItemActivity).toContain("{unit}");
     }
   });
 });

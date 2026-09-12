@@ -14,6 +14,7 @@ import {
 import { groupCvSkillTiers, type CvSkillTiers } from "./skill-tiers";
 import {
   attributedHoursBySlug,
+  confirmedHoursBySlug,
   type WorkIntelligence,
 } from "@/lib/journal/work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
@@ -176,6 +177,14 @@ export type VerifiedCvData = {
    * the chip then shows no figure rather than a zero (SEP-7).
    */
   recordedHoursBySkill: Record<string, number> | null;
+  /**
+   * Of `recordedHoursBySkill`, the hours a manager/client CONFIRMED — the
+   * model's own per-skill figure (re-audit F12), so a chip inside a
+   * verification tier can say in words which of its hours are confirmed
+   * and which are the person's own record. Present at 0 for every slug in
+   * `recordedHoursBySkill`; `null` exactly when that map is null.
+   */
+  confirmedHoursBySkill: Record<string, number> | null;
   /** All-time recorded hours (every entry once), or null when unreadable. */
   recordedHoursTotal: number | null;
   /** Of the total, hours a manager/client confirmed. */
@@ -662,6 +671,9 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       projects: projectsFromProof(proof),
       recordedHoursBySkill: workIntelligence
         ? Object.fromEntries(attributedHoursBySlug(workIntelligence))
+        : null,
+      confirmedHoursBySkill: workIntelligence
+        ? Object.fromEntries(confirmedHoursBySlug(workIntelligence))
         : null,
       recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
       recordedHoursConfirmed: workIntelligence
