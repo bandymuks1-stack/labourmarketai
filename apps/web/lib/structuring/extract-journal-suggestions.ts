@@ -92,25 +92,88 @@ export type JournalFragmentSuggestion = {
 };
 
 /**
- * Canonical duration-unit patterns (regex sources, folded-text compatible) —
- * the SAME unit families `findAllTimes` / `detectFragmentTime` match below.
- * Exported so the universal journal fragmenter strips trailing time
- * expressions with the exact same vocabulary instead of re-inventing it.
- * Note: written against FOLDED text (diacritics stripped → `minu[ct]`).
+ * The duration-unit vocabulary — ONE list per unit, lt / ru / en / nl / de
+ * (issue #1689, measured 2026-09-12 over the five routed locales: "5 hours",
+ * "5 hrs", "5 uur", "5 Std.", "5 Stunden", "2 Tage" read NO duration while
+ * every LT / RU form did — a worker writing in English, Dutch or German
+ * lost the hours-per-skill chain at the first step; and the one-letter
+ * abbreviation `d` read "Sumontavau 5 duris" / "Installed 5 doors" as
+ * FIVE DAYS of work because nothing bounded it). Regex sources over
+ * lower-cased text; every time regex in this file and the recognition-side
+ * fragmenter is built from these three lists — no other unit list exists.
+ *
+ *  - full words take any inflection ("valandas", "часов", "Stunden", "uren");
+ *  - a one-letter abbreviation (h / u / d / ч) must stand ALONE — no letter
+ *    or digit after it — so "5 hektarai", "5 užsakymai", "5 duris" are
+ *    quantities, never time;
+ *  - `minu[čct]` covers minutės / minutes / minuten / Minuten, on both the
+ *    original (č) and the folded (c) text.
  */
-export const DURATION_UNIT_PATTERNS: readonly string[] = [
+export const HOUR_UNIT_SOURCES: readonly string[] = [
   "valand[\\p{L}]*",
   "val\\.?",
-  "h",
   "час[\\p{L}]*",
-  "ч\\.?",
-  "minu[ct][\\p{L}]*",
+  "ч\\.?(?![\\p{L}\\p{N}])",
+  "hours?(?![\\p{L}])",
+  "hrs?\\.?(?![\\p{L}])",
+  "h\\.?(?![\\p{L}\\p{N}])",
+  "uur(?![\\p{L}])",
+  "uren(?![\\p{L}])",
+  "u\\.?(?![\\p{L}\\p{N}])",
+  "stunden?(?![\\p{L}])",
+  "std\\.?(?![\\p{L}])",
+];
+export const MINUTE_UNIT_SOURCES: readonly string[] = [
+  "minu[čct][\\p{L}]*",
   "min\\.?",
   "мин[\\p{L}]*\\.?",
+];
+export const DAY_UNIT_SOURCES: readonly string[] = [
   "dien[\\p{L}]*",
-  "d\\.?",
+  "d\\.?(?![\\p{L}\\p{N}])",
   "дн[\\p{L}]*",
   "день",
+  "days?(?![\\p{L}])",
+  "dag(?:en)?(?![\\p{L}])",
+  "tage?(?![\\p{L}])",
+];
+
+const HOUR_UNIT_RX_SRC = HOUR_UNIT_SOURCES.join("|");
+const MINUTE_UNIT_RX_SRC = MINUTE_UNIT_SOURCES.join("|");
+const DAY_UNIT_RX_SRC = DAY_UNIT_SOURCES.join("|");
+const DIGIT_HOURS_RX = new RegExp(
+  `(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})`,
+  "iu",
+);
+const DIGIT_MINUTES_RX = new RegExp(
+  `(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})`,
+  "iu",
+);
+const DIGIT_DAYS_RX = new RegExp(
+  `(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})`,
+  "iu",
+);
+/** One whole lower-cased word that IS a duration unit ("valandas", "hours",
+ *  "uur", "std", "h"). The word test of `isTimeToken`, and of the
+ *  recognition-side fragmenter's meaningfulness rule, for the same lists. */
+const DURATION_UNIT_WORD_RX = new RegExp(
+  `^(?:${HOUR_UNIT_RX_SRC}|${MINUTE_UNIT_RX_SRC}|${DAY_UNIT_RX_SRC})$`,
+  "iu",
+);
+export function isDurationUnitWord(word: string): boolean {
+  return DURATION_UNIT_WORD_RX.test(word);
+}
+
+/**
+ * Canonical duration-unit patterns (regex sources, folded-text compatible) —
+ * the three lists above, flattened. Exported so the universal journal
+ * fragmenter strips trailing time expressions with the exact same vocabulary
+ * instead of re-inventing it.
+ */
+export const DURATION_UNIT_PATTERNS: readonly string[] = [
+  ...HOUR_UNIT_SOURCES,
+  ...MINUTE_UNIT_SOURCES,
+  ...DAY_UNIT_SOURCES,
 ];
 
 /**
@@ -228,12 +291,9 @@ function findAllTimes(
   lower: string,
 ): { value: number; unitSlug: "hours" | "days" | "minutes" }[] {
   const out: { value: number; unitSlug: "hours" | "days" | "minutes" }[] = [];
-  const hoursRe =
-    /(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b|час[\p{L}]*|ч\.?(?=\s|[.,!?]|$))/giu;
-  const daysRe =
-    /(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*\b|d\.?\b|дн[\p{L}]*|день)/giu;
-  const minutesRe =
-    /(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?|мин[\p{L}]*\.?)/giu;
+  const hoursRe = new RegExp(DIGIT_HOURS_RX, "giu");
+  const daysRe = new RegExp(DIGIT_DAYS_RX, "giu");
+  const minutesRe = new RegExp(DIGIT_MINUTES_RX, "giu");
   for (const m of lower.matchAll(hoursRe)) {
     const v = toNumber(m[1]);
     if (v !== null) out.push({ value: v, unitSlug: "hours" });
@@ -329,7 +389,7 @@ function detectHoursWord(f: string): number | null {
 function detectMinutesWord(f: string): number | null {
   const keys = numberWordKeysAlternation();
   const m = new RegExp(
-    `(?:^|[^\\p{L}])(${keys})\\s+minu[čt][\\p{L}]*(?=\\s|[.,!?]|$)`,
+    `(?:^|[^\\p{L}])(${keys})\\s+(?:${MINUTE_UNIT_RX_SRC})(?=\\s|[.,!?]|$)`,
     "u",
   ).exec(f);
   if (m) {
@@ -373,9 +433,7 @@ function detectFragmentTime(
 
   // Hours contribution (digit OR word OR special idiom).
   let hours: number | null = null;
-  const digitHourMatch = f.match(
-    /(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b|час[\p{L}]*|ч\.?(?=\s|[.,!?]|$))/u,
-  );
+  const digitHourMatch = f.match(DIGIT_HOURS_RX);
   if (digitHourMatch) hours = toNumber(digitHourMatch[1]);
   if (hours === null) hours = detectHoursWord(f);
 
@@ -392,9 +450,7 @@ function detectFragmentTime(
 
   // Minutes contribution.
   let minutes: number | null = null;
-  const digitMinMatch = f.match(
-    /(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?|мин[\p{L}]*\.?)/u,
-  );
+  const digitMinMatch = f.match(DIGIT_MINUTES_RX);
   if (digitMinMatch) minutes = toNumber(digitMinMatch[1]);
   if (minutes === null) minutes = detectMinutesWord(f);
 
@@ -402,9 +458,7 @@ function detectFragmentTime(
   // compound with sub-hour units in journal language).
   if (hours === null && minutes === null) {
     let days: number | null = null;
-    const digitDayMatch = f.match(
-      /(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*|d\.?|дн[\p{L}]*|день)/u,
-    );
+    const digitDayMatch = f.match(DIGIT_DAYS_RX);
     if (digitDayMatch) days = toNumber(digitDayMatch[1]);
     if (days === null) days = detectDaysWord(f);
     if (days !== null) return { value: days, unitSlug: "days" };
@@ -433,7 +487,12 @@ function detectFragmentTime(
  * Written against the ORIGINAL text (case matters for the first rule).
  */
 const UNIT_ABBREVIATION_RX =
-  /((?:^|[^\p{L}])(?:val|min|h|d|ч|мин|vnt|kv|kg|m|м|шт)\.)(?=[ \t]+\p{Ll})/gu;
+  /((?:^|[^\p{L}])(?:val|min|h|hrs?|u|d|ч|мин|vnt|kv|kg|m|м|шт)\.)(?=[ \t]+\p{Ll})/gu;
+/** German "Std." stands before a capitalised noun as a rule ("5 Std. Fliesen
+ *  verlegt", "4 Std. Wände gestrichen") — the lower-case test above would end
+ *  the sentence after every German hour figure and the hours would lose
+ *  their work. Its dot is protected before any letter. */
+const DE_HOUR_ABBREVIATION_RX = /((?:^|[^\p{L}])std\.)(?=[ \t]+\p{L})/giu;
 const PROTECTED_DOT = "##DOT##";
 const PROTECTED_COMMA = "##COMMA##";
 
@@ -455,6 +514,7 @@ export function protectNonBoundaryDots(
 ): string {
   return text
     .replace(UNIT_ABBREVIATION_RX, (m) => m.replace(".", marks.dot))
+    .replace(DE_HOUR_ABBREVIATION_RX, (m) => m.replace(".", marks.dot))
     .replace(/(\d)\.(\d)/g, `$1${marks.dot}$2`)
     .replace(/(\d),(\d)/g, `$1${marks.comma}$2`)
     .replace(/(\p{L})\.(\p{L})/gu, `$1${marks.dot}$2`);
@@ -480,10 +540,11 @@ export const ITEMISING_COLON_RX = /:\s+(?=\d)/u;
 
 /** Split a free-text entry into discrete work fragments. */
 function splitFragments(text: string): { parts: string[]; headerCount: number } {
-  // RU «и» joins work items the same way LT "ir"/"bei" do.
+  // RU «и», EN "and", NL "en", DE "und" join work items the same way LT
+  // "ir"/"bei" do ("5 hours tiling and 4 hours painting" is two items).
   const normalized = protectNonBoundaryDots(text.replace(/\r/g, ""))
-    .replace(/,\s*(ir|bei|и)\s+/gi, " | ")
-    .replace(/\s+(ir|bei|и)\s+/gi, " | ");
+    .replace(/,\s*(ir|bei|и|and|en|und)\s+/gi, " | ")
+    .replace(/\s+(ir|bei|и|and|en|und)\s+/gi, " | ");
   // Do not split on plain commas if the next chunk introduces a `tema:`
   // (theme) qualifier — the theme is metadata for the previous fragment,
   // not a new fragment. We protect it with a placeholder first.
@@ -540,15 +601,7 @@ function isTimeOnlyFragment(fragment: string): boolean {
  *  token. Exactly the per-word test `isTimeOnlyFragment` always applied. */
 function isTimeToken(w: string, idiom: ReadonlySet<string>): boolean {
   if (/^\d+(?:[.,]\d+)?$/.test(w)) return true;
-  if (/^valand[\p{L}]*$/u.test(w)) return true;
-  if (/^minu[čt][\p{L}]*$/u.test(w)) return true;
-  if (/^dien[\p{L}]*$/u.test(w)) return true;
-  // RU duration nouns: час/часа/часов, мин/минут, дн/дня/дней, день, ч.
-  if (/^час[\p{L}]*$/u.test(w)) return true;
-  if (/^мин[\p{L}]*$/u.test(w)) return true;
-  if (/^дн[\p{L}]*$/u.test(w)) return true;
-  if (/^день$/u.test(w)) return true;
-  if (/^ч\.?$/u.test(w)) return true;
+  if (isDurationUnitWord(w)) return true;
   return idiom.has(w);
 }
 
@@ -559,10 +612,6 @@ const WHERE_IDIOM_TOKENS: ReadonlySet<string> = new Set([
   "половиной",
   ...Object.keys(LT_NUMBER_WORDS),
 ]);
-/** Unit abbreviations and EN / NL / DE unit words that the place rule strips
- *  beside the LT / RU vocabulary ("5 val. virtuvėje", "5 h in the kitchen",
- *  "5 uur in de keuken", "5 Std. im Lager"). */
-const WHERE_UNIT_WORD_RX = /^(?:val|min|h|hrs?|hours?|uur|std|stunden?)$/u;
 /** The bare work verb names no trade: "dirbau virtuvėje" is still only a
  *  place. First-person and plural past forms, lt/en/ru/nl/de. */
 const GENERIC_WORK_VERB_RX =
@@ -614,9 +663,7 @@ export function describesWhereOnly(phrase: string): boolean {
     .split(/\s+/u)
     .filter(Boolean)
     .map((w) => w.toLowerCase())
-    .filter(
-      (w) => !isTimeToken(w, WHERE_IDIOM_TOKENS) && !WHERE_UNIT_WORD_RX.test(w),
-    );
+    .filter((w) => !isTimeToken(w, WHERE_IDIOM_TOKENS));
   if (words.length === 0) return false;
   if (words.some((w) => !/^\p{L}+$/u.test(w))) return false;
   if (GENERIC_WORK_VERB_RX.test(words[0])) words.shift();

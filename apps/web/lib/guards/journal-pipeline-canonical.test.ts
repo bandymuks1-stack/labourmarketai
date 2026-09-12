@@ -414,3 +414,80 @@ describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, n
     expect(RECOGNITION).toMatch(/\| "stated_total"/);
   });
 });
+
+describe("the duration-unit vocabulary (#1689, measured 2026-09-12) — ONE list per unit, five routed languages, on both sides", () => {
+  const EXTRACTOR = read("lib/structuring/extract-journal-suggestions.ts");
+
+  it("every time regex is built from the three exported lists — no second unit list anywhere", () => {
+    expect(EXTRACTOR).toMatch(/export const HOUR_UNIT_SOURCES: readonly string\[\]/);
+    expect(EXTRACTOR).toMatch(/export const MINUTE_UNIT_SOURCES: readonly string\[\]/);
+    expect(EXTRACTOR).toMatch(/export const DAY_UNIT_SOURCES: readonly string\[\]/);
+    expect(EXTRACTOR).toMatch(/export function isDurationUnitWord\(word: string\): boolean/);
+    // the flattened export the fragmenter strips trailing time with is the same three lists
+    expect(EXTRACTOR).toMatch(
+      /export const DURATION_UNIT_PATTERNS: readonly string\[\] = \[\s*\.\.\.HOUR_UNIT_SOURCES,\s*\.\.\.MINUTE_UNIT_SOURCES,\s*\.\.\.DAY_UNIT_SOURCES,\s*\]/,
+    );
+    // no inline hour / minute / day alternation survives outside the lists
+    // (regex-literal and template-string spellings both)
+    const afterLists = EXTRACTOR.slice(EXTRACTOR.indexOf("const HOUR_UNIT_RX_SRC"));
+    for (const inline of [
+      String.raw`valand[\p{L}]*|val`,
+      String.raw`valand[\\p{L}]*|val`,
+      "minu[čt]",
+      "minu[čct]",
+      String.raw`dien[\p{L}]*|d`,
+      String.raw`dien[\\p{L}]*|d`,
+      String.raw`h\b`,
+    ]) {
+      expect(afterLists).not.toContain(inline);
+    }
+    expect(EXTRACTOR).toMatch(/f\.match\(DIGIT_HOURS_RX\)/);
+    expect(EXTRACTOR).toMatch(/f\.match\(DIGIT_MINUTES_RX\)/);
+    expect(EXTRACTOR).toMatch(/f\.match\(DIGIT_DAYS_RX\)/);
+    expect(EXTRACTOR).toMatch(/new RegExp\(DIGIT_HOURS_RX, "giu"\)/);
+    // the word test reads the lists, never its own regexes
+    expect(EXTRACTOR).toMatch(/if \(isDurationUnitWord\(w\)\) return true;/);
+    expect(EXTRACTOR).not.toMatch(/WHERE_UNIT_WORD_RX/);
+    // the recognition side's meaningfulness rule reads the SAME word test
+    expect(FRAGMENTER).toMatch(/isDurationUnitWord,/);
+    expect(FRAGMENTER).toMatch(/QUANTITY_TOKEN_RE\.test\(tok\) \|\| isDurationUnitWord\(tok\)/);
+    expect(FRAGMENTER).not.toContain(String.raw`valand\p{L}*|min`);
+    expect(FRAGMENTER).not.toContain("UNIT_TOKEN_RE");
+  });
+
+  it("the lists carry every routed language and bound the one-letter abbreviations", () => {
+    const list = (name: string): string =>
+      EXTRACTOR.slice(
+        EXTRACTOR.indexOf(`export const ${name}`),
+        EXTRACTOR.indexOf("];", EXTRACTOR.indexOf(`export const ${name}`)),
+      );
+    const hours = list("HOUR_UNIT_SOURCES");
+    for (const form of ["valand", "час", "hours?", "hrs?", "uur", "uren", "stunden?", "std"]) {
+      expect(hours).toContain(form);
+    }
+    const days = list("DAY_UNIT_SOURCES");
+    for (const form of ["dien", "дн", "days?", "dag(?:en)?", "tage?"]) {
+      expect(days).toContain(form);
+    }
+    expect(list("MINUTE_UNIT_SOURCES")).toContain("minu[čct]");
+    // h / u / d / ч never swallow the word they begin ("5 duris" is doors, not
+    // days): the one-letter forms carry the letter-or-digit lookahead.
+    const bounded = (letter: string): string =>
+      String.raw`"${letter}\\.?(?![\\p{L}\\p{N}])"`;
+    expect(hours).toContain(bounded("h"));
+    expect(hours).toContain(bounded("u"));
+    expect(hours).toContain(bounded("ч"));
+    expect(days).toContain(bounded("d"));
+    expect(days).not.toContain(String.raw`"d\\.?",`);
+    // German "Std." keeps its dot before the capitalised noun that follows it
+    expect(EXTRACTOR).toContain(
+      String.raw`const DE_HOUR_ABBREVIATION_RX = /((?:^|[^\p{L}])std\.)(?=[ \t]+\p{L})/giu;`,
+    );
+    expect(EXTRACTOR).toContain(
+      '.replace(DE_HOUR_ABBREVIATION_RX, (m) => m.replace(".", marks.dot))',
+    );
+    // the item conjunctions of the three languages split items on both sides
+    expect(EXTRACTOR).toContain("(ir|bei|и|and|en|und)");
+    expect(FRAGMENTER).toContain(String.raw`ir|bei|taip\s+pat|and|also|en|und|и`);
+  });
+});

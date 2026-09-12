@@ -20,8 +20,8 @@
  *     val. Y") closes the header phrase, the same cut the extractor makes
  *     (`ITEMISING_COLON_RX`) — so a persisted item re-fragments to the
  *     derivation's own id;
- *   • clause conjunctions (LT ir / bei / taip pat, EN and / also,
- *     RU и / а также) — ONLY when the left side already carries a verb-like
+ *   • clause conjunctions (LT ir / bei / taip pat, EN and / also, NL en,
+ *     DE und, RU и / а также) — ONLY when the left side already carries a verb-like
  *     token AND the right side starts a new verb phrase. "su X ir Y" tool
  *     enumerations never split: when the nearest token left of the
  *     conjunction chain is an instrumental preposition (su / with / с)
@@ -36,6 +36,7 @@ import {
   DURATION_UNIT_PATTERNS,
   ITEMISING_COLON_RX,
   QUANTITY_UNIT_PATTERNS,
+  isDurationUnitWord,
   protectNonBoundaryDots,
 } from "./extract-journal-suggestions";
 
@@ -75,7 +76,8 @@ const TRAILING_SEPARATORS_RE = /[\s,;:–—-]+$/u;
 const LEADING_SEPARATORS_RE = /^[\s,;:–—-]+/u;
 
 /** Clause conjunctions that MAY split two work items (folded forms). */
-const CONJUNCTION_RE = /\s+(?:ir|bei|taip\s+pat|and|also|и|а\s+также)\s+/giu;
+const CONJUNCTION_RE =
+  /\s+(?:ir|bei|taip\s+pat|and|also|en|und|и|а\s+также)\s+/giu;
 
 /** Instrumental prepositions — a conjunction directly inside a "su X ir Y"
  *  enumeration joins nouns and must never split. */
@@ -192,9 +194,10 @@ const STOPWORDS: ReadonlySet<string> = new Set([
   "за",
 ]);
 
-/** Time/quantity unit tokens (folded) — never make a fragment meaningful. */
-const UNIT_TOKEN_RE =
-  /^(?:val|valand\p{L}*|min|minu[ct]\p{L}*|h|d|vnt|kg|m2|m|kv|час\p{L}*|мин\p{L}*|дн\p{L}*|день|ч|шт|кг|м)$/u;
+/** Quantity unit tokens (folded) — never make a fragment meaningful. The
+ *  duration units come from the extractor's ONE vocabulary
+ *  (`isDurationUnitWord`: valand* / hours / uur / Std / час* …). */
+const QUANTITY_TOKEN_RE = /^(?:vnt|kg|m2|m|kv|шт|кг|м)$/u;
 
 function tokenize(folded: string): string[] {
   return folded.split(/[^\p{L}\p{N}']+/u).filter(Boolean);
@@ -207,7 +210,7 @@ function isMeaningful(normalized: string): boolean {
   for (const tok of tokenize(normalized)) {
     if (tok.length < 3) continue;
     if (STOPWORDS.has(tok)) continue;
-    if (UNIT_TOKEN_RE.test(tok)) continue;
+    if (QUANTITY_TOKEN_RE.test(tok) || isDurationUnitWord(tok)) continue;
     if (/^\d+$/.test(tok)) continue;
     return true;
   }
