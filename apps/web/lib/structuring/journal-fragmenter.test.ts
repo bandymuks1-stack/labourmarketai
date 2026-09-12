@@ -193,6 +193,70 @@ describe("INCIDENT PIN — the production text yields exactly 3 meaningful fragm
   });
 });
 
+describe("non-boundary dots + the itemising colon — ONE rule with the suggestion extractor (#1689)", () => {
+  /** The owner's own day (2026-09-11): a stated total, a context name with a
+   *  dot inside it, three items each with a unit abbreviation before a
+   *  lower-case verb. Before this rule the recognition side cut
+   *  "LabourMarket" | "ai: 5 val" | "programavau" | "2 val" | "testavau" … —
+   *  the name lost, every item's hours parted from its work. */
+  const OWNER_DAY =
+    "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių.";
+
+  it("the owner's sentence → the header and its three items, the name whole, each item with its hours", () => {
+    expect(fragmentJournalText(OWNER_DAY).map((f) => f.text)).toEqual([
+      "Šiandien 9 valandas dirbau LabourMarket.ai",
+      "5 val. programavau",
+      "2 val. testavau",
+      "2 val. ieškojau partnerių",
+    ]);
+    expect(fragmentJournalText(OWNER_DAY)[0].normalized).toBe("siandien 9 valandas dirbau labourmarket.ai");
+  });
+
+  it("the items the extractor persists re-fragment to the derivation's OWN ids (the join holds)", () => {
+    const derived = fragmentJournalText(OWNER_DAY);
+    for (const phrase of ["5 val. programavau", "2 val. testavau", "2 val. ieškojau partnerių"]) {
+      const again = fragmentJournalText(phrase);
+      expect(again).toHaveLength(1);
+      expect(derived.some((f) => f.id === again[0].id)).toBe(true);
+    }
+  });
+
+  it("a unit dot before an UPPER-case word still ends the sentence — two items stating their own time stay two", () => {
+    expect(fragmentJournalText("Mūrijau sieną 5 val. Klojau plyteles 2 val.").map((f) => f.normalized)).toEqual([
+      "murijau siena",
+      "klojau plyteles",
+    ]);
+  });
+
+  it.each([
+    ["5 val. programavau", ["5 val. programavau"]],
+    ["30 min. pertrauka, 2 val. dažiau", ["30 min. pertrauka", "2 val. dažiau"]],
+    ["2 ч. тестировал систему", ["2 ч. тестировал систему"]],
+    ["Dirbau www.imone.lt svetainėje 3.5 val.", ["Dirbau www.imone.lt svetainėje 3.5 val"]],
+    ["Klojau laminatą 1,5 val", ["Klojau laminatą 1,5 val"]],
+  ])("%s never splits on the protected dot", (input, texts) => {
+    expect(fragmentJournalText(input).map((f) => f.text)).toEqual(texts);
+  });
+
+  it("the itemising colon splits only before a digit — 'tema: sienos' stays one item", () => {
+    expect(fragmentJournalText("Dažiau 4 val., tema: sienos").map((f) => f.text)).toEqual([
+      "Dažiau 4 val",
+      "tema: sienos",
+    ]);
+    expect(fragmentJournalText("Dirbau 6 val.: 4 val. dažiau, 2 val. glaisčiau").map((f) => f.text)).toEqual([
+      "Dirbau 6 val",
+      "4 val. dažiau",
+      "2 val. glaisčiau",
+    ]);
+  });
+
+  it("the raw text keeps its dot — only the cut moved", () => {
+    const [first] = fragmentJournalText("Dirbau LabourMarket.ai projekte 2 val");
+    expect(first.text).toBe("Dirbau LabourMarket.ai projekte 2 val");
+    expect(first.normalized).toBe("dirbau labourmarket.ai projekte");
+  });
+});
+
 describe("isVerbLikeToken heuristics", () => {
   it.each(["ploviau", "tvarkiau", "kodavau", "dirbau", "naudojau", "cleaned", "painting", "мыл", "убирал", "built"])
     ("verb-like: %s", (tok) => {

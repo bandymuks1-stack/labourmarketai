@@ -105,6 +105,49 @@ describe("mapRecognitionToPersistedFragments — the join between the two fragme
     ]);
   });
 
+  it("the owner's itemised day: each recognised skill sits on the persisted item that names it (#1689)", () => {
+    const text =
+      "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių.";
+    const rec = deriveJournalRecognition(text, {
+      declaredSlugs: new Set(),
+      entryRejections: NO_REJECTIONS,
+    });
+    const persisted = parsePersistedFragments(persistedFor(text));
+    // the extractor persists the three items — the 9 h header is the stated
+    // total, never a fourth item
+    expect(persisted.map((p) => p.phrase)).toEqual([
+      "5 val. programavau",
+      "2 val. testavau",
+      "2 val. ieškojau partnerių",
+    ]);
+    // the recognition side cuts at the same places: the name is one token,
+    // the items keep their hours, nothing is silently lost
+    expect(rec.fragments.map((f) => f.text)).toEqual([
+      "Šiandien 9 valandas dirbau LabourMarket.ai",
+      "5 val. programavau",
+      "2 val. testavau",
+      "2 val. ieškojau partnerių",
+    ]);
+    expect(rec.coverage.silentlyLostFragmentCount).toBe(0);
+    const rows = mapRecognitionToPersistedFragments({
+      persisted,
+      derivationFragments: rec.fragments,
+      skills: rec.recognizedSkills,
+    });
+    // every recognised skill lands on exactly one persisted item, by the
+    // derivation's own id (no loose end-anchored join needed)
+    expect(rows.length).toBe(rec.recognizedSkills.length);
+    expect(rows.length).toBeGreaterThan(0);
+    const byIndex = new Map(rows.map((r) => [r.slug, r.index] as const));
+    for (const s of rec.recognizedSkills) {
+      const idx = byIndex.get(s.slug);
+      expect(idx, s.slug).toBeDefined();
+      expect(persisted[idx! - 1]!.phrase).toBe(
+        rec.fragments.find((f) => s.fragmentIds.includes(f.id))!.text,
+      );
+    }
+  });
+
   it("a skill recognised on NO persisted phrase yields no row (fails closed, never guesses)", () => {
     const rows = mapRecognitionToPersistedFragments({
       persisted: [{ index: 1, phrase: "Klijavau plyteles 6 val" }],

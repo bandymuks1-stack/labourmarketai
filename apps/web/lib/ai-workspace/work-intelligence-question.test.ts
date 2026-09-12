@@ -178,6 +178,28 @@ describe("line 2 — 'Kiek programavau?' answers the ONE skill, naming window an
     expect(wiMock).toHaveBeenCalledWith({ focus: "all" });
   });
 
+  it("the subject is read in the other routed languages too — EN 'program', DE, NL, RU (#1689 line 2)", async () => {
+    for (const q of [
+      "How much did I program?",
+      "Wie viel habe ich programmiert?",
+      "Hoeveel heb ik geprogrammeerd?",
+      "Сколько я программировал?",
+    ]) {
+      const r = await runWorkIntelligenceQuestion(q, "journal-skill");
+      const text = r.kind === "answer" ? r.text : "";
+      expect(text, q).toContain("workspace.ai.wiSkillHours(");
+      expect(text, q).toContain('"skill":"skillNames.programming"');
+      expect(text, q).toContain('"hours":"5"');
+    }
+    for (const q of ["Where did I use tiling?", "Waar heb ik tegelen gebruikt?", "Wo habe ich Fliesenlegen verwendet?"]) {
+      const r = await runWorkIntelligenceQuestion(q, "journal-skill");
+      const text = r.kind === "answer" ? r.text : "";
+      expect(text, q).toContain("workspace.ai.wiSkillHours(");
+      expect(text, q).toContain('"hours":"8"');
+      expect(text, q).toContain('"confirmed":"8"');
+    }
+  });
+
   it("the named period scopes the model and the answer says which", async () => {
     const r = await runWorkIntelligenceQuestion("Kiek programavau šį mėnesį?", "journal-skill");
     const text = r.kind === "answer" ? r.text : "";

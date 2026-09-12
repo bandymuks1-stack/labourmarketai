@@ -437,12 +437,27 @@ const UNIT_ABBREVIATION_RX =
 const PROTECTED_DOT = "##DOT##";
 const PROTECTED_COMMA = "##COMMA##";
 
-function protectNonBoundaryDots(text: string): string {
+/**
+ * Replace every non-boundary dot/comma with the given marks so a later split
+ * on `.` / `,` leaves them alone. Exported so the universal journal
+ * fragmenter (`./journal-fragmenter`, the recognition side) protects the
+ * SAME dots this extractor protects — two fragmenters, one rule; when both
+ * cut at the same places a persisted phrase re-fragments to the derivation's
+ * own ids (see `mapRecognitionToPersistedFragments`). Callers that need
+ * index alignment pass single-character marks.
+ */
+export function protectNonBoundaryDots(
+  text: string,
+  marks: { readonly dot: string; readonly comma: string } = {
+    dot: PROTECTED_DOT,
+    comma: PROTECTED_COMMA,
+  },
+): string {
   return text
-    .replace(UNIT_ABBREVIATION_RX, (m) => m.replace(".", PROTECTED_DOT))
-    .replace(/(\d)\.(\d)/g, `$1${PROTECTED_DOT}$2`)
-    .replace(/(\d),(\d)/g, `$1${PROTECTED_COMMA}$2`)
-    .replace(/(\p{L})\.(\p{L})/gu, `$1${PROTECTED_DOT}$2`);
+    .replace(UNIT_ABBREVIATION_RX, (m) => m.replace(".", marks.dot))
+    .replace(/(\d)\.(\d)/g, `$1${marks.dot}$2`)
+    .replace(/(\d),(\d)/g, `$1${marks.comma}$2`)
+    .replace(/(\p{L})\.(\p{L})/gu, `$1${marks.dot}$2`);
 }
 
 function restoreProtected(fragment: string): string {
@@ -461,7 +476,7 @@ function restoreProtected(fragment: string): string {
  * separately so the multi-fragment pass can read it as the STATED TOTAL of
  * the items that follow, never as one more item.
  */
-const ITEMISING_COLON_RX = /:\s+(?=\d)/u;
+export const ITEMISING_COLON_RX = /:\s+(?=\d)/u;
 
 /** Split a free-text entry into discrete work fragments. */
 function splitFragments(text: string): { parts: string[]; headerCount: number } {
