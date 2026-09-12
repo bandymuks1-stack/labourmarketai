@@ -581,7 +581,7 @@
       "new": "nauja per paskutines 30 d."
     },
     "outputsTitle": "Atlikta",
-    "multiActivityHours": "{hours} val. iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} aprašo kelių rūšių darbą — padalyta pagal darbų rūšis, o ne pagal įgūdį (susieti tik su vienu įgūdžiu).",
+    "multiActivityHours": "{hours} val. iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} užfiksuotos keliomis dalimis su laiku (skirtingos darbo rūšys arba rūšis neįvardyta) — padalyta pagal darbų rūšis, o ne pagal įgūdį (susieti tik su vienu įgūdžiu).",
     "trendNewShort": "nauja",
     "checks": {
       "title": "Verta patikrinti",
@@ -614,7 +614,14 @@
       "provenance": "Iš kur valandos: {worker} val. įvedė žmogus, {extracted} val. atpažinta iš jo teksto, {corrected} val. pataisė vadovas.",
       "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda priskiriama įgūdžiui tik tada, kai įrašas susietas su vienu įgūdžiu arba kai paties žmogaus frazė įvardija tą įgūdį.",
       "scopeNote": "Tai ta žmogaus įrašų dalis, kurią jūsų organizacija turi teisę matyti — darbas, užfiksuotas jūsų pačių bendradarbiavimui. Tai nėra visa jo istorija ir nėra įvertinimas. Vadovo patvirtinimas iš jūsų gautųjų įrašo valandas paverčia vadovo patvirtintomis valandomis čia ir žmogaus CV."
-    }
+    },
+    "confirmedOfDays": "{confirmed} iš {total} d. patvirtinta vadovo įrašu",
+    "confirmedNoDuration": "{confirmed} iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} patvirtinta vadovo ar kliento — užfiksuota be trukmės, todėl valandų rodyti nėra",
+    "activityShareOf": "{percent} iš visų {total} val. užfiksuotų",
+    "unlabelledHours": "{hours} val. iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} be įvardytos darbo rūšies — įskaičiuotos į bendrą sumą, į šį sąrašą nepatenka",
+    "skillsCoverage": "Įgūdžiams priskirta {attributed} val. iš {total} val. užfiksuotų ({period}). Kiekvienas % žemiau yra dalis iš tų {attributed} val., o ne iš viso užfiksuoto laiko.",
+    "shareOf": "{percent} iš {base} val. priskirtų",
+    "activitiesCoverage": "Darbo rūšis įvardyta {labelled} val. iš {total} val.; kiekvienas % yra dalis iš visų {total} val."
   },
   "verification": {
     "state": {

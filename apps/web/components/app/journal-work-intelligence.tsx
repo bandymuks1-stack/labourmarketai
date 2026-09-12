@@ -191,7 +191,10 @@ export async function JournalWorkIntelligence({
   const otherActivities = activities.slice(1);
   const months = wi.months.slice(-MAX_MONTHS);
   const monthMax = Math.max(0, ...months.map((m) => m.hours));
-  const hasAnyHours = wi.totalHours > 0;
+  // Work recorded in DAYS is a duration too — "no entry with a duration"
+  // was false for a 2-day entry (re-audit F5).
+  const allPeriod = wi.periods.find((p) => p.key === "all") ?? period;
+  const hasAnyHours = wi.totalHours > 0 || allPeriod.dayUnits > 0;
   const noEntriesAtAll = wi.totalEntries === 0;
   const openChecks = wi.checks.filter((c) => c.acknowledged === null);
   const ackedChecks = wi.checks.filter((c) => c.acknowledged !== null);
@@ -384,8 +387,18 @@ export async function JournalWorkIntelligence({
                         data-testid="wi-main-activity"
                       >
                         {activityName(mainActivity.key)}
-                        <span className="ml-2 font-normal tabular-nums text-text-secondary">
+                        <span
+                          className="ml-2 font-normal tabular-nums text-text-secondary"
+                          data-testid="wi-main-activity-share"
+                          data-share={mainActivity.share}
+                        >
                           {h(mainActivity.hours)}
+                          {mainActivity.share > 0
+                            ? ` · ${t("activityShareOf", {
+                                percent: fmtPct(mainActivity.share, locale),
+                                total: fmtHours(period.hours, locale),
+                              })}`
+                            : ""}
                         </span>
                       </span>
                       {otherActivities.length > 0 && (
@@ -397,6 +410,21 @@ export async function JournalWorkIntelligence({
                           {otherActivities
                             .map((a) => activityName(a.key))
                             .join(", ")}
+                        </span>
+                      )}
+                      {/* the coverage of this reading — timed parts with no
+                        kind of work stay in the base and are named here,
+                        never dropped (re-audit F2) */}
+                      {wi.unlabelledHours > 0 && (
+                        <span
+                          className="text-meta leading-relaxed text-text-muted"
+                          data-testid="wi-unlabelled-hours"
+                          data-hours={wi.unlabelledHours}
+                        >
+                          {t("unlabelledHours", {
+                            hours: fmtHours(wi.unlabelledHours, locale),
+                            count: wi.unlabelledEntries,
+                          })}
                         </span>
                       )}
                     </>
@@ -429,13 +457,36 @@ export async function JournalWorkIntelligence({
                   <span
                     className="text-base font-semibold tabular-nums text-text-primary"
                     data-testid="wi-confirmed-hours"
+                    data-confirmed-hours={period.confirmedHours}
+                    data-confirmed-day-units={period.confirmedDayUnits}
+                    data-confirmed-entries={wi.evidence.confirmed}
                   >
+                    {/* The headline and the count below it read the SAME
+                      review state: hours, then day units, then entries
+                      confirmed without a duration — never "no confirmations"
+                      above "1 confirmed" (re-audit F5). */}
                     {period.hours > 0
                       ? t("confirmedOf", {
                           confirmed: fmtHours(period.confirmedHours, locale),
                           total: fmtHours(period.hours, locale),
-                        })
-                      : t("confirmedNone")}
+                        }) +
+                        (period.dayUnits > 0
+                          ? ` · ${t("confirmedOfDays", {
+                              confirmed: fmtHours(period.confirmedDayUnits, locale),
+                              total: fmtHours(period.dayUnits, locale),
+                            })}`
+                          : "")
+                      : period.dayUnits > 0
+                        ? t("confirmedOfDays", {
+                            confirmed: fmtHours(period.confirmedDayUnits, locale),
+                            total: fmtHours(period.dayUnits, locale),
+                          })
+                        : wi.evidence.confirmed > 0
+                          ? t("confirmedNoDuration", {
+                              confirmed: wi.evidence.confirmed,
+                              entries: wi.evidence.entries,
+                            })
+                          : t("confirmedNone")}
                   </span>
                   <span
                     className="text-meta leading-relaxed text-text-muted"
@@ -465,6 +516,23 @@ export async function JournalWorkIntelligence({
                 <p className="text-meta leading-relaxed text-text-muted">
                   {tk("skillsHint")}
                 </p>
+                {/* the base every % below is a share OF — stated in words,
+                  not only in an aria-label: "5 h · 100 %" over 95 unlinked
+                  hours was a full bar with no visible base (re-audit F3) */}
+                {period.hours > 0 && (
+                  <p
+                    className="text-meta leading-relaxed text-text-secondary"
+                    data-testid="wi-skills-coverage"
+                    data-attributed-hours={wi.attributedHours}
+                    data-period-hours={period.hours}
+                  >
+                    {t("skillsCoverage", {
+                      attributed: fmtHours(wi.attributedHours, locale),
+                      total: fmtHours(period.hours, locale),
+                      period: t(`period.${wi.focus}`),
+                    })}
+                  </p>
+                )}
                 {skills.length > 0 && (
                   <ul className="flex flex-col gap-1.5">
                     {skills.map((s) => {
@@ -499,10 +567,16 @@ export async function JournalWorkIntelligence({
                             )}
                             <span className="flex flex-wrap items-baseline gap-x-2 text-meta tabular-nums text-text-muted">
                               {s.attributedHours > 0 ? (
-                                <span className="font-medium text-text-primary">
+                                <span
+                                  className="font-medium text-text-primary"
+                                  data-testid={`wi-skill-share-${s.slug}`}
+                                >
                                   {h(s.attributedHours)}
                                   {wi.attributedHours > 0 && s.share > 0
-                                    ? ` · ${fmtPct(s.share, locale)}`
+                                    ? ` · ${t("shareOf", {
+                                        percent: fmtPct(s.share, locale),
+                                        base: fmtHours(wi.attributedHours, locale),
+                                      })}`
                                     : ""}
                                 </span>
                               ) : (
@@ -615,6 +689,19 @@ export async function JournalWorkIntelligence({
                     <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                       {t("activitiesTitle")}
                     </h3>
+                    {period.hours > 0 && (
+                      <p
+                        className="text-meta leading-relaxed text-text-muted"
+                        data-testid="wi-activities-coverage"
+                        data-activity-hours={wi.activityHours}
+                        data-unlabelled-hours={wi.unlabelledHours}
+                      >
+                        {t("activitiesCoverage", {
+                          labelled: fmtHours(wi.activityHours, locale),
+                          total: fmtHours(period.hours, locale),
+                        })}
+                      </p>
+                    )}
                     <ul className="flex flex-col gap-1">
                       {activities.map((a) => (
                         <li
@@ -622,6 +709,7 @@ export async function JournalWorkIntelligence({
                           className="flex items-baseline justify-between gap-3 text-sm"
                           data-testid="wi-activity"
                           data-trend={a.trend}
+                          data-share={a.share}
                         >
                           <span className="min-w-0 break-words text-text-primary">
                             {activityName(a.key)}
@@ -638,7 +726,8 @@ export async function JournalWorkIntelligence({
                             )}
                           </span>
                           <span className="shrink-0 text-meta tabular-nums text-text-muted">
-                            {h(a.hours)} ·{" "}
+                            {h(a.hours)}
+                            {a.share > 0 ? ` · ${fmtPct(a.share, locale)}` : ""} ·{" "}
                             {t("activityMeta", {
                               entries: a.entries,
                               contexts: a.contexts,

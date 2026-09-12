@@ -581,7 +581,7 @@
       "new": "nieuw in de laatste 30 dagen"
     },
     "outputsTitle": "Afgerond",
-    "multiActivityHours": "{hours} u over {count, plural, one {# registratie} other {# registraties}} beschrijven meerdere soorten werk — verdeeld per soort werk, niet per vaardigheid (aan één vaardigheid gekoppeld).",
+    "multiActivityHours": "{hours} u over {count, plural, one {# registratie} other {# registraties}} zijn als meerdere getimede delen geregistreerd (verschillende soorten werk, of geen benoemd) — verdeeld per soort werk, niet per vaardigheid (aan één vaardigheid gekoppeld).",
     "trendNewShort": "nieuw",
     "checks": {
       "title": "Even nakijken",
@@ -614,7 +614,14 @@
       "provenance": "Waar de uren vandaan komen: {worker} u door de persoon ingevoerd, {extracted} u herkend uit diens tekst, {corrected} u gecorrigeerd door een leidinggevende.",
       "provenanceRule": "Elke invoer telt één keer; een uur wordt alleen aan een vaardigheid toegerekend als de invoer aan één vaardigheid is gekoppeld, of als de eigen zin van de persoon die vaardigheid noemt.",
       "scopeNote": "Dit is het deel van de registratie van de persoon dat uw organisatie mag zien — werk dat voor uw eigen samenwerkingen is vastgelegd. Het is niet de volledige geschiedenis en geen beoordeling. De bevestiging van een leidinggevende uit uw inbox maakt de uren van een invoer hier en op het cv van de persoon door een leidinggevende bevestigde uren."
-    }
+    },
+    "confirmedOfDays": "{confirmed} van {total} d. bevestigd door een registratie van de leidinggevende",
+    "confirmedNoDuration": "{confirmed} van {entries, plural, one {# registratie} other {# registraties}} bevestigd door leidinggevende of klant — geregistreerd zonder duur, dus geen uren om te tonen",
+    "activityShareOf": "{percent} van alle {total} u geregistreerd",
+    "unlabelledHours": "{hours} u over {count, plural, one {# registratie} other {# registraties}} zonder benoemde soort werk — meegeteld in het totaal, niet in deze lijst",
+    "skillsCoverage": "{attributed} van {total} u geregistreerd ({period}) zijn aan een vaardigheid toegerekend. Elk % hieronder is een aandeel van die {attributed} u, niet van alle geregistreerde tijd.",
+    "shareOf": "{percent} van {base} u toegerekend",
+    "activitiesCoverage": "Een soort werk is benoemd voor {labelled} van {total} u; elk % is een aandeel van alle {total} u."
   },
   "verification": {
     "state": {

@@ -695,6 +695,7 @@ function JournalWindowDetail({
     year: "numeric",
   });
   const numFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const pctFmt = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });
   const hours = (n: number) => t("journalWindow.hours", { hours: numFmt.format(n) });
   /** Work time was measured for this report (the hours columns render only
    *  then — an unmeasured report shows counts, never "0 h"). */
@@ -864,10 +865,17 @@ function JournalWindowDetail({
                             className="mt-0.5 block text-meta text-text-muted"
                             data-testid={`journal-window-activity-${w.workerId}`}
                           >
-                            {t("journalWindow.mainly", {
-                              activity: activityName(w.work.mainActivity.key),
-                              hours: numFmt.format(w.work.mainActivity.hours),
-                            })}
+                            {w.work.mainActivity.share > 0
+                              ? t("journalWindow.mainlyShare", {
+                                  activity: activityName(w.work.mainActivity.key),
+                                  hours: numFmt.format(w.work.mainActivity.hours),
+                                  percent: pctFmt.format(w.work.mainActivity.share),
+                                  total: numFmt.format(w.work.hours),
+                                })
+                              : t("journalWindow.mainly", {
+                                  activity: activityName(w.work.mainActivity.key),
+                                  hours: numFmt.format(w.work.mainActivity.hours),
+                                })}
                           </span>
                         ) : null}
                       </td>

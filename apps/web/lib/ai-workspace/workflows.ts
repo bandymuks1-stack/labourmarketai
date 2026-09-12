@@ -913,20 +913,21 @@ export async function runWorkIntelligenceQuestion(
         chips,
       };
     }
-    const labelled = wi.activities.reduce((sum, a) => sum + a.hours, 0);
-    const unlabelled = Math.max(0, Math.round((totals.hours - labelled) * 100) / 100);
+    // The coverage figures are the MODEL's (`activityHours` + `unlabelledHours`
+    // = the period's hours; `share` is of all recorded hours) — the same ones
+    // the section's "Kinds of work" states, never re-derived here.
     const lines = [
-      t("wiActivitiesIntro", { period: periodLabel, labelled: fmtHours(labelled, locale), total: totalHours }),
+      t("wiActivitiesIntro", { period: periodLabel, labelled: fmtHours(wi.activityHours, locale), total: totalHours }),
       ...top.map((a) =>
         t("wiActivityLine", {
           activity: activityName(a.key),
           hours: fmtHours(a.hours, locale),
-          pct: fmtPct(totals.hours > 0 ? a.hours / totals.hours : 0, locale),
+          pct: fmtPct(a.share, locale),
           entries: a.entries,
         }),
       ),
     ];
-    if (unlabelled > 0) lines.push(t("wiActivitiesUnlabelled", { hours: fmtHours(unlabelled, locale) }));
+    if (wi.unlabelledHours > 0) lines.push(t("wiActivitiesUnlabelled", { hours: fmtHours(wi.unlabelledHours, locale) }));
     return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
   }
 

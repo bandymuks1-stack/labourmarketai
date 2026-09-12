@@ -141,7 +141,10 @@ describe("deriveWorkIntelligence — totals never double count", () => {
     const all = wi.periods.find((p) => p.key === "all")!;
     expect(all.hours).toBe(0);
     expect(all.dayUnits).toBe(2);
-    expect(all.daysWorked).toBe(0);
+    // A day recorded in DAYS is still a day that carries a duration line —
+    // "0 days worked" beside "2 days" was the contradictory copy of F5. The
+    // day units themselves are never converted into hours.
+    expect(all.daysWorked).toBe(1);
     expect(wi.skills.find((s) => s.slug === "tiling")!.attributedHours).toBe(0);
   });
 
@@ -314,6 +317,148 @@ describe("deriveWorkIntelligence — periods", () => {
   });
 });
 
+/**
+ * COVERAGE SEMANTICS (re-audit 2026-09-11, F2/F3/F4/F5).
+ *
+ * Every share the product prints must name the base it is a share OF, and no
+ * recorded hour may vanish from the reading it belongs to. These cases are
+ * the ones the audit constructed against the real model.
+ */
+describe("deriveWorkIntelligence — coverage semantics", () => {
+  it("F4 · several TIMED parts brake the single-skill claim even when no kind of work is named", () => {
+    // The owner's own sentence: "5 h programming, 2 h testing, 2 h partners",
+    // one linked skill, two of the three parts with no recognised activity.
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("f4", "2026-09-10", {
+          frags: [
+            [5, null],
+            [2, null],
+            [2, null],
+          ],
+          linkedSkillIds: ["s-tiling"],
+        }),
+      ],
+    });
+    const tiling = wi.skills.find((s) => s.slug === "tiling")!;
+    expect(tiling.attributedHours).toBe(0);
+    expect(tiling.sharedHours).toBe(9);
+    expect(wi.multiActivityHours).toBe(9);
+    expect(wi.attributedHours).toBe(0);
+  });
+
+  it("F4 · the brake lifts when every timed part names the SAME kind of work", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("f4b", "2026-09-10", {
+          frags: [
+            [5, "tiler"],
+            [3, "tiler"],
+          ],
+          linkedSkillIds: ["s-tiling"],
+        }),
+      ],
+    });
+    expect(wi.skills.find((s) => s.slug === "tiling")!.attributedHours).toBe(8);
+    expect(wi.multiActivityHours).toBe(0);
+  });
+
+  it("F4 · a `fragment_skill` row still says WHERE, so that part is claimed and the rest stays involvement", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("f4c", "2026-09-10", {
+          frags: [
+            [5, null, ["tiling"]],
+            [2, null],
+            [2, null],
+          ],
+          linkedSkillIds: ["s-tiling"],
+        }),
+      ],
+    });
+    expect(wi.skills.find((s) => s.slug === "tiling")!.attributedHours).toBe(5);
+    expect(wi.multiActivityHours).toBe(4);
+    // every hour is still counted exactly once
+    const all = wi.periods.find((p) => p.key === "all")!;
+    expect(wi.attributedHours + wi.sharedHours + wi.multiActivityHours + wi.unattributedHours).toBe(all.hours);
+  });
+
+  it("F2 · timed parts with no kind of work stay in the denominator and are named", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("f2", "2026-09-10", {
+          frags: [
+            [6, "tiler"],
+            [4, null],
+          ],
+          linkedSkillIds: ["s-tiling"],
+        }),
+      ],
+    });
+    const all = wi.periods.find((p) => p.key === "all")!;
+    expect(all.hours).toBe(10);
+    expect(wi.activityHours).toBe(6);
+    expect(wi.unlabelledHours).toBe(4);
+    expect(wi.unlabelledEntries).toBe(1);
+    // nothing vanishes from "kinds of work"
+    expect(wi.activityHours + wi.unlabelledHours).toBe(all.hours);
+    // 6 of 10 h — NOT 6 of 6 h, which would read as a 100 % main activity
+    expect(wi.activities).toEqual([
+      { key: "tiler", hours: 6, share: 0.6, entries: 1, contexts: 1, lastWorkedDay: "2026-09-10", trend: "new" },
+    ]);
+  });
+
+  it("F3 · a skill share is a share of the ATTRIBUTED hours, and the model exposes that base", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        // 95 h nobody linked + 5 h of tiling → "5 h · 100 %" is only honest
+        // when the 5 h base is visible beside it.
+        entry("f3a", "2026-09-10", { hours: 95 }),
+        entry("f3b", "2026-09-10", { hours: 5, linkedSkillIds: ["s-tiling"] }),
+      ],
+    });
+    const all = wi.periods.find((p) => p.key === "all")!;
+    expect(all.hours).toBe(100);
+    expect(wi.attributedHours).toBe(5);
+    expect(wi.unattributedHours).toBe(95);
+    expect(wi.skills.find((s) => s.slug === "tiling")!.share).toBe(1);
+  });
+
+  it("F5 · work recorded in DAYS has its own confirmed figure and counts as a worked day", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("f5a", "2026-09-10", {
+          metrics: [metric("quantity", { n: 2, unit: "days" })],
+          reviewResult: "approved",
+        }),
+        entry("f5b", "2026-09-09", {
+          metrics: [metric("quantity", { n: 1, unit: "days" })],
+        }),
+      ],
+    });
+    const all = wi.periods.find((p) => p.key === "all")!;
+    expect(all.hours).toBe(0);
+    expect(all.confirmedHours).toBe(0);
+    expect(all.dayUnits).toBe(3);
+    // the approved entry's days are confirmed days — never converted to hours
+    expect(all.confirmedDayUnits).toBe(2);
+    expect(all.daysWorked).toBe(2);
+    expect(all.entriesWithoutDuration).toBe(0);
+  });
+});
+
 describe("deriveWorkIntelligence — skills, activities, contexts, months", () => {
   const entries = [
     entry("a", "2026-09-10", { hours: 8, linkedSkillIds: ["s-tiling"], linkProvenance: new Map([["s-tiling", "recognized" as const]]) }),
@@ -353,11 +498,15 @@ describe("deriveWorkIntelligence — skills, activities, contexts, months", () =
 
   it("activities come from the SAME fragment as the duration, or the entry direction", () => {
     const wi = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries });
+    // `share` is of ALL 18 recorded hours of the focus period, not of the
+    // 6 labelled ones — the coverage denominator of F2.
     expect(wi.activities).toEqual([
-      { key: "tiler", hours: 3, entries: 1, contexts: 1, lastWorkedDay: "2026-08-01", trend: "down" },
-      { key: "painter", hours: 2, entries: 1, contexts: 1, lastWorkedDay: "2026-07-15", trend: "down" },
-      { key: "plasterer", hours: 1, entries: 1, contexts: 1, lastWorkedDay: "2026-08-01", trend: "down" },
+      { key: "tiler", hours: 3, share: 0.17, entries: 1, contexts: 1, lastWorkedDay: "2026-08-01", trend: "down" },
+      { key: "painter", hours: 2, share: 0.11, entries: 1, contexts: 1, lastWorkedDay: "2026-07-15", trend: "down" },
+      { key: "plasterer", hours: 1, share: 0.06, entries: 1, contexts: 1, lastWorkedDay: "2026-08-01", trend: "down" },
     ]);
+    const allHours = wi.periods.find((p) => p.key === "all")!.hours;
+    expect(wi.activityHours + wi.unlabelledHours).toBe(allHours);
   });
 
   it("contexts split hours per engagement, the personal (null) context included", () => {

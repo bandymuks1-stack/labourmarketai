@@ -773,6 +773,7 @@
       "hours": "{hours} h",
       "dayUnits": "+ {days} d recorded in days",
       "mainly": "mainly {activity} · {hours} h",
+      "mainlyShare": "mainly {activity} · {hours} h ({percent} of {total} h)",
       "withoutDuration": "{count, plural, one {# entry in this window records no duration — it is counted, not timed.} other {# entries in this window record no duration — they are counted, not timed.}}",
       "collapse": "Hide the detailed report"
     }

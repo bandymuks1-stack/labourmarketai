@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   deriveWindowWorkTime,
+  inWorkWindow,
   journalReportWindow,
   rollUpJournalWindow,
   windowCreatedAtBounds,
@@ -162,13 +163,16 @@ describe("rollUpJournalWindow — hours from the one model, counted once", () =>
     expect(ona.work?.hours).toBe(12);
     expect(ona.work?.confirmedHours).toBe(8);
     expect(ona.work?.daysWorked).toBe(2);
-    expect(ona.work?.mainActivity).toEqual({ key: "tiler", hours: 10 });
+    // the share is of ALL 12 of Ona's window hours, unlabelled parts included
+    expect(ona.work?.mainActivity).toEqual({ key: "tiler", hours: 10, share: 0.83 });
+    expect(ona.work?.unlabelledHours).toBe(0);
   });
 
   it("days-unit durations stay days; an entry without duration is counted, not timed", () => {
     expect(jonas.work?.hours).toBe(0);
     expect(jonas.work?.dayUnits).toBe(2);
-    expect(jonas.work?.daysWorked).toBe(0);
+    // a day recorded in days is a day that carries a duration (F5)
+    expect(jonas.work?.daysWorked).toBe(1);
     expect(jonas.work?.entriesWithoutDuration).toBe(1);
     expect(jonas.work?.mainActivity).toBeNull();
   });
@@ -191,9 +195,10 @@ describe("rollUpJournalWindow — hours from the one model, counted once", () =>
       hours: 12,
       confirmedHours: 8,
       dayUnits: 2,
-      daysWorked: 2,
+      daysWorked: 3,
       entriesWithoutDuration: 1,
       mainActivity: null,
+      unlabelledHours: 0,
     });
   });
 
@@ -226,6 +231,9 @@ describe("deriveWindowWorkTime — the model without skill links", () => {
       daysWorked: 1,
       entriesWithoutDuration: 0,
       mainActivity: null,
+      // an entry-level duration with no direction names no kind of work —
+      // the 8 h stay in the base and are named, never dropped (F2)
+      unlabelledHours: 8,
     });
   });
 
@@ -240,5 +248,47 @@ describe("deriveWindowWorkTime — the model without skill links", () => {
 
   it("no rows → zeros that mean measured-empty (the caller passed rows)", () => {
     expect(deriveWindowWorkTime([], TODAY_ISO).hours).toBe(0);
+  });
+});
+
+/**
+ * THE WINDOW IS THE DAY THE WORK HAPPENED (re-audit 2026-09-11, F6).
+ *
+ * Hours are dated by `work_date` everywhere else in the product; the report
+ * window must agree. Before this, last month's 40 h typed this morning
+ * showed under "Today" and Monday's shift logged on Friday sat in the wrong
+ * week. `inWorkWindow` is the ONE rule that decides membership after the
+ * created-in-window and worked-in-window reads are merged.
+ */
+describe("inWorkWindow — membership is decided by the work day", () => {
+  const today = journalReportWindow("today", TODAY_ISO);
+  const week = journalReportWindow("week", TODAY_ISO);
+  const workDay = (day: string): Metric[] => [
+    { metric_slug: "work_date", value_text: day, value_numeric: null, unit_slug: null, source: "worker_input" },
+  ];
+
+  it("an entry typed today about last month is NOT in today", () => {
+    const r = row("late", "a", `${TODAY_ISO}T08:00:00.000Z`, workDay("2026-08-04"));
+    expect(inWorkWindow(r, today)).toBe(false);
+    expect(inWorkWindow(r, week)).toBe(false);
+  });
+
+  it("an entry worked inside the window but typed after it joins the window", () => {
+    // logged on Friday about Monday: created_at is outside "today", the
+    // stated work day is inside the week.
+    const r = row("backdated", "a", "2026-09-18T08:00:00.000Z", workDay("2026-09-07"));
+    expect(inWorkWindow(r, week)).toBe(true);
+    expect(inWorkWindow(r, today)).toBe(false);
+  });
+
+  it("an entry with no stated work day stays where created_at puts it", () => {
+    expect(inWorkWindow(row("nw", "a", `${TODAY_ISO}T22:30:00.000Z`, []), today)).toBe(true);
+    expect(inWorkWindow(row("old", "a", "2026-08-04T10:00:00.000Z", []), today)).toBe(false);
+  });
+
+  it("the window edges are inclusive on both sides", () => {
+    expect(inWorkWindow(row("s", "a", "2026-01-01T00:00:00.000Z", workDay(week.startIso)), week)).toBe(true);
+    expect(inWorkWindow(row("e", "a", "2026-01-01T00:00:00.000Z", workDay(week.endIso)), week)).toBe(true);
+    expect(inWorkWindow(row("b", "a", "2026-01-01T00:00:00.000Z", workDay("2026-09-04")), week)).toBe(false);
   });
 });

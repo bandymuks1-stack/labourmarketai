@@ -773,6 +773,7 @@
       "hours": "{hours} val.",
       "dayUnits": "+ {days} d. užfiksuota dienomis",
       "mainly": "daugiausia {activity} · {hours} val.",
+      "mainlyShare": "daugiausia {activity} · {hours} val. ({percent} iš {total} val.)",
       "withoutDuration": "{count, plural, one {# įrašas šiame lange neturi trukmės – jis suskaičiuotas, bet ne valandomis.} few {# įrašai šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.} many {# įrašo šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.} other {# įrašų šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.}}",
       "collapse": "Slėpti detalią ataskaitą"
     }

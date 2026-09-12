@@ -19,6 +19,7 @@ import {
   deriveWorkIntelligence,
   type WorkIntelligenceEntry,
 } from "@/lib/journal/work-intelligence";
+import { resolveWorkDay } from "@/lib/journal/work-time";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
@@ -73,6 +74,18 @@ import {
  * today = one UTC calendar day; week = 7 calendar days inclusive ending
  * today; month = 30 calendar days inclusive ending today. Pure derivation in
  * `journalReportWindow` so the boundaries are unit-testable.
+ *
+ * ── THE WINDOW IS THE DAY THE WORK HAPPENED (re-audit 2026-09-11, F6) ──────
+ * Hours are dated by the entry's own `work_date` (`resolveWorkDay`, the rule
+ * every hour figure already follows), so the window must be too. Before,
+ * this read bounded by `created_at` alone: last month's 40 h typed this
+ * morning showed under "Today", and Monday's shift logged on Friday was in
+ * the wrong week. The read is now the D-13 shape the planning read already
+ * uses: (A) entries CREATED in the window and (B) entries whose stated
+ * `work_date` falls in it — both RLS-scoped to the org's engagements —
+ * merged by id and kept only when the resolved work day lies inside the
+ * window (`inWorkWindow`). An entry with no stated work day stays where
+ * `created_at` puts it, exactly as every other surface places it.
  *
  * Read-only. No admin client, no outbound call.
  */
@@ -130,6 +143,19 @@ export function windowCreatedAtBounds(window: JournalReportWindow): {
   };
 }
 
+/**
+ * Whether the row's WORK DAY — its stated `work_date`, else the UTC day it
+ * was created — lies inside the window. Pure; the one rule that decides
+ * membership after the two reads above are merged.
+ */
+export function inWorkWindow(
+  row: Pick<JournalWindowEntryRow, "created_at" | "journal_entry_metrics">,
+  window: JournalReportWindow,
+): boolean {
+  const day = resolveWorkDay(row.journal_entry_metrics ?? [], row.created_at);
+  return day >= window.startIso && day <= window.endIso;
+}
+
 /** What the window's entries add up to in WORK TIME, from the one model.
  *  Every entry counted once; `days`-unit durations kept apart. */
 export interface JournalWindowWorkTime {
@@ -144,7 +170,16 @@ export interface JournalWindowWorkTime {
   readonly entriesWithoutDuration: number;
   /** The kind of work with the most hours (an activity label the member's
    *  own metrics carried — a profession slug or their own words), or null. */
-  readonly mainActivity: { readonly key: string; readonly hours: number } | null;
+  readonly mainActivity: {
+    readonly key: string;
+    readonly hours: number;
+    /** Share of ALL the member's window hours — the unlabelled timed parts
+     *  stay in the base (`unlabelledHours`), so "mainly X" is never chosen
+     *  from a partial denominator (re-audit F2). */
+    readonly share: number;
+  } | null;
+  /** Window hours whose duration line names no kind of work. */
+  readonly unlabelledHours: number;
 }
 
 export interface JournalWindowWorkerRow {
@@ -252,7 +287,8 @@ export function deriveWindowWorkTime(
     dayUnits: all?.dayUnits ?? 0,
     daysWorked: all?.daysWorked ?? 0,
     entriesWithoutDuration: all?.entriesWithoutDuration ?? 0,
-    mainActivity: main ? { key: main.key, hours: main.hours } : null,
+    mainActivity: main ? { key: main.key, hours: main.hours, share: main.share } : null,
+    unlabelledHours: wi.unlabelledHours,
   };
 }
 
@@ -264,12 +300,14 @@ function sumWorkTime(
   let dayUnits = 0;
   let daysWorked = 0;
   let entriesWithoutDuration = 0;
+  let unlabelledHours = 0;
   for (const p of parts) {
     hours += p.hours;
     confirmedHours += p.confirmedHours;
     dayUnits += p.dayUnits;
     daysWorked += p.daysWorked;
     entriesWithoutDuration += p.entriesWithoutDuration;
+    unlabelledHours += p.unlabelledHours;
   }
   // A sum across members has no single "main" kind of work — the total
   // never invents one. `daysWorked` here is member-days (a day two people
@@ -281,6 +319,7 @@ function sumWorkTime(
     daysWorked,
     entriesWithoutDuration,
     mainActivity: null,
+    unlabelledHours: round2(unlabelledHours),
   };
 }
 
@@ -416,26 +455,74 @@ export async function getJournalWindowReport(
   // review report resolves it. RLS's org-manager branch on every embedded
   // table decides what comes back — nothing here widens it.
   const { gteIso, ltIso } = windowCreatedAtBounds(window);
+  // The metric projection is ALWAYS the list core's one embed — never a
+  // hand-written second shape. Without `workTime` a query-time filter keeps
+  // only the `work_date` row (one row or none per entry), so the hub tile
+  // and the daily panel stay count-sized while every entry still lands on
+  // the day it was WORKED; with it, the whole projection feeds the model.
   const select = [
     `id, worker_id, created_at, correction_of, engagement_context_id, workers(${WORKER_NAME_FIELDS})`,
     JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
-    ...(opts.workTime ? [JOURNAL_ENTRY_METRICS_EMBED] : []),
+    JOURNAL_ENTRY_METRICS_EMBED,
   ].join(", ");
-  const entriesRes = await asAny(supabase)
-    .from("journal_entries")
-    .select(select)
-    .in("engagement_context_id", contextIds)
-    .gte("created_at", gteIso)
-    .lt("created_at", ltIso)
-    .is("superseded_by", null)
-    .is("deleted_at", null)
-    .order("created_at", { ascending: true })
+  const liveEntries = () => {
+    const q = asAny(supabase)
+      .from("journal_entries")
+      .select(select)
+      .in("engagement_context_id", contextIds)
+      .is("superseded_by", null)
+      .is("deleted_at", null);
+    return opts.workTime ? q : q.eq("journal_entry_metrics.metric_slug", "work_date");
+  };
+
+  // (B) the ids whose STATED work day falls in the window — the metrics
+  // table is the only place that day lives. RLS's org-manager branch on
+  // the metrics table scopes the read; the entry read below re-checks the
+  // org's contexts, so an id from elsewhere can never widen the report.
+  const workDateIdsRes = await asAny(supabase)
+    .from("journal_entry_metrics")
+    .select("entry_id")
+    .eq("metric_slug", "work_date")
+    .gte("value_text", window.startIso)
+    .lte("value_text", window.endIso)
     .limit(ENTRY_READ_LIMIT);
+  if (workDateIdsRes.error) return { applied: false, reason: "error" };
+  const workDateIds = [
+    ...new Set(
+      ((workDateIdsRes.data ?? []) as { entry_id: string }[]).map((m) => m.entry_id),
+    ),
+  ];
+
+  const [createdRes, workedRes] = await Promise.all([
+    // (A) entries CREATED in the window — keeps every entry that carries no
+    // work day at all, exactly where `created_at` still puts it.
+    liveEntries()
+      .gte("created_at", gteIso)
+      .lt("created_at", ltIso)
+      .order("created_at", { ascending: true })
+      .limit(ENTRY_READ_LIMIT),
+    workDateIds.length > 0
+      ? liveEntries().in("id", workDateIds).limit(ENTRY_READ_LIMIT)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
   // The review rows ride the same select (the list core's projection), so a
   // failed read degrades the WHOLE report rather than silently rendering
-  // every entry as unreviewed — a wrong count is worse than none.
-  if (entriesRes.error) return { applied: false, reason: "error" };
-  const entries = (entriesRes.data ?? []) as JournalWindowEntryRow[];
+  // every entry as unreviewed — a wrong count is worse than none. A failed
+  // work-day read likewise must not shrink the answer back to the
+  // `created_at`-only defect.
+  if (createdRes.error || workedRes.error) return { applied: false, reason: "error" };
+  const byId = new Map<string, JournalWindowEntryRow>();
+  for (const row of [
+    ...((createdRes.data ?? []) as JournalWindowEntryRow[]),
+    ...((workedRes.data ?? []) as JournalWindowEntryRow[]),
+  ]) {
+    byId.set(row.id, row);
+  }
+  // Membership is decided ONCE, by the work day: an entry typed today about
+  // last month leaves "Today"; one worked this week and typed later joins it.
+  const entries = [...byId.values()]
+    .filter((row) => inWorkWindow(row, window))
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
 
   const { workers, totals } = rollUpJournalWindow(entries, {
     workTime: opts.workTime === true,

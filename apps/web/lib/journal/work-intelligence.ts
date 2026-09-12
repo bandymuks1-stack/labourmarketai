@@ -37,9 +37,10 @@
  * An 8-hour entry linked to four skills is 8 hours of work, four skills
  * involved, and ZERO attributable hours for each — never 32. There is no
  * evidence for the split and the product refuses to guess one. The same
- * caution runs the other way: an entry whose OWN fragments describe several
- * kinds of work ("6 h tiles, 2 h plaster") but carries one linked skill is
- * not 8 h of that skill either — the evidence says the time was split, so
+ * caution runs the other way: an entry whose OWN timed fragments say the
+ * time was split ("6 h tiles, 2 h plaster" — or three timed parts with no
+ * kind of work named at all) but carries one linked skill is not 8 h of
+ * that skill either — the evidence says the time was split, so
  * unless the link says WHERE (a `fragment_skill` row on the 6 h fragment →
  * 6 h of tiling, the 2 h stay MULTI_ACTIVITY) those hours stay involvement
  * and are split by ACTIVITY only. Every hour is still counted once:
@@ -138,10 +139,14 @@ export type WorkPeriodTotals = {
   readonly dayUnits: number;
   /** Hours on entries a manager/client APPROVED. Self-reported = hours − this. */
   readonly confirmedHours: number;
+  /** Of `dayUnits`, the part on approved entries — work recorded in days
+   *  has its own confirmed figure, never a converted one (re-audit F5). */
+  readonly confirmedDayUnits: number;
   readonly entries: number;
   /** Entries in the period that record no usable duration at all. */
   readonly entriesWithoutDuration: number;
-  /** Distinct calendar days that carry at least one hour line. */
+  /** Distinct calendar days that carry at least one duration line — an
+   *  hour line or a `days`-unit line. */
   readonly daysWorked: number;
 };
 
@@ -194,6 +199,11 @@ export type WorkTrend = "up" | "down" | "flat" | "new" | "none";
 export type ActivityWorkTime = {
   readonly key: string;
   readonly hours: number;
+  /** Share of ALL recorded hours in the focus period, 0..1 — the timed
+   *  parts that carry no kind-of-work label stay in the denominator
+   *  (`unlabelledHours` names them), so a "main activity" is never chosen
+   *  from a partial base (re-audit F2). */
+  readonly share: number;
   readonly entries: number;
   readonly contexts: number;
   readonly lastWorkedDay: string | null;
@@ -257,8 +267,10 @@ export type WorkIntelligence = {
   /** Hours on entries linked to two or more skills (reported once). */
   readonly sharedHours: number;
   readonly sharedEntries: number;
-  /** Hours on single-skill entries whose fragments name several kinds of
-   *  work — split by activity, never by skill (reported once). */
+  /** Hours on single-skill entries whose timed fragments say the time was
+   *  split (several kinds of work, or timed parts with no kind named) and no
+   *  `fragment_skill` row says where — split by activity, never by skill
+   *  (reported once). */
   readonly multiActivityHours: number;
   readonly multiActivityEntries: number;
   /** Hours on entries linked to no skill at all (reported once). */
@@ -266,6 +278,14 @@ export type WorkIntelligence = {
   readonly unattributedEntries: number;
   /** Sum of every skill's attributed hours — the denominator of `share`. */
   readonly attributedHours: number;
+  /** COVERAGE of the activity reading: hours in the focus period whose
+   *  duration line carries a kind-of-work label (the sum of `activities`),
+   *  and the timed hours that carry none. `activityHours + unlabelledHours`
+   *  = the focus period's hours — nothing vanishes from "kinds of work". */
+  readonly activityHours: number;
+  readonly unlabelledHours: number;
+  /** Entries in the focus period with at least one unlabelled timed hour. */
+  readonly unlabelledEntries: number;
   readonly provenance: ProvenanceSplit;
   /** Plausibility checks over the focus period's lines (owner §13): a day
    *  above 24 h, a long day, a single duration longer than a day, an entry-
@@ -320,17 +340,27 @@ function inPeriod(
   return day <= bounds.endIso;
 }
 
+/**
+ * Whether one linked skill may claim the WHOLE entry. It may not when the
+ * entry's own timed fragments say the time was split: two or more timed
+ * parts that do not all carry the SAME kind-of-work label. The brake keys
+ * on the timed parts, not on the labels — three unlabelled parts ("5 h X,
+ * 2 h Y, 2 h Z" with no recognised kind of work) are still three parts,
+ * and the unlabelled path is the majority case in production (re-audit
+ * 2026-09-11, F4). Only a `fragment_skill` row can then say WHERE the
+ * skill was used; the rest stays involvement.
+ */
 function skillBasis(entry: WorkIntelligenceEntry, time: EntryWorkTime): SkillTimeBasis {
   const n = new Set(entry.linkedSkillIds).size;
   if (n > 1) return "shared";
   if (n === 0) return "none";
-  const activities = new Set(
-    time.lines
-      .filter((l) => l.hours > 0 && l.derivedFrom === "fragment_time")
-      .map((l) => (l.workTypeKey ?? "").trim())
-      .filter((k) => k !== ""),
-  );
-  return activities.size > 1 ? "multi_activity" : "attributed";
+  const fragments = time.lines.filter((l) => l.hours > 0 && l.derivedFrom === "fragment_time");
+  if (fragments.length > 1) {
+    const labels = new Set(fragments.map((l) => (l.workTypeKey ?? "").trim()));
+    const oneKindOfWork = labels.size === 1 && !labels.has("");
+    if (!oneKindOfWork) return "multi_activity";
+  }
+  return "attributed";
 }
 
 /**
@@ -471,6 +501,7 @@ export function deriveWorkIntelligence(
     let hours = 0;
     let dayUnits = 0;
     let confirmedHours = 0;
+    let confirmedDayUnits = 0;
     let entries = 0;
     let entriesWithoutDuration = 0;
     const days = new Set<string>();
@@ -483,8 +514,11 @@ export function deriveWorkIntelligence(
       }
       hours += d.time.totalHours;
       dayUnits += d.time.totalDayUnits;
-      if (d.entry.reviewResult === "approved") confirmedHours += d.time.totalHours;
-      if (d.time.totalHours > 0) days.add(d.time.day);
+      if (d.entry.reviewResult === "approved") {
+        confirmedHours += d.time.totalHours;
+        confirmedDayUnits += d.time.totalDayUnits;
+      }
+      if (d.time.totalHours > 0 || d.time.totalDayUnits > 0) days.add(d.time.day);
     }
     return {
       key,
@@ -493,6 +527,7 @@ export function deriveWorkIntelligence(
       hours: round2(hours),
       dayUnits: round2(dayUnits),
       confirmedHours: round2(confirmedHours),
+      confirmedDayUnits: round2(confirmedDayUnits),
       entries,
       entriesWithoutDuration,
       daysWorked: days.size,
@@ -626,15 +661,26 @@ export function deriveWorkIntelligence(
     prior: number;
   };
   const actAcc = new Map<string, ActAcc>();
+  let activityHours = 0;
+  let unlabelledHours = 0;
+  let unlabelledEntries = 0;
   for (const d of scoped) {
     const direction = directionOf(d.entry.metrics);
+    let entryUnlabelled = false;
     for (const line of d.time.lines) {
       if (line.hours <= 0) continue;
       const key =
         line.derivedFrom === "fragment_time"
           ? (line.workTypeKey ?? "").trim()
           : (direction ?? "");
-      if (!key) continue;
+      if (!key) {
+        // A timed part with no kind of work: counted in the denominator,
+        // named as unlabelled — never dropped from the reading.
+        unlabelledHours += line.hours;
+        entryUnlabelled = true;
+        continue;
+      }
+      activityHours += line.hours;
       let a = actAcc.get(key);
       if (!a) {
         a = { hours: 0, entries: new Set(), contexts: new Set(), last: null, recent: 0, prior: 0 };
@@ -649,11 +695,16 @@ export function deriveWorkIntelligence(
         else if (line.day >= priorStart) a.prior += line.hours;
       }
     }
+    if (entryUnlabelled) unlabelledEntries += 1;
   }
+  // The activity share's base is EVERY recorded hour of the focus period —
+  // the same figure the period tile shows — not only the labelled ones.
+  const focusHours = periods.find((p) => p.key === focus)?.hours ?? 0;
   const activities: ActivityWorkTime[] = [...actAcc.entries()]
     .map(([key, a]) => ({
       key,
       hours: round2(a.hours),
+      share: focusHours > 0 ? round2(a.hours / focusHours) : 0,
       entries: a.entries.size,
       contexts: a.contexts.size,
       lastWorkedDay: a.last,
@@ -772,6 +823,9 @@ export function deriveWorkIntelligence(
     unattributedHours: round2(unattributedHours),
     unattributedEntries,
     attributedHours,
+    activityHours: round2(activityHours),
+    unlabelledHours: round2(unlabelledHours),
+    unlabelledEntries,
     provenance: {
       workerInput: round2(provenance.workerInput),
       aiExtracted: round2(provenance.aiExtracted),

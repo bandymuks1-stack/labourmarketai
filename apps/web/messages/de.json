@@ -773,6 +773,7 @@
       "hours": "{hours} Std.",
       "dayUnits": "+ {days} T. in Tagen erfasst",
       "mainly": "vor allem {activity} · {hours} Std.",
+      "mainlyShare": "vor allem {activity} · {hours} Std. ({percent} von {total} Std.)",
       "withoutDuration": "{count, plural, one {# Eintrag in diesem Fenster hat keine Dauer – er wird gezählt, aber nicht in Stunden.} other {# Einträge in diesem Fenster haben keine Dauer – sie werden gezählt, aber nicht in Stunden.}}",
       "collapse": "Detailbericht ausblenden"
     }
