@@ -411,6 +411,27 @@ describe("owner smoke follow-up 2026-07-02 — RENDER-TIME detected section for 
     expect(all).toMatch(/rengin|inventori/i); // "Renginių / inventoriaus paruošimas"
   });
 
+  it("a skill-slug activity key never reaches the card as a raw label; the skill shows as a skill (#1689)", () => {
+    for (const text of ["5 hours tiling", "5 uur getegeld", "5 Std. Fliesen verlegt"]) {
+      const d = detectedOf(text, []);
+      expect(d.labels, text).not.toContain("tiling");
+      expect(d.recognizedSlugs.has("tiling"), text).toBe(true);
+      expect(d.labels.join(" | ") + d.skills.map((s) => s.name).join(" | "), text).toContain(skillNamesLT["tiling"]);
+    }
+  });
+
+  it("a capability label that rewords a skill already on the card is one signal, not two (#1689)", () => {
+    // "Glaisčiau sienas" → skill skim-coating ("Sienų glaistymas") + the activity
+    // label "Sienų glaistymas / lyginimas" — one name contains the other
+    const declared = [{ id: "s1", slug: "skim-coating", name: skillNamesLT["skim-coating"] }];
+    const d = detectedOf("Glaisčiau sienas 4 val.", declared);
+    expect(d.skills.map((s) => s.name)).toEqual([skillNamesLT["skim-coating"]]);
+    expect(d.labels.some((l) => l.toLowerCase().includes("glaist"))).toBe(false);
+    // a label that names something ELSE still shows
+    const other = detectedOf("Glaisčiau sienas 4 val. ir vedžiojau šunį", declared);
+    expect(other.labels.join(" | ")).toMatch(/gyvūn|priežiūr/i);
+  });
+
   it("owner sentence → NONE of the 8 declared construction skills in Section A", () => {
     const d = detectedOf(OWNER_TEXT);
     // No declared construction skill is offered as detected/linkable…
