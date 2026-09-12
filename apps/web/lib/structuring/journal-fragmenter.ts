@@ -9,7 +9,17 @@
  * data-driven (no sentence-specific branches).
  *
  * Splitting rules:
- *   • sentence boundaries (`.`, `!`, `?`, newlines), commas and semicolons;
+ *   • sentence boundaries (`.`, `!`, `?`, newlines), commas and semicolons —
+ *     except the dots the suggestion extractor also keeps (ONE shared rule,
+ *     `protectNonBoundaryDots`): a unit's abbreviation dot before a
+ *     lower-case continuation ("5 val. programavau"), a decimal separator
+ *     ("3.5 val", "1,5 h") and a dot inside one token ("LabourMarket.ai",
+ *     "www.imone.lt") — issue #1689, the owner's own sentence lost its
+ *     context name to "LabourMarket" + "ai";
+ *   • the colon that itemises a stated total ("dirbau 9 val.: 5 val. X, 2
+ *     val. Y") closes the header phrase, the same cut the extractor makes
+ *     (`ITEMISING_COLON_RX`) — so a persisted item re-fragments to the
+ *     derivation's own id;
  *   • clause conjunctions (LT ir / bei / taip pat, EN and / also,
  *     RU и / а также) — ONLY when the left side already carries a verb-like
  *     token AND the right side starts a new verb phrase. "su X ir Y" tool
@@ -24,7 +34,9 @@
 import { foldText } from "./normalize";
 import {
   DURATION_UNIT_PATTERNS,
+  ITEMISING_COLON_RX,
   QUANTITY_UNIT_PATTERNS,
+  protectNonBoundaryDots,
 } from "./extract-journal-suggestions";
 
 export type JournalFragment = {
@@ -262,6 +274,8 @@ function stripTimeAndQuantity(folded: string): string {
 
 const DECIMAL_COMMA = "";
 const DECIMAL_DOT = "";
+/** Every itemising colon (the extractor's rule, applied to the whole text). */
+const ITEMISING_COLON_G = new RegExp(ITEMISING_COLON_RX.source, "gu");
 
 /**
  * Fragment a free-text journal entry into discrete work items.
@@ -271,11 +285,16 @@ const DECIMAL_DOT = "";
 export function fragmentJournalText(text: string): JournalFragment[] {
   if (!text || text.trim().length === 0) return [];
 
-  // Protect decimal separators ("1,5 val" / "2.5 h") from the hard split.
-  const guarded = text
-    .replace(/\r/g, "")
-    .replace(/(\d),(\d)/g, `$1${DECIMAL_COMMA}$2`)
-    .replace(/(\d)\.(\d)/g, `$1${DECIMAL_DOT}$2`);
+  // Protect the dots/commas that are not boundaries (decimal separators,
+  // unit abbreviations before a lower-case word, dots inside one token) with
+  // the extractor's own rule; single-character marks keep every index
+  // aligned with the original text. The itemising colon becomes a hard
+  // boundary so the stated-total header and its items split as the
+  // extractor splits them.
+  const guarded = protectNonBoundaryDots(text.replace(/\r/g, ""), {
+    dot: DECIMAL_DOT,
+    comma: DECIMAL_COMMA,
+  }).replace(ITEMISING_COLON_G, (m) => `;${m.slice(1)}`);
 
   const hardParts = guarded
     .split(/[.!?;,\n]+/)

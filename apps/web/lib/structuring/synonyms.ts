@@ -16,6 +16,12 @@
  */
 export const SKILL_SYNONYMS: Readonly<Record<string, readonly string[]>> = {
   tiling: ["tile", "tiles", "tiling", "tiled"],
+  // The QUESTION forms a person asks the chat about their own work ("How
+  // much did I program?", issue #1689 line 2 — measured: "did I program" and
+  // "did I code" read NO subject while LT/RU/DE/NL read it). Subject-anchored
+  // ("did i …", "do i …") so the bare stem "program" never brushes
+  // a training programme or an installed program.
+  programming: ["did i program", "do i program", "did i code", "do i code"],
   drywall: ["gips", "gipsas", "plasterboard", "drywall", "гипс"],
   "ceiling-systems": ["ceiling", "suspended ceiling", "потолоч"],
   "partition-walls": ["partition wall", "перегородк"],
