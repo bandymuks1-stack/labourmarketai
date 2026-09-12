@@ -949,3 +949,39 @@ describe("14 · the growth reading (owner line 8): one derivation, fact apart fr
     }
   });
 });
+
+describe("15 · a capped list says it is capped (#1689, REMAINING 2 of the receipts — 2026-09-12)", () => {
+  it("every capped list on the section carries the cap line when the cap cuts, from ONE helper, with the totals untouched", () => {
+    expect(component).toMatch(/const skillsAll = wi\.skills\.filter\(/);
+    expect(component).toMatch(/const skills = skillsAll\.slice\(0, MAX_SKILLS\)/);
+    expect(component).toMatch(/const capLine = \(/);
+    expect(component).toMatch(/total > shown \? \(/);
+    expect(component).toContain('data-testid={`wi-cap-${kind}`}');
+    expect(component).toContain('{capLine("skills", skills.length, skillsAll.length)}');
+    expect(component).toContain('{capLine("activities", activities.length, wi.activities.length)}');
+    expect(component).toContain('{capLine("months", months.length, wi.months.length)}');
+    expect(component).toContain('{capLine("directions", directions.length, directionsTotal)}');
+    // the months line says "the last N of M" — a different sentence from a plain cut
+    expect(component).toContain('t(kind === "months" ? "monthsCap" : "listCap", { shown, total })');
+    // the caps themselves did not move: the figures above the lists are computed on the model, not the slice
+    expect(component).toMatch(/const MAX_SKILLS = 8;/);
+    expect(component).toMatch(/const MAX_ACTIVITIES = 6;/);
+    expect(component).toMatch(/const MAX_MONTHS = 12;/);
+    expect(component).toMatch(/const MAX_DIRECTIONS = 3;/);
+  });
+
+  it("the two cap sentences exist in every published locale, carry both figures, and name no internal vocabulary", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: Record<string, string>;
+      };
+      for (const key of ["listCap", "monthsCap"]) {
+        const s = j.intelligence[key];
+        expect(typeof s, `${loc}.intelligence.${key}`).toBe("string");
+        expect(s).toContain("{shown}");
+        expect(s).toContain("{total}");
+        expect(s).not.toMatch(/slice|MAX_|cap\b|limit/i);
+      }
+    }
+  });
+});

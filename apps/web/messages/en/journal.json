@@ -653,6 +653,8 @@
     "contextsTitle": "Worked for",
     "monthsTitle": "How it changes",
     "monthsLegend": "Hours per month by the day worked. The green part is manager-confirmed hours. A month with no entries is a real zero.",
+    "listCap": "Showing {shown} of {total} — every row counts toward the totals.",
+    "monthsCap": "Showing the last {shown} of {total} months — all of them count toward the totals.",
     "directionsTitle": "Where your recorded work already points",
     "directionsHint": "Derived only from skills your entries back — not a rating and not a qualification, just directions your work already fits.",
     "directionCoverage": "your entries back {shared} of {total} skills of this direction",
