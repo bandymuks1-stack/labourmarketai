@@ -1060,6 +1060,7 @@ export default async function JournalPage({
               unitName: unitNameOf,
               contextLabel: contextLabelOf,
               primaryProfessionSlug,
+              iscoGroups: ownPath.iscoGroups,
             }}
           />
         </div>
