@@ -16,7 +16,9 @@
  *           a rank or a tier of the person:
  *           · deepen — evidenced skills whose evidence is thin or moving:
  *             used only alongside other skills (no attributable hours yet),
- *             recorded but never confirmed by a manager or client, rising
+ *             backed only by untimed entries (no hour reaches it — never
+ *             shown as "0 h"), recorded but never confirmed by a manager or
+ *             client, rising
  *             in the last 30 days, or not used for 90 days. Each reason is
  *             a closed-set fact about the person's own rows, in words;
  *           · expand — the EXISTING `computeAdjacentDirections` over the
@@ -61,6 +63,7 @@ const MAX_DEMAND = 6;
  *  fact about the person's rows, never a judgement. */
 export type DeepenReason =
   | "involvement_only" // used alongside other skills; no entry where it was the work
+  | "untimed" // backed only by entries that carry no duration — no hour reaches it yet
   | "unconfirmed" // recorded, never confirmed by a manager or client
   | "rising" // more use in the last 30 days than the 30 before (or new)
   | "dormant"; // no linked entry for 90 days
@@ -118,6 +121,9 @@ function isoDayMinus(dayIso: string, days: number): string {
 function deepenReasons(s: SkillWorkTime, dormantBefore: string): DeepenReason[] {
   const reasons: DeepenReason[] = [];
   if (s.attributedHours <= 0 && s.sharedHours > 0) reasons.push("involvement_only");
+  // an entry with no duration is COUNTED, never timed (SEP-7): the skill it
+  // backs has no hour at all — said as such, never as "0 h"
+  if (s.attributedHours <= 0 && s.sharedHours <= 0 && s.entries > 0) reasons.push("untimed");
   if (s.attributedHours > 0 && s.confirmedHours <= 0) reasons.push("unconfirmed");
   if (s.trend === "up" || s.trend === "new") reasons.push("rising");
   if (s.lastWorkedDay !== null && s.lastWorkedDay < dormantBefore) reasons.push("dormant");

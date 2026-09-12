@@ -124,6 +124,36 @@ describe("the READING block — deepen: a closed set of facts about each evidenc
   });
 });
 
+describe("a skill backed only by UNTIMED entries — counted, never timed (SEP-7; production walk 2026-09-12)", () => {
+  // the pallets entry of the production walk: linked skills, no duration —
+  // the fact line read "dalyvauta 0 val." (a zero figure for NOT_MEASURED)
+  const untimed: WorkIntelligenceEntry = {
+    entryId: "e-pallets",
+    createdAt: "2026-09-11T09:00:00.000Z",
+    metrics: [{ ...workDate("2026-09-11"), created_at: "2026-09-11T09:00:00.000Z" }],
+    engagementContextId: null,
+    reviewResult: "submitted",
+    linkedSkillIds: ["s-pallet"],
+  };
+  const skills = [...SKILLS, { skillId: "s-pallet", slug: "pallet-loading", verified: false, source: null }];
+  const g = deriveGrowthReading(model([...ENTRIES, untimed], skills), { primaryProfessionSlug: "tiler" });
+  const pallet = g.basis.skills.find((s) => s.slug === "pallet-loading");
+
+  it("is in the FACT block with its entry, and with NO hour of any kind — not a 0 h involvement", () => {
+    expect(pallet).toMatchObject({ entries: 1, attributedHours: 0, sharedHours: 0, confirmedHours: 0 });
+  });
+
+  it("reads 'untimed' — and not 'involvement_only' (nothing was shared) nor 'unconfirmed' (no hour to confirm)", () => {
+    expect(g.deepen.find((d) => d.slug === "pallet-loading")?.reasons).toEqual(["untimed"]);
+  });
+
+  it("changes nothing for the timed skills", () => {
+    expect(g.deepen.find((d) => d.slug === "tiling")?.reasons).toEqual(["rising"]);
+    expect(g.basis.recordedHours).toBe(18);
+    expect(g.basis.entries).toBe(5);
+  });
+});
+
 describe("the READING block — expand: the existing adjacency over EVIDENCED skills only", () => {
   it("a direction is backed by evidenced skills; the declared-only skill contributes nothing; the primary profession is excluded", () => {
     const g = deriveGrowthReading(model(), { primaryProfessionSlug: "tiler" });

@@ -661,12 +661,14 @@
     "growthBasis": "Remiasi {count, plural, one {# įgūdžiu} few {# įgūdžiais} other {# įgūdžių}}, {count, plural, one {kurį} other {kuriuos}} remia jūsų įrašai — {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} ({period}):",
     "growthBasisSkill": "{skill} {hours} val.",
     "growthBasisSkillInvolved": "{skill} dalyvauta {hours} val.",
+    "growthBasisSkillUntimed": "{skill} {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} be trukmės",
     "growthDeclaredOnly": "{count, plural, one {# įgūdis, kurį nurodėte patys, bet nė vienas įrašas jo neremia, į šį skaitymą neįtrauktas.} few {# įgūdžiai, kuriuos nurodėte patys, bet nė vienas įrašas jų neremia, į šį skaitymą neįtraukti.} other {# įgūdžių, kuriuos nurodėte patys, bet nė vienas įrašas jų neremia, į šį skaitymą neįtraukti.}}",
     "growthDerivedHint": "Išvesta iš aukščiau išvardytų jūsų pačių įrašų — tai skaitymas, o ne faktas: ne įvertinimas, ne reitingas ir ne kvalifikacija.",
     "growthInsufficient": "Skaitymui reikia bent dviejų įgūdžių, kuriuos remia įrašai — kol kas rodome tik faktus.",
     "deepenTitle": "Ką galėtumėte gilinti",
     "deepen": {
       "involvement_only": "kol kas tik dalyvauta kartu su kitais įgūdžiais — nėra įrašo, kuriame tai būtų buvęs pagrindinis darbas",
+      "untimed": "įrašai, kurie tai remia, neturi trukmės — valandų dar nėra; nurodykite laiką ir jos bus skaičiuojamos",
       "unconfirmed": "užfiksuota jūsų pačių, vadovo patvirtinimo dar nėra",
       "rising": "paskutines 30 d. naudota daugiau nei ankstesnes 30 d.",
       "dormant": "90 dienų be įrašo"

@@ -901,6 +901,16 @@ describe("14 · the growth reading (owner line 8): one derivation, fact apart fr
     expect(block.indexOf('t("wiGrowthBasis"')).toBeLessThan(block.indexOf('t("wiGrowthDerived")'));
     expect(block.indexOf('t("wiGrowthDerived")')).toBeLessThan(block.indexOf('t("wiGrowthDeepen"'));
     expect(block).toMatch(/if \(growth\.demand === null\) lines\.push\(t\("wiGrowthDemandUnread"\)\);/);
+    // SEP-7 (production walk 2026-09-12): a skill backed only by untimed
+    // entries is NOT_MEASURED — both surfaces say so in words and neither
+    // prints it as a 0 h involvement; the chat's list never doubles the
+    // sentence's full stop after a unit abbreviation ("val..")
+    expect(growth).toMatch(/if \(s\.attributedHours <= 0 && s\.sharedHours <= 0 && s\.entries > 0\) reasons\.push\("untimed"\);/);
+    expect(block).toMatch(/: s\.sharedHours > 0\s*\n\s*\? t\("wiGrowthBasisSkillInvolved"/);
+    expect(block).toContain('t("wiGrowthBasisSkillUntimed", { skill: skillName(s.slug), entries: s.entries })');
+    expect(block).toContain('.replace(/\\.$/, "")');
+    expect(component).toMatch(/: s\.sharedHours > 0\s*\n\s*\? t\("growthBasisSkillInvolved"/);
+    expect(component).toContain('t("growthBasisSkillUntimed", { skill: s.name, entries: s.entries })');
     expect(workflows).toMatch(/async function readDemandBySkillForGrowth\(\): Promise<ReadonlyMap<string, number> \| null>/);
     expect(workflows).toMatch(/if \(board\.kind !== "ready" \|\| !board\.capabilities\.boardAvailable\) return null;/);
     // the door: a journal READ intent on the SAME handler as lines 2–7
@@ -917,14 +927,14 @@ describe("14 · the growth reading (owner line 8): one derivation, fact apart fr
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: Record<string, string> & { deepen: Record<string, string> };
       };
-      for (const key of ["growthTitle", "growthBasis", "growthBasisSkill", "growthBasisSkillInvolved", "growthDeclaredOnly", "growthDerivedHint", "growthInsufficient", "deepenTitle", "growthDemandNote"]) {
+      for (const key of ["growthTitle", "growthBasis", "growthBasisSkill", "growthBasisSkillInvolved", "growthBasisSkillUntimed", "growthDeclaredOnly", "growthDerivedHint", "growthInsufficient", "deepenTitle", "growthDemandNote"]) {
         expect(typeof j.intelligence[key] === "string" && j.intelligence[key]!.trim().length > 0, `${loc}.intelligence.${key}`).toBe(true);
       }
-      for (const r of ["involvement_only", "unconfirmed", "rising", "dormant"]) {
+      for (const r of ["involvement_only", "untimed", "unconfirmed", "rising", "dormant"]) {
         expect(typeof j.intelligence.deepen[r] === "string" && j.intelligence.deepen[r]!.trim().length > 0, `${loc}.intelligence.deepen.${r}`).toBe(true);
       }
       const root = JSON.parse(read(`messages/${loc}.json`)) as { workspace: { ai: Record<string, string> } };
-      for (const key of ["wiGrowthBasis", "wiGrowthDerived", "wiGrowthInsufficient", "wiGrowthDeepen", "wiGrowthDeepenItem", "wiGrowthExpand", "wiGrowthExpandItem", "wiGrowthDemandUnread", "wiGrowthDemandNone", "wiGrowthDemand", "wiGrowthDemandItem", "whyWiGrowth", "wiGrowthReason_involvement_only", "wiGrowthReason_unconfirmed", "wiGrowthReason_rising", "wiGrowthReason_dormant"]) {
+      for (const key of ["wiGrowthBasis", "wiGrowthDerived", "wiGrowthInsufficient", "wiGrowthDeepen", "wiGrowthDeepenItem", "wiGrowthExpand", "wiGrowthExpandItem", "wiGrowthDemandUnread", "wiGrowthDemandNone", "wiGrowthDemand", "wiGrowthDemandItem", "whyWiGrowth", "wiGrowthBasisSkillUntimed", "wiGrowthReason_involvement_only", "wiGrowthReason_untimed", "wiGrowthReason_unconfirmed", "wiGrowthReason_rising", "wiGrowthReason_dormant"]) {
         expect(typeof root.workspace.ai[key] === "string" && root.workspace.ai[key]!.trim().length > 0, `${loc}.workspace.ai.${key}`).toBe(true);
       }
       // the copy names itself derived and disclaims the score in every locale

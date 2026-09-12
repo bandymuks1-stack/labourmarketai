@@ -661,12 +661,14 @@
     "growthBasis": "Auf Basis von {count, plural, one {# Fähigkeit} other {# Fähigkeiten}}, die Ihre Einträge belegen — {hours} h aus {entries, plural, one {# Eintrag} other {# Einträgen}} ({period}):",
     "growthBasisSkill": "{skill} {hours} h",
     "growthBasisSkillInvolved": "{skill} beteiligt {hours} h",
+    "growthBasisSkillUntimed": "{skill} {entries, plural, one {# Eintrag} other {# Einträge}} ohne Dauer",
     "growthDeclaredOnly": "{count, plural, one {# selbst angegebene Fähigkeit ohne belegenden Eintrag bleibt außerhalb dieser Lesart.} other {# selbst angegebene Fähigkeiten ohne belegenden Eintrag bleiben außerhalb dieser Lesart.}}",
     "growthDerivedHint": "Abgeleitet aus Ihren eigenen Einträgen oben — eine Lesart, keine Tatsache: keine Bewertung, kein Rang, keine Qualifikation.",
     "growthInsufficient": "Eine Lesart braucht mindestens zwei Fähigkeiten, die Ihre Einträge belegen — vorerst nur die Fakten.",
     "deepenTitle": "Was Sie vertiefen könnten",
     "deepen": {
       "involvement_only": "bisher nur neben anderen Fähigkeiten — kein Eintrag, in dem dies die Hauptarbeit war",
+      "untimed": "die Einträge, die das belegen, tragen keine Dauer — noch keine Stunden; nennen Sie die Zeit, und sie zählen",
       "unconfirmed": "von Ihnen erfasst, noch nicht von einer Führungskraft oder einem Kunden bestätigt",
       "rising": "in den letzten 30 Tagen mehr genutzt als in den 30 davor",
       "dormant": "90 Tage ohne Eintrag"
