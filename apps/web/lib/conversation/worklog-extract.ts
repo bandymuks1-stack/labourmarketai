@@ -33,7 +33,11 @@ export type WorkLogParse = {
   workedMinutes: number | null;
   /** Human label for worked time, e.g. "8 val. 15 min." — null when unknown. */
   hoursLabel: string | null;
-  /** Best-effort work site (word(s) after "objekte"/"site"/"на объекте"). */
+  /** Best-effort context — the entry's ONE `site_name` slot ("Objektas /
+   *  vieta"): the word after "objekte"/"site"/"на объекте", a NAME after a
+   *  place noun ("sandėlyje Kaune", "projekte LabourMarket.ai") or after
+   *  the work verb ("dirbau LabourMarket.ai"). Shown for correction, never
+   *  saved unseen. */
   site: string | null;
   /** Best-effort activity phrase (trailing clause) — display only. */
   task: string | null;
@@ -86,9 +90,42 @@ const BREAK_RE =
 const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|break|lunch|обед|перерыв|pauze|pause)/iu;
 // explicit "8 valandas / hours / часов"
 const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?)/iu;
-// site after "objekte X" / "site X" / "на объекте в X"
+// site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
+// the locative forms only: "Statyba" inside a company name is a NAME, not
+// a place word (the context rules below read it)
 const SITE_RE =
-  /(?:objekt\w*|statyb\w*|site|на\s+объекте(?:\s+в)?|op\s+de\s+locatie|auf\s+der\s+baustelle)\s+([A-Za-zÀ-ÿА-Яа-яĀ-ž][\wÀ-ÿА-Яа-яĀ-ž-]{1,40})/iu;
+  /(?:objekt\w*|statybo(?:je|se)|site|на\s+объекте(?:\s+в)?|op\s+de\s+locatie|auf\s+der\s+baustelle)\s+([A-Za-zÀ-ÿА-Яа-яĀ-ž][\wÀ-ÿА-Яа-яĀ-ž-]{1,40})/iu;
+// ── the CONTEXT slot (issue #1689, re-audit line 0) ────────────────────────
+// The entry carries ONE free context — `site_name`, "Objektas / vieta": the
+// object, place, project or client the work was for. The owner's own
+// sentence, "Šiandien 9 valandas dirbau LabourMarket.ai: …", named its
+// context and the flow captured nothing, so the person had to retype it.
+// Two further readings, both a PARSE PREVIEW the person corrects before
+// the save (never a silent claim):
+//   · a place noun the sentence names — warehouse / office / project /
+//     company / shop / at the client — followed by a NAME: a capitalised
+//     token or a dotted one ("LabourMarket.ai"), optionally two words
+//     ("UAB Statyba"). The name requirement is what keeps "sandėlyje
+//     iškroviau" from reading the verb as the place;
+//   · the work verb itself followed by such a NAME — "dirbau LabourMarket.ai",
+//     "worked at Acme", "работал в Maxima", "gewerkt bij Bol", "gearbeitet
+//     bei Bosch". A digit after the verb ("dirbau 8 valandas", "nuo 8") is
+//     never a name, so the time reading is untouched.
+// A proper NAME: starts with an upper-case letter; may carry dots, digits,
+// "&", an apostrophe or a hyphen; a second capitalised word may follow.
+const NAME = String.raw`(\p{Lu}[\p{L}\p{N}.&'’-]{1,40}(?:\s\p{Lu}[\p{L}\p{N}.&'’-]{1,40})?)`;
+const SITE_PLACE_NOUN_RE = new RegExp(
+  String.raw`(?<!\p{L})(?:[Ss]andėl\p{L}*|[Bb]iur\p{L}*|[Pp]rojekt\p{L}*|[Įį]mon\p{L}*|[Ff]irm\p{L}*|[Pp]arduotuv\p{L}*|[Kk]lientui|[Pp]as\s+klient\p{L}*|[Ww]arehouse|[Oo]ffice|[Pp]roject|[Cc]ompany|[Ss]hop|[Ss]tore|[Aa]t\s+the\s+client|[Ff]or\s+client|[Нн]а\s+складе|[Вв]\s+офисе|[Нн]а\s+проекте|[Вв]\s+компании|[Вв]\s+фирме|[Вв]\s+магазине|[Уу]\s+клиента|[Ii]n\s+het\s+magazijn|[Oo]p\s+kantoor|[Ii]n\s+het\s+project|[Bb]ij\s+de\s+klant|[Ii]m\s+Lager|[Ii]m\s+Büro|[Ii]m\s+Projekt|[Ii]n\s+der\s+Firma|[Bb]eim\s+Kunden)\s+` + NAME,
+  "u",
+);
+const SITE_AFTER_WORK_VERB_RE = new RegExp(
+  String.raw`(?<!\p{L})(?:[Dd]irbau|[Dd]irbome|[Ww]orked\s+(?:at|for|on)|[Рр]аботал[аи]?\s+(?:в|на|у|для)|[Gg]ewerkt\s+(?:bij|voor|aan)|[Gg]earbeitet\s+(?:bei|für|an))\s+` + NAME,
+  "u",
+);
+/** Trailing sentence punctuation is never part of a name ("LabourMarket.ai:"). */
+function trimName(name: string): string {
+  return name.replace(/[.,:;!?]+$/u, "").trim();
+}
 // "šiandien" today, "vakar" yesterday, explicit ISO, "liepos 24"/"24 d."
 const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute)/iu;
 const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern)/iu;
@@ -167,8 +204,8 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
 
   // ── site ──────────────────────────────────────────────────────────────────
   let site: string | null = null;
-  const siteM = raw.match(SITE_RE);
-  if (siteM) site = siteM[1];
+  const siteM = raw.match(SITE_RE) ?? raw.match(SITE_PLACE_NOUN_RE) ?? raw.match(SITE_AFTER_WORK_VERB_RE);
+  if (siteM) site = trimName(siteM[1]!) || null;
 
   // ── task (best effort, display only) ──────────────────────────────────────
   // Trailing clause after the last comma, when it looks like an activity

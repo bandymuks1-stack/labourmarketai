@@ -1010,9 +1010,15 @@ export async function runWorkIntelligenceQuestion(
       .map((s) =>
         s.attributedHours > 0
           ? t("wiGrowthBasisSkill", { skill: skillName(s.slug), hours: fmtHours(s.attributedHours, locale) })
-          : t("wiGrowthBasisSkillInvolved", { skill: skillName(s.slug), hours: fmtHours(s.sharedHours, locale) }),
+          : s.sharedHours > 0
+            ? t("wiGrowthBasisSkillInvolved", { skill: skillName(s.slug), hours: fmtHours(s.sharedHours, locale) })
+            : // backed only by untimed entries — counted, not timed (SEP-7)
+              t("wiGrowthBasisSkillUntimed", { skill: skillName(s.slug), entries: s.entries }),
       )
-      .join(", ");
+      .join(", ")
+      // the sentence template closes with its own full stop; a unit
+      // abbreviation ("val.") at the end of the list must not double it
+      .replace(/\.$/, "");
     const lines = [
       t("wiGrowthBasis", {
         period: periodLabel,

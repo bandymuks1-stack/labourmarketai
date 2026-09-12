@@ -1006,7 +1006,11 @@ export async function JournalWorkIntelligence({
                     .map((s) =>
                       s.attributedHours > 0
                         ? t("growthBasisSkill", { skill: s.name, hours: fmtHours(s.attributedHours, locale) })
-                        : t("growthBasisSkillInvolved", { skill: s.name, hours: fmtHours(s.sharedHours, locale) }),
+                        : s.sharedHours > 0
+                          ? t("growthBasisSkillInvolved", { skill: s.name, hours: fmtHours(s.sharedHours, locale) })
+                          : // backed only by untimed entries — counted, not
+                            // timed; NOT_MEASURED is never printed as 0 h
+                            t("growthBasisSkillUntimed", { skill: s.name, entries: s.entries }),
                     )
                     .join(" · ")}
                   {growth.basis.declaredOnly > 0
