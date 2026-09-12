@@ -257,3 +257,48 @@ export async function iscoGroupForEscoOccupation(
   const code = (data as { isco_group?: string | null } | null)?.isco_group ?? null;
   return { status: "ok", value: typeof code === "string" && code.trim() ? code.trim() : null };
 }
+
+/** Ceiling on one URI batch — a worker holds a handful of professions, never
+ *  a catalogue's worth; anything beyond this is a caller bug, not a query. */
+export const ESCO_URI_BATCH_LIMIT = 50;
+
+/**
+ * ISCO-08 groups for a set of ESCO occupation URIs — the join the platform's
+ * own taxonomy makes: `professions.esco_uri` (applied to production on
+ * 2026-09-08, ledger 20260908082301: 34 of 49 professions carry one) →
+ * `esco_occupations.esco_uri` → `isco_group`. This is the occupation path of
+ * the Work Journal's archetype model (`archetypesForIsco`); it is the FIRST
+ * product consumer of `lib/esco` that a person reaches without an admin
+ * screen. ONE bounded read; a URI the catalogue does not hold is simply
+ * absent from the map (unknown, never a guessed family). Read-only, under the
+ * caller's own client and RLS (`esco_occupations_select`: authenticated,
+ * active rows).
+ */
+export async function iscoGroupsForEscoUris(
+  escoUris: readonly string[],
+  client?: SupabaseClient,
+): Promise<EscoRead<ReadonlyMap<string, string>>> {
+  const uris = [...new Set(escoUris.map((u) => u.trim()).filter((u) => u.length > 0))].slice(
+    0,
+    ESCO_URI_BATCH_LIMIT,
+  );
+  if (uris.length === 0) return { status: "ok", value: new Map() };
+  const supabase = client ?? (await createClient());
+  const { data, error } = await asAny(supabase)
+    .from("esco_occupations")
+    .select("esco_uri, isco_group")
+    .in("esco_uri", uris)
+    .limit(ESCO_URI_BATCH_LIMIT);
+
+  if (error) {
+    if (isMissingTable(error)) return { status: "unavailable", reason: "not_imported" };
+    return { status: "unavailable", reason: "error" };
+  }
+  const out = new Map<string, string>();
+  for (const r of (data ?? []) as { esco_uri?: string | null; isco_group?: string | null }[]) {
+    const uri = typeof r.esco_uri === "string" ? r.esco_uri : "";
+    const code = typeof r.isco_group === "string" ? r.isco_group.trim() : "";
+    if (uri && code) out.set(uri, code);
+  }
+  return { status: "ok", value: out };
+}

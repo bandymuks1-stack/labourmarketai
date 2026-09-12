@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   ALL_MODULE_SLUGS,
+  allowedModuleSlugsFor,
   allowedModuleSlugsForRelationship,
+  archetypesForSources,
   MODULE_FIELDS_MAX,
   MODULE_VALUE_MAX_LENGTH,
+  moduleGroupsFor,
   moduleGroupsForRelationship,
   moduleMetricRows,
   parseModuleFields,
@@ -36,7 +39,7 @@ describe("which fields a relationship composes", () => {
       "weather_safety",
     ]);
   });
-  it("an employee context composes nothing today — no generic form is manufactured", () => {
+  it("an employee context adds nothing of its own — with no occupation in play, no generic form is manufactured", () => {
     expect(moduleGroupsForRelationship("employee")).toEqual([]);
     expect(allowedModuleSlugsForRelationship("employee").size).toBe(0);
   });
@@ -46,6 +49,70 @@ describe("which fields a relationship composes", () => {
     }
   });
   it("no module slug is a universal-core slug", () => {
+    for (const core of UNIVERSAL_CORE_SLUGS) expect(ALL_MODULE_SLUGS.has(core)).toBe(false);
+  });
+});
+
+/**
+ * The occupation path (re-audit 2026-09-11, gate 1 stale): the worker's own
+ * profession → `professions.esco_uri` → `esco_occupations.isco_group` →
+ * `archetypesForIsco`. The codes below are what production resolves today
+ * (tiler 7122, software developer 2512, site manager 1323, welder 7212).
+ */
+describe("which fields an occupation composes", () => {
+  it("a tiler (ISCO 7122 → 71) composes the construction trade's fields: place and crew, materials and tools, conditions and safety, inspection", () => {
+    expect(moduleGroupsFor({ iscoGroups: ["7122"] }).map((g) => g.moduleId)).toEqual([
+      "site_zone",
+      "materials_tools",
+      "weather_safety",
+      "inspection",
+    ]);
+    expect(allowedModuleSlugsFor({ iscoGroups: ["7122"] }).has("inspection_result")).toBe(true);
+    expect(allowedModuleSlugsFor({ iscoGroups: ["7122"] }).has("repository")).toBe(false);
+  });
+  it("a software developer (2512 → 25) composes software delivery and client/matter — nothing from the building site", () => {
+    const groups = moduleGroupsFor({ iscoGroups: ["2512"], relationshipSlug: "employee" });
+    expect(groups.map((g) => g.moduleId)).toEqual(["case_matter", "software_delivery"]);
+    expect(allowedModuleSlugsFor({ iscoGroups: ["2512"] }).has("crew")).toBe(false);
+  });
+  it("occupation and relationship UNION: an apprentice welder gets the trade's fields AND the placement's supervision", () => {
+    const ids = archetypesForSources({ iscoGroups: ["7212"], relationshipSlug: "student" });
+    expect(ids).toContain("maintenance_repair");
+    expect(ids).toContain("apprenticeship_training");
+    const modules = moduleGroupsFor({ iscoGroups: ["7212"], relationshipSlug: "student" }).map((g) => g.moduleId);
+    expect(modules).toContain("supervision");
+    expect(modules).toContain("asset_fault");
+    // each module once, in catalogue order, however many sources name it
+    expect(new Set(modules).size).toBe(modules.length);
+  });
+  it("several own professions union too — the server's accept set is every family the worker holds", () => {
+    const allowed = allowedModuleSlugsFor({ iscoGroups: ["7122", "2512"] });
+    expect(allowed.has("inspection_result")).toBe(true);
+    expect(allowed.has("repository")).toBe(true);
+    expect(allowed.has("supervision_level")).toBe(false);
+  });
+  it("an unmapped profession (null ISCO — teacher, caregiver on production), a blank or a malformed code composes nothing: UNKNOWN is not a family", () => {
+    for (const code of [null, undefined, "", "  ", "abc", "7-1", "12345"]) {
+      expect(moduleGroupsFor({ iscoGroups: [code] })).toEqual([]);
+    }
+    expect(moduleGroupsFor({ iscoGroups: [null], relationshipSlug: "employee" })).toEqual([]);
+    expect(moduleGroupsFor({})).toEqual([]);
+  });
+  it("a tiler's entry refuses a software field by name — the family, not the request, decides", () => {
+    expect(
+      moduleMetricRows(
+        { inspection_result: "ok", ticket_ref: "LM-1" },
+        allowedModuleSlugsFor({ iscoGroups: ["7122"], relationshipSlug: "employee" }),
+      ),
+    ).toEqual({ ok: false, refused: ["ticket_ref"] });
+  });
+  it("the relationship-only entry points are the same composition with no occupation", () => {
+    expect(moduleGroupsForRelationship("student")).toEqual(moduleGroupsFor({ relationshipSlug: "student" }));
+    expect([...allowedModuleSlugsForRelationship("volunteer")].sort()).toEqual(
+      [...allowedModuleSlugsFor({ relationshipSlug: "volunteer", iscoGroups: [] })].sort(),
+    );
+  });
+  it("no module slug is a universal-core slug (occupation path included)", () => {
     for (const core of UNIVERSAL_CORE_SLUGS) expect(ALL_MODULE_SLUGS.has(core)).toBe(false);
   });
 });

@@ -1,9 +1,11 @@
 import {
+  archetypesForIsco,
   archetypesForRelationship,
   composeJournal,
   JOURNAL_MODULES,
   UNIVERSAL_CORE_SLUGS,
   type JournalModuleId,
+  type WorkEvidenceArchetypeId,
 } from "./work-evidence-archetypes";
 
 /**
@@ -12,24 +14,39 @@ import {
  * (`journal_entry_metrics`, owner rule §12: modules appear progressively,
  * each field = one metric row, never a column, never a second form).
  *
- * WHO decides which modules an entry may carry: the RELATIONSHIP the work is
- * done under — the engagement context's `relationship_slug`, which the
- * product already holds. A `student` placement composes apprenticeship
- * training + supervised practice (supervision level, competency practised,
- * learning outcome); a `volunteer` engagement composes a field project
- * (zone, crew, materials, tools, weather, safety, blockers). An `employee`
- * context composes nothing yet: the occupation → ISCO → archetype path has
- * no live resolver until the owner-gated slug↔ESCO bridge (#1355), and this
- * module manufactures nothing for it — an unknown relationship is the
- * universal core alone, exactly as `composeJournal([])`.
+ * WHO decides which modules an entry may carry — TWO sources, unioned:
  *
- * WHERE the rows are accepted: the server, by the ENGAGEMENT's own
- * relationship (`resolveModuleMetricRows` in journal-write-core), never by
- * a client-declared list — a surgeon's entry cannot be posted construction
- * quantity fields by editing a request. Values are the person's own words
- * (`source = worker_input`), text only, capped, one row per slug.
+ *   · the OCCUPATION the work belongs to — the entry's work direction is one
+ *     of the worker's own professions; `professions.esco_uri` (applied to
+ *     production 2026-09-08, ledger 20260908082301, 34 of 49 professions)
+ *     names the ESCO occupation, `esco_occupations.isco_group` its ISCO-08
+ *     unit group, and `archetypesForIsco` the work-evidence archetypes of
+ *     that family. A tiler (7122 → 71) composes place and crew, materials
+ *     and tools, conditions and safety, inspection; a software developer
+ *     (2512 → 25) composes software delivery and case/matter fields. An
+ *     unmapped profession (`esco_uri` NULL — `teacher`, `caregiver`, kept
+ *     unmapped on purpose) resolves to nothing: UNKNOWN is the honest answer,
+ *     never a guessed family.
+ *   · the RELATIONSHIP the work is done under — the engagement context's
+ *     `relationship_slug`. A `student` placement adds apprenticeship training
+ *     + supervised practice; a `volunteer` engagement adds a field project.
  *
- * Pure: no I/O, no React, safe on both sides.
+ * Neither source alone is the composition: an apprentice electrician gets
+ * the trade's modules AND the placement's supervision fields. Nothing on
+ * either path is manufactured — a worker with no mapped profession under an
+ * `employee` context sees the universal core alone, exactly as
+ * `composeJournal([])`.
+ *
+ * WHERE the rows are accepted: the server, from the ENGAGEMENT's own
+ * relationship AND the worker's OWN professions read server-side
+ * (`resolveModuleMetricRows` in journal-write-core) — never from a
+ * client-declared list or a client-declared occupation: a surgeon's entry
+ * cannot be posted construction quantity fields by editing a request. Values
+ * are the person's own words (`source = worker_input`), text only, capped,
+ * one row per slug.
+ *
+ * Pure: no I/O, no React, safe on both sides. The ISCO codes come in from the
+ * server (`journal-occupation-path.ts`); this module only composes.
  */
 
 /** FormData field both editors ship and both write paths read. */
@@ -53,27 +70,56 @@ export type JournalModuleGroup = {
   readonly slugs: readonly string[];
 };
 
-/** The module groups an engagement relationship composes, in catalogue
- *  order. Empty for an unknown or unmapped relationship — the editors then
- *  render nothing (honest absence, never a generic form). */
-export function moduleGroupsForRelationship(
-  relationshipSlug: string | null | undefined,
-): JournalModuleGroup[] {
-  const composition = composeJournal(archetypesForRelationship(relationshipSlug));
+/** What decides an entry's composition: the occupation family (ISCO-08
+ *  codes of the professions in play — the entry's own direction on the
+ *  client, ALL of the worker's professions on the server) and the
+ *  engagement relationship. Either may be absent. */
+export type JournalModuleSources = {
+  readonly relationshipSlug?: string | null;
+  readonly iscoGroups?: ReadonlyArray<string | null | undefined>;
+};
+
+/** The archetypes both sources resolve to, in the order they were named —
+ *  occupation families first, the relationship's additions after. */
+export function archetypesForSources(
+  sources: JournalModuleSources,
+): readonly WorkEvidenceArchetypeId[] {
+  const ids: WorkEvidenceArchetypeId[] = [];
+  for (const code of sources.iscoGroups ?? []) ids.push(...archetypesForIsco(code));
+  ids.push(...archetypesForRelationship(sources.relationshipSlug));
+  return [...new Set(ids)];
+}
+
+/** The module groups the sources compose, in catalogue order. Empty when
+ *  nothing resolves — the editors then render nothing (honest absence, never
+ *  a generic form). */
+export function moduleGroupsFor(sources: JournalModuleSources): JournalModuleGroup[] {
+  const composition = composeJournal(archetypesForSources(sources));
   return composition.modules.map((moduleId) => ({
     moduleId,
     slugs: [...JOURNAL_MODULES[moduleId]],
   }));
 }
 
-/** The metric slugs a relationship's composition allows — what the server
- *  accepts for an entry logged against that engagement. */
+/** The metric slugs the sources' composition allows — what the server
+ *  accepts for an entry logged against that engagement by that worker. */
+export function allowedModuleSlugsFor(sources: JournalModuleSources): ReadonlySet<string> {
+  return new Set(moduleGroupsFor(sources).flatMap((g) => [...g.slugs]));
+}
+
+/** Relationship-only view of the same composition (a context with no
+ *  occupation in play, or a caller that has none to offer). */
+export function moduleGroupsForRelationship(
+  relationshipSlug: string | null | undefined,
+): JournalModuleGroup[] {
+  return moduleGroupsFor({ relationshipSlug });
+}
+
+/** Relationship-only accept set — see `allowedModuleSlugsFor`. */
 export function allowedModuleSlugsForRelationship(
   relationshipSlug: string | null | undefined,
 ): ReadonlySet<string> {
-  return new Set(
-    moduleGroupsForRelationship(relationshipSlug).flatMap((g) => [...g.slugs]),
-  );
+  return allowedModuleSlugsFor({ relationshipSlug });
 }
 
 /** slug → the person's text, for the fields that carry a value. */

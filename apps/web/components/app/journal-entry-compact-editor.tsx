@@ -146,6 +146,14 @@ export function JournalEntryCompactEditor({
   );
   const selectedRelationship =
     engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
+  // Occupation path (owner §12): the ISCO group of the direction the entry
+  // names, else of the worker's primary profession (`directions` arrives
+  // primary-first); null when unmapped, so no family is guessed.
+  const selectedIscoGroup =
+    (directionSlug
+      ? directions.find((d) => d.slug === directionSlug)
+      : directions[0]
+    )?.iscoGroup ?? null;
 
   // Addition flow (small inline autocomplete over ACTIVE taxonomy skills via
   // the existing `searchTaxonomySkills` server action + free-text fallback).
@@ -702,12 +710,14 @@ export function JournalEntryCompactEditor({
               onChange={(e) => setTopic(e.target.value)}
             />
           </label>
-          {/* Owner §12 — the relationship's own module fields (a placement's
-              supervision, a volunteer's field project); nothing for a
-              context whose composition adds no module. */}
+          {/* Owner §12 — the module fields the entry's occupation (named
+              direction, else the primary profession, through its ISCO group)
+              and the relationship compose; nothing when neither source adds
+              a module. */}
           <div className="sm:col-span-2">
             <JournalModuleFields
               relationshipSlug={selectedRelationship}
+              iscoGroup={selectedIscoGroup}
               values={moduleFields}
               onChange={setModuleFields}
               testId="journal-compact-module-fields"

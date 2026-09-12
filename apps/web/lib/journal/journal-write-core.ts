@@ -15,11 +15,12 @@ import {
   type WorkDayCheck,
 } from "@/lib/journal/work-time-plausibility-read";
 import {
-  allowedModuleSlugsForRelationship,
+  allowedModuleSlugsFor,
   MODULE_METRICS_FIELD,
   moduleMetricRows,
   parseModuleFields,
 } from "@/lib/journal/journal-module-fields";
+import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -216,29 +217,40 @@ export async function runSkillPipeline(opts: {
 
 /**
  * Owner §12 — archetype module fields → metric rows, accepted by the
- * ENGAGEMENT's own relationship. The relationship is read under the caller's
- * RLS (their own context; a foreign or unknown id reads as no relationship
- * and therefore allows nothing). No field posted → no read, no rows.
+ * ENGAGEMENT's own relationship AND the worker's OWN professions, both read
+ * under the caller's RLS. The relationship is the context's (a foreign or
+ * unknown id reads as no relationship); the occupation path is the worker's
+ * professions → `esco_uri` → ISCO (`readOwnOccupationPathForUser`), never a
+ * profession slug the request names — so the accept set is what THIS person
+ * may honestly record under THIS context, whatever the form posted. No
+ * field posted → no read, no rows.
  */
 export async function resolveModuleMetricRows(
   supabase: ServerSupabase,
   t: Translator,
   engagementId: string,
   raw: string | null | undefined,
+  userId: string,
 ): Promise<
   | { ok: true; rows: RpcMetricRow[] }
   | { ok: false; code: "module_field_invalid"; message: string }
 > {
   const values = parseModuleFields(raw);
   if (Object.keys(values).length === 0) return { ok: true, rows: [] };
-  const { data: ctx } = await supabase
-    .from("engagement_contexts")
-    .select("relationship_slug")
-    .eq("id", engagementId)
-    .maybeSingle();
+  const [{ data: ctx }, own] = await Promise.all([
+    supabase
+      .from("engagement_contexts")
+      .select("relationship_slug")
+      .eq("id", engagementId)
+      .maybeSingle(),
+    readOwnOccupationPathForUser(supabase, userId),
+  ]);
   const result = moduleMetricRows(
     values,
-    allowedModuleSlugsForRelationship(ctx?.relationship_slug ?? null),
+    allowedModuleSlugsFor({
+      relationshipSlug: ctx?.relationship_slug ?? null,
+      iscoGroups: own.iscoGroups,
+    }),
   );
   if (!result.ok) {
     return {
@@ -473,6 +485,7 @@ export async function createJournalEntryCore(
     t,
     engagementId,
     String(formData.get(MODULE_METRICS_FIELD) ?? ""),
+    userId,
   );
   if (!moduleRows.ok) return moduleRows;
 
