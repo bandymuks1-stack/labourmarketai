@@ -269,12 +269,23 @@ export function buildCompactSaveFields(
     .filter((r) => r.label.trim().length > 0)
     .map((r) => {
       const t = parseRowTime(r);
+      const rawPhrase = (r.rawPhrase ?? r.label).trim();
+      const label = r.label.trim();
       return {
-        rawPhrase: (r.rawPhrase ?? r.label).trim(),
+        rawPhrase,
         timeValue: t ? t.value : null,
         timeUnit: t ? t.unitSlug : null,
         activitySlug: r.skillSlug,
-        activityLabel: r.label.trim(),
+        // A label that is nothing but the phrase itself names no kind of work
+        // (a persisted fragment whose activity the lexicon never read shows
+        // its own words as the row label) — shipping it as the activity wrote
+        // "2 val. testavau" into `fragment_activity`, and the activities
+        // block listed the sentence as a kind of work (#1689, production
+        // 2026-09-12). The worker's own typed label on an added row stays.
+        activityLabel:
+          r.skillSlug === null && r.rawPhrase !== null && label === r.rawPhrase.trim()
+            ? null
+            : label,
         isUnknown: false,
         userLabel: null,
         // EXPLICIT worker selection marker — only fragments flagged here may
