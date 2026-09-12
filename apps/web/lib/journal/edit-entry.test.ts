@@ -145,6 +145,7 @@ describe("buildEditingEntry — index-grouped activity fragments (compact edit)"
         activityLabel: "vairavimas",
         time: { value: 1, unitSlug: "hours" },
         userLabel: null,
+        source: null,
       },
       {
         index: 2,
@@ -152,6 +153,7 @@ describe("buildEditingEntry — index-grouped activity fragments (compact edit)"
         activityLabel: "kasininko darbas",
         time: { value: 3, unitSlug: "hours" },
         userLabel: null,
+        source: null,
       },
     ]);
   });
@@ -196,5 +198,34 @@ describe("buildEditingEntry — index-grouped activity fragments (compact edit)"
       ],
     });
     expect(out.activities).toEqual([]);
+  });
+});
+
+describe("fragment provenance rides into the editing entry (#1689)", () => {
+  const row = (
+    metric_slug: string,
+    value_text: string | null,
+    source: string | null,
+    value_numeric: number | null = null,
+    unit_slug: string | null = null,
+  ): EditEntryMetricRow => ({ metric_slug, value_text, value_numeric, unit_slug, source });
+
+  it("the fragment_time row's source wins; the parsed_fragment row's is the fallback; none → null", () => {
+    const out = buildEditingEntry({
+      id: "e2",
+      originalText: "x",
+      metrics: [
+        row("parsed_fragment", "1|5 val. programavau", "worker_input"),
+        row("fragment_time", "1", "ai_extracted", 5, "hours"),
+        row("parsed_fragment", "2|2 val. testavau", "ai_extracted"),
+        row("parsed_fragment", "3|1 val. susirinkimas", null),
+        row("fragment_time", "3", "something_else", 1, "hours"),
+      ],
+    });
+    expect(out.activities.map((a) => [a.index, a.source])).toEqual([
+      [1, "ai_extracted"],
+      [2, "ai_extracted"],
+      [3, null],
+    ]);
   });
 });

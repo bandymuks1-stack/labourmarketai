@@ -25,7 +25,14 @@ export type EditEntryMetricRow = {
   value_text: string | null;
   value_numeric: number | null;
   unit_slug: string | null;
+  /** Row provenance (`journal_entry_metrics.source`): `worker_input` when the
+   *  person reviewed the fragment, `ai_extracted` when a transport persisted
+   *  the deterministic parse after a summary-level confirmation. Optional so
+   *  pure tests and older callers stay valid; absent reads as unknown. */
+  source?: string | null;
 };
+
+export type EditEntryProvenance = "worker_input" | "ai_extracted";
 
 export type EditEntryAmount = { value: number; unitSlug: string };
 
@@ -49,6 +56,13 @@ export type EditEntryActivity = {
   time: EditEntryAmount | null;
   /** Worker-typed clarification for an unknown fragment, when present. */
   userLabel: string | null;
+  /** Provenance of the fragment's persisted rows — the `fragment_time` row's
+   *  source, else the `parsed_fragment` row's; null when the rows carry none.
+   *  A re-save that leaves the fragment untouched keeps this (issue #1689,
+   *  observed 2026-09-12: the compact editor re-sent every `ai_extracted`
+   *  fragment as `worker_input`, turning a machine reading the person never
+   *  typed into "the worker's own input"). */
+  source: EditEntryProvenance | null;
 };
 
 export type JournalEditingEntry = {
@@ -124,6 +138,11 @@ export function buildEditingEntry(args: {
   };
 }
 
+/** The DB CHECK vocabulary (0013) as a typed value; anything else is unknown. */
+function provenanceOf(source: string | null | undefined): EditEntryProvenance | null {
+  return source === "worker_input" || source === "ai_extracted" ? source : null;
+}
+
 /** Split an `"N|rest"` metric value into its index + payload (null when the
  *  prefix is not a positive integer — malformed rows are skipped, never
  *  guessed into an association). */
@@ -149,7 +168,7 @@ function buildActivities(
   const get = (index: number): EditEntryActivity => {
     let a = byIndex.get(index);
     if (!a) {
-      a = { index, rawPhrase: null, activityLabel: null, time: null, userLabel: null };
+      a = { index, rawPhrase: null, activityLabel: null, time: null, userLabel: null, source: null };
       byIndex.set(index, a);
     }
     return a;
@@ -161,6 +180,8 @@ function buildActivities(
         if (p && p.rest.trim()) {
           const a = get(p.index);
           if (a.rawPhrase === null) a.rawPhrase = p.rest.trim();
+          // the time row's provenance wins; the phrase row's is the fallback
+          if (a.source === null) a.source = provenanceOf(m.source);
         }
         break;
       }
@@ -183,6 +204,8 @@ function buildActivities(
           const a = get(index);
           if (a.time === null) {
             a.time = { value: m.value_numeric, unitSlug: m.unit_slug };
+            const src = provenanceOf(m.source);
+            if (src !== null) a.source = src;
           }
         }
         break;

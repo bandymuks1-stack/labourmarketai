@@ -289,3 +289,33 @@ describe("7 · integrity — the compact surface can never fake verification", (
     expect(EDITOR).not.toMatch(/console\.[a-z]+\([^)]*\btext\b/);
   });
 });
+
+describe("provenance survives a compact re-save; a free-text label is not a message key (#1689, 2026-09-12)", () => {
+  const EDIT_ENTRY = read("lib/journal/edit-entry.ts");
+  const WRITE_CORE = read("lib/journal/journal-write-core.ts");
+
+  it("the persisted fragment's source rides from the metric rows into the row, and back out unchanged when the row is untouched", () => {
+    // edit-entry reads `source` off the fragment rows (time row wins, phrase row falls back)
+    expect(EDIT_ENTRY).toMatch(/source\?: string \| null;/);
+    expect(EDIT_ENTRY).toMatch(/source: EditEntryProvenance \| null;/);
+    expect(EDIT_ENTRY).toMatch(/if \(a\.source === null\) a\.source = provenanceOf\(m\.source\);/);
+    expect(EDIT_ENTRY).toMatch(/const src = provenanceOf\(m\.source\);\s+if \(src !== null\) a\.source = src;/);
+    // the compact row keeps it with a fingerprint of the persisted values
+    expect(MODEL).toMatch(/source\?: "worker_input" \| "ai_extracted" \| null;/);
+    expect(MODEL).toMatch(/row\.persistedFingerprint = rowFingerprint\(row\);/);
+    // the save ships it through ONE rule: untouched → as persisted, else the worker's input
+    expect(MODEL).toMatch(/export function fragmentProvenance\(/);
+    expect(MODEL).toMatch(/source: fragmentProvenance\(r\),/);
+    expect(MODEL).toMatch(/return rowFingerprint\(row\) === row\.persistedFingerprint\s+\? row\.source\s+: "worker_input";/);
+    // the write core honours the shipped source (it always did; pinned so the lane stays open)
+    expect(WRITE_CORE).toMatch(/source: r\.source === "ai_extracted" \? "ai_extracted" : "worker_input",/);
+    expect(WRITE_CORE).toMatch(/const fragmentSource: RpcMetricRow\["source"\] = f\.source \?\? "worker_input";/);
+  });
+
+  it("profession lookups ask `has` first — no try/catch around a translation, no MISSING_MESSAGE for the worker's own words", () => {
+    expect(EDITOR).toMatch(/if \(!tProf\.has\(label\)\) return label;/);
+    expect(EDITOR).not.toMatch(/try \{\s*const v = tProf\(/);
+    expect(COMPOSER).toMatch(/if \(tProf\.has\(slug\)\) \{/);
+    expect(COMPOSER).not.toMatch(/try \{\s*const v = tProf\(/);
+  });
+});
