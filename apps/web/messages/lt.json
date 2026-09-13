@@ -1891,7 +1891,9 @@
           "error": "Kažkas nepavyko. Bandykite dar kartą."
         },
         "unavailable": "Šiuo metu programų įkelti nepavyko. Perkraukite puslapį; tai, ką sukūrėte, neprarasta.",
-        "inviteLearners": "Pakviesti besimokančiuosius"
+        "inviteLearners": "Pakviesti besimokančiuosius",
+        "exportReport": "Atsisiųsti ataskaitą (CSV)",
+        "exportReportHint": "Programos, srautai, besimokančiųjų skaičiai ir gyva paklausa — kartu su jūsų besimokančiųjų rezultatais. Nežinomi skaičiai rašomi kaip „unknown“, niekada kaip nulis."
       },
       "learners": {
         "title": "Besimokantieji",
