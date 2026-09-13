@@ -1,5 +1,14 @@
 # Mobile store assets — execution pack v1
 
+> **SUPERSEDED IN DIRECTION, 2026-09-13.** This pack is written against a
+> PWA + Android TWA route. A native Expo client shipped after it
+> (`ANDROID_NATIVE_BUILD_PROVEN` 2026-08-30, `IOS_RUNTIME_JOURNEY_PROVEN`
+> 2026-08-31), so the TWA path is no longer the plan. The asset specs,
+> honesty rules and owner-decision list below remain valid and are carried
+> forward by
+> [`STORE_RELEASE_READINESS_2026-09-13.md`](STORE_RELEASE_READINESS_2026-09-13.md),
+> which is the current release truth.
+
 Status: docs-only production runbook (2026-07-06). This pack converts the
 owner pack (`mobile-store-assets-owner-pack-v1.md`, merged as #660) into a
 step-by-step execution sequence: exactly what to produce, in what order,
