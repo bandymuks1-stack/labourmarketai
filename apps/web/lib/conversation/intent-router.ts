@@ -163,6 +163,12 @@ export type ConversationIntent =
   //    forbids by name.
   | "cv-view" // "noriu pamatyti savo CV" — open the CV the product already holds
   | "cv-choose" // the CV named with no verb that separates the five — ASK, never guess
+  // ── THE PHOTO SHOWN BACK (issue #1689, defect G). "Parodyk įkeltą
+  //    nuotrauką, ar tikrai išsisaugojo" scored 0 — the router had no photo,
+  //    file or gallery word at all — so the proposer picked the nearest CV
+  //    door and the chat said the CV was empty about a photo that WAS
+  //    stored. A read over the ONE personal-gallery projection. ──────────
+  | "evidence-photos" // "parodyk įkeltą nuotrauką" / "did my photo save" — the stored work photos
   | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
   | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
   | "stage-status" // "etapas pamatai baigtas" — a project stage moved to a real status
@@ -1502,6 +1508,56 @@ const RULES: IntentRule[] = [
       // разрешение": a document to RECORD, not the documents folder to open.
       p("(turiu|gavau|atsinaujin|prat[eę]s|prid[eė]|[iį]kel|u[zž]ra[sš]|užregistr|have|got|renewed|add|upload|record|habe|bekommen|erneuert|hinzuf|heb|gekregen|verlengd|toevoeg|получил|продлил|добав|загруз|запиш)\\w*\\s*.{0,24}(dokument|pa[zž]ym|sertifik|certif|leidim|permit|pas[aą]\\b|passport|\\ba1\\b|\\bvca\\b|zertifik|ausweis|vergunning|paspoort|документ|сертиф|разрешен|паспорт)", 9),
       p("(nauj|new|neu|nieuw|нов)\\w*\\s*.{0,10}(pa[zž]ym|sertifik|certificate|zertifikat|certificaat|сертификат|leidim|permit|vergunning|\\ba1\\b|\\bvca\\b)", 9),
+    ],
+  },
+  /**
+   * ── THE PHOTO SHOWN BACK (issue #1689, defect G) ─────────────────────────
+   *
+   * BEFORE the CV rules and weighted level with them (8), because this is
+   * the sentence that used to fall INTO them: with no photo / file /
+   * gallery vocabulary anywhere in this table, "Parodyk įkeltą nuotrauką ar
+   * tikrai išsisaugojo" scored 0, the proposer chose `cv-view` from the
+   * catalogue, and a worker whose photo WAS persisted was told the CV held
+   * nothing. Every pattern requires a PHOTO / FILE noun or a second-person
+   * "what you saved", so a CV sentence, a document sentence or a work entry
+   * cannot land here by a verb alone.
+   *
+   * A READBACK, never a deposit: "įkeltą" / "uploaded" / "загруженное" /
+   * "hochgeladene" / "geüploade" are PAST forms — the person is asking about
+   * a file already handed over, not handing one over. `readFileIntent`
+   * ignores those forms for the same reason (file-subject.ts).
+   */
+  {
+    intent: "evidence-photos",
+    patterns: [
+      // SHOW / SEE / CHECK … PHOTO. "parodyk (įkeltą) nuotrauką", "show the
+      // photo I just uploaded", "покажи загруженное фото", "laat de foto
+      // zien", "zeig das Foto", "Foto anzeigen".
+      p("(parodyk|rodyk|pamaty|matyt|perzi[uū]r|peržiūr|patikrin|atidaryk|show|see\\b|view|check|open|покаж|посмотр|провер|открой|laat|toon|bekijk|zeig|anzeig|ansehen|sehen|pr[uü]f)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|\\bimage|фото|снимк|afbeelding|\\bbild)", 8),
+      // PHOTO … SHOW (verb last: "die Fotos anzeigen", "de foto's bekijken",
+      // "nuotrauką parodyk").
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild)\\w*\\s*.{0,16}(parodyk|rodyk|pamaty|perzi[uū]r|peržiūr|show|see\\b|view|open|bekijk|zien|tonen|anzeig|ansehen|zeig|покаж|посмотр)", 8),
+      // DID IT SAVE? "ar nuotrauka išsisaugojo", "did my photo save", "is the
+      // file saved", "сохранилось ли фото", "is de foto opgeslagen", "wurde
+      // das Foto gespeichert" — in both orders.
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|\\bfailas|файл|bestand|datei)\\w*\\s*.{0,24}(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|ikelt|įkelt|\\bsave|uploaded|сохран|загруж|opgeslagen|ge[uü]pload|gespeichert|hochgeladen)", 8),
+      p("(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|\\bsaved|\\bsave\\b|сохрани|opgeslagen|gespeichert)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)", 8),
+      // THE ONE JUST UPLOADED: "ką tik įkeltas failas", "the photo I just
+      // uploaded", "загруженный файл", "das hochgeladene Foto", "de
+      // geüploade foto" — a past form beside a photo / file noun.
+      p("(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload)\\w*\\s*.{0,16}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)", 8),
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)\\w*\\s*.{0,24}(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload)", 8),
+      // THAT / THIS PHOTO — the demonstrative alone points at the one just
+      // handed over: "ta nuotrauka", "šita nuotrauka", "that photo", "это
+      // фото", "die foto", "das Bild".
+      p("\\b(ta|toji|sita|šita|si|ši|that|this|та|эта|это|dat|die|deze|das|dieses|jenes)\\s+(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild)", 8),
+      // WHAT YOU SAVED — second person, so "parodyk išsaugotus kriterijus"
+      // (a criteria readback) stays where it is: "parodyk ką išsaugojai",
+      // "show what you saved", "покажи что сохранил", "laat zien wat je hebt
+      // opgeslagen", "zeig was du gespeichert hast".
+      p("(parodyk|rodyk|show|покаж|laat|toon|zeig)\\w*\\s*.{0,16}(issaugojai|išsaugojai|issaugojote|išsaugojote|you\\s+saved|you\\s+(just\\s+)?stored|сохранил|je\\s+(hebt|had)\\s+opgeslagen|opgeslagen\\s+hebt|du\\s+gespeichert\\s+hast|gespeichert\\s+hast)", 8),
+      // THE GALLERY BY NAME: "mano galerija", "open the gallery", "галерея".
+      p("(galerij|gallery|галере|galerie)", 8),
     ],
   },
   /**

@@ -138,6 +138,8 @@ import {
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
+import { ChatPhotoStrip } from "@/components/app/conversation/chat-photo-strip";
+import { readRecentPhotosForChat } from "@/lib/conversation/evidence-photos";
 import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
@@ -2487,6 +2489,46 @@ export function ConversationChat({
         assistant(labels.invitationsUnavailable, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
       });
   }, [assistant, pushEmbed, locale, labels, tRelationships]);
+
+  /**
+   * THE PHOTO SHOWN BACK (issue #1689, defect G). "Parodyk įkeltą nuotrauką,
+   * ar tikrai išsisaugojo" used to reach `cv-view` and answer that the CV
+   * was empty — about a photo that WAS stored. This reads the ONE
+   * personal-gallery projection (the same journal_entry_photos rows, the
+   * same signed URLs `/dashboard/gallery` renders) and SHOWS the stored
+   * photos in the thread. Honest states: `none` says no stored photo was
+   * FOUND (the read cannot tell "nothing" from "could not read", so it never
+   * claims "nothing uploaded"); `no-worker` says this account holds no
+   * journal; unavailable previews are said, never rendered broken.
+   */
+  const startEvidencePhotos = useCallback(() => {
+    setTyping(true);
+    const chips = [
+      { id: "link:/dashboard/gallery", label: t("chipGallery") },
+      { id: "link:/dashboard/journal#journal-entries", label: labels.navJournal },
+    ];
+    readRecentPhotosForChat({ limit: 3 })
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "no-worker") {
+          assistant(t("photosNoWorker"), chips);
+          return;
+        }
+        if (res.kind === "none") {
+          assistant(t("photosNone"), chips);
+          return;
+        }
+        assistant(t("photosRecent", { count: res.photos.length, total: res.total }), chips);
+        pushEmbed(
+          <ChatPhotoStrip photos={res.photos} locale={locale} previewsUnavailable={res.previewsUnavailable} />,
+        );
+      })
+      .catch(() => {
+        setTyping(false);
+        // A failed read says it could not check — never that nothing is stored.
+        assistant(t("photosUnavailable"), chips);
+      });
+  }, [assistant, pushEmbed, locale, labels.navJournal, t]);
   const startMessages = useCallback(() => {
     setTyping(true);
     loadMessagesForChat()
@@ -5637,6 +5679,8 @@ export function ConversationChat({
         // sends it after confirmation — the full inbox stays one tap away.
         messages: () => startMessages(),
         invitations: () => startInvitations(),
+        // The stored work photos, shown back (issue #1689, defect G).
+        evidencePhotos: () => startEvidencePhotos(),
         writeEmployer: () => assistant(labels.writeEmployerHint),
       };
       const fallback = () => assistant(fallbackText, starterChips);
@@ -5695,7 +5739,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startEvidencePhotos, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**

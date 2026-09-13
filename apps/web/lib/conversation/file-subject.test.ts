@@ -192,3 +192,41 @@ describe("nothing else is captured", () => {
     });
   }
 });
+
+describe("a PAST upload form is a readback, not a deposit (issue #1689, defect G)", () => {
+  // "įkeltą" / "uploaded" / "загруженное" / "hochgeladene" / "geüploade" —
+  // the person asks about a file already handed over. The English form used
+  // to trip the DEPOSIT list on the bare stem "upload" and ASK whose file it
+  // was; every one of these must fall through to the router, where the
+  // `evidence-photos` rule answers.
+  for (const s of [
+    "Parodyk įkeltą nuotrauką ar tikrai išsisaugojo",
+    "Parodyk įkeltą nuotrauką",
+    "ką tik įkeltas failas",
+    "show the photo I just uploaded",
+    "Show my uploaded photo",
+    "покажи загруженное фото",
+    "zeig das hochgeladene Foto",
+    "laat de geüploade foto zien",
+  ]) {
+    it(`"${s}" is NOT read as handing a file over`, () => {
+      expect(readFileIntent(s), `"${s}" was captured as a file offer`).toBeNull();
+      expect(classifyIntent(s).intent).toBe("evidence-photos");
+    });
+  }
+
+  it("a genuine deposit that also uses a past form is still a deposit", () => {
+    // "čia" says the file is being handed over now; the participle does not
+    // undo that.
+    const i = readFileIntent("Čia mano įkeltas CV");
+    expect(i).not.toBeNull();
+    expect(i!.subject).toBe("self");
+    expect(i!.kind).toBe("cv");
+  });
+
+  it("NEGATIVE CONTROL: the present deposit forms are untouched", () => {
+    expect(readFileIntent("I am uploading 20 candidate CVs")).not.toBeNull();
+    expect(readFileIntent("Įkeliu 20 kandidatų CV.")).not.toBeNull();
+    expect(readFileIntent("Загружаю 20 резюме кандидатов")).not.toBeNull();
+  });
+});

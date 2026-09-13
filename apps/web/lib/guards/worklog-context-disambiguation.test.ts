@@ -2,8 +2,14 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import {
+  composeDistinctEngagementLabels,
+  composeEngagementLabel,
+} from "@/lib/journal/engagement-label";
+
 /**
- * THE WORK-LOG CONTEXT SELECTOR MUST NAME DISTINCT THINGS DISTINCTLY.
+ * THE WORK-LOG CONTEXT SELECTOR MUST NAME DISTINCT THINGS DISTINCTLY —
+ * AND NEVER THE SAME THING TWICE.
  *
  * Found by the cross-actor loop E2E on 2026-08-27, and caused by making
  * multi-role real: once a learner could hold BOTH `employee` and `student`
@@ -15,92 +21,126 @@ import { join } from "node:path";
  *     Dev Construction
  *     Dev Construction      ← the placement, indistinguishable from the job
  *
- * and the flow — correctly — refuses to save until one is chosen. So the
- * person is asked a question they have no way to answer, and the journal is
- * evidence: filing work against the wrong relationship is a false statement,
- * not a cosmetic slip.
+ * The first fix qualified a repeated base label with its relationship. That
+ * produced the second defect (issue #1689, defect J, production
+ * HUMAN_ACCEPTANCE FAIL): two org-less employee contexts had the
+ * RELATIONSHIP as their base, and the qualifier repeated it —
  *
- * The rule this guards: a base label that occurs more than once is qualified
- * by its relationship; a unique one is left exactly as it was.
+ *     Darbuotojas — Darbuotojas
  *
- * Asserted on the SOURCE because the function is `server-only` and reads the
- * database — the behaviour is proven end to end by
- * `pilot-cross-actor-loop.spec.ts`, and this keeps the rule from being
- * silently deleted in a refactor.
+ * — while the journal page composed the very same rows a third way. The rule
+ * now lives in ONE pure composer (`lib/journal/engagement-label.ts`) used by
+ * both surfaces: organization → "Org · Relationship", personal → "Asmeninis
+ * įrašas [· title]", a collision qualified by the title, else the start
+ * month, never by a word already present; the list pairwise distinct.
+ *
+ * The composer is unit-tested in `engagement-label.test.ts`. This guard pins
+ * the WIRING — that both surfaces actually call it — on the SOURCE, because
+ * the two consumers are `server-only` and read the database; the behaviour
+ * is proven end to end by `pilot-cross-actor-loop.spec.ts`.
  */
-const SOURCE = readFileSync(
-  join(__dirname, "..", "conversation", "worklog-engagements.ts"),
+const WEB = join(__dirname, "..", "..");
+const SELECTOR = readFileSync(
+  join(WEB, "lib", "conversation", "worklog-engagements.ts"),
   "utf8",
 );
-const flat = SOURCE.replace(/\s+/g, " ");
+const JOURNAL_PAGE = readFileSync(
+  join(WEB, "app", "[locale]", "dashboard", "journal", "page.tsx"),
+  "utf8",
+);
+const flat = SELECTOR.replace(/\s+/g, " ");
 
 describe("work-log context labels", () => {
-  it("NEGATIVE CONTROL: the module this guard reads is real", () => {
-    expect(SOURCE.length).toBeGreaterThan(2000);
+  it("NEGATIVE CONTROL: the modules this guard reads are real", () => {
+    expect(SELECTOR.length).toBeGreaterThan(2000);
     expect(flat).toContain("export async function listWorkLogEngagements");
+    expect(JOURNAL_PAGE.length).toBeGreaterThan(2000);
   });
 
-  it("counts base labels so a repeat can be detected at all", () => {
-    expect(flat).toContain("baseCounts");
-    expect(flat).toMatch(/baseCounts\.set\(base, \(baseCounts\.get\(base\) \?\? 0\) \+ 1\)/);
+  it("BOTH surfaces compose labels through the ONE composer", () => {
+    for (const [name, src] of [
+      ["worklog-engagements.ts", SELECTOR],
+      ["journal/page.tsx", JOURNAL_PAGE],
+    ] as const) {
+      expect(src, name).toContain(
+        'import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label"',
+      );
+      expect(src, name).toMatch(/composeDistinctEngagementLabels\(/);
+    }
   });
 
-  it("qualifies ONLY the ambiguous label, never every label", () => {
-    // The qualification must be conditional. An unconditional suffix would
-    // rename every context in the product — including the single-context case
-    // that reads correctly today.
-    expect(flat).toContain("const ambiguous = (baseCounts.get(base) ?? 0) > 1");
-    expect(flat).toMatch(
-      /ambiguous \? `\$\{base\} — \$\{canonicalRelationship\(e\.relationship_slug\)\}` : base/,
-    );
+  it("the superseded per-surface compositions are gone", () => {
+    // The selector's own base label and its "— relationship" qualifier.
+    expect(flat).not.toContain("base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug)");
+    expect(flat).not.toMatch(/\$\{base\} — \$\{canonicalRelationship\(e\.relationship_slug\)\}/);
+    expect(flat).not.toContain("baseCounts");
+    // The page's own three-way template.
+    expect(JOURNAL_PAGE).not.toMatch(/`\$\{orgName\} · \$\{tRel\(e\.relationship_slug\)\}`/);
+    expect(JOURNAL_PAGE).not.toMatch(/`\$\{t\("personalEntry"\)\} · \$\{personalTitle\}`/);
+    expect(JOURNAL_PAGE).not.toContain('?? e.title ?? "—"');
   });
 
-  it("takes the relationship name from the ONE canonical catalogue", () => {
+  it("takes the relationship name from the ONE canonical catalogue, with the older wording as fallback", () => {
     // `conversation.worklog.relationship.*` does not carry `student` or
-    // `volunteer`, so using it here would print "other" for exactly the
-    // education case this exists to disambiguate.
+    // `volunteer`, so using it first would print "other" for exactly the
+    // education case this exists to disambiguate. The owner once saw a
+    // literal "employee" in a Lithuanian dropdown — the fallback chain must
+    // survive too.
     expect(flat).toContain('getTranslations("relationshipTypes")');
     expect(flat).toContain("canonicalRelationship");
-  });
-
-  it("still falls back rather than printing a raw slug", () => {
-    // The owner once saw a literal "employee" in a Lithuanian dropdown. The
-    // fallback chain must survive.
+    expect(flat).toContain("relationshipLabel: canonicalRelationship(e.relationship_slug)");
     expect(flat).toContain("relationshipLabel(slug)");
   });
 
-  it("names the BASE label from the canonical catalogue too, not just the qualifier", () => {
-    // The gap this closes: a placement with no organization display name and
-    // no title used to resolve its base label through
-    // `conversation.worklog.relationship.*`, which carries neither `student`
-    // nor `volunteer` — so it printed "Kita" / "Other" for precisely the
-    // education case. Both the base and the qualifier now ask the one
-    // canonical catalogue first, and the old wording remains the fallback.
-    expect(flat).toContain("base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug)");
-    expect(flat).not.toContain("base: orgName ?? e.title ?? relationshipLabel(e.relationship_slug)");
+  it("both surfaces hand the composer the same facts", () => {
+    for (const src of [SELECTOR, JOURNAL_PAGE]) {
+      for (const field of [
+        "orgName:",
+        "orgTypeLabel",
+        "title:",
+        "relationshipLabel:",
+        "personalEntryLabel",
+        "isPersonal: !org",
+        "startedAt:",
+      ]) {
+        expect(src).toContain(field);
+      }
+      // The org TYPE label reuses the existing role labels (no new key).
+      expect(src).toContain('tRole("company")');
+      expect(src).toContain('tRole("agency")');
+    }
+  });
+
+  it("THE DEFECT, on the composer both surfaces use: base === relationship ⇒ no 'X — X'", () => {
+    const rel = "Darbuotojas";
+    const twoOrgless = composeDistinctEngagementLabels([
+      { orgName: null, orgTypeLabel: null, title: null, relationshipLabel: rel, personalEntryLabel: "Asmeninis darbuotojo įrašas", isPersonal: true, startedAt: "2026-01-10" },
+      { orgName: null, orgTypeLabel: null, title: null, relationshipLabel: rel, personalEntryLabel: "Asmeninis darbuotojo įrašas", isPersonal: true, startedAt: "2026-04-02" },
+    ]);
+    expect(new Set(twoOrgless).size).toBe(2);
+    for (const l of twoOrgless) {
+      expect(l).not.toContain(`${rel} — ${rel}`);
+      expect(l).not.toContain(`${rel} · ${rel}`);
+    }
+    // And with the relationship as the only fact the composer holds:
+    expect(
+      composeEngagementLabel({ orgName: null, orgTypeLabel: null, title: null, relationshipLabel: rel, personalEntryLabel: "", isPersonal: false, startedAt: null, needsQualifier: true }),
+    ).toBe(rel);
+  });
+
+  it("a job and a placement at one organization are still told apart (the 2026-08-27 case)", () => {
+    const labels = composeDistinctEngagementLabels([
+      { orgName: "Dev Construction", orgTypeLabel: "Įmonė", title: null, relationshipLabel: "Darbuotojas", personalEntryLabel: "Asmeninis darbuotojo įrašas", isPersonal: false, startedAt: null },
+      { orgName: "Dev Construction", orgTypeLabel: "Įmonė", title: null, relationshipLabel: "Studentas", personalEntryLabel: "Asmeninis darbuotojo įrašas", isPersonal: false, startedAt: null },
+    ]);
+    expect(labels).toEqual(["Dev Construction · Darbuotojas", "Dev Construction · Studentas"]);
   });
 
   it("NEGATIVE CONTROL — the superseded spelling is detectable", () => {
     // A guard that would pass against the old code proves nothing.
-    const old = "base: orgName ?? e.title ?? relationshipLabel(e.relationship_slug),";
-    expect(old).toContain("base: orgName ?? e.title ?? relationshipLabel(e.relationship_slug)");
-  });
-
-  it("the canonical catalogue really carries the two practice slugs", () => {
-    // If it did not, the fix above would silently fall through to the same
-    // "other" it exists to replace.
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
-      const n = JSON.parse(
-        readFileSync(
-          join(__dirname, "..", "..", "messages", loc, "relationship-types.json"),
-          "utf8",
-        ),
-      );
-      for (const slug of ["student", "volunteer"]) {
-        expect(typeof n[slug], `${loc}.${slug}`).toBe("string");
-        expect(String(n[slug]).trim().length, `${loc}.${slug}`).toBeGreaterThan(0);
-      }
-    }
+    const old = "base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug),";
+    expect(old).toContain("base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug)");
+    expect(`${"Darbuotojas"} — ${"Darbuotojas"}`).toBe("Darbuotojas — Darbuotojas");
   });
 });
 
@@ -131,6 +171,16 @@ describe("the canonical catalogue can actually name a placement", () => {
           `${loc}: relationship-types.json cannot name "${slug}"`,
         ).toBe(true);
       }
+    }
+  });
+
+  it("the personal-entry head exists in every active locale", () => {
+    for (const loc of ACTIVE) {
+      const j = JSON.parse(
+        readFileSync(join(__dirname, "..", "..", "messages", loc, "journal.json"), "utf8"),
+      );
+      expect(typeof j.personalEntry, `${loc}.journal.personalEntry`).toBe("string");
+      expect(String(j.personalEntry).trim().length, `${loc}.journal.personalEntry`).toBeGreaterThan(0);
     }
   });
 

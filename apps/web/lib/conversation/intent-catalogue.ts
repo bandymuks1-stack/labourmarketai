@@ -22,6 +22,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "cv-export": "download or print the person's verified CV sheet",
   "cv-view": "open and look at the CV the product already holds for the person",
   "cv-choose": "the person named their CV without saying whether to view, upload or change it",
+  "evidence-photos":
+    "show the work photos / files the person already uploaded to their work journal — did the photo save, show the one just uploaded, open the gallery. NOT the CV.",
   profile: "the person's profile: add a language, skill, experience or education",
   "player-card": "show the person's professional card (player card)",
   experiences: "the person's work experience list",
