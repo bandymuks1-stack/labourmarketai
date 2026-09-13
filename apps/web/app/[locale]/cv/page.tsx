@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { PrintButton } from "@/components/app/print-button";
 import { CvPrivateDetails } from "@/components/app/cv-private-details";
 import { WorkCardPlausibilityNote } from "@/components/app/work-card-plausibility-note";
@@ -94,6 +95,7 @@ export default async function VerifiedCvPage({
   const tSkill = await getTranslations("skillNames");
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
+  const tQuick = await getTranslations("quickNav");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
@@ -326,6 +328,34 @@ export default async function VerifiedCvPage({
     : "font-display text-lg font-bold";
   const bodyText = compact ? "text-xs" : "text-sm";
   const pageGap = compact ? "gap-4" : "gap-6";
+  /**
+   * The jump strip's anchors. ONE list, built from the SAME predicates the
+   * sections below are rendered under — a section that is omitted (no work
+   * history, no languages, no certificates) can never appear here as a dead
+   * link, which is exactly what the dead-UI guard exists to prevent.
+   */
+  const cvQuickNavItems = [
+    cv.professionalSummary || factsSentences.length > 0
+      ? { href: "#cv-summary-section", label: t("summaryTitle") }
+      : null,
+    visibility.workHistory
+      ? { href: "#cv-work-history", label: t("workHistoryTitle") }
+      : null,
+    visibility.practiceHistory
+      ? { href: "#cv-practice-history", label: t("practiceHistoryTitle") }
+      : null,
+    { href: "#cv-skills", label: t("skills") },
+    visibility.education ? { href: "#cv-education", label: t("educationTitle") } : null,
+    visibility.languages ? { href: "#cv-languages", label: t("languagesTitle") } : null,
+    visibility.certificates
+      ? { href: "#cv-certificates", label: t("certificatesTitle") }
+      : null,
+    visibility.projects ? { href: "#cv-projects", label: t("projectsTitle") } : null,
+    visibility.achievements
+      ? { href: "#cv-achievements", label: t("achievementsTitle") }
+      : null,
+    { href: "#cv-proof", label: t("proofTitle") },
+  ].filter((i): i is { href: string; label: string } => i !== null);
 
   // One renderer for both history sections — employment and placements differ
   // in their HEADING, never in how a real engagement is described.
@@ -570,6 +600,24 @@ export default async function VerifiedCvPage({
           )}
         </header>
 
+        {/* SECTION JUMP — screen-only, never printed (owner direction
+            2026-09-13: a phone must not force a scroll to reach a section).
+            A CV is a DOCUMENT: it is meant to be read top to bottom and the
+            sections are not collapsed. What it lacked was a way IN. The
+            anchors are built from the SAME visibility predicates that decide
+            whether each section renders, so the strip can never offer a
+            link to a section that is not on the page — and each label is the
+            section's own heading, so no second vocabulary is introduced.
+            `PageQuickNav` is the existing primitive (its own docstring names
+            "Mano CV" as an intended consumer); no new nav is added. */}
+        {cvQuickNavItems.length > 1 ? (
+          <PageQuickNav
+            ariaLabel={tQuick("ariaLabel")}
+            items={cvQuickNavItems}
+            className="print:hidden"
+          />
+        ) : null}
+
         {/* Built-from explainer — screen-only, standard template only (the
             compact template keeps the screen dense too). */}
         {!compact ? (
@@ -593,7 +641,7 @@ export default async function VerifiedCvPage({
             cv.professionalSummary read model already nulls empty text; the
             guard pins this exact conditional). */}
         {cv.professionalSummary ? (
-          <section className="flex flex-col gap-2" data-testid="cv-summary-section">
+          <section id="cv-summary-section" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-summary-section">
             <h2 className={sectionTitle}>{t("summaryTitle")}</h2>
             <p className={`whitespace-pre-wrap leading-relaxed text-text-secondary ${bodyText}`}>
               {cv.professionalSummary}
@@ -624,7 +672,8 @@ export default async function VerifiedCvPage({
             external verification); omitted entirely when empty. */}
         {visibility.workHistory ? (
           <section
-            className="flex flex-col gap-3"
+            id="cv-work-history"
+            className="flex flex-col gap-3 scroll-mt-20"
             data-testid="cv-work-history"
           >
             <h2 className={sectionTitle}>{t("workHistoryTitle")}</h2>
@@ -640,7 +689,8 @@ export default async function VerifiedCvPage({
             a job. Omitted entirely when the person has none. */}
         {visibility.practiceHistory ? (
           <section
-            className="flex flex-col gap-3"
+            id="cv-practice-history"
+            className="flex flex-col gap-3 scroll-mt-20"
             data-testid="cv-practice-history"
           >
             <h2 className={sectionTitle}>{t("practiceHistoryTitle")}</h2>
@@ -652,7 +702,7 @@ export default async function VerifiedCvPage({
 
         {/* Education — self-declared entries; slug labels from i18n. */}
         {visibility.education ? (
-          <section className="flex flex-col gap-2" data-testid="cv-education">
+          <section id="cv-education" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-education">
             <h2 className={sectionTitle}>{t("educationTitle")}</h2>
             <ul className="flex flex-col gap-2">
               {cv.education.map((e, i) => {
@@ -679,7 +729,7 @@ export default async function VerifiedCvPage({
 
         {/* Languages — self-stated CEFR facts (worker_languages). */}
         {visibility.languages ? (
-          <section className="flex flex-col gap-2" data-testid="cv-languages">
+          <section id="cv-languages" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-languages">
             <h2 className={sectionTitle}>{t("languagesTitle")}</h2>
             <div className="flex flex-wrap gap-1.5">
               {cv.languages.map((l) => (
@@ -699,7 +749,7 @@ export default async function VerifiedCvPage({
             unexpired), driving licence categories, and text-declared
             certificates (always labelled declared, never verified). */}
         {visibility.certificates ? (
-          <section className="flex flex-col gap-2" data-testid="cv-certificates">
+          <section id="cv-certificates" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-certificates">
             <h2 className={sectionTitle}>{t("certificatesTitle")}</h2>
             <ul className="flex flex-col gap-1.5">
               {cv.certificateDocs.map((d, i) => (
@@ -751,7 +801,7 @@ export default async function VerifiedCvPage({
 
         {/* Skills by honest tier — tailored mode only REORDERS (matched
             first) and highlights; nothing is added or hidden. */}
-        <section className="flex flex-col gap-4" data-testid="cv-skills">
+        <section id="cv-skills" className="flex flex-col gap-4 scroll-mt-20" data-testid="cv-skills">
           <h2 className={sectionTitle}>{t("skills")}</h2>
           {/* Recorded work behind the skills (issue #1689): the SAME figures
               the journal's "work in numbers" shows, through the one canonical
@@ -906,7 +956,7 @@ export default async function VerifiedCvPage({
 
         {/* Projects — DERIVED from confirmed proof (single truth source). */}
         {visibility.projects ? (
-          <section className="flex flex-col gap-2" data-testid="cv-projects">
+          <section id="cv-projects" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-projects">
             <h2 className={sectionTitle}>{t("projectsTitle")}</h2>
             <p className="text-meta text-text-muted">{t("projectsHint")}</p>
             <ul className="flex flex-col gap-1">
@@ -925,7 +975,7 @@ export default async function VerifiedCvPage({
         {/* Achievements — self-declared unless a REAL confirmation set the
             manager flag (which the app itself can never write). */}
         {visibility.achievements ? (
-          <section className="flex flex-col gap-2" data-testid="cv-achievements">
+          <section id="cv-achievements" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-achievements">
             <h2 className={sectionTitle}>{t("achievementsTitle")}</h2>
             <ul className="flex flex-col gap-1.5">
               {cv.achievements.map((a, i) => (
@@ -955,7 +1005,7 @@ export default async function VerifiedCvPage({
         ) : null}
 
         {/* Confirmed Work Proof — real confirmations only; role, never name. */}
-        <section className="flex flex-col gap-2" data-testid="cv-proof">
+        <section id="cv-proof" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-proof">
           <h2 className={sectionTitle}>{t("proofTitle")}</h2>
           {cv.proof.length === 0 ? (
             <p className={`text-text-muted ${bodyText}`}>{t("proofEmpty")}</p>
