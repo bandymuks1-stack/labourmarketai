@@ -13,6 +13,11 @@ import {
 } from "@/lib/profile/trust-signals";
 import { groupCvSkillTiers, type CvSkillTiers } from "./skill-tiers";
 import {
+  skillPracticeFromIntelligence,
+  type SkillPracticeFacts,
+} from "./skill-presentation";
+import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
+import {
   attributedHoursBySlug,
   confirmedHoursBySlug,
   type WorkIntelligence,
@@ -147,7 +152,26 @@ export type VerifiedCvData = {
    *  from: the profile narrative ("profile") or a work-journal entry's
    *  `skill_claim` metric ("journal", P0 Track B) — the CV UI labels the
    *  journal-derived ones so provenance stays honest. */
-  declaredClaims: { label: string; origin: "profile" | "journal" }[];
+  declaredClaims: {
+    /** The person's OWN label as saved — casing preserved (the CV used to
+     *  print `normalized_label`, which is how "programavimas" sat beside
+     *  the catalogue's "Programavimas"). */
+    label: string;
+    origin: "profile" | "journal";
+    /** Row id for profile claims (a removal UI folds variants by it). */
+    id?: string;
+    /** Catalogue slugs the deterministic lexicon maps this label to — so
+     *  the presentation can fold a claim into the skill it already is. */
+    mappedSlugs?: string[];
+  }[];
+  /**
+   * The journal's per-skill figures (attributed / confirmed / shared hours,
+   * share, entries, days, contexts, first/last day, trend) keyed by slug —
+   * the SAME `SkillWorkTime` rows the journal's "work in numbers" shows,
+   * for the skill presentation (magnitude, order). `null` when the journal
+   * could not be read: the CV then shows no figure and no zero (SEP-7).
+   */
+  skillPractice: Record<string, SkillPracticeFacts> | null;
   /** Real work history from engagement_contexts (companies, role, dates) —
    *  the same source the profile renders; empty array when none. */
   workHistory: VerifiedCvEngagement[];
@@ -452,14 +476,24 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       ...selectJournalClaimLabels(claimMetrics ?? [], profileNormalized),
     );
   }
+  // The lexicon mapping of every free label (pure, deterministic — the same
+  // extractor the promotion path trusts), so a claim that IS a catalogued
+  // skill the person already holds is presented as that skill, once.
+  const mappedByLabel = mapClaimLabelsToCatalogSlugs([
+    ...claims.map((c) => c.label),
+    ...journalClaimLabels,
+  ]);
   const declaredClaims: VerifiedCvData["declaredClaims"] = [
     ...claims.map((c) => ({
-      label: c.normalized_label,
+      id: c.id,
+      label: c.label,
       origin: "profile" as const,
+      mappedSlugs: mappedByLabel.get(c.label.trim()) ?? [],
     })),
     ...journalClaimLabels.map((label) => ({
       label,
       origin: "journal" as const,
+      mappedSlugs: mappedByLabel.get(label.trim()) ?? [],
     })),
   ];
 
@@ -675,6 +709,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       confirmedHoursBySkill: workIntelligence
         ? Object.fromEntries(confirmedHoursBySlug(workIntelligence))
         : null,
+      skillPractice: workIntelligence ? skillPracticeFromIntelligence(workIntelligence) : null,
       recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
       recordedHoursConfirmed: workIntelligence
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)

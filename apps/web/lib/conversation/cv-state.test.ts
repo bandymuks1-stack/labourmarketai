@@ -26,6 +26,7 @@ function emptyCv(): VerifiedCvData {
     achievements: [],
     projects: [],
     recordedHoursBySkill: null,
+    skillPractice: null,
     confirmedHoursBySkill: null,
     recordedHoursTotal: null,
     recordedHoursConfirmed: null,
