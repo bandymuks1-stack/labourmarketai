@@ -1,4 +1,4 @@
-import { csvCell } from "@/lib/projects/operations-report";
+import { csvSafeCell } from "@/lib/projects/operations-report";
 
 import type { InstitutionLearnerOutcomes } from "./institution-outcomes";
 import type { ProgramRow } from "./programs";
@@ -30,6 +30,11 @@ import type { ProgramRow } from "./programs";
  *   mistake a privacy floor for a measured zero.
  * · An unavailable outcomes read is stated as its reason, not omitted. A
  *   missing block reads as "no outcomes"; a stated `unavailable` does not.
+ * · A programme NAME is text one manager typed and another manager opens in a
+ *   spreadsheet, so cells go through `csvSafeCell`: a value starting `=`, `+`,
+ *   `-`, `@`, tab or CR is prefixed with an apostrophe. RFC-4180 quoting alone
+ *   does not stop this — Excel and Sheets strip the quotes and then evaluate
+ *   what is inside, which is how a downloaded report runs a formula.
  * · Column names describe what the number IS. `active_public_vacancies` is a
  *   market count over the public vacancy pool, not a promise of places; and
  *   `active_learners` counts cohort membership, not achievement.
@@ -62,7 +67,7 @@ export type OutcomesForReport =
   | { readonly status: "unavailable"; readonly reason: string };
 
 function csvRow(cells: readonly string[]): string {
-  return cells.map(csvCell).join(",");
+  return cells.map(csvSafeCell).join(",");
 }
 
 /** Active cohort members across a programme's cohorts, counted once per person. */

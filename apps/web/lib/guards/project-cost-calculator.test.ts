@@ -86,11 +86,22 @@ describe("quantity pack — rounding can never go down", () => {
 
 describe("CSV export — formula-injection safe", () => {
   it("every cell goes through csvSafeCell on top of the shared csvCell", () => {
+    // The escaper pair MOVED (2026-09-13): `csvSafeCell` now lives beside
+    // `csvCell` in operations-report, so every export in every domain reaches
+    // one definition — this module had the only copy, and a second export in
+    // the education domain would otherwise have written a third. What this
+    // guard protects is unchanged and is not about the file it lives in: the
+    // calculator's cells go through the formula-safe escaper, and the rule
+    // itself still exists exactly once.
     expect(csvSrc).toMatch(
-      /import\s*\{\s*csvCell\s*\}\s*from\s*"@\/lib\/projects\/operations-report"/,
+      /from\s*"@\/lib\/projects\/operations-report"/,
     );
-    expect(csvSrc).toMatch(/\^\[=\+\\-@\\t\\r\]/); // the guard regex
     expect(csvSrc).toMatch(/cells\.map\(csvSafeCell\)/);
+    const shared = read("lib/projects/operations-report.ts");
+    expect(shared).toMatch(/\^\[=\+\\-@\\t\\r\]/); // the guard regex, at its one home
+    expect(shared).toMatch(/export function csvSafeCell/);
+    // And nowhere else: a reimplementation is how the two drift apart.
+    expect(csvSrc).not.toMatch(/export function csvSafeCell/);
   });
 });
 

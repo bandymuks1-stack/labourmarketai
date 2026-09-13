@@ -6396,5 +6396,13 @@
       "answer": "Atbildēt uz uzaicinājumu",
       "invite": "Uzaicināt partneri"
     }
+  },
+  "roleDashboards": {
+    "company": {
+      "programs": {
+        "exportReport": "[EN] Download the report (CSV)",
+        "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
+      }
+    }
   }
 }

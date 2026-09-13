@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { demandCountFor } from "./programs";
 import {
   SUPPRESSED_CELL,
   UNKNOWN_CELL,
@@ -104,6 +105,26 @@ describe("institution report — an unknown demand never exports as zero (SEP-7)
     expect(blocks(csv).programs[1]).toContain(UNKNOWN_CELL);
   });
 
+  it("the READER produces that null — the report is not tested against a value only a test can make", () => {
+    // Codex P1 on #1731, and correct: every case above constructed the null by
+    // hand, so none of them would have failed while `readInstitutionPrograms`
+    // was mapping a missing profession to `?? 0`. This exercises the reader's
+    // own mapping, which is where SEP-7 actually had to hold.
+    //
+    // The map models the real shape: the count function is a TOP-N read
+    // (`limit 20` by default), so a profession outside the window is absent
+    // for the same reason one with no vacancy is — indistinguishable, and
+    // therefore UNKNOWN.
+    const top = new Map<string, number>([["carpenter", 12], ["welder", 3], ["electrician", 0]]);
+    expect(demandCountFor("builder", top, false)).toBeNull();
+    // A zero is only ever a zero the function actually returned.
+    expect(demandCountFor("electrician", top, false)).toBe(0);
+    expect(demandCountFor("carpenter", top, false)).toBe(12);
+    // No direction set, and a failed read, are both UNKNOWN — never 0.
+    expect(demandCountFor(null, top, false)).toBeNull();
+    expect(demandCountFor("carpenter", top, true)).toBeNull();
+  });
+
   it("writes a real zero when the count actually measured zero", () => {
     const csv = buildInstitutionReportCsv([program({ demandCount: 0 })], OK_OUTCOMES);
     const row = blocks(csv).programs[1];
@@ -166,6 +187,20 @@ describe("institution report — shape and escaping", () => {
     expect(blocks(csv).programs[1].startsWith('"Course, level ""2"""')).toBe(true);
   });
 
+  it("neutralises a programme name a spreadsheet would run as a formula", () => {
+    // A programme name is text one manager typed; another manager opens this
+    // file. Quoting alone does not help — Excel and Sheets strip the quotes
+    // and evaluate what is inside.
+    for (const name of ["=SUM(A1:A9)", "+1", "-cmd", "@import", "\tlead"]) {
+      const row = blocks(buildInstitutionReportCsv([program({ name })], OK_OUTCOMES)).programs[1];
+      expect(row.startsWith("'") || row.startsWith('"\'')).toBe(true);
+    }
+    const hyperlink = blocks(
+      buildInstitutionReportCsv([program({ name: '=HYPERLINK("http://x"),y' })], OK_OUTCOMES),
+    ).programs[1];
+    expect(hyperlink.startsWith('"\'=HYPERLINK(')).toBe(true);
+  });
+
   it("emits both headers even with no programme", () => {
     const csv = buildInstitutionReportCsv([], OK_OUTCOMES);
     const b = blocks(csv);
@@ -185,7 +220,11 @@ describe("institution report — it reads nothing of its own", () => {
     expect(src).not.toMatch(/createClient|supabase|\.rpc\(|fetch\(/);
   });
 
-  it("reuses the canonical CSV cell escaper rather than writing a second one", () => {
+  it("reuses the canonical CSV escaper rather than writing a second one", () => {
     expect(src).toContain('from "@/lib/projects/operations-report"');
+    // And the formula-safe one, not the plain quoter: this file carries text a
+    // person typed.
+    expect(src).toContain("csvSafeCell");
+    expect(src).not.toMatch(/map\(csvCell\)/);
   });
 });

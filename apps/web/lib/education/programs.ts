@@ -87,6 +87,38 @@ export function eligibleLearners(
   return out;
 }
 
+/**
+ * The demand number for one programme, or null when it is NOT KNOWN.
+ *
+ * SEP-7 (UNKNOWN ≠ ZERO ≠ NOT_MEASURED) lives exactly here, and it was
+ * COLLAPSED until 2026-09-13: this mapping read `?? 0`, so a programme whose
+ * work direction the count did not carry rendered "0 live vacancies" — a
+ * measured zero — on the institution's own screen.
+ *
+ * Absence from the map is not zero, for a structural reason:
+ * `count_public_vacancies_by_profession_v1` is a TOP-N read. It groups the
+ * active public vacancies by profession, orders by count descending and
+ * LIMITs (20 by default). A profession is therefore absent when it is outside
+ * that window just as much as when it has no vacancy at all, and the two are
+ * indistinguishable from the rows. Production on 2026-09-13 is the live case:
+ * 20 professions come back and `builder` — the one live programme's direction
+ * — is not among them.
+ *
+ * So absence is UNKNOWN and says so. A zero here is only ever a zero the
+ * function actually returned.
+ *
+ * The read failing is also null, never 0: "we could not ask" is not "there is
+ * none". And a programme with no direction at all has nothing to count.
+ */
+export function demandCountFor(
+  targetProfessionSlug: string | null,
+  demandBySlug: ReadonlyMap<string, number>,
+  demandReadFailed: boolean,
+): number | null {
+  if (!targetProfessionSlug || demandReadFailed) return null;
+  return demandBySlug.get(targetProfessionSlug) ?? null;
+}
+
 export type InstitutionProgramsRead =
   | {
       readonly status: "ok";
@@ -197,7 +229,7 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
       targetProfessionSlug: slug,
       educationTypeSlug: (p.education_type_slug as string | null) ?? null,
       description: (p.description as string | null) ?? null,
-      demandCount: slug && !demandRes.error ? (demandBySlug.get(slug) ?? 0) : null,
+      demandCount: demandCountFor(slug, demandBySlug, Boolean(demandRes.error)),
       cohorts: cohortsByProgram.get(String(p.id)) ?? [],
     };
   });
