@@ -1891,7 +1891,9 @@
           "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
         },
         "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
-        "inviteLearners": "Lernende einladen"
+        "inviteLearners": "Lernende einladen",
+        "exportReport": "Bericht herunterladen (CSV)",
+        "exportReportHint": "Programme, Kohorten, Lernendenzahlen und aktuelle Nachfrage — zusammen mit den Ergebnissen Ihrer Lernenden. Unbekannte Zahlen werden als unknown geschrieben, niemals als Null."
       },
       "learners": {
         "title": "Lernende",

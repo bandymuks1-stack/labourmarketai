@@ -1891,7 +1891,9 @@
           "error": "Something went wrong. Please try again."
         },
         "unavailable": "Programmes could not be loaded right now. Reload the page; nothing you created is lost.",
-        "inviteLearners": "Invite learners"
+        "inviteLearners": "Invite learners",
+        "exportReport": "Download the report (CSV)",
+        "exportReportHint": "Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "learners": {
         "title": "Learners",

@@ -1891,7 +1891,9 @@
           "error": "Er ging iets mis. Probeer het opnieuw."
         },
         "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
-        "inviteLearners": "Lerenden uitnodigen"
+        "inviteLearners": "Lerenden uitnodigen",
+        "exportReport": "Rapport downloaden (CSV)",
+        "exportReportHint": "Programma's, cohorten, aantallen lerenden en actuele vraag — samen met de uitkomsten van je lerenden. Onbekende aantallen worden als unknown geschreven, nooit als nul."
       },
       "learners": {
         "title": "Lerenden",
