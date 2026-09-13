@@ -89,6 +89,28 @@ e2e `calendar-journal-history` (repointed to the calendar cell).
 
 No migration, no RLS, no auth, no grant, no schema change in any of it.
 
+## Unrelated findings — RECORDED, NOT ACTED ON
+
+Found while working, outside this mobile-UX scope, deliberately left alone
+(owner: do not drift into governance cleanup):
+
+- `capability-register.ts` EDU-2 and the `J-INSTITUTION-OUTCOME` journey link
+  assert, as current truth, that "a programme cannot be CORRECTED … there is
+  no update function in `pg_proc` … the one live programme reads
+  `demandUnknown` and always will". Read-only SQL against production
+  `gorgitwvdzxbnaxhrsrw` on 2026-09-13 contradicts every clause:
+  `update_education_program_v1(uuid,text,text,text,text)` exists
+  (SECURITY DEFINER, migration `20260908120000`), and the single programme
+  carries `builder` / vocational. Its demand tile still shows no number for a
+  DIFFERENT and legitimate reason —
+  `count_public_vacancies_by_profession_v1()` returns 20 professions and
+  `builder` is not among them, an honest UNKNOWN (SEP-7), not a defect.
+  A correction was drafted and then REVERTED out of this branch to keep the
+  mobile-UX PR clean. It needs its own PR and its own owner decision.
+- `main` carries one EMPTY duplicate squash commit (`dd6147d`) from the
+  GitHub incident described above. Harmless; removing it means rewriting
+  `main`.
+
 ## Owner gates
 
 1. **The phone walkthrough.** Nothing replaces it.
