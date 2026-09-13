@@ -7898,6 +7898,7 @@
     "skillEntries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
     "skillNoRecords": "įrašų dar nėra",
     "recordedHoursScope": "Visas laikas.",
+    "recordedHoursScopeTruncated": "Iš paskutinių {count} įrašų; senesni įrašai į šiuos skaičius neįtraukti.",
     "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui."
   },
   "todayScreen": {

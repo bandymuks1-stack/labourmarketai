@@ -7898,6 +7898,7 @@
     "skillEntries": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записей}}",
     "skillNoRecords": "записей пока нет",
     "recordedHoursScope": "За всё время.",
+    "recordedHoursScopeTruncated": "По последним {count} записям; более старые записи в эти цифры не входят.",
     "organizationRecordedHours": "В учёте организации: {hours} ч за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}} в табелях или импортированных документах ({imported} ч импортировано, {approved} ч утверждено) — учитываются отдельно от цифры журнала и не относятся ни к одному навыку."
   },
   "todayScreen": {

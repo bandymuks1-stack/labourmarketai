@@ -7898,6 +7898,7 @@
     "skillEntries": "{count, plural, one {# Eintrag} other {# Einträge}}",
     "skillNoRecords": "noch keine Einträge",
     "recordedHoursScope": "Gesamte Zeit.",
+    "recordedHoursScopeTruncated": "Aus den letzten {count} Einträgen; ältere Einträge sind in diesen Zahlen nicht enthalten.",
     "organizationRecordedHours": "Erfassung der Organisation: {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} in Stundenzetteln oder importierten Dokumenten ({imported} Std. importiert, {approved} Std. genehmigt) — getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet."
   },
   "todayScreen": {

@@ -7898,6 +7898,7 @@
     "skillEntries": "{count, plural, one {# entry} other {# entries}}",
     "skillNoRecords": "no records yet",
     "recordedHoursScope": "All time.",
+    "recordedHoursScopeTruncated": "From the last {count} entries; older entries are not in these figures.",
     "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill."
   },
   "todayScreen": {

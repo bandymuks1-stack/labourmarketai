@@ -189,6 +189,11 @@ export type VerifiedCvData = {
    * could not be read: the CV then shows no figure and no zero (SEP-7).
    */
   skillPractice: Record<string, SkillPracticeFacts> | null;
+  /** How much of the journal the figures rest on (lane B, #1689): the
+   *  entry read stops at a ceiling, so `truncated` means older entries MAY
+   *  exist outside every figure — the CV then names the window instead of
+   *  calling it "all time". `null` when the journal was unreadable. */
+  journalCoverage: { entriesRead: number; truncated: boolean } | null;
   /** Deterministic professional facts from the canonical work-intelligence
    *  reading (all-time hours, entries, span, contexts, top skills, outputs)
    *  — printed UNDER the person's own summary, never in its place; `null`
@@ -777,6 +782,12 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         ? Object.fromEntries(confirmedHoursBySlug(workIntelligence))
         : null,
       skillPractice: workIntelligence ? skillPracticeFromIntelligence(workIntelligence) : null,
+      journalCoverage: workIntelligence
+        ? {
+            entriesRead: workIntelligence.coverage.entriesRead,
+            truncated: workIntelligence.coverage.truncated,
+          }
+        : null,
       recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
       recordedHoursConfirmed: workIntelligence
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)

@@ -763,7 +763,13 @@ export default async function VerifiedCvPage({
                 ? `${t("recordedHours", {
                     hours: fmtHours(cv.recordedHoursTotal),
                     confirmed: fmtHours(cv.recordedHoursConfirmed ?? 0),
-                  })} ${t("recordedHoursScope")}`
+                  })} ${
+                    cv.journalCoverage?.truncated
+                      ? t("recordedHoursScopeTruncated", {
+                          count: cv.journalCoverage.entriesRead,
+                        })
+                      : t("recordedHoursScope")
+                  }`
                 : t("recordedHoursNone")}
             </p>
           )}

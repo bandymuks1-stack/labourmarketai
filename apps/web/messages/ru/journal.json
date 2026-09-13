@@ -777,7 +777,7 @@
     "growthWhyCounts": "{entries, plural, one {# запись} few {# записи} other {# записей}}, {contexts, plural, one {# контекст} few {# контекста} other {# контекстов}}",
     "growthWhyLastDay": "последний раз {day}",
     "growthWhyDormant": "{days} дн. без записи",
-    "growthWhySelfStated": "заявлено вами — 0 записей и 0 часов это подтверждают",
+    "growthWhySelfStated": "заявлено вами — в журнале 0 записей и 0 часов по этому навыку",
     "growthWhyTrend": {
       "up": "за последние 30 дней использовался больше, чем за предыдущие 30",
       "new": "первые записи за последние 30 дней",

@@ -7898,6 +7898,7 @@
     "skillEntries": "{count, plural, one {# registratie} other {# registraties}}",
     "skillNoRecords": "nog geen registraties",
     "recordedHoursScope": "Alle tijd.",
+    "recordedHoursScopeTruncated": "Uit de laatste {count} records; oudere records zitten niet in deze cijfers.",
     "organizationRecordedHours": "Registratie van de organisatie: {hours} u op {days, plural, one {# dag} other {# dagen}} in urenstaten of geïmporteerde documenten ({imported} u geïmporteerd, {approved} u goedgekeurd) — gescheiden van het journaalcijfer en aan geen enkele vaardigheid toegewezen."
   },
   "todayScreen": {
