@@ -35,13 +35,17 @@ import { theme } from "../../src/ui/theme";
  * engagement there are different facts. The composer already shows and asks
  * for the work context; this section must not imply it decides one.
  *
- * PARTICIPATION CONTEXT is a DIFFERENT AXIS and still says so. A workspace is
- * an organization the person belongs to; a participation mode is how they take
- * part (worker / company / agency / customer). A company-type organization
- * does not make its employee an employer, so the workspace list cannot supply
- * the mode — deriving one from the other would reclassify a real person's role
- * from data that does not carry it. That read does not exist yet, so the
- * section keeps saying so rather than guessing.
+ * PARTICIPATION CONTEXT is a DIFFERENT AXIS, and it is real now too. A
+ * workspace is an organization the person belongs to; a participation mode is
+ * how they take part (worker / company / agency / customer). A company-type
+ * organization does not make its employee an employer, so the workspace list
+ * could never supply the mode — the modes come from the account's own held
+ * roles, carried on `profile.get` and mapped by `holdingsFromHeldRoles`.
+ *
+ * Four states, and the distinctions between them are the point: still asking,
+ * a read that could not answer, an answer of NOTHING, and a real list. The
+ * middle two look identical if you are careless, and rendering a failure as
+ * "you hold nothing" is the defect that was live on the web shell in August.
  *
  * Every active language is offered, and the ones that are AI-seeded and
  * awaiting human review are labelled as previews (doctrine §7.4) — the same
@@ -170,19 +174,36 @@ export default function Settings() {
         <Divider />
 
         <Title>{t("context.title")}</Title>
-        {holdings.status === "known" ? (
+        {holdings.status === "unknown" ? (
+          <Body muted>{t("context.loading")}</Body>
+        ) : holdings.status === "known" && holdings.contexts.length === 0 ? (
+          // The read ANSWERED and this account holds no participation role.
+          // That is a fact about the account, not a failure, and it must not
+          // render as a bare heading over nothing.
+          <Body muted>{t("context.none")}</Body>
+        ) : holdings.status === "known" ? (
           <View style={styles.list}>
-            {holdings.contexts.map((context) => (
-              <Pressable
-                key={context.label + context.mode}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: active?.label === context.label }}
-                onPress={() => switchTo(context)}
-                style={styles.row}
-              >
-                <Text style={styles.rowLabel}>{context.label}</Text>
-              </Pressable>
-            ))}
+            {holdings.contexts.map((context) => {
+              const selected = active !== null && active.mode === context.mode;
+              return (
+                <Pressable
+                  key={context.mode}
+                  testID={`context-${context.mode}`}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={context.label}
+                  onPress={() => switchTo(context)}
+                  style={({ pressed }) => [
+                    styles.row,
+                    selected && styles.rowSelected,
+                    pressed && styles.rowPressed,
+                  ]}
+                >
+                  <Text style={styles.rowLabel}>{context.label}</Text>
+                  {selected ? <Text style={styles.tag}>{t("context.active")}</Text> : null}
+                </Pressable>
+              );
+            })}
           </View>
         ) : (
           <NotAvailable

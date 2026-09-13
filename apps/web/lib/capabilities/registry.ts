@@ -7,6 +7,7 @@ import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
+import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
 import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
 import { listJournalEntries } from "@/lib/journal/journal-list-core";
 import { WORK_PERIOD_KEYS } from "@/lib/journal/work-intelligence";
@@ -80,8 +81,9 @@ const profileGet: CapabilityDescriptor = {
   title: "My LabourMarket profile",
   description:
     "The caller's own profile record: name, locale, country, onboarding " +
-    "state, and whether a worker profile exists. Facts as recorded — no " +
-    "derived scores.",
+    "state, whether a worker profile exists, and the roles the account " +
+    "actually holds. Facts as recorded — no derived scores, and a read that " +
+    "failed is reported as unavailable rather than as an absence.",
   exposed: true,
   annotations: {
     readOnlyHint: true,
@@ -108,9 +110,16 @@ const profileGet: CapabilityDescriptor = {
     // read is also issued when the profile turns out to be missing or
     // unreadable — a wasted query in a rare case, never a disclosed one,
     // because RLS answers it exactly as before.
-    const [read, workerRead] = await Promise.all([
+    const [read, workerRead, heldRolesRead] = await Promise.all([
       readProfileRow(caller),
       readWorkerCoreRow(caller),
+      // The PLURAL of `activeRole`. Same subject — the caller's own identity
+      // facts — so it rides this capability rather than a second round trip a
+      // phone would have to make on every launch. Through the canonical
+      // `profile_roles` core, never a query written here: this registry is
+      // exactly the transport adapter `g4-domain-core-reuse` keeps out of the
+      // tables the web already owns.
+      readHeldProfileRoles(caller),
     ]);
     if (!read.ok) {
       // A failed read is "unavailable", never "you have no profile" (#1314).
@@ -139,6 +148,16 @@ const profileGet: CapabilityDescriptor = {
           : workerRead.value
             ? { status: "exists" as const, workerId: workerRead.value.id }
             : { status: "none" as const },
+        // Same reason, and the reason this is not simply an array: a failed
+        // roles read that arrived as `[]` would tell a person who manages
+        // three companies that they hold nothing. That defect was live on the
+        // web shell on 2026-08-28 and is why the core throws rather than
+        // returning empty. `roles` is the RBAC set as recorded — it carries
+        // `admin`, which is not a participation mode, so a consumer mapping
+        // these to modes must FILTER rather than assume.
+        heldRoles: heldRolesRead.ok
+          ? { status: "known" as const, roles: heldRolesRead.value }
+          : { status: "unavailable" as const },
       },
     };
   },

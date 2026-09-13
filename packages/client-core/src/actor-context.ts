@@ -130,3 +130,53 @@ export function selectContext(
   if (!held) return selection;
   return { holdings: selection.holdings, active: next };
 }
+
+/**
+ * The account's HELD ROLES → the contexts it may act in.
+ *
+ * The two vocabularies are NOT the same list, and that is the whole reason
+ * this is a function rather than a cast. `profile_roles` is the RBAC set
+ * (doctrine §5, positions vs roles) and carries values that are not
+ * participation modes — `admin` today, and whatever a future migration adds.
+ * A client that trusted the raw strings would offer a person a context the
+ * product has no surface for, or store one the backend would refuse.
+ *
+ * So unknown values are DROPPED, not passed through and not guessed at. A
+ * dropped value is not a loss: the modes are what this client can actually
+ * open, and `PARTICIPATION_MODES` is itself pinned against the web catalogue
+ * by `client-core-vocabulary-mirror`.
+ *
+ * `unavailable` survives as `unavailable`. It is the state that matters most
+ * here: a roles read that failed and was rendered as an empty set told a
+ * person who manages three companies that they hold nothing (web shell,
+ * 2026-08-28). An empty KNOWN set is a different and honest answer — the read
+ * answered, and this account holds no participation role.
+ *
+ * `organizationId` is null for every context this builds. A held mode says
+ * WHAT a person may do; WHICH organization they do it for is the workspace
+ * axis, answered by `context.list` and shown separately. Merging them here
+ * would invent an organization the role row does not name.
+ */
+export function holdingsFromHeldRoles(
+  read:
+    | { readonly status: "unavailable" }
+    | { readonly status: "known"; readonly roles: readonly string[] },
+  labelOf: (mode: ParticipationMode) => string,
+): ContextHoldings {
+  if (read.status === "unavailable") {
+    return { status: "unavailable", because: "the roles read did not answer" };
+  }
+  const seen = new Set<ParticipationMode>();
+  const contexts: ActorContext[] = [];
+  for (const role of read.roles) {
+    if (!isParticipationMode(role) || seen.has(role)) continue;
+    seen.add(role);
+    contexts.push({ mode: role, organizationId: null, label: labelOf(role) });
+  }
+  return { status: "known", contexts };
+}
+
+/** Is this recorded role one of the modes this client can actually open? */
+export function isParticipationMode(role: string): role is ParticipationMode {
+  return (PARTICIPATION_MODES as readonly string[]).includes(role);
+}

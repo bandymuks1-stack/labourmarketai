@@ -107,6 +107,35 @@ describe("mobile workspace surface — real, and not confused with participation
     expect(shapes).toMatch(/readonly label: string/);
   });
 
+  it("participation modes come from held roles, never from the workspace list", () => {
+    // The two axes are wired from different reads, and that separation is the
+    // product rule (SEP-5). The provider must map `profile.get`'s heldRoles
+    // through the client-core function; it must never reach into the
+    // workspace list for a mode.
+    const provider = read("apps/mobile/src/context-provider.tsx");
+    expect(provider).toContain("holdingsFromHeldRoles(");
+    expect(provider).toContain('useCapability<ProfileGetData>("profile.get")');
+    // The CALL, not the word: the provider's own note explains the separation
+    // and names `context.list` in prose, which is documentation worth keeping.
+    expect(provider).not.toMatch(/["']context\.list["']/);
+    expect(provider).not.toMatch(/organizationType|ContextListData/);
+    // Every context this builds names no organization — a role row does not
+    // carry one, and inventing one is the collapse this refuses.
+    const core = read("packages/client-core/src/actor-context.ts");
+    expect(core).toMatch(/organizationId: null/);
+  });
+
+  it("loading, could-not-ask and holds-nothing stay three different states", () => {
+    // Rendering a failure as "you hold nothing" was live on the web shell on
+    // 2026-08-28. Rendering LOADING that way is the same lie a moment earlier.
+    expect(settings).toContain('holdings.status === "unknown"');
+    expect(settings).toContain("context.loading");
+    expect(settings).toContain("holdings.contexts.length === 0");
+    expect(settings).toContain("context.none");
+    // And the unavailable arm still renders the NotAvailable block.
+    expect(settings).toContain("context.unavailable.title");
+  });
+
   it("every workspace string exists in all five active mobile locales", () => {
     const messages = read("apps/mobile/src/i18n/messages.ts");
     const keys = [
@@ -118,6 +147,9 @@ describe("mobile workspace surface — real, and not confused with participation
       "workspace.failed.body",
       "workspace.pointerUnavailable",
       "workspace.switchFailed",
+      "context.loading",
+      "context.active",
+      "context.none",
     ];
     for (const key of keys) {
       const occurrences = messages.split(`"${key}":`).length - 1;

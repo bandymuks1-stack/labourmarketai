@@ -74,6 +74,9 @@ const en = {
   "workspace.pointerUnavailable":
     "This is worked out from what you belong to, not a choice saved for you, and it cannot be changed here yet.",
   "workspace.switchFailed": "The workspace was not changed. Nothing was moved.",
+  "context.loading": "Reading your roles…",
+  "context.active": "Active",
+  "context.none": "No participation role is recorded on this account yet. That is what we read — not a problem with the app.",
   "context.title": "You are working as",
   "context.unavailable.title": "We cannot list your contexts yet",
   "context.unavailable.body":
@@ -260,6 +263,9 @@ const lt: Catalogue = {
   "workspace.pointerUnavailable":
     "Tai apskaičiuota iš to, kam priklausote, o ne jūsų išsaugotas pasirinkimas, ir kol kas čia to pakeisti negalima.",
   "workspace.switchFailed": "Darbo erdvė nepakeista. Niekas neperkelta.",
+  "context.loading": "Skaitome jūsų roles…",
+  "context.active": "Aktyvi",
+  "context.none": "Šioje paskyroje kol kas neįrašyta nė viena dalyvavimo rolė. Tai perskaitėme — ne programėlės klaida.",
   "context.title": "Dirbate kaip",
   "context.unavailable.title": "Kol kas negalime parodyti jūsų kontekstų",
   "context.unavailable.body":
@@ -442,6 +448,9 @@ const ru: Catalogue = {
   "workspace.pointerUnavailable":
     "Это выведено из того, где вы состоите, а не сохранённый вами выбор, и изменить это здесь пока нельзя.",
   "workspace.switchFailed": "Рабочее пространство не изменено. Ничего не перенесено.",
+  "context.loading": "Читаем ваши роли…",
+  "context.active": "Активная",
+  "context.none": "В этой учётной записи пока не записана ни одна роль участия. Это то, что мы прочитали, а не сбой приложения.",
   "context.title": "Вы работаете как",
   "context.unavailable.title": "Пока мы не можем показать ваши контексты",
   "context.unavailable.body":
@@ -624,6 +633,9 @@ const nl: Catalogue = {
   "workspace.pointerUnavailable":
     "Dit is afgeleid uit waar je bij hoort, niet een keuze die voor jou is bewaard, en het kan hier nog niet gewijzigd worden.",
   "workspace.switchFailed": "De werkruimte is niet gewijzigd. Er is niets verplaatst.",
+  "context.loading": "Je rollen worden gelezen…",
+  "context.active": "Actief",
+  "context.none": "Voor dit account is nog geen deelnamerol vastgelegd. Dat is wat we gelezen hebben — geen fout in de app.",
   "context.title": "Je werkt als",
   "context.unavailable.title": "We kunnen je contexten nog niet tonen",
   "context.unavailable.body":
@@ -806,6 +818,9 @@ const de: Catalogue = {
   "workspace.pointerUnavailable":
     "Das ist daraus abgeleitet, wo du dazugehörst, und keine für dich gespeicherte Wahl; ändern lässt es sich hier noch nicht.",
   "workspace.switchFailed": "Der Arbeitsbereich wurde nicht geändert. Es wurde nichts verschoben.",
+  "context.loading": "Deine Rollen werden gelesen…",
+  "context.active": "Aktiv",
+  "context.none": "Für dieses Konto ist noch keine Teilnahmerolle erfasst. Das haben wir gelesen — kein Fehler der App.",
   "context.title": "Du arbeitest als",
   "context.unavailable.title": "Wir können deine Kontexte noch nicht anzeigen",
   "context.unavailable.body":

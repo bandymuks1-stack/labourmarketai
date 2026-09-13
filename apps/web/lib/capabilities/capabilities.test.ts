@@ -319,6 +319,7 @@ describe("profile.get", () => {
       caller({
         profiles: { data: PROFILE_ROW, error: null },
         workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: [{ role: "worker" }, { role: "company" }], error: null },
       }),
       {},
     );
@@ -335,7 +336,50 @@ describe("profile.get", () => {
           activeRole: "worker",
         },
         worker: { status: "exists", workerId: "worker-1" },
+        // The PLURAL of activeRole, as recorded. A person is one person with
+        // several roles at once (I-1) — `activeRole` is which one they are in
+        // right now, never the set they hold.
+        heldRoles: { status: "known", roles: ["worker", "company"] },
       },
+    });
+  });
+
+  it("a failed ROLES read is 'unavailable', never 'holds no roles'", async () => {
+    // The live defect this mirrors (web shell, 2026-08-28): a transient
+    // PostgREST failure read as an empty list stripped every role from the
+    // authenticated shell. A person who manages three companies was shown as
+    // holding nothing. The profile itself still answers — one signal failing
+    // does not blank the others.
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: null, error: { message: "pooler hiccup" } },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "unavailable" } },
+    });
+    expect((r as unknown as { data: { heldRoles: Record<string, unknown> } }).data.heldRoles)
+      .not.toHaveProperty("roles");
+  });
+
+  it("holding nothing is reported as a KNOWN empty set, not as unavailable", async () => {
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: null, error: null },
+        profile_roles: { data: [], error: null },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "known", roles: [] } },
     });
   });
 
