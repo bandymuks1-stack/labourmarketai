@@ -37,7 +37,9 @@ import { createClient } from "@/lib/supabase/server";
  * It never fabricates a photo and never claims verification of anything.
  */
 
-export const CHAT_PHOTO_LIMIT = 3;
+// Not exported: a "use server" module may export only async functions
+// (Next.js build rule); the limit is this module's own default.
+const CHAT_PHOTO_LIMIT = 3;
 
 export type EvidencePhotosRead =
   | {
