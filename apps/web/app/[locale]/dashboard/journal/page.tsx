@@ -66,14 +66,15 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { formatUtcDate, utcDayKey } from "@/lib/time/display";
-// ONE day-resolution rule for the Work Journal, shared with the canonical
-// calendar (lib/planning/planning-model.ts) so a record cannot sit on one day
-// here and another day there.
-import { journalStartDay } from "@/lib/planning/planning-model";
-import { deriveEntryWorkTime } from "@/lib/journal/work-time";
+import { formatUtcDate } from "@/lib/time/display";
+// ONE day-resolution rule for the Work Journal — the canonical work-time
+// rule's own (`resolveWorkDayDetail`), the same one the work-in-numbers
+// model groups by, so a record cannot sit on one day in the diary and
+// another day in the period tile above it.
+import { deriveEntryWorkTime, resolveWorkDayDetail } from "@/lib/journal/work-time";
 import {
   WORK_PERIOD_KEYS,
+  workPeriodBounds,
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
 import {
@@ -687,8 +688,8 @@ export default async function JournalPage({
     entries: JournalEntryRow[];
   }[] = [];
   /**
-   * THE DAY AN ENTRY BELONGS TO — the day WORKED, resolved by the one shared
-   * `journalStartDay` the canonical calendar uses.
+   * THE DAY AN ENTRY BELONGS TO — the day WORKED, resolved by THE canonical
+   * work-time rule (`resolveWorkDayDetail`, work-time.ts).
    *
    * THE REGRESSION THIS CLOSES. The calendar started placing entries on their
    * own `work_date`; this page kept grouping by `created_at`. The same entry
@@ -698,15 +699,16 @@ export default async function JournalPage({
    * empty day view. Yesterday's shift logged tonight is the ordinary case, so
    * this was not an edge: it was the normal path.
    *
-   * One function decides the day for both surfaces, so they cannot disagree
-   * again. `created_at` remains the fallback for entries that never carried a
-   * work date, which is every historical row.
+   * DIARY DAY = MODEL DAY (issue #1689, lane B). The page then picked the
+   * FIRST `work_date` row it found, while the model (`deriveEntryWorkTime`
+   * → `resolveWorkDayDetail`) takes the LATEST stated one — an entry whose
+   * work date was corrected sat under its old day in the diary and under
+   * its corrected day in the period tile above it. One rule now decides the
+   * day for the diary card, the calendar and every figure. `created_at`
+   * remains the fallback for entries that never carried a work date.
    */
-  const workDateOf = (e: JournalEntryRow): string | null =>
-    (e.journal_entry_metrics ?? []).find((m) => m.metric_slug === "work_date")
-      ?.value_text ?? null;
   const isoDayOf = (e: JournalEntryRow): string =>
-    journalStartDay(workDateOf(e), e.created_at) ?? utcDayKey(e.created_at) ?? "";
+    resolveWorkDayDetail(e.journal_entry_metrics ?? [], e.created_at).day;
   // Evidence drill-down (W5 slice 3): resolve ?skill= against the worker's
   // OWN skill set and narrow the diary to entries linked to it. Unknown slug
   // or links unavailable → no filter, never an invented empty diary. The
@@ -789,13 +791,10 @@ export default async function JournalPage({
 
   // Proof-engine loop strip (Sprint v2 §3) — the journal is the PROOF ENGINE,
   // not a diary: one dense line showing the real loop state from data already
-  // loaded on this page (no extra queries): entries this month, distinct
-  // declared skills with journal-entry evidence links, manager/client
-  // CONFIRMED skills. Counts are honest zeros until real activity exists.
-  const thisMonthPrefix = new Date().toISOString().slice(0, 7);
-  const entriesThisMonth = (entries ?? []).filter((e) =>
-    (e.created_at ?? "").startsWith(thisMonthPrefix),
-  ).length;
+  // loaded on this page (no extra queries): entries in the model's 30-day
+  // period (`entriesThisMonth`, derived below the model), distinct declared
+  // skills with journal-entry evidence links, manager/client CONFIRMED
+  // skills. Counts are honest zeros until real activity exists.
   const evidencedSkillIds = new Set<string>();
   for (const ids of linksByEntry.values()) {
     for (const id of ids) evidencedSkillIds.add(id);
@@ -805,6 +804,7 @@ export default async function JournalPage({
   // and declared skills loaded above — no second read, so the figures can
   // never disagree with the diary beneath them. Unreadable entries or links
   // → the section is withheld rather than rendered as zero hours (SEP-7).
+  const todayIso = new Date().toISOString().slice(0, 10);
   const workIntelligence =
     entries && skillLinksReady
       ? assembleWorkIntelligence({
@@ -812,8 +812,15 @@ export default async function JournalPage({
           linksByEntry,
           provenanceByEntry,
           skillRows: (skillIdRows ?? []) as unknown as WorkerSkillSourceRow[],
-          todayIso: new Date().toISOString().slice(0, 10),
+          todayIso,
           focus: periodKey,
+          coverage: entriesRead.ok
+            ? {
+                entriesRead: entriesRead.coverage.entriesRead,
+                truncated: entriesRead.coverage.truncated,
+                linksTruncated: linkRead.truncated,
+              }
+            : undefined,
           // Evidence strength needs to know which entries carry photos —
           // one bounded read over the live ids already in hand.
           photoCountByEntry: await readPhotoCountsByEntry(
@@ -823,6 +830,21 @@ export default async function JournalPage({
           organizationRecords,
         })
       : null;
+  // THE STRIP'S MONTH IS THE MODEL'S (issue #1689, lane B). This counted
+  // entries by the `created_at` CALENDAR month while the section's "30
+  // days" tile counted by the work day over a rolling window — two numbers
+  // for one word. The strip now reads the model's own `month` row (30 UTC
+  // days ending today, by the day WORKED) and names it with the section's
+  // period label. When the model is withheld (links unreadable) the same
+  // rule is applied by hand over the loaded entries — the model's day and
+  // the model's bounds, never a third definition.
+  const monthBounds = workPeriodBounds("month", todayIso);
+  const entriesThisMonth =
+    workIntelligence?.periods.find((p) => p.key === "month")?.entries ??
+    (entries ?? []).filter((e) => {
+      const day = resolveWorkDayDetail(e.journal_entry_metrics ?? [], e.created_at).day;
+      return day >= (monthBounds.startIso ?? day) && day <= monthBounds.endIso;
+    }).length;
   const primaryProfessionSlug =
     ownPath.directions.find((d) => d.isPrimary)?.slug ?? null;
   const professionNameOf = (slug: string): string | null => {
@@ -1233,8 +1255,9 @@ export default async function JournalPage({
           className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-proof-loop"
         >
-          {t("proofLoop.strip", {
+          {t("proofLoop.stripPeriod", {
             entries: entriesThisMonth,
+            period: t("intelligence.period.month"),
             evidenced: evidencedSkillIds.size,
             confirmed: verifiedSkillIds.size,
           })}{" "}

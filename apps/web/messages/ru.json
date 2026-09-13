@@ -13708,12 +13708,14 @@
       "journalUnlabelled": "(без описания)",
       "journalEmpty": "За последние {days} дней записей у вас нет.",
       "journalHoursTotal": "Всего за {days} дн.: {hours} ч из {entries, plural, one {# записи} few {# записей} many {# записей} other {# записей}} (каждая запись считается один раз).",
+      "journalHoursWindow": "Всего за {days} дн.: {hours} ч из {entries, plural, one {# записи} few {# записей} many {# записей} other {# записей}}, из них подтверждено руководителем {confirmed} ч (каждая запись считается один раз).",
       "journalPeriod_today": "Сегодня",
       "journalPeriod_yesterday": "Вчера",
       "journalPeriod_week": "За последние 7 дней",
       "journalPeriod_month": "За последние 30 дней",
       "journalPeriod_year": "За последние 365 дней",
       "journalPeriod_all": "За всё время",
+      "journalPeriod_range": "За последние {days, plural, one {# день} few {# дня} many {# дней} other {# дней}}",
       "journalHoursPeriod": "{period}: {hours} ч из {entries, plural, one {# записи} few {# записей} many {# записей} other {# записей}}, из них подтверждено руководителем {confirmed} ч (каждая запись считается один раз).",
       "journalHoursPeriodPlain": "{period}: {hours} ч из {entries, plural, one {# записи} few {# записей} many {# записей} other {# записей}} (каждая запись считается один раз).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# запись} few {# записи} many {# записей} other {# записей}}, но без длительности — добавьте часы, и они будут посчитаны.",
@@ -13820,7 +13822,8 @@
       "whyVerifierSelf": "Свою собственную работу подтвердить нельзя — подтверждение должно прийти от другого человека.",
       "whyVerifierNone": "Ни одна из ваших активных связей не указывает на организацию, способную подтвердить работу.",
       "whyVerifierUnavailable": "Это значит, что не удалось прочитать данные, а не то, что подтверждать некому.",
-      "journalOrgRecords": "Также в учёте вашей организации ({period}): {hours} ч за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}} — часы из табеля или импорта, учитываются отдельно и к цифре выше не добавляются."
+      "journalOrgRecords": "Также в учёте вашей организации ({period}): {hours} ч за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}} — часы из табеля или импорта, учитываются отдельно и к цифре выше не добавляются.",
+      "journalCoverageTruncated": "Показано по последним {count} записям — более старые записи в эту цифру не входят."
     },
     "project": {
       "fieldStatus": "Статус",

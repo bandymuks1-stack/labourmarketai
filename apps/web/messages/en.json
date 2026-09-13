@@ -13708,12 +13708,14 @@
       "journalUnlabelled": "(no description)",
       "journalEmpty": "You have no journal entries in the last {days} days.",
       "journalHoursTotal": "Total over {days} days: {hours} h across {entries, plural, one {# entry} other {# entries}} (each entry counted once).",
+      "journalHoursWindow": "Total over {days} days: {hours} h across {entries, plural, one {# entry} other {# entries}}, of which {confirmed} h confirmed by a manager (each entry counted once).",
       "journalPeriod_today": "Today",
       "journalPeriod_yesterday": "Yesterday",
       "journalPeriod_week": "Over the last 7 days",
       "journalPeriod_month": "Over the last 30 days",
       "journalPeriod_year": "Over the last 365 days",
       "journalPeriod_all": "All time",
+      "journalPeriod_range": "In the last {days, plural, one {# day} other {# days}}",
       "journalHoursPeriod": "{period}: {hours} h across {entries, plural, one {# entry} other {# entries}}, of which {confirmed} h confirmed by a manager (each entry counted once).",
       "journalHoursPeriodPlain": "{period}: {hours} h across {entries, plural, one {# entry} other {# entries}} (each entry counted once).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# entry} other {# entries}}, but without a duration — add the hours and they will be counted.",
@@ -13820,7 +13822,8 @@
       "whyVerifierSelf": "You cannot confirm your own work — confirmation has to come from someone else.",
       "whyVerifierNone": "None of your active relationships points to an organization that can confirm work.",
       "whyVerifierUnavailable": "That means the data could not be read — not that nobody can confirm it.",
-      "journalOrgRecords": "Also in your organization's records ({period}): {hours} h on {days, plural, one {# day} other {# days}} — timesheet or imported hours, kept apart and not added to the figure above."
+      "journalOrgRecords": "Also in your organization's records ({period}): {hours} h on {days, plural, one {# day} other {# days}} — timesheet or imported hours, kept apart and not added to the figure above.",
+      "journalCoverageTruncated": "Shown from the last {count} entries — older entries are not in this figure."
     },
     "project": {
       "fieldStatus": "Status",

@@ -13708,12 +13708,14 @@
       "journalUnlabelled": "(geen omschrijving)",
       "journalEmpty": "Je hebt geen dagboekregels in de afgelopen {days} dagen.",
       "journalHoursTotal": "Totaal over {days} dagen: {hours} u over {entries, plural, one {# registratie} other {# registraties}} (elke registratie één keer geteld).",
+      "journalHoursWindow": "Totaal over {days} dagen: {hours} u over {entries, plural, one {# registratie} other {# registraties}}, waarvan {confirmed} u bevestigd door een leidinggevende (elke registratie één keer geteld).",
       "journalPeriod_today": "Vandaag",
       "journalPeriod_yesterday": "Gisteren",
       "journalPeriod_week": "In de laatste 7 dagen",
       "journalPeriod_month": "In de laatste 30 dagen",
       "journalPeriod_year": "In de laatste 365 dagen",
       "journalPeriod_all": "Over de hele periode",
+      "journalPeriod_range": "In de afgelopen {days, plural, one {# dag} other {# dagen}}",
       "journalHoursPeriod": "{period}: {hours} u over {entries, plural, one {# registratie} other {# registraties}}, waarvan {confirmed} u bevestigd door een leidinggevende (elke registratie één keer geteld).",
       "journalHoursPeriodPlain": "{period}: {hours} u over {entries, plural, one {# registratie} other {# registraties}} (elke registratie één keer geteld).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# registratie} other {# registraties}}, maar zonder duur — voeg de uren toe en ze worden meegeteld.",
@@ -13820,7 +13822,8 @@
       "whyVerifierSelf": "Je kunt je eigen werk niet bevestigen — bevestiging moet van iemand anders komen.",
       "whyVerifierNone": "Geen van je actieve relaties wijst naar een organisatie die werk kan bevestigen.",
       "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen.",
-      "journalOrgRecords": "Ook in de registratie van uw organisatie ({period}): {hours} u op {days, plural, one {# dag} other {# dagen}} — uren uit een urenstaat of import, apart gehouden en niet bij het cijfer hierboven opgeteld."
+      "journalOrgRecords": "Ook in de registratie van uw organisatie ({period}): {hours} u op {days, plural, one {# dag} other {# dagen}} — uren uit een urenstaat of import, apart gehouden en niet bij het cijfer hierboven opgeteld.",
+      "journalCoverageTruncated": "Getoond op basis van de laatste {count} registraties — oudere registraties zitten niet in dit cijfer."
     },
     "project": {
       "fieldStatus": "Status",

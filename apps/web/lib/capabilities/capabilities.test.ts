@@ -143,6 +143,9 @@ describe("the registry itself", () => {
       "profile.get",
       "living_cv.skills.get",
       "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
       "interest.express_draft",
@@ -182,6 +185,9 @@ describe("the registry itself", () => {
       "profile.get",
       "living_cv.skills.get",
       "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
       "interest.express_draft",
@@ -264,6 +270,7 @@ describe("the registry itself", () => {
     expect(byId["profile.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["living_cv.skills.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.list"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.work_intelligence.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.create_draft"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.confirm"].annotations.readOnlyHint).toBe(false);
     // The one-time token makes a duplicate confirm a no-op, not a second row.

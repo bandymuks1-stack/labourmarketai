@@ -95,7 +95,8 @@ const intentRegistry = read("lib/conversation/intent-registry.ts");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
-    expect(page).toContain('import { deriveEntryWorkTime } from "@/lib/journal/work-time"');
+    // lane B (#1689): the page also imports the day rule from the same module
+    expect(page).toContain('import { deriveEntryWorkTime, resolveWorkDayDetail } from "@/lib/journal/work-time"');
     expect(page).toMatch(/deriveEntryWorkTime\(\{\s*entryId: e\.id/);
   });
   it("the old entry-level-only computation is gone", () => {
@@ -723,7 +724,10 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
     expect(cvPage).toContain('data-testid="cv-organization-recorded-hours"');
     expect(cvPage).toMatch(/t\("organizationRecordedHours", \{/);
     expect(workflows).toMatch(/t\("journalOrgRecords", \{/);
-    expect(workflows).toMatch(/wi\?\.organizationRecords\?\.find\(\(p\) => p\.key === \(focus \?\? "all"\)\)/);
+    // lane B (#1689): the ledger row is the SAME window as the figure — a
+    // tab, or the explicit `range` row — never the all-time row for a window
+    // the section has no tab for
+    expect(workflows).toMatch(/wi\?\.organizationRecords\?\.find\(\(p\) => p\.key === scopeKey\)/);
   });
 
   it("every ledger sentence has copy in each locale the section is published in, and none of it sums the two ledgers", () => {
@@ -1051,6 +1055,130 @@ describe("16 · the owner's `skillTimeAttribution` column is READ by the analyti
         expect(typeof s, `${loc}.intelligence.attribution.${key}`).toBe("string");
         expect(s).not.toMatch(/archetype|isco|involvement_expected|precise_possible|skillTimeAttribution|score|rating|rank/i);
       }
+    }
+  });
+});
+
+describe("14 · ONE time scope (issue #1689, lane B): bounded reads say so, diary day = model day, the chat's recent path on the one model, the MCP figures", () => {
+  const planning = read("lib/planning/planning.ts");
+  const timesheets = read("lib/timesheets/timesheets.ts");
+  const linkRead = read("lib/journal/entry-skill-link-read.ts");
+  const countedOnce = read("lib/journal/counted-once.ts");
+
+  it("the journal list and the link read PAGE with .range() and carry `coverage` / `truncated` — never an unbounded select PostgREST caps at 1000 in silence (SEP-7)", () => {
+    expect(listCore).toMatch(/export const JOURNAL_LIST_PAGE_SIZE = 1000;/);
+    expect(listCore).toMatch(/export async function readAllPages</);
+    expect(listCore).toMatch(/\.range\(from, from \+ pageSize - 1\)/);
+    expect(listCore).toMatch(/if \(batch\.length < pageSize\) return \{ rows, truncated: false, error: null \};/);
+    expect(listCore).toMatch(/coverage: \{ entriesRead: entries\.length, truncated: v3\.truncated \}/);
+    // a total order so a page boundary never repeats or skips a row
+    expect(listCore).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\)/);
+    expect(linkRead).toContain('import { readAllPages } from "@/lib/journal/journal-list-core"');
+    expect(linkRead).toMatch(/truncated: res\.truncated,/);
+    expect(linkRead).toMatch(/\.order\("journal_entry_id", \{ ascending: true \}\)\s*\.order\("skill_id", \{ ascending: true \}\)/);
+    // the reader hands both facts to the model, and the model carries them
+    expect(reader).toMatch(/entriesRead: entriesRead\.coverage\.entriesRead,\s*truncated: entriesRead\.coverage\.truncated,\s*linksTruncated: linkRead\.truncated,/);
+    expect(model).toContain("readonly coverage: WorkIntelligenceCoverage;");
+    expect(model).toMatch(/truncated: input\.coverage\?\.truncated \?\? false,/);
+    // photos: every id, chunked — no `slice(0, 500)` coverage cap
+    expect(reader).toMatch(/for \(let i = 0; i < entryIds\.length; i \+= PHOTO_COUNT_ID_CHUNK\)/);
+    expect(reader).not.toMatch(/slice\(0, 500\)/);
+  });
+
+  it("the diary's day card is the MODEL's day: resolveWorkDayDetail (latest stated work_date), not the first work_date row", () => {
+    expect(page).toContain('import { deriveEntryWorkTime, resolveWorkDayDetail } from "@/lib/journal/work-time"');
+    expect(page).toMatch(/const isoDayOf = \(e: JournalEntryRow\): string =>\s*resolveWorkDayDetail\(e\.journal_entry_metrics \?\? \[\], e\.created_at\)\.day;/);
+    // the pre-fix shape: a second day rule on the page
+    expect(page).not.toMatch(/journalStartDay\(/);
+    expect(page).not.toMatch(/const workDateOf = /);
+  });
+
+  it("the proof strip's month is the model's `month` row, named with the section's own period label — not a created_at calendar month", () => {
+    expect(page).toMatch(/workIntelligence\?\.periods\.find\(\(p\) => p\.key === "month"\)\?\.entries \?\?/);
+    expect(page).toMatch(/const monthBounds = workPeriodBounds\("month", todayIso\);/);
+    expect(page).not.toMatch(/thisMonthPrefix/);
+    expect(page).not.toMatch(/startsWith\(thisMonthPrefix\)/);
+    expect(page).toMatch(/t\("proofLoop\.stripPeriod", \{\s*entries: entriesThisMonth,\s*period: t\("intelligence\.period\.month"\),/);
+    // the page hands the reads' coverage to the model it renders
+    expect(page).toMatch(/coverage: entriesRead\.ok\s*\?\s*\{\s*entriesRead: entriesRead\.coverage\.entriesRead,/);
+  });
+
+  it("the chat's recent path is the one model: a `focusRange`, the `range` row, no second sum over planning labels", () => {
+    expect(workflows).not.toMatch(/parseDurationLabel/);
+    expect(workflows).not.toMatch(/from "@\/lib\/journal\/work-time"/);
+    expect(workflows).toMatch(/\{ focus: "all", focusRange: \{ startIso: range\.start, endIso: range\.end \} \}/);
+    expect(workflows).toMatch(/const scopeKey: WorkPeriodScope = focus \?\? "range";/);
+    expect(workflows).toMatch(/const totals = wi\?\.periods\.find\(\(p\) => p\.key === scopeKey\) \?\? null;/);
+    // UNKNOWN is said, never re-derived
+    expect(workflows).toMatch(/totals === null\s*\?\s*t\("wiUnread"\)/);
+    // the base is named over a capped read
+    expect(workflows).toMatch(/t\("journalCoverageTruncated", \{ count: wi\.coverage\.entriesRead \}\)/);
+    // the model: an explicit window is a period row of its own
+    expect(model).toMatch(/export type WorkPeriodScope = WorkPeriodKey \| "range";/);
+    expect(model).toMatch(/const periodKeys: readonly WorkPeriodScope\[\] = focusRange\s*\?\s*\[\.\.\.WORK_PERIOD_KEYS, "range"\]\s*:\s*WORK_PERIOD_KEYS;/);
+    expect(model).toMatch(/const scope: WorkPeriodScope = focusRange \? "range" : focus;/);
+  });
+
+  it("a skill states its first worked day and its context ids; contexts = their count, the personal (null) context excluded", () => {
+    expect(model).toContain("readonly firstWorkedDay: string | null;");
+    expect(model).toContain("readonly contextIds: readonly string[];");
+    expect(model).toMatch(/if \(d\.entry\.engagementContextId\) a\.contexts\.add\(d\.entry\.engagementContextId\);/);
+    expect(model).toMatch(/contextIds: \[\.\.\.\(a\?\.contexts \?\? \[\]\)\]\.sort\(\),/);
+  });
+
+  it("the counted-once rule is ONE module: planning and timesheets import it, neither re-implements the correction chain inline", () => {
+    expect(countedOnce).toMatch(/export function countedOnce</);
+    expect(planning).toContain('import { correctedOriginalIds } from "@/lib/journal/counted-once"');
+    expect(planning).toMatch(/const correctedIds = correctedOriginalIds\(rows\);/);
+    expect(timesheets).toContain('import { countedOnce } from "@/lib/journal/counted-once"');
+    expect(timesheets).toMatch(/const liveRows = countedOnce\(rows\);/);
+    for (const [name, src] of Object.entries({ planning, timesheets })) {
+      expect(src, `${name} re-implements the chain`).not.toMatch(/rows\.map\(\(r\) => r\.correction_of\)\.filter\(/);
+    }
+    // the bounded workload read is deterministic: ordered before limited
+    expect(timesheets).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\)\s*\.limit\(WORKLOAD_READ_LIMIT\)/);
+  });
+
+  it("the intake's saved-record day check adds the SAME organization ledger the section's checks add, through the one helper", () => {
+    expect(model).toMatch(/export function organizationHoursPerDay\(/);
+    expect(model).toMatch(/const organizationHoursByDay = organizationHoursPerDay\(orgRows, focusBounds\);/);
+    expect(plausibilityRead).toContain('import { organizationHoursPerDay } from "@/lib/journal/work-intelligence"');
+    expect(plausibilityRead).toContain('import { readOrganizationRecords } from "@/lib/journal/work-intelligence-read"');
+    expect(plausibilityRead).toMatch(/readOrganizationRecords\(caller\.supabase, workerId\)/);
+    expect(plausibilityRead).toMatch(/\{ organizationHoursByDay: organizationHoursPerDay\(organizationRecords\) \}/);
+  });
+
+  it("the MCP capability `journal.work_intelligence.get` reads through loadWorkIntelligence and exposes the person's figures only", () => {
+    expect(capabilities).toContain('id: "journal.work_intelligence.get"');
+    expect(capabilities).toContain('import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read"');
+    expect(capabilities).toMatch(/period: z\.enum\(WORK_PERIOD_KEYS\)\.optional\(\),/);
+    const start = capabilities.indexOf('id: "journal.work_intelligence.get"');
+    const end = capabilities.indexOf("// ── journal.create_draft / journal.confirm");
+    const block = capabilities.slice(start, end);
+    expect(block).toMatch(/const wi = await loadWorkIntelligence\(caller, worker\.id, \{\s*focus: parsed\.period \?\? "all",\s*\}\);/);
+    expect(block).toMatch(/firstWorkedDay: sk\.firstWorkedDay,/);
+    expect(block).toMatch(/coverage: \{\s*entriesRead: wi\.coverage\.entriesRead,/);
+    // withheld: the organization's ledger, context ids, checks, skill ids
+    for (const forbidden of ["organizationRecords:", "contextIds", "checks:", "skillId:", "createAdminClient", "service_role"]) {
+      expect(block, forbidden).not.toContain(forbidden);
+    }
+  });
+
+  it("every new sentence has copy in each routed locale, and the truncation sentence names the count", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: Record<string, string>;
+        proofLoop: Record<string, string>;
+      };
+      expect(j.intelligence.coverageTruncated, `${loc}.intelligence.coverageTruncated`).toMatch(/\{count\}/);
+      expect(j.proofLoop.stripPeriod, `${loc}.proofLoop.stripPeriod`).toMatch(/\{period\}/);
+      expect(j.proofLoop.stripPeriod, `${loc}.proofLoop.stripPeriod`).toMatch(/\{entries\}/);
+      const root = JSON.parse(read(`messages/${loc}.json`)) as { workspace: { ai: Record<string, string> } };
+      const ai = root.workspace.ai;
+      expect(ai.journalCoverageTruncated, `${loc} journalCoverageTruncated`).toMatch(/\{count\}/);
+      expect(ai.journalPeriod_range, `${loc} journalPeriod_range`).toMatch(/\{days/);
+      expect(ai.journalHoursWindow, `${loc} journalHoursWindow`).toMatch(/\{confirmed\}/);
+      expect(ai.journalHoursWindow, `${loc} journalHoursWindow`).toMatch(/\{days\}/);
     }
   });
 });

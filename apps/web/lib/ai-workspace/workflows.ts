@@ -13,12 +13,11 @@ import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
 import { loadOwnPrimaryProfessionSlug, loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
-import type { WorkIntelligence, WorkPeriodKey } from "@/lib/journal/work-intelligence";
+import type { WorkIntelligence, WorkPeriodKey, WorkPeriodScope } from "@/lib/journal/work-intelligence";
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
 import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
-import { isWorkTimeUnit, workTimeHours } from "@/lib/journal/work-time";
 import {
   DOCUMENT_GAP_LINE_CAP,
   groupMissingDocumentsByType,
@@ -528,10 +527,18 @@ const PERIOD_WINDOW_DAYS: Record<Exclude<JournalPeriodPhrase, "all" | "today" | 
  * sentence names a period, the figure comes from `loadOwnWorkIntelligence`'s
  * `periods` — the SAME model and the SAME number the work-in-numbers section
  * shows for that tab (today / 7 / 30 / 365 days / all, confirmed hours told
- * apart) — and the entry lines are read over that window. "Yesterday" is a
- * single-day window the section has no tab for; it is summed the recent way.
- * No period word → the recent window, as before. Every answer names its
- * window, so nothing is silently reinterpreted.
+ * apart) — and the entry lines are read over that window. No period word →
+ * the recent window, as before. Every answer names its window, so nothing
+ * is silently reinterpreted.
+ *
+ * ONE TIME SCOPE (issue #1689, lane B). "Yesterday" and the recent default
+ * used to be summed a second way — from the planning strip's "<value>|<unit>"
+ * duration labels — beside the model the section renders. They are now
+ * passed to the model as an explicit `focusRange` and answered from its
+ * `range` row: the same arithmetic, the same confirmed-hours split, the same
+ * counted-once rule. Planning only LISTS the entry lines. An unreadable
+ * model is said as such (UNKNOWN), never re-derived from another surface;
+ * a model built over a capped read says how many entries it rests on.
  */
 export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
@@ -568,38 +575,38 @@ export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
     .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1));
   const entries = journalItems.slice(0, ANSWER_LIMIT);
 
-  // Hours over the whole window, one canonical label per entry ("<value>|<unit>").
-  let windowHours = 0;
-  let windowDayUnits = 0;
-  for (const it of journalItems) {
-    const parsed = parseDurationLabel(it.duration);
-    if (!parsed) continue;
-    if (parsed.unit === "days") windowDayUnits += parsed.value;
-    else windowHours += workTimeHours(parsed.value, parsed.unit);
-  }
-  windowHours = Math.round(windowHours * 100) / 100;
+  // THE FIGURE IS THE MODEL'S. A named section tab is its own `periods`
+  // row; the recent default and "yesterday" have no tab, so the window is
+  // passed as an explicit `focusRange` and read from the model's `range`
+  // row. The model is FOCUSED on the same window, so its outputs and the
+  // organization ledger (below) describe the window the figure does.
+  const focus: WorkPeriodKey | null = period !== null && period !== "yesterday" ? period : null;
+  const wi = await loadOwnWorkIntelligence(
+    focus !== null
+      ? { focus }
+      : { focus: "all", focusRange: { startIso: range.start, endIso: range.end } },
+  ).catch(() => null);
+  const scopeKey: WorkPeriodScope = focus ?? "range";
+  const totals = wi?.periods.find((p) => p.key === scopeKey) ?? null;
+  const days = rangeDays(range.start, range.end);
 
+  // Every answer names its window: the tab's own word, "yesterday", or the
+  // recent window's own length in days.
   const periodLabel = period === null ? null : t(`journalPeriod_${period}`);
+  const scopeLabel = periodLabel ?? t("journalPeriod_range", { days });
   const why =
     periodLabel === null
-      ? t("whyJournalWindow", { days: rangeDays(range.start, range.end) })
+      ? t("whyJournalWindow", { days })
       : t("whyJournalPeriod", { period: periodLabel });
 
-  // A named section period: the section's own figure for that tab. The
-  // model is FOCUSED on that period so its outputs (below) describe the
-  // same window the figure does; "yesterday" and the recent default have
-  // no section tab, so their outputs are read over all time and say so.
-  const focus: WorkPeriodKey | null = period !== null && period !== "yesterday" ? period : null;
-  const wi = await loadOwnWorkIntelligence({ focus: focus ?? "all" }).catch(() => null);
-  const sectionPeriod = focus !== null ? (wi?.periods.find((p) => p.key === focus) ?? null) : null;
-  const periodEntries = sectionPeriod?.entries ?? journalItems.length;
+  const periodEntries = totals?.entries ?? journalItems.length;
 
   if (periodEntries === 0 && entries.length === 0) {
     return {
       kind: "answer",
       text:
         periodLabel === null
-          ? t("journalEmpty", { days: rangeDays(range.start, range.end) })
+          ? t("journalEmpty", { days })
           : t("journalEmptyPeriod", { period: periodLabel }),
       explanation: { why },
       chips: [{ id: "logwork", label: t("chipLogWork") }],
@@ -618,52 +625,55 @@ export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
     }),
   );
 
-  const dayUnits = sectionPeriod?.dayUnits ?? windowDayUnits;
+  // The window's figure — hours, confirmed hours and entries from the ONE
+  // model row for this window. `days`-unit work stays in days. A model that
+  // could not be read is said as UNKNOWN: no figure is re-derived from the
+  // planning lines (the second arithmetic this closes).
+  const dayUnits = totals?.dayUnits ?? 0;
   const dayUnitsLine = dayUnits > 0 ? " " + t("journalDayUnits", { days: fmtHours(dayUnits, locale) }) : "";
   const hoursLine =
-    periodLabel === null
-      ? windowHours > 0 || windowDayUnits > 0
-        ? t("journalHoursTotal", {
-            hours: fmtHours(windowHours, locale),
-            days: rangeDays(range.start, range.end),
-            entries: journalItems.length,
-          }) + dayUnitsLine
-        : t("journalHoursNone", { entries: journalItems.length })
-      : sectionPeriod !== null
-        ? sectionPeriod.hours > 0 || sectionPeriod.dayUnits > 0
-          ? t("journalHoursPeriod", {
-              period: periodLabel,
-              hours: fmtHours(sectionPeriod.hours, locale),
-              confirmed: fmtHours(sectionPeriod.confirmedHours, locale),
-              entries: sectionPeriod.entries,
-            }) + dayUnitsLine
-          : t("journalHoursNonePeriod", { period: periodLabel, entries: sectionPeriod.entries })
-        : windowHours > 0 || windowDayUnits > 0
-          ? t("journalHoursPeriodPlain", {
-              period: periodLabel,
-              hours: fmtHours(windowHours, locale),
-              entries: journalItems.length,
-            }) + dayUnitsLine
-          : t("journalHoursNonePeriod", { period: periodLabel, entries: journalItems.length });
+    totals === null
+      ? t("wiUnread")
+      : totals.hours > 0 || totals.dayUnits > 0
+        ? (periodLabel === null
+            ? t("journalHoursWindow", {
+                days,
+                hours: fmtHours(totals.hours, locale),
+                confirmed: fmtHours(totals.confirmedHours, locale),
+                entries: totals.entries,
+              })
+            : t("journalHoursPeriod", {
+                period: periodLabel,
+                hours: fmtHours(totals.hours, locale),
+                confirmed: fmtHours(totals.confirmedHours, locale),
+                entries: totals.entries,
+              })) + dayUnitsLine
+        : periodLabel === null
+          ? t("journalHoursNone", { entries: totals.entries })
+          : t("journalHoursNonePeriod", { period: periodLabel, entries: totals.entries });
+
+  // A figure over a capped read names its base (SEP-7): "from the last N
+  // entries", never a total that quietly stops at a page ceiling.
+  const coverageLine =
+    wi !== null && wi.coverage.truncated
+      ? t("journalCoverageTruncated", { count: wi.coverage.entriesRead })
+      : null;
 
   // WHAT WAS PRODUCED (issue #1689, owner line 6 — "ką padariau per tą
   // laiką?"): the completed outputs in their recorded units, from the same
-  // model, over the same window as the figure (all time when the question
-  // named none — the line says which). Never converted, never time.
-  const outputsLine = wi === null ? null : await formatOutputsLine(wi, focus ?? "all", locale);
+  // model, over the same window as the figure — the line says which.
+  // Never converted, never time.
+  const outputsLine = wi === null ? null : await formatOutputsLine(wi, scopeLabel, locale);
 
   // THE ORGANIZATION'S OWN RECORDS (owner §19): when an organization
   // recorded hours about the person in the same window (timesheet lines,
   // imported documents), the answer names that ledger beside the journal
-  // figure — the model's own figure, added to nothing. A window the model
-  // has no tab for ("yesterday", the recent default) reads the all-time
-  // ledger and says so.
-  const orgLedger =
-    wi?.organizationRecords?.find((p) => p.key === (focus ?? "all")) ?? null;
+  // figure — the model's own row for the SAME window, added to nothing.
+  const orgLedger = wi?.organizationRecords?.find((p) => p.key === scopeKey) ?? null;
   const orgLine =
     orgLedger !== null && orgLedger.hours > 0
       ? t("journalOrgRecords", {
-          period: t(`journalPeriod_${focus ?? "all"}`),
+          period: scopeLabel,
           hours: fmtHours(orgLedger.hours, locale),
           days: orgLedger.daysWorked,
         })
@@ -676,11 +686,13 @@ export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
           t("journalIntro", { count: entries.length }),
           ...lines,
           hoursLine,
+          ...(coverageLine ? [coverageLine] : []),
           ...(orgLine ? [orgLine] : []),
           ...(outputsLine ? [outputsLine] : []),
         ]
       : [
           hoursLine,
+          ...(coverageLine ? [coverageLine] : []),
           ...(orgLine ? [orgLine] : []),
           ...(outputsLine ? [outputsLine] : []),
           ...(lines.length > 0 ? [t("journalPeriodLines"), ...lines] : []),
@@ -704,19 +716,6 @@ function isoDayMinus(todayIso: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** The planning strip's canonical `"<value>|<unit>"` duration label. */
-function parseDurationLabel(
-  label: string | null,
-): { value: number; unit: "hours" | "minutes" | "days" } | null {
-  if (!label) return null;
-  const sep = label.indexOf("|");
-  if (sep <= 0) return null;
-  const value = Number(label.slice(0, sep));
-  const unit = label.slice(sep + 1);
-  if (!Number.isFinite(value) || value <= 0 || !isWorkTimeUnit(unit)) return null;
-  return { value, unit };
-}
-
 function fmtHours(hours: number, locale: string): string {
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(hours);
 }
@@ -725,12 +724,14 @@ function fmtPct(share: number, locale: string): string {
   return new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(share);
 }
 
-/** The model's focus-period outputs as one sentence naming its window, or
- *  null when nothing was produced in a non-time unit. Unit names come from
- *  the ONE `productivityUnits` catalogue the section and the pickers use. */
+/** The model's focus-period outputs as one sentence naming its window
+ *  (`periodLabel` — the tab's word, "yesterday", or the recent window's
+ *  length), or null when nothing was produced in a non-time unit. Unit
+ *  names come from the ONE `productivityUnits` catalogue the section and
+ *  the pickers use. */
 async function formatOutputsLine(
   wi: WorkIntelligence,
-  focus: WorkPeriodKey,
+  periodLabel: string,
   locale: string,
 ): Promise<string | null> {
   if (wi.outputs.length === 0) return null;
@@ -756,7 +757,7 @@ async function formatOutputsLine(
           }),
     )
     .join("; ");
-  return t("wiOutputs", { period: t(`journalPeriod_${focus}`), list });
+  return t("wiOutputs", { period: periodLabel, list });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1440,9 +1441,12 @@ async function blocked(text: string, why: string): Promise<WorkflowResult> {
   return { kind: "blocked", text, explanation: { why } };
 }
 
+/** Calendar days in an INCLUSIVE `[start, end]` window — the recent window
+ *  of `RECENT_JOURNAL_DAYS` is named as that many days, not one fewer (the
+ *  old difference-only count said "13 d." for a 14-day window, #1689). */
 function rangeDays(start: string, end: string): number {
   const ms = Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`);
-  return Math.max(1, Math.round(ms / 86_400_000));
+  return Math.max(1, Math.round(ms / 86_400_000) + 1);
 }
 
 /**

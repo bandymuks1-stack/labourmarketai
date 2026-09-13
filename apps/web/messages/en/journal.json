@@ -409,6 +409,7 @@
   },
   "proofLoop": {
     "strip": "Entries → skills → CV → opportunities: {entries} entries this month · {evidenced} skills with records · {confirmed} reviewed",
+    "stripPeriod": "Entries → skills → CV → opportunities: {entries} entries ({period}) · {evidenced} skills with records · {confirmed} reviewed",
     "cvLink": "CV"
   },
   "statusExplainer": "How are your entries used?",
@@ -654,6 +655,7 @@
     "monthsTitle": "How it changes",
     "monthsLegend": "Hours per month by the day worked. The green part is manager-confirmed hours. A month with no entries is a real zero.",
     "listCap": "Showing {shown} of {total} — every row counts toward the totals.",
+    "coverageTruncated": "Shown from the last {count} entries — older entries are not in these figures.",
     "monthsCap": "Showing the last {shown} of {total} months — all of them count toward the totals.",
     "attribution": {
       "involvement_expected": "In this kind of work time is usually recorded for the whole shift, not per activity, so hours show here as involvement — that is not an error. For hours per skill, give the time next to the activity in an entry.",
