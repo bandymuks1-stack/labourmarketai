@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { demandCountFor } from "./programs";
+import { demandCountFor, publicDemandRead } from "@/lib/market/public-demand";
 import {
   SUPPRESSED_CELL,
   UNKNOWN_CELL,
@@ -97,32 +97,45 @@ describe("institution report — an unknown demand never exports as zero (SEP-7)
     expect(row.endsWith(",0")).toBe(false);
   });
 
-  it("writes `unknown` for a direction the vacancy count does not carry", () => {
-    // Production's `builder` programme on 2026-09-13: the direction IS set,
-    // and `count_public_vacancies_by_profession_v1` returns 20 professions
-    // without it. Null here means unmeasured, not empty.
+  it("writes `unknown` for a direction the vacancy count could not measure", () => {
+    // Null reaches the builder only when the count came back FULL and may be
+    // truncated — see the reader test below for which absences are zeros.
     const csv = buildInstitutionReportCsv([program({ demandCount: null })], OK_OUTCOMES);
     expect(blocks(csv).programs[1]).toContain(UNKNOWN_CELL);
   });
 
-  it("the READER produces that null — the report is not tested against a value only a test can make", () => {
-    // Codex P1 on #1731, and correct: every case above constructed the null by
-    // hand, so none of them would have failed while `readInstitutionPrograms`
-    // was mapping a missing profession to `?? 0`. This exercises the reader's
-    // own mapping, which is where SEP-7 actually had to hold.
+  it("the READER decides that null, and only when the count could not see the whole pool", () => {
+    // Two Codex P1s, both correct, in opposite directions — the reason the
+    // rule now lives once in lib/market/public-demand and is tested here
+    // against the READER rather than against a value a test invented.
     //
-    // The map models the real shape: the count function is a TOP-N read
-    // (`limit 20` by default), so a profession outside the window is absent
-    // for the same reason one with no vacancy is — indistinguishable, and
-    // therefore UNKNOWN.
-    const top = new Map<string, number>([["carpenter", 12], ["welder", 3], ["electrician", 0]]);
-    expect(demandCountFor("builder", top, false)).toBeNull();
-    // A zero is only ever a zero the function actually returned.
-    expect(demandCountFor("electrician", top, false)).toBe(0);
-    expect(demandCountFor("carpenter", top, false)).toBe(12);
-    // No direction set, and a failed read, are both UNKNOWN — never 0.
-    expect(demandCountFor(null, top, false)).toBeNull();
-    expect(demandCountFor("carpenter", top, true)).toBeNull();
+    // `count_public_vacancies_by_profession_v1` is a grouped TOP-N. Absence
+    // means a measured ZERO when the list came back shorter than the limit
+    // asked for, and NOT MEASURED when it came back full.
+    const rows = [
+      { profession_slug: "carpenter", active_vacancies: 12 },
+      { profession_slug: "welder", active_vacancies: 3 },
+    ];
+
+    // EXHAUSTIVE: 2 rows for a limit of 100 — every profession with an active
+    // vacancy is present, so an absent one really has none. This is
+    // production's `builder` case: 39 rows at the limit of 100 the reader
+    // actually passes, and `public_vacancies` holds 0 active builder rows.
+    const whole = publicDemandRead(rows, 100);
+    expect(whole.exhaustive).toBe(true);
+    expect(demandCountFor("builder", whole)).toBe(0);
+    expect(demandCountFor("carpenter", whole)).toBe(12);
+
+    // TRUNCATED: the list filled the limit, so it may be cut off and an
+    // absent profession is genuinely unmeasured.
+    const truncated = publicDemandRead(rows, 2);
+    expect(truncated.exhaustive).toBe(false);
+    expect(demandCountFor("builder", truncated)).toBeNull();
+    expect(demandCountFor("carpenter", truncated)).toBe(12);
+
+    // No direction set, and a failed read, are UNKNOWN — never 0.
+    expect(demandCountFor(null, whole)).toBeNull();
+    expect(demandCountFor("carpenter", null)).toBeNull();
   });
 
   it("writes a real zero when the count actually measured zero", () => {
