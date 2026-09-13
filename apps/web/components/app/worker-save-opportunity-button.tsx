@@ -54,7 +54,7 @@ export function WorkerSaveOpportunityButton({
         title={saved ? labels.unsave : labels.save}
         onClick={onToggle}
         disabled={pending}
-        className={`inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+        className={`inline-flex min-h-11 items-center gap-1.5 rounded-md border px-3 text-support font-medium transition-colors disabled:opacity-50 ${
           saved
             ? "border-state-success/40 bg-state-success/10 text-state-success hover:border-state-success"
             : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"

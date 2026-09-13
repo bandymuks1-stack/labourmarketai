@@ -39,7 +39,7 @@ export function OpportunityDetailsDisclosure({
         aria-expanded={open}
         aria-controls={regionId}
         onClick={onToggle}
-        className="inline-flex w-fit min-h-[2.25rem] items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-primary transition-colors hover:border-brand-blue"
+        className="inline-flex w-fit min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 text-support font-medium text-text-primary transition-colors hover:border-brand-blue"
       >
         <span aria-hidden className="font-mono text-meta text-text-muted">
           {open ? "−" : "+"}

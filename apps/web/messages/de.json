@@ -9227,6 +9227,53 @@
       "pay_unknown": "Vergütung konnte nicht verglichen werden",
       "language_unknown": "deine Sprachen sind nicht angegeben",
       "language_requirement_unknown": "die Sprachanforderung der Anzeige ist unbekannt"
+    },
+    "world": {
+      "title": "Arbeitsmöglichkeiten",
+      "assessedAgainst": "Bewertet anhand: {facts}",
+      "fact": {
+        "profession": "Beruf — {value}",
+        "professionEvidenced": "Beruf aus erfasster Arbeit — {value}",
+        "professionMissing": "Beruf nicht angegeben",
+        "skills": "Fähigkeiten — {count}",
+        "skillsMissing": "keine Fähigkeiten erfasst",
+        "place": "Ort — {value}",
+        "placeMissing": "Ort nicht angegeben",
+        "pay": "Vergütungserwartung — ab {amount} EUR",
+        "payMissing": "Vergütungserwartung nicht angegeben",
+        "languages": "Sprachen — {list}",
+        "languagesMissing": "Sprachen nicht angegeben"
+      },
+      "countsPlatform": "Plattformanfragen: {shown} von {retrieved} angezeigt",
+      "countsPlatformUnavailable": "Plattformanfragen: noch nicht freigeschaltet",
+      "countsExternal": "öffentliche Anzeigen: {shown} von {retrieved} angezeigt",
+      "countsExternalUnreadable": "öffentliche Anzeigen: konnten nicht gelesen werden",
+      "countsFiltered": "{count} durch deine Filter zurückgestellt",
+      "derivedNote": "Die Gruppen werden aus deinen angegebenen Fakten und den Fakten jeder Anzeige abgeleitet — eine Erklärung in Worten, keine Zahl.",
+      "chip": {
+        "strong": "Passt gut",
+        "possible": "Passt möglicherweise",
+        "missing_requirement": "Anforderung fehlt",
+        "conflict": "Konflikt",
+        "not_assessed": "Noch nicht bewertet"
+      },
+      "strongEmpty": "Unter den angezeigten Zeilen passt keine gut.",
+      "strongEmptyChange": "Was das ändern würde: {items}.",
+      "change": {
+        "profession_missing": "gib deinen Beruf an",
+        "no_subject_skills": "bestätige die Fähigkeiten, die deine erfasste Arbeit zeigt",
+        "location_unknown": "gib an, wo du bist",
+        "pay_unknown": "gib deine Vergütungserwartung an",
+        "language_unknown": "gib deine Sprachen an",
+        "availability_unknown": "gib deine Verfügbarkeit an"
+      },
+      "why": "Warum:",
+      "whyNoGaps": "keine Lücke gegenüber den angegebenen Fakten gefunden",
+      "whyUnknown": "der Grund konnte nicht gelesen werden",
+      "payNotStated": "Vergütung von der Quelle nicht angegeben",
+      "payUnitNotStated": "Einheit von der Quelle nicht angegeben",
+      "sourcePlatform": "Plattformanfrage",
+      "externalCouldNotRead": "Die Quelle der öffentlichen Anzeigen konnte diesmal nicht gelesen werden — diese Zeilen sind unbekannt, nicht abwesend."
     }
   },
   "workerIntake": {
@@ -13048,8 +13095,6 @@
       "pipelineFailedNote": "Die Fähigkeits-Erkennung ist diesmal fehlgeschlagen — der Eintrag ist gespeichert; du kannst die Erkennung im Journal wiederholen."
     },
     "findWork": {
-      "intro": "Ich habe {count} passende Optionen gefunden. Beste Treffer:",
-      "introOne": "Ich habe 1 passende Option gefunden:",
       "emptyState": "Momentan habe ich keine aktiven Angebote gefunden, die zu deinen Kriterien passen. Es gibt noch keine Benachrichtigungen, deshalb verspreche ich keine — frag später noch einmal oder ergänze dein Profil, damit mehr Bedarfe passen.",
       "blockedNoWorker": "Um Arbeit zu suchen, aktiviere die Arbeitnehmerrolle in den Kontoeinstellungen.",
       "blockedNoAccess": "Die Angebotsliste ist in dieser Umgebung noch nicht aktiviert. Sobald sie es ist, zeige ich echte Bedarfe.",
@@ -13059,11 +13104,18 @@
       "fitInsufficient": "Nicht genug Daten",
       "locationReason": "Ort: {location}",
       "roleReason": "Bedarf: {role}",
-      "introExternalAssessed": "Im Panel {count, plural, one {ist # öffentliche Stellenanzeige, die ich als passend bewertet habe} other {sind # öffentliche Stellenanzeigen, die ich als passend bewertet habe}} — die Bewerbung erfolgt über die Originalanzeige.",
-      "introExternalDiscovered": "Außerdem habe ich {count, plural, one {# öffentliche Anzeige gefunden, deren Passung ich noch nicht bewerten kann oder bei der dir etwas fehlt} other {# öffentliche Anzeigen gefunden, deren Passung ich noch nicht bewerten kann oder bei denen dir etwas fehlt}} — im Panel steht bei jeder, warum. Das sind gefundene Anzeigen, keine Treffer.",
       "fitNotAssessed": "Noch nicht bewertet",
       "fitMissingRequirement": "Anforderung fehlt",
-      "fitConflict": "Konflikt"
+      "fitConflict": "Konflikt",
+      "readback": "Ich habe {total} gefunden ({bands}). Die besten stehen im Panel; jede Zeile mit Grund auf der Seite der Möglichkeiten.",
+      "readbackDiscoveryOnly": "Ich habe {total} gefunden, noch keine als passend bewertet ({bands}). Warum jede — auf der Seite der Möglichkeiten.",
+      "band": {
+        "strong": "passt gut: {count}",
+        "possible": "passt möglicherweise: {count}",
+        "missing_requirement": "Anforderung fehlt: {count}",
+        "conflict": "Konflikt: {count}",
+        "not_assessed": "noch nicht bewertet: {count}"
+      }
     },
     "summary": {
       "introProfile": "So sieht dein Profil aktuell aus: {done} von {total} Grundangaben sind gespeichert.",
@@ -13386,7 +13438,9 @@
       "engagementsEndedAt": "Die Arbeitsbeziehung ist am {date} beendet.",
       "engagementsEndedStillVisible": "Hinweis: Dieses Unternehmen kann Ihr Profil weiterhin sehen, solange Sie seinem Projekt zugewiesen sind. Dieser Zugriff endet mit dem Ende der Zuweisung.",
       "engagementsAlreadyEnded": "Diese Arbeitsbeziehung war bereits beendet. Es wurde nichts geändert.",
-      "engagementsAlreadyEndedAt": "Diese Arbeitsbeziehung war bereits am {date} beendet. Es wurde nichts geändert."
+      "engagementsAlreadyEndedAt": "Diese Arbeitsbeziehung war bereits am {date} beendet. Es wurde nichts geändert.",
+      "opportunitiesCounts": "Gesamt {total}: {bands}.",
+      "opportunitiesDiscoveryOnly": "Noch keine als passend bewertet — warum, steht neben jeder Zeile auf der Seite der Möglichkeiten."
     }
   },
   "landing": {
