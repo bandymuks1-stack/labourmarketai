@@ -12,7 +12,7 @@ import { listJournalEntries } from "@/lib/journal/journal-list-core";
 import { WORK_PERIOD_KEYS } from "@/lib/journal/work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import {
-  listWorkspaceMemberships,
+  readWorkspaceMemberships,
   resolveActiveWorkspaceForCaller,
 } from "@/lib/company/active-organization";
 import { workspaceLabeller } from "@/lib/capabilities/workspace-labels";
@@ -1022,11 +1022,11 @@ const contextSwitchInput = z
  * mobile settings screen is the first — needs an answer it can fetch without
  * proposing a write.
  *
- * It opens NO new path. The list is `listWorkspaceMemberships`, the same
- * RLS-scoped reader behind the web workspace chip, `context.switch` and
+ * It opens NO new path. The list is `readWorkspaceMemberships`, the same
+ * RLS-scoped sources behind the web workspace chip, `context.switch` and
  * `switchActiveWorkspaceCore`; the labels are the canonical builder, through
- * the same `workspaceLabeller` the switch now uses. There is no second
- * membership source and no second set of names to drift.
+ * the same `workspaceLabeller` the switch uses. There is no second membership
+ * source and no second set of names to drift.
  *
  * It reports the ACTIVE workspace as the durable pointer records it, so a
  * client can show which one a write would land in — the thing a phone could
@@ -1131,7 +1131,23 @@ const contextSwitch: CapabilityDescriptor = {
     const parsed = contextSwitchInput.parse(input);
     // G4 bridge: the SAME membership list the web workspace chip renders,
     // and the SAME switch core the web server actions run.
-    const memberships = await listWorkspaceMemberships(caller);
+    //
+    // The COMPLETE-aware read, because this capability SHOWS the list: on an
+    // unresolvable value it answers `workspace_choice_required` with the
+    // options a person then picks from. A degraded list is doubly wrong here —
+    // a missing row can be the very reason the requested workspace failed to
+    // match, so the person would be told their own workspace is not theirs and
+    // handed a short list to choose from instead.
+    const membershipRead = await readWorkspaceMemberships(caller);
+    if (!membershipRead.complete) {
+      return {
+        ok: false,
+        code: "unavailable",
+        message:
+          "Your workspaces could not be read in full, so nothing was switched and the options would be incomplete.",
+      };
+    }
+    const memberships = membershipRead.workspaces;
 
     const labelOf = await workspaceLabeller(caller.locale, memberships);
 

@@ -12,8 +12,8 @@ remains accurate; this one continues from `main` after it.
 | | |
 |---|---|
 | Branch | `claude/labourmarket-production-sfwlcd` |
-| `main` at checkpoint time | `e62b931` (#1733) ← `2896371` (#1732) ← `3fb517f` (#1731) ← `04485e7` (#1730) |
-| Merged this session | **#1731**, **#1732**, **#1733** — all squash-merged, all GREEN class |
+| `main` at checkpoint time | `0ce9e5b` (#1735) ← `36886eb` (#1734, not mine — Claude Code plugin config) ← `e62b931` (#1733) ← `2896371` (#1732) ← `3fb517f` (#1731) |
+| Merged this session | **#1731**, **#1732**, **#1733**, **#1735** — all squash-merged, all GREEN class |
 | In flight | nothing. Verify with `git log origin/main -1` rather than trusting a SHA written here |
 | Production DB | `gorgitwvdzxbnaxhrsrw` — read-only SQL VERIFIED working via Supabase MCP |
 | Production HTTP | **NOT REACHABLE from this container.** The egress proxy denies `labourmarket.ai:443` (`connect_rejected`, organization policy). No web production verification was possible and none is claimed |
@@ -56,10 +56,35 @@ carry supersession banners.
 **#1733 — six review findings, all correct, none caught by me or the suite.**
 Listed under LESSONS because that is the part worth carrying forward.
 
+**#1735 — the phone can show which organization it is acting for.** The
+doctrine check found a SECOND workspace labeller before any of the slice got
+built: `context.switch` had one inline (a shared `notSet` string for every
+unnamed organization, a relationship appended on collision) while
+`workspaceDisplayLabels` is the canonical builder the web chip and
+`/dashboard/network` use. An MCP or mobile caller saw different names than a
+web user for the same workspaces. Fixed first —
+`lib/capabilities/workspace-labels.ts` is now the one way the capability layer
+gets a label, and it delegates.
+
+Then `context.list`, a READ over the same `resolveActiveWorkspaceForCaller`
+core (`context.switch` could be MADE to list workspaces by handing it an
+unresolvable value, but its `readOnlyHint` is false — showing someone their
+workspaces should not require proposing a write). Then the mobile Settings
+"Acting for" section over both.
+
+THE WORKSPACE AND PARTICIPATION-MODE AXES WERE DELIBERATELY NOT MERGED.
+`organizationType` says what the ORGANIZATION is, `relationship` says how the
+person stands in it; neither is `ActorContext.mode`. A company-type
+organization does not make its employee an employer, so deriving the mode from
+the workspace list would reclassify a real person's role from data that does
+not carry it (SEP-5). `ContextHoldings` therefore stays honestly `unknown` and
+a guard refuses the shortcut.
+
 ## LESSONS — read these before trusting anything below
 
-Six Codex findings landed this session. **All six were correct.** Twice I
-reasoned from the wrong artifact and shipped a false claim.
+NINE Codex findings landed this session. **All nine were correct**, and not
+one was caught by me or by 22,000 tests. THREE of them were false claims I
+wrote about code I had not read carefully enough.
 
 1. **A test that builds its own input proves nothing about the reader.** The
    institution export shipped with 12 tests defending SEP-7 while SEP-7 was
@@ -85,6 +110,19 @@ reasoned from the wrong artifact and shipped a false claim.
    `lib/learning/learning-compass.ts` had the exhaustiveness rule correct and
    inline; `lib/education/programs.ts` had a second, wrong copy. That
    divergence was the root cause, not either expression.
+5. **#1735's own headline was false, and it is the same mistake a third
+   time.** It claimed the phone could show "where the work it records will
+   land". The workspace pointer does NOT route journal entries:
+   `resolveDraftEngagementContext` reads `engagement_contexts` by its own rule
+   hierarchy and asks when ambiguous — it never consults
+   `profiles.active_organization_id`. A person can act for organization A
+   while an entry drafts against their engagement at B, and that is correct.
+6. **Two reads were hiding their own failures.** The three membership sources
+   each degrade an error to omitted rows, so a transient blip produced a
+   partial list handed on as a complete answer. And `pointerAvailable` was
+   hardcoded `true` against its own module's contract — so in exactly the
+   environment where switching cannot work, the screen enabled every switch
+   control and called the shown workspace a stored choice.
 
 Three guards now address the CLASS, not the instances:
 `mobile-release-config` (the README may not claim journal writes are missing
@@ -111,34 +149,51 @@ the CODE, not the document that describes it.**
   downloaded by a human and has not been run against production.
 - **Production web was never reached** (egress policy, above). Do not read any
   green gate in this session as a production verification.
-- Mobile: **context holdings NOT WIRED**. `context-provider.tsx` performs no
-  holdings read, so `holdings.status` is `unknown`, `active` is always `null`,
-  and `selectContext` refuses every switch. Only `app/(shell)/settings.tsx`
-  consumes it, so reads and writes still work — but a person cannot SEE or
-  CHANGE which workspace they are acting in from the phone, while
-  `journal.confirm` lands wherever the server's durable pointer says.
+- Mobile: **which organization a person is acting for is now visible and
+  switchable** (#1735). What is still NOT wired is the PARTICIPATION-MODE
+  half: `context-provider.tsx` performs no holdings read, so
+  `holdings.status` stays `unknown` and the "you are working as" section says
+  so. That is deliberate, not an oversight — see SEP-5 above.
+- **The workspace pointer does not route journal entries.** Recorded here
+  because this checkpoint's previous version implied otherwise: a journal
+  draft resolves its engagement context from `engagement_contexts` and asks
+  when ambiguous. Acting for organization A while an entry drafts against an
+  engagement at B is correct behaviour, not a bug.
 - Mobile: **Android runtime NOT PROVEN** (no emulator image, no device).
   `ios.yml` proves the auth-failure journey on a CI simulator only.
 
 ## NEXT ACTION (exact)
 
 1. Reconcile first: `git fetch origin main && git log origin/main -1`. Do not
-   trust `e62b931` above.
-2. **Slice: wire mobile context holdings.** Assessed from the code, not from a
-   document:
-   - `context.switch` (`lib/capabilities/registry.ts`) already calls
-     `listWorkspaceMemberships(caller)` — the canonical membership reader — and
-     already returns the labeled options when a value is ambiguous.
-   - So the work is an ADDITIVE READ capability over that SAME reader (do not
-     abuse the write capability as a read: its `readOnlyHint` is false), then
-     wire `context-provider.tsx` to it so `holdings` becomes `known` with a
-     real loading state, and make the Settings switcher call `context.switch`
-     so the device and the durable server pointer cannot diverge.
-   - **Run the `doctrine-guard` skill BEFORE adding the capability** — CLAUDE.md
-     requires it for any new capability, and it is exactly the check that would
-     have caught this session's duplicate-path near-miss.
-   - No RLS change, no migration, no new data model. GREEN.
-3. Then: Android runtime proof, if an emulator image can be installed.
+   trust `0ce9e5b` above.
+2. **`ios` was still running on `main` when this was written.** `mobile` is
+   green on the final head; `ios` takes ~30 minutes and is NOT a required
+   check, so #1735 merged without it. If it went red and the cause is in
+   #1735's diff, that is still mine to fix in a follow-up PR.
+3. Then pick between the two remaining NON-GATED candidates. Both are real;
+   neither is blocked on anyone.
+
+   **(a) Mobile participation-mode holdings.** `ContextHoldings` is still
+   `unknown`, so the Settings "you are working as" section honestly says it
+   cannot list contexts. It was deliberately NOT derived from the workspace
+   list (SEP-5 — see #1735 above), so this needs a REAL holdings read that
+   does not exist yet. Start from `PARTICIPATION_MODES` in
+   `packages/client-core/src/actor-context.ts` and `LIVE_ROLE_IDS` in
+   `apps/web/lib/config/roles.ts`, and find what actually stores a person's
+   modes before designing anything.
+
+   **(b) Android runtime proof.** `ANDROID_NATIVE_BUILD_PROVEN` is recorded;
+   runtime is not. **MEASURED 2026-09-13: THIS CONTAINER CANNOT DO IT.** There
+   is no `/dev/kvm` — an emulator falls back to full software translation,
+   which is impractical for a boot-and-drive flow — and no Android SDK is
+   installed (a JDK is). Do not spend a window rediscovering that.
+
+   The plausible path is a CI job mirroring `.github/workflows/ios.yml`, which
+   already proves `IOS_RUNTIME_JOURNEY_PROVEN` on GitHub's macOS runners with
+   a Maestro flow (`apps/mobile/.maestro/auth-failure-journey.yaml`). The
+   Android equivalent would run on a Linux runner — **VERIFY that such a
+   runner actually provides KVM before building on it; do not assert it from
+   memory.** Advisory, not a required check, like `ios.yml` and `mobile.yml`.
 
 ## OWNER GATES — none may be resolved by an agent
 
@@ -159,6 +214,20 @@ the CODE, not the document that describes it.**
 - The institution export opens no second reader and writes no person's id or
   name; it borrows the outcomes aggregate's authorisation and refuses 503
   rather than exporting past an unreachable gate.
+- `lib/capabilities/workspace-labels.ts` is the ONE way the capability layer
+  labels a workspace, and it delegates to `workspaceDisplayLabels`. A third
+  copy is the defect.
+- `readWorkspaceMemberships` carries `complete`; anything that SHOWS the list
+  to a person must refuse rather than present a short list as an answer. BOTH
+  context capabilities show one — `context.list` renders it, and
+  `context.switch` renders it too on its `workspace_choice_required` answer,
+  where a degraded list is doubly wrong: a missing row can be the very reason
+  the requested workspace failed to match, so the person would be told their
+  own workspace is not theirs and handed a short list to pick from. (That
+  second case was missed when this entry was first written, and the entry said
+  the opposite — found in review on #1736.) `listWorkspaceMemberships` remains
+  only for the membership CHECK inside `switchActiveWorkspaceCore`, where
+  degrading is fail-closed: a missing org is refused, never wrongly admitted.
 - `lib/market/public-demand` is the ONE rule for absent demand: a zero only
   when the returned list was SHORTER than the limit it asked for. Both
   `programs.ts` and `learning-compass.ts` read it. A third copy is the defect.
