@@ -102,6 +102,15 @@ export type JournalConfirmData = {
   };
 };
 
+/**
+ * `journal.work_intelligence.get` — the SAME figures the web "work in
+ * numbers" section, ŠIANDIEN and the Living CV show, from the one work-time
+ * rule on the server. The shape lives in `@labourmarket/client-core`
+ * (`work-figures.ts`) because the ordering rules over it are proven there;
+ * this alias keeps every capability shape discoverable from one file.
+ */
+export type { WorkIntelligenceData } from "@labourmarket/client-core";
+
 export type LivingCvSkillsData = {
   readonly workerId: string;
   readonly skills: readonly {

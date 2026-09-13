@@ -15,7 +15,10 @@ This app reads product data through **one door**: the canonical capability
 boundary at **`/api/mcp`** (JSON-RPC 2.0 `tools/call`, bearer-authenticated by
 the auth-core seam merged 2026-08-29 as #1331). `DOMAIN_TRANSPORT_STATUS` is
 **open**, and the Today / Work journal / Profile tabs perform real reads —
-`profile.get`, `journal.list`, `living_cv.skills.get` — as the signed-in
+`profile.get`, `journal.list`, `living_cv.skills.get`,
+`journal.work_intelligence.get` (today / 7-day hours and entries, the
+dominant skill, and hours · share · entries per skill — the SAME figures the
+web shows, ordered the same way) — as the signed-in
 person, under their own RLS.
 
 What is NOT wired yet: writes (journal draft→confirm), context holdings, and
