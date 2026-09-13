@@ -12,8 +12,8 @@ remains accurate; this one continues from `main` after it.
 | | |
 |---|---|
 | Branch | `claude/labourmarket-production-sfwlcd` |
-| `main` at checkpoint time | `0ce9e5b` (#1735) ← `36886eb` (#1734, not mine — Claude Code plugin config) ← `e62b931` (#1733) ← `2896371` (#1732) ← `3fb517f` (#1731) |
-| Merged this session | **#1731**, **#1732**, **#1733**, **#1735** — all squash-merged, all GREEN class |
+| `main` at checkpoint time | `7971291` (#1737) ← `1559386` (#1736) ← `0ce9e5b` (#1735) ← `36886eb` (#1734, not mine — Claude Code plugin config) ← `e62b931` (#1733) ← `2896371` (#1732) ← `3fb517f` (#1731) |
+| Merged this session | **#1731**, **#1732**, **#1733**, **#1735**, **#1736**, **#1737** — all squash-merged, all GREEN class |
 | In flight | nothing. Verify with `git log origin/main -1` rather than trusting a SHA written here |
 | Production DB | `gorgitwvdzxbnaxhrsrw` — read-only SQL VERIFIED working via Supabase MCP |
 | Production HTTP | **NOT REACHABLE from this container.** The egress proxy denies `labourmarket.ai:443` (`connect_rejected`, organization policy). No web production verification was possible and none is claimed |
@@ -80,11 +80,39 @@ the workspace list would reclassify a real person's role from data that does
 not carry it (SEP-5). `ContextHoldings` therefore stays honestly `unknown` and
 a guard refuses the shortcut.
 
+**#1737 — the phone can say which roles the account holds.** `profile.get`
+returned `activeRole` (which ONE mode a person is in now) and not the set they
+HOLD. `readHeldProfileRoles` is the `profile_roles` read as a core;
+`holdingsFromHeldRoles` (client-core, 5 tests) filters through
+`PARTICIPATION_MODES` and DROPS what it does not recognise — `admin` is a real
+role value and not a mode. Four honest states: still asking, could not ask, an
+answer of NOTHING, a real list.
+
+**And it shipped a control that lied, caught in review.** The rows were
+pressable: pressing one marked a mode active and remembered it, while
+`useActorContext` was read by the Settings screen alone, no other surface
+changed behaviour, and nothing was written to `profiles.active_role`. The rows
+now REPORT, with active taken from the server's own `activeRole`. Removing the
+control also removed a real leak — the remembered choice lived under a GLOBAL
+preference key and sign-out clears only the session store, so on a shared site
+phone one person's context would have been restored for the next.
+
+**`ProfileProvider` — one shared `profile.get` CALLER, which is not one request
+per session.** `useCapability` holds no cache and Today and Profile each
+already called it, so the holdings caller made three round trips per launch
+while its comment claimed it added none. What the provider removes is the
+MULTIPLICATION: three screens issuing their own request became one that all
+three read. It still refetches on a token renewal, a language change or a
+manual reload, and the guard counts static call sites — so it proves one
+caller, not one request. Said precisely because the first version of this
+entry, and the provider's own heading, claimed the stronger thing.
+
 ## LESSONS — read these before trusting anything below
 
-NINE Codex findings landed this session. **All nine were correct**, and not
-one was caught by me or by 22,000 tests. THREE of them were false claims I
-wrote about code I had not read carefully enough.
+THIRTEEN Codex findings landed this session. **All thirteen were correct**, and
+not one was caught by me or by 22,700 tests. FOUR were false claims I wrote
+about code I had not read carefully enough; a fifth I caught and corrected
+myself before committing.
 
 1. **A test that builds its own input proves nothing about the reader.** The
    institution export shipped with 12 tests defending SEP-7 while SEP-7 was
@@ -117,7 +145,17 @@ wrote about code I had not read carefully enough.
    hierarchy and asks when ambiguous — it never consults
    `profiles.active_organization_id`. A person can act for organization A
    while an entry drafts against their engagement at B, and that is correct.
-6. **Two reads were hiding their own failures.** The three membership sources
+6. **A control that changed nothing.** #1737 shipped a pressable list that
+   marked a participation mode active and remembered it. Nothing consumed the
+   selection — not one surface outside Settings, and no server write. Telling
+   someone they are acting as a company while every request stays identical is
+   worse than the feature being absent. I built an interactive affordance
+   without tracing whether anything read it.
+7. **Three guards in this repo have fired on their own documentation.** A
+   `not.toContain` on a word the file legitimately explains in prose. Assert
+   the CALL SHAPE, not the bare string — and keep the history in the note,
+   because that is the part a future reader needs.
+8. **Two reads were hiding their own failures.** The three membership sources
    each degrade an error to omitted rows, so a transient blip produced a
    partial list handed on as a complete answer. And `pointerAvailable` was
    hardcoded `true` against its own module's contract — so in exactly the
@@ -165,35 +203,30 @@ the CODE, not the document that describes it.**
 ## NEXT ACTION (exact)
 
 1. Reconcile first: `git fetch origin main && git log origin/main -1`. Do not
-   trust `0ce9e5b` above.
-2. **`ios` was still running on `main` when this was written.** `mobile` is
-   green on the final head; `ios` takes ~30 minutes and is NOT a required
-   check, so #1735 merged without it. If it went red and the cause is in
-   #1735's diff, that is still mine to fix in a follow-up PR.
-3. Then pick between the two remaining NON-GATED candidates. Both are real;
-   neither is blocked on anyone.
+   trust `7971291` above.
+2. **ONE non-gated item remains. Everything else is owner-gated.** If that item
+   is not startable, say so plainly rather than inventing a slice — the honest
+   answer at this point is that the product is waiting on the owner.
 
-   **(a) Mobile participation-mode holdings.** `ContextHoldings` is still
-   `unknown`, so the Settings "you are working as" section honestly says it
-   cannot list contexts. It was deliberately NOT derived from the workspace
-   list (SEP-5 — see #1735 above), so this needs a REAL holdings read that
-   does not exist yet. Start from `PARTICIPATION_MODES` in
-   `packages/client-core/src/actor-context.ts` and `LIVE_ROLE_IDS` in
-   `apps/web/lib/config/roles.ts`, and find what actually stores a person's
-   modes before designing anything.
-
-   **(b) Android runtime proof.** `ANDROID_NATIVE_BUILD_PROVEN` is recorded;
-   runtime is not. **MEASURED 2026-09-13: THIS CONTAINER CANNOT DO IT.** There
-   is no `/dev/kvm` — an emulator falls back to full software translation,
-   which is impractical for a boot-and-drive flow — and no Android SDK is
-   installed (a JDK is). Do not spend a window rediscovering that.
+   **Android runtime proof.** `ANDROID_NATIVE_BUILD_PROVEN` is recorded;
+   runtime is not. **MEASURED 2026-09-13: THIS CONTAINER CANNOT DO IT.** No
+   `/dev/kvm` — an emulator falls back to full software translation, which is
+   impractical for a boot-and-drive flow — and no Android SDK installed (a JDK
+   is). Do not spend a window rediscovering that.
 
    The plausible path is a CI job mirroring `.github/workflows/ios.yml`, which
-   already proves `IOS_RUNTIME_JOURNEY_PROVEN` on GitHub's macOS runners with
-   a Maestro flow (`apps/mobile/.maestro/auth-failure-journey.yaml`). The
-   Android equivalent would run on a Linux runner — **VERIFY that such a
-   runner actually provides KVM before building on it; do not assert it from
-   memory.** Advisory, not a required check, like `ios.yml` and `mobile.yml`.
+   already proves `IOS_RUNTIME_JOURNEY_PROVEN` on GitHub's macOS runners with a
+   Maestro flow (`apps/mobile/.maestro/auth-failure-journey.yaml`). The Android
+   equivalent would run on a Linux runner — **VERIFY that such a runner
+   actually provides KVM before building on it; do not assert it from memory.**
+   Advisory, not a required check, like `ios.yml` and `mobile.yml`.
+
+3. **Restoring the mobile participation switcher** is a real future slice, and
+   it is NOT just UI: it needs the active role WRITTEN server-side and the
+   other surfaces (Today, Journal, Profile) actually READING the selection.
+   The selection rules in `client-core/actor-context` (`selectContext`, the
+   remembered choice) are tested and waiting. Until both halves exist, the
+   rows report and do not switch — that is deliberate, not unfinished.
 
 ## OWNER GATES — none may be resolved by an agent
 
