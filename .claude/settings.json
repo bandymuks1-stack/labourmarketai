@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "IMPECCABLE_HOOK_DISABLED": "1",
+    "IMPECCABLE_NO_UPDATE_CHECK": "1"
+  },
+  "enabledPlugins": {
+    "impeccable@impeccable": true,
+    "humanizer@humanizer": true,
+    "claude-code-setup@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable",
+        "ref": "cb56ed6c19a07329a9fa0cd4e657bee040156593"
+      }
+    },
+    "humanizer": {
+      "source": {
+        "source": "github",
+        "repo": "blader/humanizer",
+        "ref": "9862685f575c65a8247f90369951df1b3416e3d6"
+      }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official",
+        "ref": "f0dce59fec064db10450cb6ed6e33c1080d61537",
+        "sparsePaths": [
+          ".claude-plugin",
+          "plugins/claude-code-setup"
+        ]
+      }
+    }
+  }
+}
