@@ -353,7 +353,8 @@
     "openInCalendar": "Open in calendar",
     "recordOnDay": "Record work",
     "dayEmpty": "No records on this day.",
-    "moreDays": "Showing the most recent days. {count, plural, one {# more day} other {# more days}} — pick it on the calendar."
+    "moreDays": "Showing the most recent days. {count, plural, one {# more day} other {# more days}} — pick it on the calendar.",
+    "periodEmpty": "No records in this period."
   },
   "spreadsheet": {
     "title": "Spreadsheet mode — several entries at once",

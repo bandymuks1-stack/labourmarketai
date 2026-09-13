@@ -39,6 +39,19 @@ describe("MANO DARBAS — the records live on a calendar, not in a list of dates
     expect(page).toMatch(/data-testid="journal-day-empty"/);
   });
 
+  it("the list answers the same window the grid draws — day, period, or recent", () => {
+    // browsing ‹ › must not leave the grid on August and the list on September
+    expect(page).toMatch(/const diaryScope: "day" \| "period" \| "recent"/);
+    expect(page).toMatch(/g\.isoKey >= calendarGrid\.rangeStart && g\.isoKey <= calendarGrid\.rangeEnd/);
+    expect(page).toMatch(/t\("dayNav\.periodEmpty"\)/);
+    const cal = read("components/app/journal/journal-calendar.tsx");
+    // and period navigation drops a selection the new period does not contain
+    expect(cal).toMatch(/month: grid\.prevAnchor, date: null/);
+    expect(cal).toMatch(/month: grid\.nextAnchor, date: null/);
+    // while clearing the day keeps the period the person is looking at
+    expect(cal).toMatch(/date: null, month: grid\.anchor/);
+  });
+
   it("a selected day carries its own actions: record, and the one canonical calendar", () => {
     expect(page).toMatch(/data-testid="journal-day-actions"/);
     expect(page).toMatch(/data-testid="journal-day-record"/);

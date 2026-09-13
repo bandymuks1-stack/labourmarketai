@@ -811,35 +811,6 @@ export default async function JournalPage({
       });
     }
   }
-  /**
-   * DAY FILTER — the calendar's selection (owner direction 2026-09-13).
-   *
-   * A selected `?date=` narrows the diary to THAT day, and a day with no
-   * records stays selected and shows its own empty line. It used to fall
-   * back to the whole diary, which read as "your tap did nothing" and put
-   * the endless list back on the screen; the calendar already tells the
-   * person which days carry records, so an empty day is an answer, not a
-   * miss.
-   */
-  const filteredDayGroups = selectedDate
-    ? entryDayGroups.filter((g) => g.isoKey === selectedDate)
-    : entryDayGroups;
-  const dayFilterActive = selectedDate !== null;
-  /**
-   * BOUNDED DIARY (owner direction 2026-09-13: the phone must not open on a
-   * bedsheet). With no day selected the diary shows the most recent
-   * `DIARY_DAY_LIMIT` days and says how many days it is NOT showing — the
-   * calendar above is how the rest is reached. Nothing is deleted and
-   * nothing is unreachable: every day is one tap away on the grid, and
-   * "visos dienos" past the bound stays honest about being a bound.
-   */
-  const boundedDayGroups = dayFilterActive
-    ? filteredDayGroups
-    : entryDayGroups.slice(0, DIARY_DAY_LIMIT);
-  const hiddenDayCount = dayFilterActive
-    ? 0
-    : Math.max(0, entryDayGroups.length - boundedDayGroups.length);
-  const visibleDayGroups = boundedDayGroups;
   // The calendar reads the SAME day groups the diary renders — one grouping,
   // one set of figures, so a cell can never disagree with the day card.
   const calendarGrid = buildJournalCalendar({
@@ -858,6 +829,45 @@ export default async function JournalPage({
       totalMinutes: g.totalMinutes,
     })),
   });
+  /**
+   * WHAT THE DIARY IS SHOWING (owner direction 2026-09-13). Three scopes,
+   * and the calendar above always names the one in force:
+   *
+   *   · DAY    — `?date=` is set: exactly that day. A day with no records
+   *              stays selected and shows its own empty line; it used to
+   *              fall back to the whole diary, which read as "your tap did
+   *              nothing" and put the endless list back on the screen.
+   *   · PERIOD — `?month=` is set (the person browsed with ‹ ›): the days
+   *              INSIDE the period the calendar is drawing. Without this the
+   *              grid showed August while the list still showed September's
+   *              last days — two answers to "which days am I looking at".
+   *   · RECENT — neither: the most recent days overall, which is the right
+   *              first view for someone who just opened the journal.
+   *
+   * Every scope is BOUNDED to `DIARY_DAY_LIMIT` with an honest count of the
+   * days it is not stacking (the same rule `lib/planning/calendar-result.ts`
+   * uses). Nothing is deleted and nothing is unreachable: every day is one
+   * tap away on the grid.
+   */
+  const monthRequested = isIsoDay(sp.month);
+  const dayFilterActive = selectedDate !== null;
+  const diaryScope: "day" | "period" | "recent" = dayFilterActive
+    ? "day"
+    : monthRequested
+      ? "period"
+      : "recent";
+  const scopedDayGroups =
+    diaryScope === "day"
+      ? entryDayGroups.filter((g) => g.isoKey === selectedDate)
+      : diaryScope === "period"
+        ? entryDayGroups.filter(
+            (g) =>
+              g.isoKey >= calendarGrid.rangeStart && g.isoKey <= calendarGrid.rangeEnd,
+          )
+        : entryDayGroups;
+  const visibleDayGroups =
+    diaryScope === "day" ? scopedDayGroups : scopedDayGroups.slice(0, DIARY_DAY_LIMIT);
+  const hiddenDayCount = Math.max(0, scopedDayGroups.length - visibleDayGroups.length);
   // Query params the calendar must keep when it changes the day — a skill
   // drill-down or a chosen period is not undone by tapping a date.
   const calendarCarry: Record<string, string> = {};
@@ -1378,17 +1388,19 @@ export default async function JournalPage({
         </p>
           </div>
         </details>
-        {dayFilterActive && visibleDayGroups.length === 0 ? (
-          /* A day the person tapped that holds no records. Real answer over a
-             known day (SEP-7: a recorded zero, not an unknown) — with the one
-             action that changes it, and the way back to every day. */
+        {diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
+          /* A day — or a period — the person navigated to that holds no
+             records. A real answer over a known window (SEP-7: a recorded
+             zero, not an unknown), with the one action that changes it and
+             the way back to every day. */
           <div
             className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
             data-testid="journal-day-empty"
-            data-day={selectedDate}
+            data-day={selectedDate ?? calendarGrid.rangeStart}
+            data-scope={diaryScope}
           >
             <p className="text-sm leading-relaxed text-text-secondary">
-              {t("dayNav.dayEmpty")}
+              {diaryScope === "day" ? t("dayNav.dayEmpty") : t("dayNav.periodEmpty")}
             </p>
             <Link
               href={"/dashboard/journal#journal-composer" as "/dashboard"}

@@ -353,7 +353,8 @@
     "openInCalendar": "Openen in kalender",
     "recordOnDay": "Werk vastleggen",
     "dayEmpty": "Geen registraties op deze dag.",
-    "moreDays": "De meest recente dagen worden getoond. Nog {count, plural, one {# dag} other {# dagen}} — kies die in de kalender."
+    "moreDays": "De meest recente dagen worden getoond. Nog {count, plural, one {# dag} other {# dagen}} — kies die in de kalender.",
+    "periodEmpty": "Geen registraties in deze periode."
   },
   "spreadsheet": {
     "title": "Spreadsheetmodus — meerdere regels tegelijk",

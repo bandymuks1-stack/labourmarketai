@@ -44,7 +44,16 @@ Quick recording stays where it was, above the history.
   unknown (SEP-7); a future day is shown and not offered. A tapped day with
   no records now STAYS selected and says so, instead of silently falling
   back to the whole diary (which read as "your tap did nothing").
-- **Bounded diary.** With no day selected the list renders the most recent
+- **The list answers the same window the grid draws.** Three scopes, and the
+  calendar always names the one in force: DAY (`?date=`), PERIOD (`?month=`,
+  set by the ‹ › buttons — the days inside the period the grid is drawing),
+  and RECENT (neither — the most recent days overall, the right first view).
+  Found by re-reading the diff before the owner walked it: without the PERIOD
+  scope the grid showed August while the list still showed September's last
+  days, which is two answers to "which days am I looking at". Period
+  navigation also drops a day selection the new period does not contain,
+  while clearing the day keeps the period.
+- **Bounded diary.** Every scope renders at most
   `DIARY_DAY_LIMIT = 7` days and states how many days it is not stacking —
   the same bounded-output-with-an-honest-"+n" rule
   `lib/planning/calendar-result.ts` already uses. Nothing is deleted and

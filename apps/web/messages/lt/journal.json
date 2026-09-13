@@ -353,7 +353,8 @@
     "openInCalendar": "Atidaryti kalendoriuje",
     "recordOnDay": "Įrašyti darbą",
     "dayEmpty": "Šią dieną įrašų nėra.",
-    "moreDays": "Rodomos naujausios dienos. Dar {count, plural, one {# diena} few {# dienos} other {# dienų}} — pasirinkite kalendoriuje."
+    "moreDays": "Rodomos naujausios dienos. Dar {count, plural, one {# diena} few {# dienos} other {# dienų}} — pasirinkite kalendoriuje.",
+    "periodEmpty": "Šiuo laikotarpiu įrašų nėra."
   },
   "spreadsheet": {
     "title": "Lentelės režimas — keli įrašai iš karto",

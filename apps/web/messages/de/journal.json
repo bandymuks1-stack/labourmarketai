@@ -353,7 +353,8 @@
     "openInCalendar": "Im Kalender öffnen",
     "recordOnDay": "Arbeit erfassen",
     "dayEmpty": "An diesem Tag gibt es keine Einträge.",
-    "moreDays": "Die neuesten Tage werden gezeigt. Noch {count, plural, one {# Tag} other {# Tage}} — im Kalender auswählen."
+    "moreDays": "Die neuesten Tage werden gezeigt. Noch {count, plural, one {# Tag} other {# Tage}} — im Kalender auswählen.",
+    "periodEmpty": "In diesem Zeitraum gibt es keine Einträge."
   },
   "spreadsheet": {
     "title": "Tabellenmodus — mehrere Einträge auf einmal",

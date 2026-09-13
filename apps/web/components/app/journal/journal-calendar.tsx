@@ -98,7 +98,7 @@ export async function JournalCalendar({
       {/* Period header: back · the period · forward, then the scale switch. */}
       <div className="flex items-center justify-between gap-2">
         <Link
-          href={href({ month: grid.prevAnchor })}
+          href={href({ month: grid.prevAnchor, date: null })}
           data-testid="journal-calendar-prev"
           aria-label={t("prev")}
           className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
@@ -112,7 +112,7 @@ export async function JournalCalendar({
           {grid.scale === "week" ? weekLabel : periodLabel}
         </span>
         <Link
-          href={href({ month: grid.nextAnchor })}
+          href={href({ month: grid.nextAnchor, date: null })}
           data-testid="journal-calendar-next"
           aria-label={t("next")}
           className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
@@ -141,7 +141,7 @@ export async function JournalCalendar({
         </nav>
         {selected && (
           <Link
-            href={href({ date: null })}
+            href={href({ date: null, month: grid.anchor })}
             data-testid="journal-calendar-clear"
             className="rounded-full border border-ink-500 px-2.5 py-1 text-xs text-text-secondary transition-colors hover:border-brand-blue"
           >
