@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { MarketMap, type MarketMapViewport } from "./market-map";
-import type { MarketAnchor } from "./market-map-model";
+import type { MarketAnchor, MarketMapMode } from "./market-map-model";
 import { loadWorldViewAction } from "@/lib/market-map/world-actions";
 import {
   WORLD_LAYERS,
@@ -62,11 +62,21 @@ export function WorldDiscovery({
   initial,
   initialLayer = "demand",
   placeLink,
+  mapMode = "dashboard",
 }: {
   /** The first view, rendered on the server for the default viewport. */
   initial: WorldViewResult;
   initialLayer?: WorldLayer;
   placeLink?: WorldPlaceLink;
+  /**
+   * The canonical container height (`MODE_HEIGHT`). The market map page is
+   * the map's own screen and keeps `dashboard` (60vh). On PASAULIS the map
+   * is the BASE of a page whose next section is the banded list, so it uses
+   * `result` (32vh): on a 390 px phone the map and the first rows of the
+   * list share one screen, which is the point of putting them together.
+   * Not a new size — one of the four the model already defines.
+   */
+  mapMode?: MarketMapMode;
 }) {
   const t = useTranslations("marketMap.world");
   const locale = useLocale();
@@ -218,7 +228,7 @@ export function WorldDiscovery({
 
       <MarketMap
         view={view?.view ?? EMPTY_VIEW}
-        mode="dashboard"
+        mode={mapMode}
         layer={WORLD_LAYER_TO_MAP_LAYER[layer]}
         autoFly={false}
         onViewportChange={onViewportChange}

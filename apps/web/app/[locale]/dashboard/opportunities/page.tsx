@@ -656,6 +656,7 @@ export default async function OpportunitiesPage({
         </div>
         <WorldDiscovery
           initial={worldView}
+          mapMode="result"
           placeLink={{
             hrefTemplate: `/${locale}/dashboard/opportunities?country={country}#opportunities-results`,
             label: t("world.placeLink"),

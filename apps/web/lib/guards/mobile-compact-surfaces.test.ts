@@ -119,3 +119,38 @@ describe("GALIMYBĖS — a compact row first, the detail on selection", () => {
     expect(secondary).toBeLessThan(compare);
   });
 });
+
+describe("PASAULIS — the map is the base, and a place opens that place's list", () => {
+  const page = read("app/[locale]/dashboard/opportunities/page.tsx");
+
+  it("the map sits under the header, above the banded list", () => {
+    const header = page.indexOf("</header>");
+    const map = page.indexOf('data-testid="opportunities-map"');
+    const results = page.indexOf('id="opportunities-results"');
+    expect(header).toBeGreaterThan(-1);
+    expect(map).toBeGreaterThan(header);
+    expect(results).toBeGreaterThan(map);
+  });
+
+  it("it is the canonical world container and reader — never a second map", () => {
+    expect(page).toMatch(/from "@\/components\/app\/market-map\/world-discovery"/);
+    expect(page).toMatch(/loadWorldView\(\{/);
+    expect(page).not.toMatch(/from "leaflet"|mountLeafletMap/);
+  });
+
+  it("the map shares the screen with the list: the shorter canonical height", () => {
+    expect(page).toMatch(/mapMode="result"/);
+    // and anyone who came for the list is one tap past the map
+    expect(page).toMatch(/data-testid="opportunities-map-skip"/);
+    expect(page).toMatch(/href="#opportunities-results"/);
+  });
+
+  it("a place links into the page's OWN country filter, not a second board", () => {
+    expect(page).toMatch(
+      /hrefTemplate: `\/\$\{locale\}\/dashboard\/opportunities\?country=\{country\}/,
+    );
+    const world = read("components/app/market-map/world-discovery.tsx");
+    expect(world).toMatch(/data-testid="world-place-link"/);
+    expect(world).toMatch(/placeLink\.hrefTemplate\.replace\("\{country\}", c\.country\)/);
+  });
+});
