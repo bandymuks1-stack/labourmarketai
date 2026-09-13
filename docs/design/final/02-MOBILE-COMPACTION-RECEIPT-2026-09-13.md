@@ -157,3 +157,29 @@ supports it — `result.readiness.evidencedProfessionSlug` still feeds
 7. Tap a place (on the map or in its list) → **Rodyti šios šalies
    galimybes** → the same page, narrowed by country, with the active-filter
    chip visible.
+
+---
+
+# PROFESINIS PROFILIS — the page opens on the person (same day, third slice)
+
+Owner: "per daug kortelių/mygtukų/teksto".
+
+`/dashboard/profile` opened with **seven** equally-weighted destination chips
+in a two-column grid — a wall of decisions before the person had seen their
+own profile. The two a worker actually leaves this page for (**Galimybės**,
+**CV**) stay visible; the other five (documents, visibility, gallery,
+network, my spaces) moved behind ONE disclosure.
+
+Same links, same targets, same affordance class, same tap size. Only how
+many shout at once changed — every reachability guard
+(`room-separation`, `clickable-affordance`,
+`w7-s4-profile-information-architecture`, `player-card-profile`) still
+passes unchanged, which is the point: nothing became unreachable.
+
+Pinned by `mobile-compact-surfaces`: the two primaries are asserted to be in
+the visible cluster, and all five others are asserted to be inside the
+disclosure — so neither half can quietly disappear.
+
+**Still open on this surface** (not in this slice): the profile page is
+1,300+ lines and remains a long page behind its quick-nav. Splitting it into
+stations per the target IA §2 is its own slice with its own receipt.

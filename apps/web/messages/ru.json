@@ -897,7 +897,8 @@
     "improve": "Что улучшить",
     "capabilities": "Навыки и история работы",
     "fullRecordsInCv": "Все рабочие записи",
-    "compass": "Компас обучения"
+    "compass": "Компас обучения",
+    "moreDestinations": "Другие разделы"
   },
   "mapLayers": {
     "title": "Слои карты",

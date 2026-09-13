@@ -762,6 +762,15 @@ export default async function ProfilePage({
               Measured at 768: shrink-0 -> 903px wide, +183px, one line;
               without it -> 672px, +0px, wraps to two lines. `min-w-0` alone
               changes nothing, which is why the shrink flag is the fix. */}
+          {/* WHERE TO GO FROM HERE (owner direction 2026-09-13: "per daug
+              kortelių/mygtukų/teksto"). Seven equal chips opened this page
+              on a phone as a two-column wall of decisions before the person
+              had seen their own profile. The two a worker actually leaves
+              this page for stay visible; the other five — all still real,
+              all still one tap — moved behind ONE disclosure. Same links,
+              same targets, same affordance class: only how many shout at
+              once changed. */}
+          <div className="flex w-full flex-col gap-2 sm:w-auto" data-testid="profile-destinations">
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>a]:justify-center sm:[&>a]:justify-start">
             {workerId ? (
               <Link
@@ -781,6 +790,15 @@ export default async function ProfilePage({
                 {tCv("exportButton")}
               </Link>
             ) : null}
+          </div>
+          <details className="group" data-testid="profile-more-destinations">
+            <summary className="inline-flex min-h-11 cursor-pointer select-none list-none items-center font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:text-text-primary [&::-webkit-details-marker]:hidden">
+              {tQuick("moreDestinations")}
+              <span aria-hidden className="ml-1 transition-transform group-open:rotate-90">
+                ›
+              </span>
+            </summary>
+            <div className="mt-2 grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>a]:justify-center sm:[&>a]:justify-start">
             {/* Documents & readiness entry point (flag-flip slice) — the
                 page is not in the primary nav yet (separate IA slice). */}
             {workerId && DOCUMENTS_READINESS_ENABLED ? (
@@ -833,6 +851,8 @@ export default async function ProfilePage({
             >
               {tSpaces("mySpaces")} →
             </Link>
+            </div>
+          </details>
           </div>
         </div>
         <p className="mt-2 text-sm text-text-secondary">

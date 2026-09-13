@@ -897,7 +897,8 @@
     "improve": "Verbesserungspunkte",
     "capabilities": "Fähigkeiten & Arbeitshistorie",
     "fullRecordsInCv": "Alle Arbeitseinträge",
-    "compass": "Lernkompass"
+    "compass": "Lernkompass",
+    "moreDestinations": "Weitere Ziele"
   },
   "mapLayers": {
     "title": "Kartenebenen",

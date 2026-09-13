@@ -897,7 +897,8 @@
     "improve": "What to improve",
     "capabilities": "Skills & work history",
     "fullRecordsInCv": "All work records",
-    "compass": "Learning Compass"
+    "compass": "Learning Compass",
+    "moreDestinations": "More destinations"
   },
   "mapLayers": {
     "title": "Map layers",

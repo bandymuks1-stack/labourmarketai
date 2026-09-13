@@ -154,3 +154,30 @@ describe("PASAULIS — the map is the base, and a place opens that place's list"
     expect(world).toMatch(/placeLink\.hrefTemplate\.replace\("\{country\}", c\.country\)/);
   });
 });
+
+describe("PROFESINIS PROFILIS — the page opens on the person, not on seven decisions", () => {
+  const page = read("app/[locale]/dashboard/profile/page.tsx");
+
+  it("the two destinations a worker leaves this page for stay visible", () => {
+    const cluster = page.slice(
+      page.indexOf('data-testid="profile-destinations"'),
+      page.indexOf('data-testid="profile-more-destinations"'),
+    );
+    expect(cluster.length).toBeGreaterThan(100);
+    expect(cluster).toMatch(/data-testid="profile-opportunities-link"/);
+    expect(cluster).toMatch(/data-testid="profile-cv-export-link"/);
+  });
+
+  it("the other five moved behind ONE disclosure — all still there, all still one tap", () => {
+    const more = page.slice(page.indexOf('data-testid="profile-more-destinations"'));
+    for (const id of [
+      "profile-documents-link",
+      "profile-visibility-link",
+      "profile-gallery-link",
+      "profile-network-link",
+      "room-my-spaces-link",
+    ]) {
+      expect(more, id).toMatch(new RegExp(`data-testid="${id}"`));
+    }
+  });
+});
