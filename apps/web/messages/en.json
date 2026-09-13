@@ -897,7 +897,8 @@
     "improve": "What to improve",
     "capabilities": "Skills & work history",
     "fullRecordsInCv": "All work records",
-    "compass": "Learning Compass"
+    "compass": "Learning Compass",
+    "moreDestinations": "More destinations"
   },
   "mapLayers": {
     "title": "Map layers",
@@ -1391,7 +1392,8 @@
         "label": "Scale: {scale}",
         "country": "countries",
         "place": "places"
-      }
+      },
+      "placeLinkHint": "Selecting a place takes you to that place's list of opportunities."
     }
   },
   "demandLocationCapture": {
@@ -9273,7 +9275,10 @@
       "payNotStated": "pay not stated by the source",
       "payUnitNotStated": "unit not stated by the source",
       "sourcePlatform": "Platform inquiry",
-      "externalCouldNotRead": "The public advertisement source could not be read this time — these rows are unknown, not absent."
+      "externalCouldNotRead": "The public advertisement source could not be read this time — these rows are unknown, not absent.",
+      "mapTitle": "Where the work is",
+      "skipToList": "To the list",
+      "placeLink": "Show this country's opportunities"
     }
   },
   "workerIntake": {

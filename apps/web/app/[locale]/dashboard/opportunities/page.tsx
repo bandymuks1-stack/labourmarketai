@@ -54,6 +54,12 @@ import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportuniti
 import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
 import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
 import { MarketExplanationPanel } from "@/components/app/market-explanation-panel";
+import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
+import { loadWorldView } from "@/lib/market-map/world-read";
+import {
+  DEFAULT_WORLD_BOUNDS,
+  DEFAULT_WORLD_ZOOM,
+} from "@/lib/market-map/world-model";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
@@ -188,7 +194,7 @@ export default async function OpportunitiesPage({
   const { filters, sort, view } = parseDiscoveryParams(sp);
   // Board + salary benchmark + weekly digest are independent reads — one
   // combined await so TTFB pays the slowest of the three, not their sum.
-  const [result, salaryIntel, weekly] = await Promise.all([
+  const [result, salaryIntel, weekly, worldView] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
@@ -197,6 +203,16 @@ export default async function OpportunitiesPage({
     }),
     getWorkerSalaryIntelligence(),
     getWeeklyPersonalIntelligence(),
+    // PASAULIS' natural base (owner direction 2026-09-13): the SAME
+    // viewport-bounded world read the market map already uses, for the same
+    // default Europe viewport. No new reader, no new layer, no second map —
+    // the canonical `WorldDiscovery` container is rendered here too, and
+    // the client re-reads on pan/zoom exactly as it does on /market-map.
+    loadWorldView({
+      bounds: DEFAULT_WORLD_BOUNDS,
+      zoom: DEFAULT_WORLD_ZOOM,
+      layer: "demand",
+    }),
   ]);
 
   // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
@@ -602,6 +618,54 @@ export default async function OpportunitiesPage({
         ) : null}
       </header>
 
+      {/* THE MAP IS PASAULIS' BASE (owner direction 2026-09-13: "jos
+          natūralus pagrindas turi būti interaktyvus žemėlapis su realiomis
+          galimybėmis pagal šalis/miestus; iš žemėlapio pereinama į
+          kompaktišką rezultatą/detalę").
+          
+          The canonical `WorldDiscovery` container — the same component,
+          the same viewport-bounded reader and the same honest counts strip
+          the market map page renders. It is a discovery surface: it shows
+          where demand IS, never a claim about fit. The fit is the banded
+          list below, and selecting a place links INTO that list through the
+          page's own `?country=` filter — one board, one filter vocabulary.
+          
+          `/dashboard/market-map` keeps every other layer and stays linked
+          from the market section below; nothing moved and nothing was
+          duplicated. */}
+      <section
+        aria-labelledby="opportunities-map-title"
+        data-testid="opportunities-map"
+        className="flex flex-col gap-2"
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2
+            id="opportunities-map-title"
+            className="font-mono text-meta uppercase tracking-label text-text-secondary"
+          >
+            {t("world.mapTitle")}
+          </h2>
+          {/* One tap past the map for anyone who came for the list. */}
+          <a
+            href="#opportunities-results"
+            data-testid="opportunities-map-skip"
+            className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
+          >
+            {t("world.skipToList")} ↓
+          </a>
+        </div>
+        <WorldDiscovery
+          initial={worldView}
+          mapMode="result"
+          placeLink={{
+            hrefTemplate: `/${locale}/dashboard/opportunities?country={country}#opportunities-results`,
+            label: t("world.placeLink"),
+          }}
+        />
+      </section>
+
+      <div id="opportunities-results" className="scroll-mt-4" />
+
       {world.kind === "could_not_read_subject" || result.kind !== "ready" ? (
         /* READER FAILURE — no worker row, nothing to compare against. Said
            as such, never rendered as an empty band. */
@@ -965,13 +1029,14 @@ export default async function OpportunitiesPage({
                                         <FitBandChip band={row.band} label={bandChip(row.band)} />
                                       </div>
 
-                                      {/* Organization / source · place · start. */}
-                                      <p className="text-basis text-text-secondary" data-testid="opportunity-company">
+                                      {/* Organization / source · place · start — ONE compact meta
+                                          line (owner direction 2026-09-13: the list carries the
+                                          essence, the detail opens on selection). The field label
+                                          is dropped here and kept in the detail grid below, where
+                                          it is what a person is actually reading for. */}
+                                      <p className="truncate text-meta text-text-secondary" data-testid="opportunity-company">
                                         {need.companyName ? (
                                           <>
-                                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                                              {t("fieldCompany")}:
-                                            </span>{" "}
                                             {need.companyName}
                                             {/* Trust minimum (PR11): the approved-route badge is shown ONLY
                                                 when the row carries the real signal — never copy-driven. */}
@@ -1003,9 +1068,10 @@ export default async function OpportunitiesPage({
                                         locale={locale}
                                         ts={ts}
                                         sd={sd}
+                                        essence
                                       />
                                       {pay === null ? (
-                                        <p className="text-basis text-text-muted" data-testid="opportunity-pay-not-stated">
+                                        <p className="text-meta text-text-muted" data-testid="opportunity-pay-not-stated">
                                           {t("world.payNotStated")}
                                         </p>
                                       ) : null}
@@ -1013,7 +1079,7 @@ export default async function OpportunitiesPage({
                                       {/* WHY the row sits in its band — the engine's own codes in
                                           words; a strong / possible row with no gap says so through
                                           its §19 basis, never through a bare percentage. */}
-                                      <p className="text-basis text-text-secondary" data-testid="opportunity-why">
+                                      <p className="line-clamp-2 text-basis text-text-secondary" data-testid="opportunity-why">
                                         <span className="font-medium text-text-primary">{t("world.why")} </span>
                                         {whyLines.length > 0
                                           ? whyLines.join(" · ")
@@ -1037,18 +1103,19 @@ export default async function OpportunitiesPage({
                                         {t(`workerNext.${nextAction}` as never)}
                                       </p>
 
-                                      {/* Actions — the SAME canonical controls the board always had:
-                                          save (gated on the store), express interest (gated on the
-                                          table), compare, details. */}
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        {result.capabilities.savedAvailable ? (
-                                          <WorkerSaveOpportunityButton
-                                            locale={locale}
-                                            requestId={need.id}
-                                            initialSaved={saved}
-                                            labels={savedLabels}
-                                          />
-                                        ) : null}
+                                      {/* ACTIONS, IN ONE HIERARCHY (owner direction 2026-09-13:
+                                          "veiksmai turi būti aiškios hierarchijos, ne chaotiška
+                                          mygtukų krūva"). The SAME canonical controls the board
+                                          always had, in the order a person uses them: the one
+                                          forward action for this row first (express interest, the
+                                          gated real write), then the two quiet keep-for-later
+                                          controls, then the details door below. Nothing is
+                                          removed and nothing is gated differently — only the
+                                          reading order changed. */}
+                                      <div
+                                        className="flex flex-wrap items-center gap-x-3 gap-y-2"
+                                        data-testid="opportunity-actions"
+                                      >
                                         {result.capabilities.interestAvailable ? (
                                           <WorkerInterestButton
                                             locale={locale}
@@ -1068,10 +1135,23 @@ export default async function OpportunitiesPage({
                                             }}
                                           />
                                         ) : null}
-                                        <CompareToggleChip
-                                          entry={buildCompareEntry(need, structured)}
-                                          label={t("compare.toggle")}
-                                        />
+                                        <span
+                                          className="ml-auto flex flex-wrap items-center gap-2"
+                                          data-testid="opportunity-actions-secondary"
+                                        >
+                                          {result.capabilities.savedAvailable ? (
+                                            <WorkerSaveOpportunityButton
+                                              locale={locale}
+                                              requestId={need.id}
+                                              initialSaved={saved}
+                                              labels={savedLabels}
+                                            />
+                                          ) : null}
+                                          <CompareToggleChip
+                                            entry={buildCompareEntry(need, structured)}
+                                            label={t("compare.toggle")}
+                                          />
+                                        </span>
                                       </div>
 
                                       {/* Progressive disclosure: the legacy card body — every

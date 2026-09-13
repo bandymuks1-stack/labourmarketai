@@ -897,7 +897,8 @@
     "improve": "Wat te verbeteren",
     "capabilities": "Vaardigheden & werkgeschiedenis",
     "fullRecordsInCv": "Alle werkregistraties",
-    "compass": "Leerkompas"
+    "compass": "Leerkompas",
+    "moreDestinations": "Meer bestemmingen"
   },
   "mapLayers": {
     "title": "Kaartlagen",
@@ -1391,7 +1392,8 @@
         "label": "Schaal: {scale}",
         "country": "landen",
         "place": "plaatsen"
-      }
+      },
+      "placeLinkHint": "Een plaats kiezen brengt je naar de kansenlijst van die plaats."
     }
   },
   "demandLocationCapture": {
@@ -9273,7 +9275,10 @@
       "payNotStated": "loon niet vermeld door de bron",
       "payUnitNotStated": "eenheid niet vermeld door de bron",
       "sourcePlatform": "Platformaanvraag",
-      "externalCouldNotRead": "De bron van openbare vacatures kon deze keer niet worden gelezen — deze rijen zijn onbekend, niet afwezig."
+      "externalCouldNotRead": "De bron van openbare vacatures kon deze keer niet worden gelezen — deze rijen zijn onbekend, niet afwezig.",
+      "mapTitle": "Waar het werk is",
+      "skipToList": "Naar de lijst",
+      "placeLink": "Toon de kansen in dit land"
     }
   },
   "workerIntake": {

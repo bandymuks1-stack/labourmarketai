@@ -130,13 +130,19 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
     // The journal grouped by `created_at` while the calendar used `work_date`,
     // so its own day chip pointed at today and its "open in calendar" link
     // landed on an empty day. Both surfaces resolve the day the same way now.
+    //
+    // The day chips became a real calendar (owner direction 2026-09-13), so
+    // the same claim is now read off the calendar's own cell for that day:
+    // the day is selected, and it carries records.
     await page.goto(`/lt/dashboard/journal?date=${workDay}`);
     await expect(page.getByText(marker, { exact: false })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(
-      page.locator(`[data-testid="journal-day-nav-${workDay}"]`),
-    ).toBeVisible();
+    const dayCell = page.locator(
+      `[data-testid="journal-calendar-day"][data-day="${workDay}"]`,
+    );
+    await expect(dayCell).toBeVisible();
+    await expect(dayCell).toHaveAttribute("data-state", "selected");
   });
 
   test("the forward-only agenda offers a way into past days", async ({ page }) => {

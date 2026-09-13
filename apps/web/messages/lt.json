@@ -897,7 +897,8 @@
     "improve": "Ką dar pagerinti",
     "capabilities": "Įgūdžiai ir darbo istorija",
     "fullRecordsInCv": "Visi darbo įrašai",
-    "compass": "Mokymosi kompasas"
+    "compass": "Mokymosi kompasas",
+    "moreDestinations": "Daugiau vietų"
   },
   "mapLayers": {
     "title": "Žemėlapio sluoksniai",
@@ -1391,7 +1392,8 @@
         "label": "Mastelis: {scale}",
         "country": "šalys",
         "place": "vietos"
-      }
+      },
+      "placeLinkHint": "Pasirinkę vietą pereisite prie tos vietos galimybių sąrašo."
     }
   },
   "demandLocationCapture": {
@@ -9273,7 +9275,10 @@
       "payNotStated": "atlygis šaltinyje nenurodytas",
       "payUnitNotStated": "vienetas šaltinyje nenurodytas",
       "sourcePlatform": "Platformos užklausa",
-      "externalCouldNotRead": "Viešų skelbimų šaltinio šį kartą nepavyko perskaityti — šios eilutės nežinomos, o ne jų nėra."
+      "externalCouldNotRead": "Viešų skelbimų šaltinio šį kartą nepavyko perskaityti — šios eilutės nežinomos, o ne jų nėra.",
+      "mapTitle": "Kur yra darbo",
+      "skipToList": "Į sąrašą",
+      "placeLink": "Rodyti šios šalies galimybes"
     }
   },
   "workerIntake": {
