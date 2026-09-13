@@ -185,10 +185,38 @@ function normalizeOrgType(
     : "other";
 }
 
+/**
+ * A schema-shaped absence, as opposed to a FAILURE.
+ *
+ * `company_memberships` and the pointer column are feature-detected: an
+ * environment where the migration is unapplied answers 42P01 / PGRST205 /
+ * 42703 / PGRST204, and degrading to "this source contributes nothing" is
+ * correct there — the source genuinely does not exist.
+ *
+ * Every OTHER error is a real failure, and those two cases were conflated:
+ * a transient PostgREST or RLS error produced a SHORTER membership list that
+ * was then handed on as a complete answer. A person whose organizations
+ * briefly failed to read would have been told, with no hedge, which
+ * workspaces they belong to — a shorter list presented as the truth. That is
+ * the #1314 rule (absence of an answer is never an answer of absence), and it
+ * is why these readers now say whether they actually answered.
+ */
+const ABSENT_SCHEMA_CODES = new Set(["42P01", "PGRST205", "42703", "PGRST204"]);
+export function isAbsentSchema(code: string | null | undefined): boolean {
+  return !!code && ABSENT_SCHEMA_CODES.has(code);
+}
+
+/** Rows, and whether this source actually answered. */
+interface SourceRead {
+  readonly workspaces: readonly WorkspaceInfo[];
+  /** False ONLY on a real failure — a structurally absent source is complete. */
+  readonly complete: boolean;
+}
+
 async function readEngagementMemberships(
   supabase: SupabaseClient,
   profileId: string,
-): Promise<WorkspaceInfo[]> {
+): Promise<SourceRead> {
   const { data, error } = await asAny(supabase)
     .from("engagement_contexts")
     .select(
@@ -198,7 +226,9 @@ async function readEngagementMemberships(
     .eq("status", "active")
     .not("organization_id", "is", null)
     .limit(50);
-  if (error) return []; // honest degradation — the personal workspace remains
+  // Absent schema is a real "nothing here"; anything else is a failure this
+  // list must carry, not swallow.
+  if (error) return { workspaces: [], complete: isAbsentSchema(error.code) };
   const byOrg = new Map<string, WorkspaceInfo>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const row of (data ?? []) as any[]) {
@@ -223,7 +253,7 @@ async function readEngagementMemberships(
       accentIndex: workspaceAccentIndex(orgId),
     });
   }
-  return [...byOrg.values()];
+  return { workspaces: [...byOrg.values()], complete: true };
 }
 
 /**
@@ -237,7 +267,7 @@ async function readEngagementMemberships(
 async function readGovernanceMemberships(
   supabase: SupabaseClient,
   profileId: string,
-): Promise<WorkspaceInfo[]> {
+): Promise<SourceRead> {
   const { data, error } = await asAny(supabase)
     .from("company_memberships")
     .select(
@@ -246,7 +276,9 @@ async function readGovernanceMemberships(
     .eq("profile_id", profileId)
     .eq("status", "active")
     .limit(50);
-  if (error) return []; // honest degradation — table not applied here
+  // Feature detection stays: an environment without the Slice 1 table is
+  // complete with nothing to add. A different error is a failure.
+  if (error) return { workspaces: [], complete: isAbsentSchema(error.code) };
   const byOrg = new Map<string, WorkspaceInfo>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const row of (data ?? []) as any[]) {
@@ -275,7 +307,7 @@ async function readGovernanceMemberships(
       accentIndex: workspaceAccentIndex(orgId),
     });
   }
-  return [...byOrg.values()];
+  return { workspaces: [...byOrg.values()], complete: true };
 }
 
 export interface WorkspaceContext {
@@ -283,9 +315,14 @@ export interface WorkspaceContext {
   readonly workspaces: readonly WorkspaceInfo[];
   /** PERSONAL_WORKSPACE_ID or a membership-validated org id. */
   readonly activeWorkspaceId: string;
-  /** False while migration 20260714210000 is unapplied — switching is then
-   *  honestly unavailable and the chip is an indicator only. */
+  /** False while migration 20260714210000 is unapplied, and false when the
+   *  pointer could not be read at all — switching is then honestly
+   *  unavailable and `activeWorkspaceId` is the resolver's default rather
+   *  than a stored choice. */
   readonly pointerAvailable: boolean;
+  /** False when a membership source FAILED, so `workspaces` may be missing
+   *  organizations. Absent on the session path, which has its own shape. */
+  readonly membershipsComplete?: boolean;
 }
 
 const EMPTY_WORKSPACE: WorkspaceContext = {
@@ -303,14 +340,35 @@ const EMPTY_WORKSPACE: WorkspaceContext = {
  * from the resolver below. NO pointer resolution here: which workspace is
  * ACTIVE is a session concern the cookie-side wrapper owns.
  */
-export async function listWorkspaceMemberships(
+/**
+ * The membership list AND whether it is COMPLETE.
+ *
+ * `complete: false` means at least one of the three sources failed, so the
+ * list may be missing organizations the person really belongs to. A caller
+ * that shows a person "these are your workspaces" must not present that as an
+ * answer — it is a shorter list, not a smaller truth.
+ *
+ * `listWorkspaceMemberships` stays as it was for the callers that legitimately
+ * degrade (a membership CHECK only ever narrows: an org missing from a
+ * degraded list is refused, never wrongly admitted). Reads that show the list
+ * to a person use this one.
+ */
+export interface WorkspaceMembershipsRead {
+  readonly workspaces: readonly WorkspaceInfo[];
+  readonly complete: boolean;
+}
+
+export async function readWorkspaceMemberships(
   caller: DomainCaller,
-): Promise<readonly WorkspaceInfo[]> {
-  const [owned, engagementWorkspaces, governanceWorkspaces] = await Promise.all([
+): Promise<WorkspaceMembershipsRead> {
+  const [owned, engagement, governance] = await Promise.all([
     readOwnedOrganizations(caller),
     readEngagementMemberships(caller.supabase, caller.userId),
     readGovernanceMemberships(caller.supabase, caller.userId),
   ]);
+  const engagementWorkspaces = engagement.workspaces;
+  const governanceWorkspaces = governance.workspaces;
+  const complete = owned.kind === "ok" && engagement.complete && governance.complete;
 
   const orgWorkspaces: WorkspaceInfo[] = [];
   const seen = new Set<string>();
@@ -343,7 +401,14 @@ export async function listWorkspaceMemberships(
     kind: "personal",
     accentIndex: 0,
   };
-  return [personal, ...orgWorkspaces];
+  return { workspaces: [personal, ...orgWorkspaces], complete };
+}
+
+/** The list alone — unchanged for every caller that only needs to CHECK it. */
+export async function listWorkspaceMemberships(
+  caller: DomainCaller,
+): Promise<readonly WorkspaceInfo[]> {
+  return (await readWorkspaceMemberships(caller)).workspaces;
 }
 
 /**
@@ -359,16 +424,33 @@ export async function resolveActiveWorkspaceForCaller(
   caller: DomainCaller,
   identity: "person" | "company" | null,
 ): Promise<WorkspaceContext> {
-  const workspaces = await listWorkspaceMemberships(caller);
+  const memberships = await readWorkspaceMemberships(caller);
+  const workspaces = memberships.workspaces;
   const orgWorkspaces = workspaces.filter((w) => w.kind === "organization");
 
   let dbPointer: string | null = null;
+  // `pointerAvailable` was hardcoded `true` here, which contradicted this
+  // module's own contract (§ the note above: "until that migration is applied
+  // the column read fails with 42703 → ... report `pointerAvailable: false` so
+  // callers stay honest about persistence"). A caller therefore enabled a
+  // switch control, and told the person the active workspace was their stored
+  // choice, in exactly the environment where `context.switch` answers
+  // `needs_migration` — the honest branch was unreachable where it was needed.
+  //
+  // It is DERIVED now: false when the column is absent (the migration is
+  // unapplied and switching genuinely cannot work) and false when the read
+  // failed for any other reason (the mechanism may exist, but the value shown
+  // is then the resolver's default rather than a choice anyone made, and
+  // saying otherwise is the claim that misleads).
+  let pointerAvailable = true;
   const { data, error } = await asAny(caller.supabase)
     .from("profiles")
     .select("active_organization_id")
     .eq("id", caller.userId)
     .maybeSingle();
-  if (!error) {
+  if (error) {
+    pointerAvailable = false;
+  } else {
     dbPointer =
       ((data as { active_organization_id?: string | null } | null)
         ?.active_organization_id as string | null) ?? null;
@@ -381,7 +463,8 @@ export async function resolveActiveWorkspaceForCaller(
       orgWorkspaces.map((w) => w.id),
       dbPointer,
     ),
-    pointerAvailable: true,
+    pointerAvailable,
+    membershipsComplete: memberships.complete,
   };
 }
 

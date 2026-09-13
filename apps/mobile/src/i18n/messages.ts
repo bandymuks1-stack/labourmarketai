@@ -64,6 +64,16 @@ const en = {
   "config.problem.body":
     "The app cannot start until these values are set. No data has been sent anywhere.",
 
+  "workspace.title": "Acting for",
+  "workspace.loading": "Reading your workspaces…",
+  "workspace.active": "Active",
+  "workspace.switching": "Switching…",
+  "workspace.failed.title": "We could not read your workspaces",
+  "workspace.failed.body":
+    "This is a failed read, not an answer: it does not mean you belong to no organization. Try again in a moment.",
+  "workspace.pointerUnavailable":
+    "This is worked out from what you belong to, not a choice saved for you, and it cannot be changed here yet.",
+  "workspace.switchFailed": "The workspace was not changed. Nothing was moved.",
   "context.title": "You are working as",
   "context.unavailable.title": "We cannot list your contexts yet",
   "context.unavailable.body":
@@ -240,6 +250,16 @@ const lt: Catalogue = {
   "config.problem.body":
     "Programa negali pasileisti, kol nenustatytos šios reikšmės. Jokie duomenys niekur nebuvo išsiųsti.",
 
+  "workspace.title": "Veikiate kaip",
+  "workspace.loading": "Skaitome jūsų darbo erdves…",
+  "workspace.active": "Aktyvi",
+  "workspace.switching": "Keičiama…",
+  "workspace.failed.title": "Nepavyko perskaityti jūsų darbo erdvių",
+  "workspace.failed.body":
+    "Tai nepavykęs skaitymas, o ne atsakymas: tai nereiškia, kad nepriklausote jokiai organizacijai. Pabandykite po akimirkos.",
+  "workspace.pointerUnavailable":
+    "Tai apskaičiuota iš to, kam priklausote, o ne jūsų išsaugotas pasirinkimas, ir kol kas čia to pakeisti negalima.",
+  "workspace.switchFailed": "Darbo erdvė nepakeista. Niekas neperkelta.",
   "context.title": "Dirbate kaip",
   "context.unavailable.title": "Kol kas negalime parodyti jūsų kontekstų",
   "context.unavailable.body":
@@ -412,6 +432,16 @@ const ru: Catalogue = {
   "config.problem.body":
     "Приложение не запустится, пока не заданы эти значения. Никакие данные никуда не отправлялись.",
 
+  "workspace.title": "Действуете от имени",
+  "workspace.loading": "Читаем ваши рабочие пространства…",
+  "workspace.active": "Активное",
+  "workspace.switching": "Переключаем…",
+  "workspace.failed.title": "Не удалось прочитать ваши рабочие пространства",
+  "workspace.failed.body":
+    "Это неудавшееся чтение, а не ответ: оно не означает, что вы не состоите ни в одной организации. Попробуйте через мгновение.",
+  "workspace.pointerUnavailable":
+    "Это выведено из того, где вы состоите, а не сохранённый вами выбор, и изменить это здесь пока нельзя.",
+  "workspace.switchFailed": "Рабочее пространство не изменено. Ничего не перенесено.",
   "context.title": "Вы работаете как",
   "context.unavailable.title": "Пока мы не можем показать ваши контексты",
   "context.unavailable.body":
@@ -584,6 +614,16 @@ const nl: Catalogue = {
   "config.problem.body":
     "De app kan niet starten totdat deze waarden zijn ingesteld. Er zijn geen gegevens verstuurd.",
 
+  "workspace.title": "Handelt namens",
+  "workspace.loading": "Je werkruimtes worden gelezen…",
+  "workspace.active": "Actief",
+  "workspace.switching": "Wisselen…",
+  "workspace.failed.title": "We konden je werkruimtes niet lezen",
+  "workspace.failed.body":
+    "Dit is een mislukte leesactie, geen antwoord: het betekent niet dat je bij geen enkele organisatie hoort. Probeer het zo opnieuw.",
+  "workspace.pointerUnavailable":
+    "Dit is afgeleid uit waar je bij hoort, niet een keuze die voor jou is bewaard, en het kan hier nog niet gewijzigd worden.",
+  "workspace.switchFailed": "De werkruimte is niet gewijzigd. Er is niets verplaatst.",
   "context.title": "Je werkt als",
   "context.unavailable.title": "We kunnen je contexten nog niet tonen",
   "context.unavailable.body":
@@ -756,6 +796,16 @@ const de: Catalogue = {
   "config.problem.body":
     "Die App kann erst starten, wenn diese Werte gesetzt sind. Es wurden keine Daten gesendet.",
 
+  "workspace.title": "Handelt für",
+  "workspace.loading": "Deine Arbeitsbereiche werden gelesen…",
+  "workspace.active": "Aktiv",
+  "workspace.switching": "Wird gewechselt…",
+  "workspace.failed.title": "Wir konnten deine Arbeitsbereiche nicht lesen",
+  "workspace.failed.body":
+    "Das ist ein fehlgeschlagener Lesevorgang, keine Antwort: Es bedeutet nicht, dass du zu keiner Organisation gehörst. Versuche es gleich noch einmal.",
+  "workspace.pointerUnavailable":
+    "Das ist daraus abgeleitet, wo du dazugehörst, und keine für dich gespeicherte Wahl; ändern lässt es sich hier noch nicht.",
+  "workspace.switchFailed": "Der Arbeitsbereich wurde nicht geändert. Es wurde nichts verschoben.",
   "context.title": "Du arbeitest als",
   "context.unavailable.title": "Wir können deine Kontexte noch nicht anzeigen",
   "context.unavailable.body":

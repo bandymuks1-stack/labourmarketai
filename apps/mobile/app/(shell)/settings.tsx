@@ -1,22 +1,47 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ACTIVE_LOCALES, isPreviewTranslation } from "@labourmarket/client-core";
 
+import type { ContextListData, ContextSwitchData } from "../../src/capability-shapes";
 import { useActorContext } from "../../src/context-provider";
 import { useAuth } from "../../src/auth-context";
+import { capability } from "../../src/domain";
+import { useCapability } from "../../src/use-capability";
 import { useLocale } from "../../src/i18n/locale-context";
 import { LANGUAGE_NAMES } from "../../src/i18n/messages";
 import { Body, Button, Divider, NotAvailable, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
 
 /**
- * SETTINGS — the screen that actually works today.
+ * SETTINGS — language, WORKSPACE, participation context, sign-out.
  *
  * Language and sign-out need nothing from the canonical domain, so they are
- * real. Context switching needs to know which contexts the person holds, which
- * is a read this client cannot make yet, so it says so instead of guessing.
+ * real.
+ *
+ * ACTING FOR is real too, as of `context.list`: which organization this person
+ * is currently acting for, and a way to change it. Switching writes the
+ * DURABLE pointer through `context.switch`, the same core the web switcher
+ * runs, so the device and the server cannot hold different answers.
+ *
+ * WHAT THIS POINTER DOES NOT DO, because the first version of this screen
+ * claimed it did: it does NOT decide where a Work Journal entry lands. A
+ * journal draft resolves its engagement context from `engagement_contexts` by
+ * its own rule hierarchy and asks when that is ambiguous — it never consults
+ * `profiles.active_organization_id`. So a person can be acting for
+ * organization A while an entry is drafted against their engagement at B, and
+ * that is correct: belonging to an organization and having a live work
+ * engagement there are different facts. The composer already shows and asks
+ * for the work context; this section must not imply it decides one.
+ *
+ * PARTICIPATION CONTEXT is a DIFFERENT AXIS and still says so. A workspace is
+ * an organization the person belongs to; a participation mode is how they take
+ * part (worker / company / agency / customer). A company-type organization
+ * does not make its employee an employer, so the workspace list cannot supply
+ * the mode — deriving one from the other would reclassify a real person's role
+ * from data that does not carry it. That read does not exist yet, so the
+ * section keeps saying so rather than guessing.
  *
  * Every active language is offered, and the ones that are AI-seeded and
  * awaiting human review are labelled as previews (doctrine §7.4) — the same
@@ -26,7 +51,41 @@ import { theme } from "../../src/ui/theme";
 export default function Settings() {
   const { locale, setLocale, t } = useLocale();
   const { holdings, active, switchTo } = useActorContext();
-  const { signOut, busy, state } = useAuth();
+  const { signOut, busy, state, accessToken } = useAuth();
+
+  const workspaces = useCapability<ContextListData>("context.list");
+  const [switching, setSwitching] = useState<string | null>(null);
+  const [switchError, setSwitchError] = useState<string | null>(null);
+  // Bound once: narrowing a property access does not survive into the map
+  // callback below.
+  const listed = workspaces.state.status === "loaded" ? workspaces.state.data : null;
+  const canSwitch = listed !== null && listed.pointerAvailable;
+
+  const switchWorkspace = useCallback(
+    async (workspaceId: string) => {
+      setSwitchError(null);
+      setSwitching(workspaceId);
+      const result = await capability<ContextSwitchData>({
+        name: "context.switch",
+        args: { workspace: workspaceId },
+        accessToken,
+        locale,
+      });
+      setSwitching(null);
+      if (!result.ok) {
+        setSwitchError(t("workspace.switchFailed"));
+        return;
+      }
+      if (result.data.status !== "switched") {
+        // The server could not resolve the id to exactly one workspace. It
+        // switched NOTHING, so the list is re-read rather than a local guess
+        // being painted over the truth.
+        setSwitchError(t("workspace.switchFailed"));
+      }
+      workspaces.reload();
+    },
+    [accessToken, locale, t, workspaces],
+  );
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
@@ -57,6 +116,56 @@ export default function Settings() {
             );
           })}
         </View>
+
+        <Divider />
+
+        <Title>{t("workspace.title")}</Title>
+        {workspaces.state.status === "loading" ? (
+          <Body muted>{t("workspace.loading")}</Body>
+        ) : workspaces.state.status === "failed" ? (
+          // A failed read is a failure, never an empty list: "you belong to no
+          // organization" is a different and false statement.
+          <NotAvailable
+            title={t("workspace.failed.title")}
+            body={t("workspace.failed.body")}
+          />
+        ) : listed === null ? null : (
+          <>
+            <View style={styles.list}>
+              {listed.workspaces.map((w) => {
+                const selected = w.id === listed.activeWorkspaceId;
+                return (
+                  <Pressable
+                    key={w.id}
+                    testID={`workspace-${w.id}`}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected, disabled: !canSwitch }}
+                    accessibilityLabel={w.label}
+                    disabled={!canSwitch || switching !== null}
+                    onPress={() => void switchWorkspace(w.id)}
+                    style={({ pressed }) => [
+                      styles.row,
+                      selected && styles.rowSelected,
+                      pressed && styles.rowPressed,
+                    ]}
+                  >
+                    <Text style={styles.rowLabel}>{w.label}</Text>
+                    {switching === w.id ? (
+                      <Text style={styles.tag}>{t("workspace.switching")}</Text>
+                    ) : selected ? (
+                      <Text style={styles.tag}>{t("workspace.active")}</Text>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+            {/* The pointer migration is not applied here: what is shown is the
+                resolver's default, not a stored choice, and a switch would be
+                refused. Say it rather than offer a control that cannot work. */}
+            {!canSwitch ? <Body muted>{t("workspace.pointerUnavailable")}</Body> : null}
+            {switchError !== null ? <Body muted>{switchError}</Body> : null}
+          </>
+        )}
 
         <Divider />
 

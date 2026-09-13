@@ -154,6 +154,13 @@ describe("the registry itself", () => {
       "work_card.save_confirm",
       "demand.create_draft",
       "demand.create_confirm",
+      // The READ half of the context pair (2026-09-13). `context.switch`
+      // could already be MADE to list the options by handing it a value it
+      // cannot resolve — but that is a write capability (`readOnlyHint:
+      // false`), and a client that only wants to SHOW a person which
+      // workspaces they hold should not have to propose a write to find out.
+      // Same reader, same labels, no new path.
+      "context.list",
       "context.switch",
       // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
       // company questions to become an authorized action rather than a
@@ -196,6 +203,7 @@ describe("the registry itself", () => {
       "work_card.save_confirm",
       "demand.create_draft",
       "demand.create_confirm",
+      "context.list",
       "context.switch",
       // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
       // company questions to become an authorized action rather than a
