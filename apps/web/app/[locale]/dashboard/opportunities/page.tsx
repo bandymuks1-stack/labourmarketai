@@ -965,13 +965,14 @@ export default async function OpportunitiesPage({
                                         <FitBandChip band={row.band} label={bandChip(row.band)} />
                                       </div>
 
-                                      {/* Organization / source · place · start. */}
-                                      <p className="text-basis text-text-secondary" data-testid="opportunity-company">
+                                      {/* Organization / source · place · start — ONE compact meta
+                                          line (owner direction 2026-09-13: the list carries the
+                                          essence, the detail opens on selection). The field label
+                                          is dropped here and kept in the detail grid below, where
+                                          it is what a person is actually reading for. */}
+                                      <p className="truncate text-meta text-text-secondary" data-testid="opportunity-company">
                                         {need.companyName ? (
                                           <>
-                                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                                              {t("fieldCompany")}:
-                                            </span>{" "}
                                             {need.companyName}
                                             {/* Trust minimum (PR11): the approved-route badge is shown ONLY
                                                 when the row carries the real signal — never copy-driven. */}
@@ -1003,9 +1004,10 @@ export default async function OpportunitiesPage({
                                         locale={locale}
                                         ts={ts}
                                         sd={sd}
+                                        essence
                                       />
                                       {pay === null ? (
-                                        <p className="text-basis text-text-muted" data-testid="opportunity-pay-not-stated">
+                                        <p className="text-meta text-text-muted" data-testid="opportunity-pay-not-stated">
                                           {t("world.payNotStated")}
                                         </p>
                                       ) : null}
@@ -1013,7 +1015,7 @@ export default async function OpportunitiesPage({
                                       {/* WHY the row sits in its band — the engine's own codes in
                                           words; a strong / possible row with no gap says so through
                                           its §19 basis, never through a bare percentage. */}
-                                      <p className="text-basis text-text-secondary" data-testid="opportunity-why">
+                                      <p className="line-clamp-2 text-basis text-text-secondary" data-testid="opportunity-why">
                                         <span className="font-medium text-text-primary">{t("world.why")} </span>
                                         {whyLines.length > 0
                                           ? whyLines.join(" · ")
@@ -1037,18 +1039,19 @@ export default async function OpportunitiesPage({
                                         {t(`workerNext.${nextAction}` as never)}
                                       </p>
 
-                                      {/* Actions — the SAME canonical controls the board always had:
-                                          save (gated on the store), express interest (gated on the
-                                          table), compare, details. */}
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        {result.capabilities.savedAvailable ? (
-                                          <WorkerSaveOpportunityButton
-                                            locale={locale}
-                                            requestId={need.id}
-                                            initialSaved={saved}
-                                            labels={savedLabels}
-                                          />
-                                        ) : null}
+                                      {/* ACTIONS, IN ONE HIERARCHY (owner direction 2026-09-13:
+                                          "veiksmai turi būti aiškios hierarchijos, ne chaotiška
+                                          mygtukų krūva"). The SAME canonical controls the board
+                                          always had, in the order a person uses them: the one
+                                          forward action for this row first (express interest, the
+                                          gated real write), then the two quiet keep-for-later
+                                          controls, then the details door below. Nothing is
+                                          removed and nothing is gated differently — only the
+                                          reading order changed. */}
+                                      <div
+                                        className="flex flex-wrap items-center gap-x-3 gap-y-2"
+                                        data-testid="opportunity-actions"
+                                      >
                                         {result.capabilities.interestAvailable ? (
                                           <WorkerInterestButton
                                             locale={locale}
@@ -1068,10 +1071,23 @@ export default async function OpportunitiesPage({
                                             }}
                                           />
                                         ) : null}
-                                        <CompareToggleChip
-                                          entry={buildCompareEntry(need, structured)}
-                                          label={t("compare.toggle")}
-                                        />
+                                        <span
+                                          className="ml-auto flex flex-wrap items-center gap-2"
+                                          data-testid="opportunity-actions-secondary"
+                                        >
+                                          {result.capabilities.savedAvailable ? (
+                                            <WorkerSaveOpportunityButton
+                                              locale={locale}
+                                              requestId={need.id}
+                                              initialSaved={saved}
+                                              labels={savedLabels}
+                                            />
+                                          ) : null}
+                                          <CompareToggleChip
+                                            entry={buildCompareEntry(need, structured)}
+                                            label={t("compare.toggle")}
+                                          />
+                                        </span>
                                       </div>
 
                                       {/* Progressive disclosure: the legacy card body — every

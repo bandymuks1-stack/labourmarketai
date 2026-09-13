@@ -350,7 +350,10 @@
   "dayNav": {
     "title": "Навигация по дням",
     "all": "Все дни",
-    "openInCalendar": "Открыть в календаре"
+    "openInCalendar": "Открыть в календаре",
+    "recordOnDay": "Записать работу",
+    "dayEmpty": "В этот день записей нет.",
+    "moreDays": "Показаны последние дни. Ещё {count, plural, one {# день} few {# дня} other {# дней}} — выберите в календаре."
   },
   "spreadsheet": {
     "title": "Табличный режим — несколько записей сразу",
@@ -848,5 +851,21 @@
     "startOver": "Написать заново",
     "detailed": "Подробнее (полная форма)",
     "detailedBack": "Назад к простой записи"
+  },
+  "calendar": {
+    "title": "Рабочий календарь",
+    "prev": "Предыдущий период",
+    "next": "Следующий период",
+    "scaleLabel": "Вид",
+    "scale": {
+      "month": "Месяц",
+      "week": "Неделя"
+    },
+    "allDays": "Все дни",
+    "dayWithRecords": "{day} — {count, plural, one {# запись} few {# записи} other {# записей}}",
+    "dayEmpty": "{day} — записей нет",
+    "periodEmpty": "В этом периоде записей нет.",
+    "periodSummary": "{days, plural, one {# день} few {# дня} other {# дней}}, {entries, plural, one {# запись} few {# записи} other {# записей}}.",
+    "periodSummaryWithTime": "{days, plural, one {# день} few {# дня} other {# дней}}, {entries, plural, one {# запись} few {# записи} other {# записей}}, {time}."
   }
 }
