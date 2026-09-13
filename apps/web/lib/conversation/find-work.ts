@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 
 import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
+import { deriveFitBand, isAssessedFit } from "@/lib/opportunities/fit-band";
 import {
   CONVERSATION_FIND_WORK_LIMIT,
   CONVERSATION_FIND_WORK_EXTERNAL_LIMIT,
@@ -34,7 +35,10 @@ import {
  * this function calls — one data flow, read once by the surface that renders.
  *
  * It still decides nothing: no loading, filtering, ranking, scoring or
- * explaining of its own. An empty board yields an honest empty message and an
+ * explaining of its own — it COUNTS the panel's external rows by the fit band
+ * the ONE engine's verdict already implies (`deriveFitBand`, #1689 defect H),
+ * so a found posting is never announced as a suitable one. An empty board
+ * yields an honest empty message and an
  * unapplied board RPC yields an honest blocked message — those two remain
  * DISTINCT, because "nothing matched" and "there is no demand data at all" are
  * different answers to a person.
@@ -63,10 +67,26 @@ export async function findWorkForChat(
   // PLATFORM demand data. External public-source ads read from their own
   // store, so they still count — "blocked" is only the answer when NOTHING
   // can be shown.
-  const externalShown = Math.min(
-    view.totalExternal,
+  //
+  // The external rows the panel will render are its own display slice of the
+  // SAME cards, and each is counted BY BAND (#1689, defect H): a posting the
+  // engine assessed as strong/possible is a fit; one it could not assess, or
+  // assessed as missing a requirement / in conflict, is a FOUND posting —
+  // said so, never called suitable. The production sentence "Radau 2
+  // tinkamų variantų" over an `insufficient_data` "Senior AI Engineer" was
+  // exactly that collapse.
+  const externalRows = view.externalCards.slice(
+    0,
     CONVERSATION_FIND_WORK_EXTERNAL_LIMIT,
   );
+  // A COUNT by band — not a filter: nothing is dropped or re-selected here,
+  // the rows the panel renders are exactly the slice above.
+  let externalAssessed = 0;
+  for (const c of externalRows) {
+    if (isAssessedFit(deriveFitBand(c.match).band)) externalAssessed += 1;
+  }
+  const externalDiscovered = externalRows.length - externalAssessed;
+  const externalShown = externalRows.length;
   if (!view.capabilities.boardAvailable && externalShown === 0) {
     return { kind: "blocked", message: t("blockedNoAccess") };
   }
@@ -84,11 +104,16 @@ export async function findWorkForChat(
   // External ads get their own sentence: "public ads from official sources"
   // is a different claim than "matches on this platform", and folding the two
   // into one number would blur who is offering what.
+  // The external sentence is TWO sentences, by band: assessed fits and found
+  // postings are different claims, and a person hears the difference.
   const introParts: string[] = [];
   if (platformShown === 1) introParts.push(t("introOne"));
   else if (platformShown > 1) introParts.push(t("intro", { count: platformShown }));
-  if (externalShown > 0) {
-    introParts.push(t("introExternal", { count: externalShown }));
+  if (externalAssessed > 0) {
+    introParts.push(t("introExternalAssessed", { count: externalAssessed }));
+  }
+  if (externalDiscovered > 0) {
+    introParts.push(t("introExternalDiscovered", { count: externalDiscovered }));
   }
   return {
     kind: "matches",

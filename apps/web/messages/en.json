@@ -9136,7 +9136,25 @@
       },
       "confirmNotice": "Your application continues on another portal — in the original advertisement.",
       "confirmContinue": "Continue",
-      "confirmDismiss": "Cancel"
+      "confirmDismiss": "Cancel",
+      "bandNotAssessed": "Not yet assessed",
+      "bandMissingRequirement": "Missing a requirement",
+      "bandConflict": "Conflict"
+    },
+    "fitWhy": {
+      "skills_missing": "lacks skills the ad requires",
+      "language_missing": "requires a language you have not listed",
+      "location_outside_radius": "location outside your stated radius",
+      "pay_above_offer": "your pay expectation is above the offer",
+      "accommodation_needed_not_provided": "you need accommodation and none is offered",
+      "profession_mismatch": "a different profession than yours",
+      "need_not_structured": "the ad states no skill requirements — nothing to compare against",
+      "need_recognized_not_confirmed": "requirements were recognized from the ad's text, not yet confirmed",
+      "no_subject_skills": "your profile lists no skills yet — nothing to compare",
+      "location_unknown": "your location is not stated",
+      "pay_unknown": "pay could not be compared",
+      "language_unknown": "your languages are not stated",
+      "language_requirement_unknown": "the ad's language requirement is unknown"
     }
   },
   "workerIntake": {
@@ -12969,7 +12987,11 @@
       "fitInsufficient": "Not enough data",
       "locationReason": "Location: {location}",
       "roleReason": "Need: {role}",
-      "introExternal": "There are {count} public job ads from official sources in the panel — applying happens through the original advertisement."
+      "introExternalAssessed": "The panel has {count, plural, one {# public job ad I assessed as a fit} other {# public job ads I assessed as fits}} — applying happens through the original advertisement.",
+      "introExternalDiscovered": "I also found {count, plural, one {# public posting whose fit I cannot assess yet, or that asks for something you lack} other {# public postings whose fit I cannot assess yet, or that ask for something you lack}} — the panel says why beside each. These are found postings, not fits.",
+      "fitNotAssessed": "Not yet assessed",
+      "fitMissingRequirement": "Missing a requirement",
+      "fitConflict": "Conflict"
     },
     "summary": {
       "introProfile": "Here's your profile as it stands: {done} of {total} essentials are saved.",
@@ -13130,7 +13152,8 @@
         "organization": "organization"
       },
       "opportunities": {
-        "title": "Jobs that fit you"
+        "title": "Jobs that fit you",
+        "titleDiscovery": "Found postings (not yet assessed)"
       },
       "opportunitiesError": "Could not read the jobs that fit you.",
       "opportunitiesUnavailable": "The demand source is not enabled yet, so there is nothing to match against.",

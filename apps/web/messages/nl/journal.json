@@ -761,6 +761,28 @@
       "linked": "{hours} u beschrijven journaalregistraties die hierboven al zijn geteld",
       "rejected": "{hours} u afgewezen in een urenstaat — nergens geteld",
       "rule": "Een urenregistratie zegt wanneer en hoe lang, niet wat er is gedaan — daarom bereiken deze uren geen enkele vaardigheid en geen enkel soort werk. Alleen een journaalregistratie doet dat."
+    },
+    "growthKindsTitle": "Wat je vermeldingen laten zien",
+    "growthKindsHint": "Elke regel is een soort, afgeleid met een eenvoudige regel uit je eigen vermeldingen, met de feiten waarop die steunt. Geen eigenschap, geen beoordeling.",
+    "growthKind": {
+      "core_strength": "Kernsterkte",
+      "growing": "Groeit",
+      "underused": "Onderbenut",
+      "self_stated": "Alleen zelf opgegeven",
+      "adjacent_opportunity": "Aangrenzende kans"
+    },
+    "growthWhyHours": "{hours} u — {percent} van je toegewezen uren",
+    "growthWhyInvolved": "betrokken {hours} u naast andere vaardigheden",
+    "growthWhyUntimed": "vermeldingen zonder duur",
+    "growthWhyCounts": "{entries, plural, one {# vermelding} other {# vermeldingen}}, {contexts, plural, one {# context} other {# contexten}}",
+    "growthWhyLastDay": "laatst {day}",
+    "growthWhyDormant": "{days} dagen zonder vermelding",
+    "growthWhySelfStated": "door jou opgegeven — 0 vermeldingen en 0 uren onderbouwen dit",
+    "growthWhyTrend": {
+      "up": "de laatste 30 dagen meer gebruikt dan de 30 daarvoor",
+      "new": "eerste vermeldingen in de laatste 30 dagen",
+      "down": "de laatste 30 dagen minder gebruikt dan de 30 daarvoor",
+      "flat": "de laatste 30 dagen evenveel gebruikt als de 30 daarvoor"
     }
   },
   "verification": {

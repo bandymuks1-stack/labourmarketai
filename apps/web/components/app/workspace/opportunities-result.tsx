@@ -10,9 +10,15 @@ import { useWorldStateOptional } from "@/components/app/world-state/world-state-
 import { loadOpportunitiesResultAction } from "@/lib/marketplace/worker-opportunities-actions";
 import type {
   InterestLabelBag,
+  OpportunitiesResultExternalRow,
   OpportunitiesResultMatch,
   OpportunitiesResultView,
 } from "@/lib/marketplace/worker-opportunities-contract";
+import {
+  FIT_BAND_ORDER,
+  isAssessedFit,
+  type FitBand,
+} from "@/lib/opportunities/fit-band";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 
 /**
@@ -46,7 +52,10 @@ import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
  *
  * NOTHING IS COMPUTED HERE. Every value rendered came from a row the canonical
  * use case returned. There is no score, no ranking of its own, and no sentence
- * about whether a job is a good idea.
+ * about whether a job is a good idea. External rows are GROUPED by the fit
+ * band each row already carries (#1689, defect H) — a grouping, not a
+ * judgement — and a result with nothing assessed as a fit heads itself
+ * "found postings (not yet assessed)", never "jobs that fit you".
  *
  * NO ROUTING. Like every other result body, this component holds no `<Link>`
  * and no router — `onOpenFull` is the workspace layer's callback to the
@@ -156,8 +165,31 @@ export function OpportunitiesResult({
     );
   }
 
+  // The bands, in the engine's strongest-first order; empty bands are not
+  // rendered. Pure grouping of a field each row already carries.
+  const externalGroups = FIT_BAND_ORDER.map((band) => ({
+    band,
+    rows: view.external.filter((row) => row.band === band),
+  })).filter((g) => g.rows.length > 0);
+  // DISCOVERY-ONLY: nothing the engine assessed as a fit — no platform match
+  // and no strong/possible external ad. The result then heads itself
+  // "found postings (not yet assessed)"; "jobs that fit you" over such rows
+  // was the production defect.
+  const discoveryOnly =
+    view.matches.length === 0 &&
+    view.external.length > 0 &&
+    view.external.every((row) => !isAssessedFit(row.band));
+
   return (
     <div className="flex flex-col gap-3" data-testid="opportunities-view">
+      {discoveryOnly && (
+        <h3
+          className="text-support font-semibold text-text-primary"
+          data-testid="opportunities-discovery-title"
+        >
+          {t("opportunities.titleDiscovery")}
+        </h3>
+      )}
       {/* Rendering IS the read event — and only the rows below are reported,
           never the full loaded set. */}
       {view.matches.length > 0 && (
@@ -203,20 +235,40 @@ export function OpportunitiesResult({
       {/* EXTERNAL public-source ads — the same rows the board's external
           section renders, compact. Provenance on every row; the publisher's
           original ad is the ONLY action (no platform apply, no interest —
-          the employer never agreed to receive any of that). */}
+          the employer never agreed to receive any of that).
+
+          GROUPED BY FIT BAND (#1689, defect H). The rows used to render as
+          one plain list under this result's "jobs that fit you" heading —
+          and on production that list was an `insufficient_data` "Senior AI
+          Engineer" and a `weak` "Rörmokare". The engine's verdict decides the
+          group, the shared comparator already decided the order inside each;
+          a found posting is never called suitable. */}
       {view.external.length > 0 && (
         <div
           className="flex flex-col gap-2"
           data-testid="opportunities-external-rows"
+          data-discovery-only={discoveryOnly ? "true" : undefined}
         >
           <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tOpp("external.sectionTitle")} · {view.totalExternal}
           </span>
-          <ul className="flex flex-col divide-y divide-border/40">
-            {view.external.map((row) => (
-              <ExternalRow key={row.key} row={row} />
-            ))}
-          </ul>
+          {externalGroups.map((group) => (
+            <div
+              key={group.band}
+              className="flex flex-col gap-1"
+              data-testid="opportunities-external-band"
+              data-band={group.band}
+            >
+              <span className="text-meta font-medium text-text-secondary">
+                {tOpp(BAND_TITLE[group.band])} · {group.rows.length}
+              </span>
+              <ul className="flex flex-col divide-y divide-border/40">
+                {group.rows.map((row) => (
+                  <ExternalRow key={row.key} row={row} />
+                ))}
+              </ul>
+            </div>
+          ))}
           {view.totalExternal > view.external.length && (
             <p
               className="text-meta text-text-muted"
@@ -260,6 +312,36 @@ const FIT_LABEL: Record<string, string> = {
   possible: "fitPossible",
   weak: "fitWeak",
   insufficient: "fitInsufficient",
+};
+
+/**
+ * FIT BAND vocabulary for EXTERNAL rows (#1689, defect H) — total over the
+ * five bands. Group headings reuse the board's own `external.band*` keys
+ * (one vocabulary for external ads, whichever surface renders them); the
+ * badge reuses the conversation's FIT_LABEL words for the two assessed
+ * bands and names the three others for what they are. `not_assessed` is
+ * painted like `insufficient` above: muted, never success.
+ */
+const BAND_TITLE: Record<FitBand, string> = {
+  strong: "external.bandBest",
+  possible: "external.bandPossible",
+  missing_requirement: "external.bandMissingRequirement",
+  conflict: "external.bandConflict",
+  not_assessed: "external.bandNotAssessed",
+};
+const BAND_FIT_LABEL: Record<FitBand, string> = {
+  strong: FIT_LABEL.strong,
+  possible: FIT_LABEL.possible,
+  missing_requirement: "fitMissingRequirement",
+  conflict: "fitConflict",
+  not_assessed: "fitNotAssessed",
+};
+const BAND_BADGE: Record<FitBand, string> = {
+  strong: FIT_BADGE.strong,
+  possible: FIT_BADGE.possible,
+  missing_requirement: FIT_BADGE.weak,
+  conflict: "bg-state-amber/10 text-state-amber",
+  not_assessed: FIT_BADGE.insufficient,
 };
 
 /** One match. Every line is a field from the row; nothing is derived here. */
@@ -425,18 +507,50 @@ function MatchRow({
  * original ad mirrors the board section's own control — it is an external
  * link, not internal routing, so the panel's "no router" rule holds.
  */
-function ExternalRow({ row }: { row: import("@/lib/marketplace/worker-opportunities-contract").OpportunitiesResultExternalRow }) {
+function ExternalRow({ row }: { row: OpportunitiesResultExternalRow }) {
   // The SAME label keys the board's external section uses — one vocabulary
   // for external ads, whichever surface renders them.
   const tOpp = useTranslations("opportunities");
+  const tFind = useTranslations("conversation.findWork");
+  // WHY the row sits in its band — the engine's own codes, in words. An
+  // existing gap sentence is reused where one exists; a code with no copy
+  // is dropped rather than shown raw. Nothing is judged here: every line is
+  // a code the engine emitted for THIS worker against THIS ad.
+  const whyText = (code: string): string | null =>
+    tOpp.has(`gap.${code}`)
+      ? tOpp(`gap.${code}` as never)
+      : tOpp.has(`fitWhy.${code}`)
+        ? tOpp(`fitWhy.${code}` as never)
+        : null;
+  const why = [...row.gapCodes, ...row.missingDataCodes]
+    .map(whyText)
+    .filter((s): s is string => s !== null);
   return (
     <li
       className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0"
       data-testid="opportunities-external-row"
+      data-band={row.band}
     >
-      <span className="text-support font-semibold text-text-primary">
-        {row.title}
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="min-w-0 text-support font-semibold text-text-primary">
+          {row.title}
+        </span>
+        <span
+          data-fit-status={row.fitStatus}
+          data-testid="opportunities-external-fit"
+          className={`flex-none rounded-full px-2 py-0.5 text-meta font-semibold ${BAND_BADGE[row.band]}`}
+        >
+          {tFind(BAND_FIT_LABEL[row.band])}
+        </span>
       </span>
+      {why.length > 0 && (
+        <span
+          className="text-meta text-text-secondary"
+          data-testid="opportunities-external-why"
+        >
+          {why.join(" · ")}
+        </span>
+      )}
       <span className="text-meta text-text-muted">
         {[row.employerName, row.city, row.country].filter(Boolean).join(" · ")}
         {" · "}

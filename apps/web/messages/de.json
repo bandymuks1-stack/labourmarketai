@@ -9136,7 +9136,25 @@
       },
       "confirmNotice": "Ihre Bewerbung wird auf einem anderen Portal fortgesetzt — in der Originalanzeige.",
       "confirmContinue": "Weiter",
-      "confirmDismiss": "Abbrechen"
+      "confirmDismiss": "Abbrechen",
+      "bandNotAssessed": "Noch nicht bewertet",
+      "bandMissingRequirement": "Anforderung fehlt",
+      "bandConflict": "Konflikt"
+    },
+    "fitWhy": {
+      "skills_missing": "es fehlen in der Anzeige geforderte Fähigkeiten",
+      "language_missing": "verlangt eine Sprache, die du nicht angegeben hast",
+      "location_outside_radius": "Ort außerhalb deines angegebenen Umkreises",
+      "pay_above_offer": "deine Gehaltserwartung liegt über dem Angebot",
+      "accommodation_needed_not_provided": "du brauchst eine Unterkunft, es wird keine angeboten",
+      "profession_mismatch": "ein anderer Beruf als deiner",
+      "need_not_structured": "die Anzeige nennt keine Anforderungen an Fähigkeiten — nichts zum Vergleichen",
+      "need_recognized_not_confirmed": "Anforderungen wurden aus dem Anzeigentext erkannt, noch nicht bestätigt",
+      "no_subject_skills": "dein Profil enthält noch keine Fähigkeiten — nichts zum Vergleichen",
+      "location_unknown": "dein Standort ist nicht angegeben",
+      "pay_unknown": "Vergütung konnte nicht verglichen werden",
+      "language_unknown": "deine Sprachen sind nicht angegeben",
+      "language_requirement_unknown": "die Sprachanforderung der Anzeige ist unbekannt"
     }
   },
   "workerIntake": {
@@ -12969,7 +12987,11 @@
       "fitInsufficient": "Nicht genug Daten",
       "locationReason": "Ort: {location}",
       "roleReason": "Bedarf: {role}",
-      "introExternal": "Im Panel gibt es {count} öffentliche Stellenanzeigen aus offiziellen Quellen — die Bewerbung erfolgt über die Originalanzeige."
+      "introExternalAssessed": "Im Panel {count, plural, one {ist # öffentliche Stellenanzeige, die ich als passend bewertet habe} other {sind # öffentliche Stellenanzeigen, die ich als passend bewertet habe}} — die Bewerbung erfolgt über die Originalanzeige.",
+      "introExternalDiscovered": "Außerdem habe ich {count, plural, one {# öffentliche Anzeige gefunden, deren Passung ich noch nicht bewerten kann oder bei der dir etwas fehlt} other {# öffentliche Anzeigen gefunden, deren Passung ich noch nicht bewerten kann oder bei denen dir etwas fehlt}} — im Panel steht bei jeder, warum. Das sind gefundene Anzeigen, keine Treffer.",
+      "fitNotAssessed": "Noch nicht bewertet",
+      "fitMissingRequirement": "Anforderung fehlt",
+      "fitConflict": "Konflikt"
     },
     "summary": {
       "introProfile": "So sieht dein Profil aktuell aus: {done} von {total} Grundangaben sind gespeichert.",
@@ -13130,7 +13152,8 @@
         "organization": "Organisation"
       },
       "opportunities": {
-        "title": "Passende Jobs"
+        "title": "Passende Jobs",
+        "titleDiscovery": "Gefundene Anzeigen (noch nicht bewertet)"
       },
       "opportunitiesError": "Die passenden Jobs konnten nicht geladen werden.",
       "opportunitiesUnavailable": "Die Bedarfsquelle ist noch nicht aktiviert, es gibt also noch nichts zum Abgleichen.",

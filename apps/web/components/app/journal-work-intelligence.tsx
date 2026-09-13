@@ -12,7 +12,7 @@ import {
   type WorkPeriodKey,
   type WorkTrend,
 } from "@/lib/journal/work-intelligence";
-import { deriveGrowthReading } from "@/lib/journal/growth-reading";
+import { deriveGrowthReading, type GrowthDirection } from "@/lib/journal/growth-reading";
 import { deriveAttributionExpectation } from "@/lib/journal/attribution-expectation";
 import { JournalWorkTimeCheckAck } from "@/components/app/journal-work-time-check-ack";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
@@ -130,6 +130,11 @@ const MAX_SKILLS = 8;
 const MAX_ACTIVITIES = 6;
 const MAX_MONTHS = 12;
 const MAX_DIRECTIONS = 3;
+const MAX_KINDS = 6;
+
+/** The skill-kinds of the growth reading — every direction except the
+ *  adjacent one, which the directions block renders. */
+type GrowthSkillDirection = Exclude<GrowthDirection, { kind: "adjacent_opportunity" }>;
 
 function fmtHours(hours: number, locale: string): string {
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(
@@ -213,6 +218,32 @@ export async function JournalWorkIntelligence({
   const deepen = (growth?.deepen ?? [])
     .map((d) => ({ ...d, name: labels.skillName(d.slug) }))
     .filter((d): d is typeof d & { name: string } => d.name !== null);
+  // the KINDS over skills (owner requirement 5, #1689) — core strength /
+  // growing / underused / self-stated, each with the facts it was decided
+  // on; the adjacent kind is the existing directions block below, labelled
+  const kindsAll = (growth?.directions ?? [])
+    .filter((d): d is GrowthSkillDirection => d.kind !== "adjacent_opportunity")
+    .map((d) => ({ ...d, name: labels.skillName(d.slug) }))
+    .filter((d): d is typeof d & { name: string } => d.name !== null);
+  const kinds = kindsAll.slice(0, MAX_KINDS);
+  // every sentence names the evidence: the figures the kind was decided on
+  const kindWhy = (d: GrowthSkillDirection): string => {
+    if (d.kind === "self_stated") return t("growthWhySelfStated");
+    const w = d.why;
+    const parts: string[] = [
+      w.attributedHours > 0
+        ? t("growthWhyHours", { hours: fmtHours(w.attributedHours, locale), percent: fmtPct(w.share, locale) })
+        : w.sharedHours > 0
+          ? t("growthWhyInvolved", { hours: fmtHours(w.sharedHours, locale) })
+          : t("growthWhyUntimed"),
+      t("growthWhyCounts", { entries: w.entries, contexts: w.contexts }),
+    ];
+    if (d.kind === "underused") parts.push(t("growthWhyDormant", { days: d.why.dormantDays }));
+    const last = day(w.lastWorkedDay);
+    if (last) parts.push(t("growthWhyLastDay", { day: last }));
+    if (w.trend !== "none") parts.push(t(`growthWhyTrend.${w.trend}`));
+    return parts.join(" · ");
+  };
   const directions = (growth?.expand ?? [])
     .map((d) => ({
       ...d,
@@ -241,7 +272,7 @@ export async function JournalWorkIntelligence({
     (d) => labels.professionName(d.professionId) !== null,
   ).length;
   const capLine = (
-    kind: "skills" | "activities" | "months" | "directions" | "deepen",
+    kind: "skills" | "activities" | "months" | "directions" | "deepen" | "kinds",
     shown: number,
     total: number,
   ) =>
@@ -1101,13 +1132,44 @@ export async function JournalWorkIntelligence({
                       {capLine("deepen", deepen.length, growth?.deepenTotal ?? deepen.length)}
                     </div>
                   )}
+                  {/* the KINDS (owner requirement 5): each skill's kind, decided
+                      by a plain rule, with the facts it was decided on — the
+                      evidence named on every line, never a trait */}
+                  {kinds.length > 0 && (
+                    <div className="flex flex-col gap-1" data-testid="wi-growth-kinds">
+                      <h4 className="text-meta font-medium text-text-secondary">{t("growthKindsTitle")}</h4>
+                      <p className="text-meta leading-relaxed text-text-muted">{t("growthKindsHint")}</p>
+                      <ul className="flex flex-col gap-1">
+                        {kinds.map((d) => (
+                          <li
+                            key={`${d.kind}:${d.slug}`}
+                            className="text-meta text-text-muted"
+                            data-testid={`wi-kind-${d.slug}`}
+                            data-kind={d.kind}
+                          >
+                            <span className="rounded-md border border-border-subtle px-1.5 py-0.5 text-text-secondary">
+                              {t(`growthKind.${d.kind}`)}
+                            </span>{" "}
+                            <span className="font-medium text-text-primary">{d.name}</span>
+                            {" — "}
+                            {kindWhy(d)}
+                          </li>
+                        ))}
+                      </ul>
+                      {capLine("kinds", kinds.length, kindsAll.length)}
+                    </div>
+                  )}
                   {directions.length > 0 && (
               <div
                 className="flex flex-col gap-1.5"
                 data-testid="wi-directions"
+                data-kind="adjacent_opportunity"
               >
                 <h4 className="text-meta font-medium text-text-secondary">
-                  {t("directionsTitle")}
+                  {t("directionsTitle")}{" "}
+                  <span className="rounded-md border border-border-subtle px-1.5 py-0.5 text-meta font-normal text-text-secondary">
+                    {t("growthKind.adjacent_opportunity")}
+                  </span>
                 </h4>
                 <p className="text-meta leading-relaxed text-text-muted">
                   {t("directionsHint")}

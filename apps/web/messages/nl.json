@@ -9136,7 +9136,25 @@
       },
       "confirmNotice": "Je sollicitatie gaat verder op een ander portaal — in de originele advertentie.",
       "confirmContinue": "Doorgaan",
-      "confirmDismiss": "Annuleren"
+      "confirmDismiss": "Annuleren",
+      "bandNotAssessed": "Nog niet beoordeeld",
+      "bandMissingRequirement": "Vereiste ontbreekt",
+      "bandConflict": "Strijdig"
+    },
+    "fitWhy": {
+      "skills_missing": "mist vaardigheden die de advertentie vereist",
+      "language_missing": "vereist een taal die je niet hebt opgegeven",
+      "location_outside_radius": "locatie buiten je opgegeven straal",
+      "pay_above_offer": "je loonverwachting ligt boven het aanbod",
+      "accommodation_needed_not_provided": "je hebt huisvesting nodig en die wordt niet geboden",
+      "profession_mismatch": "een ander beroep dan het jouwe",
+      "need_not_structured": "de advertentie noemt geen vaardigheidseisen — niets om mee te vergelijken",
+      "need_recognized_not_confirmed": "eisen zijn herkend uit de advertentietekst, nog niet bevestigd",
+      "no_subject_skills": "je profiel bevat nog geen vaardigheden — niets om te vergelijken",
+      "location_unknown": "je locatie is niet opgegeven",
+      "pay_unknown": "loon kon niet worden vergeleken",
+      "language_unknown": "je talen zijn niet opgegeven",
+      "language_requirement_unknown": "de taaleis van de advertentie is onbekend"
     }
   },
   "workerIntake": {
@@ -12969,7 +12987,11 @@
       "fitInsufficient": "Onvoldoende gegevens",
       "locationReason": "Locatie: {location}",
       "roleReason": "Behoefte: {role}",
-      "introExternal": "In het paneel staan {count} openbare vacatures uit officiële bronnen — solliciteren gebeurt via de originele advertentie."
+      "introExternalAssessed": "In het paneel {count, plural, one {staat # openbare vacature die ik als passend heb beoordeeld} other {staan # openbare vacatures die ik als passend heb beoordeeld}} — solliciteren gebeurt via de originele advertentie.",
+      "introExternalDiscovered": "Ik vond ook {count, plural, one {# openbare advertentie waarvan ik de match nog niet kan beoordelen of waarvoor je iets mist} other {# openbare advertenties waarvan ik de match nog niet kan beoordelen of waarvoor je iets mist}} — in het paneel staat bij elke waarom. Dit zijn gevonden advertenties, geen matches.",
+      "fitNotAssessed": "Nog niet beoordeeld",
+      "fitMissingRequirement": "Vereiste ontbreekt",
+      "fitConflict": "Strijdig"
     },
     "summary": {
       "introProfile": "Dit is je profiel op dit moment: {done} van {total} basisgegevens zijn opgeslagen.",
@@ -13130,7 +13152,8 @@
         "organization": "organisatie"
       },
       "opportunities": {
-        "title": "Vacatures die bij je passen"
+        "title": "Vacatures die bij je passen",
+        "titleDiscovery": "Gevonden advertenties (nog niet beoordeeld)"
       },
       "opportunitiesError": "Kon de vacatures die bij je passen niet laden.",
       "opportunitiesUnavailable": "De vraagbron is nog niet ingeschakeld, dus er valt nog niets te matchen.",

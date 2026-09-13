@@ -9136,7 +9136,25 @@
       },
       "confirmNotice": "Kandidatavimas tęsiamas kitame portale — originaliame skelbime.",
       "confirmContinue": "Tęsti",
-      "confirmDismiss": "Atšaukti"
+      "confirmDismiss": "Atšaukti",
+      "bandNotAssessed": "Dar neįvertinti",
+      "bandMissingRequirement": "Trūksta reikalavimo",
+      "bandConflict": "Nesuderinami"
+    },
+    "fitWhy": {
+      "skills_missing": "trūksta skelbime reikalaujamų įgūdžių",
+      "language_missing": "reikalaujama kalba, kurios nenurodėte",
+      "location_outside_radius": "vieta už jūsų nurodyto atstumo",
+      "pay_above_offer": "jūsų atlygio lūkestis viršija pasiūlymą",
+      "accommodation_needed_not_provided": "reikia apgyvendinimo, o jis nesiūlomas",
+      "profession_mismatch": "kita profesija nei jūsų",
+      "need_not_structured": "skelbime nenurodyti įgūdžių reikalavimai — palyginti negalima",
+      "need_recognized_not_confirmed": "reikalavimai atpažinti iš skelbimo teksto, dar nepatvirtinti",
+      "no_subject_skills": "jūsų profilyje dar nėra įgūdžių — palyginti negalima",
+      "location_unknown": "nenurodyta jūsų vieta",
+      "pay_unknown": "atlygis nepalyginamas",
+      "language_unknown": "nenurodytos jūsų kalbos",
+      "language_requirement_unknown": "kalbų reikalavimas skelbime neaiškus"
     }
   },
   "workerIntake": {
@@ -12969,7 +12987,11 @@
       "fitInsufficient": "Trūksta duomenų",
       "locationReason": "Vieta: {location}",
       "roleReason": "Poreikis: {role}",
-      "introExternal": "Skydelyje yra {count} viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą."
+      "introExternalAssessed": "Skydelyje yra {count, plural, one {# viešas darbo skelbimas, kurį įvertinau kaip tinkantį} few {# vieši darbo skelbimai, kuriuos įvertinau kaip tinkančius} other {# viešų darbo skelbimų, kuriuos įvertinau kaip tinkančius}} — kandidatuojama per originalų skelbimą.",
+      "introExternalDiscovered": "Dar radau {count, plural, one {# viešą skelbimą, kurio tinkamumo dar negaliu įvertinti arba kuriame trūksta reikalavimo} few {# viešus skelbimus, kurių tinkamumo dar negaliu įvertinti arba kuriuose trūksta reikalavimo} other {# viešų skelbimų, kurių tinkamumo dar negaliu įvertinti arba kuriuose trūksta reikalavimo}} — skydelyje prie kiekvieno nurodyta kodėl. Tai rasti skelbimai, ne tinkantys.",
+      "fitNotAssessed": "Dar neįvertinta",
+      "fitMissingRequirement": "Trūksta reikalavimo",
+      "fitConflict": "Nesuderinama"
     },
     "summary": {
       "introProfile": "Štai tavo profilis šiandien: išsaugota {done} iš {total} esminių dalių.",
@@ -13130,7 +13152,8 @@
         "organization": "organizacija"
       },
       "opportunities": {
-        "title": "Man tinkantys darbai"
+        "title": "Man tinkantys darbai",
+        "titleDiscovery": "Rasti skelbimai (dar neįvertinti)"
       },
       "opportunitiesError": "Nepavyko nuskaityti jums tinkančių darbų.",
       "opportunitiesUnavailable": "Poreikių šaltinis dar neįjungtas, todėl atitikmenų kol kas nėra iš ko skaičiuoti.",
