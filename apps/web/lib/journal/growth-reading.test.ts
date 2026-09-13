@@ -31,7 +31,10 @@ function entry(
     entryId: id,
     createdAt: `${day}T09:00:00.000Z`,
     metrics: [workDate(day), hours(h)].map((m) => ({ ...m, created_at: `${day}T09:00:00.000Z` })),
-    engagementContextId: null,
+    // ONE engagement context for the base fixture: the model counts DISTINCT
+    // engagement contexts (lane B — an entry with none is the personal
+    // journal, in every hour figure but not "a place").
+    engagementContextId: "ctx-a",
     reviewResult,
     linkedSkillIds: linked,
   };

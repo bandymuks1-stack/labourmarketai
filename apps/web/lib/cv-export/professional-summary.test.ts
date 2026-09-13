@@ -53,8 +53,9 @@ describe("professional facts — derived only from the canonical reading", () =>
     expect(f.entries).toBe(14);
     expect(f.firstMonth).toBe("2025-03");
     expect(f.lastMonth).toBe("2026-09");
-    // a context with no entries is not "a place the person worked"
-    expect(f.contexts).toBe(2);
+    // a context with no entries is not "a place the person worked", and the
+    // personal journal (no engagement context) is not a place either
+    expect(f.contexts).toBe(1);
   });
 
   it("top skills are the largest shares above the floor, at most three, desc", () => {

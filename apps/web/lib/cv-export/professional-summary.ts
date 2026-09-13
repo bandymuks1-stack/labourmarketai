@@ -29,8 +29,10 @@ export type ProfessionalFacts = {
   /** Of `hours`, the part a manager approved. */
   readonly confirmedHours: number;
   readonly entries: number;
-  /** Distinct engagement contexts the entries belong to (the personal
-   *  context counts as one when entries were written against it). */
+  /** Distinct ENGAGEMENT contexts the entries belong to — organizations /
+   *  placements the person worked at. Entries without a context (the
+   *  personal journal) are in every hour figure but are not "a place";
+   *  same rule as `SkillWorkTime.contexts` (lane B). */
   readonly contexts: number;
   /** `YYYY-MM` of the oldest / newest month with an entry. */
   readonly firstMonth: string | null;
@@ -75,7 +77,7 @@ export function deriveProfessionalFacts(
     hours,
     confirmedHours: all?.confirmedHours ?? 0,
     entries,
-    contexts: wi.contexts.filter((c) => c.entries > 0).length,
+    contexts: wi.contexts.filter((c) => c.engagementContextId !== null && c.entries > 0).length,
     firstMonth: months[0]?.month ?? null,
     lastMonth: months[months.length - 1]?.month ?? null,
     topSkills,
