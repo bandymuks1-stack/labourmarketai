@@ -31,6 +31,17 @@
 > maximum boundary**. Preserve what exists, add what is now known, keep the
 > extension points.
 
+> ⚖️ **Owner execution principle — delivery over legacy constraints**
+> ([`docs/DECISIONS/0016-delivery-over-legacy-constraints.md`](docs/DECISIONS/0016-delivery-over-legacy-constraints.md),
+> 2026-09-13): never duplicate; always reuse or extend when that realizes the
+> approved intent without degrading UX / architecture / security; add the
+> smallest coherent structure (capability, component, view, route, …) when an
+> owner-approved decision cannot be realized properly by what exists; never
+> force a requirement into an unsuitable old page; if a constitution clause
+> blocks approved intent, name the exact conflict and propose the smallest
+> amendment (A-14, decision 0015) — never a silent workaround. Optimize for the
+> shortest path to a real, production-usable end-to-end result.
+>
 > 📜 **Read [`docs/PLATFORM_DOCTRINE.md`](docs/PLATFORM_DOCTRINE.md) first** — canonical, permanent, binding platform doctrine. If a task spec contradicts it, the doctrine wins (flag the conflict in the PR).
 >
 > 🧭 Prieš planuojant ar įgyvendinant produkto funkcijas privaloma perskaityti
