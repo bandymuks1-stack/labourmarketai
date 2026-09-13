@@ -99,3 +99,15 @@ supabase/.temp/
 # Playwright JSON report — written by the E2E Smoke workflow's executed-count
 # guard (.github/workflows/e2e-smoke.yml) and by local subset runs.
 /apps/web/e2e-report.json
+
+# Impeccable (design QA plugin) — machine/session-scoped state only.
+# Everything else under .impeccable/ is tracked on purpose:
+#   config.json  — carries the automatic-hook disable
+#   design.json  — the design-system sidecar, read back by the detector, so an
+#                  untracked copy would make findings differ per checkout
+#   surfaces/    — authored per-surface briefs
+/.impeccable/hook.cache.json
+/.impeccable/hook.pending.json
+/.impeccable/config.local.json
+/.impeccable/live/
+/.impeccable/critique/
