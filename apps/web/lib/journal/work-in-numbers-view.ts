@@ -6,7 +6,7 @@
  * Pure: no IO, no i18n, no clock. Every figure in here is READ from the ONE
  * work-intelligence model (`lib/journal/work-intelligence.ts`); nothing is
  * re-derived, summed or re-scoped. The two consumers — the journal page's
- * compact summary and the `/dashboard/journal?view=numbers` station — build their
+ * compact summary and the `/dashboard/work-in-numbers` station — build their
  * rows through these functions so a figure is composed ONCE and renders the
  * same on both.
  *
@@ -36,6 +36,10 @@ import type {
 import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 
 /** What the surface may render for a model it was handed. */
+
+/** The station's one address (A-14 surface, decision 0015). Every link to
+ *  "Mano veikla skaičiais" is built from this constant. */
+export const WORK_IN_NUMBERS_HREF = "/dashboard/work-in-numbers";
 export type NumbersState = "unknown" | "no_entries" | "ok";
 
 export function numbersState(wi: WorkIntelligence | null | undefined): NumbersState {

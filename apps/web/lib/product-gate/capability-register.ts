@@ -859,6 +859,7 @@ const EVIDENCE: readonly CapabilityRow[] = [
       "app/[locale]/cv",
       "app/[locale]/dashboard/people/[workerId]",
       "app/[locale]/dashboard/reports",
+      "app/[locale]/dashboard/work-in-numbers",
       "components/app/journal-work-intelligence.tsx",
     ],
     note:

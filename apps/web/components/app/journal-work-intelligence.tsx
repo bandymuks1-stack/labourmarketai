@@ -15,7 +15,7 @@ import { formatUtcDate } from "@/lib/time/display";
 // ONE rendering of every figure (target worker IA 2026-09-13): the period
 // tiles, the checks, the organization's ledger, the share bars, the honest
 // remainder and the growth kinds are the SAME components the Work-in-Numbers
-// station (`/dashboard/journal?view=numbers`) composes — this block only arranges
+// station (`/dashboard/work-in-numbers`) composes — this block only arranges
 // them for the audience it serves.
 import { ChecksList } from "@/components/app/work-in-numbers/checks-list";
 import { fmtHours, fmtPct } from "@/components/app/work-in-numbers/format";
@@ -171,7 +171,7 @@ export async function JournalWorkIntelligence({
   // figures' stable destination, target IA §2); the organization view passes
   // the person page it sits on
   const periodHref = (key: WorkPeriodKey): string =>
-    labels.periodHref?.(key) ?? `/dashboard/journal?view=numbers&period=${key}`;
+    labels.periodHref?.(key) ?? `/dashboard/work-in-numbers?period=${key}`;
   const period =
     wi.periods.find((p) => p.key === wi.focus) ??
     wi.periods[wi.periods.length - 1]!;

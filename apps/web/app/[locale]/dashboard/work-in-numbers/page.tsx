@@ -16,6 +16,7 @@ import { deriveAttributionExpectation } from "@/lib/journal/attribution-expectat
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 import {
+  WORK_IN_NUMBERS_HREF,
   dominantAnswer,
   focusPeriod,
   orgLedger,
@@ -39,12 +40,14 @@ import { formatUtcDate } from "@/lib/time/display";
  * MANO VEIKLA SKAIČIAIS — the Work-in-Numbers station (target worker IA
  * 2026-09-13 §2; issue #1689 / #1724). Worker-only, server-rendered.
  *
- * NOT A PAGE OF ITS OWN. The Product Constitution (A-01: one workspace, no
- * page switching) reserves a new route to an owner ruling, so the station
- * is a VIEW of the existing journal route — `/dashboard/journal?view=numbers`
- * — with `/dashboard/journal/numbers` kept as a redirect alias. Same stable,
- * linkable destination the IA names; no new surface until the owner amends
- * the constitution (audit §21.3, owner-gate batch).
+ * A FIRST-CLASS SURFACE under Product Constitution A-14 (owner decision
+ * 0015, 2026-09-13): the person's DERIVED reading of their work over a period
+ * is a distinct user job (understand what dominates, over which window, how
+ * it moves) on the TIME → CAPABILITY edge of the product graph — not the
+ * journal's job (record → see it saved → correct). Declared in
+ * `lib/product-gate/surface-registry.ts`; owns no action (the journal owns
+ * every write); reads through the ONE reader the journal, the CV, the chat
+ * and the organization pages read.
  *
  * Answers, first and above the fold on a phone, "Kokie įgūdžiai užima
  * didžiausią mano veiklos dalį?" — then, in this order: the period
@@ -67,21 +70,19 @@ const MAX_STATION_DIRECTIONS = 3;
 
 const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
 
-export type WorkInNumbersSearchParams = {
-  period?: string | string[];
-  from?: string | string[];
-  to?: string | string[];
-};
-
-export const WORK_IN_NUMBERS_HREF = "/dashboard/journal?view=numbers";
-
-export async function WorkInNumbersStation({
-  locale,
-  sp,
+export default async function WorkInNumbersPage({
+  params,
+  searchParams,
 }: {
-  locale: string;
-  sp: WorkInNumbersSearchParams;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<{
+    period?: string | string[];
+    from?: string | string[];
+    to?: string | string[];
+  }>;
 }) {
+  const { locale } = await params;
+  const sp = (await searchParams) ?? {};
   setRequestLocale(locale);
 
   const periodKey: WorkPeriodKey =
@@ -134,9 +135,9 @@ export async function WorkInNumbersStation({
   const unitNameOf = safeName(tUnit, "productivityUnits");
   const dayLabel = (iso: string | null) =>
     iso ? (formatUtcDate(iso, locale, { month: "short", day: "numeric" }) ?? iso) : null;
-  const periodHref = (key: WorkPeriodKey) => `${WORK_IN_NUMBERS_HREF}&period=${key}`;
+  const periodHref = (key: WorkPeriodKey) => `${WORK_IN_NUMBERS_HREF}?period=${key}`;
   const rangeHref = focusRange
-    ? `${WORK_IN_NUMBERS_HREF}&from=${focusRange.startIso}&to=${focusRange.endIso}`
+    ? `${WORK_IN_NUMBERS_HREF}?from=${focusRange.startIso}&to=${focusRange.endIso}`
     : undefined;
 
   // ── every row below is READ from the one model; nothing re-derived ──────

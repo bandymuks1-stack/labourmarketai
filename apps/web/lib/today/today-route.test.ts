@@ -108,7 +108,7 @@ describe("the three worker tabs and the stations", () => {
   it("every station is one of the IA's named destinations", () => {
     expect(TODAY_STATIONS.map((s) => [s.id, s.href])).toEqual([
       ["journal", "/dashboard/journal"],
-      ["numbers", "/dashboard/journal?view=numbers"],
+      ["numbers", "/dashboard/work-in-numbers"],
       ["profile", "/dashboard/profile"],
       ["cv", "/cv"],
       ["gallery", "/dashboard/gallery"],

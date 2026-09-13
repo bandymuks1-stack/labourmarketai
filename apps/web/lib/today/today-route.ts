@@ -115,11 +115,11 @@ export function activeWorkerTab(
 }
 
 /** The secondary stations reachable from ŠIANDIEN in one tap (IA §2). Every
- *  href is an existing route; `numbers` is the journal route's own view for "Mano
- *  veikla skaičiais" (a new page is reserved to an owner ruling, A-01). */
+ *  href is an existing route; `numbers` is the Work-in-Numbers station — a first-class
+ *  surface under A-14 (owner decision 0015). */
 export const TODAY_STATIONS = [
   { id: "journal", href: "/dashboard/journal" },
-  { id: "numbers", href: "/dashboard/journal?view=numbers" },
+  { id: "numbers", href: "/dashboard/work-in-numbers" },
   { id: "profile", href: "/dashboard/profile" },
   { id: "cv", href: "/cv" },
   { id: "gallery", href: "/dashboard/gallery" },
