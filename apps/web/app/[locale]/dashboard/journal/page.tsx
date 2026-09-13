@@ -827,6 +827,25 @@ export default async function JournalPage({
       iso: g.isoKey,
       entryCount: g.entries.length,
       totalMinutes: g.totalMinutes,
+      /**
+       * The SAME derivation the rest of the page uses for "confirmed"
+       * (`deriveReviewResult` === "approved") — never a second rule.
+       *
+       * WHAT THIS COUNT CANNOT SAY, and why the calendar's words are careful:
+       * `deriveReviewResult` also returns "approved" when the SUBJECT
+       * approved their own entry (a worker who manages their organization),
+       * and this page's reader selects `confirmation_scope, created_at,
+       * confirmer_role` — not `confirmer_id` — so `isSelfConfirmation` cannot
+       * be evaluated here (review-status.ts documents exactly this). The
+       * marker therefore says a JOURNAL RECORD is confirmed and never that a
+       * MANAGER confirmed it: claiming independence the data cannot support
+       * would dress self-declared evidence as external confirmation (SEP-3).
+       * Widening the reader's select is a change to a shared canonical reader
+       * and belongs in its own slice, not in a UX pass.
+       */
+      confirmedCount: g.entries.filter(
+        (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+      ).length,
     })),
   });
   /**

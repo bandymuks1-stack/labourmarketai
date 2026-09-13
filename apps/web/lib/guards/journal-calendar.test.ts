@@ -64,10 +64,12 @@ describe("journal calendar — day arithmetic is UTC and Monday-first", () => {
 
 describe("journal calendar — the grid reports what it was given", () => {
   const days = [
-    { iso: "2026-09-01", entryCount: 2, totalMinutes: 300 },
-    { iso: "2026-09-13", entryCount: 1, totalMinutes: 120 },
+    // two entries, ONE of them confirmed → partial
+    { iso: "2026-09-01", entryCount: 2, totalMinutes: 300, confirmedCount: 1 },
+    // one entry, nobody confirmed it → self-declared, which is not a failure
+    { iso: "2026-09-13", entryCount: 1, totalMinutes: 120, confirmedCount: 0 },
     // A day OUTSIDE September — it must not leak into September's totals.
-    { iso: "2026-08-31", entryCount: 5, totalMinutes: 999 },
+    { iso: "2026-08-31", entryCount: 5, totalMinutes: 999, confirmedCount: 5 },
   ];
 
   const grid = buildJournalCalendar({
@@ -108,6 +110,16 @@ describe("journal calendar — the grid reports what it was given", () => {
     expect(grid.recordedMinutes).toBe(420);
   });
 
+  it("a date carries its confirmation state as a word, never inferred", () => {
+    const cells = grid.weeks.flat();
+    expect(cells.find((c) => c.iso === "2026-09-01")?.confirmation).toBe("partial");
+    // nobody confirmed it — self-declared work is real evidence, not a failure
+    expect(cells.find((c) => c.iso === "2026-09-13")?.confirmation).toBe("none");
+    // a day with nothing recorded is not "unconfirmed", it is empty
+    expect(cells.find((c) => c.iso === "2026-09-02")?.confirmation).toBe("none");
+    expect(cells.find((c) => c.iso === "2026-09-02")?.confirmedCount).toBe(0);
+  });
+
   it("a day with no records is a real zero, never an invented figure", () => {
     const empty = grid.weeks.flat().find((c) => c.iso === "2026-09-02");
     expect(empty?.entryCount).toBe(0);
@@ -126,7 +138,7 @@ describe("journal calendar — the week scale", () => {
     anchor: "2026-09-13",
     today: "2026-09-13",
     selected: null,
-    days: [{ iso: "2026-09-11", entryCount: 1, totalMinutes: 60 }],
+    days: [{ iso: "2026-09-11", entryCount: 1, totalMinutes: 60, confirmedCount: 1 }],
   });
 
   it("is exactly one Monday-first week", () => {

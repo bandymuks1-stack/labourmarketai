@@ -70,6 +70,34 @@ describe("MANO DARBAS — the records live on a calendar, not in a list of dates
     expect(page).toMatch(/id="journal-composer" className="order-1"/);
   });
 
+  it("a date exposes entries, HOURS and confirmation state — measured at 390px", () => {
+    const cal = read("components/app/journal/journal-calendar.tsx");
+    // hours ON the date (the number; the unit is in the aria-label + summary)
+    expect(cal).toMatch(/cell\.totalMinutes > 0 \?/);
+    expect(cal).toMatch(/hoursLabel\(cell\.totalMinutes\)/);
+    // confirmation as the marker's material AND as words (never colour alone)
+    expect(cal).toMatch(/data-confirmation=\{cell\.confirmation\}/);
+    expect(cal).toMatch(/t\(`confirmation\.\$\{cell\.confirmation\}`\)/);
+    // a short day is never rounded UP into time the journal does not hold
+    expect(cal).not.toMatch(/Math\.max\(0\.1/);
+    expect(cal).toMatch(/hours === 0 \? `<\$\{hoursFmt\.format\(0\.1\)\}`/);
+    // an untimed record is real work, never rendered as "0 h" (SEP-7)
+    expect(cal).not.toMatch(/totalMinutes \|\| 0\s*\}/);
+    // the page hands over the SAME confirmed derivation it uses elsewhere
+    expect(page).toMatch(/deriveReviewResult\(e\.journal_entry_confirmations\) === "approved"/);
+  });
+
+  it("every calendar control meets the product's own 44px rule", () => {
+    // rendered at 390px and 690px: prev/next were 36px and the pills 26px
+    const cal = read("components/app/journal/journal-calendar.tsx");
+    expect(cal).toMatch(/inline-flex size-11 shrink-0 items-center justify-center/);
+    expect(cal).not.toMatch(/inline-flex size-9 shrink-0/);
+    const pills = cal.match(/rounded-full border/g) ?? [];
+    expect(pills.length).toBeGreaterThanOrEqual(2);
+    expect(cal).toMatch(/inline-flex min-h-11 items-center rounded-full border px-3 text-xs transition-colors/);
+    expect(cal).toMatch(/inline-flex min-h-11 items-center rounded-full border border-ink-500/);
+  });
+
   it("the calendar itself needs no JavaScript — the day lives in the URL", () => {
     const cal = read("components/app/journal/journal-calendar.tsx");
     expect(cal).not.toMatch(/"use client"/);
@@ -238,5 +266,55 @@ describe("MANO CV — a document with a way in, and never a dead anchor", () => 
     // a CV is read top to bottom; the fix was a way IN, not a fold
     const body = page.slice(page.indexOf('data-testid="cv-work-history"'));
     expect(body).not.toMatch(/<details[\s\S]{0,200}data-testid="cv-/);
+  });
+});
+
+describe("the calendar never claims independence the data cannot support", () => {
+  /**
+   * `deriveReviewResult` returns "approved" for a SELF-approval too (a worker
+   * who manages their own organization), and the journal page's reader selects
+   * `confirmation_scope, created_at, confirmer_role` — NOT `confirmer_id` — so
+   * `isSelfConfirmation` cannot be evaluated there. The day marker must
+   * therefore say a JOURNAL RECORD is confirmed, never that a MANAGER
+   * confirmed it: the second would dress self-declared evidence as external
+   * confirmation (SEP-3). Found by review on #1729.
+   */
+  const SERVED = ["lt", "en", "ru", "nl", "de"] as const;
+  const MANAGER = /manager|vadov|руковод|Manager/;
+
+  for (const loc of SERVED) {
+    it(`${loc}: no confirmation state attributes the decision to a manager`, () => {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        calendar?: { confirmation?: Record<string, string> };
+      };
+      const conf = j.calendar?.confirmation;
+      expect(conf, loc).toBeTruthy();
+      for (const [state, text] of Object.entries(conf ?? {})) {
+        expect(MANAGER.test(text), `${loc}.${state}: "${text}"`).toBe(false);
+      }
+      // and the unconfirmed state still names the person's own record
+      expect(conf?.none, loc).toMatch(/paties|self|самостоятельн|zelf|selbst/i);
+    });
+  }
+
+  it("the page records WHY it cannot use the independent derivation", () => {
+    const page = read("app/[locale]/dashboard/journal/page.tsx");
+    expect(page).toMatch(/confirmer_id/);
+    expect(page).toMatch(/isSelfConfirmation|independence|SELF-approval|SUBJECT approved/);
+  });
+});
+
+describe("the CV summary anchor lands on whichever block renders", () => {
+  const page = read("app/[locale]/cv/page.tsx");
+
+  it("the facts-only state carries the summary id, and never duplicates it", () => {
+    // the quick-nav offers the anchor when EITHER block renders
+    expect(page).toMatch(/cv\.professionalSummary \|\| factsSentences\.length > 0/);
+    // so the facts section takes the id exactly when the summary block is absent
+    expect(page).toMatch(/id=\{!cv\.professionalSummary \? "cv-summary-section" : undefined\}/);
+    // one unconditional id on the summary block, one conditional on the facts
+    // \s matters: without it this also matches `data-testid="..."`
+    const unconditional = page.match(/\sid="cv-summary-section"/g) ?? [];
+    expect(unconditional).toHaveLength(1);
   });
 });

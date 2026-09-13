@@ -867,6 +867,11 @@
     "dayEmpty": "{day} — geen registraties",
     "periodEmpty": "Geen registraties in deze periode.",
     "periodSummary": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}.",
-    "periodSummaryWithTime": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}, {time}."
+    "periodSummaryWithTime": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}, {time}",
+    "confirmation": {
+      "none": "zelf vastgelegde registratie",
+      "partial": "deel van de journaalregistraties bevestigd",
+      "all": "journaalregistratie bevestigd"
+    }
   }
 }

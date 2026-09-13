@@ -867,6 +867,11 @@
     "dayEmpty": "{day} — keine Einträge",
     "periodEmpty": "Keine Einträge in diesem Zeitraum.",
     "periodSummary": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}.",
-    "periodSummaryWithTime": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}, {time}."
+    "periodSummaryWithTime": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}, {time}",
+    "confirmation": {
+      "none": "selbst erfasster Eintrag",
+      "partial": "ein Teil der Journaleinträge bestätigt",
+      "all": "Journaleintrag bestätigt"
+    }
   }
 }

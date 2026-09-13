@@ -867,6 +867,11 @@
     "dayEmpty": "{day} — записей нет",
     "periodEmpty": "В этом периоде записей нет.",
     "periodSummary": "{days, plural, one {# день} few {# дня} other {# дней}}, {entries, plural, one {# запись} few {# записи} other {# записей}}.",
-    "periodSummaryWithTime": "{days, plural, one {# день} few {# дня} other {# дней}}, {entries, plural, one {# запись} few {# записи} other {# записей}}, {time}."
+    "periodSummaryWithTime": "{days, plural, one {# день} few {# дня} other {# дней}}, {entries, plural, one {# запись} few {# записи} other {# записей}}, {time}",
+    "confirmation": {
+      "none": "запись самостоятельная",
+      "partial": "часть записей в журнале подтверждена",
+      "all": "запись в журнале подтверждена"
+    }
   }
 }

@@ -867,6 +867,11 @@
     "dayEmpty": "{day} — no records",
     "periodEmpty": "No records in this period.",
     "periodSummary": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}.",
-    "periodSummaryWithTime": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}, {time}."
+    "periodSummaryWithTime": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}, {time}.",
+    "confirmation": {
+      "none": "self-declared record",
+      "partial": "some journal records confirmed",
+      "all": "journal record confirmed"
+    }
   }
 }
