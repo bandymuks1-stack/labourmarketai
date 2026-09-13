@@ -357,7 +357,7 @@ describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, n
 
   it("the derivation asks the extractor which phrase is the total (one rule, two grains)", () => {
     expect(RECOGNITION).toMatch(
-      /import \{\s*describesWhereOnly,\s*extractJournalSuggestions,\s*\} from "@\/lib\/structuring\/extract-journal-suggestions"/,
+      /import \{\s*describesWhereOnly,\s*extractJournalSuggestions,\s*workPartOf,\s*\} from "@\/lib\/structuring\/extract-journal-suggestions"/,
     );
     expect(RECOGNITION).toMatch(/extractJournalSuggestions\(text \?\? ""\)/);
     expect(RECOGNITION).toMatch(/statedTotal\.statedTotal!\.rawPhrase/);
@@ -384,13 +384,31 @@ describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, n
     );
     expect(RECOGNITION).toMatch(/headerNamedWork = outcomes\.length > 0/);
     // every own lane yields to it: taxonomy, ambiguity, claims, the offer
-    expect(RECOGNITION).toMatch(/for \(const r of describesWhere \? \[\] : recognizeSkills\(f\.text, 8\)\)/);
+    expect(RECOGNITION).toMatch(/for \(const r of describesWhere \? \[\] : recognizeSkills\(workText, 8\)\)/);
     expect(RECOGNITION).toMatch(/for \(const a of describesWhere \? \[\] : extractAmbiguousCandidates\(f\.text\)\)/);
     expect(RECOGNITION).toMatch(/for \(const c of describesWhere \? \[\] : extractProfileSkillClaims\(f\.text\)\)/);
     // the rule is structural: the function body names no place word
     const start = EXTRACTOR.indexOf("export function describesWhereOnly(");
     const body = EXTRACTOR.slice(start, EXTRACTOR.indexOf("return true;", start));
     expect(body).not.toMatch(/virtuv|kitchen|sandėl|warehouse|kuch|keuken|küche/i);
+  });
+
+  it("a trailing where-phrase is taken off before recognition by ONE rule on both sides, only when the head names work (#1689, production 2026-09-12)", () => {
+    expect(EXTRACTOR).toMatch(/export function workPartOf\(phrase: string\): string/);
+    // cautious by construction: shortest where-tail, head must be strong
+    expect(EXTRACTOR).toMatch(/if \(!describesWhereOnly\(tail\)\) continue;/);
+    expect(EXTRACTOR).toMatch(/const strong = recognizeSkills\(head, 8\)\.some\(\s*\(m\) => m\.via === "exact" \|\| m\.via === "synonym",\s*\);\s*if \(strong\) return head;/);
+    // the three intake readers read the work part; the time is read off the whole phrase
+    expect(EXTRACTOR).toMatch(/const work = workPartOf\(raw\);\s*const activity = detectActivity\(work\);/);
+    expect(EXTRACTOR).toMatch(/extractProfileSkillClaims\(work\)\[0\]/);
+    expect(EXTRACTOR).toMatch(/recognizeSkills\(work, 3\)/);
+    expect(EXTRACTOR).toMatch(/const localTime = detectFragmentTime\(raw\);/);
+    // the whole-text suggestions (the card) read the same join
+    expect(EXTRACTOR).toMatch(/\.map\(workPartOf\)\s*\.join\("\. "\)/);
+    // the recognition side's lane 1 reads the rule — never a second grammar
+    expect(RECOGNITION).toMatch(/const workText = workPartOf\(f\.text\);/);
+    expect(RECOGNITION).toMatch(/recognizeSkills\(workText, 8\)/);
+    expect(RECOGNITION).not.toMatch(/function workPartOf/);
   });
 
   it("the header is marked as the total and inheritance is provenance only (never a new reading)", () => {
@@ -456,9 +474,9 @@ describe("the duration-unit vocabulary (#1689, measured 2026-09-12) — ONE list
   });
 
   it("a fragment's activity falls back to a STRONG skill reading only, after the lexicon and the capability dictionary (#1689)", () => {
-    const start = EXTRACTOR.indexOf("const cap = extractProfileSkillClaims(raw)[0];");
+    const start = EXTRACTOR.indexOf("const cap = extractProfileSkillClaims(work)[0];");
     const fallback = EXTRACTOR.slice(start, EXTRACTOR.indexOf("const isUnknown =", start));
-    expect(fallback).toMatch(/const strong = recognizeSkills\(raw, 3\)\.find\(\s*\(m\) => m\.via === "exact" \|\| m\.via === "synonym",\s*\);/);
+    expect(fallback).toMatch(/const strong = recognizeSkills\(work, 3\)\.find\(\s*\(m\) => m\.via === "exact" \|\| m\.via === "synonym",\s*\);/);
     expect(fallback).toMatch(/if \(strong\) slug = strong\.slug;/);
     expect(fallback).not.toMatch(/"fuzzy"/);
     // the surfaces name a skill-slug key as they name a profession slug — never raw

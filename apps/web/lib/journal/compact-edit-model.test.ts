@@ -559,3 +559,26 @@ describe("provenance survives a re-save (#1689, observed 2026-09-12)", () => {
     expect(JSON.parse(fields.fragments_json!)[0].source).toBe("worker_input");
   });
 });
+
+describe("a row that is only its own phrase names no kind of work (#1689, production 2026-09-12)", () => {
+  it("a persisted fragment whose label is its phrase ships no activityLabel; a named activity and a typed label do", () => {
+    const { rows } = deriveCompactRows(
+      {
+        ...baseEntry,
+        activities: [
+          { index: 1, rawPhrase: "2 val. testavau", activityLabel: null, time: { value: 2, unitSlug: "hours" }, userLabel: null, source: "ai_extracted" },
+          { index: 2, rawPhrase: "3 val. vairavau", activityLabel: "vairavimas", time: { value: 3, unitSlug: "hours" }, userLabel: null, source: "ai_extracted" },
+        ],
+      },
+      skills,
+    );
+    const typed: CompactActivityRow = { key: "added-1", label: "dokumentacija", skillSlug: null, rawPhrase: null, timeValue: "1", timeUnit: "hours", origin: "added" };
+    const fields = buildCompactSaveFields(input({ rows: [...rows, typed] }));
+    const fragments = JSON.parse(fields.fragments_json!) as { rawPhrase: string; activityLabel: string | null }[];
+    expect(fragments.map((f) => [f.rawPhrase, f.activityLabel])).toEqual([
+      ["2 val. testavau", null],
+      ["3 val. vairavau", "vairavimas"],
+      ["dokumentacija", "dokumentacija"],
+    ]);
+  });
+});

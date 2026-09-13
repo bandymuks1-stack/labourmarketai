@@ -223,6 +223,42 @@ describe("negative guards — no wrong defaults", () => {
     expect(extractJournalSuggestions("Elektrinė instaliacija name").workDirectionSlug).toBe("electrician");
   });
 
+  it("a trailing where-phrase after the work is context, never a second trade — measured on production 2026-09-12 (#1689)", () => {
+    // "5 hours tiling in the kitchen" auto-added COOKING to a CV beside tiling
+    const noKitchenTrade = [
+      "5 hours tiling in the kitchen",
+      "Klijavau plyteles virtuvėje",
+      "Klijavau plytelę virtuvėje",
+      "5 uur getegeld in de keuken",
+      "клал плитку на кухне",
+    ];
+    for (const text of noKitchenTrade) {
+      expect(signalsOf(text).slugs, text).toContain("tiling");
+      expect(signalsOf(text).slugs, text).not.toContain("cooking");
+      expect(extractJournalSuggestions(text).fragments.map((f) => f.activitySlug), text).not.toContain("cook");
+    }
+    expect(signalsOf("4 Std. gestrichen im Lager").slugs).toEqual(["painting"]);
+    // a bare place is still the place's work, by design — nothing else names the work
+    expect(signalsOf("Dirbau virtuvėje 5 val.").slugs).toContain("cooking");
+    expect(signalsOf("5 val. virtuvėje").slugs).toContain("cooking");
+    // an object that merely ENDS like a locative keeps its trade, with or without the ę
+    expect(signalsOf("Dėjau plytelę").slugs).toContain("tiling");
+    expect(signalsOf("Dejau plytele").slugs).toContain("tiling");
+    // the head must already name work: mopping in a warehouse keeps the warehouse reading
+    expect(signalsOf("Ploviau grindis sandėlyje").slugs).toContain("warehouse-operations");
+    // under a header, a place-only item names no trade for the whole text either (#1711 on the card path)
+    expect(signalsOf("9 val. klijavau plyteles: 5 val. virtuvėje, 4 val. vonioje").slugs).toEqual(["tiling"]);
+  });
+
+  it("lifting and tightening are not cooking or translation — the fuzzy tier's LT blocklist (#1689, measured over 49 work verbs)", () => {
+    for (const text of ["2 val. kėliau prekes", "Veržiau varžtus 3 val.", "Varžtų veržimas"]) {
+      expect(signalsOf(text).all, text).not.toMatch(/cooking|translation|maist|vertim/i);
+    }
+    // the stems themselves still read: baking is cooking, translating is translation
+    expect(signalsOf("Kepiau duoną 2 val.").all).toMatch(/cooking|maist/i);
+    expect(signalsOf("Verčiau dokumentus 2 val.").all).toMatch(/translation|vertim/i);
+  });
+
   it("'kraną' as a faucet (repair) never becomes crane operation", () => {
     const s = signalsOf("remontavau kraną");
     expect(s.all).toMatch(/remont/i);
