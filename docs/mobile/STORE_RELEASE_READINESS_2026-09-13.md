@@ -32,13 +32,26 @@ claims an approval.
 | iOS runtime journey | **PROVEN** (CI simulator) | Maestro: auth screen renders, real sign-in attempt, failure surfaced honestly, app survives |
 | Android runtime on a device | **NOT PROVEN** | no emulator image, no device attached |
 | Product data on device | transport **open** — Today / Journal / Profile read live through `/api/mcp` | `DOMAIN_TRANSPORT_STATUS.open === true` |
-| Writes from the device | **NOT WIRED** — journal draft→confirm, context holdings | `apps/mobile/README.md` |
+| Journal writes from the device | **WIRED** — `/(shell)/log-work` → `JournalComposer` → `journal.create_draft` → `journal.confirm` → `createJournalEntryCore`, the one canonical write | the code, read 2026-09-13 |
+| Context holdings | **NOT WIRED** — holdings read `unknown`; the UI says it cannot list contexts, never invents one | `apps/mobile/src/context-provider.tsx` |
 | Signing, store listing, submission | **NOT STARTED**, owner-gated | — |
 
-The mobile client is a **reader** today. A person can sign in on a phone and
-see their work; they cannot yet record work from it. That is the single
-largest remaining product gap on the native side, and it is a build task, not
-an owner gate.
+**This paragraph said the opposite when this document was first written, and
+it was wrong.** It read: "The mobile client is a reader today. A person can
+sign in on a phone and see their work; they cannot yet record work from it.
+That is the single largest remaining product gap on the native side." Every
+sentence of that is false. `apps/mobile/README.md` had claimed writes were
+unwired since before #1648 shipped the composer, and this document copied the
+claim instead of reading the code — which is exactly how a capability gets
+built a second time. Caught in review on #1732, on the same day, by a reviewer
+who read the code.
+
+The truth: a person can sign in on a phone, read their work AND record work
+into the journal, through the same `/api/mcp` door, under their own RLS. What
+is missing on the native side is **context holdings** and, separately, **any
+runtime proof on a real device** — proof, not construction. The README is
+corrected and the claim is now pinned by a guard, so this particular lie
+cannot be told again.
 
 ---
 
@@ -92,16 +105,17 @@ collected-data list instead of the empty one.
 
 In value order. None needs a credential.
 
-1. **Device writes.** Journal draft→confirm from the phone. Until this ships
-   the native app cannot complete the PERSON journey on a device, which is
-   the reason to have it.
+1. **Android runtime proof.** An emulator image or an attached device turns
+   `ANDROID_NATIVE_BUILD_PROVEN` into a runtime claim, the way `ios.yml`
+   already did for iOS. This is now the top item because the one that used to
+   sit here — "device writes" — was already built; see §1.
 2. **Icons and splash.** `apps/mobile` has no `assets/` directory, so both
    stores would receive the Expo placeholder. The brand source
    (`apps/web/public/app-icon.svg`) exists and generation is mechanical —
    but §4.1 is the owner's approval to use it as-is.
-3. **Android runtime proof.** An emulator image or an attached device turns
-   `ANDROID_NATIVE_BUILD_PROVEN` into a runtime claim, the way `ios.yml`
-   already did for iOS.
+3. **Context holdings.** `context-provider.tsx` performs no holdings read, so
+   a person with several contexts is told the app cannot list them. Honest,
+   and incomplete.
 4. **Deep links as universal links.** `labourmarketai://` works today. The
    `https://labourmarket.ai/...` form needs
    `/.well-known/apple-app-site-association` and

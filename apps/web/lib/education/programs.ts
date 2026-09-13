@@ -2,6 +2,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  PUBLIC_DEMAND_LIMIT,
+  demandCountFor,
+  publicDemandRead,
+} from "@/lib/market/public-demand";
 
 /**
  * Education programmes / cohorts — institution-side read (Track C slice 2,
@@ -13,7 +18,9 @@ import { createClient } from "@/lib/supabase/server";
  * profile_id` → `invited_name`). No learner journal, skills or profile is
  * read (least-privilege ruling 2026-08-27). Demand per programme comes from
  * `count_public_vacancies_by_profession_v1` (authenticated callers only;
- * counts per profession, no vacancy row).
+ * counts per profession, no vacancy row) — read through the shared
+ * `lib/market/public-demand` rule, which decides whether an absent profession
+ * is a measured zero or an unmeasured unknown.
  *
  * Honest degradation (batch 20260903120000 is applied in production):
  * `unavailable` on any other failure — never an empty list pretending.
@@ -150,7 +157,7 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
       .eq("relationship_slug", "student")
       .eq("status", "active")
       .limit(500),
-    asAny(supabase).rpc("count_public_vacancies_by_profession_v1", { p_limit: 100 }),
+    asAny(supabase).rpc("count_public_vacancies_by_profession_v1", { p_limit: PUBLIC_DEMAND_LIMIT }),
   ]);
   // A failed eligibility read is `unavailable`, not an empty dropdown: an
   // empty list here reads as "this institution has no learners", which is a
@@ -164,12 +171,14 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
       labelByProfile.set(pid, String(r.invited_name ?? r.invited_email ?? pid.slice(0, 8)));
     }
   }
-  const demandBySlug = new Map<string, number>();
-  if (!demandRes.error) {
-    for (const r of (demandRes.data ?? []) as Array<Record<string, unknown>>) {
-      demandBySlug.set(String(r.profession_slug), Number(r.active_vacancies ?? 0));
-    }
-  }
+  // One rule, shared with the learning compass: absence is a zero only when
+  // the list came back shorter than the limit it asked for (lib/market/public-demand).
+  const demand = demandRes.error
+    ? null
+    : publicDemandRead(
+        (demandRes.data ?? []) as Array<Record<string, unknown>>,
+        PUBLIC_DEMAND_LIMIT,
+      );
 
   const cohortsByProgram = new Map<string, CohortRow[]>();
   for (const c of (cohortsRes.data ?? []) as Array<Record<string, unknown>>) {
@@ -197,7 +206,7 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
       targetProfessionSlug: slug,
       educationTypeSlug: (p.education_type_slug as string | null) ?? null,
       description: (p.description as string | null) ?? null,
-      demandCount: slug && !demandRes.error ? (demandBySlug.get(slug) ?? 0) : null,
+      demandCount: demandCountFor(slug, demand),
       cohorts: cohortsByProgram.get(String(p.id)) ?? [],
     };
   });

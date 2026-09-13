@@ -7,6 +7,11 @@ import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations
 import { getOwnWorkerEducation } from "@/lib/worker/worker-education";
 import { listMyEngagements } from "@/lib/invitations/network";
 import {
+  type PublicDemandRead,
+  demandCountFor,
+  publicDemandRead,
+} from "@/lib/market/public-demand";
+import {
   buildLearningCompass,
   isStudentPath,
   type CompassCohort,
@@ -68,10 +73,13 @@ type CohortMembershipRow = {
  * (`organizationNameById`), so nothing of the institution's is read here.
  *
  * Demand per direction is the same authenticated count the institution sees
- * (`count_public_vacancies_by_profession_v1`, imported public vacancy pool):
- * when the returned list is shorter than the limit it is exhaustive, so an
- * absent direction is a real 0; when it is full, an absent direction is
- * `null` (not measured) — never a made-up zero.
+ * (`count_public_vacancies_by_profession_v1`, imported public vacancy pool),
+ * read through the SHARED `lib/market/public-demand` rule: when the returned
+ * list is shorter than the limit it is exhaustive, so an absent direction is a
+ * real 0; when it is full, an absent direction is `null` (not measured) —
+ * never a made-up zero. This module had that rule right and inline while
+ * `lib/education/programs.ts` had a second, wrong copy; it now reads the one
+ * rule so the two cannot answer differently about the same profession again.
  */
 async function readOwnCohorts(
   supabase: SupabaseClient,
@@ -94,14 +102,14 @@ async function readOwnCohorts(
   if (live.length === 0) return [];
 
   const wantsDemand = live.some((r) => r.education_cohorts?.education_programs?.target_profession_slug);
-  let demandBySlug: Map<string, number> | null = null;
-  let exhaustive = false;
+  let demand: PublicDemandRead | null = null;
   if (wantsDemand) {
     const demandRes = await asAny(supabase).rpc("count_public_vacancies_by_profession_v1", { p_limit: DEMAND_LIMIT });
     if (!demandRes.error) {
-      const list = (demandRes.data ?? []) as Array<{ profession_slug: string; active_vacancies: number | string }>;
-      demandBySlug = new Map(list.map((r) => [String(r.profession_slug), Number(r.active_vacancies ?? 0)]));
-      exhaustive = list.length < DEMAND_LIMIT;
+      demand = publicDemandRead(
+        (demandRes.data ?? []) as Array<{ profession_slug: string; active_vacancies: number | string }>,
+        DEMAND_LIMIT,
+      );
     }
   }
 
@@ -109,11 +117,7 @@ async function readOwnCohorts(
     const c = r.education_cohorts!;
     const p = c.education_programs!;
     const slug = p.target_profession_slug ?? null;
-    let demandCount: number | null = null;
-    if (slug && demandBySlug) {
-      const found = demandBySlug.get(slug);
-      demandCount = found !== undefined ? found : exhaustive ? 0 : null;
-    }
+    const demandCount = demandCountFor(slug, demand);
     return {
       cohortId: c.id,
       cohortName: c.name,
