@@ -65,10 +65,26 @@ describe("mobile store-release config — the generated native project is only a
     const pm = appConfig.ios.privacyManifests;
     const collected = pm.NSPrivacyCollectedDataTypes;
     expect(Array.isArray(collected)).toBe(true);
-    expect(
-      collected.length,
-      "An empty NSPrivacyCollectedDataTypes tells Apple this product collects nothing about a person. It collects an account, a name, a user id and the journal's content.",
-    ).toBeGreaterThan(0);
+    // Codex P2 on #1732, and correct: a `length > 0` check would still pass
+    // after an edit removed EmailAddress and left one entry standing — which
+    // is the very false declaration this pin exists to prevent. Each type is
+    // named, because each answers for something the client demonstrably
+    // handles: the account it signs in with, the name and user id on the
+    // profile it reads, and the journal content it writes.
+    const declared = new Set(
+      collected.map((t: Record<string, unknown>) => t.NSPrivacyCollectedDataType as string),
+    );
+    for (const required of [
+      "NSPrivacyCollectedDataTypeEmailAddress",
+      "NSPrivacyCollectedDataTypeName",
+      "NSPrivacyCollectedDataTypeUserID",
+      "NSPrivacyCollectedDataTypeOtherUserContent",
+    ]) {
+      expect(
+        declared.has(required),
+        `${required} is not declared. Removing a type the client handles is a false statement to Apple, not a smaller one.`,
+      ).toBe(true);
+    }
     for (const entry of collected) {
       expect(entry.NSPrivacyCollectedDataTypeTracking).toBe(false);
       expect(entry.NSPrivacyCollectedDataTypePurposes).toContain(
@@ -127,6 +143,31 @@ describe("mobile store-release config — the generated native project is only a
     // Play takes an app bundle, not an APK. Getting this wrong is found at
     // upload time, after a build that takes half an hour.
     expect(eas.build.production.android.buildType).toBe("app-bundle");
+  });
+
+  it("the README does not claim a capability the code has already wired", () => {
+    // THE EXPENSIVE ONE. `apps/mobile/README.md` said "What is NOT wired yet:
+    // writes (journal draft→confirm)" for days after #1648 shipped
+    // `JournalComposer`. On 2026-09-13 that sentence was copied into a new
+    // release document and into a plan to BUILD the write path — the exact
+    // duplicate-capability failure the product truth bootstrap exists to stop.
+    // Nobody noticed, because a README is prose and prose is not checked.
+    //
+    // So the claim is checked against the code that decides it. This asserts
+    // only the direction that misleads: the README may not say writes are
+    // missing while the composer calls both halves of the write.
+    const composer = readFileSync(
+      resolve(REPO, "apps/mobile/src/screens/journal-composer.tsx"),
+      "utf8",
+    );
+    const writesAreWired =
+      composer.includes("journal.create_draft") && composer.includes("journal.confirm");
+    expect(writesAreWired, "the composer no longer calls both halves of the write — re-read this guard's premise before changing it").toBe(true);
+    const readme = readFileSync(resolve(REPO, "apps/mobile/README.md"), "utf8");
+    expect(
+      /NOT wired yet:[^.]*writes/i.test(readme),
+      "apps/mobile/README.md says journal writes are not wired, and JournalComposer calls journal.create_draft and journal.confirm. Correct the README — a document that says a built capability is missing is how it gets built twice.",
+    ).toBe(false);
   });
 
   it("the native projects stay generated, never committed", () => {
