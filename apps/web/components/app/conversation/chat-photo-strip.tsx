@@ -38,7 +38,7 @@ export function ChatPhotoStrip({
     <div className="flex max-w-2xl flex-col gap-2" data-testid="chat-photo-strip">
       {previewsUnavailable ? (
         <p
-          className="text-xs leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="chat-photo-strip-previews-unavailable"
         >
           {t("photosPreviewUnavailable")}
@@ -72,7 +72,7 @@ export function ChatPhotoStrip({
                 {dateOf(p.entryCreatedAt)}
               </span>
               {p.entrySnippet ? (
-                <p className="text-xs leading-relaxed text-text-secondary">{p.entrySnippet}</p>
+                <p className="text-meta leading-relaxed text-text-secondary">{p.entrySnippet}</p>
               ) : null}
             </div>
           </li>
