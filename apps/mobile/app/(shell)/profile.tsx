@@ -15,6 +15,7 @@ import { SkillFigureList } from "../../src/screens/work-figures";
 import { Body, Button, Divider, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
 import { useCapability } from "../../src/use-capability";
+import { useProfile } from "../../src/profile-provider";
 
 /** All time — the Living CV's own scope for a skill's hours. */
 const ALL_TIME = { period: "all" } as const;
@@ -37,7 +38,10 @@ const ALL_TIME = { period: "all" } as const;
 export default function Screen() {
   const { t } = useLocale();
   const router = useRouter();
-  const profile = useCapability<ProfileGetData>("profile.get");
+  // The SHARED read (ProfileProvider) — one `profile.get` per session, not
+  // one per screen. The rendering below is unchanged: this screen still owns
+  // its loading and failure states.
+  const profile = useProfile();
   const skills = useCapability<LivingCvSkillsData>("living_cv.skills.get");
   const figures = useCapability<WorkIntelligenceData>(
     "journal.work_intelligence.get",

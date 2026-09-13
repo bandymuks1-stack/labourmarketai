@@ -114,7 +114,10 @@ describe("mobile workspace surface — real, and not confused with participation
     // workspace list for a mode.
     const provider = read("apps/mobile/src/context-provider.tsx");
     expect(provider).toContain("holdingsFromHeldRoles(");
-    expect(provider).toContain('useCapability<ProfileGetData>("profile.get")');
+    // Through the SHARED read. A second `profile.get` per launch is what an
+    // earlier version of this file added while claiming it added none.
+    expect(provider).toContain("useProfile()");
+    expect(provider).not.toMatch(/useCapability<[^>]*>\(/);
     // The CALL, not the word: the provider's own note explains the separation
     // and names `context.list` in prose, which is documentation worth keeping.
     expect(provider).not.toMatch(/["']context\.list["']/);
@@ -123,6 +126,31 @@ describe("mobile workspace surface — real, and not confused with participation
     // carry one, and inventing one is the collapse this refuses.
     const core = read("packages/client-core/src/actor-context.ts");
     expect(core).toMatch(/organizationId: null/);
+  });
+
+  it("exactly one profile.get caller exists in the whole client", () => {
+    const callers = ["src/profile-provider.tsx", "src/context-provider.tsx", "app/(shell)/today.tsx", "app/(shell)/profile.tsx"]
+      .filter((f) => read(`apps/mobile/${f}`).includes('useCapability<ProfileGetData>("profile.get")'));
+    expect(callers).toEqual(["src/profile-provider.tsx"]);
+  });
+
+  it("the participation list REPORTS and does not pretend to switch", () => {
+    // A pressable row marked a mode active, persisted it, and changed nothing:
+    // no server write, and no surface outside Settings reads the selection.
+    // Telling someone they are acting as a company while every request stays
+    // identical is worse than the feature being absent (#1737 review).
+    expect(settings).not.toContain("switchTo");
+    const provider = read("apps/mobile/src/context-provider.tsx");
+    expect(provider).not.toContain("switchTo");
+    // And with no selection to remember there is no global preference key to
+    // leak between accounts on a shared phone.
+    // The CODE, not the word. This file's note explains the removed key and
+    // why it mattered, and that history is worth keeping readable — three
+    // guards in this repo have now fired on their own documentation.
+    expect(provider).not.toMatch(/preferenceStore\./);
+    expect(provider).not.toMatch(/["']labourmarket\.context\.v1["']/);
+    // Active comes from the server's own `activeRole`, not a local choice.
+    expect(settings).toContain("profile.state.data.profile.activeRole");
   });
 
   it("loading, could-not-ask and holds-nothing stay three different states", () => {

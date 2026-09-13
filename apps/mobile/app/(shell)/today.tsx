@@ -15,6 +15,7 @@ import { TodayFigures } from "../../src/screens/work-figures";
 import { Body, Button, Divider, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
 import { useCapability } from "../../src/use-capability";
+import { useProfile } from "../../src/profile-provider";
 
 const RECENT_LIMIT = { limit: 5 } as const;
 /** The week scope: `periods` still carries every window (today included);
@@ -39,7 +40,10 @@ const WEEK_SCOPE = { period: "week" } as const;
 export default function Screen() {
   const { t } = useLocale();
   const router = useRouter();
-  const profile = useCapability<ProfileGetData>("profile.get");
+  // The SHARED read (ProfileProvider) — one `profile.get` per session, not
+  // one per screen. The rendering below is unchanged: this screen still owns
+  // its loading and failure states.
+  const profile = useProfile();
   const figures = useCapability<WorkIntelligenceData>(
     "journal.work_intelligence.get",
     WEEK_SCOPE,

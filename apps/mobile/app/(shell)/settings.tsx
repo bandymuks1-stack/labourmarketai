@@ -6,6 +6,7 @@ import { ACTIVE_LOCALES, isPreviewTranslation } from "@labourmarket/client-core"
 
 import type { ContextListData, ContextSwitchData } from "../../src/capability-shapes";
 import { useActorContext } from "../../src/context-provider";
+import { useProfile } from "../../src/profile-provider";
 import { useAuth } from "../../src/auth-context";
 import { capability } from "../../src/domain";
 import { useCapability } from "../../src/use-capability";
@@ -54,7 +55,8 @@ import { theme } from "../../src/ui/theme";
  */
 export default function Settings() {
   const { locale, setLocale, t } = useLocale();
-  const { holdings, active, switchTo } = useActorContext();
+  const { holdings } = useActorContext();
+  const profile = useProfile();
   const { signOut, busy, state, accessToken } = useAuth();
 
   const workspaces = useCapability<ContextListData>("context.list");
@@ -184,24 +186,17 @@ export default function Settings() {
         ) : holdings.status === "known" ? (
           <View style={styles.list}>
             {holdings.contexts.map((context) => {
-              const selected = active !== null && active.mode === context.mode;
+              // `profiles.active_role` — real server state, not a local choice.
+              // These rows REPORT; they are not pressable, because a selection
+              // here reaches no request (see context-provider's note).
+              const isActive =
+                profile.state.status === "loaded" &&
+                profile.state.data.profile.activeRole === context.mode;
               return (
-                <Pressable
-                  key={context.mode}
-                  testID={`context-${context.mode}`}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={context.label}
-                  onPress={() => switchTo(context)}
-                  style={({ pressed }) => [
-                    styles.row,
-                    selected && styles.rowSelected,
-                    pressed && styles.rowPressed,
-                  ]}
-                >
+                <View key={context.mode} testID={`context-${context.mode}`} style={styles.row}>
                   <Text style={styles.rowLabel}>{context.label}</Text>
-                  {selected ? <Text style={styles.tag}>{t("context.active")}</Text> : null}
-                </Pressable>
+                  {isActive ? <Text style={styles.tag}>{t("context.active")}</Text> : null}
+                </View>
               );
             })}
           </View>

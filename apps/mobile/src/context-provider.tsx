@@ -1,36 +1,26 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useCallback, useContext, useMemo } from "react";
 
 import {
-  contextKey,
   holdingsFromHeldRoles,
   initialSelection,
-  selectContext,
-  type ActorContext,
   type ContextHoldings,
   type ContextSelection,
   type ParticipationMode,
 } from "@labourmarket/client-core";
 
-import type { ProfileGetData } from "./capability-shapes";
-import { preferenceStore } from "./preference-store";
 import { TRANSPORT_STATUS } from "./domain";
-import { useCapability } from "./use-capability";
+import { useProfile } from "./profile-provider";
 import { useLocale } from "./i18n/locale-context";
 
 /**
  * WHICH CONTEXT THE PERSON IS ACTING IN — one person, many contexts (I-1).
  *
- * The selection rules (restore what they used last, do not guess between
- * several, refuse a context they do not hold) are in
- * `@labourmarket/client-core/actor-context` and unit-tested there. This is the
- * React wiring plus one honest fact.
+ * The selection rules live in `@labourmarket/client-core/actor-context` and
+ * are unit-tested there. This file uses only the part that applies today —
+ * `initialSelection`, which opens on a person's single context and chooses
+ * NOTHING when they hold several. The rest of that module (restoring a
+ * remembered choice, `selectContext`) waits for a selection that actually
+ * reaches a request; see the note below on why there is no switcher.
  *
  * ## The honest fact
  *
@@ -53,15 +43,28 @@ import { useLocale } from "./i18n/locale-context";
  * separately in Settings. `organizationId` is null on every context built
  * here, because a role row does not name an organization and inventing one
  * would be the SEP-5 collapse this client already refuses elsewhere.
+ *
+ * ## It REPORTS. It does not switch, and that is deliberate.
+ *
+ * The first version of this shipped a pressable list that marked a mode
+ * active and remembered the choice. Nothing came of it: `useActorContext` is
+ * read by the Settings screen alone, Today / Journal / Profile issue the same
+ * requests whatever is selected, and the selection was never written to
+ * `profiles.active_role` either. So the control told a person they were acting
+ * as a company and changed nothing, anywhere — a claim about their account
+ * that the product did not honour, which is worse than an absent feature.
+ *
+ * Caught in review on #1737. The read stays, because seeing which roles an
+ * account holds was genuinely impossible on a phone before it; the affordance
+ * is gone until a selection actually reaches a request. Restoring it means
+ * writing the active role server-side AND making the other surfaces read it —
+ * at which point the selection rules in `client-core/actor-context`
+ * (`selectContext`, the remembered choice) are waiting and already tested.
  */
 
-export type ContextValue = ContextSelection & {
-  switchTo(next: ActorContext): void;
-};
+export type ContextValue = ContextSelection;
 
 const ActorContextContext = createContext<ContextValue | null>(null);
-
-const CONTEXT_PREFERENCE_KEY = "labourmarket.context.v1";
 
 export function ActorContextProvider({
   children,
@@ -69,10 +72,11 @@ export function ActorContextProvider({
   children: React.ReactNode;
 }) {
   const { t } = useLocale();
-  // `profile.get` is already the first read every signed-in session makes, so
-  // the holdings ride a request the client performs anyway rather than adding
-  // one to every launch.
-  const profile = useCapability<ProfileGetData>("profile.get");
+  // THE SHARED read — `ProfileProvider` owns the one `profile.get` this
+  // session makes. Calling `useCapability` here would add a second request per
+  // launch, which is exactly what an earlier version of this file did while
+  // claiming otherwise.
+  const profile = useProfile();
 
   const modeLabel = useCallback(
     (mode: ParticipationMode) => t(`context.mode.${mode}` as never),
@@ -94,40 +98,17 @@ export function ActorContextProvider({
     return holdingsFromHeldRoles(profile.state.data.heldRoles, modeLabel);
   }, [profile.state, modeLabel]);
 
-  const [selection, setSelection] = useState<ContextSelection>(() =>
-    initialSelection(holdings, null),
+  // NO REMEMBERED SELECTION, and no switching — see the note above. With
+  // nothing to remember there is also nothing to leak: the preference key was
+  // global (`labourmarket.context.v1`), and sign-out clears only the session
+  // store, so on a shared phone user A's remembered context would have been
+  // restored for user B. Removing the control removed that too.
+  const selection = useMemo<ContextSelection>(
+    () => initialSelection(holdings, null),
+    [holdings],
   );
 
-  // The holdings arrive after the first render, so the selection is rebuilt
-  // when they do — restoring the person's remembered context if they hold it,
-  // and choosing NOTHING when they hold several (guessing would put someone
-  // into an employer view when they opened the app to log their own hours).
-  useEffect(() => {
-    let live = true;
-    void (async () => {
-      const remembered = await preferenceStore.get(CONTEXT_PREFERENCE_KEY);
-      if (!live) return;
-      setSelection(initialSelection(holdings, remembered ?? null));
-    })();
-    return () => {
-      live = false;
-    };
-  }, [holdings]);
-
-  const switchTo = useCallback((next: ActorContext) => {
-    setSelection((current) => {
-      const updated = selectContext(current, next);
-      if (updated.active !== null) {
-        void preferenceStore.set(CONTEXT_PREFERENCE_KEY, contextKey(updated.active));
-      }
-      return updated;
-    });
-  }, []);
-
-  const value = useMemo<ContextValue>(
-    () => ({ ...selection, switchTo }),
-    [selection, switchTo],
-  );
+  const value = useMemo<ContextValue>(() => selection, [selection]);
 
   return (
     <ActorContextContext.Provider value={value}>
