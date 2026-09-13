@@ -101,3 +101,59 @@ full composer are unchanged.
 4. Switch **Savaitė** / **Mėnuo**, then ‹ › to the previous period.
 5. `/lt/dashboard/opportunities` — the rows should read as rows; open one
    and confirm every fact that used to be on the card is inside it.
+
+---
+
+# PASAULIS — THE MAP IS THE BASE (same day, second slice)
+
+Owner: "jei tai pagrindinė 'Pasaulio' erdvė, jos natūralus pagrindas turi
+būti interaktyvus žemėlapis su realiomis galimybėmis pagal šalis/miestus;
+iš žemėlapio pereinama į kompaktišką rezultatą/detalę."
+
+**Nothing new was built.** The interactive map already existed and worked:
+`components/app/market-map/world-discovery.tsx` on the canonical
+`<MarketMap>`, with a viewport-bounded server read
+(`lib/market-map/world-read.ts`), clustering by place, a hard object cap
+with the folded remainder counted, FACT/DERIVED as material *and* words, and
+an always-present list equivalent. It was reachable only as a text link at
+the bottom of a collapsed disclosure on PASAULIS — a working capability
+behind a door nobody opens.
+
+**Now.** The same component, fed by the same reader for the same default
+viewport, is rendered directly under the PASAULIS header, above the banded
+list. Selecting a place offers one link into the page's OWN existing
+`?country=` discovery filter (`lib/opportunities/discovery-filters.ts`), so
+a place narrows the compact list the person is already reading. Discovery
+above (where demand *is*), fit below (what of it fits *me*, and why) — the
+separation the fit bands exist to protect (DEMAND ≠ SUPPLY, band ≠ rating).
+
+- No second map, no second engine, no second reader, no new route.
+- `/dashboard/market-map` keeps every other layer and stays linked from the
+  market section; nothing moved and nothing was duplicated.
+- A "į sąrašą" anchor sits beside the map heading, so anyone who came for
+  the list is one tap past it.
+
+## Guard retired deliberately
+
+`lib/guards/world-discovery-subset.test.ts` rule 3 said "one mount, one
+entry". Its INTENT — one implementation, one reader, one action, one Leaflet
+bootstrap, no new world/map route — is unchanged and still enforced. What
+changed is the COUNT: the canonical mounts are now a closed two-entry list
+(`/dashboard/market-map` and `/dashboard/opportunities`), each asserted to
+render the component exactly once, with PASAULIS additionally asserted to
+build no map of its own and to send a place into the page's own country
+filter. Adding a third mount stays a product decision with a receipt.
+
+## Do-not-regress, confirmed still true
+
+The Living CV may still surface a DIFFERENT profession when the evidence
+supports it — `result.readiness.evidencedProfessionSlug` still feeds
+`MarketExplanationPanel` and the board's retrieval, untouched by this slice.
+
+## Owner walk (phone), added to §5
+
+6. `/lt/dashboard/opportunities` — the map is the first thing under the
+   title; pan/zoom re-reads and the counts strip follows.
+7. Tap a place (on the map or in its list) → **Rodyti šios šalies
+   galimybes** → the same page, narrowed by country, with the active-filter
+   chip visible.

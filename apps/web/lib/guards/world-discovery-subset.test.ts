@@ -25,6 +25,27 @@ const READ = "lib/market-map/world-read.ts";
 const ACTIONS = "lib/market-map/world-actions.ts";
 const COMPONENT = "components/app/market-map/world-discovery.tsx";
 const PAGE = "app/[locale]/dashboard/market-map/page.tsx";
+/**
+ * THE CANONICAL MOUNTS — the closed list of pages that may render the World
+ * (owner direction 2026-09-13, receipt
+ * `docs/design/final/02-MOBILE-COMPACTION-RECEIPT-2026-09-13.md`).
+ *
+ * The subset's rule was "one mount, one entry". Its INTENT is intact and is
+ * still enforced below: one implementation, one reader, one action, one
+ * Leaflet bootstrap, no new world/map route. What changed is the count: the
+ * owner ruled that PASAULIS' natural base is the interactive map, and
+ * PASAULIS is `/dashboard/opportunities` (target worker IA §2 — it is that
+ * route's own job, case A of decision 0015; a redirect or a third route
+ * would have been the violation). So the map is mounted there too, as the
+ * SAME component with the SAME reader — discovery above, fit below, and a
+ * place links into the page's own `?country=` filter rather than into a
+ * second board.
+ *
+ * This list is closed on purpose. Adding to it is a product decision with a
+ * receipt, never a convenience import.
+ */
+const OPPORTUNITIES_PAGE = "app/[locale]/dashboard/opportunities/page.tsx";
+const WORLD_MOUNT_PAGES = [PAGE, OPPORTUNITIES_PAGE] as const;
 const WORLD_FILES = [MODEL, READ, ACTIONS, COMPONENT];
 
 const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
@@ -102,10 +123,19 @@ describe("3 · no second map surface", () => {
     expect(comp).toMatch(/<MarketMap\b/);
     expect(comp).not.toMatch(/mountLeafletMap|from "leaflet"|import\("leaflet"\)|tile\.openstreetmap/);
   });
-  it("the market-map page mounts it exactly once, on the existing route", () => {
-    const page = read(PAGE);
-    expect([...page.matchAll(/<WorldDiscovery\b/g)]).toHaveLength(1);
-    expect(existsSync(join(APP, PAGE))).toBe(true);
+  it("each canonical mount renders it exactly once, on an existing route", () => {
+    for (const rel of WORLD_MOUNT_PAGES) {
+      expect(existsSync(join(APP, rel)), rel).toBe(true);
+      expect([...read(rel).matchAll(/<WorldDiscovery\b/g)], rel).toHaveLength(1);
+    }
+  });
+  it("PASAULIS reuses the component and reader — it builds no map of its own", () => {
+    const opp = read(OPPORTUNITIES_PAGE);
+    expect(opp).toMatch(/from "@\/components\/app\/market-map\/world-discovery"/);
+    expect(opp).toMatch(/from "@\/lib\/market-map\/world-read"/);
+    expect(opp).not.toMatch(/from "leaflet"|import\("leaflet"\)|tile\.openstreetmap/);
+    // a place goes to the page's OWN country filter, not to a second board
+    expect(opp).toMatch(/hrefTemplate: `\/\$\{locale\}\/dashboard\/opportunities\?country=\{country\}/);
   });
   it("no new world/map route exists beside /dashboard/market-map", () => {
     const offenders: string[] = [];
@@ -117,13 +147,18 @@ describe("3 · no second map surface", () => {
     }
     expect(offenders).toEqual([]);
   });
-  it("no other file imports the World read or action (one mount, one entry)", () => {
+  it("no file outside the canonical mounts imports the World read or action", () => {
     const importers: string[] = [];
     for (const dir of ["app", "components", "lib"]) {
       for (const p of walk(join(APP, dir))) {
         if (!/\.(ts|tsx)$/.test(p) || /\.test\.tsx?$/.test(p)) continue;
         const rel = p.slice(APP.length + 1).replace(/\\/g, "/");
-        if (WORLD_FILES.includes(rel) || rel === PAGE) continue;
+        if (
+          WORLD_FILES.includes(rel) ||
+          (WORLD_MOUNT_PAGES as readonly string[]).includes(rel)
+        ) {
+          continue;
+        }
         if (/market-map\/world-(read|actions)"/.test(readFileSync(p, "utf8"))) importers.push(rel);
       }
     }

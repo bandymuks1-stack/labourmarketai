@@ -1391,7 +1391,8 @@
         "label": "Maßstab: {scale}",
         "country": "Länder",
         "place": "Orte"
-      }
+      },
+      "placeLinkHint": "Ein Ort führt zur Liste der Möglichkeiten dieses Ortes."
     }
   },
   "demandLocationCapture": {
@@ -9273,7 +9274,10 @@
       "payNotStated": "Vergütung von der Quelle nicht angegeben",
       "payUnitNotStated": "Einheit von der Quelle nicht angegeben",
       "sourcePlatform": "Plattformanfrage",
-      "externalCouldNotRead": "Die Quelle der öffentlichen Anzeigen konnte diesmal nicht gelesen werden — diese Zeilen sind unbekannt, nicht abwesend."
+      "externalCouldNotRead": "Die Quelle der öffentlichen Anzeigen konnte diesmal nicht gelesen werden — diese Zeilen sind unbekannt, nicht abwesend.",
+      "mapTitle": "Wo die Arbeit ist",
+      "skipToList": "Zur Liste",
+      "placeLink": "Möglichkeiten in diesem Land zeigen"
     }
   },
   "workerIntake": {

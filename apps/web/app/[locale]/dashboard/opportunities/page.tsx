@@ -54,6 +54,12 @@ import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportuniti
 import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
 import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
 import { MarketExplanationPanel } from "@/components/app/market-explanation-panel";
+import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
+import { loadWorldView } from "@/lib/market-map/world-read";
+import {
+  DEFAULT_WORLD_BOUNDS,
+  DEFAULT_WORLD_ZOOM,
+} from "@/lib/market-map/world-model";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
@@ -188,7 +194,7 @@ export default async function OpportunitiesPage({
   const { filters, sort, view } = parseDiscoveryParams(sp);
   // Board + salary benchmark + weekly digest are independent reads — one
   // combined await so TTFB pays the slowest of the three, not their sum.
-  const [result, salaryIntel, weekly] = await Promise.all([
+  const [result, salaryIntel, weekly, worldView] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
@@ -197,6 +203,16 @@ export default async function OpportunitiesPage({
     }),
     getWorkerSalaryIntelligence(),
     getWeeklyPersonalIntelligence(),
+    // PASAULIS' natural base (owner direction 2026-09-13): the SAME
+    // viewport-bounded world read the market map already uses, for the same
+    // default Europe viewport. No new reader, no new layer, no second map —
+    // the canonical `WorldDiscovery` container is rendered here too, and
+    // the client re-reads on pan/zoom exactly as it does on /market-map.
+    loadWorldView({
+      bounds: DEFAULT_WORLD_BOUNDS,
+      zoom: DEFAULT_WORLD_ZOOM,
+      layer: "demand",
+    }),
   ]);
 
   // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
@@ -601,6 +617,53 @@ export default async function OpportunitiesPage({
           </>
         ) : null}
       </header>
+
+      {/* THE MAP IS PASAULIS' BASE (owner direction 2026-09-13: "jos
+          natūralus pagrindas turi būti interaktyvus žemėlapis su realiomis
+          galimybėmis pagal šalis/miestus; iš žemėlapio pereinama į
+          kompaktišką rezultatą/detalę").
+          
+          The canonical `WorldDiscovery` container — the same component,
+          the same viewport-bounded reader and the same honest counts strip
+          the market map page renders. It is a discovery surface: it shows
+          where demand IS, never a claim about fit. The fit is the banded
+          list below, and selecting a place links INTO that list through the
+          page's own `?country=` filter — one board, one filter vocabulary.
+          
+          `/dashboard/market-map` keeps every other layer and stays linked
+          from the market section below; nothing moved and nothing was
+          duplicated. */}
+      <section
+        aria-labelledby="opportunities-map-title"
+        data-testid="opportunities-map"
+        className="flex flex-col gap-2"
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2
+            id="opportunities-map-title"
+            className="font-mono text-meta uppercase tracking-label text-text-secondary"
+          >
+            {t("world.mapTitle")}
+          </h2>
+          {/* One tap past the map for anyone who came for the list. */}
+          <a
+            href="#opportunities-results"
+            data-testid="opportunities-map-skip"
+            className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
+          >
+            {t("world.skipToList")} ↓
+          </a>
+        </div>
+        <WorldDiscovery
+          initial={worldView}
+          placeLink={{
+            hrefTemplate: `/${locale}/dashboard/opportunities?country={country}#opportunities-results`,
+            label: t("world.placeLink"),
+          }}
+        />
+      </section>
+
+      <div id="opportunities-results" className="scroll-mt-4" />
 
       {world.kind === "could_not_read_subject" || result.kind !== "ready" ? (
         /* READER FAILURE — no worker row, nothing to compare against. Said

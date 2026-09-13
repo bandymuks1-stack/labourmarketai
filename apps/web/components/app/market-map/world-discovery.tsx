@@ -39,13 +39,34 @@ const FETCH_DEBOUNCE_MS = 250;
 
 type LayerStateKind = "ok" | "empty" | "error" | "unavailable" | "not_authenticated" | "invalid" | "fetch_failed";
 
+/**
+ * FROM A PLACE TO ITS OPPORTUNITIES (owner direction 2026-09-13: "iš
+ * žemėlapio pereinama į kompaktišką rezultatą/detalę").
+ *
+ * The map answers "where is there work"; the compact banded list answers
+ * "what of it fits me, and why". This prop is the one edge between them: a
+ * place's row gets a link into the SAME page's EXISTING country filter
+ * (`?country=`), so selecting a place narrows the list the person is
+ * already reading. No second board, no second filter vocabulary.
+ *
+ * `hrefTemplate` carries `{country}`, replaced with the cluster's ISO-2
+ * code. It is a template rather than a callback because this is a client
+ * component and its server parent cannot hand it a function.
+ */
+export interface WorldPlaceLink {
+  readonly hrefTemplate: string;
+  readonly label: string;
+}
+
 export function WorldDiscovery({
   initial,
   initialLayer = "demand",
+  placeLink,
 }: {
   /** The first view, rendered on the server for the default viewport. */
   initial: WorldViewResult;
   initialLayer?: WorldLayer;
+  placeLink?: WorldPlaceLink;
 }) {
   const t = useTranslations("marketMap.world");
   const locale = useLocale();
@@ -190,7 +211,10 @@ export function WorldDiscovery({
           })}
         </div>
       </div>
-      <p className="text-sm leading-relaxed text-text-secondary">{t("lead")}</p>
+      <p className="text-sm leading-relaxed text-text-secondary">
+        {t("lead")}
+        {placeLink ? <> {t("placeLinkHint")}</> : null}
+      </p>
 
       <MarketMap
         view={view?.view ?? EMPTY_VIEW}
@@ -325,6 +349,16 @@ export function WorldDiscovery({
                       ))}
                       {c.moreMembers > 0 ? <li>{t("list.more", { count: c.moreMembers })}</li> : null}
                     </ul>
+                  ) : null}
+                  {placeLink ? (
+                    <a
+                      href={placeLink.hrefTemplate.replace("{country}", c.country)}
+                      data-testid="world-place-link"
+                      data-country={c.country}
+                      className="inline-flex min-h-9 w-fit items-center text-xs font-medium text-brand-blue underline-offset-4 hover:underline"
+                    >
+                      {placeLink.label} →
+                    </a>
                   ) : null}
                 </li>
               );
