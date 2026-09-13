@@ -3,20 +3,30 @@ import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import {
-  EVIDENCE_TIER_MESSAGE_KEY,
-  type EvidenceTier,
-} from "@/lib/evidence/evidence-tier";
-import {
-  WORK_PERIOD_KEYS,
   type WorkIntelligence,
   type WorkPeriodKey,
   type WorkTrend,
 } from "@/lib/journal/work-intelligence";
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
 import { deriveAttributionExpectation } from "@/lib/journal/attribution-expectation";
-import { JournalWorkTimeCheckAck } from "@/components/app/journal-work-time-check-ack";
+import { orgLedger, skillRows } from "@/lib/journal/work-in-numbers-view";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 import { formatUtcDate } from "@/lib/time/display";
+// ONE rendering of every figure (target worker IA 2026-09-13): the period
+// tiles, the checks, the organization's ledger, the share bars, the honest
+// remainder and the growth kinds are the SAME components the Work-in-Numbers
+// station (`/dashboard/work-in-numbers`) composes — this block only arranges
+// them for the audience it serves.
+import { ChecksList } from "@/components/app/work-in-numbers/checks-list";
+import { fmtHours, fmtPct } from "@/components/app/work-in-numbers/format";
+import {
+  GrowthKinds,
+  type GrowthSkillDirection,
+} from "@/components/app/work-in-numbers/growth-kinds";
+import { HoursRemainder } from "@/components/app/work-in-numbers/hours-remainder";
+import { OrgLedger } from "@/components/app/work-in-numbers/org-ledger";
+import { PeriodNav } from "@/components/app/work-in-numbers/period-nav";
+import { SkillShareList } from "@/components/app/work-in-numbers/skill-share-list";
 
 /**
  * "Darbas skaičiais" — what the person's recorded work adds up to, rendered
@@ -130,25 +140,7 @@ const MAX_SKILLS = 8;
 const MAX_ACTIVITIES = 6;
 const MAX_MONTHS = 12;
 const MAX_DIRECTIONS = 3;
-
-function fmtHours(hours: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(
-    hours,
-  );
-}
-
-function fmtPct(share: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
-    style: "percent",
-    maximumFractionDigits: 0,
-  }).format(share);
-}
-
-const TIER_CHIP: Record<EvidenceTier, string> = {
-  manager_confirmed: "border-state-success/50 text-state-success",
-  work_journal: "border-brand-blue/50 text-brand-blue",
-  self_declared: "border-ink-500 text-text-muted",
-};
+const MAX_KINDS = 6;
 
 const TREND_GLYPH: Record<WorkTrend, string> = {
   up: "↗",
@@ -175,9 +167,11 @@ export async function JournalWorkIntelligence({
   /** Organization wording where the sentence addressed the person ("you"). */
   const tk = (key: string, values?: Record<string, string | number>) =>
     org && t.has(`org.${key}`) ? t(`org.${key}`, values) : t(key, values);
+  // the person's own tiles point at the Work-in-Numbers station (the
+  // figures' stable destination, target IA §2); the organization view passes
+  // the person page it sits on
   const periodHref = (key: WorkPeriodKey): string =>
-    labels.periodHref?.(key) ??
-    `/dashboard/journal?period=${key}#work-intelligence`;
+    labels.periodHref?.(key) ?? `/dashboard/work-in-numbers?period=${key}`;
   const period =
     wi.periods.find((p) => p.key === wi.focus) ??
     wi.periods[wi.periods.length - 1]!;
@@ -213,25 +207,37 @@ export async function JournalWorkIntelligence({
   const deepen = (growth?.deepen ?? [])
     .map((d) => ({ ...d, name: labels.skillName(d.slug) }))
     .filter((d): d is typeof d & { name: string } => d.name !== null);
+  // the KINDS over skills (owner requirement 5, #1689) — core strength /
+  // growing / underused / self-stated, each with the facts it was decided
+  // on; the adjacent kind is the existing directions block below, labelled
+  const kindsAll = (growth?.directions ?? [])
+    .filter((d): d is GrowthSkillDirection => d.kind !== "adjacent_opportunity")
+    .map((d) => ({ ...d, name: labels.skillName(d.slug) }))
+    .filter((d): d is typeof d & { name: string } => d.name !== null);
+  const kinds = kindsAll.slice(0, MAX_KINDS);
+  // every sentence names the evidence: the figures the kind was decided on
+  // (`growthKindWhy`, shared with the station)
   const directions = (growth?.expand ?? [])
     .map((d) => ({
-      ...d,
+      professionId: d.professionId,
       name: labels.professionName(d.professionId),
+      sharedCount: d.sharedCount,
       total: skillsForProfession(d.professionId).length,
       missingNames: d.missingSkills
         .map((s) => labels.skillName(s))
         .filter((n): n is string => n !== null)
         .slice(0, 3),
     }))
-    .filter((d) => d.name !== null)
+    .filter((d): d is typeof d & { name: string } => d.name !== null)
     .slice(0, MAX_DIRECTIONS);
 
   // Every list below is CAPPED for the page; the totals above them are not.
   // Where a cap cuts, the surface says so ("Rodoma 8 iš 12") — a silent cut
   // read as "these are all my skills" (#1689, REMAINING 2 of the receipts).
-  const skillsAll = wi.skills.filter(
-    (s) => s.attributedHours > 0 || s.sharedHours > 0 || s.entries > 0,
-  );
+  // The rows are the ONE presentation model (`skillRows`: evidenced skills,
+  // share desc, every figure the model's) the station lists too; a skill the
+  // locale cannot name is dropped, never shown as a raw slug.
+  const skillsAll = skillRows(wi, labels.skillName).filter((r) => r.name !== null);
   const skills = skillsAll.slice(0, MAX_SKILLS);
   const activities = wi.activities.slice(0, MAX_ACTIVITIES);
   const mainActivity = activities[0] ?? null;
@@ -241,7 +247,7 @@ export async function JournalWorkIntelligence({
     (d) => labels.professionName(d.professionId) !== null,
   ).length;
   const capLine = (
-    kind: "skills" | "activities" | "months" | "directions" | "deepen",
+    kind: "skills" | "activities" | "months" | "directions" | "deepen" | "kinds",
     shown: number,
     total: number,
   ) =>
@@ -261,34 +267,14 @@ export async function JournalWorkIntelligence({
   const allPeriod = wi.periods.find((p) => p.key === "all") ?? period;
   const hasAnyHours = wi.totalHours > 0 || allPeriod.dayUnits > 0;
   const noEntriesAtAll = wi.totalEntries === 0;
-  const openChecks = wi.checks.filter((c) => c.acknowledged === null);
-  const ackedChecks = wi.checks.filter((c) => c.acknowledged !== null);
-  const checkSentence = (c: (typeof wi.checks)[number]) =>
-    t(`checks.${c.code}`, {
-      hours: fmtHours(c.hours, locale),
-      day: day(c.day) ?? c.day,
-      entries: c.entryIds.length,
-      title: c.title ?? t("checks.untitled"),
-      ignored: c.ignored
-        ? `${fmtHours(c.ignored.value, locale)} ${labels.unitName(c.ignored.unit) ?? c.ignored.unit}`
-        : "",
-    }) +
-    // which ledger doubled the day — the organization's records on top of
-    // the journal's lines are named, so the person knows what to compare
-    (c.organizationHours > 0
-      ? ` ${t("checks.organizationHours", { hours: fmtHours(c.organizationHours, locale) })}`
-      : "");
   const periodHasEntries = period.entries > 0;
 
   // ── 1b · the organization's own hour records (owner §19) ──────────────
-  // A ledger beside the journal: shown when it holds anything at all, with
-  // the focus period's figure (and the all-time one when the period is
-  // empty). `null` = the ledger could not be read → nothing is claimed.
-  const orgRecords = wi.organizationRecords;
-  const orgPeriod = orgRecords?.find((p) => p.key === wi.focus) ?? null;
-  const orgAll = orgRecords?.find((p) => p.key === "all") ?? null;
-  const showOrgRecords =
-    orgAll !== null && (orgAll.hours > 0 || orgAll.rejectedHours > 0);
+  // A ledger beside the journal (`orgLedger`): shown when it holds anything
+  // at all, with the focus period's figure (and the all-time one when the
+  // period is empty). `null` = the ledger could not be read → UNKNOWN is
+  // said, never a zero (the shared `OrgLedger` renders each state).
+  const ledger = orgLedger(wi);
 
   return (
     <section
@@ -320,183 +306,30 @@ export async function JournalWorkIntelligence({
           <>
             {/* 1 · at a glance — every period real and visible; the chosen one
               scopes the detail below (owner §4, §12) */}
-            <nav
-              aria-label={t("periodLabel")}
-              className="grid grid-cols-3 gap-2 sm:grid-cols-5"
-              data-testid="wi-period-nav"
-            >
-              {WORK_PERIOD_KEYS.map((key: WorkPeriodKey) => {
-                const p = wi.periods.find((x) => x.key === key)!;
-                const active = key === wi.focus;
-                return (
-                  <Link
-                    key={key}
-                    href={periodHref(key) as "/dashboard"}
-                    aria-current={active ? "page" : undefined}
-                    data-testid={`wi-period-${key}`}
-                    data-hours={p.hours}
-                    className={`flex flex-col gap-0.5 rounded-md border px-3 py-2.5 transition-colors ${
-                      active
-                        ? "border-brand-blue bg-brand-blue/10"
-                        : "border-border-subtle bg-surface-1/50 hover:border-brand-blue/60"
-                    }`}
-                  >
-                    <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
-                      {t(`period.${key}`)}
-                    </span>
-                    <span
-                      className="font-display text-xl font-bold tabular-nums text-text-primary"
-                      data-testid={`wi-period-hours-${key}`}
-                    >
-                      {h(p.hours)}
-                    </span>
-                    <span className="text-meta tabular-nums text-text-muted">
-                      {p.entries > 0
-                        ? t("glance", {
-                            days: p.daysWorked,
-                            entries: p.entries,
-                          })
-                        : t("glanceNone")}
-                      {p.dayUnits > 0
-                        ? ` · ${t("plusDayUnits", { days: fmtHours(p.dayUnits, locale) })}`
-                        : ""}
-                    </span>
-                  </Link>
-                );
-              })}
-            </nav>
+            <PeriodNav wi={wi} locale={locale} t={t} href={periodHref} />
 
             {/* 1a · plausibility checks (owner §13) — warn, never corrupt:
-              every figure above and below is exactly what was recorded. */}
+              every figure above and below is exactly what was recorded.
+              The person's own surface only. */}
             {!org && wi.checks.length > 0 && (
-              <div
-                className="flex flex-col gap-2"
-                data-testid="wi-checks"
-                data-open-checks={openChecks.length}
-              >
-                <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
-                  {t("checks.title")}
-                </h3>
-                <p className="text-meta leading-relaxed text-text-muted">
-                  {t("checks.hint")}
-                </p>
-                <ul className="flex flex-col gap-1.5">
-                  {openChecks.map((c) => (
-                    <li
-                      key={c.key}
-                      className="flex flex-col gap-1.5 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2"
-                      data-testid={`wi-check-${c.code}`}
-                      data-check-key={c.key}
-                      data-check-day={c.day}
-                    >
-                      <span className="text-sm leading-relaxed text-text-primary">
-                        {checkSentence(c)}
-                      </span>
-                      <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <Link
-                          href={
-                            `/dashboard/journal?date=${c.day}#journal-entries` as "/dashboard"
-                          }
-                          className="text-meta font-medium text-brand-blue hover:underline"
-                          data-testid={`wi-check-open-${c.code}`}
-                        >
-                          {t("checks.openRecords", { entries: c.entryIds.length })} →
-                        </Link>
-                        <JournalWorkTimeCheckAck
-                          entryId={c.entryIds[0]!}
-                          code={c.code}
-                          day={c.day}
-                          checkKey={c.key}
-                        />
-                      </span>
-                    </li>
-                  ))}
-                  {ackedChecks.map((c) => (
-                    <li
-                      key={c.key}
-                      className="flex flex-col gap-0.5 rounded-md border border-border-subtle bg-surface-1/40 px-3 py-2"
-                      data-testid={`wi-check-acked-${c.code}`}
-                      data-check-key={c.key}
-                    >
-                      <span className="text-meta leading-relaxed text-text-muted">
-                        {checkSentence(c)}
-                      </span>
-                      <span className="text-meta text-text-secondary">
-                        {t("checks.acknowledged", {
-                          reason: c.acknowledged!.reason,
-                        })}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ChecksList
+                checks={wi.checks}
+                locale={locale}
+                t={t}
+                unitName={labels.unitName}
+                dayLabel={day}
+              />
             )}
 
             {/* 1b · the organization's hour records — the second ledger,
               named beside the journal, added to nothing, reaching no skill */}
-            {showOrgRecords && orgPeriod && orgAll && (
-              <div
-                className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/50 px-3 py-2.5"
-                data-testid="wi-org-records"
-                data-hours={orgPeriod.hours}
-                data-all-hours={orgAll.hours}
-                data-imported-hours={orgPeriod.importedHours}
-                data-linked-hours={orgPeriod.linkedHours}
-              >
-                <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
-                  {tk("orgRecords.title")}
-                </span>
-                <span
-                  className="text-sm leading-relaxed text-text-primary"
-                  data-testid="wi-org-records-hours"
-                >
-                  {orgPeriod.hours > 0
-                    ? tk("orgRecords.body", {
-                        hours: fmtHours(orgPeriod.hours, locale),
-                        days: orgPeriod.daysWorked,
-                        period: t(`period.${wi.focus}`),
-                        organizations: orgPeriod.organizations,
-                      })
-                    : tk("orgRecords.periodEmpty", {
-                        period: t(`period.${wi.focus}`),
-                        hours: fmtHours(orgAll.hours, locale),
-                        days: orgAll.daysWorked,
-                      })}
-                </span>
-                {(orgPeriod.importedHours > 0 ||
-                  orgPeriod.approvedHours > 0 ||
-                  orgPeriod.linkedHours > 0 ||
-                  orgPeriod.rejectedHours > 0) && (
-                  <span
-                    className="text-meta leading-relaxed text-text-muted"
-                    data-testid="wi-org-records-provenance"
-                  >
-                    {[
-                      orgPeriod.importedHours > 0
-                        ? t("orgRecords.imported", { hours: fmtHours(orgPeriod.importedHours, locale) })
-                        : null,
-                      orgPeriod.approvedHours > 0
-                        ? t("orgRecords.approved", { hours: fmtHours(orgPeriod.approvedHours, locale) })
-                        : null,
-                      orgPeriod.linkedHours > 0
-                        ? t("orgRecords.linked", { hours: fmtHours(orgPeriod.linkedHours, locale) })
-                        : null,
-                      orgPeriod.rejectedHours > 0
-                        ? t("orgRecords.rejected", { hours: fmtHours(orgPeriod.rejectedHours, locale) })
-                        : null,
-                    ]
-                      .filter((x): x is string => x !== null)
-                      .join(" · ")}
-                  </span>
-                )}
-                <span
-                  className="text-meta leading-relaxed text-text-muted"
-                  data-testid="wi-org-records-rule"
-                >
-                  {tk("orgRecords.rule")}
-                </span>
-              </div>
-            )}
+            <OrgLedger
+              view={ledger}
+              periodWord={t(`period.${wi.focus}`)}
+              locale={locale}
+              t={t}
+              tk={tk}
+            />
 
             {!hasAnyHours && (
               <p
@@ -574,12 +407,12 @@ export async function JournalWorkIntelligence({
                         </span>
                       )}
                     </>
-                  ) : skills[0] && skills[0].attributedHours > 0 ? (
+                  ) : skills[0] && skills[0].measured ? (
                     <span
                       className="text-base font-semibold text-text-primary"
                       data-testid="wi-main-skill"
                     >
-                      {labels.skillName(skills[0].slug) ?? skills[0].slug}
+                      {skills[0].name ?? skills[0].slug}
                       <span className="ml-2 font-normal tabular-nums text-text-secondary">
                         {h(skills[0].attributedHours)}
                       </span>
@@ -650,186 +483,35 @@ export async function JournalWorkIntelligence({
               </div>
             )}
 
-            {/* 4 · skills — attributed practice time vs involvement */}
+            {/* 4 · skills — attributed practice time vs involvement: the ONE
+              share-bar rendering the station uses, then the honest remainder
+              (shared / multi-activity / unattributed) and the provenance of
+              every hour — reported once, never summed */}
             {(skills.length > 0 ||
               wi.unattributedHours > 0 ||
               wi.sharedHours > 0 ||
               wi.multiActivityHours > 0) && (
-              <div className="flex flex-col gap-2" data-testid="wi-skills">
-                <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
-                  {t("skillsTitle")}
-                </h3>
-                <p className="text-meta leading-relaxed text-text-muted">
-                  {tk("skillsHint")}
-                </p>
-                {/* the base every % below is a share OF — stated in words,
-                  not only in an aria-label: "5 h · 100 %" over 95 unlinked
-                  hours was a full bar with no visible base (re-audit F3) */}
-                {attribution?.reason && (
-                  <p
-                    className="text-meta leading-relaxed text-text-secondary"
-                    data-testid="wi-attribution-note"
-                    data-attribution={attribution.attribution}
-                    data-reason={attribution.reason}
-                  >
-                    {t(`attribution.${attribution.reason}`)}
-                  </p>
-                )}
-                {period.hours > 0 && (
-                  <p
-                    className="text-meta leading-relaxed text-text-secondary"
-                    data-testid="wi-skills-coverage"
-                    data-attributed-hours={wi.attributedHours}
-                    data-period-hours={period.hours}
-                  >
-                    {t("skillsCoverage", {
-                      attributed: fmtHours(wi.attributedHours, locale),
-                      total: fmtHours(period.hours, locale),
-                      period: t(`period.${wi.focus}`),
-                    })}
-                  </p>
-                )}
-                {skills.length > 0 && (
-                  <ul className="flex flex-col gap-1.5">
-                    {skills.map((s) => {
-                      const name = labels.skillName(s.slug) ?? s.slug;
-                      const last = day(s.lastWorkedDay);
-                      return (
-                        <li
-                          key={s.skillId}
-                          className="flex flex-col gap-1"
-                          data-testid={`wi-skill-${s.slug}`}
-                          data-attributed-hours={s.attributedHours}
-                          data-shared-hours={s.sharedHours}
-                        >
-                          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                            {org ? (
-                              <span
-                                className="text-sm font-medium text-text-primary"
-                                data-testid={`wi-skill-name-${s.slug}`}
-                              >
-                                {name}
-                              </span>
-                            ) : (
-                              <Link
-                                href={
-                                  `/dashboard/journal?skill=${s.slug}#journal-entries` as "/dashboard"
-                                }
-                                className="text-sm font-medium text-text-primary underline-offset-2 hover:underline"
-                                data-testid={`wi-skill-link-${s.slug}`}
-                              >
-                                {name}
-                              </Link>
-                            )}
-                            <span className="flex flex-wrap items-baseline gap-x-2 text-meta tabular-nums text-text-muted">
-                              {s.attributedHours > 0 ? (
-                                <span
-                                  className="font-medium text-text-primary"
-                                  data-testid={`wi-skill-share-${s.slug}`}
-                                >
-                                  {h(s.attributedHours)}
-                                  {wi.attributedHours > 0 && s.share > 0
-                                    ? ` · ${t("shareOf", {
-                                        percent: fmtPct(s.share, locale),
-                                        base: fmtHours(wi.attributedHours, locale),
-                                      })}`
-                                    : ""}
-                                </span>
-                              ) : (
-                                <span>{t("noAttributedHours")}</span>
-                              )}
-                              {s.sharedHours > 0 && (
-                                <span data-testid={`wi-skill-shared-${s.slug}`}>
-                                  {t("sharedWithOthers", {
-                                    hours: fmtHours(s.sharedHours, locale),
-                                  })}
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                          <div
-                            className="h-1.5 w-full overflow-hidden rounded-full bg-ink-700/60"
-                            role="img"
-                            aria-label={t("shareAria", {
-                              name,
-                              percent: fmtPct(s.share, locale),
-                            })}
-                          >
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-brand-blue to-brand-cyan"
-                              style={{
-                                width: `${Math.round(Math.min(1, s.share) * 100)}%`,
-                              }}
-                            />
-                          </div>
-                          <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-meta text-text-muted">
-                            <span
-                              className={`rounded-full border px-1.5 py-px text-[0.65rem] ${TIER_CHIP[s.tier]}`}
-                              data-testid={`wi-skill-tier-${s.slug}`}
-                              data-tier={s.tier}
-                            >
-                              {tTier(EVIDENCE_TIER_MESSAGE_KEY[s.tier])}
-                            </span>
-                            <span>
-                              {t("frequency", {
-                                entries: s.entries,
-                                days: s.days,
-                                contexts: s.contexts,
-                              })}
-                            </span>
-                            {last && (
-                              <span>{t("lastWorked", { day: last })}</span>
-                            )}
-                            {s.confirmedHours > 0 && (
-                              <span
-                                data-testid={`wi-skill-confirmed-${s.slug}`}
-                              >
-                                {t("skillConfirmed", {
-                                  hours: fmtHours(s.confirmedHours, locale),
-                                })}
-                              </span>
-                            )}
-                          </p>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-                {capLine("skills", skills.length, skillsAll.length)}
-                {/* the honest remainder — what no skill can claim yet */}
-                {wi.sharedHours > 0 && (
-                  <p
-                    className="text-meta leading-relaxed text-text-muted"
-                    data-testid="wi-shared-hours"
-                  >
-                    {t("sharedHours", {
-                      hours: fmtHours(wi.sharedHours, locale),
-                      count: wi.sharedEntries,
-                    })}
-                  </p>
-                )}
-                {wi.multiActivityHours > 0 && (
-                  <p
-                    className="text-meta leading-relaxed text-text-muted"
-                    data-testid="wi-multi-activity-hours"
-                  >
-                    {t("multiActivityHours", {
-                      hours: fmtHours(wi.multiActivityHours, locale),
-                      count: wi.multiActivityEntries,
-                    })}
-                  </p>
-                )}
-                {wi.unattributedHours > 0 && (
-                  <p
-                    className="text-meta leading-relaxed text-text-muted"
-                    data-testid="wi-unattributed-hours"
-                  >
-                    {tk("unattributedHours", {
-                      hours: fmtHours(wi.unattributedHours, locale),
-                      count: wi.unattributedEntries,
-                    })}
-                  </p>
-                )}
+              <div className="flex flex-col gap-3">
+                <SkillShareList
+                  rows={skills}
+                  attributedHours={wi.attributedHours}
+                  periodHours={period.hours}
+                  periodWord={t(`period.${wi.focus}`)}
+                  locale={locale}
+                  t={t}
+                  tk={tk}
+                  tTier={tTier}
+                  linkHref={
+                    org
+                      ? null
+                      : (slug) => `/dashboard/journal?skill=${slug}#journal-entries`
+                  }
+                  unitName={labels.unitName}
+                  dayLabel={day}
+                  attributionNote={attribution}
+                  capNote={capLine("skills", skills.length, skillsAll.length)}
+                />
+                <HoursRemainder wi={wi} period={period} locale={locale} t={t} tk={tk} />
               </div>
             )}
 
@@ -1101,53 +783,21 @@ export async function JournalWorkIntelligence({
                       {capLine("deepen", deepen.length, growth?.deepenTotal ?? deepen.length)}
                     </div>
                   )}
-                  {directions.length > 0 && (
-              <div
-                className="flex flex-col gap-1.5"
-                data-testid="wi-directions"
-              >
-                <h4 className="text-meta font-medium text-text-secondary">
-                  {t("directionsTitle")}
-                </h4>
-                <p className="text-meta leading-relaxed text-text-muted">
-                  {t("directionsHint")}
-                </p>
-                <ul className="flex flex-col gap-1.5">
-                  {directions.map((d) => (
-                    <li
-                      key={d.professionId}
-                      className="flex flex-col gap-0.5 rounded-md border border-border-subtle bg-surface-1/40 px-3 py-2"
-                      data-testid={`wi-direction-${d.professionId}`}
-                    >
-                      <span className="text-sm font-medium text-text-primary">
-                        {d.name}
-                      </span>
-                      <span className="text-meta text-text-muted">
-                        {t("directionCoverage", {
-                          shared: d.sharedCount,
-                          total: d.total,
-                        })}
-                        {d.missingNames.length > 0
-                          ? ` · ${t("directionMissing", { skills: d.missingNames.join(", ") })}`
-                          : ""}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                {capLine("directions", directions.length, directionsTotal)}
-              </div>
-                  )}
-                  {/* demand is not read on this page — the board is where
-                      real needs are; said, not implied (UNKNOWN ≠ ZERO) */}
-                  <p className="text-meta text-text-muted" data-testid="wi-growth-demand-note">
-                    {t("growthDemandNote")}{" "}
-                    <Link
-                      href={"/dashboard/opportunities" as "/dashboard"}
-                      className="font-medium text-brand-blue hover:underline"
-                    >
-                      {t("openOpportunities")} →
-                    </Link>
-                  </p>
+                  {/* the KINDS (owner requirement 5): each skill's kind, decided
+                      by a plain rule, with the facts it was decided on — the
+                      evidence named on every line, never a trait; and the
+                      adjacent directions, labelled as the adjacent kind. ONE
+                      rendering with the station; the demand note (UNKNOWN,
+                      not zero) is part of it. */}
+                  <GrowthKinds
+                    kinds={kinds}
+                    directions={directions}
+                    locale={locale}
+                    t={t}
+                    dayLabel={day}
+                    kindsCap={capLine("kinds", kinds.length, kindsAll.length)}
+                    directionsCap={capLine("directions", directions.length, directionsTotal)}
+                  />
                 </div>
               </div>
             )}
@@ -1184,30 +834,6 @@ export async function JournalWorkIntelligence({
             </div>
             )}
 
-            {/* 9 · provenance — where every hour came from */}
-            {hasAnyHours && (
-              <p
-                className="text-meta leading-relaxed text-text-muted"
-                data-testid="wi-provenance"
-              >
-                {tk("provenance", {
-                  worker: fmtHours(wi.provenance.workerInput, locale),
-                  extracted: fmtHours(wi.provenance.aiExtracted, locale),
-                  corrected: fmtHours(wi.provenance.managerCorrected, locale),
-                })}{" "}
-                {tk("provenanceRule")}
-                {/* an entry with no stated work day is placed by the UTC day
-                    it was saved — said, never silently a fact (re-audit F10) */}
-                {period.entriesDayInferred > 0 ? (
-                  <>
-                    {" "}
-                    <span data-testid="wi-day-inferred">
-                      {t("dayInferred", { count: period.entriesDayInferred })}
-                    </span>
-                  </>
-                ) : null}
-              </p>
-            )}
           </>
         )}
       </Card>

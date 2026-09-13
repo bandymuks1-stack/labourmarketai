@@ -237,7 +237,7 @@
   "listEmptyTitle": "Start building work records",
   "listEmptyNext": "Create your first entry below — it stays private until you submit it.",
   "listEmptyCta": "Create your first entry",
-  "logViaChatBody": "Work is logged in the conversation — say what you did and the record appears here.",
+  "logViaChatBody": "Other ways to record work:",
   "logViaChatCta": "Log work in the chat",
   "logViaVoiceCta": "Record by voice",
   "skillFilterActive": "Showing records linked to “{name}” ({count})",
@@ -409,6 +409,7 @@
   },
   "proofLoop": {
     "strip": "Entries → skills → CV → opportunities: {entries} entries this month · {evidenced} skills with records · {confirmed} reviewed",
+    "stripPeriod": "Entries → skills → CV → opportunities: {entries} entries ({period}) · {evidenced} skills with records · {confirmed} reviewed",
     "cvLink": "CV"
   },
   "statusExplainer": "How are your entries used?",
@@ -654,6 +655,7 @@
     "monthsTitle": "How it changes",
     "monthsLegend": "Hours per month by the day worked. The green part is manager-confirmed hours. A month with no entries is a real zero.",
     "listCap": "Showing {shown} of {total} — every row counts toward the totals.",
+    "coverageTruncated": "Shown from the last {count} entries — older entries are not in these figures.",
     "monthsCap": "Showing the last {shown} of {total} months — all of them count toward the totals.",
     "attribution": {
       "involvement_expected": "In this kind of work time is usually recorded for the whole shift, not per activity, so hours show here as involvement — that is not an error. For hours per skill, give the time next to the activity in an entry.",
@@ -759,6 +761,64 @@
       "linked": "{hours} h describe journal entries already counted above",
       "rejected": "{hours} h rejected in a timesheet — counted nowhere",
       "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only a journal entry does that."
+    },
+    "growthKindsTitle": "What your entries show",
+    "growthKindsHint": "Each line is a kind read by a plain rule from your own entries, with the facts it stands on. Not a trait, not a rating.",
+    "growthKind": {
+      "core_strength": "Core strength",
+      "growing": "Growing",
+      "underused": "Underused",
+      "self_stated": "Self-stated only",
+      "adjacent_opportunity": "Adjacent opportunity"
+    },
+    "growthWhyHours": "{hours} h — {percent} of your attributed hours",
+    "growthWhyInvolved": "involved {hours} h alongside other skills",
+    "growthWhyUntimed": "entries without a duration",
+    "growthWhyCounts": "{entries, plural, one {# entry} other {# entries}}, {contexts, plural, one {# context} other {# contexts}}",
+    "growthWhyLastDay": "last {day}",
+    "growthWhyDormant": "{days} days without an entry",
+    "growthWhySelfStated": "declared by you — 0 entries and 0 hours back it",
+    "growthWhyTrend": {
+      "up": "used more in the last 30 days than in the 30 before",
+      "new": "first entries in the last 30 days",
+      "down": "used less in the last 30 days than in the 30 before",
+      "flat": "used as much in the last 30 days as in the 30 before"
+    },
+    "numbers": {
+      "stationTitle": "My work in numbers",
+      "stationSubtitle": "What your recorded work adds up to — from your own entries only, every figure with its period beside it.",
+      "question": "Which skills take up the largest part of my work?",
+      "dominant": "{skill} — {hours} h, {percent} of your attributed hours ({scope}).",
+      "dominantUntimed": "{scope}: {entries, plural, one {# entry} other {# entries}}, but no hours are attributed to any skill yet — state the time next to the activity or link a skill.",
+      "periodEmpty": "{scope}: no entries. Pick another period below.",
+      "unknown": "The figures could not be read right now — that is not a zero. Please try again later.",
+      "periodHours": "{hours} h · {scope}",
+      "scope": {
+        "today": "today",
+        "week": "the last 7 days",
+        "month": "the last 30 days",
+        "year": "the last 365 days",
+        "all": "all time"
+      },
+      "scopeRange": "{from} – {to}",
+      "scopeNote": "Every figure on this page is for {scope}. A bounded window is never shown as all time.",
+      "openStation": "All the figures",
+      "backToJournal": "Back to the work journal",
+      "linksTruncated": "The skill-link read stopped at its ceiling — some entries may show without a skill, their hours as unattributed.",
+      "skillsTitle": "Skills by share of work",
+      "skillFirst": "first on {day}",
+      "skillOutput": "completed {value} {unit}",
+      "confirmationShare": "{percent} confirmed by a manager's record ({confirmed} of {attributed} h)",
+      "confirmationNone": "no manager confirmation yet",
+      "notMeasured": "entries without a duration — hours not measured",
+      "checksOpen": "{count, plural, one {# check is waiting for your decision.} other {# checks are waiting for your decision.}}",
+      "ledgerUnknown": "The organization's records could not be read right now — that is not a zero.",
+      "trendShort": {
+        "up": "increasing",
+        "down": "decreasing",
+        "flat": "about the same",
+        "new": "new"
+      }
     }
   },
   "verification": {
@@ -780,5 +840,13 @@
       "respond_to_decision": "Read the decision and reply",
       "none": "Nothing is missing"
     }
+  },
+  "record": {
+    "hint": "One sentence: what you did, where and for how long. A photo is optional and is added before saving.",
+    "placeholder": "e.g. tiled 6 h at the site in Kaunas",
+    "understand": "Read it back",
+    "startOver": "Start over",
+    "detailed": "In detail (full form)",
+    "detailedBack": "Back to the simple entry"
   }
 }

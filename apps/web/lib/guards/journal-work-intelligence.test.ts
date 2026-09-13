@@ -65,6 +65,20 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8").replace(/\r\
 
 const page = read("app/[locale]/dashboard/journal/page.tsx");
 const component = read("components/app/journal-work-intelligence.tsx");
+// Target worker IA 2026-09-13 (#1724 lane F): the figures' human-facing
+// composition moved to ONE set of shared pieces the section AND the
+// Work-in-Numbers station render — the pins below follow the rendering.
+const numbersView = read("lib/journal/work-in-numbers-view.ts");
+// The station is a FIRST-CLASS surface under A-14 (owner decision 0015).
+const stationPage = read("app/[locale]/dashboard/work-in-numbers/page.tsx");
+const quickRecord = read("app/[locale]/dashboard/journal/quick-record.tsx");
+const shareList = read("components/app/work-in-numbers/skill-share-list.tsx");
+const checksList = read("components/app/work-in-numbers/checks-list.tsx");
+const ledgerBox = read("components/app/work-in-numbers/org-ledger.tsx");
+const remainder = read("components/app/work-in-numbers/hours-remainder.tsx");
+const growthKinds = read("components/app/work-in-numbers/growth-kinds.tsx");
+const dominantLead = read("components/app/work-in-numbers/dominant-lead.tsx");
+const periodNav = read("components/app/work-in-numbers/period-nav.tsx");
 const model = read("lib/journal/work-intelligence.ts");
 const cv = read("lib/cv-export/verified-cv.ts");
 const workflows = read("lib/ai-workspace/workflows.ts");
@@ -95,7 +109,8 @@ const intentRegistry = read("lib/conversation/intent-registry.ts");
 
 describe("1 · one hours rule", () => {
   it("the journal page's day totals go through deriveEntryWorkTime", () => {
-    expect(page).toContain('import { deriveEntryWorkTime } from "@/lib/journal/work-time"');
+    // lane B (#1689): the page also imports the day rule from the same module
+    expect(page).toContain('import { deriveEntryWorkTime, resolveWorkDayDetail } from "@/lib/journal/work-time"');
     expect(page).toMatch(/deriveEntryWorkTime\(\{\s*entryId: e\.id/);
   });
   it("the old entry-level-only computation is gone", () => {
@@ -299,9 +314,12 @@ describe("7 · plausibility checks warn, never corrupt (owner §13)", () => {
     expect(plausibility).toContain('if (m.source !== "worker_input") continue;');
   });
   it("an acknowledged check stays visible with its reason — the section never hides it", () => {
-    expect(component).toContain("ackedChecks.map((c) =>");
-    expect(component).toContain('t("checks.acknowledged"');
-    expect(component).toContain("data-open-checks={openChecks.length}");
+    // the ONE checks rendering (shared with the station) keeps both halves
+    expect(checksList).toContain("ackedChecks.map((c) =>");
+    expect(checksList).toContain('t("checks.acknowledged"');
+    expect(checksList).toContain("data-open-checks={openChecks.length}");
+    expect(component).toMatch(/\{!org && wi\.checks\.length > 0 && \(\s*<ChecksList/);
+    expect(stationPage).toMatch(/<ChecksList checks=\{wi\.checks\}/);
     expect(ackForm).toContain("acknowledgeWorkTimeCheck(");
   });
   it("both intake surfaces show the saved record's day check, read AFTER the save from the same journal read", () => {
@@ -334,7 +352,10 @@ describe("8 · the organization view composes the same reader (owner §14)", () 
     expect(component).toContain("{!org && wi.checks.length > 0 && (");
     // the growth reading (directions included) is not composed at all for the organization
     expect(component).toMatch(/const growth = org\s*\? null\s*: deriveGrowthReading\(/);
-    expect(component).toMatch(/\{org \? \(\s*<span[^>]*data-testid=\{`wi-skill-name-\$\{s\.slug\}`\}/);
+    // the section hands the shared list NO diary link for the organization;
+    // the list then renders a plain name (never an anchor into a diary)
+    expect(component).toMatch(/linkHref=\{\s*org\s*\? null/);
+    expect(shareList).toMatch(/\{linkHref === null \? \(\s*<span[^>]*data-testid=\{`wi-skill-name-\$\{s\.slug\}`\}/);
     expect(component).toMatch(/\{org \? \(\s*<p[\s\S]*?data-testid="wi-org-scope"/);
     expect(component).toContain('t("org.scopeNote")');
     // the period tiles point at the surface they sit on, never at someone else's diary by default
@@ -593,11 +614,15 @@ describe("11 · coverage semantics: shares name their base, hours never vanish",
   });
 
   it("F3 · the skill share states its base in WORDS, not only in an aria-label", () => {
-    expect(component).toContain('data-testid="wi-skills-coverage"');
-    expect(component).toMatch(/t\("skillsCoverage", \{/);
-    expect(component).toMatch(/t\("shareOf", \{/);
+    expect(shareList).toContain('data-testid="wi-skills-coverage"');
+    expect(shareList).toMatch(/t\("skillsCoverage", \{/);
+    expect(shareList).toMatch(/t\("shareOf", \{/);
     // the bare percentage with no base beside it is the pre-fix shape
+    expect(shareList).not.toMatch(/\? ` · \$\{fmtPct\(s\.share, locale\)\}`/);
     expect(component).not.toMatch(/\? ` · \$\{fmtPct\(s\.share, locale\)\}`/);
+    // both surfaces render the ONE list
+    expect(component).toMatch(/<SkillShareList\s/);
+    expect(stationPage).toMatch(/<SkillShareList\s/);
   });
 
   it("F5 · work recorded in days has its own confirmed figure, and the headline reads the same state as the count below it", () => {
@@ -712,18 +737,28 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
   });
 
   it("the section, the CV and the chat NAME the ledger beside the journal figure and state it is added to nothing", () => {
-    expect(component).toContain('data-testid="wi-org-records"');
-    expect(component).toContain('data-testid="wi-org-records-provenance"');
-    expect(component).toContain('data-testid="wi-org-records-rule"');
-    expect(component).toMatch(/tk\("orgRecords\.rule"\)/);
-    expect(component).toMatch(/t\("checks\.organizationHours", \{/);
-    // the ledger figure is the model's own — the component adds nothing to a journal figure
-    expect(component).not.toMatch(/orgPeriod\.hours \+|\+ orgPeriod\.hours|orgAll\.hours \+|\+ orgAll\.hours/);
+    expect(ledgerBox).toContain('data-testid="wi-org-records"');
+    expect(ledgerBox).toContain('data-testid="wi-org-records-provenance"');
+    expect(ledgerBox).toContain('data-testid="wi-org-records-rule"');
+    expect(ledgerBox).toMatch(/tk\("orgRecords\.rule"\)/);
+    expect(checksList).toMatch(/t\("checks\.organizationHours", \{/);
+    // the ledger figure is the model's own — no surface adds it to a journal figure
+    for (const src of [component, ledgerBox, stationPage, numbersView]) {
+      expect(src).not.toMatch(/orgPeriod\.hours \+|\+ orgPeriod\.hours|orgAll\.hours \+|\+ orgAll\.hours/);
+    }
+    // UNKNOWN is a state of its own: a null ledger is said, never rendered as none
+    expect(numbersView).toMatch(/if \(records === null\) return \{ kind: "unknown" \};/);
+    expect(ledgerBox).toContain('data-testid="wi-org-records-unknown"');
+    expect(component).toMatch(/<OrgLedger\s/);
+    expect(stationPage).toMatch(/<OrgLedger view=\{orgLedger\(wi\)\}/);
     expect(cv).toContain("organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),");
     expect(cvPage).toContain('data-testid="cv-organization-recorded-hours"');
     expect(cvPage).toMatch(/t\("organizationRecordedHours", \{/);
     expect(workflows).toMatch(/t\("journalOrgRecords", \{/);
-    expect(workflows).toMatch(/wi\?\.organizationRecords\?\.find\(\(p\) => p\.key === \(focus \?\? "all"\)\)/);
+    // lane B (#1689): the ledger row is the SAME window as the figure — a
+    // tab, or the explicit `range` row — never the all-time row for a window
+    // the section has no tab for
+    expect(workflows).toMatch(/wi\?\.organizationRecords\?\.find\(\(p\) => p\.key === scopeKey\)/);
   });
 
   it("every ledger sentence has copy in each locale the section is published in, and none of it sums the two ledgers", () => {
@@ -811,8 +846,10 @@ describe("13 · the five rules the re-audit pinned (2026-09-11, F8–F12)", () =
     expect(workTime).toMatch(/export function resolveWorkDayDetail\(/);
     expect(workTime).toMatch(/return \{ day: String\(createdAt \?\? ""\)\.slice\(0, 10\), basis: "created" \};/);
     expect(model).toMatch(/if \(d\.time\.dayBasis === "created"\) entriesDayInferred \+= 1;/);
-    expect(component).toContain('data-testid="wi-day-inferred"');
-    expect(component).toMatch(/t\("dayInferred", \{ count: period\.entriesDayInferred \}\)/);
+    expect(remainder).toContain('data-testid="wi-day-inferred"');
+    expect(component).toMatch(/<HoursRemainder\s/);
+    expect(stationPage).toMatch(/<HoursRemainder\s/);
+    expect(remainder).toMatch(/t\("dayInferred", \{ count: period\.entriesDayInferred \}\)/);
     // every intake that records time carries a work_date: the chat and the MCP
     // capability REQUIRE it at the floor every write crosses …
     expect(workerSchemas).toMatch(/workDate: z\.string\(\)\.trim\(\)\.regex\(\/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\/\),/);
@@ -891,8 +928,9 @@ describe("14 · the growth reading (owner line 8): one derivation, fact apart fr
     // the declared-only count is said when non-zero — a reading never hides what it left out
     expect(component).toMatch(/growth\.basis\.declaredOnly > 0\s*\? ` \$\{t\("growthDeclaredOnly", \{ count: growth\.basis\.declaredOnly \}\)\}`/);
     // demand is NOT read on the page and the page says so (UNKNOWN ≠ ZERO)
-    expect(component).toContain('data-testid="wi-growth-demand-note"');
-    expect(component).not.toMatch(/loadWorkerOpportunityBoard|demandBySkill/);
+    expect(growthKinds).toContain('data-testid="wi-growth-demand-note"');
+    expect(component).toMatch(/<GrowthKinds\s/);
+    for (const src of [component, growthKinds, stationPage]) expect(src).not.toMatch(/loadWorkerOpportunityBoard|demandBySkill/);
   });
 
   it("the chat states the facts before the derived label, and demand is the board's count or UNKNOWN — never zero by default", () => {
@@ -952,15 +990,16 @@ describe("14 · the growth reading (owner line 8): one derivation, fact apart fr
 
 describe("15 · a capped list says it is capped (#1689, REMAINING 2 of the receipts — 2026-09-12)", () => {
   it("every capped list on the section carries the cap line when the cap cuts, from ONE helper, with the totals untouched", () => {
-    expect(component).toMatch(/const skillsAll = wi\.skills\.filter\(/);
+    expect(component).toMatch(/const skillsAll = skillRows\(wi, labels\.skillName\)/);
+    expect(numbersView).toMatch(/\.filter\(\(s\) => s\.attributedHours > 0 \|\| s\.sharedHours > 0 \|\| s\.entries > 0\)/);
     expect(component).toMatch(/const skills = skillsAll\.slice\(0, MAX_SKILLS\)/);
     expect(component).toMatch(/const capLine = \(/);
     expect(component).toMatch(/total > shown \? \(/);
     expect(component).toContain('data-testid={`wi-cap-${kind}`}');
-    expect(component).toContain('{capLine("skills", skills.length, skillsAll.length)}');
+    expect(component).toContain('capNote={capLine("skills", skills.length, skillsAll.length)}');
     expect(component).toContain('{capLine("activities", activities.length, wi.activities.length)}');
     expect(component).toContain('{capLine("months", months.length, wi.months.length)}');
-    expect(component).toContain('{capLine("directions", directions.length, directionsTotal)}');
+    expect(component).toContain('directionsCap={capLine("directions", directions.length, directionsTotal)}');
     // the months line says "the last N of M" — a different sentence from a plain cut
     expect(component).toContain('t(kind === "months" ? "monthsCap" : "listCap", { shown, total })');
     // the caps themselves did not move: the figures above the lists are computed on the model, not the slice
@@ -1037,11 +1076,13 @@ describe("16 · the owner's `skillTimeAttribution` column is READ by the analyti
 
   it("the section says it once, beside the skills coverage, for the person only — never to the organization, never a score", () => {
     expect(component).toMatch(/const attribution = org\s*\?\s*null\s*:\s*deriveAttributionExpectation/);
-    expect(component).toContain('data-testid="wi-attribution-note"');
-    expect(component).toContain("{t(`attribution.${attribution.reason}`)}");
-    // the page feeds the person's own occupation path
-    const page = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(page).toContain("iscoGroups: ownPath.iscoGroups,");
+    expect(component).toMatch(/attributionNote=\{attribution\}/);
+    expect(shareList).toContain('data-testid="wi-attribution-note"');
+    expect(shareList).toContain("{t(`attribution.${attributionNote.reason}`)}");
+    // the station feeds the person's own occupation path (the figures moved
+    // there with their block — target worker IA 2026-09-13)
+    expect(stationPage).toContain("deriveAttributionExpectation(ownPath?.iscoGroups ?? [], wi)");
+    expect(stationPage).toContain("readOwnOccupationPath(supabase, worker.id)");
     for (const loc of ["lt", "en", "ru", "nl", "de"]) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: { attribution: Record<string, string> };
@@ -1052,5 +1093,270 @@ describe("16 · the owner's `skillTimeAttribution` column is READ by the analyti
         expect(s).not.toMatch(/archetype|isco|involvement_expected|precise_possible|skillTimeAttribution|score|rating|rank/i);
       }
     }
+  });
+});
+
+describe("14 · ONE time scope (issue #1689, lane B): bounded reads say so, diary day = model day, the chat's recent path on the one model, the MCP figures", () => {
+  const planning = read("lib/planning/planning.ts");
+  const timesheets = read("lib/timesheets/timesheets.ts");
+  const linkRead = read("lib/journal/entry-skill-link-read.ts");
+  const countedOnce = read("lib/journal/counted-once.ts");
+
+  it("the journal list and the link read PAGE with .range() and carry `coverage` / `truncated` — never an unbounded select PostgREST caps at 1000 in silence (SEP-7)", () => {
+    expect(listCore).toMatch(/export const JOURNAL_LIST_PAGE_SIZE = 1000;/);
+    expect(listCore).toMatch(/export async function readAllPages</);
+    expect(listCore).toMatch(/\.range\(from, from \+ pageSize - 1\)/);
+    expect(listCore).toMatch(/if \(batch\.length < pageSize\) return \{ rows, truncated: false, error: null \};/);
+    expect(listCore).toMatch(/coverage: \{ entriesRead: entries\.length, truncated: v3\.truncated \}/);
+    // a total order so a page boundary never repeats or skips a row
+    expect(listCore).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\)/);
+    expect(linkRead).toContain('import { readAllPages } from "@/lib/journal/journal-list-core"');
+    expect(linkRead).toMatch(/truncated: res\.truncated,/);
+    expect(linkRead).toMatch(/\.order\("journal_entry_id", \{ ascending: true \}\)\s*\.order\("skill_id", \{ ascending: true \}\)/);
+    // the reader hands both facts to the model, and the model carries them
+    expect(reader).toMatch(/entriesRead: entriesRead\.coverage\.entriesRead,\s*truncated: entriesRead\.coverage\.truncated,\s*linksTruncated: linkRead\.truncated,/);
+    expect(model).toContain("readonly coverage: WorkIntelligenceCoverage;");
+    expect(model).toMatch(/truncated: input\.coverage\?\.truncated \?\? false,/);
+    // photos: every id, chunked — no `slice(0, 500)` coverage cap
+    expect(reader).toMatch(/for \(let i = 0; i < entryIds\.length; i \+= PHOTO_COUNT_ID_CHUNK\)/);
+    expect(reader).not.toMatch(/slice\(0, 500\)/);
+  });
+
+  it("the diary's day card is the MODEL's day: resolveWorkDayDetail (latest stated work_date), not the first work_date row", () => {
+    expect(page).toContain('import { deriveEntryWorkTime, resolveWorkDayDetail } from "@/lib/journal/work-time"');
+    expect(page).toMatch(/const isoDayOf = \(e: JournalEntryRow\): string =>\s*resolveWorkDayDetail\(e\.journal_entry_metrics \?\? \[\], e\.created_at\)\.day;/);
+    // the pre-fix shape: a second day rule on the page
+    expect(page).not.toMatch(/journalStartDay\(/);
+    expect(page).not.toMatch(/const workDateOf = /);
+  });
+
+  it("the proof strip's month is the model's `month` row, named with the section's own period label — not a created_at calendar month", () => {
+    expect(page).toMatch(/workIntelligence\?\.periods\.find\(\(p\) => p\.key === "month"\)\?\.entries \?\?/);
+    expect(page).toMatch(/const monthBounds = workPeriodBounds\("month", todayIso\);/);
+    expect(page).not.toMatch(/thisMonthPrefix/);
+    expect(page).not.toMatch(/startsWith\(thisMonthPrefix\)/);
+    expect(page).toMatch(/t\("proofLoop\.stripPeriod", \{\s*entries: entriesThisMonth,\s*period: t\("intelligence\.period\.month"\),/);
+    // the page hands the reads' coverage to the model it renders
+    expect(page).toMatch(/coverage: entriesRead\.ok\s*\?\s*\{\s*entriesRead: entriesRead\.coverage\.entriesRead,/);
+  });
+
+  it("the chat's recent path is the one model: a `focusRange`, the `range` row, no second sum over planning labels", () => {
+    expect(workflows).not.toMatch(/parseDurationLabel/);
+    expect(workflows).not.toMatch(/from "@\/lib\/journal\/work-time"/);
+    expect(workflows).toMatch(/\{ focus: "all", focusRange: \{ startIso: range\.start, endIso: range\.end \} \}/);
+    expect(workflows).toMatch(/const scopeKey: WorkPeriodScope = focus \?\? "range";/);
+    expect(workflows).toMatch(/const totals = wi\?\.periods\.find\(\(p\) => p\.key === scopeKey\) \?\? null;/);
+    // UNKNOWN is said, never re-derived
+    expect(workflows).toMatch(/totals === null\s*\?\s*t\("wiUnread"\)/);
+    // the base is named over a capped read
+    expect(workflows).toMatch(/t\("journalCoverageTruncated", \{ count: wi\.coverage\.entriesRead \}\)/);
+    // the model: an explicit window is a period row of its own
+    expect(model).toMatch(/export type WorkPeriodScope = WorkPeriodKey \| "range";/);
+    expect(model).toMatch(/const periodKeys: readonly WorkPeriodScope\[\] = focusRange\s*\?\s*\[\.\.\.WORK_PERIOD_KEYS, "range"\]\s*:\s*WORK_PERIOD_KEYS;/);
+    expect(model).toMatch(/const scope: WorkPeriodScope = focusRange \? "range" : focus;/);
+  });
+
+  it("a skill states its first worked day and its context ids; contexts = their count, the personal (null) context excluded", () => {
+    expect(model).toContain("readonly firstWorkedDay: string | null;");
+    expect(model).toContain("readonly contextIds: readonly string[];");
+    expect(model).toMatch(/if \(d\.entry\.engagementContextId\) a\.contexts\.add\(d\.entry\.engagementContextId\);/);
+    expect(model).toMatch(/contextIds: \[\.\.\.\(a\?\.contexts \?\? \[\]\)\]\.sort\(\),/);
+  });
+
+  it("the counted-once rule is ONE module: planning and timesheets import it, neither re-implements the correction chain inline", () => {
+    expect(countedOnce).toMatch(/export function countedOnce</);
+    expect(planning).toContain('import { correctedOriginalIds } from "@/lib/journal/counted-once"');
+    expect(planning).toMatch(/const correctedIds = correctedOriginalIds\(rows\);/);
+    expect(timesheets).toContain('import { countedOnce } from "@/lib/journal/counted-once"');
+    expect(timesheets).toMatch(/const liveRows = countedOnce\(rows\);/);
+    for (const [name, src] of Object.entries({ planning, timesheets })) {
+      expect(src, `${name} re-implements the chain`).not.toMatch(/rows\.map\(\(r\) => r\.correction_of\)\.filter\(/);
+    }
+    // the bounded workload read is deterministic: ordered before limited
+    expect(timesheets).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\)\s*\.limit\(WORKLOAD_READ_LIMIT\)/);
+  });
+
+  it("the intake's saved-record day check adds the SAME organization ledger the section's checks add, through the one helper", () => {
+    expect(model).toMatch(/export function organizationHoursPerDay\(/);
+    expect(model).toMatch(/const organizationHoursByDay = organizationHoursPerDay\(orgRows, focusBounds\);/);
+    expect(plausibilityRead).toContain('import { organizationHoursPerDay } from "@/lib/journal/work-intelligence"');
+    expect(plausibilityRead).toContain('import { readOrganizationRecords } from "@/lib/journal/work-intelligence-read"');
+    expect(plausibilityRead).toMatch(/readOrganizationRecords\(caller\.supabase, workerId\)/);
+    expect(plausibilityRead).toMatch(/\{ organizationHoursByDay: organizationHoursPerDay\(organizationRecords\) \}/);
+  });
+
+  it("the MCP capability `journal.work_intelligence.get` reads through loadWorkIntelligence and exposes the person's figures only", () => {
+    expect(capabilities).toContain('id: "journal.work_intelligence.get"');
+    expect(capabilities).toContain('import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read"');
+    expect(capabilities).toMatch(/period: z\.enum\(WORK_PERIOD_KEYS\)\.optional\(\),/);
+    const start = capabilities.indexOf('id: "journal.work_intelligence.get"');
+    const end = capabilities.indexOf("// ── journal.create_draft / journal.confirm");
+    const block = capabilities.slice(start, end);
+    expect(block).toMatch(/const wi = await loadWorkIntelligence\(caller, worker\.id, \{\s*focus: parsed\.period \?\? "all",\s*\}\);/);
+    expect(block).toMatch(/firstWorkedDay: sk\.firstWorkedDay,/);
+    expect(block).toMatch(/coverage: \{\s*entriesRead: wi\.coverage\.entriesRead,/);
+    // withheld: the organization's ledger, context ids, checks, skill ids
+    for (const forbidden of ["organizationRecords:", "contextIds", "checks:", "skillId:", "createAdminClient", "service_role"]) {
+      expect(block, forbidden).not.toContain(forbidden);
+    }
+  });
+
+  it("every new sentence has copy in each routed locale, and the truncation sentence names the count", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: Record<string, string>;
+        proofLoop: Record<string, string>;
+      };
+      expect(j.intelligence.coverageTruncated, `${loc}.intelligence.coverageTruncated`).toMatch(/\{count\}/);
+      expect(j.proofLoop.stripPeriod, `${loc}.proofLoop.stripPeriod`).toMatch(/\{period\}/);
+      expect(j.proofLoop.stripPeriod, `${loc}.proofLoop.stripPeriod`).toMatch(/\{entries\}/);
+      const root = JSON.parse(read(`messages/${loc}.json`)) as { workspace: { ai: Record<string, string> } };
+      const ai = root.workspace.ai;
+      expect(ai.journalCoverageTruncated, `${loc} journalCoverageTruncated`).toMatch(/\{count\}/);
+      expect(ai.journalPeriod_range, `${loc} journalPeriod_range`).toMatch(/\{days/);
+      expect(ai.journalHoursWindow, `${loc} journalHoursWindow`).toMatch(/\{confirmed\}/);
+      expect(ai.journalHoursWindow, `${loc} journalHoursWindow`).toMatch(/\{days\}/);
+    }
+  });
+});
+
+/**
+ * 17 · MANO VEIKLA SKAIČIAIS — the Work-in-Numbers station and the compact
+ * recorder (target worker IA 2026-09-13, #1724 lane F).
+ *
+ * "Reuse canonical existing structures" applies to data, logic, security
+ * and readers — never to the human-facing composition. The station answers
+ * "kokie įgūdžiai užima didžiausią mano veiklos dalį?" FIRST, from the ONE
+ * reader; the journal page keeps recording first and one compact summary;
+ * every figure is composed by ONE presentation model and rendered by ONE
+ * set of components on both surfaces.
+ */
+describe("17 · the Work-in-Numbers station (target worker IA 2026-09-13)", () => {
+  it("is a worker-only server page over loadOwnWorkIntelligence — no client filtering, no second read", () => {
+    expect(stationPage).not.toMatch(/"use client"/);
+    expect(stationPage).toContain("loadOwnWorkIntelligence({ focus: periodKey, focusRange })");
+    expect(stationPage).toMatch(/if \(!user\) redirect\(`\/\$\{locale\}\/auth\/login`\);/);
+    expect(stationPage).toMatch(/if \(!worker\) redirect\(`\/\$\{locale\}\/dashboard`\);/);
+    expect(stationPage).not.toMatch(/journal_entry_metrics|deriveEntryWorkTime|fragment_time|work_hour_allocations|assembleWorkIntelligence/);
+    expect(stationPage).not.toMatch(/service_role|createAdminClient/);
+    // the period selector is REAL links the server re-reads for
+    expect(stationPage).toMatch(/const periodHref = \(key: WorkPeriodKey\) => `\$\{WORK_IN_NUMBERS_HREF\}\?period=\$\{key\}`;/);
+    expect(numbersView).toContain('export const WORK_IN_NUMBERS_HREF = "/dashboard/work-in-numbers";');
+    expect(periodNav).toMatch(/href=\{href\(key\) as "\/dashboard"\}/);
+    expect(periodNav).not.toMatch(/useState|onClick/);
+    // an explicit window is the model's own `range` row, refused when malformed
+    expect(stationPage).toMatch(/normalizeWorkRange\(\{ startIso: sp\.from, endIso: sp\.to \}\)/);
+  });
+
+  it("answers the dominant-skill question first, with the scope in words, and UNKNOWN is a sentence — never a zero", () => {
+    // the lead is the first thing inside the first card
+    const lead = stationPage.indexOf("<DominantLead");
+    expect(lead).toBeGreaterThan(-1);
+    expect(lead).toBeLessThan(stationPage.indexOf("<PeriodNav"));
+    expect(stationPage.indexOf("<PeriodNav")).toBeLessThan(stationPage.indexOf("<SkillShareList"));
+    expect(stationPage.indexOf("<SkillShareList")).toBeLessThan(stationPage.indexOf("<OrgLedger"));
+    expect(stationPage.indexOf("<OrgLedger")).toBeLessThan(stationPage.indexOf("<ChecksList"));
+    expect(stationPage.indexOf("<ChecksList")).toBeLessThan(stationPage.indexOf("<GrowthKinds"));
+    // the answer is decided by the model, not guessed: dominant / untimed /
+    // period_empty / no_entries / unknown are five sentences
+    expect(numbersView).toMatch(/export function dominantAnswer\(/);
+    expect(numbersView).toMatch(/readonly kind: "unknown" \}/);
+    expect(numbersView).toMatch(/readonly kind: "untimed"; readonly entries: number \}/);
+    for (const k of ["unknown", "no_entries", "period_empty", "untimed", "dominant"]) expect(dominantLead).toContain(`case "${k}":`);
+    expect(dominantLead).toMatch(/t\("numbers\.unknown"\)/);
+    // an untimed-only window is NEVER promoted to a dominant skill
+    expect(numbersView).toMatch(/return first && first\.measured && first\.share > 0 \? first : null;/);
+    // the scope is named beside the figure, in every sentence
+    expect(dominantLead).toMatch(/t\("numbers\.periodHours", \{ hours: fmtHours\(period\.hours, locale\), scope \}\)/);
+    expect(stationPage).toMatch(/t\("numbers\.scopeNote", \{ scope \}\)/);
+    expect(periodNav).toMatch(/export function scopeText\(/);
+  });
+
+  it("the share bar IS the share: CSS width from the model's figure, the number printed beside it", () => {
+    expect(numbersView).toMatch(/export function shareBarWidth\(share: number\): number/);
+    expect(numbersView).toMatch(/if \(!Number\.isFinite\(share\) \|\| share <= 0\) return 0;/);
+    expect(shareList).toMatch(/style=\{\{ width: `\$\{s\.barWidth\}%` \}\}/);
+    expect(shareList).toMatch(/data-testid=\{`wi-skill-share-\$\{s\.slug\}`\}/);
+    // NOT_MEASURED: an untimed row says so, never "0 h"; confirmation share is
+    // null without attributed hours, never 0
+    expect(numbersView).toMatch(/confirmationShare: measured \? Math\.min\(1, s\.confirmedHours \/ s\.attributedHours\) : null,/);
+    expect(shareList).toMatch(/\) : s\.untimed \? \(\s*<span data-testid=\{`wi-skill-untimed-\$\{s\.slug\}`\}>\{t\("numbers\.notMeasured"\)\}/);
+    // first / last day, contexts, outputs, trend with a TEXT equivalent
+    for (const k of ["numbers.skillFirst", "lastWorked", "frequency", "numbers.skillOutput", "numbers.confirmationShare", "numbers.confirmationNone"]) expect(shareList).toContain(`t("${k}"`);
+    expect(shareList).toMatch(/t\(`numbers\.trendShort\.\$\{s\.trend\}`\)/);
+    // sorted by share desc — a listing order, never a ranking of the person
+    expect(numbersView).toMatch(/b\.share - a\.share \|\|/);
+  });
+
+  it("the growth kinds render with their WHY; a qualification gap is not invented", () => {
+    expect(growthKinds).toMatch(/export function growthKindWhy\(/);
+    expect(growthKinds).toMatch(/t\(`growthKind\.\$\{d\.kind\}`\)/);
+    expect(growthKinds).not.toMatch(/qualification_gap|formal_qualification/);
+    expect(stationPage).toMatch(/deriveGrowthReading\(wi, \{ primaryProfessionSlug \}\)/);
+    expect(stationPage).toMatch(/\{t\("growthDerivedHint"\)\}/);
+  });
+
+  it("no score, rating, rank, tier, level or grade word reaches the person from the station copy", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        intelligence: { numbers: Record<string, unknown> };
+        record: Record<string, string>;
+      };
+      const flat: string[] = [];
+      const walk = (o: unknown) => {
+        if (typeof o === "string") flat.push(o);
+        else if (o && typeof o === "object") for (const v of Object.values(o)) walk(v);
+      };
+      walk(j.intelligence.numbers);
+      walk(j.record);
+      expect(flat.length).toBeGreaterThan(20);
+      for (const key of ["stationTitle", "question", "dominant", "dominantUntimed", "unknown", "periodHours", "scopeNote", "notMeasured", "confirmationShare", "confirmationNone", "checksOpen", "ledgerUnknown"]) {
+        expect(typeof j.intelligence.numbers[key] === "string" && (j.intelligence.numbers[key] as string).trim().length > 0, `${loc}.intelligence.numbers.${key}`).toBe(true);
+      }
+      for (const key of ["hint", "placeholder", "understand", "startOver", "detailed", "detailedBack"]) {
+        expect(typeof j.record[key] === "string" && j.record[key]!.trim().length > 0, `${loc}.record.${key}`).toBe(true);
+      }
+      if (loc === "en") {
+        for (const v of flat) expect(v).not.toMatch(/\b(score|rating|rank|tier|level|grade)\b/i);
+      }
+      // no internal vocabulary
+      for (const v of flat) expect(v).not.toMatch(/attributedHours|sharedHours|work_hour_allocations|journal_entry|focusRange/);
+    }
+  });
+});
+
+describe("17b · the journal page: recording first, one numbers card, the station as the figures' destination", () => {
+  it("the compact text-first recorder is the default; the full composer only edits or sits behind the explicit door", () => {
+    expect(page).toMatch(/<JournalQuickRecord\s/);
+    expect(page).toMatch(/const composeFull = sp\.compose === "full";/);
+    expect(page).toMatch(/editingEntry \? \([\s\S]*?<JournalEntryComposer[\s\S]*?\) : composeFull \? \([\s\S]*?<JournalEntryComposer[\s\S]*?\) : \(\s*<JournalQuickRecord/);
+    expect(page).toContain('data-testid="journal-compose-full-link"');
+    // the recorder rides the conversation's reader and its readback+confirm
+    // surface: no second parser, no second write path
+    expect(quickRecord).toContain("extractWorkLog(text, personCalendarDay())");
+    expect(quickRecord).toMatch(/<WorkerWorkLogFlow\s/);
+    const quickRecordCode = quickRecord.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, "");
+    expect(quickRecordCode).not.toMatch(/createJournalEntry|supersedeJournalEntry|from\("journal_entr|fragments_json/);
+    // one primary action on the recorder; the other doors are text links
+    expect((quickRecord.match(/variant="primary"/g) ?? []).length).toBe(1);
+    expect(page).not.toMatch(/from-brand-blue to-brand-cyan/);
+    expect(page).toMatch(/data-testid="journal-log-via-chat-cta"/);
+    expect(page).toMatch(/data-testid="journal-log-via-voice-cta"/);
+  });
+
+  it("keeps ONE compact numbers card (dominant skill + this period's hours) with a link to the station, after the records", () => {
+    expect(page).not.toMatch(/<JournalWorkIntelligence\s/);
+    // the page-local quick-nav strip is gone (IA §4: a second nav strip is card soup)
+    expect(page).not.toMatch(/<PageQuickNav/);
+    expect(page).toMatch(/id="work-intelligence"\s+className="order-3/);
+    expect(page).toMatch(/data-testid="journal-numbers-summary"/);
+    expect(page).toMatch(/<DominantLead[\s\S]*?compact/);
+    expect(page).toMatch(/data-testid="journal-numbers-link"/);
+    expect(page).toMatch(/\$\{WORK_IN_NUMBERS_HREF\}\?period=\$\{wi\?\.focus \?\? periodKey\}/);
+    // the summary is composed from the SAME model the diary was derived from
+    expect(page).toMatch(/const rows = wi \? skillRows\(wi, skillNameOf\)/);
+    expect(page).toMatch(/const answer = dominantAnswer\(wi, rows\);/);
+    // the section's own tiles now point at the station
+    expect(component).toContain("`/dashboard/work-in-numbers?period=${key}`");
   });
 });

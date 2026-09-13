@@ -31,7 +31,10 @@ function entry(
     entryId: id,
     createdAt: `${day}T09:00:00.000Z`,
     metrics: [workDate(day), hours(h)].map((m) => ({ ...m, created_at: `${day}T09:00:00.000Z` })),
-    engagementContextId: null,
+    // ONE engagement context for the base fixture: the model counts DISTINCT
+    // engagement contexts (lane B — an entry with none is the personal
+    // journal, in every hour figure but not "a place").
+    engagementContextId: "ctx-a",
     reviewResult,
     linkedSkillIds: linked,
   };
@@ -209,6 +212,110 @@ describe("the READING block — demand: the board's own count, or UNKNOWN", () =
   it("a read board with nothing missing is an empty list (ZERO), apart from null (UNKNOWN)", () => {
     const g = deriveGrowthReading(model(), { primaryProfessionSlug: "tiler", demandBySkill: new Map() });
     expect(g.demand).toEqual([]);
+  });
+});
+
+describe("the KINDS (owner requirement 5, #1689) — each direction names its kind and the facts it stands on", () => {
+  /* NEGATIVE CONTROL for the whole block: a kind is decided by a plain rule
+     over the person's own rows; nothing here is a trait, a grade or a career
+     fact the entries do not contain. The base fixture's largest share
+     (tiling, 2 entries in ONE context) is deliberately NOT a core strength —
+     one day's work is not a strength, however large its share. */
+  const g = deriveGrowthReading(model(), { primaryProfessionSlug: "tiler" });
+  const byKind = (kind: string) => g.directions.filter((d) => d.kind === kind);
+
+  it("emits no invented kind: the base fixture has no core strength (largest share, but 2 entries in 1 context)", () => {
+    expect(byKind("core_strength")).toEqual([]);
+    const tiling = g.basis.skills[0]!;
+    expect(tiling.slug).toBe("tiling");
+    expect(tiling.entries).toBe(2);
+  });
+
+  it("growing — trend up / new, with the hours, share, entries, contexts, last day and trend as the why", () => {
+    const growing = byKind("growing");
+    expect(growing.map((d) => (d as { slug: string }).slug)).toEqual(["tiling", "floor-screeding", "flooring"]);
+    const tiling = growing[0]!;
+    if (tiling.kind !== "growing") throw new Error("kind");
+    expect(tiling.why).toEqual({
+      attributedHours: 6,
+      sharedHours: 3,
+      confirmedHours: 6,
+      share: 0.4,
+      entries: 2,
+      contexts: 1,
+      lastWorkedDay: "2026-09-10",
+      trend: "new",
+    });
+  });
+
+  it("underused — no linked entry for 90 days, with the dormant days counted from the focus window's end", () => {
+    const under = byKind("underused");
+    expect(under).toHaveLength(1);
+    const wp = under[0]!;
+    if (wp.kind !== "underused") throw new Error("kind");
+    expect(wp.slug).toBe("waterproofing");
+    expect(wp.why).toMatchObject({ attributedHours: 5, entries: 1, lastWorkedDay: "2026-05-01" });
+    // 2026-05-01 → 2026-09-11 (focus "all" ends today)
+    expect(wp.why.dormantDays).toBe(133);
+  });
+
+  it("self_stated — the declared-only skill, with its zeros stated, never a trait", () => {
+    expect(byKind("self_stated")).toEqual([{ kind: "self_stated", slug: "carpentry", why: { entries: 0, hours: 0 } }]);
+  });
+
+  it("adjacent_opportunity — the EXISTING adjacency reading, restated with its shared and missing skills", () => {
+    const adj = byKind("adjacent_opportunity");
+    expect(adj.map((d) => (d as { professionId: string }).professionId)).toEqual(g.expand.map((d) => d.professionId));
+    const cw = adj.find((d) => (d as { professionId: string }).professionId === "concrete_worker")!;
+    if (cw.kind !== "adjacent_opportunity") throw new Error("kind");
+    expect([...cw.why.sharedSkills].sort()).toEqual(["floor-screeding", "waterproofing"]);
+    expect(cw.why.sharedCount).toBe(2);
+    expect(cw.why.missingSkills.length).toBeGreaterThan(0);
+  });
+
+  it("core_strength — the largest attributed share once its entries are spread over ≥ 2 contexts or ≥ 3 entries; one kind per skill", () => {
+    // a third tiling entry, in another context: still the largest share,
+    // now spread → core strength; it stops being listed as `growing` even
+    // though its trend is still up (one kind per skill; the trend is in why)
+    const third = { ...entry("e-tile-3", "2026-09-09", 2, ["s-tile"]), engagementContextId: "ctx-b" };
+    const g2 = deriveGrowthReading(model([...ENTRIES, third]), { primaryProfessionSlug: "tiler" });
+    const core = g2.directions.filter((d) => d.kind === "core_strength");
+    expect(core).toHaveLength(1);
+    const tiling = core[0]!;
+    if (tiling.kind !== "core_strength") throw new Error("kind");
+    expect(tiling.slug).toBe("tiling");
+    expect(tiling.why).toMatchObject({ attributedHours: 8, entries: 3, contexts: 2, trend: "new" });
+    // the model's own (rounded) share figure — 8 of 17 attributed hours
+    expect(tiling.why.share).toBe(0.47);
+    expect(g2.directions.filter((d) => d.kind === "growing").map((d) => (d as { slug: string }).slug)).not.toContain("tiling");
+  });
+
+  it("no qualification_gap is ever emitted — the model receives no requirement ledger, so none is invented", () => {
+    const kinds = new Set(g.directions.map((d) => d.kind));
+    expect(kinds.has("qualification_gap" as never)).toBe(false);
+    expect([...kinds].every((k) => ["core_strength", "growing", "underused", "self_stated", "adjacent_opportunity"].includes(k))).toBe(true);
+  });
+
+  it("is listed by kind, then in the model's own hours order — never re-ranked by anything", () => {
+    const order = ["core_strength", "growing", "underused", "self_stated", "adjacent_opportunity"];
+    const seen = g.directions.map((d) => order.indexOf(d.kind));
+    expect([...seen].sort((a, b) => a - b)).toEqual(seen);
+  });
+
+  it("no field of any direction is a score, rating, rank, tier, level or grade", () => {
+    const names = new Set<string>();
+    const walk = (v: unknown): void => {
+      if (Array.isArray(v)) return v.forEach(walk);
+      if (v && typeof v === "object") for (const [k, val] of Object.entries(v)) { names.add(k.toLowerCase()); walk(val); }
+    };
+    walk(g.directions);
+    for (const n of names) expect(n, n).not.toMatch(/score|rating|rank|tier|level|ovr|grade/);
+  });
+
+  it("under the insufficient-skills limitation the kinds are empty too — the fact block still stands", () => {
+    const g1 = deriveGrowthReading(model([ENTRIES[0]!]), { primaryProfessionSlug: null });
+    expect(g1.limitation).toBe("insufficient_skills");
+    expect(g1.directions).toEqual([]);
   });
 });
 

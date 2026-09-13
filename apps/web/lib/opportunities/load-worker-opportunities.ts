@@ -32,6 +32,7 @@ import {
   type MatchResultV1,
 } from "@/lib/market/match-v1";
 import { bestEvidencedProfession } from "./adjacent-directions";
+import type { AssessedAgainstFacts } from "./opportunities-view";
 import {
   readStructuredDemandPublic,
   type StructuredDemandPublic,
@@ -73,6 +74,13 @@ export interface WorkerReadiness extends WorkerOpportunityProfile {
    * the person — every surface that uses it must say so.
    */
   readonly evidencedProfessionSlug: string | null;
+  /**
+   * The subject facts the ONE engine compared against — a projection of the
+   * SAME subject the matches below were computed from, so the destination
+   * can state in words what "fit" was assessed against (#1689, defect H:
+   * discovery ≠ matching). Every field is "as stated"; nothing is defaulted.
+   */
+  readonly assessedAgainst: AssessedAgainstFacts;
 }
 
 export interface OpportunityCard {
@@ -230,6 +238,14 @@ export async function loadWorkerOpportunities(
     // once above and reused, so the readiness gate and the market panel can
     // never disagree about which occupation this person is.
     evidencedProfessionSlug,
+    // What the engine ran on — the subject reader's own facts, projected,
+    // never re-read from a second source.
+    assessedAgainst: {
+      skillCount: ctx.subject.skills.length,
+      languages: ctx.subject.languages ?? [],
+      salaryMinEur: ctx.subject.salaryMinEur ?? null,
+      city: ctx.subject.city ?? null,
+    },
   };
 
   // Own interest map (empty + unavailable until the owner-gated table exists).

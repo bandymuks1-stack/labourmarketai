@@ -15,10 +15,12 @@ import { deriveReviewResult } from "@/lib/journal/review-status";
 import {
   deriveWorkIntelligence,
   type WorkIntelligence,
+  type WorkIntelligenceCoverage,
   type WorkIntelligenceEntry,
   type WorkIntelligenceOrganizationRecord,
   type WorkIntelligenceSkillRow,
   type WorkPeriodKey,
+  type WorkRange,
 } from "@/lib/journal/work-intelligence";
 import { readAllocationsForWorker } from "@/lib/work-hours/allocations";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
@@ -49,6 +51,11 @@ import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
  * `organizationRecords`. They are never merged into the journal's figures
  * and never reach a skill; a failed ledger read hands the model `null`
  * (UNKNOWN) while the journal figures still render.
+ *
+ * COVERAGE (issue #1689, lane B): both list reads page to the end and say
+ * when they stopped at their ceiling; that fact travels into the model as
+ * `coverage`, so a section, a CV or a chat answer built over a capped read
+ * says "from the last N entries" rather than posing as a total (SEP-7).
  */
 
 /** A `worker_skills` row as the page and the CV already select it. */
@@ -66,6 +73,12 @@ export function assembleWorkIntelligence(input: {
   skillRows: readonly WorkerSkillSourceRow[];
   todayIso: string;
   focus?: WorkPeriodKey;
+  /** An explicit window instead of a tab (see the model's `focusRange`). */
+  focusRange?: WorkRange | null;
+  /** What the reads behind `entries` covered (`listJournalEntries(...).
+   *  coverage`, `readWorkerEntrySkillLinks(...).truncated`). Omitted =
+   *  every given entry, nothing cut. */
+  coverage?: Partial<WorkIntelligenceCoverage>;
   /** Uploaded photos per entry id (from `readPhotoCountsByEntry`); omitted
    *  when the caller did not read photos. */
   photoCountByEntry?: ReadonlyMap<string, number>;
@@ -100,6 +113,8 @@ export function assembleWorkIntelligence(input: {
     skills,
     todayIso: input.todayIso,
     focus: input.focus,
+    focusRange: input.focusRange ?? null,
+    coverage: input.coverage,
     organizationRecords: input.organizationRecords ?? null,
   });
 }
@@ -129,11 +144,17 @@ export async function readOrganizationRecords(
   }));
 }
 
+/** Entry ids per `.in()` filter — a URL-length bound, not a coverage cap:
+ *  every id is read, in chunks. */
+const PHOTO_COUNT_ID_CHUNK = 500;
+
 /**
- * Uploaded photos per entry — ONE bounded read over the caller's own live
- * entry ids (`journal_entry_photos` RLS scopes it to the owner). A failed
- * read yields an EMPTY map: the evidence-strength count then under-states
- * photos rather than inventing them, and the section still renders.
+ * Uploaded photos per entry — bounded reads over ALL the caller's own live
+ * entry ids, chunked (`journal_entry_photos` RLS scopes it to the owner).
+ * This used to read the first 500 ids only, so a worker past that many
+ * entries had their oldest photos silently uncounted. A failed chunk yields
+ * an EMPTY map: the evidence-strength count then under-states photos rather
+ * than inventing them, and the section still renders.
  */
 export async function readPhotoCountsByEntry(
   // The photos table is outside the generated types (same routing as the
@@ -144,15 +165,18 @@ export async function readPhotoCountsByEntry(
 ): Promise<Map<string, number>> {
   const out = new Map<string, number>();
   if (entryIds.length === 0) return out;
-  const { data, error } = await supabase
-    .from("journal_entry_photos")
-    .select("entry_id")
-    .in("entry_id", entryIds.slice(0, 500))
-    .eq("upload_status", "uploaded");
-  if (error || !Array.isArray(data)) return out;
-  for (const r of data as { entry_id: string | null }[]) {
-    if (!r.entry_id) continue;
-    out.set(r.entry_id, (out.get(r.entry_id) ?? 0) + 1);
+  for (let i = 0; i < entryIds.length; i += PHOTO_COUNT_ID_CHUNK) {
+    const chunk = entryIds.slice(i, i + PHOTO_COUNT_ID_CHUNK);
+    const { data, error } = await supabase
+      .from("journal_entry_photos")
+      .select("entry_id")
+      .in("entry_id", chunk)
+      .eq("upload_status", "uploaded");
+    if (error || !Array.isArray(data)) return new Map();
+    for (const r of data as { entry_id: string | null }[]) {
+      if (!r.entry_id) continue;
+      out.set(r.entry_id, (out.get(r.entry_id) ?? 0) + 1);
+    }
   }
   return out;
 }
@@ -181,7 +205,7 @@ export function workIntelligenceToday(): string {
 export async function loadWorkIntelligence(
   caller: DomainCaller,
   workerId: string,
-  opts: { focus?: WorkPeriodKey } = {},
+  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
 ): Promise<WorkIntelligence | null> {
   const [entriesRead, linkRead, skillsRead, organizationRecords] = await Promise.all([
     listJournalEntries(caller, { workerId }),
@@ -211,6 +235,12 @@ export async function loadWorkIntelligence(
     skillRows: (skillsRead.data ?? []) as unknown as WorkerSkillSourceRow[],
     todayIso: workIntelligenceToday(),
     focus: opts.focus,
+    focusRange: opts.focusRange ?? null,
+    coverage: {
+      entriesRead: entriesRead.coverage.entriesRead,
+      truncated: entriesRead.coverage.truncated,
+      linksTruncated: linkRead.truncated,
+    },
     photoCountByEntry,
     organizationRecords,
   });
@@ -223,7 +253,7 @@ export async function loadWorkIntelligence(
  * read, yields `null` (UNKNOWN), never an empty model that reads as "no work".
  */
 export async function loadOwnWorkIntelligence(
-  opts: { focus?: WorkPeriodKey } = {},
+  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
 ): Promise<WorkIntelligence | null> {
   const supabase = await createClient();
   const {

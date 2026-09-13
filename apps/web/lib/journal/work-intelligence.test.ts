@@ -5,6 +5,8 @@ import {
   confirmedHoursBySlug,
   deriveWorkIntelligence,
   evidencedSkillSlugs,
+  normalizeWorkRange,
+  organizationHoursPerDay,
   workPeriodBounds,
   type WorkIntelligenceEntry,
   type WorkIntelligenceOrganizationRecord,
@@ -1005,5 +1007,130 @@ describe("the five rules the re-audit pinned (2026-09-11, F8–F12)", () => {
     expect([...confirmedHoursBySlug(wi)]).toEqual([["tiling", 8], ["plastering", 0]]);
     // the same slugs on both maps — a chip can always state its base
     expect([...confirmedHoursBySlug(wi).keys()]).toEqual([...attributedHoursBySlug(wi).keys()]);
+  });
+});
+
+describe("one time scope (issue #1689, lane B) — range focus, first day, context ids, coverage", () => {
+  it("workPeriodBounds('range') is the caller's own window; a malformed one is all time, never a guess", () => {
+    expect(workPeriodBounds("range", TODAY, { startIso: "2026-09-01", endIso: "2026-09-05" })).toEqual({
+      startIso: "2026-09-01",
+      endIso: "2026-09-05",
+    });
+    // start after end, a non-day, nothing at all → all time (said by focusRange: null on the model)
+    expect(workPeriodBounds("range", TODAY, { startIso: "2026-09-05", endIso: "2026-09-01" })).toEqual({ startIso: null, endIso: TODAY });
+    expect(workPeriodBounds("range", TODAY, { startIso: "yesterday", endIso: TODAY })).toEqual({ startIso: null, endIso: TODAY });
+    expect(workPeriodBounds("range", TODAY, null)).toEqual({ startIso: null, endIso: TODAY });
+    expect(normalizeWorkRange({ startIso: " 2026-09-01 ", endIso: "2026-09-05" })).toEqual({ startIso: "2026-09-01", endIso: "2026-09-05" });
+    expect(normalizeWorkRange(undefined)).toBeNull();
+    // the five tabs are untouched by the third argument
+    expect(workPeriodBounds("week", TODAY, { startIso: "2026-09-01", endIso: "2026-09-05" })).toEqual({ startIso: "2026-09-05", endIso: TODAY });
+  });
+
+  it("a focusRange adds ONE `range` row to periods and the ledger, and scopes the focus sections to it (pre-change: no way to ask the model about 'yesterday' — the chat re-summed planning labels)", () => {
+    const yesterday = "2026-09-10";
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      focusRange: { startIso: yesterday, endIso: yesterday },
+      organizationRecords: [
+        { id: "o1", workDate: yesterday, hours: 3, source: "manual", status: "recorded", organizationId: "org-1", journalEntryId: null },
+        { id: "o2", workDate: "2026-09-09", hours: 5, source: "import", status: "recorded", organizationId: "org-1", journalEntryId: null },
+      ],
+      entries: [
+        entry("y", yesterday, { hours: 6, linkedSkillIds: ["s-tiling"], reviewResult: "approved" }),
+        entry("t", TODAY, { hours: 4, linkedSkillIds: ["s-plaster"] }),
+        entry("old", "2026-09-01", { hours: 8, linkedSkillIds: ["s-tiling"] }),
+      ],
+    });
+    expect(wi.periods.map((p) => p.key)).toEqual(["today", "week", "month", "year", "all", "range"]);
+    const range = wi.periods.find((p) => p.key === "range")!;
+    expect(range).toMatchObject({ startIso: yesterday, endIso: yesterday, hours: 6, confirmedHours: 6, entries: 1, daysWorked: 1 });
+    // the tabs still say what they said — the range row is beside them, not instead
+    expect(wi.periods.find((p) => p.key === "today")!.hours).toBe(4);
+    expect(wi.periods.find((p) => p.key === "all")!.hours).toBe(18);
+    expect(wi.totalHours).toBe(18);
+    // the focus sections describe the range: only tiling's 6 h of yesterday
+    expect(wi.scope).toBe("range");
+    expect(wi.focus).toBe("all");
+    expect(wi.focusRange).toEqual({ startIso: yesterday, endIso: yesterday });
+    expect(wi.attributedHours).toBe(6);
+    expect(wi.skills.find((s) => s.slug === "tiling")!.attributedHours).toBe(6);
+    expect(wi.skills.find((s) => s.slug === "plastering")!.attributedHours).toBe(0);
+    expect(wi.evidence.entries).toBe(1);
+    // the organization ledger carries the same extra row, over the same window
+    const orgRange = wi.organizationRecords!.find((p) => p.key === "range")!;
+    expect(orgRange).toMatchObject({ startIso: yesterday, endIso: yesterday, hours: 3, rows: 1 });
+    expect(wi.organizationRecords!.map((p) => p.key)).toEqual(["today", "week", "month", "year", "all", "range"]);
+  });
+
+  it("a malformed focusRange is ignored — the five tabs only, scope = focus, focusRange null", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      focus: "week",
+      focusRange: { startIso: "2026-09-12", endIso: "2026-09-01" },
+      entries: [entry("a", "2026-09-10", { hours: 8, linkedSkillIds: ["s-tiling"] })],
+    });
+    expect(wi.periods.map((p) => p.key)).toEqual(["today", "week", "month", "year", "all"]);
+    expect(wi.scope).toBe("week");
+    expect(wi.focusRange).toBeNull();
+    expect(wi.attributedHours).toBe(8);
+  });
+
+  it("a skill carries its FIRST worked day and the distinct context ids — the null (personal) context excluded, `contexts` = their count (pre-change: a personal entry counted as a context of its own)", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [
+        entry("a", "2026-09-10", { hours: 8, linkedSkillIds: ["s-tiling"], engagementContextId: "ctx-b" }),
+        entry("b", "2026-09-03", { hours: 4, linkedSkillIds: ["s-tiling"], engagementContextId: "ctx-a" }),
+        entry("c", "2026-09-07", { hours: 2, linkedSkillIds: ["s-tiling"], engagementContextId: "ctx-a" }),
+        entry("d", "2026-09-08", { hours: 1, linkedSkillIds: ["s-tiling", "s-plaster"], engagementContextId: null }),
+      ],
+    });
+    const tiling = wi.skills.find((s) => s.slug === "tiling")!;
+    expect(tiling.firstWorkedDay).toBe("2026-09-03");
+    expect(tiling.lastWorkedDay).toBe("2026-09-10");
+    expect(tiling.contextIds).toEqual(["ctx-a", "ctx-b"]);
+    expect(tiling.contexts).toBe(tiling.contextIds.length);
+    // plastering: one shared personal entry — a day, no context
+    const plaster = wi.skills.find((s) => s.slug === "plastering")!;
+    expect(plaster.firstWorkedDay).toBe("2026-09-08");
+    expect(plaster.contextIds).toEqual([]);
+    expect(plaster.contexts).toBe(0);
+    // a declared-only skill: nothing
+    const paint = wi.skills.find((s) => s.slug === "painting")!;
+    expect(paint.firstWorkedDay).toBeNull();
+    expect(paint.contextIds).toEqual([]);
+    // every skill keeps the invariant
+    for (const s of wi.skills) expect(s.contexts).toBe(s.contextIds.length);
+  });
+
+  it("coverage defaults to 'every given entry, nothing cut' and passes a reader's truncation through unchanged (SEP-7)", () => {
+    const entries = [entry("a", "2026-09-10", { hours: 8 }), entry("b", "2026-09-09", { hours: 1 })];
+    const pure = deriveWorkIntelligence({ todayIso: TODAY, skills: SKILLS, entries });
+    expect(pure.coverage).toEqual({ entriesRead: 2, truncated: false, linksTruncated: false });
+    const capped = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries,
+      coverage: { entriesRead: 2, truncated: true },
+    });
+    expect(capped.coverage).toEqual({ entriesRead: 2, truncated: true, linksTruncated: false });
+    // no figure is changed by the flag — only the base is named
+    expect(capped.totalHours).toBe(pure.totalHours);
+  });
+
+  it("organizationHoursPerDay is ONE helper: live rows per day inside the bounds, rejected rows nowhere, UNKNOWN → empty", () => {
+    const records: WorkIntelligenceOrganizationRecord[] = [
+      { id: "1", workDate: "2026-09-10", hours: 4, source: "manual", status: "recorded", organizationId: "o", journalEntryId: null },
+      { id: "2", workDate: "2026-09-10", hours: 2, source: "import", status: "approved", organizationId: "o", journalEntryId: null },
+      { id: "3", workDate: "2026-09-10", hours: 9, source: "manual", status: "rejected", organizationId: "o", journalEntryId: null },
+      { id: "4", workDate: "2026-08-01", hours: 8, source: "manual", status: "recorded", organizationId: "o", journalEntryId: null },
+    ];
+    expect([...organizationHoursPerDay(records)]).toEqual([["2026-09-10", 6], ["2026-08-01", 8]]);
+    expect([...organizationHoursPerDay(records, workPeriodBounds("week", TODAY))]).toEqual([["2026-09-10", 6]]);
+    expect(organizationHoursPerDay(null).size).toBe(0);
+    expect(organizationHoursPerDay(undefined).size).toBe(0);
   });
 });

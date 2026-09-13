@@ -111,9 +111,11 @@ export interface MarkShownInput {
   readonly shownRequestIds: readonly string[];
 }
 
-/* Types only — both modules are pure, so this file stays pure. */
+/* Types only — every module below is pure, so this file stays pure. */
 import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
+import type { FitBand } from "@/lib/opportunities/fit-band";
+import type { MatchGap, MatchMissingDataCode, MatchStatus } from "@/lib/market/match-v1";
 
 /**
  * How many matches the conversation's opportunities RESULT shows (W3 row 5).
@@ -239,6 +241,21 @@ export interface OpportunitiesResultExternalRow {
    * attribution wording.
    */
   readonly attributionText: string;
+  /**
+   * The ONE engine's own status for this worker against this ad — a
+   * passthrough, never recomputed (#1689, defect H). It used to be DROPPED
+   * here, and the panel then listed `insufficient_data` rows under a heading
+   * that called them suitable.
+   */
+  readonly fitStatus: MatchStatus;
+  /** The honest group the row belongs in, derived by `deriveFitBand` from
+   *  the status above. A found posting is not a suitable one: only `strong`
+   *  and `possible` may ever be called a fit. */
+  readonly band: FitBand;
+  /** WHY the row sits in its band — the engine's gap codes… */
+  readonly gapCodes: readonly MatchGap["code"][];
+  /** …and what it could NOT judge. Rendered as unknowns, never as failures. */
+  readonly missingDataCodes: readonly MatchMissingDataCode[];
 }
 
 /**

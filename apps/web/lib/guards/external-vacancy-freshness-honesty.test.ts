@@ -3,7 +3,10 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { ExternalVacanciesSection } from "@/components/app/external-vacancies-section";
+import {
+  ExternalOpportunityRow,
+  ExternalVacanciesSection,
+} from "@/components/app/external-vacancies-section";
 import {
   classifySourceFreshness,
   type SourceFreshnessV1,
@@ -121,6 +124,33 @@ const renderWith = (freshness: SourceFreshnessV1) =>
     }),
   );
 
+/**
+ * The ROW is where the ad and its publisher route render now (#1689, defect
+ * H): the section states the supply's count and age, the destination lists
+ * every ad inside its fit band through this row. The freshness notice and
+ * the original-ad route are still never traded for each other — they live
+ * one component apart, both rendered on the same page.
+ */
+const renderRow = () =>
+  renderToStaticMarkup(
+    createElement(ExternalOpportunityRow, {
+      card: CARD,
+      band: "not_assessed",
+      whyCodes: [],
+      labels: {
+        ...LABELS,
+        bandLabel: "not assessed",
+        whyLabel: "why",
+        whyText: () => null,
+        whyFallback: "unknown",
+        payUnitNotStated: "unit not stated",
+        payNotStated: "pay not stated",
+        detailsShow: "more",
+        detailsHide: "less",
+      } as never,
+    }),
+  );
+
 describe("the board states how old its external supply is", () => {
   it("renders NO notice while supply is current (a banner on healthy supply is noise)", () => {
     const html = renderWith(
@@ -129,8 +159,8 @@ describe("the board states how old its external supply is", () => {
         nowIso: "2026-08-12T06:00:00.000Z",
       }),
     );
-    expect(html).toContain("external-vacancy-card");
     expect(html).not.toContain("external-freshness-notice");
+    expect(renderRow()).toContain("external-vacancy-card");
   });
 
   /**
@@ -153,7 +183,7 @@ describe("the board states how old its external supply is", () => {
     // the route sits behind ONE confirm step (owner decision, addendum §4),
     // so the initial render carries the confirm trigger, not the raw URL —
     // lib/guards/external-apply-confirm.test.ts pins the anchor itself.
-    expect(html).toContain("external-vacancy-original-link-confirm");
+    expect(renderRow()).toContain("external-vacancy-original-link-confirm");
   });
 
   it("renders a notice for every non-current state", () => {

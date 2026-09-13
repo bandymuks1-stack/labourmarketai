@@ -1822,6 +1822,14 @@
     "disclaimer": "You added these skills yourself. Strengthen them with work journal entries.",
     "experienceTitle": "Work history",
     "removeLabel": "Remove skill",
+    "skillPractice": "{hours} h · {count, plural, one {# entry} other {# entries}}",
+    "skillEntries": "{count, plural, one {# entry} other {# entries}}",
+    "skillShare": "{share}% of recorded work",
+    "skillNoRecords": "no records yet",
+    "skillUnknown": "journal could not be read",
+    "variantsFolded": "{count} spellings",
+    "foldedIntoSkills": "{count, plural, one {# skill you stated is} other {# skills you stated are}} already shown above with work records.",
+    "selfStatedTitle": "Self-stated, no records yet",
     "deleteError": "Could not remove. Please try again.",
     "manualAddLabel": "Add a skill manually",
     "manualAddPlaceholder": "e.g. English language",
@@ -4015,12 +4023,6 @@
       "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Jobs that fit me",
-        "viewAll": "All listings",
-        "empty": "No matching listings right now — add skills to your profile.",
-        "emptyCta": "Update profile"
-      },
       "firstUse": {
         "eyebrow": "Start here",
         "title": "Start from yourself",
@@ -4374,13 +4376,23 @@
           "locationHint": "LT",
           "preferredLabel": "Countries I'd like to work in",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Rate from (€)",
-          "salaryMaxLabel": "Rate to (€)",
+          "salaryMinLabel": "Pay expectation from (€/month)",
+          "salaryMaxLabel": "Pay expectation to (€/month)",
           "save": "Save",
           "saving": "Saving...",
           "saved": "Saved",
           "error": "Could not save. Please try again.",
           "needsMigration": "Couldn’t complete the action. Please try again."
+        },
+        "checks": {
+          "eyebrow": "Check this is what you meant",
+          "keep": "Keep as is",
+          "correct": "Correct it",
+          "salary_below_monthly_floor": "{min}–{max} € is stored and shown as a MONTHLY expectation. As a month that is below any minimum wage — if you meant an hourly or daily rate, enter the monthly amount. If it is a monthly amount, keep it.",
+          "salary_reads_annual": "{min} € per month reads like a yearly figure. If so, enter the monthly amount; if not, keep it.",
+          "available_from_past": "Your \"can start from\" date ({date}) has passed — it reads as \"now\". If that is no longer true, set a new date.",
+          "available_from_far": "Your start date ({date}) is more than a year away. If the year is a slip, correct it; otherwise keep it.",
+          "unavailable_with_start_date": "Status says \"cannot work now\" but a start date ({date}) is set. If you can from that date — fine; if not, correct it."
         }
       },
       "tabs": {
@@ -7787,9 +7799,23 @@
     "generatedAt": "Generated",
     "notWorker": "CV export is available for worker profiles.",
     "summaryTitle": "Professional summary",
+    "facts": {
+      "recorded": "The work journal records {hours} h across {count, plural, one {# entry} other {# entries}}.",
+      "recordedSpan": "The work journal records {hours} h across {count, plural, one {# entry} other {# entries}} ({span}).",
+      "confirmed": "Of these, {hours} h were approved by a manager.",
+      "contexts": "Work was recorded at {count, plural, one {# place} other {# places}}.",
+      "topSkills": "Most of the recorded work falls on: {list}.",
+      "outputs": "Recorded outputs: {list}.",
+      "source": "Figures come from the worker's own work-journal entries; the description above is their own words."
+    },
     "practiceHistoryTitle": "Practice and volunteering",
     "workHistoryTitle": "Work history",
     "present": "Present",
+    "history": {
+      "project": "Project: {name}",
+      "recorded": "Work journal: {hours} h, {count, plural, one {# entry} other {# entries}}",
+      "recordedConfirmed": "Work journal: {hours} h, {count, plural, one {# entry} other {# entries}}, of which {confirmed} h approved by a manager"
+    },
     "languagesTitle": "Languages",
     "languagesSelfStated": "Languages as stated by the worker.",
     "certificatesTitle": "Certificates & licences",
@@ -7835,6 +7861,16 @@
         "unavailable": "Unavailable"
       }
     },
+    "checks": {
+      "eyebrow": "Check before printing",
+      "keep": "Keep as is",
+      "correct": "Correct on the work card",
+      "salary_below_monthly_floor": "The pay expectation {min}–{max} € prints as a MONTHLY amount (EUR/month). As a month that is below any minimum wage — if you meant an hourly or daily rate, correct it to a monthly amount. This note does not print.",
+      "salary_reads_annual": "The pay expectation {min} € per month reads like a yearly figure. If so, correct it to a monthly amount. This note does not print.",
+      "available_from_past": "The \"can start from\" date ({date}) has passed — a reader will take it as \"now\". If that is no longer true, update it.",
+      "available_from_far": "The start date ({date}) is more than a year away. If the year is a slip, correct it.",
+      "unavailable_with_start_date": "Status says \"cannot work\" but a start date ({date}) is set. If you can from that date — fine; if not, correct it."
+    },
     "tailored": {
       "badge": "Tailored CV",
       "forNeed": "Tailored to the request: {role}",
@@ -7850,6 +7886,13 @@
     "skillHoursOwn": "{hours} h, your own record",
     "skillHoursConfirmed": "{hours} h, {confirmed} h of it confirmed by a manager",
     "skillHoursHint": "hours from work-journal entries linked to this skill alone",
+    "selfStatedTitle": "Self-stated, no records yet",
+    "variantsFolded": "{count} spellings",
+    "skillShare": "{share}% of recorded work",
+    "skillEntries": "{count, plural, one {# entry} other {# entries}}",
+    "skillNoRecords": "no records yet",
+    "recordedHoursScope": "All time.",
+    "recordedHoursScopeTruncated": "From the last {count} entries; older entries are not in these figures.",
     "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill."
   },
   "todayScreen": {
@@ -7893,6 +7936,83 @@
         "overview": "Week & growth",
         "playerCard": "Player card"
       }
+    },
+    "home": {
+      "eyebrow": "Today",
+      "headerNoName": "Your day",
+      "professionUnknown": "Profession not set yet",
+      "reading": "Reading…",
+      "state": {
+        "recorded": "{entries, plural, one {# record} other {# records}} today · {hours} h",
+        "nothing": "Nothing recorded today yet.",
+        "unknown": "Today's records could not be read."
+      },
+      "next": {
+        "title": "Next step",
+        "unknown": "No next step can be offered right now — the work card could not be read."
+      },
+      "work": {
+        "title": "Recorded work",
+        "today": "Today: {hours} h · {entries, plural, one {# record} other {# records}}",
+        "none": "No records today yet.",
+        "untimed": "{n, plural, one {# record} other {# records}} without a duration — hours not counted yet.",
+        "week": "Last 7 days: {hours} h · {entries, plural, one {# record} other {# records}}",
+        "truncated": "Counted from the last records read — not all of them.",
+        "unknown": "No data — the journal could not be read."
+      },
+      "open": {
+        "title": "Needs your attention",
+        "untimed": "{n, plural, one {# record} other {# records}} without a duration — add the hours",
+        "unlabelled": "{n, plural, one {# record} other {# records}} with hours but no kind of work named",
+        "unknown": "Open items could not be read."
+      },
+      "growth": {
+        "title": "Growth",
+        "core_strength": "{skill} — the largest share of your attributed hours: {hours} h ({percent}).",
+        "growing": "{skill} is growing: used more in the last 30 days than before ({hours} h).",
+        "underused": "{skill} unused for {days} days — no record for it in a while.",
+        "self_stated": "{skill} — stated by you; no record backs it yet.",
+        "adjacent_opportunity": "Adjacent direction: {profession} — your records back {shared} of {total} of its skills.",
+        "derived": "A reading of your own records, not a conclusion about you.",
+        "insufficient": "A growth reading needs at least two skills backed by records.",
+        "none": "Your records show no clear direction yet.",
+        "unknown": "No data — the growth reading could not be built."
+      },
+      "opportunity": {
+        "title": "World",
+        "band": {
+          "strong": "{n, plural, one {# strong fit} other {# strong fits}}",
+          "possible": "{n, plural, one {# possible fit} other {# possible fits}}",
+          "missing_requirement": "{n, plural, one {# missing a requirement} other {# missing a requirement}}",
+          "conflict": "{n, plural, one {# incompatible} other {# incompatible}}",
+          "not_assessed": "{n, plural, one {# found, not yet assessed} other {# found, not yet assessed}}"
+        },
+        "more": "{n, plural, one {# more posting} other {# more postings}}",
+        "none": "No postings for you right now.",
+        "noWorker": "Postings appear once you have a worker profile.",
+        "unavailable": "The postings source is not reachable right now.",
+        "unknown": "No data — postings could not be read.",
+        "open": "Open World"
+      },
+      "ask": {
+        "title": "Ask",
+        "body": "Record work in one sentence, ask about your skills, or open any place.",
+        "cta": "Write"
+      },
+      "stations": {
+        "title": "Other places",
+        "journal": "My work",
+        "numbers": "My activity in numbers",
+        "profile": "Professional profile",
+        "cv": "Living CV",
+        "gallery": "Gallery"
+      }
+    },
+    "nav": {
+      "today": "Today",
+      "world": "World",
+      "ask": "Ask",
+      "aria": "Primary navigation"
     }
   },
   "agencyPool": {
@@ -9088,7 +9208,72 @@
       },
       "confirmNotice": "Your application continues on another portal — in the original advertisement.",
       "confirmContinue": "Continue",
-      "confirmDismiss": "Cancel"
+      "confirmDismiss": "Cancel",
+      "bandNotAssessed": "Not yet assessed",
+      "bandMissingRequirement": "Missing a requirement",
+      "bandConflict": "Conflict"
+    },
+    "fitWhy": {
+      "skills_missing": "lacks skills the ad requires",
+      "language_missing": "requires a language you have not listed",
+      "location_outside_radius": "location outside your stated radius",
+      "pay_above_offer": "your pay expectation is above the offer",
+      "accommodation_needed_not_provided": "you need accommodation and none is offered",
+      "profession_mismatch": "a different profession than yours",
+      "need_not_structured": "the ad states no skill requirements — nothing to compare against",
+      "need_recognized_not_confirmed": "requirements were recognized from the ad's text, not yet confirmed",
+      "no_subject_skills": "your profile lists no skills yet — nothing to compare",
+      "location_unknown": "your location is not stated",
+      "pay_unknown": "pay could not be compared",
+      "language_unknown": "your languages are not stated",
+      "language_requirement_unknown": "the ad's language requirement is unknown"
+    },
+    "world": {
+      "title": "Work opportunities",
+      "assessedAgainst": "Assessed against: {facts}",
+      "fact": {
+        "profession": "profession — {value}",
+        "professionEvidenced": "profession from recorded work — {value}",
+        "professionMissing": "profession not stated",
+        "skills": "skills — {count}",
+        "skillsMissing": "no skills recorded",
+        "place": "place — {value}",
+        "placeMissing": "place not stated",
+        "pay": "pay expectation — from {amount} EUR",
+        "payMissing": "pay expectation not stated",
+        "languages": "languages — {list}",
+        "languagesMissing": "languages not stated"
+      },
+      "countsPlatform": "platform inquiries: showing {shown} of {retrieved}",
+      "countsPlatformUnavailable": "platform inquiries: not enabled yet",
+      "countsExternal": "public advertisements: showing {shown} of {retrieved}",
+      "countsExternalUnreadable": "public advertisements: could not be read",
+      "countsFiltered": "{count} set aside by your filters",
+      "derivedNote": "Bands are derived from the facts you stated and the facts each advertisement states — an explanation in words, not a number.",
+      "chip": {
+        "strong": "Strong fit",
+        "possible": "Possible fit",
+        "missing_requirement": "Missing a requirement",
+        "conflict": "Conflict",
+        "not_assessed": "Not yet assessed"
+      },
+      "strongEmpty": "No strong fit among the rows shown.",
+      "strongEmptyChange": "What would change it: {items}.",
+      "change": {
+        "profession_missing": "state your profession",
+        "no_subject_skills": "confirm the skills your recorded work shows",
+        "location_unknown": "state where you are",
+        "pay_unknown": "state your pay expectation",
+        "language_unknown": "state your languages",
+        "availability_unknown": "state your availability"
+      },
+      "why": "Why:",
+      "whyNoGaps": "no gap found against the stated facts",
+      "whyUnknown": "the reason could not be read",
+      "payNotStated": "pay not stated by the source",
+      "payUnitNotStated": "unit not stated by the source",
+      "sourcePlatform": "Platform inquiry",
+      "externalCouldNotRead": "The public advertisement source could not be read this time — these rows are unknown, not absent."
     }
   },
   "workerIntake": {
@@ -12599,6 +12784,14 @@
       "chipLearningCompass": "Learning Compass",
       "journalNumbersHint": "Your work in numbers — hours, main activity, skills and directions — lives in the work journal:",
       "chipJournalNumbers": "Work in numbers",
+      "photosRecent": "I found photos stored in your journal — showing {count} of {total}. They are kept with your journal entries.",
+      "photosNone": "I cannot find a stored photo in your journal right now. A photo is saved together with a journal entry — open the gallery to check; if it is not there, the upload did not complete.",
+      "photosNoWorker": "Photos are stored in a worker's work journal, and this account has no worker profile yet — so there is no stored photo here.",
+      "photosUnavailable": "I could not check whether the photo was saved — reading the journal photos failed just now. Try again or open the gallery.",
+      "photosPreviewUnavailable": "The photos are stored, but previews could not be generated right now — the list is shown without images.",
+      "photoNoPreview": "Preview unavailable",
+      "photoAlt": "Work photo",
+      "chipGallery": "Gallery",
       "inviteStudentHint": "A learner is invited with a personal link from the network area (relationship “Student”):",
       "chipInviteStudent": "Invite a learner",
       "programmesHint": "Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
@@ -12902,8 +13095,6 @@
       "pipelineFailedNote": "Skill recognition failed this time — the entry is saved; you can rerun recognition in the journal."
     },
     "findWork": {
-      "intro": "I found {count} suitable options. Best matches:",
-      "introOne": "I found 1 suitable option:",
       "emptyState": "I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "To search for work, enable the worker role in account settings.",
       "blockedNoAccess": "The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
@@ -12913,7 +13104,18 @@
       "fitInsufficient": "Not enough data",
       "locationReason": "Location: {location}",
       "roleReason": "Need: {role}",
-      "introExternal": "There are {count} public job ads from official sources in the panel — applying happens through the original advertisement."
+      "fitNotAssessed": "Not yet assessed",
+      "fitMissingRequirement": "Missing a requirement",
+      "fitConflict": "Conflict",
+      "readback": "I found {total} ({bands}). The best are in the panel; every row with its reason is on the opportunities page.",
+      "readbackDiscoveryOnly": "I found {total}, none assessed as a fit yet ({bands}). Why each — on the opportunities page.",
+      "band": {
+        "strong": "strong fits: {count}",
+        "possible": "possible fits: {count}",
+        "missing_requirement": "missing a requirement: {count}",
+        "conflict": "conflict: {count}",
+        "not_assessed": "not yet assessed: {count}"
+      }
     },
     "summary": {
       "introProfile": "Here's your profile as it stands: {done} of {total} essentials are saved.",
@@ -13074,7 +13276,8 @@
         "organization": "organization"
       },
       "opportunities": {
-        "title": "Jobs that fit you"
+        "title": "Jobs that fit you",
+        "titleDiscovery": "Found postings (not yet assessed)"
       },
       "opportunitiesError": "Could not read the jobs that fit you.",
       "opportunitiesUnavailable": "The demand source is not enabled yet, so there is nothing to match against.",
@@ -13235,7 +13438,9 @@
       "engagementsEndedAt": "The engagement is ended on {date}.",
       "engagementsEndedStillVisible": "Note: this company can still see your profile while you remain assigned to their project. That access ends when the assignment ends.",
       "engagementsAlreadyEnded": "This engagement was already ended. Nothing was changed.",
-      "engagementsAlreadyEndedAt": "This engagement was already ended on {date}. Nothing was changed."
+      "engagementsAlreadyEndedAt": "This engagement was already ended on {date}. Nothing was changed.",
+      "opportunitiesCounts": "Total {total}: {bands}.",
+      "opportunitiesDiscoveryOnly": "None assessed as a fit yet — the opportunities page says why beside each."
     }
   },
   "landing": {
@@ -13708,12 +13913,14 @@
       "journalUnlabelled": "(no description)",
       "journalEmpty": "You have no journal entries in the last {days} days.",
       "journalHoursTotal": "Total over {days} days: {hours} h across {entries, plural, one {# entry} other {# entries}} (each entry counted once).",
+      "journalHoursWindow": "Total over {days} days: {hours} h across {entries, plural, one {# entry} other {# entries}}, of which {confirmed} h confirmed by a manager (each entry counted once).",
       "journalPeriod_today": "Today",
       "journalPeriod_yesterday": "Yesterday",
       "journalPeriod_week": "Over the last 7 days",
       "journalPeriod_month": "Over the last 30 days",
       "journalPeriod_year": "Over the last 365 days",
       "journalPeriod_all": "All time",
+      "journalPeriod_range": "In the last {days, plural, one {# day} other {# days}}",
       "journalHoursPeriod": "{period}: {hours} h across {entries, plural, one {# entry} other {# entries}}, of which {confirmed} h confirmed by a manager (each entry counted once).",
       "journalHoursPeriodPlain": "{period}: {hours} h across {entries, plural, one {# entry} other {# entries}} (each entry counted once).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# entry} other {# entries}}, but without a duration — add the hours and they will be counted.",
@@ -13820,7 +14027,8 @@
       "whyVerifierSelf": "You cannot confirm your own work — confirmation has to come from someone else.",
       "whyVerifierNone": "None of your active relationships points to an organization that can confirm work.",
       "whyVerifierUnavailable": "That means the data could not be read — not that nobody can confirm it.",
-      "journalOrgRecords": "Also in your organization's records ({period}): {hours} h on {days, plural, one {# day} other {# days}} — timesheet or imported hours, kept apart and not added to the figure above."
+      "journalOrgRecords": "Also in your organization's records ({period}): {hours} h on {days, plural, one {# day} other {# days}} — timesheet or imported hours, kept apart and not added to the figure above.",
+      "journalCoverageTruncated": "Shown from the last {count} entries — older entries are not in this figure."
     },
     "project": {
       "fieldStatus": "Status",
@@ -15738,5 +15946,29 @@
     "unusable": "{count} rows skipped — no usable name",
     "willCreate": "{count} will be added",
     "willNot": "What will NOT happen: no accounts are created for these people, they do not become administrators of your organisation, what you upload does not become verified evidence about them, and nothing here gives permission to represent them publicly or commercially."
+  },
+  "teamRecordedWork": {
+    "title": "Recorded work",
+    "intro": "{period}: what each person's own Work Journal entries logged against this organization's engagements add up to — the same rule and the same reader as the person's own \"work in numbers\". Entries recorded personally or for another employer never enter this view.",
+    "bound": "Showing the first {shown} of {total} people on the roster; open a person for the full section.",
+    "journalTotal": "Journal: {hours} h across {members, plural, one {# person} other {# people}} whose entries were read",
+    "journalTotalNone": "Journal: no readable entries in this period",
+    "organizationTotal": "Your organization's ledger: {hours} h across {members, plural, one {# person} other {# people}} — counted apart, added to nothing",
+    "unknownCount": "{count, plural, one {# person} other {# people}} could not be read",
+    "noReadableCount": "{count, plural, one {# person} other {# people}} with no readable records",
+    "memberUnknown": "Could not be read",
+    "memberNoReadable": "No readable records",
+    "memberFigures": "{hours} h · {entries, plural, one {# entry} other {# entries}} · {days, plural, one {# day} other {# days}}",
+    "memberDayUnits": "+ {days} recorded in days, kept apart from hours",
+    "confirmedShare": "{share} of these hours ({hours} h) a manager confirmed in the journal; the rest is the person's own record",
+    "confirmedNone": "No hours a manager confirmed in the journal this period — the person's own record",
+    "confirmedNoHours": "No timed hours in this period",
+    "topSkills": "Largest share of their recorded hours: {list}",
+    "topSkillsNone": "No hours attributed to a skill in this period",
+    "coverageTruncated": "From the last {count} entries read — older entries are not in these figures",
+    "ledgerUnknown": "could not be read",
+    "ledgerNone": "nothing in this period ({period})",
+    "ledgerFigures": "{hours} h · {rows, plural, one {# row} other {# rows}} · {days, plural, one {# day} other {# days}}",
+    "rule": "The journal figures and the organization's ledger are two records of the same work, shown side by side and never added together. An hour record says when and how much, not what — it reaches no skill."
   }
 }

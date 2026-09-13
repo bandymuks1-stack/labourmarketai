@@ -1822,6 +1822,14 @@
     "disclaimer": "Diese Fähigkeiten haben Sie selbst angegeben. Stärken Sie sie mit Einträgen im Arbeitsjournal.",
     "experienceTitle": "Arbeitsverlauf",
     "removeLabel": "Fähigkeit entfernen",
+    "skillPractice": "{hours} Std. · {count, plural, one {# Eintrag} other {# Einträge}}",
+    "skillEntries": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "skillShare": "{share} % der erfassten Arbeit",
+    "skillNoRecords": "noch keine Einträge",
+    "skillUnknown": "Journal konnte nicht gelesen werden",
+    "variantsFolded": "{count} Schreibweisen",
+    "foldedIntoSkills": "{count, plural, one {# von Ihnen angegebene Fähigkeit wird} other {# von Ihnen angegebene Fähigkeiten werden}} oben bereits mit Arbeitseinträgen gezeigt.",
+    "selfStatedTitle": "Selbst angegeben, noch keine Einträge",
     "deleteError": "Konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
     "manualAddLabel": "Fähigkeit manuell hinzufügen",
     "manualAddPlaceholder": "z. B. Englische Sprache",
@@ -4015,12 +4023,6 @@
       "clarityNote": "Ein Konto, zwei Identitäten — Sie als Person und Ihr Unternehmen. Der Wechsel ändert nur, welche Aktionen Sie sehen (Arbeit finden, Dienstleistungen anbieten, einstellen, einen Bedarf einreichen); Agentur und Einkauf sind Aktionen, keine separaten Systeme. Einige Unternehmensaktionen benötigen später möglicherweise ein Organisationsprofil."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Passende Jobs für mich",
-        "viewAll": "Alle Anzeigen",
-        "empty": "Derzeit keine passenden Anzeigen — ergänzen Sie Ihre Fähigkeiten im Profil.",
-        "emptyCta": "Profil ergänzen"
-      },
       "firstUse": {
         "eyebrow": "Hier starten",
         "title": "Beginnen Sie bei sich selbst",
@@ -4374,13 +4376,23 @@
           "locationHint": "LT",
           "preferredLabel": "Länder, in denen ich arbeiten möchte",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Satz ab (€)",
-          "salaryMaxLabel": "Satz bis (€)",
+          "salaryMinLabel": "Gehaltsvorstellung ab (€/Monat)",
+          "salaryMaxLabel": "Gehaltsvorstellung bis (€/Monat)",
           "save": "Speichern",
           "saving": "Wird gespeichert...",
           "saved": "Gespeichert",
           "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
           "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
+        },
+        "checks": {
+          "eyebrow": "Prüfe, ob du das gemeint hast",
+          "keep": "So lassen",
+          "correct": "Korrigieren",
+          "salary_below_monthly_floor": "{min}–{max} € wird als MONATLICHE Vorstellung gespeichert und angezeigt. Als Monat liegt das unter jedem Mindestlohn — wenn du einen Stunden- oder Tagessatz meintest, trage den Monatsbetrag ein. Ist es ein Monatsbetrag, lass es so.",
+          "salary_reads_annual": "{min} € pro Monat liest sich wie ein Jahresbetrag. Wenn ja, trage den Monatsbetrag ein; wenn nicht, lass es so.",
+          "available_from_past": "Dein Datum „kann beginnen ab“ ({date}) ist vorbei — es wird als „jetzt“ gelesen. Stimmt das nicht mehr, setze ein neues Datum.",
+          "available_from_far": "Dein Startdatum ({date}) liegt mehr als ein Jahr voraus. Ist das Jahr ein Tippfehler, korrigiere es; sonst lass es so.",
+          "unavailable_with_start_date": "Status sagt „kann derzeit nicht arbeiten“, aber ein Startdatum ({date}) ist gesetzt. Kannst du ab diesem Datum — gut; wenn nicht, korrigiere es."
         }
       },
       "tabs": {
@@ -7787,9 +7799,23 @@
     "generatedAt": "Erstellt",
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt.",
     "summaryTitle": "Berufliches Profil",
+    "facts": {
+      "recorded": "Das Arbeitsjournal verzeichnet {hours} Std. in {count, plural, one {# Eintrag} other {# Einträgen}}.",
+      "recordedSpan": "Das Arbeitsjournal verzeichnet {hours} Std. in {count, plural, one {# Eintrag} other {# Einträgen}} ({span}).",
+      "confirmed": "Davon wurden {hours} Std. von einem Vorgesetzten freigegeben.",
+      "contexts": "Arbeit wurde an {count, plural, one {# Ort} other {# Orten}} verzeichnet.",
+      "topSkills": "Der größte Teil der verzeichneten Arbeit entfällt auf: {list}.",
+      "outputs": "Verzeichnete Ergebnisse: {list}.",
+      "source": "Zahlen stammen aus den eigenen Arbeitsjournal-Einträgen; die Beschreibung oben sind die eigenen Worte der Person."
+    },
     "practiceHistoryTitle": "Praktikum und Ehrenamt",
     "workHistoryTitle": "Beruflicher Werdegang",
     "present": "Heute",
+    "history": {
+      "project": "Projekt: {name}",
+      "recorded": "Arbeitsjournal: {hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}",
+      "recordedConfirmed": "Arbeitsjournal: {hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}, davon {confirmed} Std. von einem Vorgesetzten freigegeben"
+    },
     "languagesTitle": "Sprachen",
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
     "certificatesTitle": "Zertifikate & Lizenzen",
@@ -7835,6 +7861,16 @@
         "unavailable": "Nicht verfügbar"
       }
     },
+    "checks": {
+      "eyebrow": "Vor dem Drucken prüfen",
+      "keep": "So lassen",
+      "correct": "Auf der Arbeitskarte korrigieren",
+      "salary_below_monthly_floor": "Die Gehaltsvorstellung {min}–{max} € wird als MONATSBETRAG gedruckt (EUR/Monat). Als Monat liegt das unter jedem Mindestlohn — wenn du einen Stunden- oder Tagessatz meintest, korrigiere auf einen Monatsbetrag. Dieser Hinweis wird nicht gedruckt.",
+      "salary_reads_annual": "Die Gehaltsvorstellung {min} € pro Monat liest sich wie ein Jahresbetrag. Wenn ja, korrigiere auf einen Monatsbetrag. Dieser Hinweis wird nicht gedruckt.",
+      "available_from_past": "Das Datum „kann beginnen ab“ ({date}) ist vorbei — ein Leser versteht es als „jetzt“. Stimmt das nicht mehr, aktualisiere es.",
+      "available_from_far": "Das Startdatum ({date}) liegt mehr als ein Jahr voraus. Ist das Jahr ein Tippfehler, korrigiere es.",
+      "unavailable_with_start_date": "Status sagt „kann nicht arbeiten“, aber ein Startdatum ({date}) ist gesetzt. Kannst du ab diesem Datum — gut; wenn nicht, korrigiere es."
+    },
     "tailored": {
       "badge": "Zugeschnittener Lebenslauf",
       "forNeed": "Zugeschnitten auf die Anfrage: {role}",
@@ -7850,6 +7886,13 @@
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
     "skillHoursConfirmed": "{hours} Std., davon {confirmed} Std. vom Vorgesetzten bestätigt",
     "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind",
+    "selfStatedTitle": "Selbst angegeben, noch keine Einträge",
+    "variantsFolded": "{count} Schreibweisen",
+    "skillShare": "{share} % der erfassten Arbeit",
+    "skillEntries": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "skillNoRecords": "noch keine Einträge",
+    "recordedHoursScope": "Gesamte Zeit.",
+    "recordedHoursScopeTruncated": "Aus den letzten {count} Einträgen; ältere Einträge sind in diesen Zahlen nicht enthalten.",
     "organizationRecordedHours": "Erfassung der Organisation: {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} in Stundenzetteln oder importierten Dokumenten ({imported} Std. importiert, {approved} Std. genehmigt) — getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet."
   },
   "todayScreen": {
@@ -7893,6 +7936,83 @@
         "overview": "Woche & Wachstum",
         "playerCard": "Spielerkarte"
       }
+    },
+    "home": {
+      "eyebrow": "Heute",
+      "headerNoName": "Dein Tag",
+      "professionUnknown": "Beruf noch nicht angegeben",
+      "reading": "Wird gelesen…",
+      "state": {
+        "recorded": "{entries, plural, one {# Eintrag} other {# Einträge}} heute · {hours} Std.",
+        "nothing": "Heute noch nichts erfasst.",
+        "unknown": "Die heutigen Einträge konnten nicht gelesen werden."
+      },
+      "next": {
+        "title": "Nächster Schritt",
+        "unknown": "Ein nächster Schritt kann gerade nicht vorgeschlagen werden — die Arbeitskarte konnte nicht gelesen werden."
+      },
+      "work": {
+        "title": "Erfasste Arbeit",
+        "today": "Heute: {hours} Std. · {entries, plural, one {# Eintrag} other {# Einträge}}",
+        "none": "Heute noch keine Einträge.",
+        "untimed": "{n, plural, one {# Eintrag} other {# Einträge}} ohne Dauer — Stunden noch nicht gezählt.",
+        "week": "Letzte 7 Tage: {hours} Std. · {entries, plural, one {# Eintrag} other {# Einträge}}",
+        "truncated": "Gezählt aus den zuletzt gelesenen Einträgen — nicht aus allen.",
+        "unknown": "Keine Daten — das Journal konnte nicht gelesen werden."
+      },
+      "open": {
+        "title": "Braucht deine Aufmerksamkeit",
+        "untimed": "{n, plural, one {# Eintrag} other {# Einträge}} ohne Dauer — Stunden ergänzen",
+        "unlabelled": "{n, plural, one {# Eintrag} other {# Einträge}} mit Stunden, aber ohne benannte Arbeitsart",
+        "unknown": "Offene Punkte konnten nicht gelesen werden."
+      },
+      "growth": {
+        "title": "Wachstum",
+        "core_strength": "{skill} — der größte Anteil deiner zugeordneten Stunden: {hours} Std. ({percent}).",
+        "growing": "{skill} wächst: in den letzten 30 Tagen häufiger genutzt als davor ({hours} Std.).",
+        "underused": "{skill} seit {days} Tagen nicht genutzt — schon länger kein Eintrag dazu.",
+        "self_stated": "{skill} — von dir angegeben; noch kein Eintrag stützt es.",
+        "adjacent_opportunity": "Angrenzende Richtung: {profession} — deine Einträge stützen {shared} von {total} ihrer Fähigkeiten.",
+        "derived": "Eine Lesart deiner eigenen Einträge, kein Urteil über dich.",
+        "insufficient": "Eine Wachstumslesart braucht mindestens zwei durch Einträge gestützte Fähigkeiten.",
+        "none": "Deine Einträge zeigen noch keine klare Richtung.",
+        "unknown": "Keine Daten — die Wachstumslesart konnte nicht erstellt werden."
+      },
+      "opportunity": {
+        "title": "Welt",
+        "band": {
+          "strong": "{n, plural, one {# stark passend} other {# stark passend}}",
+          "possible": "{n, plural, one {# möglicherweise passend} other {# möglicherweise passend}}",
+          "missing_requirement": "{n, plural, one {# mit fehlender Anforderung} other {# mit fehlender Anforderung}}",
+          "conflict": "{n, plural, one {# unvereinbar} other {# unvereinbar}}",
+          "not_assessed": "{n, plural, one {# gefunden, noch nicht bewertet} other {# gefunden, noch nicht bewertet}}"
+        },
+        "more": "{n, plural, one {noch # Anzeige} other {noch # Anzeigen}}",
+        "none": "Derzeit keine Anzeigen für dich.",
+        "noWorker": "Anzeigen erscheinen, sobald du ein Arbeitskräfteprofil hast.",
+        "unavailable": "Die Anzeigenquelle ist gerade nicht erreichbar.",
+        "unknown": "Keine Daten — Anzeigen konnten nicht gelesen werden.",
+        "open": "Welt öffnen"
+      },
+      "ask": {
+        "title": "Fragen",
+        "body": "Erfasse Arbeit in einem Satz, frag nach deinen Fähigkeiten oder öffne jeden Ort.",
+        "cta": "Schreiben"
+      },
+      "stations": {
+        "title": "Weitere Orte",
+        "journal": "Meine Arbeit",
+        "numbers": "Meine Tätigkeit in Zahlen",
+        "profile": "Berufsprofil",
+        "cv": "Lebendiger Lebenslauf",
+        "gallery": "Galerie"
+      }
+    },
+    "nav": {
+      "today": "Heute",
+      "world": "Welt",
+      "ask": "Fragen",
+      "aria": "Hauptnavigation"
     }
   },
   "agencyPool": {
@@ -9088,7 +9208,72 @@
       },
       "confirmNotice": "Ihre Bewerbung wird auf einem anderen Portal fortgesetzt — in der Originalanzeige.",
       "confirmContinue": "Weiter",
-      "confirmDismiss": "Abbrechen"
+      "confirmDismiss": "Abbrechen",
+      "bandNotAssessed": "Noch nicht bewertet",
+      "bandMissingRequirement": "Anforderung fehlt",
+      "bandConflict": "Konflikt"
+    },
+    "fitWhy": {
+      "skills_missing": "es fehlen in der Anzeige geforderte Fähigkeiten",
+      "language_missing": "verlangt eine Sprache, die du nicht angegeben hast",
+      "location_outside_radius": "Ort außerhalb deines angegebenen Umkreises",
+      "pay_above_offer": "deine Gehaltserwartung liegt über dem Angebot",
+      "accommodation_needed_not_provided": "du brauchst eine Unterkunft, es wird keine angeboten",
+      "profession_mismatch": "ein anderer Beruf als deiner",
+      "need_not_structured": "die Anzeige nennt keine Anforderungen an Fähigkeiten — nichts zum Vergleichen",
+      "need_recognized_not_confirmed": "Anforderungen wurden aus dem Anzeigentext erkannt, noch nicht bestätigt",
+      "no_subject_skills": "dein Profil enthält noch keine Fähigkeiten — nichts zum Vergleichen",
+      "location_unknown": "dein Standort ist nicht angegeben",
+      "pay_unknown": "Vergütung konnte nicht verglichen werden",
+      "language_unknown": "deine Sprachen sind nicht angegeben",
+      "language_requirement_unknown": "die Sprachanforderung der Anzeige ist unbekannt"
+    },
+    "world": {
+      "title": "Arbeitsmöglichkeiten",
+      "assessedAgainst": "Bewertet anhand: {facts}",
+      "fact": {
+        "profession": "Beruf — {value}",
+        "professionEvidenced": "Beruf aus erfasster Arbeit — {value}",
+        "professionMissing": "Beruf nicht angegeben",
+        "skills": "Fähigkeiten — {count}",
+        "skillsMissing": "keine Fähigkeiten erfasst",
+        "place": "Ort — {value}",
+        "placeMissing": "Ort nicht angegeben",
+        "pay": "Vergütungserwartung — ab {amount} EUR",
+        "payMissing": "Vergütungserwartung nicht angegeben",
+        "languages": "Sprachen — {list}",
+        "languagesMissing": "Sprachen nicht angegeben"
+      },
+      "countsPlatform": "Plattformanfragen: {shown} von {retrieved} angezeigt",
+      "countsPlatformUnavailable": "Plattformanfragen: noch nicht freigeschaltet",
+      "countsExternal": "öffentliche Anzeigen: {shown} von {retrieved} angezeigt",
+      "countsExternalUnreadable": "öffentliche Anzeigen: konnten nicht gelesen werden",
+      "countsFiltered": "{count} durch deine Filter zurückgestellt",
+      "derivedNote": "Die Gruppen werden aus deinen angegebenen Fakten und den Fakten jeder Anzeige abgeleitet — eine Erklärung in Worten, keine Zahl.",
+      "chip": {
+        "strong": "Passt gut",
+        "possible": "Passt möglicherweise",
+        "missing_requirement": "Anforderung fehlt",
+        "conflict": "Konflikt",
+        "not_assessed": "Noch nicht bewertet"
+      },
+      "strongEmpty": "Unter den angezeigten Zeilen passt keine gut.",
+      "strongEmptyChange": "Was das ändern würde: {items}.",
+      "change": {
+        "profession_missing": "gib deinen Beruf an",
+        "no_subject_skills": "bestätige die Fähigkeiten, die deine erfasste Arbeit zeigt",
+        "location_unknown": "gib an, wo du bist",
+        "pay_unknown": "gib deine Vergütungserwartung an",
+        "language_unknown": "gib deine Sprachen an",
+        "availability_unknown": "gib deine Verfügbarkeit an"
+      },
+      "why": "Warum:",
+      "whyNoGaps": "keine Lücke gegenüber den angegebenen Fakten gefunden",
+      "whyUnknown": "der Grund konnte nicht gelesen werden",
+      "payNotStated": "Vergütung von der Quelle nicht angegeben",
+      "payUnitNotStated": "Einheit von der Quelle nicht angegeben",
+      "sourcePlatform": "Plattformanfrage",
+      "externalCouldNotRead": "Die Quelle der öffentlichen Anzeigen konnte diesmal nicht gelesen werden — diese Zeilen sind unbekannt, nicht abwesend."
     }
   },
   "workerIntake": {
@@ -12599,6 +12784,14 @@
       "chipLearningCompass": "Lernkompass",
       "journalNumbersHint": "Ihre Arbeit in Zahlen — Stunden, Haupttätigkeit, Fähigkeiten und Richtungen — steht im Arbeitsjournal:",
       "chipJournalNumbers": "Arbeit in Zahlen",
+      "photosRecent": "Ich habe in Ihrem Journal gespeicherte Fotos gefunden: {count} von {total} werden angezeigt. Sie liegen bei Ihren Journaleinträgen.",
+      "photosNone": "Ich finde im Moment kein gespeichertes Foto in Ihrem Journal. Ein Foto wird zusammen mit einem Journaleintrag gespeichert — öffnen Sie die Galerie und prüfen Sie es; ist es dort nicht, wurde der Upload nicht abgeschlossen.",
+      "photosNoWorker": "Fotos werden im Arbeitsjournal einer Arbeitskraft gespeichert, und dieses Konto hat noch kein Arbeitskraft-Profil — daher gibt es hier kein gespeichertes Foto.",
+      "photosUnavailable": "Ich konnte nicht prüfen, ob das Foto gespeichert wurde — das Lesen der Journalfotos ist gerade fehlgeschlagen. Versuchen Sie es erneut oder öffnen Sie die Galerie.",
+      "photosPreviewUnavailable": "Die Fotos sind gespeichert, aber Vorschauen konnten gerade nicht erzeugt werden — die Liste wird ohne Bilder angezeigt.",
+      "photoNoPreview": "Vorschau nicht verfügbar",
+      "photoAlt": "Arbeitsfoto",
+      "chipGallery": "Galerie",
       "inviteStudentHint": "Ein Lernender wird mit einem persönlichen Link aus dem Netzwerkbereich eingeladen (Beziehung „Student“):",
       "chipInviteStudent": "Lernenden einladen",
       "programmesHint": "Programme und Kohorten werden im Unternehmensbereich verwaltet — dort legen Sie ein Programm und eine Kohorte an und weisen Lernende zu:",
@@ -12902,8 +13095,6 @@
       "pipelineFailedNote": "Die Fähigkeits-Erkennung ist diesmal fehlgeschlagen — der Eintrag ist gespeichert; du kannst die Erkennung im Journal wiederholen."
     },
     "findWork": {
-      "intro": "Ich habe {count} passende Optionen gefunden. Beste Treffer:",
-      "introOne": "Ich habe 1 passende Option gefunden:",
       "emptyState": "Momentan habe ich keine aktiven Angebote gefunden, die zu deinen Kriterien passen. Es gibt noch keine Benachrichtigungen, deshalb verspreche ich keine — frag später noch einmal oder ergänze dein Profil, damit mehr Bedarfe passen.",
       "blockedNoWorker": "Um Arbeit zu suchen, aktiviere die Arbeitnehmerrolle in den Kontoeinstellungen.",
       "blockedNoAccess": "Die Angebotsliste ist in dieser Umgebung noch nicht aktiviert. Sobald sie es ist, zeige ich echte Bedarfe.",
@@ -12913,7 +13104,18 @@
       "fitInsufficient": "Nicht genug Daten",
       "locationReason": "Ort: {location}",
       "roleReason": "Bedarf: {role}",
-      "introExternal": "Im Panel gibt es {count} öffentliche Stellenanzeigen aus offiziellen Quellen — die Bewerbung erfolgt über die Originalanzeige."
+      "fitNotAssessed": "Noch nicht bewertet",
+      "fitMissingRequirement": "Anforderung fehlt",
+      "fitConflict": "Konflikt",
+      "readback": "Ich habe {total} gefunden ({bands}). Die besten stehen im Panel; jede Zeile mit Grund auf der Seite der Möglichkeiten.",
+      "readbackDiscoveryOnly": "Ich habe {total} gefunden, noch keine als passend bewertet ({bands}). Warum jede — auf der Seite der Möglichkeiten.",
+      "band": {
+        "strong": "passt gut: {count}",
+        "possible": "passt möglicherweise: {count}",
+        "missing_requirement": "Anforderung fehlt: {count}",
+        "conflict": "Konflikt: {count}",
+        "not_assessed": "noch nicht bewertet: {count}"
+      }
     },
     "summary": {
       "introProfile": "So sieht dein Profil aktuell aus: {done} von {total} Grundangaben sind gespeichert.",
@@ -13074,7 +13276,8 @@
         "organization": "Organisation"
       },
       "opportunities": {
-        "title": "Passende Jobs"
+        "title": "Passende Jobs",
+        "titleDiscovery": "Gefundene Anzeigen (noch nicht bewertet)"
       },
       "opportunitiesError": "Die passenden Jobs konnten nicht geladen werden.",
       "opportunitiesUnavailable": "Die Bedarfsquelle ist noch nicht aktiviert, es gibt also noch nichts zum Abgleichen.",
@@ -13235,7 +13438,9 @@
       "engagementsEndedAt": "Die Arbeitsbeziehung ist am {date} beendet.",
       "engagementsEndedStillVisible": "Hinweis: Dieses Unternehmen kann Ihr Profil weiterhin sehen, solange Sie seinem Projekt zugewiesen sind. Dieser Zugriff endet mit dem Ende der Zuweisung.",
       "engagementsAlreadyEnded": "Diese Arbeitsbeziehung war bereits beendet. Es wurde nichts geändert.",
-      "engagementsAlreadyEndedAt": "Diese Arbeitsbeziehung war bereits am {date} beendet. Es wurde nichts geändert."
+      "engagementsAlreadyEndedAt": "Diese Arbeitsbeziehung war bereits am {date} beendet. Es wurde nichts geändert.",
+      "opportunitiesCounts": "Gesamt {total}: {bands}.",
+      "opportunitiesDiscoveryOnly": "Noch keine als passend bewertet — warum, steht neben jeder Zeile auf der Seite der Möglichkeiten."
     }
   },
   "landing": {
@@ -13708,12 +13913,14 @@
       "journalUnlabelled": "(ohne Beschreibung)",
       "journalEmpty": "In den letzten {days} Tagen hast du keine Einträge.",
       "journalHoursTotal": "Gesamt über {days} Tage: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}} (jeder Eintrag einmal gezählt).",
+      "journalHoursWindow": "Gesamt über {days} Tage: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}}, davon {confirmed} Std. von einer Führungskraft bestätigt (jeder Eintrag einmal gezählt).",
       "journalPeriod_today": "Heute",
       "journalPeriod_yesterday": "Gestern",
       "journalPeriod_week": "In den letzten 7 Tagen",
       "journalPeriod_month": "In den letzten 30 Tagen",
       "journalPeriod_year": "In den letzten 365 Tagen",
       "journalPeriod_all": "Gesamter Zeitraum",
+      "journalPeriod_range": "In den letzten {days, plural, one {# Tag} other {# Tagen}}",
       "journalHoursPeriod": "{period}: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}}, davon {confirmed} Std. von einer Führungskraft bestätigt (jeder Eintrag einmal gezählt).",
       "journalHoursPeriodPlain": "{period}: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}} (jeder Eintrag einmal gezählt).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# Eintrag} other {# Einträge}}, aber ohne Dauer — tragen Sie die Stunden nach, dann werden sie gezählt.",
@@ -13820,7 +14027,8 @@
       "whyVerifierSelf": "Du kannst deine eigene Arbeit nicht bestätigen — die Bestätigung muss von jemand anderem kommen.",
       "whyVerifierNone": "Keine deiner aktiven Beziehungen verweist auf eine Organisation, die Arbeit bestätigen kann.",
       "whyVerifierUnavailable": "Das heißt, die Daten konnten nicht gelesen werden — nicht, dass niemand bestätigen kann.",
-      "journalOrgRecords": "Außerdem in der Erfassung Ihrer Organisation ({period}): {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} — Stunden aus Stundenzettel oder Import, getrennt geführt und nicht zur Zahl oben addiert."
+      "journalOrgRecords": "Außerdem in der Erfassung Ihrer Organisation ({period}): {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} — Stunden aus Stundenzettel oder Import, getrennt geführt und nicht zur Zahl oben addiert.",
+      "journalCoverageTruncated": "Angezeigt aus den letzten {count} Einträgen — ältere Einträge sind in dieser Zahl nicht enthalten."
     },
     "project": {
       "fieldStatus": "Status",
@@ -15738,5 +15946,29 @@
     "unusable": "{count} Zeilen übersprungen — kein brauchbarer Name",
     "willCreate": "{count} werden hinzugefügt",
     "willNot": "Was NICHT passiert: für diese Menschen werden keine Konten angelegt, sie werden keine Administratoren Ihrer Organisation, das Hochgeladene wird kein bestätigter Nachweis über sie, und es erlaubt nicht, sie öffentlich oder kommerziell zu vertreten."
+  },
+  "teamRecordedWork": {
+    "title": "Erfasste Arbeit",
+    "intro": "{period}: was die eigenen Arbeitstagebuch-Einträge jeder Person, erfasst zu den Arbeitsverhältnissen dieser Organisation, zusammen ergeben — nach derselben Regel und über denselben Leser wie die „Arbeit in Zahlen“ der Person selbst. Persönlich oder für einen anderen Arbeitgeber erfasste Einträge gelangen nie in diese Ansicht.",
+    "bound": "Die ersten {shown} von {total} Personen der Liste; öffnen Sie eine Person für den vollständigen Abschnitt.",
+    "journalTotal": "Tagebuch: {hours} Std. bei {members, plural, one {# Person} other {# Personen}}, deren Einträge gelesen wurden",
+    "journalTotalNone": "Tagebuch: keine lesbaren Einträge in diesem Zeitraum",
+    "organizationTotal": "Erfassung Ihrer Organisation: {hours} Std. bei {members, plural, one {# Person} other {# Personen}} — getrennt gezählt, nirgends addiert",
+    "unknownCount": "{count, plural, one {# Person} other {# Personen}} konnte nicht gelesen werden",
+    "noReadableCount": "{count, plural, one {# Person} other {# Personen}} ohne lesbare Einträge",
+    "memberUnknown": "Konnte nicht gelesen werden",
+    "memberNoReadable": "Keine lesbaren Einträge",
+    "memberFigures": "{hours} Std. · {entries, plural, one {# Eintrag} other {# Einträge}} · {days, plural, one {# Tag} other {# Tage}}",
+    "memberDayUnits": "+ {days} in Tagen erfasst, getrennt von Stunden",
+    "confirmedShare": "{share} dieser Stunden ({hours} Std.) hat eine Führungskraft im Tagebuch bestätigt; der Rest ist die eigene Erfassung der Person",
+    "confirmedNone": "In diesem Zeitraum hat keine Führungskraft im Tagebuch Stunden bestätigt — die eigene Erfassung der Person",
+    "confirmedNoHours": "Keine erfassten Stunden in diesem Zeitraum",
+    "topSkills": "Größter Anteil der erfassten Stunden: {list}",
+    "topSkillsNone": "In diesem Zeitraum wurden keiner Fähigkeit Stunden zugeordnet",
+    "coverageTruncated": "Aus den letzten {count} gelesenen Einträgen — ältere Einträge sind nicht in diesen Zahlen",
+    "ledgerUnknown": "konnte nicht gelesen werden",
+    "ledgerNone": "nichts in diesem Zeitraum ({period})",
+    "ledgerFigures": "{hours} Std. · {rows, plural, one {# Zeile} other {# Zeilen}} · {days, plural, one {# Tag} other {# Tage}}",
+    "rule": "Die Tagebuchzahlen und die Erfassung der Organisation sind zwei Aufzeichnungen derselben Arbeit, nebeneinander gezeigt und nie addiert. Eine Stundenerfassung sagt, wann und wie viel, nicht was — sie erreicht keine Fähigkeit."
   }
 }

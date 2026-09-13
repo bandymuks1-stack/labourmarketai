@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
+import type { SkillPresentation } from "@/lib/cv-export/skill-presentation";
 import {
   deleteProfileSkillClaimAction,
   saveProfileSkillClaimsAction,
@@ -53,10 +54,16 @@ export function CapabilityProfileSection({
   claims,
   engagements = [],
   workerSkillDots = [],
+  skillPresentation = null,
   professionIconSlug = null,
 }: {
   /** Owner-only `profile_skill_claims` rows, newest first. */
   claims: ProfileSkillClaimRow[];
+  /** The ONE skill presentation (lib/cv-export/skill-presentation): free
+   *  labels folded into the catalogued skill they already are, case and
+   *  diacritic variants folded into one item. Null for non-workers — the
+   *  raw claims then render one chip each, as before. */
+  skillPresentation?: SkillPresentation | null;
   /** Worker engagement-context cards. Empty for non-workers. */
   engagements?: EngagementCard[];
   /** Worker_skills confidence dots. Empty for non-workers. */
@@ -67,9 +74,14 @@ export function CapabilityProfileSection({
   const t = useTranslations("capabilityProfile");
   const tEng = useTranslations("journal.cv");
   const tTier = useTranslations("evidenceTier");
+  // The confirmed-hours sentence is the CV's own (cvExport.skillHoursConfirmed)
+  // so the profile and the Living CV say it in the same words.
+  const tCv = useTranslations("cvExport");
   const tRel = useTranslations("relationshipTypes");
   const tGroups = useTranslations();
   const locale = useLocale();
+  const fmtHours = (h: number) =>
+    new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
 
   const router = useRouter();
   const [savedClaims, setSavedClaims] =
@@ -91,6 +103,32 @@ export function CapabilityProfileSection({
           setError(t("deleteError"));
         });
     });
+  }
+
+  // The chips this section shows: with a presentation, one per folded
+  // group (the group's ids travel with it so removal covers every variant
+  // the person saved under that spelling — an explicit act, never silent);
+  // without one, the raw rows. Claims already folded INTO a catalogued
+  // skill are not repeated here — they are that skill, shown above with
+  // its figures.
+  const savedIds = new Set(savedClaims.map((c) => c.id));
+  const claimItems: { key: string; label: string; ids: string[]; variants: readonly string[] }[] =
+    skillPresentation
+      ? (skillPresentation.groups.find((g) => g.tier === "self_stated")?.items ?? [])
+          .map((it) => ({
+            key: it.key,
+            label: it.name,
+            ids: it.claimIds.filter((id) => savedIds.has(id)),
+            variants: it.variants,
+          }))
+          .filter((it) => it.ids.length > 0)
+      : savedClaims.map((c) => ({ key: c.id, label: c.label, ids: [c.id], variants: [c.label] }));
+  const foldedIntoSkills = skillPresentation
+    ? skillPresentation.claimsFoldedIntoSkills
+    : 0;
+
+  function removeClaimGroup(ids: string[]) {
+    for (const id of ids) removeClaim(id);
   }
 
   // Manual-add path for pilot users (Work Package D1). The extractor
@@ -285,15 +323,25 @@ export function CapabilityProfileSection({
             className="flex flex-wrap gap-2"
             data-testid="capability-profile-claims"
           >
-            {savedClaims.map((c) => (
+            {claimItems.map((c) => (
               <li
-                key={c.id}
-                className="flex min-h-11 items-center gap-2 rounded-md border border-state-success/40 bg-state-success/5 px-2 text-sm text-text-primary"
+                key={c.key}
+                className="flex min-h-11 items-center gap-2 rounded-md border border-dashed border-ink-500 px-2 text-sm text-text-primary"
+                data-variants={c.variants.length}
               >
                 <span>{c.label}</span>
+                {c.variants.length > 1 ? (
+                  <span
+                    className="text-meta text-text-muted"
+                    title={c.variants.join(" · ")}
+                    data-testid="capability-profile-claim-variants"
+                  >
+                    · {t("variantsFolded", { count: c.variants.length })}
+                  </span>
+                ) : null}
                 <button
                   type="button"
-                  onClick={() => removeClaim(c.id)}
+                  onClick={() => removeClaimGroup(c.ids)}
                   disabled={isDeleting}
                   className="flex items-center self-stretch px-2 text-xs text-text-muted hover:text-state-danger"
                   aria-label={t("removeLabel")}
@@ -303,6 +351,14 @@ export function CapabilityProfileSection({
               </li>
             ))}
           </ul>
+          {foldedIntoSkills > 0 ? (
+            <p
+              className="text-xs text-text-muted"
+              data-testid="capability-profile-claims-folded"
+            >
+              {t("foldedIntoSkills", { count: foldedIntoSkills })}
+            </p>
+          ) : null}
           {error && (
             <p role="alert" className="text-xs text-state-danger">
               {error}
@@ -403,15 +459,60 @@ export function CapabilityProfileSection({
                                   key={s.slug}
                                   className="flex items-center justify-between gap-2 text-sm text-text-primary"
                                 >
-                                  <span className="flex items-center gap-2">
+                                  <span className="flex min-w-0 flex-col">
                                     <span
-                                      aria-hidden
                                       className={cn(
-                                        "inline-block size-2 flex-none rounded-full",
-                                        BIN_DOT[s.bin] ?? "bg-ink-500",
+                                        "flex items-center gap-2",
+                                        s.magnitude === "major" && "text-base font-medium",
+                                        (s.magnitude === "none" || s.magnitude === "trace") &&
+                                          "text-text-secondary",
                                       )}
-                                    />
-                                    {s.name}
+                                      data-magnitude={s.magnitude ?? "unknown"}
+                                    >
+                                      <span
+                                        aria-hidden
+                                        className={cn(
+                                          "inline-block size-2 flex-none rounded-full",
+                                          BIN_DOT[s.bin] ?? "bg-ink-500",
+                                        )}
+                                      />
+                                      {s.name}
+                                    </span>
+                                    {/* The journal's own figures for the skill (owner
+                                        defect C): hours, confirmed hours, entries and
+                                        share — so 0.5 h never looks like 100 h. Unknown
+                                        (journal unread) says so; none says "no records". */}
+                                    <span
+                                      className="pl-4 text-meta text-text-muted tabular-nums"
+                                      data-testid={`capability-skill-practice-${s.slug}`}
+                                    >
+                                      {s.magnitude === "unknown"
+                                        ? t("skillUnknown")
+                                        : s.practice && s.practice.attributedHours > 0
+                                          ? `${
+                                              s.practice.confirmedHours > 0
+                                                ? `${tCv("skillHoursConfirmed", {
+                                                    hours: fmtHours(s.practice.attributedHours),
+                                                    confirmed: fmtHours(s.practice.confirmedHours),
+                                                  })} · ${t("skillEntries", { count: s.practice.entries })}`
+                                                : t("skillPractice", {
+                                                    hours: fmtHours(s.practice.attributedHours),
+                                                    count: s.practice.entries,
+                                                  })
+                                            }${
+                                              s.practice.share > 0
+                                                ? ` · ${t("skillShare", {
+                                                    share: Math.round(s.practice.share * 100),
+                                                  })}`
+                                                : ""
+                                            }`
+                                          : s.practice && s.practice.entries > 0
+                                            ? t("skillPractice", {
+                                                hours: fmtHours(s.practice.attributedHours),
+                                                count: s.practice.entries,
+                                              })
+                                            : t("skillNoRecords")}
+                                    </span>
                                   </span>
                                   {s.isCore && (
                                     <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">

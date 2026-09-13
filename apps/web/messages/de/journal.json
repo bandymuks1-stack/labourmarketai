@@ -237,7 +237,7 @@
   "listEmptyTitle": "Beginnen Sie, Arbeitsnachweise aufzubauen",
   "listEmptyNext": "Erstellen Sie unten Ihren ersten Eintrag — er bleibt privat, bis Sie ihn einreichen.",
   "listEmptyCta": "Ersten Eintrag erstellen",
-  "logViaChatBody": "Arbeit wird im Gespräch erfasst — sag, was du getan hast, und der Eintrag erscheint hier.",
+  "logViaChatBody": "Weitere Wege, Arbeit zu erfassen:",
   "logViaChatCta": "Arbeit im Chat erfassen",
   "logViaVoiceCta": "Per Sprache erfassen",
   "skillFilterActive": "Einträge mit der Fähigkeit „{name}“ ({count})",
@@ -409,6 +409,7 @@
   },
   "proofLoop": {
     "strip": "Einträge → Fähigkeiten → CV → Angebote: {entries} Einträge diesen Monat · {evidenced} Fähigkeiten mit Einträgen · {confirmed} geprüft",
+    "stripPeriod": "Einträge → Fähigkeiten → CV → Angebote: {entries} Einträge ({period}) · {evidenced} Fähigkeiten mit Einträgen · {confirmed} geprüft",
     "cvLink": "CV"
   },
   "statusExplainer": "Wie werden Ihre Einträge verwendet?",
@@ -654,6 +655,7 @@
     "monthsTitle": "Wie es sich verändert",
     "monthsLegend": "Stunden pro Monat nach Arbeitstag. Der grüne Teil sind von der Führungskraft bestätigte Stunden. Ein Monat ohne Einträge ist eine echte Null.",
     "listCap": "{shown} von {total} angezeigt — alle Zeilen zählen in den Summen.",
+    "coverageTruncated": "Angezeigt aus den letzten {count} Einträgen — ältere Einträge sind in diesen Zahlen nicht enthalten.",
     "monthsCap": "Die letzten {shown} von {total} Monaten angezeigt — alle zählen in den Summen.",
     "attribution": {
       "involvement_expected": "In dieser Art von Arbeit wird Zeit meist für die ganze Schicht erfasst, nicht je Tätigkeit; deshalb stehen die Stunden hier als Beteiligung — das ist kein Fehler. Für Stunden je Fähigkeit: die Zeit im Eintrag neben die Tätigkeit schreiben.",
@@ -759,6 +761,64 @@
       "linked": "{hours} Std. beschreiben Journaleinträge, die oben bereits gezählt sind",
       "rejected": "{hours} Std. in einem Stundenzettel abgelehnt — nirgends gezählt",
       "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur ein Journaleintrag."
+    },
+    "growthKindsTitle": "Was deine Einträge zeigen",
+    "growthKindsHint": "Jede Zeile ist eine Art, nach einer einfachen Regel aus deinen eigenen Einträgen abgeleitet, mit den Fakten, auf denen sie steht. Keine Eigenschaft, keine Bewertung.",
+    "growthKind": {
+      "core_strength": "Kernstärke",
+      "growing": "Wächst",
+      "underused": "Ungenutzt",
+      "self_stated": "Nur selbst angegeben",
+      "adjacent_opportunity": "Angrenzende Möglichkeit"
+    },
+    "growthWhyHours": "{hours} Std. — {percent} deiner zugeordneten Stunden",
+    "growthWhyInvolved": "beteiligt {hours} Std. neben anderen Fähigkeiten",
+    "growthWhyUntimed": "Einträge ohne Dauer",
+    "growthWhyCounts": "{entries, plural, one {# Eintrag} other {# Einträge}}, {contexts, plural, one {# Kontext} other {# Kontexte}}",
+    "growthWhyLastDay": "zuletzt {day}",
+    "growthWhyDormant": "{days} Tage ohne Eintrag",
+    "growthWhySelfStated": "von dir angegeben — 0 Einträge und 0 Stunden belegen es",
+    "growthWhyTrend": {
+      "up": "in den letzten 30 Tagen mehr genutzt als in den 30 davor",
+      "new": "erste Einträge in den letzten 30 Tagen",
+      "down": "in den letzten 30 Tagen weniger genutzt als in den 30 davor",
+      "flat": "in den letzten 30 Tagen genauso viel genutzt wie in den 30 davor"
+    },
+    "numbers": {
+      "stationTitle": "Meine Arbeit in Zahlen",
+      "stationSubtitle": "Was Ihre erfasste Arbeit zusammen ergibt — nur aus Ihren eigenen Einträgen, jede Zahl mit ihrem Zeitraum daneben.",
+      "question": "Welche Fähigkeiten machen den größten Teil meiner Arbeit aus?",
+      "dominant": "{skill} — {hours} Std., {percent} Ihrer zugeordneten Stunden ({scope}).",
+      "dominantUntimed": "{scope}: {entries, plural, one {# Eintrag} other {# Einträge}}, aber noch keine Stunden einer Fähigkeit zugeordnet — nennen Sie die Zeit neben der Tätigkeit oder verknüpfen Sie eine Fähigkeit.",
+      "periodEmpty": "{scope}: keine Einträge. Wählen Sie unten einen anderen Zeitraum.",
+      "unknown": "Die Zahlen konnten gerade nicht gelesen werden — das ist keine Null. Bitte versuchen Sie es später erneut.",
+      "periodHours": "{hours} Std. · {scope}",
+      "scope": {
+        "today": "heute",
+        "week": "die letzten 7 Tage",
+        "month": "die letzten 30 Tage",
+        "year": "die letzten 365 Tage",
+        "all": "gesamte Zeit"
+      },
+      "scopeRange": "{from} – {to}",
+      "scopeNote": "Jede Zahl auf dieser Seite gilt für {scope}. Ein begrenzter Zeitraum wird nie als gesamte Zeit gezeigt.",
+      "openStation": "Alle Zahlen",
+      "backToJournal": "Zurück zum Arbeitsjournal",
+      "linksTruncated": "Das Lesen der Fähigkeitsverknüpfungen endete an der Obergrenze — manche Einträge können ohne Fähigkeit erscheinen, ihre Stunden als nicht zugeordnet.",
+      "skillsTitle": "Fähigkeiten nach Anteil an der Arbeit",
+      "skillFirst": "zuerst am {day}",
+      "skillOutput": "erledigt {value} {unit}",
+      "confirmationShare": "{percent} durch einen Eintrag des Vorgesetzten bestätigt ({confirmed} von {attributed} Std.)",
+      "confirmationNone": "noch keine Bestätigung eines Vorgesetzten",
+      "notMeasured": "Einträge ohne Dauer — Stunden nicht gemessen",
+      "checksOpen": "{count, plural, one {# Prüfung wartet auf Ihre Entscheidung.} other {# Prüfungen warten auf Ihre Entscheidung.}}",
+      "ledgerUnknown": "Die Aufzeichnungen der Organisation konnten gerade nicht gelesen werden — das ist keine Null.",
+      "trendShort": {
+        "up": "steigend",
+        "down": "sinkend",
+        "flat": "etwa gleich",
+        "new": "neu"
+      }
     }
   },
   "verification": {
@@ -780,5 +840,13 @@
       "respond_to_decision": "Lesen Sie die Entscheidung und antworten Sie",
       "none": "Es fehlt nichts"
     }
+  },
+  "record": {
+    "hint": "In einem Satz: was Sie getan haben, wo und wie lange. Ein Foto ist optional und wird vor dem Speichern hinzugefügt.",
+    "placeholder": "z. B. 6 Std. Fliesen verlegt auf der Baustelle in Kaunas",
+    "understand": "Verstehen",
+    "startOver": "Neu schreiben",
+    "detailed": "Im Detail (vollständiges Formular)",
+    "detailedBack": "Zurück zum einfachen Eintrag"
   }
 }

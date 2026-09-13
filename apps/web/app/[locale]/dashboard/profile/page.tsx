@@ -75,6 +75,15 @@ import {
 } from "@/lib/worker/worker-achievements";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import {
+  presentSkills,
+  skillMagnitude,
+  skillPracticeFromIntelligence,
+  type SkillPresentation,
+} from "@/lib/cv-export/skill-presentation";
+import { groupCvSkillTiers } from "@/lib/cv-export/skill-tiers";
+import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
 import { OrganizationEvidenceSection } from "@/components/app/organization-evidence-section";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
@@ -293,6 +302,9 @@ export default async function ProfilePage({
   let initialSkillIds: string[] = [];
   let savedSkills: CvSkill[] = [];
   let skillDots: SkillDot[] = [];
+  // ONE skill presentation for the profile (owner defects C + D): the same
+  // fold/magnitude rules the Living CV uses (lib/cv-export/skill-presentation).
+  let skillPresentation: SkillPresentation | null = null;
   let engagementCards: EngagementCard[] = [];
   // FAILED ≠ EMPTY (SEP-7): true when the saved-skills or work-history read
   // failed. The rows stay empty (nothing is invented), the CV section cards are
@@ -364,6 +376,7 @@ export default async function ProfilePage({
       linkRes,
       ecRes,
       trust,
+      workIntelligence,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -420,6 +433,13 @@ export default async function ProfilePage({
       // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),
       // so it could not overlap anything at all.
       getOwnTrustSignals(workerId),
+      // The journal's per-skill figures (attributed / confirmed hours, share,
+      // entries) through the ONE reader the journal section and the Living
+      // CV use — so the profile's skills carry their magnitude. Best-effort:
+      // an unreadable journal yields null (UNKNOWN), never zeros.
+      loadWorkIntelligence({ supabase, userId: user.id }, workerId).catch(
+        () => null,
+      ),
     ]);
 
     availabilityPrefs = prefsRes;
@@ -524,23 +544,70 @@ export default async function ProfilePage({
       // core first; stable sort preserves the created_at ascending order within.
       .sort((a, b) => Number(b.isCore) - Number(a.isCore));
 
-    // CV engagement-card skill dots (confidence bin + core flag), core first.
+    // The journal's per-skill figures, keyed by slug; null = journal unread.
+    const practice = workIntelligence
+      ? skillPracticeFromIntelligence(workIntelligence)
+      : null;
+    const MAG_RANK = { major: 4, supported: 3, trace: 2, none: 1, unknown: 0 } as const;
+
+    // CV engagement-card skill dots (confidence bin + core flag) — ordered by
+    // MAGNITUDE first (a skill with 25 h before one with 0.5 h), core as the
+    // tiebreak; each dot carries its own figures so the list is never an
+    // unweighted tag cloud again.
     skillDots = rows
       .map((r) => {
         const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
-        return slug
-          ? {
-              slug,
-              name: tSkill(slug),
-              bin: (r.confidence_bin as string) ?? "red",
-              isCore: coreMap.get(r.skill_id as string) ?? false,
-              verified: r.verified === true,
-              source: (r.source as string | null) ?? "self_declared",
-            }
-          : null;
+        if (!slug) return null;
+        const facts = practice ? (practice[slug] ?? null) : null;
+        return {
+          slug,
+          name: tSkill(slug),
+          bin: (r.confidence_bin as string) ?? "red",
+          isCore: coreMap.get(r.skill_id as string) ?? false,
+          verified: r.verified === true,
+          source: (r.source as string | null) ?? "self_declared",
+          practice: facts,
+          magnitude: skillMagnitude(facts, practice !== null),
+        };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
-      .sort((a, b) => Number(b.isCore) - Number(a.isCore));
+      .sort(
+        (a, b) =>
+          MAG_RANK[b.magnitude] - MAG_RANK[a.magnitude] ||
+          (b.practice?.attributedHours ?? 0) - (a.practice?.attributedHours ?? 0) ||
+          Number(b.isCore) - Number(a.isCore),
+      );
+
+    // The free-label claims folded by the same rules as the Living CV: a claim
+    // that is a held catalogue skill is shown as that skill; case/diacritic
+    // variants are one item. Nothing is written.
+    const tiers = groupCvSkillTiers(
+      rows
+        .map((r) => {
+          const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
+          return slug
+            ? {
+                slug,
+                verified: r.verified === true,
+                source: (r.source as string | null) ?? "self_declared",
+                journalSupported: r.skill_id ? durableSupported.has(r.skill_id) : false,
+              }
+            : null;
+        })
+        .filter((x): x is NonNullable<typeof x> => x !== null),
+    );
+    const mappedByLabel = mapClaimLabelsToCatalogSlugs(savedSkillClaims.map((c) => c.label));
+    skillPresentation = presentSkills({
+      tiers,
+      claims: savedSkillClaims.map((c) => ({
+        id: c.id,
+        label: c.label,
+        origin: "profile" as const,
+        mappedSlugs: mappedByLabel.get(c.label.trim()) ?? [],
+      })),
+      practice,
+      nameOf: (slug) => tSkill(slug),
+    });
 
     // Engagement-context cards (current first): primary first, then most-recent.
     engagementCards = (ecRes.data ?? []).map((e) => {
@@ -1234,6 +1301,7 @@ export default async function ProfilePage({
             claims={savedSkillClaims}
             engagements={workerId ? engagementCards : []}
             workerSkillDots={workerId ? skillDots : []}
+            skillPresentation={workerId ? skillPresentation : null}
             professionIconSlug={workerId ? professionIconSlug : null}
           />
         </div>

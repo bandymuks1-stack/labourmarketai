@@ -240,6 +240,7 @@ stay identical to this table).
 | **A-11** | No feature launches without a known economic model. | PR #896 (not yet merged) | review — machine half ships with #896 |
 | **A-12** | An unmeasured metric is reported as unmeasured, never as zero. | PR #897 (not yet merged) | review — machine half ships with #897 |
 | **A-13** | The product is never reducible to a job board / recruitment platform / CV builder / ATS / marketplace / ERP / Work Journal / chatbot / data portal — those are capabilities inside the opportunity-realization flywheel (activity history → understanding of what one can offer → matching against real demand → new activity), and the flywheel is a product invariant. | docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md (owner directive 2026-08-14) | review |
+| **A-14** | Distinct user job → first-class surface, owner-gated. Existing structures are reused when a capability naturally belongs to them; duplicate or convenience-only top-level pages stay prohibited; a new first-class surface is allowed only for a genuinely distinct user job / graph edge where reuse would materially damage UX, information architecture or extensibility — demonstrated by evidence and recorded as an owner ruling in the surface declaration (`distinctSurface`). The constitution protects the vision; it does not freeze old implementations. | docs/DECISIONS/0015-distinct-user-job-surfaces.md (owner decision 2026-09-13) | machine |
 
 **Conflict rule (unchanged, restated):** where any other product, UX or
 architecture document conflicts with this constitution, **these win** — the
@@ -270,6 +271,23 @@ In `apps/web/lib/product-gate/surface-registry.ts`, five answers:
 A surface nobody can justify in five short sentences is a surface that should
 not exist. A blank answer is not a declaration.
 
+**A-14 block (optional, owner-gated).** A surface that is a *distinct user job*
+(decision 0015) adds `distinctSurface` with five more answers:
+
+| Field | Question it answers |
+|---|---|
+| `userJob` | which user job / decision space this serves, in one sentence |
+| `graphEdge` | which edge of the §14 graph it is, and why it is not the edge an existing surface already serves |
+| `whyReuseDamages` | what reusing the existing structure would materially damage (UX, IA, extensibility) |
+| `evidence` | the repository / audit / production evidence, one item each |
+| `ownerRuling` | the owner ruling that authorised it (decision id + date) |
+
+With all five present, the World-State readiness answers `changesWorldState`,
+`reflectedOnMap`, `usableWithoutLeavingWorkspace`, `needsNoNewPage` and the
+behavior answer `worldStateCanControlIt` may honestly be "no" and are reported
+as **notices** in the architecture diff, never silently. `aiControlled`,
+`usesEntity`, `registrationIsEnough` and `aiCanWorkWithIt` stay blocking.
+
 ### 13.3 Automatic RED rules
 
 CI fails — status **`PRODUCT_REVIEW_REQUIRED`**, merge blocked — when a diff:
@@ -286,6 +304,7 @@ CI fails — status **`PRODUCT_REVIEW_REQUIRED`**, merge blocked — when a diff
 | `chat_importance_reduced` | chat leaves the core nav, or the conversation root loses its chat | A-01 | certain |
 | `undeclared_surface` | any new surface has no declaration | A-09 | certain |
 | `unknown_axiom` | a declaration cites an axiom that does not exist | A-09 | certain |
+| `distinct_surface_unruled` | an A-14 `distinctSurface` block lacks its owner ruling or its evidence | A-14 | certain |
 
 `heuristic` findings still block. The reviewer either declares the surface or
 removes it — the gate never decides taste, it only refuses silence.

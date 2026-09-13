@@ -91,6 +91,8 @@ const BOARD_LIMIT = 20;
  *  engine below, and the rendered shortlist stays capped at BOARD_LIMIT. */
 const PROFILE_POOL_LIMIT = 30;
 
+type SearchOutcome = Awaited<ReturnType<typeof searchPublicVacancies>>;
+
 export async function loadExternalVacancyCards(
   client: VacancyDbClient,
   subject: MatchSubject,
@@ -100,6 +102,44 @@ export async function loadExternalVacancyCards(
   >,
 ): Promise<ExternalVacanciesResultV1> {
   const explicitProfession = options.professionSlug ?? null;
+  const nowIso = options.nowIso ?? new Date().toISOString();
+
+  // Profile-directed pool, read FIRST (#1689, defect H): when the person has
+  // a declared profession and the board is not already narrowed (no explicit
+  // profession filter, no free-text query), fetch ads IN that profession
+  // before the generic newest page. This is what lets a profile enrichment
+  // change which ads the shortlist is drawn from, instead of the shortlist
+  // forever being "the 20 newest ads of any kind". On production a
+  // Lithuanian worker's answer to "Ieškau naujo darbo" was "Senior AI
+  // Engineer" and "Rörmokare" — the newest ads overall — because the newest
+  // page was read first and the profession pool merged in behind it. With
+  // the pool first, ads of the person's profession stand ahead of
+  // newest-of-any-kind whenever the engine's verdicts tie; the ranking
+  // itself stays the ONE engine, and the limits are unchanged.
+  const profileProfession = subject.professionSlug ?? null;
+  const poolApplies =
+    !explicitProfession &&
+    !(options.query && options.query.trim().length > 0) &&
+    profileProfession !== null;
+  const pool: SearchOutcome | null = poolApplies
+    ? await searchPublicVacancies(client, {
+        country: options.country ?? null,
+        professionSlug: profileProfession,
+        query: null,
+        limit: PROFILE_POOL_LIMIT,
+        nowIso: options.nowIso,
+      }).catch((e: unknown) => {
+        // The pool is an enrichment; a failed read leaves the board to the
+        // generic page, never breaks it.
+        if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
+          return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
+        }
+        throw e;
+      })
+    : null;
+
+  // The generic page: the newest ads under the caller's own filters.
+  //
   // A FAILED external read is an UNAVAILABLE source, never a broken board.
   // On production (2026-09-06) the search timed out (57014) and the throw
   // reached the server action: the whole worker board — and every sentence
@@ -120,13 +160,17 @@ export async function loadExternalVacancyCards(
     throw e;
   });
 
-  if (result.status === "not_provisioned") {
+  // The store is unavailable only when NEITHER read answered. Both reads go
+  // to the same table, so a read that answered proves the store exists; the
+  // other failing is a degraded read, and the board stands on what it has.
+  const poolOk = pool !== null && pool.status === "ok";
+  if (result.status === "not_provisioned" && !poolOk) {
     return {
       available: false,
       cards: [],
       freshness: classifySourceFreshness({
         lastRefreshedAt: null,
-        nowIso: options.nowIso ?? new Date().toISOString(),
+        nowIso,
         unavailable: true,
       }),
     };
@@ -136,48 +180,24 @@ export async function loadExternalVacancyCards(
   // predicate as the cards above — it describes THESE rows, not a wider view.
   const refreshed = await readSupplyLastRefreshedAt(client, {
     country: options.country ?? null,
-    nowIso: options.nowIso ?? new Date().toISOString(),
+    nowIso,
   });
   const freshness = classifySourceFreshness({
     lastRefreshedAt: refreshed.lastRefreshedAt,
-    nowIso: options.nowIso ?? new Date().toISOString(),
+    nowIso,
     unavailable: refreshed.status === "not_provisioned",
   });
 
-  // Profile-directed pool: when the person has a declared profession and the
-  // board is not already narrowed (no explicit profession filter, no free-text
-  // query), also fetch ads IN that profession. This is what lets a profile
-  // enrichment change which ads the shortlist is drawn from, instead of the
-  // shortlist forever being "the 20 newest ads of any kind".
-  const profileProfession = subject.professionSlug ?? null;
-  let profilePool = [] as (typeof result.vacancies)[number][];
-  if (
-    !explicitProfession &&
-    !(options.query && options.query.trim().length > 0) &&
-    profileProfession
-  ) {
-    const extra = await searchPublicVacancies(client, {
-      country: options.country ?? null,
-      professionSlug: profileProfession,
-      query: null,
-      limit: PROFILE_POOL_LIMIT,
-      nowIso: options.nowIso,
-    }).catch((e: unknown) => {
-      // The deeper pool is an enrichment; a failed read leaves the board as
-      // the first page answered it, never breaks it.
-      if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
-        return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
-      }
-      throw e;
-    });
-    if (extra.status === "ok") profilePool = [...extra.vacancies];
-  }
+  const profilePool = poolOk ? pool.vacancies : [];
+  const newest = result.status === "ok" ? result.vacancies : [];
 
   // Merge + dedupe by publisher identity — the newest page and the
-  // profile-directed pool can overlap.
-  const byKey = new Map<string, (typeof result.vacancies)[number]>();
-  for (const v of [...result.vacancies, ...profilePool]) {
-    byKey.set(`${v.providerKey}:${v.externalId}`, v);
+  // profile-directed pool can overlap. Profile pool FIRST: insertion order
+  // is what the stable sort below keeps between equal verdicts.
+  const byKey = new Map<string, (typeof newest)[number]>();
+  for (const v of [...profilePool, ...newest]) {
+    const key = `${v.providerKey}:${v.externalId}`;
+    if (!byKey.has(key)) byKey.set(key, v);
   }
 
   const cards = [...byKey.values()]
@@ -186,7 +206,9 @@ export async function loadExternalVacancyCards(
       // text recognizer at import time — the categorizer's tier, declared
       // rather than upgraded. An ad the recognizer could not read carries no
       // slugs, a `no_requirement_set` gap, and the engine reports
-      // insufficient data instead of a fake score.
+      // insufficient data instead of a fake score. Downstream that verdict
+      // is the NOT ASSESSED band (`fit-band.ts`): such an ad is shown as a
+      // found posting, explained, and never called suitable.
       const skillSource =
         vacancy.skillSlugs.length > 0 ? "recognized_from_text" : null;
       const { need, missingForMatching } = buildNeedFromVacancy(

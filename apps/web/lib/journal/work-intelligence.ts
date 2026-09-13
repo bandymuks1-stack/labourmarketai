@@ -96,6 +96,26 @@
  *       a manager confirmed and which are the person's own record — never
  *       only in a hover title.
  *
+ * ── ONE TIME SCOPE (issue #1689, lane B) ──────────────────────────────────
+ *   RANGE FOCUS   a consumer that asks about a window the section has no
+ *                 tab for ("yesterday", "the last 14 days") passes
+ *                 `focusRange` — an explicit inclusive UTC-day window. The
+ *                 model then adds ONE more `periods` row keyed `range` (and
+ *                 one more organization-ledger row) and scopes every focus
+ *                 section to it, so the chat's "recent" answer is the same
+ *                 arithmetic as the section's tabs — never a second sum
+ *                 over another surface's duration labels.
+ *   COVERAGE      `coverage` says how many counted entries the figures rest
+ *                 on and whether a bounded read stopped short (`truncated`
+ *                 — SEP-7: a figure over a capped read is "from the last N
+ *                 entries", never a total). The reader fills it from the
+ *                 journal-list read; a pure caller defaults to "all given
+ *                 entries, nothing cut".
+ *   THE DAY       every consumer that groups by day uses
+ *                 `resolveWorkDayDetail` (latest stated `work_date` wins) —
+ *                 the diary's day card and the period tile are the SAME
+ *                 day, by construction.
+ *
  * ── WHAT THIS IS NOT ──────────────────────────────────────────────────────
  * Nothing here is a score, a rating, a rank or a tier OF THE PERSON. A share
  * is a fraction of that person's own attributed hours; a tier is the evidence
@@ -178,6 +198,28 @@ export type WorkIntelligenceOrganizationRecord = {
 export type WorkPeriodKey = "today" | "week" | "month" | "year" | "all";
 export const WORK_PERIOD_KEYS = ["today", "week", "month", "year", "all"] as const;
 
+/** A period row's key: one of the section's tabs, or the explicit window a
+ *  consumer asked for (`focusRange`). */
+export type WorkPeriodScope = WorkPeriodKey | "range";
+
+/** An explicit inclusive UTC calendar-day window (`YYYY-MM-DD`, start ≤ end). */
+export type WorkRange = {
+  readonly startIso: string;
+  readonly endIso: string;
+};
+
+/** What the reads behind a model actually covered (SEP-7). */
+export type WorkIntelligenceCoverage = {
+  /** Counted entries the figures rest on. */
+  readonly entriesRead: number;
+  /** The entry read stopped at a ceiling — older entries MAY exist and are
+   *  not in any figure. */
+  readonly truncated: boolean;
+  /** The skill-link read stopped at a ceiling — some entries may read as
+   *  linked to no skill and their hours as unattributed. */
+  readonly linksTruncated: boolean;
+};
+
 export type WorkIntelligenceInput = {
   readonly entries: readonly WorkIntelligenceEntry[];
   readonly skills: readonly WorkIntelligenceSkillRow[];
@@ -187,6 +229,14 @@ export type WorkIntelligenceInput = {
    *  sections describe. `periods` and `months` are always computed over
    *  everything. Defaults to `all`. */
   readonly focus?: WorkPeriodKey;
+  /** An explicit window instead of a tab: when given (and well-formed), it
+   *  scopes every focus section and adds a `range` row to `periods` and to
+   *  the organization ledger. A malformed range is ignored, never guessed
+   *  at — the output's `focusRange` is then null and `scope` is `focus`. */
+  readonly focusRange?: WorkRange | null;
+  /** What the reads behind these entries covered. Omitted = every given
+   *  entry, nothing cut (the pure caller's truth). */
+  readonly coverage?: Partial<WorkIntelligenceCoverage>;
   /** The organization's own hour records about this person (owner §19).
    *  `undefined` / `null` = not read (UNKNOWN); `[]` = read, none. */
   readonly organizationRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
@@ -203,7 +253,7 @@ const PERIOD_DAYS: Record<Exclude<WorkPeriodKey, "all">, number> = {
 
 /** Totals for one period. Every entry counted once. */
 export type WorkPeriodTotals = {
-  readonly key: WorkPeriodKey;
+  readonly key: WorkPeriodScope;
   /** First day (inclusive) — null for `all`. */
   readonly startIso: string | null;
   readonly endIso: string;
@@ -249,8 +299,14 @@ export type SkillWorkTime = {
   readonly entries: number;
   /** Distinct calendar days with a linked entry (frequency). */
   readonly days: number;
-  /** Distinct engagement contexts the linked entries belong to (diversity). */
+  /** Distinct engagement contexts the linked entries belong to (diversity)
+   *  — `contextIds.length`; a personal entry (no context) counts none. */
   readonly contexts: number;
+  /** The distinct engagement context ids those entries belong to, sorted;
+   *  the null (personal) context is excluded — it names nothing. */
+  readonly contextIds: readonly string[];
+  /** The earliest day a linked entry was worked, or null. */
+  readonly firstWorkedDay: string | null;
   /** The most recent day a linked entry was worked, or null. */
   readonly lastWorkedDay: string | null;
   /** Share of the person's own ATTRIBUTED hours, 0..1 (0 when none). */
@@ -343,7 +399,7 @@ export type EvidenceStrength = {
 /** The organization's hour records over one period — a ledger of its own,
  *  never summed into `WorkPeriodTotals` and never reaching a skill. */
 export type OrganizationRecordTotals = {
-  readonly key: WorkPeriodKey;
+  readonly key: WorkPeriodScope;
   readonly startIso: string | null;
   readonly endIso: string;
   /** Hours on live rows the organization has not rejected. */
@@ -367,6 +423,15 @@ export type OrganizationRecordTotals = {
 export type WorkIntelligence = {
   /** The period every section below `periods` / `months` describes. */
   readonly focus: WorkPeriodKey;
+  /** The explicit window the focus sections describe INSTEAD of `focus`,
+   *  when the caller passed one (echoed back, normalized); else null. */
+  readonly focusRange: WorkRange | null;
+  /** Which `periods` row the focus sections match: `focus`, or `range`
+   *  when `focusRange` is set. */
+  readonly scope: WorkPeriodScope;
+  /** What the reads covered — a consumer names the base when `truncated`. */
+  readonly coverage: WorkIntelligenceCoverage;
+  /** The section's five tabs, plus one `range` row when `focusRange` is set. */
   readonly periods: readonly WorkPeriodTotals[];
   /** The organization's own hour records per period (owner §19) — read
    *  beside the journal, shown beside it, added to nothing. `null` when the
@@ -420,16 +485,54 @@ function isoDayMinus(todayIso: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Pure period bounds: inclusive UTC calendar days ending on `todayIso`. */
+/** A well-formed range (two plain ISO days, start ≤ end) or null — a
+ *  malformed one is refused, never repaired into a window nobody asked for. */
+export function normalizeWorkRange(range: WorkRange | null | undefined): WorkRange | null {
+  if (!range) return null;
+  const startIso = String(range.startIso ?? "").trim();
+  const endIso = String(range.endIso ?? "").trim();
+  if (!DAY_RX.test(startIso) || !DAY_RX.test(endIso) || startIso > endIso) return null;
+  return { startIso, endIso };
+}
+
+/** Pure period bounds: inclusive UTC calendar days ending on `todayIso`.
+ *  The `range` scope is the caller's own window (`focusRange`); asked for
+ *  without one it is all time — the widest honest answer, said so by the
+ *  model's `focusRange: null`. */
 export function workPeriodBounds(
-  key: WorkPeriodKey,
+  key: WorkPeriodScope,
   todayIso: string,
+  focusRange?: WorkRange | null,
 ): { startIso: string | null; endIso: string } {
+  if (key === "range") {
+    const range = normalizeWorkRange(focusRange);
+    return range ? { startIso: range.startIso, endIso: range.endIso } : { startIso: null, endIso: todayIso };
+  }
   if (key === "all") return { startIso: null, endIso: todayIso };
   return {
     startIso: isoDayMinus(todayIso, PERIOD_DAYS[key] - 1),
     endIso: todayIso,
   };
+}
+
+/**
+ * The organization's live hour records summed per calendar day inside
+ * `bounds` — the ONE map the day check reads (`deriveWorkTimeChecks`,
+ * `organizationHoursByDay`), so the section's checks and the intake
+ * composer's saved-record check add the same ledger to the same days.
+ * Rejected rows count nowhere; `null` records (UNKNOWN) yield an empty map.
+ */
+export function organizationHoursPerDay(
+  records: readonly WorkIntelligenceOrganizationRecord[] | null | undefined,
+  bounds: { startIso: string | null; endIso: string } = { startIso: null, endIso: "9999-12-31" },
+): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const r of records ?? []) {
+    if (!Number.isFinite(r.hours) || r.hours <= 0 || r.status === "rejected") continue;
+    if (!inPeriod(r.workDate, bounds)) continue;
+    out.set(r.workDate, (out.get(r.workDate) ?? 0) + r.hours);
+  }
+  return out;
 }
 
 /** How one entry's hours divide between its linked skills and the rest. */
@@ -646,8 +749,13 @@ export function deriveWorkIntelligence(
   });
 
   // ── periods ───────────────────────────────────────────────────────────
-  const periods: WorkPeriodTotals[] = WORK_PERIOD_KEYS.map((key) => {
-    const bounds = workPeriodBounds(key, input.todayIso);
+  // The five tabs, plus the caller's explicit window when it passed one.
+  const focusRange = normalizeWorkRange(input.focusRange);
+  const periodKeys: readonly WorkPeriodScope[] = focusRange
+    ? [...WORK_PERIOD_KEYS, "range"]
+    : WORK_PERIOD_KEYS;
+  const periods: WorkPeriodTotals[] = periodKeys.map((key) => {
+    const bounds = workPeriodBounds(key, input.todayIso, focusRange);
     let hours = 0;
     let dayUnits = 0;
     let confirmedHours = 0;
@@ -688,9 +796,11 @@ export function deriveWorkIntelligence(
   });
 
   // Everything from here on describes the FOCUS period only — the same
-  // inclusive bounds the matching `periods` row states.
+  // inclusive bounds the matching `periods` row states: the explicit
+  // window when one was passed, else the tab.
   const focus: WorkPeriodKey = input.focus ?? "all";
-  const focusBounds = workPeriodBounds(focus, input.todayIso);
+  const scope: WorkPeriodScope = focusRange ? "range" : focus;
+  const focusBounds = workPeriodBounds(scope, input.todayIso, focusRange);
   const scoped = derived.filter((d) => inPeriod(d.time.day, focusBounds));
 
   // ── skills ────────────────────────────────────────────────────────────
@@ -701,6 +811,7 @@ export function deriveWorkIntelligence(
     entries: Set<string>;
     days: Set<string>;
     contexts: Set<string>;
+    first: string | null;
     last: string | null;
     recent: number;
     prior: number;
@@ -720,6 +831,7 @@ export function deriveWorkIntelligence(
         entries: new Set(),
         days: new Set(),
         contexts: new Set(),
+        first: null,
         last: null,
         recent: 0,
         prior: 0,
@@ -742,9 +854,11 @@ export function deriveWorkIntelligence(
     for (const id of ids) {
       const a = accFor(id);
       a.entries.add(d.entry.entryId);
-      a.contexts.add(d.entry.engagementContextId ?? "");
+      // a personal entry names no context — it is not a context of its own
+      if (d.entry.engagementContextId) a.contexts.add(d.entry.engagementContextId);
       if (DAY_RX.test(d.time.day)) {
         a.days.add(d.time.day);
+        if (a.first === null || d.time.day < a.first) a.first = d.time.day;
         if (a.last === null || d.time.day > a.last) a.last = d.time.day;
         // use = the linked entry's own hours; a direction, never a total
         if (d.time.day >= recentStart) a.recent += d.time.totalHours;
@@ -798,6 +912,8 @@ export function deriveWorkIntelligence(
       entries: a?.entries.size ?? 0,
       days: a?.days.size ?? 0,
       contexts: a?.contexts.size ?? 0,
+      contextIds: [...(a?.contexts ?? [])].sort(),
+      firstWorkedDay: a?.first ?? null,
       lastWorkedDay: a?.last ?? null,
       share: attributedHours > 0 ? round2(attributed / attributedHours) : 0,
       trend: trendOf(a?.recent ?? 0, a?.prior ?? 0),
@@ -981,8 +1097,8 @@ export function deriveWorkIntelligence(
   const organizationRecords: readonly OrganizationRecordTotals[] | null =
     orgRows === null
       ? null
-      : WORK_PERIOD_KEYS.map((key) => {
-          const bounds = workPeriodBounds(key, input.todayIso);
+      : periodKeys.map((key) => {
+          const bounds = workPeriodBounds(key, input.todayIso, focusRange);
           let hours = 0;
           let rows = 0;
           let importedHours = 0;
@@ -1021,24 +1137,28 @@ export function deriveWorkIntelligence(
           };
         });
 
-  // The same records per day, for the DAY check only: an imported
-  // timesheet on top of a live journal record is then arithmetic.
-  const organizationHoursByDay = new Map<string, number>();
-  for (const r of orgRows ?? []) {
-    if (!Number.isFinite(r.hours) || r.hours <= 0 || r.status === "rejected") continue;
-    if (!inPeriod(r.workDate, focusBounds)) continue;
-    organizationHoursByDay.set(r.workDate, (organizationHoursByDay.get(r.workDate) ?? 0) + r.hours);
-  }
-
   // ── plausibility checks (warn, never corrupt) ─────────────────────────
+  // The same records per day, for the DAY check only: an imported
+  // timesheet on top of a live journal record is then arithmetic. ONE
+  // helper builds the map here and in the intake's saved-record check.
+  const organizationHoursByDay = organizationHoursPerDay(orgRows, focusBounds);
   const checks = deriveWorkTimeChecks(
     scoped.map((d) => ({ time: d.time, metrics: d.entry.metrics })),
     { organizationHoursByDay },
   );
 
+  const coverage: WorkIntelligenceCoverage = {
+    entriesRead: input.coverage?.entriesRead ?? input.entries.length,
+    truncated: input.coverage?.truncated ?? false,
+    linksTruncated: input.coverage?.linksTruncated ?? false,
+  };
+
   const all = periods.find((p) => p.key === "all")!;
   return {
     focus,
+    focusRange,
+    scope,
+    coverage,
     periods,
     organizationRecords,
     skills,

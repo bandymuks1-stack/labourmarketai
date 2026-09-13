@@ -5,6 +5,7 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 
 import { getWorkerPlayerCard, type WorkerPlayerCard } from "./player-card";
+import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
 import { buildPlayerCardLabels } from "./labels";
 import {
   getOwnThermometer,
@@ -121,8 +122,27 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
   const derived = deriveWorkCardState(data.signals, Date.now());
 
   const tw = await getTranslations("auth.dashboard.workCard");
+  // What the saved figures READ AS — derived from the same values the editor
+  // prefills; the sentence names the figure, the person decides.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const checks = deriveWorkCardChecks(
+    {
+      salaryMin: data.values.salaryMin,
+      salaryMax: data.values.salaryMax,
+      availabilityStatus: data.values.availabilityStatus,
+      availableFrom: data.values.availableFrom,
+    },
+    todayIso,
+  ).map((c) => ({
+    fingerprint: c.fingerprint,
+    text: tw(`checks.${c.code}`, {
+      min: c.salaryMin ?? "",
+      max: c.salaryMax ?? "",
+      date: c.availableFrom ?? "",
+    }),
+  }));
   return {
-    vm: { state: derived.state, next: derived.next, values: data.values },
+    vm: { state: derived.state, next: derived.next, values: data.values, checks },
     labels: {
       nextEyebrow: tw("nextEyebrow"),
       nextLabel: tw(`next.${derived.next.dim}`),
@@ -146,6 +166,9 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
       preferredHint: tw("editor.preferredHint"),
       salaryMinLabel: tw("editor.salaryMinLabel"),
       salaryMaxLabel: tw("editor.salaryMaxLabel"),
+      checksEyebrow: tw("checks.eyebrow"),
+      checkKeep: tw("checks.keep"),
+      checkCorrect: tw("checks.correct"),
       save: tw("editor.save"),
       saving: tw("editor.saving"),
       saved: tw("editor.saved"),

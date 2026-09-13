@@ -1822,6 +1822,14 @@
     "disclaimer": "Šiuos įgūdžius nurodėte patys. Sustiprinkite juos darbo žurnalo įrašais.",
     "experienceTitle": "Darbo istorija",
     "removeLabel": "Pašalinti įgūdį",
+    "skillPractice": "{hours} val. · {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "skillEntries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "skillShare": "{share} % užfiksuoto darbo",
+    "skillNoRecords": "įrašų dar nėra",
+    "skillUnknown": "žurnalo nepavyko perskaityti",
+    "variantsFolded": "{count} rašybos",
+    "foldedIntoSkills": "{count, plural, one {# jūsų nurodytas įgūdis} few {# jūsų nurodyti įgūdžiai} other {# jūsų nurodytų įgūdžių}} jau rodomi aukščiau su darbo įrašais.",
+    "selfStatedTitle": "Nurodyta paties, įrašų dar nėra",
     "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą.",
     "manualAddLabel": "Pridėti įgūdį rankiniu būdu",
     "manualAddPlaceholder": "Pvz., Anglų kalba",
@@ -4015,12 +4023,6 @@
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Man tinkantys darbai",
-        "viewAll": "Visi skelbimai",
-        "empty": "Šiuo metu atitinkančių skelbimų nėra — papildykite įgūdžius profilyje.",
-        "emptyCta": "Papildyti profilį"
-      },
       "firstUse": {
         "eyebrow": "Pradžia",
         "title": "Pradėkite nuo savęs",
@@ -4374,13 +4376,23 @@
           "locationHint": "LT",
           "preferredLabel": "Šalys, kuriose norėčiau dirbti",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Tarifas nuo (€)",
-          "salaryMaxLabel": "Tarifas iki (€)",
+          "salaryMinLabel": "Atlyginimo lūkestis nuo (€/mėn.)",
+          "salaryMaxLabel": "Atlyginimo lūkestis iki (€/mėn.)",
           "save": "Išsaugoti",
           "saving": "Saugoma...",
           "saved": "Išsaugota",
           "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
           "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
+        },
+        "checks": {
+          "eyebrow": "Patikrink, ar taip ir turėjai omeny",
+          "keep": "Palikti kaip yra",
+          "correct": "Pataisyti",
+          "salary_below_monthly_floor": "Nurodyta {min}–{max} € saugoma ir rodoma kaip mėnesio lūkestis. Mėnesiui tai mažiau nei minimali alga — jei turėjai omeny valandinį ar dienos tarifą, įrašyk mėnesio sumą. Jei tai mėnesio suma, palik kaip yra.",
+          "salary_reads_annual": "Nurodyta {min} € per mėnesį atrodo kaip metinė suma. Jei taip — įrašyk mėnesio sumą; jei ne, palik kaip yra.",
+          "available_from_past": "Data „galiu pradėti nuo“ ({date}) jau praėjo — skaitoma kaip „dabar“. Jei tai nebetiesa, nurodyk naują datą.",
+          "available_from_far": "Pradžios data ({date}) yra daugiau nei po metų. Jei metai suklysti, pataisyk; jei ne — palik.",
+          "unavailable_with_start_date": "Būsena „šiuo metu negaliu“, bet nurodyta pradžios data {date}. Jei nuo tos datos galėsi — viskas gerai; jei ne, pataisyk."
         }
       },
       "tabs": {
@@ -7787,9 +7799,23 @@
     "generatedAt": "Sugeneruota",
     "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas",
+    "facts": {
+      "recorded": "Darbo žurnale užfiksuota {hours} val. per {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}.",
+      "recordedSpan": "Darbo žurnale užfiksuota {hours} val. per {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}} ({span}).",
+      "confirmed": "Iš jų vadovo patvirtinta {hours} val.",
+      "contexts": "Dirbta {count, plural, one {# vietoje} few {# vietose} other {# vietų}}.",
+      "topSkills": "Daugiausia užfiksuoto darbo tenka: {list}.",
+      "outputs": "Užfiksuoti rezultatai: {list}.",
+      "source": "Skaičiai iš paties darbuotojo darbo žurnalo įrašų; aprašymas aukščiau — jo paties žodžiai."
+    },
     "practiceHistoryTitle": "Praktika ir savanorystė",
     "workHistoryTitle": "Darbo istorija",
     "present": "Dabar",
+    "history": {
+      "project": "Projektas: {name}",
+      "recorded": "Darbo žurnale: {hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "recordedConfirmed": "Darbo žurnale: {hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val."
+    },
     "languagesTitle": "Kalbos",
     "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",
     "certificatesTitle": "Sertifikatai ir pažymėjimai",
@@ -7835,6 +7861,16 @@
         "unavailable": "Negali dirbti"
       }
     },
+    "checks": {
+      "eyebrow": "Patikrink prieš spausdinant",
+      "keep": "Palikti kaip yra",
+      "correct": "Pataisyti darbo kortelėje",
+      "salary_below_monthly_floor": "Atlyginimo lūkestis {min}–{max} € spausdinamas kaip mėnesio suma (EUR/mėn.). Mėnesiui tai mažiau nei minimali alga — jei turėjai omeny valandinį ar dienos tarifą, pataisyk į mėnesio sumą. Ši pastaba nespausdinama.",
+      "salary_reads_annual": "Atlyginimo lūkestis {min} € per mėnesį atrodo kaip metinė suma. Jei taip — pataisyk į mėnesio sumą. Ši pastaba nespausdinama.",
+      "available_from_past": "Data „gali pradėti nuo“ ({date}) jau praėjo — skaitytojas ją supras kaip „dabar“. Jei tai nebetiesa, atnaujink.",
+      "available_from_far": "Pradžios data ({date}) yra daugiau nei po metų. Jei metai suklysti, pataisyk.",
+      "unavailable_with_start_date": "Būsena „negali dirbti“, bet nurodyta pradžios data {date}. Jei nuo tos datos galėsi — viskas gerai; jei ne, pataisyk."
+    },
     "tailored": {
       "badge": "Pritaikytas CV",
       "forNeed": "Pritaikyta pagal poreikį: {role}",
@@ -7850,6 +7886,13 @@
     "skillHoursOwn": "{hours} val., jūsų pačių įrašas",
     "skillHoursConfirmed": "{hours} val., iš jų vadovo patvirtinta {confirmed} val.",
     "skillHoursHint": "valandos iš darbo žurnalo įrašų, susietų tik su šiuo įgūdžiu",
+    "selfStatedTitle": "Nurodyta paties, įrašų dar nėra",
+    "variantsFolded": "{count} rašybos",
+    "skillShare": "{share} % užfiksuoto darbo",
+    "skillEntries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "skillNoRecords": "įrašų dar nėra",
+    "recordedHoursScope": "Visas laikas.",
+    "recordedHoursScopeTruncated": "Iš paskutinių {count} įrašų; senesni įrašai į šiuos skaičius neįtraukti.",
     "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui."
   },
   "todayScreen": {
@@ -7893,6 +7936,83 @@
         "overview": "Savaitė ir augimas",
         "playerCard": "Žaidėjo kortelė"
       }
+    },
+    "home": {
+      "eyebrow": "Šiandien",
+      "headerNoName": "Jūsų diena",
+      "professionUnknown": "Profesija dar nenurodyta",
+      "reading": "Skaitoma…",
+      "state": {
+        "recorded": "{entries, plural, one {Šiandien užrašytas # įrašas} few {Šiandien užrašyti # įrašai} other {Šiandien užrašyta # įrašų}} · {hours} val.",
+        "nothing": "Šiandien dar nieko neužrašyta.",
+        "unknown": "Šiandienos įrašų perskaityti nepavyko."
+      },
+      "next": {
+        "title": "Kitas žingsnis",
+        "unknown": "Kito žingsnio dabar pasiūlyti negalime — darbo kortelės perskaityti nepavyko."
+      },
+      "work": {
+        "title": "Užrašytas darbas",
+        "today": "Šiandien: {hours} val. · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+        "none": "Šiandien įrašų dar nėra.",
+        "untimed": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} be trukmės — valandos dar neįskaičiuotos.",
+        "week": "Paskutinės 7 dienos: {hours} val. · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+        "truncated": "Skaičiuota iš paskutinių perskaitytų įrašų — ne visų.",
+        "unknown": "Nėra duomenų — žurnalo perskaityti nepavyko."
+      },
+      "open": {
+        "title": "Reikia jūsų dėmesio",
+        "untimed": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} be trukmės — pridėkite valandas",
+        "unlabelled": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} su valandomis be įvardytos darbo rūšies",
+        "unknown": "Atvirų punktų perskaityti nepavyko."
+      },
+      "growth": {
+        "title": "Augimas",
+        "core_strength": "{skill} — didžiausia jūsų priskirtų valandų dalis: {hours} val. ({percent}).",
+        "growing": "{skill} auga: per paskutines 30 dienų naudota daugiau nei prieš tai ({hours} val.).",
+        "underused": "{skill} nenaudota {days} d. — įrašų šiam įgūdžiui seniai nebuvo.",
+        "self_stated": "{skill} — nurodėte patys; įrašų, kurie tai remtų, dar nėra.",
+        "adjacent_opportunity": "Gretima kryptis: {profession} — jūsų įrašai remia {shared} iš {total} jos įgūdžių.",
+        "derived": "Tai skaitymas iš jūsų pačių įrašų, ne išvada apie jus.",
+        "insufficient": "Augimo skaitymui reikia bent dviejų įrašais paremtų įgūdžių.",
+        "none": "Jūsų įrašai kol kas nerodo aiškios krypties.",
+        "unknown": "Nėra duomenų — augimo skaitymo sudaryti nepavyko."
+      },
+      "opportunity": {
+        "title": "Pasaulis",
+        "band": {
+          "strong": "{n, plural, one {# stipriai tinkantis} few {# stipriai tinkantys} other {# stipriai tinkančių}}",
+          "possible": "{n, plural, one {# galimai tinkantis} few {# galimai tinkantys} other {# galimai tinkančių}}",
+          "missing_requirement": "{n, plural, one {# su trūkstamu reikalavimu} few {# su trūkstamu reikalavimu} other {# su trūkstamu reikalavimu}}",
+          "conflict": "{n, plural, one {# nesuderinamas} few {# nesuderinami} other {# nesuderinamų}}",
+          "not_assessed": "{n, plural, one {# rastas, dar neįvertintas} few {# rasti, dar neįvertinti} other {# rastų, dar neįvertintų}}"
+        },
+        "more": "{n, plural, one {dar # skelbimas} few {dar # skelbimai} other {dar # skelbimų}}",
+        "none": "Šiuo metu skelbimų jums nėra.",
+        "noWorker": "Skelbimai rodomi, kai turite darbuotojo profilį.",
+        "unavailable": "Skelbimų šaltinis šiuo metu nepasiekiamas.",
+        "unknown": "Nėra duomenų — skelbimų perskaityti nepavyko.",
+        "open": "Atidaryti Pasaulį"
+      },
+      "ask": {
+        "title": "Paklausk",
+        "body": "Užrašykite darbą vienu sakiniu, paklauskite apie savo įgūdžius ar atidarykite bet kurią vietą.",
+        "cta": "Rašyti"
+      },
+      "stations": {
+        "title": "Kitos vietos",
+        "journal": "Mano darbas",
+        "numbers": "Mano veikla skaičiais",
+        "profile": "Profesinis profilis",
+        "cv": "Gyvas CV",
+        "gallery": "Galerija"
+      }
+    },
+    "nav": {
+      "today": "Šiandien",
+      "world": "Pasaulis",
+      "ask": "Paklausk",
+      "aria": "Pagrindinė navigacija"
     }
   },
   "agencyPool": {
@@ -9088,7 +9208,72 @@
       },
       "confirmNotice": "Kandidatavimas tęsiamas kitame portale — originaliame skelbime.",
       "confirmContinue": "Tęsti",
-      "confirmDismiss": "Atšaukti"
+      "confirmDismiss": "Atšaukti",
+      "bandNotAssessed": "Dar neįvertinti",
+      "bandMissingRequirement": "Trūksta reikalavimo",
+      "bandConflict": "Nesuderinami"
+    },
+    "fitWhy": {
+      "skills_missing": "trūksta skelbime reikalaujamų įgūdžių",
+      "language_missing": "reikalaujama kalba, kurios nenurodėte",
+      "location_outside_radius": "vieta už jūsų nurodyto atstumo",
+      "pay_above_offer": "jūsų atlygio lūkestis viršija pasiūlymą",
+      "accommodation_needed_not_provided": "reikia apgyvendinimo, o jis nesiūlomas",
+      "profession_mismatch": "kita profesija nei jūsų",
+      "need_not_structured": "skelbime nenurodyti įgūdžių reikalavimai — palyginti negalima",
+      "need_recognized_not_confirmed": "reikalavimai atpažinti iš skelbimo teksto, dar nepatvirtinti",
+      "no_subject_skills": "jūsų profilyje dar nėra įgūdžių — palyginti negalima",
+      "location_unknown": "nenurodyta jūsų vieta",
+      "pay_unknown": "atlygis nepalyginamas",
+      "language_unknown": "nenurodytos jūsų kalbos",
+      "language_requirement_unknown": "kalbų reikalavimas skelbime neaiškus"
+    },
+    "world": {
+      "title": "Darbo galimybės",
+      "assessedAgainst": "Vertinta pagal: {facts}",
+      "fact": {
+        "profession": "profesija — {value}",
+        "professionEvidenced": "profesija pagal darbo įrašus — {value}",
+        "professionMissing": "profesija nenurodyta",
+        "skills": "įgūdžiai — {count}",
+        "skillsMissing": "įgūdžių neužfiksuota",
+        "place": "vieta — {value}",
+        "placeMissing": "vieta nenurodyta",
+        "pay": "atlygio lūkestis — nuo {amount} EUR",
+        "payMissing": "atlygio lūkestis nenurodytas",
+        "languages": "kalbos — {list}",
+        "languagesMissing": "kalbos nenurodytos"
+      },
+      "countsPlatform": "platformos užklausos: rodoma {shown} iš {retrieved}",
+      "countsPlatformUnavailable": "platformos užklausos: dar neįjungta",
+      "countsExternal": "vieši skelbimai: rodoma {shown} iš {retrieved}",
+      "countsExternalUnreadable": "vieši skelbimai: nepavyko perskaityti",
+      "countsFiltered": "{count} atidėta pagal jūsų filtrus",
+      "derivedNote": "Juostos išvestos iš jūsų nurodytų faktų ir kiekvieno skelbimo nurodytų faktų — paaiškinimas žodžiais, ne skaičius.",
+      "chip": {
+        "strong": "Stiprus atitikimas",
+        "possible": "Galimas atitikimas",
+        "missing_requirement": "Trūksta reikalavimo",
+        "conflict": "Nesuderinama",
+        "not_assessed": "Dar neįvertinta"
+      },
+      "strongEmpty": "Tarp rodomų eilučių stipraus atitikimo nėra.",
+      "strongEmptyChange": "Kas tai pakeistų: {items}.",
+      "change": {
+        "profession_missing": "nurodykite profesiją",
+        "no_subject_skills": "patvirtinkite įgūdžius, kuriuos rodo jūsų darbo įrašai",
+        "location_unknown": "nurodykite, kur esate",
+        "pay_unknown": "nurodykite atlygio lūkestį",
+        "language_unknown": "nurodykite kalbas",
+        "availability_unknown": "nurodykite prieinamumą"
+      },
+      "why": "Kodėl:",
+      "whyNoGaps": "pagal nurodytus faktus spragų nerasta",
+      "whyUnknown": "priežasties nepavyko perskaityti",
+      "payNotStated": "atlygis šaltinyje nenurodytas",
+      "payUnitNotStated": "vienetas šaltinyje nenurodytas",
+      "sourcePlatform": "Platformos užklausa",
+      "externalCouldNotRead": "Viešų skelbimų šaltinio šį kartą nepavyko perskaityti — šios eilutės nežinomos, o ne jų nėra."
     }
   },
   "workerIntake": {
@@ -12599,6 +12784,14 @@
       "chipLearningCompass": "Mokymosi kompasas",
       "journalNumbersHint": "Jūsų darbas skaičiais — valandos, pagrindinė veikla, įgūdžiai ir kryptys — yra darbo žurnale:",
       "chipJournalNumbers": "Darbas skaičiais",
+      "photosRecent": "Radau žurnale išsaugotas nuotraukas: rodau {count} iš {total}. Jos saugomos prie jūsų žurnalo įrašų.",
+      "photosNone": "Žurnale šiuo metu nerandu išsaugotos nuotraukos. Nuotrauka išsaugoma kartu su žurnalo įrašu — atidarykite galeriją ir patikrinkite; jei jos ten nėra, įkėlimas nebuvo užbaigtas.",
+      "photosNoWorker": "Nuotraukos saugomos darbuotojo darbo žurnale, o ši paskyra darbuotojo profilio dar neturi — todėl išsaugotos nuotraukos čia nėra.",
+      "photosUnavailable": "Nepavyko patikrinti, ar nuotrauka išsaugota — perskaityti žurnalo nuotraukų dabar nepavyko. Pabandykite dar kartą arba atidarykite galeriją.",
+      "photosPreviewUnavailable": "Nuotraukos išsaugotos, bet peržiūros dabar nepavyko sugeneruoti — sąrašas rodomas be vaizdų.",
+      "photoNoPreview": "Peržiūra nepasiekiama",
+      "photoAlt": "Darbo nuotrauka",
+      "chipGallery": "Galerija",
       "inviteStudentHint": "Studentas pakviečiamas asmenine nuoroda iš tinklo skilties (ryšys „Studentas“):",
       "chipInviteStudent": "Pakviesti studentą",
       "programmesHint": "Programos ir grupės tvarkomos įmonės erdvėje — čia sukursite programą, grupę ir priskirsite besimokančius:",
@@ -12902,8 +13095,6 @@
       "pipelineFailedNote": "Įgūdžių atpažinimas šįkart nepavyko — įrašas išsaugotas, atpažinimą gali pakartoti žurnale."
     },
     "findWork": {
-      "intro": "Radau {count} tinkamų variantų. Geriausi atitikimai:",
-      "introOne": "Radau 1 tinkamą variantą:",
       "emptyState": "Šiuo metu neradau aktyvių pasiūlymų, atitinkančių tavo kriterijus. Pranešimų mechanizmo dar nėra, todėl nežadu pranešti — paklausk vėliau arba papildyk profilį, kad atitiktų daugiau poreikių.",
       "blockedNoWorker": "Kad ieškočiau darbo, įjunk darbuotojo vaidmenį paskyros nustatymuose.",
       "blockedNoAccess": "Darbo pasiūlymų sąrašas dar neįjungtas šioje aplinkoje. Kai bus, parodysiu tikrus poreikius.",
@@ -12913,7 +13104,18 @@
       "fitInsufficient": "Trūksta duomenų",
       "locationReason": "Vieta: {location}",
       "roleReason": "Poreikis: {role}",
-      "introExternal": "Skydelyje yra {count} viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą."
+      "fitNotAssessed": "Dar neįvertinta",
+      "fitMissingRequirement": "Trūksta reikalavimo",
+      "fitConflict": "Nesuderinama",
+      "readback": "Radau {total} ({bands}). Geriausi — skydelyje; visi su priežastimi — galimybių puslapyje.",
+      "readbackDiscoveryOnly": "Radau {total}, bet nė vieno dar neįvertinau kaip tinkančio ({bands}). Kodėl kiekvienas — galimybių puslapyje.",
+      "band": {
+        "strong": "stiprūs atitikimai: {count}",
+        "possible": "galimi atitikimai: {count}",
+        "missing_requirement": "trūksta reikalavimo: {count}",
+        "conflict": "nesuderinami: {count}",
+        "not_assessed": "dar neįvertinti: {count}"
+      }
     },
     "summary": {
       "introProfile": "Štai tavo profilis šiandien: išsaugota {done} iš {total} esminių dalių.",
@@ -13074,7 +13276,8 @@
         "organization": "organizacija"
       },
       "opportunities": {
-        "title": "Man tinkantys darbai"
+        "title": "Man tinkantys darbai",
+        "titleDiscovery": "Rasti skelbimai (dar neįvertinti)"
       },
       "opportunitiesError": "Nepavyko nuskaityti jums tinkančių darbų.",
       "opportunitiesUnavailable": "Poreikių šaltinis dar neįjungtas, todėl atitikmenų kol kas nėra iš ko skaičiuoti.",
@@ -13235,7 +13438,9 @@
       "engagementsEndedAt": "Darbo santykis baigtas {date}.",
       "engagementsEndedStillVisible": "Pastaba: ši įmonė vis dar mato jūsų profilį, kol tebesate priskirti jos projektui. Ši prieiga baigsis pasibaigus priskyrimui.",
       "engagementsAlreadyEnded": "Šis darbo santykis jau buvo baigtas. Niekas nepakeista.",
-      "engagementsAlreadyEndedAt": "Šis darbo santykis jau buvo baigtas {date}. Niekas nepakeista."
+      "engagementsAlreadyEndedAt": "Šis darbo santykis jau buvo baigtas {date}. Niekas nepakeista.",
+      "opportunitiesCounts": "Iš viso {total}: {bands}.",
+      "opportunitiesDiscoveryOnly": "Nė vienas dar neįvertintas kaip tinkantis — kodėl, matysite prie kiekvieno galimybių puslapyje."
     }
   },
   "landing": {
@@ -13708,12 +13913,14 @@
       "journalUnlabelled": "(be aprašymo)",
       "journalEmpty": "Per paskutines {days} dienas žurnalo įrašų neturi.",
       "journalHoursTotal": "Iš viso per {days} d.: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} (kiekvienas įrašas skaičiuojamas kartą).",
+      "journalHoursWindow": "Iš viso per {days} d.: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val. (kiekvienas įrašas skaičiuojamas kartą).",
       "journalPeriod_today": "Šiandien",
       "journalPeriod_yesterday": "Vakar",
       "journalPeriod_week": "Per paskutines 7 dienas",
       "journalPeriod_month": "Per paskutines 30 dienų",
       "journalPeriod_year": "Per paskutines 365 dienų",
       "journalPeriod_all": "Per visą laiką",
+      "journalPeriod_range": "Per paskutines {days, plural, one {# dieną} few {# dienas} other {# dienų}}",
       "journalHoursPeriod": "{period}: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val. (kiekvienas įrašas skaičiuojamas kartą).",
       "journalHoursPeriodPlain": "{period}: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} (kiekvienas įrašas skaičiuojamas kartą).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, bet be trukmės — pridėkite valandas, ir jos bus suskaičiuotos.",
@@ -13820,7 +14027,8 @@
       "whyVerifierSelf": "Savo paties darbo patvirtinti negali — patvirtinimas turi ateiti iš kito asmens.",
       "whyVerifierNone": "Nė vienas tavo aktyvus ryšys nenurodo organizacijos, galinčios patvirtinti darbą.",
       "whyVerifierUnavailable": "Tai reiškia, kad nepavyko perskaityti duomenų — ne tai, kad patvirtinti nėra kam.",
-      "journalOrgRecords": "Dar jūsų organizacijos apskaitoje ({period}): {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} — žiniaraščio ar importo valandos, skaičiuojamos atskirai ir prie skaičiaus aukščiau nepridedamos."
+      "journalOrgRecords": "Dar jūsų organizacijos apskaitoje ({period}): {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} — žiniaraščio ar importo valandos, skaičiuojamos atskirai ir prie skaičiaus aukščiau nepridedamos.",
+      "journalCoverageTruncated": "Rodoma iš paskutinių {count} įrašų — senesni įrašai į šį skaičių neįtraukti."
     },
     "project": {
       "fieldStatus": "Būsena",
@@ -15738,5 +15946,29 @@
     "unusable": "Praleista eilučių be tinkamo vardo: {count}",
     "willCreate": "Bus pridėta: {count}",
     "willNot": "Ko NEBUS: šiems žmonėms nesukuriamos paskyros, jie netampa jūsų organizacijos administratoriais, tai, ką įkeliate, netampa patvirtintais įrodymais apie juos, ir tai nesuteikia teisės jiems atstovauti viešai ar komerciškai."
+  },
+  "teamRecordedWork": {
+    "title": "Užfiksuotas darbas",
+    "intro": "{period}: ką sudaro kiekvieno žmogaus paties darbo dienoraščio įrašai, užrašyti prie šios organizacijos darbo santykių — pagal tą pačią taisyklę ir per tą patį skaitytuvą kaip žmogaus „veikla skaičiais“. Asmeniniai ar kitam darbdaviui užrašyti įrašai į šį vaizdą nepatenka.",
+    "bound": "Rodomi pirmi {shown} iš {total} sąrašo žmonių; atidarykite žmogų pilnai skilčiai.",
+    "journalTotal": "Žurnale: {hours} val. iš {members, plural, one {# žmogaus} few {# žmonių} other {# žmonių}}, kurių įrašai perskaityti",
+    "journalTotalNone": "Žurnale: šiuo laikotarpiu perskaitomų įrašų nėra",
+    "organizationTotal": "Jūsų organizacijos apskaitoje: {hours} val. iš {members, plural, one {# žmogaus} few {# žmonių} other {# žmonių}} — skaičiuojama atskirai, niekur nepridedama",
+    "unknownCount": "{count, plural, one {# žmogaus} few {# žmonių} other {# žmonių}} perskaityti nepavyko",
+    "noReadableCount": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}} be perskaitomų įrašų",
+    "memberUnknown": "Perskaityti nepavyko",
+    "memberNoReadable": "Perskaitomų įrašų nėra",
+    "memberFigures": "{hours} val. · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} · {days, plural, one {# diena} few {# dienos} other {# dienų}}",
+    "memberDayUnits": "+ {days} užrašyta dienomis, laikoma atskirai nuo valandų",
+    "confirmedShare": "{share} šių valandų ({hours} val.) vadovas patvirtino žurnale; likusi dalis — paties žmogaus įrašas",
+    "confirmedNone": "Šiuo laikotarpiu vadovas žurnale valandų nepatvirtino — paties žmogaus įrašas",
+    "confirmedNoHours": "Šiuo laikotarpiu valandų nefiksuota",
+    "topSkills": "Didžiausią užrašytų valandų dalį užima: {list}",
+    "topSkillsNone": "Šiuo laikotarpiu jokiam įgūdžiui valandos nepriskirtos",
+    "coverageTruncated": "Iš paskutinių {count} perskaitytų įrašų — senesni įrašai į šiuos skaičius nepatenka",
+    "ledgerUnknown": "perskaityti nepavyko",
+    "ledgerNone": "šiuo laikotarpiu ({period}) nieko",
+    "ledgerFigures": "{hours} val. · {rows, plural, one {# eilutė} few {# eilutės} other {# eilučių}} · {days, plural, one {# diena} few {# dienos} other {# dienų}}",
+    "rule": "Žurnalo skaičiai ir organizacijos apskaita — du to paties darbo įrašai, rodomi greta ir niekada nesudedami. Valandų įrašas sako kada ir kiek, bet ne ką — jis nepasiekia jokio įgūdžio."
   }
 }

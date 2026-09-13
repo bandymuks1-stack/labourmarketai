@@ -115,6 +115,15 @@ export interface ResultDescriptor {
   /** i18n key (namespace `conversation.results`) for the panel title. */
   readonly titleKey: string;
   /**
+   * The title the panel shows INSTEAD of `titleKey` while the rendered result
+   * declares itself DISCOVERY-ONLY (`data-discovery-only="true"` on its
+   * rows — nothing the engine assessed as a fit). The chrome must follow the
+   * result's own state: "jobs that fit you" over unassessed rows was the
+   * production defect (#1689, defect H). Absent = the result has no such
+   * state and `titleKey` always applies.
+   */
+  readonly discoveryTitleKey?: string;
+  /**
    * Action ids from `action-registry.ts` that open this result. Every id here
    * MUST exist in that registry — pinned by a guard test so a rename in the
    * action registry cannot silently orphan a result.
@@ -203,6 +212,9 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
   {
     kind: "opportunities",
     titleKey: "conversation.results.opportunities.title",
+    // The result heads itself "found postings (not yet assessed)" when no
+    // row is an assessed fit (lane D); the panel's chrome title follows.
+    discoveryTitleKey: "conversation.results.opportunities.titleDiscovery",
     // The action whose own advancedRoute is `/dashboard/opportunities`. The
     // result and the action now name the SAME screen.
     openedBy: ["worker.express-interest"],

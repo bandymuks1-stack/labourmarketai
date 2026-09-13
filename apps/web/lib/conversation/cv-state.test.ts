@@ -13,6 +13,7 @@ function emptyCv(): VerifiedCvData {
   return {
     personName: "A Person",
     professionalSummary: null,
+    professionalFacts: null,
     professionSlugs: [],
     tiers: { confirmed: [], evidence: [], declared: [] } as VerifiedCvData["tiers"],
     skillFacts: [],
@@ -26,6 +27,8 @@ function emptyCv(): VerifiedCvData {
     achievements: [],
     projects: [],
     recordedHoursBySkill: null,
+    skillPractice: null,
+    journalCoverage: null,
     confirmedHoursBySkill: null,
     recordedHoursTotal: null,
     recordedHoursConfirmed: null,

@@ -78,6 +78,11 @@ const CLASSIFICATION: Record<string, string> = {
   // transcript review; degrades honestly until the owner deploys the
   // self-hosted transcription service.
   "dashboard/journal/voice": "REAL_LAUNCH_SURFACE",
+  // Work in Numbers (target worker IA 2026-09-13 §2, #1724 lane F): the
+  // figures' own station over the ONE work-intelligence reader — the
+  // dominant-skill answer first, share bars, period selector, checks, the
+  // organization's ledger beside, growth kinds. UNKNOWN is said, never zero.
+  "dashboard/work-in-numbers": "REAL_LAUNCH_SURFACE",
   "dashboard/market-map": "REAL_LAUNCH_SURFACE",
   "dashboard/opportunities": "REAL_LAUNCH_SURFACE",
   // Person detail page (production UX repair v2, F2) — the single permitted
