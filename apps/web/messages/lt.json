@@ -15821,5 +15821,29 @@
     "unusable": "Praleista eilučių be tinkamo vardo: {count}",
     "willCreate": "Bus pridėta: {count}",
     "willNot": "Ko NEBUS: šiems žmonėms nesukuriamos paskyros, jie netampa jūsų organizacijos administratoriais, tai, ką įkeliate, netampa patvirtintais įrodymais apie juos, ir tai nesuteikia teisės jiems atstovauti viešai ar komerciškai."
+  },
+  "teamRecordedWork": {
+    "title": "Užfiksuotas darbas",
+    "intro": "{period}: ką sudaro kiekvieno žmogaus paties darbo dienoraščio įrašai, užrašyti prie šios organizacijos darbo santykių — pagal tą pačią taisyklę ir per tą patį skaitytuvą kaip žmogaus „veikla skaičiais“. Asmeniniai ar kitam darbdaviui užrašyti įrašai į šį vaizdą nepatenka.",
+    "bound": "Rodomi pirmi {shown} iš {total} sąrašo žmonių; atidarykite žmogų pilnai skilčiai.",
+    "journalTotal": "Žurnale: {hours} val. iš {members, plural, one {# žmogaus} few {# žmonių} other {# žmonių}}, kurių įrašai perskaityti",
+    "journalTotalNone": "Žurnale: šiuo laikotarpiu perskaitomų įrašų nėra",
+    "organizationTotal": "Jūsų organizacijos apskaitoje: {hours} val. iš {members, plural, one {# žmogaus} few {# žmonių} other {# žmonių}} — skaičiuojama atskirai, niekur nepridedama",
+    "unknownCount": "{count, plural, one {# žmogaus} few {# žmonių} other {# žmonių}} perskaityti nepavyko",
+    "noReadableCount": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}} be perskaitomų įrašų",
+    "memberUnknown": "Perskaityti nepavyko",
+    "memberNoReadable": "Perskaitomų įrašų nėra",
+    "memberFigures": "{hours} val. · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} · {days, plural, one {# diena} few {# dienos} other {# dienų}}",
+    "memberDayUnits": "+ {days} užrašyta dienomis, laikoma atskirai nuo valandų",
+    "confirmedShare": "{share} šių valandų ({hours} val.) vadovas patvirtino žurnale; likusi dalis — paties žmogaus įrašas",
+    "confirmedNone": "Šiuo laikotarpiu vadovas žurnale valandų nepatvirtino — paties žmogaus įrašas",
+    "confirmedNoHours": "Šiuo laikotarpiu valandų nefiksuota",
+    "topSkills": "Didžiausią užrašytų valandų dalį užima: {list}",
+    "topSkillsNone": "Šiuo laikotarpiu jokiam įgūdžiui valandos nepriskirtos",
+    "coverageTruncated": "Iš paskutinių {count} perskaitytų įrašų — senesni įrašai į šiuos skaičius nepatenka",
+    "ledgerUnknown": "perskaityti nepavyko",
+    "ledgerNone": "šiuo laikotarpiu ({period}) nieko",
+    "ledgerFigures": "{hours} val. · {rows, plural, one {# eilutė} few {# eilutės} other {# eilučių}} · {days, plural, one {# diena} few {# dienos} other {# dienų}}",
+    "rule": "Žurnalo skaičiai ir organizacijos apskaita — du to paties darbo įrašai, rodomi greta ir niekada nesudedami. Valandų įrašas sako kada ir kiek, bet ne ką — jis nepasiekia jokio įgūdžio."
   }
 }

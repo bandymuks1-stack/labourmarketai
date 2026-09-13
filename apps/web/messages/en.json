@@ -15821,5 +15821,29 @@
     "unusable": "{count} rows skipped — no usable name",
     "willCreate": "{count} will be added",
     "willNot": "What will NOT happen: no accounts are created for these people, they do not become administrators of your organisation, what you upload does not become verified evidence about them, and nothing here gives permission to represent them publicly or commercially."
+  },
+  "teamRecordedWork": {
+    "title": "Recorded work",
+    "intro": "{period}: what each person's own Work Journal entries logged against this organization's engagements add up to — the same rule and the same reader as the person's own \"work in numbers\". Entries recorded personally or for another employer never enter this view.",
+    "bound": "Showing the first {shown} of {total} people on the roster; open a person for the full section.",
+    "journalTotal": "Journal: {hours} h across {members, plural, one {# person} other {# people}} whose entries were read",
+    "journalTotalNone": "Journal: no readable entries in this period",
+    "organizationTotal": "Your organization's ledger: {hours} h across {members, plural, one {# person} other {# people}} — counted apart, added to nothing",
+    "unknownCount": "{count, plural, one {# person} other {# people}} could not be read",
+    "noReadableCount": "{count, plural, one {# person} other {# people}} with no readable records",
+    "memberUnknown": "Could not be read",
+    "memberNoReadable": "No readable records",
+    "memberFigures": "{hours} h · {entries, plural, one {# entry} other {# entries}} · {days, plural, one {# day} other {# days}}",
+    "memberDayUnits": "+ {days} recorded in days, kept apart from hours",
+    "confirmedShare": "{share} of these hours ({hours} h) a manager confirmed in the journal; the rest is the person's own record",
+    "confirmedNone": "No hours a manager confirmed in the journal this period — the person's own record",
+    "confirmedNoHours": "No timed hours in this period",
+    "topSkills": "Largest share of their recorded hours: {list}",
+    "topSkillsNone": "No hours attributed to a skill in this period",
+    "coverageTruncated": "From the last {count} entries read — older entries are not in these figures",
+    "ledgerUnknown": "could not be read",
+    "ledgerNone": "nothing in this period ({period})",
+    "ledgerFigures": "{hours} h · {rows, plural, one {# row} other {# rows}} · {days, plural, one {# day} other {# days}}",
+    "rule": "The journal figures and the organization's ledger are two records of the same work, shown side by side and never added together. An hour record says when and how much, not what — it reaches no skill."
   }
 }

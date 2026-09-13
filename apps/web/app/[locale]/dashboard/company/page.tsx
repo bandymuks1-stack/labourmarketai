@@ -47,6 +47,7 @@ import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
+import { TeamRecordedWork } from "@/components/app/organization/team-recorded-work";
 import { WorkObjectsSection } from "@/components/app/work-objects-section";
 import { EvidenceImportSection } from "@/components/app/evidence-import-section";
 import { CompanyGallerySection } from "@/components/app/company-gallery-section";
@@ -1499,6 +1500,19 @@ export default async function CompanyDashboardPage({
           labels={workersLabels}
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
+        />
+        {/* Užfiksuotas darbas (owner req. 15–17, #1724): the roster's
+            recorded work through THE one work-intelligence reader, one call
+            per row as this manager, bounded to the rows above; the
+            organization's own hour ledger beside it, never added. Additive
+            block, no roster redesign (§1.5). */}
+        <TeamRecordedWork
+          locale={locale}
+          members={activeWorkerRows.map((w) => ({
+            workerId: w.workerId,
+            displayName: w.displayName,
+            email: w.email,
+          }))}
         />
       </div>
 
