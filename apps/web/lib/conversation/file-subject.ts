@@ -133,6 +133,32 @@ const hasAny = (hay: string, needles: readonly string[]): boolean =>
   needles.some((n) => hay.includes(n));
 
 /**
+ * A READBACK, NOT A DEPOSIT (issue #1689, defect G).
+ *
+ * "Parodyk įkeltą nuotrauką", "show the photo I just uploaded", "покажи
+ * загруженное фото", "zeig das hochgeladene Foto", "laat de geüploade foto
+ * zien" — every one of these carries the upload verb in a PAST form: the
+ * person is asking about a file already handed over, not handing one over.
+ * The English one used to trip the DEPOSIT list on the bare stem "upload",
+ * which read a question about a stored photo as a new file with no stated
+ * owner — and asked whose it was.
+ *
+ * These forms are blanked before the deposit test, so the sentence falls
+ * through to the ordinary intent path (where the `evidence-photos` rule
+ * answers it) unless it ALSO carries a genuine present deposit signal
+ * ("čia mano įkeltas CV" is still a deposit — "čia" says so).
+ */
+// Written in already-FOLDED form (the query is folded before it is tested):
+// "įkeltą" → "ikelta", "geüpload" → "geupload".
+const READBACK_FORMS =
+  /(?<!\p{L})(ikelt\p{L}*|uploaded|загружен\p{L}*|hochgeladen\p{L}*|geupload\p{L}*)(?!\p{L})/giu;
+
+/** The sentence with its past upload forms removed — what the deposit test sees. */
+export function withoutReadbackForms(folded: string): string {
+  return folded.replace(READBACK_FORMS, " ");
+}
+
+/**
  * Read the file intent out of a sentence, or `null` when the sentence is not
  * handing a file over at all.
  *
@@ -145,7 +171,7 @@ export function readFileIntent(text: string): FileIntent | null {
   const raw = (text ?? "").trim();
   if (!raw) return null;
   const q = ` ${fold(raw)} `;
-  if (!hasAny(q, DEPOSIT)) return null;
+  if (!hasAny(withoutReadbackForms(q), DEPOSIT)) return null;
 
   const documentTypeSlug = guessDocumentType(raw);
   const evidence = hasAny(q, WORK_EVIDENCE);

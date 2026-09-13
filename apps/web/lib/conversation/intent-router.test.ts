@@ -935,6 +935,15 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Mijn cv",
     de: "Mein Lebenslauf",
   },
+  // THE PHOTO SHOWN BACK (issue #1689, defect G) — the production sentence
+  // that used to reach `cv-view`, and its parity forms.
+  "evidence-photos": {
+    lt: "Parodyk įkeltą nuotrauką ar tikrai išsisaugojo",
+    en: "Show the photo I just uploaded",
+    ru: "Покажи загруженное фото",
+    nl: "Laat de foto zien",
+    de: "Zeig das Foto",
+  },
   "add-task": {
     lt: "Pridėk užduotį projektui: sumontuoti pastolius",
     en: "Add a task to the project: erect the scaffold",

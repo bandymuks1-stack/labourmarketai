@@ -125,6 +125,9 @@ export type IntentHandlerId =
   // which of the five CV actions is meant.
   | "cvView"
   | "cvChoose"
+  // The photo shown back (issue #1689, defect G): a read over the ONE
+  // personal-gallery projection, embedded in the thread.
+  | "evidencePhotos"
   /**
    * "Ką galiu padaryti šioje paskyroje?" — the capability question.
    *
@@ -295,6 +298,13 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The sentence named the CV and nothing more. Route, not write: the answer
   // is a question with the three real doors and no side effect.
   "cv-choose": { domain: "cv", access: "route", handler: "cvChoose", ownTyping: false },
+  // THE PHOTO SHOWN BACK (issue #1689, defect G). "Parodyk įkeltą nuotrauką,
+  // ar tikrai išsisaugojo" — a READ over the ONE personal-gallery projection
+  // (`lib/journal/personal-gallery.ts`: the same journal_entry_photos rows,
+  // the same private bucket, the same signed URLs), answered INSIDE the
+  // chat with the stored photos and one chip to the gallery. Never a second
+  // photo store; never a claim about the photo beyond "it is stored".
+  "evidence-photos": { domain: "journal", access: "read", handler: "evidencePhotos", ownTyping: true },
   // PROJECT → WORK (§11): a work package on the company's project through
   // the one inline form over the one task create.
   "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },

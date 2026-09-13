@@ -13,6 +13,7 @@ import {
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
 import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
+import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
 import { detectUnrecordedHours } from "@/lib/journal/unrecorded-hours";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
@@ -254,50 +255,47 @@ export default async function JournalPage({
     }),
   });
 
-  const engagements: JournalEngagement[] = ecOrdered.map((e) => {
+  // ONE LABEL COMPOSER (issue #1689, defect J): the same facts the chat's
+  // work-log selector hands to `composeDistinctEngagementLabels`, so a context
+  // is named identically here and there. Rules live in
+  // `lib/journal/engagement-label.ts`: an organization context reads "Org ·
+  // Relationship" (the org TYPE label when it has no display/legal name —
+  // never a bare "—"; existing role labels, no new i18n key); a personal one
+  // reads "Asmeninis įrašas [· title]" — the person's own title is what tells
+  // two org-less contexts apart (production holds exactly that case: one
+  // untitled personal context carrying entries, one titled "Darbų vadovas");
+  // a collision is qualified by the title, else the start month, never by a
+  // word already present; and the list comes back pairwise distinct.
+  const engagementLabelInputs = ecOrdered.map((e) => {
     const org = e.organizations as {
       display_name: string | null;
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    // Disambiguate same-relationship engagements (e.g. owning a company AND an
-    // agency both show "Owner") by falling back to the org TYPE label when the
-    // org has no display/legal name — never a bare "—". Reuses existing role
-    // labels (company/agency), so no new i18n keys.
     const typeLabel =
       org?.organization_type === "company"
         ? tRole("company")
         : org?.organization_type === "agency"
           ? tRole("agency")
           : null;
-    const orgName =
-      org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—";
-    // A personal worker engagement (no organization) reads clearer as a
-    // named personal entry than a bare "— · Darbuotojas". Role model unchanged.
-    //
-    // …but when the person GAVE it a title, that title is what tells two of
-    // them apart. This branch used to return the same constant for every
-    // org-less context, so an account holding more than one rendered the
-    // identical row twice and the chooser asked the worker to pick between
-    // two things it had just made indistinguishable. Production holds exactly
-    // this case: one untitled personal context carrying entries, and one
-    // titled "Darbų vadovas". Same defect the network page already fixed for
-    // unnamed organizations — the rows were never duplicates, their labels
-    // were. Their own words, no invented data, no new i18n key.
-    const personalTitle = e.title?.trim();
-    const label = org
-      ? `${orgName} · ${tRel(e.relationship_slug)}`
-      : personalTitle
-        ? `${t("personalEntry")} · ${personalTitle}`
-        : t("personalEntry");
     return {
-      id: e.id,
-      label,
-      isPrimary: e.is_primary,
-      // Owner §12 — the editors compose archetype module fields from this.
-      relationshipSlug: e.relationship_slug,
+      orgName: org?.display_name ?? org?.legal_name ?? null,
+      orgTypeLabel: typeLabel,
+      title: e.title ?? null,
+      relationshipLabel: tRel(e.relationship_slug),
+      personalEntryLabel: t("personalEntry"),
+      isPersonal: !org,
+      startedAt: (e as { started_at?: string | null }).started_at ?? null,
     };
   });
+  const engagementLabels = composeDistinctEngagementLabels(engagementLabelInputs);
+  const engagements: JournalEngagement[] = ecOrdered.map((e, i) => ({
+    id: e.id,
+    label: engagementLabels[i],
+    isPrimary: e.is_primary,
+    // Owner §12 — the editors compose archetype module fields from this.
+    relationshipSlug: e.relationship_slug,
+  }));
 
   /**
    * "KAM PATEIKTI ATLIKTĄ DARBĄ?" — the worker's own question, answered.

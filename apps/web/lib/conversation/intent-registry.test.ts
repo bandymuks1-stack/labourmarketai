@@ -89,7 +89,12 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 74 -> 75: owner line 8, "Kur yra didžiausias augimo potencialas?"
     // scored 0 — the growth reading (journal-growth) over the SAME model,
     // the same handler; a fact block and a block said to be derived.
-    expect(entries.length).toBe(75);
+    // 75 -> 76: `evidence-photos` (issue #1689, defect G). "Parodyk įkeltą
+    // nuotrauką, ar tikrai išsisaugojo" scored 0 — no photo / file / gallery
+    // word in the router — so the proposer chose `cv-view` and the chat said
+    // the CV was empty about a photo that WAS stored. A read over the ONE
+    // personal-gallery projection, shown back inside the thread.
+    expect(entries.length).toBe(76);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
