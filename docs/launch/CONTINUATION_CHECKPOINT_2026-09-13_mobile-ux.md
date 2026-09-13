@@ -7,9 +7,9 @@ Owner scope: the MOBILE UX correction only. Not a product/governance audit.
 | | |
 |---|---|
 | Branch | `claude/labourmarket-mobile-ux-qwdmk8` |
-| Branch head | `31ba19b` (= `main`; nothing unmerged) |
+| Mobile-UX CODE baseline | `31ba19b` (#1729) — the last commit carrying CODE from this work |
 | PR #1729 | **MERGED** as `31ba19b` |
-| `main` | `31ba19b` (#1729) ← `cb4f43c` (#1728) ← `dd6147d` / `cc63df5` (#1727) |
+| `main` lineage | `31ba19b` (#1729) ← `cb4f43c` (#1728) ← `dd6147d` / `cc63df5` (#1727). This checkpoint itself rides a LATER docs-only commit, so neither `main` nor the branch stays at `31ba19b` — do not read that SHA as a current head |
 | Production | Vercel auto-deploys `main`; all three PRs are on it. The Vercel deploy itself was NOT verified from here |
 
 `main` carries one EMPTY duplicate squash commit (`dd6147d`): during a GitHub
@@ -152,8 +152,10 @@ Found while working, outside this mobile-UX scope, deliberately left alone
 
 ## NEXT ACTION (exact)
 
-1. **Nothing is in flight.** `main` = `31ba19b`, the branch matches it, no
-   open PR from this work.
+1. **No CODE from this work is in flight.** Everything through `31ba19b` is
+   merged. The only thing that may still be open is this checkpoint's own
+   docs-only PR — check `git log origin/main -1` rather than trusting any
+   SHA written here.
 2. **Wait for the owner's walkthrough.** Do not start another
    mobile slice without rendered evidence of a problem: remaining candidates
    (full journal page scroll, map usability, bottom-nav obstruction) are
