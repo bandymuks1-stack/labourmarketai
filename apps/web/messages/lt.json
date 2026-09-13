@@ -4023,12 +4023,6 @@
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Man tinkantys darbai",
-        "viewAll": "Visi skelbimai",
-        "empty": "Šiuo metu atitinkančių skelbimų nėra — papildykite įgūdžius profilyje.",
-        "emptyCta": "Papildyti profilį"
-      },
       "firstUse": {
         "eyebrow": "Pradžia",
         "title": "Pradėkite nuo savęs",
@@ -7942,6 +7936,83 @@
         "overview": "Savaitė ir augimas",
         "playerCard": "Žaidėjo kortelė"
       }
+    },
+    "home": {
+      "eyebrow": "Šiandien",
+      "headerNoName": "Jūsų diena",
+      "professionUnknown": "Profesija dar nenurodyta",
+      "reading": "Skaitoma…",
+      "state": {
+        "recorded": "{entries, plural, one {Šiandien užrašytas # įrašas} few {Šiandien užrašyti # įrašai} other {Šiandien užrašyta # įrašų}} · {hours} val.",
+        "nothing": "Šiandien dar nieko neužrašyta.",
+        "unknown": "Šiandienos įrašų perskaityti nepavyko."
+      },
+      "next": {
+        "title": "Kitas žingsnis",
+        "unknown": "Kito žingsnio dabar pasiūlyti negalime — darbo kortelės perskaityti nepavyko."
+      },
+      "work": {
+        "title": "Užrašytas darbas",
+        "today": "Šiandien: {hours} val. · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+        "none": "Šiandien įrašų dar nėra.",
+        "untimed": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} be trukmės — valandos dar neįskaičiuotos.",
+        "week": "Paskutinės 7 dienos: {hours} val. · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+        "truncated": "Skaičiuota iš paskutinių perskaitytų įrašų — ne visų.",
+        "unknown": "Nėra duomenų — žurnalo perskaityti nepavyko."
+      },
+      "open": {
+        "title": "Reikia jūsų dėmesio",
+        "untimed": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} be trukmės — pridėkite valandas",
+        "unlabelled": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} su valandomis be įvardytos darbo rūšies",
+        "unknown": "Atvirų punktų perskaityti nepavyko."
+      },
+      "growth": {
+        "title": "Augimas",
+        "core_strength": "{skill} — didžiausia jūsų priskirtų valandų dalis: {hours} val. ({percent}).",
+        "growing": "{skill} auga: per paskutines 30 dienų naudota daugiau nei prieš tai ({hours} val.).",
+        "underused": "{skill} nenaudota {days} d. — įrašų šiam įgūdžiui seniai nebuvo.",
+        "self_stated": "{skill} — nurodėte patys; įrašų, kurie tai remtų, dar nėra.",
+        "adjacent_opportunity": "Gretima kryptis: {profession} — jūsų įrašai remia {shared} iš {total} jos įgūdžių.",
+        "derived": "Tai skaitymas iš jūsų pačių įrašų, ne išvada apie jus.",
+        "insufficient": "Augimo skaitymui reikia bent dviejų įrašais paremtų įgūdžių.",
+        "none": "Jūsų įrašai kol kas nerodo aiškios krypties.",
+        "unknown": "Nėra duomenų — augimo skaitymo sudaryti nepavyko."
+      },
+      "opportunity": {
+        "title": "Pasaulis",
+        "band": {
+          "strong": "{n, plural, one {# stipriai tinkantis} few {# stipriai tinkantys} other {# stipriai tinkančių}}",
+          "possible": "{n, plural, one {# galimai tinkantis} few {# galimai tinkantys} other {# galimai tinkančių}}",
+          "missing_requirement": "{n, plural, one {# su trūkstamu reikalavimu} few {# su trūkstamu reikalavimu} other {# su trūkstamu reikalavimu}}",
+          "conflict": "{n, plural, one {# nesuderinamas} few {# nesuderinami} other {# nesuderinamų}}",
+          "not_assessed": "{n, plural, one {# rastas, dar neįvertintas} few {# rasti, dar neįvertinti} other {# rastų, dar neįvertintų}}"
+        },
+        "more": "{n, plural, one {dar # skelbimas} few {dar # skelbimai} other {dar # skelbimų}}",
+        "none": "Šiuo metu skelbimų jums nėra.",
+        "noWorker": "Skelbimai rodomi, kai turite darbuotojo profilį.",
+        "unavailable": "Skelbimų šaltinis šiuo metu nepasiekiamas.",
+        "unknown": "Nėra duomenų — skelbimų perskaityti nepavyko.",
+        "open": "Atidaryti Pasaulį"
+      },
+      "ask": {
+        "title": "Paklausk",
+        "body": "Užrašykite darbą vienu sakiniu, paklauskite apie savo įgūdžius ar atidarykite bet kurią vietą.",
+        "cta": "Rašyti"
+      },
+      "stations": {
+        "title": "Kitos vietos",
+        "journal": "Mano darbas",
+        "numbers": "Mano veikla skaičiais",
+        "profile": "Profesinis profilis",
+        "cv": "Gyvas CV",
+        "gallery": "Galerija"
+      }
+    },
+    "nav": {
+      "today": "Šiandien",
+      "world": "Pasaulis",
+      "ask": "Paklausk",
+      "aria": "Pagrindinė navigacija"
     }
   },
   "agencyPool": {

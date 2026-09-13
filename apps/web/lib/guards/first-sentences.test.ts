@@ -74,6 +74,36 @@ describe("4. a named profession reaches the need form's role field", () => {
 });
 
 /**
+ * 6. THE WORKER'S FIRST SCREEN IS ŠIANDIEN (owner direction 2026-09-13,
+ *    worker mobile IA §2). The first screen a worker in their personal
+ *    space sees is their day — name · profession · today's state, then ONE
+ *    next action — not the chat's opening with an intro card. The opening
+ *    brief and its first sentences (§3 above) still govern the conversation
+ *    the moment it is opened (PAKLAUSK, or any deep link).
+ */
+describe("6. the worker's first screen is ŠIANDIEN; the conversation's first sentences stay on demand", () => {
+  it("the dashboard root decides by the ONE pure predicate and renders the header first", () => {
+    const page = read("app", "[locale]", "dashboard", "page.tsx");
+    expect(page).toMatch(/dashboardRootSurface\(\{/);
+    expect(page.indexOf("<TodayScreen")).toBeGreaterThan(-1);
+    expect(page.indexOf("<TodayScreen")).toBeLessThan(page.indexOf("<ConversationChat"));
+    const screen = read("components", "app", "today", "today-screen.tsx");
+    const header = screen.indexOf('data-testid="today-header"');
+    const next = screen.indexOf('data-testid="today-next"');
+    expect(header).toBeGreaterThan(-1);
+    expect(next).toBeGreaterThan(header);
+    // No welcome card, no first sentence of its own.
+    expect(screen).not.toMatch(/PersonalWorkspaceIntro|openingBrief|starterChips/);
+  });
+
+  it("the header's state line is a reader's figure or a named unknown — never a greeting", () => {
+    const screen = read("components", "app", "today", "today-screen.tsx");
+    expect(screen).toMatch(/deriveTodayState\(wi\)/);
+    expect(screen).toMatch(/t\("state\.unknown"\)/);
+  });
+});
+
+/**
  * 5. PROFESSIONAL LANGUAGE (window 6, production ca96605b measured 2026-09-06).
  *    Six of eleven employer sentences ("Reikia buhalterio.", "reikia
  *    inžinieriaus", "reikia teisininko", "reikia dizainerio", "ieškome

@@ -203,6 +203,13 @@ describe("e2e specs never wait on a testid the product cannot render", () => {
     // Known-good sentinels: one literal, one generated.
     expect(resolvesExact("conversation-chat")).toBe(true);
     expect(resolvesExact("chat-chip-cv")).toBe(true);
+    // ŠIANDIEN (worker mobile IA 2026-09-13): the worker's home and its
+    // 3-tab bar are part of the vocabulary a future spec may wait on.
+    expect(resolvesExact("today-screen")).toBe(true);
+    expect(resolvesExact("today-next-cta")).toBe(true);
+    expect(resolvesExact("worker-bottom-nav")).toBe(true);
+    expect(resolvesExact("bottom-nav-today")).toBe(true);
+    expect(resolvesExact("today-station-journal")).toBe(true);
     // Negative control: a plausible id nothing renders must NOT resolve.
     expect(resolvesExact("chat-advanced-link")).toBe(false);
   });

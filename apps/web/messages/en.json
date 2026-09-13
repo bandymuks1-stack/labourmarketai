@@ -4023,12 +4023,6 @@
       "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Jobs that fit me",
-        "viewAll": "All listings",
-        "empty": "No matching listings right now — add skills to your profile.",
-        "emptyCta": "Update profile"
-      },
       "firstUse": {
         "eyebrow": "Start here",
         "title": "Start from yourself",
@@ -7942,6 +7936,83 @@
         "overview": "Week & growth",
         "playerCard": "Player card"
       }
+    },
+    "home": {
+      "eyebrow": "Today",
+      "headerNoName": "Your day",
+      "professionUnknown": "Profession not set yet",
+      "reading": "Reading…",
+      "state": {
+        "recorded": "{entries, plural, one {# record} other {# records}} today · {hours} h",
+        "nothing": "Nothing recorded today yet.",
+        "unknown": "Today's records could not be read."
+      },
+      "next": {
+        "title": "Next step",
+        "unknown": "No next step can be offered right now — the work card could not be read."
+      },
+      "work": {
+        "title": "Recorded work",
+        "today": "Today: {hours} h · {entries, plural, one {# record} other {# records}}",
+        "none": "No records today yet.",
+        "untimed": "{n, plural, one {# record} other {# records}} without a duration — hours not counted yet.",
+        "week": "Last 7 days: {hours} h · {entries, plural, one {# record} other {# records}}",
+        "truncated": "Counted from the last records read — not all of them.",
+        "unknown": "No data — the journal could not be read."
+      },
+      "open": {
+        "title": "Needs your attention",
+        "untimed": "{n, plural, one {# record} other {# records}} without a duration — add the hours",
+        "unlabelled": "{n, plural, one {# record} other {# records}} with hours but no kind of work named",
+        "unknown": "Open items could not be read."
+      },
+      "growth": {
+        "title": "Growth",
+        "core_strength": "{skill} — the largest share of your attributed hours: {hours} h ({percent}).",
+        "growing": "{skill} is growing: used more in the last 30 days than before ({hours} h).",
+        "underused": "{skill} unused for {days} days — no record for it in a while.",
+        "self_stated": "{skill} — stated by you; no record backs it yet.",
+        "adjacent_opportunity": "Adjacent direction: {profession} — your records back {shared} of {total} of its skills.",
+        "derived": "A reading of your own records, not a conclusion about you.",
+        "insufficient": "A growth reading needs at least two skills backed by records.",
+        "none": "Your records show no clear direction yet.",
+        "unknown": "No data — the growth reading could not be built."
+      },
+      "opportunity": {
+        "title": "World",
+        "band": {
+          "strong": "{n, plural, one {# strong fit} other {# strong fits}}",
+          "possible": "{n, plural, one {# possible fit} other {# possible fits}}",
+          "missing_requirement": "{n, plural, one {# missing a requirement} other {# missing a requirement}}",
+          "conflict": "{n, plural, one {# incompatible} other {# incompatible}}",
+          "not_assessed": "{n, plural, one {# found, not yet assessed} other {# found, not yet assessed}}"
+        },
+        "more": "{n, plural, one {# more posting} other {# more postings}}",
+        "none": "No postings for you right now.",
+        "noWorker": "Postings appear once you have a worker profile.",
+        "unavailable": "The postings source is not reachable right now.",
+        "unknown": "No data — postings could not be read.",
+        "open": "Open World"
+      },
+      "ask": {
+        "title": "Ask",
+        "body": "Record work in one sentence, ask about your skills, or open any place.",
+        "cta": "Write"
+      },
+      "stations": {
+        "title": "Other places",
+        "journal": "My work",
+        "numbers": "My activity in numbers",
+        "profile": "Professional profile",
+        "cv": "Living CV",
+        "gallery": "Gallery"
+      }
+    },
+    "nav": {
+      "today": "Today",
+      "world": "World",
+      "ask": "Ask",
+      "aria": "Primary navigation"
     }
   },
   "agencyPool": {

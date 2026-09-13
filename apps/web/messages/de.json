@@ -4023,12 +4023,6 @@
       "clarityNote": "Ein Konto, zwei Identitäten — Sie als Person und Ihr Unternehmen. Der Wechsel ändert nur, welche Aktionen Sie sehen (Arbeit finden, Dienstleistungen anbieten, einstellen, einen Bedarf einreichen); Agentur und Einkauf sind Aktionen, keine separaten Systeme. Einige Unternehmensaktionen benötigen später möglicherweise ein Organisationsprofil."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Passende Jobs für mich",
-        "viewAll": "Alle Anzeigen",
-        "empty": "Derzeit keine passenden Anzeigen — ergänzen Sie Ihre Fähigkeiten im Profil.",
-        "emptyCta": "Profil ergänzen"
-      },
       "firstUse": {
         "eyebrow": "Hier starten",
         "title": "Beginnen Sie bei sich selbst",
@@ -7942,6 +7936,83 @@
         "overview": "Woche & Wachstum",
         "playerCard": "Spielerkarte"
       }
+    },
+    "home": {
+      "eyebrow": "Heute",
+      "headerNoName": "Dein Tag",
+      "professionUnknown": "Beruf noch nicht angegeben",
+      "reading": "Wird gelesen…",
+      "state": {
+        "recorded": "{entries, plural, one {# Eintrag} other {# Einträge}} heute · {hours} Std.",
+        "nothing": "Heute noch nichts erfasst.",
+        "unknown": "Die heutigen Einträge konnten nicht gelesen werden."
+      },
+      "next": {
+        "title": "Nächster Schritt",
+        "unknown": "Ein nächster Schritt kann gerade nicht vorgeschlagen werden — die Arbeitskarte konnte nicht gelesen werden."
+      },
+      "work": {
+        "title": "Erfasste Arbeit",
+        "today": "Heute: {hours} Std. · {entries, plural, one {# Eintrag} other {# Einträge}}",
+        "none": "Heute noch keine Einträge.",
+        "untimed": "{n, plural, one {# Eintrag} other {# Einträge}} ohne Dauer — Stunden noch nicht gezählt.",
+        "week": "Letzte 7 Tage: {hours} Std. · {entries, plural, one {# Eintrag} other {# Einträge}}",
+        "truncated": "Gezählt aus den zuletzt gelesenen Einträgen — nicht aus allen.",
+        "unknown": "Keine Daten — das Journal konnte nicht gelesen werden."
+      },
+      "open": {
+        "title": "Braucht deine Aufmerksamkeit",
+        "untimed": "{n, plural, one {# Eintrag} other {# Einträge}} ohne Dauer — Stunden ergänzen",
+        "unlabelled": "{n, plural, one {# Eintrag} other {# Einträge}} mit Stunden, aber ohne benannte Arbeitsart",
+        "unknown": "Offene Punkte konnten nicht gelesen werden."
+      },
+      "growth": {
+        "title": "Wachstum",
+        "core_strength": "{skill} — der größte Anteil deiner zugeordneten Stunden: {hours} Std. ({percent}).",
+        "growing": "{skill} wächst: in den letzten 30 Tagen häufiger genutzt als davor ({hours} Std.).",
+        "underused": "{skill} seit {days} Tagen nicht genutzt — schon länger kein Eintrag dazu.",
+        "self_stated": "{skill} — von dir angegeben; noch kein Eintrag stützt es.",
+        "adjacent_opportunity": "Angrenzende Richtung: {profession} — deine Einträge stützen {shared} von {total} ihrer Fähigkeiten.",
+        "derived": "Eine Lesart deiner eigenen Einträge, kein Urteil über dich.",
+        "insufficient": "Eine Wachstumslesart braucht mindestens zwei durch Einträge gestützte Fähigkeiten.",
+        "none": "Deine Einträge zeigen noch keine klare Richtung.",
+        "unknown": "Keine Daten — die Wachstumslesart konnte nicht erstellt werden."
+      },
+      "opportunity": {
+        "title": "Welt",
+        "band": {
+          "strong": "{n, plural, one {# stark passend} other {# stark passend}}",
+          "possible": "{n, plural, one {# möglicherweise passend} other {# möglicherweise passend}}",
+          "missing_requirement": "{n, plural, one {# mit fehlender Anforderung} other {# mit fehlender Anforderung}}",
+          "conflict": "{n, plural, one {# unvereinbar} other {# unvereinbar}}",
+          "not_assessed": "{n, plural, one {# gefunden, noch nicht bewertet} other {# gefunden, noch nicht bewertet}}"
+        },
+        "more": "{n, plural, one {noch # Anzeige} other {noch # Anzeigen}}",
+        "none": "Derzeit keine Anzeigen für dich.",
+        "noWorker": "Anzeigen erscheinen, sobald du ein Arbeitskräfteprofil hast.",
+        "unavailable": "Die Anzeigenquelle ist gerade nicht erreichbar.",
+        "unknown": "Keine Daten — Anzeigen konnten nicht gelesen werden.",
+        "open": "Welt öffnen"
+      },
+      "ask": {
+        "title": "Fragen",
+        "body": "Erfasse Arbeit in einem Satz, frag nach deinen Fähigkeiten oder öffne jeden Ort.",
+        "cta": "Schreiben"
+      },
+      "stations": {
+        "title": "Weitere Orte",
+        "journal": "Meine Arbeit",
+        "numbers": "Meine Tätigkeit in Zahlen",
+        "profile": "Berufsprofil",
+        "cv": "Lebendiger Lebenslauf",
+        "gallery": "Galerie"
+      }
+    },
+    "nav": {
+      "today": "Heute",
+      "world": "Welt",
+      "ask": "Fragen",
+      "aria": "Hauptnavigation"
     }
   },
   "agencyPool": {
