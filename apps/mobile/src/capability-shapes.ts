@@ -121,3 +121,55 @@ export type LivingCvSkillsData = {
     readonly verifiedAt: string | null;
   }[];
 };
+
+/**
+ * `context.list` — WHICH WORKSPACES THE PERSON HOLDS, and which one the
+ * durable pointer currently makes active.
+ *
+ * This is the WORKSPACE axis, and it is deliberately NOT `ActorContext`.
+ * `ActorContext.mode` is a PARTICIPATION MODE — how a person takes part
+ * (worker / company / agency / customer) — while `organizationType` says what
+ * the ORGANIZATION is and `relationship` says how the person stands in it. A
+ * company-type organization does not make its employee an employer, so
+ * deriving a mode from either field would reclassify a real person's role from
+ * data that does not carry it (SEP-5, IDENTITY ≠ ROLE). The two axes stay
+ * apart, and `ContextHoldings` stays honestly `unknown` until the
+ * participation-mode holdings are themselves readable.
+ *
+ * `label` is the SERVER's label — the canonical workspace label a web user
+ * reads for the same organization, including the "no name stored" phrasing for
+ * organizations that have none. The client never builds one.
+ */
+export type ContextListData = {
+  readonly workspaces: readonly {
+    readonly id: string;
+    readonly label: string;
+    readonly kind: "personal" | "organization";
+    readonly organizationType: "company" | "agency" | "team" | "other" | null;
+    readonly relationship: "owner" | "manager" | "employee" | "other" | null;
+    readonly active: boolean;
+  }[];
+  readonly activeWorkspaceId: string;
+  /**
+   * FALSE means this environment records no durable pointer, so
+   * `activeWorkspaceId` is the resolver's DEFAULT rather than a stored choice
+   * and a bearer client cannot switch. A screen must say so rather than offer
+   * a control that would be refused.
+   */
+  readonly pointerAvailable: boolean;
+  readonly note: string;
+};
+
+/** `context.switch` — the durable pointer write. */
+export type ContextSwitchData =
+  | {
+      readonly status: "switched";
+      readonly workspaceId: string;
+      readonly label: string;
+      readonly durablePointer: boolean;
+    }
+  | {
+      readonly status: "workspace_choice_required";
+      readonly options: readonly { readonly id: string; readonly label: string }[];
+      readonly note: string;
+    };
