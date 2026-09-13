@@ -350,7 +350,10 @@
   "dayNav": {
     "title": "Dagnavigatie",
     "all": "Alle dagen",
-    "openInCalendar": "Openen in kalender"
+    "openInCalendar": "Openen in kalender",
+    "recordOnDay": "Werk vastleggen",
+    "dayEmpty": "Geen registraties op deze dag.",
+    "moreDays": "De meest recente dagen worden getoond. Nog {count, plural, one {# dag} other {# dagen}} — kies die in de kalender."
   },
   "spreadsheet": {
     "title": "Spreadsheetmodus — meerdere regels tegelijk",
@@ -848,5 +851,21 @@
     "startOver": "Opnieuw beginnen",
     "detailed": "Uitgebreid (volledig formulier)",
     "detailedBack": "Terug naar de eenvoudige registratie"
+  },
+  "calendar": {
+    "title": "Werkkalender",
+    "prev": "Vorige periode",
+    "next": "Volgende periode",
+    "scaleLabel": "Weergave",
+    "scale": {
+      "month": "Maand",
+      "week": "Week"
+    },
+    "allDays": "Alle dagen",
+    "dayWithRecords": "{day} — {count, plural, one {# registratie} other {# registraties}}",
+    "dayEmpty": "{day} — geen registraties",
+    "periodEmpty": "Geen registraties in deze periode.",
+    "periodSummary": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}.",
+    "periodSummaryWithTime": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}, {time}."
   }
 }

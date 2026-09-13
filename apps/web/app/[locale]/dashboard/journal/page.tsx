@@ -52,6 +52,7 @@ import { createClient } from "@/lib/supabase/server";
 import { processJournalEntrySkills } from "@/lib/journal/skill-pipeline";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
 // Mano CV identity lead — the player-card/avatar identity is the visual layer
 // at the TOP of the Mano CV surface (this work-records surface), with the work
@@ -66,7 +67,7 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { formatUtcDate } from "@/lib/time/display";
+import { formatUtcDate, utcTodayKey } from "@/lib/time/display";
 // ONE day-resolution rule for the Work Journal — the canonical work-time
 // rule's own (`resolveWorkDayDetail`), the same one the work-in-numbers
 // model groups by, so a record cannot sit on one day in the diary and
@@ -100,6 +101,13 @@ import {
 } from "@/lib/journal/work-in-numbers-view";
 import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
 import { JournalQuickRecord } from "./quick-record";
+import { JournalCalendar } from "@/components/app/journal/journal-calendar";
+import {
+  buildJournalCalendar,
+  isIsoDay,
+  resolveAnchor,
+  resolveScale,
+} from "@/lib/journal/journal-calendar";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -112,6 +120,14 @@ import { JournalQuickRecord } from "./quick-record";
 // placement). A second list is exactly how the CV, the profile card and the
 // chat selector drifted apart before (reconciliation 2026-09-07).
 const HISTORY_RELATIONSHIPS = [...PROFESSIONAL_HISTORY_RELATIONSHIPS];
+
+/**
+ * How many recorded days the diary renders when no single day is selected.
+ * Bounded output with an honest "+n" (the same rule the calendar panel uses,
+ * `lib/planning/calendar-result.ts`) — the phone opens on a readable page,
+ * and the calendar above reaches every other day in one tap.
+ */
+const DIARY_DAY_LIMIT = 7;
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')
@@ -127,6 +143,10 @@ export default async function JournalPage({
     skill?: string | string[];
     period?: string | string[];
     compose?: string | string[];
+    /** Journal calendar: the scale (`month` default, `week`) and the
+     *  anchored period. See `lib/journal/journal-calendar.ts`. */
+    cal?: string | string[];
+    month?: string | string[];
   }>;
 }) {
   const { locale } = await params;
@@ -138,12 +158,15 @@ export default async function JournalPage({
     typeof sp.editing === "string" && sp.editing.trim().length > 0
       ? sp.editing.trim()
       : null;
-  // Calendar-driven day navigation (owner UX recovery v1): ?date=YYYY-MM-DD
-  // filters the records to ONE day. Anything not a plain ISO day is ignored.
-  const selectedDate =
-    typeof sp.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(sp.date)
-      ? sp.date
-      : null;
+  // Calendar day navigation (owner direction 2026-09-13): ?date=YYYY-MM-DD
+  // narrows the records to ONE day — the day the person tapped on the
+  // calendar. Anything that is not a real ISO day is ignored.
+  const selectedDate = isIsoDay(sp.date) ? sp.date : null;
+  // The calendar's own two params: the scale (`month` default, `week`) and
+  // the anchored period. Both are URL state — no client store, no second
+  // source of "which day am I looking at".
+  const calendarScale = resolveScale(sp.cal);
+  const todayIsoKey = utcTodayKey();
   // Evidence drill-down (W5 slice 3): ?skill=<slug> filters the records to
   // those linked to ONE of the worker's own skills — the player-card evidence
   // bars land here. Same shape as ?date=; anything not a plain slug is ignored.
@@ -788,13 +811,59 @@ export default async function JournalPage({
       });
     }
   }
-  // Day filter (calendar-driven navigation): a selected ?date= narrows the
-  // diary to that one day; no match → the full diary with an honest note.
+  /**
+   * DAY FILTER — the calendar's selection (owner direction 2026-09-13).
+   *
+   * A selected `?date=` narrows the diary to THAT day, and a day with no
+   * records stays selected and shows its own empty line. It used to fall
+   * back to the whole diary, which read as "your tap did nothing" and put
+   * the endless list back on the screen; the calendar already tells the
+   * person which days carry records, so an empty day is an answer, not a
+   * miss.
+   */
   const filteredDayGroups = selectedDate
     ? entryDayGroups.filter((g) => g.isoKey === selectedDate)
     : entryDayGroups;
-  const dayFilterActive = selectedDate !== null && filteredDayGroups.length > 0;
-  const visibleDayGroups = dayFilterActive ? filteredDayGroups : entryDayGroups;
+  const dayFilterActive = selectedDate !== null;
+  /**
+   * BOUNDED DIARY (owner direction 2026-09-13: the phone must not open on a
+   * bedsheet). With no day selected the diary shows the most recent
+   * `DIARY_DAY_LIMIT` days and says how many days it is NOT showing — the
+   * calendar above is how the rest is reached. Nothing is deleted and
+   * nothing is unreachable: every day is one tap away on the grid, and
+   * "visos dienos" past the bound stays honest about being a bound.
+   */
+  const boundedDayGroups = dayFilterActive
+    ? filteredDayGroups
+    : entryDayGroups.slice(0, DIARY_DAY_LIMIT);
+  const hiddenDayCount = dayFilterActive
+    ? 0
+    : Math.max(0, entryDayGroups.length - boundedDayGroups.length);
+  const visibleDayGroups = boundedDayGroups;
+  // The calendar reads the SAME day groups the diary renders — one grouping,
+  // one set of figures, so a cell can never disagree with the day card.
+  const calendarGrid = buildJournalCalendar({
+    scale: calendarScale,
+    anchor: resolveAnchor({
+      requested: sp.month,
+      selected: selectedDate,
+      today: todayIsoKey,
+      scale: calendarScale,
+    }),
+    today: todayIsoKey,
+    selected: selectedDate,
+    days: entryDayGroups.map((g) => ({
+      iso: g.isoKey,
+      entryCount: g.entries.length,
+      totalMinutes: g.totalMinutes,
+    })),
+  });
+  // Query params the calendar must keep when it changes the day — a skill
+  // drill-down or a chosen period is not undone by tapping a date.
+  const calendarCarry: Record<string, string> = {};
+  if (skillFilterSlug) calendarCarry.skill = skillFilterSlug;
+  if (periodKey !== "all") calendarCarry.period = periodKey;
+  if (calendarScale !== "month") calendarCarry.cal = calendarScale;
   const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
   if (
     evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
@@ -1188,66 +1257,50 @@ export default async function JournalPage({
             </Link>
           </div>
         )}
-        {/* Calendar-driven day navigation (owner UX recovery v1): the diary's
-            days as compact chips — tap a day to see exactly that day, tap the
-            calendar link to see the SAME day with bookings, projects and
-            tasks on the one canonical calendar. Real days only (only days
-            that actually have entries become chips). */}
-        {entryDayGroups.length > 1 && (
-          <nav
-            aria-label={t("dayNav.title")}
-            data-testid="journal-day-nav"
-            className="flex items-center gap-1.5 overflow-x-auto pb-1"
+        {/* THE CALENDAR (owner direction 2026-09-13). The records live on a
+            real calendar — month or week — and tapping a day shows exactly
+            that day below, with that day's actions. The day chips this
+            replaces could only ever show the days that already had records,
+            in one flat strip, over an endless list of date headings: the
+            person could not see the shape of their own month and could not
+            reach a day that held nothing yet. Same days, same figures
+            (`entryDayGroups`), a shape a person can read. */}
+        <JournalCalendar
+          grid={calendarGrid}
+          locale={locale as ActiveLocale}
+          selected={selectedDate}
+          carry={calendarCarry}
+        />
+        {/* THE SELECTED DAY'S ACTIONS. What a person wants on a day they
+            tapped: record work on that day, and see that same day on the one
+            canonical calendar beside bookings, projects and tasks. Both are
+            existing destinations — nothing new is introduced here. */}
+        {dayFilterActive && selectedDate && (
+          <div
+            className="flex flex-wrap items-center gap-2"
+            data-testid="journal-day-actions"
+            data-day={selectedDate}
           >
+            <span className="mr-auto font-display text-sm font-semibold text-text-primary">
+              {formatUtcDate(selectedDate, locale)}
+            </span>
             <Link
-              href={"/dashboard/journal#journal-entries" as "/dashboard"}
-              data-testid="journal-day-nav-all"
-              aria-current={!dayFilterActive ? "page" : undefined}
-              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs transition-colors ${
-                !dayFilterActive
-                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                  : "border-ink-500 text-text-secondary hover:border-brand-blue"
-              }`}
+              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              data-testid="journal-day-record"
+              className="inline-flex min-h-9 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
             >
-              {t("dayNav.all")}
+              {t("dayNav.recordOnDay")}
             </Link>
-            {entryDayGroups.slice(0, 21).map((g) => (
-              <Link
-                key={g.isoKey}
-                href={
-                  `/dashboard/journal?date=${g.isoKey}#journal-entries` as "/dashboard"
-                }
-                data-testid={`journal-day-nav-${g.isoKey}`}
-                aria-current={
-                  dayFilterActive && selectedDate === g.isoKey ? "page" : undefined
-                }
-                className={`shrink-0 rounded-full border px-2.5 py-1 text-xs tabular-nums transition-colors ${
-                  dayFilterActive && selectedDate === g.isoKey
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
-                }`}
-              >
-                {formatUtcDate(g.isoKey, locale, {
-                  month: "short",
-                  day: "numeric",
-                })}
-                <span className="ml-1 text-meta text-text-muted">
-                  {g.entries.length}
-                </span>
-              </Link>
-            ))}
-            {dayFilterActive && selectedDate && (
-              <Link
-                href={
-                  `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
-                }
-                data-testid="journal-day-open-calendar"
-                className="ml-auto shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
-              >
-                {t("dayNav.openInCalendar")} →
-              </Link>
-            )}
-          </nav>
+            <Link
+              href={
+                `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
+              }
+              data-testid="journal-day-open-calendar"
+              className="inline-flex min-h-9 items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue"
+            >
+              {t("dayNav.openInCalendar")} →
+            </Link>
+          </div>
         )}
         {/* Wagon 5 first view: the status/legend/count lines are REAL and
             stay word-for-word — but behind ONE deliberate disclosure, so the
@@ -1325,7 +1378,27 @@ export default async function JournalPage({
         </p>
           </div>
         </details>
-        {(entries ?? []).length === 0 ? (
+        {dayFilterActive && visibleDayGroups.length === 0 ? (
+          /* A day the person tapped that holds no records. Real answer over a
+             known day (SEP-7: a recorded zero, not an unknown) — with the one
+             action that changes it, and the way back to every day. */
+          <div
+            className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+            data-testid="journal-day-empty"
+            data-day={selectedDate}
+          >
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {t("dayNav.dayEmpty")}
+            </p>
+            <Link
+              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              className="self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+              data-testid="journal-day-empty-record"
+            >
+              {t("dayNav.recordOnDay")} →
+            </Link>
+          </div>
+        ) : (entries ?? []).length === 0 ? (
           <EmptyState
             testId="journal-empty-state"
             title={t("listEmptyTitle")}
@@ -1724,6 +1797,18 @@ export default async function JournalPage({
                 </details>
               );
             })}
+            {hiddenDayCount > 0 && (
+              /* The diary is bounded, and says so. Every other day is one tap
+                 away on the calendar above — nothing is hidden, only not
+                 stacked onto one screen. */
+              <p
+                className="text-meta leading-relaxed text-text-muted"
+                data-testid="journal-days-bounded"
+                data-hidden-days={hiddenDayCount}
+              >
+                {t("dayNav.moreDays", { count: hiddenDayCount })}
+              </p>
+            )}
           </div>
         )}
       </section>

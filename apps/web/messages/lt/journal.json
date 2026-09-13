@@ -350,7 +350,10 @@
   "dayNav": {
     "title": "Dienų navigacija",
     "all": "Visos dienos",
-    "openInCalendar": "Atidaryti kalendoriuje"
+    "openInCalendar": "Atidaryti kalendoriuje",
+    "recordOnDay": "Įrašyti darbą",
+    "dayEmpty": "Šią dieną įrašų nėra.",
+    "moreDays": "Rodomos naujausios dienos. Dar {count, plural, one {# diena} few {# dienos} other {# dienų}} — pasirinkite kalendoriuje."
   },
   "spreadsheet": {
     "title": "Lentelės režimas — keli įrašai iš karto",
@@ -848,5 +851,21 @@
     "startOver": "Rašyti iš naujo",
     "detailed": "Detaliau (pilna forma)",
     "detailedBack": "Grįžti į paprastą įrašą"
+  },
+  "calendar": {
+    "title": "Darbo kalendorius",
+    "prev": "Ankstesnis laikotarpis",
+    "next": "Kitas laikotarpis",
+    "scaleLabel": "Rodinys",
+    "scale": {
+      "month": "Mėnuo",
+      "week": "Savaitė"
+    },
+    "allDays": "Visos dienos",
+    "dayWithRecords": "{day} — {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "dayEmpty": "{day} — įrašų nėra",
+    "periodEmpty": "Šiame laikotarpyje įrašų nėra.",
+    "periodSummary": "{days, plural, one {# diena} few {# dienos} other {# dienų}}, {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}.",
+    "periodSummaryWithTime": "{days, plural, one {# diena} few {# dienos} other {# dienų}}, {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, {time}."
   }
 }

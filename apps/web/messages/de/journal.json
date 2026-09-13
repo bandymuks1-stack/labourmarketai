@@ -350,7 +350,10 @@
   "dayNav": {
     "title": "Tagesnavigation",
     "all": "Alle Tage",
-    "openInCalendar": "Im Kalender öffnen"
+    "openInCalendar": "Im Kalender öffnen",
+    "recordOnDay": "Arbeit erfassen",
+    "dayEmpty": "An diesem Tag gibt es keine Einträge.",
+    "moreDays": "Die neuesten Tage werden gezeigt. Noch {count, plural, one {# Tag} other {# Tage}} — im Kalender auswählen."
   },
   "spreadsheet": {
     "title": "Tabellenmodus — mehrere Einträge auf einmal",
@@ -848,5 +851,21 @@
     "startOver": "Neu schreiben",
     "detailed": "Im Detail (vollständiges Formular)",
     "detailedBack": "Zurück zum einfachen Eintrag"
+  },
+  "calendar": {
+    "title": "Arbeitskalender",
+    "prev": "Vorheriger Zeitraum",
+    "next": "Nächster Zeitraum",
+    "scaleLabel": "Ansicht",
+    "scale": {
+      "month": "Monat",
+      "week": "Woche"
+    },
+    "allDays": "Alle Tage",
+    "dayWithRecords": "{day} — {count, plural, one {# Eintrag} other {# Einträge}}",
+    "dayEmpty": "{day} — keine Einträge",
+    "periodEmpty": "Keine Einträge in diesem Zeitraum.",
+    "periodSummary": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}.",
+    "periodSummaryWithTime": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}, {time}."
   }
 }

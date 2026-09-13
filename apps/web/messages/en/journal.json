@@ -350,7 +350,10 @@
   "dayNav": {
     "title": "Day navigation",
     "all": "All days",
-    "openInCalendar": "Open in calendar"
+    "openInCalendar": "Open in calendar",
+    "recordOnDay": "Record work",
+    "dayEmpty": "No records on this day.",
+    "moreDays": "Showing the most recent days. {count, plural, one {# more day} other {# more days}} — pick it on the calendar."
   },
   "spreadsheet": {
     "title": "Spreadsheet mode — several entries at once",
@@ -848,5 +851,21 @@
     "startOver": "Start over",
     "detailed": "In detail (full form)",
     "detailedBack": "Back to the simple entry"
+  },
+  "calendar": {
+    "title": "Work calendar",
+    "prev": "Previous period",
+    "next": "Next period",
+    "scaleLabel": "View",
+    "scale": {
+      "month": "Month",
+      "week": "Week"
+    },
+    "allDays": "All days",
+    "dayWithRecords": "{day} — {count, plural, one {# record} other {# records}}",
+    "dayEmpty": "{day} — no records",
+    "periodEmpty": "No records in this period.",
+    "periodSummary": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}.",
+    "periodSummaryWithTime": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}, {time}."
   }
 }
