@@ -48,6 +48,20 @@ guards under `apps/web/lib/guards/` remain binding and win on every conflict.
 Never use it to soften or remove an honesty label (`preview`, `concept`,
 `not live yet`), a status qualifier, or any evidence-level wording.
 
+## Trust gate — never bypass
+
+These plugins install only after a human confirms **"Yes, I trust this folder"**
+in the first *interactive* Claude Code session on a clone or workspace. That
+prompt is a security boundary, not friction: it is what stops a repository from
+silently installing plugins that execute code — which Impeccable does, via its
+downloaded engine binary.
+
+- Every new clone or workspace requires that human confirmation, each time.
+- Never pre-seed, automate, script or otherwise bypass the trust gate, and
+  never write the acceptance flag on someone's behalf.
+- A session that has not been trusted simply runs without these plugins. That
+  is the correct outcome — not a fault to work around.
+
 ## Rejected
 
 **21st.dev / Magic MCP** — component code retrieval, generation and publishing
