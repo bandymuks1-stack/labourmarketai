@@ -870,8 +870,8 @@
     "periodSummaryWithTime": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}, {time}",
     "confirmation": {
       "none": "zelf vastgelegde registratie",
-      "partial": "manager bevestigde een deel",
-      "all": "manager bevestigde"
+      "partial": "deel van de journaalregistraties bevestigd",
+      "all": "journaalregistratie bevestigd"
     }
   }
 }

@@ -870,8 +870,8 @@
     "periodSummaryWithTime": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}, {time}.",
     "confirmation": {
       "none": "self-declared record",
-      "partial": "manager confirmed some",
-      "all": "manager confirmed"
+      "partial": "some journal records confirmed",
+      "all": "journal record confirmed"
     }
   }
 }

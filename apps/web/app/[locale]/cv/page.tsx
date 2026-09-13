@@ -655,7 +655,12 @@ export default async function VerifiedCvPage({
             recorded units. Omitted when the journal was unreadable or empty. */}
         {factsSentences.length > 0 ? (
           <section
-            className="flex flex-col gap-1"
+            /* The summary anchor belongs to whichever block actually renders.
+               With no self-written summary this facts paragraph IS the
+               summary section, so it carries the id; with one, the block
+               above already does and this must not duplicate it. */
+            id={!cv.professionalSummary ? "cv-summary-section" : undefined}
+            className="flex flex-col gap-1 scroll-mt-20"
             data-testid="cv-professional-facts"
           >
             {!cv.professionalSummary ? (

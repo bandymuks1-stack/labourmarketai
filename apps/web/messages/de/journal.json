@@ -870,8 +870,8 @@
     "periodSummaryWithTime": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}, {time}",
     "confirmation": {
       "none": "selbst erfasster Eintrag",
-      "partial": "Manager bestätigte einen Teil",
-      "all": "Manager bestätigte"
+      "partial": "ein Teil der Journaleinträge bestätigt",
+      "all": "Journaleintrag bestätigt"
     }
   }
 }

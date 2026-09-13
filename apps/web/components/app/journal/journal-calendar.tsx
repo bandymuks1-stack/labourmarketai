@@ -86,8 +86,13 @@ export async function JournalCalendar({
    * a day with recorded time always reads as some time.
    */
   const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-  const hoursLabel = (minutes: number) =>
-    hoursFmt.format(Math.max(0.1, Math.round((minutes / 60) * 10) / 10));
+  const hoursLabel = (minutes: number) => {
+    const hours = Math.round((minutes / 60) * 10) / 10;
+    // A day of one or two recorded minutes rounds to 0.0. It must not be
+    // floored up to 0,1 — that would print MORE time than the journal holds,
+    // on the surface whose whole job is to state recorded time honestly.
+    return hours === 0 ? `<${hoursFmt.format(0.1)}` : hoursFmt.format(hours);
+  };
 
   const scaleHref = (scale: JournalCalendarScale) =>
     href({ cal: scale === "month" ? null : scale, month: grid.anchor });
