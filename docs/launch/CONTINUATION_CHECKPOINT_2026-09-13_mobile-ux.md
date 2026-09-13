@@ -7,10 +7,10 @@ Owner scope: the MOBILE UX correction only. Not a product/governance audit.
 | | |
 |---|---|
 | Branch | `claude/labourmarket-mobile-ux-qwdmk8` |
-| Branch head | `3d8430d` |
-| Open PR | **#1729** — auto-merge (squash) ENABLED, waiting on CI |
-| `main` | `cb4f43c` (#1728 merged) ← `dd6147d` / `cc63df5` (#1727 merged) |
-| Production | Vercel auto-deploys `main`. #1727 + #1728 are live; **#1729 is not** |
+| Branch head | `31ba19b` (= `main`; nothing unmerged) |
+| PR #1729 | **MERGED** as `31ba19b` |
+| `main` | `31ba19b` (#1729) ← `cb4f43c` (#1728) ← `dd6147d` / `cc63df5` (#1727) |
+| Production | Vercel auto-deploys `main`; all three PRs are on it. The Vercel deploy itself was NOT verified from here |
 
 `main` carries one EMPTY duplicate squash commit (`dd6147d`): during a GitHub
 incident a merge call reported `500` but had in fact succeeded (`cc63df5`),
@@ -89,6 +89,20 @@ e2e `calendar-journal-history` (repointed to the calendar cell).
 
 No migration, no RLS, no auth, no grant, no schema change in any of it.
 
+## Why #1729 sat unmerged for ~45 minutes
+
+Auto-merge was armed and every check was green, but GitHub never fired it:
+the PR had a **merge conflict**. #1728 was squash-merged, so `main` carried
+the same CV edits under a different history than the branch still held.
+Conflicts were in `mobile-compact-surfaces.test.ts` and this file; both were
+resolved by merging `origin/main` INTO the branch (never a rebase or
+force-push) and keeping the branch's newer content.
+
+**Lesson, and it cost 45 minutes:** "no check suite failed" does NOT mean a
+PR is mergeable. A merge conflict is silent in check events. When a PR with
+auto-merge armed has not merged, attempt the merge — the 405 names the
+reason immediately.
+
 ## Review findings on #1729 — three fixed, two declined
 
 Codex review, fixed in `3d8430d`:
@@ -138,8 +152,9 @@ Found while working, outside this mobile-UX scope, deliberately left alone
 
 ## NEXT ACTION (exact)
 
-1. Confirm **#1729** auto-merged; if CI is red, fix it before anything else.
-2. Then STOP and wait for the owner's walkthrough. Do not start another
+1. **Nothing is in flight.** `main` = `31ba19b`, the branch matches it, no
+   open PR from this work.
+2. **Wait for the owner's walkthrough.** Do not start another
    mobile slice without rendered evidence of a problem: remaining candidates
    (full journal page scroll, map usability, bottom-nav obstruction) are
    exactly the ones this container cannot measure.
