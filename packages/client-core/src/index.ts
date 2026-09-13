@@ -76,6 +76,27 @@ export {
   initialSelection,
   selectContext,
 } from "./actor-context";
+
+export {
+  PROFILE_SKILL_GROUP_ORDER,
+  periodFigures,
+  dominantSkill,
+  presentProfileSkills,
+  formatHours,
+  formatShare,
+} from "./work-figures";
+export type {
+  WorkPeriodFigures,
+  WorkSkillFigures,
+  WorkActivityFigures,
+  WorkCoverage,
+  WorkIntelligenceData,
+  LivingCvSkillRow,
+  ProfileSkillGroupKey,
+  ProfileSkillItem,
+  ProfileSkillGroup,
+  ProfileSkillPresentation,
+} from "./work-figures";
 export type {
   ParticipationMode,
   ActorContext,

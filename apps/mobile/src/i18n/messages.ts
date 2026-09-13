@@ -151,11 +151,45 @@ const en = {
     "The Living CV update did not run this time. The entry itself is saved.",
   "journal.compose.reviewOnWeb":
     "What is waiting for review is confirmed on the website.",
-  "profile.skillsTitle": "Living CV skills",
   "profile.skillsEmpty": "No skills recorded yet.",
   "profile.noWorkerProfile": "This account has no worker profile yet.",
-  "profile.skillVerified": "Verified",
-  "profile.skillUnverified": "Unverified",
+  "profile.figuresTitle": "Skills, with your recorded hours",
+  "profile.groupManagerConfirmed": "Confirmed by a manager",
+  "profile.groupJournalBacked": "Backed by your Work Journal",
+  "profile.groupDeclared": "Declared by you",
+  "profile.figuresUnavailable":
+    "Hours, share and entries could not be read this time. The skills below are still your recorded skills — nothing is shown as 0.",
+  "profile.figuresLegend":
+    "Hours · share of the hours attributed to a skill · entries, all time. The same figures as the website.",
+  "profile.figuresNotRead": "figures could not be read",
+  "profile.noFigures": "no recorded hours",
+  "profile.hoursShort": "h",
+  "profile.entriesLabel": "entries",
+  "profile.selfStatedMissing":
+    "Capabilities you noted in your own words are not carried to this screen yet; the website shows them under your skills.",
+  "profile.openJournal": "Open your work journal",
+  "journal.openProfile": "See what these entries add up to on your profile",
+
+  "today.figuresTitle": "Your work in numbers",
+  "today.periodToday": "Today",
+  "today.periodWeek": "Last 7 days",
+  "today.hoursLabel": "Hours",
+  "today.daysUnitLabel": "recorded in days",
+  "today.entriesLabel": "Entries",
+  "today.daysLabel": "Days",
+  "today.confirmedLabel": "Confirmed by a manager, h",
+  "today.periodEmpty": "Nothing recorded in this window.",
+  "today.periodMissing": "The server sent no figure for this window.",
+  "today.dominantTitle": "Largest share of your hours, last 7 days",
+  "today.dominantShare": "of the hours attributed to a skill",
+  "today.dominantNone":
+    "No hours attributed to a single skill in the last 7 days.",
+  "today.coverageTruncated":
+    "These figures rest on the last entries read — older entries are not included.",
+  "today.figuresScope":
+    "From your own Work Journal entries, by the same rule as the website. Calendar days end today (UTC).",
+  "today.openJournal": "Open your work journal",
+  "today.openProfile": "Open your profile and skills",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -293,11 +327,45 @@ const lt: Catalogue = {
     "Šįkart gyvojo CV atnaujinimas nebuvo atliktas. Pats įrašas išsaugotas.",
   "journal.compose.reviewOnWeb":
     "Tai, kas laukia peržiūros, patvirtinama svetainėje.",
-  "profile.skillsTitle": "Gyvojo CV įgūdžiai",
   "profile.skillsEmpty": "Įgūdžių dar neužfiksuota.",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
-  "profile.skillVerified": "Patvirtinta",
-  "profile.skillUnverified": "Nepatvirtinta",
+  "profile.figuresTitle": "Įgūdžiai su jūsų užrašytomis valandomis",
+  "profile.groupManagerConfirmed": "Vadovo patvirtinta",
+  "profile.groupJournalBacked": "Paremta jūsų darbo dienoraščiu",
+  "profile.groupDeclared": "Jūsų nurodyta",
+  "profile.figuresUnavailable":
+    "Valandų, dalies ir įrašų šį kartą perskaityti nepavyko. Įgūdžiai žemiau vis tiek yra jūsų užfiksuoti įgūdžiai — niekas nerodoma kaip 0.",
+  "profile.figuresLegend":
+    "Valandos · dalis iš įgūdžiams priskirtų valandų · įrašai, per visą laiką. Tie patys skaičiai kaip svetainėje.",
+  "profile.figuresNotRead": "skaičių perskaityti nepavyko",
+  "profile.noFigures": "užrašytų valandų nėra",
+  "profile.hoursShort": "val.",
+  "profile.entriesLabel": "įr.",
+  "profile.selfStatedMissing":
+    "Gebėjimai, kuriuos užrašėte savais žodžiais, į šį ekraną dar neperkeliami; svetainė juos rodo prie jūsų įgūdžių.",
+  "profile.openJournal": "Atidaryti darbo dienoraštį",
+  "journal.openProfile": "Kiek šie įrašai sudaro — jūsų profilyje",
+
+  "today.figuresTitle": "Jūsų veikla skaičiais",
+  "today.periodToday": "Šiandien",
+  "today.periodWeek": "Paskutinės 7 dienos",
+  "today.hoursLabel": "Valandos",
+  "today.daysUnitLabel": "užrašyta dienomis",
+  "today.entriesLabel": "Įrašai",
+  "today.daysLabel": "Dienos",
+  "today.confirmedLabel": "Vadovo patvirtinta, val.",
+  "today.periodEmpty": "Šiame lange nieko neužrašyta.",
+  "today.periodMissing": "Serveris šiam langui skaičiaus neatsiuntė.",
+  "today.dominantTitle": "Didžiausia jūsų valandų dalis per 7 dienas",
+  "today.dominantShare": "iš įgūdžiams priskirtų valandų",
+  "today.dominantNone":
+    "Per paskutines 7 dienas nė vienam įgūdžiui valandos nepriskirtos.",
+  "today.coverageTruncated":
+    "Šie skaičiai remiasi paskutiniais perskaitytais įrašais — senesni įrašai neįtraukti.",
+  "today.figuresScope":
+    "Iš jūsų paties darbo dienoraščio įrašų, pagal tą pačią taisyklę kaip svetainėje. Kalendorinės dienos baigiasi šiandien (UTC).",
+  "today.openJournal": "Atidaryti darbo dienoraštį",
+  "today.openProfile": "Atidaryti profilį ir įgūdžius",
 };
 
 const ru: Catalogue = {
@@ -431,11 +499,45 @@ const ru: Catalogue = {
     "Обновление живого CV в этот раз не выполнялось. Сама запись сохранена.",
   "journal.compose.reviewOnWeb":
     "То, что ждёт проверки, подтверждается на сайте.",
-  "profile.skillsTitle": "Навыки живого CV",
   "profile.skillsEmpty": "Навыки пока не записаны.",
   "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
-  "profile.skillVerified": "Подтверждено",
-  "profile.skillUnverified": "Не подтверждено",
+  "profile.figuresTitle": "Навыки с вашими записанными часами",
+  "profile.groupManagerConfirmed": "Подтверждено руководителем",
+  "profile.groupJournalBacked": "Подкреплено вашим дневником работы",
+  "profile.groupDeclared": "Указано вами",
+  "profile.figuresUnavailable":
+    "Часы, долю и записи в этот раз прочитать не удалось. Навыки ниже по-прежнему ваши записанные навыки — ничего не показывается как 0.",
+  "profile.figuresLegend":
+    "Часы · доля от часов, отнесённых к навыкам · записи, за всё время. Те же цифры, что и на сайте.",
+  "profile.figuresNotRead": "цифры прочитать не удалось",
+  "profile.noFigures": "записанных часов нет",
+  "profile.hoursShort": "ч",
+  "profile.entriesLabel": "зап.",
+  "profile.selfStatedMissing":
+    "Умения, которые вы записали своими словами, на этот экран пока не переносятся; сайт показывает их рядом с вашими навыками.",
+  "profile.openJournal": "Открыть дневник работы",
+  "journal.openProfile": "Что складывается из этих записей — в вашем профиле",
+
+  "today.figuresTitle": "Ваша работа в цифрах",
+  "today.periodToday": "Сегодня",
+  "today.periodWeek": "Последние 7 дней",
+  "today.hoursLabel": "Часы",
+  "today.daysUnitLabel": "записано в днях",
+  "today.entriesLabel": "Записи",
+  "today.daysLabel": "Дни",
+  "today.confirmedLabel": "Подтверждено руководителем, ч",
+  "today.periodEmpty": "В этом окне ничего не записано.",
+  "today.periodMissing": "Сервер не прислал цифру для этого окна.",
+  "today.dominantTitle": "Наибольшая доля ваших часов за 7 дней",
+  "today.dominantShare": "от часов, отнесённых к навыкам",
+  "today.dominantNone":
+    "За последние 7 дней ни одному навыку часы не отнесены.",
+  "today.coverageTruncated":
+    "Эти цифры опираются на последние прочитанные записи — более старые не включены.",
+  "today.figuresScope":
+    "Из ваших собственных записей дневника работы, по тому же правилу, что и на сайте. Календарные дни заканчиваются сегодня (UTC).",
+  "today.openJournal": "Открыть дневник работы",
+  "today.openProfile": "Открыть профиль и навыки",
 };
 
 const nl: Catalogue = {
@@ -569,11 +671,45 @@ const nl: Catalogue = {
     "De Living CV-update is deze keer niet uitgevoerd. Het item zelf is opgeslagen.",
   "journal.compose.reviewOnWeb":
     "Wat op beoordeling wacht, bevestig je op de website.",
-  "profile.skillsTitle": "Living CV-vaardigheden",
   "profile.skillsEmpty": "Nog geen vaardigheden vastgelegd.",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
-  "profile.skillVerified": "Geverifieerd",
-  "profile.skillUnverified": "Niet geverifieerd",
+  "profile.figuresTitle": "Vaardigheden, met uw vastgelegde uren",
+  "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
+  "profile.groupJournalBacked": "Onderbouwd door uw werkdagboek",
+  "profile.groupDeclared": "Door u opgegeven",
+  "profile.figuresUnavailable":
+    "Uren, aandeel en items konden deze keer niet worden gelezen. De vaardigheden hieronder zijn nog steeds uw vastgelegde vaardigheden — niets wordt als 0 getoond.",
+  "profile.figuresLegend":
+    "Uren · aandeel van de aan een vaardigheid toegekende uren · items, alle tijd. Dezelfde cijfers als op de website.",
+  "profile.figuresNotRead": "cijfers konden niet worden gelezen",
+  "profile.noFigures": "geen vastgelegde uren",
+  "profile.hoursShort": "u",
+  "profile.entriesLabel": "items",
+  "profile.selfStatedMissing":
+    "Vaardigheden die u in uw eigen woorden noteerde, komen nog niet op dit scherm; de website toont ze bij uw vaardigheden.",
+  "profile.openJournal": "Werkdagboek openen",
+  "journal.openProfile": "Wat deze items samen opleveren — op uw profiel",
+
+  "today.figuresTitle": "Uw werk in cijfers",
+  "today.periodToday": "Vandaag",
+  "today.periodWeek": "Laatste 7 dagen",
+  "today.hoursLabel": "Uren",
+  "today.daysUnitLabel": "vastgelegd in dagen",
+  "today.entriesLabel": "Items",
+  "today.daysLabel": "Dagen",
+  "today.confirmedLabel": "Bevestigd door een leidinggevende, u",
+  "today.periodEmpty": "Niets vastgelegd in dit venster.",
+  "today.periodMissing": "De server stuurde geen cijfer voor dit venster.",
+  "today.dominantTitle": "Grootste aandeel van uw uren, laatste 7 dagen",
+  "today.dominantShare": "van de aan een vaardigheid toegekende uren",
+  "today.dominantNone":
+    "In de laatste 7 dagen zijn geen uren aan één vaardigheid toegekend.",
+  "today.coverageTruncated":
+    "Deze cijfers berusten op de laatst gelezen items — oudere items zijn niet meegenomen.",
+  "today.figuresScope":
+    "Uit uw eigen werkdagboek-items, volgens dezelfde regel als de website. Kalenderdagen eindigen vandaag (UTC).",
+  "today.openJournal": "Werkdagboek openen",
+  "today.openProfile": "Profiel en vaardigheden openen",
 };
 
 const de: Catalogue = {
@@ -710,11 +846,45 @@ const de: Catalogue = {
     "Die Living-CV-Aktualisierung lief diesmal nicht. Der Eintrag selbst ist gespeichert.",
   "journal.compose.reviewOnWeb":
     "Was auf Prüfung wartet, wird auf der Website bestätigt.",
-  "profile.skillsTitle": "Living-CV-Fähigkeiten",
   "profile.skillsEmpty": "Noch keine Fähigkeiten erfasst.",
   "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
-  "profile.skillVerified": "Bestätigt",
-  "profile.skillUnverified": "Unbestätigt",
+  "profile.figuresTitle": "Fähigkeiten mit Ihren erfassten Stunden",
+  "profile.groupManagerConfirmed": "Von einer Führungskraft bestätigt",
+  "profile.groupJournalBacked": "Durch Ihr Arbeitstagebuch belegt",
+  "profile.groupDeclared": "Von Ihnen angegeben",
+  "profile.figuresUnavailable":
+    "Stunden, Anteil und Einträge konnten diesmal nicht gelesen werden. Die Fähigkeiten unten sind weiterhin Ihre erfassten Fähigkeiten — nichts wird als 0 gezeigt.",
+  "profile.figuresLegend":
+    "Stunden · Anteil an den einer Fähigkeit zugeordneten Stunden · Einträge, gesamt. Dieselben Zahlen wie auf der Website.",
+  "profile.figuresNotRead": "Zahlen konnten nicht gelesen werden",
+  "profile.noFigures": "keine erfassten Stunden",
+  "profile.hoursShort": "Std.",
+  "profile.entriesLabel": "Einträge",
+  "profile.selfStatedMissing":
+    "Fähigkeiten, die Sie in eigenen Worten notiert haben, erreichen diesen Bildschirm noch nicht; die Website zeigt sie bei Ihren Fähigkeiten.",
+  "profile.openJournal": "Arbeitstagebuch öffnen",
+  "journal.openProfile": "Was diese Einträge ergeben — in Ihrem Profil",
+
+  "today.figuresTitle": "Ihre Arbeit in Zahlen",
+  "today.periodToday": "Heute",
+  "today.periodWeek": "Letzte 7 Tage",
+  "today.hoursLabel": "Stunden",
+  "today.daysUnitLabel": "in Tagen erfasst",
+  "today.entriesLabel": "Einträge",
+  "today.daysLabel": "Tage",
+  "today.confirmedLabel": "Von einer Führungskraft bestätigt, Std.",
+  "today.periodEmpty": "In diesem Zeitfenster nichts erfasst.",
+  "today.periodMissing": "Der Server hat für dieses Zeitfenster keine Zahl gesendet.",
+  "today.dominantTitle": "Größter Anteil Ihrer Stunden, letzte 7 Tage",
+  "today.dominantShare": "der einer Fähigkeit zugeordneten Stunden",
+  "today.dominantNone":
+    "In den letzten 7 Tagen wurden keiner einzelnen Fähigkeit Stunden zugeordnet.",
+  "today.coverageTruncated":
+    "Diese Zahlen beruhen auf den zuletzt gelesenen Einträgen — ältere Einträge sind nicht enthalten.",
+  "today.figuresScope":
+    "Aus Ihren eigenen Arbeitstagebuch-Einträgen, nach derselben Regel wie die Website. Kalendertage enden heute (UTC).",
+  "today.openJournal": "Arbeitstagebuch öffnen",
+  "today.openProfile": "Profil und Fähigkeiten öffnen",
 };
 
 export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de };

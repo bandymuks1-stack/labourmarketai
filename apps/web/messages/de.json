@@ -15821,5 +15821,29 @@
     "unusable": "{count} Zeilen übersprungen — kein brauchbarer Name",
     "willCreate": "{count} werden hinzugefügt",
     "willNot": "Was NICHT passiert: für diese Menschen werden keine Konten angelegt, sie werden keine Administratoren Ihrer Organisation, das Hochgeladene wird kein bestätigter Nachweis über sie, und es erlaubt nicht, sie öffentlich oder kommerziell zu vertreten."
+  },
+  "teamRecordedWork": {
+    "title": "Erfasste Arbeit",
+    "intro": "{period}: was die eigenen Arbeitstagebuch-Einträge jeder Person, erfasst zu den Arbeitsverhältnissen dieser Organisation, zusammen ergeben — nach derselben Regel und über denselben Leser wie die „Arbeit in Zahlen“ der Person selbst. Persönlich oder für einen anderen Arbeitgeber erfasste Einträge gelangen nie in diese Ansicht.",
+    "bound": "Die ersten {shown} von {total} Personen der Liste; öffnen Sie eine Person für den vollständigen Abschnitt.",
+    "journalTotal": "Tagebuch: {hours} Std. bei {members, plural, one {# Person} other {# Personen}}, deren Einträge gelesen wurden",
+    "journalTotalNone": "Tagebuch: keine lesbaren Einträge in diesem Zeitraum",
+    "organizationTotal": "Erfassung Ihrer Organisation: {hours} Std. bei {members, plural, one {# Person} other {# Personen}} — getrennt gezählt, nirgends addiert",
+    "unknownCount": "{count, plural, one {# Person} other {# Personen}} konnte nicht gelesen werden",
+    "noReadableCount": "{count, plural, one {# Person} other {# Personen}} ohne lesbare Einträge",
+    "memberUnknown": "Konnte nicht gelesen werden",
+    "memberNoReadable": "Keine lesbaren Einträge",
+    "memberFigures": "{hours} Std. · {entries, plural, one {# Eintrag} other {# Einträge}} · {days, plural, one {# Tag} other {# Tage}}",
+    "memberDayUnits": "+ {days} in Tagen erfasst, getrennt von Stunden",
+    "confirmedShare": "{share} dieser Stunden ({hours} Std.) hat eine Führungskraft im Tagebuch bestätigt; der Rest ist die eigene Erfassung der Person",
+    "confirmedNone": "In diesem Zeitraum hat keine Führungskraft im Tagebuch Stunden bestätigt — die eigene Erfassung der Person",
+    "confirmedNoHours": "Keine erfassten Stunden in diesem Zeitraum",
+    "topSkills": "Größter Anteil der erfassten Stunden: {list}",
+    "topSkillsNone": "In diesem Zeitraum wurden keiner Fähigkeit Stunden zugeordnet",
+    "coverageTruncated": "Aus den letzten {count} gelesenen Einträgen — ältere Einträge sind nicht in diesen Zahlen",
+    "ledgerUnknown": "konnte nicht gelesen werden",
+    "ledgerNone": "nichts in diesem Zeitraum ({period})",
+    "ledgerFigures": "{hours} Std. · {rows, plural, one {# Zeile} other {# Zeilen}} · {days, plural, one {# Tag} other {# Tage}}",
+    "rule": "Die Tagebuchzahlen und die Erfassung der Organisation sind zwei Aufzeichnungen derselben Arbeit, nebeneinander gezeigt und nie addiert. Eine Stundenerfassung sagt, wann und wie viel, nicht was — sie erreicht keine Fähigkeit."
   }
 }
