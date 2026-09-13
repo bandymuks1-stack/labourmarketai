@@ -4023,12 +4023,6 @@
       "clarityNote": "Eén account, twee identiteiten — jij als persoon en je bedrijf. Wisselen verandert alleen welke acties je ziet (werk vinden, diensten aanbieden, personeel aannemen, een behoefte indienen); uitzendbureau en inkopen zijn acties, geen aparte systemen. Voor sommige bedrijfsacties kan later een organisatieprofiel nodig zijn."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Banen die bij mij passen",
-        "viewAll": "Alle advertenties",
-        "empty": "Momenteel geen passende advertenties — vul je vaardigheden in je profiel aan.",
-        "emptyCta": "Profiel aanvullen"
-      },
       "firstUse": {
         "eyebrow": "Begin hier",
         "title": "Begin bij jezelf",
@@ -7942,6 +7936,83 @@
         "overview": "Week & groei",
         "playerCard": "Spelerskaart"
       }
+    },
+    "home": {
+      "eyebrow": "Vandaag",
+      "headerNoName": "Jouw dag",
+      "professionUnknown": "Beroep nog niet ingevuld",
+      "reading": "Bezig met lezen…",
+      "state": {
+        "recorded": "{entries, plural, one {# registratie} other {# registraties}} vandaag · {hours} u",
+        "nothing": "Vandaag nog niets vastgelegd.",
+        "unknown": "De registraties van vandaag konden niet worden gelezen."
+      },
+      "next": {
+        "title": "Volgende stap",
+        "unknown": "Er kan nu geen volgende stap worden voorgesteld — de werkkaart kon niet worden gelezen."
+      },
+      "work": {
+        "title": "Vastgelegd werk",
+        "today": "Vandaag: {hours} u · {entries, plural, one {# registratie} other {# registraties}}",
+        "none": "Vandaag nog geen registraties.",
+        "untimed": "{n, plural, one {# registratie} other {# registraties}} zonder duur — uren nog niet meegeteld.",
+        "week": "Laatste 7 dagen: {hours} u · {entries, plural, one {# registratie} other {# registraties}}",
+        "truncated": "Geteld uit de laatst gelezen registraties — niet uit alle.",
+        "unknown": "Geen gegevens — het logboek kon niet worden gelezen."
+      },
+      "open": {
+        "title": "Vraagt je aandacht",
+        "untimed": "{n, plural, one {# registratie} other {# registraties}} zonder duur — voeg de uren toe",
+        "unlabelled": "{n, plural, one {# registratie} other {# registraties}} met uren maar zonder benoemd soort werk",
+        "unknown": "Open punten konden niet worden gelezen."
+      },
+      "growth": {
+        "title": "Groei",
+        "core_strength": "{skill} — het grootste aandeel van je toegewezen uren: {hours} u ({percent}).",
+        "growing": "{skill} groeit: de laatste 30 dagen vaker gebruikt dan daarvoor ({hours} u).",
+        "underused": "{skill} {days} dagen niet gebruikt — al een tijd geen registratie voor.",
+        "self_stated": "{skill} — door jou opgegeven; nog geen registratie ondersteunt het.",
+        "adjacent_opportunity": "Aangrenzende richting: {profession} — je registraties ondersteunen {shared} van de {total} vaardigheden ervan.",
+        "derived": "Een lezing van je eigen registraties, geen conclusie over jou.",
+        "insufficient": "Een groeilezing heeft minstens twee door registraties ondersteunde vaardigheden nodig.",
+        "none": "Je registraties tonen nog geen duidelijke richting.",
+        "unknown": "Geen gegevens — de groeilezing kon niet worden opgebouwd."
+      },
+      "opportunity": {
+        "title": "Wereld",
+        "band": {
+          "strong": "{n, plural, one {# sterk passend} other {# sterk passend}}",
+          "possible": "{n, plural, one {# mogelijk passend} other {# mogelijk passend}}",
+          "missing_requirement": "{n, plural, one {# met een ontbrekende eis} other {# met een ontbrekende eis}}",
+          "conflict": "{n, plural, one {# onverenigbaar} other {# onverenigbaar}}",
+          "not_assessed": "{n, plural, one {# gevonden, nog niet beoordeeld} other {# gevonden, nog niet beoordeeld}}"
+        },
+        "more": "{n, plural, one {nog # advertentie} other {nog # advertenties}}",
+        "none": "Op dit moment geen advertenties voor jou.",
+        "noWorker": "Advertenties verschijnen zodra je een werkersprofiel hebt.",
+        "unavailable": "De bron van advertenties is nu niet bereikbaar.",
+        "unknown": "Geen gegevens — advertenties konden niet worden gelezen.",
+        "open": "Wereld openen"
+      },
+      "ask": {
+        "title": "Vraag",
+        "body": "Leg werk vast in één zin, vraag naar je vaardigheden of open elke plek.",
+        "cta": "Schrijven"
+      },
+      "stations": {
+        "title": "Andere plekken",
+        "journal": "Mijn werk",
+        "numbers": "Mijn activiteit in cijfers",
+        "profile": "Beroepsprofiel",
+        "cv": "Levend cv",
+        "gallery": "Galerij"
+      }
+    },
+    "nav": {
+      "today": "Vandaag",
+      "world": "Wereld",
+      "ask": "Vraag",
+      "aria": "Hoofdnavigatie"
     }
   },
   "agencyPool": {

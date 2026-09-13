@@ -45,6 +45,14 @@ import { WorkspaceMap } from "./workspace-map";
  * real actions available on it.
  *
  * WHAT IT IS NOT.
+ *  - NOT a home for persistent information (worker mobile IA 2026-09-13 §3,
+ *    owner direction: "persistent information needs a stable destination;
+ *    overlays are temporary only"). Today's work, open items, the growth
+ *    line and the opportunity line live on ŠIANDIEN (`/dashboard`, the
+ *    worker's page); the panel shows ONE entity or ONE result readback and
+ *    closes back to the page it came from. It never duplicates what the
+ *    page carries as a card of its own, and its chrome title follows the
+ *    result's own state (see `discoveryOnly` below).
  *  - NOT a dialog. It is never modal, never traps focus, never covers the
  *    conversation and never blocks the page. It is a complementary landmark,
  *    and the guard forbids the modal roles outright: a modal would make the
@@ -219,13 +227,47 @@ export function ContextPanel({
     yieldKeyRef.current = key;
   }, [chipsPostedAt, result, selectionKey]);
 
+  // THE CHROME TITLE FOLLOWS THE RESULT'S OWN STATE (#1689, defect H; IA
+  // 2026-09-13 §4). A result that renders nothing the engine assessed as a
+  // fit marks its rows `data-discovery-only="true"`; the panel observes
+  // that declaration in its own body and heads itself with the registry's
+  // discovery title instead of the resting one — never "jobs that fit you"
+  // over unassessed rows. Observed, not passed: the panel keeps knowing
+  // nothing about any result's domain (it reads a generic attribute, and the
+  // registry names the alternative title).
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [discoveryOnly, setDiscoveryOnly] = useState(false);
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!body || !showsResult) {
+      setDiscoveryOnly(false);
+      return;
+    }
+    const read = () =>
+      setDiscoveryOnly(body.querySelector('[data-discovery-only="true"]') !== null);
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["data-discovery-only"],
+    });
+    return () => observer.disconnect();
+  }, [showsResult, result]);
+
+  const resultTitleKey = resultDescriptor
+    ? discoveryOnly && resultDescriptor.discoveryTitleKey
+      ? resultDescriptor.discoveryTitleKey
+      : resultDescriptor.titleKey
+    : null;
   const title =
     panel.mode === "entity"
       ? (entity?.title ?? t("loading"))
-      : resultDescriptor
-        ? // `titleKey` is the absolute path; this hook is scoped to the
+      : resultTitleKey
+        ? // The key is the absolute path; this hook is scoped to the
           // `conversation.results` namespace, so trim the prefix.
-          tr(resultDescriptor.titleKey.replace("conversation.results.", ""))
+          tr(resultTitleKey.replace("conversation.results.", ""))
         : t("workTitle");
 
   return (
@@ -305,6 +347,8 @@ export function ContextPanel({
 
       <div
         id="context-panel-body"
+        ref={bodyRef}
+        data-title-state={discoveryOnly ? "discovery" : undefined}
         className={`mt-2.5 min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${expanded ? "block max-h-[45dvh]" : "hidden"} lg:block lg:max-h-none`}
       >
         {/* W6 — THE MAP, inside the one workspace. It subscribes to the SAME

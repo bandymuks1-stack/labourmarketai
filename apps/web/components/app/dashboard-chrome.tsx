@@ -1,25 +1,46 @@
 "use client";
 
 import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/lib/i18n/navigation";
 import { ADMIN_NAV_ITEM } from "@/lib/config/navigation";
+import { hasConversationParams } from "@/lib/today/today-route";
 import {
   ConversationHeader,
   type ConversationNavLabels,
 } from "@/components/app/conversation/chat/conversation-header";
+import {
+  WorkerBottomNav,
+  type WorkerNavLabels,
+} from "@/components/app/today/worker-bottom-nav";
 
 /**
  * Dashboard chrome selector. It chooses WHICH chrome is actually in the DOM per
- * route — never an overlay painted over a still-mounted navbar. Three modes:
+ * route — never an overlay painted over a still-mounted navbar. Four modes:
  *
- *   • conversation (`/dashboard`) — children bare; the conversation surface is
- *     self-contained (`h-[100dvh]`, its own header).
+ *   • today (`/dashboard`, a WORKER in the personal space, no conversation
+ *     parameter) — ŠIANDIEN: the one top bar, a scrolling main and the
+ *     worker's 3-tab bar (IA 2026-09-13 §2). The page renders the screen;
+ *     the chrome renders the shell around it.
+ *   • conversation (`/dashboard`, everyone else — and the worker with a
+ *     conversation parameter such as `?ask=1` or `?result=`) — children
+ *     bare; the conversation surface is self-contained (`h-[100dvh]`, its
+ *     own header). For the worker the 3-tab bar sits BELOW it in normal
+ *     flow (PAKLAUSK is one of the tabs), never over the composer.
  *   • panel (EVERY other product route) — the canonical ONE TOP BAR
  *     (`<ConversationHeader>`): back-to-chat · identity · the active workspace
- *     chip · search · language · notifications · one avatar menu.
+ *     chip · search · language · notifications · one avatar menu. For the
+ *     worker the 3-tab bar rides the bottom here too (PASAULIS is
+ *     `/dashboard/opportunities`).
  *   • full (`/dashboard/admin/*` only) — the legacy module chrome (wide tab
  *     row + role switcher + bottom nav), kept for the INTERNAL operator
  *     console, which is not the user-facing product.
+ *
+ * The today/conversation split for the worker is decided by the SAME pure
+ * predicate the page uses (`lib/today/today-route.ts`), so the shell and the
+ * screen inside it can never disagree. The layout decides WHETHER the person
+ * is a worker in their personal space (it holds the session) and passes the
+ * bar's labels; a `null` here means "not a worker bar route".
  *
  * WHY panel is now the default, not a four-route exception
  * -------------------------------------------------------
@@ -70,10 +91,16 @@ import {
  *  an ungated admin LINK. Deriving it keeps both honest. */
 const FULL_CHROME_PREFIX = ADMIN_NAV_ITEM.href;
 
-type Mode = "conversation" | "panel" | "full";
+type Mode = "today" | "conversation" | "panel" | "full";
 
-function modeFor(pathname: string): Mode {
-  if (pathname === "/dashboard") return "conversation";
+function modeFor(
+  pathname: string,
+  workerBar: boolean,
+  conversationRequested: boolean,
+): Mode {
+  if (pathname === "/dashboard") {
+    return workerBar && !conversationRequested ? "today" : "conversation";
+  }
   if (
     pathname === FULL_CHROME_PREFIX ||
     pathname.startsWith(`${FULL_CHROME_PREFIX}/`)
@@ -87,6 +114,7 @@ export function DashboardChrome({
   children,
   headerTitle,
   nav,
+  workerNav,
   fullHeader,
   fullBottomNav,
   rexora,
@@ -94,12 +122,18 @@ export function DashboardChrome({
   children: React.ReactNode;
   headerTitle: string;
   nav: ConversationNavLabels;
+  /** The worker's 3-tab bar labels — `null` for every other identity and for
+   *  a worker acting inside an organization (the layout decides). */
+  workerNav: WorkerNavLabels | null;
   /** Full-mode chrome slots, authored server-side in the layout. */
   fullHeader: React.ReactNode;
   fullBottomNav: React.ReactNode;
   rexora: React.ReactNode;
 }) {
-  const mode = modeFor(usePathname());
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const workerBar = workerNav !== null;
+  const mode = modeFor(pathname, workerBar, hasConversationParams(searchParams));
 
   // Flag the conversation surface on <html> so globals.css can lift the global
   // language-feedback FAB above the chat's composer + bottom nav. The FAB is a
@@ -116,16 +150,34 @@ export function DashboardChrome({
   }, [mode]);
 
   // Conversation: bare — the chat is self-contained (h-[100dvh], own nav).
-  if (mode === "conversation") return <>{children}</>;
-
-  // Panel: a PROJECTION of the conversation (owner audit §4.4) — the same
-  // minimal top bar with the back-to-chat affordance; no parallel tab system
-  // and no bottom nav exists any more.
-  if (mode === "panel") {
+  // For the worker the 3-tab bar sits under it in normal flow: the chat's
+  // own `h-[100dvh]` root is confined to the flex column's remaining height
+  // (`[&>*]:!h-full`), so the composer and the bar never overlap.
+  if (mode === "conversation") {
+    if (!workerNav) return <>{children}</>;
     return (
-      <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple">
+      <div className="flex h-[100dvh] flex-col" data-chrome="conversation">
+        <div className="min-h-0 flex-1 [&>*]:!h-full">{children}</div>
+        <WorkerBottomNav labels={workerNav} placement="static" />
+      </div>
+    );
+  }
+
+  // Today / Panel: a PROJECTION of the conversation (owner audit §4.4) — the
+  // same minimal top bar with the back-to-chat affordance; no parallel tab
+  // system. The worker's 3-tab bar is the one bottom bar that exists here,
+  // and only for the worker (IA §2); the main pads for it.
+  if (mode === "today" || mode === "panel") {
+    return (
+      <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
         <ConversationHeader title={headerTitle} nav={nav} />
-        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+        <main
+          className={`relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 sm:px-12 ${
+            workerNav
+              ? "pb-[calc(6rem+env(safe-area-inset-bottom))]"
+              : "pb-[calc(2.5rem+env(safe-area-inset-bottom))] md:pb-8"
+          }`}
+        >
           {children}
           {/* The Rexora product credit (owner directive 2026-07-14, pinned by
               legal-entity-truth.test.ts) used to hang off the FULL chrome. Now
@@ -134,6 +186,7 @@ export function DashboardChrome({
               same one-line credit, in the shell the product actually uses. */}
           {rexora}
         </main>
+        {workerNav && <WorkerBottomNav labels={workerNav} placement="fixed" />}
       </div>
     );
   }

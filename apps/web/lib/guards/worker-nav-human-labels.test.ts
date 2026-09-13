@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
+import { TODAY_STATIONS, WORKER_TABS } from "../today/today-route";
 
 /**
  * Human navigation guard (slice human-nav-cleanup-v1, PR E).
@@ -83,6 +84,61 @@ describe("compact action-first global nav + sub-surface reachability", () => {
   it("account/settings stays reachable via the avatar account menu", () => {
     const menu = read("components/app/account-menu.tsx");
     expect(menu).toMatch(/\/dashboard\/account/);
+  });
+});
+
+describe("the worker's phone nav is ŠIANDIEN · PASAULIS · PAKLAUSK (IA 2026-09-13 §2)", () => {
+  // RETIRED for the worker: the catalogue bar (space · map · journal ·
+  // messages) as the worker's primary nav. The catalogue bar survives for the
+  // admin console only (chrome mode `full`); the worker's bar is three roots
+  // built ON the same primitive, from ONE tab definition.
+  const today = (j: Record<string, unknown>) =>
+    (j.todayScreen as { nav: Record<string, string> }).nav;
+
+  it("LT tabs read Šiandien / Pasaulis / Paklausk; EN mirrors them", () => {
+    expect(today(lt).today).toBe("Šiandien");
+    expect(today(lt).world).toBe("Pasaulis");
+    expect(today(lt).ask).toBe("Paklausk");
+    expect(today(en).today).toMatch(/today/i);
+    expect(today(en).world).toMatch(/world/i);
+    expect(today(en).ask).toMatch(/ask/i);
+  });
+
+  it("the three tabs are the existing routes — no new route for a tab", () => {
+    expect(WORKER_TABS.map((t) => t.href)).toEqual([
+      "/dashboard",
+      "/dashboard/opportunities",
+      "/dashboard?ask=1",
+    ]);
+  });
+
+  it("the worker bar is built on the ONE bottom-nav primitive, and the chrome mounts it", () => {
+    const bar = read("components/app/today/worker-bottom-nav.tsx");
+    expect(bar).toMatch(/import \{ BottomNav[^}]*\} from "@\/components\/app\/bottom-nav"/);
+    expect(bar).toMatch(/<BottomNav\b/);
+    expect(bar).not.toMatch(/<nav\b/);
+    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/<WorkerBottomNav\b/);
+  });
+
+  it("ŠIANDIEN renders no page quick-nav strip (a second nav strip is card soup)", () => {
+    const dir = join(root, "components", "app", "today");
+    for (const f of readdirSync(dir)) {
+      expect(read(`components/app/today/${f}`), f).not.toMatch(/PageQuickNav|page-quick-nav/);
+    }
+    expect(read("app/[locale]/dashboard/page.tsx")).not.toMatch(/PageQuickNav/);
+  });
+
+  it("the secondary stations are text links, one tap from ŠIANDIEN", () => {
+    expect(TODAY_STATIONS.map((s) => s.href)).toEqual([
+      "/dashboard/journal",
+      "/dashboard/journal/numbers",
+      "/dashboard/profile",
+      "/cv",
+      "/dashboard/gallery",
+    ]);
+    const screen = read("components/app/today/today-screen.tsx");
+    expect(screen).toMatch(/TODAY_STATIONS\.map/);
+    expect(screen).toMatch(/today-station-\$\{s\.id\}/);
   });
 });
 
