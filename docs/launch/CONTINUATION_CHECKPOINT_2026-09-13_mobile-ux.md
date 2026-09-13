@@ -1,157 +1,119 @@
-# CONTINUATION CHECKPOINT — 2026-09-13 (mobile UX recovery)
+# CHECKPOINT — mobile UX correction, 2026-09-13
 
-Written for the next session/context. Facts only; nothing forecast.
+Owner scope: the MOBILE UX correction only. Not a product/governance audit.
 
-## Where the repository stands
+## Exact state
 
 | | |
 |---|---|
-| `main` at session start | `6331908` — "#1689 premium recovery — one worker loop, A-14 constitution (#1724)" |
-| Working branch | `claude/labourmarket-mobile-ux-qwdmk8` |
-| Branch head | `a3f073c` |
-| PR #1727 | **MERGED** — https://github.com/bandymuks1-stack/labourmarketai/pull/1727 |
-| `main` after the merge | `dd6147d` (tree byte-identical to the tested head `3b27e9e`) |
-| Production | Vercel auto-deploys `main`; **PRODUCTION_PROVEN is still NO** until the owner walks it |
+| Branch | `claude/labourmarket-mobile-ux-qwdmk8` |
+| Branch head | `425e30f` |
+| Open PR | **#1729** — auto-merge (squash) ENABLED, waiting on CI |
+| `main` | `cb4f43c` (#1728 merged) ← `dd6147d` / `cc63df5` (#1727 merged) |
+| Production | Vercel auto-deploys `main`. #1727 + #1728 are live; **#1729 is not** |
 
-## What was actually done, and proven how
+`main` carries one EMPTY duplicate squash commit (`dd6147d`): during a GitHub
+incident a merge call reported `500` but had in fact succeeded (`cc63df5`),
+and the retry produced a no-op. Trees are identical; left alone deliberately
+— removing it means rewriting `main`. **After a 5xx on a GitHub write,
+re-read before retrying.**
 
-Five commits, one PR, **composition only**. No migration, no RLS, no auth,
-no new AI call, no new route, no new reader, no destructive write.
+## DONE
 
-1. `0554aa3` — **the journal's records live on a calendar**; the opportunity
-   list reads as a list.
-2. `8b99abd` — **PASAULIS' base is the map**, and a place opens that place's
-   list.
-3. `1c0fbbd` — the map and the first results share one phone screen.
-4. `1549de4` — the **profile** opens on the person, not on seven decisions.
-5. `a3f073c` — the diary answers the same window the calendar draws.
+**Work Journal — calendar-first history.** The flat day-chip strip over an
+endless date list is retired. A real month/week calendar is the day
+navigator; tapping a day shows that day's entries and that day's actions
+(record work, open the same day on `/dashboard/planning`). Quick recording
+unchanged. Each date shows **entries (marker) · hours (number) · state
+(marker material + words in `aria-label`)**. Three scopes — DAY (`?date=`),
+PERIOD (`?month=`, the ‹ › buttons), RECENT — each bounded to 7 day-cards
+with an honest "+n". The long list survives as the day/period detail.
+The grid is a PURE re-shaping of the page's own `entryDayGroups`; it reads
+nothing, so it cannot disagree with the diary or the planning calendar.
+`confirmedCount` uses the page's own `deriveReviewResult === "approved"`.
 
-**TECHNICALLY_PROVEN** (each run locally on the head, all green):
-`pnpm -F web typecheck`, `lint` (0 errors), `test` — 1325 files / 22,652
-tests, `build`, plus `placeholders:check`, `check:fit-signal-copy`,
-`check:pilot-honesty-copy`, `check:pricing-honesty-copy`,
-`check:worker-plain-language`, `check:constitution`,
-`check:primary-route-smoke`, `check:public-seo-indexing`,
-`check:i18n-debt`, `product-truth --check`, `migration-safety` (GREEN — no
-migration files changed).
+**Pasaulis — map-first.** The already-working `WorldDiscovery` map (canonical
+`MarketMap`, viewport-bounded reader, clustered by place, honest counts,
+list equivalent) moved from a link at the bottom of a collapsed disclosure
+to directly under the header, above the banded list, at `mode="result"`
+(32vh) so map + first rows share one phone screen. A place links into the
+page's OWN `?country=` filter. CV-driven cross-profession opportunities
+preserved (`evidencedProfessionSlug` untouched).
 
-**CI on GitHub**, on `8b99abd`: **Quality Gates ✅ · E2E Smoke ✅ ·
-Migration Safety ✅**. Later commits were pushed after that run; re-check
-the head before merging.
+**Galimybės — compact rows.** Essence on the row (work · place · pay if
+stated · fit band · clamped WHY); detail stays behind the existing
+disclosure. Both mandatory disclosures survive by construction. One action
+hierarchy: forward action first, keep-for-later quiet.
 
-`product-gate.mjs` reports 42 violations locally — **identical on a clean
-checkout of `main`**, i.e. pre-existing waiver-scoped surfaces, nothing this
-branch introduced.
+**Profilis** — 7 destination chips → 2 visible + 5 behind one disclosure.
+**CV** — print-hidden section jump strip; the document is NOT collapsed.
 
-**HUMAN_UI_PROVEN = NO. PRODUCTION_PROVEN = NO.** Nobody has walked this on
-a phone. Do not upgrade either without a real walk.
+**Measured at 390px and 690px** (real component, real compiled CSS): overflow
+**0**, every control **≥44px**, a whole month in **403px**. Four defects were
+found ONLY by measuring and are fixed in #1729: dates lacked hours/state;
+‹ › were 36px and the pills 26px; `"57 val. 15 min.."` double period in
+LT/RU/NL/DE; and my own state words broke the precise-origin doctrine
+(now "patvirtino vadovas" / "paties užrašyta").
 
-## One thing to know about `main`'s history
+## NOT DONE / NOT VERIFIED
 
-GitHub was mid-incident during the merge: `markPullRequestReadyForReview`,
-`enablePullRequestAutoMerge` and the REST merge endpoint all returned 502 /
-500 for several minutes. **One of the merge calls that reported
-`500 Server Error` had in fact succeeded server-side** (`cc63df5`, 12:25:57),
-and the retry that finally reported success produced a second, EMPTY squash
-commit (`dd6147d`, 12:32:18). `git diff cc63df5 dd6147d` is empty and
-`git diff 3b27e9e dd6147d` is empty, so the content on `main` is exactly what
-was tested. The duplicate is a no-op commit in the history and was left
-alone deliberately: removing it would mean rewriting `main`, which the
-operating contract forbids.
+- **No phone walkthrough by a human.** `HUMAN_UI_PROVEN = NO`,
+  `PRODUCTION_PROVEN = NO` for every item above.
+- **No Docker in the build container** → local Supabase cannot boot → the
+  authenticated pages were never rendered end-to-end. NOT measured:
+  full `/dashboard/journal` page scroll length, `/dashboard/opportunities`
+  composition, bottom-nav obstruction, and **map usability** (Leaflet needs
+  a live browser + tiles).
+- `/dashboard/profile` was NOT split into stations — deliberately. Most of
+  that file is already inside two disclosures (`#cv-details`,
+  `#capabilities`); ~6 blocks render unconditionally. A line count is not a
+  page length.
+- PAKLAUSK was NOT changed — deliberately. 52 registered actions, 77
+  classified intents (40 read / 17 write / 16 route / 3 blocked), and
+  `lib/conversation/starters.ts` already derives contextual starters on the
+  server, capped at three. It must not be given a menu.
 
-**Lesson for the next agent:** when a GitHub write returns 5xx, re-read the
-resource before retrying — the write may have landed.
+## Files changed (all three PRs)
 
-**The repo's *Allow auto-merge* setting IS on.** It was enabled successfully
-on the follow-up PR #1728 minutes later, so the merge model's one-time DI
-prerequisite is satisfied and every earlier failure was the incident alone.
-GREEN-class PRs can be opened with auto-merge from here on; the
-wait-for-CI-then-merge fallback is not needed.
+`lib/journal/journal-calendar.ts` (new, pure) ·
+`components/app/journal/journal-calendar.tsx` (new) ·
+`app/[locale]/dashboard/journal/page.tsx` ·
+`app/[locale]/dashboard/opportunities/page.tsx` ·
+`components/app/market-map/world-discovery.tsx` ·
+`components/app/opportunity-structured-detail.tsx` ·
+`app/[locale]/dashboard/profile/page.tsx` · `app/[locale]/cv/page.tsx` ·
+`messages/{lt,en,ru,nl,de}{,/journal}.json` ·
+guards `journal-calendar`, `mobile-compact-surfaces`,
+`world-discovery-subset` (mount list widened to a CLOSED two entries) ·
+e2e `calendar-journal-history` (repointed to the calendar cell).
 
-## Blocked — needs the owner (nothing an agent can do)
+No migration, no RLS, no auth, no grant, no schema change in any of it.
 
-1. **`SUPABASE_DB_URL`** (read-only) is still missing as a GitHub Actions
-   secret — the live secdef-allowlist and migration-parity gates stay
-   inactive. This is open owner decision GOV-1, unchanged by this session.
-3. The six open owner decisions printed by `product-truth.mjs`
-   (PER-11, ORG-2, EVID-2, EVID-6, MKT-7, GOV-1) are unchanged.
+## Owner gates
 
-## Shortest owner walk (phone) — the one thing that is actually needed
+1. **The phone walkthrough.** Nothing replaces it.
+2. `SUPABASE_DB_URL` (read-only GitHub Actions secret, GOV-1) — two live
+   security gates stay inactive without it. Unchanged by this work.
 
-1. `/lt/dashboard/journal` — a calendar opens on the current month with dots
-   on the days that carry records; the list below shows a handful of days.
-2. Tap a day **with** dots → only that day, with **Įrašyti darbą** and
-   **Atidaryti kalendoriuje** beside its date.
-3. Tap a day **without** dots → it stays selected and says so.
-4. **Savaitė** / **Mėnuo**, then ‹ › — the grid AND the list move together.
-5. `/lt/dashboard/opportunities` — the map is the first thing under the
-   title and the first rows are on the same screen.
-6. Tap a place → **Rodyti šios šalies galimybes** → the same page, narrowed.
-7. The rows read as rows; open one — every fact is inside it.
+## NEXT ACTION (exact)
 
-## NEXT_HIGHEST_VALUE_ACTION
-
-In order, for whoever picks this up:
-
-1. **The owner's phone walk** (§ above). Everything else is guesswork until
-   someone has used it.
-2. **PAKLAUSK is NOT "just another menu" — measured, and the measurement
-   argues against building.** `action-registry.ts` carries 52 actions with
-   confirmation tiers and preconditions; `intent-registry.ts` carries 77
-   classified intents (40 read · 17 write · 16 route · 3 blocked) wired
-   through `dispatch.ts` into the chat; and discoverability is already
-   designed — `lib/conversation/starters.ts` derives starter chips on the
-   SERVER from the person's real signals, capped at three, per workspace
-   kind. So do **not** rebuild it, and do not add a menu to it.
-   Two facts recorded, neither of them yet a defect:
-   · `actionsForRoles()` is exported by the registry and called NOWHERE in
-     the product — the registry is a contract, not an enumerated menu, and
-     actions are reached through the intents and through the components
-     that dispatch by id. That is what the registry's own docstring says
-     the design is ("wired per journey"), so it is not, by itself, a bug.
-   · six registered actions are referenced nowhere outside the registry —
-     `worker.complete-onboarding`, `worker.upload-cv`, `worker.save-skills`,
-     `agency.review-clients`, `agency.offer-status`, `agency.who-waits`.
-     Whether the LLM proposer can still reach them was NOT established.
-     Establish that before calling them dead.
-   The honest next step is the owner's phone walk telling us WHERE it reads
-   as a menu. Anything before that is speculation.
-3. **`/dashboard/profile` needs no split — a line count is not a page
-   length.** 1,300+ lines sounds like a bedsheet, and an earlier version of
-   this checkpoint said so. Re-read: most of the page is already inside TWO
-   disclosures (`#cv-details`, holding work preferences, languages,
-   education, organization evidence, the learning compass, achievements and
-   external profiles; and `#capabilities`, holding skills). What renders
-   unconditionally is the header, the jump strip, the hub overview, the
-   trust signals, a feature note and the composer — about six blocks. The
-   destination-chip wall was the real defect on this page and it is fixed.
-   Do not "split it into stations" on the strength of `wc -l`.
-4. `/cv` is deliberately NOT compacted — it is a printable DOCUMENT
-   (`cv-doc`, `print:` styles, template registry) and is meant to be read
-   top to bottom. It gained a print-hidden jump strip instead. Do not
-   "fix" it by collapsing sections.
-5. `/dashboard/gallery` (116 lines) and `/dashboard/work-in-numbers`
-   (305 lines) were checked and are **already compact**. Do not redo them.
+1. Confirm **#1729** auto-merged; if CI is red, fix it before anything else.
+2. Then STOP and wait for the owner's walkthrough. Do not start another
+   mobile slice without rendered evidence of a problem: remaining candidates
+   (full journal page scroll, map usability, bottom-nav obstruction) are
+   exactly the ones this container cannot measure.
+3. If a rendering environment with Docker becomes available, boot local
+   Supabase + fixtures and re-run the 390px measurement against the REAL
+   `/dashboard/journal` and `/dashboard/opportunities` pages.
 
 ## DO-NOT-REGRESS
 
-- The journal calendar **reads nothing**. It is a pure re-shaping of the
-  page's own `entryDayGroups`, which come from the canonical work-time rule.
-  If it ever grows a query, the diary and the calendar can disagree again.
-- **One map, one reader.** `world-discovery-subset` now allows a CLOSED
-  two-entry mount list. A third mount is a product decision with a receipt,
-  never a convenience import.
-- **Both mandatory opportunity disclosures.** The talent-pool chip renders
-  OUTSIDE the essence filter, and "pay not stated" stays on the row. A
-  talent pool may never read as a vacancy.
-- **The Living CV may still surface a different profession** when the
-  evidence supports it (`evidencedProfessionSlug`). Confirmed untouched.
-- Every profile destination stays reachable — five moved behind one
-  disclosure, none were removed.
-- SEP-7 on the calendar: an empty cell is a recorded zero over a known day,
-  a future day is shown and not offered, and a day the reader could not
-  answer for never reaches the grid.
-- **A CV is a document.** `/cv` sections are not collapsed and must not be:
-  the jump strip is the way in, and every one of its anchors is built from
-  the SAME predicate that renders its section, so it can never offer a dead
-  link. Pinned by `mobile-compact-surfaces`.
+- The calendar reads nothing — pure re-shaping of the page's own day groups.
+- One map, one reader: `world-discovery-subset` allows a CLOSED two-entry
+  mount list. A third mount is a product decision with a receipt.
+- Talent-pool chip renders OUTSIDE the essence filter; "pay not stated"
+  stays on the row.
+- CV sections are not collapsed; every jump anchor is built from the same
+  predicate that renders its section.
+- An untimed record is never "0 h"; an empty day is a recorded zero; a
+  confirmation always names its origin.
