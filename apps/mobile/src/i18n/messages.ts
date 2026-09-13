@@ -64,7 +64,7 @@ const en = {
   "config.problem.body":
     "The app cannot start until these values are set. No data has been sent anywhere.",
 
-  "workspace.title": "Workspace",
+  "workspace.title": "Acting for",
   "workspace.loading": "Reading your workspaces…",
   "workspace.active": "Active",
   "workspace.switching": "Switching…",
@@ -72,7 +72,7 @@ const en = {
   "workspace.failed.body":
     "This is a failed read, not an answer: it does not mean you belong to no organization. Try again in a moment.",
   "workspace.pointerUnavailable":
-    "This is where work you record would land, worked out from what you belong to — not a choice saved for you. Switching is not available here yet.",
+    "This is worked out from what you belong to, not a choice saved for you, and it cannot be changed here yet.",
   "workspace.switchFailed": "The workspace was not changed. Nothing was moved.",
   "context.title": "You are working as",
   "context.unavailable.title": "We cannot list your contexts yet",
@@ -250,7 +250,7 @@ const lt: Catalogue = {
   "config.problem.body":
     "Programa negali pasileisti, kol nenustatytos šios reikšmės. Jokie duomenys niekur nebuvo išsiųsti.",
 
-  "workspace.title": "Darbo erdvė",
+  "workspace.title": "Veikiate kaip",
   "workspace.loading": "Skaitome jūsų darbo erdves…",
   "workspace.active": "Aktyvi",
   "workspace.switching": "Keičiama…",
@@ -258,7 +258,7 @@ const lt: Catalogue = {
   "workspace.failed.body":
     "Tai nepavykęs skaitymas, o ne atsakymas: tai nereiškia, kad nepriklausote jokiai organizacijai. Pabandykite po akimirkos.",
   "workspace.pointerUnavailable":
-    "Čia patektų jūsų įrašytas darbas — tai apskaičiuota iš to, kam priklausote, o ne jūsų išsaugotas pasirinkimas. Keisti čia kol kas negalima.",
+    "Tai apskaičiuota iš to, kam priklausote, o ne jūsų išsaugotas pasirinkimas, ir kol kas čia to pakeisti negalima.",
   "workspace.switchFailed": "Darbo erdvė nepakeista. Niekas neperkelta.",
   "context.title": "Dirbate kaip",
   "context.unavailable.title": "Kol kas negalime parodyti jūsų kontekstų",
@@ -432,7 +432,7 @@ const ru: Catalogue = {
   "config.problem.body":
     "Приложение не запустится, пока не заданы эти значения. Никакие данные никуда не отправлялись.",
 
-  "workspace.title": "Рабочее пространство",
+  "workspace.title": "Действуете от имени",
   "workspace.loading": "Читаем ваши рабочие пространства…",
   "workspace.active": "Активное",
   "workspace.switching": "Переключаем…",
@@ -440,7 +440,7 @@ const ru: Catalogue = {
   "workspace.failed.body":
     "Это неудавшееся чтение, а не ответ: оно не означает, что вы не состоите ни в одной организации. Попробуйте через мгновение.",
   "workspace.pointerUnavailable":
-    "Сюда попала бы записанная вами работа — это выведено из того, где вы состоите, а не сохранённый вами выбор. Переключение здесь пока недоступно.",
+    "Это выведено из того, где вы состоите, а не сохранённый вами выбор, и изменить это здесь пока нельзя.",
   "workspace.switchFailed": "Рабочее пространство не изменено. Ничего не перенесено.",
   "context.title": "Вы работаете как",
   "context.unavailable.title": "Пока мы не можем показать ваши контексты",
@@ -614,7 +614,7 @@ const nl: Catalogue = {
   "config.problem.body":
     "De app kan niet starten totdat deze waarden zijn ingesteld. Er zijn geen gegevens verstuurd.",
 
-  "workspace.title": "Werkruimte",
+  "workspace.title": "Handelt namens",
   "workspace.loading": "Je werkruimtes worden gelezen…",
   "workspace.active": "Actief",
   "workspace.switching": "Wisselen…",
@@ -622,7 +622,7 @@ const nl: Catalogue = {
   "workspace.failed.body":
     "Dit is een mislukte leesactie, geen antwoord: het betekent niet dat je bij geen enkele organisatie hoort. Probeer het zo opnieuw.",
   "workspace.pointerUnavailable":
-    "Hier zou het werk terechtkomen dat je vastlegt — afgeleid uit waar je bij hoort, niet een keuze die voor jou is bewaard. Wisselen kan hier nog niet.",
+    "Dit is afgeleid uit waar je bij hoort, niet een keuze die voor jou is bewaard, en het kan hier nog niet gewijzigd worden.",
   "workspace.switchFailed": "De werkruimte is niet gewijzigd. Er is niets verplaatst.",
   "context.title": "Je werkt als",
   "context.unavailable.title": "We kunnen je contexten nog niet tonen",
@@ -796,7 +796,7 @@ const de: Catalogue = {
   "config.problem.body":
     "Die App kann erst starten, wenn diese Werte gesetzt sind. Es wurden keine Daten gesendet.",
 
-  "workspace.title": "Arbeitsbereich",
+  "workspace.title": "Handelt für",
   "workspace.loading": "Deine Arbeitsbereiche werden gelesen…",
   "workspace.active": "Aktiv",
   "workspace.switching": "Wird gewechselt…",
@@ -804,7 +804,7 @@ const de: Catalogue = {
   "workspace.failed.body":
     "Das ist ein fehlgeschlagener Lesevorgang, keine Antwort: Es bedeutet nicht, dass du zu keiner Organisation gehörst. Versuche es gleich noch einmal.",
   "workspace.pointerUnavailable":
-    "Hier würde die Arbeit landen, die du erfasst — abgeleitet daraus, wo du dazugehörst, und keine für dich gespeicherte Wahl. Wechseln ist hier noch nicht möglich.",
+    "Das ist daraus abgeleitet, wo du dazugehörst, und keine für dich gespeicherte Wahl; ändern lässt es sich hier noch nicht.",
   "workspace.switchFailed": "Der Arbeitsbereich wurde nicht geändert. Es wurde nichts verschoben.",
   "context.title": "Du arbeitest als",
   "context.unavailable.title": "Wir können deine Kontexte noch nicht anzeigen",

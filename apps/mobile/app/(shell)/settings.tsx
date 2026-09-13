@@ -20,11 +20,20 @@ import { theme } from "../../src/ui/theme";
  * Language and sign-out need nothing from the canonical domain, so they are
  * real.
  *
- * WORKSPACE is real too, as of `context.list`. It answers the question a phone
- * could not answer before: which workspace am I acting in — and therefore
- * where does the work I record from here actually land? Switching writes the
+ * ACTING FOR is real too, as of `context.list`: which organization this person
+ * is currently acting for, and a way to change it. Switching writes the
  * DURABLE pointer through `context.switch`, the same core the web switcher
  * runs, so the device and the server cannot hold different answers.
+ *
+ * WHAT THIS POINTER DOES NOT DO, because the first version of this screen
+ * claimed it did: it does NOT decide where a Work Journal entry lands. A
+ * journal draft resolves its engagement context from `engagement_contexts` by
+ * its own rule hierarchy and asks when that is ambiguous — it never consults
+ * `profiles.active_organization_id`. So a person can be acting for
+ * organization A while an entry is drafted against their engagement at B, and
+ * that is correct: belonging to an organization and having a live work
+ * engagement there are different facts. The composer already shows and asks
+ * for the work context; this section must not imply it decides one.
  *
  * PARTICIPATION CONTEXT is a DIFFERENT AXIS and still says so. A workspace is
  * an organization the person belongs to; a participation mode is how they take

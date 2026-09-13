@@ -1062,8 +1062,22 @@ const contextList: CapabilityDescriptor = {
     // the single-organization default for a COMPANY identity; withholding it
     // means an unset pointer resolves to the personal workspace rather than
     // inferring an organization this caller never chose.
-    const { workspaces, activeWorkspaceId, pointerAvailable } =
+    const { workspaces, activeWorkspaceId, pointerAvailable, membershipsComplete } =
       await resolveActiveWorkspaceForCaller(caller, null);
+    // A SHORTER LIST IS NOT A SMALLER TRUTH. The three membership sources
+    // degrade a failure to omitted rows, so without this an ordinary
+    // PostgREST or RLS blip would answer `ok` with some of the caller's
+    // organizations missing — and a person would read "these are your
+    // workspaces" with no hedge at all. Refusing is the #1314 rule: absence
+    // of an answer is never rendered as an answer of absence.
+    if (membershipsComplete === false) {
+      return {
+        ok: false,
+        code: "unavailable",
+        message:
+          "Your workspaces could not be read in full, so this list would be missing some. Nothing was changed.",
+      };
+    }
     const labelOf = await workspaceLabeller(caller.locale, workspaces);
     return {
       ok: true,
