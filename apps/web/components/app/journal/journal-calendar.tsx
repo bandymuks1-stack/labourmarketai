@@ -79,6 +79,16 @@ export async function JournalCalendar({
     timeZone: "UTC",
   });
 
+  /**
+   * The hours figure ON the date — compact enough for a 48 px cell, so it is
+   * the NUMBER only; the unit is carried by the cell's aria-label and by the
+   * period summary under the grid. Rounded to one decimal and never to zero:
+   * a day with recorded time always reads as some time.
+   */
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const hoursLabel = (minutes: number) =>
+    hoursFmt.format(Math.max(0.1, Math.round((minutes / 60) * 10) / 10));
+
   const scaleHref = (scale: JournalCalendarScale) =>
     href({ cal: scale === "month" ? null : scale, month: grid.anchor });
 
@@ -101,7 +111,7 @@ export async function JournalCalendar({
           href={href({ month: grid.prevAnchor, date: null })}
           data-testid="journal-calendar-prev"
           aria-label={t("prev")}
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
         >
           ‹
         </Link>
@@ -115,7 +125,7 @@ export async function JournalCalendar({
           href={href({ month: grid.nextAnchor, date: null })}
           data-testid="journal-calendar-next"
           aria-label={t("next")}
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
         >
           ›
         </Link>
@@ -129,7 +139,7 @@ export async function JournalCalendar({
               href={scaleHref(scale)}
               data-testid={`journal-calendar-scale-${scale}`}
               aria-current={grid.scale === scale ? "page" : undefined}
-              className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+              className={`inline-flex min-h-11 items-center rounded-full border px-3 text-xs transition-colors ${
                 grid.scale === scale
                   ? "border-brand-blue bg-brand-blue/10 text-text-primary"
                   : "border-ink-500 text-text-secondary hover:border-brand-blue"
@@ -143,7 +153,7 @@ export async function JournalCalendar({
           <Link
             href={href({ date: null, month: grid.anchor })}
             data-testid="journal-calendar-clear"
-            className="rounded-full border border-ink-500 px-2.5 py-1 text-xs text-text-secondary transition-colors hover:border-brand-blue"
+            className="inline-flex min-h-11 items-center rounded-full border border-ink-500 px-3 text-xs text-text-secondary transition-colors hover:border-brand-blue"
           >
             {t("allDays")}
           </Link>
@@ -199,9 +209,13 @@ export async function JournalCalendar({
               data-entries={cell.entryCount}
               aria-current={cell.isSelected ? "date" : undefined}
               aria-label={
-                cell.entryCount > 0
-                  ? t("dayWithRecords", { day: dayTitle, count: cell.entryCount })
-                  : t("dayEmpty", { day: dayTitle })
+                cell.entryCount === 0
+                  ? t("dayEmpty", { day: dayTitle })
+                  : `${t("dayWithRecords", { day: dayTitle, count: cell.entryCount })}${
+                      cell.totalMinutes > 0
+                        ? `, ${formatDuration(cell.totalMinutes, "minutes", locale === "en" ? "en" : "lt")}`
+                        : ""
+                    }, ${t(`confirmation.${cell.confirmation}`)}`
               }
               className={`${shared.join(" ")} text-xs ${
                 cell.isSelected
@@ -212,20 +226,33 @@ export async function JournalCalendar({
               } ${cell.isToday && !cell.isSelected ? "ring-1 ring-inset ring-ink-500" : ""}`}
             >
               <span aria-hidden>{cell.dayOfMonth}</span>
+              {/* WHAT THE DAY HOLDS, on the date itself: the recorded HOURS
+                  when the day carries time, and the confirmation STATE as the
+                  marker's material. A day with entries but no recorded time
+                  shows the marker alone — an untimed record is real work, not
+                  "0 h" (SEP-7). The state is never colour alone: the full
+                  words are in the cell's aria-label (design system §M). */}
               {cell.entryCount > 0 && (
                 <span
                   aria-hidden
                   data-testid="journal-calendar-day-marker"
-                  className="flex items-center gap-px"
+                  data-confirmation={cell.confirmation}
+                  className="flex items-center gap-0.5 leading-none"
                 >
-                  {Array.from({ length: Math.min(cell.entryCount, 3) }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`size-1 rounded-full ${
-                        cell.isSelected ? "bg-brand-blue" : "bg-brand-blue/70"
-                      }`}
-                    />
-                  ))}
+                  {cell.totalMinutes > 0 ? (
+                    <span className="font-mono text-[0.5625rem] text-text-secondary">
+                      {hoursLabel(cell.totalMinutes)}
+                    </span>
+                  ) : null}
+                  <span
+                    className={`size-1.5 rounded-full border ${
+                      cell.confirmation === "all"
+                        ? "border-state-success bg-state-success"
+                        : cell.confirmation === "partial"
+                          ? "border-state-success bg-transparent"
+                          : "border-text-muted bg-text-muted/40"
+                    }`}
+                  />
                 </span>
               )}
             </Link>

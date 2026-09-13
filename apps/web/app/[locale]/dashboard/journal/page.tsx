@@ -827,6 +827,13 @@ export default async function JournalPage({
       iso: g.isoKey,
       entryCount: g.entries.length,
       totalMinutes: g.totalMinutes,
+      // The SAME derivation the rest of the page uses for "confirmed"
+      // (`deriveReviewResult` === "approved"); never a second rule, and
+      // never inferred — a day with none is self-declared work, which is
+      // real evidence nobody has verified (SEP-3).
+      confirmedCount: g.entries.filter(
+        (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+      ).length,
     })),
   });
   /**

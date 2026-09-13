@@ -38,6 +38,14 @@ export interface JournalCalendarDayInput {
   readonly entryCount: number;
   /** Summed through the canonical work-time rule; 0 when the day is untimed. */
   readonly totalMinutes: number;
+  /**
+   * How many of the day's entries carry a REAL approved confirmation
+   * (`deriveReviewResult` === "approved" — the page's own derivation, passed
+   * in rather than recomputed here). Never inferred: a day with none is
+   * self-declared work, which is real evidence nobody has verified, not a
+   * failure (SEP-3: EVIDENCE ≠ VERIFICATION).
+   */
+  readonly confirmedCount: number;
 }
 
 export interface JournalCalendarCell {
@@ -51,6 +59,12 @@ export interface JournalCalendarCell {
   readonly isFuture: boolean;
   readonly entryCount: number;
   readonly totalMinutes: number;
+  readonly confirmedCount: number;
+  /**
+   * What the day's confirmation state IS, as a word — never a colour alone
+   * (design system §M). `none` means the day holds only self-declared work.
+   */
+  readonly confirmation: "none" | "partial" | "all";
 }
 
 export interface JournalCalendarGrid {
@@ -180,6 +194,7 @@ export function buildJournalCalendar({
             iso: d.iso,
             entryCount: prev.entryCount + d.entryCount,
             totalMinutes: prev.totalMinutes + d.totalMinutes,
+            confirmedCount: prev.confirmedCount + d.confirmedCount,
           }
         : d,
     );
@@ -202,6 +217,13 @@ export function buildJournalCalendar({
       isFuture: cursor > today,
       entryCount: rec?.entryCount ?? 0,
       totalMinutes: rec?.totalMinutes ?? 0,
+      confirmedCount: rec?.confirmedCount ?? 0,
+      confirmation:
+        !rec || rec.entryCount === 0 || rec.confirmedCount === 0
+          ? "none"
+          : rec.confirmedCount >= rec.entryCount
+            ? "all"
+            : "partial",
     });
     if (row.length === 7) {
       weeks.push(row);

@@ -70,6 +70,31 @@ describe("MANO DARBAS — the records live on a calendar, not in a list of dates
     expect(page).toMatch(/id="journal-composer" className="order-1"/);
   });
 
+  it("a date exposes entries, HOURS and confirmation state — measured at 390px", () => {
+    const cal = read("components/app/journal/journal-calendar.tsx");
+    // hours ON the date (the number; the unit is in the aria-label + summary)
+    expect(cal).toMatch(/cell\.totalMinutes > 0 \?/);
+    expect(cal).toMatch(/hoursLabel\(cell\.totalMinutes\)/);
+    // confirmation as the marker's material AND as words (never colour alone)
+    expect(cal).toMatch(/data-confirmation=\{cell\.confirmation\}/);
+    expect(cal).toMatch(/t\(`confirmation\.\$\{cell\.confirmation\}`\)/);
+    // an untimed record is real work, never rendered as "0 h" (SEP-7)
+    expect(cal).not.toMatch(/totalMinutes \|\| 0\s*\}/);
+    // the page hands over the SAME confirmed derivation it uses elsewhere
+    expect(page).toMatch(/deriveReviewResult\(e\.journal_entry_confirmations\) === "approved"/);
+  });
+
+  it("every calendar control meets the product's own 44px rule", () => {
+    // rendered at 390px and 690px: prev/next were 36px and the pills 26px
+    const cal = read("components/app/journal/journal-calendar.tsx");
+    expect(cal).toMatch(/inline-flex size-11 shrink-0 items-center justify-center/);
+    expect(cal).not.toMatch(/inline-flex size-9 shrink-0/);
+    const pills = cal.match(/rounded-full border/g) ?? [];
+    expect(pills.length).toBeGreaterThanOrEqual(2);
+    expect(cal).toMatch(/inline-flex min-h-11 items-center rounded-full border px-3 text-xs transition-colors/);
+    expect(cal).toMatch(/inline-flex min-h-11 items-center rounded-full border border-ink-500/);
+  });
+
   it("the calendar itself needs no JavaScript — the day lives in the URL", () => {
     const cal = read("components/app/journal/journal-calendar.tsx");
     expect(cal).not.toMatch(/"use client"/);
