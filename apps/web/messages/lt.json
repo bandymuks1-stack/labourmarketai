@@ -4382,13 +4382,23 @@
           "locationHint": "LT",
           "preferredLabel": "Šalys, kuriose norėčiau dirbti",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Tarifas nuo (€)",
-          "salaryMaxLabel": "Tarifas iki (€)",
+          "salaryMinLabel": "Atlyginimo lūkestis nuo (€/mėn.)",
+          "salaryMaxLabel": "Atlyginimo lūkestis iki (€/mėn.)",
           "save": "Išsaugoti",
           "saving": "Saugoma...",
           "saved": "Išsaugota",
           "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
           "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
+        },
+        "checks": {
+          "eyebrow": "Patikrink, ar taip ir turėjai omeny",
+          "keep": "Palikti kaip yra",
+          "correct": "Pataisyti",
+          "salary_below_monthly_floor": "Nurodyta {min}–{max} € saugoma ir rodoma kaip mėnesio lūkestis. Mėnesiui tai mažiau nei minimali alga — jei turėjai omeny valandinį ar dienos tarifą, įrašyk mėnesio sumą. Jei tai mėnesio suma, palik kaip yra.",
+          "salary_reads_annual": "Nurodyta {min} € per mėnesį atrodo kaip metinė suma. Jei taip — įrašyk mėnesio sumą; jei ne, palik kaip yra.",
+          "available_from_past": "Data „galiu pradėti nuo“ ({date}) jau praėjo — skaitoma kaip „dabar“. Jei tai nebetiesa, nurodyk naują datą.",
+          "available_from_far": "Pradžios data ({date}) yra daugiau nei po metų. Jei metai suklysti, pataisyk; jei ne — palik.",
+          "unavailable_with_start_date": "Būsena „šiuo metu negaliu“, bet nurodyta pradžios data {date}. Jei nuo tos datos galėsi — viskas gerai; jei ne, pataisyk."
         }
       },
       "tabs": {
@@ -7795,9 +7805,23 @@
     "generatedAt": "Sugeneruota",
     "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas",
+    "facts": {
+      "recorded": "Darbo žurnale užfiksuota {hours} val. per {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}.",
+      "recordedSpan": "Darbo žurnale užfiksuota {hours} val. per {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}} ({span}).",
+      "confirmed": "Iš jų vadovo patvirtinta {hours} val.",
+      "contexts": "Dirbta {count, plural, one {# vietoje} few {# vietose} other {# vietų}}.",
+      "topSkills": "Daugiausia užfiksuoto darbo tenka: {list}.",
+      "outputs": "Užfiksuoti rezultatai: {list}.",
+      "source": "Skaičiai iš paties darbuotojo darbo žurnalo įrašų; aprašymas aukščiau — jo paties žodžiai."
+    },
     "practiceHistoryTitle": "Praktika ir savanorystė",
     "workHistoryTitle": "Darbo istorija",
     "present": "Dabar",
+    "history": {
+      "project": "Projektas: {name}",
+      "recorded": "Darbo žurnale: {hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "recordedConfirmed": "Darbo žurnale: {hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val."
+    },
     "languagesTitle": "Kalbos",
     "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",
     "certificatesTitle": "Sertifikatai ir pažymėjimai",
@@ -7842,6 +7866,16 @@
         "busy": "Užimtas",
         "unavailable": "Negali dirbti"
       }
+    },
+    "checks": {
+      "eyebrow": "Patikrink prieš spausdinant",
+      "keep": "Palikti kaip yra",
+      "correct": "Pataisyti darbo kortelėje",
+      "salary_below_monthly_floor": "Atlyginimo lūkestis {min}–{max} € spausdinamas kaip mėnesio suma (EUR/mėn.). Mėnesiui tai mažiau nei minimali alga — jei turėjai omeny valandinį ar dienos tarifą, pataisyk į mėnesio sumą. Ši pastaba nespausdinama.",
+      "salary_reads_annual": "Atlyginimo lūkestis {min} € per mėnesį atrodo kaip metinė suma. Jei taip — pataisyk į mėnesio sumą. Ši pastaba nespausdinama.",
+      "available_from_past": "Data „gali pradėti nuo“ ({date}) jau praėjo — skaitytojas ją supras kaip „dabar“. Jei tai nebetiesa, atnaujink.",
+      "available_from_far": "Pradžios data ({date}) yra daugiau nei po metų. Jei metai suklysti, pataisyk.",
+      "unavailable_with_start_date": "Būsena „negali dirbti“, bet nurodyta pradžios data {date}. Jei nuo tos datos galėsi — viskas gerai; jei ne, pataisyk."
     },
     "tailored": {
       "badge": "Pritaikytas CV",

@@ -4382,13 +4382,23 @@
           "locationHint": "LT",
           "preferredLabel": "Landen waarin ik zou willen werken",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Tarief vanaf (€)",
-          "salaryMaxLabel": "Tarief tot (€)",
+          "salaryMinLabel": "Loonverwachting vanaf (€/maand)",
+          "salaryMaxLabel": "Loonverwachting tot (€/maand)",
           "save": "Opslaan",
           "saving": "Opslaan...",
           "saved": "Opgeslagen",
           "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
           "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw."
+        },
+        "checks": {
+          "eyebrow": "Controleer of je dit bedoelde",
+          "keep": "Zo laten",
+          "correct": "Corrigeren",
+          "salary_below_monthly_floor": "{min}–{max} € wordt opgeslagen en getoond als verwachting PER MAAND. Als maandbedrag ligt dat onder elk minimumloon — bedoelde je een uur- of dagtarief, vul dan het maandbedrag in. Is het een maandbedrag, laat het dan zo.",
+          "salary_reads_annual": "{min} € per maand leest als een jaarbedrag. Zo ja, vul het maandbedrag in; zo nee, laat het zo.",
+          "available_from_past": "Je datum \"kan beginnen vanaf\" ({date}) is voorbij — hij wordt gelezen als \"nu\". Klopt dat niet meer, stel dan een nieuwe datum in.",
+          "available_from_far": "Je startdatum ({date}) ligt meer dan een jaar vooruit. Is het jaar een vergissing, corrigeer het; anders laat je het zo.",
+          "unavailable_with_start_date": "Status zegt \"kan nu niet werken\", maar er staat een startdatum ({date}). Kun je vanaf die datum — prima; zo niet, corrigeer het."
         }
       },
       "tabs": {
@@ -7795,9 +7805,23 @@
     "generatedAt": "Gegenereerd",
     "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
+    "facts": {
+      "recorded": "Het werkjournaal registreert {hours} u over {count, plural, one {# record} other {# records}}.",
+      "recordedSpan": "Het werkjournaal registreert {hours} u over {count, plural, one {# record} other {# records}} ({span}).",
+      "confirmed": "Daarvan is {hours} u goedgekeurd door een manager.",
+      "contexts": "Werk is geregistreerd op {count, plural, one {# plek} other {# plekken}}.",
+      "topSkills": "Het meeste geregistreerde werk valt onder: {list}.",
+      "outputs": "Geregistreerde resultaten: {list}.",
+      "source": "Cijfers komen uit de eigen werkjournaalrecords van de werker; de beschrijving hierboven zijn zijn of haar eigen woorden."
+    },
     "practiceHistoryTitle": "Stage en vrijwilligerswerk",
     "workHistoryTitle": "Werkervaring",
     "present": "Heden",
+    "history": {
+      "project": "Binnen project: {name}",
+      "recorded": "Werkjournaal: {hours} u, {count, plural, one {# record} other {# records}}",
+      "recordedConfirmed": "Werkjournaal: {hours} u, {count, plural, one {# record} other {# records}}, waarvan {confirmed} u goedgekeurd door een manager"
+    },
     "languagesTitle": "Talen",
     "languagesSelfStated": "Talen zoals opgegeven door de werker.",
     "certificatesTitle": "Certificaten en licenties",
@@ -7842,6 +7866,16 @@
         "busy": "Bezet",
         "unavailable": "Niet beschikbaar"
       }
+    },
+    "checks": {
+      "eyebrow": "Controleer vóór het printen",
+      "keep": "Zo laten",
+      "correct": "Corrigeren op de werkkaart",
+      "salary_below_monthly_floor": "De loonverwachting {min}–{max} € wordt geprint als MAANDBEDRAG (EUR/maand). Als maandbedrag ligt dat onder elk minimumloon — bedoelde je een uur- of dagtarief, corrigeer het dan naar een maandbedrag. Deze notitie wordt niet geprint.",
+      "salary_reads_annual": "De loonverwachting {min} € per maand leest als een jaarbedrag. Zo ja, corrigeer het naar een maandbedrag. Deze notitie wordt niet geprint.",
+      "available_from_past": "De datum \"kan beginnen vanaf\" ({date}) is voorbij — een lezer neemt hem als \"nu\". Klopt dat niet meer, werk hem bij.",
+      "available_from_far": "De startdatum ({date}) ligt meer dan een jaar vooruit. Is het jaar een vergissing, corrigeer het.",
+      "unavailable_with_start_date": "Status zegt \"kan niet werken\", maar er staat een startdatum ({date}). Kun je vanaf die datum — prima; zo niet, corrigeer het."
     },
     "tailored": {
       "badge": "Cv op maat",

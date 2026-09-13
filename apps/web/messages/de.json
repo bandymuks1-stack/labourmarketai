@@ -4382,13 +4382,23 @@
           "locationHint": "LT",
           "preferredLabel": "Länder, in denen ich arbeiten möchte",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Satz ab (€)",
-          "salaryMaxLabel": "Satz bis (€)",
+          "salaryMinLabel": "Gehaltsvorstellung ab (€/Monat)",
+          "salaryMaxLabel": "Gehaltsvorstellung bis (€/Monat)",
           "save": "Speichern",
           "saving": "Wird gespeichert...",
           "saved": "Gespeichert",
           "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
           "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
+        },
+        "checks": {
+          "eyebrow": "Prüfe, ob du das gemeint hast",
+          "keep": "So lassen",
+          "correct": "Korrigieren",
+          "salary_below_monthly_floor": "{min}–{max} € wird als MONATLICHE Vorstellung gespeichert und angezeigt. Als Monat liegt das unter jedem Mindestlohn — wenn du einen Stunden- oder Tagessatz meintest, trage den Monatsbetrag ein. Ist es ein Monatsbetrag, lass es so.",
+          "salary_reads_annual": "{min} € pro Monat liest sich wie ein Jahresbetrag. Wenn ja, trage den Monatsbetrag ein; wenn nicht, lass es so.",
+          "available_from_past": "Dein Datum „kann beginnen ab“ ({date}) ist vorbei — es wird als „jetzt“ gelesen. Stimmt das nicht mehr, setze ein neues Datum.",
+          "available_from_far": "Dein Startdatum ({date}) liegt mehr als ein Jahr voraus. Ist das Jahr ein Tippfehler, korrigiere es; sonst lass es so.",
+          "unavailable_with_start_date": "Status sagt „kann derzeit nicht arbeiten“, aber ein Startdatum ({date}) ist gesetzt. Kannst du ab diesem Datum — gut; wenn nicht, korrigiere es."
         }
       },
       "tabs": {
@@ -7795,9 +7805,23 @@
     "generatedAt": "Erstellt",
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt.",
     "summaryTitle": "Berufliches Profil",
+    "facts": {
+      "recorded": "Das Arbeitsjournal verzeichnet {hours} Std. in {count, plural, one {# Eintrag} other {# Einträgen}}.",
+      "recordedSpan": "Das Arbeitsjournal verzeichnet {hours} Std. in {count, plural, one {# Eintrag} other {# Einträgen}} ({span}).",
+      "confirmed": "Davon wurden {hours} Std. von einem Vorgesetzten freigegeben.",
+      "contexts": "Arbeit wurde an {count, plural, one {# Ort} other {# Orten}} verzeichnet.",
+      "topSkills": "Der größte Teil der verzeichneten Arbeit entfällt auf: {list}.",
+      "outputs": "Verzeichnete Ergebnisse: {list}.",
+      "source": "Zahlen stammen aus den eigenen Arbeitsjournal-Einträgen; die Beschreibung oben sind die eigenen Worte der Person."
+    },
     "practiceHistoryTitle": "Praktikum und Ehrenamt",
     "workHistoryTitle": "Beruflicher Werdegang",
     "present": "Heute",
+    "history": {
+      "project": "Projekt: {name}",
+      "recorded": "Arbeitsjournal: {hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}",
+      "recordedConfirmed": "Arbeitsjournal: {hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}, davon {confirmed} Std. von einem Vorgesetzten freigegeben"
+    },
     "languagesTitle": "Sprachen",
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
     "certificatesTitle": "Zertifikate & Lizenzen",
@@ -7842,6 +7866,16 @@
         "busy": "Beschäftigt",
         "unavailable": "Nicht verfügbar"
       }
+    },
+    "checks": {
+      "eyebrow": "Vor dem Drucken prüfen",
+      "keep": "So lassen",
+      "correct": "Auf der Arbeitskarte korrigieren",
+      "salary_below_monthly_floor": "Die Gehaltsvorstellung {min}–{max} € wird als MONATSBETRAG gedruckt (EUR/Monat). Als Monat liegt das unter jedem Mindestlohn — wenn du einen Stunden- oder Tagessatz meintest, korrigiere auf einen Monatsbetrag. Dieser Hinweis wird nicht gedruckt.",
+      "salary_reads_annual": "Die Gehaltsvorstellung {min} € pro Monat liest sich wie ein Jahresbetrag. Wenn ja, korrigiere auf einen Monatsbetrag. Dieser Hinweis wird nicht gedruckt.",
+      "available_from_past": "Das Datum „kann beginnen ab“ ({date}) ist vorbei — ein Leser versteht es als „jetzt“. Stimmt das nicht mehr, aktualisiere es.",
+      "available_from_far": "Das Startdatum ({date}) liegt mehr als ein Jahr voraus. Ist das Jahr ein Tippfehler, korrigiere es.",
+      "unavailable_with_start_date": "Status sagt „kann nicht arbeiten“, aber ein Startdatum ({date}) ist gesetzt. Kannst du ab diesem Datum — gut; wenn nicht, korrigiere es."
     },
     "tailored": {
       "badge": "Zugeschnittener Lebenslauf",

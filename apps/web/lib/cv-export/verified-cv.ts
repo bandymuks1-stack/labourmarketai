@@ -16,6 +16,7 @@ import {
   skillPracticeFromIntelligence,
   type SkillPracticeFacts,
 } from "./skill-presentation";
+import { deriveProfessionalFacts, type ProfessionalFacts } from "./professional-summary";
 import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
 import {
   attributedHoursBySlug,
@@ -75,6 +76,22 @@ export type VerifiedCvEngagement = {
   title: string | null;
   startedAt: string | null;
   endedAt: string | null;
+  /** engagement_contexts.id — the key the journal's per-context figures
+   *  (`WorkIntelligence.contexts`) are joined on. */
+  id: string | null;
+  /** The person's own description of the engagement (what the work was),
+   *  as saved — never rewritten. */
+  description: string | null;
+  /** engagement_contexts.operations_role — the operational role slug/text,
+   *  printed only when it adds to the title. */
+  operationsRole: string | null;
+  /** Name of the project the context is bound to (`projects.name`), when
+   *  the context has one and the project row was readable. */
+  projectName: string | null;
+  /** The journal's own figures for THIS context: hours / approved hours /
+   *  entries. `null` when the journal could not be read (unknown), a zero
+   *  row when it was read and holds no entry for the context. */
+  recorded: { hours: number; confirmedHours: number; entries: number } | null;
 };
 
 export type VerifiedCvProofRow = {
@@ -172,6 +189,11 @@ export type VerifiedCvData = {
    * could not be read: the CV then shows no figure and no zero (SEP-7).
    */
   skillPractice: Record<string, SkillPracticeFacts> | null;
+  /** Deterministic professional facts from the canonical work-intelligence
+   *  reading (all-time hours, entries, span, contexts, top skills, outputs)
+   *  — printed UNDER the person's own summary, never in its place; `null`
+   *  when the journal was unreadable or holds no entry. */
+  professionalFacts: ProfessionalFacts | null;
   /** Real work history from engagement_contexts (companies, role, dates) —
    *  the same source the profile renders; empty array when none. */
   workHistory: VerifiedCvEngagement[];
@@ -291,7 +313,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       supabase
         .from("engagement_contexts")
         .select(
-          "relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+          "id, relationship_slug, title, description, operations_role, project_id, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
         .in("relationship_slug", PROFESSIONAL_HISTORY_RELATIONSHIPS)
@@ -369,6 +391,36 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   // Real work history (same source the profile renders). Primary first, then
   // most-recent; org name prefers display → legal, else null so the page can
   // fall back to an org-type/relationship label (never an invented name).
+  // Projects the contexts are bound to — a separate tolerant read (no FK
+  // embed to depend on); a missing name prints nothing, never a placeholder.
+  const contextProjectIds = [
+    ...new Set(
+      (ecRes.data ?? [])
+        .map((e) => (e as { project_id?: string | null }).project_id ?? null)
+        .filter((id): id is string => typeof id === "string" && id.length > 0),
+    ),
+  ];
+  const projectNamesRes =
+    contextProjectIds.length > 0
+      ? await tolerant<{ id: string; name: string | null }[]>(
+          sb.from("projects").select("id, name").in("id", contextProjectIds),
+        )
+      : { data: null };
+  const projectNameById = new Map(
+    (projectNamesRes.data ?? []).map((p) => [p.id, p.name?.trim() || null] as const),
+  );
+  // The journal's per-context figures (canonical reader; null = unreadable).
+  const recordedByContext = workIntelligence
+    ? new Map(
+        workIntelligence.contexts
+          .filter((c) => c.engagementContextId !== null)
+          .map((c) => [
+            c.engagementContextId as string,
+            { hours: c.hours, confirmedHours: c.confirmedHours, entries: c.entries },
+          ]),
+      )
+    : null;
+
   const workHistory: VerifiedCvEngagement[] = (ecRes.data ?? []).map((e) => {
     const org = e.organizations as
       | {
@@ -377,6 +429,13 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
           organization_type: string | null;
         }
       | null;
+    const row = e as typeof e & {
+      id?: string | null;
+      description?: string | null;
+      operations_role?: string | null;
+      project_id?: string | null;
+    };
+    const id = row.id ?? null;
     return {
       orgName: orgDisplayName(org?.display_name, org?.legal_name),
       organizationType: org?.organization_type ?? null,
@@ -385,6 +444,13 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       title: (e.title as string | null) ?? null,
       startedAt: e.started_at,
       endedAt: e.ended_at,
+      id,
+      description: row.description?.trim() || null,
+      operationsRole: row.operations_role?.trim() || null,
+      projectName: row.project_id ? (projectNameById.get(row.project_id) ?? null) : null,
+      recorded: recordedByContext
+        ? (id && recordedByContext.get(id)) || { hours: 0, confirmedHours: 0, entries: 0 }
+        : null,
     };
   })
     // The trigger-provisioned personal context (20260702140000) carries no
@@ -691,6 +757,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     cv: {
       personName,
       professionalSummary,
+      professionalFacts: deriveProfessionalFacts(workIntelligence),
       professionSlugs,
       tiers,
       skillFacts,

@@ -4,6 +4,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { PrintButton } from "@/components/app/print-button";
 import { CvPrivateDetails } from "@/components/app/cv-private-details";
+import { WorkCardPlausibilityNote } from "@/components/app/work-card-plausibility-note";
+import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
+import { percentOf, roundHours } from "@/lib/cv-export/professional-summary";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
@@ -195,8 +198,79 @@ export default async function VerifiedCvPage({
     includePrivateDetails: true,
   });
 
-  // Pre-localised private-detail rows (only real saved facts become rows).
+  // Professional FACTS under the person's own summary — deterministic
+  // sentences from the canonical work-intelligence reading; nothing here is
+  // written by a model and nothing appears for an unreadable journal.
+  const fmtNum = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const facts = cv.professionalFacts;
+  const factsSentences: string[] = [];
+  if (facts) {
+    const span =
+      facts.firstMonth && facts.lastMonth
+        ? facts.firstMonth === facts.lastMonth
+          ? facts.firstMonth
+          : `${facts.firstMonth} – ${facts.lastMonth}`
+        : null;
+    factsSentences.push(
+      span
+        ? t("facts.recordedSpan", {
+            hours: fmtNum.format(roundHours(facts.hours)),
+            count: facts.entries,
+            span,
+          })
+        : t("facts.recorded", {
+            hours: fmtNum.format(roundHours(facts.hours)),
+            count: facts.entries,
+          }),
+    );
+    if (facts.confirmedHours > 0) {
+      factsSentences.push(
+        t("facts.confirmed", { hours: fmtNum.format(roundHours(facts.confirmedHours)) }),
+      );
+    }
+    if (facts.contexts > 1) {
+      factsSentences.push(t("facts.contexts", { count: facts.contexts }));
+    }
+    if (facts.topSkills.length > 0) {
+      factsSentences.push(
+        t("facts.topSkills", {
+          list: facts.topSkills
+            .map((s) => `${tSkill(s.slug)} (${percentOf(s.share)} %)`)
+            .join(", "),
+        }),
+      );
+    }
+    if (facts.outputs.length > 0) {
+      factsSentences.push(
+        t("facts.outputs", {
+          list: facts.outputs.map((o) => `${fmtNum.format(o.value)} ${o.unit}`).join(", "),
+        }),
+      );
+    }
+  }
+
+  // What the saved private figures READ AS (owner #1689: "150–500 EUR/month"
+  // printed as a fact). Screen-only sentences beside the section; the
+  // printout carries the person's figures untouched.
   const priv = cv.privateDetails;
+  const cardChecks = deriveWorkCardChecks(
+    {
+      salaryMin: priv.salaryMinEur,
+      salaryMax: priv.salaryMaxEur,
+      availabilityStatus: priv.availabilityStatus,
+      availableFrom: priv.availableFrom,
+    },
+    new Date().toISOString().slice(0, 10),
+  ).map((c) => ({
+    fingerprint: c.fingerprint,
+    text: t(`checks.${c.code}`, {
+      min: c.salaryMin ?? "",
+      max: c.salaryMax ?? "",
+      date: c.availableFrom ?? "",
+    }),
+  }));
+
+  // Pre-localised private-detail rows (only real saved facts become rows).
   const privateRows: { label: string; value: string }[] = [];
   if (priv.salaryMinEur !== null || priv.salaryMaxEur !== null) {
     // A one-sided expectation must keep its direction — a bare "1800" says
@@ -288,6 +362,43 @@ export default async function VerifiedCvPage({
           </span>
           {e.title && e.title !== orgDisplay ? (
             <span className="text-xs text-text-muted">{e.title}</span>
+          ) : null}
+          {e.operationsRole && e.operationsRole !== e.title ? (
+            <span className="text-xs text-text-muted">{e.operationsRole}</span>
+          ) : null}
+          {e.projectName ? (
+            <span className="text-xs text-text-muted" data-testid="cv-history-project">
+              {t("history.project", { name: e.projectName })}
+            </span>
+          ) : null}
+          {e.description ? (
+            <p
+              className={`mt-1 whitespace-pre-wrap leading-relaxed text-text-secondary ${bodyText}`}
+              data-testid="cv-history-description"
+            >
+              {e.description}
+            </p>
+          ) : null}
+          {/* The journal's own figures for THIS engagement — omitted when
+              the journal was unreadable (unknown) and when it holds no entry
+              for it (a job needs no journal to be real); the data attribute
+              keeps the two apart for anyone reading the markup. */}
+          {e.recorded && e.recorded.entries > 0 ? (
+            <span
+              className="mt-1 text-xs text-text-secondary"
+              data-testid="cv-history-recorded"
+            >
+              {e.recorded.confirmedHours > 0
+                ? t("history.recordedConfirmed", {
+                    hours: fmtNum.format(roundHours(e.recorded.hours)),
+                    confirmed: fmtNum.format(roundHours(e.recorded.confirmedHours)),
+                    count: e.recorded.entries,
+                  })
+                : t("history.recorded", {
+                    hours: fmtNum.format(roundHours(e.recorded.hours)),
+                    count: e.recorded.entries,
+                  })}
+            </span>
           ) : null}
         </li>
       );
@@ -487,6 +598,25 @@ export default async function VerifiedCvPage({
             <p className={`whitespace-pre-wrap leading-relaxed text-text-secondary ${bodyText}`}>
               {cv.professionalSummary}
             </p>
+          </section>
+        ) : null}
+
+        {/* Professional FACTS — the deterministic paragraph under (never in
+            place of) the person's own words: recorded hours, span, places,
+            the skills that take most of the recorded work, outputs in their
+            recorded units. Omitted when the journal was unreadable or empty. */}
+        {factsSentences.length > 0 ? (
+          <section
+            className="flex flex-col gap-1"
+            data-testid="cv-professional-facts"
+          >
+            {!cv.professionalSummary ? (
+              <h2 className={sectionTitle}>{t("summaryTitle")}</h2>
+            ) : null}
+            <p className={`leading-relaxed text-text-secondary ${bodyText}`}>
+              {factsSentences.join(" ")}
+            </p>
+            <p className="text-xs text-text-muted">{t("facts.source")}</p>
           </section>
         ) : null}
 
@@ -875,6 +1005,16 @@ export default async function VerifiedCvPage({
         {/* Salary + availability — per-export opt-in (default OFF, never
             persisted). The checkbox never prints; the section prints only
             when the worker ticked it for THIS export. */}
+        {cardChecks.length > 0 ? (
+          <WorkCardPlausibilityNote
+            items={cardChecks}
+            eyebrow={t("checks.eyebrow")}
+            keepLabel={t("checks.keep")}
+            correctLabel={t("checks.correct")}
+            correctHref="/dashboard"
+          />
+        ) : null}
+
         <CvPrivateDetails
           toggleLabel={t("privateDetails.toggle")}
           title={t("privateDetails.title")}

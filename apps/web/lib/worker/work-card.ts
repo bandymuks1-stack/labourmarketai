@@ -8,6 +8,7 @@ import type {
   WorkCardSignals,
   WorkCardState,
 } from "./work-card-state";
+import type { WorkCardCheckItem } from "@/components/app/work-card-plausibility-note";
 
 /**
  * Read service for "Mano darbo kortelė" (slice work-card-state-aware-v1).
@@ -65,6 +66,9 @@ export interface WorkEditorVM {
    *  deriveWorkCardState — href is null when the action is an inline edit. */
   next: WorkCardNext;
   values: WorkCardValues;
+  /** Plausibility checks over `values` (`deriveWorkCardChecks`), already
+   *  localised — shown beside the card, never blocking. */
+  checks: WorkCardCheckItem[];
 }
 
 type WorkerCardRow = {

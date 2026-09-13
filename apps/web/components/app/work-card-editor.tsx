@@ -3,6 +3,10 @@
 import { useActionState, useEffect, useState, useTransition } from "react";
 
 import { WORK_CARD_OPEN_EDITOR_EVENT } from "./work-card-missing-chip";
+import {
+  WorkCardPlausibilityNote,
+  type WorkCardCheckItem,
+} from "./work-card-plausibility-note";
 
 import { Link } from "@/lib/i18n/navigation";
 import {
@@ -48,6 +52,10 @@ export interface WorkCardLabels {
   preferredHint: string;
   salaryMinLabel: string;
   salaryMaxLabel: string;
+  /** Plausibility note (deriveWorkCardChecks): eyebrow + the two actions. */
+  checksEyebrow: string;
+  checkKeep: string;
+  checkCorrect: string;
   save: string;
   saving: string;
   saved: string;
@@ -65,12 +73,16 @@ export function WorkCardEditor({
   nextHref,
   values,
   labels,
+  checks = [],
 }: {
   state: WorkCardState;
   /** Real route for the next action, or null when it is an inline card edit. */
   nextHref: string | null;
   values: WorkCardValues;
   labels: WorkCardLabels;
+  /** Plausibility checks over `values` (server-derived, pre-localised) —
+   *  a sentence each; none blocks a save. */
+  checks?: WorkCardCheckItem[];
 }) {
   const [open, setOpen] = useState(false);
 
@@ -178,6 +190,24 @@ export function WorkCardEditor({
           </div>
         </div>
       )}
+
+      {/* ── What the saved figures READ AS (owner #1689: "150–500 EUR/month")
+          — one sentence per check beside the card, never a blocked save;
+          "correct" opens the editor below, "keep" is the person's word. ── */}
+      {checks.length > 0 ? (
+        <WorkCardPlausibilityNote
+          items={checks}
+          eyebrow={labels.checksEyebrow}
+          keepLabel={labels.checkKeep}
+          correctLabel={labels.checkCorrect}
+          onCorrect={() => {
+            setOpen(true);
+            document
+              .getElementById("work-card-editor-section")
+              ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }}
+        />
+      ) : null}
 
       {/* ── Secondary/collapsed editor (always available, never primary) ── */}
       <div id="work-card-editor-section">

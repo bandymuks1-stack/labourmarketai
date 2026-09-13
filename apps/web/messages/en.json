@@ -4382,13 +4382,23 @@
           "locationHint": "LT",
           "preferredLabel": "Countries I'd like to work in",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Rate from (€)",
-          "salaryMaxLabel": "Rate to (€)",
+          "salaryMinLabel": "Pay expectation from (€/month)",
+          "salaryMaxLabel": "Pay expectation to (€/month)",
           "save": "Save",
           "saving": "Saving...",
           "saved": "Saved",
           "error": "Could not save. Please try again.",
           "needsMigration": "Couldn’t complete the action. Please try again."
+        },
+        "checks": {
+          "eyebrow": "Check this is what you meant",
+          "keep": "Keep as is",
+          "correct": "Correct it",
+          "salary_below_monthly_floor": "{min}–{max} € is stored and shown as a MONTHLY expectation. As a month that is below any minimum wage — if you meant an hourly or daily rate, enter the monthly amount. If it is a monthly amount, keep it.",
+          "salary_reads_annual": "{min} € per month reads like a yearly figure. If so, enter the monthly amount; if not, keep it.",
+          "available_from_past": "Your \"can start from\" date ({date}) has passed — it reads as \"now\". If that is no longer true, set a new date.",
+          "available_from_far": "Your start date ({date}) is more than a year away. If the year is a slip, correct it; otherwise keep it.",
+          "unavailable_with_start_date": "Status says \"cannot work now\" but a start date ({date}) is set. If you can from that date — fine; if not, correct it."
         }
       },
       "tabs": {
@@ -7795,9 +7805,23 @@
     "generatedAt": "Generated",
     "notWorker": "CV export is available for worker profiles.",
     "summaryTitle": "Professional summary",
+    "facts": {
+      "recorded": "The work journal records {hours} h across {count, plural, one {# entry} other {# entries}}.",
+      "recordedSpan": "The work journal records {hours} h across {count, plural, one {# entry} other {# entries}} ({span}).",
+      "confirmed": "Of these, {hours} h were approved by a manager.",
+      "contexts": "Work was recorded at {count, plural, one {# place} other {# places}}.",
+      "topSkills": "Most of the recorded work falls on: {list}.",
+      "outputs": "Recorded outputs: {list}.",
+      "source": "Figures come from the worker's own work-journal entries; the description above is their own words."
+    },
     "practiceHistoryTitle": "Practice and volunteering",
     "workHistoryTitle": "Work history",
     "present": "Present",
+    "history": {
+      "project": "Project: {name}",
+      "recorded": "Work journal: {hours} h, {count, plural, one {# entry} other {# entries}}",
+      "recordedConfirmed": "Work journal: {hours} h, {count, plural, one {# entry} other {# entries}}, of which {confirmed} h approved by a manager"
+    },
     "languagesTitle": "Languages",
     "languagesSelfStated": "Languages as stated by the worker.",
     "certificatesTitle": "Certificates & licences",
@@ -7842,6 +7866,16 @@
         "busy": "Busy",
         "unavailable": "Unavailable"
       }
+    },
+    "checks": {
+      "eyebrow": "Check before printing",
+      "keep": "Keep as is",
+      "correct": "Correct on the work card",
+      "salary_below_monthly_floor": "The pay expectation {min}–{max} € prints as a MONTHLY amount (EUR/month). As a month that is below any minimum wage — if you meant an hourly or daily rate, correct it to a monthly amount. This note does not print.",
+      "salary_reads_annual": "The pay expectation {min} € per month reads like a yearly figure. If so, correct it to a monthly amount. This note does not print.",
+      "available_from_past": "The \"can start from\" date ({date}) has passed — a reader will take it as \"now\". If that is no longer true, update it.",
+      "available_from_far": "The start date ({date}) is more than a year away. If the year is a slip, correct it.",
+      "unavailable_with_start_date": "Status says \"cannot work\" but a start date ({date}) is set. If you can from that date — fine; if not, correct it."
     },
     "tailored": {
       "badge": "Tailored CV",
