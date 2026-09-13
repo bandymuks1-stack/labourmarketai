@@ -24,6 +24,25 @@ export type ProfileGetData = {
     | { readonly status: "unavailable" }
     | { readonly status: "exists"; readonly workerId: string }
     | { readonly status: "none" };
+  /**
+   * The roles the account actually HOLDS — the plural of `activeRole`, which
+   * is only whichever one the person is in right now. One person, many
+   * contexts (I-1): the two are different facts and the singular never stands
+   * in for the set.
+   *
+   * `unavailable` is a first-class state and not a formality. A failed roles
+   * read rendered as an empty set told a person who manages three companies
+   * that they hold nothing — live on the web shell, 2026-08-28. A client must
+   * say it could not ask.
+   *
+   * `roles` is the RBAC set AS RECORDED and carries values that are not
+   * participation modes (`admin` among them). Map through
+   * `PARTICIPATION_MODES`, filtering — never assume the two vocabularies are
+   * the same list.
+   */
+  readonly heldRoles:
+    | { readonly status: "unavailable" }
+    | { readonly status: "known"; readonly roles: readonly string[] };
 };
 
 export type JournalEntry = {

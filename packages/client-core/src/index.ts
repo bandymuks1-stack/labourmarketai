@@ -72,6 +72,8 @@ export type {
 export {
   PARTICIPATION_MODES,
   contextKey,
+  holdingsFromHeldRoles,
+  isParticipationMode,
   sameContext,
   initialSelection,
   selectContext,

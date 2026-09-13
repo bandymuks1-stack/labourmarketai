@@ -107,6 +107,63 @@ describe("mobile workspace surface — real, and not confused with participation
     expect(shapes).toMatch(/readonly label: string/);
   });
 
+  it("participation modes come from held roles, never from the workspace list", () => {
+    // The two axes are wired from different reads, and that separation is the
+    // product rule (SEP-5). The provider must map `profile.get`'s heldRoles
+    // through the client-core function; it must never reach into the
+    // workspace list for a mode.
+    const provider = read("apps/mobile/src/context-provider.tsx");
+    expect(provider).toContain("holdingsFromHeldRoles(");
+    // Through the SHARED read. A second `profile.get` per launch is what an
+    // earlier version of this file added while claiming it added none.
+    expect(provider).toContain("useProfile()");
+    expect(provider).not.toMatch(/useCapability<[^>]*>\(/);
+    // The CALL, not the word: the provider's own note explains the separation
+    // and names `context.list` in prose, which is documentation worth keeping.
+    expect(provider).not.toMatch(/["']context\.list["']/);
+    expect(provider).not.toMatch(/organizationType|ContextListData/);
+    // Every context this builds names no organization — a role row does not
+    // carry one, and inventing one is the collapse this refuses.
+    const core = read("packages/client-core/src/actor-context.ts");
+    expect(core).toMatch(/organizationId: null/);
+  });
+
+  it("exactly one profile.get caller exists in the whole client", () => {
+    const callers = ["src/profile-provider.tsx", "src/context-provider.tsx", "app/(shell)/today.tsx", "app/(shell)/profile.tsx"]
+      .filter((f) => read(`apps/mobile/${f}`).includes('useCapability<ProfileGetData>("profile.get")'));
+    expect(callers).toEqual(["src/profile-provider.tsx"]);
+  });
+
+  it("the participation list REPORTS and does not pretend to switch", () => {
+    // A pressable row marked a mode active, persisted it, and changed nothing:
+    // no server write, and no surface outside Settings reads the selection.
+    // Telling someone they are acting as a company while every request stays
+    // identical is worse than the feature being absent (#1737 review).
+    expect(settings).not.toContain("switchTo");
+    const provider = read("apps/mobile/src/context-provider.tsx");
+    expect(provider).not.toContain("switchTo");
+    // And with no selection to remember there is no global preference key to
+    // leak between accounts on a shared phone.
+    // The CODE, not the word. This file's note explains the removed key and
+    // why it mattered, and that history is worth keeping readable — three
+    // guards in this repo have now fired on their own documentation.
+    expect(provider).not.toMatch(/preferenceStore\./);
+    expect(provider).not.toMatch(/["']labourmarket\.context\.v1["']/);
+    // Active comes from the server's own `activeRole`, not a local choice.
+    expect(settings).toContain("profile.state.data.profile.activeRole");
+  });
+
+  it("loading, could-not-ask and holds-nothing stay three different states", () => {
+    // Rendering a failure as "you hold nothing" was live on the web shell on
+    // 2026-08-28. Rendering LOADING that way is the same lie a moment earlier.
+    expect(settings).toContain('holdings.status === "unknown"');
+    expect(settings).toContain("context.loading");
+    expect(settings).toContain("holdings.contexts.length === 0");
+    expect(settings).toContain("context.none");
+    // And the unavailable arm still renders the NotAvailable block.
+    expect(settings).toContain("context.unavailable.title");
+  });
+
   it("every workspace string exists in all five active mobile locales", () => {
     const messages = read("apps/mobile/src/i18n/messages.ts");
     const keys = [
@@ -118,6 +175,9 @@ describe("mobile workspace surface — real, and not confused with participation
       "workspace.failed.body",
       "workspace.pointerUnavailable",
       "workspace.switchFailed",
+      "context.loading",
+      "context.active",
+      "context.none",
     ];
     for (const key of keys) {
       const occurrences = messages.split(`"${key}":`).length - 1;
