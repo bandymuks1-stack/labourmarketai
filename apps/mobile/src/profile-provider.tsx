@@ -4,7 +4,8 @@ import type { ProfileGetData } from "./capability-shapes";
 import { useCapability, type CapabilityState } from "./use-capability";
 
 /**
- * ONE `profile.get` PER SIGNED-IN SESSION.
+ * ONE SHARED `profile.get` CALLER — which is not the same as one request per
+ * session, and the difference is worth stating.
  *
  * `useCapability` holds no shared cache, so every component that called
  * `profile.get` issued its own HTTP request. Three did — Today, Profile, and

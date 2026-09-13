@@ -128,7 +128,12 @@ describe("mobile workspace surface — real, and not confused with participation
     expect(core).toMatch(/organizationId: null/);
   });
 
-  it("exactly one profile.get caller exists in the whole client", () => {
+  // NB: this counts static CALL SITES, so it proves one shared caller — not
+  // one request per session. `useCapability` refetches on a token renewal, a
+  // language change or a manual reload, and the provider is not a cache. The
+  // checkpoint and the provider both said the stronger thing once; the guard
+  // name should not repeat it.
+  it("exactly one profile.get call site exists in the whole client", () => {
     const callers = ["src/profile-provider.tsx", "src/context-provider.tsx", "app/(shell)/today.tsx", "app/(shell)/profile.tsx"]
       .filter((f) => read(`apps/mobile/${f}`).includes('useCapability<ProfileGetData>("profile.get")'));
     expect(callers).toEqual(["src/profile-provider.tsx"]);

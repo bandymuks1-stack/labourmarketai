@@ -97,10 +97,15 @@ control also removed a real leak — the remembered choice lived under a GLOBAL
 preference key and sign-out clears only the session store, so on a shared site
 phone one person's context would have been restored for the next.
 
-**`ProfileProvider` — one `profile.get` per session.** `useCapability` holds no
-shared cache and Today and Profile each already called it, so the holdings
-caller made three round trips per launch while its comment claimed it added
-none. A guard asserts exactly one caller exists in the whole client.
+**`ProfileProvider` — one shared `profile.get` CALLER, which is not one request
+per session.** `useCapability` holds no cache and Today and Profile each
+already called it, so the holdings caller made three round trips per launch
+while its comment claimed it added none. What the provider removes is the
+MULTIPLICATION: three screens issuing their own request became one that all
+three read. It still refetches on a token renewal, a language change or a
+manual reload, and the guard counts static call sites — so it proves one
+caller, not one request. Said precisely because the first version of this
+entry, and the provider's own heading, claimed the stronger thing.
 
 ## LESSONS — read these before trusting anything below
 
