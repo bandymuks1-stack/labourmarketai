@@ -11,7 +11,11 @@ import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
 import { listJournalEntries } from "@/lib/journal/journal-list-core";
 import { WORK_PERIOD_KEYS } from "@/lib/journal/work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
-import { listWorkspaceMemberships } from "@/lib/company/active-organization";
+import {
+  listWorkspaceMemberships,
+  resolveActiveWorkspaceForCaller,
+} from "@/lib/company/active-organization";
+import { workspaceLabeller } from "@/lib/capabilities/workspace-labels";
 import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
 import {
   expressInterestCore,
@@ -1008,6 +1012,86 @@ const contextSwitchInput = z
   })
   .strict();
 
+/**
+ * WHICH WORKSPACES AM I IN — the READ half of the context pair.
+ *
+ * `context.switch` could already be made to list the options, by handing it a
+ * value it cannot resolve. That is not a read: its `readOnlyHint` is false and
+ * a strict MCP client is entitled to ask a human before every call to it. A
+ * client that only wants to SHOW a person which workspaces they hold — the
+ * mobile settings screen is the first — needs an answer it can fetch without
+ * proposing a write.
+ *
+ * It opens NO new path. The list is `listWorkspaceMemberships`, the same
+ * RLS-scoped reader behind the web workspace chip, `context.switch` and
+ * `switchActiveWorkspaceCore`; the labels are the canonical builder, through
+ * the same `workspaceLabeller` the switch now uses. There is no second
+ * membership source and no second set of names to drift.
+ *
+ * It reports the ACTIVE workspace as the durable pointer records it, so a
+ * client can show which one a write would land in — the thing a phone could
+ * not tell anyone before this existed. An open browser session may hold its
+ * own in-session choice; that is stated rather than guessed at.
+ */
+const contextList: CapabilityDescriptor = {
+  id: "context.list",
+  kind: "read",
+  title: "Which workspaces I hold",
+  description:
+    "The caller's own workspaces — their personal space and every " +
+    "organization they are a member of — with the label a person actually " +
+    "reads, and which one the DURABLE pointer currently makes active. " +
+    "Membership as recorded; no derived authority and no score.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: z.object({}).strict(),
+  run: async (caller): Promise<ExecResult> => {
+    // `resolveActiveWorkspaceForCaller` is THE transport-neutral core — its
+    // own note says it exists so that "acting for organization X" means one
+    // thing for the web session, this capability layer and mobile alike. It
+    // returns the membership list AND the resolved pointer, so there is no
+    // second read and no second resolution rule here.
+    //
+    // `identity: null` is correct for a bearer caller: it is the web session's
+    // person/company signal, which a token does not carry. Its only effect is
+    // the single-organization default for a COMPANY identity; withholding it
+    // means an unset pointer resolves to the personal workspace rather than
+    // inferring an organization this caller never chose.
+    const { workspaces, activeWorkspaceId, pointerAvailable } =
+      await resolveActiveWorkspaceForCaller(caller, null);
+    const labelOf = await workspaceLabeller(caller.locale, workspaces);
+    return {
+      ok: true,
+      data: {
+        workspaces: workspaces.map((w) => ({
+          id: w.id,
+          label: labelOf(w),
+          kind: w.kind,
+          organizationType: w.kind === "organization" ? (w.organizationType ?? null) : null,
+          relationship: w.relationship ?? null,
+          active: w.id === activeWorkspaceId,
+        })),
+        activeWorkspaceId,
+        // `pointerAvailable: false` means the owner-gated pointer migration is
+        // unapplied on this environment, so `activeWorkspaceId` is the
+        // RESOLVER's default rather than a recorded choice, and a bearer
+        // client cannot switch. Saying so is the difference between a client
+        // showing the truth and one showing a confident wrong answer about
+        // where a write will land.
+        pointerAvailable,
+        note: pointerAvailable
+          ? "This is the DURABLE pointer. An already-open browser session may hold its own in-session choice until changed there."
+          : "No durable active-workspace pointer is recorded on this environment: the active workspace shown is the resolver's default, not a stored choice, and a bearer client cannot switch yet.",
+      },
+    };
+  },
+};
+
 const contextSwitch: CapabilityDescriptor = {
   id: "context.switch",
   kind: "execute",
@@ -1035,32 +1119,7 @@ const contextSwitch: CapabilityDescriptor = {
     // and the SAME switch core the web server actions run.
     const memberships = await listWorkspaceMemberships(caller);
 
-    const t = await getTranslations({
-      locale: caller.locale,
-      namespace: "capabilities",
-    });
-    const tRelationships = await getTranslations({
-      locale: caller.locale,
-      namespace: "relationshipTypes",
-    });
-    const relationshipLabel = (slug: string): string =>
-      tRelationships.has(slug) ? tRelationships(slug) : slug;
-    // Same duplicate-qualification rule as the work-log selector (#1360):
-    // a base label that occurs more than once gains its relationship.
-    const baseOf = (w: (typeof memberships)[number]): string =>
-      w.kind === "personal" ? t("workspacePersonal") : w.name.trim() || t("notSet");
-    const baseCounts = new Map<string, number>();
-    for (const w of memberships) {
-      const base = baseOf(w);
-      baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
-    }
-    const labelOf = (w: (typeof memberships)[number]): string => {
-      const base = baseOf(w);
-      const duplicated = (baseCounts.get(base) ?? 0) > 1;
-      return duplicated && w.kind === "organization" && w.relationship
-        ? `${base} — ${relationshipLabel(w.relationship)}`
-        : base;
-    };
+    const labelOf = await workspaceLabeller(caller.locale, memberships);
 
     // Resolution is deliberately EXACT (id, the personal sentinel, or a
     // full case-insensitive name) — fuzzy sentence matching stays the web
@@ -1647,6 +1706,7 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   workCardSaveConfirm,
   demandCreateDraft,
   demandCreateConfirm,
+  contextList,
   contextSwitch,
   workforceAvailability,
   // Organization evidence import — the ELEVEN capabilities that give an
