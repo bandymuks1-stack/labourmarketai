@@ -612,6 +612,46 @@ Claude execution stays plan-included: this audit and the recommended slice are o
 
 ---
 
+## 21. Reconciliation with the owner's HUMAN_ACCEPTANCE walk of #1689 (2026-09-13) — defects A–K
+
+The owner walked the deployed Work Intelligence journey (#1689) on production and returned eleven HUMAN_ACCEPTANCE defects. They are reconciled here, in the same audit, as **production defects of the one journey in real use** — not as a new roadmap. Ranking is by end-to-end user value on the loop RECORD REAL WORK → SEE IT SAVED → SEE HOURS → SEE HOURS/SHARE BY SKILL → SEE WHAT DOMINATES → SEE EVIDENCE → SEE THE LIVING CV UPDATE → SEE GROWTH → SEE RELEVANT OPPORTUNITIES AND WHY. Branch: `claude/labourmarket-product-audit-iwjyy0` (PR #1724). "FIXED" means fixed in that branch with tests and a negative control; nothing below is HUMAN_UI_PROVEN until a human walks production (`HUMAN_UI_PROVEN = NO`).
+
+### 21.1 Defects, root causes, fixes
+
+| # | Owner saw | Root cause (repository evidence) | Fix in branch | Status |
+|---|---|---|---|---|
+| **A** | The Work Journal does not visibly behave as a serious hour-based professional record | Hours were a side figure of a list; the reader silently capped at PostgREST `max_rows` 1000; the diary's day key and the model's day key were computed differently; the chat's "recent" path re-parsed durations instead of reading the model; no per-skill first/last day; no MCP capability exposed the reading | Lane B `9a6c454`: paged reads with `coverage {entriesRead, truncated}` on the model, the CV names the window when truncated; diary day = `resolveWorkDayDetail(...).day`; chat reads the model's own range row; `SkillWorkTime.firstWorkedDay` / `contextIds`; counted-once in planning and timesheets; `journal.work_intelligence.get` capability | FIXED (reader + model); the *visible* recording flow is lane F (§21.3) |
+| **B** | 25.6 recorded hours exist but hours/share per skill are absent | The CV and profile never read `WorkIntelligence.skills`; the journal block showed totals, not the per-skill share | Lane A `4413ca7`: `presentSkills` renders hours · share · entries per skill from `skillPracticeFromIntelligence` on `/cv` and `/dashboard/profile`; lane B exposes share/first/last/contexts | FIXED on CV/profile; Work in Numbers station = lane F |
+| **C** | Skills are an unweighted tag cloud | Chips carried no magnitude; tier order was by list, not evidence strength | Lane A: magnitude bands major / supported / trace / none / **unknown** (journal unreadable ≠ zero); order confirmed → work-supported → declared → self-stated, then hours, then entries; chip weight follows magnitude | FIXED |
+| **D** | Duplicate / case variants ("Programavimas" / "programavimas") | The CV printed `normalized_label` beside the catalogue name; nothing folded a claim into the slug it already is | Lane A `skill-presentation.ts`: claims fold into held slugs by folded name (`foldText`) or lexicon mapping; case/diacritic variants fold into one item that names its variants; **no row is deleted** (non-destructive) | FIXED |
+| **E** | Professional description is keyword-like | Only the person's own `profile_text` rendered; no deterministic facts | Lane A `4ef4cac` `professional-summary.ts`: facts under (never in place of) the person's words — all-time hours, approved part, entries, span, places, top skills by share, outputs in recorded units; unreadable journal → nothing | FIXED |
+| **F** | Work history is semantically thin | `engagement_contexts` read only `title/relationship/dates` | Lane A: reads `description`, `operations_role`, `project_id` (+ project name, tolerant) and joins the journal's per-context hours / approved hours / entries (`unknown` kept apart from `none`) | FIXED |
+| **G** | A saved photo cannot be retrieved conversationally | No intent for "show the photo I uploaded"; the file-subject rule read the sentence as a new deposit | Lane C `66a64e6`: `evidence-photos` intent (18 phrases measured), `readRecentPhotosForChat` over `getPersonalGallery()` (same rows, signed URLs), `chat-photo-strip`, readback-form blanking in `file-subject.ts` | FIXED |
+| **H** | Weak / unrelated retrieved vacancies are labelled "Man tinkantys darbai" | `external-vacancies.ts` fetched the 20 newest ads unfiltered; the action dropped `MatchStatus`; the panel title was static | Lane D `86caeec`: `deriveFitBand` (strong / possible / missing_requirement / conflict / **not_assessed**), rows carry band + why codes, result grouped by band with WHY, discovery-only heading; profile pool read first. Panel chrome title + the destination page = lanes E/G (§21.3) | FIXED (result); destination in progress |
+| **I** | A suspicious salary (150–500 EUR/month) flows into the printable CV without warning | `workers.salary_*_eur` is monthly everywhere (CV prints "EUR/mėn.", matching compares monthly) but the editor labelled the inputs "Tarifas nuo (€)" — a rate of nothing | Lane A `4ef4cac`: editor labels say €/mėn.; `work-card-plausibility.ts` (below monthly floor / reads annual / start date past / far / unavailable-with-date) — warn, never corrupt: no figure changes, no save blocks, "keep as is" or "correct"; sentence beside the editor and on the CV screen, never on the printout | FIXED |
+| **J** | Work-context selector is confusing / duplicated ("Darbuotojas — Darbuotojas") | `worklog-engagements.ts` used the relationship as the base when no org/title existed, and the journal page composed its own label | Lane C `engagement-label.ts`: one composer for both surfaces; base = relationship ⇒ no "X — X"; two rows at one org stay distinct | FIXED |
+| **K** | Dashboard / chat / CV / jobs do not behave as one premium product | Composition, not data: the worker's home is a chat column with results stacked as cards, persistent content lives in a catch-all sheet, the journal page is one 1,662-line scroll, opportunities are an overlay, there is no Work in Numbers destination | `docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md` (target IA; KEEP / REDESIGN / MERGE / REPLACE / REMOVE per surface); lanes E (ŠIANDIEN + 3-tab shell + panel), F (Work in Numbers station + simple recording), G (PASAULIS destination), H (organization reuse, imports provenance, mobile coherence) | IN PROGRESS (§21.3) |
+
+Data safety across all of the above: no migration, no RLS change, no auth change, no new AI call, no destructive write; every new figure comes from `loadWorkIntelligence` / `buildVerifiedCv` / `worker-opportunities-actions` / `getPersonalGallery` — no second ledger.
+
+### 21.2 What this changes in the ranking
+
+The 2026-09-12 ranking (§13, §19) put provenance integrity (P0-2) first because it is the highest-integrity defect. The owner's walk shows that the *visible* journey is what a real user judges, and that the same journal train is where every defect A–K sits. The two are not in conflict: A–J are fixed additively in this branch without touching the provenance write paths, and P0-2 stays the next integrity slice. The re-ranked remaining gaps by end-to-end value:
+
+1. **K — one premium worker experience** (in progress, lanes E/F/G): without it, A–J are correct data shown through the rejected composition.
+2. **P0-2 provenance integrity** (§20): unchanged, next integrity slice; it needs no owner action.
+3. **P0-4 / EVID-2 self-confirmation** and **P0-3 supersede RPC** — owner-gated migrations (§18 G-A…G-E) that the confirmation share shown in Work in Numbers depends on for its honesty.
+4. **P1 manager persona** (`membership_accept_v1` does not write `profile_roles`) — blocks the organization side from seeing the same reader (lane H builds the block; the persona gate stays).
+5. **K2-1 company contact exposure** (PR #1430, RED) — unchanged.
+
+### 21.3 Consolidated next slice and owner-gate batch
+
+**Next slice (SAFE, running now):** finish K — merge lanes E/F/G/H into this branch; then the human walk of the loop on production with the owner's own sentences ("8h total: 5h formwork, 2h rebar, 1h cleanup" → "Kiek šiandien?" / "Kiek šią savaitę?" / "Kam skyriau daugiausia laiko?" / "Kokius įgūdžius naudoju daugiausiai?" / "Kur mano veikla auga?"; upload a photo → "Parodyk ką tik įkeltą darbo nuotrauką."; "Ieškau naujo darbo."; open the Living CV). Acceptance = the coherent journey works and the same figures appear on ŠIANDIEN, Work in Numbers, the CV and the chat.
+
+**Owner-gate batch (unchanged, request in parallel):** G-A supersede RPC migration (P0-3), G-B self-confirmation policy (EVID-2 / P0-4), G-C erasure path (#856 / P0-6), G-D K2-1 contact columns (PR #1430), G-E Supabase auth settings (leaked-password protection), plus the Gemini cost-basis confirmation. None blocks the next slice.
+
+---
+
 ### Appendix A — Register and prior-audit corrections recorded by this audit
 
 | Claim | Where | Reality |
