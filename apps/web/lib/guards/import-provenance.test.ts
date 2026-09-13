@@ -70,6 +70,9 @@ const allocationsRead = read("lib/work-hours/allocations.ts");
 const reader = read("lib/journal/work-intelligence-read.ts");
 const model = read("lib/journal/work-intelligence.ts");
 const section = read("components/app/journal-work-intelligence.tsx");
+// The organization-ledger sentence is rendered ONCE, by the shared
+// Work-in-Numbers piece the section and the station both compose (lane F).
+const orgLedger = read("components/app/work-in-numbers/org-ledger.tsx");
 const writeCore = read("lib/journal/journal-write-core.ts");
 const documentDraft = read("lib/journal/document-journal-draft-model.ts");
 const evidenceImport = read("lib/organization-evidence/import-core.ts");
@@ -186,7 +189,8 @@ describe("5 · provenance travels from the one allocation read to the surface", 
   it("the model separates imported hours by that source and the section names them", () => {
     expect(model).toContain("readonly importedHours: number;");
     expect(model).toMatch(/source === "import"/);
-    expect(section).toContain('t("orgRecords.imported", { hours: fmtHours(orgPeriod.importedHours, locale) })');
+    expect(orgLedger).toContain('t("orgRecords.imported", { hours: fmtHours(orgPeriod.importedHours, locale) })');
+    expect(section).toMatch(/import \{ OrgLedger \} from "@\/components\/app\/work-in-numbers\/org-ledger"/);
   });
   for (const loc of ACTIVE) {
     it(`${loc}: the imported-from-document sentence exists and carries {hours}`, () => {
