@@ -9156,6 +9156,53 @@
       "pay_unknown": "atlygis nepalyginamas",
       "language_unknown": "nenurodytos jūsų kalbos",
       "language_requirement_unknown": "kalbų reikalavimas skelbime neaiškus"
+    },
+    "world": {
+      "title": "Darbo galimybės",
+      "assessedAgainst": "Vertinta pagal: {facts}",
+      "fact": {
+        "profession": "profesija — {value}",
+        "professionEvidenced": "profesija pagal darbo įrašus — {value}",
+        "professionMissing": "profesija nenurodyta",
+        "skills": "įgūdžiai — {count}",
+        "skillsMissing": "įgūdžių neužfiksuota",
+        "place": "vieta — {value}",
+        "placeMissing": "vieta nenurodyta",
+        "pay": "atlygio lūkestis — nuo {amount} EUR",
+        "payMissing": "atlygio lūkestis nenurodytas",
+        "languages": "kalbos — {list}",
+        "languagesMissing": "kalbos nenurodytos"
+      },
+      "countsPlatform": "platformos užklausos: rodoma {shown} iš {retrieved}",
+      "countsPlatformUnavailable": "platformos užklausos: dar neįjungta",
+      "countsExternal": "vieši skelbimai: rodoma {shown} iš {retrieved}",
+      "countsExternalUnreadable": "vieši skelbimai: nepavyko perskaityti",
+      "countsFiltered": "{count} atidėta pagal jūsų filtrus",
+      "derivedNote": "Juostos išvestos iš jūsų nurodytų faktų ir kiekvieno skelbimo nurodytų faktų — paaiškinimas žodžiais, ne skaičius.",
+      "chip": {
+        "strong": "Stiprus atitikimas",
+        "possible": "Galimas atitikimas",
+        "missing_requirement": "Trūksta reikalavimo",
+        "conflict": "Nesuderinama",
+        "not_assessed": "Dar neįvertinta"
+      },
+      "strongEmpty": "Tarp rodomų eilučių stipraus atitikimo nėra.",
+      "strongEmptyChange": "Kas tai pakeistų: {items}.",
+      "change": {
+        "profession_missing": "nurodykite profesiją",
+        "no_subject_skills": "patvirtinkite įgūdžius, kuriuos rodo jūsų darbo įrašai",
+        "location_unknown": "nurodykite, kur esate",
+        "pay_unknown": "nurodykite atlygio lūkestį",
+        "language_unknown": "nurodykite kalbas",
+        "availability_unknown": "nurodykite prieinamumą"
+      },
+      "why": "Kodėl:",
+      "whyNoGaps": "pagal nurodytus faktus spragų nerasta",
+      "whyUnknown": "priežasties nepavyko perskaityti",
+      "payNotStated": "atlygis šaltinyje nenurodytas",
+      "payUnitNotStated": "vienetas šaltinyje nenurodytas",
+      "sourcePlatform": "Platformos užklausa",
+      "externalCouldNotRead": "Viešų skelbimų šaltinio šį kartą nepavyko perskaityti — šios eilutės nežinomos, o ne jų nėra."
     }
   },
   "workerIntake": {
@@ -12977,8 +13024,6 @@
       "pipelineFailedNote": "Įgūdžių atpažinimas šįkart nepavyko — įrašas išsaugotas, atpažinimą gali pakartoti žurnale."
     },
     "findWork": {
-      "intro": "Radau {count} tinkamų variantų. Geriausi atitikimai:",
-      "introOne": "Radau 1 tinkamą variantą:",
       "emptyState": "Šiuo metu neradau aktyvių pasiūlymų, atitinkančių tavo kriterijus. Pranešimų mechanizmo dar nėra, todėl nežadu pranešti — paklausk vėliau arba papildyk profilį, kad atitiktų daugiau poreikių.",
       "blockedNoWorker": "Kad ieškočiau darbo, įjunk darbuotojo vaidmenį paskyros nustatymuose.",
       "blockedNoAccess": "Darbo pasiūlymų sąrašas dar neįjungtas šioje aplinkoje. Kai bus, parodysiu tikrus poreikius.",
@@ -12988,11 +13033,18 @@
       "fitInsufficient": "Trūksta duomenų",
       "locationReason": "Vieta: {location}",
       "roleReason": "Poreikis: {role}",
-      "introExternalAssessed": "Skydelyje yra {count, plural, one {# viešas darbo skelbimas, kurį įvertinau kaip tinkantį} few {# vieši darbo skelbimai, kuriuos įvertinau kaip tinkančius} other {# viešų darbo skelbimų, kuriuos įvertinau kaip tinkančius}} — kandidatuojama per originalų skelbimą.",
-      "introExternalDiscovered": "Dar radau {count, plural, one {# viešą skelbimą, kurio tinkamumo dar negaliu įvertinti arba kuriame trūksta reikalavimo} few {# viešus skelbimus, kurių tinkamumo dar negaliu įvertinti arba kuriuose trūksta reikalavimo} other {# viešų skelbimų, kurių tinkamumo dar negaliu įvertinti arba kuriuose trūksta reikalavimo}} — skydelyje prie kiekvieno nurodyta kodėl. Tai rasti skelbimai, ne tinkantys.",
       "fitNotAssessed": "Dar neįvertinta",
       "fitMissingRequirement": "Trūksta reikalavimo",
-      "fitConflict": "Nesuderinama"
+      "fitConflict": "Nesuderinama",
+      "readback": "Radau {total} ({bands}). Geriausi — skydelyje; visi su priežastimi — galimybių puslapyje.",
+      "readbackDiscoveryOnly": "Radau {total}, bet nė vieno dar neįvertinau kaip tinkančio ({bands}). Kodėl kiekvienas — galimybių puslapyje.",
+      "band": {
+        "strong": "stiprūs atitikimai: {count}",
+        "possible": "galimi atitikimai: {count}",
+        "missing_requirement": "trūksta reikalavimo: {count}",
+        "conflict": "nesuderinami: {count}",
+        "not_assessed": "dar neįvertinti: {count}"
+      }
     },
     "summary": {
       "introProfile": "Štai tavo profilis šiandien: išsaugota {done} iš {total} esminių dalių.",
@@ -13315,7 +13367,9 @@
       "engagementsEndedAt": "Darbo santykis baigtas {date}.",
       "engagementsEndedStillVisible": "Pastaba: ši įmonė vis dar mato jūsų profilį, kol tebesate priskirti jos projektui. Ši prieiga baigsis pasibaigus priskyrimui.",
       "engagementsAlreadyEnded": "Šis darbo santykis jau buvo baigtas. Niekas nepakeista.",
-      "engagementsAlreadyEndedAt": "Šis darbo santykis jau buvo baigtas {date}. Niekas nepakeista."
+      "engagementsAlreadyEndedAt": "Šis darbo santykis jau buvo baigtas {date}. Niekas nepakeista.",
+      "opportunitiesCounts": "Iš viso {total}: {bands}.",
+      "opportunitiesDiscoveryOnly": "Nė vienas dar neįvertintas kaip tinkantis — kodėl, matysite prie kiekvieno galimybių puslapyje."
     }
   },
   "landing": {

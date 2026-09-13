@@ -9156,6 +9156,53 @@
       "pay_unknown": "loon kon niet worden vergeleken",
       "language_unknown": "je talen zijn niet opgegeven",
       "language_requirement_unknown": "de taaleis van de advertentie is onbekend"
+    },
+    "world": {
+      "title": "Werkkansen",
+      "assessedAgainst": "Beoordeeld tegen: {facts}",
+      "fact": {
+        "profession": "beroep — {value}",
+        "professionEvidenced": "beroep uit vastgelegd werk — {value}",
+        "professionMissing": "beroep niet opgegeven",
+        "skills": "vaardigheden — {count}",
+        "skillsMissing": "geen vaardigheden vastgelegd",
+        "place": "plaats — {value}",
+        "placeMissing": "plaats niet opgegeven",
+        "pay": "loonverwachting — vanaf {amount} EUR",
+        "payMissing": "loonverwachting niet opgegeven",
+        "languages": "talen — {list}",
+        "languagesMissing": "talen niet opgegeven"
+      },
+      "countsPlatform": "platformaanvragen: {shown} van {retrieved} getoond",
+      "countsPlatformUnavailable": "platformaanvragen: nog niet ingeschakeld",
+      "countsExternal": "openbare vacatures: {shown} van {retrieved} getoond",
+      "countsExternalUnreadable": "openbare vacatures: kon niet worden gelezen",
+      "countsFiltered": "{count} opzijgezet door je filters",
+      "derivedNote": "De groepen zijn afgeleid van de feiten die jij opgaf en de feiten die elke vacature vermeldt — een uitleg in woorden, geen getal.",
+      "chip": {
+        "strong": "Sterk passend",
+        "possible": "Mogelijk passend",
+        "missing_requirement": "Vereiste ontbreekt",
+        "conflict": "Strijdig",
+        "not_assessed": "Nog niet beoordeeld"
+      },
+      "strongEmpty": "Geen sterk passende vacature tussen de getoonde rijen.",
+      "strongEmptyChange": "Wat dit zou veranderen: {items}.",
+      "change": {
+        "profession_missing": "geef je beroep op",
+        "no_subject_skills": "bevestig de vaardigheden die je vastgelegde werk laat zien",
+        "location_unknown": "geef op waar je bent",
+        "pay_unknown": "geef je loonverwachting op",
+        "language_unknown": "geef je talen op",
+        "availability_unknown": "geef je beschikbaarheid op"
+      },
+      "why": "Waarom:",
+      "whyNoGaps": "geen hiaat gevonden tegen de opgegeven feiten",
+      "whyUnknown": "de reden kon niet worden gelezen",
+      "payNotStated": "loon niet vermeld door de bron",
+      "payUnitNotStated": "eenheid niet vermeld door de bron",
+      "sourcePlatform": "Platformaanvraag",
+      "externalCouldNotRead": "De bron van openbare vacatures kon deze keer niet worden gelezen — deze rijen zijn onbekend, niet afwezig."
     }
   },
   "workerIntake": {
@@ -12977,8 +13024,6 @@
       "pipelineFailedNote": "Vaardigheidsherkenning is deze keer mislukt — de registratie is opgeslagen; je kunt de herkenning in het logboek opnieuw uitvoeren."
     },
     "findWork": {
-      "intro": "Ik vond {count} passende opties. Beste matches:",
-      "introOne": "Ik vond 1 passende optie:",
       "emptyState": "Op dit moment vond ik geen actieve vacatures die aan je criteria voldoen. Er zijn nog geen meldingen, dus dat beloof ik niet — vraag het later opnieuw of vul je profiel aan zodat meer behoeften passen.",
       "blockedNoWorker": "Om werk te zoeken, schakel de werknemersrol in bij accountinstellingen.",
       "blockedNoAccess": "De vacaturelijst is nog niet ingeschakeld in deze omgeving. Zodra dat zo is, toon ik echte behoeften.",
@@ -12988,11 +13033,18 @@
       "fitInsufficient": "Onvoldoende gegevens",
       "locationReason": "Locatie: {location}",
       "roleReason": "Behoefte: {role}",
-      "introExternalAssessed": "In het paneel {count, plural, one {staat # openbare vacature die ik als passend heb beoordeeld} other {staan # openbare vacatures die ik als passend heb beoordeeld}} — solliciteren gebeurt via de originele advertentie.",
-      "introExternalDiscovered": "Ik vond ook {count, plural, one {# openbare advertentie waarvan ik de match nog niet kan beoordelen of waarvoor je iets mist} other {# openbare advertenties waarvan ik de match nog niet kan beoordelen of waarvoor je iets mist}} — in het paneel staat bij elke waarom. Dit zijn gevonden advertenties, geen matches.",
       "fitNotAssessed": "Nog niet beoordeeld",
       "fitMissingRequirement": "Vereiste ontbreekt",
-      "fitConflict": "Strijdig"
+      "fitConflict": "Strijdig",
+      "readback": "Ik vond er {total} ({bands}). De beste staan in het paneel; elke rij met reden staat op de pagina met kansen.",
+      "readbackDiscoveryOnly": "Ik vond er {total}, nog geen enkele als passend beoordeeld ({bands}). Waarom elke — op de pagina met kansen.",
+      "band": {
+        "strong": "sterk passend: {count}",
+        "possible": "mogelijk passend: {count}",
+        "missing_requirement": "vereiste ontbreekt: {count}",
+        "conflict": "strijdig: {count}",
+        "not_assessed": "nog niet beoordeeld: {count}"
+      }
     },
     "summary": {
       "introProfile": "Dit is je profiel op dit moment: {done} van {total} basisgegevens zijn opgeslagen.",
@@ -13315,7 +13367,9 @@
       "engagementsEndedAt": "De werkrelatie is beëindigd op {date}.",
       "engagementsEndedStillVisible": "Let op: dit bedrijf kan uw profiel nog steeds zien zolang u aan zijn project bent toegewezen. Die toegang eindigt wanneer de toewijzing eindigt.",
       "engagementsAlreadyEnded": "Deze werkrelatie was al beëindigd. Er is niets gewijzigd.",
-      "engagementsAlreadyEndedAt": "Deze werkrelatie was al beëindigd op {date}. Er is niets gewijzigd."
+      "engagementsAlreadyEndedAt": "Deze werkrelatie was al beëindigd op {date}. Er is niets gewijzigd.",
+      "opportunitiesCounts": "Totaal {total}: {bands}.",
+      "opportunitiesDiscoveryOnly": "Nog geen enkele beoordeeld als passend — waarom staat naast elke rij op de pagina met kansen."
     }
   },
   "landing": {
