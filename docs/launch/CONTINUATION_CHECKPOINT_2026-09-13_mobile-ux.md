@@ -9,9 +9,9 @@ Written for the next session/context. Facts only; nothing forecast.
 | `main` at session start | `6331908` — "#1689 premium recovery — one worker loop, A-14 constitution (#1724)" |
 | Working branch | `claude/labourmarket-mobile-ux-qwdmk8` |
 | Branch head | `a3f073c` |
-| Open PR | **#1727** — https://github.com/bandymuks1-stack/labourmarketai/pull/1727 |
-| PR state | **DRAFT** (see *Blocked* below) |
-| Production | unchanged — nothing from this branch is merged or deployed |
+| PR #1727 | **MERGED** — https://github.com/bandymuks1-stack/labourmarketai/pull/1727 |
+| `main` after the merge | `dd6147d` (tree byte-identical to the tested head `3b27e9e`) |
+| Production | Vercel auto-deploys `main`; **PRODUCTION_PROVEN is still NO** until the owner walks it |
 
 ## What was actually done, and proven how
 
@@ -46,18 +46,30 @@ branch introduced.
 **HUMAN_UI_PROVEN = NO. PRODUCTION_PROVEN = NO.** Nobody has walked this on
 a phone. Do not upgrade either without a real walk.
 
+## One thing to know about `main`'s history
+
+GitHub was mid-incident during the merge: `markPullRequestReadyForReview`,
+`enablePullRequestAutoMerge` and the REST merge endpoint all returned 502 /
+500 for several minutes. **One of the merge calls that reported
+`500 Server Error` had in fact succeeded server-side** (`cc63df5`, 12:25:57),
+and the retry that finally reported success produced a second, EMPTY squash
+commit (`dd6147d`, 12:32:18). `git diff cc63df5 dd6147d` is empty and
+`git diff 3b27e9e dd6147d` is empty, so the content on `main` is exactly what
+was tested. The duplicate is a no-op commit in the history and was left
+alone deliberately: removing it would mean rewriting `main`, which the
+operating contract forbids.
+
+**Lesson for the next agent:** when a GitHub write returns 5xx, re-read the
+resource before retrying — the write may have landed.
+
+`enablePullRequestAutoMerge` never succeeded, so it is still unknown whether
+the repo's *Allow auto-merge* setting is on. The merge model's one-time DI
+prerequisite may still be outstanding; the fallback (wait for CI, then
+merge) worked.
+
 ## Blocked — needs the owner (nothing an agent can do)
 
-1. **PR #1727 cannot be taken out of draft from here.** Both GitHub GraphQL
-   mutations — `markPullRequestReadyForReview` and
-   `enablePullRequestAutoMerge` — fail repeatedly (HTTP 502 and
-   "Something went wrong while executing your query", several distinct
-   request ids). The repo's own merge model names the likely cause: the
-   one-time DI prerequisite *repo setting → Allow auto-merge = ON* plus
-   branch protection requiring `quality` and `migration-safety`. Until that
-   is set, auto-merge is inert. **Owner action: press "Ready for review"
-   and merge #1727** (or turn Allow auto-merge on and let an agent retry).
-2. **`SUPABASE_DB_URL`** (read-only) is still missing as a GitHub Actions
+1. **`SUPABASE_DB_URL`** (read-only) is still missing as a GitHub Actions
    secret — the live secdef-allowlist and migration-parity gates stay
    inactive. This is open owner decision GOV-1, unchanged by this session.
 3. The six open owner decisions printed by `product-truth.mjs`
@@ -80,19 +92,30 @@ a phone. Do not upgrade either without a real walk.
 
 In order, for whoever picks this up:
 
-1. **Get #1727 merged** (owner gate above), then re-verify on production.
-2. **PAKLAUSK is still a conversation, not yet a control surface.** The
-   machinery exists and is real — `lib/conversation/action-registry.ts`
-   (54 actions with confirmation tiers and preconditions), `dispatch.ts`,
-   `intent-registry.ts`, `result-registry.ts`. What was NOT audited this
-   session is how many of those 54 a person can actually reach from the
-   PAKLAUSK tab on a phone. Start by measuring that, not by building.
-3. **`/cv` (1,041 lines) and `/dashboard/profile` (1,300+ lines) are still
-   long pages.** The profile's chip wall is fixed; the page itself is not
-   split into stations per target IA §2. That is its own slice.
-4. `/dashboard/gallery` and `/dashboard/work-in-numbers` were NOT inspected
-   this session — check them against the same compactness rule before
-   assuming they are fine.
+1. **The owner's phone walk** (§ above). Everything else is guesswork until
+   someone has used it.
+2. **PAKLAUSK's gap is presentational, not architectural — measured, not
+   assumed.** The control layer is real: `action-registry.ts` carries 52
+   actions with confirmation tiers and preconditions, and
+   `intent-registry.ts` carries 77 classified intents (40 read · 17 write ·
+   16 route · 3 blocked) wired through `dispatch.ts` into the chat. So do
+   NOT rebuild it. Two concrete findings to start from:
+   · six registered actions are referenced NOWHERE outside the registry —
+     `worker.complete-onboarding`, `worker.upload-cv`, `worker.save-skills`,
+     `agency.review-clients`, `agency.offer-status`, `agency.who-waits`.
+     Whether the LLM proposer can still reach them was NOT established;
+     establish that before calling them dead.
+   · what was never measured is how many of the 77 intents a person
+     actually discovers on a phone. That is the real question.
+3. **`/dashboard/profile` (1,300+ lines) is still a long page.** Its chip
+   wall is fixed and it has a jump strip; it is not split into stations per
+   target IA §2. That is its own slice with its own receipt.
+4. `/cv` is deliberately NOT compacted — it is a printable DOCUMENT
+   (`cv-doc`, `print:` styles, template registry) and is meant to be read
+   top to bottom. It gained a print-hidden jump strip instead. Do not
+   "fix" it by collapsing sections.
+5. `/dashboard/gallery` (116 lines) and `/dashboard/work-in-numbers`
+   (305 lines) were checked and are **already compact**. Do not redo them.
 
 ## DO-NOT-REGRESS
 
@@ -112,3 +135,7 @@ In order, for whoever picks this up:
 - SEP-7 on the calendar: an empty cell is a recorded zero over a known day,
   a future day is shown and not offered, and a day the reader could not
   answer for never reaches the grid.
+- **A CV is a document.** `/cv` sections are not collapsed and must not be:
+  the jump strip is the way in, and every one of its anchors is built from
+  the SAME predicate that renders its section, so it can never offer a dead
+  link. Pinned by `mobile-compact-surfaces`.
