@@ -759,6 +759,28 @@
       "linked": "{hours} Std. beschreiben Journaleinträge, die oben bereits gezählt sind",
       "rejected": "{hours} Std. in einem Stundenzettel abgelehnt — nirgends gezählt",
       "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur ein Journaleintrag."
+    },
+    "growthKindsTitle": "Was deine Einträge zeigen",
+    "growthKindsHint": "Jede Zeile ist eine Art, nach einer einfachen Regel aus deinen eigenen Einträgen abgeleitet, mit den Fakten, auf denen sie steht. Keine Eigenschaft, keine Bewertung.",
+    "growthKind": {
+      "core_strength": "Kernstärke",
+      "growing": "Wächst",
+      "underused": "Ungenutzt",
+      "self_stated": "Nur selbst angegeben",
+      "adjacent_opportunity": "Angrenzende Möglichkeit"
+    },
+    "growthWhyHours": "{hours} Std. — {percent} deiner zugeordneten Stunden",
+    "growthWhyInvolved": "beteiligt {hours} Std. neben anderen Fähigkeiten",
+    "growthWhyUntimed": "Einträge ohne Dauer",
+    "growthWhyCounts": "{entries, plural, one {# Eintrag} other {# Einträge}}, {contexts, plural, one {# Kontext} other {# Kontexte}}",
+    "growthWhyLastDay": "zuletzt {day}",
+    "growthWhyDormant": "{days} Tage ohne Eintrag",
+    "growthWhySelfStated": "von dir angegeben — 0 Einträge und 0 Stunden belegen es",
+    "growthWhyTrend": {
+      "up": "in den letzten 30 Tagen mehr genutzt als in den 30 davor",
+      "new": "erste Einträge in den letzten 30 Tagen",
+      "down": "in den letzten 30 Tagen weniger genutzt als in den 30 davor",
+      "flat": "in den letzten 30 Tagen genauso viel genutzt wie in den 30 davor"
     }
   },
   "verification": {

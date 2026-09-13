@@ -759,6 +759,28 @@
       "linked": "{hours} h describe journal entries already counted above",
       "rejected": "{hours} h rejected in a timesheet — counted nowhere",
       "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only a journal entry does that."
+    },
+    "growthKindsTitle": "What your entries show",
+    "growthKindsHint": "Each line is a kind read by a plain rule from your own entries, with the facts it stands on. Not a trait, not a rating.",
+    "growthKind": {
+      "core_strength": "Core strength",
+      "growing": "Growing",
+      "underused": "Underused",
+      "self_stated": "Self-stated only",
+      "adjacent_opportunity": "Adjacent opportunity"
+    },
+    "growthWhyHours": "{hours} h — {percent} of your attributed hours",
+    "growthWhyInvolved": "involved {hours} h alongside other skills",
+    "growthWhyUntimed": "entries without a duration",
+    "growthWhyCounts": "{entries, plural, one {# entry} other {# entries}}, {contexts, plural, one {# context} other {# contexts}}",
+    "growthWhyLastDay": "last {day}",
+    "growthWhyDormant": "{days} days without an entry",
+    "growthWhySelfStated": "declared by you — 0 entries and 0 hours back it",
+    "growthWhyTrend": {
+      "up": "used more in the last 30 days than in the 30 before",
+      "new": "first entries in the last 30 days",
+      "down": "used less in the last 30 days than in the 30 before",
+      "flat": "used as much in the last 30 days as in the 30 before"
     }
   },
   "verification": {

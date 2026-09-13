@@ -28,7 +28,12 @@
  *             evidence does not cover yet, when the caller has read the
  *             opportunities board; `null` when it was not read (UNKNOWN ≠
  *             ZERO, SEP-7) — the section passes null and points at the
- *             board, the chat passes the board's own missing-skill counts.
+ *             board, the chat passes the board's own missing-skill counts;
+ *           · directions — the KINDS (owner requirement 5, #1689): each
+ *             evidenced skill read as core_strength / growing / underused,
+ *             each declared-only skill as self_stated, each adjacency as
+ *             adjacent_opportunity — every one with the facts (`why`) it was
+ *             decided on, so a surface names the evidence, never a trait.
  *
  * ── HONESTY ───────────────────────────────────────────────────────────────
  *   · pure and deterministic: same model in → same reading out; no IO, no
@@ -58,6 +63,11 @@ import {
 const DORMANT_AFTER_DAYS = 90;
 const MAX_DEEPEN = 6;
 const MAX_DEMAND = 6;
+/** A core strength is the largest attributed share AND spread: entries over
+ *  at least this many contexts, or at least this many entries. One context
+ *  and one entry is a single day's work, not a strength. */
+const CORE_MIN_CONTEXTS = 2;
+const CORE_MIN_ENTRIES = 3;
 
 /** Why a skill's OWN evidence could be deepened — closed set, each one a
  *  fact about the person's rows, never a judgement. */
@@ -89,6 +99,78 @@ export type GrowthDemand = {
   readonly demands: number;
 };
 
+/**
+ * GROWTH KINDS (owner requirement 5, #1689) — what the person's OWN rows show
+ * about each skill or direction, named as a KIND with its evidence attached.
+ *
+ * A kind is a closed-set reading, never a grade of the person: each one is
+ * decided by a plain rule over the facts in `why`, and the facts travel with
+ * it so every sentence a surface renders can name its evidence.
+ *
+ *   core_strength        the largest share of the person's ATTRIBUTED hours,
+ *                        backed by entries over ≥ 2 contexts or ≥ 3 entries
+ *   growing              used more in the last 30 days than the 30 before,
+ *                        or new in the window
+ *   underused            evidenced earlier, no linked entry for 90 days
+ *   self_stated          declared by the person; 0 entries and 0 hours back it
+ *   adjacent_opportunity the EXISTING adjacency reading — a profession the
+ *                        evidenced skills already partly cover
+ *
+ * `qualification_gap` (a formal requirement the requirement ledger says is
+ * missing) is deliberately NOT a kind here: this model receives no
+ * requirement-ledger input, and a kind the evidence cannot back would be an
+ * invented career fact. It is omitted, not guessed.
+ *
+ * One kind per skill, decided in the order above (a core strength that is
+ * also rising is `core_strength`; its `why.trend` still says "up").
+ */
+export type GrowthKind =
+  | "core_strength"
+  | "growing"
+  | "underused"
+  | "self_stated"
+  | "adjacent_opportunity";
+
+/** The facts a skill-kind stands on — the model's own figures for the skill. */
+export type GrowthSkillFacts = {
+  readonly attributedHours: number;
+  readonly sharedHours: number;
+  readonly confirmedHours: number;
+  /** Share of the person's own ATTRIBUTED hours, 0..1. */
+  readonly share: number;
+  readonly entries: number;
+  readonly contexts: number;
+  readonly lastWorkedDay: string | null;
+  readonly trend: WorkTrend;
+};
+
+export type GrowthDirection =
+  | { readonly kind: "core_strength"; readonly slug: string; readonly why: GrowthSkillFacts }
+  | { readonly kind: "growing"; readonly slug: string; readonly why: GrowthSkillFacts }
+  | {
+      readonly kind: "underused";
+      readonly slug: string;
+      readonly why: GrowthSkillFacts & {
+        /** Days since the last linked entry, at the focus window's end. */
+        readonly dormantDays: number;
+      };
+    }
+  | {
+      readonly kind: "self_stated";
+      readonly slug: string;
+      /** Stated as the zeros they are: no entry, no hour, backs this skill. */
+      readonly why: { readonly entries: 0; readonly hours: 0 };
+    }
+  | {
+      readonly kind: "adjacent_opportunity";
+      readonly professionId: string;
+      readonly why: {
+        readonly sharedSkills: readonly string[];
+        readonly missingSkills: readonly string[];
+        readonly sharedCount: number;
+      };
+    };
+
 export type GrowthLimitation = "ok" | AdjacentDirectionLimitation;
 
 export type GrowthReading = {
@@ -115,6 +197,14 @@ export type GrowthReading = {
   readonly demand: readonly GrowthDemand[] | null;
   /** Demand rows before the MAX_DEMAND cap; `null` when demand was not read. */
   readonly demandTotal: number | null;
+  /**
+   * The KINDS (owner requirement 5): one entry per skill that reads as a
+   * core strength / growing / underused, one per declared-only skill
+   * (self_stated), one per adjacent profession — each with its `why`. Listed
+   * by kind in the order the type declares, then in the model's own hours
+   * order. Uncapped here; a surface caps and says so.
+   */
+  readonly directions: readonly GrowthDirection[];
   readonly limitation: GrowthLimitation;
 };
 
@@ -122,6 +212,80 @@ function isoDayMinus(dayIso: string, days: number): string {
   const d = new Date(`${dayIso}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() - days);
   return d.toISOString().slice(0, 10);
+}
+
+function daysBetween(fromDayIso: string, toDayIso: string): number {
+  const a = new Date(`${fromDayIso}T00:00:00Z`).getTime();
+  const b = new Date(`${toDayIso}T00:00:00Z`).getTime();
+  return Math.max(0, Math.round((b - a) / 86_400_000));
+}
+
+function skillFacts(s: SkillWorkTime): GrowthSkillFacts {
+  return {
+    attributedHours: s.attributedHours,
+    sharedHours: s.sharedHours,
+    confirmedHours: s.confirmedHours,
+    share: s.share,
+    entries: s.entries,
+    contexts: s.contexts,
+    lastWorkedDay: s.lastWorkedDay,
+    trend: s.trend,
+  };
+}
+
+/**
+ * The kinds over the evidenced skills, the declared-only skills and the
+ * adjacency directions. One kind per skill, decided in the declared order;
+ * every entry carries the facts it was decided on.
+ */
+function deriveDirections(
+  evidenced: readonly SkillWorkTime[],
+  declaredOnly: readonly SkillWorkTime[],
+  adjacency: readonly AdjacentDirection[],
+  focusEndIso: string,
+  dormantBefore: string,
+): GrowthDirection[] {
+  // core strength — the largest attributed share among evidenced skills,
+  // and only when the entries are spread (ties all qualify: two skills at
+  // the same share are two core strengths, not a ranking of one over the other)
+  const topShare = Math.max(0, ...evidenced.map((s) => s.share));
+  const isCore = (s: SkillWorkTime) =>
+    s.attributedHours > 0 &&
+    s.share === topShare &&
+    (s.contexts >= CORE_MIN_CONTEXTS || s.entries >= CORE_MIN_ENTRIES);
+  const isGrowing = (s: SkillWorkTime) => s.trend === "up" || s.trend === "new";
+  const isUnderused = (s: SkillWorkTime) =>
+    s.lastWorkedDay !== null && s.lastWorkedDay < dormantBefore;
+
+  const core: GrowthDirection[] = [];
+  const growing: GrowthDirection[] = [];
+  const underused: GrowthDirection[] = [];
+  for (const s of evidenced) {
+    if (isCore(s)) core.push({ kind: "core_strength", slug: s.slug, why: skillFacts(s) });
+    else if (isGrowing(s)) growing.push({ kind: "growing", slug: s.slug, why: skillFacts(s) });
+    else if (isUnderused(s)) {
+      underused.push({
+        kind: "underused",
+        slug: s.slug,
+        why: { ...skillFacts(s), dormantDays: daysBetween(s.lastWorkedDay!, focusEndIso) },
+      });
+    }
+  }
+  const selfStated: GrowthDirection[] = declaredOnly.map((s) => ({
+    kind: "self_stated",
+    slug: s.slug,
+    why: { entries: 0, hours: 0 },
+  }));
+  const adjacent: GrowthDirection[] = adjacency.map((d) => ({
+    kind: "adjacent_opportunity",
+    professionId: d.professionId,
+    why: {
+      sharedSkills: d.sharedSkills,
+      missingSkills: d.missingSkills,
+      sharedCount: d.sharedCount,
+    },
+  }));
+  return [...core, ...growing, ...underused, ...selfStated, ...adjacent];
 }
 
 function deepenReasons(s: SkillWorkTime, dormantBefore: string): DeepenReason[] {
@@ -184,6 +348,7 @@ export function deriveGrowthReading(
       expand: [],
       demand: demandRead === null ? null : [],
       demandTotal: demandRead === null ? null : 0,
+      directions: [],
       limitation: "insufficient_skills",
     };
   }
@@ -206,6 +371,16 @@ export function deriveGrowthReading(
           .sort((a, b) => b.demands - a.demands || a.slug.localeCompare(b.slug));
   const demand = demandAll === null ? null : demandAll.slice(0, MAX_DEMAND);
 
+  // kinds — over the SAME evidenced rows, the declared-only rows named as
+  // self-stated, and the adjacency already computed above (one read)
+  const directions = deriveDirections(
+    evidenced,
+    wi.skills.filter((s) => !evidencedSlugs.has(s.slug)),
+    adjacency.directions,
+    focus.endIso,
+    dormantBefore,
+  );
+
   return {
     kind: "derived",
     basis,
@@ -214,6 +389,7 @@ export function deriveGrowthReading(
     expand: adjacency.directions,
     demand,
     demandTotal: demandAll === null ? null : demandAll.length,
+    directions,
     limitation: adjacency.limitationState,
   };
 }

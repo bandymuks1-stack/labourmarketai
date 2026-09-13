@@ -759,6 +759,28 @@
       "linked": "{hours} val. aprašo žurnalo įrašus, kurie jau suskaičiuoti aukščiau",
       "rejected": "{hours} val. atmesta žiniaraštyje — niekur neskaičiuojama",
       "rule": "Valandų įrašas sako kada ir kiek, bet ne ką darėte — todėl šios valandos nepasiekia jokio įgūdžio ir jokios darbo rūšies. Tai daro tik žurnalo įrašas."
+    },
+    "growthKindsTitle": "Ką rodo jūsų įrašai",
+    "growthKindsHint": "Kiekviena eilutė — rūšis, išvesta pagal paprastą taisyklę iš jūsų pačių įrašų, ir faktai, kuriais ji remiasi. Ne savybė ir ne įvertinimas.",
+    "growthKind": {
+      "core_strength": "Pagrindinė stiprybė",
+      "growing": "Auga",
+      "underused": "Nenaudojama",
+      "self_stated": "Tik jūsų nurodyta",
+      "adjacent_opportunity": "Gretima galimybė"
+    },
+    "growthWhyHours": "{hours} val. — {percent} jūsų priskirtų valandų",
+    "growthWhyInvolved": "dalyvauta {hours} val. kartu su kitais įgūdžiais",
+    "growthWhyUntimed": "įrašai be trukmės",
+    "growthWhyCounts": "{entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, {contexts, plural, one {# kontekstas} few {# kontekstai} other {# kontekstų}}",
+    "growthWhyLastDay": "paskutinį kartą {day}",
+    "growthWhyDormant": "{days} d. be įrašo",
+    "growthWhySelfStated": "nurodėte patys — 0 įrašų ir 0 valandų tai remia",
+    "growthWhyTrend": {
+      "up": "per paskutines 30 d. naudota daugiau nei ankstesnes 30 d.",
+      "new": "pirmieji įrašai per paskutines 30 d.",
+      "down": "per paskutines 30 d. naudota mažiau nei ankstesnes 30 d.",
+      "flat": "per paskutines 30 d. naudota tiek pat, kiek ankstesnes 30 d."
     }
   },
   "verification": {
