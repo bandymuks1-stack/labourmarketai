@@ -7,7 +7,7 @@ Owner scope: the MOBILE UX correction only. Not a product/governance audit.
 | | |
 |---|---|
 | Branch | `claude/labourmarket-mobile-ux-qwdmk8` |
-| Branch head | `425e30f` |
+| Branch head | `3d8430d` |
 | Open PR | **#1729** — auto-merge (squash) ENABLED, waiting on CI |
 | `main` | `cb4f43c` (#1728 merged) ← `dd6147d` / `cc63df5` (#1727 merged) |
 | Production | Vercel auto-deploys `main`. #1727 + #1728 are live; **#1729 is not** |
@@ -88,6 +88,25 @@ guards `journal-calendar`, `mobile-compact-surfaces`,
 e2e `calendar-journal-history` (repointed to the calendar cell).
 
 No migration, no RLS, no auth, no grant, no schema change in any of it.
+
+## Review findings on #1729 — three fixed, two declined
+
+Codex review, fixed in `3d8430d`:
+- **P1** a SELF-approval was being labelled "manager confirmed"
+  (`deriveReviewResult` returns `approved` for one, and the journal reader
+  does not select `confirmer_id`). The words now say a JOURNAL RECORD is
+  confirmed and never name an actor the data cannot identify (SEP-3).
+- **P2** `Math.max(0.1, …)` printed 0,1 h (~6 min) for a day of 1-2 recorded
+  minutes. Such a day now reads `<0,1`.
+- **P2** the CV summary anchor was dead in the facts-only state; the facts
+  section now takes the id exactly when the summary block is absent. This
+  closed a real gap in #1728's "no dead anchor" claim — its guard checked the
+  id existed somewhere, not that it was on the block that renders.
+
+Declined, with reasons on the PR: backfilling `journal.calendar` into the six
+unrouted catalogs (they also lack `dayNav`, which predates this work — a
+standing convention, not a regression), and the `aria-label` duration units
+(`formatDuration` supports en|lt only; extending it is its own change).
 
 ## Unrelated findings — RECORDED, NOT ACTED ON
 
