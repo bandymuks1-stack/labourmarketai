@@ -43,7 +43,7 @@ Secondary (reachable from ŠIANDIEN and from PAKLAUSK, one tap):
 | Station | Route | Content |
 |---|---|---|
 | **Mano darbas** (journal) | `/dashboard/journal` | Recording (extremely simple: what · where · how long · photo → readback → confirm), the entry list, corrections. |
-| **Mano veikla skaičiais** (Work in Numbers) | `/dashboard/journal#work-in-numbers` → own page in the next slice | Answers "kokie įgūdžiai užima didžiausią mano veiklos dalį?" first: share bars per skill (measured hours, %, entries, first/last, contexts, outputs, confirmation share, trend), period selector, plausibility checks, organization records shown *beside* — never summed. |
+| **Mano veikla skaičiais** (Work in Numbers) | `/dashboard/journal?view=numbers` (alias `/dashboard/journal/numbers` redirects here) — a stable, linkable view of the journal route; a page of its own is reserved to an owner ruling under Product Constitution A-01 (see §9) | Answers "kokie įgūdžiai užima didžiausią mano veiklos dalį?" first: share bars per skill (measured hours, %, entries, first/last, contexts, outputs, confirmation share, trend), period selector, plausibility checks, organization records shown *beside* — never summed. |
 | **Profesinis profilis / Living CV** | `/dashboard/profile`, `/cv` | Strength and magnitude visible: tier order (confirmed → work-supported → declared → self-stated), chip size by magnitude, hours · share · entries per skill, professional facts under the person's own words, work history with description / project / recorded hours. |
 | **Augimas** | inside Work in Numbers → own section | CORE STRENGTH · GROWING · UNDERUSED · SELF-STATED-NOT-EVIDENCED · ADJACENT OPPORTUNITY · FORMAL QUALIFICATION GAP, each with its WHY in figures. No score, no rank. |
 
@@ -134,7 +134,18 @@ Desktop expands the same architecture: the tab bar becomes a left rail with
 the same three roots and the same stations; a station may show two columns
 (figure + detail) instead of a sheet. No desktop-only surface.
 
-## 9. Not in scope
+## 9. Not in scope, and the one constitution conflict
 
 Brand and logo (no recreation); organization-side redesign; any migration,
 RLS or auth change (none is required by this IA).
+
+**Constitution conflict (owner decision).** `docs/PRODUCT_CONSTITUTION.md`
+A-01 ("AI-first, one workspace, no page switching") and its product gate
+block every new page; scoped waivers are recorded only on an explicit owner
+ruling per PR (`.github/scripts/owner-waivers.mjs`). This IA names stable
+stations. Until the owner amends A-01 to recognise worker stations (or
+records a waiver for PR #1724), every station lives on an EXISTING route:
+ŠIANDIEN on `/dashboard`, PASAULIS on `/dashboard/opportunities`, Work in
+Numbers as `/dashboard/journal?view=numbers`. Nothing in the composition
+depends on the URL shape; promoting a view to a page is a one-line change
+once the ruling exists.

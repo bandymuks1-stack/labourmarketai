@@ -69,7 +69,9 @@ const component = read("components/app/journal-work-intelligence.tsx");
 // composition moved to ONE set of shared pieces the section AND the
 // Work-in-Numbers station render — the pins below follow the rendering.
 const numbersView = read("lib/journal/work-in-numbers-view.ts");
-const stationPage = read("app/[locale]/dashboard/journal/numbers/page.tsx");
+// The station is a VIEW of the journal route (A-01: a new page is reserved to
+// an owner ruling); `numbers/page.tsx` is only a redirect alias.
+const stationPage = read("app/[locale]/dashboard/journal/work-in-numbers-station.tsx");
 const quickRecord = read("app/[locale]/dashboard/journal/quick-record.tsx");
 const shareList = read("components/app/work-in-numbers/skill-share-list.tsx");
 const checksList = read("components/app/work-in-numbers/checks-list.tsx");
@@ -1239,7 +1241,8 @@ describe("17 · the Work-in-Numbers station (target worker IA 2026-09-13)", () =
     expect(stationPage).not.toMatch(/journal_entry_metrics|deriveEntryWorkTime|fragment_time|work_hour_allocations|assembleWorkIntelligence/);
     expect(stationPage).not.toMatch(/service_role|createAdminClient/);
     // the period selector is REAL links the server re-reads for
-    expect(stationPage).toMatch(/const periodHref = \(key: WorkPeriodKey\) => `\/dashboard\/journal\/numbers\?period=\$\{key\}`;/);
+    expect(stationPage).toMatch(/const periodHref = \(key: WorkPeriodKey\) => `\$\{WORK_IN_NUMBERS_HREF\}&period=\$\{key\}`;/);
+    expect(stationPage).toContain('export const WORK_IN_NUMBERS_HREF = "/dashboard/journal?view=numbers";');
     expect(periodNav).toMatch(/href=\{href\(key\) as "\/dashboard"\}/);
     expect(periodNav).not.toMatch(/useState|onClick/);
     // an explicit window is the model's own `range` row, refused when malformed
@@ -1350,11 +1353,11 @@ describe("17b · the journal page: recording first, one numbers card, the statio
     expect(page).toMatch(/data-testid="journal-numbers-summary"/);
     expect(page).toMatch(/<DominantLead[\s\S]*?compact/);
     expect(page).toMatch(/data-testid="journal-numbers-link"/);
-    expect(page).toMatch(/\/dashboard\/journal\/numbers\?period=\$\{wi\?\.focus \?\? periodKey\}/);
+    expect(page).toMatch(/\$\{WORK_IN_NUMBERS_HREF\}&period=\$\{wi\?\.focus \?\? periodKey\}/);
     // the summary is composed from the SAME model the diary was derived from
     expect(page).toMatch(/const rows = wi \? skillRows\(wi, skillNameOf\)/);
     expect(page).toMatch(/const answer = dominantAnswer\(wi, rows\);/);
     // the section's own tiles now point at the station
-    expect(component).toContain("`/dashboard/journal/numbers?period=${key}`");
+    expect(component).toContain("`/dashboard/journal?view=numbers&period=${key}`");
   });
 });

@@ -115,11 +115,11 @@ export function activeWorkerTab(
 }
 
 /** The secondary stations reachable from ŠIANDIEN in one tap (IA §2). Every
- *  href is an existing route; `numbers` is lane F's own page for "Mano
- *  veikla skaičiais" and is linked as the IA names it. */
+ *  href is an existing route; `numbers` is the journal route's own view for "Mano
+ *  veikla skaičiais" (a new page is reserved to an owner ruling, A-01). */
 export const TODAY_STATIONS = [
   { id: "journal", href: "/dashboard/journal" },
-  { id: "numbers", href: "/dashboard/journal/numbers" },
+  { id: "numbers", href: "/dashboard/journal?view=numbers" },
   { id: "profile", href: "/dashboard/profile" },
   { id: "cv", href: "/cv" },
   { id: "gallery", href: "/dashboard/gallery" },

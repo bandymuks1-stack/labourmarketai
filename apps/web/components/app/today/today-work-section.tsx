@@ -198,7 +198,7 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
           </p>
         )}
         {/* "Mano veikla skaičiais" — the station lane F builds
-            (`/dashboard/journal/numbers`); its address comes from the ONE
+            (`/dashboard/journal?view=numbers`); its address comes from the ONE
             station table so this file never spells a route of its own. */}
         <StationLink href={stationHref("numbers")} testId="today-growth-open">
           {t("stations.numbers")}

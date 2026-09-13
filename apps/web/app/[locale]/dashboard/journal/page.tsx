@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
+import {
+  WORK_IN_NUMBERS_HREF,
+  WorkInNumbersStation,
+} from "./work-in-numbers-station";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   JournalEntryComposer,
@@ -85,7 +89,7 @@ import {
 } from "@/lib/journal/work-intelligence-read";
 // MANO DARBAS · MANO VEIKLA SKAIČIAIS (target worker IA 2026-09-13): this
 // page records and lists; the figures have their own station
-// (`/dashboard/journal/numbers`). What stays here is ONE compact summary —
+// (`/dashboard/journal?view=numbers`). What stays here is ONE compact summary —
 // the dominant-skill sentence and this period's hours — composed by the same
 // presentation model and the same lead component the station renders.
 import { Card } from "@/components/ui/Card";
@@ -126,10 +130,19 @@ export default async function JournalPage({
     skill?: string | string[];
     period?: string | string[];
     compose?: string | string[];
+    view?: string | string[];
+    from?: string | string[];
+    to?: string | string[];
   }>;
 }) {
   const { locale } = await params;
   const sp = (await searchParams) ?? {};
+  // "Mano veikla skaičiais" is a VIEW of this route (`?view=numbers`), not a
+  // page of its own — the Product Constitution (A-01) reserves a new page to
+  // an owner ruling. The station does its own worker read and redirects.
+  if (sp.view === "numbers") {
+    return <WorkInNumbersStation locale={locale} sp={sp} />;
+  }
   // The full composer for a NEW record only behind the explicit "detaliau"
   // door (`?compose=full`); the compact text-first recording is the default.
   const composeFull = sp.compose === "full";
@@ -1129,7 +1142,7 @@ export default async function JournalPage({
               ) : null}
               <Link
                 href={
-                  `/dashboard/journal/numbers?period=${wi?.focus ?? periodKey}` as "/dashboard"
+                  `${WORK_IN_NUMBERS_HREF}&period=${wi?.focus ?? periodKey}` as "/dashboard"
                 }
                 className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
                 data-testid="journal-numbers-link"

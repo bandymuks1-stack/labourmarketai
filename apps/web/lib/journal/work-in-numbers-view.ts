@@ -6,7 +6,7 @@
  * Pure: no IO, no i18n, no clock. Every figure in here is READ from the ONE
  * work-intelligence model (`lib/journal/work-intelligence.ts`); nothing is
  * re-derived, summed or re-scoped. The two consumers — the journal page's
- * compact summary and the `/dashboard/journal/numbers` station — build their
+ * compact summary and the `/dashboard/journal?view=numbers` station — build their
  * rows through these functions so a figure is composed ONCE and renders the
  * same on both.
  *

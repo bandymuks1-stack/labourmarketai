@@ -131,7 +131,7 @@ describe("the worker's phone nav is ŠIANDIEN · PASAULIS · PAKLAUSK (IA 2026-0
   it("the secondary stations are text links, one tap from ŠIANDIEN", () => {
     expect(TODAY_STATIONS.map((s) => s.href)).toEqual([
       "/dashboard/journal",
-      "/dashboard/journal/numbers",
+      "/dashboard/journal?view=numbers",
       "/dashboard/profile",
       "/cv",
       "/dashboard/gallery",
