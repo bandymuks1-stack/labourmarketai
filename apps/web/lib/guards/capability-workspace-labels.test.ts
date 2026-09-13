@@ -111,4 +111,21 @@ describe("capability workspace labels — one builder, one membership list", () 
     const block = registry.slice(listStart, registry.indexOf('id: "context.switch"'));
     expect(block).not.toContain("switchActiveWorkspaceCore");
   });
+
+  it("neither context capability SHOWS a membership list it knows may be short", () => {
+    // The three membership sources degrade a failure to omitted rows.
+    // `context.list` renders the list, and `context.switch` renders it too on
+    // its `workspace_choice_required` answer — where a degraded list is doubly
+    // wrong, because a missing row can be the very reason the requested
+    // workspace failed to match. Both must read the COMPLETE-aware variant and
+    // refuse, never the bare list.
+    const from = registry.indexOf('id: "context.list"');
+    const to = registry.indexOf("// ── work_card.save", from);
+    const block = registry.slice(from, to);
+    expect(block).not.toMatch(/await listWorkspaceMemberships\(/);
+    expect(block.match(/readWorkspaceMemberships\(|resolveActiveWorkspaceForCaller\(/g)?.length ?? 0)
+      .toBeGreaterThanOrEqual(2);
+    // Each one refuses rather than answering with a partial list.
+    expect(block.match(/complete/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
+  });
 });

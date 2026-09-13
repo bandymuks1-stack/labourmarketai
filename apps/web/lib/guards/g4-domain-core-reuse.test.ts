@@ -45,10 +45,18 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(actions).toMatch(/switchActiveWorkspaceCore\(/);
     expect(actions).not.toMatch(/from\("profiles"\)/);
     expect(REGISTRY).toMatch(/switchActiveWorkspaceCore\(caller/);
-    expect(REGISTRY).toMatch(/listWorkspaceMemberships\(caller\)/);
-    // The membership list itself is built in exactly one place.
+    // The capability reads memberships through the canonical reader. It moved
+    // from `listWorkspaceMemberships` to `readWorkspaceMemberships` (2026-09-13)
+    // because this capability SHOWS the list — on an unresolvable value it
+    // answers with the options a person picks from — and the bare list variant
+    // degrades a source failure to omitted rows. Same sources, same one place;
+    // the COMPLETE-aware variant is the one a SHOW path must use.
+    expect(REGISTRY).toMatch(/readWorkspaceMemberships\(caller\)/);
+    // The membership list itself is built in exactly one place: the list
+    // variant delegates to the complete-aware one rather than re-querying.
     const activeOrg = read("lib", "company", "active-organization.ts");
     expect(activeOrg).toMatch(/listWorkspaceMemberships\(\{ supabase, userId: user\.id \}\)/);
+    expect(activeOrg).toMatch(/return \(await readWorkspaceMemberships\(caller\)\)\.workspaces;/);
   });
 
   it("express-interest runs through ONE core, ONE gate, ONE fingerprint (wagon 1)", () => {

@@ -217,9 +217,17 @@ the CODE, not the document that describes it.**
 - `lib/capabilities/workspace-labels.ts` is the ONE way the capability layer
   labels a workspace, and it delegates to `workspaceDisplayLabels`. A third
   copy is the defect.
-- `readWorkspaceMemberships` carries `complete`; a reader that SHOWS the list
-  to a person must refuse rather than present a short list as an answer.
-  `listWorkspaceMemberships` stays for callers that only CHECK membership.
+- `readWorkspaceMemberships` carries `complete`; anything that SHOWS the list
+  to a person must refuse rather than present a short list as an answer. BOTH
+  context capabilities show one — `context.list` renders it, and
+  `context.switch` renders it too on its `workspace_choice_required` answer,
+  where a degraded list is doubly wrong: a missing row can be the very reason
+  the requested workspace failed to match, so the person would be told their
+  own workspace is not theirs and handed a short list to pick from. (That
+  second case was missed when this entry was first written, and the entry said
+  the opposite — found in review on #1736.) `listWorkspaceMemberships` remains
+  only for the membership CHECK inside `switchActiveWorkspaceCore`, where
+  degrading is fail-closed: a missing org is refused, never wrongly admitted.
 - `lib/market/public-demand` is the ONE rule for absent demand: a zero only
   when the returned list was SHORTER than the limit it asked for. Both
   `programs.ts` and `learning-compass.ts` read it. A third copy is the defect.
