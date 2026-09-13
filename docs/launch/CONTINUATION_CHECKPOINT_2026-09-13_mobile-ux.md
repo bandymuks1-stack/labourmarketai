@@ -62,10 +62,11 @@ operating contract forbids.
 **Lesson for the next agent:** when a GitHub write returns 5xx, re-read the
 resource before retrying — the write may have landed.
 
-`enablePullRequestAutoMerge` never succeeded, so it is still unknown whether
-the repo's *Allow auto-merge* setting is on. The merge model's one-time DI
-prerequisite may still be outstanding; the fallback (wait for CI, then
-merge) worked.
+**The repo's *Allow auto-merge* setting IS on.** It was enabled successfully
+on the follow-up PR #1728 minutes later, so the merge model's one-time DI
+prerequisite is satisfied and every earlier failure was the incident alone.
+GREEN-class PRs can be opened with auto-merge from here on; the
+wait-for-CI-then-merge fallback is not needed.
 
 ## Blocked — needs the owner (nothing an agent can do)
 
@@ -94,22 +95,37 @@ In order, for whoever picks this up:
 
 1. **The owner's phone walk** (§ above). Everything else is guesswork until
    someone has used it.
-2. **PAKLAUSK's gap is presentational, not architectural — measured, not
-   assumed.** The control layer is real: `action-registry.ts` carries 52
-   actions with confirmation tiers and preconditions, and
-   `intent-registry.ts` carries 77 classified intents (40 read · 17 write ·
-   16 route · 3 blocked) wired through `dispatch.ts` into the chat. So do
-   NOT rebuild it. Two concrete findings to start from:
-   · six registered actions are referenced NOWHERE outside the registry —
+2. **PAKLAUSK is NOT "just another menu" — measured, and the measurement
+   argues against building.** `action-registry.ts` carries 52 actions with
+   confirmation tiers and preconditions; `intent-registry.ts` carries 77
+   classified intents (40 read · 17 write · 16 route · 3 blocked) wired
+   through `dispatch.ts` into the chat; and discoverability is already
+   designed — `lib/conversation/starters.ts` derives starter chips on the
+   SERVER from the person's real signals, capped at three, per workspace
+   kind. So do **not** rebuild it, and do not add a menu to it.
+   Two facts recorded, neither of them yet a defect:
+   · `actionsForRoles()` is exported by the registry and called NOWHERE in
+     the product — the registry is a contract, not an enumerated menu, and
+     actions are reached through the intents and through the components
+     that dispatch by id. That is what the registry's own docstring says
+     the design is ("wired per journey"), so it is not, by itself, a bug.
+   · six registered actions are referenced nowhere outside the registry —
      `worker.complete-onboarding`, `worker.upload-cv`, `worker.save-skills`,
      `agency.review-clients`, `agency.offer-status`, `agency.who-waits`.
-     Whether the LLM proposer can still reach them was NOT established;
-     establish that before calling them dead.
-   · what was never measured is how many of the 77 intents a person
-     actually discovers on a phone. That is the real question.
-3. **`/dashboard/profile` (1,300+ lines) is still a long page.** Its chip
-   wall is fixed and it has a jump strip; it is not split into stations per
-   target IA §2. That is its own slice with its own receipt.
+     Whether the LLM proposer can still reach them was NOT established.
+     Establish that before calling them dead.
+   The honest next step is the owner's phone walk telling us WHERE it reads
+   as a menu. Anything before that is speculation.
+3. **`/dashboard/profile` needs no split — a line count is not a page
+   length.** 1,300+ lines sounds like a bedsheet, and an earlier version of
+   this checkpoint said so. Re-read: most of the page is already inside TWO
+   disclosures (`#cv-details`, holding work preferences, languages,
+   education, organization evidence, the learning compass, achievements and
+   external profiles; and `#capabilities`, holding skills). What renders
+   unconditionally is the header, the jump strip, the hub overview, the
+   trust signals, a feature note and the composer — about six blocks. The
+   destination-chip wall was the real defect on this page and it is fixed.
+   Do not "split it into stations" on the strength of `wc -l`.
 4. `/cv` is deliberately NOT compacted — it is a printable DOCUMENT
    (`cv-doc`, `print:` styles, template registry) and is meant to be read
    top to bottom. It gained a print-hidden jump strip instead. Do not
