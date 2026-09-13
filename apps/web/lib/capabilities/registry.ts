@@ -9,6 +9,8 @@ import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
 import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
 import { listJournalEntries } from "@/lib/journal/journal-list-core";
+import { WORK_PERIOD_KEYS } from "@/lib/journal/work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import { listWorkspaceMemberships } from "@/lib/company/active-organization";
 import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
 import {
@@ -250,6 +252,112 @@ const journalList: CapabilityDescriptor = {
           })),
           confirmations: (e.journal_entry_confirmations ?? []).length,
         })),
+      },
+    };
+  },
+};
+
+// ── journal.work_intelligence.get ──────────────────────────────────────────
+
+const journalWorkIntelligenceInput = z
+  .object({
+    period: z.enum(WORK_PERIOD_KEYS).optional(),
+  })
+  .strict();
+
+const journalWorkIntelligenceGet: CapabilityDescriptor = {
+  id: "journal.work_intelligence.get",
+  kind: "read",
+  title: "My work in numbers",
+  description:
+    "What the caller's own Work Journal adds up to — the SAME figures the " +
+    "web 'work in numbers' section shows, from the one work-time rule: hours, " +
+    "confirmed hours, entries and days worked per period (today / 7 / 30 / " +
+    "365 days / all, UTC calendar days ending today); per skill the hours it " +
+    "can claim (attributed), the confirmed part, hours shared with other " +
+    "skills (involvement — never a total), share of attributed hours, " +
+    "entries, days, contexts, first and last worked day and a 30-day trend; " +
+    "hours per kind of work; and `coverage` — how many entries the figures " +
+    "rest on and whether a bounded read stopped short. `period` scopes the " +
+    "skill and activity sections (default `all`); `scope` names it. No " +
+    "score, rating or rank; nothing about other people or organizations.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: journalWorkIntelligenceInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = journalWorkIntelligenceInput.parse(input);
+    // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
+      return { ok: false, code: "unavailable", message: "Worker read failed." };
+    }
+    const worker = workerRead.value;
+    if (!worker) {
+      return {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it has no Work Journal.",
+      };
+    }
+    // THE one reader the section, the Living CV and the chat use — the
+    // canonical journal-list read + the link read + the declared skills,
+    // under the caller's own RLS. A failed read is UNKNOWN (unavailable),
+    // never an empty model that reads as "no work" (SEP-7).
+    const wi = await loadWorkIntelligence(caller, worker.id, {
+      focus: parsed.period ?? "all",
+    });
+    if (!wi) {
+      return { ok: false, code: "unavailable", message: "Work intelligence read failed." };
+    }
+    // The person's OWN figures only. The organization's hour ledger
+    // (`organizationRecords`), context ids, and plausibility checks are
+    // deliberately not exposed here — they name other parties' records.
+    return {
+      ok: true,
+      data: {
+        workerId: worker.id,
+        scope: wi.scope,
+        periods: wi.periods.map((p) => ({
+          key: p.key,
+          startIso: p.startIso,
+          endIso: p.endIso,
+          hours: p.hours,
+          confirmedHours: p.confirmedHours,
+          dayUnits: p.dayUnits,
+          entries: p.entries,
+          daysWorked: p.daysWorked,
+        })),
+        skills: wi.skills.map((sk) => ({
+          slug: sk.slug,
+          attributedHours: sk.attributedHours,
+          confirmedHours: sk.confirmedHours,
+          sharedHours: sk.sharedHours,
+          share: sk.share,
+          entries: sk.entries,
+          days: sk.days,
+          contexts: sk.contexts,
+          firstWorkedDay: sk.firstWorkedDay,
+          lastWorkedDay: sk.lastWorkedDay,
+          trend: sk.trend,
+        })),
+        activities: wi.activities.map((a) => ({
+          key: a.key,
+          hours: a.hours,
+          share: a.share,
+          entries: a.entries,
+          lastWorkedDay: a.lastWorkedDay,
+          trend: a.trend,
+        })),
+        coverage: {
+          entriesRead: wi.coverage.entriesRead,
+          truncated: wi.coverage.truncated,
+          linksTruncated: wi.coverage.linksTruncated,
+        },
       },
     };
   },
@@ -1528,6 +1636,9 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   profileGet,
   livingCvSkillsGet,
   journalList,
+  // The figures the section shows, for an authorized assistant (#1689,
+  // lane B) — a read over the one reader, never a second derivation.
+  journalWorkIntelligenceGet,
   journalCreateDraft,
   journalConfirm,
   interestExpressDraft,

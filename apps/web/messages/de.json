@@ -13756,12 +13756,14 @@
       "journalUnlabelled": "(ohne Beschreibung)",
       "journalEmpty": "In den letzten {days} Tagen hast du keine Einträge.",
       "journalHoursTotal": "Gesamt über {days} Tage: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}} (jeder Eintrag einmal gezählt).",
+      "journalHoursWindow": "Gesamt über {days} Tage: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}}, davon {confirmed} Std. von einer Führungskraft bestätigt (jeder Eintrag einmal gezählt).",
       "journalPeriod_today": "Heute",
       "journalPeriod_yesterday": "Gestern",
       "journalPeriod_week": "In den letzten 7 Tagen",
       "journalPeriod_month": "In den letzten 30 Tagen",
       "journalPeriod_year": "In den letzten 365 Tagen",
       "journalPeriod_all": "Gesamter Zeitraum",
+      "journalPeriod_range": "In den letzten {days, plural, one {# Tag} other {# Tagen}}",
       "journalHoursPeriod": "{period}: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}}, davon {confirmed} Std. von einer Führungskraft bestätigt (jeder Eintrag einmal gezählt).",
       "journalHoursPeriodPlain": "{period}: {hours} Std. aus {entries, plural, one {# Eintrag} other {# Einträgen}} (jeder Eintrag einmal gezählt).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# Eintrag} other {# Einträge}}, aber ohne Dauer — tragen Sie die Stunden nach, dann werden sie gezählt.",
@@ -13868,7 +13870,8 @@
       "whyVerifierSelf": "Du kannst deine eigene Arbeit nicht bestätigen — die Bestätigung muss von jemand anderem kommen.",
       "whyVerifierNone": "Keine deiner aktiven Beziehungen verweist auf eine Organisation, die Arbeit bestätigen kann.",
       "whyVerifierUnavailable": "Das heißt, die Daten konnten nicht gelesen werden — nicht, dass niemand bestätigen kann.",
-      "journalOrgRecords": "Außerdem in der Erfassung Ihrer Organisation ({period}): {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} — Stunden aus Stundenzettel oder Import, getrennt geführt und nicht zur Zahl oben addiert."
+      "journalOrgRecords": "Außerdem in der Erfassung Ihrer Organisation ({period}): {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} — Stunden aus Stundenzettel oder Import, getrennt geführt und nicht zur Zahl oben addiert.",
+      "journalCoverageTruncated": "Angezeigt aus den letzten {count} Einträgen — ältere Einträge sind in dieser Zahl nicht enthalten."
     },
     "project": {
       "fieldStatus": "Status",

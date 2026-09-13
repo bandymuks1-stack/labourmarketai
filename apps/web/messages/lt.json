@@ -13756,12 +13756,14 @@
       "journalUnlabelled": "(be aprašymo)",
       "journalEmpty": "Per paskutines {days} dienas žurnalo įrašų neturi.",
       "journalHoursTotal": "Iš viso per {days} d.: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} (kiekvienas įrašas skaičiuojamas kartą).",
+      "journalHoursWindow": "Iš viso per {days} d.: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val. (kiekvienas įrašas skaičiuojamas kartą).",
       "journalPeriod_today": "Šiandien",
       "journalPeriod_yesterday": "Vakar",
       "journalPeriod_week": "Per paskutines 7 dienas",
       "journalPeriod_month": "Per paskutines 30 dienų",
       "journalPeriod_year": "Per paskutines 365 dienų",
       "journalPeriod_all": "Per visą laiką",
+      "journalPeriod_range": "Per paskutines {days, plural, one {# dieną} few {# dienas} other {# dienų}}",
       "journalHoursPeriod": "{period}: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val. (kiekvienas įrašas skaičiuojamas kartą).",
       "journalHoursPeriodPlain": "{period}: {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} (kiekvienas įrašas skaičiuojamas kartą).",
       "journalHoursNonePeriod": "{period}: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, bet be trukmės — pridėkite valandas, ir jos bus suskaičiuotos.",
@@ -13868,7 +13870,8 @@
       "whyVerifierSelf": "Savo paties darbo patvirtinti negali — patvirtinimas turi ateiti iš kito asmens.",
       "whyVerifierNone": "Nė vienas tavo aktyvus ryšys nenurodo organizacijos, galinčios patvirtinti darbą.",
       "whyVerifierUnavailable": "Tai reiškia, kad nepavyko perskaityti duomenų — ne tai, kad patvirtinti nėra kam.",
-      "journalOrgRecords": "Dar jūsų organizacijos apskaitoje ({period}): {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} — žiniaraščio ar importo valandos, skaičiuojamos atskirai ir prie skaičiaus aukščiau nepridedamos."
+      "journalOrgRecords": "Dar jūsų organizacijos apskaitoje ({period}): {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} — žiniaraščio ar importo valandos, skaičiuojamos atskirai ir prie skaičiaus aukščiau nepridedamos.",
+      "journalCoverageTruncated": "Rodoma iš paskutinių {count} įrašų — senesni įrašai į šį skaičių neįtraukti."
     },
     "project": {
       "fieldStatus": "Būsena",

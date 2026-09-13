@@ -409,6 +409,7 @@
   },
   "proofLoop": {
     "strip": "Vermeldingen → vaardigheden → CV → kansen: {entries} vermeldingen deze maand · {evidenced} vaardigheden met vermeldingen · {confirmed} beoordeeld",
+    "stripPeriod": "Vermeldingen → vaardigheden → CV → kansen: {entries} vermeldingen ({period}) · {evidenced} vaardigheden met vermeldingen · {confirmed} beoordeeld",
     "cvLink": "CV"
   },
   "statusExplainer": "Hoe worden uw invoeren gebruikt?",
@@ -654,6 +655,7 @@
     "monthsTitle": "Hoe het verandert",
     "monthsLegend": "Uren per maand op de gewerkte dag. Het groene deel zijn door de leidinggevende bevestigde uren. Een maand zonder registraties is een echte nul.",
     "listCap": "{shown} van {total} getoond — alle rijen tellen mee in de totalen.",
+    "coverageTruncated": "Getoond op basis van de laatste {count} registraties — oudere registraties zitten niet in deze cijfers.",
     "monthsCap": "De laatste {shown} van {total} maanden getoond — alle tellen mee in de totalen.",
     "attribution": {
       "involvement_expected": "In dit soort werk wordt tijd meestal per hele dienst vastgelegd, niet per activiteit; daarom staan de uren hier als betrokkenheid — dat is geen fout. Voor uren per vaardigheid: zet de tijd naast de activiteit in een registratie.",

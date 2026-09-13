@@ -409,6 +409,7 @@
   },
   "proofLoop": {
     "strip": "Einträge → Fähigkeiten → CV → Angebote: {entries} Einträge diesen Monat · {evidenced} Fähigkeiten mit Einträgen · {confirmed} geprüft",
+    "stripPeriod": "Einträge → Fähigkeiten → CV → Angebote: {entries} Einträge ({period}) · {evidenced} Fähigkeiten mit Einträgen · {confirmed} geprüft",
     "cvLink": "CV"
   },
   "statusExplainer": "Wie werden Ihre Einträge verwendet?",
@@ -654,6 +655,7 @@
     "monthsTitle": "Wie es sich verändert",
     "monthsLegend": "Stunden pro Monat nach Arbeitstag. Der grüne Teil sind von der Führungskraft bestätigte Stunden. Ein Monat ohne Einträge ist eine echte Null.",
     "listCap": "{shown} von {total} angezeigt — alle Zeilen zählen in den Summen.",
+    "coverageTruncated": "Angezeigt aus den letzten {count} Einträgen — ältere Einträge sind in diesen Zahlen nicht enthalten.",
     "monthsCap": "Die letzten {shown} von {total} Monaten angezeigt — alle zählen in den Summen.",
     "attribution": {
       "involvement_expected": "In dieser Art von Arbeit wird Zeit meist für die ganze Schicht erfasst, nicht je Tätigkeit; deshalb stehen die Stunden hier als Beteiligung — das ist kein Fehler. Für Stunden je Fähigkeit: die Zeit im Eintrag neben die Tätigkeit schreiben.",

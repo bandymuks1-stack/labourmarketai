@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
+import { countedOnce } from "@/lib/journal/counted-once";
 import {
   TIMESHEET_READ_LIMIT,
   isTimesheetMigrationMissingCode,
@@ -571,12 +572,21 @@ export async function getMyJournalWorkHours(
   // The caller's own LIVE entries. Deleted and superseded rows are excluded
   // here; entries replaced by a live correction are dropped below, so an
   // edited entry is counted once — never twice.
+  //
+  // BOUNDED, AND DETERMINISTICALLY SO (issue #1689, lane B): the read is
+  // capped at `WORKLOAD_READ_LIMIT`, and a `.limit()` with no `.order()`
+  // let PostgreSQL choose WHICH rows fell inside it — the strip could show
+  // a different set of days on two consecutive loads. Newest first (`id`
+  // as the tiebreaker) makes the bound a stable "the latest N entries";
+  // the cap itself is a known remaining limit, not a hidden one.
   const entriesRes = await asAny(supabase)
     .from("journal_entries")
     .select("id, created_at, original_text, correction_of")
     .eq("worker_id", workerId)
     .is("deleted_at", null)
     .is("superseded_by", null)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(WORKLOAD_READ_LIMIT);
   if (entriesRes.error) return { status: "unavailable" };
 
@@ -588,10 +598,9 @@ export async function getMyJournalWorkHours(
   };
   const rows = (entriesRes.data ?? []) as EntryRow[];
   if (rows.length === 0) return { status: "ok", days: [] };
-  const correctedIds = new Set(
-    rows.map((r) => r.correction_of).filter((v): v is string => Boolean(v)),
-  );
-  const liveRows = rows.filter((r) => !correctedIds.has(r.id));
+  // ONE ACTIVE ENTRY PER CORRECTION CHAIN — the same rule the journal list,
+  // the section, the CV and the calendar apply (`counted-once.ts`).
+  const liveRows = countedOnce(rows);
   const entryIds = liveRows.map((r) => r.id);
   if (entryIds.length === 0) return { status: "ok", days: [] };
 
