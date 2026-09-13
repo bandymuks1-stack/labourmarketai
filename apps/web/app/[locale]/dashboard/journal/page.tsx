@@ -48,7 +48,6 @@ import {
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { EmptyState } from "@/components/app/empty-state";
 import { JournalJobContext } from "@/components/app/journal-job-context";
-import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { createClient } from "@/lib/supabase/server";
 import { processJournalEntrySkills } from "@/lib/journal/skill-pipeline";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
@@ -84,7 +83,22 @@ import {
   readPhotoCountsByEntry,
   type WorkerSkillSourceRow,
 } from "@/lib/journal/work-intelligence-read";
-import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
+// MANO DARBAS · MANO VEIKLA SKAIČIAIS (target worker IA 2026-09-13): this
+// page records and lists; the figures have their own station
+// (`/dashboard/journal/numbers`). What stays here is ONE compact summary —
+// the dominant-skill sentence and this period's hours — composed by the same
+// presentation model and the same lead component the station renders.
+import { Card } from "@/components/ui/Card";
+import { DominantLead } from "@/components/app/work-in-numbers/dominant-lead";
+import { scopeText } from "@/components/app/work-in-numbers/period-nav";
+import {
+  dominantAnswer,
+  focusPeriod,
+  skillRows,
+  splitChecks,
+} from "@/lib/journal/work-in-numbers-view";
+import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
+import { JournalQuickRecord } from "./quick-record";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -111,10 +125,14 @@ export default async function JournalPage({
     date?: string | string[];
     skill?: string | string[];
     period?: string | string[];
+    compose?: string | string[];
   }>;
 }) {
   const { locale } = await params;
   const sp = (await searchParams) ?? {};
+  // The full composer for a NEW record only behind the explicit "detaliau"
+  // door (`?compose=full`); the compact text-first recording is the default.
+  const composeFull = sp.compose === "full";
   const editingId =
     typeof sp.editing === "string" && sp.editing.trim().length > 0
       ? sp.editing.trim()
@@ -146,7 +164,13 @@ export default async function JournalPage({
   const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
-  const tQuick = await getTranslations("quickNav");
+  const tIntel = await getTranslations("journal.intelligence");
+  // The compact recorder rides the conversation's own readback + confirm
+  // surface, so it speaks that surface's vocabulary — resolved here, on the
+  // server, exactly as the dashboard resolves it for the chat.
+  const workLogLabels = resolveWorkLogLabels(
+    await getTranslations("conversation.worklog"),
+  );
   // "Kam pateikti atliktą darbą?" — the verification-state vocabulary. One
   // key per canonical state and per next action; the page never spells the
   // words itself.
@@ -843,26 +867,9 @@ export default async function JournalPage({
       const day = resolveWorkDayDetail(e.journal_entry_metrics ?? [], e.created_at).day;
       return day >= (monthBounds.startIso ?? day) && day <= monthBounds.endIso;
     }).length;
-  const primaryProfessionSlug =
-    ownPath.directions.find((d) => d.isPrimary)?.slug ?? null;
-  const professionNameOf = (slug: string): string | null => {
-    try {
-      const v = tProf(slug);
-      return v && v !== slug && v !== `professions.${slug}` ? v : null;
-    } catch {
-      return null;
-    }
-  };
-  const contextLabelOf = (id: string | null): string =>
-    (id ? engagementChips.get(id)?.label : null) ?? t("personalEntry");
-  const unitNameOf = (slug: string): string | null => {
-    try {
-      const v = tUnit(slug);
-      return v && v !== slug && v !== `productivityUnits.${slug}` ? v : null;
-    } catch {
-      return null;
-    }
-  };
+  // The profession / unit / context label helpers the full figures block
+  // needed moved with it to the station (`numbers/page.tsx`); the summary
+  // card here names skills only, through the one catalogue reader above.
 
   // Mano CV identity lead — the player-card/avatar identity that opens the Mano
   // CV surface, above the work records. Worker-scoped real data only (null for
@@ -911,22 +918,9 @@ export default async function JournalPage({
         </p>
       </header>
 
-      {/* Page-local quick nav (IA cleanup v2 #3): compact sticky jump bar so a
-          long Mano CV doesn't lose the user after scrolling. Only the anchors
-          relevant to this page (identity card, work records, add entry). */}
-      <PageQuickNav
-        ariaLabel={tQuick("ariaLabel")}
-        items={[
-          { href: "#mano-cv-top", label: tQuick("top") },
-          { href: "#mano-cv-identity", label: tTabs("playerCard") },
-          ...(workIntelligence
-            ? [{ href: "#work-intelligence", label: t("intelligence.title") }]
-            : []),
-          { href: "#journal-entries", label: tQuick("records") },
-          // §6.1: "add entry" is the conversation's job now; the quick nav
-          // keeps only the projection's own regions.
-        ]}
-      />
+      {/* The page-local quick-nav strip is gone (target worker IA 2026-09-13
+          §4: a second nav strip is card soup) — three first-level blocks
+          lead on a phone: recording, today's records, one numbers card. */}
 
       {/* Mano CV identity lead: player-card/avatar identity at the top of the
           Mano CV surface; the work records follow below. IA cleanup v2 (#5):
@@ -954,7 +948,7 @@ export default async function JournalPage({
       {manoCard && manoCardLabels ? (
         <details
           id="mano-cv-identity"
-          className="group order-3 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
+          className="group order-4 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
           <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
@@ -989,7 +983,7 @@ export default async function JournalPage({
           kept but demoted to ONE compact footnote — it is guard-required
           (journal-evidence-clarity + product-readiness) and stays honest
           (private + not yet externally confirmed). */}
-      <p className="order-5 text-meta leading-relaxed text-text-muted">
+      <p className="order-6 text-meta leading-relaxed text-text-muted">
         {t("pilotBackboneNote")}
       </p>
 
@@ -1002,19 +996,22 @@ export default async function JournalPage({
           correction-request UI for that. */}
       {!anyReviewEnabled && (
         <p
-          className="order-4 text-meta leading-relaxed text-text-muted"
+          className="order-5 text-meta leading-relaxed text-text-muted"
           data-testid="journal-review-not-enabled-note"
         >
           {t("reviewNotEnabledNote")}
         </p>
       )}
-      {/* CHAT-FIRST INTAKE (owner audit §6.1): work is REGISTERED in the
-          conversation — this page is the history/evidence PROJECTION of the
-          journal, not a second intake form. The composer therefore renders
-          ONLY in edit mode (?editing=<id> — correcting an existing record is
-          a projection concern; the supersede path stays canonical). A fresh
-          record starts in the chat, where the same deterministic extractor
-          saves through the same createJournalEntry action. */}
+      {/* RECORDING FIRST (target worker IA 2026-09-13 §2, "Mano darbas"):
+          the compact text-first flow is the default — one sentence (what ·
+          where · how long · optional photo) → the readback of what was
+          understood → one confirm — over the SAME deterministic reader and
+          the SAME createJournalEntry path the conversation uses. The full
+          composer renders for an EDIT (?editing=<id> — the supersede path
+          stays canonical) and behind the explicit "detaliau" door
+          (?compose=full); it is never the first thing a worker sees. The
+          conversation and the voice door stay reachable as text links inside
+          the recorder (§1.5: nothing removed). */}
       <div id="journal-composer" className="order-1">
         {editingEntry ? (
           <div className="flex flex-col gap-2">
@@ -1031,60 +1028,118 @@ export default async function JournalPage({
               templates={journalTemplates}
             />
           </div>
-        ) : (
-          <div
-            className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/50 p-4"
-            data-testid="journal-log-via-chat"
-          >
-            <p className="text-sm leading-relaxed text-text-secondary">
-              {t("logViaChatBody")}
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                // `?intent=log-work` — the chat opens the work-log flow on
-                // arrival. Without it this CTA dropped the worker on the
-                // generic greeting, which is what the tester reported as
-                // being thrown back to the first page.
-                href={"/dashboard?intent=log-work" as "/dashboard"}
-                className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
-                data-testid="journal-log-via-chat-cta"
-              >
-                {t("logViaChatCta")}
-              </Link>
-              {/* W5 slice 2: the voice surface finally gets a door. The page
-                  itself stays honest when transcription is unconfigured. */}
-              <Link
-                href="/dashboard/journal/voice"
-                className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md border border-border px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
-                data-testid="journal-log-via-voice-cta"
-              >
-                {t("logViaVoiceCta")}
-              </Link>
-            </div>
+        ) : composeFull ? (
+          <div className="flex flex-col gap-2" data-testid="journal-compose-full">
+            <JournalEntryComposer
+              key="new"
+              engagements={engagements}
+              contextResolution={contextResolution}
+              directions={directions}
+              workerSkills={workerSkills}
+              templates={journalTemplates}
+            />
+            <Link
+              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+              data-testid="journal-compose-full-back"
+            >
+              ← {t("record.detailedBack")}
+            </Link>
           </div>
+        ) : (
+          <JournalQuickRecord
+            locale={locale}
+            labels={workLogLabels}
+            otherDoors={
+              <p
+                className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted"
+                data-testid="journal-log-via-chat"
+              >
+                <span>{t("logViaChatBody")}</span>
+                <Link
+                  // `?intent=log-work` — the chat opens the work-log flow on
+                  // arrival, never the generic greeting.
+                  href={"/dashboard?intent=log-work" as "/dashboard"}
+                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  data-testid="journal-log-via-chat-cta"
+                >
+                  {t("logViaChatCta")} →
+                </Link>
+                {/* W5 slice 2: the voice surface keeps its door. */}
+                <Link
+                  href="/dashboard/journal/voice"
+                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  data-testid="journal-log-via-voice-cta"
+                >
+                  {t("logViaVoiceCta")} →
+                </Link>
+                <Link
+                  href={"/dashboard/journal?compose=full#journal-composer" as "/dashboard"}
+                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  data-testid="journal-compose-full-link"
+                >
+                  {t("record.detailed")} →
+                </Link>
+              </p>
+            }
+          />
         )}
       </div>
 
-      {/* "Work in numbers" (issue #1689) — what the diary beneath adds up
-          to. Sits between the intake door and the records: the person sees
-          the total, the skills the hours reached and where they lead BEFORE
-          scrolling the raw days. Withheld (not zeroed) when unreadable. */}
-      {workIntelligence && (
-        <div className="order-2">
-          <JournalWorkIntelligence
-            wi={workIntelligence}
-            locale={locale}
-            labels={{
-              skillName: skillNameOf,
-              professionName: professionNameOf,
-              unitName: unitNameOf,
-              contextLabel: contextLabelOf,
-              primaryProfessionSlug,
-              iscoGroups: ownPath.iscoGroups,
-            }}
-          />
-        </div>
-      )}
+      {/* MANO VEIKLA SKAIČIAIS — one compact card (target IA §2): the
+          dominant-skill sentence and this period's hours, from the SAME
+          model the diary beneath was derived from, with the station as the
+          figures' stable destination. UNKNOWN (unreadable entries or links)
+          is said as such — never a zero that reads as "no work" (SEP-7). */}
+      {(() => {
+        const wi = workIntelligence;
+        const rows = wi ? skillRows(wi, skillNameOf).filter((r) => r.name !== null) : [];
+        const answer = dominantAnswer(wi, rows);
+        const period = wi ? focusPeriod(wi) : null;
+        const scope = wi ? scopeText(wi, locale, tIntel) : tIntel("numbers.scope.all");
+        const openChecks = wi ? splitChecks(wi.checks).open.length : 0;
+        return (
+          <section
+            id="work-intelligence"
+            className="order-3 scroll-mt-20"
+            data-testid="journal-numbers-summary"
+            data-answer={answer.kind}
+            data-period={wi?.scope ?? periodKey}
+          >
+            <Card compact className="flex flex-col gap-3">
+              <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                {tIntel("numbers.stationTitle")}
+              </h2>
+              <DominantLead
+                answer={answer}
+                period={period}
+                scope={scope}
+                locale={locale}
+                t={tIntel}
+                compact
+              />
+              {openChecks > 0 ? (
+                <p
+                  className="text-meta leading-relaxed text-state-warning"
+                  data-testid="journal-numbers-open-checks"
+                  data-open-checks={openChecks}
+                >
+                  {tIntel("numbers.checksOpen", { count: openChecks })}
+                </p>
+              ) : null}
+              <Link
+                href={
+                  `/dashboard/journal/numbers?period=${wi?.focus ?? periodKey}` as "/dashboard"
+                }
+                className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+                data-testid="journal-numbers-link"
+              >
+                {tIntel("numbers.openStation")} →
+              </Link>
+            </Card>
+          </section>
+        );
+      })()}
 
       {/* Entry list — compact recent history AFTER the composer (Wagon 5
           first-view order). Newest day open, older days collapsed. Visual

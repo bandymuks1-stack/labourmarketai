@@ -237,7 +237,7 @@
   "listEmptyTitle": "Start building work records",
   "listEmptyNext": "Create your first entry below — it stays private until you submit it.",
   "listEmptyCta": "Create your first entry",
-  "logViaChatBody": "Work is logged in the conversation — say what you did and the record appears here.",
+  "logViaChatBody": "Other ways to record work:",
   "logViaChatCta": "Log work in the chat",
   "logViaVoiceCta": "Record by voice",
   "skillFilterActive": "Showing records linked to “{name}” ({count})",
@@ -783,6 +783,42 @@
       "new": "first entries in the last 30 days",
       "down": "used less in the last 30 days than in the 30 before",
       "flat": "used as much in the last 30 days as in the 30 before"
+    },
+    "numbers": {
+      "stationTitle": "My work in numbers",
+      "stationSubtitle": "What your recorded work adds up to — from your own entries only, every figure with its period beside it.",
+      "question": "Which skills take up the largest part of my work?",
+      "dominant": "{skill} — {hours} h, {percent} of your attributed hours ({scope}).",
+      "dominantUntimed": "{scope}: {entries, plural, one {# entry} other {# entries}}, but no hours are attributed to any skill yet — state the time next to the activity or link a skill.",
+      "periodEmpty": "{scope}: no entries. Pick another period below.",
+      "unknown": "The figures could not be read right now — that is not a zero. Please try again later.",
+      "periodHours": "{hours} h · {scope}",
+      "scope": {
+        "today": "today",
+        "week": "the last 7 days",
+        "month": "the last 30 days",
+        "year": "the last 365 days",
+        "all": "all time"
+      },
+      "scopeRange": "{from} – {to}",
+      "scopeNote": "Every figure on this page is for {scope}. A bounded window is never shown as all time.",
+      "openStation": "All the figures",
+      "backToJournal": "Back to the work journal",
+      "linksTruncated": "The skill-link read stopped at its ceiling — some entries may show without a skill, their hours as unattributed.",
+      "skillsTitle": "Skills by share of work",
+      "skillFirst": "first on {day}",
+      "skillOutput": "completed {value} {unit}",
+      "confirmationShare": "{percent} confirmed by a manager's record ({confirmed} of {attributed} h)",
+      "confirmationNone": "no manager confirmation yet",
+      "notMeasured": "entries without a duration — hours not measured",
+      "checksOpen": "{count, plural, one {# check is waiting for your decision.} other {# checks are waiting for your decision.}}",
+      "ledgerUnknown": "The organization's records could not be read right now — that is not a zero.",
+      "trendShort": {
+        "up": "increasing",
+        "down": "decreasing",
+        "flat": "about the same",
+        "new": "new"
+      }
     }
   },
   "verification": {
@@ -804,5 +840,13 @@
       "respond_to_decision": "Read the decision and reply",
       "none": "Nothing is missing"
     }
+  },
+  "record": {
+    "hint": "One sentence: what you did, where and for how long. A photo is optional and is added before saving.",
+    "placeholder": "e.g. tiled 6 h at the site in Kaunas",
+    "understand": "Read it back",
+    "startOver": "Start over",
+    "detailed": "In detail (full form)",
+    "detailedBack": "Back to the simple entry"
   }
 }

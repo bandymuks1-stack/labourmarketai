@@ -236,7 +236,11 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
    */
   it("the collapsed row and the avatar menu name the card identically", () => {
     const journal = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(journal).toContain('label: tTabs("playerCard")');
+    // Target worker IA 2026-09-13 §4: the page-local quick-nav strip (which
+    // carried a second `label: tTabs("playerCard")`) is REMOVED for the
+    // worker — the collapsed row is now the ONE thing naming the card here,
+    // and it still names it exactly as the avatar menu does.
+    expect(journal).not.toMatch(/<PageQuickNav/);
     expect(journal).toContain('{tTabs("playerCard")}');
     expect(read("components/app/account-menu.tsx")).toContain(
       't("tabs.playerCard")',

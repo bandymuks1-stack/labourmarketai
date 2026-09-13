@@ -237,7 +237,7 @@
   "listEmptyTitle": "Begin met het opbouwen van werkregistraties",
   "listEmptyNext": "Maak hieronder je eerste item aan — het blijft privé totdat je het indient.",
   "listEmptyCta": "Maak je eerste item aan",
-  "logViaChatBody": "Werk wordt in het gesprek vastgelegd — vertel wat je deed en het record verschijnt hier.",
+  "logViaChatBody": "Andere manieren om werk vast te leggen:",
   "logViaChatCta": "Werk vastleggen in de chat",
   "logViaVoiceCta": "Inspreken met je stem",
   "skillFilterActive": "Records gekoppeld aan “{name}” ({count})",
@@ -783,6 +783,42 @@
       "new": "eerste vermeldingen in de laatste 30 dagen",
       "down": "de laatste 30 dagen minder gebruikt dan de 30 daarvoor",
       "flat": "de laatste 30 dagen evenveel gebruikt als de 30 daarvoor"
+    },
+    "numbers": {
+      "stationTitle": "Mijn werk in cijfers",
+      "stationSubtitle": "Wat je vastgelegde werk bij elkaar optelt — alleen uit je eigen registraties, elk cijfer met zijn periode ernaast.",
+      "question": "Welke vaardigheden nemen het grootste deel van mijn werk in?",
+      "dominant": "{skill} — {hours} u, {percent} van je toegewezen uren ({scope}).",
+      "dominantUntimed": "{scope}: {entries, plural, one {# registratie} other {# registraties}}, maar nog geen uren toegewezen aan een vaardigheid — noem de tijd naast de activiteit of koppel een vaardigheid.",
+      "periodEmpty": "{scope}: geen registraties. Kies hieronder een andere periode.",
+      "unknown": "De cijfers konden nu niet worden gelezen — dat is geen nul. Probeer het later opnieuw.",
+      "periodHours": "{hours} u · {scope}",
+      "scope": {
+        "today": "vandaag",
+        "week": "de laatste 7 dagen",
+        "month": "de laatste 30 dagen",
+        "year": "de laatste 365 dagen",
+        "all": "alle tijd"
+      },
+      "scopeRange": "{from} – {to}",
+      "scopeNote": "Elk cijfer op deze pagina geldt voor {scope}. Een begrensde periode wordt nooit als alle tijd getoond.",
+      "openStation": "Alle cijfers",
+      "backToJournal": "Terug naar het werkjournaal",
+      "linksTruncated": "Het lezen van vaardigheidskoppelingen stopte bij de limiet — sommige registraties kunnen zonder vaardigheid verschijnen, hun uren als niet toegewezen.",
+      "skillsTitle": "Vaardigheden naar aandeel in het werk",
+      "skillFirst": "eerst op {day}",
+      "skillOutput": "afgerond {value} {unit}",
+      "confirmationShare": "{percent} bevestigd door een record van de manager ({confirmed} van {attributed} u)",
+      "confirmationNone": "nog geen bevestiging van een manager",
+      "notMeasured": "registraties zonder duur — uren niet gemeten",
+      "checksOpen": "{count, plural, one {# controle wacht op je beslissing.} other {# controles wachten op je beslissing.}}",
+      "ledgerUnknown": "De registratie van de organisatie kon nu niet worden gelezen — dat is geen nul.",
+      "trendShort": {
+        "up": "stijgend",
+        "down": "dalend",
+        "flat": "ongeveer gelijk",
+        "new": "nieuw"
+      }
     }
   },
   "verification": {
@@ -804,5 +840,13 @@
       "respond_to_decision": "Lees het besluit en reageer",
       "none": "Er ontbreekt niets"
     }
+  },
+  "record": {
+    "hint": "In één zin: wat je deed, waar en hoe lang. Een foto is optioneel en wordt vóór het opslaan toegevoegd.",
+    "placeholder": "bv. 6 u getegeld op de locatie in Kaunas",
+    "understand": "Begrijpen",
+    "startOver": "Opnieuw beginnen",
+    "detailed": "Uitgebreid (volledig formulier)",
+    "detailedBack": "Terug naar de eenvoudige registratie"
   }
 }

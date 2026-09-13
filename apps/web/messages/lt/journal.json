@@ -237,7 +237,7 @@
   "listEmptyTitle": "Pradėkite kurti darbo įrašus",
   "listEmptyNext": "Sukurkite pirmą įrašą žemiau — jis lieka privatus, kol jį pateiksite.",
   "listEmptyCta": "Sukurti pirmą įrašą",
-  "logViaChatBody": "Darbas fiksuojamas pokalbyje — parašyk, ką dirbai, ir įrašas atsiras čia.",
+  "logViaChatBody": "Kiti būdai užfiksuoti darbą:",
   "logViaChatCta": "Užfiksuoti darbą pokalbyje",
   "logViaVoiceCta": "Įrašyti balsu",
   "skillFilterActive": "Rodomi įrašai su įgūdžiu „{name}“ ({count})",
@@ -783,6 +783,42 @@
       "new": "pirmieji įrašai per paskutines 30 d.",
       "down": "per paskutines 30 d. naudota mažiau nei ankstesnes 30 d.",
       "flat": "per paskutines 30 d. naudota tiek pat, kiek ankstesnes 30 d."
+    },
+    "numbers": {
+      "stationTitle": "Mano veikla skaičiais",
+      "stationSubtitle": "Ką sudėjus rodo jūsų užfiksuotas darbas — tik iš jūsų pačių įrašų, kiekvienas skaičius su laikotarpiu šalia.",
+      "question": "Kokie įgūdžiai užima didžiausią mano veiklos dalį?",
+      "dominant": "{skill} — {hours} val., {percent} priskirtų valandų ({scope}).",
+      "dominantUntimed": "{scope}: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, bet valandos dar nepriskirtos nė vienam įgūdžiui — nurodykite laiką prie veiklos arba susiekite įgūdį.",
+      "periodEmpty": "{scope}: įrašų nėra. Pasirinkite kitą laikotarpį žemiau.",
+      "unknown": "Skaičių šiuo metu perskaityti nepavyko — tai ne nulis. Pabandykite dar kartą vėliau.",
+      "periodHours": "{hours} val. · {scope}",
+      "scope": {
+        "today": "šiandien",
+        "week": "paskutinės 7 dienos",
+        "month": "paskutinės 30 dienų",
+        "year": "paskutinės 365 dienos",
+        "all": "visas laikas"
+      },
+      "scopeRange": "{from} – {to}",
+      "scopeNote": "Visi skaičiai šiame puslapyje — {scope}. Apribotas laikotarpis niekada nerodomas kaip visas laikas.",
+      "openStation": "Visi skaičiai",
+      "backToJournal": "Į darbo žurnalą",
+      "linksTruncated": "Įgūdžių sąsajų skaitymas sustojo prie ribos — dalis įrašų gali rodytis be įgūdžio, o jų valandos kaip nepriskirtos.",
+      "skillsTitle": "Įgūdžiai pagal veiklos dalį",
+      "skillFirst": "pirmą kartą {day}",
+      "skillOutput": "atlikta {value} {unit}",
+      "confirmationShare": "{percent} vadovo įrašu patvirtinta ({confirmed} iš {attributed} val.)",
+      "confirmationNone": "vadovo patvirtinimo dar nėra",
+      "notMeasured": "įrašai be trukmės — valandos nematuotos",
+      "checksOpen": "{count, plural, one {# patikra laukia jūsų sprendimo.} few {# patikros laukia jūsų sprendimo.} other {# patikrų laukia jūsų sprendimo.}}",
+      "ledgerUnknown": "Organizacijos apskaitos šiuo metu perskaityti nepavyko — tai ne nulis.",
+      "trendShort": {
+        "up": "daugėja",
+        "down": "mažėja",
+        "flat": "panašiai",
+        "new": "nauja"
+      }
     }
   },
   "verification": {
@@ -804,5 +840,13 @@
       "respond_to_decision": "Perskaitykite sprendimą ir atsakykite",
       "none": "Nieko netrūksta"
     }
+  },
+  "record": {
+    "hint": "Vienu sakiniu: ką dirbai, kur ir kiek laiko. Nuotrauka — neprivaloma, pridedama prieš išsaugant.",
+    "placeholder": "Pvz.: klijavau plyteles 6 val. objekte Kaune",
+    "understand": "Suprasti",
+    "startOver": "Rašyti iš naujo",
+    "detailed": "Detaliau (pilna forma)",
+    "detailedBack": "Grįžti į paprastą įrašą"
   }
 }
