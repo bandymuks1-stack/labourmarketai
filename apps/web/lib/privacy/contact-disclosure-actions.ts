@@ -45,10 +45,15 @@ import {
  * record_personal_data_disclosure execution path. This module never selects
  * a contact column.
  *
- * HONEST DEGRADATION: the ask table/RPCs are a DRAFT-gated migration
- * (20260716120000). While unapplied every read reports applied:false and
- * every write returns kind:"needs-migration" — prepared, not enabled; never
- * a fake success.
+ * HONEST DEGRADATION: the ask table/RPCs (migration 20260716120000) were
+ * APPLIED — read from the production ledger 2026-09-14 as version
+ * 20260716194948 `contact_disclosure_requests_v1`, with the table, its select
+ * policy and all five RPCs live. This comment said "DRAFT-gated" and "while
+ * unapplied" long after that stopped being true, which is a stale-truth claim
+ * of the kind the register exists to catch. The degradation paths below STAY:
+ * an absent relation still reports applied:false and every write still returns
+ * kind:"needs-migration" rather than a fake success. They are now a guard
+ * against regression, not a description of today.
  *
  * RATE LIMIT (shared contract, app layer, works today): max 10 open + 30/24h
  * asks per requester (lib/limits/request-rate-limits.ts, fail closed on
@@ -198,8 +203,9 @@ export interface ScoutingContactRequestState {
 }
 
 export interface ScoutingContactRequestStates {
-  /** False while the draft-gated ask model is not applied (prepared, not
-   *  enabled) — the UI shows the honest unavailable note, no dead button. */
+  /** False only if the ask model becomes unreadable — it IS applied in
+   *  production (ledger 20260716194948). Kept so a regression shows the
+   *  honest unavailable note rather than a dead button. */
   readonly applied: boolean;
   /** worker_id → newest ask state for THIS demand (owner-scoped read). */
   readonly byWorker: Readonly<Record<string, ScoutingContactRequestState>>;
@@ -222,7 +228,7 @@ export async function getScoutingContactRequestStates(
     .eq("owner_id", user.id)
     .eq("request_id", requestId)
     .order("created_at", { ascending: false });
-  if (error) return none; // absent table (draft-gated) or read failure
+  if (error) return none; // unreadable relation or read failure — fail closed
 
   const byWorker: Record<string, ScoutingContactRequestState> = {};
   const acceptedRows: { workerId: string; organizationId: string }[] = [];

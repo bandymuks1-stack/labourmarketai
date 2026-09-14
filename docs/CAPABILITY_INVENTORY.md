@@ -546,7 +546,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | WRK-5 | Worker→project assignment | `project_worker_assignments` | PROD_DATA (1 row) | W (strong) | 1 | no overlap constraint of any kind |
 | WRK-6 | **Team→project assignment** | — | **MISSING** | — | 1 | no FK exists anywhere |
 | WRK-7 | Readiness / operational status | `project_worker_readiness_items` | IMPL | W | 2 | — |
-| WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | — |
+| WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | reachable from project operations; `defects_select` ignores `assignee_profile_id` — the assigned worker cannot read it (RED) |
 | WRK-9 | Handover passport | `project_handover_entries` | IMPL | — | 3 | — |
 | WRK-10 | Project economics | `project_budgets` | IMPL | — | 3 | — |
 

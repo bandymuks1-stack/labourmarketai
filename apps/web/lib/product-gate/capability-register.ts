@@ -694,16 +694,16 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-8",
-    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Defects / corrections",
     worldElement: "projects",
-    status: "BUILT_NOT_CONNECTED",
+    status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/quality"],
-    coreModule: null,
-    surfaces: [],
-    note: "0 rows; no human path opens it. Measured 2026-09-08: `defects` and `defect_corrections` both hold 0 rows, and neither `/dashboard/quality` nor any defects route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
+    coreModule: "lib/quality/quality.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
+    note:
+      "Corrected 2026-09-14, and this is the WRK-4 defect a second time. The old note said `no human path opens it` and called that `Genuinely unreachable - this one is correct`. It was not correct. `ProjectDefectsPanel` is rendered on `/dashboard/projects/[id]/operations`, fed by `getProjectDefects` in `lib/quality/quality.ts`, with all four write actions (`report_defect_v1`, `set_defect_status_v1`, `add_defect_correction_v1`, `delete_defect_v1`) wired through `lib/quality/quality-actions.ts`. That route is linked from at least six places outside its own directory - the project page, the project map, the company home field section, the assignment manager, the admin page and a chat action chip. The claim survived because the row declared `coreModule: null` and `surfaces: []`, which is exactly the shape the reachability guards SKIP: a row that names nothing to check cannot be falsified, so it rots. That is the SEP-8 collapse happening inside the register that exists to prevent it. What IS true: `/dashboard/quality` does not exist and no defects route carries a surfaceRoute in the dashboard module registry - no nav entry of its own, the WRK-9 wording. And measured on production 2026-09-14, `defects` and `defect_corrections` both still hold 0 rows against 9 projects, so nobody has used it. 0 rows is USAGE, not disconnection - the same distinction this register already applied to WRK-6 teams. PARTIAL rather than BUILT_AND_USABLE for a reason that is NOT navigation: the manager half is complete and the worker half does not exist. `defects_select` admits `can_manage_project(project_id) OR reporter_id = auth.uid() OR is_admin()`, and `assignee_profile_id` - the column that records who must fix the defect - appears in no policy. A worker assigned a defect cannot read the row naming them. That is WRK-8s real gate and it is owner-gated (RLS), not a wiring job.",
   },
   {
     id: "WRK-9",
