@@ -1858,7 +1858,10 @@
     "expSaving": "Opslaan…",
     "expInvalid": "Vul een functie en minstens het startjaar in.",
     "expNeedsMigration": "Deze functie is nog niet ingeschakeld. Probeer het later.",
-    "expError": "Opslaan mislukt. Probeer het opnieuw."
+    "expError": "Opslaan mislukt. Probeer het opnieuw.",
+    "expRemove": "Verwijderen",
+    "expRemoveInUse": "Aan deze vermelding zijn werkregistraties gekoppeld, daarom is die niet verwijderd.",
+    "expRemoveError": "Deze vermelding kon niet worden verwijderd."
   },
   "roleDashboards": {
     "company": {

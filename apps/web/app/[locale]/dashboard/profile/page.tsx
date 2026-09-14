@@ -638,6 +638,8 @@ export default async function ProfilePage({
         endedAt: e.ended_at,
         title: e.title,
         isPrimary: e.is_primary,
+        // Exactly the RPC's preconditions, computed from rows already read.
+        selfDeclared: org === null && e.is_primary !== true,
       };
     });
 

@@ -221,7 +221,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/cv", "app/api/cv"],
     coreModule: "lib/cv/extract.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "Extraction is a proposal; every fact is confirmed by the person (A-05).",
+    note: "Extraction is a proposal; every fact is confirmed by the person (A-05). AND NOW WITHDRAWABLE (2026-09-14). A confirmed work-history fact was one-way: the profile carried a form writing through `save_self_declared_work_history_v1`, while its sibling `remove_self_declared_work_history_v1` — applied and callable since migration 20260714161000 — was named in NO source file at all. A living CV whose statements cannot be taken back is the wrong shape. The control appears only on the person's OWN self-declared, non-primary engagements, which are exactly the RPC's preconditions, and the RPC re-checks all of them; an entry a journal record points at answers `in_use` and is refused rather than destroyed (the FK is RESTRICT), which the surface states instead of swallowing. `not_found` stays merged for a missing row and an unauthorized one, so nothing became an existence oracle. No migration, no new authority. Guard: lib/guards/self-declared-history-can-be-taken-back.test.ts.",
   },
   {
     id: "PER-5",

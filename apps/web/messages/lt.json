@@ -1858,7 +1858,10 @@
     "expSaving": "Saugoma…",
     "expInvalid": "Įveskite pareigas ir bent pradžios metus.",
     "expNeedsMigration": "Ši funkcija dar neįjungta. Bandykite vėliau.",
-    "expError": "Nepavyko išsaugoti. Bandykite dar kartą."
+    "expError": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "expRemove": "Pašalinti",
+    "expRemoveInUse": "Su šiuo įrašu susieti darbo įrašai, todėl jis nepašalintas.",
+    "expRemoveError": "Nepavyko pašalinti šio įrašo."
   },
   "roleDashboards": {
     "company": {

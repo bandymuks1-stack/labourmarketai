@@ -1858,7 +1858,10 @@
     "expSaving": "Saving…",
     "expInvalid": "Enter a job title and at least the start year.",
     "expNeedsMigration": "This feature isn't enabled yet. Please try later.",
-    "expError": "Could not save. Please try again."
+    "expError": "Could not save. Please try again.",
+    "expRemove": "Remove",
+    "expRemoveInUse": "This entry has work records linked to it, so it was not removed.",
+    "expRemoveError": "Could not remove this entry."
   },
   "roleDashboards": {
     "company": {

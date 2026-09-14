@@ -1858,7 +1858,10 @@
     "expSaving": "Speichern…",
     "expInvalid": "Bitte Position und mindestens das Startjahr angeben.",
     "expNeedsMigration": "Diese Funktion ist noch nicht aktiviert. Bitte später versuchen.",
-    "expError": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    "expError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "expRemove": "Entfernen",
+    "expRemoveInUse": "Zu diesem Eintrag gehören Arbeitsaufzeichnungen, deshalb wurde er nicht entfernt.",
+    "expRemoveError": "Dieser Eintrag konnte nicht entfernt werden."
   },
   "roleDashboards": {
     "company": {
