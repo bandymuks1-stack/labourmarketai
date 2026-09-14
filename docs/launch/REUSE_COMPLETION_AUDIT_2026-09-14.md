@@ -159,6 +159,25 @@ Eight unreferenced out of 329 is a healthy figure; the point of recording it is
 that the two that mattered were both a `create` whose counterpart never
 shipped a control, the same shape as the six above.
 
+### And from the data side — a clean negative (2026-09-14)
+
+Third angle, to catch data captured and never shown (SEP-8): every `public`
+table in production that holds rows — **105 of them** — checked for any
+mention in `lib`, `app` or `components`. **Four** are named by no application
+code, and all four are correct as they are:
+
+| Table | Rows | Why no TypeScript reads it |
+|---|---|---|
+| `timesheet_events` | 6 | *"APPEND-ONLY timesheet history. Rows are immutable (trigger-enforced for every role incl. service_role)."* — its own table comment |
+| `booking_request_events` | 2 | The booking lifecycle's audit trail, written by the RPCs |
+| `public_vacancy_supply_counts` | 1 | *"Written only by `refresh_public_vacancy_supply_counts_v1()` (pg_cron / service role); read only by `count_public_vacancies_v1()`. RLS on with no policies = deny-all."* — its own table comment |
+| `ai_runs_retention_sweeps` | 37 | Retention-job bookkeeping, read by `ai_runs_retention_health` |
+
+Recording the negative so the angle is not re-run: **101 of 105 populated
+tables have a named application reader, and the four that do not are audit,
+ops and cron-singleton tables read from SQL.** No data is being captured and
+hidden.
+
 ---
 
 ## 3. THE 61 ITEMS
