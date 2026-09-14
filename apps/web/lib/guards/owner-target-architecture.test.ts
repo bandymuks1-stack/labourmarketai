@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { PRODUCT_GRAPH } from "@/lib/product-gate/product-graph";
 import { JOURNEY_REGISTER } from "@/lib/product-gate/journey-register";
 import { SEMANTIC_SEPARATIONS } from "@/lib/product-gate/semantic-separations";
+import { CAPABILITY_REGISTER } from "@/lib/product-gate/capability-register";
 
 const REPO = resolve(__dirname, "../../../..");
 const read = (rel: string) => readFileSync(resolve(REPO, rel), "utf8");
@@ -102,20 +103,49 @@ describe("owner target architecture — one file, and it stays reconciled", () =
     }
   });
 
-  it("the four nodes this reconciliation ADDED are flagged as an owner decision", () => {
-    // INSTITUTIONS, SUPPLY and MATCHING were promoted from prose to nodes on
-    // owner text of 2026-09-14. That is the single substantive extension this
-    // reconciliation made, and an agent may not make it silently: ARCH-1 is
-    // where the owner confirms or corrects it.
-    const s = read(CANONICAL);
-    expect(s).toContain("ARCH-1");
-    for (const added of ["INSTITUTIONS", "SUPPLY", "MATCHING"]) {
-      expect(s).toContain(added);
+  it("ARCH-1's four nodes are REAL nodes, not prose (owner APPROVED 2026-09-14)", () => {
+    // Before ARCH-1 these lived only in the value chain and the flywheel text.
+    // A concept with no node cannot lose its last capability, so the one
+    // mechanism built to stop silent narrowing was blind to four of the
+    // twenty-eight things it protects. This is the assertion that closes that.
+    const ids = new Set(PRODUCT_GRAPH.map((n) => n.id));
+    for (const id of ["institutions", "supply", "matching", "recognition"]) {
+      expect(
+        ids.has(id as (typeof PRODUCT_GRAPH)[number]["id"]),
+        `"${id}" is an owner-approved first-class node (ARCH-1) and is not in product-graph.ts. Removing it re-opens the silent-narrowing hole ARCH-1 closed; that needs a NEW owner decision, not a deletion.`,
+      ).toBe(true);
     }
-    expect(
-      /ARCH-1[\s\S]{0,900}(INSTITUTIONS|SUPPLY|MATCHING)/.test(s),
-      "ARCH-1 must name the nodes it is asking about, or the owner cannot answer it.",
-    ).toBe(true);
+    expect(PRODUCT_GRAPH.length).toBe(28);
+  });
+
+  it("ARCH-1 added MEANING, not modules — every new node reuses existing capabilities", () => {
+    // The owner approved the nodes with an explicit limit: "not authorization
+    // to create four duplicate modules, routes, databases or UI sections."
+    // The check that enforces it is that each new node's capabilities were
+    // ALREADY in the register — a node inventing its own capability id is the
+    // duplication the decision forbade.
+    const registered = new Set(CAPABILITY_REGISTER.map((c) => c.id));
+    for (const id of ["institutions", "supply", "matching", "recognition"]) {
+      const node = PRODUCT_GRAPH.find((n) => n.id === id);
+      expect(node, `${id} missing`).toBeTruthy();
+      expect(node!.capabilities.length).toBeGreaterThan(0);
+      for (const cap of node!.capabilities) {
+        expect(
+          registered.has(cap),
+          `Node "${id}" names capability ${cap}, which is not in the register. ARCH-1 was approved as a semantic decision only — a new node may not bring a new capability with it.`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("RECOGNITION does not absorb demonstrated capability (SEP-6)", () => {
+    // SKL-2 is deterministic journal → skill recognition: DEMONSTRATED
+    // capability. This node is RECOGNISED EQUIVALENCE against a formal
+    // requirement. One node holding both IS the SEP-6 collapse — demonstrated
+    // capability silently satisfying a formal requirement.
+    const recognition = PRODUCT_GRAPH.find((n) => n.id === "recognition");
+    expect(recognition?.capabilities).not.toContain("SKL-2");
+    expect(read(CANONICAL)).toMatch(/SKL-2[\s\S]{0,400}SEP-6/);
   });
 
   it("every permanent journey id is named", () => {

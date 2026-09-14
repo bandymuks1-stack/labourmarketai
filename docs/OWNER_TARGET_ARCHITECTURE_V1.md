@@ -2,10 +2,10 @@
 
 | Field | Value |
 |---|---|
-| **Version** | V1 |
-| **Date** | 2026-09-14 |
+| **Version** | V1.1 |
+| **Date** | 2026-09-14 (V1.1 — ARCH-1 resolved same day) |
 | **Status** | **ACTIVE — THE canonical architecture. Read this first, before any other architecture, product, vision or completion document.** |
-| **Sources** | Owner text 2026-09-07 (`PRODUCT_CONSTITUTION` §14–16) + owner text 2026-09-14 (§1.2 below), reconciled. Every earlier owner lock is preserved, not replaced |
+| **Sources** | Owner text 2026-09-07 (`PRODUCT_CONSTITUTION` §14–16) + owner text 2026-09-14 (§1.2 below) + **owner decision ARCH-1, 2026-09-14 (APPROVED)**, reconciled. Every earlier owner lock is preserved, not replaced |
 | **Supersedes as ENTRY POINT** | `docs/ARCHITECTURE.md` (now SUPPORTING — navigation and process), `docs/ARCHITECTURE_UNIVERSAL_LABOURMARKETAI.md` (now SUPPORTING — one vertical) |
 | **Machine halves** | `apps/web/lib/product-gate/*.ts` — see §9 |
 | **Enforced by** | `apps/web/lib/guards/owner-target-architecture.test.ts` |
@@ -101,7 +101,7 @@ the newer text governs"*) both stand together.
 | 7 | ORGANIZATIONS | both |
 | 8 | COMPANIES | both |
 | 9 | AGENCIES | both |
-| 10 | **INSTITUTIONS** | **NEW, 2026-09-14** — implicit before as an organization type and as `J-INSTITUTION-OUTCOME`; now a first-class actor node |
+| 10 | **INSTITUTIONS** | **ARCH-1 APPROVED 2026-09-14.** Implicit before as an organization type and as `J-INSTITUTION-OUTCOME`; now a first-class node in `product-graph.ts`, realized by EDU-1/2/3/6 |
 | 11 | TEAMS / BRIGADES | both |
 | 12 | PROJECTS | both |
 | 13 | SITES / OBJECTS | both |
@@ -110,12 +110,12 @@ the newer text governs"*) both stand together.
 | 16 | AVAILABILITY | both |
 | 17 | TIME | both |
 | 18 | CAPACITY | both |
-| 19 | **SUPPLY** | **NEW, 2026-09-14** — present only in the flywheel prose before. Its absence as a node is the market-direction defect in structural form (SEP-4) |
+| 19 | **SUPPLY** | **ARCH-1 APPROVED 2026-09-14.** Present only in flywheel prose before; its absence as a node WAS the market-direction defect in structural form (SEP-4). Realized by DEM-2/DEM-9/ORG-8/CAL-3 |
 | 20 | CURRENT DEMAND | both |
 | 21 | FUTURE DEMAND | both |
-| 22 | **MATCHING** | **NEW, 2026-09-14** — present only in the value chain before |
+| 22 | **MATCHING** | **ARCH-1 APPROVED 2026-09-14.** Present only in the value chain before; filed under demand it was vacancy-ranking, which is the job-board reduction. Realized by DEM-5/DEM-6/DEM-3 |
 | 23 | EDUCATION / TRAINING | both |
-| 24 | **RECOGNITION / RPL** | named "RECOGNITION" 2026-09-07, named "RPL" 2026-09-14 — **the same node**, now named explicitly |
+| 24 | **RECOGNITION / RPL** | named "RECOGNITION" 2026-09-07, "RPL" 2026-09-14 — **the same node**. **ARCH-1 APPROVED**: distinct from QUALIFICATIONS (holding/validating credentials); this node is the ACT of recognising. Realized by SKL-9/SKL-10/EDU-4 |
 | 25 | COUNTRIES / JURISDICTIONS | both |
 | 26 | MOBILITY | both |
 | 27 | MARKET SIGNALS | both |
@@ -214,6 +214,52 @@ domain rule for one platform is the defect, whatever it enables.
 Vendor neutrality is architectural, not diplomatic: no surface may receive a
 capability the others structurally cannot. Which LLM providers the platform
 itself uses internally is a different concern entirely.
+
+---
+
+### 1.9 A node is a claim about MEANING, not a licence to build (ARCH-1, 2026-09-14)
+
+The owner approved the four nodes with an explicit limit, recorded here
+verbatim in substance:
+
+> *This is an architectural/semantic decision, not authorization to create four
+> duplicate modules, routes, databases or UI sections. Reuse and connect
+> existing capabilities first. Implement new structures only where the
+> corrected evidence-based gap analysis proves they are genuinely missing.*
+
+**What was therefore done, and it is the whole change:** each new node was
+given EXISTING capability ids. Nothing was created — no table, no route, no
+component, no server action, no migration.
+
+| Node | Realized by (all pre-existing) |
+|---|---|
+| INSTITUTIONS | EDU-1 institution capability + learner link · EDU-2 programmes/cohorts/members · EDU-3 learner outcomes · EDU-6 institution reporting |
+| SUPPLY | DEM-2 demand/supply semantic boundary · DEM-9 organizational supply discovery · ORG-8 agency↔client bridge · CAL-3 availability (the worker-side half) |
+| MATCHING | DEM-5 matching engine (20 criteria, both directions) · DEM-6 team matching · DEM-3 worker opportunity board + interest |
+| RECOGNITION / RPL | SKL-9 qualification recognition/RPL/equivalence · SKL-10 training & certification register · EDU-4 learning compass |
+
+A capability may belong to several nodes; that was already the pattern
+(WRK-1 under COMPANIES and PROJECTS, SKL-8 under QUALIFICATIONS and COUNTRIES).
+Multi-attribution is how one product carries two decompositions without
+duplicating either.
+
+**Two deliberate exclusions, both to protect a separation:**
+
+- **SKL-2** (deterministic journal → skill recognition) is NOT under
+  RECOGNITION. It recognises DEMONSTRATED CAPABILITY; this node is about
+  RECOGNISED EQUIVALENCE against a formal requirement. Putting them under one
+  node is exactly the SEP-6 collapse — demonstrated capability silently
+  satisfying a formal requirement.
+- **RECOGNITION is not QUALIFICATIONS.** QUALIFICATIONS is holding and
+  validating credentials a person already has (SKL-7, SKL-8, PER-9, PER-13).
+  RECOGNITION is the ACT of converting evidence into standing. They share a
+  domain and not a meaning.
+
+**What this changes in practice:** nothing renders differently and no user sees
+a new screen. What changes is that `product-graph-journeys.test.ts` now fails
+if any of these four loses its last live capability — the silent-narrowing
+protection the audit found was structurally blind to four of twenty-eight
+things it was meant to protect.
 
 ---
 
@@ -446,7 +492,7 @@ Six carried forward, plus four surfaced by this reconciliation.
 | **EVID-6** | The v1 select policy resolves `moderation_status` to the RECORD's status and hands the experience author a reply moderation has not published. Correcting it is a schema change (RED) |
 | **MKT-7** | Two independent owner acts arm real charging |
 | **GOV-1** | Add a READ-ONLY `SUPABASE_DB_URL` GitHub Actions secret. Two live security gates stay inactive without it |
-| **ARCH-1** *(new)* | **Are INSTITUTIONS, SUPPLY and MATCHING first-class graph nodes?** §1.2 records them from owner text 2026-09-14 and this file treats them as nodes. If the intent was that they remain edges of ORGANIZATIONS / DEMAND / the value chain, say so and §1.2 is corrected. **This is the one place this reconciliation extended the graph, and it is flagged rather than assumed.** |
+| ~~**ARCH-1**~~ | ✅ **RESOLVED — APPROVED by the owner, 2026-09-14.** INSTITUTIONS, SUPPLY, MATCHING and RECOGNITION/RPL are first-class nodes. All 28 are now in `product-graph.ts` and guarded. The decision was explicitly *architectural/semantic, not authorization to create four duplicate modules, routes, databases or UI sections* — see §1.9 for what that means in practice. |
 | **ARCH-2** *(new)* | **Who may assert a RECOGNISED EQUIVALENCE (RPL)?** The SEP-6 decision model is built and consumed; its only non-test input is hardcoded `false`. The blocker is a policy question — which actor, on what evidence, with what audit — not engineering |
 | **ARCH-3** *(new)* | **Is zero usage a broken journey?** `EDU-2` is classed BROKEN for zero cohort members while `WRK-6` calls the identical fact *"a human fact and not a code gap"*. One standard must go. Until then, "10 broken links" mixes missing code with missing users and is not a usable backlog number |
 | **ARCH-4** *(new)* | **Employer-side team matching** — opening `get_team_capability_summary_v1` beyond owner/manager/admin is a disclosure decision, not a wiring task |

@@ -3,7 +3,8 @@
 | Field | Value |
 |---|---|
 | **Date** | 2026-09-14 |
-| **Measured against** | [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](../OWNER_TARGET_ARCHITECTURE_V1.md) §1.2 — the 28-node target graph |
+| **Measured against** | [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](../OWNER_TARGET_ARCHITECTURE_V1.md) V1.1 §1.2 — the 28-node target graph |
+| **Revised** | 2026-09-14, after owner decision **ARCH-1 (APPROVED)**. All 28 nodes are now measured; the four previously-unmeasured nodes have real verdicts (§2) |
 | **Supersedes** | the *completion matrix and conclusions* of `AUDIT_CHECKPOINT_2026-09-14_end-to-end.md`. **Its seven defects are preserved in full** (§4) — none was erased because a register was stale |
 | **Status** | Audit only. No product code, schema, RLS, migration or owner gate touched |
 
@@ -50,7 +51,7 @@ Legend: **G** built+usable · **P** partial · **M** missing · **B** built-not-
 | 7 | ORGANIZATIONS | 5 | 1 | 3 | 0 | 0 | 1 | 0 | PARTIAL |
 | 8 | COMPANIES | 4 | 1 | 3 | 0 | 0 | 0 | 0 | PARTIAL |
 | 9 | AGENCIES | 3 | 2 | 1 | 0 | 0 | 0 | 0 | PARTIAL |
-| **10** | **INSTITUTIONS** | — | — | — | — | — | — | — | **NOT MEASURED** (§2) |
+| **10** | **INSTITUTIONS** | 4 | 3 | 1 | 0 | 0 | 0 | 0 | PARTIAL — strongest of the four |
 | 11 | TEAMS / BRIGADES | 2 | 0 | 1 | 1 | 0 | 0 | 0 | PARTIAL |
 | 12 | PROJECTS | 6 | 5 | 0 | 0 | 1 | 0 | 0 | PARTIAL |
 | 13 | SITES / OBJECTS | 2 | 0 | 2 | 0 | 0 | 0 | 0 | PARTIAL |
@@ -59,12 +60,12 @@ Legend: **G** built+usable · **P** partial · **M** missing · **B** built-not-
 | 16 | AVAILABILITY | 4 | 1 | 3 | 0 | 0 | 0 | 0 | PARTIAL |
 | 17 | TIME | 4 | 1 | 2 | 1 | 0 | 0 | 0 | PARTIAL |
 | 18 | CAPACITY | 4 | 0 | 1 | **3** | 0 | 0 | 0 | PARTIAL — barely |
-| **19** | **SUPPLY** | — | — | — | — | — | — | — | **NOT MEASURED** (§2) |
+| **19** | **SUPPLY** | 4 | 2 | 2 | 0 | 0 | 0 | 0 | PARTIAL |
 | 20 | CURRENT DEMAND | 5 | 3 | 2 | 0 | 0 | 0 | 0 | PARTIAL |
 | 21 | FUTURE DEMAND | 3 | 0 | 0 | **3** | 0 | 0 | 0 | **MISSING** |
-| **22** | **MATCHING** | — | — | — | — | — | — | — | **NOT MEASURED** (§2) |
+| **22** | **MATCHING** | 3 | 1 | 2 | 0 | 0 | 0 | 0 | PARTIAL |
 | 23 | EDUCATION / TRAINING | 8 | 4 | 3 | 0 | 1 | 0 | 0 | PARTIAL |
-| **24** | **RECOGNITION / RPL** | — | — | — | — | — | — | — | **NOT MEASURED** (§2) |
+| **24** | **RECOGNITION / RPL** | 3 | **0** | 3 | 0 | 0 | 0 | 0 | PARTIAL — **no fully-built capability at all** |
 | 25 | COUNTRIES / JURISDICTIONS | 2 | 0 | 2 | 0 | 0 | 0 | 0 | PARTIAL |
 | 26 | MOBILITY | 2 | 1 | 1 | 0 | 0 | 0 | 0 | PARTIAL |
 | 27 | MARKET SIGNALS | 3 | 1 | 2 | 0 | 0 | 0 | 0 | PARTIAL |
@@ -90,29 +91,49 @@ CAL-4, is the gap timeline, which #1739 found collapses UNKNOWN into NOT-MET
 
 ---
 
-## 2. FOUR TARGET NODES THAT NOTHING MEASURES
+## 2. THE FOUR NODES ARCH-1 ADDED — now measured
 
-INSTITUTIONS, SUPPLY, MATCHING and RECOGNITION/RPL are in the owner target
-(§1.2) and are **not nodes in `product-graph.ts`**. They are not unimplemented
-— their capabilities exist, filed under other nodes:
+**RESOLVED 2026-09-14. Owner decision ARCH-1: APPROVED.** INSTITUTIONS,
+SUPPLY, MATCHING and RECOGNITION/RPL are first-class nodes.
 
-| Target node | Where its capabilities actually live | Consequence |
-|---|---|---|
-| INSTITUTIONS | EDU-1…EDU-6 under `education`; `J-INSTITUTION-OUTCOME` exists as a journey | The institution is a first-class ACTOR with no first-class NODE |
-| SUPPLY | DEM-2, DEM-9 under `agencies`; `lib/supply/employer-supply-discovery.ts` | **SEP-4 (DEMAND ≠ SUPPLY) has no structural expression.** The separation that the market-direction defect violates is enforced only by review |
-| MATCHING | DEM-5 under `current_demand`, DEM-6 under `teams` | Matching is filed as a property of demand — which is the job-board reduction in structural form |
-| RECOGNITION / RPL | SKL-9 under `qualifications` | See §4.4 — the model exists, its input is hardcoded `false` |
+They were never unimplemented — their capabilities existed, filed under other
+nodes. What was absent was the architectural representation, and the cost of
+that absence was precise: `product-graph-journeys.test.ts` protects a node by
+failing when it loses its last live capability, and **a concept with no node
+cannot lose its last capability.** The one mechanism this repository built to
+stop silent narrowing was blind to four of the twenty-eight things it protects.
 
-**Why this matters and is not bookkeeping.** `product-graph-journeys.test.ts`
-protects a node by failing when it loses its last live capability. A concept
-with no node cannot lose its last capability, so **the guard is structurally
-blind to the disappearance of matching, supply, RPL and the institution.** The
-one mechanism this repository built to stop silent narrowing does not cover
-four of the twenty-eight things it is meant to protect.
+Each node was given EXISTING capability ids. **Nothing was created** — no
+table, no route, no component, no server action, no migration — per the
+owner's explicit limit (canonical §1.9).
 
-Classification: **MISSING (structural)** — the capabilities are PARTIAL, the
-architectural representation is absent. Resolving it is one register edit and
-an owner confirmation, not a build. **Gated on ARCH-1.**
+| Node | Realized by | Verdict | What the node now protects |
+|---|---|---|---|
+| INSTITUTIONS | EDU-1, EDU-2, EDU-3, EDU-6 | **PARTIAL** (3 built, 1 partial) | The strongest of the four. `J-INSTITUTION-OUTCOME` had a journey and no node; both exist now |
+| SUPPLY | DEM-2, DEM-9, ORG-8, CAL-3 | **PARTIAL** (2 built, 2 partial) | **SEP-4 (DEMAND ≠ SUPPLY) now has a structural expression.** The separation the market-direction defect violates was previously enforced by review alone |
+| MATCHING | DEM-5, DEM-6, DEM-3 | **PARTIAL** (1 built, 2 partial) | Matching was filed as a property of demand — vacancy-ranking, the job-board reduction in structural form. It is now its own node in both directions |
+| RECOGNITION / RPL | SKL-9, SKL-10, EDU-4 | **PARTIAL — and the weakest node in the graph: ZERO fully-built capabilities** | The SEP-6 boundary. SKL-9's model exists with a hardcoded `false` input (§4.4), SKL-10 deliberately writes nothing into the skill ladder, EDU-4 is a student path. Nothing here completes |
+
+**Two deliberate exclusions**, both to protect a separation rather than to
+inflate a node:
+
+- **SKL-2** (deterministic journal → skill recognition) is NOT under
+  RECOGNITION. It recognises DEMONSTRATED CAPABILITY; the node is about
+  RECOGNISED EQUIVALENCE against a formal requirement. One node holding both is
+  the SEP-6 collapse.
+- **RECOGNITION is not QUALIFICATIONS.** The latter holds and validates
+  credentials a person already has; the former is the act of converting
+  evidence into standing.
+
+**What ARCH-1 changed in the numbers:** nothing improved. 24 measured nodes
+became 28, and the four arrived as PARTIAL — one of them with no fully-built
+capability at all. That is the correct outcome: the decision made an
+already-existing gap *visible and guarded*, and a reconciliation that had
+improved the score would have been the suspicious one.
+
+Enforced by `lib/guards/owner-target-architecture.test.ts`: the four must exist
+as nodes, `PRODUCT_GRAPH.length` must be 28, every capability they name must
+already be in the register, and RECOGNITION may not absorb SKL-2.
 
 ---
 
@@ -183,13 +204,13 @@ under-describes the product in both directions.
 
 | Class | Count | Contents |
 |---|---|---|
-| **BUILT_AND_CONNECTED** | 38 caps · **1 node** (TASKS) · 2 surfaces | The one fully-standing node is TASKS/WORK STAGES |
-| **PARTIAL** | 55 caps · 21 nodes | The overwhelming majority of the product |
-| **MISSING** | 6 caps · **1 node** (FUTURE DEMAND) + **4 unrepresented nodes** | DEM-8, CAL-7, CAL-8, CAL-9, CAL-10, WRK-6 |
+| **BUILT_AND_CONNECTED** | 38 caps · **1 of 28 nodes** (TASKS) · 2 surfaces | The one fully-standing node is TASKS/WORK STAGES |
+| **PARTIAL** | 55 caps · **26 of 28 nodes** | The overwhelming majority of the product. RECOGNITION/RPL is the weakest — zero fully-built capabilities |
+| **MISSING** | 6 caps · **1 node** (FUTURE DEMAND) | DEM-8, CAL-7, CAL-8, CAL-9, CAL-10, WRK-6. *(The four unrepresented nodes are resolved — ARCH-1.)* |
 | **BUILT_NOT_CONNECTED** | 2 caps + 2 orphan routes + 68 unanchored subsystems | EDU-5 `/dashboard/learning`, WRK-9 handover |
 | **DUPLICATED_OR_PARALLEL** | 2 real divergences | `languageLevelSatisfies`; journal live-filter across 34 readers, 23 omitting it |
 | **BROKEN** | 4 | Trust/CV count · capacity language gap · 2 vacuous guards · stale parity snapshot |
-| **OWNER_GATED** | 12 | PER-11, ORG-2, EVID-2, EVID-6, MKT-7, GOV-1 + ARCH-1…ARCH-6 |
+| **OWNER_GATED** | **11** | PER-11, ORG-2, EVID-2, EVID-6, MKT-7, GOV-1 + ARCH-2…ARCH-6. **ARCH-1 resolved.** |
 | **EXTERNAL_RELEASE_GATED** | 2 surfaces | App Store, Google Play |
 | **HUMAN_PROOF_REQUIRED** | **89 of 106** | Only 17 capabilities are HUMAN_UI_PROVEN |
 
@@ -198,9 +219,8 @@ under-describes the product in both directions.
 ## 6. REVISED DEPENDENCY-ORDERED PATH
 
 ### Phase 0 — truth (blocks the meaning of everything downstream)
-1. **ARCH-1** owner answer on INSTITUTIONS / SUPPLY / MATCHING as nodes. Until
-   answered, four target nodes are unguarded and the completion matrix has a
-   hole in it. *Owner, minutes.*
+1. ~~**ARCH-1**~~ ✅ **DONE 2026-09-14** — approved and implemented by reuse;
+   all 28 nodes guarded.
 2. Apply the four register reclassifications (§4.1) and remove the two vacuous
    guard escapes. *1 window.*
 3. Refresh the parity snapshot; resolve **ARCH-3** (is zero usage broken?).
@@ -257,8 +277,9 @@ The previous estimate of 12–18 was for a *narrower target* and stands only for
 
 **Fully connected final architecture (all 28 nodes):** **45–75 realistic**,
 constrained by decision sequencing — CAL-9 depends on CAL-10, CAL-10 depends on
-CAL-7, WRK-6 and RPL are owner-gated today, and ARCH-1 gates whether four
-nodes exist at all.
+CAL-7, and WRK-6 and the RPL write path are owner-gated today (ARCH-2, ARCH-4,
+ARCH-5). ARCH-1 is resolved, so all 28 nodes now exist and are guarded; that
+removed an unknown from the estimate without removing any work from it.
 
 **Assumptions:** each window ends in a merged GREEN-class PR; no RED migration
 without an owner gate; nothing in the 90 unrun e2e specs needs a schema change.

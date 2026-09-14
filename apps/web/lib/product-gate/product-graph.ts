@@ -43,6 +43,7 @@ export type GraphNodeId =
   | "organizations"
   | "companies"
   | "agencies"
+  | "institutions"
   | "teams"
   | "projects"
   | "sites"
@@ -52,8 +53,11 @@ export type GraphNodeId =
   | "time"
   | "capacity"
   | "current_demand"
+  | "supply"
   | "future_demand"
+  | "matching"
   | "education"
+  | "recognition"
   | "countries"
   | "mobility"
   | "market_signals"
@@ -167,6 +171,15 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
     capabilities: ["ORG-8", "DEM-2", "DEM-9"],
   },
   {
+    id: "institutions",
+    name: "INSTITUTIONS",
+    definition:
+      "Schools, training providers and any body that FORMS capability rather than consuming it. An institution is an organization by type and an actor in its own right: its output is a person who has learned something, and the product's job is to carry that learning into real work, evidence and demand. Reading an institution as just another employer loses the whole J-INSTITUTION-OUTCOME chain.",
+    worldElement: "organizations",
+    domains: ["education", "organization"],
+    capabilities: ["EDU-1", "EDU-2", "EDU-3", "EDU-6"],
+  },
+  {
     id: "teams",
     name: "TEAMS / BRIGADES",
     definition:
@@ -237,6 +250,15 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
     capabilities: ["CAL-4", "CAL-7", "CAL-9", "CAL-10"],
   },
   {
+    id: "supply",
+    name: "SUPPLY",
+    definition:
+      "Capacity OFFERED to the market — by a person declaring availability, by an agency declaring workforce, by an organization opening its bench. Supply is the counterpart of demand and never the same object: reading an agency's declared capacity as its need is the market-direction defect, and SEP-4 exists because it happened. This node is what makes that separation structural rather than a review habit.",
+    worldElement: "organizations",
+    domains: ["demand_supply", "time_capacity"],
+    capabilities: ["DEM-2", "DEM-9", "ORG-8", "CAL-3"],
+  },
+  {
     id: "current_demand",
     name: "CURRENT DEMAND",
     definition:
@@ -259,6 +281,15 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
     },
   },
   {
+    id: "matching",
+    name: "MATCHING",
+    definition:
+      "The act of putting SUPPLY and DEMAND against each other and saying, with reasons, how well they meet. Matching is a node and not a property of demand: filed under demand it becomes vacancy-ranking, which is the job-board reduction. It runs in BOTH directions — a person sees fitting work, an employer sees fitting people — and an unknown fact must stay unknown rather than count as a miss (SEP-7).",
+    worldElement: "market_world_map",
+    domains: ["demand_supply"],
+    capabilities: ["DEM-5", "DEM-6", "DEM-3"],
+  },
+  {
     id: "education",
     name: "EDUCATION / TRAINING / RECOGNITION",
     definition:
@@ -266,6 +297,15 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
     worldElement: "organizations",
     domains: ["education", "skills"],
     capabilities: ["EDU-1", "EDU-2", "EDU-3", "EDU-4", "EDU-5", "EDU-6", "SKL-10", "PER-8"],
+  },
+  {
+    id: "recognition",
+    name: "RECOGNITION / RPL",
+    definition:
+      "The conversion of demonstrated capability into RECOGNISED standing — prior learning assessed as equivalent to a formal requirement. Distinct from QUALIFICATIONS, which is about holding and validating credentials a person already has: this node is the act of recognising. SEP-6 is the whole point, and it may never collapse — demonstrated capability must never silently satisfy a formal requirement, and an equivalence is a formal answer only when an authorized assessor gave it.",
+    worldElement: "skills",
+    domains: ["skills", "education"],
+    capabilities: ["SKL-9", "SKL-10", "EDU-4"],
   },
   {
     id: "countries",

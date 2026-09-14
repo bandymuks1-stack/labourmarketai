@@ -12,11 +12,12 @@
 > which canonical journeys are broken, and the open owner decisions. No network,
 > no database, no credentials.
 >
-> **It measures 24 nodes; the owner target is 28.** INSTITUTIONS, SUPPLY,
-> MATCHING and RECOGNITION/RPL are in the target graph and are not yet nodes in
-> `product-graph.ts`, so nothing detects if their last capability dies. That gap
-> is open owner decision **ARCH-1** — see the canonical architecture §2 and §10.
-> Until it is answered, this command is a floor, not the target.
+> **It measures all 28 target nodes.** INSTITUTIONS, SUPPLY, MATCHING and
+> RECOGNITION/RPL became first-class nodes by owner decision **ARCH-1**
+> (APPROVED 2026-09-14) and are realized entirely by pre-existing capabilities
+> — ARCH-1 was semantic, and explicitly not authorization to build four
+> duplicate modules, routes, databases or UI sections. See the canonical
+> architecture §1.9 before touching any of them.
 >
 > This is enforced, not advised: `apps/web/lib/guards/capability-register.test.ts`,
 > `apps/web/lib/guards/product-graph-journeys.test.ts` and the `Product truth`

@@ -185,9 +185,10 @@ LABOURMARKET.AI — PRODUCT TRUTH
 
 WHAT THIS PRODUCT IS
   A living global labour/work graph: people, real work, skills, experience,
-  evidence, qualifications, organizations, teams, projects, sites, tasks,
-  services, availability, time, capacity, current and future demand,
-  education, jurisdictions, mobility, market signals and commercial
+  evidence, qualifications, organizations, companies, agencies, institutions,
+  teams/brigades, projects, sites, tasks, services, availability, time,
+  capacity, supply, current and future demand, matching, education,
+  recognition/RPL, jurisdictions, mobility, market signals and commercial
   opportunities — one graph, ${nodes.length} nodes.
 
   REAL WORK → EVIDENCE → CAPABILITY → CAPACITY → DEMAND → MATCH → EXECUTION
