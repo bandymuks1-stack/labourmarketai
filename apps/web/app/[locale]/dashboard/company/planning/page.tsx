@@ -520,6 +520,16 @@ export default async function CompanyWorkforcePlanningPage({
               {t("summary.coveredAll")}
             </span>
           )}
+          {view.totals.unknownCapacityWorkers > 0 ? (
+            <span
+              className="font-mono text-meta uppercase tracking-label text-text-muted"
+              data-testid="planning-zone-unknown-capacity"
+            >
+              {t("summary.unknownCapacity", {
+                count: view.totals.unknownCapacityWorkers,
+              })}
+            </span>
+          ) : null}
         </div>
         {/* Headcount provenance — the user's number is shown as the user's,
             a system placeholder as a labelled suggestion, confirmed as

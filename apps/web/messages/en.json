@@ -10285,7 +10285,8 @@
       "capacityLabel": "Capacity coverage",
       "userEntered": "You entered: {count}",
       "systemSuggested": "Suggested automatically: {count} (confirm or edit)",
-      "confirmedRequired": "Confirmed: {count}"
+      "confirmedRequired": "Confirmed: {count}",
+      "unknownCapacity": "{count} could not be assessed — the shortfall may be smaller"
     },
     "risk": {
       "none": "No capacity risk in the current view.",

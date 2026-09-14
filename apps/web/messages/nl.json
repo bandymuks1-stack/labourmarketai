@@ -10285,7 +10285,8 @@
       "capacityLabel": "Capaciteitsdekking",
       "userEntered": "Door u ingevoerd: {count}",
       "systemSuggested": "Automatisch voorgesteld: {count} (bevestigen of bewerken)",
-      "confirmedRequired": "Bevestigd: {count}"
+      "confirmedRequired": "Bevestigd: {count}",
+      "unknownCapacity": "{count} konden niet worden beoordeeld — het tekort kan kleiner zijn"
     },
     "risk": {
       "none": "Geen capaciteitsrisico in dit beeld.",

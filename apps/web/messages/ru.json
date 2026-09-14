@@ -10285,7 +10285,8 @@
       "capacityLabel": "Покрытие мощности",
       "userEntered": "Вы ввели: {count}",
       "systemSuggested": "Предложено автоматически: {count} (подтвердите или измените)",
-      "confirmedRequired": "Подтверждено: {count}"
+      "confirmedRequired": "Подтверждено: {count}",
+      "unknownCapacity": "{count} не удалось оценить — нехватка может быть меньше"
     },
     "risk": {
       "none": "В текущем виде риска нехватки нет.",

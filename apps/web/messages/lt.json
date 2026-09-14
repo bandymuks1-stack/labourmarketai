@@ -10285,7 +10285,8 @@
       "capacityLabel": "Pajėgumo padengimas",
       "userEntered": "Jūsų įvesta: {count}",
       "systemSuggested": "Pasiūlyta automatiškai: {count} (patvirtinkite arba pataisykite)",
-      "confirmedRequired": "Patvirtinta: {count}"
+      "confirmedRequired": "Patvirtinta: {count}",
+      "unknownCapacity": "{count} nepavyko įvertinti — trūkumas gali būti mažesnis"
     },
     "risk": {
       "none": "Dabartiniame vaizde pajėgumo rizikos nėra.",

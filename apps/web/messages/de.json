@@ -10285,7 +10285,8 @@
       "capacityLabel": "Kapazitätsabdeckung",
       "userEntered": "Ihre Eingabe: {count}",
       "systemSuggested": "Automatisch vorgeschlagen: {count} (bestätigen oder bearbeiten)",
-      "confirmedRequired": "Bestätigt: {count}"
+      "confirmedRequired": "Bestätigt: {count}",
+      "unknownCapacity": "{count} konnten nicht bewertet werden — die Lücke ist möglicherweise kleiner"
     },
     "risk": {
       "none": "Kein Kapazitätsrisiko in dieser Ansicht.",

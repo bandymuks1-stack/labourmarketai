@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import type {
   FutureWorkEntry,
@@ -432,5 +434,56 @@ describe("derivationRouting — real task-router call site (P4)", () => {
     const plan = planFromDerived(reqs);
     const view = build({ entries: [e], plans: { [e.id]: plan } });
     expect(view.derivationRouting).toBeNull();
+  });
+});
+
+describe("an unassessable person is counted and said, not silently absorbed", () => {
+  /**
+   * Step A1–A3 fixed the ARITHMETIC: a language level outside the closed CEFR
+   * set ranks `null`, so the person is neither a match nor a proven miss and
+   * lands in `unknownWorkerIds`. `capacity-model.ts` counts them as NOT
+   * covered — the cautious reading — and its own contract says a surface
+   * showing the shortfall "should say how much of it is unknown rather than
+   * missing". Until 2026-09-14 nothing did: the field existed in the model and
+   * reached no screen. SEP-7 held in the arithmetic and was lost at the last
+   * step, which is SEP-8.
+   */
+  const gapWith = (unknownWorkerIds: string[]) => ({
+    kind: "language" as const,
+    requirementId: "r1",
+    subject: "lt",
+    required: 2,
+    matchedWorkerIds: [],
+    unknownWorkerIds,
+    shortfall: 2,
+  });
+
+  it("counts DISTINCT people, not occurrences", () => {
+    // One person unrankable on two requirements is one person the manager
+    // cannot assess, not two.
+    const seen = new Set(
+      [gapWith(["w1", "w2"]), gapWith(["w1"])].flatMap((g) => [...g.unknownWorkerIds]),
+    );
+    expect(seen.size).toBe(2);
+  });
+
+  it("the totals shape carries the count so a surface can state it", () => {
+    // The pin that matters: the field must SURVIVE to the view model. Its
+    // absence is what made the model's honesty invisible for six days.
+    const src = readFileSync(
+      join(__dirname, "planning-zone-view.ts"),
+      "utf8",
+    );
+    expect(src).toMatch(/readonly unknownCapacityWorkers: number;/);
+    expect(src).toMatch(/unknownCapacityWorkers: unknownWorkerCount,/);
+    expect(src).toMatch(/const unknownWorkerCount = new Set\(/);
+    // Every gap dimension contributes — language is the only one that can
+    // produce an unknown today, but hard-coding that would rot the moment
+    // another dimension learns to say "I cannot tell".
+    for (const dim of ["skillGaps", "languageGaps", "certificateGaps"]) {
+      expect(src, `${dim} must contribute to the unknown count`).toContain(
+        `r.${dim}.flatMap`,
+      );
+    }
   });
 });
