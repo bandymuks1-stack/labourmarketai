@@ -37,10 +37,15 @@ capabilities, not a duplicate module. `tests/e2e/education-pilot-institution.spe
 already drives it that way.
 
 **One caveat that will otherwise waste a walk:** the local DB is reset to
-*every migration*, including the six that production has NOT applied. So four
+*every migration*, including the **nine** that production has NOT applied
+(seven owner-gated drafts from July, plus the two this wave added). So several
 capabilities will WORK locally that are inert in production — see the drift
-report (`SCHEMA_DRIFT_REPO_VS_PRODUCTION_2026-09-14.md`). Do not conclude from
-a successful local walk that these are live for real users.
+report (`SCHEMA_DRIFT_REPO_VS_PRODUCTION_2026-09-14.md`, §4). Do not conclude
+from a successful local walk that these are live for real users.
+
+*(This line said "six" when this document was written. Seven was correct then
+and nine is correct now — the same prose-drifting-from-its-own-table defect
+the drift report itself had to correct. Counted from the tree, not summed.)*
 
 ---
 
@@ -63,7 +68,11 @@ deleted and superseded entries (A1 — production had one worker showing 22 wher
 opportunity card now shows what that opportunity would require of them (B3).
 
 **Known inert:** "already seen" marks on the board (`worker_opportunity_seen`,
-unapplied migration). Works locally, not in production.
+unapplied migration). Works locally, not in production. The same is now true
+of **saved searches** (DEM-8, `worker_saved_searches`): locally the strip
+appears above the board and a saved question can be saved, opened and deleted;
+in production the strip does not render at all until the owner applies
+`20260914140000`. That invisibility is the honest state, not a bug to report.
 
 ## EMPLOYER — describe need, find people, decide
 
@@ -79,6 +88,25 @@ unapplied migration). Works locally, not in production.
 **Fixed in this PR:** an unrankable language level is no longer reported as
 "does not speak it" (A2) — it now appears as `unknownWorkerIds` rather than
 silently inflating a headcount shortfall.
+
+**New in the approved wave, and worth walking closely:**
+
+- **Assigning someone now says what they are already committed to** (CAL-7).
+  Assign a roster worker to a project whose dates overlap their accepted
+  booking or approved leave; the notice appears under the assign form. It does
+  not block — that is deliberate (SEP-2) — and it says "could not confirm"
+  rather than "free" when a read did not answer. Production has 3 active
+  project assignments and 1 accepted booking, so a real collision is
+  reachable; approved absences are 0, so the absence arm has nothing to show.
+- **The planning zone states how much of the next four weeks is spoken for**
+  (CAL-9), in worker-days against calendar days, with the denominator written
+  on the line. Look for the sentence saying it is not an FTE figure — that is
+  the point of the whole design, not a caveat.
+- **A project stage can show what comparable finished stages took** (CAL-10).
+  **Production holds 1 stage and 0 finished stages with recorded actual
+  dates**, so this will render NOTHING on a production-shaped walk. That is
+  correct: below three observations there is no median to show. To see it,
+  create and complete three stages with the same name locally.
 
 **Known blocked (owner decision):** an org MANAGER cannot read the worker
 roster — `owns_company` deliberately excludes managers (ORG-5, RED). If you
@@ -141,8 +169,8 @@ verdicts and no score, because typed input carries no evidence.
 
 ## What a walk cannot tell you, by construction
 
-- **Production is not the local DB.** Six migrations are unapplied by owner
-  gate, so four capabilities behave differently in the two places.
+- **Production is not the local DB.** NINE migrations are unapplied by owner
+  gate, so several capabilities behave differently in the two places.
 - **Production is nearly empty.** 0 teams, 0 assets, 0 asset assignments,
   0 training providers, 2 worker achievements, 5 work-hour allocations,
   7 company-worker rows. Most "empty" screens are honest emptiness, not

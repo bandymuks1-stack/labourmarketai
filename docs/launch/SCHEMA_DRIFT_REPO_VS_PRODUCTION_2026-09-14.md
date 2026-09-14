@@ -119,3 +119,50 @@ already registers `worker_external_profiles`, `worker_opportunity_seen`,
 `dashboard_preferences` and `demand_interest_seen` as personal data, so the
 GDPR export will begin covering them automatically on the day they are applied
 — no follow-up needed on the privacy side.
+
+---
+
+## 4. Addendum, 2026-09-14 (after the owner's approved execution wave)
+
+The wave merged **two more migrations that are deliberately unapplied**, both
+RED-class and both waiting on the same owner act as the seven above. They are
+recorded here so this document stays the one place that says what production
+is actually running.
+
+| Migration | What it changes | Creates a table? |
+|---|---|---|
+| `20260914120000_asset_single_open_assignment_v1` | MKT-3: one open assignment per asset — a partial unique index + `for update` in three SECURITY DEFINER bodies | no |
+| `20260914140000_worker_saved_searches_v1` | DEM-8: `worker_saved_searches` + three gated RPCs + the `saved_search_match` notification type | yes |
+
+**Measured directly on production, read-only, after the wave (not inferred):**
+
+| Probe | Result |
+|---|---|
+| `worker_saved_searches` in `information_schema.tables` | **absent** |
+| index `asset_assignments_one_open_per_asset` in `pg_indexes` | **absent** |
+| `issue_asset_v1` body contains `for update` | **no** |
+| `notification_events_type_check` contains `saved_search_match` | **no** |
+| applied ledger rows | **278** (unchanged) |
+| public base tables | **204** (unchanged) |
+
+So the wave changed nothing in production, which is what the governance
+requires: a RED migration is merged, never self-applied.
+
+**Why the counts in §2 are not simply "+2".** §2 measures TABLES created in
+repo migrations and absent from production, and only one of these two creates
+a table. Counting by ledger version would be worse, not better: the applied
+ledger's versions do not match the repo's filenames at all (verified again
+today — the repo's `20260713120000_company_locations_v1` corresponds to ledger
+row `20260715064810`), which is exactly why `supabase db push` is forbidden
+here. Stated precisely:
+
+- tables created in repo migrations but absent from production: **11 → 12**
+- migrations prepared, merged and awaiting a separate owner apply: **7 → 9**
+
+**Blast radius of the two new ones: none, and less than the seven above.**
+Neither has a live reader that could degrade: MKT-3 only tightens functions
+that already exist and already work (production holds 0 assets and 0 asset
+assignments, so there is nothing to tighten yet either), and the saved-search
+board strip renders NOTHING at all while its store is absent — no dead button,
+no empty state claiming the worker has saved nothing.
+
