@@ -268,12 +268,51 @@ describe("a capability nobody can reach is not a capability a user has", () => {
   });
 
   it("BUILT_NOT_CONNECTED means it really is not connected", () => {
+    // WIDENED 2026-09-14 to fall back to ANCHORS when `coreModule` is null.
+    //
+    // The narrow version skipped every row without a core module — and that
+    // was precisely the set that had gone stale. FIVE rows sat at
+    // BUILT_NOT_CONNECTED with `coreModule: null` while their code was
+    // mounted on pages a person reaches every day:
+    //
+    //   · WRK-8  defects        → ProjectDefectsPanel on project operations
+    //   · WRK-9  handover       → HandoverPassportPanel, same page (and this
+    //     row's OWN note already said "it is not unreachable" while the
+    //     status beside it said the opposite)
+    //   · WRK-10 economics      → ProjectEconomicsPanel, same page
+    //   · MKT-5  procurement    → ProcurementSection on /dashboard/finance
+    //   · MKT-6  business trips → TripsSection, same page
+    //
+    // Their notes reasoned from "no surfaceRoute of its own in the dashboard
+    // module registry", which is a claim about NAVIGATION ENTRIES, not about
+    // reachability: procurement is a section of finance, and finance carries
+    // a surfaceRoute. A panel mounted on a reachable page IS a product path,
+    // which is what the status word means.
+    //
+    // A row with neither a core module nor a reachable anchor is still
+    // legitimately disconnected — the fallback only fires when there is
+    // something to check.
+    //
+    // `orphan_route` is exempt from the ANCHOR fallback, and the exemption is
+    // load-bearing rather than convenient. An orphan route is imported by its
+    // own page file, so the import graph calls it reachable while a person
+    // genuinely cannot arrive without typing the URL. EDU-5 is the live case:
+    // `/dashboard/learning` works and is deliberately PARKED pending owner
+    // decision F-N1, and its zero-inbound-links property is pinned by
+    // `preview-surfaces-unlinked.test.ts`, which is the guard that can
+    // actually tell the difference. The fallback below cannot, so it does not
+    // pretend to.
     for (const row of CAPABILITY_REGISTER) {
-      if (row.status !== "BUILT_NOT_CONNECTED" || row.coreModule === null) continue;
+      if (row.status !== "BUILT_NOT_CONNECTED") continue;
+      if (row.coreModule === null && row.disconnectedBecause === "orphan_route") continue;
+      const probes = row.coreModule !== null ? [row.coreModule] : [...row.anchors];
+      const wired = probes.filter((probe) =>
+        [...reachable].some((file) => file === probe || file.startsWith(`${probe}/`)),
+      );
       expect(
-        reachable.has(row.coreModule),
-        `${describeRow(row)} is recorded as disconnected, and \`${row.coreModule}\` IS reachable. Somebody wired it — raise the status and say what evidence the wiring reached.`,
-      ).toBe(false);
+        wired,
+        `${describeRow(row)} is recorded as disconnected, and ${wired.join(", ")} IS reachable from a route or component. Somebody wired it — raise the status and say what evidence the wiring reached. "No navigation entry of its own" is not the same as "no product path".`,
+      ).toEqual([]);
     }
   });
 
