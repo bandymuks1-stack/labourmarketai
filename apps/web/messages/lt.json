@@ -12724,6 +12724,8 @@
       "assignUnavailable": "Šiuo metu nepavyko nuskaityti jūsų komandos.",
       "assignEngagementCandidate": "priimto pasiūlymo kandidatas",
       "assignDone": "Priskirta projektui.",
+      "assignAlreadyCommitted": "Pastaba: kai kuriomis šiomis dienomis jis (-i) jau turi įsipareigojimų ({count}). Priskyrimas galioja — sprendimas jūsų.",
+      "assignCommitmentUnknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
       "assignFailed": "Priskyrimo atlikti nepavyko.",
       "chipEngagements": "Su kuo dirbu",
       "userEngagements": "Su kuo aš dirbu?",

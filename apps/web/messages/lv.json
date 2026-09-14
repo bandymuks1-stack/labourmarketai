@@ -3801,6 +3801,8 @@
       "assignUnavailable": "[EN] I could not read your team right now.",
       "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
+      "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
+      "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
       "chipEngagements": "Ar ko es strādāju",
       "userEngagements": "Ar ko es strādāju?",

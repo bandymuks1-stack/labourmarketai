@@ -152,6 +152,8 @@ const CHAT_KEYS = [
   "assignUnavailable",
   "assignEngagementCandidate",
   "assignDone",
+  "assignAlreadyCommitted",
+  "assignCommitmentUnknown",
   "assignFailed",
   // §7.1 — work relationships. Same rule again: "none recorded", "no company"
   // and "the read failed" are three different truths and stay three sentences.

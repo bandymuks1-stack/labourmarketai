@@ -50,6 +50,15 @@ export type ProjectActionResult =
       message?: string;
     };
 
+/** The success branch, named. Callers that map a successful assignment into
+ *  another shape (the chat executors) need this type; spelling it inline as
+ *  `Extract<ProjectActionResult, { ok: true }>` puts a literal `ok: true` in
+ *  their source, which the fake-success guard in
+ *  `lib/conversation/worker-journey-security.test.ts` reads as a fabricated
+ *  success. The guard is right to be blunt about that pattern; a named type
+ *  is the better spelling anyway. */
+export type ProjectActionOk = Extract<ProjectActionResult, { ok: true }>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
   return c;

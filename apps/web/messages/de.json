@@ -12724,6 +12724,8 @@
       "assignUnavailable": "Dein Team konnte gerade nicht gelesen werden.",
       "assignEngagementCandidate": "Kandidat aus angenommenem Angebot",
       "assignDone": "Dem Projekt zugewiesen.",
+      "assignAlreadyCommitted": "Hinweis: An einigen dieser Tage besteht bereits eine Verpflichtung ({count}). Die Zuweisung bleibt bestehen — Sie entscheiden.",
+      "assignCommitmentUnknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
       "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden.",
       "chipEngagements": "Mit wem ich arbeite",
       "userEngagements": "Mit wem arbeite ich?",

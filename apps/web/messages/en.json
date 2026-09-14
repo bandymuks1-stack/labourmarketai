@@ -12724,6 +12724,8 @@
       "assignUnavailable": "I could not read your team right now.",
       "assignEngagementCandidate": "accepted-offer candidate",
       "assignDone": "Assigned to the project.",
+      "assignAlreadyCommitted": "Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
+      "assignCommitmentUnknown": "We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "The assignment could not be made.",
       "chipEngagements": "Who I work with",
       "userEngagements": "Who do I work with?",

@@ -151,6 +151,56 @@ describe("unknown is never rendered as free — SEP-7", () => {
   });
 });
 
+describe("the chat and the page state the SAME verdict", () => {
+  // The repo's rule, from `lib/projects/assignable-workers.ts`: chat and page
+  // reach the same state through the same reads. The first cut of CAL-7 broke
+  // it — the chat executors called the same action and DISCARDED the verdict,
+  // so a manager assigning by chat was told nothing while the page warned.
+  const executors = read("lib/conversation/company-executors.ts");
+  const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+
+  it("both assign executors carry the verdict back", () => {
+    for (const id of ["company.assign-worker", "company.move-worker"]) {
+      const block = executors.slice(
+        executors.indexOf(`"${id}": async`),
+        executors.indexOf(`"${id}": async`) + 1800,
+      );
+      expect(block, `${id} must not discard the reservation`).toMatch(/assignPayload\(r\)/);
+    }
+    // ONE place decides what a successful assignment carries.
+    expect(executors).toMatch(/if \(r\.reservation\) data\.reservation = r\.reservation;/);
+    // …and it answers `undefined`, not `{}`, when there is nothing to carry:
+    // an executor that started returning an empty object where it used to
+    // return nothing is a shape change every caller would have to learn.
+    expect(executors).toMatch(/Object\.keys\(data\)\.length > 0 \? data : undefined/);
+  });
+
+  it("the chat renders it, and renders unknown as its own sentence", () => {
+    const c = code(chat);
+    expect(c).toMatch(/function reservationNote\(/);
+    expect(c).toMatch(/verdict\.state === "unknown"[\s\S]{0,80}assignCommitmentUnknown/);
+    expect(c).toMatch(/verdict\.state !== "collides"[\s\S]{0,30}return "";/);
+    // `clear` says nothing — there is nothing to say.
+    expect(c).toMatch(/if \(!verdict\) return "";/);
+  });
+
+  it("the chat note cannot become a refusal", () => {
+    // It is appended to the SUCCESS sentence. If it ever moves to the failure
+    // branch, a warning has turned into a block (SEP-2).
+    const c = code(chat);
+    expect(c).toMatch(/res\.ok\s*\?\s*\[labels\.assignDone, reservationNote\(res\.data, labels\)\]/);
+  });
+
+  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    it(`${loc} says it in the chat too, with the count`, () => {
+      const chatCopy = JSON.parse(read(`messages/${loc}.json`)).conversation?.chat;
+      expect(chatCopy?.assignAlreadyCommitted, `${loc}.assignAlreadyCommitted`).toBeTruthy();
+      expect(chatCopy.assignAlreadyCommitted).toContain("{count}");
+      expect(chatCopy?.assignCommitmentUnknown, `${loc}.assignCommitmentUnknown`).toBeTruthy();
+    });
+  }
+});
+
 describe("the manager can read the warning in their own language", () => {
   for (const loc of ["en", "lt", "ru", "nl", "de"]) {
     it(`${loc} carries the reservation copy, including all three sources`, () => {

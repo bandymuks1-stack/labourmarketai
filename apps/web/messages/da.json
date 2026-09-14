@@ -3801,6 +3801,8 @@
       "assignUnavailable": "Jeg kunne ikke læse dit team lige nu.",
       "assignEngagementCandidate": "kandidat fra accepteret tilbud",
       "assignDone": "Tildelt projektet.",
+      "assignAlreadyCommitted": "Bemærk: personen er allerede booket på nogle af disse dage ({count}). Tildelingen står ved magt — du bestemmer.",
+      "assignCommitmentUnknown": "Vi kunne ikke bekræfte, at disse dage er ledige. Det er ikke det samme som ledige.",
       "assignFailed": "Tildelingen kunne ikke gennemføres.",
       "chipEngagements": "Hvem jeg arbejder med",
       "userEngagements": "Hvem arbejder jeg med?",

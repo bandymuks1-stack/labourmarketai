@@ -12724,6 +12724,8 @@
       "assignUnavailable": "Ik kon je team nu niet lezen.",
       "assignEngagementCandidate": "kandidaat uit geaccepteerd aanbod",
       "assignDone": "Toegewezen aan het project.",
+      "assignAlreadyCommitted": "Let op: op sommige van deze dagen is deze persoon al vastgelegd ({count}). De toewijzing blijft staan — jij beslist.",
+      "assignCommitmentUnknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
       "assignFailed": "De toewijzing kon niet worden gemaakt.",
       "chipEngagements": "Met wie ik werk",
       "userEngagements": "Met wie werk ik?",
