@@ -139,6 +139,26 @@ had none; five of those were `create`'s missing counterpart.
 | `previewPeopleIngestAction` | **Bounded, not a gap.** The preview journey is live through `previewPeopleFileAction`; this is a second, unused entry point | Left alone, recorded |
 | `markCanOfferAction` | Part of the unmounted S5 pool above | Owner decision |
 
+### The same sweep from the database side (2026-09-14)
+
+The action sweep can only see what the code names. So the mirror was run too:
+every SECURITY DEFINER function in production that `authenticated` may execute
+— **329 of them** — checked against every string literal in `lib`, `app`,
+`components` and `scripts`. **Eight** are named nowhere in the codebase.
+
+| RPC | Verdict |
+|---|---|
+| `remove_self_declared_work_history_v1` | Real gap — a person could state a work-history entry about themselves and never take it back. **Connected** (`733a867`) |
+| `withdraw_contact_disclosure_request_v1` | **Real gap, and a GATE.** An employer cannot retract a pending ask for a worker's contact details; it sits in the worker's list until they answer or it expires in 14 days. Wiring it needs an employer-side read of their own outgoing asks, and none exists — `list_my_contact_disclosure_requests_v1` filters `w.profile_id = auth.uid()`, i.e. the worker. That is a NEW privacy surface plus a NEW read, not a wire-up |
+| `expire_contact_disclosure_requests_v1`, `expire_stale_booking_requests_v1` | Sweepers, expected to run on a schedule rather than from app code. Not defects; the missing scheduler is recorded elsewhere |
+| `journal_entry_supersede` | Superseded by `journal_entry_supersede_v2`, which IS called |
+| `moderate_experience_response`, `review_experience_dispute` | Experience-record moderation. Belongs with EVID-6, an open owner decision |
+| `record_personal_data_disclosure` | Disclosure ledger write with no caller — worth a look under the privacy train, not swept in here |
+
+Eight unreferenced out of 329 is a healthy figure; the point of recording it is
+that the two that mattered were both a `create` whose counterpart never
+shipped a control, the same shape as the six above.
+
 ---
 
 ## 3. THE 61 ITEMS
