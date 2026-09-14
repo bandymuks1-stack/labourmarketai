@@ -5883,6 +5883,7 @@
         "source": {
           "project": "Objektas",
           "booking": "Rezervacija",
+          "trip": "Komandiruotė",
           "absence": "Nepasiekiama"
         }
       }

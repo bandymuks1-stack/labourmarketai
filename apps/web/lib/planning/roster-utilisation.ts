@@ -32,8 +32,9 @@ import { measureUtilisation, type WorkerUtilisation } from "@/lib/workforce/util
  *  is a day somebody could still change. */
 export const ROSTER_UTILISATION_WINDOW_DAYS = 28;
 
-/** Both bookings and project assignments come from ONE read. */
-const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking"];
+/** Project assignments, accepted bookings and approved trips all come from
+ *  ONE read, so a failure makes all three unknown. */
+const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking", "trip"];
 
 export interface RosterUtilisationWindow {
   readonly startDate: string;

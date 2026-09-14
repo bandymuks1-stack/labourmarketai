@@ -78,6 +78,40 @@ describe("no new data path, no new authority — the reuse proof", () => {
     expect(c).not.toMatch(/createClient|fetch\(|Date\.now|new Date\(/);
   });
 
+  it("an approved business trip counts as a commitment, with no new authority", () => {
+    // The one dated commitment the employer side did not count. It needed no
+    // policy change: `business_trips_select` already admits the person, the
+    // org's managers and admin — the same shape as every other source here.
+    const src = read("lib/planning/employer-committed-work.ts");
+    expect(src).toMatch(/\.from\("business_trips"\)/);
+    expect(src).toMatch(/\.in\("status", \["approved", "completed"\]\)/);
+    // Pending intentions are NOT commitments — the same rule the absence read
+    // follows for a `requested` absence.
+    expect(src).not.toMatch(/"submitted".*status|status.*"draft"/);
+    expect(read(MODEL)).toMatch(/"project", "booking", "trip", "absence"/);
+  });
+
+  it("a trip's PURPOSE is never read, only its destination", () => {
+    // Free text up to 1000 characters, and not needed to answer "is this
+    // person committed". The select list is the boundary, as it is for an
+    // absence's reason: a column that never enters the process cannot leak.
+    const src = read("lib/planning/employer-committed-work.ts");
+    const select = src.slice(src.indexOf('.from("business_trips")'), src.indexOf('.from("business_trips")') + 300);
+    expect(select).toMatch(/select\("id, profile_id, destination, date_from, date_to"\)/);
+    expect(select).not.toMatch(/purpose/);
+  });
+
+  it("an unread commitment read makes ALL THREE of its sources unknown", () => {
+    // Trips share the one read with projects and bookings. Leaving `trip` out
+    // of the unreadable list would let a failed read be reported as an
+    // absence of trips (SEP-7).
+    for (const rel of [READER, "lib/planning/roster-utilisation.ts"]) {
+      expect(code(read(rel)), rel).toMatch(
+        /COMMITMENT_SOURCES: readonly ReservationSource\[\] = \["project", "booking", "trip"\]/,
+      );
+    }
+  });
+
   it("the absence label is null at every step, so WHY never leaks", () => {
     // `employer-availability.ts` deliberately never reads `note` or
     // `absence_type`: an employer may learn THAT someone is unavailable,
@@ -209,7 +243,7 @@ describe("the manager can read the warning in their own language", () => {
       for (const key of ["collidesTitle", "notBlocking", "unknown"]) {
         expect(r[key], `${loc}.${key}`).toBeTruthy();
       }
-      for (const source of ["project", "booking", "absence"]) {
+      for (const source of ["project", "booking", "trip", "absence"]) {
         expect(r.source?.[source], `${loc}.source.${source}`).toBeTruthy();
       }
       // The copy must not promise a block it cannot deliver.

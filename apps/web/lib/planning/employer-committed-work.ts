@@ -47,8 +47,11 @@ import { createClient } from "@/lib/supabase/server";
 /** One dated commitment, reduced to what a capacity answer needs. */
 export interface WorkerCommitment {
   readonly workerId: string;
-  /** `project` or `booking` — the two canonical committed-work sources. */
-  readonly kind: "project" | "booking";
+  /** The canonical committed-work sources. `trip` joined them on 2026-09-14:
+   *  an APPROVED business trip is a person working somewhere else, which is a
+   *  commitment by any reading, and it was the one dated commitment nothing
+   *  on the employer side counted. */
+  readonly kind: "project" | "booking" | "trip";
   /** The source row, so a caller can link to the real object. */
   readonly sourceId: string;
   /** Real title from the source; null renders an i18n noun, never invented
@@ -167,8 +170,88 @@ export async function getEmployerWorkerCommitments(
     }
   }
 
+  // APPROVED AND COMPLETED BUSINESS TRIPS.
+  //
+  // NO NEW AUTHORITY: `business_trips_select` (20260817222000) already admits
+  // `profile_id = auth.uid() OR manages_organization(organization_id) OR
+  // is_admin()` — the same shape as every other source here, so a manager
+  // reads their own organization's trips and a stranger reads none.
+  //
+  // WHICH STATUSES COUNT, and why not the others. `approved` is a commitment
+  // somebody authorized; `completed` is one that demonstrably happened, and it
+  // occupied those days whether or not the window is in the past. `draft` and
+  // `submitted` are intentions — treating a pending request as unavailability
+  // would block scheduling on something nobody approved, which is the exact
+  // rule the absence read already follows. `rejected` and `cancelled` are not
+  // commitments at all.
+  //
+  // `purpose` IS DELIBERATELY NOT READ. It is free text up to 1000 characters
+  // and it is not needed to answer "is this person committed"; the destination
+  // is, and it is the useful half. The select list is the boundary, the way
+  // `employer-availability.ts` makes it one — a column that never enters this
+  // process cannot leak from a later refactor.
+  //
+  // Trips are keyed by PROFILE, not by worker, so the ids are mapped through
+  // one bounded read rather than by assuming the two are interchangeable.
+  const profileByWorker = new Map<string, string>();
+  const workerByProfile = new Map<string, string>();
+  const workerRes = await asAny(supabase)
+    .from("workers")
+    .select("id, profile_id")
+    .in("id", ids)
+    .limit(READ_LIMIT);
+  if (workerRes.error) {
+    return MISSING_OBJECT_CODES.has(workerRes.error.code ?? "")
+      ? { status: "needs-migration" }
+      : { status: "unavailable" };
+  }
+  for (const w of (workerRes.data ?? []) as Record<string, unknown>[]) {
+    const workerId = w.id as string;
+    const profileId = (w.profile_id as string | null) ?? null;
+    if (!profileId) continue;
+    profileByWorker.set(workerId, profileId);
+    workerByProfile.set(profileId, workerId);
+  }
+
+  type TripRow = {
+    id: string;
+    profile_id: string;
+    destination: string | null;
+    date_from: string | null;
+    date_to: string | null;
+  };
+  let tripRows: TripRow[] = [];
+  const profileIds = [...workerByProfile.keys()];
+  if (profileIds.length > 0) {
+    const tripsRes = await asAny(supabase)
+      .from("business_trips")
+      .select("id, profile_id, destination, date_from, date_to")
+      .in("profile_id", profileIds)
+      .in("status", ["approved", "completed"])
+      .limit(READ_LIMIT);
+    if (tripsRes.error) {
+      return MISSING_OBJECT_CODES.has(tripsRes.error.code ?? "")
+        ? { status: "needs-migration" }
+        : { status: "unavailable" };
+    }
+    tripRows = (tripsRes.data ?? []) as TripRow[];
+  }
+
   const commitments: WorkerCommitment[] = [];
   const undatedProjects: UndatedProjectCommitment[] = [];
+  for (const t of tripRows) {
+    const workerId = workerByProfile.get(t.profile_id);
+    if (!workerId) continue;
+    commitments.push({
+      workerId,
+      kind: "trip",
+      sourceId: t.id,
+      // The place, which is the useful fact. Never the purpose.
+      label: t.destination,
+      startDate: t.date_from,
+      endDate: t.date_to,
+    });
+  }
   for (const b of (bookingsRes.data ?? []) as Record<string, unknown>[]) {
     commitments.push({
       workerId: b.worker_id as string,

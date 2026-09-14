@@ -5883,6 +5883,7 @@
         "source": {
           "project": "Project",
           "booking": "Booking",
+          "trip": "Business trip",
           "absence": "Unavailable"
         }
       }

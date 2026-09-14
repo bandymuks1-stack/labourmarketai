@@ -38,8 +38,11 @@ import { effectiveEndDay, rangesOverlapInclusive } from "@/lib/planning/planning
  * overlap is.
  */
 
-/** What can hold a person's time. Three sources, three different meanings. */
-export const RESERVATION_SOURCES = ["project", "booking", "absence"] as const;
+/** What can hold a person's time. Four sources, four different meanings —
+ *  `trip` joined on 2026-09-14: an approved business trip is a person working
+ *  somewhere else, which is a commitment, and it was the one dated commitment
+ *  the employer side did not count. */
+export const RESERVATION_SOURCES = ["project", "booking", "trip", "absence"] as const;
 export type ReservationSource = (typeof RESERVATION_SOURCES)[number];
 
 /** A commitment that already holds part of this person's calendar. */
@@ -51,6 +54,8 @@ export interface HeldTime {
    * Real title, or null. Absence is ALWAYS null and must stay null: an
    * employer may learn that someone is unavailable, never why
    * (`lib/planning/employer-availability.ts` never even reads the reason).
+   * A trip carries its DESTINATION and never its purpose, for the same
+   * reason and by the same means — the purpose column is not read at all.
    */
   readonly label: string | null;
   readonly startDate: string | null;

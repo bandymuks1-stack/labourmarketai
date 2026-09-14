@@ -50,9 +50,11 @@ export interface WorkerReservationInput {
   readonly caller?: { readonly supabase: SupabaseClient; readonly userId: string };
 }
 
-/** Both bookings and project assignments come from ONE read, so when that
- *  read fails both sources are unknown, and saying so is the point. */
-const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking"];
+/** Project assignments, accepted bookings and approved trips all come from
+ *  ONE read, so when that read fails ALL THREE are unknown, and saying so is
+ *  the point. Missing one from this list would let an unread source be
+ *  reported as an absence of commitments. */
+const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking", "trip"];
 
 export async function checkWorkerReservation(
   input: WorkerReservationInput,
