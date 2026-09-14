@@ -532,7 +532,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | ORG-5 | Cross-org isolation | 7 authority helpers | PARTIAL | — | 0 | an org **manager** cannot read `company_workers` (`owns_company` excludes managers) |
 | ORG-6 | Roster (employees, historical, agency) | `engagement_contexts` + 4 legacy link tables | DUPLICATED | — | 1 | 4 parallel roster truths |
 | ORG-7 | Candidates / talent pool / scouting | `candidate_drafts`, `demand_shortlist` | PROD_DATA | — | 1 | `/dashboard/talent` is a superadmin sample preview |
-| ORG-8 | Agency ↔ client bridge | `agency_client_connections`, `agency_candidate_offers` | PROD_DATA | — | 1 | `agency_clients` is a second, unapplied client model |
+| ORG-8 | Agency ↔ client bridge | `agency_client_connections`, `agency_candidate_offers`, `agency_clients` | PROD_DATA | — | 1 | `agency_clients` APPLIED 2026-09-14 (ledger `20260914202322`) under canonical Model B — a private client record, not a rival to the bridge |
 | ORG-9 | Public organization profile | `organizations.public_*`, `/business/[slug]` | IMPL | — | 3 | no index/directory route |
 | ORG-10 | Agency worker pool (legacy `agencies` world) | `agencies`, `agency_workers` (3 / 0 rows) | **RETIRED 2026-09-14** | — | — | Model B canonical (owner). B1 retire-and-record: nothing dropped, all 3 agencies already mirrored into `organizations`; revisit a Model-B-native pool when real agency workforce exists |
 

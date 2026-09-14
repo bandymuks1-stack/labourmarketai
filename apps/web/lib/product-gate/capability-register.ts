@@ -585,7 +585,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/agency"],
     coreModule: "lib/agency/clients.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`agency_client_connections` is live; `agency_clients` is a second, unapplied client model (§6.4 item 1).",
+    note: "`agency_client_connections` is live. `agency_clients` was APPLIED 2026-09-14 (owner item 4d, ledger `20260914202322`) under the confirmed canonical Model B: its policy is `owns_company(company_id) OR is_admin()` - company/org authority, never the legacy `owns_agency` - so applying it did not revive Model A (see ORG-10). The two are NOT rivals and this row used to imply they were: `agency_client_connections` is an invitation-based bidirectional bridge to a real platform organization, `agency_clients` is an agency's own private record of a client who may not be on the platform. `AgencyClientsSection` on /dashboard/company had been degrading against a 42P01 since it shipped; read back under a REAL staffing-agency owner's auth after the apply, the relation now reads cleanly (0 rows). 0 rows is adoption, not breakage - 4 staffing-agency companies can now use it. The demand link is one additive nullable column, `customer_requests.agency_client_id`; `customer_requests` was re-counted at 20 rows after the apply, unchanged, 0 linked.",
   },
   {
     id: "ORG-10",

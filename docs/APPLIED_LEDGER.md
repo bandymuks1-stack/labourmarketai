@@ -58,6 +58,64 @@
 
 # Applied Migration Ledger
 
+## Applied 2026-09-14 — owner decision round (items 2a, 4b, 4c, 4d)
+
+> Four migrations applied via Supabase MCP `apply_migration` after explicit
+> per-item owner approval. Each was verified read-only on production
+> immediately after apply; the verification output is recorded below. Ledger
+> versions are APPLY-TIME stamps and never match the repo filename — match on
+> `name`.
+>
+> **The three pre-existing files still carry their `DRAFT — needs-human-gate —
+> DO NOT APPLY` headers, and those headers are now HISTORICAL.** This entry is
+> the current truth for all three. The headers are deliberately not edited, for
+> the same reason recorded in the never-apply section below: touching a
+> migration file makes `migration-safety` re-scan it, and their contents are
+> inherently RED (SECURITY DEFINER, grants, policy changes), so every future
+> edit would fail CI for no benefit. Read apply status from this ledger, never
+> from a migration header. (`20260914200000_defects_assignee_read_v1` is new in
+> this round and its header records the owner approval directly.)
+
+### ✅ APPLIED TO PROD — `20260914200000_defects_assignee_read_v1` (owner item 2a, WRK-8)
+
+| | |
+|---|---|
+| Ledger | version `20260914195053`, name `defects_assignee_read_v1` |
+| Rollback | `supabase/rollbacks/20260914200000_defects_assignee_read_v1.down.sql` |
+| Change | ONE disjunct added to `defects_select`: `or assignee_profile_id = auth.uid()`. No other policy, grant, function or column touched. |
+| Why | `assignee_profile_id` records who must fix a defect and appeared in no policy, so the one person the row exists to instruct could not read it (SEP-8). |
+| Preconditions | `defects` 0 rows, `defect_corrections` 0 rows, 9 projects, single SELECT policy — all read immediately before apply. |
+| Post-apply proof | Three defects seeded on ONE project differing only in assignee, read under four real users' auth inside a transaction that was ROLLED BACK. ASSIGNEE 1 row (their own); the unassigned defect and the defect assigned to another worker on the SAME project both invisible (`f`, `f`) — proving a per-ROW and not per-project disclosure. Second worker 1 row (only theirs). Worker with no assignment 0 rows, no error (fails closed). MANAGER 3 rows, unchanged. Assignee sees 0 `defect_corrections`, so owner item 2b (DEFER) holds at the database. |
+| Residue | Re-counted after rollback: `defects` 0, `defect_corrections` 0. Grants unchanged (`authenticated` SELECT only). |
+
+### ✅ APPLIED TO PROD — `20260714180000_journal_profession_templates_v1` (owner item 4b)
+
+| | |
+|---|---|
+| Ledger | version `20260914202151`, name `journal_profession_templates_v1` |
+| Rollback | `supabase/rollbacks/20260714180000_journal_profession_templates_v1.down.sql` |
+| Pre-apply tightening | The owner required the privilege model to EXPRESS admin-only write authority rather than lean on RLS to neutralise a broader grant. `grant insert, update, delete … to authenticated` was REMOVED before apply. It could not be narrowed to admins instead: `is_admin()` resolves a flag on `profiles`/`profile_roles`, not a Postgres role, so an admin still connects as `authenticated`. Costs nothing — `lib/journal/journal-templates.ts` performs exactly one `.select()` and nothing in `apps/web` writes the table. |
+| Post-apply proof | 3 templates seeded, **`active` = 0** (activation stays a deliberate owner act). RLS on. `authenticated`: SELECT `true`, INSERT/UPDATE/DELETE **`false`**. `anon`: SELECT `false`. |
+
+### ✅ APPLIED TO PROD — `20260714170000_worker_opportunity_seen_v1` (owner item 4c)
+
+| | |
+|---|---|
+| Ledger | version `20260914202221`, name `worker_opportunity_seen_v1` |
+| Rollback | `supabase/rollbacks/20260714170000_worker_opportunity_seen_v1.down.sql` |
+| Post-apply proof | 0 rows. Single policy `((profile_id = auth.uid()) OR is_admin())` — worker-owned visibility, and the demand owner never learns who looked. `authenticated`: SELECT `true`, INSERT/UPDATE/DELETE **`false`** (writes RPC-only). `anon`: SELECT `false`, EXECUTE on `mark_worker_opportunities_seen_v1` `false`; `authenticated` EXECUTE `true`. |
+
+### ✅ APPLIED TO PROD — `20260713160000_agency_clients_v1` (owner item 4d)
+
+| | |
+|---|---|
+| Ledger | version `20260914202322`, name `agency_clients_v1` |
+| Rollback | `supabase/rollbacks/20260713160000_agency_clients_v1.down.sql` |
+| Scope note | Applied under the confirmed canonical **Model B** interpretation (owner item 1). `agency_clients_select` uses `owns_company(company_id)` — company/org authority, NOT the legacy `owns_agency`. This does **not** revive Model A and authorises no second agency architecture. |
+| Live-table change | ONE additive nullable column on the canonical demand: `customer_requests.agency_client_id uuid references agency_clients(id) on delete set null`, plus its index. No default, no backfill, no NOT NULL. |
+| Post-apply proof | `agency_clients` exists, 0 rows. `customer_requests` **still 20 rows** (unchanged), 0 linked. Policy `(owns_company(company_id) OR is_admin())`. `authenticated`: SELECT `true`, INSERT `false` (writes RPC-only). `anon`: SELECT `false`, and EXECUTE `false` on all three RPCs while `authenticated` holds `true` on all three. |
+| Surface readback | Run under a REAL staffing-agency owner's auth (`6fd1bd46-…`): `agency_clients` readable (0 rows) and the new demand-link column readable on their own rows. Before this apply that read returned 42P01, which is what `/dashboard/company`'s `AgencyClientsSection` had been degrading against. |
+
 ## 🚫 NEVER APPLY — already live under a different ledger name (recorded 2026-09-14, owner decision 4a)
 
 > Three repository files whose objects are **already in production** under
