@@ -1,4 +1,23 @@
 -- ============================================================================
+-- ALREADY APPLIED — MUST NOT BE APPLIED AGAIN. (Recorded 2026-09-14, owner
+-- decision 4a.) Applied to production TOGETHER WITH
+-- 20260817130100_notification_events_v3_workflow_types.sql as ONE ledger row:
+--     notification_types_union_workflow_document_v3  (version 20260817172306)
+-- Canonical accounting: REVIEWED_APPLY_SHAPES in
+-- apps/web/lib/migrations/parity-model.ts (kind: "union"); the drift was first
+-- recorded in the 2026-08-19 correction block at the head of
+-- docs/APPLIED_LEDGER.md.
+-- Verified read-only on production gorgitwvdzxbnaxhrsrw 2026-09-14:
+-- notification_events_type_check ALREADY admits document_ack_assigned,
+-- document_ack_completed and document_expiring, and
+-- notification_events_entity_type_check ALREADY admits worker_document,
+-- org_document and document_acknowledgement — precisely what this file adds.
+--
+-- The `@human-gate-approved` annotation below is STALE: the work it authorised
+-- was completed by the union route above. It is retained (never rewritten) so
+-- the original authorisation stays legible, but it authorises NOTHING now.
+-- ============================================================================
+-- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
 -- OWNER_APPROVAL_REQUIRED_BEFORE_APPLY (apply is performed by the train LEAD
 -- via Supabase MCP apply_migration; never `db push`).

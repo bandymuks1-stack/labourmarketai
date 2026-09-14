@@ -349,7 +349,17 @@ rather than inferred. **Eleven, not nine** — the §6.4 reconciliation of
 
 ### Classification
 
-#### ALREADY_EQUIVALENT — applied under a different ledger name. **Never apply.** (3 — all new findings)
+#### ALREADY_EQUIVALENT — applied under a different ledger name. **Never apply.** (3)
+
+> **CORRECTION 2026-09-14 — this packet's own error.** An earlier revision called
+> these three "all new findings" and said the 2026-09-07 §6.4 pass "missed three".
+> The first half was wrong. §6.4 did not cover them, but the repository already
+> recorded all three, in two places: the 2026-08-19 correction block at the head
+> of `docs/APPLIED_LEDGER.md` (the two notification files, applied as one union
+> row), and `docs/migrations/production-parity-register.md` +
+> `REVIEWED_APPLY_SHAPES` in `apps/web/lib/migrations/parity-model.ts` (all three,
+> with reasons, guarded in CI). **Nothing here was newly discovered.** What was
+> genuinely missing is narrower, and is what 4a fixed — see below.
 
 | File | Evidence |
 |---|---|
@@ -360,9 +370,28 @@ rather than inferred. **Eleven, not nine** — the §6.4 reconciliation of
 > **Consequence if applied anyway:** each drops and re-adds a constraint that is
 > already correct, or re-runs DDL against objects holding live data. This is the
 > exact re-run hazard the doctrine's "never `db push`" rule exists to prevent.
-> **Recommendation: leave in tree, never apply.** These three carry
-> `@human-gate-approved` annotations that are now *stale* — the work they
-> authorise was completed by another route.
+> **Recommendation: leave in tree, never apply.** The two notification files
+> (not the third) carry `@human-gate-approved` annotations that are now *stale* —
+> the work they authorise was completed by another route.
+
+**Durable recording as implemented (4a, 2026-09-14) — nothing deleted.** The
+guard this packet proposed building would have duplicated a canonical structure:
+`REVIEWED_APPLY_SHAPES` in `apps/web/lib/migrations/parity-model.ts` already
+accounts for all three (kinds `split` and `union`), behind `parity-model.test.ts`,
+`product-readiness.test.ts` and a `quality.yml` step. So the canonical register
+was EXTENDED, not replaced:
+
+- each file gained an `ALREADY APPLIED — MUST NOT BE APPLIED AGAIN` header naming
+  the exact ledger row(s) it is live under, with the read-only production evidence;
+- the two stale `@human-gate-approved` annotations are **retained verbatim**
+  (history is evidence) and explicitly marked stale — they authorise nothing now;
+- `lib/guards/never-apply-already-applied-v1.test.ts` pins each marker AND
+  cross-checks every claimed ledger name against `REVIEWED_APPLY_SHAPES`, so the
+  file-side claim and the canonical accounting cannot drift apart.
+
+`parity-model.ts` answers "every APPLIED row has a repo file". It cannot answer
+the reverse — "this FILE must never be applied" — and that direction was the
+unguarded one.
 
 #### OBSOLETE — superseded, guard-pinned. **Never apply.** (2 — confirmed, unchanged)
 
