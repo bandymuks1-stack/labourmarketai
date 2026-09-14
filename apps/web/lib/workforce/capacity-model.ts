@@ -30,6 +30,7 @@
  *
  * Pure module: no server-only import, no DB client, no IO.
  */
+import { languageLevelSatisfies } from "@/lib/market/match-criteria-v2";
 import { rangesOverlapInclusive } from "@/lib/planning/planning-model";
 import type {
   FutureWorkEntry,
@@ -118,6 +119,18 @@ export interface CapacityGap {
   readonly required: number;
   /** Workers that CAN cover this dimension (opaque ids). */
   readonly matchedWorkerIds: readonly string[];
+  /**
+   * Workers whose coverage of this dimension COULD NOT BE DETERMINED — as
+   * opposed to determined-and-negative, which is simply absence from
+   * `matchedWorkerIds`. Today only the language dimension can produce this:
+   * a stated level outside the closed CEFR set ranks `null`, and guessing
+   * either way would put a number in front of an employer that the data does
+   * not support. `shortfall` counts these as NOT covered (the cautious
+   * reading), so a surface that ignores this field is conservative rather
+   * than wrong — but a surface that shows the shortfall should say how much
+   * of it is unknown rather than missing.
+   */
+  readonly unknownWorkerIds: readonly string[];
   readonly shortfall: number;
 }
 
@@ -170,19 +183,14 @@ export interface CapacityAssessment {
 /* Deterministic matching helpers                                       */
 /* ------------------------------------------------------------------ */
 
-const CEFR_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
-
-/** level >= required on the CEFR ladder; "native" beats everything. */
-export function languageLevelSatisfies(
-  workerLevel: string,
-  requiredLevel: string,
-): boolean {
-  if (workerLevel === "native") return true;
-  const have = CEFR_ORDER.indexOf(workerLevel as (typeof CEFR_ORDER)[number]);
-  const need = CEFR_ORDER.indexOf(requiredLevel as (typeof CEFR_ORDER)[number]);
-  if (have === -1 || need === -1) return false;
-  return have >= need;
-}
+/**
+ * THE CEFR LADDER LIVES IN `match-criteria-v2`. This module used to carry its
+ * own copy, and the copies disagreed on the case that matters: the canonical
+ * one answers `null` when either level string is outside the closed set
+ * (unknown), while the copy answered `false` — so an unreadable level became
+ * "this worker does not speak it", and the employer was shown a headcount
+ * shortfall that may not exist. SEP-7: UNKNOWN is not FAILED.
+ */
 
 function norm(s: string): string {
   return s.trim().toLowerCase();
@@ -288,6 +296,7 @@ function gap(
   subject: string | null,
   required: number,
   matchedWorkerIds: readonly string[],
+  unknownWorkerIds: readonly string[] = [],
 ): CapacityGap {
   return {
     kind,
@@ -295,6 +304,7 @@ function gap(
     subject,
     required,
     matchedWorkerIds,
+    unknownWorkerIds,
     shortfall: Math.max(0, required - matchedWorkerIds.length),
   };
 }
@@ -393,23 +403,30 @@ function assessRequirement(
     ),
   );
 
-  const languageGaps = requirement.languages.map((need) =>
-    gap(
+  // THREE ANSWERS, NOT TWO. `languageLevelSatisfies` is now the canonical
+  // one, which returns `null` for a level string outside the closed CEFR set.
+  // A worker whose stated level cannot be ranked is neither a match nor a
+  // proven miss: they go in `unknownWorkerIds` so the shortfall can be
+  // reported with its uncertainty instead of silently absorbing it.
+  const languageGaps = requirement.languages.map((need) => {
+    const verdicts = eligibleWorkers.map((w) => {
+      const stated = w.languages.filter((l) => norm(l.lang) === norm(need.lang));
+      if (stated.length === 0) return { workerId: w.workerId, verdict: false as boolean | null };
+      // Best stated level wins: a `true` beats a `null` beats a `false`.
+      const results = stated.map((l) => languageLevelSatisfies(l.level, need.level));
+      if (results.some((r) => r === true)) return { workerId: w.workerId, verdict: true };
+      if (results.some((r) => r === null)) return { workerId: w.workerId, verdict: null };
+      return { workerId: w.workerId, verdict: false };
+    });
+    return gap(
       "language",
       requirement.id,
       need.lang,
       need.onePerTeamSufficient ? 1 : requirement.headcount,
-      eligibleWorkers
-        .filter((w) =>
-          w.languages.some(
-            (l) =>
-              norm(l.lang) === norm(need.lang) &&
-              languageLevelSatisfies(l.level, need.level),
-          ),
-        )
-        .map((w) => w.workerId),
-    ),
-  );
+      verdicts.filter((v) => v.verdict === true).map((v) => v.workerId),
+      verdicts.filter((v) => v.verdict === null).map((v) => v.workerId),
+    );
+  });
 
   const supervisorGap =
     requirement.kind === "supervisor"

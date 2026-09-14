@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 
 /**
  * Workstream C — honest trust signals for the person's OWN profile.
@@ -44,10 +45,14 @@ export async function getOwnTrustSignals(
       .select("id", { count: "exact", head: true })
       .eq("worker_id", workerId)
       .eq("verified", true),
-    asAny(supabase)
-      .from("journal_entries")
-      .select("id")
-      .eq("worker_id", workerId),
+    // LIVE ONLY. This count is presented as "evidence trail length" and feeds
+    // the Verified CV. Measured against production 2026-09-14: 65 entries
+    // existed, 46 were live (8 deleted, 11 superseded) — so the unfiltered
+    // read overstated four real people's evidence by up to 41%. The rule has
+    // ONE home; this reader does not restate it.
+    liveJournalEntriesOnly(
+      asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
+    ),
   ]);
 
   // A READ THAT FAILED IS NOT A PERSON WITH NOTHING. Every count here used to

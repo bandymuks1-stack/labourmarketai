@@ -32,7 +32,10 @@ describe("stadium read service is real-data-only", () => {
   });
   it("today's pulse counts only live RLS-readable journal rows", () => {
     expect(lib).toMatch(/journal_entries/);
-    expect(lib).toMatch(/\.is\("deleted_at", null\)/);
+    // "live" now means both lifecycle columns, through the shared rule —
+    // the inline `deleted_at`-only filter this used to pin counted a
+    // correction and the entry it replaced as two days of work.
+    expect(lib).toMatch(/liveJournalEntriesOnly\(/);
     expect(lib).toMatch(/\.gte\("created_at", dayStartIso\(\)\)/);
   });
   it("degrades to nulls/0 on error — never fabricates", () => {

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -186,10 +187,12 @@ export async function loadWorkerOpportunities(
       .from("worker_documents")
       .select("id")
       .eq("worker_id", ctx.workerId),
-    asAny(supabase)
-      .from("journal_entries")
-      .select("id", { count: "exact", head: true })
-      .eq("worker_id", ctx.workerId),
+    liveJournalEntriesOnly(
+      asAny(supabase)
+        .from("journal_entries")
+        .select("id", { count: "exact", head: true })
+        .eq("worker_id", ctx.workerId),
+    ),
   ]);
   const journalEntryCount =
     typeof entryCountRes?.count === "number" ? entryCountRes.count : 0;

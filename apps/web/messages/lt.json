@@ -6770,6 +6770,7 @@
     "noMembers": "Narių dar nėra. Pakviesk darbuotojus iš savo sąrašo žemiau — kiekvienas prisijungia pats priėmęs kvietimą.",
     "capabilityHeading": "Ką ši brigada deklaruoja",
     "capabilityEmpty": "Nariai dar nedeklaravo įgūdžių — nieko neišgalvojame.",
+    "capabilityUnknown": "Nepavyko nuskaityti įgūdžių — tai nereiškia, kad jų nėra.",
     "declaredShort": "deklaravo {count}",
     "confirmedShort": "patvirtinta {count}",
     "noAddable": "Nebeliko susietų darbuotojų, kuriuos būtų galima pridėti. Pirmiausia pakviesk darbuotojus sąrašo skiltyje.",

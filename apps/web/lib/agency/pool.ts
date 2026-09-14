@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -168,10 +169,9 @@ export async function getAgencyPool(): Promise<AgencyPoolResult> {
   const confirmationsByWorker = new Map<string, number>();
   if (linkedIds.length > 0) {
     try {
-      const { data: entryRows } = await asAny(supabase)
-        .from("journal_entries")
-        .select("id, worker_id")
-        .in("worker_id", linkedIds);
+      const { data: entryRows } = await liveJournalEntriesOnly(
+        asAny(supabase).from("journal_entries").select("id, worker_id").in("worker_id", linkedIds),
+      );
       const entryIds: string[] = [];
       const entryWorker = new Map<string, string>();
       for (const e of (entryRows ?? []) as { id: string; worker_id: string }[]) {

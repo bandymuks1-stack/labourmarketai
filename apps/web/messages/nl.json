@@ -6770,6 +6770,7 @@
     "noMembers": "Nog geen leden. Nodig hieronder werknemers uit je gekoppelde bestand uit — iedereen treedt toe na eigen acceptatie.",
     "capabilityHeading": "Wat deze brigade opgeeft",
     "capabilityEmpty": "Nog geen opgegeven vaardigheden onder de leden — er wordt niets verzonnen.",
+    "capabilityUnknown": "Vaardigheden konden nu niet worden gelezen — dat betekent niet dat er geen zijn.",
     "declaredShort": "opgegeven door {count}",
     "confirmedShort": "bevestigd voor {count}",
     "noAddable": "Geen gekoppelde werknemers meer om toe te voegen. Nodig eerst werknemers uit in het bestandsgedeelte.",

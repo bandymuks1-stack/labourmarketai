@@ -196,8 +196,41 @@ describe("set blockers — the hard-cap invariant at team level", () => {
 });
 
 describe("team_aggregate basis — contract not-stated discipline", () => {
+  it("NOT READABLE (null) is a missing fact, never a team with no skills", () => {
+    // THE SEP-7 CASE THE OWNER CLASSIFIED. The gated capability summary
+    // answers an unauthorized caller with zero rows and a failed read with an
+    // error; the adapter used to turn BOTH into `[]`, a value a consumer can
+    // iterate and report as zero capability. `null` now means "did not
+    // answer" and must reach the employer as an absent basis.
+    const r = matchTeamToNeed(need, teamOf(3, { skillComposition: null }));
+    expect(r.coverage, "no basis may be built from an unread summary").toBeNull();
+    expect(r.status).toBe("insufficient_data");
+    expect(r.missingData).toContain("team_skills_not_stated");
+    expect(
+      r.missingFacts.some(
+        (f) => f.criterion === "skills_coverage" && f.side === "worker",
+      ),
+      "the employer must be TOLD the basis is absent, not shown a zero",
+    ).toBe(true);
+    // NOT a claim that `eligible` is true. On the aggregate basis `eligible`
+    // is documented as "false when nothing is computable" (line 103), so it
+    // reads false here exactly as it does for `[]` — a pre-existing two-valued
+    // flag that means "not PROVEN eligible", not "proven ineligible". What
+    // makes that honest rather than a hidden zero is that it never travels
+    // alone: `insufficient_data` + the stated missing fact are what tell a
+    // consumer the flag carries no judgement about this team.
+    expect(r.status).toBe("insufficient_data");
+    // And no coverage percentage is ever produced from an unread summary,
+    // which is the number an employer would actually have acted on.
+    expect(r.coverage).toBeNull();
+  });
+
+  it("an all-unknown contract value starts NOT READABLE, not 'declared nothing'", () => {
+    expect(emptyTeamMatchInput("team-1", 3).skillComposition).toBeNull();
+  });
+
   it("[] skillComposition = NOT STATED → missing fact + insufficient_data, never 0% mismatch", () => {
-    const r = matchTeamToNeed(need, teamOf(3));
+    const r = matchTeamToNeed(need, teamOf(3, { skillComposition: [] }));
     expect(r.basis).toBe("team_aggregate");
     expect(r.coverage).toBeNull();
     expect(r.status).toBe("insufficient_data");

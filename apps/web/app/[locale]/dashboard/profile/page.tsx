@@ -1,3 +1,4 @@
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -386,11 +387,12 @@ export default async function ProfilePage({
       getOwnExternalProfiles(),
       getOwnWorkerEducation(),
       getOwnWorkerAchievements(),
-      supabase
-        .from("journal_entries")
-        .select("*", { count: "exact", head: true })
-        .eq("worker_id", workerId)
-        .not("project_id", "is", null),
+      liveJournalEntriesOnly(
+        supabase
+          .from("journal_entries")
+          .select("*", { count: "exact", head: true })
+          .eq("worker_id", workerId),
+      ).not("project_id", "is", null),
       // Certificate/licence documents count (worker_documents is applied prod
       // schema; cert-type slugs mirror lib/cv-export/cv-sections.ts).
       supabase

@@ -1,4 +1,5 @@
 import "server-only";
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -146,11 +147,12 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
     getOwnWorkerEducation(),
     getWorkerJobRecommendations({ limit: 5 }).catch(() => ({ kind: "no-worker" as const })),
     listMyEngagements().catch(() => []),
-    asAny(supabase)
-      .from("journal_entries")
-      .select("id", { count: "exact", head: true })
-      .eq("worker_id", ctx.workerId)
-      .is("deleted_at", null)
+    liveJournalEntriesOnly(
+      asAny(supabase)
+        .from("journal_entries")
+        .select("id", { count: "exact", head: true })
+        .eq("worker_id", ctx.workerId),
+    )
       .then((r: { count: number | null; error: unknown }) => (r.error ? 0 : (r.count ?? 0)))
       .catch(() => 0),
   ]);

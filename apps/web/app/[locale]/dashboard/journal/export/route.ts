@@ -1,3 +1,4 @@
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -40,11 +41,12 @@ export async function GET(): Promise<NextResponse> {
   }
 
   const [entriesRes, linksRes] = await Promise.all([
-    supabase
-      .from("journal_entries")
-      .select("id, created_at, entry_type_slug, original_language, original_text")
-      .eq("worker_id", worker.id)
-      .order("created_at", { ascending: true }),
+    liveJournalEntriesOnly(
+      supabase
+        .from("journal_entries")
+        .select("id, created_at, entry_type_slug, original_language, original_text")
+        .eq("worker_id", worker.id),
+    ).order("created_at", { ascending: true }),
     asAny(supabase)
       .from("journal_entry_skills")
       .select("journal_entry_id, skills(slug)")

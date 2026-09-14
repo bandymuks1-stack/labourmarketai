@@ -6770,6 +6770,7 @@
     "noMembers": "No members yet. Invite workers from your linked roster below — each joins after accepting the invitation.",
     "capabilityHeading": "What this brigade declares",
     "capabilityEmpty": "No declared skills among members yet — nothing is invented.",
+    "capabilityUnknown": "Skills could not be read just now — this is not a statement that there are none.",
     "declaredShort": "declared by {count}",
     "confirmedShort": "confirmed for {count}",
     "noAddable": "No linked workers left to add. Invite workers in the roster section first.",

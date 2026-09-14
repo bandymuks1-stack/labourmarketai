@@ -6770,6 +6770,7 @@
     "noMembers": "Noch keine Mitglieder. Laden Sie unten Arbeitskräfte aus Ihrer verknüpften Belegschaftsliste ein — jede Person tritt nach eigener Annahme bei.",
     "capabilityHeading": "Was diese Kolonne angibt",
     "capabilityEmpty": "Noch keine angegebenen Fähigkeiten unter den Mitgliedern — nichts wird erfunden.",
+    "capabilityUnknown": "Fähigkeiten konnten gerade nicht gelesen werden — das heißt nicht, dass es keine gibt.",
     "declaredShort": "angegeben von {count}",
     "confirmedShort": "bestätigt für {count}",
     "noAddable": "Keine verknüpften Arbeitskräfte mehr zum Hinzufügen. Laden Sie zuerst Arbeitskräfte im Bereich Belegschaftsliste ein.",
