@@ -84,10 +84,14 @@ describe("no new data path, no new authority — the reuse proof", () => {
     // org's managers and admin — the same shape as every other source here.
     const src = read("lib/planning/employer-committed-work.ts");
     expect(src).toMatch(/\.from\("business_trips"\)/);
-    expect(src).toMatch(/\.in\("status", \["approved", "completed"\]\)/);
+    // ONE home for the rule, imported — not a second literal that can drift.
+    expect(src).toMatch(/import \{ PLANNED_TRIP_STATUSES \} from "@\/lib\/planning\/planning-model"/);
+    expect(src).toMatch(/\.in\("status", \[\.\.\.PLANNED_TRIP_STATUSES\]\)/);
     // Pending intentions are NOT commitments — the same rule the absence read
     // follows for a `requested` absence.
-    expect(src).not.toMatch(/"submitted".*status|status.*"draft"/);
+    expect(read("lib/planning/planning-model.ts")).toMatch(
+      /export const PLANNED_TRIP_STATUSES = \["approved", "completed"\] as const;/,
+    );
     expect(read(MODEL)).toMatch(/"project", "booking", "trip", "absence"/);
   });
 

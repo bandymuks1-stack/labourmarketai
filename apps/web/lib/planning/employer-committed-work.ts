@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { PLANNED_TRIP_STATUSES } from "@/lib/planning/planning-model";
 
 /**
  * WHAT THE ROSTER IS ALREADY COMMITTED TO — the other half of "who is free?".
@@ -177,13 +178,19 @@ export async function getEmployerWorkerCommitments(
   // is_admin()` — the same shape as every other source here, so a manager
   // reads their own organization's trips and a stranger reads none.
   //
-  // WHICH STATUSES COUNT, and why not the others. `approved` is a commitment
-  // somebody authorized; `completed` is one that demonstrably happened, and it
-  // occupied those days whether or not the window is in the past. `draft` and
-  // `submitted` are intentions — treating a pending request as unavailability
-  // would block scheduling on something nobody approved, which is the exact
-  // rule the absence read already follows. `rejected` and `cancelled` are not
-  // commitments at all.
+  // WHICH STATUSES COUNT is decided in ONE place, `PLANNED_TRIP_STATUSES` in
+  // `planning-model.ts`, and imported by every consumer. The employer's
+  // capacity read, the reservation verdict, the utilisation window and the
+  // person's own calendar therefore cannot come to different conclusions
+  // about whether a trip occupies time — which is the failure mode this
+  // product has hit before with hours, where three computations gave 0 h, 5 h
+  // and 9 h for the same entry.
+  //
+  // `approved` is a commitment somebody authorized; `completed` demonstrably
+  // happened and occupied those days. `draft` and `submitted` are intentions,
+  // and treating a pending request as unavailability would block scheduling
+  // on something nobody approved — the exact rule the absence read follows.
+  // `rejected` and `cancelled` are not commitments at all.
   //
   // `purpose` IS DELIBERATELY NOT READ. It is free text up to 1000 characters
   // and it is not needed to answer "is this person committed"; the destination
@@ -227,7 +234,7 @@ export async function getEmployerWorkerCommitments(
       .from("business_trips")
       .select("id, profile_id, destination, date_from, date_to")
       .in("profile_id", profileIds)
-      .in("status", ["approved", "completed"])
+      .in("status", [...PLANNED_TRIP_STATUSES])
       .limit(READ_LIMIT);
     if (tripsRes.error) {
       return MISSING_OBJECT_CODES.has(tripsRes.error.code ?? "")
