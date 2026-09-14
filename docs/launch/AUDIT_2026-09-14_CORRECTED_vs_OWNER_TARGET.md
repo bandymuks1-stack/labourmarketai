@@ -1,5 +1,15 @@
 # CORRECTED AUDIT — measured against the OWNER TARGET ARCHITECTURE
 
+> 🔁 **ITS §6 PATH AND §7 ESTIMATE ARE SUPERSEDED (2026-09-14, same day) by
+> [`REUSE_COMPLETION_AUDIT_2026-09-14.md`](REUSE_COMPLETION_AUDIT_2026-09-14.md).**
+> Two errors were found in them: (1) "a database in CI" was priced at 4–7
+> windows as the largest item, and **GOV-3 had already decided against it on
+> 2026-09-08** on security grounds; (2) architecture-completion was folded into
+> "production-complete web", inflating that number by the whole of Phase 3.
+> Corrected: **production-complete web 10–14 realistic**, architecture-complete
+> 25–37. **The node matrix (§1–§2), the distribution table (§3) and the seven
+> preserved defects (§4) stand unchanged.**
+
 | Field | Value |
 |---|---|
 | **Date** | 2026-09-14 |
@@ -23,12 +33,21 @@ feature by construction.
 
 Measured against the owner target instead, the picture inverts:
 
-> **Of the 24 target nodes that the product graph measures at all, exactly ONE
-> is BUILT_AND_CONNECTED. Twenty-two are PARTIAL and one is MISSING outright.
-> Four further target nodes are not measured by anything.**
+> **After ARCH-1, all 28 target nodes are measured: exactly ONE is
+> BUILT_AND_CONNECTED, 26 are PARTIAL and FUTURE DEMAND is MISSING outright.**
+> (Before ARCH-1: 24 measured, four measured by nothing.)
 
-This is an architecture-completeness problem *and* a proof problem. The
-previous conclusion was half right and the wrong half was load-bearing.
+The previous conclusion was half right and the wrong half was load-bearing.
+
+**But read §1 with the reuse audit beside it.** "26 of 28 PARTIAL" describes a
+product that is *unevenly connected*, not one that is unbuilt — and the
+follow-up
+[`REUSE_COMPLETION_AUDIT_2026-09-14.md`](REUSE_COMPLETION_AUDIT_2026-09-14.md)
+establishes that only **4 of 61** PARTIAL/MISSING items need new engineering,
+while **11 are duplicated truth** from months of parallel building. A node
+counts as PARTIAL if any one of its capabilities is short of complete, so the
+node-level view is deliberately unforgiving and must not be read as a build
+estimate. Mine was, and §0 of that document records the error.
 
 ---
 
