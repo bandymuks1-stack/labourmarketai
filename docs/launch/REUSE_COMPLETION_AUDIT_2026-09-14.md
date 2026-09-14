@@ -1,5 +1,14 @@
 # REUSE / COMPLETION AUDIT — every PARTIAL and MISSING item
 
+> ▶️ **The completion path in §4 and the estimate in §5 are carried forward,
+> owner-decision-resolved, into
+> [`MINIMUM_COMPLETION_PLAN_2026-09-14.md`](MINIMUM_COMPLETION_PLAN_2026-09-14.md)
+> (2026-09-14).** ARCH-4 is APPROVED consent-scoped, ARCH-2's principle is
+> binding with its structure deferred, and UNAUTHORIZED-is-not-ZERO is
+> classified as its own FIX — so **no sequencing ambiguities remain**. This
+> document stays the EVIDENCE base (the 61-item classification and the
+> duplicate register); the plan document is what to work from.
+
 | Field | Value |
 |---|---|
 | **Date** | 2026-09-14 |

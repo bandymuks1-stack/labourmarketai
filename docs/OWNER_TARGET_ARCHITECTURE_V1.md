@@ -2,10 +2,10 @@
 
 | Field | Value |
 |---|---|
-| **Version** | V1.1 |
-| **Date** | 2026-09-14 (V1.1 — ARCH-1 resolved same day) |
+| **Version** | V1.2 |
+| **Date** | 2026-09-14 (V1.2 — ARCH-1, ARCH-2 and ARCH-4 resolved same day) |
 | **Status** | **ACTIVE — THE canonical architecture. Read this first, before any other architecture, product, vision or completion document.** |
-| **Sources** | Owner text 2026-09-07 (`PRODUCT_CONSTITUTION` §14–16) + owner text 2026-09-14 (§1.2 below) + **owner decision ARCH-1, 2026-09-14 (APPROVED)**, reconciled. Every earlier owner lock is preserved, not replaced |
+| **Sources** | Owner text 2026-09-07 (`PRODUCT_CONSTITUTION` §14–16) + owner text 2026-09-14 (§1.2 below) + **owner decisions ARCH-1, ARCH-2 and ARCH-4, 2026-09-14**, reconciled. Every earlier owner lock is preserved, not replaced |
 | **Supersedes as ENTRY POINT** | `docs/ARCHITECTURE.md` (now SUPPORTING — navigation and process), `docs/ARCHITECTURE_UNIVERSAL_LABOURMARKETAI.md` (now SUPPORTING — one vertical) |
 | **Machine halves** | `apps/web/lib/product-gate/*.ts` — see §9 |
 | **Enforced by** | `apps/web/lib/guards/owner-target-architecture.test.ts` |
@@ -263,6 +263,86 @@ things it was meant to protect.
 
 ---
 
+### 1.10 Recognised equivalence (RPL) — who may assert it (ARCH-2, 2026-09-14)
+
+**Principle APPROVED and binding on the target now. Implementation deferred.**
+
+> A recognised equivalence must be asserted by an **appropriately authorized
+> independent assessor, training or education provider, sector body or public
+> body — never by the beneficiary, and never by a self-interested employer.**
+
+Five properties are mandatory whenever it is built:
+
+1. **Evidence** — what was assessed;
+2. **Provenance** — who assessed it, in what capacity, when;
+3. **Requirement linkage** — *which formal requirement* the equivalence
+   satisfies. An equivalence with no requirement attached is not an
+   equivalence, which is why it cannot live on an evidence record;
+4. **Validity and revocation** — an equivalence can expire and be withdrawn;
+5. **A subject-visible receipt** — the person sees what was asserted about them.
+
+**Reuse, do not reinvent.** `organization_evidence_events` already proves the
+independence pattern: its `..._verify` policy admits `independently_verified`
+only when the actor does **not** manage the organization and carries an
+`actor_organization_id`, so a supplier vouching for its own report is
+impossible rather than discouraged. Its `actor_role` vocabulary already
+contains `assessor`, `verifier`, `training_provider`, `education_provider`,
+`sector_body` and `public_body`. **Reuse that pattern and that vocabulary.**
+
+**What is deferred, and why that is safe:** the structure is RED class (new
+table + RLS) and production holds **0 training-provider organizations and 0
+evidence events**, so nothing and nobody is served by building it now. It is
+scheduled at the dependency point in the Institution/RPL chain, under the
+normal owner schema gate.
+
+**Until then, SEP-6 holds by construction:** `hasRecognizedEquivalence` stays
+`false`, and that is honest — no equivalence has been asserted, so none is
+claimed. Demonstrated capability must never silently satisfy a formal
+requirement.
+
+### 1.11 Team capability disclosure — consent-scoped (ARCH-4, 2026-09-14)
+
+**APPROVED.**
+
+> An employer may access a team's **aggregate capability summary** only when
+> that team has explicitly **offered or declared its supply against that
+> employer's demand**, or through an equivalent explicit consent relationship.
+> **Team capability summaries are never exposed to arbitrary authenticated
+> employers.**
+
+Why consent and not role: **supply is something an actor OFFERS.** A team that
+has offered itself has consented to being assessed against that demand; a team
+that has not is not a market participant to that employer. Role-scoping would
+have made capability readable by position rather than by relationship, which is
+SEP-4 read backwards — treating a team's existence as availability.
+
+What is disclosed is narrow and stays narrow: `get_team_capability_summary_v1`
+returns `skill_slug`, `members_declared`, `members_confirmed`, capped at 30
+skills. **No names, no worker ids, no member identities.** Any future widening
+beyond aggregate counts is a NEW owner decision, not an extension of this one.
+
+### 1.12 UNAUTHORIZED is not ZERO (SEP-7, owner-classified 2026-09-14)
+
+Raised by the owner as a standing rule while deciding ARCH-4, and it binds
+everywhere, not only on teams:
+
+> **Unauthorized and unknown must be explicit, and must never be interpreted as
+> zero capability.**
+
+The live instance that prompted it: `get_team_capability_summary_v1` returns
+**zero rows** — not an error — when the caller is not authorized, and
+`lib/company/team-match-input.ts` reads `if (!error && Array.isArray(data))`,
+so an unauthorized caller receives `skillComposition = []`. The matcher then
+sees a team with **no skills** and reports poor coverage. A refusal is rendered
+as a fact about the team.
+
+This is a **FIX in its own right**, independent of ARCH-4, and it must land
+**before** any employer-side surface reaches that reader — otherwise the first
+employer to use team matching gets a confidently wrong answer about a real
+brigade.
+
+---
+
 ## 2. THE ELEVEN REDUCTIONS — each is one edge, never the product
 
 | Reduction | What adopting it would require |
@@ -493,9 +573,9 @@ Six carried forward, plus four surfaced by this reconciliation.
 | **MKT-7** | Two independent owner acts arm real charging |
 | **GOV-1** | Add a READ-ONLY `SUPABASE_DB_URL` GitHub Actions secret. Two live security gates stay inactive without it |
 | ~~**ARCH-1**~~ | ✅ **RESOLVED — APPROVED by the owner, 2026-09-14.** INSTITUTIONS, SUPPLY, MATCHING and RECOGNITION/RPL are first-class nodes. All 28 are now in `product-graph.ts` and guarded. The decision was explicitly *architectural/semantic, not authorization to create four duplicate modules, routes, databases or UI sections* — see §1.9 for what that means in practice. |
-| **ARCH-2** *(new)* | **Who may assert a RECOGNISED EQUIVALENCE (RPL)?** The SEP-6 decision model is built and consumed; its only non-test input is hardcoded `false`. The blocker is a policy question — which actor, on what evidence, with what audit — not engineering |
+| ~~**ARCH-2**~~ | ✅ **PRINCIPLE APPROVED, IMPLEMENTATION DEFERRED — owner, 2026-09-14.** The rule is binding now and recorded in **§1.10**. The structure is NOT to be built yet: it lands only when the Institution/RPL end-to-end chain reaches its dependency point, and then through the normal owner schema gate (RED). **No longer a sequencing ambiguity** — RPL is scheduled, not blocked |
 | **ARCH-3** *(new)* | **Is zero usage a broken journey?** `EDU-2` is classed BROKEN for zero cohort members while `WRK-6` calls the identical fact *"a human fact and not a code gap"*. One standard must go. Until then, "10 broken links" mixes missing code with missing users and is not a usable backlog number |
-| **ARCH-4** *(new)* | **Employer-side team matching** — opening `get_team_capability_summary_v1` beyond owner/manager/admin is a disclosure decision, not a wiring task |
+| ~~**ARCH-4**~~ | ✅ **APPROVED — owner, 2026-09-14: consent-scoped.** Recorded in **§1.11**. An employer reaches a team's aggregate capability summary only through explicit consent; arbitrary authenticated employers never do. **No longer a sequencing ambiguity** |
 | **ARCH-5** *(new)* | **The subject's right to refuse an imported record** (§1.6). RED — no INSERT policy admits a subject and no SECURITY DEFINER function writes for one. Note when prioritising: `organization_evidence_records` currently holds **0 rows** |
 | **ARCH-6** *(new)* | **Distribution scope for mobile.** The phone ships a 6-screen record-and-review slice against 72 web routes. Which further capabilities the native clients must carry before "complete" is a product decision, not a parity gap to close by default |
 

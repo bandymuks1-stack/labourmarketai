@@ -10,6 +10,18 @@ import { CAPABILITY_REGISTER } from "@/lib/product-gate/capability-register";
 const REPO = resolve(__dirname, "../../../..");
 const read = (rel: string) => readFileSync(resolve(REPO, rel), "utf8");
 
+/**
+ * Markdown prose, flattened to one line: blockquote markers and wrapping
+ * removed. Sentences in this document legitimately wrap and legitimately sit
+ * inside `>` quotes, so a regex over the raw text asserts the LINE BREAKS as
+ * much as the words — it goes red on a reflow that changed nothing. Three of
+ * the pins below are whole sentences, so they match against this instead.
+ */
+const prose = (rel: string) =>
+  read(rel)
+    .replace(/^\s*>\s?/gm, "")
+    .replace(/\s+/g, " ");
+
 const CANONICAL = "docs/OWNER_TARGET_ARCHITECTURE_V1.md";
 
 /**
@@ -180,6 +192,45 @@ describe("owner target architecture — one file, and it stays reconciled", () =
     for (const surface of ["PWA", "Google Play", "App Store", "ChatGPT", "Claude connector", "MCP"]) {
       expect(s, `distribution surface "${surface}" is missing`).toContain(surface);
     }
+  });
+
+  it("ARCH-2 keeps RPL independence binding while its structure stays deferred", () => {
+    // The principle binds NOW even though nothing is built. The risk this
+    // pins is the opposite of the usual one: not that someone builds it, but
+    // that a later reader sees "deferred" and treats the rule as undecided.
+    const s = read(CANONICAL);
+    expect(s).toMatch(/### 1\.10 Recognised equivalence/);
+    expect(prose(CANONICAL)).toMatch(/never by the beneficiary/i);
+    // The five mandatory properties. Dropping any one is how an equivalence
+    // becomes an unfalsifiable claim about a person.
+    for (const property of ["Evidence", "Provenance", "Requirement linkage", "validity", "receipt"]) {
+      expect(s.toLowerCase(), `ARCH-2 property "${property}" dropped`).toContain(property.toLowerCase());
+    }
+    // Still no structure — the deferral is real, and this is what proves it.
+    const graph = PRODUCT_GRAPH.find((n) => n.id === "recognition");
+    expect(graph?.capabilities).toContain("SKL-9");
+  });
+
+  it("ARCH-4 disclosure stays consent-scoped, and aggregate-only", () => {
+    const s = read(CANONICAL);
+    expect(s).toMatch(/### 1\.11 Team capability disclosure — consent-scoped/);
+    expect(prose(CANONICAL)).toMatch(/never exposed to arbitrary authenticated employers/i);
+    // The columns are the boundary. Widening past aggregate counts to member
+    // identities is a NEW owner decision, and this names what "aggregate"
+    // meant when the owner approved it.
+    for (const col of ["skill_slug", "members_declared", "members_confirmed"]) {
+      expect(s).toContain(col);
+    }
+    expect(s).toMatch(/No names, no worker ids/i);
+  });
+
+  it("UNAUTHORIZED is not ZERO is recorded as a standing rule, not a team footnote", () => {
+    // The owner raised it while deciding ARCH-4 and scoped it wider than
+    // teams. Recording it under ARCH-4 alone would lose that.
+    const s = read(CANONICAL);
+    expect(s).toMatch(/### 1\.12 UNAUTHORIZED is not ZERO/);
+    expect(prose(CANONICAL)).toMatch(/must never be interpreted as zero capability/i);
+    expect(s).toMatch(/SEP-7/);
   });
 
   it("keeps the open owner decisions visible and unresolved by agents", () => {
