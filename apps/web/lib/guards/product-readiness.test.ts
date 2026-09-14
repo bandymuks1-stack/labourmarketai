@@ -2507,7 +2507,13 @@ describe("no migration files added by this sprint", () => {
     //   `assignee_profile_id`, for that row only. `defects` held 0 rows at
     //   apply time, so no existing row's visibility changed.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
-const SPRINT_BASELINE = 281;
+    // Bumped 281 -> 282 for the PER-11 split
+    //   (20260914210000_external_profiles_v1, owner decision 4e of 2026-09-14,
+    //   paired rollback). PREPARED FOR REVIEW ONLY and deliberately carries NO
+    //   @human-gate-approved annotation: the owner approved preparing it, not
+    //   applying it. Ships UNAPPLIED.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
+const SPRINT_BASELINE = 282;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

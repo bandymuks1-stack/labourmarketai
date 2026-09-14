@@ -920,7 +920,11 @@ describe("NO new DB migration in this PR", () => {
     //   changed. RED by route (any ALTER/DROP POLICY is), applied via MCP as
     //   ledger 20260914195053. Nothing in the market-map read layer is touched.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
-expect(count).toBeLessThanOrEqual(281);
+    // 281 -> 282: the PER-11 split (20260914210000_external_profiles_v1,
+    //   owner decision 4e). Prepared for review only, ships UNAPPLIED, no
+    //   annotation. Nothing in the market-map read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
+expect(count).toBeLessThanOrEqual(282);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
