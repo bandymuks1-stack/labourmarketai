@@ -37,15 +37,16 @@ capabilities, not a duplicate module. `tests/e2e/education-pilot-institution.spe
 already drives it that way.
 
 **One caveat that will otherwise waste a walk:** the local DB is reset to
-*every migration*, including the **nine** that production has NOT applied
-(seven owner-gated drafts from July, plus the two this wave added). So several
-capabilities will WORK locally that are inert in production — see the drift
-report (`SCHEMA_DRIFT_REPO_VS_PRODUCTION_2026-09-14.md`, §4). Do not conclude
-from a successful local walk that these are live for real users.
+*every migration*, including the **seven** that production has NOT applied —
+the owner-gated drafts from July. So several capabilities will WORK locally
+that are inert in production — see the drift report
+(`SCHEMA_DRIFT_REPO_VS_PRODUCTION_2026-09-14.md`, §5). Do not conclude from a
+successful local walk that these are live for real users.
 
-*(This line said "six" when this document was written. Seven was correct then
-and nine is correct now — the same prose-drifting-from-its-own-table defect
-the drift report itself had to correct. Counted from the tree, not summed.)*
+*(This line has been wrong twice and is worth watching: it said "six" when
+written, seven was correct then, nine after the wave merged, and seven again
+now that the owner has applied both of the wave's migrations. Counted from the
+tree against the live database, never summed.)*
 
 ---
 
@@ -68,11 +69,15 @@ deleted and superseded entries (A1 — production had one worker showing 22 wher
 opportunity card now shows what that opportunity would require of them (B3).
 
 **Known inert:** "already seen" marks on the board (`worker_opportunity_seen`,
-unapplied migration). Works locally, not in production. The same is now true
-of **saved searches** (DEM-8, `worker_saved_searches`): locally the strip
-appears above the board and a saved question can be saved, opened and deleted;
-in production the strip does not render at all until the owner applies
-`20260914140000`. That invisibility is the honest state, not a bug to report.
+unapplied migration). Works locally, not in production.
+
+**LIVE as of 2026-09-14: saved searches** (DEM-8). The owner applied
+`20260914140000`, so the strip now renders above the board in production too.
+It holds **0 rows**, so the first walk sees the empty state and the save
+control only after narrowing the board — which is correct: an empty question
+matches everything and is refused. Proven live: the saving worker sees their
+own row and another worker sees none; an eighth criteria key and a direct
+INSERT are both refused by the database.
 
 ## EMPLOYER — describe need, find people, decide
 
@@ -91,6 +96,10 @@ silently inflating a headcount shortfall.
 
 **New in the approved wave, and worth walking closely:**
 
+- **An asset cannot be issued twice** (MKT-3, applied 2026-09-14). Issue a
+  tool to someone, then try to issue the same tool again: the second attempt
+  is refused in words, not silently accepted. Proven on production through the
+  real RPC. Production holds 0 assets, so you will need to create one first.
 - **Assigning someone now says what they are already committed to** (CAL-7).
   Assign a roster worker to a project whose dates overlap their accepted
   booking or approved leave; the notice appears under the assign form. It does
@@ -169,7 +178,7 @@ verdicts and no score, because typed input carries no evidence.
 
 ## What a walk cannot tell you, by construction
 
-- **Production is not the local DB.** NINE migrations are unapplied by owner
+- **Production is not the local DB.** SEVEN migrations are unapplied by owner
   gate, so several capabilities behave differently in the two places.
 - **Production is nearly empty.** 0 teams, 0 assets, 0 asset assignments,
   0 training providers, 2 worker achievements, 5 work-hour allocations,

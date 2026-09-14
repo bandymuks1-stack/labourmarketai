@@ -1516,6 +1516,45 @@ Applied via Supabase MCP `apply_migration` (name `public_plans_v1`) at ~18:20 UT
 
 Applied via Supabase MCP `apply_migration` (name `productivity_units_universal_v1`, ledger version `20260911094312` — apply time, not the repo prefix) after `migration-safety` classified the file GREEN locally (INSERT … ON CONFLICT DO NOTHING; no table, column, policy, grant or function touched). Readback: `kilometers` (length, parent `meters` ×1000), `pallets`, `covers`, `cases` (count) — all `scope = 'platform'`, `organization_id null`, so the 20260817120000 least-privilege SELECT covers them unchanged; registry 10 → 14 rows. Rollback: `supabase/rollbacks/20260911130000_productivity_units_universal_v1.down.sql` — deletes ONLY those four slugs and only while no `journal_entry_metrics.unit_slug` / `worker_skills.current_pace_unit_slug` / registry parent references them (a referencing row is recorded evidence, never deleted). Code: issue #1689 slice — `PLATFORM_OUTPUT_UNIT_SLUGS` (both editors' pickers), recognizer km / pallets, chat + MCP intake output quantity, labels in 12 catalogues, guard `journal-units-registry.test.ts`; two migration-count ratchets 279 → 280.
 
+## Applied 2026-09-14 — `20260914120000_asset_single_open_assignment_v1.sql` (RED: SECURITY DEFINER replacement + revokes; owner approval "OWNER APPROVAL — BOTH RED APPLIES APPROVED", Decision 1)
+
+Applied via Supabase MCP `apply_migration` (name `asset_single_open_assignment_v1`, ledger version `20260914144053` — apply time, not the repo prefix). Applied FIRST, alone, and verified before Decision 2 was touched, as the approval required.
+
+**Preconditions re-verified immediately before apply, and they matched the review exactly:** 0 assets, 0 asset_assignments, no `asset_assignments_one_open_per_asset` index, `issue_asset_v1` with no `for update`, and all three lifecycle functions holding a direct `authenticated=X` grant (so revoking `public`/`anon` could not remove the product's own path).
+
+**Readback.** Index present with predicate `WHERE (status = ANY (ARRAY['issued','acknowledged']))`. All three of `issue_asset_v1`, `transfer_asset_assignment_v1`, `return_asset_v1` now contain `for update`. **ACLs UNCHANGED** before and after — `postgres=X/postgres | authenticated=X/postgres` on each, `anon` absent in both readings, so nothing gained authority. Policies on `assets` / `asset_assignments` still 2, unchanged. Ledger 278 → 279.
+
+**Invariant proven ON PRODUCTION, twice, inside blocks that roll themselves back** (final `raise` aborts the implicit transaction; readback confirmed 0 assets / 0 assignments after each):
+1. *Constraint level* — a second open assignment on one asset was refused: `duplicate key value violates unique constraint "asset_assignments_one_open_per_asset"`.
+2. *Real product write path* — as a live org manager, `issue_asset_v1` succeeded once, then refused the second call with **"asset is already issued and must be returned before it can be issued again"**, and refused an issue while the asset was in maintenance with **"asset is not issuable while it is maintenance"**.
+
+The two-session concurrency half (the loser BLOCKING on the row lock, measured at 2046 ms) was proven pre-apply on a real PostgreSQL 16 cluster against byte-identical bodies — `scripts/db-proof/asset-single-open-assignment.sh`, 22/22 — because two genuinely concurrent sessions cannot be held open through the MCP transport.
+
+Rollback: `supabase/rollbacks/20260914120000_asset_single_open_assignment_v1.down.sql` — drops the index, restores the three bodies verbatim from 20260718170000. Loses no data; re-opens the defect, and says so.
+
+## Applied 2026-09-14 — `20260914140000_worker_saved_searches_v1.sql` (RED: new table + RLS + 3 SECURITY DEFINER RPCs + grants + constraint swap; owner approval same message, Decision 2)
+
+Applied via Supabase MCP `apply_migration` (name `worker_saved_searches_v1`, ledger version `20260914144310`) AFTER Decision 1 was applied and verified.
+
+**Preconditions re-verified immediately before apply:** table absent, 0 of the 3 RPCs present, neither notification constraint carrying `saved_search_match` / `saved_search`, 10 notification events, 0 notification preference rows, 57 workers, `is_admin()` present.
+
+**Note on transaction control.** The file carries its own `begin;`/`commit;` and `apply_migration` supplies a wrapper, so the inner `commit` ends the outer transaction early (measured locally: `WARNING: there is already a transaction in progress`, then `WARNING: there is no transaction in progress`). It was applied VERBATIM anyway, deliberately: the inner `commit` is the file's LAST statement, so nothing can be stranded after it, a failure before it still rolls the whole migration back, and the local test confirmed an identical end state. Deviating from the reviewed bytes was the larger risk.
+
+**Readback.** Table present; RLS enabled; **exactly one policy, and it is SELECT** — no INSERT/UPDATE/DELETE policy exists. Table ACL `authenticated=r/postgres` (read only). All three RPCs `postgres=X | authenticated=X`, **anon absent from all three**. `notification_events_type_check` now carries `saved_search_match` AND still carries `weekly_digest` (strict superset). 0 saved-search rows, notification events still 10, **notification preference rows still 0** — so no email was activated as a consequence of this migration (the email channel defaults OFF, requires explicit opt-in, and additionally requires a transactional path that is not configured). Ledger 279 → 280; public base tables 204 → 205.
+
+**Privacy and authority boundaries proven ON PRODUCTION** in one rollback-guaranteed block, acting as the `authenticated` role with a real `request.jwt.claim.sub`, first as one worker and then as another:
+
+| Property | Result |
+|---|---|
+| the saving worker sees their own row | **1 row** |
+| a DIFFERENT worker sees it | **0 rows** |
+| an eighth criteria key | **refused** — `violates check` |
+| a direct INSERT bypassing the RPC | **refused** — `permission denied for table worker_saved_searches` |
+
+Readback after the probe: 0 rows. The RPC path itself therefore also ran successfully against production (`save_worker_search_v1` returned an id), which is what makes DEM-8's evidence `PRODUCTION_RPC_PROVEN` rather than test-only.
+
+Rollback: `supabase/rollbacks/20260914140000_worker_saved_searches_v1.down.sql` — one transaction, and it REFUSES while any saved search exists. That refusal is real only because of the transaction: the first draft raised outside one, printed its refusal and dropped the table anyway, which the paired db-proof caught before either reached production.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
