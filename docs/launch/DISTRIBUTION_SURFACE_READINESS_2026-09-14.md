@@ -124,6 +124,42 @@ declaration; metadata, support URL, screenshots; a review test account.
 
 **EXTERNAL-REVIEW-GATED** — App Review.
 
+### iOS CI proof — status, and a correction (2026-09-14)
+
+`.github/workflows/ios.yml` proves `IOS_NATIVE_BUILD_PROVEN`,
+`IOS_SIM_LAUNCH_PROVEN` and a Maestro auth-failure journey on GitHub's macOS
+runners. It is **advisory, not a required check** — its own header says so.
+
+**A correction, because the earlier statement was misleading.** This session
+reported that iOS *"has been cancelled on every head and has never completed"*,
+which implied a defect. There is none:
+
+- `ios.yml` is **paths-filtered** to `apps/mobile/**`, `packages/client-core/**`
+  and its own file. It correctly does not run on docs-only commits.
+- It sets `concurrency: cancel-in-progress: true`. The cancellations were that
+  setting working, not failures.
+
+**What is genuinely open.** The single branch head that touches mobile —
+`13ceb45`, which added `ios.associatedDomains` and `android.intentFilters` —
+had its iOS run cancelled by the next push. That native proof is therefore
+outstanding **by push cadence, not by any failure**.
+
+**Attempted and blocked.** A `workflow_dispatch` against the branch and a
+re-run of the cancelled run `34800170382` both return
+`403 Resource not accessible by integration`: this integration holds read-only
+Actions scope. **No trivial commit was pushed to trigger CI** — that is
+forbidden here and was ruled out by the owner.
+
+**Owner action, if the proof is wanted:** Actions → *iOS* → *Run workflow* →
+branch `claude/labourmarket-audit-ikzeez`. One click, ~40 macOS minutes.
+
+**What already covers the change in the meantime:** the `app.json` edits are
+asserted by `lib/guards/mobile-release-config.test.ts` — the app claims the
+product domain on both platforms, the Android filter is `autoVerify` over
+https only, and both `.well-known` route handlers exist. That guard passes. It
+proves the CONFIG is right; only a native run proves the app still builds and
+launches with it.
+
 ### Why both association documents answer 404 until configured
 
 Apple and Google **fetch and cache** these files, *including the failure*. A
