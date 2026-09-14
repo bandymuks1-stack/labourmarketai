@@ -15978,5 +15978,65 @@
     "ledgerNone": "nothing in this period ({period})",
     "ledgerFigures": "{hours} h · {rows, plural, one {# row} other {# rows}} · {days, plural, one {# day} other {# days}}",
     "rule": "The journal figures and the organization's ledger are two records of the same work, shown side by side and never added together. An hour record says when and how much, not what — it reaches no skill."
+  },
+  "countryReadiness": {
+    "heading": "What this country requires of you",
+    "intro": "The EU framework that applies when you work, post workers, or place a team in this country. Every statement links to its official source and shows when it was last checked. Where a rule is national rather than EU-wide, we say so and point you to the official national site instead of guessing.",
+    "noResearchYet": "We have not researched this country's requirements yet. That means we have nothing to show you — not that there is nothing to meet. We would rather leave this blank than fill it in from a neighbouring country.",
+    "nationalInfo": "National rules for this country are published by the authorities themselves:",
+    "nationalInfoLink": "official posting-of-workers information",
+    "disclaimer": "This is sourced information, not legal advice. Rules change and national detail varies; confirm anything that affects a decision with the official national authority.",
+    "fieldSource": "Source",
+    "fieldConfidence": "Backing",
+    "fieldLastReviewed": "Last checked",
+    "scope": {
+      "worker_solo": {
+        "label": "Working here yourself",
+        "description": "You are working in this country as a local hire, or on your own account."
+      },
+      "worker_posted": {
+        "label": "Being posted here from another country",
+        "description": "Your employer sends you here temporarily while you stay employed at home — the Posting of Workers Directive applies."
+      },
+      "team_subcontracting": {
+        "label": "Placing a team here as a subcontractor",
+        "description": "A team or subcontractor works here cross-border. Each posted person carries their own paperwork, and chain liability may apply."
+      },
+      "company_hiring": {
+        "label": "Hiring or placing workers here as a company",
+        "description": "Your company employs or places people in this country, which brings registration and tax obligations of its own."
+      }
+    },
+    "level": {
+      "required": "Required",
+      "recommended": "Recommended",
+      "conditional": "Depends"
+    },
+    "risk": {
+      "high": "High risk if missing",
+      "medium": "Medium risk",
+      "low": "Low risk"
+    },
+    "confidence": {
+      "needs_legal_review": "This part is national, not EU-wide. We have not verified the specific rule for this country, so treat it as a question to ask — not as an answer we have given you."
+    },
+    "confidenceShort": {
+      "official": "Official EU source",
+      "strong": "Well-established",
+      "needs_legal_review": "Needs legal check"
+    },
+    "explanation": {
+      "valid_id_document": "A valid passport or national identity card. Bring the document itself, not a copy — it is what proves who you are at a check.",
+      "right_to_work": "The right to work here. If you are an EU/EEA citizen you need no work permit. If you are not, you need a work and/or residence permit — confirm which with the national authority before you travel.",
+      "a1_certificate": "An A1 portable document. If you stay insured in your home country while working here, A1 is what proves which country's social-security law applies to you. Without it you can be treated as uninsured.",
+      "prior_posting_notification": "A prior notification, filed before the work starts. Most host countries require the posting to be declared in advance; the portal is national, so use the country link below.",
+      "employment_contract": "Your employment contract, and the written terms of the posting. Not always demanded at a check, but it is the document that settles a dispute about what was agreed.",
+      "host_minimum_conditions": "This country's minimum pay and core working conditions apply to you while you are posted here, even though you remain employed at home. The exact rates and rules are national.",
+      "posted_worker_package": "A full set of documents for every posted person on the team — each one needs their own A1, notification and contract paperwork. One shared set for the group is not enough.",
+      "subcontractor_liability": "Chain liability. In many countries a main contractor can be held responsible for a subcontractor's unpaid wages. The rules differ by country and are worth confirming before signing.",
+      "company_posting_registration": "Registration of the posting by the company. This is the employer's obligation, separate from anything the individual worker files.",
+      "company_tax_vat": "VAT, tax and social-security registration for the company. Whether these apply depends on what the work is and how long it lasts.",
+      "national_specifics": "Country-specific paperwork — sector ID or construction cards, local registration, national tax and social-security steps. These exist in most countries but the specifics are national, so confirm them on the official site."
+    }
   }
 }

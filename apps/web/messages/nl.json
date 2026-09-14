@@ -15978,5 +15978,65 @@
     "ledgerNone": "niets in deze periode ({period})",
     "ledgerFigures": "{hours} u · {rows, plural, one {# regel} other {# regels}} · {days, plural, one {# dag} other {# dagen}}",
     "rule": "De dagboekcijfers en de registratie van de organisatie zijn twee vastleggingen van hetzelfde werk, naast elkaar getoond en nooit bij elkaar opgeteld. Een urenregistratie zegt wanneer en hoeveel, niet wat — ze bereikt geen enkele vaardigheid."
+  },
+  "countryReadiness": {
+    "heading": "Wat dit land van u vraagt",
+    "intro": "Het EU-kader dat geldt wanneer u hier werkt, werknemers detacheert of een ploeg plaatst. Elke uitspraak verwijst naar de officiële bron en toont wanneer die voor het laatst is gecontroleerd. Waar een regel nationaal is in plaats van EU-breed, zeggen we dat en verwijzen we naar de officiële nationale site in plaats van te gissen.",
+    "noResearchYet": "De eisen van dit land hebben we nog niet onderzocht. Dat betekent dat we u niets kunnen tonen — niet dat er niets geldt. We laten dit liever leeg dan het in te vullen met gegevens van een buurland.",
+    "nationalInfo": "De nationale regels van dit land worden door de autoriteiten zelf gepubliceerd:",
+    "nationalInfoLink": "officiële informatie over detachering",
+    "disclaimer": "Dit is informatie met bronvermelding, geen juridisch advies. Regels veranderen en nationale details verschillen; controleer alles wat een beslissing beïnvloedt bij de officiële nationale instantie.",
+    "fieldSource": "Bron",
+    "fieldConfidence": "Onderbouwing",
+    "fieldLastReviewed": "Gecontroleerd",
+    "scope": {
+      "worker_solo": {
+        "label": "Zelf hier werken",
+        "description": "U werkt in dit land als lokale kracht of voor eigen rekening."
+      },
+      "worker_posted": {
+        "label": "Hierheen gedetacheerd worden",
+        "description": "Uw werkgever stuurt u tijdelijk hierheen terwijl u thuis in dienst blijft — de Detacheringsrichtlijn geldt."
+      },
+      "team_subcontracting": {
+        "label": "Een ploeg hier plaatsen als onderaannemer",
+        "description": "Een ploeg of onderaannemer werkt hier grensoverschrijdend. Iedere gedetacheerde heeft eigen papieren, en ketenaansprakelijkheid kan gelden."
+      },
+      "company_hiring": {
+        "label": "Als bedrijf hier mensen aannemen of plaatsen",
+        "description": "Uw bedrijf neemt mensen aan of plaatst ze in dit land, wat eigen registratie- en belastingverplichtingen meebrengt."
+      }
+    },
+    "level": {
+      "required": "Verplicht",
+      "recommended": "Aanbevolen",
+      "conditional": "Hangt ervan af"
+    },
+    "risk": {
+      "high": "Hoog risico bij ontbreken",
+      "medium": "Gemiddeld risico",
+      "low": "Laag risico"
+    },
+    "confidence": {
+      "needs_legal_review": "Dit deel is nationaal, niet EU-breed. We hebben de specifieke regel voor dit land niet geverifieerd, dus behandel dit als een vraag om te stellen — niet als een antwoord dat wij u hebben gegeven."
+    },
+    "confidenceShort": {
+      "official": "Officiële EU-bron",
+      "strong": "Goed gevestigd",
+      "needs_legal_review": "Juridische check nodig"
+    },
+    "explanation": {
+      "valid_id_document": "Een geldig paspoort of nationale identiteitskaart. Neem het document zelf mee, geen kopie — dat is wat bij een controle bewijst wie u bent.",
+      "right_to_work": "Het recht om hier te werken. Als EU/EER-burger hebt u geen werkvergunning nodig. Bent u dat niet, dan hebt u een werk- en/of verblijfsvergunning nodig — controleer welke bij de nationale instantie voordat u reist.",
+      "a1_certificate": "Een A1-verklaring. Blijft u tijdens het werk hier verzekerd in uw eigen land, dan bewijst A1 welk socialezekerheidsrecht op u van toepassing is. Zonder A1 kunt u als onverzekerd worden behandeld.",
+      "prior_posting_notification": "Een voorafgaande melding, ingediend vóór het werk begint. De meeste gastlanden eisen dat de detachering vooraf wordt gemeld; het portaal is nationaal, gebruik dus de landlink hieronder.",
+      "employment_contract": "Uw arbeidsovereenkomst en de schriftelijke voorwaarden van de detachering. Niet altijd gevraagd bij een controle, maar wel het document dat een geschil beslecht over wat is afgesproken.",
+      "host_minimum_conditions": "Het minimumloon en de kernarbeidsvoorwaarden van dit land gelden voor u zolang u hier gedetacheerd bent, ook al blijft u thuis in dienst. De exacte tarieven en regels zijn nationaal.",
+      "posted_worker_package": "Een volledige set documenten voor iedere gedetacheerde in de ploeg — ieder heeft een eigen A1, melding en contract nodig. Eén gedeelde set voor de groep volstaat niet.",
+      "subcontractor_liability": "Ketenaansprakelijkheid. In veel landen kan een hoofdaannemer aansprakelijk zijn voor onbetaald loon van een onderaannemer. De regels verschillen per land en zijn het controleren waard vóór ondertekening.",
+      "company_posting_registration": "Registratie van de detachering door het bedrijf. Dit is een verplichting van de werkgever, los van wat de werknemer zelf indient.",
+      "company_tax_vat": "Btw-, belasting- en socialezekerheidsregistratie voor het bedrijf. Of dit geldt, hangt af van wat het werk is en hoe lang het duurt.",
+      "national_specifics": "Landspecifieke papieren — sector- of bouwpassen, lokale registratie, nationale belasting- en socialezekerheidsstappen. Die bestaan in de meeste landen, maar de details zijn nationaal, dus controleer ze op de officiële site."
+    }
   }
 }

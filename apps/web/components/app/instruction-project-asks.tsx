@@ -114,7 +114,15 @@ function resolutionHref(r: RequirementResolution): string | null {
   }
 }
 
-function LedgerRows({ ledger, labels }: { ledger: RequirementLedger; labels: InstructionLedgerLabels }) {
+/**
+ * THE requirement-ledger renderer. Exported (PER-13 Step B) because the ledger
+ * is built for three contexts — project, opportunity, role — and was mounted
+ * for one. The opportunities surface renders THIS component with the SAME
+ * labels rather than growing a second presentation of the same rows; a
+ * requirement that reads one way under an instruction and another way under an
+ * opportunity would be two answers to one question.
+ */
+export function RequirementLedgerRows({ ledger, labels }: { ledger: RequirementLedger; labels: InstructionLedgerLabels }) {
   return (
     <>
       <p
@@ -218,7 +226,7 @@ export function InstructionProjectAsks({
     >
       <span className="font-mono text-meta uppercase tracking-label text-brand-blue">{labels.title}</span>
       {showLedger ? (
-        <LedgerRows ledger={ledger} labels={ledgerLabels} />
+        <RequirementLedgerRows ledger={ledger} labels={ledgerLabels} />
       ) : (
         <ul className="flex flex-col gap-1">
           {asks.map((a) => {

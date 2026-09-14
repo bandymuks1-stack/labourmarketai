@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 /**
  * The public surface may not state how SURE it is.
@@ -113,13 +113,52 @@ describe("marketing render tree renders no fabricated percentage", () => {
     expect(files.length).toBeGreaterThan(5);
   });
 
+  /**
+   * ONE deliberate exception, added with its contract as this guard's header
+   * requires — not to make an unrelated change pass.
+   *
+   * `country-readiness-requirements.tsx` renders the researched country
+   * requirement matrix, whose rows carry `confidence: "official" | "strong" |
+   * "needs_legal_review"`. That value is the PROVENANCE GRADE OF AN EXTERNAL
+   * LEGAL SOURCE — how well the statement is backed by europa.eu / the
+   * European Labour Authority — and never a self-assessment of a prediction.
+   * It is the opposite of the defect this guard exists to prevent: its whole
+   * job is to mark the statements the platform CANNOT stand behind, so a
+   * national rule we have not verified does not read like an EU-wide one we
+   * have. It is a word, never a number, and the file is held to the extra
+   * assertions below.
+   *
+   * Anything else in the marketing tree stays banned.
+   */
+  const CERTAINTY_EXEMPT = new Set([
+    "components/marketing/country-readiness-requirements.tsx",
+  ]);
+
   it("uses no self-certainty vocabulary", () => {
     const hits: string[] = [];
     for (const abs of files) {
+      const rel = relative(APP, abs).split(sep).join("/");
+      if (CERTAINTY_EXEMPT.has(rel)) continue;
       const m = stripComments(readFileSync(abs, "utf8")).match(CERTAINTY_TERMS);
-      if (m) hits.push(`${relative(APP, abs)} — "${m[0]}"`);
+      if (m) hits.push(`${rel} — "${m[0]}"`);
     }
     expect(hits, hits.join("\n")).toEqual([]);
+  });
+
+  it("the exemption names files that exist and still earn it", () => {
+    for (const rel of CERTAINTY_EXEMPT) {
+      const abs = join(APP, rel);
+      const src = stripComments(readFileSync(abs, "utf8"));
+      // Earning it means: the grade is a WORD from the closed source-quality
+      // set, and the file states the unsettled case out loud.
+      expect(src, `${rel} no longer renders the sourcing grade`).toMatch(
+        /needs_legal_review/,
+      );
+      // And it must never turn that grade into a score or a percentage.
+      expect(src, `${rel} turned a sourcing grade into a number`).not.toMatch(
+        /confidence\s*\*|\bscore\b|%/i,
+      );
+    }
   });
 
   it("renders no numeric literal as a percentage", () => {

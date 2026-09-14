@@ -9,6 +9,7 @@ import {
 import { listManagedProjects } from "@/lib/projects/projects";
 import { loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
 import { loadOwnProjectLedgers } from "@/lib/player-card/requirement-ledger-server";
+import { buildRequirementLedgerLabels } from "@/lib/player-card/requirement-ledger-labels";
 import type { RequirementLedger } from "@/lib/player-card/requirement-ledger";
 import {
   InstructionProjectAsks,
@@ -154,69 +155,9 @@ export default async function InstructionsPage({
       [...threadByProject.entries()].slice(0, LEDGER_PROJECT_LIMIT).map(([projectId, conversationId]) => ({ projectId, conversationId })),
     ).catch(() => new Map<string, RequirementLedger>());
   }
-  const tDocs = await getTranslations("documents");
-  const tSkills = await getTranslations("skills");
-  const tLm = await getTranslations("labourMarket");
-  const countryName = (c: string | null): string => (c && tLm.has(`countryNames.${c}`) ? tLm(`countryNames.${c}`) : (c ?? ""));
-  const ledgerLabels: InstructionLedgerLabels = {
-    ratio: (have, total) => t("card.ledger.ratio", { have, total }),
-    state: {
-      valid: t("card.ledger.state.valid"),
-      expiring: t("card.ledger.state.expiring"),
-      missing: t("card.ledger.state.missing"),
-      unknown: t("card.ledger.state.unknown"),
-    },
-    why: (row, country) => t(`card.ledger.why.${row.reason}`, { country: countryName(country) }),
-    stateFrom: (row) => {
-      const p = row.provenance;
-      switch (p.source) {
-        case "own_document":
-          return p.validUntil ? t("card.ledger.from.ownDocumentUntil", { date: p.validUntil }) : t("card.ledger.from.ownDocument");
-        case "own_skill":
-          return t(p.verified ? "card.ledger.from.ownSkillConfirmed" : "card.ledger.from.ownSkill");
-        case "own_language":
-          return t("card.ledger.from.ownLanguage", { level: p.level });
-        case "own_profile":
-          return t("card.ledger.from.ownProfile");
-        case "manager_checklist":
-          return t("card.ledger.from.manager", { status: t(`card.ledger.managerStatus.${p.status}`) });
-        case "not_readable":
-          return t("card.ledger.from.notReadable");
-        case "none":
-          return t("card.ledger.from.none");
-      }
-    },
-    level: { recommended: t("card.ledger.level.recommended"), conditional: t("card.ledger.level.conditional") },
-    availability: t("card.ledger.availability"),
-    documentType: (slug) => (tDocs.has(`types.${slug}`) ? tDocs(`types.${slug}`) : slug.replace(/_/g, " ")),
-    skill: (slug) => (tSkills.has(slug) ? tSkills(slug) : slug.replace(/[-_]/g, " ")),
-    resolution: (r) => {
-      switch (r.kind) {
-        case "add_document":
-          return t("card.ledger.resolution.addDocument");
-        case "issuing_authority":
-          return t("card.ledger.resolution.issuingAuthority", { title: r.title });
-        case "training_program":
-          return t("card.ledger.resolution.trainingProgram", { title: r.title });
-        case "service_offering":
-          return r.rateText
-            ? t("card.ledger.resolution.serviceOfferingRate", { title: r.title, rate: r.rateText })
-            : t("card.ledger.resolution.serviceOffering", { title: r.title });
-        case "add_evidence":
-          return t("card.ledger.resolution.addEvidence");
-        case "set_availability":
-          return t("card.ledger.resolution.setAvailability");
-        case "ask":
-          return t("card.ledger.resolution.ask");
-      }
-    },
-    resolutionWhy: (r) => {
-      if (r.kind === "training_program") return t(`card.ledger.resolutionWhy.${r.why === "assigned_to_you" ? "assignedToYou" : "nameMatches"}`);
-      if (r.kind === "service_offering") return t("card.ledger.resolutionWhy.nameMatches");
-      return null;
-    },
-    rejected: (count) => t("card.ledger.rejected", { count }),
-  };
+  // THE ledger copy comes from its one home now that a second context
+  // (opportunity) renders the same rows — see requirement-ledger-labels.
+  const ledgerLabels = await buildRequirementLedgerLabels();
   const cardLabels: InstructionCardLabels = {
     autoTranslation: t("card.autoTranslation"),
     translationUnavailable: t("card.translationUnavailable"),

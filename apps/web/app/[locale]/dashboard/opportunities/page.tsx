@@ -13,6 +13,9 @@ import {
 } from "@/components/app/external-vacancies-section";
 import { ProfessionRecoveryPrompt } from "@/components/app/profession-recovery-prompt";
 import { OpportunityDetailsDisclosure } from "@/components/app/opportunity-details-disclosure";
+import { RequirementLedgerRows } from "@/components/app/instruction-project-asks";
+import { loadOwnOpportunityLedgers } from "@/lib/player-card/requirement-ledger-server";
+import { buildRequirementLedgerLabels } from "@/lib/player-card/requirement-ledger-labels";
 import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
 import { OpportunityBandSection } from "@/components/app/opportunities/opportunity-band-section";
 import {
@@ -502,6 +505,20 @@ export default async function OpportunitiesPage({
       };
     }),
   ];
+
+  // PER-13 ON THE OPPORTUNITY CONTEXT (Step B). The requirement ledger was
+  // built for three contexts and mounted for one: a person could see what a
+  // PROJECT still needed from them, but not what an OPPORTUNITY would — the
+  // exact moment the answer matters most, because it is the moment they decide
+  // whether to raise their hand. No new derivation: this is the loader's
+  // `opportunity` branch, which has existed all along with no caller, bounded
+  // to the first rows and request-cached. A ledger that does not answer is
+  // absent, and the card renders as it did before — never an empty
+  // requirement list, which would read as "nothing is required of you".
+  const ledgerLabels = await buildRequirementLedgerLabels();
+  const opportunityLedgers = await loadOwnOpportunityLedgers(
+    rows.filter((r) => r.kind === "platform").map((r) => r.card.need.id),
+  ).catch(() => new Map());
   const world = deriveWorldReading({
     subject: result.kind === "ready" ? "ready" : "unreadable",
     rows,
@@ -1354,6 +1371,25 @@ export default async function OpportunitiesPage({
                                             <span className="text-meta text-text-muted">{t("possibleNote")}</span>
                                           ) : null}
                                         </div>
+
+                                        {/* WHAT THIS OPPORTUNITY WOULD NEED FROM ME.
+                                            The SAME ledger rows, with the SAME copy, the
+                                            instructions surface renders for a project — one
+                                            answer to "what is missing for me", not two. */}
+                                        {(() => {
+                                          const ledger = opportunityLedgers.get(need.id);
+                                          return ledger && ledger.rows.length > 0 ? (
+                                            <div
+                                              className="flex flex-col gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 p-3"
+                                              data-testid="opportunity-requirement-ledger"
+                                            >
+                                              <RequirementLedgerRows
+                                                ledger={ledger}
+                                                labels={ledgerLabels}
+                                              />
+                                            </div>
+                                          ) : null;
+                                        })()}
                                       </OpportunityDetailsDisclosure>
                                     </Card>
                                   </li>

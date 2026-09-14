@@ -15978,5 +15978,65 @@
     "ledgerNone": "šiuo laikotarpiu ({period}) nieko",
     "ledgerFigures": "{hours} val. · {rows, plural, one {# eilutė} few {# eilutės} other {# eilučių}} · {days, plural, one {# diena} few {# dienos} other {# dienų}}",
     "rule": "Žurnalo skaičiai ir organizacijos apskaita — du to paties darbo įrašai, rodomi greta ir niekada nesudedami. Valandų įrašas sako kada ir kiek, bet ne ką — jis nepasiekia jokio įgūdžio."
+  },
+  "countryReadiness": {
+    "heading": "Ko ši šalis iš jūsų reikalauja",
+    "intro": "ES sistema, taikoma, kai dirbate, komandiruojate darbuotojus ar siunčiate komandą į šią šalį. Kiekvienas teiginys nurodo oficialų šaltinį ir datą, kada paskutinį kartą tikrinta. Kai taisyklė yra nacionalinė, o ne bendra ES, tai pasakome ir nukreipiame į oficialų nacionalinį puslapį, o ne spėliojame.",
+    "noResearchYet": "Šios šalies reikalavimų dar netyrėme. Tai reiškia, kad neturime ką parodyti — o ne kad nieko nereikia. Verčiau paliksime tuščią, nei užpildysime kaimyninės šalies duomenimis.",
+    "nationalInfo": "Nacionalines šios šalies taisykles skelbia pačios institucijos:",
+    "nationalInfoLink": "oficiali informacija apie darbuotojų komandiravimą",
+    "disclaimer": "Tai šaltiniais pagrįsta informacija, o ne teisinė konsultacija. Taisyklės keičiasi, nacionaliniai skirtumai dideli — viską, kas lemia sprendimą, pasitikrinkite oficialioje nacionalinėje institucijoje.",
+    "fieldSource": "Šaltinis",
+    "fieldConfidence": "Pagrindimas",
+    "fieldLastReviewed": "Tikrinta",
+    "scope": {
+      "worker_solo": {
+        "label": "Patys dirbate čia",
+        "description": "Dirbate šioje šalyje kaip vietinis darbuotojas arba savarankiškai."
+      },
+      "worker_posted": {
+        "label": "Esate komandiruojami čia iš kitos šalies",
+        "description": "Darbdavys jus laikinai siunčia čia, o įdarbinimas lieka namuose — taikoma Darbuotojų komandiravimo direktyva."
+      },
+      "team_subcontracting": {
+        "label": "Siunčiate komandą kaip subrangovas",
+        "description": "Komanda ar subrangovas dirba čia tarpvalstybiniu mastu. Kiekvienas komandiruotas žmogus turi savo dokumentus, gali būti taikoma grandinės atsakomybė."
+      },
+      "company_hiring": {
+        "label": "Įdarbinate ar siunčiate darbuotojus kaip įmonė",
+        "description": "Jūsų įmonė įdarbina ar siunčia žmones į šią šalį — tai užtraukia atskiras registracijos ir mokesčių prievoles."
+      }
+    },
+    "level": {
+      "required": "Privaloma",
+      "recommended": "Rekomenduojama",
+      "conditional": "Priklauso"
+    },
+    "risk": {
+      "high": "Didelė rizika, jei trūksta",
+      "medium": "Vidutinė rizika",
+      "low": "Maža rizika"
+    },
+    "confidence": {
+      "needs_legal_review": "Ši dalis yra nacionalinė, ne bendra ES. Konkrečios šios šalies taisyklės nepatikrinome, todėl laikykite tai klausimu, kurį reikia užduoti — o ne mūsų pateiktu atsakymu."
+    },
+    "confidenceShort": {
+      "official": "Oficialus ES šaltinis",
+      "strong": "Tvirtai nusistovėjęs",
+      "needs_legal_review": "Reikia teisinio patikrinimo"
+    },
+    "explanation": {
+      "valid_id_document": "Galiojantis pasas arba asmens tapatybės kortelė. Turėkite patį dokumentą, ne kopiją — būtent jis patikrinimo metu įrodo, kas esate.",
+      "right_to_work": "Teisė čia dirbti. ES/EEE piliečiams darbo leidimo nereikia. Jei nesate ES/EEE pilietis, reikia darbo ir (ar) leidimo gyventi — prieš išvykdami pasitikslinkite nacionalinėje institucijoje.",
+      "a1_certificate": "A1 pažyma. Jei dirbdami čia liekate apdrausti savo šalyje, A1 įrodo, kurios šalies socialinės apsaugos teisė jums taikoma. Be jos galite būti laikomi neapdraustu.",
+      "prior_posting_notification": "Išankstinis pranešimas, pateiktas prieš pradedant darbą. Dauguma priimančiųjų šalių reikalauja iš anksto deklaruoti komandiravimą; portalas yra nacionalinis, todėl naudokitės žemiau esančia nuoroda.",
+      "employment_contract": "Darbo sutartis ir raštiškos komandiravimo sąlygos. Patikrinimo metu ne visada prašoma, bet būtent šis dokumentas išsprendžia ginčą dėl to, kas buvo sutarta.",
+      "host_minimum_conditions": "Šios šalies minimalus darbo užmokestis ir pagrindinės darbo sąlygos jums galioja komandiruotės metu, nors ir liekate įdarbintas namuose. Konkretūs tarifai ir taisyklės yra nacionaliniai.",
+      "posted_worker_package": "Pilnas dokumentų rinkinys kiekvienam komandiruotam komandos nariui — kiekvienam reikia savo A1, pranešimo ir sutarties. Vieno bendro rinkinio grupei nepakanka.",
+      "subcontractor_liability": "Grandinės atsakomybė. Daugelyje šalių pagrindinis rangovas gali atsakyti už subrangovo neišmokėtus atlyginimus. Taisyklės skiriasi — verta pasitikslinti prieš pasirašant.",
+      "company_posting_registration": "Įmonės atliekama komandiravimo registracija. Tai darbdavio prievolė, atskira nuo to, ką pateikia pats darbuotojas.",
+      "company_tax_vat": "Įmonės PVM, mokesčių ir socialinio draudimo registracija. Ar tai taikoma, priklauso nuo darbo pobūdžio ir trukmės.",
+      "national_specifics": "Šaliai būdingi dokumentai — sektoriaus ar statybų kortelės, vietinė registracija, nacionaliniai mokesčių ir socialinio draudimo veiksmai. Jų yra daugumoje šalių, bet specifika nacionalinė, todėl pasitikrinkite oficialiame puslapyje."
+    }
   }
 }

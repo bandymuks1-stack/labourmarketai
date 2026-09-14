@@ -15978,5 +15978,65 @@
     "ledgerNone": "nichts in diesem Zeitraum ({period})",
     "ledgerFigures": "{hours} Std. · {rows, plural, one {# Zeile} other {# Zeilen}} · {days, plural, one {# Tag} other {# Tage}}",
     "rule": "Die Tagebuchzahlen und die Erfassung der Organisation sind zwei Aufzeichnungen derselben Arbeit, nebeneinander gezeigt und nie addiert. Eine Stundenerfassung sagt, wann und wie viel, nicht was — sie erreicht keine Fähigkeit."
+  },
+  "countryReadiness": {
+    "heading": "Was dieses Land von Ihnen verlangt",
+    "intro": "Der EU-Rahmen, der gilt, wenn Sie hier arbeiten, Arbeitskräfte entsenden oder ein Team einsetzen. Jede Aussage nennt ihre offizielle Quelle und das Datum der letzten Prüfung. Wo eine Regel national statt EU-weit ist, sagen wir das und verweisen auf die offizielle nationale Seite, statt zu raten.",
+    "noResearchYet": "Die Anforderungen dieses Landes haben wir noch nicht recherchiert. Das heißt, wir haben Ihnen nichts zu zeigen — nicht, dass es nichts zu erfüllen gibt. Wir lassen das lieber leer, als es mit Daten eines Nachbarlandes zu füllen.",
+    "nationalInfo": "Die nationalen Regeln dieses Landes veröffentlichen die Behörden selbst:",
+    "nationalInfoLink": "offizielle Informationen zur Arbeitnehmerentsendung",
+    "disclaimer": "Dies ist mit Quellen belegte Information, keine Rechtsberatung. Regeln ändern sich und nationale Details unterscheiden sich; prüfen Sie alles, was eine Entscheidung beeinflusst, bei der offiziellen nationalen Behörde.",
+    "fieldSource": "Quelle",
+    "fieldConfidence": "Grundlage",
+    "fieldLastReviewed": "Geprüft",
+    "scope": {
+      "worker_solo": {
+        "label": "Selbst hier arbeiten",
+        "description": "Sie arbeiten in diesem Land als örtliche Arbeitskraft oder auf eigene Rechnung."
+      },
+      "worker_posted": {
+        "label": "Aus einem anderen Land hierher entsandt werden",
+        "description": "Ihr Arbeitgeber schickt Sie vorübergehend hierher, während Ihr Arbeitsverhältnis zu Hause bestehen bleibt — die Entsenderichtlinie gilt."
+      },
+      "team_subcontracting": {
+        "label": "Ein Team als Subunternehmer hier einsetzen",
+        "description": "Ein Team oder Subunternehmer arbeitet hier grenzüberschreitend. Jede entsandte Person führt eigene Unterlagen mit, und Kettenhaftung kann greifen."
+      },
+      "company_hiring": {
+        "label": "Als Unternehmen hier einstellen oder einsetzen",
+        "description": "Ihr Unternehmen beschäftigt oder entsendet Menschen in dieses Land, was eigene Melde- und Steuerpflichten mit sich bringt."
+      }
+    },
+    "level": {
+      "required": "Erforderlich",
+      "recommended": "Empfohlen",
+      "conditional": "Kommt darauf an"
+    },
+    "risk": {
+      "high": "Hohes Risiko, wenn es fehlt",
+      "medium": "Mittleres Risiko",
+      "low": "Geringes Risiko"
+    },
+    "confidence": {
+      "needs_legal_review": "Dieser Teil ist national, nicht EU-weit. Die konkrete Regel dieses Landes haben wir nicht geprüft — behandeln Sie das als Frage, die zu stellen ist, nicht als Antwort, die wir Ihnen gegeben haben."
+    },
+    "confidenceShort": {
+      "official": "Offizielle EU-Quelle",
+      "strong": "Gut etabliert",
+      "needs_legal_review": "Rechtliche Prüfung nötig"
+    },
+    "explanation": {
+      "valid_id_document": "Ein gültiger Reisepass oder Personalausweis. Nehmen Sie das Dokument selbst mit, keine Kopie — es ist das, was bei einer Kontrolle Ihre Identität belegt.",
+      "right_to_work": "Das Recht, hier zu arbeiten. Als EU/EWR-Bürgerin oder -Bürger brauchen Sie keine Arbeitserlaubnis. Andernfalls brauchen Sie eine Arbeits- und/oder Aufenthaltserlaubnis — klären Sie vor der Reise bei der nationalen Behörde, welche.",
+      "a1_certificate": "Eine A1-Bescheinigung. Bleiben Sie während der Arbeit hier in Ihrem Heimatland versichert, belegt A1, welches Sozialversicherungsrecht für Sie gilt. Ohne sie können Sie als nicht versichert behandelt werden.",
+      "prior_posting_notification": "Eine Vorabmeldung, eingereicht vor Arbeitsbeginn. Die meisten Aufnahmeländer verlangen, die Entsendung im Voraus zu melden; das Portal ist national — nutzen Sie den Länderlink unten.",
+      "employment_contract": "Ihr Arbeitsvertrag und die schriftlichen Entsendebedingungen. Bei einer Kontrolle nicht immer verlangt, aber das Dokument, das einen Streit darüber klärt, was vereinbart wurde.",
+      "host_minimum_conditions": "Mindestlohn und Kernarbeitsbedingungen dieses Landes gelten für Sie während der Entsendung, auch wenn Ihr Arbeitsverhältnis zu Hause bestehen bleibt. Die genauen Sätze und Regeln sind national.",
+      "posted_worker_package": "Ein vollständiger Satz Unterlagen für jede entsandte Person im Team — jede braucht eigene A1, Meldung und Vertragsunterlagen. Ein gemeinsamer Satz für die Gruppe genügt nicht.",
+      "subcontractor_liability": "Kettenhaftung. In vielen Ländern kann ein Generalunternehmer für nicht gezahlte Löhne eines Subunternehmers haften. Die Regeln unterscheiden sich und sollten vor Unterzeichnung geklärt werden.",
+      "company_posting_registration": "Anmeldung der Entsendung durch das Unternehmen. Das ist eine Pflicht des Arbeitgebers, getrennt von dem, was die einzelne Arbeitskraft einreicht.",
+      "company_tax_vat": "Umsatzsteuer-, Steuer- und Sozialversicherungsanmeldung des Unternehmens. Ob das gilt, hängt davon ab, worin die Arbeit besteht und wie lange sie dauert.",
+      "national_specifics": "Länderspezifische Unterlagen — Branchen- oder Bauausweise, örtliche Registrierung, nationale Steuer- und Sozialversicherungsschritte. Die gibt es in den meisten Ländern, aber die Details sind national — prüfen Sie sie auf der offiziellen Seite."
+    }
   }
 }

@@ -332,7 +332,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/player-card/requirement-ledger.ts"],
     coreModule: "lib/player-card/requirement-ledger.ts",
     surfaces: ["app/[locale]/dashboard/projects"],
-    note: "Built for three contexts, mounted for one (`project`).",
+    note: "Built for three contexts, mounted for TWO. `project` renders under an instruction (/dashboard/instructions); `opportunity` now renders inside the opportunity card (/dashboard/opportunities) through `loadOwnOpportunityLedgers` — the loader branch that existed with no caller until Step B. Both surfaces render the SAME `RequirementLedgerRows` with the SAME copy (lib/player-card/requirement-ledger-labels.ts), so 'what is missing for me' cannot acquire two wordings. `role` (professionSlug + country) remains unmounted: it needs a surface where a person picks a profession to aim at, which does not exist yet.",
   },
 ];
 
@@ -597,7 +597,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["app/[locale]/business"],
     coreModule: null,
     surfaces: ["app/[locale]/business"],
-    note: "Per-organization page exists; no index or directory route.",
+    note: "Per-organization page exists (/business/[slug], public, opted-in orgs only via `get_public_business_profile_v1`); no index or directory route. Step B STOPPED this item on a hard dependency rather than building it: there is no listing read. `organizations` SELECT is hardened to owner/member/admin (20260802170000), and the one cross-org reader, `search_organizations_directory_v1`, is revoked from anon, requires a >=2-char term, and deliberately refuses a wildcard dump — and it does NOT filter on `public_profile_enabled`, so using it for a directory would list organizations that never opted in. An index therefore needs a NEW SECURITY DEFINER listing RPC granted to anon: RED class (needs-human-gate), and NEW is not authorized in Step B.",
   },
 ];
 
@@ -626,7 +626,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/objects"],
     coreModule: "lib/objects/objects-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "One row in production; a section of the company workspace, no route of its own.",
+    note: "One row in production. NOT unreachable, and the earlier note read as if it were: work objects render on /dashboard/company (WorkObjectsSection), on /dashboard/tasks (listVisibleActiveObjects) and in the organization document register — three surfaces. Step B considered giving them a route of their own and did NOT: that would be a fourth surface over the same rows with no new outcome, and route-truth-map states the DUPLICATE_DRIFT list must shrink, never grow. What is missing is usage (one row), not reachability.",
   },
   {
     id: "WRK-3",
@@ -943,7 +943,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/market/match-team-v1.ts"],
     coreModule: "lib/market/match-team-v1.ts",
     surfaces: ["app/[locale]/dashboard/admin"],
-    note: "Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`.",
+    note: "Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`. STEP B (2026-09-14) STOPPED the employer surface on a missing consent relation, not on effort. The plan scopes it 'reachable only where a team has offered its supply against that employer's demand' (ARCH-4). No such relation exists: `team_enquiries` runs employer -> team and carries NO demand / customer_request reference, so consent there is ORG-scoped, not DEMAND-scoped. Implementing B4 as written needs a new demand-linked offer relation (NEW + migration, not authorized in Step B); implementing it on `team_enquiries` instead would silently widen the consent boundary the owner set in ARCH-4 from one demand to every demand that employer holds. That is an owner decision. Production 2026-09-14: 0 teams, 0 team_enquiries, 0 team_details — nobody is served either way today."
   },
   {
     id: "DEM-7",
@@ -1485,7 +1485,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: ["lib/ai/runtime"],
     coreModule: "lib/ai/runtime/run-core.ts",
     surfaces: ["app/api"],
-    note: "47 real runs with real spend; six registered agents still have zero call sites.",
+    note: "47 real runs with real spend. SEVEN of the thirteen registered agents have zero call sites (admin_risk, booking_risk, country_readiness, document_assistant, skill_evidence, support_onboarding, translation_copy) — this note said SIX until it was counted on 2026-09-14; the count is now derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift again. Each one's domain is already answered DETERMINISTICALLY and connected (documents-gap, readiness-overview, skill-pipeline, the booking-conflict logic, the DeepL route, the country-readiness matrix), so giving them call sites would add a second model-based answer beside a working one, or seven new surfaces — an owner decision, not a wiring task.",
   },
   {
     id: "AI-4",
