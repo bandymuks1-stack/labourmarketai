@@ -11,6 +11,10 @@ import {
 import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects";
 import type { ManagedWorker } from "@/lib/instructions/instructions";
 import type { EngagementWorker } from "@/lib/projects/booking-engagement-workers";
+import type {
+  ReservationSource,
+  ReservationVerdict,
+} from "@/lib/workforce/commitment-reservation";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -60,6 +64,12 @@ export interface ProjectManagerLabels {
   /** Booking-engagement bridge v1 — the picker's two DISTINCT origins. */
   rosterGroupLabel: string;
   engagementGroupLabel: string;
+  /** CAL-7 capacity reservation — shown AFTER the assignment, never before,
+   *  because a warning may not decide whether a commitment happens. */
+  reservationCollidesTitle: string;
+  reservationNotBlocking: string;
+  reservationUnknown: string;
+  reservationSource: Record<ReservationSource, string>;
 }
 
 type ProjectWithAssignments = ManagedProject & {
@@ -85,6 +95,60 @@ function resultError(r: ProjectActionResult | null, l: ProjectManagerLabels) {
     <span className="text-xs text-state-danger" role="status">
       {msg}
     </span>
+  );
+}
+
+/**
+ * CAL-7 — what the person was already committed to across these dates.
+ *
+ * This is a NOTICE, not a gate: the assignment has already happened by the
+ * time it renders (SEP-2 — a reservation warns, it never prohibits), and the
+ * manager can end it from the roster below if the clash is real.
+ *
+ * Three states, never two. `clear` renders nothing — there is nothing to say.
+ * `collides` names each commitment and the days it shares. `unknown` says the
+ * dates could not be confirmed free, which is NOT the same as free: a failed
+ * read rendered as an empty schedule is the exact defect the capacity work
+ * exists to end (SEP-7).
+ *
+ * An absence carries no label by construction — the employer read never asks
+ * for the reason, and nothing here invents one.
+ */
+function ReservationNotice({
+  verdict,
+  labels,
+}: {
+  verdict: ReservationVerdict;
+  labels: ProjectManagerLabels;
+}) {
+  if (verdict.state === "clear") return null;
+  if (verdict.state === "unknown") {
+    return (
+      <p className="text-xs text-text-muted" role="status" data-testid="assign-reservation-unknown">
+        {labels.reservationUnknown}
+      </p>
+    );
+  }
+  return (
+    <div
+      className="flex flex-col gap-1 rounded-md border border-state-warning/40 p-3"
+      role="status"
+      data-testid="assign-reservation-collides"
+    >
+      <p className="text-xs font-semibold text-state-warning">{labels.reservationCollidesTitle}</p>
+      <ul className="flex flex-col gap-0.5">
+        {verdict.collisions.map((c) => (
+          <li key={`${c.source}:${c.sourceId}`} className="text-xs text-text-secondary">
+            <span className="font-mono uppercase tracking-label text-text-muted">
+              {labels.reservationSource[c.source]}
+            </span>{" "}
+            {c.label ? `${c.label} · ` : ""}
+            {c.overlapStart === c.overlapEnd ? c.overlapStart : `${c.overlapStart} – ${c.overlapEnd}`}
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-text-muted">{labels.reservationNotBlocking}</p>
+    </div>
   );
 }
 
@@ -192,6 +256,9 @@ export function ProjectAssignmentManager({
             )}
             {resultError(assignState, labels)}
           </div>
+          {assignState?.ok && assignState.reservation ? (
+            <ReservationNotice verdict={assignState.reservation} labels={labels} />
+          ) : null}
         </form>
       )}
 

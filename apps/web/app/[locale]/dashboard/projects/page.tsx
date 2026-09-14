@@ -168,6 +168,14 @@ export default async function ProjectsPage({
     openBoard: t("map.openArena"),
     rosterGroupLabel: t("assign.rosterGroup"),
     engagementGroupLabel: t("assign.engagementGroup"),
+    reservationCollidesTitle: t("assign.reservation.collidesTitle"),
+    reservationNotBlocking: t("assign.reservation.notBlocking"),
+    reservationUnknown: t("assign.reservation.unknown"),
+    reservationSource: {
+      project: t("assign.reservation.source.project"),
+      booking: t("assign.reservation.source.booking"),
+      absence: t("assign.reservation.source.absence"),
+    },
   };
 
   return (

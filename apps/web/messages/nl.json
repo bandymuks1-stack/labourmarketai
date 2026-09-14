@@ -5869,7 +5869,17 @@
       "noWorkers": "Je hebt nog geen toewijsbare werknemers in je ploeg.",
       "fromRoster": "Een werknemer aan dit object toewijzen",
       "rosterGroup": "Teamleden",
-      "engagementGroup": "Kandidaten met geaccepteerd voorstel"
+      "engagementGroup": "Kandidaten met geaccepteerd voorstel",
+      "reservation": {
+        "collidesTitle": "Op deze dagen al vastgelegd",
+        "notBlocking": "Dit blokkeert de toewijzing niet — jij beslist.",
+        "unknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
+        "source": {
+          "project": "Projecttoewijzing",
+          "booking": "Boeking",
+          "absence": "Niet beschikbaar"
+        }
+      }
     },
     "model": {
       "note": "Dit bord volgt het werkmodel van het platform: spelerskaarten van werknemers worden toegewezen aan objecten (projecten), en jij beheert de toewijzingen.",

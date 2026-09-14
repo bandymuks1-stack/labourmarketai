@@ -5869,7 +5869,17 @@
       "noWorkers": "Sie haben noch keine zuweisbaren Arbeitskräfte in Ihrem Team.",
       "fromRoster": "Eine Arbeitskraft diesem Objekt zuweisen",
       "rosterGroup": "Teammitglieder",
-      "engagementGroup": "Kandidaten mit angenommenem Angebot"
+      "engagementGroup": "Kandidaten mit angenommenem Angebot",
+      "reservation": {
+        "collidesTitle": "An diesen Tagen bereits verplant",
+        "notBlocking": "Das blockiert die Zuweisung nicht — Sie entscheiden.",
+        "unknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
+        "source": {
+          "project": "Projekt",
+          "booking": "Buchung",
+          "absence": "Nicht verfügbar"
+        }
+      }
     },
     "model": {
       "note": "Dieses Board folgt dem Betriebsmodell der Plattform: Spielerkarten von Arbeitskräften werden Objekten (Projekten) zugewiesen, und Sie verwalten die Zuweisungen.",

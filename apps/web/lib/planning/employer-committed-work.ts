@@ -59,8 +59,25 @@ export interface WorkerCommitment {
   readonly endDate: string | null;
 }
 
+/**
+ * An active assignment to a project NOBODY DATED. It is a real commitment
+ * whose window is unknown, so it is reported SEPARATELY rather than folded
+ * into `commitments` — a capacity view must not invent a band for it, and a
+ * reservation verdict must not call the person clear while it exists
+ * (SEP-7, `lib/workforce/commitment-reservation.ts`).
+ */
+export interface UndatedProjectCommitment {
+  readonly workerId: string;
+  readonly projectId: string;
+  readonly label: string | null;
+}
+
 export type EmployerCommittedWorkResult =
-  | { readonly status: "ok"; readonly commitments: readonly WorkerCommitment[] }
+  | {
+      readonly status: "ok";
+      readonly commitments: readonly WorkerCommitment[];
+      readonly undatedProjects: readonly UndatedProjectCommitment[];
+    }
   /** A store is not provisioned here. NOT "nobody is committed to anything". */
   | { readonly status: "needs-migration" }
   /** A real read failure. NEVER rendered as an empty schedule. */
@@ -89,7 +106,7 @@ export async function getEmployerWorkerCommitments(
   /** OPTIONAL explicit caller (G4 bridge) — absent = the cookie session. */
   caller?: { readonly supabase: SupabaseClient },
 ): Promise<EmployerCommittedWorkResult> {
-  if (workerIds.length === 0) return { status: "ok", commitments: [] };
+  if (workerIds.length === 0) return { status: "ok", commitments: [], undatedProjects: [] };
   const supabase = caller?.supabase ?? (await createClient());
   const ids = workerIds.slice(0, READ_LIMIT);
 
@@ -151,6 +168,7 @@ export async function getEmployerWorkerCommitments(
   }
 
   const commitments: WorkerCommitment[] = [];
+  const undatedProjects: UndatedProjectCommitment[] = [];
   for (const b of (bookingsRes.data ?? []) as Record<string, unknown>[]) {
     commitments.push({
       workerId: b.worker_id as string,
@@ -163,11 +181,21 @@ export async function getEmployerWorkerCommitments(
   }
   for (const a of assignments) {
     // An assignment to a project with no dates is a real assignment to an
-    // undated band. It is DROPPED from capacity rather than assumed to cover
-    // today: assuming would make a worker unavailable on evidence nobody
-    // recorded, which is the same class of invention this fix exists to end.
+    // undated band. It is kept OUT of `commitments` rather than assumed to
+    // cover today: assuming would make a worker unavailable on evidence
+    // nobody recorded, which is the same class of invention this fix exists
+    // to end. It is not thrown away either — it is reported as an undated
+    // commitment, so a caller that needs a COMPLETE answer (the reservation
+    // verdict) can say "I could not account for this" instead of "clear".
     const project = projectById.get(a.project_id as string);
-    if (!project?.startDate) continue;
+    if (!project?.startDate) {
+      undatedProjects.push({
+        workerId: a.worker_id as string,
+        projectId: a.project_id as string,
+        label: project?.title ?? null,
+      });
+      continue;
+    }
     commitments.push({
       workerId: a.worker_id as string,
       kind: "project",
@@ -177,5 +205,5 @@ export async function getEmployerWorkerCommitments(
       endDate: project.endDate,
     });
   }
-  return { status: "ok", commitments };
+  return { status: "ok", commitments, undatedProjects };
 }

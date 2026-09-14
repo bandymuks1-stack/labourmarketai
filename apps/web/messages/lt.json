@@ -5869,7 +5869,17 @@
       "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje.",
       "fromRoster": "Priskirti darbuotoją šiam objektui",
       "rosterGroup": "Komandos nariai",
-      "engagementGroup": "Priimto pasiūlymo kandidatai"
+      "engagementGroup": "Priimto pasiūlymo kandidatai",
+      "reservation": {
+        "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
+        "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
+        "unknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
+        "source": {
+          "project": "Objektas",
+          "booking": "Rezervacija",
+          "absence": "Nepasiekiama"
+        }
+      }
     },
     "model": {
       "note": "Ši lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs.",
