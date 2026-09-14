@@ -1,5 +1,13 @@
 # LABOURMARKET_AI_WORK_OS_VECTICUM_COMPLETION_REPORT
 
+> 🗄️ **SUPERSEDED AS ARCHITECTURE / COMPLETION AUTHORITY — HISTORICAL EVIDENCE ONLY (2026-09-14).**
+> This document is preserved for provenance and may be read as a record of what
+> was true at its date. It is **not** current architecture, not a current
+> completion authority, and not a source of truth for planning.
+> Current architecture: [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](docs/OWNER_TARGET_ARCHITECTURE_V1.md).
+> Current completion status: [`docs/launch/AUDIT_2026-09-14_CORRECTED_vs_OWNER_TARGET.md`](docs/launch/AUDIT_2026-09-14_CORRECTED_vs_OWNER_TARGET.md).
+> Reason it is listed here: see the canonical architecture's §9 registry.
+
 Date: 2026-08-17. Operator command: full code+production+DB reality audit
 vs the Vecticum capability matrix, then completion of what is safely
 completable. Companion documents (same train):

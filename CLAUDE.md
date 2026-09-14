@@ -6,30 +6,52 @@
 > node .github/scripts/product-truth.mjs
 > ```
 >
-> It prints what LabourMarket.ai IS (one labour/work graph, 24 nodes), the
-> eleven reductions it must never be narrowed into, the eight distinctions that
-> may never collapse, the honest status and evidence level of every capability,
+> It prints what LabourMarket.ai IS (one labour/work graph), the eleven
+> reductions it must never be narrowed into, the eight distinctions that may
+> never collapse, the honest status and evidence level of every capability,
 > which canonical journeys are broken, and the open owner decisions. No network,
 > no database, no credentials.
+>
+> **It measures 24 nodes; the owner target is 28.** INSTITUTIONS, SUPPLY,
+> MATCHING and RECOGNITION/RPL are in the target graph and are not yet nodes in
+> `product-graph.ts`, so nothing detects if their last capability dies. That gap
+> is open owner decision **ARCH-1** — see the canonical architecture §2 and §10.
+> Until it is answered, this command is a floor, not the target.
 >
 > This is enforced, not advised: `apps/web/lib/guards/capability-register.test.ts`,
 > `apps/web/lib/guards/product-graph-journeys.test.ts` and the `Product truth`
 > step in `quality.yml` fail on the same data. Full rationale: `AGENTS.md`
 > § FIRST COMMAND.
 
-> 🧭 **START HERE: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — the ONE
-> canonical architecture entry point (owner directive 2026-08-27). It carries
-> the authority order, the product invariants, the three loops, the capability
-> inventory and the **extensibility contract**.
+> 🧭 **START HERE: [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](docs/OWNER_TARGET_ARCHITECTURE_V1.md)**
+> — V1, 2026-09-14, **the ONE canonical architecture and the single source of
+> truth.** Read it before any other architecture, product, vision or completion
+> document. It carries the 28-node target graph, the six journeys, the eleven
+> reductions, the eight separations, the six distribution surfaces, the
+> precedence rule, the ACTIVE/SUPPORTING/SUPERSEDED document registry, and the
+> open owner decisions.
 >
-> Before ANY change, run its §7 process. Two review questions, not one:
-> **(A) did we break something that worked?** and **(B) did we make impossible
-> something the architecture previously allowed?** A change can pass every test
-> and still fail B — that is an architecture regression.
+> **TARGET is not STATUS.** Missing code never weakens the target architecture;
+> existing code never silently redefines an owner decision. Current status is a
+> separate section and a separate document.
+>
+> Two supporting documents, NEITHER of which is the architecture:
+> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — navigation, the §5 owner
+> directions, the §6 extensibility contract, the §7 process (its own §2 graph
+> is NARROWER than the canonical one — do not read it as the target); and
+> [`docs/ARCHITECTURE_UNIVERSAL_LABOURMARKETAI.md`](docs/ARCHITECTURE_UNIVERSAL_LABOURMARKETAI.md)
+> — one vertical only.
+>
+> Before ANY change, run the canonical file's §12 process. Two review
+> questions, not one: **(A) did we break something that worked?** and
+> **(B) did we make impossible something the architecture previously allowed?**
+> A change can pass every test and still fail B — that is an architecture
+> regression.
 >
 > The canonical architecture is the **minimum known possibility space, not its
 > maximum boundary**. Preserve what exists, add what is now known, keep the
-> extension points.
+> extension points. A new direction EXTENDS the canonical file; it never spawns
+> a competing architecture.
 
 > ⚖️ **Owner execution principle — delivery over legacy constraints**
 > ([`docs/DECISIONS/0016-delivery-over-legacy-constraints.md`](docs/DECISIONS/0016-delivery-over-legacy-constraints.md),

@@ -1,5 +1,12 @@
 # labourmarket.ai — Universal Architecture (Summary)
 
+> ⛔ **NOT THE CANONICAL ARCHITECTURE — SUPPORTING DOCUMENT.**
+> The single source of truth is
+> [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](OWNER_TARGET_ARCHITECTURE_V1.md) (V1, 2026-09-14). Read it first.
+> This file remains ACTIVE as the universal work-journal vertical only — one edge of the graph, not the graph. Where it and the canonical
+> architecture differ on WHAT THE PRODUCT IS, the canonical architecture wins —
+> see its §9 registry for why.
+
 > **Full strategic context:** `docs/handoffs/TASK-ARCH-LABOURMARKETAI-UNIVERSAL-DIRECTION.md`
 > This file is a quick reference. The strategic doc is the source of truth.
 

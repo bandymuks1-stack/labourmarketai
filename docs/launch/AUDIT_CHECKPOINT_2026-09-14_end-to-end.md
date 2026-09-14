@@ -1,5 +1,16 @@
 # AUDIT CHECKPOINT — end-to-end, 2026-09-14
 
+> ⚠️ **ITS COMPLETION MATRIX AND CONCLUSIONS ARE SUPERSEDED (2026-09-14, same day).**
+> This audit was measured against an architecture pasted into a chat prompt,
+> because no repository document contained one — so it compared the code to the
+> register that describes the code, and a self-referential comparison cannot
+> find a missing feature.
+> **Its seven defects are all still valid and are carried forward in full.**
+> What is withdrawn is its closing conclusion ("not missing features — missing
+> proof and missing users").
+> Read instead: [`AUDIT_2026-09-14_CORRECTED_vs_OWNER_TARGET.md`](AUDIT_2026-09-14_CORRECTED_vs_OWNER_TARGET.md),
+> measured against [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](../OWNER_TARGET_ARCHITECTURE_V1.md).
+
 Owner scope: **AUDIT ONLY.** No production mutation, no migration, no RLS, no
 auth, no legal semantics, no RED/owner-gated decision was touched. Nothing in
 this document was implemented; it is the evidence base for the next window.
