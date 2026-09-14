@@ -11366,7 +11366,10 @@
     "shareButton": "Pasidalinti",
     "noDemands": "Pirmiausia sukurkite poreikį, tada galėsite juo pasidalinti.",
     "errorLabel": "Kažkas nepavyko. Bandykite dar kartą.",
-    "fromAgency": "Nuo"
+    "fromAgency": "Nuo",
+    "sharedHeading": "Bendrinama su šia agentūra",
+    "noShared": "Su šia agentūra kol kas niekas nebendrinama",
+    "unshareButton": "Nustoti bendrinti šią užklausą"
   },
   "scoutingAgencyOffers": {
     "status": {

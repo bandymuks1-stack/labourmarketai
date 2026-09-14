@@ -37,6 +37,7 @@ import { ClientAgencyBridgeSection } from "@/components/app/client-agency-bridge
 import {
   listAgencyConnections,
   listMyConnectionInvites,
+  listSharedRequestsByClient,
   listSharedRequestsForAgency,
   listAgencyOfferProgress,
 } from "@/lib/agency/bridge-read";
@@ -544,7 +545,8 @@ export default async function CompanyDashboardPage({
         revokeButton: tCB("revokeButton"), shareLabel: tCB("shareLabel"),
         sharePlaceholder: tCB("sharePlaceholder"), shareButton: tCB("shareButton"),
         noDemands: tCB("noDemands"), errorLabel: tCB("errorLabel"),
-        fromAgency: tCB("fromAgency"),
+        fromAgency: tCB("fromAgency"), sharedHeading: tCB("sharedHeading"),
+        noShared: tCB("noShared"), unshareButton: tCB("unshareButton"),
       }
     : null;
   const bridgeRosterOptions =
@@ -560,6 +562,15 @@ export default async function CompanyDashboardPage({
     clientDemands?.kind === "ok"
       ? clientDemands.rows.map((d) => ({ id: d.id, title: d.title }))
       : [];
+  // WHAT THIS CLIENT IS DISCLOSING. Depends on the connection ids resolved
+  // above, so it cannot join the batch; it is skipped entirely when the
+  // section will not render, and narrowed to the connections it will show.
+  const clientBridgeShares =
+    clientBridgeLabels && clientInvites?.kind === "ok"
+      ? await listSharedRequestsByClient(
+          clientInvites.rows.filter((r) => r.status === "active").map((r) => r.id),
+        )
+      : ({ kind: "ok", rows: [] } as const);
   // Slice 1 — operational status counts from existing data (read-back only).
   const acceptedCount = workersResult.kind === "ok" ? workersResult.rows.length : 0;
   // Slice 9 — per-worker work-readiness SIGNALS (not a rating), computed from
@@ -1255,6 +1266,7 @@ export default async function CompanyDashboardPage({
             invites={clientInvites}
             clientCompanyId={ownCompany.id}
             demands={clientBridgeDemands}
+            shared={clientBridgeShares}
             labels={clientBridgeLabels}
           />
         </div>

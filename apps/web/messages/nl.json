@@ -11366,7 +11366,10 @@
     "shareButton": "Delen",
     "noDemands": "Maak eerst een aanvraag, daarna kunt u die delen.",
     "errorLabel": "Er ging iets mis. Probeer opnieuw.",
-    "fromAgency": "Van"
+    "fromAgency": "Van",
+    "sharedHeading": "Gedeeld met dit bureau",
+    "noShared": "Nog niets gedeeld met dit bureau",
+    "unshareButton": "Deze aanvraag niet langer delen"
   },
   "scoutingAgencyOffers": {
     "status": {

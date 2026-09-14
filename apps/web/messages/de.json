@@ -11366,7 +11366,10 @@
     "shareButton": "Teilen",
     "noDemands": "Erstellen Sie zuerst eine Anfrage, dann können Sie sie teilen.",
     "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
-    "fromAgency": "Von"
+    "fromAgency": "Von",
+    "sharedHeading": "Mit dieser Agentur geteilt",
+    "noShared": "Noch nichts mit dieser Agentur geteilt",
+    "unshareButton": "Diese Anfrage nicht mehr teilen"
   },
   "scoutingAgencyOffers": {
     "status": {

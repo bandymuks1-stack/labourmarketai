@@ -11366,7 +11366,10 @@
     "shareButton": "Share",
     "noDemands": "Create a request first, then you can share it.",
     "errorLabel": "Something went wrong. Try again.",
-    "fromAgency": "From"
+    "fromAgency": "From",
+    "sharedHeading": "Shared with this agency",
+    "noShared": "Nothing shared with this agency yet",
+    "unshareButton": "Stop sharing this request"
   },
   "scoutingAgencyOffers": {
     "status": {
