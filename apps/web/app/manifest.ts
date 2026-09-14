@@ -33,22 +33,30 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#000000",
     theme_color: "#000000",
     icons: [
-      // The brand SVG scales to every size and carries its own background
-      // plate (safe for maskable cropping). PNG 192/512 fallbacks for older
-      // Android launchers are a known follow-up (needs generated assets —
-      // tracked in docs/mobile/mobile-app-readiness-v1.md).
-      {
-        src: "/app-icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
-        purpose: "any",
-      },
-      {
-        src: "/app-icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
-        purpose: "maskable",
-      },
+      // THE PNGs ARE NOT A FALLBACK — THEY ARE THE INSTALLABILITY REQUIREMENT.
+      //
+      // Chromium's install criteria require a raster icon of at least
+      // 192x192, and a 512x512 for the splash. An SVG-only icon list is
+      // valid manifest JSON and is NOT installable: the browser simply never
+      // offers to install, with no error anywhere a developer would look.
+      // This manifest shipped SVG-only, so the PWA has not been installable
+      // on Android or desktop Chrome — the same silent-failure class as a
+      // green test over an unreachable capability.
+      //
+      // All four are rasterizations of `public/app-icon.svg` — the owner's
+      // own mark, geometry verbatim. Nothing here is a new design, and no
+      // brand decision was taken to generate them. Regenerate with
+      // `pnpm -F web icons:generate`.
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      // Maskable is a SEPARATE rendering, not the same file relabelled: an
+      // Android launcher crops a maskable icon to ~80% of its width, so the
+      // mark is drawn at 80% on a full-bleed ink plate. Declaring the "any"
+      // PNG as maskable would let the launcher clip the glyph.
+      { src: "/icon-maskable-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+      { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      // The vector stays FIRST-CLASS for anything that can scale it.
+      { src: "/app-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
       { src: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
     ],
   };

@@ -483,6 +483,38 @@ describe("the ChatGPT / MCP surface carries the canonical brand", () => {
       "favicon.ico",
       "logo-mark.svg", // the explicitly-labelled placeholder set
     ]);
+
+    /**
+     * GENERATED RASTERIZATIONS — admitted 2026-09-14, and the distinction
+     * this guard turns on is worth stating rather than widening quietly.
+     *
+     * What this rule exists to stop is a SECOND MARK: a file somebody drew,
+     * traced or hand-resized, which then drifts from the owner's vector with
+     * nothing to notice the drift. What these four are is the output of
+     * `scripts/generate-icons.mts` run over `public/app-icon.svg` — one
+     * source, one command, geometry by construction.
+     *
+     * They exist because Chromium will not offer to install a PWA whose icon
+     * list has no raster >= 192x192, and says nothing when it declines. The
+     * manifest was SVG-only, so the product was silently not installable.
+     *
+     * The safeguard against the fork this rule fears is therefore not their
+     * absence but their PROVENANCE, and that is checked:
+     * `lib/guards/pwa-installability.test.ts` requires both the source SVG
+     * and the generator to exist, and pins every declared size against the
+     * PNG's real IHDR header. Delete the generator and that guard goes red.
+     *
+     * A hand-made copy at one of these names would pass here and is still
+     * forbidden — the rule is the generator, not the filename.
+     */
+    for (const generated of [
+      "icon-192.png",
+      "icon-512.png",
+      "icon-maskable-192.png",
+      "icon-maskable-512.png",
+    ]) {
+      CANONICAL_MARKS.add(generated);
+    }
     const svgsIn = (dir: string): string[] => {
       try {
         return readdirSync(join(APP_ROOT, dir), { withFileTypes: true })

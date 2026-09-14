@@ -15,6 +15,8 @@ import {
 import {
   handleMcpMessage,
   parseErrorResponse,
+  MCP_PROTOCOL_VERSION,
+  SUPPORTED_PROTOCOL_VERSIONS,
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
@@ -143,6 +145,41 @@ function serverInfo(origin: string) {
 const MAX_BODY_BYTES = 64 * 1024;
 
 /**
+ * CORS for browser-resident MCP clients (the Inspector, a web-hosted agent).
+ *
+ * `*` WITHOUT `Access-Control-Allow-Credentials`. That pairing is the whole
+ * security argument and it is not an oversight: with a wildcard origin and no
+ * credentials flag, a browser REFUSES to attach cookies, so the cookie-session
+ * branch of `resolveApiIdentity` is unreachable cross-origin and no CSRF is
+ * introduced. A cross-origin caller can only present a bearer token, which is
+ * exactly what an MCP client has. Adding `Allow-Credentials: true` here would
+ * turn this door into a CSRF hole against every signed-in browser session.
+ *
+ * `WWW-Authenticate` is EXPOSED because it carries the RFC 9728 pointer a
+ * client needs to start OAuth; unexposed, a browser client sees a bare 401
+ * and cannot discover where to authenticate.
+ */
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type, MCP-Protocol-Version, Accept-Language",
+  "Access-Control-Expose-Headers": "WWW-Authenticate, MCP-Protocol-Version, Server-Timing",
+  "Access-Control-Max-Age": "86400",
+};
+
+/**
+ * The protocol version this response is spoken in, echoed per 2026-07-28.
+ *
+ * A client that stated a version we serve gets its own back; one that stated
+ * nothing gets the default. `handleMcpMessage` has already REFUSED anything
+ * we do not serve, so this never echoes a version we cannot honour.
+ */
+function negotiatedVersion(req: Request): string {
+  const stated = req.headers.get("mcp-protocol-version");
+  return stated && SUPPORTED_PROTOCOL_VERSIONS.includes(stated) ? stated : MCP_PROTOCOL_VERSION;
+}
+
+/**
  * Server-Timing (RFC-standard header) for the three server-side phases a
  * client can otherwise only guess at: bearer verification against the auth
  * server, the capability (including its DB reads), and the presentation
@@ -161,7 +198,11 @@ export async function POST(req: Request) {
   const authMs = performance.now() - t0;
   if (!auth.ok) {
     const refusal = classifyRefusal(auth.reason);
-    const headers: Record<string, string> = { "Server-Timing": serverTiming({ auth: authMs }) };
+    const headers: Record<string, string> = {
+      ...CORS_HEADERS,
+      "MCP-Protocol-Version": negotiatedVersion(req),
+      "Server-Timing": serverTiming({ auth: authMs }),
+    };
     const challenge = wwwAuthenticateChallenge(new URL(req.url).origin, refusal.errorClass);
     if (challenge) headers["WWW-Authenticate"] = challenge;
     logEvent({
@@ -220,6 +261,12 @@ export async function POST(req: Request) {
 
   const marks: Record<string, number> = { auth: authMs };
   const response = await handleMcpMessage(message, {
+    // 2026-07-28 carries the protocol version per request. `Mcp-Session-Id`
+    // is deliberately NOT read: the revision removed protocol-level sessions,
+    // and a server on it must ignore the header an older client may still
+    // send rather than mint or echo one. This door has never been stateful,
+    // so there is nothing to stop doing — only something never to start.
+    transportProtocolVersion: req.headers.get("mcp-protocol-version"),
     serverInfo: serverInfo(new URL(req.url).origin),
     instructions:
       "LabourMarket.ai capabilities for the signed-in user. Reads return " +
@@ -273,16 +320,29 @@ export async function POST(req: Request) {
   });
 
   marks.total = performance.now() - t0;
-  const timing = { "Server-Timing": serverTiming(marks) };
+  const headers = {
+    ...CORS_HEADERS,
+    "MCP-Protocol-Version": negotiatedVersion(req),
+    "Server-Timing": serverTiming(marks),
+  };
   // A notification produces no body — 202 per streamable-HTTP MCP.
-  if (response === null) return new Response(null, { status: 202, headers: timing });
-  return NextResponse.json(response, { headers: timing });
+  if (response === null) return new Response(null, { status: 202, headers });
+  return NextResponse.json(response, { headers });
+}
+
+/**
+ * CORS preflight. A browser-resident MCP client cannot POST here at all
+ * without it — the request never leaves the browser, so the door looks dead
+ * rather than protected.
+ */
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
 /** No SSE stream: this server is deliberately stateless (single-response). */
 export async function GET() {
   return NextResponse.json(
     { ok: false, message: "This MCP endpoint is POST-only (stateless streamable HTTP)." },
-    { status: 405, headers: { Allow: "POST" } },
+    { status: 405, headers: { ...CORS_HEADERS, Allow: "POST, OPTIONS" } },
   );
 }
