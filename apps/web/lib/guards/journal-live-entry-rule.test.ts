@@ -239,14 +239,36 @@ const SEES_EVERY_ROW: Record<string, string> = {
   "app/[locale]/dashboard/inbox/page.tsx":
     "ids come from reviewable_journal_entry_ids(), filtered in SQL",
 
-  // A subject-access export is the one place the person is entitled to
-  // EVERYTHING held about them, retracted rows included.
-  "lib/privacy/export-data.ts": "GDPR subject access — withholding rows would be the defect",
 
   // Not a figure shown to anyone: which workers were active, for notification
   // targeting. A superseded entry still means the person worked.
   "lib/notifications/event-emitters.ts": "activity cohort for notifications, not a presented count",
 };
+
+/**
+ * WHERE THE GDPR EXPORT WENT (PER-12, Step C). `lib/privacy/export-data.ts`
+ * used to appear in the sweep below and sat on SEES_EVERY_ROW: a subject-access
+ * response is the one place a person is entitled to EVERYTHING held about them,
+ * retracted rows included. It no longer names a table at all — the relation set
+ * moved to `lib/privacy/personal-relations.ts`, so the sweep cannot see it and
+ * the exemption became a ghost. The property still has to hold, so it is
+ * asserted directly against the register instead of by exemption.
+ */
+describe("the subject-access export still sees every journal row", () => {
+  it("journal_entries is exported, and not through the live-only rule", async () => {
+    const { EXPORTED_RELATIONS } = await import("@/lib/privacy/personal-relations");
+    const entry = EXPORTED_RELATIONS.find((r) => r.table === "journal_entries");
+    expect(entry, "the GDPR export must still carry the person's journal").toBeTruthy();
+    const src = readFileSync(
+      join(__dirname, "..", "privacy", "export-data.ts"),
+      "utf8",
+    );
+    expect(
+      src,
+      "a subject-access bundle must not hide the person's own retracted work",
+    ).not.toMatch(/liveJournalEntriesOnly|isLiveJournalEntry/);
+  });
+});
 
 describe("no reader of journal_entries is unclassified", () => {
   const APP = join(__dirname, "..", "..");

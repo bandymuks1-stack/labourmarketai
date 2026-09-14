@@ -282,7 +282,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/worker"],
     coreModule: null,
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "`confirmed_by_manager` has no write path, so it is permanently false.",
+    note: "`confirmed_by_manager` has no write path, so it is permanently false. STEP C (2026-09-14) STOPPED this: it is DEFERRED BY DESIGN, not half-built. The creating migration (20260714160000) says so in the column comment — 'Only a REAL confirmation flow (future, SECURITY DEFINER) may set true' — and the column is deliberately excluded from the authenticated insert/update grants. Building that flow means a new SECURITY DEFINER RPC and a decision about who may confirm an achievement: NEW structure plus a new authority boundary, neither authorized in Step C. Production: 2 achievements, 0 confirmed.",
   },
   {
     id: "PER-10",
@@ -320,7 +320,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/privacy"],
     coreModule: "lib/privacy/export-data.ts",
     surfaces: ["app/[locale]/dashboard/account"],
-    note: "GDPR export covers 6 relations; ~14 personal relations are not in it.",
+    note: "GDPR export now covers 48 relations, up from 6. The count in this note was itself wrong: it said ~14 were missing; a production sweep on 2026-09-14 found 60 person-keyed tables, so ~30 were neither exported nor named while the bundle's `excluded` list invited the reader to assume anything unmentioned was included. Every person-keyed relation is now EXPORTED, WITHHELD with a reason that travels in the bundle, or declared non-product (lib/privacy/personal-relations.ts), enforced by `privacy-export-completeness.test.ts`, which derives the table set from the MIGRATIONS so a new person-keyed table fails CI the day it lands. That guard immediately found four the production sweep had missed (dashboard_preferences, demand_interest_seen, worker_external_profiles, worker_opportunity_seen) — they are in migrations that are NOT applied to production. Bundle format is v2; a relation this database does not have reports as empty, not as unread. Still RLS-scoped as the person: no service role, guarded.",
   },
   {
     id: "PER-13",
@@ -549,7 +549,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/company"],
     coreModule: null,
     surfaces: [],
-    note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers.",
+    note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers. STEP C (2026-09-14) STOPPED this: it is a NEW AUTHORITY BOUNDARY, not a wiring gap. Verified against production — `owns_company` = company creator OR an active `owner`/`admin` company_membership, and the migration that widened it (20260904060000) records in its own proof note that a manager-role member deliberately satisfies neither arm. Meanwhile `manages_organization` DOES include manager/external_manager (20260806180000), so the two helpers encode two intentionally different authority levels and `company_workers_select` uses the narrower one. Pointing that policy at the wider helper would let managers read the roster (worker personal data) — RLS-loosening, RED class, owner gate. Production: 1 active manager, 7 company_workers rows, so exactly one real person is affected.",
   },
   {
     id: "ORG-6",
@@ -1061,7 +1061,7 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     anchors: ["lib/booking"],
     coreModule: "lib/booking/booking-state.ts",
     surfaces: ["app/[locale]/dashboard/bookings"],
-    note: "Nothing exists past `accepted`; the expiry RPC has no scheduler.",
+    note: "Nothing exists past `accepted`; the expiry RPC has no scheduler — and STEP C found the scheduler is not the blocker. `expire_stale_booking_requests_v1` raises 'Admin only' unless `auth.uid()` is non-null and `is_admin()`, and is granted to `authenticated`, not service_role; a Vercel cron request is a machine with no identity. The platform DOES already have a scheduler (vercel.json crons + `authorizeCronRequest`, fail-closed) — what is missing is an authority path for a machine caller, which is RED. Everything past `accepted` is separate and needs new state.",
   },
   {
     id: "CAL-7",
@@ -1154,7 +1154,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     anchors: ["lib/assets"],
     coreModule: "lib/assets/assets-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`issue_asset_v1` has no availability guard and no lock.",
+    note: "`issue_asset_v1` has no availability guard and no lock — CONFIRMED against the live function body 2026-09-14: it checks authority, requires a target and validates the condition enum, then inserts an `issued` assignment and sets `assets.availability = assigned` WITHOUT testing current availability, without checking for an existing open assignment, and without `for update`. Two calls therefore issue the same physical asset twice. STEP C wrote no migration: the fix is a CREATE OR REPLACE of a SECURITY DEFINER function, which is RED class (human gate) by doctrine, and adding a RED migration would move this whole PR out of its current all-green class. The fix is small and tightening — lock the asset row, then refuse when it is already assigned or already has an open assignment. Production exposure today: 0 assets, 0 asset_assignments.",
   },
   {
     id: "MKT-4",
@@ -1247,7 +1247,7 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     anchors: ["lib/privacy"],
     coreModule: null,
     surfaces: ["app/[locale]/dashboard/inbox"],
-    note: "0 rows; the expiry RPC has no caller, so requests never expire.",
+    note: "0 rows; the expiry RPC has no caller, so requests never expire. STEP C established WHY, and it is not a missing cron entry: `expire_contact_disclosure_requests_v1` is granted to `authenticated` only (never service_role) and returns not_authorized unless `auth.uid()` is non-null AND `is_admin()`. A scheduler is a machine with no user identity, so it cannot satisfy either condition. Connecting it needs a grant change plus an authority-model change — RED, owner gate. The same is true of `expire_stale_booking_requests_v1` (CAL-6) and `expire_stale_team_enquiries_v1`.",
   },
   {
     id: "COM-3",

@@ -110,10 +110,12 @@ describe("a failed read is named, never rendered as absence", () => {
   });
 
   it("a failed profile read yields null AND an entry, not a bare null", async () => {
+    // The bundle key is the TABLE name now (format version 2): every other
+    // key in `data` is a table, and `profile` was the one exception.
     tables.set("profiles", fails());
     const b = await bundle();
-    expect(b.data.profile).toBeNull();
-    expect(b.unavailable).toContain("profile");
+    expect(b.data.profiles).toBeNull();
+    expect(b.unavailable).toContain("profiles");
   });
 
   it("a failed consents read is not an empty consent audit trail", async () => {
