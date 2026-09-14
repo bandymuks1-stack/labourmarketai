@@ -15679,7 +15679,10 @@
         "notAuthorized": "Negalite įrašyti šių valandų.",
         "generic": "Nepavyko apdoroti. Bandykite dar kartą."
       }
-    }
+    },
+    "correct": "Taisyti",
+    "correctCancel": "Atšaukti",
+    "correctHint": "Išsaugojus sukuriamas naujas įrašas, o pradinis lieka šalia — niekas neištrinama."
   },
   "oauthConsent": {
     "title": "Prieigos patvirtinimas",

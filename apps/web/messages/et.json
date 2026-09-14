@@ -6308,7 +6308,10 @@
         "notAuthorized": "Te ei tohi neid tunde kirjutada.",
         "generic": "Töötlemine ebaõnnestus. Proovige uuesti."
       }
-    }
+    },
+    "correct": "Paranda",
+    "correctCancel": "Tühista",
+    "correctHint": "Salvestamisel luuakse uus kirje ja algne jääb selle kõrvale alles — midagi ei kustutata."
   },
   "companyHome": {
     "eyebrow": "Teie organisatsioon praegu",

@@ -15679,7 +15679,10 @@
         "notAuthorized": "You may not record these hours.",
         "generic": "Could not process. Please try again."
       }
-    }
+    },
+    "correct": "Correct",
+    "correctCancel": "Cancel",
+    "correctHint": "Saving writes a new record and keeps the original alongside it — nothing is erased."
   },
   "oauthConsent": {
     "title": "Confirm access",

@@ -6308,7 +6308,10 @@
         "notAuthorized": "Jūs nevarat ierakstīt šīs stundas.",
         "generic": "Neizdevās apstrādāt. Mēģiniet vēlreiz."
       }
-    }
+    },
+    "correct": "Labot",
+    "correctCancel": "Atcelt",
+    "correctHint": "Saglabājot tiek izveidots jauns ieraksts, bet sākotnējais paliek blakus — nekas netiek dzēsts."
   },
   "companyHome": {
     "eyebrow": "Jūsu organizācija tagad",

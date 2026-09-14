@@ -6308,7 +6308,10 @@
         "notAuthorized": "Du får inte registrera dessa timmar.",
         "generic": "Bearbetningen misslyckades. Försök igen."
       }
-    }
+    },
+    "correct": "Rätta",
+    "correctCancel": "Avbryt",
+    "correctHint": "När du sparar skapas en ny post och den ursprungliga behålls bredvid — inget raderas."
   },
   "companyHome": {
     "eyebrow": "Din organisation nu",

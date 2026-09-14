@@ -15679,7 +15679,10 @@
         "notAuthorized": "Sie dürfen diese Stunden nicht erfassen.",
         "generic": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen."
       }
-    }
+    },
+    "correct": "Korrigieren",
+    "correctCancel": "Abbrechen",
+    "correctHint": "Beim Speichern entsteht ein neuer Eintrag, der ursprüngliche bleibt daneben erhalten — nichts wird gelöscht."
   },
   "oauthConsent": {
     "title": "Zugriff bestätigen",

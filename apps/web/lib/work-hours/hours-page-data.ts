@@ -42,6 +42,11 @@ export type HoursPageObject = {
 
 export type HoursPageEntry = {
   readonly id: string;
+  /** Opaque ids so a correction can be pre-filled without a second read.
+   *  Both are ids of rows the caller already manages — the surface renders
+   *  only on the employer/manager branch, and RLS decides again on write. */
+  readonly workerId: string;
+  readonly workObjectId: string;
   readonly workerName: string;
   readonly objectName: string;
   readonly objectTint: string;
@@ -132,6 +137,8 @@ export async function getHoursPageData(workDate: string): Promise<HoursPageData>
     const obj = objectById.get(a.workObjectId);
     return {
       id: a.id,
+      workerId: a.workerId,
+      workObjectId: a.workObjectId,
       workerName: workerName.get(a.workerId) ?? "—",
       objectName: obj?.name ?? "—",
       objectTint: obj?.tint ?? objectTint(a.workObjectId, null),

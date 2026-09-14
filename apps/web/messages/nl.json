@@ -15679,7 +15679,10 @@
         "notAuthorized": "U mag deze uren niet registreren.",
         "generic": "Verwerken mislukt. Probeer het opnieuw."
       }
-    }
+    },
+    "correct": "Corrigeren",
+    "correctCancel": "Annuleren",
+    "correctHint": "Opslaan maakt een nieuw record aan en bewaart het origineel ernaast — er wordt niets gewist."
   },
   "oauthConsent": {
     "title": "Toegang bevestigen",

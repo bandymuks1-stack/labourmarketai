@@ -6308,7 +6308,10 @@
         "notAuthorized": "Nie możesz zapisać tych godzin.",
         "generic": "Przetwarzanie nie powiodło się. Spróbuj ponownie."
       }
-    }
+    },
+    "correct": "Popraw",
+    "correctCancel": "Anuluj",
+    "correctHint": "Zapis tworzy nowy wpis, a pierwotny pozostaje obok — nic nie jest usuwane."
   },
   "companyHome": {
     "eyebrow": "Twoja organizacja teraz",

@@ -6308,7 +6308,10 @@
         "notAuthorized": "Du må ikke registrere disse timer.",
         "generic": "Behandlingen mislykkedes. Prøv igen."
       }
-    }
+    },
+    "correct": "Ret",
+    "correctCancel": "Annullér",
+    "correctHint": "Ved at gemme oprettes en ny post, og den oprindelige bevares ved siden af — intet slettes."
   },
   "companyHome": {
     "eyebrow": "Din organisation nu",

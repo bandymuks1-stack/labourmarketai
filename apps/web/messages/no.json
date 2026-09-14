@@ -6308,7 +6308,10 @@
         "notAuthorized": "Du kan ikke registrere disse timene.",
         "generic": "Behandlingen mislyktes. Prøv igjen."
       }
-    }
+    },
+    "correct": "Rett",
+    "correctCancel": "Avbryt",
+    "correctHint": "Lagring oppretter en ny oppføring, og den opprinnelige beholdes ved siden av — ingenting slettes."
   },
   "companyHome": {
     "eyebrow": "Organisasjonen din nå",
