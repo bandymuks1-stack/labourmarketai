@@ -10330,6 +10330,14 @@
       "noneRecordedNext": "Für die nächsten 7 Tage ist keine genehmigte Abwesenheit erfasst.",
       "notReadable": "Kann gerade nicht gelesen werden",
       "basis": "Das aktive Team zählt Beschäftigte, die aktiv mit Ihrem Unternehmen verknüpft sind. Abwesenheiten sind genehmigte erfasste Abwesenheiten — eine Person ohne erfasste Abwesenheit ist damit nicht bestätigt bei der Arbeit. Die Zahl der Arbeitseinträge umfasst Einträge, die Beschäftigte heute in den Beschäftigungsverhältnissen Ihrer Organisation erfasst haben. Gründe für Abwesenheiten bleiben privat."
+    },
+    "utilisation": {
+      "title": "Verplanter Anteil der kommenden Wochen",
+      "committedDays": "{committed} von {counted} Personentagen verplant — {workers} Personen über {days} Tage",
+      "noneCounted": "Für diesen Zeitraum konnten von niemandem Verpflichtungen gezählt werden.",
+      "partial": "{count} davon konnten nicht vollständig gezählt werden — etwas Reales hat keine Daten, die Zahl oben ist also eine Untergrenze.",
+      "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
+      "denominatorNote": "Gezählt in Kalendertagen. Vertragsstunden werden nicht erfasst, dies ist also keine VZÄ-Kennzahl."
     }
   },
   "tasks": {

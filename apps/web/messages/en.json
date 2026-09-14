@@ -10330,6 +10330,14 @@
       "noneRecordedNext": "No approved absence is recorded for the next 7 days.",
       "notReadable": "Cannot be read right now",
       "basis": "Active roster counts workers actively linked to your company. Absences are approved recorded absences — a worker without a recorded absence is not thereby confirmed to be at work. Work entry counts cover entries recorded by workers in your organization's engagements today. Reasons for absences stay private."
+    },
+    "utilisation": {
+      "title": "Committed share of the next weeks",
+      "committedDays": "{committed} of {counted} worker-days committed — {workers} people over {days} days",
+      "noneCounted": "No worker's commitments could be counted for this window.",
+      "partial": "{count} of them could not be counted in full — something real has no dates, so the figure above is a floor.",
+      "unknown": "{count} could not be read at all. That is not the same as free.",
+      "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
     }
   },
   "tasks": {

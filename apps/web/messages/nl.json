@@ -10330,6 +10330,14 @@
       "noneRecordedNext": "Voor de komende 7 dagen is geen goedgekeurde afwezigheid geregistreerd.",
       "notReadable": "Kan nu niet worden gelezen",
       "basis": "De actieve ploeg telt werkers die actief aan je bedrijf zijn gekoppeld. Afwezigheden zijn goedgekeurde geregistreerde afwezigheden — een werker zonder geregistreerde afwezigheid is daarmee niet bevestigd aan het werk. Werkregistratie-aantallen omvatten registraties die werkers vandaag in de dienstverbanden van je organisatie hebben vastgelegd. Redenen van afwezigheid blijven privé."
+    },
+    "utilisation": {
+      "title": "Vastgelegd deel van de komende weken",
+      "committedDays": "{committed} van {counted} mensdagen vastgelegd — {workers} mensen over {days} dagen",
+      "noneCounted": "Voor dit venster konden van niemand de afspraken worden geteld.",
+      "partial": "{count} daarvan konden niet volledig worden geteld — iets echts heeft geen datums, dus het getal hierboven is een ondergrens.",
+      "unknown": "{count} konden helemaal niet worden gelezen. Dat is niet hetzelfde als vrij.",
+      "denominatorNote": "Geteld in kalenderdagen. We leggen geen contracturen vast, dus dit is geen fte-cijfer."
     }
   },
   "tasks": {

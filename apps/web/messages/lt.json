@@ -10330,6 +10330,14 @@
       "noneRecordedNext": "Artimiausioms 7 dienoms patvirtintų neatvykimų neužfiksuota.",
       "notReadable": "Dabar nepavyksta perskaityti",
       "basis": "Aktyvi komanda — darbuotojai, aktyviai susieti su jūsų įmone. Neatvykimai — patvirtinti užfiksuoti neatvykimai; darbuotojas be užfiksuoto neatvykimo nėra dėl to patvirtintai darbe. Darbo įrašų skaičiai apima įrašus, kuriuos darbuotojai šiandien užfiksavo jūsų organizacijos darbo santykiuose. Neatvykimų priežastys lieka privačios."
+    },
+    "utilisation": {
+      "title": "Užimta artimiausių savaičių dalis",
+      "committedDays": "Užimta {committed} iš {counted} žmogaus dienų — {workers} žmonės per {days} d.",
+      "noneCounted": "Šiam laikotarpiui nepavyko suskaičiuoti nė vieno darbuotojo įsipareigojimų.",
+      "partial": "{count} iš jų nepavyko suskaičiuoti iki galo — kai kas neturi datų, todėl skaičius viršuje yra minimumas.",
+      "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
+      "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
     }
   },
   "tasks": {

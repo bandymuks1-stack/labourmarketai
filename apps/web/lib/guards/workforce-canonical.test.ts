@@ -45,6 +45,11 @@ const PURE_MODULES = [
   // a fact (SEP-1), so the reading is derived from finished project_stages
   // rows on every render. The authorized read lives in lib/projects.
   "learned-duration.ts",
+  // CAL-9 (owner-approved 2026-09-14): utilisation over a window, read from
+  // the SAME commitment vocabulary CAL-7 defines. Pure. It names its
+  // denominator (calendar days) because the schema records no contracted
+  // hours, and it withholds a ratio rather than build one on a floor.
+  "utilisation.ts",
 ] as const;
 
 const sourceFiles = readdirSync(WORKFORCE_DIR).filter(
