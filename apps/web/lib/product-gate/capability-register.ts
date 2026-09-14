@@ -585,7 +585,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/agency"],
     coreModule: "lib/agency/clients.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`agency_client_connections` is live; `agency_clients` is a second, unapplied client model (§6.4 item 1).",
+    note: "`agency_client_connections` is live; `agency_clients` is a second client model that is UNAPPLIED BY OWNER GATE, not by drift — its migration (20260713160000) carries the header 'DRAFT — needs-human-gate — DO NOT APPLY … owner approved MERGING this draft; application to production stays a separate owner gate'. STEP D therefore did not converge it: retiring a prepared, owner-gated migration is an owner decision, and the two models are not equivalent (`agency_client_connections` records an invitation-shaped connection; the unapplied table is the fuller client model). `lib/agency/clients.ts` reads the absent table and degrades honestly, so the capability is inert, not broken. Full inventory: docs/launch/SCHEMA_DRIFT_REPO_VS_PRODUCTION_2026-09-14.md.",
   },
   {
     id: "ORG-9",
@@ -822,7 +822,7 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/work-hours", "lib/timesheets"],
     coreModule: "lib/work-hours/allocations-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Three stores plus one dead one, reconciled inside ONE SQL function; no TypeScript reader unions them.",
+    note: "STEP D (2026-09-14): this convergence WAS ALREADY DONE, and the note described a state that no longer exists. OWNER RULING 2026-08-18 made `journal_entry_metrics` the canonical persisted source and `lib/journal/work-time.ts` THE one derivation rule; its header records the exact defect it closed (three computations gave 0 h, 5 h and 9 h for the same production entry) and states that SQL mirrors it byte-for-byte with a guard pinning the pair. The stores are a PIPELINE, not parallel truths: `timesheet_compute_lines_v1` is labelled THE CANONICAL HOUR FACT and carries an explicit allocation-wins dedupe — an entry referenced by a live allocation is excluded so its hours count exactly once. A TypeScript reader that UNIONED the stores, which the old note asked for, would double-count by construction. Duplicate finding classified FALSE.",
   },
   {
     id: "EVID-6",
@@ -931,7 +931,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/market/match-v1.ts"],
     coreModule: "lib/market/match-v1.ts",
     surfaces: ["app/[locale]/dashboard/opportunities"],
-    note: "One frozen fork is still reachable at /match-preview — a second matching truth (debt).",
+    note: "One frozen fork is reachable at /match-preview. STEP D (2026-09-14) tested it against the five-point convergence proof and classifies the DUPLICATE FINDING AS FALSE — preserve both. The fork and `match-v1` differ on every axis that matters: PERMISSIONS (anonymous marketing page vs authenticated board), PROVENANCE (two hand-typed intake schemas vs a subject assembled from the person's real rows with manager_confirmed/work_journal/self_declared tiers), LIFECYCLE (nothing persisted vs a board carrying interest and booking), and USER INTENT (a stranger deciding whether to sign up vs a member deciding whether to raise their hand). The fork's output shape is also the HONEST one for its input: it returns five blocker verdicts and refuses to produce a score, because there is no evidence behind typed input — re-pointing it at the canonical engine would run an evidence-weighted ranking over data with no provenance and hand a stranger a weak verdict for a perfect fit. Copy verified honest ('preview tool … does not book or save'). It remains real debt (two engines to maintain) and stays FROZEN by `staffing-fit-frozen.test.ts`; it is not a convergence candidate.",
   },
   {
     id: "DEM-6",
@@ -1024,7 +1024,7 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     anchors: ["lib/worker/work-card-core.ts"],
     coreModule: "lib/worker/work-card-core.ts",
     surfaces: ["components/app/conversation"],
-    note: "Four incompatible availability vocabularies, none derived from another (debt).",
+    note: "STEP D (2026-09-14) classifies this duplicate finding FALSE: the vocabularies describe four different SUBJECTS, not one subject four ways. `WORK_CARD_AVAILABILITY_STATUSES` (available|busy|unavailable) is a PERSON's current state on `workers.availability_status`; `TeamAvailabilityStatus` (available_now|available_from|not_available) is a TEAM's deployability on `team_details`, pairing a state with a start date; `ASSET_AVAILABILITY` (available|assigned|maintenance|retired) is EQUIPMENT. Different subject, table, lifecycle and authority in each case — they share only the English word 'available'. Worker availability itself is read consistently against one literal across admin/league, launch-readiness and worker-readiness: no same-subject duplication found. Converging them would collapse three real distinctions.",
   },
   {
     id: "CAL-4",
