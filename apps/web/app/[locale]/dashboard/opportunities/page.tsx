@@ -63,6 +63,9 @@ import {
   DEFAULT_WORLD_BOUNDS,
   DEFAULT_WORLD_ZOOM,
 } from "@/lib/market-map/world-model";
+import { SavedSearchesStrip } from "@/components/app/saved-searches-strip";
+import { getMySavedSearches, notifySavedSearchMatches } from "@/lib/opportunities/saved-searches";
+import { hasAnyCriteria, readSavedSearches } from "@/lib/opportunities/saved-search-model";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
@@ -195,6 +198,11 @@ export default async function OpportunitiesPage({
   // chip narrows what the external-supply retrieval FETCHES (closed-set
   // values), not merely what the page hides afterwards.
   const { filters, sort, view } = parseDiscoveryParams(sp);
+  // DEM-8 — the worker's own standing questions. Read alongside the board so
+  // the matches are counted against the SAME cards the worker sees, under
+  // their own authorization. Unavailable (owner-gated migration unapplied, or
+  // a failed read) renders no controls at all.
+  const savedSearches = await getMySavedSearches();
   // Board + salary benchmark + weekly digest are independent reads — one
   // combined await so TTFB pays the slowest of the three, not their sum.
   const [result, salaryIntel, weekly, worldView] = await Promise.all([
@@ -217,6 +225,22 @@ export default async function OpportunitiesPage({
       layer: "demand",
     }),
   ]);
+
+  // DEM-8 — each saved question read against the cards this worker's own
+  // board read returned. `applyDiscoveryFilters` is the board's own matcher,
+  // so what the strip counts and what the search opens cannot disagree.
+  const savedSearchReadings =
+    savedSearches.available && result.kind === "ready"
+      ? readSavedSearches(savedSearches.searches, result.opportunities)
+      : [];
+  // Fire-and-forget: the board is the answer; the durable notification is a
+  // convenience on top of it and must never delay or fail this render.
+  if (savedSearchReadings.length > 0) {
+    void notifySavedSearchMatches(
+      savedSearchReadings,
+      new Date().toISOString().slice(0, 10),
+    );
+  }
 
   // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
   //    never more than 5 items before the person asks for more. Pure
@@ -878,6 +902,15 @@ export default async function OpportunitiesPage({
                 : [];
             return (
               <OpportunityCompareProvider>
+                {savedSearches.available ? (
+                  <SavedSearchesStrip
+                    readings={savedSearchReadings}
+                    currentFilters={filters}
+                    canSaveCurrent={hasAnyCriteria(filters)}
+                    boardPath={boardHref}
+                  />
+                ) : null}
+
                 {/* Public supply line: retrieved vs shown, source, how old
                     the supply is, the door to the rest. Rows are in the
                     bands below — this states the count they come from. */}

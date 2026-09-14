@@ -90,7 +90,16 @@ export type NotificationEventType =
   // recomputes them at read time). entity_id is a deterministic uuid of the
   // ISO week, which with the UNIQUE (recipient, dedupe_key) constraint makes
   // the digest exactly-once per recipient per week.
-  | "weekly_digest";
+  | "weekly_digest"
+  // v7 (20260914140000): a saved search has answers the worker has not seen
+  // (DEM-8). Recipient is the worker themselves. POINTER-ONLY, for the same
+  // reason the digest is: a match count written by a background writer is a
+  // claim nobody re-checked, so the number is recomputed on the board under
+  // the worker's own read. entity_id is a deterministic uuid of
+  // `saved_search:<id>:<ISO week>`, which with UNIQUE (recipient, dedupe_key)
+  // makes the alert exactly-once per saved search per week — a saved search
+  // is a standing question, not a firehose.
+  | "saved_search_match";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -113,7 +122,10 @@ export type NotificationEntityType =
   | "demand_interest_response"
   // v6: the weekly digest points at the opportunities board — the surface
   // that recomputes every number the digest is about, at read time.
-  | "weekly_digest";
+  | "weekly_digest"
+  // v7: a saved search points at the opportunities board, where applying its
+  // criteria recomputes the answer live.
+  | "saved_search";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -144,6 +156,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   "demand_interest_expressed",
   "demand_interest_reviewed",
   "weekly_digest",
+  "saved_search_match",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -208,6 +221,11 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // recomputed live on the opportunities board — the digest row is only the
   // pointer to them (§19: no persisted fit values).
   weekly_digest: "/dashboard/opportunities",
+  // v7: the saved search's answer is the board with its criteria applied.
+  // The href is the plain route — the criteria are the worker's to re-apply
+  // from their own saved list, and putting them in a stored href would
+  // persist the question in a second place.
+  saved_search: "/dashboard/opportunities",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

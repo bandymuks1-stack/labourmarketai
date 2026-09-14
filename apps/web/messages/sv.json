@@ -382,7 +382,8 @@
         "event_work_task_assigned": "En uppgift har tilldelats dig",
         "event_demand_interest_expressed": "En arbetstagare har visat intresse för ditt behov",
         "event_demand_interest_reviewed": "Ett företag har markerat ditt intresse som granskat",
-        "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar"
+        "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar",
+        "event_saved_search_match": "En sparad sökning har nya resultat"
       },
       "email": {
         "open": "Öppna i LabourMarket.ai:",

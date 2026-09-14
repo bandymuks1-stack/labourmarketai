@@ -1305,6 +1305,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // being issued twice. Merged behind the human gate; the production
       // apply stays a separate owner act.
       "20260914120000_asset_single_open_assignment_v1.sql",
+      // 2026-09-14: DEM-8 (saved searches) gained its marker under the same
+      // owner decision, which approved the narrow query/criteria persistence
+      // it introduces. Merged behind the human gate; the production apply
+      // stays a separate owner act.
+      "20260914140000_worker_saved_searches_v1.sql",
     ]);
   });
 

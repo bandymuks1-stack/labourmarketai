@@ -382,7 +382,8 @@
         "event_work_task_assigned": "En oppgave er tildelt deg",
         "event_demand_interest_expressed": "En arbeidstaker har vist interesse for behovet ditt",
         "event_demand_interest_reviewed": "En bedrift har markert interessen din som gjennomgått",
-        "event_weekly_digest": "Din ukentlige oversikt over arbeid og muligheter er klar"
+        "event_weekly_digest": "Din ukentlige oversikt over arbeid og muligheter er klar",
+        "event_saved_search_match": "Et lagret søk har nye resultater"
       },
       "email": {
         "open": "Åpne i LabourMarket.ai:",

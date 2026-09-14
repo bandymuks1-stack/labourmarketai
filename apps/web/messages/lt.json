@@ -4610,7 +4610,8 @@
         "event_work_task_assigned": "Jums priskirta užduotis",
         "event_demand_interest_expressed": "Darbuotojas pareiškė susidomėjimą jūsų poreikiu",
         "event_demand_interest_reviewed": "Įmonė pažymėjo jūsų susidomėjimą kaip peržiūrėtą",
-        "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga"
+        "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
+        "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -9300,6 +9301,27 @@
       "mapTitle": "Kur yra darbo",
       "skipToList": "Į sąrašą",
       "placeLink": "Rodyti šios šalies galimybes"
+    },
+    "savedSearches": {
+      "title": "Išsaugotos paieškos",
+      "intro": "Klausimas, kurį išsaugai — atsakymas perskaičiuojamas kaskart jį atidarius.",
+      "empty": "Išsaugotų paieškų dar nėra. Susiaurink sąrašą ir išsaugok klausimą.",
+      "matches": "atitinka {count}",
+      "new": "naujų: {count}",
+      "delete": "Pašalinti",
+      "labelField": "Paieškos pavadinimas",
+      "labelPlaceholder": "pvz., suvirinimas NL",
+      "saveCurrent": "Išsaugoti šią paiešką",
+      "limitReached": "Pasiektas {limit} išsaugotų paieškų limitas.",
+      "outcome": {
+        "saved": "Išsaugota.",
+        "deleted": "Pašalinta.",
+        "invalid": "Patikrink pavadinimą ir filtrus.",
+        "limit": "Pasiektas išsaugotų paieškų limitas.",
+        "auth": "Prisijunk iš naujo.",
+        "feature-absent": "Dar neprieinama — išsaugotų paieškų atnaujinimas nepritaikytas.",
+        "error": "Įvyko klaida. Bandyk dar kartą."
+      }
     }
   },
   "workerIntake": {

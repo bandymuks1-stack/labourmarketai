@@ -382,7 +382,8 @@
         "event_work_task_assigned": "Sulle määrati ülesanne",
         "event_demand_interest_expressed": "Töötaja avaldas huvi teie vajaduse vastu",
         "event_demand_interest_reviewed": "Ettevõte märkis teie huvi läbivaadatuks",
-        "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis"
+        "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis",
+        "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi"
       },
       "email": {
         "open": "Ava LabourMarket.ai-s:",

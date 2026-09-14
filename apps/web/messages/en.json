@@ -4610,7 +4610,8 @@
         "event_work_task_assigned": "A task was assigned to you",
         "event_demand_interest_expressed": "A worker expressed interest in your demand",
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
-        "event_weekly_digest": "Your weekly work and opportunities summary is ready"
+        "event_weekly_digest": "Your weekly work and opportunities summary is ready",
+        "event_saved_search_match": "A search you saved has new results"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -9300,6 +9301,27 @@
       "mapTitle": "Where the work is",
       "skipToList": "To the list",
       "placeLink": "Show this country's opportunities"
+    },
+    "savedSearches": {
+      "title": "Saved searches",
+      "intro": "A question you keep, answered live every time you open it.",
+      "empty": "No saved searches yet. Narrow the board, then save the question.",
+      "matches": "{count} matching",
+      "new": "{count} new",
+      "delete": "Remove",
+      "labelField": "Name for this search",
+      "labelPlaceholder": "e.g. welding in NL",
+      "saveCurrent": "Save this search",
+      "limitReached": "You have reached the limit of {limit} saved searches.",
+      "outcome": {
+        "saved": "Saved.",
+        "deleted": "Removed.",
+        "invalid": "Please check the name and the filters.",
+        "limit": "You have reached the saved-search limit.",
+        "auth": "Please sign in again.",
+        "feature-absent": "Not available yet — the saved-search update is not applied.",
+        "error": "Something went wrong. Please try again."
+      }
     }
   },
   "workerIntake": {

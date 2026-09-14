@@ -4610,7 +4610,8 @@
         "event_work_task_assigned": "Er is een taak aan je toegewezen",
         "event_demand_interest_expressed": "Een werknemer heeft interesse getoond in je aanvraag",
         "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd",
-        "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar"
+        "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
+        "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -9300,6 +9301,27 @@
       "mapTitle": "Waar het werk is",
       "skipToList": "Naar de lijst",
       "placeLink": "Toon de kansen in dit land"
+    },
+    "savedSearches": {
+      "title": "Opgeslagen zoekopdrachten",
+      "intro": "Een vraag die je bewaart — het antwoord wordt elke keer opnieuw berekend.",
+      "empty": "Nog geen opgeslagen zoekopdrachten. Verfijn het overzicht en bewaar de vraag.",
+      "matches": "{count} treffers",
+      "new": "{count} nieuw",
+      "delete": "Verwijderen",
+      "labelField": "Naam voor deze zoekopdracht",
+      "labelPlaceholder": "bijv. lassen in NL",
+      "saveCurrent": "Deze zoekopdracht bewaren",
+      "limitReached": "Je hebt de limiet van {limit} opgeslagen zoekopdrachten bereikt.",
+      "outcome": {
+        "saved": "Bewaard.",
+        "deleted": "Verwijderd.",
+        "invalid": "Controleer de naam en de filters.",
+        "limit": "Je hebt de limiet bereikt.",
+        "auth": "Log opnieuw in.",
+        "feature-absent": "Nog niet beschikbaar — de update voor opgeslagen zoekopdrachten is niet toegepast.",
+        "error": "Er ging iets mis. Probeer opnieuw."
+      }
     }
   },
   "workerIntake": {

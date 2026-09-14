@@ -923,7 +923,16 @@ describe("NO new DB migration in this PR", () => {
     //   three revokes of anon. RED class (definer replacement): merged behind
     //   the human gate, production apply is a separate owner act.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
-    expect(count).toBeLessThanOrEqual(281);
+        // 281 -> the count below: DEM-8 saved searches
+    //   (20260914140000_worker_saved_searches_v1, paired guarded rollback).
+    //   Owner approval "OWNER DECISIONS — APPROVED EXECUTION WAVE"
+    //   (2026-09-14) for narrow query/criteria persistence. ONE new
+    //   worker-owned table with three gated RPCs + the notification type
+    //   widening by the v2..v6 drop-and-re-add idiom (a strict superset).
+    //   RED class: merged behind the human gate, production apply is a
+    //   separate owner act.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
+    expect(count).toBeLessThanOrEqual(282);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

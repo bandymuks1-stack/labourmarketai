@@ -253,6 +253,8 @@ describe("NOTIFICATION_EVENT_TYPES (runtime list)", () => {
     expect(NOTIFICATION_EVENT_TYPES).toContain("booking_proposed");
     expect(NOTIFICATION_EVENT_TYPES).toContain("weekly_digest");
     expect(NOTIFICATION_EVENT_TYPES).toContain("demand_interest_reviewed");
-    expect(NOTIFICATION_EVENT_TYPES.length).toBe(20);
+    // v7 (DEM-8): the saved-search alert.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("saved_search_match");
+    expect(NOTIFICATION_EVENT_TYPES.length).toBe(21);
   });
 });

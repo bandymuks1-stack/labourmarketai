@@ -4610,7 +4610,8 @@
         "event_work_task_assigned": "Ihnen wurde eine Aufgabe zugewiesen",
         "event_demand_interest_expressed": "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet",
         "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
-        "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit"
+        "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
+        "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -9300,6 +9301,27 @@
       "mapTitle": "Wo die Arbeit ist",
       "skipToList": "Zur Liste",
       "placeLink": "Möglichkeiten in diesem Land zeigen"
+    },
+    "savedSearches": {
+      "title": "Gespeicherte Suchen",
+      "intro": "Eine Frage, die du behältst — die Antwort wird bei jedem Öffnen neu berechnet.",
+      "empty": "Noch keine gespeicherten Suchen. Grenze die Liste ein und speichere die Frage.",
+      "matches": "{count} Treffer",
+      "new": "{count} neu",
+      "delete": "Entfernen",
+      "labelField": "Name für diese Suche",
+      "labelPlaceholder": "z. B. SchweiÞn in NL",
+      "saveCurrent": "Diese Suche speichern",
+      "limitReached": "Du hast das Limit von {limit} gespeicherten Suchen erreicht.",
+      "outcome": {
+        "saved": "Gespeichert.",
+        "deleted": "Entfernt.",
+        "invalid": "Bitte Name und Filter prüfen.",
+        "limit": "Das Limit ist erreicht.",
+        "auth": "Bitte erneut anmelden.",
+        "feature-absent": "Noch nicht verfügbar — das Update für gespeicherte Suchen ist nicht angewendet.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
     }
   },
   "workerIntake": {

@@ -96,6 +96,10 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "business_trips", key: "profile_id" },
   { table: "booking_requests", key: "worker_id" },
   { table: "worker_saved_opportunities", key: "worker_id" },
+  // DEM-8: the QUESTION a person saved, not just the answer they bookmarked.
+  // Exported for the same reason the bookmark is — it is their own record of
+  // what they are looking for, and it reveals nobody else.
+  { table: "worker_saved_searches", key: "worker_id" },
   { table: "demand_interest_signals", key: "worker_id" },
   { table: "matches", key: "worker_id" },
   { table: "agency_candidate_offers", key: "worker_id" },

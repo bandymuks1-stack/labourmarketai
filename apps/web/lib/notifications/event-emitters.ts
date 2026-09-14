@@ -71,6 +71,8 @@ import {
   type NotificationPreferenceRow,
 } from "./notification-preferences";
 import { maybeDispatchNotificationEmail } from "./email-dispatch";
+import { deterministicEntityId } from "./deterministic-entity-id";
+import { isoWeekKey } from "../worker/weekly-intelligence-model";
 import { getWorkerCoreRow } from "../data/worker-core";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
@@ -1368,5 +1370,46 @@ export async function emitWeeklyDigestNotificationsForCron(): Promise<
     return { kind: "ran", ...summary };
   } catch {
     return { kind: "unavailable" };
+  }
+}
+
+/**
+ * A SAVED SEARCH HAS ANSWERS THE WORKER HAS NOT SEEN (DEM-8, v7).
+ *
+ * Emitted from the worker's OWN board render, after their own read has
+ * already counted the matches under their own authorization — so this writer
+ * never decides what matches, it only records that something did. The row is
+ * a POINTER, exactly like the weekly digest: no count is persisted, because a
+ * number written by a background writer is a claim nobody re-checked, and the
+ * board recomputes it live where the href lands.
+ *
+ * EXACTLY ONCE PER SEARCH PER WEEK. The entity id is a deterministic uuid of
+ * `saved_search:<id>:<ISO week>`, so the store's UNIQUE (recipient,
+ * dedupe_key) makes re-renders, races and retries no-ops. A standing question
+ * is not a firehose: a worker who keeps finding new matches every day still
+ * hears about each saved search once a week.
+ *
+ * Fire-and-forget, like every other emitter here: a board render must never
+ * fail because a notification could not be written.
+ */
+export async function emitSavedSearchMatchNotification(input: {
+  readonly recipientProfileId: string;
+  readonly savedSearchId: string;
+  readonly todayIso: string;
+}): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    await deliver(admin, {
+      recipientProfileId: input.recipientProfileId,
+      eventType: "saved_search_match",
+      entityType: "saved_search",
+      entityId: deterministicEntityId(
+        `saved_search:${input.savedSearchId}:${isoWeekKey(input.todayIso)}`,
+      ),
+    });
+  } catch {
+    // Never surfaced to the reader — the board they are looking at is the
+    // answer; the notification is a convenience on top of it.
+    undelivered("saved_search_emit_failed");
   }
 }

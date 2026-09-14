@@ -2498,7 +2498,7 @@ describe("no migration files added by this sprint", () => {
     //   table, column, policy, grant or function touched. GREEN class;
     //   self-applied via MCP under the conditional prod-apply rule.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
-const SPRINT_BASELINE = 281;
+const SPRINT_BASELINE = 282;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
@@ -2629,6 +2629,15 @@ const SPRINT_BASELINE = 281;
     //   three revokes of anon. RED class (definer replacement): merged behind
     //   the human gate, production apply is a separate owner act.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+    // 281 -> the count below: DEM-8 saved searches
+    //   (20260914140000_worker_saved_searches_v1, paired guarded rollback).
+    //   Owner approval "OWNER DECISIONS — APPROVED EXECUTION WAVE"
+    //   (2026-09-14) for narrow query/criteria persistence. ONE new
+    //   worker-owned table with three gated RPCs + the notification type
+    //   widening by the v2..v6 drop-and-re-add idiom (a strict superset).
+    //   RED class: merged behind the human gate, production apply is a
+    //   separate owner act.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
