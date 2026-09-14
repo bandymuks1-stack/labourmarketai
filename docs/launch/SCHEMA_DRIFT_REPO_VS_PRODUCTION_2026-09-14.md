@@ -9,6 +9,11 @@ Method: every `create table … public.<name>` in `supabase/migrations/*.sql`
 compared against `information_schema.tables` on the production project
 (`gorgitwvdzxbnaxhrsrw`), read-only.
 
+> **Count correction (made 2026-09-14, after this file was first written):**
+> the prose below originally said "seven migrations" while the table listed
+> SEVEN. Seven is correct, and verified by file existence. The nine-table
+> figure, the classification and the blast radius are unchanged.
+
 - Repo migrations: **280**
 - Applied ledger rows: **278** (`supabase_migrations.schema_migrations`)
 - Production base tables: **204**
@@ -26,9 +31,9 @@ compared against `information_schema.tables` on the production project
 No action. The migration history is forward-only, so the create statements stay
 in the record.
 
-## 2. The real drift: six migrations, nine tables — INTENTIONALLY UNAPPLIED
+## 2. The real drift: SEVEN migrations, nine tables — INTENTIONALLY UNAPPLIED
 
-All six were prepared in a five-day window (2026-07-13 → 2026-07-17) and each
+All seven were prepared in a five-day window (2026-07-13 → 2026-07-17) and each
 carries an explicit header saying it must not be applied automatically. This is
 **not a deployment accident**: it is the documented RED-class pattern — prepare
 fully, merge the SQL, apply only by a separate owner act.
@@ -56,7 +61,7 @@ and from `20260713160000_agency_clients_v1.sql`:
 
 ### Dependency and order
 
-The six are **independent of one another** — no table here references another
+The seven are **independent of one another** — no table here references another
 in the list, and each migration stands alone. Applying any subset is therefore
 safe with respect to the others; order is not constrained beyond the usual
 timestamp ordering. `20260713210000_multi_source_talent_v1` creates three
@@ -93,7 +98,7 @@ unavailable state rather than throwing:
 
 So the four capabilities are **inert but honest** in production. There is no
 user-visible defect and no silent wrong answer. What there is, is four built
-capabilities that nobody can use until the owner applies six migrations.
+capabilities that nobody can use until the owner applies these migrations.
 
 `dashboard_preferences` and `demand_interest_seen` have no product reader at
 all — unapplied *and* unused.
@@ -102,8 +107,8 @@ all — unapplied *and* unused.
 
 ## 3. What the owner has to decide
 
-Not for an agent. For each of the six: apply, or retire the migration and its
-reader.
+Not for an agent. For each of the seven: apply, or retire the migration and
+its reader.
 
 Applying them is a **RED-class act** by the repo's own rules and by each file's
 own header. The Step D instruction was to record this, not to fix it, and it
