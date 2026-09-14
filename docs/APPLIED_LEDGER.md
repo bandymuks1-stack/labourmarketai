@@ -58,6 +58,71 @@
 
 # Applied Migration Ledger
 
+## 🚫 NEVER APPLY — already live under a different ledger name (recorded 2026-09-14, owner decision 4a)
+
+> Three repository files whose objects are **already in production** under
+> different ledger names. `parity-model.ts` answers "every APPLIED row has a
+> repo file" and answers it well; it cannot answer the reverse — "this FILE
+> must never be applied" — and that direction was unguarded. A session
+> scanning the tree saw three ordinary pending migrations, two of them
+> carrying `@human-gate-approved`, which reads as pre-authorised.
+>
+> **The marker lives here, in this ledger, and not in the SQL headers.** That
+> is deliberate: editing those files makes `migration-safety` re-scan them, and
+> their already-applied contents are inherently RED, so every future touch
+> would fail CI. The only bypass the scanner offers is `@human-gate-approved`,
+> which asserts "approved to apply" — the exact opposite of the truth here.
+> `docs/APPLIED_LEDGER.md` is already where never-apply verdicts live
+> (`company_locations_v1`, `company_memberships_v1`), so the canonical register
+> is extended rather than a new one invented.
+>
+> Pinned by `apps/web/lib/guards/never-apply-already-applied-v1.test.ts`, which
+> also cross-checks every ledger name claimed below against
+> `REVIEWED_APPLY_SHAPES` in `apps/web/lib/migrations/parity-model.ts`, so this
+> record and the canonical parity accounting cannot drift apart.
+
+- **`20260612091000_journal_entry_photos.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  Applied as **three** ledger rows, not one: `journal_entry_photos_table`
+  (version `20260612072652`), `journal_entry_photos_rpc` (`20260612072736`),
+  `journal_entry_photos_storage` (`20260612075300`). Accounted for in
+  `REVIEWED_APPLY_SHAPES` as `kind: "split"`, parts 1/3–3/3. Verified read-only
+  on production `gorgitwvdzxbnaxhrsrw` 2026-09-14:
+  `to_regclass('public.journal_entry_photos')` → `journal_entry_photos`;
+  `register_journal_entry_photo` present; private bucket `journal-entry-photos`
+  present; **the table holds 11 rows of real worker photo evidence.** Re-running
+  it would re-execute DDL against objects carrying live production data. The
+  file stays in the tree for history and clean-rebuild parity. *This file was
+  previously recorded only in `docs/migrations/production-parity-register.md`
+  and the 2026-08-18 technical-operations audit — never in this ledger.*
+
+- **`20260817130100_notification_events_v3_workflow_types.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  Applied to production **together with** `20260817140100_notification_document_types_v3.sql`
+  as ONE ledger row: `notification_types_union_workflow_document_v3`
+  (version `20260817172306`). `REVIEWED_APPLY_SHAPES` accounts for it as
+  `kind: "union"`. Verified read-only 2026-09-14:
+  `notification_events_type_check` **already** admits `workflow_step_pending`,
+  `workflow_decided`, `workflow_delegated`, `workflow_escalated`, and
+  `notification_events_entity_type_check` **already** admits
+  `workflow_instance` — precisely what this file adds. Its drop-and-re-add of
+  those constraints is a no-op at best and live-constraint churn at worst.
+  **Its `@human-gate-approved` annotation is STALE** — the work it authorised
+  was completed by the union route. The annotation is deliberately left in the
+  file rather than edited out: history is evidence, and editing the file would
+  trip `migration-safety` for no benefit. It authorises nothing now.
+  *First recorded in the 2026-08-19 correction block at the head of this
+  document; restated here as an explicit never-apply verdict.*
+
+- **`20260817140100_notification_document_types_v3.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  The other half of the same union row `notification_types_union_workflow_document_v3`
+  (version `20260817172306`). Verified read-only 2026-09-14:
+  `notification_events_type_check` **already** admits `document_ack_assigned`,
+  `document_ack_completed` and `document_expiring`, and the entity check
+  **already** admits `worker_document`, `org_document` and
+  `document_acknowledgement`. Its `@human-gate-approved` annotation is **STALE**
+  on the same reasoning as above and is likewise left in place unedited.
+
+
+
 > ## ⚠️ READ THIS BEFORE TRUSTING ANY ENTRY BELOW (added 2026-08-18)
 >
 > **This document is a SECONDARY record. The truth is production's own

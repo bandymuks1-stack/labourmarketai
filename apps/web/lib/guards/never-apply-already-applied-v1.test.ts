@@ -17,10 +17,19 @@ import { REVIEWED_APPLY_SHAPES } from "@/lib/migrations/parity-model";
  * DDL against objects holding production data (`journal_entry_photos` has 11
  * real rows) or churns a live CHECK constraint.
  *
- * So this guard pins the marker in the FILE, and cross-checks it against the
- * canonical `REVIEWED_APPLY_SHAPES` accounting rather than restating it. It
- * deliberately does not introduce a second register: the ledger-name truth
- * stays in parity-model.ts, and this only asserts the file says so too.
+ * The marker lives in `docs/APPLIED_LEDGER.md`, NOT in the SQL headers, and
+ * that is a deliberate choice rather than a convenience. Editing one of these
+ * files makes `migration-safety` re-scan it, and their already-applied contents
+ * are inherently RED (SECURITY DEFINER, grants, policy changes, DML), so every
+ * future touch would fail CI. The only bypass the scanner offers is
+ * `@human-gate-approved`, which asserts "approved to apply" — the exact
+ * opposite of the truth here. APPLIED_LEDGER.md is already where never-apply
+ * verdicts live (`company_locations_v1`, `company_memberships_v1`), so this
+ * extends the canonical register instead of inventing a second one.
+ *
+ * This guard pins those ledger entries AND cross-checks every ledger name they
+ * claim against `REVIEWED_APPLY_SHAPES`, so the never-apply verdict and the
+ * canonical parity accounting cannot drift apart.
  */
 
 const REPO = join(__dirname, "..", "..", "..", "..");
@@ -41,24 +50,40 @@ const ALREADY_APPLIED: Readonly<Record<string, readonly string[]>> = {
   ],
 };
 
-describe("a migration that is already live says so in its own first lines", () => {
+describe("the ledger carries an explicit never-apply verdict for each file", () => {
+  const ledger = read("docs/APPLIED_LEDGER.md");
+
+  it("the never-apply section exists", () => {
+    expect(
+      ledger,
+      "docs/APPLIED_LEDGER.md lost its NEVER APPLY section — the canonical place " +
+        "a session learns these files must not be applied.",
+    ).toContain("🚫 NEVER APPLY — already live under a different ledger name");
+  });
+
   for (const stem of Object.keys(ALREADY_APPLIED)) {
-    it(`${stem} carries the never-apply marker`, () => {
-      const sql = read(`supabase/migrations/${stem}.sql`);
-      const head = sql.slice(0, 2400);
+    it(`${stem} is recorded as never-apply`, () => {
+      const line = ledger
+        .split("\n")
+        .find((l) => l.includes(`${stem}.sql`) && l.includes("ALREADY APPLIED"));
       expect(
-        head,
-        `${stem} is live in production under another ledger name and must say so ` +
-          `in its header, or the next session reads it as pending and applies it.`,
-      ).toContain("ALREADY APPLIED — MUST NOT BE APPLIED AGAIN");
+        line,
+        `${stem} is live in production under another ledger name and the ledger ` +
+          `must say so, or the next session reads the file as pending and applies it.`,
+      ).toBeDefined();
+      expect(line).toContain("MUST NOT BE APPLIED");
     });
 
-    it(`${stem} names the ledger row(s) it is already live under`, () => {
-      const sql = read(`supabase/migrations/${stem}.sql`);
+    it(`${stem}'s ledger entry names the row(s) it is already live under`, () => {
+      const section = ledger.slice(
+        ledger.indexOf("🚫 NEVER APPLY"),
+        ledger.indexOf("\n## ", ledger.indexOf("🚫 NEVER APPLY") + 10),
+      );
+      const entry = section.slice(section.indexOf(`${stem}.sql`));
       for (const ledgerName of ALREADY_APPLIED[stem]!) {
         expect(
-          sql.slice(0, 2400),
-          `${stem} must name ${ledgerName} so the claim is checkable against production`,
+          entry.slice(0, 2000),
+          `${stem}'s entry must name ${ledgerName} so the claim is checkable against production`,
         ).toContain(ledgerName);
       }
     });
@@ -86,19 +111,26 @@ describe("the never-apply claim agrees with the canonical parity accounting", ()
   });
 });
 
-describe("the stale gate annotations are marked stale, not silently deleted", () => {
+describe("the stale gate annotations are recorded as stale, not silently deleted", () => {
+  const ledger = read("docs/APPLIED_LEDGER.md");
+
   for (const stem of [
     "20260817130100_notification_events_v3_workflow_types",
     "20260817140100_notification_document_types_v3",
   ]) {
-    it(`${stem} keeps its original @human-gate-approved line and says it is stale`, () => {
-      const sql = read(`supabase/migrations/${stem}.sql`);
-      // History is evidence: the authorisation is retained, never rewritten.
-      expect(sql).toContain("@human-gate-approved");
+    it(`${stem} keeps its @human-gate-approved line in the file`, () => {
+      // History is evidence. The authorisation is retained verbatim — and
+      // editing the file would trip migration-safety for no benefit.
+      expect(read(`supabase/migrations/${stem}.sql`)).toContain("@human-gate-approved");
+    });
+
+    it(`the ledger records that ${stem}'s annotation is stale`, () => {
+      const section = ledger.slice(ledger.indexOf("🚫 NEVER APPLY"));
+      const entry = section.slice(section.indexOf(`${stem}.sql`), section.indexOf(`${stem}.sql`) + 2000);
       expect(
-        sql.slice(0, 2400),
-        `${stem} still reads as pre-authorised unless the header says the annotation is stale`,
-      ).toMatch(/annotation below is STALE/);
+        entry,
+        `${stem} still reads as pre-authorised unless the ledger says its annotation is stale`,
+      ).toMatch(/STALE/);
     });
   }
 });
