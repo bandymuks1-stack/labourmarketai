@@ -325,6 +325,9 @@
       "invalid": "Controleer de gegevens.",
       "auth": "Log opnieuw in.",
       "not_authorized": "Je mag dit niet doen.",
+      "already_issued": "Al aan iemand anders uitgegeven. Eerst inleveren.",
+      "not_issuable": "Nu niet uit te geven — in onderhoud of afgeschreven.",
+      "not_found": "Dit item bestaat niet meer. Ververs en probeer opnieuw.",
       "error": "Er ging iets mis. Probeer opnieuw."
     },
     "myEmpty": "Er zijn momenteel geen gereedschappen of apparatuur aan je toegewezen."

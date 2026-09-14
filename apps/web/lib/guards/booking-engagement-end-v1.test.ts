@@ -1299,7 +1299,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // turns the employer-demand count on was fixed at creation. RED,
       // owner-gated, unapplied.
       "20260908120000_education_program_correction_v1.sql",
-]);
+      // 2026-09-14: MKT-3 (one open asset assignment) gained its marker
+      // under "OWNER DECISIONS — APPROVED EXECUTION WAVE" (2026-09-14),
+      // which approved the minimum RED tightening that stops the same asset
+      // being issued twice. Merged behind the human gate; the production
+      // apply stays a separate owner act.
+      "20260914120000_asset_single_open_assignment_v1.sql",
+    ]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

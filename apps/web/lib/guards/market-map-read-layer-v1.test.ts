@@ -913,7 +913,17 @@ describe("NO new DB migration in this PR", () => {
     //   table, column, policy, grant or function touched. GREEN class;
     //   self-applied via MCP under the conditional prod-apply rule.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
-expect(count).toBeLessThanOrEqual(280);
+    // 281 -> the count below: MKT-3, one open assignment per asset
+    //   (20260914120000_asset_single_open_assignment_v1, paired rollback).
+    //   Owner approval "OWNER DECISIONS — APPROVED EXECUTION WAVE"
+    //   (2026-09-14) for the minimum RED tightening that stops the same asset
+    //   being issued twice. Adds ONE partial unique index and replaces three
+    //   SECURITY DEFINER bodies to take the asset row lock; no table, column,
+    //   policy or authority change, and the only privilege statements are
+    //   three revokes of anon. RED class (definer replacement): merged behind
+    //   the human gate, production apply is a separate owner act.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+    expect(count).toBeLessThanOrEqual(281);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

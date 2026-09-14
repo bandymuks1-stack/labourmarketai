@@ -325,6 +325,9 @@
       "invalid": "Patikrinkite duomenis.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Neturite teisės tai atlikti.",
+      "already_issued": "Jau išduota kitam. Pirma reikia grąžinti.",
+      "not_issuable": "Šiuo metu neišduodama — remontuojama arba nurašyta.",
+      "not_found": "Tokio įrašo nebeėra. Atnaujinkite ir bandykite dar kartą.",
       "error": "Įvyko klaida. Bandykite dar kartą."
     },
     "myEmpty": "Tau priskirtų įrankių ar technikos šiuo metu nėra."

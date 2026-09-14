@@ -325,6 +325,9 @@
       "invalid": "Bitte prüfen Sie die Angaben.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie dürfen das nicht tun.",
+      "already_issued": "Bereits an jemand anderen ausgegeben. Zuerst zurückgeben.",
+      "not_issuable": "Derzeit nicht ausgebbar — in Wartung oder ausgemustert.",
+      "not_found": "Dieser Eintrag existiert nicht mehr. Bitte neu laden.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     },
     "myEmpty": "Dir sind derzeit keine Werkzeuge oder Geräte zugewiesen."

@@ -325,6 +325,9 @@
       "invalid": "Please check the details.",
       "auth": "Please sign in again.",
       "not_authorized": "You are not allowed to do that.",
+      "already_issued": "Already issued to someone else. It has to be returned first.",
+      "not_issuable": "Not issuable right now — it is in maintenance or retired.",
+      "not_found": "That record no longer exists. Refresh and try again.",
       "error": "Something went wrong. Please try again."
     },
     "myEmpty": "No tools or equipment are currently assigned to you."
