@@ -588,6 +588,25 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     note: "`agency_client_connections` is live; `agency_clients` is a second, unapplied client model (§6.4 item 1).",
   },
   {
+    id: "ORG-10",
+    disconnectedBecause: "no_importer",
+    domain: "organization",
+    title: "Agency worker pool (legacy `agencies` world)",
+    worldElement: "organizations",
+    status: "BUILT_NOT_CONNECTED",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/agency/pool.ts", "lib/agency/pool-actions.ts"],
+    coreModule: "lib/agency/pool.ts",
+    surfaces: [],
+    retired: {
+      on: "2026-09-14",
+      why:
+        "Owner decision 2026-09-14: Model B is canonical and this Model A surface is retired-and-recorded (B1). The product once answered `who is in my agency pool and are they ready?` here - docs-readiness aggregates, country readiness, bridge-gated journal evidence - and it stopped because the actor model moved, not because the question stopped mattering. THE QUESTION IS NOT RETIRED, only this answer: a Model-B-native workforce/pool surface is to be reconsidered when real agency workforce evidence exists (owner, same decision). WHY B WON, measured on production 2026-09-14 rather than argued: the SUPPLY side of the market - `list_open_supply_for_employers`, owner-approved and proven end to end 2026-09-07 - resolves authority through `engagement_contexts` + `company_memberships` + `manages_organization` and contains NO reference to `agencies`. Model A holds exactly one reader, `list_open_demand_for_agencies`, which keys off `public.agencies.profile_id`, and it is the one with no surface. NOTHING IS LOST, checked in both directions: all 3 `agencies` rows are already mirrored into `organizations` (organization_type='agency', legacy_agency_id back-pointer) by the `mirror_agency_to_org` trigger; 2 of the 3 profiles additionally own a `companies` row with company_type='staffing_agency'; the third authored 2 `agency_offer` supply rows, which live in `customer_requests` keyed by profile_id and are read by the Model B supply function - so its real evidence never depended on this world either. `agency_workers` holds 0 rows, so `getAgencyPool()` would return an empty pool for every caller alive. NOTHING IS DROPPED: `agencies`, `agency_workers`, `owns_agency`, `list_open_demand_for_agencies` and `mark_agency_can_offer` all remain in the database untouched, and both modules remain in the tree. Retirement here is a statement about what the PRODUCT offers, not a deletion. The route `/dashboard/agency/pool` has redirected to `/dashboard/company#company-team` since W1 (next.config.ts), so no human path changes today.",
+    },
+    note:
+      "RETIRED as a product surface, not deleted. `lib/agency/pool.ts` has no importer among routes or components - only guards and the redirect map reference it - which is why `no_importer` is the honest disconnection kind rather than `no_navigation`. The anti-revival guard is `lib/guards/agency-model-b-canonical-v1.test.ts`: it bans the legacy pool modules from EVERY route and component, not just the company page, so this cannot quietly become a second agency product model again. Extending `agency-direction-a.test.ts`, which already banned them from `/dashboard/company` alone. Writing that guard surfaced a SECOND Model A leftover this row did not know about: `components/app/agency-workers-section.tsx` still imports `lib/agency/actions` and `lib/agency/agency-workers`. It is dead - nothing renders it, and `company-workers-section.tsx` (Model B) is its replacement, referring to it only in a comment. It is kept rather than deleted, for the same retire-and-record reason, and the guard allow-lists that one file while separately asserting it stays ORPHANED, so the exception cannot quietly hide a live surface.",
+  },
+  {
     id: "ORG-9",
     domain: "organization",
     title: "Public organization profile",
