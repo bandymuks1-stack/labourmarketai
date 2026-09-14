@@ -584,6 +584,11 @@
       "auth": "Log opnieuw in.",
       "not_authorized": "U kunt alleen fasen van uw eigen projecten beheren.",
       "error": "Er ging iets mis. Probeer opnieuw."
+    },
+    "learned": {
+      "median": "Vergelijkbare afgeronde fasen duurden {days} dagen (mediaan van {count})",
+      "vsPlan": "gepland {days}",
+      "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen."
     }
   },
   "activityCentre": {

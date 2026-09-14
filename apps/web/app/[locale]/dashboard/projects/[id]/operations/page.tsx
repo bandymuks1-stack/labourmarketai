@@ -27,6 +27,7 @@ import {
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
 import { ProjectStagesPanel } from "@/components/app/project-stages-panel";
+import { getLearnedStageDurations } from "@/lib/projects/learned-stage-duration";
 import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
 import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel";
 import { listProjectStages } from "@/lib/projects/stages";
@@ -151,8 +152,16 @@ export default async function ProjectOperationsPage({
    * the responsible pointer (gated migration → null pre-apply) and the org
    * member list for the responsible select.
    */
-  const [progressById, manageFacts, stages, economics, projectAssets, defects, capacity] =
-    await Promise.all([
+  const [
+    progressById,
+    manageFacts,
+    stages,
+    economics,
+    projectAssets,
+    defects,
+    capacity,
+    learnedStageDurations,
+  ] = await Promise.all([
       getProjectsProgress([id]),
       getProjectManageFacts(id),
       listProjectStages(id),
@@ -162,6 +171,10 @@ export default async function ProjectOperationsPage({
       // P4 — the ready edge: the SAME capacity read the chat answers
       // "who is available" with (roster vs approved absences, WHEN only).
       loadWhoIsAvailableForChat(),
+      // CAL-10 — what comparable finished stages have really taken. Derived
+      // from the SAME project_stages rows, never stored, and authorized by
+      // the same policy: a caller learns only from stages they can open.
+      getLearnedStageDurations(),
     ]);
   const progress = progressById[id] ?? null;
   const projectOrgId: string | null = manageFacts?.organizationId ?? null;
@@ -557,7 +570,7 @@ export default async function ProjectOperationsPage({
             project spine. Managers add stages, set real status and planned
             dates; no fabricated progress. Honest "not yet available" state
             while the owner-gated migration is unapplied. */}
-      <ProjectStagesPanel projectId={id} data={stages} />
+      <ProjectStagesPanel projectId={id} data={stages} learned={learnedStageDurations} />
 
       {/* Gantt projection over the SAME stage truth (no stored events) — bars
             from real planned/actual dates, today marker, overdue highlight,

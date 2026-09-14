@@ -275,10 +275,19 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
     worldElement: "market_world_map",
     domains: ["demand_supply", "time_capacity"],
     capabilities: ["DEM-8", "CAL-9", "CAL-10"],
-    unrealized: {
-      since: "2026-09-07",
-      why: "Nothing in the product forecasts demand. GEO-4 observes today's market and is deliberately NOT counted here, because an observation is not a forecast (SEP-1) and counting it would make an empty node look half-alive.",
-    },
+    // The `unrealized` marker (2026-09-07: "nothing in the product forecasts
+    // demand") came off on 2026-09-14 when CAL-10 went live under the owner's
+    // approved execution wave. The marker's contract is narrow and literal —
+    // it is set ONLY while EVERY capability realizing a node is missing — so
+    // leaving it would have been the same class of untruth it exists to
+    // prevent, in the other direction.
+    //
+    // The node is PARTLY realized and nothing here claims otherwise; the
+    // register carries the per-capability status. What CAL-10 supplies is the
+    // learning half: what comparable work has really taken, read back from
+    // finished stages, never stored and never stated as what the next one
+    // WILL take. GEO-4 is still deliberately not counted — an observation of
+    // today's market is not a forecast (SEP-1).
   },
   {
     id: "matching",

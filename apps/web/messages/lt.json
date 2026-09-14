@@ -584,6 +584,11 @@
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Etapus galite valdyti tik savo projektuose.",
       "error": "Įvyko klaida. Bandykite dar kartą."
+    },
+    "learned": {
+      "median": "Panašios baigtos stadijos truko {days} d. (mediana iš {count})",
+      "vsPlan": "planuota {days}",
+      "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių."
     }
   },
   "activityCentre": {

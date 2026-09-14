@@ -584,6 +584,11 @@
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie können nur Phasen Ihrer eigenen Projekte verwalten.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    },
+    "learned": {
+      "median": "Vergleichbare abgeschlossene Phasen dauerten {days} Tage (Median aus {count})",
+      "vsPlan": "geplant {days}",
+      "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden."
     }
   },
   "activityCentre": {

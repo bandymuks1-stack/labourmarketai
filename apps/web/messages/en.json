@@ -584,6 +584,11 @@
       "auth": "Please sign in again.",
       "not_authorized": "You can only manage stages for your own projects.",
       "error": "Something went wrong. Please try again."
+    },
+    "learned": {
+      "median": "Comparable finished stages took {days} days (median of {count})",
+      "vsPlan": "planned {days}",
+      "unavailable": "Past-duration comparison could not be read just now."
     }
   },
   "activityCentre": {

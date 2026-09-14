@@ -40,6 +40,11 @@ const PURE_MODULES = [
   // authorized reads it is fed live in lib/planning, not here, so no new
   // table or data path enters the workforce layer.
   "commitment-reservation.ts",
+  // CAL-10 (owner-approved 2026-09-14): the ONE learned-duration reading.
+  // Pure, and deliberately storeless — a forecast may never be persisted as
+  // a fact (SEP-1), so the reading is derived from finished project_stages
+  // rows on every render. The authorized read lives in lib/projects.
+  "learned-duration.ts",
 ] as const;
 
 const sourceFiles = readdirSync(WORKFORCE_DIR).filter(

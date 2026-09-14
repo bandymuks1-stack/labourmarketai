@@ -1104,12 +1104,12 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     domain: "time_capacity",
     title: "Planned vs actual → learned duration / capacity",
     worldElement: "projects",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "The learning loop of the canonical flywheel. A forecast may never be stored as a fact (SEP-1).",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/workforce/learned-duration.ts", "lib/projects/learned-stage-duration.ts"],
+    coreModule: "lib/workforce/learned-duration.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
+    note: "Built by REUSE — no table, no RPC, no migration (owner-approved 2026-09-14, E3). Both halves already existed: every `project_stages` row carries planned_start/planned_end AND actual_start/actual_end, so every finished stage has been a measured planned-vs-actual answer since 20260718140000, and nothing read them back. `learnDurations` groups finished stages by a casefolded stage name — no stemming, no synonym table, because guessing that two names mean the same work would pool two bodies of evidence invisibly — and reports the median actual, the median planned and the median of the PER-OBSERVATION ratios (never the ratio of the medians, which would pair one stage’s plan with another’s outcome). SEP-1 is the whole discipline: nothing is written, nothing is cached, the reading is derived on every render, there is no `predictedDays` field anywhere, and a guard fails any migration that gives a learned duration a table. Sparse evidence stays sparse — below MIN_OBSERVATIONS=3 the medians are null and only the count is reported, and the panel renders nothing at all. Provenance rides with each reading (count, first/last observed day, source row ids). A stage marked done with no recorded actual dates is skipped, not assumed to have met its plan. PARTIAL: one surface reads it (the project operations board) and the unit of learning is the stage name; duration learned per profession, per team or per productivity unit is not attempted.",
   },
 ];
 
