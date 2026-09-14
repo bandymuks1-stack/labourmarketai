@@ -482,7 +482,7 @@ const SKILLS: readonly CapabilityRow[] = [
     anchors: ["lib/training"],
     coreModule: "lib/training/training-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Applied, 0 rows; writes nothing into the skill ladder, by decision.",
+    note: "Applied, 0 rows; writes nothing into the skill ladder, by decision. A COURSE CAN NOW BE CORRECTED AND RETIRED (2026-09-14). `update_training_program_v1` and its \"Course updated.\" notice in all eleven locales shipped with the module and no control called them: a course name typed wrong stayed wrong, and a course the organization had stopped running stayed assignable right up to the point where `assign_training_v1` refused it as `inactive_program` with nothing on screen saying why. Each course now opens in place, shows whether it is still running, and can be retired or brought back; retiring is a flag and the assignments already made are untouched. No migration, no new authority. `link_training_skill_v1` was checked in the same sweep and DELIBERATELY LEFT UNCONNECTED: the creating migration documents the skill seam as not crossed on purpose (worker_skills carries a closed provenance vocabulary, journal_entry_skills requires a real journal entry, and admitting a training provenance into the canonical ladder is named there as a later train and an owner decision), and nothing reads `training_skill_links` — connecting the write alone would make a write-only store. That is a bounded capability, not a missing one."
   },
 ];
 

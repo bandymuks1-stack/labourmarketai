@@ -15292,7 +15292,13 @@
       "issuedOnLabel": "Afgegeven op",
       "expiresOnLabel": "Geldig tot",
       "attachCertificate": "Certificaat opslaan",
-      "markExpired": "Als verlopen markeren"
+      "markExpired": "Als verlopen markeren",
+      "editProgram": "Deze cursus bewerken",
+      "saveProgram": "Wijzigingen opslaan",
+      "activeLabel": "Loopt nog",
+      "activeYes": "Ja — kan worden toegewezen",
+      "activeNo": "Nee — beëindigd",
+      "retired": "Beëindigd"
     },
     "certificates": {
       "heading": "Certificaten",
@@ -15467,6 +15473,11 @@
       "not_found": "Niet gevonden.",
       "limit_reached": "Er staat hier al te veel.",
       "error": "Er ging iets mis. Er is niets opgeslagen."
+    },
+    "edit": {
+      "open": "Dit concept corrigeren",
+      "save": "Wijzigingen opslaan",
+      "responsible": "Verantwoordelijke wijzigen (laat leeg om te behouden)"
     }
   },
   "talentPreview": {

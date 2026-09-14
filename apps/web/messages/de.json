@@ -15292,7 +15292,13 @@
       "issuedOnLabel": "Ausgestellt am",
       "expiresOnLabel": "Gültig bis",
       "attachCertificate": "Zertifikat speichern",
-      "markExpired": "Als abgelaufen markieren"
+      "markExpired": "Als abgelaufen markieren",
+      "editProgram": "Diesen Kurs bearbeiten",
+      "saveProgram": "Änderungen speichern",
+      "activeLabel": "Läuft weiterhin",
+      "activeYes": "Ja — kann zugewiesen werden",
+      "activeNo": "Nein — eingestellt",
+      "retired": "Eingestellt"
     },
     "certificates": {
       "heading": "Zertifikate",
@@ -15467,6 +15473,11 @@
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    },
+    "edit": {
+      "open": "Diesen Entwurf korrigieren",
+      "save": "Änderungen speichern",
+      "responsible": "Verantwortliche Person ändern (leer lassen, um sie zu behalten)"
     }
   },
   "talentPreview": {

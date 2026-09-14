@@ -15292,7 +15292,13 @@
       "issuedOnLabel": "Išduota",
       "expiresOnLabel": "Galioja iki",
       "attachCertificate": "Įrašyti pažymėjimą",
-      "markExpired": "Pažymėti kaip nebegaliojantį"
+      "markExpired": "Pažymėti kaip nebegaliojantį",
+      "editProgram": "Redaguoti šį kursą",
+      "saveProgram": "Išsaugoti pakeitimus",
+      "activeLabel": "Vis dar vykdomas",
+      "activeYes": "Taip — galima priskirti",
+      "activeNo": "Ne — nebevykdomas",
+      "retired": "Nebevykdomas"
     },
     "certificates": {
       "heading": "Pažymėjimai",
@@ -15467,6 +15473,11 @@
       "not_found": "Nerasta.",
       "limit_reached": "Čia jau per daug įrašų.",
       "error": "Kažkas nepavyko. Nieko neišsaugota."
+    },
+    "edit": {
+      "open": "Taisyti šį juodraštį",
+      "save": "Išsaugoti pakeitimus",
+      "responsible": "Keisti atsakingą asmenį (palikite tuščią — nesikeis)"
     }
   },
   "talentPreview": {

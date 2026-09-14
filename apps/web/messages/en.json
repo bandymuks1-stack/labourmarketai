@@ -15292,7 +15292,13 @@
       "issuedOnLabel": "Issued on",
       "expiresOnLabel": "Valid until",
       "attachCertificate": "Save certificate",
-      "markExpired": "Mark out of date"
+      "markExpired": "Mark out of date",
+      "editProgram": "Edit this course",
+      "saveProgram": "Save changes",
+      "activeLabel": "Still running",
+      "activeYes": "Yes — can be assigned",
+      "activeNo": "No — retired",
+      "retired": "Retired"
     },
     "certificates": {
       "heading": "Certificates",
@@ -15467,6 +15473,11 @@
       "not_found": "Not found.",
       "limit_reached": "There is too much here already.",
       "error": "Something went wrong. Nothing was saved."
+    },
+    "edit": {
+      "open": "Correct this draft",
+      "save": "Save changes",
+      "responsible": "Change responsible person (leave blank to keep)"
     }
   },
   "talentPreview": {

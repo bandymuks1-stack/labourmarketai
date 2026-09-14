@@ -6009,7 +6009,13 @@
       "issuedOnLabel": "Udstedt",
       "expiresOnLabel": "Gyldigt til",
       "attachCertificate": "Gem bevis",
-      "markExpired": "Marker som udløbet"
+      "markExpired": "Marker som udløbet",
+      "editProgram": "Rediger dette kursus",
+      "saveProgram": "Gem ændringer",
+      "activeLabel": "Kører stadig",
+      "activeYes": "Ja — kan tildeles",
+      "activeNo": "Nej — udgået",
+      "retired": "Udgået"
     },
     "certificates": {
       "heading": "Beviser",
@@ -6184,6 +6190,11 @@
       "not_found": "Ikke fundet.",
       "limit_reached": "Der er allerede for meget her.",
       "error": "Noget gik galt. Intet blev gemt."
+    },
+    "edit": {
+      "open": "Ret dette udkast",
+      "save": "Gem ændringer",
+      "responsible": "Skift ansvarlig person (lad stå tomt for at beholde)"
     }
   },
   "talentPreview": {

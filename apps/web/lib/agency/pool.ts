@@ -24,9 +24,20 @@ import {
  *   - worker documents are NEVER read here (owner-only RLS). Country
  *     readiness is an AGGREGATE of availability + declared countries only;
  *     document-level readiness waits for the consent switch (draft + gate);
- *   - demand positioning rides the S5 draft RPCs
- *     (list_open_demand_for_agencies / mark_agency_can_offer) and degrades
- *     to an honest needs-gate state until the owner applies the draft.
+ *   - demand positioning rides list_open_demand_for_agencies /
+ *     mark_agency_can_offer, which are APPLIED in production (both verified
+ *     present 2026-09-14; this header called them "S5 draft RPCs ... until
+ *     the owner applies the draft"). The needs-gate state stays for a
+ *     database without them.
+ *
+ * NOT MOUNTED. `getAgencyPool()` has no caller anywhere in the product, and
+ * neither does `markCanOfferAction`; the only "pool" on a page is the clearly
+ * labelled marketing preview built from `content/placeholders.ts`. So this is
+ * a complete read service with live RPCs behind it and no surface — recorded
+ * rather than quietly wired, because the product already carries a SECOND
+ * agency model (the agency<->client bridge, `lib/agency/bridge-*.ts`) and
+ * which of the two an agency screen should be built on is an owner decision,
+ * not a wiring detail.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

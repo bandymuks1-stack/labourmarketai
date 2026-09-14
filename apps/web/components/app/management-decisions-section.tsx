@@ -6,6 +6,7 @@ import {
   linkDecisionTaskAction,
   recordDecisionResultAction,
   submitManagementDecisionAction,
+  updateManagementDecisionAction,
 } from "@/lib/decisions/decisions-actions";
 import { getDecisionsOverview } from "@/lib/decisions/decisions";
 import {
@@ -35,6 +36,14 @@ import {
  *
  * Honest absence: while the human-gated migration is unapplied the read
  * answers needs-migration and the section shows a calm note.
+ *
+ * A DRAFT CAN BE CORRECTED BEFORE IT GOES TO THE APPROVERS.
+ * `update_management_decision_v1` and the "Decision updated." notice have
+ * existed in all eleven locales since the module shipped, and no control
+ * called them: a decision could be created and submitted, and a wrong title,
+ * agenda, responsible person or deadline could not be put right — the only
+ * way out was a second decision. The edit is offered on DRAFT rows only,
+ * which is the database's own rule rather than this component's.
  *
  * Pure server component, NATIVE-NAV forms with an honest `?dec=` outcome.
  */
@@ -186,6 +195,70 @@ export async function ManagementDecisionsSection({
                   >
                     {t("resultLabel")}: {d.decisionResult}
                   </p>
+                ) : null}
+
+                {d.status === "draft" ? (
+                  <details data-testid="decision-edit">
+                    <summary className="cursor-pointer text-meta text-text-muted">
+                      {t("edit.open")}
+                    </summary>
+                    {/* DRAFT ONLY, and the database says so too:
+                        `update_management_decision_v1` answers `invalid_state`
+                        for anything past draft, so a decision already in the
+                        approval chain cannot be rewritten under the approvers.
+                        Every field left blank is left unchanged. */}
+                    <form
+                      action={updateManagementDecisionAction}
+                      className="mt-2 flex flex-col gap-2"
+                    >
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="decisionId" value={d.id} />
+                      <input
+                        type="text"
+                        name="title"
+                        defaultValue={d.title}
+                        minLength={DECISION_TITLE_MIN}
+                        maxLength={DECISION_TITLE_MAX}
+                        aria-label={t("form.title")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <textarea
+                        name="agenda"
+                        defaultValue={d.agenda}
+                        rows={3}
+                        maxLength={DECISION_AGENDA_MAX}
+                        aria-label={t("form.agenda")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <label className="flex min-w-0 flex-1 flex-col gap-1 text-meta text-text-muted">
+                          {t("edit.responsible")}
+                          <input
+                            type="email"
+                            name="responsibleEmail"
+                            maxLength={320}
+                            className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-1 text-meta text-text-muted">
+                          {t("form.deadline")}
+                          <input
+                            type="date"
+                            name="deadline"
+                            defaultValue={d.deadline ?? ""}
+                            className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                          />
+                        </label>
+                      </div>
+                      <button
+                        type="submit"
+                        data-testid="decision-edit-save"
+                        className="self-start rounded-md border border-ink-500 px-3 py-1 text-sm text-text-primary"
+                      >
+                        {t("edit.save")}
+                      </button>
+                    </form>
+                  </details>
                 ) : null}
 
                 {d.status === "draft" && data.approvalTemplates.length > 0 ? (

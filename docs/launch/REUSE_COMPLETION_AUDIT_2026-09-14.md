@@ -122,6 +122,22 @@ not yet fired.
 | `/dashboard/talent` | No inbound link anywhere | Superadmin preview |
 | `/dashboard/admin/import-sandbox`, `…/intelligence-observations` | Zero references of any kind | Flag-gated owner tools |
 | 68 of 141 `lib` subsystems | No register anchor | Unregistered, not necessarily unused |
+| `lib/agency/pool.ts` (S5 agency worker pool) | `getAgencyPool()` and `markCanOfferAction` have **no caller anywhere**; the only "pool" on a page is the labelled marketing preview from `content/placeholders.ts`. Both RPCs (`list_open_demand_for_agencies`, `mark_agency_can_offer`) verified **present in production** 2026-09-14 | **BUILT_NOT_CONNECTED — owner decision, not wiring.** A complete read service (worker cards, country readiness, open demand) with live RPCs and no surface. Not mounted here because the product already carries a SECOND agency model, the agency↔client bridge, and which one an agency screen belongs on is #7 above, still open |
+
+### Six one-way records that had no way back (swept 2026-09-14)
+
+Every server action in the codebase was checked for a production caller. Seven
+had none; five of those were `create`'s missing counterpart.
+
+| Action | Verdict | Outcome |
+|---|---|---|
+| `unshareRequestAction` | Real gap — the agency could see what was shared with it, the client could not see or withdraw it | **Connected** (`a8b9bf0`) |
+| `recordCorrectionAction` | Real gap — hours somebody is paid from were write-once | **Connected** (`995fb99`) |
+| `updateTrainingProgramAction` | Real gap — a course could not be renamed or retired, and an inactive one still offered to assign | **Connected** |
+| `updateManagementDecisionAction` | Real gap — a draft could be submitted but not corrected | **Connected** (draft rows only, the database's own rule) |
+| `linkTrainingSkillAction` | **Bounded, not a gap.** Migration 20260817230000 documents the skill seam as deliberately not crossed, and nothing reads `training_skill_links`; connecting the write alone makes a write-only store | Left alone, recorded |
+| `previewPeopleIngestAction` | **Bounded, not a gap.** The preview journey is live through `previewPeopleFileAction`; this is a second, unused entry point | Left alone, recorded |
+| `markCanOfferAction` | Part of the unmounted S5 pool above | Owner decision |
 
 ---
 

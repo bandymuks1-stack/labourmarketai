@@ -168,3 +168,41 @@ owner-gate header, none has been superseded, and the four with live readers
 still degrade honestly. They remain the owner's decision: apply, or retire the
 migration and its reader.
 
+### 5.1 An EIGHTH prepared capability, outside `supabase/migrations/`
+
+Added 2026-09-14. This inventory is built from `supabase/migrations/`, so it
+could not see a prepared migration that was deliberately placed elsewhere:
+
+| Capability | Files | Objects absent from production | Live reader |
+|---|---|---|---|
+| Assistant (AI-control) transcript persistence | `docs/proposals/assistant-transcript-v1/20260724_assistant_transcript_v1.sql` + `.down.sql` + `README.md` | `assistant_conversations`, `assistant_messages`, `append_assistant_message` | `apps/web/lib/assistant/transcript.ts`, read by the conversation chat |
+
+The placement is **deliberate and documented**, not an accident: the README
+states it is kept out of `supabase/migrations/` so `#864` CI stays green, and
+that applying it is a separate owner-gated PR. Both files carry SHA-256
+integrity lines. The reader degrades to `available: false` and the chat stays
+session-only, claiming nothing was saved.
+
+It is recorded here because an inventory that lists seven and says "these are
+what is still unapplied" reads as complete. The honest count of prepared,
+unapplied capabilities is **eight**; only seven of them are migrations.
+
+### 5.2 Twelve source headers claimed an applied migration was not
+
+Also 2026-09-14. Checked every module whose comments assert a migration is
+unapplied against production: of 101 tables and 54 RPCs so referenced, only
+`agency_clients`, `journal_profession_templates`, `worker_external_profiles`,
+`worker_opportunity_seen` (the July four) and the assistant pair above are
+actually absent. Everything else is live — several with real rows.
+
+Corrected in place, with the degradation branches kept: worker languages
+(ledger `20260711203623`, **13 rows**), worker education and achievements
+(`20260716195418`, **4 and 2 rows**), the availability-prefs v2 pack (all
+seven columns present on `workers`), `upsert_worker_document`, the pilot
+cohort tables and RPCs (`20260716195326`), the agency↔client bridge
+(`20260723155658`) and the S5 pool RPCs.
+
+`lib/worker/worker-education.ts` had already been corrected once and states
+the lesson its ten siblings kept repeating: **apply status belongs to the
+database, not to a comment.**
+

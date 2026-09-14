@@ -6,6 +6,7 @@ import {
   completeTrainingAction,
   createTrainingProgramAction,
   markTrainingExpiredAction,
+  updateTrainingProgramAction,
 } from "@/lib/training/training-actions";
 import {
   getCertificationRegister,
@@ -38,6 +39,16 @@ import {
  * shown as proof of skill, and there is no rating anywhere on this surface.
  * Confirming that someone READ the material is the document centre's
  * confirmation list, not a second control here.
+ *
+ * A COURSE CAN BE CORRECTED AND RETIRED. `update_training_program_v1` and the
+ * "Course updated." notice have existed in all eleven locales since the module
+ * shipped, and nothing called them: a course name typed wrong stayed wrong,
+ * and a course the organization had stopped running stayed in the list
+ * forever — assignable right up to the point where `assign_training_v1`
+ * refused it as `inactive_program` with no explanation on screen. Each course
+ * now opens in place, says whether it is still running, and can be retired or
+ * brought back. Nothing is deleted: retiring is a flag, and the assignments
+ * already made against a course are untouched by it.
  *
  * Pure server component, NATIVE-NAV forms: every submit is a server action
  * that redirects back with an honest `?trn=` outcome.
@@ -214,12 +225,71 @@ export async function TrainingRegister({
                   className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
                   data-testid="training-program-row"
                 >
-                  <span className="text-sm font-semibold text-text-primary">
-                    {p.title}
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-text-primary">
+                      {p.title}
+                    </span>
+                    {p.isActive ? null : (
+                      <span
+                        className="rounded-md border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+                        data-testid="training-program-retired"
+                      >
+                        {t("org.retired")}
+                      </span>
+                    )}
                   </span>
                   {p.description ? (
                     <span className="text-xs text-text-secondary">{p.description}</span>
                   ) : null}
+
+                  <details data-testid="training-program-edit">
+                    <summary className="cursor-pointer text-meta text-text-muted">
+                      {t("org.editProgram")}
+                    </summary>
+                    <form
+                      action={updateTrainingProgramAction}
+                      className="mt-2 flex flex-col gap-2"
+                    >
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="programId" value={p.id} />
+                      <input
+                        type="text"
+                        name="title"
+                        defaultValue={p.title}
+                        minLength={TRAINING_TITLE_MIN}
+                        maxLength={TRAINING_TITLE_MAX}
+                        aria-label={t("org.programTitle")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <textarea
+                        name="description"
+                        defaultValue={p.description ?? ""}
+                        rows={2}
+                        maxLength={TRAINING_DESCRIPTION_MAX}
+                        aria-label={t("org.programDescription")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <label className="flex flex-col gap-1 text-meta text-text-muted">
+                        {t("org.activeLabel")}
+                        <select
+                          name="isActive"
+                          defaultValue={p.isActive ? "true" : "false"}
+                          className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                        >
+                          <option value="true">{t("org.activeYes")}</option>
+                          <option value="false">{t("org.activeNo")}</option>
+                        </select>
+                      </label>
+                      <button
+                        type="submit"
+                        data-testid="training-program-save"
+                        className="self-start rounded-md border border-ink-500 px-3 py-1 text-sm text-text-primary"
+                      >
+                        {t("org.saveProgram")}
+                      </button>
+                    </form>
+                  </details>
+
                   <form action={assignTrainingAction} className="flex flex-col gap-2 sm:flex-row">
                     <input type="hidden" name="locale" value={locale} />
                     <input type="hidden" name="programId" value={p.id} />

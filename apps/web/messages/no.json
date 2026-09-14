@@ -6009,7 +6009,13 @@
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
-      "markExpired": "[EN] Mark out of date"
+      "markExpired": "[EN] Mark out of date",
+      "editProgram": "Rediger dette kurset",
+      "saveProgram": "Lagre endringer",
+      "activeLabel": "Går fortsatt",
+      "activeYes": "Ja — kan tildeles",
+      "activeNo": "Nei — avviklet",
+      "retired": "Avviklet"
     },
     "certificates": {
       "heading": "[EN] Certificates",
@@ -6184,6 +6190,11 @@
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
+    },
+    "edit": {
+      "open": "[EN] Correct this draft",
+      "save": "[EN] Save changes",
+      "responsible": "[EN] Change responsible person (leave blank to keep)"
     }
   },
   "talentPreview": {

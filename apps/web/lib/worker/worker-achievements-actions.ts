@@ -15,7 +15,7 @@ import {
 /**
  * Server actions for self-declared achievements / declared certificates.
  * Direct table writes under owner-only RLS (worker_achievements, DRAFT
- * migration 20260714160000 — human-gated, NOT applied yet).
+ * migration 20260714160000 — APPLIED, ledger `20260716195418`).
  *
  * HONESTY: `confirmed_by_manager` is never written here — the migration's
  * column grants exclude it, so even a crafted request cannot set it.

@@ -1,7 +1,8 @@
 /**
- * Pure model for self-declared education entries (DRAFT migration
- * 20260714160000_worker_education_achievements_v1 — human-gated, NOT applied
- * yet). No DB, no React — validation + error classification are guard-testable
+ * Pure model for self-declared education entries (migration
+ * 20260714160000_worker_education_achievements_v1 — APPLIED, ledger
+ * `20260716195418`, 4 education and 2 achievement rows on 2026-09-14).
+ * No DB, no React — validation + error classification are guard-testable
  * in isolation, same convention as worker-languages-model.ts.
  *
  * Honesty invariants:
