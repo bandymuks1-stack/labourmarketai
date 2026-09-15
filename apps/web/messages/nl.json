@@ -588,7 +588,9 @@
     "learned": {
       "median": "Vergelijkbare afgeronde fasen duurden {days} dagen (mediaan van {count})",
       "vsPlan": "gepland {days}",
-      "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen."
+      "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen.",
+      "suggest": "Vergelijkbare fasen duurden {days} dagen ({observations} waargenomen) — dat zou eindigen op {date}.",
+      "suggestApply": "Deze datum gebruiken"
     }
   },
   "activityCentre": {

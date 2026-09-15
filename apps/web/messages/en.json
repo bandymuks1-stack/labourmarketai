@@ -588,7 +588,9 @@
     "learned": {
       "median": "Comparable finished stages took {days} days (median of {count})",
       "vsPlan": "planned {days}",
-      "unavailable": "Past-duration comparison could not be read just now."
+      "unavailable": "Past-duration comparison could not be read just now.",
+      "suggest": "Comparable stages took {days} days ({observations} observed) — that would end {date}.",
+      "suggestApply": "Use this date"
     }
   },
   "activityCentre": {

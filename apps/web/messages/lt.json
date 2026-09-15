@@ -588,7 +588,9 @@
     "learned": {
       "median": "Panašios baigtos stadijos truko {days} d. (mediana iš {count})",
       "vsPlan": "planuota {days}",
-      "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių."
+      "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių.",
+      "suggest": "Panašūs etapai truko {days} d. (stebėta {observations}) — tai baigtųsi {date}.",
+      "suggestApply": "Naudoti šią datą"
     }
   },
   "activityCentre": {
