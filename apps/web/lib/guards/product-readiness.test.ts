@@ -2525,7 +2525,16 @@ describe("no migration files added by this sprint", () => {
     //   full body was dry-run on production inside a rolled-back transaction
     //   (nine authority/shape/append-only stages, zero objects left behind).
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
-const SPRINT_BASELINE = 285;
+    // Bumped 285 -> 286 for WRK-6's UNIT half
+    //   (20260915130000_project_team_assignments_v1, paired guarded
+    //   rollback). PREPARED FOR REVIEW ONLY, unannotated, unapplied: the
+    //   team↔project link plus two definer commands that ride the EXISTING
+    //   per-person writes. Dry-run on production in a rolled-back transaction
+    //   through the real create_team_v1 and add_org_member: unit assigned,
+    //   member assigned, idempotent, member sees the unit, outsider 0 and
+    //   refused, end takes back only what the unit gave, anon refused.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
+const SPRINT_BASELINE = 286;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

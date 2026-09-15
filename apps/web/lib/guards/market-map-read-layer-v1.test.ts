@@ -951,7 +951,11 @@ describe("NO new DB migration in this PR", () => {
     //   receipts_v1, paired guarded rollback). Prepared for review only,
     //   unannotated, unapplied. Nothing in the market-map read layer is touched.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
-    expect(count).toBeLessThanOrEqual(285);
+    // 285 -> 286: WRK-6 unit half (20260915130000_project_team_assignments_v1,
+    //   paired guarded rollback). Prepared for review only, unannotated,
+    //   unapplied. Nothing in the market-map read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
+    expect(count).toBeLessThanOrEqual(286);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
