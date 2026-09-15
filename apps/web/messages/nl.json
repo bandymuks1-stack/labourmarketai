@@ -3271,7 +3271,8 @@
           "consents": "Toestemmingsgeschiedenis",
           "messages": "Berichten",
           "inquiries": "Aanvragen en verzoeken",
-          "notifications": "Meldingen"
+          "notifications": "Meldingen",
+          "externalProfiles": "Links naar externe profielen"
         },
         "action": {
           "delete": "Verwijderen",

@@ -1,15 +1,30 @@
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY. PREPARED FOR REVIEW ONLY.
+-- @human-gate-approved — TIER: owner-gated (new table + RLS + SECURITY DEFINER
+-- functions + grants). The annotation states the ROUTE, not the decision.
 --
--- Owner decision round 2026-09-14, item 4e:
---   "REJECT AS WRITTEN. DO NOT APPLY. APPROVED only to PREPARE the proposed
---    PER-11 split for review: isolate worker_external_profiles plus only the
---    RPCs/dependencies genuinely required by its existing live consumer."
+-- REVIEWED AND APPROVED BY THE OWNER 2026-09-15, after the full PER-11
+-- approval packet (schema, both RPCs, every grant/revoke, RLS, consumer,
+-- fetch/scrape analysis, GDPR, production state, equivalence proof, exclusion
+-- proof, rollback, lineage):
+--   "APPROVE 20260914210000_external_profiles_v1.sql as the canonical minimal
+--    PER-11 implementation."
 --
--- NO `@human-gate-approved` annotation is present, deliberately. The owner
--- approved PREPARING this file, not applying it. Adding the annotation would
--- assert an apply approval that does not exist.
+-- The approval carried THREE pre-apply conditions, all met in the same slice:
+--   1. `worker_external_profiles` added to the privacy export allowlist
+--      (lib/privacy/export-data.ts) so a subject-access export cannot silently
+--      omit it;
+--   2. added to the deletion-plan accounting (lib/privacy/deletion-plan.ts) as
+--      the `externalProfiles` class — the existing worker FK cascade remains
+--      the actual deletion mechanism, unchanged;
+--   3. lib/guards/external-profiles-consent.test.ts extended so its privacy
+--      invariants are enforced against THIS file, the one that ships, not only
+--      against the rejected parent.
 --
+-- This file previously carried a "PREPARED FOR REVIEW ONLY / no annotation"
+-- header, which was correct while only PREPARING it was approved. That header
+-- is superseded by the approval above.
+--
+-- Apply ONLY via Supabase MCP apply_migration — never `db push`.
 -- Rollback: supabase/rollbacks/20260914210000_external_profiles_v1.down.sql
 -- ============================================================================
 --

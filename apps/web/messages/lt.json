@@ -3271,7 +3271,8 @@
           "consents": "Sutikimų istorija",
           "messages": "Žinutės",
           "inquiries": "Užklausos ir prašymai",
-          "notifications": "Pranešimai"
+          "notifications": "Pranešimai",
+          "externalProfiles": "Išorinių profilių nuorodos"
         },
         "action": {
           "delete": "Ištrinti",

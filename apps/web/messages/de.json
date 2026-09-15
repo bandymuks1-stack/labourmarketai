@@ -3271,7 +3271,8 @@
           "consents": "Einwilligungsverlauf",
           "messages": "Nachrichten",
           "inquiries": "Anfragen und Gesuche",
-          "notifications": "Benachrichtigungen"
+          "notifications": "Benachrichtigungen",
+          "externalProfiles": "Links zu externen Profilen"
         },
         "action": {
           "delete": "Löschen",

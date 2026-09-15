@@ -3271,7 +3271,8 @@
           "consents": "История согласий",
           "messages": "Сообщения",
           "inquiries": "Запросы и обращения",
-          "notifications": "Уведомления"
+          "notifications": "Уведомления",
+          "externalProfiles": "Ссылки на внешние профили"
         },
         "action": {
           "delete": "Удалить",

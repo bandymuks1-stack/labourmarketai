@@ -3271,7 +3271,8 @@
           "consents": "Consent history",
           "messages": "Messages",
           "inquiries": "Requests and inquiries",
-          "notifications": "Notifications"
+          "notifications": "Notifications",
+          "externalProfiles": "External profile links"
         },
         "action": {
           "delete": "Delete",

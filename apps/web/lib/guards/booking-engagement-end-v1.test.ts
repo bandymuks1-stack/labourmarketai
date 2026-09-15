@@ -1307,6 +1307,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // Marker added in the same commit as the owner's recorded decision.
       // Applied via MCP apply_migration as ledger 20260914195053.
       "20260914200000_defects_assignee_read_v1.sql",
+      // 2026-09-15, PER-11: the owner reviewed the full approval packet and
+      // approved this split as the canonical minimal implementation, with
+      // three pre-apply conditions (privacy export, deletion-plan accounting,
+      // guard re-pointing) met in the same slice. The annotation was added in
+      // the commit that records that approval — not spread from an earlier one.
+      "20260914210000_external_profiles_v1.sql",
 ]);
   });
 

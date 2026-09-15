@@ -116,6 +116,85 @@
 | Post-apply proof | `agency_clients` exists, 0 rows. `customer_requests` **still 20 rows** (unchanged), 0 linked. Policy `(owns_company(company_id) OR is_admin())`. `authenticated`: SELECT `true`, INSERT `false` (writes RPC-only). `anon`: SELECT `false`, and EXECUTE `false` on all three RPCs while `authenticated` holds `true` on all three. |
 | Surface readback | Run under a REAL staffing-agency owner's auth (`6fd1bd46-…`): `agency_clients` readable (0 rows) and the new demand-link column readable on their own rows. Before this apply that read returned 42P01, which is what `/dashboard/company`'s `AgencyClientsSection` had been degrading against. |
 
+## Applied 2026-09-15 — PER-11 `external_profiles_v1` (owner approval with conditions)
+
+### ✅ APPLIED TO PROD — `20260914210000_external_profiles_v1` (PER-11 split)
+
+| | |
+|---|---|
+| Ledger | version `20260915042406`, name `external_profiles_v1` |
+| Rollback | `supabase/rollbacks/20260914210000_external_profiles_v1.down.sql` |
+| Approval | Owner, 2026-09-15, after the full PER-11 approval packet. Approved as **the canonical minimal PER-11 implementation**, with three pre-apply conditions, all met in the same slice. |
+| Scope | ONE table (`worker_external_profiles`), 1 index, 1 SELECT policy, 2 SECURITY DEFINER RPCs, 7 grant/revoke. 14 executable statements. |
+
+**Pre-apply conditions, met before the apply:**
+1. `worker_external_profiles` added to the subject-access export allowlist
+   (`lib/privacy/export-data.ts`) — an unreadable relation reports as
+   `unavailable`, never as an empty list; disconnected rows are included
+   deliberately, because disconnect is soft and the row is still the subject's
+   personal data.
+2. Added to the deletion-plan accounting (`lib/privacy/deletion-plan.ts`) as the
+   `externalProfiles` class, planned action `delete`, basis E7. **The existing
+   `worker_id -> workers(id) on delete cascade` remains the actual deletion
+   mechanism, unchanged** — the new row only makes the preview tell the truth
+   about what that cascade removes.
+3. `lib/guards/external-profiles-consent.test.ts` extended (§g, §h) so its
+   privacy invariants are enforced against the file that SHIPS, not only against
+   the rejected parent. No invariant was weakened to make the split pass.
+
+**Post-apply verification, read-only on production 2026-09-15:**
+
+| Check | Result |
+|---|---|
+| Table + both functions exist | ✅ `worker_external_profiles`; `save_worker_external_profile_v1`, `disconnect_external_profile_v1` — both `SECURITY DEFINER`, `search_path=public` |
+| RLS / ACL | RLS on; exactly **1** policy, `(owns_worker(worker_id) OR is_admin())`; `authenticated` SELECT ✅, INSERT/UPDATE/DELETE ❌; `anon` SELECT ❌; both RPCs EXECUTE `authenticated` ✅ / `anon` ❌ |
+| Rows created by the migration | **0** |
+| Existing workers affected | **0** of 57 — unaffected until a worker explicitly adds a link |
+| No employer read path | Proven in a ROLLED-BACK transaction: subject worker **1**, other non-admin worker **0**, employer (company owner, non-admin) **0**, and **employer still 0 after flipping `visibility='employers'`** — the stored preference discloses nothing because no policy honours it. Admin reads 1, the documented disjunct. |
+| Privacy surfaces recognise the relation | Both the export read shape and the deletion-plan `headCount` shape execute cleanly under a real subject's auth (no 42P01) |
+| `talent_source_records` | **absent** ✅ |
+| `identity_resolution_events` | **absent** ✅ |
+| Rejected parent's other RPCs | **none appeared** — only the 2 approved functions exist; `set_external_profile_visibility_v1`, `review_external_profile_snapshot_v1`, `record_talent_source_v1`, `record_identity_resolution_event_v1` are all absent |
+| Residue | `worker_external_profiles` back to **0** rows after the proof rolled back |
+
+> **A NOTE ON THE FIRST PROOF RUN, kept because it nearly misled.** An initial
+> boundary test reported "other worker sees 1", which reads as a policy leak. It
+> was not: the worker that run picked as "other" holds the `admin` role in
+> `profile_roles`, so `is_admin()` legitimately admitted it. The test was re-run
+> selecting a genuine non-admin, and the admin case was then asserted separately
+> so the result cannot be misread either way. `owns_worker` was inspected and is
+> strict: `x.id = w and x.profile_id = auth.uid()`.
+
+### ⚠️ `20260713210000_multi_source_talent_v1` — SUPERSEDED-IN-PART, NEVER APPLY AS A WHOLE
+
+**Status: REJECTED AS WRITTEN (owner, 2026-09-14 item 4e). NEVER APPLY THIS FILE.**
+
+The one third of it that had a live consumer — `worker_external_profiles` plus
+`save_worker_external_profile_v1` and `disconnect_external_profile_v1` — shipped
+on 2026-09-15 as `external_profiles_v1` (ledger `20260915042406`), recorded
+above. Applying the parent now would attempt to re-create that table and would
+additionally bring the two tables that were deliberately left out.
+
+**What is superseded:** `worker_external_profiles` and the two RPCs above. Live
+in production via the split.
+
+**What is NOT superseded, and NOT implemented:** `talent_source_records` (P5
+provenance) and `identity_resolution_events` (P7 identity audit), together with
+`record_talent_source_v1`, `record_identity_resolution_event_v1`,
+`set_external_profile_visibility_v1`, `review_external_profile_snapshot_v1` and
+the P7 immutability trigger. These remain **DEFERRED ARCHITECTURE**: designed,
+recorded in this file's text, and **absent from production**. Their consumer
+modules (`lib/talent/*`, `lib/identity/identity-resolution*`) were deleted as
+dead code on 2026-08-17 with zero importers.
+
+**Applying the split creates NO obligation to implement P5 or P7.** The split is
+self-contained: its own table, policy, RPCs and rollback, with no FK or call
+into either deferred table. Reviving P5/P7 would be a fresh owner decision, not
+a consequence of this apply. Nothing here declares those capabilities
+implemented.
+
+The parent file stays in the tree for history and for the P5/P7 design record.
+
 ## 🚫 NEVER APPLY — already live under a different ledger name (recorded 2026-09-14, owner decision 4a)
 
 > Three repository files whose objects are **already in production** under
