@@ -1295,6 +1295,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // before any insert. SELECT only on both; owner-approved and applied
       // via MCP apply_migration (#1566).
       "20260908070000_notification_recipient_discovery_service_role_select.sql",
+      // EVID-7: the subject of an imported record can contest it. RED,
+      // owner-gated, unapplied - Appendix C of the 2026-09-08 gate document.
+      "20260908110000_evidence_subject_dispute_v1.sql",
       // An institution can CORRECT a programme it created - the field that
       // turns the employer-demand count on was fixed at creation. RED,
       // owner-gated, unapplied.

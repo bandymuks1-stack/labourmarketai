@@ -857,6 +857,8 @@ describe("NO new DB migration in this PR", () => {
 
         //
     // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // 274 -> 275: EVID-7, the subject of an imported evidence record can
+    //   contest it (20260908110000). RED, owner-gated, UNAPPLIED.
     // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
     // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
     // the two ambiguous cases stay UNMAPPED on purpose, because generic
@@ -924,7 +926,13 @@ describe("NO new DB migration in this PR", () => {
     //   owner decision 4e). Prepared for review only, ships UNAPPLIED, no
     //   annotation. Nothing in the market-map read layer is touched.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
-expect(count).toBeLessThanOrEqual(282);
+    // 282 -> 283: EVID-7 (20260908110000_evidence_subject_dispute_v1, paired
+    //   guarded rollback), reconciled onto main 2026-09-15 after #1740. RED,
+    //   owner-gated, UNAPPLIED — the subject of an imported evidence record
+    //   can contest it, and withdraw the contest. Nothing in the market-map
+    //   read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 283.
+    expect(count).toBeLessThanOrEqual(283);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

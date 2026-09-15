@@ -2442,6 +2442,8 @@ describe("no migration files added by this sprint", () => {
     // + policy replace) - applying it does not make it GREEN.
     //
     // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // 274 -> 275: EVID-7, the subject of an imported evidence record can
+    //   contest it (20260908110000). RED, owner-gated, UNAPPLIED.
     // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
     // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
     // the two ambiguous cases stay UNMAPPED on purpose, because generic
@@ -2513,7 +2515,13 @@ describe("no migration files added by this sprint", () => {
     //   @human-gate-approved annotation: the owner approved preparing it, not
     //   applying it. Ships UNAPPLIED.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
-const SPRINT_BASELINE = 282;
+    // Bumped 282 -> 283 for EVID-7 (20260908110000_evidence_subject_dispute_v1, paired
+    //   guarded rollback), reconciled onto main 2026-09-15 after #1740. RED,
+    //   owner-gated, UNAPPLIED — the subject of an imported evidence record
+    //   can contest it, and withdraw the contest. Nothing in the market-map
+    //   read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 283.
+const SPRINT_BASELINE = 283;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
