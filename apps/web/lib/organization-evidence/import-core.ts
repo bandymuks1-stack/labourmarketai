@@ -1428,6 +1428,19 @@ export interface EvidenceRecordView {
   /** ALWAYS false for an imported record. Independent verification lives in a
    *  separate event with its own policy and is never implied by an import. */
   readonly independentlyVerified: boolean;
+  /**
+   * THIS VIEWER has already contested this record.
+   *
+   * Distinct from `state === "DISPUTED"`, which says only that SOMEBODY with
+   * standing contested it — an organisation manager can dispute too. A surface
+   * that read the standing as "you contested this" would put words in the
+   * reader's mouth, so the two facts stay apart.
+   *
+   * FALSE when the caller did not pass `viewerProfileId`: an unknown viewer is
+   * not the same as a viewer who did nothing, and the honest default for the
+   * organisation-side read is to claim no authorship at all.
+   */
+  readonly disputedByViewer: boolean;
 }
 
 /**
@@ -1447,6 +1460,12 @@ export async function listEvidenceRecords(
      *  already linked to the caller. An EMPTY array means "no subjects", and
      *  is answered with no records rather than with everything. */
     readonly organizationPersonIds?: readonly string[] | null;
+    /**
+     * Who is reading. Used for ONE thing: deciding `disputedByViewer`. It is
+     * not an authority input — RLS already decided which rows come back, and
+     * passing it can never widen that.
+     */
+    readonly viewerProfileId?: string | null;
     readonly limit?: number;
   } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
@@ -1523,6 +1542,13 @@ export async function listEvidenceRecords(
           }
         : null,
       independentlyVerified: standing.independentlyVerified,
+      disputedByViewer:
+        filter.viewerProfileId != null &&
+        events.some(
+          (e) =>
+            e.eventType === "disputed" &&
+            e.actorProfileId === filter.viewerProfileId,
+        ),
     } satisfies EvidenceRecordView;
   });
 
@@ -1610,6 +1636,10 @@ export async function listMyOrganizationEvidence(
     .map((l) => l.id);
   const recordsRes = await listEvidenceRecords(caller, {
     organizationPersonIds: confirmed,
+    // On the SUBJECT's own page the reader is the subject, so their own
+    // dispute can be named as theirs. The organisation-side read deliberately
+    // does not pass this.
+    viewerProfileId: caller.userId,
     limit: opts.limit,
   });
   if (recordsRes.kind !== "ok") return recordsRes;

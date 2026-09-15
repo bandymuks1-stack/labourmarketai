@@ -2680,6 +2680,11 @@
       "notSet": "[EN] The respond-by date wasn't saved. Please try again later.",
       "respondBy": "[EN] Respond by {date}",
       "cancel": "[EN] Cancel"
+    },
+    "clash": {
+      "acceptAnyway": "Wiem, że się pokrywa — mimo to akceptuję",
+      "stillStands": "Akceptacja nie usunie nakładania się. Obie rezerwacje zachowują swoje daty, konflikt pozostaje widoczny w kalendarzu, a Twoja decyzja zostaje zapisana.",
+      "acknowledged": "Zaakceptowano ze znanym nakładaniem. Nadal koliduje rezerwacji: {count}. Nic nie zostało anulowane ani ukryte, a Twoja decyzja jest zapisana."
     }
   },
   "marketplace": {

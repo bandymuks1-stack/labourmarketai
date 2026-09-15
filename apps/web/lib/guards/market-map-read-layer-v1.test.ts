@@ -947,7 +947,14 @@ describe("NO new DB migration in this PR", () => {
     //   (both APPLIED to production as ledger 20260914144053 / 20260914144310
     //   before this branch was rebased) join the five #1740 files.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 284.
-    expect(count).toBeLessThanOrEqual(284);
+    // 284 -> 285: RED #4 + #5 — the subject-scoped contest policy and the
+    //   clash-acknowledgement receipt, ONE migration
+    //   (20260915180000_subject_contest_and_clash_receipt). PREPARED, NOT
+    //   APPLIED: owner PREPARE approval 2026-09-15, packet in
+    //   docs/DECISIONS/RED-4-5-subject-authority-packet.md. The baseline grows
+    //   because the FILE exists, not because the authority is live.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
+    expect(count).toBeLessThanOrEqual(285);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

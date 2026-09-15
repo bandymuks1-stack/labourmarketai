@@ -48,13 +48,25 @@ export function BookingRespondButtons({
   const [reasonNote, setReasonNote] = useState("");
   const [state, setState] = useState<
     | { kind: "idle" }
-    | { kind: "done"; status: "accepted" | "declined"; reasonStored?: boolean }
+    | {
+        kind: "done";
+        status: "accepted" | "declined";
+        reasonStored?: boolean;
+        /** RED #5 — how many already-accepted bookings this accept knowingly
+         *  overlapped. Undefined on an ordinary accept. */
+        acknowledgedClashes?: number;
+      }
     | { kind: "conflict" }
     | { kind: "unavailable" }
     | { kind: "error" }
   >({ kind: "idle" });
 
-  function respond(decision: "accepted" | "declined") {
+  function respond(
+    decision: "accepted" | "declined",
+    /** RED #5 — set ONLY by the explicit second action below, never by the
+     *  ordinary accept. */
+    acknowledgeClash = false,
+  ) {
     startTransition(async () => {
       const res = await respondBookingAction({
         locale,
@@ -62,6 +74,7 @@ export function BookingRespondButtons({
         decision,
         reasonKind: decision === "declined" ? reasonKind : null,
         reasonNote: decision === "declined" ? reasonNote : null,
+        acknowledgeClash,
       });
       if (res.kind === "ok") {
         // Funnel: the worker acted on an offer. Fire-and-forget, bounded
@@ -73,13 +86,19 @@ export function BookingRespondButtons({
             : FUNNEL_EVENTS.bookingDeclined,
           { surface: "booking", success: true },
         );
-        setState({ kind: "done", status: decision, reasonStored: res.reasonStored });
+        setState({
+          kind: "done",
+          status: decision,
+          reasonStored: res.reasonStored,
+          acknowledgedClashes: res.acknowledgedClashes,
+        });
         router.refresh();
       } else if (res.kind === "conflict") {
-        // W12 Slice 1: a conflict is a TERMINAL, truthful outcome — the dates
-        // really are taken by an already-accepted booking. Re-read the server
-        // state so the row stops presenting a stale "proposed" offer, and stop
-        // rendering the accept CTA (retrying can only fail the same way).
+        // The dates really are taken by an already-accepted booking, and the
+        // plain accept CTA stays gone — retrying it can only fail the same
+        // way. What CHANGED with RED #5 is that this is no longer the end of
+        // the road: the person may say they know, and accept anyway. That is
+        // a separate, explicit action rendered below, never an auto-retry.
         setState({ kind: "conflict" });
         router.refresh();
       } else if (res.kind === "needs-migration") {
@@ -99,6 +118,16 @@ export function BookingRespondButtons({
         >
           {state.status === "accepted" ? labels.accepted : labels.declined}
         </span>
+        {state.acknowledgedClashes ? (
+          // Says what was overridden, and says plainly that it was not fixed.
+          // Silence here would be the same defect as erasing the clash.
+          <span
+            className="text-meta text-state-amber"
+            data-testid="booking-clash-acknowledged"
+          >
+            {t("clash.acknowledged", { count: state.acknowledgedClashes })}
+          </span>
+        ) : null}
         {state.reasonStored === false ? (
           // Honest partial: the ANSWER landed, the reason could not be
           // stored yet (v2 not installed) — one calm sentence, no jargon.
@@ -111,16 +140,30 @@ export function BookingRespondButtons({
   }
 
   if (state.kind === "conflict") {
-    // Terminal: no accept/decline CTA is rendered, because the slot is really
-    // taken. The row itself is refreshed above and now reflects server truth.
+    // The plain accept CTA stays gone — the slot really is taken. What is
+    // offered instead is ONE deliberate second action, with the consequence
+    // stated before it is taken: the overlap is not removed, it is recorded
+    // that the person chose it. No auto-retry, no default, no pre-selection.
     return (
-      <span
-        className="text-meta text-state-warning"
-        role="status"
-        data-testid="booking-conflict"
-      >
-        {labels.conflict}
-      </span>
+      <div className="flex flex-col gap-1.5" data-testid="booking-conflict-decision">
+        <span
+          className="text-meta text-state-warning"
+          role="status"
+          data-testid="booking-conflict"
+        >
+          {labels.conflict}
+        </span>
+        <span className="text-meta text-text-muted">{t("clash.stillStands")}</span>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => respond("accepted", true)}
+          className="min-h-11 w-full rounded-md border border-state-amber/50 bg-state-amber/10 px-3 py-2 text-xs font-semibold text-state-amber disabled:opacity-50 sm:w-auto"
+          data-testid="booking-accept-anyway"
+        >
+          {t("clash.acceptAnyway")}
+        </button>
+      </div>
     );
   }
 

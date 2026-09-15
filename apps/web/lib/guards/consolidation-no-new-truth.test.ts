@@ -311,6 +311,11 @@ describe("no new employment-record model", () => {
       "20260723120000_company_worker_engagements_v1.sql", // respond_booking_request_v3 accept
       "20260802150000_booking_atomic_double_booking_v1.sql", // atomic accept rewrite
       "20260807140000_booking_engagement_org_resolution_v1.sql", // org resolution rewrite
+      // respond_booking_request_v4 — the SAME booking accept, with an explicit
+      // clash acknowledgement and its receipt. Still the booking-provenance
+      // path: the engagement is minted on an accept and nowhere else, and v3
+      // is untouched beside it. RED #4+#5, PREPARED not applied.
+      "20260915180000_subject_contest_and_clash_receipt.sql",
     ]);
     const offenders = MIGRATIONS.filter(
       (m) =>

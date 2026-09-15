@@ -8543,6 +8543,11 @@
       "notSet": "The respond-by date wasn't saved. Please try again later.",
       "respondBy": "Respond by {date}",
       "cancel": "Cancel"
+    },
+    "clash": {
+      "acceptAnyway": "I know it overlaps — accept anyway",
+      "stillStands": "Accepting will not remove the overlap. Both bookings keep their dates, the clash stays visible in your calendar, and it is recorded that you chose it.",
+      "acknowledged": "Accepted with a known overlap. {count} existing booking(s) still clash — nothing was cancelled or hidden, and your decision is on file."
     }
   },
   "adminReadiness": {
@@ -15894,7 +15899,8 @@
       "ORGANIZATION_REPORTED": "The organization reports it",
       "LEGACY_IMPORTED": "Migrated from an older system",
       "UNVERIFIED": "Supplied, standing not established",
-      "NEEDS_REVIEW": "Needs a human look"
+      "NEEDS_REVIEW": "Needs a human look",
+      "DISPUTED": "Contested"
     },
     "result": {
       "written": "Recorded",
@@ -15915,7 +15921,17 @@
       "selfAttested": "Attested by the person it is about",
       "selfAttestedHint": "This is real, recorded evidence. It is not independent verification and is never counted as such.",
       "notIndependentlyVerified": "Not independently verified",
-      "withdrawn": "Withdrawn"
+      "withdrawn": "Withdrawn",
+      "disputed": "Contested. Someone with standing has objected to this record; it stays on file and so does the objection.",
+      "disputedByYou": "You contested this record. It stays on file, and so does your objection.",
+      "disputeOpen": "This is wrong",
+      "disputeNotePlaceholder": "What is wrong with it? (optional)",
+      "disputeSubmit": "Record my objection",
+      "disputeCancel": "Cancel",
+      "disputeRecorded": "Your objection is recorded. The organisation's record is unchanged — both are now on file.",
+      "disputeAlready": "You had already contested this record. Your objection is on file.",
+      "disputeNotAllowed": "Only the person this record is about can contest it, and only once the roster link is confirmed.",
+      "disputeFailed": "Could not record the objection. Please try again."
     },
     "withdraw": {
       "title": "Undo this import",

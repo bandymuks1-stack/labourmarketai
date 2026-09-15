@@ -2680,6 +2680,11 @@
       "notSet": "Svardatoen blev ikke gemt. Prøv igen senere.",
       "respondBy": "Svar senest {date}",
       "cancel": "Annuller"
+    },
+    "clash": {
+      "acceptAnyway": "Jeg ved, det overlapper — accepter alligevel",
+      "stillStands": "Accept fjerner ikke overlappet. Begge bookinger beholder deres datoer, konflikten forbliver synlig i din kalender, og dit valg registreres.",
+      "acknowledged": "Accepteret med et kendt overlap. {count} eksisterende booking(er) overlapper stadig — intet blev aflyst eller skjult, og dit valg er registreret."
     }
   },
   "marketplace": {

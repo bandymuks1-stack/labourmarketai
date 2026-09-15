@@ -73,6 +73,13 @@ export type BookingActionResult =
        *  not installed yet and the accept completed via the v1 RPC WITHOUT
        *  an engagement (honest partial). Undefined on declines. */
       engagement?: string;
+      /**
+       * How many ALREADY-ACCEPTED bookings this accept knowingly overlapped
+       * (RED #5). Present only when the caller passed `acknowledgeClash`.
+       * A receipt row was written per counterpart; the clash itself is not
+       * resolved and both bookings keep their dates.
+       */
+      acknowledgedClashes?: number;
     }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
@@ -203,6 +210,15 @@ export async function respondBookingAction(input: {
    *  "no reason chosen" (the v1 path), never an error. */
   reasonKind?: string | null;
   reasonNote?: string | null;
+  /**
+   * THE PERSON HAS SEEN THE CLASH AND STILL WANTS THIS (RED #5).
+   *
+   * Never a default and never inferred: it is set only by an explicit second
+   * action the worker takes AFTER the first attempt came back `conflict`.
+   * Without it this function's behaviour is byte-identical to before — the
+   * same v3 call, the same refusal.
+   */
+  acknowledgeClash?: boolean;
 }): Promise<BookingActionResult> {
   const supabase = await createClient();
   const {
@@ -246,6 +262,53 @@ export async function respondBookingAction(input: {
   }
 
   if (input.decision === "accepted") {
+    // RED #5 — THE ACKNOWLEDGED OVERLAP. Only reached when the worker has
+    // already been told the dates clash and has explicitly chosen to accept
+    // anyway. v4 is v3 plus that one parameter; it writes a
+    // `clash_acknowledged` receipt per overlapping booking in the SAME
+    // transaction as the accept, and it does NOT resolve, hide or delete the
+    // clash — both bookings keep their dates and the calendar keeps showing
+    // the overlap.
+    //
+    // The default path below is untouched and still calls v3, so an accept
+    // that nobody acknowledged behaves exactly as it always has.
+    if (input.acknowledgeClash === true) {
+      const v4 = await asAny(supabase).rpc("respond_booking_request_v4", {
+        p_booking_id: input.bookingId,
+        p_decision: "accepted",
+        p_reason_kind: "",
+        p_reason_note: "",
+        p_acknowledge_clash: true,
+      });
+      if (!v4.error) {
+        const data = v4.data as
+          | { engagement?: string; acknowledged_clashes?: number }
+          | null;
+        const engagement = data?.engagement ?? "created";
+        revalidatePath(`/${input.locale}/dashboard/bookings`);
+        if (engagement === "created") {
+          emitServerFunnelEvent(FUNNEL_EVENTS.engagementCreated, {
+            source: "booking",
+            metadata: { surface: "bookings", role_context: "worker" },
+          });
+          await emitEngagementCreatedNotification(input.bookingId);
+        }
+        await emitBookingNotification(input.bookingId, "booking_accepted");
+        return {
+          kind: "ok",
+          status: "accepted",
+          engagement,
+          acknowledgedClashes: data?.acknowledged_clashes ?? 0,
+        };
+      }
+      // v4 not installed in this environment. Do NOT silently fall through to
+      // v3: v3 would raise 23P01 on the very overlap the person just
+      // acknowledged, and reporting that as a plain conflict would hide the
+      // real reason. Say the capability is missing.
+      if (isAbsentFunction(v4.error)) return { kind: "needs-migration" };
+      return classify(v4.error);
+    }
+
     // v3 first — accept + engagement in ONE DB transaction (booking-engagement
     // bridge v1). If the owner-gated v3 RPC is not installed yet, fall back to
     // the v1 RPC: the ACCEPT is never lost, and the result carries the honest

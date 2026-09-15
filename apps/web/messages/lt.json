@@ -8543,6 +8543,11 @@
       "notSet": "Atsakymo datos išsaugoti nepavyko. Pabandykite vėliau.",
       "respondBy": "Atsakyti iki {date}",
       "cancel": "Atšaukti"
+    },
+    "clash": {
+      "acceptAnyway": "Žinau, kad persidengia — vis tiek priimti",
+      "stillStands": "Priėmimas persidengimo nepanaikins. Abi rezervacijos išlaiko savo datas, konfliktas lieka matomas kalendoriuje, o jūsų sprendimas užfiksuojamas.",
+      "acknowledged": "Priimta žinant apie persidengimą. Vis dar persidengia esamų rezervacijų: {count}. Niekas neatšaukta ir nepaslėpta, o jūsų sprendimas užfiksuotas."
     }
   },
   "adminReadiness": {
@@ -15894,7 +15899,8 @@
       "ORGANIZATION_REPORTED": "Praneša organizacija",
       "LEGACY_IMPORTED": "Perkelta iš senesnės sistemos",
       "UNVERIFIED": "Pateikta, statusas nenustatytas",
-      "NEEDS_REVIEW": "Reikia žmogaus peržiūros"
+      "NEEDS_REVIEW": "Reikia žmogaus peržiūros",
+      "DISPUTED": "Užginčyta"
     },
     "result": {
       "written": "Užfiksuota",
@@ -15915,7 +15921,17 @@
       "selfAttested": "Patvirtino pats asmuo, apie kurį tai yra",
       "selfAttestedHint": "Tai tikras, užfiksuotas įrodymas. Tai nėra nepriklausomas patikrinimas ir niekada taip neskaičiuojama.",
       "notIndependentlyVerified": "Nepatikrinta nepriklausomai",
-      "withdrawn": "Atšaukta"
+      "withdrawn": "Atšaukta",
+      "disputed": "Užginčyta. Įrašą užginčijo asmuo, turintis tam pagrindą; lieka ir įrašas, ir prieštaravimas.",
+      "disputedByYou": "Jūs užginčijote šį įrašą. Lieka ir įrašas, ir jūsų prieštaravimas.",
+      "disputeOpen": "Tai neteisinga",
+      "disputeNotePlaceholder": "Kas čia negerai? (nebūtina)",
+      "disputeSubmit": "Užfiksuoti mano prieštaravimą",
+      "disputeCancel": "Atšaukti",
+      "disputeRecorded": "Jūsų prieštaravimas užfiksuotas. Organizacijos įrašas nepakeistas — dabar saugoma abu.",
+      "disputeAlready": "Šį įrašą jau buvote užginčiję. Jūsų prieštaravimas užfiksuotas.",
+      "disputeNotAllowed": "Užginčyti gali tik asmuo, apie kurį įrašas, ir tik patvirtinus sąsają su sąrašu.",
+      "disputeFailed": "Nepavyko užfiksuoti prieštaravimo. Bandykite dar kartą."
     },
     "withdraw": {
       "title": "Atšaukti šį importą",
