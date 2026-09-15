@@ -3271,7 +3271,8 @@
           "consents": "Consent history",
           "messages": "Messages",
           "inquiries": "Requests and inquiries",
-          "notifications": "Notifications"
+          "notifications": "Notifications",
+          "externalProfiles": "External profile links"
         },
         "action": {
           "delete": "Delete",
@@ -8273,7 +8274,12 @@
       "noOrganization": "Create your company organization first.",
       "fieldsNote": "Asks the worker to share their name, phone and email. The worker decides — nothing is shown without their approval.",
       "error": "The request could not be sent. Please try again.",
-      "accepted": "The worker accepted the request — contact sharing not yet allowed."
+      "accepted": "The worker accepted the request — contact sharing not yet allowed.",
+      "withdraw": "Withdraw the request",
+      "withdrawing": "Withdrawing…",
+      "withdrawn": "You withdrew this request.",
+      "withdrawNotOpen": "This request is no longer open — it cannot be withdrawn.",
+      "withdrawError": "The request could not be withdrawn. Please try again."
     },
     "shortlistNote": {
       "label": "Note",

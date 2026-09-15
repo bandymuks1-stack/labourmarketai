@@ -3271,7 +3271,8 @@
           "consents": "Einwilligungsverlauf",
           "messages": "Nachrichten",
           "inquiries": "Anfragen und Gesuche",
-          "notifications": "Benachrichtigungen"
+          "notifications": "Benachrichtigungen",
+          "externalProfiles": "Links zu externen Profilen"
         },
         "action": {
           "delete": "Löschen",
@@ -8273,7 +8274,12 @@
       "noOrganization": "Legen Sie zuerst die Organisation Ihres Unternehmens an.",
       "fieldsNote": "Bittet die Arbeitskraft, Name, Telefon und E-Mail zu teilen. Die Arbeitskraft entscheidet — ohne Zustimmung wird nichts angezeigt.",
       "error": "Die Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
-      "accepted": "Die Arbeitskraft hat die Anfrage angenommen — Kontaktfreigabe noch nicht erteilt."
+      "accepted": "Die Arbeitskraft hat die Anfrage angenommen — Kontaktfreigabe noch nicht erteilt.",
+      "withdraw": "Anfrage zurückziehen",
+      "withdrawing": "Wird zurückgezogen…",
+      "withdrawn": "Sie haben diese Anfrage zurückgezogen.",
+      "withdrawNotOpen": "Diese Anfrage ist nicht mehr offen — sie kann nicht zurückgezogen werden.",
+      "withdrawError": "Die Anfrage konnte nicht zurückgezogen werden. Bitte versuchen Sie es erneut."
     },
     "shortlistNote": {
       "label": "Notiz",

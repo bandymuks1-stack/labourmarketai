@@ -47,6 +47,13 @@ describe("the data export reads ONLY the caller's own data", () => {
         "journal_entries",
         "worker_skills",
         "worker_documents",
+        // PER-11 (owner approval 2026-09-15). Worker-owned and worker-scoped:
+        // read via `.in("worker_id", workerIds)` where workerIds came from the
+        // caller's own `workers` rows, and RLS independently restricts it to
+        // `owns_worker(worker_id) or is_admin()`. It is on this allowlist
+        // because it IS the caller's own data — the export previously omitted
+        // it, which under-reported a subject-access request.
+        "worker_external_profiles",
       ].sort(),
     );
   });

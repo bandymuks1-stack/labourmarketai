@@ -1299,6 +1299,20 @@ describe("the migration set is exactly what this slice declared", () => {
       // turns the employer-demand count on was fixed at creation. RED,
       // owner-gated, unapplied.
       "20260908120000_education_program_correction_v1.sql",
+      // 2026-09-14, owner decision 2a: WRK-8. `defects.assignee_profile_id`
+      // recorded who must fix a defect and appeared in no policy, so the one
+      // person the row exists to instruct could not read it. ONE disjunct
+      // added to `defects_select`. RED by route (any ALTER/DROP POLICY is),
+      // semantically a pure widening; `defects` held 0 rows at apply time.
+      // Marker added in the same commit as the owner's recorded decision.
+      // Applied via MCP apply_migration as ledger 20260914195053.
+      "20260914200000_defects_assignee_read_v1.sql",
+      // 2026-09-15, PER-11: the owner reviewed the full approval packet and
+      // approved this split as the canonical minimal implementation, with
+      // three pre-apply conditions (privacy export, deletion-plan accounting,
+      // guard re-pointing) met in the same slice. The annotation was added in
+      // the commit that records that approval — not spread from an earlier one.
+      "20260914210000_external_profiles_v1.sql",
 ]);
   });
 

@@ -192,6 +192,7 @@ export const CANONICAL_APP_RPCS = [
   "withdraw_agency_candidate_offer_v1",
   "withdraw_booking_request",
   "withdraw_booking_request_v2",
+  "withdraw_contact_disclosure_request_v1",
   "withdraw_profile_discoverability_consent",
   "withdraw_service_offering_request",
   "withdraw_team_enquiry_v1",

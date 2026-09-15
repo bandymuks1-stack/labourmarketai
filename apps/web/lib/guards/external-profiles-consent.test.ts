@@ -23,6 +23,20 @@ import { describe, expect, it } from "vitest";
  *   (f) identity_resolution_events is append-only: no update/delete RPC or
  *       policy in the migration, mutation-blocking trigger present — the
  *       DRAFT migration keeps these invariants even while unapplied.
+ *
+ * EXTENDED 2026-09-15 (owner approval condition 3, PER-11). The owner approved
+ * the SPLIT — 20260914210000_external_profiles_v1.sql — as the canonical
+ * minimal implementation, and it is the file that actually SHIPS. Until now
+ * every invariant above was pinned only against the rejected 601-line parent,
+ * so the moment the split shipped the guarantees would have stopped being
+ * enforced against the thing running in production.
+ *
+ * So §(g) below re-asserts the SAME invariants against the split, and they are
+ * deliberately NOT weakened to make it pass: private by default, worker-owned
+ * read, no employer read, no automatic fetch/import/scrape, soft disconnect,
+ * bounded snapshot/profile inputs. The parent's assertions stay exactly as they
+ * were — it remains recorded architecture, and P5/P7 stay deferred rather than
+ * quietly declared implemented.
  */
 
 const APP = join(__dirname, "..", "..");
@@ -44,6 +58,22 @@ const ROLLBACK = join(
 
 const sql = readFileSync(MIGRATION, "utf8");
 const sqlNoComments = sql.replace(/--[^\n]*/g, "");
+
+/** The APPROVED split — the file that actually ships (PER-11, owner 2026-09-15). */
+const SPLIT = join(
+  ROOT,
+  "supabase",
+  "migrations",
+  "20260914210000_external_profiles_v1.sql",
+);
+const SPLIT_ROLLBACK = join(
+  ROOT,
+  "supabase",
+  "rollbacks",
+  "20260914210000_external_profiles_v1.down.sql",
+);
+const splitSql = readFileSync(SPLIT, "utf8");
+const splitNoComments = splitSql.replace(/--[^\n]*/g, "");
 
 const CONSUMER_FILES = [
   "lib/worker/external-profiles.ts",
@@ -264,5 +294,168 @@ describe("provenance ledger boundaries (P5)", () => {
     // deleted with the dead consumer family — the SQL vocabulary is now the
     // only place the rule can regress.
     expect(sqlNoComments).not.toMatch(/'scraped'|'scraping'|'crawl/);
+  });
+});
+
+// ── (g) THE SHIPPING FILE — the same invariants, against the approved split ──
+//
+// PER-11, owner approval 2026-09-15 condition 3. Everything above pins the
+// REJECTED parent. This block pins the file that is actually applied, so the
+// privacy guarantees cannot quietly stop being enforced the moment the split
+// ships. None of these is a weakened restatement.
+
+describe("(g) the approved split carries the same privacy invariants", () => {
+  it("exists, with a paired rollback, and is owner-approved for apply", () => {
+    expect(existsSync(SPLIT)).toBe(true);
+    expect(existsSync(SPLIT_ROLLBACK)).toBe(true);
+    expect(splitSql).toMatch(/^--\s*@human-gate-approved/m);
+    // The approval is recorded IN the file, so the annotation can never read
+    // as a bare bypass of the static gate.
+    expect(splitSql).toMatch(/REVIEWED AND APPROVED BY THE OWNER 2026-09-15/);
+  });
+
+  it("(a) visibility still defaults to 'private'", () => {
+    expect(splitNoComments).toMatch(
+      /visibility\s+text\s+not\s+null\s+default\s+'private'/,
+    );
+    expect(splitNoComments).toMatch(/check\s*\(visibility\s+in\s*\('private','employers'\)\)/);
+  });
+
+  it("(b) read is worker-owned, and no employer path exists", () => {
+    const policy =
+      splitNoComments
+        .split("create policy worker_external_profiles_select")[1]
+        ?.split(";")[0] ?? "";
+    expect(policy).toMatch(
+      /using\s*\(public\.owns_worker\(worker_id\)\s+or\s+public\.is_admin\(\)\)/,
+    );
+    expect(policy).not.toMatch(/can_view_worker|is_employer|manages_organization|owns_company/);
+    // Exactly ONE policy, and it is SELECT: no write policy may appear.
+    const policies = splitNoComments.match(/create policy/g) ?? [];
+    expect(policies).toHaveLength(1);
+    expect(splitNoComments).not.toMatch(/for\s+(insert|update|delete|all)\b/);
+  });
+
+  it("(b2) nothing is granted to anon or public; the table gets SELECT only", () => {
+    expect(splitNoComments).toMatch(
+      /grant select on public\.worker_external_profiles to authenticated/,
+    );
+    // No write privilege on the table at all — writes are RPC-only.
+    expect(splitNoComments).not.toMatch(
+      /grant[^;]*\b(insert|update|delete)\b[^;]*on public\.worker_external_profiles/,
+    );
+    // Every grant in the file goes to `authenticated`, never anon/public.
+    for (const g of splitNoComments.match(/grant[^;]+;/g) ?? []) {
+      expect(g, `grant must target authenticated only: ${g}`).toMatch(/to authenticated/);
+      expect(g).not.toMatch(/\bto\s+(anon|public)\b/);
+    }
+    // Both definer functions are revoked from public AND anon before granting.
+    for (const fn of [
+      "save_worker_external_profile_v1",
+      "disconnect_external_profile_v1",
+    ]) {
+      expect(splitNoComments).toMatch(
+        new RegExp(`revoke all on function public\\.${fn}\\([^)]*\\) from public`),
+      );
+      expect(splitNoComments).toMatch(
+        new RegExp(`revoke all on function public\\.${fn}\\([^)]*\\) from anon`),
+      );
+    }
+  });
+
+  it("(c) disconnect is SOFT — no hard delete of provenance anywhere", () => {
+    expect(splitNoComments).toMatch(/set disconnected_at = coalesce\(ep\.disconnected_at, now\(\)\)/);
+    // Disconnecting also forces the row private — a disconnected link can
+    // never remain marked shareable.
+    expect(splitNoComments).toMatch(/visibility\s*=\s*'private'/);
+    // No DELETE statement against the table in the migration at all.
+    expect(splitNoComments).not.toMatch(/delete\s+from\s+public\.worker_external_profiles/);
+  });
+
+  it("(d) NO automatic fetch/import/scrape — in the migration or any consumer", () => {
+    expect(splitNoComments).not.toMatch(/pg_net|dblink|\bhttp_(get|post)\b|create extension/i);
+    for (const f of CONSUMER_FILES) {
+      const src = read(f);
+      expect(
+        src,
+        `${f} must not fetch an external host — profile data is supplied by the worker`,
+      ).not.toMatch(/\bfetch\s*\(|axios|puppeteer|playwright|cheerio|\bscrape|\bcrawl/i);
+    }
+  });
+
+  it("(e) bounded inputs — a snapshot can never become an unbounded shadow profile", () => {
+    // Column-level bounds.
+    expect(splitNoComments).toMatch(/pg_column_size\(imported_snapshot\)\s*<=\s*65536/);
+    expect(splitNoComments).toMatch(/char_length\(url\) between 12 and 500/);
+    expect(splitNoComments).toMatch(/url like 'https:\/\/%'/);
+    // Closed platform set, not an open string.
+    expect(splitNoComments).toMatch(
+      /platform in\s*\(\s*'linkedin','github','behance','portfolio',\s*'certification_registry','other'\s*\)/,
+    );
+    // Function-level bounds, so the cap holds on the write path too.
+    expect(splitNoComments).toMatch(/Snapshot too large/);
+    expect(splitNoComments).toMatch(/v_count >= 20/);
+  });
+
+  it("(f) the excluded P5/P7 world is absent from the shipping file", () => {
+    // Applying the split must create NOTHING from the rejected remainder.
+    for (const banned of [
+      "talent_source_records",
+      "identity_resolution_events",
+      "record_talent_source_v1",
+      "record_identity_resolution_event_v1",
+      "set_external_profile_visibility_v1",
+      "review_external_profile_snapshot_v1",
+    ]) {
+      expect(
+        splitNoComments,
+        `${banned} must not appear in the executable SQL of the split`,
+      ).not.toContain(banned);
+    }
+  });
+
+  it("the rollback drops exactly what the split creates — and nothing more", () => {
+    const down = readFileSync(SPLIT_ROLLBACK, "utf8").replace(/--[^\n]*/g, "");
+    expect(down).toMatch(/drop table if exists public\.worker_external_profiles/);
+    expect(down).toMatch(/drop function if exists public\.save_worker_external_profile_v1/);
+    expect(down).toMatch(/drop function if exists public\.disconnect_external_profile_v1/);
+    // It must NOT drop the parent's other tables — they were never created here.
+    expect(down).not.toMatch(/drop table if exists public\.talent_source_records/);
+    expect(down).not.toMatch(/drop table if exists public\.identity_resolution_events/);
+  });
+});
+
+// ── (h) the personal data is visible to the privacy surfaces ────────────────
+//
+// Owner approval conditions 1 and 2. A subject-access export that silently
+// omits a personal-data table, or a deletion preview that under-counts what a
+// deletion removes, is the same class of defect as an unreachable capability:
+// the data exists and the truth surface does not say so.
+
+describe("(h) external profiles are accounted for by the privacy surfaces", () => {
+  it("the subject-access export reads and returns the relation", () => {
+    const exportData = read("lib/privacy/export-data.ts");
+    expect(exportData).toMatch(/\.from\("worker_external_profiles"\)/);
+    expect(exportData).toMatch(/worker_external_profiles: workerExternalProfiles/);
+    // An unreadable relation is reported as UNAVAILABLE, never as an empty
+    // list — "we hold none" and "we could not read it" are different claims.
+    expect(exportData).toMatch(/unavailable\.push\("worker_external_profiles"\)/);
+  });
+
+  it("the deletion plan counts the class and plans to delete it", () => {
+    const plan = read("lib/privacy/deletion-plan.ts");
+    expect(plan).toMatch(/"externalProfiles",/);
+    expect(plan).toMatch(/headCount\(supabase, "worker_external_profiles", byWorker\("worker_id"\)\)/);
+    expect(plan).toMatch(
+      /dataClass: "externalProfiles", rowCount: externalProfiles, plannedAction: "delete"/,
+    );
+  });
+
+  it("the FK cascade stays the actual deletion mechanism", () => {
+    // The owner's condition: preserve the existing cascade unless evidence
+    // shows it insufficient. The preview reports; the cascade deletes.
+    expect(splitNoComments).toMatch(
+      /worker_id\s+uuid not null references public\.workers\(id\) on delete cascade/,
+    );
   });
 });

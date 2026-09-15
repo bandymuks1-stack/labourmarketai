@@ -2498,7 +2498,22 @@ describe("no migration files added by this sprint", () => {
     //   table, column, policy, grant or function touched. GREEN class;
     //   self-applied via MCP under the conditional prod-apply rule.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
-const SPRINT_BASELINE = 280;
+    // Bumped 280 -> 281 for the WRK-8 assignee read widening
+    //   (20260914200000_defects_assignee_read_v1, owner decision 2a of
+    //   2026-09-14, paired rollback). RED by route — the scanner flags any
+    //   ALTER/DROP POLICY — and semantically a pure one-disjunct WIDENING of
+    //   `defects_select`: every caller who could read a row before still can,
+    //   and exactly one new class is admitted, the person named in
+    //   `assignee_profile_id`, for that row only. `defects` held 0 rows at
+    //   apply time, so no existing row's visibility changed.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+    // Bumped 281 -> 282 for the PER-11 split
+    //   (20260914210000_external_profiles_v1, owner decision 4e of 2026-09-14,
+    //   paired rollback). PREPARED FOR REVIEW ONLY and deliberately carries NO
+    //   @human-gate-approved annotation: the owner approved preparing it, not
+    //   applying it. Ships UNAPPLIED.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
+const SPRINT_BASELINE = 282;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

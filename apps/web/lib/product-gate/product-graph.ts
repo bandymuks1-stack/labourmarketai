@@ -164,7 +164,11 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
       "Suppliers of workforce capacity. An agency's offer is SUPPLY; reading it as demand is the market-direction defect class.",
     worldElement: "organizations",
     domains: ["organization", "demand_supply"],
-    capabilities: ["ORG-8", "DEM-2", "DEM-9"],
+    // ORG-10 is RETIRED (2026-09-14, owner B1) and stays listed deliberately:
+    // the AGENCIES node did not go away, only one non-canonical answer to it.
+    // Dropping the row from the graph would erase that the product once
+    // answered the agency-workforce question here.
+    capabilities: ["ORG-8", "ORG-10", "DEM-2", "DEM-9"],
   },
   {
     id: "teams",
