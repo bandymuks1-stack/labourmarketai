@@ -22,6 +22,10 @@ import {
 } from "@/lib/organization-evidence/import-core";
 import { fingerprintPayload } from "@/lib/organization-evidence/fingerprint";
 import {
+  readEvidenceSourceFile,
+  SOURCE_FILE_MAX_BYTES,
+} from "@/lib/organization-evidence/read-source-file";
+import {
   MAX_ROWS_PER_SESSION,
   MAX_ROWS_PER_SUBMIT,
   type SourceWorkRow,
@@ -144,33 +148,61 @@ export async function startEvidenceImportAction(
     return { kind: "refused", reason: "invalid", detail: "source" };
   }
 
-  // The source itself: an uploaded delimited file, or pasted text. Both end up
-  // in the same grid parser — one reader, two ways of handing it the bytes.
+  // The source itself: an uploaded file — a delimited one OR a real .xlsx
+  // workbook — or pasted text. `readEvidenceSourceFile` picks the audited
+  // reader by filename and returns stageable rows either way; pasted text
+  // stays on the delimited path it always used.
   const file = form.get("file");
-  let raw = text(form, "pasted");
   let filename = text(form, "source_filename") || null;
+  let rows: readonly SourceWorkRow[] = [];
+  let sourceFingerprint = "";
+  let via = "delimited";
+
   if (file instanceof File && file.size > 0) {
-    if (file.size > 5 * 1024 * 1024)
+    if (file.size > SOURCE_FILE_MAX_BYTES)
       return { kind: "refused", reason: "file_too_large" };
+    let bytes: Buffer;
     try {
-      raw = await file.text();
+      bytes = Buffer.from(await file.arrayBuffer());
     } catch {
       return { kind: "refused", reason: "file_unreadable" };
     }
     filename = filename ?? file.name;
-  }
-  if (raw.trim() === "")
-    return { kind: "refused", reason: "no_source_supplied" };
-
-  const parsed = rowsFromGrid(parseDelimited(raw));
-  if (parsed.rows.length === 0) {
-    // The parser's own reason is shown — "no_header" and "no rows at all" are
-    // different problems with different fixes.
-    return {
-      kind: "refused",
-      reason: "nothing_parsed",
-      detail: parsed.skipped[0]?.reason ?? "empty",
-    };
+    const read = await readEvidenceSourceFile(filename, bytes);
+    switch (read.kind) {
+      case "file-too-large":
+        return { kind: "refused", reason: "file_too_large" };
+      case "file-unreadable":
+      case "unsupported-file":
+        return { kind: "refused", reason: "file_unreadable" };
+      case "month-not-stated":
+        // A recognised timesheet grid whose month appears nowhere on the
+        // sheet. Every date would have to be invented, so the sheet is
+        // refused BY NAME rather than imported against a guessed month.
+        return { kind: "refused", reason: "month_not_stated" };
+      case "nothing-parsed":
+        return { kind: "refused", reason: "nothing_parsed", detail: read.detail };
+      default:
+        rows = read.rows;
+        sourceFingerprint = read.fingerprint;
+        via = read.via;
+    }
+  } else {
+    const pasted = text(form, "pasted");
+    if (pasted.trim() === "")
+      return { kind: "refused", reason: "no_source_supplied" };
+    const parsed = rowsFromGrid(parseDelimited(pasted));
+    if (parsed.rows.length === 0) {
+      // The parser's own reason is shown — "no_header" and "no rows at all"
+      // are different problems with different fixes.
+      return {
+        kind: "refused",
+        reason: "nothing_parsed",
+        detail: parsed.skipped[0]?.reason ?? "empty",
+      };
+    }
+    rows = parsed.rows;
+    sourceFingerprint = fingerprintPayload("web-source", { raw: pasted });
   }
 
   // The session is keyed on the SOURCE, so re-uploading the same file resolves
@@ -181,7 +213,7 @@ export async function startEvidenceImportAction(
     sourceLanguage,
     sourceFilename: filename,
     sourceReference: text(form, "source_reference") || null,
-    sourceFingerprint: fingerprintPayload("web-source", { raw }),
+    sourceFingerprint,
     notes: text(form, "notes") || null,
     actorKind: "human",
   });
@@ -190,11 +222,8 @@ export async function startEvidenceImportAction(
   // Bounded batches, always — a year of a company's timesheets is thousands of
   // rows and one unbounded request is how an import dies half-done.
   let staged = 0;
-  for (let i = 0; i < parsed.rows.length; i += MAX_ROWS_PER_SUBMIT) {
-    const batch: readonly SourceWorkRow[] = parsed.rows.slice(
-      i,
-      i + MAX_ROWS_PER_SUBMIT,
-    );
+  for (let i = 0; i < rows.length; i += MAX_ROWS_PER_SUBMIT) {
+    const batch: readonly SourceWorkRow[] = rows.slice(i, i + MAX_ROWS_PER_SUBMIT);
     const res = await submitRows(c, session.session.id, batch);
     if (res.kind !== "ok") return refuse(res);
     staged += res.inserted;
@@ -207,7 +236,7 @@ export async function startEvidenceImportAction(
   return {
     kind: "ok",
     sessionId: session.session.id,
-    note: session.session.reused ? "reused_session" : `staged:${staged}`,
+    note: session.session.reused ? "reused_session" : `staged:${staged}:${via}`,
   };
 }
 

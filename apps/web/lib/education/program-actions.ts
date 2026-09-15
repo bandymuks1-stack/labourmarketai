@@ -93,3 +93,39 @@ export async function setCohortMemberAction(_prev: ProgramActionState, formData:
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }
+
+/**
+ * CORRECT a programme the institution already created.
+ *
+ * Before this, `education_programs` had one policy — a SELECT — and one
+ * writer, `create_education_program_v1`. A programme was immutable from
+ * creation, so an institution that skipped the optional target profession
+ * could never turn on the employer-demand signal that field activates, and
+ * the surface read `demandUnknown` forever.
+ *
+ * REPLACE, NOT PATCH: the form always sends the current values, so an empty
+ * select clears the field. The RPC re-derives the organisation from the row
+ * rather than trusting the form, so a manager of one organisation cannot edit
+ * another's programme.
+ */
+export async function updateProgramAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const programId = String(formData.get("programId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const profession = String(formData.get("targetProfessionSlug") ?? "").trim();
+  const educationType = String(formData.get("educationTypeSlug") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim().slice(0, 2000);
+  if (!UUID.test(programId) || name.length < 2 || name.length > 160) return { status: "invalid" };
+  if (profession && !PROFESSION_SLUGS.includes(profession)) return { status: "invalid" };
+  if (educationType && !(EDUCATION_TYPE_SLUGS as readonly string[]).includes(educationType)) return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("update_education_program_v1", {
+    p_program_id: programId,
+    p_name: name,
+    p_target_profession_slug: profession || null,
+    p_education_type_slug: educationType || null,
+    p_description: description || null,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "page");
+  return { status: "ok", id: programId };
+}

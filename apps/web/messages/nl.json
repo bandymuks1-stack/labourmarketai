@@ -744,7 +744,7 @@
     },
     "journalWindow": {
       "title": "Werkjournaalrapport",
-      "intro": "Aantallen vastgelegde werkregistraties per werker over een vast kalendervenster. Alleen aantallen en datums — geen tekst van registraties, geen beoordeling.",
+      "intro": "Werktijd en vastgelegde registraties per lid over een vast kalendervenster – uit de eigen gegevens van deze organisatie. Alleen uren, aantallen en datums – geen tekst van registraties, geen beoordeling.",
       "windowLabel": "Rapportvenster",
       "window": {
         "today": "Vandaag",
@@ -761,11 +761,20 @@
         "entries": "Registraties",
         "awaitingReview": "Wacht op beoordeling",
         "confirmed": "Bevestigd",
-        "lastEntry": "Laatste registratie"
+        "lastEntry": "Laatste registratie",
+        "hours": "Uren",
+        "confirmedHours": "Bevestigde uren",
+        "days": "Dagen",
+        "returned": "Teruggestuurd"
       },
       "totals": "{count, plural, one {Totaal · # werker} other {Totaal · # werkers}}",
       "basisLabel": "Basis",
-      "basis": "Geteld uit werkregistraties die werkers in de dienstverbanden van deze organisatie binnen het gekozen venster hebben vastgelegd. De beoordelingsstatus komt uit bevestigingen van managers. Het ontbreken van registraties is geen bewijs van afwezigheid van werk, en niets hier beoordeelt of scoort iemand.",
+      "basis": "Geteld uit werkregistraties die leden binnen de arbeidsrelaties van deze organisatie in het gekozen venster hebben vastgelegd. Uren zijn de eigen vastgelegde duur van elke registratie, één keer geteld; bevestigde uren het deel op registraties die een manager heeft goedgekeurd; dagen zijn kalenderdagen met minstens één registratie met duur (in het totaal liddagen). „Bevestigd“ telt goedgekeurde registraties, „teruggestuurd“ afgewezen of teruggestuurde, de rest wacht op beoordeling. Het ontbreken van registraties bewijst niet dat er geen werk was, en niets hier beoordeelt of scoort iemand.",
+      "hours": "{hours} u",
+      "dayUnits": "+ {days} d in dagen vastgelegd",
+      "mainly": "vooral {activity} · {hours} u",
+      "mainlyShare": "vooral {activity} · {hours} u ({percent} van {total} u)",
+      "withoutDuration": "{count, plural, one {# registratie in dit venster heeft geen duur – die telt mee, maar niet in uren.} other {# registraties in dit venster hebben geen duur – die tellen mee, maar niet in uren.}}",
       "collapse": "Gedetailleerd rapport verbergen"
     }
   },
@@ -888,7 +897,8 @@
     "improve": "Wat te verbeteren",
     "capabilities": "Vaardigheden & werkgeschiedenis",
     "fullRecordsInCv": "Alle werkregistraties",
-    "compass": "Leerkompas"
+    "compass": "Leerkompas",
+    "moreDestinations": "Meer bestemmingen"
   },
   "mapLayers": {
     "title": "Kaartlagen",
@@ -1382,7 +1392,8 @@
         "label": "Schaal: {scale}",
         "country": "landen",
         "place": "plaatsen"
-      }
+      },
+      "placeLinkHint": "Een plaats kiezen brengt je naar de kansenlijst van die plaats."
     }
   },
   "demandLocationCapture": {
@@ -1576,7 +1587,8 @@
     "linkDone": "Lijst sluiten",
     "pickerHint": "Je profielvaardigheden — koppel handmatig als ze bij deze vermelding passen. Deze zijn niet uit deze vermelding gedetecteerd.",
     "detectedHeading": "Vaardigheden herkend uit deze vermelding",
-    "detectedEmpty": "Er zijn geen vaardigheden herkend uit de tekst van deze vermelding. Je kunt handmatig een vaardigheid koppelen."
+    "detectedEmpty": "Er zijn geen vaardigheden herkend uit de tekst van deze vermelding. Je kunt handmatig een vaardigheid koppelen.",
+    "detectedAllLinked": "De herkende vaardigheden zijn al aan deze registratie gekoppeld — ze staan hierboven."
   },
   "reviewReport": {
     "title": "Beoordelingsrapport",
@@ -1812,6 +1824,14 @@
     "disclaimer": "Deze vaardigheden heb je zelf opgegeven. Versterk ze met registraties in je werkjournaal.",
     "experienceTitle": "Werkgeschiedenis",
     "removeLabel": "Vaardigheid verwijderen",
+    "skillPractice": "{hours} u · {count, plural, one {# registratie} other {# registraties}}",
+    "skillEntries": "{count, plural, one {# registratie} other {# registraties}}",
+    "skillShare": "{share}% van het geregistreerde werk",
+    "skillNoRecords": "nog geen registraties",
+    "skillUnknown": "journaal kon niet worden gelezen",
+    "variantsFolded": "{count} spellingen",
+    "foldedIntoSkills": "{count, plural, one {# door u opgegeven vaardigheid staat} other {# door u opgegeven vaardigheden staan}} hierboven al met werkregistraties.",
+    "selfStatedTitle": "Zelf opgegeven, nog geen registraties",
     "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw.",
     "manualAddLabel": "Handmatig een vaardigheid toevoegen",
     "manualAddPlaceholder": "bijv. Engelse taal",
@@ -1846,6 +1866,9 @@
         "members": "{count} lerenden",
         "noLearnersYet": "Nog geen verbonden lerenden om toe te wijzen — nodig eerst studenten uit.",
         "form": {
+          "editProgram": "Dit programma corrigeren",
+          "saveProgram": "Wijzigingen opslaan",
+          "setDirectionHint": "Kies het beroep waartoe dit programma leidt, en naast het programma verschijnt hoeveel vacatures daarvoor nu openstaan. Zonder dat is er niets om tegen te tellen.",
           "programName": "Naam opleiding",
           "targetProfession": "Leidt naar (werkrichting)",
           "noProfession": "— niet ingesteld —",
@@ -1868,7 +1891,9 @@
           "error": "Er ging iets mis. Probeer het opnieuw."
         },
         "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
-        "inviteLearners": "Lerenden uitnodigen"
+        "inviteLearners": "Lerenden uitnodigen",
+        "exportReport": "Rapport downloaden (CSV)",
+        "exportReportHint": "Programma's, cohorten, aantallen lerenden en actuele vraag — samen met de uitkomsten van je lerenden. Onbekende aantallen worden als unknown geschreven, nooit als nul."
       },
       "learners": {
         "title": "Lerenden",
@@ -1962,7 +1987,7 @@
         "legalNameHelp": "Verplicht. 2–200 tekens.",
         "legalNamePlaceholder": "bijv. Acme Ltd",
         "companyType": "Primaire activiteit",
-        "companyTypeHelp": "Dit is alleen je hoofdactiviteit — het legt je niet vast. Je kiest de specifieke rol (opdrachtgever, aannemer, onderaannemer, enz.) wanneer je elke behoefte aanmaakt.",
+        "companyTypeHelp": "Dit is je HOOFDACTIVITEIT — de branche waarin je werkt. Het legt je niet vast: de specifieke rol (opdrachtgever, aannemer, onderaannemer) kies je bij elke aanvraag, en wat je organisatie DOET (in dienst nemen, mensen leveren, werven, opleiden, projecten uitvoeren) is een aparte vraag die je met meerdere antwoorden tegelijk kunt beantwoorden, in je bedrijfsprofiel.",
         "companyTypeOptions": {
           "construction": "Bouwbedrijf",
           "staffing_agency": "Uitzendbureau",
@@ -3246,7 +3271,8 @@
           "consents": "Toestemmingsgeschiedenis",
           "messages": "Berichten",
           "inquiries": "Aanvragen en verzoeken",
-          "notifications": "Meldingen"
+          "notifications": "Meldingen",
+          "externalProfiles": "Links naar externe profielen"
         },
         "action": {
           "delete": "Verwijderen",
@@ -3305,6 +3331,7 @@
     "administrative": "Administratieve / zakelijke capaciteiten"
   },
   "skills": {
+    "profileReadUnavailable": "Je opgeslagen vaardigheden of werkgeschiedenis konden nu niet worden gelezen. Wat hieronder staat is niet je volledige dossier — laad de pagina zo opnieuw; niets wat je hebt opgeslagen is verloren.",
     "workDirectionsTitle": "Werkrichtingen",
     "editingDirection": "Richting bewerken",
     "skillsForDirection": "Vaardigheden voor deze richting",
@@ -3688,7 +3715,7 @@
       "active_markets": "Kernrichtingen (9)",
       "expansion_candidates": "Uitbreidingskandidaten"
     },
-    "caption": "Werkrichtingen in de Baltische staten en Noord-Europa",
+    "caption": "Werkrichtingen in de markten waarin we actief zijn",
     "world": {
       "caption": "Conceptweergave — marktrichtingen, geen live gegevens",
       "legendTarget": "Marktrichtingen",
@@ -4001,12 +4028,6 @@
       "clarityNote": "Eén account, twee identiteiten — jij als persoon en je bedrijf. Wisselen verandert alleen welke acties je ziet (werk vinden, diensten aanbieden, personeel aannemen, een behoefte indienen); uitzendbureau en inkopen zijn acties, geen aparte systemen. Voor sommige bedrijfsacties kan later een organisatieprofiel nodig zijn."
     },
     "dashboard": {
-      "jobsCard": {
-        "title": "Banen die bij mij passen",
-        "viewAll": "Alle advertenties",
-        "empty": "Momenteel geen passende advertenties — vul je vaardigheden in je profiel aan.",
-        "emptyCta": "Profiel aanvullen"
-      },
       "firstUse": {
         "eyebrow": "Begin hier",
         "title": "Begin bij jezelf",
@@ -4360,13 +4381,23 @@
           "locationHint": "LT",
           "preferredLabel": "Landen waarin ik zou willen werken",
           "preferredHint": "LT, DE, NL",
-          "salaryMinLabel": "Tarief vanaf (€)",
-          "salaryMaxLabel": "Tarief tot (€)",
+          "salaryMinLabel": "Loonverwachting vanaf (€/maand)",
+          "salaryMaxLabel": "Loonverwachting tot (€/maand)",
           "save": "Opslaan",
           "saving": "Opslaan...",
           "saved": "Opgeslagen",
           "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
           "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw."
+        },
+        "checks": {
+          "eyebrow": "Controleer of je dit bedoelde",
+          "keep": "Zo laten",
+          "correct": "Corrigeren",
+          "salary_below_monthly_floor": "{min}–{max} € wordt opgeslagen en getoond als verwachting PER MAAND. Als maandbedrag ligt dat onder elk minimumloon — bedoelde je een uur- of dagtarief, vul dan het maandbedrag in. Is het een maandbedrag, laat het dan zo.",
+          "salary_reads_annual": "{min} € per maand leest als een jaarbedrag. Zo ja, vul het maandbedrag in; zo nee, laat het zo.",
+          "available_from_past": "Je datum \"kan beginnen vanaf\" ({date}) is voorbij — hij wordt gelezen als \"nu\". Klopt dat niet meer, stel dan een nieuwe datum in.",
+          "available_from_far": "Je startdatum ({date}) ligt meer dan een jaar vooruit. Is het jaar een vergissing, corrigeer het; anders laat je het zo.",
+          "unavailable_with_start_date": "Status zegt \"kan nu niet werken\", maar er staat een startdatum ({date}). Kun je vanaf die datum — prima; zo niet, corrigeer het."
         }
       },
       "tabs": {
@@ -4760,7 +4791,7 @@
         },
         {
           "title": "Werknemerspool over de grens",
-          "desc": "Baltisch + Noords aanbod op één plek."
+          "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
         },
         {
           "title": "Geen ondoorzichtige tussenpersonen",
@@ -4870,7 +4901,7 @@
         },
         {
           "title": "Grensoverschrijdend bereik",
-          "desc": "Baltische + Noordse klanten en werknemers."
+          "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
         },
         {
           "title": "Laat je desk groeien",
@@ -4982,7 +5013,7 @@
     "successRate": "Slagingspercentage van matches"
   },
   "trusted": {
-    "title": "Gebouwd voor marktleiders in de Baltische staten & Noord-Europa"
+    "title": "Gebouwd voor marktleiders in de markten waarin we actief zijn"
   },
   "heroCards": {
     "worker": {
@@ -7117,26 +7148,6 @@
     "cv": {
       "verified": "Bevestigd",
       "declared": "Opgegeven"
-    },
-    "verification": {
-      "state": {
-        "self_reported": "Uw eigen registratie — niemand heeft die bevestigd",
-        "verifier_not_identified": "Nog niemand kan dit bevestigen",
-        "verifier_available": "Uw werkgever kan werk nog niet bevestigen",
-        "verification_pending": "Wacht op bevestiging",
-        "verified": "Bevestigd",
-        "self_confirmed": "Door uzelf bevestigd — niet onafhankelijk",
-        "returned": "Teruggestuurd voor wijziging",
-        "disputed": "Betwist",
-        "not_applicable": "Hier staat niemand boven u"
-      },
-      "action": {
-        "await_verifier": "Niets te doen — het staat in iemands wachtrij",
-        "ask_employer_to_enable_confirmation": "Vraag om bevestiging aan te zetten",
-        "identify_verifier": "Geef aan voor wie u dit deed",
-        "respond_to_decision": "Lees het besluit en reageer",
-        "none": "Er ontbreekt niets"
-      }
     }
   },
   "orgMembers": {
@@ -7793,13 +7804,28 @@
     "generatedAt": "Gegenereerd",
     "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
+    "facts": {
+      "recorded": "Het werkjournaal registreert {hours} u over {count, plural, one {# record} other {# records}}.",
+      "recordedSpan": "Het werkjournaal registreert {hours} u over {count, plural, one {# record} other {# records}} ({span}).",
+      "confirmed": "Daarvan is {hours} u goedgekeurd door een manager.",
+      "contexts": "Werk is geregistreerd op {count, plural, one {# plek} other {# plekken}}.",
+      "topSkills": "Het meeste geregistreerde werk valt onder: {list}.",
+      "outputs": "Geregistreerde resultaten: {list}.",
+      "source": "Cijfers komen uit de eigen werkjournaalrecords van de werker; de beschrijving hierboven zijn zijn of haar eigen woorden."
+    },
     "practiceHistoryTitle": "Stage en vrijwilligerswerk",
     "workHistoryTitle": "Werkervaring",
     "present": "Heden",
+    "history": {
+      "project": "Binnen project: {name}",
+      "recorded": "Werkjournaal: {hours} u, {count, plural, one {# record} other {# records}}",
+      "recordedConfirmed": "Werkjournaal: {hours} u, {count, plural, one {# record} other {# records}}, waarvan {confirmed} u goedgekeurd door een manager"
+    },
     "languagesTitle": "Talen",
     "languagesSelfStated": "Talen zoals opgegeven door de werker.",
     "certificatesTitle": "Certificaten en licenties",
     "declaredCertHint": "Zelf opgegeven",
+    "documentSelfSuppliedHint": "Document aangeleverd door de werknemer",
     "validUntil": "Geldig tot",
     "drivingLicences": "Rijbewijscategorieën",
     "educationTitle": "Opleiding",
@@ -7840,6 +7866,16 @@
         "unavailable": "Niet beschikbaar"
       }
     },
+    "checks": {
+      "eyebrow": "Controleer vóór het printen",
+      "keep": "Zo laten",
+      "correct": "Corrigeren op de werkkaart",
+      "salary_below_monthly_floor": "De loonverwachting {min}–{max} € wordt geprint als MAANDBEDRAG (EUR/maand). Als maandbedrag ligt dat onder elk minimumloon — bedoelde je een uur- of dagtarief, corrigeer het dan naar een maandbedrag. Deze notitie wordt niet geprint.",
+      "salary_reads_annual": "De loonverwachting {min} € per maand leest als een jaarbedrag. Zo ja, corrigeer het naar een maandbedrag. Deze notitie wordt niet geprint.",
+      "available_from_past": "De datum \"kan beginnen vanaf\" ({date}) is voorbij — een lezer neemt hem als \"nu\". Klopt dat niet meer, werk hem bij.",
+      "available_from_far": "De startdatum ({date}) ligt meer dan een jaar vooruit. Is het jaar een vergissing, corrigeer het.",
+      "unavailable_with_start_date": "Status zegt \"kan niet werken\", maar er staat een startdatum ({date}). Kun je vanaf die datum — prima; zo niet, corrigeer het."
+    },
     "tailored": {
       "badge": "Cv op maat",
       "forNeed": "Afgestemd op de aanvraag: {role}",
@@ -7848,7 +7884,21 @@
       "noStructure": "Deze aanvraag heeft geen gestructureerde vaardigheidseisen — het standaard-cv wordt getoond.",
       "matchedTag": "Sluit aan op de aanvraag"
     },
-    "claimFromJournal": "uit het werkjournaal"
+    "claimFromJournal": "uit het werkjournaal",
+    "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
+    "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
+    "skillHours": "{hours} u",
+    "skillHoursOwn": "{hours} u, uw eigen registratie",
+    "skillHoursConfirmed": "{hours} u, waarvan {confirmed} u bevestigd door een manager",
+    "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn",
+    "selfStatedTitle": "Zelf opgegeven, nog geen registraties",
+    "variantsFolded": "{count} spellingen",
+    "skillShare": "{share}% van het geregistreerde werk",
+    "skillEntries": "{count, plural, one {# registratie} other {# registraties}}",
+    "skillNoRecords": "nog geen registraties",
+    "recordedHoursScope": "Alle tijd.",
+    "recordedHoursScopeTruncated": "Uit de laatste {count} records; oudere records zitten niet in deze cijfers.",
+    "organizationRecordedHours": "Registratie van de organisatie: {hours} u op {days, plural, one {# dag} other {# dagen}} in urenstaten of geïmporteerde documenten ({imported} u geïmporteerd, {approved} u goedgekeurd) — gescheiden van het journaalcijfer en aan geen enkele vaardigheid toegewezen."
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -7891,6 +7941,83 @@
         "overview": "Week & groei",
         "playerCard": "Spelerskaart"
       }
+    },
+    "home": {
+      "eyebrow": "Vandaag",
+      "headerNoName": "Jouw dag",
+      "professionUnknown": "Beroep nog niet ingevuld",
+      "reading": "Bezig met lezen…",
+      "state": {
+        "recorded": "{entries, plural, one {# registratie} other {# registraties}} vandaag · {hours} u",
+        "nothing": "Vandaag nog niets vastgelegd.",
+        "unknown": "De registraties van vandaag konden niet worden gelezen."
+      },
+      "next": {
+        "title": "Volgende stap",
+        "unknown": "Er kan nu geen volgende stap worden voorgesteld — de werkkaart kon niet worden gelezen."
+      },
+      "work": {
+        "title": "Vastgelegd werk",
+        "today": "Vandaag: {hours} u · {entries, plural, one {# registratie} other {# registraties}}",
+        "none": "Vandaag nog geen registraties.",
+        "untimed": "{n, plural, one {# registratie} other {# registraties}} zonder duur — uren nog niet meegeteld.",
+        "week": "Laatste 7 dagen: {hours} u · {entries, plural, one {# registratie} other {# registraties}}",
+        "truncated": "Geteld uit de laatst gelezen registraties — niet uit alle.",
+        "unknown": "Geen gegevens — het logboek kon niet worden gelezen."
+      },
+      "open": {
+        "title": "Vraagt je aandacht",
+        "untimed": "{n, plural, one {# registratie} other {# registraties}} zonder duur — voeg de uren toe",
+        "unlabelled": "{n, plural, one {# registratie} other {# registraties}} met uren maar zonder benoemd soort werk",
+        "unknown": "Open punten konden niet worden gelezen."
+      },
+      "growth": {
+        "title": "Groei",
+        "core_strength": "{skill} — het grootste aandeel van je toegewezen uren: {hours} u ({percent}).",
+        "growing": "{skill} groeit: de laatste 30 dagen vaker gebruikt dan daarvoor ({hours} u).",
+        "underused": "{skill} {days} dagen niet gebruikt — al een tijd geen registratie voor.",
+        "self_stated": "{skill} — door jou opgegeven; nog geen registratie ondersteunt het.",
+        "adjacent_opportunity": "Aangrenzende richting: {profession} — je registraties ondersteunen {shared} van de {total} vaardigheden ervan.",
+        "derived": "Een lezing van je eigen registraties, geen conclusie over jou.",
+        "insufficient": "Een groeilezing heeft minstens twee door registraties ondersteunde vaardigheden nodig.",
+        "none": "Je registraties tonen nog geen duidelijke richting.",
+        "unknown": "Geen gegevens — de groeilezing kon niet worden opgebouwd."
+      },
+      "opportunity": {
+        "title": "Wereld",
+        "band": {
+          "strong": "{n, plural, one {# sterk passend} other {# sterk passend}}",
+          "possible": "{n, plural, one {# mogelijk passend} other {# mogelijk passend}}",
+          "missing_requirement": "{n, plural, one {# met een ontbrekende eis} other {# met een ontbrekende eis}}",
+          "conflict": "{n, plural, one {# onverenigbaar} other {# onverenigbaar}}",
+          "not_assessed": "{n, plural, one {# gevonden, nog niet beoordeeld} other {# gevonden, nog niet beoordeeld}}"
+        },
+        "more": "{n, plural, one {nog # advertentie} other {nog # advertenties}}",
+        "none": "Op dit moment geen advertenties voor jou.",
+        "noWorker": "Advertenties verschijnen zodra je een werkersprofiel hebt.",
+        "unavailable": "De bron van advertenties is nu niet bereikbaar.",
+        "unknown": "Geen gegevens — advertenties konden niet worden gelezen.",
+        "open": "Wereld openen"
+      },
+      "ask": {
+        "title": "Vraag",
+        "body": "Leg werk vast in één zin, vraag naar je vaardigheden of open elke plek.",
+        "cta": "Schrijven"
+      },
+      "stations": {
+        "title": "Andere plekken",
+        "journal": "Mijn werk",
+        "numbers": "Mijn activiteit in cijfers",
+        "profile": "Beroepsprofiel",
+        "cv": "Levend cv",
+        "gallery": "Galerij"
+      }
+    },
+    "nav": {
+      "today": "Vandaag",
+      "world": "Wereld",
+      "ask": "Vraag",
+      "aria": "Hoofdnavigatie"
     }
   },
   "agencyPool": {
@@ -8147,7 +8274,12 @@
       "noOrganization": "Maak eerst de organisatie van uw bedrijf aan.",
       "fieldsNote": "Vraagt de werker om naam, telefoon en e-mail te delen. De werker beslist — zonder goedkeuring wordt niets getoond.",
       "error": "Het verzoek kon niet worden verstuurd. Probeer het opnieuw.",
-      "accepted": "De werker heeft het verzoek geaccepteerd — contact delen nog niet toegestaan."
+      "accepted": "De werker heeft het verzoek geaccepteerd — contact delen nog niet toegestaan.",
+      "withdraw": "Verzoek intrekken",
+      "withdrawing": "Intrekken…",
+      "withdrawn": "Je hebt dit verzoek ingetrokken.",
+      "withdrawNotOpen": "Dit verzoek staat niet meer open — het kan niet worden ingetrokken.",
+      "withdrawError": "Het verzoek kon niet worden ingetrokken. Probeer het opnieuw."
     },
     "shortlistNote": {
       "label": "Notitie",
@@ -8594,7 +8726,7 @@
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
     ],
-    "note": "Er is hier nog geen automatische vacaturebank en geen automatische matching — tijdens de vroege toegang wordt de selectie door een mens gecoördineerd. Wat je ziet is wat er echt draait.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg als één geheel aanbieden of inzetten is nog niet gebouwd — vandaag wordt een ploeg persoon per persoon gematcht.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {
@@ -9086,7 +9218,75 @@
       },
       "confirmNotice": "Je sollicitatie gaat verder op een ander portaal — in de originele advertentie.",
       "confirmContinue": "Doorgaan",
-      "confirmDismiss": "Annuleren"
+      "confirmDismiss": "Annuleren",
+      "bandNotAssessed": "Nog niet beoordeeld",
+      "bandMissingRequirement": "Vereiste ontbreekt",
+      "bandConflict": "Strijdig"
+    },
+    "fitWhy": {
+      "skills_missing": "mist vaardigheden die de advertentie vereist",
+      "language_missing": "vereist een taal die je niet hebt opgegeven",
+      "location_outside_radius": "locatie buiten je opgegeven straal",
+      "pay_above_offer": "je loonverwachting ligt boven het aanbod",
+      "accommodation_needed_not_provided": "je hebt huisvesting nodig en die wordt niet geboden",
+      "profession_mismatch": "een ander beroep dan het jouwe",
+      "need_not_structured": "de advertentie noemt geen vaardigheidseisen — niets om mee te vergelijken",
+      "need_recognized_not_confirmed": "eisen zijn herkend uit de advertentietekst, nog niet bevestigd",
+      "no_subject_skills": "je profiel bevat nog geen vaardigheden — niets om te vergelijken",
+      "location_unknown": "je locatie is niet opgegeven",
+      "pay_unknown": "loon kon niet worden vergeleken",
+      "language_unknown": "je talen zijn niet opgegeven",
+      "language_requirement_unknown": "de taaleis van de advertentie is onbekend"
+    },
+    "world": {
+      "title": "Werkkansen",
+      "assessedAgainst": "Beoordeeld tegen: {facts}",
+      "fact": {
+        "profession": "beroep — {value}",
+        "professionEvidenced": "beroep uit vastgelegd werk — {value}",
+        "professionMissing": "beroep niet opgegeven",
+        "skills": "vaardigheden — {count}",
+        "skillsMissing": "geen vaardigheden vastgelegd",
+        "place": "plaats — {value}",
+        "placeMissing": "plaats niet opgegeven",
+        "pay": "loonverwachting — vanaf {amount} EUR",
+        "payMissing": "loonverwachting niet opgegeven",
+        "languages": "talen — {list}",
+        "languagesMissing": "talen niet opgegeven"
+      },
+      "countsPlatform": "platformaanvragen: {shown} van {retrieved} getoond",
+      "countsPlatformUnavailable": "platformaanvragen: nog niet ingeschakeld",
+      "countsExternal": "openbare vacatures: {shown} van {retrieved} getoond",
+      "countsExternalUnreadable": "openbare vacatures: kon niet worden gelezen",
+      "countsFiltered": "{count} opzijgezet door je filters",
+      "derivedNote": "De groepen zijn afgeleid van de feiten die jij opgaf en de feiten die elke vacature vermeldt — een uitleg in woorden, geen getal.",
+      "chip": {
+        "strong": "Sterk passend",
+        "possible": "Mogelijk passend",
+        "missing_requirement": "Vereiste ontbreekt",
+        "conflict": "Strijdig",
+        "not_assessed": "Nog niet beoordeeld"
+      },
+      "strongEmpty": "Geen sterk passende vacature tussen de getoonde rijen.",
+      "strongEmptyChange": "Wat dit zou veranderen: {items}.",
+      "change": {
+        "profession_missing": "geef je beroep op",
+        "no_subject_skills": "bevestig de vaardigheden die je vastgelegde werk laat zien",
+        "location_unknown": "geef op waar je bent",
+        "pay_unknown": "geef je loonverwachting op",
+        "language_unknown": "geef je talen op",
+        "availability_unknown": "geef je beschikbaarheid op"
+      },
+      "why": "Waarom:",
+      "whyNoGaps": "geen hiaat gevonden tegen de opgegeven feiten",
+      "whyUnknown": "de reden kon niet worden gelezen",
+      "payNotStated": "loon niet vermeld door de bron",
+      "payUnitNotStated": "eenheid niet vermeld door de bron",
+      "sourcePlatform": "Platformaanvraag",
+      "externalCouldNotRead": "De bron van openbare vacatures kon deze keer niet worden gelezen — deze rijen zijn onbekend, niet afwezig.",
+      "mapTitle": "Waar het werk is",
+      "skipToList": "Naar de lijst",
+      "placeLink": "Toon de kansen in dit land"
     }
   },
   "workerIntake": {
@@ -9729,7 +9929,8 @@
       "visibility": "Zichtbaarheid voor werkgevers",
       "disclosures": "Gegevensoverdrachten aan bedrijven",
       "history": "Toestemmingsgeschiedenis",
-      "rights": "Privacyrechten en contact"
+      "rights": "Privacyrechten en contact",
+      "partnerSupply": "VERTEGENWOORDIGING BUITEN LABOURMARKET.AI"
     },
     "status": {
       "hidden": "Profiel niet zichtbaar voor werkgevers",
@@ -9818,6 +10019,75 @@
       "acceptedNote": "Geaccepteerd. Er is nog niets gedeeld — contactgegevens toestaan is een aparte keuze hieronder.",
       "grantTitle": "Contactgegevens delen?",
       "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
+    },
+    "partnerSupply": {
+      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor u zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een geanonimiseerde professionele samenvatting wordt doorgegeven — nooit uw naam of contactgegevens.",
+      "noWorkerProfile": "U heeft nog geen werknemersprofiel, dus er zou niets vertegenwoordigd worden. Maak eerst uw professionele profiel aan — deze antwoorden blijven bewaard en gaan gelden zodra het bestaat.",
+      "statusNotRepresented": "U wordt niet vertegenwoordigd buiten LabourMarket.ai",
+      "statusNotRepresentedBody": "Er wordt niets over u buiten dit platform verstuurd. Uw account, cv en werkjournaal werken hier precies hetzelfde zonder.",
+      "statusRepresented": "U wordt ook buiten LabourMarket.ai vertegenwoordigd",
+      "statusConsentOnly": "Toestemming gegeven — geef nu aan wat u zoekt",
+      "statusWithdrawn": "U heeft deze toestemming ingetrokken",
+      "statusStale": "De tekst van deze toestemming is gewijzigd — lees hem opnieuw",
+      "statusAgeing": "Uw antwoord wordt oud — bevestig of het nog klopt",
+      "statusExpired": "Uw antwoord is verlopen en wordt niet meer verstuurd",
+      "authoritiesTitle": "Wat elke toestemming betekent",
+      "authorityMatch": "Matchen",
+      "authorityMatchBody": "U mag worden meegeteld en vergeleken met passend werk. Een werkgever ziet een aantal en een anonieme referentie.",
+      "authorityContact": "Contact opnemen",
+      "authorityContactBody": "Een werkgever mag via LabourMarket.ai met u in contact worden gebracht.",
+      "authorityPresentation": "Presentatie",
+      "authorityPresentationBody": "Uw beschikbaarheid mag aan een publiek worden getoond — als groepscijfer, bijvoorbeeld “3 timmerlieden beschikbaar vanaf oktober”.",
+      "authorityIdentity": "Naamsvermelding",
+      "authorityIdentityBody": "U mag bij naam genoemd worden. Zonder dit wordt u uitsluitend anoniem gepresenteerd.",
+      "matchNeverReveals": "Matchen alleen onthult nooit uw naam, e-mailadres, telefoonnummer of adres. Contact en naamsvermelding zijn aparte toestemmingen die u hieronder geeft, en beide staan standaard uit.",
+      "grant": "Akkoord — vertegenwoordig mij",
+      "decline": "Nu niet",
+      "declinedNote": "Er is niets opgeslagen. Uw profiel, cv en werkjournaal blijven ongewijzigd.",
+      "manage": "Beheren",
+      "withdrawConsent": "Deze toestemming intrekken",
+      "formTitle": "Wat zoekt u op dit moment?",
+      "intentLabel": "Huidige situatie",
+      "intentAvailableNow": "Ik kan nu beginnen",
+      "intentAvailableFrom": "Ik kan vanaf een datum beginnen",
+      "intentOpenToOffers": "Ik werk, maar sta open voor aanbiedingen",
+      "intentLookingForWork": "Ik zoek werk",
+      "intentLookingForProjects": "Ik zoek projecten",
+      "availableFromLabel": "Ik kan beginnen vanaf",
+      "workCountriesLabel": "Landen waar ik wettelijk mag werken",
+      "workCountriesHelp": "Landcodes van twee letters, gescheiden door komma’s. Dit gaat over uw recht om te werken, niet over een voorkeur.",
+      "marketsLabel": "Landen waar ik aangeboden wil worden",
+      "marketsHelp": "Een aparte vraag. Alleen werkgevers in deze landen mogen u aangeboden krijgen, en ze moeten bij de landen hierboven horen.",
+      "validDaysLabel": "Hoeveel dagen dit antwoord geldig blijft",
+      "validDaysHelp": "Daarna vragen we het opnieuw. Vragen we niet, dan stopt het antwoord met verstuurd worden in plaats van te verouderen.",
+      "save": "Opslaan",
+      "saving": "Opslaan…",
+      "saved": "Opgeslagen.",
+      "edit": "Antwoorden wijzigen",
+      "cancel": "Annuleren",
+      "currentTitle": "Uw huidige antwoorden",
+      "currentIntent": "Huidige situatie",
+      "currentAvailableFrom": "Kan beginnen vanaf",
+      "currentWorkCountries": "Mag wettelijk werken in",
+      "currentMarkets": "Akkoord aangeboden te worden in",
+      "currentValidUntil": "Geldig tot",
+      "currentReconfirmedAt": "Laatst bevestigd",
+      "currentAuthorities": "Toestemmingen",
+      "granted": "ja",
+      "denied": "nee",
+      "unknown": "niet opgegeven",
+      "reconfirm": "Ja, klopt nog steeds",
+      "reconfirmed": "Dank u — bevestigd.",
+      "withdrawDeclaration": "Vertegenwoordig mij niet meer",
+      "withdrawnDeclarationNote": "U wordt niet langer vertegenwoordigd buiten LabourMarket.ai.",
+      "needsMigration": "Deze functie is nog niet beschikbaar.",
+      "errorGeneric": "Er ging iets mis. Er is niets gewijzigd.",
+      "errorUnknownIntent": "Kies uw huidige situatie.",
+      "errorAvailableFromRequired": "Geef de datum waarop u kunt beginnen.",
+      "errorCountriesRequired": "Noem minstens één land waar u wettelijk mag werken.",
+      "errorNotIso2": "Gebruik landcodes van twee letters, bijvoorbeeld LT, DE, NL.",
+      "errorMarketOutside": "U kunt alleen worden aangeboden waar u wettelijk mag werken. Voeg dat land hierboven eerst toe.",
+      "errorValidity": "Kies 30, 60 of 90 dagen."
     }
   },
   "planning": {
@@ -12458,6 +12728,7 @@
       "workHoursChip": "Gewerkte uren",
       "absencesChip": "Verlof & afwezigheid",
       "documentsChip": "Mijn documenten",
+      "chipPeopleImport": "Mensen toevoegen",
       "marketMapChip": "Marktkaart",
       "activityChip": "Activiteit",
       "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier.",
@@ -12524,6 +12795,16 @@
       "userProposalStatus": "Hoe staat het met mijn voorstellen?",
       "learningCompassHint": "Je leerkompas — richting, ontbrekende vaardigheden en passende kansen:",
       "chipLearningCompass": "Leerkompas",
+      "journalNumbersHint": "Je werk in cijfers — uren, hoofdactiviteit, vaardigheden en richtingen — staat in het werkjournaal:",
+      "chipJournalNumbers": "Werk in cijfers",
+      "photosRecent": "Ik heb foto's gevonden die in je journaal zijn opgeslagen: {count} van {total} worden getoond. Ze staan bij je journaalitems.",
+      "photosNone": "Ik vind op dit moment geen opgeslagen foto in je journaal. Een foto wordt samen met een journaalitem opgeslagen — open de galerij om te controleren; staat hij daar niet, dan is het uploaden niet voltooid.",
+      "photosNoWorker": "Foto's worden bewaard in het werkjournaal van een werknemer, en dit account heeft nog geen werknemersprofiel — er is hier dus geen opgeslagen foto.",
+      "photosUnavailable": "Ik kon niet controleren of de foto is opgeslagen — het lezen van de journaalfoto's is zojuist mislukt. Probeer het opnieuw of open de galerij.",
+      "photosPreviewUnavailable": "De foto's zijn opgeslagen, maar er konden nu geen voorbeelden worden gemaakt — de lijst wordt zonder afbeeldingen getoond.",
+      "photoNoPreview": "Voorbeeld niet beschikbaar",
+      "photoAlt": "Werkfoto",
+      "chipGallery": "Galerij",
       "inviteStudentHint": "Een leerling nodig je uit met een persoonlijke link vanuit het netwerkgedeelte (relatie ‘Student’):",
       "chipInviteStudent": "Leerling uitnodigen",
       "programmesHint": "Opleidingen en groepen beheer je in de bedrijfswerkruimte — maak daar een opleiding en een groep aan en wijs leerlingen toe:",
@@ -12578,6 +12859,55 @@
       "chipCvSheet": "Cv-blad openen",
       "cvViewHint": "Dit is je cv — wat het systeem vandaag over je weet. Open het en bekijk het; er wordt niets geüpload en niets gewijzigd.",
       "cvChooseAsk": "Wat wil je met je cv doen? Ik kan het tonen, een nieuw bestand aannemen, of je profiel openen — daaruit wordt het cv opgebouwd.",
+      "cvStateSubstantive": "Je hebt al een cv. Werkervaring: {work}. Vaardigheden: {skills}, waarvan bevestigd: {confirmed}. Bevestigde werkregistraties: {proof}. Er is niets geüpload en niets gewijzigd — open het en bekijk het.",
+      "cvStateStarted": "Je cv is begonnen, maar bevat nog geen werkervaring en geen bevestigd werk. Nu bevat het: vaardigheden {skills}, opleidingen {education}, certificaten {certificates}, talen {languages}.",
+      "cvStateEmpty": "Je hebt nog geen cv — de registratie is leeg. Ik kan het opbouwen uit een bestand dat je al hebt, of uit je profiel.",
+      "cvStateNotWorker": "Je hebt nog geen persoonlijke werkregistratie, dus er is geen cv om te tonen. Die ontstaat zodra je je persoonlijke ruimte start.",
+      "cvStateUnreadable": "Ik kon je cv nu niet lezen — dat is een storing aan onze kant, geen leeg cv. Er is niets gewijzigd. Probeer het zo nog eens.",
+      "capIntroPerson": "Dit is je eigen ruimte. Het nuttigst op dit moment:",
+      "capIntroEmployer": "Je werkt als werkgever. Het nuttigst op dit moment:",
+      "capIntroAgency": "Je werkt als uitzendbureau. Het nuttigst op dit moment:",
+      "capIntroEducation": "Je werkt als opleider. Het nuttigst op dit moment:",
+      "capWorkspaceNamed": "Je handelt namens {company}.",
+      "capPartial": "Een paar dingen kon ik nu niet controleren, dus enkele aantallen ontbreken.",
+      "capUnreadable": "Ik kon je ruimte nu niet lezen — dat is een storing aan onze kant, geen leeg account. Er is niets gewijzigd. Probeer het zo nog eens.",
+      "capContinue": "Zeg gewoon in je eigen woorden wat je wilt doen.",
+      "refLooksLikeName": "Dat leest als een naam en niet als iets om te doen, dus ik heb er niets mee gedaan. Zeg wat je ermee wilt doen.",
+      "refWorkspaceAsk": "“{name}” is een van je eigen ruimtes. Daarnaartoe overschakelen?",
+      "refWorkspaceMany": "Meerdere van je ruimtes passen bij die naam. Welke bedoel je?",
+      "questionWorkspaceKnown": "“{name}” is een van je eigen organisaties hier. Dat is alles wat ik erover weet uit je eigen gegevens.",
+      "questionUnansweredAbout": "Ik las dat als een vraag over “{name}”, maar ik heb er nog geen antwoord op.",
+      "questionUnanswered": "Ik las dat als een vraag, maar ik heb er nog geen antwoord op. Zeg wat je wilt doen, daar kan ik wel mee helpen.",
+      "understandClarify": "Ik heb je bericht gelezen, maar weet nog niet wat je vraagt. Vertel iets meer over wat je wilt doen.",
+      "fileAskSubject": "Van wie is dit document? Ik koppel het aan niemand tot je het zegt — van jou, van iemand anders, of van je organisatie.",
+      "fileSelfCv": "Begrepen: je eigen cv. Open de cv-import, dan lezen we het samen door, deel voor deel — er wordt niets opgeslagen tot je elk deel bevestigt.",
+      "fileSelfDocument": "Begrepen: je eigen document. Leg het vast in je documenten en voeg het bestand daar toe.",
+      "fileOrgEvidence": "Begrepen: mensen van je organisatie. Dat gaat via de werkbewijs-import: elke persoon wordt gematcht, je krijgt een voorbeeld te zien en over wat niet te plaatsen is wordt gevraagd — er wordt niets weggeschreven tot jij bevestigt.",
+      "fileOrgPeople": "Begrepen: de mensen van uw organisatie. Dat gaat via de personenimport: die leest de namen, toont u een voorbeeld, vraagt naar iedereen die niet te plaatsen is, en schrijft niets tot u bevestigt. Er worden geen accounts aangemaakt.",
+      "fileNeedsOrganization": "Dat hoort bij een organisatie en je zit nu in je persoonlijke ruimte. Schakel eerst over naar de organisatie, dan kan ik het daar aannemen.",
+      "fileNotYetOther": "Begrepen: dit is het document van iemand anders, niet van jou. Ik heb het nergens aan gekoppeld — en documenten van iemand anders kan ik nog niet aannemen. Hun eigen account of een uitnodiging van jou is vandaag de enige eerlijke weg.",
+      "fileNotYetCohort": "Begrepen: een lijst met studenten. Ik heb hem niet geïmporteerd — studenten sluiten zich vandaag aan via een uitnodiging, en een bestandsimport voor een groep bestaat nog niet.",
+      "fileNotYetSelf": "Begrepen: je eigen werk. Ik heb niets gekoppeld — losse werkfoto's kunnen nog nergens heen. Leg eerst het werk vast, dan horen de foto's bij die registratie.",
+      "fileNotYetManyPeople": "Begrepen: documenten van meerdere mensen, niet van jou. Ik heb er geen enkel gekoppeld — en documenten van anderen kan ik nog niet in bulk aannemen. Hen uitnodigen, zodat ieder zijn eigen meebrengt, is vandaag de enige eerlijke weg.",
+      "fileNotYetOrganization": "Begrepen: mensen van je organisatie, en dit zijn hun eigen persoonlijke documenten. Ik heb ze aan niemand gekoppeld — het cv van een persoon hoort bij het account van die persoon. Wat ik vandaag wel kan aannemen is bewijs van werk dat je organisatie heeft gedaan.",
+      "capOutPersonCv": "het cv bekijken dat het systeem al van je heeft",
+      "capOutPersonFindWork": "werk zoeken dat past bij wat je kunt",
+      "capOutPersonLogWork": "gedaan werk vastleggen, zodat het deel wordt van je geschiedenis",
+      "capOutPersonProfile": "je vaardigheden en werkervaring aanvullen",
+      "capOutPersonLearning": "je opleiding en stage volgen",
+      "capOutEmployerNeed": "aangeven wie je nodig hebt en wanneer",
+      "capOutEmployerCandidates": "zien wie op je vraag heeft gereageerd",
+      "capOutEmployerCandidatesN": "zien wie op je {count, plural, one {# openstaande vraag} other {# openstaande vragen}} heeft gereageerd",
+      "capOutAgencyClients": "een klantbedrijf koppelen en zien wat het nodig heeft",
+      "capOutAgencyProposals": "je mensen voorstellen voor werk dat een klant heeft gedeeld",
+      "capOutAgencyProposalsN": "je mensen voorstellen voor {count, plural, one {# aanvraag} other {# aanvragen}} van een klant",
+      "capOutAgencyRoster": "de lijst mensen die je kunt aanbieden bijhouden",
+      "capOutEduLearners": "volgen hoe je studenten naar echt werk doorstromen",
+      "capOutEduLearnersN": "volgen hoe {count, plural, one {je # student naar echt werk doorstroomt} other {je # studenten naar echt werk doorstromen}}",
+      "capOutEduProgrammes": "de opleidingen beschrijven die je geeft",
+      "capOutOpsProjects": "het lopende werk aansturen",
+      "capOutOpsProjectsN": "de {count, plural, one {# lopende project} other {# lopende projecten}} aansturen",
+      "capOutOpsTeam": "de mensen met wie je werkt beheren",
       "taskCreateIntro": "Een nieuwe taak: wat er moet gebeuren, op welk project en wanneer.",
       "taskCreatedNext": "Taak vastgelegd. De projectpuls toont hem als open; wijs een persoon toe op het takenscherm.",
       "capacityIntro": "Team {from} – {to} ({count} mensen):",
@@ -12754,6 +13084,13 @@
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
       "minutesUnit": "min",
       "errorNoWorkContent": "Een invoer heeft het werk nodig: wat je deed, waar of hoe lang. Schrijf het in je eigen woorden, bijv. „ramen gemonteerd van 8 tot 17“.",
+      "recordTitle": "Wordt vastgelegd als werktijd",
+      "recordNoActivity": "soort werk niet herkend",
+      "recordTotalStated": "Opgegeven totaal",
+      "recordPartsSum": "de delen tellen op tot",
+      "recordTotalDiffers": "het verschil wordt als controle getoond, nooit bij je uren opgeteld",
+      "recordNone": "Geen tijd in de tekst gevonden — de invoer wordt geteld, maar zonder duur. Voeg de uren toe als je ze in je totalen wilt.",
+      "hoursUnit": "u",
       "relationship": {
         "employee": "Werknemer",
         "freelancer": "Freelancer",
@@ -12771,8 +13108,6 @@
       "pipelineFailedNote": "Vaardigheidsherkenning is deze keer mislukt — de registratie is opgeslagen; je kunt de herkenning in het logboek opnieuw uitvoeren."
     },
     "findWork": {
-      "intro": "Ik vond {count} passende opties. Beste matches:",
-      "introOne": "Ik vond 1 passende optie:",
       "emptyState": "Op dit moment vond ik geen actieve vacatures die aan je criteria voldoen. Er zijn nog geen meldingen, dus dat beloof ik niet — vraag het later opnieuw of vul je profiel aan zodat meer behoeften passen.",
       "blockedNoWorker": "Om werk te zoeken, schakel de werknemersrol in bij accountinstellingen.",
       "blockedNoAccess": "De vacaturelijst is nog niet ingeschakeld in deze omgeving. Zodra dat zo is, toon ik echte behoeften.",
@@ -12782,7 +13117,18 @@
       "fitInsufficient": "Onvoldoende gegevens",
       "locationReason": "Locatie: {location}",
       "roleReason": "Behoefte: {role}",
-      "introExternal": "In het paneel staan {count} openbare vacatures uit officiële bronnen — solliciteren gebeurt via de originele advertentie."
+      "fitNotAssessed": "Nog niet beoordeeld",
+      "fitMissingRequirement": "Vereiste ontbreekt",
+      "fitConflict": "Strijdig",
+      "readback": "Ik vond er {total} ({bands}). De beste staan in het paneel; elke rij met reden staat op de pagina met kansen.",
+      "readbackDiscoveryOnly": "Ik vond er {total}, nog geen enkele als passend beoordeeld ({bands}). Waarom elke — op de pagina met kansen.",
+      "band": {
+        "strong": "sterk passend: {count}",
+        "possible": "mogelijk passend: {count}",
+        "missing_requirement": "vereiste ontbreekt: {count}",
+        "conflict": "strijdig: {count}",
+        "not_assessed": "nog niet beoordeeld: {count}"
+      }
     },
     "summary": {
       "introProfile": "Dit is je profiel op dit moment: {done} van {total} basisgegevens zijn opgeslagen.",
@@ -12943,7 +13289,8 @@
         "organization": "organisatie"
       },
       "opportunities": {
-        "title": "Vacatures die bij je passen"
+        "title": "Vacatures die bij je passen",
+        "titleDiscovery": "Gevonden advertenties (nog niet beoordeeld)"
       },
       "opportunitiesError": "Kon de vacatures die bij je passen niet laden.",
       "opportunitiesUnavailable": "De vraagbron is nog niet ingeschakeld, dus er valt nog niets te matchen.",
@@ -13104,7 +13451,9 @@
       "engagementsEndedAt": "De werkrelatie is beëindigd op {date}.",
       "engagementsEndedStillVisible": "Let op: dit bedrijf kan uw profiel nog steeds zien zolang u aan zijn project bent toegewezen. Die toegang eindigt wanneer de toewijzing eindigt.",
       "engagementsAlreadyEnded": "Deze werkrelatie was al beëindigd. Er is niets gewijzigd.",
-      "engagementsAlreadyEndedAt": "Deze werkrelatie was al beëindigd op {date}. Er is niets gewijzigd."
+      "engagementsAlreadyEndedAt": "Deze werkrelatie was al beëindigd op {date}. Er is niets gewijzigd.",
+      "opportunitiesCounts": "Totaal {total}: {bands}.",
+      "opportunitiesDiscoveryOnly": "Nog geen enkele beoordeeld als passend — waarom staat naast elke rij op de pagina met kansen."
     }
   },
   "landing": {
@@ -13423,7 +13772,7 @@
       "title": "De arbeidsmarkt bestaat op echte plekken.",
       "lead": "Mensen, werk en behoeften zijn ergens. De kaart hoort bij het product, het is geen plaatje naast de tekst.",
       "shows": "De kaart toont de {count, plural, one {# markt} other {# markten}} waarin LabourMarket.ai vandaag actief is. Dat zijn markten, geen activiteit van vandaag.",
-      "notPublished": "Hoeveel werk of hoeveel mensen er op één plek zijn, tonen we bezoekers nog niet — die gegevens publiceren we niet, dus staat er geen enkele geraden stip op deze kaart. Ingelogd zie je de echte stand van jouw markt."
+      "invite": "Meld je aan en vergroot je kansen op de arbeidsmarkt."
     },
     "contexts": {
       "eyebrow": "Waar te beginnen",
@@ -13576,6 +13925,73 @@
       "journalLine": "— {day}: {what}",
       "journalUnlabelled": "(geen omschrijving)",
       "journalEmpty": "Je hebt geen dagboekregels in de afgelopen {days} dagen.",
+      "journalHoursTotal": "Totaal over {days} dagen: {hours} u over {entries, plural, one {# registratie} other {# registraties}} (elke registratie één keer geteld).",
+      "journalHoursWindow": "Totaal over {days} dagen: {hours} u over {entries, plural, one {# registratie} other {# registraties}}, waarvan {confirmed} u bevestigd door een leidinggevende (elke registratie één keer geteld).",
+      "journalPeriod_today": "Vandaag",
+      "journalPeriod_yesterday": "Gisteren",
+      "journalPeriod_week": "In de laatste 7 dagen",
+      "journalPeriod_month": "In de laatste 30 dagen",
+      "journalPeriod_year": "In de laatste 365 dagen",
+      "journalPeriod_all": "Over de hele periode",
+      "journalPeriod_range": "In de afgelopen {days, plural, one {# dag} other {# dagen}}",
+      "journalHoursPeriod": "{period}: {hours} u over {entries, plural, one {# registratie} other {# registraties}}, waarvan {confirmed} u bevestigd door een leidinggevende (elke registratie één keer geteld).",
+      "journalHoursPeriodPlain": "{period}: {hours} u over {entries, plural, one {# registratie} other {# registraties}} (elke registratie één keer geteld).",
+      "journalHoursNonePeriod": "{period}: {entries, plural, one {# registratie} other {# registraties}}, maar zonder duur — voeg de uren toe en ze worden meegeteld.",
+      "journalEmptyPeriod": "{period} — geen registraties in het logboek.",
+      "journalPeriodLines": "Registraties:",
+      "whyJournalPeriod": "Uit je eigen logboekregistraties. Periode: {period}.",
+      "journalDayUnits": "Nog {days} d in dagen vastgelegd — niet naar uren omgerekend.",
+      "journalHoursNone": "{entries, plural, =0 {Geen registraties met een duur.} one {# registratie, maar zonder duur — voeg uren toe en ze worden geteld.} other {# registraties, maar zonder duur — voeg uren toe en ze worden geteld.}}",
+      "whyWi": "Uit uw eigen dagboekregistraties, elke één keer geteld — dezelfde cijfers als het onderdeel “Werk in cijfers”. Periode: {period}.",
+      "wiUnread": "Ik kon uw geregistreerde werk nu niet lezen — dat is niet hetzelfde als geen werk hebben. Vraag het zo nog eens.",
+      "wiOutputs": "{period} gedaan: {list}.",
+      "wiOutputItem": "{value} {unit} ({entries, plural, one {# registratie} other {# registraties}})",
+      "wiOutputItemActivity": "{value} {unit} · {activity} ({entries, plural, one {# registratie} other {# registraties}})",
+      "wiSkillHours": "{skill}: {hours} u toegewezen aan deze vaardigheid van {total} u geregistreerd werk ({period}); daarvan {confirmed} u bevestigd door een leidinggevende.",
+      "wiSkillShared": "Nog {hours} u gewerkt samen met andere vaardigheden — getoond als betrokkenheid, niet bij het cijfer opgeteld.",
+      "wiSkillWhere": "Gebruikt in {entries, plural, one {# registratie} other {# registraties}} op {days, plural, one {# dag} other {# dagen}} in {contexts, plural, =0 {geen genoemde context} one {# context} other {# contexten}}; laatst op {day}.",
+      "wiSkillNoEntries": "{period}: geen registratie is aan deze vaardigheid gekoppeld.",
+      "chipSkillEntries": "Registraties met {skill}",
+      "wiActivityHours": "{activity}: {hours} u van {total} u geregistreerd werk ({period}), {entries, plural, one {# registratie} other {# registraties}}; laatst op {day}.",
+      "wiSubjectNone": "{subject}: {period} niets onder geregistreerd — in totaal {total} u geregistreerd over {entries, plural, one {# registratie} other {# registraties}}.",
+      "wiSkillsNone": "{period}: {total} u geregistreerd over {entries, plural, one {# registratie} other {# registraties}}, maar nog geen uur is aan een vaardigheid toegewezen — koppel vaardigheden aan uw registraties en ze worden geteld.",
+      "wiSkillsIntro": "{period}: {attributed} u toegewezen aan vaardigheden van {total} u geregistreerd werk ({entries, plural, one {# registratie} other {# registraties}}). Meest gebruikt:",
+      "wiSkillLine": "— {skill}: {hours} u ({pct} van de {attributed} u toegewezen), {confirmed} u bevestigd; betrokken bij nog {shared} u",
+      "wiSkillsRemainder": "Niet aan één vaardigheid toegewezen: {shared} u gedeeld tussen vaardigheden of soorten werk, {unlinked} u zonder gekoppelde vaardigheid.",
+      "wiActivitiesNone": "{period}: {total} u geregistreerd over {entries, plural, one {# registratie} other {# registraties}}, nog geen met een genoemd soort werk.",
+      "wiActivitiesIntro": "{period}: {labelled} u dragen een soort werk van {total} u geregistreerd werk. Meeste tijd:",
+      "wiActivityLine": "— {activity}: {hours} u ({pct} van alle geregistreerde tijd), {entries, plural, one {# registratie} other {# registraties}}",
+      "wiActivitiesUnlabelled": "{hours} u zonder soort werk staan niet in deze lijst.",
+      "wiConfirmedNone": "{period}: nog geen bevestiging van een leidinggevende of klant — alle {total} u over {entries, plural, one {# registratie} other {# registraties}} zijn uw eigen registratie.",
+      "wiConfirmedHours": "{period}: {confirmed} u bevestigd door een leidinggevende of klant van {total} u geregistreerd werk; {confirmedEntries} van {entries, plural, one {# registratie} other {# registraties}} bevestigd.",
+      "wiConfirmedSkills": "Bevestigde uren per vaardigheid: {list}.",
+      "wiConfirmedSkillItem": "{skill} {hours} u",
+      "wiGrowthBasis": "{period}: feiten — uw registraties onderbouwen {count, plural, one {# vaardigheid} other {# vaardigheden}} van {total} u geregistreerd werk ({entries, plural, one {# registratie} other {# registraties}}): {list}.",
+      "wiGrowthBasisSkill": "{skill} {hours} u",
+      "wiGrowthBasisSkillInvolved": "{skill} betrokken {hours} u",
+      "wiGrowthBasisSkillUntimed": "{skill} {entries, plural, one {# vermelding} other {# vermeldingen}} zonder duur",
+      "wiGrowthDeclaredOnly": "{count, plural, one {# vaardigheid die u zelf opgaf en die door geen registratie wordt onderbouwd, blijft buiten deze lezing.} other {# vaardigheden die u zelf opgaf en die door geen registratie worden onderbouwd, blijven buiten deze lezing.}}",
+      "wiGrowthDerived": "Lezing (afgeleid uit die feiten — geen beoordeling, geen rangorde, geen kwalificatie):",
+      "wiGrowthInsufficient": "Een lezing vraagt minstens twee vaardigheden die uw registraties onderbouwen — voorlopig alleen de feiten.",
+      "wiGrowthDeepen": "Wat u zou kunnen verdiepen:\n{list}",
+      "wiGrowthDeepenItem": "— {skill} — {reasons}",
+      "wiGrowthReason_involvement_only": "tot nu toe alleen naast andere vaardigheden — geen registratie waarin dit het hoofdwerk was",
+      "wiGrowthReason_untimed": "de vermeldingen die dit onderbouwen hebben geen duur — nog geen uren; noem de tijd en ze tellen mee",
+      "wiGrowthReason_unconfirmed": "door u geregistreerd, nog niet bevestigd door een leidinggevende of klant",
+      "wiGrowthReason_rising": "de laatste 30 dagen meer gebruikt dan de 30 dagen ervoor",
+      "wiGrowthReason_dormant": "90 dagen zonder registratie",
+      "wiGrowthExpand": "Waar uw geregistreerde werk al heen wijst (richtingen waar uw registraties al bij passen):\n{list}",
+      "wiGrowthExpandItem": "— {direction}: uw registraties onderbouwen {shared, plural, one {# vaardigheid} other {# vaardigheden}}; nog niet onderbouwd: {missing}",
+      "wiGrowthDemandUnread": "Wat de echte vraag zoekt, kon deze keer niet worden gelezen — dat staat op uw kansenbord.",
+      "wiGrowthMore": "en nog {count} — alle tellen mee in de totalen",
+      "wiGrowthDemandNone": "Uw zichtbare aanvragen zoeken geen vaardigheid die uw registraties niet al onderbouwen.",
+      "wiGrowthDemand": "Wat uw zichtbare aanvragen zoeken en uw registraties nog niet onderbouwen: {list}.",
+      "wiGrowthDemandItem": "{skill} ({demands, plural, one {# aanvraag} other {# aanvragen}})",
+      "whyWiGrowth": "Feiten — uit uw eigen dagboekregistraties, dezelfde cijfers als \"Werk in cijfers\"; lezing — daaruit afgeleid, geen beoordeling. Periode: {period}.",
+      "chipJournalNumbers": "Werk in cijfers",
+      "figuresWorkerHours": "Vastgelegd werk: {total} u in totaal, waarvan {confirmed} u bevestigd; {month} u in de laatste 30 dagen.",
+      "figuresWorkerHoursNone": "{entries, plural, =0 {Nog geen registraties met een duur — uren komen uit je eigen registraties.} one {# registratie, geen enkele met een duur — voeg uren toe aan de registratie.} other {# registraties, geen enkele met een duur — voeg uren toe aan een registratie.}}",
+      "figuresWorkerHoursUnread": "Ik kon je uren nu niet lezen — dat is niet hetzelfde als geen uren hebben. Vraag het zo nog eens.",
       "figuresWorker": "{entries} dagboekregels, waarvan {confirmations} bevestigd door een leidinggevende. {skills} vaardigheden opgeslagen, {confirmed} bevestigd.",
       "figuresWorkerUnread": "{skills} vaardigheden opgeslagen, {confirmed} bevestigd. Ik kon je aantal journaalregels en bevestigingen zojuist niet lezen — dat is niet hetzelfde als er geen hebben. Vraag het zo meteen opnieuw.",
       "figuresNoHoursLedger": "Het platform houdt geen register van goedgekeurde uren bij, dus een urencijfer kan ik niet geven — het legt bevestigde regels vast.",
@@ -13623,7 +14039,9 @@
       "whyVerifierChoice": "Meerdere organisaties passen even goed, dus ik gok niet — jij kiest.",
       "whyVerifierSelf": "Je kunt je eigen werk niet bevestigen — bevestiging moet van iemand anders komen.",
       "whyVerifierNone": "Geen van je actieve relaties wijst naar een organisatie die werk kan bevestigen.",
-      "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen."
+      "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen.",
+      "journalOrgRecords": "Ook in de registratie van uw organisatie ({period}): {hours} u op {days, plural, one {# dag} other {# dagen}} — uren uit een urenstaat of import, apart gehouden en niet bij het cijfer hierboven opgeteld.",
+      "journalCoverageTruncated": "Getoond op basis van de laatste {count} registraties — oudere registraties zitten niet in dit cijfer."
     },
     "project": {
       "fieldStatus": "Status",
@@ -15366,6 +15784,7 @@
       "unlinkedNote": "Een hier toegevoegde persoon is een registratie van uw organisatie. Het is geen account en zegt niets over wie hij is — de echte persoon kan hem later opeisen."
     },
     "relationship": {
+      "candidate": "Kandidaat",
       "employee": "Werknemer",
       "former_employee": "Voormalig werknemer",
       "agency_worker": "Uitzendkracht",
@@ -15459,8 +15878,9 @@
       "too_many_rows": "Dat zijn meer regels dan één import aankan. Splits de bron, bijvoorbeeld per jaar.",
       "no_source_supplied": "Geen bestand en geen geplakte regels — er is niets te lezen.",
       "file_too_large": "Dat bestand is te groot om hier te lezen.",
-      "file_unreadable": "Dat bestand kon niet als tekst worden gelezen.",
+      "file_unreadable": "Dit bestand kon niet worden gelezen. Ondersteund: .xlsx, .xlsm, .csv, .tsv, .txt.",
       "nothing_parsed": "Er is geen bruikbare regel gevonden. De bron heeft een kopregel nodig die ten minste een persoon en een datum noemt.",
+      "month_not_stated": "Deze urenstaat vermeldt geen maand, dus elke datum zou een gok zijn. Zet de maand op het blad - bijvoorbeeld “2026-05” in een kop - en upload het opnieuw.",
       "confirmation_rejected": "Deze import is veranderd nadat u ernaar keek, dus er is niets vastgelegd. Lees hem opnieuw en keur de nieuwe versie goed.",
       "confirmation_unavailable": "Goedkeuringen kunnen in deze omgeving niet worden ondertekend, dus er is niets vastgelegd."
     },
@@ -15483,5 +15903,92 @@
       "decisionFailed": "Dat antwoord kon niet worden opgeslagen. Er is niets gewijzigd.",
       "unnamedOrganization": "Een organisatie"
     }
+  },
+  "organizationRoster": {
+    "title": "Mensen die deze organisatie heeft vastgelegd",
+    "intro": "Iedereen die via een import binnenkwam of is toegevoegd bij het matchen van een bron. Dit is wat uw organisatie heeft vastgelegd — het is geen lijst met platformaccounts.",
+    "actingFor": "U handelt namens",
+    "count": "{count, plural, one {# persoon} other {# personen}} op de lijst.",
+    "truncated": "De eerste {limit} worden getoond.",
+    "empty": "Er staat nog niemand op de lijst. Het lezen is gelukt — de lijst is echt leeg.",
+    "emptyAction": "Breng uw mensen binnen",
+    "meaning": "Een naam hier betekent dat uw organisatie voor die persoon instaat. Het betekent niet dat zij een account hebben, en niet dat zij ergens mee hebben ingestemd.",
+    "linkState": {
+      "unlinked": "Geen account gekoppeld",
+      "link_proposed": "Koppeling voorgesteld",
+      "linked": "Gekoppeld aan hun account"
+    },
+    "context": {
+      "unauthenticated": "Meld u aan om de mensen van deze organisatie te zien.",
+      "personalWorkspace": "U bent in uw persoonlijke ruimte. Schakel naar een organisatie om haar mensen te zien.",
+      "noOrganization": "U hoort nog bij geen enkele organisatie.",
+      "notAMember": "U bent geen lid van die organisatie.",
+      "chooseOrganization": "U beheert meer dan één organisatie. Kies namens welke u handelt.",
+      "notAuthorized": "U hebt in deze organisatie geen rol die haar mensen mag zien.",
+      "needsMigration": "De personenopslag is in deze omgeving nog niet ingeschakeld.",
+      "unavailable": "De lijst met mensen kon niet worden gelezen. Dat is iets anders dan een lege lijst — probeer het zo meteen opnieuw."
+    }
+  },
+  "peopleImport": {
+    "alreadyThere": "{count} staan al op je lijst",
+    "ambiguousLead": "Deze namen passen bij meer dan één persoon die je al hebt. Wij gokken niet.",
+    "ambiguousTitle": "Hier moet jij beslissen",
+    "cancel": "Annuleren",
+    "choose": "Bestand kiezen",
+    "chooseExisting": "Dit is {name}",
+    "chooseNew": "Dit is een andere persoon",
+    "committing": "Toevoegen…",
+    "confirm": "Deze mensen toevoegen",
+    "detected": "{count} mensen gevonden in {file}",
+    "duplicates": "{count} komen dubbel voor in het bestand",
+    "errFailed": "Dat is niet gelukt en er is niets opgeslagen. Probeer het zo nog eens.",
+    "errNeedsMigration": "Die relatie is in deze omgeving nog niet beschikbaar.",
+    "errNoName": "Geen enkele kolom in dit bestand zegt wie de mensen zijn. Voeg een kop toe zoals “Naam” en probeer opnieuw.",
+    "errNotAuthorized": "Je kunt geen mensen toevoegen voor deze organisatie.",
+    "errNothing": "Uit dat bestand kon niets worden gelezen.",
+    "errTooLarge": "Dat bestand is te groot.",
+    "errTooMany": "Dat zijn meer dan {limit} mensen tegelijk. Splits het bestand en voeg het in delen toe.",
+    "errUnsupported": "Ik kan {file} nog niet lezen. Een spreadsheet (.xlsx) of een .csv werkt vandaag.",
+    "lead": "Voeg een lijst met je mensen toe (.xlsx, .csv). Eén kolom moet de namen bevatten. Je ziet wat we begrepen hebben voordat er iets wordt opgeslagen.",
+    "nothingToAdd": "Niets toe te voegen — iedereen in dit bestand staat al op je lijst.",
+    "previewTitle": "Dit hebben we begrepen",
+    "reading": "Bestand lezen…",
+    "receipt": "{created} toegevoegd aan {org}. {existing} stonden al op je lijst. {skipped} regels zijn overgeslagen. Er zijn geen accounts voor hen aangemaakt.",
+    "receiptTitle": "Klaar",
+    "relAgencyWorker": "Mensen die we leveren",
+    "relCandidate": "Kandidaten die we overwegen",
+    "relContractor": "Opdrachtnemers",
+    "relEmployee": "Onze medewerkers",
+    "relStudent": "Onze studenten",
+    "relTrainee": "Onze stagiairs",
+    "relationship": "Wie zijn deze mensen voor jou?",
+    "title": "Breng je mensen binnen",
+    "unusable": "{count} regels overgeslagen — geen bruikbare naam",
+    "willCreate": "{count} worden toegevoegd",
+    "willNot": "Wat er NIET gebeurt: er worden geen accounts voor deze mensen aangemaakt, ze worden geen beheerder van je organisatie, wat je uploadt wordt geen geverifieerd bewijs over hen, en dit geeft geen toestemming om hen publiek of commercieel te vertegenwoordigen."
+  },
+  "teamRecordedWork": {
+    "title": "Vastgelegd werk",
+    "intro": "{period}: wat de eigen werkdagboek-items van elke persoon, vastgelegd bij de werkrelaties van deze organisatie, samen opleveren — dezelfde regel en dezelfde lezer als het \"werk in cijfers\" van de persoon zelf. Items die persoonlijk of voor een andere werkgever zijn vastgelegd, komen nooit in dit beeld.",
+    "bound": "De eerste {shown} van {total} mensen op de lijst; open een persoon voor de volledige sectie.",
+    "journalTotal": "Dagboek: {hours} u over {members, plural, one {# persoon} other {# personen}} van wie de items zijn gelezen",
+    "journalTotalNone": "Dagboek: geen leesbare items in deze periode",
+    "organizationTotal": "Uw organisatieregistratie: {hours} u over {members, plural, one {# persoon} other {# personen}} — apart geteld, nergens bij opgeteld",
+    "unknownCount": "{count, plural, one {# persoon} other {# personen}} kon niet worden gelezen",
+    "noReadableCount": "{count, plural, one {# persoon} other {# personen}} zonder leesbare gegevens",
+    "memberUnknown": "Kon niet worden gelezen",
+    "memberNoReadable": "Geen leesbare gegevens",
+    "memberFigures": "{hours} u · {entries, plural, one {# item} other {# items}} · {days, plural, one {# dag} other {# dagen}}",
+    "memberDayUnits": "+ {days} vastgelegd in dagen, apart van uren",
+    "confirmedShare": "{share} van deze uren ({hours} u) heeft een leidinggevende in het dagboek bevestigd; de rest is de eigen registratie van de persoon",
+    "confirmedNone": "Geen uren door een leidinggevende in het dagboek bevestigd in deze periode — de eigen registratie van de persoon",
+    "confirmedNoHours": "Geen getimede uren in deze periode",
+    "topSkills": "Grootste aandeel van de vastgelegde uren: {list}",
+    "topSkillsNone": "In deze periode zijn geen uren aan een vaardigheid toegekend",
+    "coverageTruncated": "Op basis van de laatste {count} gelezen items — oudere items zitten niet in deze cijfers",
+    "ledgerUnknown": "kon niet worden gelezen",
+    "ledgerNone": "niets in deze periode ({period})",
+    "ledgerFigures": "{hours} u · {rows, plural, one {# regel} other {# regels}} · {days, plural, one {# dag} other {# dagen}}",
+    "rule": "De dagboekcijfers en de registratie van de organisatie zijn twee vastleggingen van hetzelfde werk, naast elkaar getoond en nooit bij elkaar opgeteld. Een urenregistratie zegt wanneer en hoeveel, niet wat — ze bereikt geen enkele vaardigheid."
   }
 }

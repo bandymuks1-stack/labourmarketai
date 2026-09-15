@@ -58,7 +58,7 @@ export async function WeeklyIntelligenceSection({
             {t("weekly.journalInactive")}{" "}
             <Link
               href={`/${locale}/dashboard/journal`}
-              className="font-medium text-brand-blue hover:text-brand-cyan"
+              className="font-medium text-brand-blue hover:text-brand-champagne"
               data-testid="weekly-journal-cta"
             >
               {t("weekly.journalCta")} →

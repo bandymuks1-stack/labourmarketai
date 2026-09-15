@@ -58,6 +58,208 @@
 
 # Applied Migration Ledger
 
+## Applied 2026-09-14 — owner decision round (items 2a, 4b, 4c, 4d)
+
+> Four migrations applied via Supabase MCP `apply_migration` after explicit
+> per-item owner approval. Each was verified read-only on production
+> immediately after apply; the verification output is recorded below. Ledger
+> versions are APPLY-TIME stamps and never match the repo filename — match on
+> `name`.
+>
+> **The three pre-existing files still carry their `DRAFT — needs-human-gate —
+> DO NOT APPLY` headers, and those headers are now HISTORICAL.** This entry is
+> the current truth for all three. The headers are deliberately not edited, for
+> the same reason recorded in the never-apply section below: touching a
+> migration file makes `migration-safety` re-scan it, and their contents are
+> inherently RED (SECURITY DEFINER, grants, policy changes), so every future
+> edit would fail CI for no benefit. Read apply status from this ledger, never
+> from a migration header. (`20260914200000_defects_assignee_read_v1` is new in
+> this round and its header records the owner approval directly.)
+
+### ✅ APPLIED TO PROD — `20260914200000_defects_assignee_read_v1` (owner item 2a, WRK-8)
+
+| | |
+|---|---|
+| Ledger | version `20260914195053`, name `defects_assignee_read_v1` |
+| Rollback | `supabase/rollbacks/20260914200000_defects_assignee_read_v1.down.sql` |
+| Change | ONE disjunct added to `defects_select`: `or assignee_profile_id = auth.uid()`. No other policy, grant, function or column touched. |
+| Why | `assignee_profile_id` records who must fix a defect and appeared in no policy, so the one person the row exists to instruct could not read it (SEP-8). |
+| Preconditions | `defects` 0 rows, `defect_corrections` 0 rows, 9 projects, single SELECT policy — all read immediately before apply. |
+| Post-apply proof | Three defects seeded on ONE project differing only in assignee, read under four real users' auth inside a transaction that was ROLLED BACK. ASSIGNEE 1 row (their own); the unassigned defect and the defect assigned to another worker on the SAME project both invisible (`f`, `f`) — proving a per-ROW and not per-project disclosure. Second worker 1 row (only theirs). Worker with no assignment 0 rows, no error (fails closed). MANAGER 3 rows, unchanged. Assignee sees 0 `defect_corrections`, so owner item 2b (DEFER) holds at the database. |
+| Residue | Re-counted after rollback: `defects` 0, `defect_corrections` 0. Grants unchanged (`authenticated` SELECT only). |
+
+### ✅ APPLIED TO PROD — `20260714180000_journal_profession_templates_v1` (owner item 4b)
+
+| | |
+|---|---|
+| Ledger | version `20260914202151`, name `journal_profession_templates_v1` |
+| Rollback | `supabase/rollbacks/20260714180000_journal_profession_templates_v1.down.sql` |
+| Pre-apply tightening | The owner required the privilege model to EXPRESS admin-only write authority rather than lean on RLS to neutralise a broader grant. `grant insert, update, delete … to authenticated` was REMOVED before apply. It could not be narrowed to admins instead: `is_admin()` resolves a flag on `profiles`/`profile_roles`, not a Postgres role, so an admin still connects as `authenticated`. Costs nothing — `lib/journal/journal-templates.ts` performs exactly one `.select()` and nothing in `apps/web` writes the table. |
+| Post-apply proof | 3 templates seeded, **`active` = 0** (activation stays a deliberate owner act). RLS on. `authenticated`: SELECT `true`, INSERT/UPDATE/DELETE **`false`**. `anon`: SELECT `false`. |
+
+### ✅ APPLIED TO PROD — `20260714170000_worker_opportunity_seen_v1` (owner item 4c)
+
+| | |
+|---|---|
+| Ledger | version `20260914202221`, name `worker_opportunity_seen_v1` |
+| Rollback | `supabase/rollbacks/20260714170000_worker_opportunity_seen_v1.down.sql` |
+| Post-apply proof | 0 rows. Single policy `((profile_id = auth.uid()) OR is_admin())` — worker-owned visibility, and the demand owner never learns who looked. `authenticated`: SELECT `true`, INSERT/UPDATE/DELETE **`false`** (writes RPC-only). `anon`: SELECT `false`, EXECUTE on `mark_worker_opportunities_seen_v1` `false`; `authenticated` EXECUTE `true`. |
+
+### ✅ APPLIED TO PROD — `20260713160000_agency_clients_v1` (owner item 4d)
+
+| | |
+|---|---|
+| Ledger | version `20260914202322`, name `agency_clients_v1` |
+| Rollback | `supabase/rollbacks/20260713160000_agency_clients_v1.down.sql` |
+| Scope note | Applied under the confirmed canonical **Model B** interpretation (owner item 1). `agency_clients_select` uses `owns_company(company_id)` — company/org authority, NOT the legacy `owns_agency`. This does **not** revive Model A and authorises no second agency architecture. |
+| Live-table change | ONE additive nullable column on the canonical demand: `customer_requests.agency_client_id uuid references agency_clients(id) on delete set null`, plus its index. No default, no backfill, no NOT NULL. |
+| Post-apply proof | `agency_clients` exists, 0 rows. `customer_requests` **still 20 rows** (unchanged), 0 linked. Policy `(owns_company(company_id) OR is_admin())`. `authenticated`: SELECT `true`, INSERT `false` (writes RPC-only). `anon`: SELECT `false`, and EXECUTE `false` on all three RPCs while `authenticated` holds `true` on all three. |
+| Surface readback | Run under a REAL staffing-agency owner's auth (`6fd1bd46-…`): `agency_clients` readable (0 rows) and the new demand-link column readable on their own rows. Before this apply that read returned 42P01, which is what `/dashboard/company`'s `AgencyClientsSection` had been degrading against. |
+
+## Applied 2026-09-15 — PER-11 `external_profiles_v1` (owner approval with conditions)
+
+### ✅ APPLIED TO PROD — `20260914210000_external_profiles_v1` (PER-11 split)
+
+| | |
+|---|---|
+| Ledger | version `20260915042406`, name `external_profiles_v1` |
+| Rollback | `supabase/rollbacks/20260914210000_external_profiles_v1.down.sql` |
+| Approval | Owner, 2026-09-15, after the full PER-11 approval packet. Approved as **the canonical minimal PER-11 implementation**, with three pre-apply conditions, all met in the same slice. |
+| Scope | ONE table (`worker_external_profiles`), 1 index, 1 SELECT policy, 2 SECURITY DEFINER RPCs, 7 grant/revoke. 14 executable statements. |
+
+**Pre-apply conditions, met before the apply:**
+1. `worker_external_profiles` added to the subject-access export allowlist
+   (`lib/privacy/export-data.ts`) — an unreadable relation reports as
+   `unavailable`, never as an empty list; disconnected rows are included
+   deliberately, because disconnect is soft and the row is still the subject's
+   personal data.
+2. Added to the deletion-plan accounting (`lib/privacy/deletion-plan.ts`) as the
+   `externalProfiles` class, planned action `delete`, basis E7. **The existing
+   `worker_id -> workers(id) on delete cascade` remains the actual deletion
+   mechanism, unchanged** — the new row only makes the preview tell the truth
+   about what that cascade removes.
+3. `lib/guards/external-profiles-consent.test.ts` extended (§g, §h) so its
+   privacy invariants are enforced against the file that SHIPS, not only against
+   the rejected parent. No invariant was weakened to make the split pass.
+
+**Post-apply verification, read-only on production 2026-09-15:**
+
+| Check | Result |
+|---|---|
+| Table + both functions exist | ✅ `worker_external_profiles`; `save_worker_external_profile_v1`, `disconnect_external_profile_v1` — both `SECURITY DEFINER`, `search_path=public` |
+| RLS / ACL | RLS on; exactly **1** policy, `(owns_worker(worker_id) OR is_admin())`; `authenticated` SELECT ✅, INSERT/UPDATE/DELETE ❌; `anon` SELECT ❌; both RPCs EXECUTE `authenticated` ✅ / `anon` ❌ |
+| Rows created by the migration | **0** |
+| Existing workers affected | **0** of 57 — unaffected until a worker explicitly adds a link |
+| No employer read path | Proven in a ROLLED-BACK transaction: subject worker **1**, other non-admin worker **0**, employer (company owner, non-admin) **0**, and **employer still 0 after flipping `visibility='employers'`** — the stored preference discloses nothing because no policy honours it. Admin reads 1, the documented disjunct. |
+| Privacy surfaces recognise the relation | Both the export read shape and the deletion-plan `headCount` shape execute cleanly under a real subject's auth (no 42P01) |
+| `talent_source_records` | **absent** ✅ |
+| `identity_resolution_events` | **absent** ✅ |
+| Rejected parent's other RPCs | **none appeared** — only the 2 approved functions exist; `set_external_profile_visibility_v1`, `review_external_profile_snapshot_v1`, `record_talent_source_v1`, `record_identity_resolution_event_v1` are all absent |
+| Residue | `worker_external_profiles` back to **0** rows after the proof rolled back |
+
+> **A NOTE ON THE FIRST PROOF RUN, kept because it nearly misled.** An initial
+> boundary test reported "other worker sees 1", which reads as a policy leak. It
+> was not: the worker that run picked as "other" holds the `admin` role in
+> `profile_roles`, so `is_admin()` legitimately admitted it. The test was re-run
+> selecting a genuine non-admin, and the admin case was then asserted separately
+> so the result cannot be misread either way. `owns_worker` was inspected and is
+> strict: `x.id = w and x.profile_id = auth.uid()`.
+
+### ⚠️ `20260713210000_multi_source_talent_v1` — SUPERSEDED-IN-PART, NEVER APPLY AS A WHOLE
+
+**Status: REJECTED AS WRITTEN (owner, 2026-09-14 item 4e). NEVER APPLY THIS FILE.**
+
+The one third of it that had a live consumer — `worker_external_profiles` plus
+`save_worker_external_profile_v1` and `disconnect_external_profile_v1` — shipped
+on 2026-09-15 as `external_profiles_v1` (ledger `20260915042406`), recorded
+above. Applying the parent now would attempt to re-create that table and would
+additionally bring the two tables that were deliberately left out.
+
+**What is superseded:** `worker_external_profiles` and the two RPCs above. Live
+in production via the split.
+
+**What is NOT superseded, and NOT implemented:** `talent_source_records` (P5
+provenance) and `identity_resolution_events` (P7 identity audit), together with
+`record_talent_source_v1`, `record_identity_resolution_event_v1`,
+`set_external_profile_visibility_v1`, `review_external_profile_snapshot_v1` and
+the P7 immutability trigger. These remain **DEFERRED ARCHITECTURE**: designed,
+recorded in this file's text, and **absent from production**. Their consumer
+modules (`lib/talent/*`, `lib/identity/identity-resolution*`) were deleted as
+dead code on 2026-08-17 with zero importers.
+
+**Applying the split creates NO obligation to implement P5 or P7.** The split is
+self-contained: its own table, policy, RPCs and rollback, with no FK or call
+into either deferred table. Reviving P5/P7 would be a fresh owner decision, not
+a consequence of this apply. Nothing here declares those capabilities
+implemented.
+
+The parent file stays in the tree for history and for the P5/P7 design record.
+
+## 🚫 NEVER APPLY — already live under a different ledger name (recorded 2026-09-14, owner decision 4a)
+
+> Three repository files whose objects are **already in production** under
+> different ledger names. `parity-model.ts` answers "every APPLIED row has a
+> repo file" and answers it well; it cannot answer the reverse — "this FILE
+> must never be applied" — and that direction was unguarded. A session
+> scanning the tree saw three ordinary pending migrations, two of them
+> carrying `@human-gate-approved`, which reads as pre-authorised.
+>
+> **The marker lives here, in this ledger, and not in the SQL headers.** That
+> is deliberate: editing those files makes `migration-safety` re-scan them, and
+> their already-applied contents are inherently RED, so every future touch
+> would fail CI. The only bypass the scanner offers is `@human-gate-approved`,
+> which asserts "approved to apply" — the exact opposite of the truth here.
+> `docs/APPLIED_LEDGER.md` is already where never-apply verdicts live
+> (`company_locations_v1`, `company_memberships_v1`), so the canonical register
+> is extended rather than a new one invented.
+>
+> Pinned by `apps/web/lib/guards/never-apply-already-applied-v1.test.ts`, which
+> also cross-checks every ledger name claimed below against
+> `REVIEWED_APPLY_SHAPES` in `apps/web/lib/migrations/parity-model.ts`, so this
+> record and the canonical parity accounting cannot drift apart.
+
+- **`20260612091000_journal_entry_photos.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  Applied as **three** ledger rows, not one: `journal_entry_photos_table`
+  (version `20260612072652`), `journal_entry_photos_rpc` (`20260612072736`),
+  `journal_entry_photos_storage` (`20260612075300`). Accounted for in
+  `REVIEWED_APPLY_SHAPES` as `kind: "split"`, parts 1/3–3/3. Verified read-only
+  on production `gorgitwvdzxbnaxhrsrw` 2026-09-14:
+  `to_regclass('public.journal_entry_photos')` → `journal_entry_photos`;
+  `register_journal_entry_photo` present; private bucket `journal-entry-photos`
+  present; **the table holds 11 rows of real worker photo evidence.** Re-running
+  it would re-execute DDL against objects carrying live production data. The
+  file stays in the tree for history and clean-rebuild parity. *This file was
+  previously recorded only in `docs/migrations/production-parity-register.md`
+  and the 2026-08-18 technical-operations audit — never in this ledger.*
+
+- **`20260817130100_notification_events_v3_workflow_types.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  Applied to production **together with** `20260817140100_notification_document_types_v3.sql`
+  as ONE ledger row: `notification_types_union_workflow_document_v3`
+  (version `20260817172306`). `REVIEWED_APPLY_SHAPES` accounts for it as
+  `kind: "union"`. Verified read-only 2026-09-14:
+  `notification_events_type_check` **already** admits `workflow_step_pending`,
+  `workflow_decided`, `workflow_delegated`, `workflow_escalated`, and
+  `notification_events_entity_type_check` **already** admits
+  `workflow_instance` — precisely what this file adds. Its drop-and-re-add of
+  those constraints is a no-op at best and live-constraint churn at worst.
+  **Its `@human-gate-approved` annotation is STALE** — the work it authorised
+  was completed by the union route. The annotation is deliberately left in the
+  file rather than edited out: history is evidence, and editing the file would
+  trip `migration-safety` for no benefit. It authorises nothing now.
+  *First recorded in the 2026-08-19 correction block at the head of this
+  document; restated here as an explicit never-apply verdict.*
+
+- **`20260817140100_notification_document_types_v3.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  The other half of the same union row `notification_types_union_workflow_document_v3`
+  (version `20260817172306`). Verified read-only 2026-09-14:
+  `notification_events_type_check` **already** admits `document_ack_assigned`,
+  `document_ack_completed` and `document_expiring`, and the entity check
+  **already** admits `worker_document`, `org_document` and
+  `document_acknowledgement`. Its `@human-gate-approved` annotation is **STALE**
+  on the same reasoning as above and is likewise left in place unedited.
+
+
+
 > ## ⚠️ READ THIS BEFORE TRUSTING ANY ENTRY BELOW (added 2026-08-18)
 >
 > **This document is a SECONDARY record. The truth is production's own
@@ -1511,6 +1713,10 @@ Readback after apply: exactly those four rows. Rollback: `update plans set price
 ## Applied 2026-09-05 — `20260905190000_public_plans_v1.sql` (RED: grant execute to anon; owner approval "approve public_plans_v1" in chat)
 
 Applied via Supabase MCP `apply_migration` (name `public_plans_v1`) at ~18:20 UTC, then verified: anon `rpc("public_plans_v1")` → `free 0`, `business 99` (Nemokamas / Organizacija); anon direct `select` on `plans` still "permission denied"; `proacl = {postgres=X, anon=X, authenticated=X}` (PUBLIC revoked). Rollback: `drop function if exists public.public_plans_v1();` (no data touched). Code: PR #1548 (`getPlans()` reads through the function; allowlist entry; three migration ratchets +1).
+
+## Applied 2026-09-11 — `20260911130000_productivity_units_universal_v1.sql` (GREEN: four additive registry rows; conditional prod-apply autonomy)
+
+Applied via Supabase MCP `apply_migration` (name `productivity_units_universal_v1`, ledger version `20260911094312` — apply time, not the repo prefix) after `migration-safety` classified the file GREEN locally (INSERT … ON CONFLICT DO NOTHING; no table, column, policy, grant or function touched). Readback: `kilometers` (length, parent `meters` ×1000), `pallets`, `covers`, `cases` (count) — all `scope = 'platform'`, `organization_id null`, so the 20260817120000 least-privilege SELECT covers them unchanged; registry 10 → 14 rows. Rollback: `supabase/rollbacks/20260911130000_productivity_units_universal_v1.down.sql` — deletes ONLY those four slugs and only while no `journal_entry_metrics.unit_slug` / `worker_skills.current_pace_unit_slug` / registry parent references them (a referencing row is recorded evidence, never deleted). Code: issue #1689 slice — `PLATFORM_OUTPUT_UNIT_SLUGS` (both editors' pickers), recognizer km / pallets, chat + MCP intake output quantity, labels in 12 catalogues, guard `journal-units-registry.test.ts`; two migration-count ratchets 279 → 280.
 
 ## Deferred / rejected — NEVER-APPLY register
 

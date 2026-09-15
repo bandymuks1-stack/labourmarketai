@@ -485,7 +485,7 @@ export async function ProfileHubOverview({
             assistant, no parallel workflow. */}
         <Link
           href="/dashboard"
-          className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+          className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
           data-testid="profile-hub-ask-workspace"
         >
           {t("askWorkspace")} →
@@ -495,7 +495,7 @@ export async function ProfileHubOverview({
         {hasWorker && !journalIsPrimary && (
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
             data-testid="profile-hub-journal-link"
           >
             {t("journalLink")} →
@@ -505,7 +505,7 @@ export async function ProfileHubOverview({
         {!aboutOk && (
           <a
             href="#profile-edit"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
             data-testid="profile-hub-cv-import-link"
           >
             {t("cvImportLink")} ↓
@@ -514,7 +514,7 @@ export async function ProfileHubOverview({
         {hasWorker && (
           <Link
             href="/dashboard/opportunities"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
             data-testid="profile-hub-opportunities-link"
           >
             {t("opportunitiesLink")} →

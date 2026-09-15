@@ -49,7 +49,7 @@ export async function WorkerProjectPanel({
       data-testid="worker-project-view"
     >
       <header className="flex flex-col gap-2">
-        <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

@@ -71,13 +71,81 @@ export function buildEntryDetectedSignals(input: {
     }
   }
 
+  // A capability label that merely rewords a skill already on the card
+  // ("Sienų glaistymas / lyginimas" beside the chip "Sienų glaistymas") is the
+  // same signal twice (#1689, observed 2026-09-12 on one card): one name
+  // contained in the other, folded, is one signal.
+  const fold = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+  const overlapsSeen = (display: string): boolean => {
+    const d = fold(display);
+    for (const name of seen) {
+      const n = fold(name);
+      if (n.length >= 4 && (d.includes(n) || n.includes(d))) return true;
+    }
+    return false;
+  };
   for (const ltLabel of recognition.autoCapabilityLabels) {
     const display = localizeCapabilityLabel(ltLabel, input.locale);
-    if (display && !seen.has(display)) {
+    if (display && !seen.has(display) && !overlapsSeen(display)) {
       seen.add(display);
       labels.push(display);
     }
   }
 
   return { skills, labels, recognizedSlugs };
+}
+
+/**
+ * What Section A ("skills recognized from this entry") may say once the
+ * linked chips above it have been taken out of the detected set.
+ *
+ *   chips       — something recognized is NOT yet linked: show it (linkable
+ *                 declared skill / display-only label), or the entry has a
+ *                 CANDIDATE the worker decides on the card (#1689,
+ *                 2026-09-12: decidable here now, not only right after the
+ *                 save) — an offer is recognition waiting on a person, never
+ *                 "nothing recognized".
+ *   all_linked  — recognition DID read this entry, and every recognized skill
+ *                 already sits in the linked list above. Saying "nothing was
+ *                 recognized" here would be false: measured on production
+ *                 2026-09-12 (build 5e5c2aaf, QA worker) four of six entry
+ *                 cards — tiling entries whose pipeline rows read `1|tiling` —
+ *                 said "Iš šio įrašo teksto įgūdžių atpažinti nepavyko".
+ *   none        — the recognizer read nothing from the text (a manual link may
+ *                 still exist above; that is not recognition).
+ *
+ * Pure, so the component and its guard read ONE rule.
+ */
+export type DetectedSectionState = "chips" | "all_linked" | "none";
+
+export function detectedSectionState(input: {
+  /** Detected skills the worker has declared (`EntryDetectedSignals.skills`). */
+  detectedSkills: readonly { id: string; name: string }[];
+  /** Display-only detected labels (`EntryDetectedSignals.labels`). */
+  detectedLabels: readonly string[];
+  /** Skill ids currently linked to the entry (live client state). */
+  selectedIds: ReadonlySet<string>;
+  /** Names of the linked chips rendered above Section A. */
+  linkedNames: ReadonlySet<string>;
+  /** Names of this entry's candidates — pending or decided on this card.
+   *  Their rows carry their own result ("✓ Pridėta" / "Atmesta"), so while
+   *  any exist Section A shows them and never a sentence beneath them; a
+   *  display-only label that names a candidate is the candidate, not a
+   *  second signal. */
+  candidateNames?: ReadonlySet<string>;
+}): DetectedSectionState {
+  if ((input.candidateNames?.size ?? 0) > 0) return "chips";
+  const unlinkedSkills = input.detectedSkills.filter(
+    (s) => !input.selectedIds.has(s.id),
+  );
+  const unlinkedLabels = input.detectedLabels.filter(
+    (l) =>
+      !input.linkedNames.has(l) &&
+      !unlinkedSkills.some((s) => s.name === l) &&
+      !(input.candidateNames?.has(l) ?? false),
+  );
+  if (unlinkedSkills.length > 0 || unlinkedLabels.length > 0) return "chips";
+  const anyRecognized =
+    input.detectedSkills.length > 0 || input.detectedLabels.length > 0;
+  return anyRecognized ? "all_linked" : "none";
 }

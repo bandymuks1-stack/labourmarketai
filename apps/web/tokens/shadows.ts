@@ -1,12 +1,16 @@
 // Shadows / glows (brief §8.4). Soft colored glows, never hard drop shadows.
 //
-// Premium visual refinement (real-user-launch train): the decorative glows are
-// softened (lower spread + opacity) so surfaces read as a restrained European
-// business product rather than a neon "AI" UI. Single primary-blue glow only.
+// BLACK + METALLIC GOLD (owner-approved final direction, 2026-09-09). Same
+// restraint as before, gold instead of blue: on a #000 ground a glow reads much
+// hotter than it did on #06070D, so the spreads and opacities are held DOWN
+// rather than carried over — the owner's brief asks for "restrained warm
+// illumination", explicitly not "everything glowing" (§21).
 export const shadows = {
-  card: "0 1px 0 rgba(255,255,255,0.04) inset, 0 0 0 1px rgba(62,139,255,0.06)",
-  cardHover:
-    "0 0 24px rgba(62,139,255,0.10), 0 0 0 1px rgba(62,139,255,0.18)",
-  ctaGlow: "0 6px 20px rgba(62,139,255,0.22)",
-  portrait: "0 0 48px rgba(62,139,255,0.30)",
+  // The inset top line is CHAMPAGNE at very low alpha — the "illuminated edge"
+  // of the palette. It is what makes a graphite panel read as a lit surface
+  // rather than a flat black rectangle, without any glow.
+  card: "0 1px 0 rgba(242,214,117,0.05) inset, 0 0 0 1px rgba(212,175,55,0.08)",
+  cardHover: "0 0 24px rgba(212,175,55,0.10), 0 0 0 1px rgba(212,175,55,0.24)",
+  ctaGlow: "0 6px 20px rgba(140,106,22,0.28)",
+  portrait: "0 0 48px rgba(212,175,55,0.26)",
 } as const;

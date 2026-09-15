@@ -34,6 +34,7 @@ import {
   LT_MINUTE_FORMS,
 } from "@/lib/i18n/lt-plural";
 import { formatDuration } from "@/lib/journal/format-duration";
+import { PLATFORM_OUTPUT_UNIT_SLUGS } from "@/lib/journal/work-time";
 import { recordEvent } from "@/lib/telemetry/task";
 import { cn } from "@/lib/utils";
 import type {
@@ -41,6 +42,9 @@ import type {
   JournalEngagement,
   JournalSkill,
 } from "@/components/app/journal-entry-composer";
+import { JournalModuleFields } from "@/components/app/journal-module-fields";
+import type { ModuleFieldValues } from "@/lib/journal/journal-module-fields";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 /**
  * COMPACT edit surface for an existing journal entry (journal compact edit
@@ -87,6 +91,7 @@ export function JournalEntryCompactEditor({
   const t = useTranslations("journal");
   const tUnit = useTranslations("productivityUnits");
   const tProf = useTranslations("professions");
+  const tSkillName = useTranslations("skillNames");
   const locale = useLocale();
 
   const derived = useMemo(
@@ -113,6 +118,12 @@ export function JournalEntryCompactEditor({
   // Advanced (collapsed) fields — preloaded from the persisted entry so an
   // untouched edit re-submits them unchanged.
   const [workDate, setWorkDate] = useState(entry.workDate ?? today);
+  // An entry with no saved day defaults to the PERSON's calendar day, not
+  // the server's UTC day (re-audit F10) — after mount, so hydration matches.
+  useEffect(() => {
+    if (entry.workDate) return;
+    setWorkDate((d) => (d === today ? personCalendarDay() : d));
+  }, [entry.workDate, today]);
   // Default to the entry's OWN engagement (preloaded) so a text-only edit never
   // silently reassigns the work to the worker's primary engagement. Falls back
   // to the primary only for a legacy entry with no stored engagement.
@@ -133,6 +144,24 @@ export function JournalEntryCompactEditor({
     entry.institutionName ?? "",
   );
   const [topic, setTopic] = useState(entry.topic ?? "");
+  // Owner §12 — archetype module fields, preloaded from the entry's own rows
+  // so an untouched edit re-sends them. Which fields RENDER follows the
+  // selected engagement's relationship; values typed under one context stay
+  // in state if the person switches and back, and the server accepts only
+  // what the saved engagement's composition allows.
+  const [moduleFields, setModuleFields] = useState<ModuleFieldValues>(
+    entry.moduleFields ?? {},
+  );
+  const selectedRelationship =
+    engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
+  // Occupation path (owner §12): the ISCO group of the direction the entry
+  // names, else of the worker's primary profession (`directions` arrives
+  // primary-first); null when unmapped, so no family is guessed.
+  const selectedIscoGroup =
+    (directionSlug
+      ? directions.find((d) => d.slug === directionSlug)
+      : directions[0]
+    )?.iscoGroup ?? null;
 
   // Addition flow (small inline autocomplete over ACTIVE taxonomy skills via
   // the existing `searchTaxonomySkills` server action + free-text fallback).
@@ -174,6 +203,7 @@ export function JournalEntryCompactEditor({
     siteName,
     institutionName,
     topic,
+    moduleFields,
   };
   // Dirty = the ONE save payload differs from the baseline taken at open (or
   // at the last successful save). Never silently reset.
@@ -196,6 +226,7 @@ export function JournalEntryCompactEditor({
       siteName: entry.siteName ?? "",
       institutionName: entry.institutionName ?? "",
       topic: entry.topic ?? "",
+      moduleFields: entry.moduleFields ?? {},
     }),
   );
   const dirty = compactStateFingerprint(saveInput) !== baseline;
@@ -215,13 +246,19 @@ export function JournalEntryCompactEditor({
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty]);
 
-  /** Canonical stored labels may be slugs — localize for DISPLAY only. */
+  /** Canonical stored labels may be slugs — a profession slug (the LT
+   *  activity lexicon) or a skill slug (a saved selection, or the intake's
+   *  strong skill reading — #1689) — localize for DISPLAY only. A free-text
+   *  label is not a key: `has` first, so next-intl never logs
+   *  `MISSING_MESSAGE: professions.<label>` for the worker's own words. */
   function displayLabel(label: string): string {
-    try {
+    if (tProf.has(label)) {
       const v = tProf(label);
-      if (v && v !== label && !v.includes(`professions.${label}`)) return v;
-    } catch {
-      /* fall through */
+      if (v && v !== label) return v;
+    }
+    if (tSkillName.has(label)) {
+      const v = tSkillName(label);
+      if (v && v !== label) return v;
     }
     return label;
   }
@@ -639,15 +676,10 @@ export function JournalEntryCompactEditor({
                 <DarkListbox
                   value={quantityUnit}
                   onChange={setQuantityUnit}
-                  options={(
-                    [
-                      "square_meters",
-                      "meters",
-                      "pieces",
-                      "kilograms",
-                      "packages",
-                    ] as const
-                  ).map((u) => ({ value: u, label: tUnit(u) }))}
+                  options={PLATFORM_OUTPUT_UNIT_SLUGS.map((u) => ({
+                    value: u,
+                    label: tUnit(u),
+                  }))}
                   ariaLabel={t("compactEdit.quantityLabel")}
                 />
               </span>
@@ -692,6 +724,19 @@ export function JournalEntryCompactEditor({
               onChange={(e) => setTopic(e.target.value)}
             />
           </label>
+          {/* Owner §12 — the module fields the entry's occupation (named
+              direction, else the primary profession, through its ISCO group)
+              and the relationship compose; nothing when neither source adds
+              a module. */}
+          <div className="sm:col-span-2">
+            <JournalModuleFields
+              relationshipSlug={selectedRelationship}
+              iscoGroup={selectedIscoGroup}
+              values={moduleFields}
+              onChange={setModuleFields}
+              testId="journal-compact-module-fields"
+            />
+          </div>
         </div>
       </details>
 

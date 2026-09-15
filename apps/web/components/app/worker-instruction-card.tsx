@@ -71,7 +71,7 @@ export function WorkerInstructionCard({
       {/* Primary reading surface: real translation if present, else honest state. */}
       {hasTranslation ? (
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.autoTranslation}
           </span>
           <p className="text-sm leading-relaxed text-text-primary">

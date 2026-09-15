@@ -25,7 +25,10 @@ describe("Guard: color tokens are theme-swappable CSS-var channels", () => {
     expect(css).toMatch(/:root\s*\{[\s\S]*--c-ink-900:/);
     expect(css).toMatch(/\[data-theme="light"\][\s\S]*--c-ink-900:/);
     // A representative semantic token flips between the two themes.
-    expect(css).toMatch(/--c-text-primary:\s*244 246 251/); // dark
+    // Dark moved 244 246 251 → 245 241 232 (WARM IVORY) with the canonical
+    // obsidian/gold palette: a cool off-white read colder than the gold beside
+    // it on a warm-black ground.
+    expect(css).toMatch(/--c-text-primary:\s*245 241 232/); // dark
     expect(css).toMatch(/--c-text-primary:\s*11 13 23/); // light
   });
 });

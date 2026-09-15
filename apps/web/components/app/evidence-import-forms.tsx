@@ -203,7 +203,7 @@ export function EvidenceSourceForm({
         <input
           type="file"
           name="file"
-          accept=".csv,.tsv,.txt,text/csv,text/plain"
+          accept=".xlsx,.xlsm,.csv,.tsv,.txt,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           className={field}
         />
       </label>

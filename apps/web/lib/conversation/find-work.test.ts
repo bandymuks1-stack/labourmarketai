@@ -149,27 +149,12 @@ describe("delegation to the canonical use case", () => {
   });
 });
 
-describe("the answer is a count and a sentence — the panel renders the rows", () => {
+describe("the answer is ONE readback sentence — the panel renders the rows, the destination explains them", () => {
   it("reports how many rows the panel will render", async () => {
     loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b), rec(ID.c)]));
     const res = await findWorkForChat();
     if (res.kind !== "matches") throw new Error("expected matches");
     expect(res.count).toBe(3);
-  });
-
-  it("uses the singular opening for exactly one match", async () => {
-    loadMatchesMock.mockResolvedValue(ready([rec(ID.a)]));
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.count).toBe(1);
-    expect(res.intro).toBe("conversation.findWork.introOne");
-  });
-
-  it("states the real count in the plural opening — never a number of its own", async () => {
-    loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b)]));
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.intro).toBe('conversation.findWork.intro({"count":2})');
   });
 
   it("hands the chat NO rows, NO ids and NO labels to render", async () => {
@@ -184,30 +169,54 @@ describe("the answer is a count and a sentence — the panel renders the rows", 
   });
 });
 
+/** An external card as the use case returns it — only the engine's verdict
+ *  matters to the sentence. `{}` (no verdict) is NOT ASSESSED. */
+const ext = (status?: string, over: Record<string, unknown> = {}) =>
+  status ? { match: { status, eligible: true, gaps: [], missingData: [], blocking: [], ...over } } : {};
+
+/** The bands fragment the stub translator produces for a count map — the
+ *  non-empty bands only, strongest first, each with its own count. */
+const bands = (counts: Partial<Record<string, number>>) =>
+  ["strong", "possible", "missing_requirement", "conflict", "not_assessed"]
+    .filter((b) => (counts[b] ?? 0) > 0)
+    .map((b) => `conversation.findWork.band.${b}({"count":${counts[b]}})`)
+    .join(", ");
+const readback = (total: number, counts: Partial<Record<string, number>>) =>
+  `conversation.findWork.readback(${JSON.stringify({ total, bands: bands(counts) })})`;
+const discovery = (total: number, counts: Partial<Record<string, number>>) =>
+  `conversation.findWork.readbackDiscoveryOnly(${JSON.stringify({ total, bands: bands(counts) })})`;
+
+describe("the sentence carries the total and the non-empty bands — never a number of its own", () => {
+  it("platform rows are banded by their engine status", async () => {
+    loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b, { status: "possible" })]));
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.intro).toBe(readback(2, { strong: 1, possible: 1 }));
+  });
+});
+
 describe("external public-source ads reach the chat's answer (real-supply train)", () => {
   it("zero platform matches but real external ads is an ANSWER, not an empty state", async () => {
     // The exact production state on 2026-08-09: job_demands empty, 87 real
     // Swedish ads stored. A chat that said "nothing matched" here would
     // disagree with the board the person opens next.
     loadMatchesMock.mockResolvedValue(
-      ready([], { externalCards: [{}, {}], totalExternal: 2 }),
+      ready([], { externalCards: [ext("strong"), ext("possible")], totalExternal: 2 }),
     );
     const res = await findWorkForChat();
     if (res.kind !== "matches") throw new Error("expected matches");
     expect(res.count).toBe(2);
-    expect(res.intro).toBe('conversation.findWork.introExternal({"count":2})');
+    expect(res.intro).toBe(readback(2, { strong: 1, possible: 1 }));
   });
 
-  it("platform and external counts travel as ONE total with both sentences", async () => {
+  it("platform and external rows travel as ONE total, counted by band together", async () => {
     loadMatchesMock.mockResolvedValue(
-      ready([rec(ID.a)], { externalCards: [{}, {}, {}], totalExternal: 3 }),
+      ready([rec(ID.a)], { externalCards: [ext("strong"), ext("strong"), ext("possible")], totalExternal: 3 }),
     );
     const res = await findWorkForChat();
     if (res.kind !== "matches") throw new Error("expected matches");
     expect(res.count).toBe(4);
-    expect(res.intro).toBe(
-      'conversation.findWork.introOne conversation.findWork.introExternal({"count":3})',
-    );
+    expect(res.intro).toBe(readback(4, { strong: 3, possible: 1 }));
   });
 
   it("an unapplied board RPC with real external ads still answers with the ads", async () => {
@@ -231,7 +240,7 @@ describe("external public-source ads reach the chat's answer (real-supply train)
   });
 
   it("the external count in the sentence is capped at the panel's own display limit", async () => {
-    const cards = Array.from({ length: 9 }, () => ({}));
+    const cards = Array.from({ length: 9 }, () => ext("strong"));
     loadMatchesMock.mockResolvedValue(
       ready([], { externalCards: cards, totalExternal: 9 }),
     );
@@ -240,5 +249,88 @@ describe("external public-source ads reach the chat's answer (real-supply train)
     // The chat states what the panel proves — and the panel renders at most
     // its contract limit, never the full stored set.
     expect(res.count).toBe(5);
+    expect(res.intro).toBe(readback(5, { strong: 5 }));
+  });
+});
+
+describe("a found posting is not a suitable one — the sentence counts BY BAND (#1689, defect H)", () => {
+  /* NEGATIVE CONTROL: production, "Ieškau naujo darbo" — two external ads
+     the engine had NOT assessed as fits (insufficient_data "Senior AI
+     Engineer", weak "Rörmokare") were announced as "Radau 2 tinkamų
+     variantų". Nothing below may ever produce the fit readback over rows
+     the engine did not assess as fits. */
+
+  it("only not-assessed rows → the DISCOVERY-ONLY readback, never the fit one", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([], {
+        externalCards: [
+          ext("insufficient_data", { missingData: ["need_not_structured"] }),
+          ext("insufficient_data", { missingData: ["need_not_structured"] }),
+        ],
+        totalExternal: 2,
+      }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.count).toBe(2);
+    expect(res.intro).toBe(discovery(2, { not_assessed: 2 }));
+    expect(res.intro).not.toContain("readback(");
+    expect(res.intro).not.toContain("tinkam");
+  });
+
+  it("weak rows (missing requirement / conflict) are DISCOVERED too — the engine did not say they fit", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([], {
+        externalCards: [
+          ext("weak", { gaps: [{ code: "skills_missing", count: 2, uris: ["a", "b"] }] }),
+          ext("weak", { eligible: false, gaps: [{ code: "country_mismatch" }] }),
+        ],
+        totalExternal: 2,
+      }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.intro).toBe(discovery(2, { missing_requirement: 1, conflict: 1 }));
+  });
+
+  it("a card with no verdict at all is not assessed — never counted as a fit", async () => {
+    loadMatchesMock.mockResolvedValue(ready([], { externalCards: [{}, {}], totalExternal: 2 }));
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.intro).toBe(discovery(2, { not_assessed: 2 }));
+  });
+
+  it("a weak PLATFORM recommendation is a missing requirement — never a fit, never a conflict on a status alone", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([rec(ID.a, { status: "weak" }), rec(ID.b, { status: "insufficient_data" })]),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.intro).toBe(discovery(2, { missing_requirement: 1, not_assessed: 1 }));
+  });
+
+  it("mixed bands → ONE fit readback listing every non-empty band, strongest first", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([], {
+        externalCards: [ext("strong"), ext("insufficient_data"), ext("possible"), ext("weak")],
+        totalExternal: 4,
+      }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.count).toBe(4);
+    expect(res.intro).toBe(
+      readback(4, { strong: 1, possible: 1, missing_requirement: 1, not_assessed: 1 }),
+    );
+  });
+
+  it("the bands are counted over the panel's display slice only — the sentence never claims rows the panel will not render", async () => {
+    // 3 fits beyond the 5-row cap: the sentence counts what the panel shows.
+    const cards = [...Array.from({ length: 5 }, () => ext("insufficient_data")), ext("strong"), ext("strong"), ext("strong")];
+    loadMatchesMock.mockResolvedValue(ready([], { externalCards: cards, totalExternal: 8 }));
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.count).toBe(5);
+    expect(res.intro).toBe(discovery(5, { not_assessed: 5 }));
   });
 });

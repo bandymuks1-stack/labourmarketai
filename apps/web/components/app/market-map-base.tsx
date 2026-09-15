@@ -338,7 +338,7 @@ export function MarketMapBase({
           type="button"
           onClick={() => setManualOpen(true)}
           data-testid="map-locator-manual-toggle"
-          className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+          className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-brand-blue transition-colors hover:text-brand-champagne"
         >
           <Pencil className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
           {t("manualToggle")}

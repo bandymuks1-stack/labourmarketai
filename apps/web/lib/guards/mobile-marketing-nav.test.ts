@@ -67,7 +67,14 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     expect(navSrc).toMatch(/gap-2[^"]*sm:gap-6/);
     expect(navSrc).toMatch(/px-4[^"]*sm:px-12/);
     // The logo yields space instead of pushing the controls off-screen.
-    expect(navSrc).toMatch(/min-w-0 shrink truncate/);
+    // The brand is now a MARK + wordmark (black/gold visual system), so the
+    // shrink contract moved one level in rather than disappearing: the link
+    // still refuses to claim space (`min-w-0 shrink`), the wordmark is what
+    // actually truncates, and the mark is `shrink-0` so it degrades to the
+    // logo alone instead of squashing into an unreadable sliver.
+    expect(navSrc).toMatch(/min-w-0 shrink items-center/);
+    expect(navSrc).toMatch(/<span className="truncate">/);
+    expect(navSrc).toMatch(/<LmLogo[^/]*shrink-0/);
     // The locale switcher shows the CODE below sm here, and ONLY here.
     expect(navSrc).toMatch(/<LocaleSwitcher[^/]*compactBelowSm/);
   });

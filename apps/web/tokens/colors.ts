@@ -22,6 +22,9 @@ export const colors = {
   },
   brand: {
     blue: c("brand-blue"),
+    // `brand-champagne` — highlights, illuminated edges, hover/focus lift. The
+    // light ON the gold, not a second brand colour.
+    champagne: c("brand-champagne"),
     cyan: c("brand-cyan"),
     violet: c("brand-violet"),
     purple: c("brand-purple"),
@@ -38,6 +41,11 @@ export const colors = {
     primary: c("text-primary"),
     secondary: c("text-secondary"),
     muted: c("text-muted"),
+    // `text-text-on-brand` — the readable foreground for anything sitting ON a
+    // brand fill (primary buttons, the send control, brand badges). It is NOT
+    // white: the brand is metallic gold, and white on gold is 2.10:1. This
+    // token is why the rebrand did not silently break every primary action.
+    "on-brand": c("text-on-brand"),
   },
   tier: {
     diamond: c("tier-diamond"),

@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatUtcDate } from "@/lib/time/display";
+import type { SkillMagnitude, SkillPracticeFacts } from "@/lib/cv-export/skill-presentation";
 
 export type EngagementCard = {
   id: string;
@@ -24,6 +25,12 @@ export type SkillDot = {
   verified?: boolean;
   /** Stored verification provenance: self_declared | work_journal | manager_confirmed. */
   source?: string;
+  /** The journal's own figures for this skill (lib/cv-export/skill-presentation):
+   *  null when nothing is recorded OR the journal could not be read —
+   *  `magnitude` tells the two apart. */
+  practice?: SkillPracticeFacts | null;
+  /** Presentation band from those figures — a size for the eye, never a score. */
+  magnitude?: SkillMagnitude;
 };
 
 // Confidence bin → dot colour (§15). Literal bin name maps to literal colour.

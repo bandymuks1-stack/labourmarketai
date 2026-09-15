@@ -194,7 +194,7 @@ was unmerged, and a stale refusal is as dishonest as a fake success.
 | Context switching | **Shell built, holdings read not wired.** The transport can now carry the read; wiring it (via `context.switch` options or a dedicated read) is its own slice. Until then holdings are `unknown` and the UI says it cannot list contexts yet. |
 | Navigation shell | **Real.** One app, four destinations, with a deep-link auth guard. |
 | Environment handling | **Real.** Public values only, validated, RLS-bypassing keys refused. |
-| Today / Work journal / Profile | **Real reads (2026-08-31).** `profile.get`, `journal.list`, `living_cv.skills.get` over `/api/mcp` as the signed-in person. Failures render as failures (`CapabilityGate`); on-device runtime proof against production is still outstanding. |
+| Today / Work journal / Profile | **Real reads (2026-08-31; figures 2026-09-13).** `profile.get`, `journal.list`, `living_cv.skills.get` and `journal.work_intelligence.get` over `/api/mcp` as the signed-in person. Today shows today / 7-day hours and entries and the dominant skill; Profile shows hours · share · entries per skill in the web's order (confirmed → journal-backed → declared; self-stated free labels are not in the payload and the screen says so) — the ordering rules live in `packages/client-core/src/work-figures.ts`. Failures render as failures (`CapabilityGate`), a failed figures read never shows 0 h; on-device runtime proof against production is still outstanding. |
 
 ### Next, in order
 

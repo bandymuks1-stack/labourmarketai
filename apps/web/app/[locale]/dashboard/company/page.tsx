@@ -18,6 +18,8 @@ import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
+import { PeopleImportPanel } from "@/components/app/people-import-panel";
+import { OrganizationRosterSection } from "@/components/app/organization-roster-section";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
@@ -45,6 +47,7 @@ import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
+import { TeamRecordedWork } from "@/components/app/organization/team-recorded-work";
 import { WorkObjectsSection } from "@/components/app/work-objects-section";
 import { EvidenceImportSection } from "@/components/app/evidence-import-section";
 import { CompanyGallerySection } from "@/components/app/company-gallery-section";
@@ -840,7 +843,7 @@ export default async function CompanyDashboardPage({
         {companyRow ? (
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span
-              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan"
+              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
               data-testid="company-dashboard-type-chip"
             >
               {t(`setup.companyTypeOptions.${companyRow.companyType}`)}
@@ -1055,6 +1058,35 @@ export default async function CompanyDashboardPage({
           />
         </div>
       ) : null}
+
+      {/* BRINGING PEOPLE IN. Beside the capability question because it is the
+          same subject — who this organization works with — and because the
+          evidence import next door MATCHES against this roster and had no way
+          to fill it. The relationship that LEADS follows what the workspace
+          declared; every other truthful relationship stays available, because
+          an agency still employs people and a school still hires. */}
+      {capabilityOrgId ? (
+        <div id="people-import-section" className="scroll-mt-20">
+          <PeopleImportPanel
+            organizationName={(companyRow?.displayName || companyRow?.legalName || "").trim()}
+            suggested={
+              declaredCapabilities.includes("training_provider")
+                ? "student"
+                : isStaffingAgency ||
+                    declaredCapabilities.includes("workforce_provider") ||
+                    declaredCapabilities.includes("recruitment_partner")
+                  ? "candidate"
+                  : "employee"
+            }
+          />
+        </div>
+      ) : null}
+
+      {/* THE ROSTER, READ BACK — directly under the panel that fills it.
+          Without this the import's only evidence was an in-memory receipt
+          that died on the next page load, so a manager could bring forty
+          people in and have no way to see that anything had happened. */}
+      {capabilityOrgId ? <OrganizationRosterSection locale={locale} /> : null}
 
       {/* Education institution (training_provider capability): participation
           state of its learners — connected count + the invitations it sent.
@@ -1469,6 +1501,19 @@ export default async function CompanyDashboardPage({
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
         />
+        {/* Užfiksuotas darbas (owner req. 15–17, #1724): the roster's
+            recorded work through THE one work-intelligence reader, one call
+            per row as this manager, bounded to the rows above; the
+            organization's own hour ledger beside it, never added. Additive
+            block, no roster redesign (§1.5). */}
+        <TeamRecordedWork
+          locale={locale}
+          members={activeWorkerRows.map((w) => ({
+            workerId: w.workerId,
+            displayName: w.displayName,
+            email: w.email,
+          }))}
+        />
       </div>
 
       {/* Train D: objects & sites — the canonical work_objects entity
@@ -1578,7 +1623,7 @@ export default async function CompanyDashboardPage({
           className="flex flex-col gap-5 scroll-mt-20"
         >
           <div className="flex flex-col gap-1">
-            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
               <span className="live-dot" aria-hidden />
               {tFlow("company.eyebrow")}
             </span>

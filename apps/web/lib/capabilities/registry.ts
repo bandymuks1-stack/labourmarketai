@@ -4,11 +4,19 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
+import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
 import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
 import { listJournalEntries } from "@/lib/journal/journal-list-core";
-import { listWorkspaceMemberships } from "@/lib/company/active-organization";
+import { WORK_PERIOD_KEYS } from "@/lib/journal/work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import {
+  readWorkspaceMemberships,
+  resolveActiveWorkspaceForCaller,
+} from "@/lib/company/active-organization";
+import { workspaceLabeller } from "@/lib/capabilities/workspace-labels";
 import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
 import {
   expressInterestCore,
@@ -22,6 +30,7 @@ import {
   verifyCapabilityConfirmation,
 } from "./confirmable";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
+import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -72,8 +81,9 @@ const profileGet: CapabilityDescriptor = {
   title: "My LabourMarket profile",
   description:
     "The caller's own profile record: name, locale, country, onboarding " +
-    "state, and whether a worker profile exists. Facts as recorded — no " +
-    "derived scores.",
+    "state, whether a worker profile exists, and the roles the account " +
+    "actually holds. Facts as recorded — no derived scores, and a read that " +
+    "failed is reported as unavailable rather than as an absence.",
   exposed: true,
   annotations: {
     readOnlyHint: true,
@@ -87,7 +97,30 @@ const profileGet: CapabilityDescriptor = {
     // (`getSessionProfile` → readProfileRow) and the SAME workers-row core
     // every web navigation reads (`getWorkerCoreRow` → readWorkerCoreRow) —
     // one query contract per table, no capability-side re-implementation.
-    const read = await readProfileRow(caller);
+    //
+    // CONCURRENT, because they are independent: both are keyed on the
+    // caller's own id (`profiles.id` and `workers.profile_id`), so neither
+    // read's query depends on the other's result. Run sequentially they cost
+    // two round trips — measured at 417 ms of pure waiting in the real
+    // ChatGPT trace of 2026-09-10 (profiles 10:29:59.952 → workers
+    // 10:30:00.369), which was most of this capability's server time.
+    //
+    // Authorization is untouched: both still execute under the caller's own
+    // RLS-scoped client. The only behavioural difference is that the workers
+    // read is also issued when the profile turns out to be missing or
+    // unreadable — a wasted query in a rare case, never a disclosed one,
+    // because RLS answers it exactly as before.
+    const [read, workerRead, heldRolesRead] = await Promise.all([
+      readProfileRow(caller),
+      readWorkerCoreRow(caller),
+      // The PLURAL of `activeRole`. Same subject — the caller's own identity
+      // facts — so it rides this capability rather than a second round trip a
+      // phone would have to make on every launch. Through the canonical
+      // `profile_roles` core, never a query written here: this registry is
+      // exactly the transport adapter `g4-domain-core-reuse` keeps out of the
+      // tables the web already owns.
+      readHeldProfileRoles(caller),
+    ]);
     if (!read.ok) {
       // A failed read is "unavailable", never "you have no profile" (#1314).
       return { ok: false, code: "unavailable", message: "Profile read failed." };
@@ -96,8 +129,6 @@ const profileGet: CapabilityDescriptor = {
     if (!profile) {
       return { ok: false, code: "not_found", message: "No profile row for this account." };
     }
-
-    const workerRead = await readWorkerCoreRow(caller);
 
     return {
       ok: true,
@@ -117,6 +148,16 @@ const profileGet: CapabilityDescriptor = {
           : workerRead.value
             ? { status: "exists" as const, workerId: workerRead.value.id }
             : { status: "none" as const },
+        // Same reason, and the reason this is not simply an array: a failed
+        // roles read that arrived as `[]` would tell a person who manages
+        // three companies that they hold nothing. That defect was live on the
+        // web shell on 2026-08-28 and is why the core throws rather than
+        // returning empty. `roles` is the RBAC set as recorded — it carries
+        // `admin`, which is not a participation mode, so a consumer mapping
+        // these to modes must FILTER rather than assume.
+        heldRoles: heldRolesRead.ok
+          ? { status: "known" as const, roles: heldRolesRead.value }
+          : { status: "unavailable" as const },
       },
     };
   },
@@ -234,6 +275,112 @@ const journalList: CapabilityDescriptor = {
           })),
           confirmations: (e.journal_entry_confirmations ?? []).length,
         })),
+      },
+    };
+  },
+};
+
+// ── journal.work_intelligence.get ──────────────────────────────────────────
+
+const journalWorkIntelligenceInput = z
+  .object({
+    period: z.enum(WORK_PERIOD_KEYS).optional(),
+  })
+  .strict();
+
+const journalWorkIntelligenceGet: CapabilityDescriptor = {
+  id: "journal.work_intelligence.get",
+  kind: "read",
+  title: "My work in numbers",
+  description:
+    "What the caller's own Work Journal adds up to — the SAME figures the " +
+    "web 'work in numbers' section shows, from the one work-time rule: hours, " +
+    "confirmed hours, entries and days worked per period (today / 7 / 30 / " +
+    "365 days / all, UTC calendar days ending today); per skill the hours it " +
+    "can claim (attributed), the confirmed part, hours shared with other " +
+    "skills (involvement — never a total), share of attributed hours, " +
+    "entries, days, contexts, first and last worked day and a 30-day trend; " +
+    "hours per kind of work; and `coverage` — how many entries the figures " +
+    "rest on and whether a bounded read stopped short. `period` scopes the " +
+    "skill and activity sections (default `all`); `scope` names it. No " +
+    "score, rating or rank; nothing about other people or organizations.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: journalWorkIntelligenceInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = journalWorkIntelligenceInput.parse(input);
+    // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
+      return { ok: false, code: "unavailable", message: "Worker read failed." };
+    }
+    const worker = workerRead.value;
+    if (!worker) {
+      return {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it has no Work Journal.",
+      };
+    }
+    // THE one reader the section, the Living CV and the chat use — the
+    // canonical journal-list read + the link read + the declared skills,
+    // under the caller's own RLS. A failed read is UNKNOWN (unavailable),
+    // never an empty model that reads as "no work" (SEP-7).
+    const wi = await loadWorkIntelligence(caller, worker.id, {
+      focus: parsed.period ?? "all",
+    });
+    if (!wi) {
+      return { ok: false, code: "unavailable", message: "Work intelligence read failed." };
+    }
+    // The person's OWN figures only. The organization's hour ledger
+    // (`organizationRecords`), context ids, and plausibility checks are
+    // deliberately not exposed here — they name other parties' records.
+    return {
+      ok: true,
+      data: {
+        workerId: worker.id,
+        scope: wi.scope,
+        periods: wi.periods.map((p) => ({
+          key: p.key,
+          startIso: p.startIso,
+          endIso: p.endIso,
+          hours: p.hours,
+          confirmedHours: p.confirmedHours,
+          dayUnits: p.dayUnits,
+          entries: p.entries,
+          daysWorked: p.daysWorked,
+        })),
+        skills: wi.skills.map((sk) => ({
+          slug: sk.slug,
+          attributedHours: sk.attributedHours,
+          confirmedHours: sk.confirmedHours,
+          sharedHours: sk.sharedHours,
+          share: sk.share,
+          entries: sk.entries,
+          days: sk.days,
+          contexts: sk.contexts,
+          firstWorkedDay: sk.firstWorkedDay,
+          lastWorkedDay: sk.lastWorkedDay,
+          trend: sk.trend,
+        })),
+        activities: wi.activities.map((a) => ({
+          key: a.key,
+          hours: a.hours,
+          share: a.share,
+          entries: a.entries,
+          lastWorkedDay: a.lastWorkedDay,
+          trend: a.trend,
+        })),
+        coverage: {
+          entriesRead: wi.coverage.entriesRead,
+          truncated: wi.coverage.truncated,
+          linksTruncated: wi.coverage.linksTruncated,
+        },
       },
     };
   },
@@ -624,6 +771,9 @@ const journalConfirm: CapabilityDescriptor = {
         notes: draft.notes,
         work_date: draft.workDate,
         site_name: draft.siteName ?? "",
+        // The stated time becomes time on the record — the same derivation
+        // the conversation executor applies (issue #1689).
+        ...intakeWorkTimeFields(draft.notes, draft.workDate),
       }),
     );
     if (!result.ok) {
@@ -881,6 +1031,100 @@ const contextSwitchInput = z
   })
   .strict();
 
+/**
+ * WHICH WORKSPACES AM I IN — the READ half of the context pair.
+ *
+ * `context.switch` could already be made to list the options, by handing it a
+ * value it cannot resolve. That is not a read: its `readOnlyHint` is false and
+ * a strict MCP client is entitled to ask a human before every call to it. A
+ * client that only wants to SHOW a person which workspaces they hold — the
+ * mobile settings screen is the first — needs an answer it can fetch without
+ * proposing a write.
+ *
+ * It opens NO new path. The list is `readWorkspaceMemberships`, the same
+ * RLS-scoped sources behind the web workspace chip, `context.switch` and
+ * `switchActiveWorkspaceCore`; the labels are the canonical builder, through
+ * the same `workspaceLabeller` the switch uses. There is no second membership
+ * source and no second set of names to drift.
+ *
+ * It reports the ACTIVE workspace as the durable pointer records it, so a
+ * client can show which one a write would land in — the thing a phone could
+ * not tell anyone before this existed. An open browser session may hold its
+ * own in-session choice; that is stated rather than guessed at.
+ */
+const contextList: CapabilityDescriptor = {
+  id: "context.list",
+  kind: "read",
+  title: "Which workspaces I hold",
+  description:
+    "The caller's own workspaces — their personal space and every " +
+    "organization they are a member of — with the label a person actually " +
+    "reads, and which one the DURABLE pointer currently makes active. " +
+    "Membership as recorded; no derived authority and no score.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: z.object({}).strict(),
+  run: async (caller): Promise<ExecResult> => {
+    // `resolveActiveWorkspaceForCaller` is THE transport-neutral core — its
+    // own note says it exists so that "acting for organization X" means one
+    // thing for the web session, this capability layer and mobile alike. It
+    // returns the membership list AND the resolved pointer, so there is no
+    // second read and no second resolution rule here.
+    //
+    // `identity: null` is correct for a bearer caller: it is the web session's
+    // person/company signal, which a token does not carry. Its only effect is
+    // the single-organization default for a COMPANY identity; withholding it
+    // means an unset pointer resolves to the personal workspace rather than
+    // inferring an organization this caller never chose.
+    const { workspaces, activeWorkspaceId, pointerAvailable, membershipsComplete } =
+      await resolveActiveWorkspaceForCaller(caller, null);
+    // A SHORTER LIST IS NOT A SMALLER TRUTH. The three membership sources
+    // degrade a failure to omitted rows, so without this an ordinary
+    // PostgREST or RLS blip would answer `ok` with some of the caller's
+    // organizations missing — and a person would read "these are your
+    // workspaces" with no hedge at all. Refusing is the #1314 rule: absence
+    // of an answer is never rendered as an answer of absence.
+    if (membershipsComplete === false) {
+      return {
+        ok: false,
+        code: "unavailable",
+        message:
+          "Your workspaces could not be read in full, so this list would be missing some. Nothing was changed.",
+      };
+    }
+    const labelOf = await workspaceLabeller(caller.locale, workspaces);
+    return {
+      ok: true,
+      data: {
+        workspaces: workspaces.map((w) => ({
+          id: w.id,
+          label: labelOf(w),
+          kind: w.kind,
+          organizationType: w.kind === "organization" ? (w.organizationType ?? null) : null,
+          relationship: w.relationship ?? null,
+          active: w.id === activeWorkspaceId,
+        })),
+        activeWorkspaceId,
+        // `pointerAvailable: false` means the owner-gated pointer migration is
+        // unapplied on this environment, so `activeWorkspaceId` is the
+        // RESOLVER's default rather than a recorded choice, and a bearer
+        // client cannot switch. Saying so is the difference between a client
+        // showing the truth and one showing a confident wrong answer about
+        // where a write will land.
+        pointerAvailable,
+        note: pointerAvailable
+          ? "This is the DURABLE pointer. An already-open browser session may hold its own in-session choice until changed there."
+          : "No durable active-workspace pointer is recorded on this environment: the active workspace shown is the resolver's default, not a stored choice, and a bearer client cannot switch yet.",
+      },
+    };
+  },
+};
+
 const contextSwitch: CapabilityDescriptor = {
   id: "context.switch",
   kind: "execute",
@@ -906,34 +1150,25 @@ const contextSwitch: CapabilityDescriptor = {
     const parsed = contextSwitchInput.parse(input);
     // G4 bridge: the SAME membership list the web workspace chip renders,
     // and the SAME switch core the web server actions run.
-    const memberships = await listWorkspaceMemberships(caller);
-
-    const t = await getTranslations({
-      locale: caller.locale,
-      namespace: "capabilities",
-    });
-    const tRelationships = await getTranslations({
-      locale: caller.locale,
-      namespace: "relationshipTypes",
-    });
-    const relationshipLabel = (slug: string): string =>
-      tRelationships.has(slug) ? tRelationships(slug) : slug;
-    // Same duplicate-qualification rule as the work-log selector (#1360):
-    // a base label that occurs more than once gains its relationship.
-    const baseOf = (w: (typeof memberships)[number]): string =>
-      w.kind === "personal" ? t("workspacePersonal") : w.name.trim() || t("notSet");
-    const baseCounts = new Map<string, number>();
-    for (const w of memberships) {
-      const base = baseOf(w);
-      baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+    //
+    // The COMPLETE-aware read, because this capability SHOWS the list: on an
+    // unresolvable value it answers `workspace_choice_required` with the
+    // options a person then picks from. A degraded list is doubly wrong here —
+    // a missing row can be the very reason the requested workspace failed to
+    // match, so the person would be told their own workspace is not theirs and
+    // handed a short list to choose from instead.
+    const membershipRead = await readWorkspaceMemberships(caller);
+    if (!membershipRead.complete) {
+      return {
+        ok: false,
+        code: "unavailable",
+        message:
+          "Your workspaces could not be read in full, so nothing was switched and the options would be incomplete.",
+      };
     }
-    const labelOf = (w: (typeof memberships)[number]): string => {
-      const base = baseOf(w);
-      const duplicated = (baseCounts.get(base) ?? 0) > 1;
-      return duplicated && w.kind === "organization" && w.relationship
-        ? `${base} — ${relationshipLabel(w.relationship)}`
-        : base;
-    };
+    const memberships = membershipRead.workspaces;
+
+    const labelOf = await workspaceLabeller(caller.locale, memberships);
 
     // Resolution is deliberately EXACT (id, the personal sentinel, or a
     // full case-insensitive name) — fuzzy sentence matching stays the web
@@ -1509,6 +1744,9 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   profileGet,
   livingCvSkillsGet,
   journalList,
+  // The figures the section shows, for an authorized assistant (#1689,
+  // lane B) — a read over the one reader, never a second derivation.
+  journalWorkIntelligenceGet,
   journalCreateDraft,
   journalConfirm,
   interestExpressDraft,
@@ -1517,6 +1755,7 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   workCardSaveConfirm,
   demandCreateDraft,
   demandCreateConfirm,
+  contextList,
   contextSwitch,
   workforceAvailability,
   // Organization evidence import — the ELEVEN capabilities that give an
@@ -1525,6 +1764,12 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // Declared as a group because they are one flow, not eleven unrelated
   // actions; each descriptor is still reviewed individually in its own file.
   ...EVIDENCE_IMPORT_CAPABILITIES,
+  // Organization people ingestion — the roster half of the same architecture.
+  // The evidence import READS the roster; this is what puts people on it, for
+  // a company's employees, an agency's candidates and an institution's
+  // learners alike. One flow (preview → answer → commit), one domain service
+  // shared with the web import panel.
+  ...PEOPLE_INGEST_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

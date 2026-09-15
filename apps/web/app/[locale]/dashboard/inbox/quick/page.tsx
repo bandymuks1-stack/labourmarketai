@@ -29,8 +29,15 @@ export default async function QuickConfirmPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const queue = await fetchQuickReviewQueue();
-  const entries: QuickConfirmEntryView[] = queue.map((e) => ({
+  // FAILED ≠ EMPTY (SEP-7): a read that failed gets its own named state below,
+  // never the "nothing to review" empty state.
+  let queue: Awaited<ReturnType<typeof fetchQuickReviewQueue>> | null;
+  try {
+    queue = await fetchQuickReviewQueue();
+  } catch {
+    queue = null;
+  }
+  const entries: QuickConfirmEntryView[] = (queue ?? []).map((e) => ({
     id: e.id,
     workerName: e.workerName,
     createdAt: e.createdAt,
@@ -50,7 +57,10 @@ export default async function QuickConfirmPage({
   // Exceptions pyramid (DESIGN_SOUL §3): the REAL server-flagged exceptions
   // for the batch candidates, surfaced BEFORE the confirm click. RPC absent
   // → empty map (the write side then enforces nothing extra either).
-  const exceptionMap = await fetchBatchExceptions(todays.map((e) => e.id));
+  const exceptionMap =
+    queue === null
+      ? new Map<string, never>()
+      : await fetchBatchExceptions(todays.map((e) => e.id));
   const exceptions = Object.fromEntries(exceptionMap);
 
   return (
@@ -74,7 +84,12 @@ export default async function QuickConfirmPage({
       {/* One client boundary that stays mounted across the post-tap
           revalidation, so the manager's receipt survives the queue emptying
           (empty state + batch + cards all live inside it). */}
-      <QuickConfirmQueue entries={entries} todays={todays} exceptions={exceptions} />
+      <QuickConfirmQueue
+        entries={entries}
+        todays={todays}
+        exceptions={exceptions}
+        unavailable={queue === null}
+      />
     </div>
   );
 }

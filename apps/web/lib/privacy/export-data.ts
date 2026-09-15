@@ -99,16 +99,31 @@ export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
   let journalEntries: unknown[] = [];
   let workerSkills: unknown[] = [];
   let workerDocuments: unknown[] = [];
+  // PER-11 (owner approval 2026-09-15): a worker's own external profile links
+  // are personal data — they identify the person across platforms and may
+  // carry a snapshot the worker uploaded. This export is an explicit
+  // ALLOWLIST, so a new table is silently omitted unless it is named here.
+  let workerExternalProfiles: unknown[] = [];
   if (workersRes.error) {
     // The branch below is gated on workerIds, so a failed `workers` read used
     // to skip it silently and report NO work history rather than an unread
     // one. Name all three: their emptiness here is unexplained, not proven.
-    unavailable.push("journal_entries", "worker_skills", "worker_documents");
+    unavailable.push(
+      "journal_entries",
+      "worker_skills",
+      "worker_documents",
+      "worker_external_profiles",
+    );
   } else if (workerIds.length > 0) {
-    const [journalRes, skillsRes, docsRes] = await Promise.all([
+    const [journalRes, skillsRes, docsRes, externalRes] = await Promise.all([
       db.from("journal_entries").select("*").in("worker_id", workerIds),
       db.from("worker_skills").select("*").in("worker_id", workerIds),
       db.from("worker_documents").select("*").in("worker_id", workerIds),
+      // DISCONNECTED ROWS ARE INCLUDED DELIBERATELY. Disconnect is soft
+      // (`disconnected_at`), so the row still exists and is still the
+      // subject's personal data — a subject-access export that showed only
+      // currently-connected links would under-report what is held.
+      db.from("worker_external_profiles").select("*").in("worker_id", workerIds),
     ]);
     if (journalRes.error) unavailable.push("journal_entries");
     else journalEntries = journalRes.data ?? [];
@@ -116,6 +131,11 @@ export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
     else workerSkills = skillsRes.data ?? [];
     if (docsRes.error) unavailable.push("worker_documents");
     else workerDocuments = docsRes.data ?? [];
+    // Before the PER-11 migration is applied the relation does not exist and
+    // this reads 42P01 — reported as UNAVAILABLE, never as an empty list. An
+    // empty list would assert "you have none", which is a different claim.
+    if (externalRes.error) unavailable.push("worker_external_profiles");
+    else workerExternalProfiles = externalRes.data ?? [];
   }
 
   return {
@@ -134,6 +154,7 @@ export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
         journal_entries: journalEntries,
         worker_skills: workerSkills,
         worker_documents: workerDocuments,
+        worker_external_profiles: workerExternalProfiles,
       },
     },
   };

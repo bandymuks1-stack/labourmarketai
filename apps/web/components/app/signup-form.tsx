@@ -266,7 +266,7 @@ export function SignupForm({
               ? `/auth/login?next=${encodeURIComponent(nextPath)}`
               : "/auth/login"
           }
-          className="text-sm text-brand-blue hover:text-brand-cyan"
+          className="text-sm text-brand-blue hover:text-brand-champagne"
         >
           {t("login_link")} →
         </Link>
@@ -426,7 +426,7 @@ export function SignupForm({
                 ? `/auth/login?next=${encodeURIComponent(nextPath)}`
                 : "/auth/login"
             }
-            className="text-brand-blue hover:text-brand-cyan"
+            className="text-brand-blue hover:text-brand-champagne"
           >
             {t("login_link")}
           </Link>

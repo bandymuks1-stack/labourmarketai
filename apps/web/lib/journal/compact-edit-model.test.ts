@@ -33,6 +33,7 @@ const baseEntry: JournalEditingEntry = {
   topic: null,
   skillSlugs: [],
   activities: [],
+  moduleFields: {},
 };
 
 const skills = [
@@ -52,6 +53,7 @@ describe("deriveCompactRows", () => {
             activityLabel: "vairavimas",
             time: { value: 1, unitSlug: "hours" },
             userLabel: null,
+            source: null,
           },
           {
             index: 2,
@@ -59,6 +61,7 @@ describe("deriveCompactRows", () => {
             activityLabel: "kasininko darbas",
             time: { value: 3, unitSlug: "hours" },
             userLabel: null,
+            source: null,
           },
         ],
       },
@@ -83,6 +86,7 @@ describe("deriveCompactRows", () => {
             activityLabel: "Plytelių klojimas",
             time: { value: 2, unitSlug: "hours" },
             userLabel: null,
+            source: null,
           },
         ],
       },
@@ -112,6 +116,7 @@ describe("deriveCompactRows", () => {
             activityLabel: "driving",
             time: { value: 2, unitSlug: "hours" },
             userLabel: null,
+            source: null,
           },
         ],
       },
@@ -141,6 +146,7 @@ describe("deriveCompactRows", () => {
             activityLabel: "a",
             time: { value: 6, unitSlug: "hours" },
             userLabel: null,
+            source: null,
           },
         ],
       },
@@ -160,6 +166,7 @@ describe("deriveCompactRows", () => {
             activityLabel: null,
             time: { value: 2, unitSlug: "hours" },
             userLabel: "stendo montavimas",
+            source: null,
           },
         ],
       },
@@ -206,9 +213,41 @@ function input(overrides: Partial<CompactSaveInput>): CompactSaveInput {
     siteName: "",
     institutionName: "",
     topic: "",
+    moduleFields: {},
     ...overrides,
   };
 }
+
+describe("archetype module fields (owner §12)", () => {
+  it("ships non-empty module values as ONE json field, trimmed", () => {
+    const fields = buildCompactSaveFields(
+      input({
+        moduleFields: {
+          supervision_level: "  meistras Jonas, šalia visą dieną ",
+          learning_outcome: "",
+        },
+      }),
+    );
+    expect(JSON.parse(fields.module_metrics_json!)).toEqual({
+      supervision_level: "meistras Jonas, šalia visą dieną",
+    });
+  });
+  it("omits the field entirely when every value is empty", () => {
+    const fields = buildCompactSaveFields(
+      input({ moduleFields: { supervision_level: "   " } }),
+    );
+    expect("module_metrics_json" in fields).toBe(false);
+  });
+  it("a changed module value makes the edit dirty; an untouched preload does not", () => {
+    const base = input({ moduleFields: { crew: "3 žmonės" } });
+    expect(compactStateFingerprint(base)).toBe(
+      compactStateFingerprint(input({ moduleFields: { crew: "3 žmonės" } })),
+    );
+    expect(compactStateFingerprint(base)).not.toBe(
+      compactStateFingerprint(input({ moduleFields: { crew: "4 žmonės" } })),
+    );
+  });
+});
 
 function row(overrides: Partial<CompactActivityRow>): CompactActivityRow {
   return {
@@ -318,6 +357,7 @@ describe("buildCompactSaveFields — the ONE batch save payload", () => {
             activityLabel: "Vairavimas",
             time: null,
             userLabel: null,
+            source: null,
           },
           // The actual saved taxonomy selection (fragment_activity = slug).
           {
@@ -326,6 +366,7 @@ describe("buildCompactSaveFields — the ONE batch save payload", () => {
             activityLabel: "driving",
             time: { value: 2, unitSlug: "hours" },
             userLabel: null,
+            source: null,
           },
         ],
       },
@@ -442,5 +483,102 @@ describe("compactStateFingerprint — dirty detection", () => {
     expect(
       compactStateFingerprint(input({ rows: [row({ timeValue: "2" })] })),
     ).not.toBe(compactStateFingerprint(input({ rows: [row({})] })));
+  });
+});
+
+describe("provenance survives a re-save (#1689, observed 2026-09-12)", () => {
+  const entry: JournalEditingEntry = {
+    ...baseEntry,
+    activities: [
+      {
+        index: 1,
+        rawPhrase: "5 val. programavau",
+        activityLabel: "programavimas",
+        time: { value: 5, unitSlug: "hours" },
+        userLabel: null,
+        source: "ai_extracted",
+      },
+      {
+        index: 2,
+        rawPhrase: "2 val. testavau",
+        activityLabel: "testavimas",
+        time: { value: 2, unitSlug: "hours" },
+        userLabel: null,
+        source: "worker_input",
+      },
+      {
+        index: 3,
+        rawPhrase: "1 val. susirinkimas",
+        activityLabel: "susirinkimas",
+        time: { value: 1, unitSlug: "hours" },
+        userLabel: null,
+        source: null,
+      },
+    ],
+  };
+
+  it("derived rows carry the persisted provenance and a fingerprint of what was persisted", () => {
+    const { rows } = deriveCompactRows(entry, skills);
+    expect(rows.map((r) => [r.source, r.persistedFingerprint])).toEqual([
+      ["ai_extracted", "programavimas|5|hours"],
+      ["worker_input", "testavimas|2|hours"],
+      [null, "susirinkimas|1|hours"],
+    ]);
+  });
+
+  it("an untouched ai_extracted fragment is re-sent as ai_extracted; an edited one, an added one, and one of unknown provenance are the worker's input", () => {
+    const { rows } = deriveCompactRows(entry, skills);
+    const edited: CompactActivityRow = { ...rows[0], timeValue: "6" }; // the worker changed the hours
+    const added: CompactActivityRow = {
+      key: "added-1",
+      label: "dokumentacija",
+      skillSlug: null,
+      rawPhrase: null,
+      timeValue: "1",
+      timeUnit: "hours",
+      origin: "added",
+    };
+    const untouched = buildCompactSaveFields(input({ rows }));
+    expect(JSON.parse(untouched.fragments_json!).map((f: { source: string }) => f.source)).toEqual([
+      "ai_extracted",
+      "worker_input",
+      "worker_input",
+    ]);
+    const changed = buildCompactSaveFields(input({ rows: [edited, rows[1], added] }));
+    expect(JSON.parse(changed.fragments_json!).map((f: { source: string }) => f.source)).toEqual([
+      "worker_input",
+      "worker_input",
+      "worker_input",
+    ]);
+  });
+
+  it("a label change alone is the worker's input too — provenance follows the words as well as the hours", () => {
+    const { rows } = deriveCompactRows(entry, skills);
+    const relabelled: CompactActivityRow = { ...rows[0], label: "Programavimas (backend)" };
+    const fields = buildCompactSaveFields(input({ rows: [relabelled] }));
+    expect(JSON.parse(fields.fragments_json!)[0].source).toBe("worker_input");
+  });
+});
+
+describe("a row that is only its own phrase names no kind of work (#1689, production 2026-09-12)", () => {
+  it("a persisted fragment whose label is its phrase ships no activityLabel; a named activity and a typed label do", () => {
+    const { rows } = deriveCompactRows(
+      {
+        ...baseEntry,
+        activities: [
+          { index: 1, rawPhrase: "2 val. testavau", activityLabel: null, time: { value: 2, unitSlug: "hours" }, userLabel: null, source: "ai_extracted" },
+          { index: 2, rawPhrase: "3 val. vairavau", activityLabel: "vairavimas", time: { value: 3, unitSlug: "hours" }, userLabel: null, source: "ai_extracted" },
+        ],
+      },
+      skills,
+    );
+    const typed: CompactActivityRow = { key: "added-1", label: "dokumentacija", skillSlug: null, rawPhrase: null, timeValue: "1", timeUnit: "hours", origin: "added" };
+    const fields = buildCompactSaveFields(input({ rows: [...rows, typed] }));
+    const fragments = JSON.parse(fields.fragments_json!) as { rawPhrase: string; activityLabel: string | null }[];
+    expect(fragments.map((f) => [f.rawPhrase, f.activityLabel])).toEqual([
+      ["2 val. testavau", null],
+      ["3 val. vairavau", "vairavimas"],
+      ["dokumentacija", "dokumentacija"],
+    ]);
   });
 });

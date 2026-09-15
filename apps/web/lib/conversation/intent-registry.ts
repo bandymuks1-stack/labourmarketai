@@ -66,6 +66,7 @@ export type IntentHandlerId =
   | "availabilityStatement"
   | "skillGap"
   | "recentJournal"
+  | "workIntelligence"
   | "figures"
   | "openProject"
   | "projectsList"
@@ -124,6 +125,19 @@ export type IntentHandlerId =
   // which of the five CV actions is meant.
   | "cvView"
   | "cvChoose"
+  // The photo shown back (issue #1689, defect G): a read over the ONE
+  // personal-gallery projection, embedded in the thread.
+  | "evidencePhotos"
+  /**
+   * "Ką galiu padaryti šioje paskyroje?" — the capability question.
+   *
+   * This handler is a SEAM, not an answer. Everything a person hears is
+   * derived at ask time from the active context and the workspace's real
+   * state (`lib/conversation/capability-answer.ts`); nothing about the
+   * outcomes, their order or their wording is decided here. See the router
+   * entry for why the vocabulary needs an id at all.
+   */
+  | "capabilities"
   | "addTask"
   | "whoAvailable"
   | "stageStatus"
@@ -156,6 +170,15 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   opportunities: { domain: "matching", access: "read", handler: "findWork", ownTyping: true },
   "skill-gap": { domain: "profile", access: "read", handler: "skillGap", ownTyping: true },
   "journal-recent": { domain: "journal", access: "read", handler: "recentJournal", ownTyping: true },
+  // Work intelligence by sentence (issue #1689, owner lines 2–7): ONE
+  // handler over the ONE work-in-numbers model; the intent names the facet.
+  "journal-skill": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-skills-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-activities-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-confirmed": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  // Owner line 8 — the growth reading over the SAME model: a fact block and
+  // a block said to be derived; never a score.
+  "journal-growth": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
   figures: { domain: "journal", access: "read", handler: "figures", ownTyping: true },
   "open-project": { domain: "project", access: "read", handler: "openProject", ownTyping: true },
   // G8: the chip surfaces by SENTENCE — each routes to the SAME component
@@ -165,6 +188,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   candidates: { domain: "matching", access: "read", handler: "employerCandidates", ownTyping: true },
   "find-workers": { domain: "matching", access: "read", handler: "findWorkers", ownTyping: true },
   context: { domain: "context", access: "read", handler: "contextReadback", ownTyping: true },
+  // "What do you know about me" (`context`) answers with STATE. This answers
+  // with what the person can ACHIEVE from where they stand — a different
+  // question, and merging them would collapse a real distinction.
+  capabilities: { domain: "context", access: "read", handler: "capabilities", ownTyping: true },
   // Routed by IDENTITY inside the handler; the ambiguous dual-role case is
   // ASKED, never guessed (guard: interest-inbox-asks-not-guesses).
   "interest-inbox": { domain: "matching", access: "read", handler: "interestInbox", ownTyping: true },
@@ -271,6 +298,13 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The sentence named the CV and nothing more. Route, not write: the answer
   // is a question with the three real doors and no side effect.
   "cv-choose": { domain: "cv", access: "route", handler: "cvChoose", ownTyping: false },
+  // THE PHOTO SHOWN BACK (issue #1689, defect G). "Parodyk įkeltą nuotrauką,
+  // ar tikrai išsisaugojo" — a READ over the ONE personal-gallery projection
+  // (`lib/journal/personal-gallery.ts`: the same journal_entry_photos rows,
+  // the same private bucket, the same signed URLs), answered INSIDE the
+  // chat with the stored photos and one chip to the gallery. Never a second
+  // photo store; never a claim about the photo beyond "it is stored".
+  "evidence-photos": { domain: "journal", access: "read", handler: "evidencePhotos", ownTyping: true },
   // PROJECT → WORK (§11): a work package on the company's project through
   // the one inline form over the one task create.
   "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },

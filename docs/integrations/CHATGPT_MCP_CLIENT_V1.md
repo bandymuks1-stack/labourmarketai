@@ -5,6 +5,15 @@
 > `profile.get` read are all proven against the live client with server-log
 > evidence (§4, §6). The first real-client WRITE (`journal.create_draft` →
 > `journal.confirm`) is the remaining unproven step.
+>
+> **Update 2026-09-10 — read §8, §9 and §10 first, they supersede the counts
+> and the latency assumptions above.** A real Work session was traced end to
+> end in production: the owner's observed 38–40 s round trip is **~2.1 s of
+> LabourMarket and ~36 s of ChatGPT orchestration** (§8, with the logged
+> timeline). The exposed surface was already 24 capabilities, not the three
+> the session surfaced; it is now 26 with organization people ingestion (§9).
+> The canonical brand is declared to the client, and the circular "L" the
+> owner saw is ChatGPT's own fallback avatar, not a LabourMarket asset (§10).
 
 ## 1. The verified platform contract
 
@@ -251,3 +260,197 @@ Natural request (verbatim): *"Įrašyk į mano darbo dienoraštį bandomąjį į
 - The rule-C option labels can collide (two org-less/unnamed contexts both
   render as the localized relationship word). The web flow qualifies duplicate
   labels; the capability path should too. Follow-up slice.
+
+---
+
+## 8. Latency — the 38–40 s observation, decomposed (2026-09-10)
+
+The owner ran `profile_get` from a real ChatGPT Work session and observed a
+**38–40 second** round trip. That number is real. It is also **~95% not ours**,
+and the fix list below is scoped to the part LabourMarket controls.
+
+### The measured production trace
+
+Reconstructed from Vercel runtime logs (`/api/mcp`, deployment
+`dpl_9euwghWk5v7U3So6n6bLZE6GYXKS`) joined to Supabase `edge_logs` on project
+`gorgitwvdzxbnaxhrsrw`. Every line below is a logged event, not an estimate:
+
+| time (UTC) | surface | event |
+|---|---|---|
+| 10:29:57.106 | Supabase | `POST /auth/v1/oauth/token` 200 — ChatGPT refreshes the access token |
+| 10:29:58.326 | Vercel | `POST /api/mcp` 200 — request #1, `auth ok`, **no tool call** |
+| 10:29:59.675 | Supabase | `GET /auth/v1/user` 200 — request #1's bearer verification |
+| 10:29:59.813 | Vercel | `POST /api/mcp` 200 — request #2, `auth ok` + `profile_get ok` |
+| 10:29:59.903 | Supabase | `GET /auth/v1/user` 200 — request #2's bearer verification |
+| 10:29:59.952 | Supabase | `GET /rest/v1/profiles` 200 — `profile.get` read 1 |
+| 10:30:00.369 | Supabase | `GET /rest/v1/workers` 200 — `profile.get` read 2 |
+
+**The whole interaction was TWO MCP requests.** There was no repeated
+capability discovery, no re-`initialize` storm, no N+1 fan-out.
+
+### The split
+
+| segment | measured | owner target |
+|---|---|---|
+| `LABOURMARKET_EXECUTION_TIME` (first byte in to last DB read out) | **~2.1 s** | <= 3 s, already met |
+| of which cold start, before auth was even attempted | ~1.35 s | the real target |
+| of which the two sequential `profile.get` reads | 417 ms | fixed below |
+| `CHATGPT_ORCHESTRATION/UI_TIME` (remainder of 38–40 s) | **~36–38 s** | not ours |
+
+**Zero AI calls.** No `lib/ai/` runtime is on this path; the deterministic
+reads and the whole people-ingest flow call no LabourMarket model provider.
+ChatGPT already supplies the conversational layer.
+
+### What was fixed here
+
+1. **`profile.get` ran its two independent reads sequentially** — `profiles`
+   then `workers`, both keyed on the caller's own id. The 417 ms gap above is
+   pure waiting. Now `Promise.all`; authorization is untouched (both still run
+   on the caller's RLS-scoped client).
+2. **`tools/list` rebuilt every tool's JSON Schema on every request** —
+   `z.toJSONSchema()` across the full exposed set, on a hot path a client hits
+   on each new conversation. Memoized lazily (a derived view containing no
+   user data, no identity and no authorization decision), along with the
+   tool-name to capability lookup.
+3. **An oversized body answered a bare `{ ok: false }`** — now a named
+   `request_too_large` carrying the limit and what to do instead, so "your file
+   exceeded this door" cannot reach a user as "the import did not work".
+
+### What was NOT changed, deliberately
+
+- **Cold start (~1.35 s, the largest single item)** is the route's module
+  graph: `app/api/mcp/route.ts` pulls the whole capability registry, which
+  pulls the journal, worker, demand, opportunity, company and evidence-import
+  cores at import time. Making these lazy is a real improvement and a real
+  refactor of the registry's shape — it is the **next smallest gap**, not
+  something to bolt on inside a slice that also changes the write surface.
+- **The per-request `GET /auth/v1/user` round trip** (~90–230 ms each) is the
+  platform verifying the token properly. Caching verified tokens would cut it
+  and would be an **auth-core change** — RED class, owner-gated. Not taken.
+- **The 64 KB request-body cap** stays. It bounds roughly 48 KB of base64 file,
+  a few thousand names in a CSV; larger lists belong in the web panel, and the
+  refusal now says so.
+
+### Honest conclusion
+
+A deterministic profile read is **not** a 38-second operation on our side and
+was not one before this slice; it was ~2.1 s, of which ~1.35 s was cold start.
+The user-visible 38–40 s is dominated by ChatGPT's own orchestration — model
+turn, tool selection, rendering — which this repository cannot change. The two
+fixes above remove ~0.4 s of measured waiting plus the repeated schema work;
+they do not and cannot turn 38 s into 3 s.
+
+---
+
+## 9. Organization people ingestion through ChatGPT (2026-09-10)
+
+`organization_people` is the canonical organization-to-person roster: people an
+organization vouches for who **need not have accounts**, with a consent
+lifecycle (`unlinked` -> `link_proposed` -> `linked`). The evidence import READS
+that roster; the ingestion flow is what puts people on it.
+
+### One architecture, two transports
+
+```
+                 web panel (cookie)  -> ingest-actions.ts ----+
+FILE / ROWS -----                                             +--> ingest-service.ts
+                 ChatGPT (bearer)    -> people-ingest-  ------+           |
+                                        capabilities.ts                   |
+                                                                          v
+                                   planPeopleIngest (pure) + organization_people
+```
+
+`lib/organization-people/ingest-service.ts` is new and is the **only**
+preview/commit implementation. The server actions previously owned that logic
+and derived the caller from `cookies()`, which no bearer client can do; rather
+than write a second copy for the second transport, the body moved down and now
+takes an already-authenticated `DomainCaller`. The file reader
+(`ingest-file.ts`) is shared the same way, so a file refused in the browser is
+refused identically through an assistant.
+
+### The two tools
+
+| tool | kind | behaviour |
+|---|---|---|
+| `people_ingest_preview` | draft, `readOnlyHint:true` | parses a workforce list (xlsx/xlsm/csv/tsv/txt, base64) or explicit rows, matches against the roster, names every duplicate and ambiguity. **Writes nothing.** Mints a one-time token ONLY when nothing is unresolved |
+| `people_ingest_commit` | confirm, append-write | verifies that token against the exact previewed set, re-plans against the roster as it is NOW, writes, reads back by id |
+
+Ambiguity resolution is re-previewing with `resolutions` — the domain's own
+shape — rather than a third tool with no domain counterpart.
+
+### The invariants, and where they are enforced
+
+- **A file arriving is not a commit.** The preview is the only tool that takes
+  a file and it cannot write; the commit takes no file at all.
+- **A commit requires a token bound to what was shown.** Minting is guarded by
+  `!needsReconciliation && !needsRelationship`, so a permit cannot exist for a
+  batch with an open question. Replay, widening, relationship change,
+  cross-user and tamper are each exercised in
+  `people-commit-confirmation.test.ts` — run, not grepped.
+- **The token carries no personal data**: names are hashed into the
+  fingerprint, so a token in a chat transcript discloses nothing.
+- **ChatGPT asserts no authority.** An `organizationId` is a SELECTOR among the
+  caller's own memberships (`resolveEvidenceOrganization`), never a grant; the
+  write uses the RESOLVED id. Guarded.
+- **The relationship is supplied, never inferred** — no batch is quietly filed
+  as `employee`.
+- **No governance, no accounts, no CV.** Nothing writes `company_memberships`,
+  `profiles` or `auth.users`; every row starts `link_state:'unlinked'`.
+- **Failure classes stay distinct**: `not_authorized`, `needs_migration`,
+  `unavailable`, `too_many_rows`, `unresolved`,
+  `organization_choice_required`, `not_supported`, `no_name_column`,
+  `nothing_parsed`. A failed read is never an empty roster.
+- **PDF/DOCX CVs are refused by name.** Keeping a person's name while
+  discarding their professional history would read as "imported" to the
+  organization and as erasure to the person.
+
+### Exposed capability surface
+
+**Before:** 24 exposed capabilities (profile, Living CV, journal, interest,
+work card, demand, context, workforce availability, and the 11 evidence-import
+steps). The owner's session surfaced only profile/CV/journal, but the rest were
+already listed — that was a discovery/selection outcome inside ChatGPT, not a
+missing exposure.
+
+**After:** 26 — the two above. Exposure remains a reviewed decision, pinned in
+`lib/capabilities/capabilities.test.ts`.
+
+---
+
+## 10. Brand — the canonical mark on the ChatGPT app
+
+**Canonical source:** `docs/brand/source/LM_Color Single.svg`, the owner's
+original CorelDRAW vector, md5 `eafd130e9820d6e9df12cc075229d0b5`, archived in
+the repo by PR #1683. Everything the product serves is a geometry-verbatim
+derivation of it:
+
+| asset | use | relationship to the source |
+|---|---|---|
+| `public/brand/lm-mark.svg` | full mark | coordinates verbatim; orange becomes the metallic-gold gradient; the source's opaque black plate dropped |
+| `public/app-icon.svg`, `app/icon.svg` | favicon / PWA tile | same geometry; flat `#D4AF37`, because a five-stop ramp resolves to mud at 16 px |
+| `components/ui/lm-logo.tsx` | in-app | same geometry |
+
+`lib/guards/visual-system-black-gold.test.ts` pins four original coordinates
+and the `.ai` dot in every one of them, and keeps the untouched source archived
+as proof of derivation. **No logo was generated, redrawn or re-traced in this
+slice, and none needed to be.**
+
+The mark is an **LM monogram**, not a letter in a circle. The circular "L" the
+owner saw in ChatGPT is therefore **not our asset** — it is the host's own
+fallback avatar, shown because the MCP server declared a bare machine name
+(`labourmarket-ai`) and no identity at all.
+
+**Changed here:** `initialize` now returns `title: "LabourMarket.ai"`,
+`websiteUrl`, and `icons` pointing at the two canonical assets by absolute
+URL. These are the MCP spec's own identity fields and are additive — a client
+that predates them ignores them. A guard asserts the MCP route declares those
+exact canonical paths, that the paths resolve to files carrying the original
+geometry, and that **no second logo asset** is introduced for the integration
+(negative-controlled: planting a `chatgpt-logo.svg` fails the guard).
+
+**OWNER GATE — the remaining half.** Whether a host renders a server-declared
+icon is the host's decision, and ChatGPT's connector list has historically
+drawn its own avatar from the connector name. If the LM mark does not appear
+after this deploys, the icon must be set **inside ChatGPT's connector
+settings** by the owner, from `public/app-icon.svg`. That is a ChatGPT-side UI
+action; no repository change can perform it.

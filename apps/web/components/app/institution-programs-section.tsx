@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
@@ -8,6 +8,7 @@ import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
 import {
   AssignLearnerForm,
+  EditProgramForm,
   CreateCohortForm,
   CreateProgramForm,
   RemoveMemberButton,
@@ -23,6 +24,7 @@ import {
  * Until the batch is applied the section says so and offers nothing fake.
  */
 export async function InstitutionProgramsSection({ organizationId }: { readonly organizationId: string }) {
+  const locale = await getLocale();
   const t = await getTranslations("roleDashboards.company.programs");
   const tProf = await getTranslations("professions");
   const tEdu = await getTranslations("cvSections.educationTypes");
@@ -36,6 +38,9 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
     noType: t("form.noType"),
     description: t("form.description"),
     createProgram: t("form.createProgram"),
+    editProgram: t("form.editProgram"),
+    saveProgram: t("form.saveProgram"),
+    setDirectionHint: t("form.setDirectionHint"),
     cohortName: t("form.cohortName"),
     startsOn: t("form.startsOn"),
     endsOn: t("form.endsOn"),
@@ -98,6 +103,23 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                         ) : null}
                       </div>
 
+                      {/* Correcting a programme was impossible before this: the
+                          table had one writer and no update path, so a target
+                          profession skipped at creation could never be added —
+                          and that field is what turns the demand count on. */}
+                      <EditProgramForm
+                        program={{
+                          id: p.id,
+                          name: p.name,
+                          targetProfessionSlug: p.targetProfessionSlug,
+                          educationTypeSlug: p.educationTypeSlug,
+                          description: p.description,
+                        }}
+                        professions={professions}
+                        educationTypes={educationTypes}
+                        labels={labels}
+                      />
+
                       {p.cohorts.length > 0 ? (
                         <ul className="flex flex-col gap-2">
                           {p.cohorts.map((c) => (
@@ -149,6 +171,22 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                 })}
               </ul>
             )}
+            {read.programs.length > 0 ? (
+              <p className="text-xs leading-relaxed text-text-secondary">
+                {/* CSV route handler — a file download, not a page (the
+                    reports-page precedent: plain anchor with locale). The
+                    link exists only with a programme to report on; an export
+                    of nothing is a file that reads as "no programmes". */}
+                <a
+                  href={`/${locale}/dashboard/company/institution-report/export?org=${organizationId}`}
+                  className="text-brand-blue hover:underline"
+                  data-testid="institution-report-export"
+                >
+                  {t("exportReport")} →
+                </a>
+                <span className="ml-2 text-text-muted">{t("exportReportHint")}</span>
+              </p>
+            ) : null}
             {/* First session: with no programme yet the create form is the
                 only door, so it starts open instead of hiding behind a
                 collapsed disclosure. */}

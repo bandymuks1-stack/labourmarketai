@@ -532,8 +532,9 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | ORG-5 | Cross-org isolation | 7 authority helpers | PARTIAL | — | 0 | an org **manager** cannot read `company_workers` (`owns_company` excludes managers) |
 | ORG-6 | Roster (employees, historical, agency) | `engagement_contexts` + 4 legacy link tables | DUPLICATED | — | 1 | 4 parallel roster truths |
 | ORG-7 | Candidates / talent pool / scouting | `candidate_drafts`, `demand_shortlist` | PROD_DATA | — | 1 | `/dashboard/talent` is a superadmin sample preview |
-| ORG-8 | Agency ↔ client bridge | `agency_client_connections`, `agency_candidate_offers` | PROD_DATA | — | 1 | `agency_clients` is a second, unapplied client model |
+| ORG-8 | Agency ↔ client bridge | `agency_client_connections`, `agency_candidate_offers`, `agency_clients` | PROD_DATA | — | 1 | `agency_clients` APPLIED 2026-09-14 (ledger `20260914202322`) under canonical Model B — a private client record, not a rival to the bridge |
 | ORG-9 | Public organization profile | `organizations.public_*`, `/business/[slug]` | IMPL | — | 3 | no index/directory route |
+| ORG-10 | Agency worker pool (legacy `agencies` world) | `agencies`, `agency_workers` (3 / 0 rows) | **RETIRED 2026-09-14** | — | — | Model B canonical (owner). B1 retire-and-record: nothing dropped, all 3 agencies already mirrored into `organizations`; revisit a Model-B-native pool when real agency workforce exists |
 
 #### D. WORK EXECUTION
 
@@ -546,9 +547,9 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | WRK-5 | Worker→project assignment | `project_worker_assignments` | PROD_DATA (1 row) | W (strong) | 1 | no overlap constraint of any kind |
 | WRK-6 | **Team→project assignment** | — | **MISSING** | — | 1 | no FK exists anywhere |
 | WRK-7 | Readiness / operational status | `project_worker_readiness_items` | IMPL | W | 2 | — |
-| WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | — |
-| WRK-9 | Handover passport | `project_handover_entries` | IMPL | — | 3 | — |
-| WRK-10 | Project economics | `project_budgets` | IMPL | — | 3 | — |
+| WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | assignee read APPLIED 2026-09-14 (ledger `20260914195053`), proven per-row on prod; `defect_corrections` stays manager-only (owner 2b DEFER) |
+| WRK-9 | Handover passport | `project_handover_entries` (1 row) | IMPL | — | 3 | reachable on `/dashboard/projects/[id]/operations`; written once in prod — no nav tile of its own |
+| WRK-10 | Project economics | `project_budgets` (0 rows) | IMPL | — | 3 | `ProjectEconomicsPanel` renders on project operations; 0 rows is adoption, not disconnection |
 
 #### E. EVIDENCE · JOURNAL
 
@@ -561,6 +562,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | EVID-4 | Photos / task evidence | `journal_entry_photos`, `journal_entry_tasks` | PROD_DATA (8 photos) | — | 2 | — |
 | EVID-5 | Hours: journal metrics · allocations · timesheets | 3 stores + 1 dead | PARTIAL | — | 1 | reconciled inside ONE SQL function; no TS reader unions them |
 | EVID-6 | Experience records + disputes + right of reply | `experience_records`, `experience_responses` | PROD_DATA (2) | — | 2 | **`experience_responses` is write-only — no surface renders a reply** |
+| EVID-7 | Work intelligence: hours · activities · skill practice · evidence strength | `journal_entry_metrics` (+ `fragment_skill` rows) + `journal_entry_skills` + confirmations + photos, ONE pure model over the canonical work-time rule | PARTIAL | — | 1 | #1689: journal section + Living CV chips + conversation; fragment-level skill attribution from the worker's own split (#1692); §13 plausibility checks (day > 24 h / long day / line > 24 h / set-aside entry duration) warn in the section and at both intake surfaces, acknowledged with a reason via `work_time_override` rows, never a changed figure (#1692); archetype map covers all 43 ISCO sub-major groups; composer modules, §14 org views and a human walk remain |
 
 #### F. DEMAND · SUPPLY · MATCHING
 
@@ -599,8 +601,8 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | MKT-2 | Physical resource listings | `marketplace_listings` | DISCONNECTED (0 rows) | — | 2 | no bridge to `assets` |
 | MKT-3 | Assets / tools / equipment | `assets`, `asset_assignments` | IMPL (0 rows) | — | 2 | `issue_asset_v1` has no availability guard, no lock |
 | MKT-4 | Proposals / contracts / agreements | 3 stores | DUPLICATED (0 rows) | — | 3 | `contracts` is legacy of `agreements` |
-| MKT-5 | Procurement | `procurement_*` | IMPL (0 rows) | — | 3 | no route; `#procurement` anchor |
-| MKT-6 | Business trips | `business_trips` | IMPL (0 rows) | — | 3 | never reaches the calendar |
+| MKT-5 | Procurement | `procurement_*` | IMPL (0 rows) | — | 3 | `ProcurementSection` renders on `/dashboard/finance`, which reports + commercial-panel link to |
+| MKT-6 | Business trips | `business_trips` (0 rows) | IMPL (0 rows) | — | 3 | `TripsSection` renders on `/dashboard/finance`; trips already feed commitment/capacity. Calendar link still open |
 | MKT-7 | Billing / plans / entitlements | `plans`, `billing_*` | DEFERRED | — | 1 | test mode; two independent owner acts to arm |
 | MKT-8 | LMC credit ledger | 5 tables, 16 RPCs | DEFERRED | — | 3 | all six flags false in code AND database |
 
@@ -629,11 +631,11 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | ID | Capability | Canonical objects | Status | AI | P | Next action |
 |---|---|---|---|---|---|---|
 | EDU-1 | Institution capability + learner link | `organization_roles`, `engagement_contexts` `student` | PROD_DATA | — | 1 | — |
-| EDU-2 | Programmes / cohorts / members | `education_*` | PROD_DATA (1/1/0) | W | 1 | applied 2026-09-03 |
+| EDU-2 | Programmes / cohorts / members | `education_*` | PROD_DATA (1/1/0) | W | 1 | correction path applied 2026-09-08; zero cohort members in production |
 | EDU-3 | Learner outcomes | `institution_learner_outcomes` | IMPL | — | 2 | — |
 | EDU-4 | Learning compass (student path) | `lib/learning/learning-compass` | IMPL | — | 2 | — |
-| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links |
-| EDU-6 | **Institution reporting** | — | **MISSING** | — | 2 | programmes exist; no report, no export |
+| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links — VERIFIED, verdict unchanged; parked on F-N1 (owner). Claim now names its module + route so it is checkable |
+| EDU-6 | Institution reporting | `education_programs` + public vacancy counts | IMPL | — | 2 | CSV export built 2026-09-13; never downloaded by a human |
 
 #### L. PLATFORM · AI · GOVERNANCE
 

@@ -198,7 +198,7 @@ export function CompareBar({
               onClick={() => setOpen((v) => !v)}
               disabled={!canCompare}
               aria-expanded={showTable}
-              className="inline-flex min-h-[2.75rem] items-center rounded-md bg-brand-blue px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-40"
+              className="inline-flex min-h-[2.75rem] items-center rounded-md bg-brand-blue px-4 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-40"
               data-testid="compare-open"
             >
               {showTable ? labels.close : labels.open}

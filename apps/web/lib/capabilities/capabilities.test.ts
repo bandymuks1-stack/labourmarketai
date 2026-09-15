@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 
 vi.mock("@/lib/env", () => ({
   env: {
@@ -142,6 +143,9 @@ describe("the registry itself", () => {
       "profile.get",
       "living_cv.skills.get",
       "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
       "interest.express_draft",
@@ -150,6 +154,13 @@ describe("the registry itself", () => {
       "work_card.save_confirm",
       "demand.create_draft",
       "demand.create_confirm",
+      // The READ half of the context pair (2026-09-13). `context.switch`
+      // could already be MADE to list the options by handing it a value it
+      // cannot resolve — but that is a write capability (`readOnlyHint:
+      // false`), and a client that only wants to SHOW a person which
+      // workspaces they hold should not have to propose a write to find out.
+      // Same reader, same labels, no new path.
+      "context.list",
       "context.switch",
       // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
       // company questions to become an authorized action rather than a
@@ -170,11 +181,20 @@ describe("the registry itself", () => {
       "evidence.records.list",
       "evidence.record.attest",
       "evidence.import.withdraw",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
       "living_cv.skills.get",
       "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
       "interest.express_draft",
@@ -183,6 +203,7 @@ describe("the registry itself", () => {
       "work_card.save_confirm",
       "demand.create_draft",
       "demand.create_confirm",
+      "context.list",
       "context.switch",
       // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
       // company questions to become an authorized action rather than a
@@ -203,6 +224,12 @@ describe("the registry itself", () => {
       "evidence.records.list",
       "evidence.record.attest",
       "evidence.import.withdraw",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
     ]);
   });
 
@@ -251,6 +278,7 @@ describe("the registry itself", () => {
     expect(byId["profile.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["living_cv.skills.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.list"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.work_intelligence.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.create_draft"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.confirm"].annotations.readOnlyHint).toBe(false);
     // The one-time token makes a duplicate confirm a no-op, not a second row.
@@ -291,6 +319,7 @@ describe("profile.get", () => {
       caller({
         profiles: { data: PROFILE_ROW, error: null },
         workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: [{ role: "worker" }, { role: "company" }], error: null },
       }),
       {},
     );
@@ -307,7 +336,50 @@ describe("profile.get", () => {
           activeRole: "worker",
         },
         worker: { status: "exists", workerId: "worker-1" },
+        // The PLURAL of activeRole, as recorded. A person is one person with
+        // several roles at once (I-1) — `activeRole` is which one they are in
+        // right now, never the set they hold.
+        heldRoles: { status: "known", roles: ["worker", "company"] },
       },
+    });
+  });
+
+  it("a failed ROLES read is 'unavailable', never 'holds no roles'", async () => {
+    // The live defect this mirrors (web shell, 2026-08-28): a transient
+    // PostgREST failure read as an empty list stripped every role from the
+    // authenticated shell. A person who manages three companies was shown as
+    // holding nothing. The profile itself still answers — one signal failing
+    // does not blank the others.
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: null, error: { message: "pooler hiccup" } },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "unavailable" } },
+    });
+    expect((r as unknown as { data: { heldRoles: Record<string, unknown> } }).data.heldRoles)
+      .not.toHaveProperty("roles");
+  });
+
+  it("holding nothing is reported as a KNOWN empty set, not as unavailable", async () => {
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: null, error: null },
+        profile_roles: { data: [], error: null },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "known", roles: [] } },
     });
   });
 
@@ -979,14 +1051,21 @@ describe("journal draft → confirm", () => {
     ];
     expect(deps.userId).toBe("00000000-0000-4000-8000-0000000000aa");
     // Byte-for-byte the mapping worker-executors.ts "worker.log-work" uses —
-    // one write contract, no ChatGPT-specific fork.
+    // one write contract, no ChatGPT-specific fork. Since #1689 that mapping
+    // also carries the time the person stated ("6 valandos") as the same
+    // fragment rows the composer would persist (intake-work-time), so the
+    // canonical work-time rule sees it — with machine-extraction provenance.
     expect(Object.fromEntries(formData.entries())).toEqual({
       locale: "lt",
       engagement_context_id: DRAFT.engagementContextId,
       notes: DRAFT.notes,
       work_date: DRAFT.workDate,
       site_name: DRAFT.siteName,
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
     });
+    const fragments = JSON.parse(String(formData.get("fragments_json")));
+    expect(fragments).toHaveLength(1);
+    expect(fragments[0]).toMatchObject({ timeValue: 6, timeUnit: "hours", source: "ai_extracted", selected: false });
   });
 
   it("a write failure maps through with its real code — never invented success", async () => {

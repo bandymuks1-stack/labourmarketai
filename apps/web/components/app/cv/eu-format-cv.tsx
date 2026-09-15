@@ -52,10 +52,10 @@ function Row({
 }) {
   return (
     <section
-      className="grid grid-cols-1 gap-2 border-t border-zinc-300 pt-4 sm:grid-cols-[10rem_1fr] sm:gap-6"
+      className="grid grid-cols-1 gap-2 border-t border-ink-600 pt-4 sm:grid-cols-[10rem_1fr] sm:gap-6"
       data-testid={testId}
     >
-      <h2 className="font-display text-xs font-bold uppercase tracking-widest text-zinc-500">
+      <h2 className="font-display text-xs font-bold uppercase tracking-widest text-text-muted">
         {label}
       </h2>
       <div className="flex flex-col gap-3">{children}</div>
@@ -69,14 +69,14 @@ function Entry({ entry }: { entry: EuDisplayEntry }) {
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
         <span className="text-sm font-semibold">{entry.heading}</span>
         {entry.period ? (
-          <span className="font-mono text-xs text-zinc-600">{entry.period}</span>
+          <span className="font-mono text-xs text-text-secondary">{entry.period}</span>
         ) : null}
       </div>
       {entry.subheading ? (
-        <span className="text-sm text-zinc-700">{entry.subheading}</span>
+        <span className="text-sm text-text-secondary">{entry.subheading}</span>
       ) : null}
       {entry.note ? (
-        <span className="text-xs text-zinc-500">{entry.note}</span>
+        <span className="text-xs text-text-muted">{entry.note}</span>
       ) : null}
     </div>
   );
@@ -92,18 +92,18 @@ export function EuFormatCv({
   return (
     <article className="flex flex-col gap-5" data-testid="cv-eu-format">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-widest text-zinc-500">
+        <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
           {labels.documentTitle}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tight">
           {doc.personName ?? (
-            <span className="italic text-zinc-400" data-testid="cv-eu-name-missing">
+            <span className="italic text-text-muted" data-testid="cv-eu-name-missing">
               {labels.nameNotProvided}
             </span>
           )}
         </h1>
         {doc.professions ? (
-          <p className="text-sm text-zinc-600" data-testid="cv-eu-professions">
+          <p className="text-sm text-text-secondary" data-testid="cv-eu-professions">
             {doc.professions}
           </p>
         ) : null}
@@ -114,7 +114,7 @@ export function EuFormatCv({
           left believing otherwise (§7). It is not printed — the claim it
           corrects is a claim about this app, not about the CV. */}
       <p
-        className="rounded-md border border-zinc-300 bg-zinc-50 px-3 py-2 text-xs text-zinc-600 print:hidden"
+        className="rounded-md border border-ink-600 bg-ink-800 px-3 py-2 text-xs text-text-secondary print:hidden"
         data-testid="cv-eu-disclaimer"
       >
         {labels.notAnOfficialEuropass}
@@ -148,21 +148,21 @@ export function EuFormatCv({
         <Row label={labels.personalSkills} testId="cv-eu-personal-skills">
           {doc.languages.length > 0 ? (
             <div className="flex flex-col gap-1" data-testid="cv-eu-languages">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                 {labels.languages}
               </p>
               <ul className="flex flex-col gap-0.5">
                 {doc.languages.map((l) => (
                   <li key={l.name} className="text-sm">
                     <span className="font-medium">{l.name}</span>
-                    <span className="text-zinc-600"> — {l.level}</span>
+                    <span className="text-text-secondary"> — {l.level}</span>
                   </li>
                 ))}
               </ul>
               {/* The level is what the person said it is. Europass expects a
                   self-assessed CEFR grid; this is self-stated either way, and
                   saying so is cheaper than implying an assessment happened. */}
-              <p className="text-meta uppercase tracking-wide text-zinc-500">
+              <p className="text-meta uppercase tracking-wide text-text-muted">
                 {labels.languagesSelfStated}
               </p>
             </div>
@@ -170,7 +170,7 @@ export function EuFormatCv({
 
           {doc.skillGroups.length > 0 ? (
             <div className="flex flex-col gap-2" data-testid="cv-eu-skills">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                 {labels.jobRelatedSkills}
               </p>
               {/* Grouped by how well each skill is backed. Europass has no
@@ -179,7 +179,7 @@ export function EuFormatCv({
                   manager-confirmed one. */}
               {doc.skillGroups.map((g) => (
                 <div key={g.tier} className="flex flex-col gap-1" data-testid={`cv-eu-tier-${g.tier}`}>
-                  <p className="text-meta uppercase tracking-wide text-zinc-500">
+                  <p className="text-meta uppercase tracking-wide text-text-muted">
                     {labels.tiers[g.tier]}
                   </p>
                   <p className="text-sm leading-relaxed">{g.names.join(", ")}</p>
@@ -190,7 +190,7 @@ export function EuFormatCv({
 
           {doc.drivingLicences.length > 0 ? (
             <div className="flex flex-col gap-1" data-testid="cv-eu-driving-licences">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                 {labels.drivingLicences}
               </p>
               <p className="text-sm">{doc.drivingLicences.join(", ")}</p>
@@ -207,7 +207,7 @@ export function EuFormatCv({
         </Row>
       ) : null}
 
-      <p className="border-t border-zinc-300 pt-3 text-meta text-zinc-500">
+      <p className="border-t border-ink-600 pt-3 text-meta text-text-muted">
         {labels.generatedAt}
       </p>
     </article>

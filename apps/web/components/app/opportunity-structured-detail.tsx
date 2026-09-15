@@ -67,16 +67,32 @@ export function payText(
     : ts("chipPay", { amount, currency: compensation.currency, unit });
 }
 
+/**
+ * THE COMPACT ESSENCE (owner direction 2026-09-13: "pirmiausia kompaktiškas
+ * sąrašas … su esme (darbas, vieta, atlygis jei žinomas, atitikimas,
+ * pagrindinis KODĖL); detalės atidaromos tik pasirinkus").
+ *
+ * In `essence` mode the chip row carries only what decides whether a person
+ * opens the row at all — the pay the employer stated, and the MANDATORY
+ * talent-pool disclosure, which is never compacted away. Hours, start
+ * windows, deadlines and engagement form are not removed: they are the
+ * detail the row opens into (`OpportunityStructuredSections`), one tap away.
+ */
+const ESSENCE_CHIP_KEYS = new Set(["pay"]);
+
 export function OpportunityStructuredChips({
   structured,
   locale,
   ts,
   sd,
+  essence = false,
 }: {
   structured: StructuredDemandPublic | null;
   locale: string;
   ts: Translate;
   sd: Translate;
+  /** Compact list mode: pay + the mandatory disclosure, nothing else. */
+  essence?: boolean;
 }) {
   if (!structured) return null;
   const time = structured.time;
@@ -123,10 +139,11 @@ export function OpportunityStructuredChips({
   }
 
   const talentPool = publicRequiresTalentPoolDisclosure(structured);
-  if (chips.length === 0 && !talentPool) return null;
+  const shown = essence ? chips.filter((c) => ESSENCE_CHIP_KEYS.has(c.key)) : chips;
+  if (shown.length === 0 && !talentPool) return null;
   return (
     <div className="flex flex-wrap gap-1.5" data-testid="opportunity-structured-chips">
-      {chips.map((c) => (
+      {shown.map((c) => (
         <span key={c.key} className={CHIP} data-chip={c.key}>
           {c.text}
         </span>

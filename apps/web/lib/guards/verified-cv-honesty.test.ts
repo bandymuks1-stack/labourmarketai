@@ -98,6 +98,40 @@ describe("Guard: confirmed-proof rows are role-only (no confirmer identity)", ()
     expect(columns).toContain("confirmer_role");
     expect(columns).not.toMatch(/confirmer_id|full_name|email|profiles/);
   });
+
+  /**
+   * SEP-3 on the document handed to an employer. `worker_documents` carries
+   * two independent axes — `status` (missing/ready/blocked: where the WORKER
+   * put the file) and `verification` (unverified/pending/verified/rejected:
+   * what a REVIEWER decided). The CV read used to select only the first, so a
+   * REJECTED credential printed exactly like a verified one, unqualified,
+   * directly above declared certificates that ARE labelled unverified.
+   */
+  it("reads the reviewer's verdict, not only where the worker filed the document", () => {
+    const docsIdx = src.indexOf('.from("worker_documents")');
+    expect(docsIdx).toBeGreaterThan(-1);
+    const selectMatch = src.slice(docsIdx).match(/\.select\(\s*"([^"]*)"\s*\)/);
+    expect(selectMatch, "worker_documents .select() not found").toBeTruthy();
+    const columns = selectMatch![1];
+    expect(columns).toContain("status");
+    expect(columns).toContain("verification");
+  });
+
+  it("never promotes a missing verdict to verified", () => {
+    // The tolerated-read fallback must default to `unverified`.
+    expect(src).toMatch(/verification: d\.verification \?\? "unverified"/);
+    expect(src).not.toMatch(/verification: d\.verification \?\? "verified"/);
+  });
+
+  it("the CV sheet qualifies a document certificate that no reviewer verified", () => {
+    const page = readFileSync(
+      join(APP_ROOT, "app", "[locale]", "cv", "page.tsx"),
+      "utf8",
+    );
+    // The unqualified row is the defect; the hint is what makes it honest.
+    expect(page).toMatch(/d\.reviewerVerified \? null : \(/);
+    expect(page).toContain('t("documentSelfSuppliedHint")');
+  });
 });
 
 describe("Guard: cvExport copy is present + honest in all 10 locales", () => {

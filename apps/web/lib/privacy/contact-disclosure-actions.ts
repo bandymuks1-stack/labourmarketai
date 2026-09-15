@@ -45,10 +45,15 @@ import {
  * record_personal_data_disclosure execution path. This module never selects
  * a contact column.
  *
- * HONEST DEGRADATION: the ask table/RPCs are a DRAFT-gated migration
- * (20260716120000). While unapplied every read reports applied:false and
- * every write returns kind:"needs-migration" — prepared, not enabled; never
- * a fake success.
+ * HONEST DEGRADATION: the ask table/RPCs (migration 20260716120000) were
+ * APPLIED — read from the production ledger 2026-09-14 as version
+ * 20260716194948 `contact_disclosure_requests_v1`, with the table, its select
+ * policy and all five RPCs live. This comment said "DRAFT-gated" and "while
+ * unapplied" long after that stopped being true, which is a stale-truth claim
+ * of the kind the register exists to catch. The degradation paths below STAY:
+ * an absent relation still reports applied:false and every write still returns
+ * kind:"needs-migration" rather than a fake success. They are now a guard
+ * against regression, not a description of today.
  *
  * RATE LIMIT (shared contract, app layer, works today): max 10 open + 30/24h
  * asks per requester (lib/limits/request-rate-limits.ts, fail closed on
@@ -190,6 +195,10 @@ export async function requestContactDisclosureAction(input: {
 }
 
 export interface ScoutingContactRequestState {
+  /** The ask row's own id — what `withdraw_contact_disclosure_request_v1`
+   *  addresses. Carried because the employer sees the ask here and, until
+   *  2026-09-14, had no way to take it back. */
+  readonly requestRowId: string;
   readonly status: ContactDisclosureStatus;
   /** True only when the SEPARATE consent-ledger grant currently exists
    *  (verified live via has_employer_data_disclosure — a worker withdrawal
@@ -198,8 +207,9 @@ export interface ScoutingContactRequestState {
 }
 
 export interface ScoutingContactRequestStates {
-  /** False while the draft-gated ask model is not applied (prepared, not
-   *  enabled) — the UI shows the honest unavailable note, no dead button. */
+  /** False only if the ask model becomes unreadable — it IS applied in
+   *  production (ledger 20260716194948). Kept so a regression shows the
+   *  honest unavailable note rather than a dead button. */
   readonly applied: boolean;
   /** worker_id → newest ask state for THIS demand (owner-scoped read). */
   readonly byWorker: Readonly<Record<string, ScoutingContactRequestState>>;
@@ -218,15 +228,16 @@ export async function getScoutingContactRequestStates(
 
   const { data, error } = await asAny(supabase)
     .from("contact_disclosure_requests")
-    .select("worker_id, status, expires_at, organization_id, created_at")
+    .select("id, worker_id, status, expires_at, organization_id, created_at")
     .eq("owner_id", user.id)
     .eq("request_id", requestId)
     .order("created_at", { ascending: false });
-  if (error) return none; // absent table (draft-gated) or read failure
+  if (error) return none; // unreadable relation or read failure — fail closed
 
   const byWorker: Record<string, ScoutingContactRequestState> = {};
   const acceptedRows: { workerId: string; organizationId: string }[] = [];
   for (const r of (data ?? []) as {
+    id: string;
     worker_id: string;
     status: string;
     expires_at: string | null;
@@ -239,7 +250,7 @@ export async function getScoutingContactRequestStates(
       Date.parse(r.expires_at) <= Date.now();
     const status = expired ? "expired" : r.status;
     if (!isContactDisclosureStatus(status)) continue;
-    byWorker[r.worker_id] = { status, disclosureGranted: false };
+    byWorker[r.worker_id] = { requestRowId: r.id, status, disclosureGranted: false };
     if (status === "accepted") {
       acceptedRows.push({ workerId: r.worker_id, organizationId: r.organization_id });
     }
@@ -267,7 +278,10 @@ export async function getScoutingContactRequestStates(
           },
         );
         if (granted === true) {
-          byWorker[workerId] = { status: "accepted", disclosureGranted: true };
+          const prev = byWorker[workerId];
+          if (prev) {
+            byWorker[workerId] = { ...prev, status: "accepted", disclosureGranted: true };
+          }
         }
       } catch {
         // ledger probe unavailable → stays false (fail closed)
@@ -276,6 +290,75 @@ export async function getScoutingContactRequestStates(
   );
 
   return { applied: true, byWorker };
+}
+
+export type WithdrawContactDisclosureResult =
+  | { kind: "ok" }
+  /** The ask is no longer open — already answered, withdrawn or expired. The
+   *  RPC refuses anything but `created`, which is the product rule: a request
+   *  the worker has already answered is part of the record, not a draft. */
+  | { kind: "not-open"; status: string | null }
+  | { kind: "not-found" }
+  | { kind: "not-authed" }
+  | { kind: "not-authorized" }
+  | { kind: "needs-migration" }
+  | { kind: "error" };
+
+/**
+ * Employer side — TAKE BACK an ask that is still open.
+ *
+ * The lifecycle was asymmetric: the employer could ASK for a person's contact
+ * details and could watch the answer arrive, and had no way to un-ask. The
+ * worker already had both a response and a revocation path. This closes that,
+ * and adds no new authority to do it: `withdraw_contact_disclosure_request_v1`
+ * has existed since 20260716120000 (org authority widened 20260817122000),
+ * EXECUTE already held by `authenticated`, and nothing in the product had ever
+ * called it.
+ *
+ * Everything that makes it safe is already enforced IN THE DATABASE, and this
+ * wrapper deliberately adds no rules of its own:
+ *   - authority: `owner_id = auth.uid()` OR `has_org_demand_access(org)`,
+ *     null-safe (the P0 secdef lesson — no bare `<>` in a definer gate);
+ *   - window: `status <> 'created'` is refused, so an accepted, declined,
+ *     withdrawn or expired ask can never be rewritten;
+ *   - evidence: the RPC writes an append-only `contact_disclosure_log_change`
+ *     row ('withdrawn', created -> withdrawn) inside the same transaction.
+ *
+ * Withdrawing the ASK is not a disclosure revocation. If the worker already
+ * granted the separate consent-ledger disclosure, that grant is a different
+ * object with its own revocation path and is untouched here.
+ */
+export async function withdrawContactDisclosureAction(input: {
+  locale: string;
+  id: string;
+}): Promise<WithdrawContactDisclosureResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  const { data, error } = await asAny(supabase).rpc(
+    "withdraw_contact_disclosure_request_v1",
+    { p_id: input.id },
+  );
+  if (error) {
+    if (ABSENT.has(error.code)) return { kind: "needs-migration" };
+    return { kind: "error" };
+  }
+
+  const res = (data ?? {}) as { ok?: boolean; error?: string; status?: string };
+  if (res.ok === true) {
+    revalidatePath(`/${input.locale}/dashboard/company/scouting`);
+    return { kind: "ok" };
+  }
+  if (res.error === "not_open") {
+    return { kind: "not-open", status: res.status ?? null };
+  }
+  if (res.error === "not_found") return { kind: "not-found" };
+  if (res.error === "not_authorized") return { kind: "not-authorized" };
+  if (res.error === "not_authenticated") return { kind: "not-authed" };
+  return { kind: "error" };
 }
 
 // ─── Worker side ─────────────────────────────────────────────────────────────

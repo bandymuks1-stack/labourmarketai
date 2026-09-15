@@ -294,3 +294,292 @@ describe("Universal Journal Recall v2 — fragment pipeline source guards", () =
     expect(page).toMatch(/\.slice\(0, 5\)/); // bounded per request
   });
 });
+
+describe("catalogue OFFER per fragment (#1689) — lane 4b rides the ONE candidate lane", () => {
+  const WORKLOG_FLOW = read("components/app/conversation/worker-worklog-flow.tsx");
+  const EXECUTORS = read("lib/conversation/worker-executors.ts");
+
+  it("the derivation consults the intake side's catalogue (no second lexicon) only for a fragment nothing read", () => {
+    expect(RECOGNITION).toMatch(
+      /import \{ recognizeNewSkillSuggestions \} from "@\/lib\/structuring\/new-skill-suggestions"/,
+    );
+    // gated on an EMPTY outcome list — the tier-2 rule at fragment grain
+    // (and never for an item that only says WHERE under a header, whose
+    // own lanes are skipped so lane 4c can hand it the header's readings)
+    expect(RECOGNITION).toMatch(
+      /if \(outcomes\.length === 0 && !describesWhere\) \{\s*for \(const s of recognizeNewSkillSuggestions\(f\.text\)\)/,
+    );
+    // an offer, never a reading: the catalogue result feeds the fuzzy
+    // candidate map, never the recognized map
+    const lane = RECOGNITION.slice(
+      RECOGNITION.indexOf("Lane 4b"),
+      RECOGNITION.indexOf("Lane 5"),
+    );
+    expect(lane).toMatch(/fuzzyMap\.set\(s\.slug/);
+    expect(lane).not.toMatch(/recognizedMap\.set/);
+    // the declared set is NOT passed: declared or not, a weak needle asks
+    expect(lane).not.toMatch(/recognizeNewSkillSuggestions\(f\.text,\s*declaredSlugs/);
+    // the worker's rejection stays visible on the fragment
+    expect(lane).toMatch(/pushRejected\("skill", s\.slug, s\.slug, "user_rejected", f\.id\)/);
+  });
+
+  it("the chat's done card decides the offer through the SAME server actions the composer uses", () => {
+    expect(WORKLOG_FLOW).toMatch(
+      /import \{\s*confirmJournalSkillCandidate,\s*rejectJournalSkillCandidate,\s*\} from "@\/lib\/journal\/skill-pipeline-actions"/,
+    );
+    // only a taxonomy offer is decidable here; ambiguous readings keep
+    // their curated choices in the journal
+    expect(WORKLOG_FLOW).toMatch(/c\.kind === "fuzzy_skill" &&/);
+    expect(WORKLOG_FLOW).toMatch(/testId="worklog-candidate-confirm"/);
+    expect(WORKLOG_FLOW).toMatch(/testId="worklog-candidate-reject"/);
+    // the decision carries the derivation version the server refuses when
+    // stale — read through from the awaited pipeline result, never assumed
+    expect(EXECUTORS).toMatch(/pipelineVersion: r\.skills\.recognition\.pipelineVersion/);
+    expect(WORKLOG_FLOW).not.toMatch(/JOURNAL_PIPELINE_VERSION/);
+    // the copy is the composer's own (journal.candidate*) — no second wording
+    for (const key of [
+      "candidateConfirm",
+      "candidateConfirming",
+      "candidateReject",
+      "candidateConfirmed",
+      "candidateRejected",
+      "candidateError",
+    ]) {
+      expect(WORKLOG_FLOW).toContain(`tCandidate("${key}")`);
+    }
+    // never a fake result: the state shown is the RETURNED result
+    expect(WORKLOG_FLOW).toMatch(/\[slug\]: res\.ok\s*\?/);
+  });
+});
+
+describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, never re-implements it", () => {
+  const EXTRACTOR = read("lib/structuring/extract-journal-suggestions.ts");
+
+  it("the derivation asks the extractor which phrase is the total (one rule, two grains)", () => {
+    expect(RECOGNITION).toMatch(
+      /import \{\s*describesWhereOnly,\s*extractJournalSuggestions,\s*workPartOf,\s*\} from "@\/lib\/structuring\/extract-journal-suggestions"/,
+    );
+    expect(RECOGNITION).toMatch(/extractJournalSuggestions\(text \?\? ""\)/);
+    expect(RECOGNITION).toMatch(/statedTotal\.statedTotal!\.rawPhrase/);
+    // the rule itself lives in ONE place
+    expect(EXTRACTOR).toMatch(/function separateStatedTotal\(/);
+    expect(RECOGNITION).not.toMatch(/function separateStatedTotal/);
+    expect(RECOGNITION).not.toMatch(/ITEMISING_COLON/);
+  });
+
+  it("an item that says only WHERE is decided by the extractor's ONE rule on both sides (#1689, measured 2026-09-12)", () => {
+    // the rule lives in the extractor and is exported once
+    expect(EXTRACTOR).toMatch(/export function describesWhereOnly\(phrase: string\): boolean/);
+    // the extractor's inheritance reads it beside the no-activity rule
+    expect(EXTRACTOR).toMatch(/noActivity\(f\) \|\| describesWhereOnly\(f\.rawPhrase\)/);
+    // the recognition side reads it — never a second place grammar
+    expect(RECOGNITION).toMatch(/describesWhereOnly\(f\.text\)/);
+    expect(RECOGNITION).not.toMatch(/function describesWhereOnly/);
+    expect(RECOGNITION).not.toMatch(/LT_PLACE_PREPOSITION|LT_VERB_ENDING|endsWith\("e"\)/);
+    // gated on a header that NAMED work (a rejected reading counts) and on
+    // the item being one of the extractor's timed items — never on a bare
+    // place item with no header, whose place is the only signal
+    expect(RECOGNITION).toMatch(
+      /const describesWhere =\s*headerIndex >= 0 &&\s*index > headerIndex &&\s*headerNamedWork &&\s*timedItemKeys\.has\(phraseKey\(f\.text\)\) &&\s*describesWhereOnly\(f\.text\)/,
+    );
+    expect(RECOGNITION).toMatch(/headerNamedWork = outcomes\.length > 0/);
+    // every own lane yields to it: taxonomy, ambiguity, claims, the offer
+    expect(RECOGNITION).toMatch(/for \(const r of describesWhere \? \[\] : recognizeSkills\(workText, 8\)\)/);
+    expect(RECOGNITION).toMatch(/for \(const a of describesWhere \? \[\] : extractAmbiguousCandidates\(f\.text\)\)/);
+    expect(RECOGNITION).toMatch(/for \(const c of describesWhere \? \[\] : extractProfileSkillClaims\(f\.text\)\)/);
+    // the rule is structural: the function body names no place word
+    const start = EXTRACTOR.indexOf("export function describesWhereOnly(");
+    const body = EXTRACTOR.slice(start, EXTRACTOR.indexOf("return true;", start));
+    expect(body).not.toMatch(/virtuv|kitchen|sandėl|warehouse|kuch|keuken|küche/i);
+  });
+
+  it("a trailing where-phrase is taken off before recognition by ONE rule on both sides, only when the head names work (#1689, production 2026-09-12)", () => {
+    expect(EXTRACTOR).toMatch(/export function workPartOf\(phrase: string\): string/);
+    // cautious by construction: shortest where-tail, head must be strong
+    expect(EXTRACTOR).toMatch(/if \(!describesWhereOnly\(tail\)\) continue;/);
+    expect(EXTRACTOR).toMatch(/const strong = recognizeSkills\(head, 8\)\.some\(\s*\(m\) => m\.via === "exact" \|\| m\.via === "synonym",\s*\);\s*if \(strong\) return head;/);
+    // the three intake readers read the work part; the time is read off the whole phrase
+    expect(EXTRACTOR).toMatch(/const work = workPartOf\(raw\);\s*const activity = detectActivity\(work\);/);
+    expect(EXTRACTOR).toMatch(/extractProfileSkillClaims\(work\)\[0\]/);
+    expect(EXTRACTOR).toMatch(/recognizeSkills\(work, 3\)/);
+    expect(EXTRACTOR).toMatch(/const localTime = detectFragmentTime\(raw\);/);
+    // the whole-text suggestions (the card) read the same join
+    expect(EXTRACTOR).toMatch(/\.map\(workPartOf\)\s*\.join\("\. "\)/);
+    // the recognition side's lane 1 reads the rule — never a second grammar
+    expect(RECOGNITION).toMatch(/const workText = workPartOf\(f\.text\);/);
+    expect(RECOGNITION).toMatch(/recognizeSkills\(workText, 8\)/);
+    expect(RECOGNITION).not.toMatch(/function workPartOf/);
+  });
+
+  it("the header is marked as the total and inheritance is provenance only (never a new reading)", () => {
+    const lane = RECOGNITION.slice(
+      RECOGNITION.indexOf("Lane 4c"),
+      RECOGNITION.indexOf("Lane 5"),
+    );
+    expect(lane).toMatch(/outcomes\.push\(\{ kind: "stated_total", ref: f\.id \}\)/);
+    // only a TIMED item nothing read inherits, after the header
+    expect(lane).toMatch(/outcomes\.length === 0 &&/);
+    expect(lane).toMatch(/index > headerIndex/);
+    expect(lane).toMatch(/timedItemKeys\.has\(phraseKey\(f\.text\)\)/);
+    // inheritance adds the item's id to the header's OWN entries
+    expect(lane).toMatch(/entry\.fragmentIds\.add\(f\.id\)/);
+    expect(lane).not.toMatch(/recognizedMap\.set|fuzzyMap\.set|ambiguousMap\.set|claimMap\.set/);
+    // a rejected header reading is never passed down
+    expect(RECOGNITION).toMatch(
+      /headerOutcomes = outcomes\.filter\(\s*\(o\) => o\.kind !== "rejected" && o\.kind !== "unresolved",\s*\)/,
+    );
+    // the outcome kind exists in the closed set
+    expect(RECOGNITION).toMatch(/\| "stated_total"/);
+  });
+});
+
+describe("the duration-unit vocabulary (#1689, measured 2026-09-12) — ONE list per unit, five routed languages, on both sides", () => {
+  const EXTRACTOR = read("lib/structuring/extract-journal-suggestions.ts");
+
+  it("every time regex is built from the three exported lists — no second unit list anywhere", () => {
+    expect(EXTRACTOR).toMatch(/export const HOUR_UNIT_SOURCES: readonly string\[\]/);
+    expect(EXTRACTOR).toMatch(/export const MINUTE_UNIT_SOURCES: readonly string\[\]/);
+    expect(EXTRACTOR).toMatch(/export const DAY_UNIT_SOURCES: readonly string\[\]/);
+    expect(EXTRACTOR).toMatch(/export function isDurationUnitWord\(word: string\): boolean/);
+    // the flattened export the fragmenter strips trailing time with is the same three lists
+    expect(EXTRACTOR).toMatch(
+      /export const DURATION_UNIT_PATTERNS: readonly string\[\] = \[\s*\.\.\.HOUR_UNIT_SOURCES,\s*\.\.\.MINUTE_UNIT_SOURCES,\s*\.\.\.DAY_UNIT_SOURCES,\s*\]/,
+    );
+    // no inline hour / minute / day alternation survives outside the lists
+    // (regex-literal and template-string spellings both)
+    const afterLists = EXTRACTOR.slice(EXTRACTOR.indexOf("const HOUR_UNIT_RX_SRC"));
+    for (const inline of [
+      String.raw`valand[\p{L}]*|val`,
+      String.raw`valand[\\p{L}]*|val`,
+      "minu[čt]",
+      "minu[čct]",
+      String.raw`dien[\p{L}]*|d`,
+      String.raw`dien[\\p{L}]*|d`,
+      String.raw`h\b`,
+    ]) {
+      expect(afterLists).not.toContain(inline);
+    }
+    expect(EXTRACTOR).toMatch(/f\.match\(DIGIT_HOURS_RX\)/);
+    expect(EXTRACTOR).toMatch(/f\.match\(DIGIT_MINUTES_RX\)/);
+    expect(EXTRACTOR).toMatch(/f\.match\(DIGIT_DAYS_RX\)/);
+    expect(EXTRACTOR).toMatch(/new RegExp\(DIGIT_HOURS_RX, "giu"\)/);
+    // the word test reads the lists, never its own regexes
+    expect(EXTRACTOR).toMatch(/if \(isDurationUnitWord\(w\)\) return true;/);
+    expect(EXTRACTOR).not.toMatch(/WHERE_UNIT_WORD_RX/);
+    // the recognition side's meaningfulness rule reads the SAME word test
+    expect(FRAGMENTER).toMatch(/isDurationUnitWord,/);
+    expect(FRAGMENTER).toMatch(/QUANTITY_TOKEN_RE\.test\(tok\) \|\| isDurationUnitWord\(tok\)/);
+    expect(FRAGMENTER).not.toContain(String.raw`valand\p{L}*|min`);
+    expect(FRAGMENTER).not.toContain("UNIT_TOKEN_RE");
+  });
+
+  it("a fragment's activity falls back to a STRONG skill reading only, after the lexicon and the capability dictionary (#1689)", () => {
+    const start = EXTRACTOR.indexOf("const cap = extractProfileSkillClaims(work)[0];");
+    const fallback = EXTRACTOR.slice(start, EXTRACTOR.indexOf("const isUnknown =", start));
+    expect(fallback).toMatch(/const strong = recognizeSkills\(work, 3\)\.find\(\s*\(m\) => m\.via === "exact" \|\| m\.via === "synonym",\s*\);/);
+    expect(fallback).toMatch(/if \(strong\) slug = strong\.slug;/);
+    expect(fallback).not.toMatch(/"fuzzy"/);
+    // the surfaces name a skill-slug key as they name a profession slug — never raw
+    const SECTION = read("components/app/journal-work-intelligence.tsx");
+    const CHAT = read("lib/ai-workspace/workflows.ts");
+    expect(SECTION).toMatch(/labels\.professionName\(key\) \?\? labels\.skillName\(key\) \?\? key/);
+    expect(CHAT).toMatch(/tProf\.has\(key\) \? tProf\(key\) : tSkill\.has\(key\) \? tSkill\(key\) : key/);
+  });
+
+  it("the lists carry every routed language and bound the one-letter abbreviations", () => {
+    const list = (name: string): string =>
+      EXTRACTOR.slice(
+        EXTRACTOR.indexOf(`export const ${name}`),
+        EXTRACTOR.indexOf("];", EXTRACTOR.indexOf(`export const ${name}`)),
+      );
+    const hours = list("HOUR_UNIT_SOURCES");
+    for (const form of ["valand", "час", "hours?", "hrs?", "uur", "uren", "stunden?", "std"]) {
+      expect(hours).toContain(form);
+    }
+    const days = list("DAY_UNIT_SOURCES");
+    for (const form of ["dien", "дн", "days?", "dag(?:en)?", "tage?"]) {
+      expect(days).toContain(form);
+    }
+    expect(list("MINUTE_UNIT_SOURCES")).toContain("minu[čct]");
+    // h / u / d / ч never swallow the word they begin ("5 duris" is doors, not
+    // days): the one-letter forms carry the letter-or-digit lookahead.
+    const bounded = (letter: string): string =>
+      String.raw`"${letter}\\.?(?![\\p{L}\\p{N}])"`;
+    expect(hours).toContain(bounded("h"));
+    expect(hours).toContain(bounded("u"));
+    expect(hours).toContain(bounded("ч"));
+    expect(days).toContain(bounded("d"));
+    expect(days).not.toContain(String.raw`"d\\.?",`);
+    // German "Std." keeps its dot before the capitalised noun that follows it
+    expect(EXTRACTOR).toContain(
+      String.raw`const DE_HOUR_ABBREVIATION_RX = /((?:^|[^\p{L}])std\.)(?=[ \t]+\p{L})/giu;`,
+    );
+    expect(EXTRACTOR).toContain(
+      '.replace(DE_HOUR_ABBREVIATION_RX, (m) => m.replace(".", marks.dot))',
+    );
+    // the item conjunctions of the three languages split items on both sides
+    expect(EXTRACTOR).toContain("(ir|bei|и|and|en|und)");
+    expect(FRAGMENTER).toContain(String.raw`ir|bei|taip\s+pat|and|also|en|und|и`);
+  });
+});
+
+describe("a candidate on a SAVED entry is decidable on its card (#1689, 2026-09-12) — ONE derivation, ONE marker reader, the same actions", () => {
+  const PAGE = read("app/[locale]/dashboard/journal/page.tsx");
+  const PENDING = read("lib/journal/entry-pending-candidates.ts");
+  const MARKERS = read("lib/journal/entry-recognition-markers.ts");
+  const ROW = read("components/app/journal-entry-candidate-decision.tsx");
+  const LINKS = read("components/app/journal-entry-skill-links.tsx");
+
+  it("the page derives the saved entry's pending candidates through the canonical derivation and its own markers", () => {
+    expect(PAGE).toContain('import { pendingEntryCandidates } from "@/lib/journal/entry-pending-candidates"');
+    expect(PAGE).toContain("const candidatesForEntry = pendingEntryCandidates({");
+    expect(PAGE).toContain("metrics: e.journal_entry_metrics,");
+    expect(PAGE).toContain("candidates: candidatesForEntry,");
+    // the derivation is THE derivation — never the display-only classifier
+    expect(PENDING).toContain("deriveJournalRecognition(text, {");
+    expect(PENDING).toContain("readEntryRecognitionMarkers(input.metrics ?? [])");
+    expect(PENDING).not.toContain("classifyEntryRecognition");
+    // only the rows the decision actions accept: fuzzy_skill, not yet linked here, named
+    expect(PENDING).toContain('if (c.kind !== "fuzzy_skill" || !c.slug) continue;');
+    expect(PENDING).toContain("if (linkedSlugs.has(c.slug) || seen.has(c.slug)) continue;");
+    expect(PENDING).toMatch(/const name = skillNameOf\(c\.slug\);\r?\n\s+if \(!name\) continue;/);
+    // pure: no IO, no server import
+    expect(PENDING).not.toMatch(/supabase|import "server-only"|next\/cache|"use server"/);
+  });
+
+  it("the pipeline and the page read the entry's markers through the ONE pure reader", () => {
+    expect(MARKERS).toContain("export function readEntryRecognitionMarkers(");
+    expect(MARKERS).not.toMatch(/import "server-only"|from "node:crypto"|from "next\/cache"|supabase/);
+    expect(PIPELINE).toContain("const markers = readEntryRecognitionMarkers(metricRows);");
+    expect(PIPELINE).toContain("slugs: markers.rejectedSlugs,");
+    expect(PIPELINE).toContain("entryResolutions: markers.entryResolutions,");
+    // the inline switch is gone from the pipeline; the constants are re-exported, not re-declared
+    expect(PIPELINE).not.toContain("case ENTRY_MARKER_SLUGS.skillRejected:");
+    expect(PIPELINE).not.toMatch(/export const ENTRY_MARKER_SLUGS = \{/);
+    expect(PIPELINE).toContain('} from "@/lib/journal/entry-recognition-markers";');
+    expect(MARKERS).toContain('ambiguousResolved: "ambiguous_resolved",');
+  });
+
+  it("the card's decision row goes through the same two server actions the composer uses, with the current pipeline version, and the composer's own strings", () => {
+    expect(ROW).toContain('"use client"');
+    expect(ROW).toMatch(/confirmJournalSkillCandidate\(\s+entryId,\s+candidate\.slug,\s+JOURNAL_PIPELINE_VERSION,/);
+    expect(ROW).toMatch(/rejectJournalSkillCandidate\(\s+entryId,\s+candidate\.slug,\s+JOURNAL_PIPELINE_VERSION,/);
+    // the row shows the RETURNED result, never an optimistic one
+    expect(ROW).toContain('setState(res.ok ? decision : "error");');
+    // no other write path, no fetch, no direct DB
+    expect(ROW).not.toMatch(/setJournalEntrySkillLinks|supabase|fetch\(/);
+    // strings: the journal namespace's candidate keys — no new i18n keys for this
+    expect(ROW).toContain('useTranslations("journal")');
+    for (const key of ["resultNeedsConfirm", "candidateConfirm", "candidateConfirming", "candidateReject", "candidateConfirmed", "candidateRejected", "candidateError"]) {
+      expect(ROW).toContain(`t("${key}")`);
+      for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+        const journal = JSON.parse(read(`messages/${loc}/journal.json`)) as Record<string, unknown>;
+        expect(typeof journal[key], `${loc}.journal.${key}`).toBe("string");
+      }
+    }
+    // the card renders the rows in both branches through the shared row component
+    expect(LINKS).toContain('import { JournalEntryCandidateDecision } from "@/components/app/journal-entry-candidate-decision"');
+    expect(LINKS.match(/\{candidateRows\}/g)?.length).toBe(2);
+    expect(LINKS).toContain("candidateNames,");
+  });
+});

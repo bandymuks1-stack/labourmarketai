@@ -9,13 +9,16 @@ import { failedPipelineResult } from "@/lib/journal/skill-pipeline";
 import {
   collectUnitSlugs,
   createJournalEntryCore,
+  fragmentMetricRows,
   parseFragments,
   parseRejectedSlugs,
+  resolveModuleMetricRows,
   runSkillPipeline,
   type CreateJournalEntryResult,
   type ParsedFragmentInput,
   type RpcMetricRow,
 } from "@/lib/journal/journal-write-core";
+import { MODULE_METRICS_FIELD } from "@/lib/journal/journal-module-fields";
 
 // The write implementation and its whole vocabulary moved to
 // `journal-write-core.ts` (owner-approved transport extraction, 2026-08-29
@@ -228,16 +231,32 @@ export async function supersedeJournalEntry(
   const hasStructured =
     quantity !== null || workDirection !== "" || fragments.length > 0;
 
-  const metrics = buildMetricsForSave({
-    workDirection,
-    siteName,
-    quantity,
-    unitSlug,
-    workDate,
-    institutionName,
-    topic,
-    fragments,
-  });
+  // Owner §12 — module fields ride the supersede exactly as the create:
+  // accepted by the engagement's own composition, one metric row each. An
+  // edit that re-sends the preloaded values keeps them; a refused slug
+  // fails the save before any write, with every edit still in the form.
+  const moduleRows = await resolveModuleMetricRows(
+    supabase,
+    t,
+    engagementId,
+    String(formData.get(MODULE_METRICS_FIELD) ?? ""),
+    user.id,
+  );
+  if (!moduleRows.ok) return moduleRows;
+
+  const metrics = [
+    ...buildMetricsForSave({
+      workDirection,
+      siteName,
+      quantity,
+      unitSlug,
+      workDate,
+      institutionName,
+      topic,
+      fragments,
+    }),
+    ...moduleRows.rows,
+  ];
 
   // Slugs the worker EXPLICITLY selected in this save (compact-editor rows
   // only — see ParsedFragmentInput.selected). Slug-shaped values only — the
@@ -423,40 +442,9 @@ function buildMetricsForSave(args: {
           },
         ]
       : []),
-    ...fragments.flatMap((f, idx): RpcMetricRow[] => {
-      const rows: RpcMetricRow[] = [
-        {
-          metric_slug: "parsed_fragment",
-          value_text: `${idx + 1}|${f.rawPhrase}`,
-          source: "worker_input" as const,
-        },
-      ];
-      if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
-        rows.push({
-          metric_slug: "fragment_time",
-          value_numeric: f.timeValue,
-          unit_slug: f.timeUnit,
-          value_text: String(idx + 1),
-          source: "worker_input" as const,
-        });
-      }
-      const activityLabel = f.activitySlug ?? f.activityLabel;
-      if (activityLabel) {
-        rows.push({
-          metric_slug: "fragment_activity",
-          value_text: `${idx + 1}|${activityLabel}`,
-          source: "worker_input" as const,
-        });
-      }
-      if (f.isUnknown && f.userLabel) {
-        rows.push({
-          metric_slug: "unknown_phrase",
-          value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
-          source: "worker_input" as const,
-        });
-      }
-      return rows;
-    }),
+    // ONE builder with the create path — each fragment keeps its own
+    // provenance (#1689: this copy hardcoded `worker_input`)
+    ...fragmentMetricRows(fragments),
   ];
 }
 

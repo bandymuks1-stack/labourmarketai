@@ -87,7 +87,35 @@ create policy journal_profession_templates_write
   using (public.is_admin()) with check (public.is_admin());
 
 grant select on public.journal_profession_templates to authenticated;
-grant insert, update, delete on public.journal_profession_templates to authenticated;
+
+-- PRIVILEGE TIGHTENING (owner decision 4b, 2026-09-14). This file previously
+-- also carried:
+--
+--     grant insert, update, delete on public.journal_profession_templates
+--       to authenticated;
+--
+-- which handed every signed-in user the full write privilege and then relied
+-- on the `_write` policy above to take it straight back. The owner's ruling is
+-- that the DB privilege model should EXPRESS the intended authority rather
+-- than lean on RLS to neutralise a broader grant, so the grant is removed.
+--
+-- It costs nothing, because nothing writes this table. `lib/journal/
+-- journal-templates.ts` performs exactly one operation against it — a
+-- `.select("slug, profession_slug, field_schema").eq("active", true)` — and
+-- there is no writer anywhere in `apps/web`. Templates arrive by migration and
+-- activation is a deliberate owner act at the database.
+--
+-- Note WHY the grant cannot simply be narrowed to admins instead: `is_admin()`
+-- resolves a FLAG on `profiles` / `profile_roles`, not a Postgres role. An
+-- admin's session still connects as `authenticated`, so a role-level GRANT has
+-- no way to express "only the admins among them". The honest privilege-layer
+-- statement is therefore "no direct client writes at all", which is what this
+-- now says, and which matches the writes-are-RPC-only shape used by `defects`,
+-- `agency_clients` and `worker_opportunity_seen`.
+--
+-- The `_write` policy is deliberately KEPT. With no grant it is unreachable
+-- today; it is the second line if a future migration ever grants a narrow
+-- write path, so that path still admits only admins.
 
 -- ── Seeds — 3 REAL daily-report templates, ALL inactive (owner activates) ───
 -- Unit slugs come from the applied productivity_units registry (0017):

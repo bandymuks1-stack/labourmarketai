@@ -21,6 +21,8 @@
  */
 import {
   OCCUPATION_STEM_SOURCE,
+  OWN_PEOPLE_SOURCE,
+  DURATION_UNIT_SOURCE,
   TRADE_STEM_SOURCE,
   PROFESSION_STATEMENT_ANCHOR_SOURCE,
   ROLE_NOUN_EXCLUSION_SOURCE,
@@ -53,6 +55,13 @@ export type ConversationIntent =
   // ── AI workspace (W4): goals stated in words, executed as workflows ──────
   | "skill-gap" // "kokių įgūdžių man trūksta?"
   | "journal-recent" // "parodyk paskutinius žurnalo įrašus"
+  // ── Work intelligence by sentence (issue #1689, owner lines 2–7): the
+  //    questions the work-in-numbers section answers, asked in words. ──────
+  | "journal-skill" // "kiek programavau?" / "kur naudojau programavimo įgūdį?"
+  | "journal-skills-top" // "kokius įgūdžius naudoju daugiausia?"
+  | "journal-activities-top" // "kokia veikla užima daugiausia mano laiko?"
+  | "journal-confirmed" // "kas patvirtinta?"
+  | "journal-growth" // "kur yra didžiausias augimo potencialas?" (owner line 8)
   | "figures" // "parodyk patvirtintas valandas" / "paruošk ataskaitą"
   | "open-project" // "atidaryk šį projektą"
   // ── G8 (chat-first audit 2026-08-30): the chip surfaces, reachable by
@@ -62,6 +71,23 @@ export type ConversationIntent =
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "need-service" // "reikia, kad kas nors sutaisytų stogą" — a JOB done, not a job
   | "context" // "ką tu apie mane žinai?"
+  /**
+   * "Ką galiu padaryti šioje paskyroje?" — WHAT CAN I ACHIEVE FROM HERE.
+   *
+   * Distinct from `context` ("what do you know about me" — state) and from
+   * `next-action` ("ką dar TURIU padaryti" — obligation). This is CAN, and it
+   * is the question a person asks when they do not yet know the product.
+   *
+   * WHY THIS ID HAS TO EXIST AT ALL. The sentence scored 0, so it fell to the
+   * generic fallback — and the LLM proposer could not rescue it either,
+   * because `llm-proposal.ts` re-validates the model's answer against
+   * `INTENT_REGISTRY` and returns "not understood" for anything else. A
+   * question with no id in this vocabulary is therefore unanswerable by BOTH
+   * routers, forever. The id is the seam; the ANSWER is derived entirely from
+   * the active context and the workspace's real state, and nothing about it
+   * is written down here.
+   */
+  | "capabilities"
   | "switch-context" // "perjunk į įmonę X" / "grįžk į asmeninį" — ONE ACTIVE CONTEXT
   | "opportunities" // "kokias galimybes man gali pasiūlyti?" — the OWN board
   | "interest-inbox" // "kas susidomėjo mano poreikiu?" — who raised a hand
@@ -137,6 +163,12 @@ export type ConversationIntent =
   //    forbids by name.
   | "cv-view" // "noriu pamatyti savo CV" — open the CV the product already holds
   | "cv-choose" // the CV named with no verb that separates the five — ASK, never guess
+  // ── THE PHOTO SHOWN BACK (issue #1689, defect G). "Parodyk įkeltą
+  //    nuotrauką, ar tikrai išsisaugojo" scored 0 — the router had no photo,
+  //    file or gallery word at all — so the proposer picked the nearest CV
+  //    door and the chat said the CV was empty about a photo that WAS
+  //    stored. A read over the ONE personal-gallery projection. ──────────
+  | "evidence-photos" // "parodyk įkeltą nuotrauką" / "did my photo save" — the stored work photos
   | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
   | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
   | "stage-status" // "etapas pamatai baigtas" — a project stage moved to a real status
@@ -160,7 +192,48 @@ export type IntentMatch = {
   matched: string[];
 };
 
-type Pattern = { re: RegExp; weight: number };
+type Pattern = {
+  re: RegExp;
+  weight: number;
+  /**
+   * "…unless the sentence also asks for work or for workers." Evaluated ONCE
+   * per sentence by `classifyIntent`, not folded into the pattern.
+   *
+   * ── WHY THIS IS NOT A LOOKAHEAD (measured 2026-09-09) ──────────────────
+   *
+   * It used to be written inline, as
+   * `^(?![^]*(?:SEEK_GUARD_SOURCE))[^]*?…`. That form is correct and very
+   * expensive to WARM UP, in the exact case that matters: when the sentence
+   * does NOT contain a seek verb, the lookahead has to walk the whole
+   * alternation at every position of `[^]*` and fail at all of them — and
+   * `SEEK_GUARD_SOURCE` contains `\b`, which `p()` expands into the long
+   * `UNICODE_WORD_BOUNDARY` look-around group. A sentence WITH a seek verb
+   * is fast, because the lookahead fails immediately.
+   *
+   * Measured on the FIRST `classifyIntent` call in a fresh process:
+   *
+   *   "ieškau darbo Norvegijoje"              1 ms  (seek verb → fails fast)
+   *   "Parodyk ką šiandien turiu padaryti"  3937 ms  ← no seek verb
+   *   "pakviesk studentą į programą"        1457 ms  ←
+   *   "I am a welder"                       1017 ms  ←
+   *
+   * BE PRECISE ABOUT WHAT THIS COST IS, because the first reading of it was
+   * wrong. It is cold-start regex compilation and JIT, NOT a per-message
+   * price: the same three sentences measured 46/0.3/0.6 ms on the second
+   * call and ~1/0.3/0.5 ms on the third. Steady-state classification is well
+   * under a millisecond and always was, so there is no production latency
+   * defect here and none is being claimed.
+   *
+   * What it DID break is test processes, which pay cold start once and get
+   * 5 s. Three rules already carried the inline guard, so most of this cost
+   * predates today (`main` measures 1857 ms for the first sentence);
+   * extending it to the twelve availability patterns pushed three unrelated
+   * unit tests over their timeout. A flag checked once means exactly the
+   * same thing, restores the previous cold start, and removes the trap for
+   * whoever adds the next guarded pattern.
+   */
+  noSeek?: true;
+};
 type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
 
 /**
@@ -210,6 +283,13 @@ function p(source: string, weight = 1): Pattern {
   return { re: new RegExp(fold(source).replace(/\\b/g, UB), "iu"), weight };
 }
 
+/** `p()`, but the pattern only counts when the sentence is NOT also asking
+ *  for work or for workers — see `Pattern.noSeek` for why this is a flag and
+ *  not a lookahead. */
+function pNoSeek(source: string, weight = 1): Pattern {
+  return { ...p(source, weight), noSeek: true };
+}
+
 /**
  * Rule table. Ordered by specificity of the *signal*, not by intent priority —
  * scoring resolves overlaps (e.g. the word "darbas"/"work" appears in both
@@ -228,6 +308,37 @@ function p(source: string, weight = 1): Pattern {
  */
 const SEEK_GUARD_SOURCE =
   "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch";
+
+/**
+ * AN OPTIONAL PLACE PHRASE, between a verb and the time word after it.
+ *
+ * "I can work IN GERMANY from Monday" — one sentence carrying both mobility
+ * and availability, which is exactly how people state them together. Every
+ * non-Lithuanian availability pattern required the time word to follow the
+ * verb immediately, so naming the country silenced the whole rule (owner
+ * readiness window 2026-09-09; the measurements are on the `availability`
+ * rule below).
+ *
+ * A PLACE PHRASE, NOT A WILDCARD. It admits only a locative preposition plus
+ * a token or two — `in Germany`, `в Германии`, `in Duitsland`. A bare
+ * `.{0,20}` would have read "I can work WITH PEOPLE from Poland" as a stated
+ * availability, which is a fluent wrong answer (§14) and the kind of quiet
+ * over-match that turns a fix into the next regression.
+ *
+ * Prepositions only from the routed locales, and only ones that introduce a
+ * PLACE: lt `-` (Lithuanian marks the locative in the ending, so no
+ * preposition is needed — the LT patterns never had this problem), en
+ * `in/at`, de `in/bei`, nl `in/bij`, ru `в/во/на`.
+ */
+const WHERE_GAP = "(?:(?:in|at|bei|bij|в|во|на)\\s+[^\\s]+\\s+){0,2}";
+
+/** Does the sentence ask for work or for workers? Compiled once, tested once
+ *  per `classifyIntent` call — the cheap half of what used to be an inline
+ *  negative lookahead on every guarded pattern (`Pattern.noSeek`). */
+const SEEK_GUARD_RE = new RegExp(
+  fold(SEEK_GUARD_SOURCE).replace(/\\b/g, UB),
+  "iu",
+);
 
 const RULES: IntentRule[] = [
   /**
@@ -259,11 +370,21 @@ const RULES: IntentRule[] = [
       // "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose."
       // "We have workers and we are looking for employers."
       // "Мы имеем 20 сварщиков и ищем для них работу."
-      p("(turim|turiu|disponuoj|have|hebben|haben|имеем|располага)\\w*\\s*.{0,20}([0-9]{1,4}|darbuotoj|žmoni|žmon|komand|specialist|brigad|worker|people|staff|team|crew|medewerk|mensen|ploeg|mitarbeit|leute|работник|люд|специалист|бригад)\\w*\\s*.{0,40}(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу|reikia|nodig|brauch|нужн)\\w*\\s*.{0,30}(darb|work|job|projekt|project|employer|užsakym|werk|opdracht|werkgever|arbeit|auftrag|arbeitgeb|работ|проект|заказ)", 10),
+      p(`(turim|turiu|disponuoj|have|hebben|haben|имеем|располага)\\w*\\s*.{0,20}([0-9]{1,4}|${OWN_PEOPLE_SOURCE})\\w*\\s*.{0,40}(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу|reikia|nodig|brauch|нужн)\\w*\\s*.{0,30}(darb|work|job|projekt|project|employer|užsakym|werk|opdracht|werkgever|arbeit|auftrag|arbeitgeb|работ|проект|заказ)`, 10),
       // SEEKING WORK **FOR OUR PEOPLE** — the possessive is what makes it
       // supply. "Ieškome darbo savo darbuotojams", "looking for work for our
       // people", "Arbeit für unsere Mitarbeiter".
-      p("(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу)\\w*\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|auftrag|работ|проект)\\w*\\s*.{0,20}(savo|mūsų|our|onze|unser|наш|для\\s+наш)\\w*\\s*.{0,20}(darbuotoj|žmon|komand|specialist|worker|people|staff|medewerk|mensen|mitarbeit|leute|работник|люд|специалист)", 10),
+      p(
+        // THE SEEK VERB INCLUDES THE IMPERATIVE. "Rask projektą mūsų 12
+        // žmonių brigadai" and "Find a project for our 12-person crew" are
+        // how someone actually asks, and neither `rask`/`surask` nor `find`
+        // was here — the first measured `find-work` (one person job-hunting)
+        // and the second `unknown`. The possessive + own-people clause below
+        // is what keeps this SUPPLY, so widening the verb cannot turn "find
+        // me a job" into an offer: that sentence has no "our <people>".
+        `(ieško|ieškau|ieškom|paieška|rask|surask|looking|search|seeking|\\bfind\\b|zoek|such|ищем|ищу|найди|найти)\\w*\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|auftrag|работ|проект)\\w*\\s*.{0,24}(savo|mūsų|our|onze|unser|наш|для\\s+наш)\\w*\\s*.{0,24}(${OWN_PEOPLE_SOURCE})`,
+        10,
+      ),
       // WORK **FOR THEM** — the pronoun carries the same possession.
       // "turim 20 suvirintoju, reikia jiems projektu".
       p("(jiems|joms|them|voor\\s+hen|für\\s+sie|ihnen|для\\s+них|им)\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|работ|проект)", 10),
@@ -325,15 +446,35 @@ const RULES: IntentRule[] = [
       // matched: it is as likely to be an employer describing its own payroll
       // as an agency offering people, and `darbuotoj` is absent from this
       // vocabulary for that reason.
+      //
+      // THE COUNT MUST BE A HEADCOUNT, NOT A DURATION (2026-09-09). As first
+      // written this rule asked only for HAVE, a number and a trade within 24
+      // characters — and "I have 3 years experience as a welder" satisfies all
+      // three. It was answered as an agency offering welders: a PERSON
+      // describing themselves, read as an organisation describing its
+      // workforce. `turiu 3 metus patirties suvirintoju` did the same in
+      // Lithuanian. The demand rule below has excluded time units since the
+      // day before this rule was written; this one copied its shape and not
+      // its guard, so the exclusion is now SHARED vocabulary
+      // (`DURATION_UNIT_SOURCE`) rather than a second list that can drift.
+      //
+      // Two lookaheads, and BOTH are load-bearing. `(?![0-9])` forbids a
+      // partial digit run: without it the engine matches "1" of "10", leaving
+      // the time-unit test looking at "0 metu" where it finds nothing and
+      // passes. The second swallows its own whitespace, so the `\s*` after it
+      // cannot backtrack past the unit either. The first dodge was caught by
+      // the control for "turiu 10 metu patirties elektriku", not by reading.
       p(
-        `(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)\\w*\\s*.{0,16}[0-9]{1,4}\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
+        `(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)\\w*\\s*.{0,16}[0-9]{1,4}(?![0-9])(?!\\s*(?:${DURATION_UNIT_SOURCE})\\w*\\b)\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
         9,
       ),
       // …and the same capacity stated as AVAILABILITY, with no verb at all:
       // "nuo spalio 5 d. laisvi 3 elektrikai". A date, an availability word, a
-      // count and a trade — no "we have" anywhere.
+      // count and a trade — no "we have" anywhere. Same duration guard, for
+      // the same reason: "laisvas 3 menesius, suvirintojas" is one person
+      // saying how long they are free, not three welders on offer.
       p(
-        `(laisv|available|\\bfree|beschikba|verfügbar|verfuegbar|\\bfrei|\\bvrij|свобод)\\w*\\s*.{0,12}[0-9]{1,4}\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
+        `(laisv|available|\\bfree|beschikba|verfügbar|verfuegbar|\\bfrei|\\bvrij|свобод)\\w*\\s*.{0,12}[0-9]{1,4}(?![0-9])(?!\\s*(?:${DURATION_UNIT_SOURCE})\\w*\\b)\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
         9,
       ),
       // ── WE HAVE WORKERS **FOR** A COUNTRY ───────────────────────────────
@@ -466,6 +607,120 @@ const RULES: IntentRule[] = [
         "\\b(ką|what|что|was|wat)\\b\\s*.{0,24}(dariau|dirbau|dirbome|nuveikiau|did\\s+i\\s+do|делал|сделал|gemacht|getan|gedaan|gewerkt|gearbeitet)",
         7,
       ),
+    ],
+  },
+  /**
+   * WORK INTELLIGENCE BY SENTENCE (issue #1689, re-audit 2026-09-11, owner
+   * chat lines 2–7). Measured through this router before the rules below:
+   * "Kiek programavau?" → unknown; "Kur naudojau programavimo įgūdį?" →
+   * `profile` (profile COMPLETENESS — the wrong answer); "Kokia veikla užima
+   * daugiausia mano laiko?" → unknown; "Kokius įgūdžius naudoju daugiausia?"
+   * → `profile`; "Kas patvirtinta?" → unknown. The data behind every one of
+   * them already existed in the work-in-numbers model; only the door did
+   * not. Each rule outweighs `profile` (2) and `skill-gap` (5) by design —
+   * a question about RECORDED work is a journal read, not a profile edit.
+   *
+   * The SUBJECT of a "how much did I <verb>" question ("programavau",
+   * "klojau plyteles") is not read here: the journal recognizer reads it in
+   * the handler, the same way it reads an intake sentence. A subject it
+   * cannot recognise falls back to the plain period answer — so a broad
+   * verb rule costs nothing wrong. The "dirb-" verbs are excluded so "kiek
+   * dirbau šiandien?" keeps its own intent (journal-recent).
+   */
+  {
+    intent: "journal-skill",
+    patterns: [
+      // lt — "Kiek programavau?", "Kiek klojau plyteles?", "kiek valandų
+      // klojau plyteles šį mėnesį?" — an interrogative + a first-person
+      // past-tense verb (-au) other than dirbau/uždirbau. Folded text, so
+      // `[^\s]` not `\S` (the folder lower-cases pattern sources).
+      p("^\\s*kiek\\s+(?:valand[^\\s]*\\s+)?(?:[^\\s]+\\s+){0,2}?(?!dirb|uzdirb|gav|turej|siunt|issiunt|mokej|sumokej)[^\\s]+au\\b", 8),
+      // en — "How much did I program?", "how often did I do tiling"
+      p("^\\s*how\\s+(much|many|often|long)\\s+(did|have)\\s+i\\s+(?!work)[^\\s]+", 8),
+      // ru — "Сколько я программировал?"
+      p("^\\s*сколько\\s+(я\\s+)?(?!работал|отработал)[^\\s]+(л|ла)\\b", 8),
+      // de — "Wie viel habe ich programmiert?"
+      p("^\\s*wie\\s+(viel|oft|lange)\\s+habe\\s+ich\\s+(?!gearbeitet)[^\\s]+", 8),
+      // nl — "Hoeveel heb ik geprogrammeerd?"
+      p("^\\s*hoeveel\\s+heb\\s+ik\\s+(?!gewerkt)[^\\s]+", 8),
+      // WHERE was a skill used — the contexts / entries it sits on. The
+      // en/de/nl shapes carry the past-tense auxiliary ("where did I use",
+      // "wo habe ich … verwendet"), so "where can I use my skills" — a
+      // question about the future — is not pulled into a journal read.
+      p("(kur|где)\\s*.{0,24}(naudoj|использ)", 8),
+      p("(where|wo|waar)\\s+(did|have|habe|heb)\\s+(i|ich|ik)\\b.{0,24}(use|verwend|benutz|eingesetzt|gebruik|ingezet)", 8),
+      p("(kur|где)\\s*.{0,30}(įgūd|навык)", 4),
+      p("(where|wo|waar)\\s+(did|have|habe|heb)\\s+(i|ich|ik)\\b.{0,30}(skill|fähigkeit|vaardigh)", 4),
+    ],
+  },
+  {
+    intent: "journal-skills-top",
+    patterns: [
+      // "Kokius įgūdžius naudoju daugiausia?" / "Which skills do I use most?"
+      // / "Какие навыки я использую больше всего?" / "Welche Fähigkeiten
+      // nutze ich am meisten?" / "Welke vaardigheden gebruik ik het meest?"
+      // Interrogative-gated, so "use my skills in Germany" stays a search.
+      p(
+        "(kokius|kokiu|kurius|kuriu|which|what|какие|каких|welche|welke)\\s+.{0,12}(įgūd|skill|навык|fähigkeit|kompetenz|vaardigh|competent)[^\\s]*\\s*.{0,20}(naudoj|use|использ|nutze|benutze|verwende|gebruik)",
+        8,
+      ),
+    ],
+  },
+  {
+    intent: "journal-activities-top",
+    patterns: [
+      // "Kokia veikla užima daugiausia mano laiko?" / "Which activity takes
+      // most of my time?" / "Какая деятельность занимает больше всего
+      // времени?" / "Welche Tätigkeit nimmt die meiste Zeit?" / "Welke
+      // activiteit kost de meeste tijd?"
+      p(
+        "(veikl|activit|деятельност|занят|tätigkeit|activiteit|bezigheid)[^\\s]*\\s*.{0,40}(daugiausia|most|больше\\s+всего|meiste|meest)",
+        8,
+      ),
+      // "Kur praleidžiu daugiausia laiko?" / "Womit verbringe ich die meiste
+      // Zeit?" / "Waar besteed ik de meeste tijd aan?"
+      p("(daugiausia|most\\s+of|больше\\s+всего|meiste|meeste)\\s*.{0,24}(laik|time|времен|zeit|tijd)", 8),
+      // "Ką daugiausia dirbau?" — outweighs journal-recent's ką…dirbau (7).
+      p(
+        "\\b(ką|what|что|was|wat)\\b\\s*.{0,16}(daugiausia|most|больше\\s+всего|meisten|meest)\\s*.{0,16}(dirbau|dariau|did|делал|gemacht|gedaan)",
+        8,
+      ),
+    ],
+  },
+  {
+    intent: "journal-confirmed",
+    patterns: [
+      // "Kas patvirtinta?" / "What is confirmed?" / "Что подтверждено?" /
+      // "Was ist bestätigt?" / "Wat is bevestigd?"
+      p("^\\s*(kas|what|что|was|wat)\\s+(yra\\s+|is\\s+|ist\\s+)?(jau\\s+|already\\s+|уже\\s+|schon\\s+|al\\s+)?(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)", 8),
+      // "kiek valandų patvirtinta?" — outweighs journal-recent's kiek…valand
+      // (7); "show my approved hours" stays `figures` (no interrogative).
+      p("(kiek|how\\s+(much|many)|сколько|wie\\s+viel|hoeveel)\\s*.{0,24}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)", 8),
+      // "kurie įrašai patvirtinti?" / "which entries are confirmed?"
+      p(
+        "(kurie|kuriuos|which|какие|welche|welke)\\s*.{0,16}(įraš|entr|запис|eintr|invoer|registr)[^\\s]*\\s*.{0,12}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)",
+        8,
+      ),
+    ],
+  },
+  {
+    intent: "journal-growth",
+    patterns: [
+      // Owner line 8 — "Kur yra didžiausias augimo potencialas?" / "Where
+      // is my biggest growth potential?" / "Где потенциал роста?" / "Wo
+      // liegt mein Wachstumspotenzial?" / "Waar zit mijn groeipotentieel?"
+      // The noun alone is enough: a person asking about growth potential is
+      // asking for the reading of their own evidence, not for a course
+      // (learning-compass) and not for a gap list (skill-gap, 5).
+      p("(augimo|growth|роста|wachstums|groei)[^\\s]*\\s*.{0,6}(potencial|potential|потенциал|potenzial|potentieel)", 8),
+      p("(potencial|potential|потенциал|potenzial|potentieel)[^\\s]*\\s*.{0,10}(aug|grow|рост|wachs|groei)", 8),
+      // "Kur galėčiau augti / tobulėti?", "Where could I grow?", "Где я
+      // могу расти?", "Wo kann ich wachsen?", "Waar kan ik groeien?" — an
+      // interrogative + a first-person modal + the growth verb, so
+      // "augalai" and "the company grows" never land here.
+      p("(kur|kaip|kame|where|how|где|куда|как|wo|wie|waar|hoe)\\s*.{0,24}(galėčiau|galiu|galėsiu|could\\s+i|can\\s+i|might\\s+i|могу|мог\\s+бы|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik)\\s*.{0,16}(augti|tobulėti|gilinti|plėsti|grow|deepen|expand|develop|расти|углуб|развива|wachsen|vertiefen|erweitern|groeien|verdiepen|uitbreiden)", 8),
+      // "Ką galėčiau gilinti / plėsti?", "What could I deepen?"
+      p("(ką|ka|what|что|was|wat)\\s*.{0,10}(galėčiau|galiu|could\\s+i|can\\s+i|могу|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik)\\s*.{0,10}(gilinti|plėsti|deepen|expand|углуб|расшир|vertiefen|erweitern|verdiepen|uitbreiden)", 8),
     ],
   },
   {
@@ -796,6 +1051,51 @@ const RULES: IntentRule[] = [
       p("(was\\s+wei(ß|ss)t\\s+du|wat\\s+weet\\s+je)", 5),
       p("(kokiame\\s+kontekst|current\\s+context|мой\\s+контекст|mein\\s+kontext|mijn\\s+context)", 4),
       p("(kur\\s+aš\\s+dabar\\s+esu|where\\s+am\\s+i\\s+now)", 4),
+    ],
+  },
+  {
+    // WHAT CAN I ACHIEVE FROM HERE — the question a person asks before they
+    // know the product. It scored 0 and fell to the generic fallback, whose
+    // composed capability sentence answers a PERSON with nothing at all.
+    //
+    // Deliberately narrower than it looks. EVERY form pairs a CAN verb
+    // ("galiu", "can i", "могу", "kan ik", "kann ich") with a DO verb. That
+    // is what keeps it out of `next-action` ("ką dar TURIU padaryti" —
+    // obligation, not capability) and out of the value-intent family ("ką
+    // galiu PASIŪLYTI" — an offer, not a question about the account).
+    // Diacritics are folded on both sides, so the undiacriticked spellings
+    // people actually type match without separate variants.
+    //
+    // THE "POSSIBILITIES" FAMILY IS DELIBERATELY ABSENT, in all five locales.
+    // "Kokias galimybes man gali pasiūlyti?" / "Какие возможности у меня
+    // есть?" / "Welche Möglichkeiten habe ich?" already mean the OPPORTUNITY
+    // BOARD in this product — the first of those is an owner-pinned phrase
+    // contract (`owner-phrase-contract.test.ts`). A first draft of this rule
+    // claimed that family and silently re-routed three locales away from the
+    // owner's own recorded meaning; the guards caught it. It is dropped
+    // UNIFORMLY rather than in the three locales that happened to fail, so
+    // the vocabulary cannot become reachable by a phrasing in one language
+    // and not the others.
+    intent: "capabilities",
+    patterns: [
+      p("(ką|kas)\\s+(aš\\s+)?galiu\\s+(čia\\s+|šioje\\s+|šitoje\\s+|dabar\\s+)?[^.]{0,24}(padaryti|daryti|nuveikti)", 6),
+      p("(ką|kas)\\s+(čia|šioje\\s+paskyroje|šioje\\s+sistemoje)\\s+galima\\s+(pa)?daryti", 6),
+      p("kam\\s+skirta\\s+(ši|šita)\\s+(paskyra|sistema|platforma)", 4),
+      // ── AND THE SAME QUESTION ASKED ABOUT THE ORGANIZATION (E, 2026-09-10).
+      // "Ką gali mūsų agentūra?" scored 0. The capability answer already
+      // reads the ACTIVE organization, so this needed a way in, not a second
+      // answer. A CAN verb plus an organisation noun, same shape as above.
+      p("(ką|ka)\\s+gali\\s+(mūsų|musu|ši|si|šita|šios|mano)\\s+[^.]{0,16}(agentūra|agentura|įmonė|imone|imon|organizacij|mokykl|bendrov|kompanij)", 6),
+      p("what\\s+can\\s+(our|this|my)\\s+[^.]{0,16}(agency|company|organi[sz]ation|school|business|firm)\\s+do", 6),
+      p("что\\s+может\\s+(наше|наша|наш|эта|это)\\s+[^.]{0,16}(агентство|компани|организаци|школа|фирма)", 6),
+      p("wat\\s+kan\\s+(ons|onze|dit|deze)\\s+[^.]{0,16}(bureau|bedrijf|organisatie|school)\\s+doen", 6),
+      p("was\\s+kann\\s+(unser|unsere|diese|dieses)\\s+[^.]{0,16}(agentur|firma|unternehmen|organisation|schule)", 6),
+      p("what\\s+can\\s+i\\s+do", 6),
+      p("what\\s+can\\s+(this|the|my)\\s+(account|workspace|platform|system|space)\\s+do", 5),
+      p("что\\s+я\\s+могу\\s+[^.]{0,20}(сделать|делать)", 6),
+      p("что\\s+(здесь|тут)\\s+можно\\s+(с)?делать", 6),
+      p("wat\\s+kan\\s+ik\\s+(hier\\s+)?doen", 6),
+      p("was\\s+kann\\s+ich\\s+(hier\\s+)?(machen|tun)", 6),
     ],
   },
   {
@@ -1211,6 +1511,56 @@ const RULES: IntentRule[] = [
     ],
   },
   /**
+   * ── THE PHOTO SHOWN BACK (issue #1689, defect G) ─────────────────────────
+   *
+   * BEFORE the CV rules and weighted level with them (8), because this is
+   * the sentence that used to fall INTO them: with no photo / file /
+   * gallery vocabulary anywhere in this table, "Parodyk įkeltą nuotrauką ar
+   * tikrai išsisaugojo" scored 0, the proposer chose `cv-view` from the
+   * catalogue, and a worker whose photo WAS persisted was told the CV held
+   * nothing. Every pattern requires a PHOTO / FILE noun or a second-person
+   * "what you saved", so a CV sentence, a document sentence or a work entry
+   * cannot land here by a verb alone.
+   *
+   * A READBACK, never a deposit: "įkeltą" / "uploaded" / "загруженное" /
+   * "hochgeladene" / "geüploade" are PAST forms — the person is asking about
+   * a file already handed over, not handing one over. `readFileIntent`
+   * ignores those forms for the same reason (file-subject.ts).
+   */
+  {
+    intent: "evidence-photos",
+    patterns: [
+      // SHOW / SEE / CHECK … PHOTO. "parodyk (įkeltą) nuotrauką", "show the
+      // photo I just uploaded", "покажи загруженное фото", "laat de foto
+      // zien", "zeig das Foto", "Foto anzeigen".
+      p("(parodyk|rodyk|pamaty|matyt|perzi[uū]r|peržiūr|patikrin|atidaryk|show|see\\b|view|check|open|покаж|посмотр|провер|открой|laat|toon|bekijk|zeig|anzeig|ansehen|sehen|pr[uü]f)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|\\bimage|фото|снимк|afbeelding|\\bbild)", 8),
+      // PHOTO … SHOW (verb last: "die Fotos anzeigen", "de foto's bekijken",
+      // "nuotrauką parodyk").
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild)\\w*\\s*.{0,16}(parodyk|rodyk|pamaty|perzi[uū]r|peržiūr|show|see\\b|view|open|bekijk|zien|tonen|anzeig|ansehen|zeig|покаж|посмотр)", 8),
+      // DID IT SAVE? "ar nuotrauka išsisaugojo", "did my photo save", "is the
+      // file saved", "сохранилось ли фото", "is de foto opgeslagen", "wurde
+      // das Foto gespeichert" — in both orders.
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|\\bfailas|файл|bestand|datei)\\w*\\s*.{0,24}(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|ikelt|įkelt|\\bsave|uploaded|сохран|загруж|opgeslagen|ge[uü]pload|gespeichert|hochgeladen)", 8),
+      p("(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|\\bsaved|\\bsave\\b|сохрани|opgeslagen|gespeichert)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)", 8),
+      // THE ONE JUST UPLOADED: "ką tik įkeltas failas", "the photo I just
+      // uploaded", "загруженный файл", "das hochgeladene Foto", "de
+      // geüploade foto" — a past form beside a photo / file noun.
+      p("(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload)\\w*\\s*.{0,16}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)", 8),
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)\\w*\\s*.{0,24}(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload)", 8),
+      // THAT / THIS PHOTO — the demonstrative alone points at the one just
+      // handed over: "ta nuotrauka", "šita nuotrauka", "that photo", "это
+      // фото", "die foto", "das Bild".
+      p("\\b(ta|toji|sita|šita|si|ši|that|this|та|эта|это|dat|die|deze|das|dieses|jenes)\\s+(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild)", 8),
+      // WHAT YOU SAVED — second person, so "parodyk išsaugotus kriterijus"
+      // (a criteria readback) stays where it is: "parodyk ką išsaugojai",
+      // "show what you saved", "покажи что сохранил", "laat zien wat je hebt
+      // opgeslagen", "zeig was du gespeichert hast".
+      p("(parodyk|rodyk|show|покаж|laat|toon|zeig)\\w*\\s*.{0,16}(issaugojai|išsaugojai|issaugojote|išsaugojote|you\\s+saved|you\\s+(just\\s+)?stored|сохранил|je\\s+(hebt|had)\\s+opgeslagen|opgeslagen\\s+hebt|du\\s+gespeichert\\s+hast|gespeichert\\s+hast)", 8),
+      // THE GALLERY BY NAME: "mano galerija", "open the gallery", "галерея".
+      p("(galerij|gallery|галере|galerie)", 8),
+    ],
+  },
+  /**
    * ── THE CV, AS FIVE SEPARATE REQUESTS (owner window 11 §5 / §30) ─────────
    *
    * These four rules come BEFORE the noun-only `cv` rule further down and are
@@ -1553,25 +1903,58 @@ const RULES: IntentRule[] = [
      * Weight 5 beats the bare `galiu` capacity reading (3) and the `darbo`
      * noun (1); a sentence that also SEEKS ("galiu dirbti, ieškau darbo")
      * keeps find-work through the guard.
+     *
+     * ── SAYING WHERE BROKE SAYING WHEN (owner readiness window, 2026-09-09)
+     *
+     * §5A's probe is "I can work in Germany from Monday." — one sentence
+     * carrying BOTH facts §5B asks a person for, mobility and availability.
+     * Measured on this router before the change:
+     *
+     *   lt "Galiu dirbti Vokietijoje nuo pirmadienio"    → availability
+     *   en "I can work in Germany from Monday"           → UNKNOWN
+     *   de "Ich kann in Deutschland ab Montag arbeiten"  → find-work (!)
+     *   nl "Ik kan in Duitsland vanaf maandag werken"    → UNKNOWN
+     *   ru "Могу работать в Германии с понедельника"     → UNKNOWN
+     *
+     * Drop the country and all five worked. The Lithuanian pattern binds
+     * `galiu … dirbti` with no from-word, so a place between them is free;
+     * every other locale required the time word to sit IMMEDIATELY after the
+     * verb, and naming a country pushed it out of reach. German was the worst
+     * of the five: it did not fall silent, it answered a person stating their
+     * availability with a JOB SEARCH.
+     *
+     * `WHERE_GAP` (above) is the fix, and it is deliberately a PLACE phrase
+     * rather than a wildcard: a bare `.{0,20}` would have swallowed "I can
+     * work with people from Poland" as an availability statement. Pinned,
+     * both directions, in `lib/guards/availability-survives-a-place.test.ts`.
      */
     intent: "availability",
     patterns: [
-      p(
-        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(galiu|galeciau|galesiu|galiu\\s+pradeti|galesiu\\s+pradeti)\\s+(pradeti\\s+)?dirbti\\b`,
+      pNoSeek(
+        `\\b(galiu|galeciau|galesiu|galiu\\s+pradeti|galesiu\\s+pradeti)\\s+(pradeti\\s+)?dirbti\\b`,
         5,
       ),
-      p("\\b(galiu|galesiu|galeciau)\\s+(pradeti|pradeciau)\\s+(nuo|kita|sia|rytoj|poryt|po|iki)\\b", 5),
-      p("\\b(esu|busiu)\\s+laisv[a-z]{0,4}\\s+(nuo|iki|rytoj|ryt|kita|sia|po|visa)\\b", 5),
-      p("\\b(i\\s+am|i'm|i\\s+will\\s+be)\\s+(available|free)\\s+(from|starting|on|next|this|after|until)\\b", 5),
-      p("\\b(available|can\\s+start|can\\s+work)\\s+(from|starting|on|next|this|after)\\b", 5),
-      p("могу\\s+(начать\\s+)?работать\\s+(с|со|после|через)\\b", 5),
-      p("могу\\s+(выйти|приступить|начать)\\s+(с|со|после|через)\\b", 5),
-      p("(свободен|свободна)\\s+(с|со|после|до)\\b", 5),
-      p("\\bkann\\s+(ab|von|nach)\\b.{0,20}(arbeiten|anfangen|beginnen)", 5),
-      p("\\b(bin|ware)\\s+(ab|von)\\s*.{0,20}\\b(verfugbar|frei)\\b", 5),
-      p("\\bverfugbar\\s+(ab|von)\\b", 5),
-      p("\\bkan\\s+(vanaf|per|na)\\b.{0,20}(werken|beginnen|starten)", 5),
-      p("\\bbeschikbaar\\s+(vanaf|per)\\b", 5),
+      // ── THE SEEK GUARD BELONGS ON ALL OF THEM (2026-09-09) ──────────────
+      //
+      // Only the FIRST pattern carried it, so "galiu dirbti nuo pirmadienio,
+      // ieškau darbo" correctly ran the search while its English, German,
+      // Dutch and Russian equivalents answered with a bare acknowledgement of
+      // the availability — the person asked for work and was told what they
+      // had just told us. `pNoSeek` applies the same guard uniformly: it can
+      // only ever NARROW a pattern, so no sentence changes meaning, and the
+      // five locales finally behave the same way.
+      pNoSeek(`\\b(galiu|galesiu|galeciau)\\s+(pradeti|pradeciau)\\s+(nuo|kita|sia|rytoj|poryt|po|iki)\\b`, 5),
+      pNoSeek(`\\b(esu|busiu)\\s+laisv[a-z]{0,4}\\s+(nuo|iki|rytoj|ryt|kita|sia|po|visa)\\b`, 5),
+      pNoSeek(`\\b(i\\s+am|i'm|i\\s+will\\s+be)\\s+(available|free)\\s+${WHERE_GAP}(from|starting|on|next|this|after|until)\\b`, 5),
+      pNoSeek(`\\b(available|can\\s+start|can\\s+work)\\s+${WHERE_GAP}(from|starting|on|next|this|after)\\b`, 5),
+      pNoSeek(`могу\\s+(начать\\s+)?работать\\s+${WHERE_GAP}(с|со|после|через)\\b`, 5),
+      pNoSeek(`могу\\s+(выйти|приступить|начать)\\s+${WHERE_GAP}(с|со|после|через)\\b`, 5),
+      pNoSeek(`(свободен|свободна)\\s+${WHERE_GAP}(с|со|после|до)\\b`, 5),
+      pNoSeek(`\\bkann\\s+${WHERE_GAP}(ab|von|nach)\\b.{0,20}(arbeiten|anfangen|beginnen)`, 5),
+      pNoSeek(`\\b(bin|ware)\\s+${WHERE_GAP}(ab|von)\\s*.{0,20}\\b(verfugbar|frei)\\b`, 5),
+      pNoSeek(`\\bverfugbar\\s+${WHERE_GAP}(ab|von)\\b`, 5),
+      pNoSeek(`\\bkan\\s+${WHERE_GAP}(vanaf|per|na)\\b.{0,20}(werken|beginnen|starten)`, 5),
+      pNoSeek(`\\bbeschikbaar\\s+${WHERE_GAP}(vanaf|per)\\b`, 5),
     ],
   },
   {
@@ -1587,8 +1970,8 @@ const RULES: IntentRule[] = [
       // is a stated SERVICE — the ONE verb list the value structurer reads,
       // so the router and the reader cannot drift. A sentence that also
       // seeks ("remontuoju automobilius, ieškau darbo") keeps find-work.
-      p(
-        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(?:${PRESENT_ACTIVITY_VERB_SOURCE})\\b`,
+      pNoSeek(
+        `\\b(?:${PRESENT_ACTIVITY_VERB_SOURCE})\\b`,
         5,
       ),
       p("parduo", 4), // parduodu / parduoti / noriu parduoti
@@ -1713,7 +2096,7 @@ const RULES: IntentRule[] = [
       // Without that exclusion this rule would confidently answer a question
       // about time with an employer demand form.
       p(
-        `(?:${SEEK_VERB_SOURCE})\\s+[0-9]{1,4}\\s+(?!(?:val|valand|dien|savait|men|metu|hour|day|week|month|year|час|дн|недел|месяц|год|stunde|tag|woche|monat|jahr|uur|dag|week|maand|jaar)\\w*\\b)`,
+        `(?:${SEEK_VERB_SOURCE})\\s+[0-9]{1,4}\\s+(?!(?:${DURATION_UNIT_SOURCE})\\w*\\b)`,
         3,
       ),
       p("(darbuotojų\\s+)?poreik", 2), // "darbuotojų poreikis"
@@ -1915,13 +2298,53 @@ const RULES: IntentRule[] = [
      * the profession beside it — so the guard below excludes seek verbs.
      * The suffix / stem / exclusion sources are shared with the reader in
      * `lib/structuring/role-label.ts`.
+     *
+     * ── A TRADE COULD ONLY INTRODUCE ITSELF IN LITHUANIAN ─────────────────
+     * (owner readiness window, 2026-09-09 — §5A's probe "I am a welder.")
+     *
+     * Measured on this router before the change, one sentence per language:
+     *
+     *   "I am an accountant"   → profession-statement    "I am a welder"     → UNKNOWN
+     *   "Ich bin Buchhalter"   → profession-statement    "Ich bin Schweisser"→ UNKNOWN
+     *   "Ik ben boekhouder"    → profession-statement    "Ik ben lasser"     → UNKNOWN
+     *   "Я бухгалтер"          → profession-statement    "Я сварщик"         → UNKNOWN
+     *   "Esu buhalteris"       → profession-statement    "Esu suvirintojas"  → OK
+     *
+     * The office professions live in `OCCUPATION_STEM_SOURCE`, which this
+     * rule read. The manual trades live in `TRADE_STEM_SOURCE`, which it did
+     * not — so a welder, electrician, plumber, carpenter, painter, driver,
+     * cook, cleaner or scaffolder could not say what they were in four of the
+     * five routed languages. Lithuanian passed only by ACCIDENT OF GRAMMAR:
+     * "suvirintojas" ends in `-tojas`, so it matched the nominative suffix,
+     * not any vocabulary. The moment the ending is not Lithuanian the person
+     * disappears — and these are the professions this product is for.
+     *
+     * It is the #1669 defect exactly one layer up. There the trades were
+     * readable by DEMAND and not by SUPPLY; here they are readable by both
+     * market directions and not by a PERSON describing themselves. The fix is
+     * the same fix: read the ONE shared list instead of a second copy.
+     *
+     * WHY THIS CANNOT BECOME A SUPPLY OR DEMAND SENTENCE (§13/§28, and the
+     * regression #1675 fixed). Three independent guards, none added here:
+     *   · EVERY anchor in `PROFESSION_STATEMENT_ANCHOR_SOURCE` is FIRST
+     *     PERSON SINGULAR — "esu", "dirbu", "i am", "i'm", "я", "ich bin",
+     *     "ik ben". "We have 20 welders" and "we need welders" contain no
+     *     anchor and cannot reach this rule at all.
+     *   · `SEEK_GUARD_SOURCE` still fails the whole pattern when the sentence
+     *     also asks for work or for workers.
+     *   · `offer-capacity` requires a DIGIT that is not followed by a
+     *     duration unit; a bare self-introduction carries no number, and
+     *     "I have 3 years of experience as a welder" carries one that is a
+     *     duration — which is what #1675 settled and this does not touch.
+     * The opposite-direction controls are pinned in
+     * `lib/guards/a-trade-can-say-what-it-is.test.ts`.
      */
     intent: "profession-statement",
     patterns: [
-      p(
-        // NB `[^]` (anything), never `[\s\S]`: pattern sources are lower-cased
-        // and `\S` would silently become `\s`.
-        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE}))`,
+      pNoSeek(
+        // NB `[^\s]`, never `\S`: pattern sources are lower-cased and `\S`
+        // would silently become `\s`.
+        `\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE})|(?:${TRADE_STEM_SOURCE}))`,
         6,
       ),
     ],
@@ -2263,11 +2686,15 @@ export function classifyIntent(text: string): IntentMatch {
   const q = fold(text ?? "");
   if (!q.trim()) return { intent: "unknown", score: 0, matched: [] };
 
+  // Asked ONCE, then answered in O(1) for every `noSeek` pattern below.
+  const seeks = SEEK_GUARD_RE.test(q);
+
   let best: IntentMatch = { intent: "unknown", score: 0, matched: [] };
   for (const rule of RULES) {
     let score = 0;
     const matched: string[] = [];
-    for (const { re, weight } of rule.patterns) {
+    for (const { re, weight, noSeek } of rule.patterns) {
+      if (noSeek && seeks) continue;
       if (re.test(q)) {
         score += weight;
         matched.push(re.source);

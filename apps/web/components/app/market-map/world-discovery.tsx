@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { MarketMap, type MarketMapViewport } from "./market-map";
-import type { MarketAnchor } from "./market-map-model";
+import type { MarketAnchor, MarketMapMode } from "./market-map-model";
 import { loadWorldViewAction } from "@/lib/market-map/world-actions";
 import {
   WORLD_LAYERS,
@@ -39,13 +39,44 @@ const FETCH_DEBOUNCE_MS = 250;
 
 type LayerStateKind = "ok" | "empty" | "error" | "unavailable" | "not_authenticated" | "invalid" | "fetch_failed";
 
+/**
+ * FROM A PLACE TO ITS OPPORTUNITIES (owner direction 2026-09-13: "iš
+ * žemėlapio pereinama į kompaktišką rezultatą/detalę").
+ *
+ * The map answers "where is there work"; the compact banded list answers
+ * "what of it fits me, and why". This prop is the one edge between them: a
+ * place's row gets a link into the SAME page's EXISTING country filter
+ * (`?country=`), so selecting a place narrows the list the person is
+ * already reading. No second board, no second filter vocabulary.
+ *
+ * `hrefTemplate` carries `{country}`, replaced with the cluster's ISO-2
+ * code. It is a template rather than a callback because this is a client
+ * component and its server parent cannot hand it a function.
+ */
+export interface WorldPlaceLink {
+  readonly hrefTemplate: string;
+  readonly label: string;
+}
+
 export function WorldDiscovery({
   initial,
   initialLayer = "demand",
+  placeLink,
+  mapMode = "dashboard",
 }: {
   /** The first view, rendered on the server for the default viewport. */
   initial: WorldViewResult;
   initialLayer?: WorldLayer;
+  placeLink?: WorldPlaceLink;
+  /**
+   * The canonical container height (`MODE_HEIGHT`). The market map page is
+   * the map's own screen and keeps `dashboard` (60vh). On PASAULIS the map
+   * is the BASE of a page whose next section is the banded list, so it uses
+   * `result` (32vh): on a 390 px phone the map and the first rows of the
+   * list share one screen, which is the point of putting them together.
+   * Not a new size — one of the four the model already defines.
+   */
+  mapMode?: MarketMapMode;
 }) {
   const t = useTranslations("marketMap.world");
   const locale = useLocale();
@@ -160,7 +191,7 @@ export function WorldDiscovery({
   return (
     <section className="flex flex-col gap-2" data-testid="market-map-world" data-world-layer={layer}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("title")}
         </h2>
         <div
@@ -190,11 +221,14 @@ export function WorldDiscovery({
           })}
         </div>
       </div>
-      <p className="text-sm leading-relaxed text-text-secondary">{t("lead")}</p>
+      <p className="text-sm leading-relaxed text-text-secondary">
+        {t("lead")}
+        {placeLink ? <> {t("placeLinkHint")}</> : null}
+      </p>
 
       <MarketMap
         view={view?.view ?? EMPTY_VIEW}
-        mode="dashboard"
+        mode={mapMode}
         layer={WORLD_LAYER_TO_MAP_LAYER[layer]}
         autoFly={false}
         onViewportChange={onViewportChange}
@@ -325,6 +359,16 @@ export function WorldDiscovery({
                       ))}
                       {c.moreMembers > 0 ? <li>{t("list.more", { count: c.moreMembers })}</li> : null}
                     </ul>
+                  ) : null}
+                  {placeLink ? (
+                    <a
+                      href={placeLink.hrefTemplate.replace("{country}", c.country)}
+                      data-testid="world-place-link"
+                      data-country={c.country}
+                      className="inline-flex min-h-9 w-fit items-center text-xs font-medium text-brand-blue underline-offset-4 hover:underline"
+                    >
+                      {placeLink.label} →
+                    </a>
                   ) : null}
                 </li>
               );

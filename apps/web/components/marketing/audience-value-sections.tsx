@@ -97,7 +97,7 @@ export async function AudienceValueSections() {
               </ul>
               <Link
                 href={b.href}
-                className="mt-auto inline-flex items-center gap-1 pt-1 text-sm font-semibold text-brand-blue transition-colors hover:text-brand-cyan"
+                className="mt-auto inline-flex items-center gap-1 pt-1 text-sm font-semibold text-brand-blue transition-colors hover:text-brand-champagne"
               >
                 {t(`${b.ns}.cta`)} →
               </Link>

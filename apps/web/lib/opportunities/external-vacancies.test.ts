@@ -11,6 +11,7 @@
 import { describe, it, expect } from "vitest";
 
 import { loadExternalVacancyCards } from "./external-vacancies";
+import { deriveFitBand, isAssessedFit } from "./fit-band";
 import { toPublicVacancyRow } from "@/lib/vacancy-store/vacancy-row";
 import { computeVacancyContentHash } from "@/lib/vacancy-sources/vacancy-hash";
 import type { PublicVacancyV1 } from "@/lib/vacancy-sources/vacancy-contract";
@@ -223,6 +224,53 @@ describe("matching honesty", () => {
     // SEK pay is real but NOT comparable to the platform's EUR pay logic —
     // an honest gap, never a converted number.
     expect(gaps).toContain("pay_not_comparable");
+  });
+
+  it("an unreadable newest-page ad reads as NOT ASSESSED — shown, explained, never a fit (#1689, defect H)", async () => {
+    // NEGATIVE CONTROL: this is the production "Senior AI Engineer" — an ad
+    // whose requirements the recognizer could not read, served from the
+    // newest page and listed under "Man tinkantys darbai". The engine's
+    // verdict is insufficient_data; the band derived from it is
+    // not_assessed, and the why names what could not be judged.
+    const row = toPublicVacancyRow(
+      vacancy({ externalId: "senior-ai", titleRaw: "Senior AI Engineer", skillSlugs: [] }),
+      NOW,
+      null,
+    );
+    const result = await loadExternalVacancyCards(
+      clientWith({ data: [row] }),
+      SUBJECT,
+      { nowIso: NOW },
+    );
+    const fit = deriveFitBand(result.cards[0].match);
+    expect(fit.band).toBe("not_assessed");
+    expect(isAssessedFit(fit.band)).toBe(false);
+    expect(fit.why.missingDataCodes).toContain("need_not_structured");
+  });
+
+  it("an ad that states requirements the worker lacks is MISSING_REQUIREMENT or CONFLICT — never a fit", async () => {
+    // The production "Rörmokare": readable, but asks for skills the tiler /
+    // carpenter subject does not hold.
+    const row = toPublicVacancyRow(
+      vacancy({
+        externalId: "plumber",
+        titleRaw: "Rörmokare",
+        skillSlugs: ["pipe-fitting", "soldering"],
+        professionSlug: "plumber",
+      }),
+      NOW,
+      null,
+    );
+    const result = await loadExternalVacancyCards(
+      clientWith({ data: [row] }),
+      SUBJECT,
+      { nowIso: NOW },
+    );
+    const fit = deriveFitBand(result.cards[0].match);
+    expect(result.cards[0].match.status).toBe("weak");
+    expect(["missing_requirement", "conflict"]).toContain(fit.band);
+    expect(isAssessedFit(fit.band)).toBe(false);
+    expect(fit.why.gapCodes).toContain("skills_missing");
   });
 
   it("ranks with the shared comparator — a scoring ad above an unreadable one", async () => {

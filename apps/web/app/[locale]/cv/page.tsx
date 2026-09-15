@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { PrintButton } from "@/components/app/print-button";
 import { CvPrivateDetails } from "@/components/app/cv-private-details";
+import { WorkCardPlausibilityNote } from "@/components/app/work-card-plausibility-note";
+import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
+import { percentOf, roundHours } from "@/lib/cv-export/professional-summary";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
+import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
   cvSectionVisibility,
   orderSkillsForNeed,
@@ -48,15 +53,24 @@ import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-mode
  * two REAL print layouts; the registry slots future ones in.
  */
 
-const TIER_ORDER: CvSkillTier[] = ["confirmed", "evidence", "declared"];
-
 // Silent-trust rule: tiers stay visually distinct but carry NO certification
 // styling — no green "verified" tone, no checkmark. The strongest tier reads
 // as a neutral "with records" signal, not a public confirmation badge.
 const TIER_STYLES: Record<CvSkillTier, string> = {
   confirmed: "border-slate-400 bg-slate-50 text-slate-800",
-  evidence: "border-sky-500 bg-sky-50 text-sky-900",
-  declared: "border-zinc-300 bg-zinc-50 text-zinc-600",
+  evidence: "border-brand-cyan/60 bg-brand-cyan/10 text-brand-cyan",
+  declared: "border-ink-500 bg-ink-700 text-text-muted",
+};
+
+// Magnitude for the eye (lib/cv-export/skill-presentation.ts): a skill with
+// 0.5 h must not sit at the same size as one with 100 h. Sizes only — never
+// a person score.
+const MAGNITUDE_STYLES: Record<SkillMagnitude, string> = {
+  major: "px-3 py-1 text-sm font-medium",
+  supported: "px-2.5 py-0.5 text-xs",
+  trace: "px-2 py-0.5 text-xs",
+  none: "px-2 py-0.5 text-xs opacity-80",
+  unknown: "px-2.5 py-0.5 text-xs",
 };
 
 /** A person's CV render: private surface, never indexable. robots.txt
@@ -81,6 +95,9 @@ export default async function VerifiedCvPage({
   const tSkill = await getTranslations("skillNames");
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
+  const tQuick = await getTranslations("quickNav");
+  const fmtHours = (h: number) =>
+    new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
   const tDocTypes = await getTranslations("documents.types");
   const tEduTypes = await getTranslations("cvSections.educationTypes");
@@ -101,14 +118,14 @@ export default async function VerifiedCvPage({
     // Honest worker-only gate: the Verified CV is built from the worker's
     // journal/skills chain; other roles have no such data to export.
     return (
-      <div className="min-h-screen bg-white px-6 py-10 text-zinc-900">
+      <div className="cv-doc min-h-screen bg-ink-900 px-6 py-10 text-text-primary">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
-          <p className="text-sm text-zinc-600" data-testid="cv-not-worker">
+          <p className="text-sm text-text-secondary" data-testid="cv-not-worker">
             {t("notWorker")}
           </p>
           <Link
             href="/dashboard/profile"
-            className="w-fit text-sm font-medium text-sky-700 hover:underline"
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
           >
             {t("back")}
           </Link>
@@ -130,20 +147,17 @@ export default async function VerifiedCvPage({
     tailoredOk?.matchedSlugs ?? new Set<string>();
 
   const tierSlugs: Record<CvSkillTier, string[]> = cv.tiers;
-  // Declared tier: catalogued declared skills + free-label claims. Journal-
-  // derived claims (P0 Track B) carry a small provenance suffix — same
-  // declared tier, never presented as verified.
-  const declaredAll: { name: string; fromJournal: boolean }[] = [
-    ...tierSlugs.declared.map((slug) => ({
-      name: tSkill(slug),
-      fromJournal: false,
-    })),
-    ...cv.declaredClaims.map((c) => ({
-      name: c.label,
-      fromJournal: c.origin === "journal",
-    })),
-  ];
 
+  // ONE presentation for every skill on this document: tiers from the
+  // catalogue rows, free labels folded into the skill they already are or
+  // into each other by case/diacritic variant, magnitude from the journal's
+  // own figures (lib/cv-export/skill-presentation.ts).
+  const presentation = presentSkills({
+    tiers: tierSlugs,
+    claims: cv.declaredClaims,
+    practice: cv.skillPractice,
+    nameOf: (slug) => tSkill(slug),
+  });
   // A count we could not read is null (see lib/profile/trust-signals.ts). It
   // must never reach the page as a raw value: React renders null as an empty
   // box, and the compact path INTERPOLATES it, which printed the literal word
@@ -186,8 +200,79 @@ export default async function VerifiedCvPage({
     includePrivateDetails: true,
   });
 
-  // Pre-localised private-detail rows (only real saved facts become rows).
+  // Professional FACTS under the person's own summary — deterministic
+  // sentences from the canonical work-intelligence reading; nothing here is
+  // written by a model and nothing appears for an unreadable journal.
+  const fmtNum = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const facts = cv.professionalFacts;
+  const factsSentences: string[] = [];
+  if (facts) {
+    const span =
+      facts.firstMonth && facts.lastMonth
+        ? facts.firstMonth === facts.lastMonth
+          ? facts.firstMonth
+          : `${facts.firstMonth} – ${facts.lastMonth}`
+        : null;
+    factsSentences.push(
+      span
+        ? t("facts.recordedSpan", {
+            hours: fmtNum.format(roundHours(facts.hours)),
+            count: facts.entries,
+            span,
+          })
+        : t("facts.recorded", {
+            hours: fmtNum.format(roundHours(facts.hours)),
+            count: facts.entries,
+          }),
+    );
+    if (facts.confirmedHours > 0) {
+      factsSentences.push(
+        t("facts.confirmed", { hours: fmtNum.format(roundHours(facts.confirmedHours)) }),
+      );
+    }
+    if (facts.contexts > 1) {
+      factsSentences.push(t("facts.contexts", { count: facts.contexts }));
+    }
+    if (facts.topSkills.length > 0) {
+      factsSentences.push(
+        t("facts.topSkills", {
+          list: facts.topSkills
+            .map((s) => `${tSkill(s.slug)} (${percentOf(s.share)} %)`)
+            .join(", "),
+        }),
+      );
+    }
+    if (facts.outputs.length > 0) {
+      factsSentences.push(
+        t("facts.outputs", {
+          list: facts.outputs.map((o) => `${fmtNum.format(o.value)} ${o.unit}`).join(", "),
+        }),
+      );
+    }
+  }
+
+  // What the saved private figures READ AS (owner #1689: "150–500 EUR/month"
+  // printed as a fact). Screen-only sentences beside the section; the
+  // printout carries the person's figures untouched.
   const priv = cv.privateDetails;
+  const cardChecks = deriveWorkCardChecks(
+    {
+      salaryMin: priv.salaryMinEur,
+      salaryMax: priv.salaryMaxEur,
+      availabilityStatus: priv.availabilityStatus,
+      availableFrom: priv.availableFrom,
+    },
+    new Date().toISOString().slice(0, 10),
+  ).map((c) => ({
+    fingerprint: c.fingerprint,
+    text: t(`checks.${c.code}`, {
+      min: c.salaryMin ?? "",
+      max: c.salaryMax ?? "",
+      date: c.availableFrom ?? "",
+    }),
+  }));
+
+  // Pre-localised private-detail rows (only real saved facts become rows).
   const privateRows: { label: string; value: string }[] = [];
   if (priv.salaryMinEur !== null || priv.salaryMaxEur !== null) {
     // A one-sided expectation must keep its direction — a bare "1800" says
@@ -243,6 +328,34 @@ export default async function VerifiedCvPage({
     : "font-display text-lg font-bold";
   const bodyText = compact ? "text-xs" : "text-sm";
   const pageGap = compact ? "gap-4" : "gap-6";
+  /**
+   * The jump strip's anchors. ONE list, built from the SAME predicates the
+   * sections below are rendered under — a section that is omitted (no work
+   * history, no languages, no certificates) can never appear here as a dead
+   * link, which is exactly what the dead-UI guard exists to prevent.
+   */
+  const cvQuickNavItems = [
+    cv.professionalSummary || factsSentences.length > 0
+      ? { href: "#cv-summary-section", label: t("summaryTitle") }
+      : null,
+    visibility.workHistory
+      ? { href: "#cv-work-history", label: t("workHistoryTitle") }
+      : null,
+    visibility.practiceHistory
+      ? { href: "#cv-practice-history", label: t("practiceHistoryTitle") }
+      : null,
+    { href: "#cv-skills", label: t("skills") },
+    visibility.education ? { href: "#cv-education", label: t("educationTitle") } : null,
+    visibility.languages ? { href: "#cv-languages", label: t("languagesTitle") } : null,
+    visibility.certificates
+      ? { href: "#cv-certificates", label: t("certificatesTitle") }
+      : null,
+    visibility.projects ? { href: "#cv-projects", label: t("projectsTitle") } : null,
+    visibility.achievements
+      ? { href: "#cv-achievements", label: t("achievementsTitle") }
+      : null,
+    { href: "#cv-proof", label: t("proofTitle") },
+  ].filter((i): i is { href: string; label: string } => i !== null);
 
   // One renderer for both history sections — employment and placements differ
   // in their HEADING, never in how a real engagement is described.
@@ -270,53 +383,87 @@ export default async function VerifiedCvPage({
       return (
         <li
           key={`${e.relationship}-${i}`}
-          className="flex flex-col border-l-2 border-zinc-300 pl-3"
+          className="flex flex-col border-l-2 border-ink-600 pl-3"
         >
           <span className={`font-semibold ${bodyText}`}>{orgDisplay}</span>
-          <span className="text-xs text-zinc-600">
+          <span className="text-xs text-text-secondary">
             {roleLabel}
             {range ? ` · ${range}` : ""}
           </span>
           {e.title && e.title !== orgDisplay ? (
-            <span className="text-xs text-zinc-500">{e.title}</span>
+            <span className="text-xs text-text-muted">{e.title}</span>
+          ) : null}
+          {e.operationsRole && e.operationsRole !== e.title ? (
+            <span className="text-xs text-text-muted">{e.operationsRole}</span>
+          ) : null}
+          {e.projectName ? (
+            <span className="text-xs text-text-muted" data-testid="cv-history-project">
+              {t("history.project", { name: e.projectName })}
+            </span>
+          ) : null}
+          {e.description ? (
+            <p
+              className={`mt-1 whitespace-pre-wrap leading-relaxed text-text-secondary ${bodyText}`}
+              data-testid="cv-history-description"
+            >
+              {e.description}
+            </p>
+          ) : null}
+          {/* The journal's own figures for THIS engagement — omitted when
+              the journal was unreadable (unknown) and when it holds no entry
+              for it (a job needs no journal to be real); the data attribute
+              keeps the two apart for anyone reading the markup. */}
+          {e.recorded && e.recorded.entries > 0 ? (
+            <span
+              className="mt-1 text-xs text-text-secondary"
+              data-testid="cv-history-recorded"
+            >
+              {e.recorded.confirmedHours > 0
+                ? t("history.recordedConfirmed", {
+                    hours: fmtNum.format(roundHours(e.recorded.hours)),
+                    confirmed: fmtNum.format(roundHours(e.recorded.confirmedHours)),
+                    count: e.recorded.entries,
+                  })
+                : t("history.recorded", {
+                    hours: fmtNum.format(roundHours(e.recorded.hours)),
+                    count: e.recorded.entries,
+                  })}
+            </span>
           ) : null}
         </li>
       );
     });
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 text-zinc-900 print:p-0">
+    <div className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
         {/* Screen-only toolbar — never printed. */}
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <Link
             href="/dashboard/profile"
-            className="text-sm font-medium text-sky-700 hover:underline"
+            className="text-sm font-medium text-brand-blue hover:underline"
             data-testid="cv-back-link"
           >
             {t("back")}
           </Link>
           <div className="flex flex-wrap items-center gap-2">
             {/* Template registry (§10): one link per registered template. */}
-            <span className="text-xs text-zinc-500">{t("templates.label")}:</span>
+            <span className="text-xs text-text-muted">{t("templates.label")}:</span>
             {CV_TEMPLATES.map((tpl) => (
               <a
                 key={tpl.id}
                 href={templateHref(tpl.id)}
                 className={`rounded-md border px-2.5 py-1 text-xs ${
                   template === tpl.id
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-300 text-zinc-700 hover:border-zinc-500"
+                    ? "border-brand-blue bg-brand-blue text-text-on-brand"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
                 }`}
                 data-testid={`cv-template-${tpl.id}`}
               >
                 {t(`templates.${tpl.id}`)}
               </a>
             ))}
-            <PrintButton
-              label={t("print")}
-              className="border-zinc-300 bg-zinc-900 px-4 py-2 text-sm text-white hover:bg-zinc-700"
-            />
+            <PrintButton label={t("print")} tone="primary" />
           </div>
         </div>
 
@@ -324,7 +471,7 @@ export default async function VerifiedCvPage({
             in fallback IS the standard CV; no note needed on paper). */}
         {tailored && tailored.kind === "not-visible" ? (
           <p
-            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 print:hidden"
+            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
             data-testid="cv-tailored-not-visible"
           >
             {t("tailored.notVisible")}
@@ -332,7 +479,7 @@ export default async function VerifiedCvPage({
         ) : null}
         {tailored && tailored.kind === "no-structure" ? (
           <p
-            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 print:hidden"
+            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
             data-testid="cv-tailored-no-structure"
           >
             {t("tailored.noStructure")}
@@ -387,21 +534,21 @@ export default async function VerifiedCvPage({
         ) : (
           <>
         {/* Player-card style header — identity + honest counters. */}
-        <header className={`rounded-xl border-2 border-zinc-900 ${compact ? "p-4" : "p-6"}`}>
-          <p className="font-mono text-meta uppercase tracking-widest text-zinc-500">
+        <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
+          <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
             {t("pageTitle")}
           </p>
           <h1 className={`mt-1 font-display font-bold tracking-tight ${compact ? "text-2xl" : "text-3xl"}`}>
             {cv.personName.trim() && cv.personName.trim() !== "—" ? (
               cv.personName
             ) : (
-              <span className="italic text-zinc-400" data-testid="cv-name-missing">
+              <span className="italic text-text-muted" data-testid="cv-name-missing">
                 {t("nameNotProvided")}
               </span>
             )}
           </h1>
           {cv.professionSlugs.length > 0 ? (
-            <p className="mt-1 text-sm text-zinc-600" data-testid="cv-professions">
+            <p className="mt-1 text-sm text-text-secondary" data-testid="cv-professions">
               {cv.professionSlugs
                 .map(
                   (p) => `${tProf(p.slug)}${p.isPrimary ? ` · ${t("primary")}` : ""}`,
@@ -413,13 +560,13 @@ export default async function VerifiedCvPage({
               highlight may never appear without its basis). */}
           {tailoredOk ? (
             <div className="mt-2 flex flex-col gap-0.5" data-testid="cv-tailored-basis">
-              <p className="font-mono text-meta uppercase tracking-widest text-zinc-500">
+              <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
                 {t("tailored.badge")}
                 {tailoredOk.roleText
                   ? ` — ${t("tailored.forNeed", { role: tailoredOk.roleText })}`
                   : ""}
               </p>
-              <p className="text-xs text-zinc-600">
+              <p className="text-xs text-text-secondary">
                 {t("tailored.basis", {
                   matched: tailoredOk.fit.matchedTotal,
                   needTotal: tailoredOk.fit.needTotal,
@@ -433,9 +580,9 @@ export default async function VerifiedCvPage({
               {summary.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-lg border border-zinc-200 p-3 text-center"
+                  className="rounded-lg border border-ink-600 p-3 text-center"
                 >
-                  <dt className="text-meta uppercase tracking-wide text-zinc-500">
+                  <dt className="text-meta uppercase tracking-wide text-text-muted">
                     {t(`summary.${s.key}`)}
                   </dt>
                   <dd className="mt-1 font-display text-2xl font-bold">
@@ -445,7 +592,7 @@ export default async function VerifiedCvPage({
               ))}
             </dl>
           ) : (
-            <p className="mt-3 text-xs text-zinc-600" data-testid="cv-summary">
+            <p className="mt-3 text-xs text-text-secondary" data-testid="cv-summary">
               {summary
                 .map((s) => `${t(`summary.${s.key}`)}: ${s.text}`)
                 .join(" · ")}
@@ -453,20 +600,38 @@ export default async function VerifiedCvPage({
           )}
         </header>
 
+        {/* SECTION JUMP — screen-only, never printed (owner direction
+            2026-09-13: a phone must not force a scroll to reach a section).
+            A CV is a DOCUMENT: it is meant to be read top to bottom and the
+            sections are not collapsed. What it lacked was a way IN. The
+            anchors are built from the SAME visibility predicates that decide
+            whether each section renders, so the strip can never offer a
+            link to a section that is not on the page — and each label is the
+            section's own heading, so no second vocabulary is introduced.
+            `PageQuickNav` is the existing primitive (its own docstring names
+            "Mano CV" as an intended consumer); no new nav is added. */}
+        {cvQuickNavItems.length > 1 ? (
+          <PageQuickNav
+            ariaLabel={tQuick("ariaLabel")}
+            items={cvQuickNavItems}
+            className="print:hidden"
+          />
+        ) : null}
+
         {/* Built-from explainer — screen-only, standard template only (the
             compact template keeps the screen dense too). */}
         {!compact ? (
           <section
-            className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 print:hidden"
+            className="rounded-lg border border-ink-600 bg-ink-800 p-4 print:hidden"
             data-testid="cv-built-from"
           >
-            <p className="text-sm text-zinc-700">{t("builtFrom.lead")}</p>
-            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-zinc-600">
+            <p className="text-sm text-text-secondary">{t("builtFrom.lead")}</p>
+            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-text-secondary">
               <li>{t("builtFrom.profile")}</li>
               <li>{t("builtFrom.skills")}</li>
               <li>{t("builtFrom.records")}</li>
             </ul>
-            <p className="mt-2 text-xs text-zinc-500" data-testid="cv-built-from-privacy">
+            <p className="mt-2 text-xs text-text-muted" data-testid="cv-built-from-privacy">
               {t("builtFrom.privacy")}
             </p>
           </section>
@@ -476,11 +641,35 @@ export default async function VerifiedCvPage({
             cv.professionalSummary read model already nulls empty text; the
             guard pins this exact conditional). */}
         {cv.professionalSummary ? (
-          <section className="flex flex-col gap-2" data-testid="cv-summary-section">
+          <section id="cv-summary-section" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-summary-section">
             <h2 className={sectionTitle}>{t("summaryTitle")}</h2>
-            <p className={`whitespace-pre-wrap leading-relaxed text-zinc-700 ${bodyText}`}>
+            <p className={`whitespace-pre-wrap leading-relaxed text-text-secondary ${bodyText}`}>
               {cv.professionalSummary}
             </p>
+          </section>
+        ) : null}
+
+        {/* Professional FACTS — the deterministic paragraph under (never in
+            place of) the person's own words: recorded hours, span, places,
+            the skills that take most of the recorded work, outputs in their
+            recorded units. Omitted when the journal was unreadable or empty. */}
+        {factsSentences.length > 0 ? (
+          <section
+            /* The summary anchor belongs to whichever block actually renders.
+               With no self-written summary this facts paragraph IS the
+               summary section, so it carries the id; with one, the block
+               above already does and this must not duplicate it. */
+            id={!cv.professionalSummary ? "cv-summary-section" : undefined}
+            className="flex flex-col gap-1 scroll-mt-20"
+            data-testid="cv-professional-facts"
+          >
+            {!cv.professionalSummary ? (
+              <h2 className={sectionTitle}>{t("summaryTitle")}</h2>
+            ) : null}
+            <p className={`leading-relaxed text-text-secondary ${bodyText}`}>
+              {factsSentences.join(" ")}
+            </p>
+            <p className="text-xs text-text-muted">{t("facts.source")}</p>
           </section>
         ) : null}
 
@@ -488,7 +677,8 @@ export default async function VerifiedCvPage({
             external verification); omitted entirely when empty. */}
         {visibility.workHistory ? (
           <section
-            className="flex flex-col gap-3"
+            id="cv-work-history"
+            className="flex flex-col gap-3 scroll-mt-20"
             data-testid="cv-work-history"
           >
             <h2 className={sectionTitle}>{t("workHistoryTitle")}</h2>
@@ -504,7 +694,8 @@ export default async function VerifiedCvPage({
             a job. Omitted entirely when the person has none. */}
         {visibility.practiceHistory ? (
           <section
-            className="flex flex-col gap-3"
+            id="cv-practice-history"
+            className="flex flex-col gap-3 scroll-mt-20"
             data-testid="cv-practice-history"
           >
             <h2 className={sectionTitle}>{t("practiceHistoryTitle")}</h2>
@@ -516,7 +707,7 @@ export default async function VerifiedCvPage({
 
         {/* Education — self-declared entries; slug labels from i18n. */}
         {visibility.education ? (
-          <section className="flex flex-col gap-2" data-testid="cv-education">
+          <section id="cv-education" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-education">
             <h2 className={sectionTitle}>{t("educationTitle")}</h2>
             <ul className="flex flex-col gap-2">
               {cv.education.map((e, i) => {
@@ -525,11 +716,11 @@ export default async function VerifiedCvPage({
                     ? `${e.startYear ?? ""}–${e.isCurrent ? t("present") : (e.endYear ?? "")}`
                     : null;
                 return (
-                  <li key={i} className="flex flex-col border-l-2 border-zinc-300 pl-3">
+                  <li key={i} className="flex flex-col border-l-2 border-ink-600 pl-3">
                     <span className={`font-semibold ${bodyText}`}>
                       {e.institutionName}
                     </span>
-                    <span className="text-xs text-zinc-600">
+                    <span className="text-xs text-text-secondary">
                       {tEduTypes(e.educationTypeSlug)}
                       {e.programOrField ? ` · ${e.programOrField}` : ""}
                       {range ? ` · ${range}` : ""}
@@ -543,19 +734,19 @@ export default async function VerifiedCvPage({
 
         {/* Languages — self-stated CEFR facts (worker_languages). */}
         {visibility.languages ? (
-          <section className="flex flex-col gap-2" data-testid="cv-languages">
+          <section id="cv-languages" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-languages">
             <h2 className={sectionTitle}>{t("languagesTitle")}</h2>
             <div className="flex flex-wrap gap-1.5">
               {cv.languages.map((l) => (
                 <span
                   key={l.lang}
-                  className="rounded-full border border-zinc-300 bg-zinc-50 px-2.5 py-0.5 text-xs text-zinc-700"
+                  className="rounded-full border border-ink-500 bg-ink-700 px-2.5 py-0.5 text-xs text-text-secondary"
                 >
                   {l.lang.toUpperCase()} · {l.level}
                 </span>
               ))}
             </div>
-            <p className="text-meta text-zinc-500">{t("languagesSelfStated")}</p>
+            <p className="text-meta text-text-muted">{t("languagesSelfStated")}</p>
           </section>
         ) : null}
 
@@ -563,26 +754,35 @@ export default async function VerifiedCvPage({
             unexpired), driving licence categories, and text-declared
             certificates (always labelled declared, never verified). */}
         {visibility.certificates ? (
-          <section className="flex flex-col gap-2" data-testid="cv-certificates">
+          <section id="cv-certificates" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-certificates">
             <h2 className={sectionTitle}>{t("certificatesTitle")}</h2>
             <ul className="flex flex-col gap-1.5">
               {cv.certificateDocs.map((d, i) => (
                 <li key={`doc-${i}`} className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}>
                   <span className="font-medium">{tDocTypes(d.typeSlug)}</span>
                   {d.country ? (
-                    <span className="text-xs text-zinc-600">{d.country}</span>
+                    <span className="text-xs text-text-secondary">{d.country}</span>
                   ) : null}
                   {d.validUntil ? (
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-text-muted">
                       {t("validUntil")}: {formatUtcDate(d.validUntil, locale)}
                     </span>
                   ) : null}
+                  {/* A held document is not a reviewed one. Without this the
+                      row sat unqualified directly above declared certificates
+                      that ARE labelled unverified, and the contrast alone
+                      claimed a review that may never have happened. */}
+                  {d.reviewerVerified ? null : (
+                    <span className="text-meta uppercase tracking-wide text-text-muted">
+                      {t("documentSelfSuppliedHint")}
+                    </span>
+                  )}
                 </li>
               ))}
               {cv.drivingLicenceCategories.length > 0 ? (
                 <li className={`flex flex-wrap items-baseline gap-2 ${bodyText}`} data-testid="cv-driving-licences">
                   <span className="font-medium">{t("drivingLicences")}</span>
-                  <span className="text-xs text-zinc-600">
+                  <span className="text-xs text-text-secondary">
                     {cv.drivingLicenceCategories.join(", ")}
                   </span>
                 </li>
@@ -591,11 +791,11 @@ export default async function VerifiedCvPage({
                 <li key={`decl-${i}`} className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}>
                   <span className="font-medium">{c.title}</span>
                   {c.achievedAt ? (
-                    <span className="text-xs text-zinc-600">
+                    <span className="text-xs text-text-secondary">
                       {formatUtcDate(c.achievedAt, locale, { year: "numeric" })}
                     </span>
                   ) : null}
-                  <span className="text-meta uppercase tracking-wide text-zinc-500">
+                  <span className="text-meta uppercase tracking-wide text-text-muted">
                     {t("declaredCertHint")}
                   </span>
                 </li>
@@ -606,61 +806,147 @@ export default async function VerifiedCvPage({
 
         {/* Skills by honest tier — tailored mode only REORDERS (matched
             first) and highlights; nothing is added or hidden. */}
-        <section className="flex flex-col gap-4" data-testid="cv-skills">
+        <section id="cv-skills" className="flex flex-col gap-4 scroll-mt-20" data-testid="cv-skills">
           <h2 className={sectionTitle}>{t("skills")}</h2>
-          {TIER_ORDER.map((tier) => {
-            if (tier === "declared") {
-              if (declaredAll.length === 0) return null;
-              return (
-                <div key={tier} className="flex flex-col gap-1.5" data-testid={`cv-tier-${tier}`}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
-                    {t(`tiers.${tier}`)}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {declaredAll.map(({ name, fromJournal }) => (
-                      <span
-                        key={name}
-                        className={`rounded-full border px-2.5 py-0.5 text-xs ${TIER_STYLES[tier]}`}
-                      >
-                        {name}
-                        {fromJournal ? (
-                          <span
-                            className="ml-1 text-meta text-zinc-500"
-                            data-testid="cv-claim-from-journal"
-                          >
-                            · {t("claimFromJournal")}
-                          </span>
-                        ) : null}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-            const { ordered } = orderSkillsForNeed(
-              tierSlugs[tier],
-              (slug) => slug,
-              matchedSlugs,
-            );
-            if (ordered.length === 0) return null;
+          {/* Recorded work behind the skills (issue #1689): the SAME figures
+              the journal's "work in numbers" shows, through the one canonical
+              work-time rule. Null (unreadable) renders nothing — never a zero
+              that reads as "no work". */}
+          {cv.recordedHoursTotal !== null && (
+            <p className="text-meta text-text-muted" data-testid="cv-recorded-hours">
+              {cv.recordedHoursTotal > 0
+                ? `${t("recordedHours", {
+                    hours: fmtHours(cv.recordedHoursTotal),
+                    confirmed: fmtHours(cv.recordedHoursConfirmed ?? 0),
+                  })} ${
+                    cv.journalCoverage?.truncated
+                      ? t("recordedHoursScopeTruncated", {
+                          count: cv.journalCoverage.entriesRead,
+                        })
+                      : t("recordedHoursScope")
+                  }`
+                : t("recordedHoursNone")}
+            </p>
+          )}
+          {/* The organization's own hour records (owner §19) — the second
+              ledger, named beside the journal figure and added to nothing:
+              an hour record proves attendance, not a skill. Shown only when
+              it holds hours; null (unreadable) renders nothing. */}
+          {cv.organizationRecordedHours !== null && cv.organizationRecordedHours.hours > 0 && (
+            <p
+              className="text-meta text-text-muted"
+              data-testid="cv-organization-recorded-hours"
+              data-hours={cv.organizationRecordedHours.hours}
+            >
+              {t("organizationRecordedHours", {
+                hours: fmtHours(cv.organizationRecordedHours.hours),
+                days: cv.organizationRecordedHours.days,
+                imported: fmtHours(cv.organizationRecordedHours.importedHours),
+                approved: fmtHours(cv.organizationRecordedHours.approvedHours),
+              })}
+            </p>
+          )}
+          {/* Skills as ONE presentation (owner defects C + D, 2026-09-12):
+              evidence tier first, then magnitude; a free-label claim that
+              is a catalogued skill the person already holds is folded INTO
+              that skill (once, with the skill's hours); case/diacritic
+              variants of a label are one item that names its variants.
+              Nothing is written — the rows stay as saved. Tailored mode
+              only REORDERS within a tier (matched first). */}
+          {presentation.groups.map((group) => {
+            const tier = group.tier;
+            const catalogSlugs = group.items
+              .map((i) => i.slug)
+              .filter((s): s is string => s !== null);
+            const { ordered } =
+              tier === "self_stated"
+                ? { ordered: [] as string[] }
+                : orderSkillsForNeed(catalogSlugs, (slug) => slug, matchedSlugs);
+            const orderIndex = new Map(ordered.map((slug, i) => [slug, i]));
+            const items =
+              tier === "self_stated"
+                ? group.items
+                : [...group.items].sort(
+                    (a, b) =>
+                      (orderIndex.get(a.slug ?? "") ?? 0) - (orderIndex.get(b.slug ?? "") ?? 0),
+                  );
             return (
-              <div key={tier} className="flex flex-col gap-1.5" data-testid={`cv-tier-${tier}`}>
-                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
-                  {t(`tiers.${tier}`)}
+              <div key={tier} className="flex flex-col gap-1.5" data-testid={`cv-tier-${tier === "self_stated" ? "declared" : tier}`}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  {tier === "self_stated" ? t("selfStatedTitle") : t(`tiers.${tier}`)}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {ordered.map((slug) => {
-                    const matched = matchedSlugs.has(slug);
+                  {items.map((item) => {
+                    const slug = item.slug;
+                    const matched = slug !== null && matchedSlugs.has(slug);
+                    const facts = item.practice;
+                    const hours = facts?.attributedHours ?? 0;
+                    const confirmed = facts?.confirmedHours ?? 0;
                     return (
                       <span
-                        key={slug}
-                        className={`rounded-full border px-2.5 py-0.5 text-xs ${TIER_STYLES[tier]} ${
-                          matched ? "ring-2 ring-zinc-900" : ""
+                        key={item.key}
+                        className={`inline-flex flex-col rounded-md border ${
+                          tier === "self_stated"
+                            ? "border-dashed border-ink-500 bg-transparent text-text-muted"
+                            : TIER_STYLES[tier]
+                        } ${MAGNITUDE_STYLES[item.magnitude]} ${
+                          matched ? "ring-2 ring-brand-blue" : ""
                         }`}
                         data-testid={matched ? "cv-skill-matched" : undefined}
+                        data-magnitude={item.magnitude}
+                        data-variants={item.variants.length}
                         title={matched ? t("tailored.matchedTag") : undefined}
                       >
-                        {tSkill(slug)}
+                        <span className="flex items-baseline gap-1">
+                          {item.name}
+                          {item.variants.length > 1 ? (
+                            <span
+                              className="text-meta text-text-muted"
+                              data-testid="cv-skill-variants"
+                              title={item.variants.join(" · ")}
+                            >
+                              · {t("variantsFolded", { count: item.variants.length })}
+                            </span>
+                          ) : null}
+                          {item.kind === "claim" && item.claimOrigin === "journal" ? (
+                            <span
+                              className="text-meta text-text-muted"
+                              data-testid="cv-claim-from-journal"
+                            >
+                              · {t("claimFromJournal")}
+                            </span>
+                          ) : null}
+                        </span>
+                        {hours > 0 && slug !== null ? (
+                          // The chip names its base in words (re-audit F12):
+                          // which of the hours a manager confirmed and which
+                          // are the person's own record — never a bare number.
+                          <span
+                            className="tabular-nums text-meta text-text-muted"
+                            title={t("skillHoursHint")}
+                            data-testid={`cv-skill-hours-${slug}`}
+                            data-confirmed-hours={confirmed}
+                          >
+                            {confirmed > 0
+                              ? t("skillHoursConfirmed", {
+                                  hours: fmtHours(hours),
+                                  confirmed: fmtHours(confirmed),
+                                })
+                              : t("skillHoursOwn", {
+                                  hours: fmtHours(hours),
+                                })}
+                            {facts && facts.share > 0
+                              ? ` · ${t("skillShare", { share: Math.round(facts.share * 100) })}`
+                              : ""}
+                            {facts && facts.entries > 0
+                              ? ` · ${t("skillEntries", { count: facts.entries })}`
+                              : ""}
+                          </span>
+                        ) : tier !== "self_stated" && item.magnitude === "none" ? (
+                          <span className="text-meta text-text-muted" data-testid="cv-skill-no-records">
+                            {t("skillNoRecords")}
+                          </span>
+                        ) : null}
                       </span>
                     );
                   })}
@@ -668,23 +954,21 @@ export default async function VerifiedCvPage({
               </div>
             );
           })}
-          {declaredAll.length === 0 &&
-          tierSlugs.confirmed.length === 0 &&
-          tierSlugs.evidence.length === 0 ? (
-            <p className={`text-zinc-500 ${bodyText}`}>{t("skillsEmpty")}</p>
+          {presentation.visible === 0 ? (
+            <p className={`text-text-muted ${bodyText}`}>{t("skillsEmpty")}</p>
           ) : null}
         </section>
 
         {/* Projects — DERIVED from confirmed proof (single truth source). */}
         {visibility.projects ? (
-          <section className="flex flex-col gap-2" data-testid="cv-projects">
+          <section id="cv-projects" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-projects">
             <h2 className={sectionTitle}>{t("projectsTitle")}</h2>
-            <p className="text-meta text-zinc-500">{t("projectsHint")}</p>
+            <p className="text-meta text-text-muted">{t("projectsHint")}</p>
             <ul className="flex flex-col gap-1">
               {cv.projects.map((p) => (
                 <li key={p.title} className={`flex items-baseline gap-2 ${bodyText}`}>
                   <span className="font-medium">{p.title}</span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-text-muted">
                     {formatUtcDate(p.lastConfirmedAt, locale)}
                   </span>
                 </li>
@@ -696,7 +980,7 @@ export default async function VerifiedCvPage({
         {/* Achievements — self-declared unless a REAL confirmation set the
             manager flag (which the app itself can never write). */}
         {visibility.achievements ? (
-          <section className="flex flex-col gap-2" data-testid="cv-achievements">
+          <section id="cv-achievements" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-achievements">
             <h2 className={sectionTitle}>{t("achievementsTitle")}</h2>
             <ul className="flex flex-col gap-1.5">
               {cv.achievements.map((a, i) => (
@@ -704,13 +988,13 @@ export default async function VerifiedCvPage({
                   <span className={`font-medium ${bodyText}`}>
                     {a.title}
                     {a.confirmedByManager ? (
-                      <span className="ml-2 text-meta uppercase tracking-wide text-zinc-600">
+                      <span className="ml-2 text-meta uppercase tracking-wide text-text-secondary">
                         {t("confirmedByManager")}
                       </span>
                     ) : null}
                   </span>
                   {a.achievedAt || a.description ? (
-                    <span className="text-xs text-zinc-600">
+                    <span className="text-xs text-text-secondary">
                       {[
                         formatUtcDate(a.achievedAt, locale),
                         a.description,
@@ -726,14 +1010,14 @@ export default async function VerifiedCvPage({
         ) : null}
 
         {/* Confirmed Work Proof — real confirmations only; role, never name. */}
-        <section className="flex flex-col gap-2" data-testid="cv-proof">
+        <section id="cv-proof" className="flex flex-col gap-2 scroll-mt-20" data-testid="cv-proof">
           <h2 className={sectionTitle}>{t("proofTitle")}</h2>
           {cv.proof.length === 0 ? (
-            <p className={`text-zinc-500 ${bodyText}`}>{t("proofEmpty")}</p>
+            <p className={`text-text-muted ${bodyText}`}>{t("proofEmpty")}</p>
           ) : (
             <table className={`w-full border-collapse ${bodyText}`}>
               <thead>
-                <tr className="border-b-2 border-zinc-900 text-left">
+                <tr className="border-b-2 border-ink-500 text-left">
                   <th className="py-1.5 pr-3 font-semibold">{t("proofDate")}</th>
                   <th className="py-1.5 pr-3 font-semibold">{t("proofProject")}</th>
                   <th className="py-1.5 font-semibold">{t("proofRole")}</th>
@@ -741,7 +1025,7 @@ export default async function VerifiedCvPage({
               </thead>
               <tbody>
                 {cv.proof.map((row, i) => (
-                  <tr key={`${row.confirmedAt}-${i}`} className="border-b border-zinc-200">
+                  <tr key={`${row.confirmedAt}-${i}`} className="border-b border-ink-600">
                     <td className="py-1.5 pr-3">
                       {formatUtcDate(row.entryDate, locale)}
                     </td>
@@ -753,7 +1037,7 @@ export default async function VerifiedCvPage({
                       {/* W6 slice 1: automatic never renders identically. */}
                       {row.automatic ? (
                         <span
-                          className="text-zinc-500"
+                          className="text-text-muted"
                           data-testid="cv-proof-auto-confirm-qualifier"
                         >
                           {" "}· {tTier("autoConfirmQualifier")}
@@ -765,7 +1049,7 @@ export default async function VerifiedCvPage({
                           own attestation as somebody else's. */}
                       {row.selfConfirmed ? (
                         <span
-                          className="text-zinc-500"
+                          className="text-text-muted"
                           data-testid="cv-proof-self-confirm-qualifier"
                         >
                           {" "}· {tTier("selfConfirmQualifier")}
@@ -782,6 +1066,16 @@ export default async function VerifiedCvPage({
         {/* Salary + availability — per-export opt-in (default OFF, never
             persisted). The checkbox never prints; the section prints only
             when the worker ticked it for THIS export. */}
+        {cardChecks.length > 0 ? (
+          <WorkCardPlausibilityNote
+            items={cardChecks}
+            eyebrow={t("checks.eyebrow")}
+            keepLabel={t("checks.keep")}
+            correctLabel={t("checks.correct")}
+            correctHref="/dashboard"
+          />
+        ) : null}
+
         <CvPrivateDetails
           toggleLabel={t("privateDetails.toggle")}
           title={t("privateDetails.title")}
@@ -789,7 +1083,7 @@ export default async function VerifiedCvPage({
         />
 
         {/* Footer — generation date only (quiet UI: no verification process note). */}
-        <footer className="mt-2 border-t border-zinc-300 pt-3 text-xs text-zinc-500">
+        <footer className="mt-2 border-t border-ink-600 pt-3 text-xs text-text-muted">
           <p>
             {t("generatedAt")}: {generatedAt}
           </p>

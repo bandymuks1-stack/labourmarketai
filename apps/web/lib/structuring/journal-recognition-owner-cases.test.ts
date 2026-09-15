@@ -2,8 +2,12 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { classifyEntryRecognition } from "./recognition-tiers";
+import { extractJournalSuggestions } from "./extract-journal-suggestions";
 import { CONSTRUCTION_SKILL_HINT_SLUGS } from "./keywords";
-import { buildEntryDetectedSignals } from "../journal/entry-detected-signals";
+import {
+  buildEntryDetectedSignals,
+  detectedSectionState,
+} from "../journal/entry-detected-signals";
 
 /**
  * Work-Journal recognition guards — root-cause fix + maximal activity layer
@@ -167,6 +171,94 @@ describe("multi-activity entries surface ALL activities", () => {
 });
 
 describe("negative guards — no wrong defaults", () => {
+  it("'instaliacija' is not a carpenter and not automatically electrical (#1689, measured 2026-09-12)", () => {
+    // "stali" (stalius = carpenter) sat inside "in-STALI-acija": every
+    // electrical installation read as carpentry beside electrical-install.
+    for (const text of [
+      "4 val. montavau elektros instaliaciją",
+      "Elektros instaliacijos montavimas",
+      "Vandentiekio instaliacija",
+    ]) {
+      expect(signalsOf(text).all, text).not.toMatch(/carpentr|carpenter|stali/i);
+    }
+    expect(signalsOf("4 val. montavau elektros instaliaciją").slugs).toContain("electrical-install");
+    // the carpenter's own forms still read as carpentry
+    for (const text of ["Dirbau staliumi 5 val.", "Staliaus darbai 3 val.", "Padėjau staliui"]) {
+      expect(signalsOf(text).slugs, text).toContain("carpentry");
+    }
+    // "instaliac" alone was an ELECTRICIAN work-direction needle: a water
+    // installation is not electrical work
+    expect(extractJournalSuggestions("Vandentiekio instaliacija").workDirectionSlug).toBeNull();
+    expect(extractJournalSuggestions("Elektros instaliacijos montavimas").workDirectionSlug).toBe("electrician");
+  });
+
+  it("e-mail, e-commerce and an electronic signature are not electrical work (#1689, measured 2026-09-12)", () => {
+    // the bare stems "elektr" / "электр" sat inside "elektroninis paštas" /
+    // "электронная почта": every office worker's mail line read
+    // electrical-install:exact with the electrician activity on the intake side
+    for (const text of [
+      "2 val. tvarkiau elektroninį paštą",
+      "Atsakinėjau į elektroninius laiškus",
+      "Pasirašiau elektroniniu parašu",
+      "Elektroninių dokumentų archyvavimas",
+      "Работал с электронной почтой 2 часа",
+      "Elektriniai įrankiai: šlifavau 2 val.",
+    ]) {
+      expect(signalsOf(text).slugs, text).not.toContain("electrical-install");
+      const s = extractJournalSuggestions(text);
+      expect(s.workDirectionSlug, text).not.toBe("electrician");
+      expect(s.fragments.map((f) => f.activitySlug), text).not.toContain("electrician");
+    }
+    // real electrical work in both languages still reads as such
+    for (const text of [
+      "Elektrikas keitė rozetes",
+      "Montavau elektros skydą",
+      "3 val. dirbau prie elektros instaliacijos",
+      "Электрик 5 часов",
+      "Электромонтажные работы",
+    ]) {
+      expect(signalsOf(text).slugs, text).toContain("electrical-install");
+    }
+    expect(extractJournalSuggestions("Elektros darbai").workDirectionSlug).toBe("electrician");
+    expect(extractJournalSuggestions("Elektrinė instaliacija name").workDirectionSlug).toBe("electrician");
+  });
+
+  it("a trailing where-phrase after the work is context, never a second trade — measured on production 2026-09-12 (#1689)", () => {
+    // "5 hours tiling in the kitchen" auto-added COOKING to a CV beside tiling
+    const noKitchenTrade = [
+      "5 hours tiling in the kitchen",
+      "Klijavau plyteles virtuvėje",
+      "Klijavau plytelę virtuvėje",
+      "5 uur getegeld in de keuken",
+      "клал плитку на кухне",
+    ];
+    for (const text of noKitchenTrade) {
+      expect(signalsOf(text).slugs, text).toContain("tiling");
+      expect(signalsOf(text).slugs, text).not.toContain("cooking");
+      expect(extractJournalSuggestions(text).fragments.map((f) => f.activitySlug), text).not.toContain("cook");
+    }
+    expect(signalsOf("4 Std. gestrichen im Lager").slugs).toEqual(["painting"]);
+    // a bare place is still the place's work, by design — nothing else names the work
+    expect(signalsOf("Dirbau virtuvėje 5 val.").slugs).toContain("cooking");
+    expect(signalsOf("5 val. virtuvėje").slugs).toContain("cooking");
+    // an object that merely ENDS like a locative keeps its trade, with or without the ę
+    expect(signalsOf("Dėjau plytelę").slugs).toContain("tiling");
+    expect(signalsOf("Dejau plytele").slugs).toContain("tiling");
+    // the head must already name work: mopping in a warehouse keeps the warehouse reading
+    expect(signalsOf("Ploviau grindis sandėlyje").slugs).toContain("warehouse-operations");
+    // under a header, a place-only item names no trade for the whole text either (#1711 on the card path)
+    expect(signalsOf("9 val. klijavau plyteles: 5 val. virtuvėje, 4 val. vonioje").slugs).toEqual(["tiling"]);
+  });
+
+  it("lifting and tightening are not cooking or translation — the fuzzy tier's LT blocklist (#1689, measured over 49 work verbs)", () => {
+    for (const text of ["2 val. kėliau prekes", "Veržiau varžtus 3 val.", "Varžtų veržimas"]) {
+      expect(signalsOf(text).all, text).not.toMatch(/cooking|translation|maist|vertim/i);
+    }
+    // the stems themselves still read: baking is cooking, translating is translation
+    expect(signalsOf("Kepiau duoną 2 val.").all).toMatch(/cooking|maist/i);
+    expect(signalsOf("Verčiau dokumentus 2 val.").all).toMatch(/translation|vertim/i);
+  });
+
   it("'kraną' as a faucet (repair) never becomes crane operation", () => {
     const s = signalsOf("remontavau kraną");
     expect(s.all).toMatch(/remont/i);
@@ -355,6 +447,27 @@ describe("owner smoke follow-up 2026-07-02 — RENDER-TIME detected section for 
     expect(all).toMatch(/rengin|inventori/i); // "Renginių / inventoriaus paruošimas"
   });
 
+  it("a skill-slug activity key never reaches the card as a raw label; the skill shows as a skill (#1689)", () => {
+    for (const text of ["5 hours tiling", "5 uur getegeld", "5 Std. Fliesen verlegt"]) {
+      const d = detectedOf(text, []);
+      expect(d.labels, text).not.toContain("tiling");
+      expect(d.recognizedSlugs.has("tiling"), text).toBe(true);
+      expect(d.labels.join(" | ") + d.skills.map((s) => s.name).join(" | "), text).toContain(skillNamesLT["tiling"]);
+    }
+  });
+
+  it("a capability label that rewords a skill already on the card is one signal, not two (#1689)", () => {
+    // "Glaisčiau sienas" → skill skim-coating ("Sienų glaistymas") + the activity
+    // label "Sienų glaistymas / lyginimas" — one name contains the other
+    const declared = [{ id: "s1", slug: "skim-coating", name: skillNamesLT["skim-coating"] }];
+    const d = detectedOf("Glaisčiau sienas 4 val.", declared);
+    expect(d.skills.map((s) => s.name)).toEqual([skillNamesLT["skim-coating"]]);
+    expect(d.labels.some((l) => l.toLowerCase().includes("glaist"))).toBe(false);
+    // a label that names something ELSE still shows
+    const other = detectedOf("Glaisčiau sienas 4 val. ir vedžiojau šunį", declared);
+    expect(other.labels.join(" | ")).toMatch(/gyvūn|priežiūr/i);
+  });
+
   it("owner sentence → NONE of the 8 declared construction skills in Section A", () => {
     const d = detectedOf(OWNER_TEXT);
     // No declared construction skill is offered as detected/linkable…
@@ -465,6 +578,138 @@ describe("owner smoke follow-up 2026-07-02 — profile catalogue collapsed, dete
       expect(messages.journalSkillLinks.linkMore).toBe(linkMore);
       expect(messages.journalSkillLinks.detectedHeading).toBeTruthy();
       expect(messages.journalSkillLinks.detectedEmpty).toBeTruthy();
+    }
+  });
+});
+
+describe("production walk 2026-09-12 (#1689) — a fully linked entry never reads as unrecognized", () => {
+  // Measured on build 5e5c2aaf with the QA worker: four of six entry cards —
+  // tiling entries whose pipeline rows read `fragment_skill 1|tiling` and whose
+  // linked chip sat right above — said "Iš šio įrašo teksto įgūdžių atpažinti
+  // nepavyko". The recognized skills were merely filtered out of Section A
+  // because they were already linked. ONE pure rule now decides the section's
+  // sentence; the component reads it.
+  const ROOT = join(__dirname, "..", "..");
+  const links = readFileSync(
+    join(ROOT, "components/app/journal-entry-skill-links.tsx"),
+    "utf8",
+  );
+  const tiling = { id: "s-tiling", name: "Plytelių klojimas" };
+  const skim = { id: "s-skim", name: "Sienų glaistymas" };
+
+  it("recognized + all already linked → all_linked (never 'none')", () => {
+    expect(
+      detectedSectionState({
+        detectedSkills: [tiling],
+        detectedLabels: ["Plytelių klojimas"],
+        selectedIds: new Set([tiling.id]),
+        linkedNames: new Set([tiling.name]),
+      }),
+    ).toBe("all_linked");
+  });
+
+  it("recognized and NOT yet linked → chips (a declared skill or a label)", () => {
+    expect(
+      detectedSectionState({
+        detectedSkills: [tiling, skim],
+        detectedLabels: [],
+        selectedIds: new Set([tiling.id]),
+        linkedNames: new Set([tiling.name]),
+      }),
+    ).toBe("chips");
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: ["Sandėlio / logistikos darbai"],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+      }),
+    ).toBe("chips");
+  });
+
+  it("nothing recognized → none, even when a manual link exists above", () => {
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: [],
+        selectedIds: new Set([tiling.id]),
+        linkedNames: new Set([tiling.name]),
+      }),
+    ).toBe("none");
+  });
+
+  it("a label that only duplicates a chip about to render is not a second chip", () => {
+    // Detected label == the name of a detected declared skill (unlinked): the
+    // skill chip renders, the label is dropped — still "chips", counted once.
+    expect(
+      detectedSectionState({
+        detectedSkills: [skim],
+        detectedLabels: [skim.name],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+      }),
+    ).toBe("chips");
+  });
+
+  it("a candidate of the entry (pending or just decided) is recognition content → chips, never a sentence (#1689)", () => {
+    // The rows carry their own result ("✓ Pridėta" / "Atmesta"); Section A
+    // must not say "nothing recognized" or "already linked above" under them.
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: [],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+        candidateNames: new Set(["Programinės įrangos testavimas"]),
+      }),
+    ).toBe("chips");
+    // A display-only label that names the candidate IS the candidate.
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: ["Programinės įrangos testavimas"],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+        candidateNames: new Set(["Programinės įrangos testavimas"]),
+      }),
+    ).toBe("chips");
+    // No candidates → the three-way rule is unchanged.
+    expect(
+      detectedSectionState({
+        detectedSkills: [],
+        detectedLabels: [],
+        selectedIds: new Set(),
+        linkedNames: new Set(),
+        candidateNames: new Set(),
+      }),
+    ).toBe("none");
+  });
+
+  it("the component reads the ONE rule and renders the truthful sentence in both branches", () => {
+    expect(links).toContain("detectedSectionState({");
+    expect(links).toContain("candidateNames,");
+    // the candidate rows render in BOTH branches, through the shared row
+    expect(links.match(/\{candidateRows\}/g)?.length).toBe(2);
+    expect(links).toContain('from "@/components/app/journal-entry-candidate-decision"');
+    expect(links).toMatch(/const hasDetected = detectedState === "chips"/);
+    // Both the no-declared-skills branch and the main branch carry the
+    // three-way sentence; `detectedEmpty` is never the only alternative.
+    const linkedOccurrences = links.match(
+      /entry-skill-detected-linked-\$\{entryId\}/g,
+    );
+    expect(linkedOccurrences?.length).toBe(2);
+    expect(links.match(/t\("detectedAllLinked"\)/g)?.length).toBe(2);
+  });
+
+  it("the sentence exists in every catalogue that carries the namespace", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const messages = JSON.parse(
+        readFileSync(join(ROOT, `messages/${loc}.json`), "utf8"),
+      ) as { journalSkillLinks: Record<string, string> };
+      expect(messages.journalSkillLinks.detectedAllLinked).toBeTruthy();
+      expect(messages.journalSkillLinks.detectedAllLinked).not.toBe(
+        messages.journalSkillLinks.detectedEmpty,
+      );
     }
   });
 });

@@ -126,7 +126,7 @@ export async function LabourMarketWorldMap() {
   return (
     <section className="card-border flex flex-col gap-5 p-5 sm:p-6" data-testid="labour-market-world-map">
       <header className="flex flex-col gap-1">
-        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>
@@ -149,9 +149,9 @@ export async function LabourMarketWorldMap() {
             <svg aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" data-testid="world-map-routes">
               <defs>
                 <linearGradient id="lmwm2-route" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.05" />
+                  <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.05" />
                   <stop offset="50%" stopColor="#2563EB" stopOpacity="0.45" />
-                  <stop offset="100%" stopColor="#22D3EE" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.05" />
                 </linearGradient>
               </defs>
               {zones
@@ -196,7 +196,7 @@ export async function LabourMarketWorldMap() {
                     <span className="text-meta leading-snug text-text-muted" data-testid={`world-zone-${z.key}-state`}>
                       {nodeState(z)}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-meta font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
+                    <span className="inline-flex items-center gap-1 text-meta font-semibold text-brand-blue transition-colors group-hover:text-brand-champagne">
                       {ctaLabel(z)}
                       <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
                     </span>
@@ -229,10 +229,10 @@ export async function LabourMarketWorldMap() {
                         <Icon className="h-3.5 w-3.5 text-brand-cyan" strokeWidth={1.75} aria-hidden />
                         <span className="font-display text-sm font-semibold text-text-primary">{nodeLabel(z)}</span>
                       </span>
-                      <ArrowRight className="h-4 w-4 text-brand-blue transition-colors group-hover:text-brand-cyan" strokeWidth={2} aria-hidden />
+                      <ArrowRight className="h-4 w-4 text-brand-blue transition-colors group-hover:text-brand-champagne" strokeWidth={2} aria-hidden />
                     </span>
                     <span className="text-xs leading-relaxed text-text-muted">{nodeState(z)}</span>
-                    <span className="mt-0.5 text-meta font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
+                    <span className="mt-0.5 text-meta font-semibold text-brand-blue transition-colors group-hover:text-brand-champagne">
                       {ctaLabel(z)}
                     </span>
                   </Link>
@@ -264,7 +264,7 @@ export async function LabourMarketWorldMap() {
             <Link
               href="/dashboard/profile"
               data-testid="world-map-profile-cta"
-              className="mt-2 inline-flex w-fit items-center gap-1 text-xs font-semibold text-brand-blue transition-colors hover:text-brand-cyan"
+              className="mt-2 inline-flex w-fit items-center gap-1 text-xs font-semibold text-brand-blue transition-colors hover:text-brand-champagne"
             >
               {t("ctaProfile")} →
             </Link>

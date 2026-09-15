@@ -8,5 +8,9 @@
   "kilograms": "kg",
   "packages": "[EN] packages",
   "box_per_day": "[EN] boxes/day",
-  "square_meters_per_day": "[EN] m²/day"
+  "square_meters_per_day": "[EN] m²/day",
+  "kilometers": "km",
+  "pallets": "[EN]pallets",
+  "covers": "[EN]covers",
+  "cases": "[EN]cases"
 }

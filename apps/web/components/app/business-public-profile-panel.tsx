@@ -206,7 +206,7 @@ export function BusinessPublicProfilePanel({
               type="button"
               onClick={save}
               disabled={pending}
-              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand disabled:opacity-50"
             >
               {pending ? t("saving") : t("save")}
             </button>

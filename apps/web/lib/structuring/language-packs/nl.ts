@@ -184,7 +184,9 @@ export const NL_PACK: LanguagePack = {
       exact: ["geschilderd", "schilderde", "geverfd", "muren geverfd"],
     },
     tiling: {
-      exact: ["tegels gezet", "tegels gelegd", "betegeld", "tegelzetter"],
+      // Verb forms carry the stem WITH its ending — bare "tegel" ⊂ "tegelijk"
+      // (at the same time), verified by the FP fixture.
+      exact: ["tegels gezet", "tegels gelegd", "betegeld", "tegelzetter", "tegelen", "getegeld", "tegelde"],
     },
     plastering: {
       exact: ["gestuukt", "stucwerk", "gepleisterd", "stukadoor"],

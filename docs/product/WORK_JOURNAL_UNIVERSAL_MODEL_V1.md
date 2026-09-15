@@ -1,0 +1,230 @@
+# Work Journal — Universal Model v1 (one journal for the full world of work)
+
+Status: OWNER-DIRECTED DESIGN EVIDENCE + LIVE CONTRACT (issue #1689, 2026-09-11).
+Machine form: `apps/web/lib/journal/work-evidence-archetypes.ts` (data + composition),
+guarded by `work-evidence-archetypes.test.ts` and `lib/guards/journal-work-intelligence.test.ts`.
+This file is the human-readable matrix those tests enforce; the code is the source of truth.
+
+Owner direction (verbatim intent): ONE Work Journal engine capable of representing work
+across the whole ESCO/ISCO occupational universe — no profession-specific journals, no
+thousands of static forms, no giant occupation switch, no arbitrary human scores, no fake
+skill-hours. `ESCO/ISCO → OCCUPATION → ARCHETYPE(S) → UNIVERSAL RECORD → ADAPTIVE MODULES
+→ REAL EVIDENCE → PROFESSIONAL INTELLIGENCE`. The person never sees this classification.
+
+## 1. What already exists (audited on production, 2026-09-11)
+
+| Structure | Finding | Consequence |
+|---|---|---|
+| `journal_entries` + `journal_entry_metrics` | `metric_slug` is free TEXT (no CHECK, no FK); `value_numeric` / `value_text` / `unit_slug → productivity_units` (14 units in 5 categories since 20260911130000) / `source ∈ worker_input, ai_extracted, manager_corrected` | **The universal record is already extensible.** Every archetype field is a metric slug; no column, no table, no migration for fields. New UNITS are registry rows (§10 slug registry): km / pallets / covers / cases LIVE 2026-09-11 |
+| `esco_occupations` | 3,039 active, **all** with a 4-digit ISCO-08 code; 42 of 43 sub-major groups populated (63 has no ESCO rows) | ISCO group is the resolution key; the map needs ≈50 rows, not 3,039 |
+| `esco_skills`, `esco_occupation_skills`, `esco_labels` | 13,939 skills (10,715 competence / 3,219 knowledge), 126,051 relations, 1.05 M labels / 28 locales | Semantic layer exists; slug↔ESCO bridge for the platform's 161 skills is EMPTY and owner-gated (#1355) — ESCO stays interoperability, never ranking |
+| Canonical work-time rule `work-time.ts` (+ SQL mirror) | fragments win, entry quantity fallback, never summed; `days` never hours; provenance per line | Time is already first-class and counted once |
+| `journal_entry_skills` (+ `provenance`), `journal_entry_confirmations`, `journal_entry_photos`, `source_document_file` metric | skill involvement, human confirmation, photo evidence, immutable original document | Evidence/verification layer exists |
+| `fragment_skill` metric (`"<index>\|<slug>"`, added 2026-09-11) | the skill pipeline / the worker's candidate confirmation record WHICH persisted fragment a link was recognised on (`fragment-skill-evidence.ts`); append-only, inert without the link | Fragment-level attribution is evidence, not a guess |
+| `work_time_override` metric (`"<code>\|<day>\|<reason>"`, source `worker_input`, added 2026-09-11) | the worker's acknowledgement of a plausibility check (`work-time-plausibility.ts`, owner §13); append-only, one per check; only the worker's own row counts | A warning is answered with a reason, never by editing a figure; the check stays listed as acknowledged |
+| archetype module rows (`journal-module-fields.ts`, added 2026-09-11) | `metric_slug` ∈ `JOURNAL_MODULES` (never a core slug), `value_text` = the person's words, `source = worker_input`; accepted only inside the saved engagement's composition | The adaptive modules are rows in the same table — no column, no form registry, no second write path |
+| `journal_profession_templates` (migration 20260714180000) | **not applied** (owner-gated draft) | The template registry is not live; archetype data lives in code until it is |
+| Recognition chain (`skill-pipeline.ts`, accept / reject / correct, append-only markers) | live, measured on production 2026-09-08 | Unchanged by this model |
+
+## 2. Four kinds of time (binding — owner rule §5)
+
+| Concept | Definition | Where it lives |
+|---|---|---|
+| ENTRY WORKED TIME | the entry's canonical duration, counted once | `deriveEntryWorkTime` |
+| ACTIVITY TIME | hours on the same fragment as an activity label, or the entry's own direction for an entry-level duration | `work-intelligence.ts` → `activities` |
+| SKILL INVOLVEMENT | a skill was linked to an entry: entries · days · contexts · `sharedHours` (shown, never summed across skills) | `work-intelligence.ts` → `skills` |
+| ATTRIBUTABLE PRACTICE TIME | hours a skill can claim: entries where it is the ONLY linked skill, plus fragments where a `fragment_skill` row names it as the ONE linked skill on that fragment's own duration | `work-intelligence.ts` → `attributedHours` |
+
+An 8-hour entry linked to four skills = 8 h of work, four involvements, 0 h attributed each — never 32.
+"Klijavau plyteles 6 val., glaisčiau sienas 2 val." with both skills linked on their own fragments = 8 h of work,
+6 h tiling + 2 h skim-coating attributed, 0 h shared — from the worker's own split. A fragment two linked skills
+sit on, a row whose skill the worker unlinked, and an entry-level duration all stay involvement. Every hour once:
+attributed + shared + multi-activity + unattributed = total. Entries saved before this rule gain the rows on the
+next pipeline pass (reprocess) or when the worker confirms a candidate.
+
+## 3. Archetype matrix
+
+Columns: time model · activity model · quantity/output · tools · precise skill-time attribution possible? · evidence · verifier · regulatory/continuity · privacy · result · Living CV consequence · modelled on (real-world record). Machine form carries the same rows.
+
+| Archetype | Time | Activity | Output | Tools | Skill-time | Evidence | Verifier | Regulatory | Privacy | Result | Living CV | Modelled on |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| field_project | activity duration | work package | physical output | equipment | activity | photo, supervisor, client | supervisor | safety record | — | completed/partial/blocked | hours + output | daily site diary / field report |
+| shift | shift | task | units handled | — | involvement | system record, supervisor | supervisor | — | — | handover | hours + output | rostered shift record with handover |
+| construction_trade | clock (start/end/breaks) | work package | physical output (m², pcs) | equipment | activity | photo, original timesheet, supervisor, client | supervisor | safety record | — | completed/partial/blocked | hours + output | trade daily report (08:00–17:00, 30 min break, object, m², materials, photos, sign-off) |
+| production_manufacturing | shift | batch run | physical output | equipment | activity | system record, inspection, supervisor | supervisor | safety record | — | inspection pass/fail | hours + output | production / batch log (line, machine, output, scrap, QC) |
+| machine_equipment_operation | clock | task | physical output | equipment | precise | system record, supervisor | supervisor | continuity | — | completed/partial/blocked | continuity record | operator hour-meter / equipment log |
+| maintenance_repair | activity duration | task | cases | equipment | activity | system record, photo, inspection, client | client | safety record | — | inspection pass/fail | hours + cases | CMMS work order (asset, fault, diagnosis, parts, labour hours, downtime, test) |
+| driving_mobile | driving / duty / rest | route leg | distance | vehicle | precise | tachograph/GPS, document, client | client | duty time | — | completed/partial/blocked | hours + output | tachograph / driver daily log (Reg. 561/2006) — driving, other work, rest never merged |
+| logistics_warehouse | shift | task | units handled | equipment | activity | system record, supervisor | supervisor | safety record | — | completed/partial/blocked | hours + output | WMS shift record (zone, orders/pallets, forklift) |
+| clinical_healthcare | shift | procedure | cases | instruments | involvement | system record, supervisor, peer | supervisor | supervised practice | patient-confidential | outcome | practice hours | clinical shift log / placement logbook — categories and counts, never patient content |
+| supervised_practice | session | procedure | cases | — | activity | document, supervisor | supervisor | supervised practice | client-confidential | outcome | practice hours | trainee lawyer / psychologist / social worker / teacher practice record |
+| case_client | case time | case/matter | cases | software | precise | artifact, document, client | client | — | client-confidential | outcome | hours + cases | matter time entry (client, matter, activity, duration, billable, deliverable) |
+| office_administrative | clock | task | units handled | software | involvement | system record, artifact | supervisor | — | — | completed/partial/blocked | hours + output | office day record |
+| knowledge_project | activity duration | deliverable | — | software | activity | artifact, document, peer | peer | — | client-confidential | outcome | deliverables | project timesheet + deliverable log |
+| software_digital | activity duration | deliverable | — | software | activity | system record, artifact, peer | peer | — | client-confidential | outcome | deliverables | issue tracker + change history; time evidence when available, never forced |
+| engineering_technical | activity duration | deliverable | — | instruments | activity | artifact, document, inspection, peer | peer | safety record | — | inspection pass/fail | deliverables | engineering design / inspection / test record |
+| research | activity duration | procedure | — | instruments | activity | artifact, document, peer | peer | — | — | outcome | deliverables | lab notebook (experiment, protocol, sample, finding) |
+| education_teaching | session | session | cases (learners) | — | precise | document, artifact, peer | supervisor | — | client-confidential | outcome | hours + cases | lesson register / teaching log |
+| apprenticeship_training | session | task | — | — | activity | document, supervisor | supervisor | licence hours | — | outcome | practice hours | on-the-job training record (competency practised, hours, trainer sign-off, cumulative) |
+| sales_commercial | activity duration | task | units handled | software | involvement | system record, client | supervisor | — | client-confidential | outcome | hours + output | CRM activity log (leads, meetings, orders) |
+| customer_service | shift | task | units handled | software | involvement | system record, supervisor | supervisor | — | client-confidential | outcome | hours + output | contact-centre shift (contacts, channel, outcomes) |
+| hospitality | shift | task | units handled (covers) | equipment | involvement | supervisor | supervisor | safety record | — | completed/partial/blocked | hours + output | service-period record (station, covers, food-safety checks) |
+| care_work | session | procedure | cases (visits) | — | activity | document, client, supervisor | supervisor | supervised practice | patient-confidential | outcome | practice hours | care visit log — activity category and duration, never private detail |
+| agriculture_forestry_fisheries | activity duration | work package | physical output | equipment | activity | photo, document, system record | supervisor | safety record | — | completed/partial/blocked | hours + output | field / spray / catch record |
+| security_emergency | shift | incident response | — | equipment | involvement | system record, supervisor | supervisor | safety record | security-sensitive | handover | hours + cases | patrol log / daily activity report (timestamped checkpoints, incidents, handover) |
+| management_leadership | activity duration | deliverable | — | software | involvement | artifact, document, peer | peer | — | client-confidential | outcome | deliverables | management record (team, decisions, plans, outcomes) |
+| creative_media | activity duration | deliverable | — | software | activity | artifact, client | client | — | — | outcome | deliverables | production / publication log |
+| legal_professional_services | case time | case/matter | cases | software | precise | artifact, document, client | client | supervised practice | client-confidential | outcome | hours + cases | matter time entry (6-minute units) + supervised-practice record |
+| public_service | clock | case/matter | cases | software | involvement | system record, document | supervisor | — | client-confidential | outcome | hours + cases | case / service record (reference only) |
+| cleaning_facility | shift | task | physical output (area) | equipment | activity | photo, supervisor, client | client | safety record | — | completed/partial/blocked | hours + output | facility checklist |
+| personal_services | session | session | cases | instruments | precise | photo (consented), client | client | — | client-confidential | outcome | hours + cases | appointment book |
+| military_regulated | shift | task | — | equipment | involvement | document, supervisor | supervisor | licence hours | security-sensitive | handover | continuity record | service record / exercise log, clearance-bounded |
+
+## 4. ISCO-08 → archetypes (the full universe in ≈50 rows)
+
+Resolution: minor group (3 digits) wins, else sub-major (2 digits); unknown → universal core only.
+A RELATIONSHIP adds archetypes (a `student` engagement adds `apprenticeship_training` + `supervised_practice`).
+Every one of the 43 sub-major groups resolves (guarded). Examples:
+
+| ISCO | Family | Archetypes |
+|---|---|---|
+| 01–03 | Armed forces | military_regulated (+ management / shift) |
+| 11–14 | Managers | management_leadership + public_service / knowledge_project / field_project / hospitality + sales |
+| 21 | Science & engineering professionals | engineering_technical, knowledge_project |
+| 22 | Health professionals | clinical_healthcare, supervised_practice, case_client |
+| 23 | Teaching professionals | education_teaching, supervised_practice |
+| 24 · 26 | Business / legal-social-cultural professionals | knowledge_project, case_client; **261** legal → legal_professional_services; **263** social/religious → research, case_client; **264–265** authors, artists → creative_media |
+| 25 | ICT professionals | software_digital, knowledge_project |
+| 31 | Science & engineering associate | engineering_technical, field_project; **315** ship/aircraft controllers → driving_mobile, shift |
+| 32 | Health associate | clinical_healthcare, supervised_practice |
+| 33 · 34 · 35 | Business / legal-social / ICT associate | office/sales/case; **342** sports → personal_services, education; **343** artistic/culinary → creative_media, hospitality |
+| 41–44 | Clerical | office_administrative (+ customer_service, logistics_warehouse) |
+| 51–54 | Personal service / sales / care / protective | personal_services, hospitality; **511** travel attendants → driving_mobile; sales_commercial; care_work; security_emergency |
+| 61–63 | Agricultural, forestry, fishery | agriculture_forestry_fisheries (+ machine operation) |
+| 71–75 | Craft & trades | construction_trade, maintenance_repair, engineering_technical (721 metal/welding), production_manufacturing, creative_media (73) |
+| 81–83 | Plant/machine operators, drivers | production_manufacturing, machine_equipment_operation, driving_mobile; **834** mobile plant → machine operation; **835** deck crews → shift |
+| 91–96 | Elementary | cleaning_facility, agriculture, construction/production/logistics labour, hospitality (94), sales (95) |
+
+## 5. Composition (the assembly contract)
+
+`composeJournal(archetypes)` = UNIVERSAL CORE + strictest TIME MODEL + CONTEXT + union of
+ACTIVITY models + union of ARCHETYPE MODULES (each a small set of metric slugs, never a core
+slug) + union of EVIDENCE kinds + VERIFIERS + the **most cautious** skill-time attribution any
+archetype allows + privacy + regulatory needs. Only these modules may appear, progressively
+(quick entry → relevant details → optional evidence → advanced detail). A surgeon never sees
+construction quantity fields; a warehouse worker never clinical ones (guarded).
+
+## 6. Universal professional intelligence (what the evidence can answer today)
+
+Live in `deriveWorkIntelligence` and rendered on `/dashboard/journal#work-intelligence`, the
+Living CV (`/cv`) and the conversation (`journal-recent`, `figures`): WHAT (activities,
+skills) · HOW LONG (today / 7 / 30 / 365 days / all time) · HOW OFTEN (entries, days) · WHEN LAST ·
+WHERE / CONTEXT (per engagement, context diversity) · WHAT PRODUCED (outputs in recorded units) ·
+WHAT SKILLS WERE INVOLVED (involvement vs attributed) · WHAT EVIDENCE (confirmed / photos /
+original document / self-only) · WHO CONFIRMED (approved confirmations only) · HOW IT CHANGED
+(months, 30-vs-30 trend) · WHAT OCCUPIES MOST · WHERE TO GROW (owner line 8, LIVE 2026-09-12:
+`growth-reading.ts`, ONE pure derivation the section renders and the chat answers — a FACT block
+(the skills the entries back, in hours; the declared-only skills left out, counted) kept apart
+from a block labelled DERIVED: deepen (a closed set of facts per evidenced skill — used only
+alongside others / never confirmed / rising 30-vs-30 / no entry for 90 days), expand (the existing
+adjacency over EVIDENCED slugs only), demand (the board's own missing-skill counts in the chat,
+UNKNOWN on the page — never an empty list that reads as "nothing asks"); never a score, a rank or
+a tier of the person; withheld from the organization view) · WHAT DEMAND (opportunities board
+from journal-linked skills). Tools/systems used and ESCO occupation mapping are extension points
+(§7) — nothing is manufactured for them.
+
+## 7. Extension path (preserved, not built here)
+
+1. ~~Composer modules~~ — LIVE 2026-09-11 for RELATIONSHIP-resolved archetypes
+   (`journal-module-fields.ts`): the entry's engagement `relationship_slug` →
+   `archetypesForRelationship` → `composeJournal` → module groups, rendered behind the
+   existing "more" disclosure in BOTH editors (the compact drawer and
+   `journal-entry-composer.tsx`) as plain-word fields; each field = one `worker_input`
+   `journal_entry_metrics` row under the same atomic save (create and supersede), accepted
+   server-side only when the SAVED engagement's own composition allows the slug (refused
+   by name — `module_field_invalid` — never dropped), preloaded on edit, shown back on the
+   entry. A `student` placement shows supervision level / competency practised / learning
+   outcome; `volunteer` the field-project modules. The OCCUPATION path is LIVE 2026-09-12:
+   `journal-occupation-path.ts` resolves the worker's OWN professions → `professions.esco_uri`
+   → `esco_occupations.isco_group` server-side (the linkage was applied 2026-09-08, ledger
+   `20260908082301`, 34 of 49 professions), both editors compose `archetypesForIsco` ∪
+   `archetypesForRelationship` (a tiler, 7122 → 71, sees place and crew, materials and tools,
+   conditions and safety, inspection; a software developer, 2512 → 25, software delivery and
+   client/matter), and the server's accept set is the worker's own families ∪ the engagement's
+   relationship — never a client-posted slug. All 25 modules / 87 field slugs are labelled in
+   the five journal locales (guarded: every ISCO- or relationship-reachable slug). A profession
+   without an `esco_uri` composes nothing on this path — UNKNOWN, never a guessed family.
+2. ~~Units: add registry rows for km / covers / cases / pallets~~ — LIVE 2026-09-11
+   (`20260911130000_productivity_units_universal_v1`, four additive platform rows, guarded
+   rollback). One list in code (`PLATFORM_OUTPUT_UNIT_SLUGS`, `work-time.ts`) feeds both
+   editors' quantity pickers; the recognizer reads "320 km" / "36 palečių" the way it read
+   m²; the chat and MCP intake write the stated output as the entry-level `quantity` in its
+   recorded unit (machine provenance) beside the fragments' time — never where the slot
+   already carries a span's minutes, never as time. Covers and cases are picker-only: no
+   safe prose reading exists, so nothing is guessed. Work intelligence shows each unit on
+   its own line, unconverted. Still extension points: `orders`, `contacts`, `tonnes` and
+   org-scoped units — seeded only when a surface actually records them.
+3. ~~ESCO occupation → archetype resolution surface~~ — LIVE 2026-09-12 (item 1 above;
+   `iscoGroupsForEscoUris` is the batched reader). Still an extension point: the composition's
+   `timeModel` / `skillTimeAttribution` are computed but not yet read by the analytics layer,
+   and the 15 unmapped professions stay unmapped until a correct URI exists for each.
+4. Template registry migration (draft 20260714180000) may carry the same archetype data when
+   the owner applies it — the code stays canonical until then.
+5. ~~Overlap / implausible-duration detection (owner §13)~~ — LIVE 2026-09-11 as
+   `work-time-plausibility.ts` over `work-time.ts` lines: `day_over_24h` (arithmetic), `long_day`
+   (> 16 h, a prompt to look again), `line_over_24h`, `entry_duration_ignored` (the rule's
+   `conflict`, recorded before but shown to nobody). Warn, never corrupt: no figure changes;
+   acknowledged with a reason via `work_time_override` rows and kept visible. Shown in the
+   section (`wi-checks`) and right after a save in the chat flow and the composer. What stays
+   an extension point: a SPAN overlap check — the journal persists durations, not clock spans,
+   so nothing compares "08:00–12:00" across entries until spans become persisted evidence.
+6. ~~Organization views (owner §14)~~ — LIVE 2026-09-11: the person page
+   (`/dashboard/people/[workerId]`) composes `loadWorkIntelligence` for a member and renders
+   the same section with `audience="organization"`. Scope is the database's org-manager RLS
+   branch on every journal table (entries logged against the organization's own engagements),
+   never a filter or an admin client; confirmed hours come from the organization's own approved
+   confirmations. The organization sees no plausibility checks, no adjacent directions and no
+   diary links — those are the person's. The per-member roll-up on `/dashboard/reports`
+   (the windowed journal report, `journal-window-report.ts`) is LIVE the same day: with
+   `workTime` the report embeds the list core's metric projection and derives every member's
+   hours, confirmed hours (approved only), days worked and main kind of work through
+   `deriveWorkIntelligence` over the window's own rows — no skills read, no second hours
+   arithmetic; each member's name opens the person page. Its review counts were corrected in
+   the same slice: confirmed = approved, returned = rejected / changes requested, the rest
+   await review (any confirmation row used to count as confirmed, hub tile included).
+7. ~~The second hour ledger (owner §19)~~ — BRIDGED 2026-09-12. Imported XLSX timesheets and
+   operator-entered attendance land in `work_hour_allocations`, never in `journal_entry_metrics`;
+   until this date that ledger was invisible to the section, the CV and the day check (re-audit
+   F7). The ONE work-intelligence reader now reads it beside the journal (`readAllocationsForWorker`
+   → `readOrganizationRecords`, the caller's RLS: own worker OR manages the organization) and the
+   model carries it as `organizationRecords` per period — hours, days, imported / approved /
+   linked-to-a-live-entry / rejected — **added to no journal figure and reaching no skill** (an
+   hour record says when and how long, not what was done). The section (`wi-org-records`), the
+   CV (`cv-organization-recorded-hours`) and the chat's period answer name it beside the journal
+   figure with that rule in words. The day check now includes the organization's hours on days
+   that carry a journal line, so "an imported timesheet on top of a live record" is arithmetic
+   (`organizationHours` on the check), not a comment. Extension points: a row explicitly linked to
+   a journal entry is named as already counted; unlinked overlap is NOT guessed — when the import
+   path starts linking rows to entries, `linkedHours` will say how much of the ledger the journal
+   already describes.
+8. ~~Five model rules the re-audit found unpinned (F8–F12)~~ — PINNED 2026-09-12. **F8** a
+   skill's involvement (`sharedHours`) is the whole remainder of every entry it shares, so five
+   skills on one 8 h entry each show 8 h and the person's figure is 8 — no consumer may add
+   per-skill involvement (guard block 13 forbids the sum in every surface that reads the model).
+   **F9** every completed quantity an entry recorded in a non-time unit counts, one per unit
+   within the entry (latest row per unit — a re-sent figure never doubles), and a unit is
+   totalled only inside one kind of work (`OutputTotal.activity`, the entry's `work_direction`):
+   40 m² + 12 m are two outputs, km driven and km of cable stay two lines; the section and the
+   chat name the kind of work on the line. **F10** the work day is the person's stated day on
+   every intake — the chat and the MCP capability require `work_date`, and the composer, the
+   compact editor and the chat default it from the person's own calendar
+   (`lib/time/person-calendar-day.ts`, client input only; display stays UTC per W12). An entry
+   with no usable `work_date` is placed by its UTC save day and COUNTED as placed
+   (`EntryWorkTime.dayBasis`, `WorkPeriodTotals.entriesDayInferred`, `wi-day-inferred`) — a
+   placement is not a fact (SEP-1). Production 2026-09-12: 38 live entries, 34 stated, 4
+   without a day, none of them timed. **F11** skill rows are collapsed by slug (the canonical
+   skill identity), a link to any alias id is a link to the one skill — it can never demote an
+   entry to "shared" or list a skill twice; order-independent. **F12** per-skill
+   `confirmedHours` travels with `attributedHours` (`confirmedHoursBySlug` → the CV's
+   `confirmedHoursBySkill`), so the CV chip says in words "12 h, 8 h of it confirmed by a
+   manager" or "4 h, your own record" — never a bare figure with the qualifier in a hover title.

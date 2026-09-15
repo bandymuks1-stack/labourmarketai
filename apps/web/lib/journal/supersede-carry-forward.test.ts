@@ -319,3 +319,60 @@ describe("supersedeJournalEntry — exclusions, failure, integrity", () => {
     expect(everything).not.toMatch(/manager_confirmed/);
   });
 });
+
+describe("supersedeJournalEntry — archetype module fields ride the same atomic save (owner §12)", () => {
+  /** The saved engagement's relationship decides which module slugs the
+   *  server accepts; the composer's request never does. */
+  function withRelationship(relationship: string): Handler {
+    const base = baseHandler();
+    return (table, calls) =>
+      table === "engagement_contexts"
+        ? { data: { relationship_slug: relationship } }
+        : base(table, calls);
+  }
+
+  it("a placement's supervision fields become worker_input metric rows inside p_metrics", async () => {
+    currentSupabase = makeSupabase(withRelationship("student"), { id: "user-1" });
+    const res = await supersedeJournalEntry(
+      OLD_ID,
+      makeFormData({
+        module_metrics_json: JSON.stringify({
+          supervision_level: "meistras šalia visą dieną",
+          learning_outcome: "glaistymas",
+        }),
+      }),
+    );
+    expect(res.ok).toBe(true);
+    const rpc = rpcCalls.find((c) => c.fn === RPC_V2)!;
+    const metrics = rpc.params.p_metrics as { metric_slug: string; value_text?: string; source: string }[];
+    expect(metrics.filter((m) => m.metric_slug === "supervision_level")).toEqual([
+      { metric_slug: "supervision_level", value_text: "meistras šalia visą dieną", source: "worker_input" },
+    ]);
+    expect(metrics.some((m) => m.metric_slug === "learning_outcome")).toBe(true);
+    expect(writePayloads).toHaveLength(0);
+  });
+
+  it("a field the saved engagement does not compose is refused by name before any write — no RPC, no pipeline", async () => {
+    currentSupabase = makeSupabase(withRelationship("employee"), { id: "user-1" });
+    const res = await supersedeJournalEntry(
+      OLD_ID,
+      makeFormData({ module_metrics_json: JSON.stringify({ crew: "3 žmonės" }) }),
+    );
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.code).toBe("module_field_invalid");
+    expect(rpcCalls).toHaveLength(0);
+    expect(pipelineCalls).toHaveLength(0);
+  });
+
+  it("no module field posted → the engagement relationship is not even read", async () => {
+    const tables: string[] = [];
+    const base = baseHandler();
+    currentSupabase = makeSupabase((table, calls) => {
+      tables.push(table);
+      return base(table, calls);
+    }, { id: "user-1" });
+    const res = await supersedeJournalEntry(OLD_ID, makeFormData());
+    expect(res.ok).toBe(true);
+    expect(tables).not.toContain("engagement_contexts");
+  });
+});

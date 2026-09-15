@@ -135,7 +135,7 @@ export function ProfessionSkillsPicker({
             <button
               type="button"
               onClick={() => setReloadKey((k) => k + 1)}
-              className="text-xs text-brand-blue underline hover:text-brand-cyan"
+              className="text-xs text-brand-blue underline hover:text-brand-champagne"
             >
               {t("retry")}
             </button>
@@ -206,7 +206,7 @@ export function ProfessionSkillsPicker({
             ✓ {t("savedToast")}
             <Link
               href="/dashboard"
-              className="text-brand-blue hover:text-brand-cyan"
+              className="text-brand-blue hover:text-brand-champagne"
             >
               {t("viewProfile")}
             </Link>

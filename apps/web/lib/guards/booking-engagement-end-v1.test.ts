@@ -1221,6 +1221,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval sentence "Apply Lane A ownership 2026-09-04" pending — the
       // marker records the RED classification, not a granted approval.
       "20260904060000_owns_company_governance_membership_v1.sql",
+      // 2026-09-04, OWNER-APPROVED 2026-09-09 for this migration only: the
+      // first-party supply bridge — a new consent purpose, the
+      // partner_supply_representation declaration table, and six SECURITY
+      // DEFINER functions (first_party_supply_feed_v1 granted to service_role
+      // ONLY). RED by classification; the approval is recorded here, and a
+      // marker never reclassifies a file to GREEN.
+      "20260904120000_first_party_supply_representation_v1.sql",
       "20260905190000_public_plans_v1.sql", // 2026-09-05: public_plans_v1 — anon-safe price catalogue RPC (RED, owner-approved, APPLIED to prod 2026-09-05, #1548 merged)
       // 2026-09-05: billing safety invariants v1 (owner directive "BILLING
       // SAFETY — MANDATORY BEFORE REAL CUSTOMERS"). RED (billing): additive
@@ -1291,6 +1298,24 @@ describe("the migration set is exactly what this slice declared", () => {
       // EVID-7: the subject of an imported record can contest it. RED,
       // owner-gated, unapplied - Appendix C of the 2026-09-08 gate document.
       "20260908110000_evidence_subject_dispute_v1.sql",
+      // An institution can CORRECT a programme it created - the field that
+      // turns the employer-demand count on was fixed at creation. RED,
+      // owner-gated, unapplied.
+      "20260908120000_education_program_correction_v1.sql",
+      // 2026-09-14, owner decision 2a: WRK-8. `defects.assignee_profile_id`
+      // recorded who must fix a defect and appeared in no policy, so the one
+      // person the row exists to instruct could not read it. ONE disjunct
+      // added to `defects_select`. RED by route (any ALTER/DROP POLICY is),
+      // semantically a pure widening; `defects` held 0 rows at apply time.
+      // Marker added in the same commit as the owner's recorded decision.
+      // Applied via MCP apply_migration as ledger 20260914195053.
+      "20260914200000_defects_assignee_read_v1.sql",
+      // 2026-09-15, PER-11: the owner reviewed the full approval packet and
+      // approved this split as the canonical minimal implementation, with
+      // three pre-apply conditions (privacy export, deletion-plan accounting,
+      // guard re-pointing) met in the same slice. The annotation was added in
+      // the commit that records that approval — not spread from an earlier one.
+      "20260914210000_external_profiles_v1.sql",
 ]);
   });
 

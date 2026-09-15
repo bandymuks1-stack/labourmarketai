@@ -95,7 +95,7 @@ export function ConversationQuickReply({
           disabled={pending || value.trim().length === 0}
           aria-label={t("send")}
           data-testid={`quick-reply-send-${conversationId}`}
-          className="flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-text-on-brand transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
         >
           <ArrowUp className="h-4 w-4" strokeWidth={2} aria-hidden />
         </button>

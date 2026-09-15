@@ -69,8 +69,24 @@ function logEvent(event: Parameters<typeof serializeAuthEvent>[0]): void {
 /** MCP tool names allow [a-zA-Z0-9_-]; capability ids use dots. */
 const toolName = (capabilityId: string): string => capabilityId.replace(/\./g, "_");
 
+/**
+ * The tool list is DERIVED FROM THE REGISTRY AND CONSTANT for the lifetime of
+ * the process — `exposedCapabilities()` is a static array and every schema is
+ * a module-level zod object. Converting all of them to JSON Schema on every
+ * `tools/list` was pure repeated work on the hot path a client hits on each
+ * new conversation. Computed once, lazily, so nothing is paid at import time
+ * either (that would land on cold start, which the 2026-09-10 trace already
+ * showed is this door's largest single cost).
+ *
+ * Memoizing a DERIVED VIEW is safe in a way memoizing a read never is: it
+ * contains no user data, no caller identity and no authorization decision —
+ * only the capability descriptions every authorized client is shown.
+ */
+let TOOL_DEFS: McpToolDef[] | null = null;
+
 function toolDefs(): McpToolDef[] {
-  return exposedCapabilities().map((c) => ({
+  if (TOOL_DEFS) return TOOL_DEFS;
+  TOOL_DEFS = exposedCapabilities().map((c) => ({
     name: toolName(c.id),
     title: c.title,
     description: c.description,
@@ -79,6 +95,49 @@ function toolDefs(): McpToolDef[] {
     // tell reads from writes without parsing prose.
     annotations: c.annotations,
   }));
+  return TOOL_DEFS;
+}
+
+/** Capability lookup by MCP tool name, memoized for the same reason. */
+let BY_TOOL_NAME: Map<string, string> | null = null;
+
+function capabilityIdForTool(name: string): string | undefined {
+  if (!BY_TOOL_NAME) {
+    BY_TOOL_NAME = new Map(exposedCapabilities().map((c) => [toolName(c.id), c.id]));
+  }
+  return BY_TOOL_NAME.get(name);
+}
+
+/**
+ * THE CANONICAL BRAND, DECLARED TO THE CLIENT.
+ *
+ * The mark is the owner's original vector — `docs/brand/source/LM_Color
+ * Single.svg` — served at these paths as geometry-verbatim derivations
+ * (`public/brand/lm-mark.svg`, `public/app-icon.svg`). Nothing here draws,
+ * re-traces or substitutes a logo, and the ChatGPT-side fallback letter avatar
+ * is not ours.
+ *
+ * `title`, `websiteUrl` and `icons` are the MCP spec's own identity fields.
+ * They are additive: a client that predates them ignores them, exactly as
+ * JSON has always worked, so declaring them cannot regress an older client.
+ * Whether a given host actually renders a server-declared icon is the HOST's
+ * decision — see docs/integrations/CHATGPT_MCP_CLIENT_V1.md for what remains
+ * an owner action inside ChatGPT itself.
+ */
+function serverInfo(origin: string) {
+  return {
+    name: "labourmarket-ai",
+    version: "0.1.0",
+    title: "LabourMarket.ai",
+    websiteUrl: origin,
+    icons: [
+      // The full metallic-gold mark, for anywhere with room to render it.
+      { src: `${origin}/brand/lm-mark.svg`, mimeType: "image/svg+xml", sizes: ["any"] },
+      // The tile: same geometry, flat #D4AF37 on the ink plate, for small
+      // sizes where a five-stop gradient resolves into mud.
+      { src: `${origin}/app-icon.svg`, mimeType: "image/svg+xml", sizes: ["any"] },
+    ],
+  };
 }
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -123,7 +182,23 @@ export async function POST(req: Request) {
 
   const raw = await req.text();
   if (raw.length > MAX_BODY_BYTES) {
-    return NextResponse.json({ ok: false }, { status: 413 });
+    // NAME the limit. A bare `{ ok: false }` here is how "your file was too
+    // big for this door" reaches a user as "the import did not work" — the
+    // §12 failure this product refuses to ship. The people-ingest tools can
+    // carry a workforce list inline, so this is a boundary a real user meets,
+    // and the answer has to say what to do instead.
+    return NextResponse.json(
+      {
+        ok: false,
+        code: "request_too_large",
+        message:
+          `This MCP endpoint accepts at most ${MAX_BODY_BYTES} bytes per request ` +
+          "(roughly 48 KB of base64-encoded file). NOTHING was read or written. " +
+          "Import a larger workforce list from the web people-import panel at " +
+          "/dashboard/company#people-import.",
+      },
+      { status: 413 },
+    );
   }
   let message: unknown;
   try {
@@ -145,21 +220,21 @@ export async function POST(req: Request) {
 
   const marks: Record<string, number> = { auth: authMs };
   const response = await handleMcpMessage(message, {
-    serverInfo: { name: "labourmarket-ai", version: "0.1.0" },
+    serverInfo: serverInfo(new URL(req.url).origin),
     instructions:
       "LabourMarket.ai capabilities for the signed-in user. Reads return " +
       "recorded facts under the user's own permissions. Nothing here writes " +
       "without an explicit draft→confirm step.",
     tools: toolDefs(),
     callTool: async (name, args) => {
-      const capability = exposedCapabilities().find((c) => toolName(c.id) === name);
+      const capabilityId = capabilityIdForTool(name);
       // Unknown names are already refused by the protocol layer; this guard
       // is for the race where exposure changes between list and call.
-      if (!capability) {
+      if (!capabilityId) {
         return { isError: true, payload: { ok: false, code: "unknown_capability" } };
       }
       const tCap = performance.now();
-      const result = await runCapability(capability.id, caller, args);
+      const result = await runCapability(capabilityId, caller, args);
       marks.capability = performance.now() - tCap;
       logEvent({
         event: "external_client.tool",
@@ -184,7 +259,7 @@ export async function POST(req: Request) {
         try {
           humanText =
             (await summarizeCapabilityResult(
-              capability.id,
+              capabilityId,
               result.data ?? {},
               caller.locale,
             )) ?? undefined;

@@ -140,6 +140,34 @@ function analyse(base) {
 
   const add = (code, axiom, what, detail, certainty) =>
     findings.push({ code, axiom, what, detail, certainty });
+  // A-14 (decision 0015): a readiness answer a complete, owner-ruled
+  // `distinctSurface` block excuses is a NOTICE — printed, written to the
+  // architecture diff, never a RED finding and never silent.
+  const notices = [];
+  const notice = (code, axiom, what, detail) =>
+    notices.push({ code, axiom, what, detail, certainty: "notice" });
+  const A14_EXCUSED = [
+    "not_world_state_driven",
+    "not_reflected_on_map",
+    "requires_leaving_workspace",
+    "requires_new_page",
+    "world_state_cannot_control_it",
+  ];
+  /** `present` = the block exists; `ruled` = every answer stated, ≥ 1 evidence. */
+  const a14Of = (decl) => {
+    const present = /distinctSurface:\s*\{/.test(decl);
+    if (!present) return { present: false, ruled: false };
+    const str = (k) => (new RegExp(k + ":\\s*[\"'`]([^\"'`]*)[\"'`]").exec(decl)?.[1] ?? "").trim();
+    const evidenceSrc = /evidence:\s*\[([^\]]*)\]/.exec(decl)?.[1] ?? "";
+    const evidenceCount = [...evidenceSrc.matchAll(/["'`][^"'`]{10,}["'`]/g)].length;
+    const ruled =
+      str("userJob").length >= 10 &&
+      str("graphEdge").length >= 10 &&
+      str("whyReuseDamages").length >= 10 &&
+      str("ownerRuling").length >= 10 &&
+      evidenceCount > 0;
+    return { present, ruled };
+  };
 
   // 1. NEW SCREENS ---------------------------------------------------------
   for (const file of added.filter((f) => IS_SCREEN.test(f))) {
@@ -436,15 +464,26 @@ function analyse(base) {
     for (const decl of blockW.split(/\n\s*\{\s*\n/).slice(1)) {
       const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
       if (!id) continue;
+      const a14 = a14Of(decl);
+      if (a14.present && !a14.ruled) {
+        add("distinct_surface_unruled", "A-14", id,
+          "distinctSurface must state userJob, graphEdge, whyReuseDamages, at least one evidence item and the owner ruling (decision 0015)",
+          "certain");
+      }
       for (const [field, code] of Object.entries(WS)) {
         if (!new RegExp(field + ":").test(decl)) {
           add("unanswered_universe_question", "A-01", id,
             'does not answer "' + field + '" — WORLD_STATE_UX_ARCHITECTURE_V1 requires all five answers',
             "certain");
         } else if (new RegExp(field + ":\\s*false").test(decl)) {
-          add(code, "A-01", id,
-            '"' + field + '" is false — AI-first, one workspace, no page switching',
-            "certain");
+          if (a14.ruled && A14_EXCUSED.includes(code)) {
+            notice(code, "A-14", id,
+              '"' + field + '" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page');
+          } else {
+            add(code, "A-01", id,
+              '"' + field + '" is false — AI-first, one workspace, no page switching',
+              "certain");
+          }
         }
       }
     }
@@ -522,11 +561,16 @@ function analyse(base) {
             'does not answer "' + field + '" — ENTITY_BEHAVIOR_MODEL_V1 requires it',
             "certain");
         } else if (new RegExp(field + ":\\s*false").test(decl)) {
-          add(code, "A-01", id,
-            field === "worldStateCanControlIt"
-              ? '"worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed'
-              : '"' + field + '" is false — the world grows by behavior, not by new tables, modules or architectures',
-            "certain");
+          if (a14Of(decl).ruled && A14_EXCUSED.includes(code)) {
+            notice(code, "A-14", id,
+              '"' + field + '" is false — excused by the owner-ruled distinctSurface block (decision 0015)');
+          } else {
+            add(code, "A-01", id,
+              field === "worldStateCanControlIt"
+                ? '"worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed'
+                : '"' + field + '" is false — the world grows by behavior, not by new tables, modules or architectures',
+              "certain");
+          }
         }
       }
     }
@@ -614,12 +658,12 @@ function analyse(base) {
     add("duplicate_action", "A-08", d, "two surfaces claim to own the same action", "certain");
   }
 
-  return { findings, surfaces, changed: { added, modified, deleted } };
+  return { findings, notices, surfaces, changed: { added, modified, deleted } };
 }
 
 // ── architecture diff ───────────────────────────────────────────────────────
 
-function writeArchitectureDiff({ findings, surfaces }, status) {
+function writeArchitectureDiff({ findings, notices = [], surfaces }, status) {
   const rows =
     surfaces.length === 0
       ? "_No new product surface was added by this PR._"
@@ -662,6 +706,14 @@ ${rows}
 ## Axiom checks
 
 ${violations}
+
+## A-14 notices (owner-ruled distinct surfaces — decision 0015)
+
+${
+  notices.length === 0
+    ? "_none_"
+    : notices.map((n) => `- \`${n.code}\` on \`${n.what}\` — ${n.detail}`).join("\n")
+}
 
 ## Rules that were checked
 
@@ -707,6 +759,11 @@ function selfTest() {
     // Transitional waiver: the expiry predicate must really flip.
     ["waiver_expiry_before", /SPATIAL_ENTITY_KINDS\s*=\s*\[/.test("export const SPATIAL_ENTITY_KINDS = [")],
     ["waiver_expiry_after", !/SPATIAL_ENTITY_KINDS\s*=\s*\[/.test("export function renderEntityByType(e) {}")],
+    // A-14 (decision 0015): the distinctSurface detectors must really fire.
+    ["a14_block_present", /distinctSurface:\s*\{/.test("    distinctSurface: {\n      userJob:")],
+    ["a14_block_present_negative", !/distinctSurface:\s*\{/.test("    transitionalWaiver: {\n")],
+    ["a14_ruling_regex", (new RegExp("ownerRuling" + ":\\s*[\"'`]([^\"'`]*)[\"'`]").exec('      ownerRuling: "Owner decision 0015, 2026-09-13",')?.[1] ?? "").length >= 10],
+    ["a14_evidence_regex", [...(/evidence:\s*\[([^\]]*)\]/.exec('evidence: [\n "constitution §14 names TIME as its own node",\n],')?.[1] ?? "").matchAll(/["'`][^"'`]{10,}["'`]/g)].length === 1],
     ["waiver_field_allowlist", ["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("worldStateCanControlIt")],
     ["waiver_field_allowlist_negative", !["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("registrationIsEnough")],
     // second_ai: the file-name heuristic must fire on ALL THREE alternatives.
@@ -739,7 +796,7 @@ try {
   process.exit(1);
 }
 
-const { findings, surfaces } = result;
+const { findings, surfaces, notices = [] } = result;
 /**
  * SCOPED OWNER WAIVERS (owner ruling 2026-07-29).
  *
@@ -777,6 +834,11 @@ writeArchitectureDiff(result, status);
 console.log(`product-gate: ${surfaces.length} new product surface(s) in this diff`);
 for (const s of surfaces) {
   console.log(`  • ${s.kind.padEnd(18)} ${s.id} ${s.declared ? "[declared]" : "[UNDECLARED]"}`);
+}
+
+// A-14 notices are never silent: printed on every run, green or red.
+for (const n of notices) {
+  console.log(`::notice file=${n.what}::[${n.code}] ${n.axiom} — ${n.detail}`);
 }
 
 if (findings.length === 0) {

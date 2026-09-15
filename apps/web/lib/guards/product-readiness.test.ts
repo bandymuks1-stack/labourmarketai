@@ -2476,9 +2476,52 @@ describe("no migration files added by this sprint", () => {
     // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
     // UNAPPLIED and owner-gated.
     //
-    // 276 -> 277: EVID-7, the subject of an imported evidence record can
-    //   contest it (20260908110000). RED, owner-gated, UNAPPLIED.
-const SPRINT_BASELINE = 277;
+    // 277 -> 278: EDU-7, an institution can correct a programme it created
+    //   (20260908120000, paired rollback). RED, owner-gated, UNAPPLIED.
+    //   Rebased over the supply bridge on 2026-09-09; RECOUNTED from the
+    //   tree: `ls supabase/migrations/*.sql | wc -l` = 278 files.
+    // 276 -> 277: the first-party supply bridge
+    // (20260904120000_first_party_supply_representation_v1, paired rollback).
+    // A new consent purpose, the partner_supply_representation declaration
+    // table with three owner-only policies and no delete policy, and six
+    // SECURITY DEFINER functions — one of them (first_party_supply_feed_v1)
+    // revoked from authenticated and granted to service_role ONLY. Additive:
+    // no existing table, policy or column is altered and nothing is dropped.
+    // RED class; owner approval given 2026-09-09 for THIS migration only.
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 277 files.
+    // 278 -> 279: `candidate` added to organization_people.relationship_kind
+    //   (owner approval 2026-09-10). ONE additive CHECK widening — a strict
+    //   superset, 0 rows in the table, no policy/grant/function touched.
+    // 279 -> 280: four platform rows in the `productivity_units` registry —
+    //   kilometers / pallets / covers / cases
+    //   (20260911130000_productivity_units_universal_v1, paired guarded
+    //   rollback; issue #1689). INSERT … ON CONFLICT DO NOTHING only: no
+    //   table, column, policy, grant or function touched. GREEN class;
+    //   self-applied via MCP under the conditional prod-apply rule.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
+    // Bumped 280 -> 281 for the WRK-8 assignee read widening
+    //   (20260914200000_defects_assignee_read_v1, owner decision 2a of
+    //   2026-09-14, paired rollback). RED by route — the scanner flags any
+    //   ALTER/DROP POLICY — and semantically a pure one-disjunct WIDENING of
+    //   `defects_select`: every caller who could read a row before still can,
+    //   and exactly one new class is admitted, the person named in
+    //   `assignee_profile_id`, for that row only. `defects` held 0 rows at
+    //   apply time, so no existing row's visibility changed.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+    // Bumped 281 -> 282 for the PER-11 split
+    //   (20260914210000_external_profiles_v1, owner decision 4e of 2026-09-14,
+    //   paired rollback). PREPARED FOR REVIEW ONLY and deliberately carries NO
+    //   @human-gate-approved annotation: the owner approved preparing it, not
+    //   applying it. Ships UNAPPLIED.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
+    // Bumped 282 -> 283 for EVID-7 (20260908110000_evidence_subject_dispute_v1, paired
+    //   guarded rollback), reconciled onto main 2026-09-15 after #1740. RED,
+    //   owner-gated, UNAPPLIED — the subject of an imported evidence record
+    //   can contest it, and withdraw the contest. Nothing in the market-map
+    //   read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 283.
+const SPRINT_BASELINE = 283;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

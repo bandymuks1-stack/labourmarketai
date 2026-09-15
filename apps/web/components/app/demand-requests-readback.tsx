@@ -193,8 +193,8 @@ function RequestRow({
           href={`/${locale}/dashboard/company/scouting?request=${r.id}`}
           className={
             waiting
-              ? "inline-flex w-fit items-center gap-1 text-xs font-semibold text-brand-blue underline underline-offset-2 transition-colors hover:text-brand-cyan"
-              : "inline-flex w-fit items-center gap-1 text-xs font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+              ? "inline-flex w-fit items-center gap-1 text-xs font-semibold text-brand-blue underline underline-offset-2 transition-colors hover:text-brand-champagne"
+              : "inline-flex w-fit items-center gap-1 text-xs font-medium text-brand-blue transition-colors hover:text-brand-champagne"
           }
           data-testid="demand-readback-scout-link"
         >

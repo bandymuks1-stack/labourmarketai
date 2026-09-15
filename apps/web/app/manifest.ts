@@ -13,7 +13,7 @@ import type { MetadataRoute } from "next";
  * locale, and an authenticated user continues to their dashboard exactly
  * like a normal visit (no special app entry that could bypass auth).
  *
- * theme/background use the ink-900 page token (#06070D, dark-first product;
+ * theme/background use the ink-900 page token (#000000, black + metallic gold;
  * see app/globals.css --c-ink-900).
  */
 export default function manifest(): MetadataRoute.Manifest {
@@ -30,8 +30,8 @@ export default function manifest(): MetadataRoute.Manifest {
     // Store taxonomy (readiness v2) — helps install-prompt + Play listing
     // classification; purely descriptive, no capability claim.
     categories: ["business", "productivity"],
-    background_color: "#06070D",
-    theme_color: "#06070D",
+    background_color: "#000000",
+    theme_color: "#000000",
     icons: [
       // The brand SVG scales to every size and carries its own background
       // plate (safe for maskable cropping). PNG 192/512 fallbacks for older

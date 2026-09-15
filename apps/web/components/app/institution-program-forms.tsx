@@ -6,6 +6,7 @@ import {
   createCohortAction,
   createProgramAction,
   setCohortMemberAction,
+  updateProgramAction,
   type ProgramActionState,
 } from "@/lib/education/program-actions";
 
@@ -19,6 +20,9 @@ export type ProgramFormLabels = {
   readonly noType: string;
   readonly description: string;
   readonly createProgram: string;
+  readonly editProgram: string;
+  readonly saveProgram: string;
+  readonly setDirectionHint: string;
   readonly cohortName: string;
   readonly startsOn: string;
   readonly endsOn: string;
@@ -95,6 +99,104 @@ export function CreateProgramForm({
         <StateLine state={state} labels={labels} />
       </div>
     </form>
+  );
+}
+
+/**
+ * CORRECT a programme that already exists.
+ *
+ * `education_programs` had one writer and no update path, so every field was
+ * fixed at creation. That is not cosmetic: the target profession is what
+ * activates the live employer-demand count beside the programme, and an
+ * institution that skipped it once could never aim at the market afterwards.
+ *
+ * Collapsed by default — correcting is the rarer act, and an always-open edit
+ * form would read as the programme being unfinished. The fields are prefilled
+ * with what is there now, and an empty select CLEARS the value, because the
+ * form always submits all four.
+ */
+export function EditProgramForm({
+  program,
+  professions,
+  educationTypes,
+  labels,
+}: {
+  readonly program: {
+    readonly id: string;
+    readonly name: string;
+    readonly targetProfessionSlug: string | null;
+    readonly educationTypeSlug: string | null;
+    readonly description: string | null;
+  };
+  readonly professions: ReadonlyArray<{ slug: string; label: string }>;
+  readonly educationTypes: ReadonlyArray<{ slug: string; label: string }>;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(updateProgramAction, IDLE);
+  return (
+    <details className="rounded-md border border-ink-600 p-2" data-testid={`edit-program-${program.id}`}>
+      <summary className="cursor-pointer text-xs text-text-secondary">{labels.editProgram}</summary>
+      <form action={action} className="mt-2 flex flex-col gap-2">
+        <input type="hidden" name="programId" value={program.id} readOnly />
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.programName}
+          <input
+            name="name"
+            required
+            minLength={2}
+            maxLength={160}
+            defaultValue={program.name}
+            className={inputCls}
+            data-testid={`edit-program-name-${program.id}`}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.targetProfession}
+          <select
+            name="targetProfessionSlug"
+            className={inputCls}
+            defaultValue={program.targetProfessionSlug ?? ""}
+            data-testid={`edit-program-profession-${program.id}`}
+          >
+            <option value="">{labels.noProfession}</option>
+            {professions.map((p) => (
+              <option key={p.slug} value={p.slug}>{p.label}</option>
+            ))}
+          </select>
+        </label>
+        {/* Says what the empty field COSTS, at the moment it can be filled.
+            Without this the programme reads "no direction" and the person is
+            never told that a direction is what shows them live market demand. */}
+        {program.targetProfessionSlug === null ? (
+          <p className="text-xs leading-relaxed text-text-muted" data-testid={`edit-program-direction-hint-${program.id}`}>
+            {labels.setDirectionHint}
+          </p>
+        ) : null}
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.educationType}
+          <select
+            name="educationTypeSlug"
+            className={inputCls}
+            defaultValue={program.educationTypeSlug ?? ""}
+          >
+            <option value="">{labels.noType}</option>
+            {educationTypes.map((e) => (
+              <option key={e.slug} value={e.slug}>{e.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.description}
+          <textarea name="description" maxLength={2000} rows={2} defaultValue={program.description ?? ""} className={inputCls} />
+        </label>
+        <div className="flex items-center gap-3">
+          <button type="submit" disabled={pending} className={btnCls} data-testid={`edit-program-save-${program.id}`}>
+            {pending ? labels.saving : labels.saveProgram}
+          </button>
+          <StateLine state={state} labels={labels} />
+        </div>
+      </form>
+    </details>
   );
 }
 

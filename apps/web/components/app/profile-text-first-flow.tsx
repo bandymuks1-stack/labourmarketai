@@ -612,7 +612,7 @@ export function ProfileTextFirstFlow({
               a silent dead end. */}
           <a
             href="#capabilities"
-            className="mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+            className="mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-champagne"
             data-testid="profile-text-flow-view-capabilities"
           >
             {t("viewCapabilities")} →
@@ -620,7 +620,7 @@ export function ProfileTextFirstFlow({
           {promotion && promotion.promoted > 0 && (
             <Link
               href={"/cv" as "/dashboard"}
-              className="ml-3 mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+              className="ml-3 mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-champagne"
               data-testid="profile-text-flow-view-cv"
             >
               {t("viewUpdatedCv")} →

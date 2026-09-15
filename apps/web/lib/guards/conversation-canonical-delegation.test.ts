@@ -175,10 +175,25 @@ describe("structure — exactly one conversation surface", () => {
     }
   });
 
-  it("/dashboard is the conversation and mounts exactly one chat", () => {
+  it("/dashboard mounts exactly one chat — the conversation on demand — beside ONE ŠIANDIEN", () => {
+    // RETIRED (worker mobile IA 2026-09-13 §2): "/dashboard IS the
+    // conversation". The worker in their personal space opens ŠIANDIEN (a
+    // page); the chat stays the ONE conversation surface, opened on demand
+    // (`?ask=1`, every existing deep link) and for every other identity.
+    // What is pinned is still "one chat" — a second `<ConversationChat`
+    // would be the parallel product this guard exists to prevent.
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/<ConversationChat\b/);
     expect(page.match(/<ConversationChat\b/g)).toHaveLength(1);
+    expect(page).toMatch(/<TodayScreen\b/);
+    expect(page.match(/<TodayScreen\b/g)).toHaveLength(1);
+    // The split is the ONE pure predicate the chrome reads too — never a
+    // page-local role check that could disagree with the shell around it.
+    expect(page).toMatch(/dashboardRootSurface\(\{/);
+    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/hasConversationParams\(/);
+    // ŠIANDIEN carries no conversation of its own.
+    const today = read("components/app/today/today-screen.tsx");
+    expect(today).not.toMatch(/ConversationChat|ConversationThread|useConversation/);
   });
 });
 

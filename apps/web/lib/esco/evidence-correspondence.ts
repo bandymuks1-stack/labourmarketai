@@ -17,11 +17,13 @@ import {
  * REAL WORK → STANDARDISED MEANING, in the person's own words.
  *
  * This is the join the product has been missing, and it deliberately does NOT
- * use the platform's slug↔ESCO bridge — that bridge is empty (0 of 161 skills
- * carry an `esco_uri`), owner-gated as PR #1355, and reviewed on 2026-09-08 as
- * carrying at least three semantically wrong mappings. Waiting for it would
- * have meant waiting for a gate; using it would have meant inheriting its
- * errors.
+ * use the platform's slug↔ESCO bridge. When this was written the bridge was
+ * empty and under review; it has since been applied in its corrected form
+ * (2026-09-08, ledger 20260908082301: 31 of 161 skills, 34 of 49
+ * professions, the wrong mappings removed and the ambiguous ones left NULL)
+ * and the Work Journal's occupation path reads it. This module still runs on
+ * the person's own words, because a slug-level mapping cannot say which WORD
+ * the person used, and because 130 skills carry no mapping at all.
  *
  * So the correspondence runs on what the PERSON actually wrote. The
  * deterministic recognizer already records the word that triggered each match

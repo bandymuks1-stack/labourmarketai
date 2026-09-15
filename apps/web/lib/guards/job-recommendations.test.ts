@@ -96,10 +96,10 @@ describe("§19 form — recommendation copy always carries counts + confirmed sh
       // Activity-centre read semantics + card copy exist in every locale.
       for (const key of [
         "activityCentre.readSemantics.new_job_matches",
-        "auth.dashboard.jobsCard.title",
-        "auth.dashboard.jobsCard.viewAll",
-        "auth.dashboard.jobsCard.empty",
-        "auth.dashboard.jobsCard.emptyCta",
+        // `auth.dashboard.jobsCard.*` used to be listed here. The card it
+        // named died with the second dashboard (W3 Package 4) and the copy
+        // was removed by the worker mobile IA slice (2026-09-13 §4: dead
+        // copy) — a guard is not a consumer, so it no longer pins it.
         "opportunities.recommendations.newBadge",
         "opportunities.recommendations.salaryWithin",
         "opportunities.recommendations.salaryNegotiable",

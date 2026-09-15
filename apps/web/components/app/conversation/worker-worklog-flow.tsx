@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import {
   ChatAction,
@@ -26,7 +26,13 @@ import {
   journalDraftReadiness,
   type WorkLogParse,
 } from "@/lib/conversation/worklog-extract";
+import { deriveIntakeWorkTime } from "@/lib/journal/intake-work-time";
+import {
+  confirmJournalSkillCandidate,
+  rejectJournalSkillCandidate,
+} from "@/lib/journal/skill-pipeline-actions";
 import { trackFunnel } from "@/lib/telemetry/task";
+import { formatUtcDate } from "@/lib/time/display";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 export type WorkLogLabels = {
@@ -68,6 +74,18 @@ export type WorkLogLabels = {
    *  e.g. the request "Užpildyk darbo žurnalą" typed into the field. The
    *  flow asks for the work instead of saving the request (prod 2026-09-06). */
   errorNoWorkContent: string;
+  /** What the save will RECORD as work time (issue #1689): the timed phrases
+   *  the executor persists as fragments, in the person's own words, and the
+   *  stated day total beside them. The person confirms figures, not a
+   *  sentence — before this the preview showed the parser's day figure while
+   *  the record received the itemised phrases. */
+  recordTitle: string;
+  recordNoActivity: string;
+  recordTotalStated: string;
+  recordPartsSum: string;
+  recordTotalDiffers: string;
+  recordNone: string;
+  hoursUnit: string;
 };
 
 /** The subset of the awaited server pipeline result the chat surface shows.
@@ -78,8 +96,14 @@ type WorkLogSkillsOutcome = {
   addedSkills: string[];
   strengthenedSkills: string[];
   pendingCandidates: { label: string; slug: string | null; kind: string }[];
+  /** Derivation version of the candidates (the actions refuse a stale one);
+   *  null = not readable → the offers are listed, not decidable here. */
+  pipelineVersion: number | null;
   cvUpdated: boolean;
 };
+
+/** One-tap decision state per offered skill (keyed by slug). */
+type CandidateDecision = "idle" | "working" | "confirmed" | "rejected" | "error";
 
 /** The saved entry's id, straight off the dispatcher result. The photo can only
  *  be attached once a REAL entry exists, so a missing id means no upload is
@@ -88,6 +112,28 @@ function parseEntryId(data: unknown): string | null {
   if (typeof data !== "object" || data === null) return null;
   const id = (data as { entryId?: unknown }).entryId;
   return typeof id === "string" && id.length > 0 ? id : null;
+}
+
+/** Owner §13 — the open day-level plausibility check the saved entry takes
+ *  part in, straight off the dispatcher result. Parsed defensively: anything
+ *  malformed means "no check shown", never an invented warning. */
+type WorkLogDayCheck = {
+  code: "day_over_24h" | "long_day";
+  day: string;
+  hours: number;
+  entries: number;
+};
+
+function parseDayCheck(data: unknown): WorkLogDayCheck | null {
+  if (typeof data !== "object" || data === null) return null;
+  const c = (data as { dayCheck?: unknown }).dayCheck;
+  if (typeof c !== "object" || c === null) return null;
+  const o = c as Record<string, unknown>;
+  if (o.code !== "day_over_24h" && o.code !== "long_day") return null;
+  if (typeof o.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(o.day)) return null;
+  if (typeof o.hours !== "number" || !Number.isFinite(o.hours)) return null;
+  if (typeof o.entries !== "number" || !Number.isFinite(o.entries)) return null;
+  return { code: o.code, day: o.day, hours: o.hours, entries: o.entries };
 }
 
 function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
@@ -120,6 +166,10 @@ function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
     addedSkills: strings(o.addedSkills),
     strengthenedSkills: strings(o.strengthenedSkills),
     pendingCandidates: candidates,
+    pipelineVersion:
+      typeof o.pipelineVersion === "number" && Number.isFinite(o.pipelineVersion)
+        ? o.pipelineVersion
+        : null,
     cvUpdated: o.cvUpdated === true,
   };
 }
@@ -135,7 +185,11 @@ type Phase =
   | { kind: "uploading" }
   | {
       kind: "done";
+      /** The saved entry's id (null = not readable → offers are not decidable). */
+      entryId: string | null;
       skills: WorkLogSkillsOutcome | null;
+      /** null = no open day check (or not readable) — nothing is shown. */
+      dayCheck: WorkLogDayCheck | null;
       /** null = no photo was attached; otherwise the REAL upload outcome. */
       photo: JournalPhotoUploadResult | null;
     }
@@ -171,8 +225,13 @@ const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
  *      with a one-time token → the canonical `createJournalEntry`;
  *   4. shows the REAL server outcome (never a fabricated success — §7).
  *
- * Times/break/hours are shown as a read-only parse summary: they already live
- * in the evidence notes, so they are not persisted as separate claims.
+ * Times/break/hours are shown as a read-only parse summary. Since issue #1689
+ * the SAME deterministic parse is persisted by the executor as duration
+ * metrics with machine-extraction provenance (`lib/journal/intake-work-time`),
+ * so the hours the person stated reach the canonical work-time rule instead
+ * of staying hidden in the evidence text — and the preview lists EXACTLY
+ * those figures (`RecordedTimePreview`, derived from the notes as edited),
+ * so what the person confirms is what the record receives.
  */
 export function WorkerWorkLogFlow({
   draft,
@@ -208,6 +267,15 @@ export function WorkerWorkLogFlow({
    * ONE write path across both surfaces. Nothing about photos is re-decided here.
    */
   const tPhoto = useTranslations("journal.photo");
+  const tCheck = useTranslations("journal.intelligence.checks");
+  // The offered-skill decision rides the journal composer's OWN copy and
+  // actions (issue #1689): a fragment nothing read may carry a catalogue
+  // OFFER ("2 val. testavau" → software testing) that only the worker's word
+  // links — and the worker typed it here, so the decision is made here.
+  const tCandidate = useTranslations("journal");
+  const [candidateDecisions, setCandidateDecisions] = useState<
+    Record<string, CandidateDecision>
+  >({});
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoPrep, setPhotoPrep] = useState<PhotoPrep>("idle");
@@ -374,6 +442,7 @@ export function WorkerWorkLogFlow({
       });
       const skills = parseSkillsOutcome(res.data);
       const entryId = parseEntryId(res.data);
+      const dayCheck = parseDayCheck(res.data);
 
       // ORDER MATTERS, and it is the journal composer's order: the entry is
       // saved FIRST and the photo is attached to it afterwards. A storage
@@ -388,7 +457,7 @@ export function WorkerWorkLogFlow({
           // A thrown uploader is a FAILED upload, never a silent success.
           outcome = "failed";
         }
-        setPhase({ kind: "done", skills, photo: outcome });
+        setPhase({ kind: "done", entryId, skills, dayCheck, photo: outcome });
         router.refresh();
         return;
       }
@@ -396,7 +465,9 @@ export function WorkerWorkLogFlow({
       // honestly and say the photo did not attach, rather than implying it did.
       setPhase({
         kind: "done",
+        entryId,
         skills,
+        dayCheck,
         photo: photoFile ? "failed" : null,
       });
       router.refresh();
@@ -471,6 +542,48 @@ export function WorkerWorkLogFlow({
       (skills?.addedSkills.length ?? 0) +
         (skills?.strengthenedSkills.length ?? 0) >
       0;
+    // A taxonomy offer (`fuzzy_skill`) is decidable right here through the
+    // SAME server actions the journal composer uses — the server re-derives
+    // from the stored text and checks membership + version; nothing is
+    // trusted from this client. Ambiguous readings keep their curated
+    // choices in the journal, so they stay listed, not decided, here.
+    const decidable = (c: { slug: string | null; kind: string }): c is {
+      slug: string;
+      kind: "fuzzy_skill";
+    } =>
+      c.kind === "fuzzy_skill" &&
+      typeof c.slug === "string" &&
+      phase.entryId !== null &&
+      skills?.pipelineVersion !== null;
+    const decide = async (slug: string, decision: "confirm" | "reject") => {
+      if (!phase.entryId || skills?.pipelineVersion == null) return;
+      setCandidateDecisions((prev) => ({ ...prev, [slug]: "working" }));
+      try {
+        const res =
+          decision === "confirm"
+            ? await confirmJournalSkillCandidate(
+                phase.entryId,
+                slug,
+                skills.pipelineVersion,
+              )
+            : await rejectJournalSkillCandidate(
+                phase.entryId,
+                slug,
+                skills.pipelineVersion,
+              );
+        setCandidateDecisions((prev) => ({
+          ...prev,
+          [slug]: res.ok
+            ? decision === "confirm"
+              ? "confirmed"
+              : "rejected"
+            : "error",
+        }));
+        if (res.ok) router.refresh();
+      } catch {
+        setCandidateDecisions((prev) => ({ ...prev, [slug]: "error" }));
+      }
+    };
     return (
       <div
         className="flex flex-col gap-2 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support"
@@ -498,16 +611,72 @@ export function WorkerWorkLogFlow({
                   {labels.strengthenedSkillPrefix}: {skillName(slug)}
                 </li>
               ))}
-              {awaiting.map((c) => (
-                <li
-                  key={`pend-${c.slug ?? c.label}`}
-                  className="text-text-muted"
-                  data-testid="worklog-pending-candidate"
-                >
-                  {labels.pendingConfirmPrefix}:{" "}
-                  {c.slug ? skillName(c.slug) : c.label}
-                </li>
-              ))}
+              {awaiting.map((c) => {
+                const state: CandidateDecision = c.slug
+                  ? (candidateDecisions[c.slug] ?? "idle")
+                  : "idle";
+                return (
+                  <li
+                    key={`pend-${c.slug ?? c.label}`}
+                    className="text-text-muted"
+                    data-testid="worklog-pending-candidate"
+                    data-candidate-slug={c.slug ?? undefined}
+                    data-candidate-state={state}
+                  >
+                    {labels.pendingConfirmPrefix}:{" "}
+                    {c.slug ? skillName(c.slug) : c.label}
+                    {state === "confirmed" && (
+                      <span
+                        className="ml-2 font-semibold text-state-success"
+                        data-testid="worklog-candidate-confirmed"
+                      >
+                        ✓ {tCandidate("candidateConfirmed")}
+                      </span>
+                    )}
+                    {state === "rejected" && (
+                      <span
+                        className="ml-2"
+                        data-testid="worklog-candidate-rejected"
+                      >
+                        {tCandidate("candidateRejected")}
+                      </span>
+                    )}
+                    {state === "error" && (
+                      <span
+                        role="alert"
+                        className="ml-2 text-state-danger"
+                        data-testid="worklog-candidate-error"
+                      >
+                        {tCandidate("candidateError")}
+                      </span>
+                    )}
+                    {decidable(c) &&
+                      state !== "confirmed" &&
+                      state !== "rejected" && (
+                        <ChatActionRow>
+                          <ChatAction
+                            tone="primary"
+                            loading={state === "working"}
+                            testId="worklog-candidate-confirm"
+                            onClick={() => void decide(c.slug, "confirm")}
+                          >
+                            {state === "working"
+                              ? tCandidate("candidateConfirming")
+                              : tCandidate("candidateConfirm")}
+                          </ChatAction>
+                          <ChatAction
+                            tone="secondary"
+                            disabled={state === "working"}
+                            testId="worklog-candidate-reject"
+                            onClick={() => void decide(c.slug, "reject")}
+                          >
+                            {tCandidate("candidateReject")}
+                          </ChatAction>
+                        </ChatActionRow>
+                      )}
+                  </li>
+                );
+              })}
               {skills.status === "failed" && (
                 <li className="text-text-muted">{labels.pipelineFailedNote}</li>
               )}
@@ -546,6 +715,38 @@ export function WorkerWorkLogFlow({
           >
             {labels.viewOpportunities} →
           </Link>
+        )}
+        {/* OWNER §13 — the saved record pushed its day above 24 h / into a
+            long day. A warning next to the save, never a changed figure:
+            the hours stay exactly as recorded; the person decides whether
+            a record is a duplicate (edit it in the journal) or stands
+            (acknowledge it there with a reason). */}
+        {phase.dayCheck && (
+          <p
+            className="rounded-control border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-state-warning"
+            role="status"
+            data-testid="worklog-day-check"
+            data-check-code={phase.dayCheck.code}
+          >
+            {tCheck(phase.dayCheck.code, {
+              hours: new Intl.NumberFormat(locale, {
+                maximumFractionDigits: 1,
+              }).format(phase.dayCheck.hours),
+              day:
+                formatUtcDate(phase.dayCheck.day, locale, {
+                  month: "short",
+                  day: "numeric",
+                }) ?? phase.dayCheck.day,
+              entries: phase.dayCheck.entries,
+            })}{" "}
+            <Link
+              href="/dashboard/journal#work-intelligence"
+              className="font-semibold underline underline-offset-2"
+              data-testid="worklog-day-check-link"
+            >
+              {tCheck("openInJournal")}
+            </Link>
+          </p>
         )}
         {/* PHOTO OUTCOME — the real result of the real upload, one sentence per
             state. `uploaded` is the ONLY line that claims evidence is attached;
@@ -698,6 +899,8 @@ export function WorkerWorkLogFlow({
         {draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />}
       </dl>
 
+      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} />
+
       <label className="flex flex-col gap-1 text-support">
         <span className="text-text-muted">{labels.labelSite}</span>
         <input
@@ -806,6 +1009,83 @@ export function WorkerWorkLogFlow({
           {phase.message}
         </p>
       )}
+    </div>
+  );
+}
+
+/** One line per figure the save will record, in the person's own words. */
+function fragmentTimeLabel(
+  value: number,
+  unit: string,
+  labels: Pick<WorkLogLabels, "hoursUnit" | "minutesUnit">,
+): string {
+  if (unit === "minutes") return `${value} ${labels.minutesUnit}`;
+  if (unit === "hours") return `${value} ${labels.hoursUnit}`;
+  return `${value} ${unit}`;
+}
+
+function RecordedTimePreview({
+  notes,
+  workDate,
+  labels,
+}: {
+  notes: string;
+  workDate: string;
+  labels: WorkLogLabels;
+}) {
+  // The SAME derivation the executor runs on save, over the notes as the
+  // person has edited them — never a second parser, never a cached figure.
+  const record = useMemo(() => {
+    const anchor = /^\d{4}-\d{2}-\d{2}$/.test(workDate)
+      ? workDate
+      : new Date().toISOString().slice(0, 10);
+    const t = deriveIntakeWorkTime(notes, anchor);
+    const partsMinutes = t.fragments.reduce((sum, f) => {
+      if (f.timeUnit === "hours") return sum + f.timeValue * 60;
+      if (f.timeUnit === "minutes") return sum + f.timeValue;
+      return sum;
+    }, 0);
+    return { ...t, partsMinutes };
+  }, [notes, workDate]);
+
+  if (record.fragments.length === 0 && record.quantityMinutes === null) {
+    return (
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="worklog-record-none">
+        {labels.recordNone}
+      </p>
+    );
+  }
+  const hours = (minutes: number) =>
+    `${Math.round((minutes / 60) * 100) / 100} ${labels.hoursUnit}`;
+  return (
+    <div
+      className="flex flex-col gap-1 rounded-control border border-ink-500 bg-ink-800/60 px-3 py-2 text-support"
+      data-testid="worklog-record"
+    >
+      <p className="text-meta text-text-muted">{labels.recordTitle}</p>
+      {record.fragments.length > 0 ? (
+        <ul className="flex flex-col gap-0.5">
+          {record.fragments.map((f, i) => (
+            <li key={`${i}-${f.rawPhrase}`} className="flex justify-between gap-3">
+              <span className="min-w-0 truncate text-text-primary">„{f.rawPhrase}“</span>
+              <span className="shrink-0 text-right font-medium text-text-primary">
+                {fragmentTimeLabel(f.timeValue, f.timeUnit, labels)}
+                {f.activitySlug === null && f.activityLabel === null ? (
+                  <span className="ml-1 font-normal text-text-muted">· {labels.recordNoActivity}</span>
+                ) : null}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-text-primary">{hours(record.quantityMinutes ?? 0)}</p>
+      )}
+      {record.statedTotalMinutes !== null ? (
+        <p className="text-meta leading-relaxed text-state-warning" data-testid="worklog-record-total-differs">
+          {labels.recordTotalStated} {hours(record.statedTotalMinutes)} · {labels.recordPartsSum}{" "}
+          {hours(record.partsMinutes)} — {labels.recordTotalDiffers}
+        </p>
+      ) : null}
     </div>
   );
 }

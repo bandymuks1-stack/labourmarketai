@@ -13,7 +13,7 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary:
-    "rounded-md font-semibold bg-gradient-cta text-white shadow-cta-glow hover:opacity-95",
+    "rounded-md font-semibold bg-gradient-cta text-text-on-brand shadow-cta-glow hover:opacity-95",
   secondary:
     "rounded-md font-semibold border border-ink-500 text-text-primary hover:border-brand-blue",
   ghost: "rounded-md font-semibold text-text-secondary hover:text-text-primary",

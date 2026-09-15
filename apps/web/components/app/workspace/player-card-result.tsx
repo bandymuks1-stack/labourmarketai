@@ -152,6 +152,7 @@ export function PlayerCardResult({
             nextHref={view.workEditor.next.href}
             values={view.workEditor.values}
             labels={view.workEditorLabels}
+            checks={view.workEditor.checks}
           />
         </div>
       ) : null}

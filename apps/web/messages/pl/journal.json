@@ -263,6 +263,7 @@
     "cannotSupersedeDeleted": "Nie można zmieniać usuniętego wpisu.",
     "cannotRestoreSuperseded": "Tego wpisu nie można przywrócić — zastąpiła go już nowsza wersja.",
     "cannotRestoreCorrectionConflict": "Tego wpisu nie można przywrócić — dla tej samej pracy istnieje już inna aktualna poprawiona wersja.",
-    "metricsInsertFailed": "Wpis nie został zapisany w całości: {reason}. Wpis został odrzucony — spróbuj ponownie."
+    "metricsInsertFailed": "Wpis nie został zapisany w całości: {reason}. Wpis został odrzucony — spróbuj ponownie.",
+    "moduleFieldInvalid": "Te dane nie pasują do tego rodzaju zaangażowania: {fields}. Nic nie zapisano — usuń je i spróbuj ponownie."
   }
 }

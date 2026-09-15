@@ -13,7 +13,7 @@
  * clamps), so a leading "-" can only come from user text — guarding it never
  * corrupts a real value.
  */
-import { csvCell } from "@/lib/projects/operations-report";
+import { csvSafeCell } from "@/lib/projects/operations-report";
 import { ESTIMATE_VERSION, type EstimateInputs, type EstimateResult } from "./estimate";
 import {
   AREA_QUANTITY_PACK_VERSION,
@@ -24,11 +24,13 @@ import { VAT_DISPLAY_VERSION, type VatDisplay } from "./vat-display-v1";
 /** Version of the CSV layout itself (first metadata row). */
 export const CALCULATOR_CSV_VERSION = 1;
 
-/** Neutralise spreadsheet formula injection, then RFC-4180-escape. */
-export function csvSafeCell(value: string): string {
-  const guarded = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
-  return csvCell(guarded);
-}
+/**
+ * Formula-injection-safe CSV escaping. The rule now lives beside `csvCell` in
+ * lib/projects/operations-report so every export in every domain reaches the
+ * same one; re-exported here because this module's own tests and callers
+ * named it, and a second copy is how an escaping rule drifts.
+ */
+export { csvSafeCell };
 
 function row(cells: readonly string[]): string {
   return cells.map(csvSafeCell).join(",");

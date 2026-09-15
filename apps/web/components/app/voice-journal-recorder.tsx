@@ -314,7 +314,7 @@ export function VoiceJournalRecorder({
               type="button"
               onClick={() => void startRecording()}
               disabled={!ackDisclosure}
-              className={`${btn} bg-brand-blue text-white disabled:cursor-not-allowed disabled:opacity-50`}
+              className={`${btn} bg-brand-blue text-text-on-brand disabled:cursor-not-allowed disabled:opacity-50`}
               data-testid="voice-start"
             >
               {phase === "denied" || phase === "failed"
@@ -374,7 +374,7 @@ export function VoiceJournalRecorder({
             <button
               type="button"
               onClick={() => void finishRecording()}
-              className={`${btn} bg-brand-blue text-white`}
+              className={`${btn} bg-brand-blue text-text-on-brand`}
               data-testid="voice-stop"
             >
               {t("stop")}
@@ -426,7 +426,7 @@ export function VoiceJournalRecorder({
               type="button"
               onClick={useInJournal}
               disabled={!transcript.trim() || handedOff}
-              className={`${btn} bg-brand-blue text-white disabled:cursor-not-allowed disabled:opacity-50`}
+              className={`${btn} bg-brand-blue text-text-on-brand disabled:cursor-not-allowed disabled:opacity-50`}
               data-testid="voice-use-in-journal"
             >
               {t("useInJournal")}

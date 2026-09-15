@@ -28,11 +28,13 @@
  * question, whose answers are ESCO concept ids and are labelled as such.
  *
  * The two are joined only where the platform taxonomy itself carries an
- * `esco_uri`, which today is true for ZERO of 161 skills and ZERO of 49
- * professions (measured on production 2026-09-08). That bridge is a separate
- * owner-gated decision (SKL-6 / PR #1355) and this layer does not assume,
- * require or pre-empt it. Everything here works without it, and works better
- * with it.
+ * `esco_uri`. That bridge was applied to production on 2026-09-08 (ledger
+ * 20260908082301, the corrected set of #1635 — #1355 closed as superseded):
+ * 31 of 161 skills and 34 of 49 professions carry one; the rest stay NULL
+ * rather than guessed (`teacher`, `caregiver` deliberately unmapped). This
+ * layer does not require the bridge — everything here works without it —
+ * and its first product consumer runs THROUGH it: the Work Journal's
+ * occupation path (`iscoGroupsForEscoUris` → `archetypesForIsco`).
  *
  * ── EVIDENCE ORDER OF A LABEL MATCH ───────────────────────────────────────
  *

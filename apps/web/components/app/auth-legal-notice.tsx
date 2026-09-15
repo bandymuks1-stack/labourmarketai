@@ -20,7 +20,7 @@ export function AuthLegalNotice({
 }) {
   const t = useTranslations("auth.legalNotice");
   const linkCls =
-    "font-medium text-brand-blue underline underline-offset-2 hover:text-brand-cyan";
+    "font-medium text-brand-blue underline underline-offset-2 hover:text-brand-champagne";
   return (
     <div
       data-testid="auth-legal-notice"

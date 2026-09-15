@@ -70,7 +70,31 @@ describe("the intent registry is the enumerable routing contract", () => {
     // UPLOAD ≠ EDIT ≠ EXPORT, and the bare noun no longer resolves to any of
     // them — it asks. Measured before the split: 11 of 22 ordinary CV
     // sentences, including "noriu pamatyti savo CV", opened the IMPORT flow.
-    expect(entries.length).toBe(69);
+    // 69 -> 70: `capabilities` (takeover 2026-09-10). "Ką galiu padaryti
+    // šioje paskyroje?" scored 0 and reached the generic fallback — and the
+    // Gemini proposer could not rescue it either, because `llm-proposal.ts`
+    // re-validates the model's answer against THIS registry. A question with
+    // no id here is unanswerable by both routers, permanently. The id is the
+    // seam; the answer itself is derived from the active context and the
+    // workspace's real state (`lib/conversation/capability-answer.ts`).
+    // 70 -> 74: the work-intelligence doors (issue #1689, re-audit
+    // 2026-09-11, owner chat lines 2–5 and 7). "Kiek programavau?" scored 0,
+    // "Kur naudojau programavimo įgūdį?" and "Kokius įgūdžius naudoju
+    // daugiausia?" reached `profile` (the completeness answer), "Kokia
+    // veikla užima daugiausia laiko?" and "Kas patvirtinta?" scored 0 —
+    // while every figure they ask for already sat in the work-in-numbers
+    // model. Four read intents (journal-skill, journal-skills-top,
+    // journal-activities-top, journal-confirmed), ONE handler over the ONE
+    // model.
+    // 74 -> 75: owner line 8, "Kur yra didžiausias augimo potencialas?"
+    // scored 0 — the growth reading (journal-growth) over the SAME model,
+    // the same handler; a fact block and a block said to be derived.
+    // 75 -> 76: `evidence-photos` (issue #1689, defect G). "Parodyk įkeltą
+    // nuotrauką, ar tikrai išsisaugojo" scored 0 — no photo / file / gallery
+    // word in the router — so the proposer chose `cv-view` and the chat said
+    // the CV was empty about a photo that WAS stored. A read over the ONE
+    // personal-gallery projection, shown back inside the thread.
+    expect(entries.length).toBe(76);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

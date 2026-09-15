@@ -15,6 +15,13 @@ import { normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
 import { normalizeSkillLabel } from "@/lib/skills/candidate-skills";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
+import {
+  FRAGMENT_SKILL_METRIC_SLUG,
+  formatFragmentSkillValue,
+  mapRecognitionToPersistedFragments,
+  parsePersistedFragments,
+  type PersistedFragment,
+} from "@/lib/journal/fragment-skill-evidence";
 
 /**
  * Canonical server-side journal → skill pipeline (Universal Journal Recall,
@@ -32,7 +39,10 @@ import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
  *   3. ADDS worker_skills rows for recognised UNDECLARED active skills —
  *      always `verified:false`, `source:'self_declared'`,
  *      `confidence_bin:'yellow'`;
- *   4. links recognised skills to the entry as evidence (idempotent);
+ *   4. links recognised skills to the entry as evidence (idempotent) and
+ *      records ON WHICH persisted fragment each link was recognised
+ *      (`fragment_skill` rows — the evidence the work-intelligence model
+ *      needs before it may give a fragment's hours to one skill);
  *   5. persists ambiguous candidates via the EXISTING clarification lane
  *      (`skill_candidate_clarifications`) — NEVER worker_skills;
  *   6. persists claims as `skill_claim` metric rows with provenance;
@@ -116,35 +126,17 @@ const MAX_CLAIMS_PER_RUN = 12;
 /** Safety cap on unresolved_fragment rows persisted per run. */
 const MAX_UNRESOLVED_PER_RUN = 12;
 
-/** Entry-scoped marker/metric slugs the pipeline reads and appends. */
-export const ENTRY_MARKER_SLUGS = {
-  skillRejected: "skill_rejected",
-  claimRejected: "skill_claim_rejected",
-  claim: "skill_claim",
-  unresolvedFragment: "unresolved_fragment",
-  unresolvedDismissed: "unresolved_dismissed",
-  pipelineVersion: "pipeline_version",
-  /** Worker's ambiguity decision (P2 integrity fix): entry-scoped,
-   *  append-only. value_text = `<normalized candidate label>=><chosen slug>`,
-   *  value_numeric = pipeline version at decision time, source =
-   *  worker_input (the worker's own decision on their own entry). The
-   *  derivation reads it so a resolved ambiguity is never re-offered on
-   *  reprocess/restore/upgrade — and a decision on one entry can never
-   *  leak into another (it lives in that entry's metrics only). */
-  ambiguousResolved: "ambiguous_resolved",
-} as const;
-
-/** Parse an ambiguous_resolved marker value into [normalizedLabel, slug]. */
-export function parseAmbiguousResolvedMarker(
-  valueText: string,
-): { normalizedLabel: string; slug: string } | null {
-  const idx = valueText.indexOf("=>");
-  if (idx <= 0) return null;
-  const normalizedLabel = valueText.slice(0, idx).trim();
-  const slug = valueText.slice(idx + 2).trim();
-  if (!normalizedLabel || !slug) return null;
-  return { normalizedLabel, slug };
-}
+/** Entry-scoped marker/metric slugs the pipeline reads and appends, and the
+ *  ONE pure reader of them — shared with the journal page (render-time
+ *  pending candidates), see `entry-recognition-markers.ts`. */
+export {
+  ENTRY_MARKER_SLUGS,
+  parseAmbiguousResolvedMarker,
+} from "@/lib/journal/entry-recognition-markers";
+import {
+  ENTRY_MARKER_SLUGS,
+  readEntryRecognitionMarkers,
+} from "@/lib/journal/entry-recognition-markers";
 
 function newTrace(): string {
   return randomBytes(6).toString("hex");
@@ -194,6 +186,12 @@ function logError(trace: string, step: string, error: unknown): void {
 
 export type EntryRecognitionInputs = {
   declaredSlugs: ReadonlySet<string>;
+  /** The entry's persisted `parsed_fragment` phrases (index-bound to its
+   *  `fragment_time` rows) — the join target for fragment-level skill
+   *  evidence. Empty for single-phrase / legacy entries. */
+  persistedFragments: readonly PersistedFragment[];
+  /** `fragment_skill` values (`"<index>|<slug>"`) already on the entry. */
+  existingFragmentSkillSet: ReadonlySet<string>;
   /** slug → worker's declared skill row id (for links). */
   declaredIdBySlug: ReadonlyMap<string, string>;
   entryRejections: JournalEntryRejections;
@@ -244,6 +242,8 @@ export async function loadEntryRecognitionInputs(
         ENTRY_MARKER_SLUGS.unresolvedDismissed,
         ENTRY_MARKER_SLUGS.ambiguousResolved,
         ENTRY_MARKER_SLUGS.pipelineVersion,
+        "parsed_fragment",
+        FRAGMENT_SKILL_METRIC_SLUG,
       ]),
   ]);
   if (declaredRes.error || metricsRes.error) return null;
@@ -261,68 +261,29 @@ export async function loadEntryRecognitionInputs(
     }
   }
 
-  const rejectedSlugs = new Set<string>();
-  const rejectedClaims = new Set<string>();
-  const existingClaimSet = new Set<string>();
-  const existingUnresolvedSet = new Set<string>();
-  const dismissedUnresolvedSet = new Set<string>();
-  const entryResolutions = new Map<string, string>();
-  let latestPipelineVersion = 0;
-  for (const r of (metricsRes.data ?? []) as {
+  const metricRows = (metricsRes.data ?? []) as {
     metric_slug: string | null;
     value_text: string | null;
     value_numeric: number | null;
-  }[]) {
-    switch (r.metric_slug) {
-      case ENTRY_MARKER_SLUGS.skillRejected:
-        if (r.value_text) rejectedSlugs.add(r.value_text.trim());
-        break;
-      case ENTRY_MARKER_SLUGS.claimRejected:
-        if (r.value_text) rejectedClaims.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.claim:
-        if (r.value_text) existingClaimSet.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.unresolvedFragment:
-        if (r.value_text)
-          existingUnresolvedSet.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.unresolvedDismissed:
-        if (r.value_text)
-          dismissedUnresolvedSet.add(normalizeClaimLabel(r.value_text));
-        break;
-      case ENTRY_MARKER_SLUGS.ambiguousResolved: {
-        const parsed = r.value_text
-          ? parseAmbiguousResolvedMarker(r.value_text)
-          : null;
-        if (parsed) {
-          entryResolutions.set(
-            normalizeClaimLabel(parsed.normalizedLabel),
-            parsed.slug,
-          );
-        }
-        break;
-      }
-      case ENTRY_MARKER_SLUGS.pipelineVersion:
-        if (
-          typeof r.value_numeric === "number" &&
-          r.value_numeric > latestPipelineVersion
-        ) {
-          latestPipelineVersion = r.value_numeric;
-        }
-        break;
-    }
-  }
+  }[];
+  // ONE reader of the entry's markers — the journal page reads the same one
+  // at render time for the entry card's pending candidates.
+  const markers = readEntryRecognitionMarkers(metricRows);
 
   return {
     declaredSlugs,
     declaredIdBySlug,
-    entryRejections: { slugs: rejectedSlugs, claimLabels: rejectedClaims },
-    existingClaimSet,
-    existingUnresolvedSet,
-    dismissedUnresolvedSet,
-    entryResolutions,
-    latestPipelineVersion,
+    persistedFragments: parsePersistedFragments(metricRows),
+    existingFragmentSkillSet: markers.existingFragmentSkillSet,
+    entryRejections: {
+      slugs: markers.rejectedSlugs,
+      claimLabels: markers.rejectedClaims,
+    },
+    existingClaimSet: markers.existingClaimSet,
+    existingUnresolvedSet: markers.existingUnresolvedSet,
+    dismissedUnresolvedSet: markers.dismissedUnresolvedSet,
+    entryResolutions: markers.entryResolutions,
+    latestPipelineVersion: markers.latestPipelineVersion,
   };
 }
 
@@ -532,6 +493,7 @@ export async function processJournalEntrySkills(opts: {
     const linkTargets = resolved.filter(
       (r) => inputs.declaredSlugs.has(r.slug) || justAdded.has(r.id),
     );
+    let linkPhaseOk = true;
     if (linkTargets.length > 0) {
       const existingLinkSet = new Set<string>();
       const { data: links, error: linkReadErr } = await sb
@@ -541,6 +503,7 @@ export async function processJournalEntrySkills(opts: {
       if (linkReadErr) {
         logError(trace, "read_links", linkReadErr);
         writeFailures += 1;
+        linkPhaseOk = false;
       } else {
         for (const r of (links ?? []) as { skill_id: string }[]) {
           existingLinkSet.add(r.skill_id);
@@ -561,12 +524,48 @@ export async function processJournalEntrySkills(opts: {
           if (ins.error) {
             logError(trace, "link_entry_skills", ins.error);
             writeFailures += 1;
+            linkPhaseOk = false;
           } else {
             strengthenedSkills = newLinks
               .filter((r) => inputs.declaredSlugs.has(r.slug))
               .map((r) => ({ slug: r.slug }));
             writeSuccesses += 1;
           }
+        }
+      }
+    }
+
+    // ── 6a. WHERE each link came from — fragment-level skill evidence ────
+    // For every skill linked to this entry (new or already linked), record
+    // the persisted fragment(s) the derivation recognised it on, as
+    // append-only `fragment_skill` rows. This is what lets the
+    // work-intelligence model give "6 h tiles, 2 h plaster" its 6 h to
+    // tiling and its 2 h to plastering — from the worker's own split, not
+    // a guess. Idempotent by value; the join fails closed (no row) where
+    // the persisted phrase and the derivation fragment do not line up.
+    if (linkPhaseOk && linkTargets.length > 0 && inputs.persistedFragments.length > 0) {
+      const linkedSlugs = new Set(linkTargets.map((r) => r.slug));
+      const fragmentRows = mapRecognitionToPersistedFragments({
+        persisted: inputs.persistedFragments,
+        derivationFragments: recognition.fragments,
+        skills: recognition.recognizedSkills.filter((r) => linkedSlugs.has(r.slug)),
+      }).filter((row) => !inputs.existingFragmentSkillSet.has(formatFragmentSkillValue(row)));
+      if (fragmentRows.length > 0) {
+        // source 'worker_input': the row states which of the worker's OWN
+        // phrases a deterministic lexicon match landed on — not AI (§7).
+        const ins = await sb.from("journal_entry_metrics").insert(
+          fragmentRows.map((row) => ({
+            entry_id: entryId,
+            metric_slug: FRAGMENT_SKILL_METRIC_SLUG,
+            source: "worker_input",
+            value_text: formatFragmentSkillValue(row),
+          })),
+        );
+        if (ins.error) {
+          logError(trace, "save_fragment_skills", ins.error);
+          writeFailures += 1;
+        } else {
+          writeSuccesses += 1;
         }
       }
     }

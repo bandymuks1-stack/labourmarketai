@@ -17,7 +17,7 @@ import "./globals.css";
  */
 export default function RootNotFound() {
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en" data-theme="dark">
       <body className="bg-ink-900 font-sans text-text-primary antialiased">
         <main
           className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center"

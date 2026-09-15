@@ -425,7 +425,7 @@ const SKILLS: readonly CapabilityRow[] = [
       "The catalogue itself is substantial and now measured: 1,045,186 labels over 28 locales, 13,939 skills, 3,039 occupations, 126,051 occupation-skill relations (67,600 essential / 58,451 optional). RLS on, authenticated SELECT, no anon. " +
       "Read live under a real user 2026-09-08: a Lithuanian phrase resolves to an ESCO occupation and the SAME concept comes back as en=construction scaffolder, de=Gerustbauer, sv=stallningsbyggare, no=stillasarbeider, pl=monter rusztowan, nl=steigerbouwer - the cross-language bridge working on real data, and Norway is exactly where the one production supply row points. The occupation decomposes into its essential ESCO skills bilingually (build/dismantle scaffolding, work-at-height safety, interpret 2D/3D plans). A non-construction control behaves the same (lt slaugytojas specialistas -> no spesialsykepleier, 68 essential skills), so the model is not construction-shaped. " +
       "PERFORMANCE IS A CONTRACT, not a detail: esco_labels_typeahead_idx leads with `locale`, so the same lookup measured 1.5 ms with a locale and 10,076 ms without - 6,500x. lib/esco therefore REQUIRES locales and fans out one indexed query per locale. " +
-      "WHAT IS NOT CONNECTED, stated plainly: the new lib/esco semantic layer (concept resolution, the cross-language bridge, and the occupation-skill relation reader) has NO product consumer yet. It is CODE_PROVEN as TypeScript and its query shapes are proven on production; it is not reachable by a human, and this entry does not pretend otherwise. " +
+      "WHAT IS CONNECTED (corrected 2026-09-12): the lib/esco semantic layer has its first product consumer a person reaches without an admin screen - the Work Journal's occupation path (`iscoGroupsForEscoUris` in esco-lookup, read by `lib/journal/journal-occupation-path.ts`): the worker's own profession -> professions.esco_uri -> esco_occupations.isco_group -> the archetype modules both journal editors compose (a tiler, 7122, gets inspection fields; a software developer, 2512, software delivery). The concept resolver, the cross-language bridge and the occupation-skill relation reader still have NO product consumer; they are CODE_PROVEN as TypeScript with query shapes proven on production, and this entry does not pretend otherwise. " +
       "THE LINKAGE IS NOW APPLIED (2026-09-08, owner-approved on #1635, ledger 20260908082301), so the line above about 0 of 161 skills and 0 of 49 professions is superseded: production now carries 65 mappings - 31 of 161 skills and 34 of 49 professions. The corrected set is what shipped, NOT the set the owner refused: the six objectively wrong mappings are absent and the two ambiguous ones are deliberately left UNMAPPED. `teacher` and `caregiver` are NULL on production and that is the intended outcome, because UNKNOWN is the correct answer for an ambiguous occupation and a confidently wrong one propagates into matching. Verified by FINGERPRINT rather than by eye - the applied rows and the migration file both hash to 4a86d46c3701871e06d8c355d76173f4 over 65 sorted type|slug|uri triples. The migration can only fill a NULL: it asserts every slug exists and every URI is in the corpus, and refuses to overwrite a different esco_uri. The remaining 130 skills and 15 professions stay unmapped rather than guessed.",
     // ownerDecision RESOLVED 2026-09-08. The gate did its job: #1355 was
     // refused as written, the wrong mappings were corrected in #1635, and the
@@ -547,8 +547,8 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "PRODUCTION_RPC_PROVEN",
     anchors: ["lib/company"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/company/active-organization.ts",
+    surfaces: ["app/[locale]/dashboard/company"],
     note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers.",
   },
   {
@@ -585,7 +585,26 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/agency"],
     coreModule: "lib/agency/clients.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`agency_client_connections` is live; `agency_clients` is a second, unapplied client model (§6.4 item 1).",
+    note: "`agency_client_connections` is live. `agency_clients` was APPLIED 2026-09-14 (owner item 4d, ledger `20260914202322`) under the confirmed canonical Model B: its policy is `owns_company(company_id) OR is_admin()` - company/org authority, never the legacy `owns_agency` - so applying it did not revive Model A (see ORG-10). The two are NOT rivals and this row used to imply they were: `agency_client_connections` is an invitation-based bidirectional bridge to a real platform organization, `agency_clients` is an agency's own private record of a client who may not be on the platform. `AgencyClientsSection` on /dashboard/company had been degrading against a 42P01 since it shipped; read back under a REAL staffing-agency owner's auth after the apply, the relation now reads cleanly (0 rows). 0 rows is adoption, not breakage - 4 staffing-agency companies can now use it. The demand link is one additive nullable column, `customer_requests.agency_client_id`; `customer_requests` was re-counted at 20 rows after the apply, unchanged, 0 linked.",
+  },
+  {
+    id: "ORG-10",
+    disconnectedBecause: "no_importer",
+    domain: "organization",
+    title: "Agency worker pool (legacy `agencies` world)",
+    worldElement: "organizations",
+    status: "BUILT_NOT_CONNECTED",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/agency/pool.ts", "lib/agency/pool-actions.ts"],
+    coreModule: "lib/agency/pool.ts",
+    surfaces: [],
+    retired: {
+      on: "2026-09-14",
+      why:
+        "Owner decision 2026-09-14: Model B is canonical and this Model A surface is retired-and-recorded (B1). The product once answered `who is in my agency pool and are they ready?` here - docs-readiness aggregates, country readiness, bridge-gated journal evidence - and it stopped because the actor model moved, not because the question stopped mattering. THE QUESTION IS NOT RETIRED, only this answer: a Model-B-native workforce/pool surface is to be reconsidered when real agency workforce evidence exists (owner, same decision). WHY B WON, measured on production 2026-09-14 rather than argued: the SUPPLY side of the market - `list_open_supply_for_employers`, owner-approved and proven end to end 2026-09-07 - resolves authority through `engagement_contexts` + `company_memberships` + `manages_organization` and contains NO reference to `agencies`. Model A holds exactly one reader, `list_open_demand_for_agencies`, which keys off `public.agencies.profile_id`, and it is the one with no surface. NOTHING IS LOST, checked in both directions: all 3 `agencies` rows are already mirrored into `organizations` (organization_type='agency', legacy_agency_id back-pointer) by the `mirror_agency_to_org` trigger; 2 of the 3 profiles additionally own a `companies` row with company_type='staffing_agency'; the third authored 2 `agency_offer` supply rows, which live in `customer_requests` keyed by profile_id and are read by the Model B supply function - so its real evidence never depended on this world either. `agency_workers` holds 0 rows, so `getAgencyPool()` would return an empty pool for every caller alive. NOTHING IS DROPPED: `agencies`, `agency_workers`, `owns_agency`, `list_open_demand_for_agencies` and `mark_agency_can_offer` all remain in the database untouched, and both modules remain in the tree. Retirement here is a statement about what the PRODUCT offers, not a deletion. The route `/dashboard/agency/pool` has redirected to `/dashboard/company#company-team` since W1 (next.config.ts), so no human path changes today.",
+    },
+    note:
+      "RETIRED as a product surface, not deleted. `lib/agency/pool.ts` has no importer among routes or components - only guards and the redirect map reference it - which is why `no_importer` is the honest disconnection kind rather than `no_navigation`. The anti-revival guard is `lib/guards/agency-model-b-canonical-v1.test.ts`: it bans the legacy pool modules from EVERY route and component, not just the company page, so this cannot quietly become a second agency product model again. Extending `agency-direction-a.test.ts`, which already banned them from `/dashboard/company` alone. Writing that guard surfaced a SECOND Model A leftover this row did not know about: `components/app/agency-workers-section.tsx` still imports `lib/agency/actions` and `lib/agency/agency-workers`. It is dead - nothing renders it, and `company-workers-section.tsx` (Model B) is its replacement, referring to it only in a comment. It is kept rather than deleted, for the same retire-and-record reason, and the guard allow-lists that one file while separately asserting it stays ORPHANED, so the exception cannot quietly hide a live surface.",
   },
   {
     id: "ORG-9",
@@ -678,7 +697,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: [],
     coreModule: null,
     surfaces: [],
-    note: "No FK exists anywhere; teams are `organizations` rows with `organization_type='team'` and 0 of them exist.",
+    note: "ASSIGNMENT is genuinely missing: no FK ties a team to a project assignment, so a brigade cannot be assigned as a UNIT. The rest of the team layer is NOT missing, and this note used to imply it was — re-measured against production 2026-09-09: `organization_type='team'` is in the live CHECK constraint, `create_team_v1` and `get_team_capability_summary_v1` both EXIST, `team_details` and `team_enquiries` both EXIST, `invitations.invitation_type` carries `join_team`, and `authenticated` HAS execute on `create_team_v1` — so a team can be created, given members by consent (the existing `engagement_contexts`, 80 rows in real use), described with availability/location, and enquired about. What is 0 is USAGE: 0 teams, 0 team_details, 0 team_enquiries, 0 join_team invitations. Nobody has created one, which is a human fact and not a code gap (the same distinction the institution's `members 0` needed). The sentence front door was the real reachability defect and is fixed (see `a-brigade-can-offer-itself.test.ts`).",
   },
   {
     id: "WRK-7",
@@ -694,42 +713,42 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-8",
-    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Defects / corrections",
     worldElement: "projects",
-    status: "BUILT_NOT_CONNECTED",
+    status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/quality"],
-    coreModule: null,
-    surfaces: [],
-    note: "0 rows; no human path opens it. Measured 2026-09-08: `defects` and `defect_corrections` both hold 0 rows, and neither `/dashboard/quality` nor any defects route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
+    coreModule: "lib/quality/quality.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
+    note:
+      "Corrected 2026-09-14, and this is the WRK-4 defect a second time. The old note said `no human path opens it` and called that `Genuinely unreachable - this one is correct`. It was not correct. `ProjectDefectsPanel` is rendered on `/dashboard/projects/[id]/operations`, fed by `getProjectDefects` in `lib/quality/quality.ts`, with all four write actions (`report_defect_v1`, `set_defect_status_v1`, `add_defect_correction_v1`, `delete_defect_v1`) wired through `lib/quality/quality-actions.ts`. That route is linked from at least six places outside its own directory - the project page, the project map, the company home field section, the assignment manager, the admin page and a chat action chip. The claim survived because the row declared `coreModule: null` and `surfaces: []`, which is exactly the shape the reachability guards SKIP: a row that names nothing to check cannot be falsified, so it rots. That is the SEP-8 collapse happening inside the register that exists to prevent it. What IS true: `/dashboard/quality` does not exist and no defects route carries a surfaceRoute in the dashboard module registry - no nav entry of its own, the WRK-9 wording. And measured on production 2026-09-14, `defects` and `defect_corrections` both still hold 0 rows against 9 projects, so nobody has used it. 0 rows is USAGE, not disconnection - the same distinction this register already applied to WRK-6 teams. PARTIAL rather than BUILT_AND_USABLE for a reason that is NOT navigation: the manager half is complete and the worker half does not exist. `defects_select` admits `can_manage_project(project_id) OR reporter_id = auth.uid() OR is_admin()`, and `assignee_profile_id` - the column that records who must fix the defect - appears in no policy. A worker assigned a defect cannot read the row naming them. That was WRK-8's real gate. CLOSED 2026-09-14: the owner approved the minimum one-disjunct widening (decision 2a) and `20260914200000_defects_assignee_read_v1` was applied via Supabase MCP as ledger `20260914195053`. `defects_select` now reads `can_manage_project(project_id) OR reporter_id = auth.uid() OR assignee_profile_id = auth.uid() OR is_admin()`. PROVEN ON PRODUCTION, not inferred: three defects were seeded on ONE project differing only in assignee, inside a transaction that was then ROLLED BACK, and read under four real users' auth. The assigned worker saw exactly 1 row - their own - and the unassigned defect and the defect assigned to a different worker ON THE SAME PROJECT both came back invisible (f, f), which is what makes this a per-ROW disclosure and not a per-project one. A second worker saw only the defect assigned to them. A worker with no assignment saw 0 rows with no error, so it fails closed. The manager saw all 3, unchanged. The assignee saw 0 `defect_corrections`, so owner decision 2b (DEFER) holds at the database rather than only in the UI. Residue re-counted after the rollback: `defects` and `defect_corrections` both back to 0. Grants untouched - `authenticated` still holds SELECT and no INSERT/UPDATE/DELETE, writes stay RPC-only. Rollback: `supabase/rollbacks/20260914200000_defects_assignee_read_v1.down.sql`, a faithful inverse that reintroduces the defect by design. What is still NOT proven is a human: no defect has ever been written by a real person, so the worker-facing read has no surface exercising it yet and the evidence stays TEST_PROVEN.",
   },
   {
     id: "WRK-9",
-    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Handover passport",
     worldElement: "projects",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "TEST_PROVEN",
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/projects"],
-    coreModule: null,
-    surfaces: [],
-    note: "`project_handover_entries` has no reader surface. Measured 2026-09-08: `project_handover_entries` holds 1 row, so it HAS been written once. There is no dashboard-module-registry entry for it; it is reachable only from inside project operations and the handover panel. `no_navigation` is therefore accurate as written - no nav entry of its own - but it is not unreachable.",
+    coreModule: "lib/projects/handover-passport.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
+    note:
+      "Corrected 2026-09-15 (falsifiability sweep). This claimed `no_navigation` while naming NO module and NO surface — the WRK-8 shape, which every reachability guard skips. Measured: `lib/projects/handover-passport.ts` is the read service, `HandoverPassportPanel` renders on `/dashboard/projects/[id]/operations`, and the passport is also reachable from `/dashboard/tasks` and the workspace project result. The route carries inbound links from six places. Production holds **1** `project_handover_entries` row, so this has been WRITTEN by a real path at least once — which is why the evidence is PRODUCTION_PERSISTENCE_PROVEN and the status PARTIAL, not disconnected. The old note already admitted it is not unreachable, in those words, while the STATUS still said BUILT_NOT_CONNECTED; the row now says one thing. What remains true: no dashboard-module-registry entry of its own, so there is no nav tile — reachable from inside project operations, not from a menu.",
   },
   {
     id: "WRK-10",
-    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Project economics",
     worldElement: "projects",
-    status: "BUILT_NOT_CONNECTED",
+    status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/economics"],
-    coreModule: null,
-    surfaces: [],
-    note: "`project_budgets` exists with no surface. Measured 2026-09-08: `project_budgets` holds 0 rows and no economics/budgets route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
+    coreModule: "lib/economics/economics.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
+    note:
+      "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with no module and no surface named. Measured: `lib/economics/economics.ts` is the read service and `ProjectEconomicsPanel` renders at `app/[locale]/dashboard/projects/[id]/operations/page.tsx:570`, a route linked from six places. `project_budgets` holds 0 rows — that is ADOPTION, not disconnection, the same distinction this register already applied to WRK-6 and WRK-8. PARTIAL because the manager path is wired and nobody has used it yet.",
   },
 ];
 
@@ -838,6 +857,34 @@ const EVIDENCE: readonly CapabilityRow[] = [
     ownerDecision:
       "The v1 select policy compares an unqualified `moderation_status` inside a subquery over `experience_records`, so it resolves to the RECORD's status and hands the experience author a reply moderation has not published. The surface now withholds it; correcting the policy is a schema change (RED).",
   },
+  {
+    id: "EVID-7",
+    domain: "evidence",
+    title: "Work intelligence: hours · activities · skill practice · evidence strength",
+    worldElement: "work_journal",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: [
+      "lib/journal/work-intelligence.ts",
+      "lib/journal/work-intelligence-read.ts",
+      "lib/journal/work-evidence-archetypes.ts",
+      "lib/journal/fragment-skill-evidence.ts",
+      "lib/journal/work-time-plausibility.ts",
+      "lib/journal/journal-module-fields.ts",
+    ],
+    coreModule: "lib/journal/work-intelligence.ts",
+    surfaces: [
+      "app/[locale]/dashboard/journal",
+      "app/[locale]/cv",
+      "app/[locale]/dashboard/people/[workerId]",
+      "app/[locale]/dashboard/reports",
+      "app/[locale]/dashboard/work-in-numbers",
+      "components/app/journal-work-intelligence.tsx",
+    ],
+    note:
+      "Issue #1689 (2026-09-11). ONE attribution layer over the canonical work-time rule answers, from persisted rows only: hours today / 7 / 30 / 365 days / all time (every entry once), main activity, hours per activity with a 30-vs-30 trend, per-skill ATTRIBUTED practice time (when the entry links ONE skill, or — since the fragment-evidence slice of the same issue — for the fragment a link was recognised on: `fragment_skill` rows written by the skill pipeline and by the worker's candidate confirmation, so ‘6 h tiles, 2 h plaster’ gives 6 h to tiling and 2 h to skim-coating from the worker's own split; a fragment two linked skills sit on, an unlinked skill's row and an entry-level duration all stay involvement) kept apart from INVOLVEMENT (entries · days · contexts · shared hours, never summed — an 8 h entry with four skills is 8 h, not 32), confirmed hours from approved confirmations only, evidence strength (confirmed / photos / original document / self-only), outputs in their recorded units, contexts, months, adjacent directions from EVIDENCED skills only, and the provenance of every hour. The SAME model reaches the Living CV (hours on skill chips) and the conversation (`journal-recent` now looks BACK 14 days and states the total; `figures` states recorded hours instead of denying a ledger). Also FIXED on the way: the journal's own day totals read only the entry-level metric and showed 0 h for fragment-recorded days while the calendar showed the real figure. " +
+      "The universal-journal extension path is data, not forms: `work-evidence-archetypes.ts` carries 31 work-evidence archetypes and an ISCO-08 map covering all 43 sub-major groups (3,039 ESCO occupations resolve through ~50 rows), with `composeJournal` as the assembly contract; guarded against occupation switches and core-slug collisions. Plausibility checks (owner §13, `work-time-plausibility.ts`) warn over the same lines — a day above 24 h, a long day, one duration longer than a day, an entry-level figure the rule set aside — in the section and right after a save in the chat flow and the composer; they never change a figure, and the worker's acknowledgement is an append-only `work_time_override` row with a reason that keeps the check visible. Organization view (owner §14): the person page composes the SAME reader for a member under the database's org-manager RLS branch — a manager sees hours, kinds of work, skill practice and evidence strength from exactly the entries logged against their own organization's engagements, with confirmed hours from their own approved confirmations; no checks, directions or diary links, no second timesheet read. The organization's per-member roll-up on /dashboard/reports (the windowed journal report) derives every member's hours, confirmed hours, days worked and main kind of work through the same model over the window's own rows — the hub tile and the daily panel stay count-sized (work time is null there, not zero) — and its review counts now mean what they say (confirmed = approved; rejected / changes-requested = returned; the rest await review — before, any confirmation row counted as confirmed). Archetype modules reach the person (owner §12) through `journal-module-fields.ts`: the entry's engagement RELATIONSHIP resolves archetypes, `composeJournal` unions their modules, and both editors (the compact drawer and the composer) render exactly those fields behind their existing disclosure — a placement shows supervision level / competency practised / learning outcome, volunteering the field-project modules; each field is one worker_input `journal_entry_metrics` row under the same atomic save, accepted server-side only when the SAVED engagement's composition allows the slug (refused by name, never dropped), preloaded on edit and shown back on the entry in plain words. The occupation path is live since 2026-09-12 (the slug↔ESCO linkage was applied 2026-09-08, ledger 20260908082301): `journal-occupation-path.ts` resolves the worker's OWN professions → `professions.esco_uri` → `esco_occupations.isco_group` server-side, the editors compose `archetypesForIsco` ∪ `archetypesForRelationship` (a tiler under an employee context sees place and crew, materials and tools, conditions and safety, inspection), all 25 modules / 87 field slugs carry plain-word labels in the five journal locales, and the server's accept set is the worker's own families plus the engagement's relationship — never a client-posted slug. A profession without an `esco_uri` (15 of 49; `teacher`, `caregiver` unmapped on purpose) composes nothing on this path — nothing is manufactured for it. On the way, the journal page now filters contexts by the canonical PROFESSIONAL_HISTORY_RELATIONSHIPS (a placement context the chat could write into was invisible to the page). PARTIAL because no human has walked the section, the organization views or the module fields on production; it never manufactures precision the rows do not hold.",
+  },
 ];
 
 // ── F. DEMAND · SUPPLY · MATCHING ───────────────────────────────────────────
@@ -915,7 +962,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/market/match-team-v1.ts"],
     coreModule: "lib/market/match-team-v1.ts",
     surfaces: ["app/[locale]/dashboard/admin"],
-    note: "Admin route only, and no team exists to match (WRK-6). Registered as DISCONNECTED until the reachability guard proved the admin route does reach it.",
+    note: "Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`.",
   },
   {
     id: "DEM-7",
@@ -1136,35 +1183,35 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/agreements"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/agreements/agreements.ts",
+    surfaces: ["app/[locale]/dashboard/commercial"],
     note: "Three stores, 0 rows; `contracts` is legacy of `agreements` (debt).",
   },
   {
     id: "MKT-5",
-    disconnectedBecause: "no_navigation",
     domain: "marketplace",
     title: "Procurement",
     worldElement: "organizations",
-    status: "BUILT_NOT_CONNECTED",
+    status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/procurement"],
-    coreModule: null,
-    surfaces: [],
-    note: "No route; an anchor only. Measured 2026-09-08: `procurement_inquiries`, `procurement_offers` and `procurement_events` all hold 0 rows, and no procurement route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
+    coreModule: "lib/procurement/procurement.ts",
+    surfaces: ["app/[locale]/dashboard/finance"],
+    note:
+      "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with nothing named. Measured: `lib/procurement/procurement.ts` is the read service and `ProcurementSection` renders on `/dashboard/finance` (page line 280). That route is NOT orphaned — `/dashboard/reports` and `components/app/commercial-panel.tsx` both link to it. Production: `procurement_inquiries` 0, `procurement_offers` 0 — adoption, not reachability.",
   },
   {
     id: "MKT-6",
-    disconnectedBecause: "no_navigation",
     domain: "marketplace",
     title: "Business trips",
     worldElement: "objects",
-    status: "BUILT_NOT_CONNECTED",
+    status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/trips"],
-    coreModule: null,
-    surfaces: [],
-    note: "Never reaches the calendar. Measured 2026-09-08: `business_trips` and `business_trip_events` both hold 0 rows and no trips route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
+    coreModule: "lib/trips/trips.ts",
+    surfaces: ["app/[locale]/dashboard/finance"],
+    note:
+      "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with nothing named. Measured: `lib/trips/trips.ts` is the read service and `TripsSection` renders on `/dashboard/finance` (page line 285), a route with real inbound links. This row was especially wrong in context: business trips already participate in commitment/capacity reality (commit b7b7936), so a capability feeding the planning loop was recorded as reachable by nobody. Production: `business_trips` 0, `business_trip_events` 0 — adoption.",
   },
   {
     id: "MKT-7",
@@ -1187,10 +1234,10 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     status: "ARCHITECTURE_ONLY",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/lmc"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/lmc/lmc-account.ts",
+    surfaces: ["app/[locale]/dashboard/account"],
     deferredByDesign: true,
-    note: "Five tables and sixteen RPCs live; all six flags are false in code AND in the database. Spend has no reversal — that is the recorded blocker.",
+    note: "Corrected 2026-09-15: SEVEN lmc_* tables are live in production (lmc_accounts, lmc_account_balances, lmc_lots, lmc_lot_balances, lmc_lot_consumptions, lmc_transactions, lmc_settings), not five — re-counted from information_schema, and the note had drifted. Sixteen RPCs live; all six flags remain false in code AND in the database. Spend has no reversal — that is the recorded blocker, and it is why this stays ARCHITECTURE_ONLY + deferredByDesign even though the machinery exists: the capability is deliberately unarmed, not unbuilt. Arming it is MKT-7, an owner decision (two independent owner acts). The row now names `lib/lmc/lmc-account.ts` and `/dashboard/account`, where LmcBalanceSection renders the disabled state — so the claim is checkable rather than merely asserted. Naming them does not arm anything.",
   },
 ];
 
@@ -1242,8 +1289,8 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/notifications"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/notifications/weekly-digest-emitter.ts",
+    surfaces: ["app/[locale]/dashboard/activity"],
     note:
       "PROMOTED 2026-09-08 from TEST_PROVEN on real evidence, not on a green suite: the cron actually ran and PERSISTED, writing 4 weekly_digest rows to notification_events at 07:09 and 07:28 UTC - the first digests this product has ever stored. Until that morning it could not: it returned HTTP 503 because service_role could read neither journal_entries nor workers to find a recipient. The only cron in the product. Still PARTIAL because DELIVERY is not persistence - the email channel remains inert with no provider configured, so a digest is stored and readable in-product and reaches nobody by mail.",
   },
@@ -1353,7 +1400,8 @@ const EDUCATION: readonly CapabilityRow[] = [
     surfaces: ["app/[locale]/dashboard/company"],
     note:
       "One programme, one cohort, zero members in production - the journey has never run end to end. The WRITE paths are all present and reachable: create programme, create cohort, assign learner and remove member are all on `/dashboard/company`, and production holds 1 accepted `student` invitation, so the assignable list is not empty. What is missing is a human doing it, not a control to do it with. " +
-      "ONE REAL GAP, measured 2026-09-08: a programme cannot be CORRECTED. `education_programs` carries a single SELECT policy and every write goes through `create_education_program_v1`; there is no update function in `pg_proc`. Name, target profession, education type and description are fixed at creation, so a field skipped once is skipped permanently - and because the target profession is what activates the employer-demand signal (EDU-6), the one live programme reads `demandUnknown` and always will.",
+      "THE 'ONE REAL GAP' THIS ROW CARRIED IS CLOSED, and the row said otherwise for five days. It asserted, as current truth, that a programme cannot be CORRECTED - 'there is no update function in `pg_proc`', so a field skipped once is skipped permanently and the one live programme 'reads `demandUnknown` and always will'. Every clause of that was measured false against production on 2026-09-13: `update_education_program_v1(uuid,text,text,text,text)` EXISTS (SECURITY DEFINER, migration `20260908120000_education_program_correction_v1`), `EditProgramForm` is MOUNTED in `institution-programs-section.tsx` beside the create form, and the single live programme now carries `builder` / `vocational` - it has in fact been corrected. The fix shipped on 2026-09-08 and this note was never updated with it. A register REDDER than the product is not a safe error: this one told two windows to go build a correction path that already existed. " +
+      "WHAT IS STILL TRUE: one programme, one cohort, ZERO members in production - the vertical has never run end to end. All five write paths are present and reachable on `/dashboard/company` (create programme, correct programme, create cohort, assign learner, remove member) and production holds 1 accepted `student` invitation, so the assignable list is not empty. What is missing is a human doing it, not a control to do it with.",
   },
   {
     id: "EDU-3",
@@ -1392,24 +1440,31 @@ const EDUCATION: readonly CapabilityRow[] = [
     status: "BUILT_NOT_CONNECTED",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/learning"],
-    coreModule: null,
-    surfaces: [],
-    note: "/dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL. Measured 2026-09-08: `learning_signals`, `learning_review_queue` and `learning_policy_settings` all hold 0 rows and no learning route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
+    coreModule: "lib/learning/learning.ts",
+    surfaces: ["app/[locale]/dashboard/learning"],
+    note:
+      "Made FALSIFIABLE 2026-09-15 without changing the verdict. The row claimed `orphan_route` while naming no module and no surface, so the claim could not be checked at all - the same unfalsifiable shape as WRK-8. It now names `lib/learning/learning.ts` and `app/[locale]/dashboard/learning`, and the claim VERIFIES: grep finds ZERO inbound links to `/dashboard/learning` from any route or component outside its own directory, so a person reaches it only by typing the URL. THE LIMITATION IS DELIBERATE AND PRESERVED - EDU-5 remains parked on F-N1 by owner instruction and this sweep does not bypass it; the capability stays BUILT_NOT_CONNECTED. Note the module IS imported (the learning page and two sections import it), which is exactly why `orphan_route` and not `no_importer` is the right kind: the code is reached, the ROUTE is not. Production: `learning_review_queue` 0, `learning_signals` 0. ORIGINAL NOTE: /dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL. Measured 2026-09-08: `learning_signals`, `learning_review_queue` and `learning_policy_settings` all hold 0 rows and no learning route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "EDU-6",
     domain: "education",
     title: "Institution reporting",
     worldElement: "organizations",
-    status: "PARTIAL",
+    status: "BUILT_AND_USABLE",
     strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
-    anchors: ["lib/education/programs.ts"],
+    anchors: ["lib/education/programs.ts", "lib/education/institution-report.ts"],
     coreModule: "lib/education/programs.ts",
     surfaces: ["components/app/institution-programs-section.tsx"],
     note:
       "CORRECTED 2026-09-08. This row said MISSING with no anchors, no surfaces and 'Programmes exist; no report and no export', and the journey register repeated it as 'an institution cannot see employer demand'. HALF of that was already false, and a register REDDER than the product is not a safe error: it invites the next window to build a demand reader that exists, which is how a second demand model gets born. " +
       "WHAT IS BUILT AND MEASURED ON PRODUCTION: `readInstitutionPrograms` already composes `count_public_vacancies_by_profession_v1`, the canonical per-profession count over the public vacancy pool. Verified live: the function EXISTS, returns 39 professions with real active-vacancy counts, and holds EXECUTE for `authenticated` and NOT for `anon`. `institution-programs-section.tsx` renders it per programme at `program-demand-<id>`, and the surface is mounted on `/dashboard/company`, so it is reachable by a training-provider manager rather than orphaned. It is also HONEST where it cannot answer: a programme with no target profession renders `demandUnknown`, never 0 - SEP-7 held at the surface. Nothing here needed building; it needed measuring. " +
-      "WHAT IS GENUINELY MISSING is narrower than the old note claimed, and it is two things. FIRST, there is no report and no export - an institution can read demand on screen and cannot take it anywhere. SECOND, and this is the one that bites today: production's single programme carries NO target profession, so the number it would show is `demandUnknown` FOREVER. `education_programs` has exactly ONE policy, a SELECT; every write goes through `create_education_program_v1`, and no update function exists in `pg_proc`. A programme is immutable after creation, so an institution that skipped the optional profession field at creation can never turn the market signal on. The demand reader is not the blocker - correcting a programme is.",
+      "BOTH OF THE GAPS THIS ROW NAMED ARE NOW CLOSED, 2026-09-13. It said two things were missing. " +
+      "THE SECOND WAS ALREADY FALSE WHEN IT WAS WRITTEN, and stayed on the row for five days: 'production\'s single programme carries NO target profession ... a programme is immutable after creation ... no update function exists in `pg_proc`'. Measured against production 2026-09-13: the update function EXISTS (SECURITY DEFINER, migration `20260908120000`), its form is mounted beside the create form, and the live programme carries `builder` / `vocational`. See EDU-2, corrected in the same pass. " +
+      "THE FIRST - no report and no export - WAS REAL AND IS NOW BUILT: `lib/education/institution-report.ts` (PURE, DB-free) serialises the two reads this surface already performs into a CSV, served by the export route under `/dashboard/company/institution-report/`, linked from this section whenever there is a programme to report on. It opens NO second reader: the programme half is `readInstitutionPrograms`, the outcomes half is the single permitted caller of the learner-outcomes aggregate, so the file cannot disagree with the screen. Authorisation is BORROWED, not re-implemented - the organisation id arrives in the query string as a CLAIM, and the outcomes read (manager of a `training_provider` organisation, 42501 to anyone else) runs first and decides; the route refuses 503 rather than export when that gate is itself unreachable. The honesty rules travel with the data: an unmeasured demand prints `unknown` and never `0` (SEP-7), a count the k-anonymity floor nulled prints `suppressed` and never `0`, and no person appears in the file - the programme block counts learners, it never names one. " +
+      "WHERE THE REMAINING UNKNOWN IS. The demand read is PRODUCTION_DATA_PATH_PROVEN; the EXPORT is TEST_PROVEN only - it is new, no human has downloaded it and it has not been run against production. " +
+      "AND A CORRECTION THIS ROW TOOK THREE ATTEMPTS TO GET RIGHT, recorded because the shape of the mistake matters more than the value. Version one claimed the live programme\'s tile \'reads `demandUnknown`\'; it did not, it read \'0 live vacancies\', because `readInstitutionPrograms` mapped an absent profession to `?? 0`. Version two \'fixed\' that by returning null for every absence - which HID a real zero. Both are the same defect: an unknown dressed as a zero, then a zero dressed as an unknown. " +
+      "THE MEASURED TRUTH, taken directly from production 2026-09-13: the reader asks `count_public_vacancies_by_profession_v1` for `p_limit: 100` and gets 39 rows. 39 < 100, so the grouping is EXHAUSTIVE - every profession with an active public vacancy is in it. `builder` is absent, and `public_vacancies` holds ZERO active unexpired builder rows. The tile therefore correctly reads 0 live vacancies, and the export correctly writes 0. The earlier \'20 professions, not the 39 recorded on 2026-09-08\' line in this row was my own measurement error - I called the function at its DEFAULT limit of 20 instead of the limit the application passes. The 2026-09-08 figure of 39 was right. " +
+      "The rule now lives once, in `lib/market/public-demand`: absence is a measured ZERO when the list came back shorter than the limit it asked for, and NOT MEASURED when it came back full. `lib/learning/learning-compass.ts` already had it correct and inline while `programs.ts` carried a second, wrong copy - two readers of one function answering differently about the same profession. Both now read the one rule.",
   },
 ];
 
@@ -1528,8 +1583,8 @@ const PLATFORM: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "HUMAN_UI_PROVEN",
     anchors: ["lib/i18n", "messages"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/i18n/config.ts",
+    surfaces: ["components/layouts"],
     note: "Eleven locales, five active; the inactive five carry large [EN] blocks and are not ratchet-tracked. A missing key renders as the key itself — only a walk sees it.",
   },
   {

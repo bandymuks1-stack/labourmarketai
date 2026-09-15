@@ -1,13 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="LabourMarket.ai">
-  <defs>
-    <linearGradient id="lm" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3E8BFF"/>
-      <stop offset="1" stop-color="#8B5CF6"/>
-    </linearGradient>
-  </defs>
-  <rect width="32" height="32" rx="7" fill="#0B0D17"/>
-  <!-- Ascending labour-market bars: the brand's core motif, legible at 16px. -->
-  <rect x="8"  y="17" width="4" height="8"  rx="1.5" fill="url(#lm)"/>
-  <rect x="14" y="12" width="4" height="13" rx="1.5" fill="url(#lm)"/>
-  <rect x="20" y="7"  width="4" height="18" rx="1.5" fill="url(#lm)"/>
+  <!--
+    The REAL LM mark, from the owner's original vector
+    (docs/brand/source/LM_Color Single.svg) — geometry verbatim, only the
+    orange becomes gold. It replaces the three ascending bars that
+    used to stand in for a logo the product never actually had.
+
+    Flat #D4AF37 rather than the five-stop metallic ramp: at 16px a favicon
+    resolves the gradient into mud, and the ramp's midpoint IS #D4AF37, so a
+    flat fill is the same brand colour at the size where metal cannot read.
+
+    The <g> maps the mark's ink bounding box (x 89.02..653.21, y 123.09..537.11
+    in the source viewBox) into a 24px square inside the 32px tile.
+  -->
+  <rect width="32" height="32" rx="7" fill="#070706"/>
+  <g transform="translate(0.213 1.959) scale(0.04254)" fill="#D4AF37">
+    <polygon points="158.18,123.09 89.02,123.09 89.02,533.46 336.3,533.46 336.3,464.3 158.18,464.3 "/>
+    <polygon points="208.23,173.43 367.53,385.6 367.55,385.57 367.69,385.77 478.08,238.75 478.08,533.46 547.24,533.46 547.24,146.63 547.46,146.34 547.24,135.44 547.24,123.09 546.99,123.09 478.43,123.09 478.08,123.09 478.08,123.56 367.63,270.66 256.84,123.09 208.23,123.09 "/>
+    <circle cx="614.05" cy="497.95" r="39.16"/>
+    <polygon points="326.49,414.25 208.23,256.78 208.23,414.25 "/>
+  </g>
 </svg>

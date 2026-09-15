@@ -155,7 +155,7 @@ export function WorkerMyInterestSection({
                       type="button"
                       onClick={() => onContact(row.requestId)}
                       disabled={pending}
-                      className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+                      className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
                       data-testid="my-interest-contact"
                     >
                       {labels.contactEmployer}
@@ -196,7 +196,7 @@ export function WorkerMyInterestSection({
                   {row.cvHref && status !== "withdrawn" ? (
                     <Link
                       href={row.cvHref}
-                      className="text-xs font-medium text-brand-blue hover:text-brand-cyan"
+                      className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
                       data-testid="my-interest-cv-link"
                     >
                       {labels.cvLink} →

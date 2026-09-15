@@ -143,7 +143,7 @@ export async function WorkerReadinessPanel({ card }: { card: WorkerPlayerCard })
               {!p.met && isStep && step ? (
                 <Link
                   href={step.href as "/dashboard"}
-                  className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-blue hover:text-brand-cyan"
+                  className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-blue hover:text-brand-champagne"
                   data-testid={`readiness-step-${p.key}`}
                 >
                   {t(`readinessSteps.action.${step.labelKey}`)}

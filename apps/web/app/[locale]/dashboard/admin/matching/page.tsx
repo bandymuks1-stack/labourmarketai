@@ -425,7 +425,7 @@ export default async function AdminMatchingWorkbenchPage({
                           className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
                           data-testid={`matching-team-${r.id}`}
                         >
-                          <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+                          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                             {t("team.title")}
                           </p>
                           {teamsRead === null || teamsRead.kind === "unreadable" ? (
@@ -475,7 +475,7 @@ export default async function AdminMatchingWorkbenchPage({
                                       <span className="text-xs font-semibold text-text-primary">
                                         {team.name}
                                       </span>
-                                      <span className="rounded-sm border border-brand-cyan/30 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan">
+                                      <span className="rounded-sm border border-brand-cyan/30 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                                         {t(`engine.status.${teamMatch.status}` as never)}
                                       </span>
                                     </span>
@@ -570,7 +570,7 @@ export default async function AdminMatchingWorkbenchPage({
                             className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
                             data-testid={`matching-fit-${r.id}`}
                           >
-                            <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+                            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                               {t("fit.title")}
                             </p>
                             <p className="text-meta leading-relaxed text-text-secondary">

@@ -112,6 +112,10 @@ const CHAT_KEYS = [
   "workHoursChip",
   "absencesChip",
   "documentsChip",
+  // The ROSTER importer is not the documents centre. Sharing one chip label
+  // told a manager attaching a workforce list that they were opening "My
+  // documents" - a different page for a different subject.
+  "chipPeopleImport",
   "marketMapChip",
   "activityChip",
   "writeEmployerHint",
@@ -190,6 +194,8 @@ const CHAT_KEYS = [
   "userProposalStatus",
   "learningCompassHint",
   "chipLearningCompass",
+  "journalNumbersHint",
+  "chipJournalNumbers",
   "inviteStudentHint",
   "chipInviteStudent",
   "programmesHint",
@@ -383,6 +389,14 @@ const WORKLOG_KEYS = [
   "pipelineFailedNote",
   // The evidence carries no work content — ask, never save the request.
   "errorNoWorkContent",
+  // What the save will record as work time (issue #1689).
+  "recordTitle",
+  "recordNoActivity",
+  "recordTotalStated",
+  "recordPartsSum",
+  "recordTotalDiffers",
+  "recordNone",
+  "hoursUnit",
 ] as const;
 
 /** Resolve the flat chat label bag from a `conversation.chat`-scoped translator.

@@ -6,7 +6,16 @@ import type { PersonalWorkspaceIntro as IntroModel } from "@/lib/workspace/perso
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 
 /**
- * "Mano erdvė" — the first block of the conversation-first home (S2).
+ * "Mano erdvė" — the first block of the conversation's opening (S2).
+ *
+ * REPLACED FOR THE WORKER'S HOME (worker mobile IA 2026-09-13 §4, owner
+ * direction: no welcome card). A worker in their personal space opens
+ * ŠIANDIEN (`components/app/today/today-screen.tsx`), whose header — name ·
+ * profession · today's state — is where their space is introduced; the
+ * dashboard root hands the conversation a `hidden` intro (`replaced-by-today`)
+ * when that worker opens the chat on demand, so this block is never shown
+ * twice. It still renders for the conversation openings the model allows
+ * (`derivePersonalWorkspaceIntro`) and is mounted from the chat alone.
  *
  * IT IS NOT A DASHBOARD. It has no route of its own, it owns no data, it reads
  * nothing and it derives nothing: the server hands it a finished model built

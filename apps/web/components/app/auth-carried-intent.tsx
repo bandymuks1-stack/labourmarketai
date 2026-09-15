@@ -33,7 +33,7 @@ export function AuthCarriedIntent({ next }: { next: string | null }) {
       data-testid="auth-carried-intent"
       className="rounded-md border border-brand-blue/35 bg-ink-900/60 px-3 py-2.5"
     >
-      <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("label")}
       </p>
       <p className="mt-1 text-sm leading-relaxed text-text-primary">

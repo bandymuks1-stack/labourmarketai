@@ -16,6 +16,11 @@ import type {
   EditEntryAmount,
   JournalEditingEntry,
 } from "@/lib/journal/edit-entry";
+import {
+  MODULE_METRICS_FIELD,
+  serializeModuleFields,
+  type ModuleFieldValues,
+} from "@/lib/journal/journal-module-fields";
 
 export type CompactTimeUnit = "hours" | "minutes" | "days";
 
@@ -33,7 +38,23 @@ export type CompactActivityRow = {
   timeUnit: CompactTimeUnit;
   /** persisted = from the saved entry; added = local, UNSAVED until save. */
   origin: "persisted" | "added";
+  /** Provenance of the persisted fragment rows this row came from (null for
+   *  an added row, or when the rows carried none). */
+  source?: "worker_input" | "ai_extracted" | null;
+  /** `label|timeValue|timeUnit` as PERSISTED — the save compares the row to
+   *  it: an untouched row keeps its provenance, an edited one is the
+   *  worker's input. */
+  persistedFingerprint?: string | null;
 };
+
+/** The ONE comparison both the derive and the save use. */
+export function rowFingerprint(row: {
+  label: string;
+  timeValue: string;
+  timeUnit: CompactTimeUnit;
+}): string {
+  return `${foldLabel(row.label)}|${row.timeValue.trim()}|${row.timeUnit}`;
+}
 
 const TIME_UNITS: readonly CompactTimeUnit[] = ["hours", "minutes", "days"];
 
@@ -78,7 +99,7 @@ export function deriveCompactRows(
     const label =
       a.userLabel ?? a.activityLabel ?? a.rawPhrase ?? "";
     if (!label.trim()) continue;
-    rows.push({
+    const row: CompactActivityRow = {
       key: `frag-${a.index}`,
       label: label.trim(),
       skillSlug: null,
@@ -86,7 +107,11 @@ export function deriveCompactRows(
       timeValue: a.time ? amountToInput(a.time.value) : "",
       timeUnit: toTimeUnit(a.time?.unitSlug),
       origin: "persisted",
-    });
+      source: a.source,
+      persistedFingerprint: null,
+    };
+    row.persistedFingerprint = rowFingerprint(row);
+    rows.push(row);
   }
 
   // Durable skill links → their own rows, unless a fragment row already
@@ -128,6 +153,19 @@ export function deriveCompactRows(
     rows,
     looseTime: !anyRowTime && entry.time ? entry.time : null,
   };
+}
+
+/** The provenance a re-saved fragment row ships with — see `source` on
+ *  `CompactActivityRow`. Unknown persisted provenance defaults to the
+ *  worker's input, as the write core always did. */
+export function fragmentProvenance(
+  row: CompactActivityRow,
+): "worker_input" | "ai_extracted" {
+  if (row.origin !== "persisted") return "worker_input";
+  if (!row.source || !row.persistedFingerprint) return "worker_input";
+  return rowFingerprint(row) === row.persistedFingerprint
+    ? row.source
+    : "worker_input";
 }
 
 /** Parse a row's time input; null when empty/invalid/negative. */
@@ -190,6 +228,9 @@ export type CompactSaveInput = {
   siteName: string;
   institutionName: string;
   topic: string;
+  /** Owner §12 — archetype module fields (slug → text) for the entry's
+   *  engagement relationship. Empty values are not sent. */
+  moduleFields: ModuleFieldValues;
 };
 
 /**
@@ -214,6 +255,10 @@ export function buildCompactSaveFields(
   if (input.institutionName.trim())
     fields.institution_name = input.institutionName.trim();
   if (input.topic.trim()) fields.topic = input.topic.trim();
+  // Module fields → one JSON field; the server turns each into a metric row
+  // after checking the engagement's own composition allows the slug.
+  const moduleJson = serializeModuleFields(input.moduleFields);
+  if (moduleJson) fields[MODULE_METRICS_FIELD] = moduleJson;
 
   // Activity rows → fragments_json (index association preserved by order).
   // A row that originates from a taxonomy selection keeps ITS `skillSlug` as
@@ -224,12 +269,23 @@ export function buildCompactSaveFields(
     .filter((r) => r.label.trim().length > 0)
     .map((r) => {
       const t = parseRowTime(r);
+      const rawPhrase = (r.rawPhrase ?? r.label).trim();
+      const label = r.label.trim();
       return {
-        rawPhrase: (r.rawPhrase ?? r.label).trim(),
+        rawPhrase,
         timeValue: t ? t.value : null,
         timeUnit: t ? t.unitSlug : null,
         activitySlug: r.skillSlug,
-        activityLabel: r.label.trim(),
+        // A label that is nothing but the phrase itself names no kind of work
+        // (a persisted fragment whose activity the lexicon never read shows
+        // its own words as the row label) — shipping it as the activity wrote
+        // "2 val. testavau" into `fragment_activity`, and the activities
+        // block listed the sentence as a kind of work (#1689, production
+        // 2026-09-12). The worker's own typed label on an added row stays.
+        activityLabel:
+          r.skillSlug === null && r.rawPhrase !== null && label === r.rawPhrase.trim()
+            ? null
+            : label,
         isUnknown: false,
         userLabel: null,
         // EXPLICIT worker selection marker — only fragments flagged here may
@@ -237,6 +293,10 @@ export function buildCompactSaveFields(
         // so its parser-derived slugs keep their pre-existing metric-only
         // behaviour (no silent self-declaration from a time confirm).
         selected: r.skillSlug !== null,
+        // PROVENANCE (issue #1689): a persisted fragment the worker did not
+        // touch keeps the source it was saved with (`ai_extracted` stays a
+        // machine reading); a row the worker edited or added is their input.
+        source: fragmentProvenance(r),
       };
     });
   if (fragments.length > 0) {

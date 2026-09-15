@@ -160,7 +160,7 @@ export function NeedStructureRow({ need }: { need: UnstructuredNeed }) {
             type="button"
             onClick={apply}
             disabled={isPending}
-            className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+            className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
             data-testid={`need-apply-${need.id}`}
           >
             {isPending ? t("applying") : t("applyButton")}

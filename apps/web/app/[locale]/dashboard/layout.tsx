@@ -17,6 +17,8 @@ import { SpineStream } from "@/components/app/spine-stream";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
+import type { WorkerNavLabels } from "@/components/app/today/worker-bottom-nav";
+import { isWorkerPersonalSpace } from "@/lib/today/today-route";
 import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
 import { Link } from "@/lib/i18n/navigation";
@@ -40,7 +42,9 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  * client `AuthProvider` so every downstream widget (RoleSwitcher,
  * NotificationPanel, DashboardTabs, the simple-mode header) stays in sync. The
  * chrome itself is chosen per-route by the client `<DashboardChrome>`:
- *   - `/dashboard`                              → conversation (bare; the chat
+ *   - `/dashboard` (worker, personal space)     → ŠIANDIEN (one top bar, the
+ *                                                  page, the worker's 3-tab bar)
+ *   - `/dashboard` (everyone else; `?ask=1`)    → conversation (bare; the chat
  *                                                  supplies its own simple nav)
  *   - `/dashboard/communication|planning|profile` → simple-mode shell (5-item nav)
  *   - every other module route (detail/admin surfaces) → the full module chrome
@@ -181,8 +185,28 @@ export default async function DashboardLayout({
   // to the client chrome selector (which needs no data fetch of its own).
   const tChat = await getTranslations("conversation.chat");
   const tFooter = await getTranslations("footer");
+  // THE WORKER'S THREE TABS (IA 2026-09-13 §2; frozen contract §2.3). Only a
+  // worker standing in their PERSONAL space gets the bar — the same predicate
+  // the dashboard root uses to decide ŠIANDIEN vs the conversation
+  // (`lib/today/today-route.ts`). Labels are resolved here, server-side, so
+  // no client message namespace is added. For that worker the "back to
+  // chat" affordance on projection routes leads to ŠIANDIEN, so it is
+  // named as such.
+  const workerPersonal = isWorkerPersonalSpace({
+    activeRole,
+    activeWorkspaceId: workspace.activeWorkspaceId,
+  });
+  const tToday = await getTranslations("todayScreen.nav");
+  const workerNav: WorkerNavLabels | null = workerPersonal
+    ? {
+        today: tToday("today"),
+        world: tToday("world"),
+        ask: tToday("ask"),
+        aria: tToday("aria"),
+      }
+    : null;
   const nav: ConversationNavLabels = {
-    chat: tChat("navChat"),
+    chat: workerPersonal ? tToday("today") : tChat("navChat"),
     journal: tChat("navJournal"),
     messages: tChat("navMessages"),
     calendar: tChat("navCalendar"),
@@ -295,6 +319,7 @@ export default async function DashboardLayout({
         <DashboardChrome
           nav={nav}
           headerTitle={tChat("headerTitle")}
+          workerNav={workerNav}
           fullHeader={fullHeader}
           fullBottomNav={<BottomNav />}
           rexora={rexora}

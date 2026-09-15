@@ -566,6 +566,42 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn dagboek",
     de: "Zeig mein Tagebuch",
   },
+  // Work intelligence by sentence (issue #1689, owner chat lines 2–7).
+  "journal-skill": {
+    lt: "Kiek programavau?",
+    en: "Where did I use tiling?",
+    ru: "Сколько я программировал?",
+    nl: "Hoeveel heb ik geprogrammeerd?",
+    de: "Wie viel habe ich programmiert?",
+  },
+  "journal-skills-top": {
+    lt: "Kokius įgūdžius naudoju daugiausia?",
+    en: "Which skills do I use most?",
+    ru: "Какие навыки я использую больше всего?",
+    nl: "Welke vaardigheden gebruik ik het meest?",
+    de: "Welche Fähigkeiten nutze ich am meisten?",
+  },
+  "journal-activities-top": {
+    lt: "Kokia veikla užima daugiausia mano laiko šį mėnesį?",
+    en: "Which activity takes most of my time this month?",
+    ru: "Какая деятельность занимает больше всего времени?",
+    nl: "Welke activiteit kost de meeste tijd?",
+    de: "Welche Tätigkeit nimmt die meiste Zeit?",
+  },
+  "journal-confirmed": {
+    lt: "Kas patvirtinta?",
+    en: "What is confirmed?",
+    ru: "Что подтверждено?",
+    nl: "Wat is bevestigd?",
+    de: "Was ist bestätigt?",
+  },
+  "journal-growth": {
+    lt: "Kur yra didžiausias augimo potencialas?",
+    en: "Where could I grow?",
+    ru: "Где мой потенциал роста?",
+    nl: "Waar kan ik groeien?",
+    de: "Wo kann ich wachsen?",
+  },
   figures: {
     lt: "Paruošk ataskaitą",
     en: "Show my approved hours",
@@ -614,6 +650,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     ru: "Что ты знаешь обо мне?",
     nl: "Wat weet je over mij?",
     de: "Was weißt du über mich?",
+  },
+  capabilities: {
+    lt: "Ką galiu padaryti šioje paskyroje?",
+    en: "What can I do in this account?",
+    ru: "Что я могу сделать в этом аккаунте?",
+    nl: "Wat kan ik hier doen?",
+    de: "Was kann ich hier machen?",
   },
   "switch-context": {
     lt: "Perjunk į įmonę",
@@ -891,6 +934,15 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     ru: "Моё резюме",
     nl: "Mijn cv",
     de: "Mein Lebenslauf",
+  },
+  // THE PHOTO SHOWN BACK (issue #1689, defect G) — the production sentence
+  // that used to reach `cv-view`, and its parity forms.
+  "evidence-photos": {
+    lt: "Parodyk įkeltą nuotrauką ar tikrai išsisaugojo",
+    en: "Show the photo I just uploaded",
+    ru: "Покажи загруженное фото",
+    nl: "Laat de foto zien",
+    de: "Zeig das Foto",
   },
   "add-task": {
     lt: "Pridėk užduotį projektui: sumontuoti pastolius",

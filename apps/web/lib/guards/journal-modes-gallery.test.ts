@@ -233,3 +233,57 @@ describe("i18n copy present (lt/en/ru)", () => {
     });
   }
 });
+
+// ── Issue #1689, defect G (production HUMAN_ACCEPTANCE FAIL): a worker
+// uploaded a work photo in the journal, then asked the chat to show it and
+// was told the CV was empty. The chat now SHOWS the stored photo — through
+// the ONE personal-gallery read, never a second photo system.
+describe("the chat shows a stored photo back through the ONE gallery read", () => {
+  const adapter = read("lib/conversation/evidence-photos.ts");
+  const strip = read("components/app/conversation/chat-photo-strip.tsx");
+  const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+
+  it("the chat adapter is a thin layer over getPersonalGallery — no second photo query, no new table, no new bucket", () => {
+    expect(adapter).toContain('from "@/lib/journal/personal-gallery"');
+    expect(adapter).toContain("getPersonalGallery()");
+    expect(adapter).not.toContain('from("journal_entry_photos")');
+    expect(adapter).not.toContain("storage");
+    expect(adapter).not.toMatch(/create table|insert|upsert|\.delete\(/i);
+  });
+
+  it("the adapter names the honest states and never fabricates a photo", () => {
+    for (const kind of ['kind: "ok"', 'kind: "none"', 'kind: "no-worker"']) {
+      expect(adapter).toContain(kind);
+    }
+    expect(adapter).toContain("previewsUnavailable");
+  });
+
+  it("the strip renders an <img> ONLY from a minted signed URL, with an honest no-preview tile", () => {
+    expect(strip).toMatch(/\{p\.signedUrl \? \(/);
+    expect(strip).toMatch(/src=\{p\.signedUrl\}/);
+    expect(strip).toMatch(/data-testid="chat-photo-strip-no-preview"/);
+    expect(strip).toMatch(/data-testid="chat-photo-strip-previews-unavailable"/);
+    expect(strip).not.toContain("getPublicUrl");
+  });
+
+  it("the chat handler embeds the strip and keeps the gallery one chip away", () => {
+    expect(chat).toMatch(/evidencePhotos: \(\) => startEvidencePhotos\(\)/);
+    expect(chat).toMatch(/readRecentPhotosForChat\(\{ limit: 3 \}\)/);
+    expect(chat).toMatch(/<ChatPhotoStrip photos=\{res\.photos\}/);
+    expect(chat).toContain('id: "link:/dashboard/gallery"');
+  });
+
+  it("the copy never says 'nothing uploaded' for a read that found none, and never claims verification", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const chatCopy = JSON.parse(read(`messages/${loc}.json`)).conversation.chat as Record<string, string>;
+      for (const k of ["photosRecent", "photosNone", "photosNoWorker", "photosUnavailable", "photosPreviewUnavailable", "photoNoPreview", "photoAlt", "chipGallery"]) {
+        expect(typeof chatCopy[k], `${loc}.conversation.chat.${k}`).toBe("string");
+        expect(chatCopy[k].trim().length, `${loc}.conversation.chat.${k}`).toBeGreaterThan(0);
+        expect(chatCopy[k], `${loc}.${k} must not claim verification`).not.toMatch(/verified|patvirtint|verifiziert|geverifieerd|подтвержд/i);
+      }
+      expect(chatCopy.photosNone, `${loc}.photosNone`).not.toMatch(/nothing uploaded|nieko neįkelta|ничего не загружено/i);
+      // The failed-read copy says it could not CHECK.
+      expect(chatCopy.photosUnavailable, `${loc}.photosUnavailable`).toMatch(/nepavyko patikrinti|could not check|не удалось проверить|kon niet controleren|konnte nicht prüfen/i);
+    }
+  });
+});

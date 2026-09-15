@@ -13,6 +13,7 @@ import {
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
 import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
+import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
 import { detectUnrecordedHours } from "@/lib/journal/unrecorded-hours";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
@@ -33,9 +34,13 @@ import {
   type JournalEntryListRow,
 } from "@/lib/journal/journal-list-core";
 import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals";
+import { pendingEntryCandidates } from "@/lib/journal/entry-pending-candidates";
 import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
+import { readModuleFieldValues } from "@/lib/journal/journal-module-fields";
+import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
+import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
   deriveReviewResult,
   deriveReviewTimeline,
@@ -43,11 +48,11 @@ import {
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { EmptyState } from "@/components/app/empty-state";
 import { JournalJobContext } from "@/components/app/journal-job-context";
-import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { createClient } from "@/lib/supabase/server";
 import { processJournalEntrySkills } from "@/lib/journal/skill-pipeline";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
 // Mano CV identity lead — the player-card/avatar identity is the visual layer
 // at the TOP of the Mano CV surface (this work-records surface), with the work
@@ -62,21 +67,67 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { formatUtcDate, utcDayKey } from "@/lib/time/display";
-// ONE day-resolution rule for the Work Journal, shared with the canonical
-// calendar (lib/planning/planning-model.ts) so a record cannot sit on one day
-// here and another day there.
-import { journalStartDay } from "@/lib/planning/planning-model";
+import { formatUtcDate, utcTodayKey } from "@/lib/time/display";
+// ONE day-resolution rule for the Work Journal — the canonical work-time
+// rule's own (`resolveWorkDayDetail`), the same one the work-in-numbers
+// model groups by, so a record cannot sit on one day in the diary and
+// another day in the period tile above it.
+import { deriveEntryWorkTime, resolveWorkDayDetail } from "@/lib/journal/work-time";
+import {
+  WORK_PERIOD_KEYS,
+  workPeriodBounds,
+  type WorkPeriodKey,
+} from "@/lib/journal/work-intelligence";
+import {
+  assembleWorkIntelligence,
+  readOrganizationRecords,
+  readPhotoCountsByEntry,
+  type WorkerSkillSourceRow,
+} from "@/lib/journal/work-intelligence-read";
+// MANO DARBAS · MANO VEIKLA SKAIČIAIS (target worker IA 2026-09-13): this
+// page records and lists; the figures have their own station
+// (`/dashboard/work-in-numbers`). What stays here is ONE compact summary —
+// the dominant-skill sentence and this period's hours — composed by the same
+// presentation model and the same lead component the station renders.
+import { Card } from "@/components/ui/Card";
+import { DominantLead } from "@/components/app/work-in-numbers/dominant-lead";
+import { scopeText } from "@/components/app/work-in-numbers/period-nav";
+import {
+  dominantAnswer,
+  focusPeriod,
+  skillRows,
+  splitChecks,
+  WORK_IN_NUMBERS_HREF,
+} from "@/lib/journal/work-in-numbers-view";
+import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
+import { JournalQuickRecord } from "./quick-record";
+import { JournalCalendar } from "@/components/app/journal/journal-calendar";
+import {
+  buildJournalCalendar,
+  isIsoDay,
+  resolveAnchor,
+  resolveScale,
+} from "@/lib/journal/journal-calendar";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
-const WORKER_RELATIONSHIPS = [
-  "employee",
-  "freelancer",
-  "consultant",
-  "owner",
-  "collaborator",
-];
+//
+// The CANONICAL list, imported rather than re-declared: this page kept its own
+// copy of the paid/contracted five, so a placement context (`student`,
+// `volunteer`) that the chat work-log flow happily writes into was invisible
+// here — the person's own entries rendered without their context and the
+// editors could not name it (production 2026-09-11: one active student
+// placement). A second list is exactly how the CV, the profile card and the
+// chat selector drifted apart before (reconciliation 2026-09-07).
+const HISTORY_RELATIONSHIPS = [...PROFESSIONAL_HISTORY_RELATIONSHIPS];
+
+/**
+ * How many recorded days the diary renders when no single day is selected.
+ * Bounded output with an honest "+n" (the same rule the calendar panel uses,
+ * `lib/planning/calendar-result.ts`) — the phone opens on a readable page,
+ * and the calendar above reaches every other day in one tap.
+ */
+const DIARY_DAY_LIMIT = 7;
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')
@@ -90,20 +141,32 @@ export default async function JournalPage({
     editing?: string | string[];
     date?: string | string[];
     skill?: string | string[];
+    period?: string | string[];
+    compose?: string | string[];
+    /** Journal calendar: the scale (`month` default, `week`) and the
+     *  anchored period. See `lib/journal/journal-calendar.ts`. */
+    cal?: string | string[];
+    month?: string | string[];
   }>;
 }) {
   const { locale } = await params;
   const sp = (await searchParams) ?? {};
+  // The full composer for a NEW record only behind the explicit "detaliau"
+  // door (`?compose=full`); the compact text-first recording is the default.
+  const composeFull = sp.compose === "full";
   const editingId =
     typeof sp.editing === "string" && sp.editing.trim().length > 0
       ? sp.editing.trim()
       : null;
-  // Calendar-driven day navigation (owner UX recovery v1): ?date=YYYY-MM-DD
-  // filters the records to ONE day. Anything not a plain ISO day is ignored.
-  const selectedDate =
-    typeof sp.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(sp.date)
-      ? sp.date
-      : null;
+  // Calendar day navigation (owner direction 2026-09-13): ?date=YYYY-MM-DD
+  // narrows the records to ONE day — the day the person tapped on the
+  // calendar. Anything that is not a real ISO day is ignored.
+  const selectedDate = isIsoDay(sp.date) ? sp.date : null;
+  // The calendar's own two params: the scale (`month` default, `week`) and
+  // the anchored period. Both are URL state — no client store, no second
+  // source of "which day am I looking at".
+  const calendarScale = resolveScale(sp.cal);
+  const todayIsoKey = utcTodayKey();
   // Evidence drill-down (W5 slice 3): ?skill=<slug> filters the records to
   // those linked to ONE of the worker's own skills — the player-card evidence
   // bars land here. Same shape as ?date=; anything not a plain slug is ignored.
@@ -111,6 +174,13 @@ export default async function JournalPage({
     typeof sp.skill === "string" && /^[a-z0-9_-]{1,80}$/.test(sp.skill)
       ? sp.skill
       : null;
+  // "Work in numbers" period (issue #1689): ?period=week|month|all scopes the
+  // intelligence section. Anything else → all time. Same shape as ?date=.
+  const periodKey: WorkPeriodKey =
+    typeof sp.period === "string" &&
+    (WORK_PERIOD_KEYS as readonly string[]).includes(sp.period)
+      ? (sp.period as WorkPeriodKey)
+      : "all";
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tSpaces = await getTranslations("spaces");
@@ -118,7 +188,13 @@ export default async function JournalPage({
   const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
-  const tQuick = await getTranslations("quickNav");
+  const tIntel = await getTranslations("journal.intelligence");
+  // The compact recorder rides the conversation's own readback + confirm
+  // surface, so it speaks that surface's vocabulary — resolved here, on the
+  // server, exactly as the dashboard resolves it for the chat.
+  const workLogLabels = resolveWorkLogLabels(
+    await getTranslations("conversation.worklog"),
+  );
   // "Kam pateikti atliktą darbą?" — the verification-state vocabulary. One
   // key per canonical state and per next action; the page never spells the
   // words itself.
@@ -159,7 +235,7 @@ export default async function JournalPage({
       )
       .eq("profile_id", user.id)
       .eq("status", "active")
-      .in("relationship_slug", WORKER_RELATIONSHIPS)
+      .in("relationship_slug", HISTORY_RELATIONSHIPS)
       .order("is_primary", { ascending: false }),
     getWorkspaceContext("person"),
   ]);
@@ -228,48 +304,47 @@ export default async function JournalPage({
     }),
   });
 
-  const engagements: JournalEngagement[] = ecOrdered.map((e) => {
+  // ONE LABEL COMPOSER (issue #1689, defect J): the same facts the chat's
+  // work-log selector hands to `composeDistinctEngagementLabels`, so a context
+  // is named identically here and there. Rules live in
+  // `lib/journal/engagement-label.ts`: an organization context reads "Org ·
+  // Relationship" (the org TYPE label when it has no display/legal name —
+  // never a bare "—"; existing role labels, no new i18n key); a personal one
+  // reads "Asmeninis įrašas [· title]" — the person's own title is what tells
+  // two org-less contexts apart (production holds exactly that case: one
+  // untitled personal context carrying entries, one titled "Darbų vadovas");
+  // a collision is qualified by the title, else the start month, never by a
+  // word already present; and the list comes back pairwise distinct.
+  const engagementLabelInputs = ecOrdered.map((e) => {
     const org = e.organizations as {
       display_name: string | null;
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    // Disambiguate same-relationship engagements (e.g. owning a company AND an
-    // agency both show "Owner") by falling back to the org TYPE label when the
-    // org has no display/legal name — never a bare "—". Reuses existing role
-    // labels (company/agency), so no new i18n keys.
     const typeLabel =
       org?.organization_type === "company"
         ? tRole("company")
         : org?.organization_type === "agency"
           ? tRole("agency")
           : null;
-    const orgName =
-      org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—";
-    // A personal worker engagement (no organization) reads clearer as a
-    // named personal entry than a bare "— · Darbuotojas". Role model unchanged.
-    //
-    // …but when the person GAVE it a title, that title is what tells two of
-    // them apart. This branch used to return the same constant for every
-    // org-less context, so an account holding more than one rendered the
-    // identical row twice and the chooser asked the worker to pick between
-    // two things it had just made indistinguishable. Production holds exactly
-    // this case: one untitled personal context carrying entries, and one
-    // titled "Darbų vadovas". Same defect the network page already fixed for
-    // unnamed organizations — the rows were never duplicates, their labels
-    // were. Their own words, no invented data, no new i18n key.
-    const personalTitle = e.title?.trim();
-    const label = org
-      ? `${orgName} · ${tRel(e.relationship_slug)}`
-      : personalTitle
-        ? `${t("personalEntry")} · ${personalTitle}`
-        : t("personalEntry");
     return {
-      id: e.id,
-      label,
-      isPrimary: e.is_primary,
+      orgName: org?.display_name ?? org?.legal_name ?? null,
+      orgTypeLabel: typeLabel,
+      title: e.title ?? null,
+      relationshipLabel: tRel(e.relationship_slug),
+      personalEntryLabel: t("personalEntry"),
+      isPersonal: !org,
+      startedAt: (e as { started_at?: string | null }).started_at ?? null,
     };
   });
+  const engagementLabels = composeDistinctEngagementLabels(engagementLabelInputs);
+  const engagements: JournalEngagement[] = ecOrdered.map((e, i) => ({
+    id: e.id,
+    label: engagementLabels[i],
+    isPrimary: e.is_primary,
+    // Owner §12 — the editors compose archetype module fields from this.
+    relationshipSlug: e.relationship_slug,
+  }));
 
   /**
    * "KAM PATEIKTI ATLIKTĄ DARBĄ?" — the worker's own question, answered.
@@ -445,7 +520,7 @@ export default async function JournalPage({
   // selecting `skills(slug)` and once selecting `skill_id, verified,
   // skills(slug)`. The second is a strict superset of the first, so both the
   // composer's suggestion list and the entry↔skill link UI are derived from
-  // it. Both reads depend only on `worker.id`, so they batch with `dirRows`.
+  // it. Both reads depend only on `worker.id`, so they batch with the directions read.
   //
   // The entry-skill link read and the entries read below depend only on
   // `worker.id` too, so they ride in this same round trip. Both used to await
@@ -453,16 +528,19 @@ export default async function JournalPage({
   // where two suffice: this batch, then the templates read that genuinely
   // needs `directions`. Read ORDER is unchanged where it matters — the links
   // are still read before the lazy heal writes to `journal_entry_skills`.
-  const [{ data: dirRows }, { data: skillIdRows }, linkRead, entriesRead] =
+  //
+  // The directions read is the occupation path of the universal journal
+  // (owner §12): each of the worker's professions with the ISCO-08 group its
+  // ESCO occupation belongs to (`professions.esco_uri` →
+  // `esco_occupations.isco_group`), so the editors compose exactly the module
+  // fields that family logs. Two bounded reads inside one batch slot; an
+  // unmapped profession carries null and composes nothing.
+  const [ownPath, { data: skillIdRows }, linkRead, entriesRead, organizationRecords] =
     await Promise.all([
-      supabase
-        .from("worker_professions")
-        .select("is_primary, professions(slug)")
-        .eq("worker_id", worker.id)
-        .order("is_primary", { ascending: false }),
+      readOwnOccupationPath(supabase, worker.id),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, skills(slug)")
+        .select("skill_id, verified, source, skills(slug)")
         .eq("worker_id", worker.id),
       readWorkerEntrySkillLinks(supabase, worker.id),
       // G4 bridge: THE canonical journal-list core (v3 select + legacy
@@ -472,11 +550,17 @@ export default async function JournalPage({
         { supabase, userId: user.id },
         { workerId: worker.id },
       ),
+      // The organization's own hour records about this person (owner §19:
+      // timesheet lines, imported documents) — read beside the diary so
+      // "work in numbers" can name the second ledger instead of hiding it.
+      // RLS: the person's own rows. A failed read is null (UNKNOWN).
+      readOrganizationRecords(supabase, worker.id),
     ]);
-  const directions = (dirRows ?? [])
-    .map((r) => (r.professions as { slug: string } | null)?.slug ?? null)
-    .filter((s): s is string => s !== null)
-    .map((slug) => ({ slug, name: tProf(slug) }));
+  const directions = ownPath.directions.map((d) => ({
+    slug: d.slug,
+    name: tProf(d.slug),
+    iscoGroup: d.iscoGroup,
+  }));
 
   // Journal Proof Engine v1 (§10): ACTIVE profession templates from the
   // journal_profession_templates registry (owner-gated draft migration
@@ -531,6 +615,7 @@ export default async function JournalPage({
   // recognizer's full known-skill slug set — a linked skill INSIDE it that the
   // entry text does not support is the stale/suspicious case ("Reikia peržiūrėti").
   const idToSlug = new Map<string, string>();
+  const declaredSlugSet = new Set(availableSkillsForLinks.map((s) => s.slug));
   const verifiedSkillIds = new Set<string>();
   for (const r of skillIdRows ?? []) {
     const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
@@ -649,8 +734,8 @@ export default async function JournalPage({
     entries: JournalEntryRow[];
   }[] = [];
   /**
-   * THE DAY AN ENTRY BELONGS TO — the day WORKED, resolved by the one shared
-   * `journalStartDay` the canonical calendar uses.
+   * THE DAY AN ENTRY BELONGS TO — the day WORKED, resolved by THE canonical
+   * work-time rule (`resolveWorkDayDetail`, work-time.ts).
    *
    * THE REGRESSION THIS CLOSES. The calendar started placing entries on their
    * own `work_date`; this page kept grouping by `created_at`. The same entry
@@ -660,15 +745,16 @@ export default async function JournalPage({
    * empty day view. Yesterday's shift logged tonight is the ordinary case, so
    * this was not an edge: it was the normal path.
    *
-   * One function decides the day for both surfaces, so they cannot disagree
-   * again. `created_at` remains the fallback for entries that never carried a
-   * work date, which is every historical row.
+   * DIARY DAY = MODEL DAY (issue #1689, lane B). The page then picked the
+   * FIRST `work_date` row it found, while the model (`deriveEntryWorkTime`
+   * → `resolveWorkDayDetail`) takes the LATEST stated one — an entry whose
+   * work date was corrected sat under its old day in the diary and under
+   * its corrected day in the period tile above it. One rule now decides the
+   * day for the diary card, the calendar and every figure. `created_at`
+   * remains the fallback for entries that never carried a work date.
    */
-  const workDateOf = (e: JournalEntryRow): string | null =>
-    (e.journal_entry_metrics ?? []).find((m) => m.metric_slug === "work_date")
-      ?.value_text ?? null;
   const isoDayOf = (e: JournalEntryRow): string =>
-    journalStartDay(workDateOf(e), e.created_at) ?? utcDayKey(e.created_at) ?? "";
+    resolveWorkDayDetail(e.journal_entry_metrics ?? [], e.created_at).day;
   // Evidence drill-down (W5 slice 3): resolve ?skill= against the worker's
   // OWN skill set and narrow the diary to entries linked to it. Unknown slug
   // or links unavailable → no filter, never an invented empty diary. The
@@ -694,20 +780,20 @@ export default async function JournalPage({
   for (const e of diaryEntriesByDay) {
     const isoKey = isoDayOf(e);
     const label = formatUtcDate(isoKey, locale) ?? "";
-    // Day total = sum of each entry's time metric (hours/minutes only). "days"
-    // and non-time quantities are never summed, so the figure is real, not
-    // invented; days with no time entry simply show no hours.
-    const timeMetric = (e.journal_entry_metrics ?? []).find(
-      (m) =>
-        (m.metric_slug === "quantity" || m.metric_slug === "area_done") &&
-        (m.unit_slug === "hours" || m.unit_slug === "minutes"),
+    // Day total through THE canonical work-time rule (owner ruling
+    // 2026-08-18). This used to read only the entry-level `quantity` metric,
+    // so an entry recorded as per-activity fragments ("3 val. plyteles, 2 val.
+    // glaistas") showed NO hours here while the calendar and the timesheet
+    // showed 5 — the exact three-answers defect `work-time.ts` was written to
+    // end. `days`-unit and non-time quantities still never become hours.
+    const mins = Math.round(
+      deriveEntryWorkTime({
+        entryId: e.id,
+        createdAt: e.created_at,
+        originalText: e.original_text,
+        metrics: e.journal_entry_metrics ?? [],
+      }).totalHours * 60,
     );
-    const mins =
-      timeMetric?.value_numeric != null
-        ? timeMetric.unit_slug === "hours"
-          ? timeMetric.value_numeric * 60
-          : timeMetric.value_numeric
-        : 0;
     const last = entryDayGroups[entryDayGroups.length - 1];
     // Keyed by the ISO day, not by the formatted label: two different days can
     // format identically in some locales, and the key is what `?date=` filters
@@ -725,13 +811,88 @@ export default async function JournalPage({
       });
     }
   }
-  // Day filter (calendar-driven navigation): a selected ?date= narrows the
-  // diary to that one day; no match → the full diary with an honest note.
-  const filteredDayGroups = selectedDate
-    ? entryDayGroups.filter((g) => g.isoKey === selectedDate)
-    : entryDayGroups;
-  const dayFilterActive = selectedDate !== null && filteredDayGroups.length > 0;
-  const visibleDayGroups = dayFilterActive ? filteredDayGroups : entryDayGroups;
+  // The calendar reads the SAME day groups the diary renders — one grouping,
+  // one set of figures, so a cell can never disagree with the day card.
+  const calendarGrid = buildJournalCalendar({
+    scale: calendarScale,
+    anchor: resolveAnchor({
+      requested: sp.month,
+      selected: selectedDate,
+      today: todayIsoKey,
+      scale: calendarScale,
+    }),
+    today: todayIsoKey,
+    selected: selectedDate,
+    days: entryDayGroups.map((g) => ({
+      iso: g.isoKey,
+      entryCount: g.entries.length,
+      totalMinutes: g.totalMinutes,
+      /**
+       * The SAME derivation the rest of the page uses for "confirmed"
+       * (`deriveReviewResult` === "approved") — never a second rule.
+       *
+       * WHAT THIS COUNT CANNOT SAY, and why the calendar's words are careful:
+       * `deriveReviewResult` also returns "approved" when the SUBJECT
+       * approved their own entry (a worker who manages their organization),
+       * and this page's reader selects `confirmation_scope, created_at,
+       * confirmer_role` — not `confirmer_id` — so `isSelfConfirmation` cannot
+       * be evaluated here (review-status.ts documents exactly this). The
+       * marker therefore says a JOURNAL RECORD is confirmed and never that a
+       * MANAGER confirmed it: claiming independence the data cannot support
+       * would dress self-declared evidence as external confirmation (SEP-3).
+       * Widening the reader's select is a change to a shared canonical reader
+       * and belongs in its own slice, not in a UX pass.
+       */
+      confirmedCount: g.entries.filter(
+        (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+      ).length,
+    })),
+  });
+  /**
+   * WHAT THE DIARY IS SHOWING (owner direction 2026-09-13). Three scopes,
+   * and the calendar above always names the one in force:
+   *
+   *   · DAY    — `?date=` is set: exactly that day. A day with no records
+   *              stays selected and shows its own empty line; it used to
+   *              fall back to the whole diary, which read as "your tap did
+   *              nothing" and put the endless list back on the screen.
+   *   · PERIOD — `?month=` is set (the person browsed with ‹ ›): the days
+   *              INSIDE the period the calendar is drawing. Without this the
+   *              grid showed August while the list still showed September's
+   *              last days — two answers to "which days am I looking at".
+   *   · RECENT — neither: the most recent days overall, which is the right
+   *              first view for someone who just opened the journal.
+   *
+   * Every scope is BOUNDED to `DIARY_DAY_LIMIT` with an honest count of the
+   * days it is not stacking (the same rule `lib/planning/calendar-result.ts`
+   * uses). Nothing is deleted and nothing is unreachable: every day is one
+   * tap away on the grid.
+   */
+  const monthRequested = isIsoDay(sp.month);
+  const dayFilterActive = selectedDate !== null;
+  const diaryScope: "day" | "period" | "recent" = dayFilterActive
+    ? "day"
+    : monthRequested
+      ? "period"
+      : "recent";
+  const scopedDayGroups =
+    diaryScope === "day"
+      ? entryDayGroups.filter((g) => g.isoKey === selectedDate)
+      : diaryScope === "period"
+        ? entryDayGroups.filter(
+            (g) =>
+              g.isoKey >= calendarGrid.rangeStart && g.isoKey <= calendarGrid.rangeEnd,
+          )
+        : entryDayGroups;
+  const visibleDayGroups =
+    diaryScope === "day" ? scopedDayGroups : scopedDayGroups.slice(0, DIARY_DAY_LIMIT);
+  const hiddenDayCount = Math.max(0, scopedDayGroups.length - visibleDayGroups.length);
+  // Query params the calendar must keep when it changes the day — a skill
+  // drill-down or a chosen period is not undone by tapping a date.
+  const calendarCarry: Record<string, string> = {};
+  if (skillFilterSlug) calendarCarry.skill = skillFilterSlug;
+  if (periodKey !== "all") calendarCarry.period = periodKey;
+  if (calendarScale !== "month") calendarCarry.cal = calendarScale;
   const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
   if (
     evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
@@ -751,17 +912,63 @@ export default async function JournalPage({
 
   // Proof-engine loop strip (Sprint v2 §3) — the journal is the PROOF ENGINE,
   // not a diary: one dense line showing the real loop state from data already
-  // loaded on this page (no extra queries): entries this month, distinct
-  // declared skills with journal-entry evidence links, manager/client
-  // CONFIRMED skills. Counts are honest zeros until real activity exists.
-  const thisMonthPrefix = new Date().toISOString().slice(0, 7);
-  const entriesThisMonth = (entries ?? []).filter((e) =>
-    (e.created_at ?? "").startsWith(thisMonthPrefix),
-  ).length;
+  // loaded on this page (no extra queries): entries in the model's 30-day
+  // period (`entriesThisMonth`, derived below the model), distinct declared
+  // skills with journal-entry evidence links, manager/client CONFIRMED
+  // skills. Counts are honest zeros until real activity exists.
   const evidencedSkillIds = new Set<string>();
   for (const ids of linksByEntry.values()) {
     for (const id of ids) evidencedSkillIds.add(id);
   }
+
+  // "Work in numbers" (issue #1689): derived from EXACTLY the entries, links
+  // and declared skills loaded above — no second read, so the figures can
+  // never disagree with the diary beneath them. Unreadable entries or links
+  // → the section is withheld rather than rendered as zero hours (SEP-7).
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const workIntelligence =
+    entries && skillLinksReady
+      ? assembleWorkIntelligence({
+          entries,
+          linksByEntry,
+          provenanceByEntry,
+          skillRows: (skillIdRows ?? []) as unknown as WorkerSkillSourceRow[],
+          todayIso,
+          focus: periodKey,
+          coverage: entriesRead.ok
+            ? {
+                entriesRead: entriesRead.coverage.entriesRead,
+                truncated: entriesRead.coverage.truncated,
+                linksTruncated: linkRead.truncated,
+              }
+            : undefined,
+          // Evidence strength needs to know which entries carry photos —
+          // one bounded read over the live ids already in hand.
+          photoCountByEntry: await readPhotoCountsByEntry(
+            supabase,
+            entries.map((e) => e.id),
+          ),
+          organizationRecords,
+        })
+      : null;
+  // THE STRIP'S MONTH IS THE MODEL'S (issue #1689, lane B). This counted
+  // entries by the `created_at` CALENDAR month while the section's "30
+  // days" tile counted by the work day over a rolling window — two numbers
+  // for one word. The strip now reads the model's own `month` row (30 UTC
+  // days ending today, by the day WORKED) and names it with the section's
+  // period label. When the model is withheld (links unreadable) the same
+  // rule is applied by hand over the loaded entries — the model's day and
+  // the model's bounds, never a third definition.
+  const monthBounds = workPeriodBounds("month", todayIso);
+  const entriesThisMonth =
+    workIntelligence?.periods.find((p) => p.key === "month")?.entries ??
+    (entries ?? []).filter((e) => {
+      const day = resolveWorkDayDetail(e.journal_entry_metrics ?? [], e.created_at).day;
+      return day >= (monthBounds.startIso ?? day) && day <= monthBounds.endIso;
+    }).length;
+  // The profession / unit / context label helpers the full figures block
+  // needed moved with it to the station (`numbers/page.tsx`); the summary
+  // card here names skills only, through the one catalogue reader above.
 
   // Mano CV identity lead — the player-card/avatar identity that opens the Mano
   // CV surface, above the work records. Worker-scoped real data only (null for
@@ -810,19 +1017,9 @@ export default async function JournalPage({
         </p>
       </header>
 
-      {/* Page-local quick nav (IA cleanup v2 #3): compact sticky jump bar so a
-          long Mano CV doesn't lose the user after scrolling. Only the anchors
-          relevant to this page (identity card, work records, add entry). */}
-      <PageQuickNav
-        ariaLabel={tQuick("ariaLabel")}
-        items={[
-          { href: "#mano-cv-top", label: tQuick("top") },
-          { href: "#mano-cv-identity", label: tTabs("playerCard") },
-          { href: "#journal-entries", label: tQuick("records") },
-          // §6.1: "add entry" is the conversation's job now; the quick nav
-          // keeps only the projection's own regions.
-        ]}
-      />
+      {/* The page-local quick-nav strip is gone (target worker IA 2026-09-13
+          §4: a second nav strip is card soup) — three first-level blocks
+          lead on a phone: recording, today's records, one numbers card. */}
 
       {/* Mano CV identity lead: player-card/avatar identity at the top of the
           Mano CV surface; the work records follow below. IA cleanup v2 (#5):
@@ -850,7 +1047,7 @@ export default async function JournalPage({
       {manoCard && manoCardLabels ? (
         <details
           id="mano-cv-identity"
-          className="group order-3 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
+          className="group order-4 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
           <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
@@ -885,7 +1082,7 @@ export default async function JournalPage({
           kept but demoted to ONE compact footnote — it is guard-required
           (journal-evidence-clarity + product-readiness) and stays honest
           (private + not yet externally confirmed). */}
-      <p className="order-5 text-meta leading-relaxed text-text-muted">
+      <p className="order-6 text-meta leading-relaxed text-text-muted">
         {t("pilotBackboneNote")}
       </p>
 
@@ -898,19 +1095,22 @@ export default async function JournalPage({
           correction-request UI for that. */}
       {!anyReviewEnabled && (
         <p
-          className="order-4 text-meta leading-relaxed text-text-muted"
+          className="order-5 text-meta leading-relaxed text-text-muted"
           data-testid="journal-review-not-enabled-note"
         >
           {t("reviewNotEnabledNote")}
         </p>
       )}
-      {/* CHAT-FIRST INTAKE (owner audit §6.1): work is REGISTERED in the
-          conversation — this page is the history/evidence PROJECTION of the
-          journal, not a second intake form. The composer therefore renders
-          ONLY in edit mode (?editing=<id> — correcting an existing record is
-          a projection concern; the supersede path stays canonical). A fresh
-          record starts in the chat, where the same deterministic extractor
-          saves through the same createJournalEntry action. */}
+      {/* RECORDING FIRST (target worker IA 2026-09-13 §2, "Mano darbas"):
+          the compact text-first flow is the default — one sentence (what ·
+          where · how long · optional photo) → the readback of what was
+          understood → one confirm — over the SAME deterministic reader and
+          the SAME createJournalEntry path the conversation uses. The full
+          composer renders for an EDIT (?editing=<id> — the supersede path
+          stays canonical) and behind the explicit "detaliau" door
+          (?compose=full); it is never the first thing a worker sees. The
+          conversation and the voice door stay reachable as text links inside
+          the recorder (§1.5: nothing removed). */}
       <div id="journal-composer" className="order-1">
         {editingEntry ? (
           <div className="flex flex-col gap-2">
@@ -927,39 +1127,118 @@ export default async function JournalPage({
               templates={journalTemplates}
             />
           </div>
-        ) : (
-          <div
-            className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/50 p-4"
-            data-testid="journal-log-via-chat"
-          >
-            <p className="text-sm leading-relaxed text-text-secondary">
-              {t("logViaChatBody")}
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                // `?intent=log-work` — the chat opens the work-log flow on
-                // arrival. Without it this CTA dropped the worker on the
-                // generic greeting, which is what the tester reported as
-                // being thrown back to the first page.
-                href={"/dashboard?intent=log-work" as "/dashboard"}
-                className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
-                data-testid="journal-log-via-chat-cta"
-              >
-                {t("logViaChatCta")}
-              </Link>
-              {/* W5 slice 2: the voice surface finally gets a door. The page
-                  itself stays honest when transcription is unconfigured. */}
-              <Link
-                href="/dashboard/journal/voice"
-                className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md border border-border px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
-                data-testid="journal-log-via-voice-cta"
-              >
-                {t("logViaVoiceCta")}
-              </Link>
-            </div>
+        ) : composeFull ? (
+          <div className="flex flex-col gap-2" data-testid="journal-compose-full">
+            <JournalEntryComposer
+              key="new"
+              engagements={engagements}
+              contextResolution={contextResolution}
+              directions={directions}
+              workerSkills={workerSkills}
+              templates={journalTemplates}
+            />
+            <Link
+              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+              data-testid="journal-compose-full-back"
+            >
+              ← {t("record.detailedBack")}
+            </Link>
           </div>
+        ) : (
+          <JournalQuickRecord
+            locale={locale}
+            labels={workLogLabels}
+            otherDoors={
+              <p
+                className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted"
+                data-testid="journal-log-via-chat"
+              >
+                <span>{t("logViaChatBody")}</span>
+                <Link
+                  // `?intent=log-work` — the chat opens the work-log flow on
+                  // arrival, never the generic greeting.
+                  href={"/dashboard?intent=log-work" as "/dashboard"}
+                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  data-testid="journal-log-via-chat-cta"
+                >
+                  {t("logViaChatCta")} →
+                </Link>
+                {/* W5 slice 2: the voice surface keeps its door. */}
+                <Link
+                  href="/dashboard/journal/voice"
+                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  data-testid="journal-log-via-voice-cta"
+                >
+                  {t("logViaVoiceCta")} →
+                </Link>
+                <Link
+                  href={"/dashboard/journal?compose=full#journal-composer" as "/dashboard"}
+                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  data-testid="journal-compose-full-link"
+                >
+                  {t("record.detailed")} →
+                </Link>
+              </p>
+            }
+          />
         )}
       </div>
+
+      {/* MANO VEIKLA SKAIČIAIS — one compact card (target IA §2): the
+          dominant-skill sentence and this period's hours, from the SAME
+          model the diary beneath was derived from, with the station as the
+          figures' stable destination. UNKNOWN (unreadable entries or links)
+          is said as such — never a zero that reads as "no work" (SEP-7). */}
+      {(() => {
+        const wi = workIntelligence;
+        const rows = wi ? skillRows(wi, skillNameOf).filter((r) => r.name !== null) : [];
+        const answer = dominantAnswer(wi, rows);
+        const period = wi ? focusPeriod(wi) : null;
+        const scope = wi ? scopeText(wi, locale, tIntel) : tIntel("numbers.scope.all");
+        const openChecks = wi ? splitChecks(wi.checks).open.length : 0;
+        return (
+          <section
+            id="work-intelligence"
+            className="order-3 scroll-mt-20"
+            data-testid="journal-numbers-summary"
+            data-answer={answer.kind}
+            data-period={wi?.scope ?? periodKey}
+          >
+            <Card compact className="flex flex-col gap-3">
+              <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                {tIntel("numbers.stationTitle")}
+              </h2>
+              <DominantLead
+                answer={answer}
+                period={period}
+                scope={scope}
+                locale={locale}
+                t={tIntel}
+                compact
+              />
+              {openChecks > 0 ? (
+                <p
+                  className="text-meta leading-relaxed text-state-warning"
+                  data-testid="journal-numbers-open-checks"
+                  data-open-checks={openChecks}
+                >
+                  {tIntel("numbers.checksOpen", { count: openChecks })}
+                </p>
+              ) : null}
+              <Link
+                href={
+                  `${WORK_IN_NUMBERS_HREF}?period=${wi?.focus ?? periodKey}` as "/dashboard"
+                }
+                className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+                data-testid="journal-numbers-link"
+              >
+                {tIntel("numbers.openStation")} →
+              </Link>
+            </Card>
+          </section>
+        );
+      })()}
 
       {/* Entry list — compact recent history AFTER the composer (Wagon 5
           first-view order). Newest day open, older days collapsed. Visual
@@ -1007,66 +1286,50 @@ export default async function JournalPage({
             </Link>
           </div>
         )}
-        {/* Calendar-driven day navigation (owner UX recovery v1): the diary's
-            days as compact chips — tap a day to see exactly that day, tap the
-            calendar link to see the SAME day with bookings, projects and
-            tasks on the one canonical calendar. Real days only (only days
-            that actually have entries become chips). */}
-        {entryDayGroups.length > 1 && (
-          <nav
-            aria-label={t("dayNav.title")}
-            data-testid="journal-day-nav"
-            className="flex items-center gap-1.5 overflow-x-auto pb-1"
+        {/* THE CALENDAR (owner direction 2026-09-13). The records live on a
+            real calendar — month or week — and tapping a day shows exactly
+            that day below, with that day's actions. The day chips this
+            replaces could only ever show the days that already had records,
+            in one flat strip, over an endless list of date headings: the
+            person could not see the shape of their own month and could not
+            reach a day that held nothing yet. Same days, same figures
+            (`entryDayGroups`), a shape a person can read. */}
+        <JournalCalendar
+          grid={calendarGrid}
+          locale={locale as ActiveLocale}
+          selected={selectedDate}
+          carry={calendarCarry}
+        />
+        {/* THE SELECTED DAY'S ACTIONS. What a person wants on a day they
+            tapped: record work on that day, and see that same day on the one
+            canonical calendar beside bookings, projects and tasks. Both are
+            existing destinations — nothing new is introduced here. */}
+        {dayFilterActive && selectedDate && (
+          <div
+            className="flex flex-wrap items-center gap-2"
+            data-testid="journal-day-actions"
+            data-day={selectedDate}
           >
+            <span className="mr-auto font-display text-sm font-semibold text-text-primary">
+              {formatUtcDate(selectedDate, locale)}
+            </span>
             <Link
-              href={"/dashboard/journal#journal-entries" as "/dashboard"}
-              data-testid="journal-day-nav-all"
-              aria-current={!dayFilterActive ? "page" : undefined}
-              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs transition-colors ${
-                !dayFilterActive
-                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                  : "border-ink-500 text-text-secondary hover:border-brand-blue"
-              }`}
+              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              data-testid="journal-day-record"
+              className="inline-flex min-h-9 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
             >
-              {t("dayNav.all")}
+              {t("dayNav.recordOnDay")}
             </Link>
-            {entryDayGroups.slice(0, 21).map((g) => (
-              <Link
-                key={g.isoKey}
-                href={
-                  `/dashboard/journal?date=${g.isoKey}#journal-entries` as "/dashboard"
-                }
-                data-testid={`journal-day-nav-${g.isoKey}`}
-                aria-current={
-                  dayFilterActive && selectedDate === g.isoKey ? "page" : undefined
-                }
-                className={`shrink-0 rounded-full border px-2.5 py-1 text-xs tabular-nums transition-colors ${
-                  dayFilterActive && selectedDate === g.isoKey
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
-                }`}
-              >
-                {formatUtcDate(g.isoKey, locale, {
-                  month: "short",
-                  day: "numeric",
-                })}
-                <span className="ml-1 text-meta text-text-muted">
-                  {g.entries.length}
-                </span>
-              </Link>
-            ))}
-            {dayFilterActive && selectedDate && (
-              <Link
-                href={
-                  `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
-                }
-                data-testid="journal-day-open-calendar"
-                className="ml-auto shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
-              >
-                {t("dayNav.openInCalendar")} →
-              </Link>
-            )}
-          </nav>
+            <Link
+              href={
+                `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
+              }
+              data-testid="journal-day-open-calendar"
+              className="inline-flex min-h-9 items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue"
+            >
+              {t("dayNav.openInCalendar")} →
+            </Link>
+          </div>
         )}
         {/* Wagon 5 first view: the status/legend/count lines are REAL and
             stay word-for-word — but behind ONE deliberate disclosure, so the
@@ -1128,8 +1391,9 @@ export default async function JournalPage({
           className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-proof-loop"
         >
-          {t("proofLoop.strip", {
+          {t("proofLoop.stripPeriod", {
             entries: entriesThisMonth,
+            period: t("intelligence.period.month"),
             evidenced: evidencedSkillIds.size,
             confirmed: verifiedSkillIds.size,
           })}{" "}
@@ -1143,7 +1407,29 @@ export default async function JournalPage({
         </p>
           </div>
         </details>
-        {(entries ?? []).length === 0 ? (
+        {diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
+          /* A day — or a period — the person navigated to that holds no
+             records. A real answer over a known window (SEP-7: a recorded
+             zero, not an unknown), with the one action that changes it and
+             the way back to every day. */
+          <div
+            className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+            data-testid="journal-day-empty"
+            data-day={selectedDate ?? calendarGrid.rangeStart}
+            data-scope={diaryScope}
+          >
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {diaryScope === "day" ? t("dayNav.dayEmpty") : t("dayNav.periodEmpty")}
+            </p>
+            <Link
+              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              className="self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+              data-testid="journal-day-empty-record"
+            >
+              {t("dayNav.recordOnDay")} →
+            </Link>
+          </div>
+        ) : (entries ?? []).length === 0 ? (
           <EmptyState
             testId="journal-empty-state"
             title={t("listEmptyTitle")}
@@ -1245,6 +1531,13 @@ export default async function JournalPage({
                       const dir = metrics.find(
                         (m) => m.metric_slug === "work_direction",
                       );
+                      // Owner §12 — the entry's own module fields (a
+                      // placement's supervision, a volunteer's field
+                      // project), shown back in plain words. Read from the
+                      // rows already loaded; nothing for an entry without.
+                      const moduleValues = Object.entries(
+                        readModuleFieldValues(metrics),
+                      );
                       // v3 — Delete control is offered only when the entry has no
                       // external confirmations yet. The RPC re-enforces the same
                       // rule server-side, so a stale client can't escalate.
@@ -1284,6 +1577,23 @@ export default async function JournalPage({
                         skillNameOf,
                       });
                       const recognizedSlugs = detectedForEntry.recognizedSlugs;
+                      // PENDING candidates of this saved entry — the ONE
+                      // derivation over the saved text and the entry's own
+                      // markers, decidable on the card (#1689, 2026-09-12);
+                      // before, a candidate could be decided only right after
+                      // the save. Pure, no write; the server re-derives and
+                      // membership-checks every decision.
+                      const candidatesForEntry = pendingEntryCandidates({
+                        text: e.original_text ?? "",
+                        metrics: e.journal_entry_metrics,
+                        declaredSlugs: declaredSlugSet,
+                        linkedSlugs: new Set(
+                          linkedForEntry
+                            .map((id) => idToSlug.get(id))
+                            .filter((x): x is string => !!x),
+                        ),
+                        skillNameOf,
+                      });
                       const skillSources = buildEntrySkillSources({
                         linkedSkillIds: linkedForEntry,
                         idToSlug,
@@ -1330,6 +1640,7 @@ export default async function JournalPage({
                                     skills: detectedForEntry.skills,
                                     labels: detectedForEntry.labels,
                                   },
+                                  candidates: candidatesForEntry,
                                 }
                               : undefined
                           }
@@ -1388,6 +1699,19 @@ export default async function JournalPage({
                             {/* Entry location — the entry's own saved snapshot only.
                                 No snapshot → honest "Vieta nenurodyta" (never the
                                 worker's current or profile location). */}
+                            {moduleValues.length > 0 && (
+                              <p
+                                className="text-meta leading-relaxed text-text-muted"
+                                data-testid={`journal-entry-module-fields-${e.id}`}
+                              >
+                                {moduleValues
+                                  .map(
+                                    ([slug, value]) =>
+                                      `${t(`moduleFields.fields.${slug}`)}: ${value}`,
+                                  )
+                                  .join(" · ")}
+                              </p>
+                            )}
                             <p
                               className="text-meta text-text-muted"
                               data-testid={`journal-entry-location-${e.id}`}
@@ -1504,6 +1828,18 @@ export default async function JournalPage({
                 </details>
               );
             })}
+            {hiddenDayCount > 0 && (
+              /* The diary is bounded, and says so. Every other day is one tap
+                 away on the calendar above — nothing is hidden, only not
+                 stacked onto one screen. */
+              <p
+                className="text-meta leading-relaxed text-text-muted"
+                data-testid="journal-days-bounded"
+                data-hidden-days={hiddenDayCount}
+              >
+                {t("dayNav.moreDays", { count: hiddenDayCount })}
+              </p>
+            )}
           </div>
         )}
       </section>

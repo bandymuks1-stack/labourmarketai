@@ -50,6 +50,7 @@ const WORLD = {
     { id: "s-clean", slug: "cleaning-services", is_active: true },
     { id: "s-repair", slug: "appliance-repair", is_active: true },
     { id: "s-prog", slug: "programming", is_active: true },
+    { id: "s-qa", slug: "qa-testing", is_active: true },
   ],
 };
 
@@ -181,6 +182,19 @@ beforeEach(() => {
     worker_id: "SOMEONE-ELSE",
     original_text: "Klijavau plyteles",
   });
+  // Entry O: the owner's itemised day (#1689) with the three items the
+  // extractor persisted — "2 val. testavau" is read by no lane but the
+  // catalogue OFFER (lane 4b).
+  WORLD.entries.set("e-O", {
+    worker_id: "w1",
+    original_text:
+      "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių.",
+  });
+  WORLD.metrics.set("e-O", [
+    { metric_slug: "parsed_fragment", value_text: "1|5 val. programavau" },
+    { metric_slug: "parsed_fragment", value_text: "2|2 val. testavau" },
+    { metric_slug: "parsed_fragment", value_text: "3|2 val. ieškojau partnerių" },
+  ]);
   currentSupabase = makeSupabase();
 });
 
@@ -410,6 +424,62 @@ describe("legitimate flows — honest writes only", () => {
       { type: "skill", slug: "tiling" },
       V,
     );
+    expect(res).toEqual({ ok: false, code: "candidate_not_found" });
+    expect(writePayloads).toHaveLength(0);
+  });
+});
+
+describe("catalogue OFFER (lane 4b) — the worker's word links the fragment's hours (#1689)", () => {
+  it("confirming the offered slug adds it self-declared, links the entry and records the ITEM it sits on", async () => {
+    const res = await confirmJournalSkillCandidate("e-O", "qa-testing", V);
+    expect(res).toEqual({ ok: true, added: true });
+    expect(writePayloads.find((w) => w.table === "worker_skills")?.rows).toEqual([
+      {
+        worker_id: "w1",
+        skill_id: "s-qa",
+        verified: false,
+        source: "self_declared",
+        confidence_bin: "yellow",
+      },
+    ]);
+    expect(
+      writePayloads.find((w) => w.table === "journal_entry_skills")?.rows,
+    ).toEqual([
+      {
+        journal_entry_id: "e-O",
+        worker_id: "w1",
+        skill_id: "s-qa",
+        provenance: "confirmed",
+      },
+    ]);
+    // the evidence row names the persisted item "2 val. testavau" (index 2)
+    // by the derivation's own id — the 2 h belong to the skill the worker
+    // confirmed, on the phrase that carries them
+    expect(
+      writePayloads.find((w) => w.table === "journal_entry_metrics")?.rows,
+    ).toEqual([
+      {
+        entry_id: "e-O",
+        metric_slug: "fragment_skill",
+        source: "worker_input",
+        value_text: "2|qa-testing",
+      },
+    ]);
+  });
+
+  it("rejecting the offer appends the entry-scoped skill_rejected marker (visible, never gone)", async () => {
+    const res = await rejectJournalSkillCandidate("e-O", "qa-testing", V);
+    expect(res).toEqual({ ok: true });
+    expect(
+      writePayloads.find((w) => w.table === "journal_entry_metrics")?.rows,
+    ).toMatchObject([
+      { entry_id: "e-O", metric_slug: "skill_rejected", value_text: "qa-testing" },
+    ]);
+    expect(signalWrites()).toHaveLength(0);
+  });
+
+  it("the offer is a MEMBER of this entry only: the same slug on an entry whose text never offered it is refused", async () => {
+    const res = await confirmJournalSkillCandidate("e-B", "qa-testing", V);
     expect(res).toEqual({ ok: false, code: "candidate_not_found" });
     expect(writePayloads).toHaveLength(0);
   });

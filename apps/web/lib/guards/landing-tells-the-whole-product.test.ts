@@ -165,12 +165,74 @@ describe("§17 the public map is real geography and claims no activity", () => {
     }
   });
 
+  /**
+   * RE-ANCHORED, not relaxed (owner directive 2026-09-09 §15).
+   *
+   * This assertion used to read `landing.marketMap.notPublished` — a second
+   * sentence that re-stated the negation the owner has now removed. What it
+   * was protecting is a PROPERTY of the band, not that particular key: the
+   * section must say, in words a visitor reads, that the markers are markets
+   * and not today's activity. That sentence is `shows`, it always was, and it
+   * is what the assertion now names.
+   *
+   * The negative control below is the half that matters: it fails if the copy
+   * ever drops the negation and starts describing the map only in the
+   * positive — which is exactly the regression the original pin existed to
+   * stop, and which a bare "the key is a string" check could never catch.
+   */
   it("the section states in words what it is NOT showing", () => {
-    expect(band).toMatch(/notPublished/);
+    expect(band).toMatch(/t\("shows"/);
+    // Each active locale's own words for "these are markets, NOT today's
+    // activity". Written per locale because a negation is a language fact.
+    //
+    // Bounded with a Unicode look-around, NOT `\b`: JavaScript's `\b` is
+    // defined over ASCII `\w`, so `/\bне\b/` never matches Russian at all —
+    // it failed on this very catalogue on the first run, on a string that
+    // plainly reads "а не сегодняшняя активность".
+    const word = (w: string) => new RegExp(`(?<!\\p{L})${w}(?!\\p{L})`, "iu");
+    const NEGATION: Readonly<Record<(typeof ACTIVE)[number], RegExp>> = {
+      lt: word("ne"),
+      en: word("not"),
+      ru: word("не"),
+      nl: word("niet|geen"),
+      de: word("nicht|keine?"),
+    };
     for (const loc of ACTIVE) {
-      const v = at(catalog(loc), "landing.marketMap.notPublished") as string;
-      expect(v, `${loc}: notPublished`).toBeTypeOf("string");
-      expect(v.length).toBeGreaterThan(60);
+      const v = at(catalog(loc), "landing.marketMap.shows") as string;
+      expect(v, `${loc}: shows`).toBeTypeOf("string");
+      expect(
+        NEGATION[loc].test(v),
+        `${loc}: the map caption stopped saying what the markers are NOT — "${v}"`,
+      ).toBe(true);
+    }
+    // The bound is real: a locale whose caption lost the negation must fail.
+    expect(NEGATION.ru.test("Это рынки и сегодняшняя активность.")).toBe(false);
+    expect(NEGATION.en.test("These are markets and today's activity.")).toBe(false);
+    // ...and it is a WORD boundary, not a substring match: "note", "nettо",
+    // "keiner Angabe" must not read as the negation they contain.
+    expect(NEGATION.en.test("Note the markets.")).toBe(false);
+  });
+
+  /**
+   * The line the owner put in the negation's place. It is an INVITATION, so
+   * it is pinned as one: present in every active locale, and never a
+   * quantity. A count here would be the fake-activity claim the band exists
+   * to prevent, arriving through the one line nobody is watching.
+   */
+  it("the last line invites, and never states a per-place quantity", () => {
+    expect(band).toMatch(/t\("invite"\)/);
+    for (const loc of ACTIVE) {
+      const v = at(catalog(loc), "landing.marketMap.invite") as string;
+      expect(v, `${loc}: invite`).toBeTypeOf("string");
+      expect(v.length, `${loc}: invite`).toBeGreaterThan(20);
+      expect(/\d/.test(v), `${loc}: the invite line states a number`).toBe(false);
+    }
+    // The removed key must not linger half-wired in any active catalogue.
+    for (const loc of ACTIVE) {
+      expect(
+        at(catalog(loc), "landing.marketMap.notPublished"),
+        `${loc}: notPublished survived the §15 correction`,
+      ).toBeUndefined();
     }
   });
 

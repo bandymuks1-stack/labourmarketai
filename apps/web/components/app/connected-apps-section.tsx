@@ -96,7 +96,7 @@ export async function ConnectedAppsSection({
                       href={app.website}
                       rel="noopener noreferrer nofollow"
                       target="_blank"
-                      className="break-all text-xs text-brand-blue hover:text-brand-cyan"
+                      className="break-all text-xs text-brand-blue hover:text-brand-champagne"
                     >
                       {app.website}
                     </a>

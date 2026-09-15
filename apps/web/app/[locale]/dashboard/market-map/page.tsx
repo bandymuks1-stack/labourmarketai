@@ -221,7 +221,7 @@ export default async function MarketMapPage({
         title={tRec("entry.body")}
       >
         <span className="flex min-w-0 flex-col">
-          <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tRec("entry.title")}
           </span>
           <span className="truncate text-xs leading-relaxed text-text-secondary">
@@ -261,7 +261,7 @@ export default async function MarketMapPage({
           className="flex flex-col gap-2"
           data-testid="market-map-vacancy-volume"
         >
-          <h2 className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tMap("vacancyVolume.title")}
           </h2>
           <p className="text-sm leading-relaxed text-text-secondary">

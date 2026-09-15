@@ -224,6 +224,7 @@ export async function EvidenceImportSection({
       "file_too_large",
       "file_unreadable",
       "nothing_parsed",
+      "month_not_stated",
       "confirmation_rejected",
       "confirmation_unavailable",
     ].map((k) => [k, t(`error.${k}` as never) as string]),

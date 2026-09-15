@@ -66,13 +66,15 @@ export function classifyEntryRecognition(
 
   const autoSignalSlugs = [...js.skillSlugs];
   // Confident capability/activity labels: explicit named capabilities + any
-  // fragment that resolved to a real activity (slug or label, not "unknown").
+  // fragment that resolved to a real activity LABEL. A fragment whose key is
+  // a skill slug with no label (the intake's strong multilingual skill
+  // reading, #1689) is already in `autoSignalSlugs` — the slug itself is
+  // never a label (it would reach the card raw: "tiling").
   const autoCapabilityLabels = [
     ...js.capabilitySuggestions.map((c) => c.label),
     ...js.fragments
-      .filter((f) => !f.isUnknown && (f.activitySlug !== null || !!f.activityLabel))
-      .map((f) => f.activityLabel ?? f.activitySlug ?? "")
-      .filter((s): s is string => s.length > 0),
+      .filter((f) => !f.isUnknown && !!f.activityLabel)
+      .map((f) => f.activityLabel as string),
   ];
   const dedupedCapabilityLabels = [...new Set(autoCapabilityLabels)];
 

@@ -17,7 +17,7 @@
 
 export type AxiomId =
   | "A-01" | "A-02" | "A-03" | "A-04" | "A-05" | "A-06"
-  | "A-07" | "A-08" | "A-09" | "A-10" | "A-11" | "A-12" | "A-13";
+  | "A-07" | "A-08" | "A-09" | "A-10" | "A-11" | "A-12" | "A-13" | "A-14";
 
 /** Can a CI gate prove a violation, or is it a human judgement? */
 export type AxiomEnforcement = "machine" | "heuristic" | "review";
@@ -146,6 +146,15 @@ export const AXIOMS: readonly Axiom[] = [
     source: "docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md (owner directive 2026-08-14)",
     enforcement: "review",
     gateCheck: "",
+  },
+  {
+    id: "A-14",
+    rule:
+      "DISTINCT USER JOB → FIRST-CLASS SURFACE, OWNER-GATED. Existing structures are reused when a capability naturally belongs to them; duplicate or convenience-only top-level pages stay prohibited; a new first-class surface is allowed only for a genuinely distinct user job / graph edge where reuse would materially damage UX, information architecture or extensibility — demonstrated by evidence and recorded as an owner ruling in the declaration.",
+    source: "docs/DECISIONS/0015-distinct-user-job-surfaces.md (owner decision 2026-09-13)",
+    enforcement: "machine",
+    gateCheck:
+      "A declaration carrying `distinctSurface` must state userJob, graphEdge, whyReuseDamages, at least one evidence item and the owner ruling; then its World-State readiness answers (changesWorldState, reflectedOnMap, usableWithoutLeavingWorkspace, needsNoNewPage) and worldStateCanControlIt are notices, not RED. Without the ruling the block is `distinct_surface_unruled` (RED).",
   },
 ] as const;
 

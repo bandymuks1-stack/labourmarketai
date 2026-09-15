@@ -9,9 +9,19 @@
  * data-driven (no sentence-specific branches).
  *
  * Splitting rules:
- *   • sentence boundaries (`.`, `!`, `?`, newlines), commas and semicolons;
- *   • clause conjunctions (LT ir / bei / taip pat, EN and / also,
- *     RU и / а также) — ONLY when the left side already carries a verb-like
+ *   • sentence boundaries (`.`, `!`, `?`, newlines), commas and semicolons —
+ *     except the dots the suggestion extractor also keeps (ONE shared rule,
+ *     `protectNonBoundaryDots`): a unit's abbreviation dot before a
+ *     lower-case continuation ("5 val. programavau"), a decimal separator
+ *     ("3.5 val", "1,5 h") and a dot inside one token ("LabourMarket.ai",
+ *     "www.imone.lt") — issue #1689, the owner's own sentence lost its
+ *     context name to "LabourMarket" + "ai";
+ *   • the colon that itemises a stated total ("dirbau 9 val.: 5 val. X, 2
+ *     val. Y") closes the header phrase, the same cut the extractor makes
+ *     (`ITEMISING_COLON_RX`) — so a persisted item re-fragments to the
+ *     derivation's own id;
+ *   • clause conjunctions (LT ir / bei / taip pat, EN and / also, NL en,
+ *     DE und, RU и / а также) — ONLY when the left side already carries a verb-like
  *     token AND the right side starts a new verb phrase. "su X ir Y" tool
  *     enumerations never split: when the nearest token left of the
  *     conjunction chain is an instrumental preposition (su / with / с)
@@ -24,7 +34,10 @@
 import { foldText } from "./normalize";
 import {
   DURATION_UNIT_PATTERNS,
+  ITEMISING_COLON_RX,
   QUANTITY_UNIT_PATTERNS,
+  isDurationUnitWord,
+  protectNonBoundaryDots,
 } from "./extract-journal-suggestions";
 
 export type JournalFragment = {
@@ -63,7 +76,8 @@ const TRAILING_SEPARATORS_RE = /[\s,;:–—-]+$/u;
 const LEADING_SEPARATORS_RE = /^[\s,;:–—-]+/u;
 
 /** Clause conjunctions that MAY split two work items (folded forms). */
-const CONJUNCTION_RE = /\s+(?:ir|bei|taip\s+pat|and|also|и|а\s+также)\s+/giu;
+const CONJUNCTION_RE =
+  /\s+(?:ir|bei|taip\s+pat|and|also|en|und|и|а\s+также)\s+/giu;
 
 /** Instrumental prepositions — a conjunction directly inside a "su X ir Y"
  *  enumeration joins nouns and must never split. */
@@ -180,9 +194,10 @@ const STOPWORDS: ReadonlySet<string> = new Set([
   "за",
 ]);
 
-/** Time/quantity unit tokens (folded) — never make a fragment meaningful. */
-const UNIT_TOKEN_RE =
-  /^(?:val|valand\p{L}*|min|minu[ct]\p{L}*|h|d|vnt|kg|m2|m|kv|час\p{L}*|мин\p{L}*|дн\p{L}*|день|ч|шт|кг|м)$/u;
+/** Quantity unit tokens (folded) — never make a fragment meaningful. The
+ *  duration units come from the extractor's ONE vocabulary
+ *  (`isDurationUnitWord`: valand* / hours / uur / Std / час* …). */
+const QUANTITY_TOKEN_RE = /^(?:vnt|kg|m2|m|kv|шт|кг|м)$/u;
 
 function tokenize(folded: string): string[] {
   return folded.split(/[^\p{L}\p{N}']+/u).filter(Boolean);
@@ -195,7 +210,7 @@ function isMeaningful(normalized: string): boolean {
   for (const tok of tokenize(normalized)) {
     if (tok.length < 3) continue;
     if (STOPWORDS.has(tok)) continue;
-    if (UNIT_TOKEN_RE.test(tok)) continue;
+    if (QUANTITY_TOKEN_RE.test(tok) || isDurationUnitWord(tok)) continue;
     if (/^\d+$/.test(tok)) continue;
     return true;
   }
@@ -262,6 +277,8 @@ function stripTimeAndQuantity(folded: string): string {
 
 const DECIMAL_COMMA = "";
 const DECIMAL_DOT = "";
+/** Every itemising colon (the extractor's rule, applied to the whole text). */
+const ITEMISING_COLON_G = new RegExp(ITEMISING_COLON_RX.source, "gu");
 
 /**
  * Fragment a free-text journal entry into discrete work items.
@@ -271,11 +288,16 @@ const DECIMAL_DOT = "";
 export function fragmentJournalText(text: string): JournalFragment[] {
   if (!text || text.trim().length === 0) return [];
 
-  // Protect decimal separators ("1,5 val" / "2.5 h") from the hard split.
-  const guarded = text
-    .replace(/\r/g, "")
-    .replace(/(\d),(\d)/g, `$1${DECIMAL_COMMA}$2`)
-    .replace(/(\d)\.(\d)/g, `$1${DECIMAL_DOT}$2`);
+  // Protect the dots/commas that are not boundaries (decimal separators,
+  // unit abbreviations before a lower-case word, dots inside one token) with
+  // the extractor's own rule; single-character marks keep every index
+  // aligned with the original text. The itemising colon becomes a hard
+  // boundary so the stated-total header and its items split as the
+  // extractor splits them.
+  const guarded = protectNonBoundaryDots(text.replace(/\r/g, ""), {
+    dot: DECIMAL_DOT,
+    comma: DECIMAL_COMMA,
+  }).replace(ITEMISING_COLON_G, (m) => `;${m.slice(1)}`);
 
   const hardParts = guarded
     .split(/[.!?;,\n]+/)

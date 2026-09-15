@@ -65,13 +65,20 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   }
   if (reviewableIds.length === 0) return [];
 
-  const { data: rows } = await supabase
+  const { data: rows, error: rowsError } = await supabase
     .from("journal_entries")
     .select(
       `id, original_text, created_at, worker_id, workers!inner(${WORKER_NAME_FIELDS})`,
     )
     .in("id", reviewableIds)
     .order("created_at", { ascending: true });
+  // FAILED ≠ EMPTY (SEP-7). A read that failed is thrown, never returned as
+  // "nothing to review": the quick inbox names the state, and the chat and
+  // the opening brief already catch a thrown read and say nothing rather than
+  // invent an empty queue.
+  if (rowsError) {
+    throw new Error(`review_queue_unavailable:${rowsError.code ?? "unknown"}`);
+  }
   const entries = rows ?? [];
   if (entries.length === 0) return [];
 

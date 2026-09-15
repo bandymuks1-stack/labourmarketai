@@ -113,7 +113,7 @@ export function WorkerInterestButton({
               type="button"
               onClick={onContactEmployer}
               disabled={pending}
-              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
               data-testid="interest-contact-employer"
             >
               {labels.contactEmployer}
@@ -133,7 +133,7 @@ export function WorkerInterestButton({
             type="button"
             onClick={onExpress}
             disabled={pending}
-            className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+            className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
             data-testid="interest-express"
           >
             {labels.express}

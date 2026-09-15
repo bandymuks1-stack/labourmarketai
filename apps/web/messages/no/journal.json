@@ -263,6 +263,7 @@
     "cannotSupersedeDeleted": "En fjernet oppføring kan ikke endres.",
     "cannotRestoreSuperseded": "Denne oppføringen kan ikke gjenopprettes — en nyere versjon har allerede erstattet den.",
     "cannotRestoreCorrectionConflict": "Denne oppføringen kan ikke gjenopprettes — det finnes allerede en annen gjeldende korrigert versjon for det samme arbeidet.",
-    "metricsInsertFailed": "Oppføringen ble ikke lagret fullstendig: {reason}. Oppføringen ble forkastet — prøv igjen."
+    "metricsInsertFailed": "Oppføringen ble ikke lagret fullstendig: {reason}. Oppføringen ble forkastet — prøv igjen.",
+    "moduleFieldInvalid": "Disse opplysningene hører ikke til denne typen engasjement: {fields}. Ingenting ble lagret — fjern dem og prøv igjen."
   }
 }

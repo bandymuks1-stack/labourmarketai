@@ -35,7 +35,7 @@ export function AssistantMark({
     <span
       aria-hidden
       data-testid="assistant-mark"
-      className={`flex flex-none items-center justify-center bg-brand-blue font-display font-bold text-white ${SIZE[size]} ${className}`}
+      className={`flex flex-none items-center justify-center bg-brand-blue font-display font-bold text-text-on-brand ${SIZE[size]} ${className}`}
     >
       L
     </span>

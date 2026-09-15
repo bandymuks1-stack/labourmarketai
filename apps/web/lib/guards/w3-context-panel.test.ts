@@ -163,6 +163,49 @@ describe("W3 — one dispatcher, one write path", () => {
   });
 });
 
+describe("the chrome title follows the result's own state (IA 2026-09-13 §4; #1689 defect H)", () => {
+  // RETIRED: the panel headed EVERY opportunities result "Man tinkantys
+  // darbai", including a result made only of found-not-assessed rows. The
+  // registry now names a discovery title, the result declares its state on
+  // its rows, and the panel observes that declaration — without learning
+  // what an opportunity is.
+  it("the registry names the discovery title for the opportunities result", () => {
+    const registry = read("lib/conversation/result-registry.ts");
+    expect(registry).toMatch(/readonly discoveryTitleKey\?: string;/);
+    expect(registry).toMatch(
+      /kind: "opportunities",[\s\S]*?discoveryTitleKey: "conversation\.results\.opportunities\.titleDiscovery"/,
+    );
+  });
+
+  it("the panel observes `data-discovery-only` in its own body and switches the title", () => {
+    const src = read(PANEL);
+    expect(src).toMatch(/querySelector\('\[data-discovery-only="true"\]'\)/);
+    expect(src).toMatch(/MutationObserver/);
+    expect(src).toMatch(/discoveryOnly && resultDescriptor\.discoveryTitleKey/);
+    // Generic: no result kind is named in the panel (the per-type rule above).
+    expect(src).not.toMatch(/"opportunities"/);
+  });
+
+  it("the result really declares that state, and the discovery title exists in every active locale", () => {
+    expect(read(MESSAGES)).toMatch(/data-discovery-only=\{discoveryOnly \? "true" : undefined\}/);
+    for (const locale of ["lt", "en", "ru", "nl", "de"] as const) {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as {
+        conversation: { results: { opportunities: Record<string, string> } };
+      };
+      const o = json.conversation.results.opportunities;
+      expect(o.titleDiscovery, `${locale}: titleDiscovery`).toBeTruthy();
+      expect(o.titleDiscovery).not.toBe(o.title);
+    }
+  });
+
+  it("the panel is not a home for persistent content ŠIANDIEN carries", () => {
+    // The worker's now (today's work, open items, growth, opportunity lines)
+    // lives on the page; the panel renders an entity or a result readback.
+    const src = read(PANEL);
+    expect(src).not.toMatch(/loadOwnWorkIntelligence|deriveGrowthReading|loadTodayHead|TodayScreen/);
+  });
+});
+
 describe("W3 — a new entity type is a registration", () => {
   it("the registry is the only place a type is bound to a resolver", () => {
     const src = read(RESOLVERS);

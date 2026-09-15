@@ -167,12 +167,34 @@ describe("profile-directed candidate pool", () => {
       { nowIso: NOW },
     );
 
-    // Two reads: the newest page (unfiltered) + the profession pool.
-    expect(filters).toEqual([null, "electrician"]);
+    // Two reads: the profession pool FIRST, then the newest page (unfiltered)
+    // — #1689 defect H: newest-of-any-kind must never crowd out the person's
+    // own profession. (NEGATIVE CONTROL: the pre-fix order was [null,
+    // "electrician"], and the newest page was merged ahead of the pool.)
+    expect(filters).toEqual(["electrician", null]);
     const keys = result.cards.map((c) => c.key);
     expect(keys).toContain("arbetsformedlingen:el-1");
     // …and it competes on match rank: the one fitting ad ranks first.
     expect(result.cards[0].key).toBe("arbetsformedlingen:el-1");
+  });
+
+  it("on equal engine verdicts the profession's ads stand ahead of newest-of-any-kind", async () => {
+    // An electrician with NO recorded skills: every ad is `insufficient_data`
+    // alike, so nothing but retrieval order separates them. The profession
+    // pool was read first, so the person's own profession leads — never "the
+    // newest ad of any kind". NEGATIVE CONTROL: with the pre-fix order (newest
+    // page first, 20 cooks) the older electrician ad was the 21st candidate
+    // and fell off the capped shortlist entirely.
+    const result = await loadExternalVacancyCards(
+      queryAwareClient(() => undefined),
+      { ...ELECTRICIAN_SUBJECT, skills: [] },
+      { nowIso: NOW },
+    );
+    expect(new Set(result.cards.map((c) => c.match.status))).toEqual(
+      new Set(["insufficient_data"]),
+    );
+    expect(result.cards[0].key).toBe("arbetsformedlingen:el-1");
+    expect(result.cards.length).toBeLessThanOrEqual(20);
   });
 
   it("no declared profession → no speculative extra read", async () => {

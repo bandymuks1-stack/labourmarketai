@@ -111,6 +111,34 @@ describe("the chain capabilities live on their canonical surfaces", () => {
 // deleted with the second dashboard (W3 Package 4), so the copy checks left
 // with them — there is no surviving surface that reads those keys.
 
+describe("the chain is reachable from the worker's home — ŠIANDIEN (IA 2026-09-13 §2)", () => {
+  // The worker's `/dashboard` is a page now, not the chat. Its open items
+  // (entries owed a figure, unexplained plausibility checks) and its "my
+  // work" station link to the journal, where the review chain lives; the
+  // conversation — and the panel with the invitation control — stays one
+  // tab (PAKLAUSK) away. Nothing on the page writes.
+  it("open items and the work station link to /dashboard/journal; PAKLAUSK links to the chat", () => {
+    const work = read("components/app/today/today-work-section.tsx");
+    expect(work).toMatch(/href="\/dashboard\/journal"/);
+    expect(work).toMatch(/today-open-\$\{item\.kind\}/);
+    const screen = read("components/app/today/today-screen.tsx");
+    expect(screen).toMatch(/\/dashboard\?\$\{ASK_PARAM\}=1/);
+  });
+
+  it("ŠIANDIEN performs no write of its own", () => {
+    for (const rel of [
+      "components/app/today/today-screen.tsx",
+      "components/app/today/today-work-section.tsx",
+      "components/app/today/today-opportunity-section.tsx",
+      "lib/today/today-server.ts",
+      "lib/today/today-model.ts",
+    ]) {
+      const src = read(rel);
+      expect(src, rel).not.toMatch(/<form\b|formAction|\.insert\(|\.update\(|\.upsert\(|\.delete\(/);
+    }
+  });
+});
+
 describe("the inbox review route is registered in the primary-route smoke", () => {
   it("primary-route-smoke lists /dashboard/inbox", () => {
     const smoke = read("lib/guards/primary-route-smoke.ts");

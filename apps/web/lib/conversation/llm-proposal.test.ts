@@ -43,11 +43,25 @@ describe("the proposer is confined to the product's existing intents", () => {
     expect(widened.success).toBe(false);
   });
 
-  it("the output is one id (or unknown) plus up to two alternatives inside the standard envelope", () => {
+  it("the output carries a KIND, an optional catalogue id and nothing else", () => {
     const base = { suggestion: true, agent: "conversation_intent", confidence: "high", evidence_refs: [], missing_information: ["project"], needs_human_review: false, blocked_claims: [] };
-    expect(conversationIntentOutputSchema.safeParse({ ...base, data: { intent: "who-available", alternatives: [] } }).success).toBe(true);
-    expect(conversationIntentOutputSchema.safeParse({ ...base, data: { intent: "who-available", alternatives: ["a", "b", "c"] } }).success).toBe(false);
-    expect(conversationIntentOutputSchema.safeParse({ ...base, data: { intent: "who-available", alternatives: [], reply: "Done!" } }).success).toBe(false);
+    const ok = (data: unknown) => conversationIntentOutputSchema.safeParse({ ...base, data }).success;
+    // An action still carries exactly one catalogue id.
+    expect(ok({ kind: "action", intent: "who-available", alternatives: [] })).toBe(true);
+    expect(ok({ kind: "action", intent: "who-available", alternatives: ["a", "b", "c"] })).toBe(false);
+    // THE WIDENING: the four non-operational kinds are now representable.
+    expect(ok({ kind: "reference", reference: "Baltic Staffing Group" })).toBe(true);
+    expect(ok({ kind: "question", reference: "Nonstop Group" })).toBe(true);
+    expect(ok({ kind: "clarification" })).toBe(true);
+    expect(ok({ kind: "unsupported" })).toBe(true);
+    // Still strict: an invented kind, or any field outside the contract, is
+    // a schema failure and never a quiet widening.
+    expect(ok({ kind: "execute", intent: "who-available" })).toBe(false);
+    expect(ok({ kind: "action", intent: "who-available", reply: "Done!" })).toBe(false);
+    expect(ok({ kind: "question", answer: "It is a staffing agency in Riga." })).toBe(false);
+    // The kind is REQUIRED — a v1-shaped answer must not silently pass as an
+    // action, because v1 could not tell an action from a name.
+    expect(ok({ intent: "who-available", alternatives: [] })).toBe(false);
   });
 
   it("the server action re-validates against the registry, needs a signed-in user, is rate-limited, and never writes or dispatches", () => {
@@ -60,6 +74,35 @@ describe("the proposer is confined to the product's existing intents", () => {
     expect(ACTION).toContain('inputSource: "conversation_sentence"');
     expect(ACTION).not.toMatch(/profileId/);
     expect(ACTION).not.toMatch(/dispatchWorkerAction|prepareConfirmationAction|\.rpc\(|\.from\(|\.insert\(|\.update\(/);
+  });
+
+  it("an id is read ONLY for an action — a question cannot smuggle an operation", () => {
+    // The registry re-validation happens inside `case "action"`, so no other
+    // kind can reach it. If the switch is ever flattened, this fails.
+    const actionCase = ACTION.slice(ACTION.indexOf('case "action"'), ACTION.indexOf('case "reference"'));
+    expect(actionCase).toContain("isRoutedIntent");
+    for (const other of ['case "question"', 'case "clarification"']) {
+      const start = ACTION.indexOf(other);
+      const body = ACTION.slice(start, start + 260);
+      expect(body, `${other} must not resolve an intent id`).not.toContain("isRoutedIntent");
+    }
+  });
+
+  it("no provider is named in the understanding CODE — routing is by task", () => {
+    // The whole point of the vendor-neutral seam: this file must not know
+    // which model answers. It calls `runAiAgent` with a TASK.
+    //
+    // Comments are stripped first, deliberately. The header cites the owner's
+    // grant by its recorded name ("GEMINI CONVERSATION NLU EGRESS") and must
+    // keep doing so — that is the audit trail for a data-protection decision.
+    // What may not exist is a vendor in the executable path. An earlier draft
+    // of this assertion scanned the raw file and failed on the citation,
+    // which would have pushed a future author to delete the provenance.
+    const code = ACTION.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    expect(code).toContain("runAiAgent");
+    for (const vendor of ["gemini", "openai", "anthropic", "claude", "gpt-", "grok", "qwen", "mistral", "groq"]) {
+      expect(code.toLowerCase(), `the action names ${vendor} in code`).not.toContain(vendor);
+    }
   });
 });
 
@@ -108,7 +151,7 @@ describe("the chat: deterministic first, the proposer only for unknown, the same
     const classify = CHAT.indexOf(
       "const { intent: routedIntent, score: routedScore } = classifyIntent(sent);",
     );
-    const propose = CHAT.indexOf("proposeConversationIntentAction({ sentence: text, locale, identity })");
+    const propose = CHAT.indexOf("proposeUnderstandingAction({ sentence: text, locale, identity })");
     expect(classify).toBeGreaterThan(-1);
     expect(propose).toBeGreaterThan(classify);
     // THREE TIERS, IN THIS ORDER (owner P0 §1, 2026-09-06). The router is
@@ -119,12 +162,24 @@ describe("the chat: deterministic first, the proposer only for unknown, the same
     const goalAt = CHAT.indexOf("const turnKind = classifyTurn({");
     expect(goalAt).toBeGreaterThan(classify);
     expect(goalAt).toBeLessThan(propose);
-    const flow = CHAT.slice(propose - 1200, propose + 1000);
+    // The window grew with the widening: the answer is now a switch over the
+    // typed union rather than one ternary.
+    const flow = CHAT.slice(propose - 2600, propose + 2200);
     expect(flow).toContain('if (intent !== "unknown") {');
     expect(flow).toContain("dispatchIntent(intent, handlers, withTyping, fallback)");
-    // low confidence is honestly "not understood", never a guess
-    expect(flow).toContain('res.kind === "proposal" && res.confidence !== "low" ? res.intent : "unknown"');
-    expect(flow).toContain("dispatchIntent(resolved, handlers, withTyping, fallback)");
+    // THE WIDENING (2026-09-10): the answer is a typed union, so a message
+    // may come back as a name, a question or a correction. Only `intent`
+    // dispatches; low confidence on an action is handled server-side and
+    // arrives as `unsupported`, never as a guess.
+    expect(flow).toContain('case "intent":');
+    expect(flow).toContain("dispatchIntent(res.intent, handlers, withTyping, fallback)");
+    expect(flow).toContain('case "reference":');
+    expect(flow).toContain("handleReference(res.text)");
+    expect(flow).toContain('case "question":');
+    expect(flow).toContain("handleQuestion(res.text, res.reference)");
+    expect(flow).toContain('case "clarification":');
+    // Anything else still lands on the honest existing fallback.
+    expect(flow).toContain('dispatchIntent("unknown", handlers, withTyping, fallback)');
     // never a second router, never a model call from the client
     expect(CHAT).not.toMatch(/from\s+["']@\/lib\/ai\//);
     expect(CHAT).not.toMatch(/runAiAgent/);
@@ -135,7 +190,11 @@ describe("the chat: deterministic first, the proposer only for unknown, the same
     // active goal could is a DIFFERENT event from one the router resolved,
     // and collapsing the two would hide how much work the goal layer does.
     expect(CHAT).toContain('trackResolution(intent, continuing ? "goal" : "deterministic")');
-    expect(CHAT).toContain('res.kind === "proposal" ? "llm" : "deterministic"');
+    // Every model-understood kind is recorded as `llm`, including the ones
+    // that are NOT operations — otherwise the widening would look, in
+    // telemetry, like the proposer had simply stopped answering.
+    expect(CHAT).toContain('trackResolution(res.intent, "llm")');
+    expect(CHAT).toContain('trackResolution("unknown", "llm")');
     const at = CHAT.indexOf("const trackResolution =");
     const body = CHAT.slice(at, at + 500);
     expect(body).toContain("role_context: roleContextNow, resolution");

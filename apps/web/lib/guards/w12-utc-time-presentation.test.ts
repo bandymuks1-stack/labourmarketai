@@ -181,7 +181,11 @@ describe("day KEYS are derived in the same zone as the day LABELS", () => {
 
   it("the journal diary groups by the canonical UTC day", () => {
     const src = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(src).toMatch(/utcDayKey\(/);
+    // Lane B (#1689): the diary's day key is the work-time model's own day
+    // (`resolveWorkDayDetail(...).day`, UTC) so the diary and "work in
+    // numbers" can never disagree on which day an entry belongs to; the
+    // older `utcDayKey(` derivation is the same zone and stays accepted.
+    expect(src).toMatch(/resolveWorkDayDetail\(|utcDayKey\(/);
     // The ambient-zone getters that used to build the key must not return.
     expect(src).not.toMatch(/getFullYear\s*\(\)/);
     expect(src).not.toMatch(/getMonth\s*\(\)/);

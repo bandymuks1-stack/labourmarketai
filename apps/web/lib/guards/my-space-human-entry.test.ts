@@ -36,7 +36,57 @@ const en = JSON.parse(read("messages/en.json"));
 // card in the player-card result, and the copy/surface invariants below.
 const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
-describe("worker entry opens with the state-aware work card (canonical home)", () => {
+describe("worker entry is ŠIANDIEN — a page, not the chat and not a card stack (IA 2026-09-13)", () => {
+  // RETIRED: "the worker's calm entry is the workspace (the chat) with the
+  // intro card". The worker in their personal space lands on ŠIANDIEN:
+  // header · ONE next action · today's work · open items · one growth line ·
+  // one opportunity line · a quiet door to the conversation · stations.
+  const SCREEN = "components/app/today/today-screen.tsx";
+
+  it("the dashboard root renders ŠIANDIEN for the worker and keeps the chat on demand", () => {
+    const page = read("app/[locale]/dashboard/page.tsx");
+    expect(page).toMatch(/rootSurface === "today"/);
+    expect(page).toMatch(/<TodayScreen\b/);
+    expect(page).toMatch(/reason: "replaced-by-today"/);
+  });
+
+  it("the ONE next action comes from the work-card engine — no second priority engine", () => {
+    const server = read("lib/today/today-server.ts");
+    expect(server).toMatch(/deriveWorkCardState\(/);
+    expect(server).toMatch(/getWorkerCard\(/);
+    // The pure model lifts `card.next` — it never re-orders dimensions.
+    const model = read("lib/today/today-model.ts");
+    expect(model).toMatch(/dim: card\.next\.dim/);
+    expect(model).toMatch(/whyKey: card\.next\.whyKey/);
+    const screen = read(SCREEN);
+    expect(screen).toMatch(/deriveTodayNext\(/);
+    // Exactly one primary CTA on the screen; everything else is a text link.
+    expect(screen.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
+  });
+
+  it("no intro card, no quick-nav strip, no chat inside ŠIANDIEN", () => {
+    const screen = read(SCREEN);
+    expect(screen).not.toMatch(/PersonalWorkspaceIntro|PageQuickNav|ConversationChat/);
+  });
+
+  it("the figures are the readers' figures, and UNKNOWN is never zero", () => {
+    const server = read("lib/today/today-server.ts");
+    expect(server).toMatch(/loadOwnWorkIntelligence\(/);
+    expect(server).toMatch(/deriveGrowthReading\(/);
+    expect(server).toMatch(/loadOpportunitiesResultAction\(/);
+    // No second vacancy query, no table read of its own.
+    expect(server).not.toMatch(/\.from\(["']|\.rpc\(|createClient/);
+    // A null reader is a named unknown in every locale, never a "0".
+    for (const [name, json] of [["lt", lt], ["en", en]] as const) {
+      const home = (json.todayScreen as { home: Record<string, Record<string, string>> }).home;
+      for (const block of ["work", "growth", "opportunity", "state"]) {
+        const v = home[block]?.unknown;
+        expect(typeof v === "string" && v.trim().length > 0, `${name} home.${block}.unknown`).toBe(true);
+        expect(v, `${name} home.${block}.unknown must not read as zero`).not.toMatch(/\b0\b/);
+      }
+    }
+  });
+
   it("the inline editor lives in the workspace player-card result", () => {
     // WorkCard was removed (dedup v1); W3 row 1 moved the state-aware
     // availability/location/pay editor into the `player-card` result — its

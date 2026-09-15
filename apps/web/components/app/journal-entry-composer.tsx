@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
@@ -64,6 +64,7 @@ import {
 } from "@/lib/journal/photo-upload";
 import { compressImageFile } from "@/lib/browser/image-compress";
 import { formatDuration } from "@/lib/journal/format-duration";
+import { PLATFORM_OUTPUT_UNIT_SLUGS, WORK_TIME_UNIT_SLUGS } from "@/lib/journal/work-time";
 import {
   completeTask,
   errorTask,
@@ -75,11 +76,25 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { reviewUnconfirmedWorkTime } from "@/lib/journal/unconfirmed-work-time";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
+import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
+import { formatUtcDate } from "@/lib/time/display";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { JournalModuleFields } from "@/components/app/journal-module-fields";
+import {
+  MODULE_METRICS_FIELD,
+  serializeModuleFields,
+  type ModuleFieldValues,
+} from "@/lib/journal/journal-module-fields";
 
 export type JournalEngagement = {
   id: string;
   label: string;
   isPrimary: boolean;
+  /** The worker's relationship to the context (`employee`, `student`,
+   *  `volunteer`, …) — what decides which archetype module fields the
+   *  editors compose for an entry logged against it (owner §12). Optional
+   *  so older callers keep working; absent → no module fields. */
+  relationshipSlug?: string;
 };
 
 /** How the entry's engagement context was decided — see
@@ -90,7 +105,14 @@ export type JournalContextResolution = {
   rule: "A" | "B" | "C" | "D" | "NONE";
   selectedId: string | null;
 };
-export type JournalDirection = { slug: string; name: string };
+export type JournalDirection = {
+  slug: string;
+  name: string;
+  /** ISCO-08 group of the profession's ESCO occupation (server-resolved from
+   *  `professions.esco_uri`); null for an unmapped profession. Decides which
+   *  archetype module fields the entry composes (owner §12). */
+  iscoGroup?: string | null;
+};
 export type JournalSkill = { slug: string; name: string };
 /** A worker skill matched to the entry, carrying why it was suggested and how
  *  strong the evidence is (Recognition v1). */
@@ -112,16 +134,10 @@ export type ComposerNewSkillSuggestion = {
 };
 type NewSkillAddStatus = "idle" | "adding" | "added" | "error";
 
-const UNIT_OPTIONS = [
-  "hours",
-  "minutes",
-  "days",
-  "square_meters",
-  "meters",
-  "pieces",
-  "kilograms",
-  "packages",
-] as const;
+/** The quantity picker: time units first (a confirmed quantity can still be
+ *  a duration when no fragment carries it), then every platform OUTPUT unit
+ *  the registry knows — the ONE list shared with the compact editor. */
+const UNIT_OPTIONS = [...WORK_TIME_UNIT_SLUGS, ...PLATFORM_OUTPUT_UNIT_SLUGS] as const;
 
 type Stage = "compose" | "review";
 
@@ -194,6 +210,7 @@ export function JournalEntryComposer({
   const tUnit = useTranslations("productivityUnits");
   const tProf = useTranslations("professions");
   const tSkill = useTranslations("skillNames");
+  const tCheck = useTranslations("journal.intelligence.checks");
   const locale = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -325,6 +342,12 @@ export function JournalEntryComposer({
   // P1 recall repair: the saved entry id (candidate confirm/reject targets it)
   // + per-candidate action state for the one-tap confirm/reject buttons.
   const [savedEntryId, setSavedEntryId] = useState<string | null>(null);
+  /** Owner §13 — the open day-level plausibility check the saved record
+   *  takes part in (its day now above 24 h / a long day). null = none or
+   *  not readable: nothing is shown, no figure is touched. */
+  const [savedDayCheck, setSavedDayCheck] = useState<WorkDayCheck | null>(
+    null,
+  );
   const [candidateStates, setCandidateStates] = useState<
     Record<string, "idle" | "working" | "confirmed" | "rejected" | "error">
   >({});
@@ -376,11 +399,31 @@ export function JournalEntryComposer({
     editingEntry?.topic ? "confirmed" : "pending",
   );
   const [topic, setTopic] = useState<string>(editingEntry?.topic ?? "");
-  const [engagementId, setEngagementId] = useState<string>(primaryId);
+  // An edit keeps the entry's OWN engagement (the compact editor already
+  // did; this path defaulted to the primary and could silently move the
+  // work). A legacy entry with no stored engagement falls back as before.
+  const [engagementId, setEngagementId] = useState<string>(
+    editingEntry?.engagementContextId ?? primaryId,
+  );
+  // Owner §12 — archetype module fields for the selected engagement's
+  // relationship, preloaded on edit so they are re-sent, not lost.
+  const [moduleFields, setModuleFields] = useState<ModuleFieldValues>(
+    editingEntry?.moduleFields ?? {},
+  );
+  const selectedRelationship =
+    engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
   // Preserve the entry's saved work date on edit (do NOT reset to today).
   const [workDate, setWorkDate] = useState<string>(
     editingEntry?.workDate ?? today,
   );
+  // A NEW entry defaults to the PERSON's calendar day, not the server's UTC
+  // day (re-audit F10): at 01:30 in Vilnius the UTC key still says
+  // yesterday. Applied after mount so server and client hydrate the same
+  // markup; an already-edited date is left alone.
+  useEffect(() => {
+    if (editingEntry?.workDate) return;
+    setWorkDate((d) => (d === today ? personCalendarDay() : d));
+  }, [editingEntry?.workDate, today]);
 
   const existingSkillRefs = useMemo(
     () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),
@@ -394,6 +437,11 @@ export function JournalEntryComposer({
     () => new Map(directions.map((d) => [d.slug, d])),
     [directions],
   );
+  // Occupation path (owner §12): the ISCO group of the direction this entry
+  // names, else of the worker's primary profession (`directions` arrives
+  // primary-first); null when unmapped, so no family is guessed.
+  const selectedIscoGroup =
+    (dirSlug ? directionBySlug.get(dirSlug) : directions[0])?.iscoGroup ?? null;
 
   function analyse(raw: string) {
     setError(null);
@@ -905,6 +953,10 @@ export function JournalEntryComposer({
         fd.set("institution_name", institutionName.trim());
       if (topicStatus === "confirmed" && topic.trim())
         fd.set("topic", topic.trim());
+      // Owner §12 — module fields, one metric row each server-side, accepted
+      // by the engagement's own composition.
+      const moduleJson = serializeModuleFields(moduleFields);
+      if (moduleJson) fd.set(MODULE_METRICS_FIELD, moduleJson);
       if (confirmedFragments.length > 0) {
         fd.set("fragments_json", JSON.stringify(confirmedFragments));
       }
@@ -952,6 +1004,7 @@ export function JournalEntryComposer({
       // is the real outcome — no fire-and-forget call that can silently die.
       setSavedPipeline(result.skills);
       setSavedEntryId(result.entryId);
+      setSavedDayCheck(result.dayCheck ?? null);
       setCandidateStates({});
       setRenameDrafts({});
       setUnresolvedStates({});
@@ -1212,6 +1265,36 @@ export function JournalEntryComposer({
                   {t("savedSkillsLine", savedSkillsSummary)}
                 </p>
               )}
+            {/* Owner §13 — this record pushed its day above 24 h / into a
+                long day. A warning beside the save, never a changed figure:
+                the person checks for a duplicate or stands by the record
+                with a reason in the "work in numbers" section. */}
+            {savedDayCheck !== null && (
+              <p
+                className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-state-warning"
+                data-testid="journal-saved-day-check"
+                data-check-code={savedDayCheck.code}
+              >
+                {tCheck(savedDayCheck.code, {
+                  hours: new Intl.NumberFormat(locale, {
+                    maximumFractionDigits: 1,
+                  }).format(savedDayCheck.hours),
+                  day:
+                    formatUtcDate(savedDayCheck.day, locale, {
+                      month: "short",
+                      day: "numeric",
+                    }) ?? savedDayCheck.day,
+                  entries: savedDayCheck.entries,
+                })}{" "}
+                <Link
+                  href={"/dashboard/journal#work-intelligence" as "/dashboard"}
+                  className="font-semibold underline underline-offset-2"
+                  data-testid="journal-saved-day-check-link"
+                >
+                  {tCheck("openInJournal")}
+                </Link>
+              </p>
+            )}
             {/* P0 Track B: honest SERVER-side pipeline outcome — real counts
                 from the awaited recognition→evidence→CV run, or the failure
                 line with its trace id (never a silent death). */}
@@ -1716,14 +1799,14 @@ export function JournalEntryComposer({
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               <a
                 href="#journal-entries"
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-see-entries"
               >
                 {t("savedSeeEntries")} →
               </a>
               <Link
                 href="/dashboard/profile#capabilities"
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-open-profile"
               >
                 {t("savedOpenProfile")} →
@@ -1733,7 +1816,7 @@ export function JournalEntryComposer({
                   the change becomes visible one tap away. */}
               <Link
                 href={"/cv" as "/dashboard"}
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-open-cv"
               >
                 {t("savedOpenCv")} →
@@ -2040,6 +2123,18 @@ export function JournalEntryComposer({
           ) : null}
         </label>
 
+        {/* Owner §12 — the module fields the entry's OCCUPATION (the named
+            direction, else the worker's primary profession, through its
+            ISCO group) and the relationship compose — a tiler's inspection
+            fields, a placement's supervision, a volunteer's field project;
+            nothing renders when neither source adds a module. */}
+        <JournalModuleFields
+          relationshipSlug={selectedRelationship}
+          iscoGroup={selectedIscoGroup}
+          values={moduleFields}
+          onChange={setModuleFields}
+        />
+
         {mode === "photo" && !editingEntry && photoField}
 
         {/* Photo evidence — free tier: ONE photo per entry, enforced
@@ -2130,7 +2225,7 @@ export function JournalEntryComposer({
           </p>
           <Link
             href="/dashboard/profile#capabilities"
-            className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+            className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-champagne"
             data-testid="manual-fallback-link"
           >
             {t("addManuallyCta")} →
@@ -2394,7 +2489,7 @@ export function JournalEntryComposer({
                   newSkillSuggestions.length === 0 && (
                     <Link
                       href="/dashboard/profile#capabilities"
-                      className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                      className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-champagne"
                       data-testid="skill-add-manually-link"
                     >
                       {t("addManuallyCta")} →
@@ -2622,17 +2717,17 @@ export function JournalEntryComposer({
 /** Resolve a profession slug to its localized label, falling back to the
  *  raw LT label when the taxonomy doesn't have an entry yet (rule-based
  *  matches outside the construction set, e.g. cashier — surfaced via the
- *  free-text label rather than a fake taxonomy entry). */
+ *  free-text label rather than a fake taxonomy entry). Asks `has` first: a
+ *  missing key is an expected outcome here, not an error — next-intl logged
+ *  `MISSING_MESSAGE: professions.<label>` on every such render (#1689). */
 function tProfSafe(
-  tProf: (key: string) => string,
+  tProf: { (key: string): string; has: (key: string) => boolean },
   slug: string,
   fallback: string | null,
 ): string {
-  try {
+  if (tProf.has(slug)) {
     const v = tProf(slug);
     if (v && v !== slug) return v;
-  } catch {
-    /* fall through */
   }
   return fallback ?? slug;
 }

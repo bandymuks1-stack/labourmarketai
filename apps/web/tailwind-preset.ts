@@ -41,6 +41,9 @@ const preset = {
         portrait: shadows.portrait,
       },
       backgroundImage: {
+        // The owner's five-stop metallic ramp. Brand moments ONLY — the logo
+        // and a single accent word; never ordinary chrome (brief §2).
+        "gradient-metallic": gradients.metallic,
         "gradient-hero": gradients.heroAccent,
         "gradient-cta": gradients.primaryCta,
         "card-glow": gradients.cardGlow,

@@ -60,7 +60,7 @@ export function ForgotPasswordForm() {
         </p>
         <Link
           href="/auth/login"
-          className="mt-4 inline-block text-sm text-brand-blue hover:text-brand-cyan"
+          className="mt-4 inline-block text-sm text-brand-blue hover:text-brand-champagne"
         >
           {t("back_to_login")}
         </Link>

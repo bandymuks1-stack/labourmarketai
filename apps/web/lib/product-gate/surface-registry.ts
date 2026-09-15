@@ -136,6 +136,52 @@ export interface SurfaceDeclaration {
    * it into a hard error the moment the enabling architecture ships.
    */
   readonly transitionalWaiver?: TransitionalWaiver;
+
+  /**
+   * A-14 (owner decision 0015, 2026-09-13): a genuinely DISTINCT user job /
+   * graph edge that reuse would materially damage. Owner-gated: the block is
+   * valid only with its ruling and at least one evidence item; then the
+   * readiness answers in `A14_EXCUSED_CODES` may honestly be "no" and are
+   * reported as notices. `aiControlled`, `usesEntity`, `registrationIsEnough`
+   * and `aiCanWorkWithIt` are never excused — a distinct surface must still be
+   * AI-operable and entity-based.
+   */
+  readonly distinctSurface?: DistinctSurfaceRuling;
+}
+
+export interface DistinctSurfaceRuling {
+  /** Which user job / decision space this serves, in one sentence. */
+  readonly userJob: string;
+  /** Which §14 graph edge it is, and why not the edge an existing surface serves. */
+  readonly graphEdge: string;
+  /** What reusing the existing structure would materially damage. */
+  readonly whyReuseDamages: string;
+  /** Repository / audit / production evidence, one item each. */
+  readonly evidence: readonly string[];
+  /** The owner ruling that authorised it (decision id + date). */
+  readonly ownerRuling: string;
+}
+
+/** The readiness answers an A-14 ruling may excuse (reported as notices). */
+export const A14_EXCUSED_CODES = [
+  "not_world_state_driven",
+  "not_reflected_on_map",
+  "requires_leaving_workspace",
+  "requires_new_page",
+  "world_state_cannot_control_it",
+] as const;
+
+/** A complete A-14 block: every answer stated, at least one evidence item. */
+export function distinctSurfaceIsRuled(d: DistinctSurfaceRuling | undefined): boolean {
+  if (!d) return false;
+  return (
+    d.userJob.trim().length >= 10 &&
+    d.graphEdge.trim().length >= 10 &&
+    d.whyReuseDamages.trim().length >= 10 &&
+    d.evidence.length > 0 &&
+    d.evidence.every((e) => e.trim().length >= 10) &&
+    d.ownerRuling.trim().length >= 10
+  );
 }
 
 /**
@@ -755,6 +801,85 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     worldStateCanControlIt: false,
   },
 
+  // ══ WORK IN NUMBERS — "Mano veikla skaičiais" (A-14, owner decision 0015) ══
+  // The person's DERIVED reading of their recorded work over a period. Not a
+  // journal module (it owns no write, lives on no journal path) and not a
+  // second dashboard: one station of the worker loop the target IA names
+  // (docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md §2), reached from
+  // ŠIANDIEN, the journal's compact card, the chat's answers and the CV.
+  {
+    id: "/dashboard/work-in-numbers",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "Answers, first and above the fold on a phone, which skills take the largest share of the person's recorded work over a chosen window — hours, share, entries, first/last day, contexts, outputs, approved share and trend per skill — then the hours no skill can claim and their provenance, the organization's own ledger beside (never summed), the plausibility checks and the growth kinds with their WHY.",
+    whyNotChat:
+      "The conversation answers one period question at a time (\"Kiek šią savaitę?\", \"Kam skyriau daugiausia laiko?\") from the same reader and links here; a share-bar reading over twelve skills, a period selector and the organization ledger beside are a comparison the person keeps in view while deciding what to deepen or present — an answer that scrolls away cannot carry it. The station owns no action; every write stays in the journal.",
+    whyNotExistingComponent:
+      "The journal page's job is record → see it saved → correct → submit (one entry, one day, one context, a write path). Composing the period reading inside it produced a 1,662-line single scroll, the owner's production defects A/B/K on #1689, a day-scoped page carrying period-scoped server reads (§T) and more than three first-level blocks on a phone. The organization pages already compose the same reading WITHOUT the recording surface; mobile exposes it as its own capability.",
+    owner: "Product architecture (DI) — owner decision 0015 (2026-09-13)",
+    // A pure read surface: the period selector is a GET; acknowledging a
+    // plausibility check reuses the journal's own action (its home stays
+    // the journal).
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the TIME → CAPABILITY edge of the §14 graph: the journal is the REAL WORK fact; this is the derived reading over it (SEP-1 DERIVED, never FACT). No new element — the reading already exists in the model (`WorkIntelligence`); what did not exist was its own destination.",
+    chatIntegration:
+      "The assistant answers the same questions from the same reader (`loadOwnWorkIntelligence`, capability `journal.work_intelligence.get`) and links here; the station dispatches nothing and holds no conversation state.",
+    avatarEffect:
+      "None by itself. It SHOWS the avatar's practice (share per skill, approved share, trend) and feeds the Living CV's skill presentation and professional facts through the same reader; it changes no skill row.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the contexts it counts are the engagement contexts the map already knows.",
+    journalRelation:
+      "Downstream and read-only: every figure is a sum of journal lines through the ONE canonical work-time rule; every skill row links back to the entries that back it; the journal page keeps a one-card summary with a link here.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true, // periods and months are dated state of the reading
+    hasHistory: true, // all-time reading over dated entries
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct station needs its own page — and
+    // excused ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true, // the chat opens and answers it from the same model
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "Understand what dominates my recorded work, over which window, how it moves, and what to deepen or present — a period decision, not a recording task.",
+      graphEdge:
+        "TIME → CAPABILITY (§14 nodes TIME and CAPACITY; value chain REAL WORK → EVIDENCE → CAPABILITY → CAPACITY). The journal serves the REAL WORK edge; no existing surface serves this edge for the person.",
+      whyReuseDamages:
+        "Reuse put a period-scoped analytical reading inside a day-scoped recording page: a 1,662-line scroll, owner defects A/B/K on the #1689 production walk, §T server-scoping conflict (period vs day), >3 first-level blocks on a phone, and no destination the chat, the CV or ŠIANDIEN could link to.",
+      evidence: [
+        "docs/PRODUCT_CONSTITUTION.md §14: TIME and CAPACITY are graph nodes distinct from REAL WORK; product-graph.ts node `time`",
+        "docs/design/final/00-GALUTINE-DIZAINO-SISTEMA.md: Time is its own lens (kas buvo / yra / bus); §P fact / derived / forecast language",
+        "capability-register.ts EVID-7: the reading's surfaces already span journal, CV, /dashboard/people/[workerId] and /dashboard/reports — read apart from the recorder",
+        "lib/capabilities/registry.ts: mobile capability journal.work_intelligence.get beside journal.list",
+        "docs/audits/labourmarket-full-product-audit-2026-09-12.md §21: defects A, B, K; docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md §4 journal page REDESIGN → split",
+      ],
+      ownerRuling:
+        "Owner decision 0015 (2026-09-13), docs/DECISIONS/0015-distinct-user-job-surfaces.md: 'I authorize a constitution change only if case B is demonstrated by evidence' — case B demonstrated above.",
+    },
+  },
+
 ] as const;
 
 /**
@@ -818,6 +943,7 @@ export type DeclarationViolation =
   | "duplicate_id"
   | "waiver_not_approved"
   | "waiver_covers_unwaivable_field"
+  | "distinct_surface_unruled"
   | "waiver_expired"
   | "duplicate_action";
 
@@ -916,7 +1042,25 @@ export function validateDeclarations(
     }
 
     // The five world-state answers. Any "no" breaks the vision lock.
+    // A-14 (decision 0015): a DISTINCT user job may honestly answer the
+    // readiness questions "no" — only with a complete, owner-ruled block. An
+    // incomplete block is itself a violation; a complete one turns the
+    // excused codes into notices (the gate prints them), never silence.
+    const a14Present = d.distinctSurface !== undefined;
+    const a14Ruled = distinctSurfaceIsRuled(d.distinctSurface);
+    if (a14Present && !a14Ruled) {
+      problems.push({
+        id: d.id,
+        code: "distinct_surface_unruled",
+        detail:
+          "distinctSurface must state userJob, graphEdge, whyReuseDamages, at least one evidence item and the owner ruling (A-14, decision 0015)",
+      });
+    }
+    const excusedByA14 = (code: string) =>
+      a14Ruled && (A14_EXCUSED_CODES as readonly string[]).includes(code);
+
     for (const problem of validateWorldStateAnswers(d.id, d as WorldStateAnswers)) {
+      if (excusedByA14(problem.code)) continue;
       problems.push({
         id: problem.id,
         code: problem.code as DeclarationViolation,
@@ -926,6 +1070,7 @@ export function validateDeclarations(
 
     // The six behavior answers. The last one escalates to REDESIGN.
     for (const problem of validateBehaviorAnswers(d.id, d as BehaviorAnswers)) {
+      if (excusedByA14(problem.code)) continue;
       problems.push({
         id: problem.id,
         code: problem.code as DeclarationViolation,

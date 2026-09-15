@@ -14,6 +14,7 @@ import {
 } from "@/lib/invitations/network";
 import { getMyAbsences } from "@/lib/leave/absences";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
+import { correctedOriginalIds } from "@/lib/journal/counted-once";
 import {
   deriveEntryWorkTime,
   workTimeDurationLabel,
@@ -585,11 +586,11 @@ async function readJournalItems(
   // the original deliberately stays visible in the journal's audit trail,
   // but the CALENDAR is a projection of what happened, and showing both made
   // one edited entry appear as several similar rows. An entry that a live
-  // correction points at is therefore replaced by that correction here.
+  // correction points at is therefore replaced by that correction here —
+  // through THE counted-once rule (`lib/journal/counted-once.ts`), the same
+  // one the journal list, the section and the CV apply, never a local copy.
   const rows = (res.data ?? []) as Row[];
-  const correctedIds = new Set(
-    rows.map((r) => r.correction_of).filter((v): v is string => Boolean(v)),
-  );
+  const correctedIds = correctedOriginalIds(rows);
   // §7.1 THE FULL FIELD SET for the source the owner reads most. Two
   // bounded, RLS-scoped follow-up reads over the SAME entry ids: the entry's
   // own metrics (real hours + site name, written by the save action) and the

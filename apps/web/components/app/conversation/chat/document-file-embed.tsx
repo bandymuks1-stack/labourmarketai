@@ -127,7 +127,7 @@ export function DocumentFileEmbed({
             onClick={() => void submit()}
             disabled={!file || pending}
             data-testid="doc-file-submit"
-            className="rounded-md bg-brand-blue px-3 py-1.5 text-meta font-medium text-white disabled:opacity-50"
+            className="rounded-md bg-brand-blue px-3 py-1.5 text-meta font-medium text-text-on-brand disabled:opacity-50"
           >
             {pending ? labels.uploading : labels.submit}
           </button>

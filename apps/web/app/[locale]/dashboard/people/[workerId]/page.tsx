@@ -1,5 +1,14 @@
 import { redirect } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  availabilityDateLabel,
+  countryLabel,
+  mobilityLabels,
+} from "@/lib/people/person-page-labels";
+import {
+  PersonServiceRequestButton,
+  type PersonServiceRequestLabels,
+} from "@/components/app/person-service-request-button";
 import {
   BadgeCheck,
   CalendarDays,
@@ -16,6 +25,12 @@ import { createClient } from "@/lib/supabase/server";
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
 import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
+import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import {
+  WORK_PERIOD_KEYS,
+  type WorkPeriodKey,
+} from "@/lib/journal/work-intelligence";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
@@ -45,13 +60,40 @@ const UUID_RE =
  */
 export default async function PersonPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; workerId: string }>;
+  searchParams?: Promise<{ period?: string }>;
 }) {
   const { locale, workerId } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("people");
   const tSkillNames = await getTranslations("skillNames");
+  // The organization's "work in numbers" period switch — the same keys and
+  // the same default the person's own journal section uses.
+  const sp = (await searchParams) ?? {};
+  const periodKey: WorkPeriodKey =
+    typeof sp.period === "string" &&
+    (WORK_PERIOD_KEYS as readonly string[]).includes(sp.period)
+      ? (sp.period as WorkPeriodKey)
+      : "all";
+  // Countries and dates are FACTS ABOUT A PERSON that an employer reads on
+  // the one page where they judge them. Both were rendered raw here — see
+  // `countryName` and the availability chip below.
+  const tCountries = await getTranslations("labourMarket");
+  // Priority 4: the action on a listed service. Copy comes from the
+  // EXISTING `marketplace` namespace the service-requests page reads, so
+  // this entry point carries no vocabulary of its own.
+  const tMarket = await getTranslations("marketplace");
+  const serviceRequestLabels: PersonServiceRequestLabels = {
+    request: tMarket("request"),
+    requested: tMarket("requested"),
+    duplicate: tMarket("duplicate"),
+    offeringInactive: tMarket("offeringInactive"),
+    notAvailable: tMarket("notAvailable"),
+    errorGeneric: tMarket("errorGeneric"),
+  };
+  const format = await getFormatter();
 
   const supabase = await createClient();
   const {
@@ -123,8 +165,30 @@ export default async function PersonPage({
   const recordedWork = await readRecordedWorkFor(
     (worker.profile_id as string | null) ?? "",
   );
-  const mobility = ((worker.preferred_countries as string[] | null) ?? []).filter(
-    (c) => typeof c === "string" && c.trim().length > 0,
+  /**
+   * ── A COUNTRY CODE IS NOT A COUNTRY NAME (owner readiness window, §5B/§24)
+   *
+   * Read back from production today, this page rendered a real worker's
+   * location as "LT" and their mobility as "NL, DK, NO, SE" — the stored
+   * ISO-3166 alpha-2 codes, printed straight onto the ONE cross-person page
+   * an employer uses to decide about someone. §24 bans raw internal
+   * identifiers in the product's surfaces, and for a visitor reading in
+   * Russian or Dutch these two-letter tokens are not even a weak label.
+   *
+   * The catalogue that fixes it already exists and every other surface uses
+   * it (`labourMarket.countryNames`, all 17 markets × 5 active locales). The
+   * fallback is the CODE, never a blank and never a guess: a worker whose
+   * stored country is outside the market set — the column is free text and
+   * the location model deliberately spans all of ISO — still shows something
+   * true rather than vanishing. UNKNOWN is not EMPTY (SEP-7).
+   */
+  const countries = {
+    has: (key: string) => tCountries.has(key),
+    get: (key: string) => tCountries(key),
+  };
+  const mobility = mobilityLabels(
+    worker.preferred_countries as string[] | null,
+    countries,
   );
 
   // REAL WORK and WHAT THEY OFFER. Both already existed and were rendered
@@ -135,6 +199,45 @@ export default async function PersonPage({
     readWorkPhotosFor((worker.profile_id as string | null) ?? ""),
     listActiveOfferingsByProvider((worker.profile_id as string | null) ?? ""),
   ]);
+
+  /**
+   * ── WORK IN NUMBERS, FOR THE ORGANIZATION (issue #1689, owner §14) ──────
+   *
+   * The same reader and the same rendering the person's own journal uses —
+   * no second timesheet universe. What differs is the SCOPE, and the
+   * database sets it: every journal table carries an org-manager branch
+   * (`manages_organization` on the entry's engagement organization), so a
+   * manager receives exactly the entries logged against their own
+   * organization's engagements and nothing recorded for anyone else.
+   *
+   * Composed only when the viewer already sees an engagement with this
+   * person (`recordedWork` above is RLS-scoped the same way): a viewer with
+   * no standing is never shown "no recorded work" about someone — that
+   * sentence would be a claim about a record they cannot read (SEP-8: DATA
+   * EXISTS ≠ VISIBLE). A failed read withholds the section (null), never a
+   * zero that reads as "this person did nothing" (SEP-7).
+   */
+  const orgWorkIntelligence =
+    recordedWork.status === "ok" && recordedWork.entries.length > 0
+      ? await loadWorkIntelligence(
+          { supabase, userId: user.id },
+          worker.id as string,
+          { focus: periodKey },
+        )
+      : null;
+  const tProfessions = await getTranslations("professions");
+  const tUnits = await getTranslations("productivityUnits");
+  const catalogueName =
+    (tr: { has: (k: string) => boolean; (k: string): string }) =>
+    (slug: string): string | null =>
+      tr.has(slug) ? tr(slug) : null;
+  const engagementLabels = new Map<string, string>();
+  if (recordedWork.status === "ok") {
+    for (const e of recordedWork.entries) {
+      const label = e.title ?? e.organizationName;
+      if (label) engagementLabels.set(e.id, label);
+    }
+  }
 
   const name =
     (worker.display_name as string | null)?.trim() ||
@@ -162,7 +265,7 @@ export default async function PersonPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="person-page">
       <header className="flex flex-col gap-3">
-        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <UserRound className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
@@ -201,13 +304,23 @@ export default async function PersonPage({
           {worker.available_from ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
-              {t("availableFrom", { date: worker.available_from as string })}
+              {/* A stored `date` column arrives as "2026-07-31" and was
+                  interpolated verbatim. Formatted in the reader's locale —
+                  and parsed defensively, because a value the formatter
+                  cannot read must degrade to the stored string, never to
+                  "Invalid Date". */}
+              {t("availableFrom", {
+                date: availabilityDateLabel(
+                  worker.available_from as string,
+                  format,
+                ),
+              })}
             </span>
           ) : null}
           {worker.current_location_country ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <MapPin className="h-3 w-3" aria-hidden />
-              {worker.current_location_country as string}
+              {countryLabel(worker.current_location_country as string, countries)}
             </span>
           ) : null}
           {typeof worker.experience_years === "number" &&
@@ -273,7 +386,9 @@ export default async function PersonPage({
                     {o.locationCountry ? (
                       <span className="inline-flex items-center gap-1 font-mono text-meta text-text-muted">
                         <MapPin className="h-3 w-3" aria-hidden />
-                        {o.locationCountry}
+                        {/* Named, not printed as an ISO code — the same
+                            correction as the person's own country above. */}
+                        {countryLabel(o.locationCountry, countries)}
                       </span>
                     ) : null}
                     {/* The provider's OWN words for what it costs. Never a
@@ -287,6 +402,16 @@ export default async function PersonPage({
                   {o.description ? (
                     <p className="text-sm text-text-secondary">{o.description}</p>
                   ) : null}
+                  {/* THE NEXT ACTION. A listed service with no way to ask for
+                      it is a decorative list; this is the canonical request
+                      loop's own action, reached from where the visitor is
+                      actually looking. */}
+                  <div className="mt-1 flex justify-end">
+                    <PersonServiceRequestButton
+                      offeringId={o.id}
+                      labels={serviceRequestLabels}
+                    />
+                  </div>
                 </Card>
               </li>
             ))}
@@ -349,6 +474,28 @@ export default async function PersonPage({
           </>
         )}
       </section>
+
+      {/* WHAT THEIR RECORDED WORK ADDS UP TO — in this organization's own
+          records. Hours, kinds of work, the skills the hours reach and what
+          backs them, from the one work-time rule; confirmed hours light up
+          from this organization's own approved confirmations. */}
+      {orgWorkIntelligence && (
+        <JournalWorkIntelligence
+          wi={orgWorkIntelligence}
+          locale={locale}
+          audience="organization"
+          labels={{
+            skillName: catalogueName(tSkillNames),
+            professionName: catalogueName(tProfessions),
+            unitName: catalogueName(tUnits),
+            contextLabel: (id) =>
+              (id ? engagementLabels.get(id) : null) ?? t("workTitle"),
+            primaryProfessionSlug: null,
+            periodHref: (key) =>
+              `/dashboard/people/${workerId}?period=${key}#work-intelligence`,
+          }}
+        />
+      )}
 
       <section className="flex flex-col gap-3">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">

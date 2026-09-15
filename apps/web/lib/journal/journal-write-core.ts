@@ -10,6 +10,17 @@ import {
   processJournalEntrySkills,
   type JournalSkillPipelineResult,
 } from "@/lib/journal/skill-pipeline";
+import {
+  readSavedEntryDayCheck,
+  type WorkDayCheck,
+} from "@/lib/journal/work-time-plausibility-read";
+import {
+  allowedModuleSlugsFor,
+  MODULE_METRICS_FIELD,
+  moduleMetricRows,
+  parseModuleFields,
+} from "@/lib/journal/journal-module-fields";
+import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -46,7 +57,16 @@ export type JournalWriteCaller = {
 };
 
 export type CreateJournalEntryResult =
-  | { ok: true; entryId: string; skills: JournalSkillPipelineResult }
+  | {
+      ok: true;
+      entryId: string;
+      skills: JournalSkillPipelineResult;
+      /** Owner §13: the open day-level plausibility check the saved entry
+       *  takes part in (its day now above 24 h / a long day), so the intake
+       *  surface can say so right away. `null` = none, or not readable —
+       *  the save itself is unaffected either way. */
+      dayCheck?: WorkDayCheck | null;
+    }
   | { ok: false; code: JournalSaveErrorCode; message: string };
 
 export type JournalSaveErrorCode =
@@ -67,7 +87,12 @@ export type JournalSaveErrorCode =
   | "entry_superseded"
   /** W0 — a selected taxonomy slug failed server-side validation (unknown /
    *  inactive / malformed). The atomic RPC rolled the whole save back. */
-  | "skill_selection_invalid";
+  | "skill_selection_invalid"
+  /** Owner §12 — a module field was posted that the ENTRY's own engagement
+   *  relationship does not compose (or the engagement is not the caller's).
+   *  Refused, never silently dropped: the composition decides which fields
+   *  an entry may carry, not the request. */
+  | "module_field_invalid";
 
 export type ParsedFragmentInput = {
   rawPhrase: string;
@@ -87,6 +112,12 @@ export type ParsedFragmentInput = {
    *  be skill-linked by the save; the composer's parser-derived slugs never
    *  set it, so confirming a time parse can't silently declare a skill. */
   selected?: boolean;
+  /** Provenance of the fragment's rows. `worker_input` (default) when the
+   *  person reviewed the parse fragment by fragment (the composer);
+   *  `ai_extracted` when a transport persisted the deterministic parse of the
+   *  person's sentence after a summary-level confirmation (conversation, MCP —
+   *  `lib/journal/intake-work-time.ts`). Never a vendor-AI claim. */
+  source?: "worker_input" | "ai_extracted";
 };
 
 export type RpcMetricRow = {
@@ -153,12 +184,69 @@ export function parseFragments(raw: string | null): ParsedFragmentInput[] {
             ? r.userLabel.trim().slice(0, 200)
             : null,
         selected: r.selected === true,
+        source: r.source === "ai_extracted" ? "ai_extracted" : "worker_input",
       });
     }
     return out;
   } catch {
     return [];
   }
+}
+
+/**
+ * The index-paired metric rows ONE fragment list becomes — `parsed_fragment`,
+ * `fragment_time`, `fragment_activity` (+ `unknown_phrase` for a clarified
+ * unknown). The ONE builder for both writers: the create path
+ * (`createJournalEntryCore`) and the supersede path (`actions.ts`). Each
+ * fragment's rows carry the fragment's OWN provenance (`ai_extracted` when a
+ * transport persisted the deterministic parse; `worker_input` when the
+ * person typed or edited it) — a re-save that leaves a fragment untouched
+ * keeps what it was saved with (#1689, measured on production 2026-09-12:
+ * the supersede writer hardcoded `worker_input` and turned 2 h of
+ * `ai_extracted` into the worker's own input on a site-name edit).
+ */
+export function fragmentMetricRows(
+  fragments: readonly ParsedFragmentInput[],
+): RpcMetricRow[] {
+  return fragments.flatMap((f, idx): RpcMetricRow[] => {
+    const fragmentSource: RpcMetricRow["source"] = f.source ?? "worker_input";
+    const rows: RpcMetricRow[] = [
+      {
+        metric_slug: "parsed_fragment",
+        value_text: `${idx + 1}|${f.rawPhrase}`,
+        source: fragmentSource,
+      },
+    ];
+    if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
+      rows.push({
+        metric_slug: "fragment_time",
+        value_numeric: f.timeValue,
+        unit_slug: f.timeUnit,
+        value_text: String(idx + 1),
+        source: fragmentSource,
+      });
+    }
+    const activityLabel = f.activitySlug ?? f.activityLabel;
+    if (activityLabel) {
+      rows.push({
+        metric_slug: "fragment_activity",
+        value_text: `${idx + 1}|${activityLabel}`,
+        source: fragmentSource,
+      });
+    }
+    // v3 — when the parser flagged the fragment as unknown AND the worker
+    // typed a clarification, persist that as a review-only label. Stored
+    // for future admin / agent dictionary review (no auto-promotion). The
+    // clarification is the worker's word whatever the parse's provenance.
+    if (f.isUnknown && f.userLabel) {
+      rows.push({
+        metric_slug: "unknown_phrase",
+        value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
+        source: "worker_input" as const,
+      });
+    }
+    return rows;
+  });
 }
 
 /** Run the canonical skill pipeline for a saved entry AS THE CALLER. A
@@ -181,6 +269,53 @@ export async function runSkillPipeline(opts: {
     );
     return failedPipelineResult();
   }
+}
+
+/**
+ * Owner §12 — archetype module fields → metric rows, accepted by the
+ * ENGAGEMENT's own relationship AND the worker's OWN professions, both read
+ * under the caller's RLS. The relationship is the context's (a foreign or
+ * unknown id reads as no relationship); the occupation path is the worker's
+ * professions → `esco_uri` → ISCO (`readOwnOccupationPathForUser`), never a
+ * profession slug the request names — so the accept set is what THIS person
+ * may honestly record under THIS context, whatever the form posted. No
+ * field posted → no read, no rows.
+ */
+export async function resolveModuleMetricRows(
+  supabase: ServerSupabase,
+  t: Translator,
+  engagementId: string,
+  raw: string | null | undefined,
+  userId: string,
+): Promise<
+  | { ok: true; rows: RpcMetricRow[] }
+  | { ok: false; code: "module_field_invalid"; message: string }
+> {
+  const values = parseModuleFields(raw);
+  if (Object.keys(values).length === 0) return { ok: true, rows: [] };
+  const [{ data: ctx }, own] = await Promise.all([
+    supabase
+      .from("engagement_contexts")
+      .select("relationship_slug")
+      .eq("id", engagementId)
+      .maybeSingle(),
+    readOwnOccupationPathForUser(supabase, userId),
+  ]);
+  const result = moduleMetricRows(
+    values,
+    allowedModuleSlugsFor({
+      relationshipSlug: ctx?.relationship_slug ?? null,
+      iscoGroups: own.iscoGroups,
+    }),
+  );
+  if (!result.ok) {
+    return {
+      ok: false,
+      code: "module_field_invalid",
+      message: t("moduleFieldInvalid", { fields: result.refused.join(", ") }),
+    };
+  }
+  return { ok: true, rows: result.rows };
 }
 
 export function collectUnitSlugs(args: {
@@ -288,6 +423,13 @@ export async function createJournalEntryCore(
   const workDirection = String(formData.get("work_direction") ?? "").trim();
   const quantityRaw = String(formData.get("quantity") ?? "").trim();
   const unitSlug = String(formData.get("unit_slug") ?? "square_meters").trim();
+  // Provenance of the entry-level quantity: a transport that derived it from
+  // the sentence (intake-work-time) says so; the composer's own field is the
+  // person's input.
+  const quantitySource: RpcMetricRow["source"] =
+    String(formData.get("quantity_source") ?? "") === "ai_extracted"
+      ? "ai_extracted"
+      : "worker_input";
   const notes = String(formData.get("notes") ?? "").trim();
   const workDate = String(formData.get("work_date") ?? "").trim();
   // v3 — free-text review-only metadata. Capped lengths so a runaway paste
@@ -393,6 +535,16 @@ export async function createJournalEntryCore(
   const hasStructured =
     quantity !== null || workDirection !== "" || fragments.length > 0;
 
+  // Owner §12 — module fields, accepted by the engagement's own composition.
+  const moduleRows = await resolveModuleMetricRows(
+    supabase,
+    t,
+    engagementId,
+    String(formData.get(MODULE_METRICS_FIELD) ?? ""),
+    userId,
+  );
+  if (!moduleRows.ok) return moduleRows;
+
   // Pre-validate the unit_slug FK so we fail BEFORE any insert if the
   // worker's productivity unit isn't registered in `productivity_units`.
   // This is what surfaced after PR #61: the legacy seed only covered
@@ -443,7 +595,7 @@ export async function createJournalEntryCore(
             metric_slug: "quantity",
             value_numeric: quantity,
             unit_slug: unitSlug,
-            source: "worker_input" as const,
+            source: quantitySource,
           },
         ]
       : []),
@@ -474,49 +626,16 @@ export async function createJournalEntryCore(
           },
         ]
       : []),
-    ...fragments.flatMap((f, idx): RpcMetricRow[] => {
-      const rows: RpcMetricRow[] = [
-        {
-          metric_slug: "parsed_fragment",
-          value_text: `${idx + 1}|${f.rawPhrase}`,
-          source: "worker_input" as const,
-        },
-      ];
-      if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
-        rows.push({
-          metric_slug: "fragment_time",
-          value_numeric: f.timeValue,
-          unit_slug: f.timeUnit,
-          value_text: String(idx + 1),
-          source: "worker_input" as const,
-        });
-      }
-      const activityLabel = f.activitySlug ?? f.activityLabel;
-      if (activityLabel) {
-        rows.push({
-          metric_slug: "fragment_activity",
-          value_text: `${idx + 1}|${activityLabel}`,
-          source: "worker_input" as const,
-        });
-      }
-      // v3 — when the parser flagged the fragment as unknown AND the worker
-      // typed a clarification, persist that as a review-only label. Stored
-      // for future admin / agent dictionary review (no auto-promotion).
-      if (f.isUnknown && f.userLabel) {
-        rows.push({
-          metric_slug: "unknown_phrase",
-          value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
-          source: "worker_input" as const,
-        });
-      }
-      return rows;
-    }),
+    ...fragmentMetricRows(fragments),
     // C2a — document-import provenance: the verified source file id + the
     // server-stamped extractor identity (deterministic-structuring@…) ride
     // the same atomic save, so an imported entry stays attributable forever.
     ...(sourceDocumentFileId
       ? documentProvenanceMetrics(sourceDocumentFileId)
       : []),
+    // Owner §12 — one metric row per archetype module field the person
+    // filled, under the same atomic save (never a core slug, guarded).
+    ...moduleRows.rows,
   ];
 
   // Atomic save — the RPC inserts the entry and all metric rows inside one
@@ -593,7 +712,16 @@ export async function createJournalEntryCore(
       caller: { supabase, userId },
     });
     revalidatePath(`/${locale}/dashboard/journal`);
-    return { ok: true, entryId: legacy.entryId, skills: legacySkills };
+    return {
+      ok: true,
+      entryId: legacy.entryId,
+      skills: legacySkills,
+      dayCheck: await readSavedEntryDayCheck(
+        { supabase, userId },
+        worker.id,
+        legacy.entryId,
+      ),
+    };
   }
 
   const skills = await runSkillPipeline({
@@ -604,5 +732,13 @@ export async function createJournalEntryCore(
     caller: { supabase, userId },
   });
   revalidatePath(`/${locale}/dashboard/journal`);
-  return { ok: true, entryId: rpcEntryId, skills };
+  // Owner §13 — the day check is read AFTER the save from the same journal
+  // read every surface uses; a failed read leaves the save reported as the
+  // success it is, with the check unknown (never invented).
+  const dayCheck = await readSavedEntryDayCheck(
+    { supabase, userId },
+    worker.id,
+    rpcEntryId,
+  );
+  return { ok: true, entryId: rpcEntryId, skills, dayCheck };
 }

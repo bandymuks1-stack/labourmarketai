@@ -181,7 +181,7 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
                   <a
                     href={anchor}
                     data-testid={`market-map-cta-${type}`}
-                    className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-champagne"
                   >
                     {t(ctaKey)}
                     <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -190,7 +190,7 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
                   <Link
                     href={href as "/dashboard"}
                     data-testid={`market-map-cta-${type}`}
-                    className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-champagne"
                   >
                     {t(ctaKey)}
                     <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />

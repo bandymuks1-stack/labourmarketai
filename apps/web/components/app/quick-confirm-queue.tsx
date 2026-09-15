@@ -32,11 +32,15 @@ export function QuickConfirmQueue({
   entries,
   todays,
   exceptions,
+  unavailable = false,
 }: {
   entries: QuickConfirmEntryView[];
   /** Today's entries (UTC day) — the batch candidates, computed by the page. */
   todays: QuickConfirmEntryView[];
   exceptions: Record<string, string[]>;
+  /** FAILED ≠ EMPTY (SEP-7): the queue read failed. Rendered as its own named
+   *  state inside this boundary, never as the "nothing to review" empty state. */
+  unavailable?: boolean;
 }) {
   const t = useTranslations("journal");
   const [receipts, setReceipts] = useState<QuickConfirmReceipt[]>([]);
@@ -76,7 +80,13 @@ export function QuickConfirmQueue({
       {/* The batch stays mounted so its own result survives the re-render. */}
       <QuickConfirmBatch entries={visibleToday} exceptions={exceptions} />
 
-      {visible.length === 0 ? (
+      {unavailable ? (
+        <EmptyState
+          testId="quick-unavailable"
+          title={t("inbox.unavailableTitle")}
+          why={t("inbox.unavailable")}
+        />
+      ) : visible.length === 0 ? (
         <EmptyState
           testId="quick-empty-state"
           title={t("inbox.emptyTitle")}

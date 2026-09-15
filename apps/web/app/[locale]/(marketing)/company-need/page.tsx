@@ -16,8 +16,10 @@ import {
   CompanyNeedForm,
   type CompanyNeedFormLabels,
 } from "@/components/app/company-need-form";
-import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
-import { READINESS_COUNTRIES } from "@/lib/country-readiness/types";
+import {
+  buildWorkCategoryOptions,
+  MARKET_COUNTRIES,
+} from "@/lib/taxonomy/work-categories";
 
 /**
  * Company need / vacancy page (Staffing Operating Model v1, PR4 UI / PR10).
@@ -33,6 +35,7 @@ export default async function CompanyNeedPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("companyNeed");
+  const tCountries = await getTranslations("labourMarket");
 
   const labels: CompanyNeedFormLabels = {
     title: t("title"),
@@ -93,12 +96,39 @@ export default async function CompanyNeedPage({
 
   const categories = buildWorkCategoryOptions(locale);
 
-  // Constrained country choice — the current target markets (same set as
-  // lib/country-readiness), localized display names from the catalog. No
-  // free-text ISO-code guessing, no big country-database dependency.
-  const countryOptions = READINESS_COUNTRIES.map((code) => ({
+  // ── THE MARKETS THIS FORM MAY NAME (owner readiness window, 2026-09-09) ──
+  //
+  // This list used to be `READINESS_COUNTRIES` — ten countries — under a
+  // comment claiming it was "the current target markets". It stopped being
+  // that on 2026-07-17, when GE/BE/FR/ES/AT/CH joined `ACTIVE_MARKETS`, and
+  // again in 2026-07 when US did. `READINESS_COUNTRIES` answers a DIFFERENT
+  // question: where researched, source-backed document/legal guidance exists
+  // (see its own docblock). A market and a curated-guidance country are not
+  // the same fact, and this select was answering the wrong one.
+  //
+  // The visible consequence, walked on production today: the landing's map
+  // band tells a visitor "the 17 markets LabourMarket.ai operates in today"
+  // and lists Belgium, France, Spain, Austria, Switzerland, Georgia and the
+  // United States by name. The employer door is the very next click, and a
+  // company in any of those seven could not say where it needs people. The
+  // landing claimed a capability the first real action could not reach —
+  // release-defect class §33.
+  //
+  // `MARKET_COUNTRIES` is the canonical set and its own docblock already
+  // names this exact use ("the allowed country set for structured demand
+  // intake"). The signed-in company workspace has read it all along, so this
+  // aligns the public door with the workspace behind it rather than
+  // inventing a third list. Display names come from the shared
+  // `labourMarket.countryNames` catalogue — which carries all 17 in every
+  // active locale — instead of `companyNeed.countries`, which carries only
+  // the ten and would have rendered raw keys for the rest.
+  //
+  // Nothing widens downstream: `customer_requests.country` is free text with
+  // no CHECK constraint, so this needs no migration, and this public form
+  // persists nothing at all (it prepares a draft — see the honest note).
+  const countryOptions = MARKET_COUNTRIES.map((code) => ({
     code,
-    label: t(`countries.${code}`),
+    label: tCountries(`countryNames.${code}`),
   }));
 
   return (

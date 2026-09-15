@@ -178,7 +178,15 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
   );
 
   return (
-    <section data-testid="public-entry" aria-label={t("label")} className="max-w-3xl">
+    // The entry claimed 768px of a 1904px viewport — 40% — leaving the wide
+    // desktop composition half empty (owner §4). It widens only from `xl`,
+    // where the room actually exists; below that the 3xl measure is what keeps
+    // the sentence readable, so narrow layouts are untouched.
+    <section
+      data-testid="public-entry"
+      aria-label={t("label")}
+      className="max-w-3xl xl:max-w-5xl"
+    >
       <Card className="flex flex-col gap-4">
         {/* ── The sentence ─────────────────────────────────────────────── */}
         <form
@@ -221,7 +229,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
               // synchronous (the router is pure and local), so there is no
               // pending state to invent.
               disabled={draft.trim().length === 0}
-              className="flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-brand-blue px-4 text-support font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t("submit")}
             </button>
@@ -276,7 +284,26 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                   setDraft(example);
                   ask(example);
                 }}
-                className="min-h-11 rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                // COMPACT WRAPPING, not fewer chips (owner correction,
+                // 2026-09-09). MEASURED on the built app: at 320px the ten
+                // chips took TEN rows and 494px — 68.6% of the viewport — and
+                // at 390px eight rows / 46.7%. The examples are meant to be
+                // secondary; they were the page.
+                //
+                // Capping each chip at half the row makes them wrap two-up
+                // below `sm` (5 rows instead of 10) while `truncate` absorbs
+                // the two long labels. Nothing is hidden and nothing is
+                // dropped: all ten still RENDER at every width, which is what
+                // both the §16 breadth requirement and
+                // tests/e2e/landing-mobile-overflow.spec.ts depend on — that
+                // spec asserts a non-null bounding box for every chip, so
+                // `display:none` progressive disclosure would fail it, and a
+                // horizontal scroll strip was already tried and reverted
+                // (#1607) for hiding eight of ten behind a gesture.
+                //
+                // The full sentence is still the accessible name and the
+                // tooltip, so truncation costs nothing to a screen reader.
+                className="min-h-11 max-w-[calc(50%-0.375rem)] truncate rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-champagne hover:text-brand-champagne sm:max-w-none"
               >
                 {t(`exampleLabels.${key}`)}
               </button>
@@ -293,7 +320,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             data-intent={reading?.kind === "recognised" ? reading.intent : `chip:${chosen}`}
             className="rounded-card border border-brand-blue/35 bg-ink-900/70 p-3.5"
           >
-            <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("understoodLabel")}
             </p>
             <p className="mt-1 text-meta text-text-muted">&bdquo;{sentence}&ldquo;</p>

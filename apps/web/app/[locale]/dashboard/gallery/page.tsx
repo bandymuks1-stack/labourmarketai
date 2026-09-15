@@ -38,7 +38,7 @@ export default async function PersonalGalleryPage({
       data-testid="personal-gallery"
     >
       <header className="flex flex-col gap-1">
-        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Images className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>

@@ -51,6 +51,23 @@ describe("W3 row 21 — the canonical work-card model carries MyZone's capabilit
     expect(result).toMatch(/WorkCardEditor/);
   });
 
+  it("ŠIANDIEN's one next action is the SAME model — readiness has one engine (IA 2026-09-13)", () => {
+    // MyZone's "readiness status + missing-item deep links" capability now
+    // also surfaces on the worker's home page, and it does so by lifting
+    // `deriveWorkCardState(...).next` — never by a third readiness rule.
+    const server = read("lib/today/today-server.ts");
+    expect(server).toMatch(/import \{ deriveWorkCardState[^}]*\} from "@\/lib\/worker\/work-card-state"/);
+    expect(server).toMatch(/deriveWorkCardState\(data\.signals, Date\.now\(\)\)/);
+    const model = read("lib/today/today-model.ts");
+    // An inline dimension (availability / location / pay) opens the editor's
+    // canonical home named above — the player-card result.
+    expect(model).toMatch(/WORK_CARD_EDITOR_HREF = "\/dashboard\?result=player-card"/);
+    expect(model).toMatch(/href: card\.next\.href \?\? WORK_CARD_EDITOR_HREF/);
+    // The "why it helps" line travels with the action — the surviving form
+    // of the "Kas ką gerina" explainer, here too.
+    expect(read("components/app/today/today-screen.tsx")).toMatch(/tCard\(next\.whyKey\)/);
+  });
+
   // The single-mount and explainer-single-consumer pins proved the deletion
   // was clean BEFORE Package 4 ran it; both are now facts of history, and
   // absence is owned by the deletion ratchet (w3-return-to-workspace).
