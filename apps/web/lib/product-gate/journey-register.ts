@@ -362,9 +362,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Alternatives are shown",
         capabilities: ["CAL-4", "DEM-5"],
-        link: "BROKEN",
+        link: "LIVE",
         because:
-          "Corrected 2026-09-14: both capabilities are PARTIAL and live, so \"not built at any layer\" was false. The gap timeline can say WHEN capacity is short and the matching engine can say WHO fits; nothing composes the two into \"try these dates, or this crew instead\". Detection reaches a warning and stops — the break is between the parts, not inside either.",
+          "Corrected again 2026-09-15, and the previous reason was HALF WRONG. It said nothing composes the two into \"try these dates, or this crew instead\". The CREW half was already composed and already rendered: `recommendActions` turns the capacity assessment into assign / transfer / form-a-brigade / engage-an-agency, and the planning zone shows the first as its one CTA with the rest as a quiet list. Only the DATES half was missing, and it is now closed: `alternativeWindows` returns the nearest buckets AFTER the risk date in which nothing is short. It is a filter over readings the timeline already computed — no forecast, nothing stored (SEP-1) — and it renders nothing when no window in the horizon is clear, because offering the least-bad period is advice to walk into a known shortfall. Guard: lib/guards/alternative-windows-are-a-suggestion.test.ts.",
       },
       {
         step: "The authorized actor decides, and an explicit override is recorded with a receipt",

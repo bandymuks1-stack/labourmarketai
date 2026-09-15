@@ -10328,7 +10328,9 @@
         "create_position": "Atidaryti poziciją patvirtintam poreikiui",
         "engage_staffing_agency": "Pasitelkti įdarbinimo agentūrą",
         "engage_partner": "Rasti išorės partnerį"
-      }
+      },
+      "altWindowsTitle": "Arba pabandykite šias datas",
+      "altWindowsNote": "Laikotarpiai šiame plane, kuriais šiuo metu nieko netrūksta. Tai pasiūlymas pagal šios dienos duomenis, ne prognozė."
     },
     "timeline": {
       "title": "Būsimi darbai",

@@ -634,6 +634,30 @@ export default async function CompanyWorkforcePlanningPage({
                 ? `${view.primaryAction.entryTitle} · ${t("action.optionalHint")}`
                 : t("action.optionalHint")}
             </p>
+            {/* "TRY THESE DATES" — the other half of an alternative. The crew
+                half has always been here (the CTA and the list above); the
+                timeline knew when capacity was short and nothing said when it
+                would not be. These are buckets the timeline ALREADY computed
+                in which nothing is short — a filter over present readings, so
+                it is a suggestion and never a forecast or a stored promise
+                (SEP-1). Nothing renders when no window in the horizon is
+                clear: offering the least-bad one is advice to walk into a
+                known shortfall. */}
+            {view.alternativeWindows.length > 0 ? (
+              <div className="flex flex-col gap-1 pt-1" data-testid="planning-zone-alternative-windows">
+                <p className="text-meta uppercase tracking-label text-text-muted">
+                  {t("action.altWindowsTitle")}
+                </p>
+                <ul className="flex flex-col gap-0.5 text-xs text-text-secondary">
+                  {view.alternativeWindows.map((w) => (
+                    <li key={w.bucketStart} data-testid="planning-zone-alternative-window">
+                      {fmtDay(w.bucketStart)} — {fmtDay(w.bucketEnd)}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-meta text-text-muted">{t("action.altWindowsNote")}</p>
+              </div>
+            ) : null}
             {view.secondaryActions.length > 0 ? (
               <div className="flex flex-col gap-1 pt-1">
                 <p className="text-meta uppercase tracking-label text-text-muted">

@@ -10328,7 +10328,9 @@
         "create_position": "Open a position for the confirmed need",
         "engage_staffing_agency": "Engage a staffing agency",
         "engage_partner": "Find an external partner"
-      }
+      },
+      "altWindowsTitle": "Or try these dates",
+      "altWindowsNote": "Periods in this plan where nothing is currently short. A suggestion from today's figures, not a forecast."
     },
     "timeline": {
       "title": "Upcoming work",

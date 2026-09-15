@@ -10328,7 +10328,9 @@
         "create_position": "Position für den bestätigten Bedarf eröffnen",
         "engage_staffing_agency": "Personalagentur einschalten",
         "engage_partner": "Externen Partner finden"
-      }
+      },
+      "altWindowsTitle": "Oder diese Zeiträume versuchen",
+      "altWindowsNote": "Zeiträume in diesem Plan, in denen derzeit nichts fehlt. Ein Vorschlag aus den heutigen Zahlen, keine Prognose."
     },
     "timeline": {
       "title": "Anstehende Arbeit",

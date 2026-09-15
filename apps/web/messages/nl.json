@@ -10328,7 +10328,9 @@
         "create_position": "Positie openen voor de bevestigde behoefte",
         "engage_staffing_agency": "Uitzendbureau inschakelen",
         "engage_partner": "Externe partner vinden"
-      }
+      },
+      "altWindowsTitle": "Of probeer deze data",
+      "altWindowsNote": "Periodes in dit plan waarin op dit moment niets tekortschiet. Een suggestie op basis van de cijfers van vandaag, geen voorspelling."
     },
     "timeline": {
       "title": "Aankomend werk",
