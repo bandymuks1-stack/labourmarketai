@@ -502,7 +502,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | PER-8 | Education records | `worker_education`, `education_types` | PROD_DATA | — | 2 | in-code comment still says DRAFT |
 | PER-9 | Achievements / declared certificates | `worker_achievements` | IMPL | — | 3 | `confirmed_by_manager` has no write path — permanently false |
 | PER-10 | Languages | `worker_languages` | PROD_DATA | — | 3 | no `verified` concept |
-| PER-11 | External profile links | `worker_external_profiles` | **DISCONNECTED** | — | 1 | **migration never applied**; UI ships an honest empty |
+| PER-11 | External profile links | `worker_external_profiles` | PARTIAL (0 rows) | W | 1 | split APPLIED 2026-09-15 by #1740 (ledger `20260915042406`); section live |
 | PER-12 | Privacy: consent, disclosure ledger, export, deletion | `privacy_consent_*`, `personal_data_disclosures` | PROD_DATA | — | 1 | GDPR export covers 6 relations; ~14 personal relations are missing from it |
 | PER-13 | Requirement ledger (what is missing for a role) | `lib/player-card/requirement-ledger` | PARTIAL | — | 2 | built for 3 contexts, mounted for 1 (`project`) |
 
@@ -518,7 +518,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | SKL-6 | ESCO taxonomy | 4 tables, 1,045,186 labels | IMPL | — | 2 | 0 of 161 platform skills carry an `esco_uri` — the bridge is inert |
 | SKL-7 | Documents / credential validity | `worker_documents`, `document_files` | IMPL | W (add only) | 1 | one download door, versioned, ack-bound |
 | SKL-8 | Country requirement matrix | `lib/country-readiness` (code), `country_document_requirements` (empty) | PARTIAL | — | 2 | no route of its own |
-| SKL-9 | **Qualification recognition / RPL / equivalence** | — | **MISSING** | — | 2 | nothing at any layer; keep in the architecture |
+| SKL-9 | **Qualification recognition / RPL / equivalence** | model: `lib/skills/recognition-model.ts`; record: `competency_recognitions` (PREPARED, unapplied) | ARCHITECTURE_ONLY (2026-09-15) | T | 2 | five SEP-6 states + independent-assessor rule modelled and tested; the record is owner-gated (`20260915140000`), dry-run proven on prod |
 | SKL-10 | Training & certification register | `training_programs`, `training_assignments` | IMPL (0 rows) | — | 2 | applied; writes nothing into the skill ladder, by decision |
 
 #### C. ORGANIZATION · WORKSPACE · AUTHORITY

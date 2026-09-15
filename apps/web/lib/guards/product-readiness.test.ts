@@ -2534,7 +2534,14 @@ describe("no migration files added by this sprint", () => {
     //   member assigned, idempotent, member sees the unit, outsider 0 and
     //   refused, end takes back only what the unit gave, anon refused.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
-const SPRINT_BASELINE = 286;
+    // Bumped 286 -> 287 for SKL-9 / ARCH-2
+    //   (20260915140000_competency_recognitions_v1, paired guarded rollback).
+    //   PREPARED FOR REVIEW ONLY, unannotated, unapplied, and LEGALLY
+    //   SIGNIFICANT (who may recognise prior learning). Dry-run on production
+    //   in a rolled-back transaction through ten authority stages; the
+    //   beneficiary rule and the self-recognition rule both refused.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
+const SPRINT_BASELINE = 287;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

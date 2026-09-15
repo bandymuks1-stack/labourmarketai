@@ -955,7 +955,11 @@ describe("NO new DB migration in this PR", () => {
     //   paired guarded rollback). Prepared for review only, unannotated,
     //   unapplied. Nothing in the market-map read layer is touched.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
-    expect(count).toBeLessThanOrEqual(286);
+    // 286 -> 287: SKL-9 (20260915140000_competency_recognitions_v1, paired
+    //   guarded rollback). Prepared for review only, unannotated, unapplied.
+    //   Nothing in the market-map read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
+    expect(count).toBeLessThanOrEqual(287);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
