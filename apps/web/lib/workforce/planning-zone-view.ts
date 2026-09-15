@@ -53,6 +53,8 @@ import {
   type GapRiskLevel,
   type RecommendedAction,
   type RecommendedActionType,
+  alternativeWindows,
+  type AlternativeWindow,
 } from "@/lib/workforce/gap-timeline";
 import type { WorkforceSources } from "@/lib/workforce/workforce";
 
@@ -186,6 +188,12 @@ export interface PlanningZoneView {
   readonly primaryAction: ZoneAction | null;
   /** Remaining recommendations, deduplicated by kind — quiet text list. */
   readonly secondaryActions: readonly ZoneAction[];
+  /** "Try these dates" — the nearest already-computed buckets after the risk
+   *  date in which nothing is short. A filter over present readings, never a
+   *  forecast and never stored (SEP-1). Empty when nothing in the horizon is
+   *  clear, because offering the least-bad window is advice to walk into a
+   *  known shortfall. */
+  readonly alternativeWindows: readonly AlternativeWindow[];
   readonly notes: readonly PlanningZoneNoteId[];
 }
 
@@ -544,6 +552,7 @@ export function buildPlanningZoneView(
     },
     primaryAction,
     secondaryActions,
+    alternativeWindows: alternativeWindows(timeline, timeline.riskDate),
     notes: collectNotes(input.sources),
   };
 }

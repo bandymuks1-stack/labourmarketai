@@ -18,6 +18,7 @@ import {
 } from "@/lib/projects/stages-model";
 import type { LearnedStageDurations } from "@/lib/projects/learned-stage-duration";
 import { durationKey, type LearnedDuration } from "@/lib/workforce/learned-duration";
+import { addDays } from "@/lib/planning/planning-model";
 
 /**
  * Project stages panel (Wagon 6 — Project Operations Core, slice 1) on the
@@ -216,6 +217,32 @@ export function ProjectStagesPanel({
   const [plannedEnd, setPlannedEnd] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
 
+  /**
+   * CARRYING THE READING FORWARD, WITHOUT IT BECOMING A RECORD (SEP-1).
+   *
+   * The learned durations were already READ and already shown beside each
+   * stage — what comparable finished stages actually took. Nothing carried
+   * that to the moment a planner types the NEXT stage, so the loop stopped at
+   * observation.
+   *
+   * This suggests an end date and DOES NOT FILL ONE IN. Prefilling would store
+   * a forecast as a plan the instant they saved, and the plan is a commitment
+   * the organization is held to. The planner clicks, or ignores it: what ends
+   * up in the record is their decision, and the median that informed it stays
+   * a reading.
+   */
+  const suggestion = (() => {
+    const typed = name.trim();
+    if (typed.length === 0 || plannedStart === "") return null;
+    const reading = learnedFor(learned, typed);
+    if (!reading || reading.medianActualDays === null) return null;
+    // Inclusive day span: a 1-day stage starts and ends the same day.
+    return {
+      reading,
+      endDate: addDays(plannedStart, reading.medianActualDays - 1),
+    };
+  })();
+
   function report(m: string) {
     setMsg(m);
     router.refresh();
@@ -312,6 +339,28 @@ export function ProjectStagesPanel({
                 className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
                 data-testid="project-stage-planned-end"
               />
+              {suggestion ? (
+                <div
+                  className="flex flex-wrap items-center gap-2 text-meta text-text-muted"
+                  data-testid="project-stage-duration-suggestion"
+                >
+                  <span>
+                    {t("learned.suggest", {
+                      days: suggestion.reading.medianActualDays as number,
+                      observations: suggestion.reading.observations,
+                      date: suggestion.endDate,
+                    })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPlannedEnd(suggestion.endDate)}
+                    data-testid="project-stage-duration-suggestion-apply"
+                    className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    {t("learned.suggestApply")}
+                  </button>
+                </div>
+              ) : null}
               <Button
                 type="button"
                 size="sm"

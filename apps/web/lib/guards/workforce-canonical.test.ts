@@ -40,6 +40,13 @@ const PURE_MODULES = [
   // authorized reads it is fed live in lib/planning, not here, so no new
   // table or data path enters the workforce layer.
   "commitment-reservation.ts",
+  // B1 (owner-approved 2026-09-15): brigade -> members -> per-member verdict.
+  // Pure on the same contract — it IMPORTS the CAL-7 ReservationVerdict rather
+  // than restating an overlap rule, defines no brigade entity (a brigade stays
+  // an organizations row with organization_type='team'), and cannot write.
+  // Its server composition lives in lib/planning/brigade-plan.ts, beside
+  // worker-reservation.ts, so this directory keeps exactly ONE server service.
+  "brigade-assignment.ts",
   // CAL-10 (owner-approved 2026-09-14): the ONE learned-duration reading.
   // Pure, and deliberately storeless — a forecast may never be persisted as
   // a fact (SEP-1), so the reading is derived from finished project_stages

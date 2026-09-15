@@ -588,7 +588,9 @@
     "learned": {
       "median": "Comparable finished stages took {days} days (median of {count})",
       "vsPlan": "planned {days}",
-      "unavailable": "Past-duration comparison could not be read just now."
+      "unavailable": "Past-duration comparison could not be read just now.",
+      "suggest": "Comparable stages took {days} days ({observations} observed) — that would end {date}.",
+      "suggestApply": "Use this date"
     }
   },
   "activityCentre": {
@@ -7546,6 +7548,11 @@
       "saved": "Saved. The list above is updated.",
       "invalid": "Please check the fields — something is not valid.",
       "errorMsg": "Could not save right now. Try again shortly."
+    },
+    "unmatchable": {
+      "heading": "Also required — we cannot check these for you",
+      "note": "These requirements apply and are sourced, but they are conditions rather than documents, so nothing in your file can confirm them. Check with the competent authority.",
+      "state": "Not checked"
     }
   },
   "documentCentre": {
@@ -10323,7 +10330,9 @@
         "create_position": "Open a position for the confirmed need",
         "engage_staffing_agency": "Engage a staffing agency",
         "engage_partner": "Find an external partner"
-      }
+      },
+      "altWindowsTitle": "Or try these dates",
+      "altWindowsNote": "Periods in this plan where nothing is currently short. A suggestion from today's figures, not a forecast."
     },
     "timeline": {
       "title": "Upcoming work",

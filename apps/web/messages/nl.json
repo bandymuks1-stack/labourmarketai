@@ -588,7 +588,9 @@
     "learned": {
       "median": "Vergelijkbare afgeronde fasen duurden {days} dagen (mediaan van {count})",
       "vsPlan": "gepland {days}",
-      "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen."
+      "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen.",
+      "suggest": "Vergelijkbare fasen duurden {days} dagen ({observations} waargenomen) — dat zou eindigen op {date}.",
+      "suggestApply": "Deze datum gebruiken"
     }
   },
   "activityCentre": {
@@ -7546,6 +7548,11 @@
       "saved": "Opgeslagen. De lijst hierboven is bijgewerkt.",
       "invalid": "Controleer de velden — er klopt iets niet.",
       "errorMsg": "Opslaan lukt nu niet. Probeer het zo opnieuw."
+    },
+    "unmatchable": {
+      "heading": "Ook vereist — dit kunnen wij niet voor u controleren",
+      "note": "Deze eisen gelden en zijn onderbouwd, maar het zijn voorwaarden en geen documenten; in uw dossier valt niets te controleren. Vraag na bij de bevoegde instantie.",
+      "state": "Niet gecontroleerd"
     }
   },
   "documentCentre": {
@@ -10323,7 +10330,9 @@
         "create_position": "Positie openen voor de bevestigde behoefte",
         "engage_staffing_agency": "Uitzendbureau inschakelen",
         "engage_partner": "Externe partner vinden"
-      }
+      },
+      "altWindowsTitle": "Of probeer deze data",
+      "altWindowsNote": "Periodes in dit plan waarin op dit moment niets tekortschiet. Een suggestie op basis van de cijfers van vandaag, geen voorspelling."
     },
     "timeline": {
       "title": "Aankomend werk",
