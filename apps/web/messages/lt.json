@@ -7546,6 +7546,11 @@
       "saved": "Išsaugota. Sąrašas viršuje atnaujintas.",
       "invalid": "Patikrinkite laukus — kažkas netinka.",
       "errorMsg": "Šiuo metu išsaugoti nepavyko. Pabandykite netrukus."
+    },
+    "unmatchable": {
+      "heading": "Taip pat privaloma — to patikrinti už jus negalime",
+      "note": "Šie reikalavimai galioja ir turi šaltinį, bet tai sąlygos, o ne dokumentai, todėl jūsų byloje nėra ko patikrinti. Pasitikslinkite kompetentingoje institucijoje.",
+      "state": "Nepatikrinta"
     }
   },
   "documentCentre": {

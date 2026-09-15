@@ -11,6 +11,7 @@ import {
   computeCountryReadiness,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
+import { unmatchableRequirementRows } from "@/lib/country-readiness/requirement-rows";
 import {
   getOrgDocumentCentre,
   getWorkerDocumentCentre,
@@ -198,6 +199,10 @@ export default async function WorkerDocumentsPage({
   const t = await getTranslations("documents");
   const tc = await getTranslations("documentCentre");
   const tf = await getTranslations("documentFiles");
+  // Reused, not duplicated: the requirement explanations already live in
+  // the countryReadiness namespace, keyed by the requirement's own
+  // explanationKey, in every locale that has the matrix.
+  const tcr = await getTranslations("countryReadiness");
 
   // Role branch (page-level active_role read, the overview's pattern): org
   // sessions get the consent-gated aggregate view — a worker document row
@@ -789,6 +794,70 @@ export default async function WorkerDocumentsPage({
                     <p className="text-meta text-text-muted">
                       {t("scopeNote")}
                     </p>
+
+                    {/* REQUIREMENTS THAT APPLY AND CANNOT BE CHECKED FROM
+                        DOCUMENTS. `matrixRequirementRows` keys on a document
+                        type and filters everything else out — correct for the
+                        join, wrong as a picture of the law: three of eleven
+                        curated archetypes carry no document slug and were
+                        invisible on every surface. "We cannot check this" was
+                        rendering as "this does not exist" (SEP-7). They are
+                        shown here as UNKNOWN, with their source, and never
+                        folded into the status above — this list changes no
+                        count and no overall verdict. */}
+                    {(() => {
+                      const unmatchable = unmatchableRequirementRows(
+                        country,
+                        "worker_posted",
+                      );
+                      if (unmatchable.length === 0) return null;
+                      return (
+                        <div
+                          className="flex flex-col gap-2 rounded-md border border-dashed border-ink-500 p-3"
+                          data-testid="documents-unmatchable-requirements"
+                        >
+                          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                            {t("unmatchable.heading")}
+                          </p>
+                          <p className="text-meta text-text-muted">
+                            {t("unmatchable.note")}
+                          </p>
+                          <ul className="flex flex-col gap-1.5">
+                            {unmatchable.map((r) => (
+                              <li
+                                key={r.requirementKey}
+                                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 px-2 py-1.5"
+                                data-testid="documents-unmatchable-row"
+                              >
+                                <span className="text-sm text-text-primary">
+                                  {tcr(`explanation.${r.explanationKey}` as never)}
+                                  <span className="ml-2 font-mono text-meta uppercase tracking-label text-text-muted">
+                                    {t(`requirement.${r.requirementLevel}` as never)}
+                                  </span>
+                                  {r.confidence === "needs_legal_review" ||
+                                  r.sourceStatus === "needs_legal_source" ? (
+                                    <span className="ml-2 font-mono text-meta uppercase tracking-label text-state-warning">
+                                      {t("needsLegalReview")}
+                                    </span>
+                                  ) : null}
+                                  <a
+                                    href={r.sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="ml-2 font-mono text-meta uppercase tracking-label text-brand-blue underline"
+                                  >
+                                    {t("sourceLink")}
+                                  </a>
+                                </span>
+                                <span className="rounded-sm border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
+                                  {t("unmatchable.state")}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
                     {readiness.nextActionSlug ? (
                       <p
                         className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"

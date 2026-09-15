@@ -7546,6 +7546,11 @@
       "saved": "Opgeslagen. De lijst hierboven is bijgewerkt.",
       "invalid": "Controleer de velden — er klopt iets niet.",
       "errorMsg": "Opslaan lukt nu niet. Probeer het zo opnieuw."
+    },
+    "unmatchable": {
+      "heading": "Ook vereist — dit kunnen wij niet voor u controleren",
+      "note": "Deze eisen gelden en zijn onderbouwd, maar het zijn voorwaarden en geen documenten; in uw dossier valt niets te controleren. Vraag na bij de bevoegde instantie.",
+      "state": "Niet gecontroleerd"
     }
   },
   "documentCentre": {

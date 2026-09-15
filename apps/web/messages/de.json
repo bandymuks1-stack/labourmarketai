@@ -7546,6 +7546,11 @@
       "saved": "Gespeichert. Die Liste oben ist aktualisiert.",
       "invalid": "Bitte prüfen Sie die Felder — etwas ist ungültig.",
       "errorMsg": "Speichern gerade nicht möglich. Bitte gleich erneut versuchen."
+    },
+    "unmatchable": {
+      "heading": "Ebenfalls erforderlich — für Sie nicht prüfbar",
+      "note": "Diese Anforderungen gelten und sind belegt, sind aber Bedingungen und keine Dokumente; in Ihrer Akte lässt sich nichts dazu prüfen. Klären Sie dies mit der zuständigen Behörde.",
+      "state": "Nicht geprüft"
     }
   },
   "documentCentre": {
