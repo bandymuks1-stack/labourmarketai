@@ -589,6 +589,16 @@
       "median": "Comparable finished stages took {days} days (median of {count})",
       "vsPlan": "planned {days}",
       "unavailable": "Past-duration comparison could not be read just now."
+    },
+    "forecast": {
+      "withEnd": "Forecast: {days, plural, one {# day} other {# days}} → ends {end} (from {count} finished stages of this name)",
+      "daysOnly": "Forecast: {days, plural, one {# day} other {# days}} (from {count} finished stages of this name) — set a start to see the end date",
+      "confidence": {
+        "indicative": "indicative",
+        "established": "established"
+      },
+      "label": "a forecast, not a plan — nothing is saved until you set the dates",
+      "adopt": "Use as planned end"
     }
   },
   "activityCentre": {
@@ -5890,6 +5900,14 @@
           "trip": "Business trip",
           "absence": "Unavailable"
         }
+      },
+      "alternatives": {
+        "title": "What you could do instead",
+        "dates": "Same person, other dates",
+        "crew": "Someone else, same dates",
+        "none": "No free window within a year and nobody on the roster is confirmed free for these dates.",
+        "unconfirmed": "not confirmed free",
+        "notStored": "These are proposals from the commitments as they stand, not a plan. Nothing is saved until you change the project or the assignment."
       }
     },
     "model": {

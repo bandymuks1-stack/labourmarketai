@@ -264,9 +264,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Learners join the cohort",
         capabilities: ["EDU-2"],
-        link: "BROKEN",
-        because:
-          "Production holds zero cohort members. Programme and cohort exist and no human has ever put a person into one — the vertical is architecture, and calling it release-ready would be false.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_PERSISTENCE_PROVEN (rolled back) — 2026-09-15. This step was BROKEN for 'zero cohort members', and zero rows is adoption, not a broken chain: the honest question is whether the EDGE works, and it was never walked. Walked on production under the real institution manager's auth in ONE transaction (`scripts/db-proof/b4-learner-joins-cohort.sql`): an outsider calling `set_education_cohort_member_v1` was refused `42501 not_manager`; the manager assigning a person NOT linked as a student was refused `42501 not_a_linked_learner`; the manager assigning the linked student succeeded, and the row read back as 1 under the manager's RLS AND as 1 under the student's own RLS, while an outsider read 0; marking `left` set `left_at`. Then rolled back — `education_cohort_members` re-counted at 0, cohorts 1, programmes 1. Every layer above the RPC is mounted: `AssignLearnerForm` → `setCohortMemberAction` → the RPC, on `/dashboard/company` behind the `training_provider` capability, and the assignable list is drawn from accepted `student` invitations (1 in production). What is still weak, and LIVE does not claim otherwise: no human has pressed the button. HUMAN_UI_PROVEN = NO; EDU-2 stays PARTIAL on volume.",
       },
       {
         step: "A learner's practice is recorded as real work on their own profile",
@@ -362,9 +362,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Alternatives are shown",
         capabilities: ["CAL-4", "DEM-5"],
-        link: "BROKEN",
-        because:
-          "Corrected 2026-09-14: both capabilities are PARTIAL and live, so \"not built at any layer\" was false. The gap timeline can say WHEN capacity is short and the matching engine can say WHO fits; nothing composes the two into \"try these dates, or this crew instead\". Detection reaches a warning and stops — the break is between the parts, not inside either.",
+        link: "LIVE",
+        proof:
+          "TEST_PROVEN — 2026-09-15. The composition that was missing exists: `lib/workforce/commitment-alternatives.ts` (pure) proposes, for a KNOWN clash, the nearest free window of the SAME length for the same person in each direction (bounded to a year, never before today) and anyone on the roster whose own verdict for the same window is clear; `lib/planning/assignment-alternatives.ts` reads the whole roster's commitments ONCE through the existing employer readers and derives every candidate's verdict from that one result. It renders where the warning already renders — under the CAL-7 notice on the assignment form — after the write, never able to fail it. Three honesties are structural: a proposal under an `unknown` verdict is `not_applicable` (no dates proposed around commitments that could not be read); a window that overlaps no DATED commitment while an undated one exists is `unconfirmed`, and so is a candidate whose reads did not answer; and `none` (searched, found nothing) is distinct from `not_applicable` (did not search). Nothing is stored — a date the manager adopts becomes the plan by their act (SEP-1), and the clash they were warned about remains theirs to accept (SEP-2). Fifteen unit tests; no human has seen it. HUMAN_UI_PROVEN = NO.",
       },
       {
         step: "The authorized actor decides, and an explicit override is recorded with a receipt",
@@ -383,9 +383,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Learned durations improve the next forecast — labelled as forecast",
         capabilities: ["CAL-10", "CAL-9"],
-        link: "BROKEN",
-        because:
-          "Corrected 2026-09-14: the step above is now LIVE, so \"the learning loop needs the step above first\" no longer holds. What a planner sees today is the READING — what comparable finished stages took, with its observation count and date span, beside the plan. What does not exist is anything that carries it FORWARD: no suggested dates, no prefilled band, no forecast object. That absence is deliberate rather than pending — a forecast may never be stored where a fact is read (SEP-1) — so closing this step means designing where a suggestion lives without it hardening into a record.",
+        link: "LIVE",
+        proof:
+          "TEST_PROVEN — 2026-09-15. The question the previous reason left open — where a suggestion lives without hardening into a record — is answered: NOWHERE. `lib/workforce/duration-forecast.ts` derives a forecast at render from the SAME learned readings CAL-10 shows (the median, its observation count, its date span, its source rows), dates it from the planned start being typed, and the stages panel offers it as a prefill with a one-line label that says it is a forecast and that nothing is saved until the dates are set. Adopting it writes `planned_end` — a PLAN, by the planner's act. No column, no row, no cache holds the forecast; FACT (actual dates) → DERIVED (median) → FORECAST (this value) and only the first is stored (SEP-1). Below three observations there is no forecast at all, not a rough one. Production holds 0 finished stages with actuals, so a walk today sees no forecast — empty evidence, not a broken chain. Seven unit tests; HUMAN_UI_PROVEN = NO.",
       },
     ],
   },

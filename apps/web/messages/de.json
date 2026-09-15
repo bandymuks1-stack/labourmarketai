@@ -589,6 +589,16 @@
       "median": "Vergleichbare abgeschlossene Phasen dauerten {days} Tage (Median aus {count})",
       "vsPlan": "geplant {days}",
       "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden."
+    },
+    "forecast": {
+      "withEnd": "Prognose: {days, plural, one {# Tag} other {# Tage}} → Ende {end} (aus {count} abgeschlossenen Phasen dieses Namens)",
+      "daysOnly": "Prognose: {days, plural, one {# Tag} other {# Tage}} (aus {count} abgeschlossenen Phasen dieses Namens) — Start setzen, um das Enddatum zu sehen",
+      "confidence": {
+        "indicative": "richtungsweisend",
+        "established": "gefestigt"
+      },
+      "label": "eine Prognose, kein Plan — nichts wird gespeichert, bis Sie die Termine setzen",
+      "adopt": "Als geplantes Ende übernehmen"
     }
   },
   "activityCentre": {
@@ -5890,6 +5900,14 @@
           "trip": "Dienstreise",
           "absence": "Nicht verfügbar"
         }
+      },
+      "alternatives": {
+        "title": "Was Sie stattdessen tun könnten",
+        "dates": "Dieselbe Person, andere Termine",
+        "crew": "Jemand anderes, dieselben Termine",
+        "none": "Innerhalb eines Jahres kein freies Fenster, und niemand aus der Liste ist für diese Termine bestätigt frei.",
+        "unconfirmed": "nicht bestätigt frei",
+        "notStored": "Das sind Vorschläge aus den aktuellen Verpflichtungen, kein Plan. Nichts wird gespeichert, bis Sie das Projekt oder die Zuweisung ändern."
       }
     },
     "model": {

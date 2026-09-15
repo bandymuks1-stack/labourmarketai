@@ -177,6 +177,12 @@ export default async function ProjectsPage({
       trip: t("assign.reservation.source.trip"),
       absence: t("assign.reservation.source.absence"),
     },
+    alternativesTitle: t("assign.alternatives.title"),
+    alternativesDates: t("assign.alternatives.dates"),
+    alternativesCrew: t("assign.alternatives.crew"),
+    alternativesNone: t("assign.alternatives.none"),
+    alternativesUnconfirmed: t("assign.alternatives.unconfirmed"),
+    alternativesNotStored: t("assign.alternatives.notStored"),
   };
 
   return (

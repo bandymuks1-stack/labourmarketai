@@ -589,6 +589,16 @@
       "median": "Panašios baigtos stadijos truko {days} d. (mediana iš {count})",
       "vsPlan": "planuota {days}",
       "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių."
+    },
+    "forecast": {
+      "withEnd": "Prognozė: {days, plural, one {# diena} few {# dienos} many {# dienos} other {# dienų}} → baigtųsi {end} (pagal {count} užbaigtus šio pavadinimo etapus)",
+      "daysOnly": "Prognozė: {days, plural, one {# diena} few {# dienos} many {# dienos} other {# dienų}} (pagal {count} užbaigtus šio pavadinimo etapus) — nurodykite pradžią, kad matytumėte pabaigos datą",
+      "confidence": {
+        "indicative": "orientacinė",
+        "established": "nusistovėjusi"
+      },
+      "label": "tai prognozė, ne planas — niekas neišsaugoma, kol nenustatysite datų",
+      "adopt": "Naudoti kaip planuojamą pabaigą"
     }
   },
   "activityCentre": {
@@ -5890,6 +5900,14 @@
           "trip": "Komandiruotė",
           "absence": "Nepasiekiama"
         }
+      },
+      "alternatives": {
+        "title": "Ką galėtumėte daryti vietoj to",
+        "dates": "Tas pats žmogus, kitos datos",
+        "crew": "Kitas žmogus, tos pačios datos",
+        "none": "Per metus nėra laisvo lango ir niekas sąraše nėra patvirtintai laisvas šiomis datomis.",
+        "unconfirmed": "nepatvirtinta, kad laisva",
+        "notStored": "Tai pasiūlymai pagal dabartinius įsipareigojimus, ne planas. Niekas neišsaugoma, kol nepakeisite projekto ar priskyrimo."
       }
     },
     "model": {

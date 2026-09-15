@@ -589,6 +589,16 @@
       "median": "Vergelijkbare afgeronde fasen duurden {days} dagen (mediaan van {count})",
       "vsPlan": "gepland {days}",
       "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen."
+    },
+    "forecast": {
+      "withEnd": "Prognose: {days, plural, one {# dag} other {# dagen}} → eindigt {end} (uit {count} afgeronde fasen met deze naam)",
+      "daysOnly": "Prognose: {days, plural, one {# dag} other {# dagen}} (uit {count} afgeronde fasen met deze naam) — stel een start in om de einddatum te zien",
+      "confidence": {
+        "indicative": "indicatief",
+        "established": "gevestigd"
+      },
+      "label": "een prognose, geen plan — er wordt niets opgeslagen tot u de data instelt",
+      "adopt": "Gebruiken als gepland einde"
     }
   },
   "activityCentre": {
@@ -5890,6 +5900,14 @@
           "trip": "Dienstreis",
           "absence": "Niet beschikbaar"
         }
+      },
+      "alternatives": {
+        "title": "Wat u in plaats daarvan zou kunnen doen",
+        "dates": "Dezelfde persoon, andere data",
+        "crew": "Iemand anders, dezelfde data",
+        "none": "Geen vrij venster binnen een jaar en niemand op de lijst is bevestigd vrij op deze data.",
+        "unconfirmed": "niet bevestigd vrij",
+        "notStored": "Dit zijn voorstellen op basis van de huidige verplichtingen, geen plan. Er wordt niets opgeslagen tot u het project of de toewijzing wijzigt."
       }
     },
     "model": {

@@ -15,6 +15,7 @@ import type {
   ReservationSource,
   ReservationVerdict,
 } from "@/lib/workforce/commitment-reservation";
+import type { AlternativesProposal } from "@/lib/workforce/commitment-alternatives";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -70,6 +71,14 @@ export interface ProjectManagerLabels {
   reservationNotBlocking: string;
   reservationUnknown: string;
   reservationSource: Record<ReservationSource, string>;
+  /** J-TIME-FREEDOM step 4 — feasible alternatives, shown beside the clash.
+   *  Proposed, never imposed: the assignment already happened. */
+  alternativesTitle: string;
+  alternativesDates: string;
+  alternativesCrew: string;
+  alternativesNone: string;
+  alternativesUnconfirmed: string;
+  alternativesNotStored: string;
 }
 
 type ProjectWithAssignments = ManagedProject & {
@@ -114,11 +123,81 @@ function resultError(r: ProjectActionResult | null, l: ProjectManagerLabels) {
  * An absence carries no label by construction — the employer read never asks
  * for the reason, and nothing here invents one.
  */
+/**
+ * Step 4 — what the manager could do instead. Rendered ONLY under a
+ * `collides` verdict (the proposal itself is `not_applicable` otherwise).
+ *
+ * Every line is an offer. A date window is a shift of the SAME LENGTH for
+ * the same person; a crew line is someone on the roster whose own verdict
+ * for these dates is clear. `unconfirmed` marks a proposal that overlaps no
+ * DATED commitment while an undated one exists, or a candidate whose reads
+ * did not answer — offered, and honestly labelled (SEP-7). Nothing here is
+ * stored: adopt a date and it becomes the plan by the manager's act (SEP-1).
+ */
+function AlternativesNotice({
+  proposal,
+  labels,
+}: {
+  proposal: AlternativesProposal;
+  labels: ProjectManagerLabels;
+}) {
+  if (proposal.status === "not_applicable") return null;
+  return (
+    <div className="flex flex-col gap-1 pt-1" data-testid="assign-alternatives">
+      <p className="text-xs font-semibold text-text-secondary">{labels.alternativesTitle}</p>
+      {proposal.status === "none" ? (
+        <p className="text-xs text-text-muted" data-testid="assign-alternatives-none">
+          {labels.alternativesNone}
+        </p>
+      ) : (
+        <>
+          {proposal.dates.length > 0 ? (
+            <ul className="flex flex-col gap-0.5" data-testid="assign-alternatives-dates">
+              {proposal.dates.map((d) => (
+                <li key={d.startDate} className="text-xs text-text-secondary">
+                  <span className="font-mono uppercase tracking-label text-text-muted">
+                    {labels.alternativesDates}
+                  </span>{" "}
+                  {d.startDate === d.endDate ? d.startDate : `${d.startDate} – ${d.endDate}`}{" "}
+                  <span className="text-text-muted">
+                    ({d.shiftDays > 0 ? `+${d.shiftDays}` : d.shiftDays})
+                  </span>
+                  {d.confidence === "unconfirmed" ? (
+                    <span className="text-text-muted"> · {labels.alternativesUnconfirmed}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {proposal.crew.length > 0 ? (
+            <ul className="flex flex-col gap-0.5" data-testid="assign-alternatives-crew">
+              {proposal.crew.map((c) => (
+                <li key={c.workerId} className="text-xs text-text-secondary">
+                  <span className="font-mono uppercase tracking-label text-text-muted">
+                    {labels.alternativesCrew}
+                  </span>{" "}
+                  {c.name}
+                  {c.confidence === "unconfirmed" ? (
+                    <span className="text-text-muted"> · {labels.alternativesUnconfirmed}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </>
+      )}
+      <p className="text-xs text-text-muted">{labels.alternativesNotStored}</p>
+    </div>
+  );
+}
+
 function ReservationNotice({
   verdict,
+  alternatives,
   labels,
 }: {
   verdict: ReservationVerdict;
+  alternatives?: AlternativesProposal;
   labels: ProjectManagerLabels;
 }) {
   if (verdict.state === "clear") return null;
@@ -148,6 +227,7 @@ function ReservationNotice({
         ))}
       </ul>
       <p className="text-xs text-text-muted">{labels.reservationNotBlocking}</p>
+      {alternatives ? <AlternativesNotice proposal={alternatives} labels={labels} /> : null}
     </div>
   );
 }
@@ -257,7 +337,11 @@ export function ProjectAssignmentManager({
             {resultError(assignState, labels)}
           </div>
           {assignState?.ok && assignState.reservation ? (
-            <ReservationNotice verdict={assignState.reservation} labels={labels} />
+            <ReservationNotice
+              verdict={assignState.reservation}
+              alternatives={assignState.alternatives}
+              labels={labels}
+            />
           ) : null}
         </form>
       )}
