@@ -547,8 +547,8 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "PRODUCTION_RPC_PROVEN",
     anchors: ["lib/company"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/company/active-organization.ts",
+    surfaces: ["app/[locale]/dashboard/company"],
     note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers.",
   },
   {
@@ -1183,8 +1183,8 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/agreements"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/agreements/agreements.ts",
+    surfaces: ["app/[locale]/dashboard/commercial"],
     note: "Three stores, 0 rows; `contracts` is legacy of `agreements` (debt).",
   },
   {
@@ -1234,10 +1234,10 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     status: "ARCHITECTURE_ONLY",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/lmc"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/lmc/lmc-account.ts",
+    surfaces: ["app/[locale]/dashboard/account"],
     deferredByDesign: true,
-    note: "Five tables and sixteen RPCs live; all six flags are false in code AND in the database. Spend has no reversal — that is the recorded blocker.",
+    note: "Corrected 2026-09-15: SEVEN lmc_* tables are live in production (lmc_accounts, lmc_account_balances, lmc_lots, lmc_lot_balances, lmc_lot_consumptions, lmc_transactions, lmc_settings), not five — re-counted from information_schema, and the note had drifted. Sixteen RPCs live; all six flags remain false in code AND in the database. Spend has no reversal — that is the recorded blocker, and it is why this stays ARCHITECTURE_ONLY + deferredByDesign even though the machinery exists: the capability is deliberately unarmed, not unbuilt. Arming it is MKT-7, an owner decision (two independent owner acts). The row now names `lib/lmc/lmc-account.ts` and `/dashboard/account`, where LmcBalanceSection renders the disabled state — so the claim is checkable rather than merely asserted. Naming them does not arm anything.",
   },
 ];
 
@@ -1289,8 +1289,8 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/notifications"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/notifications/weekly-digest-emitter.ts",
+    surfaces: ["app/[locale]/dashboard/activity"],
     note:
       "PROMOTED 2026-09-08 from TEST_PROVEN on real evidence, not on a green suite: the cron actually ran and PERSISTED, writing 4 weekly_digest rows to notification_events at 07:09 and 07:28 UTC - the first digests this product has ever stored. Until that morning it could not: it returned HTTP 503 because service_role could read neither journal_entries nor workers to find a recipient. The only cron in the product. Still PARTIAL because DELIVERY is not persistence - the email channel remains inert with no provider configured, so a digest is stored and readable in-product and reaches nobody by mail.",
   },
@@ -1583,8 +1583,8 @@ const PLATFORM: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "HUMAN_UI_PROVEN",
     anchors: ["lib/i18n", "messages"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/i18n/config.ts",
+    surfaces: ["components/layouts"],
     note: "Eleven locales, five active; the inactive five carry large [EN] blocks and are not ratchet-tracked. A missing key renders as the key itself — only a walk sees it.",
   },
   {

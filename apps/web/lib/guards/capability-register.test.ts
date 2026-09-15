@@ -309,6 +309,36 @@ describe("a capability nobody can reach is not a capability a user has", () => {
     }
   });
 
+  it("NO row may name neither a module nor a surface — the escape itself", () => {
+    // The general form of the WRK-8 defect, closed for every status rather
+    // than only for disconnection claims.
+    //
+    // Every reachability check in this file is conditional on the row naming
+    // something: `coreModule === null` skips the import-graph checks, and
+    // `surfaces: []` skips the navigability checks. A row that names NEITHER
+    // is therefore unverifiable in both directions at once — it can claim to
+    // be live, or claim to be unreachable, and nothing here can contradict
+    // either. That is not a gap in the data; it is a hole in the guard's own
+    // coverage, and it is how WRK-8 survived for months.
+    //
+    // Ten rows had this shape on 2026-09-15: five carrying a disconnection
+    // claim (WRK-9, WRK-10, MKT-5, MKT-6, EDU-5) and five carrying a LIVE
+    // claim with nothing to check it against (ORG-5, MKT-4, MKT-8, COM-4,
+    // GOV-5). All ten now name a real module and, where one exists, a real
+    // surface — and every one of them PASSES the checks it used to skip.
+    //
+    // MISSING is exempt by design: it must carry nothing, and that is what
+    // makes IT checkable. `internal` is exempt because its user is CI, not a
+    // person, so there is no surface to name.
+    for (const row of CAPABILITY_REGISTER) {
+      if (row.status === "MISSING" || row.internal) continue;
+      expect(
+        row.coreModule !== null || row.surfaces.length > 0,
+        `${describeRow(row)} names NEITHER a module NOR a surface, so every reachability check in this file skips it and no evidence can contradict whatever it claims. Name the module a human path must import, or the surface they open.`,
+      ).toBe(true);
+    }
+  });
+
   it("a disconnection claim must name something a test can check", () => {
     // THE WRK-8 DEFECT, made structurally impossible.
     //
