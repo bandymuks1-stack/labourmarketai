@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import { prepareConfirmationAction, dispatchWorkerAction } from "@/lib/conversation/dispatch";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -43,9 +44,23 @@ export type BookingActionLabels = {
 
 type Phase =
   | { kind: "idle" }
-  | { kind: "confirm"; decision: "accepted" | "declined"; token: string }
-  | { kind: "done"; status: "accepted" | "declined" }
-  /** W12 Slice 1: a REAL date conflict — terminal, never a retryable error. */
+  | {
+      kind: "confirm";
+      decision: "accepted" | "declined";
+      token: string;
+      /** RED #5 — this confirmation is for an ACKNOWLEDGED overlap. The token
+       *  was minted for exactly this input, so it cannot be reused for the
+       *  plain accept, nor the plain accept's token for this. */
+      acknowledgeClash: boolean;
+    }
+  | {
+      kind: "done";
+      status: "accepted" | "declined";
+      /** How many already-accepted bookings this knowingly overlapped. */
+      acknowledgedClashes?: number | null;
+    }
+  /** A REAL date clash. Terminal for the PLAIN accept; the person may still
+   *  take one separate, explicit decision below (RED #5). */
   | { kind: "conflict" }
   | { kind: "error"; message: string };
 
@@ -70,31 +85,45 @@ export function WorkerBookingAction({
   labels: BookingActionLabels;
 }) {
   const router = useRouter();
+  // RED #5 — the SAME `bookings.clash.*` catalogue the bookings list uses,
+  // already shipped in all 11 locales: one wording, two surfaces, nothing to
+  // drift. Resolved HERE rather than threaded through `labels` because the
+  // acknowledged line interpolates a COUNT the server cannot know — a label
+  // baked at render time would have had to guess it, and guessing "1" would
+  // misreport a two-booking overlap.
+  const tClash = useTranslations("bookings.clash");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [pending, start] = useTransition();
 
-  function beginConfirm(decision: "accepted" | "declined") {
+  function beginConfirm(
+    decision: "accepted" | "declined",
+    /** RED #5 — set ONLY by the explicit control in the conflict branch. */
+    acknowledgeClash = false,
+  ) {
     setPhase({ kind: "idle" });
     start(async () => {
       const prep = await prepareConfirmationAction("worker.respond-booking", {
         bookingId,
         decision,
+        ...(acknowledgeClash ? { acknowledgeClash: true } : {}),
       });
       if (!prep.ok) {
         setPhase({ kind: "error", message: labels.errorGeneric });
         return;
       }
-      setPhase({ kind: "confirm", decision, token: prep.token });
+      setPhase({ kind: "confirm", decision, token: prep.token, acknowledgeClash });
     });
   }
 
   function confirm() {
     if (phase.kind !== "confirm") return;
-    const { decision, token } = phase;
+    const { decision, token, acknowledgeClash } = phase;
     start(async () => {
       const res = await dispatchWorkerAction(
         "worker.respond-booking",
-        { bookingId, decision },
+        // EXACTLY the input the token was minted for — `canonicalInputHash`
+        // binds them, so any drift here is a stale-confirmation refusal.
+        { bookingId, decision, ...(acknowledgeClash ? { acknowledgeClash: true } : {}) },
         { locale, confirmationToken: token },
       );
       if (res.ok) {
@@ -102,13 +131,18 @@ export function WorkerBookingAction({
           decision === "accepted" ? FUNNEL_EVENTS.bookingAccepted : FUNNEL_EVENTS.bookingDeclined,
           { surface: "conversation", role_context: "worker", success: true },
         );
-        setPhase({ kind: "done", status: decision });
+        const data = res.data as { acknowledgedClashes?: number | null } | undefined;
+        setPhase({
+          kind: "done",
+          status: decision,
+          acknowledgedClashes: data?.acknowledgedClashes ?? null,
+        });
         router.refresh();
       } else if (res.code === "conflict") {
-        // W12 Slice 1: the dates really are taken by an already-accepted
-        // booking. Terminal — the offer card stops showing accept/decline
-        // (retrying can only fail identically), and the conversation re-reads
-        // server state so nothing downstream still reads as "open".
+        // The dates really are taken by an already-accepted booking, so the
+        // plain accept/decline CTAs stop being shown — retrying them can only
+        // fail identically. RED #5 adds ONE separate, explicit decision below;
+        // it is never taken automatically and needs its own confirmation.
         setPhase({ kind: "conflict" });
         router.refresh();
       } else {
@@ -124,11 +158,33 @@ export function WorkerBookingAction({
   if (phase.kind === "conflict") {
     return (
       <div
-        className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-support font-semibold text-state-warning"
-        role="status"
-        data-testid="conversation-booking-conflict"
+        className="flex flex-col gap-2 rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3"
+        data-testid="conversation-booking-conflict-decision"
       >
-        {labels.errorConflict}
+        <span
+          className="text-support font-semibold text-state-warning"
+          role="status"
+          data-testid="conversation-booking-conflict"
+        >
+          {labels.errorConflict}
+        </span>
+        {/* The consequence is stated BEFORE the control that acts on it. */}
+        <span className="text-meta text-text-muted">{tClash("stillStands")}</span>
+        {/* The canonical conversation control, not a hand-rolled button: it
+            carries the surface's type ladder, its 44px touch target and its
+            tone set. `secondary` deliberately — overriding a clash is not the
+            card's primary action, and a `ux-2-0-foundation` guard counts how
+            many primaries a card renders. */}
+        <ChatActionRow>
+          <ChatAction
+            tone="secondary"
+            disabled={pending}
+            testId="conversation-booking-accept-anyway"
+            onClick={() => beginConfirm("accepted", true)}
+          >
+            {tClash("acceptAnyway")}
+          </ChatAction>
+        </ChatActionRow>
       </div>
     );
   }
@@ -136,10 +192,21 @@ export function WorkerBookingAction({
   if (phase.kind === "done") {
     return (
       <div
-        className="rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support font-semibold text-state-success"
+        className="flex flex-col gap-1 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3"
         data-testid="conversation-booking-done"
       >
-        {phase.status === "accepted" ? labels.acceptedResult : labels.declinedResult}
+        <span className="text-support font-semibold text-state-success">
+          {phase.status === "accepted" ? labels.acceptedResult : labels.declinedResult}
+        </span>
+        {phase.acknowledgedClashes ? (
+          // Says what was overridden, and says plainly it was not fixed.
+          <span
+            className="text-meta text-state-amber"
+            data-testid="conversation-booking-clash-acknowledged"
+          >
+            {tClash("acknowledged", { count: phase.acknowledgedClashes })}
+          </span>
+        ) : null}
       </div>
     );
   }

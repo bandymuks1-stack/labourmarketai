@@ -114,6 +114,22 @@ export const workerRespondBookingSchema = z.object({
   decision: z.enum(["accepted", "declined"]),
   reasonKind: z.string().trim().max(64).nullable().optional(),
   reasonNote: z.string().trim().max(500).nullable().optional(),
+  /**
+   * RED #5 — the person has been shown a date clash and still wants this.
+   *
+   * OPTIONAL and absent by default, so every existing caller and every stored
+   * confirmation token keeps its exact meaning. It is the ONLY reason this
+   * schema changed: the dispatcher validates against a closed object, so an
+   * acknowledgement could not otherwise reach the executor.
+   *
+   * It carries NO authority of its own. `respond_booking_request_v4` still
+   * admits only the addressed worker, still refuses an unacknowledged overlap
+   * with the same SQLSTATE, and still leaves both bookings' dates alone. And
+   * because the confirmation token binds `canonicalInputHash(parsed.data)`,
+   * a token minted WITHOUT this flag cannot execute WITH it — acknowledging
+   * requires its own confirmation, which is the intended cost.
+   */
+  acknowledgeClash: z.boolean().optional(),
 });
 
 export const workerExpressInterestSchema = z.object({
