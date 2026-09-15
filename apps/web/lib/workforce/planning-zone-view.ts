@@ -159,6 +159,21 @@ export interface PlanningZoneView {
     readonly confirmedRequiredHeadcount: number | null;
     readonly requiredHours: number | null;
     readonly shortfallHours: number | null;
+    /**
+     * How many DISTINCT people could not be assessed against a requirement at
+     * all — today only a language level outside the closed CEFR set, which
+     * `languageLevelSatisfies` ranks `null` rather than guessing.
+     *
+     * `capacity-model.ts` counts these as NOT covered, the cautious reading,
+     * so the shortfall above is conservative rather than wrong. But cautious
+     * is not the same as known: some of those people may well qualify. That
+     * module's own contract says a surface showing the shortfall "should say
+     * how much of it is unknown rather than missing", and until 2026-09-14
+     * nothing did — `unknownWorkerIds` existed in the model and reached no
+     * screen, so a manager read a number without its uncertainty (SEP-7 held
+     * in the arithmetic and lost at the last step, which is SEP-8).
+     */
+    readonly unknownCapacityWorkers: number;
   };
   /** Skill slugs with a non-zero shortfall anywhere in the assessment. */
   readonly missingSkills: readonly string[];
@@ -454,6 +469,16 @@ export function buildPlanningZoneView(
       ? hourRows.reduce((s, r) => s + (r.hoursGap.shortfallHours ?? 0), 0)
       : null;
 
+  // DISTINCT people, not occurrences: one person unrankable on two
+  // requirements is one person the manager cannot assess, not two.
+  const unknownWorkerCount = new Set(
+    assessment.requirements.flatMap((r) => [
+      ...r.skillGaps.flatMap((g) => [...g.unknownWorkerIds]),
+      ...r.languageGaps.flatMap((g) => [...g.unknownWorkerIds]),
+      ...r.certificateGaps.flatMap((g) => [...g.unknownWorkerIds]),
+    ]),
+  ).size;
+
   const missingSkills = [
     ...new Set(
       assessment.requirements.flatMap((r) =>
@@ -510,6 +535,7 @@ export function buildPlanningZoneView(
       confirmedRequiredHeadcount: sumProvenance("confirmed"),
       requiredHours,
       shortfallHours,
+      unknownCapacityWorkers: unknownWorkerCount,
     },
     missingSkills,
     risk: {

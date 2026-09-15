@@ -9,6 +9,8 @@ import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-nav
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
 import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
+import { getRosterUtilisation } from "@/lib/planning/roster-utilisation";
+import { summariseRosterUtilisation } from "@/lib/workforce/utilisation";
 import { getOrganizationToday } from "@/lib/planning/organization-today";
 import { OrganizationTodayPanel } from "@/components/app/organization-today-panel";
 import {
@@ -130,6 +132,16 @@ export default async function CompanyWorkforcePlanningPage({
   const intelContextCard = (
     <TrustInsightCard card={demandTrustCard} locale={locale} linkToWorkspace />
   );
+
+  // CAL-9 — how much of the next four weeks the roster is already spoken
+  // for. Same two authorized reads as the availability projection above, over
+  // a window instead of at a moment; no new store and no invented working
+  // pattern. The DENOMINATOR is calendar days and travels with the number.
+  const utilisation = await getRosterUtilisation(result.workers.map((w) => w.workerId));
+  const utilisationSummary =
+    utilisation.status === "ok"
+      ? summariseRosterUtilisation(utilisation.rows, utilisation.window.days)
+      : null;
 
   const view = buildPlanningZoneView({
     entries: result.entries,
@@ -340,6 +352,51 @@ export default async function CompanyWorkforcePlanningPage({
      an employer with no demand entered yet is exactly the one about to
      schedule somebody, and the first version of this shipped unreachable for
      them. */
+  /* CAL-9 — the roster's committed share of the window.
+     Three populations, always separately: measured, floor-only (something
+     real could not be placed on a calendar) and unreadable. A percentage is
+     shown ONLY when every worker was measured, because a roster percentage is
+     the number people quote without reading the footnote. The denominator is
+     named on the line itself — this product records no contracted hours, so
+     "18 of 30 days" is measurable and "60% FTE" would be invented. */
+  const utilisationSection =
+    utilisationSummary && utilisationSummary.workers > 0 ? (
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-utilisation"
+      >
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("utilisation.title")}
+        </h2>
+        {utilisationSummary.committedWorkerDays !== null &&
+        utilisationSummary.countedWorkerDays !== null ? (
+          <p className="text-sm text-text-secondary" data-testid="roster-utilisation-days">
+            {t("utilisation.committedDays", {
+              committed: utilisationSummary.committedWorkerDays,
+              counted: utilisationSummary.countedWorkerDays,
+              workers: utilisationSummary.measured + utilisationSummary.partial,
+              days: utilisationSummary.windowDays,
+            })}
+          </p>
+        ) : (
+          <p className="text-sm text-text-muted" data-testid="roster-utilisation-uncounted">
+            {t("utilisation.noneCounted")}
+          </p>
+        )}
+        {utilisationSummary.partial > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="roster-utilisation-partial">
+            {t("utilisation.partial", { count: utilisationSummary.partial })}
+          </p>
+        ) : null}
+        {utilisationSummary.unknown > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="roster-utilisation-unknown">
+            {t("utilisation.unknown", { count: utilisationSummary.unknown })}
+          </p>
+        ) : null}
+        <p className="text-meta text-text-muted">{t("utilisation.denominatorNote")}</p>
+      </section>
+    ) : null;
+
   const availabilitySection =
     availability.status === "ok" && availability.unavailability.length > 0 ? (
       <section
@@ -391,6 +448,7 @@ export default async function CompanyWorkforcePlanningPage({
         {/* Unavailability is independent of whether any demand has been
             entered — an employer with an empty planning zone is precisely the
             one about to schedule someone. */}
+        {utilisationSection}
         {availabilitySection}
         <div
           className="flex flex-col gap-3 rounded-md border border-dashed border-ink-500 p-5"
@@ -422,6 +480,7 @@ export default async function CompanyWorkforcePlanningPage({
 
       <Notes notes={view.notes} />
 
+      {utilisationSection}
       {availabilitySection}
 
       {/* Capacity summary — short numbers + one bar, never a text wall. */}
@@ -461,6 +520,16 @@ export default async function CompanyWorkforcePlanningPage({
               {t("summary.coveredAll")}
             </span>
           )}
+          {view.totals.unknownCapacityWorkers > 0 ? (
+            <span
+              className="font-mono text-meta uppercase tracking-label text-text-muted"
+              data-testid="planning-zone-unknown-capacity"
+            >
+              {t("summary.unknownCapacity", {
+                count: view.totals.unknownCapacityWorkers,
+              })}
+            </span>
+          ) : null}
         </div>
         {/* Headcount provenance — the user's number is shown as the user's,
             a system placeholder as a labelled suggestion, confirmed as

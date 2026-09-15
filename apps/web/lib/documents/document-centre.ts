@@ -200,15 +200,17 @@ async function readOwnJournalProofCounts(
         .from("journal_entries")
         .select("*", { count: "exact", head: true })
         .eq("worker_id", workerId)
-        .is("deleted_at", null),
+        .is("deleted_at", null)
+        .is("superseded_by", null),
       asAny(supabase)
         .from("journal_entry_photos")
-        .select("id, journal_entries!inner(worker_id, deleted_at)", {
+        .select("id, journal_entries!inner(worker_id, deleted_at, superseded_by)", {
           count: "exact",
           head: true,
         })
         .eq("journal_entries.worker_id", workerId)
         .is("journal_entries.deleted_at", null)
+        .is("journal_entries.superseded_by", null)
         .eq("upload_status", "uploaded"),
     ]);
     return {

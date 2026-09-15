@@ -14,6 +14,12 @@ export type EngagementCard = {
   endedAt: string | null;
   title: string | null;
   isPrimary: boolean;
+  /** True only when this row is one the PERSON stated about themselves and
+   *  the database would let them take back: no organization behind it, and
+   *  not the primary engagement. Mirrors `remove_self_declared_work_history_v1`'s
+   *  own preconditions so a control is never offered where it cannot work;
+   *  the RPC re-checks all of them regardless. */
+  selfDeclared?: boolean;
 };
 
 export type SkillDot = {

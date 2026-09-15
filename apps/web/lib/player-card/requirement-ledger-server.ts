@@ -179,6 +179,43 @@ export async function loadOwnProjectLedgers(
   return out;
 }
 
+/**
+ * PER-13 on the OPPORTUNITY context (Step B). The ledger was built for three
+ * contexts and mounted for one; this is the second, and it adds no new
+ * derivation — it is `loadRequirementLedger` with `kind: "opportunity"`, the
+ * branch that has existed all along and had no caller.
+ *
+ * Bounded exactly like the project loader above and for the same reason: the
+ * board read and every person read are request-cached, so k opportunities cost
+ * k card lookups plus one of each shared read. An opportunity whose ledger does
+ * not answer is simply absent from the map — the card then renders without it
+ * rather than showing a person an empty requirement list that reads as
+ * "nothing is required of you".
+ */
+export const OWN_OPPORTUNITY_LEDGERS_LIMIT = 5;
+
+export async function loadOwnOpportunityLedgers(
+  requestIds: readonly string[],
+): Promise<Map<string, RequirementLedger>> {
+  const out = new Map<string, RequirementLedger>();
+  const distinct = [...new Set(requestIds)].slice(0, OWN_OPPORTUNITY_LEDGERS_LIMIT);
+  if (distinct.length === 0) return out;
+  const personId = await getOwnWorkerId();
+  if (!personId) return out;
+  const results = await Promise.all(
+    distinct.map((requestId) =>
+      loadRequirementLedger({
+        personId,
+        context: { kind: "opportunity", requestId },
+      }).catch(() => null),
+    ),
+  );
+  results.forEach((r, i) => {
+    if (r && r.kind === "ok") out.set(distinct[i], r.ledger);
+  });
+  return out;
+}
+
 export async function loadRequirementLedger(args: {
   /** The person's worker id — must be the caller's own. */
   readonly personId: string;

@@ -7,7 +7,6 @@ import type {
 import {
   assessCapacity,
   certificateMatches,
-  languageLevelSatisfies,
   workerCanSupervise,
   workerFitsRequirement,
   type CapacityGap,
@@ -114,13 +113,88 @@ function assess(
 /* Deterministic helpers                                                */
 /* ------------------------------------------------------------------ */
 
-describe("languageLevelSatisfies (CEFR ladder)", () => {
-  it("orders A1..C2 and lets native beat everything", () => {
+describe("the CEFR ladder has ONE implementation", () => {
+  /**
+   * This module used to export its own `languageLevelSatisfies`, and this
+   * block used to assert `("weird", "B1") === false`. That was the DEFECT
+   * written down as an expectation: the canonical implementation in
+   * `match-criteria-v2` answers `null` for a level it cannot rank, and the
+   * copy's `false` turned "we cannot read this level" into "this worker does
+   * not speak it" — an employer-visible headcount shortfall that may not
+   * exist. The copy is gone; the ladder's own behaviour is pinned where it
+   * lives (lib/guards/matching-dimensions-v2-1.test.ts).
+   */
+  it("capacity-model no longer exports a second ladder", async () => {
+    const mod = await import("@/lib/workforce/capacity-model");
+    expect(Object.keys(mod)).not.toContain("languageLevelSatisfies");
+  });
+
+  it("the canonical ladder ranks an unreadable level UNKNOWN, not failed", async () => {
+    const { languageLevelSatisfies } = await import("@/lib/market/match-criteria-v2");
     expect(languageLevelSatisfies("B2", "B1")).toBe(true);
-    expect(languageLevelSatisfies("B1", "B1")).toBe(true);
     expect(languageLevelSatisfies("A2", "B1")).toBe(false);
     expect(languageLevelSatisfies("native", "C2")).toBe(true);
-    expect(languageLevelSatisfies("weird", "B1")).toBe(false);
+    expect(languageLevelSatisfies("weird", "B1")).toBeNull();
+  });
+});
+
+describe("an unreadable language level is UNKNOWN, never a proven miss", () => {
+  /**
+   * THE DEFECT THIS PINS. `assessCapacity` used the module's own ladder, which
+   * answered `false` for any level string it could not rank. The worker then
+   * vanished from `matchedWorkerIds` exactly as if they had been checked and
+   * found wanting, and the employer read a headcount shortfall that the data
+   * never supported. The three workers below are the three real answers.
+   */
+  const need = requirement({
+    headcount: 3,
+    languages: [{ lang: "de", level: "B1", onePerTeamSufficient: false }],
+  });
+
+  const covers = worker({ workerId: "w-covers", languages: [{ lang: "de", level: "B2" }] });
+  const misses = worker({ workerId: "w-misses", languages: [{ lang: "de", level: "A1" }] });
+  const unreadable = worker({
+    workerId: "w-unreadable",
+    // Not in the closed CEFR set. Real rows reach this shape from imports and
+    // from older free-text capture.
+    languages: [{ lang: "de", level: "fluent" }],
+  });
+
+  const gap = assess([need], supply({ workers: [covers, misses, unreadable] }))
+    .requirements[0].languageGaps[0];
+
+  it("separates covered, missed and unreadable into three buckets", () => {
+    expect(gap.matchedWorkerIds).toEqual(["w-covers"]);
+    expect(gap.unknownWorkerIds).toEqual(["w-unreadable"]);
+  });
+
+  it("does NOT report the unreadable worker as a proven miss", () => {
+    expect(
+      gap.unknownWorkerIds,
+      "the whole point: an unrankable level must not read as 'does not speak it'",
+    ).not.toContain("w-misses");
+    expect(gap.matchedWorkerIds).not.toContain("w-unreadable");
+  });
+
+  it("still counts the unknown cautiously in the shortfall, and says so", () => {
+    // 3 needed, 1 proven cover → 2 short. One of those 2 is unknown, not
+    // missing; the field is what lets a surface say that instead of guessing.
+    expect(gap.shortfall).toBe(2);
+    expect(gap.unknownWorkerIds.length).toBe(1);
+  });
+
+  it("a worker with several stated levels is judged by their best", () => {
+    const both = worker({
+      workerId: "w-both",
+      languages: [
+        { lang: "de", level: "fluent" },
+        { lang: "de", level: "C1" },
+      ],
+    });
+    const g = assess([requirement({ headcount: 1, languages: need.languages })],
+      supply({ workers: [both] })).requirements[0].languageGaps[0];
+    expect(g.matchedWorkerIds).toEqual(["w-both"]);
+    expect(g.unknownWorkerIds).toEqual([]);
   });
 });
 

@@ -6,6 +6,11 @@ import {
   PRIVACY_REQUEST_TYPES,
   isPrivacyRequestType,
 } from "@/lib/privacy/privacy-request-model";
+import {
+  EXPORTED_RELATIONS,
+  ROOT_RELATIONS,
+  WITHHELD_RELATIONS,
+} from "@/lib/privacy/personal-relations";
 
 /**
  * Privacy self-service guard (quality-train PR G).
@@ -36,26 +41,26 @@ const migrationIt = hasMigration ? it : it.skip;
 
 describe("the data export reads ONLY the caller's own data", () => {
   it("every exported table is on the own-data allowlist", () => {
+    // The allowlist used to be six table names inlined here, matching six
+    // `.from()` calls. PER-12 moved the set to `lib/privacy/personal-relations`
+    // because the bundle covered six relations out of sixty and named neither
+    // the gap nor most of the omissions. The allowlist is now that register,
+    // and its completeness is enforced by
+    // `privacy-export-completeness.test.ts`. What THIS guard keeps is the
+    // narrower property it always had: the exporter must not read a table
+    // off its own bat. Only the two ROOT relations may be named in the file;
+    // everything else has to come from the register, where classifying it is
+    // mandatory.
     const fromCalls = [...EXPORT_LIB.matchAll(/\.from\("([a-z_]+)"\)/g)].map(
       (m) => m[1],
     );
-    expect(fromCalls.sort()).toEqual(
-      [
-        "profiles",
-        "consents",
-        "workers",
-        "journal_entries",
-        "worker_skills",
-        "worker_documents",
-        // PER-11 (owner approval 2026-09-15). Worker-owned and worker-scoped:
-        // read via `.in("worker_id", workerIds)` where workerIds came from the
-        // caller's own `workers` rows, and RLS independently restricts it to
-        // `owns_worker(worker_id) or is_admin()`. It is on this allowlist
-        // because it IS the caller's own data — the export previously omitted
-        // it, which under-reported a subject-access request.
-        "worker_external_profiles",
-      ].sort(),
-    );
+    expect(fromCalls.sort()).toEqual(ROOT_RELATIONS.slice().sort());
+    // And every register entry is joined to the caller by a person column —
+    // never by an id the caller could choose.
+    for (const r of EXPORTED_RELATIONS) {
+      expect(["profile_id", "worker_id"]).toContain(r.key);
+    }
+    expect(EXPORTED_RELATIONS.length).toBeGreaterThan(20);
   });
 
   it("scoped by the caller's identity, never a service role", () => {
@@ -70,9 +75,18 @@ describe("the data export reads ONLY the caller's own data", () => {
     }
   });
 
-  it("the excluded categories are stated inside the bundle itself", () => {
-    expect(EXPORT_LIB).toMatch(/other party's words/);
-    expect(EXPORT_LIB).toMatch(/excluded/);
+  it("the withheld categories are stated inside the bundle itself", () => {
+    // Renamed `excluded` -> `withheld` in bundle format v2, and the reasons
+    // moved to the register so the SAME text is both the rule and what the
+    // person reads. The property is unchanged and stricter: the bundle must
+    // carry the reasons, not merely the fact that something was left out.
+    expect(EXPORT_LIB).toMatch(/withheld:/);
+    expect(EXPORT_LIB).toMatch(/WITHHELD_RELATIONS/);
+    const reasons = WITHHELD_RELATIONS.map((w) => w.reason).join(" ");
+    expect(reasons).toMatch(/other party's words/);
+    for (const w of WITHHELD_RELATIONS) {
+      expect(w.reason.length, `${w.table} is withheld without a reason`).toBeGreaterThan(30);
+    }
   });
 
   it("the download route serves an attachment and never caches", () => {

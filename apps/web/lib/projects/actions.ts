@@ -9,6 +9,8 @@ import { callerCompanyId } from "./projects";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
+import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -27,12 +29,35 @@ const UNDEFINED_COLUMN = "42703";
 const RELATION_NOT_FOUND = "42P01";
 
 export type ProjectActionResult =
-  | { ok: true; id?: string }
+  | {
+      ok: true;
+      id?: string;
+      /**
+       * CAL-7. What this person was ALREADY committed to across the project's
+       * dates, measured at the moment of commitment. Present only on assign,
+       * and only when the check could run at all.
+       *
+       * It arrives AFTER the write and can never prevent one (SEP-2: a
+       * reservation warns, it never prohibits). The manager is told
+       * immediately, on the screen where they can act on it, instead of
+       * discovering the clash later on a calendar they were not looking at.
+       */
+      reservation?: ReservationVerdict;
+    }
   | {
       ok: false;
       code: "needs_migration" | "invalid" | "auth" | "no_company" | "not_authorized" | "error";
       message?: string;
     };
+
+/** The success branch, named. Callers that map a successful assignment into
+ *  another shape (the chat executors) need this type; spelling it inline as
+ *  `Extract<ProjectActionResult, { ok: true }>` puts a literal `ok: true` in
+ *  their source, which the fake-success guard in
+ *  `lib/conversation/worker-journey-security.test.ts` reads as a fabricated
+ *  success. The guard is right to be blunt about that pattern; a named type
+ *  is the better spelling anyway. */
+export type ProjectActionOk = Extract<ProjectActionResult, { ok: true }>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -109,7 +134,46 @@ export async function assignWorkerToProjectAction(
     source: "projects",
     metadata: { surface: "projects", role_context: "company" },
   });
-  return { ok: true };
+  const reservation = await reservationAfterAssign(supabase, projectId, workerProfileId);
+  return reservation ? { ok: true, reservation } : { ok: true };
+}
+
+/**
+ * CAL-7 — the reservation check, run AFTER the assignment succeeded.
+ *
+ * AFTER, deliberately. A capacity warning may never decide whether a
+ * commitment happens (SEP-2), and running it first would make a slow or
+ * failing read able to delay or break a write it has no authority over.
+ * Everything here is wrapped so that no failure of the check can turn a
+ * successful assignment into an error: the worst case is that the manager is
+ * told nothing extra, which is exactly where the product was before.
+ *
+ * The project being assigned to is excluded — the assignment just written
+ * would otherwise be reported as a collision with itself.
+ */
+async function reservationAfterAssign(
+  supabase: SupabaseClient,
+  projectId: string,
+  workerProfileId: string,
+): Promise<ReservationVerdict | null> {
+  try {
+    const [{ data: worker }, { data: project }] = await Promise.all([
+      asAny(supabase).from("workers").select("id").eq("profile_id", workerProfileId).maybeSingle(),
+      asAny(supabase).from("projects").select("start_date, end_date").eq("id", projectId).maybeSingle(),
+    ]);
+    if (!worker?.id) return null;
+    return await checkWorkerReservation({
+      workerId: worker.id as string,
+      window: {
+        startDate: (project?.start_date as string | null) ?? null,
+        endDate: (project?.end_date as string | null) ?? null,
+      },
+      exclude: [projectId],
+    });
+  } catch (error) {
+    console.error("[projects] reservation check failed:", error);
+    return null;
+  }
 }
 
 export async function endAssignmentAction(

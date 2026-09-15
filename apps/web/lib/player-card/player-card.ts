@@ -10,6 +10,7 @@ import {
   getWorkerSkillRows,
   type WorkerSkillRow,
 } from "@/lib/data/worker-core";
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { listAttentionInstructions } from "@/lib/instructions/instructions";
 import {
   deriveDocumentStatus,
@@ -294,10 +295,13 @@ async function ownConfirmationsCount(
   workerId: string,
 ): Promise<number> {
   try {
-    const { data: entryRows } = await asAny(supabase)
-      .from("journal_entries")
-      .select("id")
-      .eq("worker_id", workerId);
+    // LIVE ONLY — a confirmation on a retracted or superseded entry is not a
+    // confirmation of live work. Unfiltered, this counted both, and the
+    // adjacent read four lines down had already been filtering `deleted_at`:
+    // one file, two answers to the same question.
+    const { data: entryRows } = await liveJournalEntriesOnly(
+      asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
+    );
     const ids = ((entryRows ?? []) as { id: string }[]).map((e) => e.id);
     if (ids.length === 0) return 0;
     return await safeCount(
@@ -322,11 +326,13 @@ async function journalEntryTimestamps(
   windowStart: Date,
 ): Promise<string[]> {
   try {
-    const { data, error } = await asAny(supabase)
-      .from("journal_entries")
-      .select("created_at")
+    // Was `deleted_at` only, so a SUPERSEDED entry still drew a mark on the
+    // evidence timeline — the correction and the original both counted as
+    // activity on their own days.
+    const { data, error } = await liveJournalEntriesOnly(
+      asAny(supabase).from("journal_entries").select("created_at"),
+    )
       .eq("worker_id", workerId)
-      .is("deleted_at", null)
       .gte("created_at", windowStart.toISOString())
       .order("created_at", { ascending: true })
       .limit(2000);
@@ -430,12 +436,18 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
         .select("*", { count: "exact", head: true })
         .eq("profile_id", user.id),
     ),
+    // LIVE ONLY. This is the person's "evidence entries" figure AND the
+    // `journalEntries` input to `deriveProvenance` below, so an unfiltered
+    // count both overstated the trail and could push someone to
+    // EVIDENCE_SUPPORTED on entries they had retracted or replaced.
     workerId
       ? safeCount(
-          asAny(supabase)
-            .from("journal_entries")
-            .select("*", { count: "exact", head: true })
-            .eq("worker_id", workerId),
+          liveJournalEntriesOnly(
+            asAny(supabase)
+              .from("journal_entries")
+              .select("*", { count: "exact", head: true })
+              .eq("worker_id", workerId),
+          ),
         )
       : Promise.resolve(0),
     listAttentionInstructions()
@@ -450,12 +462,15 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     // Primary profession from the ONE cached profession read (was its own
     // `is_primary = true` select — one of 4 identical ones per navigation).
     workerId ? getPrimaryProfessionSlug() : Promise.resolve(null),
+    // `latestEvidenceAt` — was `deleted_at` only, so a SUPERSEDED entry could
+    // date a person's newest evidence to work that has since been replaced.
     workerId
-      ? asAny(supabase)
-          .from("journal_entries")
-          .select("created_at")
-          .eq("worker_id", workerId)
-          .is("deleted_at", null)
+      ? liveJournalEntriesOnly(
+          asAny(supabase)
+            .from("journal_entries")
+            .select("created_at")
+            .eq("worker_id", workerId),
+        )
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle()

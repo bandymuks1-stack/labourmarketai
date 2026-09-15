@@ -11,7 +11,10 @@ import {
   deleteProfileSkillClaimAction,
   saveProfileSkillClaimsAction,
 } from "@/lib/profile/profile-skill-claims-actions";
-import { confirmCvWorkHistoryAction } from "@/lib/profile/cv-section-import-actions";
+import {
+  confirmCvWorkHistoryAction,
+  removeSelfDeclaredWorkHistoryAction,
+} from "@/lib/profile/cv-section-import-actions";
 import type {
   EngagementCard,
   SkillDot,
@@ -173,6 +176,37 @@ export function CapabilityProfileSection({
   const [expCurrent, setExpCurrent] = useState(false);
   const [expError, setExpError] = useState<string | null>(null);
   const [isSavingExp, startSaveExp] = useTransition();
+
+  // ── Taking a stated entry back (2026-09-14) ───────────────────────────────
+  // The form above could add a work-experience entry and nothing could remove
+  // one. `removeSelfDeclaredWorkHistoryAction` wraps an RPC applied since
+  // migration 20260714161000 that no surface had ever called. It refuses
+  // anything but the person's OWN self-declared, non-primary entry, and
+  // answers `conflict` rather than destroying one that journal records point
+  // at — that refusal is shown, not swallowed.
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [isRemoving, startRemove] = useTransition();
+
+  function removeExperience(id: string) {
+    setRemoveError(null);
+    setRemovingId(id);
+    startRemove(() => {
+      void removeSelfDeclaredWorkHistoryAction(id)
+        .then((res) => {
+          setRemovingId(null);
+          if (res.ok) return;
+          setRemoveError(
+            res.code === "conflict" ? t("expRemoveInUse") : t("expRemoveError"),
+          );
+        })
+        .catch((e: unknown) => {
+          console.error("[capability-profile] remove failed", e);
+          setRemovingId(null);
+          setRemoveError(t("expRemoveError"));
+        });
+    });
+  }
 
   function toYear(v: string): number | null {
     const n = Number.parseInt(v, 10);
@@ -400,6 +434,17 @@ export function CapabilityProfileSection({
                         {tEng("primary")}
                       </span>
                     )}
+                    {c.selfDeclared && (
+                      <button
+                        type="button"
+                        onClick={() => removeExperience(c.id)}
+                        disabled={isRemoving && removingId === c.id}
+                        data-testid={`capability-experience-remove-${c.id}`}
+                        className="flex-none rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-muted transition-colors hover:border-state-danger hover:text-state-danger disabled:opacity-60"
+                      >
+                        {t("expRemove")}
+                      </button>
+                    )}
                   </div>
                   {start && (
                     <p className="mt-1 font-mono text-meta uppercase tracking-label text-text-muted">
@@ -531,6 +576,11 @@ export function CapabilityProfileSection({
               );
             })}
           </ul>
+          {removeError && (
+            <p className="text-meta text-state-danger" role="alert" data-testid="capability-experience-remove-error">
+              {removeError}
+            </p>
+          )}
         </div>
       )}
 

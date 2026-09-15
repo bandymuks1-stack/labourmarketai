@@ -11,7 +11,7 @@ import type { DemandLifecycleResult } from "@/lib/demand/demand-lifecycle";
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionResult } from "@/lib/projects/actions";
+import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionOk, type ProjectActionResult } from "@/lib/projects/actions";
 import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
@@ -45,6 +45,26 @@ import {
   type ExecCtx,
   type ExecResult,
 } from "@/lib/conversation/executor-contract";
+
+/**
+ * CAL-7 — the reservation verdict, carried from the canonical action to the
+ * chat instead of being dropped at this seam.
+ *
+ * The projects page already renders it. Discarding it here is what made the
+ * two surfaces disagree about the same assignment, which the repo's own rule
+ * forbids: chat and page reach the same state through the same reads. It is a
+ * note on a write that ALREADY HAPPENED and can never block one.
+ *
+ * Returns `undefined` rather than an empty object when there is nothing to
+ * carry — an executor that answered `data: {}` where it used to answer
+ * nothing is a shape change every caller would have to learn about.
+ */
+function assignPayload(r: ProjectActionOk): Record<string, unknown> | undefined {
+  const data: Record<string, unknown> = {};
+  if (r.id) data.id = r.id;
+  if (r.reservation) data.reservation = r.reservation;
+  return Object.keys(data).length > 0 ? data : undefined;
+}
 
 /**
  * Employer-side executors (PR-E: company.* + agency.*). Same contract as the
@@ -269,9 +289,9 @@ export const COMPANY_EXECUTORS: {
       null,
       fd({ project_id: input.projectId, worker_profile_id: input.workerProfileId }),
     );
-    return r.ok
-      ? { ok: true, data: r.id ? { id: r.id } : undefined }
-      : { ok: false, code: r.code, message: r.message };
+    if (!r.ok) return { ok: false, code: r.code, message: r.message };
+    const data = assignPayload(r);
+    return data ? { ok: true, data } : { ok: true };
   },
 
   "company.move-worker": async (input) => {
@@ -287,7 +307,13 @@ export const COMPANY_EXECUTORS: {
     );
     if (!r.ok) return { ok: false, code: r.code, message: r.message };
     const ended = await endAssignmentAction(input.fromProjectId, input.workerProfileId);
-    return { ok: true, data: { assigned: true, ended: ended.ok } };
+    // CAL-7, as above. The verdict is about the DESTINATION project and is
+    // computed before the source assignment ends, so a person moving between
+    // two overlapping projects is reported against the one they came from —
+    // which is the collision worth naming, not a bookkeeping artefact.
+    return r.ok
+      ? { ok: true, data: { assigned: true, ended: ended.ok, ...assignPayload(r) } }
+      : { ok: false, code: "error" };
   },
 
   "company.invite-worker": async (input) => {

@@ -16,6 +16,8 @@ import {
   type ProjectStagesData,
   type StageStatus,
 } from "@/lib/projects/stages-model";
+import type { LearnedStageDurations } from "@/lib/projects/learned-stage-duration";
+import { durationKey, type LearnedDuration } from "@/lib/workforce/learned-duration";
 
 /**
  * Project stages panel (Wagon 6 — Project Operations Core, slice 1) on the
@@ -36,11 +38,56 @@ const STATUS_TONE: Record<StageStatus, string> = {
   cancelled: "border-ink-500 text-text-muted",
 };
 
+/**
+ * CAL-10 — what comparable stages have really taken.
+ *
+ * A reading of the PAST, rendered beside the plan. It never says what this
+ * stage will take: a forecast may not be presented as a fact (SEP-1), and
+ * nothing here is stored — it is derived from finished stages on every
+ * render. Provenance is on the line itself (how many, over what span), so
+ * the number can always be asked where it came from.
+ *
+ * Renders nothing below the evidence threshold. A "typical" drawn from two
+ * finished stages would be read as guidance no matter how it were captioned.
+ */
+function LearnedDurationLine({ reading }: { reading: LearnedDuration }) {
+  const t = useTranslations("projectStages");
+  if (reading.confidence === "insufficient" || reading.medianActualDays === null) return null;
+  return (
+    <p className="text-meta text-text-muted" data-testid="stage-learned-duration">
+      {t("learned.median", {
+        days: reading.medianActualDays,
+        count: reading.observations,
+      })}
+      {reading.medianPlannedDays !== null
+        ? ` · ${t("learned.vsPlan", { days: reading.medianPlannedDays })}`
+        : ""}
+      {reading.firstObservedOn && reading.lastObservedOn
+        ? ` · ${reading.firstObservedOn} – ${reading.lastObservedOn}`
+        : ""}
+    </p>
+  );
+}
+
+/** The reading for a stage, matched on the SAME normalized key the model
+ *  groups by — never a second, looser match invented in the component. */
+function learnedFor(
+  learned: LearnedStageDurations | undefined,
+  name: string,
+): LearnedDuration | null {
+  if (!learned || learned.status !== "ok") return null;
+  const key = durationKey(name);
+  if (!key) return null;
+  return learned.readings.find((r) => r.key === key) ?? null;
+}
+
 function StageRow({
   stage,
+  learned,
   onDone,
 }: {
   stage: ProjectStage;
+  learned: LearnedDuration | null;
   onDone: (msg: string) => void;
 }) {
   const t = useTranslations("projectStages");
@@ -88,6 +135,8 @@ function StageRow({
           {t(`statuses.${status}`)}
         </span>
       </div>
+
+      {learned ? <LearnedDurationLine reading={learned} /> : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <label className="text-meta text-text-secondary" htmlFor={`stage-status-${stage.id}`}>
@@ -151,9 +200,13 @@ function StageRow({
 export function ProjectStagesPanel({
   projectId,
   data,
+  learned,
 }: {
   projectId: string;
   data: ProjectStagesData;
+  /** CAL-10. Optional: a surface that has not wired the read yet simply
+   *  shows no comparison, which asserts nothing either way. */
+  learned?: LearnedStageDurations;
 }) {
   const router = useRouter();
   const t = useTranslations("projectStages");
@@ -199,6 +252,11 @@ export function ProjectStagesPanel({
         </h2>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
         <p className="text-meta leading-relaxed text-text-muted">{t("honestNote")}</p>
+        {learned?.status === "unavailable" ? (
+          <p className="text-meta text-text-muted" data-testid="stage-learned-unavailable">
+            {t("learned.unavailable")}
+          </p>
+        ) : null}
       </header>
 
       {!data.applied ? (
@@ -214,7 +272,12 @@ export function ProjectStagesPanel({
           ) : (
             <ul className="flex flex-col gap-2" data-testid="project-stages-list">
               {data.stages.map((s) => (
-                <StageRow key={s.id} stage={s} onDone={report} />
+                <StageRow
+                  key={s.id}
+                  stage={s}
+                  learned={learnedFor(learned, s.name)}
+                  onDone={report}
+                />
               ))}
             </ul>
           )}

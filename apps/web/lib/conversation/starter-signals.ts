@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOwnedCompanyById } from "@/lib/company/company-setup";
@@ -118,7 +119,11 @@ export async function loadPersonStarterFacts(): Promise<PersonStarterFacts> {
         .is("organization_id", null)
         .not("title", "is", null),
     ),
-    count((c) => c.from("journal_entries").select("id", { count: "exact", head: true })),
+    count((c) =>
+      liveJournalEntriesOnly(
+        c.from("journal_entries").select("id", { count: "exact", head: true }),
+      ),
+    ),
   ]);
 
   return { skills, workHistory, journalEntries };

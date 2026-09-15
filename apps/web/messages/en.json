@@ -325,6 +325,9 @@
       "invalid": "Please check the details.",
       "auth": "Please sign in again.",
       "not_authorized": "You are not allowed to do that.",
+      "already_issued": "Already issued to someone else. It has to be returned first.",
+      "not_issuable": "Not issuable right now — it is in maintenance or retired.",
+      "not_found": "That record no longer exists. Refresh and try again.",
       "error": "Something went wrong. Please try again."
     },
     "myEmpty": "No tools or equipment are currently assigned to you."
@@ -581,6 +584,11 @@
       "auth": "Please sign in again.",
       "not_authorized": "You can only manage stages for your own projects.",
       "error": "Something went wrong. Please try again."
+    },
+    "learned": {
+      "median": "Comparable finished stages took {days} days (median of {count})",
+      "vsPlan": "planned {days}",
+      "unavailable": "Past-duration comparison could not be read just now."
     }
   },
   "activityCentre": {
@@ -1850,7 +1858,10 @@
     "expSaving": "Saving…",
     "expInvalid": "Enter a job title and at least the start year.",
     "expNeedsMigration": "This feature isn't enabled yet. Please try later.",
-    "expError": "Could not save. Please try again."
+    "expError": "Could not save. Please try again.",
+    "expRemove": "Remove",
+    "expRemoveInUse": "This entry has work records linked to it, so it was not removed.",
+    "expRemoveError": "Could not remove this entry."
   },
   "roleDashboards": {
     "company": {
@@ -4603,7 +4614,8 @@
         "event_work_task_assigned": "A task was assigned to you",
         "event_demand_interest_expressed": "A worker expressed interest in your demand",
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
-        "event_weekly_digest": "Your weekly work and opportunities summary is ready"
+        "event_weekly_digest": "Your weekly work and opportunities summary is ready",
+        "event_saved_search_match": "A search you saved has new results"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -5867,7 +5879,18 @@
       "noWorkers": "You don't have any assignable workers on your team yet.",
       "fromRoster": "Assign a worker to this object",
       "rosterGroup": "Team members",
-      "engagementGroup": "Accepted-proposal candidates"
+      "engagementGroup": "Accepted-proposal candidates",
+      "reservation": {
+        "collidesTitle": "Already committed on these dates",
+        "notBlocking": "This does not block the assignment — you decide what is right.",
+        "unknown": "We could not confirm these dates are free. That is not the same as free.",
+        "source": {
+          "project": "Project",
+          "booking": "Booking",
+          "trip": "Business trip",
+          "absence": "Unavailable"
+        }
+      }
     },
     "model": {
       "note": "This board follows the platform's operating model: worker player cards are assigned to objects (projects), and you manage the assignments.",
@@ -6771,6 +6794,7 @@
     "noMembers": "No members yet. Invite workers from your linked roster below — each joins after accepting the invitation.",
     "capabilityHeading": "What this brigade declares",
     "capabilityEmpty": "No declared skills among members yet — nothing is invented.",
+    "capabilityUnknown": "Skills could not be read just now — this is not a statement that there are none.",
     "declaredShort": "declared by {count}",
     "confirmedShort": "confirmed for {count}",
     "noAddable": "No linked workers left to add. Invite workers in the roster section first.",
@@ -9287,6 +9311,27 @@
       "mapTitle": "Where the work is",
       "skipToList": "To the list",
       "placeLink": "Show this country's opportunities"
+    },
+    "savedSearches": {
+      "title": "Saved searches",
+      "intro": "A question you keep, answered live every time you open it.",
+      "empty": "No saved searches yet. Narrow the board, then save the question.",
+      "matches": "{count} matching",
+      "new": "{count} new",
+      "delete": "Remove",
+      "labelField": "Name for this search",
+      "labelPlaceholder": "e.g. welding in NL",
+      "saveCurrent": "Save this search",
+      "limitReached": "You have reached the limit of {limit} saved searches.",
+      "outcome": {
+        "saved": "Saved.",
+        "deleted": "Removed.",
+        "invalid": "Please check the name and the filters.",
+        "limit": "You have reached the saved-search limit.",
+        "auth": "Please sign in again.",
+        "feature-absent": "Not available yet — the saved-search update is not applied.",
+        "error": "Something went wrong. Please try again."
+      }
     }
   },
   "workerIntake": {
@@ -10249,7 +10294,8 @@
       "capacityLabel": "Capacity coverage",
       "userEntered": "You entered: {count}",
       "systemSuggested": "Suggested automatically: {count} (confirm or edit)",
-      "confirmedRequired": "Confirmed: {count}"
+      "confirmedRequired": "Confirmed: {count}",
+      "unknownCapacity": "{count} could not be assessed — the shortfall may be smaller"
     },
     "risk": {
       "none": "No capacity risk in the current view.",
@@ -10317,6 +10363,14 @@
       "noneRecordedNext": "No approved absence is recorded for the next 7 days.",
       "notReadable": "Cannot be read right now",
       "basis": "Active roster counts workers actively linked to your company. Absences are approved recorded absences — a worker without a recorded absence is not thereby confirmed to be at work. Work entry counts cover entries recorded by workers in your organization's engagements today. Reasons for absences stay private."
+    },
+    "utilisation": {
+      "title": "Committed share of the next weeks",
+      "committedDays": "{committed} of {counted} worker-days committed — {workers} people over {days} days",
+      "noneCounted": "No worker's commitments could be counted for this window.",
+      "partial": "{count} of them could not be counted in full — something real has no dates, so the figure above is a floor.",
+      "unknown": "{count} could not be read at all. That is not the same as free.",
+      "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
     }
   },
   "tasks": {
@@ -11321,7 +11375,10 @@
     "shareButton": "Share",
     "noDemands": "Create a request first, then you can share it.",
     "errorLabel": "Something went wrong. Try again.",
-    "fromAgency": "From"
+    "fromAgency": "From",
+    "sharedHeading": "Shared with this agency",
+    "noShared": "Nothing shared with this agency yet",
+    "unshareButton": "Stop sharing this request"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -12681,6 +12738,8 @@
       "assignUnavailable": "I could not read your team right now.",
       "assignEngagementCandidate": "accepted-offer candidate",
       "assignDone": "Assigned to the project.",
+      "assignAlreadyCommitted": "Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
+      "assignCommitmentUnknown": "We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "The assignment could not be made.",
       "chipEngagements": "Who I work with",
       "userEngagements": "Who do I work with?",
@@ -15242,7 +15301,13 @@
       "issuedOnLabel": "Issued on",
       "expiresOnLabel": "Valid until",
       "attachCertificate": "Save certificate",
-      "markExpired": "Mark out of date"
+      "markExpired": "Mark out of date",
+      "editProgram": "Edit this course",
+      "saveProgram": "Save changes",
+      "activeLabel": "Still running",
+      "activeYes": "Yes — can be assigned",
+      "activeNo": "No — retired",
+      "retired": "Retired"
     },
     "certificates": {
       "heading": "Certificates",
@@ -15417,6 +15482,11 @@
       "not_found": "Not found.",
       "limit_reached": "There is too much here already.",
       "error": "Something went wrong. Nothing was saved."
+    },
+    "edit": {
+      "open": "Correct this draft",
+      "save": "Save changes",
+      "responsible": "Change responsible person (leave blank to keep)"
     }
   },
   "talentPreview": {
@@ -15629,7 +15699,10 @@
         "notAuthorized": "You may not record these hours.",
         "generic": "Could not process. Please try again."
       }
-    }
+    },
+    "correct": "Correct",
+    "correctCancel": "Cancel",
+    "correctHint": "Saving writes a new record and keeps the original alongside it — nothing is erased."
   },
   "oauthConsent": {
     "title": "Confirm access",
@@ -15983,5 +16056,65 @@
     "ledgerNone": "nothing in this period ({period})",
     "ledgerFigures": "{hours} h · {rows, plural, one {# row} other {# rows}} · {days, plural, one {# day} other {# days}}",
     "rule": "The journal figures and the organization's ledger are two records of the same work, shown side by side and never added together. An hour record says when and how much, not what — it reaches no skill."
+  },
+  "countryReadiness": {
+    "heading": "What this country requires of you",
+    "intro": "The EU framework that applies when you work, post workers, or place a team in this country. Every statement links to its official source and shows when it was last checked. Where a rule is national rather than EU-wide, we say so and point you to the official national site instead of guessing.",
+    "noResearchYet": "We have not researched this country's requirements yet. That means we have nothing to show you — not that there is nothing to meet. We would rather leave this blank than fill it in from a neighbouring country.",
+    "nationalInfo": "National rules for this country are published by the authorities themselves:",
+    "nationalInfoLink": "official posting-of-workers information",
+    "disclaimer": "This is sourced information, not legal advice. Rules change and national detail varies; confirm anything that affects a decision with the official national authority.",
+    "fieldSource": "Source",
+    "fieldConfidence": "Backing",
+    "fieldLastReviewed": "Last checked",
+    "scope": {
+      "worker_solo": {
+        "label": "Working here yourself",
+        "description": "You are working in this country as a local hire, or on your own account."
+      },
+      "worker_posted": {
+        "label": "Being posted here from another country",
+        "description": "Your employer sends you here temporarily while you stay employed at home — the Posting of Workers Directive applies."
+      },
+      "team_subcontracting": {
+        "label": "Placing a team here as a subcontractor",
+        "description": "A team or subcontractor works here cross-border. Each posted person carries their own paperwork, and chain liability may apply."
+      },
+      "company_hiring": {
+        "label": "Hiring or placing workers here as a company",
+        "description": "Your company employs or places people in this country, which brings registration and tax obligations of its own."
+      }
+    },
+    "level": {
+      "required": "Required",
+      "recommended": "Recommended",
+      "conditional": "Depends"
+    },
+    "risk": {
+      "high": "High risk if missing",
+      "medium": "Medium risk",
+      "low": "Low risk"
+    },
+    "confidence": {
+      "needs_legal_review": "This part is national, not EU-wide. We have not verified the specific rule for this country, so treat it as a question to ask — not as an answer we have given you."
+    },
+    "confidenceShort": {
+      "official": "Official EU source",
+      "strong": "Well-established",
+      "needs_legal_review": "Needs legal check"
+    },
+    "explanation": {
+      "valid_id_document": "A valid passport or national identity card. Bring the document itself, not a copy — it is what proves who you are at a check.",
+      "right_to_work": "The right to work here. If you are an EU/EEA citizen you need no work permit. If you are not, you need a work and/or residence permit — confirm which with the national authority before you travel.",
+      "a1_certificate": "An A1 portable document. If you stay insured in your home country while working here, A1 is what proves which country's social-security law applies to you. Without it you can be treated as uninsured.",
+      "prior_posting_notification": "A prior notification, filed before the work starts. Most host countries require the posting to be declared in advance; the portal is national, so use the country link below.",
+      "employment_contract": "Your employment contract, and the written terms of the posting. Not always demanded at a check, but it is the document that settles a dispute about what was agreed.",
+      "host_minimum_conditions": "This country's minimum pay and core working conditions apply to you while you are posted here, even though you remain employed at home. The exact rates and rules are national.",
+      "posted_worker_package": "A full set of documents for every posted person on the team — each one needs their own A1, notification and contract paperwork. One shared set for the group is not enough.",
+      "subcontractor_liability": "Chain liability. In many countries a main contractor can be held responsible for a subcontractor's unpaid wages. The rules differ by country and are worth confirming before signing.",
+      "company_posting_registration": "Registration of the posting by the company. This is the employer's obligation, separate from anything the individual worker files.",
+      "company_tax_vat": "VAT, tax and social-security registration for the company. Whether these apply depends on what the work is and how long it lasts.",
+      "national_specifics": "Country-specific paperwork — sector ID or construction cards, local registration, national tax and social-security steps. These exist in most countries but the specifics are national, so confirm them on the official site."
+    }
   }
 }

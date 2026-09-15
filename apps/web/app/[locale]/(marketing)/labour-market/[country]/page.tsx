@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { CountrySignals } from "@/components/marketing/country-signals";
 import { LabourMarketEvidence } from "@/components/marketing/labour-market-evidence";
+import { CountryReadinessRequirements } from "@/components/marketing/country-readiness-requirements";
 import {
   SUPPORTED_COUNTRIES,
   isSupportedCountry,
@@ -60,6 +61,14 @@ export default async function CountryPage({
       <section className="mt-10">
         <CountrySignals country={code} />
       </section>
+
+      {/* SKL-8 + GEO-3. The researched country-readiness matrix — 18 sourced
+          requirements across all four mobility scopes — had exactly one
+          reader before this: the personal document checklist, which uses the
+          `worker_posted` scope only. This page is where the chain that
+          already pointed here (capability -> /work-abroad -> /labour-market ->
+          here) finally arrives at the requirements themselves. */}
+      <CountryReadinessRequirements country={code} />
 
       {/* EU regional backdrop — the already-verified EU evidence module. */}
       <LabourMarketEvidence />

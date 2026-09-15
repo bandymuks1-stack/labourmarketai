@@ -325,6 +325,9 @@
       "invalid": "Controleer de gegevens.",
       "auth": "Log opnieuw in.",
       "not_authorized": "Je mag dit niet doen.",
+      "already_issued": "Al aan iemand anders uitgegeven. Eerst inleveren.",
+      "not_issuable": "Nu niet uit te geven — in onderhoud of afgeschreven.",
+      "not_found": "Dit item bestaat niet meer. Ververs en probeer opnieuw.",
       "error": "Er ging iets mis. Probeer opnieuw."
     },
     "myEmpty": "Er zijn momenteel geen gereedschappen of apparatuur aan je toegewezen."
@@ -581,6 +584,11 @@
       "auth": "Log opnieuw in.",
       "not_authorized": "U kunt alleen fasen van uw eigen projecten beheren.",
       "error": "Er ging iets mis. Probeer opnieuw."
+    },
+    "learned": {
+      "median": "Vergelijkbare afgeronde fasen duurden {days} dagen (mediaan van {count})",
+      "vsPlan": "gepland {days}",
+      "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen."
     }
   },
   "activityCentre": {
@@ -1850,7 +1858,10 @@
     "expSaving": "Opslaan…",
     "expInvalid": "Vul een functie en minstens het startjaar in.",
     "expNeedsMigration": "Deze functie is nog niet ingeschakeld. Probeer het later.",
-    "expError": "Opslaan mislukt. Probeer het opnieuw."
+    "expError": "Opslaan mislukt. Probeer het opnieuw.",
+    "expRemove": "Verwijderen",
+    "expRemoveInUse": "Aan deze vermelding zijn werkregistraties gekoppeld, daarom is die niet verwijderd.",
+    "expRemoveError": "Deze vermelding kon niet worden verwijderd."
   },
   "roleDashboards": {
     "company": {
@@ -4603,7 +4614,8 @@
         "event_work_task_assigned": "Er is een taak aan je toegewezen",
         "event_demand_interest_expressed": "Een werknemer heeft interesse getoond in je aanvraag",
         "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd",
-        "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar"
+        "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
+        "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -5867,7 +5879,18 @@
       "noWorkers": "Je hebt nog geen toewijsbare werknemers in je ploeg.",
       "fromRoster": "Een werknemer aan dit object toewijzen",
       "rosterGroup": "Teamleden",
-      "engagementGroup": "Kandidaten met geaccepteerd voorstel"
+      "engagementGroup": "Kandidaten met geaccepteerd voorstel",
+      "reservation": {
+        "collidesTitle": "Op deze dagen al vastgelegd",
+        "notBlocking": "Dit blokkeert de toewijzing niet — jij beslist.",
+        "unknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
+        "source": {
+          "project": "Projecttoewijzing",
+          "booking": "Boeking",
+          "trip": "Dienstreis",
+          "absence": "Niet beschikbaar"
+        }
+      }
     },
     "model": {
       "note": "Dit bord volgt het werkmodel van het platform: spelerskaarten van werknemers worden toegewezen aan objecten (projecten), en jij beheert de toewijzingen.",
@@ -6771,6 +6794,7 @@
     "noMembers": "Nog geen leden. Nodig hieronder werknemers uit je gekoppelde bestand uit — iedereen treedt toe na eigen acceptatie.",
     "capabilityHeading": "Wat deze brigade opgeeft",
     "capabilityEmpty": "Nog geen opgegeven vaardigheden onder de leden — er wordt niets verzonnen.",
+    "capabilityUnknown": "Vaardigheden konden nu niet worden gelezen — dat betekent niet dat er geen zijn.",
     "declaredShort": "opgegeven door {count}",
     "confirmedShort": "bevestigd voor {count}",
     "noAddable": "Geen gekoppelde werknemers meer om toe te voegen. Nodig eerst werknemers uit in het bestandsgedeelte.",
@@ -9287,6 +9311,27 @@
       "mapTitle": "Waar het werk is",
       "skipToList": "Naar de lijst",
       "placeLink": "Toon de kansen in dit land"
+    },
+    "savedSearches": {
+      "title": "Opgeslagen zoekopdrachten",
+      "intro": "Een vraag die je bewaart — het antwoord wordt elke keer opnieuw berekend.",
+      "empty": "Nog geen opgeslagen zoekopdrachten. Verfijn het overzicht en bewaar de vraag.",
+      "matches": "{count} treffers",
+      "new": "{count} nieuw",
+      "delete": "Verwijderen",
+      "labelField": "Naam voor deze zoekopdracht",
+      "labelPlaceholder": "bijv. lassen in NL",
+      "saveCurrent": "Deze zoekopdracht bewaren",
+      "limitReached": "Je hebt de limiet van {limit} opgeslagen zoekopdrachten bereikt.",
+      "outcome": {
+        "saved": "Bewaard.",
+        "deleted": "Verwijderd.",
+        "invalid": "Controleer de naam en de filters.",
+        "limit": "Je hebt de limiet bereikt.",
+        "auth": "Log opnieuw in.",
+        "feature-absent": "Nog niet beschikbaar — de update voor opgeslagen zoekopdrachten is niet toegepast.",
+        "error": "Er ging iets mis. Probeer opnieuw."
+      }
     }
   },
   "workerIntake": {
@@ -10249,7 +10294,8 @@
       "capacityLabel": "Capaciteitsdekking",
       "userEntered": "Door u ingevoerd: {count}",
       "systemSuggested": "Automatisch voorgesteld: {count} (bevestigen of bewerken)",
-      "confirmedRequired": "Bevestigd: {count}"
+      "confirmedRequired": "Bevestigd: {count}",
+      "unknownCapacity": "{count} konden niet worden beoordeeld — het tekort kan kleiner zijn"
     },
     "risk": {
       "none": "Geen capaciteitsrisico in dit beeld.",
@@ -10317,6 +10363,14 @@
       "noneRecordedNext": "Voor de komende 7 dagen is geen goedgekeurde afwezigheid geregistreerd.",
       "notReadable": "Kan nu niet worden gelezen",
       "basis": "De actieve ploeg telt werkers die actief aan je bedrijf zijn gekoppeld. Afwezigheden zijn goedgekeurde geregistreerde afwezigheden — een werker zonder geregistreerde afwezigheid is daarmee niet bevestigd aan het werk. Werkregistratie-aantallen omvatten registraties die werkers vandaag in de dienstverbanden van je organisatie hebben vastgelegd. Redenen van afwezigheid blijven privé."
+    },
+    "utilisation": {
+      "title": "Vastgelegd deel van de komende weken",
+      "committedDays": "{committed} van {counted} mensdagen vastgelegd — {workers} mensen over {days} dagen",
+      "noneCounted": "Voor dit venster konden van niemand de afspraken worden geteld.",
+      "partial": "{count} daarvan konden niet volledig worden geteld — iets echts heeft geen datums, dus het getal hierboven is een ondergrens.",
+      "unknown": "{count} konden helemaal niet worden gelezen. Dat is niet hetzelfde als vrij.",
+      "denominatorNote": "Geteld in kalenderdagen. We leggen geen contracturen vast, dus dit is geen fte-cijfer."
     }
   },
   "tasks": {
@@ -11321,7 +11375,10 @@
     "shareButton": "Delen",
     "noDemands": "Maak eerst een aanvraag, daarna kunt u die delen.",
     "errorLabel": "Er ging iets mis. Probeer opnieuw.",
-    "fromAgency": "Van"
+    "fromAgency": "Van",
+    "sharedHeading": "Gedeeld met dit bureau",
+    "noShared": "Nog niets gedeeld met dit bureau",
+    "unshareButton": "Deze aanvraag niet langer delen"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -12681,6 +12738,8 @@
       "assignUnavailable": "Ik kon je team nu niet lezen.",
       "assignEngagementCandidate": "kandidaat uit geaccepteerd aanbod",
       "assignDone": "Toegewezen aan het project.",
+      "assignAlreadyCommitted": "Let op: op sommige van deze dagen is deze persoon al vastgelegd ({count}). De toewijzing blijft staan — jij beslist.",
+      "assignCommitmentUnknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
       "assignFailed": "De toewijzing kon niet worden gemaakt.",
       "chipEngagements": "Met wie ik werk",
       "userEngagements": "Met wie werk ik?",
@@ -15242,7 +15301,13 @@
       "issuedOnLabel": "Afgegeven op",
       "expiresOnLabel": "Geldig tot",
       "attachCertificate": "Certificaat opslaan",
-      "markExpired": "Als verlopen markeren"
+      "markExpired": "Als verlopen markeren",
+      "editProgram": "Deze cursus bewerken",
+      "saveProgram": "Wijzigingen opslaan",
+      "activeLabel": "Loopt nog",
+      "activeYes": "Ja — kan worden toegewezen",
+      "activeNo": "Nee — beëindigd",
+      "retired": "Beëindigd"
     },
     "certificates": {
       "heading": "Certificaten",
@@ -15417,6 +15482,11 @@
       "not_found": "Niet gevonden.",
       "limit_reached": "Er staat hier al te veel.",
       "error": "Er ging iets mis. Er is niets opgeslagen."
+    },
+    "edit": {
+      "open": "Dit concept corrigeren",
+      "save": "Wijzigingen opslaan",
+      "responsible": "Verantwoordelijke wijzigen (laat leeg om te behouden)"
     }
   },
   "talentPreview": {
@@ -15629,7 +15699,10 @@
         "notAuthorized": "U mag deze uren niet registreren.",
         "generic": "Verwerken mislukt. Probeer het opnieuw."
       }
-    }
+    },
+    "correct": "Corrigeren",
+    "correctCancel": "Annuleren",
+    "correctHint": "Opslaan maakt een nieuw record aan en bewaart het origineel ernaast — er wordt niets gewist."
   },
   "oauthConsent": {
     "title": "Toegang bevestigen",
@@ -15983,5 +16056,65 @@
     "ledgerNone": "niets in deze periode ({period})",
     "ledgerFigures": "{hours} u · {rows, plural, one {# regel} other {# regels}} · {days, plural, one {# dag} other {# dagen}}",
     "rule": "De dagboekcijfers en de registratie van de organisatie zijn twee vastleggingen van hetzelfde werk, naast elkaar getoond en nooit bij elkaar opgeteld. Een urenregistratie zegt wanneer en hoeveel, niet wat — ze bereikt geen enkele vaardigheid."
+  },
+  "countryReadiness": {
+    "heading": "Wat dit land van u vraagt",
+    "intro": "Het EU-kader dat geldt wanneer u hier werkt, werknemers detacheert of een ploeg plaatst. Elke uitspraak verwijst naar de officiële bron en toont wanneer die voor het laatst is gecontroleerd. Waar een regel nationaal is in plaats van EU-breed, zeggen we dat en verwijzen we naar de officiële nationale site in plaats van te gissen.",
+    "noResearchYet": "De eisen van dit land hebben we nog niet onderzocht. Dat betekent dat we u niets kunnen tonen — niet dat er niets geldt. We laten dit liever leeg dan het in te vullen met gegevens van een buurland.",
+    "nationalInfo": "De nationale regels van dit land worden door de autoriteiten zelf gepubliceerd:",
+    "nationalInfoLink": "officiële informatie over detachering",
+    "disclaimer": "Dit is informatie met bronvermelding, geen juridisch advies. Regels veranderen en nationale details verschillen; controleer alles wat een beslissing beïnvloedt bij de officiële nationale instantie.",
+    "fieldSource": "Bron",
+    "fieldConfidence": "Onderbouwing",
+    "fieldLastReviewed": "Gecontroleerd",
+    "scope": {
+      "worker_solo": {
+        "label": "Zelf hier werken",
+        "description": "U werkt in dit land als lokale kracht of voor eigen rekening."
+      },
+      "worker_posted": {
+        "label": "Hierheen gedetacheerd worden",
+        "description": "Uw werkgever stuurt u tijdelijk hierheen terwijl u thuis in dienst blijft — de Detacheringsrichtlijn geldt."
+      },
+      "team_subcontracting": {
+        "label": "Een ploeg hier plaatsen als onderaannemer",
+        "description": "Een ploeg of onderaannemer werkt hier grensoverschrijdend. Iedere gedetacheerde heeft eigen papieren, en ketenaansprakelijkheid kan gelden."
+      },
+      "company_hiring": {
+        "label": "Als bedrijf hier mensen aannemen of plaatsen",
+        "description": "Uw bedrijf neemt mensen aan of plaatst ze in dit land, wat eigen registratie- en belastingverplichtingen meebrengt."
+      }
+    },
+    "level": {
+      "required": "Verplicht",
+      "recommended": "Aanbevolen",
+      "conditional": "Hangt ervan af"
+    },
+    "risk": {
+      "high": "Hoog risico bij ontbreken",
+      "medium": "Gemiddeld risico",
+      "low": "Laag risico"
+    },
+    "confidence": {
+      "needs_legal_review": "Dit deel is nationaal, niet EU-breed. We hebben de specifieke regel voor dit land niet geverifieerd, dus behandel dit als een vraag om te stellen — niet als een antwoord dat wij u hebben gegeven."
+    },
+    "confidenceShort": {
+      "official": "Officiële EU-bron",
+      "strong": "Goed gevestigd",
+      "needs_legal_review": "Juridische check nodig"
+    },
+    "explanation": {
+      "valid_id_document": "Een geldig paspoort of nationale identiteitskaart. Neem het document zelf mee, geen kopie — dat is wat bij een controle bewijst wie u bent.",
+      "right_to_work": "Het recht om hier te werken. Als EU/EER-burger hebt u geen werkvergunning nodig. Bent u dat niet, dan hebt u een werk- en/of verblijfsvergunning nodig — controleer welke bij de nationale instantie voordat u reist.",
+      "a1_certificate": "Een A1-verklaring. Blijft u tijdens het werk hier verzekerd in uw eigen land, dan bewijst A1 welk socialezekerheidsrecht op u van toepassing is. Zonder A1 kunt u als onverzekerd worden behandeld.",
+      "prior_posting_notification": "Een voorafgaande melding, ingediend vóór het werk begint. De meeste gastlanden eisen dat de detachering vooraf wordt gemeld; het portaal is nationaal, gebruik dus de landlink hieronder.",
+      "employment_contract": "Uw arbeidsovereenkomst en de schriftelijke voorwaarden van de detachering. Niet altijd gevraagd bij een controle, maar wel het document dat een geschil beslecht over wat is afgesproken.",
+      "host_minimum_conditions": "Het minimumloon en de kernarbeidsvoorwaarden van dit land gelden voor u zolang u hier gedetacheerd bent, ook al blijft u thuis in dienst. De exacte tarieven en regels zijn nationaal.",
+      "posted_worker_package": "Een volledige set documenten voor iedere gedetacheerde in de ploeg — ieder heeft een eigen A1, melding en contract nodig. Eén gedeelde set voor de groep volstaat niet.",
+      "subcontractor_liability": "Ketenaansprakelijkheid. In veel landen kan een hoofdaannemer aansprakelijk zijn voor onbetaald loon van een onderaannemer. De regels verschillen per land en zijn het controleren waard vóór ondertekening.",
+      "company_posting_registration": "Registratie van de detachering door het bedrijf. Dit is een verplichting van de werkgever, los van wat de werknemer zelf indient.",
+      "company_tax_vat": "Btw-, belasting- en socialezekerheidsregistratie voor het bedrijf. Of dit geldt, hangt af van wat het werk is en hoe lang het duurt.",
+      "national_specifics": "Landspecifieke papieren — sector- of bouwpassen, lokale registratie, nationale belasting- en socialezekerheidsstappen. Die bestaan in de meeste landen, maar de details zijn nationaal, dus controleer ze op de officiële site."
+    }
   }
 }

@@ -13,6 +13,9 @@ import {
 } from "@/components/app/external-vacancies-section";
 import { ProfessionRecoveryPrompt } from "@/components/app/profession-recovery-prompt";
 import { OpportunityDetailsDisclosure } from "@/components/app/opportunity-details-disclosure";
+import { RequirementLedgerRows } from "@/components/app/instruction-project-asks";
+import { loadOwnOpportunityLedgers } from "@/lib/player-card/requirement-ledger-server";
+import { buildRequirementLedgerLabels } from "@/lib/player-card/requirement-ledger-labels";
 import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
 import { OpportunityBandSection } from "@/components/app/opportunities/opportunity-band-section";
 import {
@@ -60,6 +63,9 @@ import {
   DEFAULT_WORLD_BOUNDS,
   DEFAULT_WORLD_ZOOM,
 } from "@/lib/market-map/world-model";
+import { SavedSearchesStrip } from "@/components/app/saved-searches-strip";
+import { getMySavedSearches, notifySavedSearchMatches } from "@/lib/opportunities/saved-searches";
+import { hasAnyCriteria, readSavedSearches } from "@/lib/opportunities/saved-search-model";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
@@ -192,6 +198,11 @@ export default async function OpportunitiesPage({
   // chip narrows what the external-supply retrieval FETCHES (closed-set
   // values), not merely what the page hides afterwards.
   const { filters, sort, view } = parseDiscoveryParams(sp);
+  // DEM-8 — the worker's own standing questions. Read alongside the board so
+  // the matches are counted against the SAME cards the worker sees, under
+  // their own authorization. Unavailable (owner-gated migration unapplied, or
+  // a failed read) renders no controls at all.
+  const savedSearches = await getMySavedSearches();
   // Board + salary benchmark + weekly digest are independent reads — one
   // combined await so TTFB pays the slowest of the three, not their sum.
   const [result, salaryIntel, weekly, worldView] = await Promise.all([
@@ -214,6 +225,22 @@ export default async function OpportunitiesPage({
       layer: "demand",
     }),
   ]);
+
+  // DEM-8 — each saved question read against the cards this worker's own
+  // board read returned. `applyDiscoveryFilters` is the board's own matcher,
+  // so what the strip counts and what the search opens cannot disagree.
+  const savedSearchReadings =
+    savedSearches.available && result.kind === "ready"
+      ? readSavedSearches(savedSearches.searches, result.opportunities)
+      : [];
+  // Fire-and-forget: the board is the answer; the durable notification is a
+  // convenience on top of it and must never delay or fail this render.
+  if (savedSearchReadings.length > 0) {
+    void notifySavedSearchMatches(
+      savedSearchReadings,
+      new Date().toISOString().slice(0, 10),
+    );
+  }
 
   // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
   //    never more than 5 items before the person asks for more. Pure
@@ -502,6 +529,20 @@ export default async function OpportunitiesPage({
       };
     }),
   ];
+
+  // PER-13 ON THE OPPORTUNITY CONTEXT (Step B). The requirement ledger was
+  // built for three contexts and mounted for one: a person could see what a
+  // PROJECT still needed from them, but not what an OPPORTUNITY would — the
+  // exact moment the answer matters most, because it is the moment they decide
+  // whether to raise their hand. No new derivation: this is the loader's
+  // `opportunity` branch, which has existed all along with no caller, bounded
+  // to the first rows and request-cached. A ledger that does not answer is
+  // absent, and the card renders as it did before — never an empty
+  // requirement list, which would read as "nothing is required of you".
+  const ledgerLabels = await buildRequirementLedgerLabels();
+  const opportunityLedgers = await loadOwnOpportunityLedgers(
+    rows.filter((r) => r.kind === "platform").map((r) => r.card.need.id),
+  ).catch(() => new Map());
   const world = deriveWorldReading({
     subject: result.kind === "ready" ? "ready" : "unreadable",
     rows,
@@ -861,6 +902,15 @@ export default async function OpportunitiesPage({
                 : [];
             return (
               <OpportunityCompareProvider>
+                {savedSearches.available ? (
+                  <SavedSearchesStrip
+                    readings={savedSearchReadings}
+                    currentFilters={filters}
+                    canSaveCurrent={hasAnyCriteria(filters)}
+                    boardPath={boardHref}
+                  />
+                ) : null}
+
                 {/* Public supply line: retrieved vs shown, source, how old
                     the supply is, the door to the rest. Rows are in the
                     bands below — this states the count they come from. */}
@@ -1354,6 +1404,25 @@ export default async function OpportunitiesPage({
                                             <span className="text-meta text-text-muted">{t("possibleNote")}</span>
                                           ) : null}
                                         </div>
+
+                                        {/* WHAT THIS OPPORTUNITY WOULD NEED FROM ME.
+                                            The SAME ledger rows, with the SAME copy, the
+                                            instructions surface renders for a project — one
+                                            answer to "what is missing for me", not two. */}
+                                        {(() => {
+                                          const ledger = opportunityLedgers.get(need.id);
+                                          return ledger && ledger.rows.length > 0 ? (
+                                            <div
+                                              className="flex flex-col gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 p-3"
+                                              data-testid="opportunity-requirement-ledger"
+                                            >
+                                              <RequirementLedgerRows
+                                                ledger={ledger}
+                                                labels={ledgerLabels}
+                                              />
+                                            </div>
+                                          ) : null;
+                                        })()}
                                       </OpportunityDetailsDisclosure>
                                     </Card>
                                   </li>

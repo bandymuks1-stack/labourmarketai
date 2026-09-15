@@ -382,7 +382,8 @@
         "event_work_task_assigned": "En oppgave er tildelt deg",
         "event_demand_interest_expressed": "En arbeidstaker har vist interesse for behovet ditt",
         "event_demand_interest_reviewed": "En bedrift har markert interessen din som gjennomgått",
-        "event_weekly_digest": "Din ukentlige oversikt over arbeid og muligheter er klar"
+        "event_weekly_digest": "Din ukentlige oversikt over arbeid og muligheter er klar",
+        "event_saved_search_match": "Et lagret søk har nye resultater"
       },
       "email": {
         "open": "Åpne i LabourMarket.ai:",
@@ -3800,6 +3801,8 @@
       "assignUnavailable": "[EN] I could not read your team right now.",
       "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
+      "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
+      "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
       "chipEngagements": "Hvem jeg jobber med",
       "userEngagements": "Hvem jobber jeg med?",
@@ -6006,7 +6009,13 @@
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
-      "markExpired": "[EN] Mark out of date"
+      "markExpired": "[EN] Mark out of date",
+      "editProgram": "Rediger dette kurset",
+      "saveProgram": "Lagre endringer",
+      "activeLabel": "Går fortsatt",
+      "activeYes": "Ja — kan tildeles",
+      "activeNo": "Nei — avviklet",
+      "retired": "Avviklet"
     },
     "certificates": {
       "heading": "[EN] Certificates",
@@ -6181,6 +6190,11 @@
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
+    },
+    "edit": {
+      "open": "[EN] Correct this draft",
+      "save": "[EN] Save changes",
+      "responsible": "[EN] Change responsible person (leave blank to keep)"
     }
   },
   "talentPreview": {
@@ -6305,7 +6319,10 @@
         "notAuthorized": "Du kan ikke registrere disse timene.",
         "generic": "Behandlingen mislyktes. Prøv igjen."
       }
-    }
+    },
+    "correct": "Rett",
+    "correctCancel": "Avbryt",
+    "correctHint": "Lagring oppretter en ny oppføring, og den opprinnelige beholdes ved siden av — ingenting slettes."
   },
   "companyHome": {
     "eyebrow": "Organisasjonen din nå",

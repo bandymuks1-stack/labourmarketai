@@ -19,21 +19,19 @@
  *
  * Pure. No IO beyond hashing, no env, no server-only.
  */
-import { createHash } from "node:crypto";
 import { isoWeekKey } from "../worker/weekly-intelligence-model";
+import { deterministicEntityId } from "./deterministic-entity-id";
 
 /**
  * Deterministic RFC-4122-shaped uuid for one ISO week (name-based, sha-256).
+ *
+ * The hashing itself moved to `deterministic-entity-id.ts` on 2026-09-14 so
+ * the saved-search alert could use the SAME exactly-once arithmetic instead of
+ * a second copy of it. Byte-for-byte identical output — the name fed in is
+ * unchanged, so every uuid this has ever produced it still produces.
  */
 export function weeklyDigestEntityId(dayIso: string): string {
-  const digest = createHash("sha256")
-    .update(`weekly_digest:${isoWeekKey(dayIso)}`)
-    .digest();
-  const b = Uint8Array.prototype.slice.call(digest, 0, 16);
-  b[6] = (b[6] & 0x0f) | 0x50; // name-based version marker
-  b[8] = (b[8] & 0x3f) | 0x80; // RFC 4122 variant
-  const hex = Buffer.from(b).toString("hex");
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  return deterministicEntityId(`weekly_digest:${isoWeekKey(dayIso)}`);
 }
 
 /** The minimal durable-feed row shape the skip check needs. */

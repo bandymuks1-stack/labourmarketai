@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const REPO = resolve(__dirname, "../../../..");
@@ -174,5 +174,51 @@ describe("mobile store-release config — the generated native project is only a
     const ignore = readFileSync(resolve(REPO, "apps/mobile/.gitignore"), "utf8");
     expect(ignore).toMatch(/^\/android$/m);
     expect(ignore).toMatch(/^\/ios$/m);
+  });
+
+  /**
+   * DEEP LINKS — both halves, or neither.
+   *
+   * A universal/app link works only when the APP claims the domain and the
+   * DOMAIN claims the app. The app's half is here in `app.json`; the domain's
+   * half is `/.well-known/apple-app-site-association` and
+   * `/.well-known/assetlinks.json`, which answer 404 until the owner sets the
+   * Team ID and the signing fingerprints.
+   *
+   * That asymmetry is deliberate and safe (a link simply opens in the browser
+   * meanwhile). What is NOT safe is deleting one half: an app that claims a
+   * domain no longer served, or routes served for an app that no longer
+   * claims them, both look configured and neither works.
+   */
+  it("the app claims the product domain on both platforms", () => {
+    expect(appConfig.ios.associatedDomains).toContain("applinks:labourmarket.ai");
+    const hosts = (appConfig.android.intentFilters ?? [])
+      .flatMap((f: { data?: { host?: string }[] }) => f.data ?? [])
+      .map((d: { host?: string }) => d.host);
+    expect(hosts).toContain("labourmarket.ai");
+  });
+
+  it("the Android link filter asks to be verified, over https only", () => {
+    // Without `autoVerify` Android shows a disambiguation dialog instead of
+    // opening the app — the link "works" and the app never opens. And a
+    // `http` scheme here would claim links this product does not serve.
+    const filters = (appConfig.android.intentFilters ?? []) as {
+      autoVerify?: boolean;
+      data?: { scheme?: string }[];
+    }[];
+    expect(filters.length).toBeGreaterThan(0);
+    for (const f of filters) {
+      expect(f.autoVerify).toBe(true);
+      for (const d of f.data ?? []) expect(d.scheme).toBe("https");
+    }
+  });
+
+  it("the domain half exists as routes, so the owner sets a value and nothing else", () => {
+    for (const p of [
+      "apps/web/app/.well-known/apple-app-site-association/route.ts",
+      "apps/web/app/.well-known/assetlinks.json/route.ts",
+    ]) {
+      expect(existsSync(resolve(REPO, p)), `${p} is missing — the app claims a domain that serves nothing`).toBe(true);
+    }
   });
 });

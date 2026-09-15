@@ -93,12 +93,19 @@ jobs:
       # untouched, because that spec is the last written record that those
       # surfaces were once expected. Wiring a permanently-red check would only
       # teach everyone to ignore this job.
+      #   cross-border visitor  : country-readiness-public (the SKL-8 + GEO-3
+      #                           requirements matrix on /labour-market/[country]
+      #                           — public, and DB-free by construction: the
+      #                           page, CountrySignals, LabourMarketEvidence and
+      #                           the matrix hold zero `createClient` and zero
+      #                           `.from(` between them, verified 2026-09-14)
       E2E_SPECS: >-
         tests/e2e/primary-route-live-smoke.spec.ts
         tests/e2e/ru-landing-localization.spec.ts
         tests/e2e/landing-mobile-overflow.spec.ts
         tests/e2e/auth-field-touch-floor.spec.ts
         tests/e2e/social-auth-matrix.spec.ts
+        tests/e2e/country-readiness-public.spec.ts
       # Excludes the env-dependent describe block named above. If that title
       # ever changes, the block comes BACK IN and this job goes red — it can
       # never silently drop coverage, which is the safe direction. And if the
@@ -112,7 +119,10 @@ jobs:
       # A floor, not a target. Adding tests is fine. NEVER lower it to make a
       # red run go green — a dropping count IS the rot signal this job exists
       # to surface.
-      MIN_EXPECTED: "27"
+      # country-readiness-public adds 5 (2026-09-14). Measured, not guessed:
+      # run against a local `next start` with the runner's own Chromium, all
+      # five passed in 7.2 s before this floor was raised.
+      MIN_EXPECTED: "32"
 
     steps:
       - name: Checkout

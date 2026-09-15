@@ -221,7 +221,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/cv", "app/api/cv"],
     coreModule: "lib/cv/extract.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "Extraction is a proposal; every fact is confirmed by the person (A-05).",
+    note: "Extraction is a proposal; every fact is confirmed by the person (A-05). AND NOW WITHDRAWABLE (2026-09-14). A confirmed work-history fact was one-way: the profile carried a form writing through `save_self_declared_work_history_v1`, while its sibling `remove_self_declared_work_history_v1` — applied and callable since migration 20260714161000 — was named in NO source file at all. A living CV whose statements cannot be taken back is the wrong shape. The control appears only on the person's OWN self-declared, non-primary engagements, which are exactly the RPC's preconditions, and the RPC re-checks all of them; an entry a journal record points at answers `in_use` and is refused rather than destroyed (the FK is RESTRICT), which the surface states instead of swallowing. `not_found` stays merged for a missing row and an unauthorized one, so nothing became an existence oracle. No migration, no new authority. Guard: lib/guards/self-declared-history-can-be-taken-back.test.ts.",
   },
   {
     id: "PER-5",
@@ -282,7 +282,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/worker"],
     coreModule: null,
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "`confirmed_by_manager` has no write path, so it is permanently false.",
+    note: "`confirmed_by_manager` has no write path, so it is permanently false. STEP C (2026-09-14) STOPPED this: it is DEFERRED BY DESIGN, not half-built. The creating migration (20260714160000) says so in the column comment — 'Only a REAL confirmation flow (future, SECURITY DEFINER) may set true' — and the column is deliberately excluded from the authenticated insert/update grants. Building that flow means a new SECURITY DEFINER RPC and a decision about who may confirm an achievement: NEW structure plus a new authority boundary, neither authorized in Step C. Production: 2 achievements, 0 confirmed.",
   },
   {
     id: "PER-10",
@@ -320,7 +320,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/privacy"],
     coreModule: "lib/privacy/export-data.ts",
     surfaces: ["app/[locale]/dashboard/account"],
-    note: "GDPR export covers 6 relations; ~14 personal relations are not in it.",
+    note: "GDPR export now covers 48 relations, up from 6. The count in this note was itself wrong: it said ~14 were missing; a production sweep on 2026-09-14 found 60 person-keyed tables, so ~30 were neither exported nor named while the bundle's `excluded` list invited the reader to assume anything unmentioned was included. Every person-keyed relation is now EXPORTED, WITHHELD with a reason that travels in the bundle, or declared non-product (lib/privacy/personal-relations.ts), enforced by `privacy-export-completeness.test.ts`, which derives the table set from the MIGRATIONS so a new person-keyed table fails CI the day it lands. That guard immediately found four the production sweep had missed (dashboard_preferences, demand_interest_seen, worker_external_profiles, worker_opportunity_seen) — they are in migrations that are NOT applied to production. Bundle format is v2; a relation this database does not have reports as empty, not as unread. Still RLS-scoped as the person: no service role, guarded.",
   },
   {
     id: "PER-13",
@@ -332,7 +332,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/player-card/requirement-ledger.ts"],
     coreModule: "lib/player-card/requirement-ledger.ts",
     surfaces: ["app/[locale]/dashboard/projects"],
-    note: "Built for three contexts, mounted for one (`project`).",
+    note: "Built for three contexts, mounted for TWO. `project` renders under an instruction (/dashboard/instructions); `opportunity` now renders inside the opportunity card (/dashboard/opportunities) through `loadOwnOpportunityLedgers` — the loader branch that existed with no caller until Step B. Both surfaces render the SAME `RequirementLedgerRows` with the SAME copy (lib/player-card/requirement-ledger-labels.ts), so 'what is missing for me' cannot acquire two wordings. `role` (professionSlug + country) remains unmounted: it needs a surface where a person picks a profession to aim at, which does not exist yet.",
   },
 ];
 
@@ -482,7 +482,7 @@ const SKILLS: readonly CapabilityRow[] = [
     anchors: ["lib/training"],
     coreModule: "lib/training/training-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Applied, 0 rows; writes nothing into the skill ladder, by decision.",
+    note: "Applied, 0 rows; writes nothing into the skill ladder, by decision. A COURSE CAN NOW BE CORRECTED AND RETIRED (2026-09-14). `update_training_program_v1` and its \"Course updated.\" notice in all eleven locales shipped with the module and no control called them: a course name typed wrong stayed wrong, and a course the organization had stopped running stayed assignable right up to the point where `assign_training_v1` refused it as `inactive_program` with nothing on screen saying why. Each course now opens in place, shows whether it is still running, and can be retired or brought back; retiring is a flag and the assignments already made are untouched. No migration, no new authority. `link_training_skill_v1` was checked in the same sweep and DELIBERATELY LEFT UNCONNECTED: the creating migration documents the skill seam as not crossed on purpose (worker_skills carries a closed provenance vocabulary, journal_entry_skills requires a real journal entry, and admitting a training provenance into the canonical ladder is named there as a later train and an owner decision), and nothing reads `training_skill_links` — connecting the write alone would make a write-only store. That is a bounded capability, not a missing one."
   },
 ];
 
@@ -549,7 +549,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/company"],
     coreModule: "lib/company/active-organization.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers.",
+    note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers. STEP C (2026-09-14) STOPPED this: it is a NEW AUTHORITY BOUNDARY, not a wiring gap. Verified against production — `owns_company` = company creator OR an active `owner`/`admin` company_membership, and the migration that widened it (20260904060000) records in its own proof note that a manager-role member deliberately satisfies neither arm. Meanwhile `manages_organization` DOES include manager/external_manager (20260806180000), so the two helpers encode two intentionally different authority levels and `company_workers_select` uses the narrower one. Pointing that policy at the wider helper would let managers read the roster (worker personal data) — RLS-loosening, RED class, owner gate. Production: 1 active manager, 7 company_workers rows, so exactly one real person is affected.",
   },
   {
     id: "ORG-6",
@@ -616,7 +616,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["app/[locale]/business"],
     coreModule: null,
     surfaces: ["app/[locale]/business"],
-    note: "Per-organization page exists; no index or directory route.",
+    note: "Per-organization page exists (/business/[slug], public, opted-in orgs only via `get_public_business_profile_v1`); no index or directory route. Step B STOPPED this item on a hard dependency rather than building it: there is no listing read. `organizations` SELECT is hardened to owner/member/admin (20260802170000), and the one cross-org reader, `search_organizations_directory_v1`, is revoked from anon, requires a >=2-char term, and deliberately refuses a wildcard dump — and it does NOT filter on `public_profile_enabled`, so using it for a directory would list organizations that never opted in. An index therefore needs a NEW SECURITY DEFINER listing RPC granted to anon: RED class (needs-human-gate), and NEW is not authorized in Step B.",
   },
 ];
 
@@ -645,7 +645,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/objects"],
     coreModule: "lib/objects/objects-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "One row in production; a section of the company workspace, no route of its own.",
+    note: "One row in production. NOT unreachable, and the earlier note read as if it were: work objects render on /dashboard/company (WorkObjectsSection), on /dashboard/tasks (listVisibleActiveObjects) and in the organization document register — three surfaces. Step B considered giving them a route of their own and did NOT: that would be a fourth surface over the same rows with no new outcome, and route-truth-map states the DUPLICATE_DRIFT list must shrink, never grow. What is missing is usage (one row), not reachability.",
   },
   {
     id: "WRK-3",
@@ -841,7 +841,7 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/work-hours", "lib/timesheets"],
     coreModule: "lib/work-hours/allocations-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Three stores plus one dead one, reconciled inside ONE SQL function; no TypeScript reader unions them.",
+    note: "STEP D (2026-09-14): this convergence WAS ALREADY DONE, and the note described a state that no longer exists. OWNER RULING 2026-08-18 made `journal_entry_metrics` the canonical persisted source and `lib/journal/work-time.ts` THE one derivation rule; its header records the exact defect it closed (three computations gave 0 h, 5 h and 9 h for the same production entry) and states that SQL mirrors it byte-for-byte with a guard pinning the pair. The stores are a PIPELINE, not parallel truths: `timesheet_compute_lines_v1` is labelled THE CANONICAL HOUR FACT and carries an explicit allocation-wins dedupe — an entry referenced by a live allocation is excluded so its hours count exactly once. A TypeScript reader that UNIONED the stores, which the old note asked for, would double-count by construction. Duplicate finding classified FALSE. CORRECTION REACHED THE SURFACE 2026-09-14. Until then an hour record was write-once from every screen: `recordCorrectionAction` — which writes a NEW allocation carrying `correction_of` and stamps the original's `superseded_by`, so both numbers and the link survive — had no control anywhere, and neither did anything else, because there is no delete path in the code or the database. Production held the whole apparatus unused: the two columns present, `authenticated` granted UPDATE, the update policy `manages_organization(organization_id) OR owns_worker(worker_id)`, 5 allocations and 0 superseded rows. Each entry on the quick-entry list now opens in place with its own object, hours and note; WHO and WHEN are carried hidden and never re-opened, because moving a record onto another person or day is a different act. The corrected original leaves every list by the `superseded_by is null` filter all three reads already carried — no new read, no new authority, no migration. Guard: lib/guards/work-hours-correction-reachable.test.ts.",
   },
   {
     id: "EVID-6",
@@ -950,7 +950,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/market/match-v1.ts"],
     coreModule: "lib/market/match-v1.ts",
     surfaces: ["app/[locale]/dashboard/opportunities"],
-    note: "One frozen fork is still reachable at /match-preview — a second matching truth (debt).",
+    note: "One frozen fork is reachable at /match-preview. STEP D (2026-09-14) tested it against the five-point convergence proof and classifies the DUPLICATE FINDING AS FALSE — preserve both. The fork and `match-v1` differ on every axis that matters: PERMISSIONS (anonymous marketing page vs authenticated board), PROVENANCE (two hand-typed intake schemas vs a subject assembled from the person's real rows with manager_confirmed/work_journal/self_declared tiers), LIFECYCLE (nothing persisted vs a board carrying interest and booking), and USER INTENT (a stranger deciding whether to sign up vs a member deciding whether to raise their hand). The fork's output shape is also the HONEST one for its input: it returns five blocker verdicts and refuses to produce a score, because there is no evidence behind typed input — re-pointing it at the canonical engine would run an evidence-weighted ranking over data with no provenance and hand a stranger a weak verdict for a perfect fit. Copy verified honest ('preview tool … does not book or save'). It remains real debt (two engines to maintain) and stays FROZEN by `staffing-fit-frozen.test.ts`; it is not a convergence candidate.",
   },
   {
     id: "DEM-6",
@@ -962,7 +962,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/market/match-team-v1.ts"],
     coreModule: "lib/market/match-team-v1.ts",
     surfaces: ["app/[locale]/dashboard/admin"],
-    note: "Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`.",
+    note: "Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`. STEP B (2026-09-14) STOPPED the employer surface on a missing consent relation, not on effort. The plan scopes it 'reachable only where a team has offered its supply against that employer's demand' (ARCH-4). No such relation exists: `team_enquiries` runs employer -> team and carries NO demand / customer_request reference, so consent there is ORG-scoped, not DEMAND-scoped. Implementing B4 as written needs a new demand-linked offer relation (NEW + migration, not authorized in Step B); implementing it on `team_enquiries` instead would silently widen the consent boundary the owner set in ARCH-4 from one demand to every demand that employer holds. That is an owner decision. Production 2026-09-14: 0 teams, 0 team_enquiries, 0 team_details — nobody is served either way today."
   },
   {
     id: "DEM-7",
@@ -981,12 +981,16 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     domain: "demand_supply",
     title: "Saved searches / alerts",
     worldElement: "market_world_map",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "Bookmarks exist; a recurring query that notifies does not.",
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_RPC_PROVEN",
+    anchors: [
+      "lib/opportunities/saved-search-model.ts",
+      "lib/opportunities/saved-searches.ts",
+      "components/app/saved-searches-strip.tsx",
+    ],
+    coreModule: "lib/opportunities/saved-search-model.ts",
+    surfaces: ["app/[locale]/dashboard/opportunities"],
+    note: "APPLIED TO PRODUCTION 2026-09-14 (ledger 20260914144310), owner approval same message, Decision 2, applied after Decision 1 was verified. The only item in the wave that genuinely needed new storage. THE GAP, in the register’s own earlier words: \"Bookmarks exist; a recurring query that notifies does not\" — `worker_saved_opportunities` remembers ONE opportunity already found; nothing remembered the QUESTION. ONE worker-owned table with three gated RPCs, shaped on the saved-opportunities precedent. NO second notification path and no second matcher: the alert is one more `notification_events` type written by the ONE audited emitter honouring the SAME preferences, and the matching is `applyDiscoveryFilters` — the board’s own — run over the cards the worker’s own read returned, so the count and the results cannot disagree. POINTER-ONLY like the weekly digest, exactly-once per search per ISO week through a deterministic entity id whose implementation was DE-DUPLICATED out of the digest emitter rather than copied. SEP-7: `newSinceSeen` is null, never zero, when a match carries no date, and an unknown count can never raise an alert. No demand facts are copied, so a saved search cannot go stale. BOUNDARIES PROVEN ON PRODUCTION in one rollback-guaranteed probe, acting as the `authenticated` role with a real `request.jwt.claim.sub`, first as one worker then as another: the saving worker saw 1 row, a DIFFERENT worker saw 0; an eighth criteria key was refused by the CHECK; a direct INSERT bypassing the RPC was refused with `permission denied for table worker_saved_searches`. Readback: 0 rows. Post-apply readback also confirms exactly ONE policy and it is SELECT, table ACL `authenticated=r`, all three RPCs `authenticated=X` with `anon` absent, the type constraint a strict superset (still carries `weekly_digest`), and notification preference rows still 0 — so NO email was activated by the apply (that channel defaults off, needs explicit opt-in, and needs a transactional path that is not configured). Pre-apply the paired db-proof (`scripts/db-proof/worker-saved-searches.sh`, 26/26) caught two defects that would otherwise have reached production: a CHECK containing a subquery (illegal in PostgreSQL — the apply would have failed) and a rollback whose data guard printed its refusal and then dropped the table anyway. Stays PARTIAL: delivery reaches a worker who opens the board — reaching those who do not is the email half, deliberately owner-gated behind notification consent.",
   },
   {
     id: "DEM-9",
@@ -1043,7 +1047,7 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     anchors: ["lib/worker/work-card-core.ts"],
     coreModule: "lib/worker/work-card-core.ts",
     surfaces: ["components/app/conversation"],
-    note: "Four incompatible availability vocabularies, none derived from another (debt).",
+    note: "STEP D (2026-09-14) classifies this duplicate finding FALSE: the vocabularies describe four different SUBJECTS, not one subject four ways. `WORK_CARD_AVAILABILITY_STATUSES` (available|busy|unavailable) is a PERSON's current state on `workers.availability_status`; `TeamAvailabilityStatus` (available_now|available_from|not_available) is a TEAM's deployability on `team_details`, pairing a state with a start date; `ASSET_AVAILABILITY` (available|assigned|maintenance|retired) is EQUIPMENT. Different subject, table, lifecycle and authority in each case — they share only the English word 'available'. Worker availability itself is read consistently against one literal across admin/league, launch-readiness and worker-readiness: no same-subject duplication found. Converging them would collapse three real distinctions.",
   },
   {
     id: "CAL-4",
@@ -1056,7 +1060,7 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     coreModule: "lib/workforce/capacity-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
     note:
-      "The three-state fix is ON MAIN (#1600, `lib/conversation/capacity.ts`) — the previous note, that it sat in an open RED PR, was stale. Capacity no longer reads one signal: FREE means neither an approved absence nor a commitment overlaps the window, UNAVAILABLE means an absence does, COMMITTED means only work does, and an input that did not answer is reported as unknown (`absencesKnown` / `commitmentsKnown`) rather than as 'no' — SEP-7 held at the read. Re-measured on production 2026-09-08, unchanged from the day the defect was found: `worker_absences` 0 rows, `booking_requests` 1 accepted, `project_worker_assignments` 3 active, so the two signals that were invisible are exactly the ones carrying all the real data. PARTIAL now rests on CAL-3's four incompatible availability vocabularies, which remain recorded debt.",
+      "The three-state fix is ON MAIN (#1600, `lib/conversation/capacity.ts`) — the previous note, that it sat in an open RED PR, was stale. Capacity no longer reads one signal: FREE means neither an approved absence nor a commitment overlaps the window, UNAVAILABLE means an absence does, COMMITTED means only work does, and an input that did not answer is reported as unknown (`absencesKnown` / `commitmentsKnown`) rather than as 'no' — SEP-7 held at the read. Re-measured on production 2026-09-08, unchanged from the day the defect was found: `worker_absences` 0 rows, `booking_requests` 1 accepted, `project_worker_assignments` 3 active, so the two signals that were invisible are exactly the ones carrying all the real data. CORRECTED 2026-09-14: this said PARTIAL “rests on CAL-3’s four incompatible availability vocabularies, which remain recorded debt” — but STEP D classified that finding FALSE the same week (four different SUBJECTS, not one subject four ways; converging them would collapse three real distinctions). Two register rows contradicted each other about the same fact, which is the defect the journey guard’s own header warns about. PARTIAL now rests on something measured instead: the assessment can say “I could not tell” — `unknownWorkerIds`, a stated language level outside the closed CEFR set — and until 2026-09-14 that reached no screen at all. The count is now carried to the planning zone (`unknownCapacityWorkers`) and rendered beside the shortfall, so a manager reads the number WITH its uncertainty rather than a confident figure built partly on people nobody could assess. What keeps it PARTIAL: only the LANGUAGE dimension can currently produce an unknown — skills and certificates answer yes/no with no third state — so a worker whose certificate cannot be interpreted is still silently a miss.",
   },
   {
     id: "CAL-5",
@@ -1080,19 +1084,19 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     anchors: ["lib/booking"],
     coreModule: "lib/booking/booking-state.ts",
     surfaces: ["app/[locale]/dashboard/bookings"],
-    note: "Nothing exists past `accepted`; the expiry RPC has no scheduler.",
+    note: "Nothing exists past `accepted`; the expiry RPC has no scheduler — and STEP C found the scheduler is not the blocker. `expire_stale_booking_requests_v1` raises 'Admin only' unless `auth.uid()` is non-null and `is_admin()`, and is granted to `authenticated`, not service_role; a Vercel cron request is a machine with no identity. The platform DOES already have a scheduler (vercel.json crons + `authorizeCronRequest`, fail-closed) — what is missing is an authority path for a machine caller, which is RED. Everything past `accepted` is separate and needs new state.",
   },
   {
     id: "CAL-7",
     domain: "time_capacity",
     title: "Capacity reservation",
     worldElement: "organizations",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "Nothing decrements anything. A reservation must warn, never prohibit (SEP-2).",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/workforce/commitment-reservation.ts", "lib/planning/worker-reservation.ts"],
+    coreModule: "lib/workforce/commitment-reservation.ts",
+    surfaces: ["app/[locale]/dashboard/projects"],
+    note: "Built by REUSE — no table, no RPC, no migration (owner-approved 2026-09-14, E2). The product could already answer \"who is free this week?\"; nothing asked at the moment somebody is COMMITTED. `reserveCapacity` is the one reservation rule and imports the calendar’s inclusive-range overlap from `planning-model` rather than forking it; `checkWorkerReservation` composes the two EXISTING authorized employer reads (`getEmployerWorkerCommitments`, `getEmployerWorkerAvailability`) and adds no query of its own; since 2026-09-14 the first of those also carries APPROVED business trips, so “already somewhere else” finally includes actually being somewhere else. It WARNS and cannot prohibit (SEP-2): the verdict has three states and no refusal, it is computed AFTER the assign RPC inside a try/catch so it can never fail a write, and it rides back on the OK result. `clear` is issued only when every source answered — an unreadable read, an undated window, or an assignment to an undated project all yield `unknown` with a named reason (SEP-7); `getEmployerWorkerCommitments` gained `undatedProjects` so those stop being silently dropped. Absence carries no label at any step, so an employer learns THAT, never why. PARTIAL because ONE commitment moment is wired — the manager assigning someone to a project. BOTH its surfaces now state the same verdict: the projects page renders the collisions as a list, and the chat, whose `company.assign-worker` / `company.move-worker` executors first DISCARDED it, appends the fact and the count to its success sentence. (An earlier note here claimed closing that needed a cross-cutting change to the shared inline-action “done” state; that was wrong — the chat’s assign path is its own callback, `runAssignWorker`, and the connection was local. Corrected 2026-09-14.) `unknown` is its own sentence on both surfaces and the note rides the SUCCESS branch only, so it can never become a refusal. Booking accept already has its own DB-level overlap guard; agency placement and demand commitment do not consult this yet.",
   },
   {
     id: "CAL-8",
@@ -1111,24 +1115,24 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     domain: "time_capacity",
     title: "Utilisation / FTE",
     worldElement: "organizations",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "Needs the actual-vs-planned capture that does not exist yet.",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/workforce/utilisation.ts", "lib/planning/roster-utilisation.ts"],
+    coreModule: "lib/workforce/utilisation.ts",
+    surfaces: ["app/[locale]/dashboard/company/planning"],
+    note: "Built by REUSE — no table, no RPC, no migration (owner-approved 2026-09-14, E4). NOT FTE, and the code says so: checked across every migration 2026-09-14, the schema records no PERSON-side contracted hours, FTE fraction or working pattern. `hours_per_week` does exist — twice, both inside the DEMAND payload projection, i.e. what an opening asks for; treating that as a worker’s capacity would collapse SEP-4 (DEMAND ≠ SUPPLY), and a guard names those two occurrences so a third gets reviewed. With no available time to divide by, a percentage against an assumed 8-hour day or 5-day week would be a number invented in code and read as a measurement. `measureUtilisation` therefore answers the narrower question it can measure — how many days of a STATED window a person is already committed for — and exports UTILISATION_DENOMINATOR = calendar_days so no caller can mistake \"18 of 30 days\" for \"60% FTE\"; the window travels with every answer. Days are counted as a SET, so two overlapping commitments are one committed day and nobody is 200% committed. Four states (SEP-7): `measured`; `partial` when something real cannot be placed on a calendar, where the counts are a FLOOR and the ratio is withheld because a ratio on an incomplete numerator looks complete; `unknown` with NULL counts when a source could not be read, never zero; `invalid_window`. The roster summary counts only the workers it could count into the denominator and issues a percentage only when EVERY worker is measured. Reuses the CAL-7 commitment and gap vocabulary and the same two authorized employer reads — including, since 2026-09-14, approved business trips, so a person away for three days is no longer counted as free for them. PARTIAL: this is COMMITTED-day coverage, not worked-vs-available utilisation — the latter stays unbuildable until the product records a capacity denominator, and inventing one is the thing this entry refuses to do.",
   },
   {
     id: "CAL-10",
     domain: "time_capacity",
     title: "Planned vs actual → learned duration / capacity",
     worldElement: "projects",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "The learning loop of the canonical flywheel. A forecast may never be stored as a fact (SEP-1).",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/workforce/learned-duration.ts", "lib/projects/learned-stage-duration.ts"],
+    coreModule: "lib/workforce/learned-duration.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
+    note: "Built by REUSE — no table, no RPC, no migration (owner-approved 2026-09-14, E3). Both halves already existed: every `project_stages` row carries planned_start/planned_end AND actual_start/actual_end, so every finished stage has been a measured planned-vs-actual answer since 20260718140000, and nothing read them back. `learnDurations` groups finished stages by a casefolded stage name — no stemming, no synonym table, because guessing that two names mean the same work would pool two bodies of evidence invisibly — and reports the median actual, the median planned and the median of the PER-OBSERVATION ratios (never the ratio of the medians, which would pair one stage’s plan with another’s outcome). SEP-1 is the whole discipline: nothing is written, nothing is cached, the reading is derived on every render, there is no `predictedDays` field anywhere, and a guard fails any migration that gives a learned duration a table. Sparse evidence stays sparse — below MIN_OBSERVATIONS=3 the medians are null and only the count is reported, and the panel renders nothing at all. Provenance rides with each reading (count, first/last observed day, source row ids). A stage marked done with no recorded actual dates is skipped, not assumed to have met its plan. PARTIAL: one surface reads it (the project operations board) and the unit of learning is the stage name; duration learned per profession, per team or per productivity unit is not attempted.",
   },
 ];
 
@@ -1169,11 +1173,12 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     title: "Assets / tools / equipment",
     worldElement: "objects",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_RPC_PROVEN",
     anchors: ["lib/assets"],
     coreModule: "lib/assets/assets-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`issue_asset_v1` has no availability guard and no lock.",
+    note: "APPLIED TO PRODUCTION 2026-09-14 (ledger 20260914144053), owner approval \"OWNER APPROVAL — BOTH RED APPLIES APPROVED\" Decision 1. THE DEFECT IT CLOSED: `issue_asset_v1` checked authority, required a target and validated the condition enum, then inserted an `issued` assignment and set `assets.availability = assigned` WITHOUT testing current availability, without checking for an existing open assignment, and without `for update` — so two managers could issue the same physical asset twice, and `lib/assets/assets.ts` kept only the FIRST open assignment per asset, hiding the second from the very screen that should have shown it. THE FIX: a partial unique index on one open assignment per asset, plus `select … for update` on the asset row in issue/transfer/return before any decision is read. PROVEN ON PRODUCTION, read-only plus two rollback-guaranteed probes (final RAISE aborts the transaction; readback confirmed 0 assets / 0 assignments after each): the index refused a second open assignment (`duplicate key value violates unique constraint \"asset_assignments_one_open_per_asset\"`), and the REAL RPC path, called as a live org manager, issued once then refused with \"asset is already issued and must be returned before it can be issued again\" and refused a maintenance asset with \"asset is not issuable while it is maintenance\". The two-session concurrency half (loser BLOCKING 2046ms on the row lock) was proven pre-apply on a real PostgreSQL 16 cluster against byte-identical bodies (`scripts/db-proof/asset-single-open-assignment.sh`, 22/22) — two concurrent sessions cannot be held through the MCP transport. AUTHORITY UNCHANGED, measured: the three lifecycle RPCs’ ACLs read `postgres=X | authenticated=X` both before and after, with `anon` absent in both, and the policy count on `assets` / `asset_assignments` is unchanged. Production exposure: 0 assets, 0 asset_assignments — the fix is in place ahead of first use. Stays PARTIAL because the asset surface itself is one manager screen: no handover signature, no condition photo, no maintenance schedule.",
+
   },
   {
     id: "MKT-4",
@@ -1266,7 +1271,7 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     anchors: ["lib/privacy"],
     coreModule: null,
     surfaces: ["app/[locale]/dashboard/inbox"],
-    note: "0 rows; the expiry RPC has no caller, so requests never expire.",
+    note: "0 rows; the expiry RPC has no caller, so requests never expire. STEP C established WHY, and it is not a missing cron entry: `expire_contact_disclosure_requests_v1` is granted to `authenticated` only (never service_role) and returns not_authorized unless `auth.uid()` is non-null AND `is_admin()`. A scheduler is a machine with no user identity, so it cannot satisfy either condition. Connecting it needs a grant change plus an authority-model change — RED, owner gate. The same is true of `expire_stale_booking_requests_v1` (CAL-6) and `expire_stale_team_enquiries_v1`.",
   },
   {
     id: "COM-3",
@@ -1505,7 +1510,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: ["lib/ai/runtime"],
     coreModule: "lib/ai/runtime/run-core.ts",
     surfaces: ["app/api"],
-    note: "47 real runs with real spend; six registered agents still have zero call sites.",
+    note: "47 real runs with real spend. SEVEN of the thirteen registered agents have zero call sites (admin_risk, booking_risk, country_readiness, document_assistant, skill_evidence, support_onboarding, translation_copy) — this note said SIX until it was counted on 2026-09-14; the count is now derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift again. Each one's domain is already answered DETERMINISTICALLY and connected (documents-gap, readiness-overview, skill-pipeline, the booking-conflict logic, the DeepL route, the country-readiness matrix), so giving them call sites would add a second model-based answer beside a working one, or seven new surfaces — an owner decision, not a wiring task.",
   },
   {
     id: "AI-4",

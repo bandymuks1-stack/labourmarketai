@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { PLANNED_TRIP_STATUSES } from "@/lib/planning/planning-model";
 
 /**
  * WHAT THE ROSTER IS ALREADY COMMITTED TO — the other half of "who is free?".
@@ -47,8 +48,11 @@ import { createClient } from "@/lib/supabase/server";
 /** One dated commitment, reduced to what a capacity answer needs. */
 export interface WorkerCommitment {
   readonly workerId: string;
-  /** `project` or `booking` — the two canonical committed-work sources. */
-  readonly kind: "project" | "booking";
+  /** The canonical committed-work sources. `trip` joined them on 2026-09-14:
+   *  an APPROVED business trip is a person working somewhere else, which is a
+   *  commitment by any reading, and it was the one dated commitment nothing
+   *  on the employer side counted. */
+  readonly kind: "project" | "booking" | "trip";
   /** The source row, so a caller can link to the real object. */
   readonly sourceId: string;
   /** Real title from the source; null renders an i18n noun, never invented
@@ -59,8 +63,25 @@ export interface WorkerCommitment {
   readonly endDate: string | null;
 }
 
+/**
+ * An active assignment to a project NOBODY DATED. It is a real commitment
+ * whose window is unknown, so it is reported SEPARATELY rather than folded
+ * into `commitments` — a capacity view must not invent a band for it, and a
+ * reservation verdict must not call the person clear while it exists
+ * (SEP-7, `lib/workforce/commitment-reservation.ts`).
+ */
+export interface UndatedProjectCommitment {
+  readonly workerId: string;
+  readonly projectId: string;
+  readonly label: string | null;
+}
+
 export type EmployerCommittedWorkResult =
-  | { readonly status: "ok"; readonly commitments: readonly WorkerCommitment[] }
+  | {
+      readonly status: "ok";
+      readonly commitments: readonly WorkerCommitment[];
+      readonly undatedProjects: readonly UndatedProjectCommitment[];
+    }
   /** A store is not provisioned here. NOT "nobody is committed to anything". */
   | { readonly status: "needs-migration" }
   /** A real read failure. NEVER rendered as an empty schedule. */
@@ -89,7 +110,7 @@ export async function getEmployerWorkerCommitments(
   /** OPTIONAL explicit caller (G4 bridge) — absent = the cookie session. */
   caller?: { readonly supabase: SupabaseClient },
 ): Promise<EmployerCommittedWorkResult> {
-  if (workerIds.length === 0) return { status: "ok", commitments: [] };
+  if (workerIds.length === 0) return { status: "ok", commitments: [], undatedProjects: [] };
   const supabase = caller?.supabase ?? (await createClient());
   const ids = workerIds.slice(0, READ_LIMIT);
 
@@ -150,7 +171,94 @@ export async function getEmployerWorkerCommitments(
     }
   }
 
+  // APPROVED AND COMPLETED BUSINESS TRIPS.
+  //
+  // NO NEW AUTHORITY: `business_trips_select` (20260817222000) already admits
+  // `profile_id = auth.uid() OR manages_organization(organization_id) OR
+  // is_admin()` — the same shape as every other source here, so a manager
+  // reads their own organization's trips and a stranger reads none.
+  //
+  // WHICH STATUSES COUNT is decided in ONE place, `PLANNED_TRIP_STATUSES` in
+  // `planning-model.ts`, and imported by every consumer. The employer's
+  // capacity read, the reservation verdict, the utilisation window and the
+  // person's own calendar therefore cannot come to different conclusions
+  // about whether a trip occupies time — which is the failure mode this
+  // product has hit before with hours, where three computations gave 0 h, 5 h
+  // and 9 h for the same entry.
+  //
+  // `approved` is a commitment somebody authorized; `completed` demonstrably
+  // happened and occupied those days. `draft` and `submitted` are intentions,
+  // and treating a pending request as unavailability would block scheduling
+  // on something nobody approved — the exact rule the absence read follows.
+  // `rejected` and `cancelled` are not commitments at all.
+  //
+  // `purpose` IS DELIBERATELY NOT READ. It is free text up to 1000 characters
+  // and it is not needed to answer "is this person committed"; the destination
+  // is, and it is the useful half. The select list is the boundary, the way
+  // `employer-availability.ts` makes it one — a column that never enters this
+  // process cannot leak from a later refactor.
+  //
+  // Trips are keyed by PROFILE, not by worker, so the ids are mapped through
+  // one bounded read rather than by assuming the two are interchangeable.
+  const profileByWorker = new Map<string, string>();
+  const workerByProfile = new Map<string, string>();
+  const workerRes = await asAny(supabase)
+    .from("workers")
+    .select("id, profile_id")
+    .in("id", ids)
+    .limit(READ_LIMIT);
+  if (workerRes.error) {
+    return MISSING_OBJECT_CODES.has(workerRes.error.code ?? "")
+      ? { status: "needs-migration" }
+      : { status: "unavailable" };
+  }
+  for (const w of (workerRes.data ?? []) as Record<string, unknown>[]) {
+    const workerId = w.id as string;
+    const profileId = (w.profile_id as string | null) ?? null;
+    if (!profileId) continue;
+    profileByWorker.set(workerId, profileId);
+    workerByProfile.set(profileId, workerId);
+  }
+
+  type TripRow = {
+    id: string;
+    profile_id: string;
+    destination: string | null;
+    date_from: string | null;
+    date_to: string | null;
+  };
+  let tripRows: TripRow[] = [];
+  const profileIds = [...workerByProfile.keys()];
+  if (profileIds.length > 0) {
+    const tripsRes = await asAny(supabase)
+      .from("business_trips")
+      .select("id, profile_id, destination, date_from, date_to")
+      .in("profile_id", profileIds)
+      .in("status", [...PLANNED_TRIP_STATUSES])
+      .limit(READ_LIMIT);
+    if (tripsRes.error) {
+      return MISSING_OBJECT_CODES.has(tripsRes.error.code ?? "")
+        ? { status: "needs-migration" }
+        : { status: "unavailable" };
+    }
+    tripRows = (tripsRes.data ?? []) as TripRow[];
+  }
+
   const commitments: WorkerCommitment[] = [];
+  const undatedProjects: UndatedProjectCommitment[] = [];
+  for (const t of tripRows) {
+    const workerId = workerByProfile.get(t.profile_id);
+    if (!workerId) continue;
+    commitments.push({
+      workerId,
+      kind: "trip",
+      sourceId: t.id,
+      // The place, which is the useful fact. Never the purpose.
+      label: t.destination,
+      startDate: t.date_from,
+      endDate: t.date_to,
+    });
+  }
   for (const b of (bookingsRes.data ?? []) as Record<string, unknown>[]) {
     commitments.push({
       workerId: b.worker_id as string,
@@ -163,11 +271,21 @@ export async function getEmployerWorkerCommitments(
   }
   for (const a of assignments) {
     // An assignment to a project with no dates is a real assignment to an
-    // undated band. It is DROPPED from capacity rather than assumed to cover
-    // today: assuming would make a worker unavailable on evidence nobody
-    // recorded, which is the same class of invention this fix exists to end.
+    // undated band. It is kept OUT of `commitments` rather than assumed to
+    // cover today: assuming would make a worker unavailable on evidence
+    // nobody recorded, which is the same class of invention this fix exists
+    // to end. It is not thrown away either — it is reported as an undated
+    // commitment, so a caller that needs a COMPLETE answer (the reservation
+    // verdict) can say "I could not account for this" instead of "clear".
     const project = projectById.get(a.project_id as string);
-    if (!project?.startDate) continue;
+    if (!project?.startDate) {
+      undatedProjects.push({
+        workerId: a.worker_id as string,
+        projectId: a.project_id as string,
+        label: project?.title ?? null,
+      });
+      continue;
+    }
     commitments.push({
       workerId: a.worker_id as string,
       kind: "project",
@@ -177,5 +295,5 @@ export async function getEmployerWorkerCommitments(
       endDate: project.endDate,
     });
   }
-  return { status: "ok", commitments };
+  return { status: "ok", commitments, undatedProjects };
 }

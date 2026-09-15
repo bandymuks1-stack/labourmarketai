@@ -382,7 +382,8 @@
         "event_work_task_assigned": "En opgave er blevet tildelt dig",
         "event_demand_interest_expressed": "En medarbejder har vist interesse for dit behov",
         "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået",
-        "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar"
+        "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar",
+        "event_saved_search_match": "En gemt søgning har nye resultater"
       },
       "email": {
         "open": "Åbn i LabourMarket.ai:",
@@ -3800,6 +3801,8 @@
       "assignUnavailable": "Jeg kunne ikke læse dit team lige nu.",
       "assignEngagementCandidate": "kandidat fra accepteret tilbud",
       "assignDone": "Tildelt projektet.",
+      "assignAlreadyCommitted": "Bemærk: personen er allerede booket på nogle af disse dage ({count}). Tildelingen står ved magt — du bestemmer.",
+      "assignCommitmentUnknown": "Vi kunne ikke bekræfte, at disse dage er ledige. Det er ikke det samme som ledige.",
       "assignFailed": "Tildelingen kunne ikke gennemføres.",
       "chipEngagements": "Hvem jeg arbejder med",
       "userEngagements": "Hvem arbejder jeg med?",
@@ -6006,7 +6009,13 @@
       "issuedOnLabel": "Udstedt",
       "expiresOnLabel": "Gyldigt til",
       "attachCertificate": "Gem bevis",
-      "markExpired": "Marker som udløbet"
+      "markExpired": "Marker som udløbet",
+      "editProgram": "Rediger dette kursus",
+      "saveProgram": "Gem ændringer",
+      "activeLabel": "Kører stadig",
+      "activeYes": "Ja — kan tildeles",
+      "activeNo": "Nej — udgået",
+      "retired": "Udgået"
     },
     "certificates": {
       "heading": "Beviser",
@@ -6181,6 +6190,11 @@
       "not_found": "Ikke fundet.",
       "limit_reached": "Der er allerede for meget her.",
       "error": "Noget gik galt. Intet blev gemt."
+    },
+    "edit": {
+      "open": "Ret dette udkast",
+      "save": "Gem ændringer",
+      "responsible": "Skift ansvarlig person (lad stå tomt for at beholde)"
     }
   },
   "talentPreview": {
@@ -6305,7 +6319,10 @@
         "notAuthorized": "Du må ikke registrere disse timer.",
         "generic": "Behandlingen mislykkedes. Prøv igen."
       }
-    }
+    },
+    "correct": "Ret",
+    "correctCancel": "Annullér",
+    "correctHint": "Ved at gemme oprettes en ny post, og den oprindelige bevares ved siden af — intet slettes."
   },
   "companyHome": {
     "eyebrow": "Din organisation nu",

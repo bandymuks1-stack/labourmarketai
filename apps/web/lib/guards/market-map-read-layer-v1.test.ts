@@ -913,6 +913,25 @@ describe("NO new DB migration in this PR", () => {
     //   table, column, policy, grant or function touched. GREEN class;
     //   self-applied via MCP under the conditional prod-apply rule.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
+    // 281 -> the count below: MKT-3, one open assignment per asset
+    //   (20260914120000_asset_single_open_assignment_v1, paired rollback).
+    //   Owner approval "OWNER DECISIONS — APPROVED EXECUTION WAVE"
+    //   (2026-09-14) for the minimum RED tightening that stops the same asset
+    //   being issued twice. Adds ONE partial unique index and replaces three
+    //   SECURITY DEFINER bodies to take the asset row lock; no table, column,
+    //   policy or authority change, and the only privilege statements are
+    //   three revokes of anon. RED class (definer replacement): merged behind
+    //   the human gate, production apply is a separate owner act.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+        // 281 -> the count below: DEM-8 saved searches
+    //   (20260914140000_worker_saved_searches_v1, paired guarded rollback).
+    //   Owner approval "OWNER DECISIONS — APPROVED EXECUTION WAVE"
+    //   (2026-09-14) for narrow query/criteria persistence. ONE new
+    //   worker-owned table with three gated RPCs + the notification type
+    //   widening by the v2..v6 drop-and-re-add idiom (a strict superset).
+    //   RED class: merged behind the human gate, production apply is a
+    //   separate owner act.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
     // 280 -> 281: WRK-8 assignee read (20260914200000_defects_assignee_read_v1,
     //   owner decision 2a of 2026-09-14, paired rollback). ONE disjunct added
     //   to `defects_select` so the worker a defect is ASSIGNED to can read it;
@@ -924,7 +943,11 @@ describe("NO new DB migration in this PR", () => {
     //   owner decision 4e). Prepared for review only, ships UNAPPLIED, no
     //   annotation. Nothing in the market-map read layer is touched.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
-expect(count).toBeLessThanOrEqual(282);
+    // 282 -> 284: #1739 reconciled onto main after #1740 — MKT-3 and DEM-8
+    //   (both APPLIED to production as ledger 20260914144053 / 20260914144310
+    //   before this branch was rebased) join the five #1740 files.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 284.
+    expect(count).toBeLessThanOrEqual(284);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

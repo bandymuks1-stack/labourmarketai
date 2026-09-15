@@ -33,6 +33,23 @@ const PURE_MODULES = [
   // P10: the planning-zone view model — pure shaping behind the ONE visual
   // workforce-planning surface (page: dashboard/company/planning).
   "planning-zone-view.ts",
+  // CAL-7 (owner-approved 2026-09-14): the ONE capacity-reservation rule.
+  // Pure by the same contract as the rest of this list — it imports the
+  // calendar's inclusive-range overlap from planning-model rather than
+  // forking it, reads nothing, and cannot express a refusal (SEP-2). The
+  // authorized reads it is fed live in lib/planning, not here, so no new
+  // table or data path enters the workforce layer.
+  "commitment-reservation.ts",
+  // CAL-10 (owner-approved 2026-09-14): the ONE learned-duration reading.
+  // Pure, and deliberately storeless — a forecast may never be persisted as
+  // a fact (SEP-1), so the reading is derived from finished project_stages
+  // rows on every render. The authorized read lives in lib/projects.
+  "learned-duration.ts",
+  // CAL-9 (owner-approved 2026-09-14): utilisation over a window, read from
+  // the SAME commitment vocabulary CAL-7 defines. Pure. It names its
+  // denominator (calendar days) because the schema records no contracted
+  // hours, and it withholds a ratio rather than build one on a floor.
+  "utilisation.ts",
 ] as const;
 
 const sourceFiles = readdirSync(WORKFORCE_DIR).filter(
@@ -44,7 +61,7 @@ function src(file: string): string {
 }
 
 describe("Guard: workforce module inventory", () => {
-  it("ships exactly the four pure modules + one server service", () => {
+  it("ships exactly the declared pure modules + one server service", () => {
     expect([...sourceFiles].sort()).toEqual(
       [...PURE_MODULES, "workforce.ts"].sort(),
     );

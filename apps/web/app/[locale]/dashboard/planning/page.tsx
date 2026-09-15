@@ -90,6 +90,9 @@ const SOURCE_TONE: Record<PlanningSourceType, string> = {
   // Time Engine W2: the W6/W7 sources joined the canonical calendar.
   absence: "border-state-amber/40 text-state-amber",
   stage: "border-brand-violet/40 text-brand-violet",
+  // 2026-09-14: an approved trip is the person being somewhere else, so it
+  // reads as a place, not as an absence — its own tone, not the amber one.
+  trip: "border-brand-cyan/40 text-brand-cyan",
 };
 
 /** Canonical href — omits defaults so the clean URL stays canonical. */

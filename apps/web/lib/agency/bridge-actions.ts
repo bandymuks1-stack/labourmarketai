@@ -43,11 +43,15 @@ function emitFirstRealAction(
 
 /**
  * Real two-subject bridge — server actions (issue #859). Thin wrappers around
- * the owner-gated RPCs from migration 20260723180000. EVERY authorization rule
- * lives server-side in the SECURITY DEFINER RPCs (agency/client identity,
- * connection-active, share-active, roster ownership, own-request-only,
- * own-JWT-email accept). Until the migration is applied each action reports
- * `needs-migration`. No outbound action of any kind.
+ * the RPCs from migration 20260723180000, which IS APPLIED on production
+ * (verified 2026-09-14: the three tables, the share SELECT policy and
+ * `unshare_request_v1(uuid)` are all present). The old wording here —
+ * "owner-gated RPCs … until the migration is applied" — described a state
+ * that has passed. EVERY authorization rule lives server-side in the SECURITY
+ * DEFINER RPCs (agency/client identity, connection-active, share-active,
+ * roster ownership, own-request-only, own-JWT-email accept). The
+ * `needs-migration` outcome remains for an environment where the objects are
+ * absent. No outbound action of any kind.
  */
 export type BridgeActionState =
   | { status: "idle" }

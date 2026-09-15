@@ -325,6 +325,9 @@
       "invalid": "Bitte prüfen Sie die Angaben.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie dürfen das nicht tun.",
+      "already_issued": "Bereits an jemand anderen ausgegeben. Zuerst zurückgeben.",
+      "not_issuable": "Derzeit nicht ausgebbar — in Wartung oder ausgemustert.",
+      "not_found": "Dieser Eintrag existiert nicht mehr. Bitte neu laden.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     },
     "myEmpty": "Dir sind derzeit keine Werkzeuge oder Geräte zugewiesen."
@@ -581,6 +584,11 @@
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie können nur Phasen Ihrer eigenen Projekte verwalten.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    },
+    "learned": {
+      "median": "Vergleichbare abgeschlossene Phasen dauerten {days} Tage (Median aus {count})",
+      "vsPlan": "geplant {days}",
+      "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden."
     }
   },
   "activityCentre": {
@@ -1850,7 +1858,10 @@
     "expSaving": "Speichern…",
     "expInvalid": "Bitte Position und mindestens das Startjahr angeben.",
     "expNeedsMigration": "Diese Funktion ist noch nicht aktiviert. Bitte später versuchen.",
-    "expError": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    "expError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "expRemove": "Entfernen",
+    "expRemoveInUse": "Zu diesem Eintrag gehören Arbeitsaufzeichnungen, deshalb wurde er nicht entfernt.",
+    "expRemoveError": "Dieser Eintrag konnte nicht entfernt werden."
   },
   "roleDashboards": {
     "company": {
@@ -4603,7 +4614,8 @@
         "event_work_task_assigned": "Ihnen wurde eine Aufgabe zugewiesen",
         "event_demand_interest_expressed": "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet",
         "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
-        "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit"
+        "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
+        "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -5867,7 +5879,18 @@
       "noWorkers": "Sie haben noch keine zuweisbaren Arbeitskräfte in Ihrem Team.",
       "fromRoster": "Eine Arbeitskraft diesem Objekt zuweisen",
       "rosterGroup": "Teammitglieder",
-      "engagementGroup": "Kandidaten mit angenommenem Angebot"
+      "engagementGroup": "Kandidaten mit angenommenem Angebot",
+      "reservation": {
+        "collidesTitle": "An diesen Tagen bereits verplant",
+        "notBlocking": "Das blockiert die Zuweisung nicht — Sie entscheiden.",
+        "unknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
+        "source": {
+          "project": "Projekt",
+          "booking": "Buchung",
+          "trip": "Dienstreise",
+          "absence": "Nicht verfügbar"
+        }
+      }
     },
     "model": {
       "note": "Dieses Board folgt dem Betriebsmodell der Plattform: Spielerkarten von Arbeitskräften werden Objekten (Projekten) zugewiesen, und Sie verwalten die Zuweisungen.",
@@ -6771,6 +6794,7 @@
     "noMembers": "Noch keine Mitglieder. Laden Sie unten Arbeitskräfte aus Ihrer verknüpften Belegschaftsliste ein — jede Person tritt nach eigener Annahme bei.",
     "capabilityHeading": "Was diese Kolonne angibt",
     "capabilityEmpty": "Noch keine angegebenen Fähigkeiten unter den Mitgliedern — nichts wird erfunden.",
+    "capabilityUnknown": "Fähigkeiten konnten gerade nicht gelesen werden — das heißt nicht, dass es keine gibt.",
     "declaredShort": "angegeben von {count}",
     "confirmedShort": "bestätigt für {count}",
     "noAddable": "Keine verknüpften Arbeitskräfte mehr zum Hinzufügen. Laden Sie zuerst Arbeitskräfte im Bereich Belegschaftsliste ein.",
@@ -9287,6 +9311,27 @@
       "mapTitle": "Wo die Arbeit ist",
       "skipToList": "Zur Liste",
       "placeLink": "Möglichkeiten in diesem Land zeigen"
+    },
+    "savedSearches": {
+      "title": "Gespeicherte Suchen",
+      "intro": "Eine Frage, die du behältst — die Antwort wird bei jedem Öffnen neu berechnet.",
+      "empty": "Noch keine gespeicherten Suchen. Grenze die Liste ein und speichere die Frage.",
+      "matches": "{count} Treffer",
+      "new": "{count} neu",
+      "delete": "Entfernen",
+      "labelField": "Name für diese Suche",
+      "labelPlaceholder": "z. B. SchweiÞn in NL",
+      "saveCurrent": "Diese Suche speichern",
+      "limitReached": "Du hast das Limit von {limit} gespeicherten Suchen erreicht.",
+      "outcome": {
+        "saved": "Gespeichert.",
+        "deleted": "Entfernt.",
+        "invalid": "Bitte Name und Filter prüfen.",
+        "limit": "Das Limit ist erreicht.",
+        "auth": "Bitte erneut anmelden.",
+        "feature-absent": "Noch nicht verfügbar — das Update für gespeicherte Suchen ist nicht angewendet.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
     }
   },
   "workerIntake": {
@@ -10249,7 +10294,8 @@
       "capacityLabel": "Kapazitätsabdeckung",
       "userEntered": "Ihre Eingabe: {count}",
       "systemSuggested": "Automatisch vorgeschlagen: {count} (bestätigen oder bearbeiten)",
-      "confirmedRequired": "Bestätigt: {count}"
+      "confirmedRequired": "Bestätigt: {count}",
+      "unknownCapacity": "{count} konnten nicht bewertet werden — die Lücke ist möglicherweise kleiner"
     },
     "risk": {
       "none": "Kein Kapazitätsrisiko in dieser Ansicht.",
@@ -10317,6 +10363,14 @@
       "noneRecordedNext": "Für die nächsten 7 Tage ist keine genehmigte Abwesenheit erfasst.",
       "notReadable": "Kann gerade nicht gelesen werden",
       "basis": "Das aktive Team zählt Beschäftigte, die aktiv mit Ihrem Unternehmen verknüpft sind. Abwesenheiten sind genehmigte erfasste Abwesenheiten — eine Person ohne erfasste Abwesenheit ist damit nicht bestätigt bei der Arbeit. Die Zahl der Arbeitseinträge umfasst Einträge, die Beschäftigte heute in den Beschäftigungsverhältnissen Ihrer Organisation erfasst haben. Gründe für Abwesenheiten bleiben privat."
+    },
+    "utilisation": {
+      "title": "Verplanter Anteil der kommenden Wochen",
+      "committedDays": "{committed} von {counted} Personentagen verplant — {workers} Personen über {days} Tage",
+      "noneCounted": "Für diesen Zeitraum konnten von niemandem Verpflichtungen gezählt werden.",
+      "partial": "{count} davon konnten nicht vollständig gezählt werden — etwas Reales hat keine Daten, die Zahl oben ist also eine Untergrenze.",
+      "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
+      "denominatorNote": "Gezählt in Kalendertagen. Vertragsstunden werden nicht erfasst, dies ist also keine VZÄ-Kennzahl."
     }
   },
   "tasks": {
@@ -11321,7 +11375,10 @@
     "shareButton": "Teilen",
     "noDemands": "Erstellen Sie zuerst eine Anfrage, dann können Sie sie teilen.",
     "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
-    "fromAgency": "Von"
+    "fromAgency": "Von",
+    "sharedHeading": "Mit dieser Agentur geteilt",
+    "noShared": "Noch nichts mit dieser Agentur geteilt",
+    "unshareButton": "Diese Anfrage nicht mehr teilen"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -12681,6 +12738,8 @@
       "assignUnavailable": "Dein Team konnte gerade nicht gelesen werden.",
       "assignEngagementCandidate": "Kandidat aus angenommenem Angebot",
       "assignDone": "Dem Projekt zugewiesen.",
+      "assignAlreadyCommitted": "Hinweis: An einigen dieser Tage besteht bereits eine Verpflichtung ({count}). Die Zuweisung bleibt bestehen — Sie entscheiden.",
+      "assignCommitmentUnknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
       "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden.",
       "chipEngagements": "Mit wem ich arbeite",
       "userEngagements": "Mit wem arbeite ich?",
@@ -15242,7 +15301,13 @@
       "issuedOnLabel": "Ausgestellt am",
       "expiresOnLabel": "Gültig bis",
       "attachCertificate": "Zertifikat speichern",
-      "markExpired": "Als abgelaufen markieren"
+      "markExpired": "Als abgelaufen markieren",
+      "editProgram": "Diesen Kurs bearbeiten",
+      "saveProgram": "Änderungen speichern",
+      "activeLabel": "Läuft weiterhin",
+      "activeYes": "Ja — kann zugewiesen werden",
+      "activeNo": "Nein — eingestellt",
+      "retired": "Eingestellt"
     },
     "certificates": {
       "heading": "Zertifikate",
@@ -15417,6 +15482,11 @@
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    },
+    "edit": {
+      "open": "Diesen Entwurf korrigieren",
+      "save": "Änderungen speichern",
+      "responsible": "Verantwortliche Person ändern (leer lassen, um sie zu behalten)"
     }
   },
   "talentPreview": {
@@ -15629,7 +15699,10 @@
         "notAuthorized": "Sie dürfen diese Stunden nicht erfassen.",
         "generic": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen."
       }
-    }
+    },
+    "correct": "Korrigieren",
+    "correctCancel": "Abbrechen",
+    "correctHint": "Beim Speichern entsteht ein neuer Eintrag, der ursprüngliche bleibt daneben erhalten — nichts wird gelöscht."
   },
   "oauthConsent": {
     "title": "Zugriff bestätigen",
@@ -15983,5 +16056,65 @@
     "ledgerNone": "nichts in diesem Zeitraum ({period})",
     "ledgerFigures": "{hours} Std. · {rows, plural, one {# Zeile} other {# Zeilen}} · {days, plural, one {# Tag} other {# Tage}}",
     "rule": "Die Tagebuchzahlen und die Erfassung der Organisation sind zwei Aufzeichnungen derselben Arbeit, nebeneinander gezeigt und nie addiert. Eine Stundenerfassung sagt, wann und wie viel, nicht was — sie erreicht keine Fähigkeit."
+  },
+  "countryReadiness": {
+    "heading": "Was dieses Land von Ihnen verlangt",
+    "intro": "Der EU-Rahmen, der gilt, wenn Sie hier arbeiten, Arbeitskräfte entsenden oder ein Team einsetzen. Jede Aussage nennt ihre offizielle Quelle und das Datum der letzten Prüfung. Wo eine Regel national statt EU-weit ist, sagen wir das und verweisen auf die offizielle nationale Seite, statt zu raten.",
+    "noResearchYet": "Die Anforderungen dieses Landes haben wir noch nicht recherchiert. Das heißt, wir haben Ihnen nichts zu zeigen — nicht, dass es nichts zu erfüllen gibt. Wir lassen das lieber leer, als es mit Daten eines Nachbarlandes zu füllen.",
+    "nationalInfo": "Die nationalen Regeln dieses Landes veröffentlichen die Behörden selbst:",
+    "nationalInfoLink": "offizielle Informationen zur Arbeitnehmerentsendung",
+    "disclaimer": "Dies ist mit Quellen belegte Information, keine Rechtsberatung. Regeln ändern sich und nationale Details unterscheiden sich; prüfen Sie alles, was eine Entscheidung beeinflusst, bei der offiziellen nationalen Behörde.",
+    "fieldSource": "Quelle",
+    "fieldConfidence": "Grundlage",
+    "fieldLastReviewed": "Geprüft",
+    "scope": {
+      "worker_solo": {
+        "label": "Selbst hier arbeiten",
+        "description": "Sie arbeiten in diesem Land als örtliche Arbeitskraft oder auf eigene Rechnung."
+      },
+      "worker_posted": {
+        "label": "Aus einem anderen Land hierher entsandt werden",
+        "description": "Ihr Arbeitgeber schickt Sie vorübergehend hierher, während Ihr Arbeitsverhältnis zu Hause bestehen bleibt — die Entsenderichtlinie gilt."
+      },
+      "team_subcontracting": {
+        "label": "Ein Team als Subunternehmer hier einsetzen",
+        "description": "Ein Team oder Subunternehmer arbeitet hier grenzüberschreitend. Jede entsandte Person führt eigene Unterlagen mit, und Kettenhaftung kann greifen."
+      },
+      "company_hiring": {
+        "label": "Als Unternehmen hier einstellen oder einsetzen",
+        "description": "Ihr Unternehmen beschäftigt oder entsendet Menschen in dieses Land, was eigene Melde- und Steuerpflichten mit sich bringt."
+      }
+    },
+    "level": {
+      "required": "Erforderlich",
+      "recommended": "Empfohlen",
+      "conditional": "Kommt darauf an"
+    },
+    "risk": {
+      "high": "Hohes Risiko, wenn es fehlt",
+      "medium": "Mittleres Risiko",
+      "low": "Geringes Risiko"
+    },
+    "confidence": {
+      "needs_legal_review": "Dieser Teil ist national, nicht EU-weit. Die konkrete Regel dieses Landes haben wir nicht geprüft — behandeln Sie das als Frage, die zu stellen ist, nicht als Antwort, die wir Ihnen gegeben haben."
+    },
+    "confidenceShort": {
+      "official": "Offizielle EU-Quelle",
+      "strong": "Gut etabliert",
+      "needs_legal_review": "Rechtliche Prüfung nötig"
+    },
+    "explanation": {
+      "valid_id_document": "Ein gültiger Reisepass oder Personalausweis. Nehmen Sie das Dokument selbst mit, keine Kopie — es ist das, was bei einer Kontrolle Ihre Identität belegt.",
+      "right_to_work": "Das Recht, hier zu arbeiten. Als EU/EWR-Bürgerin oder -Bürger brauchen Sie keine Arbeitserlaubnis. Andernfalls brauchen Sie eine Arbeits- und/oder Aufenthaltserlaubnis — klären Sie vor der Reise bei der nationalen Behörde, welche.",
+      "a1_certificate": "Eine A1-Bescheinigung. Bleiben Sie während der Arbeit hier in Ihrem Heimatland versichert, belegt A1, welches Sozialversicherungsrecht für Sie gilt. Ohne sie können Sie als nicht versichert behandelt werden.",
+      "prior_posting_notification": "Eine Vorabmeldung, eingereicht vor Arbeitsbeginn. Die meisten Aufnahmeländer verlangen, die Entsendung im Voraus zu melden; das Portal ist national — nutzen Sie den Länderlink unten.",
+      "employment_contract": "Ihr Arbeitsvertrag und die schriftlichen Entsendebedingungen. Bei einer Kontrolle nicht immer verlangt, aber das Dokument, das einen Streit darüber klärt, was vereinbart wurde.",
+      "host_minimum_conditions": "Mindestlohn und Kernarbeitsbedingungen dieses Landes gelten für Sie während der Entsendung, auch wenn Ihr Arbeitsverhältnis zu Hause bestehen bleibt. Die genauen Sätze und Regeln sind national.",
+      "posted_worker_package": "Ein vollständiger Satz Unterlagen für jede entsandte Person im Team — jede braucht eigene A1, Meldung und Vertragsunterlagen. Ein gemeinsamer Satz für die Gruppe genügt nicht.",
+      "subcontractor_liability": "Kettenhaftung. In vielen Ländern kann ein Generalunternehmer für nicht gezahlte Löhne eines Subunternehmers haften. Die Regeln unterscheiden sich und sollten vor Unterzeichnung geklärt werden.",
+      "company_posting_registration": "Anmeldung der Entsendung durch das Unternehmen. Das ist eine Pflicht des Arbeitgebers, getrennt von dem, was die einzelne Arbeitskraft einreicht.",
+      "company_tax_vat": "Umsatzsteuer-, Steuer- und Sozialversicherungsanmeldung des Unternehmens. Ob das gilt, hängt davon ab, worin die Arbeit besteht und wie lange sie dauert.",
+      "national_specifics": "Länderspezifische Unterlagen — Branchen- oder Bauausweise, örtliche Registrierung, nationale Steuer- und Sozialversicherungsschritte. Die gibt es in den meisten Ländern, aber die Details sind national — prüfen Sie sie auf der offiziellen Seite."
+    }
   }
 }

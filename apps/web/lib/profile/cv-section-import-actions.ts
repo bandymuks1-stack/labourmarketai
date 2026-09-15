@@ -36,7 +36,8 @@ import {
  *                   (migration 20260714161000 — APPLIED; verified on
  *                   production 2026-09-07. The needs_migration branch stays
  *                   for environments without it);
- *   education     → worker_education (DRAFT 20260714160000);
+ *   education     → worker_education (20260714160000 — APPLIED, ledger
+ *                   `20260716195418`, 4 rows on production 2026-09-14);
  *   language      → worker_languages via save_worker_language_v1 (applied);
  *   certificate   → worker_achievements with slug 'declared_certificate'
  *                   (HONEST MAPPING: no file exists, so no worker_documents
@@ -70,6 +71,11 @@ export type CvImportConfirmResult =
       /** Human-renderable existing value for conflict display. */
       existing?: string;
     };
+
+/** Shape check only — authority is the RPC (a well-formed id the caller does
+ *  not own answers `not_found`, never an existence oracle). */
+const UUID_RX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(supabase: SupabaseClient): any {
@@ -152,6 +158,54 @@ export async function confirmCvWorkHistoryAction(input: {
     console.error("[cv-import] work-history save failed:", error.code, error.message);
     return { ok: false, code: "error" };
   }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/**
+ * REMOVE one self-declared work-history entry.
+ *
+ * The person could type an entry into their own profile and never take it
+ * back: `remove_self_declared_work_history_v1` has been applied and callable
+ * since migration 20260714161000 and no surface reached it. Something a person
+ * stated about themselves that they can never withdraw is the wrong shape for
+ * a living CV.
+ *
+ * EVERY limit is the RPC's own, re-checked server-side: only the caller's own
+ * row (`profile_id = auth.uid()`), only a self-declared one
+ * (`organization_id is null`), never the primary engagement, and never one a
+ * journal entry references — the FK is RESTRICT and the RPC answers `in_use`
+ * rather than destroying history that carries real records. This action adds
+ * no authority; it maps `in_use` to `conflict` so the surface can say why.
+ */
+export async function removeSelfDeclaredWorkHistoryAction(
+  id: string,
+): Promise<CvImportConfirmResult> {
+  const ctx = await requireUser();
+  if (!ctx) return { ok: false, code: "unauthenticated" };
+  if (typeof id !== "string" || !UUID_RX.test(id)) {
+    return { ok: false, code: "invalid" };
+  }
+
+  const { data, error } = await asAny(ctx.supabase).rpc(
+    "remove_self_declared_work_history_v1",
+    { p_id: id },
+  );
+  if (error) {
+    if (["42883", "PGRST202"].includes(error.code ?? "")) {
+      return { ok: false, code: "needs_migration" };
+    }
+    console.error("[cv-import] work-history remove failed:", error.code);
+    return { ok: false, code: "error" };
+  }
+  const outcome = String(data ?? "");
+  // `in_use` is not a failure of this action — it is the database refusing to
+  // destroy an entry that journal records point at. Say so, do not retry.
+  if (outcome === "in_use") return { ok: false, code: "conflict" };
+  // `not_found` covers a missing row AND one the caller may not touch: the RPC
+  // merges them deliberately so nothing here becomes an existence oracle.
+  if (outcome !== "removed") return { ok: false, code: "invalid" };
+
   revalidatePath("/", "layout");
   return { ok: true };
 }

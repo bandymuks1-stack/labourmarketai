@@ -91,16 +91,18 @@ export async function getProjectGallerySummary(
         .from("journal_entries")
         .select("*", { count: "exact", head: true })
         .eq("project_id", projectId)
-        .is("deleted_at", null),
+        .is("deleted_at", null)
+        .is("superseded_by", null),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from("journal_entry_photos")
-        .select("id, journal_entries!inner(project_id, deleted_at)", {
+        .select("id, journal_entries!inner(project_id, deleted_at, superseded_by)", {
           count: "exact",
           head: true,
         })
         .eq("journal_entries.project_id", projectId)
         .is("journal_entries.deleted_at", null)
+        .is("journal_entries.superseded_by", null)
         .eq("upload_status", "uploaded"),
     ]);
     if (!entriesRes.error && typeof entriesRes.count === "number") {

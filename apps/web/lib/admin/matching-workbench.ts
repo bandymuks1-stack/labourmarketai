@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -308,10 +309,9 @@ export async function listWorkbench(
         .from("worker_skills")
         .select("worker_id, verified, skills ( esco_uri )")
         .in("worker_id", workerIds),
-      asAny(supabase)
-        .from("journal_entries")
-        .select("id, worker_id")
-        .in("worker_id", workerIds),
+      liveJournalEntriesOnly(
+        asAny(supabase).from("journal_entries").select("id, worker_id").in("worker_id", workerIds),
+      ),
     ]);
 
     for (const p of (profs.data ?? []) as {

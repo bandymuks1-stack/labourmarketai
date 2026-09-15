@@ -135,6 +135,53 @@ export async function readAllPages<T>(
  *  (`work-time.ts` needs slug / values / unit; `source` is the row's own
  *  provenance). ONE projection — the org window report embeds the same
  *  fragment so its hours come from the rows the diary and the CV read. */
+/**
+ * A JOURNAL ENTRY IS LIVE WHEN IT IS NEITHER DELETED NOR SUPERSEDED.
+ *
+ * THE ONE PLACE THAT RULE LIVES. It was re-derived inline by every reader that
+ * needed it, and on 2026-09-14 an audit measured the result: of 34 non-test
+ * modules reading `journal_entries`, 23 never mentioned `superseded_by`. Two of
+ * those were counting a person's evidence — `lib/profile/trust-signals.ts`
+ * returned 65 entries where production held 46 live, and that number reaches
+ * the Verified CV, a document that leaves the platform.
+ *
+ * A correction is not a second piece of work: superseding an entry replaces it,
+ * so counting both is counting the same work twice. Deleting one retracts it.
+ * Neither belongs in a total presented to a person as what their work adds up
+ * to.
+ *
+ * TWO FORMS, ON PURPOSE:
+ *   · `liveJournalEntriesOnly(query)` filters in the DATABASE — use it when the
+ *     reader only ever wants live rows, which is the common case and the
+ *     cheaper one;
+ *   · `isLiveJournalEntry(row)` filters in MEMORY — use it when the reader also
+ *     needs the non-live rows, as `listJournalEntries` does to build
+ *     `correctedOriginals`.
+ *
+ * NOT EVERY READER SHOULD USE THESE. A writer, a correction-chain walker, or an
+ * integrity fingerprint legitimately sees everything. The rule is for readers
+ * that PRESENT a count or a history to a person.
+ */
+export type LiveJournalEntryFlags = {
+  readonly deleted_at?: string | null;
+  readonly superseded_by?: string | null;
+};
+
+export function isLiveJournalEntry(row: LiveJournalEntryFlags): boolean {
+  return !row.deleted_at && !row.superseded_by;
+}
+
+/**
+ * Apply the live-entry rule to a PostgREST query. Structurally typed so it
+ * works with the repo's `asAny`-wrapped builders without importing a client
+ * type into this pure-ish module.
+ */
+export function liveJournalEntriesOnly<T extends { is(column: string, value: null): T }>(
+  query: T,
+): T {
+  return query.is("deleted_at", null).is("superseded_by", null);
+}
+
 export const JOURNAL_ENTRY_METRICS_EMBED =
   "journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source)";
 
@@ -195,7 +242,9 @@ export async function listJournalEntries(
 
   const v3 = await read(V3_SELECT);
   if (!v3.error) {
-    const live = v3.rows.filter((e) => !e.deleted_at && !e.superseded_by);
+    // In memory, not in the query: `correctedOriginals` below needs the rows
+    // this drops, so the read must fetch them.
+    const live = v3.rows.filter(isLiveJournalEntry);
     const entries = countedOnce(live);
     const counted = new Set(entries.map((e) => e.id));
     return {

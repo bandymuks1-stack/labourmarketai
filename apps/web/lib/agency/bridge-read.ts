@@ -16,10 +16,20 @@ import {
 } from "@/lib/agency/bridge-model";
 
 /**
- * Real two-subject bridge — read services (issue #859). Backed by the
- * OWNER-GATED draft migration 20260723180000 (NOT applied). Until the owner
- * applies it, every read reports `needs-migration` and the UI shows the honest
- * "prepared, owner activation pending" state.
+ * Real two-subject bridge — read services (issue #859), backed by migration
+ * 20260723180000.
+ *
+ * THAT MIGRATION IS APPLIED. Read on production 2026-09-14:
+ * `agency_client_connections`, `agency_client_request_shares` and
+ * `agency_candidate_offers` all exist with RLS enabled, the share SELECT
+ * policy carries its `owns_company(c.client_company_id)` clause, and
+ * `unshare_request_v1(uuid)` is present — with 2 connections, 1 ACTIVE share
+ * and 2 offers actually stored. The header this comment replaces still said
+ * the migration was an unapplied owner-gated draft and that every read
+ * reports `needs-migration`; that stopped being true and made a live store
+ * look dormant. The `needs-migration` branches below stay exactly as they
+ * are: they are the honest degradation for an environment where the table is
+ * absent, not a statement about production.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(v: unknown): any {
@@ -146,6 +156,80 @@ export async function listSharedRequestsForAgency(): Promise<SharedRequestsState
           status: (r.status as string | null) ?? "draft",
           sharedAt: r.shared_at as string,
         }),
+      ),
+    };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/**
+ * CLIENT side: what this client is CURRENTLY disclosing, per connection.
+ *
+ * The agency has always been able to see what was shared with it
+ * (`list_shared_requests_for_agency_v1`); the client doing the disclosing
+ * could not see or withdraw it, and the only withdrawal available was
+ * revoking the whole relationship. This read closes that half with the
+ * authority that already exists: `agency_client_request_shares_select`
+ * (migration 20260723180000 §2) admits the client owner of the connection,
+ * and the client owns the `customer_requests` rows the titles come from, so
+ * no RPC and no new grant is needed.
+ *
+ * `connectionIds` NARROWS, never widens: a caller who happens to own both an
+ * agency and a client company sees only the connections this surface listed
+ * for them, not everything RLS would allow.
+ */
+export async function listSharedRequestsByClient(
+  connectionIds: readonly string[],
+): Promise<SharedRequestsState> {
+  const ids = connectionIds.slice(0, 100);
+  if (ids.length === 0) return { kind: "ok", rows: [] };
+  const supabase = await createClient();
+  const map = (r: Record<string, unknown>, req: Record<string, unknown>): SharedRequestRow => ({
+    shareId: r.id as string,
+    connectionId: r.connection_id as string,
+    requestId: r.request_id as string,
+    title: (req.title as string | null) ?? "\u2014",
+    roleText: (req.role_or_work_type as string | null) ?? null,
+    country: (req.country as string | null) ?? null,
+    status: (req.status as string | null) ?? "draft",
+    sharedAt: r.created_at as string,
+  });
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("agency_client_request_shares")
+      .select(
+        "id, connection_id, request_id, created_at, customer_requests!agency_client_request_shares_request_id_fkey(title, role_or_work_type, country, status)",
+      )
+      .in("connection_id", ids)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) {
+      if (isMissingTableCode(error.code)) return { kind: "needs-migration" };
+      // The embedded FK alias may not resolve in every schema cache; the
+      // share rows still answer "what is disclosed", which is the point.
+      const fb = await asAny(supabase)
+        .from("agency_client_request_shares")
+        .select("id, connection_id, request_id, created_at")
+        .in("connection_id", ids)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (fb.error) {
+        if (isMissingTableCode(fb.error.code)) return { kind: "needs-migration" };
+        console.error("[bridge] client shares read failed:", fb.error.code);
+        return { kind: "error" };
+      }
+      return {
+        kind: "ok",
+        rows: (fb.data ?? []).map((r: Record<string, unknown>) => map(r, {})),
+      };
+    }
+    return {
+      kind: "ok",
+      rows: (data ?? []).map((r: Record<string, unknown>) =>
+        map(r, (r.customer_requests ?? {}) as Record<string, unknown>),
       ),
     };
   } catch {

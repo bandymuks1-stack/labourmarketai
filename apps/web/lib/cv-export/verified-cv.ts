@@ -8,6 +8,10 @@ import {
 } from "@/lib/journal/journal-entry-skills";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import {
+  isLiveJournalEntry,
+  type LiveJournalEntryFlags,
+} from "@/lib/journal/journal-list-core";
+import {
   getOwnTrustSignals,
   type OwnTrustSignals,
 } from "@/lib/profile/trust-signals";
@@ -521,11 +525,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   // ids. Journal claims dedupe against profile claims by normalized label and
   // stay in the SAME declared tier — never presented as verified.
   const liveEntryIds = (entriesRes.data ?? [])
-    .filter(
-      (e) =>
-        (e as { deleted_at?: string | null }).deleted_at == null &&
-        (e as { superseded_by?: string | null }).superseded_by == null,
-    )
+    .filter((e) => isLiveJournalEntry(e as LiveJournalEntryFlags))
     .map((e) => e.id);
   const journalClaimLabels: string[] = [];
   if (liveEntryIds.length > 0) {

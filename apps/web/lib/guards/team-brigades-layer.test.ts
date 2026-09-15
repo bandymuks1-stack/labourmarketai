@@ -313,9 +313,20 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(panel).toMatch(/tSkill\.has\(slug\) \? tSkill\(slug\) : slug/);
     expect(panel).toMatch(/t\("honestNote"\)/);
     expect(panel).toMatch(/t\("capabilityEmpty"\)/);
-    // Never a fabricated summary: null/empty renders the empty copy.
-    expect(panel).toMatch(
-      /team\.capability === null \|\| team\.capability\.length === 0/,
+    // NEVER A FABRICATED SUMMARY — and never a fabricated ABSENCE either.
+    // This assertion used to require `team.capability === null ||
+    // team.capability.length === 0`, i.e. it pinned the defect: a read that
+    // FAILED (null) printed the same "no declared skills among members yet"
+    // as a team that genuinely has none. That is UNKNOWN rendered as ZERO
+    // (SEP-7) in a sentence shown to the team's owner. The two states are now
+    // separate, and this guard pins the separation rather than the collapse.
+    expect(panel).toMatch(/team\.capability === null \?/);
+    expect(panel).toMatch(/t\("capabilityUnknown"\)/);
+    expect(panel).toMatch(/team\.capability\.length === 0 \?/);
+    // The order matters: the null branch must come FIRST, or the length check
+    // would throw on the very state it is meant to describe.
+    expect(panel.indexOf('capabilityUnknown')).toBeLessThan(
+      panel.indexOf('capabilityEmpty'),
     );
   });
 });

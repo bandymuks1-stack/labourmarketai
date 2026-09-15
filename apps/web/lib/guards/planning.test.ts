@@ -129,6 +129,15 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
     // both chained over the SAME entry ids, never a wider scope) — every
     // read RLS-scoped and bounded. Absences deliberately do NOT appear
     // here: they reuse the W7 surface's own read (getMyAbsences).
+    //
+    // `business_trips` joined on 2026-09-14 and is the one source that reads
+    // its own table rather than reusing a service, for a measured reason:
+    // `lib/trips/trips.ts` exposes only `getTripsOverview`, a whole-workspace
+    // read built for the finance page (org options, templates, workflow
+    // states, advances). Calling it here would pull that entire payload to
+    // draw a date band. The read below is four columns filtered to the
+    // caller's OWN profile — narrower than the service in every dimension —
+    // and it is bounded like the rest. `purpose` is deliberately absent.
     expect(new Set(froms)).toEqual(
       new Set([
         "projects",
@@ -139,11 +148,23 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
         "engagement_contexts",
         "project_worker_assignments",
         "project_stages",
+        "business_trips",
       ]),
     );
     expect(COMPOSE).toMatch(/\.limit\(PLANNING_PROJECT_READ_LIMIT\)/);
     expect(COMPOSE).toMatch(/\.limit\(PLANNING_JOURNAL_READ_LIMIT\)/);
     expect(COMPOSE).toMatch(/\.limit\(PLANNING_STAGE_READ_LIMIT\)/);
+    expect(COMPOSE).toMatch(/\.limit\(PLANNING_TRIP_READ_LIMIT\)/);
+    // The trip read is scoped to the caller and never asks for the purpose.
+    expect(COMPOSE).toMatch(
+      /\.select\("id, destination, date_from, date_to, status"\)\s*\n\s*\.eq\("profile_id", profileId\)/,
+    );
+    // Comments stripped first. The composition's own header EXPLAINS that
+    // the purpose is not read, and a guard that matched the explanation
+    // would pass on a file that then read the column anyway — the exact
+    // "assert over source text" brittleness this repo has been bitten by.
+    const composeCode = COMPOSE.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+    expect(composeCode).not.toMatch(/purpose/);
     // The absence source reuses the W7 read — never a duplicate query.
     expect(COMPOSE).toMatch(
       /import \{ getMyAbsences \} from "@\/lib\/leave\/absences"/,
@@ -349,10 +370,19 @@ describe("4. the agenda is pure, forward-looking date math", () => {
 });
 
 describe("5. real sources only — nothing that does not exist is simulated", () => {
-  it("exactly booking / project / task / journal / finance / invitation / absence / stage", () => {
+  it("exactly booking / project / task / journal / finance / invitation / absence / stage / trip", () => {
     // Time Engine W2: the APPLIED W6/W7 tables (project_stages,
     // worker_absences) finally project into the ONE canonical calendar —
     // they are real, live models, not simulations.
+    //
+    // `trip` joined 2026-09-14 and is real on the same terms: `business_trips`
+    // is APPLIED in production, the read is the caller's own rows under the
+    // policy that already allowed them, and only APPROVED or COMPLETED
+    // statuses draw — a `draft` or `submitted` trip is an intention and
+    // drawing it would put a plan nobody agreed to on somebody's calendar.
+    // The ORDER matters and is asserted, not just the set: it is the order
+    // the composition merges in, and a source appended anywhere else would
+    // change which item wins an id collision.
     expect([...PLANNING_SOURCE_TYPES]).toEqual([
       "booking",
       "project",
@@ -362,6 +392,7 @@ describe("5. real sources only — nothing that does not exist is simulated", ()
       "invitation",
       "absence",
       "stage",
+      "trip",
     ]);
   });
 

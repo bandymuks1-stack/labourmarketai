@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
 import { computeConfidence } from "./confidence";
 
@@ -22,10 +23,9 @@ async function recomputeProfessionSkills(
   if (skillIds.length === 0) return;
 
   // entries for this (worker, profession)
-  let entryQuery = supabase
-    .from("journal_entries")
-    .select("id")
-    .eq("worker_id", workerId);
+  let entryQuery = liveJournalEntriesOnly(
+    supabase.from("journal_entries").select("id").eq("worker_id", workerId),
+  );
   entryQuery = professionId
     ? entryQuery.eq("profession_id", professionId)
     : entryQuery.is("profession_id", null);

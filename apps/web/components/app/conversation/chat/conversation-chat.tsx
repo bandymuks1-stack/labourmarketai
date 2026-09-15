@@ -414,6 +414,11 @@ export type ChatLabels = {
   assignEngagementCandidate: string;
   /** The assignment landed. Followed by the real project result. */
   assignDone: string;
+  /** CAL-7 — appended to assignDone when the person was already committed
+   *  across the project's dates. A note on a write that happened, never a
+   *  refusal. */
+  assignAlreadyCommitted: string;
+  assignCommitmentUnknown: string;
   /** The assignment was refused by the server. The reason is the server's. */
   assignFailed: string;
 
@@ -635,6 +640,33 @@ const PIN_USAGE_KEY = "lm.myspace.usage.v1";
 const PIN_ASKED_KEY = "lm.myspace.asked.v1";
 
 /** A stated start day in the person's own language ("5 October"); UTC day. */
+/**
+ * CAL-7 in one sentence, for the chat.
+ *
+ * The projects page renders the collisions as a list; the chat has one line,
+ * so it states the FACT and the COUNT and stops. Both surfaces get the same
+ * verdict from the same action — what differs is how much room each has to
+ * say it, which is the honest kind of difference.
+ *
+ * `unknown` is its own sentence, never silence: a read that did not answer is
+ * not a person who is free (SEP-7). `clear` says nothing, because there is
+ * nothing to say.
+ */
+function reservationNote(
+  data: Record<string, unknown> | undefined,
+  labels: Pick<ChatLabels, "assignAlreadyCommitted" | "assignCommitmentUnknown">,
+): string {
+  const verdict = data?.reservation as
+    | { state?: string; collisions?: unknown[] }
+    | undefined;
+  if (!verdict) return "";
+  if (verdict.state === "unknown") return labels.assignCommitmentUnknown;
+  if (verdict.state !== "collides") return "";
+  const count = Array.isArray(verdict.collisions) ? verdict.collisions.length : 0;
+  if (count === 0) return "";
+  return labels.assignAlreadyCommitted.replace("{count}", String(count));
+}
+
 function formatDay(iso: string, locale: string): string {
   try {
     return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", timeZone: "UTC" }).format(
@@ -2381,7 +2413,13 @@ export function ConversationChat({
             confirmationToken: prep.token,
           }).then((res) => {
             setTyping(false);
-            assistant(res.ok ? labels.assignDone : labels.assignFailed);
+            assistant(
+              res.ok
+                ? [labels.assignDone, reservationNote(res.data, labels)]
+                    .filter(Boolean)
+                    .join(" ")
+                : labels.assignFailed,
+            );
             // Re-open the project either way: after a success it shows the new
             // roster, and after a refusal it shows the state that refused.
             selectProjectRef.current(projectId);
@@ -2392,7 +2430,14 @@ export function ConversationChat({
           assistant(labels.assignFailed);
         });
     },
-    [assistant, locale, labels.assignDone, labels.assignFailed],
+    [
+      assistant,
+      locale,
+      labels.assignDone,
+      labels.assignFailed,
+      labels.assignAlreadyCommitted,
+      labels.assignCommitmentUnknown,
+    ],
   );
 
   /** The CLIENT's decision on an agency's offer (owner contract §15): the

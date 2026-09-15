@@ -237,8 +237,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "A whole brigade is offered and matched as a unit",
         capabilities: ["DEM-6", "WRK-6"],
-        link: "NOT_BUILT",
-        because: "Team matching is admin-only and no team exists to match.",
+        link: "BROKEN",
+        because:
+          "Corrected 2026-09-14: this said NOT_BUILT — \"not built at any layer\" — while `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest insufficient_data terminals) and DEM-6 is PARTIAL. The engine exists; the CHAIN does not connect, for one reason: offering a brigade as a unit against a specific demand needs DEMAND-scoped consent, and the only consent relation that exists (`team_enquiries`) is ORGANIZATION-scoped. Substituting it would weaken ARCH-4, so E6 stays owner-blocked. WRK-6 (team → project assignment) is separately MISSING. Production holds 0 teams, so nothing is walkable regardless.",
       },
     ],
   },
@@ -283,8 +284,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Competency becomes a qualification or a recognised equivalence",
         capabilities: ["SKL-9", "SKL-10"],
-        link: "NOT_BUILT",
-        because: "RPL is missing; the training register deliberately writes nothing into the skill ladder.",
+        link: "BROKEN",
+        because:
+          "Corrected 2026-09-14: NOT_BUILT was too red. SKL-9 (RPL / equivalence) is genuinely MISSING and deferred by ARCH-2 — but SKL-10, the training and certification register, is APPLIED and PARTIAL. So a piece of this step exists and the chain does not connect, and it does not connect BY DECISION: the register deliberately writes nothing into the skill ladder, because a certificate is not a demonstrated competency (SEP-6). The missing half is the recognition path, not the register.",
       },
       {
         step: "The institution sees employer demand and reports outcomes",
@@ -360,28 +362,30 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Alternatives are shown",
         capabilities: ["CAL-4", "DEM-5"],
-        link: "NOT_BUILT",
-        because: "Detection reaches a warning and stops. Nothing proposes another sequencing, crew or date.",
+        link: "BROKEN",
+        because:
+          "Corrected 2026-09-14: both capabilities are PARTIAL and live, so \"not built at any layer\" was false. The gap timeline can say WHEN capacity is short and the matching engine can say WHO fits; nothing composes the two into \"try these dates, or this crew instead\". Detection reaches a warning and stops — the break is between the parts, not inside either.",
       },
       {
         step: "The authorized actor decides, and an explicit override is recorded with a receipt",
         capabilities: ["CAL-7"],
-        link: "NOT_BUILT",
+        link: "BROKEN",
         because:
-          "There is no override object and no audit receipt for one. DETECT → WARN is the whole chain today; claiming DETECT → WARN → DECIDE → OVERRIDE → AUDIT would be false.",
+          "Corrected 2026-09-14, and only half of it. CAL-7 went PARTIAL in the approved wave: a manager assigning someone now sees, at the moment of commitment, what that person is already committed to, and the warning cannot block — so DETECT → WARN → DECIDE is real, and the decision is the actor\u2019s. What still does not exist is the RECEIPT: no override object, no audit row, nothing that records afterwards that a known clash was accepted deliberately. Claiming DECIDE → OVERRIDE → AUDIT would still be false.",
       },
       {
         step: "The actual result is captured against the plan",
         capabilities: ["CAL-10"],
-        link: "NOT_BUILT",
-        because: "Nothing compares planned to actual, so nothing can learn a duration.",
+        link: "LIVE",
+        proof:
+          "TEST_PROVEN — `project_stages` has carried planned_start/planned_end AND actual_start/actual_end since 20260718140000; the approved wave (2026-09-14) added the reading that compares them and renders it on the project operations board. The old reason, \"nothing compares planned to actual\", became false that day. Production currently holds 1 stage and 0 finished stages with recorded actuals, so a walk sees nothing — that is empty evidence, not a broken chain, and below three observations the reading deliberately shows no median.",
       },
       {
         step: "Learned durations improve the next forecast — labelled as forecast",
         capabilities: ["CAL-10", "CAL-9"],
-        link: "NOT_BUILT",
+        link: "BROKEN",
         because:
-          "The learning loop needs the step above first. A forecast must never be stored where a fact is read (SEP-1).",
+          "Corrected 2026-09-14: the step above is now LIVE, so \"the learning loop needs the step above first\" no longer holds. What a planner sees today is the READING — what comparable finished stages took, with its observation count and date span, beside the plan. What does not exist is anything that carries it FORWARD: no suggested dates, no prefilled band, no forecast object. That absence is deliberate rather than pending — a forecast may never be stored where a fact is read (SEP-1) — so closing this step means designing where a suggestion lives without it hardening into a record.",
       },
     ],
   },

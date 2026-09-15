@@ -35,6 +35,12 @@ function builderFor(table: string) {
     select: () => chain,
     eq: () => chain,
     in: () => chain,
+    // The journal read applies the shared live-entry rule, which chains two
+    // `.is()` calls. This double is about the UNREAD-vs-ZERO semantics below,
+    // so it just has to stay chainable; that the reader really asks for live
+    // rows is asserted against a RECORDING client in
+    // lib/guards/journal-live-entry-rule.test.ts.
+    is: () => chain,
     then: (resolve: (r: Result) => unknown) => Promise.resolve(result).then(resolve),
   };
   return chain;

@@ -325,6 +325,9 @@
       "invalid": "Patikrinkite duomenis.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Neturite teisės tai atlikti.",
+      "already_issued": "Jau išduota kitam. Pirma reikia grąžinti.",
+      "not_issuable": "Šiuo metu neišduodama — remontuojama arba nurašyta.",
+      "not_found": "Tokio įrašo nebeėra. Atnaujinkite ir bandykite dar kartą.",
       "error": "Įvyko klaida. Bandykite dar kartą."
     },
     "myEmpty": "Tau priskirtų įrankių ar technikos šiuo metu nėra."
@@ -581,6 +584,11 @@
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Etapus galite valdyti tik savo projektuose.",
       "error": "Įvyko klaida. Bandykite dar kartą."
+    },
+    "learned": {
+      "median": "Panašios baigtos stadijos truko {days} d. (mediana iš {count})",
+      "vsPlan": "planuota {days}",
+      "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių."
     }
   },
   "activityCentre": {
@@ -1850,7 +1858,10 @@
     "expSaving": "Saugoma…",
     "expInvalid": "Įveskite pareigas ir bent pradžios metus.",
     "expNeedsMigration": "Ši funkcija dar neįjungta. Bandykite vėliau.",
-    "expError": "Nepavyko išsaugoti. Bandykite dar kartą."
+    "expError": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "expRemove": "Pašalinti",
+    "expRemoveInUse": "Su šiuo įrašu susieti darbo įrašai, todėl jis nepašalintas.",
+    "expRemoveError": "Nepavyko pašalinti šio įrašo."
   },
   "roleDashboards": {
     "company": {
@@ -4603,7 +4614,8 @@
         "event_work_task_assigned": "Jums priskirta užduotis",
         "event_demand_interest_expressed": "Darbuotojas pareiškė susidomėjimą jūsų poreikiu",
         "event_demand_interest_reviewed": "Įmonė pažymėjo jūsų susidomėjimą kaip peržiūrėtą",
-        "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga"
+        "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
+        "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -5867,7 +5879,18 @@
       "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje.",
       "fromRoster": "Priskirti darbuotoją šiam objektui",
       "rosterGroup": "Komandos nariai",
-      "engagementGroup": "Priimto pasiūlymo kandidatai"
+      "engagementGroup": "Priimto pasiūlymo kandidatai",
+      "reservation": {
+        "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
+        "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
+        "unknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
+        "source": {
+          "project": "Objektas",
+          "booking": "Rezervacija",
+          "trip": "Komandiruotė",
+          "absence": "Nepasiekiama"
+        }
+      }
     },
     "model": {
       "note": "Ši lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs.",
@@ -6771,6 +6794,7 @@
     "noMembers": "Narių dar nėra. Pakviesk darbuotojus iš savo sąrašo žemiau — kiekvienas prisijungia pats priėmęs kvietimą.",
     "capabilityHeading": "Ką ši brigada deklaruoja",
     "capabilityEmpty": "Nariai dar nedeklaravo įgūdžių — nieko neišgalvojame.",
+    "capabilityUnknown": "Nepavyko nuskaityti įgūdžių — tai nereiškia, kad jų nėra.",
     "declaredShort": "deklaravo {count}",
     "confirmedShort": "patvirtinta {count}",
     "noAddable": "Nebeliko susietų darbuotojų, kuriuos būtų galima pridėti. Pirmiausia pakviesk darbuotojus sąrašo skiltyje.",
@@ -9287,6 +9311,27 @@
       "mapTitle": "Kur yra darbo",
       "skipToList": "Į sąrašą",
       "placeLink": "Rodyti šios šalies galimybes"
+    },
+    "savedSearches": {
+      "title": "Išsaugotos paieškos",
+      "intro": "Klausimas, kurį išsaugai — atsakymas perskaičiuojamas kaskart jį atidarius.",
+      "empty": "Išsaugotų paieškų dar nėra. Susiaurink sąrašą ir išsaugok klausimą.",
+      "matches": "atitinka {count}",
+      "new": "naujų: {count}",
+      "delete": "Pašalinti",
+      "labelField": "Paieškos pavadinimas",
+      "labelPlaceholder": "pvz., suvirinimas NL",
+      "saveCurrent": "Išsaugoti šią paiešką",
+      "limitReached": "Pasiektas {limit} išsaugotų paieškų limitas.",
+      "outcome": {
+        "saved": "Išsaugota.",
+        "deleted": "Pašalinta.",
+        "invalid": "Patikrink pavadinimą ir filtrus.",
+        "limit": "Pasiektas išsaugotų paieškų limitas.",
+        "auth": "Prisijunk iš naujo.",
+        "feature-absent": "Dar neprieinama — išsaugotų paieškų atnaujinimas nepritaikytas.",
+        "error": "Įvyko klaida. Bandyk dar kartą."
+      }
     }
   },
   "workerIntake": {
@@ -10249,7 +10294,8 @@
       "capacityLabel": "Pajėgumo padengimas",
       "userEntered": "Jūsų įvesta: {count}",
       "systemSuggested": "Pasiūlyta automatiškai: {count} (patvirtinkite arba pataisykite)",
-      "confirmedRequired": "Patvirtinta: {count}"
+      "confirmedRequired": "Patvirtinta: {count}",
+      "unknownCapacity": "{count} nepavyko įvertinti — trūkumas gali būti mažesnis"
     },
     "risk": {
       "none": "Dabartiniame vaizde pajėgumo rizikos nėra.",
@@ -10317,6 +10363,14 @@
       "noneRecordedNext": "Artimiausioms 7 dienoms patvirtintų neatvykimų neužfiksuota.",
       "notReadable": "Dabar nepavyksta perskaityti",
       "basis": "Aktyvi komanda — darbuotojai, aktyviai susieti su jūsų įmone. Neatvykimai — patvirtinti užfiksuoti neatvykimai; darbuotojas be užfiksuoto neatvykimo nėra dėl to patvirtintai darbe. Darbo įrašų skaičiai apima įrašus, kuriuos darbuotojai šiandien užfiksavo jūsų organizacijos darbo santykiuose. Neatvykimų priežastys lieka privačios."
+    },
+    "utilisation": {
+      "title": "Užimta artimiausių savaičių dalis",
+      "committedDays": "Užimta {committed} iš {counted} žmogaus dienų — {workers} žmonės per {days} d.",
+      "noneCounted": "Šiam laikotarpiui nepavyko suskaičiuoti nė vieno darbuotojo įsipareigojimų.",
+      "partial": "{count} iš jų nepavyko suskaičiuoti iki galo — kai kas neturi datų, todėl skaičius viršuje yra minimumas.",
+      "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
+      "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
     }
   },
   "tasks": {
@@ -11321,7 +11375,10 @@
     "shareButton": "Pasidalinti",
     "noDemands": "Pirmiausia sukurkite poreikį, tada galėsite juo pasidalinti.",
     "errorLabel": "Kažkas nepavyko. Bandykite dar kartą.",
-    "fromAgency": "Nuo"
+    "fromAgency": "Nuo",
+    "sharedHeading": "Bendrinama su šia agentūra",
+    "noShared": "Su šia agentūra kol kas niekas nebendrinama",
+    "unshareButton": "Nustoti bendrinti šią užklausą"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -12681,6 +12738,8 @@
       "assignUnavailable": "Šiuo metu nepavyko nuskaityti jūsų komandos.",
       "assignEngagementCandidate": "priimto pasiūlymo kandidatas",
       "assignDone": "Priskirta projektui.",
+      "assignAlreadyCommitted": "Pastaba: kai kuriomis šiomis dienomis jis (-i) jau turi įsipareigojimų ({count}). Priskyrimas galioja — sprendimas jūsų.",
+      "assignCommitmentUnknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
       "assignFailed": "Priskyrimo atlikti nepavyko.",
       "chipEngagements": "Su kuo dirbu",
       "userEngagements": "Su kuo aš dirbu?",
@@ -15242,7 +15301,13 @@
       "issuedOnLabel": "Išduota",
       "expiresOnLabel": "Galioja iki",
       "attachCertificate": "Įrašyti pažymėjimą",
-      "markExpired": "Pažymėti kaip nebegaliojantį"
+      "markExpired": "Pažymėti kaip nebegaliojantį",
+      "editProgram": "Redaguoti šį kursą",
+      "saveProgram": "Išsaugoti pakeitimus",
+      "activeLabel": "Vis dar vykdomas",
+      "activeYes": "Taip — galima priskirti",
+      "activeNo": "Ne — nebevykdomas",
+      "retired": "Nebevykdomas"
     },
     "certificates": {
       "heading": "Pažymėjimai",
@@ -15417,6 +15482,11 @@
       "not_found": "Nerasta.",
       "limit_reached": "Čia jau per daug įrašų.",
       "error": "Kažkas nepavyko. Nieko neišsaugota."
+    },
+    "edit": {
+      "open": "Taisyti šį juodraštį",
+      "save": "Išsaugoti pakeitimus",
+      "responsible": "Keisti atsakingą asmenį (palikite tuščią — nesikeis)"
     }
   },
   "talentPreview": {
@@ -15629,7 +15699,10 @@
         "notAuthorized": "Negalite įrašyti šių valandų.",
         "generic": "Nepavyko apdoroti. Bandykite dar kartą."
       }
-    }
+    },
+    "correct": "Taisyti",
+    "correctCancel": "Atšaukti",
+    "correctHint": "Išsaugojus sukuriamas naujas įrašas, o pradinis lieka šalia — niekas neištrinama."
   },
   "oauthConsent": {
     "title": "Prieigos patvirtinimas",
@@ -15983,5 +16056,65 @@
     "ledgerNone": "šiuo laikotarpiu ({period}) nieko",
     "ledgerFigures": "{hours} val. · {rows, plural, one {# eilutė} few {# eilutės} other {# eilučių}} · {days, plural, one {# diena} few {# dienos} other {# dienų}}",
     "rule": "Žurnalo skaičiai ir organizacijos apskaita — du to paties darbo įrašai, rodomi greta ir niekada nesudedami. Valandų įrašas sako kada ir kiek, bet ne ką — jis nepasiekia jokio įgūdžio."
+  },
+  "countryReadiness": {
+    "heading": "Ko ši šalis iš jūsų reikalauja",
+    "intro": "ES sistema, taikoma, kai dirbate, komandiruojate darbuotojus ar siunčiate komandą į šią šalį. Kiekvienas teiginys nurodo oficialų šaltinį ir datą, kada paskutinį kartą tikrinta. Kai taisyklė yra nacionalinė, o ne bendra ES, tai pasakome ir nukreipiame į oficialų nacionalinį puslapį, o ne spėliojame.",
+    "noResearchYet": "Šios šalies reikalavimų dar netyrėme. Tai reiškia, kad neturime ką parodyti — o ne kad nieko nereikia. Verčiau paliksime tuščią, nei užpildysime kaimyninės šalies duomenimis.",
+    "nationalInfo": "Nacionalines šios šalies taisykles skelbia pačios institucijos:",
+    "nationalInfoLink": "oficiali informacija apie darbuotojų komandiravimą",
+    "disclaimer": "Tai šaltiniais pagrįsta informacija, o ne teisinė konsultacija. Taisyklės keičiasi, nacionaliniai skirtumai dideli — viską, kas lemia sprendimą, pasitikrinkite oficialioje nacionalinėje institucijoje.",
+    "fieldSource": "Šaltinis",
+    "fieldConfidence": "Pagrindimas",
+    "fieldLastReviewed": "Tikrinta",
+    "scope": {
+      "worker_solo": {
+        "label": "Patys dirbate čia",
+        "description": "Dirbate šioje šalyje kaip vietinis darbuotojas arba savarankiškai."
+      },
+      "worker_posted": {
+        "label": "Esate komandiruojami čia iš kitos šalies",
+        "description": "Darbdavys jus laikinai siunčia čia, o įdarbinimas lieka namuose — taikoma Darbuotojų komandiravimo direktyva."
+      },
+      "team_subcontracting": {
+        "label": "Siunčiate komandą kaip subrangovas",
+        "description": "Komanda ar subrangovas dirba čia tarpvalstybiniu mastu. Kiekvienas komandiruotas žmogus turi savo dokumentus, gali būti taikoma grandinės atsakomybė."
+      },
+      "company_hiring": {
+        "label": "Įdarbinate ar siunčiate darbuotojus kaip įmonė",
+        "description": "Jūsų įmonė įdarbina ar siunčia žmones į šią šalį — tai užtraukia atskiras registracijos ir mokesčių prievoles."
+      }
+    },
+    "level": {
+      "required": "Privaloma",
+      "recommended": "Rekomenduojama",
+      "conditional": "Priklauso"
+    },
+    "risk": {
+      "high": "Didelė rizika, jei trūksta",
+      "medium": "Vidutinė rizika",
+      "low": "Maža rizika"
+    },
+    "confidence": {
+      "needs_legal_review": "Ši dalis yra nacionalinė, ne bendra ES. Konkrečios šios šalies taisyklės nepatikrinome, todėl laikykite tai klausimu, kurį reikia užduoti — o ne mūsų pateiktu atsakymu."
+    },
+    "confidenceShort": {
+      "official": "Oficialus ES šaltinis",
+      "strong": "Tvirtai nusistovėjęs",
+      "needs_legal_review": "Reikia teisinio patikrinimo"
+    },
+    "explanation": {
+      "valid_id_document": "Galiojantis pasas arba asmens tapatybės kortelė. Turėkite patį dokumentą, ne kopiją — būtent jis patikrinimo metu įrodo, kas esate.",
+      "right_to_work": "Teisė čia dirbti. ES/EEE piliečiams darbo leidimo nereikia. Jei nesate ES/EEE pilietis, reikia darbo ir (ar) leidimo gyventi — prieš išvykdami pasitikslinkite nacionalinėje institucijoje.",
+      "a1_certificate": "A1 pažyma. Jei dirbdami čia liekate apdrausti savo šalyje, A1 įrodo, kurios šalies socialinės apsaugos teisė jums taikoma. Be jos galite būti laikomi neapdraustu.",
+      "prior_posting_notification": "Išankstinis pranešimas, pateiktas prieš pradedant darbą. Dauguma priimančiųjų šalių reikalauja iš anksto deklaruoti komandiravimą; portalas yra nacionalinis, todėl naudokitės žemiau esančia nuoroda.",
+      "employment_contract": "Darbo sutartis ir raštiškos komandiravimo sąlygos. Patikrinimo metu ne visada prašoma, bet būtent šis dokumentas išsprendžia ginčą dėl to, kas buvo sutarta.",
+      "host_minimum_conditions": "Šios šalies minimalus darbo užmokestis ir pagrindinės darbo sąlygos jums galioja komandiruotės metu, nors ir liekate įdarbintas namuose. Konkretūs tarifai ir taisyklės yra nacionaliniai.",
+      "posted_worker_package": "Pilnas dokumentų rinkinys kiekvienam komandiruotam komandos nariui — kiekvienam reikia savo A1, pranešimo ir sutarties. Vieno bendro rinkinio grupei nepakanka.",
+      "subcontractor_liability": "Grandinės atsakomybė. Daugelyje šalių pagrindinis rangovas gali atsakyti už subrangovo neišmokėtus atlyginimus. Taisyklės skiriasi — verta pasitikslinti prieš pasirašant.",
+      "company_posting_registration": "Įmonės atliekama komandiravimo registracija. Tai darbdavio prievolė, atskira nuo to, ką pateikia pats darbuotojas.",
+      "company_tax_vat": "Įmonės PVM, mokesčių ir socialinio draudimo registracija. Ar tai taikoma, priklauso nuo darbo pobūdžio ir trukmės.",
+      "national_specifics": "Šaliai būdingi dokumentai — sektoriaus ar statybų kortelės, vietinė registracija, nacionaliniai mokesčių ir socialinio draudimo veiksmai. Jų yra daugumoje šalių, bet specifika nacionalinė, todėl pasitikrinkite oficialiame puslapyje."
+    }
   }
 }

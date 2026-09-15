@@ -84,7 +84,10 @@ describe("§5.2 the series are REAL rows, never invented", () => {
   it("the evidence timeline reads the worker's own live journal entries", () => {
     expect(DATA).toContain("journalEntryTimestamps");
     expect(DATA).toMatch(/\.from\("journal_entries"\)[\s\S]{0,200}\.select\("created_at"\)/);
-    expect(DATA).toMatch(/\.is\("deleted_at", null\)/);
+    // Was `.is("deleted_at", null)` written inline — which let a SUPERSEDED
+    // entry keep drawing a mark on the timeline. The read now goes through
+    // the shared live-entry rule, which filters BOTH lifecycle columns.
+    expect(DATA).toMatch(/liveJournalEntriesOnly\(/);
     expect(DATA).toMatch(/\.gte\("created_at", windowStart\.toISOString\(\)\)/);
   });
 

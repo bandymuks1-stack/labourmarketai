@@ -434,12 +434,22 @@ describe("(g) the approved split carries the same privacy invariants", () => {
 
 describe("(h) external profiles are accounted for by the privacy surfaces", () => {
   it("the subject-access export reads and returns the relation", () => {
+    // RE-ANCHORED 2026-09-15 when #1739 landed on top of #1740. The export
+    // no longer names each relation inline: it reads every entry of the ONE
+    // register in `lib/privacy/personal-relations.ts` through a generic
+    // reader, so the guarantee this guard exists for — the relation is read,
+    // returned under its own name, and an unreadable read is reported as
+    // UNAVAILABLE rather than as an empty list — is now a property of the
+    // register entry plus the reader, and that is what is pinned here.
+    const relations = read("lib/privacy/personal-relations.ts");
+    expect(relations).toMatch(/\{ table: "worker_external_profiles", key: "worker_id" \}/);
     const exportData = read("lib/privacy/export-data.ts");
-    expect(exportData).toMatch(/\.from\("worker_external_profiles"\)/);
-    expect(exportData).toMatch(/worker_external_profiles: workerExternalProfiles/);
+    expect(exportData).toMatch(/EXPORTED_RELATIONS\.filter\(\(r\) => r\.key === key\)/);
+    expect(exportData).toMatch(/\.from\(r\.table\)/);
+    expect(exportData).toMatch(/data\[table\] = res\.error \? \[\] : \(res\.data \?\? \[\]\)/);
     // An unreadable relation is reported as UNAVAILABLE, never as an empty
     // list — "we hold none" and "we could not read it" are different claims.
-    expect(exportData).toMatch(/unavailable\.push\("worker_external_profiles"\)/);
+    expect(exportData).toMatch(/if \(res\.error && !isRelationAbsent\(res\.error\)\) unavailable\.push\(table\)/);
   });
 
   it("the deletion plan counts the class and plans to delete it", () => {

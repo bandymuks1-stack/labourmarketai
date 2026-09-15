@@ -1,6 +1,14 @@
-# LabourMarket.ai — CANONICAL ARCHITECTURE ENTRY POINT
+# LabourMarket.ai — ARCHITECTURE NAVIGATION, OWNER DIRECTIONS & PROCESS
 
-> **Status:** CANONICAL BASELINE. Start here.
+> ⛔ **NOT THE CANONICAL ARCHITECTURE — SUPPORTING DOCUMENT.**
+> The single source of truth is
+> [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](OWNER_TARGET_ARCHITECTURE_V1.md) (V1, 2026-09-14). Read it first.
+> This file remains ACTIVE as navigation, the §5 owner directions, the §6 extensibility contract and the §7 process. Where it and the canonical
+> architecture differ on WHAT THE PRODUCT IS, the canonical architecture wins —
+> see its §9 registry for why.
+
+> **Status:** SUPPORTING (was CANONICAL BASELINE until 2026-09-14).
+> **Start at** [`OWNER_TARGET_ARCHITECTURE_V1.md`](OWNER_TARGET_ARCHITECTURE_V1.md).
 > **Owner decision:** 2026-08-27 (consolidation + extensibility directive).
 > **This is a navigation and status document, not a replacement.** The
 > authority hierarchy below already existed and is unchanged. Per the
@@ -20,9 +28,12 @@ which document is current, which is historical, and where a recent owner
 decision was recorded. That is how architecture gets accidentally narrowed —
 not by disagreement, but by someone reasonably reading the wrong file.
 
-This file is the single obvious starting point. It adds no new authority of
-its own except §6 (the extensibility contract) and §5 (sections the owner
-added on 2026-08-27 that no earlier document contained).
+This file WAS the single obvious starting point, and it adds no new authority
+of its own except §6 (the extensibility contract) and §5 (sections the owner
+added on 2026-08-27 that no earlier document contained). Those sections remain
+binding. The starting point moved to `OWNER_TARGET_ARCHITECTURE_V1.md` on
+2026-09-14, because this file's own §2 graph is NARROWER than the owner's
+canonical graph and was being read as the target.
 
 ---
 

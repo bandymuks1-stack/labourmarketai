@@ -116,12 +116,18 @@ In value order. None needs a credential.
 3. **Context holdings.** `context-provider.tsx` performs no holdings read, so
    a person with several contexts is told the app cannot list them. Honest,
    and incomplete.
-4. **Deep links as universal links.** `labourmarketai://` works today. The
-   `https://labourmarket.ai/...` form needs
-   `/.well-known/apple-app-site-association` and
-   `/.well-known/assetlinks.json`, and both embed identifiers that only exist
-   once §4.2 and §4.3 are done — so the files are preparable but not
-   completable.
+4. ~~**Deep links as universal links.**~~ **DONE 2026-09-14** — see
+   [`../launch/DISTRIBUTION_SURFACE_READINESS_2026-09-14.md`](../launch/DISTRIBUTION_SURFACE_READINESS_2026-09-14.md)
+   §2–3. Both `.well-known` documents are served as route handlers, and
+   `app.json` now claims `labourmarket.ai` on both platforms
+   (`ios.associatedDomains`, `android.intentFilters` with `autoVerify`).
+
+   The identifiers are read from `APPLE_TEAM_ID` and
+   `ANDROID_CERT_FINGERPRINTS` and each document **404s until its variable is
+   set** — deliberately, because Apple and Google cache a failed association,
+   so a placeholder keeps links broken after the real value arrives. The
+   remaining owner action is therefore **one environment variable per
+   platform, and no code change** (§4.2, §4.3).
 
 ---
 

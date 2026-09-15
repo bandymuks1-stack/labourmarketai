@@ -30,6 +30,8 @@ import {
   planningMeta,
   projectAbsenceItem,
   projectFinanceItem,
+  projectTripItem,
+  PLANNED_TRIP_STATUSES,
   projectIncomingInvitationItem,
   projectSentInvitationItem,
   projectStageItem,
@@ -92,6 +94,7 @@ export interface PlanningSources {
   readonly invitation: PlanningSourceState;
   /** Time Engine W2: the caller's own leave/absence bands (W7 model). */
   readonly absence: PlanningSourceState;
+  readonly trip: PlanningSourceState;
   /** Time Engine W2: dated stages of visible projects (W6 model). */
   readonly stage: PlanningSourceState;
 }
@@ -368,6 +371,68 @@ async function readAbsenceItems(): Promise<{
       startDate: absence.startDate,
       endDate: absence.endDate,
       status: absence.status,
+    });
+    if (item) items.push(item);
+  }
+  return { state: { status: "ok", count: items.length }, items };
+}
+
+/** The person's own plan never streams: a trip read is bounded like the rest. */
+const PLANNING_TRIP_READ_LIMIT = 200;
+
+/**
+ * The caller's OWN business trips (2026-09-14).
+ *
+ * NO NEW AUTHORITY. `business_trips_select` (20260817222000) already reads
+ * `profile_id = auth.uid() OR manages_organization(organization_id) OR
+ * is_admin()`, so a person has always been allowed to read their own trips —
+ * this is a read that existed and was never taken. The filter below is
+ * `profile_id = the caller`, so the person's plan shows THEIR trips and
+ * nobody else's, and RLS would enforce that even if this line were wrong.
+ *
+ * NO PARALLEL CALENDAR. The trip becomes a `PlanningItem` through the pure
+ * `projectTripItem` mapper and joins the canonical planning pipeline beside
+ * bookings, projects, stages, tasks, journal, finance, invitations and
+ * absences — same merge, same conflict detection, same rendering.
+ *
+ * `purpose` IS NOT READ. Free text up to 1000 characters, and drawing a date
+ * band needs none of it. The select list is the boundary, exactly as it is
+ * for an absence's reason and for the employer-side commitment read.
+ *
+ * WHICH STATUSES OCCUPY TIME is `PLANNED_TRIP_STATUSES`, the same constant
+ * the employer-side commitment read imports — so the person's calendar and
+ * the employer's capacity answer cannot disagree about whether a trip is
+ * real. An unapplied store or a failed read reports `unavailable`, never an
+ * empty plan.
+ */
+async function readTripItems(
+  profileId: string,
+): Promise<{ state: PlanningSourceState; items: PlanningItem[] }> {
+  const supabase = await createClient();
+  const res = await asAny(supabase)
+    .from("business_trips")
+    .select("id, destination, date_from, date_to, status")
+    .eq("profile_id", profileId)
+    .in("status", [...PLANNED_TRIP_STATUSES])
+    .limit(PLANNING_TRIP_READ_LIMIT);
+  if (res.error) {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  type Row = {
+    id: string;
+    destination: string | null;
+    date_from: string | null;
+    date_to: string | null;
+    status: string;
+  };
+  const items: PlanningItem[] = [];
+  for (const row of (res.data ?? []) as Row[]) {
+    const item = projectTripItem({
+      id: row.id,
+      destination: row.destination,
+      startDate: row.date_from,
+      endDate: row.date_to,
+      status: row.status,
     });
     if (item) items.push(item);
   }
@@ -854,8 +919,18 @@ export async function getPlanning(
     },
   );
 
-  const [booking, managed, assigned, stage, task, journal, finance, invitation, absence] =
-    await Promise.all([
+  const [
+    booking,
+    managed,
+    assigned,
+    stage,
+    task,
+    journal,
+    finance,
+    invitation,
+    absence,
+    trip,
+  ] = await Promise.all([
       readBookingItems(),
       managedPromise,
       assignedPromise,
@@ -865,6 +940,7 @@ export async function getPlanning(
       readFinanceItems(today),
       readInvitationItems(),
       readAbsenceItems(),
+      readTripItems(user.id),
     ]);
 
   // Merge project directions — assigned (personal commitment) wins on id
@@ -897,6 +973,7 @@ export async function getPlanning(
       ...finance.items,
       ...invitation.items,
       ...absence.items,
+      ...trip.items,
     ],
     sources: {
       booking: booking.state,
@@ -907,6 +984,7 @@ export async function getPlanning(
       invitation: invitation.state,
       absence: absence.state,
       stage: stage.state,
+      trip: trip.state,
     },
   };
 }

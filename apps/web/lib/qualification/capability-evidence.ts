@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -68,11 +69,9 @@ export async function getOwnRecordedWorkEvidence(
       .select("id", { count: "exact", head: true })
       .eq("worker_id", workerId)
       .eq("verified", true),
-    asAny(supabase)
-      .from("journal_entries")
-      .select("id")
-      .eq("worker_id", workerId)
-      .limit(ENTRY_READ_LIMIT),
+    liveJournalEntriesOnly(
+      asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
+    ).limit(ENTRY_READ_LIMIT),
   ]);
 
   const verifiedSkills = skillsRes.error ? null : (skillsRes.count ?? 0);

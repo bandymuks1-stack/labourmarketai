@@ -229,14 +229,38 @@ describe("the permanent journey contracts", () => {
   it("a step may not be redder than every capability under it", () => {
     for (const j of JOURNEY_REGISTER) {
       for (const step of j.steps) {
-        // NOT_BUILT means "not built at any layer". One live capability
+        // NOT_BUILT means "not built at any layer". One LIVE capability
         // underneath is a direct contradiction of that sentence.
+        //
+        // WIDENED 2026-09-14 from `status === "BUILT_AND_USABLE"` to `isLive`,
+        // which is BUILT_AND_USABLE **or PARTIAL**. The narrow version left a
+        // hole exactly the shape of the drift this rule exists to catch, and
+        // six steps had fallen through it — four of them saying, in words,
+        // things that were no longer true:
+        //
+        //   · J-TIME-FREEDOM "The actual result is captured against the plan"
+        //     read "Nothing compares planned to actual", while CAL-10 had gone
+        //     PARTIAL and does exactly that;
+        //   · its "Learned durations improve the next forecast" rested on the
+        //     step above being unbuilt, which it no longer was;
+        //   · "Alternatives are shown" and the override step called themselves
+        //     unbuilt over two and one PARTIAL capabilities;
+        //   · J-AGENCY-SUPPLY's brigade step said team matching is admin-only
+        //     while `matchTeamToNeed` is complete and the real break is the
+        //     consent SCOPE;
+        //   · J-INSTITUTION-OUTCOME's qualification step called the applied
+        //     training register unbuilt.
+        //
+        // PARTIAL is `isLive`'s own answer to "does this exist" — the register
+        // uses it for the graph, and a step may not answer differently. A step
+        // whose capability is partly built and whose chain still does not
+        // connect is BROKEN, with a reason naming the part that is missing.
         if (step.link === "NOT_BUILT") {
           for (const id of step.capabilities) {
             const row = capabilityById(id)!;
             expect(
-              row.status === "BUILT_AND_USABLE",
-              `${j.id} · "${step.step}" is NOT_BUILT — "not built at any layer" — but ${id} is BUILT_AND_USABLE. If part of this step exists and the chain still does not connect, the honest link is BROKEN with a reason that says which part is missing.`,
+              isLive(row),
+              `${j.id} · "${step.step}" is NOT_BUILT — "not built at any layer" — but ${id} is ${row.status}, which the register counts as LIVE. If part of this step exists and the chain still does not connect, the honest link is BROKEN with a reason that says which part is missing.`,
             ).toBe(false);
           }
         }

@@ -171,7 +171,20 @@ export function TeamBrigadesPanel({
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("capabilityHeading")}
                   </span>
-                  {team.capability === null || team.capability.length === 0 ? (
+                  {/*
+                    UNKNOWN IS NOT ZERO (SEP-7). `null` means the capability
+                    read did not answer; `[]` means it answered and the
+                    members have declared nothing. Both used to print "no
+                    declared skills among members yet" — a positive claim of
+                    absence made on the strength of a failed read. `[]` is a
+                    sound zero HERE and only here: this panel lists teams
+                    filtered by `owner_profile_id = user.id`, so the RPC's
+                    owner branch always passes and an empty answer cannot be
+                    a silent refusal.
+                  */}
+                  {team.capability === null ? (
+                    <p className="text-xs text-text-muted">{t("capabilityUnknown")}</p>
+                  ) : team.capability.length === 0 ? (
                     <p className="text-xs text-text-muted">{t("capabilityEmpty")}</p>
                   ) : (
                     <ul
