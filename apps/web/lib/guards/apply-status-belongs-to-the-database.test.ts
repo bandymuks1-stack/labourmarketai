@@ -23,13 +23,17 @@ import { join } from "node:path";
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
-/** Verified absent from production 2026-09-14. Everything else a module
- *  claims is "not applied yet" needs re-checking before it is believed. */
+/** Verified absent from production. Everything else a module claims is "not
+ *  applied yet" needs re-checking before it is believed — and this list is
+ *  itself subject to that rule, which it has already proved.
+ *
+ *  RE-MEASURED 2026-09-15. Four of the six named here on 2026-09-14 were
+ *  applied by #1740 within a day: `agency_clients`, `journal_profession_templates`,
+ *  `worker_opportunity_seen` and `worker_external_profiles` (PER-11's split).
+ *  This guard's own list had become the thing it exists to catch. What is
+ *  still genuinely absent is the assistant-transcript pair, whose migration is
+ *  deliberately kept outside supabase/migrations. */
 const GENUINELY_ABSENT = [
-  "agency_clients",
-  "journal_profession_templates",
-  "worker_external_profiles",
-  "worker_opportunity_seen",
   "assistant_conversations",
   "assistant_messages",
 ] as const;

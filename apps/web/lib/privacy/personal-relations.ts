@@ -26,14 +26,22 @@ import "server-only";
  * inputs may quote a third party. Those are named, with the reason, so the
  * person can ask for them through a route that can redact.
  *
- * FOUR REGISTERED RELATIONS ARE NOT ON PRODUCTION YET (measured 2026-09-14):
- * `dashboard_preferences`, `demand_interest_seen`, `worker_external_profiles`
- * and `worker_opportunity_seen` exist in migrations that have not been
- * applied. They are registered anyway — the export reads what the database
- * has, and reports a relation the database LACKS as empty (it genuinely holds
- * nothing for anyone), not as unread. Registering them now means the bundle
- * grows by itself the day the migration lands, instead of quietly omitting
- * them for however long it takes someone to notice.
+ * TWO REGISTERED RELATIONS ARE NOT ON PRODUCTION YET (re-measured 2026-09-15):
+ * `dashboard_preferences` and `demand_interest_seen`. They are registered
+ * anyway — the export reads what the database has, and reports a relation the
+ * database LACKS as empty (it genuinely holds nothing for anyone), not as
+ * unread. Registering them now means the bundle grows by itself the day the
+ * migration lands, instead of quietly omitting them for however long it takes
+ * someone to notice.
+ *
+ * THE OTHER TWO LANDED, WHICH IS THE POINT. This paragraph said FOUR on
+ * 2026-09-14 and named `worker_external_profiles` and `worker_opportunity_seen`
+ * among them; both were applied to production on 2026-09-15 (PER-11's split
+ * `external_profiles_v1`, ledger 20260915042406, and `worker_opportunity_seen_v1`,
+ * ledger 20260914202221). The bundle picked them up with no code change —
+ * exactly the behaviour this design was for — and the only thing that needed
+ * correcting was this sentence. Apply status belongs to the database, not to a
+ * comment: re-measure before believing any line like the one this replaced.
  */
 
 /** How a relation is joined to the person. */

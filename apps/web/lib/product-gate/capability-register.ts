@@ -301,14 +301,14 @@ const PERSON: readonly CapabilityRow[] = [
     domain: "person",
     title: "External profile links",
     worldElement: "user_avatar",
-    status: "BLOCKED",
-    strongestEvidence: "CODE_PROVEN",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/worker/external-profiles.ts"],
     coreModule: "lib/worker/external-profiles.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "`20260713210000_multi_source_talent_v1` never applied; the UI ships an honest 'not enabled yet'.",
-    ownerDecision:
-      "Apply a split external_profiles_v1 carrying only the one table its live UI needs, or retire the section (§6.4 item 4).",
+    note:
+      "UNBLOCKED 2026-09-15. The owner decision this row carried — apply a split or retire the section — was MADE and EXECUTED in #1740: `20260914210000_external_profiles_v1`, the one-table split, is applied as production ledger `20260915042406`. Verified read-only 2026-09-15: `worker_external_profiles` exists with RLS enabled and exactly one SELECT policy, `authenticated` holds SELECT only so writes stay RPC-only, and both `save_worker_external_profile_v1` and `disconnect_external_profile_v1` are present. THE EXCLUSION HELD: `talent_source_records` and `identity_resolution_events` — the two tables of the 601-line parent that no live surface needs — are absent, and the parent is recorded SUPERSEDED-IN-PART / NEVER APPLY AS A WHOLE in the applied ledger. All three pre-apply conditions are met: the table is in `EXPORTED_RELATIONS` (personal-relations.ts, which export-data.ts imports — the migration header names export-data.ts, but the registration is real and drives the bundle), it is in the deletion-plan accounting as `externalProfiles` with the worker FK cascade unchanged as the actual mechanism, and `external-profiles-consent.test.ts` enforces its invariants against the shipping file. " +
+      "NO CODE CHANGE WAS NEEDED to light the surface: the read answers `needs-migration` only on 42P01, so with the table present the section stops rendering 'not enabled yet' by itself. PARTIAL, not BUILT_AND_USABLE, and deliberately: the table holds 0 rows, nothing has traversed the write path on production, and no human has walked the section. The previous note — '20260713210000_multi_source_talent_v1 never applied; the UI ships an honest not-enabled-yet' — was true of the PARENT and stayed on the row after the SPLIT landed.",
   },
   {
     id: "PER-12",
@@ -404,7 +404,14 @@ const SKILLS: readonly CapabilityRow[] = [
   },
   {
     id: "SKL-6",
-    disconnectedBecause: "inert_bridge",
+    // `inert_bridge` REMOVED 2026-09-15, falsified by production. The kind
+    // means "the code runs and the data it links to does not exist", and the
+    // note asserted "0 of 161 platform skills and 0 of 49 professions carry an
+    // esco_uri". Measured read-only on 2026-09-15: 34 of 49 professions and 31
+    // of 161 skills DO carry one. The join the claim denied is the same one
+    // the occupation path has been resolving live since 2026-09-12. Nothing in
+    // the suite could contradict `inert_bridge`, which is why it survived —
+    // the canonical guard now checks the kind (see capability-register.test.ts).
     domain: "skills",
     title: "ESCO taxonomy",
     worldElement: "skills",
@@ -421,7 +428,7 @@ const SKILLS: readonly CapabilityRow[] = [
       "components/app/structure-need-form.tsx",
     ],
     note:
-      "TWO CLAIMS HERE WERE STALE, corrected 2026-09-08 from production. (1) 'The capability has never read a row' - it reads rows on BOTH sides of the market today: the ESCO typeahead is mounted in skill-clarify (worker) and structure-need (employer demand). (2) The bridge being inert does not make the catalogue unreadable. What IS still true: 0 of 161 platform skills and 0 of 49 professions carry an esco_uri, so nothing joins ESCO to the platform taxonomy. " +
+      "TWO CLAIMS HERE WERE STALE, corrected 2026-09-08 from production. (1) 'The capability has never read a row' - it reads rows on BOTH sides of the market today: the ESCO typeahead is mounted in skill-clarify (worker) and structure-need (employer demand). (2) The bridge being inert does not make the catalogue unreadable. THAT SENTENCE IS NOW FALSE TOO, corrected 2026-09-15 from production: it claimed '0 of 161 platform skills and 0 of 49 professions carry an esco_uri, so nothing joins ESCO to the platform taxonomy'. Measured read-only 2026-09-15: 34 of 49 professions and 31 of 161 skills carry one, against 3,039 esco_occupations and 13,939 esco_skills. The join exists and is the same one the occupation path has resolved live since 2026-09-12 — which this very note describes two sentences later, so the row contradicted itself. The `inert_bridge` kind is removed with it: nothing in the guard suite could falsify that kind, and it is now checked. What remains true is narrower and is stated below: the SEMANTIC layer (concept resolver, cross-language bridge, occupation-skill reader) still has no product consumer. " +
       "The catalogue itself is substantial and now measured: 1,045,186 labels over 28 locales, 13,939 skills, 3,039 occupations, 126,051 occupation-skill relations (67,600 essential / 58,451 optional). RLS on, authenticated SELECT, no anon. " +
       "Read live under a real user 2026-09-08: a Lithuanian phrase resolves to an ESCO occupation and the SAME concept comes back as en=construction scaffolder, de=Gerustbauer, sv=stallningsbyggare, no=stillasarbeider, pl=monter rusztowan, nl=steigerbouwer - the cross-language bridge working on real data, and Norway is exactly where the one production supply row points. The occupation decomposes into its essential ESCO skills bilingually (build/dismantle scaffolding, work-at-height safety, interpret 2D/3D plans). A non-construction control behaves the same (lt slaugytojas specialistas -> no spesialsykepleier, 68 essential skills), so the model is not construction-shaped. " +
       "PERFORMANCE IS A CONTRACT, not a detail: esco_labels_typeahead_idx leads with `locale`, so the same lookup measured 1.5 ms with a locale and 10,076 ms without - 6,500x. lib/esco therefore REQUIRES locales and fans out one indexed query per locale. " +
