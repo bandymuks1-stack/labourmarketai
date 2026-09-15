@@ -601,6 +601,23 @@
       "adopt": "Use as planned end"
     }
   },
+  "overrideReceipts": {
+    "title": "Accepted clashes",
+    "introManager": "Assignments kept despite a known clash, with what was known at the time. Append-only; the person concerned can see each receipt.",
+    "introWorker": "A manager kept an assignment for you knowing it overlapped something you already had. Nothing here was hidden from you.",
+    "notApplied": "Receipts are prepared and not enabled in this environment yet.",
+    "unavailable": "Receipts could not be read just now.",
+    "empty": "No clash has been accepted with a receipt on this project.",
+    "acceptedOn": "Accepted on {date}",
+    "window": "window {start} – {end}",
+    "windowUndated": "project undated at the time",
+    "source": {
+      "project": "Project",
+      "booking": "Booking",
+      "trip": "Business trip",
+      "absence": "Unavailable"
+    }
+  },
   "activityCentre": {
     "eyebrow": "Activity centre",
     "title": "Activity",
@@ -5908,6 +5925,17 @@
         "none": "No free window within a year and nobody on the roster is confirmed free for these dates.",
         "unconfirmed": "not confirmed free",
         "notStored": "These are proposals from the commitments as they stand, not a plan. Nothing is saved until you change the project or the assignment."
+      },
+      "receipt": {
+        "prompt": "Keeping this assignment despite the clash? Say so — it leaves a receipt this person can see.",
+        "reasonLabel": "Why (optional)",
+        "submit": "Keep it, leave a receipt",
+        "saving": "Recording…",
+        "recorded": "Receipt recorded. The assignment is unchanged; the person can see that the clash was accepted knowingly.",
+        "needsMigration": "Receipts are prepared and not enabled in this environment yet — nothing was recorded.",
+        "notAuthorized": "Only a manager of this project can record this.",
+        "invalid": "This receipt could not be recorded as sent — the assignment may no longer be active.",
+        "error": "The receipt could not be recorded just now."
       }
     },
     "model": {

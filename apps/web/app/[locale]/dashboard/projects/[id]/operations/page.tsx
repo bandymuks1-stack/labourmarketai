@@ -28,6 +28,8 @@ import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
 import { ProjectStagesPanel } from "@/components/app/project-stages-panel";
 import { getLearnedStageDurations } from "@/lib/projects/learned-stage-duration";
+import { getProjectOverrideReceipts } from "@/lib/planning/override-receipts";
+import { OverrideReceiptsSection } from "@/components/app/override-receipts-section";
 import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
 import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel";
 import { listProjectStages } from "@/lib/projects/stages";
@@ -161,6 +163,7 @@ export default async function ProjectOperationsPage({
     defects,
     capacity,
     learnedStageDurations,
+    overrideReceipts,
   ] = await Promise.all([
       getProjectsProgress([id]),
       getProjectManageFacts(id),
@@ -175,6 +178,9 @@ export default async function ProjectOperationsPage({
       // from the SAME project_stages rows, never stored, and authorized by
       // the same policy: a caller learns only from stages they can open.
       getLearnedStageDurations(),
+      // J-TIME-FREEDOM step 5 — receipts of clashes this project's managers
+      // accepted knowingly. Same rows the worker sees, same policy.
+      getProjectOverrideReceipts(id),
     ]);
   const progress = progressById[id] ?? null;
   const projectOrgId: string | null = manageFacts?.organizationId ?? null;
@@ -571,6 +577,11 @@ export default async function ProjectOperationsPage({
             dates; no fabricated progress. Honest "not yet available" state
             while the owner-gated migration is unapplied. */}
       <ProjectStagesPanel projectId={id} data={stages} learned={learnedStageDurations} />
+
+      {/* J-TIME-FREEDOM step 5 — explicit overrides, recorded with a receipt.
+            Honest three-state read: prepared-not-enabled until the owner-gated
+            migration is applied. */}
+      <OverrideReceiptsSection read={overrideReceipts} perspective="manager" />
 
       {/* Gantt projection over the SAME stage truth (no stored events) — bars
             from real planned/actual dates, today marker, overdue highlight,

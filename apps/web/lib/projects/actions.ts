@@ -52,6 +52,12 @@ export type ProjectActionResult =
        * dates. Proposed, never imposed; derived, never stored.
        */
       alternatives?: AlternativesProposal;
+      /**
+       * J-TIME-FREEDOM step 5. The assignment the notice is about, so the
+       * receipt form can name it without a second read: `projects.id` and
+       * `workers.id` (not a profile id). Present only when the check ran.
+       */
+      assignment?: { projectId: string; workerId: string };
     }
   | {
       ok: false;
@@ -146,9 +152,10 @@ export async function assignWorkerToProjectAction(
   const reservation = await reservationAfterAssign(supabase, projectId, workerProfileId);
   if (!reservation) return { ok: true };
   const alternatives = await alternativesAfterCollision(reservation, projectId, workerProfileId);
+  const assignment = { projectId, workerId: reservation.workerId };
   return alternatives
-    ? { ok: true, reservation: reservation.verdict, alternatives }
-    : { ok: true, reservation: reservation.verdict };
+    ? { ok: true, reservation: reservation.verdict, alternatives, assignment }
+    : { ok: true, reservation: reservation.verdict, assignment };
 }
 
 /**

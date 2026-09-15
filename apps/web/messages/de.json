@@ -601,6 +601,23 @@
       "adopt": "Als geplantes Ende übernehmen"
     }
   },
+  "overrideReceipts": {
+    "title": "Akzeptierte Überschneidungen",
+    "introManager": "Zuweisungen, die trotz bekannter Überschneidung beibehalten wurden, mit dem damaligen Kenntnisstand. Nur anfügend; die betroffene Person sieht jeden Beleg.",
+    "introWorker": "Eine Projektleitung hat eine Zuweisung für Sie beibehalten, wissend, dass sie sich mit etwas überschneidet, das Sie bereits hatten. Nichts davon wurde Ihnen verborgen.",
+    "notApplied": "Belege sind vorbereitet und in dieser Umgebung noch nicht aktiviert.",
+    "unavailable": "Belege konnten gerade nicht gelesen werden.",
+    "empty": "In diesem Projekt wurde keine Überschneidung mit Beleg akzeptiert.",
+    "acceptedOn": "Akzeptiert am {date}",
+    "window": "Zeitfenster {start} – {end}",
+    "windowUndated": "Projekt damals ohne Termine",
+    "source": {
+      "project": "Projekt",
+      "booking": "Buchung",
+      "trip": "Dienstreise",
+      "absence": "Nicht verfügbar"
+    }
+  },
   "activityCentre": {
     "eyebrow": "Aktivitätszentrum",
     "title": "Aktivität",
@@ -5908,6 +5925,17 @@
         "none": "Innerhalb eines Jahres kein freies Fenster, und niemand aus der Liste ist für diese Termine bestätigt frei.",
         "unconfirmed": "nicht bestätigt frei",
         "notStored": "Das sind Vorschläge aus den aktuellen Verpflichtungen, kein Plan. Nichts wird gespeichert, bis Sie das Projekt oder die Zuweisung ändern."
+      },
+      "receipt": {
+        "prompt": "Behalten Sie die Zuweisung trotz der Überschneidung? Sagen Sie es — es bleibt ein Beleg, den diese Person sehen kann.",
+        "reasonLabel": "Warum (optional)",
+        "submit": "Behalten und Beleg hinterlassen",
+        "saving": "Wird erfasst…",
+        "recorded": "Beleg erfasst. Die Zuweisung ist unverändert; die Person kann sehen, dass die Überschneidung bewusst akzeptiert wurde.",
+        "needsMigration": "Belege sind vorbereitet und in dieser Umgebung noch nicht aktiviert — nichts wurde erfasst.",
+        "notAuthorized": "Nur eine Projektleitung dieses Projekts kann das erfassen.",
+        "invalid": "Dieser Beleg konnte nicht wie gesendet erfasst werden — die Zuweisung ist möglicherweise nicht mehr aktiv.",
+        "error": "Der Beleg konnte gerade nicht erfasst werden."
       }
     },
     "model": {

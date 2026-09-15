@@ -16,6 +16,10 @@ import type {
   ReservationVerdict,
 } from "@/lib/workforce/commitment-reservation";
 import type { AlternativesProposal } from "@/lib/workforce/commitment-alternatives";
+import {
+  recordOverrideReceiptAction,
+  type OverrideReceiptState,
+} from "@/lib/planning/override-receipt-actions";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -79,6 +83,16 @@ export interface ProjectManagerLabels {
   alternativesNone: string;
   alternativesUnconfirmed: string;
   alternativesNotStored: string;
+  /** J-TIME-FREEDOM step 5 — the explicit override receipt. */
+  receiptPrompt: string;
+  receiptReasonLabel: string;
+  receiptSubmit: string;
+  receiptSaving: string;
+  receiptRecorded: string;
+  receiptNeedsMigration: string;
+  receiptNotAuthorized: string;
+  receiptInvalid: string;
+  receiptError: string;
 }
 
 type ProjectWithAssignments = ManagedProject & {
@@ -191,13 +205,98 @@ function AlternativesNotice({
   );
 }
 
+const RECEIPT_IDLE: OverrideReceiptState = { status: "idle" };
+
+/**
+ * Step 5 — the explicit override, recorded with a receipt.
+ *
+ * The assignment already exists and stays exactly as it is whether or not
+ * this form is used (SEP-2 — the warning never decided anything). What the
+ * form adds is the RECORD: that this manager saw these collisions on this
+ * window and kept the assignment on purpose, optionally saying why. The
+ * receipt is append-only and readable by the worker it concerns.
+ *
+ * Until the owner-gated migration is applied the action answers
+ * `needs_migration`, and that is rendered as "prepared, not enabled" — a
+ * true sentence, never a fake success.
+ */
+function OverrideReceiptForm({
+  verdict,
+  assignment,
+  labels,
+}: {
+  verdict: ReservationVerdict;
+  assignment: { projectId: string; workerId: string };
+  labels: ProjectManagerLabels;
+}) {
+  const [state, action, pending] = useActionState(recordOverrideReceiptAction, RECEIPT_IDLE);
+  const collisions = JSON.stringify(
+    verdict.collisions.map((c) => ({
+      source: c.source,
+      sourceId: c.sourceId,
+      overlapStart: c.overlapStart,
+      overlapEnd: c.overlapEnd,
+    })),
+  );
+  if (state.status === "ok") {
+    return (
+      <p className="text-xs text-text-secondary" role="status" data-testid="assign-override-recorded">
+        {labels.receiptRecorded}
+      </p>
+    );
+  }
+  const outcome =
+    state.status === "needs_migration"
+      ? labels.receiptNeedsMigration
+      : state.status === "not_authorized"
+        ? labels.receiptNotAuthorized
+        : state.status === "invalid"
+          ? labels.receiptInvalid
+          : state.status === "error"
+            ? labels.receiptError
+            : null;
+  return (
+    <form action={action} className="flex flex-col gap-1 pt-1" data-testid="assign-override-receipt">
+      <input type="hidden" name="project_id" value={assignment.projectId} />
+      <input type="hidden" name="worker_id" value={assignment.workerId} />
+      <input type="hidden" name="collisions" value={collisions} />
+      <p className="text-xs text-text-secondary">{labels.receiptPrompt}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          name="reason"
+          maxLength={1000}
+          aria-label={labels.receiptReasonLabel}
+          placeholder={labels.receiptReasonLabel}
+          className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+          data-testid="assign-override-reason"
+        />
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md border border-ink-500 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-60"
+          data-testid="assign-override-submit"
+        >
+          {pending ? labels.receiptSaving : labels.receiptSubmit}
+        </button>
+      </div>
+      {outcome ? (
+        <p className="text-xs text-text-muted" role="status" data-testid={`assign-override-${state.status}`}>
+          {outcome}
+        </p>
+      ) : null}
+    </form>
+  );
+}
+
 function ReservationNotice({
   verdict,
   alternatives,
+  assignment,
   labels,
 }: {
   verdict: ReservationVerdict;
   alternatives?: AlternativesProposal;
+  assignment?: { projectId: string; workerId: string };
   labels: ProjectManagerLabels;
 }) {
   if (verdict.state === "clear") return null;
@@ -228,6 +327,7 @@ function ReservationNotice({
       </ul>
       <p className="text-xs text-text-muted">{labels.reservationNotBlocking}</p>
       {alternatives ? <AlternativesNotice proposal={alternatives} labels={labels} /> : null}
+      {assignment ? <OverrideReceiptForm verdict={verdict} assignment={assignment} labels={labels} /> : null}
     </div>
   );
 }
@@ -340,6 +440,7 @@ export function ProjectAssignmentManager({
             <ReservationNotice
               verdict={assignState.reservation}
               alternatives={assignState.alternatives}
+              assignment={assignState.assignment}
               labels={labels}
             />
           ) : null}

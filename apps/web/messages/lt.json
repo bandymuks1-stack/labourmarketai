@@ -601,6 +601,23 @@
       "adopt": "Naudoti kaip planuojamą pabaigą"
     }
   },
+  "overrideReceipts": {
+    "title": "Priimti sutapimai",
+    "introManager": "Priskyrimai, palikti nepaisant žinomo sutapimo, su tuo, kas tuo metu buvo žinoma. Tik papildoma; susijęs žmogus mato kiekvieną kvitą.",
+    "introWorker": "Vadovas paliko jums priskyrimą žinodamas, kad jis sutampa su tuo, ką jau turėjote. Niekas čia nuo jūsų nepaslėpta.",
+    "notApplied": "Kvitai paruošti, bet šioje aplinkoje dar neįjungti.",
+    "unavailable": "Kvitų šiuo metu nepavyko perskaityti.",
+    "empty": "Šiame projekte joks sutapimas nebuvo priimtas su kvitu.",
+    "acceptedOn": "Priimta {date}",
+    "window": "langas {start} – {end}",
+    "windowUndated": "projektas tuo metu be datų",
+    "source": {
+      "project": "Projektas",
+      "booking": "Užsakymas",
+      "trip": "Komandiruotė",
+      "absence": "Nepasiekiamas"
+    }
+  },
   "activityCentre": {
     "eyebrow": "Veiklos centras",
     "title": "Veikla",
@@ -5908,6 +5925,17 @@
         "none": "Per metus nėra laisvo lango ir niekas sąraše nėra patvirtintai laisvas šiomis datomis.",
         "unconfirmed": "nepatvirtinta, kad laisva",
         "notStored": "Tai pasiūlymai pagal dabartinius įsipareigojimus, ne planas. Niekas neišsaugoma, kol nepakeisite projekto ar priskyrimo."
+      },
+      "receipt": {
+        "prompt": "Paliekate priskyrimą nepaisant sutapimo? Pasakykite tai — liks kvitas, kurį šis žmogus matys.",
+        "reasonLabel": "Kodėl (neprivaloma)",
+        "submit": "Palikti ir įrašyti kvitą",
+        "saving": "Įrašoma…",
+        "recorded": "Kvitas įrašytas. Priskyrimas nepakeistas; žmogus matys, kad sutapimas priimtas sąmoningai.",
+        "needsMigration": "Kvitai paruošti, bet šioje aplinkoje dar neįjungti — niekas neįrašyta.",
+        "notAuthorized": "Tai įrašyti gali tik šio projekto vadovas.",
+        "invalid": "Šio kvito nepavyko įrašyti taip, kaip išsiųsta — priskyrimas gali būti nebeaktyvus.",
+        "error": "Kvito šiuo metu įrašyti nepavyko."
       }
     },
     "model": {

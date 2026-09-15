@@ -2518,7 +2518,14 @@ describe("no migration files added by this sprint", () => {
     //   were APPLIED to production as ledger 20260914144053 / 20260914144310
     //   before the reconciliation; the files land here so main = production.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 284.
-const SPRINT_BASELINE = 284;
+    // Bumped 284 -> 285 for J-TIME-FREEDOM step 5
+    //   (20260915120000_commitment_override_receipts_v1, paired guarded
+    //   rollback). PREPARED FOR REVIEW ONLY, deliberately UNANNOTATED and
+    //   UNAPPLIED: one append-only receipt table + one definer writer. Its
+    //   full body was dry-run on production inside a rolled-back transaction
+    //   (nine authority/shape/append-only stages, zero objects left behind).
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
+const SPRINT_BASELINE = 285;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

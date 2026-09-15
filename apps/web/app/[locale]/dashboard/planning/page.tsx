@@ -36,6 +36,9 @@ import {
   type TimesheetNotice,
 } from "@/lib/timesheets/timesheets-model";
 import { TimesheetsSection } from "./timesheets-section";
+import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
+import { getWorkerOverrideReceipts } from "@/lib/planning/override-receipts";
+import { OverrideReceiptsSection } from "@/components/app/override-receipts-section";
 import { createUtcFormatter } from "@/lib/time/display";
 
 /**
@@ -156,6 +159,8 @@ export default async function PlanningPage({
   // `view` alone. So they travel together instead of one after the other, and
   // the strip is still not fetched at all on the views that do not show it.
   const showWorkload = view === "week" || view === "agenda";
+  const ownWorkerId = await getOwnWorkerId();
+  const ownReceipts = ownWorkerId ? await getWorkerOverrideReceipts(ownWorkerId) : null;
   const [result, workloadActuals] = await Promise.all([
     getPlanning({ rangeStart: range.start, rangeEnd: range.end }),
     showWorkload ? getMyJournalWorkHours(range.start, range.end) : null,
@@ -913,6 +918,11 @@ export default async function PlanningPage({
       {!agenda && !hasAnything && view !== "day" ? (
         <EmptyState t={t} sourceFilter={sourceFilter} />
       ) : null}
+
+      {/* J-TIME-FREEDOM step 5 — what a manager knowingly accepted about
+          THIS person's calendar. The subject's receipt: the same rows the
+          manager sees, read under the worker's own RLS. */}
+      {ownReceipts ? <OverrideReceiptsSection read={ownReceipts} perspective="worker" /> : null}
 
       {/* ---------------- TIMESHEETS (#timesheets) ---------------- */}
       <TimesheetsSection locale={locale} notice={tsNotice} />

@@ -601,6 +601,23 @@
       "adopt": "Gebruiken als gepland einde"
     }
   },
+  "overrideReceipts": {
+    "title": "Geaccepteerde overlappingen",
+    "introManager": "Toewijzingen die ondanks een bekende overlap zijn behouden, met wat toen bekend was. Alleen toevoegen; de betrokken persoon ziet elk bewijs.",
+    "introWorker": "Een manager heeft een toewijzing voor u behouden wetende dat die overlapte met iets dat u al had. Niets hiervan is voor u verborgen.",
+    "notApplied": "Bewijzen zijn voorbereid en in deze omgeving nog niet ingeschakeld.",
+    "unavailable": "Bewijzen konden nu niet worden gelezen.",
+    "empty": "In dit project is geen overlap met een bewijs geaccepteerd.",
+    "acceptedOn": "Geaccepteerd op {date}",
+    "window": "venster {start} – {end}",
+    "windowUndated": "project destijds zonder data",
+    "source": {
+      "project": "Project",
+      "booking": "Boeking",
+      "trip": "Zakenreis",
+      "absence": "Niet beschikbaar"
+    }
+  },
   "activityCentre": {
     "eyebrow": "Activiteitencentrum",
     "title": "Activiteit",
@@ -5908,6 +5925,17 @@
         "none": "Geen vrij venster binnen een jaar en niemand op de lijst is bevestigd vrij op deze data.",
         "unconfirmed": "niet bevestigd vrij",
         "notStored": "Dit zijn voorstellen op basis van de huidige verplichtingen, geen plan. Er wordt niets opgeslagen tot u het project of de toewijzing wijzigt."
+      },
+      "receipt": {
+        "prompt": "Houdt u deze toewijzing ondanks de overlap? Zeg het — er blijft een bewijs achter dat deze persoon kan zien.",
+        "reasonLabel": "Waarom (optioneel)",
+        "submit": "Behouden en bewijs achterlaten",
+        "saving": "Vastleggen…",
+        "recorded": "Bewijs vastgelegd. De toewijzing is ongewijzigd; de persoon kan zien dat de overlap bewust is geaccepteerd.",
+        "needsMigration": "Bewijzen zijn voorbereid en in deze omgeving nog niet ingeschakeld — er is niets vastgelegd.",
+        "notAuthorized": "Alleen een manager van dit project kan dit vastleggen.",
+        "invalid": "Dit bewijs kon niet worden vastgelegd zoals verzonden — de toewijzing is mogelijk niet meer actief.",
+        "error": "Het bewijs kon nu niet worden vastgelegd."
       }
     },
     "model": {
