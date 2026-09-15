@@ -1324,6 +1324,16 @@ describe("the migration set is exactly what this slice declared", () => {
       // guard re-pointing) met in the same slice. The annotation was added in
       // the commit that records that approval — not spread from an earlier one.
       "20260914210000_external_profiles_v1.sql",
+      // 2026-09-15, RED #4 + #5: the subject-scoped contest event and the
+      // clash-acknowledgement receipt. The marker records that the RED content
+      // (a new SECURITY DEFINER function, its GRANT/REVOKE, and the
+      // drop-and-widen of the booking_request_events event_type CHECK) is
+      // INTENTIONAL. It carries a PREPARE approval only — the owner's decision
+      // of 2026-09-15, recorded in
+      // docs/DECISIONS/RED-4-5-subject-authority-packet.md — and NO APPLY
+      // APPROVAL. The migration is unapplied; the marker was added in the same
+      // commit as the packet, not spread from an earlier approval.
+      "20260915180000_subject_contest_and_clash_receipt.sql",
 ]);
   });
 

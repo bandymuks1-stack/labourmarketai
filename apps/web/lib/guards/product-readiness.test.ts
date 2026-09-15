@@ -2518,7 +2518,14 @@ describe("no migration files added by this sprint", () => {
     //   were APPLIED to production as ledger 20260914144053 / 20260914144310
     //   before the reconciliation; the files land here so main = production.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 284.
-const SPRINT_BASELINE = 284;
+// 284 -> 285: RED #4 + #5 — the subject-scoped contest policy and the
+//   clash-acknowledgement receipt, ONE migration
+//   (20260915180000_subject_contest_and_clash_receipt). PREPARED, NOT
+//   APPLIED: owner PREPARE approval 2026-09-15, packet in
+//   docs/DECISIONS/RED-4-5-subject-authority-packet.md. The baseline grows
+//   because the FILE exists, not because the authority is live.
+//   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
+const SPRINT_BASELINE = 285;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

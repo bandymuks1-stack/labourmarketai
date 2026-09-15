@@ -336,7 +336,12 @@ begin
 end;
 $function$;
 
-revoke all on function public.respond_booking_request_v4(uuid, text, text, text, boolean) from public;
+-- `anon` is named EXPLICITLY, not left to `public`. On a fresh Supabase
+-- database ALTER DEFAULT PRIVILEGES grants EXECUTE to anon outright, so
+-- revoking PUBLIC alone leaves this SECURITY DEFINER function anon-reachable
+-- locally while looking closed on production
+-- (20260722160000_secdef_anon_reach_revoke_v1 and its guard).
+revoke all on function public.respond_booking_request_v4(uuid, text, text, text, boolean) from public, anon;
 grant execute on function public.respond_booking_request_v4(uuid, text, text, text, boolean) to authenticated;
 
 comment on function public.respond_booking_request_v4(uuid, text, text, text, boolean) is
