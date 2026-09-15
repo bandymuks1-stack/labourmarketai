@@ -996,6 +996,74 @@ export default async function CompanyDashboardPage({
         ))}
       </nav>
 
+      {/* W3 rows 7/8/25 — the CANONICAL demand intake. The FULL wizard
+          (describe → criteria → review, structured v2, estimate builder,
+          prefill, draft auto-continue, private save-draft leg) moved here
+          from the deleted /dashboard/advanced mount. #demand-intake is the
+          stable anchor every demand door in the product targets.
+
+          IT IS THE FIRST SECTION OF THE ROOM, and that is the whole point.
+          It carried `data-testid="company-dashboard-first-action"` while
+          rendering LAST — after the decisions strip, the agency mode card,
+          the ops workspace, the assignment connections, the pilot note, the
+          invite link, the lifecycle panel and the public business profile.
+          An employer who answered "Man reikia darbuotojų" at the door had to
+          scroll past eight sections of administration before reaching the
+          one thing they came to do. The testid was not wrong about intent;
+          the order was wrong about it. Position is pinned by
+          `lib/guards/company-demand-first-action.test.ts`.
+
+          The readback travels WITH the wizard: "what I already asked for"
+          and its per-demand scouting deep link are the second half of the
+          same question, and separating them put the next step — matching —
+          at the far end of the page too. */}
+      <section
+        id="company-requests"
+        className="card-border flex flex-col gap-5 p-5 scroll-mt-20 sm:p-6"
+        data-testid="company-dashboard-first-action"
+      >
+        <div
+          id="demand-intake"
+          data-testid="demand-intake-section"
+          className="flex flex-col gap-5 scroll-mt-20"
+        >
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+              <span className="live-dot" aria-hidden />
+              {tFlow("company.eyebrow")}
+            </span>
+            <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
+              {tWow(`demand.${demandPilotKey}.title`)}
+            </h2>
+            <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
+              {tWow(`demand.${demandPilotKey}.body`)}
+            </p>
+          </div>
+          <DemandRequestButton
+            intent={demandIntent}
+            stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
+          />
+          {/* Static-stepper honesty note (guarded): the steps show progress,
+              they are not live modules. */}
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journey-progress-helper"
+          >
+            {tWow("demand.progressHelper")}
+          </p>
+        </div>
+      </section>
+
+      {/* The ONE owner readback of what this organisation already asked for
+          (moved from /dashboard/advanced) — honest stored status only, with
+          the per-demand scouting deep link as the operational follow-up. */}
+      <DemandRequestsReadback
+        result={demandReadback}
+        labels={readbackLabels}
+        locale={locale}
+        pendingInterest={pendingInterest}
+      />
+
       {/* Decision-first strip (company architecture v1): the overview LEADS
           with what actually waits for the owner's decision — pending journal
           reviews, pending worker invitations, claimable public intakes. All
@@ -1618,58 +1686,6 @@ export default async function CompanyDashboardPage({
           />
         </div>
       )}
-
-      {/* W3 rows 7/8/25 — the CANONICAL demand intake. The FULL wizard
-          (describe → criteria → review, structured v2, estimate builder,
-          prefill, draft auto-continue, private save-draft leg) moved here
-          from the deleted /dashboard/advanced mount. #demand-intake is the
-          stable anchor every demand door in the product targets. */}
-      <section
-        id="company-requests"
-        className="card-border flex flex-col gap-5 p-5 scroll-mt-20 sm:p-6"
-        data-testid="company-dashboard-first-action"
-      >
-        <div
-          id="demand-intake"
-          data-testid="demand-intake-section"
-          className="flex flex-col gap-5 scroll-mt-20"
-        >
-          <div className="flex flex-col gap-1">
-            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
-              <span className="live-dot" aria-hidden />
-              {tFlow("company.eyebrow")}
-            </span>
-            <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
-              {tWow(`demand.${demandPilotKey}.title`)}
-            </h2>
-            <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
-              {tWow(`demand.${demandPilotKey}.body`)}
-            </p>
-          </div>
-          <DemandRequestButton
-            intent={demandIntent}
-            stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
-          />
-          {/* Static-stepper honesty note (guarded): the steps show progress,
-              they are not live modules. */}
-          <p
-            className="text-meta leading-relaxed text-text-muted"
-            data-testid="journey-progress-helper"
-          >
-            {tWow("demand.progressHelper")}
-          </p>
-        </div>
-      </section>
-
-      {/* The ONE owner readback of what this organisation already asked for
-          (moved from /dashboard/advanced) — honest stored status only, with
-          the per-demand scouting deep link as the operational follow-up. */}
-      <DemandRequestsReadback
-        result={demandReadback}
-        labels={readbackLabels}
-        locale={locale}
-        pendingInterest={pendingInterest}
-      />
 
       {/* WAGON 10 (areas 18+19) — typed INTERNAL help requests: recruiter /
           accounting / legal / document check / demand-filling help. Creates
