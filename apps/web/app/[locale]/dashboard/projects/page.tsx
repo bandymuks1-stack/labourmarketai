@@ -177,6 +177,21 @@ export default async function ProjectsPage({
       trip: t("assign.reservation.source.trip"),
       absence: t("assign.reservation.source.absence"),
     },
+    alternativesTitle: t("assign.alternatives.title"),
+    alternativesDates: t("assign.alternatives.dates"),
+    alternativesCrew: t("assign.alternatives.crew"),
+    alternativesNone: t("assign.alternatives.none"),
+    alternativesUnconfirmed: t("assign.alternatives.unconfirmed"),
+    alternativesNotStored: t("assign.alternatives.notStored"),
+    receiptPrompt: t("assign.receipt.prompt"),
+    receiptReasonLabel: t("assign.receipt.reasonLabel"),
+    receiptSubmit: t("assign.receipt.submit"),
+    receiptSaving: t("assign.receipt.saving"),
+    receiptRecorded: t("assign.receipt.recorded"),
+    receiptNeedsMigration: t("assign.receipt.needsMigration"),
+    receiptNotAuthorized: t("assign.receipt.notAuthorized"),
+    receiptInvalid: t("assign.receipt.invalid"),
+    receiptError: t("assign.receipt.error"),
   };
 
   return (

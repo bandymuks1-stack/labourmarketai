@@ -589,6 +589,33 @@
       "median": "Vergelijkbare afgeronde fasen duurden {days} dagen (mediaan van {count})",
       "vsPlan": "gepland {days}",
       "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen."
+    },
+    "forecast": {
+      "withEnd": "Prognose: {days, plural, one {# dag} other {# dagen}} → eindigt {end} (uit {count} afgeronde fasen met deze naam)",
+      "daysOnly": "Prognose: {days, plural, one {# dag} other {# dagen}} (uit {count} afgeronde fasen met deze naam) — stel een start in om de einddatum te zien",
+      "confidence": {
+        "indicative": "indicatief",
+        "established": "gevestigd"
+      },
+      "label": "een prognose, geen plan — er wordt niets opgeslagen tot u de data instelt",
+      "adopt": "Gebruiken als gepland einde"
+    }
+  },
+  "overrideReceipts": {
+    "title": "Geaccepteerde overlappingen",
+    "introManager": "Toewijzingen die ondanks een bekende overlap zijn behouden, met wat toen bekend was. Alleen toevoegen; de betrokken persoon ziet elk bewijs.",
+    "introWorker": "Een manager heeft een toewijzing voor u behouden wetende dat die overlapte met iets dat u al had. Niets hiervan is voor u verborgen.",
+    "notApplied": "Bewijzen zijn voorbereid en in deze omgeving nog niet ingeschakeld.",
+    "unavailable": "Bewijzen konden nu niet worden gelezen.",
+    "empty": "In dit project is geen overlap met een bewijs geaccepteerd.",
+    "acceptedOn": "Geaccepteerd op {date}",
+    "window": "venster {start} – {end}",
+    "windowUndated": "project destijds zonder data",
+    "source": {
+      "project": "Projectinzet",
+      "booking": "Boeking",
+      "trip": "Zakenreis",
+      "absence": "Niet beschikbaar"
     }
   },
   "activityCentre": {
@@ -5890,6 +5917,25 @@
           "trip": "Dienstreis",
           "absence": "Niet beschikbaar"
         }
+      },
+      "alternatives": {
+        "title": "Wat u in plaats daarvan zou kunnen doen",
+        "dates": "Dezelfde persoon, andere data",
+        "crew": "Iemand anders, dezelfde data",
+        "none": "Geen vrij venster binnen een jaar en niemand op de lijst is bevestigd vrij op deze data.",
+        "unconfirmed": "niet bevestigd vrij",
+        "notStored": "Dit zijn voorstellen op basis van de huidige verplichtingen, geen plan. Er wordt niets opgeslagen tot u het project of de toewijzing wijzigt."
+      },
+      "receipt": {
+        "prompt": "Houdt u deze toewijzing ondanks de overlap? Zeg het — er blijft een bewijs achter dat deze persoon kan zien.",
+        "reasonLabel": "Waarom (optioneel)",
+        "submit": "Behouden en bewijs achterlaten",
+        "saving": "Vastleggen…",
+        "recorded": "Bewijs vastgelegd. De toewijzing is ongewijzigd; de persoon kan zien dat de overlap bewust is geaccepteerd.",
+        "needsMigration": "Bewijzen zijn voorbereid en in deze omgeving nog niet ingeschakeld — er is niets vastgelegd.",
+        "notAuthorized": "Alleen een manager van dit project kan dit vastleggen.",
+        "invalid": "Dit bewijs kon niet worden vastgelegd zoals verzonden — de toewijzing is mogelijk niet meer actief.",
+        "error": "Het bewijs kon nu niet worden vastgelegd."
       }
     },
     "model": {
@@ -6893,6 +6939,34 @@
         "notAllowed": "Alleen de ploegeigenaar of een manager kan antwoorden.",
         "notOpen": "Deze aanvraag is niet meer open.",
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
+      }
+    },
+    "assign": {
+      "heading": "Het hele team aan een project toewijzen",
+      "intro": "Elk van de {count, plural, one {# lid} other {# leden}} wordt via dezelfde regel per persoon toegewezen — het project moet van u zijn en elke persoon op uw lijst. Elk resultaat wordt op naam getoond.",
+      "projectLabel": "Kies project",
+      "projectPlaceholder": "Kies een project…",
+      "submit": "Team toewijzen",
+      "assigning": "Toewijzen…",
+      "noProjects": "Nog geen open project om aan toe te wijzen.",
+      "notBlocking": "Een overlap maakt een toewijzing niet ongedaan — u beslist wat juist is voor elke persoon.",
+      "outcome": {
+        "not_authed": "Meld u aan om een team toe te wijzen.",
+        "no_such_team": "Dit team is niet van u of bestaat niet meer.",
+        "empty_team": "Dit team heeft nog geen leden.",
+        "needs_migration": "Teamtoewijzing is voorbereid en in deze omgeving nog niet ingeschakeld.",
+        "unavailable": "Het team kon nu niet worden toegewezen."
+      },
+      "member": {
+        "assigned": "toegewezen",
+        "not_authorized": "geweigerd — voor dit project niet op uw lijst",
+        "no_worker": "heeft nog geen werkprofiel",
+        "error": "kon niet worden toegewezen"
+      },
+      "reservation": {
+        "clear": "data vrij",
+        "unknown": "data niet bevestigd vrij",
+        "collides": "{count, plural, one {# overlap} other {# overlappingen}}"
       }
     }
   },

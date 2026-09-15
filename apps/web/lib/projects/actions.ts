@@ -10,7 +10,9 @@ import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
+import { proposeAssignmentAlternatives } from "@/lib/planning/assignment-alternatives";
 import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
+import type { AlternativesProposal } from "@/lib/workforce/commitment-alternatives";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -43,6 +45,19 @@ export type ProjectActionResult =
        * discovering the clash later on a calendar they were not looking at.
        */
       reservation?: ReservationVerdict;
+      /**
+       * J-TIME-FREEDOM step 4. When the reservation COLLIDES, what the manager
+       * could do instead: the same person on the nearest free window of the
+       * same length, or someone else on the roster who is clear for these
+       * dates. Proposed, never imposed; derived, never stored.
+       */
+      alternatives?: AlternativesProposal;
+      /**
+       * J-TIME-FREEDOM step 5. The assignment the notice is about, so the
+       * receipt form can name it without a second read: `projects.id` and
+       * `workers.id` (not a profile id). Present only when the check ran.
+       */
+      assignment?: { projectId: string; workerId: string };
     }
   | {
       ok: false;
@@ -135,7 +150,38 @@ export async function assignWorkerToProjectAction(
     metadata: { surface: "projects", role_context: "company" },
   });
   const reservation = await reservationAfterAssign(supabase, projectId, workerProfileId);
-  return reservation ? { ok: true, reservation } : { ok: true };
+  if (!reservation) return { ok: true };
+  const alternatives = await alternativesAfterCollision(reservation, projectId, workerProfileId);
+  const assignment = { projectId, workerId: reservation.workerId };
+  return alternatives
+    ? { ok: true, reservation: reservation.verdict, alternatives, assignment }
+    : { ok: true, reservation: reservation.verdict, assignment };
+}
+
+/**
+ * Step 4 of J-TIME-FREEDOM, run only when step 3 found a clash. Same
+ * discipline as the check itself: after the write, never able to fail it,
+ * and the worst case is that the manager sees the warning without the
+ * proposals — which is where the product was before.
+ */
+async function alternativesAfterCollision(
+  reservation: NonNullable<Awaited<ReturnType<typeof reservationAfterAssign>>>,
+  projectId: string,
+  workerProfileId: string,
+): Promise<AlternativesProposal | null> {
+  if (reservation.verdict.state !== "collides") return null;
+  try {
+    return await proposeAssignmentAlternatives({
+      projectId,
+      collidingWorkerId: reservation.workerId,
+      verdict: reservation.verdict,
+      window: reservation.window,
+      notBefore: new Date().toISOString().slice(0, 10),
+    });
+  } catch (error) {
+    console.error("[projects] alternatives proposal failed:", error, workerProfileId);
+    return null;
+  }
 }
 
 /**
@@ -155,21 +201,24 @@ async function reservationAfterAssign(
   supabase: SupabaseClient,
   projectId: string,
   workerProfileId: string,
-): Promise<ReservationVerdict | null> {
+): Promise<{
+  verdict: ReservationVerdict;
+  workerId: string;
+  window: { startDate: string | null; endDate: string | null };
+} | null> {
   try {
     const [{ data: worker }, { data: project }] = await Promise.all([
       asAny(supabase).from("workers").select("id").eq("profile_id", workerProfileId).maybeSingle(),
       asAny(supabase).from("projects").select("start_date, end_date").eq("id", projectId).maybeSingle(),
     ]);
     if (!worker?.id) return null;
-    return await checkWorkerReservation({
-      workerId: worker.id as string,
-      window: {
-        startDate: (project?.start_date as string | null) ?? null,
-        endDate: (project?.end_date as string | null) ?? null,
-      },
-      exclude: [projectId],
-    });
+    const workerId = worker.id as string;
+    const window = {
+      startDate: (project?.start_date as string | null) ?? null,
+      endDate: (project?.end_date as string | null) ?? null,
+    };
+    const verdict = await checkWorkerReservation({ workerId, window, exclude: [projectId] });
+    return { verdict, workerId, window };
   } catch (error) {
     console.error("[projects] reservation check failed:", error);
     return null;

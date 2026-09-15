@@ -12,6 +12,7 @@ import {
 import type { TeamBrigade } from "@/lib/company/team-brigades";
 import { TeamDetailsForm } from "@/components/app/team-details-form";
 import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
+import { TeamAssignForm } from "@/components/app/team-assign-form";
 
 /**
  * Teams / brigades surface on the EXISTING company room (§8.3 + Trust
@@ -38,12 +39,15 @@ export function TeamBrigadesPanel({
   invitationsApplied,
   detailsApplied,
   enquiriesApplied,
+  projects = [],
 }: {
   teams: readonly TeamBrigade[];
   locale: string;
   invitationsApplied: boolean;
   detailsApplied: boolean;
   enquiriesApplied: boolean;
+  /** WRK-6 — the projects the caller manages, for assigning a whole team. */
+  projects?: readonly { id: string; title: string | null }[];
 }) {
   const router = useRouter();
   const t = useTranslations("teamBrigades");
@@ -285,6 +289,18 @@ export function TeamBrigadesPanel({
                   )}
                 </div>
               </div>
+
+              {/* WRK-6 — assign the whole brigade to a project the caller
+                  manages: one existing per-person write per member, each
+                  member's own outcome and calendar truth shown. */}
+              <details className="rounded-md border border-ink-600 bg-ink-800/30 p-3" data-testid="team-assign-section">
+                <summary className="cursor-pointer text-xs font-medium text-text-secondary">
+                  {t("assign.heading")}
+                </summary>
+                <div className="pt-3">
+                  <TeamAssignForm teamId={team.id} memberCount={team.members.length} projects={projects} />
+                </div>
+              </details>
 
               {/* Folded: edit team details (gap 2). */}
               {detailsApplied && (

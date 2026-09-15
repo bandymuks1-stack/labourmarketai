@@ -159,6 +159,9 @@ export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
 
   const byProfile = await readRelations(db, "profile_id", [user.id]);
   unavailable.push(...byProfile.unavailable);
+  // Relations where the person is the SUBJECT of another party's act.
+  const bySubject = await readRelations(db, "subject_profile_id", [user.id]);
+  unavailable.push(...bySubject.unavailable);
 
   let byWorker: { data: Record<string, unknown>; unavailable: string[] };
   if (workersRes.error) {
@@ -198,6 +201,7 @@ export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
         profiles: profile,
         workers,
         ...byProfile.data,
+        ...bySubject.data,
         ...byWorker.data,
       },
     },

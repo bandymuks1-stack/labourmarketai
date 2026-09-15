@@ -589,6 +589,33 @@
       "median": "Panašios baigtos stadijos truko {days} d. (mediana iš {count})",
       "vsPlan": "planuota {days}",
       "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių."
+    },
+    "forecast": {
+      "withEnd": "Prognozė: {days, plural, one {# diena} few {# dienos} many {# dienos} other {# dienų}} → baigtųsi {end} (pagal {count} užbaigtus šio pavadinimo etapus)",
+      "daysOnly": "Prognozė: {days, plural, one {# diena} few {# dienos} many {# dienos} other {# dienų}} (pagal {count} užbaigtus šio pavadinimo etapus) — nurodykite pradžią, kad matytumėte pabaigos datą",
+      "confidence": {
+        "indicative": "orientacinė",
+        "established": "nusistovėjusi"
+      },
+      "label": "tai prognozė, ne planas — niekas neišsaugoma, kol nenustatysite datų",
+      "adopt": "Naudoti kaip planuojamą pabaigą"
+    }
+  },
+  "overrideReceipts": {
+    "title": "Priimti sutapimai",
+    "introManager": "Priskyrimai, palikti nepaisant žinomo sutapimo, su tuo, kas tuo metu buvo žinoma. Tik papildoma; susijęs žmogus mato kiekvieną kvitą.",
+    "introWorker": "Vadovas paliko jums priskyrimą žinodamas, kad jis sutampa su tuo, ką jau turėjote. Niekas čia nuo jūsų nepaslėpta.",
+    "notApplied": "Kvitai paruošti, bet šioje aplinkoje dar neįjungti.",
+    "unavailable": "Kvitų šiuo metu nepavyko perskaityti.",
+    "empty": "Šiame projekte joks sutapimas nebuvo priimtas su kvitu.",
+    "acceptedOn": "Priimta {date}",
+    "window": "langas {start} – {end}",
+    "windowUndated": "projektas tuo metu be datų",
+    "source": {
+      "project": "Projektas",
+      "booking": "Užsakymas",
+      "trip": "Komandiruotė",
+      "absence": "Nepasiekiamas"
     }
   },
   "activityCentre": {
@@ -5890,6 +5917,25 @@
           "trip": "Komandiruotė",
           "absence": "Nepasiekiama"
         }
+      },
+      "alternatives": {
+        "title": "Ką galėtumėte daryti vietoj to",
+        "dates": "Tas pats žmogus, kitos datos",
+        "crew": "Kitas žmogus, tos pačios datos",
+        "none": "Per metus nėra laisvo lango ir niekas sąraše nėra patvirtintai laisvas šiomis datomis.",
+        "unconfirmed": "nepatvirtinta, kad laisva",
+        "notStored": "Tai pasiūlymai pagal dabartinius įsipareigojimus, ne planas. Niekas neišsaugoma, kol nepakeisite projekto ar priskyrimo."
+      },
+      "receipt": {
+        "prompt": "Paliekate priskyrimą nepaisant sutapimo? Pasakykite tai — liks kvitas, kurį šis žmogus matys.",
+        "reasonLabel": "Kodėl (neprivaloma)",
+        "submit": "Palikti ir įrašyti kvitą",
+        "saving": "Įrašoma…",
+        "recorded": "Kvitas įrašytas. Priskyrimas nepakeistas; žmogus matys, kad sutapimas priimtas sąmoningai.",
+        "needsMigration": "Kvitai paruošti, bet šioje aplinkoje dar neįjungti — niekas neįrašyta.",
+        "notAuthorized": "Tai įrašyti gali tik šio projekto vadovas.",
+        "invalid": "Šio kvito nepavyko įrašyti taip, kaip išsiųsta — priskyrimas gali būti nebeaktyvus.",
+        "error": "Kvito šiuo metu įrašyti nepavyko."
       }
     },
     "model": {
@@ -6893,6 +6939,34 @@
         "notAllowed": "Atsakyti gali tik komandos savininkas arba vadovas.",
         "notOpen": "Ši užklausa nebėra atvira.",
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
+      }
+    },
+    "assign": {
+      "heading": "Priskirti visą komandą projektui",
+      "intro": "Kiekvienas iš {count, plural, one {# nario} few {# narių} many {# narių} other {# narių}} priskiriamas pagal tą pačią asmeninę taisyklę — projektas turi būti jūsų, o kiekvienas žmogus — jūsų sąraše. Kiekvienas rezultatas rodomas pagal vardą.",
+      "projectLabel": "Projektas",
+      "projectPlaceholder": "Pasirinkite projektą…",
+      "submit": "Priskirti komandą",
+      "assigning": "Priskiriama…",
+      "noProjects": "Dar nėra atviro projekto, kuriam būtų galima priskirti.",
+      "notBlocking": "Sutapimas priskyrimo neatšaukia — jūs sprendžiate, kas tinka kiekvienam žmogui.",
+      "outcome": {
+        "not_authed": "Prisijunkite, kad priskirtumėte komandą.",
+        "no_such_team": "Ši komanda ne jūsų arba nebeegzistuoja.",
+        "empty_team": "Ši komanda dar neturi narių.",
+        "needs_migration": "Komandos priskyrimas paruoštas, bet šioje aplinkoje dar neįjungtas.",
+        "unavailable": "Komandos šiuo metu priskirti nepavyko."
+      },
+      "member": {
+        "assigned": "priskirta",
+        "not_authorized": "atmesta — nėra jūsų sąraše šiam projektui",
+        "no_worker": "dar neturi darbuotojo profilio",
+        "error": "nepavyko priskirti"
+      },
+      "reservation": {
+        "clear": "datos laisvos",
+        "unknown": "nepatvirtinta, kad datos laisvos",
+        "collides": "{count, plural, one {# sutapimas} few {# sutapimai} many {# sutapimo} other {# sutapimų}}"
       }
     }
   },

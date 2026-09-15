@@ -589,6 +589,33 @@
       "median": "Comparable finished stages took {days} days (median of {count})",
       "vsPlan": "planned {days}",
       "unavailable": "Past-duration comparison could not be read just now."
+    },
+    "forecast": {
+      "withEnd": "Forecast: {days, plural, one {# day} other {# days}} → ends {end} (from {count} finished stages of this name)",
+      "daysOnly": "Forecast: {days, plural, one {# day} other {# days}} (from {count} finished stages of this name) — set a start to see the end date",
+      "confidence": {
+        "indicative": "indicative",
+        "established": "established"
+      },
+      "label": "a forecast, not a plan — nothing is saved until you set the dates",
+      "adopt": "Use as planned end"
+    }
+  },
+  "overrideReceipts": {
+    "title": "Accepted clashes",
+    "introManager": "Assignments kept despite a known clash, with what was known at the time. Append-only; the person concerned can see each receipt.",
+    "introWorker": "A manager kept an assignment for you knowing it overlapped something you already had. Nothing here was hidden from you.",
+    "notApplied": "Receipts are prepared and not enabled in this environment yet.",
+    "unavailable": "Receipts could not be read just now.",
+    "empty": "No clash has been accepted with a receipt on this project.",
+    "acceptedOn": "Accepted on {date}",
+    "window": "window {start} – {end}",
+    "windowUndated": "project undated at the time",
+    "source": {
+      "project": "Project",
+      "booking": "Booking",
+      "trip": "Business trip",
+      "absence": "Unavailable"
     }
   },
   "activityCentre": {
@@ -5890,6 +5917,25 @@
           "trip": "Business trip",
           "absence": "Unavailable"
         }
+      },
+      "alternatives": {
+        "title": "What you could do instead",
+        "dates": "Same person, other dates",
+        "crew": "Someone else, same dates",
+        "none": "No free window within a year and nobody on the roster is confirmed free for these dates.",
+        "unconfirmed": "not confirmed free",
+        "notStored": "These are proposals from the commitments as they stand, not a plan. Nothing is saved until you change the project or the assignment."
+      },
+      "receipt": {
+        "prompt": "Keeping this assignment despite the clash? Say so — it leaves a receipt this person can see.",
+        "reasonLabel": "Why (optional)",
+        "submit": "Keep it, leave a receipt",
+        "saving": "Recording…",
+        "recorded": "Receipt recorded. The assignment is unchanged; the person can see that the clash was accepted knowingly.",
+        "needsMigration": "Receipts are prepared and not enabled in this environment yet — nothing was recorded.",
+        "notAuthorized": "Only a manager of this project can record this.",
+        "invalid": "This receipt could not be recorded as sent — the assignment may no longer be active.",
+        "error": "The receipt could not be recorded just now."
       }
     },
     "model": {
@@ -6893,6 +6939,34 @@
         "notAllowed": "Only the team owner or a manager can answer.",
         "notOpen": "This enquiry is no longer open.",
         "error": "Could not save the answer. Nothing was changed."
+      }
+    },
+    "assign": {
+      "heading": "Assign the whole team to a project",
+      "intro": "Every one of the {count, plural, one {# member} other {# members}} is assigned through the same per-person rule — the project must be yours and each person must be on your roster. Each result is shown by name.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project…",
+      "submit": "Assign the team",
+      "assigning": "Assigning…",
+      "noProjects": "No open project to assign to yet.",
+      "notBlocking": "A clash does not undo an assignment — you decide what is right for each person.",
+      "outcome": {
+        "not_authed": "Sign in to assign a team.",
+        "no_such_team": "This team is not yours or no longer exists.",
+        "empty_team": "This team has no members yet.",
+        "needs_migration": "Team assignment is prepared and not enabled in this environment yet.",
+        "unavailable": "The team could not be assigned just now."
+      },
+      "member": {
+        "assigned": "assigned",
+        "not_authorized": "refused — not on your roster for this project",
+        "no_worker": "has no worker profile yet",
+        "error": "could not be assigned"
+      },
+      "reservation": {
+        "clear": "dates free",
+        "unknown": "dates not confirmed free",
+        "collides": "{count, plural, one {# clash} other {# clashes}}"
       }
     }
   },

@@ -50,6 +50,20 @@ const PURE_MODULES = [
   // denominator (calendar days) because the schema records no contracted
   // hours, and it withholds a ratio rather than build one on a floor.
   "utilisation.ts",
+  // J-TIME-FREEDOM step 4 (2026-09-15): feasible alternatives once a clash
+  // is KNOWN — the nearest free window of the same length for the same
+  // person, and roster candidates whose own reservation verdict is clear.
+  // Pure by the same contract: it imports the overlap rule and the verdict
+  // type from the modules above, reads nothing, stores nothing, and cannot
+  // express "you must" (SEP-2). The one roster read behind it lives in
+  // lib/planning/assignment-alternatives.ts.
+  "commitment-alternatives.ts",
+  // J-TIME-FREEDOM step 7 (2026-09-15): the learned reading carried forward
+  // as a FORECAST. Pure and storeless by construction — it is derived from
+  // `learned-duration.ts` readings at render and offered as a prefill; the
+  // value the planner adopts becomes a PLAN by their act, and the forecast
+  // itself is never a column, a row or a cache (SEP-1).
+  "duration-forecast.ts",
 ] as const;
 
 const sourceFiles = readdirSync(WORKFORCE_DIR).filter(

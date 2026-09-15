@@ -589,6 +589,33 @@
       "median": "Vergleichbare abgeschlossene Phasen dauerten {days} Tage (Median aus {count})",
       "vsPlan": "geplant {days}",
       "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden."
+    },
+    "forecast": {
+      "withEnd": "Prognose: {days, plural, one {# Tag} other {# Tage}} → Ende {end} (aus {count} abgeschlossenen Phasen dieses Namens)",
+      "daysOnly": "Prognose: {days, plural, one {# Tag} other {# Tage}} (aus {count} abgeschlossenen Phasen dieses Namens) — Start setzen, um das Enddatum zu sehen",
+      "confidence": {
+        "indicative": "richtungsweisend",
+        "established": "gefestigt"
+      },
+      "label": "eine Prognose, kein Plan — nichts wird gespeichert, bis Sie die Termine setzen",
+      "adopt": "Als geplantes Ende übernehmen"
+    }
+  },
+  "overrideReceipts": {
+    "title": "Akzeptierte Überschneidungen",
+    "introManager": "Zuweisungen, die trotz bekannter Überschneidung beibehalten wurden, mit dem damaligen Kenntnisstand. Nur anfügend; die betroffene Person sieht jeden Beleg.",
+    "introWorker": "Eine Projektleitung hat eine Zuweisung für Sie beibehalten, wissend, dass sie sich mit etwas überschneidet, das Sie bereits hatten. Nichts davon wurde Ihnen verborgen.",
+    "notApplied": "Belege sind vorbereitet und in dieser Umgebung noch nicht aktiviert.",
+    "unavailable": "Belege konnten gerade nicht gelesen werden.",
+    "empty": "In diesem Projekt wurde keine Überschneidung mit Beleg akzeptiert.",
+    "acceptedOn": "Akzeptiert am {date}",
+    "window": "Zeitfenster {start} – {end}",
+    "windowUndated": "Projekt damals ohne Termine",
+    "source": {
+      "project": "Projekt",
+      "booking": "Buchung",
+      "trip": "Dienstreise",
+      "absence": "Nicht verfügbar"
     }
   },
   "activityCentre": {
@@ -5890,6 +5917,25 @@
           "trip": "Dienstreise",
           "absence": "Nicht verfügbar"
         }
+      },
+      "alternatives": {
+        "title": "Was Sie stattdessen tun könnten",
+        "dates": "Dieselbe Person, andere Termine",
+        "crew": "Jemand anderes, dieselben Termine",
+        "none": "Innerhalb eines Jahres kein freies Fenster, und niemand aus der Liste ist für diese Termine bestätigt frei.",
+        "unconfirmed": "nicht bestätigt frei",
+        "notStored": "Das sind Vorschläge aus den aktuellen Verpflichtungen, kein Plan. Nichts wird gespeichert, bis Sie das Projekt oder die Zuweisung ändern."
+      },
+      "receipt": {
+        "prompt": "Behalten Sie die Zuweisung trotz der Überschneidung? Sagen Sie es — es bleibt ein Beleg, den diese Person sehen kann.",
+        "reasonLabel": "Warum (optional)",
+        "submit": "Behalten und Beleg hinterlassen",
+        "saving": "Wird erfasst…",
+        "recorded": "Beleg erfasst. Die Zuweisung ist unverändert; die Person kann sehen, dass die Überschneidung bewusst akzeptiert wurde.",
+        "needsMigration": "Belege sind vorbereitet und in dieser Umgebung noch nicht aktiviert — nichts wurde erfasst.",
+        "notAuthorized": "Nur eine Projektleitung dieses Projekts kann das erfassen.",
+        "invalid": "Dieser Beleg konnte nicht wie gesendet erfasst werden — die Zuweisung ist möglicherweise nicht mehr aktiv.",
+        "error": "Der Beleg konnte gerade nicht erfasst werden."
       }
     },
     "model": {
@@ -6893,6 +6939,34 @@
         "notAllowed": "Nur der Kolonneninhaber oder ein Manager kann antworten.",
         "notOpen": "Diese Anfrage ist nicht mehr offen.",
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
+      }
+    },
+    "assign": {
+      "heading": "Das ganze Team einem Projekt zuweisen",
+      "intro": "Jedes der {count, plural, one {# Mitglied} other {# Mitglieder}} wird nach derselben Regel pro Person zugewiesen — das Projekt muss Ihres sein und jede Person auf Ihrer Liste. Jedes Ergebnis wird namentlich gezeigt.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Projekt wählen…",
+      "submit": "Team zuweisen",
+      "assigning": "Wird zugewiesen…",
+      "noProjects": "Noch kein offenes Projekt zum Zuweisen.",
+      "notBlocking": "Eine Überschneidung hebt keine Zuweisung auf — Sie entscheiden, was für jede Person richtig ist.",
+      "outcome": {
+        "not_authed": "Melden Sie sich an, um ein Team zuzuweisen.",
+        "no_such_team": "Dieses Team gehört nicht Ihnen oder existiert nicht mehr.",
+        "empty_team": "Dieses Team hat noch keine Mitglieder.",
+        "needs_migration": "Teamzuweisung ist vorbereitet und in dieser Umgebung noch nicht aktiviert.",
+        "unavailable": "Das Team konnte gerade nicht zugewiesen werden."
+      },
+      "member": {
+        "assigned": "zugewiesen",
+        "not_authorized": "abgelehnt — für dieses Projekt nicht auf Ihrer Liste",
+        "no_worker": "hat noch kein Arbeitsprofil",
+        "error": "konnte nicht zugewiesen werden"
+      },
+      "reservation": {
+        "clear": "Termine frei",
+        "unknown": "Termine nicht bestätigt frei",
+        "collides": "{count, plural, one {# Überschneidung} other {# Überschneidungen}}"
       }
     }
   },

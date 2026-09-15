@@ -2518,7 +2518,30 @@ describe("no migration files added by this sprint", () => {
     //   were APPLIED to production as ledger 20260914144053 / 20260914144310
     //   before the reconciliation; the files land here so main = production.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 284.
-const SPRINT_BASELINE = 284;
+    // Bumped 284 -> 285 for J-TIME-FREEDOM step 5
+    //   (20260915120000_commitment_override_receipts_v1, paired guarded
+    //   rollback). PREPARED FOR REVIEW ONLY, deliberately UNANNOTATED and
+    //   UNAPPLIED: one append-only receipt table + one definer writer. Its
+    //   full body was dry-run on production inside a rolled-back transaction
+    //   (nine authority/shape/append-only stages, zero objects left behind).
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
+    // Bumped 285 -> 286 for WRK-6's UNIT half
+    //   (20260915130000_project_team_assignments_v1, paired guarded
+    //   rollback). PREPARED FOR REVIEW ONLY, unannotated, unapplied: the
+    //   team↔project link plus two definer commands that ride the EXISTING
+    //   per-person writes. Dry-run on production in a rolled-back transaction
+    //   through the real create_team_v1 and add_org_member: unit assigned,
+    //   member assigned, idempotent, member sees the unit, outsider 0 and
+    //   refused, end takes back only what the unit gave, anon refused.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
+    // Bumped 286 -> 287 for SKL-9 / ARCH-2
+    //   (20260915140000_competency_recognitions_v1, paired guarded rollback).
+    //   PREPARED FOR REVIEW ONLY, unannotated, unapplied, and LEGALLY
+    //   SIGNIFICANT (who may recognise prior learning). Dry-run on production
+    //   in a rolled-back transaction through ten authority stages; the
+    //   beneficiary rule and the self-recognition rule both refused.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
+const SPRINT_BASELINE = 287;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

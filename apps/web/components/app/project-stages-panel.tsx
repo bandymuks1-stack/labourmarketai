@@ -18,6 +18,7 @@ import {
 } from "@/lib/projects/stages-model";
 import type { LearnedStageDurations } from "@/lib/projects/learned-stage-duration";
 import { durationKey, type LearnedDuration } from "@/lib/workforce/learned-duration";
+import { forecastDuration } from "@/lib/workforce/duration-forecast";
 
 /**
  * Project stages panel (Wagon 6 — Project Operations Core, slice 1) on the
@@ -216,6 +217,16 @@ export function ProjectStagesPanel({
   const [plannedEnd, setPlannedEnd] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
 
+  // J-TIME-FREEDOM step 7. The learned reading for the name being typed,
+  // carried forward as a FORECAST for the stage being planned. Computed at
+  // render from the readings as they stand; never stored anywhere. Adopting
+  // it below writes the PLAN by the planner's act — the forecast itself stays
+  // a suggestion (SEP-1: FACT ≠ DERIVED ≠ FORECAST).
+  const forecast =
+    learned?.status === "ok"
+      ? forecastDuration({ stageName: name, plannedStart, learned: learned.readings })
+      : null;
+
   function report(m: string) {
     setMsg(m);
     router.refresh();
@@ -322,6 +333,41 @@ export function ProjectStagesPanel({
                 {pending ? t("saving") : t("add")}
               </Button>
             </div>
+            {forecast ? (
+              <p
+                className="flex flex-wrap items-center gap-2 text-meta text-text-muted"
+                data-testid="stage-forecast"
+                data-forecast-days={forecast.forecastDays}
+                data-forecast-confidence={forecast.confidence}
+              >
+                <span>
+                  {forecast.forecastEnd
+                    ? t("forecast.withEnd", {
+                        days: forecast.forecastDays,
+                        end: forecast.forecastEnd,
+                        count: forecast.observations,
+                      })
+                    : t("forecast.daysOnly", {
+                        days: forecast.forecastDays,
+                        count: forecast.observations,
+                      })}
+                  {" · "}
+                  {t(`forecast.confidence.${forecast.confidence}`)}
+                  {" · "}
+                  {t("forecast.label")}
+                </span>
+                {forecast.forecastEnd && forecast.forecastEnd !== plannedEnd ? (
+                  <button
+                    type="button"
+                    className="underline decoration-dotted underline-offset-2 hover:text-text-secondary"
+                    onClick={() => setPlannedEnd(forecast.forecastEnd ?? "")}
+                    data-testid="stage-forecast-adopt"
+                  >
+                    {t("forecast.adopt")}
+                  </button>
+                ) : null}
+              </p>
+            ) : null}
           </div>
         </>
       )}
