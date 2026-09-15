@@ -30,14 +30,16 @@ import {
  *     the owner applies the draft"). The needs-gate state stays for a
  *     database without them.
  *
- * NOT MOUNTED. `getAgencyPool()` has no caller anywhere in the product, and
- * neither does `markCanOfferAction`; the only "pool" on a page is the clearly
- * labelled marketing preview built from `content/placeholders.ts`. So this is
- * a complete read service with live RPCs behind it and no surface — recorded
- * rather than quietly wired, because the product already carries a SECOND
- * agency model (the agency<->client bridge, `lib/agency/bridge-*.ts`) and
- * which of the two an agency screen should be built on is an owner decision,
- * not a wiring detail.
+ * NOT MOUNTED, AND RETIRED. `getAgencyPool()` has no caller anywhere in the
+ * product, and neither does `markCanOfferAction`; the only "pool" on a page is
+ * the clearly labelled marketing preview built from `content/placeholders.ts`.
+ * This header used to say that which of the two agency models a screen should
+ * be built on was an open owner decision. IT WAS ANSWERED on 2026-09-14
+ * (#1740): Model B — the agency<->client bridge, `lib/agency/bridge-*.ts` — is
+ * canonical, and this Model A pool is RETIRED on the record as ORG-10. Do not
+ * mount it. `lib/guards/agency-model-b-canonical-v1.test.ts` bans importing
+ * this module from any route or component for exactly that reason; the file
+ * stays so the product's own history remains readable.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
