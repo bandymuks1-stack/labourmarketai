@@ -200,8 +200,25 @@ suite is green on this branch (1358 files / 23167 tests, 2 skipped).
 migration has not been executed anywhere. These assertions prove the text says
 what was approved; they do not prove the policy admits the right caller and
 refuses the wrong one. Getting that requires executing it against a database —
-a Supabase preview branch — which carries a cost and is therefore owner-gated.
-It is not claimed here and it has not been done.
+a Supabase preview branch. It is not claimed here and it has not been done.
+
+**And the preview branch is currently blocked, by a stale slot rather than by
+cost.** On PR #1744 the Supabase check came back `cancelled` and the bot said
+the project had *reached the limit of concurrent preview branches*. Checked
+against the API rather than taken on the bot's word — the two non-default
+branches are:
+
+| Preview branch | PR | PR state | Preview status |
+|---|---|---|---|
+| `feat/cc/ai-runs-retention-delink-subject-v1` | #1266 | **open** (draft, needs-human-gate) | ACTIVE_HEALTHY |
+| `feat/cc/stage2-agency-worker-link` | #99 | **MERGED 2026-05-28** | INACTIVE |
+
+One slot is held by a live open PR and is legitimately occupied. The other has
+been held since 2026-05-28 by the preview for a pull request that merged the
+same day — three and a half months of a slot spent on nothing. Reclaiming it is
+what makes runtime evidence for this migration possible at all, and it is an
+owner act: deleting a preview database is not reversible and is not mine to do
+uninstructed.
 
 **Production dry-run state, read-only, 2026-09-15:**
 
@@ -248,6 +265,13 @@ Two things follow the apply and are **not** part of it:
    the accept path still uses v3. Wiring it (an explicit "I know this overlaps —
    accept anyway" confirmation, not a silent default) is GREEN once the
    authority exists, and is the only way Part B becomes reachable.
+
+**Either way, one unrelated cleanup is worth doing now.** Delete the preview
+branch for merged PR #99 (`feat/cc/stage2-agency-worker-link`). It frees the
+concurrent-branch slot, which is the only thing standing between this packet
+and real runtime evidence, and it stops a preview database for a long-merged PR
+from sitting in the project. Say the word and I will delete exactly that one;
+#1266's preview stays, because #1266 is still open.
 
 **If the answer is instead DEFER:** nothing is lost. The migration file and its
 rollback stay in the repository, unapplied, and the guard keeps them honest.
