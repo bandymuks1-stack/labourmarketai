@@ -192,8 +192,17 @@ unapplied capabilities is **eight**; only seven of them are migrations.
 Also 2026-09-14. Checked every module whose comments assert a migration is
 unapplied against production: of 101 tables and 54 RPCs so referenced, only
 `agency_clients`, `journal_profession_templates`, `worker_external_profiles`,
-`worker_opportunity_seen` (the July four) and the assistant pair above are
-actually absent. Everything else is live — several with real rows.
+`worker_opportunity_seen` (the July four) and the assistant pair above were
+actually absent. Everything else was live — several with real rows.
+
+> **Re-measured 2026-09-15 — and this section has itself gone stale, exactly as
+> predicted.** #1740 applied all four of that July group within a day:
+> `agency_clients`, `journal_profession_templates`, `worker_opportunity_seen`,
+> and `worker_external_profiles` via PER-11's split `external_profiles_v1`
+> (ledger `20260915042406`). The residual July gate is **three** migrations —
+> `company_locations_v1`, `dashboard_preferences_v1`, `demand_interest_seen_v1`
+> — not seven, and the only objects still genuinely absent from the list above
+> are the assistant-transcript pair.
 
 Corrected in place, with the degradation branches kept: worker languages
 (ledger `20260711203623`, **13 rows**), worker education and achievements

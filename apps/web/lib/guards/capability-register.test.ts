@@ -309,6 +309,56 @@ describe("a capability nobody can reach is not a capability a user has", () => {
     }
   });
 
+  it("a bridge called INERT must at least RUN — the last unchecked kind", () => {
+    // THE HOLE #1740 LEFT, closed 2026-09-15.
+    //
+    // `inert_bridge` means "the code runs and the data it links to does not
+    // exist". Every other kind had a check: `no_importer` inverts module
+    // reachability, `no_navigation` and `orphan_route` invert route
+    // navigability. `inert_bridge` had NONE — it was required to name a module
+    // and then nothing was asked of that module. So the kind could be asserted
+    // about anything and contradicted by nothing, which is the WRK-8 shape
+    // wearing a different label.
+    //
+    // SKL-6 is the worked example. It claimed `inert_bridge` on the strength of
+    // "0 of 161 platform skills and 0 of 49 professions carry an esco_uri".
+    // Measured on production 2026-09-15: 34 of 49 professions and 31 of 161
+    // skills carry one. The claim was false and had been for weeks; the kind
+    // was removed and the note corrected from the database.
+    //
+    // WHAT THIS CAN AND CANNOT CHECK. Whether the linked DATA is empty is a
+    // production fact and no static suite may assert it. What IS statically
+    // checkable is the other half of the kind's own definition: a bridge that
+    // RUNS must be reached. A module nothing imports is not an inert bridge —
+    // it is `no_importer`, and saying otherwise hides an unwired module behind
+    // a data excuse. Requiring the module to be imported makes the kind mean
+    // exactly one thing and forces the honest label when it does not hold.
+    for (const row of CAPABILITY_REGISTER) {
+      if (row.disconnectedBecause !== "inert_bridge") continue;
+      expect(
+        row.coreModule,
+        `${describeRow(row)} claims inert_bridge, which is a statement about code that RUNS — name the module.`,
+      ).not.toBeNull();
+      expect(
+        reachable.has(row.coreModule as string),
+        `${describeRow(row)} claims inert_bridge, but \`${row.coreModule}\` is imported by no route or component. A bridge that nothing reaches is not inert — it is unwired. Use no_importer, or name the module that actually runs.`,
+      ).toBe(true);
+    }
+  });
+
+  it("...and that check is not vacuous — it fires on a module nothing imports", () => {
+    // SKL-6 was the only `inert_bridge` row and its kind was just removed, so
+    // the loop above currently iterates over nothing. A guard that cannot fail
+    // is not a guard, and a future row could adopt the kind believing it were
+    // checked. This pins the PREDICATE itself against a module proven
+    // unreachable by this same graph, so the rule has teeth with zero rows.
+    const provenUnreachable = "lib/agency/pool.ts"; // ORG-10, retired Model A
+    expect(
+      reachable.has(provenUnreachable),
+      "lib/agency/pool.ts is expected to be imported by nothing — ORG-10 rests on it and the Model B guard bans importing it. If this changed, this self-test needs a different witness, not deletion.",
+    ).toBe(false);
+  });
+
   it("NO row may name neither a module nor a surface — the escape itself", () => {
     // The general form of the WRK-8 defect, closed for every status rather
     // than only for disconnection claims.
