@@ -37,6 +37,78 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
   // carries no demand surface" no longer needs a file-level check here — the
   // deletion ratchet (w3-return-to-workspace / route-truth-map) owns absence.
 
+  /**
+   * AND IT IS ACTUALLY FIRST.
+   *
+   * The section has carried `data-testid="company-dashboard-first-action"`
+   * since the W3 consolidation while rendering LAST in the room — after the
+   * decisions strip, agency mode, ops workspace, assignment connections, the
+   * pilot note, the invite link, the lifecycle panel and the public business
+   * profile. The testid asserted a position nothing enforced, so "demand
+   * first" was a name, not a fact. This pins the fact.
+   *
+   * Source order is DOM order for a server component with no reordering CSS
+   * (the room is a plain `flex flex-col`), so an index comparison in the file
+   * is a real statement about what the employer sees first.
+   */
+  it("the demand intake renders BEFORE every other section of the room", () => {
+    const page = read("app/[locale]/dashboard/company/page.tsx");
+    const at = (needle: string) => {
+      const i = page.indexOf(needle);
+      expect(i, `missing marker: ${needle}`).toBeGreaterThan(-1);
+      return i;
+    };
+
+    const intake = at('data-testid="demand-intake-section"');
+
+    // The control bar is the only thing allowed above it: it is navigation,
+    // not a section, and it is how the room's other areas stay one tap away.
+    expect(at('data-testid="company-control-bar"')).toBeLessThan(intake);
+
+    // Everything that used to sit between the employer and the wizard.
+    for (const later of [
+      'data-testid="company-decisions-strip"',
+      'data-testid="company-agency-mode"',
+      'data-testid="company-ops-workspace"',
+      'data-testid="company-assignment-connections"',
+      'data-testid="company-dashboard-pilot-disclaimer"',
+      'data-testid="company-invite-link"',
+      'id="public-business-profile"',
+    ]) {
+      expect(at(later), `${later} must render after the demand intake`).toBeGreaterThan(
+        intake,
+      );
+    }
+  });
+
+  /**
+   * The next step travels with it. "What I already asked for" — and the
+   * per-demand scouting deep link inside it, which is the ONLY route from a
+   * submitted need to ranked candidates — is the second half of the same
+   * question. Leaving the readback at the bottom would put matching at the
+   * far end of the page again, which is the defect this guard exists for.
+   */
+  it("the readback (and its scouting deep link) sits with the wizard", () => {
+    const page = read("app/[locale]/dashboard/company/page.tsx");
+    const intake = page.indexOf('data-testid="demand-intake-section"');
+    const readback = page.indexOf("<DemandRequestsReadback");
+    const nextSection = page.indexOf('data-testid="company-decisions-strip"');
+    expect(intake).toBeGreaterThan(-1);
+    expect(readback).toBeGreaterThan(intake);
+    expect(readback).toBeLessThan(nextSection);
+  });
+
+  /**
+   * The submit is not a dead end: the done state hands the employer the one
+   * room where matches for that need appear. Guarded here because the whole
+   * demand-first path is worth nothing if its last link is missing.
+   */
+  it("a submitted need points at the scouting room", () => {
+    const form = read("components/app/demand-request-button.tsx");
+    expect(form).toMatch(/data-testid="demand-done-scouting-link"/);
+    expect(form).toMatch(/\/dashboard\/company\/scouting/);
+  });
+
   it("the workspace-switching action targets the company route's anchor", () => {
     const action = read("lib/company/demand-intake-navigation.ts");
     expect(action).toMatch(/\/dashboard\/company#demand-intake/);

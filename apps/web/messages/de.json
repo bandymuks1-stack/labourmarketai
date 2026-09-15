@@ -588,7 +588,9 @@
     "learned": {
       "median": "Vergleichbare abgeschlossene Phasen dauerten {days} Tage (Median aus {count})",
       "vsPlan": "geplant {days}",
-      "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden."
+      "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden.",
+      "suggest": "Vergleichbare Phasen dauerten {days} Tage ({observations} beobachtet) — das würde am {date} enden.",
+      "suggestApply": "Dieses Datum übernehmen"
     }
   },
   "activityCentre": {
@@ -7546,6 +7548,11 @@
       "saved": "Gespeichert. Die Liste oben ist aktualisiert.",
       "invalid": "Bitte prüfen Sie die Felder — etwas ist ungültig.",
       "errorMsg": "Speichern gerade nicht möglich. Bitte gleich erneut versuchen."
+    },
+    "unmatchable": {
+      "heading": "Ebenfalls erforderlich — für Sie nicht prüfbar",
+      "note": "Diese Anforderungen gelten und sind belegt, sind aber Bedingungen und keine Dokumente; in Ihrer Akte lässt sich nichts dazu prüfen. Klären Sie dies mit der zuständigen Behörde.",
+      "state": "Nicht geprüft"
     }
   },
   "documentCentre": {
@@ -10323,7 +10330,9 @@
         "create_position": "Position für den bestätigten Bedarf eröffnen",
         "engage_staffing_agency": "Personalagentur einschalten",
         "engage_partner": "Externen Partner finden"
-      }
+      },
+      "altWindowsTitle": "Oder diese Zeiträume versuchen",
+      "altWindowsNote": "Zeiträume in diesem Plan, in denen derzeit nichts fehlt. Ein Vorschlag aus den heutigen Zahlen, keine Prognose."
     },
     "timeline": {
       "title": "Anstehende Arbeit",

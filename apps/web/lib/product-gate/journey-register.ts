@@ -362,9 +362,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Alternatives are shown",
         capabilities: ["CAL-4", "DEM-5"],
-        link: "BROKEN",
+        link: "LIVE",
         because:
-          "Corrected 2026-09-14: both capabilities are PARTIAL and live, so \"not built at any layer\" was false. The gap timeline can say WHEN capacity is short and the matching engine can say WHO fits; nothing composes the two into \"try these dates, or this crew instead\". Detection reaches a warning and stops — the break is between the parts, not inside either.",
+          "Corrected again 2026-09-15, and the previous reason was HALF WRONG. It said nothing composes the two into \"try these dates, or this crew instead\". The CREW half was already composed and already rendered: `recommendActions` turns the capacity assessment into assign / transfer / form-a-brigade / engage-an-agency, and the planning zone shows the first as its one CTA with the rest as a quiet list. Only the DATES half was missing, and it is now closed: `alternativeWindows` returns the nearest buckets AFTER the risk date in which nothing is short. It is a filter over readings the timeline already computed — no forecast, nothing stored (SEP-1) — and it renders nothing when no window in the horizon is clear, because offering the least-bad period is advice to walk into a known shortfall. Guard: lib/guards/alternative-windows-are-a-suggestion.test.ts.",
       },
       {
         step: "The authorized actor decides, and an explicit override is recorded with a receipt",
@@ -383,9 +383,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Learned durations improve the next forecast — labelled as forecast",
         capabilities: ["CAL-10", "CAL-9"],
-        link: "BROKEN",
+        link: "LIVE",
         because:
-          "Corrected 2026-09-14: the step above is now LIVE, so \"the learning loop needs the step above first\" no longer holds. What a planner sees today is the READING — what comparable finished stages took, with its observation count and date span, beside the plan. What does not exist is anything that carries it FORWARD: no suggested dates, no prefilled band, no forecast object. That absence is deliberate rather than pending — a forecast may never be stored where a fact is read (SEP-1) — so closing this step means designing where a suggestion lives without it hardening into a record.",
+          "CLOSED 2026-09-15 by answering the design question the previous reason posed. It asked where a suggestion can live without hardening into a record. The answer: beside the field, offered, and applied only by the human. When a planner types a stage name that matches a learned reading and has set a start, the panel states what comparable stages TOOK, with the observation count, and what end date that implies — and a button applies it. Nothing prefills: an auto-filled median becomes a stored forecast the instant the row saves, and the plan is a commitment the organization is held to. What lands in the record is the planner\u2019s decision; the median that informed it stays a reading (SEP-1). Guard: lib/guards/learned-duration-suggests-never-stores.test.ts.",
       },
     ],
   },

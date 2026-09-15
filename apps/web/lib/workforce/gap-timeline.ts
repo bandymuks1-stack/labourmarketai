@@ -386,6 +386,71 @@ function recommendForRequirement(
  * Every action names its trigger gap; nothing is recommended without an
  * evidencing gap.
  */
+/**
+ * "TRY THESE DATES" — the other half of an alternative.
+ *
+ * THE GAP THIS CLOSES. The planning zone already answers "this crew instead":
+ * `recommendActions` composes the capacity assessment into assign / transfer /
+ * form-a-brigade / engage-an-agency, and the zone renders the first as its one
+ * CTA with the rest as a quiet list. What it could not answer was "try these
+ * dates" — the timeline knew exactly WHEN capacity was short and nothing said
+ * when it would not be. Detection reached a warning and stopped.
+ *
+ * ── A WINDOW IS A SUGGESTION, NEVER A FORECAST AND NEVER A FACT (SEP-1) ────
+ *
+ * This returns buckets the timeline ALREADY computed and already shows, in
+ * which the shortfall is zero. It predicts nothing, models nothing and stores
+ * nothing: it is a filter over present readings, so it cannot harden into a
+ * record the way a forecast would. If the underlying capacity changes, the
+ * same call returns different windows and no stale promise survives anywhere.
+ *
+ * ── AN EMPTY ANSWER IS AN ANSWER ──────────────────────────────────────────
+ *
+ * When no bucket in the horizon is clear, this returns nothing rather than the
+ * least-bad one. "The nearest tight week" presented as an alternative would be
+ * a recommendation to walk into a known shortfall.
+ */
+export interface AlternativeWindow {
+  readonly bucketStart: string;
+  readonly bucketEnd: string;
+  /** Carried so a surface can say WHY this one is clear. */
+  readonly requiredHeadcount: number;
+  readonly matchedHeadcount: number;
+}
+
+/** How many clear windows are worth offering. Beyond a few it is a calendar,
+ *  not a suggestion. */
+export const MAX_ALTERNATIVE_WINDOWS = 3;
+
+/**
+ * The nearest buckets AFTER `from` in which nothing is short.
+ *
+ * `from` is normally the risk date — the first day capacity is insufficient.
+ * Buckets at or before it are skipped: an alternative that starts before the
+ * problem is not an alternative.
+ */
+export function alternativeWindows(
+  timeline: GapTimeline,
+  from: string | null,
+): AlternativeWindow[] {
+  if (from === null) return [];
+  const out: AlternativeWindow[] = [];
+  for (const b of timeline.buckets) {
+    if (b.bucketStart <= from) continue;
+    // `ok` is the timeline's own word for "nothing short here", and the
+    // shortfall check is belt-and-braces against a risk rule that changes.
+    if (b.riskLevel !== "ok" || b.shortfall !== 0) continue;
+    out.push({
+      bucketStart: b.bucketStart,
+      bucketEnd: b.bucketEnd,
+      requiredHeadcount: b.requiredHeadcount,
+      matchedHeadcount: b.matchedHeadcount,
+    });
+    if (out.length === MAX_ALTERNATIVE_WINDOWS) break;
+  }
+  return out;
+}
+
 export function recommendActions(
   assessment: CapacityAssessment,
 ): readonly RecommendedAction[] {
