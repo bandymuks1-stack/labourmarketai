@@ -6940,6 +6940,34 @@
         "notOpen": "Diese Anfrage ist nicht mehr offen.",
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
+    },
+    "assign": {
+      "heading": "Das ganze Team einem Projekt zuweisen",
+      "intro": "Jedes der {count, plural, one {# Mitglied} other {# Mitglieder}} wird nach derselben Regel pro Person zugewiesen — das Projekt muss Ihres sein und jede Person auf Ihrer Liste. Jedes Ergebnis wird namentlich gezeigt.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Projekt wählen…",
+      "submit": "Team zuweisen",
+      "assigning": "Wird zugewiesen…",
+      "noProjects": "Noch kein offenes Projekt zum Zuweisen.",
+      "notBlocking": "Eine Überschneidung hebt keine Zuweisung auf — Sie entscheiden, was für jede Person richtig ist.",
+      "outcome": {
+        "not_authed": "Melden Sie sich an, um ein Team zuzuweisen.",
+        "no_such_team": "Dieses Team gehört nicht Ihnen oder existiert nicht mehr.",
+        "empty_team": "Dieses Team hat noch keine Mitglieder.",
+        "needs_migration": "Teamzuweisung ist vorbereitet und in dieser Umgebung noch nicht aktiviert.",
+        "unavailable": "Das Team konnte gerade nicht zugewiesen werden."
+      },
+      "member": {
+        "assigned": "zugewiesen",
+        "not_authorized": "abgelehnt — für dieses Projekt nicht auf Ihrer Liste",
+        "no_worker": "hat noch kein Arbeitsprofil",
+        "error": "konnte nicht zugewiesen werden"
+      },
+      "reservation": {
+        "clear": "Termine frei",
+        "unknown": "Termine nicht bestätigt frei",
+        "collides": "{count, plural, one {# Überschneidung} other {# Überschneidungen}}"
+      }
     }
   },
   "teamEnquiries": {

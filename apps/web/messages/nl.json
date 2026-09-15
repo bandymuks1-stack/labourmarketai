@@ -6940,6 +6940,34 @@
         "notOpen": "Deze aanvraag is niet meer open.",
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
+    },
+    "assign": {
+      "heading": "Het hele team aan een project toewijzen",
+      "intro": "Elk van de {count, plural, one {# lid} other {# leden}} wordt via dezelfde regel per persoon toegewezen — het project moet van u zijn en elke persoon op uw lijst. Elk resultaat wordt op naam getoond.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Kies een project…",
+      "submit": "Team toewijzen",
+      "assigning": "Toewijzen…",
+      "noProjects": "Nog geen open project om aan toe te wijzen.",
+      "notBlocking": "Een overlap maakt een toewijzing niet ongedaan — u beslist wat juist is voor elke persoon.",
+      "outcome": {
+        "not_authed": "Meld u aan om een team toe te wijzen.",
+        "no_such_team": "Dit team is niet van u of bestaat niet meer.",
+        "empty_team": "Dit team heeft nog geen leden.",
+        "needs_migration": "Teamtoewijzing is voorbereid en in deze omgeving nog niet ingeschakeld.",
+        "unavailable": "Het team kon nu niet worden toegewezen."
+      },
+      "member": {
+        "assigned": "toegewezen",
+        "not_authorized": "geweigerd — voor dit project niet op uw lijst",
+        "no_worker": "heeft nog geen werkprofiel",
+        "error": "kon niet worden toegewezen"
+      },
+      "reservation": {
+        "clear": "data vrij",
+        "unknown": "data niet bevestigd vrij",
+        "collides": "{count, plural, one {# overlap} other {# overlappingen}}"
+      }
     }
   },
   "teamEnquiries": {

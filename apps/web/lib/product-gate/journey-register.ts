@@ -158,10 +158,10 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "It assigns a whole team or brigade",
         capabilities: ["WRK-6"],
-        link: "NOT_BUILT",
+        link: "BROKEN",
         because:
-          "No team→project FK exists and zero team organizations exist. Brigade work is a first-class case in construction and agency supply; the step stays so the gap is a decision, not an oversight.",
-      },
+          "NOT_BUILT → BROKEN, 2026-09-15: the ASSIGNING now exists and the UNIT does not. From the team panel a manager assigns the whole brigade to a project they manage; each member goes through the ONE existing per-person write and the database's own gates, each outcome is named, and each assigned member's calendar gets its own verdict for the project's window — so a brigade assignment cannot silently put a person in two places (WRK-6 PARTIAL, TEST_PROVEN). What does not exist is the record that they were assigned AS A UNIT: no team↔project link, so the brigade cannot be ended as one act and a brigade match has nothing to point at. That link is new schema — RED, owner-gated — and its packet is the remaining half. Production holds 0 teams (a human fact, not a code gap), so no walk is possible until someone creates one.",
+
       {
         step: "It sees who is free and who is committed",
         capabilities: ["CAL-4", "CAL-3"],

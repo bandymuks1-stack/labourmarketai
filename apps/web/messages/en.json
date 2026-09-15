@@ -6940,6 +6940,34 @@
         "notOpen": "This enquiry is no longer open.",
         "error": "Could not save the answer. Nothing was changed."
       }
+    },
+    "assign": {
+      "heading": "Assign the whole team to a project",
+      "intro": "Every one of the {count, plural, one {# member} other {# members}} is assigned through the same per-person rule — the project must be yours and each person must be on your roster. Each result is shown by name.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project…",
+      "submit": "Assign the team",
+      "assigning": "Assigning…",
+      "noProjects": "No open project to assign to yet.",
+      "notBlocking": "A clash does not undo an assignment — you decide what is right for each person.",
+      "outcome": {
+        "not_authed": "Sign in to assign a team.",
+        "no_such_team": "This team is not yours or no longer exists.",
+        "empty_team": "This team has no members yet.",
+        "needs_migration": "Team assignment is prepared and not enabled in this environment yet.",
+        "unavailable": "The team could not be assigned just now."
+      },
+      "member": {
+        "assigned": "assigned",
+        "not_authorized": "refused — not on your roster for this project",
+        "no_worker": "has no worker profile yet",
+        "error": "could not be assigned"
+      },
+      "reservation": {
+        "clear": "dates free",
+        "unknown": "dates not confirmed free",
+        "collides": "{count, plural, one {# clash} other {# clashes}}"
+      }
     }
   },
   "teamEnquiries": {

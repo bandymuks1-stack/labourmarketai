@@ -1490,6 +1490,9 @@ export default async function CompanyDashboardPage({
           invitationsApplied={teamBrigades.invitationsApplied}
           detailsApplied={teamBrigades.detailsApplied}
           enquiriesApplied={teamBrigades.enquiriesApplied}
+          projects={(rManagedProjects ?? [])
+            .filter((p) => p.status !== "completed")
+            .map((p) => ({ id: p.id, title: p.title }))}
         />
       ) : (
         <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />

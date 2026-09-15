@@ -4,8 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { listManagedWorkers } from "@/lib/instructions/instructions";
-import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
-import { getEmployerWorkerCommitments } from "@/lib/planning/employer-committed-work";
+import { readRosterHeldTime } from "@/lib/planning/roster-held-time";
 import {
   proposeAlternatives,
   type AlternativesProposal,
@@ -13,8 +12,6 @@ import {
 } from "@/lib/workforce/commitment-alternatives";
 import {
   reserveCapacity,
-  type HeldTime,
-  type ReservationSource,
   type ReservationVerdict,
   type ReservationWindow,
 } from "@/lib/workforce/commitment-reservation";
@@ -24,16 +21,14 @@ import {
  *
  * ONE READ FOR THE WHOLE ROSTER. The reservation check
  * (`worker-reservation.ts`) reads one person's commitments. Proposing a crew
- * alternative needs the same answer for everyone the caller manages, and
- * `getEmployerWorkerCommitments` already takes a LIST, so the roster is read
- * once and every candidate's verdict is derived from that one result — not
- * one round trip per person. Both reads are the existing employer readers,
- * under the caller's own RLS; this module adds no client and no filter of its
- * own.
+ * alternative needs the same answer for everyone the caller manages, so the
+ * roster is read once (`readRosterHeldTime`) and every candidate's verdict is
+ * derived from that one result — not one round trip per person. Both reads
+ * behind it are the existing employer readers, under the caller's own RLS;
+ * this module adds no client and no filter of its own.
  *
- * `unreadableSources` is derived from the read RESULTS, exactly as the single
- * check does: a failed roster read makes every candidate `unknown`, and an
- * unknown candidate is listed as unconfirmed, never as free (SEP-7).
+ * A failed roster read makes every candidate `unknown`, and an unknown
+ * candidate is listed as unconfirmed, never as free (SEP-7).
  *
  * WHY THE DATE SEARCH USES THE SAME HELD LIST AS THE VERDICT. The colliding
  * person's alternatives are computed against everything they hold — not only
@@ -45,8 +40,6 @@ import {
 function asAny(c: SupabaseClient): any {
   return c;
 }
-
-const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking", "trip"];
 
 /** Bounded like every other planning read. */
 const ROSTER_LIMIT = 200;
@@ -89,73 +82,26 @@ export async function proposeAssignmentAlternatives(
   const workerIds = workerRows.map((w) => w.id);
   if (!workerIds.includes(input.collidingWorkerId)) workerIds.push(input.collidingWorkerId);
 
-  const [committed, availability] = await Promise.all([
-    getEmployerWorkerCommitments(workerIds, input.caller),
-    getEmployerWorkerAvailability(input.caller),
-  ]);
-
-  const heldByWorker = new Map<string, HeldTime[]>();
-  const push = (workerId: string, h: HeldTime) => {
-    const list = heldByWorker.get(workerId) ?? [];
-    list.push(h);
-    heldByWorker.set(workerId, list);
-  };
-  const unreadableSources: ReservationSource[] = [];
-  /** Workers already on THIS project — not alternatives to themselves. */
-  const alreadyOnProject = new Set<string>();
-
-  if (committed.status === "ok") {
-    for (const c of committed.commitments) {
-      if (c.kind === "project" && c.sourceId === input.projectId) alreadyOnProject.add(c.workerId);
-      push(c.workerId, {
-        source: c.kind,
-        sourceId: c.sourceId,
-        label: c.label,
-        startDate: c.startDate,
-        endDate: c.endDate,
-      });
-    }
-    for (const u of committed.undatedProjects) {
-      if (u.projectId === input.projectId) alreadyOnProject.add(u.workerId);
-      push(u.workerId, {
-        source: "project",
-        sourceId: u.projectId,
-        label: u.label,
-        startDate: null,
-        endDate: null,
-      });
-    }
-  } else {
-    unreadableSources.push(...COMMITMENT_SOURCES);
-  }
-
-  if (availability.status === "ok") {
-    for (const u of availability.unavailability) {
-      push(u.workerId, {
-        source: "absence",
-        sourceId: u.item.id,
-        label: null,
-        startDate: u.item.startDate,
-        endDate: u.item.endDate,
-      });
-    }
-  } else {
-    unreadableSources.push("absence");
-  }
+  const rosterHeld = await readRosterHeldTime({
+    workerIds,
+    projectId: input.projectId,
+    caller: input.caller,
+  });
 
   const exclude = [input.projectId];
   const candidates: CrewCandidate[] = [];
   for (const w of workerRows) {
     if (w.id === input.collidingWorkerId) continue;
-    if (alreadyOnProject.has(w.id)) continue;
+    // Already on this project — not an alternative to themselves.
+    if (rosterHeld.onProject.has(w.id)) continue;
     candidates.push({
       workerId: w.id,
       profileId: w.profile_id,
       name: nameByProfile.get(w.profile_id) ?? w.profile_id.slice(0, 8),
       verdict: reserveCapacity({
         window: input.window,
-        held: heldByWorker.get(w.id) ?? [],
-        unreadableSources,
+        held: rosterHeld.heldByWorker.get(w.id) ?? [],
+        unreadableSources: rosterHeld.unreadableSources,
         exclude,
       }),
     });
@@ -165,7 +111,7 @@ export async function proposeAssignmentAlternatives(
     verdict: input.verdict,
     window: input.window,
     collidingWorkerId: input.collidingWorkerId,
-    held: heldByWorker.get(input.collidingWorkerId) ?? [],
+    held: rosterHeld.heldByWorker.get(input.collidingWorkerId) ?? [],
     exclude,
     candidates,
     notBefore: input.notBefore,

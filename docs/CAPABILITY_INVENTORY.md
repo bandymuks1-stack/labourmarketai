@@ -545,7 +545,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | WRK-3 | Stages | `project_stages` | IMPL | W | 2 | — |
 | WRK-4 | Tasks | `work_tasks` (+ `follow_up_tasks` duplicate) | IMPL (0 rows) | W | 2 | "reachable, functional and pointless" — its own migration says so |
 | WRK-5 | Worker→project assignment | `project_worker_assignments` | PROD_DATA (1 row) | W (strong) | 1 | no overlap constraint of any kind |
-| WRK-6 | **Team→project assignment** | — | **MISSING** | — | 1 | no FK exists anywhere |
+| WRK-6 | **Team→project assignment** | fan-out over `project_worker_assignments` via `assign_worker_to_project` | PARTIAL (2026-09-15) | T | 1 | assigning exists (per-member, existing gates, per-member calendar verdict); the UNIT link (team↔project) is still no FK anywhere — owner-gated |
 | WRK-7 | Readiness / operational status | `project_worker_readiness_items` | IMPL | W | 2 | — |
 | WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | assignee read APPLIED 2026-09-14 (ledger `20260914195053`), proven per-row on prod; `defect_corrections` stays manager-only (owner 2b DEFER) |
 | WRK-9 | Handover passport | `project_handover_entries` (1 row) | IMPL | — | 3 | reachable on `/dashboard/projects/[id]/operations`; written once in prod — no nav tile of its own |

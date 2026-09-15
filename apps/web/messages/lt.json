@@ -6940,6 +6940,34 @@
         "notOpen": "Ši užklausa nebėra atvira.",
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
       }
+    },
+    "assign": {
+      "heading": "Priskirti visą komandą projektui",
+      "intro": "Kiekvienas iš {count, plural, one {# nario} few {# narių} many {# narių} other {# narių}} priskiriamas pagal tą pačią asmeninę taisyklę — projektas turi būti jūsų, o kiekvienas žmogus — jūsų sąraše. Kiekvienas rezultatas rodomas pagal vardą.",
+      "projectLabel": "Projektas",
+      "projectPlaceholder": "Pasirinkite projektą…",
+      "submit": "Priskirti komandą",
+      "assigning": "Priskiriama…",
+      "noProjects": "Dar nėra atviro projekto, kuriam būtų galima priskirti.",
+      "notBlocking": "Sutapimas priskyrimo neatšaukia — jūs sprendžiate, kas tinka kiekvienam žmogui.",
+      "outcome": {
+        "not_authed": "Prisijunkite, kad priskirtumėte komandą.",
+        "no_such_team": "Ši komanda ne jūsų arba nebeegzistuoja.",
+        "empty_team": "Ši komanda dar neturi narių.",
+        "needs_migration": "Komandos priskyrimas paruoštas, bet šioje aplinkoje dar neįjungtas.",
+        "unavailable": "Komandos šiuo metu priskirti nepavyko."
+      },
+      "member": {
+        "assigned": "priskirta",
+        "not_authorized": "atmesta — nėra jūsų sąraše šiam projektui",
+        "no_worker": "dar neturi darbuotojo profilio",
+        "error": "nepavyko priskirti"
+      },
+      "reservation": {
+        "clear": "datos laisvos",
+        "unknown": "nepatvirtinta, kad datos laisvos",
+        "collides": "{count, plural, one {# sutapimas} few {# sutapimai} many {# sutapimo} other {# sutapimų}}"
+      }
     }
   },
   "teamEnquiries": {
