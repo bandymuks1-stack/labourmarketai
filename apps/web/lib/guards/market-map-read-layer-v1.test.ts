@@ -932,7 +932,22 @@ describe("NO new DB migration in this PR", () => {
     //   RED class: merged behind the human gate, production apply is a
     //   separate owner act.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
-    expect(count).toBeLessThanOrEqual(282);
+    // 280 -> 281: WRK-8 assignee read (20260914200000_defects_assignee_read_v1,
+    //   owner decision 2a of 2026-09-14, paired rollback). ONE disjunct added
+    //   to `defects_select` so the worker a defect is ASSIGNED to can read it;
+    //   `defects` held 0 rows at apply time, so no existing row's visibility
+    //   changed. RED by route (any ALTER/DROP POLICY is), applied via MCP as
+    //   ledger 20260914195053. Nothing in the market-map read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+    // 281 -> 282: the PER-11 split (20260914210000_external_profiles_v1,
+    //   owner decision 4e). Prepared for review only, ships UNAPPLIED, no
+    //   annotation. Nothing in the market-map read layer is touched.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
+    // 282 -> 284: #1739 reconciled onto main after #1740 — MKT-3 and DEM-8
+    //   (both APPLIED to production as ledger 20260914144053 / 20260914144310
+    //   before this branch was rebased) join the five #1740 files.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 284.
+    expect(count).toBeLessThanOrEqual(284);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

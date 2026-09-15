@@ -547,8 +547,8 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "PRODUCTION_RPC_PROVEN",
     anchors: ["lib/company"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/company/active-organization.ts",
+    surfaces: ["app/[locale]/dashboard/company"],
     note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers. STEP C (2026-09-14) STOPPED this: it is a NEW AUTHORITY BOUNDARY, not a wiring gap. Verified against production — `owns_company` = company creator OR an active `owner`/`admin` company_membership, and the migration that widened it (20260904060000) records in its own proof note that a manager-role member deliberately satisfies neither arm. Meanwhile `manages_organization` DOES include manager/external_manager (20260806180000), so the two helpers encode two intentionally different authority levels and `company_workers_select` uses the narrower one. Pointing that policy at the wider helper would let managers read the roster (worker personal data) — RLS-loosening, RED class, owner gate. Production: 1 active manager, 7 company_workers rows, so exactly one real person is affected.",
   },
   {
@@ -585,7 +585,26 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/agency"],
     coreModule: "lib/agency/clients.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`agency_client_connections` is live; `agency_clients` is a second client model that is UNAPPLIED BY OWNER GATE, not by drift — its migration (20260713160000) carries the header 'DRAFT — needs-human-gate — DO NOT APPLY … owner approved MERGING this draft; application to production stays a separate owner gate'. STEP D therefore did not converge it: retiring a prepared, owner-gated migration is an owner decision, and the two models are not equivalent (`agency_client_connections` records an invitation-shaped connection; the unapplied table is the fuller client model). `lib/agency/clients.ts` reads the absent table and degrades honestly, so the capability is inert, not broken. Full inventory: docs/launch/SCHEMA_DRIFT_REPO_VS_PRODUCTION_2026-09-14.md. DISCLOSURE CONTROL CLOSED 2026-09-14. The other half of the bridge — migration 20260723180000 — is APPLIED (production, 2026-07-23; re-verified 2026-09-14: three tables with RLS, the share SELECT policy carrying its client-owner clause, `unshare_request_v1(uuid)` present, and 2 connections / 1 ACTIVE share / 2 offers actually stored). Two source comments still described it as an unapplied owner-gated draft whose reads all return `needs-migration`; both are corrected. The real defect underneath was asymmetric: the AGENCY could see what had been shared with it (`list_shared_requests_for_agency_v1`, rendered), while the CLIENT that did the sharing could see nothing and could withdraw nothing — `unshare_request_v1`, whose body admits ONLY the client owner and which the production E2E had already exercised (its 'agency-cannot-unshare' negative case), was reachable from no surface. The only withdrawal a client had was revoking the entire relationship. The client bridge section now lists each agency's active shares and carries the per-share withdrawal, over the RLS and the RPC that already existed: no migration, no policy change, no new grant. Guard: lib/guards/client-disclosure-visible-and-withdrawable.test.ts.",
+    note: "`agency_client_connections` is live. `agency_clients` was APPLIED 2026-09-14 (owner item 4d, ledger `20260914202322`) under the confirmed canonical Model B: its policy is `owns_company(company_id) OR is_admin()` - company/org authority, never the legacy `owns_agency` - so applying it did not revive Model A (see ORG-10). The two are NOT rivals and this row used to imply they were: `agency_client_connections` is an invitation-based bidirectional bridge to a real platform organization, `agency_clients` is an agency's own private record of a client who may not be on the platform. `AgencyClientsSection` on /dashboard/company had been degrading against a 42P01 since it shipped; read back under a REAL staffing-agency owner's auth after the apply, the relation now reads cleanly (0 rows). 0 rows is adoption, not breakage - 4 staffing-agency companies can now use it. The demand link is one additive nullable column, `customer_requests.agency_client_id`; `customer_requests` was re-counted at 20 rows after the apply, unchanged, 0 linked.",
+  },
+  {
+    id: "ORG-10",
+    disconnectedBecause: "no_importer",
+    domain: "organization",
+    title: "Agency worker pool (legacy `agencies` world)",
+    worldElement: "organizations",
+    status: "BUILT_NOT_CONNECTED",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/agency/pool.ts", "lib/agency/pool-actions.ts"],
+    coreModule: "lib/agency/pool.ts",
+    surfaces: [],
+    retired: {
+      on: "2026-09-14",
+      why:
+        "Owner decision 2026-09-14: Model B is canonical and this Model A surface is retired-and-recorded (B1). The product once answered `who is in my agency pool and are they ready?` here - docs-readiness aggregates, country readiness, bridge-gated journal evidence - and it stopped because the actor model moved, not because the question stopped mattering. THE QUESTION IS NOT RETIRED, only this answer: a Model-B-native workforce/pool surface is to be reconsidered when real agency workforce evidence exists (owner, same decision). WHY B WON, measured on production 2026-09-14 rather than argued: the SUPPLY side of the market - `list_open_supply_for_employers`, owner-approved and proven end to end 2026-09-07 - resolves authority through `engagement_contexts` + `company_memberships` + `manages_organization` and contains NO reference to `agencies`. Model A holds exactly one reader, `list_open_demand_for_agencies`, which keys off `public.agencies.profile_id`, and it is the one with no surface. NOTHING IS LOST, checked in both directions: all 3 `agencies` rows are already mirrored into `organizations` (organization_type='agency', legacy_agency_id back-pointer) by the `mirror_agency_to_org` trigger; 2 of the 3 profiles additionally own a `companies` row with company_type='staffing_agency'; the third authored 2 `agency_offer` supply rows, which live in `customer_requests` keyed by profile_id and are read by the Model B supply function - so its real evidence never depended on this world either. `agency_workers` holds 0 rows, so `getAgencyPool()` would return an empty pool for every caller alive. NOTHING IS DROPPED: `agencies`, `agency_workers`, `owns_agency`, `list_open_demand_for_agencies` and `mark_agency_can_offer` all remain in the database untouched, and both modules remain in the tree. Retirement here is a statement about what the PRODUCT offers, not a deletion. The route `/dashboard/agency/pool` has redirected to `/dashboard/company#company-team` since W1 (next.config.ts), so no human path changes today.",
+    },
+    note:
+      "RETIRED as a product surface, not deleted. `lib/agency/pool.ts` has no importer among routes or components - only guards and the redirect map reference it - which is why `no_importer` is the honest disconnection kind rather than `no_navigation`. The anti-revival guard is `lib/guards/agency-model-b-canonical-v1.test.ts`: it bans the legacy pool modules from EVERY route and component, not just the company page, so this cannot quietly become a second agency product model again. Extending `agency-direction-a.test.ts`, which already banned them from `/dashboard/company` alone. Writing that guard surfaced a SECOND Model A leftover this row did not know about: `components/app/agency-workers-section.tsx` still imports `lib/agency/actions` and `lib/agency/agency-workers`. It is dead - nothing renders it, and `company-workers-section.tsx` (Model B) is its replacement, referring to it only in a comment. It is kept rather than deleted, for the same retire-and-record reason, and the guard allow-lists that one file while separately asserting it stays ORPHANED, so the exception cannot quietly hide a live surface.",
   },
   {
     id: "ORG-9",
@@ -699,11 +718,11 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     worldElement: "projects",
     status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/quality", "components/app/project-defects-panel.tsx"],
-    coreModule: "lib/quality/quality-model.ts",
+    anchors: ["lib/quality"],
+    coreModule: "lib/quality/quality.ts",
     surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
     note:
-      "RECLASSIFIED 2026-09-14, re-measured against the code and the live database. The 2026-09-08 note called this “genuinely unreachable” on one criterion — no surfaceRoute of its own in the dashboard module registry — but BUILT_NOT_CONNECTED means “no product path leads to it”, and a panel mounted on a reachable page IS a product path. MEASURED: `ProjectDefectsPanel` is mounted on the project operations page, which is linked from the project map, the company home field, the workspace project result and the assignment manager; `defects` and `defect_corrections` are BOTH APPLIED in production; the panel carries four write actions and honest pre-apply and empty states. THE REAL LIMIT IS DEEPER THAN THE SURFACE, re-measured 2026-09-14 and stated precisely because the earlier version of this note understated it. It is not that the operations board is manager-only — it is that THE DATABASE REFUSES. `defects_select` (20260718200000, never revised since) admits `can_manage_project(project_id) OR reporter_id = auth.uid() OR is_admin()`, and `assignee_profile_id` grants NOTHING. So a worker assigned to correct a defect cannot read the defect they were assigned; building a worker-side surface today would render an empty list, correctly. `defect_corrections_select` is narrower still — managers and admin only — so the assignee cannot see the correction record describing their own work either. A CONSEQUENCE WORTH NAMING: because the assignee has no read, assigning a defect to a worker produces a row only managers can see, so the assignment is inert as a communication. This is therefore NOT a connect. Worker visibility needs `assignee_profile_id = auth.uid()` added to the SELECT policy — a new disclosure decision and an RLS change, i.e. RED class and owner-gated. Reported rather than widened. Production holds 0 defects, so nothing is currently hidden from anyone.",
+      "Corrected 2026-09-14, and this is the WRK-4 defect a second time. The old note said `no human path opens it` and called that `Genuinely unreachable - this one is correct`. It was not correct. `ProjectDefectsPanel` is rendered on `/dashboard/projects/[id]/operations`, fed by `getProjectDefects` in `lib/quality/quality.ts`, with all four write actions (`report_defect_v1`, `set_defect_status_v1`, `add_defect_correction_v1`, `delete_defect_v1`) wired through `lib/quality/quality-actions.ts`. That route is linked from at least six places outside its own directory - the project page, the project map, the company home field section, the assignment manager, the admin page and a chat action chip. The claim survived because the row declared `coreModule: null` and `surfaces: []`, which is exactly the shape the reachability guards SKIP: a row that names nothing to check cannot be falsified, so it rots. That is the SEP-8 collapse happening inside the register that exists to prevent it. What IS true: `/dashboard/quality` does not exist and no defects route carries a surfaceRoute in the dashboard module registry - no nav entry of its own, the WRK-9 wording. And measured on production 2026-09-14, `defects` and `defect_corrections` both still hold 0 rows against 9 projects, so nobody has used it. 0 rows is USAGE, not disconnection - the same distinction this register already applied to WRK-6 teams. PARTIAL rather than BUILT_AND_USABLE for a reason that is NOT navigation: the manager half is complete and the worker half does not exist. `defects_select` admits `can_manage_project(project_id) OR reporter_id = auth.uid() OR is_admin()`, and `assignee_profile_id` - the column that records who must fix the defect - appears in no policy. A worker assigned a defect cannot read the row naming them. That was WRK-8's real gate. CLOSED 2026-09-14: the owner approved the minimum one-disjunct widening (decision 2a) and `20260914200000_defects_assignee_read_v1` was applied via Supabase MCP as ledger `20260914195053`. `defects_select` now reads `can_manage_project(project_id) OR reporter_id = auth.uid() OR assignee_profile_id = auth.uid() OR is_admin()`. PROVEN ON PRODUCTION, not inferred: three defects were seeded on ONE project differing only in assignee, inside a transaction that was then ROLLED BACK, and read under four real users' auth. The assigned worker saw exactly 1 row - their own - and the unassigned defect and the defect assigned to a different worker ON THE SAME PROJECT both came back invisible (f, f), which is what makes this a per-ROW disclosure and not a per-project one. A second worker saw only the defect assigned to them. A worker with no assignment saw 0 rows with no error, so it fails closed. The manager saw all 3, unchanged. The assignee saw 0 `defect_corrections`, so owner decision 2b (DEFER) holds at the database rather than only in the UI. Residue re-counted after the rollback: `defects` and `defect_corrections` both back to 0. Grants untouched - `authenticated` still holds SELECT and no INSERT/UPDATE/DELETE, writes stay RPC-only. Rollback: `supabase/rollbacks/20260914200000_defects_assignee_read_v1.down.sql`, a faithful inverse that reintroduces the defect by design. What is still NOT proven is a human: no defect has ever been written by a real person, so the worker-facing read has no surface exercising it yet and the evidence stays TEST_PROVEN.",
   },
   {
     id: "WRK-9",
@@ -711,12 +730,12 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     title: "Handover passport",
     worldElement: "projects",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/projects"],
-    coreModule: "lib/projects/handover-passport-actions.ts",
+    coreModule: "lib/projects/handover-passport.ts",
     surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
     note:
-      "RECLASSIFIED 2026-09-14, re-measured against the code and the live database. The 2026-09-08 note called this “genuinely unreachable” on one criterion — no surfaceRoute of its own in the dashboard module registry — but BUILT_NOT_CONNECTED means “no product path leads to it”, and a panel mounted on a reachable page IS a product path. This entry’s own note already said so on 2026-09-08 — “it is not unreachable” — while the STATUS beside it said the opposite, which is the contradiction being closed. MEASURED: `HandoverPassportPanel` is mounted on the project operations page and `project_handover_entries` is applied and holds 1 row, so it has been written for real. THE REAL LIMIT: no entry of its own — the passport is reachable only from inside project operations, so a person who wants the handover record must first know which project it belongs to and that the operations board exists.",
+      "Corrected 2026-09-15 (falsifiability sweep). This claimed `no_navigation` while naming NO module and NO surface — the WRK-8 shape, which every reachability guard skips. Measured: `lib/projects/handover-passport.ts` is the read service, `HandoverPassportPanel` renders on `/dashboard/projects/[id]/operations`, and the passport is also reachable from `/dashboard/tasks` and the workspace project result. The route carries inbound links from six places. Production holds **1** `project_handover_entries` row, so this has been WRITTEN by a real path at least once — which is why the evidence is PRODUCTION_PERSISTENCE_PROVEN and the status PARTIAL, not disconnected. The old note already admitted it is not unreachable, in those words, while the STATUS still said BUILT_NOT_CONNECTED; the row now says one thing. What remains true: no dashboard-module-registry entry of its own, so there is no nav tile — reachable from inside project operations, not from a menu.",
   },
   {
     id: "WRK-10",
@@ -725,11 +744,11 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     worldElement: "projects",
     status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/economics", "components/app/project-economics-panel.tsx"],
-    coreModule: "lib/economics/economics-model.ts",
+    anchors: ["lib/economics"],
+    coreModule: "lib/economics/economics.ts",
     surfaces: ["app/[locale]/dashboard/projects/[id]/operations"],
     note:
-      "RECLASSIFIED 2026-09-14, re-measured against the code and the live database. The 2026-09-08 note called this “genuinely unreachable” on one criterion — no surfaceRoute of its own in the dashboard module registry — but BUILT_NOT_CONNECTED means “no product path leads to it”, and a panel mounted on a reachable page IS a product path. MEASURED: `ProjectEconomicsPanel` is mounted on the project operations page, `project_budgets` is APPLIED in production, and the panel carries three write actions plus honest pre-apply and empty states. THE REAL LIMIT: it is manager-only, and more importantly the ACTUAL side of the comparison has no source — `economics-model.ts` derives baseline and variance from budget LINES a manager typed, so “actual” means “what someone recorded”, not what the work cost. Until a cost fact flows in from somewhere else, the variance is a comparison of two intentions. Production holds 0 budgets.",
+      "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with no module and no surface named. Measured: `lib/economics/economics.ts` is the read service and `ProjectEconomicsPanel` renders at `app/[locale]/dashboard/projects/[id]/operations/page.tsx:570`, a route linked from six places. `project_budgets` holds 0 rows — that is ADOPTION, not disconnection, the same distinction this register already applied to WRK-6 and WRK-8. PARTIAL because the manager path is wired and nobody has used it yet.",
   },
 ];
 
@@ -1169,8 +1188,8 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/agreements"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/agreements/agreements.ts",
+    surfaces: ["app/[locale]/dashboard/commercial"],
     note: "Three stores, 0 rows; `contracts` is legacy of `agreements` (debt).",
   },
   {
@@ -1180,11 +1199,11 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     worldElement: "organizations",
     status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/procurement", "app/[locale]/dashboard/finance/procurement-section.tsx"],
-    coreModule: "lib/procurement/procurement-model.ts",
+    anchors: ["lib/procurement"],
+    coreModule: "lib/procurement/procurement.ts",
     surfaces: ["app/[locale]/dashboard/finance"],
     note:
-      "RECLASSIFIED 2026-09-14, re-measured against the code and the live database. The 2026-09-08 note called this “genuinely unreachable” on one criterion — no surfaceRoute of its own in the dashboard module registry — but BUILT_NOT_CONNECTED means “no product path leads to it”, and a panel mounted on a reachable page IS a product path. The criterion was wrong here in a specific way: procurement is not a route, it is a SECTION of `/dashboard/finance`, and that page DOES carry a surfaceRoute in the module registry. MEASURED: `ProcurementSection` is mounted on the finance page, all three tables (`procurement_inquiries`, `procurement_offers`, `procurement_events`) are APPLIED in production, and the section wires six real write actions — create, update, submit, add offer, select offer, set status. THE REAL LIMIT: it is BUYER-SIDE ONLY. `addProcurementOfferAction` takes `supplierName` as free text the buyer types, and no supplier-facing route exists anywhere — so a supplier is a name in a field, not a participant who can answer. Production holds 0 inquiries.",
+      "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with nothing named. Measured: `lib/procurement/procurement.ts` is the read service and `ProcurementSection` renders on `/dashboard/finance` (page line 280). That route is NOT orphaned — `/dashboard/reports` and `components/app/commercial-panel.tsx` both link to it. Production: `procurement_inquiries` 0, `procurement_offers` 0 — adoption, not reachability.",
   },
   {
     id: "MKT-6",
@@ -1193,11 +1212,11 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     worldElement: "objects",
     status: "PARTIAL",
     strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/trips", "app/[locale]/dashboard/finance/trips-section.tsx"],
-    coreModule: "lib/trips/trips-model.ts",
+    anchors: ["lib/trips"],
+    coreModule: "lib/trips/trips.ts",
     surfaces: ["app/[locale]/dashboard/finance"],
     note:
-      "RECLASSIFIED 2026-09-14, re-measured against the code and the live database. The 2026-09-08 note called this “genuinely unreachable” on one criterion — no surfaceRoute of its own in the dashboard module registry — but BUILT_NOT_CONNECTED means “no product path leads to it”, and a panel mounted on a reachable page IS a product path. MEASURED: `TripsSection` is mounted on the finance page, `business_trips` and `business_trip_events` are APPLIED in production, and the section wires the full lifecycle — create, update, submit, decide, complete, cancel. HALF OF THE OLD LIMIT IS NOW CLOSED (2026-09-14). An APPROVED or COMPLETED trip is now a first-class commitment on the employer side: `getEmployerWorkerCommitments` reads it, so the capacity answer (“who is free this week”), the CAL-7 reservation verdict and the CAL-9 utilisation window all count it. No new authority was needed — `business_trips_select` already admitted the person, the organization’s managers and admin, the same shape as every other commitment source — and the trip’s `purpose` is deliberately not read, only its destination, exactly as an absence’s reason is not read. `draft` and `submitted` do NOT count: a pending request is an intention, and treating it as unavailability would block scheduling on something nobody approved. AND THE OTHER HALF IS NOW CLOSED TOO (same day): `trip` is the ninth `PLANNING_SOURCE_TYPES` member, so the person’s own calendar draws the band, and an approved trip overlapping an accepted booking is reported as the real impossible plan it is. It went through the EXISTING pipeline — same pure mapper shape as absences and stages, same merge, same conflict detection, same rendering — not a parallel trip calendar. The person’s own read needed no new authority either: the policy has always admitted `profile_id = auth.uid()`. ONE RULE, FOUR CONSUMERS: `PLANNED_TRIP_STATUSES` is the single home of “which statuses occupy time”, imported by the calendar, the employer commitment read, the reservation verdict and the utilisation window, and `lib/planning/trip-time-consistency.test.ts` proves they AGREE rather than merely each looking reasonable alone — including that every status the trips domain can produce falls on a decided side of the line, so a new one cannot slip through silently. WHAT REMAINS, and it is a bounded choice rather than a gap: the trip’s advance and expenses stay on the finance surface under that surface’s permissions — the calendar draws the DAYS, not the money. Production holds 0 trips, so all of this is correct ahead of first use.",
+      "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with nothing named. Measured: `lib/trips/trips.ts` is the read service and `TripsSection` renders on `/dashboard/finance` (page line 285), a route with real inbound links. This row was especially wrong in context: business trips already participate in commitment/capacity reality (commit b7b7936), so a capability feeding the planning loop was recorded as reachable by nobody. Production: `business_trips` 0, `business_trip_events` 0 — adoption.",
   },
   {
     id: "MKT-7",
@@ -1220,10 +1239,10 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     status: "ARCHITECTURE_ONLY",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/lmc"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/lmc/lmc-account.ts",
+    surfaces: ["app/[locale]/dashboard/account"],
     deferredByDesign: true,
-    note: "Five tables and sixteen RPCs live; all six flags are false in code AND in the database. Spend has no reversal — that is the recorded blocker.",
+    note: "Corrected 2026-09-15: SEVEN lmc_* tables are live in production (lmc_accounts, lmc_account_balances, lmc_lots, lmc_lot_balances, lmc_lot_consumptions, lmc_transactions, lmc_settings), not five — re-counted from information_schema, and the note had drifted. Sixteen RPCs live; all six flags remain false in code AND in the database. Spend has no reversal — that is the recorded blocker, and it is why this stays ARCHITECTURE_ONLY + deferredByDesign even though the machinery exists: the capability is deliberately unarmed, not unbuilt. Arming it is MKT-7, an owner decision (two independent owner acts). The row now names `lib/lmc/lmc-account.ts` and `/dashboard/account`, where LmcBalanceSection renders the disabled state — so the claim is checkable rather than merely asserted. Naming them does not arm anything.",
   },
 ];
 
@@ -1275,8 +1294,8 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/notifications"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/notifications/weekly-digest-emitter.ts",
+    surfaces: ["app/[locale]/dashboard/activity"],
     note:
       "PROMOTED 2026-09-08 from TEST_PROVEN on real evidence, not on a green suite: the cron actually ran and PERSISTED, writing 4 weekly_digest rows to notification_events at 07:09 and 07:28 UTC - the first digests this product has ever stored. Until that morning it could not: it returned HTTP 503 because service_role could read neither journal_entries nor workers to find a recipient. The only cron in the product. Still PARTIAL because DELIVERY is not persistence - the email channel remains inert with no provider configured, so a digest is stored and readable in-product and reaches nobody by mail.",
   },
@@ -1426,9 +1445,10 @@ const EDUCATION: readonly CapabilityRow[] = [
     status: "BUILT_NOT_CONNECTED",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/learning"],
-    coreModule: null,
-    surfaces: [],
-    note: "/dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL. Measured 2026-09-08: `learning_signals`, `learning_review_queue` and `learning_policy_settings` all hold 0 rows and no learning route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
+    coreModule: "lib/learning/learning.ts",
+    surfaces: ["app/[locale]/dashboard/learning"],
+    note:
+      "Made FALSIFIABLE 2026-09-15 without changing the verdict. The row claimed `orphan_route` while naming no module and no surface, so the claim could not be checked at all - the same unfalsifiable shape as WRK-8. It now names `lib/learning/learning.ts` and `app/[locale]/dashboard/learning`, and the claim VERIFIES: grep finds ZERO inbound links to `/dashboard/learning` from any route or component outside its own directory, so a person reaches it only by typing the URL. THE LIMITATION IS DELIBERATE AND PRESERVED - EDU-5 remains parked on F-N1 by owner instruction and this sweep does not bypass it; the capability stays BUILT_NOT_CONNECTED. Note the module IS imported (the learning page and two sections import it), which is exactly why `orphan_route` and not `no_importer` is the right kind: the code is reached, the ROUTE is not. Production: `learning_review_queue` 0, `learning_signals` 0. ORIGINAL NOTE: /dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL. Measured 2026-09-08: `learning_signals`, `learning_review_queue` and `learning_policy_settings` all hold 0 rows and no learning route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "EDU-6",
@@ -1568,8 +1588,8 @@ const PLATFORM: readonly CapabilityRow[] = [
     status: "PARTIAL",
     strongestEvidence: "HUMAN_UI_PROVEN",
     anchors: ["lib/i18n", "messages"],
-    coreModule: null,
-    surfaces: [],
+    coreModule: "lib/i18n/config.ts",
+    surfaces: ["components/layouts"],
     note: "Eleven locales, five active; the inactive five carry large [EN] blocks and are not ratchet-tracked. A missing key renders as the key itself — only a walk sees it.",
   },
   {

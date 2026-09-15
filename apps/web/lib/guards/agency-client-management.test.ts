@@ -159,12 +159,32 @@ describe("4. the owner gate is honest", () => {
     }
   });
 
-  it("APPLIED_LEDGER.md carries the Deferred entry", () => {
+  it("APPLIED_LEDGER.md records the migration as APPLIED, with its ledger name", () => {
+    // Until 2026-09-14 this asserted the entry sat under "## Deferred", which
+    // was the honest state while the owner gate was open. The owner approved it
+    // (decision round item 4d) and it was applied via Supabase MCP, so the
+    // ledger now carries an APPLIED record instead — asserting "still deferred"
+    // would now be the dishonest half.
     const ledger = readFileSync(join(REPO, "docs/APPLIED_LEDGER.md"), "utf8");
-    const deferredIdx = ledger.indexOf("## Deferred");
-    const entryIdx = ledger.indexOf("20260713160000_agency_clients_v1");
-    expect(deferredIdx).toBeGreaterThan(-1);
-    expect(entryIdx).toBeGreaterThan(deferredIdx);
+    const applied = ledger.indexOf(
+      "✅ APPLIED TO PROD — `20260713160000_agency_clients_v1`",
+    );
+    expect(
+      applied,
+      "the ledger must record agency_clients_v1 as applied, not merely mention it",
+    ).toBeGreaterThan(-1);
+
+    // Matching is on the ledger NAME, never the repo filename's timestamp —
+    // apply-time versions never match the filename, which is this ledger's own
+    // standing rule.
+    const record = ledger.slice(applied, applied + 3000);
+    expect(record).toContain("agency_clients_v1");
+    expect(record, "an applied record must name its rollback").toContain(
+      "supabase/rollbacks/20260713160000_agency_clients_v1.down.sql",
+    );
+    // The Model B scope note is load-bearing: applying this must never be read
+    // as reviving the retired Model A pool world (ORG-10).
+    expect(record).toMatch(/owns_company/);
   });
 
   it("the read service degrades honestly (42P01/PGRST205 → needs-migration; 42703 → not linkable)", () => {

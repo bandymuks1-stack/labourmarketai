@@ -3282,7 +3282,8 @@
           "consents": "Sutikimų istorija",
           "messages": "Žinutės",
           "inquiries": "Užklausos ir prašymai",
-          "notifications": "Pranešimai"
+          "notifications": "Pranešimai",
+          "externalProfiles": "Išorinių profilių nuorodos"
         },
         "action": {
           "delete": "Ištrinti",
@@ -8297,7 +8298,12 @@
       "noOrganization": "Pirmiausia sukurkite savo įmonės organizaciją.",
       "fieldsNote": "Darbuotojo prašoma pasidalinti vardu, telefonu ir el. paštu. Sprendžia darbuotojas — be jo patvirtinimo niekas nerodoma.",
       "error": "Prašymo išsiųsti nepavyko. Bandykite dar kartą.",
-      "accepted": "Darbuotojas priėmė prašymą — kontaktų perdavimas dar neleistas."
+      "accepted": "Darbuotojas priėmė prašymą — kontaktų perdavimas dar neleistas.",
+      "withdraw": "Atšaukti užklausą",
+      "withdrawing": "Atšaukiama…",
+      "withdrawn": "Jūs atšaukėte šią užklausą.",
+      "withdrawNotOpen": "Ši užklausa nebėra atvira — jos atšaukti nebegalima.",
+      "withdrawError": "Užklausos atšaukti nepavyko. Bandykite dar kartą."
     },
     "shortlistNote": {
       "label": "Pastaba",

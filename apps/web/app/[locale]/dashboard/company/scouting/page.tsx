@@ -1029,6 +1029,9 @@ export default async function CompanyScoutingPage({
                         locale={locale}
                         requestId={result.demand.id}
                         workerId={c.workerId}
+                        requestRowId={
+                          contactRequests.byWorker[c.workerId]?.requestRowId ?? null
+                        }
                         currentStatus={
                           contactRequests.byWorker[c.workerId]?.status ?? null
                         }
@@ -1048,6 +1051,11 @@ export default async function CompanyScoutingPage({
                           unavailable: t("contactRequest.unavailable"),
                           rateLimited: t("contactRequest.rateLimited"),
                           noOrganization: t("contactRequest.noOrganization"),
+                          withdraw: t("contactRequest.withdraw"),
+                          withdrawing: t("contactRequest.withdrawing"),
+                          withdrawn: t("contactRequest.withdrawn"),
+                          withdrawNotOpen: t("contactRequest.withdrawNotOpen"),
+                          withdrawError: t("contactRequest.withdrawError"),
                           fieldsNote: t("contactRequest.fieldsNote"),
                           error: t("contactRequest.error"),
                         }}
