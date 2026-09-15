@@ -2680,6 +2680,11 @@
       "notSet": "[EN] The respond-by date wasn't saved. Please try again later.",
       "respondBy": "[EN] Respond by {date}",
       "cancel": "[EN] Cancel"
+    },
+    "clash": {
+      "acceptAnyway": "Zinu, ka pārklājas — tomēr pieņemt",
+      "stillStands": "Pieņemšana pārklāšanos nenovērsīs. Abas rezervācijas saglabā savus datumus, konflikts paliek redzams kalendārā, un jūsu lēmums tiek reģistrēts.",
+      "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts."
     }
   },
   "marketplace": {

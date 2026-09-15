@@ -1757,6 +1757,62 @@ Readback after the probe: 0 rows. The RPC path itself therefore also ran success
 
 Rollback: `supabase/rollbacks/20260914140000_worker_saved_searches_v1.down.sql` — one transaction, and it REFUSES while any saved search exists. That refusal is real only because of the transaction: the first draft raised outside one, printed its refusal and dropped the table anyway, which the paired db-proof caught before either reached production.
 
+### `subject_contest_and_clash_receipt` — RED #4 + #5 — APPLIED 2026-09-15, ledger `20260915185038`
+
+Repo file `supabase/migrations/20260915180000_subject_contest_and_clash_receipt.sql`
+(sha256 `5a1f525987098cc419cbcbaa0633e58aec2dcad53df4a356e0df11ffe2c16247`),
+applied via Supabase MCP `apply_migration` at owner-approved reviewed HEAD
+`e08e5f23405e5da25ee9fbabe9d6215f55b240b3`. **Note the version drift** — the
+repo stem is `20260915180000`, the production ledger version is
+`20260915185038`; `apply_migration` assigns its own timestamp, which is why a
+`supabase db push` would re-run applied migrations and is forbidden.
+
+**Preconditions re-verified immediately before apply:** HEAD matched, file hash
+matched, ledger collisions on `20260915180000` = 0, scope unchanged (only the
+migration and its paired rollback under `supabase/`), working tree clean.
+
+**Runtime-proven BEFORE the apply, not after.** `scripts/db-proof/subject-contest-and-clash-receipt.sh`
+ran the migration VERBATIM against a throwaway PostgreSQL 16.13 with RLS
+enabled, every subject-facing case executed as the non-owner role
+`authenticated`: **43 assertions, 43 pass**, including the rollback. Transcript:
+`docs/db-proof/RED-4-5-runtime-proof.md`. A Supabase preview branch was NOT the
+route — the organisation is on the free plan and branching requires Pro.
+
+**Post-apply readback, measured as a DELTA against a snapshot taken immediately
+before:**
+
+| | before | after |
+|---|---|---|
+| policies in `public` | 348 | **349** (+1, the new one) |
+| fingerprint of all OTHER policies | `cc57ce3a…` | **`cc57ce3a…` — identical** |
+| functions in `public` | 473 | **474** (+1, v4) |
+| `respond_booking_request_v3` body md5 | `5cb1a2ad…` | **`5cb1a2ad…` — unchanged** |
+| constraints on `booking_request_events` | 6 | **8** (FK on the new column + the receipt iff) |
+| bookings / booking events | 1 / 2 | **1 / 2** |
+| evidence records / events | 0 / 0 | **0 / 0** |
+| customer_requests | 20 | **20** |
+
+The policy-fingerprint line is the load-bearing one: recomputing the pre-apply
+hash over every policy EXCEPT the one added returns the identical digest, so
+the ONLY RLS change in the entire database is this migration's.
+
+**Authority readback.** Policy `organization_evidence_events_subject_dispute` is
+INSERT, `{authenticated}`, with the approved predicate verbatim. Unique partial
+index present. `event_type` CHECK widened by exactly `clash_acknowledged`; the
+receipt CHECK is the iff in both directions. `respond_booking_request_v4` present
+with the expected signature and `security definer`. **Both v3 and v4 hold
+`postgres=X | authenticated=X` — `anon` absent from both.** The only security
+advisor note on v4 is the same informational "SECURITY DEFINER executable by
+authenticated" line v3 already carries.
+
+**No production rows were manufactured to prove anything.** All counts are
+unchanged; the proof was done on a throwaway database, as it should be.
+
+Rollback: `supabase/rollbacks/20260915180000_subject_contest_and_clash_receipt.down.sql`,
+exercised in the same proof run — v4 gone, v3 surviving, column and CHECK
+restored, policy gone, and a dispute already written left readable. It removes
+an authority, never a record.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

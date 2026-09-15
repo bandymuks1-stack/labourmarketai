@@ -20,8 +20,18 @@ import { join } from "node:path";
  *      EXISTING inclusive day-range semantics exactly;
  *   4. authorization is never delegated to the constraint;
  *   5. the scope stays booking-vs-booking (no leave/stage/travel creep);
- *   6. the app maps a conflict to the canonical terminal outcome and never
- *      leaves the accept CTA live after one.
+ *   6. the app maps a conflict to the canonical outcome, re-reads server
+ *      state, and never leaves the PLAIN accept CTA live after one.
+ *
+ * AMENDED 2026-09-15 by RED #5 (production ledger `20260915185038`). A
+ * conflict used to be terminal with no way forward at all. It is now terminal
+ * FOR THE PLAIN ACCEPT — that CTA is still gone, and retrying it can still
+ * only fail the same way — but the person may take ONE separate, explicit
+ * action to accept an overlap they have been shown. That is a widening of
+ * what the human may decide, not of what the machine may do behind them: the
+ * overlap is not resolved, both bookings keep their dates, and a
+ * `clash_acknowledged` receipt records who chose it. The assertions below are
+ * correspondingly STRICTER than before, not looser.
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
@@ -293,12 +303,40 @@ describe("W12 slice 1 — the app tells the truth about a conflict", () => {
     expect(actions).toMatch(/return \{ kind: "conflict" \}/);
   });
 
-  it("the bookings surface makes a conflict terminal and re-reads server state", () => {
+  it("the bookings surface handles a conflict and re-reads server state", () => {
     const c = read("components/app/booking-respond-buttons.tsx");
-    expect(c).toMatch(/res\.kind === "conflict"[\s\S]{0,400}?router\.refresh\(\)/);
-    // Terminal render: an early return, so no accept CTA is left live.
-    expect(c).toMatch(/if \(state\.kind === "conflict"\) \{[\s\S]{0,500}?return \(/);
+    expect(c).toMatch(/res\.kind === "conflict"[\s\S]{0,900}?router\.refresh\(\)/);
+    // Early return, so the ordinary accept/decline CTAs are not left live.
+    expect(c).toMatch(/if \(state\.kind === "conflict"\) \{[\s\S]{0,900}?return \(/);
     expect(c).toMatch(/data-testid="booking-conflict"/);
+  });
+
+  it("the ONLY forward path from a conflict is an explicit acknowledgement", () => {
+    const c = read("components/app/booking-respond-buttons.tsx");
+    const branch = c.slice(
+      c.indexOf('if (state.kind === "conflict")'),
+      c.indexOf("return (\n    <div className=\"flex w-full flex-col gap-1.5"),
+    );
+    expect(branch.length).toBeGreaterThan(0);
+    // No plain accept inside the conflict branch — only the acknowledged one.
+    expect(branch).not.toMatch(/respond\("accepted"\)/);
+    expect(branch).toMatch(/respond\("accepted", true\)/);
+    // And the consequence is stated before the control that acts on it.
+    expect(branch.indexOf("clash.stillStands")).toBeLessThan(
+      branch.indexOf("booking-accept-anyway"),
+    );
+  });
+
+  it("no code path acknowledges a clash on the person's behalf", () => {
+    const c = read("components/app/booking-respond-buttons.tsx");
+    const a = read("lib/booking/booking-actions.ts");
+    // The parameter defaults to false everywhere it is declared…
+    expect(c).toMatch(/acknowledgeClash = false/);
+    // …and the RPC is only ever asked to acknowledge, never told not to,
+    // because the un-acknowledged path does not go through v4 at all.
+    expect(a).toMatch(/p_acknowledge_clash: true/);
+    expect(a).not.toMatch(/p_acknowledge_clash:\s*false/);
+    expect(a).not.toMatch(/acknowledgeClash:\s*true/);
   });
 
   it("the chat offer card makes a conflict terminal and re-reads server state", () => {

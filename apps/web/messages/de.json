@@ -8543,6 +8543,11 @@
       "notSet": "Das Antwortdatum wurde nicht gespeichert. Bitte versuchen Sie es später erneut.",
       "respondBy": "Antwort bis {date}",
       "cancel": "Abbrechen"
+    },
+    "clash": {
+      "acceptAnyway": "Ich weiß, dass es sich überschneidet — trotzdem annehmen",
+      "stillStands": "Die Annahme beseitigt die Überschneidung nicht. Beide Buchungen behalten ihre Termine, der Konflikt bleibt im Kalender sichtbar, und Ihre Entscheidung wird festgehalten.",
+      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert."
     }
   },
   "adminReadiness": {
@@ -15894,7 +15899,8 @@
       "ORGANIZATION_REPORTED": "Die Organisation meldet es",
       "LEGACY_IMPORTED": "Aus einem älteren System übernommen",
       "UNVERIFIED": "Geliefert, Stellung nicht festgestellt",
-      "NEEDS_REVIEW": "Braucht einen menschlichen Blick"
+      "NEEDS_REVIEW": "Braucht einen menschlichen Blick",
+      "DISPUTED": "Bestritten"
     },
     "result": {
       "written": "Festgehalten",
@@ -15915,7 +15921,17 @@
       "selfAttested": "Bestätigt von der Person, um die es geht",
       "selfAttestedHint": "Das ist ein echter, festgehaltener Nachweis. Es ist keine unabhängige Prüfung und zählt nie als solche.",
       "notIndependentlyVerified": "Nicht unabhängig geprüft",
-      "withdrawn": "Zurückgezogen"
+      "withdrawn": "Zurückgezogen",
+      "disputed": "Bestritten. Eine Person mit Berechtigung hat diesem Eintrag widersprochen; Eintrag und Widerspruch bleiben beide erhalten.",
+      "disputedByYou": "Sie haben diesen Eintrag bestritten. Eintrag und Ihr Widerspruch bleiben beide erhalten.",
+      "disputeOpen": "Das ist falsch",
+      "disputeNotePlaceholder": "Was stimmt daran nicht? (optional)",
+      "disputeSubmit": "Widerspruch festhalten",
+      "disputeCancel": "Abbrechen",
+      "disputeRecorded": "Ihr Widerspruch ist festgehalten. Der Eintrag der Organisation bleibt unverändert — beides ist jetzt dokumentiert.",
+      "disputeAlready": "Sie hatten diesen Eintrag bereits bestritten. Ihr Widerspruch ist dokumentiert.",
+      "disputeNotAllowed": "Nur die Person, um die es in diesem Eintrag geht, kann ihn bestreiten — und erst nach bestätigter Zuordnung.",
+      "disputeFailed": "Der Widerspruch konnte nicht festgehalten werden. Bitte erneut versuchen."
     },
     "withdraw": {
       "title": "Diesen Import rückgängig machen",

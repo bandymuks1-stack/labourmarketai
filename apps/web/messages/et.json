@@ -2680,6 +2680,11 @@
       "notSet": "[EN] The respond-by date wasn't saved. Please try again later.",
       "respondBy": "[EN] Respond by {date}",
       "cancel": "[EN] Cancel"
+    },
+    "clash": {
+      "acceptAnyway": "Tean, et kattub — võtan siiski vastu",
+      "stillStands": "Vastuvõtmine ei kõrvalda kattuvust. Mõlemad broneeringud säilitavad oma kuupäevad, konflikt jääb kalendris nähtavaks ja teie otsus salvestatakse.",
+      "acknowledged": "Vastu võetud teadaoleva kattuvusega. Endiselt kattub broneeringuid: {count}. Midagi ei tühistatud ega peidetud ja teie otsus on talletatud."
     }
   },
   "marketplace": {

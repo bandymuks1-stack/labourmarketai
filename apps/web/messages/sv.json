@@ -2680,6 +2680,11 @@
       "notSet": "[EN] The respond-by date wasn't saved. Please try again later.",
       "respondBy": "[EN] Respond by {date}",
       "cancel": "[EN] Cancel"
+    },
+    "clash": {
+      "acceptAnyway": "Jag vet att det överlappar — acceptera ändå",
+      "stillStands": "Att acceptera tar inte bort överlappet. Båda bokningarna behåller sina datum, konflikten syns fortfarande i kalendern, och ditt val registreras.",
+      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat."
     }
   },
   "marketplace": {

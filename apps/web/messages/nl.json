@@ -8543,6 +8543,11 @@
       "notSet": "De reactiedatum is niet opgeslagen. Probeer het later opnieuw.",
       "respondBy": "Reageer vóór {date}",
       "cancel": "Annuleren"
+    },
+    "clash": {
+      "acceptAnyway": "Ik weet dat het overlapt — toch accepteren",
+      "stillStands": "Accepteren heft de overlap niet op. Beide boekingen houden hun data, het conflict blijft zichtbaar in uw agenda, en uw keuze wordt vastgelegd.",
+      "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en uw keuze staat geregistreerd."
     }
   },
   "adminReadiness": {
@@ -15894,7 +15899,8 @@
       "ORGANIZATION_REPORTED": "De organisatie meldt het",
       "LEGACY_IMPORTED": "Overgezet uit een ouder systeem",
       "UNVERIFIED": "Aangeleverd, status niet vastgesteld",
-      "NEEDS_REVIEW": "Vraagt om een menselijke blik"
+      "NEEDS_REVIEW": "Vraagt om een menselijke blik",
+      "DISPUTED": "Betwist"
     },
     "result": {
       "written": "Vastgelegd",
@@ -15915,7 +15921,17 @@
       "selfAttested": "Bevestigd door de persoon over wie het gaat",
       "selfAttestedHint": "Dit is echt, vastgelegd bewijs. Het is geen onafhankelijke verificatie en telt daar nooit als zodanig.",
       "notIndependentlyVerified": "Niet onafhankelijk geverifieerd",
-      "withdrawn": "Ingetrokken"
+      "withdrawn": "Ingetrokken",
+      "disputed": "Betwist. Iemand met grond heeft bezwaar gemaakt tegen dit record; zowel het record als het bezwaar blijven bewaard.",
+      "disputedByYou": "U hebt dit record betwist. Zowel het record als uw bezwaar blijven bewaard.",
+      "disputeOpen": "Dit klopt niet",
+      "disputeNotePlaceholder": "Wat klopt er niet? (optioneel)",
+      "disputeSubmit": "Mijn bezwaar vastleggen",
+      "disputeCancel": "Annuleren",
+      "disputeRecorded": "Uw bezwaar is vastgelegd. Het record van de organisatie is ongewijzigd — beide staan nu geregistreerd.",
+      "disputeAlready": "U had dit record al betwist. Uw bezwaar is vastgelegd.",
+      "disputeNotAllowed": "Alleen de persoon over wie dit record gaat kan het betwisten, en pas na een bevestigde koppeling.",
+      "disputeFailed": "Het bezwaar kon niet worden vastgelegd. Probeer het opnieuw."
     },
     "withdraw": {
       "title": "Deze import ongedaan maken",

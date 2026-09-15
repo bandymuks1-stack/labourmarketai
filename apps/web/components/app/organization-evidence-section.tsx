@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Card } from "@/components/ui/Card";
@@ -9,6 +9,10 @@ import {
   respondToRosterLinkAction,
   type RosterLinkActionResult,
 } from "@/lib/organization-evidence/roster-link-actions";
+import {
+  disputeEvidenceRecordAction,
+  type DisputeEvidenceResult,
+} from "@/lib/organization-evidence/dispute-actions";
 import type {
   EvidenceRecordView,
   SubjectRosterLink,
@@ -79,6 +83,110 @@ function OfferDecision({
       >
         {state?.ok === false ? labels.errorMsg : ""}
       </p>
+    </form>
+  );
+}
+
+/**
+ * "THIS IS WRONG" — the subject's objection to one record.
+ *
+ * Deliberately a two-step: the button reveals a form, and only an explicit
+ * submit writes anything. Contesting an employer's record is not a thing to
+ * do by mis-tap, and the note is where the person says what is actually
+ * wrong — optional, because "this is wrong" is already a complete statement
+ * and demanding an explanation before someone may object is its own kind of
+ * pressure.
+ *
+ * WHAT THE COPY MUST NEVER SAY is that the record has been corrected,
+ * removed, or proven false. It has not. The objection is recorded beside it,
+ * both stay readable, and the standing becomes CONTESTED — which is what the
+ * database actually holds.
+ */
+function DisputeRecord({
+  recordId,
+  labels,
+}: {
+  recordId: string;
+  labels: {
+    open: string;
+    notePlaceholder: string;
+    submit: string;
+    cancel: string;
+    recorded: string;
+    already: string;
+    notAllowed: string;
+    failed: string;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  const [state, submit, pending] = useActionState<
+    DisputeEvidenceResult | null,
+    FormData
+  >(disputeEvidenceRecordAction, null);
+
+  if (state?.ok) {
+    return (
+      <p
+        className="text-xs text-state-amber"
+        role="status"
+        data-testid="evidence-dispute-recorded"
+      >
+        {"already" in state ? labels.already : labels.recorded}
+      </p>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-fit rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary hover:border-state-amber hover:text-state-amber"
+        data-testid="evidence-dispute-open"
+      >
+        {labels.open}
+      </button>
+    );
+  }
+
+  return (
+    <form action={submit} className="flex flex-col gap-2">
+      <input type="hidden" name="record_id" value={recordId} />
+      <textarea
+        name="note"
+        rows={2}
+        maxLength={1000}
+        placeholder={labels.notePlaceholder}
+        data-testid="evidence-dispute-note"
+        className="w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-xs text-text-primary outline-none placeholder:text-text-muted focus:border-state-amber"
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md border border-state-amber/50 bg-state-amber/10 px-3 py-1.5 text-xs font-semibold text-state-amber disabled:opacity-50"
+          data-testid="evidence-dispute-submit"
+        >
+          {labels.submit}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          disabled={pending}
+          className="rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary disabled:opacity-50"
+        >
+          {labels.cancel}
+        </button>
+      </div>
+      {state?.ok === false ? (
+        <p
+          role="alert"
+          className="text-xs text-state-warning"
+          data-testid="evidence-dispute-error"
+        >
+          {state.code === "not_allowed" ? labels.notAllowed : labels.failed}
+        </p>
+      ) : null}
     </form>
   );
 }
@@ -208,6 +316,41 @@ export function OrganizationEvidenceSection({
                 <p className="text-xs text-text-muted">
                   {tRecords("notIndependentlyVerified")}
                 </p>
+                {/* CONTESTED is rendered as its own line rather than left to
+                    the state chip, because "someone objected to this" is the
+                    single most important thing a reader of this record can
+                    know, and because the chip's catalogue is the REPORTED
+                    states — a lifecycle standing falling through it would
+                    render a raw enum. */}
+                {rec.state === "DISPUTED" ? (
+                  <p
+                    className="text-xs text-state-amber"
+                    data-testid="evidence-record-disputed"
+                  >
+                    {rec.disputedByViewer
+                      ? tRecords("disputedByYou")
+                      : tRecords("disputed")}
+                  </p>
+                ) : null}
+                {/* The objection is offered while the person has not already
+                    made one. It never appears on a withdrawn record: the
+                    organisation has already taken that claim back, and
+                    contesting a retracted statement would be theatre. */}
+                {!rec.disputedByViewer && !rec.withdrawn ? (
+                  <DisputeRecord
+                    recordId={rec.id}
+                    labels={{
+                      open: tRecords("disputeOpen"),
+                      notePlaceholder: tRecords("disputeNotePlaceholder"),
+                      submit: tRecords("disputeSubmit"),
+                      cancel: tRecords("disputeCancel"),
+                      recorded: tRecords("disputeRecorded"),
+                      already: tRecords("disputeAlready"),
+                      notAllowed: tRecords("disputeNotAllowed"),
+                      failed: tRecords("disputeFailed"),
+                    }}
+                  />
+                ) : null}
               </li>
             ))}
           </ul>
