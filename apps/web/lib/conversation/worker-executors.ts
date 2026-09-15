@@ -170,6 +170,10 @@ export const WORKER_EXECUTORS: {
       decision: input.decision,
       reasonKind: input.reasonKind ?? null,
       reasonNote: input.reasonNote ?? null,
+      // RED #5. Absent stays absent: the ordinary accept still goes down the
+      // v3 path, byte-identical to before. Only an explicit acknowledgement
+      // reaches v4, and only from a confirmation token minted for it.
+      acknowledgeClash: input.acknowledgeClash ?? false,
     });
     if (r.kind === "ok") {
       return {
@@ -178,6 +182,9 @@ export const WORKER_EXECUTORS: {
           status: r.status,
           reasonStored: r.reasonStored ?? null,
           engagement: r.engagement ?? null,
+          // What was overridden, from the SAME call. Not reporting it would
+          // be the same defect as hiding the clash.
+          acknowledgedClashes: r.acknowledgedClashes ?? null,
         },
       };
     }
