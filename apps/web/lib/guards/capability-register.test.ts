@@ -136,10 +136,29 @@ const dashboardRouteOf = (surface: string): string | null => {
   return m ? `/${m[1]}` : null;
 };
 
+/**
+ * Files that TALK ABOUT routes without navigating to any of them. Counting a
+ * route string here as navigation is a false positive, and it is not
+ * hypothetical: EDU-5's `orphan_route` claim is TRUE (its own note, and this
+ * file's semantic-separations entry, both say `/dashboard/learning` has no
+ * inbound href), yet the naive scan "found" navigation to it — in the register
+ * prose describing that very fact. A guard that reads its own description of a
+ * problem as evidence the problem is gone is worse than no guard.
+ */
+const ROUTE_PROSE_FILES = /^lib\/(product-gate|guards)\//;
+
 function navigableRoutes(): ReadonlySet<string> {
   const found = new Set<string>();
   for (const file of graph.files) {
-    const source = readFileSync(join(WEB_ROOT, file), "utf8");
+    // Registers and guards describe the product; they are not the product.
+    if (ROUTE_PROSE_FILES.test(file)) continue;
+    const source = readFileSync(join(WEB_ROOT, file), "utf8")
+      // `revalidatePath("/dashboard/x")` is CACHE INVALIDATION, not a link. A
+      // server action that revalidates a page it just wrote to does not give
+      // any human a way to get there. EDU-5 is exactly this case: every
+      // reference to /dashboard/learning outside its own directory is a
+      // revalidatePath call.
+      .replace(/revalidatePath\(\s*[^)]*\)/g, " ");
     for (const m of source.matchAll(/["'`](?:\/\$\{locale\})?(\/dashboard\/[a-z0-9/-]+)["'`]/g)) {
       const route = m[1]!;
       // A route linking to itself is not navigation.
@@ -267,13 +286,68 @@ describe("a capability nobody can reach is not a capability a user has", () => {
     }
   });
 
-  it("BUILT_NOT_CONNECTED means it really is not connected", () => {
+  it("BUILT_NOT_CONNECTED means it really is not connected — checked by KIND", () => {
     for (const row of CAPABILITY_REGISTER) {
       if (row.status !== "BUILT_NOT_CONNECTED" || row.coreModule === null) continue;
+      // Module reachability answers ONE kind of disconnection: "no importer".
+      // It is the wrong question for the others, and asking it anyway is the
+      // SEP-8 collapse this register exists to prevent — `reachable`,
+      // `navigable` and `has a writer` are different properties.
+      //
+      // EDU-5 is the worked example: `lib/learning/learning.ts` IS imported
+      // (the learning route and two sections import it), and `/dashboard/
+      // learning` still has zero inbound links. The CODE is reached; the
+      // ROUTE is not. That is `orphan_route`, and it is true. Demanding an
+      // unreachable module here would have forced the row to either lie about
+      // its kind or go back to naming nothing — which is exactly how WRK-8
+      // rotted.
+      if (row.disconnectedBecause !== "no_importer") continue;
       expect(
         reachable.has(row.coreModule),
-        `${describeRow(row)} is recorded as disconnected, and \`${row.coreModule}\` IS reachable. Somebody wired it — raise the status and say what evidence the wiring reached.`,
+        `${describeRow(row)} claims no_importer, and \`${row.coreModule}\` IS imported by a route or component. Somebody wired it — raise the status, or name the kind of disconnection that is actually missing.`,
       ).toBe(false);
+    }
+  });
+
+  it("a disconnection claim must name something a test can check", () => {
+    // THE WRK-8 DEFECT, made structurally impossible.
+    //
+    // WRK-8 sat in this register for months saying "no human path opens it"
+    // while `ProjectDefectsPanel` rendered on a route linked from six places.
+    // It survived because it declared `coreModule: null` AND `surfaces: []` —
+    // and every reachability check above SKIPS a row that names nothing. The
+    // claim was not wrong-but-caught; it was UNCHECKABLE, so it rotted into a
+    // confident wrong answer. WRK-9, WRK-10, MKT-5, MKT-6 and EDU-5 all had
+    // the same shape (corrected 2026-09-15).
+    //
+    // So: whatever kind of disconnection a row claims, it must hand the suite
+    // the concrete thing to falsify it with.
+    const NEEDS_MODULE = ["no_importer", "no_writer", "inert_bridge"];
+    const NEEDS_ROUTE = ["no_navigation", "orphan_route"];
+
+    for (const row of CAPABILITY_REGISTER) {
+      if (!row.disconnectedBecause) continue;
+      const kind = row.disconnectedBecause;
+
+      expect(
+        row.coreModule !== null || row.surfaces.length > 0,
+        `${describeRow(row)} claims \`${kind}\` and names NEITHER a module NOR a surface. That claim cannot be falsified by anything in this suite, so it will rot exactly as WRK-8 did. Name the module whose importers can be counted, or the surface whose inbound links can be counted.`,
+      ).toBe(true);
+
+      if (NEEDS_MODULE.includes(kind)) {
+        expect(
+          row.coreModule,
+          `${describeRow(row)} claims \`${kind}\`, which is a statement about a MODULE — name the one to check.`,
+        ).not.toBeNull();
+      }
+
+      if (NEEDS_ROUTE.includes(kind)) {
+        const routes = row.surfaces.map(dashboardRouteOf).filter((r) => r !== null);
+        expect(
+          routes.length,
+          `${describeRow(row)} claims \`${kind}\`, which is a statement about a ROUTE — name a dashboard route surface whose inbound links can be counted. Component-only surfaces cannot falsify a navigation claim.`,
+        ).toBeGreaterThan(0);
+      }
     }
   });
 

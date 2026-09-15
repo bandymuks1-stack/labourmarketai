@@ -548,8 +548,8 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | WRK-6 | **Team→project assignment** | — | **MISSING** | — | 1 | no FK exists anywhere |
 | WRK-7 | Readiness / operational status | `project_worker_readiness_items` | IMPL | W | 2 | — |
 | WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | assignee read APPLIED 2026-09-14 (ledger `20260914195053`), proven per-row on prod; `defect_corrections` stays manager-only (owner 2b DEFER) |
-| WRK-9 | Handover passport | `project_handover_entries` | IMPL | — | 3 | — |
-| WRK-10 | Project economics | `project_budgets` | IMPL | — | 3 | — |
+| WRK-9 | Handover passport | `project_handover_entries` (1 row) | IMPL | — | 3 | reachable on `/dashboard/projects/[id]/operations`; written once in prod — no nav tile of its own |
+| WRK-10 | Project economics | `project_budgets` (0 rows) | IMPL | — | 3 | `ProjectEconomicsPanel` renders on project operations; 0 rows is adoption, not disconnection |
 
 #### E. EVIDENCE · JOURNAL
 
@@ -601,8 +601,8 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | MKT-2 | Physical resource listings | `marketplace_listings` | DISCONNECTED (0 rows) | — | 2 | no bridge to `assets` |
 | MKT-3 | Assets / tools / equipment | `assets`, `asset_assignments` | IMPL (0 rows) | — | 2 | `issue_asset_v1` has no availability guard, no lock |
 | MKT-4 | Proposals / contracts / agreements | 3 stores | DUPLICATED (0 rows) | — | 3 | `contracts` is legacy of `agreements` |
-| MKT-5 | Procurement | `procurement_*` | IMPL (0 rows) | — | 3 | no route; `#procurement` anchor |
-| MKT-6 | Business trips | `business_trips` | IMPL (0 rows) | — | 3 | never reaches the calendar |
+| MKT-5 | Procurement | `procurement_*` | IMPL (0 rows) | — | 3 | `ProcurementSection` renders on `/dashboard/finance`, which reports + commercial-panel link to |
+| MKT-6 | Business trips | `business_trips` (0 rows) | IMPL (0 rows) | — | 3 | `TripsSection` renders on `/dashboard/finance`; trips already feed commitment/capacity. Calendar link still open |
 | MKT-7 | Billing / plans / entitlements | `plans`, `billing_*` | DEFERRED | — | 1 | test mode; two independent owner acts to arm |
 | MKT-8 | LMC credit ledger | 5 tables, 16 RPCs | DEFERRED | — | 3 | all six flags false in code AND database |
 
@@ -634,7 +634,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | EDU-2 | Programmes / cohorts / members | `education_*` | PROD_DATA (1/1/0) | W | 1 | correction path applied 2026-09-08; zero cohort members in production |
 | EDU-3 | Learner outcomes | `institution_learner_outcomes` | IMPL | — | 2 | — |
 | EDU-4 | Learning compass (student path) | `lib/learning/learning-compass` | IMPL | — | 2 | — |
-| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links |
+| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links — VERIFIED, verdict unchanged; parked on F-N1 (owner). Claim now names its module + route so it is checkable |
 | EDU-6 | Institution reporting | `education_programs` + public vacancy counts | IMPL | — | 2 | CSV export built 2026-09-13; never downloaded by a human |
 
 #### L. PLATFORM · AI · GOVERNANCE
