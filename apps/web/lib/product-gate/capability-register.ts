@@ -301,14 +301,14 @@ const PERSON: readonly CapabilityRow[] = [
     domain: "person",
     title: "External profile links",
     worldElement: "user_avatar",
-    status: "BLOCKED",
-    strongestEvidence: "CODE_PROVEN",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/worker/external-profiles.ts"],
     coreModule: "lib/worker/external-profiles.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "`20260713210000_multi_source_talent_v1` never applied; the UI ships an honest 'not enabled yet'.",
-    ownerDecision:
-      "Apply a split external_profiles_v1 carrying only the one table its live UI needs, or retire the section (§6.4 item 4).",
+    note:
+      "UNBLOCKED 2026-09-15. The owner decision this row carried — apply a split or retire the section — was MADE and EXECUTED in #1740: `20260914210000_external_profiles_v1`, the one-table split, is applied as production ledger `20260915042406`. Verified read-only 2026-09-15: `worker_external_profiles` exists with RLS enabled and exactly one SELECT policy, `authenticated` holds SELECT only so writes stay RPC-only, and both `save_worker_external_profile_v1` and `disconnect_external_profile_v1` are present. THE EXCLUSION HELD: `talent_source_records` and `identity_resolution_events` — the two tables of the 601-line parent that no live surface needs — are absent, and the parent is recorded SUPERSEDED-IN-PART / NEVER APPLY AS A WHOLE in the applied ledger. All three pre-apply conditions are met: the table is in `EXPORTED_RELATIONS` (personal-relations.ts, which export-data.ts imports — the migration header names export-data.ts, but the registration is real and drives the bundle), it is in the deletion-plan accounting as `externalProfiles` with the worker FK cascade unchanged as the actual mechanism, and `external-profiles-consent.test.ts` enforces its invariants against the shipping file. " +
+      "NO CODE CHANGE WAS NEEDED to light the surface: the read answers `needs-migration` only on 42P01, so with the table present the section stops rendering 'not enabled yet' by itself. PARTIAL, not BUILT_AND_USABLE, and deliberately: the table holds 0 rows, nothing has traversed the write path on production, and no human has walked the section. The previous note — '20260713210000_multi_source_talent_v1 never applied; the UI ships an honest not-enabled-yet' — was true of the PARENT and stayed on the row after the SPLIT landed.",
   },
   {
     id: "PER-12",
