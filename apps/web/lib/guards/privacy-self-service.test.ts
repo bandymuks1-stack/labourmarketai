@@ -58,7 +58,7 @@ describe("the data export reads ONLY the caller's own data", () => {
     // And every register entry is joined to the caller by a person column —
     // never by an id the caller could choose.
     for (const r of EXPORTED_RELATIONS) {
-      expect(["profile_id", "worker_id"]).toContain(r.key);
+      expect(["profile_id", "worker_id", "subject_profile_id"]).toContain(r.key);
     }
     expect(EXPORTED_RELATIONS.length).toBeGreaterThan(20);
   });

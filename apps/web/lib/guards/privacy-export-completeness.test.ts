@@ -35,8 +35,11 @@ const MIGRATIONS = join(REPO, "supabase", "migrations");
 
 /**
  * Person-keyed tables, read out of the create-table statements. A table is
- * counted when its CREATE TABLE body declares a `profile_id` or `worker_id`
- * column — the same test the production sweep used.
+ * counted when its CREATE TABLE body declares a `profile_id`, `worker_id` or
+ * `subject_profile_id` column — the production sweep's test, widened on
+ * 2026-09-15 for the relation where the person is the SUBJECT of another
+ * party's act (`competency_recognitions`): a person-keyed table whose column
+ * is spelt differently is still about a person.
  */
 function personKeyedTablesFromMigrations(): Set<string> {
   const found = new Set<string>();
@@ -50,7 +53,7 @@ function personKeyedTablesFromMigrations(): Set<string> {
     let m: RegExpExecArray | null;
     while ((m = re.exec(sql)) !== null) {
       const [, table, body] = m;
-      if (/\b(profile_id|worker_id)\b/.test(body)) found.add(table);
+      if (/\b(profile_id|worker_id|subject_profile_id)\b/.test(body)) found.add(table);
     }
   }
   return found;
@@ -144,7 +147,7 @@ describe("the export grew, and can be seen to have grown", () => {
 
   it("every exported relation declares which person column joins it", () => {
     for (const r of EXPORTED_RELATIONS) {
-      expect(["profile_id", "worker_id"]).toContain(r.key);
+      expect(["profile_id", "worker_id", "subject_profile_id"]).toContain(r.key);
     }
   });
 });

@@ -36,8 +36,10 @@ import "server-only";
  * them for however long it takes someone to notice.
  */
 
-/** How a relation is joined to the person. */
-export type PersonKey = "profile_id" | "worker_id";
+/** How a relation is joined to the person. `subject_profile_id` is the
+ *  column a relation uses when the person is the SUBJECT of another party's
+ *  act (a recognition by an assessor) rather than its author. */
+export type PersonKey = "profile_id" | "worker_id" | "subject_profile_id";
 
 export type ExportedRelation = {
   readonly table: string;
@@ -109,6 +111,27 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "demand_interest_seen", key: "worker_id" },
   { table: "worker_opportunity_seen", key: "worker_id" },
   { table: "worker_external_profiles", key: "worker_id" },
+  // J-TIME-FREEDOM step 5 (prepared, unapplied): a receipt that a manager
+  // knowingly accepted a clash on THIS person's calendar. It is about them
+  // and readable by them; the export carries it for the same reason.
+  { table: "commitment_override_receipts", key: "worker_id" },
+  // WRK-6 (prepared, unapplied): which brigade assignment put this person
+  // on a project — the provenance of an assignment they can already see.
+  { table: "project_team_assignment_members", key: "worker_id" },
+  // SKL-9 (prepared, unapplied): an independent assessor's recognition of
+  // THIS person's demonstrated capability. Theirs above all — the policy
+  // already lets the subject read it; the bundle must not omit it.
+  { table: "competency_recognitions", key: "subject_profile_id" },
+  // FOUND 2026-09-15 when the completeness guard learned to see
+  // `subject_profile_id`: two relations where the person is the SUBJECT of
+  // an organization's words, both already readable by the subject under
+  // their own RLS — `experience_records` (EVID-6, published records only:
+  // the policy withholds unpublished ones and so does this export, by the
+  // same rule) and `performance_reviews` (`review_can_view_v1` admits the
+  // subject). Neither had been classified; a subject-access bundle that
+  // omitted what an organization wrote ABOUT the person was under-reporting.
+  { table: "experience_records", key: "subject_profile_id" },
+  { table: "performance_reviews", key: "subject_profile_id" },
 
   // ── Account and billing ───────────────────────────────────────────────
   { table: "subscriptions", key: "profile_id" },
@@ -177,6 +200,16 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     table: "pilot_drafts",
     reason:
       "legacy pilot drafts, superseded by the canonical demand intake — kept only so nothing is lost, not maintained as your record",
+  },
+  {
+    table: "follow_up_tasks",
+    reason:
+      "follow-up notes an organization set about you — readable in-product by administrators only today (fut_select = is_admin()), so they need a route that can redact the organization's other subjects before they can be handed over",
+  },
+  {
+    table: "talent_source_records",
+    reason:
+      "defined in a migration the owner rejected as written (multi_source_talent_v1, never applied); the relation does not exist on production and holds nothing about anyone",
   },
 ];
 

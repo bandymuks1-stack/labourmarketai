@@ -612,7 +612,7 @@
     "window": "venster {start} – {end}",
     "windowUndated": "project destijds zonder data",
     "source": {
-      "project": "Project",
+      "project": "Projectinzet",
       "booking": "Boeking",
       "trip": "Zakenreis",
       "absence": "Niet beschikbaar"
@@ -6944,7 +6944,7 @@
     "assign": {
       "heading": "Het hele team aan een project toewijzen",
       "intro": "Elk van de {count, plural, one {# lid} other {# leden}} wordt via dezelfde regel per persoon toegewezen — het project moet van u zijn en elke persoon op uw lijst. Elk resultaat wordt op naam getoond.",
-      "projectLabel": "Project",
+      "projectLabel": "Kies project",
       "projectPlaceholder": "Kies een project…",
       "submit": "Team toewijzen",
       "assigning": "Toewijzen…",
