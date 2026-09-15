@@ -194,31 +194,64 @@ named as a condition of the approval: subject-only authority, no employer
 impersonation, no widening of unrelated INSERT/UPDATE/SELECT, immutable and
 auditable events, provenance retained, no path to alter the underlying
 employer evidence, the clash override records rather than erases. The full
-suite is green on this branch (1358 files / 23167 tests, 2 skipped).
+suite is green on this branch (1365 files / 23230 tests, 2 skipped).
 
-**What does NOT exist, stated plainly: there is no runtime evidence.** The
-migration has not been executed anywhere. These assertions prove the text says
-what was approved; they do not prove the policy admits the right caller and
-refuses the wrong one. Getting that requires executing it against a database —
-a Supabase preview branch. It is not claimed here and it has not been done.
+**RUNTIME EVIDENCE NOW EXISTS. It did not when this packet was first written,
+and the two paragraphs that stood here were wrong twice over.**
 
-**And the preview branch is currently blocked, by a stale slot rather than by
-cost.** On PR #1744 the Supabase check came back `cancelled` and the bot said
-the project had *reached the limit of concurrent preview branches*. Checked
-against the API rather than taken on the bot's word — the two non-default
-branches are:
+They said there was no runtime evidence and that getting it needed a Supabase
+preview branch blocked by cost, then by a stale slot. Both readings were wrong:
 
-| Preview branch | PR | PR state | Preview status |
-|---|---|---|---|
-| `feat/cc/ai-runs-retention-delink-subject-v1` | #1266 | **open** (draft, needs-human-gate) | ACTIVE_HEALTHY |
-| `feat/cc/stage2-agency-worker-link` | #99 | **MERGED 2026-05-28** | INACTIVE |
+* the Supabase organisation is on the **free** plan, and branching requires
+  **Pro** (`PaymentRequiredException: Branching is supported only on the Pro
+  plan or above`). Deleting the stale preview for merged PR #99 freed a slot
+  and changed nothing, because the slot was never the gate. That deletion cost
+  nothing real — the PR merged on 2026-05-28 and its preview was INACTIVE — but
+  it was done on a wrong diagnosis, and that is worth saying;
+* and a preview branch was never the only way. The repository already has a
+  db-proof harness (`scripts/db-proof/`, 109 files) that spins up a throwaway
+  Postgres, applies a migration **verbatim**, and measures it. That route needs
+  no plan, no cost and no production.
 
-One slot is held by a live open PR and is legitimately occupied. The other has
-been held since 2026-05-28 by the preview for a pull request that merged the
-same day — three and a half months of a slot spent on nothing. Reclaiming it is
-what makes runtime evidence for this migration possible at all, and it is an
-owner act: deleting a preview database is not reversible and is not mine to do
-uninstructed.
+**`scripts/db-proof/subject-contest-and-clash-receipt.sh` — 43 assertions,
+43 pass, 0 fail**, on real PostgreSQL 16.13 with RLS genuinely enabled, every
+subject-facing case executed as the non-owner role `authenticated`. The
+migration is applied **verbatim** from `supabase/migrations/`; nothing is
+re-implemented. Full transcript: `docs/db-proof/RED-4-5-runtime-proof.md`.
+
+| Layer | Result | What it covers |
+|---|---|---|
+| BEFORE | 3/3 | the subject cannot dispute; v3 refuses the overlapping accept; v4 does not exist |
+| **SCHEMA_PROVEN** | 7/7 | column, both CHECKs, index, policy present; **no UPDATE or DELETE policy anywhere** |
+| **POLICY_PROVEN** (#4) | 14/14 | correct subject admitted and persisted · unrelated person refused · **employer cannot write a dispute as the subject** · subject cannot attest · no replacement record · underlying evidence unmodifiable (and still unmodifiable when handed the grant) · one dispute per actor · subject of record A cannot dispute record B · migration granted no new privilege |
+| **RUNTIME_PROVEN** (#5) | 12/12 | clash **without** acknowledgement still refused and booking stays `proposed` · clash **with** acknowledgement proceeds and reports 1 · receipt persists naming counterpart and author · **both bookings keep their original dates** · **overlap re-derives — the clash is still there** · non-addressed worker refused · **anon refused** on both the RPC and the dispute · no receipt without a counterpart |
+| **ROLLBACK_PROVEN** | 7/7 | rollback run verbatim: v4 gone, **v3 survives**, column gone, original CHECK restored, policy gone, **a dispute already written survives** — the rollback removes an authority, not a record |
+
+**Three of my own assumptions were falsified by the run, and the migration was
+right each time:**
+
+1. I expected the subject's UPDATE on the evidence to be refused by RLS. It is
+   refused earlier and harder — `permission denied for table`, because
+   `authenticated` holds only INSERT and SELECT.
+2. Handed the grant anyway, I expected an error. RLS refuses UPDATE/DELETE
+   **silently**: no policy means no visible row, so it is a zero-row no-op.
+   (INSERT is the loud one, via WITH CHECK.) Both were asserted wrong and are
+   now asserted correctly, with the row proven intact afterwards.
+3. My first harness granted UPDATE/DELETE on the events table — **more**
+   permissive than production. Corrected to production's exact grant set
+   (`INSERT,SELECT`, read from `information_schema.role_table_grants`), which
+   makes every pass mean more, not less.
+
+No test or guard was weakened to reach 43/43; two assertions were corrected to
+the true mechanism and three were added.
+
+**What is still NOT proven.** This is a faithful harness, not production. The
+CHECKs, the policies and the v3 body are verbatim from production, but
+`auth.uid()` is a session-GUC stub and `manages_organization()` is a
+shape-faithful lookup rather than production's definer function. What is proven
+is the policy engine's verdict on the real predicates; what is not proven is
+production's own `manages_organization` internals, which this migration does
+not touch.
 
 **Production dry-run state, read-only, 2026-09-15:**
 
@@ -250,9 +283,16 @@ This cuts both ways and the owner should weigh both:
 
 ## RECOMMENDED OWNER DECISION
 
-**APPLY BOTH, NOW, AS ONE MIGRATION.** They are additive, exactly scoped,
-reversible, and they land on empty tables — the cheapest and safest moment they
-will ever have. Neither changes any existing behaviour on the day it is applied:
+**APPLY BOTH, NOW, AS ONE MIGRATION — and the recommendation is stronger than
+when this packet was written.** It no longer rests on reading the SQL. The
+authority model has been exercised against a real PostgreSQL with RLS on: the
+correct subject is admitted, the unrelated person and the impersonating
+employer are refused, the underlying evidence survives every attempt at it, the
+un-acknowledged clash is still refused, the acknowledged one leaves both
+bookings and the overlap intact, anon is refused throughout, and the rollback
+restores the prior state without destroying a statement anyone had made. They
+are additive, exactly scoped, reversible, and they land on empty tables — the
+cheapest and safest moment they will ever have. Neither changes any existing behaviour on the day it is applied:
 Part A adds a door nobody is standing at yet, and Part B adds a function nothing
 calls yet.
 
@@ -266,12 +306,9 @@ Two things follow the apply and are **not** part of it:
    accept anyway" confirmation, not a silent default) is GREEN once the
    authority exists, and is the only way Part B becomes reachable.
 
-**Either way, one unrelated cleanup is worth doing now.** Delete the preview
-branch for merged PR #99 (`feat/cc/stage2-agency-worker-link`). It frees the
-concurrent-branch slot, which is the only thing standing between this packet
-and real runtime evidence, and it stops a preview database for a long-merged PR
-from sitting in the project. Say the word and I will delete exactly that one;
-#1266's preview stays, because #1266 is still open.
+**Done already:** the stale preview for merged PR #99 was deleted on owner
+authorization 2026-09-15. #1266's preview is untouched. It did not unblock
+anything (see above) but the cleanup stands on its own.
 
 **If the answer is instead DEFER:** nothing is lost. The migration file and its
 rollback stay in the repository, unapplied, and the guard keeps them honest.

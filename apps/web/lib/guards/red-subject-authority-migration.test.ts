@@ -9,12 +9,19 @@ import { join } from "node:path";
  *
  * WHAT THESE TESTS ARE AND ARE NOT.
  *
- * They are a STATIC reading of the prepared SQL. The migration has not been
- * applied to any database, so nothing here is runtime evidence that the
- * policy admits the right caller — only that the text says what the owner
- * approved. Runtime evidence needs a Supabase branch, which costs money and
- * is therefore owner-gated; the packet says so plainly rather than dressing
- * these assertions up as a dry run.
+ * They are a STATIC reading of the prepared SQL — the text says what the owner
+ * approved. They are NOT the runtime evidence, and they never were.
+ *
+ * That evidence now exists separately and is the stronger artefact:
+ * `scripts/db-proof/subject-contest-and-clash-receipt.sh` applies this exact
+ * migration VERBATIM to a throwaway PostgreSQL with RLS genuinely enabled and
+ * measures 43 assertions across BEFORE / SCHEMA / POLICY / RUNTIME / ROLLBACK,
+ * every subject-facing case executed as the non-owner role `authenticated`.
+ * Transcript: `docs/db-proof/RED-4-5-runtime-proof.md`.
+ *
+ * Both are kept. The runtime proof needs a database and does not run in CI;
+ * these assertions run on every push and are what stops the clauses below from
+ * being quietly deleted between proofs.
  *
  * What they DO protect is the boundary. Every clause below is one the owner
  * named as a condition of the approval, and each is the kind of clause a
