@@ -82,21 +82,21 @@ export function HistoricalOverview({
       {calendar.weeks.length > 0 && (
         <section className="flex flex-col gap-1" data-testid="evidence-time-spine" aria-label={labels.rhythm}>
           <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.rhythm}</span>
-          <ol className="flex h-20 items-end gap-1.5">
+          <ol className="flex h-16 items-end gap-1.5">
             {calendar.weeks.map((w) => {
               const byPerson = new Map<string, number>();
               for (const d of w.days) for (const p of d.people) byPerson.set(p.label, (byPerson.get(p.label) ?? 0) + (p.hours ?? 0));
               const stack = [...byPerson.entries()].sort((a, b) => a[0].localeCompare(b[0]));
               return (
-                <li key={w.isoWeek} className="flex flex-1 flex-col items-stretch justify-end gap-0.5" data-testid="evidence-spine-week" data-iso-week={w.isoWeek}>
+                <li key={w.isoWeek} className="flex min-w-0 flex-1 flex-col items-stretch justify-end gap-0.5" data-testid="evidence-spine-week" data-iso-week={w.isoWeek}>
                   <button
                     type="button"
                     onClick={() => onSelectWeek(w.isoWeek)}
                     title={`${labels.weekShort} ${w.isoWeek} · ${fmt.day(w.days[0].date)} – ${fmt.day(w.days[w.days.length - 1].date)} · ${fmt.hours(w.hours)} h · ${w.personDays} ${labels.personDaysShort}`}
                     className="flex min-h-11 w-full flex-col items-stretch justify-end gap-0.5 rounded-sm hover:bg-ink-800/60"
                   >
-                    <span className="text-center font-mono text-meta tabular-nums text-text-secondary">{fmt.hours(w.hours)}</span>
-                    <span className="flex w-full flex-col-reverse gap-px" style={{ height: `${Math.max(4, Math.round((w.hours / maxWeek) * 44))}px` }} aria-hidden>
+                    <span className="hidden text-center font-mono text-meta tabular-nums text-text-secondary sm:block">{fmt.hours(w.hours)}</span>
+                    <span className="flex w-full flex-col-reverse gap-px" style={{ height: `${Math.max(4, Math.round((w.hours / maxWeek) * 32))}px` }} aria-hidden>
                       {stack.map(([label, h]) => (
                         <span
                           key={label}
@@ -198,11 +198,12 @@ function Footprint({
   labels: OverviewLabels;
 }) {
   const places = field.places;
-  const ROW = 24;
+  // Drawn at ~1:1 in a ~960 px column, so the 12 px labels stay 12 px.
+  const ROW = 22;
   const H = Math.max(people.length, places.length) * ROW + 8;
-  const W = 640;
-  const LEFT = 120;
-  const RIGHT = W - 150;
+  const W = 960;
+  const LEFT = 130;
+  const RIGHT = W - 290;
   const py = (i: number) => 4 + ROW / 2 + (people.length === 1 ? (H - 8) / 2 : (i * (H - 8 - ROW)) / Math.max(1, people.length - 1));
   const oy = (i: number) => 4 + ROW / 2 + i * ROW;
   const maxDays = Math.max(1, ...places.flatMap((p) => p.people.map((pp) => pp.days)));
@@ -221,7 +222,7 @@ function Footprint({
     (selectedPerson === null && selectedObject === null) || selectedPerson === person || selectedObject === place;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={labels.footprint} data-testid="historical-footprint-map">
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[60rem]" role="img" aria-label={labels.footprint} data-testid="historical-footprint-map">
       <g aria-hidden>
         {links.map((l) => (
           <path

@@ -257,7 +257,8 @@ describe("objects, attention, the decision bar and the source", () => {
   });
   it("the decision bar is persistent, CONFIRM is withheld while a decision blocks, the commit control is the existing one", () => {
     expect(workspace).toMatch(/data-testid="evidence-decision-bar"/);
-    expect(workspace).toMatch(/sticky bottom-0/);
+    expect(workspace).toMatch(/fixed inset-x-0 bottom-0/);
+    expect(workspace).toMatch(/data-testid="evidence-decision-bar-spacer"/);
     expect(workspace).toMatch(/disabled=\{blocking > 0\}/);
     expect(workspace).toMatch(/\{confirmOpen && blocking === 0 && \(/);
     expect(section).toMatch(/const commitNode = \(/);

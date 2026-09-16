@@ -136,13 +136,20 @@ export function WorkHistoryTimeline({
         </div>
       </div>
 
-      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta leading-relaxed text-text-secondary">
-        <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden className="h-1.5 w-4 rounded-full bg-brand-cyan/60" />
-          {labels.current}
-        </span>
-        {labels.undated ? <span>{labels.undated}</span> : null}
-      </p>
+      {/* The "current" key only when a lane IS current — a historical band
+          (an import's places) has none, and a key for an absent state reads
+          as a claim. */}
+      {(timeline.lanes.some((l) => l.current) || labels.undated) && (
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta leading-relaxed text-text-secondary">
+          {timeline.lanes.some((l) => l.current) && (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden className="h-1.5 w-4 rounded-full bg-brand-cyan/60" />
+              {labels.current}
+            </span>
+          )}
+          {labels.undated ? <span>{labels.undated}</span> : null}
+        </p>
+      )}
     </section>
   );
 }

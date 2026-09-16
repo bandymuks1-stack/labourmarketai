@@ -116,7 +116,7 @@ export function HistoricalObjects({
                 {(at?.people ?? []).slice(0, 4).map((p) => (
                   <span key={p.label} aria-hidden className={cn(TILE, "h-6 w-6 text-meta", personFilter === p.label ? "ring-1 ring-brand-blue" : "")} title={p.label}>{playerInitials(p.label)}</span>
                 ))}
-                {(at?.people.length ?? 0) > 4 && <span className="font-mono text-meta text-text-muted">+{(at?.people.length ?? 0) - 4}</span>}
+                {(at?.people.length ?? 0) > 4 && <span className="ml-2.5 self-center font-mono text-meta text-text-muted">+{(at?.people.length ?? 0) - 4}</span>}
               </span>
             </button>
           </li>

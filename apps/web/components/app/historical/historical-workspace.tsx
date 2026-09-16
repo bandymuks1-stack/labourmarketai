@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 
 import { HistoricalAttention } from "@/components/app/historical/historical-attention";
@@ -69,6 +69,23 @@ function useNarrowViewport(): boolean {
   return narrow;
 }
 
+/** Whether the workspace's section is on screen. The decision bar is FIXED
+ *  to the viewport bottom (the shell's `overflow-x: hidden` on html/body
+ *  defeats `position: sticky`, as the compare bar found before it) and it
+ *  must not follow the reader onto unrelated pages of the same scroll — so it
+ *  shows only while the import section intersects the viewport. */
+function useInView(ref: React.RefObject<HTMLElement | null>): boolean {
+  const [inView, setInView] = useState(true);
+  useEffect(() => {
+    const el = ref.current?.closest("#evidence-import") ?? ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "0px 0px -80px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref]);
+  return inView;
+}
+
 export function HistoricalWorkspace({
   locale,
   sessionId,
@@ -106,6 +123,8 @@ export function HistoricalWorkspace({
   const [calendarView, setCalendarView] = useState<"calendar" | "table">("calendar");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const narrow = useNarrowViewport();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(rootRef);
 
   const state = useMemo(() => topState(projection), [projection]);
   const fmt = useMemo(() => {
@@ -150,7 +169,7 @@ export function HistoricalWorkspace({
     timeline: { title: t("card.timelineTitle"), current: t("card.timelineCurrent"), empty: t("card.timelineEmpty"), ariaLabel: t("card.timelineTitle") },
     activities: t("card.activities"), evidence: t("card.evidence"), interpretations: t("card.interpretations"), interpretationNames,
     unknowns: t("card.unknowns"), unknownAllocation: t("card.unknownAllocation"), unknownPlace: t("card.unknownPlace"), noActivities: t("card.noActivities"),
-    unknown: t("unknown"), person: t("icon.person"), time: t("icon.time"), evidenceIcon: t("icon.evidence"), warning: t("icon.warning"), moreLanes: t("card.moreLanes"),
+    unknown: t("card.unknowns"), person: t("icon.person"), time: t("icon.time"), evidenceIcon: t("icon.evidence"), warning: t("icon.warning"), moreLanes: t("card.moreLanes"),
   };
   const fieldLabels = {
     title: t("field.title"), allWeeks: t("field.allWeeks"), week: t("weekShort"), noWork: t("field.noWork"), hoursUnknown: t("field.hoursUnknown"),
@@ -167,13 +186,13 @@ export function HistoricalWorkspace({
     title: t("placesTitle", { count: state.objects }), days: t("field.days"), hours: t("card.hours"), people: t("figures.people"), hoursUnknown: t("field.hoursUnknown"),
     shared: t("placeShared"), spellings: t("placeSpellings"), fromText: t("placeFromText"), source: t("source"),
     state: { new: t("placeState.new"), existing: t("placeState.existing"), ambiguous: t("placeState.ambiguous") },
-    weeks: t("card.weeks"), weekShort: t("weekShort"), object: t("icon.object"), time: t("icon.time"), clear: t("field.clear"), unknown: t("unknown"),
+    weeks: t("card.weeks"), weekShort: t("weekShort"), object: t("icon.object"), time: t("icon.time"), clear: t("field.clear"), unknown: t("card.unknowns"),
   };
   const attentionLabels = {
     decisions: t("attention.decisions"), observations: t("attention.observations"), none: t("noIssues"),
     issue: (kind: string, v: { count: number; label: string }) => tx(`issue.${kind}`, v), why: (kind: string) => tx(`issueWhy.${kind}`),
     detected: t("attention.detected"), machineReading: { period_aggregate: t("attention.periodTotal"), unknown: t("machineReading.unknown") },
-    remote: t("timeRemote"), period: t("timePeriod"), unknown: t("unknown"), source: t("source"), whyLabel: t("attention.why"), person: t("icon.person"), sum: t("calendar.sum"),
+    remote: t("timeRemote"), period: t("timePeriod"), unknown: t("card.unknowns"), source: t("source"), whyLabel: t("attention.why"), person: t("icon.person"), sum: t("calendar.sum"),
     time: {
       question: t("timeQuestion"), kindLabel: t("timeKind"),
       kinds: { period_aggregate: t("timeKinds.period_aggregate"), daily: t("timeKinds.daily"), unknown: t("timeKinds.unknown") },
@@ -183,7 +202,7 @@ export function HistoricalWorkspace({
     label: { question: t("whichPlace"), useExisting: t("useExisting"), sameAs: t("sameAs"), createNew: t("createNew"), notAPlace: t("notAPlace"), save: t("save"), errors },
   };
   const overviewLabels = {
-    rhythm: t("spineTitle"), people: t("figures.people"), objects: t("figures.places"), footprint: t("overview.footprint"), unknownTitle: t("unknown"),
+    rhythm: t("spineTitle"), people: t("figures.people"), objects: t("figures.places"), footprint: t("overview.footprint"), unknownTitle: t("card.unknowns"),
     unknownItem: (k: string) => tx(`unknownItem.${k}`), weekShort: t("weekShort"), personDaysShort: t("personDaysShort"), days: t("field.days"), activities: t("activities"),
     card: cardLabels,
   };
@@ -202,22 +221,19 @@ export function HistoricalWorkspace({
   const modeLabel = (m: Mode) => t(`mode.${m}`);
 
   return (
-    <div className="flex flex-col gap-4" data-testid="evidence-reconstruction" data-mode={mode} data-decisions={blocking}>
+    <div ref={rootRef} className="flex flex-col gap-4" data-testid="evidence-reconstruction" data-mode={mode} data-decisions={blocking}>
       {/* ── TOP STATE ──────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-end gap-x-6 gap-y-2" data-testid="evidence-understood">
-        <Stat icon="time" value={period} label={t("state.period")} />
-        <Stat icon="person" value={String(state.people)} label={t("state.people")} onClick={() => setMode("people")} />
-        <Stat icon="object" value={String(state.objects)} label={t("state.objects")} onClick={() => setMode("objects")} />
-        <Stat icon="calendar" value={String(state.personDays)} label={t("state.personDays")} onClick={() => setMode("calendar")} />
-        <Stat icon="work" value={`${fmt.hours(state.dailyHours)} h`} label={t("state.dailyHours")} />
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2" data-testid="evidence-understood">
+        <Stat icon="time" value={period} label={t("state.period")} compact />
+        <span aria-hidden className="hidden h-6 w-px bg-ink-600 sm:block" />
+        <Stat icon="person" value={String(state.people)} label={t("state.people")} compact onClick={() => setMode("people")} />
+        <Stat icon="object" value={String(state.objects)} label={t("state.objects")} compact onClick={() => setMode("objects")} />
+        <Stat icon="calendar" value={String(state.personDays)} label={t("state.personDays")} compact onClick={() => setMode("calendar")} />
+        <Stat icon="work" value={`${fmt.hours(state.dailyHours)} h`} label={t("state.dailyHours")} compact />
         {state.aggregateRows > 0 && (
-          <Stat icon="time" value={`Σ ${fmt.hours(state.aggregateHours)} h`} label={t("state.aggregate")} tone="amber" title={t("aggregateLine", { hours: fmt.hours(state.aggregateHours), rows: state.aggregateRows })} onClick={() => setMode("attention")} testid="evidence-aggregate-hours" />
+          <Stat icon="time" value={`Σ ${fmt.hours(state.aggregateHours)} h`} label={t("state.aggregate")} tone="amber" compact title={t("aggregateLine", { hours: fmt.hours(state.aggregateHours), rows: state.aggregateRows })} onClick={() => setMode("attention")} testid="evidence-aggregate-hours" />
         )}
-        <Stat icon="warning" value={String(blocking)} label={blocking === 1 ? t("state.decision") : t("state.decisions")} tone={blocking > 0 ? "orange" : "muted"} onClick={() => setMode("attention")} testid="evidence-decisions" />
-        <button type="button" onClick={openSource} className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink-500 px-3 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue" data-testid="evidence-source-link">
-          <SemanticIcon concept="source" label={t("source")} className="h-3.5 w-3.5" />
-          {t("source")} · {projection.company.rows}
-        </button>
+        <Stat icon="warning" value={String(blocking)} label={blocking === 1 ? t("state.decision") : t("state.decisions")} tone={blocking > 0 ? "orange" : "muted"} compact onClick={() => setMode("attention")} testid="evidence-decisions" />
       </div>
 
       {/* ── MODES ──────────────────────────────────────────────────────── */}
@@ -254,7 +270,39 @@ export function HistoricalWorkspace({
             </button>
           );
         })}
+        {/* SOURCE — not a mode: it opens the raw rows the section keeps below. */}
+        <button type="button" onClick={openSource} className="ml-auto inline-flex min-h-11 shrink-0 items-center gap-1.5 px-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary" data-testid="evidence-source-link">
+          <SemanticIcon concept="source" label={t("source")} className="h-3.5 w-3.5" />
+          {t("source")} · {projection.company.rows}
+        </button>
       </div>
+
+      {/* ── THE SELECTION — one state, visible in every mode ──────────── */}
+      {(person || object || week !== "all") && (
+        <div className="flex flex-wrap items-center gap-1.5" data-testid="historical-selection">
+          {week !== "all" && (
+            <button type="button" onClick={() => setWeek("all")} className="inline-flex min-h-8 items-center gap-1 rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 font-mono text-meta uppercase tracking-label text-text-primary" data-testid="historical-selection-week">
+              <SemanticIcon concept="time" label={t("weekShort")} className="h-3 w-3" />
+              {t("weekShort")} {week}
+              <span aria-hidden>×</span>
+            </button>
+          )}
+          {person && (
+            <button type="button" onClick={() => focusPerson(null)} className="inline-flex min-h-8 items-center gap-1 rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 font-mono text-meta text-text-primary" data-testid="historical-selection-person">
+              <SemanticIcon concept="person" label={t("icon.person")} className="h-3 w-3" />
+              {person}
+              <span aria-hidden>×</span>
+            </button>
+          )}
+          {object && (
+            <button type="button" onClick={() => focusObject(null)} className="inline-flex min-h-8 items-center gap-1 rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 font-mono text-meta text-text-primary" data-testid="historical-selection-object">
+              <SemanticIcon concept="object" label={t("icon.object")} className="h-3 w-3" />
+              {object}
+              <span aria-hidden>×</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ── THE WORKSPACE ──────────────────────────────────────────────── */}
       <div className={cn("grid gap-4", detail ? "md:grid-cols-[minmax(0,1fr)_20rem]" : "")} data-testid="historical-workspace">
@@ -311,9 +359,20 @@ export function HistoricalWorkspace({
         )}
       </div>
 
-      {/* ── DECISION BAR ───────────────────────────────────────────────── */}
-      <div className="sticky bottom-0 z-10 -mx-1 flex flex-col gap-2 rounded-t-card border border-ink-600 bg-ink-900/95 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur" data-testid="evidence-decision-bar" data-blocking={blocking} data-ready={readyCount}>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      {/* ── DECISION BAR — fixed to the viewport while the section is on
+             screen; an in-flow spacer keeps it off the last content. ──── */}
+      <div aria-hidden className="h-16" data-testid="evidence-decision-bar-spacer" />
+      <div
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-40 flex flex-col gap-2 border-t border-ink-600 bg-ink-900/95 px-4 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform",
+          inView ? "translate-y-0" : "translate-y-full",
+        )}
+        data-testid="evidence-decision-bar"
+        data-blocking={blocking}
+        data-ready={readyCount}
+        data-in-view={inView ? "true" : "false"}
+      >
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-4 gap-y-2">
           <Stat icon="confirmed" value={String(readyCount)} label={t("bar.ready")} tone={readyCount > 0 ? "success" : "muted"} compact />
           <Stat icon="warning" value={String(blocking)} label={blocking === 1 ? t("state.decision") : t("state.decisions")} tone={blocking > 0 ? "orange" : "muted"} compact onClick={() => setMode("attention")} />
           <Stat icon="person" value={`+${projection.commit.createPeople}`} label={t("bar.people")} compact title={t("impact.people", { count: projection.commit.createPeople, total: state.people })} />
@@ -337,9 +396,9 @@ export function HistoricalWorkspace({
             </button>
           </div>
         </div>
-        {blocking > 0 && <p className="font-mono text-meta text-brand-orange" data-testid="evidence-confirm-blocked">{t("bar.blocked", { count: blocking })}</p>}
+        {blocking > 0 && <p className="mx-auto w-full max-w-7xl font-mono text-meta text-brand-orange" data-testid="evidence-confirm-blocked">{t("bar.blocked", { count: blocking })}</p>}
         {confirmOpen && blocking === 0 && (
-          <div className="flex flex-col gap-3 border-t border-ink-600 pt-3" data-testid="evidence-confirm-panel">
+          <div className="mx-auto flex max-h-[60vh] w-full max-w-7xl flex-col gap-3 overflow-y-auto border-t border-ink-600 pt-3" data-testid="evidence-confirm-panel">
             {commit}
           </div>
         )}
