@@ -15848,7 +15848,8 @@
       "derived": "Door ons afgeleid",
       "derivedMethod": "Methode",
       "confidence": "Zekerheid",
-      "source": "Bron"
+      "source": "Bron",
+      "showRows": "Alle {count} bronregels tonen"
     },
     "personState": {
       "unmatched": "Niet in het bestand",
@@ -15863,7 +15864,9 @@
       "matched": "Gekoppeld",
       "ambiguous": "Meer dan één overeenkomst",
       "created": "Aangemaakt",
-      "will_create": "wordt aangemaakt"
+      "will_create": "wordt aangemaakt",
+      "from_text": "plaats gelezen uit de werktekst",
+      "unknown_split": "uren niet verdeeld over plaatsen"
     },
     "duplicateState": {
       "new": "Nieuw",
@@ -15875,7 +15878,8 @@
       "person_not_on_roster": "Deze naam staat niet in uw bestand. Kies de persoon of voeg hem toe.",
       "person_ambiguous": "Meer dan één persoon in uw bestand heeft deze naam. Kies welke.",
       "context_ambiguous": "Meer dan één plaats past bij dit label. Kies welke.",
-      "already_imported": "Er bestaat al een identieke registratie, dus deze regel wordt overgeslagen."
+      "already_imported": "Er bestaat al een identieke registratie, dus deze regel wordt overgeslagen.",
+      "hours_exceed_day": "Meer uren op één dag dan een dag heeft. Controleer en laat staan zoals opgegeven, of sla over."
     },
     "resolve": {
       "title": "Oplossen",
@@ -16030,12 +16034,115 @@
       "createPeople": "Ontbrekende mensen aanmaken bij bevestigen",
       "createObjects": "Ontbrekende locaties aanmaken bij bevestigen",
       "relationship": "Relatie van de nieuwe mensen tot de organisatie",
-      "nothingBeforeCommit": "Er wordt niets aangemaakt of weggeschreven tot u bevestigt."
+      "nothingBeforeCommit": "Er wordt niets aangemaakt of weggeschreven tot u bevestigt.",
+      "spellings": "{count} spellingen"
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "kalenderweek uit de datum",
       "iso_week_conflicts_with_source_week": "week in bestand klopt niet met datum — week uit datum voorgesteld",
       "hours_exceed_day": "meer uren dan één dag bevat — controleer of dit een periodetotaal is"
+    },
+    "segmentKind": {
+      "activity": "activiteit",
+      "note": "notitie"
+    },
+    "segmentState": {
+      "matched": "bestaat",
+      "proposed": "voorgesteld",
+      "ambiguous": "keuze nodig",
+      "new": "wordt aangemaakt",
+      "human": "uw keuze",
+      "created": "aangemaakt",
+      "ignored": "overgeslagen",
+      "none": "geen plaats"
+    },
+    "reconstruction": {
+      "understoodEyebrow": "Historie gereconstrueerd",
+      "understoodTitle": "Wat het systeem uit uw bestand heeft begrepen",
+      "periodUnknown": "Periode niet vastgesteld",
+      "figures": {
+        "rows": "werkregels",
+        "people": "mensen",
+        "places": "plaatsen",
+        "hours": "opgegeven uren"
+      },
+      "flaggedHours": "Nog {hours} u staan op regels met meer dan een dag heeft — apart getoond, nooit opgeteld.",
+      "nothingWritten": "Dit is een voorbeeld. Vóór uw bevestiging wordt niets aangemaakt of geschreven.",
+      "issuesTitleBlocking": "Te controleren: {count}",
+      "issuesTitleClear": "Te controleren: niets dat blokkeert",
+      "noIssues": "Geen tegenstrijdigheden of onduidelijkheden gevonden.",
+      "informational": "{count} extra opmerkingen die niet blokkeren",
+      "issue": {
+        "impossible_hours": "{count} regels — meer uren dan een dag heeft",
+        "week_conflicts": "{count} regels — week in het bestand klopt niet met de datum",
+        "ambiguous_place": "{count} regels — welke plaats is dit?",
+        "ambiguous_person": "{count} regels — welke persoon is dit?",
+        "site_unknown": "{count} regels — plaats niet vastgesteld",
+        "duplicates": "{count} regels — waarschijnlijk al vastgelegd",
+        "conflicts": "{count} regels — spreken al vastgelegde gegevens tegen",
+        "allocation_unknown": "{count} regels — meerdere plaatsen op een dag, verdeling niet opgegeven",
+        "allocation_inconsistent": "{count} regels — uren in de tekst tellen niet op tot de dag",
+        "place_from_text": "{count} regels — plaats gelezen uit de tekst: „{label}”"
+      },
+      "issueWhy": {
+        "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan“ wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
+        "week_conflicts": "De datum geldt als feit, het weeknummer als groepering van de auteur. Beide worden getoond; niets wordt herschreven.",
+        "ambiguous_place": "Meer dan één plaats past bij deze spelling. Uw antwoord geldt voor elke regel ermee.",
+        "ambiguous_person": "Meer dan één persoon op de lijst draagt deze naam. Kies in de regel hieronder.",
+        "site_unknown": "Noch de plaatscel noch de tekst noemt een locatie. De regel blijft zonder — onbekend, niet „geen“.",
+        "duplicates": "Een vergelijkbare regel voor dezelfde persoon en dag bestaat al. Controleer in de regels.",
+        "conflicts": "Zelfde persoon, dag en plaats — andere uren. Beide regels blijven zichtbaar.",
+        "allocation_unknown": "Het dagtotaal blijft exact; uren worden niet op gok over plaatsen verdeeld.",
+        "allocation_inconsistent": "De delen in de tekst vormen niet het dagtotaal. Beide getallen blijven bewaard.",
+        "place_from_text": "De plaatscel is leeg; de locatie komt uit de eerste woorden van de tekst. Is het een spelfout van een andere plaats, kies dan „dezelfde plaats als” — er ontstaat één object, niet twee."
+      },
+      "keepAsStated": "Laten staan zoals in de bron",
+      "keepAsStatedHint": "Het brongetal blijft ongewijzigd en wordt vastgelegd als bronfeit. Het wordt NIET de werkduur van die dag — de dagduur blijft onbekend, dus kalender, werk in cijfers, tempo en capaciteit tellen het nooit op.",
+      "whichPlace": "Welke plaats is",
+      "useExisting": "Bestaande plaats",
+      "createNew": "Nieuw aanmaken onder deze naam",
+      "notAPlace": "Dit is geen plaats",
+      "save": "Toepassen op alle regels",
+      "peopleTitle": "Mensen ({count})",
+      "personState": {
+        "new": "nieuw",
+        "existing": "op de lijst",
+        "ambiguous": "keuze nodig",
+        "unresolved": "onduidelijk"
+      },
+      "personLine": "{rows} regels · {days} dagen · {hours} u",
+      "personFlagged": "+ {hours} u op te controleren regels",
+      "personUnlinked": "Zonder platformaccount — de persoon kan het later koppelen.",
+      "placesTitle": "Plaatsen ({count})",
+      "placeState": {
+        "new": "wordt aangemaakt",
+        "existing": "bestaat",
+        "ambiguous": "keuze nodig"
+      },
+      "placeLine": "{rows} regels · {people} pers. · {hours} u opgegeven",
+      "placeShared": "{count} dagen gedeeld met andere plaatsen",
+      "placeFromText": "uit de werktekst",
+      "placeSpellings": "in het bestand geschreven als",
+      "calendarTitle": "Kalender: werkelijk werk",
+      "calendarLine": "{weeks} weken · {personDays} persoonsdagen",
+      "week": "Wk",
+      "weekN": "wk {n}",
+      "calendarNote": "Dit is verricht werk, geen plan en geen toezegging. ⚠ markeert een dag met een te controleren getal; die uren zitten in geen totaal.",
+      "companyTitle": "Het bedrijf, zoals deze gegevens het tonen",
+      "known": "Wat de gegevens laten zeggen",
+      "knownLine": "{people} mensen werkten op {places} plaatsen: {personDays} persoonsdagen, {hours} u opgegeven.",
+      "activities": "Activiteiten zonder plaats",
+      "unknown": "Wat de bron niet zegt",
+      "unknownItem": {
+        "client": "opdrachtgever",
+        "project": "project boven de locatie",
+        "work_package": "werkpakket / fase",
+        "wage": "loon / prijs",
+        "output": "resultaat",
+        "team": "ploeg (samen aanwezig is geen team)"
+      },
+      "commitEffect": "Bevestigen zou aanmaken: {records} regels ({held} vastgehouden tot uw besluit), {people} personen, {objects} plaatsen. Eén keer schrijven — de bestaande schermen lezen het daarna.",
+      "sameAs": "Dezelfde plaats als"
     }
   },
   "organizationRoster": {

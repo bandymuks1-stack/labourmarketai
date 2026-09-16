@@ -16,6 +16,8 @@ import {
   commitImport,
   createImportSession,
   createRosterPerson,
+  acknowledgeRows,
+  resolveContextLabel,
   resolveRow,
   submitRows,
   withdrawImport,
@@ -303,6 +305,68 @@ export async function resolveEvidenceRowAction(
   if (res.kind !== "ok") return refuse(res);
   revalidatePath(PATH);
   return { kind: "ok", sessionId: text(form, "session_id") || undefined };
+}
+
+/**
+ * Step 2a' — settle one PLACE LABEL for every row that names it (owner
+ * command §7: one question per genuine ambiguity, asked once). The choice
+ * is an existing object, "create it under this name", or "not a place".
+ * Staging only; the next preview carries the choice.
+ */
+export async function resolveEvidenceLabelAction(
+  _previous: EvidenceImportActionState,
+  form: FormData,
+): Promise<EvidenceImportActionState> {
+  const c = await caller();
+  if (!c) return { kind: "refused", reason: "unauthenticated" };
+  const sessionId = text(form, "session_id");
+  const key = text(form, "label_key");
+  if (sessionId === "" || key === "")
+    return { kind: "refused", reason: "invalid", detail: "label" };
+  const choice = text(form, "choice");
+  const decision =
+    choice === "ignore"
+      ? ({ kind: "ignore" } as const)
+      : choice === "create"
+        ? ({ kind: "create", name: text(form, "name") || null } as const)
+        : choice.startsWith("alias:")
+          ? ({ kind: "alias", name: choice.slice("alias:".length) } as const)
+          : choice !== ""
+            ? ({ kind: "object", workObjectId: choice } as const)
+            : null;
+  if (!decision) return { kind: "refused", reason: "invalid", detail: "choice" };
+  const res = await resolveContextLabel(c, { sessionId, key, decision });
+  if (res.kind !== "ok") return refuse(res);
+  revalidatePath(PATH);
+  return { kind: "ok", sessionId, note: `updated:${res.updated}` };
+}
+
+/**
+ * Step 2a'' — a human keeps a flagged figure AS STATED (owner command §11).
+ * The 800 h day stays 800 h; what changes is that a named person accepted
+ * it, and the row may now commit. Staging only.
+ */
+export async function acknowledgeEvidenceRowsAction(
+  _previous: EvidenceImportActionState,
+  form: FormData,
+): Promise<EvidenceImportActionState> {
+  const c = await caller();
+  if (!c) return { kind: "refused", reason: "unauthenticated" };
+  const sessionId = text(form, "session_id");
+  if (sessionId === "") return { kind: "refused", reason: "invalid", detail: "session" };
+  const rowIds = form
+    .getAll("row_id")
+    .map((v) => (typeof v === "string" ? v.trim() : ""))
+    .filter((v) => v !== "");
+  const problem = text(form, "problem");
+  const res = await acknowledgeRows(c, {
+    sessionId,
+    rowIds: rowIds.length > 0 ? rowIds : undefined,
+    problem: problem === "hours_exceed_day" ? "hours_exceed_day" : undefined,
+  });
+  if (res.kind !== "ok") return refuse(res);
+  revalidatePath(PATH);
+  return { kind: "ok", sessionId, note: `updated:${res.updated}` };
 }
 
 /**

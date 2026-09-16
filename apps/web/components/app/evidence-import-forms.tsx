@@ -726,3 +726,134 @@ export function EvidenceAttestForm({
     </form>
   );
 }
+
+// ── label-level place decision ─────────────────────────────────────────────
+
+export interface LabelResolveLabels {
+  readonly question: string;
+  readonly useExisting: string;
+  /** "Same place as" another one this file names. */
+  readonly sameAs: string;
+  readonly createNew: string;
+  readonly notAPlace: string;
+  readonly save: string;
+  readonly errors: Record<string, string>;
+}
+
+/**
+ * ONE question for ONE source spelling, applied to every row that names it
+ * (owner command §7). The choices are exactly the real candidates, "create
+ * it under this name", or "this is not a place". Nothing is written until
+ * saved, and saving writes staging only.
+ */
+export function EvidenceLabelResolveForm({
+  action,
+  labels,
+  sessionId,
+  labelKey,
+  sourceLabel,
+  candidates,
+  defaultChoice,
+}: {
+  action: (
+    prev: EvidenceImportActionState,
+    form: FormData,
+  ) => Promise<EvidenceImportActionState>;
+  labels: LabelResolveLabels;
+  sessionId: string;
+  labelKey: string;
+  sourceLabel: string;
+  /** Existing objects (an id) and other places this file names (`alias:<name>`). */
+  candidates: readonly Option[];
+  defaultChoice?: string;
+}) {
+  const [state, submit, pending] = useActionState<
+    EvidenceImportActionState,
+    FormData
+  >(action, { kind: "idle" });
+  return (
+    <form
+      action={submit}
+      className="flex flex-col gap-2"
+      data-testid="evidence-label-resolve"
+      data-label-key={labelKey}
+    >
+      <input type="hidden" name="session_id" value={sessionId} />
+      <input type="hidden" name="label_key" value={labelKey} />
+      <p className="text-sm text-text-primary">
+        {labels.question}: <span className="font-semibold">“{sourceLabel}”</span>
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <select name="choice" className={field} defaultValue={defaultChoice ?? candidates[0]?.value ?? "create"} data-testid="evidence-label-choice">
+          {candidates.map((c) => (
+            <option key={c.value} value={c.value}>
+              {c.value.startsWith("alias:") ? labels.sameAs : labels.useExisting}: {c.label}
+            </option>
+          ))}
+          <option value="create">{labels.createNew}</option>
+          <option value="ignore">{labels.notAPlace}</option>
+        </select>
+        <button type="submit" className={quietButton} disabled={pending}>
+          {labels.save}
+        </button>
+      </div>
+      <Refusal state={state} errors={labels.errors} />
+    </form>
+  );
+}
+
+// ── keep a flagged figure as stated ────────────────────────────────────────
+
+export interface AcknowledgeLabels {
+  readonly keepAsStated: string;
+  readonly hint: string;
+  readonly errors: Record<string, string>;
+}
+
+/**
+ * A human accepts a figure the system flagged (800 h on one day) AS STATED.
+ * The figure is not edited — what is recorded is that a named person looked
+ * and kept it (owner command §11). Staging only.
+ */
+export function EvidenceAcknowledgeForm({
+  action,
+  labels,
+  sessionId,
+  rowIds,
+  problem,
+}: {
+  action: (
+    prev: EvidenceImportActionState,
+    form: FormData,
+  ) => Promise<EvidenceImportActionState>;
+  labels: AcknowledgeLabels;
+  sessionId: string;
+  rowIds: readonly string[];
+  problem: "hours_exceed_day";
+}) {
+  const [state, submit, pending] = useActionState<
+    EvidenceImportActionState,
+    FormData
+  >(action, { kind: "idle" });
+  return (
+    <form
+      action={submit}
+      className="flex flex-col gap-2"
+      data-testid="evidence-acknowledge-form"
+      data-problem={problem}
+    >
+      <input type="hidden" name="session_id" value={sessionId} />
+      <input type="hidden" name="problem" value={problem} />
+      {rowIds.map((id) => (
+        <input key={id} type="hidden" name="row_id" value={id} />
+      ))}
+      <p className="text-xs leading-relaxed text-text-muted">{labels.hint}</p>
+      <Refusal state={state} errors={labels.errors} />
+      <div>
+        <button type="submit" className={quietButton} disabled={pending}>
+          {labels.keepAsStated}
+        </button>
+      </div>
+    </form>
+  );
+}

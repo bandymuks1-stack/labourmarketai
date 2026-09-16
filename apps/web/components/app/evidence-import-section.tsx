@@ -33,10 +33,14 @@ import {
   EvidenceWithdrawForm,
   type Option,
 } from "@/components/app/evidence-import-forms";
+import { projectImport } from "@/lib/organization-evidence/import-projections";
+import { EvidenceImportReconstruction } from "@/components/app/evidence-import-reconstruction";
 import {
+  acknowledgeEvidenceRowsAction,
   attestEvidenceRecordAction,
   commitEvidenceImportAction,
   createEvidencePersonAction,
+  resolveEvidenceLabelAction,
   resolveEvidenceRowAction,
   startEvidenceImportAction,
   withdrawEvidenceImportAction,
@@ -387,13 +391,30 @@ export async function EvidenceImportSection({
       : p.displayName,
   }));
 
+  // THE RECONSTRUCTION — computed from the preview alone (no write). What
+  // the human sees FIRST: what was understood, what genuinely needs them,
+  // the people, the places, the calendar, the company view. The row table
+  // is behind progressive disclosure; nobody reads 158 rows to decide
+  // whether an import is safe (owner command §39, §57).
+  const projection = projectImport(preview);
+  const objectOptions: Option[] = Array.from(
+    new Map(
+      preview.rows
+        .flatMap((r) => r.contexts?.segments ?? [])
+        .filter((sg) => sg.workObjectId && sg.name)
+        .map((sg) => [sg.workObjectId as string, { value: sg.workObjectId as string, label: sg.name as string }]),
+    ).values(),
+  );
+
   // THE PLAN, IN WORDS (owner acceptance 2026-09-16: "Radau 7 objektus. 5 jau
   // yra sistemoje. 2 naujus paruošiau sukurti."). Found = distinct labels the
   // source names; existing = those matched to something already here.
   const distinct = (pick: (r: PreviewRow) => string | null) =>
     new Set(preview.rows.map(pick).filter((v): v is string => !!v && v.trim() !== "")).size;
   const peopleFound = distinct((r) => r.personLabel?.toLowerCase() ?? null);
-  const objectsFound = distinct((r) => r.contextLabel?.toLowerCase() ?? null);
+  // Real places, not cells: `Hoofdgracht 3; Kantoor` is two of them, and a
+  // typo of an existing one is not a new one.
+  const objectsFound = projection.places.filter((pl) => pl.state !== "ambiguous").length;
   const peopleNew = preview.plan.people.length;
   const objectsNew = preview.plan.objects.length;
   const peopleAmbiguous = preview.rows.filter((r) => r.personState === "ambiguous").length;
@@ -469,8 +490,11 @@ export async function EvidenceImportSection({
                 key={o.label}
                 className="rounded-full border border-ink-500 bg-ink-900 px-2 py-0.5 text-text-primary"
                 data-testid="evidence-plan-object"
+                data-origin={o.origin}
+                title={o.spellings.length > 0 ? o.spellings.join(", ") : undefined}
               >
                 {o.label} · {t("plan.rows", { count: o.rows })}
+                {o.spellings.length > 0 ? ` · ${t("plan.spellings", { count: o.spellings.length })}` : ""}
               </li>
             ))}
           </ul>
@@ -480,57 +504,87 @@ export async function EvidenceImportSection({
     </section>
   );
 
-  const counts = (
-    <dl
-      className="grid grid-cols-2 gap-2 sm:grid-cols-4"
-      data-testid="evidence-preview-counts"
-    >
-      {(
-        [
-          ["total", preview.counts.total],
-          ["ready", ready.length],
-          ["willCreatePeople", preview.counts.willCreatePeople],
-          ["willCreateObjects", preview.counts.willCreateObjects],
-          ["needsPerson", preview.counts.needsPerson - preview.counts.willCreatePeople],
-          ["needsContext", preview.counts.needsContext],
-          ["duplicates", preview.counts.duplicates],
-          ["conflicts", preview.counts.conflicts],
-        ] as const
-      ).map(([key, value]) => (
-        <div
-          key={key}
-          className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2"
-        >
-          <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t(`preview.counts.${key}` as never)}
-          </dt>
-          <dd className="text-lg font-semibold text-text-primary">{value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-
   return shell(
     <>
       {actingFor}
-      {sourceForm}
+      {/* THE SOURCE, AS IT IS (P0-C): the file's own name and its real
+          kind — a spreadsheet is a spreadsheet, whatever the engine reads
+          underneath. */}
+      <p className="text-xs text-text-secondary" data-testid="evidence-preview-source" data-kind={shownSourceKind}>
+        {t("preview.source")}: {preview.source.filename ?? "—"} · {t(`sourceKind.${shownSourceKind}` as never)}
+        {" · "}
+        {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
+      </p>
+
+      <EvidenceImportReconstruction
+        locale={locale}
+        sessionId={sessionId}
+        projection={projection}
+        workObjects={objectOptions}
+        actions={{ resolveLabel: resolveEvidenceLabelAction, acknowledge: acknowledgeEvidenceRowsAction }}
+        errors={errors}
+      />
 
       <Card compact>
-        <section className={SECTION} data-testid="evidence-preview">
-          <h2 className={HEADING}>{t("preview.title")}</h2>
+        <section className={SECTION}>
+          <h2 className={HEADING}>{t("commit.title")}</h2>
+          {planBlock}
+          {commitToken === null && (
+            <p
+              className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-text-secondary"
+              data-testid="evidence-commit-unavailable"
+            >
+              {t("error.confirmation_unavailable")}
+            </p>
+          )}
+          <EvidenceCommitForm
+            action={commitEvidenceImportAction}
+            sessionId={sessionId}
+            confirmationToken={commitToken}
+            readyCount={ready.length}
+            evidenceStates={options(REPORTED_EVIDENCE_STATES, "evidenceState")}
+            plan={{
+              people: preview.plan.people.length,
+              objects: preview.plan.objects.length,
+              relationships: options(RELATIONSHIP_KINDS, "relationship"),
+              // The relationship that LEADS follows the session's supplier
+              // role: a school imports learners, an agency its workers, an
+              // employer its employees. The person can still pick any other.
+              suggestedRelationship: "employee",
+            }}
+            labels={{
+              evidenceState: t("commit.evidenceState"),
+              evidenceStateHint: t("commit.evidenceStateHint"),
+              confirm: t("commit.confirm", { count: "{count}" }),
+              confirmNone: t("commit.confirmNone"),
+              confirming: t("commit.confirming"),
+              readOnce: t("commit.readOnce"),
+              written: t("result.written"),
+              skipped: t("result.skipped"),
+              notReady: t("result.notReady"),
+              createdPeople: t("result.createdPeople"),
+              createdObjects: t("result.createdObjects"),
+              createPeople: t("plan.createPeople"),
+              createObjects: t("plan.createObjects"),
+              relationship: t("plan.relationship"),
+              errors,
+            }}
+          />
+        </section>
+      </Card>
+
+      {/* THE SOURCE ROWS — every one, fact and derived per field, behind
+          progressive disclosure. The reconstruction above is the default
+          experience; this is the evidence behind it, one click away. */}
+      <Card compact>
+        <details data-testid="evidence-preview-rows-disclosure">
+          <summary className="cursor-pointer text-sm font-semibold text-text-primary">
+            {t("preview.showRows", { count: preview.rows.length })}
+          </summary>
+        <section className={`${SECTION} mt-3`} data-testid="evidence-preview">
           <p className="text-xs leading-relaxed text-state-amber">
             {t("preview.notPersisted")}
           </p>
-          {/* THE SOURCE, AS IT IS (P0-C): the file's own name and its real
-              kind — a spreadsheet is a spreadsheet, whatever the engine reads
-              underneath. */}
-          <p className="text-xs text-text-secondary" data-testid="evidence-preview-source" data-kind={shownSourceKind}>
-            {t("preview.source")}: {preview.source.filename ?? "—"} · {t(`sourceKind.${shownSourceKind}` as never)}
-            {" · "}
-            {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
-          </p>
-          {planBlock}
-          {counts}
 
           {preview.rows.length === 0 ? (
             <p className="text-sm text-text-muted">{t("preview.empty")}</p>
@@ -600,13 +654,29 @@ export async function EvidenceImportSection({
                           {row.hours ?? "—"}
                         </td>
                         <td className="px-2 py-2">
-                          <div className="text-text-secondary">
-                            {row.workObjectName ?? row.contextLabel ?? "—"}
-                          </div>
+                          {row.contexts ? (
+                            <ul className="flex flex-col gap-0.5" data-testid="evidence-row-contexts">
+                              {row.contexts.segments.map((sg) => (
+                                <li key={sg.key} className="text-text-secondary" data-kind={sg.kind} data-state={sg.state}>
+                                  {sg.name ?? sg.label}
+                                  {sg.name && sg.name.toLowerCase() !== sg.label.toLowerCase() ? (
+                                    <span className="text-xs text-text-muted"> ({sg.label})</span>
+                                  ) : null}
+                                  {sg.hours !== null ? <span className="text-xs text-text-muted"> · {sg.hours} h</span> : null}
+                                  <span className="ml-1 text-xs text-text-muted">
+                                    {sg.kind !== "place"
+                                      ? t(`segmentKind.${sg.kind}` as never)
+                                      : t(`segmentState.${sg.state}` as never)}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="text-text-secondary">{row.contextLabel ?? "—"}</div>
+                          )}
                           <div className="text-xs text-text-muted">
-                            {row.contextWillCreate
-                              ? t("contextState.will_create")
-                              : t(`contextState.${row.contextState}` as never)}
+                            {row.contexts?.method === "site_from_work_text" ? t("contextState.from_text") : null}
+                            {row.contexts?.allocation?.method === "unknown_split" ? t("contextState.unknown_split") : null}
                           </div>
                         </td>
                         <td className="px-2 py-2 text-text-secondary">
@@ -701,53 +771,7 @@ export async function EvidenceImportSection({
             </div>
           )}
         </section>
-      </Card>
-
-      <Card compact>
-        <section className={SECTION}>
-          <h2 className={HEADING}>{t("commit.title")}</h2>
-          {commitToken === null && (
-            <p
-              className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-text-secondary"
-              data-testid="evidence-commit-unavailable"
-            >
-              {t("error.confirmation_unavailable")}
-            </p>
-          )}
-          <EvidenceCommitForm
-            action={commitEvidenceImportAction}
-            sessionId={sessionId}
-            confirmationToken={commitToken}
-            readyCount={ready.length}
-            evidenceStates={options(REPORTED_EVIDENCE_STATES, "evidenceState")}
-            plan={{
-              people: preview.plan.people.length,
-              objects: preview.plan.objects.length,
-              relationships: options(RELATIONSHIP_KINDS, "relationship"),
-              // The relationship that LEADS follows the session's supplier
-              // role: a school imports learners, an agency its workers, an
-              // employer its employees. The person can still pick any other.
-              suggestedRelationship: "employee",
-            }}
-            labels={{
-              evidenceState: t("commit.evidenceState"),
-              evidenceStateHint: t("commit.evidenceStateHint"),
-              confirm: t("commit.confirm", { count: "{count}" }),
-              confirmNone: t("commit.confirmNone"),
-              confirming: t("commit.confirming"),
-              readOnce: t("commit.readOnce"),
-              written: t("result.written"),
-              skipped: t("result.skipped"),
-              notReady: t("result.notReady"),
-              createdPeople: t("result.createdPeople"),
-              createdObjects: t("result.createdObjects"),
-              createPeople: t("plan.createPeople"),
-              createObjects: t("plan.createObjects"),
-              relationship: t("plan.relationship"),
-              errors,
-            }}
-          />
-        </section>
+        </details>
       </Card>
 
       <Card compact>

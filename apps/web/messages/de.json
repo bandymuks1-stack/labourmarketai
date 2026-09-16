@@ -15848,7 +15848,8 @@
       "derived": "Von uns erschlossen",
       "derivedMethod": "Verfahren",
       "confidence": "Sicherheit",
-      "source": "Quelle"
+      "source": "Quelle",
+      "showRows": "Alle {count} Quellzeilen anzeigen"
     },
     "personState": {
       "unmatched": "Nicht in der Liste",
@@ -15863,7 +15864,9 @@
       "matched": "Zugeordnet",
       "ambiguous": "Mehr als eine Übereinstimmung",
       "created": "Angelegt",
-      "will_create": "wird angelegt"
+      "will_create": "wird angelegt",
+      "from_text": "Ort aus dem Arbeitstext gelesen",
+      "unknown_split": "Stunden nicht auf Orte verteilt"
     },
     "duplicateState": {
       "new": "Neu",
@@ -15875,7 +15878,8 @@
       "person_not_on_roster": "Dieser Name steht nicht in Ihrer Liste. Wählen Sie die Person oder fügen Sie sie hinzu.",
       "person_ambiguous": "Mehr als eine Person in Ihrer Liste trägt diesen Namen. Wählen Sie, welche.",
       "context_ambiguous": "Mehr als ein Ort passt zu dieser Bezeichnung. Wählen Sie, welcher.",
-      "already_imported": "Ein identischer Eintrag besteht bereits, diese Zeile wird daher übersprungen."
+      "already_imported": "Ein identischer Eintrag besteht bereits, diese Zeile wird daher übersprungen.",
+      "hours_exceed_day": "Mehr Stunden an einem Tag, als ein Tag hat. Prüfen und wie angegeben belassen oder überspringen."
     },
     "resolve": {
       "title": "Klären",
@@ -16030,12 +16034,115 @@
       "createPeople": "Fehlende Personen beim Bestätigen anlegen",
       "createObjects": "Fehlende Objekte beim Bestätigen anlegen",
       "relationship": "Beziehung der neuen Personen zur Organisation",
-      "nothingBeforeCommit": "Bis zur Bestätigung wird nichts angelegt oder geschrieben."
+      "nothingBeforeCommit": "Bis zur Bestätigung wird nichts angelegt oder geschrieben.",
+      "spellings": "{count} Schreibweisen"
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "Kalenderwoche aus dem Datum",
       "iso_week_conflicts_with_source_week": "Woche der Datei widerspricht dem Datum — Woche aus dem Datum vorgeschlagen",
       "hours_exceed_day": "mehr Stunden als ein Tag hat — prüfen, ob dies eine Periodensumme ist"
+    },
+    "segmentKind": {
+      "activity": "Tätigkeit",
+      "note": "Notiz"
+    },
+    "segmentState": {
+      "matched": "vorhanden",
+      "proposed": "vorgeschlagen",
+      "ambiguous": "Auswahl nötig",
+      "new": "wird angelegt",
+      "human": "Ihre Wahl",
+      "created": "angelegt",
+      "ignored": "übersprungen",
+      "none": "kein Ort"
+    },
+    "reconstruction": {
+      "understoodEyebrow": "Historie rekonstruiert",
+      "understoodTitle": "Was das System aus Ihrer Datei verstanden hat",
+      "periodUnknown": "Zeitraum nicht ermittelt",
+      "figures": {
+        "rows": "Arbeitseinträge",
+        "people": "Personen",
+        "places": "Orte",
+        "hours": "angegebene Stunden"
+      },
+      "flaggedHours": "Weitere {hours} h stehen in Zeilen mit mehr als ein Tag hat — getrennt gezeigt, nie summiert.",
+      "nothingWritten": "Dies ist eine Vorschau. Vor Ihrer Bestätigung wird nichts angelegt oder geschrieben.",
+      "issuesTitleBlocking": "Zu prüfen: {count}",
+      "issuesTitleClear": "Zu prüfen: nichts Blockierendes",
+      "noIssues": "Keine Widersprüche oder Unklarheiten gefunden.",
+      "informational": "{count} weitere Hinweise, die nicht blockieren",
+      "issue": {
+        "impossible_hours": "{count} Zeilen — mehr Stunden als ein Tag hat",
+        "week_conflicts": "{count} Zeilen — Woche der Datei widerspricht dem Datum",
+        "ambiguous_place": "{count} Zeilen — welcher Ort ist das?",
+        "ambiguous_person": "{count} Zeilen — welche Person ist das?",
+        "site_unknown": "{count} Zeilen — Ort nicht ermittelt",
+        "duplicates": "{count} Zeilen — wahrscheinlich bereits erfasst",
+        "conflicts": "{count} Zeilen — widersprechen bereits Erfasstem",
+        "allocation_unknown": "{count} Zeilen — mehrere Orte am Tag, Verteilung nicht angegeben",
+        "allocation_inconsistent": "{count} Zeilen — Stunden im Text ergeben nicht die Tagessumme",
+        "place_from_text": "{count} Zeilen — Ort aus dem Text gelesen: „{label}“"
+      },
+      "issueWhy": {
+        "impossible_hours": "Die Quellzahl bleibt wie sie ist (z. B. eine Monatssumme an einem Tag). Nach „wie angegeben belassen“ wird die Zeile als Quellfakt erfasst; die Tagesdauer bleibt unbekannt und wird nirgends summiert.",
+        "week_conflicts": "Das Datum gilt als Fakt, die Wochennummer als Gruppierung des Autors. Beides wird gezeigt; nichts wird umgeschrieben.",
+        "ambiguous_place": "Mehr als ein Ort passt zu dieser Schreibweise. Ihre Antwort gilt für jede Zeile damit.",
+        "ambiguous_person": "Mehr als eine Person auf der Liste trägt diesen Namen. Wählen Sie in der Zeile unten.",
+        "site_unknown": "Weder Ortszelle noch Text nennen einen Ort. Der Eintrag bleibt ohne — unbekannt, nicht „keiner“.",
+        "duplicates": "Ein ähnlicher Eintrag für dieselbe Person und denselben Tag existiert bereits. In den Zeilen prüfen.",
+        "conflicts": "Gleiche Person, Tag und Ort — andere Stunden. Beide Einträge bleiben sichtbar.",
+        "allocation_unknown": "Die Tagessumme bleibt exakt; Stunden werden nicht geschätzt auf Orte verteilt.",
+        "allocation_inconsistent": "Die im Text genannten Teile ergeben nicht die Tagessumme. Beide Zahlen bleiben erhalten.",
+        "place_from_text": "Die Ortszelle ist leer; der Ort stammt aus den ersten Wörtern des Textes. Ist es eine Schreibvariante eines anderen Ortes, wählen Sie „derselbe Ort wie“ — es entsteht ein Objekt, nicht zwei."
+      },
+      "keepAsStated": "Wie in der Quelle angegeben belassen",
+      "keepAsStatedHint": "Die Quellzahl bleibt unverändert und wird als Quellfakt erfasst. Sie wird NICHT zur Arbeitsdauer dieses Tages — die Tagesdauer bleibt unbekannt, sodass Kalender, Arbeit in Zahlen, Tempo und Kapazität sie nie summieren.",
+      "whichPlace": "Welcher Ort ist",
+      "useExisting": "Vorhandener Ort",
+      "createNew": "Neu unter diesem Namen anlegen",
+      "notAPlace": "Das ist kein Ort",
+      "save": "Auf alle Zeilen anwenden",
+      "peopleTitle": "Personen ({count})",
+      "personState": {
+        "new": "neu",
+        "existing": "auf der Liste",
+        "ambiguous": "Auswahl nötig",
+        "unresolved": "unklar"
+      },
+      "personLine": "{rows} Einträge · {days} Tage · {hours} h",
+      "personFlagged": "+ {hours} h in zu prüfenden Zeilen",
+      "personUnlinked": "Ohne Plattformkonto — die Person kann es später verknüpfen.",
+      "placesTitle": "Orte ({count})",
+      "placeState": {
+        "new": "wird angelegt",
+        "existing": "vorhanden",
+        "ambiguous": "Auswahl nötig"
+      },
+      "placeLine": "{rows} Einträge · {people} Pers. · {hours} h angegeben",
+      "placeShared": "{count} Tage mit anderen Orten geteilt",
+      "placeFromText": "aus dem Arbeitstext",
+      "placeSpellings": "in der Datei geschrieben als",
+      "calendarTitle": "Kalender: tatsächliche Arbeit",
+      "calendarLine": "{weeks} Wochen · {personDays} Personentage",
+      "week": "Woche",
+      "weekN": "KW {n}",
+      "calendarNote": "Das ist geleistete Arbeit, kein Plan und keine Zusage. ⚠ markiert einen Tag mit zu prüfender Zahl; seine Stunden sind in keiner Summe.",
+      "companyTitle": "Das Unternehmen, wie diese Daten es zeigen",
+      "known": "Was die Daten sagen lassen",
+      "knownLine": "{people} Personen arbeiteten an {places} Orten: {personDays} Personentage, {hours} h angegeben.",
+      "activities": "Tätigkeiten ohne Ort",
+      "unknown": "Was die Quelle nicht sagt",
+      "unknownItem": {
+        "client": "Auftraggeber",
+        "project": "Projekt über dem Ort",
+        "work_package": "Arbeitspaket / Phase",
+        "wage": "Lohn / Preis",
+        "output": "Ergebnis",
+        "team": "Brigade (gemeinsame Anwesenheit ist kein Team)"
+      },
+      "commitEffect": "Bestätigen würde anlegen: {records} Einträge ({held} bis zu Ihrer Entscheidung zurückgehalten), {people} Personen, {objects} Orte. Ein Schreibvorgang — die vorhandenen Ansichten lesen ihn dann.",
+      "sameAs": "Derselbe Ort wie"
     }
   },
   "organizationRoster": {
