@@ -98,15 +98,34 @@ function Tile({
 export function HistoricalFieldBoard({
   field,
   labels,
-  formatDate,
-  formatHours,
+  locale,
 }: {
   field: FieldProjection;
   labels: FieldBoardLabels;
-  formatDate: (iso: string) => string;
-  formatHours: (n: number) => string;
+  /**
+   * The locale, NOT formatter functions. This is a Client Component: every
+   * prop crosses the server→client boundary and must be serialisable. Passing
+   * `formatDate`/`formatHours` functions from the server component threw
+   * "Functions cannot be passed directly to Client Components" on production
+   * (build f3e090ef, digest 1624882775) and the whole history door fell to the
+   * error fallback. The formatters are built here, from the locale.
+   */
+  locale: string;
 }) {
   const [week, setWeek] = useState<number | "all">("all");
+  const { formatDate, formatHours } = useMemo(() => {
+    // Lithuanian has no textual short month ("10-22"); the long month reads
+    // as a date in every active locale — the same rule the server side uses.
+    const day = new Intl.DateTimeFormat(locale, { day: "numeric", month: locale === "lt" ? "long" : "short", timeZone: "UTC" });
+    const num = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+    return {
+      formatDate: (iso: string) => {
+        const d = new Date(`${iso}T00:00:00Z`);
+        return Number.isNaN(d.getTime()) ? iso : day.format(d);
+      },
+      formatHours: (n: number) => num.format(n),
+    };
+  }, [locale]);
   const [selection, setSelection] = useState<Selection>(null);
 
   const scope = useMemo(() => {

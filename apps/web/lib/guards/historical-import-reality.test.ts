@@ -15,7 +15,8 @@ import { classifyTimeSemantics, countsAsDailyHours } from "@/lib/organization-ev
  */
 
 const dir = path.resolve(__dirname, "../..");
-const read = (p: string) => readFileSync(path.join(dir, p), "utf8");
+/** Line endings normalised: a Windows checkout is CRLF, CI is LF, the anchors are one. */
+const read = (p: string) => readFileSync(path.join(dir, p), "utf8").replace(/\r\n/g, "\n");
 
 const core = read("lib/organization-evidence/import-core.ts");
 const section = read("components/app/evidence-import-section.tsx");
