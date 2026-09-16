@@ -314,8 +314,7 @@ export async function EvidenceImportReconstruction({
       <Card compact>
         <HistoricalFieldBoard
           field={field}
-          formatDate={fmtDate}
-          formatHours={hours}
+          locale={locale}
           labels={{
             title: t("field.title"),
             subtitle: t("field.subtitle"),

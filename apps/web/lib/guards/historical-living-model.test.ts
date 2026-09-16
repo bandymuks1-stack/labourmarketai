@@ -14,7 +14,8 @@ import { PLAYER_IDENTITY_VARIANTS } from "@/lib/identity/player-identity";
  */
 
 const dir = path.resolve(__dirname, "../..");
-const read = (p: string) => readFileSync(path.join(dir, p), "utf8");
+/** Line endings normalised: a Windows checkout is CRLF, CI is LF, the anchors are one. */
+const read = (p: string) => readFileSync(path.join(dir, p), "utf8").replace(/\r\n/g, "\n");
 /** The code without its comments — the comments NAME what is forbidden. */
 const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
