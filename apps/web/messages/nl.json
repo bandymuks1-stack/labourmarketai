@@ -16054,7 +16054,7 @@
       "human": "uw keuze",
       "created": "aangemaakt",
       "ignored": "overgeslagen",
-      "none": ""
+      "none": "geen plaats"
     },
     "reconstruction": {
       "understoodEyebrow": "Historie gereconstrueerd",
@@ -16125,8 +16125,8 @@
       "placeSpellings": "in het bestand geschreven als",
       "calendarTitle": "Kalender: werkelijk werk",
       "calendarLine": "{weeks} weken · {personDays} persoonsdagen",
-      "week": "Week",
-      "weekN": "W{n}",
+      "week": "Wk",
+      "weekN": "wk {n}",
       "calendarNote": "Dit is verricht werk, geen plan en geen toezegging. ⚠ markeert een dag met een te controleren getal; die uren zitten in geen totaal.",
       "companyTitle": "Het bedrijf, zoals deze gegevens het tonen",
       "known": "Wat de gegevens laten zeggen",
