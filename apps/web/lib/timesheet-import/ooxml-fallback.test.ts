@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { readPrefixedOoxml } from "./ooxml-fallback";
 import { readTimesheetXlsx } from "./xlsx-read";
 import { detectTimesheetMonth, parseTimesheetSheet } from "./xlsx-grid-parse";
-import { readDate, rowsFromGrid } from "@/lib/organization-evidence/parse-tabular";
+import { detectHeaderLanguage, readDate, rowsFromGrid } from "@/lib/organization-evidence/parse-tabular";
 import { readEvidenceSourceFile } from "@/lib/organization-evidence/read-source-file";
 
 /**
@@ -207,3 +207,22 @@ describe("the state timesheet template (monthly grid) — people, no invented ob
     expect(rows[0].workText).toBe("formwork installation");
   });
 });
+
+describe("the source language is read from the header words, or stays unknown", () => {
+  it("names a language only on a strict winner", () => {
+    expect(detectHeaderLanguage(["Person", "Date", "Hours", "Object / recognized objects", "Work performed", "Source week"])).toBe("en");
+    expect(detectHeaderLanguage(["Darbuotojas", "Objektas", "Savaitė", "Data", "Valandos", "Darbai"])).toBe("lt");
+    expect(detectHeaderLanguage(["Medewerker", "Datum", "Uren", "Omschrijving"])).toBe("nl");
+    // "Datum" alone belongs to two languages — no answer, never a guess.
+    expect(detectHeaderLanguage(["Datum"])).toBeNull();
+    expect(detectHeaderLanguage([])).toBeNull();
+  });
+  it("the reader hands the recognised header row to the action", async () => {
+    const r = await readEvidenceSourceFile("work_history.xlsx", prefixedWorkbook());
+    expect(r.kind).toBe("ok");
+    if (r.kind !== "ok") return;
+    expect(r.headers).toEqual(["Person", "Date", "Hours", "Object / recognized objects", "Work performed", "Source week"]);
+    expect(detectHeaderLanguage(r.headers)).toBe("en");
+  }, 30_000);
+});
+

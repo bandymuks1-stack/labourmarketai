@@ -43,6 +43,9 @@ export type SourceFileRead =
       readonly via: "delimited" | "xlsx-grid";
       /** Stable identity of THIS source, so re-uploading resolves to the same session. */
       readonly fingerprint: string;
+      /** The header cells the parser recognised (first sheet / the file),
+       *  for the language detection the action performs. Empty for a grid. */
+      readonly headers: readonly string[];
     }
   | { readonly kind: "unsupported-file"; readonly filename: string }
   | { readonly kind: "file-too-large"; readonly limit: number }
@@ -79,6 +82,7 @@ export async function readEvidenceSourceFile(
       kind: "ok",
       rows: parsed.rows,
       skipped: parsed.skipped,
+      headers: Object.keys(parsed.rows[0]?.raw ?? {}),
       via: "delimited",
       // Unchanged from the original text path, so a file already imported
       // keeps resolving to its existing session.
@@ -99,6 +103,7 @@ export async function readEvidenceSourceFile(
   const skipped: { rowIndex: number; reason: string }[] = [];
   let anyRecognised = false;
   let anyDatedProposal = false;
+  let headers: readonly string[] = [];
 
   for (const [index, sheet] of read.sheets.slice(0, MAX_SHEETS).entries()) {
     const name = sheet.name || `Sheet${index + 1}`;
@@ -112,6 +117,7 @@ export async function readEvidenceSourceFile(
     if (long.rows.length > 0) {
       anyRecognised = true;
       anyDatedProposal = true;
+      if (headers.length === 0) headers = Object.keys(long.rows[0].raw);
       rows.push(...long.rows);
       for (const s of long.skipped) {
         skipped.push({ rowIndex: index, reason: `${name}!row${s.rowIndex + 1}: ${s.reason}` });
@@ -157,6 +163,7 @@ export async function readEvidenceSourceFile(
     kind: "ok",
     rows,
     skipped,
+    headers,
     via: "xlsx-grid",
     // Binary bytes, not text: `toString("utf8")` on a zip is lossy, so two
     // different workbooks could otherwise fingerprint alike.

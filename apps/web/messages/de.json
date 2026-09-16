@@ -15811,9 +15811,15 @@
       "notes": "Notizen",
       "paste": "Zeilen einfügen",
       "pasteHint": "Eine Zeile pro Datensatz, Spalten getrennt durch Komma, Semikolon oder Tabulator. Die erste erkannte Kopfzeile wird verwendet; alles darüber wird ignoriert.",
-      "file": "Oder laden Sie eine CSV-/TSV-Datei hoch",
+      "file": "Datei (XLSX, CSV, TSV)",
       "submit": "Quelle einlesen",
-      "submitting": "Wird gelesen…"
+      "submitting": "Wird gelesen…",
+      "dropzone": "Datei hochladen",
+      "dropzoneHint": "Oder hier ablegen. XLSX, CSV, TSV. Das System erkennt Struktur, Personen, Objekte, Daten, Stunden und Widersprüche selbst — Sie bestätigen nur, was es nicht entscheiden kann.",
+      "chosen": "Gewählte Datei",
+      "advanced": "Zusätzliche Angaben",
+      "auto": "automatisch",
+      "readNow": "Lesen"
     },
     "preview": {
       "title": "2. Was festgehalten würde",
@@ -15841,7 +15847,8 @@
       "fact": "Von der Quelle angegeben",
       "derived": "Von uns erschlossen",
       "derivedMethod": "Verfahren",
-      "confidence": "Sicherheit"
+      "confidence": "Sicherheit",
+      "source": "Quelle"
     },
     "personState": {
       "unmatched": "Nicht in der Liste",
@@ -15971,7 +15978,7 @@
       "other": "Sonstiges"
     },
     "sourceKind": {
-      "xlsx": "Tabellenkalkulation",
+      "xlsx": "Tabelle (XLSX)",
       "csv": "CSV-/TSV-Datei",
       "pdf": "PDF-Dokument",
       "api": "Schnittstelle eines anderen Systems",

@@ -249,6 +249,39 @@ const HEADER_SYNONYMS: Readonly<Record<SourceRowField, readonly string[]>> = {
   ],
 };
 
+/**
+ * THE SOURCE'S LANGUAGE, FROM ITS OWN HEADER WORDS (owner entry contract
+ * 2026-09-16 P0-B: "language where reasonably detectable"). Header words that
+ * exist in ONE language only are counted; the language with the most wins;
+ * a tie or no evidence is `null` — UNKNOWN stays UNKNOWN and the form shows
+ * the person the value it will use instead of inventing one. The words are
+ * folded the same way `headerKey` folds them, so "Vardas, pavardė" and
+ * "vardas pavarde" are one word.
+ */
+const HEADER_LANGUAGE_WORDS: readonly (readonly [string, readonly string[]])[] = [
+  ["lt", ["darbuotojas", "vardas", "pavarde", "asmuo", "objektas", "objektai", "statybvete", "projektas", "adresas", "vieta", "darbo vieta", "data", "diena", "darbo data", "valandos", "val", "darbo valandos", "isdirbta", "aprasymas", "darbai", "atlikti darbai", "uzduotis", "pastabos", "veikla", "savaite", "savaites nr", "tabelio nr", "darbuotojo nr"]],
+  ["en", ["worker", "employee", "person", "full name", "object", "site", "project", "address", "location", "workplace", "date", "work date", "day", "hours", "worked hours", "total hours", "description", "work", "works", "task", "tasks", "notes", "comment", "activity", "week", "source week", "work performed", "recognized objects", "employee number"]],
+  ["nl", ["medewerker", "locatie", "datum", "dag", "uren", "omschrijving", "weeknummer", "weeknr", "personeelsnummer"]],
+  ["de", ["mitarbeiter", "baustelle", "objekt", "datum", "stunden", "beschreibung", "woche", "kalenderwoche", "personalnummer"]],
+  ["ru", ["rabotnik", "sotrudnik", "fio", "obekt", "adres raboty", "data raboty", "chasy", "opisanie", "vypolnennye raboty", "nedelya", "tabelnyj nomer"]],
+];
+
+export function detectHeaderLanguage(
+  headers: readonly string[],
+): "lt" | "en" | "nl" | "de" | "ru" | null {
+  const keys = new Set(headers.map(headerKey).filter((k) => k !== ""));
+  const scores = HEADER_LANGUAGE_WORDS.map(([lang, words]) => [
+    lang,
+    words.filter((w) => keys.has(w)).length,
+  ] as const);
+  // "datum" / "data" are shared between languages; a word counted for two
+  // languages helps neither, so the score is per distinct word per language
+  // and only a strict winner is an answer.
+  const sorted = [...scores].sort((a, b) => b[1] - a[1]);
+  if (sorted[0][1] === 0 || sorted[0][1] === sorted[1][1]) return null;
+  return sorted[0][0] as "lt" | "en" | "nl" | "de" | "ru";
+}
+
 /** Fold a header cell to a comparison key: lowercase, diacritics stripped,
  *  punctuation collapsed. Same folding as the entity resolver so "Pavardė"
  *  and "pavarde" are one header. */
