@@ -93,7 +93,7 @@ export async function readEvidenceSourceFile(
   if (read.kind !== "ok") return { kind: "file-unreadable" };
 
   const { parseTimesheetSheet } = await import("@/lib/timesheet-import/xlsx-grid-parse");
-  const { rowsFromTimesheetProposals } = await import("./parse-tabular");
+  const { rowsFromGrid, rowsFromTimesheetProposals } = await import("./parse-tabular");
 
   const rows: SourceWorkRow[] = [];
   const skipped: { rowIndex: number; reason: string }[] = [];
@@ -102,6 +102,22 @@ export async function readEvidenceSourceFile(
 
   for (const [index, sheet] of read.sheets.slice(0, MAX_SHEETS).entries()) {
     const name = sheet.name || `Sheet${index + 1}`;
+    // A LONG-FORMAT sheet (one fact per line, a person column and a date
+    // column) is the shape of the owner's prepared history and of most ERP /
+    // payroll exports. It goes through the SAME parser a CSV does — header
+    // synonyms in the source languages, the fact/derived split, the source
+    // week vs explicit date comparison — instead of the monthly-grid parser,
+    // which knows none of that. The grid parser stays for the grids.
+    const long = rowsFromGrid(sheet.rows);
+    if (long.rows.length > 0) {
+      anyRecognised = true;
+      anyDatedProposal = true;
+      rows.push(...long.rows);
+      for (const s of long.skipped) {
+        skipped.push({ rowIndex: index, reason: `${name}!row${s.rowIndex + 1}: ${s.reason}` });
+      }
+      continue;
+    }
     const parse = parseTimesheetSheet(sheet.rows, name);
     if (parse.kind !== "parsed") continue;
     anyRecognised = true;

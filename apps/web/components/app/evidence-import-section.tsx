@@ -120,6 +120,7 @@ function rowTone(row: PreviewRow): string {
 const NAMED_DERIVED_METHODS = new Set([
   "iso_week_of_explicit_date",
   "iso_week_conflicts_with_source_week",
+  "hours_exceed_day",
 ]);
 
 export async function EvidenceImportSection({

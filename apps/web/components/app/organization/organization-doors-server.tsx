@@ -27,10 +27,12 @@ export async function OrganizationDoorsServer({
     getTranslations("organizationDoors"),
   ]);
   if (state.organizationId === null) return null;
+  // SEP-4 (DEMAND ≠ SUPPLY): a staffing agency's intake declares what it
+  // OFFERS (`agency_offer`), so its door is named for supply, not for need.
   const doors: OrganizationDoorItem[] = state.doors.map((id) => ({
     id,
     href: ORGANIZATION_DOOR_ROUTES[id],
-    label: t(id),
+    label: id === "needs" && state.isStaffingAgency ? t("needsAgency") : t(id),
   }));
   return (
     <OrganizationDoors

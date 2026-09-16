@@ -16029,7 +16029,8 @@
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "calendar week from the date",
-      "iso_week_conflicts_with_source_week": "the file's week disagrees with the date — week from the date proposed"
+      "iso_week_conflicts_with_source_week": "the file's week disagrees with the date — week from the date proposed",
+      "hours_exceed_day": "more hours than one day holds — check whether this is a period total"
     }
   },
   "organizationRoster": {
@@ -16233,7 +16234,12 @@
       },
       "work": {
         "objectsIntro": "Sites and objects that people, hours and photos are attached to."
+      },
+      "needsAgency": {
+        "title": "Your supply and the market's needs",
+        "subtitle": "Which people or teams you offer, what you already published, and where matching happens."
       }
-    }
+    },
+    "needsAgency": "Supply"
   }
 }

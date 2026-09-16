@@ -16029,7 +16029,8 @@
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "kalendorinė savaitė pagal datą",
-      "iso_week_conflicts_with_source_week": "savaitė faile nesutampa su data — siūloma savaitė pagal datą"
+      "iso_week_conflicts_with_source_week": "savaitė faile nesutampa su data — siūloma savaitė pagal datą",
+      "hours_exceed_day": "daugiau valandų nei telpa į vieną dieną — patikrinkite, ar tai ne laikotarpio suma"
     }
   },
   "organizationRoster": {
@@ -16233,7 +16234,12 @@
       },
       "work": {
         "objectsIntro": "Objektai ir statybvietės, prie kurių priskiriami žmonės, valandos ir nuotraukos."
+      },
+      "needsAgency": {
+        "title": "Jūsų pasiūla ir rinkos poreikiai",
+        "subtitle": "Kokius žmones ar komandas siūlote, ką jau paskelbėte ir kur vyksta atranka."
       }
-    }
+    },
+    "needsAgency": "Pasiūla"
   }
 }

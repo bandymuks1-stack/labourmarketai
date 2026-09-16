@@ -139,6 +139,11 @@ const HEADER_SYNONYMS: Readonly<Record<SourceRowField, readonly string[]>> = {
   ],
   projectLabel: [
     "object",
+    // The owner's prepared export (2026-09-16) names the column
+    // "Object / recognized objects"; the fold keeps the words.
+    "object recognized objects",
+    "recognized objects",
+    "objects",
     "site",
     "project",
     "address",
@@ -220,6 +225,10 @@ const HEADER_SYNONYMS: Readonly<Record<SourceRowField, readonly string[]>> = {
   workText: [
     "description",
     "work",
+    "work performed",
+    "works performed",
+    "work description",
+    "performed work",
     "works",
     "task",
     "tasks",
@@ -268,6 +277,7 @@ export type ColumnMap = Partial<Record<SourceRowField, number>>;
  */
 const WEEK_HEADER_SYNONYMS: readonly string[] = [
   "week",
+  "source week",
   "week no",
   "week nr",
   "week number",
@@ -322,6 +332,7 @@ export function isoWeekOf(isoDate: string): number | null {
 /** Method slugs the preview localises (`evidenceImport.derivedMethod.*`). */
 export const WEEK_CONSISTENT_METHOD = "iso_week_of_explicit_date";
 export const WEEK_CONFLICT_METHOD = "iso_week_conflicts_with_source_week";
+export const HOURS_EXCEED_DAY_METHOD = "hours_exceed_day";
 
 /** Map a header row to canonical columns. Unrecognised columns are kept out of
  *  the map but stay in `raw` - nothing from the source is discarded. */
@@ -345,6 +356,7 @@ export function mapHeaderRow(header: readonly string[]): ColumnMap {
 // ── value readers ───────────────────────────────────────────────────────────
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const EXCEL_SERIAL = /^(\d{5})(?:\.0+)?$/;
 const DMY = /^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})$/;
 const YMD_DOT = /^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})$/;
 
@@ -371,6 +383,20 @@ export function readDate(
 ): { iso: string; ambiguous: boolean } | null {
   const value = raw.trim();
   if (value === "") return null;
+  // An Excel date serial (1900 system) — what a date cell becomes when the
+  // workbook is read without its number formats (the prefixed-OOXML
+  // fallback), and what some exports write on purpose. The conversion is
+  // arithmetic, not a guess: 45666 is 2025-01-09 and nothing else. Bounded to
+  // 1950..2149 so an hours figure or an id can never be mistaken for a date.
+  const serial = EXCEL_SERIAL.exec(value);
+  if (serial) {
+    const n = Number(serial[1]);
+    if (n >= 18264 && n <= 91311) {
+      const ms = Date.UTC(1899, 11, 30) + n * 86_400_000;
+      return { iso: new Date(ms).toISOString().slice(0, 10), ambiguous: false };
+    }
+    return null;
+  }
   const iso = ISO_DATE.exec(value);
   if (iso) {
     const [y, m, d] = [Number(iso[1]), Number(iso[2]), Number(iso[3])];
@@ -559,6 +585,17 @@ export function rowsFromGrid(
       hours = readHours(hoursCell);
       if (hours !== null) factFields.push("hours");
       else skipped.push({ rowIndex: i, reason: "unreadable_hours" });
+    }
+    // More hours than a day holds, on ONE dated row, is a real contradiction
+    // (the owner's file carries 800 h and 165 h "on 2025-11-17" — monthly
+    // totals typed as a day). The figure is kept as stated; the row is marked
+    // so the preview shows it and the human decides. Never rewritten.
+    if (hours !== null && hours > 24 && workDate !== null && periodStart === null) {
+      derived.hoursPlausibility = {
+        value: hours,
+        method: HOURS_EXCEED_DAY_METHOD,
+        confidence: 1,
+      };
     }
 
     const projectCell = tidy(cell("projectLabel"));

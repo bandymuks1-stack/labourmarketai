@@ -16029,7 +16029,8 @@
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "Kalenderwoche aus dem Datum",
-      "iso_week_conflicts_with_source_week": "Woche der Datei widerspricht dem Datum — Woche aus dem Datum vorgeschlagen"
+      "iso_week_conflicts_with_source_week": "Woche der Datei widerspricht dem Datum — Woche aus dem Datum vorgeschlagen",
+      "hours_exceed_day": "mehr Stunden als ein Tag hat — prüfen, ob dies eine Periodensumme ist"
     }
   },
   "organizationRoster": {
@@ -16233,7 +16234,12 @@
       },
       "work": {
         "objectsIntro": "Objekte und Baustellen, denen Personen, Stunden und Fotos zugeordnet sind."
+      },
+      "needsAgency": {
+        "title": "Ihr Angebot und der Bedarf des Marktes",
+        "subtitle": "Welche Personen oder Teams Sie anbieten, was Sie bereits veröffentlicht haben und wo das Matching stattfindet."
       }
-    }
+    },
+    "needsAgency": "Angebot"
   }
 }

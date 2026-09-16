@@ -96,6 +96,23 @@ routes, no new data model.**
 | Istorija | `/dashboard/company/history` | historical import (the one engine), records, corrections; hours-grid format link | always |
 | Nustatymai | `/dashboard/company/settings` | identity, verification, capabilities, public profile, help | always |
 
+### 2a. The doors verified against the real user contexts (2026-09-16, second pass)
+
+Verified in code (`loadOrganizationDoors`, the company layout, the door pages'
+own gates), not by opinion:
+
+| Context | What the person sees | Why it is right |
+|---|---|---|
+| **Worker**, personal space | No door strip. ŠIANDIEN · PASAULIS · PAKLAUSK + stations (IA 01) unchanged. `/dashboard/company/*` redirects a person without the company role. | `resolveEmployerCompanyContext` is unavailable in the personal space → `organizationId: null` → the strip renders nothing. |
+| **Employer** (company) | Dabar · Žmonės · Darbai · Poreikiai · Kalendorius · Istorija · Nustatymai; Klientai/Partneriai appears only once an agency has invited it. | A first-visit employer is never shown an empty relationship room. |
+| **Agency** (`staffing_agency`) | Same, plus Klientai/Partneriai always; the demand door is labelled **Pasiūla** and its page is "Jūsų pasiūla ir rinkos poreikiai". | SEP-4: the agency's intake runs the `partner` intent and writes `agency_offer` — that is supply it HAS, not a need. Calling the door "Poreikiai" would have collapsed the market direction (the `#1588` class). Fixed in this pass. |
+| **Institution** (`training_provider`) | Same fixed set plus **Mokymai** (learners, programmes, demand per direction). `/dashboard/company/education` redirects to Dabar for any other organization. | The door exists only where the capability exists; the Needs door still serves a school that also hires. |
+| **Multi-role owner** | Doors follow the ACTIVE workspace; switching it in the chip changes the set. Admin console stays in the avatar menu, never a door. | Identity = the workspace (owner audit P0.1); administration ≠ operations (§12). |
+
+Not a generic icon-card menu: each door is a real context with a canonical
+surface behind it, labelled in words, and two of the nine are conditional on
+what the organization is.
+
 Design rule: the door strip is text-first with a domain icon, ≤ 9 items,
 horizontally scrollable on a phone, `aria-current` on the active door. It is
 navigation, not a card grid. The Dabar screen never repeats a door's content.
@@ -232,6 +249,52 @@ Before / after, deterministic:
 | `[QA-SYNTHETIC]` rows on cross-org readers | rendered | filtered by ONE predicate at the three shared readers |
 | Admin home | 6 KPI tiles + 2 monitoring notes + review help prose | attention rows (queue doors with counts) + one summary sentence; help in `<details>` |
 
+### 7a. REAL prepared XLSX — deterministic walk (2026-09-16, second pass)
+
+The owner's prepared files (`~/Downloads/work_history_2025_part1–3.xlsx`,
+`people_2025_preview.xlsx`, and the real state timesheet
+`Conturus_tabelis_PELENISKIAI_RUGPJUTIS_Atnaujintas.xlsx`) were run through
+the engine's OWN reader (`readEvidenceSourceFile`) offline: no database, no
+session, no write. The files are not committed; the shapes are reproduced
+synthetically in `lib/timesheet-import/ooxml-fallback.test.ts`.
+
+**Before this pass (foundation slice `4a5ab515`):**
+
+| File | Result |
+|---|---|
+| `work_history_2025_part1/2/3.xlsx` | `file-unreadable` — exceljs cannot open namespace-prefixed SpreadsheetML (`<x:workbook>`, the .NET writer's output) |
+| `people_2025_preview.xlsx` | `file-unreadable` |
+| Conturus monthly grid | 156 rows with **person = "1"** (the row number), **object = the person's name**, **date = 2004-01-xx** (the year of the approval decree printed on the template) |
+
+**After (four pure-parser corrections, no schema):**
+
+| File | Result |
+|---|---|
+| `part1` | ok · 450 rows · 11 people · 40 distinct places · week compared on 450 rows · 0 conflicts |
+| `part2` | ok · 450 rows · 11 people · 73 places · 0 conflicts |
+| `part3` | ok · 158 rows · 7 people · 37 places · **4 week conflicts** — Linas / Ramūnas / Valerij / Viktar, source week 50, explicit date Monday 2025-12-15 → `calendarWeek 51`, method `iso_week_conflicts_with_source_week`, note `source_week=50`, raw cell untouched; the file's own "Date provenance" column says the same ("retained despite source week=50 inconsistency") — the engine found the owner's acceptance case unaided. Also **800 h and 165 h on 2025-11-17** (monthly totals typed as a day) → `hoursPlausibility: hours_exceed_day`, figure kept as stated. |
+| `people_2025_preview.xlsx` | `nothing-parsed / no_header` — honest: a people list with no dates is roster material for the people importer (Žmonės door), not work history. |
+| Conturus grid | ok · 156 rows · **7 real people** (from "Vardas, pavardė") · **no invented object** ("Profesija" is a trade, not a site) · **month 2026-08** (from the sheet's own `2026-08-01…2026-08-31` and "2026 METŲ RUGPJŪČIO"; the decree line "2004 m. sausio 27 d." is skipped) · "K" (trip) rows reported as skipped, not dropped |
+
+The corrections: `lib/timesheet-import/ooxml-fallback.ts` (dependency-free
+reader for prefixed OOXML, used only when exceljs refuses); Excel date serials
+read arithmetically (`readDate`, `toIsoDate`, bounded 1950–2149); the real
+header words ("Object / recognized objects", "Work performed", "Source week");
+an `.xlsx` sheet in long format goes through the long-format parser first
+(fact/derived split + week/date + hours plausibility) instead of the grid
+parser; the grid parser takes its month from the sheet's own dates or split
+heading and its person/object columns from headers, never from position when
+a header exists.
+
+**What this proves and what it does not.** Parse → detect people / places /
+dates / hours / work → week-vs-date and per-day plausibility contradictions
+are PROVEN deterministically on the real files. Existing-vs-new
+classification, the preview plan and the no-write-before-commit gate are
+PROVEN by unit tests on the engine (`product-ia-anti-slop.test.ts`,
+`organization-evidence-core.test.ts`) and run against a database only at the
+human walk — the local stack cannot bind on this machine (Windows excluded
+port range). **HUMAN_UI_PROVEN is not claimed.**
+
 No schema, RLS or authority change. No migration. GREEN class.
 
 Remaining — HUMAN_UI_PROOF_ONLY (not claimed): the owner walks Dabar → each
@@ -239,3 +302,29 @@ door on a phone and a laptop; uploads the real XLSX and reads the plan; types
 "noriu įkelti istorinius duomenis" and lands on Istorija; reads the admin
 console. Queued slices: admin chrome → `panel` (§4); `/opportunities` and
 `/journal` progressive disclosure (§1.2).
+
+---
+
+## 8. Project-wide anti-slop execution queue (dependency order)
+
+`#1746` is the FOUNDATION slice: it closes the systemic root causes (§3) and
+the P0 workflow. It is not the completion of the initiative. Each remaining
+item is a bounded slice with its own PR; none is authorised to redesign a
+working domain.
+
+| # | Slice | Canonical surface | Root cause | Reuse target | Acceptance condition | Class | Depends on |
+|---|---|---|---|---|---|---|---|
+| Q1 | **Historical import — HUMAN walk on production** | `/dashboard/company/history` | none (verification) | the engine as shipped | Owner uploads `work_history_2025_part3.xlsx`: plan lists 7 people / 37 sites with existing/new split; 4 week conflicts and 2 impossible-day rows visible in the preview; nothing written until commit; commit creates people/sites then records; readback + withdraw work | HUMAN_UI (no code) | #1746 merged + deployed |
+| Q2 | **Admin console chrome → one top bar** | `/dashboard/admin/*` | `DashboardChrome` mode `full` keeps the legacy tab row + role switcher + bottom nav for the console | `ConversationHeader` (mode `panel`); admin areas as the console's own navigation | no product tabs inside administration; `fullHeader`/`fullBottomNav` slots and `DashboardTabs` removed; 8 guards re-anchored (`dashboard-header-reachability`, `mobile-tap-targets`, `worker-nav-human-labels`, `product-readiness`, `p0-operation-delivery`, `ux-2-0-navigation`, `w3-return-to-workspace`, `header-role-switcher-parity`) | GREEN | #1746 |
+| Q3 | **`/opportunities` — object renderer out of the page** | `/dashboard/opportunities` (PASAULIS) | 1,861 lines because the opportunity card (why · next action · match breakdown · requirement ledger · actions) is rendered inline with its label plumbing; it is ONE object family, not a domain dump | extract `OpportunityCard` + labels module (the same method as `company-section-labels.ts`); progressive disclosure inside the card (`<details>` for breakdown/ledger) | page < 700 lines; bands with WHY unchanged (IA 01); every testid preserved; ≤ 3 first-level blocks above the fold at 390 px | GREEN | none (parallel-safe) |
+| Q4 | **`/journal` — recording surface vs. everything else** | `/dashboard/journal` (Mano darbas) | 1,855 lines: compose (full/chat/voice), numbers summary, entries + day groups, status strip, CV bridge, proof loop inline | the 2026-09-13 split already made Work in Numbers a station; move compose modes + the status/CV/proof strips into components with hoisted labels; keep the calendar | page < 700 lines; one primary action (record); IA 01 §4 rows unchanged; guards re-anchored | GREEN | none (parallel-safe) |
+| Q5 | **Shared-cause guard: page line budget for primary workspaces** | all `dashboard/**/page.tsx` classified REAL_LAUNCH_SURFACE | the recurring cause behind Q3/Q4 and the old hub is "everything inline in page.tsx" — not a shared component | extend `product-ia-anti-slop.test.ts` with a ratchet: no primary page grows past its current line count; the two outliers get budgets in Q3/Q4 | ratchet in CI; baseline recorded | GREEN | Q3, Q4 |
+| Q6 | **People importer accepts the prepared people list** | `/dashboard/company/people#people-import-section` | `people_2025_preview.xlsx` (Name · Source dataset · note) is roster material; the people ingest path reads its own formats | `lib/capabilities/people-ingest-capabilities.ts` + `PeopleImportPanel` | the file previews N people with existing/new split, no write before commit | GREEN (verify first; may already pass) | none |
+| Q7 | **Product-owned copy leak sweep, all five active locales** | every REAL_LAUNCH_SURFACE | English literals in LT/RU/NL/DE surfaces are found only by walking | the `i18n-untranslated-ratchet` + a detector for product-owned hard-coded English in `.tsx` (allow-list for brand/technical tokens) | detector runs in CI; zero new hits; existing hits listed with owner | GREEN | none |
+| Q8 | **Subject sees and may refuse an imported record** | `/dashboard/profile` (PER-12) | no INSERT policy admits the subject on `organization_evidence_events` | RED packet in `docs/launch/OWNER_GATE_PACKETS_2026-09-08.md` | subject-only SECURITY DEFINER RPC applied; refuse button works | **RED** — owner-gated | owner decision |
+
+Not queued (deliberately): any redesign of `/company/scouting`,
+`/company/planning`, the worker stations, or the marketing pages — they were
+inventoried (§1) and are not capability dumps; the constitution's subjective
+test on them is a human review, not a slice.
+

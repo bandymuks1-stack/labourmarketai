@@ -44,7 +44,8 @@ export default async function CompanyNeedsPage({
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
-  const t = await getTranslations("organizationDoors.pages.needs");
+  const tNeeds = await getTranslations("organizationDoors.pages.needs");
+  const tNeedsAgency = await getTranslations("organizationDoors.pages.needsAgency");
   const tWow = await getTranslations("auth.dashboard.wow");
   const tFlow = await getTranslations("auth.dashboard.wow.flow");
   const tReadback = await getTranslations("demandReadback");
@@ -63,6 +64,9 @@ export default async function CompanyNeedsPage({
     );
   }
   const isStaffingAgency = companyRow.companyType === "staffing_agency";
+  // SEP-4: an agency's page is about what it OFFERS; the wizard below runs
+  // with the `partner` intent (agency_offer) for exactly that reason.
+  const t = isStaffingAgency ? tNeedsAgency : tNeeds;
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
@@ -113,8 +117,8 @@ export default async function CompanyNeedsPage({
       >
         <UserSearch className="h-5 w-5 shrink-0 text-brand-cyan" aria-hidden />
         <span className="flex min-w-0 flex-col">
-          <span className="font-semibold text-text-primary">{t("matchingDoor")} →</span>
-          <span className="text-xs text-text-secondary">{t("matchingNote")}</span>
+          <span className="font-semibold text-text-primary">{tNeeds("matchingDoor")} →</span>
+          <span className="text-xs text-text-secondary">{tNeeds("matchingNote")}</span>
         </span>
       </Link>
 

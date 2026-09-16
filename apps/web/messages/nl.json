@@ -16029,7 +16029,8 @@
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "kalenderweek uit de datum",
-      "iso_week_conflicts_with_source_week": "week in bestand klopt niet met datum — week uit datum voorgesteld"
+      "iso_week_conflicts_with_source_week": "week in bestand klopt niet met datum — week uit datum voorgesteld",
+      "hours_exceed_day": "meer uren dan één dag bevat — controleer of dit een periodetotaal is"
     }
   },
   "organizationRoster": {
@@ -16233,7 +16234,12 @@
       },
       "work": {
         "objectsIntro": "Locaties en objecten waaraan mensen, uren en foto's zijn gekoppeld."
+      },
+      "needsAgency": {
+        "title": "Uw aanbod en de behoeften van de markt",
+        "subtitle": "Welke mensen of teams u aanbiedt, wat u al hebt gepubliceerd en waar de matching plaatsvindt."
       }
-    }
+    },
+    "needsAgency": "Aanbod"
   }
 }
