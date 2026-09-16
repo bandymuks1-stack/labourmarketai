@@ -15879,7 +15879,8 @@
       "person_ambiguous": "Jūsų sąraše šį vardą turi daugiau nei vienas asmuo. Pasirinkite, kuris.",
       "context_ambiguous": "Šią žymę atitinka daugiau nei viena vieta. Pasirinkite, kuri.",
       "already_imported": "Toks pat įrašas jau yra, todėl ši eilutė bus praleista.",
-      "hours_exceed_day": "Vienai dienai nurodyta daugiau valandų, nei diena turi. Peržiūrėkite ir palikite kaip nurodyta arba praleiskite."
+      "hours_exceed_day": "Vienai dienai nurodyta daugiau valandų, nei diena turi. Peržiūrėkite ir palikite kaip nurodyta arba praleiskite.",
+      "time_semantics_open": "Šio skaičiaus viena diena talpinti negali. Pasakykite, ką jis reiškia (laikotarpio suma, dienos valandos, nežinoma)."
     },
     "resolve": {
       "title": "Išspręsti",
@@ -16057,8 +16058,8 @@
       "none": "ne vieta"
     },
     "reconstruction": {
-      "understoodEyebrow": "Istorija atkurta",
-      "understoodTitle": "Ką sistema suprato iš jūsų failo",
+      "understoodEyebrow": "Štai kaip realiai dirbote",
+      "understoodTitle": "Ką LabourMarket.ai suprato apie jūsų įmonę",
       "periodUnknown": "Laikotarpis nenustatytas",
       "figures": {
         "rows": "darbo įrašai",
@@ -16082,7 +16083,8 @@
         "conflicts": "{count} eil. — prieštarauja jau įrašytiems duomenims",
         "allocation_unknown": "{count} eil. — kelios vietos per dieną, paskirstymas nenurodytas",
         "allocation_inconsistent": "{count} eil. — aprašyme nurodytos valandos nesutampa su dienos suma",
-        "place_from_text": "{count} eil. — vieta perskaityta iš aprašymo: „{label}“"
+        "place_from_text": "{count} eil. — vieta perskaityta iš aprašymo: „{label}“",
+        "time_semantics": "{count} eil. — ką reiškia šis valandų skaičius?"
       },
       "issueWhy": {
         "impossible_hours": "Šaltinio skaičius paliekamas koks yra (pvz., mėnesio suma įrašyta į vieną dieną). Patvirtinus „palikti kaip nurodyta“, eilutė įrašoma kaip šaltinio faktas, o dienos trukmė lieka nežinoma — ji niekur nesumuojama.",
@@ -16094,7 +16096,8 @@
         "conflicts": "Tas pats žmogus, diena ir vieta — kitos valandos. Abu įrašai lieka matomi.",
         "allocation_unknown": "Dienos suma išsaugoma tiksliai; valandos tarp objektų nedalijamos spėjant.",
         "allocation_inconsistent": "Aprašyme nurodytos dalys nesudaro dienos sumos. Abu skaičiai išsaugomi.",
-        "place_from_text": "Objekto langelis tuščias; vieta paimta iš pirmųjų aprašymo žodžių. Jei tai kitos vietos rašybos klaida, pasirinkite „ta pati vieta kaip“ — bus sukurtas vienas objektas, ne du."
+        "place_from_text": "Objekto langelis tuščias; vieta paimta iš pirmųjų aprašymo žodžių. Jei tai kitos vietos rašybos klaida, pasirinkite „ta pati vieta kaip“ — bus sukurtas vienas objektas, ne du.",
+        "time_semantics": "Viena diena tiek valandų talpinti negali. Pagal šaltinio žodžius tai laikotarpio suma (pvz., darbas iš namų per kelis mėnesius). Skaičius lieka koks yra; jūs pasakote, kas tai — ir laikotarpį tik jei jį žinote. Tokia suma niekada netampa vienos dienos trukme."
       },
       "keepAsStated": "Palikti kaip nurodyta šaltinyje",
       "keepAsStatedHint": "Šaltinio skaičius lieka nepakeistas ir įrašomas kaip šaltinio faktas. Jis NEtampa tos dienos darbo trukme — dienos trukmė lieka nežinoma, todėl kalendorius, „veikla skaičiais“, tempas ir pajėgumai jo nesumuoja.",
@@ -16127,7 +16130,7 @@
       "calendarLine": "{weeks} savaitės · {personDays} žmogaus dienų",
       "week": "Sav.",
       "weekN": "{n} sav.",
-      "calendarNote": "Tai atlikto darbo laikas, ne planas ir ne įsipareigojimas. ⚠ — dienos su peržiūrėtinu skaičiumi; jų valandos į sumas neįtrauktos.",
+      "calendarNote": "Tai atliktas darbas, ne planas ir ne įsipareigojimas. ⚠ — savaitės numeris faile nesutampa su data. Laikotarpio sumos rodomos atskirai ir į dienas nededamos.",
       "companyTitle": "Įmonės vaizdas",
       "known": "Ką duomenys leidžia pasakyti",
       "knownLine": "{people} žmonės dirbo {places} objektuose: {personDays} žmogaus dienų, {hours} h nurodyta.",
@@ -16139,10 +16142,107 @@
         "work_package": "darbų paketas / etapas",
         "wage": "atlygis / kaina",
         "output": "rezultatas",
-        "team": "brigada (bendras buvimas — ne komanda)"
+        "team": "brigada (bendras buvimas — ne komanda)",
+        "aggregate_period": "laikotarpio sumų laikotarpis"
       },
       "commitEffect": "Patvirtinus būtų sukurta: {records} įrašai ({held} sulaikyti iki jūsų sprendimo), {people} žmonės sąraše, {objects} objektai. Vienas įrašymas — toliau ją rodo esami ekranai.",
-      "sameAs": "Ta pati vieta kaip"
+      "sameAs": "Ta pati vieta kaip",
+      "understoodSentence": "{period}: {people} žmonės dirbo {places} objektuose — {personDays} žmogaus dienos ir {hours} h nurodyto dienos darbo.",
+      "spineTitle": "Laiko ašis · valandos per savaitę",
+      "weekShort": "Sav.",
+      "personDaysShort": "žm. d.",
+      "aggregateLine": "Atskirai: {hours} h nurodyta kaip laikotarpio suma ({rows} eil.) — ne vienos dienos darbas, į dienų sumas neįtraukta.",
+      "aggregateRemote": "šaltinis nurodo nuotolinį darbą ({rows} eil.)",
+      "machineReading": {
+        "period_aggregate": "sistema perskaitė: laikotarpio suma",
+        "unknown": "sistema perskaitė: neaišku, ką reiškia"
+      },
+      "remoteEvidenced": "šaltinyje: nuotolinis darbas",
+      "timeQuestion": "Ką reiškia šis skaičius?",
+      "timeKind": "Reikšmė",
+      "timeKinds": {
+        "period_aggregate": "Laikotarpio suma (pvz., darbas iš namų per mėnesius)",
+        "daily": "Vis dėlto — tos dienos valandos",
+        "unknown": "Nežinoma — palikti kaip šaltinio faktą be trukmės"
+      },
+      "timeRemote": "Nuotolinis / iš namų",
+      "timeRemoteYes": "Taip",
+      "timeRemoteNo": "Ne",
+      "timeRemoteUnknown": "Nenurodyta",
+      "timePeriod": "Laikotarpis (tik jei žinote)",
+      "timePeriodHint": "Palikite tuščia, jei laikotarpio nežinote — sistema datų neišgalvoja. Su laikotarpiu suma įrašoma kaip laikotarpio įrašas; be jo — kaip šaltinio faktas su nežinoma trukme.",
+      "from": "Nuo",
+      "to": "Iki",
+      "timeSave": "Pritaikyti šioms eilutėms",
+      "timeHint": "Šaltinio skaičius nekeičiamas. Įrašoma jūsų interpretacija. Kalendorius, „veikla skaičiais“, tempas ir pajėgumai laikotarpio sumos į dieną niekada nesumuoja.",
+      "peopleSubtitle": "Kiekviena kortelė — tai, ką šis failas įrodo apie žmogų. Ne vertinimas, ne dabartinė būsena.",
+      "card": {
+        "historical": "Istorinė",
+        "relationship": "organizacijos sąraše · be paskyros",
+        "provenance": "Kilmė",
+        "provenanceText": "organizacijos nurodyta, nepriklausomai nepatvirtinta",
+        "hours": "Dienos valandos",
+        "days": "Darbo dienos",
+        "places": "Objektai",
+        "aggregate": "+ {hours} h laikotarpio suma ({rows} eil.), į dienas neskaidoma",
+        "aggregateRemote": "nuotolinis darbas",
+        "aggregatePeriodUnknown": "laikotarpis nežinomas",
+        "currentNotInferred": "Dabartinė būsena (darbas, prieinamumas, atlygis, įgūdžiai) iš istorijos nenustatoma.",
+        "openQuestions": "{count} eil. laukia jūsų sprendimo",
+        "weeks": "Savaitės",
+        "details": "Rodyti įrodymus",
+        "timelineTitle": "Objektai laike",
+        "timelineCurrent": "dabar",
+        "timelineEmpty": "Nėra datuotų dienų.",
+        "activities": "Veiklos be objekto",
+        "evidence": "Šaltinio žodžiai",
+        "interpretations": "Sistemos interpretacijos",
+        "unknowns": "Nežinoma",
+        "unknownAllocation": "{count} d. — kelios vietos, paskirstymas nenurodytas",
+        "unknownPlace": "{count} d. — vieta nenustatyta",
+        "noActivities": "Šaltinis veiklų be objekto neįvardija."
+      },
+      "interpretation": {
+        "typo_same_house_number": "rašybos klaida sutapatinta pagal namo numerį",
+        "street_without_number": "gatvė be numerio priskirta vieninteliam objektui",
+        "near_identical_name": "beveik identiškas pavadinimas sutapatintas",
+        "site_from_work_text": "vieta perskaityta iš darbo aprašymo",
+        "hours_from_text": "valandos pagal objektus perskaitytos iš aprašymo",
+        "canonical_spelling": "dažniausia failo rašyba",
+        "as_written": "kaip parašyta"
+      },
+      "field": {
+        "title": "Kaip dirbo komanda",
+        "subtitle": "Pasirinkite savaitę, žmogų ar objektą — laukas rodo, kas kur dirbo pagal šaltinį.",
+        "allWeeks": "Visas laikotarpis",
+        "peopleEvidenced": "Žmonės, kurių darbas įrodytas",
+        "noWork": "Šią savaitę datuoto darbo nėra.",
+        "hoursUnknown": "val. nepaskirstytos",
+        "days": "dien.",
+        "clear": "nuimti",
+        "selectedPerson": "žmogus",
+        "selectedPlace": "objektas",
+        "notATeam": "Bendras buvimas faile — ne komanda ir ne dabartinė sudėtis. Brigada kuriama tik sutikimu.",
+        "hoursUnknownNote": "Valandos rodomos tik ten, kur šaltinis jas paskirstė pagal objektus; kitur — tik dienos."
+      },
+      "aggregatesTitle": "Laikotarpio sumos (ne kalendoriaus dienos)",
+      "aggregatePeriodUnknownRecorded": "laikotarpis nežinomas · faile užrašyta {date}",
+      "aggregateOpen": "laukia jūsų sprendimo",
+      "multiPlaceLine": "{count} d. dirbta keliuose objektuose.",
+      "impactEyebrow": "Kas atsiras patvirtinus",
+      "impactTitle": "Vienas įrašymas — toliau tai skaito esami ekranai",
+      "impact": {
+        "people": "Žmonės: {count} nauji organizacijos sąraše (iš {total}), be platformos paskyrų.",
+        "places": "Objektai: {count} nauji (iš {total}); rašybos variantai išsaugomi kaip kilmė.",
+        "records": "Darbo įrašai: {records} ({daily} kaip dienos valandos); {held} sulaikyti iki jūsų sprendimo.",
+        "aggregates": "Laikotarpio sumos: {period} su žinomu laikotarpiu, {unknown} kaip šaltinio faktas be trukmės.",
+        "time": "Laikas: {period}.",
+        "cards": "Kortelės: {count} žmonių istorinė profesinė tapatybė — organizacijos nurodyta, nepatvirtinta.",
+        "field": "Komanda: istorinis vaizdas „kas kur dirbo“ pagal savaites.",
+        "calendar": "Kalendorius: dienos valandos pasieks darbo žurnalą ir „veiklą skaičiais“ tik susiejus paskyrą; laikotarpio sumos — niekada kaip diena.",
+        "provenance": "Kilmė: kiekvienas įrašas rodo failą, eilutę ir visas interpretacijas; visą importą galima atšaukti."
+      },
+      "impactNote": "Iki patvirtinimo niekas nesukuriama ir neįrašoma."
     }
   },
   "organizationRoster": {

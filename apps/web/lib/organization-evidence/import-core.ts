@@ -28,6 +28,13 @@ import {
 } from "./source-rows";
 import { HOURS_EXCEED_DAY_METHOD } from "./parse-tabular";
 import {
+  classifyTimeSemantics,
+  countsAsDailyHours,
+  timeSemanticsOpen,
+  type TimeSemantics,
+  type TimeSemanticsKind,
+} from "./time-semantics";
+import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
 } from "./evidence-org-context";
@@ -549,8 +556,14 @@ export interface PreviewRow {
    * and carried into the record's `derived` by the commit.
    */
   readonly contexts: WorkContexts | null;
-  /** A human has looked at this row's flagged figure and kept it as stated. */
-  readonly acknowledged: boolean;
+  /**
+   * WHAT THE HOURS FIGURE MEANS when a day cannot hold it: an aggregate over
+   * a period, or unknown — machine-classified from the source's words, then
+   * settled by a human. `null` for an ordinary daily figure.
+   */
+  readonly timeSemantics: TimeSemantics | null;
+  /** True while the classification still needs the human. */
+  readonly timeSemanticsOpen: boolean;
   readonly problem: string | null;
 }
 
@@ -600,7 +613,6 @@ export interface WorkContexts {
 }
 
 const HUMAN_CHOICE = "human_choice";
-export const HOURS_ACKNOWLEDGED_METHOD = "human_acknowledged_as_stated";
 
 export function placeSegments(c: WorkContexts | null): readonly WorkContextSegment[] {
   return c ? c.segments.filter((s) => s.kind === "place" && s.state !== "ignored") : [];
@@ -628,9 +640,9 @@ function readPriorContexts(derived: Record<string, unknown>): WorkContexts | nul
   return c && Array.isArray(c.segments) ? c : null;
 }
 
-function isAcknowledged(derived: Record<string, unknown>): boolean {
-  const a = derived.humanAcknowledgement as { method?: string } | undefined;
-  return a?.method === HOURS_ACKNOWLEDGED_METHOD;
+function readTimeSemantics(derived: Record<string, unknown>): TimeSemantics | null {
+  const ts = derived.timeSemantics as TimeSemantics | undefined;
+  return ts && typeof ts.value === "string" ? ts : null;
 }
 
 /**
@@ -804,8 +816,9 @@ export interface ImportPreview {
     readonly willCreateObjects: number;
     /** Rows whose source week disagrees with their explicit date. */
     readonly weekConflicts: number;
-    /** Rows stating more hours than a day holds, not yet acknowledged. */
-    readonly impossibleHours: number;
+    /** Rows whose hours figure a day cannot hold and no human has yet said
+     *  what it is (a period aggregate, remote work, unknown). */
+    readonly timeSemanticsOpen: number;
     /** Rows whose place could not be read from the cell or the text. */
     readonly siteUnknown: number;
     /** Rows spanning several places with no per-place hours in the text. */
@@ -940,10 +953,20 @@ export async function buildPreview(
       : null;
     const contextCandidates: { id: string; name: string }[] =
       placeSegments(contexts).find((p) => p.state === "ambiguous")?.candidates.slice() ?? [];
-    const acknowledged = isAcknowledged(priorDerived);
-    const impossibleHours =
-      (priorDerived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD &&
-      !acknowledged;
+    // TIME SEMANTICS. Rows staged before the classifier existed carry only
+    // the old "exceeds a day" flag; they are classified now from the same
+    // words, so the production session needs no re-upload. A human choice
+    // already recorded always wins.
+    const rowHours = s.hours === null || s.hours === undefined ? null : Number(s.hours);
+    const timeSemantics: TimeSemantics | null =
+      readTimeSemantics(priorDerived) ??
+      classifyTimeSemantics({
+        hours: rowHours,
+        hasSingleDate: !!s.activity_date && !s.period_start,
+        workText: (s.activity_text as string | null) ?? null,
+        contextLabel,
+      });
+    const timeOpen = timeSemanticsOpen(timeSemantics);
 
     // The fingerprint is recomputed with whatever is now resolved, so a row
     // matched to a person collides with the same fact imported earlier.
@@ -973,7 +996,7 @@ export async function buildPreview(
     // shown — but it is not committed until a human has looked at it and
     // said "as stated" (owner command §11: informed acknowledgement, never a
     // silent block and never a silent rewrite).
-    const settled = contextState !== "ambiguous" && dup.state !== "duplicate" && !impossibleHours;
+    const settled = contextState !== "ambiguous" && dup.state !== "duplicate" && !timeOpen;
     const ready = (personState === "matched" || personState === "created") && settled;
     // The plan can make a row ready only when its person is simply not on the
     // roster yet. An ambiguous person, an ambiguous place, a duplicate or an
@@ -993,8 +1016,8 @@ export async function buildPreview(
           ? "context_ambiguous"
           : dup.state === "duplicate"
             ? "already_imported"
-            : impossibleHours
-              ? "hours_exceed_day"
+            : timeOpen
+              ? "time_semantics_open"
               : personState === "unmatched"
                 ? "person_not_on_roster"
                 : null;
@@ -1026,7 +1049,8 @@ export async function buildPreview(
       readyWithPlan,
       contextWillCreate,
       contexts,
-      acknowledged,
+      timeSemantics,
+      timeSemanticsOpen: timeOpen,
       problem,
     });
 
@@ -1037,6 +1061,7 @@ export async function buildPreview(
     const nextDerived: Record<string, unknown> = { ...priorDerived };
     if (contexts) nextDerived.workContexts = contexts;
     else delete nextDerived.workContexts;
+    if (timeSemantics) nextDerived.timeSemantics = timeSemantics;
 
     updates.push({
       id: s.id as string,
@@ -1149,7 +1174,7 @@ export async function buildPreview(
         ).length,
         needsContext: preview.filter((r) => r.contextState === "ambiguous")
           .length,
-        impossibleHours: preview.filter((r) => r.problem === "hours_exceed_day").length,
+        timeSemanticsOpen: preview.filter((r) => r.timeSemanticsOpen).length,
         siteUnknown: preview.filter((r) => placeSegments(r.contexts).length === 0).length,
         unallocatedMultiPlace: preview.filter(
           (r) => r.contexts?.allocation?.method === "unknown_split",
@@ -1583,32 +1608,58 @@ export async function resolveContextLabel(
   return { kind: "ok", updated };
 }
 
+export interface TimeSemanticsDecision {
+  readonly kind: TimeSemanticsKind;
+  /** Remote / work-from-home, as the human states it; null = not stated. */
+  readonly remote?: boolean | null;
+  /** The period the aggregate covers, ONLY when the human knows it. */
+  readonly periodStart?: string | null;
+  readonly periodEnd?: string | null;
+}
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
 /**
- * A human has looked at a flagged figure and keeps it AS STATED (owner
- * command §11: informed acknowledgement, responsibility preserved). The
- * figure is not changed; the row records who accepted it and the next
- * preview lets it through. Writes STAGING only.
+ * A human says what a figure MEANS (owner correction 2026-09-16: 800 h on a
+ * dated row was work from home over a broader period, not a day). The
+ * source figure is never changed; what is recorded is the human's
+ * classification — daily / period aggregate (optionally remote, optionally
+ * with the period the human knows) / unknown. Writes STAGING only; the
+ * commit then represents the row accordingly and NEVER as a day's duration
+ * unless the human said "daily".
  */
-export async function acknowledgeRows(
+export async function resolveTimeSemantics(
   caller: DomainCaller,
   input: {
     readonly sessionId: string;
-    /** Either specific rows, or every row carrying this problem. */
+    /** Either specific rows, or every row whose semantics are still open. */
     readonly rowIds?: readonly string[];
-    readonly problem?: "hours_exceed_day";
+    readonly allOpen?: boolean;
+    readonly decision: TimeSemanticsDecision;
   },
 ): Promise<EvidenceImportResult<{ readonly updated: number }>> {
   const session = await loadSession(caller, input.sessionId);
   if (!session.ok) return session.failure;
+  const d = input.decision;
+  const periodStart = d.periodStart?.trim() || null;
+  const periodEnd = d.periodEnd?.trim() || null;
+  if ((periodStart && !ISO_DAY.test(periodStart)) || (periodEnd && !ISO_DAY.test(periodEnd)))
+    return { kind: "invalid", problems: ["period must be YYYY-MM-DD"] };
+  if (periodStart && periodEnd && periodEnd < periodStart)
+    return { kind: "invalid", problems: ["periodEnd is before periodStart"] };
+  if (periodEnd && !periodStart) return { kind: "invalid", problems: ["periodStart required with periodEnd"] };
+  if (d.kind !== "period_aggregate" && (periodStart || periodEnd))
+    return { kind: "invalid", problems: ["a period belongs to a period aggregate"] };
+
   let q = db(caller.supabase)
     .from("evidence_import_rows")
-    .select("id, derived")
+    .select("id, hours, derived")
     .eq("session_id", input.sessionId)
     .neq("status", "committed")
     .limit(MAX_ROWS_PER_SESSION);
   if (input.rowIds && input.rowIds.length > 0) q = q.in("id", input.rowIds);
-  else if (input.problem) q = q.eq("problem", input.problem);
-  else return { kind: "invalid", problems: ["rowIds or problem"] };
+  else if (input.allOpen) q = q.eq("problem", "time_semantics_open");
+  else return { kind: "invalid", problems: ["rowIds or allOpen"] };
   const rowsRes = await q;
   if (rowsRes.error) return classify(rowsRes.error);
 
@@ -1616,19 +1667,22 @@ export async function acknowledgeRows(
   const at = new Date().toISOString();
   for (const s of (rowsRes.data ?? []) as Record<string, unknown>[]) {
     const derived = (s.derived as Record<string, unknown> | null) ?? {};
-    if (isAcknowledged(derived)) continue;
+    const prior = readTimeSemantics(derived);
+    const sourceHours = prior?.sourceHours ?? (s.hours === null || s.hours === undefined ? 0 : Number(s.hours));
+    const next: TimeSemantics = {
+      value: d.kind,
+      method: HUMAN_CHOICE,
+      confidence: 1,
+      sourceHours,
+      note: prior?.note ?? null,
+      remote: d.remote ?? prior?.remote ?? null,
+      periodStart,
+      periodEnd: periodEnd ?? periodStart,
+    };
     const upd = await db(caller.supabase)
       .from("evidence_import_rows")
       .update({
-        derived: {
-          ...derived,
-          humanAcknowledgement: {
-            value: input.problem ?? "row",
-            method: HOURS_ACKNOWLEDGED_METHOD,
-            confidence: 1,
-            note: `by ${caller.userId} at ${at}`,
-          },
-        },
+        derived: { ...derived, timeSemantics: next, timeSemanticsDecidedBy: { value: caller.userId, method: HUMAN_CHOICE, confidence: 1, note: at } },
         updated_at: at,
       })
       .eq("id", s.id as string);
@@ -1906,22 +1960,22 @@ export async function commitImport(
   const payload = ready.map((r) => {
     const fingerprint = r.record_fingerprint as string;
     const self = chainHash(prev, fingerprint, importedAt);
-    // AN ACKNOWLEDGED IMPOSSIBLE FIGURE IS NOT A DAY'S DURATION. "Keep as
-    // stated" means: the SOURCE said 800 h on this date and a named human
-    // confirmed that is what it says — it does not mean the person worked
-    // 800 hours that day. The source value stays verbatim in `source_fact`
-    // and in `derived.hoursPlausibility`; the canonical duration is UNKNOWN
-    // (`hours = null`, SEP-7), so no calendar, ledger, pace or capacity
-    // reading can ever sum it as a day (owner acceptance C, 2026-09-16).
+    // WHAT THE FIGURE MEANS decides how the record is written (owner
+    // correction 2026-09-16). A DAILY figure is the day's hours. A PERIOD
+    // AGGREGATE (800 h of work from home over months) is a period record
+    // when the human stated the period — `period_start/end` + `hours`, the
+    // shape the schema already has — and otherwise a dated source fact
+    // whose canonical duration is UNKNOWN (`hours = null`). UNKNOWN
+    // semantics are likewise a dated fact with no duration. The source
+    // figure is always verbatim in `source_fact` and in
+    // `derived.timeSemantics.sourceHours`; nothing operational can sum it
+    // as a day (SEP-1, SEP-7).
     const derived = { ...((r.derived as Record<string, unknown> | null) ?? {}) };
-    const plausibility = derived.hoursPlausibility as { method?: string } | undefined;
-    const impossible = plausibility?.method === HOURS_EXCEED_DAY_METHOD;
-    if (impossible) {
-      derived.hoursPlausibility = {
-        ...plausibility,
-        note: "acknowledged as stated; not a day's duration; canonical hours unknown",
-      };
-    }
+    const ts = readTimeSemantics(derived);
+    const daily = countsAsDailyHours(ts);
+    const period = ts && ts.value === "period_aggregate" && ts.periodStart ? ts : null;
+    const legacyExceeds =
+      !ts && (derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD;
     const row = {
       organization_id: session.organizationId,
       organization_person_id: r.organization_person_id as string,
@@ -1931,10 +1985,10 @@ export async function commitImport(
       // its places in `derived.workContexts`; the single object goes here.
       context_label: (r.context_label as string | null) ?? null,
       work_object_id: (r.work_object_id as string | null) ?? null,
-      activity_date: (r.activity_date as string | null) ?? null,
-      period_start: (r.period_start as string | null) ?? null,
-      period_end: (r.period_end as string | null) ?? null,
-      hours: impossible ? null : (r.hours ?? null),
+      activity_date: period ? null : ((r.activity_date as string | null) ?? null),
+      period_start: period ? period.periodStart : ((r.period_start as string | null) ?? null),
+      period_end: period ? (period.periodEnd ?? period.periodStart) : ((r.period_end as string | null) ?? null),
+      hours: period ? period.sourceHours : daily && !legacyExceeds ? (r.hours ?? null) : null,
       original_text: (r.activity_text as string | null) ?? "",
       original_language: session.sourceLanguage,
       evidence_state: state,

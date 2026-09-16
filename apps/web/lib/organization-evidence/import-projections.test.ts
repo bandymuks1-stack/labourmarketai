@@ -7,7 +7,8 @@ import {
   type ImportPreview,
   type PreviewRow,
 } from "./import-core";
-import { HOURS_EXCEED_DAY_METHOD, WEEK_CONFLICT_METHOD, isoWeekOf } from "./parse-tabular";
+import { WEEK_CONFLICT_METHOD, isoWeekOf } from "./parse-tabular";
+import { classifyTimeSemantics, timeSemanticsOpen, type TimeSemantics } from "./time-semantics";
 import { projectImport } from "./import-projections";
 
 /**
@@ -15,8 +16,8 @@ import { projectImport } from "./import-projections";
  * against an empty organization — production's state on 2026-09-16. The
  * rows are assembled exactly as `buildPreview` assembles them: every
  * person unmatched and covered by the plan, every place resolved by
- * `resolveRowContexts`, the parser's `hoursPlausibility` and
- * `calendarWeek` on the rows that carry them.
+ * `resolveRowContexts`, the time semantics classified from the source's
+ * words, the parser's `calendarWeek` on the rows that carry it.
  */
 
 type Staged = {
@@ -29,7 +30,9 @@ type Staged = {
   readonly week_conflict: boolean;
 };
 
-function buildPreview(acknowledgeImpossible = false): ImportPreview {
+type Decide = (ts: TimeSemantics) => TimeSemantics;
+
+function buildPreview(decide?: Decide): ImportPreview {
   const staged = fixture as readonly Staged[];
   const { canonical, knownAll } = sessionPlaces(staged as unknown as Record<string, unknown>[], []);
   const rows: PreviewRow[] = staged.map((s) => {
@@ -38,9 +41,11 @@ function buildPreview(acknowledgeImpossible = false): ImportPreview {
       prior: null, rowChosenObjectId: null, objects: [], knownAll, canonical,
     });
     const derived: Record<string, unknown> = {};
-    if (s.hours !== null && s.hours > 24) derived.hoursPlausibility = { value: s.hours, method: HOURS_EXCEED_DAY_METHOD, confidence: 1 };
+    let ts = classifyTimeSemantics({ hours: s.hours, hasSingleDate: true, workText: s.activity_text, contextLabel: s.context_label });
+    if (ts && decide) ts = decide(ts);
+    if (ts) derived.timeSemantics = ts;
     if (s.week_conflict) derived.calendarWeek = { value: isoWeekOf(s.activity_date), method: WEEK_CONFLICT_METHOD, confidence: 1, note: "source_week=50" };
-    const impossible = "hoursPlausibility" in derived && !acknowledgeImpossible;
+    const open = timeSemanticsOpen(ts);
     const ambiguous = contexts?.segments.some((x) => x.state === "ambiguous") ?? false;
     return {
       id: `row-${s.row_index}`, rowIndex: s.row_index,
@@ -53,11 +58,12 @@ function buildPreview(acknowledgeImpossible = false): ImportPreview {
       activityText: s.activity_text, factFields: ["personLabel", "workDate", "hours", "workText"], derived,
       duplicateState: "new", duplicateOfRecordId: null,
       ready: false,
-      readyWithPlan: !impossible && !ambiguous,
+      readyWithPlan: !open && !ambiguous,
       contextWillCreate: contexts?.segments.some((x) => x.state === "new") ?? false,
       contexts,
-      acknowledged: acknowledgeImpossible && "hoursPlausibility" in derived,
-      problem: impossible ? "hours_exceed_day" : "person_not_on_roster",
+      timeSemantics: ts,
+      timeSemanticsOpen: open,
+      problem: open ? "time_semantics_open" : "person_not_on_roster",
     };
   });
   const people = new Map<string, number>();
@@ -72,7 +78,7 @@ function buildPreview(acknowledgeImpossible = false): ImportPreview {
     counts: {
       total: rows.length, ready: 0, needsPerson: 0, needsContext: 0, duplicates: 0, conflicts: 0,
       willCreatePeople: people.size, willCreateObjects: canonical.length, weekConflicts: 4,
-      impossibleHours: 2, siteUnknown: 6, unallocatedMultiPlace: 0, ambiguousPlaces: 0,
+      timeSemanticsOpen: rows.filter((r) => r.timeSemanticsOpen).length, siteUnknown: 6, unallocatedMultiPlace: 0, ambiguousPlaces: 0,
     },
   };
 }
@@ -80,27 +86,41 @@ function buildPreview(acknowledgeImpossible = false): ImportPreview {
 describe("what the owner sees before commit — the real file, projected", () => {
   const projection = projectImport(buildPreview());
 
-  it("seven people, each with their real span, days and stated hours — no score anywhere", () => {
+  it("seven people as evidence: span, days, daily hours, places with dates, words — and no score, no current state", () => {
     expect(projection.people).toHaveLength(7);
     for (const p of projection.people) {
       expect(p.state).toBe("new");
-      expect(p.days).toBeGreaterThan(0);
-      expect(p.days).toBeLessThanOrEqual(p.rows);
-      expect(p.firstDate).toMatch(/^2025-1[0-2]-/);
-      expect(Object.keys(p)).not.toEqual(expect.arrayContaining(["score", "rating", "rank", "level"]));
+      expect(p.firstDate ?? p.aggregateRows).toBeTruthy();
+      expect(Object.keys(p)).not.toEqual(expect.arrayContaining(["score", "rating", "rank", "level", "available", "employed", "wage"]));
+      for (const pl of p.places) if (pl.rows > 0 && p.days > 0) expect(pl.firstDate).not.toBeNull();
     }
     const top = projection.people[0];
     expect(top.rows).toBe(40);
     expect(top.places.length).toBeGreaterThan(3);
+    expect(top.weeks.length).toBeGreaterThan(3);
+    expect(top.evidenceSamples.length).toBeGreaterThan(0);
+    expect(top.interpretations.some((i) => i.method === "site_from_work_text" || i.method === "typo_same_house_number")).toBe(true);
   });
 
-  it("flagged hours are kept apart from stated hours, never summed in", () => {
-    const flagged = projection.people.filter((p) => p.flaggedHours > 0);
-    expect(flagged.map((p) => p.flaggedHours).sort((a, b) => a - b)).toEqual([165, 800]);
-    for (const p of flagged) expect(p.hours).toBeLessThan(400);
-    expect(projection.company.flaggedHours).toBe(965);
+  it("period aggregates are kept apart from daily hours everywhere — person, company, calendar", () => {
+    const withAggregate = projection.people.filter((p) => p.aggregateRows > 0);
+    expect(withAggregate.map((p) => p.aggregateHours).sort((a, b) => a - b)).toEqual([165, 800]);
+    for (const p of withAggregate) expect(p.hours).toBeLessThan(400);
+    expect(projection.company.aggregateHours).toBe(965);
+    expect(projection.company.aggregateRows).toBe(2);
     expect(projection.company.statedHours).toBeLessThan(1500);
     expect(projection.company.statedHours).toBeGreaterThan(1000);
+    // On no day, in no week total; listed apart with period UNKNOWN.
+    const nov17 = projection.calendar.weeks.flatMap((w) => w.days).find((d) => d.date === "2025-11-17")!;
+    expect(nov17.people.every((p) => (p.hours ?? 0) <= 24)).toBe(true);
+    expect(projection.calendar.weeks.find((w) => w.isoWeek === 47)!.hours).toBeLessThan(400);
+    expect(projection.calendar.aggregates).toHaveLength(2);
+    for (const a of projection.calendar.aggregates) {
+      expect(a.periodStart).toBeNull();
+      expect(a.open).toBe(true);
+      expect([165, 800]).toContain(a.sourceHours);
+    }
+    expect(projection.company.unknown).toContain("aggregate_period");
   });
 
   it("places are the real ones, with their spellings shown and shared rows counted apart", () => {
@@ -113,64 +133,75 @@ describe("what the owner sees before commit — the real file, projected", () =>
     expect(h13.sharedRows).toBeGreaterThan(0);
     expect(h13.statedHours).toBeGreaterThan(0);
     expect(h13.people).toBeGreaterThanOrEqual(3);
-    expect(projection.places.every((p) => p.state === "new")).toBe(true);
   });
 
-  it("the calendar spans source weeks 43–51 with one row per person-day", () => {
+  it("the calendar carries every place of a day with its explicit hours or null — never a divided guess", () => {
     const c = projection.calendar;
     expect(c.firstDate).toBe("2025-10-22");
     expect(c.lastDate).toBe("2025-12-15");
     expect(c.weeks.map((w) => w.isoWeek)).toEqual([43, 44, 45, 46, 47, 48, 49, 50, 51]);
-    expect(c.people).toHaveLength(7);
-    expect(c.personDays).toBeLessThanOrEqual(158);
-    expect(c.personDays).toBeGreaterThan(140);
-    // The impossible day is on the calendar, flagged, and counted in no week total.
-    const nov17 = c.weeks.flatMap((w) => w.days).find((d) => d.date === "2025-11-17")!;
-    expect(nov17.people.filter((p) => p.flagged)).toHaveLength(2);
-    const w47 = c.weeks.find((w) => w.isoWeek === 47)!;
-    expect(w47.hours).toBeLessThan(400);
+    const multi = c.weeks.flatMap((w) => w.days).flatMap((d) => d.people).filter((p) => p.places.length > 1);
+    expect(multi.length).toBeGreaterThan(30);
+    const explicit = multi.find((p) => p.places.every((pl) => pl.hours !== null));
+    expect(explicit).toBeDefined();
+    expect(explicit!.places.reduce((s, pl) => s + (pl.hours ?? 0), 0)).toBeLessThanOrEqual(explicit!.hours ?? 0 + 0.01);
+    const unknownSplit = multi.find((p) => p.places.every((pl) => pl.hours === null));
+    expect(unknownSplit).toBeDefined();
+    expect(unknownSplit!.hours).not.toBeNull();
   });
 
-  it("the issues are the genuine ones, and only the impossible figures block", () => {
+  it("the field shows who is evidenced where, by week and overall — a projection, not a team", () => {
+    const f = projection.field;
+    expect(f.weeks.map((w) => w.isoWeek)).toEqual([43, 44, 45, 46, 47, 48, 49, 50, 51]);
+    const w49 = f.weeks.find((w) => w.isoWeek === 49)!;
+    expect(w49.people.length).toBeGreaterThanOrEqual(3);
+    expect(w49.places.length).toBeGreaterThanOrEqual(2);
+    for (const pl of w49.places) expect(pl.people.length).toBeGreaterThan(0);
+    const h3 = f.places.find((p) => p.name === "Testgracht 3")!;
+    expect(h3.people.length).toBeGreaterThanOrEqual(3);
+    expect(h3.days).toBeGreaterThan(20);
+    expect(Object.keys(f)).toEqual(["weeks", "places"]);
+    expect(JSON.stringify(f)).not.toMatch(/team|brigade|member/i);
+  });
+
+  it("the issues are genuine: the two figures are ONE blocking question, listed with the source's words", () => {
     const kinds = Object.fromEntries(projection.issues.map((i) => [i.kind, i]));
-    expect(kinds.impossible_hours.count).toBe(2);
-    expect(kinds.impossible_hours.blocking).toBe(true);
-    expect(kinds.impossible_hours.sample).toMatch(/800 h|165 h/);
+    expect(kinds.time_semantics.count).toBe(2);
+    expect(kinds.time_semantics.blocking).toBe(true);
+    expect(kinds.time_semantics.timeRows.map((r) => r.sourceHours).sort((a, b) => a - b)).toEqual([165, 800]);
+    expect(kinds.time_semantics.timeRows.every((r) => r.machineReading === "period_aggregate")).toBe(true);
+    expect(kinds.time_semantics.timeRows.every((r) => r.periodWords === "month")).toBe(true);
     expect(kinds.week_conflicts.count).toBe(4);
     expect(kinds.week_conflicts.blocking).toBe(false);
-    // Three rows name no site at all (a bare name, a town nobody else names)
-    // and three name only an activity or a duration note — six without a place.
     expect(kinds.site_unknown.count).toBe(6);
     expect(kinds.allocation_unknown.count).toBeGreaterThanOrEqual(25);
-    expect(kinds.ambiguous_place).toBeUndefined();
-    expect(kinds.ambiguous_person).toBeUndefined();
     expect(projection.issues.filter((i) => i.blocking)).toHaveLength(1);
-    // A place only the text named and nothing folded is a question, not a
-    // block: `Testdienst 13` (too far from Testgracht to merge). The bare
-    // town is not extracted at all — it stays under "site unknown".
     const fromText = projection.issues.filter((i) => i.kind === "place_from_text");
     expect(fromText.map((i) => i.label)).toEqual(["Testdienst 13"]);
-    for (const q of fromText) {
-      expect(q.blocking).toBe(false);
-      expect(q.siblings).toEqual(expect.arrayContaining(["Testgracht 13", "Kantoor"]));
-      expect(q.siblings).not.toContain(q.label);
-    }
   });
 
-  it("the company view names what the source does NOT say", () => {
-    expect(projection.company.unknown).toEqual(expect.arrayContaining(["client", "project", "wage", "team"]));
-    expect(projection.company.activities).toEqual(["Administraciniai/koordinavimo darbai"]);
-    expect(projection.company.people).toBe(7);
-  });
-
-  it("what commit would create: 156 records now, 2 held until acknowledged; 7 people; the real places", () => {
+  it("what commit would create: 156 daily records now, 2 held; then the human's decision changes the SHAPE, never the figure", () => {
     expect(projection.commit.records).toBe(156);
+    expect(projection.commit.dailyRecords).toBe(156);
     expect(projection.commit.notWritten).toBe(2);
     expect(projection.commit.createPeople).toBe(7);
-    expect(projection.commit.createObjects).toBeGreaterThanOrEqual(15);
-    expect(projection.commit.evidenceState).toBe("ORGANIZATION_REPORTED");
-    const after = projectImport(buildPreview(true));
-    expect(after.commit.records).toBe(158);
-    expect(after.issues.find((i) => i.kind === "impossible_hours")).toBeUndefined();
+
+    // Decided as an aggregate with the period UNKNOWN: dated facts without duration.
+    const unknownPeriod = projectImport(buildPreview((ts) => ({ ...ts, method: "human_choice", remote: true })));
+    expect(unknownPeriod.commit.records).toBe(158);
+    expect(unknownPeriod.commit.dailyRecords).toBe(156);
+    expect(unknownPeriod.commit.undatedDurationRecords).toBe(2);
+    expect(unknownPeriod.commit.periodRecords).toBe(0);
+    expect(unknownPeriod.company.statedHours).toBe(projection.company.statedHours);
+    expect(unknownPeriod.company.remoteRows).toBe(2);
+    expect(unknownPeriod.issues.find((i) => i.kind === "time_semantics")).toBeUndefined();
+
+    // Decided with a period the human knows: period records — still not a day.
+    const known = projectImport(buildPreview((ts) => ({ ...ts, method: "human_choice", periodStart: "2024-07-01", periodEnd: "2025-10-31" })));
+    expect(known.commit.periodRecords).toBe(2);
+    expect(known.commit.undatedDurationRecords).toBe(0);
+    expect(known.calendar.aggregates.every((a) => a.periodStart === "2024-07-01" && !a.open)).toBe(true);
+    expect(known.company.unknown).not.toContain("aggregate_period");
+    expect(known.company.statedHours).toBe(projection.company.statedHours);
   });
 });

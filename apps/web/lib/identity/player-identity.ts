@@ -39,6 +39,7 @@ export const PLAYER_IDENTITY_VARIANTS = [
   "dashboard-compact", // authenticated dashboard compact card
   "map-marker", // market-map simplified marker + hover card
   "request-provider", // marketplace request / provider compact card
+  "history-card", // historical reconstruction — an organization's evidence about a person (2026-09-16)
 ] as const;
 export type PlayerIdentityVariant = (typeof PLAYER_IDENTITY_VARIANTS)[number];
 

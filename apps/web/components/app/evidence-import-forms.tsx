@@ -802,56 +802,104 @@ export function EvidenceLabelResolveForm({
   );
 }
 
-// ── keep a flagged figure as stated ────────────────────────────────────────
+// ── what an hours figure means ─────────────────────────────────────────────
 
-export interface AcknowledgeLabels {
-  readonly keepAsStated: string;
+export interface TimeSemanticsLabels {
+  readonly question: string;
+  readonly kindLabel: string;
+  readonly kinds: { readonly period_aggregate: string; readonly daily: string; readonly unknown: string };
+  readonly remoteLabel: string;
+  readonly remote: { readonly yes: string; readonly no: string; readonly unknown: string };
+  readonly periodLabel: string;
+  readonly periodHint: string;
+  readonly from: string;
+  readonly to: string;
+  readonly save: string;
   readonly hint: string;
   readonly errors: Record<string, string>;
 }
 
 /**
- * A human accepts a figure the system flagged (800 h on one day) AS STATED.
- * The figure is not edited — what is recorded is that a named person looked
- * and kept it (owner command §11). Staging only.
+ * A human says what a figure a day cannot hold MEANS (owner correction
+ * 2026-09-16): a period aggregate — optionally remote, with the period only
+ * if they know it — a day's hours after all, or unknown. The source figure
+ * is never edited, and a period is never invented: the date fields are
+ * optional and empty by default. Staging only.
  */
-export function EvidenceAcknowledgeForm({
+export function EvidenceTimeSemanticsForm({
   action,
   labels,
   sessionId,
   rowIds,
-  problem,
+  suggestedKind,
+  suggestedRemote,
 }: {
   action: (
     prev: EvidenceImportActionState,
     form: FormData,
   ) => Promise<EvidenceImportActionState>;
-  labels: AcknowledgeLabels;
+  labels: TimeSemanticsLabels;
   sessionId: string;
   rowIds: readonly string[];
-  problem: "hours_exceed_day";
+  suggestedKind: "period_aggregate" | "unknown";
+  suggestedRemote: boolean | null;
 }) {
   const [state, submit, pending] = useActionState<
     EvidenceImportActionState,
     FormData
   >(action, { kind: "idle" });
+  const [kind, setKind] = useState<string>(suggestedKind);
   return (
     <form
       action={submit}
       className="flex flex-col gap-2"
-      data-testid="evidence-acknowledge-form"
-      data-problem={problem}
+      data-testid="evidence-time-semantics-form"
+      data-rows={rowIds.length}
     >
       <input type="hidden" name="session_id" value={sessionId} />
-      <input type="hidden" name="problem" value={problem} />
       {rowIds.map((id) => (
         <input key={id} type="hidden" name="row_id" value={id} />
       ))}
+      <p className="text-sm text-text-primary">{labels.question}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <label className="flex flex-col gap-1">
+          <span className={labelText}>{labels.kindLabel}</span>
+          <select name="kind" className={field} value={kind} onChange={(e) => setKind(e.target.value)} data-testid="evidence-time-kind">
+            <option value="period_aggregate">{labels.kinds.period_aggregate}</option>
+            <option value="daily">{labels.kinds.daily}</option>
+            <option value="unknown">{labels.kinds.unknown}</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className={labelText}>{labels.remoteLabel}</span>
+          <select name="remote" className={field} defaultValue={suggestedRemote === true ? "yes" : "unknown"} data-testid="evidence-time-remote">
+            <option value="yes">{labels.remote.yes}</option>
+            <option value="no">{labels.remote.no}</option>
+            <option value="unknown">{labels.remote.unknown}</option>
+          </select>
+        </label>
+      </div>
+      {kind === "period_aggregate" && (
+        <fieldset className="flex flex-col gap-1">
+          <legend className={labelText}>{labels.periodLabel}</legend>
+          <p className="text-xs text-text-muted">{labels.periodHint}</p>
+          <div className="flex flex-wrap gap-2">
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {labels.from}
+              <input type="date" name="period_start" className={field} data-testid="evidence-time-period-start" />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {labels.to}
+              <input type="date" name="period_end" className={field} data-testid="evidence-time-period-end" />
+            </label>
+          </div>
+        </fieldset>
+      )}
       <p className="text-xs leading-relaxed text-text-muted">{labels.hint}</p>
       <Refusal state={state} errors={labels.errors} />
       <div>
         <button type="submit" className={quietButton} disabled={pending}>
-          {labels.keepAsStated}
+          {labels.save}
         </button>
       </div>
     </form>

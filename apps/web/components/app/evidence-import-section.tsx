@@ -36,7 +36,7 @@ import {
 import { projectImport } from "@/lib/organization-evidence/import-projections";
 import { EvidenceImportReconstruction } from "@/components/app/evidence-import-reconstruction";
 import {
-  acknowledgeEvidenceRowsAction,
+  resolveTimeSemanticsAction,
   attestEvidenceRecordAction,
   commitEvidenceImportAction,
   createEvidencePersonAction,
@@ -521,7 +521,7 @@ export async function EvidenceImportSection({
         sessionId={sessionId}
         projection={projection}
         workObjects={objectOptions}
-        actions={{ resolveLabel: resolveEvidenceLabelAction, acknowledge: acknowledgeEvidenceRowsAction }}
+        actions={{ resolveLabel: resolveEvidenceLabelAction, resolveTime: resolveTimeSemanticsAction }}
         errors={errors}
       />
 
