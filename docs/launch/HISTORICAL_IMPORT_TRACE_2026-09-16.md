@@ -12,16 +12,16 @@ This is the trace §51 asked for. It is not an audit and authorizes nothing.
 
 | Fact | Value |
 |---|---|
-| Rows / people | 158 / 7 (Viktar 40, Linas 36, Aleksandr 28, Valerij 28, Ramūnas 15, Mihail 10, Donatas 1) |
+| Rows / people | 158 / 7 (rows per person: 40, 36, 28, 28, 15, 10, 1) |
 | Period | 2025-10-22 → 2025-12-15, 8 weekly source files (week 43–50) |
 | "Object / recognized objects" | 135 rows stated; **37 distinct labels, most COMPOSITE** (`Hoofdgracht 3; Kantoor`, `Hoofdgracht 1; Hoofdgracht 3; Hoofdgracht 13; Kantoor` …) |
-| Real distinct places behind them | ~17: Hoofdgracht 1/3/5/13, Kantoor, Travers 19, Walgang 12/19, Bloemhof 157, Banckertstraat 22, Anne Franklaan 16, Nieuwe Havenweg 81, Wijkplaats 4, Hubartlaan 6, Burgemeister, 2e Nieuwstraat, Bussum |
+| Real distinct places behind them | ~17 (four house numbers on one street, the office, twelve further addresses/places) |
 | Non-place labels in the object column | `Administraciniai/koordinavimo darbai` (activity), `2 uur - garantie` (duration note) |
 | "Assignment note" (source's own) | `vienas objektas` 74 · `keli objektai - paskirstyta apytiksliai` 61 · `objektas neatpažintas` 23 |
-| 23 rows with no object | the site is the first words of the work text, misspelled: `Hoofdgraht 13`, `Hoofdgrat 5`, `Hoofdraht 5`, `Hoofddienst 13`, `Hofdracht3`, `Anna Franklin 16`, `anna franklaan`, `Bussum`; 1 row has no text at all |
+| 23 rows with no object | the site is the first words of the work text, misspelled: `Hoofdgraht 13`, `Hoofdgrat 5`, `Hoofdraht 5`, `Hoofddienst 13`, `Hofdracht3`, a street name with a typo and a town name; 1 row has no text at all |
 | Per-object hours inside text | `Hoofdgraht 13 (7 uur) … Hoofdgraht 3 (2 uur)`, `… 8 uur`, `… 1 uur`, `2,5 uur`, `– 2 uur` — explicit allocation exists on part of the multi-object days |
 | Week vs date | 4 rows: source week 50, explicit date 2025-12-15 (ISO 51); the source's own provenance column says it kept the date on purpose |
-| Impossible day | Donatas 800 h and Ramūnas 165 h on 2025-11-17 — the text says they are 16-month aggregates |
+| Impossible day | 800 h and 165 h on 2025-11-17 (two people) — the text says they are 16-month aggregates |
 | Date provenance | the source's own column states every date was derived from year + week + weekday by the owner's pre-processing |
 
 ## The chain, edge by edge
@@ -86,3 +86,28 @@ This is the trace §51 asked for. It is not an audit and authorizes nothing.
 - Object-centred reads of multi-object days need `derived.workContexts`
   (JSONB) or a RED junction table; deferred.
 - Subject refusal of an imported record: RED, already packeted.
+
+## Delivered in this slice (branch `feat/cc/history-reality-model`)
+
+| Item | Where | Proof |
+|---|---|---|
+| Split / classify / typo-resolve / site-from-text / per-place hours | `lib/organization-evidence/work-context.ts` | `work-context.test.ts` (35), `import-contexts.test.ts` over the anonymised real file (10) |
+| Preview resolves every place per row; plan lists real places with spellings; `needsPerson` counts only what the human must settle; impossible-day rows held until acknowledged | `import-core.ts` (`sessionPlaces`, `resolveRowContexts`, `buildPreview`, `applyPlan`) | same, + `organization-evidence-core.test.ts` unchanged (50) |
+| Label-level decision and acknowledgement — staging only | `resolveContextLabel`, `acknowledgeRows`; actions `resolveEvidenceLabelAction`, `acknowledgeEvidenceRowsAction`; MCP `evidence.import.resolve_label`, `evidence.import.acknowledge_rows` | capability guards |
+| Commit writes `context_label` and the resolution in `derived` | `commitImport` | `historical-import-reality.test.ts` |
+| Read-only projections: people, places, calendar, issues, company, commit effect | `import-projections.ts` | `import-projections.test.ts` (7) |
+| First screen = reconstruction; rows behind disclosure; KPI wall removed | `components/app/evidence-import-reconstruction.tsx`, `evidence-import-section.tsx` | `historical-import-reality.test.ts`, `product-ia-anti-slop.test.ts`, i18n guard (5 locales) |
+| Evidence → the ONE work model | `worker-evidence-read.ts` → `readOrganizationRecords` | `journal-work-intelligence.test.ts` re-anchored |
+
+No migration. No RLS or policy change. No new store. No brigade inferred.
+
+## Owner HUMAN walk — what to look for on `/lt/dashboard/company/history?evidenceSession=47627d4a-…`
+
+1. **Istorija atkurta**: 158 · 7 · ~17 objektai (not 37) · stated hours; period 22 Oct – 15 Dec 2025; the 965 h flagged line shown apart.
+2. **Reikia patikrinti**: exactly ONE blocking item — 2 rows with more hours than a day — with "Palikti kaip nurodyta". Week conflicts (4), site unknown (6), unallocated multi-place days (~30+) under "pastebėjimai, kurie nestabdo".
+3. **Žmonės**: 7 cards, each "naujas", rows·days·hours, span, top places; two cards show "+ … h peržiūrėtinose eilutėse".
+4. **Objektai**: the ~17 real places (Hoofdgracht 1/3/5/13, Kantoor, …) and a separate `Hoofddienst 13` (too far from `Hoofdgracht` to merge — decide it via the row, or leave it). Spellings listed under each.
+5. **Kalendorius**: weeks 43–51, per person per week, ⚠ on week 47 for two people.
+6. **Įmonės vaizdas**: known line + UNKNOWN: užsakovas, projektas, darbų paketas, atlygis, rezultatas, brigada.
+7. **Patvirtinimas**: plan shows 7 people and the real places; "Patvirtinti (156)" until the two rows are acknowledged. **Do not press it unless you mean it** — this is the one permanent write.
+8. The 158 rows are under "Rodyti visas 158 šaltinio eilutes".

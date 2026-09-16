@@ -314,6 +314,8 @@ describe("the capabilities are registered, honest and complete", () => {
       "evidence.import.submit_rows",
       "evidence.import.preview",
       "evidence.import.resolve_row",
+      "evidence.import.resolve_label",
+      "evidence.import.acknowledge_rows",
       "evidence.import.commit",
       "evidence.records.list",
       "evidence.record.attest",

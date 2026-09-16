@@ -23,6 +23,7 @@ import {
   type WorkRange,
 } from "@/lib/journal/work-intelligence";
 import { readAllocationsForWorker } from "@/lib/work-hours/allocations";
+import { readEvidenceRecordsForWorker } from "@/lib/organization-evidence/worker-evidence-read";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 
 /**
@@ -130,18 +131,43 @@ export async function readOrganizationRecords(
   supabase: SupabaseClient,
   workerId: string,
 ): Promise<readonly WorkIntelligenceOrganizationRecord[] | null> {
-  const res = await readAllocationsForWorker(supabase, workerId);
-  if (res.kind === "error") return null;
-  if (res.kind === "needs-migration") return [];
-  return res.rows.map((r) => ({
-    id: r.id,
-    workDate: r.workDate,
-    hours: r.hours,
-    source: r.source,
-    status: r.status,
-    organizationId: r.organizationId,
-    journalEntryId: r.journalEntryId,
-  }));
+  // TWO ledgers the organization keeps about the person, ONE reading:
+  // typed hour lines (`work_hour_allocations`) and imported historical
+  // evidence (`organization_evidence_records`, through the person's
+  // LINKED roster row). Both are "the organization says"; neither is the
+  // journal; both are handed to the model as `source: "import"` when they
+  // came from a document. Either read failing is UNKNOWN for the whole
+  // ledger — a half-read ledger would pose as a smaller one (SEP-7).
+  const [allocations, evidence] = await Promise.all([
+    readAllocationsForWorker(supabase, workerId),
+    readEvidenceRecordsForWorker(supabase, workerId),
+  ]);
+  if (allocations.kind === "error" || evidence.kind === "error") return null;
+  const fromAllocations: WorkIntelligenceOrganizationRecord[] =
+    allocations.kind === "needs-migration"
+      ? []
+      : allocations.rows.map((r) => ({
+          id: r.id,
+          workDate: r.workDate,
+          hours: r.hours,
+          source: r.source,
+          status: r.status,
+          organizationId: r.organizationId,
+          journalEntryId: r.journalEntryId,
+        }));
+  const fromEvidence: WorkIntelligenceOrganizationRecord[] =
+    evidence.kind === "needs-migration"
+      ? []
+      : evidence.rows.map((r) => ({
+          id: r.id,
+          workDate: r.workDate,
+          hours: r.hours,
+          source: "import",
+          status: "recorded",
+          organizationId: r.organizationId,
+          journalEntryId: null,
+        }));
+  return [...fromAllocations, ...fromEvidence];
 }
 
 /** Entry ids per `.in()` filter — a URL-length bound, not a coverage cap:

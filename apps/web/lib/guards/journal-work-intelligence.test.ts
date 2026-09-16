@@ -708,7 +708,12 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
   });
 
   it("UNKNOWN ≠ ZERO on the ledger: a failed read is null, an absent table is an empty ledger", () => {
-    expect(reader).toMatch(/if \(res\.kind === "error"\) return null;\s*if \(res\.kind === "needs-migration"\) return \[\];/);
+    // Two ledgers, one reading (2026-09-16): either read failing is UNKNOWN
+    // for the whole ledger; an absent table on either side is an empty one.
+    expect(reader).toMatch(/if \(allocations\.kind === "error" \|\| evidence\.kind === "error"\) return null;/);
+    expect(reader).toMatch(/allocations\.kind === "needs-migration"\s*\?\s*\[\]/);
+    expect(reader).toMatch(/evidence\.kind === "needs-migration"\s*\?\s*\[\]/);
+    expect(reader).toMatch(/readEvidenceRecordsForWorker\(supabase, workerId\)/);
     expect(model).toContain("readonly organizationRecords: readonly OrganizationRecordTotals[] | null;");
   });
 

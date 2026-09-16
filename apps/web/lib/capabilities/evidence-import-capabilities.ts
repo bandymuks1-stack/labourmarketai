@@ -17,6 +17,8 @@ import {
   createRosterPerson,
   listEvidenceRecords,
   listRosterPeople,
+  acknowledgeRows,
+  resolveContextLabel,
   resolveRow,
   submitRows,
   withdrawImport,
@@ -480,6 +482,79 @@ const rowResolve: CapabilityDescriptor = {
   },
 };
 
+// ── evidence.import.resolve_label ─────────────────────────────────────────
+
+const labelResolveInput = z
+  .object({
+    sessionId: z.uuid(),
+    /** The segment key as the preview reports it (`contexts.segments[].key`). */
+    key: z.string().min(1).max(200),
+    decision: z.discriminatedUnion("kind", [
+      z.object({ kind: z.literal("object"), workObjectId: z.uuid() }).strict(),
+      z.object({ kind: z.literal("create"), name: z.string().min(1).max(160).nullish() }).strict(),
+      z.object({ kind: z.literal("ignore") }).strict(),
+    ]),
+  })
+  .strict();
+
+const labelResolve: CapabilityDescriptor = {
+  id: "evidence.import.resolve_label",
+  kind: "execute",
+  title: "Settle one place spelling for the whole session",
+  description:
+    "Answers one place question once for every staged row that names the " +
+    "same source spelling (`Travers` on eleven rows is one question): use an " +
+    "existing work object, create one under this name, or say it is not a " +
+    "place. Writes staging only; preview again afterwards.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: labelResolveInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = labelResolveInput.parse(input);
+    const res = await resolveContextLabel(caller, parsed);
+    if (res.kind !== "ok") return fail(res);
+    return { ok: true, data: { updated: res.updated, note: "Preview again to refresh the token." } };
+  },
+};
+
+// ── evidence.import.acknowledge_rows ──────────────────────────────────────
+
+const acknowledgeInput = z
+  .object({
+    sessionId: z.uuid(),
+    rowIds: z.array(z.uuid()).min(1).max(500).optional(),
+    /** Alternatively: every staged row carrying this problem. */
+    problem: z.literal("hours_exceed_day").optional(),
+  })
+  .strict()
+  .refine((v) => (v.rowIds?.length ?? 0) > 0 || v.problem !== undefined, {
+    message: "rowIds or problem",
+  });
+
+const rowsAcknowledge: CapabilityDescriptor = {
+  id: "evidence.import.acknowledge_rows",
+  kind: "execute",
+  title: "Keep a flagged figure as stated",
+  description:
+    "Records that the caller reviewed rows the preview flagged (more hours " +
+    "than a day holds) and keeps their figures AS STATED. Nothing is edited; " +
+    "the rows may then commit. Only the human's authority behind the caller " +
+    "can do this — an agent relays a decision, it does not make one.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: acknowledgeInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = acknowledgeInput.parse(input);
+    const res = await acknowledgeRows(caller, {
+      sessionId: parsed.sessionId,
+      rowIds: parsed.rowIds,
+      problem: parsed.problem,
+    });
+    if (res.kind !== "ok") return fail(res);
+    return { ok: true, data: { updated: res.updated, note: "Preview again to refresh the token." } };
+  },
+};
+
 // ── evidence.import.commit (the confirm leg) ──────────────────────────────
 
 const commitInput = z
@@ -682,6 +757,8 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   rowsSubmit,
   importPreview,
   rowResolve,
+  labelResolve,
+  rowsAcknowledge,
   importCommit,
   recordsList,
   recordAttest,
