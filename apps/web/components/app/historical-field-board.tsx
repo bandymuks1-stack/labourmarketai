@@ -80,7 +80,7 @@ function Tile({
       <span
         aria-hidden
         className={cn(
-          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold",
+          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-meta font-semibold",
           PLAYER_IDENTITY_AVATAR_BORDER,
           PLAYER_IDENTITY_FALLBACK_SURFACE,
         )}
@@ -89,7 +89,7 @@ function Tile({
       </span>
       <span className="flex min-w-0 items-baseline gap-1 leading-tight">
         <span className="truncate text-xs font-semibold text-text-primary">{label}</span>
-        <span className="text-[11px] tabular-nums text-text-muted">{summary}</span>
+        <span className="text-meta tabular-nums text-text-muted">{summary}</span>
       </span>
     </button>
   );

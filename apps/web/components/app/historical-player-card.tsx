@@ -181,12 +181,12 @@ export function HistoricalPlayerCard({
                   className="flex flex-1 flex-col items-center justify-end gap-1"
                   title={`${labels.weekShort} ${w.isoWeek}: ${formatHours(w.hours)} h · ${w.days} d.`}
                 >
-                  <span className="font-mono text-[10px] tabular-nums text-text-secondary">{formatHours(w.hours)}</span>
+                  <span className="font-mono text-meta tabular-nums text-text-secondary">{formatHours(w.hours)}</span>
                   <span
                     className="w-3 rounded-t-[2px] bg-brand-cyan"
                     style={{ height: `${Math.max(3, Math.round((w.hours / maxWeekHours) * 28))}px` }}
                   />
-                  <span className="font-mono text-[10px] tabular-nums text-text-muted">{w.isoWeek}</span>
+                  <span className="font-mono text-meta tabular-nums text-text-muted">{w.isoWeek}</span>
                 </li>
               ))}
             </ol>

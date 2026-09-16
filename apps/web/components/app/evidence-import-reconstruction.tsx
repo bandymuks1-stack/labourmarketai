@@ -243,7 +243,7 @@ export async function EvidenceImportReconstruction({
                       data-testid="evidence-spine-week"
                       data-iso-week={w.isoWeek}
                     >
-                      <span className="text-center font-mono text-[10px] tabular-nums text-text-secondary">{hours(w.hours)}</span>
+                      <span className="text-center font-mono text-meta tabular-nums text-text-secondary">{hours(w.hours)}</span>
                       <div className="flex w-full flex-col-reverse gap-px" style={{ height: `${Math.max(4, Math.round((w.hours / maxWeek) * 64))}px` }}>
                         {stack.map(([label, h], idx) => (
                           <span
@@ -254,7 +254,7 @@ export async function EvidenceImportReconstruction({
                           />
                         ))}
                       </div>
-                      <span className="text-center font-mono text-[10px] tabular-nums text-text-muted">{w.isoWeek}</span>
+                      <span className="text-center font-mono text-meta tabular-nums text-text-muted">{w.isoWeek}</span>
                     </li>
                   );
                 })}
