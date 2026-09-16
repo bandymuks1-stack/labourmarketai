@@ -638,6 +638,92 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
   },
   {
     // ═══════════════════════════════════════════════════════════════════════
+    // components/app/historical-player-card.tsx — the `history-card` variant
+    // of the ONE person identity, rendered from an organization's evidence
+    // about a person (owner command 2026-09-16, post-#1748: "the premium
+    // player card is a first-class product requirement … reusable across
+    // profile, historical reconstruction, team/field board, project,
+    // matching"). It reads a pre-commit PROJECTION of staged import rows and
+    // writes nothing; it shows only what the evidence supports — period,
+    // daily hours, days, places, activities, the source's words, the
+    // interpretations made, the unknowns — behind the organization-reported
+    // provenance edge, and it states that the person's CURRENT state is not
+    // inferred from history. No score, rating, rank or tier exists on it.
+    //
+    // The World-State answers below are honest: the card is a projection of
+    // a staging session, not a world-state entity yet (NO); nothing renders
+    // it on the map (NO); the assistant OPENS this surface (the chat's
+    // historical-import intent routes to the history door) and CHANGES what
+    // the card shows through evidence.import.resolve_label /
+    // resolve_time_semantics over the same staged rows (aiControlled YES).
+    id: "components/app/historical-player-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Shows a person as the organization's historical evidence describes them — one identity atom shared with the worker's own player card — so the owner reviewing an import sees people, not spreadsheet rows, and sees exactly what the file proves and what it does not.",
+    whyNotChat:
+      "A person's evidence-backed history is a thing to LOOK AT and compare across seven people at once (period, rhythm by week, places, words); a conversational turn can name the facts but cannot lay them side by side. The assistant reaches the same staged rows through the import capabilities; the card is the visual form of the same facts, not a second source.",
+    whyNotExistingComponent:
+      "components/app/worker-player-card.tsx is bound to a platform worker's own data (skills, journal, documents, availability) and would either show zeros for an unlinked roster person or invent them. This variant renders the same identity atoms (monogram, provenance edge, history band) from organization evidence, with no current-state fields at all — extending the identity registry (history-card), not forking it.",
+    owner:
+      "Product owner — owner unified command 2026-09-16 (post-#1748 human correction + premium player card / historical team reality), §3–§5",
+    ownsAction: null,
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "Same element. It presents a person an organization's evidence names (organization_people, possibly unlinked) and creates no new world element; the roster row is the existing one the real person may later claim.",
+    chatIntegration:
+      "The chat's historical-import intent opens the history door where the cards render; the assistant previews, settles place labels and time semantics through the evidence.import.* capabilities over the SAME staged rows, and every such decision changes what the card shows on the next render. The card itself is display; the control is the shared core.",
+    avatarEffect:
+      "None until commit and until the roster row is claimed: the card is a projection and writes nothing. After a human commit and a claimed link, the same evidence reaches the person's Work in Numbers, Living CV and player card through the one work model (worker-evidence-read.ts) — no second write.",
+    mapEffect:
+      "None. Places on the card are the organization's work objects the evidence names; nothing here renders on the market map and claiming otherwise would fabricate a map effect.",
+    journalRelation:
+      "Organization-reported evidence is a ledger BESIDE the Work Journal, never inside it and never a skill: the card shows hours, days and words as reported, with the EVIDENCE_SUPPORTED provenance class (never EMPLOYER_CONFIRMED), and hours never become competency.",
+
+    pillar: "avatar",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // The five mandatory answers, honestly.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "See the PEOPLE a historical import reconstructs — as evidence-backed professional identities, side by side — before deciding to commit it.",
+      graphEdge:
+        "PERSON ↔ EVIDENCE ↔ TIME ↔ OBJECT (§14 nodes PEOPLE, EVIDENCE, REAL WORK, TIME): the edge from organization evidence to a person's identity. The worker player card serves the person's OWN edge (journal → capability); no surface served the organization-reported edge.",
+      whyReuseDamages:
+        "Reusing the worker player card would render zeros for skills, documents and availability of a person who has no account — inventing a current state from history, which the owner command forbids — or force the card's data model onto roster people; the rejected 158-row table was the alternative.",
+      evidence: [
+        "docs/launch/HISTORICAL_IMPORT_TRACE_2026-09-16.md (chain trace; post-#1748 correction section)",
+        "docs/design/player-identity-adaptation-plan.md §4 (history-card variant registered)",
+        "lib/guards/historical-living-model.test.ts (no score, no current-state field, same identity atoms, no second model)",
+      ],
+      ownerRuling:
+        "Owner unified command 2026-09-16 (post-#1748): 'PREMIUM PLAYER CARD / AI AVATAR IS NOW A FIRST-CLASS PRODUCT REQUIREMENT … reusable across worker profile, historical reconstruction, team/field board, project/object, employer candidate inspection, matching' (§3); anti-slop acceptance §14.",
+    },
+  },
+  {
+    // ═══════════════════════════════════════════════════════════════════════
     // /dashboard/hours — where a day of real work becomes a record.
     //
     // A site manager, standing on a site, on a phone, records who worked, on
