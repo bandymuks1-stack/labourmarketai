@@ -333,6 +333,15 @@ LT/EN/RU/NL/DE copy `workHours.states.noObjects` now states a fact ("no sites
 yet to record hours against") instead of an order to the human; the guard
 pins both that copy and that the page file is byte-identical to `main`.
 
+**NEXT P0 (owner, during the HUMAN walk, 2026-09-16) — MULTILINGUAL TEAM
+COMMUNICATION CONTRACT VERIFICATION.** Immediately after #1746 is merge-ready,
+verify (do not modify) that the original contract still holds: each
+participant writes in their own language → each recipient reads in their own
+preferred language → the original message is preserved → employer / manager /
+foreman / worker / team communication stays connected to the real project /
+team / work context. Verification only; no chat, translation, schema, RLS or
+messaging code changes in #1746.
+
 Not queued (deliberately): any redesign of `/company/scouting`,
 `/company/planning`, the worker stations, or the marketing pages — they were
 inventoried (§1) and are not capability dumps; the constitution's subjective
