@@ -131,6 +131,11 @@ describe("resolution merges typos with the same house number and never different
     expect(r.kind).toBe("ambiguous");
     if (r.kind === "ambiguous") expect(r.candidates.map((c) => c.id).sort()).toEqual(["a", "b", "c"]);
   });
+  it("a named place without a number (Kantoor) never folds into an address", () => {
+    const addressesOnly = known.filter((k) => k.id !== "e");
+    expect(resolvePlace(toSegment("Kantoor"), addressesOnly).kind).toBe("new");
+    expect(resolvePlace(toSegment("kantoor"), known)).toMatchObject({ kind: "matched", place: { id: "e" } });
+  });
   it("an unknown town is new, not forced onto anything", () => {
     expect(resolvePlace(toSegment("Bussum"), known).kind).toBe("new");
   });

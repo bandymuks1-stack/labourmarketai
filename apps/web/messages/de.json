@@ -16085,7 +16085,7 @@
         "place_from_text": "{count} Zeilen — Ort aus dem Text gelesen: „{label}“"
       },
       "issueWhy": {
-        "impossible_hours": "Die Quellzahl bleibt wie sie ist (z. B. eine Monatssumme an einem Tag). Die Zeile wird erst nach „wie angegeben belassen“ übernommen.",
+        "impossible_hours": "Die Quellzahl bleibt wie sie ist (z. B. eine Monatssumme an einem Tag). Nach „wie angegeben belassen“ wird die Zeile als Quellfakt erfasst; die Tagesdauer bleibt unbekannt und wird nirgends summiert.",
         "week_conflicts": "Das Datum gilt als Fakt, die Wochennummer als Gruppierung des Autors. Beides wird gezeigt; nichts wird umgeschrieben.",
         "ambiguous_place": "Mehr als ein Ort passt zu dieser Schreibweise. Ihre Antwort gilt für jede Zeile damit.",
         "ambiguous_person": "Mehr als eine Person auf der Liste trägt diesen Namen. Wählen Sie in der Zeile unten.",
@@ -16096,8 +16096,8 @@
         "allocation_inconsistent": "Die im Text genannten Teile ergeben nicht die Tagessumme. Beide Zahlen bleiben erhalten.",
         "place_from_text": "Die Ortszelle ist leer; der Ort stammt aus den ersten Wörtern des Textes. Ist es eine Schreibvariante eines anderen Ortes, wählen Sie „derselbe Ort wie“ — es entsteht ein Objekt, nicht zwei."
       },
-      "keepAsStated": "Wie angegeben belassen",
-      "keepAsStatedHint": "Die Zahl wird nicht geändert. Festgehalten wird, dass Sie sie geprüft und belassen haben.",
+      "keepAsStated": "Wie in der Quelle angegeben belassen",
+      "keepAsStatedHint": "Die Quellzahl bleibt unverändert und wird als Quellfakt erfasst. Sie wird NICHT zur Arbeitsdauer dieses Tages — die Tagesdauer bleibt unbekannt, sodass Kalender, Arbeit in Zahlen, Tempo und Kapazität sie nie summieren.",
       "whichPlace": "Welcher Ort ist",
       "useExisting": "Vorhandener Ort",
       "createNew": "Neu unter diesem Namen anlegen",

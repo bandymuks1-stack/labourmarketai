@@ -1906,6 +1906,22 @@ export async function commitImport(
   const payload = ready.map((r) => {
     const fingerprint = r.record_fingerprint as string;
     const self = chainHash(prev, fingerprint, importedAt);
+    // AN ACKNOWLEDGED IMPOSSIBLE FIGURE IS NOT A DAY'S DURATION. "Keep as
+    // stated" means: the SOURCE said 800 h on this date and a named human
+    // confirmed that is what it says — it does not mean the person worked
+    // 800 hours that day. The source value stays verbatim in `source_fact`
+    // and in `derived.hoursPlausibility`; the canonical duration is UNKNOWN
+    // (`hours = null`, SEP-7), so no calendar, ledger, pace or capacity
+    // reading can ever sum it as a day (owner acceptance C, 2026-09-16).
+    const derived = { ...((r.derived as Record<string, unknown> | null) ?? {}) };
+    const plausibility = derived.hoursPlausibility as { method?: string } | undefined;
+    const impossible = plausibility?.method === HOURS_EXCEED_DAY_METHOD;
+    if (impossible) {
+      derived.hoursPlausibility = {
+        ...plausibility,
+        note: "acknowledged as stated; not a day's duration; canonical hours unknown",
+      };
+    }
     const row = {
       organization_id: session.organizationId,
       organization_person_id: r.organization_person_id as string,
@@ -1918,7 +1934,7 @@ export async function commitImport(
       activity_date: (r.activity_date as string | null) ?? null,
       period_start: (r.period_start as string | null) ?? null,
       period_end: (r.period_end as string | null) ?? null,
-      hours: r.hours ?? null,
+      hours: impossible ? null : (r.hours ?? null),
       original_text: (r.activity_text as string | null) ?? "",
       original_language: session.sourceLanguage,
       evidence_state: state,
@@ -1933,7 +1949,7 @@ export async function commitImport(
       source_filename: session.sourceFilename,
       source_reference: session.sourceReference,
       source_fact: r.source_fact ?? {},
-      derived: r.derived ?? {},
+      derived,
       confidence: r.person_match_confidence ?? null,
       record_fingerprint: fingerprint,
       hash_prev: prev,

@@ -16085,7 +16085,7 @@
         "place_from_text": "{count} regels — plaats gelezen uit de tekst: „{label}”"
       },
       "issueWhy": {
-        "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). De regel wordt pas vastgelegd nadat u „laten staan“ kiest.",
+        "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan“ wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
         "week_conflicts": "De datum geldt als feit, het weeknummer als groepering van de auteur. Beide worden getoond; niets wordt herschreven.",
         "ambiguous_place": "Meer dan één plaats past bij deze spelling. Uw antwoord geldt voor elke regel ermee.",
         "ambiguous_person": "Meer dan één persoon op de lijst draagt deze naam. Kies in de regel hieronder.",
@@ -16096,8 +16096,8 @@
         "allocation_inconsistent": "De delen in de tekst vormen niet het dagtotaal. Beide getallen blijven bewaard.",
         "place_from_text": "De plaatscel is leeg; de locatie komt uit de eerste woorden van de tekst. Is het een spelfout van een andere plaats, kies dan „dezelfde plaats als” — er ontstaat één object, niet twee."
       },
-      "keepAsStated": "Laten staan zoals opgegeven",
-      "keepAsStatedHint": "Het getal verandert niet. Vastgelegd wordt dat u het hebt bekeken en laten staan.",
+      "keepAsStated": "Laten staan zoals in de bron",
+      "keepAsStatedHint": "Het brongetal blijft ongewijzigd en wordt vastgelegd als bronfeit. Het wordt NIET de werkduur van die dag — de dagduur blijft onbekend, dus kalender, werk in cijfers, tempo en capaciteit tellen het nooit op.",
       "whichPlace": "Welke plaats is",
       "useExisting": "Bestaande plaats",
       "createNew": "Nieuw aanmaken onder deze naam",

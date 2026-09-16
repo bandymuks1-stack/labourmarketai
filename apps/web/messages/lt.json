@@ -16085,7 +16085,7 @@
         "place_from_text": "{count} eil. — vieta perskaityta iš aprašymo: „{label}“"
       },
       "issueWhy": {
-        "impossible_hours": "Šaltinio skaičius paliekamas koks yra (pvz., mėnesio suma įrašyta į vieną dieną). Įrašas patvirtinamas tik jums pasakius „palikti kaip nurodyta“.",
+        "impossible_hours": "Šaltinio skaičius paliekamas koks yra (pvz., mėnesio suma įrašyta į vieną dieną). Patvirtinus „palikti kaip nurodyta“, eilutė įrašoma kaip šaltinio faktas, o dienos trukmė lieka nežinoma — ji niekur nesumuojama.",
         "week_conflicts": "Data laikoma faktu, savaitės numeris — autoriaus grupavimu. Abu rodomi; niekas neperrašoma.",
         "ambiguous_place": "Šią rašybą atitinka daugiau nei viena vieta. Atsakymas pritaikomas visoms eilutėms su šia rašyba.",
         "ambiguous_person": "Sąraše šį vardą turi daugiau nei vienas žmogus. Pasirinkite eilutėje žemiau.",
@@ -16096,8 +16096,8 @@
         "allocation_inconsistent": "Aprašyme nurodytos dalys nesudaro dienos sumos. Abu skaičiai išsaugomi.",
         "place_from_text": "Objekto langelis tuščias; vieta paimta iš pirmųjų aprašymo žodžių. Jei tai kitos vietos rašybos klaida, pasirinkite „ta pati vieta kaip“ — bus sukurtas vienas objektas, ne du."
       },
-      "keepAsStated": "Palikti kaip nurodyta",
-      "keepAsStatedHint": "Skaičius nekeičiamas. Įrašoma, kad jūs jį peržiūrėjote ir palikote.",
+      "keepAsStated": "Palikti kaip nurodyta šaltinyje",
+      "keepAsStatedHint": "Šaltinio skaičius lieka nepakeistas ir įrašomas kaip šaltinio faktas. Jis NEtampa tos dienos darbo trukme — dienos trukmė lieka nežinoma, todėl kalendorius, „veikla skaičiais“, tempas ir pajėgumai jo nesumuoja.",
       "whichPlace": "Kuri tai vieta",
       "useExisting": "Esamas objektas",
       "createNew": "Sukurti naują šiuo pavadinimu",

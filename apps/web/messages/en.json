@@ -16085,7 +16085,7 @@
         "place_from_text": "{count} rows — place read from the text: “{label}”"
       },
       "issueWhy": {
-        "impossible_hours": "The source figure is kept as it is (e.g. a month's total typed on one day). The row commits only once you say \"keep as stated\".",
+        "impossible_hours": "The source figure is kept as it is (e.g. a month's total typed on one day). After \"keep as stated\" the row is recorded as a source fact and the day's duration stays unknown — it is summed nowhere.",
         "week_conflicts": "The date is treated as the fact, the week number as the author's grouping. Both are shown; nothing is rewritten.",
         "ambiguous_place": "More than one place fits this spelling. Your answer applies to every row that uses it.",
         "ambiguous_person": "More than one person on the roster has this name. Choose in the row below.",
@@ -16096,8 +16096,8 @@
         "allocation_inconsistent": "The parts written in the text do not make the day's total. Both figures are kept.",
         "place_from_text": "The place cell is empty; the site was taken from the first words of the text. If it is a misspelling of another place, choose \"same place as\" — one object is created, not two."
       },
-      "keepAsStated": "Keep as stated",
-      "keepAsStatedHint": "The figure is not changed. What is recorded is that you reviewed and kept it.",
+      "keepAsStated": "Keep as stated in the source",
+      "keepAsStatedHint": "The source figure stays unchanged and is recorded as a source fact. It does NOT become that day's working duration — the day's duration stays unknown, so the calendar, work in numbers, pace and capacity never sum it.",
       "whichPlace": "Which place is",
       "useExisting": "Existing place",
       "createNew": "Create a new one under this name",

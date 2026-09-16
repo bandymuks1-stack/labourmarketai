@@ -48,6 +48,10 @@ describe("source stays immutable; derived stays distinguishable", () => {
     expect(core).toMatch(/if \(p\.method === HUMAN_CHOICE\) priorByKey\.set\(p\.key, p\)/);
     expect(core).toMatch(/HOURS_ACKNOWLEDGED_METHOD = "human_acknowledged_as_stated"/);
   });
+  it("an alias decision keeps the source spelling on the segment and only changes the canonical name", () => {
+    const label = core.slice(core.indexOf("export async function resolveContextLabel"), core.indexOf("export async function acknowledgeRows"));
+    expect(label).toMatch(/if \(d\.kind === "alias"\) \{\s*return \{ \.\.\.seg, state: "new", workObjectId: null, name: d\.name,/);
+  });
   it("a total is never divided by guess", () => {
     expect(allocateHours("A werk. B werk.", [{ name: "A", spellings: [] }, { name: "B", spellings: [] }], 9)).toEqual({
       method: "unknown_split",
@@ -76,11 +80,19 @@ describe("no permanent write before commit; projections are read-only", () => {
   });
 });
 
-describe("an impossible day figure needs a human before it commits", () => {
+describe("an impossible day figure needs a human before it commits — and is never a day's duration", () => {
   it("readiness excludes it; acknowledgement admits it; the figure itself is never rewritten", () => {
     expect(core).toMatch(/const settled = contextState !== "ambiguous" && dup\.state !== "duplicate" && !impossibleHours;/);
     expect(core).toMatch(/!acknowledged;/);
     expect(core).not.toMatch(/hours: Math\.min\(/);
+  });
+  it("the commit writes the canonical duration as UNKNOWN and keeps the source figure in fact + derived", () => {
+    const commit = core.slice(core.indexOf("export async function commitImport"), core.indexOf("// ── the rollback path"));
+    expect(commit).toMatch(/hours: impossible \? null : \(r\.hours \?\? null\),/);
+    expect(commit).toMatch(/source_fact: r\.source_fact \?\? \{\},/);
+    expect(commit).toMatch(/not a day's duration; canonical hours unknown/);
+    // And the ledger reader still refuses such a row even if hours were present.
+    expect(workerRead).toMatch(/HOURS_EXCEED_DAY_METHOD\) continue;/);
   });
 });
 
