@@ -557,6 +557,15 @@ export interface ImportPreview {
   readonly persisted: false;
   readonly rows: readonly PreviewRow[];
   readonly plan: ImportPlan;
+  /** What the session recorded about its source — shown to the human as the
+   *  source IS (a spreadsheet is a spreadsheet), never as the engine's
+   *  internal table shape. */
+  readonly source: {
+    readonly kind: string;
+    readonly filename: string | null;
+    readonly supplierRole: string;
+    readonly language: string;
+  };
   readonly counts: {
     readonly total: number;
     readonly ready: number;
@@ -847,6 +856,12 @@ export async function buildPreview(
       persisted: false,
       rows: preview,
       plan,
+      source: {
+        kind: session.sourceKind,
+        filename: session.sourceFilename,
+        supplierRole: session.supplierRole,
+        language: session.sourceLanguage,
+      },
       counts: {
         total: preview.length,
         ready: preview.filter((r) => r.ready).length,
@@ -1741,10 +1756,19 @@ export async function listEvidenceRecords(
     readonly limit?: number;
   } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
+  // THE EMBED NAMES ITS RELATIONSHIP. `organization_evidence_events` holds
+  // TWO foreign keys to this table — `..._record_fk (record_id, organization_id)`
+  // and `..._replacement_record_id_fkey` — so a bare `organization_evidence_events(...)`
+  // is ambiguous and PostgREST answers 300 / PGRST201. That is exactly what
+  // production did on the owner's first real import (2026-09-16 09:17:33Z):
+  // preview staged and persisted, then THIS read failed and the page said
+  // "evidence store unreadable". The events a record carries are the ones
+  // that point AT it (`record_fk`); a record named as somebody's replacement is
+  // a different relationship. Regression-pinned in organization-evidence-core.test.ts.
   let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, derived, organization_people(display_name, linked_profile_id), organization_evidence_events(event_type, actor_role, actor_profile_id, created_at)",
+      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, derived, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
     )
     .order("activity_date", { ascending: false })
     .limit(Math.min(Math.max(filter.limit ?? 200, 1), 1000));

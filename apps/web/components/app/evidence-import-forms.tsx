@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { useRouter } from "@/lib/i18n/navigation";
 import type { EvidenceImportActionState } from "@/lib/organization-evidence/import-actions";
@@ -68,6 +68,13 @@ function Refusal({
 // ── step 1: the source ─────────────────────────────────────────────────────
 
 export interface SourceFormLabels {
+  /** File-first entry (owner contract 2026-09-16 P0-B). */
+  readonly dropzone: string;
+  readonly dropzoneHint: string;
+  readonly chosen: string;
+  readonly advanced: string;
+  readonly auto: string;
+  readonly readNow: string;
   readonly supplierRole: string;
   readonly supplierRoleHint: string;
   readonly sourceKind: string;
@@ -103,6 +110,10 @@ export function EvidenceSourceForm({
   defaultLanguage: string;
 }) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [chosen, setChosen] = useState<{ name: string; kind: "xlsx" | "csv" } | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [state, submit, pending] = useActionState<
     EvidenceImportActionState,
     FormData
@@ -118,106 +129,154 @@ export function EvidenceSourceForm({
     }
   }, [state, router]);
 
+  // FILE FIRST (owner entry contract 2026-09-16 P0-B). Choosing a file IS the
+  // request: the form submits itself and the server inspects the file — type,
+  // structure, people, sites, dates, hours, week/date contradictions — and
+  // stages the interpretation. Nothing becomes evidence; the commit is a
+  // separate, explicit act further down. Role, kind, language, reference and
+  // notes are derived server-side from the file and the organization; the
+  // advanced section below lets the person state them when the derivation
+  // would be wrong.
+  const kindOf = (name: string): "xlsx" | "csv" => (/\.(xlsx|xlsm)$/i.test(name) ? "xlsx" : "csv");
+  const onFile = (file: File | null) => {
+    if (!file) return;
+    setChosen({ name: file.name, kind: kindOf(file.name) });
+    formRef.current?.requestSubmit();
+  };
+  const kindLabel = (kind: "xlsx" | "csv") =>
+    sourceKinds.find((o) => o.value === kind)?.label ?? kind;
+
   return (
     <form
+      ref={formRef}
       action={submit}
       className="flex flex-col gap-4"
       data-testid="evidence-source-form"
     >
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1">
-          <span className={labelText}>{labels.supplierRole}</span>
-          <select
-            name="supplier_role"
-            required
-            className={field}
-            defaultValue=""
-          >
-            <option value="" disabled />
-            {supplierRoles.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <span className="text-xs leading-relaxed text-text-muted">
-            {labels.supplierRoleHint}
-          </span>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className={labelText}>{labels.sourceKind}</span>
-          <select
-            name="source_kind"
-            required
-            className={field}
-            defaultValue="csv"
-          >
-            {sourceKinds.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className={labelText}>{labels.sourceLanguage}</span>
-          <select
-            name="source_language"
-            required
-            className={field}
-            defaultValue={defaultLanguage}
-          >
-            {languages.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className={labelText}>{labels.filename}</span>
-          <input name="source_filename" className={field} maxLength={300} />
-        </label>
-        <label className="flex flex-col gap-1 sm:col-span-2">
-          <span className={labelText}>{labels.reference}</span>
-          <input name="source_reference" className={field} maxLength={500} />
-          <span className="text-xs leading-relaxed text-text-muted">
-            {labels.referenceHint}
-          </span>
-        </label>
-      </div>
-
-      <label className="flex flex-col gap-1">
-        <span className={labelText}>{labels.paste}</span>
-        <textarea
-          name="pasted"
-          rows={8}
-          className={`${field} font-mono text-xs`}
-        />
-        <span className="text-xs leading-relaxed text-text-muted">
-          {labels.pasteHint}
+      {/* THE PRIMARY ACTION: one drop zone, one button, nothing to fill in. */}
+      <label
+        htmlFor="evidence-source-file"
+        data-testid="evidence-dropzone"
+        data-dragging={dragging ? "true" : "false"}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          const file = e.dataTransfer.files?.[0] ?? null;
+          if (file && fileRef.current) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileRef.current.files = dt.files;
+          }
+          onFile(file);
+        }}
+        className={`flex cursor-pointer flex-col items-center gap-2 rounded-card border-2 border-dashed px-4 py-8 text-center transition-colors ${
+          dragging ? "border-brand-cyan bg-brand-cyan/5" : "border-ink-500 bg-ink-900/40 hover:border-brand-blue"
+        }`}
+      >
+        <span className="inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 py-2 text-sm font-semibold text-brand-blue">
+          {pending ? labels.submitting : labels.dropzone}
         </span>
-      </label>
-      <label className="flex flex-col gap-1">
-        <span className={labelText}>{labels.file}</span>
+        <span className="max-w-prose text-xs leading-relaxed text-text-secondary">
+          {labels.dropzoneHint}
+        </span>
         <input
+          id="evidence-source-file"
+          ref={fileRef}
           type="file"
           name="file"
           accept=".xlsx,.xlsm,.csv,.tsv,.txt,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          className={field}
+          className="sr-only"
+          data-testid="evidence-source-file"
+          onChange={(e) => onFile(e.currentTarget.files?.[0] ?? null)}
         />
-      </label>
-      <label className="flex flex-col gap-1">
-        <span className={labelText}>{labels.notes}</span>
-        <input name="notes" className={field} maxLength={1000} />
+        {chosen && (
+          <span className="text-xs text-text-primary" data-testid="evidence-chosen-file" data-kind={chosen.kind}>
+            {labels.chosen}: {chosen.name} · {kindLabel(chosen.kind)}
+          </span>
+        )}
       </label>
 
       <Refusal state={state} errors={labels.errors} />
-      <div>
-        <button type="submit" className={button} disabled={pending}>
-          {pending ? labels.submitting : labels.submit}
-        </button>
-      </div>
+
+      {/* PROGRESSIVE DISCLOSURE: provenance the file cannot state, and the
+          manual paste path. "automatiškai" means the server derives it. */}
+      <details className="rounded-md border border-ink-600" data-testid="evidence-source-advanced">
+        <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-brand-blue hover:underline">
+          {labels.advanced}
+        </summary>
+        <div className="flex flex-col gap-4 px-3 pb-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1">
+              <span className={labelText}>{labels.supplierRole}</span>
+              <select name="supplier_role" className={field} defaultValue="">
+                <option value="">{labels.auto}</option>
+                {supplierRoles.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs leading-relaxed text-text-muted">
+                {labels.supplierRoleHint}
+              </span>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={labelText}>{labels.sourceKind}</span>
+              <select name="source_kind" className={field} defaultValue="">
+                <option value="">{labels.auto}</option>
+                {sourceKinds.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={labelText}>{labels.sourceLanguage}</span>
+              <select name="source_language" className={field} defaultValue="">
+                <option value="">
+                  {labels.auto} ({defaultLanguage.toUpperCase()})
+                </option>
+                {languages.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={labelText}>{labels.filename}</span>
+              <input name="source_filename" className={field} maxLength={300} />
+            </label>
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className={labelText}>{labels.reference}</span>
+              <input name="source_reference" className={field} maxLength={500} />
+              <span className="text-xs leading-relaxed text-text-muted">
+                {labels.referenceHint}
+              </span>
+            </label>
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className={labelText}>{labels.notes}</span>
+              <input name="notes" className={field} maxLength={1000} />
+            </label>
+          </div>
+          <label className="flex flex-col gap-1">
+            <span className={labelText}>{labels.paste}</span>
+            <textarea name="pasted" rows={6} className={`${field} font-mono text-xs`} />
+            <span className="text-xs leading-relaxed text-text-muted">{labels.pasteHint}</span>
+          </label>
+          <div>
+            <button type="submit" className={button} disabled={pending} data-testid="evidence-source-read">
+              {pending ? labels.submitting : labels.readNow}
+            </button>
+          </div>
+        </div>
+      </details>
     </form>
   );
 }

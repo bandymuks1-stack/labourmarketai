@@ -32,9 +32,14 @@ import {
   type SourceWorkRow,
 } from "@/lib/organization-evidence/source-rows";
 import {
+  detectHeaderLanguage,
   parseDelimited,
   rowsFromGrid,
 } from "@/lib/organization-evidence/parse-tabular";
+import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { activeLocales } from "@/lib/i18n/config";
+import { getLocale } from "next-intl/server";
 import { verifyCommitToken } from "@/lib/organization-evidence/commit-confirmation";
 import { isReportedEvidenceState } from "@/lib/organization-evidence/evidence-state";
 
@@ -143,12 +148,16 @@ export async function startEvidenceImportAction(
   const c = await caller();
   if (!c) return { kind: "refused", reason: "unauthenticated" };
 
-  const sourceKind = oneOf(text(form, "source_kind"), SOURCE_KINDS);
-  const supplierRole = oneOf(text(form, "supplier_role"), SUPPLIER_ROLES);
-  const sourceLanguage = text(form, "source_language");
-  if (!sourceKind || !supplierRole || sourceLanguage === "") {
-    return { kind: "refused", reason: "invalid", detail: "source" };
-  }
+  // THE HUMAN CHOOSES A FILE; THE SYSTEM DERIVES THE REST (owner entry
+  // contract 2026-09-16 P0-B/P0-C). Every field below is optional on the form
+  // and lives behind "Papildoma informacija". An explicit value always wins;
+  // an absent one is derived from evidence the request already carries —
+  // the file's own type, the organization's own declared capability, the
+  // source's own header words — and where nothing supports a derivation the
+  // honest fallback is recorded as such, never a guess dressed as a fact.
+  const explicitKind = oneOf(text(form, "source_kind"), SOURCE_KINDS);
+  const explicitRole = oneOf(text(form, "supplier_role"), SUPPLIER_ROLES);
+  const explicitLanguage = oneOf(text(form, "source_language"), activeLocales);
 
   // The source itself: an uploaded file — a delimited one OR a real .xlsx
   // workbook — or pasted text. `readEvidenceSourceFile` picks the audited
@@ -159,6 +168,7 @@ export async function startEvidenceImportAction(
   let rows: readonly SourceWorkRow[] = [];
   let sourceFingerprint = "";
   let via = "delimited";
+  let headers: readonly string[] = [];
 
   if (file instanceof File && file.size > 0) {
     if (file.size > SOURCE_FILE_MAX_BYTES)
@@ -188,6 +198,7 @@ export async function startEvidenceImportAction(
         rows = read.rows;
         sourceFingerprint = read.fingerprint;
         via = read.via;
+        headers = read.headers;
     }
   } else {
     const pasted = text(form, "pasted");
@@ -205,7 +216,39 @@ export async function startEvidenceImportAction(
     }
     rows = parsed.rows;
     sourceFingerprint = fingerprintPayload("web-source", { raw: pasted });
+    headers = Object.keys(parsed.rows[0]?.raw ?? {});
   }
+
+  // SOURCE KIND is a fact of the file, never a form default: an .xlsx is a
+  // spreadsheet even though the engine reads it as a table underneath
+  // (the owner saw "CSV / TSV" printed over a .xlsx — P0-C).
+  const sourceKind =
+    explicitKind ??
+    (file instanceof File && file.size > 0
+      ? /\.(xlsx|xlsm)$/i.test(filename ?? file.name)
+        ? "xlsx"
+        : "csv"
+      : "manual");
+  // SUPPLIER ROLE follows what the organization declared it DOES (the same
+  // capability axis the doors read); "other" only when it declared nothing.
+  let supplierRole = explicitRole;
+  if (!supplierRole) {
+    const org = await resolveEvidenceOrganization(c, null);
+    const caps = org.ok ? await readOrganizationCapabilities(org.organizationId) : [];
+    supplierRole = caps.includes("training_provider")
+      ? "training_provider"
+      : caps.includes("workforce_provider") || caps.includes("recruitment_partner")
+        ? "agency"
+        : caps.includes("employer") || caps.includes("project_operator")
+          ? "employer"
+          : "other";
+  }
+  // SOURCE LANGUAGE from the header words when they say so; otherwise the
+  // caller's UI locale, which the advanced section shows and lets them change.
+  const sourceLanguage =
+    explicitLanguage ??
+    detectHeaderLanguage(headers) ??
+    (oneOf(await getLocale(), activeLocales) ?? "en");
 
   // The session is keyed on the SOURCE, so re-uploading the same file resolves
   // to the same session instead of importing it twice.

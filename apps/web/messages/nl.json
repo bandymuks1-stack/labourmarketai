@@ -15811,9 +15811,15 @@
       "notes": "Notities",
       "paste": "Plak de regels",
       "pasteHint": "Eén regel per rij, kolommen gescheiden door een komma, puntkomma of tab. De eerste herkende kopregel wordt gebruikt; alles daarboven wordt genegeerd.",
-      "file": "Of upload een CSV/TSV-bestand",
+      "file": "Bestand (XLSX, CSV, TSV)",
       "submit": "Lees de bron",
-      "submitting": "Bezig met lezen…"
+      "submitting": "Bezig met lezen…",
+      "dropzone": "Bestand uploaden",
+      "dropzoneHint": "Of sleep het hierheen. XLSX, CSV, TSV. Het systeem herkent zelf de structuur, mensen, locaties, datums, uren en tegenstrijdigheden — u bevestigt alleen wat het niet kan beslissen.",
+      "chosen": "Gekozen bestand",
+      "advanced": "Aanvullende informatie",
+      "auto": "automatisch",
+      "readNow": "Lezen"
     },
     "preview": {
       "title": "2. Wat er zou worden vastgelegd",
@@ -15841,7 +15847,8 @@
       "fact": "Vermeld door de bron",
       "derived": "Door ons afgeleid",
       "derivedMethod": "Methode",
-      "confidence": "Zekerheid"
+      "confidence": "Zekerheid",
+      "source": "Bron"
     },
     "personState": {
       "unmatched": "Niet in het bestand",
@@ -15971,7 +15978,7 @@
       "other": "Anders"
     },
     "sourceKind": {
-      "xlsx": "Rekenblad",
+      "xlsx": "Rekenblad (XLSX)",
       "csv": "CSV-/TSV-bestand",
       "pdf": "PDF-document",
       "api": "Koppeling van een ander systeem",

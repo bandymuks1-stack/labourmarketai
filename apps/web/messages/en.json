@@ -15811,9 +15811,15 @@
       "notes": "Notes",
       "paste": "Paste the rows",
       "pasteHint": "One row per line, columns separated by a comma, semicolon or tab. The first recognised header row is used; anything above it is ignored.",
-      "file": "Or upload a CSV/TSV file",
+      "file": "File (XLSX, CSV, TSV)",
       "submit": "Read the source",
-      "submitting": "Reading…"
+      "submitting": "Reading…",
+      "dropzone": "Upload a file",
+      "dropzoneHint": "Or drop it here. XLSX, CSV, TSV. The system recognises the structure, people, sites, dates, hours and contradictions itself — you confirm only what it cannot decide.",
+      "chosen": "Chosen file",
+      "advanced": "Additional information",
+      "auto": "automatically",
+      "readNow": "Read"
     },
     "preview": {
       "title": "2. What would be recorded",
@@ -15841,7 +15847,8 @@
       "fact": "Stated by the source",
       "derived": "Worked out by us",
       "derivedMethod": "Method",
-      "confidence": "Confidence"
+      "confidence": "Confidence",
+      "source": "Source"
     },
     "personState": {
       "unmatched": "Not on the roster",
@@ -15971,7 +15978,7 @@
       "other": "Other"
     },
     "sourceKind": {
-      "xlsx": "Spreadsheet",
+      "xlsx": "Spreadsheet (XLSX)",
       "csv": "CSV / TSV file",
       "pdf": "PDF document",
       "api": "Another system's interface",

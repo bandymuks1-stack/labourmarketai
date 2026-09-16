@@ -271,6 +271,12 @@ export async function EvidenceImportSection({
         <EvidenceSourceForm
           action={startEvidenceImportAction}
           labels={{
+            dropzone: t("form.dropzone"),
+            dropzoneHint: t("form.dropzoneHint"),
+            chosen: t("form.chosen"),
+            advanced: t("form.advanced"),
+            auto: t("form.auto"),
+            readNow: t("form.readNow"),
             supplierRole: t("form.supplierRole"),
             supplierRoleHint: t("form.supplierRoleHint"),
             sourceKind: t("form.sourceKind"),
@@ -343,6 +349,14 @@ export async function EvidenceImportSection({
   if (recordsRes.kind !== "ok") return readFailure(recordsRes);
 
   const preview: ImportPreview = previewRes.preview;
+  // HUMAN-FACING SOURCE TRUTH (P0-C): a session staged before the kind was
+  // derived from the file recorded "csv" over a .xlsx, and re-uploading the
+  // same file resolves to that same session (fingerprint-idempotent). The
+  // envelope is not rewritten; the label follows the file's own name.
+  const shownSourceKind =
+    preview.source.filename && /\.(xlsx|xlsm)$/i.test(preview.source.filename)
+      ? "xlsx"
+      : preview.source.kind;
   const roster: readonly RosterPersonView[] = rosterRes.people;
   const records: readonly EvidenceRecordView[] = recordsRes.records;
   // What the commit would write: the ready rows AND the rows the PLAN makes
@@ -506,6 +520,14 @@ export async function EvidenceImportSection({
           <h2 className={HEADING}>{t("preview.title")}</h2>
           <p className="text-xs leading-relaxed text-state-amber">
             {t("preview.notPersisted")}
+          </p>
+          {/* THE SOURCE, AS IT IS (P0-C): the file's own name and its real
+              kind — a spreadsheet is a spreadsheet, whatever the engine reads
+              underneath. */}
+          <p className="text-xs text-text-secondary" data-testid="evidence-preview-source" data-kind={shownSourceKind}>
+            {t("preview.source")}: {preview.source.filename ?? "—"} · {t(`sourceKind.${shownSourceKind}` as never)}
+            {" · "}
+            {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
           </p>
           {planBlock}
           {counts}

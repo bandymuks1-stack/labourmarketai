@@ -286,3 +286,66 @@ describe("historical import: source week vs explicit date is compared, never rew
     expect(none.derived.calendarWeek).toBeUndefined();
   });
 });
+
+// ── 9. the production failure of 2026-09-16 09:17Z, and the human entry ────
+
+describe("historical import — the first real production import failed on a read, not on the file", () => {
+  it("the records embed names its relationship (two FKs point at the records table)", () => {
+    // PostgREST answered 300 / PGRST201 to a bare `organization_evidence_events(...)`
+    // because `..._record_fk` and `..._replacement_record_id_fkey` both exist.
+    const migration = readFileSync(
+      join(ROOT, "..", "..", "supabase", "migrations", "20260907114500_organization_evidence_import_v1.sql"),
+      "utf8",
+    );
+    expect(migration).toMatch(/constraint organization_evidence_events_record_fk/);
+    expect(migration).toMatch(/replacement_record_id uuid references public\.organization_evidence_records/);
+    expect(importCore).toMatch(
+      /organization_evidence_events!organization_evidence_events_record_fk\(/,
+    );
+    expect(importCore).not.toMatch(/, organization_evidence_events\(/);
+  });
+
+  it("the entry is file-first: a drop zone submits on choice; role, kind and language are derived, not demanded", () => {
+    const form = read("components/app/evidence-import-forms.tsx");
+    expect(form).toMatch(/data-testid="evidence-dropzone"/);
+    expect(form).toMatch(/formRef\.current\?\.requestSubmit\(\)/);
+    // No field in the source form is `required` any more.
+    const sourceForm = form.slice(form.indexOf("export function EvidenceSourceForm"), form.indexOf("// ── step 2"));
+    expect(sourceForm).not.toMatch(/\brequired\b/);
+    // The provenance fields sit behind progressive disclosure.
+    expect(sourceForm.indexOf('data-testid="evidence-dropzone"')).toBeLessThan(
+      sourceForm.indexOf('data-testid="evidence-source-advanced"'),
+    );
+    const action = importActions;
+    expect(action).toMatch(/const explicitKind = oneOf\(text\(form, "source_kind"\), SOURCE_KINDS\)/);
+    expect(action).toMatch(/detectHeaderLanguage\(headers\)/);
+    expect(action).toMatch(/readOrganizationCapabilities\(org\.organizationId\)/);
+    expect(action).not.toMatch(/reason: "invalid", detail: "source"/);
+  });
+
+  it("an XLSX is shown to the human as a spreadsheet, never as CSV/TSV", () => {
+    const action = importActions;
+    expect(action).toMatch(/\/\\.\(xlsx\|xlsm\)\$\/i\.test\(filename \?\? file\.name\)\s*\?\s*"xlsx"/);
+    expect(importCore).toMatch(/readonly source: \{/);
+    expect(importSection).toMatch(/data-testid="evidence-preview-source"/);
+    expect(importSection).toMatch(/sourceKind\.\$\{shownSourceKind\}/);
+    // A session recorded as "csv" over a .xlsx (before the kind was derived) still reads as a spreadsheet.
+    expect(importSection).toMatch(/\/\\.\(xlsx\|xlsm\)\$\/i\.test\(preview\.source\.filename\)/);
+    const form = read("components/app/evidence-import-forms.tsx");
+    expect(form).not.toMatch(/defaultValue="csv"/);
+    const lt = JSON.parse(read("messages/lt.json")) as { evidenceImport: { sourceKind: { xlsx: string }; form: { file: string } } };
+    expect(lt.evidenceImport.sourceKind.xlsx).toMatch(/XLSX/);
+    expect(lt.evidenceImport.form.file).not.toMatch(/^Arba įkelkite CSV/);
+  });
+
+  it("choosing a file stages a session and rows but writes no evidence; commit is still the only writer", () => {
+    const start = importActions.slice(
+      importActions.indexOf("export async function startEvidenceImportAction"),
+      importActions.indexOf("export async function commitEvidenceImportAction"),
+    );
+    expect(start).toMatch(/createImportSession\(/);
+    expect(start).toMatch(/submitRows\(/);
+    expect(start).not.toMatch(/commitImport\(/);
+    expect(start).not.toMatch(/organization_evidence_records/);
+  });
+});

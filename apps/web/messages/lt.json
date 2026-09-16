@@ -15811,9 +15811,15 @@
       "notes": "Pastabos",
       "paste": "Įklijuokite eilutes",
       "pasteHint": "Po vieną eilutę kiekvienoje eilutėje, stulpelius skiriant kableliu, kabliataškiu arba tabuliacija. Naudojama pirma atpažinta antraštės eilutė; viskas virš jos ignoruojama.",
-      "file": "Arba įkelkite CSV/TSV failą",
+      "file": "Failas (XLSX, CSV, TSV)",
       "submit": "Perskaityti šaltinį",
-      "submitting": "Skaitoma…"
+      "submitting": "Skaitoma…",
+      "dropzone": "Įkelti failą",
+      "dropzoneHint": "Arba nutempkite čia. XLSX, CSV, TSV. Sistema pati atpažįsta struktūrą, žmones, objektus, datas, valandas ir prieštaravimus — jūs patvirtinate tik tai, ko ji negali nuspręsti.",
+      "chosen": "Pasirinktas failas",
+      "advanced": "Papildoma informacija",
+      "auto": "automatiškai",
+      "readNow": "Perskaityti"
     },
     "preview": {
       "title": "2. Kas būtų užfiksuota",
@@ -15841,7 +15847,8 @@
       "fact": "Nurodyta šaltinyje",
       "derived": "Nustatyta mūsų",
       "derivedMethod": "Būdas",
-      "confidence": "Patikimumas"
+      "confidence": "Patikimumas",
+      "source": "Šaltinis"
     },
     "personState": {
       "unmatched": "Nėra sąraše",
@@ -15971,7 +15978,7 @@
       "other": "Kita"
     },
     "sourceKind": {
-      "xlsx": "Skaičiuoklė",
+      "xlsx": "Skaičiuoklė (XLSX)",
       "csv": "CSV / TSV failas",
       "pdf": "PDF dokumentas",
       "api": "Kitos sistemos sąsaja",
