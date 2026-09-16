@@ -16,7 +16,6 @@ import {
 import { chainHash, recordFingerprint } from "./fingerprint";
 import {
   matchPerson,
-  matchPlace,
   personKey,
   type RosterPerson,
 } from "./person-matching";
@@ -27,6 +26,7 @@ import {
   tidy,
   type SourceWorkRow,
 } from "./source-rows";
+import { HOURS_EXCEED_DAY_METHOD } from "./parse-tabular";
 import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
@@ -35,6 +35,20 @@ import {
   competencySignalRows,
   deriveCompetencySignals,
 } from "./competency-signals";
+import {
+  allocateHours,
+  canonicalPlaces,
+  extractSiteFromText,
+  extractSitesFromText,
+  resolvePlace,
+  segmentsOf,
+  toSegment,
+  type CanonicalPlace,
+  type ContextSegment,
+  type ContextSegmentKind,
+  type HoursAllocation,
+  type KnownPlace,
+} from "./work-context";
 
 /**
  * THE ORGANIZATION EVIDENCE IMPORT — one domain core, every transport.
@@ -527,7 +541,210 @@ export interface PreviewRow {
   /** The source names a place the organization has no object for; the plan
    *  prepares it. Independent of readiness (a place is never required). */
   readonly contextWillCreate: boolean;
+  /**
+   * WHAT THE ROW'S CONTEXT CELL AND TEXT ACTUALLY NAME (owner command §5–§7):
+   * every place of the day as its own segment with its own resolution, the
+   * activity / note segments that are NOT places, and the per-place hours
+   * the text states — or `unknown_split`. `null` only when the row carries
+   * no context at all. Persisted on the staged row as `derived.workContexts`
+   * and carried into the record's `derived` by the commit.
+   */
+  readonly contexts: WorkContexts | null;
+  /** A human has looked at this row's flagged figure and kept it as stated. */
+  readonly acknowledged: boolean;
   readonly problem: string | null;
+}
+
+// ── work contexts (the per-row reading of place / activity / hours) ─────────
+
+export type WorkContextSegmentState =
+  /** Resolved to an existing object by the exact label. */
+  | "matched"
+  /** Resolved to an existing object by a derived reading (typo, street). */
+  | "proposed"
+  /** Several existing objects fit — a question for the human. */
+  | "ambiguous"
+  /** Nothing exists yet; the plan will create it under `name`. */
+  | "new"
+  /** A human chose the object (row- or label-level). */
+  | "human"
+  /** The plan created it during commit. */
+  | "created"
+  /** A human said this is not a place to keep. */
+  | "ignored"
+  /** An activity or a note — not a place, never an object. */
+  | "none";
+
+export interface WorkContextSegment {
+  /** The source spelling. */
+  readonly label: string;
+  readonly kind: ContextSegmentKind;
+  readonly key: string;
+  readonly state: WorkContextSegmentState;
+  readonly workObjectId: string | null;
+  /** The canonical name: the existing object's, or the name the plan would create. */
+  readonly name: string | null;
+  readonly confidence: number | null;
+  readonly method: string | null;
+  readonly candidates: readonly { readonly id: string; readonly name: string }[];
+  /** This place's hours on this row as the TEXT states them; null = not stated. */
+  readonly hours: number | null;
+}
+
+export interface WorkContexts {
+  /** A one-line summary for generic derived-field renderers. */
+  readonly value: string;
+  readonly method: "context_label_split" | "site_from_work_text" | "no_context";
+  readonly confidence: number;
+  readonly segments: readonly WorkContextSegment[];
+  readonly allocation: HoursAllocation | null;
+}
+
+const HUMAN_CHOICE = "human_choice";
+export const HOURS_ACKNOWLEDGED_METHOD = "human_acknowledged_as_stated";
+
+export function placeSegments(c: WorkContexts | null): readonly WorkContextSegment[] {
+  return c ? c.segments.filter((s) => s.kind === "place" && s.state !== "ignored") : [];
+}
+
+/** The one object a row may carry on its own column: exactly one kept
+ *  place with an id. A multi-place day keeps its places in `contexts`. */
+function singleObjectId(c: WorkContexts | null): string | null {
+  const places = placeSegments(c);
+  if (places.length !== 1) return null;
+  return places[0].workObjectId;
+}
+
+function rowContextState(c: WorkContexts | null): ContextState {
+  const places = placeSegments(c);
+  if (places.length === 0) return "absent";
+  if (places.some((p) => p.state === "ambiguous")) return "ambiguous";
+  if (places.some((p) => p.workObjectId === null)) return "unmatched";
+  if (places.every((p) => p.state === "created")) return "created";
+  return "matched";
+}
+
+function readPriorContexts(derived: Record<string, unknown>): WorkContexts | null {
+  const c = derived.workContexts as WorkContexts | undefined;
+  return c && Array.isArray(c.segments) ? c : null;
+}
+
+function isAcknowledged(derived: Record<string, unknown>): boolean {
+  const a = derived.humanAcknowledgement as { method?: string } | undefined;
+  return a?.method === HOURS_ACKNOWLEDGED_METHOD;
+}
+
+/**
+ * Resolve one row's contexts. The human's earlier choices (label-level or
+ * row-level) are carried over by segment key; everything else is recomputed
+ * against the CURRENT objects so a colleague's new site is matched, never
+ * duplicated.
+ */
+export function resolveRowContexts(input: {
+  readonly contextLabel: string | null;
+  readonly activityText: string | null;
+  readonly hours: number | null;
+  readonly prior: WorkContexts | null;
+  readonly rowChosenObjectId: string | null;
+  readonly objects: readonly ResolveEntity[];
+  readonly knownAll: readonly KnownPlace[];
+  readonly canonical: readonly CanonicalPlace[];
+}): WorkContexts | null {
+  let method: WorkContexts["method"] = "context_label_split";
+  let confidence = 1;
+  let segments: readonly ContextSegment[] = segmentsOf(input.contextLabel);
+  if (segments.length === 0) {
+    const sites = extractSitesFromText(input.activityText, input.knownAll);
+    if (sites.length === 0) return null;
+    method = "site_from_work_text";
+    confidence = sites[0].confidence;
+    segments = sites.map((site) => toSegment(site.label));
+  }
+
+  const priorByKey = new Map<string, WorkContextSegment>();
+  for (const p of input.prior?.segments ?? []) {
+    if (p.method === HUMAN_CHOICE) priorByKey.set(p.key, p);
+  }
+  const clusterOf = (seg: ContextSegment): CanonicalPlace | null =>
+    input.canonical.find(
+      (c) => c.key === seg.key || c.spellings.some((sp) => normalizeLabel(sp.label) === seg.key),
+    ) ?? null;
+
+  const blank = (seg: ContextSegment, state: WorkContextSegmentState): WorkContextSegment => ({
+    label: seg.label, kind: seg.kind, key: seg.key, state,
+    workObjectId: null, name: null, confidence: null, method: null, candidates: [], hours: null,
+  });
+
+  const resolved: WorkContextSegment[] = segments.map((seg) => {
+    const human = priorByKey.get(seg.key);
+    if (human) return human;
+    if (seg.kind !== "place") return blank(seg, "none");
+    const cluster = clusterOf(seg);
+    const r = resolvePlace(seg, input.knownAll);
+    if (r.kind === "ambiguous") {
+      return {
+        ...blank(seg, "ambiguous"),
+        candidates: r.candidates
+          .filter((c) => c.id !== null)
+          .map((c) => ({ id: c.id as string, name: c.name })),
+      };
+    }
+    if (r.kind === "matched" || r.kind === "proposed") {
+      // An id: an existing object. No id: the file's own canonical spelling —
+      // nothing exists yet, and the plan creates it under that name.
+      return {
+        ...blank(seg, r.place.id !== null ? r.kind : "new"),
+        workObjectId: r.place.id,
+        name: r.place.name,
+        confidence: r.confidence,
+        method: r.method,
+      };
+    }
+    return {
+      ...blank(seg, "new"),
+      name: cluster?.name ?? seg.label,
+      confidence: cluster ? 0.8 : 0.5,
+      method: cluster ? "canonical_spelling" : "as_written",
+    };
+  });
+
+  // A row-level human choice (the older `resolveRow` path) applies to a
+  // single-place row; a multi-place day is settled per label.
+  const kept = resolved.filter((s) => s.kind === "place" && s.state !== "ignored");
+  if (input.rowChosenObjectId && kept.length === 1 && kept[0].method !== HUMAN_CHOICE) {
+    const obj = input.objects.find((o) => o.id === input.rowChosenObjectId);
+    const i = resolved.indexOf(kept[0]);
+    resolved[i] = {
+      ...kept[0], state: "human", workObjectId: input.rowChosenObjectId,
+      name: obj?.name ?? kept[0].name, confidence: 1, method: HUMAN_CHOICE, candidates: [],
+    };
+  }
+
+  const places = resolved.filter((s) => s.kind === "place" && s.state !== "ignored");
+  const allocation = allocateHours(
+    input.activityText,
+    places.map((p) => {
+      const cluster = clusterOf(toSegment(p.label));
+      return {
+        name: p.name ?? p.label,
+        spellings: [p.label, ...(cluster?.spellings.map((sp) => sp.label) ?? [])],
+      };
+    }),
+    input.hours,
+  );
+  let pi = 0;
+  const withHours = resolved.map((s) =>
+    s.kind === "place" && s.state !== "ignored" ? { ...s, hours: allocation.hours[pi++] ?? null } : s,
+  );
+
+  const other = resolved.length - places.length;
+  return {
+    value: `${places.length} place${places.length === 1 ? "" : "s"}${other > 0 ? `, ${other} other` : ""}`,
+    method,
+    confidence,
+    segments: withHours,
+    allocation: places.length > 0 ? allocation : null,
+  };
 }
 
 /**
@@ -547,7 +764,16 @@ export interface PreviewRow {
  */
 export interface ImportPlan {
   readonly people: readonly { readonly label: string; readonly rows: number }[];
-  readonly objects: readonly { readonly label: string; readonly rows: number }[];
+  /** One entry per canonical place the commit would create. `spellings`
+   *  are the source's other ways of writing it, folded by the resolver
+   *  (same house number, typo distance) — shown, never hidden. */
+  readonly objects: readonly {
+    readonly label: string;
+    readonly rows: number;
+    readonly spellings: readonly string[];
+    /** `text` when the place was read from the work text, not the cell. */
+    readonly origin: "cell" | "text";
+  }[];
 }
 
 export interface ImportPreview {
@@ -579,6 +805,14 @@ export interface ImportPreview {
     readonly willCreateObjects: number;
     /** Rows whose source week disagrees with their explicit date. */
     readonly weekConflicts: number;
+    /** Rows stating more hours than a day holds, not yet acknowledged. */
+    readonly impossibleHours: number;
+    /** Rows whose place could not be read from the cell or the text. */
+    readonly siteUnknown: number;
+    /** Rows spanning several places with no per-place hours in the text. */
+    readonly unallocatedMultiPlace: number;
+    /** Distinct place labels the human must settle (several candidates). */
+    readonly ambiguousPlaces: number;
   };
 }
 
@@ -629,7 +863,15 @@ export async function buildPreview(
   if (!existing.ok) return existing.failure;
 
   const personCache = new Map<string, ReturnType<typeof matchPerson>>();
-  const placeCache = new Map<string, ReturnType<typeof matchPlace>>();
+
+  // THE SESSION'S OWN PLACES, ONCE. Every explicit place segment of every
+  // row (and the site read from the text of rows with an empty cell) is
+  // clustered by most frequent spelling and resolved against the objects
+  // the organization already has. Rows then resolve against BOTH: existing
+  // objects (an id) and the file's canonical spellings (no id yet — the
+  // plan creates them). A canonical place that already exists is not listed
+  // twice, so an exact label can never be "ambiguous" against itself.
+  const { canonical, knownAll } = sessionPlaces(staged, objects.value);
 
   const preview: PreviewRow[] = [];
   const updates: { id: string; patch: Record<string, unknown> }[] = [];
@@ -675,36 +917,34 @@ export async function buildPreview(
       }
     }
 
-    let contextState: ContextState = "absent";
-    let workObjectId: string | null = chosenObjectId;
-    let workObjectName: string | null = null;
-    let contextCandidates: { id: string; name: string }[] = [];
-
-    if (chosenObjectId) {
-      contextState = "matched";
-      workObjectName =
-        objects.value.find((o) => o.id === chosenObjectId)?.name ?? null;
-    } else if (contextLabel) {
-      const key = contextLabel.toLowerCase();
-      let m = placeCache.get(key);
-      if (!m) {
-        m = matchPlace(contextLabel, objects.value);
-        placeCache.set(key, m);
-      }
-      if (m.kind === "matched") {
-        contextState = "matched";
-        workObjectId = m.workObjectId;
-        workObjectName = m.name;
-      } else if (m.kind === "ambiguous") {
-        contextState = "ambiguous";
-        contextCandidates = m.candidates.map((c) => ({
-          id: c.id,
-          name: c.name,
-        }));
-      } else if (m.kind === "unmatched") {
-        contextState = "unmatched";
-      }
-    }
+    // THE CONTEXTS — every place of the day, each resolved on its own; the
+    // activity / note segments kept but never made into a site; the site
+    // read from the text when the cell is empty; per-place hours when the
+    // text states them. `chosenObjectId` (a row-level human choice) and the
+    // label-level choices carried in `derived.workContexts` both win over
+    // re-matching.
+    const priorDerived = (s.derived as Record<string, unknown> | null) ?? {};
+    const contexts = resolveRowContexts({
+      contextLabel,
+      activityText: (s.activity_text as string | null) ?? null,
+      hours: s.hours === null || s.hours === undefined ? null : Number(s.hours),
+      prior: readPriorContexts(priorDerived),
+      rowChosenObjectId: chosenObjectId,
+      objects: objects.value,
+      knownAll,
+      canonical,
+    });
+    const contextState: ContextState = rowContextState(contexts);
+    const workObjectId: string | null = singleObjectId(contexts);
+    const workObjectName: string | null = workObjectId
+      ? (objects.value.find((o) => o.id === workObjectId)?.name ?? null)
+      : null;
+    const contextCandidates: { id: string; name: string }[] =
+      placeSegments(contexts).find((p) => p.state === "ambiguous")?.candidates.slice() ?? [];
+    const acknowledged = isAcknowledged(priorDerived);
+    const impossibleHours =
+      (priorDerived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD &&
+      !acknowledged;
 
     // The fingerprint is recomputed with whatever is now resolved, so a row
     // matched to a person collides with the same fact imported earlier.
@@ -730,33 +970,35 @@ export async function buildPreview(
       text: (s.activity_text as string | null) ?? "",
     });
 
-    const ready =
-      personState === "matched" || personState === "created"
-        ? contextState !== "ambiguous" && dup.state !== "duplicate"
-        : false;
+    // A figure no day can hold (800 h on 2025-11-17) is kept as stated and
+    // shown — but it is not committed until a human has looked at it and
+    // said "as stated" (owner command §11: informed acknowledgement, never a
+    // silent block and never a silent rewrite).
+    const settled = contextState !== "ambiguous" && dup.state !== "duplicate" && !impossibleHours;
+    const ready = (personState === "matched" || personState === "created") && settled;
     // The plan can make a row ready only when its person is simply not on the
-    // roster yet. An ambiguous person, an ambiguous place or a duplicate stays
-    // with the human.
+    // roster yet. An ambiguous person, an ambiguous place, a duplicate or an
+    // unacknowledged impossible figure stays with the human.
     const readyWithPlan =
       !ready &&
       personState === "unmatched" &&
       personLabel !== null &&
       personLabel.trim() !== "" &&
-      contextState !== "ambiguous" &&
-      dup.state !== "duplicate";
-    const contextWillCreate =
-      contextState === "unmatched" && contextLabel !== null && contextLabel.trim() !== "";
+      settled;
+    const contextWillCreate = placeSegments(contexts).some((p) => p.state === "new");
 
     const problem =
-      personState === "unmatched"
-        ? "person_not_on_roster"
-        : personState === "ambiguous"
-          ? "person_ambiguous"
-          : contextState === "ambiguous"
-            ? "context_ambiguous"
-            : dup.state === "duplicate"
-              ? "already_imported"
-              : null;
+      personState === "ambiguous"
+        ? "person_ambiguous"
+        : contextState === "ambiguous"
+          ? "context_ambiguous"
+          : dup.state === "duplicate"
+            ? "already_imported"
+            : impossibleHours
+              ? "hours_exceed_day"
+              : personState === "unmatched"
+                ? "person_not_on_roster"
+                : null;
 
     preview.push({
       id: s.id as string,
@@ -784,8 +1026,18 @@ export async function buildPreview(
       ready,
       readyWithPlan,
       contextWillCreate,
+      contexts,
+      acknowledged,
       problem,
     });
+
+    // The reading is persisted on STAGING (`derived.workContexts`) beside the
+    // parser's own derived fields and the human's acknowledgement, so the
+    // commit carries it into the record and a later preview keeps the
+    // human's choices.
+    const nextDerived: Record<string, unknown> = { ...priorDerived };
+    if (contexts) nextDerived.workContexts = contexts;
+    else delete nextDerived.workContexts;
 
     updates.push({
       id: s.id as string,
@@ -795,6 +1047,7 @@ export async function buildPreview(
         person_match_confidence: personConfidence,
         context_state: contextState,
         work_object_id: workObjectId,
+        derived: nextDerived,
         duplicate_state: dup.state,
         duplicate_of_record_id: dup.recordId,
         record_fingerprint: fingerprint,
@@ -828,7 +1081,10 @@ export async function buildPreview(
   // The plan: one entry per DISTINCT label (the same normalisation the
   // matcher uses), so "Jonas Petraitis" on forty rows is one person to create.
   const planPeople = new Map<string, { label: string; rows: number }>();
-  const planObjects = new Map<string, { label: string; rows: number }>();
+  const planObjects = new Map<
+    string,
+    { label: string; rows: number; spellings: Set<string>; origin: "cell" | "text" }
+  >();
   for (const r of preview) {
     if (r.readyWithPlan && r.personLabel) {
       const key = personKey(r.personLabel);
@@ -836,16 +1092,28 @@ export async function buildPreview(
       entry.rows += 1;
       planPeople.set(key, entry);
     }
-    if (r.contextWillCreate && r.contextLabel) {
-      const key = normalizeLabel(r.contextLabel);
-      const entry = planObjects.get(key) ?? { label: r.contextLabel, rows: 0 };
+    for (const seg of placeSegments(r.contexts)) {
+      if (seg.state !== "new" || !seg.name) continue;
+      const key = normalizeLabel(seg.name);
+      const entry = planObjects.get(key) ?? {
+        label: seg.name,
+        rows: 0,
+        spellings: new Set<string>(),
+        origin: r.contexts?.method === "site_from_work_text" ? ("text" as const) : ("cell" as const),
+      };
       entry.rows += 1;
+      if (normalizeLabel(seg.label) !== key) entry.spellings.add(seg.label);
       planObjects.set(key, entry);
     }
   }
   const plan: ImportPlan = {
     people: [...planPeople.values()],
-    objects: [...planObjects.values()],
+    objects: [...planObjects.values()].map((o) => ({
+      label: o.label,
+      rows: o.rows,
+      spellings: [...o.spellings],
+      origin: o.origin,
+    })),
   };
 
   return {
@@ -872,11 +1140,28 @@ export async function buildPreview(
             (r.derived.calendarWeek as { method?: string } | undefined)?.method ===
             "iso_week_conflicts_with_source_week",
         ).length,
+        // A person the PLAN creates is not "needed" from the human; 151 of
+        // 158 rows read as unresolved on the first walk because the plan's
+        // seven people were subtracted from the wrong figure.
         needsPerson: preview.filter(
-          (r) => r.personState === "unmatched" || r.personState === "ambiguous",
+          (r) =>
+            r.personState === "ambiguous" ||
+            (r.personState === "unmatched" && !r.readyWithPlan && !r.ready),
         ).length,
         needsContext: preview.filter((r) => r.contextState === "ambiguous")
           .length,
+        impossibleHours: preview.filter((r) => r.problem === "hours_exceed_day").length,
+        siteUnknown: preview.filter((r) => placeSegments(r.contexts).length === 0).length,
+        unallocatedMultiPlace: preview.filter(
+          (r) => r.contexts?.allocation?.method === "unknown_split",
+        ).length,
+        ambiguousPlaces: new Set(
+          preview.flatMap((r) =>
+            placeSegments(r.contexts)
+              .filter((p) => p.state === "ambiguous")
+              .map((p) => p.key),
+          ),
+        ).size,
         duplicates: preview.filter(
           (r) =>
             r.duplicateState === "duplicate" ||
@@ -930,6 +1215,37 @@ function classifyDuplicate(
     return { state: "conflict", recordId: sameText.id };
   }
   return { state: "probable_duplicate", recordId: sameSlot[0].id };
+}
+
+/**
+ * The places a session names, clustered and resolved ONCE. Explicit cell
+ * segments first; then the sites read from the text of rows whose cell is
+ * empty, matched against the same known set so `Hoofdgraht 13` in a text
+ * folds into `Hoofdgracht 13` from the cells.
+ */
+export function sessionPlaces(
+  staged: readonly Record<string, unknown>[],
+  objects: readonly ResolveEntity[],
+): { canonical: readonly CanonicalPlace[]; knownAll: readonly KnownPlace[] } {
+  const segments: ContextSegment[] = [];
+  const textRows: string[] = [];
+  for (const s of staged) {
+    const label = (s.context_label as string | null) ?? null;
+    const segs = segmentsOf(label);
+    if (segs.length > 0) segments.push(...segs);
+    else textRows.push((s.activity_text as string | null) ?? "");
+  }
+  const fromCells = canonicalPlaces(segments, objects);
+  const known = (places: readonly CanonicalPlace[]): KnownPlace[] => [
+    ...objects.map((o) => ({ id: o.id, name: o.name })),
+    ...places.filter((c) => c.existing === null).map((c) => ({ id: null, name: c.name })),
+  ];
+  for (const text of textRows) {
+    const site = extractSiteFromText(text, known(fromCells));
+    if (site) segments.push(toSegment(site.label));
+  }
+  const canonical = canonicalPlaces(segments, objects);
+  return { canonical, knownAll: known(canonical) };
 }
 
 // ── reads the preview needs ─────────────────────────────────────────────────
@@ -1151,6 +1467,136 @@ export async function resolveRow(
   return { kind: "ok", updated: true };
 }
 
+/**
+ * Settle one PLACE LABEL for the whole session — asked once, applied to
+ * every row that names it (`Travers` on 11 rows is one question, not
+ * eleven). The choice is stamped into each row's `derived.workContexts`
+ * with method `human_choice`, which the next preview carries over instead
+ * of re-matching. Writes STAGING only.
+ */
+export async function resolveContextLabel(
+  caller: DomainCaller,
+  input: {
+    readonly sessionId: string;
+    /** The segment key (`normalizeLabel` of the source spelling). */
+    readonly key: string;
+    readonly decision:
+      | { readonly kind: "object"; readonly workObjectId: string }
+      | { readonly kind: "create"; readonly name?: string | null }
+      | { readonly kind: "ignore" };
+  },
+): Promise<EvidenceImportResult<{ readonly updated: number }>> {
+  const session = await loadSession(caller, input.sessionId);
+  if (!session.ok) return session.failure;
+  const key = input.key.trim();
+  if (key === "") return { kind: "invalid", problems: ["key"] };
+
+  let objectName: string | null = null;
+  const decision = input.decision;
+  if (decision.kind === "object") {
+    const objects = await readWorkObjects(caller, session.organizationId);
+    if (!objects.ok) return objects.failure;
+    const obj = objects.value.find((o) => o.id === decision.workObjectId);
+    if (!obj) return { kind: "not-found" };
+    objectName = obj.name;
+  }
+
+  const rowsRes = await db(caller.supabase)
+    .from("evidence_import_rows")
+    .select("id, derived")
+    .eq("session_id", input.sessionId)
+    .neq("status", "committed")
+    .limit(MAX_ROWS_PER_SESSION);
+  if (rowsRes.error) return classify(rowsRes.error);
+
+  let updated = 0;
+  for (const s of (rowsRes.data ?? []) as Record<string, unknown>[]) {
+    const derived = (s.derived as Record<string, unknown> | null) ?? {};
+    const contexts = readPriorContexts(derived);
+    if (!contexts || !contexts.segments.some((seg) => seg.key === key)) continue;
+    const segments = contexts.segments.map((seg): WorkContextSegment => {
+      if (seg.key !== key) return seg;
+      const d = input.decision;
+      if (d.kind === "object") {
+        return { ...seg, state: "human", workObjectId: d.workObjectId, name: objectName, confidence: 1, method: HUMAN_CHOICE, candidates: [] };
+      }
+      if (d.kind === "create") {
+        const name = tidy(d.name ?? seg.name ?? seg.label);
+        return { ...seg, state: "new", workObjectId: null, name: name === "" ? seg.label : name, confidence: 1, method: HUMAN_CHOICE, candidates: [] };
+      }
+      return { ...seg, state: "ignored", workObjectId: null, confidence: 1, method: HUMAN_CHOICE, candidates: [] };
+    });
+    const next: WorkContexts = { ...contexts, segments };
+    const upd = await db(caller.supabase)
+      .from("evidence_import_rows")
+      .update({
+        work_object_id: singleObjectId(next),
+        context_state: rowContextState(next),
+        derived: { ...derived, workContexts: next },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", s.id as string);
+    if (upd.error) return classify(upd.error);
+    updated += 1;
+  }
+  return { kind: "ok", updated };
+}
+
+/**
+ * A human has looked at a flagged figure and keeps it AS STATED (owner
+ * command §11: informed acknowledgement, responsibility preserved). The
+ * figure is not changed; the row records who accepted it and the next
+ * preview lets it through. Writes STAGING only.
+ */
+export async function acknowledgeRows(
+  caller: DomainCaller,
+  input: {
+    readonly sessionId: string;
+    /** Either specific rows, or every row carrying this problem. */
+    readonly rowIds?: readonly string[];
+    readonly problem?: "hours_exceed_day";
+  },
+): Promise<EvidenceImportResult<{ readonly updated: number }>> {
+  const session = await loadSession(caller, input.sessionId);
+  if (!session.ok) return session.failure;
+  let q = db(caller.supabase)
+    .from("evidence_import_rows")
+    .select("id, derived")
+    .eq("session_id", input.sessionId)
+    .neq("status", "committed")
+    .limit(MAX_ROWS_PER_SESSION);
+  if (input.rowIds && input.rowIds.length > 0) q = q.in("id", input.rowIds);
+  else if (input.problem) q = q.eq("problem", input.problem);
+  else return { kind: "invalid", problems: ["rowIds or problem"] };
+  const rowsRes = await q;
+  if (rowsRes.error) return classify(rowsRes.error);
+
+  let updated = 0;
+  const at = new Date().toISOString();
+  for (const s of (rowsRes.data ?? []) as Record<string, unknown>[]) {
+    const derived = (s.derived as Record<string, unknown> | null) ?? {};
+    if (isAcknowledged(derived)) continue;
+    const upd = await db(caller.supabase)
+      .from("evidence_import_rows")
+      .update({
+        derived: {
+          ...derived,
+          humanAcknowledgement: {
+            value: input.problem ?? "row",
+            method: HOURS_ACKNOWLEDGED_METHOD,
+            confidence: 1,
+            note: `by ${caller.userId} at ${at}`,
+          },
+        },
+        updated_at: at,
+      })
+      .eq("id", s.id as string);
+    if (upd.error) return classify(upd.error);
+    updated += 1;
+  }
+  return { kind: "ok", updated };
+}
+
 // ── commit ──────────────────────────────────────────────────────────────────
 
 export interface CommitResult {
@@ -1194,7 +1640,7 @@ async function applyPlan(
 
   const rowsRes = await db(caller.supabase)
     .from("evidence_import_rows")
-    .select("id, person_label, context_label, person_state, context_state, status, problem")
+    .select("id, person_label, context_label, person_state, context_state, status, problem, derived")
     .eq("session_id", sessionId)
     .neq("status", "skipped")
     .limit(MAX_ROWS_PER_SESSION);
@@ -1255,51 +1701,69 @@ async function applyPlan(
     const objects = await readWorkObjects(caller, session.organizationId);
     if (!objects.ok) return objects.failure;
     const current = [...objects.value];
-    const byKey = new Map<string, string>(); // normalizeLabel → id
+    const byKey = new Map<string, string>(); // normalizeLabel(canonical name) → id
     for (const s of staged) {
-      if (s.context_state !== "unmatched") continue;
-      const label = (s.context_label as string | null) ?? "";
-      if (label.trim() === "") continue;
-      const key = normalizeLabel(label);
-      let objectId = byKey.get(key) ?? null;
-      if (!objectId) {
-        const m = matchPlace(label, current);
-        if (m.kind === "matched") objectId = m.workObjectId;
-        else if (m.kind === "ambiguous") continue;
-        else {
-          // THE existing insert path for objects (membership-based authority
-          // inside the RPC). It answers a status, not an id, so the register
-          // is re-read and matched — the same way a human's "add" is read back.
-          const rpc = await db(caller.supabase).rpc("create_work_object_v1", {
-            p_organization_id: session.organizationId,
-            p_name: tidy(label).slice(0, 160),
-            p_project_id: null,
-            p_country: null,
-            p_region: null,
-            p_city: null,
-            p_address_line: null,
-            p_latitude: null,
-            p_longitude: null,
-          });
-          if (rpc.error) return classify(rpc.error);
-          const status = String(rpc.data ?? "");
-          if (status === "not_allowed") return { kind: "not-authorized", reason: "not-authorized" };
-          if (status !== "created") continue; // invalid / limit_reached: the row keeps its label
-          const again = await readWorkObjects(caller, session.organizationId);
-          if (!again.ok) return again.failure;
-          current.splice(0, current.length, ...again.value);
-          const found = matchPlace(label, current);
-          if (found.kind !== "matched") continue;
-          objectId = found.workObjectId;
-          createdObjects += 1;
-        }
-        byKey.set(key, objectId);
-      }
+      // The CANONICAL places of the row, not its cell: `Hoofdgracht 3;
+      // Kantoor` creates two objects (or none, if both exist), and
+      // `Hoofdgraht 3` creates nothing — it is a spelling of `Hoofdgracht 3`.
+      const derived = (s.derived as Record<string, unknown> | null) ?? {};
+      const contexts = readPriorContexts(derived);
+      if (!contexts) continue;
+      let changed = false;
+      const segments = await Promise.all(
+        contexts.segments.map(async (seg): Promise<WorkContextSegment> => {
+          if (seg.kind !== "place" || seg.state !== "new" || !seg.name) return seg;
+          const key = normalizeLabel(seg.name);
+          let objectId = byKey.get(key) ?? null;
+          if (!objectId) {
+            // Fresh match against the CURRENT objects: an exact one is reused,
+            // several is still the human's, only a true absence is created.
+            const m = resolvePlace(toSegment(seg.name), current.map((o) => ({ id: o.id, name: o.name })));
+            if (m.kind === "matched" || m.kind === "proposed") objectId = m.place.id;
+            else if (m.kind === "ambiguous") return seg;
+            else {
+              // THE existing insert path for objects (membership-based authority
+              // inside the RPC). It answers a status, not an id, so the register
+              // is re-read and matched — the same way a human's "add" is read back.
+              const rpc = await db(caller.supabase).rpc("create_work_object_v1", {
+                p_organization_id: session.organizationId,
+                p_name: tidy(seg.name).slice(0, 160),
+                p_project_id: null,
+                p_country: null,
+                p_region: null,
+                p_city: null,
+                p_address_line: null,
+                p_latitude: null,
+                p_longitude: null,
+              });
+              if (rpc.error) throw classify(rpc.error);
+              const status = String(rpc.data ?? "");
+              if (status === "not_allowed") throw { kind: "not-authorized", reason: "not-authorized" } as EvidenceImportFailure;
+              if (status !== "created") return seg; // invalid / limit_reached: the row keeps its label
+              const again = await readWorkObjects(caller, session.organizationId);
+              if (!again.ok) throw again.failure;
+              current.splice(0, current.length, ...again.value);
+              const found = resolvePlace(toSegment(seg.name), current.map((o) => ({ id: o.id, name: o.name })));
+              if (found.kind !== "matched" && found.kind !== "proposed") return seg;
+              objectId = found.place.id as string;
+              createdObjects += 1;
+            }
+            if (objectId) byKey.set(key, objectId);
+          }
+          if (!objectId) return seg;
+          changed = true;
+          return { ...seg, state: "created", workObjectId: objectId };
+        }),
+      ).catch((failure: EvidenceImportFailure) => failure);
+      if (!Array.isArray(segments)) return segments;
+      if (!changed) continue;
+      const next: WorkContexts = { ...contexts, segments };
       const upd = await db(caller.supabase)
         .from("evidence_import_rows")
         .update({
-          work_object_id: objectId,
-          context_state: "created",
+          work_object_id: singleObjectId(next),
+          context_state: rowContextState(next),
+          derived: { ...derived, workContexts: next },
           updated_at: new Date().toISOString(),
         })
         .eq("id", s.id as string);
@@ -1364,7 +1828,7 @@ export async function commitImport(
   const rowsRes = await db(caller.supabase)
     .from("evidence_import_rows")
     .select(
-      "id, row_index, organization_person_id, work_object_id, activity_date, period_start, period_end, hours, activity_text, source_fact, fact_fields, derived, record_fingerprint, status, person_match_confidence",
+      "id, row_index, organization_person_id, work_object_id, context_label, activity_date, period_start, period_end, hours, activity_text, source_fact, fact_fields, derived, record_fingerprint, status, person_match_confidence",
     )
     .eq("session_id", sessionId)
     .eq("status", "ready")
@@ -1405,7 +1869,10 @@ export async function commitImport(
       organization_id: session.organizationId,
       organization_person_id: r.organization_person_id as string,
       activity_kind: "work",
-      context_label: null,
+      // The source's own words for WHERE, verbatim — the column exists for
+      // exactly this and was being written null. A multi-place day keeps
+      // its places in `derived.workContexts`; the single object goes here.
+      context_label: (r.context_label as string | null) ?? null,
       work_object_id: (r.work_object_id as string | null) ?? null,
       activity_date: (r.activity_date as string | null) ?? null,
       period_start: (r.period_start as string | null) ?? null,
