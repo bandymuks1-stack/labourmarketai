@@ -15651,9 +15651,7 @@
       "needsMigration": "Diese Funktion ist in dieser Datenbank noch nicht aktiviert.",
       "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
       "noObjects": "Es gibt noch keine Objekte, denen die heutigen Stunden zugeordnet werden können.",
-      "error": "Der Tag konnte nicht geladen werden.",
-      "noObjectsImport": "Laden Sie eine Datei mit Ihrer Arbeitshistorie hoch — Objekte und Personen werden daraus vorbereitet.",
-      "noObjectsRegister": "Objektregister"
+      "error": "Der Tag konnte nicht geladen werden."
     },
     "import": {
       "entryLink": "Stunden aus einer Tabelle importieren (.xlsx)",

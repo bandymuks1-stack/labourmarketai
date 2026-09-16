@@ -55,7 +55,7 @@ verdict on its own.
 | *(new)* `/dashboard/company/education` | Programmes, cohorts, learners, employer demand for them | PROGRAMME ↔ PERSON | inside the hub | — | Learners + programmes + public demand (institution) moved verbatim; door only for `training_provider` | GREEN — new door |
 | *(new)* `/dashboard/company/history` | Bring historical reality in; see what was imported; correct it | EVIDENCE (organization_evidence_records, import sessions) | inside the hub as `#evidence-import-zone` | chat "noriu įkelti istorinius duomenis" → *hours form* dead end ("first create an object") | The ONE evidence import engine as the canonical **historical import door**; the hours-grid import stays a *format* of it; chat routes here | **P0** GREEN — new door + routing fix + automation |
 | *(new)* `/dashboard/company/settings` | Identity, verification, what we do, public profile, help | ORGANIZATION | inside the hub | — | Next actions · readiness · capabilities · public profile · tier-1 warning · help request · profile link, moved verbatim | GREEN — new door |
-| `/dashboard/hours` | Today's quick hours entry; timesheet grid import | WORK (allocations) | 70 lines; `states.noObjects` dead end | **P0 dead end** — asks the human to create objects the file already names | Keep as the operator's daily surface; the no-objects state now opens the historical import (which prepares objects from evidence) and the objects register | GREEN |
+| `/dashboard/hours` | Today's quick hours entry; timesheet grid import | WORK (allocations) | 70 lines; `states.noObjects` dead end | **P0 dead end** — asks the human to create objects the file already names | Copy corrected to a statement of fact (no order to the human); the page itself is NOT edited — it sits under the owner's `#1344` waiver and the approved flow (chat → History door) bypasses it. Doors on this page: queued with Q2-class chrome work, only with an owner waiver decision | GREEN (copy only) |
 | `/dashboard/company/projects/new` | Create a project | PROJECT | 41 lines | none | KEEP | KEEP |
 
 ### 1.2 Person context (worker) — already corrected 2026-09-13, verified only
@@ -128,7 +128,7 @@ navigation, not a card grid. The Dabar screen never repeats a door's content.
 | P0-1 | Chat `hours-import` intent for an organization pointed at `/dashboard/hours?import=1`, whose gate answers "first create an object" | Organization identity routes to the canonical historical import door (`/dashboard/company/history`); the hours grid stays reachable *from* that door as a format | `conversation-chat.tsx` executor `timesheetImport`; command registry |
 | P0-2 | The evidence import stops at `person_not_on_roster` and requires a separate per-person "create roster person" act; unmatched objects are dropped to a label | **Preview plan**: unmatched people and unmatched objects become `will_create` entries in the plan ("Radau 7 objektus. 5 jau yra. 2 naujus paruošiau sukurti."); the explicit COMMIT executes the plan through the EXISTING authorized writes (`createRosterPerson`, `create_work_object_v1` RPC) and then commits the rows. Ambiguous matches still require the human. Nothing is written before commit. | `import-core.ts` (`buildPreview` → `plan`, `commitImport` → `applyPlan`), `evidence-import-section.tsx`, `evidence-import-forms.tsx` |
 | P0-3 | Contradictory evidence inside one row (source week vs explicit date) was not detected | Parser recognises a week column, computes the ISO week of the explicit date, records `derived.calendarWeek` with method `iso_week_of_explicit_date` (consistent) or `iso_week_conflicts_with_source_week` (conflict, note carries `source_week=N`); the source cell stays verbatim in `raw`; the preview shows the conflict and the proposed canonical week with its reason. Insufficient evidence → nothing derived. | `parse-tabular.ts`, preview UI |
-| P0-4 | `/dashboard/hours` `no-objects` state is a wall | State becomes a door pair: "import from the file (objects are prepared from it)" and "objects register" | `hours/page.tsx` |
+| P0-4 | `/dashboard/hours` `no-objects` state is a wall | Copy states a fact instead of an order (messages only). The door pair on the page was reverted: the page is under the `#1344` waiver and the approved P0 flow does not pass through it | `messages/*` |
 
 ### P1 — navigation / giant page / context organization
 
@@ -323,16 +323,15 @@ working domain.
 | Q7 | **Product-owned copy leak sweep, all five active locales** | every REAL_LAUNCH_SURFACE | English literals in LT/RU/NL/DE surfaces are found only by walking | the `i18n-untranslated-ratchet` + a detector for product-owned hard-coded English in `.tsx` (allow-list for brand/technical tokens) | detector runs in CI; zero new hits; existing hits listed with owner | GREEN | none |
 | Q8 | **Subject sees and may refuse an imported record** | `/dashboard/profile` (PER-12) | no INSERT policy admits the subject on `organization_evidence_events` | RED packet in `docs/launch/OWNER_GATE_PACKETS_2026-09-08.md` | subject-only SECURITY DEFINER RPC applied; refuse button works | **RED** — owner-gated | owner decision |
 
-**Owner decision needed before merge (one line, not a code change by an agent):**
-CI `quality` on this branch fails at the Product Gate for ONE reason — editing
-`app/[locale]/dashboard/hours/page.tsx` (the no-objects state → two doors)
-re-opens the owner waiver `work-hours-allocation-surface`
-(`.github/scripts/owner-waivers.mjs`, scope "fresh #1344 only"). The three
-excused answers (`not_reflected_on_map`, `not_ai_controlled`,
-`requires_new_page`) are unchanged by the edit. Either (a) the owner extends
-`pullRequests: [1344]` to include 1746, or (b) the hours-page edit is reverted
-and P0-4 is dropped from this slice (the copy change in `messages/*` can stay).
-An agent does not extend an owner waiver.
+**Resolved without touching the waiver (owner ruling, second pass):** the
+edit to `app/[locale]/dashboard/hours/page.tsx` (P0-4, the no-objects state as
+two doors) was **reverted** — the approved P0 flow is chat intent →
+`/dashboard/company/history` → the evidence importer, which does not pass
+through the hours page at all, so the edit was not necessary to it. The
+`work-hours-allocation-surface` waiver (`#1344`) is unchanged. What stays: the
+LT/EN/RU/NL/DE copy `workHours.states.noObjects` now states a fact ("no sites
+yet to record hours against") instead of an order to the human; the guard
+pins both that copy and that the page file is byte-identical to `main`.
 
 Not queued (deliberately): any redesign of `/company/scouting`,
 `/company/planning`, the worker stations, or the marketing pages — they were

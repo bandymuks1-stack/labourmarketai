@@ -15651,9 +15651,7 @@
       "needsMigration": "This feature is not enabled on this database yet.",
       "noCompany": "Switch to a company workspace.",
       "noObjects": "There are no sites yet to record today's hours against.",
-      "error": "Could not load this day.",
-      "noObjectsImport": "Upload a file with your work history — sites and people are prepared from it.",
-      "noObjectsRegister": "Sites register"
+      "error": "Could not load this day."
     },
     "import": {
       "entryLink": "Import hours from a spreadsheet (.xlsx)",

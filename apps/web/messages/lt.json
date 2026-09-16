@@ -15651,9 +15651,7 @@
       "needsMigration": "Ši funkcija dar neįjungta šioje duomenų bazėje.",
       "noCompany": "Pasirinkite įmonės darbo sritį.",
       "noObjects": "Šiai dienai dar nėra objektų, prie kurių priskirti valandas.",
-      "error": "Nepavyko įkelti dienos duomenų.",
-      "noObjectsImport": "Įkelkite failą su darbo istorija — objektai ir žmonės paruošiami iš jo.",
-      "noObjectsRegister": "Objektų registras"
+      "error": "Nepavyko įkelti dienos duomenų."
     },
     "import": {
       "entryLink": "Importuoti valandas iš skaičiuoklės (.xlsx)",

@@ -15651,9 +15651,7 @@
       "needsMigration": "Deze functie is nog niet ingeschakeld op deze database.",
       "noCompany": "Schakel over naar een bedrijfswerkruimte.",
       "noObjects": "Er zijn nog geen locaties om de uren van vandaag aan te koppelen.",
-      "error": "Kon deze dag niet laden.",
-      "noObjectsImport": "Upload een bestand met uw werkgeschiedenis — locaties en mensen worden eruit voorbereid.",
-      "noObjectsRegister": "Locatieregister"
+      "error": "Kon deze dag niet laden."
     },
     "import": {
       "entryLink": "Uren importeren uit een spreadsheet (.xlsx)",

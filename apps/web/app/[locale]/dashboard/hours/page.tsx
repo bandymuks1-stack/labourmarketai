@@ -1,6 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { Link } from "@/lib/i18n/navigation";
 import { WorkHoursQuickEntry } from "@/components/app/work-hours-quick-entry";
 import { getHoursPageData, todayKey } from "@/lib/work-hours/hours-page-data";
 import { isValidWorkDate } from "@/lib/work-hours/allocations-model";
@@ -51,36 +50,6 @@ export default async function WorkHoursPage({
           entries={data.entries}
           dayTotal={data.dayTotal}
         />
-      ) : data.kind === "no-objects" ? (
-        // NOT A WALL (owner human walk 2026-09-16, design/final/03 §3 P0-4).
-        // "First create at least one object" asked the human to satisfy a
-        // data-model prerequisite by hand. The state is stated as a state,
-        // and the two doors that resolve it follow: the historical import,
-        // which PREPARES sites and people from the file itself, and the sites
-        // register for the person who wants to name one directly.
-        <section
-          className="flex flex-col gap-3 rounded-md border border-border-subtle p-4 text-sm"
-          data-testid={`hours-state-${data.kind}`}
-          role="status"
-        >
-          <p className="text-text-secondary">{t("states.noObjects")}</p>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/dashboard/company/history"
-              data-testid="hours-no-objects-import-door"
-              className="inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue"
-            >
-              {t("states.noObjectsImport")} →
-            </Link>
-            <Link
-              href={"/dashboard/projects#company-locations" as "/dashboard"}
-              data-testid="hours-no-objects-register-door"
-              className="inline-flex min-h-11 items-center rounded-control border border-ink-500 bg-ink-800/40 px-3 py-2 text-xs font-medium text-text-primary transition-colors hover:border-brand-blue"
-            >
-              {t("states.noObjectsRegister")} →
-            </Link>
-          </div>
-        </section>
       ) : (
         <p
           className="rounded-md border border-border-subtle p-4 text-sm"
@@ -91,7 +60,9 @@ export default async function WorkHoursPage({
             ? t("states.needsMigration")
             : data.kind === "no-company"
               ? t("states.noCompany")
-              : t("states.error")}
+              : data.kind === "no-objects"
+                ? t("states.noObjects")
+                : t("states.error")}
         </p>
       )}
     </div>
