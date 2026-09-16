@@ -16179,7 +16179,7 @@
       "card": {
         "historical": "Historical",
         "relationship": "on the organization's roster · no account",
-        "provenance": "Provenance",
+        "provenance": "Source",
         "provenanceText": "organization-reported, not independently confirmed",
         "hours": "Daily hours",
         "days": "Work days",
@@ -16233,14 +16233,14 @@
       "impactTitle": "One write — the existing screens then read it",
       "impact": {
         "people": "People: {count} new on the organization's roster (of {total}), without platform accounts.",
-        "places": "Places: {count} new (of {total}); spellings kept as provenance.",
+        "places": "Places: {count} new (of {total}); every spelling is kept as it was written.",
         "records": "Work records: {records} ({daily} as a day's hours); {held} held until you decide.",
         "aggregates": "Period aggregates: {period} with a known period, {unknown} as a source fact without duration.",
         "time": "Time: {period}.",
         "cards": "Cards: {count} people's historical professional identity — organization-reported, unconfirmed.",
         "field": "Team: the historical picture of who worked where, by week.",
         "calendar": "Calendar: daily hours reach the work journal and work in numbers only once an account is linked; period aggregates never as a day.",
-        "provenance": "Provenance: every record shows the file, the row and every interpretation; the whole import can be withdrawn."
+        "provenance": "Source: every record shows the file, the row and every reading; the whole import can be withdrawn."
       },
       "impactNote": "Nothing is created or written before you confirm."
     }
