@@ -323,6 +323,17 @@ working domain.
 | Q7 | **Product-owned copy leak sweep, all five active locales** | every REAL_LAUNCH_SURFACE | English literals in LT/RU/NL/DE surfaces are found only by walking | the `i18n-untranslated-ratchet` + a detector for product-owned hard-coded English in `.tsx` (allow-list for brand/technical tokens) | detector runs in CI; zero new hits; existing hits listed with owner | GREEN | none |
 | Q8 | **Subject sees and may refuse an imported record** | `/dashboard/profile` (PER-12) | no INSERT policy admits the subject on `organization_evidence_events` | RED packet in `docs/launch/OWNER_GATE_PACKETS_2026-09-08.md` | subject-only SECURITY DEFINER RPC applied; refuse button works | **RED** — owner-gated | owner decision |
 
+**Owner decision needed before merge (one line, not a code change by an agent):**
+CI `quality` on this branch fails at the Product Gate for ONE reason — editing
+`app/[locale]/dashboard/hours/page.tsx` (the no-objects state → two doors)
+re-opens the owner waiver `work-hours-allocation-surface`
+(`.github/scripts/owner-waivers.mjs`, scope "fresh #1344 only"). The three
+excused answers (`not_reflected_on_map`, `not_ai_controlled`,
+`requires_new_page`) are unchanged by the edit. Either (a) the owner extends
+`pullRequests: [1344]` to include 1746, or (b) the hours-page edit is reverted
+and P0-4 is dropped from this slice (the copy change in `messages/*` can stay).
+An agent does not extend an owner waiver.
+
 Not queued (deliberately): any redesign of `/company/scouting`,
 `/company/planning`, the worker stations, or the marketing pages — they were
 inventoried (§1) and are not capability dumps; the constitution's subjective
