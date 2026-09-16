@@ -15879,7 +15879,8 @@
       "person_ambiguous": "More than one person on your roster has this name. Choose which one.",
       "context_ambiguous": "More than one place matches this label. Choose which one.",
       "already_imported": "An identical record already exists, so this row will be skipped.",
-      "hours_exceed_day": "More hours on one day than a day holds. Review it and keep it as stated, or skip it."
+      "hours_exceed_day": "More hours on one day than a day holds. Review it and keep it as stated, or skip it.",
+      "time_semantics_open": "A day cannot hold this figure. Say what it means (period aggregate, a day's hours, unknown)."
     },
     "resolve": {
       "title": "Resolve",
@@ -16057,8 +16058,8 @@
       "none": "not a place"
     },
     "reconstruction": {
-      "understoodEyebrow": "History reconstructed",
-      "understoodTitle": "What the system understood from your file",
+      "understoodEyebrow": "This is how you actually worked",
+      "understoodTitle": "What LabourMarket.ai understood about your company",
       "periodUnknown": "Period not established",
       "figures": {
         "rows": "work records",
@@ -16082,7 +16083,8 @@
         "conflicts": "{count} rows — contradict what is already recorded",
         "allocation_unknown": "{count} rows — several places in a day, split not stated",
         "allocation_inconsistent": "{count} rows — the hours in the text do not add up to the day",
-        "place_from_text": "{count} rows — place read from the text: “{label}”"
+        "place_from_text": "{count} rows — place read from the text: “{label}”",
+        "time_semantics": "{count} rows — what does this hours figure mean?"
       },
       "issueWhy": {
         "impossible_hours": "The source figure is kept as it is (e.g. a month's total typed on one day). After \"keep as stated\" the row is recorded as a source fact and the day's duration stays unknown — it is summed nowhere.",
@@ -16094,7 +16096,8 @@
         "conflicts": "Same person, day and place — different hours. Both records stay visible.",
         "allocation_unknown": "The day's total is kept exactly; hours are not divided between places by guess.",
         "allocation_inconsistent": "The parts written in the text do not make the day's total. Both figures are kept.",
-        "place_from_text": "The place cell is empty; the site was taken from the first words of the text. If it is a misspelling of another place, choose \"same place as\" — one object is created, not two."
+        "place_from_text": "The place cell is empty; the site was taken from the first words of the text. If it is a misspelling of another place, choose \"same place as\" — one object is created, not two.",
+        "time_semantics": "A day cannot hold this many hours. By the source's own words it is a period aggregate (e.g. work from home over months). The figure stays as it is; you say what it is — and the period only if you know it. Such a total never becomes one day's duration."
       },
       "keepAsStated": "Keep as stated in the source",
       "keepAsStatedHint": "The source figure stays unchanged and is recorded as a source fact. It does NOT become that day's working duration — the day's duration stays unknown, so the calendar, work in numbers, pace and capacity never sum it.",
@@ -16127,7 +16130,7 @@
       "calendarLine": "{weeks} weeks · {personDays} person-days",
       "week": "Week",
       "weekN": "W{n}",
-      "calendarNote": "This is performed work, not a plan and not a commitment. ⚠ marks a day with a figure to review; its hours are in no total.",
+      "calendarNote": "This is performed work, not a plan and not a commitment. ⚠ — the file's week number disagrees with the date. Period aggregates are shown apart and placed on no day.",
       "companyTitle": "The company, as this data shows it",
       "known": "What the data lets us say",
       "knownLine": "{people} people worked at {places} places: {personDays} person-days, {hours} h stated.",
@@ -16139,10 +16142,107 @@
         "work_package": "work package / stage",
         "wage": "wage / price",
         "output": "output",
-        "team": "brigade (co-presence is not a team)"
+        "team": "brigade (co-presence is not a team)",
+        "aggregate_period": "the period of the period aggregates"
       },
       "commitEffect": "Confirming would create: {records} records ({held} held until you decide), {people} roster people, {objects} places. One write — the existing screens then read it.",
-      "sameAs": "Same place as"
+      "sameAs": "Same place as",
+      "understoodSentence": "{period}: {people} people worked at {places} places — {personDays} person-days and {hours} h of stated daily work.",
+      "spineTitle": "Time spine · hours per week",
+      "weekShort": "Wk",
+      "personDaysShort": "person-days",
+      "aggregateLine": "Apart: {hours} h stated as a period aggregate ({rows} rows) — not one day's work, in no day total.",
+      "aggregateRemote": "the source says remote work ({rows} rows)",
+      "machineReading": {
+        "period_aggregate": "system read: period aggregate",
+        "unknown": "system read: meaning unclear"
+      },
+      "remoteEvidenced": "source: remote work",
+      "timeQuestion": "What does this figure mean?",
+      "timeKind": "Meaning",
+      "timeKinds": {
+        "period_aggregate": "Period aggregate (e.g. work from home over months)",
+        "daily": "It really is that day's hours",
+        "unknown": "Unknown — keep as a source fact with no duration"
+      },
+      "timeRemote": "Remote / from home",
+      "timeRemoteYes": "Yes",
+      "timeRemoteNo": "No",
+      "timeRemoteUnknown": "Not stated",
+      "timePeriod": "Period (only if you know it)",
+      "timePeriodHint": "Leave empty if you do not know the period — the system invents no dates. With a period the total is recorded as a period record; without one, as a source fact with unknown duration.",
+      "from": "From",
+      "to": "To",
+      "timeSave": "Apply to these rows",
+      "timeHint": "The source figure is not changed. Your interpretation is recorded. The calendar, work in numbers, pace and capacity never sum a period aggregate into a day.",
+      "peopleSubtitle": "Each card is what this file proves about a person. Not a rating, not a current state.",
+      "card": {
+        "historical": "Historical",
+        "relationship": "on the organization's roster · no account",
+        "provenance": "Source",
+        "provenanceText": "organization-reported, not independently confirmed",
+        "hours": "Daily hours",
+        "days": "Work days",
+        "places": "Places",
+        "aggregate": "+ {hours} h period aggregate ({rows} rows), not split into days",
+        "aggregateRemote": "remote work",
+        "aggregatePeriodUnknown": "period unknown",
+        "currentNotInferred": "Current state (employment, availability, wage, skills) is not inferred from history.",
+        "openQuestions": "{count} rows await your decision",
+        "weeks": "Weeks",
+        "details": "Show the evidence",
+        "timelineTitle": "Places over time",
+        "timelineCurrent": "now",
+        "timelineEmpty": "No dated days.",
+        "activities": "Activities without a place",
+        "evidence": "The source's words",
+        "interpretations": "System interpretations",
+        "unknowns": "Unknown",
+        "unknownAllocation": "{count} days — several places, split not stated",
+        "unknownPlace": "{count} days — place not established",
+        "noActivities": "The source names no activity without a place."
+      },
+      "interpretation": {
+        "typo_same_house_number": "misspelling matched by house number",
+        "street_without_number": "street without a number assigned to its single place",
+        "near_identical_name": "near-identical name matched",
+        "site_from_work_text": "place read from the work text",
+        "hours_from_text": "per-place hours read from the text",
+        "canonical_spelling": "the file's most frequent spelling",
+        "as_written": "as written"
+      },
+      "field": {
+        "title": "How the team worked",
+        "subtitle": "Pick a week, a person or a place — the field shows who worked where, by the source.",
+        "allWeeks": "Whole period",
+        "peopleEvidenced": "People evidenced working",
+        "noWork": "No dated work this week.",
+        "hoursUnknown": "hours not split",
+        "days": "d.",
+        "clear": "clear",
+        "selectedPerson": "person",
+        "selectedPlace": "place",
+        "notATeam": "Appearing together in a file is not a team and not a current line-up. A brigade is formed only by consent.",
+        "hoursUnknownNote": "Hours appear only where the source split them by place; elsewhere, days only."
+      },
+      "aggregatesTitle": "Period aggregates (not calendar days)",
+      "aggregatePeriodUnknownRecorded": "period unknown · recorded in the file on {date}",
+      "aggregateOpen": "awaits your decision",
+      "multiPlaceLine": "{count} days were worked at several places.",
+      "impactEyebrow": "What exists after you confirm",
+      "impactTitle": "One write — the existing screens then read it",
+      "impact": {
+        "people": "People: {count} new on the organization's roster (of {total}), without platform accounts.",
+        "places": "Places: {count} new (of {total}); every spelling is kept as it was written.",
+        "records": "Work records: {records} ({daily} as a day's hours); {held} held until you decide.",
+        "aggregates": "Period aggregates: {period} with a known period, {unknown} as a source fact without duration.",
+        "time": "Time: {period}.",
+        "cards": "Cards: {count} people's historical professional identity — organization-reported, unconfirmed.",
+        "field": "Team: the historical picture of who worked where, by week.",
+        "calendar": "Calendar: daily hours reach the work journal and work in numbers only once an account is linked; period aggregates never as a day.",
+        "provenance": "Source: every record shows the file, the row and every reading; the whole import can be withdrawn."
+      },
+      "impactNote": "Nothing is created or written before you confirm."
     }
   },
   "organizationRoster": {

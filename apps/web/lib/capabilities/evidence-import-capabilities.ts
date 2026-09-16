@@ -17,7 +17,7 @@ import {
   createRosterPerson,
   listEvidenceRecords,
   listRosterPeople,
-  acknowledgeRows,
+  resolveTimeSemantics,
   resolveContextLabel,
   resolveRow,
   submitRows,
@@ -518,38 +518,48 @@ const labelResolve: CapabilityDescriptor = {
   },
 };
 
-// ── evidence.import.acknowledge_rows ──────────────────────────────────────
+// ── evidence.import.resolve_time_semantics ────────────────────────────────
 
-const acknowledgeInput = z
+const timeSemanticsInput = z
   .object({
     sessionId: z.uuid(),
     rowIds: z.array(z.uuid()).min(1).max(500).optional(),
-    /** Alternatively: every staged row carrying this problem. */
-    problem: z.literal("hours_exceed_day").optional(),
+    /** Alternatively: every staged row whose semantics are still open. */
+    allOpen: z.boolean().optional(),
+    decision: z
+      .object({
+        kind: z.enum(["daily", "period_aggregate", "unknown"]),
+        remote: z.boolean().nullish(),
+        periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
+        periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
+      })
+      .strict(),
   })
   .strict()
-  .refine((v) => (v.rowIds?.length ?? 0) > 0 || v.problem !== undefined, {
-    message: "rowIds or problem",
+  .refine((v) => (v.rowIds?.length ?? 0) > 0 || v.allOpen === true, {
+    message: "rowIds or allOpen",
   });
 
-const rowsAcknowledge: CapabilityDescriptor = {
-  id: "evidence.import.acknowledge_rows",
+const timeSemanticsResolve: CapabilityDescriptor = {
+  id: "evidence.import.resolve_time_semantics",
   kind: "execute",
-  title: "Keep a flagged figure as stated",
+  title: "Say what an hours figure means",
   description:
-    "Records that the caller reviewed rows the preview flagged (more hours " +
-    "than a day holds) and keeps their figures AS STATED. Nothing is edited; " +
-    "the rows may then commit. Only the human's authority behind the caller " +
-    "can do this — an agent relays a decision, it does not make one.",
+    "Settles rows whose hours figure a day cannot hold: a day's hours, a " +
+    "period aggregate (optionally remote, with the period when known), or " +
+    "unknown. The source figure is never edited; a period aggregate is never " +
+    "written as a day's duration. Only the human's authority behind the " +
+    "caller can decide this — an agent relays a decision, it does not make one.",
   exposed: true,
   annotations: appendWrite,
-  inputSchema: acknowledgeInput,
+  inputSchema: timeSemanticsInput,
   run: async (caller, input): Promise<ExecResult> => {
-    const parsed = acknowledgeInput.parse(input);
-    const res = await acknowledgeRows(caller, {
+    const parsed = timeSemanticsInput.parse(input);
+    const res = await resolveTimeSemantics(caller, {
       sessionId: parsed.sessionId,
       rowIds: parsed.rowIds,
-      problem: parsed.problem,
+      allOpen: parsed.allOpen,
+      decision: parsed.decision,
     });
     if (res.kind !== "ok") return fail(res);
     return { ok: true, data: { updated: res.updated, note: "Preview again to refresh the token." } };
@@ -759,7 +769,7 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   importPreview,
   rowResolve,
   labelResolve,
-  rowsAcknowledge,
+  timeSemanticsResolve,
   importCommit,
   recordsList,
   recordAttest,

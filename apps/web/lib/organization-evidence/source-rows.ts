@@ -44,13 +44,18 @@ const isoDate = z
     return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
   }, "not a real calendar date");
 
-const derivedFieldSchema = z.object({
-  value: z.union([z.string().max(500), z.number(), z.null()]),
-  /** A stable slug the UI localises — never a sentence. */
-  method: z.string().min(1).max(60),
-  confidence: z.number().min(0).max(1),
-  note: z.string().max(300).nullish(),
-});
+const derivedFieldSchema = z
+  .object({
+    value: z.union([z.string().max(500), z.number(), z.null()]),
+    /** A stable slug the UI localises — never a sentence. */
+    method: z.string().min(1).max(60),
+    confidence: z.number().min(0).max(1),
+    note: z.string().max(300).nullish(),
+  })
+  // A derived field may carry its own structured facts beside the four
+  // common ones (`timeSemantics` carries the source figure, the remote flag
+  // and a period). Stripping them silently would lose evidence.
+  .passthrough();
 
 export const sourceWorkRowSchema = z
   .object({

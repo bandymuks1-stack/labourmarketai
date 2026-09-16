@@ -16,7 +16,7 @@ import {
   commitImport,
   createImportSession,
   createRosterPerson,
-  acknowledgeRows,
+  resolveTimeSemantics,
   resolveContextLabel,
   resolveRow,
   submitRows,
@@ -342,11 +342,12 @@ export async function resolveEvidenceLabelAction(
 }
 
 /**
- * Step 2a'' — a human keeps a flagged figure AS STATED (owner command §11).
- * The 800 h day stays 800 h; what changes is that a named person accepted
- * it, and the row may now commit. Staging only.
+ * Step 2a'' — a human says what a figure MEANS (owner correction
+ * 2026-09-16): a day's hours, a period aggregate (optionally remote, with
+ * the period if known), or unknown. The source figure is never edited.
+ * Staging only.
  */
-export async function acknowledgeEvidenceRowsAction(
+export async function resolveTimeSemanticsAction(
   _previous: EvidenceImportActionState,
   form: FormData,
 ): Promise<EvidenceImportActionState> {
@@ -354,15 +355,23 @@ export async function acknowledgeEvidenceRowsAction(
   if (!c) return { kind: "refused", reason: "unauthenticated" };
   const sessionId = text(form, "session_id");
   if (sessionId === "") return { kind: "refused", reason: "invalid", detail: "session" };
+  const kind = oneOf(text(form, "kind"), ["daily", "period_aggregate", "unknown"] as const);
+  if (!kind) return { kind: "refused", reason: "invalid", detail: "kind" };
   const rowIds = form
     .getAll("row_id")
     .map((v) => (typeof v === "string" ? v.trim() : ""))
     .filter((v) => v !== "");
-  const problem = text(form, "problem");
-  const res = await acknowledgeRows(c, {
+  const remoteRaw = text(form, "remote");
+  const res = await resolveTimeSemantics(c, {
     sessionId,
     rowIds: rowIds.length > 0 ? rowIds : undefined,
-    problem: problem === "hours_exceed_day" ? "hours_exceed_day" : undefined,
+    allOpen: rowIds.length === 0,
+    decision: {
+      kind,
+      remote: remoteRaw === "yes" ? true : remoteRaw === "no" ? false : null,
+      periodStart: text(form, "period_start") || null,
+      periodEnd: text(form, "period_end") || null,
+    },
   });
   if (res.kind !== "ok") return refuse(res);
   revalidatePath(PATH);

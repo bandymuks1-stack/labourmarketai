@@ -5,6 +5,7 @@ import {
   type SourceWorkRow,
   type SourceRowField,
 } from "@/lib/organization-evidence/source-rows";
+import { classifyTimeSemantics } from "@/lib/organization-evidence/time-semantics";
 
 /**
  * SOURCE -> CANONICAL ROWS. Pure: text or a string grid in, `SourceWorkRow[]`
@@ -533,7 +534,7 @@ export function rowsFromGrid(
     const factFields: SourceRowField[] = ["personLabel"];
     const derived: Record<
       string,
-      { value: string | number | null; method: string; confidence: number; note?: string }
+      { value: string | number | null; method: string; confidence: number; note?: string | null } & Record<string, unknown>
     > = {};
 
     let workDate: string | null = null;
@@ -633,6 +634,18 @@ export function rowsFromGrid(
 
     const projectCell = tidy(cell("projectLabel"));
     if (projectCell !== "") factFields.push("projectLabel");
+
+    // WHAT THE FIGURE MEANS. A figure no day can hold is classified from
+    // the source's own words — an aggregate over a period the text names
+    // (the owner's 800 h "for 16 months"), or unknown — and becomes a
+    // question for the human. It is never read as a day's duration.
+    const semantics = classifyTimeSemantics({
+      hours,
+      hasSingleDate: workDate !== null && periodStart === null,
+      workText: cell("workText") || null,
+      contextLabel: projectCell || null,
+    });
+    if (semantics) derived.timeSemantics = { ...semantics };
 
     const externalRef = tidy(cell("externalRef"));
     if (externalRef !== "") factFields.push("externalRef");

@@ -25,7 +25,7 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const readRepo = (rel: string) => readFileSync(join(REPO, rel), "utf8");
 
 describe("canonical player-identity contract", () => {
-  it("defines exactly the seven canonical variants", () => {
+  it("defines exactly the eight canonical variants", () => {
     expect([...PLAYER_IDENTITY_VARIANTS]).toEqual([
       "hero",
       "profile",
@@ -34,6 +34,11 @@ describe("canonical player-identity contract", () => {
       "dashboard-compact",
       "map-marker",
       "request-provider",
+      // 2026-09-16 (owner: the premium card is a first-class atom across
+      // profile, history, team, project, matching): the historical
+      // reconstruction renders the SAME identity — monogram, provenance edge,
+      // no score — for a person an organization's evidence names.
+      "history-card",
     ]);
   });
 
@@ -83,7 +88,7 @@ describe("the adaptation plan doc is present and principle-only", () => {
     expect(doc.length).toBeGreaterThan(2000);
   });
 
-  it("documents the canonical anatomy + the seven variants", () => {
+  it("documents the canonical anatomy + the eight variants", () => {
     expect(doc.toLowerCase()).toContain("playeridentitycard");
     for (const v of PLAYER_IDENTITY_VARIANTS) {
       expect(doc, `variant ${v} documented`).toContain(v);

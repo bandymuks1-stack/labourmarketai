@@ -102,6 +102,7 @@ every value is a real, owner-consented signal or it is omitted.
 | `dashboard-compact` | authenticated dashboard card | compact 40 | name, role, one signal |
 | `map-marker` | market-map marker + hover card | marker 52 | avatar/initials, name, role, neutral status |
 | `request-provider` | marketplace request / provider card | compact 40 | provider/requester name, status pill |
+| `history-card` | historical reconstruction (organization evidence about a person, pre- and post-commit) | header 64 | monogram (never a synthesised face), name, HISTORICAL period, organization-reported provenance edge + line, evidenced hours/days/places, weekly strip, open questions; **no current status, no score** (2026-09-16) |
 
 Adding an identity surface = pick a variant + its field set. **No bespoke card.**
 

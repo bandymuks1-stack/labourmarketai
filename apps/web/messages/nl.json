@@ -15879,7 +15879,8 @@
       "person_ambiguous": "Meer dan één persoon in uw bestand heeft deze naam. Kies welke.",
       "context_ambiguous": "Meer dan één plaats past bij dit label. Kies welke.",
       "already_imported": "Er bestaat al een identieke registratie, dus deze regel wordt overgeslagen.",
-      "hours_exceed_day": "Meer uren op één dag dan een dag heeft. Controleer en laat staan zoals opgegeven, of sla over."
+      "hours_exceed_day": "Meer uren op één dag dan een dag heeft. Controleer en laat staan zoals opgegeven, of sla over.",
+      "time_semantics_open": "Een dag kan dit getal niet bevatten. Zeg wat het betekent (periodetotaal, uren van die dag, onbekend)."
     },
     "resolve": {
       "title": "Oplossen",
@@ -16057,8 +16058,8 @@
       "none": "geen plaats"
     },
     "reconstruction": {
-      "understoodEyebrow": "Historie gereconstrueerd",
-      "understoodTitle": "Wat het systeem uit uw bestand heeft begrepen",
+      "understoodEyebrow": "Zo hebt u werkelijk gewerkt",
+      "understoodTitle": "Wat LabourMarket.ai over uw bedrijf heeft begrepen",
       "periodUnknown": "Periode niet vastgesteld",
       "figures": {
         "rows": "werkregels",
@@ -16082,7 +16083,8 @@
         "conflicts": "{count} regels — spreken al vastgelegde gegevens tegen",
         "allocation_unknown": "{count} regels — meerdere plaatsen op een dag, verdeling niet opgegeven",
         "allocation_inconsistent": "{count} regels — uren in de tekst tellen niet op tot de dag",
-        "place_from_text": "{count} regels — plaats gelezen uit de tekst: „{label}”"
+        "place_from_text": "{count} regels — plaats gelezen uit de tekst: „{label}”",
+        "time_semantics": "{count} regels — wat betekent dit urengetal?"
       },
       "issueWhy": {
         "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan“ wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
@@ -16094,7 +16096,8 @@
         "conflicts": "Zelfde persoon, dag en plaats — andere uren. Beide regels blijven zichtbaar.",
         "allocation_unknown": "Het dagtotaal blijft exact; uren worden niet op gok over plaatsen verdeeld.",
         "allocation_inconsistent": "De delen in de tekst vormen niet het dagtotaal. Beide getallen blijven bewaard.",
-        "place_from_text": "De plaatscel is leeg; de locatie komt uit de eerste woorden van de tekst. Is het een spelfout van een andere plaats, kies dan „dezelfde plaats als” — er ontstaat één object, niet twee."
+        "place_from_text": "De plaatscel is leeg; de locatie komt uit de eerste woorden van de tekst. Is het een spelfout van een andere plaats, kies dan „dezelfde plaats als” — er ontstaat één object, niet twee.",
+        "time_semantics": "Een dag kan zoveel uren niet bevatten. Volgens de woorden van de bron is het een periodetotaal (bv. thuiswerk over maanden). Het getal blijft zoals het is; u zegt wat het is — en de periode alleen als u die kent. Zo'n totaal wordt nooit de duur van één dag."
       },
       "keepAsStated": "Laten staan zoals in de bron",
       "keepAsStatedHint": "Het brongetal blijft ongewijzigd en wordt vastgelegd als bronfeit. Het wordt NIET de werkduur van die dag — de dagduur blijft onbekend, dus kalender, werk in cijfers, tempo en capaciteit tellen het nooit op.",
@@ -16127,7 +16130,7 @@
       "calendarLine": "{weeks} weken · {personDays} persoonsdagen",
       "week": "Wk",
       "weekN": "wk {n}",
-      "calendarNote": "Dit is verricht werk, geen plan en geen toezegging. ⚠ markeert een dag met een te controleren getal; die uren zitten in geen totaal.",
+      "calendarNote": "Dit is verricht werk, geen plan en geen toezegging. ⚠ — het weeknummer in het bestand klopt niet met de datum. Periodetotalen staan apart en op geen enkele dag.",
       "companyTitle": "Het bedrijf, zoals deze gegevens het tonen",
       "known": "Wat de gegevens laten zeggen",
       "knownLine": "{people} mensen werkten op {places} plaatsen: {personDays} persoonsdagen, {hours} u opgegeven.",
@@ -16139,10 +16142,107 @@
         "work_package": "werkpakket / fase",
         "wage": "loon / prijs",
         "output": "resultaat",
-        "team": "ploeg (samen aanwezig is geen team)"
+        "team": "ploeg (samen aanwezig is geen team)",
+        "aggregate_period": "de periode van de periodetotalen"
       },
       "commitEffect": "Bevestigen zou aanmaken: {records} regels ({held} vastgehouden tot uw besluit), {people} personen, {objects} plaatsen. Eén keer schrijven — de bestaande schermen lezen het daarna.",
-      "sameAs": "Dezelfde plaats als"
+      "sameAs": "Dezelfde plaats als",
+      "understoodSentence": "{period}: {people} mensen werkten op {places} plaatsen — {personDays} persoonsdagen en {hours} u opgegeven dagwerk.",
+      "spineTitle": "Tijdlijn · uren per week",
+      "weekShort": "wk",
+      "personDaysShort": "persoonsdagen",
+      "aggregateLine": "Apart: {hours} u opgegeven als periodetotaal ({rows} regels) — geen dagwerk, in geen dagtotaal.",
+      "aggregateRemote": "de bron noemt werk op afstand ({rows} regels)",
+      "machineReading": {
+        "period_aggregate": "systeem las: periodetotaal",
+        "unknown": "systeem las: betekenis onduidelijk"
+      },
+      "remoteEvidenced": "bron: werk op afstand",
+      "timeQuestion": "Wat betekent dit getal?",
+      "timeKind": "Betekenis",
+      "timeKinds": {
+        "period_aggregate": "Periodetotaal (bv. thuiswerk over maanden)",
+        "daily": "Toch de uren van die dag",
+        "unknown": "Onbekend — bewaren als bronfeit zonder duur"
+      },
+      "timeRemote": "Op afstand / thuis",
+      "timeRemoteYes": "Ja",
+      "timeRemoteNo": "Nee",
+      "timeRemoteUnknown": "Niet vermeld",
+      "timePeriod": "Periode (alleen als u die kent)",
+      "timePeriodHint": "Laat leeg als u de periode niet kent — het systeem verzint geen data. Met periode wordt het totaal als perioderegel vastgelegd; zonder als bronfeit met onbekende duur.",
+      "from": "Van",
+      "to": "Tot",
+      "timeSave": "Toepassen op deze regels",
+      "timeHint": "Het brongetal verandert niet. Uw interpretatie wordt vastgelegd. Kalender, werk in cijfers, tempo en capaciteit tellen een periodetotaal nooit op tot een dag.",
+      "peopleSubtitle": "Elke kaart is wat dit bestand over een persoon bewijst. Geen beoordeling, geen huidige toestand.",
+      "card": {
+        "historical": "Historisch",
+        "relationship": "op de lijst van de organisatie · geen account",
+        "provenance": "Herkomst",
+        "provenanceText": "door de organisatie gemeld, niet onafhankelijk bevestigd",
+        "hours": "Daguren",
+        "days": "Werkdagen",
+        "places": "Plaatsen",
+        "aggregate": "+ {hours} u periodetotaal ({rows} regels), niet over dagen verdeeld",
+        "aggregateRemote": "werk op afstand",
+        "aggregatePeriodUnknown": "periode onbekend",
+        "currentNotInferred": "De huidige toestand (dienstverband, beschikbaarheid, loon, vaardigheden) wordt niet afgeleid uit de historie.",
+        "openQuestions": "{count} regels wachten op uw besluit",
+        "weeks": "Weken",
+        "details": "Bewijs tonen",
+        "timelineTitle": "Plaatsen in de tijd",
+        "timelineCurrent": "nu",
+        "timelineEmpty": "Geen gedateerde dagen.",
+        "activities": "Activiteiten zonder plaats",
+        "evidence": "De woorden van de bron",
+        "interpretations": "Interpretaties van het systeem",
+        "unknowns": "Onbekend",
+        "unknownAllocation": "{count} dagen — meerdere plaatsen, verdeling niet opgegeven",
+        "unknownPlace": "{count} dagen — plaats niet vastgesteld",
+        "noActivities": "De bron noemt geen activiteit zonder plaats."
+      },
+      "interpretation": {
+        "typo_same_house_number": "spelfout gekoppeld via huisnummer",
+        "street_without_number": "straat zonder nummer aan de enige plaats toegekend",
+        "near_identical_name": "vrijwel identieke naam gekoppeld",
+        "site_from_work_text": "plaats gelezen uit de werktekst",
+        "hours_from_text": "uren per plaats gelezen uit de tekst",
+        "canonical_spelling": "meest voorkomende spelling in het bestand",
+        "as_written": "zoals geschreven"
+      },
+      "field": {
+        "title": "Hoe het team werkte",
+        "subtitle": "Kies een week, een persoon of een plaats — het veld toont wie waar werkte, volgens de bron.",
+        "allWeeks": "Hele periode",
+        "peopleEvidenced": "Mensen met bewezen werk",
+        "noWork": "Geen gedateerd werk deze week.",
+        "hoursUnknown": "uren niet verdeeld",
+        "days": "dg.",
+        "clear": "wissen",
+        "selectedPerson": "persoon",
+        "selectedPlace": "plaats",
+        "notATeam": "Samen in een bestand staan is geen team en geen huidige opstelling. Een ploeg ontstaat alleen met instemming.",
+        "hoursUnknownNote": "Uren verschijnen alleen waar de bron ze per plaats verdeelde; elders alleen dagen."
+      },
+      "aggregatesTitle": "Periodetotalen (geen kalenderdagen)",
+      "aggregatePeriodUnknownRecorded": "periode onbekend · in het bestand genoteerd op {date}",
+      "aggregateOpen": "wacht op uw besluit",
+      "multiPlaceLine": "Op {count} dagen is op meerdere plaatsen gewerkt.",
+      "impactEyebrow": "Wat er bestaat na uw bevestiging",
+      "impactTitle": "Eén keer schrijven — daarna lezen de bestaande schermen het",
+      "impact": {
+        "people": "Mensen: {count} nieuw op de lijst van de organisatie (van {total}), zonder platformaccounts.",
+        "places": "Plaatsen: {count} nieuw (van {total}); spellingen bewaard als herkomst.",
+        "records": "Werkregels: {records} ({daily} als daguren); {held} vastgehouden tot uw besluit.",
+        "aggregates": "Periodetotalen: {period} met bekende periode, {unknown} als bronfeit zonder duur.",
+        "time": "Tijd: {period}.",
+        "cards": "Kaarten: de historische professionele identiteit van {count} mensen — door de organisatie gemeld, onbevestigd.",
+        "field": "Team: het historische beeld van wie waar werkte, per week.",
+        "calendar": "Kalender: daguren bereiken het werkjournaal en werk in cijfers pas na koppeling van een account; periodetotalen nooit als dag.",
+        "provenance": "Herkomst: elke regel toont het bestand, de rij en elke interpretatie; de hele import kan worden ingetrokken."
+      },
+      "impactNote": "Vóór uw bevestiging wordt niets aangemaakt of geschreven."
     }
   },
   "organizationRoster": {

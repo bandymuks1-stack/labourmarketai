@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { HOURS_EXCEED_DAY_METHOD } from "./parse-tabular";
+import { countsAsDailyHours, type TimeSemantics } from "./time-semantics";
 import {
   deriveEvidenceStanding,
   type RecordLifecycleEvent,
@@ -101,7 +102,12 @@ export async function readEvidenceRecordsForWorker(
     const hours = r.hours === null || r.hours === undefined ? null : Number(r.hours);
     if (hours === null || !Number.isFinite(hours) || hours <= 0) continue;
     const derived = (r.derived as Record<string, unknown> | null) ?? {};
-    if ((derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD) continue;
+    // A period aggregate or an unknown figure is evidence, not a day's
+    // duration; a legacy "exceeds a day" flag without a classification is
+    // treated the same way. Only DAILY hours reach the ledger.
+    const ts = (derived.timeSemantics as TimeSemantics | undefined) ?? null;
+    if (!countsAsDailyHours(ts)) continue;
+    if (!ts && (derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD) continue;
     const events = ((r.organization_evidence_events as Record<string, unknown>[] | null) ?? []).map(
       (e): RecordLifecycleEvent => ({
         eventType: e.event_type as RecordLifecycleEvent["eventType"],

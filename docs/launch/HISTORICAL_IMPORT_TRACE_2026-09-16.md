@@ -111,3 +111,44 @@ No migration. No RLS or policy change. No new store. No brigade inferred.
 6. **Įmonės vaizdas**: known line + UNKNOWN: užsakovas, projektas, darbų paketas, atlygis, rezultatas, brigada.
 7. **Patvirtinimas**: plan shows 7 people and the real places; "Patvirtinti (156)" until the two rows are acknowledged. **Do not press it unless you mean it** — this is the one permanent write.
 8. The 158 rows are under "Rodyti visas 158 šaltinio eilutes".
+
+## Post-#1748 correction (same day, branch `feat/cc/history-living-model`)
+
+**Source semantics.** The owner's human walk established that the 800 h /
+165 h figures were aggregate hours of work from home over months, not a
+day's work. "Impossible daily hours" was the wrong classification.
+`lib/organization-evidence/time-semantics.ts` now classifies a figure a day
+cannot hold from the source's WORDS (period words in the text or the
+context: month/week/year… in six languages; remote only when the source says
+so) into `period_aggregate` / `unknown`, never from the numbers. The
+classification is a blocking QUESTION; the human's answer
+(`resolveTimeSemantics`: daily / period aggregate ± remote ± the period only
+if known / unknown) is a `human_choice`. The commit represents it with what
+the schema already has: a period record (`period_start/end` + `hours`) when
+the period is known; otherwise a dated source fact with `hours = null`
+(duration UNKNOWN) and the source figure in `source_fact` +
+`derived.timeSemantics.sourceHours`. Only DAILY hours reach the work ledger.
+Rows staged before the classifier existed (the production session) are
+classified in the preview from the same words — no re-upload.
+
+**Player card.** `history-card` is the eighth registered variant of the ONE
+person identity (`lib/identity/player-identity.ts`);
+`components/app/historical-player-card.tsx` renders it from the projection
+with the canonical monogram, the `EVIDENCE_SUPPORTED` provenance edge and
+line, daily hours / days / places, a weekly strip, places, aggregates apart,
+"current state not inferred", and the evidence behind it (object lanes on
+the existing history band, activities, the source's words, interpretations,
+unknowns). No score of any kind.
+
+**Field board.** `components/app/historical-field-board.tsx` — read-only
+client projection: week / person / place selection over the same evidence;
+"people evidenced working", never a team (ARCH-4).
+
+**Reconstruction order.** Understood (sentence + time spine) → to check →
+people (cards) → the field → places → calendar (+ aggregates apart) → the
+company → what exists after confirm → plan → commit → raw rows (disclosure).
+
+**Still open (unchanged, not regressions):** historical ACTUAL → canonical
+calendar read; object → actual work/people/time; observed duration →
+capacity / scenario consumers; a period aggregate has no slot in the ONE
+work model (it is evidence, not a day's hours).

@@ -15879,7 +15879,8 @@
       "person_ambiguous": "Mehr als eine Person in Ihrer Liste trägt diesen Namen. Wählen Sie, welche.",
       "context_ambiguous": "Mehr als ein Ort passt zu dieser Bezeichnung. Wählen Sie, welcher.",
       "already_imported": "Ein identischer Eintrag besteht bereits, diese Zeile wird daher übersprungen.",
-      "hours_exceed_day": "Mehr Stunden an einem Tag, als ein Tag hat. Prüfen und wie angegeben belassen oder überspringen."
+      "hours_exceed_day": "Mehr Stunden an einem Tag, als ein Tag hat. Prüfen und wie angegeben belassen oder überspringen.",
+      "time_semantics_open": "Ein Tag kann diese Zahl nicht fassen. Sagen Sie, was sie bedeutet (Zeitraumsumme, Tagesstunden, unbekannt)."
     },
     "resolve": {
       "title": "Klären",
@@ -16057,8 +16058,8 @@
       "none": "kein Ort"
     },
     "reconstruction": {
-      "understoodEyebrow": "Historie rekonstruiert",
-      "understoodTitle": "Was das System aus Ihrer Datei verstanden hat",
+      "understoodEyebrow": "So haben Sie tatsächlich gearbeitet",
+      "understoodTitle": "Was LabourMarket.ai über Ihr Unternehmen verstanden hat",
       "periodUnknown": "Zeitraum nicht ermittelt",
       "figures": {
         "rows": "Arbeitseinträge",
@@ -16082,7 +16083,8 @@
         "conflicts": "{count} Zeilen — widersprechen bereits Erfasstem",
         "allocation_unknown": "{count} Zeilen — mehrere Orte am Tag, Verteilung nicht angegeben",
         "allocation_inconsistent": "{count} Zeilen — Stunden im Text ergeben nicht die Tagessumme",
-        "place_from_text": "{count} Zeilen — Ort aus dem Text gelesen: „{label}“"
+        "place_from_text": "{count} Zeilen — Ort aus dem Text gelesen: „{label}“",
+        "time_semantics": "{count} Zeilen — was bedeutet diese Stundenzahl?"
       },
       "issueWhy": {
         "impossible_hours": "Die Quellzahl bleibt wie sie ist (z. B. eine Monatssumme an einem Tag). Nach „wie angegeben belassen“ wird die Zeile als Quellfakt erfasst; die Tagesdauer bleibt unbekannt und wird nirgends summiert.",
@@ -16094,7 +16096,8 @@
         "conflicts": "Gleiche Person, Tag und Ort — andere Stunden. Beide Einträge bleiben sichtbar.",
         "allocation_unknown": "Die Tagessumme bleibt exakt; Stunden werden nicht geschätzt auf Orte verteilt.",
         "allocation_inconsistent": "Die im Text genannten Teile ergeben nicht die Tagessumme. Beide Zahlen bleiben erhalten.",
-        "place_from_text": "Die Ortszelle ist leer; der Ort stammt aus den ersten Wörtern des Textes. Ist es eine Schreibvariante eines anderen Ortes, wählen Sie „derselbe Ort wie“ — es entsteht ein Objekt, nicht zwei."
+        "place_from_text": "Die Ortszelle ist leer; der Ort stammt aus den ersten Wörtern des Textes. Ist es eine Schreibvariante eines anderen Ortes, wählen Sie „derselbe Ort wie“ — es entsteht ein Objekt, nicht zwei.",
+        "time_semantics": "Ein Tag kann so viele Stunden nicht fassen. Nach den Worten der Quelle ist es eine Zeitraumsumme (z. B. Heimarbeit über Monate). Die Zahl bleibt wie sie ist; Sie sagen, was sie ist — und den Zeitraum nur, wenn Sie ihn kennen. Eine solche Summe wird nie zur Dauer eines Tages."
       },
       "keepAsStated": "Wie in der Quelle angegeben belassen",
       "keepAsStatedHint": "Die Quellzahl bleibt unverändert und wird als Quellfakt erfasst. Sie wird NICHT zur Arbeitsdauer dieses Tages — die Tagesdauer bleibt unbekannt, sodass Kalender, Arbeit in Zahlen, Tempo und Kapazität sie nie summieren.",
@@ -16127,7 +16130,7 @@
       "calendarLine": "{weeks} Wochen · {personDays} Personentage",
       "week": "Woche",
       "weekN": "KW {n}",
-      "calendarNote": "Das ist geleistete Arbeit, kein Plan und keine Zusage. ⚠ markiert einen Tag mit zu prüfender Zahl; seine Stunden sind in keiner Summe.",
+      "calendarNote": "Das ist geleistete Arbeit, kein Plan und keine Zusage. ⚠ — die Wochennummer der Datei widerspricht dem Datum. Zeitraumsummen stehen getrennt und auf keinem Tag.",
       "companyTitle": "Das Unternehmen, wie diese Daten es zeigen",
       "known": "Was die Daten sagen lassen",
       "knownLine": "{people} Personen arbeiteten an {places} Orten: {personDays} Personentage, {hours} h angegeben.",
@@ -16139,10 +16142,107 @@
         "work_package": "Arbeitspaket / Phase",
         "wage": "Lohn / Preis",
         "output": "Ergebnis",
-        "team": "Brigade (gemeinsame Anwesenheit ist kein Team)"
+        "team": "Brigade (gemeinsame Anwesenheit ist kein Team)",
+        "aggregate_period": "der Zeitraum der Zeitraumsummen"
       },
       "commitEffect": "Bestätigen würde anlegen: {records} Einträge ({held} bis zu Ihrer Entscheidung zurückgehalten), {people} Personen, {objects} Orte. Ein Schreibvorgang — die vorhandenen Ansichten lesen ihn dann.",
-      "sameAs": "Derselbe Ort wie"
+      "sameAs": "Derselbe Ort wie",
+      "understoodSentence": "{period}: {people} Personen arbeiteten an {places} Orten — {personDays} Personentage und {hours} h angegebene Tagesarbeit.",
+      "spineTitle": "Zeitachse · Stunden pro Woche",
+      "weekShort": "KW",
+      "personDaysShort": "Personentage",
+      "aggregateLine": "Getrennt: {hours} h als Zeitraumsumme angegeben ({rows} Zeilen) — keine Tagesarbeit, in keiner Tagessumme.",
+      "aggregateRemote": "die Quelle nennt Fernarbeit ({rows} Zeilen)",
+      "machineReading": {
+        "period_aggregate": "System liest: Zeitraumsumme",
+        "unknown": "System liest: Bedeutung unklar"
+      },
+      "remoteEvidenced": "Quelle: Fernarbeit",
+      "timeQuestion": "Was bedeutet diese Zahl?",
+      "timeKind": "Bedeutung",
+      "timeKinds": {
+        "period_aggregate": "Zeitraumsumme (z. B. Heimarbeit über Monate)",
+        "daily": "Doch Tagesstunden dieses Tages",
+        "unknown": "Unbekannt — als Quellfakt ohne Dauer behalten"
+      },
+      "timeRemote": "Fern / von zu Hause",
+      "timeRemoteYes": "Ja",
+      "timeRemoteNo": "Nein",
+      "timeRemoteUnknown": "Nicht angegeben",
+      "timePeriod": "Zeitraum (nur wenn bekannt)",
+      "timePeriodHint": "Leer lassen, wenn Sie den Zeitraum nicht kennen — das System erfindet keine Daten. Mit Zeitraum wird die Summe als Zeitraumeintrag erfasst; ohne als Quellfakt mit unbekannter Dauer.",
+      "from": "Von",
+      "to": "Bis",
+      "timeSave": "Auf diese Zeilen anwenden",
+      "timeHint": "Die Quellzahl wird nicht geändert. Ihre Deutung wird erfasst. Kalender, Arbeit in Zahlen, Tempo und Kapazität summieren eine Zeitraumsumme nie in einen Tag.",
+      "peopleSubtitle": "Jede Karte ist das, was diese Datei über eine Person belegt. Keine Bewertung, kein aktueller Zustand.",
+      "card": {
+        "historical": "Historisch",
+        "relationship": "auf der Liste der Organisation · kein Konto",
+        "provenance": "Herkunft",
+        "provenanceText": "von der Organisation gemeldet, nicht unabhängig bestätigt",
+        "hours": "Tagesstunden",
+        "days": "Arbeitstage",
+        "places": "Orte",
+        "aggregate": "+ {hours} h Zeitraumsumme ({rows} Zeilen), nicht auf Tage verteilt",
+        "aggregateRemote": "Fernarbeit",
+        "aggregatePeriodUnknown": "Zeitraum unbekannt",
+        "currentNotInferred": "Der aktuelle Zustand (Anstellung, Verfügbarkeit, Lohn, Fähigkeiten) wird nicht aus der Historie abgeleitet.",
+        "openQuestions": "{count} Zeilen warten auf Ihre Entscheidung",
+        "weeks": "Wochen",
+        "details": "Belege zeigen",
+        "timelineTitle": "Orte in der Zeit",
+        "timelineCurrent": "jetzt",
+        "timelineEmpty": "Keine datierten Tage.",
+        "activities": "Tätigkeiten ohne Ort",
+        "evidence": "Die Worte der Quelle",
+        "interpretations": "Deutungen des Systems",
+        "unknowns": "Unbekannt",
+        "unknownAllocation": "{count} Tage — mehrere Orte, Verteilung nicht angegeben",
+        "unknownPlace": "{count} Tage — Ort nicht ermittelt",
+        "noActivities": "Die Quelle nennt keine Tätigkeit ohne Ort."
+      },
+      "interpretation": {
+        "typo_same_house_number": "Schreibfehler über die Hausnummer zugeordnet",
+        "street_without_number": "Straße ohne Nummer dem einzigen Ort zugeordnet",
+        "near_identical_name": "nahezu identischer Name zugeordnet",
+        "site_from_work_text": "Ort aus dem Arbeitstext gelesen",
+        "hours_from_text": "Stunden je Ort aus dem Text gelesen",
+        "canonical_spelling": "häufigste Schreibweise der Datei",
+        "as_written": "wie geschrieben"
+      },
+      "field": {
+        "title": "Wie das Team gearbeitet hat",
+        "subtitle": "Woche, Person oder Ort wählen — das Feld zeigt, wer wo gearbeitet hat, laut Quelle.",
+        "allWeeks": "Gesamter Zeitraum",
+        "peopleEvidenced": "Personen mit belegter Arbeit",
+        "noWork": "Diese Woche keine datierte Arbeit.",
+        "hoursUnknown": "Stunden nicht verteilt",
+        "days": "T.",
+        "clear": "aufheben",
+        "selectedPerson": "Person",
+        "selectedPlace": "Ort",
+        "notATeam": "Gemeinsam in einer Datei zu stehen ist kein Team und keine aktuelle Besetzung. Eine Brigade entsteht nur durch Zustimmung.",
+        "hoursUnknownNote": "Stunden erscheinen nur dort, wo die Quelle sie nach Ort aufteilte; sonst nur Tage."
+      },
+      "aggregatesTitle": "Zeitraumsummen (keine Kalendertage)",
+      "aggregatePeriodUnknownRecorded": "Zeitraum unbekannt · in der Datei erfasst am {date}",
+      "aggregateOpen": "wartet auf Ihre Entscheidung",
+      "multiPlaceLine": "An {count} Tagen wurde an mehreren Orten gearbeitet.",
+      "impactEyebrow": "Was nach der Bestätigung existiert",
+      "impactTitle": "Ein Schreibvorgang — danach lesen es die vorhandenen Ansichten",
+      "impact": {
+        "people": "Personen: {count} neu auf der Liste der Organisation (von {total}), ohne Plattformkonten.",
+        "places": "Orte: {count} neu (von {total}); Schreibweisen bleiben als Herkunft erhalten.",
+        "records": "Arbeitseinträge: {records} ({daily} als Tagesstunden); {held} bis zu Ihrer Entscheidung zurückgehalten.",
+        "aggregates": "Zeitraumsummen: {period} mit bekanntem Zeitraum, {unknown} als Quellfakt ohne Dauer.",
+        "time": "Zeit: {period}.",
+        "cards": "Karten: historische Berufsidentität von {count} Personen — von der Organisation gemeldet, unbestätigt.",
+        "field": "Team: das historische Bild, wer wo gearbeitet hat, je Woche.",
+        "calendar": "Kalender: Tagesstunden erreichen Arbeitsjournal und Arbeit in Zahlen erst nach Verknüpfung eines Kontos; Zeitraumsummen nie als Tag.",
+        "provenance": "Herkunft: jeder Eintrag zeigt Datei, Zeile und jede Deutung; der gesamte Import kann zurückgezogen werden."
+      },
+      "impactNote": "Vor Ihrer Bestätigung wird nichts angelegt oder geschrieben."
     }
   },
   "organizationRoster": {
