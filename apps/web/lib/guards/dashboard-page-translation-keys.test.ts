@@ -54,6 +54,12 @@ const PAGES: readonly { file: string; binding: string; namespace: string }[] = [
     binding: "t",
     namespace: "evidenceImport",
   },
+  {
+    // The pre-commit reconstruction the section renders above the plan.
+    file: "components/app/evidence-import-reconstruction.tsx",
+    binding: "t",
+    namespace: "evidenceImport.reconstruction",
+  },
 ];
 
 /** Read a dotted path; undefined when any segment is missing or non-string. */

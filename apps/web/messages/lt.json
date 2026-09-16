@@ -15848,7 +15848,8 @@
       "derived": "Nustatyta mūsų",
       "derivedMethod": "Būdas",
       "confidence": "Patikimumas",
-      "source": "Šaltinis"
+      "source": "Šaltinis",
+      "showRows": "Rodyti visas {count} šaltinio eilutes"
     },
     "personState": {
       "unmatched": "Nėra sąraše",
@@ -15863,7 +15864,9 @@
       "matched": "Sutapatinta",
       "ambiguous": "Daugiau nei vienas atitikmuo",
       "created": "Sukurta",
-      "will_create": "bus sukurtas"
+      "will_create": "bus sukurtas",
+      "from_text": "vieta perskaityta iš darbo aprašymo",
+      "unknown_split": "valandų paskirstymas tarp objektų nenurodytas"
     },
     "duplicateState": {
       "new": "Nauja",
@@ -15875,7 +15878,8 @@
       "person_not_on_roster": "Šio vardo nėra jūsų sąraše. Pasirinkite asmenį arba jį pridėkite.",
       "person_ambiguous": "Jūsų sąraše šį vardą turi daugiau nei vienas asmuo. Pasirinkite, kuris.",
       "context_ambiguous": "Šią žymę atitinka daugiau nei viena vieta. Pasirinkite, kuri.",
-      "already_imported": "Toks pat įrašas jau yra, todėl ši eilutė bus praleista."
+      "already_imported": "Toks pat įrašas jau yra, todėl ši eilutė bus praleista.",
+      "hours_exceed_day": "Vienai dienai nurodyta daugiau valandų, nei diena turi. Peržiūrėkite ir palikite kaip nurodyta arba praleiskite."
     },
     "resolve": {
       "title": "Išspręsti",
@@ -16030,12 +16034,112 @@
       "createPeople": "Sukurti trūkstamus žmones patvirtinant",
       "createObjects": "Sukurti trūkstamus objektus patvirtinant",
       "relationship": "Naujų žmonių ryšys su organizacija",
-      "nothingBeforeCommit": "Iki patvirtinimo niekas nesukuriama ir neįrašoma."
+      "nothingBeforeCommit": "Iki patvirtinimo niekas nesukuriama ir neįrašoma.",
+      "spellings": "{count} rašybos variantai"
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "kalendorinė savaitė pagal datą",
       "iso_week_conflicts_with_source_week": "savaitė faile nesutampa su data — siūloma savaitė pagal datą",
       "hours_exceed_day": "daugiau valandų nei telpa į vieną dieną — patikrinkite, ar tai ne laikotarpio suma"
+    },
+    "segmentKind": {
+      "activity": "veikla",
+      "note": "pastaba"
+    },
+    "segmentState": {
+      "matched": "yra sistemoje",
+      "proposed": "siūlomas atitikmuo",
+      "ambiguous": "reikia pasirinkti",
+      "new": "bus sukurtas",
+      "human": "jūsų pasirinkta",
+      "created": "sukurta",
+      "ignored": "praleista",
+      "none": ""
+    },
+    "reconstruction": {
+      "understoodEyebrow": "Istorija atkurta",
+      "understoodTitle": "Ką sistema suprato iš jūsų failo",
+      "periodUnknown": "Laikotarpis nenustatytas",
+      "figures": {
+        "rows": "darbo įrašai",
+        "people": "žmonės",
+        "places": "objektai",
+        "hours": "nurodytos valandos"
+      },
+      "flaggedHours": "Dar {hours} h nurodyta eilutėse, kurių vienai dienai per daug — jos rodomos atskirai ir nesumuojamos.",
+      "nothingWritten": "Tai peržiūra. Iki patvirtinimo niekas nesukuriama ir neįrašoma.",
+      "issuesTitleBlocking": "Reikia patikrinti: {count}",
+      "issuesTitleClear": "Reikia patikrinti: nieko, kas stabdytų",
+      "noIssues": "Prieštaravimų ar neaiškumų nerasta.",
+      "informational": "Dar {count} pastebėjimai, kurie patvirtinimo nestabdo",
+      "issue": {
+        "impossible_hours": "{count} eil. — vienai dienai per daug valandų",
+        "week_conflicts": "{count} eil. — failo savaitė nesutampa su data",
+        "ambiguous_place": "{count} eil. — kuri tai vieta?",
+        "ambiguous_person": "{count} eil. — kuris tai žmogus?",
+        "site_unknown": "{count} eil. — vieta nenustatyta",
+        "duplicates": "{count} eil. — tikėtinai jau įrašyta",
+        "conflicts": "{count} eil. — prieštarauja jau įrašytiems duomenims",
+        "allocation_unknown": "{count} eil. — kelios vietos per dieną, paskirstymas nenurodytas",
+        "allocation_inconsistent": "{count} eil. — aprašyme nurodytos valandos nesutampa su dienos suma"
+      },
+      "issueWhy": {
+        "impossible_hours": "Šaltinio skaičius paliekamas koks yra (pvz., mėnesio suma įrašyta į vieną dieną). Įrašas patvirtinamas tik jums pasakius „palikti kaip nurodyta“.",
+        "week_conflicts": "Data laikoma faktu, savaitės numeris — autoriaus grupavimu. Abu rodomi; niekas neperrašoma.",
+        "ambiguous_place": "Šią rašybą atitinka daugiau nei viena vieta. Atsakymas pritaikomas visoms eilutėms su šia rašyba.",
+        "ambiguous_person": "Sąraše šį vardą turi daugiau nei vienas žmogus. Pasirinkite eilutėje žemiau.",
+        "site_unknown": "Nei objekto langelis, nei aprašymas neįvardija vietos. Įrašas išsaugomas be objekto — vieta lieka nežinoma, ne „jokia“.",
+        "duplicates": "Panašus įrašas tam pačiam žmogui ir dienai jau yra. Peržiūrėkite eilutėse.",
+        "conflicts": "Tas pats žmogus, diena ir vieta — kitos valandos. Abu įrašai lieka matomi.",
+        "allocation_unknown": "Dienos suma išsaugoma tiksliai; valandos tarp objektų nedalijamos spėjant.",
+        "allocation_inconsistent": "Aprašyme nurodytos dalys nesudaro dienos sumos. Abu skaičiai išsaugomi."
+      },
+      "keepAsStated": "Palikti kaip nurodyta",
+      "keepAsStatedHint": "Skaičius nekeičiamas. Įrašoma, kad jūs jį peržiūrėjote ir palikote.",
+      "whichPlace": "Kuri tai vieta",
+      "useExisting": "Esamas objektas",
+      "createNew": "Sukurti naują šiuo pavadinimu",
+      "notAPlace": "Tai ne vieta",
+      "save": "Pritaikyti visoms eilutėms",
+      "peopleTitle": "Žmonės ({count})",
+      "personState": {
+        "new": "naujas",
+        "existing": "yra sąraše",
+        "ambiguous": "reikia pasirinkti",
+        "unresolved": "neaišku"
+      },
+      "personLine": "{rows} įrašai · {days} d. · {hours} h",
+      "personFlagged": "+ {hours} h peržiūrėtinose eilutėse",
+      "personUnlinked": "Be platformos paskyros — žmogus galės ją susieti vėliau.",
+      "placesTitle": "Objektai ({count})",
+      "placeState": {
+        "new": "bus sukurtas",
+        "existing": "yra sistemoje",
+        "ambiguous": "reikia pasirinkti"
+      },
+      "placeLine": "{rows} įrašai · {people} žm. · {hours} h nurodyta",
+      "placeShared": "{count} d. kartu su kitais objektais",
+      "placeFromText": "iš darbo aprašymo",
+      "placeSpellings": "rašyba faile",
+      "calendarTitle": "Kalendorius: faktinis darbas",
+      "calendarLine": "{weeks} savaitės · {personDays} žmogaus dienų",
+      "week": "Sav.",
+      "weekN": "{n} sav.",
+      "calendarNote": "Tai atlikto darbo laikas, ne planas ir ne įsipareigojimas. ⚠ — dienos su peržiūrėtinu skaičiumi; jų valandos į sumas neįtrauktos.",
+      "companyTitle": "Įmonės vaizdas",
+      "known": "Ką duomenys leidžia pasakyti",
+      "knownLine": "{people} žmonės dirbo {places} objektuose: {personDays} žmogaus dienų, {hours} h nurodyta.",
+      "activities": "Veiklos be objekto",
+      "unknown": "Ko šaltinis nesako",
+      "unknownItem": {
+        "client": "užsakovas",
+        "project": "projektas virš objekto",
+        "work_package": "darbų paketas / etapas",
+        "wage": "atlygis / kaina",
+        "output": "rezultatas",
+        "team": "brigada (bendras buvimas — ne komanda)"
+      },
+      "commitEffect": "Patvirtinus būtų sukurta: {records} įrašai ({held} sulaikyti iki jūsų sprendimo), {people} žmonės sąraše, {objects} objektai. Vienas įrašymas — toliau ją rodo esami ekranai."
     }
   },
   "organizationRoster": {

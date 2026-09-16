@@ -15848,7 +15848,8 @@
       "derived": "Worked out by us",
       "derivedMethod": "Method",
       "confidence": "Confidence",
-      "source": "Source"
+      "source": "Source",
+      "showRows": "Show all {count} source rows"
     },
     "personState": {
       "unmatched": "Not on the roster",
@@ -15863,7 +15864,9 @@
       "matched": "Matched",
       "ambiguous": "More than one match",
       "created": "Created",
-      "will_create": "will be created"
+      "will_create": "will be created",
+      "from_text": "place read from the work text",
+      "unknown_split": "hours not split between places"
     },
     "duplicateState": {
       "new": "New",
@@ -15875,7 +15878,8 @@
       "person_not_on_roster": "This name is not on your roster. Choose the person, or add them.",
       "person_ambiguous": "More than one person on your roster has this name. Choose which one.",
       "context_ambiguous": "More than one place matches this label. Choose which one.",
-      "already_imported": "An identical record already exists, so this row will be skipped."
+      "already_imported": "An identical record already exists, so this row will be skipped.",
+      "hours_exceed_day": "More hours on one day than a day holds. Review it and keep it as stated, or skip it."
     },
     "resolve": {
       "title": "Resolve",
@@ -16030,12 +16034,112 @@
       "createPeople": "Create the missing people on commit",
       "createObjects": "Create the missing sites on commit",
       "relationship": "Relationship of the new people to the organization",
-      "nothingBeforeCommit": "Nothing is created or written until you confirm."
+      "nothingBeforeCommit": "Nothing is created or written until you confirm.",
+      "spellings": "{count} spellings"
     },
     "derivedMethod": {
       "iso_week_of_explicit_date": "calendar week from the date",
       "iso_week_conflicts_with_source_week": "the file's week disagrees with the date — week from the date proposed",
       "hours_exceed_day": "more hours than one day holds — check whether this is a period total"
+    },
+    "segmentKind": {
+      "activity": "activity",
+      "note": "note"
+    },
+    "segmentState": {
+      "matched": "exists",
+      "proposed": "proposed match",
+      "ambiguous": "needs a choice",
+      "new": "will be created",
+      "human": "your choice",
+      "created": "created",
+      "ignored": "skipped",
+      "none": ""
+    },
+    "reconstruction": {
+      "understoodEyebrow": "History reconstructed",
+      "understoodTitle": "What the system understood from your file",
+      "periodUnknown": "Period not established",
+      "figures": {
+        "rows": "work records",
+        "people": "people",
+        "places": "places",
+        "hours": "stated hours"
+      },
+      "flaggedHours": "Another {hours} h sit on rows with more than a day holds — shown apart, never summed.",
+      "nothingWritten": "This is a preview. Nothing is created or written before you confirm.",
+      "issuesTitleBlocking": "To check: {count}",
+      "issuesTitleClear": "To check: nothing that blocks",
+      "noIssues": "No contradictions or ambiguities found.",
+      "informational": "{count} more observations that do not block",
+      "issue": {
+        "impossible_hours": "{count} rows — more hours than a day holds",
+        "week_conflicts": "{count} rows — the file's week disagrees with the date",
+        "ambiguous_place": "{count} rows — which place is this?",
+        "ambiguous_person": "{count} rows — which person is this?",
+        "site_unknown": "{count} rows — place not established",
+        "duplicates": "{count} rows — probably already recorded",
+        "conflicts": "{count} rows — contradict what is already recorded",
+        "allocation_unknown": "{count} rows — several places in a day, split not stated",
+        "allocation_inconsistent": "{count} rows — the hours in the text do not add up to the day"
+      },
+      "issueWhy": {
+        "impossible_hours": "The source figure is kept as it is (e.g. a month's total typed on one day). The row commits only once you say \"keep as stated\".",
+        "week_conflicts": "The date is treated as the fact, the week number as the author's grouping. Both are shown; nothing is rewritten.",
+        "ambiguous_place": "More than one place fits this spelling. Your answer applies to every row that uses it.",
+        "ambiguous_person": "More than one person on the roster has this name. Choose in the row below.",
+        "site_unknown": "Neither the place cell nor the text names a site. The record is kept without one — unknown, not \"none\".",
+        "duplicates": "A similar record for the same person and day already exists. Review in the rows.",
+        "conflicts": "Same person, day and place — different hours. Both records stay visible.",
+        "allocation_unknown": "The day's total is kept exactly; hours are not divided between places by guess.",
+        "allocation_inconsistent": "The parts written in the text do not make the day's total. Both figures are kept."
+      },
+      "keepAsStated": "Keep as stated",
+      "keepAsStatedHint": "The figure is not changed. What is recorded is that you reviewed and kept it.",
+      "whichPlace": "Which place is",
+      "useExisting": "Existing place",
+      "createNew": "Create a new one under this name",
+      "notAPlace": "This is not a place",
+      "save": "Apply to every row",
+      "peopleTitle": "People ({count})",
+      "personState": {
+        "new": "new",
+        "existing": "on the roster",
+        "ambiguous": "needs a choice",
+        "unresolved": "unclear"
+      },
+      "personLine": "{rows} records · {days} days · {hours} h",
+      "personFlagged": "+ {hours} h on rows to review",
+      "personUnlinked": "No platform account — the person can claim it later.",
+      "placesTitle": "Places ({count})",
+      "placeState": {
+        "new": "will be created",
+        "existing": "exists",
+        "ambiguous": "needs a choice"
+      },
+      "placeLine": "{rows} records · {people} people · {hours} h stated",
+      "placeShared": "{count} days shared with other places",
+      "placeFromText": "from the work text",
+      "placeSpellings": "spelled in the file as",
+      "calendarTitle": "Calendar: actual work",
+      "calendarLine": "{weeks} weeks · {personDays} person-days",
+      "week": "Week",
+      "weekN": "W{n}",
+      "calendarNote": "This is performed work, not a plan and not a commitment. ⚠ marks a day with a figure to review; its hours are in no total.",
+      "companyTitle": "The company, as this data shows it",
+      "known": "What the data lets us say",
+      "knownLine": "{people} people worked at {places} places: {personDays} person-days, {hours} h stated.",
+      "activities": "Activities without a place",
+      "unknown": "What the source does not say",
+      "unknownItem": {
+        "client": "client",
+        "project": "project above the site",
+        "work_package": "work package / stage",
+        "wage": "wage / price",
+        "output": "output",
+        "team": "brigade (co-presence is not a team)"
+      },
+      "commitEffect": "Confirming would create: {records} records ({held} held until you decide), {people} roster people, {objects} places. One write — the existing screens then read it."
     }
   },
   "organizationRoster": {
