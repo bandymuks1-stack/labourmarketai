@@ -1,4 +1,5 @@
 import "server-only";
+import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -270,6 +271,15 @@ export async function loadWorkerOpportunities(
       opportunities = (data as Record<string, unknown>[])
         // DEFAULT-CLOSED: only approved supply routes (Model A) reach a worker.
         .filter(isApprovedRouteRow)
+        // Synthetic QA subjects are not opportunities for a real person
+        // (lib/qa/synthetic-fixture.ts).
+        .filter(
+          (row) =>
+            !isSyntheticFixtureLabel(
+              row.role_text as string | null,
+              row.company_name as string | null,
+            ),
+        )
         .map((row) => {
           const need: OpportunityNeed = {
             id: String(row.id),

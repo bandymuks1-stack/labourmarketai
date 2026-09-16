@@ -46,7 +46,7 @@ describe("Guard: matching UI is removed from the app surface", () => {
   }
 
   it("the company dashboard renders no job-postings section and imports no job-postings module", () => {
-    const src = read("app/[locale]/dashboard/company/page.tsx");
+    const src = read("app/[locale]/dashboard/company/needs/page.tsx");
     expect(src).not.toMatch(/company-dashboard-job-postings/);
     expect(src).not.toMatch(/JobPostingForm|JobPostingsList/);
     expect(src).not.toMatch(/@\/lib\/job-postings\//);

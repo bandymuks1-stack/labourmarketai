@@ -517,7 +517,37 @@ export interface PreviewRow {
   readonly duplicateOfRecordId: string | null;
   /** True when this row could be committed as it stands. */
   readonly ready: boolean;
+  /**
+   * True when the ONLY thing between this row and `ready` is a structure the
+   * source itself names and the commit PLAN prepares: a person not yet on the
+   * roster. Ambiguity (several candidates) and duplicates never qualify —
+   * those are the human's to decide. See `ImportPlan`.
+   */
+  readonly readyWithPlan: boolean;
+  /** The source names a place the organization has no object for; the plan
+   *  prepares it. Independent of readiness (a place is never required). */
+  readonly contextWillCreate: boolean;
   readonly problem: string | null;
+}
+
+/**
+ * THE PLAN — what the commit will CREATE before it writes the rows (owner
+ * directive 2026-09-16, design/final/03 §3 P0-2: "Radau 7 objektus. 5 jau
+ * yra. 2 naujus paruošiau sukurti.").
+ *
+ * The importer used to stop at `person_not_on_roster` and hand the human a
+ * per-row "create this person" form; an unmatched site was silently reduced
+ * to a label. Both are structures the SOURCE states and the organization is
+ * authorized to create; asking the human to create them one by one before
+ * importing was the data model leaking into the human's work. The plan makes
+ * them visible, reviewable and cancellable — and NOTHING in it is written
+ * until the explicit commit, which then creates them through the SAME
+ * authorized paths a human would have used (`createRosterPerson`, the
+ * `create_work_object_v1` RPC). No new write path, no policy change.
+ */
+export interface ImportPlan {
+  readonly people: readonly { readonly label: string; readonly rows: number }[];
+  readonly objects: readonly { readonly label: string; readonly rows: number }[];
 }
 
 export interface ImportPreview {
@@ -526,6 +556,7 @@ export interface ImportPreview {
   /** LITERAL false — a persisted preview is unrepresentable. */
   readonly persisted: false;
   readonly rows: readonly PreviewRow[];
+  readonly plan: ImportPlan;
   readonly counts: {
     readonly total: number;
     readonly ready: number;
@@ -533,7 +564,20 @@ export interface ImportPreview {
     readonly needsContext: number;
     readonly duplicates: number;
     readonly conflicts: number;
+    /** Distinct people the plan would create. */
+    readonly willCreatePeople: number;
+    /** Distinct sites the plan would create. */
+    readonly willCreateObjects: number;
+    /** Rows whose source week disagrees with their explicit date. */
+    readonly weekConflicts: number;
   };
+}
+
+/** The rows a commit would write as the preview stands: the ready ones plus
+ *  the ones the plan makes ready. The commit confirmation binds to EXACTLY
+ *  this set on both transports (web action and MCP capability). */
+export function committableRows(preview: ImportPreview): readonly PreviewRow[] {
+  return preview.rows.filter((r) => r.ready || r.readyWithPlan);
 }
 
 /**
@@ -681,6 +725,18 @@ export async function buildPreview(
       personState === "matched" || personState === "created"
         ? contextState !== "ambiguous" && dup.state !== "duplicate"
         : false;
+    // The plan can make a row ready only when its person is simply not on the
+    // roster yet. An ambiguous person, an ambiguous place or a duplicate stays
+    // with the human.
+    const readyWithPlan =
+      !ready &&
+      personState === "unmatched" &&
+      personLabel !== null &&
+      personLabel.trim() !== "" &&
+      contextState !== "ambiguous" &&
+      dup.state !== "duplicate";
+    const contextWillCreate =
+      contextState === "unmatched" && contextLabel !== null && contextLabel.trim() !== "";
 
     const problem =
       personState === "unmatched"
@@ -717,6 +773,8 @@ export async function buildPreview(
       duplicateState: dup.state,
       duplicateOfRecordId: dup.recordId,
       ready,
+      readyWithPlan,
+      contextWillCreate,
       problem,
     });
 
@@ -758,6 +816,29 @@ export async function buildPreview(
     payload: { rows: preview.length },
   });
 
+  // The plan: one entry per DISTINCT label (the same normalisation the
+  // matcher uses), so "Jonas Petraitis" on forty rows is one person to create.
+  const planPeople = new Map<string, { label: string; rows: number }>();
+  const planObjects = new Map<string, { label: string; rows: number }>();
+  for (const r of preview) {
+    if (r.readyWithPlan && r.personLabel) {
+      const key = personKey(r.personLabel);
+      const entry = planPeople.get(key) ?? { label: r.personLabel, rows: 0 };
+      entry.rows += 1;
+      planPeople.set(key, entry);
+    }
+    if (r.contextWillCreate && r.contextLabel) {
+      const key = normalizeLabel(r.contextLabel);
+      const entry = planObjects.get(key) ?? { label: r.contextLabel, rows: 0 };
+      entry.rows += 1;
+      planObjects.set(key, entry);
+    }
+  }
+  const plan: ImportPlan = {
+    people: [...planPeople.values()],
+    objects: [...planObjects.values()],
+  };
+
   return {
     kind: "ok",
     preview: {
@@ -765,9 +846,17 @@ export async function buildPreview(
       organizationId: session.organizationId,
       persisted: false,
       rows: preview,
+      plan,
       counts: {
         total: preview.length,
         ready: preview.filter((r) => r.ready).length,
+        willCreatePeople: plan.people.length,
+        willCreateObjects: plan.objects.length,
+        weekConflicts: preview.filter(
+          (r) =>
+            (r.derived.calendarWeek as { method?: string } | undefined)?.method ===
+            "iso_week_conflicts_with_source_week",
+        ).length,
         needsPerson: preview.filter(
           (r) => r.personState === "unmatched" || r.personState === "ambiguous",
         ).length,
@@ -1054,6 +1143,166 @@ export interface CommitResult {
   readonly skippedDuplicates: number;
   readonly notReady: number;
   readonly recordIds: readonly string[];
+  /** Structures the commit PLAN created before writing (0 when no plan ran). */
+  readonly createdPeople: number;
+  readonly createdObjects: number;
+}
+
+/** What the explicit commit is allowed to CREATE. Both default to true — the
+ *  system prepares, the human reviewed the plan in the preview and confirmed.
+ *  Either may be switched off, in which case those rows stay `needs_review`. */
+export interface CommitPlanOptions {
+  readonly createPeople: boolean;
+  readonly createObjects: boolean;
+  /** `relationship_kind` for people the plan creates (`other` when absent). */
+  readonly relationshipKind?: string | null;
+}
+
+/**
+ * APPLY THE PLAN — the commit's first act, and the only place structures are
+ * created from a source. Re-reads the roster and the objects FIRST so that a
+ * person or site created by an earlier, interrupted commit (or by a colleague
+ * a minute ago) is matched, never duplicated; then creates what is still
+ * missing through the existing authorized paths and stamps the staged rows,
+ * so the preview that follows classifies them exactly as if a human had
+ * chosen them. Returns how many of each were created.
+ */
+async function applyPlan(
+  caller: DomainCaller,
+  session: { readonly organizationId: string },
+  sessionId: string,
+  plan: CommitPlanOptions,
+): Promise<{ createdPeople: number; createdObjects: number } | EvidenceImportFailure> {
+  let createdPeople = 0;
+  let createdObjects = 0;
+  if (!plan.createPeople && !plan.createObjects) return { createdPeople, createdObjects };
+
+  const rowsRes = await db(caller.supabase)
+    .from("evidence_import_rows")
+    .select("id, person_label, context_label, person_state, context_state, status, problem")
+    .eq("session_id", sessionId)
+    .neq("status", "skipped")
+    .limit(MAX_ROWS_PER_SESSION);
+  if (rowsRes.error) return classify(rowsRes.error);
+  const staged = (rowsRes.data ?? []) as Record<string, unknown>[];
+
+  if (plan.createPeople) {
+    const roster = await readRoster(caller, session.organizationId);
+    if (!roster.ok) return roster.failure;
+    const current = [...roster.value];
+    const byKey = new Map<string, string>(); // personKey → id
+    for (const s of staged) {
+      if (s.person_state !== "unmatched") continue;
+      const label = (s.person_label as string | null) ?? "";
+      if (label.trim() === "") continue;
+      const key = personKey(label);
+      let personId = byKey.get(key) ?? null;
+      if (!personId) {
+        // Fresh match against the CURRENT roster: an ambiguous name is still
+        // the human's, an exact one is reused, only a true absence is created.
+        const m = matchPerson({ name: label }, current);
+        if (m.kind === "matched") personId = m.personId;
+        else if (m.kind === "ambiguous") continue;
+        else {
+          const created = await createRosterPerson(caller, {
+            organizationId: session.organizationId,
+            displayName: label,
+            relationshipKind: plan.relationshipKind ?? "other",
+            sourceNote: `evidence import ${sessionId}`,
+          });
+          if (created.kind !== "ok") return created;
+          personId = created.personId;
+          createdPeople += 1;
+          current.push({
+            id: personId,
+            displayName: created.displayName,
+            normalizedName: key,
+            externalRef: null,
+          });
+        }
+        byKey.set(key, personId);
+      }
+      const upd = await db(caller.supabase)
+        .from("evidence_import_rows")
+        .update({
+          organization_person_id: personId,
+          person_state: "created",
+          person_match_method: "plan_created",
+          person_match_confidence: 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", s.id as string);
+      if (upd.error) return classify(upd.error);
+    }
+  }
+
+  if (plan.createObjects) {
+    const objects = await readWorkObjects(caller, session.organizationId);
+    if (!objects.ok) return objects.failure;
+    const current = [...objects.value];
+    const byKey = new Map<string, string>(); // normalizeLabel → id
+    for (const s of staged) {
+      if (s.context_state !== "unmatched") continue;
+      const label = (s.context_label as string | null) ?? "";
+      if (label.trim() === "") continue;
+      const key = normalizeLabel(label);
+      let objectId = byKey.get(key) ?? null;
+      if (!objectId) {
+        const m = matchPlace(label, current);
+        if (m.kind === "matched") objectId = m.workObjectId;
+        else if (m.kind === "ambiguous") continue;
+        else {
+          // THE existing insert path for objects (membership-based authority
+          // inside the RPC). It answers a status, not an id, so the register
+          // is re-read and matched — the same way a human's "add" is read back.
+          const rpc = await db(caller.supabase).rpc("create_work_object_v1", {
+            p_organization_id: session.organizationId,
+            p_name: tidy(label).slice(0, 160),
+            p_project_id: null,
+            p_country: null,
+            p_region: null,
+            p_city: null,
+            p_address_line: null,
+            p_latitude: null,
+            p_longitude: null,
+          });
+          if (rpc.error) return classify(rpc.error);
+          const status = String(rpc.data ?? "");
+          if (status === "not_allowed") return { kind: "not-authorized", reason: "not-authorized" };
+          if (status !== "created") continue; // invalid / limit_reached: the row keeps its label
+          const again = await readWorkObjects(caller, session.organizationId);
+          if (!again.ok) return again.failure;
+          current.splice(0, current.length, ...again.value);
+          const found = matchPlace(label, current);
+          if (found.kind !== "matched") continue;
+          objectId = found.workObjectId;
+          createdObjects += 1;
+        }
+        byKey.set(key, objectId);
+      }
+      const upd = await db(caller.supabase)
+        .from("evidence_import_rows")
+        .update({
+          work_object_id: objectId,
+          context_state: "created",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", s.id as string);
+      if (upd.error) return classify(upd.error);
+    }
+  }
+
+  // The events table's CHECK admits seven event types and "plan applied" is
+  // not one of them; widening it is a schema change (RED). The plan is the
+  // commit's own preparation, so it is recorded as the `previewed` stage it
+  // re-materialises, with the stage named in the payload — never dropped.
+  await recordImportEvent(caller, {
+    organizationId: session.organizationId,
+    sessionId,
+    eventType: "previewed",
+    payload: { stage: "plan_applied", createdPeople, createdObjects },
+  });
+  return { createdPeople, createdObjects };
 }
 
 /**
@@ -1073,10 +1322,29 @@ export interface CommitResult {
 export async function commitImport(
   caller: DomainCaller,
   sessionId: string,
-  opts?: { readonly evidenceState?: ReportedEvidenceState },
+  opts?: {
+    readonly evidenceState?: ReportedEvidenceState;
+    /** The reviewed plan. Absent = the default plan (create both). */
+    readonly plan?: CommitPlanOptions;
+  },
 ): Promise<EvidenceImportResult<CommitResult>> {
   const session = await loadSession(caller, sessionId);
   if (!session.ok) return session.failure;
+
+  // FIRST the plan, THEN the rows: what the source named and the preview
+  // showed as "will be created" is created now, under the same explicit
+  // approval, and the preview is rebuilt so fingerprints, duplicates and
+  // readiness are computed against the people and sites that now exist.
+  const planOpts: CommitPlanOptions = opts?.plan ?? {
+    createPeople: true,
+    createObjects: true,
+  };
+  const applied = await applyPlan(caller, session, sessionId, planOpts);
+  if ("kind" in applied) return applied;
+  if (planOpts.createPeople || planOpts.createObjects) {
+    const re = await buildPreview(caller, sessionId);
+    if (re.kind !== "ok") return re;
+  }
 
   const rowsRes = await db(caller.supabase)
     .from("evidence_import_rows")
@@ -1104,6 +1372,8 @@ export async function commitImport(
       skippedDuplicates: 0,
       notReady,
       recordIds: [],
+      createdPeople: applied.createdPeople,
+      createdObjects: applied.createdObjects,
     };
   }
 
@@ -1237,6 +1507,8 @@ export async function commitImport(
     recordIds: ((ins.data ?? []) as Record<string, unknown>[])
       .filter((r) => writtenRowIds.has(r.import_row_id as string))
       .map((r) => r.id as string),
+    createdPeople: applied.createdPeople,
+    createdObjects: applied.createdObjects,
   };
 }
 

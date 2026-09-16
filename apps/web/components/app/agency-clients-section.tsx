@@ -300,7 +300,7 @@ export function AgencyClientsSection({
             >
               {labels.demandsEmpty}{" "}
               <a
-                href={`/${locale}/dashboard/company#demand-intake`}
+                href={`/${locale}/dashboard/company/needs#demand-intake`}
                 className="font-semibold text-brand-blue hover:underline"
               >
                 {labels.demandsEmptyCta} →
@@ -400,7 +400,7 @@ export function AgencyClientsSection({
             >
               {labels.demandsEmpty}{" "}
               <a
-                href={`/${locale}/dashboard/company#demand-intake`}
+                href={`/${locale}/dashboard/company/needs#demand-intake`}
                 className="font-semibold text-brand-blue hover:underline"
               >
                 {labels.demandsEmptyCta} →

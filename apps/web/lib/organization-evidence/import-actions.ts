@@ -12,6 +12,7 @@ import {
   SUPPLIER_ROLES,
   attestRecord,
   buildPreview,
+  committableRows,
   commitImport,
   createImportSession,
   createRosterPerson,
@@ -74,7 +75,8 @@ export type EvidenceImportActionState =
 
 /** The workspace this section lives in. It is no longer a route of its own —
  *  see the section component's header for why. */
-const PATH = "/dashboard/company";
+// The importer lives on the organization's HISTORY door (IA 2026-09-16).
+const PATH = "/dashboard/company/history";
 
 async function caller(): Promise<DomainCaller | null> {
   const supabase = await createClient();
@@ -321,7 +323,9 @@ export async function commitEvidenceImportAction(
 
   const preview = await buildPreview(c, sessionId);
   if (preview.kind !== "ok") return refuse(preview);
-  const ready = preview.preview.rows.filter((r) => r.ready);
+  // The set the token was minted against: ready rows plus the rows the PLAN
+  // makes ready — the same selection the page showed as "will be written".
+  const committable = committableRows(preview.preview);
 
   let verdict: { ok: true } | { ok: false; reason: string };
   try {
@@ -329,7 +333,7 @@ export async function commitEvidenceImportAction(
       token,
       sessionId,
       userId: c.userId,
-      readyRows: ready,
+      readyRows: committable,
     });
   } catch {
     // The signing secret is absent in this environment. Refuse honestly —
@@ -345,15 +349,26 @@ export async function commitEvidenceImportAction(
   }
 
   const requested = text(form, "evidence_state");
+  // The reviewed plan: both boxes default to checked on the page; an unchecked
+  // box arrives as an absent field. The relationship is validated against the
+  // same closed vocabulary the page offers.
+  const relationship = text(form, "plan_relationship");
   const res = await commitImport(c, sessionId, {
     evidenceState: isReportedEvidenceState(requested) ? requested : undefined,
+    plan: {
+      createPeople: text(form, "plan_people") === "1",
+      createObjects: text(form, "plan_objects") === "1",
+      relationshipKind: /^[a-z_]{1,40}$/.test(relationship) ? relationship : null,
+    },
   });
   if (res.kind !== "ok") return refuse(res);
   revalidatePath(PATH);
   return {
     kind: "ok",
     sessionId,
-    note: `written:${res.written}:skipped:${res.skippedDuplicates}:notReady:${res.notReady}`,
+    note:
+      `written:${res.written}:skipped:${res.skippedDuplicates}:notReady:${res.notReady}` +
+      `:createdPeople:${res.createdPeople}:createdObjects:${res.createdObjects}`,
   };
 }
 

@@ -43,7 +43,7 @@ describe("OptionCards is a one-tap native-radio control (no native dropdown)", (
 describe("finite company choices use OptionCards, not native <select>", () => {
   const setupForm = read("components/app/company-setup-form.tsx");
   const demandForm = read("components/app/demand-draft-form.tsx");
-  const companyPage = read("app/[locale]/dashboard/company/page.tsx");
+  const companyPage = read("app/[locale]/dashboard/company/needs/page.tsx");
 
   it("company setup imports + uses OptionCards for company type + requester role", () => {
     expect(setupForm).toMatch(/import \{ OptionCards \}/);

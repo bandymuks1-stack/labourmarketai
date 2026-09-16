@@ -2757,7 +2757,12 @@
         "claims": "Fähigkeitsangaben"
       },
       "internalBadge": "Intern",
-      "internalNote": "Interne Diagnose — technische Details für den Inhaber, keine Produktoberfläche."
+      "internalNote": "Interne Diagnose — technische Details für den Inhaber, keine Produktoberfläche.",
+      "attention": {
+        "title": "Wartet auf Entscheidung",
+        "none": "Derzeit wartet nichts auf eine Entscheidung des Operators.",
+        "summary": "{people} aktive Personen · {companies} Organisationen · {drafts} operative Entwürfe · {claims} Kompetenzerklärungen"
+      }
     },
     "eyebrow": "BETRIEBSSTEUERUNG",
     "title": "Inhaber- / Betriebs-Kontrollraum",
@@ -2799,7 +2804,8 @@
         "company": "Unternehmensanfrage",
         "agency": "Agenturangebot",
         "buyer": "Käuferanfrage"
-      }
+      },
+      "summary": "{total} insgesamt: {company} Unternehmensbedarf · {agency} Agenturangebote · {buyer} Käuferanfragen"
     },
     "requestReview": {
       "title": "Käuferanfragen — manuelle Prüfung",
@@ -2836,7 +2842,8 @@
         "manual_review_only": "Sonstige"
       },
       "noFiles": "Keine Dateien",
-      "showAll": "Alle anzeigen ({n})"
+      "showAll": "Alle anzeigen ({n})",
+      "howTitle": "Wie die Priorität bestimmt wird"
     },
     "user": {
       "onboarded": "Onboarding abgeschlossen",
@@ -13131,7 +13138,9 @@
       "workspaceUnnamedAgency": "Agentur ohne Namen",
       "workspaceUnnamedTeam": "Kolonne ohne Namen",
       "workspaceUnnamedNote": "Kein Name angegeben",
-      "workspaceNameThis": "Namen angeben"
+      "workspaceNameThis": "Namen angeben",
+      "historyImportChip": "Historische Daten importieren",
+      "historyImportHint": "Laden Sie die Datei hoch — Personen, Objekte, Daten und Stunden bereite ich daraus vor; Sie bestätigen nur, was unklar ist."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -15641,8 +15650,10 @@
     "states": {
       "needsMigration": "Diese Funktion ist in dieser Datenbank noch nicht aktiviert.",
       "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
-      "noObjects": "Legen Sie zuerst mindestens ein Objekt an.",
-      "error": "Der Tag konnte nicht geladen werden."
+      "noObjects": "Es gibt noch keine Objekte, denen die heutigen Stunden zugeordnet werden können.",
+      "error": "Der Tag konnte nicht geladen werden.",
+      "noObjectsImport": "Laden Sie eine Datei mit Ihrer Arbeitshistorie hoch — Objekte und Personen werden daraus vorbereitet.",
+      "noObjectsRegister": "Objektregister"
     },
     "import": {
       "entryLink": "Stunden aus einer Tabelle importieren (.xlsx)",
@@ -15816,7 +15827,9 @@
         "needsPerson": "Person ungeklärt",
         "needsContext": "Ort ungeklärt",
         "duplicates": "Bereits importiert",
-        "conflicts": "Widersprüche"
+        "conflicts": "Widersprüche",
+        "willCreatePeople": "Neue Personen",
+        "willCreateObjects": "Neue Objekte"
       },
       "column": {
         "row": "Zeile",
@@ -15836,14 +15849,16 @@
       "unmatched": "Nicht in der Liste",
       "matched": "Zugeordnet",
       "ambiguous": "Mehr als eine Übereinstimmung",
-      "created": "Zur Liste hinzugefügt"
+      "created": "Zur Liste hinzugefügt",
+      "will_create": "wird angelegt"
     },
     "contextState": {
       "absent": "Kein Ort genannt",
       "unmatched": "Ort nicht gefunden",
       "matched": "Zugeordnet",
       "ambiguous": "Mehr als eine Übereinstimmung",
-      "created": "Angelegt"
+      "created": "Angelegt",
+      "will_create": "wird angelegt"
     },
     "duplicateState": {
       "new": "Neu",
@@ -15906,7 +15921,9 @@
       "written": "Festgehalten",
       "skipped": "Als bereits festgehalten übersprungen",
       "notReady": "Ungeklärt geblieben",
-      "reusedSession": "Sie haben diese Quelle bereits eingelesen. Ihre Zeilen stehen unten, statt ein zweites Mal gelesen zu werden."
+      "reusedSession": "Sie haben diese Quelle bereits eingelesen. Ihre Zeilen stehen unten, statt ein zweites Mal gelesen zu werden.",
+      "createdPeople": "Personen angelegt",
+      "createdObjects": "Objekte angelegt"
     },
     "records": {
       "title": "4. Was festgehalten ist",
@@ -15993,6 +16010,26 @@
       "refuse": "Nein, das bin ich nicht",
       "decisionFailed": "Diese Antwort konnte nicht gespeichert werden. Es hat sich nichts geändert.",
       "unnamedOrganization": "Eine Organisation"
+    },
+    "plan": {
+      "title": "Was gefunden und was vorbereitet wurde",
+      "people": "{found} Personen gefunden: {existing} bereits in der Liste, {create} neue zur Anlage vorbereitet.",
+      "objects": "{found} Objekte gefunden: {existing} bereits im System, {create} neue zur Anlage vorbereitet.",
+      "ambiguous": "{count} Zeilen brauchen Ihre Entscheidung — mehrere mögliche Treffer.",
+      "conflicts": "{count} Zeilen widersprechen bereits erfassten Daten — vor der Bestätigung prüfen.",
+      "weekConflicts": "{count} Zeilen: die Wochennummer der Datei widerspricht dem angegebenen Datum — die Kalenderwoche des Datums wird vorgeschlagen.",
+      "nothingToCreate": "Alle Personen und Objekte existieren bereits — nichts Neues muss angelegt werden.",
+      "willCreatePeople": "Diese Personen werden angelegt (in der Liste der Organisation, ohne Plattformkonto):",
+      "willCreateObjects": "Diese Objekte werden angelegt:",
+      "rows": "{count} Zeilen",
+      "createPeople": "Fehlende Personen beim Bestätigen anlegen",
+      "createObjects": "Fehlende Objekte beim Bestätigen anlegen",
+      "relationship": "Beziehung der neuen Personen zur Organisation",
+      "nothingBeforeCommit": "Bis zur Bestätigung wird nichts angelegt oder geschrieben."
+    },
+    "derivedMethod": {
+      "iso_week_of_explicit_date": "Kalenderwoche aus dem Datum",
+      "iso_week_conflicts_with_source_week": "Woche der Datei widerspricht dem Datum — Woche aus dem Datum vorgeschlagen"
     }
   },
   "organizationRoster": {
@@ -16140,6 +16177,63 @@
       "company_posting_registration": "Anmeldung der Entsendung durch das Unternehmen. Das ist eine Pflicht des Arbeitgebers, getrennt von dem, was die einzelne Arbeitskraft einreicht.",
       "company_tax_vat": "Umsatzsteuer-, Steuer- und Sozialversicherungsanmeldung des Unternehmens. Ob das gilt, hängt davon ab, worin die Arbeit besteht und wie lange sie dauert.",
       "national_specifics": "Länderspezifische Unterlagen — Branchen- oder Bauausweise, örtliche Registrierung, nationale Steuer- und Sozialversicherungsschritte. Die gibt es in den meisten Ländern, aber die Details sind national — prüfen Sie sie auf der offiziellen Seite."
+    }
+  },
+  "organizationDoors": {
+    "label": "Bereiche der Organisation",
+    "now": "Jetzt",
+    "people": "Menschen",
+    "work": "Arbeit",
+    "needs": "Bedarf",
+    "calendar": "Kalender",
+    "partners": "Kunden & Partner",
+    "education": "Ausbildung",
+    "history": "Verlauf",
+    "settings": "Einstellungen",
+    "pages": {
+      "now": {
+        "subtitle": "Was passiert, was Ihre Entscheidung braucht und wo es weitergeht.",
+        "primaryActions": "Hauptaktionen",
+        "newNeed": "Neuer Personalbedarf",
+        "newProject": "Neues Projekt",
+        "invite": "Person einladen",
+        "importHistory": "Historische Daten importieren"
+      },
+      "people": {
+        "title": "Menschen und Team",
+        "subtitle": "Wer mit Ihnen arbeitet, wer frei ist, wer Aufmerksamkeit braucht — und wie Sie Menschen aufnehmen.",
+        "summary": "{active} aktiv · {pending} Einladungen offen · {members} Mitglieder · {review} prüfen Journale"
+      },
+      "needs": {
+        "title": "Personalbedarf",
+        "subtitle": "Was fehlt, was Sie bereits angefragt haben und wo das Matching stattfindet.",
+        "matchingDoor": "Matching und Kandidaten",
+        "matchingNote": "Wer zu Ihrem Bedarf passt, wer Interesse gezeigt hat und welches Angebot frei ist."
+      },
+      "partners": {
+        "title": "Kunden und Partner",
+        "subtitle": "Mit wem Sie arbeiten: Kunden, Agenturen und geteilter Bedarf.",
+        "empty": "Noch keine Kunden- oder Partnerbeziehungen. Eine Agentur kann Sie zur Zusammenarbeit einladen — dann erscheinen ihre Vorschläge hier."
+      },
+      "education": {
+        "title": "Ausbildung und Programme",
+        "subtitle": "Programme, Lernende und die Marktnachfrage nach ihren Richtungen."
+      },
+      "history": {
+        "title": "Datenimport und Verlauf",
+        "subtitle": "Laden Sie historische Arbeitsdaten hoch — Personen, Objekte, Daten und Stunden werden aus der Datei vorbereitet; Sie bestätigen.",
+        "hoursGridTitle": "Monatlicher Stundenzettel",
+        "hoursGridNote": "Derselbe Import versteht auch die Monatstabelle (Person × Tag). Die tägliche Stundenerfassung liegt im Arbeitsstunden-Bereich.",
+        "hoursDoor": "Arbeitsstunden",
+        "evidenceReportsDoor": "Nachweisberichte"
+      },
+      "settings": {
+        "title": "Organisationseinstellungen",
+        "subtitle": "Identität, Prüfung, was die Organisation tut, öffentliches Profil und Hilfe."
+      },
+      "work": {
+        "objectsIntro": "Objekte und Baustellen, denen Personen, Stunden und Fotos zugeordnet sind."
+      }
     }
   }
 }

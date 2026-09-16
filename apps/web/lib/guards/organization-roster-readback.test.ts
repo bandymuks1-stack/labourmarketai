@@ -42,7 +42,8 @@ describe("the roster has a reader", () => {
   });
 
   it("is mounted on the company workspace, not reachable by URL alone", () => {
-    const page = read("app", "[locale]", "dashboard", "company", "page.tsx");
+    // Re-anchored 2026-09-16: the roster reader lives on the People door.
+    const page = read("app", "[locale]", "dashboard", "company", "people", "page.tsx");
     expect(page).toMatch(/import \{ OrganizationRosterSection \}/);
     expect(page).toMatch(/<OrganizationRosterSection locale=\{locale\} \/>/);
   });
@@ -143,20 +144,20 @@ describe("the chat door names the place it actually opens", () => {
   it("sends a workforce table to the people importer with its OWN sentence and chip", () => {
     const branch = chat.slice(chat.indexOf('intent.kind === "workforce_table"'));
     expect(branch).toMatch(/t\("fileOrgPeople"\)/);
-    expect(branch).toMatch(/link:\/dashboard\/company#people-import-section/);
+    expect(branch).toMatch(/link:\/dashboard\/company\/people#people-import-section/);
     expect(branch).toMatch(/labels\.chipPeopleImport/);
   });
 
   it("no longer labels the people importer as the documents centre", () => {
     // The exact regression: one chip label served both destinations.
-    const peopleAt = chat.indexOf("link:/dashboard/company#people-import-section");
+    const peopleAt = chat.indexOf("link:/dashboard/company/people#people-import-section");
     expect(peopleAt).toBeGreaterThan(-1);
     const window = chat.slice(peopleAt, peopleAt + 200);
     expect(window).not.toContain("documentsChip");
   });
 
   it("keeps the evidence branch pointing at the evidence import", () => {
-    const evidenceAt = chat.indexOf("link:/dashboard/company#evidence-import");
+    const evidenceAt = chat.indexOf("link:/dashboard/company/history#evidence-import");
     expect(evidenceAt).toBeGreaterThan(-1);
     expect(chat.slice(evidenceAt - 400, evidenceAt)).toMatch(/t\("fileOrgEvidence"\)/);
   });

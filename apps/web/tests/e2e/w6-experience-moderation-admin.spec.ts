@@ -58,7 +58,7 @@ test("the moderator queue renders as a band on the EXISTING control room", async
 
   // It is ON the control room, not on a route of its own — the control room's
   // own surface must be present in the same document.
-  await expect(page.getByTestId("admin-overview-kpis")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("admin-attention")).toBeVisible({ timeout: 60_000 });
   const panel = page.getByTestId("admin-experience-moderation");
   await expect(panel).toBeVisible();
 

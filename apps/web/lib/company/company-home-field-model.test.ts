@@ -169,7 +169,7 @@ describe("attentionChipHref — every chip leads to a page, or is not shown", ()
   });
   it("chat-answer chips map to the page that renders the same rows", () => {
     expect(attentionChipHref("candidates")).toBe("/dashboard/company/scouting");
-    expect(attentionChipHref("agency:progress")).toBe("/dashboard/company#company-agency");
+    expect(attentionChipHref("agency:progress")).toBe("/dashboard/company/partners#company-agency");
   });
   it("an unknown chat-answer chip yields null (the line stays, the shortcut does not)", () => {
     expect(attentionChipHref("something-else")).toBeNull();

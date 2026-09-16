@@ -132,6 +132,11 @@ export async function CompanyHomeFieldSection({
   const planningHref = "/dashboard/company/planning" as "/dashboard";
   const inviteHref = "/dashboard/network?type=join_as_employee" as "/dashboard";
   const partnerInviteHref = "/dashboard/network" as "/dashboard";
+  // The doors (IA 2026-09-16): a need is asked for on the Needs door, a
+  // partner's invitation is answered on the Partners door — never an anchor
+  // into a section this screen no longer holds.
+  const needsHref = "/dashboard/company/needs#demand-intake" as "/dashboard";
+  const partnersHref = "/dashboard/company/partners#company-partners-bridge" as "/dashboard";
 
   return (
     <section
@@ -486,9 +491,9 @@ export async function CompanyHomeFieldSection({
                       .join(" · ") || t(`missing.status.${n.status}`)}
                   </span>
                   {n.status === "draft" ? (
-                    <a href="#demand-intake" className={`${ACTION_LINK} w-fit`} data-testid="company-home-need-continue">
+                    <Link href={needsHref} className={`${ACTION_LINK} w-fit`} data-testid="company-home-need-continue">
                       {t("missing.continueDraft")}
-                    </a>
+                    </Link>
                   ) : (
                     <Link
                       href={`/dashboard/company/scouting?request=${n.id}` as "/dashboard"}
@@ -528,9 +533,9 @@ export async function CompanyHomeFieldSection({
               ))}
             </ul>
           ) : null}
-          <a href="#demand-intake" className={`${PRIMARY_LINK} mt-auto w-fit`} data-testid="company-home-need-new">
+          <Link href={needsHref} className={`${PRIMARY_LINK} mt-auto w-fit`} data-testid="company-home-need-new">
             {t("missing.needsCta")}
-          </a>
+          </Link>
         </section>
 
         {/* needs you — the chat's opening brief, without the chat */}
@@ -627,9 +632,9 @@ export async function CompanyHomeFieldSection({
             )}
             <div className="mt-auto flex flex-wrap gap-2 pt-1">
               {agencyRows.some((a) => a.status === "pending") ? (
-                <a href="#company-partners-bridge" className={PRIMARY_LINK} data-testid="company-home-partners-answer">
+                <Link href={partnersHref} className={PRIMARY_LINK} data-testid="company-home-partners-answer">
                   {t("partners.answer")}
-                </a>
+                </Link>
               ) : null}
               <Link href={partnerInviteHref} className={ACTION_LINK} data-testid="company-home-partners-invite">
                 <UserPlus className="h-3.5 w-3.5" aria-hidden />

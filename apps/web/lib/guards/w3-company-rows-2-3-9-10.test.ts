@@ -48,7 +48,8 @@ describe("rows 2/3 — the hub cards' destinations stay canonical", () => {
   // The door-panel cards themselves died with the route (W3 Package 4);
   // their per-file no-write pins went with them.
   it("the destinations the cards deep-linked are real canonical anchors/routes", () => {
-    const company = read("app/[locale]/dashboard/company/page.tsx");
+    // Re-anchored 2026-09-16: the team anchor lives on the People door.
+    const company = read("app/[locale]/dashboard/company/people/page.tsx");
     expect(company).toMatch(/id="company-team"/);
     // The surviving spaces hub carries the company door (route-deletion safe).
     expect(read("app/[locale]/dashboard/start/page.tsx")).toMatch(

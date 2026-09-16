@@ -37,9 +37,12 @@ describe("Guard: the company dashboard wires the next-actions surface", () => {
     expect(readIdx).toBeGreaterThan(gateIdx); // company read happens after the gate
   });
 
-  it("renders CompanyNextActions for an existing company", () => {
-    expect(page).toMatch(/import\s*\{[\s\S]*CompanyNextActions[\s\S]*\}\s*from\s*["']@\/components\/app\/company-next-actions["']/);
-    expect(page).toMatch(/companyRow\s*\?\s*<CompanyNextActions\s+company=\{companyRow\}/);
+  it("renders CompanyNextActions for an existing company (on the Settings door)", () => {
+    // Re-anchored 2026-09-16: the status/verification card is the
+    // organization's own record, behind Nustatymai.
+    const settings = read("app/[locale]/dashboard/company/settings/page.tsx");
+    expect(settings).toMatch(/import\s*\{[\s\S]*CompanyNextActions[\s\S]*\}\s*from\s*["']@\/components\/app\/company-next-actions["']/);
+    expect(settings).toMatch(/<CompanyNextActions\s+company=\{companyRow\}/);
   });
 
   it("guides to start-company (no empty technical blocks) when no company row", () => {

@@ -12,6 +12,7 @@ import {
   buildPreview,
   listEvidenceRecords,
   listRosterPeople,
+  committableRows,
   type EvidenceImportFailure,
   type EvidenceRecordView,
   type ImportPreview,
@@ -106,12 +107,20 @@ function Chip({ tone, children }: { tone: string; children: React.ReactNode }) {
 }
 
 /** A row's headline state, chosen by the same precedence the core uses: a
- *  conflict outranks a duplicate, which outranks "needs a person". */
+ *  conflict outranks a duplicate, which outranks "needs a person". A row the
+ *  PLAN makes ready reads as ready — the plan is part of the commit. */
 function rowTone(row: PreviewRow): string {
   if (row.duplicateState === "conflict") return STATE_TONE.conflict;
   if (row.duplicateState === "duplicate") return STATE_TONE.duplicate;
-  return row.ready ? STATE_TONE.ready : STATE_TONE.needs_review;
+  return row.ready || row.readyWithPlan ? STATE_TONE.ready : STATE_TONE.needs_review;
 }
+
+/** The derived-field methods the preview names in words. Anything else stays
+ *  the raw slug — under-explaining is safer than inventing a sentence. */
+const NAMED_DERIVED_METHODS = new Set([
+  "iso_week_of_explicit_date",
+  "iso_week_conflicts_with_source_week",
+]);
 
 export async function EvidenceImportSection({
   locale,
@@ -335,7 +344,10 @@ export async function EvidenceImportSection({
   const preview: ImportPreview = previewRes.preview;
   const roster: readonly RosterPersonView[] = rosterRes.people;
   const records: readonly EvidenceRecordView[] = recordsRes.records;
-  const ready = preview.rows.filter((r) => r.ready);
+  // What the commit would write: the ready rows AND the rows the PLAN makes
+  // ready. The button's count, the token and the action's verification all
+  // read this ONE selection.
+  const ready = committableRows(preview);
 
   // The token binds to the rows shown BELOW. If anything changes before the
   // person approves, the commit is refused rather than quietly recording
@@ -360,16 +372,111 @@ export async function EvidenceImportSection({
       : p.displayName,
   }));
 
+  // THE PLAN, IN WORDS (owner acceptance 2026-09-16: "Radau 7 objektus. 5 jau
+  // yra sistemoje. 2 naujus paruošiau sukurti."). Found = distinct labels the
+  // source names; existing = those matched to something already here.
+  const distinct = (pick: (r: PreviewRow) => string | null) =>
+    new Set(preview.rows.map(pick).filter((v): v is string => !!v && v.trim() !== "")).size;
+  const peopleFound = distinct((r) => r.personLabel?.toLowerCase() ?? null);
+  const objectsFound = distinct((r) => r.contextLabel?.toLowerCase() ?? null);
+  const peopleNew = preview.plan.people.length;
+  const objectsNew = preview.plan.objects.length;
+  const peopleAmbiguous = preview.rows.filter((r) => r.personState === "ambiguous").length;
+  const placesAmbiguous = preview.rows.filter((r) => r.contextState === "ambiguous").length;
+  const planBlock = (
+    <section
+      className="flex flex-col gap-2 rounded-md border border-brand-cyan/30 bg-brand-cyan/5 px-4 py-3"
+      data-testid="evidence-import-plan"
+      data-people-new={peopleNew}
+      data-objects-new={objectsNew}
+    >
+      <h3 className="font-display text-sm font-semibold text-text-primary">{t("plan.title")}</h3>
+      <ul className="flex flex-col gap-1 text-sm text-text-secondary">
+        {peopleFound > 0 && (
+          <li data-testid="evidence-plan-people">
+            {t("plan.people", {
+              found: peopleFound,
+              existing: Math.max(0, peopleFound - peopleNew - (peopleAmbiguous > 0 ? 1 : 0)),
+              create: peopleNew,
+            })}
+          </li>
+        )}
+        {objectsFound > 0 && (
+          <li data-testid="evidence-plan-objects">
+            {t("plan.objects", {
+              found: objectsFound,
+              existing: Math.max(0, objectsFound - objectsNew - (placesAmbiguous > 0 ? 1 : 0)),
+              create: objectsNew,
+            })}
+          </li>
+        )}
+        {peopleAmbiguous + placesAmbiguous > 0 && (
+          <li className="text-state-amber" data-testid="evidence-plan-ambiguous">
+            {t("plan.ambiguous", { count: peopleAmbiguous + placesAmbiguous })}
+          </li>
+        )}
+        {preview.counts.conflicts > 0 && (
+          <li className="text-state-amber" data-testid="evidence-plan-conflicts">
+            {t("plan.conflicts", { count: preview.counts.conflicts })}
+          </li>
+        )}
+        {preview.counts.weekConflicts > 0 && (
+          <li className="text-state-amber" data-testid="evidence-plan-week-conflicts">
+            {t("plan.weekConflicts", { count: preview.counts.weekConflicts })}
+          </li>
+        )}
+        {peopleNew === 0 && objectsNew === 0 && (
+          <li data-testid="evidence-plan-nothing">{t("plan.nothingToCreate")}</li>
+        )}
+      </ul>
+      {peopleNew > 0 && (
+        <div className="text-xs text-text-secondary">
+          <p>{t("plan.willCreatePeople")}</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {preview.plan.people.map((p) => (
+              <li
+                key={p.label}
+                className="rounded-full border border-ink-500 bg-ink-900 px-2 py-0.5 text-text-primary"
+                data-testid="evidence-plan-person"
+              >
+                {p.label} · {t("plan.rows", { count: p.rows })}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {objectsNew > 0 && (
+        <div className="text-xs text-text-secondary">
+          <p>{t("plan.willCreateObjects")}</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {preview.plan.objects.map((o) => (
+              <li
+                key={o.label}
+                className="rounded-full border border-ink-500 bg-ink-900 px-2 py-0.5 text-text-primary"
+                data-testid="evidence-plan-object"
+              >
+                {o.label} · {t("plan.rows", { count: o.rows })}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <p className="text-xs text-state-amber">{t("plan.nothingBeforeCommit")}</p>
+    </section>
+  );
+
   const counts = (
     <dl
-      className="grid grid-cols-2 gap-2 sm:grid-cols-6"
+      className="grid grid-cols-2 gap-2 sm:grid-cols-4"
       data-testid="evidence-preview-counts"
     >
       {(
         [
           ["total", preview.counts.total],
-          ["ready", preview.counts.ready],
-          ["needsPerson", preview.counts.needsPerson],
+          ["ready", ready.length],
+          ["willCreatePeople", preview.counts.willCreatePeople],
+          ["willCreateObjects", preview.counts.willCreateObjects],
+          ["needsPerson", preview.counts.needsPerson - preview.counts.willCreatePeople],
           ["needsContext", preview.counts.needsContext],
           ["duplicates", preview.counts.duplicates],
           ["conflicts", preview.counts.conflicts],
@@ -399,6 +506,7 @@ export async function EvidenceImportSection({
           <p className="text-xs leading-relaxed text-state-amber">
             {t("preview.notPersisted")}
           </p>
+          {planBlock}
           {counts}
 
           {preview.rows.length === 0 ? (
@@ -450,7 +558,9 @@ export async function EvidenceImportSection({
                             {row.personName ?? row.personLabel ?? "—"}
                           </div>
                           <div className="text-xs text-text-muted">
-                            {t(`personState.${row.personState}` as never)}
+                            {row.readyWithPlan
+                              ? t("personState.will_create")
+                              : t(`personState.${row.personState}` as never)}
                             {row.personConfidence !== null
                               ? ` · ${Math.round(row.personConfidence * 100)}%`
                               : ""}
@@ -471,7 +581,9 @@ export async function EvidenceImportSection({
                             {row.workObjectName ?? row.contextLabel ?? "—"}
                           </div>
                           <div className="text-xs text-text-muted">
-                            {t(`contextState.${row.contextState}` as never)}
+                            {row.contextWillCreate
+                              ? t("contextState.will_create")
+                              : t(`contextState.${row.contextState}` as never)}
                           </div>
                         </td>
                         <td className="px-2 py-2 text-text-secondary">
@@ -494,16 +606,29 @@ export async function EvidenceImportSection({
                                 className="text-xs text-state-amber"
                                 data-testid="evidence-row-derived"
                               >
-                                {t("preview.derived")}: {derivedKeys.join(", ")}
+                                {t("preview.derived")}:{" "}
+                                {derivedKeys
+                                  .map((k) => {
+                                    const d = row.derived[k] as
+                                      | { method?: string; value?: unknown; note?: string }
+                                      | undefined;
+                                    // A named method reads as a sentence with its
+                                    // proposed value; the source's own figure rides
+                                    // along in the note so both stay visible.
+                                    return d?.method && NAMED_DERIVED_METHODS.has(d.method)
+                                      ? `${t(`derivedMethod.${d.method}` as never)} → ${String(d.value)}${d.note ? ` (${d.note})` : ""}`
+                                      : k;
+                                  })
+                                  .join(", ")}
                               </span>
                             )}
-                            {row.problem && (
+                            {row.problem && !row.readyWithPlan && (
                               <span className="text-xs text-text-secondary">
                                 {t(`problem.${row.problem}` as never)}
                               </span>
                             )}
                           </div>
-                          {!row.ready && row.duplicateState !== "duplicate" && (
+                          {!row.ready && !row.readyWithPlan && row.duplicateState !== "duplicate" && (
                             <div className="mt-2">
                               <EvidenceRowResolve
                                 resolveAction={resolveEvidenceRowAction}
@@ -572,6 +697,15 @@ export async function EvidenceImportSection({
             confirmationToken={commitToken}
             readyCount={ready.length}
             evidenceStates={options(REPORTED_EVIDENCE_STATES, "evidenceState")}
+            plan={{
+              people: preview.plan.people.length,
+              objects: preview.plan.objects.length,
+              relationships: options(RELATIONSHIP_KINDS, "relationship"),
+              // The relationship that LEADS follows the session's supplier
+              // role: a school imports learners, an agency its workers, an
+              // employer its employees. The person can still pick any other.
+              suggestedRelationship: "employee",
+            }}
             labels={{
               evidenceState: t("commit.evidenceState"),
               evidenceStateHint: t("commit.evidenceStateHint"),
@@ -582,6 +716,11 @@ export async function EvidenceImportSection({
               written: t("result.written"),
               skipped: t("result.skipped"),
               notReady: t("result.notReady"),
+              createdPeople: t("result.createdPeople"),
+              createdObjects: t("result.createdObjects"),
+              createPeople: t("plan.createPeople"),
+              createObjects: t("plan.createObjects"),
+              relationship: t("plan.relationship"),
               errors,
             }}
           />

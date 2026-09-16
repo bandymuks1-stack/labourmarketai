@@ -113,7 +113,7 @@ export function EvidenceSourceForm({
   useEffect(() => {
     if (state.kind === "ok" && state.sessionId) {
       router.replace(
-        `/dashboard/company?evidenceSession=${state.sessionId}#evidence-import`,
+        `/dashboard/company/history?evidenceSession=${state.sessionId}#evidence-import`,
       );
     }
   }, [state, router]);
@@ -378,15 +378,36 @@ export interface CommitFormLabels {
   readonly written: string;
   readonly skipped: string;
   readonly notReady: string;
+  readonly createdPeople: string;
+  readonly createdObjects: string;
+  /** The PLAN controls (IA 2026-09-16 §3 P0-2). */
+  readonly createPeople: string;
+  readonly createObjects: string;
+  readonly relationship: string;
   readonly errors: Record<string, string>;
 }
 
-/** `written:N:skipped:N:notReady:N` — the action's own note, read back rather
- *  than a number the UI invented. */
+/** What the commit PLAN offers to create, so the form can show the two
+ *  choices only when there is something to choose about. */
+export interface CommitPlanSummary {
+  readonly people: number;
+  readonly objects: number;
+  readonly relationships: readonly Option[];
+  readonly suggestedRelationship: string;
+}
+
+/** `written:N:skipped:N:notReady:N[:createdPeople:N:createdObjects:N]` — the
+ *  action's own note, read back rather than a number the UI invented. */
 function commitCounts(note: string | undefined): Record<string, string> | null {
   if (!note?.startsWith("written:")) return null;
   const p = note.split(":");
-  return { written: p[1] ?? "0", skipped: p[3] ?? "0", notReady: p[5] ?? "0" };
+  return {
+    written: p[1] ?? "0",
+    skipped: p[3] ?? "0",
+    notReady: p[5] ?? "0",
+    createdPeople: p[7] ?? "0",
+    createdObjects: p[9] ?? "0",
+  };
 }
 
 export function EvidenceCommitForm({
@@ -396,6 +417,7 @@ export function EvidenceCommitForm({
   confirmationToken,
   readyCount,
   evidenceStates,
+  plan,
 }: {
   action: (
     prev: EvidenceImportActionState,
@@ -408,6 +430,7 @@ export function EvidenceCommitForm({
   confirmationToken: string | null;
   readyCount: number;
   evidenceStates: readonly Option[];
+  plan: CommitPlanSummary;
 }) {
   const [state, submit, pending] = useActionState<
     EvidenceImportActionState,
@@ -416,6 +439,7 @@ export function EvidenceCommitForm({
     kind: "idle",
   });
   const counts = state.kind === "ok" ? commitCounts(state.note) : null;
+  const hasPlan = plan.people > 0 || plan.objects > 0;
 
   return (
     <form
@@ -446,6 +470,58 @@ export function EvidenceCommitForm({
           {labels.evidenceStateHint}
         </span>
       </label>
+      {/* THE PLAN — checked by default: the system prepared what the source
+          names; the human reviewed it above and may still switch either off,
+          in which case those rows stay for review. Rendered only when there
+          is something to create, so a source that matches fully asks nothing. */}
+      {hasPlan && (
+        <fieldset
+          className="flex flex-col gap-2 rounded-md border border-ink-500 px-3 py-2"
+          data-testid="evidence-commit-plan"
+        >
+          {plan.people > 0 && (
+            <label className="flex items-center gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                name="plan_people"
+                value="1"
+                defaultChecked
+                data-testid="evidence-plan-create-people"
+              />
+              {labels.createPeople} ({plan.people})
+            </label>
+          )}
+          {plan.people > 0 && (
+            <label className="flex max-w-md flex-col gap-1">
+              <span className={labelText}>{labels.relationship}</span>
+              <select
+                name="plan_relationship"
+                className={field}
+                defaultValue={plan.suggestedRelationship}
+                data-testid="evidence-plan-relationship"
+              >
+                {plan.relationships.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {plan.objects > 0 && (
+            <label className="flex items-center gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                name="plan_objects"
+                value="1"
+                defaultChecked
+                data-testid="evidence-plan-create-objects"
+              />
+              {labels.createObjects} ({plan.objects})
+            </label>
+          )}
+        </fieldset>
+      )}
       <p className="text-xs leading-relaxed text-text-secondary">
         {labels.readOnce}
       </p>
@@ -458,6 +534,9 @@ export function EvidenceCommitForm({
         >
           {labels.written}: {counts.written} · {labels.skipped}:{" "}
           {counts.skipped} · {labels.notReady}: {counts.notReady}
+          {counts.createdPeople !== "0" || counts.createdObjects !== "0"
+            ? ` · ${labels.createdPeople}: ${counts.createdPeople} · ${labels.createdObjects}: ${counts.createdObjects}`
+            : ""}
         </p>
       )}
       <div>

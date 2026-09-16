@@ -2757,7 +2757,12 @@
         "claims": "Skill claims"
       },
       "internalBadge": "Internal",
-      "internalNote": "Internal diagnostics — technical detail for the owner, not a product surface."
+      "internalNote": "Internal diagnostics — technical detail for the owner, not a product surface.",
+      "attention": {
+        "title": "Waiting for a decision",
+        "none": "Nothing is waiting for an operator decision right now.",
+        "summary": "{people} active people · {companies} organizations · {drafts} operational drafts · {claims} skill declarations"
+      }
     },
     "eyebrow": "OPERATIONS CONTROL",
     "title": "Owner / Operations Control Room",
@@ -2799,7 +2804,8 @@
         "company": "Company request",
         "agency": "Agency offer",
         "buyer": "Buyer request"
-      }
+      },
+      "summary": "{total} in total: {company} company demand · {agency} agency offers · {buyer} buyer requests"
     },
     "requestReview": {
       "title": "Buyer requests — manual review",
@@ -2836,7 +2842,8 @@
         "manual_review_only": "Other"
       },
       "noFiles": "No files",
-      "showAll": "Show all ({n})"
+      "showAll": "Show all ({n})",
+      "howTitle": "How priority is decided"
     },
     "user": {
       "onboarded": "Onboarded",
@@ -13131,7 +13138,9 @@
       "workspaceUnnamedAgency": "Agency without a name",
       "workspaceUnnamedTeam": "Team without a name",
       "workspaceUnnamedNote": "No name provided",
-      "workspaceNameThis": "Add a name"
+      "workspaceNameThis": "Add a name",
+      "historyImportChip": "Historical data import",
+      "historyImportHint": "Upload the file — I will prepare people, sites, dates and hours from it; you confirm only what is unclear."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -15641,8 +15650,10 @@
     "states": {
       "needsMigration": "This feature is not enabled on this database yet.",
       "noCompany": "Switch to a company workspace.",
-      "noObjects": "Create at least one object first.",
-      "error": "Could not load this day."
+      "noObjects": "There are no sites yet to record today's hours against.",
+      "error": "Could not load this day.",
+      "noObjectsImport": "Upload a file with your work history — sites and people are prepared from it.",
+      "noObjectsRegister": "Sites register"
     },
     "import": {
       "entryLink": "Import hours from a spreadsheet (.xlsx)",
@@ -15816,7 +15827,9 @@
         "needsPerson": "Person unresolved",
         "needsContext": "Place unresolved",
         "duplicates": "Already imported",
-        "conflicts": "Conflicts"
+        "conflicts": "Conflicts",
+        "willCreatePeople": "New people",
+        "willCreateObjects": "New sites"
       },
       "column": {
         "row": "Row",
@@ -15836,14 +15849,16 @@
       "unmatched": "Not on the roster",
       "matched": "Matched",
       "ambiguous": "More than one match",
-      "created": "Added to the roster"
+      "created": "Added to the roster",
+      "will_create": "will be created"
     },
     "contextState": {
       "absent": "No place named",
       "unmatched": "Place not found",
       "matched": "Matched",
       "ambiguous": "More than one match",
-      "created": "Created"
+      "created": "Created",
+      "will_create": "will be created"
     },
     "duplicateState": {
       "new": "New",
@@ -15906,7 +15921,9 @@
       "written": "Recorded",
       "skipped": "Skipped as already recorded",
       "notReady": "Left unresolved",
-      "reusedSession": "You have already read this source. Its rows are shown below rather than read a second time."
+      "reusedSession": "You have already read this source. Its rows are shown below rather than read a second time.",
+      "createdPeople": "People created",
+      "createdObjects": "Sites created"
     },
     "records": {
       "title": "4. What is recorded",
@@ -15993,6 +16010,26 @@
       "refuse": "No, that is not me",
       "decisionFailed": "That answer could not be saved. Nothing changed.",
       "unnamedOrganization": "An organization"
+    },
+    "plan": {
+      "title": "What was found and what is prepared",
+      "people": "Found {found} people: {existing} already on the roster, {create} new ones prepared to be created.",
+      "objects": "Found {found} sites: {existing} already in the system, {create} new ones prepared to be created.",
+      "ambiguous": "{count} rows need your decision — several possible matches.",
+      "conflicts": "{count} rows contradict what is already recorded — review before confirming.",
+      "weekConflicts": "{count} rows: the file's week number disagrees with the stated date — the calendar week of the date is proposed.",
+      "nothingToCreate": "Every person and site already exists — nothing new needs creating.",
+      "willCreatePeople": "These people will be created (on the organization's roster, without a platform account):",
+      "willCreateObjects": "These sites will be created:",
+      "rows": "{count} rows",
+      "createPeople": "Create the missing people on commit",
+      "createObjects": "Create the missing sites on commit",
+      "relationship": "Relationship of the new people to the organization",
+      "nothingBeforeCommit": "Nothing is created or written until you confirm."
+    },
+    "derivedMethod": {
+      "iso_week_of_explicit_date": "calendar week from the date",
+      "iso_week_conflicts_with_source_week": "the file's week disagrees with the date — week from the date proposed"
     }
   },
   "organizationRoster": {
@@ -16140,6 +16177,63 @@
       "company_posting_registration": "Registration of the posting by the company. This is the employer's obligation, separate from anything the individual worker files.",
       "company_tax_vat": "VAT, tax and social-security registration for the company. Whether these apply depends on what the work is and how long it lasts.",
       "national_specifics": "Country-specific paperwork — sector ID or construction cards, local registration, national tax and social-security steps. These exist in most countries but the specifics are national, so confirm them on the official site."
+    }
+  },
+  "organizationDoors": {
+    "label": "Organization areas",
+    "now": "Now",
+    "people": "People",
+    "work": "Work",
+    "needs": "Needs",
+    "calendar": "Calendar",
+    "partners": "Clients & partners",
+    "education": "Learning",
+    "history": "History",
+    "settings": "Settings",
+    "pages": {
+      "now": {
+        "subtitle": "What is happening, what needs your decision, and where to go next.",
+        "primaryActions": "Primary actions",
+        "newNeed": "New workforce need",
+        "newProject": "New project",
+        "invite": "Invite a person",
+        "importHistory": "Import historical data"
+      },
+      "people": {
+        "title": "People and team",
+        "subtitle": "Who works with you, who is free, who needs attention — and how to bring people in.",
+        "summary": "{active} active · {pending} invitations pending · {members} members · {review} reviewing journals"
+      },
+      "needs": {
+        "title": "Workforce needs",
+        "subtitle": "What you are missing, what you already asked for, and where matching happens.",
+        "matchingDoor": "Matching and candidates",
+        "matchingNote": "Who fits your needs, who raised a hand, and what supply is free."
+      },
+      "partners": {
+        "title": "Clients and partners",
+        "subtitle": "Who you work with: clients, agencies and shared needs.",
+        "empty": "No client or partner relationships yet. An agency can invite you to work together — its proposals will appear here."
+      },
+      "education": {
+        "title": "Learning and programmes",
+        "subtitle": "Programmes, learners and the market demand for their directions."
+      },
+      "history": {
+        "title": "Data import and history",
+        "subtitle": "Upload historical work data — people, sites, dates and hours are prepared from the file; you confirm.",
+        "hoursGridTitle": "Monthly hours grid",
+        "hoursGridNote": "The same import understands the monthly grid (person × day). Day-to-day hours entry lives in the work-hours area.",
+        "hoursDoor": "Work hours",
+        "evidenceReportsDoor": "Evidence reports"
+      },
+      "settings": {
+        "title": "Organization settings",
+        "subtitle": "Identity, verification, what the organization does, public profile and help."
+      },
+      "work": {
+        "objectsIntro": "Sites and objects that people, hours and photos are attached to."
+      }
     }
   }
 }

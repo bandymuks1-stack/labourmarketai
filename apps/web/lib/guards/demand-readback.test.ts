@@ -19,7 +19,7 @@ function read(rel: string): string {
 }
 
 describe("Guard: the company page wires the canonical demand read-back (W3 7/8/25)", () => {
-  const page = read("app/[locale]/dashboard/company/page.tsx");
+  const page = read("app/[locale]/dashboard/company/needs/page.tsx");
 
   it("imports the canonical read-back query + the read-back component", () => {
     expect(page).toMatch(

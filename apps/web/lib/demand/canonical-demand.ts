@@ -1,4 +1,5 @@
 import "server-only";
+import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -141,6 +142,10 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
   const workerDemand = await asAny(supabase).rpc("list_open_demand_for_workers");
   if (!workerDemand.error) {
     for (const row of (workerDemand.data ?? []) as WorkerDemandRow[]) {
+      // Other organizations' synthetic QA subjects are not market reality
+      // (lib/qa/synthetic-fixture.ts) — the viewer's own rows, read below,
+      // are never filtered.
+      if (isSyntheticFixtureLabel(row.role_text, row.company_name)) continue;
       const mapped = toCanonicalDemand({
         id: row.id,
         source: "customer_request",
