@@ -28,7 +28,7 @@ import { join } from "node:path";
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
-const companyPage = read("app/[locale]/dashboard/company/page.tsx");
+const companyPage = read("app/[locale]/dashboard/company/partners/page.tsx");
 const truthMap = read("lib/guards/route-truth-map.test.ts");
 
 // W1: these three were redirect-only page files. The files are gone; the
@@ -43,14 +43,12 @@ describe("staffing-agency mode is a typed view on the company room", () => {
   it("renders only behind companyType === 'staffing_agency'", () => {
     // The section testid appears exactly once, inside the typed conditional.
     expect(companyPage).toMatch(
-      /companyRow && companyRow\.companyType === "staffing_agency" \? \(/,
+      /const isStaffingAgency = companyRow\.companyType === "staffing_agency"/,
     );
     expect(
       companyPage.match(/data-testid="company-agency-mode"/g) ?? [],
     ).toHaveLength(1);
-    const condIdx = companyPage.indexOf(
-      'companyRow.companyType === "staffing_agency" ? (',
-    );
+    const condIdx = companyPage.indexOf("if (isStaffingAgency) {");
     const modeIdx = companyPage.indexOf('data-testid="company-agency-mode"');
     expect(condIdx).toBeGreaterThan(-1);
     expect(modeIdx).toBeGreaterThan(condIdx);
@@ -66,8 +64,9 @@ describe("staffing-agency mode is a typed view on the company room", () => {
     // "offer" is a plain anchor link since W3 rows 7/8/25: the wizard lives
     // ON this page under #demand-intake, so the old workspace-switching
     // detour is unnecessary here.
-    expect(companyPage).toMatch(/\/dashboard\/company#company-team/);
-    expect(companyPage).toMatch(/\/dashboard\/company#demand-intake/);
+    // The three actions are the organization's doors (IA 2026-09-16).
+    expect(companyPage).toMatch(/\/dashboard\/company\/people#company-team/);
+    expect(companyPage).toMatch(/\/dashboard\/company\/needs#demand-intake/);
     expect(companyPage).toMatch(/\/dashboard\/company\/scouting/);
   });
 

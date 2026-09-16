@@ -55,6 +55,16 @@ const CLASSIFICATION: Record<string, string> = {
   // Workforce planning zone (Labour Market OS P10) — the ONE visual planning
   // zone INSIDE the company workspace; composes the P1–P4 workforce reads.
   "dashboard/company/planning": "REAL_LAUNCH_SURFACE",
+  // The organization DOORS (owner IA correction 2026-09-16,
+  // docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2): the company
+  // hub split into its domains. Each composes sections that already existed
+  // on /dashboard/company; none introduces a data model or a write path.
+  "dashboard/company/people": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/needs": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/partners": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/education": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/history": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/settings": "REAL_LAUNCH_SURFACE",
   "dashboard/company/projects/new": "REAL_LAUNCH_SURFACE",
   "dashboard/company/scouting": "REAL_LAUNCH_SURFACE",
   "dashboard/documents": "REAL_LAUNCH_SURFACE",

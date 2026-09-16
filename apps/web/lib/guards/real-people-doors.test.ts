@@ -47,7 +47,7 @@ describe("1. a private person's trade need reaches the existing doors", () => {
 
   it("the employer paths are untouched (form for the company workspace, bridge for an employer elsewhere)", () => {
     expect(handler).toMatch(/openForm\(\s*"company\.create-demand"/);
-    expect(handler).toContain('id: "link:/dashboard/company#demand-intake"');
+    expect(handler).toContain('id: "link:/dashboard/company/needs#demand-intake"');
   });
 });
 

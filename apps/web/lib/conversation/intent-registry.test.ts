@@ -183,7 +183,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     );
     for (const route of [
       "/cv",
-      "/dashboard/hours?import=1",
+      // hours-import for an ORGANIZATION opens the canonical historical
+      // import door (IA 2026-09-16), never the hours form's import mode.
+      "/dashboard/company/history",
       "/dashboard/hours",
       "/dashboard/absences",
       "/dashboard/documents",

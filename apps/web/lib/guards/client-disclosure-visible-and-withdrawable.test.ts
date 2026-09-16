@@ -28,7 +28,7 @@ const stripTs = (s: string) =>
 const SECTION = read("components/app/client-agency-bridge-section.tsx");
 const READS = read("lib/agency/bridge-read.ts");
 const ACTIONS = read("lib/agency/bridge-actions.ts");
-const PAGE = read("app/[locale]/dashboard/company/page.tsx");
+const PAGE = read("app/[locale]/dashboard/company/partners/page.tsx");
 const MIG = readRepo(
   "supabase/migrations/20260723180000_agency_real_client_bridge_v1.sql",
 );
@@ -116,7 +116,7 @@ describe("4. the page composes it without widening the surface", () => {
   const code = stripTs(PAGE);
 
   it("the read is skipped entirely when the section will not render", () => {
-    expect(code).toMatch(/clientBridgeLabels && clientInvites\?\.kind === "ok"/);
+    expect(code).toMatch(/clientInvites\.kind === "ok"\s*\? await listSharedRequestsByClient\(/);
   });
 
   it("only ACTIVE connections are passed", () => {

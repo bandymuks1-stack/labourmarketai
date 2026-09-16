@@ -30,8 +30,9 @@ describe("project-context helper — read-only, real count", () => {
   });
 });
 
-describe("company page renders the honest empty state with a real count", () => {
-  const page = read("app/[locale]/dashboard/company/page.tsx");
+describe("the Work door renders the honest empty state with a real count", () => {
+  // Re-anchored 2026-09-16: the projects card moved to /dashboard/projects.
+  const page = read("app/[locale]/dashboard/projects/page.tsx");
   it("computes the context read-only and shows the count + ready badge", () => {
     expect(page).toMatch(/getCompanyProjectContext/);
     expect(page).toMatch(/projectContext\.projects/);

@@ -236,7 +236,7 @@ export async function POST(req: Request) {
           `This MCP endpoint accepts at most ${MAX_BODY_BYTES} bytes per request ` +
           "(roughly 48 KB of base64-encoded file). NOTHING was read or written. " +
           "Import a larger workforce list from the web people-import panel at " +
-          "/dashboard/company#people-import.",
+          "/dashboard/company/people#people-import.",
       },
       { status: 413 },
     );

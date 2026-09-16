@@ -16,5 +16,5 @@ import { switchActiveRole } from "@/lib/auth/actions";
  */
 export async function openDemandIntakeAsCompanyAction(locale: string): Promise<void> {
   await switchActiveRole("company");
-  redirect(`/${locale}/dashboard/company#demand-intake`);
+  redirect(`/${locale}/dashboard/company/needs#demand-intake`);
 }

@@ -115,7 +115,7 @@ describe("2. the education workspace gets education-shaped starters", () => {
     // section on the company hub, the hub itself. All exist as canonical
     // screens today — link chips route, never duplicate.
     expect(STARTERS).toMatch(/id: "link:\/dashboard\/network\?relationship=student", labelKey: "chipInviteStudent"/);
-    expect(STARTERS).toMatch(/id: "link:\/dashboard\/company#institution-programs-title", labelKey: "chipProgrammes"/);
+    expect(STARTERS).toMatch(/id: "link:\/dashboard\/company\/education#institution-programs-title", labelKey: "chipProgrammes"/);
     expect(STARTERS).toMatch(/id: "link:\/dashboard\/company", labelKey: "chipEduCapabilities"/);
   });
 

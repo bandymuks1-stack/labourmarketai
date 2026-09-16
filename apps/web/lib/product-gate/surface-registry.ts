@@ -880,6 +880,456 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
 
+  // ORGANIZATION DOOR (people) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/people",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The organization's PEOPLE door: who works with us (roster, invitations, recorded work), teams/brigades, bringing people in (invite, roster import and its readback), readiness, membership and employment lifecycle — every section the company hub carried for this domain, now behind one door.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the PERSON ↔ ORGANIZATION (§14 nodes PERSON, ORGANIZATION, TEAM; edge people → assignment → capacity). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The organization's PEOPLE door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "PERSON ↔ ORGANIZATION (§14 nodes PERSON, ORGANIZATION, TEAM; edge people → assignment → capacity).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (needs) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/needs",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The organization's DEMAND door: the canonical intake wizard (#demand-intake), the readback of what was already asked for with who is waiting, claimable public intakes, the public demand pool for agencies/institutions, and the door onward to matching (/dashboard/company/scouting).",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It extends an existing element on the DEMAND (§14 node DEMAND; edge need → supply → match). Scouting serves MATCH; no existing surface served the intake + readback without the hub. No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The organization's DEMAND door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "DEMAND (§14 node DEMAND; edge need → supply → match). Scouting serves MATCH; no existing surface served the intake + readback without the hub.",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (partners) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/partners",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The relationship door: a staffing agency's operating mode, client records and the two-subject agency→client bridge; for any other organization the client side of that bridge (agencies that invited it, requests it shared). Exists only when the relationship exists.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the EMPLOYER / CLIENT ↔ AGENCY (§14 nodes ORGANIZATION, AGENCY, DEMAND; the supply bridge edge). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The relationship door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "EMPLOYER / CLIENT ↔ AGENCY (§14 nodes ORGANIZATION, AGENCY, DEMAND; the supply bridge edge).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (education) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/education",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The education institution's door: learners' participation state (least-privilege), programmes → cohorts → learners with live public demand per direction, and the public demand pool. Exists only for the `training_provider` capability.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the PROGRAMME ↔ PERSON ↔ DEMAND (§14 nodes INSTITUTION, EDUCATION, DEMAND; journey J-INSTITUTION-OUTCOME). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The education institution's door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "PROGRAMME ↔ PERSON ↔ DEMAND (§14 nodes INSTITUTION, EDUCATION, DEMAND; journey J-INSTITUTION-OUTCOME).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (history) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/history",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The canonical HISTORICAL IMPORT door (journey J-IMPORT-HISTORY): upload → inspect → detect structure → identify people / sites / dates / hours / work → match what exists → PREPARE what is missing → detect duplicates and contradictions → one preview → the human decides only real ambiguities → explicit commit → records with provenance. The chat's 'noriu įkelti istorinius duomenis' lands here.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends an existing element on the EVIDENCE (§14 nodes EVIDENCE, REAL WORK, TIME; edge source → evidence → capability). The hours surface serves TODAY'S allocation; no surface served the reconstruction of history as a door. No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "work_journal",
+    objectType: "project",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The canonical HISTORICAL IMPORT door (journey J-IMPORT-HISTORY) — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "EVIDENCE (§14 nodes EVIDENCE, REAL WORK, TIME; edge source → evidence → capability). The hours surface serves TODAY'S allocation; no surface served the reconstruction of history as a door.",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (settings) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/settings",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The organization's own record: identity and verification status, what it does (capabilities), public business profile, tier-1 expectations, typed help requests to the operator, the person's profile link — administration kept out of the operating screens.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the ORGANIZATION (§14 node ORGANIZATION; identity ≠ role, SEP-5). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The organization's own record — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "ORGANIZATION (§14 node ORGANIZATION; identity ≠ role, SEP-5).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
 ] as const;
 
 /**

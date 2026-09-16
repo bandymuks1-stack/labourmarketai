@@ -348,6 +348,9 @@ export type ChatLabels = {
    *  answer is the same shape ("here is where that is handled"), and one hint
    *  with six chips is one contract, not six near-identical strings. */
   timesheetImportChip: string;
+  /** The organization's historical import door (IA 2026-09-16). */
+  historyImportChip: string;
+  historyImportHint: string;
   workHoursChip: string;
   absencesChip: string;
   documentsChip: string;
@@ -2135,7 +2138,7 @@ export function ConversationChat({
           if (intent.kind === "workforce_table") {
             assistant(t("fileOrgPeople"), [
               {
-                id: "link:/dashboard/company#people-import-section",
+                id: "link:/dashboard/company/people#people-import-section",
                 label: labels.chipPeopleImport,
               },
             ]);
@@ -2143,7 +2146,7 @@ export function ConversationChat({
           }
           assistant(t("fileOrgEvidence"), [
             {
-              id: "link:/dashboard/company#evidence-import",
+              id: "link:/dashboard/company/history#evidence-import",
               label: labels.documentsChip,
             },
           ]);
@@ -3973,7 +3976,7 @@ export function ConversationChat({
             }
             if (res.kind !== "ok") {
               assistant(res.line, [
-                { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+                { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
               ]);
               return;
             }
@@ -3982,7 +3985,7 @@ export function ConversationChat({
           .catch(() => {
             setTyping(false);
             assistant(labels.eduUnavailable, [
-              { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+              { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
             ]);
           });
         return;
@@ -4023,7 +4026,7 @@ export function ConversationChat({
           }
           if (res.kind !== "ok") {
             assistant(labels.eduUnavailable, [
-              { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+              { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
             ]);
             return;
           }
@@ -4088,7 +4091,7 @@ export function ConversationChat({
         .catch(() => {
           setTyping(false);
           assistant(labels.eduUnavailable, [
-            { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+            { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
           ]);
         });
     },
@@ -4901,7 +4904,7 @@ export function ConversationChat({
         if (understood) assistant(understood);
         assistant(labels.employerBridgeHint, [
           {
-            id: "link:/dashboard/company#demand-intake",
+            id: "link:/dashboard/company/needs#demand-intake",
             label: labels.chipNeedWorkers,
           },
         ]);
@@ -5434,7 +5437,7 @@ export function ConversationChat({
             // understand a sentence the product understood perfectly.
             assistant(labels.employerBridgeHint, [
               {
-                id: "link:/dashboard/company#demand-intake",
+                id: "link:/dashboard/company/needs#demand-intake",
                 label: labels.chipNeedWorkers,
               },
             ]);
@@ -5593,16 +5596,28 @@ export function ConversationChat({
         // exist and are exactly what `cvChoose` offers a person — the CV
         // import flow and their profile. No new route, no new label, no
         // second import model.
+        // ── AND FOR THE ORGANIZATION, TO THE RECONSTRUCTION, NOT THE FORM ──
+        // (owner human walk 2026-09-16, design/final/03 §3 P0-1)
+        //
+        // "noriu įkelti istorinius duomenis" → this intent → a chip to
+        // `/dashboard/hours?import=1`, whose gate answered "first create at
+        // least one object". The person asked to bring reality in and was
+        // handed a prerequisite the file itself satisfies. The organization's
+        // canonical historical import (`/dashboard/company/history`, the ONE
+        // evidence import engine) reads the same grid AND the long tables,
+        // matches people and sites, PREPARES the missing ones in the preview
+        // plan and asks only about real ambiguity. The hours grid is a format
+        // of that engine and is linked from the door — never a second importer.
         timesheetImport: () =>
           identity === "person"
             ? assistant(labels.adminRouteHint, [
                 { id: "cv", label: labels.chipCv },
                 { id: "profile", label: labels.chipProfile },
               ])
-            : assistant(labels.adminRouteHint, [
+            : assistant(labels.historyImportHint, [
                 {
-                  id: "link:/dashboard/hours?import=1",
-                  label: labels.timesheetImportChip,
+                  id: "link:/dashboard/company/history",
+                  label: labels.historyImportChip,
                 },
               ]),
         workHours: () =>

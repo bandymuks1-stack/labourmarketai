@@ -178,8 +178,11 @@ describe("the heaviest dashboard does not queue its reads", () => {
   });
 
   it("batches the independent reads instead", () => {
+    // Since the IA correction 2026-09-16 the hub is Dabar: ONE batch of
+    // eight reads. The domains it used to stack read on their own doors.
     const batches = src.match(/await Promise\.all\(/g) ?? [];
-    expect(batches.length).toBeGreaterThanOrEqual(3);
+    expect(batches.length).toBeGreaterThanOrEqual(1);
+    expect(src.split("\n").length).toBeLessThan(420);
   });
 });
 

@@ -11,6 +11,7 @@ import {
   ATTESTATION_ROLES,
   attestRecord,
   buildPreview,
+  committableRows,
   commitImport,
   createImportSession,
   createRosterPerson,
@@ -403,14 +404,16 @@ const importPreview: CapabilityDescriptor = {
     const res = await buildPreview(caller, parsed.sessionId);
     if (res.kind !== "ok") return fail(res);
 
-    const ready = res.preview.rows.filter((r) => r.ready);
-    // The token is bound to the EXACT set of rows shown. If anything changes
-    // between preview and commit — a row resolved, a duplicate appearing — the
-    // token no longer verifies and the assistant must preview again.
+    // The token is bound to the EXACT set of rows the commit would write: the
+    // ready ones AND the ones the PLAN makes ready (people the source names
+    // that the commit will create). If anything changes between preview and
+    // commit — a row resolved, a duplicate appearing — the token no longer
+    // verifies and the assistant must preview again.
+    const committable = committableRows(res.preview);
     const token = mintCommitToken({
       sessionId: parsed.sessionId,
       userId: caller.userId,
-      readyRows: ready,
+      readyRows: committable,
     });
 
     return {
@@ -421,12 +424,17 @@ const importPreview: CapabilityDescriptor = {
           organizationId: res.preview.organizationId,
           persisted: false,
           counts: res.preview.counts,
+          plan: res.preview.plan,
           rows: res.preview.rows,
         },
         confirmationToken: token,
         note:
-          "Nothing was written. Rows that are not `ready` are excluded from the " +
-          "commit — resolve them with evidence.import.resolve_row first, then " +
+          "Nothing was written. `plan` lists the people and sites the source " +
+          "names that do not exist yet; the commit CREATES them first (through " +
+          "the organization's own authorized paths) unless `plan.createPeople` / " +
+          "`plan.createObjects` is set to false. Rows that are neither `ready` " +
+          "nor `readyWithPlan` (ambiguous person or place, duplicates) are " +
+          "excluded — resolve them with evidence.import.resolve_row first, then " +
           "preview again for a fresh token.",
       },
     };
@@ -482,6 +490,15 @@ const commitInput = z
      *  verified vocabularies are deliberately absent, here and in the DB
      *  CHECK, so an import cannot mint trust it did not earn. */
     evidenceState: z.enum(REPORTED_EVIDENCE_STATES).optional(),
+    /** The reviewed PLAN (see evidence.import.preview). Absent = create both. */
+    plan: z
+      .object({
+        createPeople: z.boolean().default(true),
+        createObjects: z.boolean().default(true),
+        relationshipKind: z.string().min(1).max(40).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -504,13 +521,13 @@ const importCommit: CapabilityDescriptor = {
     // Re-derive the state the token was bound to, from the database, now.
     const preview = await buildPreview(caller, parsed.sessionId);
     if (preview.kind !== "ok") return fail(preview);
-    const ready = preview.preview.rows.filter((r) => r.ready);
+    const committable = committableRows(preview.preview);
 
     const verdict = verifyCommitToken({
       token: parsed.confirmationToken,
       sessionId: parsed.sessionId,
       userId: caller.userId,
-      readyRows: ready,
+      readyRows: committable,
     });
     if (!verdict.ok) {
       return {
@@ -524,6 +541,13 @@ const importCommit: CapabilityDescriptor = {
 
     const res = await commitImport(caller, parsed.sessionId, {
       evidenceState: parsed.evidenceState,
+      plan: parsed.plan
+        ? {
+            createPeople: parsed.plan.createPeople,
+            createObjects: parsed.plan.createObjects,
+            relationshipKind: parsed.plan.relationshipKind ?? null,
+          }
+        : undefined,
     });
     if (res.kind !== "ok") return fail(res);
     return {
@@ -532,8 +556,10 @@ const importCommit: CapabilityDescriptor = {
         written: res.written,
         skippedDuplicates: res.skippedDuplicates,
         notReady: res.notReady,
+        createdPeople: res.createdPeople,
+        createdObjects: res.createdObjects,
         recordIds: res.recordIds,
-        structuredDestination: "/dashboard/company#evidence-import",
+        structuredDestination: "/dashboard/company/history#evidence-import",
       },
     };
   },

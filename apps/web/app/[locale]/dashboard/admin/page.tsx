@@ -179,56 +179,32 @@ export default async function AdminDashboardPage({
   const num = (n: number | null | undefined) =>
     typeof n === "number" ? n.toLocaleString() : "—";
 
-  type KpiTone = "neutral" | "risk";
-  // Dead-UI rule D (owner smoke, 2026-07-05): every numeric card either
-  // navigates to what it counts (href) or is covered by the explicit
-  // monitoring-only caption under the band.
-  const kpis: {
-    key: string;
-    label: string;
-    value: string;
-    tone: KpiTone;
-    href?: string;
-  }[] = [
+  // ATTENTION, NOT KPIs (owner directive 2026-09-16, design/final/03 §1.3):
+  // the console opens with what is WAITING FOR AN OPERATOR DECISION — each
+  // row is the queue itself, with its count, and leads into it. A number
+  // that leads nowhere is not a tile any more; the platform's size is one
+  // sentence under the header. Zero waiting = the honest "nothing waits"
+  // line, never fake urgency.
+  const attention: { key: string; label: string; count: number; href: string }[] = [
     {
-      key: "people",
-      label: t("room.kpi.people"),
-      value: num(profileCount),
-      tone: "neutral",
+      key: "reviewQueue",
+      label: t("room.kpi.reviewQueue"),
+      count: reviewMigrationNeeded ? 0 : reviewRows.length,
+      href: "#request-review",
     },
     {
       key: "peopleIncomplete",
       label: t("room.kpi.peopleIncomplete"),
-      value: num(incompleteCount),
-      tone: (incompleteCount ?? 0) > 0 ? "risk" : "neutral",
-    },
-    {
-      key: "companies",
-      label: t("room.kpi.companies"),
-      value: companyErr ? "—" : num(companyCount),
-      tone: "neutral",
+      count: incompleteCount ?? 0,
+      href: "#admin-recent-users",
     },
     {
       key: "demand",
       label: t("room.kpi.demand"),
-      value: num(draftsTotal),
-      tone: "neutral",
-      href: "/dashboard/admin/need-structuring",
+      count: draftsTotal,
+      href: `/${locale}/dashboard/admin/need-structuring`,
     },
-    {
-      key: "reviewQueue",
-      label: t("room.kpi.reviewQueue"),
-      value: reviewMigrationNeeded ? "—" : num(reviewRows.length),
-      tone: reviewRows.length > 0 ? "risk" : "neutral",
-      href: "#request-review",
-    },
-    {
-      key: "claims",
-      label: t("room.kpi.claims"),
-      value: num(claimsTotal),
-      tone: "neutral",
-    },
-  ];
+  ].filter((a) => a.count > 0);
 
   // Control-area navigation grouped by real purpose. Each link resolves to a
   // real admin (or operations) page; nothing is a decorative tile.
@@ -514,68 +490,45 @@ export default async function AdminDashboardPage({
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
-      {/* BAND 1 — Overview KPIs. Real aggregate counts, status-framed. */}
-      <section className="flex flex-col gap-3" data-testid="admin-overview-kpis">
-        <div className="flex flex-col gap-0.5">
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            {t("room.groups.overview.title")}
-          </h2>
-          <p className="text-xs text-text-secondary">
-            {t("room.groups.overview.purpose")}
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {kpis.map((k) => {
-            const body = (
-              <>
-                <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-                  {k.label}
-                </p>
-                <p
-                  className={`mt-1 font-display text-2xl font-bold ${
-                    k.tone === "risk"
-                      ? "text-state-warning"
-                      : "text-text-primary"
-                  }`}
-                >
-                  {k.value}
-                </p>
-              </>
-            );
-            return k.href ? (
-              <a
-                key={k.key}
-                href={k.href.startsWith("#") ? k.href : `/${locale}${k.href}`}
-                className={`card-border block p-4 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
-                  k.tone === "risk" ? "border-state-warning/40" : ""
-                }`}
-                data-testid={`admin-kpi-${k.key}`}
-                data-tone={k.tone}
-              >
-                {body}
-              </a>
-            ) : (
-              <div
-                key={k.key}
-                className={`rounded-md border border-ink-700 bg-ink-800/20 p-4 ${
-                  k.tone === "risk" ? "border-state-warning/40" : ""
-                }`}
-                data-testid={`admin-kpi-${k.key}`}
-                data-tone={k.tone}
-              >
-                {body}
-              </div>
-            );
-          })}
-        </div>
-        {/* Rule D: counters without a queue page are explicitly
-            monitoring-only — no pretend clickability. */}
-        <p
-          className="text-meta leading-relaxed text-text-muted"
-          data-testid="admin-kpi-monitoring-note"
-        >
-          {t("room.kpi.monitoringNote")}
+      {/* THE PLATFORM'S SIZE — one sentence, no tiles. */}
+      <p
+        className="font-mono text-meta text-text-muted tabular-nums"
+        data-testid="admin-platform-summary"
+      >
+        {t("room.attention.summary", {
+          people: num(profileCount),
+          companies: companyErr ? "—" : num(companyCount),
+          drafts: num(draftsTotal),
+          claims: num(claimsTotal),
+        })}
+      </p>
+
+      {/* BAND 1 — WHAT NEEDS AN OPERATOR DECISION. Each row IS the queue. */}
+      <section className="flex flex-col gap-2" data-testid="admin-attention">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          {t("room.attention.title")}
         </p>
+        {attention.length === 0 ? (
+          <p className="text-sm text-text-secondary" data-testid="admin-attention-none">
+            {t("room.attention.none")}
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {attention.map((a) => (
+              <a
+                key={a.key}
+                href={a.href}
+                data-testid={`admin-attention-${a.key}`}
+                className="inline-flex min-h-11 items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-orange"
+              >
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white tabular-nums">
+                  {num(a.count)}
+                </span>
+                {a.label}
+              </a>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* BAND 2 — Action queues. The live operational signals that need a
@@ -589,7 +542,15 @@ export default async function AdminDashboardPage({
           <h2 className="font-display text-lg font-semibold text-text-primary">
             {tReview("title")}
           </h2>
-          <p className="text-xs text-text-secondary">{tReview("help")}</p>
+          {/* How the order is decided is contextual help, not persistent
+              prose (owner directive 2026-09-16 §10): the guarantee stays,
+              one tap away. */}
+          <details data-testid="admin-request-review-how">
+            <summary className="cursor-pointer list-none text-xs font-medium text-brand-blue hover:underline">
+              {tReview("howTitle")}
+            </summary>
+            <p className="pt-1 text-xs text-text-secondary">{tReview("help")}</p>
+          </details>
         </div>
         {reviewMigrationNeeded ? (
           <p
@@ -657,53 +618,24 @@ export default async function AdminDashboardPage({
             {t("drafts.title")}
           </h2>
           <p className="text-xs text-text-secondary">{t("drafts.help")}</p>
-          {/* Rule D: these are monitoring-only counts (drafts live on the
-              company/buyer dashboards; no admin drafts queue exists). */}
-          <p
-            className="text-meta leading-relaxed text-text-muted"
-            data-testid="admin-drafts-monitoring-note"
-          >
-            {t("room.kpi.monitoringNote")}
-          </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-4">
-          <div className="card-border p-3">
-            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-              {t("drafts.total")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftsTotal}
-            </p>
-          </div>
-          <div className="card-border p-3">
-            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-              {t("drafts.byType.company")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftCounts.company_request}
-            </p>
-          </div>
-          <div className="card-border p-3">
-            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-              {t("drafts.byType.agency")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftCounts.agency_offer}
-            </p>
-          </div>
-          <div className="card-border p-3">
-            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-              {t("drafts.byType.buyer")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftCounts.buyer_request}
-            </p>
-          </div>
-        </div>
+        {/* Drafts live on the organization / buyer surfaces; the console only
+            watches them. One sentence of counts, not four tiles. */}
+        <p
+          className="font-mono text-meta text-text-secondary tabular-nums"
+          data-testid="admin-drafts-summary"
+        >
+          {t("drafts.summary", {
+            total: draftsTotal,
+            company: draftCounts.company_request,
+            agency: draftCounts.agency_offer,
+            buyer: draftCounts.buyer_request,
+          })}
+        </p>
       </section>
 
       {/* People — the recent profiles surface with inspect links. */}
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 scroll-mt-20" id="admin-recent-users">
         <div className="flex flex-col gap-0.5">
           <h2 className="font-display text-lg font-semibold text-text-primary">
             {t("room.groups.people.title")}

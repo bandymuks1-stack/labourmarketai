@@ -208,7 +208,7 @@ export function attentionChipHref(chipId: string): string | null {
       return "/dashboard/company/scouting";
     case "agency:progress":
     case "agency:demand":
-      return "/dashboard/company#company-agency";
+      return "/dashboard/company/partners#company-agency";
     default:
       return null;
   }

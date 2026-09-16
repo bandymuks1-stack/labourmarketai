@@ -426,7 +426,7 @@ const ingestPreview: CapabilityDescriptor = {
             "relationship and this confirmationToken."
           : "NOTHING has been written. Answer the questions above first — a commit is " +
             "refused while anything is unresolved.",
-        structuredDestination: "/dashboard/company#people-import",
+        structuredDestination: "/dashboard/company/people#people-import",
       },
     };
   },
@@ -506,7 +506,7 @@ const ingestCommit: CapabilityDescriptor = {
           "These people are now on the organization's roster as its own claim. They have " +
           "no accounts and have agreed to nothing; linking a real person to a roster " +
           "record is a separate, later, human act.",
-        structuredDestination: "/dashboard/company#people-import",
+        structuredDestination: "/dashboard/company/people#people-import",
       },
     };
   },

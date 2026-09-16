@@ -352,8 +352,13 @@ describe("employee lifecycle v1 — app layer contract", () => {
     expect(
       existsSync(join(ROOT, "app/[locale]/dashboard/lifecycle")),
     ).toBe(false);
-    expect(COMPANY_PAGE).toContain("<LifecycleSection");
-    expect(COMPANY_PAGE).toContain("isLifecycleNotice");
+    // Re-anchored 2026-09-16: the lifecycle areas live on the People door.
+    const peoplePage = readFileSync(
+      join(ROOT, "app/[locale]/dashboard/company/people/page.tsx"),
+      "utf8",
+    );
+    expect(peoplePage).toContain("<LifecycleSection");
+    expect(peoplePage).toContain("isLifecycleNotice");
     expect(START_PAGE).toContain("<MyOnboardingSection");
     expect(SECTION).toContain('id="lifecycle"');
   });

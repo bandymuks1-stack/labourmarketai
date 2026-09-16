@@ -43,20 +43,27 @@ describe("1+2. counters navigate or are covered by monitoring-only notes", () =>
     // The Stat renderer itself is a Link (rule A: real element + focus state).
     expect(playerCard).toMatch(/function Stat\([\s\S]{0,700}<Link/);
   });
-  it("admin KPI band: queue counters link, the rest sit under the monitoring note", () => {
+  it("admin attention band: every counter IS a queue door; non-queue numbers are a sentence, not tiles", () => {
+    // Owner directive 2026-09-16 §8/§10: no monitoring-only prose — a number
+    // that leads nowhere is not rendered as a tile at all.
     expect(adminPage).toMatch(/href: "#request-review"/);
-    expect(adminPage).toMatch(/href: "\/dashboard\/admin\/need-structuring"/);
-    expect(adminPage).toMatch(/data-testid="admin-kpi-monitoring-note"/);
-    expect(adminPage).toMatch(/data-testid="admin-drafts-monitoring-note"/);
+    expect(adminPage).toMatch(/dashboard\/admin\/need-structuring/);
+    expect(adminPage).not.toMatch(/monitoringNote/);
+    expect(adminPage).toMatch(/data-testid="admin-platform-summary"/);
+    expect(adminPage).toMatch(/data-testid="admin-drafts-summary"/);
     expect(adminPage).toMatch(/id="request-review"/);
   });
   it("launch signal tiles carry the monitoring-only note", () => {
     expect(launchBoard).toMatch(/data-testid="admin-launch-signals-monitoring-note"/);
   });
-  it("company ops counters navigate to their sections/queues", () => {
-    expect(companyPage).toMatch(/key: "pending", value: pendingCount, href: "#company-team"/);
-    expect(companyPage).toMatch(/key: "review", value: reviewCount, href: `\/\$\{locale\}\/dashboard\/inbox`/);
-    expect(companyPage).toMatch(/data-testid="company-ops-team-link"/);
+  it("organization decisions navigate to their doors; people counts are one sentence on the People door", () => {
+    // Re-anchored 2026-09-16: the ops KPI tiles became the People door's
+    // summary line; the decisions strip on Dabar links each queue's door.
+    expect(companyPage).toMatch(/href: `\/\$\{locale\}\/dashboard\/inbox`/);
+    expect(companyPage).toMatch(/dashboard\/company\/people#company-invitations/);
+    expect(read("app/[locale]/dashboard/company/people/page.tsx")).toMatch(
+      /data-testid="company-people-summary"/,
+    );
   });
 });
 

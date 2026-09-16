@@ -2757,7 +2757,12 @@
         "claims": "Vaardigheidsclaims"
       },
       "internalBadge": "Intern",
-      "internalNote": "Interne diagnostiek — technische details voor de eigenaar, geen productonderdeel."
+      "internalNote": "Interne diagnostiek — technische details voor de eigenaar, geen productonderdeel.",
+      "attention": {
+        "title": "Wacht op een beslissing",
+        "none": "Er wacht momenteel niets op een beslissing van de operator.",
+        "summary": "{people} actieve mensen · {companies} organisaties · {drafts} operationele concepten · {claims} vaardigheidsverklaringen"
+      }
     },
     "eyebrow": "OPERATIONS CONTROL",
     "title": "Controlekamer voor eigenaar / operations",
@@ -2799,7 +2804,8 @@
         "company": "Bedrijfsaanvraag",
         "agency": "Aanbod van uitzendbureau",
         "buyer": "Inkopersaanvraag"
-      }
+      },
+      "summary": "{total} in totaal: {company} bedrijfsvraag · {agency} bureau-aanbod · {buyer} koperaanvragen"
     },
     "requestReview": {
       "title": "Inkopersaanvragen — handmatige beoordeling",
@@ -2836,7 +2842,8 @@
         "manual_review_only": "Overig"
       },
       "noFiles": "Geen bestanden",
-      "showAll": "Alles tonen ({n})"
+      "showAll": "Alles tonen ({n})",
+      "howTitle": "Hoe prioriteit wordt bepaald"
     },
     "user": {
       "onboarded": "Onboarding voltooid",
@@ -13131,7 +13138,9 @@
       "workspaceUnnamedAgency": "Bureau zonder naam",
       "workspaceUnnamedTeam": "Ploeg zonder naam",
       "workspaceUnnamedNote": "Geen naam opgegeven",
-      "workspaceNameThis": "Naam toevoegen"
+      "workspaceNameThis": "Naam toevoegen",
+      "historyImportChip": "Historische gegevens importeren",
+      "historyImportHint": "Upload het bestand — mensen, locaties, datums en uren bereid ik eruit voor; u bevestigt alleen wat onduidelijk is."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -15641,7 +15650,7 @@
     "states": {
       "needsMigration": "Deze functie is nog niet ingeschakeld op deze database.",
       "noCompany": "Schakel over naar een bedrijfswerkruimte.",
-      "noObjects": "Maak eerst ten minste één object aan.",
+      "noObjects": "Er zijn nog geen locaties om de uren van vandaag aan te koppelen.",
       "error": "Kon deze dag niet laden."
     },
     "import": {
@@ -15816,7 +15825,9 @@
         "needsPerson": "Persoon onopgelost",
         "needsContext": "Plaats onopgelost",
         "duplicates": "Al geïmporteerd",
-        "conflicts": "Tegenstrijdigheden"
+        "conflicts": "Tegenstrijdigheden",
+        "willCreatePeople": "Nieuwe mensen",
+        "willCreateObjects": "Nieuwe locaties"
       },
       "column": {
         "row": "Regel",
@@ -15836,14 +15847,16 @@
       "unmatched": "Niet in het bestand",
       "matched": "Gekoppeld",
       "ambiguous": "Meer dan één overeenkomst",
-      "created": "Toegevoegd aan het bestand"
+      "created": "Toegevoegd aan het bestand",
+      "will_create": "wordt aangemaakt"
     },
     "contextState": {
       "absent": "Geen plaats genoemd",
       "unmatched": "Plaats niet gevonden",
       "matched": "Gekoppeld",
       "ambiguous": "Meer dan één overeenkomst",
-      "created": "Aangemaakt"
+      "created": "Aangemaakt",
+      "will_create": "wordt aangemaakt"
     },
     "duplicateState": {
       "new": "Nieuw",
@@ -15906,7 +15919,9 @@
       "written": "Vastgelegd",
       "skipped": "Overgeslagen als reeds vastgelegd",
       "notReady": "Onopgelost gebleven",
-      "reusedSession": "U hebt deze bron al gelezen. De regels ervan staan hieronder in plaats van een tweede keer te worden gelezen."
+      "reusedSession": "U hebt deze bron al gelezen. De regels ervan staan hieronder in plaats van een tweede keer te worden gelezen.",
+      "createdPeople": "Mensen aangemaakt",
+      "createdObjects": "Locaties aangemaakt"
     },
     "records": {
       "title": "4. Wat er is vastgelegd",
@@ -15993,6 +16008,27 @@
       "refuse": "Nee, dat ben ik niet",
       "decisionFailed": "Dat antwoord kon niet worden opgeslagen. Er is niets gewijzigd.",
       "unnamedOrganization": "Een organisatie"
+    },
+    "plan": {
+      "title": "Wat is gevonden en wat is voorbereid",
+      "people": "{found} mensen gevonden: {existing} staan al op de lijst, {create} nieuwe zijn voorbereid om aan te maken.",
+      "objects": "{found} locaties gevonden: {existing} al in het systeem, {create} nieuwe zijn voorbereid om aan te maken.",
+      "ambiguous": "{count} rijen vragen uw beslissing — meerdere mogelijke matches.",
+      "conflicts": "{count} rijen spreken al vastgelegde gegevens tegen — controleer voor u bevestigt.",
+      "weekConflicts": "{count} rijen: het weeknummer in het bestand klopt niet met de datum — de kalenderweek van de datum wordt voorgesteld.",
+      "nothingToCreate": "Alle mensen en locaties bestaan al — er hoeft niets nieuws te worden aangemaakt.",
+      "willCreatePeople": "Deze mensen worden aangemaakt (op de lijst van de organisatie, zonder platformaccount):",
+      "willCreateObjects": "Deze locaties worden aangemaakt:",
+      "rows": "{count} rijen",
+      "createPeople": "Ontbrekende mensen aanmaken bij bevestigen",
+      "createObjects": "Ontbrekende locaties aanmaken bij bevestigen",
+      "relationship": "Relatie van de nieuwe mensen tot de organisatie",
+      "nothingBeforeCommit": "Er wordt niets aangemaakt of weggeschreven tot u bevestigt."
+    },
+    "derivedMethod": {
+      "iso_week_of_explicit_date": "kalenderweek uit de datum",
+      "iso_week_conflicts_with_source_week": "week in bestand klopt niet met datum — week uit datum voorgesteld",
+      "hours_exceed_day": "meer uren dan één dag bevat — controleer of dit een periodetotaal is"
     }
   },
   "organizationRoster": {
@@ -16141,5 +16177,67 @@
       "company_tax_vat": "Btw-, belasting- en socialezekerheidsregistratie voor het bedrijf. Of dit geldt, hangt af van wat het werk is en hoe lang het duurt.",
       "national_specifics": "Landspecifieke papieren — sector- of bouwpassen, lokale registratie, nationale belasting- en socialezekerheidsstappen. Die bestaan in de meeste landen, maar de details zijn nationaal, dus controleer ze op de officiële site."
     }
+  },
+  "organizationDoors": {
+    "label": "Organisatieruimtes",
+    "now": "Nu",
+    "people": "Mensen",
+    "work": "Werk",
+    "needs": "Behoeften",
+    "calendar": "Kalender",
+    "partners": "Klanten en partners",
+    "education": "Opleiding",
+    "history": "Geschiedenis",
+    "settings": "Instellingen",
+    "pages": {
+      "now": {
+        "subtitle": "Wat er gebeurt, wat uw beslissing vraagt en waar u verder gaat.",
+        "primaryActions": "Belangrijkste acties",
+        "newNeed": "Nieuwe personeelsbehoefte",
+        "newProject": "Nieuw project",
+        "invite": "Iemand uitnodigen",
+        "importHistory": "Historische gegevens importeren"
+      },
+      "people": {
+        "title": "Mensen en team",
+        "subtitle": "Wie met u werkt, wie vrij is, wie aandacht nodig heeft — en hoe u mensen toevoegt.",
+        "summary": "{active} actief · {pending} uitnodigingen open · {members} leden · {review} beoordelen dagboeken"
+      },
+      "needs": {
+        "title": "Personeelsbehoeften",
+        "subtitle": "Wat u mist, wat u al hebt gevraagd en waar de matching plaatsvindt.",
+        "matchingDoor": "Matching en kandidaten",
+        "matchingNote": "Wie bij uw behoeften past, wie interesse toonde en welk aanbod vrij is."
+      },
+      "partners": {
+        "title": "Klanten en partners",
+        "subtitle": "Met wie u werkt: klanten, bureaus en gedeelde behoeften.",
+        "empty": "Nog geen klant- of partnerrelaties. Een bureau kan u uitnodigen om samen te werken — dan verschijnen zijn voorstellen hier."
+      },
+      "education": {
+        "title": "Opleiding en programma's",
+        "subtitle": "Programma's, lerenden en de marktvraag naar hun richtingen."
+      },
+      "history": {
+        "title": "Gegevens importeren en geschiedenis",
+        "subtitle": "Upload historische werkgegevens — mensen, locaties, datums en uren worden uit het bestand voorbereid; u bevestigt.",
+        "hoursGridTitle": "Maandelijkse urenstaat",
+        "hoursGridNote": "Dezelfde import begrijpt ook de maandtabel (persoon × dag). Dagelijkse ureninvoer staat in het urengedeelte.",
+        "hoursDoor": "Werkuren",
+        "evidenceReportsDoor": "Bewijsrapporten"
+      },
+      "settings": {
+        "title": "Organisatie-instellingen",
+        "subtitle": "Identiteit, verificatie, wat de organisatie doet, openbaar profiel en hulp."
+      },
+      "work": {
+        "objectsIntro": "Locaties en objecten waaraan mensen, uren en foto's zijn gekoppeld."
+      },
+      "needsAgency": {
+        "title": "Uw aanbod en de behoeften van de markt",
+        "subtitle": "Welke mensen of teams u aanbiedt, wat u al hebt gepubliceerd en waar de matching plaatsvindt."
+      }
+    },
+    "needsAgency": "Aanbod"
   }
 }

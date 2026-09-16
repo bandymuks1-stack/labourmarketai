@@ -24,8 +24,10 @@ describe("worker-visibility honesty note (F-E1)", () => {
     const readback = read("components/app/demand-requests-readback.tsx");
     expect(readback).toMatch(/workerVisibilityNote/);
     expect(readback).toMatch(/demand-readback-worker-visibility-note/);
-    const page = read("app/[locale]/dashboard/company/page.tsx");
+    // The readback labels are resolved once, in the shared labels module.
+    const page = read("lib/company/company-section-labels.ts");
     expect(page).toMatch(/workerVisibilityNote: tReadback\("workerVisibilityNote"\)/);
+    expect(read("app/[locale]/dashboard/company/needs/page.tsx")).toMatch(/readDemandReadbackLabels/);
   });
 
   it("the key exists in en/lt/ru and states the verified-only visibility truth", () => {

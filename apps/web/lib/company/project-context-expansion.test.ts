@@ -15,7 +15,9 @@ const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
 const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
-const companyPage = read("app/[locale]/dashboard/company/page.tsx");
+// Re-anchored 2026-09-16: the projects card lives on the Work door
+// (/dashboard/projects, manager branch), beside the projects it counts.
+const companyPage = read("app/[locale]/dashboard/projects/page.tsx");
 
 describe("journal page — project-context note removed (P0 UX rescue)", () => {
   it("no longer renders the read-only project-context note (noise removed)", () => {

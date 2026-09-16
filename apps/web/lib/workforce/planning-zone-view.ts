@@ -228,7 +228,7 @@ export function resolveActionTarget(
     case "transfer_from_project":
       return { kind: "route", href: "/dashboard/projects" };
     case "form_brigade":
-      return { kind: "route", href: "/dashboard/company#company-team" };
+      return { kind: "route", href: "/dashboard/company/people#company-team" };
     case "train_existing_worker":
       // No training surface exists today — honest status, never a dead button.
       return { kind: "status" };

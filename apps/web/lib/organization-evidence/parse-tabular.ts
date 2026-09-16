@@ -139,6 +139,11 @@ const HEADER_SYNONYMS: Readonly<Record<SourceRowField, readonly string[]>> = {
   ],
   projectLabel: [
     "object",
+    // The owner's prepared export (2026-09-16) names the column
+    // "Object / recognized objects"; the fold keeps the words.
+    "object recognized objects",
+    "recognized objects",
+    "objects",
     "site",
     "project",
     "address",
@@ -220,6 +225,10 @@ const HEADER_SYNONYMS: Readonly<Record<SourceRowField, readonly string[]>> = {
   workText: [
     "description",
     "work",
+    "work performed",
+    "works performed",
+    "work description",
+    "performed work",
     "works",
     "task",
     "tasks",
@@ -254,6 +263,77 @@ function headerKey(cell: string): string {
 
 export type ColumnMap = Partial<Record<SourceRowField, number>>;
 
+/**
+ * A WEEK column is not a canonical field — a week number is a grouping the
+ * source author wrote, and the date is the fact. It is recognised so that the
+ * two can be COMPARED (owner acceptance case 2026-09-16, design/final/03 §3
+ * P0-3): source grouping "week 50", explicit date Monday 2025-12-15, ISO week
+ * of that date 51 → the source cell stays verbatim in `raw`, and the row
+ * carries `derived.calendarWeek` naming the conflict and the proposed
+ * canonical week with its reason. Nothing is rewritten; the human sees both.
+ *
+ * Deliberately NOT matched: "week start" / "week end" (period bounds, mapped
+ * above) and any header that names a date.
+ */
+const WEEK_HEADER_SYNONYMS: readonly string[] = [
+  "week",
+  "source week",
+  "week no",
+  "week nr",
+  "week number",
+  "wk",
+  "kw",
+  "cw",
+  "savaite",
+  "sav",
+  "sav nr",
+  "savaites nr",
+  "savaites numeris",
+  "woche",
+  "kalenderwoche",
+  "weeknummer",
+  "weeknr",
+  "nedelya",
+  "tydzien",
+  "nr tygodnia",
+];
+
+/** The column that carries a week number, if the header names one. */
+export function weekColumnIndex(header: readonly string[]): number | undefined {
+  for (let i = 0; i < header.length; i++) {
+    const key = headerKey(header[i]);
+    if (key !== "" && WEEK_HEADER_SYNONYMS.includes(key)) return i;
+  }
+  return undefined;
+}
+
+/** A week number as the source wrote it ("50", "W50", "KW 50", "50 sav."),
+ *  or null when the cell does not hold one in 1..53. */
+export function readWeekNumber(raw: string): number | null {
+  const m = /(?:^|[^\d])(\d{1,2})(?:[^\d]|$)/.exec(raw.trim());
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isInteger(n) && n >= 1 && n <= 53 ? n : null;
+}
+
+/** ISO-8601 week number of a `YYYY-MM-DD` date (Monday-based, week 1 holds
+ *  the year's first Thursday). Pure arithmetic in UTC — no locale, no clock. */
+export function isoWeekOf(isoDate: string): number | null {
+  const m = ISO_DATE.exec(isoDate);
+  if (!m) return null;
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  if (Number.isNaN(d.getTime())) return null;
+  const day = d.getUTCDay() || 7; // Sunday → 7
+  d.setUTCDate(d.getUTCDate() + 4 - day); // the Thursday of this week
+  const yearStart = Date.UTC(d.getUTCFullYear(), 0, 1);
+  return Math.ceil(((d.getTime() - yearStart) / 86_400_000 + 1) / 7);
+}
+
+/** Method slugs the preview localises (`evidenceImport.derivedMethod.*`). */
+export const WEEK_CONSISTENT_METHOD = "iso_week_of_explicit_date";
+export const WEEK_CONFLICT_METHOD = "iso_week_conflicts_with_source_week";
+export const HOURS_EXCEED_DAY_METHOD = "hours_exceed_day";
+
 /** Map a header row to canonical columns. Unrecognised columns are kept out of
  *  the map but stay in `raw` - nothing from the source is discarded. */
 export function mapHeaderRow(header: readonly string[]): ColumnMap {
@@ -276,6 +356,7 @@ export function mapHeaderRow(header: readonly string[]): ColumnMap {
 // ── value readers ───────────────────────────────────────────────────────────
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const EXCEL_SERIAL = /^(\d{5})(?:\.0+)?$/;
 const DMY = /^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})$/;
 const YMD_DOT = /^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})$/;
 
@@ -302,6 +383,20 @@ export function readDate(
 ): { iso: string; ambiguous: boolean } | null {
   const value = raw.trim();
   if (value === "") return null;
+  // An Excel date serial (1900 system) — what a date cell becomes when the
+  // workbook is read without its number formats (the prefixed-OOXML
+  // fallback), and what some exports write on purpose. The conversion is
+  // arithmetic, not a guess: 45666 is 2025-01-09 and nothing else. Bounded to
+  // 1950..2149 so an hours figure or an id can never be mistaken for a date.
+  const serial = EXCEL_SERIAL.exec(value);
+  if (serial) {
+    const n = Number(serial[1]);
+    if (n >= 18264 && n <= 91311) {
+      const ms = Date.UTC(1899, 11, 30) + n * 86_400_000;
+      return { iso: new Date(ms).toISOString().slice(0, 10), ambiguous: false };
+    }
+    return null;
+  }
   const iso = ISO_DATE.exec(value);
   if (iso) {
     const [y, m, d] = [Number(iso[1]), Number(iso[2]), Number(iso[3])];
@@ -377,6 +472,7 @@ export function rowsFromGrid(
   }
 
   const header = grid[headerIndex];
+  const weekColumn = weekColumnIndex(header);
   const rows: SourceWorkRow[] = [];
   const skipped: { rowIndex: number; reason: string }[] = [];
 
@@ -404,7 +500,7 @@ export function rowsFromGrid(
     const factFields: SourceRowField[] = ["personLabel"];
     const derived: Record<
       string,
-      { value: string | number | null; method: string; confidence: number }
+      { value: string | number | null; method: string; confidence: number; note?: string }
     > = {};
 
     let workDate: string | null = null;
@@ -461,12 +557,45 @@ export function rowsFromGrid(
       continue;
     }
 
+    // WEEK vs DATE — deterministic evidence comparison. The source's week is
+    // preserved in `raw` (verbatim provenance); what is derived is the
+    // calendar week of the explicit date, with the method saying whether the
+    // source agreed. Only an EXPLICIT, unambiguous date can contradict a
+    // week number; a day-first-guessed date cannot be used as evidence
+    // against the author, so no comparison is recorded for it.
+    if (weekColumn !== undefined && workDate !== null && factFields.includes("workDate")) {
+      const sourceWeek = readWeekNumber((line[weekColumn] ?? "").trim());
+      const calendarWeek = isoWeekOf(workDate);
+      if (sourceWeek !== null && calendarWeek !== null) {
+        derived.calendarWeek =
+          sourceWeek === calendarWeek
+            ? { value: calendarWeek, method: WEEK_CONSISTENT_METHOD, confidence: 1 }
+            : {
+                value: calendarWeek,
+                method: WEEK_CONFLICT_METHOD,
+                confidence: 1,
+                note: `source_week=${sourceWeek}`,
+              };
+      }
+    }
+
     let hours: number | null = null;
     const hoursCell = cell("hours");
     if (hoursCell !== "") {
       hours = readHours(hoursCell);
       if (hours !== null) factFields.push("hours");
       else skipped.push({ rowIndex: i, reason: "unreadable_hours" });
+    }
+    // More hours than a day holds, on ONE dated row, is a real contradiction
+    // (the owner's file carries 800 h and 165 h "on 2025-11-17" — monthly
+    // totals typed as a day). The figure is kept as stated; the row is marked
+    // so the preview shows it and the human decides. Never rewritten.
+    if (hours !== null && hours > 24 && workDate !== null && periodStart === null) {
+      derived.hoursPlausibility = {
+        value: hours,
+        method: HOURS_EXCEED_DAY_METHOD,
+        confidence: 1,
+      };
     }
 
     const projectCell = tidy(cell("projectLabel"));

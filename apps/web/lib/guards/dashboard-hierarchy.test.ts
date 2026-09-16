@@ -36,7 +36,7 @@ function expectOrder(src: string, needles: readonly string[], label: string) {
 describe("company page: action before explanation", () => {
   it("the journey helper text explains the intake AFTER it, not before", () => {
     expectOrder(
-      read("app/[locale]/dashboard/company/page.tsx"),
+      read("app/[locale]/dashboard/company/needs/page.tsx"),
       ['data-testid="demand-intake-section"', 'data-testid="journey-progress-helper"'],
       "company intake helper",
     );

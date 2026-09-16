@@ -2757,7 +2757,12 @@
         "claims": "Įgūdžių deklaracijos"
       },
       "internalBadge": "Vidinis",
-      "internalNote": "Vidinė diagnostika — techninė informacija savininkui, ne produkto paviršius."
+      "internalNote": "Vidinė diagnostika — techninė informacija savininkui, ne produkto paviršius.",
+      "attention": {
+        "title": "Laukia sprendimo",
+        "none": "Šiuo metu nieko nelaukia operatoriaus sprendimo.",
+        "summary": "{people} aktyvūs žmonės · {companies} organizacijos · {drafts} operaciniai juodraščiai · {claims} įgūdžių deklaracijos"
+      }
     },
     "eyebrow": "OPERACIJŲ VALDYMAS",
     "title": "Savininko / operacijų valdymo centras",
@@ -2799,7 +2804,8 @@
         "company": "Įmonės paklausa",
         "agency": "Agentūros pasiūlymas",
         "buyer": "Pirkėjo užklausa"
-      }
+      },
+      "summary": "Iš viso {total}: {company} įmonių paklausos · {agency} agentūrų pasiūlymai · {buyer} pirkėjų užklausos"
     },
     "requestReview": {
       "title": "Pirkėjų užklausos — rankinė peržiūra",
@@ -2836,7 +2842,8 @@
         "manual_review_only": "Kita"
       },
       "noFiles": "Failų nėra",
-      "showAll": "Rodyti visus ({n})"
+      "showAll": "Rodyti visus ({n})",
+      "howTitle": "Kaip nustatoma pirmenybė"
     },
     "user": {
       "onboarded": "Užregistruotas",
@@ -13131,7 +13138,9 @@
       "workspaceUnnamedAgency": "Agentūra be pavadinimo",
       "workspaceUnnamedTeam": "Komanda be pavadinimo",
       "workspaceUnnamedNote": "Pavadinimas nenurodytas",
-      "workspaceNameThis": "Nurodyti pavadinimą"
+      "workspaceNameThis": "Nurodyti pavadinimą",
+      "historyImportChip": "Istorinių duomenų įkėlimas",
+      "historyImportHint": "Įkelkite failą — žmones, objektus, datas ir valandas paruošiu iš jo, o jūs patvirtinsite tik tai, kas neaišku."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -15641,7 +15650,7 @@
     "states": {
       "needsMigration": "Ši funkcija dar neįjungta šioje duomenų bazėje.",
       "noCompany": "Pasirinkite įmonės darbo sritį.",
-      "noObjects": "Pirmiausia sukurkite bent vieną objektą.",
+      "noObjects": "Šiai dienai dar nėra objektų, prie kurių priskirti valandas.",
       "error": "Nepavyko įkelti dienos duomenų."
     },
     "import": {
@@ -15816,7 +15825,9 @@
         "needsPerson": "Asmuo neišspręstas",
         "needsContext": "Vieta neišspręsta",
         "duplicates": "Jau importuota",
-        "conflicts": "Prieštaravimai"
+        "conflicts": "Prieštaravimai",
+        "willCreatePeople": "Nauji žmonės",
+        "willCreateObjects": "Nauji objektai"
       },
       "column": {
         "row": "Eilutė",
@@ -15836,14 +15847,16 @@
       "unmatched": "Nėra sąraše",
       "matched": "Sutapatinta",
       "ambiguous": "Daugiau nei vienas atitikmuo",
-      "created": "Įtrauktas į sąrašą"
+      "created": "Įtrauktas į sąrašą",
+      "will_create": "bus sukurtas"
     },
     "contextState": {
       "absent": "Vieta nenurodyta",
       "unmatched": "Vieta nerasta",
       "matched": "Sutapatinta",
       "ambiguous": "Daugiau nei vienas atitikmuo",
-      "created": "Sukurta"
+      "created": "Sukurta",
+      "will_create": "bus sukurtas"
     },
     "duplicateState": {
       "new": "Nauja",
@@ -15906,7 +15919,9 @@
       "written": "Užfiksuota",
       "skipped": "Praleista kaip jau užfiksuota",
       "notReady": "Liko neišspręsta",
-      "reusedSession": "Šį šaltinį jau esate perskaitę. Jo eilutės rodomos žemiau, o ne skaitomos antrą kartą."
+      "reusedSession": "Šį šaltinį jau esate perskaitę. Jo eilutės rodomos žemiau, o ne skaitomos antrą kartą.",
+      "createdPeople": "Sukurta žmonių",
+      "createdObjects": "Sukurta objektų"
     },
     "records": {
       "title": "4. Kas užfiksuota",
@@ -15993,6 +16008,27 @@
       "refuse": "Ne, tai ne aš",
       "decisionFailed": "Šio atsakymo išsaugoti nepavyko. Niekas nepasikeitė.",
       "unnamedOrganization": "Organizacija"
+    },
+    "plan": {
+      "title": "Ką radau ir ką paruošiau",
+      "people": "Radau {found} žmonių: {existing} jau yra sąraše, {create} naujus paruošiau sukurti.",
+      "objects": "Radau {found} objektų: {existing} jau yra sistemoje, {create} naujus paruošiau sukurti.",
+      "ambiguous": "{count} eil. reikia jūsų sprendimo — keli galimi atitikmenys.",
+      "conflicts": "{count} eil. prieštarauja jau įrašytiems duomenims — peržiūrėkite prieš patvirtindami.",
+      "weekConflicts": "{count} eil. savaitės numeris failo nesutampa su nurodyta data — siūloma kalendorinė savaitė pagal datą.",
+      "nothingToCreate": "Visi žmonės ir objektai jau yra sistemoje — nieko naujo kurti nereikia.",
+      "willCreatePeople": "Bus sukurti šie žmonės (organizacijos sąraše, be platformos paskyros):",
+      "willCreateObjects": "Bus sukurti šie objektai:",
+      "rows": "{count} eil.",
+      "createPeople": "Sukurti trūkstamus žmones patvirtinant",
+      "createObjects": "Sukurti trūkstamus objektus patvirtinant",
+      "relationship": "Naujų žmonių ryšys su organizacija",
+      "nothingBeforeCommit": "Iki patvirtinimo niekas nesukuriama ir neįrašoma."
+    },
+    "derivedMethod": {
+      "iso_week_of_explicit_date": "kalendorinė savaitė pagal datą",
+      "iso_week_conflicts_with_source_week": "savaitė faile nesutampa su data — siūloma savaitė pagal datą",
+      "hours_exceed_day": "daugiau valandų nei telpa į vieną dieną — patikrinkite, ar tai ne laikotarpio suma"
     }
   },
   "organizationRoster": {
@@ -16141,5 +16177,67 @@
       "company_tax_vat": "Įmonės PVM, mokesčių ir socialinio draudimo registracija. Ar tai taikoma, priklauso nuo darbo pobūdžio ir trukmės.",
       "national_specifics": "Šaliai būdingi dokumentai — sektoriaus ar statybų kortelės, vietinė registracija, nacionaliniai mokesčių ir socialinio draudimo veiksmai. Jų yra daugumoje šalių, bet specifika nacionalinė, todėl pasitikrinkite oficialiame puslapyje."
     }
+  },
+  "organizationDoors": {
+    "label": "Organizacijos erdvės",
+    "now": "Dabar",
+    "people": "Žmonės",
+    "work": "Darbai",
+    "needs": "Poreikiai",
+    "calendar": "Kalendorius",
+    "partners": "Klientai ir partneriai",
+    "education": "Mokymai",
+    "history": "Istorija",
+    "settings": "Nustatymai",
+    "pages": {
+      "now": {
+        "subtitle": "Kas vyksta, kam reikia jūsų sprendimo ir kur eiti toliau.",
+        "primaryActions": "Pagrindiniai veiksmai",
+        "newNeed": "Naujas darbuotojų poreikis",
+        "newProject": "Naujas projektas",
+        "invite": "Pakviesti žmogų",
+        "importHistory": "Įkelti istorinius duomenis"
+      },
+      "people": {
+        "title": "Žmonės ir komanda",
+        "subtitle": "Kas dirba su jumis, kas laisvas, kam reikia dėmesio — ir kaip įtraukti naujus žmones.",
+        "summary": "{active} aktyvūs · {pending} laukia kvietimo · {members} nariai · {review} peržiūri žurnalus"
+      },
+      "needs": {
+        "title": "Darbuotojų poreikiai",
+        "subtitle": "Ko jums trūksta, ką jau paprašėte ir kur vyksta atranka.",
+        "matchingDoor": "Atranka ir kandidatai",
+        "matchingNote": "Kas atitinka jūsų poreikius, kas pareiškė susidomėjimą ir kokia pasiūla laisva."
+      },
+      "partners": {
+        "title": "Klientai ir partneriai",
+        "subtitle": "Su kuo dirbate: klientai, agentūros ir bendri poreikiai.",
+        "empty": "Kol kas nėra klientų ar partnerių ryšių. Agentūra gali pakviesti jus bendradarbiauti — tada čia atsiras jos pasiūlymai."
+      },
+      "education": {
+        "title": "Mokymai ir programos",
+        "subtitle": "Programos, besimokantieji ir rinkos paklausa jų kryptims."
+      },
+      "history": {
+        "title": "Duomenų įkėlimas ir istorija",
+        "subtitle": "Įkelkite istorinius darbo duomenis — žmones, objektus, datas ir valandas sistema paruošia iš failo; jūs patvirtinate.",
+        "hoursGridTitle": "Mėnesio valandų tabelis",
+        "hoursGridNote": "Ta pati įkėlimo sistema supranta ir mėnesio tabelio lentelę (žmogus × diena). Kasdieninis valandų įvedimas — darbo valandų erdvėje.",
+        "hoursDoor": "Darbo valandos",
+        "evidenceReportsDoor": "Įrodymų ataskaitos"
+      },
+      "settings": {
+        "title": "Organizacijos nustatymai",
+        "subtitle": "Tapatybė, patikra, ką organizacija daro, viešas profilis ir pagalba."
+      },
+      "work": {
+        "objectsIntro": "Objektai ir statybvietės, prie kurių priskiriami žmonės, valandos ir nuotraukos."
+      },
+      "needsAgency": {
+        "title": "Jūsų pasiūla ir rinkos poreikiai",
+        "subtitle": "Kokius žmones ar komandas siūlote, ką jau paskelbėte ir kur vyksta atranka."
+      }
+    },
+    "needsAgency": "Pasiūla"
   }
 }

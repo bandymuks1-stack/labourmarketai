@@ -71,7 +71,7 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
     // The employer standing in their personal space gets the door, not a shrug.
     expect(branch).toMatch(/else if \(canActAsEmployer\)/);
     expect(branch).toMatch(/employerBridgeHint/);
-    expect(branch).toMatch(/link:\/dashboard\/company#demand-intake/);
+    expect(branch).toMatch(/link:\/dashboard\/company\/needs#demand-intake/);
     // And somebody who genuinely holds no company role must NOT see the
     // employer chip — the demand-intake door is for employers only. Since
     // 2026-09-06 (real-user fitness walk) that person is no longer shrugged
@@ -173,7 +173,7 @@ describe("a workforce statement is not called ambiguous", () => {
     const bodyStart = CHAT.indexOf(") {", j);
     const body = CHAT.slice(bodyStart, CHAT.indexOf("return;", bodyStart));
     expect(body).toMatch(/employerBridgeHint/);
-    expect(body).toMatch(/link:\/dashboard\/company#demand-intake/);
+    expect(body).toMatch(/link:\/dashboard\/company\/needs#demand-intake/);
   });
 
   it("the employer workspace still opens the real intake form", () => {

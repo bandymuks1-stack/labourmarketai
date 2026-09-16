@@ -303,7 +303,7 @@ describe("resolveActionTarget — every kind maps to a real surface or honest st
   it("form_brigade → the company team section", () => {
     expect(
       resolveActionTarget(action({ type: "form_brigade" }), entryById),
-    ).toEqual({ kind: "route", href: "/dashboard/company#company-team" });
+    ).toEqual({ kind: "route", href: "/dashboard/company/people#company-team" });
   });
 
   it("train_existing_worker → plain status (no surface exists — never a dead button)", () => {

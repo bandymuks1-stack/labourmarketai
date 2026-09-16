@@ -23,8 +23,12 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const page = read("app/[locale]/dashboard/admin/page.tsx");
 
 describe("admin home is a grouped control room, not a flat tile grid", () => {
-  it("renders the Overview KPI band + the grouped control areas", () => {
-    expect(page).toMatch(/data-testid="admin-overview-kpis"/);
+  it("opens with what waits for an operator decision, then the grouped control areas", () => {
+    // Owner directive 2026-09-16: the KPI band is gone — a number lives on
+    // the queue it counts, and the platform's size is one sentence.
+    expect(page).toMatch(/data-testid="admin-attention"/);
+    expect(page).toMatch(/data-testid="admin-platform-summary"/);
+    expect(page).not.toMatch(/data-testid="admin-overview-kpis"/);
     expect(page).toMatch(/data-testid="admin-control-areas"/);
     // The old flat hub of equal chips is gone.
     expect(page).not.toMatch(/data-testid="admin-tools-hub"/);
@@ -48,12 +52,12 @@ describe("admin home is a grouped control room, not a flat tile grid", () => {
     }
   });
 
-  it("surfaces real KPI tiles framed by status (with a risk tone path)", () => {
-    expect(page).toMatch(/admin-kpi-/);
-    // Status framing: a risk tone exists alongside the neutral default.
-    expect(page).toMatch(/"risk"/);
-    expect(page).toMatch(/"neutral"/);
-    // KPIs come from real reads, never invented numbers.
+  it("every attention row is a real queue with a real count, from real reads", () => {
+    expect(page).toMatch(/admin-attention-\$\{a\.key\}/);
+    // Zero waiting is said out loud, never faked as urgency.
+    expect(page).toMatch(/\.filter\(\(a\) => a\.count > 0\)/);
+    expect(page).toMatch(/data-testid="admin-attention-none"/);
+    // Counts come from real reads, never invented numbers.
     expect(page).toMatch(/profileCount/);
     expect(page).toMatch(/incompleteCount/);
     expect(page).toMatch(/companyCount/);

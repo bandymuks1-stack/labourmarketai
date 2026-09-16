@@ -15,7 +15,7 @@ const code = (src: string): string =>
   src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\{\/\*[\s\S]*?\*\/\}/g, " ").replace(/\/\/[^\n]*/g, " ");
 
 const COMPONENT = "components/app/company-scouting-bridge.tsx";
-const PAGE = "app/[locale]/dashboard/company/page.tsx";
+const PAGE = "app/[locale]/dashboard/company/needs/page.tsx";
 
 describe("bridge links to scouting and is mounted", () => {
   it("the component links to the scouting route", () => {

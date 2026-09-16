@@ -109,6 +109,10 @@ const CHAT_KEYS = [
   // §9 chat-first coverage — six domains that shipped reachable only by URL.
   // They reuse `adminRouteHint` for the sentence and add one chip label each.
   "timesheetImportChip",
+  // The organization's HISTORICAL IMPORT door (IA 2026-09-16): "noriu įkelti
+  // istorinius duomenis" opens the canonical reconstruction, not the hours form.
+  "historyImportChip",
+  "historyImportHint",
   "workHoursChip",
   "absencesChip",
   "documentsChip",

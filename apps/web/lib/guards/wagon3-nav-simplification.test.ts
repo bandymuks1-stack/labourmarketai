@@ -78,9 +78,9 @@ describe("Wagon 3 — route consolidation redirects stay canonical", () => {
 describe("Wagon 3 — the workforce-need readback keeps its one canonical home", () => {
   // The compact-home order pin died with the org overview page (W3 Package 4
   // deleted the second dashboard and its section components).
-  it("the workforce-need readback renders exactly once, on the company page", () => {
+  it("the workforce-need readback renders exactly once, on the Needs door", () => {
     expect(
-      (read("app/[locale]/dashboard/company/page.tsx").match(/<DemandRequestsReadback/g) ?? [])
+      (read("app/[locale]/dashboard/company/needs/page.tsx").match(/<DemandRequestsReadback/g) ?? [])
         .length,
     ).toBe(1);
   });

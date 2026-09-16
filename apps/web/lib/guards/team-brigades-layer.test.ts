@@ -245,7 +245,7 @@ describe("teams rollback chain — nothing recreated, nothing stale to restore",
 describe("app surface — reuse of the existing spine, no parallel team system", () => {
   const lib = readWeb("lib/company/team-brigades.ts");
   const panel = readWeb("components/app/team-brigades-panel.tsx");
-  const page = readWeb("app/[locale]/dashboard/company/page.tsx");
+  const page = readWeb("app/[locale]/dashboard/company/people/page.tsx");
 
   it("CONSENT (Trust Connect v1): membership arrives ONLY via a join_team invitation — no direct add remains", () => {
     // The former direct addOrgMember call was a consent bypass: the owner

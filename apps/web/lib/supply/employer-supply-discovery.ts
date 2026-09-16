@@ -1,4 +1,5 @@
 import "server-only";
+import { excludeSyntheticFixtures } from "@/lib/qa/synthetic-fixture";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -121,7 +122,12 @@ export async function listAvailableSupplyForEmployer(
   const cap = Math.min(Math.max(opts.limit ?? 50, 1), 100);
   return {
     kind: "ok",
-    rows: ((data ?? []) as Record<string, unknown>[]).slice(0, cap).map(
+    rows: excludeSyntheticFixtures(
+      ((data ?? []) as Record<string, unknown>[]).slice(0, cap),
+      // Synthetic QA offers are not supply an employer can hire
+      // (lib/qa/synthetic-fixture.ts).
+      (r) => [r.role_text as string | null],
+    ).map(
       (r): AvailableSupplyRow => ({
         id: r.id as string,
         roleText: toText(r.role_text),

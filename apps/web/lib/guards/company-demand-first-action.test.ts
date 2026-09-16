@@ -27,7 +27,7 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf-8");
 
 describe("the canonical demand intake lives on the company page (W3 7/8/25)", () => {
   it("the company page hosts the wizard under the demand-intake anchor", () => {
-    const page = read("app/[locale]/dashboard/company/page.tsx");
+    const page = read("app/[locale]/dashboard/company/needs/page.tsx");
     expect(page).toMatch(/id="demand-intake"/);
     expect(page).toMatch(/data-testid="demand-intake-section"/);
     expect(page).toMatch(/<DemandRequestButton/);
@@ -52,28 +52,22 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
    * is a real statement about what the employer sees first.
    */
   it("the demand intake renders BEFORE every other section of the room", () => {
-    const page = read("app/[locale]/dashboard/company/page.tsx");
+    const page = read("app/[locale]/dashboard/company/needs/page.tsx");
     const at = (needle: string) => {
       const i = page.indexOf(needle);
       expect(i, `missing marker: ${needle}`).toBeGreaterThan(-1);
       return i;
     };
 
+    // On the Needs door (IA 2026-09-16) only the header and the door onward
+    // to matching stand before the intake; everything else follows it.
     const intake = at('data-testid="demand-intake-section"');
-
-    // The control bar is the only thing allowed above it: it is navigation,
-    // not a section, and it is how the room's other areas stay one tap away.
-    expect(at('data-testid="company-control-bar"')).toBeLessThan(intake);
-
-    // Everything that used to sit between the employer and the wizard.
+    expect(at('data-testid="company-needs-matching-door"')).toBeLessThan(intake);
     for (const later of [
-      'data-testid="company-decisions-strip"',
-      'data-testid="company-agency-mode"',
-      'data-testid="company-ops-workspace"',
-      'data-testid="company-assignment-connections"',
-      'data-testid="company-dashboard-pilot-disclaimer"',
-      'data-testid="company-invite-link"',
-      'id="public-business-profile"',
+      "<DemandRequestsReadback",
+      'id="company-claims"',
+      "<PublicDemandSection",
+      "<CompanyScoutingBridge",
     ]) {
       expect(at(later), `${later} must render after the demand intake`).toBeGreaterThan(
         intake,
@@ -89,10 +83,10 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
    * far end of the page again, which is the defect this guard exists for.
    */
   it("the readback (and its scouting deep link) sits with the wizard", () => {
-    const page = read("app/[locale]/dashboard/company/page.tsx");
+    const page = read("app/[locale]/dashboard/company/needs/page.tsx");
     const intake = page.indexOf('data-testid="demand-intake-section"');
     const readback = page.indexOf("<DemandRequestsReadback");
-    const nextSection = page.indexOf('data-testid="company-decisions-strip"');
+    const nextSection = page.indexOf('id="company-claims"');
     expect(intake).toBeGreaterThan(-1);
     expect(readback).toBeGreaterThan(intake);
     expect(readback).toBeLessThan(nextSection);
@@ -111,7 +105,7 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
 
   it("the workspace-switching action targets the company route's anchor", () => {
     const action = read("lib/company/demand-intake-navigation.ts");
-    expect(action).toMatch(/\/dashboard\/company#demand-intake/);
+    expect(action).toMatch(/\/dashboard\/company\/needs#demand-intake/);
     expect(action).toMatch(/switchActiveRole\("company"\)/);
   });
 });
@@ -142,11 +136,10 @@ describe("buyer draft form is demoted to optional notes (F-D3)", () => {
   });
 });
 
-describe("company projects card reaches the projects board (F-D5)", () => {
-  it("links to /dashboard/projects", () => {
-    const page = read("app/[locale]/dashboard/company/page.tsx");
-    expect(page).toMatch(/company-ops-projects-manage/);
-    expect(page).toMatch(/href="\/dashboard\/projects"/);
+describe("the projects board is an organization door (F-D5, IA 2026-09-16)", () => {
+  it("the Work door leads to /dashboard/projects", () => {
+    const doors = read("lib/company/organization-doors.ts");
+    expect(doors).toMatch(/work: "\/dashboard\/projects"/);
   });
 });
 

@@ -207,14 +207,15 @@ describe("company overview decisions strip", () => {
     expect(page).toMatch(/reviewPendingCount/);
     // Count-gated: zero pending renders nothing (no fake urgency).
     expect(page).toMatch(/\.filter\(\(e\) => e\.count > 0\)/);
-    expect(page).toMatch(/decisionEntries\.length === 0\) return null/);
+    expect(page).toMatch(/decisionEntries\.length > 0 \?/);
   });
 
   it("every decision chip links a real destination", () => {
     expect(page).toMatch(/dashboard\/inbox/);
-    expect(page).toMatch(/#company-invitations/);
-    expect(page).toMatch(/#company-claims/);
-    expect(page).toMatch(/id="company-claims"/);
+    expect(page).toMatch(/dashboard\/company\/people#company-invitations/);
+    expect(page).toMatch(/dashboard\/company\/needs#company-claims/);
+    // The claims anchor lives on the Needs door (IA 2026-09-16).
+    expect(read("app/[locale]/dashboard/company/needs/page.tsx")).toMatch(/id="company-claims"/);
   });
 });
 

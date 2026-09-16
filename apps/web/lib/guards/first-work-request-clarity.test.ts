@@ -21,7 +21,7 @@ function loadJson(rel: string): Record<string, unknown> {
   return JSON.parse(read(rel)) as Record<string, unknown>;
 }
 
-const PAGE = "app/[locale]/dashboard/company/page.tsx";
+const PAGE = "app/[locale]/dashboard/company/needs/page.tsx";
 const WIZARD = "components/app/demand-request-button.tsx";
 const DRAFTS_LIB = "lib/demand/demand-drafts.ts";
 const NEXT = "components/app/company-next-actions.tsx";
