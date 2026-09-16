@@ -141,10 +141,20 @@ describe("what the owner sees before commit — the real file, projected", () =>
     // Three rows name no site at all (a bare name, a town nobody else names)
     // and three name only an activity or a duration note — six without a place.
     expect(kinds.site_unknown.count).toBe(6);
-    expect(kinds.allocation_unknown.count).toBeGreaterThan(30);
+    expect(kinds.allocation_unknown.count).toBeGreaterThanOrEqual(25);
     expect(kinds.ambiguous_place).toBeUndefined();
     expect(kinds.ambiguous_person).toBeUndefined();
     expect(projection.issues.filter((i) => i.blocking)).toHaveLength(1);
+    // A place only the text named and nothing folded is a question, not a
+    // block: `Testdienst 13` (too far from Testgracht to merge). The bare
+    // town is not extracted at all — it stays under "site unknown".
+    const fromText = projection.issues.filter((i) => i.kind === "place_from_text");
+    expect(fromText.map((i) => i.label)).toEqual(["Testdienst 13"]);
+    for (const q of fromText) {
+      expect(q.blocking).toBe(false);
+      expect(q.siblings).toEqual(expect.arrayContaining(["Testgracht 13", "Kantoor"]));
+      expect(q.siblings).not.toContain(q.label);
+    }
   });
 
   it("the company view names what the source does NOT say", () => {

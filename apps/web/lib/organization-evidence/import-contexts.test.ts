@@ -111,6 +111,20 @@ describe("the real file, against an empty organization", () => {
     expect(found.length).toBe(20);
   });
 
+  it("the cell's spelling wins over the text's, whatever the frequency", () => {
+    // The correct spelling is in ONE cell; a typo of it opens THREE texts.
+    const right = canonical.find((c) => c.name === "Vera Voorbeeldlaan 16");
+    expect(right).toBeDefined();
+    expect(canonical.some((c) => c.name === "Vera Voorbeeldlin 16")).toBe(false);
+    const typoRows = rows.filter((r) => r.row.activity_text.startsWith("Vera Voorbeeldlin 16"));
+    expect(typoRows.length).toBe(3);
+    for (const r of typoRows) {
+      const places = placeSegments(r.contexts);
+      expect(places).toHaveLength(1);
+      expect(places[0].name).toBe("Vera Voorbeeldlaan 16");
+    }
+  });
+
   it("a street too far from any spelling is a NEW place, not silently merged", () => {
     const r = rows.find((x) => x.row.activity_text.startsWith("Testdienst 13"))!;
     const seg = placeSegments(r.contexts)[0];
@@ -129,7 +143,7 @@ describe("the real file, against an empty organization", () => {
     expect(placeSegments(sevenTwo.contexts).map((p) => p.hours)).toEqual([7, 2]);
 
     const unknownSplit = rows.filter((r) => r.contexts?.allocation?.method === "unknown_split");
-    expect(unknownSplit.length).toBeGreaterThan(30);
+    expect(unknownSplit.length).toBeGreaterThanOrEqual(25);
     for (const r of unknownSplit) {
       for (const p of placeSegments(r.contexts)) expect(p.hours).toBeNull();
     }

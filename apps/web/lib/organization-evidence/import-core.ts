@@ -38,7 +38,6 @@ import {
 import {
   allocateHours,
   canonicalPlaces,
-  extractSiteFromText,
   extractSitesFromText,
   resolvePlace,
   segmentsOf,
@@ -1235,16 +1234,38 @@ export function sessionPlaces(
     if (segs.length > 0) segments.push(...segs);
     else textRows.push((s.activity_text as string | null) ?? "");
   }
-  const fromCells = canonicalPlaces(segments, objects);
+  const cellKeys = new Set(segments.map((s) => s.key));
+  const fromCells = canonicalPlaces(segments, objects, cellKeys);
   const known = (places: readonly CanonicalPlace[]): KnownPlace[] => [
     ...objects.map((o) => ({ id: o.id, name: o.name })),
     ...places.filter((c) => c.existing === null).map((c) => ({ id: null, name: c.name })),
   ];
+  // Text sites join the clustering only when they resolve to NOTHING the
+  // cells name: a text spelling that folds into a cell place is that place
+  // (row-level resolution says so), and must never outvote its spelling —
+  // it is recorded as one of that place's spellings instead.
+  const textSpellings = new Map<string, Map<string, number>>(); // place name → spelling → rows
   for (const text of textRows) {
-    const site = extractSiteFromText(text, known(fromCells));
-    if (site) segments.push(toSegment(site.label));
+    for (const site of extractSitesFromText(text, known(fromCells))) {
+      const seg = toSegment(site.label);
+      const r = resolvePlace(seg, known(fromCells));
+      if (r.kind === "new") segments.push(seg);
+      else if ((r.kind === "matched" || r.kind === "proposed") && normalizeLabel(r.place.name) !== seg.key) {
+        const bag = textSpellings.get(r.place.name) ?? new Map<string, number>();
+        bag.set(seg.label, (bag.get(seg.label) ?? 0) + 1);
+        textSpellings.set(r.place.name, bag);
+      }
+    }
   }
-  const canonical = canonicalPlaces(segments, objects);
+  const canonical = canonicalPlaces(segments, objects, cellKeys).map((c) => {
+    const bag = textSpellings.get(c.name);
+    if (!bag) return c;
+    const known = new Set(c.spellings.map((sp) => sp.label));
+    return {
+      ...c,
+      spellings: [...c.spellings, ...[...bag.entries()].filter(([l]) => !known.has(l)).map(([label, rows]) => ({ label, rows }))],
+    };
+  });
   return { canonical, knownAll: known(canonical) };
 }
 
@@ -1483,6 +1504,9 @@ export async function resolveContextLabel(
     readonly decision:
       | { readonly kind: "object"; readonly workObjectId: string }
       | { readonly kind: "create"; readonly name?: string | null }
+      /** The same place as another one THIS FILE names (`Hoofddienst 13` is
+       *  `Hoofdgracht 13`): both are created as ONE object under `name`. */
+      | { readonly kind: "alias"; readonly name: string }
       | { readonly kind: "ignore" };
   },
 ): Promise<EvidenceImportResult<{ readonly updated: number }>> {
@@ -1492,13 +1516,27 @@ export async function resolveContextLabel(
   if (key === "") return { kind: "invalid", problems: ["key"] };
 
   let objectName: string | null = null;
-  const decision = input.decision;
+  let decision = input.decision;
   if (decision.kind === "object") {
+    const wanted = decision.workObjectId;
     const objects = await readWorkObjects(caller, session.organizationId);
     if (!objects.ok) return objects.failure;
-    const obj = objects.value.find((o) => o.id === decision.workObjectId);
+    const obj = objects.value.find((o) => o.id === wanted);
     if (!obj) return { kind: "not-found" };
     objectName = obj.name;
+  } else if (decision.kind === "alias") {
+    const name = tidy(decision.name);
+    if (name === "") return { kind: "invalid", problems: ["name"] };
+    // An alias of a place that already EXISTS is simply that object.
+    const objects = await readWorkObjects(caller, session.organizationId);
+    if (!objects.ok) return objects.failure;
+    const r = resolvePlace(toSegment(name), objects.value.map((o) => ({ id: o.id, name: o.name })));
+    if ((r.kind === "matched" || r.kind === "proposed") && r.place.id) {
+      decision = { kind: "object", workObjectId: r.place.id };
+      objectName = r.place.name;
+    } else {
+      decision = { kind: "alias", name };
+    }
   }
 
   const rowsRes = await db(caller.supabase)
@@ -1523,6 +1561,9 @@ export async function resolveContextLabel(
       if (d.kind === "create") {
         const name = tidy(d.name ?? seg.name ?? seg.label);
         return { ...seg, state: "new", workObjectId: null, name: name === "" ? seg.label : name, confidence: 1, method: HUMAN_CHOICE, candidates: [] };
+      }
+      if (d.kind === "alias") {
+        return { ...seg, state: "new", workObjectId: null, name: d.name, confidence: 1, method: HUMAN_CHOICE, candidates: [] };
       }
       return { ...seg, state: "ignored", workObjectId: null, confidence: 1, method: HUMAN_CHOICE, candidates: [] };
     });

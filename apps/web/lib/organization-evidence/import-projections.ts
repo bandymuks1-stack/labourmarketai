@@ -97,7 +97,10 @@ export type IssueKind =
   | "duplicates"
   | "conflicts"
   | "allocation_unknown"
-  | "allocation_inconsistent";
+  | "allocation_inconsistent"
+  /** A place read from the text (not the cell) that nothing folded — one
+   *  question per such place: create, alias to another place, or ignore. */
+  | "place_from_text";
 
 export interface IssueProjection {
   readonly kind: IssueKind;
@@ -108,6 +111,8 @@ export interface IssueProjection {
   readonly key: string | null;
   readonly label: string | null;
   readonly candidates: readonly { readonly id: string; readonly name: string }[];
+  /** Other places THIS FILE names, for an alias decision before anything exists. */
+  readonly siblings: readonly string[];
   readonly rowIds: readonly string[];
   /** A short example from the source, for the human's eye. */
   readonly sample: string | null;
@@ -364,7 +369,7 @@ export function projectIssues(rows: readonly PreviewRow[]): readonly IssueProjec
   const push = (kind: IssueKind, list: readonly PreviewRow[], blocking: boolean, sample: string | null = null) => {
     if (list.length === 0) return;
     issues.push({
-      kind, count: list.length, blocking, key: null, label: null, candidates: [],
+      kind, count: list.length, blocking, key: null, label: null, candidates: [], siblings: [],
       rowIds: list.map((r) => r.id),
       sample: sample ?? list[0].activityText?.slice(0, 80) ?? null,
     });
@@ -391,7 +396,32 @@ export function projectIssues(rows: readonly PreviewRow[]): readonly IssueProjec
   for (const [key, e] of ambiguousPlaces) {
     issues.push({
       kind: "ambiguous_place", count: e.rows.length, blocking: true, key, label: e.label,
-      candidates: e.candidates, rowIds: e.rows.map((r) => r.id), sample: e.label,
+      candidates: e.candidates, siblings: [], rowIds: e.rows.map((r) => r.id), sample: e.label,
+    });
+  }
+
+  // A NEW place that only the text named (a typo the resolver could not fold,
+  // a town) — shown as a question, not blocking: the default is to create it.
+  const allNames = new Set<string>();
+  for (const r of rows) for (const p of placeSegments(r.contexts)) if (p.name) allNames.add(p.name);
+  const fromText = new Map<string, { label: string; name: string; rows: PreviewRow[] }>();
+  for (const r of rows) {
+    if (r.contexts?.method !== "site_from_work_text") continue;
+    for (const p of placeSegments(r.contexts)) {
+      if (p.state !== "new" || p.method === "human_choice") continue;
+      // A spelling that folded into another place (`Hofdracht3` → `Hoofdgracht 3`)
+      // is answered already; only a place that stands on its own is a question.
+      if (p.name && p.name.toLowerCase() !== p.label.toLowerCase()) continue;
+      const e = fromText.get(p.key) ?? { label: p.label, name: p.name ?? p.label, rows: [] as PreviewRow[] };
+      e.rows.push(r);
+      fromText.set(p.key, e);
+    }
+  }
+  for (const [key, e] of fromText) {
+    issues.push({
+      kind: "place_from_text", count: e.rows.length, blocking: false, key, label: e.label,
+      candidates: [], siblings: [...allNames].filter((n) => n !== e.name).sort(),
+      rowIds: e.rows.map((r) => r.id), sample: e.rows[0].activityText?.slice(0, 80) ?? null,
     });
   }
 

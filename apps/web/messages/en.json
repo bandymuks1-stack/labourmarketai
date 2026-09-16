@@ -16081,7 +16081,8 @@
         "duplicates": "{count} rows — probably already recorded",
         "conflicts": "{count} rows — contradict what is already recorded",
         "allocation_unknown": "{count} rows — several places in a day, split not stated",
-        "allocation_inconsistent": "{count} rows — the hours in the text do not add up to the day"
+        "allocation_inconsistent": "{count} rows — the hours in the text do not add up to the day",
+        "place_from_text": "{count} rows — place read from the text: “{label}”"
       },
       "issueWhy": {
         "impossible_hours": "The source figure is kept as it is (e.g. a month's total typed on one day). The row commits only once you say \"keep as stated\".",
@@ -16092,7 +16093,8 @@
         "duplicates": "A similar record for the same person and day already exists. Review in the rows.",
         "conflicts": "Same person, day and place — different hours. Both records stay visible.",
         "allocation_unknown": "The day's total is kept exactly; hours are not divided between places by guess.",
-        "allocation_inconsistent": "The parts written in the text do not make the day's total. Both figures are kept."
+        "allocation_inconsistent": "The parts written in the text do not make the day's total. Both figures are kept.",
+        "place_from_text": "The place cell is empty; the site was taken from the first words of the text. If it is a misspelling of another place, choose \"same place as\" — one object is created, not two."
       },
       "keepAsStated": "Keep as stated",
       "keepAsStatedHint": "The figure is not changed. What is recorded is that you reviewed and kept it.",
@@ -16139,7 +16141,8 @@
         "output": "output",
         "team": "brigade (co-presence is not a team)"
       },
-      "commitEffect": "Confirming would create: {records} records ({held} held until you decide), {people} roster people, {objects} places. One write — the existing screens then read it."
+      "commitEffect": "Confirming would create: {records} records ({held} held until you decide), {people} roster people, {objects} places. One write — the existing screens then read it.",
+      "sameAs": "Same place as"
     }
   },
   "organizationRoster": {

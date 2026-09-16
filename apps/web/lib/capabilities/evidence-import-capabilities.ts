@@ -492,6 +492,7 @@ const labelResolveInput = z
     decision: z.discriminatedUnion("kind", [
       z.object({ kind: z.literal("object"), workObjectId: z.uuid() }).strict(),
       z.object({ kind: z.literal("create"), name: z.string().min(1).max(160).nullish() }).strict(),
+      z.object({ kind: z.literal("alias"), name: z.string().min(1).max(160) }).strict(),
       z.object({ kind: z.literal("ignore") }).strict(),
     ]),
   })

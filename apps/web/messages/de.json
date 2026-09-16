@@ -16081,7 +16081,8 @@
         "duplicates": "{count} Zeilen — wahrscheinlich bereits erfasst",
         "conflicts": "{count} Zeilen — widersprechen bereits Erfasstem",
         "allocation_unknown": "{count} Zeilen — mehrere Orte am Tag, Verteilung nicht angegeben",
-        "allocation_inconsistent": "{count} Zeilen — Stunden im Text ergeben nicht die Tagessumme"
+        "allocation_inconsistent": "{count} Zeilen — Stunden im Text ergeben nicht die Tagessumme",
+        "place_from_text": "{count} Zeilen — Ort aus dem Text gelesen: „{label}“"
       },
       "issueWhy": {
         "impossible_hours": "Die Quellzahl bleibt wie sie ist (z. B. eine Monatssumme an einem Tag). Die Zeile wird erst nach „wie angegeben belassen“ übernommen.",
@@ -16092,7 +16093,8 @@
         "duplicates": "Ein ähnlicher Eintrag für dieselbe Person und denselben Tag existiert bereits. In den Zeilen prüfen.",
         "conflicts": "Gleiche Person, Tag und Ort — andere Stunden. Beide Einträge bleiben sichtbar.",
         "allocation_unknown": "Die Tagessumme bleibt exakt; Stunden werden nicht geschätzt auf Orte verteilt.",
-        "allocation_inconsistent": "Die im Text genannten Teile ergeben nicht die Tagessumme. Beide Zahlen bleiben erhalten."
+        "allocation_inconsistent": "Die im Text genannten Teile ergeben nicht die Tagessumme. Beide Zahlen bleiben erhalten.",
+        "place_from_text": "Die Ortszelle ist leer; der Ort stammt aus den ersten Wörtern des Textes. Ist es eine Schreibvariante eines anderen Ortes, wählen Sie „derselbe Ort wie“ — es entsteht ein Objekt, nicht zwei."
       },
       "keepAsStated": "Wie angegeben belassen",
       "keepAsStatedHint": "Die Zahl wird nicht geändert. Festgehalten wird, dass Sie sie geprüft und belassen haben.",
@@ -16139,7 +16141,8 @@
         "output": "Ergebnis",
         "team": "Brigade (gemeinsame Anwesenheit ist kein Team)"
       },
-      "commitEffect": "Bestätigen würde anlegen: {records} Einträge ({held} bis zu Ihrer Entscheidung zurückgehalten), {people} Personen, {objects} Orte. Ein Schreibvorgang — die vorhandenen Ansichten lesen ihn dann."
+      "commitEffect": "Bestätigen würde anlegen: {records} Einträge ({held} bis zu Ihrer Entscheidung zurückgehalten), {people} Personen, {objects} Orte. Ein Schreibvorgang — die vorhandenen Ansichten lesen ihn dann.",
+      "sameAs": "Derselbe Ort wie"
     }
   },
   "organizationRoster": {

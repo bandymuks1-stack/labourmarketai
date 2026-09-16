@@ -16081,7 +16081,8 @@
         "duplicates": "{count} eil. — tikėtinai jau įrašyta",
         "conflicts": "{count} eil. — prieštarauja jau įrašytiems duomenims",
         "allocation_unknown": "{count} eil. — kelios vietos per dieną, paskirstymas nenurodytas",
-        "allocation_inconsistent": "{count} eil. — aprašyme nurodytos valandos nesutampa su dienos suma"
+        "allocation_inconsistent": "{count} eil. — aprašyme nurodytos valandos nesutampa su dienos suma",
+        "place_from_text": "{count} eil. — vieta perskaityta iš aprašymo: „{label}“"
       },
       "issueWhy": {
         "impossible_hours": "Šaltinio skaičius paliekamas koks yra (pvz., mėnesio suma įrašyta į vieną dieną). Įrašas patvirtinamas tik jums pasakius „palikti kaip nurodyta“.",
@@ -16092,7 +16093,8 @@
         "duplicates": "Panašus įrašas tam pačiam žmogui ir dienai jau yra. Peržiūrėkite eilutėse.",
         "conflicts": "Tas pats žmogus, diena ir vieta — kitos valandos. Abu įrašai lieka matomi.",
         "allocation_unknown": "Dienos suma išsaugoma tiksliai; valandos tarp objektų nedalijamos spėjant.",
-        "allocation_inconsistent": "Aprašyme nurodytos dalys nesudaro dienos sumos. Abu skaičiai išsaugomi."
+        "allocation_inconsistent": "Aprašyme nurodytos dalys nesudaro dienos sumos. Abu skaičiai išsaugomi.",
+        "place_from_text": "Objekto langelis tuščias; vieta paimta iš pirmųjų aprašymo žodžių. Jei tai kitos vietos rašybos klaida, pasirinkite „ta pati vieta kaip“ — bus sukurtas vienas objektas, ne du."
       },
       "keepAsStated": "Palikti kaip nurodyta",
       "keepAsStatedHint": "Skaičius nekeičiamas. Įrašoma, kad jūs jį peržiūrėjote ir palikote.",
@@ -16139,7 +16141,8 @@
         "output": "rezultatas",
         "team": "brigada (bendras buvimas — ne komanda)"
       },
-      "commitEffect": "Patvirtinus būtų sukurta: {records} įrašai ({held} sulaikyti iki jūsų sprendimo), {people} žmonės sąraše, {objects} objektai. Vienas įrašymas — toliau ją rodo esami ekranai."
+      "commitEffect": "Patvirtinus būtų sukurta: {records} įrašai ({held} sulaikyti iki jūsų sprendimo), {people} žmonės sąraše, {objects} objektai. Vienas įrašymas — toliau ją rodo esami ekranai.",
+      "sameAs": "Ta pati vieta kaip"
     }
   },
   "organizationRoster": {

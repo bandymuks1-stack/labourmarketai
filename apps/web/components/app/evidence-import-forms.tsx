@@ -732,6 +732,8 @@ export function EvidenceAttestForm({
 export interface LabelResolveLabels {
   readonly question: string;
   readonly useExisting: string;
+  /** "Same place as" another one this file names. */
+  readonly sameAs: string;
   readonly createNew: string;
   readonly notAPlace: string;
   readonly save: string;
@@ -751,6 +753,7 @@ export function EvidenceLabelResolveForm({
   labelKey,
   sourceLabel,
   candidates,
+  defaultChoice,
 }: {
   action: (
     prev: EvidenceImportActionState,
@@ -760,7 +763,9 @@ export function EvidenceLabelResolveForm({
   sessionId: string;
   labelKey: string;
   sourceLabel: string;
+  /** Existing objects (an id) and other places this file names (`alias:<name>`). */
   candidates: readonly Option[];
+  defaultChoice?: string;
 }) {
   const [state, submit, pending] = useActionState<
     EvidenceImportActionState,
@@ -779,10 +784,10 @@ export function EvidenceLabelResolveForm({
         {labels.question}: <span className="font-semibold">“{sourceLabel}”</span>
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        <select name="choice" className={field} defaultValue={candidates[0]?.value ?? "create"} data-testid="evidence-label-choice">
+        <select name="choice" className={field} defaultValue={defaultChoice ?? candidates[0]?.value ?? "create"} data-testid="evidence-label-choice">
           {candidates.map((c) => (
             <option key={c.value} value={c.value}>
-              {labels.useExisting}: {c.label}
+              {c.value.startsWith("alias:") ? labels.sameAs : labels.useExisting}: {c.label}
             </option>
           ))}
           <option value="create">{labels.createNew}</option>

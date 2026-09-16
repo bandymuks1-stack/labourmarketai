@@ -96,9 +96,9 @@ export async function EvidenceImportReconstruction({
     >
       <div className="flex flex-wrap items-baseline gap-2">
         <span className="text-sm font-semibold text-text-primary">
-          {tx(`issue.${i.kind}`, { count: i.count })}
+          {tx(`issue.${i.kind}`, { count: i.count, label: i.label ?? "" })}
         </span>
-        {i.sample && i.kind !== "ambiguous_place" && (
+        {i.sample && i.kind !== "ambiguous_place" && i.kind !== "place_from_text" && (
           <span className="text-xs text-text-muted">{i.sample}</span>
         )}
       </div>
@@ -112,20 +112,25 @@ export async function EvidenceImportReconstruction({
           labels={{ keepAsStated: t("keepAsStated"), hint: t("keepAsStatedHint"), errors }}
         />
       )}
-      {i.kind === "ambiguous_place" && i.key && i.label && (
+      {(i.kind === "ambiguous_place" || i.kind === "place_from_text") && i.key && i.label && (
         <EvidenceLabelResolveForm
           action={actions.resolveLabel}
           sessionId={sessionId}
           labelKey={i.key}
           sourceLabel={i.label}
-          candidates={
-            i.candidates.length > 0
+          defaultChoice={i.kind === "place_from_text" ? "create" : undefined}
+          candidates={[
+            ...(i.candidates.length > 0
               ? i.candidates.map((c) => ({ value: c.id, label: c.name }))
-              : workObjects
-          }
+              : i.kind === "ambiguous_place"
+                ? workObjects
+                : []),
+            ...i.siblings.map((n) => ({ value: `alias:${n}`, label: n })),
+          ]}
           labels={{
             question: t("whichPlace"),
             useExisting: t("useExisting"),
+            sameAs: t("sameAs"),
             createNew: t("createNew"),
             notAPlace: t("notAPlace"),
             save: t("save"),

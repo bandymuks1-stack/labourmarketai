@@ -289,6 +289,10 @@ export interface CanonicalPlace {
 export function canonicalPlaces(
   segments: readonly ContextSegment[],
   existingObjects: readonly ResolveEntity[],
+  /** Keys whose spelling wins regardless of frequency — the object CELL's
+   *  spellings over the work text's, so three misspelled text mentions
+   *  cannot outvote the one correctly written cell. */
+  preferred: ReadonlySet<string> = new Set(),
 ): readonly CanonicalPlace[] {
   const counts = new Map<string, { label: string; rows: number; seg: ContextSegment }>();
   for (const s of segments) {
@@ -302,7 +306,9 @@ export function canonicalPlaces(
   const ordered = [...counts.values()].sort((a, b) => {
     const an = a.seg.number !== null ? 0 : 1;
     const bn = b.seg.number !== null ? 0 : 1;
-    return an - bn || b.rows - a.rows || a.label.localeCompare(b.label);
+    const ap = preferred.has(a.seg.key) ? 0 : 1;
+    const bp = preferred.has(b.seg.key) ? 0 : 1;
+    return an - bn || ap - bp || b.rows - a.rows || a.label.localeCompare(b.label);
   });
 
   const accepted: { name: string; key: string; spellings: { label: string; rows: number }[]; rows: number }[] = [];
@@ -410,7 +416,14 @@ export function extractSitesFromText(
   const lead = extractSiteFromText(text, known);
   if (!lead || !text) return lead ? [lead] : [];
   const out: SiteFromText[] = [lead];
+  // Deduplicated by the PLACE a mention resolves to, not by its spelling:
+  // the leading `Vera Voorbeeldlin 16` and a later `Voorbeeldlin 16` (the
+  // scanner's shorter suffix of the same words) are one place.
   const seen = new Set<string>([normalizeLabel(lead.label)]);
+  const leadResolved = resolvePlace(toSegment(lead.label), known);
+  if (leadResolved.kind === "matched" || leadResolved.kind === "proposed") {
+    seen.add(normalizeLabel(leadResolved.place.name));
+  }
   const keep = (label: string, confidence: number) => {
     const key = normalizeLabel(label);
     if (key === "" || seen.has(key)) return;
@@ -418,7 +431,10 @@ export function extractSitesFromText(
     if (seg.kind !== "place") return;
     const r = resolvePlace(seg, known);
     if (r.kind !== "matched" && r.kind !== "proposed") return;
+    const placeKey = normalizeLabel(r.place.name);
+    if (seen.has(placeKey)) return;
     seen.add(key);
+    seen.add(placeKey);
     out.push({ label: tidy(label), method: "known_place_at_text_start", confidence });
   };
   for (const m of text.matchAll(ADDRESS_ANYWHERE_RE)) {

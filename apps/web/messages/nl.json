@@ -16081,7 +16081,8 @@
         "duplicates": "{count} regels — waarschijnlijk al vastgelegd",
         "conflicts": "{count} regels — spreken al vastgelegde gegevens tegen",
         "allocation_unknown": "{count} regels — meerdere plaatsen op een dag, verdeling niet opgegeven",
-        "allocation_inconsistent": "{count} regels — uren in de tekst tellen niet op tot de dag"
+        "allocation_inconsistent": "{count} regels — uren in de tekst tellen niet op tot de dag",
+        "place_from_text": "{count} regels — plaats gelezen uit de tekst: „{label}”"
       },
       "issueWhy": {
         "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). De regel wordt pas vastgelegd nadat u „laten staan“ kiest.",
@@ -16092,7 +16093,8 @@
         "duplicates": "Een vergelijkbare regel voor dezelfde persoon en dag bestaat al. Controleer in de regels.",
         "conflicts": "Zelfde persoon, dag en plaats — andere uren. Beide regels blijven zichtbaar.",
         "allocation_unknown": "Het dagtotaal blijft exact; uren worden niet op gok over plaatsen verdeeld.",
-        "allocation_inconsistent": "De delen in de tekst vormen niet het dagtotaal. Beide getallen blijven bewaard."
+        "allocation_inconsistent": "De delen in de tekst vormen niet het dagtotaal. Beide getallen blijven bewaard.",
+        "place_from_text": "De plaatscel is leeg; de locatie komt uit de eerste woorden van de tekst. Is het een spelfout van een andere plaats, kies dan „dezelfde plaats als” — er ontstaat één object, niet twee."
       },
       "keepAsStated": "Laten staan zoals opgegeven",
       "keepAsStatedHint": "Het getal verandert niet. Vastgelegd wordt dat u het hebt bekeken en laten staan.",
@@ -16139,7 +16141,8 @@
         "output": "resultaat",
         "team": "ploeg (samen aanwezig is geen team)"
       },
-      "commitEffect": "Bevestigen zou aanmaken: {records} regels ({held} vastgehouden tot uw besluit), {people} personen, {objects} plaatsen. Eén keer schrijven — de bestaande schermen lezen het daarna."
+      "commitEffect": "Bevestigen zou aanmaken: {records} regels ({held} vastgehouden tot uw besluit), {people} personen, {objects} plaatsen. Eén keer schrijven — de bestaande schermen lezen het daarna.",
+      "sameAs": "Dezelfde plaats als"
     }
   },
   "organizationRoster": {

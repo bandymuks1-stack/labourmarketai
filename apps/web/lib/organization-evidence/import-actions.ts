@@ -329,9 +329,11 @@ export async function resolveEvidenceLabelAction(
       ? ({ kind: "ignore" } as const)
       : choice === "create"
         ? ({ kind: "create", name: text(form, "name") || null } as const)
-        : choice !== ""
-          ? ({ kind: "object", workObjectId: choice } as const)
-          : null;
+        : choice.startsWith("alias:")
+          ? ({ kind: "alias", name: choice.slice("alias:".length) } as const)
+          : choice !== ""
+            ? ({ kind: "object", workObjectId: choice } as const)
+            : null;
   if (!decision) return { kind: "refused", reason: "invalid", detail: "choice" };
   const res = await resolveContextLabel(c, { sessionId, key, decision });
   if (res.kind !== "ok") return refuse(res);
