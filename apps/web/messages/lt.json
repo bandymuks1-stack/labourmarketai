@@ -16200,7 +16200,9 @@
         "unknowns": "Nežinoma",
         "unknownAllocation": "{count} d. — kelios vietos, paskirstymas nenurodytas",
         "unknownPlace": "{count} d. — vieta nenustatyta",
-        "noActivities": "Šaltinis veiklų be objekto neįvardija."
+        "noActivities": "Šaltinis veiklų be objekto neįvardija.",
+        "currentToken": "dabartis: ?",
+        "moreLanes": "dar {count} objektai be juostos"
       },
       "interpretation": {
         "typo_same_house_number": "rašybos klaida sutapatinta pagal namo numerį",
@@ -16212,7 +16214,7 @@
         "as_written": "kaip parašyta"
       },
       "field": {
-        "title": "Kaip dirbo komanda",
+        "title": "Laukas: kas kur dirbo",
         "subtitle": "Pasirinkite savaitę, žmogų ar objektą — laukas rodo, kas kur dirbo pagal šaltinį.",
         "allWeeks": "Visas laikotarpis",
         "peopleEvidenced": "Žmonės, kurių darbas įrodytas",
@@ -16223,7 +16225,10 @@
         "selectedPerson": "žmogus",
         "selectedPlace": "objektas",
         "notATeam": "Bendras buvimas faile — ne komanda ir ne dabartinė sudėtis. Brigada kuriama tik sutikimu.",
-        "hoursUnknownNote": "Valandos rodomos tik ten, kur šaltinis jas paskirstė pagal objektus; kitur — tik dienos."
+        "hoursUnknownNote": "Valandos rodomos tik ten, kur šaltinis jas paskirstė pagal objektus; kitur — tik dienos.",
+        "legend": "Objektų žymos",
+        "notATeamWhy": "Bendras buvimas faile — istorinė grupė, ne dabartinė komanda. Narystė ir brigados iš istorijos nekuriamos.",
+        "weekConflict": "failo savaitė nesutampa su data"
       },
       "aggregatesTitle": "Laikotarpio sumos (ne kalendoriaus dienos)",
       "aggregatePeriodUnknownRecorded": "laikotarpis nežinomas · faile užrašyta {date}",
@@ -16242,7 +16247,68 @@
         "calendar": "Kalendorius: dienos valandos pasieks darbo žurnalą ir „veiklą skaičiais“ tik susiejus paskyrą; laikotarpio sumos — niekada kaip diena.",
         "provenance": "Kilmė: kiekvienas įrašas rodo failą, eilutę ir visas interpretacijas; visą importą galima atšaukti."
       },
-      "impactNote": "Iki patvirtinimo niekas nesukuriama ir neįrašoma."
+      "impactNote": "Iki patvirtinimo niekas nesukuriama ir neįrašoma.",
+      "source": "Šaltinis",
+      "close": "Uždaryti",
+      "modesLabel": "Vaizdas",
+      "nothingWrittenShort": "peržiūra · niekas neįrašyta",
+      "mode": {
+        "overview": "Apžvalga",
+        "people": "Žmonės",
+        "field": "Laukas",
+        "objects": "Objektai",
+        "calendar": "Kalendorius",
+        "attention": "Dėmesio"
+      },
+      "state": {
+        "period": "laikotarpis",
+        "people": "žmonės",
+        "objects": "objektai",
+        "personDays": "žm. dienos",
+        "dailyHours": "dienos val.",
+        "aggregate": "laikotarpio suma",
+        "decision": "sprendimas",
+        "decisions": "sprendimai"
+      },
+      "icon": {
+        "person": "žmogus",
+        "time": "laikas",
+        "evidence": "įrodymas",
+        "warning": "reikia dėmesio",
+        "object": "objektas"
+      },
+      "calendar": {
+        "prev": "Ankstesnis laikotarpis",
+        "next": "Kitas laikotarpis",
+        "month": "Mėnuo",
+        "week": "Savaitė",
+        "table": "Lentelė",
+        "scale": "Kalendoriaus mastelis",
+        "performed": "atliktas darbas",
+        "day": "Diena",
+        "sum": "iš viso"
+      },
+      "attention": {
+        "decisions": "Sprendimai",
+        "observations": "Pastebėjimai",
+        "detected": "aptikta",
+        "periodTotal": "laikotarpio suma",
+        "why": "Kodėl klausiama"
+      },
+      "overview": {
+        "footprint": "Kas kur dirbo"
+      },
+      "people": {
+        "pick": "Pasirinkite žmogų — pamatysite jo darbo tikrovę."
+      },
+      "bar": {
+        "ready": "paruošta",
+        "people": "žmonės",
+        "objects": "objektai",
+        "review": "Peržiūrėti",
+        "confirm": "Patvirtinti",
+        "blocked": "Pirmiausia {count} sprendimas (-ai) skiltyje „Dėmesio“."
+      }
     }
   },
   "organizationRoster": {

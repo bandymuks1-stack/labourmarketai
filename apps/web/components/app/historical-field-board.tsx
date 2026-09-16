@@ -1,191 +1,182 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
+import { SemanticIcon } from "@/components/app/semantic-icon";
 import {
   playerInitials,
   PLAYER_IDENTITY_AVATAR_BORDER,
   PLAYER_IDENTITY_FALLBACK_SURFACE,
 } from "@/lib/identity/player-identity";
-import type { FieldProjection, FieldWeek } from "@/lib/organization-evidence/import-projections";
+import type { CalendarProjection, FieldProjection } from "@/lib/organization-evidence/import-projections";
+import { fieldPeriodView, fieldWeekView, objectMonogram } from "@/lib/organization-evidence/import-visual";
 import { cn } from "@/lib/utils";
 
 /**
- * HISTORICAL FIELD BOARD — the organization as it actually worked, read from
- * the same projection the player cards read (owner command 2026-09-16 §6,
- * §9): pick a WEEK, and the field shows every place with the people
- * evidenced there that week; pick a PERSON and their places light up; pick
- * a PLACE and its people do. Nothing here is a team, a membership, a plan
- * or a booking — the heading says "people evidenced working", and
- * co-occurrence in one file never becomes a canonical team (ARCH-4).
+ * THE HISTORICAL FIELD — who was WHERE and WHEN, as a field of people in time
+ * (LABOURMARKET_VISUAL_FIRST constitution 2026-09-16 §T, §BE).
  *
- * READ-ONLY and purely client-side state over server-computed data: no
- * action, no fetch, no write. The same identity tile as the player card
- * (initials, never a synthesised face). Hours shown are DAILY hours the
- * source states; a place whose split is unknown shows a dash, never a
- * divided guess.
+ * PEOPLE are the actors: one row per person evidenced in the selected time,
+ * headed by their compact identity. TIME is the field's width: the seven days
+ * of the selected week, or the ISO weeks of the whole period. OBJECTS are
+ * what fills a cell: the place marks (monogram, full name on hover and in
+ * the legend) the source puts the person at on that day, with the hours the
+ * source attributes to each when it does — `?` when it does not. An empty
+ * cell is an absence of evidence, never zero work.
+ *
+ * ONE field, three dials: WEEK changes the columns; PERSON focuses a row and
+ * dims the others; OBJECT lights every mark of that place and dims the rest.
+ * The dials are owned by the workspace, so the same selection survives a
+ * switch to the calendar, the objects or the people.
+ *
+ * Nothing here is a team, a membership, a plan or a booking: the field says
+ * "historical group ≠ team" in a token, and the projection it reads carries
+ * no membership (ARCH-4). Read-only: client state over server-computed data,
+ * no fetch, no action, no write. Same identity tile as the player card.
  */
 
 export interface FieldBoardLabels {
   readonly title: string;
-  readonly subtitle: string;
   readonly allWeeks: string;
   readonly week: string;
-  readonly peopleEvidenced: string;
   readonly noWork: string;
   readonly hoursUnknown: string;
-  /** One sentence under the field: hours appear only where the source split them. */
-  readonly hoursUnknownNote: string;
   readonly days: string;
+  readonly hours: string;
   readonly clear: string;
-  readonly selectedPerson: string;
-  readonly selectedPlace: string;
   readonly notATeam: string;
+  readonly notATeamWhy: string;
+  readonly person: string;
+  readonly object: string;
+  readonly legend: string;
+  readonly weekConflict: string;
 }
 
-type Selection = { kind: "person"; label: string } | { kind: "place"; name: string } | null;
+export interface FieldSelection {
+  readonly week: number | "all";
+  readonly person: string | null;
+  readonly object: string | null;
+}
 
-function Tile({
-  label,
-  active,
+const TILE = cn("flex shrink-0 items-center justify-center rounded-full font-display font-semibold", PLAYER_IDENTITY_AVATAR_BORDER, PLAYER_IDENTITY_FALLBACK_SURFACE);
+
+/** A place mark inside a cell: monogram + hours when known. A button — it
+ *  selects the object across the whole field. */
+function PlaceMark({
+  name,
+  monogram,
+  hours,
+  days,
+  lit,
   dim,
-  onClick,
-  detail,
-  summary,
-  testId,
+  onSelect,
+  labels,
+  formatHours,
 }: {
-  label: string;
-  active: boolean;
+  name: string;
+  monogram: string;
+  hours: number | null;
+  days?: number;
+  lit: boolean;
   dim: boolean;
-  onClick: () => void;
-  /** The full line (tooltip): days, hours or "hours not split". */
-  detail: string;
-  /** The short tail beside the name: days, and hours only when known. */
-  summary: string;
-  testId: string;
+  onSelect: () => void;
+  labels: FieldBoardLabels;
+  formatHours: (n: number) => string;
 }) {
+  const detail = `${name}${days !== undefined ? ` · ${days} ${labels.days}` : ""}${hours !== null ? ` · ${formatHours(hours)} h` : ` · ${labels.hoursUnknown}`}`;
   return (
     <button
       type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      data-testid={testId}
+      onClick={onSelect}
+      aria-pressed={lit}
       title={detail}
+      data-testid="field-place"
+      data-place={name}
       className={cn(
-        "flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-2.5 text-left transition-colors",
-        active ? "border-brand-cyan bg-brand-cyan/10" : "border-ink-500 bg-ink-900 hover:border-brand-blue",
-        dim && !active ? "opacity-40" : "",
+        "inline-flex min-h-6 items-center gap-1 rounded border px-1 font-mono text-meta leading-none tabular-nums transition-colors",
+        lit ? "border-brand-blue bg-brand-blue/15 text-text-primary" : "border-ink-600 bg-ink-900 text-text-secondary hover:border-brand-blue",
+        dim && !lit ? "opacity-30" : "",
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-meta font-semibold",
-          PLAYER_IDENTITY_AVATAR_BORDER,
-          PLAYER_IDENTITY_FALLBACK_SURFACE,
-        )}
-      >
-        {playerInitials(label)}
-      </span>
-      <span className="flex min-w-0 items-baseline gap-1 leading-tight">
-        <span className="truncate text-xs font-semibold text-text-primary">{label}</span>
-        <span className="text-meta tabular-nums text-text-muted">{summary}</span>
-      </span>
+      <span className="font-semibold">{monogram}</span>
+      {days !== undefined ? <span className="text-text-muted">{days}</span> : hours !== null ? <span className="text-text-muted">{formatHours(hours)}</span> : <span className="text-text-muted">?</span>}
+      <span className="sr-only">{detail}</span>
     </button>
   );
 }
 
 export function HistoricalFieldBoard({
+  calendar,
   field,
   labels,
   locale,
+  selection,
+  onSelectWeek,
+  onSelectPerson,
+  onSelectObject,
 }: {
+  calendar: CalendarProjection;
   field: FieldProjection;
   labels: FieldBoardLabels;
   /**
    * The locale, NOT formatter functions. This is a Client Component: every
    * prop crosses the server→client boundary and must be serialisable. Passing
-   * `formatDate`/`formatHours` functions from the server component threw
-   * "Functions cannot be passed directly to Client Components" on production
-   * (build f3e090ef, digest 1624882775) and the whole history door fell to the
-   * error fallback. The formatters are built here, from the locale.
+   * formatter functions from a server component threw "Functions cannot be
+   * passed directly to Client Components" on production (build f3e090ef) and
+   * the whole history door fell to the error fallback. Formatters are built
+   * here, from the locale.
    */
   locale: string;
+  selection: FieldSelection;
+  onSelectWeek: (week: number | "all") => void;
+  onSelectPerson: (label: string | null) => void;
+  onSelectObject: (name: string | null) => void;
 }) {
-  const [week, setWeek] = useState<number | "all">("all");
-  const { formatDate, formatHours } = useMemo(() => {
-    // Lithuanian has no textual short month ("10-22"); the long month reads
-    // as a date in every active locale — the same rule the server side uses.
+  const { formatDay, formatWeekday, formatHours } = useMemo(() => {
     const day = new Intl.DateTimeFormat(locale, { day: "numeric", month: locale === "lt" ? "long" : "short", timeZone: "UTC" });
+    const weekday = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
     const num = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+    const parse = (iso: string) => new Date(`${iso}T00:00:00Z`);
     return {
-      formatDate: (iso: string) => {
-        const d = new Date(`${iso}T00:00:00Z`);
-        return Number.isNaN(d.getTime()) ? iso : day.format(d);
-      },
+      formatDay: (iso: string) => day.format(parse(iso)),
+      formatWeekday: (iso: string) => weekday.format(parse(iso)).replace(/\.$/, ""),
       formatHours: (n: number) => num.format(n),
     };
   }, [locale]);
-  const [selection, setSelection] = useState<Selection>(null);
 
-  const scope = useMemo(() => {
-    if (week === "all") {
-      return {
-        places: field.places.map((p) => ({
-          name: p.name,
-          days: p.days,
-          hours: null as number | null,
-          people: p.people.map((pp) => ({ label: pp.label, days: pp.days, hours: pp.hours })),
-        })),
-        firstDate: field.weeks[0]?.firstDate ?? null,
-        lastDate: field.weeks[field.weeks.length - 1]?.lastDate ?? null,
-      };
-    }
-    const w: FieldWeek | undefined = field.weeks.find((x) => x.isoWeek === week);
-    if (!w) return { places: [], firstDate: null, lastDate: null };
-    return {
-      places: w.places.map((p) => ({
-        name: p.name,
-        days: p.days,
-        hours: p.hours,
-        people: p.people.map((label) => {
-          const person = w.people.find((pp) => pp.label === label);
-          const at = person?.places.find((pl) => pl.name === p.name);
-          return { label, days: at?.days ?? 0, hours: at?.hours ?? null };
-        }),
-      })),
-      firstDate: w.firstDate,
-      lastDate: w.lastDate,
-    };
-  }, [field, week]);
+  const { week, person, object } = selection;
+  const weekView = useMemo(() => (week === "all" ? null : fieldWeekView(calendar, week)), [calendar, week]);
+  const periodView = useMemo(() => (week === "all" ? fieldPeriodView(field) : null), [field, week]);
+  const maxWeekHours = Math.max(1, ...field.weeks.map((w) => w.hours));
 
-  const highlightedPlaces = useMemo(() => {
-    if (selection?.kind !== "person") return null;
-    return new Set(scope.places.filter((p) => p.people.some((pp) => pp.label === selection.label)).map((p) => p.name));
-  }, [scope, selection]);
+  // The legend lists only the places on the field right now.
+  const legend = useMemo(() => {
+    const names = new Set<string>();
+    if (weekView) for (const r of weekView.rows) for (const c of r.cells) if (c) for (const p of c.places) names.add(p.name);
+    if (periodView) for (const r of periodView.rows) for (const c of r.cells) if (c) for (const p of c.places) names.add(p.name);
+    return [...names].sort((a, b) => a.localeCompare(b)).map((name) => ({ name, monogram: objectMonogram(name) }));
+  }, [weekView, periodView]);
 
-  const togglePerson = (label: string) =>
-    setSelection((s) => (s?.kind === "person" && s.label === label ? null : { kind: "person", label }));
-  const togglePlace = (name: string) =>
-    setSelection((s) => (s?.kind === "place" && s.name === name ? null : { kind: "place", name }));
+  const togglePerson = (label: string) => onSelectPerson(person === label ? null : label);
+  const toggleObject = (name: string) => onSelectObject(object === name ? null : name);
+
+  const rows = weekView?.rows ?? periodView?.rows ?? [];
+  const columns: readonly { key: string; head: string; sub: string | null }[] = weekView
+    ? weekView.days.map((iso) => ({ key: iso, head: formatWeekday(iso), sub: String(Number(iso.slice(8, 10))) }))
+    : (periodView?.weeks ?? []).map((w) => ({ key: String(w), head: `${labels.week} ${w}`, sub: null }));
 
   return (
-    <section className="flex flex-col gap-3" data-testid="historical-field-board" data-week={String(week)}>
-      <header className="flex flex-col gap-1">
-        <h2 className="font-display text-lg font-semibold tracking-tightest text-text-primary">{labels.title}</h2>
-        <p className="text-xs text-text-secondary">{labels.subtitle}</p>
-      </header>
-
-      {/* TIME — the week selector is the time machine's first dial */}
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label={labels.week}>
+    <section className="flex flex-col gap-3" data-testid="historical-field-board" data-week={String(week)} aria-label={labels.title}>
+      {/* TIME — the week dial. A chip per ISO week with its rhythm bar. */}
+      <div className="flex flex-wrap items-end gap-1" role="group" aria-label={labels.week}>
         <button
           type="button"
-          onClick={() => setWeek("all")}
+          onClick={() => onSelectWeek("all")}
           aria-pressed={week === "all"}
           data-testid="field-week-all"
           className={cn(
-            "rounded-full border px-3 py-1 text-xs font-semibold",
-            week === "all" ? "border-brand-orange bg-brand-orange/10 text-brand-orange" : "border-ink-500 text-text-secondary hover:border-brand-blue",
+            "inline-flex min-h-11 items-center rounded-md border px-3 font-mono text-meta uppercase tracking-label",
+            week === "all" ? "border-brand-blue bg-brand-blue/10 text-text-primary" : "border-ink-600 text-text-secondary hover:border-brand-blue",
           )}
         >
           {labels.allWeeks}
@@ -194,96 +185,136 @@ export function HistoricalFieldBoard({
           <button
             key={w.isoWeek}
             type="button"
-            onClick={() => setWeek(w.isoWeek)}
+            onClick={() => onSelectWeek(w.isoWeek)}
             aria-pressed={week === w.isoWeek}
             data-testid="field-week"
             data-iso-week={w.isoWeek}
-            title={`${formatDate(w.firstDate)} – ${formatDate(w.lastDate)} · ${formatHours(w.hours)} h`}
+            title={`${formatDay(w.firstDate)} – ${formatDay(w.lastDate)} · ${formatHours(w.hours)} h`}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-semibold tabular-nums",
-              week === w.isoWeek ? "border-brand-orange bg-brand-orange/10 text-brand-orange" : "border-ink-500 text-text-secondary hover:border-brand-blue",
+              "flex min-h-11 min-w-11 flex-col items-center justify-end gap-1 rounded-md border px-2 pb-1 pt-1.5 font-mono text-meta tabular-nums",
+              week === w.isoWeek ? "border-brand-blue bg-brand-blue/10 text-text-primary" : "border-ink-600 text-text-secondary hover:border-brand-blue",
             )}
           >
-            {labels.week} {w.isoWeek}
+            <span aria-hidden className="w-4 rounded-t-[1px] bg-brand-cyan/70" style={{ height: `${Math.max(2, Math.round((w.hours / maxWeekHours) * 14))}px` }} />
+            <span>{w.isoWeek}</span>
           </button>
         ))}
       </div>
 
-      <p className="text-xs text-text-muted" data-testid="field-scope">
-        {labels.peopleEvidenced}
-        {scope.firstDate && scope.lastDate ? ` · ${formatDate(scope.firstDate)} – ${formatDate(scope.lastDate)}` : ""}
-        {selection?.kind === "person" ? ` · ${labels.selectedPerson}: ${selection.label}` : ""}
-        {selection?.kind === "place" ? ` · ${labels.selectedPlace}: ${selection.name}` : ""}
-        {selection && (
-          <>
-            {" "}
-            <button type="button" onClick={() => setSelection(null)} className="underline" data-testid="field-clear">
-              {labels.clear}
-            </button>
-          </>
-        )}
-      </p>
-
-      {/* THE FIELD — places as blocks, people as identity tiles inside them */}
-      {scope.places.length === 0 ? (
-        <p className="text-sm text-text-muted">{labels.noWork}</p>
+      {/* THE FIELD — rows of people, columns of time, marks of places */}
+      {rows.length === 0 ? (
+        <p className="text-support text-text-muted">{labels.noWork}</p>
       ) : (
-        <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3" data-testid="field-places">
-          {scope.places.map((p) => {
-            const placeActive = selection?.kind === "place" && selection.name === p.name;
-            const dimmed =
-              (highlightedPlaces !== null && !highlightedPlaces.has(p.name)) ||
-              (selection?.kind === "place" && !placeActive);
+        <div className="flex flex-col gap-1" role="table" aria-label={labels.title} data-testid="field-grid">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end" role="row">
+            <div className="hidden w-44 shrink-0 md:block" role="columnheader" aria-label={labels.person} />
+            <div className="grid flex-1 gap-1" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}>
+              {columns.map((c) => (
+                <div key={c.key} role="columnheader" className="flex flex-col items-center font-mono text-meta uppercase tracking-label text-text-muted">
+                  <span>{c.head}</span>
+                  {c.sub && <span className="text-text-secondary">{c.sub}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+          {rows.map((r) => {
+            const rowLit = person === r.label;
+            const rowDim = person !== null && !rowLit;
+            const cells = r.cells as readonly (
+              | { iso?: string; isoWeek?: number; hours: number | null; days?: number; places: readonly { name: string; monogram: string; hours?: number | null; days?: number }[]; weekConflict?: boolean }
+              | null
+            )[];
             return (
-              <li
-                key={p.name}
-                className={cn(
-                  "flex flex-col gap-2 rounded-card border p-3 transition-opacity",
-                  placeActive ? "border-brand-cyan bg-brand-cyan/5" : "border-ink-600 bg-ink-800/40",
-                  dimmed ? "opacity-40" : "",
-                )}
-                data-testid="field-place"
-                data-place={p.name}
+              <div
+                key={r.label}
+                role="row"
+                className={cn("flex flex-col gap-1 rounded-md md:flex-row md:items-stretch", rowLit ? "bg-brand-blue/5" : "", rowDim ? "opacity-40" : "")}
+                data-testid="field-row"
+                data-person={r.label}
               >
                 <button
                   type="button"
-                  onClick={() => togglePlace(p.name)}
-                  aria-pressed={placeActive}
-                  className="flex items-baseline justify-between gap-2 text-left"
-                  data-testid="field-place-toggle"
+                  role="rowheader"
+                  onClick={() => togglePerson(r.label)}
+                  aria-pressed={rowLit}
+                  data-testid="field-person"
+                  data-label={r.label}
+                  className={cn(
+                    "flex min-h-11 w-full items-center gap-2 rounded-md border px-2 text-left md:w-44 md:shrink-0",
+                    rowLit ? "border-brand-blue" : "border-transparent hover:border-ink-500",
+                  )}
                 >
-                  <span className="truncate font-semibold text-text-primary">{p.name}</span>
-                  <span className="shrink-0 text-xs tabular-nums text-text-muted">
-                    {p.days} {labels.days}
-                    {p.hours !== null ? ` · ${formatHours(p.hours)} h` : ""}
+                  <span aria-hidden className={cn(TILE, "h-8 w-8 text-meta")}>{playerInitials(r.label)}</span>
+                  <span className="flex min-w-0 flex-col leading-tight">
+                    <span className="truncate text-support font-semibold text-text-primary">{r.label}</span>
+                    <span className="font-mono text-meta tabular-nums text-text-muted">
+                      {r.days} {labels.days} · {formatHours(r.hours)} h
+                    </span>
                   </span>
+                  <span className="sr-only">{labels.person}</span>
                 </button>
-                <ul className="flex flex-wrap gap-1.5">
-                  {p.people.map((pp) => {
-                    const active = selection?.kind === "person" && selection.label === pp.label;
-                    const dimPerson = selection?.kind === "person" && !active;
-                    return (
-                      <li key={pp.label}>
-                        <Tile
-                          label={pp.label}
-                          active={active}
-                          dim={dimPerson}
-                          onClick={() => togglePerson(pp.label)}
-                          testId="field-person"
-                          detail={`${pp.days} ${labels.days}${pp.hours !== null ? ` · ${formatHours(pp.hours)} h` : ` · ${labels.hoursUnknown}`}`}
-                          summary={`${pp.days} ${labels.days}${pp.hours !== null ? ` · ${formatHours(pp.hours)} h` : ""}`}
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
+                <div className="grid flex-1 gap-1" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}>
+                  {cells.map((c, i) => (
+                    <div
+                      key={columns[i]?.key ?? i}
+                      role="cell"
+                      className={cn("flex min-h-11 flex-col gap-0.5 rounded-md border p-1", c ? "border-ink-600 bg-ink-800/40" : "border-transparent")}
+                      data-testid="field-cell"
+                    >
+                      {c ? (
+                        <>
+                          <div className="flex flex-wrap gap-0.5">
+                            {c.places.map((p) => (
+                              <PlaceMark
+                                key={p.name}
+                                name={p.name}
+                                monogram={p.monogram}
+                                hours={p.hours ?? null}
+                                days={p.days}
+                                lit={object === p.name}
+                                dim={object !== null}
+                                onSelect={() => toggleObject(p.name)}
+                                labels={labels}
+                                formatHours={formatHours}
+                              />
+                            ))}
+                          </div>
+                          <span className="mt-auto flex items-center gap-1 self-end font-mono text-meta tabular-nums text-text-muted">
+                            {c.weekConflict && <SemanticIcon concept="warning" label={labels.weekConflict} className="h-3 w-3 text-state-amber" />}
+                            {c.hours !== null ? `${formatHours(c.hours)} h` : <span title={labels.hoursUnknown}>?</span>}
+                          </span>
+                        </>
+                      ) : (
+                        <span aria-hidden className="m-auto text-text-muted/40">·</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             );
           })}
-        </ul>
+        </div>
       )}
-      <p className="text-xs text-text-muted">{labels.hoursUnknownNote}</p>
-      <p className="text-xs text-text-muted" data-testid="field-not-a-team">{labels.notATeam}</p>
+
+      {/* legend of the marks on the field · the one thing the field is NOT */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="inline-flex items-center gap-1 rounded-full border border-ink-600 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted" data-testid="field-not-a-team" title={labels.notATeamWhy}>
+          <SemanticIcon concept="team" label={labels.notATeam} className="h-3 w-3" />
+          {labels.notATeam}
+        </span>
+        {(person || object) && (
+          <button type="button" onClick={() => { onSelectPerson(null); onSelectObject(null); }} className="min-h-11 font-mono text-meta uppercase tracking-label text-text-secondary underline" data-testid="field-clear">
+            {labels.clear}
+          </button>
+        )}
+        <ul className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-meta text-text-muted" aria-label={labels.legend}>
+          {legend.map((l) => (
+            <li key={l.name} className={cn(object === l.name ? "text-text-primary" : "")}>
+              <span className="font-semibold text-text-secondary">{l.monogram}</span> {l.name}
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

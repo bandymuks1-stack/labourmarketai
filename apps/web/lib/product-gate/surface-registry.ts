@@ -656,6 +656,14 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     // historical-import intent routes to the history door) and CHANGES what
     // the card shows through evidence.import.resolve_label /
     // resolve_time_semantics over the same staged rows (aiControlled YES).
+    //
+    // LABOURMARKET_VISUAL_FIRST (owner constitution, same day, docs/design/
+    // final/04): the file now carries TWO renderings of the same atom — the
+    // COMPACT identity used in every group view (overview, people rail,
+    // field rows, objects, calendar days) and the FOCUS identity shown for
+    // ONE selected person inside the historical workspace
+    // (components/app/historical/historical-workspace.tsx). Still one
+    // identity, still a read-only projection, still no score.
     id: "components/app/historical-player-card.tsx",
     kind: "persistent_card",
     originAxiom: "A-01",

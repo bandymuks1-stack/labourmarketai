@@ -1,5 +1,6 @@
 import { ProvenanceEdge, ProvenanceLine } from "@/components/app/provenance/provenance-edge";
 import { WorkHistoryTimeline } from "@/components/app/player-card/work-history-timeline";
+import { SemanticIcon } from "@/components/app/semantic-icon";
 import {
   playerInitials,
   PLAYER_IDENTITY_AVATAR_BORDER,
@@ -7,27 +8,37 @@ import {
 } from "@/lib/identity/player-identity";
 import type { HistoryTimeline } from "@/lib/player-card/evidence-visuals";
 import type { PersonProjection } from "@/lib/organization-evidence/import-projections";
+import { personObjectLanes } from "@/lib/organization-evidence/import-visual";
 import { cn } from "@/lib/utils";
 
 /**
- * HISTORICAL PLAYER CARD — the `history-card` variant of the ONE person
- * identity (lib/identity/player-identity.ts), rendered from an
- * organization's evidence about a person (owner command 2026-09-16 §3–§5).
+ * THE PREMIUM PLAYER IDENTITY, history-card variant — the ONE person identity
+ * (lib/identity/player-identity.ts) rendered from an organization's evidence
+ * about a person (LABOURMARKET_VISUAL_FIRST constitution 2026-09-16 §J–§O).
  *
- * It is the same atom as the worker's own player card, with the same rules:
- * the monogram tile, never a synthesised face; the provenance EDGE and its
- * text equivalent as the ONE "why believe this" (EVIDENCE_SUPPORTED — the
- * organization reported it, nobody has independently confirmed it; gold is
- * reserved for a real confirmation and never appears here); real figures
- * with their unit; no score, rating, rank or tier of any kind.
+ * Two renderings of the SAME atom, both from the same projection:
  *
- * What it shows is what the evidence supports and nothing more: a
- * HISTORICAL period, days and hours of work the source states as a day's
- * work, period aggregates kept apart, places, activities, the source's own
- * words, the interpretations the reading made, and the questions still
- * open. It says out loud that the person's CURRENT state is not inferred
- * from history (§3: employment, availability, wage, skill, location are
- * never derived here).
+ *   COMPACT  the identity in a group — monogram, name, the person's rhythm
+ *            as a week strip, days and places as icon + number, an attention
+ *            mark when a decision waits, a Σ mark when a period aggregate
+ *            stands apart. Selectable. This is what a team, a field, an
+ *            object and a company view show; never seven expanded cards.
+ *
+ *   FOCUS    the identity in front of you — the monogram with the
+ *            EVIDENCE_SUPPORTED provenance edge, HISTORICAL and evidence-state
+ *            tokens, the period, the real figures with their units, the
+ *            person's WORK REALITY as object lanes on their own time band,
+ *            the weekly rhythm, activities, the aggregate apart, UNKNOWN as a
+ *            `?` token, and "current state not inferred" as a token. The
+ *            source's words, the interpretations and the open questions are
+ *            LEVEL 3 — behind INSPECT.
+ *
+ * What it never does: a synthesised face (the monogram tile is the neutral
+ * professional identity), a score / rating / rank / tier of any kind, gold
+ * (reserved for a real confirmation; an import is organization-reported
+ * evidence, nobody has independently confirmed it), a skill (hours are not
+ * competency), or a current state (employment, availability, wage, location
+ * are never derived from history).
  */
 
 export interface HistoricalPlayerCardLabels {
@@ -43,6 +54,7 @@ export interface HistoricalPlayerCardLabels {
   readonly aggregateRemote: string;
   readonly aggregatePeriodUnknown: string;
   readonly currentNotInferred: string;
+  readonly currentToken: string;
   readonly openQuestions: string;
   readonly weeks: string;
   readonly weekShort: string;
@@ -61,42 +73,106 @@ export interface HistoricalPlayerCardLabels {
   readonly unknownAllocation: string;
   readonly unknownPlace: string;
   readonly noActivities: string;
+  readonly unknown: string;
+  readonly person: string;
+  readonly time: string;
+  readonly evidenceIcon: string;
+  readonly warning: string;
+  readonly moreLanes: string;
 }
 
-function historyTimelineFor(person: PersonProjection, fmt: (iso: string) => string): {
-  timeline: HistoryTimeline;
-  laneDetails: string[];
-  range: string | null;
-} {
-  const from = person.firstDate;
-  const to = person.lastDate;
-  if (!from || !to) {
-    return { timeline: { lanes: [], ticks: [], undatedCount: 0, fromIso: null, toIso: null }, laneDetails: [], range: null };
-  }
-  const start = Date.parse(`${from}T00:00:00Z`);
-  const end = Math.max(Date.parse(`${to}T00:00:00Z`), start + 86_400_000);
-  const span = end - start;
-  // One lane per place, spanning the person's first and last dated day
-  // THERE. A place without a dated day (aggregates only) is not placed.
-  const placed = person.places.slice(0, 8).filter((p) => p.firstDate && p.lastDate);
-  const lanes = placed.map((p, i) => {
-    const a = Date.parse(`${p.firstDate}T00:00:00Z`);
-    const b = Date.parse(`${p.lastDate}T00:00:00Z`) + 86_400_000;
-    return {
-      id: `${i}:${p.name}`,
-      label: p.name,
-      startFraction: Math.max(0, Math.min(1, (a - start) / span)),
-      endFraction: Math.max(0, Math.min(1, (b - start) / span)),
-      current: false,
-    };
-  });
-  return {
-    timeline: { lanes, ticks: [], undatedCount: 0, fromIso: from, toIso: to },
-    laneDetails: placed.map((p) => `${fmt(p.firstDate as string)} – ${fmt(p.lastDate as string)} · ${p.rows} d.${p.hours > 0 ? ` · ${p.hours} h` : ""}`),
-    range: `${fmt(from)} – ${fmt(to)}`,
-  };
+const MONOGRAM = cn(
+  "flex shrink-0 items-center justify-center rounded-full font-display font-semibold",
+  PLAYER_IDENTITY_AVATAR_BORDER,
+  PLAYER_IDENTITY_FALLBACK_SURFACE,
+);
+
+/** The person's own rhythm: one thin bar per evidenced week. */
+function WeekStrip({ person, height, labels, formatHours }: { person: PersonProjection; height: number; labels: Pick<HistoricalPlayerCardLabels, "weeks" | "weekShort">; formatHours: (n: number) => string }) {
+  if (person.weeks.length === 0) return null;
+  const max = Math.max(1, ...person.weeks.map((w) => w.hours));
+  return (
+    <ol className="flex items-end gap-px" style={{ height }} aria-label={labels.weeks} data-testid="historical-player-weeks">
+      {person.weeks.map((w) => (
+        <li
+          key={w.isoWeek}
+          className="w-1.5 rounded-t-[1px] bg-brand-cyan/70"
+          style={{ height: `${Math.max(2, Math.round((w.hours / max) * height))}px` }}
+          title={`${labels.weekShort} ${w.isoWeek}: ${formatHours(w.hours)} h · ${w.days} d`}
+        />
+      ))}
+    </ol>
+  );
 }
 
+/** COMPACT — the identity among others. A button: selecting it focuses the
+ *  same workspace on this person. */
+export function HistoricalPlayerCompact({
+  person,
+  labels,
+  formatHours,
+  selected,
+  dimmed,
+  onSelect,
+}: {
+  person: PersonProjection;
+  labels: Pick<HistoricalPlayerCardLabels, "weeks" | "weekShort" | "days" | "places" | "warning" | "aggregate" | "person">;
+  formatHours: (n: number) => string;
+  selected: boolean;
+  dimmed?: boolean;
+  onSelect: () => void;
+}) {
+  const name = person.name ?? person.label;
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      data-testid="historical-player-compact"
+      data-identity-variant="history-card"
+      data-label={person.label}
+      data-open={person.openRows}
+      className={cn(
+        "flex min-h-11 w-full items-center gap-3 rounded-md border px-2 py-1.5 text-left transition-colors",
+        selected ? "border-brand-blue bg-brand-blue/10" : "border-transparent hover:border-ink-500",
+        dimmed && !selected ? "opacity-40" : "",
+      )}
+    >
+      <span className="relative">
+        <span aria-hidden className={cn(MONOGRAM, "h-10 w-10 text-support")}>
+          {playerInitials(name)}
+        </span>
+        <span className="sr-only">{labels.person}</span>
+        {person.openRows > 0 && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-orange text-ink-900" title={labels.warning}>
+            <SemanticIcon concept="warning" label={labels.warning} className="h-2.5 w-2.5" strokeWidth={2.5} />
+          </span>
+        )}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate text-support font-semibold text-text-primary">{name}</span>
+        <span className="flex items-center gap-2 font-mono text-meta tabular-nums text-text-muted">
+          <span className="inline-flex items-center gap-1">
+            <SemanticIcon concept="calendar" label={labels.days} className="h-3 w-3" />
+            {person.days}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <SemanticIcon concept="object" label={labels.places} className="h-3 w-3" />
+            {person.places.length}
+          </span>
+          {person.aggregateRows > 0 && (
+            <span className="text-state-amber" title={labels.aggregate.replace("{hours}", formatHours(person.aggregateHours)).replace("{rows}", String(person.aggregateRows))}>
+              Σ
+            </span>
+          )}
+        </span>
+      </span>
+      <WeekStrip person={person} height={18} labels={labels} formatHours={formatHours} />
+    </button>
+  );
+}
+
+/** FOCUS — the identity in front of you. */
 export function HistoricalPlayerCard({
   person,
   labels,
@@ -108,162 +184,194 @@ export function HistoricalPlayerCard({
   labels: HistoricalPlayerCardLabels;
   formatDate: (iso: string) => string;
   formatHours: (n: number) => string;
-  /** A stable DOM id so the field board can deep-link to the card. */
+  /** A stable DOM id so the field can deep-link to the card. */
   personId: string;
 }) {
   const name = person.name ?? person.label;
-  const maxWeekHours = Math.max(1, ...person.weeks.map((w) => w.hours));
-  const { timeline, laneDetails, range } = historyTimelineFor(person, formatDate);
+  const lanes = personObjectLanes(person);
+  const shown = lanes.slice(0, 6);
+  const timeline: HistoryTimeline = {
+    lanes: shown.map((l, i) => ({
+      id: `${i}:${l.name}`,
+      label: `${l.name} · ${l.days} d`,
+      startFraction: l.startFraction,
+      endFraction: l.endFraction,
+      current: false,
+    })),
+    ticks: [],
+    undatedCount: 0,
+    fromIso: person.firstDate,
+    toIso: person.lastDate,
+  };
+  const range = person.firstDate && person.lastDate ? `${formatDate(person.firstDate)} → ${formatDate(person.lastDate)}` : null;
   const openQuestions = person.openRows;
 
   return (
     <article
       id={personId}
-      className="flex gap-3 rounded-card border border-ink-600 bg-ink-800/60 p-3 sm:p-4"
+      className="flex gap-3"
       data-testid="historical-player-card"
       data-identity-variant="history-card"
       data-state={person.state}
       data-open={openQuestions}
     >
       <ProvenanceEdge provenanceClass="EVIDENCE_SUPPORTED" />
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
         {/* identity */}
-        <header className="flex items-start gap-3">
-          <div
-            aria-hidden
-            data-testid="historical-player-monogram"
-            className={cn(
-              "flex h-14 w-14 shrink-0 items-center justify-center rounded-full font-display text-lg font-semibold",
-              PLAYER_IDENTITY_AVATAR_BORDER,
-              PLAYER_IDENTITY_FALLBACK_SURFACE,
-            )}
-          >
+        <header className="flex items-center gap-4">
+          <span aria-hidden data-testid="historical-player-monogram" className={cn(MONOGRAM, "h-16 w-16 text-title ring-2 ring-brand-cyan/40 ring-offset-2 ring-offset-ink-800")}>
             {playerInitials(name)}
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <h3 className="truncate font-display text-lg font-semibold tracking-tightest text-text-primary">{name}</h3>
-              <span className="rounded-full border border-brand-orange/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-orange">
+          </span>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <h3 className="truncate font-display text-title font-semibold tracking-tightest text-text-primary">{name}</h3>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full border border-brand-orange/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-orange">
+                <SemanticIcon concept="historical" label={labels.historical} className="h-3 w-3" />
                 {labels.historical}
               </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-brand-cyan/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan" data-testid="historical-player-evidence-state">
+                <SemanticIcon concept="evidence" label={labels.evidenceIcon} className="h-3 w-3" />
+                {labels.state}
+              </span>
+              {range && (
+                <span className="inline-flex items-center gap-1 font-mono text-meta tabular-nums text-text-secondary">
+                  <SemanticIcon concept="time" label={labels.time} className="h-3 w-3" />
+                  {range}
+                </span>
+              )}
             </div>
-            <p className="text-xs text-text-secondary">
-              {range ?? "—"} · {labels.state} · {labels.relationship}
-            </p>
-            <ProvenanceLine provenanceClass="EVIDENCE_SUPPORTED" text={`${labels.provenance}: ${labels.provenanceText}`} testid="historical-player-provenance" />
+            <ProvenanceLine provenanceClass="EVIDENCE_SUPPORTED" text={labels.provenanceText} testid="historical-player-provenance" className="text-meta" />
           </div>
         </header>
 
-        {/* the work, in real figures */}
-        <dl className="grid grid-cols-3 gap-2" data-testid="historical-player-figures">
-          <div className="flex flex-col">
-            <dt className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.hours}</dt>
-            <dd className="font-display text-xl font-bold tabular-nums text-text-primary">{formatHours(person.hours)} h</dd>
+        {/* the work, in real figures — icon · value · unit */}
+        <dl className="flex flex-wrap items-baseline gap-x-5 gap-y-1" data-testid="historical-player-figures">
+          <div className="flex items-baseline gap-1.5">
+            <dt className="sr-only">{labels.days}</dt>
+            <dd className="flex items-baseline gap-1.5 font-display text-card-title font-bold tabular-nums text-text-primary">
+              <SemanticIcon concept="calendar" label={labels.days} className="h-3.5 w-3.5 self-center text-text-muted" />
+              {person.days}
+              <span className="font-mono text-meta font-normal uppercase tracking-label text-text-muted">{labels.days}</span>
+            </dd>
           </div>
-          <div className="flex flex-col">
-            <dt className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.days}</dt>
-            <dd className="font-display text-xl font-bold tabular-nums text-text-primary">{person.days}</dd>
+          <div className="flex items-baseline gap-1.5">
+            <dt className="sr-only">{labels.hours}</dt>
+            <dd className="flex items-baseline gap-1.5 font-display text-card-title font-bold tabular-nums text-text-primary">
+              <SemanticIcon concept="time" label={labels.hours} className="h-3.5 w-3.5 self-center text-text-muted" />
+              {formatHours(person.hours)}
+              <span className="font-mono text-meta font-normal uppercase tracking-label text-text-muted">h</span>
+            </dd>
           </div>
-          <div className="flex flex-col">
-            <dt className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.places}</dt>
-            <dd className="font-display text-xl font-bold tabular-nums text-text-primary">{person.places.length}</dd>
+          <div className="flex items-baseline gap-1.5">
+            <dt className="sr-only">{labels.places}</dt>
+            <dd className="flex items-baseline gap-1.5 font-display text-card-title font-bold tabular-nums text-text-primary">
+              <SemanticIcon concept="object" label={labels.places} className="h-3.5 w-3.5 self-center text-text-muted" />
+              {person.places.length}
+              <span className="font-mono text-meta font-normal uppercase tracking-label text-text-muted">{labels.places}</span>
+            </dd>
           </div>
+          {person.aggregateRows > 0 && (
+            <div className="flex items-baseline gap-1.5" data-testid="historical-player-aggregate" title={labels.aggregate.replace("{hours}", formatHours(person.aggregateHours)).replace("{rows}", String(person.aggregateRows))}>
+              <dt className="sr-only">{labels.aggregate.replace("{hours}", formatHours(person.aggregateHours)).replace("{rows}", String(person.aggregateRows))}</dt>
+              <dd className="flex items-baseline gap-1.5 font-display text-card-title font-bold tabular-nums text-state-amber">
+                Σ {formatHours(person.aggregateHours)}
+                <span className="font-mono text-meta font-normal uppercase tracking-label text-state-amber">
+                  h · {person.remoteRows > 0 ? labels.aggregateRemote : `? ${labels.aggregatePeriodUnknown}`}
+                </span>
+              </dd>
+            </div>
+          )}
         </dl>
 
-        {/* time: one bar per week — the person's own rhythm */}
-        {person.weeks.length > 0 && (
-          <div className="flex flex-col gap-1" data-testid="historical-player-weeks">
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.weeks}</span>
-            <ol className="flex h-14 items-end gap-2 border-b border-ink-600" aria-label={labels.weeks}>
-              {person.weeks.map((w) => (
-                <li
-                  key={w.isoWeek}
-                  className="flex flex-1 flex-col items-center justify-end gap-1"
-                  title={`${labels.weekShort} ${w.isoWeek}: ${formatHours(w.hours)} h · ${w.days} d.`}
-                >
-                  <span className="font-mono text-meta tabular-nums text-text-secondary">{formatHours(w.hours)}</span>
-                  <span
-                    className="w-3 rounded-t-[2px] bg-brand-cyan"
-                    style={{ height: `${Math.max(3, Math.round((w.hours / maxWeekHours) * 28))}px` }}
-                  />
-                  <span className="font-mono text-meta tabular-nums text-text-muted">{w.isoWeek}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
+        {/* WORK REALITY — the person's places on their own time band */}
+        <WorkHistoryTimeline
+          timeline={timeline}
+          labels={{
+            title: labels.timeline.title,
+            current: labels.timeline.current,
+            undated: lanes.length > shown.length ? labels.moreLanes.replace("{count}", String(lanes.length - shown.length)) : null,
+            range,
+            laneDetails: [],
+            empty: labels.timeline.empty,
+            ariaLabel: labels.timeline.ariaLabel,
+          }}
+        />
 
-        {/* places */}
-        {person.places.length > 0 && (
-          <ul className="flex flex-wrap gap-1.5" data-testid="historical-player-places">
-            {person.places.slice(0, 4).map((p) => (
-              <li key={p.name} className="rounded-full border border-ink-500 bg-ink-900 px-2 py-0.5 text-xs text-text-primary">
+        {/* rhythm · places · unknown · current — tokens, not sentences */}
+        <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
+          <div className="flex flex-col gap-1">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.weeks}</span>
+            <WeekStrip person={person} height={28} labels={labels} formatHours={formatHours} />
+          </div>
+          <ul className="flex flex-wrap gap-1.5" data-testid="historical-player-places" aria-label={labels.places}>
+            {person.places.slice(0, 5).map((p) => (
+              <li key={p.name} className="inline-flex items-center gap-1 rounded-full border border-ink-500 bg-ink-900 px-2 py-0.5 text-meta text-text-primary">
+                <SemanticIcon concept="object" label={labels.places} className="h-3 w-3 text-text-muted" />
                 {p.name}
-                <span className="text-text-muted"> · {p.rows} d.</span>
+                <span className="font-mono tabular-nums text-text-muted">{p.rows}</span>
               </li>
             ))}
-            {person.places.length > 4 && (
-              <li className="rounded-full px-2 py-0.5 text-xs text-text-muted">+{person.places.length - 4}</li>
+            {person.places.length > 5 && <li className="rounded-full px-2 py-0.5 text-meta text-text-muted">+{person.places.length - 5}</li>}
+            {person.activities.map((a) => (
+              <li key={a} className="inline-flex items-center gap-1 rounded-full border border-dashed border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                <SemanticIcon concept="work" label={labels.activities} className="h-3 w-3 text-text-muted" />
+                {a}
+              </li>
+            ))}
+          </ul>
+          <ul className="flex flex-wrap gap-1.5" data-testid="historical-player-unknowns" aria-label={labels.unknowns}>
+            {person.unallocatedRows > 0 && (
+              <li className="inline-flex items-center gap-1 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta text-text-secondary" title={labels.unknownAllocation.replace("{count}", String(person.unallocatedRows))}>
+                <SemanticIcon concept="unknown" label={labels.unknown} className="h-3 w-3" />
+                {person.unallocatedRows} d
+              </li>
+            )}
+            {person.noPlaceRows > 0 && (
+              <li className="inline-flex items-center gap-1 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta text-text-secondary" title={labels.unknownPlace.replace("{count}", String(person.noPlaceRows))}>
+                <SemanticIcon concept="unknown" label={labels.unknown} className="h-3 w-3" />
+                <SemanticIcon concept="location" label={labels.places} className="h-3 w-3" />
+                {person.noPlaceRows} d
+              </li>
+            )}
+            <li
+              className="inline-flex items-center gap-1 rounded-full border border-ink-600 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+              data-testid="historical-player-current"
+              title={labels.currentNotInferred}
+            >
+              <SemanticIcon concept="current" label={labels.currentNotInferred} className="h-3 w-3" />
+              {labels.currentToken}
+            </li>
+            {openQuestions > 0 && (
+              <li className="inline-flex items-center gap-1 rounded-full border border-brand-orange/50 px-2 py-0.5 font-mono text-meta text-brand-orange" title={labels.openQuestions.replace("{count}", String(openQuestions))}>
+                <SemanticIcon concept="warning" label={labels.warning} className="h-3 w-3" />
+                {openQuestions}
+              </li>
             )}
           </ul>
-        )}
+        </div>
 
-        {/* aggregates, apart */}
-        {person.aggregateRows > 0 && (
-          <p className="text-xs text-state-amber" data-testid="historical-player-aggregate">
-            {labels.aggregate.replace("{hours}", formatHours(person.aggregateHours)).replace("{rows}", String(person.aggregateRows))}
-            {person.remoteRows > 0 ? ` · ${labels.aggregateRemote}` : ""}
-            {` · ${labels.aggregatePeriodUnknown}`}
-          </p>
-        )}
-
-        <p className="text-xs text-text-muted" data-testid="historical-player-current">{labels.currentNotInferred}</p>
-        {openQuestions > 0 && (
-          <p className="text-xs text-state-amber">{labels.openQuestions.replace("{count}", String(openQuestions))}</p>
-        )}
-
-        {/* the evidence behind the card */}
+        {/* INSPECT — the evidence behind the identity (LEVEL 3) */}
         <details className="rounded-md border border-ink-600" data-testid="historical-player-details">
-          <summary className="cursor-pointer px-3 py-2 text-sm text-text-secondary">{labels.details}</summary>
+          <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 text-support text-text-secondary">
+            <SemanticIcon concept="source" label={labels.details} className="h-4 w-4" />
+            {labels.details}
+          </summary>
           <div className="flex flex-col gap-4 px-3 pb-3 pt-1">
-            <WorkHistoryTimeline
-              timeline={timeline}
-              labels={{
-                title: labels.timeline.title,
-                current: labels.timeline.current,
-                undated: null,
-                range,
-                laneDetails,
-                empty: labels.timeline.empty,
-                ariaLabel: labels.timeline.ariaLabel,
-              }}
-            />
-            <section className="flex flex-col gap-1">
-              <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.activities}</h4>
-              {person.activities.length > 0 ? (
-                <ul className="flex flex-wrap gap-1.5">
-                  {person.activities.map((a) => (
-                    <li key={a} className="rounded-full border border-ink-500 px-2 py-0.5 text-xs text-text-secondary">{a}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-text-muted">{labels.noActivities}</p>
-              )}
-            </section>
             {person.evidenceSamples.length > 0 && (
               <section className="flex flex-col gap-1" data-testid="historical-player-evidence">
                 <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.evidence}</h4>
                 <ul className="flex flex-col gap-1">
                   {person.evidenceSamples.map((s) => (
-                    <li key={s} className="border-l-2 border-ink-500 pl-2 text-xs italic leading-relaxed text-text-secondary">“{s}”</li>
+                    <li key={s} className="border-l-2 border-ink-500 pl-2 text-meta italic leading-relaxed text-text-secondary">“{s}”</li>
                   ))}
                 </ul>
               </section>
             )}
+            {person.activities.length === 0 && <p className="text-meta text-text-muted">{labels.noActivities}</p>}
             {person.interpretations.length > 0 && (
               <section className="flex flex-col gap-1" data-testid="historical-player-interpretations">
                 <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.interpretations}</h4>
-                <ul className="flex flex-col gap-0.5 text-xs text-text-secondary">
+                <ul className="flex flex-col gap-0.5 text-meta text-text-secondary">
                   {person.interpretations.map((i) => (
                     <li key={i.method}>
                       {labels.interpretationNames[i.method] ?? i.method} · {i.rows}
@@ -273,14 +381,18 @@ export function HistoricalPlayerCard({
               </section>
             )}
             {(person.unallocatedRows > 0 || person.noPlaceRows > 0) && (
-              <section className="flex flex-col gap-1" data-testid="historical-player-unknowns">
+              <section className="flex flex-col gap-1">
                 <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.unknowns}</h4>
-                <ul className="flex flex-col gap-0.5 text-xs text-text-secondary">
+                <ul className="flex flex-col gap-0.5 text-meta text-text-secondary">
                   {person.unallocatedRows > 0 && <li>{labels.unknownAllocation.replace("{count}", String(person.unallocatedRows))}</li>}
                   {person.noPlaceRows > 0 && <li>{labels.unknownPlace.replace("{count}", String(person.noPlaceRows))}</li>}
                 </ul>
               </section>
             )}
+            <p className="text-meta text-text-muted">{labels.currentNotInferred}</p>
+            <p className="text-meta text-text-muted">
+              {labels.provenance}: {labels.provenanceText} · {labels.relationship}
+            </p>
           </div>
         </details>
       </div>

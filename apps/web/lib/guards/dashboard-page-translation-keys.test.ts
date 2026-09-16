@@ -36,7 +36,7 @@ const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
  * Deliberately a short list — a page with several namespaces or computed
  * keys needs its own assertion, not a silently-skipped scan.
  */
-const PAGES: readonly { file: string; binding: string; namespace: string }[] = [
+const PAGES: readonly { file: string; binding: string; namespace: string; hook?: true }[] = [
   {
     file: "app/[locale]/dashboard/network/page.tsx",
     binding: "t",
@@ -55,10 +55,12 @@ const PAGES: readonly { file: string; binding: string; namespace: string }[] = [
     namespace: "evidenceImport",
   },
   {
-    // The pre-commit reconstruction the section renders above the plan.
-    file: "components/app/evidence-import-reconstruction.tsx",
+    // The historical workspace the reconstruction renders — a Client
+    // Component, so the namespace is bound with the hook, not the server call.
+    file: "components/app/historical/historical-workspace.tsx",
     binding: "t",
     namespace: "evidenceImport.reconstruction",
+    hook: true,
   },
 ];
 
@@ -95,7 +97,9 @@ describe("every key a dashboard page asks for resolves in every active locale", 
       // must be corrected rather than quietly doing nothing.
       expect(source).toMatch(
         new RegExp(
-          `const ${page.binding} = await getTranslations\\("${page.namespace}"\\)`,
+          page.hook
+            ? `const ${page.binding} = useTranslations\\("${page.namespace}"\\)`
+            : `const ${page.binding} = await getTranslations\\("${page.namespace}"\\)`,
         ),
       );
       expect(keys.length).toBeGreaterThan(5);

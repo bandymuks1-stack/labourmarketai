@@ -151,9 +151,14 @@ export async function EvidenceImportSection({
       <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
         {t("title")}
       </h2>
-      <p className="text-sm leading-relaxed text-text-secondary">
-        {t("intro")}
-      </p>
+      {/* The intro sentence belongs to the upload step. With a staged session
+          open, the workspace itself is the explanation (constitution §B:
+          show → label → explain on request). */}
+      {!sessionId && (
+        <p className="text-sm leading-relaxed text-text-secondary">
+          {t("intro")}
+        </p>
+      )}
     </header>
   );
 
@@ -504,6 +509,59 @@ export async function EvidenceImportSection({
     </section>
   );
 
+  // THE COMMIT CONTROL — the plan in words, then the existing confirm form.
+  // Built here (the section owns the token and the plan) and handed to the
+  // workspace, which keeps it in a persistent decision bar instead of at the
+  // bottom of a long document (constitution §AM). The plan stays BEFORE the
+  // control, and the control is the same one, with the same token.
+  const commitNode = (
+    <section className={SECTION} data-testid="evidence-commit-section">
+      <h2 className={HEADING}>{t("commit.title")}</h2>
+      {planBlock}
+      {commitToken === null && (
+        <p
+          className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-text-secondary"
+          data-testid="evidence-commit-unavailable"
+        >
+          {t("error.confirmation_unavailable")}
+        </p>
+      )}
+      <EvidenceCommitForm
+        action={commitEvidenceImportAction}
+        sessionId={sessionId}
+        confirmationToken={commitToken}
+        readyCount={ready.length}
+        evidenceStates={options(REPORTED_EVIDENCE_STATES, "evidenceState")}
+        plan={{
+          people: preview.plan.people.length,
+          objects: preview.plan.objects.length,
+          relationships: options(RELATIONSHIP_KINDS, "relationship"),
+          // The relationship that LEADS follows the session's supplier
+          // role: a school imports learners, an agency its workers, an
+          // employer its employees. The person can still pick any other.
+          suggestedRelationship: "employee",
+        }}
+        labels={{
+          evidenceState: t("commit.evidenceState"),
+          evidenceStateHint: t("commit.evidenceStateHint"),
+          confirm: t("commit.confirm", { count: "{count}" }),
+          confirmNone: t("commit.confirmNone"),
+          confirming: t("commit.confirming"),
+          readOnce: t("commit.readOnce"),
+          written: t("result.written"),
+          skipped: t("result.skipped"),
+          notReady: t("result.notReady"),
+          createdPeople: t("result.createdPeople"),
+          createdObjects: t("result.createdObjects"),
+          createPeople: t("plan.createPeople"),
+          createObjects: t("plan.createObjects"),
+          relationship: t("plan.relationship"),
+          errors,
+        }}
+      />
+    </section>
+  );
+
   return shell(
     <>
       {actingFor}
@@ -523,61 +581,17 @@ export async function EvidenceImportSection({
         workObjects={objectOptions}
         actions={{ resolveLabel: resolveEvidenceLabelAction, resolveTime: resolveTimeSemanticsAction }}
         errors={errors}
+        commit={commitNode}
+        readyCount={ready.length}
+        sourceRowsId="evidence-source-rows"
       />
 
-      <Card compact>
-        <section className={SECTION}>
-          <h2 className={HEADING}>{t("commit.title")}</h2>
-          {planBlock}
-          {commitToken === null && (
-            <p
-              className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-text-secondary"
-              data-testid="evidence-commit-unavailable"
-            >
-              {t("error.confirmation_unavailable")}
-            </p>
-          )}
-          <EvidenceCommitForm
-            action={commitEvidenceImportAction}
-            sessionId={sessionId}
-            confirmationToken={commitToken}
-            readyCount={ready.length}
-            evidenceStates={options(REPORTED_EVIDENCE_STATES, "evidenceState")}
-            plan={{
-              people: preview.plan.people.length,
-              objects: preview.plan.objects.length,
-              relationships: options(RELATIONSHIP_KINDS, "relationship"),
-              // The relationship that LEADS follows the session's supplier
-              // role: a school imports learners, an agency its workers, an
-              // employer its employees. The person can still pick any other.
-              suggestedRelationship: "employee",
-            }}
-            labels={{
-              evidenceState: t("commit.evidenceState"),
-              evidenceStateHint: t("commit.evidenceStateHint"),
-              confirm: t("commit.confirm", { count: "{count}" }),
-              confirmNone: t("commit.confirmNone"),
-              confirming: t("commit.confirming"),
-              readOnce: t("commit.readOnce"),
-              written: t("result.written"),
-              skipped: t("result.skipped"),
-              notReady: t("result.notReady"),
-              createdPeople: t("result.createdPeople"),
-              createdObjects: t("result.createdObjects"),
-              createPeople: t("plan.createPeople"),
-              createObjects: t("plan.createObjects"),
-              relationship: t("plan.relationship"),
-              errors,
-            }}
-          />
-        </section>
-      </Card>
-
       {/* THE SOURCE ROWS — every one, fact and derived per field, behind
-          progressive disclosure. The reconstruction above is the default
-          experience; this is the evidence behind it, one click away. */}
+          progressive disclosure. The workspace above is the default
+          experience; this is the evidence behind it, one action away
+          (the workspace's SOURCE control opens and scrolls to it). */}
       <Card compact>
-        <details data-testid="evidence-preview-rows-disclosure">
+        <details data-testid="evidence-preview-rows-disclosure" id="evidence-source-rows" className="scroll-mt-20">
           <summary className="cursor-pointer text-sm font-semibold text-text-primary">
             {t("preview.showRows", { count: preview.rows.length })}
           </summary>
