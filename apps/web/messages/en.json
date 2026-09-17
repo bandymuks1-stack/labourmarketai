@@ -16036,7 +16036,8 @@
       "disputeRecorded": "Your objection is recorded. The organisation's record is unchanged — both are now on file.",
       "disputeAlready": "You had already contested this record. Your objection is on file.",
       "disputeNotAllowed": "Only the person this record is about can contest it, and only once the roster link is confirmed.",
-      "disputeFailed": "Could not record the objection. Please try again."
+      "disputeFailed": "Could not record the objection. Please try again.",
+      "monthlyShare": "Derived equal monthly share · not source days"
     },
     "withdraw": {
       "title": "Undo this import",

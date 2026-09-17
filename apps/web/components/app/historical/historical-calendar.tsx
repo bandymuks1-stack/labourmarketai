@@ -1,5 +1,6 @@
 "use client";
 
+import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
 import { useMemo } from "react";
 
 import {
@@ -62,6 +63,8 @@ export interface HistoricalCalendarLabels {
   readonly weekShort: string;
   readonly apart: string;
   readonly periodUnknown: string;
+  /** "Derived equal monthly share · not source days" (owner 2026-09-17). */
+  readonly monthlyShare: string;
   readonly remote: string;
   readonly open: string;
   readonly weekConflict: string;
@@ -531,7 +534,7 @@ export function HistoricalCalendar({
           {calendar.aggregates.map((a, i) => (
             <li
               key={`${a.label}:${a.recordedOn}:${i}`}
-              className="inline-flex items-center gap-2 rounded-full border border-state-amber/40 py-1 pl-1 pr-3 font-mono text-meta tabular-nums text-text-secondary"
+              className="inline-flex flex-wrap items-center gap-2 rounded-2xl border border-state-amber/40 py-1 pl-1 pr-3 font-mono text-meta tabular-nums text-text-secondary"
               data-testid="evidence-calendar-aggregate"
               data-open={a.open ? "true" : "false"}
             >
@@ -572,6 +575,18 @@ export function HistoricalCalendar({
                     className="h-3 w-3"
                   />
                 </span>
+              )}
+              {/* DERIVED — the even monthly share of a CONFIRMED period
+                  (owner 2026-09-17). Beside the aggregate, in the apart band,
+                  on no day and in no total; absent while the period is open. */}
+              {!a.open && (
+                <PeriodMonthlyShare
+                  hours={a.sourceHours}
+                  periodStart={a.periodStart}
+                  periodEnd={a.periodEnd}
+                  label={labels.monthlyShare}
+                  className="flex basis-full flex-col gap-0.5 pl-1"
+                />
               )}
             </li>
           ))}
