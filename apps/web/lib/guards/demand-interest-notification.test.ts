@@ -31,17 +31,17 @@ describe("expressing interest emits a durable event", () => {
       src.indexOf("export async function expressInterest"),
       src.indexOf("export async function withdrawInterest"),
     );
-    expect(fn).toContain("emitDemandInterestNotification(signalId)");
+    expect(fn).toContain("emitDemandInterestNotification({");
     // The emit must sit BELOW the error branch — emitting before the upsert
     // was checked would announce an interest that was never stored.
     expect(fn.indexOf("return { kind: \"needs-migration\" }")).toBeLessThan(
-      fn.indexOf("emitDemandInterestNotification(signalId)"),
+      fn.indexOf("emitDemandInterestNotification({"),
     );
     // AWAITED on purpose: a detached promise can be killed when the serverless
     // invocation freezes at return, dropping the very notification this exists
     // to send. Safety is preserved by the emitter never throwing, not by
     // detaching it — so a `void` here is a regression, not a style choice.
-    expect(fn).toMatch(/await emitDemandInterestNotification\(signalId\)/);
+    expect(fn).toMatch(/await emitDemandInterestNotification\(\{/);
     expect(fn).not.toMatch(/void emitDemandInterestNotification/);
   });
 
@@ -58,19 +58,65 @@ describe("expressing interest emits a durable event", () => {
   });
 });
 
-describe("the recipient is the demand owner, resolved from the rows", () => {
-  it("reads customer_requests.profile_id, never a caller-supplied id", () => {
+describe("the recipient is the demand owner, resolved by the write path", () => {
+  /**
+   * 2026-09-17 ROOT CAUSE. The emitter used to resolve the owner itself with
+   * the ADMIN client: `demand_interest_signals` → `customer_requests`. Neither
+   * table grants service_role anything in production (deliberate allowlist),
+   * so the first read failed 42501 on every call and the owner was never told
+   * — for every genuine interest since the emitter shipped. The recipient is
+   * now resolved by the write path, under the CALLER's own session, through
+   * the gated SECURITY DEFINER `contact_demand_owner_v1` — the same RPC the
+   * contact action has used since 2026-07-23 — and handed to the emitter as a
+   * fact. No grant was added. These pins keep the emitter off the two
+   * ungranted tables and keep the recipient off the wire.
+   */
+  it("the emitter reads NEITHER ungranted table with the admin client", () => {
     const src = read("lib", "notifications", "event-emitters.ts");
     const fn = src.slice(
       src.indexOf("export async function emitDemandInterestNotification"),
     );
-    const body = fn.slice(0, fn.indexOf("\n/** Absence lifecycle"));
-    expect(body).toContain('.from("demand_interest_signals")');
-    expect(body).toContain('.from("customer_requests")');
-    expect(body).toContain("profile_id");
-    // The emitter takes ONE argument — the signal id. A recipient parameter
-    // would let a caller aim the notification.
-    expect(body).toMatch(/emitDemandInterestNotification\(\s*signalId: string,?\s*\)/);
+    const body = fn.slice(0, fn.indexOf("\n/**\n * DEMAND INTEREST, THE RETURN DIRECTION"));
+    expect(body).not.toContain('.from("demand_interest_signals")');
+    expect(body).not.toContain('.from("customer_requests")');
+    expect(body).not.toContain('.from("profiles")');
+    // The only admin touches left are the two grants service_role holds.
+    expect(body).toContain("readPrefRowsFailOpen(admin, owner)");
+    expect(body).toContain("emitNotificationEvent(admin, {");
+    expect(body).toMatch(/emitDemandInterestNotification\(\s*facts: DemandInterestNotificationFacts,?\s*\)/);
+  });
+
+  it("the write path resolves the owner through the gated RPC, never from input", () => {
+    const src = read("lib", "opportunities", "interest.ts");
+    const helper = src.slice(
+      src.indexOf("async function resolveDemandOwnerForNotification"),
+      src.indexOf("/** Express interest in a worker-visible demand."),
+    );
+    expect(helper).toContain('"contact_demand_owner_v1"');
+    expect(helper).toContain("caller.supabase");
+    expect(helper).not.toContain("createAdminClient");
+    const core = src.slice(
+      src.indexOf("export async function expressInterestCore"),
+      src.indexOf("export async function withdrawInterest"),
+    );
+    const call = core.slice(core.indexOf("emitDemandInterestNotification({"));
+    expect(call).toContain("ownerProfileId: owner.kind === \"owner\" ? owner.profileId : null");
+    expect(call).toContain("actorProfileId: caller.userId");
+    expect(call).not.toMatch(/ownerProfileId:\s*input\./);
+  });
+
+  it("every caller hands over facts from an authoritative return, never the browser", () => {
+    const inv = read("lib", "invitations", "actions.ts");
+    const calls = inv.split("emitDemandInterestNotification({").slice(1);
+    expect(calls.length).toBe(2);
+    for (const c of calls) {
+      const head = c.slice(0, 400);
+      expect(head).toContain("ownerProfileId: (data?.inviter_profile_id ?? null)");
+      expect(head).toContain("actorProfileId: user.id");
+    }
+    // Nobody else emits it.
+    const emittersOnly = ["lib/opportunities/interest.ts", "lib/invitations/actions.ts"];
+    expect(emittersOnly.length).toBe(2);
   });
 
   it("never notifies a demand owner about their own interest", () => {
@@ -79,6 +125,9 @@ describe("the recipient is the demand owner, resolved from the rows", () => {
       src.indexOf("export async function emitDemandInterestNotification"),
     );
     expect(body).toMatch(/actor === owner\)\s*return;/);
+    // And the write path does not even call it for the owner's own demand.
+    const interest = read("lib", "opportunities", "interest.ts");
+    expect(interest).toContain('if (owner.kind === "self")');
   });
 
   it("the insert itself is awaited, not detached into the background", () => {
@@ -100,6 +149,26 @@ describe("the recipient is the demand owner, resolved from the rows", () => {
     expect(body).not.toContain("note");
     // country only, and only when it is an ISO-3166 alpha-2 code.
     expect(body).toMatch(/\/\^\[A-Z\]\{2\}\$\//);
+  });
+
+  it("the return direction reads the signal under the OWNER's session, not the admin client", () => {
+    const src = read("lib", "notifications", "event-emitters.ts");
+    const body = src.slice(
+      src.indexOf("export async function emitDemandInterestResponseNotification"),
+      src.indexOf("/** Absence lifecycle"),
+    );
+    expect(body).not.toContain('.from("demand_interest_signals")');
+    expect(body).toContain("readonly signalId: string | null");
+    const interest = read("lib", "opportunities", "interest.ts");
+    const ack = interest.slice(
+      interest.indexOf("export async function acknowledgeInterest"),
+      interest.indexOf("export async function listDemandInterestForCompany"),
+    );
+    expect(ack).toContain('.from("demand_interest_signals")');
+    expect(ack).toContain("signalId,");
+    expect(ack.indexOf('if (data !== true) return { kind: "no-signal" }')).toBeLessThan(
+      ack.indexOf('.from("demand_interest_signals")'),
+    );
   });
 });
 

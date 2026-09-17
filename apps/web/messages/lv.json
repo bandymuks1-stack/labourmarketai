@@ -383,7 +383,9 @@
         "event_demand_interest_expressed": "Darbinieks izrādīja interesi par jūsu pieprasījumu",
         "event_demand_interest_reviewed": "Uzņēmums atzīmēja jūsu interesi kā izskatītu",
         "event_weekly_digest": "Tavs nedēļas darba un iespēju kopsavilkums ir gatavs",
-        "event_saved_search_match": "Saglabātajā meklējumā ir jauni rezultāti"
+        "event_saved_search_match": "Saglabātajā meklējumā ir jauni rezultāti",
+        "event_weekly_digest_profile_completion": "Lai parādītu tev piemērotus darbus, apstiprini, kādu darbu tu dari",
+        "event_weekly_digest_journal": "Sagatavots tavas nedēļas darba žurnāla pārskats"
       },
       "email": {
         "open": "Atvērt LabourMarket.ai:",

@@ -383,7 +383,9 @@
         "event_demand_interest_expressed": "Töötaja avaldas huvi teie vajaduse vastu",
         "event_demand_interest_reviewed": "Ettevõte märkis teie huvi läbivaadatuks",
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis",
-        "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi"
+        "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi",
+        "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
+        "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis"
       },
       "email": {
         "open": "Ava LabourMarket.ai-s:",

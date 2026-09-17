@@ -248,13 +248,59 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
  *  to nowhere. */
 export function notificationEventHref(
   entityType: string,
+  metadata?: NotificationEventMetadata,
 ): string | undefined {
+  // A profile-completion digest lands where the person can actually become
+  // matchable (the profile: describe your work → confirm the suggestions),
+  // not on the board that would only say it knows too little.
+  if (entityType === "weekly_digest" && metadata?.focus === "profile_completion") {
+    return "/dashboard/profile";
+  }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
+}
+
+/**
+ * The rendered type key for a stored event — `event_<type>`, or for a
+ * focused weekly digest `event_weekly_digest_<focus>`, so the bell and the
+ * activity page label the row for what it truthfully is. Pure.
+ */
+export function notificationRenderedType(
+  eventType: string,
+  metadata?: NotificationEventMetadata,
+): string {
+  if (
+    eventType === "weekly_digest" &&
+    metadata?.focus &&
+    (WEEKLY_DIGEST_FOCUS as readonly string[]).includes(metadata.focus)
+  ) {
+    return `event_weekly_digest_${metadata.focus}`;
+  }
+  return `event_${eventType}`;
 }
 
 /** The ONLY metadata keys an event may carry — safe render hints, never
  *  free-form text. Widening this list is a reviewable act. */
-const SAFE_METADATA_KEYS = ["country", "roleSlug", "startDate"] as const;
+const SAFE_METADATA_KEYS = ["country", "roleSlug", "startDate", "focus"] as const;
+
+/**
+ * `focus` — what a WEEKLY DIGEST row may truthfully claim (2026-09-17).
+ * The digest used to promise "your week's work AND opportunities" to every
+ * recipient, including people whose board could only answer
+ * missing_profile_info; a bell that leads to "we do not know enough about
+ * you" is not first value. The row stays a POINTER (§19(d): no counts), but
+ * it now says which kind of pointer it is:
+ *   - (absent)              — the read-time path confirmed the person is
+ *                             matchable: the digest may speak of opportunities;
+ *   - "profile_completion"  — the person is NOT matchable yet (no work type
+ *                             or no skill evidence): the digest asks them to
+ *                             confirm what work they do, and lands on the
+ *                             profile, not on an empty board;
+ *   - "journal"             — the cron sweep, which can only know the person
+ *                             logged work this week (service_role cannot read
+ *                             skills): the digest speaks of the journal only.
+ */
+export const WEEKLY_DIGEST_FOCUS = ["profile_completion", "journal"] as const;
+export type WeeklyDigestFocus = (typeof WEEKLY_DIGEST_FOCUS)[number];
 export type NotificationEventMetadata = Partial<
   Record<(typeof SAFE_METADATA_KEYS)[number], string>
 >;

@@ -4625,7 +4625,9 @@
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
         "event_weekly_digest": "Your weekly work and opportunities summary is ready",
         "event_saved_search_match": "A search you saved has new results",
-        "event_invitation_accepted": "Somebody accepted your invitation"
+        "event_invitation_accepted": "Somebody accepted your invitation",
+        "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
+        "event_weekly_digest_journal": "Your week’s work journal summary is ready"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",

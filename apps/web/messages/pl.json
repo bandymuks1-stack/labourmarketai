@@ -383,7 +383,9 @@
         "event_demand_interest_expressed": "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
         "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
         "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe",
-        "event_saved_search_match": "Zapisane wyszukiwanie ma nowe wyniki"
+        "event_saved_search_match": "Zapisane wyszukiwanie ma nowe wyniki",
+        "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
+        "event_weekly_digest_journal": "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe"
       },
       "email": {
         "open": "Otwórz w LabourMarket.ai:",

@@ -559,6 +559,20 @@ describe("interest draft → confirm (G4 tail wagon 1)", () => {
     worker_languages: { data: [], error: null },
     demand_interest_signals: { data: signal, error: null },
     "rpc:list_open_demand_for_workers": { data: [DEMAND_ROW], error: null },
+    // The post-write owner resolution (2026-09-17): the gated RPC answers
+    // under the caller's session; the emitter is handed its result.
+    "rpc:contact_demand_owner_v1": {
+      data: [
+        {
+          owner_profile_id: "00000000-0000-4000-8000-0000000000bb",
+          demand_title: "Plytelių klojėjas",
+          has_own_signal: true,
+          demand_open: true,
+          company_verified: true,
+        },
+      ],
+      error: null,
+    },
     ...overrides,
   });
 
@@ -666,9 +680,16 @@ describe("interest draft → confirm (G4 tail wagon 1)", () => {
       ok: true,
       data: { status: "interested", structuredDestination: "/dashboard/opportunities" },
     });
-    // The notification is keyed on the REAL signal row id from the upsert.
+    // The notification is keyed on the REAL signal row id from the upsert,
+    // and the recipient is the owner the gated RPC revealed — never an id the
+    // client supplied.
     expect(interestEmit).toHaveBeenCalledTimes(1);
-    expect(interestEmit).toHaveBeenCalledWith("sig-1");
+    expect(interestEmit).toHaveBeenCalledWith({
+      signalId: "sig-1",
+      ownerProfileId: "00000000-0000-4000-8000-0000000000bb",
+      actorProfileId: "00000000-0000-4000-8000-0000000000aa",
+      country: DEMAND_ROW.country ?? null,
+    });
   });
 
   it("a TAMPERED note is rejected at the token, before any write", async () => {

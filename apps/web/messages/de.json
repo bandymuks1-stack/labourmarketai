@@ -4625,7 +4625,9 @@
         "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
         "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
         "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse",
-        "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen"
+        "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen",
+        "event_weekly_digest_profile_completion": "Damit wir dir passende Jobs zeigen können, bestätige, welche Arbeit du machst",
+        "event_weekly_digest_journal": "Die Wochenübersicht deines Arbeitsjournals ist fertig"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",

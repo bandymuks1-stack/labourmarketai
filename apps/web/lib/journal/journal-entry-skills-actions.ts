@@ -3,6 +3,8 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
@@ -110,6 +112,13 @@ export async function setJournalEntrySkillLinks(
   // dedicated module so this link layer stays insert/delete-only. Best-effort.
   await applyWorkerSkillSourceReconcile(supabase, worker.id);
 
+  // Recognition funnel (2026-09-17): the person CONFIRMED which of their own
+  // declared skills an entry evidences (a count, never a label).
+  emitServerFunnelEvent(FUNNEL_EVENTS.recognitionConfirmed, {
+    source: "journal",
+    route: "/dashboard/journal",
+    metadata: { surface: "journal_entry", role_context: "worker", success: true },
+  });
   revalidatePath("/[locale]/dashboard/journal", "page");
   revalidatePath("/[locale]/dashboard/profile", "page");
   return { ok: true, linked: unique.length };

@@ -50,6 +50,11 @@ export type WorkerJobRecommendationsResult =
        *  until then the board itself has no data and the surfaces render
        *  NOTHING (no fake empty state about "no matches"). */
       readonly boardAvailable: boolean;
+      /** The board's canonical matchability gate (`hasWorkType && hasSkills`),
+       *  projected from the same readiness the board renders. False = every
+       *  card would read missing_profile_info; nothing may promise this
+       *  person opportunities. */
+      readonly matchable: boolean;
       /** True only once the owner-gated seen store is applied. */
       readonly seenAvailable: boolean;
       /** True when the seen read failed for a reason OTHER than the store
@@ -107,11 +112,19 @@ const loadRecommendationsResult = cache(
     // surface reaching for a second source.
     const interestStatusByRequestId: Record<string, InterestStatus> = {};
     for (const row of board.myInterestRows) {
-      interestStatusByRequestId[row.requestId] = row.status;
+      // Vacancy interests key on the vacancy; this index answers "have I
+      // already signalled interest in this DEMAND?" and stays demand-only.
+      if (row.requestId) interestStatusByRequestId[row.requestId] = row.status;
     }
     return {
       kind: "ready",
       boardAvailable: !board.needsDataAccess,
+      // THE canonical matchability gate, projected once from the board's own
+      // readiness (`hasWorkType && hasSkills` — the two facts that stop
+      // `computeOpportunityFit` from producing anything but
+      // missing_profile_info). Read here so a notification that promises
+      // opportunities can check it before promising (weekly digest truth).
+      matchable: board.readiness.hasWorkType && board.readiness.hasSkills,
       seenAvailable: seen.available,
       seenReadDegraded: seenResult.kind === "unexpected_error",
       interestAvailable: board.interestAvailable,
@@ -135,6 +148,8 @@ const BOARD_READ_LIMIT = 100;
 export interface WorkerJobRecommendations {
   readonly kind: "ready";
   readonly boardAvailable: boolean;
+  /** See the read-model field of the same name. */
+  readonly matchable: boolean;
   readonly seenAvailable: boolean;
   readonly seenReadDegraded: boolean;
   readonly interestAvailable: boolean;
@@ -201,6 +216,7 @@ export async function getWorkerJobRecommendations(options?: {
   return {
     kind: "ready",
     boardAvailable: result.boardAvailable,
+    matchable: result.matchable,
     seenAvailable: result.seenAvailable,
     seenReadDegraded: result.seenReadDegraded,
     interestAvailable: result.interestAvailable,

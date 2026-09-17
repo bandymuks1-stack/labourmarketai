@@ -130,6 +130,13 @@ const EXPECTED_EVENTS = [
   "invitation_opened",
   "invitation_declined",
   "external_referral_received",
+  // Worker first-value funnel (2026-09-17).
+  "recognition_suggested",
+  "recognition_confirmed",
+  "recognition_corrected",
+  "recognition_rejected",
+  "profile_matchable",
+  "real_opportunities_loaded",
 ] as const;
 
 describe("activation funnel — event registry", () => {

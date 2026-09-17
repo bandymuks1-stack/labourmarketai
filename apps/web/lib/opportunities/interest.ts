@@ -123,6 +123,52 @@ export async function interestStateFingerprint(
   return `interest:${(data?.status as string) ?? "none"}`;
 }
 
+/**
+ * The notification recipient for a demand the caller just expressed interest
+ * in — from the caller's OWN session through `contact_demand_owner_v1`, never
+ * from the admin client and never from caller input. Outcomes:
+ *   - `owner`      — the demand owner's profile id (server-side use only);
+ *   - `self`       — the caller owns the demand (the RPC returns a row with a
+ *                    NULL owner because `cr.profile_id is distinct from uid`
+ *                    fails while every other gate holds);
+ *   - `unresolved` — no row / RPC missing / error. The emitter names it.
+ */
+async function resolveDemandOwnerForNotification(
+  caller: DomainCaller,
+  requestId: string,
+): Promise<
+  | { kind: "owner"; profileId: string }
+  | { kind: "self" }
+  | { kind: "unresolved" }
+> {
+  try {
+    const { data, error } = await asAny(caller.supabase).rpc(
+      "contact_demand_owner_v1",
+      { p_request_id: requestId },
+    );
+    if (error || !Array.isArray(data) || data.length === 0) {
+      return { kind: "unresolved" };
+    }
+    const row = data[0] as {
+      owner_profile_id?: string | null;
+      has_own_signal?: boolean;
+      demand_open?: boolean;
+      company_verified?: boolean;
+    };
+    if (row.owner_profile_id) {
+      return { kind: "owner", profileId: row.owner_profile_id };
+    }
+    // Every gate held and the owner is still withheld: the only branch of the
+    // RPC that does that is `cr.profile_id is distinct from uid` — the caller.
+    if (row.has_own_signal && row.demand_open && row.company_verified) {
+      return { kind: "self" };
+    }
+    return { kind: "unresolved" };
+  } catch {
+    return { kind: "unresolved" };
+  }
+}
+
 /** Express interest in a worker-visible demand. Idempotent: repeating the
  *  action refreshes the snapshot and keeps status=interested. Cookie-session
  *  wrapper over the transport-neutral core below. */
@@ -239,7 +285,26 @@ export async function expressInterestCore(
   // failed emission still cannot fail a worker's interest.
   const signalId = (signalRow as { id?: string } | null)?.id ?? null;
   if (signalId) {
-    await emitDemandInterestNotification(signalId);
+    // WHO IS TOLD is resolved HERE, under the caller's own session, through
+    // the gated SECURITY DEFINER RPC the contact action has used since
+    // 2026-07-23 (`contact_demand_owner_v1`, migration 20260723053000). It
+    // reveals the owner only when the caller holds their own active signal
+    // on an open demand of a verified company — which is exactly true at
+    // this line, and exactly the board gate — and NULL for the owner's own
+    // demand. The emitter used to look the owner up with the admin client,
+    // which holds no grant on `customer_requests`; that read was the whole
+    // silence (2026-09-17 root cause, see the emitter). No grant was added.
+    const owner = await resolveDemandOwnerForNotification(caller, input.requestId);
+    if (owner.kind === "self") {
+      // APPROVED silence: the demand owner raised a hand at their own demand.
+    } else {
+      await emitDemandInterestNotification({
+        signalId,
+        ownerProfileId: owner.kind === "owner" ? owner.profileId : null,
+        actorProfileId: caller.userId,
+        country: (visibleRow.country as string | null) ?? null,
+      });
+    }
   } else {
     // THE SILENT SKIP. The upsert reported no error, so the interest IS
     // stored — but `.select("id")` came back empty, so there is no signal id
@@ -390,9 +455,25 @@ export async function acknowledgeInterest(input: {
     // for the same reason the outbound half is (a detached write can be frozen
     // at return) and equally unable to fail the acknowledgement, because the
     // emitter never throws.
+    //
+    // The signal id is read HERE, under the acknowledging owner's own RLS
+    // (`demand_interest_signals_demand_owner_select`) — the emitter used to
+    // read it with the admin client, which has no grant on the table, so the
+    // worker was never told (2026-09-17 root cause, same as the outbound half).
+    let signalId: string | null = null;
+    if (input.status === "reviewed") {
+      const { data: signal } = await asAny(supabase)
+        .from("demand_interest_signals")
+        .select("id")
+        .eq("request_id", input.requestId)
+        .eq("worker_id", input.workerId)
+        .maybeSingle();
+      signalId = (signal as { id?: string } | null)?.id ?? null;
+    }
     await emitDemandInterestResponseNotification({
       requestId: input.requestId,
       workerId: input.workerId,
+      signalId,
       status: input.status as "reviewed" | "contacted",
       actorProfileId: user.id,
     });

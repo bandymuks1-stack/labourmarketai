@@ -4625,7 +4625,9 @@
         "event_demand_interest_reviewed": "Компания отметила ваш интерес как рассмотренный",
         "event_weekly_digest": "Ваш еженедельный обзор работы и возможностей готов",
         "event_saved_search_match": "В сохранённом поиске есть новые результаты",
-        "event_invitation_accepted": "Кто-то принял ваше приглашение"
+        "event_invitation_accepted": "Кто-то принял ваше приглашение",
+        "event_weekly_digest_profile_completion": "Чтобы показать подходящие вакансии, подтвердите, какую работу вы выполняете",
+        "event_weekly_digest_journal": "Готов обзор вашего рабочего журнала за неделю"
       },
       "label": "Мои уведомления",
       "emptyTitle": "Сейчас ничего не требует вашего внимания.",

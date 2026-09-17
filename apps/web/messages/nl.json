@@ -4625,7 +4625,9 @@
         "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd",
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
         "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
-        "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen"
+        "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
+        "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
+        "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",

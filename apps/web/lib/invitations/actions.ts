@@ -429,7 +429,16 @@ export async function acceptInvitationAction(input: {
     // EMPLOYER_INVITED_TO_TARGET: the interest row the RPC wrote reaches the
     // demand owner through the SAME emitter a worker's own click uses.
     if (relationship === "interest_recorded" && data?.relationship_id) {
-      await emitDemandInterestNotification(String(data.relationship_id));
+      // The recipient is the INVITER: for an employer-to-worker targeted
+      // invitation the inviter is the demand owner, and the accept RPC
+      // returns that id itself — no admin lookup (service_role holds no
+      // grant on customer_requests; 2026-09-17 root cause in the emitter).
+      await emitDemandInterestNotification({
+        signalId: String(data.relationship_id),
+        ownerProfileId: (data?.inviter_profile_id ?? null) as string | null,
+        actorProfileId: user.id,
+        country: null,
+      });
     }
     emitServerFunnelEvent(FUNNEL_EVENTS.invitationAccepted, {
       source: "invitations",
@@ -525,7 +534,12 @@ export async function acceptInvitationByIdAction(input: {
       invitationId: input.invitationId,
     });
     if (data?.relationship === "interest_recorded" && data?.relationship_id) {
-      await emitDemandInterestNotification(String(data.relationship_id));
+      await emitDemandInterestNotification({
+        signalId: String(data.relationship_id),
+        ownerProfileId: (data?.inviter_profile_id ?? null) as string | null,
+        actorProfileId: user.id,
+        country: null,
+      });
     }
   }
   revalidatePath(`/${input.locale}/dashboard/network`);
