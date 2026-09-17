@@ -5,6 +5,8 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { normalizeSkillLabel } from "@/lib/skills/candidate-skills";
 
 /**
@@ -63,6 +65,12 @@ export async function saveCandidateClarificationAction(
     console.error("[skills] clarify save failed:", error.message);
     return { ok: false, code: "error" };
   }
+  // Recognition funnel: the person CORRECTED / clarified what a word meant.
+  emitServerFunnelEvent(FUNNEL_EVENTS.recognitionCorrected, {
+    source: "profile",
+    route: "/dashboard/profile",
+    metadata: { surface: "skill_clarification", role_context: "worker", success: true },
+  });
   revalidatePath("/", "layout");
   return { ok: true };
 }

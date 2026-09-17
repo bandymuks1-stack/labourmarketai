@@ -74,6 +74,7 @@ import { maybeDispatchNotificationEmail } from "./email-dispatch";
 import { deterministicEntityId } from "./deterministic-entity-id";
 import { isoWeekKey } from "../worker/weekly-intelligence-model";
 import { getWorkerCoreRow } from "../data/worker-core";
+import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -483,45 +484,70 @@ function undelivered(reason: string, detail?: string): void {
   console.warn(INTEREST_UNDELIVERED, detail ? { reason, detail } : { reason });
 }
 
+/**
+ * The facts the write path hands this emitter. Every one is resolved by the
+ * write path from ITS OWN authoritative reads — never from the browser:
+ *   - `signalId`      — `.select("id")` of the upsert, under the worker's RLS;
+ *   - `ownerProfileId`— `contact_demand_owner_v1` (SECURITY DEFINER, applied
+ *                        20260723053000), called under the CALLER's session
+ *                        right after the write. The RPC reveals the owner only
+ *                        when the caller holds their own active signal on an
+ *                        open demand of a verified company — the exact gate
+ *                        the board applies — and returns NULL for the owner's
+ *                        own demand. `null` here = unresolved;
+ *   - `actorProfileId`— the caller's `auth.uid()` (DomainCaller.userId);
+ *   - `country`       — the board row the worker just acted on.
+ */
+export interface DemandInterestNotificationFacts {
+  readonly signalId: string;
+  readonly ownerProfileId: string | null;
+  readonly actorProfileId: string;
+  readonly country: string | null;
+}
+
+/**
+ * ROOT CAUSE, FOUND AND CLOSED (2026-09-17). The emitter used to open with two
+ * admin-client reads — `demand_interest_signals` (for request/worker) and
+ * `customer_requests` (for the owner). Production deliberately allowlists
+ * service_role table grants, and NEITHER table is on the list (verified
+ * 2026-09-17: service_role holds SELECT on `workers`,
+ * `notification_preferences` and `notification_events`, and nothing on
+ * `demand_interest_signals`, `customer_requests` or `profiles`). The first
+ * read failed 42501 on every call, `maybeSingle()` surfaced it as a null row,
+ * and the emitter returned `signal_unreadable` for every genuine interest
+ * since it shipped — which is exactly the "backfill-only" evidence above.
+ *
+ * The fix grants NOTHING. The write path already holds every fact this
+ * emitter needs, under the worker's own authorization plus the gated owner
+ * RPC that the contact action has used since 2026-07-23; it now hands them
+ * over (see `DemandInterestNotificationFacts`). The two remaining admin
+ * touches — the recipient's preferences and the event insert — are the two
+ * grants service_role actually has.
+ */
 export async function emitDemandInterestNotification(
-  signalId: string,
+  facts: DemandInterestNotificationFacts,
 ): Promise<void> {
   try {
-    const admin = createAdminClient();
-    const { data: signal } = await admin
-      .from("demand_interest_signals")
-      .select("request_id, worker_id")
-      .eq("id", signalId)
-      .maybeSingle();
-    const row = signal as {
-      request_id?: string | null;
-      worker_id?: string | null;
-    } | null;
-    if (!row?.request_id || !row.worker_id) {
+    const { signalId, actorProfileId, country } = facts;
+    if (!signalId) {
       undelivered("signal_unreadable");
       return;
     }
-
-    const { data: demand } = await admin
-      .from("customer_requests")
-      .select("profile_id, country")
-      .eq("id", row.request_id)
-      .maybeSingle();
-    const req = demand as {
-      profile_id?: string | null;
-      country?: string | null;
-    } | null;
-    const owner = req?.profile_id ?? null;
+    const owner = facts.ownerProfileId;
     if (!owner) {
+      // The gated RPC returned no owner. For the owner's OWN demand that is
+      // the approved self-interest silence and the caller does not reach
+      // here (see interest.ts); anything else is a real miss.
       undelivered("owner_unresolved");
       return;
     }
 
-    const actor = await workerProfileId(admin, row.worker_id);
     // APPROVED silence, not a failure: you do not need telling that you raised
     // your own hand. Deliberately unlogged so the marker below stays a signal.
+    const actor = actorProfileId;
     if (actor && actor === owner) return;
 
+    const admin = createAdminClient();
     // Preference gate + email hop (completion v1) — this emitter predates
     // `deliver` and keeps its own audited insert (guard-pinned), so it
     // carries the same two channel hops explicitly. Fail-open on an
@@ -532,7 +558,6 @@ export async function emitDemandInterestNotification(
       return;
     }
 
-    const country = req?.country ?? null;
     const outcome = await emitNotificationEvent(admin, {
       recipientProfileId: owner,
       eventType: "demand_interest_expressed",
@@ -605,6 +630,15 @@ export async function emitDemandInterestNotification(
 export async function emitDemandInterestResponseNotification(input: {
   readonly requestId: string;
   readonly workerId: string;
+  /**
+   * The signal row id, read by the ACKNOWLEDGING OWNER under their own RLS
+   * (`demand_interest_signals_demand_owner_select`) in `acknowledgeInterest`.
+   * Same root cause as the outbound half (2026-09-17): this emitter used to
+   * read the signal with the admin client, which holds no grant on the table,
+   * so no worker was ever told their interest had been reviewed. The event
+   * stays keyed on the SIGNAL row — one answer per (worker, demand).
+   */
+  readonly signalId: string | null;
   /** Only "reviewed" emits; "contacted" returns without a write (see above). */
   readonly status: "reviewed" | "contacted";
   /** The acting profile — never notified about answering themselves. */
@@ -613,16 +647,11 @@ export async function emitDemandInterestResponseNotification(input: {
   if (input.status !== "reviewed") return;
   try {
     const admin = createAdminClient();
-    // The event is keyed on the SIGNAL row, exactly like the outbound half, so
-    // one answer per (worker, demand).
-    const { data: signal } = await admin
-      .from("demand_interest_signals")
-      .select("id")
-      .eq("request_id", input.requestId)
-      .eq("worker_id", input.workerId)
-      .maybeSingle();
-    const signalId = (signal as { id?: string } | null)?.id ?? null;
-    if (!signalId) return;
+    const signalId = input.signalId;
+    if (!signalId) {
+      notDelivered("demand_interest_reviewed", "signal_unreadable");
+      return;
+    }
 
     const recipient = await workerProfileId(admin, input.workerId);
     if (!recipient || recipient === input.actorProfileId) return;
@@ -1248,6 +1277,16 @@ export function maybeEmitWeeklyDigestInBackground(
       const { journal, opportunities } = result.intelligence;
       if (!journal.available && !opportunities.available) return;
 
+      // DIGEST TRUTH (2026-09-17). The board's own matchability gate decides
+      // what this row may claim: a person the engine cannot match yet (no
+      // work type or no skill evidence) gets a PROFILE-COMPLETION digest —
+      // "confirm what work you do" — that lands on the profile, never the
+      // "your week's opportunities" digest that lands on a board answering
+      // missing_profile_info. Same exactly-once entity id: one digest a
+      // week, of the kind that is true. Nothing here weakens matching.
+      const recs = await getWorkerJobRecommendations();
+      const matchable = recs.kind === "ready" ? recs.matchable : false;
+
       const admin = createAdminClient();
       // Preference gate (completion v1): a stored in-app opt-out for the
       // digest suppresses the read-time emit too. Fail-open like `deliver`.
@@ -1258,6 +1297,7 @@ export function maybeEmitWeeklyDigestInBackground(
         eventType: "weekly_digest",
         entityType: "weekly_digest",
         entityId: weeklyDigestEntityId(todayIso),
+        metadata: matchable ? {} : { focus: "profile_completion" },
       });
     } catch {
       // Missing service env / transient read failure — observability only,
@@ -1351,9 +1391,14 @@ export async function emitWeeklyDigestNotificationsForCron(): Promise<
         recipientProfileId,
         eventType: "weekly_digest",
         entityType: "weekly_digest",
-        // POINTER-ONLY (§19(d)): no metadata — the numbers live where the
-        // href lands, recomputed at read time.
+        // POINTER-ONLY (§19(d)): no counts — the numbers live where the
+        // href lands, recomputed at read time. `focus: "journal"` is not a
+        // count, it is a limit on the claim: this sweep can only know the
+        // person logged work this week (service_role cannot read skills or
+        // professions), so its digest speaks of the journal and never
+        // promises opportunities it could not check.
         entityId,
+        metadata: { focus: "journal" },
       });
       if (outcome === "written") summary.written += 1;
       else if (outcome === "duplicate") summary.duplicates += 1;

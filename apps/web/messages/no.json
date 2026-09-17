@@ -383,7 +383,9 @@
         "event_demand_interest_expressed": "En arbeidstaker har vist interesse for behovet ditt",
         "event_demand_interest_reviewed": "En bedrift har markert interessen din som gjennomgått",
         "event_weekly_digest": "Din ukentlige oversikt over arbeid og muligheter er klar",
-        "event_saved_search_match": "Et lagret søk har nye resultater"
+        "event_saved_search_match": "Et lagret søk har nye resultater",
+        "event_weekly_digest_profile_completion": "For å vise deg passende jobber, bekreft hvilket arbeid du gjør",
+        "event_weekly_digest_journal": "Ukens oversikt over arbeidsjournalen din er klar"
       },
       "email": {
         "open": "Åpne i LabourMarket.ai:",

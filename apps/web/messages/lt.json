@@ -4625,7 +4625,9 @@
         "event_demand_interest_reviewed": "Įmonė pažymėjo jūsų susidomėjimą kaip peržiūrėtą",
         "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
         "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų",
-        "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą"
+        "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
+        "event_weekly_digest_profile_completion": "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
+        "event_weekly_digest_journal": "Paruošta tavo savaitės darbo žurnalo apžvalga"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",

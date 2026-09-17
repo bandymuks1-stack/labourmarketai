@@ -635,6 +635,23 @@ export default async function OpportunitiesPage({
             result.kind === "ready" && result.capabilities.boardAvailable ? result.opportunities.length : 0,
         }}
       />
+      {/* Funnel truth (2026-09-17): the board's own gate read TRUE for this
+          person on this render, and real rows (platform demand or public ad)
+          were loaded. Bounded scalars only; no ids, no counts beyond the
+          candidate_count above. */}
+      {result.kind === "ready" && result.readiness.hasWorkType && result.readiness.hasSkills ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.profileMatchable}
+          metadata={{ surface: "opportunities", role_context: "worker" }}
+        />
+      ) : null}
+      {result.kind === "ready" &&
+      (result.opportunities.length > 0 || result.externalVacancies.cards.length > 0) ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.realOpportunitiesLoaded}
+          metadata={{ surface: "opportunities", role_context: "worker", success: true }}
+        />
+      ) : null}
       <header className="flex flex-col gap-2">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("world.title")}

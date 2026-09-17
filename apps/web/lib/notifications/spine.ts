@@ -23,6 +23,7 @@ import {
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import {
   notificationEventHref,
+  notificationRenderedType,
   readMyNotificationEvents,
   type NotificationEventMetadata,
 } from "@/lib/notifications/events";
@@ -141,13 +142,16 @@ export async function getDurableNotifications(limit?: number): Promise<
   if (feed.kind !== "ready") return [];
   return feed.events.map((e) => ({
     id: e.id,
-    type: `event_${e.eventType}`,
+    // A focused weekly digest renders as its own type key (see
+    // `notificationRenderedType`), so the label never promises more than the
+    // writer could know.
+    type: notificationRenderedType(e.eventType, e.metadata),
     created_at: e.createdAt,
     read_at: e.readAt,
     // The stored row already knows which entity it is about; this turns that
     // into somewhere the reader can actually go. Clearing still happens by
     // marking read, not by visiting — see NOTIFICATION_ENTITY_HREF.
-    href: notificationEventHref(e.entityType),
+    href: notificationEventHref(e.entityType, e.metadata),
     metadata: e.metadata,
   }));
 }

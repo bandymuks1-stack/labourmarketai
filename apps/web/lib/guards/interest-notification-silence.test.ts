@@ -29,8 +29,10 @@ import { join } from "node:path";
  * This guard pins the marker, and pins that the APPROVED silences stay silent —
  * a marker that fires on correct behaviour is one everybody learns to ignore.
  *
- * It deliberately does NOT assert a fix for the delivery failure itself: the
- * cause is not yet known, and inventing one would be worse than observing it.
+ * 2026-09-17: the cause was found — the emitter's own admin-client reads of
+ * two tables service_role holds no grant on — and closed by handing the facts
+ * over from the write path (see demand-interest-notification.test.ts). The
+ * marker pins below are unchanged: an undelivered bell must stay observable.
  */
 
 const WEB = join(__dirname, "..", "..");

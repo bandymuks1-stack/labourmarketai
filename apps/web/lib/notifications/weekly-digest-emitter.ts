@@ -48,7 +48,9 @@ export function hasCurrentWeekDigest(
   const week = isoWeekKey(todayIso);
   return rows.some(
     (r) =>
-      r.type === "event_weekly_digest" &&
+      // Any variant of this week's digest counts — the focused rows render
+      // as `event_weekly_digest_<focus>` (notificationRenderedType).
+      r.type.startsWith("event_weekly_digest") &&
       typeof r.created_at === "string" &&
       r.created_at.length >= 10 &&
       isoWeekKey(r.created_at.slice(0, 10)) === week,

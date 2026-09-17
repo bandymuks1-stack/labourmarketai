@@ -190,6 +190,19 @@ export const FUNNEL_EVENTS = {
   invitationOpened: "invitation_opened",
   invitationDeclined: "invitation_declined",
   externalReferralReceived: "external_referral_received",
+  // ── Worker first-value funnel (2026-09-17). The states the owner asked to
+  //    measure, as bounded scalars at the real action points: `recognition_*`
+  //    when the person confirms / corrects / rejects a suggestion
+  //    (server-emitted by the existing claim + journal-skill actions),
+  //    `profile_matchable` when the board's own gate reads true for a person
+  //    on a render, `real_opportunities_loaded` when the board rendered ≥1
+  //    real row. No ids, no labels, no counts beyond `success`.
+  recognitionSuggested: "recognition_suggested",
+  recognitionConfirmed: "recognition_confirmed",
+  recognitionCorrected: "recognition_corrected",
+  recognitionRejected: "recognition_rejected",
+  profileMatchable: "profile_matchable",
+  realOpportunitiesLoaded: "real_opportunities_loaded",
 } as const;
 
 export type FunnelEventName =
@@ -207,6 +220,8 @@ export const FUNNEL_EVENT_NAMES: readonly FunnelEventName[] =
 export type FunnelMetadata = {
   /** Source surface, e.g. 'dashboard' | 'profile' | 'google' | 'password'. */
   surface?: string;
+  /** Bounded outcome word (already on the server allowlist). Never free text. */
+  result_kind?: string;
   /** A coarse step label inside a multi-step flow, e.g. 'compose'. */
   step?: string;
   /** Coarse role context: 'worker' | 'company' | 'agency' | 'customer' | 'person'. */
