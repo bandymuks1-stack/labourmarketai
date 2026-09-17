@@ -30,7 +30,9 @@ describe("a multi-site source never becomes a composite object", () => {
     expect(segmentsOf("Hoofdgracht 3; Kantoor").map((s) => s.label)).toEqual(["Hoofdgracht 3", "Kantoor"]);
     // The plan and the commit read canonical SEGMENTS, never the cell.
     expect(core).toMatch(/for \(const seg of placeSegments\(r\.contexts\)\) \{\s*if \(seg\.state !== "new" \|\| !seg\.name\) continue;/);
-    expect(core).toMatch(/contexts\.segments\.map\(async \(seg\): Promise<WorkContextSegment>/);
+    // (segments are walked in order since 2026-09-17 — see the "creates each
+    // canonical place ONCE" block below; the plan still reads SEGMENTS.)
+    expect(core).toMatch(/for \(const seg of contexts\.segments\) out\.push\(await placeSegment\(seg\)\);/);
     expect(core).not.toMatch(/p_name: tidy\(label\)/);
   });
   it("an activity or a note is never resolved to a place", () => {
@@ -176,5 +178,25 @@ describe("what these slices did NOT do", () => {
   it("the historical record is performed work, never a plan or a commitment", () => {
     expect(core).toMatch(/activity_kind: "work"/);
     expect(core).not.toMatch(/bookings|worker_engagements|work_commitments/);
+  });
+});
+
+describe("the commit plan creates each canonical place ONCE (B1 walk, 2026-09-17)", () => {
+  // Production received two "Travers 19" objects 2.5 ms apart: one row's
+  // segments `Travers 19; Travers` both resolved to the same canonical name,
+  // and `Promise.all` let both pass the `byKey` memo before either wrote it.
+  // Segments are now created in order, so the second finds the first's id.
+  const block = core.slice(core.indexOf("if (plan.createObjects) {"), core.indexOf("if (!Array.isArray(segments)) return segments;"));
+  it("object creation walks a row's segments sequentially, never concurrently", () => {
+    expect(block).not.toContain("Promise.all(");
+    expect(block).toMatch(/for \(const seg of contexts\.segments\) out\.push\(await placeSegment\(seg\)\);/);
+  });
+  it("the memo is consulted by canonical key BEFORE any RPC, and written after a creation", () => {
+    const memoRead = block.indexOf("byKey.get(key)");
+    const rpc = block.indexOf('rpc("create_work_object_v1"');
+    const memoWrite = block.indexOf("byKey.set(key, objectId)");
+    expect(memoRead).toBeGreaterThan(-1);
+    expect(rpc).toBeGreaterThan(memoRead);
+    expect(memoWrite).toBeGreaterThan(rpc);
   });
 });
