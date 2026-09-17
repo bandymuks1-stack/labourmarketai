@@ -1,3 +1,4 @@
+import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
@@ -827,6 +828,17 @@ export async function EvidenceImportSection({
                       <span className="text-xs text-text-secondary">
                         {rec.hours} h
                       </span>
+                    )}
+                    {/* DERIVED even monthly share of a period record (owner
+                        2026-09-17) — beside the record, never instead of it. */}
+                    {rec.activityDate === null && (
+                      <PeriodMonthlyShare
+                        hours={rec.hours}
+                        periodStart={rec.periodStart}
+                        periodEnd={rec.periodEnd}
+                        label={t("records.monthlyShare")}
+                        className="flex basis-full flex-col gap-0.5"
+                      />
                     )}
                     <Chip
                       tone={

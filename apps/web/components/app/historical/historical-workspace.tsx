@@ -152,6 +152,7 @@ export function HistoricalWorkspace({
   sourceRowsId: string;
 }) {
   const t = useTranslations("evidenceImport.reconstruction");
+  const tRecords = useTranslations("evidenceImport.records");
   // Dynamic keys (`issue.${kind}`): next-intl's typed `t` cannot see the union.
   const tx = t as unknown as (
     key: string,
@@ -341,6 +342,7 @@ export function HistoricalWorkspace({
     weekShort: t("weekShort"),
     apart: t("aggregatesTitle"),
     periodUnknown: t("card.aggregatePeriodUnknown"),
+    monthlyShare: tRecords("monthlyShare"),
     remote: t("timeRemote"),
     open: t("aggregateOpen"),
     weekConflict: t("field.weekConflict"),

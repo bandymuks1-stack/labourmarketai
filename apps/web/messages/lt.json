@@ -16036,7 +16036,8 @@
       "disputeRecorded": "Jūsų prieštaravimas užfiksuotas. Organizacijos įrašas nepakeistas — dabar saugoma abu.",
       "disputeAlready": "Šį įrašą jau buvote užginčiję. Jūsų prieštaravimas užfiksuotas.",
       "disputeNotAllowed": "Užginčyti gali tik asmuo, apie kurį įrašas, ir tik patvirtinus sąsają su sąrašu.",
-      "disputeFailed": "Nepavyko užfiksuoti prieštaravimo. Bandykite dar kartą."
+      "disputeFailed": "Nepavyko užfiksuoti prieštaravimo. Bandykite dar kartą.",
+      "monthlyShare": "Išvestinis lygus mėnesio paskirstymas · ne šaltinio dienos"
     },
     "withdraw": {
       "title": "Atšaukti šį importą",

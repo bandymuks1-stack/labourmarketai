@@ -1,5 +1,6 @@
 "use client";
 
+import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -295,6 +296,18 @@ export function OrganizationEvidenceSection({
                     <span className="text-xs text-text-secondary">
                       {rec.hours} h
                     </span>
+                  )}
+                  {/* DERIVED even monthly share of a period record (owner
+                      2026-09-17) — the subject reads the same derivation the
+                      organization does, beside the record, never instead. */}
+                  {rec.activityDate === null && (
+                    <PeriodMonthlyShare
+                      hours={rec.hours}
+                      periodStart={rec.periodStart}
+                      periodEnd={rec.periodEnd}
+                      label={tRecords("monthlyShare")}
+                      className="flex basis-full flex-col gap-0.5"
+                    />
                   )}
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {rec.withdrawn

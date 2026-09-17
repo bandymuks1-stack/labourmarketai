@@ -16036,7 +16036,8 @@
       "disputeRecorded": "Uw bezwaar is vastgelegd. Het record van de organisatie is ongewijzigd — beide staan nu geregistreerd.",
       "disputeAlready": "U had dit record al betwist. Uw bezwaar is vastgelegd.",
       "disputeNotAllowed": "Alleen de persoon over wie dit record gaat kan het betwisten, en pas na een bevestigde koppeling.",
-      "disputeFailed": "Het bezwaar kon niet worden vastgelegd. Probeer het opnieuw."
+      "disputeFailed": "Het bezwaar kon niet worden vastgelegd. Probeer het opnieuw.",
+      "monthlyShare": "Afgeleide gelijke maandverdeling · geen brondagen"
     },
     "withdraw": {
       "title": "Deze import ongedaan maken",

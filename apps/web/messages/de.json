@@ -16036,7 +16036,8 @@
       "disputeRecorded": "Ihr Widerspruch ist festgehalten. Der Eintrag der Organisation bleibt unverändert — beides ist jetzt dokumentiert.",
       "disputeAlready": "Sie hatten diesen Eintrag bereits bestritten. Ihr Widerspruch ist dokumentiert.",
       "disputeNotAllowed": "Nur die Person, um die es in diesem Eintrag geht, kann ihn bestreiten — und erst nach bestätigter Zuordnung.",
-      "disputeFailed": "Der Widerspruch konnte nicht festgehalten werden. Bitte erneut versuchen."
+      "disputeFailed": "Der Widerspruch konnte nicht festgehalten werden. Bitte erneut versuchen.",
+      "monthlyShare": "Abgeleitete gleichmäßige Monatsverteilung · keine Quelltage"
     },
     "withdraw": {
       "title": "Diesen Import rückgängig machen",
