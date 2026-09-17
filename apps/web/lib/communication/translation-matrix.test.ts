@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { locales } from "@/lib/i18n/config";
+import { communicationLocales } from "@/lib/i18n/config";
 
 /**
  * MULTILINGUAL COMMUNICATION — the FULL language matrix, proven generically.
@@ -24,7 +24,7 @@ vi.mock("@/lib/ai/run-agent-server", () => ({ runAiAgent: (...a: unknown[]) => r
 
 const { resolveViewerTexts, __clearTranslationCache } = await import("./translation-read");
 
-const SET = [...locales];
+const SET = [...communicationLocales];
 // A provider that "translates" by tagging the target locale — deterministic,
 // language-agnostic, and always DIFFERENT from the original so it is accepted.
 function fakeProvider() {

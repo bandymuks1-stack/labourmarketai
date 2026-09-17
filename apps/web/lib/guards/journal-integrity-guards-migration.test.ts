@@ -42,13 +42,29 @@ describe("Guard: journal_integrity_guards migration", () => {
     expect(name).toMatch(/^\d{14}_journal_integrity_guards\.sql$/);
   });
 
-  it("original_language CHECK set == canonical i18n config `locales` (one source of truth)", () => {
-    // canonical set from apps/web/lib/i18n/config.ts
+  it("original_language CHECK set == canonical i18n config `communicationLocales` (one source of truth)", () => {
+    // canonical set from apps/web/lib/i18n/config.ts.
+    //
+    // Owner RED-1 (2026-09-17): the original_language CHECK preserves what a
+    // message may be AUTHORED in — the COMMUNICATION set, which is the UI
+    // `locales` PLUS communication-only languages (uk/ka). UI_LANGUAGE !=
+    // COMMUNICATION_LANGUAGE, so the CHECK tracks `communicationLocales`, not
+    // `locales`. `locales` stays the 11-code UI set (sanity below); the two
+    // sets are kept in the `locales ⊆ communicationLocales` relation by
+    // lib/guards/message-language-set.test.ts.
     const cfg = read("lib/i18n/config.ts");
-    const localesBlock = cfg.match(/export const locales\s*=\s*\[([\s\S]*?)\]\s*as const/);
-    expect(localesBlock, "could not find `locales` array in config.ts").toBeTruthy();
-    const canonical = codesFrom(localesBlock![1]);
-    expect(canonical.length).toBe(11); // EN + 9 launch markets + RU (§2.4, amended 2026-06-12)
+    const uiBlock = cfg.match(/export const locales\s*=\s*\[([\s\S]*?)\]\s*as const/);
+    expect(uiBlock, "could not find `locales` array in config.ts").toBeTruthy();
+    expect(codesFrom(uiBlock![1]).length).toBe(11); // EN + 9 launch markets + RU
+
+    const commBlock = cfg.match(/export const communicationLocales\s*=\s*\[([\s\S]*?)\]\s*as const/);
+    expect(commBlock, "could not find `communicationLocales` in config.ts").toBeTruthy();
+    // `[...locales, "uk", "ka"]` — codesFrom also reads the two-letter codes in
+    // the surrounding words, so pull the added codes explicitly and union.
+    const added = [...commBlock![1].matchAll(/"([a-z]{2})"/g)].map((m) => m[1]);
+    const canonical = [...new Set([...codesFrom(uiBlock![1]), ...added])].sort();
+    expect(canonical).toContain("uk");
+    expect(canonical).toContain("ka");
 
     // The CHECK is widened forward-only (§16.1: applied migrations are
     // frozen) — the AUTHORITATIVE set lives in the LATEST migration that
@@ -70,7 +86,7 @@ describe("Guard: journal_integrity_guards migration", () => {
     for (const c of checks) {
       expect(
         codesFrom(c[1]),
-        `${latest} CHECK set must equal apps/web/lib/i18n/config.ts \`locales\` — update both or neither (no second list)`,
+        `${latest} CHECK set must equal apps/web/lib/i18n/config.ts \`communicationLocales\` — update both or neither (no second list)`,
       ).toEqual(canonical);
     }
 

@@ -2540,7 +2540,11 @@ describe("no migration files added by this sprint", () => {
 //   20260917120000 (APPLIED 2026-09-17, ledger 20260917080303). RED (SECDEF
 //   replace), PREPARED, NOT APPLIED — owner gate.
 //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
-const SPRINT_BASELINE = 287;
+// Bumped 287 -> 288 for 20260917140000_widen_original_language_uk_ka
+// (owner RED-1 2026-09-17): a GREEN-shaped CHECK widening (+uk,+ka) across the
+// four original_language tables, @human-gate-approved, paired rollback. Global
+// migration-count baseline — recounted from the tree, never summed.
+const SPRINT_BASELINE = 288;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

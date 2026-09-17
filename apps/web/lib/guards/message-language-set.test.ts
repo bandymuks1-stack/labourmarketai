@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { locales } from "@/lib/i18n/config";
+import { locales, communicationLocales } from "@/lib/i18n/config";
 
 /**
  * LANGUAGE-SET DRIFT GUARD — the product's declared locales, the language a
@@ -33,7 +33,11 @@ const APP = join(__dirname, "..", "..");
 const REPO = join(APP, "..", "..");
 const MIGRATIONS = join(REPO, "supabase", "migrations");
 
-const CANON = [...locales].sort();
+// The DB `original_language` CHECK preserves what a message may be AUTHORED in
+// — the COMMUNICATION set, not the UI locale set (owner RED-1 2026-09-17:
+// UI_LANGUAGE != COMMUNICATION_LANGUAGE). Every UI locale must be
+// communication-valid, so `locales ⊆ communicationLocales`.
+const CANON = [...communicationLocales].sort();
 
 /** Every table whose original_language the product must preserve coherently. */
 const TABLES = [
@@ -78,15 +82,19 @@ function effectiveCheckLanguages(table: string): string[] | null {
 }
 
 describe("message language set — one source, no drift", () => {
-  it("the send path derives its accepted set from the canonical `locales` (no second hardcoded list)", () => {
+  it("the send path derives its accepted set from the canonical `communicationLocales` (no second hardcoded list)", () => {
     const code = readFileSync(join(APP, "lib/communication/actions.ts"), "utf8");
-    expect(code).toMatch(/import\s*\{\s*locales\s*\}\s*from\s*"@\/lib\/i18n\/config"/);
-    expect(code).toMatch(/\(locales as readonly string\[\]\)\.includes\(input\.locale\)/);
+    expect(code).toMatch(/import\s*\{\s*communicationLocales\s*\}\s*from\s*"@\/lib\/i18n\/config"/);
+    expect(code).toMatch(/\(communicationLocales as readonly string\[\]\)\.includes\(input\.locale\)/);
     // The old private hardcoded array must be gone — that was the drift risk.
     expect(code).not.toMatch(/KNOWN_LOCALES\s*=\s*\[/);
   });
 
-  it("`locales` is non-trivial and includes the active product languages", () => {
+  it("every UI locale is communication-valid (`locales` ⊆ `communicationLocales`)", () => {
+    for (const l of locales) expect(CANON).toContain(l);
+  });
+
+  it("the communication set is non-trivial and includes the active product languages", () => {
     expect(CANON.length).toBeGreaterThanOrEqual(11);
     for (const l of ["lt", "en", "ru", "nl", "de"]) expect(CANON).toContain(l);
   });

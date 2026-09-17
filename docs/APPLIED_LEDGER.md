@@ -1909,6 +1909,39 @@ workers / worker_skills / worker_professions / claims Δ0.
 Rollback: `supabase/rollbacks/20260917130000_invitation_preview_demand_column_fix_v1.down.sql`
 (drops the function; the app falls back to `get_invitation_preview_v1`).
 
+### `widen_original_language_uk_ka` — RED-1 (CHECK widening) — APPLIED 2026-09-17, ledger `20260917112002`
+
+Repo file `supabase/migrations/20260917140000_widen_original_language_uk_ka.sql`
+(sha256 `f5debd8cf7c8fc57b4573ea342d0e2d04b802e2a2859d2240057d4db2c5f65ff`),
+applied via Supabase MCP `apply_migration` (name `widen_original_language_uk_ka`)
+under explicit owner **RED-1** approval ("OWNER DECISION — MULTILINGUAL
+COMMUNICATION … RED-1 … APPROVED", 2026-09-17). Owner semantic correction the
+same message: UI_LANGUAGE ≠ COMMUNICATION_LANGUAGE — a message may be authored
+in a language the product PRESERVES without a full UI route. Realised by
+`apps/web/lib/i18n/config.ts` `communicationLocales` (= UI `locales` + `uk` +
+`ka`); the CHECK tracks that set (guards `message-language-set` +
+`journal-integrity-guards-migration`).
+
+Widens the `original_language` CHECK from the 11-locale set to
+`('en','lt','lv','et','nl','de','da','no','sv','pl','ru','uk','ka')` on the four
+tables that carry it: `journal_entries`, `conversation_messages`,
+`organization_evidence_records`, `candidate_skills`. Additive only — every
+previously-valid value stays valid; no column, no RLS, no authority, no data
+change.
+
+**Readback (production, `gorgitwvdzxbnaxhrsrw`, zero residue):** before — all
+four CHECKs `no_ka / no_uk`; ka insert probe on the local mirror rejected by
+`conversation_messages_original_language_chk`. After apply — all four
+constraints contain `'ka'` and `'uk'`, `convalidated = true` on all four
+(`…_chk` names; the evidence table's prior `…_check` dropped and re-added as
+`…_chk`). Functional check `'ka' IN (set)` and `'uk' IN (set)` = true. No rows
+written to production. Local mirror additionally proved a real `ka`/`uk`
+message insert preserves `original_language` (rolled back) and that
+down→forward is reversible.
+
+Rollback: `supabase/rollbacks/20260917140000_widen_original_language_uk_ka.down.sql`
+(restores the 11-locale sets; fails loudly if any `uk`/`ka` row exists).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
