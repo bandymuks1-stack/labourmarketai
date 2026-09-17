@@ -6555,7 +6555,9 @@
       "placeholder": "Короткий ответ…",
       "send": "Отправить",
       "sent": "Ответ отправлен."
-    }
+    },
+    "translatedFrom": "Переведено с {lang}",
+    "showOriginal": "Оригинал ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Ваша организация",

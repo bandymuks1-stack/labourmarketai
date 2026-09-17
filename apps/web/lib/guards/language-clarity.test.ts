@@ -184,7 +184,11 @@ describe("message language chip — data-backed only, never guessed", () => {
     const page = read(
       "app/[locale]/dashboard/communication/[conversationId]/page.tsx",
     );
-    expect(page).toMatch(/resolveViewerText\(/);
+    // 2026-09-17: the page resolves the whole thread once, per viewer, through
+    // `resolveViewerTexts` (which calls the same pure `resolveViewerText` per
+    // message) — the chip is still derived from data, never guessed.
+    expect(page).toMatch(/resolveViewerTexts\(/);
+    expect(read("lib/communication/translation-read.ts")).toMatch(/resolveViewerText\(\{/);
     expect(page).toMatch(/original_language/);
     // select("*") read: tolerates the column being absent pre-apply.
     expect(page).toMatch(/\.select\("\*"\)/);

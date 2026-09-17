@@ -6555,7 +6555,9 @@
       "placeholder": "Trumpas atsakymas…",
       "send": "Siųsti",
       "sent": "Atsakymas išsiųstas."
-    }
+    },
+    "translatedFrom": "Išversta iš {lang}",
+    "showOriginal": "Originalas ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",

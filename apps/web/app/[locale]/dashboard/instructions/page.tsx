@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveViewerTexts } from "@/lib/communication/translation-read";
 import {
   listWorkerInstructions,
   listManagedWorkers,
@@ -122,7 +123,30 @@ export default async function InstructionsPage({
   }
 
   // Worker view.
-  const read = await listWorkerInstructions();
+  const listed = await listWorkerInstructions();
+  // MULTILINGUAL WORK COMMUNICATION: an instruction written in the manager's
+  // language is rendered in THIS worker's language through the egress-gated
+  // AI runtime; the original stays on the card. Without an owner grant the
+  // status stays 'unavailable' and the original shows — honestly.
+  const read: typeof listed =
+    listed.kind === "ok"
+      ? await (async () => {
+          const texts = await resolveViewerTexts(
+            listed.instructions.map((i) => ({ id: i.id, body: i.originalText, original_language: i.originalLanguage })),
+            locale,
+            user.id,
+          );
+          return {
+            kind: "ok" as const,
+            instructions: listed.instructions.map((i) => {
+              const vt = texts.get(i.id);
+              return vt && vt.kind === "translated"
+                ? { ...i, translatedText: vt.text, translationStatus: "available" as const }
+                : i;
+            }),
+          };
+        })()
+      : listed;
   // §11/§12 — what each instruction's project still needs from THIS person,
   // the SAME domain read the chat's "mano projektai" renders (visual parity).
   const asks =
