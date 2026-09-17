@@ -151,6 +151,12 @@ describe("relationship invitations — the anti-narrowing contract", () => {
     // The whole point: a learner invitation is `join_organization` carrying a
     // relationship slug. Growing this list per relationship is the taxonomy
     // hardcoding the extensibility contract names as a rejectable move.
+    // `invite_to_demand` (universal network v1, 20260917120000) is NOT a
+    // relationship and NOT a counter-example: it is a TARGET type — the
+    // employer invites a person to a canonical need (customer_requests) —
+    // the same kind of thing `join_project` is. A relationship (student,
+    // volunteer, mentor…) is still DATA on `relationship_slug`; the guard
+    // below that `join_as_student` never exists is unchanged.
     expect([...INVITATION_TYPES]).toEqual([
       "join_platform",
       "join_organization",
@@ -159,6 +165,7 @@ describe("relationship invitations — the anti-narrowing contract", () => {
       "collaborate_partner",
       "join_project",
       "invite_company",
+      "invite_to_demand",
     ]);
     // Asserted against the EXECUTABLE sql: the file's own prose explains why
     // this type was refused, and that explanation must not trip the guard.

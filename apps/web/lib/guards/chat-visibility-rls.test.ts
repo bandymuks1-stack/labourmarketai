@@ -232,6 +232,29 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    check. It calls exactly one RPC, reads and writes no table directly,
     //    touches no chat table, and sends nothing outbound — the projection it
     //    returns carries no name, email, phone or address by construction.
+    //  - lib/invitations/external-referral-receive.ts — the approved-partner
+    //    referral door's writer (universal network v1). The caller is a
+    //    MACHINE (a partner's careers intake) with no user session, so there
+    //    is no RLS-scoped client to use; and service_role holds NO table
+    //    grant on `invitations` in production (verified 2026-09-17), so the
+    //    key opens nothing by itself. It calls exactly two RPCs —
+    //    receive_external_referral_v1 and mark_external_referral_delivery_v1,
+    //    both granted to service_role ONLY (revoked from public / anon /
+    //    authenticated) by 20260917120000 — which re-check consent and
+    //    idempotency inside SQL, insert one `invitations` row and never read
+    //    a profile. Reached only after the per-source machine secret
+    //    (lib/api/external-referral-auth.ts) and the strict contract passed.
+    //    Reads or writes no table directly, touches no chat table.
+    //  - lib/invitations/public-preview.ts — the logged-out invitation
+    //    landing's read (universal network v1). A stranger holding a link has
+    //    no session; the alternative — granting a preview function to anon —
+    //    is the 20260722160000 closure in reverse. Calls exactly one RPC,
+    //    get_invitation_public_preview_v1 (service_role ONLY), whose return
+    //    is a fixed minimal object (kind, status, organization / project
+    //    name, inviter name, capacity, campaign, locale, expiry — no
+    //    addressee, no message, no need, no declared context, no id), and
+    //    re-applies that allowlist in TypeScript so a widened function cannot
+    //    widen the page. Reads or writes no table directly.
     //  - lib/company/claim-public-intake.ts — canonical-journey P3 claim
     //    bridge. Reads company_need_public_intakes rows ONLY where the
     //    caller's AUTHENTICATED email equals contact_email (re-checked on
@@ -369,6 +392,8 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
+      "lib/invitations/external-referral-receive.ts",
+      "lib/invitations/public-preview.ts",
       "lib/lmc/compensation.ts",
       "lib/notifications/event-emitters.ts",
       "lib/sales/lead-intake.ts",

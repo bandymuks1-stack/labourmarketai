@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
 import { reviewReferralContextAction } from "@/lib/invitations/actions";
@@ -24,12 +23,35 @@ import type { DeclaredContextItem, ReviewDecision } from "@/lib/invitations/mode
  */
 type ReviewState = { decision: ReviewDecision; correction?: string | null };
 
+/**
+ * Every word this component renders, resolved on the SERVER page. The
+ * /invite tree ships only the error-boundary messages to the client
+ * (client-messages-allowlist), so a `useTranslations` here would resolve
+ * to raw keys; the page passes the strings instead.
+ */
+export type ReferralReviewLabels = {
+  title: string;
+  intro: string;
+  groups: Record<DeclaredContextItem["group"] | "freeText", string>;
+  decisions: Record<ReviewDecision, string>;
+  accept: string;
+  reject: string;
+  correct: string;
+  save: string;
+  cancel: string;
+  correctionPlaceholder: string;
+  failed: { not_enabled: string; error: string };
+  boundary: string;
+  toProfile: string;
+};
+
 export function ReferralContextReview({
   invitationId,
   sourceName,
   items,
   freeText,
   initialReviews,
+  labels,
 }: {
   invitationId: string;
   sourceName: string;
@@ -37,8 +59,8 @@ export function ReferralContextReview({
   freeText: string | null;
   /** The person's earlier decisions, keyed by item key. */
   initialReviews?: Record<string, ReviewState>;
+  labels: ReferralReviewLabels;
 }) {
-  const t = useTranslations("network.referralReview");
   const [reviews, setReviews] = useState<Record<string, ReviewState>>(initialReviews ?? {});
   const [correcting, setCorrecting] = useState<string | null>(null);
   const [correction, setCorrection] = useState("");
@@ -76,15 +98,15 @@ export function ReferralContextReview({
     >
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-base font-bold text-text-primary">
-          {t("title", { source: sourceName })}
+          {labels.title.replace("{source}", sourceName)}
         </h2>
-        <p className="text-xs text-text-secondary">{t("intro")}</p>
+        <p className="text-xs text-text-secondary">{labels.intro}</p>
       </header>
 
       {groups.map((group) => (
         <div key={group} className="flex flex-col gap-1.5">
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t(`groups.${group}`)}
+            {labels.groups[group]}
           </p>
           <ul className="flex flex-col gap-1">
             {items
@@ -114,7 +136,7 @@ export function ReferralContextReview({
                           state.decision === "rejected" ? "text-state-danger" : "text-state-success"
                         }`}
                       >
-                        {t(`decisions.${state.decision}`)}
+                        {labels.decisions[state.decision]}
                       </span>
                     ) : correcting === item.key ? (
                       <span className="ml-auto flex items-center gap-1.5">
@@ -122,7 +144,7 @@ export function ReferralContextReview({
                           value={correction}
                           onChange={(e) => setCorrection(e.target.value)}
                           maxLength={200}
-                          placeholder={t("correctionPlaceholder")}
+                          placeholder={labels.correctionPlaceholder}
                           data-testid="referral-correction"
                           className="min-h-8 rounded border border-ink-500 bg-ink-800/40 px-2 text-xs text-text-primary"
                         />
@@ -133,14 +155,14 @@ export function ReferralContextReview({
                           data-testid="referral-correction-save"
                           className="rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
                         >
-                          {t("save")}
+                          {labels.save}
                         </button>
                         <button
                           type="button"
                           onClick={() => setCorrecting(null)}
                           className="rounded px-2 py-1 text-meta text-text-muted hover:text-text-primary"
                         >
-                          {t("cancel")}
+                          {labels.cancel}
                         </button>
                       </span>
                     ) : (
@@ -152,7 +174,7 @@ export function ReferralContextReview({
                           data-testid="referral-accept"
                           className="rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-state-success hover:text-text-primary disabled:opacity-50"
                         >
-                          {t("accept")}
+                          {labels.accept}
                         </button>
                         <button
                           type="button"
@@ -164,7 +186,7 @@ export function ReferralContextReview({
                           data-testid="referral-correct"
                           className="rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
                         >
-                          {t("correct")}
+                          {labels.correct}
                         </button>
                         <button
                           type="button"
@@ -173,7 +195,7 @@ export function ReferralContextReview({
                           data-testid="referral-reject"
                           className="rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-state-danger hover:text-text-primary disabled:opacity-50"
                         >
-                          {t("reject")}
+                          {labels.reject}
                         </button>
                       </span>
                     )}
@@ -187,7 +209,7 @@ export function ReferralContextReview({
       {freeText && (
         <div className="flex flex-col gap-1">
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t("groups.freeText")}
+            {labels.groups.freeText}
           </p>
           <p className="whitespace-pre-wrap rounded border border-ink-600 px-2.5 py-1.5 text-xs text-text-secondary">
             {freeText}
@@ -197,14 +219,14 @@ export function ReferralContextReview({
 
       {failed && (
         <p role="status" className="text-xs text-state-danger" data-testid="referral-review-failed">
-          {t(`failed.${failed}`)}
+          {failed === "not_enabled" ? labels.failed.not_enabled : labels.failed.error}
         </p>
       )}
 
       <p className="text-meta text-text-muted" data-testid="referral-review-boundary">
-        {t("boundary")}{" "}
+        {labels.boundary}{" "}
         <Link href="/dashboard/profile" className="underline hover:text-text-primary">
-          {t("toProfile")}
+          {labels.toProfile}
         </Link>
       </p>
     </section>

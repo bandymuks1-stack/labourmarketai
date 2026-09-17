@@ -11,7 +11,10 @@ import {
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { findExternalReferralSource } from "@/lib/invitations/external-sources";
 import { declaredContextItems } from "@/lib/invitations/model";
-import { ReferralContextReview } from "@/components/app/referral-context-review";
+import {
+  ReferralContextReview,
+  type ReferralReviewLabels,
+} from "@/components/app/referral-context-review";
 import { formatUtcDate } from "@/lib/time/display";
 // The ONE list that says "this happened and it was a placement, not a job".
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
@@ -297,6 +300,35 @@ export default async function InvitePage({
     ?.freeText;
   const safeNotice = notice && NOTICES.has(notice) ? notice : null;
   const isDemand = preview.invitation_type === "invite_to_demand";
+  // Resolved here, on the server: the /invite tree ships no `network`
+  // messages to the client (client-messages-allowlist).
+  const tReview = await getTranslations("network.referralReview");
+  const reviewLabels: ReferralReviewLabels = {
+    title: tReview("title", { source: "{source}" }),
+    intro: tReview("intro"),
+    groups: {
+      professions: tReview("groups.professions"),
+      sectors: tReview("groups.sectors"),
+      skills: tReview("groups.skills"),
+      languages: tReview("groups.languages"),
+      destinations: tReview("groups.destinations"),
+      freeText: tReview("groups.freeText"),
+    },
+    decisions: {
+      accepted: tReview("decisions.accepted"),
+      rejected: tReview("decisions.rejected"),
+      corrected: tReview("decisions.corrected"),
+    },
+    accept: tReview("accept"),
+    reject: tReview("reject"),
+    correct: tReview("correct"),
+    save: tReview("save"),
+    cancel: tReview("cancel"),
+    correctionPlaceholder: tReview("correctionPlaceholder"),
+    failed: { not_enabled: tReview("failed.not_enabled"), error: tReview("failed.error") },
+    boundary: tReview("boundary"),
+    toProfile: tReview("toProfile"),
+  };
 
   return shell(
     <>
@@ -422,6 +454,7 @@ export default async function InvitePage({
           items={contextItems}
           freeText={typeof declaredFreeText === "string" ? declaredFreeText : null}
           initialReviews={readReviews(preview.context_review)}
+          labels={reviewLabels}
         />
       )}
 

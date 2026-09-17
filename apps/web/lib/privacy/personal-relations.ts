@@ -109,6 +109,11 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   // what they are looking for, and it reveals nobody else.
   { table: "worker_saved_searches", key: "worker_id" },
   { table: "demand_interest_signals", key: "worker_id" },
+  // Universal network v1: the person's own answers to invitations (accepted /
+  // declined, what it created) and their review of what an external source
+  // declared about them. Theirs above all — it is the provenance of how they
+  // arrived and what they said about it; it names the inviter only by id.
+  { table: "invitation_acceptances", key: "profile_id" },
   { table: "matches", key: "worker_id" },
   { table: "agency_candidate_offers", key: "worker_id" },
   // Requests to disclose THIS person's contact details — theirs above all.
