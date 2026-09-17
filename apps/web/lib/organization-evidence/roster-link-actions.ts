@@ -64,6 +64,6 @@ export async function respondToRosterLinkAction(
             : "error",
     };
   }
-  revalidatePath("/dashboard/profile");
+  revalidatePath("/[locale]/dashboard/profile", "page");
   return { ok: true, linkState: res.linkState };
 }

@@ -134,6 +134,6 @@ export async function disputeEvidenceRecordAction(
     return { ok: false, code: "error" };
   }
 
-  revalidatePath("/dashboard/profile");
+  revalidatePath("/[locale]/dashboard/profile", "page");
   return { ok: true };
 }

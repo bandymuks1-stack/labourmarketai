@@ -206,7 +206,7 @@ export async function setReviewItemStatus(
   }
 
   const outcome = typeof data === "string" ? data : "";
-  revalidatePath("/dashboard/learning");
+  revalidatePath("/[locale]/dashboard/learning", "page");
   // TERMINAL STALE: the RPC closed the item instead of recording the decision.
   if (isTerminalStaleOutcome(outcome)) return { kind: "stale", outcome };
   if (outcome !== status) {
@@ -294,7 +294,7 @@ export async function setAutoConfirmPolicy(input: {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/learning");
+  revalidatePath("/[locale]/dashboard/learning", "page");
   return { kind: "ok", id: data?.id as string | undefined };
 }
 
@@ -320,7 +320,7 @@ export async function applyAutoConfirmation(reviewItemId: string): Promise<Learn
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/learning");
+  revalidatePath("/[locale]/dashboard/learning", "page");
   // The RPC returns a tagged string (e.g. "auto_confirmed:1", "policy_disabled").
   const outcome = typeof data === "string" ? data : undefined;
   // The spine RPC already closes a stale item itself (20260720150000) — surface

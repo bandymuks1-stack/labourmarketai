@@ -44,7 +44,7 @@ const MAX_DESC = 2000;
 const MAX_LABEL = 120;
 const MAX_PRICE = 80;
 const COUNTRY_RE = /^[A-Z]{2}$/;
-const LISTINGS_PATH = "/dashboard/listings";
+const LISTINGS_PATH = "/[locale]/dashboard/listings";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -184,7 +184,7 @@ export async function createMarketplaceListingAction(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: "create_failed" };
   }
-  revalidatePath(LISTINGS_PATH);
+  revalidatePath(LISTINGS_PATH, "page");
   return { kind: "ok", id: typeof data === "string" ? data : undefined };
 }
 
@@ -215,7 +215,7 @@ export async function updateMarketplaceListingAction(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: "update_failed" };
   }
-  revalidatePath(LISTINGS_PATH);
+  revalidatePath(LISTINGS_PATH, "page");
   return { kind: "ok", id };
 }
 
@@ -238,7 +238,7 @@ export async function setMarketplaceListingStatusAction(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: "status_failed" };
   }
-  revalidatePath(LISTINGS_PATH);
+  revalidatePath(LISTINGS_PATH, "page");
   return { kind: "ok", id };
 }
 
@@ -258,7 +258,7 @@ export async function deleteMarketplaceListingAction(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: "delete_failed" };
   }
-  revalidatePath(LISTINGS_PATH);
+  revalidatePath(LISTINGS_PATH, "page");
   return { kind: "ok", id };
 }
 

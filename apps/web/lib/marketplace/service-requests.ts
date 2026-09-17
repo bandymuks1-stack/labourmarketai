@@ -219,7 +219,7 @@ export async function requestServiceOffering(
     if (/offering_not_active/.test(error.message ?? "")) return { kind: "inactive" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/service-requests");
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
   return { kind: "ok", id: typeof data === "string" ? data : undefined };
 }
 
@@ -244,7 +244,7 @@ export async function respondToRequest(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/service-requests");
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
   return { kind: "ok", detail: typeof data === "string" ? data : undefined };
 }
 
@@ -261,7 +261,7 @@ export async function withdrawRequest(id: string): Promise<RequestMutateResult> 
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/service-requests");
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
   return { kind: "ok", detail: typeof data === "string" ? data : undefined };
 }
 
