@@ -1,23 +1,24 @@
 # External worker referral — receiving contract v1
 
-> **Status (2026-09-17, after the owner-gated production proof):**
-> - Database: `20260917120000` **APPLIED** to production (ledger `20260917080303`);
->   every RPC exercised on production as the real roles in a zero-residue
->   transaction — see `docs/APPLIED_LEDGER.md`.
-> - Secret: `EXTERNAL_REFERRAL_TOKEN_NONSTOP` **SET** in the LabourMarket.ai
->   Vercel **Production** environment (48 random bytes, base64url). The value
->   lives only there; it is not in any file, chat or PR.
-> - Code: PR #1752 **not yet merged** — production still runs `main`, so
->   `POST /api/referrals/external/v1` is a **404** today (fail-closed). The
->   door opens on the first deployment after merge.
-> - One forward correction (`20260917130000`, one identifier in the signed-in
->   preview) is RED and **unapplied**; it affects only demand invitations'
->   signed-in landing, not this door.
+> **Status (2026-09-17, live):**
+> - Database: `20260917120000` (ledger `20260917080303`) and the forward
+>   correction `20260917130000` (ledger `20260917091045`) are **APPLIED** to
+>   production; every RPC production-proven with zero residue — see
+>   `docs/APPLIED_LEDGER.md`.
+> - Code: PR #1752 **MERGED** (squash `4ff163da`, 2026-09-17 09:42 UTC) and
+>   **deployed**; `POST /api/referrals/external/v1` is live and answers
+>   `401 unknown_source | unauthorized` to anything but the registered source
+>   with its secret.
+> - Secret: `EXTERNAL_REFERRAL_TOKEN_NONSTOP` is set in the LabourMarket.ai
+>   Vercel **Production** environment (rotated once on 2026-09-17 before any
+>   hand-off; 48 random bytes, base64url). The value exists only there. The
+>   Nonstop side receives it through an owner-controlled channel — never
+>   through a file, a chat or a PR.
 >
 > **Nonstop may flip `LABOURMARKET_INTEGRATION.live = true` only after** (1)
-> #1752 is merged and deployed, (2) the same secret is configured on the
-> Nonstop side, and (3) one `201`, one `200 duplicate` and one `422` have been
-> observed against the live door.
+> the same secret is configured on the Nonstop side, and (2) one `201`, one
+> `200 duplicate` and one `422` have been observed against the live door
+> from the Nonstop processor.
 
 ## What it is
 
