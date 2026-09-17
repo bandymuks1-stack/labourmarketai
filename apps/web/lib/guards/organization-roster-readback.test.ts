@@ -49,7 +49,9 @@ describe("the roster has a reader", () => {
     // 2026-09-17: the roster carries the OFFER — the missing half of the link. The
     // candidates are the workers already in an active relationship (the database's
     // rule), the offer is a real server action, and the person still decides.
-    expect(page).toMatch(/linkCandidates=\{activeWorkerRows/);
+    // Candidates = the legacy company_workers list MERGED with the profiles the
+    // DB rule admits (active engagement + worker row) — 2026-09-17.
+    expect(page).toMatch(/linkCandidates=\{mergeRosterLinkCandidates\(\s*activeWorkerRows/);
     expect(read("components", "app", "organization-roster-section.tsx")).toMatch(/<RosterLinkOfferForm/);
     const actions = read("lib", "organization-evidence", "roster-link-actions.ts");
     expect(actions).toMatch(/export async function offerRosterLinkAction/);
