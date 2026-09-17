@@ -200,3 +200,32 @@ describe("the commit plan creates each canonical place ONCE (B1 walk, 2026-09-17
     expect(memoWrite).toBeGreaterThan(rpc);
   });
 });
+
+describe("attesting a whole session is the SAME event, per record, and nothing else (owner correction 2026-09-17)", () => {
+  const fn = core.slice(core.indexOf("export async function attestSessionRecords("), core.indexOf("// ── read-back"));
+  it("writes only `attested` events into the record lifecycle ledger — no record, hour or state column is touched", () => {
+    expect(fn).toContain('.from("organization_evidence_events")');
+    expect(fn).toContain('event_type: "attested"');
+    expect(fn).not.toContain('.from("organization_evidence_records")');
+    expect(fn).not.toMatch(/\.update\(|\.upsert\(|\.delete\(/);
+    expect(fn).not.toMatch(/hours|evidence_state:/);
+  });
+  it("is idempotent and never re-attests or attests a withdrawn record", () => {
+    expect(fn).toMatch(/filter\(\(r\) => !r\.withdrawn && r\.attestation === null\)/);
+  });
+  it("borrows no session event type for it — the attestation events are the audit trail", () => {
+    expect(fn).not.toContain("recordEvent(");
+  });
+  it("relies on the existing INSERT authority (42501 is reported as a refusal), never on a service role", () => {
+    expect(fn).toContain('res.error.code === "42501"');
+    expect(fn).not.toMatch(/createAdminClient|service_role/);
+  });
+  it("the session-level form omits record_id and is the per-record form in session mode", () => {
+    const forms = read("components/app/evidence-import-forms.tsx");
+    expect(forms).toContain('{recordId && <input type="hidden" name="record_id" value={recordId} />}');
+    expect(forms).toContain('data-testid={recordId ? "evidence-attest-form" : "evidence-attest-session-form"}');
+    const section = read("components/app/evidence-import-section.tsx");
+    expect(section).toContain("action={attestSessionRecordsAction}");
+    expect(section).toMatch(/records\.some\(\(r\) => !r\.attestation && !r\.withdrawn\)/);
+  });
+});

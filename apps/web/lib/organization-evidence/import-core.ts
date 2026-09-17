@@ -2313,6 +2313,59 @@ export async function attestRecord(
   return { kind: "ok", eventId: res.data.id as string };
 }
 
+/**
+ * The organization attesting EVERY live record of one import session — the
+ * same `attested` event `attestRecord` writes, once per record, in one
+ * append (owner correction 2026-09-17: a historical timesheet whose hours
+ * were confirmed in the real work process and paid is not merely
+ * "organization reported"; the organization STANDS BEHIND all of it).
+ *
+ * What this is NOT: it creates no record, changes no hour, no state column,
+ * no source fact — the standing is DERIVED from the event, exactly as for a
+ * single attestation, and a subject who attests their own row still derives
+ * SELF_ATTESTED. Records already attested (and not since withdrawn) and
+ * withdrawn records are skipped, so a repeat is idempotent. Authority is the
+ * INSERT policy on `organization_evidence_events` (manages the organization,
+ * actor is the caller) — RLS refuses every row for anyone else.
+ */
+export async function attestSessionRecords(
+  caller: DomainCaller,
+  input: {
+    readonly sessionId: string;
+    readonly actorRole: (typeof ATTESTATION_ROLES)[number];
+    readonly note?: string | null;
+  },
+): Promise<EvidenceImportResult<{ attested: number; skipped: number }>> {
+  const session = await loadSession(caller, input.sessionId);
+  if (!session.ok) return session.failure;
+  const listed = await listEvidenceRecords(caller, { sessionId: input.sessionId, limit: 1000 });
+  if (listed.kind !== "ok") return listed;
+  const pending = listed.records.filter((r) => !r.withdrawn && r.attestation === null);
+  const skipped = listed.records.length - pending.length;
+  if (pending.length === 0) return { kind: "ok", attested: 0, skipped };
+
+  const rows = pending.map((r) => ({
+    organization_id: session.organizationId,
+    record_id: r.id,
+    event_type: "attested",
+    actor_role: input.actorRole,
+    actor_organization_id: session.organizationId,
+    actor_profile_id: caller.userId,
+    note: input.note ?? null,
+  }));
+  const res = await db(caller.supabase)
+    .from("organization_evidence_events")
+    .insert(rows)
+    .select("id");
+  if (res.error) {
+    if (res.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(res.error);
+  }
+  // The attestation events ARE the audit trail (actor, role, note, time on
+  // every record); no session event is borrowed for it.
+  return { kind: "ok", attested: Array.isArray(res.data) ? res.data.length : rows.length, skipped };
+}
+
 // ── read-back ───────────────────────────────────────────────────────────────
 
 export interface EvidenceRecordView {

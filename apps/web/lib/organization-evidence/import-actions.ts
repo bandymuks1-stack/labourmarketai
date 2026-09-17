@@ -11,6 +11,7 @@ import {
   SOURCE_KINDS,
   SUPPLIER_ROLES,
   attestRecord,
+  attestSessionRecords,
   buildPreview,
   committableRows,
   commitImport,
@@ -521,6 +522,34 @@ export async function withdrawEvidenceImportAction(
  * counts as independent verification. The UI offers no "verify" control at
  * all: independent verification is a different act by a different party.
  */
+/**
+ * The organization attesting EVERY live record of one session (owner
+ * correction 2026-09-17: confirmed-and-paid historical timesheet work is
+ * something the organization stands behind, not merely reports). One
+ * append of `attested` events through the existing INSERT authority; no
+ * record, hour or state column is touched.
+ */
+export async function attestSessionRecordsAction(
+  _previous: EvidenceImportActionState,
+  form: FormData,
+): Promise<EvidenceImportActionState> {
+  const c = await caller();
+  if (!c) return { kind: "refused", reason: "unauthenticated" };
+  const sessionId = text(form, "session_id");
+  const actorRole = oneOf(text(form, "actor_role"), ATTESTATION_ROLES);
+  if (sessionId === "" || !actorRole) {
+    return { kind: "refused", reason: "invalid", detail: "session" };
+  }
+  const res = await attestSessionRecords(c, {
+    sessionId,
+    actorRole,
+    note: text(form, "note") || null,
+  });
+  if (res.kind !== "ok") return refuse(res);
+  revalidatePath(PATH, "page");
+  return { kind: "ok", sessionId, note: `attested:${res.attested}:skipped:${res.skipped}` };
+}
+
 export async function attestEvidenceRecordAction(
   _previous: EvidenceImportActionState,
   form: FormData,

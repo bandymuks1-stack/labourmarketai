@@ -39,6 +39,7 @@ import { EvidenceImportReconstruction } from "@/components/app/evidence-import-r
 import {
   resolveTimeSemanticsAction,
   attestEvidenceRecordAction,
+  attestSessionRecordsAction,
   commitEvidenceImportAction,
   createEvidencePersonAction,
   resolveEvidenceLabelAction,
@@ -800,6 +801,35 @@ export async function EvidenceImportSection({
       <Card compact>
         <section className={SECTION} data-testid="evidence-records">
           <h2 className={HEADING}>{t("records.title")}</h2>
+          {/* THE ORGANIZATION STANDS BEHIND ALL OF IT (owner correction
+              2026-09-17): a historical timesheet whose hours were confirmed in
+              the real work process and paid is attested record by record, in
+              one append, through the same event and authority as the
+              per-record form below. Only live, not-yet-attested records are
+              offered; the count is what will be written. */}
+          {records.some((r) => !r.attestation && !r.withdrawn) && (
+            <div className="flex flex-col gap-1 rounded-md border border-ink-500 px-3 py-2">
+              <p className="text-xs text-text-secondary">
+                {t("records.attestAllHint", {
+                  count: records.filter((r) => !r.attestation && !r.withdrawn).length,
+                })}
+              </p>
+              <EvidenceAttestForm
+                action={attestSessionRecordsAction}
+                sessionId={sessionId}
+                roles={options(ATTESTATION_ROLES, "role")}
+                defaultRole={records[0]?.supplierRole ?? "employer"}
+                labels={{
+                  attest: t("records.attestAll", {
+                    count: records.filter((r) => !r.attestation && !r.withdrawn).length,
+                  }),
+                  attestRole: t("records.attestRole"),
+                  attestNote: t("records.attestNote"),
+                  errors,
+                }}
+              />
+            </div>
+          )}
           {records.length === 0 ? (
             <p className="text-sm text-text-muted">{t("records.empty")}</p>
           ) : (

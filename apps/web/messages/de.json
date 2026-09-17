@@ -16059,7 +16059,9 @@
       "disputeAlready": "Sie hatten diesen Eintrag bereits bestritten. Ihr Widerspruch ist dokumentiert.",
       "disputeNotAllowed": "Nur die Person, um die es in diesem Eintrag geht, kann ihn bestreiten — und erst nach bestätigter Zuordnung.",
       "disputeFailed": "Der Widerspruch konnte nicht festgehalten werden. Bitte erneut versuchen.",
-      "monthlyShare": "Abgeleitete gleichmäßige Monatsverteilung · keine Quelltage"
+      "monthlyShare": "Abgeleitete gleichmäßige Monatsverteilung · keine Quelltage",
+      "attestAll": "Alle {count} Einträge bestätigen",
+      "attestAllHint": "Die Organisation steht hinter jedem noch nicht bestätigten Eintrag aus dieser Quelle ({count}). Ein Bestätigungsereignis je Eintrag, mit Rolle und Notiz; Stunden, Quellfakten und Einträge bleiben unverändert. Keine unabhängige Prüfung."
     },
     "withdraw": {
       "title": "Diesen Import rückgängig machen",
