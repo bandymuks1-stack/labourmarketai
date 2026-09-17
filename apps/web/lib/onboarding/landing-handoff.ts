@@ -140,6 +140,19 @@ export function doorIntentsFromReturnPath(
   return url ? (ROUTED_DOORS.get(routeKey(url)) ?? []) : [];
 }
 
+/**
+ * EVERY catalogue profession the text names, in recogniser order (bounded).
+ * The text-first profile flow shows these as a choice the person makes —
+ * a proposal, never an assignment. Same recogniser as the landing sentence.
+ */
+export function professionsNamedInText(text: string, limit = 4): string[] {
+  if (!text) return [];
+  const found = extractProfileSuggestions(text).professionSlugs.filter((s) =>
+    PROFESSION_SLUGS.includes(s),
+  );
+  return [...new Set(found)].slice(0, Math.max(1, limit));
+}
+
 /** ONE catalogue profession named in the sentence, else null. */
 export function professionFromSentence(sentence: string): string | null {
   if (!sentence) return null;

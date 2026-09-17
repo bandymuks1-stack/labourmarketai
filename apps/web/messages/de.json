@@ -3431,7 +3431,11 @@
       "promotedToCatalog": "{n} Ihrer ausgewählten Fähigkeiten wurden auch in Ihre Katalogliste übernommen — sie zählen jetzt im Matching und in Ihrem CV.",
       "promotedSkipped": "{n} kamen nicht in die Katalogliste (außerhalb Ihrer Arbeitsrichtungen) — sie bleiben in Ihrem Profil als Ihre eigenen Einträge.",
       "viewUpdatedCv": "Aktualisiertes CV ansehen",
-      "aiSuggestionHint": "KI-Vorschlag — vor dem Speichern prüfen"
+      "aiSuggestionHint": "KI-Vorschlag — vor dem Speichern prüfen",
+      "professionProposalTitle": "Welche Arbeit machst du?",
+      "professionProposalHint": "Dein Text nennt diese Berufe — wähle einen als Hauptrichtung. Ohne sie bleiben die gewählten Fähigkeiten nur deine eigenen Angaben, und die Job-Zuordnung sieht sie nicht.",
+      "needsDirection": "Die gewählten Fähigkeiten sind als eigene Angaben gespeichert. Damit Jobs zugeordnet werden können, wähle zuerst, welche Arbeit du machst.",
+      "needsDirectionCta": "Arbeitsrichtung wählen"
     }
   },
   "roles": {

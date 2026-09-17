@@ -3431,7 +3431,11 @@
       "promotedToCatalog": "{n} of your selected skills were also added to your catalogued skill list — they now count in matching and on your CV.",
       "promotedSkipped": "{n} were not added to the catalogued list (outside your current work directions) — they stay in your profile as your own notes.",
       "viewUpdatedCv": "View your updated CV",
-      "aiSuggestionHint": "Suggestion — check it before you save"
+      "aiSuggestionHint": "Suggestion — check it before you save",
+      "professionProposalTitle": "What work do you do?",
+      "professionProposalHint": "Your text names these professions — pick one as your main direction. Without it, the skills you selected stay your own statements and the job matching cannot see them.",
+      "needsDirection": "The skills you selected are saved as your own statements. To be matched with jobs, first choose what work you do.",
+      "needsDirectionCta": "Choose a work direction"
     }
   },
   "roles": {

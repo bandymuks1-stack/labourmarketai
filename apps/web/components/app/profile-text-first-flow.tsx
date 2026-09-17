@@ -22,6 +22,9 @@ import {
 import { CvImportSectionReview } from "@/components/app/cv-import-section-review";
 import { useLocale } from "next-intl";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
+import { setPrimaryProfessionBySlug } from "@/lib/worker/actions";
+import { professionsNamedInText } from "@/lib/onboarding/landing-handoff";
+import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
 import { withTimeout } from "@/lib/async/with-timeout";
 import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -104,7 +107,19 @@ export function ProfileTextFirstFlow({
   initialText = "",
   savedClaimNormalizedLabels = [],
   manualSlot,
+  hasPrimaryProfession = true,
 }: {
+  /**
+   * FAST PATH TO MATCHABILITY (2026-09-17). The board's gate needs a work
+   * type AND skill evidence, and confirmed claims become catalogued skills
+   * only INSIDE the person's declared direction — so a new worker who only
+   * described their work used to confirm suggestions that were then dropped
+   * in silence, and stayed unmatchable. When the page says there is no
+   * primary profession yet, the review step proposes the professions the
+   * text names (the SAME rule-based recogniser the landing uses), the
+   * person confirms ONE, and the promotion runs after that direction exists.
+   */
+  hasPrimaryProfession?: boolean;
   /** Previously-saved self-description text (owner-only profiles.profile_text),
    *  prefilled into the composer. */
   initialText?: string;
@@ -120,10 +135,24 @@ export function ProfileTextFirstFlow({
   const t = useTranslations("skills.textFirst");
   const tS = useTranslations("structuring");
   const tBucket = useTranslations("structuring.buckets");
+  const tSkillNames = useTranslations("skillNames");
+  const tProfessions = useTranslations("professions");
   const locale = useLocale();
   const router = useRouter();
 
   const [stage, setStage] = useState<"compose" | "review" | "manual">("compose");
+  // Professions the text NAMES (catalogue slugs only), and the one the
+  // person picked. Proposed only while no primary profession exists.
+  const [professionProposals, setProfessionProposals] = useState<string[]>([]);
+  const [chosenProfession, setChosenProfession] = useState<string | null>(null);
+  const [professionSet, setProfessionSet] = useState(false);
+  // The chip shows the catalogue name in the person's language when the
+  // label maps to one catalogue skill; the extractor's own label otherwise.
+  const localizedLabel = (label: string): string => {
+    const mapped = mapClaimLabelsToCatalogSlugs([label]).get(label) ?? [];
+    if (mapped.length === 1 && tSkillNames.has(mapped[0])) return tSkillNames(mapped[0]);
+    return label;
+  };
 
   // Activation funnel (P0-A): worker opened the profile edit/compose flow.
   const editStartedRef = useRef(false);
@@ -249,6 +278,17 @@ export function ProfileTextFirstFlow({
         label: c.label,
       })),
     );
+    // FAST PATH: which catalogue professions does the text name? A proposal
+    // the person confirms — never a silent assignment. Only while the person
+    // has no primary profession yet; a declared direction is never overridden.
+    if (!hasPrimaryProfession && !professionSet) {
+      try {
+        setProfessionProposals(professionsNamedInText(raw));
+        setChosenProfession(null);
+      } catch {
+        setProfessionProposals([]);
+      }
+    }
     setStage("review");
 
     // Canonical-journey P6 — OPTIONAL, owner-gated AI enhancement of the
@@ -309,6 +349,14 @@ export function ProfileTextFirstFlow({
       // from the text composer. Owner-only RLS; the server action
       // upserts on (profile_id, normalized_label) so re-clicking Save
       // never duplicates.
+      // FAST PATH: the chosen direction is recorded FIRST, so the promotion
+      // below has a direction to promote into. A failure here is reported
+      // like any other apply failure.
+      if (chosenProfession && !hasPrimaryProfession && !professionSet) {
+        const ok = await setPrimaryProfessionBySlug(chosenProfession);
+        if (ok) setProfessionSet(true);
+      }
+
       await saveProfileSkillClaimsAction(confirmedClaims);
 
       // Pilot telemetry — fire-and-forget. We send a count of confirmed
@@ -529,7 +577,7 @@ export function ProfileTextFirstFlow({
             {selfDeclared.map((it) => (
               <DetectedSuggestionCard
                 key={it.key}
-                label={it.label}
+                label={localizedLabel(it.label)}
                 hint={it.aiOrigin ? t("aiSuggestionHint") : undefined}
                 status={it.status}
                 onConfirm={() => toggle(it.key, "confirmed")}
@@ -546,7 +594,7 @@ export function ProfileTextFirstFlow({
           {selfDeclared.map((it) => (
             <DetectedSuggestionCard
               key={it.key}
-              label={it.label}
+              label={localizedLabel(it.label)}
               hint={it.aiOrigin ? t("aiSuggestionHint") : undefined}
               status={it.status}
               onConfirm={() => toggle(it.key, "confirmed")}
@@ -560,6 +608,45 @@ export function ProfileTextFirstFlow({
           certificates / salary / availability) — same doctrine as the chips:
           the parser proposes, the user disposes, canonical tables persist.
           Renders nothing when the text yielded no structured entries. */}
+      {/* FAST PATH — "Which work do you do?" from the text itself. One
+          choice, confirmed by the person, recorded before the skills are
+          promoted. Hidden once a primary profession exists. */}
+      {!hasPrimaryProfession && !professionSet && professionProposals.length > 0 && (
+        <fieldset
+          className="flex flex-col gap-2 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2"
+          data-testid="profile-text-flow-profession-proposal"
+        >
+          <legend className="px-1 text-xs font-semibold text-text-primary">
+            {t("professionProposalTitle")}
+          </legend>
+          <p className="text-meta text-text-secondary">{t("professionProposalHint")}</p>
+          <div className="flex flex-wrap gap-2">
+            {professionProposals.map((slug) => (
+              <label
+                key={slug}
+                className={cn(
+                  "inline-flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1 text-xs",
+                  chosenProfession === slug
+                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="profession-proposal"
+                  value={slug}
+                  checked={chosenProfession === slug}
+                  onChange={() => setChosenProfession(slug)}
+                  className="accent-brand-blue"
+                  data-testid={`profile-text-flow-profession-${slug}`}
+                />
+                {tProfessions.has(slug) ? tProfessions(slug) : slug}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+
       {sectionProposals && (
         <CvImportSectionReview
           proposals={sectionProposals}
@@ -590,6 +677,20 @@ export function ProfileTextFirstFlow({
               skills (the rows matching, journal evidence and the Verified
               CV read), and how many stay claims-only. Rendered ONLY from
               the real promotion result — no promotion, no line. */}
+          {/* Nothing became a catalogued skill and the person has no
+              direction yet: say so, and point at the one step that unblocks
+              matching — never a silent drop (2026-09-17 production walk). */}
+          {!hasPrimaryProfession && !professionSet && (!promotion || promotion.promoted === 0) && (
+            <p
+              className="mt-1 text-text-secondary"
+              data-testid="profile-text-flow-needs-direction"
+            >
+              {t("needsDirection")}{" "}
+              <a href="#profile-edit" className="font-semibold text-brand-blue hover:text-brand-champagne">
+                {t("needsDirectionCta")} →
+              </a>
+            </p>
+          )}
           {promotion && promotion.applicable && (
             <p
               className="mt-1 text-text-secondary"
