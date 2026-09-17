@@ -3,7 +3,7 @@ import path from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import fixture from "@/lib/organization-evidence/__fixtures__/work-history-2025-part3.staged.json";
 import {
@@ -12,9 +12,34 @@ import {
   type ImportPreview,
   type PreviewRow,
 } from "@/lib/organization-evidence/import-core";
-import { projectImport } from "@/lib/organization-evidence/import-projections";
+import { projectImport, type ImportProjection } from "@/lib/organization-evidence/import-projections";
 import { classifyTimeSemantics, timeSemanticsOpen } from "@/lib/organization-evidence/time-semantics";
-import { HistoricalFieldBoard } from "@/components/app/historical-field-board";
+
+// Minimal next-intl + navigation stubs: the REAL catalogs, no routing infra.
+// The locale under render is switched through `renderLocale` below.
+vi.mock("next-intl", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const fs = require("node:fs");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const path = require("node:path");
+  const cwd = process.cwd();
+  const catalogs: Record<string, Record<string, unknown>> = {};
+  const lookup = (ns: string) => (key: string, vars?: Record<string, unknown>) => {
+    const locale = (globalThis as { __renderLocale?: string }).__renderLocale ?? "lt";
+    catalogs[locale] ??= JSON.parse(fs.readFileSync(path.join(cwd, `messages/${locale}.json`), "utf8"));
+    let v: unknown = `${ns}.${key}`.split(".").reduce<unknown>((a, k) => (a as Record<string, unknown>)?.[k], catalogs[locale]);
+    if (typeof v !== "string") return `${ns}.${key}`;
+    if (vars) for (const [k, val] of Object.entries(vars)) v = (v as string).replace(new RegExp(`\\{${k}\\}`, "g"), String(val));
+    return v as string;
+  };
+  return { useTranslations: (ns: string) => lookup(ns), useLocale: () => (globalThis as { __renderLocale?: string }).__renderLocale ?? "lt" };
+});
+vi.mock("@/lib/i18n/navigation", () => ({
+  useRouter: () => ({ refresh: () => {}, push: () => {}, replace: () => {} }),
+  Link: ({ href, children }: { href: string; children: unknown }) => createElement("a", { href }, children as never),
+}));
+
+const { HistoricalWorkspace } = await import("@/components/app/historical/historical-workspace");
 
 /**
  * PRODUCTION REGRESSION 2026-09-16 (build f3e090ef, digests 1624882775 /
@@ -24,14 +49,18 @@ import { HistoricalFieldBoard } from "@/components/app/historical-field-board";
  * serialise a function across the server→client boundary:
  *
  *   Error: Functions cannot be passed directly to Client Components …
- *     {field: ..., formatDate: function m, formatHours: ..., labels: ...}
  *
  * The local render harness used `renderToStaticMarkup`, which never crosses
  * that boundary, and no e2e test walks an authenticated staged session — so
- * CI was green while production was not. This guard reproduces the exact
- * props the page builds for the exact 158-row session shape and asserts
- * they are boundary-safe, and pins the rule statically so no future prop
- * can reintroduce it.
+ * CI was green while production was not.
+ *
+ * Since the visual-first workspace (constitution 2026-09-16) the boundary is
+ * ONE component: `HistoricalWorkspace`. The server reconstruction hands it
+ * the projection, the staging-only server actions, the section's commit
+ * node and scalars — and nothing else. This guard reproduces the exact props
+ * the page builds for the exact 158-row session shape, asserts every DATA
+ * prop is boundary-safe, renders the workspace in every active locale, and
+ * pins the rule statically so no future prop can reintroduce it.
  */
 
 const dir = path.resolve(__dirname, "../..");
@@ -49,7 +78,7 @@ type Staged = {
 
 /** The projection of the real (anonymised) 158-row session, built the way
  *  `buildPreview` builds it — every row unmatched against an empty org. */
-function projectionOfTheSession() {
+export function projectionOfTheSession(): ImportProjection {
   const staged = fixture as readonly Staged[];
   const { canonical, knownAll } = sessionPlaces(staged as unknown as Record<string, unknown>[], []);
   const rows: PreviewRow[] = staged.map((s) => {
@@ -86,49 +115,63 @@ function unserialisablePaths(value: unknown, at = "props"): string[] {
   return Object.entries(value as Record<string, unknown>).flatMap(([k, v]) => unserialisablePaths(v, `${at}.${k}`));
 }
 
-const lt = JSON.parse(read("messages/lt.json")) as { evidenceImport: { reconstruction: { field: Record<string, string>; weekShort: string } } };
-const boardLabels = { ...lt.evidenceImport.reconstruction.field, week: lt.evidenceImport.reconstruction.weekShort } as never;
+const ACTIVE = ["lt", "en", "nl", "de", "ru"] as const;
 
-describe("the historical field board is a Client Component and receives only serialisable props", () => {
+/** The workspace as the page mounts it, under the locale's real messages. */
+export function renderWorkspace(projection: ImportProjection, locale: string): string {
+  (globalThis as { __renderLocale?: string }).__renderLocale = locale;
+  const noop = async () => ({ kind: "idle" as const });
+  return renderToStaticMarkup(
+    createElement(HistoricalWorkspace, {
+      locale,
+      sessionId: "47627d4a-5bfe-43ac-aa1b-1d4269760116",
+      projection,
+      workObjects: [],
+      actions: { resolveLabel: noop, resolveTime: noop },
+      errors: {},
+      commit: createElement("div", { "data-testid": "commit-node" }),
+      readyCount: projection.commit.records,
+      sourceRowsId: "evidence-source-rows",
+    }),
+  );
+}
+
+describe("the historical workspace is the ONE client boundary and receives only serialisable data", () => {
   it("the exact 158-row session projection crosses the server→client boundary", () => {
     const projection = projectionOfTheSession();
     expect(projection.people).toHaveLength(7);
-    const props = { field: projection.field, locale: "lt", labels: boardLabels };
-    expect(unserialisablePaths(props)).toEqual([]);
-    // And it renders for that session in every active locale.
-    for (const locale of ["lt", "en", "nl", "de", "ru"]) {
-      const html = renderToStaticMarkup(createElement(HistoricalFieldBoard, { ...props, locale }));
-      expect(html).toContain('data-testid="historical-field-board"');
-      expect(html).toContain('data-testid="field-place"');
-      expect(html).toContain('data-iso-week="43"');
+    expect(projection.company.places).toBe(17);
+    // The DATA props. `actions` are server actions (serialisable references)
+    // and `commit` is a React node — the two things a client component may
+    // legitimately receive besides data.
+    const data = { locale: "lt", sessionId: "s", projection, workObjects: [], errors: {}, readyCount: 156, sourceRowsId: "x" };
+    expect(unserialisablePaths(data)).toEqual([]);
+  });
+
+  it("renders for that session in every active locale, with the modes, the state and the decision bar", () => {
+    const projection = projectionOfTheSession();
+    for (const locale of ACTIVE) {
+      const html = renderWorkspace(projection, locale);
+      expect(html, locale).toContain('data-testid="evidence-reconstruction"');
+      expect(html, locale).toContain('data-testid="historical-modes"');
+      expect(html, locale).toContain('data-testid="evidence-decision-bar"');
+      expect(html, locale).toContain('data-testid="historical-overview"');
+      // one decision blocks (the 800 / 165 question), so CONFIRM is withheld
+      expect(html, locale).toMatch(/<button[^>]*disabled[^>]*data-testid="evidence-confirm-open"/);
+      expect(html, locale).not.toMatch(/evidenceImport\.reconstruction\./);
     }
   });
 
-  it("the props interface carries no function-typed prop, and the page passes none", () => {
-    const board = read("components/app/historical-field-board.tsx");
-    expect(board.startsWith('"use client";')).toBe(true);
-    const propsBlock = board.slice(board.indexOf("export function HistoricalFieldBoard("), board.indexOf("const [week, setWeek]"));
-    expect(propsBlock).not.toMatch(/\)\s*=>\s*string/);
-    expect(propsBlock).toMatch(/locale: string;/);
+  it("the reconstruction passes no formatter function; the workspace declares no function prop but the actions", () => {
     const page = read("components/app/evidence-import-reconstruction.tsx");
-    const call = page.slice(page.indexOf("<HistoricalFieldBoard"), page.indexOf("/>", page.indexOf("<HistoricalFieldBoard")));
+    const call = page.slice(page.indexOf("<HistoricalWorkspace"), page.indexOf("/>", page.indexOf("<HistoricalWorkspace")));
     expect(call).not.toMatch(/formatDate=|formatHours=|fmtDate|hours=\{hours\}/);
     expect(call).toMatch(/locale=\{locale\}/);
-  });
-
-  it("no Client Component rendered by the reconstruction receives a formatter function", () => {
-    const page = read("components/app/evidence-import-reconstruction.tsx");
-    const clientComponents = ["HistoricalFieldBoard", "EvidenceTimeSemanticsForm", "EvidenceLabelResolveForm"];
-    for (const name of clientComponents) {
-      let from = 0;
-      while ((from = page.indexOf(`<${name}`, from)) !== -1) {
-        const call = page.slice(from, page.indexOf("/>", from));
-        // Server actions (`actions.*`) are the one function a client component may receive.
-        const propNames = [...call.matchAll(/\s([a-zA-Z]+)=\{/g)].map((m) => m[1]);
-        for (const p of propNames) expect(p, `${name}.${p}`).not.toMatch(/^(format|fmt)/);
-        expect(call).not.toMatch(/=\{(fmtDate|fmtLong|fmtDay|hours)\}/);
-        from += name.length;
-      }
-    }
+    const workspace = read("components/app/historical/historical-workspace.tsx");
+    expect(workspace.startsWith('"use client";')).toBe(true);
+    const props = workspace.slice(workspace.indexOf("export function HistoricalWorkspace("), workspace.indexOf("const t = useTranslations"));
+    const fnProps = [...props.matchAll(/^\s+([a-zA-Z]+):[^;]*=>[^;]*;/gm)].map((m) => m[1]);
+    expect(fnProps).toEqual([]);
+    expect(props).toMatch(/actions: \{ readonly resolveLabel: Action; readonly resolveTime: Action \};/);
   });
 });

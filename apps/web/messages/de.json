@@ -15936,7 +15936,7 @@
       "createdObjects": "Objekte angelegt"
     },
     "records": {
-      "title": "4. Was festgehalten ist",
+      "title": "Was festgehalten ist",
       "empty": "Aus dieser Quelle wurde noch nichts festgehalten.",
       "importedAt": "Importiert",
       "supplier": "Geliefert als",
@@ -16200,7 +16200,16 @@
         "unknowns": "Unbekannt",
         "unknownAllocation": "{count} Tage — mehrere Orte, Verteilung nicht angegeben",
         "unknownPlace": "{count} Tage — Ort nicht ermittelt",
-        "noActivities": "Die Quelle nennt keine Tätigkeit ohne Ort."
+        "noActivities": "Die Quelle nennt keine Tätigkeit ohne Ort.",
+        "currentToken": "aktuell: ?",
+        "moreLanes": "{count} weitere Orte ohne Spur",
+        "profession": "Beruf",
+        "skills": "Fähigkeiten",
+        "availability": "Verfügbarkeit",
+        "pay": "Lohn",
+        "contexts": "Wo gearbeitet",
+        "rhythm": "Tagesrhythmus",
+        "ring": "belegt in {weeks} von {total} Wochen"
       },
       "interpretation": {
         "typo_same_house_number": "Schreibfehler über die Hausnummer zugeordnet",
@@ -16212,7 +16221,7 @@
         "as_written": "wie geschrieben"
       },
       "field": {
-        "title": "Wie das Team gearbeitet hat",
+        "title": "Feld: wer arbeitete wo",
         "subtitle": "Woche, Person oder Ort wählen — das Feld zeigt, wer wo gearbeitet hat, laut Quelle.",
         "allWeeks": "Gesamter Zeitraum",
         "peopleEvidenced": "Personen mit belegter Arbeit",
@@ -16222,8 +16231,14 @@
         "clear": "aufheben",
         "selectedPerson": "Person",
         "selectedPlace": "Ort",
-        "notATeam": "Gemeinsam in einer Datei zu stehen ist kein Team und keine aktuelle Besetzung. Eine Brigade entsteht nur durch Zustimmung.",
-        "hoursUnknownNote": "Stunden erscheinen nur dort, wo die Quelle sie nach Ort aufteilte; sonst nur Tage."
+        "notATeam": "Historische Gruppe ≠ Team",
+        "hoursUnknownNote": "Stunden erscheinen nur dort, wo die Quelle sie nach Ort aufteilte; sonst nur Tage.",
+        "legend": "Ortsmarken",
+        "notATeamWhy": "Gemeinsam in einer Datei zu stehen ist kein Team und keine aktuelle Besetzung. Eine Brigade entsteht nur durch Zustimmung. Gemeinsames Vorkommen in einer Datei ist eine historische Gruppe, kein aktuelles Team. Aus Geschichte entsteht keine Mitgliedschaft und keine Kolonne.",
+        "weekConflict": "die Woche in der Datei widerspricht dem Datum",
+        "formation": "Aufstellung",
+        "unplaced": "Ort nicht ermittelt",
+        "path": "Arbeitsweg"
       },
       "aggregatesTitle": "Zeitraumsummen (keine Kalendertage)",
       "aggregatePeriodUnknownRecorded": "Zeitraum unbekannt · in der Datei erfasst am {date}",
@@ -16242,7 +16257,69 @@
         "calendar": "Kalender: Tagesstunden erreichen Arbeitsjournal und Arbeit in Zahlen erst nach Verknüpfung eines Kontos; Zeitraumsummen nie als Tag.",
         "provenance": "Herkunft: jeder Eintrag zeigt Datei, Zeile und jede Deutung; der gesamte Import kann zurückgezogen werden."
       },
-      "impactNote": "Vor Ihrer Bestätigung wird nichts angelegt oder geschrieben."
+      "impactNote": "Vor Ihrer Bestätigung wird nichts angelegt oder geschrieben.",
+      "source": "Quelle",
+      "close": "Schließen",
+      "modesLabel": "Ansicht",
+      "nothingWrittenShort": "Vorschau · nichts geschrieben",
+      "mode": {
+        "overview": "Überblick",
+        "people": "Menschen",
+        "field": "Feld",
+        "objects": "Objekte",
+        "calendar": "Kalender",
+        "attention": "Achtung"
+      },
+      "state": {
+        "period": "Zeitraum",
+        "people": "Menschen",
+        "objects": "Objekte",
+        "personDays": "Personentage",
+        "dailyHours": "Tagesstunden",
+        "aggregate": "Zeitraumsumme",
+        "decision": "Entscheidung",
+        "decisions": "Entscheidungen"
+      },
+      "icon": {
+        "person": "Person",
+        "time": "Zeit",
+        "evidence": "Nachweis",
+        "warning": "braucht Aufmerksamkeit",
+        "object": "Objekt"
+      },
+      "calendar": {
+        "prev": "Vorheriger Zeitraum",
+        "next": "Nächster Zeitraum",
+        "month": "Monat",
+        "week": "Woche",
+        "table": "Tabelle",
+        "scale": "Kalendermaßstab",
+        "performed": "geleistete Arbeit",
+        "day": "Tag",
+        "sum": "gesamt",
+        "actual": "tatsächlich"
+      },
+      "attention": {
+        "decisions": "Entscheidungen",
+        "observations": "Beobachtungen",
+        "detected": "erkannt",
+        "periodTotal": "Zeitraumsumme",
+        "why": "Warum gefragt wird"
+      },
+      "overview": {
+        "footprint": "Wer arbeitete wo"
+      },
+      "people": {
+        "pick": "Person auswählen – dann sehen Sie ihre Arbeitsrealität."
+      },
+      "bar": {
+        "ready": "bereit",
+        "people": "Menschen",
+        "objects": "Objekte",
+        "review": "Prüfen",
+        "confirm": "Bestätigen",
+        "blocked": "Zuerst {count} Entscheidung(en) unter Achtung."
+      }
     }
   },
   "organizationRoster": {
