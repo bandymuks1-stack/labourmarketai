@@ -4,7 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { locales } from "@/lib/i18n/config";
+import { communicationLocales } from "@/lib/i18n/config";
 import {
   CONVERSATION_RATE_CAP,
   MESSAGE_RATE_CAP,
@@ -346,13 +346,16 @@ export async function sendMessage(input: {
   // translation-on-read later. The column ships as a DRAFT migration
   // (20260610190000) — until the owner applies it, the insert degrades to
   // the legacy shape (42703 = undefined column) instead of failing sends.
-  // The accepted set IS the canonical product locale set (lib/i18n/config),
-  // which is also exactly what the conversation_messages original_language
-  // CHECK admits (guarded by lib/guards/message-language-set.test.ts). Deriving
-  // it here — never a second hardcoded list — means widening the product locale
-  // set widens what messaging preserves, with no hidden drift. An unknown
-  // locale stamps NULL (honest "language unknown"), never a guessed code.
-  const originalLanguage = (locales as readonly string[]).includes(input.locale)
+  // The accepted set is the canonical COMMUNICATION-language set
+  // (lib/i18n/config `communicationLocales`) — the UI `locales` PLUS languages a
+  // message may be authored in without a full UI route (owner RED-1 2026-09-17:
+  // UI_LANGUAGE != COMMUNICATION_LANGUAGE). It is exactly what the
+  // original_language CHECK admits (guarded by
+  // lib/guards/message-language-set.test.ts). Deriving it here — never a second
+  // hardcoded list — means widening the communication set widens what messaging
+  // preserves, with no hidden drift. An unknown locale stamps NULL (honest
+  // "language unknown"), never a guessed code.
+  const originalLanguage = (communicationLocales as readonly string[]).includes(input.locale)
     ? input.locale
     : null;
   let result = await asAny(supabase)

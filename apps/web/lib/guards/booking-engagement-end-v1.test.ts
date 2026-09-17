@@ -1355,6 +1355,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // PREPARED, NOT APPLIED; owner gate. Rollback drops the function (the
       // app falls back to get_invitation_preview_v1).
       "20260917130000_invitation_preview_demand_column_fix_v1.sql",
+      // 2026-09-17 — owner decision RED-1: widen the original_language CHECK to
+      // add 'uk' + 'ka' across the four tables that carry it. A CHECK widening
+      // (additive, reversible, paired rollback, no RLS/data change). The marker
+      // records the owner's explicit RED-1 approval; added in the same commit as
+      // docs/launch/OWNER_GATE_MESSAGE_LANGUAGE_SET_2026-09-17.md.
+      "20260917140000_widen_original_language_uk_ka.sql",
 ]);
   });
 

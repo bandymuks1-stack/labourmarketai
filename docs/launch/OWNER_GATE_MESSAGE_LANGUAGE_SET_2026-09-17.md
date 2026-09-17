@@ -1,6 +1,16 @@
 # OWNER GATE — canonical message-language set (one consolidated CHECK widening)
 
-Date: 2026-09-17 · Class: **RED (schema change)** · Status: **awaiting owner decision, NOT applied**
+> **RESOLVED / APPLIED 2026-09-17 (CORRECTED).** The owner APPROVED RED-1
+> (add `uk` + `ka`). The single consolidated migration
+> `supabase/migrations/20260917140000_widen_original_language_uk_ka.sql` was
+> applied to production `gorgitwvdzxbnaxhrsrw` via Supabase MCP `apply_migration`
+> (ledger `20260917112002`); all four `original_language` CHECKs are validated
+> with `uk`+`ka`. See `docs/APPLIED_LEDGER.md`. The UI≠communication separation
+> lives in `apps/web/lib/i18n/config.ts` `communicationLocales`. Everything
+> below is the original decision packet (history), and its "NOT applied" wording
+> is superseded by this banner.
+
+Date: 2026-09-17 · Class: **RED (schema change)** · Status: **APPROVED + APPLIED 2026-09-17 (was: awaiting owner decision, NOT applied)**
 
 The multilingual communication capability (#1753) is language-agnostic in code:
 any author locale is preserved, any viewer renders in their own locale through

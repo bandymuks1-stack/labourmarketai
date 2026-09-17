@@ -50,3 +50,24 @@ export const defaultLocale: ActiveLocale = "lt";
 // Tier 2 (AI-seeded full translation pending human review per doctrine
 // §7.4) — the language selector tags it as preview until DI promotes it.
 export const tier1Locales = ["en", "lt"] as const;
+
+// ── COMMUNICATION LANGUAGES (owner decision RED-1, 2026-09-17) ──
+// UI_LANGUAGE ≠ COMMUNICATION_LANGUAGE ≠ TRANSLATION_PROVIDER_CAPABILITY.
+// A person may write a work message in a language the product PRESERVES and
+// TRANSLATES even though no full `/xx` UI route exists yet. This set is the
+// canonical "a message may be AUTHORED in this language" set: the UI `locales`
+// PLUS communication-only languages. It is exactly what the `original_language`
+// CHECK on conversation_messages / journal_entries / organization_evidence_
+// records / candidate_skills admits (kept in lockstep by
+// lib/guards/message-language-set.test.ts and the migration
+// 20260917140000_widen_original_language_uk_ka.sql).
+//
+// INVARIANT: every UI locale is communication-valid, so `locales ⊆
+// communicationLocales`. Adding a communication-only language here is a
+// content-free change; it still needs the owner-gated CHECK widening to be
+// applied before rows can carry it (see the migration above).
+//
+//   uk — Ukrainian (DeepL + LLM tier capable)
+//   ka — Georgian  (LLM tier capable; DeepL has no Georgian)
+export const communicationLocales = [...locales, "uk", "ka"] as const;
+export type CommunicationLocale = (typeof communicationLocales)[number];
