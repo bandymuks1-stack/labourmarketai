@@ -8,6 +8,16 @@ contract differ, the frozen contract wins; where it and the canonical
 architecture differ, the architecture wins — this document decides *how a
 human sees*, never what the graph is.
 
+**Visual status (owner decision 2026-09-17, after the #1751 review):**
+`CURRENT_VISUAL_FOUNDATION = ACCEPTED` (PR #1751, merged as `85ef5294`,
+deployed, health ok) · `FINAL_PREMIUM_VISUAL_TARGET = NOT ACHIEVED` (owner
+estimate ≈ 40 % of the intended premium living-work experience) ·
+`VISUAL_REDESIGN = DEFERRED UNTIL PRODUCT COMPLETION`. The long-term target
+(high-end sports-product clarity, motion, spatial relationships,
+evidence-backed identities, team / project / company representations) is
+unchanged and is not to be propagated as a finished standard. Nothing in this
+status is HUMAN_UI_PROVEN.
+
 Historical Reality (`/dashboard/company/history`, a staged import) is the
 first bounded reference implementation. Every other surface converges on this
 rule in its own slice; nothing else was redesigned in the reference PR.
