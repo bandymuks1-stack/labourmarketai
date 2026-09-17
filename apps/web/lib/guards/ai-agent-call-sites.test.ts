@@ -50,7 +50,8 @@ const EXPECTED_UNCALLED = [
   "document_assistant",
   "skill_evidence",
   "support_onboarding",
-  "translation_copy",
+  // translation_copy gained its call site on 2026-09-17: the viewer-language
+  // read of work messages (lib/communication/translation-read.ts).
 ].sort();
 
 function productSources(dir: string, out: string[] = []): string[] {
@@ -93,6 +94,7 @@ describe("AI-3 call sites are counted, not remembered", () => {
         "conversation_intent",
         "market_explanation",
         "matching_explanation",
+        "translation_copy",
         "work_journal",
         "worker_profile",
       ].sort(),

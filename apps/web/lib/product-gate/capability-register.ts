@@ -1528,7 +1528,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: ["lib/ai/runtime"],
     coreModule: "lib/ai/runtime/run-core.ts",
     surfaces: ["app/api"],
-    note: "47 real runs with real spend. SEVEN of the thirteen registered agents have zero call sites (admin_risk, booking_risk, country_readiness, document_assistant, skill_evidence, support_onboarding, translation_copy) — this note said SIX until it was counted on 2026-09-14; the count is now derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift again. Each one's domain is already answered DETERMINISTICALLY and connected (documents-gap, readiness-overview, skill-pipeline, the booking-conflict logic, the DeepL route, the country-readiness matrix), so giving them call sites would add a second model-based answer beside a working one, or seven new surfaces — an owner decision, not a wiring task.",
+    note: "47 real runs with real spend. SIX of the thirteen registered agents have zero call sites (admin_risk, booking_risk, country_readiness, document_assistant, skill_evidence, support_onboarding) — this note said SEVEN until translation_copy gained its call site on 2026-09-17 (the viewer-language read of work messages, egress-gated); the count is derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift. Each remaining one's domain is already answered DETERMINISTICALLY and connected (documents-gap, readiness-overview, skill-pipeline, the booking-conflict logic, the country-readiness matrix), so giving them call sites would add a second model-based answer beside a working one, or six new surfaces — an owner decision, not a wiring task.",
   },
   {
     id: "AI-4",

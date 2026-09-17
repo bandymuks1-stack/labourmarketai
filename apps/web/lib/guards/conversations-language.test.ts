@@ -56,7 +56,7 @@ describe("conversations language — draft migration + honest degrade", () => {
     const readSide = read("lib/communication/translation-read.ts");
     expect(readSide).toMatch(/from "@\/lib\/ai\/run-agent-server"/);
     expect(readSide).toMatch(/runAiAgent\(\s*"translation_copy"/);
-    expect(readSide).not.toMatch(/fetch\s*\(|deepl|googleapis|https?:\/\//i);
+    expect(readSide).not.toMatch(/\bfetch\s*\(|deepl|googleapis|https?:\/\//i);
     expect(readSide).not.toMatch(/\.from\(|\.update\(|\.insert\(|translated_text/);
     expect(readSide).toMatch(/outcome\.status !== "suggestion"/);
     expect(readSide).toMatch(/rateLimit\(/);
