@@ -45,7 +45,16 @@ describe("the roster has a reader", () => {
     // Re-anchored 2026-09-16: the roster reader lives on the People door.
     const page = read("app", "[locale]", "dashboard", "company", "people", "page.tsx");
     expect(page).toMatch(/import \{ OrganizationRosterSection \}/);
-    expect(page).toMatch(/<OrganizationRosterSection locale=\{locale\} \/>/);
+    expect(page).toMatch(/<OrganizationRosterSection\s+locale=\{locale\}/);
+    // 2026-09-17: the roster carries the OFFER — the missing half of the link. The
+    // candidates are the workers already in an active relationship (the database's
+    // rule), the offer is a real server action, and the person still decides.
+    expect(page).toMatch(/linkCandidates=\{activeWorkerRows/);
+    expect(read("components", "app", "organization-roster-section.tsx")).toMatch(/<RosterLinkOfferForm/);
+    const actions = read("lib", "organization-evidence", "roster-link-actions.ts");
+    expect(actions).toMatch(/export async function offerRosterLinkAction/);
+    expect(actions).toMatch(/offerRosterLink\(/);
+    expect(actions).toMatch(/revalidatePath\("\/\[locale\]\/dashboard\/company\/people", "page"\)/);
   });
 
   it("keeps a failed read distinct from an empty roster (SEP-7)", () => {

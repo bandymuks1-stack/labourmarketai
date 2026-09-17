@@ -16417,6 +16417,13 @@
       "notAuthorized": "Šioje organizacijoje neturite vaidmens, leidžiančio matyti jos žmones.",
       "needsMigration": "Žmonių saugykla šioje aplinkoje dar neįjungta.",
       "unavailable": "Žmonių sąrašo nepavyko perskaityti. Tai nėra tas pat, kas tuščias sąrašas — pabandykite netrukus."
+    },
+    "offer": {
+      "label": "Susieti šį vardą su darbuotojo paskyra",
+      "choose": "Pasirinkite darbuotoją…",
+      "offer": "Pasiūlyti susiejimą",
+      "offered": "Susiejimas pasiūlytas — žmogus sprendžia savo profilyje",
+      "error": "Susiejimo pasiūlyti nepavyko"
     }
   },
   "peopleImport": {

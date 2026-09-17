@@ -4,6 +4,10 @@ import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { listRosterPeople } from "@/lib/organization-evidence/import-core";
+import {
+  RosterLinkOfferForm,
+  type RosterLinkCandidate,
+} from "@/components/app/roster-link-offer-form";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
 
 /**
@@ -52,8 +56,12 @@ function linkStateKey(raw: string | null): string {
 
 export async function OrganizationRosterSection({
   locale,
+  linkCandidates = [],
 }: {
   readonly locale: string;
+  /** The workers already in an active relationship with this organization —
+   *  the only people a roster name may be OFFERED to (the database's rule). */
+  readonly linkCandidates?: readonly RosterLinkCandidate[];
 }) {
   const t = await getTranslations("organizationRoster");
   // The relationship vocabulary has ONE home. Reusing it here means the roster
@@ -207,6 +215,22 @@ export async function OrganizationRosterSection({
               >
                 {t(`linkState.${linkStateKey(p.linkState)}` as never)}
               </span>
+              {/* The OFFER: the missing half of the link. A roster name reaches a
+                  person's own history only after the manager offers the link
+                  and the person accepts it on their profile. */}
+              {linkStateKey(p.linkState) === "unlinked" && linkCandidates.length > 0 ? (
+                <RosterLinkOfferForm
+                  personId={p.id}
+                  candidates={linkCandidates}
+                  labels={{
+                    label: t("offer.label"),
+                    choose: t("offer.choose"),
+                    offer: t("offer.offer"),
+                    offered: t("offer.offered"),
+                    error: t("offer.error"),
+                  }}
+                />
+              ) : null}
             </li>
           ))}
         </ul>

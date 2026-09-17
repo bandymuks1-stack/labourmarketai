@@ -203,7 +203,13 @@ export async function JournalCalendar({
             ? "selected"
             : cell.entryCount > 0
               ? "recorded"
-              : "empty";
+              : cell.reportedMinutes > 0
+                ? "reported"
+                : "empty";
+          const reportedLabel =
+            cell.reportedMinutes > 0
+              ? t("reported", { time: formatDuration(cell.reportedMinutes, "minutes", locale === "en" ? "en" : "lt") })
+              : null;
           return (
             <Link
               key={cell.iso}
@@ -212,8 +218,9 @@ export async function JournalCalendar({
               data-day={cell.iso}
               data-state={state}
               data-entries={cell.entryCount}
+              data-reported-minutes={cell.reportedMinutes}
               aria-current={cell.isSelected ? "date" : undefined}
-              aria-label={
+              aria-label={`${
                 cell.entryCount === 0
                   ? t("dayEmpty", { day: dayTitle })
                   : `${t("dayWithRecords", { day: dayTitle, count: cell.entryCount })}${
@@ -221,13 +228,15 @@ export async function JournalCalendar({
                         ? `, ${formatDuration(cell.totalMinutes, "minutes", locale === "en" ? "en" : "lt")}`
                         : ""
                     }, ${t(`confirmation.${cell.confirmation}`)}`
-              }
+              }${reportedLabel ? `, ${reportedLabel}` : ""}`}
               className={`${shared.join(" ")} text-xs ${
                 cell.isSelected
                   ? "border-brand-blue bg-brand-blue/15 font-semibold text-text-primary"
                   : cell.entryCount > 0
                     ? "border-brand-blue/30 bg-brand-blue/5 text-text-primary hover:border-brand-blue"
-                    : "border-transparent text-text-secondary hover:border-ink-500"
+                    : cell.reportedMinutes > 0
+                      ? "border-brand-cyan/30 text-text-primary hover:border-brand-cyan"
+                      : "border-transparent text-text-secondary hover:border-ink-500"
               } ${cell.isToday && !cell.isSelected ? "ring-1 ring-inset ring-ink-500" : ""}`}
             >
               <span aria-hidden>{cell.dayOfMonth}</span>
@@ -260,6 +269,26 @@ export async function JournalCalendar({
                   />
                 </span>
               )}
+              {/* THE ORGANIZATION'S LAYER — PAST = ACTUAL as the organization
+                  recorded it (timesheet, imported document): a square mark
+                  where the journal's confirmation dot is round, and the hours
+                  when the journal has none of its own. Beside, never summed;
+                  the full words are in the aria-label. */}
+              {cell.reportedMinutes > 0 && (
+                <span
+                  aria-hidden
+                  data-testid="journal-calendar-day-reported"
+                  title={reportedLabel ?? undefined}
+                  className="flex items-center gap-0.5 leading-none"
+                >
+                  {cell.entryCount === 0 ? (
+                    <span className="font-mono text-[0.5625rem] text-text-secondary">
+                      {hoursLabel(cell.reportedMinutes)}
+                    </span>
+                  ) : null}
+                  <span className="size-1.5 rounded-[1px] border border-brand-cyan/70 bg-brand-cyan/30" />
+                </span>
+              )}
             </Link>
           );
         })}
@@ -271,7 +300,12 @@ export async function JournalCalendar({
         data-testid="journal-calendar-summary"
         data-recorded-days={grid.recordedDays}
       >
-        {grid.recordedDays === 0
+        {grid.recordedDays === 0 && grid.reportedDays > 0
+          ? t("periodReportedOnly", {
+              days: grid.reportedDays,
+              time: formatDuration(grid.reportedMinutes, "minutes", locale === "en" ? "en" : "lt"),
+            })
+          : grid.recordedDays === 0
           ? t("periodEmpty")
           : totalLabel
             ? t("periodSummaryWithTime", {

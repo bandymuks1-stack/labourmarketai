@@ -16417,6 +16417,13 @@
       "notAuthorized": "U hebt in deze organisatie geen rol die haar mensen mag zien.",
       "needsMigration": "De personenopslag is in deze omgeving nog niet ingeschakeld.",
       "unavailable": "De lijst met mensen kon niet worden gelezen. Dat is iets anders dan een lege lijst — probeer het zo meteen opnieuw."
+    },
+    "offer": {
+      "label": "Deze naam koppelen aan een werknemersaccount",
+      "choose": "Kies een werknemer…",
+      "offer": "Koppeling aanbieden",
+      "offered": "Koppeling aangeboden — de persoon beslist in zijn profiel",
+      "error": "De koppeling kon niet worden aangeboden"
     }
   },
   "peopleImport": {

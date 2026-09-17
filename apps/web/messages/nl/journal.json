@@ -872,6 +872,8 @@
       "none": "zelf vastgelegde registratie",
       "partial": "deel van de journaalregistraties bevestigd",
       "all": "journaalregistratie bevestigd"
-    }
+    },
+    "reported": "organisatie registreerde {time}",
+    "periodReportedOnly": "Geen eigen registraties; de organisatie registreerde {days, plural, one {# dag} other {# dagen}}, {time}."
   }
 }

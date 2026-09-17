@@ -16417,6 +16417,13 @@
       "notAuthorized": "You do not have a role in this organisation that may see its people.",
       "needsMigration": "The people store is not enabled in this environment yet.",
       "unavailable": "The people list could not be read. This is not the same as an empty roster — try again shortly."
+    },
+    "offer": {
+      "label": "Link this name to a worker account",
+      "choose": "Choose a worker…",
+      "offer": "Offer link",
+      "offered": "Link offered — the person decides on their profile",
+      "error": "The link could not be offered"
     }
   },
   "peopleImport": {
