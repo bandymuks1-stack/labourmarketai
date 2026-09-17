@@ -118,3 +118,57 @@ describe("live adapter self-gates on a missing key (no network)", () => {
     if (r.status === "error") expect(r.code).toBe("no_api_key");
   });
 });
+
+describe("RED-2 (owner approval 2026-09-17): the SHIPPED grant table opens translate_message for Gemini on the real dispatch path", () => {
+  // Not an injected fixture: no `grants` override, so the default
+  // `AI_EGRESS_GRANTS` decides. No network: without AI_GEMINI_ENABLED the
+  // Gemini adapter returns its disabled sentinel — and reaching THAT sentinel
+  // is the proof, because an egress refusal never gets as far as the adapter.
+  const translation = (): AiCompletionRequest => ({
+    agentKey: "translation_copy",
+    promptVersion: "1.0.0",
+    system: "translate",
+    input: { canonicalMessage: "გასაგებია, ვიქნები.", locale: "lt", context: "work message between colleagues" },
+    locale: "lt",
+  });
+  beforeEach(() => {
+    delete process.env.AI_API_KEY;
+    delete process.env.AI_GEMINI_ENABLED;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.AI_DEEPL_ENABLED;
+    delete process.env.DEEPL_API_KEY;
+  });
+
+  it("gemini: passes the gate and reaches the adapter (which self-gates on env — no network)", async () => {
+    const cfg = resolveAiRuntimeConfig({ ...base, mode: "live", provider: "gemini", apiKey: "presence-only" });
+    const r = await dispatchAiCompletion(translation(), cfg);
+    expect(r.status).toBe("disabled");
+    if (r.status === "disabled") expect(r.reason).toBe("mode_disabled");
+  });
+
+  it("anthropic: refused by the gate BEFORE any provider work — the grant is Gemini's alone", async () => {
+    const cfg = resolveAiRuntimeConfig({ ...base, mode: "live", provider: "anthropic", apiKey: "sk-ant-presence-only" });
+    const r = await dispatchAiCompletion(translation(), cfg);
+    expect(r.status).toBe("error");
+    if (r.status === "error") {
+      expect(r.code).toBe("unsupported");
+      expect(r.message).toMatch(/holds no egress grant/i);
+    }
+  });
+
+  it("openai and xai: refused the same way", async () => {
+    for (const provider of ["openai", "xai"] as const) {
+      const cfg = resolveAiRuntimeConfig({ ...base, mode: "live", provider, apiKey: "presence-only" });
+      const r = await dispatchAiCompletion(translation(), cfg);
+      expect(r.status, provider).toBe("error");
+      if (r.status === "error") expect(r.message, provider).toMatch(/holds no egress grant/i);
+    }
+  });
+
+  it("a non-translation personal task is still refused for gemini — the row is by task", async () => {
+    const cfg = resolveAiRuntimeConfig({ ...base, mode: "live", provider: "gemini", apiKey: "presence-only" });
+    const r = await dispatchAiCompletion(req(), cfg);
+    expect(r.status).toBe("error");
+    if (r.status === "error") expect(r.message).toMatch(/egress grant/i);
+  });
+});

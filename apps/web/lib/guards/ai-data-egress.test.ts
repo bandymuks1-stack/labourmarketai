@@ -38,8 +38,14 @@ describe("the gate is closed by default", () => {
     // 2026-09-05: exactly ONE row — the owner's dated, sourced, TASK-SCOPED
     // Gemini grant for the conversation intent proposer. Every other task is
     // refused for Gemini exactly as before (llm-proposal.test.ts pins it).
-    expect(AI_EGRESS_GRANTS).toHaveLength(1);
+    // 2026-09-17 (RED-2, option 1): a SECOND task-scoped Gemini row for
+    // message translation-on-read. Still one provider; still by task; the
+    // `translate_message` section below pins what it opens and what it
+    // does not.
+    expect(AI_EGRESS_GRANTS).toHaveLength(2);
     expect(AI_EGRESS_GRANTS[0]).toMatchObject({ provider: "gemini", tasks: ["propose_conversation_intent"], grantedOn: "2026-09-05" });
+    expect(AI_EGRESS_GRANTS[1]).toMatchObject({ provider: "gemini", tasks: ["translate_message"], maxSensitivity: "SENSITIVE_FREE_TEXT", grantedOn: "2026-09-17" });
+    expect(new Set(AI_EGRESS_GRANTS.map((g) => g.provider))).toEqual(new Set(["gemini"]));
   });
 
   it("an external provider with no grant may receive PUBLIC only", () => {
@@ -258,10 +264,16 @@ describe("the gate is on the PATH, not in an optional argument", () => {
     );
   });
 
-  it("DeepL holds no grant, so translation cannot leave today", () => {
+  it("DeepL holds no grant, so translation cannot leave through it — with or without the task named", () => {
+    // RED-2 (2026-09-17) opened translate_message for GEMINI only; DeepL
+    // authorization is explicitly deferred, so the preferred-secondary path
+    // still returns null before the adapter is called.
     const deepl = { id: "deepl", locality: "cloud" as const, costClass: "paid" };
     expect(
       egressPermitted(deepl, sensitivityForTask("translate_message")).permitted,
+    ).toBe(false);
+    expect(
+      egressPermitted(deepl, sensitivityForTask("translate_message"), AI_EGRESS_GRANTS, "translate_message").permitted,
     ).toBe(false);
   });
 
@@ -278,5 +290,86 @@ describe("the gate is on the PATH, not in an optional argument", () => {
       src.indexOf("/** The gate for a single configured provider"),
     );
     expect(fn).toContain('"SENSITIVE_FREE_TEXT"');
+  });
+});
+
+describe("RED-2 (owner approval 2026-09-17, option 1): translate_message may leave for Gemini ONLY", () => {
+  // The second owner grant. Everything it opens and everything it leaves shut,
+  // asserted against the SHIPPED table — not an injected fixture — so a later
+  // edit to the row (or a row for another vendor) is a red test here first.
+  const task = "translate_message";
+  const s = sensitivityForTask(task);
+  const cloud = (id: string) => ({ id, locality: "cloud" as const, costClass: "paid" });
+
+  it("the task is SENSITIVE_FREE_TEXT — the approved ceiling, which is also the top of the scale", () => {
+    expect(s).toBe("SENSITIVE_FREE_TEXT");
+    expect(AI_DATA_SENSITIVITY_CLASSES[AI_DATA_SENSITIVITY_CLASSES.length - 1]).toBe("SENSITIVE_FREE_TEXT");
+    const row = AI_EGRESS_GRANTS.find((g) => g.tasks?.includes(task));
+    expect(row?.maxSensitivity).toBe("SENSITIVE_FREE_TEXT");
+  });
+
+  it("1. translate_message + Gemini + SENSITIVE_FREE_TEXT: ALLOWED", () => {
+    expect(egressPermitted(cloud("gemini"), s, AI_EGRESS_GRANTS, task).permitted).toBe(true);
+    expect(maxPermittedSensitivity(cloud("gemini"), AI_EGRESS_GRANTS, task)).toBe("SENSITIVE_FREE_TEXT");
+  });
+
+  it("2. above the approved ceiling: REFUSED — a lower ceiling refuses the task, and a free tier is capped whatever the row says", () => {
+    // No class ranks above SENSITIVE_FREE_TEXT, so "above the ceiling" is
+    // proven from the other side: the same row with any lower ceiling
+    // refuses this task, and the free-tier cap still overrides the row.
+    const lowered = AI_EGRESS_GRANTS.map((g) =>
+      g.tasks?.includes(task) ? { ...g, maxSensitivity: "PERSONAL" as const } : g,
+    );
+    expect(egressPermitted(cloud("gemini"), s, lowered, task).permitted).toBe(false);
+    expect(
+      egressPermitted({ ...cloud("gemini"), costClass: "free_tier" }, s, AI_EGRESS_GRANTS, task).permitted,
+    ).toBe(false);
+  });
+
+  it("3–6. Anthropic, OpenAI, xAI and DeepL: REFUSED for translate_message — DeepL is deferred, not implied", () => {
+    for (const id of ["anthropic", "openai", "xai", "deepl"]) {
+      const v = egressPermitted(cloud(id), s, AI_EGRESS_GRANTS, task);
+      expect(v.permitted, id).toBe(false);
+      expect(!v.permitted && v.reason, id).toMatch(/holds no egress grant/i);
+    }
+    // and no shipped cloud profile other than gemini holds ANY grant
+    for (const p of AI_PROVIDER_PROFILES) {
+      if (p.locality === "local" || p.id === "gemini") continue;
+      expect(maxPermittedSensitivity(p, AI_EGRESS_GRANTS, task), p.id).toBe("PUBLIC");
+    }
+  });
+
+  it("the grant is by task: Gemini stays refused for every other personal task, and for a call that names none", () => {
+    for (const other of AI_TASK_TYPES) {
+      if (other === task || other === "propose_conversation_intent") continue;
+      const os = sensitivityForTask(other);
+      expect(egressPermitted(cloud("gemini"), os, AI_EGRESS_GRANTS, other).permitted, other).toBe(os === "PUBLIC");
+    }
+    expect(egressPermitted(cloud("gemini"), s, AI_EGRESS_GRANTS).permitted).toBe(false);
+  });
+
+  it("the 2026-09-05 intent row is untouched by the new one", () => {
+    expect(AI_EGRESS_GRANTS[0]).toEqual(
+      expect.objectContaining({ provider: "gemini", maxSensitivity: "SENSITIVE_FREE_TEXT", tasks: ["propose_conversation_intent"], grantedOn: "2026-09-05" }),
+    );
+  });
+
+  it("11. the mechanism is generic — the grant names a TASK, never a language pair, and the payload policy names no language", () => {
+    const row = AI_EGRESS_GRANTS.find((g) => g.tasks?.includes(task))!;
+    expect(JSON.stringify(row)).not.toMatch(/\b(ka|uk|lt|en|ru|de|nl)\b.*→/);
+    expect(Object.keys(row).sort()).toEqual(["basis", "grantedOn", "maxSensitivity", "provider", "tasks"]);
+    // the task policy's data boundary stays the minimal translation payload
+    const src = readFileSync(join(__dirname, "..", "ai", "runtime", "task-routing.ts"), "utf8");
+    const policy = src.slice(src.indexOf("translate_message: {"), src.indexOf("languageRouting: { preferredProvider: \"deepl\" }"));
+    expect(policy).toContain('allowedFields: ["source_text", "source_locale", "target_locale"]');
+    expect(policy).toContain('prohibitedFields: ["full_cv", ...NEVER_NEEDED]');
+  });
+
+  it("revocation: remove the row and translation is refused again — no data to unwind", () => {
+    const revoked = AI_EGRESS_GRANTS.filter((g) => !g.tasks?.includes(task));
+    expect(revoked).toHaveLength(1);
+    expect(egressPermitted(cloud("gemini"), s, revoked, task).permitted).toBe(false);
+    // the intent grant is unaffected by revoking translation
+    expect(egressPermitted(cloud("gemini"), "SENSITIVE_FREE_TEXT", revoked, "propose_conversation_intent").permitted).toBe(true);
   });
 });
