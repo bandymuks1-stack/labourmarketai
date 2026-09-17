@@ -178,7 +178,8 @@ describe("the historical field is people in time, read-only, never a team", () =
   });
   it("never calls co-occurrence a team, and the projection carries no membership", () => {
     expect(board).toMatch(/data-testid="field-not-a-team"/);
-    expect(String((ltR.field as Record<string, string>).notATeam)).toMatch(/ne komanda/);
+    expect(String((ltR.field as Record<string, string>).notATeam)).toMatch(/≠ komanda/);
+    expect(String((ltR.field as Record<string, string>).notATeamWhy)).toMatch(/ne komanda/);
     expect(String((ltR.field as Record<string, string>).title)).not.toMatch(/komand/i);
     expect(code(projections)).not.toMatch(/membership|team_id|brigade_id/);
     expect(code(visual)).not.toMatch(/membership|team_id|brigade_id|brigade/);

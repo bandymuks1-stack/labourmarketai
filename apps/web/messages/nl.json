@@ -15936,7 +15936,7 @@
       "createdObjects": "Locaties aangemaakt"
     },
     "records": {
-      "title": "4. Wat er is vastgelegd",
+      "title": "Wat er is vastgelegd",
       "empty": "Uit deze bron is nog niets vastgelegd.",
       "importedAt": "Geïmporteerd",
       "supplier": "Aangeleverd als",
@@ -16224,10 +16224,10 @@
         "clear": "wissen",
         "selectedPerson": "persoon",
         "selectedPlace": "plaats",
-        "notATeam": "Samen in een bestand staan is geen team en geen huidige opstelling. Een ploeg ontstaat alleen met instemming.",
+        "notATeam": "Historische groep ≠ team",
         "hoursUnknownNote": "Uren verschijnen alleen waar de bron ze per plaats verdeelde; elders alleen dagen.",
         "legend": "Plekmarkeringen",
-        "notATeamWhy": "Samen voorkomen in één bestand is een historische groep, geen huidig team. Uit geschiedenis ontstaat geen lidmaatschap of ploeg.",
+        "notATeamWhy": "Samen in een bestand staan is geen team en geen huidige opstelling. Een ploeg ontstaat alleen met instemming. Samen voorkomen in één bestand is een historische groep, geen huidig team. Uit geschiedenis ontstaat geen lidmaatschap of ploeg.",
         "weekConflict": "de week in het bestand wijkt af van de datum"
       },
       "aggregatesTitle": "Periodetotalen (geen kalenderdagen)",

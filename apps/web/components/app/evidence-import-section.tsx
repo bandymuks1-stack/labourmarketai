@@ -143,7 +143,16 @@ export async function EvidenceImportSection({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const header = (
+  // The eyebrow, title and intro belong to the UPLOAD step. With a staged
+  // session open, the page's own h1 already names the door and the workspace
+  // is the explanation (constitution §B: show → label → explain on request),
+  // so the header shrinks to a single meta line: the eyebrow as the
+  // section's accessible name, nothing else above the state strip.
+  const header = sessionId ? (
+    <header>
+      <h2 className="font-mono text-meta uppercase tracking-label text-brand-orange">{t("eyebrow")}</h2>
+    </header>
+  ) : (
     <header className="flex flex-col gap-1">
       <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
@@ -151,20 +160,15 @@ export async function EvidenceImportSection({
       <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
         {t("title")}
       </h2>
-      {/* The intro sentence belongs to the upload step. With a staged session
-          open, the workspace itself is the explanation (constitution §B:
-          show → label → explain on request). */}
-      {!sessionId && (
-        <p className="text-sm leading-relaxed text-text-secondary">
-          {t("intro")}
-        </p>
-      )}
+      <p className="text-sm leading-relaxed text-text-secondary">
+        {t("intro")}
+      </p>
     </header>
   );
 
   const shell = (children: React.ReactNode) => (
     <div
-      className="flex w-full flex-col gap-6"
+      className={sessionId ? "flex w-full flex-col gap-3" : "flex w-full flex-col gap-6"}
       data-testid="evidence-import-section"
       id="evidence-import"
     >
@@ -564,14 +568,18 @@ export async function EvidenceImportSection({
 
   return shell(
     <>
-      {actingFor}
-      {/* THE SOURCE, AS IT IS (P0-C): the file's own name and its real
-          kind — a spreadsheet is a spreadsheet, whatever the engine reads
-          underneath. */}
-      <p className="text-xs text-text-secondary" data-testid="evidence-preview-source" data-kind={shownSourceKind}>
-        {t("preview.source")}: {preview.source.filename ?? "—"} · {t(`sourceKind.${shownSourceKind}` as never)}
-        {" · "}
-        {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
+      {/* ONE meta line: who is acting, and THE SOURCE AS IT IS (P0-C) — the
+          file's own name and its real kind; a spreadsheet is a spreadsheet,
+          whatever the engine reads underneath. */}
+      <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted">
+        <span data-testid="evidence-import-acting-for">
+          {t("actingFor")}: <span className="text-text-secondary">{org.organizationName}</span>
+        </span>
+        <span className="text-text-secondary" data-testid="evidence-preview-source" data-kind={shownSourceKind}>
+          {t("preview.source")}: {preview.source.filename ?? "—"} · {t(`sourceKind.${shownSourceKind}` as never)}
+          {" · "}
+          {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
+        </span>
       </p>
 
       <EvidenceImportReconstruction

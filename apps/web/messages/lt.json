@@ -15936,7 +15936,7 @@
       "createdObjects": "Sukurta objektų"
     },
     "records": {
-      "title": "4. Kas užfiksuota",
+      "title": "Kas užfiksuota",
       "empty": "Iš šio šaltinio dar nieko neužfiksuota.",
       "importedAt": "Importuota",
       "supplier": "Pateikta kaip",
@@ -16224,10 +16224,10 @@
         "clear": "nuimti",
         "selectedPerson": "žmogus",
         "selectedPlace": "objektas",
-        "notATeam": "Bendras buvimas faile — ne komanda ir ne dabartinė sudėtis. Brigada kuriama tik sutikimu.",
+        "notATeam": "Istorinė grupė ≠ komanda",
         "hoursUnknownNote": "Valandos rodomos tik ten, kur šaltinis jas paskirstė pagal objektus; kitur — tik dienos.",
         "legend": "Objektų žymos",
-        "notATeamWhy": "Bendras buvimas faile — istorinė grupė, ne dabartinė komanda. Narystė ir brigados iš istorijos nekuriamos.",
+        "notATeamWhy": "Bendras buvimas faile — ne komanda ir ne dabartinė sudėtis. Brigada kuriama tik sutikimu. Bendras buvimas faile — istorinė grupė, ne dabartinė komanda. Narystė ir brigados iš istorijos nekuriamos.",
         "weekConflict": "failo savaitė nesutampa su data"
       },
       "aggregatesTitle": "Laikotarpio sumos (ne kalendoriaus dienos)",

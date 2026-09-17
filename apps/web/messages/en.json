@@ -15936,7 +15936,7 @@
       "createdObjects": "Sites created"
     },
     "records": {
-      "title": "4. What is recorded",
+      "title": "What is recorded",
       "empty": "Nothing has been recorded from this source yet.",
       "importedAt": "Imported",
       "supplier": "Supplied as",
@@ -16224,10 +16224,10 @@
         "clear": "clear",
         "selectedPerson": "person",
         "selectedPlace": "place",
-        "notATeam": "Appearing together in a file is not a team and not a current line-up. A brigade is formed only by consent.",
+        "notATeam": "Historical group ≠ team",
         "hoursUnknownNote": "Hours appear only where the source split them by place; elsewhere, days only.",
         "legend": "Place marks",
-        "notATeamWhy": "Co-presence in one file is a historical group, not a current team. No membership or brigade is created from history.",
+        "notATeamWhy": "Appearing together in a file is not a team and not a current line-up. A brigade is formed only by consent. Co-presence in one file is a historical group, not a current team. No membership or brigade is created from history.",
         "weekConflict": "the file's week disagrees with the date"
       },
       "aggregatesTitle": "Period aggregates (not calendar days)",

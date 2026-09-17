@@ -15936,7 +15936,7 @@
       "createdObjects": "Objekte angelegt"
     },
     "records": {
-      "title": "4. Was festgehalten ist",
+      "title": "Was festgehalten ist",
       "empty": "Aus dieser Quelle wurde noch nichts festgehalten.",
       "importedAt": "Importiert",
       "supplier": "Geliefert als",
@@ -16224,10 +16224,10 @@
         "clear": "aufheben",
         "selectedPerson": "Person",
         "selectedPlace": "Ort",
-        "notATeam": "Gemeinsam in einer Datei zu stehen ist kein Team und keine aktuelle Besetzung. Eine Brigade entsteht nur durch Zustimmung.",
+        "notATeam": "Historische Gruppe ≠ Team",
         "hoursUnknownNote": "Stunden erscheinen nur dort, wo die Quelle sie nach Ort aufteilte; sonst nur Tage.",
         "legend": "Ortsmarken",
-        "notATeamWhy": "Gemeinsames Vorkommen in einer Datei ist eine historische Gruppe, kein aktuelles Team. Aus Geschichte entsteht keine Mitgliedschaft und keine Kolonne.",
+        "notATeamWhy": "Gemeinsam in einer Datei zu stehen ist kein Team und keine aktuelle Besetzung. Eine Brigade entsteht nur durch Zustimmung. Gemeinsames Vorkommen in einer Datei ist eine historische Gruppe, kein aktuelles Team. Aus Geschichte entsteht keine Mitgliedschaft und keine Kolonne.",
         "weekConflict": "die Woche in der Datei widerspricht dem Datum"
       },
       "aggregatesTitle": "Zeitraumsummen (keine Kalendertage)",
