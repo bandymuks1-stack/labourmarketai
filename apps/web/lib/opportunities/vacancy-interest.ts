@@ -12,6 +12,7 @@ import {
   type CommercialIneligibilityCode,
 } from "@/lib/commercial/handoff-rule";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { dispatchAfterHandoff } from "@/lib/commercial/handoff-dispatch";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { bestEvidencedProfession } from "./adjacent-directions";
 import { buildOwnWorkerContext, buildOwnWorkerContextCore } from "./worker-subject";
@@ -224,6 +225,13 @@ export async function expressVacancyInterestCore(
         result_kind: handoff.outreachState,
       },
     });
+  }
+  // CONNECTION (2026-09-17): a created or re-queued handoff is handed to the
+  // partner door now, through the ONE dispatcher — awaited (serverless can
+  // freeze a detached call), bounded, and unable to fail the interest. The
+  // cron sweep picks up anything the door did not accept.
+  if (handoff.kind === "created" || (handoff.kind === "exists" && handoff.status === "queued")) {
+    await dispatchAfterHandoff();
   }
   return { kind: "ok", status: "interested", handoff };
 }

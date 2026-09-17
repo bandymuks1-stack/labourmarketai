@@ -263,8 +263,11 @@ describe("the dispatcher is inert without the owner's door, and never contacts a
     const src = read("lib", "commercial", "handoff-dispatch.ts");
     expect(src).toContain("fetchImpl(settings.endpoint, {");
     expect(src).not.toMatch(/employer_homepage\s*\)|mailto:|smtp|sendEmail|sendMail/);
-    // A row is marked delivered ONLY on the door's own 201/200 answer.
+    // A row is marked delivered ONLY on the door's own 201/200 answer; 409 is
+    // fail-closed and 401/403 stops the sweep (handoff-dispatch.test.ts).
     expect(src).toMatch(/if \(outcome === "delivered" \|\| outcome === "duplicate"\) \{/);
+    expect(src).toContain('if (status === 409) return "conflict";');
+    expect(src).toContain('if (status === 401 || status === 403) return "auth_failed";');
     expect(src).toContain('.eq("status", "queued")');
     // The bearer never reaches a log line.
     expect(src).not.toMatch(/console\.(log|warn|error)\([^)]*token/);
@@ -286,12 +289,21 @@ describe("the dispatcher is inert without the owner's door, and never contacts a
     expect(e.employer.employerKey).toBe("arbetsformedlingen:org:1");
   });
 
-  it("the cron route is double-gated (CRON_SECRET + door env) and not on the schedule yet", () => {
+  it("the cron route is double-gated (CRON_SECRET + door env) and scheduled as the daily sweep", () => {
     const route = read("app", "api", "cron", "commercial-handoffs", "route.ts");
     expect(route).toContain("authorizeCronRequest(request)");
     expect(route).toContain('reason: "not_configured"');
-    const vercel = read("vercel.json");
-    expect(vercel).not.toContain("commercial-handoffs");
+    // Connection 2026-09-17: scheduled ONCE A DAY — the Vercel Hobby plan
+    // fires crons at most daily. Near-real-time delivery comes from the write
+    // path calling the same dispatcher (`dispatchAfterHandoff`), not from a
+    // second scheduler.
+    const vercel = JSON.parse(read("vercel.json")) as { crons: { path: string; schedule: string }[] };
+    const cron = vercel.crons.find((c) => c.path === "/api/cron/commercial-handoffs");
+    expect(cron?.schedule).toBe("0 6 * * *");
+    expect(vercel.crons.filter((c) => c.path === "/api/cron/commercial-handoffs")).toHaveLength(1);
+    const core = read("lib", "opportunities", "vacancy-interest.ts");
+    expect(core).toContain("await dispatchAfterHandoff()");
+    expect(core.indexOf("await createHandoffForSignal(")).toBeLessThan(core.indexOf("await dispatchAfterHandoff()"));
   });
 });
 

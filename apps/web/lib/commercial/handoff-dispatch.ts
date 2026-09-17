@@ -16,6 +16,14 @@ import {
  *   NONSTOP_HANDOFF_TOKEN     the bearer Nonstop issued for LabourMarket.ai
  *                             (server env only; never printed, never logged)
  *
+ * TWO TRIGGERS, ONE DISPATCHER (connection 2026-09-17): the Vercel cron
+ * `/api/cron/commercial-handoffs` is the retry SWEEP (the project is on the
+ * Hobby plan, whose crons fire at most once a day), and the interest write
+ * path calls this same function right after it creates or re-queues a
+ * handoff (`dispatchAfterHandoff`), so a fresh hand-off reaches the door in
+ * seconds. Both paths read the same queue and mark the same rows; there is
+ * no second queue and no second scheduler.
+ *
  * While either is unset `dispatchQueuedHandoffs` answers `not_configured`
  * and performs NO network call and NO status change — the queue simply
  * waits. This mirrors the inbound referral door (Nonstop → LabourMarket,
@@ -51,6 +59,10 @@ export type DispatchSummary =
       readonly delivered: number;
       readonly duplicates: number;
       readonly rejected: number;
+      /** 409 from the door — a different payload under this id. Fail-closed. */
+      readonly conflicts: number;
+      /** 401 / 403 — the bearer or the door is misconfigured. Nothing moved. */
+      readonly authFailed: number;
       readonly retryLater: number;
     };
 
@@ -141,13 +153,35 @@ export function handoffDoorSettings(
   return { endpoint, token };
 }
 
-type PostOutcome = "delivered" | "duplicate" | "rejected" | "retry";
+/**
+ * What the door's answer means for the row. Pure; guard-pinned.
+ *   - 201 delivered / 200 duplicate → the row is marked delivered (the
+ *     only two answers that move state);
+ *   - 409 conflict → the door holds a DIFFERENT payload under this handoffId.
+ *     FAIL-CLOSED: never success, never marked; counted and logged so an
+ *     operator sees it; retried by the sweep (the door stays authoritative);
+ *   - 400 / 413 / 422 → the envelope was refused (contract); rejected;
+ *   - 401 / 403 → authentication / configuration failure; rejected, and the
+ *     run reports it as such (nothing is retried into a wrong door);
+ *   - 429 / 5xx / network / timeout → retryable; the row stays queued for
+ *     the next sweep.
+ */
+export type PostOutcome = "delivered" | "duplicate" | "conflict" | "rejected" | "auth_failed" | "retry";
+
+export function classifyDoorResponse(status: number): PostOutcome {
+  if (status === 201) return "delivered";
+  if (status === 200) return "duplicate";
+  if (status === 409) return "conflict";
+  if (status === 401 || status === 403) return "auth_failed";
+  if (status === 400 || status === 413 || status === 422) return "rejected";
+  return "retry";
+}
 
 async function postEnvelope(
   settings: { endpoint: string; token: string },
   envelope: WorkerVacancyInterestEnvelopeV1,
   fetchImpl: typeof fetch,
-): Promise<PostOutcome> {
+): Promise<{ outcome: PostOutcome; http: number | null }> {
   try {
     const res = await fetchImpl(settings.endpoint, {
       method: "POST",
@@ -159,20 +193,28 @@ async function postEnvelope(
       body: JSON.stringify(envelope),
       signal: AbortSignal.timeout(10_000),
     });
-    if (res.status === 201) return "delivered";
-    if (res.status === 200) return "duplicate";
-    if (res.status === 400 || res.status === 401 || res.status === 413 || res.status === 422) {
-      return "rejected";
-    }
-    return "retry";
+    return { outcome: classifyDoorResponse(res.status), http: res.status };
   } catch {
-    return "retry";
+    return { outcome: "retry", http: null };
   }
+}
+
+/** ONE greppable, bounded line per attempted row: handoff id (short), the
+ *  outcome word and the HTTP status. Never the payload, never the bearer,
+ *  never a person. This is the observability the owner asked for — queued /
+ *  attempted / delivered / retryable / conflict / auth failure are
+ *  distinguishable from the logs and from the run summary alone. */
+export const HANDOFF_DISPATCH_LOG = "[commercial-handoff]";
+function logAttempt(handoffId: string, outcome: PostOutcome, http: number | null): void {
+  console.log(HANDOFF_DISPATCH_LOG, { handoff: handoffId.slice(0, 8), outcome, http });
 }
 
 export async function dispatchQueuedHandoffs(deps?: {
   readonly env?: Readonly<Record<string, string | undefined>>;
   readonly fetchImpl?: typeof fetch;
+  /** Test seam: the admin client factory (production uses the real one). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly adminFactory?: () => any;
 }): Promise<DispatchSummary> {
   const settings = handoffDoorSettings(deps?.env ?? process.env);
   if (!settings) return { kind: "not_configured" };
@@ -183,7 +225,7 @@ export async function dispatchQueuedHandoffs(deps?: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let admin: any;
   try {
-    admin = createAdminClient();
+    admin = deps?.adminFactory ? deps.adminFactory() : createAdminClient();
   } catch {
     return { kind: "unavailable", reason: "no_service_env" };
   }
@@ -195,12 +237,21 @@ export async function dispatchQueuedHandoffs(deps?: {
     return { kind: "unavailable", reason: error.code ?? "read_failed" };
   }
   const rows = (Array.isArray(data) ? (data as unknown[]) : []) as QueuedRow[];
-  const summary = { queued: rows.length, delivered: 0, duplicates: 0, rejected: 0, retryLater: 0 };
+  const summary = {
+    queued: rows.length,
+    delivered: 0,
+    duplicates: 0,
+    rejected: 0,
+    conflicts: 0,
+    authFailed: 0,
+    retryLater: 0,
+  };
 
   for (const row of rows) {
     const envelope = envelopeFromQueuedRow(row);
     if (envelope.kind !== HANDOFF_ENVELOPE_KIND) continue;
-    const outcome = await postEnvelope(settings, envelope, fetchImpl);
+    const { outcome, http } = await postEnvelope(settings, envelope, fetchImpl);
+    logAttempt(row.handoff_id, outcome, http);
     if (outcome === "delivered" || outcome === "duplicate") {
       // Marked ONLY on the door's own answer. A rejected or unreachable
       // door leaves the row queued; the next sweep tries again.
@@ -217,9 +268,32 @@ export async function dispatchQueuedHandoffs(deps?: {
       else summary.duplicates += 1;
     } else if (outcome === "rejected") {
       summary.rejected += 1;
+    } else if (outcome === "conflict") {
+      summary.conflicts += 1;
+    } else if (outcome === "auth_failed") {
+      summary.authFailed += 1;
+      // A misconfigured bearer fails every row identically: stop the sweep,
+      // report it, retry nothing into a door that refuses us.
+      break;
     } else {
       summary.retryLater += 1;
     }
   }
+  console.log(HANDOFF_DISPATCH_LOG, { run: summary });
   return { kind: "ran", ...summary };
+}
+
+/**
+ * The near-real-time trigger used by the interest write path right after a
+ * handoff was created or re-queued: the SAME sweep, bounded, and never able
+ * to fail the caller — a door that is down simply leaves the row queued for
+ * the cron sweep. Inert while the door is not configured (returns
+ * `not_configured` without touching the service key).
+ */
+export async function dispatchAfterHandoff(): Promise<DispatchSummary> {
+  try {
+    return await dispatchQueuedHandoffs();
+  } catch {
+    return { kind: "unavailable", reason: "dispatch_threw" };
+  }
 }
