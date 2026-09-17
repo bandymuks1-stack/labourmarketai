@@ -959,7 +959,10 @@ describe("NO new DB migration in this PR", () => {
     //   behind `needs-human-gate`). Not this read layer's file; the global
     //   count is what makes an unrelated migration visible here, by design.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
-    expect(count).toBeLessThanOrEqual(286);
+    // Bumped 286 -> 287 for the forward correction 20260917130000 (one
+    //   identifier in get_invitation_preview_v2; RED, PREPARED, NOT APPLIED).
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
+    expect(count).toBeLessThanOrEqual(287);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

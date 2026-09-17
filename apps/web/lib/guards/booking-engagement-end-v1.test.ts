@@ -1346,6 +1346,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // `needs-human-gate`. Rollback:
       // supabase/rollbacks/20260917120000_universal_invitation_referral_network_v1.down.sql.
       "20260917120000_universal_invitation_referral_network_v1.sql",
+      // 2026-09-17 — forward correction to the file above, which was APPLIED
+      // to production the same day (ledger 20260917080303, owner-authorized
+      // proof run). The marker records that the RED content (CREATE OR
+      // REPLACE of a SECURITY DEFINER function + its GRANT/REVOKE floor) is
+      // INTENTIONAL: one identifier — `role_text` → `role_or_work_type` — in
+      // get_invitation_preview_v2, found by the post-apply production proof.
+      // PREPARED, NOT APPLIED; owner gate. Rollback drops the function (the
+      // app falls back to get_invitation_preview_v1).
+      "20260917130000_invitation_preview_demand_column_fix_v1.sql",
 ]);
   });
 

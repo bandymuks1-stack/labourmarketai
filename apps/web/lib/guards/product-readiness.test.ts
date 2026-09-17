@@ -2533,7 +2533,14 @@ describe("no migration files added by this sprint", () => {
 //   because the door is live. If another migration PR merges first, this
 //   must be re-bumped to that PR's count + 1.
 //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
-const SPRINT_BASELINE = 286;
+// 286 -> 287: forward correction 20260917130000_invitation_preview_demand_
+//   column_fix_v1 — `get_invitation_preview_v2` read `role_text` from
+//   customer_requests (the worker-board projection name); the column is
+//   `role_or_work_type`. Found by the post-apply production proof of
+//   20260917120000 (APPLIED 2026-09-17, ledger 20260917080303). RED (SECDEF
+//   replace), PREPARED, NOT APPLIED — owner gate.
+//   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
+const SPRINT_BASELINE = 287;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

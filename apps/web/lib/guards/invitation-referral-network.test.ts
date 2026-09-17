@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -204,6 +204,26 @@ describe("migration 20260917120000 — what it may and may not do", () => {
     expect(arm).toMatch(/from public\.customer_requests where id = p_target_request_id/);
     expect(arm).toMatch(/v_req_owner = uid\s+or \(v_req_org is not null and public\.manages_organization\(v_req_org\)\)/);
     expect(arm).toMatch(/'demand_closed'/);
+  });
+
+  it("the demand preview reads the column that exists — role_or_work_type — and the forward correction is in place", () => {
+    // The applied 20260917120000 selects `role_text` from customer_requests,
+    // which does not exist (it is the worker-board RPC's projection name);
+    // PL/pgSQL only notices at runtime. The production proof found it; the
+    // forward correction carries the right identifier. This pins both, and
+    // refuses the mistake in any future function body.
+    const fix = read(join(REPO, "supabase", "migrations", "20260917130000_invitation_preview_demand_column_fix_v1.sql"));
+    expect(fix.startsWith("-- @human-gate-approved")).toBe(true);
+    const fixed = fnBody(sqlCode(fix), "get_invitation_preview_v2");
+    expect(fixed).toMatch(/select role_or_work_type, country, organization_id/);
+    expect(fixed).not.toMatch(/\brole_text\b/);
+    expect(read(join(REPO, "supabase", "rollbacks", "20260917130000_invitation_preview_demand_column_fix_v1.down.sql"))).toMatch(/drop function if exists public\.get_invitation_preview_v2\(text\)/);
+    // No migration newer than the applied one may repeat the wrong column.
+    const dir = join(REPO, "supabase", "migrations");
+    // (the applied file itself is the recorded mistake; every file after it must not repeat it)
+    for (const f of readdirSync(dir).filter((n) => n.endsWith(".sql") && n.slice(0, 14) > "20260917120000")) {
+      expect(sqlCode(read(join(dir, f)))).not.toMatch(/role_text[^;]*from public\.customer_requests/);
+    }
   });
 
   it("the acceptance ledger is readable by the person, the inviter and the org authority — nobody else — and has no write policy", () => {
