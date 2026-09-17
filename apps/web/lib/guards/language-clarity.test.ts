@@ -169,13 +169,18 @@ describe("message language chip — data-backed only, never guessed", () => {
     expect(vt.text).toBe("Привет");
   });
 
-  it("the send path stamps 'ru' too (11-locale set of applied 20260612130000)", () => {
+  it("the send path derives its accepted set from the canonical `locales` (no second hardcoded list)", () => {
     const actions = read("lib/communication/actions.ts");
-    expect(actions).toMatch(/KNOWN_LOCALES = \[[^\]]*"ru"[^\]]*\]/);
+    // The old private KNOWN_LOCALES array was a drift risk; the accepted set is
+    // now the product's declared locales, kept in lockstep with the DB CHECK by
+    // lib/guards/message-language-set.test.ts. `ru` (and every product locale)
+    // is therefore stamped by construction.
+    expect(actions).toMatch(/import\s*\{\s*locales\s*\}\s*from\s*"@\/lib\/i18n\/config"/);
+    expect(actions).not.toMatch(/KNOWN_LOCALES/);
     // Unknown locale stamps null (honest unknown) and the legacy-shape
     // degrade on 42703 stays — the draft column migration is owner-gated.
     expect(actions).toMatch(
-      /KNOWN_LOCALES\.includes\(input\.locale\) \? input\.locale : null/,
+      /\(locales as readonly string\[\]\)\.includes\(input\.locale\)[\s\S]*\?\s*input\.locale[\s\S]*:\s*null/,
     );
     expect(actions).toMatch(/42703/);
   });
