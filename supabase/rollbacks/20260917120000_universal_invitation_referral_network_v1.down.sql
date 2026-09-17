@@ -14,7 +14,9 @@ drop function if exists public.receive_external_referral_v1(
 drop function if exists public.get_invitation_public_preview_v1(text);
 drop function if exists public.get_invitation_preview_v2(text);
 drop function if exists public.decline_invitation_v2(text);
+drop function if exists public.accept_invitation_by_id_v2(uuid);
 drop function if exists public.accept_invitation_v2(text);
+drop function if exists public.accept_invitation_apply_v2(uuid, uuid);
 drop function if exists public.create_invitation_v2(
   text, text, text, text, uuid, uuid, uuid, text, text, text, text, integer, text, integer);
 

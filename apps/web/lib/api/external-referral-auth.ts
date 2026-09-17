@@ -50,7 +50,7 @@ function constantTimeEquals(a: string, b: string): boolean {
 
 export function authorizeExternalReferralRequest(
   request: Request,
-  env: NodeJS.ProcessEnv = process.env,
+  env: Readonly<Record<string, string | undefined>> = process.env,
 ): ExternalReferralAuthResult {
   const source = findExternalReferralSource(request.headers.get(REFERRAL_SOURCE_HEADER));
   if (!source) return { kind: "unknown_source" };

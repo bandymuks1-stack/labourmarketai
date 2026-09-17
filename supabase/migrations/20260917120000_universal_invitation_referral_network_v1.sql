@@ -498,15 +498,28 @@ grant execute on function public.create_invitation_v2(
 -- multi-use ladder, the acceptance ledger row and the demand arm added. The
 -- FOR UPDATE lock, the status/expiry ladder, the organization arm and the
 -- project arm are the v1 ones.
-create or replace function public.accept_invitation_v2(
-  p_token text
+--
+-- ONE CORE, TWO DOORS. `accept_invitation_apply_v2` is the whole acceptance
+-- (status ladder, relationship arms, ledger row, seat count, audit) against
+-- a row the caller already locked. It is executable by NOBODY directly —
+-- revoked from public, anon and authenticated — and is reached only through
+-- the two SECURITY DEFINER doors below, which run as the owner: the mailed
+-- /shared link (`accept_invitation_v2`, possession of the token) and the
+-- in-app list (`accept_invitation_by_id_v2`, the caller's verified e-mail).
+-- v1 kept the two doors as two copies of one block; a demand arm added to
+-- one copy and not the other would accept an addressed demand invitation
+-- from the list without recording the interest. One core makes that
+-- impossible.
+create or replace function public.accept_invitation_apply_v2(
+  p_invitation_id uuid,
+  p_actor         uuid
 ) returns jsonb
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  uid uuid := auth.uid();
+  uid uuid := p_actor;
   v_row public.invitations%rowtype;
   v_worker uuid;
   v_existing uuid;
@@ -520,7 +533,7 @@ begin
     raise exception 'Not authenticated' using errcode = '42501';
   end if;
   select * into v_row from public.invitations
-   where token_hash = encode(extensions.digest(coalesce(p_token, ''), 'sha256'), 'hex')
+   where id = p_invitation_id
    for update;
   if not found then
     return jsonb_build_object('outcome', 'not_found');
@@ -667,8 +680,65 @@ begin
   );
 end $$;
 
+-- Reachable only through the two doors (which run as the owner). Nobody
+-- may call the core with an arbitrary actor.
+revoke all on function public.accept_invitation_apply_v2(uuid, uuid)
+  from public, anon, authenticated;
+
+-- DOOR 1 — the link. Possession of the token is the capability (v1 rule).
+create or replace function public.accept_invitation_v2(
+  p_token text
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  v_id uuid;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  select id into v_id from public.invitations
+   where token_hash = encode(extensions.digest(coalesce(p_token, ''), 'sha256'), 'hex');
+  if not found then
+    return jsonb_build_object('outcome', 'not_found');
+  end if;
+  return public.accept_invitation_apply_v2(v_id, uid);
+end $$;
+
 revoke all on function public.accept_invitation_v2(text) from public, anon;
 grant execute on function public.accept_invitation_v2(text) to authenticated;
+
+-- DOOR 2 — the in-app list. Exists ONLY for invitations addressed to the
+-- caller's own verified e-mail (v1 rule) — never a way to probe or consume
+-- an open link or someone else's invitation by id.
+create or replace function public.accept_invitation_by_id_v2(
+  p_invitation_id uuid
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  v_email text := lower(coalesce(auth.jwt() ->> 'email', ''));
+  v_invited text;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  select lower(invited_email) into v_invited from public.invitations
+   where id = p_invitation_id;
+  if not found or v_invited is null or v_email = '' or v_invited <> v_email then
+    return jsonb_build_object('outcome', 'not_found');
+  end if;
+  return public.accept_invitation_apply_v2(p_invitation_id, uid);
+end $$;
+
+revoke all on function public.accept_invitation_by_id_v2(uuid) from public, anon;
+grant execute on function public.accept_invitation_by_id_v2(uuid) to authenticated;
 
 -- Declining a campaign link is this person's answer, not the campaign's
 -- end: the row records it and the link stays open for others. Declining a
@@ -1136,7 +1206,9 @@ commit;
 --   drop function if exists public.get_invitation_public_preview_v1(text);
 --   drop function if exists public.get_invitation_preview_v2(text);
 --   drop function if exists public.decline_invitation_v2(text);
+--   drop function if exists public.accept_invitation_by_id_v2(uuid);
 --   drop function if exists public.accept_invitation_v2(text);
+--   drop function if exists public.accept_invitation_apply_v2(uuid, uuid);
 --   drop function if exists public.create_invitation_v2(text, text, text, text, uuid, uuid, uuid, text, text, text, text, integer, text, integer);
 --   notification_events CHECKs back to v7 (20260914140000) after asserting
 --     zero 'invitation_accepted' / 'invitation' rows;

@@ -93,7 +93,7 @@ describe("migration 20260917120000 — what it may and may not do", () => {
   });
 
   it("an employer invitation to a need records EMPLOYER_INVITED, never a system match", () => {
-    const accept = fnBody(sql, "accept_invitation_v2");
+    const accept = fnBody(sql, "accept_invitation_apply_v2");
     const arm = accept.slice(accept.indexOf("invite_to_demand"));
     expect(arm).toMatch(/insert into public\.demand_interest_signals/);
     expect(arm).toMatch(/'basis', 'employer_invitation'/);
@@ -105,7 +105,7 @@ describe("migration 20260917120000 — what it may and may not do", () => {
   });
 
   it("acceptance follows the existing membership/assignment rules — same arms as v1, no confirmed assignment invented", () => {
-    const accept = fnBody(sql, "accept_invitation_v2");
+    const accept = fnBody(sql, "accept_invitation_apply_v2");
     expect(accept).toMatch(/insert into public\.engagement_contexts/);
     expect(accept).toMatch(/insert into public\.project_worker_assignments \(project_id, worker_id, status\)\s*values \(v_row\.project_id, v_worker, 'active'\)/);
     // No governance seat, no membership row, no booking: an invitation is
@@ -117,7 +117,7 @@ describe("migration 20260917120000 — what it may and may not do", () => {
     expect(sql).toMatch(/max_uses between 1 and 500 and use_count between 0 and max_uses/);
     const create = fnBody(sql, "create_invitation_v2");
     expect(create).toMatch(/v_max > 1 and not v_has_context and v_max > 20/);
-    const accept = fnBody(sql, "accept_invitation_v2");
+    const accept = fnBody(sql, "accept_invitation_apply_v2");
     expect(accept).toMatch(/on conflict \(invitation_id, profile_id\)/);
     expect(accept).toMatch(/'already_accepted'/);
     expect(accept).toMatch(/'exhausted'/);
@@ -127,8 +127,21 @@ describe("migration 20260917120000 — what it may and may not do", () => {
     );
   });
 
+  it("one acceptance core, two doors: the core is callable by nobody directly; the in-app door is e-mail-bound and refuses open links", () => {
+    expect(sql).toMatch(/revoke all on function public\.accept_invitation_apply_v2\(uuid, uuid\)\s*from public, anon, authenticated/);
+    expect(sql).not.toMatch(/grant execute on function public\.accept_invitation_apply_v2/);
+    const link = fnBody(sql, "accept_invitation_v2");
+    expect(link).toMatch(/return public\.accept_invitation_apply_v2\(v_id, uid\)/);
+    const byId = fnBody(sql, "accept_invitation_by_id_v2");
+    expect(byId).toMatch(/auth\.jwt\(\) ->> 'email'/);
+    expect(byId).toMatch(/v_invited is null or v_email = '' or v_invited <> v_email/);
+    expect(byId).toMatch(/return public\.accept_invitation_apply_v2\(p_invitation_id, uid\)/);
+    // Neither door carries its own copy of an arm — the demand arm exists once.
+    expect((sql.match(/'basis', 'employer_invitation'/g) ?? []).length).toBe(1);
+  });
+
   it("revoked / declined / expired can never create a relationship", () => {
-    const accept = fnBody(sql, "accept_invitation_v2");
+    const accept = fnBody(sql, "accept_invitation_apply_v2");
     const guard = accept.indexOf("if v_row.status in ('revoked','declined','expired') then");
     const firstWrite = accept.indexOf("insert into public.engagement_contexts");
     expect(guard).toBeGreaterThan(-1);

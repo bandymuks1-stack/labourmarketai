@@ -17,7 +17,7 @@ function req(headers: Record<string, string>): Request {
 }
 
 describe("external referral auth — one secret per approved source", () => {
-  const env = { EXTERNAL_REFERRAL_TOKEN_NONSTOP: SECRET } as NodeJS.ProcessEnv;
+  const env = { EXTERNAL_REFERRAL_TOKEN_NONSTOP: SECRET };
 
   it("an unknown or malformed source slug is refused before any secret is looked at", () => {
     expect(authorizeExternalReferralRequest(req({ authorization: `Bearer ${SECRET}` }), env).kind).toBe("unknown_source");
@@ -39,13 +39,13 @@ describe("external referral auth — one secret per approved source", () => {
     expect(
       authorizeExternalReferralRequest(
         req({ [REFERRAL_SOURCE_HEADER]: "nonstop", authorization: `Bearer ${SECRET}` }),
-        {} as NodeJS.ProcessEnv,
+        {},
       ).kind,
     ).toBe("not_configured");
     expect(
       authorizeExternalReferralRequest(
         req({ [REFERRAL_SOURCE_HEADER]: "nonstop", authorization: "Bearer short" }),
-        { EXTERNAL_REFERRAL_TOKEN_NONSTOP: "short" } as NodeJS.ProcessEnv,
+        { EXTERNAL_REFERRAL_TOKEN_NONSTOP: "short" },
       ).kind,
     ).toBe("not_configured");
   });

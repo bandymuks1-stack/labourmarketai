@@ -502,22 +502,35 @@ export async function acceptInvitationByIdAction(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
-  const { data, error } = await asAny(supabase).rpc(
-    "accept_invitation_by_id_v1",
-    { p_invitation_id: input.invitationId },
-  );
+  // v2 (the shared acceptance core — demand arm, ledger, seats) first; the
+  // v1 by-id function while v2 is not applied.
+  let { data, error } = await asAny(supabase).rpc("accept_invitation_by_id_v2", {
+    p_invitation_id: input.invitationId,
+  });
+  if (error && isMissingV2(error)) {
+    ({ data, error } = await asAny(supabase).rpc("accept_invitation_by_id_v1", {
+      p_invitation_id: input.invitationId,
+    }));
+  }
   if (error) {
     return isMissingSchema(error)
       ? { status: "needs-migration" }
       : { status: "ok", outcome: "error" };
   }
+  const outcome = (data?.outcome ?? "error") as string;
+  if (outcome === "accepted") {
+    await emitInvitationAcceptedNotification({
+      inviterProfileId: (data?.inviter_profile_id ?? null) as string | null,
+      acceptedByProfileId: user.id,
+      invitationId: input.invitationId,
+    });
+    if (data?.relationship === "interest_recorded" && data?.relationship_id) {
+      await emitDemandInterestNotification(String(data.relationship_id));
+    }
+  }
   revalidatePath(`/${input.locale}/dashboard/network`);
-  return { status: "ok", outcome: (data?.outcome ?? "error") as string };
+  return { status: "ok", outcome };
 }
-
-/* ────────────────────────────────────────────────────────────────────────────
- * UNIVERSAL NETWORK v1 — the shareable link, the campaign, the demand target
- * ──────────────────────────────────────────────────────────────────────── */
 
 export type ShareableInvitationOutcome =
   | "created"
