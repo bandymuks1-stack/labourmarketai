@@ -2144,6 +2144,19 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "sandėlinink",
       "комплектовщик",
       "складск",
+      // 2026-09-17 production walk: a RU worker wrote "Я кладовщик" and the
+      // profession stayed unrecognised (LT-only lexicon for the noun); same
+      // for the EN / DE / NL titles. The profession hint is a PROPOSAL the
+      // person confirms — never a silent assignment.
+      "кладовщик",
+      "кладовщиц",
+      "warehouse worker",
+      "warehouse operative",
+      "warehouse assistant",
+      "lagerist",
+      "lagermitarbeiter",
+      "lagerarbeiter",
+      "magazijnmedewerker",
       "lagerarbetare",
       "lagermedarbetare",
       "terminalarbetare",

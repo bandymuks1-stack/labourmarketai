@@ -11,6 +11,28 @@ import { createClient } from "@/lib/supabase/server";
  * primary first so the single-primary invariant holds, then upserts the chosen
  * row. RLS (`owns_worker`) ensures a user can only touch their own worker.
  */
+/**
+ * Set the PRIMARY profession from a catalogue SLUG the person confirmed in
+ * the text-first flow (2026-09-17 fast path to matchability). The slug is
+ * resolved against the active `professions` catalogue server-side; an
+ * unknown slug is a no-op that returns false, never an insert of a guess.
+ * Everything else is `setPrimaryProfession`.
+ */
+export async function setPrimaryProfessionBySlug(slug: string): Promise<boolean> {
+  if (typeof slug !== "string" || !/^[a-z0-9_]{2,64}$/.test(slug)) return false;
+  const supabase = await createClient();
+  const { data: row } = await supabase
+    .from("professions")
+    .select("id")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .maybeSingle();
+  const id = (row as { id?: string } | null)?.id ?? null;
+  if (!id) return false;
+  await setPrimaryProfession(id);
+  return true;
+}
+
 export async function setPrimaryProfession(professionId: string): Promise<void> {
   const supabase = await createClient();
   const {

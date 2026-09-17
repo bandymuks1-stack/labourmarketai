@@ -3431,7 +3431,11 @@
       "promotedToCatalog": "{n} jūsų pasirinkti įgūdžiai taip pat įrašyti į kataloginį įgūdžių sąrašą — jie dalyvauja atitikime ir jūsų CV.",
       "promotedSkipped": "{n} į kataloginį sąrašą nepateko (ne pagal jūsų darbo kryptis) — jie lieka jūsų profilyje kaip jūsų pačių įrašai.",
       "viewUpdatedCv": "Peržiūrėti atnaujintą CV",
-      "aiSuggestionHint": "AI pasiūlymas — peržiūrėkite prieš įrašant"
+      "aiSuggestionHint": "AI pasiūlymas — peržiūrėkite prieš įrašant",
+      "professionProposalTitle": "Koks tavo darbas?",
+      "professionProposalHint": "Tekste įvardijai šias profesijas — pasirink vieną kaip pagrindinę kryptį. Be jos pasirinkti įgūdžiai lieka tik tavo teiginiais ir darbų atranka jų nemato.",
+      "needsDirection": "Pasirinkti įgūdžiai išsaugoti kaip tavo teiginiai. Kad jie taptų atrankos dalimi, pirmiausia pasirink, kokį darbą dirbi.",
+      "needsDirectionCta": "Pasirinkti darbo kryptį"
     }
   },
   "roles": {

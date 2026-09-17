@@ -1043,6 +1043,7 @@ export default async function ProfilePage({
           for the hub overview's single "Complete profile" primary action. */}
       <div id="profile-edit" className="scroll-mt-4">
         <ProfileTextFirstFlow
+        hasPrimaryProfession={currentProfessionId !== null}
         initialText={savedProfileText}
         savedClaimNormalizedLabels={savedSkillClaims.map(
           (c) => c.normalized_label,

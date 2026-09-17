@@ -3431,7 +3431,11 @@
       "promotedToCatalog": "{n} van uw geselecteerde vaardigheden zijn ook toegevoegd aan uw cataloguslijst — ze tellen nu mee in matching en op uw cv.",
       "promotedSkipped": "{n} zijn niet aan de cataloguslijst toegevoegd (buiten uw werkrichtingen) — ze blijven in uw profiel als uw eigen vermeldingen.",
       "viewUpdatedCv": "Bekijk uw bijgewerkte cv",
-      "aiSuggestionHint": "AI-suggestie — controleer vóór het opslaan"
+      "aiSuggestionHint": "AI-suggestie — controleer vóór het opslaan",
+      "professionProposalTitle": "Welk werk doe je?",
+      "professionProposalHint": "Je tekst noemt deze beroepen — kies er één als hoofdrichting. Zonder die blijven de gekozen vaardigheden je eigen uitspraken en ziet de baanmatching ze niet.",
+      "needsDirection": "De gekozen vaardigheden zijn opgeslagen als je eigen uitspraken. Om banen te matchen, kies eerst welk werk je doet.",
+      "needsDirectionCta": "Kies een werkrichting"
     }
   },
   "roles": {
