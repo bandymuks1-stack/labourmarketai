@@ -686,7 +686,10 @@ export function EvidenceAttestForm({
     form: FormData,
   ) => Promise<EvidenceImportActionState>;
   labels: AttestFormLabels;
-  recordId: string;
+  /** One record — or, when absent, EVERY live unattested record of the
+   *  session (owner correction 2026-09-17): the same event per record, the
+   *  same authority, one append. */
+  recordId?: string;
   sessionId: string;
   roles: readonly Option[];
   defaultRole: string;
@@ -701,9 +704,9 @@ export function EvidenceAttestForm({
     <form
       action={submit}
       className="flex flex-wrap items-end gap-2"
-      data-testid="evidence-attest-form"
+      data-testid={recordId ? "evidence-attest-form" : "evidence-attest-session-form"}
     >
-      <input type="hidden" name="record_id" value={recordId} />
+      {recordId && <input type="hidden" name="record_id" value={recordId} />}
       <input type="hidden" name="session_id" value={sessionId} />
       <label className="flex min-w-40 flex-col gap-1">
         <span className={labelText}>{labels.attestRole}</span>

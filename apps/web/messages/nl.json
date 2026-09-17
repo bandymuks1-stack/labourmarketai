@@ -16037,7 +16037,9 @@
       "disputeAlready": "U had dit record al betwist. Uw bezwaar is vastgelegd.",
       "disputeNotAllowed": "Alleen de persoon over wie dit record gaat kan het betwisten, en pas na een bevestigde koppeling.",
       "disputeFailed": "Het bezwaar kon niet worden vastgelegd. Probeer het opnieuw.",
-      "monthlyShare": "Afgeleide gelijke maandverdeling · geen brondagen"
+      "monthlyShare": "Afgeleide gelijke maandverdeling · geen brondagen",
+      "attestAll": "Alle {count} records bevestigen",
+      "attestAllHint": "De organisatie staat achter elk nog niet bevestigd record uit deze bron ({count}). Eén bevestigingsgebeurtenis per record, met rol en notitie; uren, bronfeiten en records veranderen niet. Dit is geen onafhankelijke verificatie."
     },
     "withdraw": {
       "title": "Deze import ongedaan maken",

@@ -16037,7 +16037,9 @@
       "disputeAlready": "You had already contested this record. Your objection is on file.",
       "disputeNotAllowed": "Only the person this record is about can contest it, and only once the roster link is confirmed.",
       "disputeFailed": "Could not record the objection. Please try again.",
-      "monthlyShare": "Derived equal monthly share · not source days"
+      "monthlyShare": "Derived equal monthly share · not source days",
+      "attestAll": "Attest all {count} records",
+      "attestAllHint": "The organization stands behind every not-yet-attested record from this source ({count}). One attestation event per record, with role and note; hours, source facts and records are not changed. This is not independent verification."
     },
     "withdraw": {
       "title": "Undo this import",

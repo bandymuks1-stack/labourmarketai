@@ -16037,7 +16037,9 @@
       "disputeAlready": "Šį įrašą jau buvote užginčiję. Jūsų prieštaravimas užfiksuotas.",
       "disputeNotAllowed": "Užginčyti gali tik asmuo, apie kurį įrašas, ir tik patvirtinus sąsają su sąrašu.",
       "disputeFailed": "Nepavyko užfiksuoti prieštaravimo. Bandykite dar kartą.",
-      "monthlyShare": "Išvestinis lygus mėnesio paskirstymas · ne šaltinio dienos"
+      "monthlyShare": "Išvestinis lygus mėnesio paskirstymas · ne šaltinio dienos",
+      "attestAll": "Patvirtinti visus {count} įrašus",
+      "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas."
     },
     "withdraw": {
       "title": "Atšaukti šį importą",
