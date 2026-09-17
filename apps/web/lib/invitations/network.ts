@@ -20,7 +20,9 @@ function asAny(c: SupabaseClient): any {
 export type SentInvitationRow = {
   id: string;
   invitationType: string;
-  invitedEmail: string;
+  /** NULL for an open link (universal network v1) — no addressee, the token
+   *  is the only capability. */
+  invitedEmail: string | null;
   invitedName: string | null;
   status: string;
   deliveryStatus: string;
@@ -38,6 +40,20 @@ export type SentInvitationRow = {
   /** The RECIPIENT'S language the invitation was created with (V8 W4-B
    *  item 6) — a resend keeps it instead of the sender's UI locale. */
   recipientLocale: string | null;
+  /**
+   * INVITER STATUS (universal network v1) — the smallest useful operational
+   * view, only what is actually evidenced: seats (1 = single-use), opens
+   * counted by the logged-out landing, and the acceptance ledger's own
+   * counts. Absent (zeros / 1) while the owner-gated migration is not
+   * applied. Never a score.
+   */
+  maxUses: number;
+  useCount: number;
+  openCount: number;
+  campaignLabel: string | null;
+  targetRequestId: string | null;
+  acceptedCount: number;
+  declinedCount: number;
 };
 
 export type SentInvitationsRead =
@@ -56,22 +72,51 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "error" };
-  const { data, error } = await asAny(supabase)
+  const BASE_COLUMNS =
+    "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, locale";
+  const V2_COLUMNS = ", max_uses, use_count, open_count, campaign_label, target_request_id";
+  // The v2 columns (20260917120000, owner-gated) may not exist yet: an
+  // undefined-column error (42703) means "read the v1 shape", never "no
+  // invitations".
+  let { data, error } = await asAny(supabase)
     .from("invitations")
-    .select(
-      "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, locale",
-    )
+    .select(BASE_COLUMNS + V2_COLUMNS)
     .eq("inviter_profile_id", user.id)
     .order("created_at", { ascending: false })
     .limit(100);
+  if (error && error.code === "42703") {
+    ({ data, error } = await asAny(supabase)
+      .from("invitations")
+      .select(BASE_COLUMNS)
+      .eq("inviter_profile_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(100));
+  }
   if (error) {
     if (error.code === "42P01") return { status: "needs-migration" };
     return { status: "error" };
   }
+  // The acceptance ledger, under its own RLS (the inviter reads the rows of
+  // invitations they sent). Absent table → zeros, honestly typed as such.
+  const ids = ((data ?? []) as { id: string }[]).map((r) => r.id);
+  const counts = new Map<string, { accepted: number; declined: number }>();
+  if (ids.length > 0) {
+    const { data: acc } = await asAny(supabase)
+      .from("invitation_acceptances")
+      .select("invitation_id, decision")
+      .in("invitation_id", ids)
+      .limit(5000);
+    for (const a of (acc ?? []) as { invitation_id: string; decision: string }[]) {
+      const c = counts.get(a.invitation_id) ?? { accepted: 0, declined: 0 };
+      if (a.decision === "accepted") c.accepted += 1;
+      else if (a.decision === "declined") c.declined += 1;
+      counts.set(a.invitation_id, c);
+    }
+  }
   type Row = {
     id: string;
     invitation_type: string;
-    invited_email: string;
+    invited_email: string | null;
     invited_name: string | null;
     status: string;
     delivery_status: string;
@@ -85,6 +130,11 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
     project_id: string | null;
     personal_message: string | null;
     locale: string | null;
+    max_uses?: number | null;
+    use_count?: number | null;
+    open_count?: number | null;
+    campaign_label?: string | null;
+    target_request_id?: string | null;
   };
   return {
     status: "ok",
@@ -105,6 +155,13 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
       projectId: r.project_id,
       personalMessage: r.personal_message,
       recipientLocale: r.locale,
+      maxUses: r.max_uses ?? 1,
+      useCount: r.use_count ?? 0,
+      openCount: r.open_count ?? 0,
+      campaignLabel: r.campaign_label ?? null,
+      targetRequestId: r.target_request_id ?? null,
+      acceptedCount: counts.get(r.id)?.accepted ?? 0,
+      declinedCount: counts.get(r.id)?.declined ?? 0,
     })),
   };
 }

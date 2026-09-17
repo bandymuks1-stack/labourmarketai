@@ -8,12 +8,19 @@ import { NATIVE_LOCALE_NAMES } from "@/components/marketing/locale-switcher";
 import { activeLocales } from "@/lib/i18n/config";
 import {
   createAndSendInvitations,
+  createShareableInvitationAction,
   type CreateInvitationsResult,
   type InvitationSendOutcome,
+  type ShareableInvitationResult,
 } from "@/lib/invitations/actions";
 import {
+  clampCampaignUses,
   DEFAULT_RELATIONSHIP_SLUG,
+  DEMAND_INVITATION_TYPES,
   INVITATION_TYPES,
+  invitationTypeHasContext,
+  MAX_CAMPAIGN_USES_WITH_CONTEXT,
+  MAX_CAMPAIGN_USES_WITHOUT_CONTEXT,
   MAX_EMAILS_PER_ACTION,
   ORG_INVITATION_TYPES,
   RELATIONSHIP_INVITE_CHOICES,
@@ -38,12 +45,19 @@ export function InvitePanel({
   locale,
   organizations,
   projects,
+  demands = [],
   defaultType,
   defaultOrganizationId,
   defaultProjectId,
   defaultRelationshipSlug,
 }: {
   locale: string;
+  /**
+   * The caller's OWN open needs (composed from `loadCanonicalDemand`, never a
+   * second reader) — the targets of an `invite_to_demand` invitation:
+   * employer finds person, employer invites, person decides.
+   */
+  demands?: { id: string; label: string }[];
   /**
    * `capabilities` are the organization's declared roles (`organization_roles`).
    * They are used ONLY to explain, before the send, why a capacity is not on
@@ -115,10 +129,26 @@ export function InvitePanel({
   );
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<CreateInvitationsResult | null>(null);
+  const [linkResult, setLinkResult] = useState<ShareableInvitationResult | null>(null);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  /**
+   * HOW THE INVITATION TRAVELS (universal network v1). "email": addressed,
+   * mailed when a provider exists — the flow that existed. "link": ONE secure
+   * link with no addressee, copied or shared by hand; optionally a campaign
+   * (many seats, one link, each acceptance its own person). The link is the
+   * distribution primitive; e-mail is one channel over it.
+   */
+  const [mode, setMode] = useState<"email" | "link">("email");
+  const [seats, setSeats] = useState(1);
+  const [campaignLabel, setCampaignLabel] = useState("");
+  const [targetRequestId, setTargetRequestId] = useState(demands[0]?.id ?? "");
 
   const needsOrg = (ORG_INVITATION_TYPES as readonly string[]).includes(type);
   const needsProject = type === "join_project";
+  const needsDemand = (DEMAND_INVITATION_TYPES as readonly string[]).includes(type);
+  const maxSeats = invitationTypeHasContext(type)
+    ? MAX_CAMPAIGN_USES_WITH_CONTEXT
+    : MAX_CAMPAIGN_USES_WITHOUT_CONTEXT;
 
   /**
    * IN WHAT CAPACITY. Only organization-scoped invitations establish a
@@ -150,9 +180,12 @@ export function InvitePanel({
           return organizations.length > 0;
         }
         if (v === "join_project") return projects.length > 0;
+        if ((DEMAND_INVITATION_TYPES as readonly string[]).includes(v)) {
+          return demands.length > 0;
+        }
         return true;
       }),
-    [organizations.length, projects.length],
+    [organizations.length, projects.length, demands.length],
   );
 
   async function onSubmit(e: React.FormEvent) {
@@ -160,6 +193,32 @@ export function InvitePanel({
     if (sending) return;
     setSending(true);
     setResult(null);
+    setLinkResult(null);
+    if (mode === "link" || needsDemand) {
+      try {
+        const r = await createShareableInvitationAction({
+          invitationType: type,
+          locale,
+          recipientLocale,
+          // A demand invitation is addressed when an address was typed —
+          // the employer found a specific person; a campaign never is.
+          email: mode === "email" ? emails : null,
+          organizationId: needsOrg ? organizationId : null,
+          projectId: needsProject ? projectId : null,
+          targetRequestId: needsDemand ? targetRequestId : null,
+          relationshipSlug: needsOrg ? relationshipSlug : null,
+          invitedName: invitedName || null,
+          proposedRole: proposedRole || null,
+          personalMessage: message || null,
+          maxUses: mode === "link" ? clampCampaignUses(type, seats) : 1,
+          campaignLabel: mode === "link" && seats > 1 ? campaignLabel || null : null,
+        });
+        setLinkResult(r);
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
     try {
       const r = await createAndSendInvitations({
         emails,
@@ -251,6 +310,47 @@ export function InvitePanel({
           </select>
         </label>
 
+        {/* HOW IT TRAVELS — addressed e-mail, or one link to hand over. */}
+        <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={t("modeLabel")}>
+          <span className="text-xs text-text-secondary">{t("modeLabel")}</span>
+          {(["email", "link"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={mode === m}
+              onClick={() => setMode(m)}
+              data-testid={`invite-mode-${m}`}
+              className={`min-h-9 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                mode === m
+                  ? "border-brand-blue text-text-primary"
+                  : "border-ink-500 text-text-secondary hover:border-brand-blue"
+              }`}
+            >
+              {t(`modes.${m}`)}
+            </button>
+          ))}
+        </div>
+
+        {needsDemand && (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("demandLabel")}
+            <select
+              value={targetRequestId}
+              onChange={(e) => setTargetRequestId(e.target.value)}
+              data-testid="invite-demand"
+              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            >
+              {demands.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+            <span className="text-meta text-text-muted">{t("demandHint")}</span>
+          </label>
+        )}
+
         {needsOrg && (
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
             {t("organizationLabel")}
@@ -341,18 +441,51 @@ export function InvitePanel({
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-text-secondary">
-          {t("emailsLabel", { max: MAX_EMAILS_PER_ACTION })}
-          <textarea
-            value={emails}
-            onChange={(e) => setEmails(e.target.value)}
-            rows={2}
-            required
-            placeholder={t("emailsPlaceholder")}
-            data-testid="invite-emails"
-            className="rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
-          />
-        </label>
+        {mode === "email" ? (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("emailsLabel", { max: needsDemand ? 1 : MAX_EMAILS_PER_ACTION })}
+            <textarea
+              value={emails}
+              onChange={(e) => setEmails(e.target.value)}
+              rows={2}
+              required
+              placeholder={t("emailsPlaceholder")}
+              data-testid="invite-emails"
+              className="rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            />
+          </label>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {/* SEATS — 1 is one person; more is a controlled campaign link
+                ("we need 30 people for this project"), bounded by what the
+                context permits and re-checked by the database. */}
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("seatsLabel", { max: maxSeats })}
+              <input
+                type="number"
+                min={1}
+                max={maxSeats}
+                value={seats}
+                onChange={(e) => setSeats(clampCampaignUses(type, Number(e.target.value)))}
+                data-testid="invite-seats"
+                className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              />
+              <span className="text-meta text-text-muted">{t("seatsHint")}</span>
+            </label>
+            {seats > 1 && (
+              <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                {t("campaignLabel")}
+                <input
+                  value={campaignLabel}
+                  onChange={(e) => setCampaignLabel(e.target.value)}
+                  maxLength={120}
+                  data-testid="invite-campaign-label"
+                  className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+                />
+              </label>
+            )}
+          </div>
+        )}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
@@ -391,13 +524,43 @@ export function InvitePanel({
 
         <button
           type="submit"
-          disabled={sending || emails.trim().length === 0}
+          disabled={sending || (mode === "email" && emails.trim().length === 0)}
           data-testid="invite-submit"
           className="inline-flex min-h-10 items-center justify-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {sending ? t("sending") : t("send")}
+          {sending ? t("sending") : mode === "link" ? t("createLink") : t("send")}
         </button>
       </form>
+      )}
+
+      {linkResult && (
+        <div role="status" className="flex flex-col gap-2 text-xs" data-testid="invite-link-result">
+          {linkResult.status === "needs-migration" && (
+            <p className="text-text-muted">{t("notEnabled")}</p>
+          )}
+          {linkResult.status === "not-authed" && (
+            <p className="text-text-muted">{t("notAuthed")}</p>
+          )}
+          {linkResult.status === "ok" && (
+            <ul className="flex flex-col gap-1.5">
+              <ResultRow
+                r={{
+                  email:
+                    (linkResult.maxUses ?? 1) > 1
+                      ? t("campaignSeats", { max: linkResult.maxUses ?? 1 })
+                      : emails.trim() || t("modes.link"),
+                  outcome: linkResult.outcome as InvitationSendOutcome["outcome"],
+                  invitationId: linkResult.invitationId,
+                  inviteLink: linkResult.inviteLink,
+                }}
+                t={t}
+                copiedLink={copiedLink}
+                onCopy={copyLink}
+                onShare={shareLink}
+              />
+            </ul>
+          )}
+        </div>
       )}
 
       {result && (

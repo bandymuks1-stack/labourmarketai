@@ -99,7 +99,16 @@ export type NotificationEventType =
   // `saved_search:<id>:<ISO week>`, which with UNIQUE (recipient, dedupe_key)
   // makes the alert exactly-once per saved search per week — a saved search
   // is a standing question, not a firehose.
-  | "saved_search_match";
+  | "saved_search_match"
+  // v8 (20260917120000, universal invitation/referral network): somebody
+  // accepted an invitation this person created. Recipient is the INVITER
+  // and only the inviter (an external-source referral has none, so it emits
+  // nothing). entity_id is the invitation id; with the UNIQUE (recipient,
+  // dedupe_key) constraint a single-use invitation notifies exactly once,
+  // and a campaign link notifies once per invitation — not once per seat,
+  // which would turn a 30-person crew into 30 bells for the same fact. The
+  // href is the network page, where the sent list already shows who joined.
+  | "invitation_accepted";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -125,7 +134,9 @@ export type NotificationEntityType =
   | "weekly_digest"
   // v7: a saved search points at the opportunities board, where applying its
   // criteria recomputes the answer live.
-  | "saved_search";
+  | "saved_search"
+  // v8: the canonical invitation row, seen from the inviter's side.
+  | "invitation";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -157,6 +168,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   "demand_interest_reviewed",
   "weekly_digest",
   "saved_search_match",
+  "invitation_accepted",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -226,6 +238,9 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // from their own saved list, and putting them in a stored href would
   // persist the question in a second place.
   saved_search: "/dashboard/opportunities",
+  // v8: the sent-invitations list on the network page is where an inviter
+  // already sees each invitation's state (opened / joined / accepted).
+  invitation: "/dashboard/network",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

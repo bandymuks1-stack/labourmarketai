@@ -28,6 +28,13 @@ export async function acceptInviteFormAction(formData: FormData): Promise<void> 
     redirect(`/${locale}/invite/${token}?notice=not_enabled`);
   }
   if (result.status === "ok" && result.outcome === "accepted") {
+    // An external-source referral carries declared context the person now
+    // reviews (accept / reject / correct) — on this same page, which shows
+    // it only to the person who accepted. Nothing was written to their
+    // profile by accepting.
+    if (result.hasDeclaredContext) {
+      redirect(`/${locale}/invite/${token}?notice=referral_accepted`);
+    }
     const destination = acceptedDestination({
       invitationType: result.invitationType ?? "",
       projectId: result.projectId,

@@ -625,6 +625,29 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     surfaces: ["app/[locale]/business"],
     note: "Per-organization page exists (/business/[slug], public, opted-in orgs only via `get_public_business_profile_v1`); no index or directory route. Step B STOPPED this item on a hard dependency rather than building it: there is no listing read. `organizations` SELECT is hardened to owner/member/admin (20260802170000), and the one cross-org reader, `search_organizations_directory_v1`, is revoked from anon, requires a >=2-char term, and deliberately refuses a wildcard dump — and it does NOT filter on `public_profile_enabled`, so using it for a directory would list organizations that never opted in. An index therefore needs a NEW SECURITY DEFINER listing RPC granted to anon: RED class (needs-human-gate), and NEW is not authorized in Step B.",
   },
+  {
+    id: "ORG-11",
+    domain: "organization",
+    title: "Universal invitation / referral network",
+    worldElement: "organizations",
+    status: "BLOCKED",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: [
+      "lib/invitations/external-sources.ts",
+      "lib/invitations/external-referral-contract.ts",
+      "lib/invitations/external-referral-receive.ts",
+      "lib/invitations/public-preview.ts",
+      "lib/api/external-referral-auth.ts",
+      "app/api/referrals/external/v1/route.ts",
+      "components/app/referral-context-review.tsx",
+    ],
+    coreModule: "lib/invitations/model.ts",
+    surfaces: ["app/[locale]/invite/[token]", "app/[locale]/dashboard/network"],
+    note:
+      "ONE distribution primitive over the canonical token `invitations` system (ORG-3), extended in place by 20260917120000: an open shareable link (no addressee), a bounded multi-use campaign link (1..500 seats, each acceptance its own person and its own `invitation_acceptances` ledger row), an employer → person invitation to a canonical need (`invite_to_demand` → customer_requests; acceptance writes a demand_interest_signals row whose snapshot names `employer_invitation` and carries no match band), and an approved-external-source referral door (`/api/referrals/external/v1`, one machine secret per registered source, consent re-checked in the database, idempotent on (source, reference), no worker table of its own). The logged-out landing shows a minimal preview and both doors (register / sign in) with the safe `?next=` return; the person who accepts an external referral reviews each declared line (accept / reject / correct) and NOTHING is written to their skills or professions by any of it. PREPARED, NOT APPLIED: every v2 RPC is behind the RED migration, the app code falls back to the v1 functions until it is applied, and the partner door answers `not_enabled` (503) rather than storing anything. TEST_PROVEN only — no browser walk can reach the v2 paths before the apply.",
+    ownerDecision:
+      "Apply 20260917120000_universal_invitation_referral_network_v1 (RED: seven SECURITY DEFINER functions incl. two service_role-only, two DROP NOT NULL on invitations, CHECK widening on invitations + notification_events) and set the first source secret (`EXTERNAL_REFERRAL_TOKEN_NONSTOP`) in Vercel. Until both: no external referral can be received and no open/campaign link can be minted.",
+  },
 ];
 
 // ── D. WORK EXECUTION ───────────────────────────────────────────────────────

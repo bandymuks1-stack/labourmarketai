@@ -1413,3 +1413,33 @@ export async function emitSavedSearchMatchNotification(input: {
     undelivered("saved_search_emit_failed");
   }
 }
+
+/**
+ * Universal invitation / referral network v1: somebody accepted an
+ * invitation this person created. The recipient is resolved from the accept
+ * RPC's own return (`inviter_profile_id`) — no admin table read, because
+ * service_role holds no grant on `invitations` in production. Self-acceptance
+ * (an inviter opening their own link) is not a fact worth a bell. An
+ * external-source referral has no inviter and emits nothing here. Awaited by
+ * the write path that calls it, like every sibling emitter.
+ */
+export async function emitInvitationAcceptedNotification(input: {
+  readonly inviterProfileId: string | null;
+  readonly acceptedByProfileId: string;
+  readonly invitationId: string;
+}): Promise<void> {
+  if (!input.inviterProfileId || input.inviterProfileId === input.acceptedByProfileId) {
+    return;
+  }
+  try {
+    const admin = createAdminClient();
+    await deliver(admin, {
+      recipientProfileId: input.inviterProfileId,
+      eventType: "invitation_accepted",
+      entityType: "invitation",
+      entityId: input.invitationId,
+    });
+  } catch {
+    undelivered("invitation_accepted_emit_failed");
+  }
+}

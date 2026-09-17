@@ -175,6 +175,21 @@ export const FUNNEL_EVENTS = {
   //    first-run family it belongs to, `resolution` = "deterministic". The
   //    sentence itself is NEVER recorded.
   landingIntent: "landing_intent",
+  // ── Universal invitation / referral network v1 (2026-09-17). The referral
+  //    funnel's REAL stages, each emitted only where the fact is observable:
+  //    `invitation_created` in the create action on a stored row;
+  //    `invitation_opened` from the logged-out landing's server read (the
+  //    one door that sees an open before an account exists; profile_id NULL);
+  //    `invitation_declined` on a stored decline; `external_referral_received`
+  //    in the partner door on a stored referral (`surface` = the source
+  //    slug). `invitation_accepted` (above) already carries the acceptance.
+  //    OPENED ≠ ACCEPTED ≠ PROFILE READY: no later stage is inferred from an
+  //    earlier one. Bounded scalars only (entity_type = the invitation type,
+  //    surface, success) — never a token, an e-mail or an id.
+  invitationCreated: "invitation_created",
+  invitationOpened: "invitation_opened",
+  invitationDeclined: "invitation_declined",
+  externalReferralReceived: "external_referral_received",
 } as const;
 
 export type FunnelEventName =

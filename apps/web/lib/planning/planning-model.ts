@@ -1040,7 +1040,8 @@ export interface SentInvitationPlanningInput {
   /** Display status — stale pending already reads as expired upstream. */
   readonly status: string;
   readonly invitedName: string | null;
-  readonly invitedEmail: string;
+  /** NULL for an open link (universal network v1) — never projected anyway. */
+  readonly invitedEmail: string | null;
   readonly expiresAt: string;
   readonly acceptedAt: string | null;
   readonly declinedAt: string | null;

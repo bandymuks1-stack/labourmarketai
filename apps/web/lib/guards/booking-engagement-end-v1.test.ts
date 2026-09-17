@@ -1334,6 +1334,18 @@ describe("the migration set is exactly what this slice declared", () => {
       // APPROVAL. The migration is unapplied; the marker was added in the same
       // commit as the packet, not spread from an earlier approval.
       "20260915180000_subject_contest_and_clash_receipt.sql",
+      // 2026-09-17 — universal invitation / referral network v1. The marker
+      // records that the RED content (seven new SECURITY DEFINER functions
+      // with their GRANT/REVOKE — two executable by service_role only, the
+      // partner door and the logged-out preview; two DROP NOT NULL on
+      // `invitations` so an open link needs no addressee and an approved
+      // external source needs no person as inviter; the drop-and-widen of
+      // the invitations type/context CHECKs and of the notification_events
+      // CHECKs) is INTENTIONAL. It carries NO approval of any kind yet: the
+      // migration is PREPARED, NOT APPLIED, and the PR is a draft behind
+      // `needs-human-gate`. Rollback:
+      // supabase/rollbacks/20260917120000_universal_invitation_referral_network_v1.down.sql.
+      "20260917120000_universal_invitation_referral_network_v1.sql",
 ]);
   });
 

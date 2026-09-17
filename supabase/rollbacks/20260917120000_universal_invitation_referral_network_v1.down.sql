@@ -8,6 +8,7 @@ begin;
 
 -- ── Part H/G/F/E/D: functions ─────────────────────────────────────────────
 drop function if exists public.review_referral_context_v1(uuid, text, text, text, text);
+drop function if exists public.mark_external_referral_delivery_v1(uuid, text);
 drop function if exists public.receive_external_referral_v1(
   text, text, text, text, text, text, jsonb, jsonb, text, integer);
 drop function if exists public.get_invitation_public_preview_v1(text);

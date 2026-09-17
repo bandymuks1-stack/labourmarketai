@@ -2525,7 +2525,15 @@ describe("no migration files added by this sprint", () => {
 //   docs/DECISIONS/RED-4-5-subject-authority-packet.md. The baseline grows
 //   because the FILE exists, not because the authority is live.
 //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
-const SPRINT_BASELINE = 285;
+// 285 -> 286: universal invitation / referral network v1, ONE migration
+//   (20260917120000_universal_invitation_referral_network_v1). RED
+//   (SECURITY DEFINER + GRANT/REVOKE + DROP NOT NULL + CHECK widening),
+//   PREPARED, NOT APPLIED — draft PR behind `needs-human-gate`, no owner
+//   approval recorded yet. The baseline grows because the FILE exists, not
+//   because the door is live. If another migration PR merges first, this
+//   must be re-bumped to that PR's count + 1.
+//   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
+const SPRINT_BASELINE = 286;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

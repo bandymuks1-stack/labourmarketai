@@ -753,6 +753,7 @@ declare
   v_demand_country text;
   v_demand_org uuid;
   v_my_decision text;
+  v_my_review jsonb;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -783,11 +784,16 @@ begin
         from public.organizations where id = v_demand_org;
     end if;
   end if;
-  select decision into v_my_decision from public.invitation_acceptances
+  select decision, context_review into v_my_decision, v_my_review
+    from public.invitation_acceptances
    where invitation_id = v_row.id and profile_id = uid;
 
   return jsonb_build_object(
     'outcome', 'ok',
+    -- The id is disclosed to the token holder so the review RPC can name
+    -- the row; it is not a capability (the review RPC requires the caller's
+    -- own accepted ledger row).
+    'invitation_id', v_row.id,
     'invitation_type', v_row.invitation_type,
     'status', v_status,
     'invited_email', v_row.invited_email,
@@ -808,7 +814,8 @@ begin
     'my_decision', v_my_decision,
     'has_declared_context', v_row.declared_context is not null,
     -- The person's own declared data, ONLY once they accepted it is theirs.
-    'declared_context', case when v_my_decision = 'accepted' then v_row.declared_context else null end
+    'declared_context', case when v_my_decision = 'accepted' then v_row.declared_context else null end,
+    'context_review', case when v_my_decision = 'accepted' then coalesce(v_my_review, '{}'::jsonb) else null end
   );
 end $$;
 
@@ -1017,6 +1024,38 @@ grant execute on function public.receive_external_referral_v1(
   text, text, text, text, text, text, jsonb, jsonb, text, integer)
   to service_role;
 
+-- The delivery truth for a referral the server e-mailed itself. The v1
+-- marker (`mark_invitation_delivery_v1`) is authenticated-only and checks
+-- the inviter; a referral has no inviter and is delivered by the server, so
+-- this one is executable by service_role only and touches ONLY rows that
+-- carry an external source.
+create or replace function public.mark_external_referral_delivery_v1(
+  p_invitation_id uuid,
+  p_outcome       text
+) returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_outcome not in ('sent','delivery_failed') then
+    return 'invalid_outcome';
+  end if;
+  update public.invitations
+     set delivery_status = p_outcome,
+         last_sent_at = case when p_outcome = 'sent' then now() else last_sent_at end
+   where id = p_invitation_id and external_source_slug is not null;
+  if not found then
+    return 'not_found';
+  end if;
+  return 'ok';
+end $$;
+
+revoke all on function public.mark_external_referral_delivery_v1(uuid, text)
+  from public, anon, authenticated;
+grant execute on function public.mark_external_referral_delivery_v1(uuid, text)
+  to service_role;
+
 -- ═════════════════════════════════════════════════════════════════════════
 -- PART H — the person reviews what was declared about them
 -- ═════════════════════════════════════════════════════════════════════════
@@ -1092,6 +1131,7 @@ commit;
 -- ROLLBACK: supabase/rollbacks/20260917120000_universal_invitation_referral_network_v1.down.sql
 --
 --   drop function if exists public.review_referral_context_v1(uuid, text, text, text, text);
+--   drop function if exists public.mark_external_referral_delivery_v1(uuid, text);
 --   drop function if exists public.receive_external_referral_v1(text, text, text, text, text, text, jsonb, jsonb, text, integer);
 --   drop function if exists public.get_invitation_public_preview_v1(text);
 --   drop function if exists public.get_invitation_preview_v2(text);

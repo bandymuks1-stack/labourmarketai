@@ -4624,7 +4624,8 @@
         "event_demand_interest_expressed": "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet",
         "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
         "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
-        "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse"
+        "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse",
+        "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -11099,7 +11100,13 @@
         "resend_limit": "Limit für erneutes Senden erreicht.",
         "invalid_token_hash": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
-      }
+      },
+      "openLink": "Geteilter Link",
+      "campaignLink": "Kampagnenlink",
+      "seats": "{used}/{max} Plätze",
+      "opened": "{count}× geöffnet",
+      "joined": "{count} beigetreten",
+      "declinedCount": "{count} abgelehnt"
     },
     "organizations": {
       "title": "Meine Unternehmen",
@@ -11141,7 +11148,8 @@
         "join_as_employee": "Als Mitarbeiter beitreten",
         "collaborate_partner": "Als Partner zusammenarbeiten",
         "join_project": "Einem Projekt beitreten",
-        "invite_company": "Ein Unternehmen einladen"
+        "invite_company": "Ein Unternehmen einladen",
+        "invite_to_demand": "Zu einem Arbeitsbedarf einladen"
       },
       "organizationLabel": "Unternehmen",
       "projectLabel": "Projekt",
@@ -11173,13 +11181,30 @@
         "not_authorized": "Nicht erlaubt",
         "error": "Fehlgeschlagen",
         "invalid_relationship": "Keine zulässige Beziehung",
-        "organization_capability_required": "Organisation hat dies noch nicht angegeben"
+        "organization_capability_required": "Organisation hat dies noch nicht angegeben",
+        "invalid_max_uses": "Zu viele Plätze für diese Art Einladung",
+        "invalid_expiry": "Ungültige Gültigkeit",
+        "demand_required": "Arbeitsbedarf wählen",
+        "demand_not_found": "Arbeitsbedarf nicht gefunden",
+        "demand_closed": "Dieser Arbeitsbedarf ist geschlossen"
       },
       "recipientLanguageLabel": "Sprache des Empfängers (E-Mail und Einladung)",
       "capacityLabel": "Was wird die eingeladene Person in Ihrer Organisation sein?",
       "capacityHint": "Ein Praktikum oder ein Studium ist kein Arbeitsverhältnis — es wird genau so erfasst, wie Sie es hier wählen.",
       "capacityNeedsCapability": "Ihre Organisation hat noch nicht angegeben, dass sie ausbildet. Geben Sie das auf der Organisationsseite an, danach können Sie eine lernende Person einladen.",
-      "capacityNeedsCapabilityCta": "Organisationsseite öffnen"
+      "capacityNeedsCapabilityCta": "Organisationsseite öffnen",
+      "modeLabel": "Übermittlung",
+      "modes": {
+        "email": "Per E-Mail-Adresse",
+        "link": "Ein Link zum Teilen"
+      },
+      "demandLabel": "Arbeitsbedarf",
+      "demandHint": "Die eingeladene Person entscheidet. Die Einladung wird als Ihre erfasst, nie als Systemmatch.",
+      "seatsLabel": "Plätze (1–{max})",
+      "seatsHint": "1 = eine Person. Mehr = ein kontrollierter Link, den mehrere Personen annehmen können, jede mit eigenem Konto.",
+      "campaignLabel": "Name für diesen Link (optional)",
+      "createLink": "Link erstellen",
+      "campaignSeats": "Link für {max} Personen"
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
@@ -11195,7 +11220,8 @@
         "join_as_employee": "Einladung als Mitarbeiter",
         "collaborate_partner": "Einladung zur Zusammenarbeit",
         "join_project": "Einladung in ein Projekt",
-        "invite_company": "Einladung für ein Unternehmen"
+        "invite_company": "Einladung für ein Unternehmen",
+        "invite_to_demand": "Ein Arbeitgeber hat Sie zu einem Arbeitsbedarf eingeladen"
       },
       "from": "Eingeladen von {name}",
       "organization": "Unternehmen: {name}",
@@ -11208,7 +11234,8 @@
         "accepted": "Diese Einladung wurde bereits angenommen.",
         "declined": "Diese Einladung wurde abgelehnt.",
         "expired": "Diese Einladung ist abgelaufen. Bitten Sie um eine neue.",
-        "revoked": "Diese Einladung wurde widerrufen."
+        "revoked": "Diese Einladung wurde widerrufen.",
+        "exhausted": "Alle Plätze dieser Einladung sind belegt. Bitten Sie um einen neuen Link."
       },
       "notices": {
         "not_enabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
@@ -11218,16 +11245,59 @@
         "declined": "Einladung abgelehnt.",
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
         "not_found": "Einladung nicht gefunden.",
-        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "exhausted": "Alle Plätze sind belegt.",
+        "referral_accepted": "Vermittlung angenommen. Prüfen Sie unten, was über Sie angegeben wurde — nichts ist verifiziert und nichts wurde Ihrem Profil hinzugefügt."
       },
       "capacity": "Beziehung: {capacity}",
-      "capacityNotEmployment": "Dies ist kein Stellenangebot und begründet kein Arbeitsverhältnis."
+      "capacityNotEmployment": "Dies ist kein Stellenangebot und begründet kein Arbeitsverhältnis.",
+      "selfStart": "Eigenes Konto anlegen",
+      "anonExplainer": "Registrieren Sie sich oder melden Sie sich an, um diese Einladung zu beantworten. Konto, Profil und Nachweise bleiben Ihre — die einladende Person stellt nur die Verbindung her.",
+      "register": "Registrieren und fortfahren",
+      "signIn": "Ich habe bereits ein Konto",
+      "youOwnYourIdentity": "Ihre berufliche Identität bleibt Ihre. Das Annehmen einer Einladung erzeugt für sich keine verifizierte Fähigkeit, kein Arbeitsverhältnis und keine Zuweisung.",
+      "referredVia": "Vermittelt über {source}",
+      "campaign": "Einladung: {label}",
+      "seats": "{used} von {max} Plätzen belegt",
+      "demand": "Arbeitsbedarf: {role} · {country}",
+      "demandNotMatch": "Der Arbeitgeber hat Sie direkt eingeladen — das ist kein Systemmatch.",
+      "interested": "Ich bin interessiert",
+      "notInterested": "Kein Interesse"
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
     "admin": {
       "title": "Verwaltung",
       "hint": "Freigaben, Anträge und Organisationsregeln — werden bei Bedarf geöffnet.",
       "back": "Zurück zu den Beziehungen"
+    },
+    "referralReview": {
+      "title": "Was {source} über Sie angegeben hat",
+      "intro": "Diese Zeilen wurden mit Ihrer Einwilligung übermittelt. Es sind Angaben, keine verifizierten Fakten. Bestätigen, korrigieren oder verwerfen Sie jede — Ihre Antwort wird erfasst, und Ihrem Profil wird nichts hinzugefügt, bis Sie es selbst tun.",
+      "groups": {
+        "professions": "Gewerke",
+        "sectors": "Arbeitsbereiche",
+        "skills": "Fähigkeiten",
+        "languages": "Sprachen",
+        "destinations": "Länder",
+        "freeText": "In Ihren Worten"
+      },
+      "decisions": {
+        "accepted": "Bestätigt",
+        "rejected": "Verworfen",
+        "corrected": "Korrigiert"
+      },
+      "accept": "Stimmt",
+      "reject": "Nicht ich",
+      "correct": "Korrigieren",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "correctionPlaceholder": "Ihre Formulierung",
+      "failed": {
+        "not_enabled": "Die Prüfung ist in dieser Umgebung noch nicht aktiviert.",
+        "error": "Ihre Antwort konnte nicht gespeichert werden. Bitte erneut versuchen."
+      },
+      "boundary": "Eine Bestätigung hier erzeugt keine Fähigkeit und kein Gewerk. Fügen Sie Zutreffendes Ihrem Profil selbst hinzu:",
+      "toProfile": "mein Profil öffnen"
     }
   },
   "people": {
