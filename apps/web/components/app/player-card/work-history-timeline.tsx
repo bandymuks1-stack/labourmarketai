@@ -29,17 +29,33 @@ export interface HistoryTimelineLabels {
 export function WorkHistoryTimeline({
   timeline,
   labels,
+  appearance = "boxed",
+  tone = "brand",
 }: {
   timeline: HistoryTimeline;
   labels: HistoryTimelineLabels;
+  /** `boxed` (default) — its own bordered panel; `bare` — the band alone,
+   *  for a surface that composes it into a larger identity object. */
+  appearance?: "boxed" | "bare";
+  /** `brand` (default) — brand fill; `evidence` — the evidence-supported
+   *  cyan, for lanes that are organization-reported evidence, not a claim. */
+  tone?: "brand" | "evidence";
 }) {
+  const frame =
+    appearance === "boxed"
+      ? "rounded-md border border-ink-600 bg-ink-800/40 p-3"
+      : "";
+  const laneFill =
+    tone === "evidence"
+      ? "bg-brand-cyan/20 ring-1 ring-inset ring-brand-cyan/50"
+      : "bg-brand-blue/25 ring-1 ring-inset ring-brand-blue/50";
   if (timeline.lanes.length === 0) {
     // Nothing placeable. When there is not even an undated row, the whole
     // block would say nothing at all — so it renders nothing.
     if (timeline.undatedCount === 0) return null;
     return (
       <section
-        className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+        className={`flex flex-col gap-1.5 ${frame}`}
         data-testid="player-card-history-timeline"
         data-chart-state="empty"
       >
@@ -55,9 +71,10 @@ export function WorkHistoryTimeline({
 
   return (
     <section
-      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+      className={`flex flex-col gap-2 ${frame}`}
       data-testid="player-card-history-timeline"
       data-chart-state="live"
+      data-chart-tone={tone}
       data-chart-lanes={timeline.lanes.length}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -100,7 +117,7 @@ export function WorkHistoryTimeline({
                 className={`absolute inset-y-0 flex items-center rounded-full px-2 ${
                   lane.current
                     ? "bg-brand-cyan/25 ring-1 ring-inset ring-brand-cyan/60"
-                    : "bg-brand-blue/25 ring-1 ring-inset ring-brand-blue/50"
+                    : laneFill
                 }`}
                 style={{
                   left: `${lane.startFraction * 100}%`,
@@ -143,7 +160,10 @@ export function WorkHistoryTimeline({
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta leading-relaxed text-text-secondary">
           {timeline.lanes.some((l) => l.current) && (
             <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden className="h-1.5 w-4 rounded-full bg-brand-cyan/60" />
+              <span
+                aria-hidden
+                className="h-1.5 w-4 rounded-full bg-brand-cyan/60"
+              />
               {labels.current}
             </span>
           )}

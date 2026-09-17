@@ -16207,7 +16207,9 @@
         "skills": "Fähigkeiten",
         "availability": "Verfügbarkeit",
         "pay": "Lohn",
-        "contexts": "Wo gearbeitet"
+        "contexts": "Wo gearbeitet",
+        "rhythm": "Tagesrhythmus",
+        "ring": "belegt in {weeks} von {total} Wochen"
       },
       "interpretation": {
         "typo_same_house_number": "Schreibfehler über die Hausnummer zugeordnet",
@@ -16233,7 +16235,10 @@
         "hoursUnknownNote": "Stunden erscheinen nur dort, wo die Quelle sie nach Ort aufteilte; sonst nur Tage.",
         "legend": "Ortsmarken",
         "notATeamWhy": "Gemeinsam in einer Datei zu stehen ist kein Team und keine aktuelle Besetzung. Eine Brigade entsteht nur durch Zustimmung. Gemeinsames Vorkommen in einer Datei ist eine historische Gruppe, kein aktuelles Team. Aus Geschichte entsteht keine Mitgliedschaft und keine Kolonne.",
-        "weekConflict": "die Woche in der Datei widerspricht dem Datum"
+        "weekConflict": "die Woche in der Datei widerspricht dem Datum",
+        "formation": "Aufstellung",
+        "unplaced": "Ort nicht ermittelt",
+        "path": "Arbeitsweg"
       },
       "aggregatesTitle": "Zeitraumsummen (keine Kalendertage)",
       "aggregatePeriodUnknownRecorded": "Zeitraum unbekannt · in der Datei erfasst am {date}",
@@ -16291,7 +16296,8 @@
         "scale": "Kalendermaßstab",
         "performed": "geleistete Arbeit",
         "day": "Tag",
-        "sum": "gesamt"
+        "sum": "gesamt",
+        "actual": "tatsächlich"
       },
       "attention": {
         "decisions": "Entscheidungen",

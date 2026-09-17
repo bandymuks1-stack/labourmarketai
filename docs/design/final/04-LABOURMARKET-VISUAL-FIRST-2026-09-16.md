@@ -161,3 +161,63 @@ workspace; raw rows behind disclosure).
   the commit writes a period record; no surface renders it as a period yet.
 - Work Journal: the diary/timeline grammar is proven compatible here (day →
   person → object → time → evidence); the journal's own list stays queued.
+
+## 9. The one grammar — OBJECTS × TIME, PEOPLE as tokens (2026-09-17, second pass)
+
+The owner's judgment of the first pass (§8) was "≈30 % of the required
+level: still a workforce-admin / timesheet / diary look". The second pass
+does not add views; it re-draws every view in ONE grammar so the product is
+learnt once and recognised everywhere:
+
+| Scale | Surface | Objects are … | Time is … | People are … | Focus does … |
+|---|---|---|---|---|---|
+| period | Overview (company footprint) | ridges across the weeks, thick where many person-days | the weeks as columns, the rhythm above | evidence-ring identities | a person **re-weights** the ridges to their own days; an object lights its ridge; no lines are ever drawn between people and places |
+| week | Field (formation) | lanes, most person-days first | the seven days as columns (period: the weeks) | tokens standing on a lane on a day | a person lights their tokens and their **work path** draws through the lanes; an object lights its lane; a day lights its column and opens that day's formation |
+| day | Calendar | (the day's places open on select) | real dates in real positions | tokens on the day, the day's hours as a density bar | a day opens its **formation**: places → people → hours or `?` |
+| person | Player Card | lanes on the person's own span (the canonical band, evidence tone) | the daily rhythm: one bar per dated day | the ring identity | places → object focus |
+| place | Object | the square place mark, the active period on the company's span | the rhythm by week | marks with the bar of their days | people → person focus |
+
+### 9.1 Visual vocabulary (`components/app/historical/historical-marks.tsx`)
+
+| Mark | Shape | Means | Never |
+|---|---|---|---|
+| `PersonMark` | round monogram tile | the ONE person identity (canonical foundation) | a synthesised face |
+| `PersonMark ring` | the **evidence ring**: one arc slot per week of the period, the arc as long as the days evidenced that week (of 7) | *when* there is evidence — a shape every person owns and no two share | a score, a rating, a percentile |
+| `PersonToken` | the tile with an outline: **solid** = hours stated on this place, **dashed** = split unknown | a person on a place on a day | hours divided by guess |
+| `ObjectMark` | **square** tile with the location glyph | a place as a place (square ≠ round, never confused with a person) | a code as the architecture |
+| `PlaceMark` | glyph + NAME | a place in a list / week cell | — |
+| `UnknownToken` | dashed circle around `?` | UNKNOWN, everywhere the same dash | zero, an estimate |
+| `Σ` amber | period aggregate, apart | a figure a day cannot hold | a day |
+| orange dot / ⚠ | a decision waits | — | — |
+| gold ring / underline | selected / focused (brand action) | — | confirmation |
+
+Colour never carries a state alone: unknown is a dash, selection a ring
+and a label, aggregate a Σ, a decision a glyph.
+
+### 9.2 Motion (`framer-motion`, already a dependency; `useReducedMotion` everywhere)
+
+Semantic only, enter-only (nothing animates out, so a click during a
+change never lands on a leaving node): a mode arrives (160 ms settle, the
+tab underline slides), the ridges settle to the focus (spring, no bounce),
+the work path **draws** through the lanes (420 ms `pathLength`), the detail
+slides in beside the workspace, the day formation staggers in. Under
+`prefers-reduced-motion` every duration is 0 and nothing moves.
+
+### 9.3 Geometry (`lib/organization-evidence/import-visual.ts`, pure)
+
+`personRing` · `personDaySeries` · `objectStreams(calendar, person?)` ·
+`fieldFormationWeek` (lanes, tokens, unplaced `?` lane, per-person paths) ·
+`fieldFormationPeriod` · `dayFormation`. All re-shape the ONE projection;
+none stores, reads, invents or divides (`hours: null` stays null).
+
+### 9.4 Fixed on the way
+
+- Template labels (`{count}`, `{hours}`) were translated without values and
+  interpolated client-side: next-intl raised `FORMATTING_ERROR` on every
+  render and leaked the raw key `evidenceImport.reconstruction.card.moreLanes`
+  into the card. Labels that need values are now functions that call the
+  translator with the values.
+- Mobile recomposes rather than shrinks: the field shows lane marks only,
+  the card hides the lane band (the footprint list below carries the same
+  places), the top state is a 2-column grid, the decision bar shows only the
+  counts that decide.

@@ -16207,7 +16207,9 @@
         "skills": "skills",
         "availability": "availability",
         "pay": "pay",
-        "contexts": "Where they worked"
+        "contexts": "Where they worked",
+        "rhythm": "Daily rhythm",
+        "ring": "evidenced {weeks} of {total} weeks"
       },
       "interpretation": {
         "typo_same_house_number": "misspelling matched by house number",
@@ -16233,7 +16235,10 @@
         "hoursUnknownNote": "Hours appear only where the source split them by place; elsewhere, days only.",
         "legend": "Place marks",
         "notATeamWhy": "Appearing together in a file is not a team and not a current line-up. A brigade is formed only by consent. Co-presence in one file is a historical group, not a current team. No membership or brigade is created from history.",
-        "weekConflict": "the file's week disagrees with the date"
+        "weekConflict": "the file's week disagrees with the date",
+        "formation": "Formation",
+        "unplaced": "place not established",
+        "path": "work path"
       },
       "aggregatesTitle": "Period aggregates (not calendar days)",
       "aggregatePeriodUnknownRecorded": "period unknown · recorded in the file on {date}",
@@ -16291,7 +16296,8 @@
         "scale": "Calendar scale",
         "performed": "performed work",
         "day": "Day",
-        "sum": "total"
+        "sum": "total",
+        "actual": "actual"
       },
       "attention": {
         "decisions": "Decisions",

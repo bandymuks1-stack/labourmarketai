@@ -16207,7 +16207,9 @@
         "skills": "įgūdžiai",
         "availability": "prieinamumas",
         "pay": "atlygis",
-        "contexts": "Kur dirbo"
+        "contexts": "Kur dirbo",
+        "rhythm": "Dienos ritmas",
+        "ring": "įrodyta {weeks} iš {total} savaičių"
       },
       "interpretation": {
         "typo_same_house_number": "rašybos klaida sutapatinta pagal namo numerį",
@@ -16233,7 +16235,10 @@
         "hoursUnknownNote": "Valandos rodomos tik ten, kur šaltinis jas paskirstė pagal objektus; kitur — tik dienos.",
         "legend": "Objektų žymos",
         "notATeamWhy": "Bendras buvimas faile — ne komanda ir ne dabartinė sudėtis. Brigada kuriama tik sutikimu. Bendras buvimas faile — istorinė grupė, ne dabartinė komanda. Narystė ir brigados iš istorijos nekuriamos.",
-        "weekConflict": "failo savaitė nesutampa su data"
+        "weekConflict": "failo savaitė nesutampa su data",
+        "formation": "Sudėtis",
+        "unplaced": "vieta nenustatyta",
+        "path": "darbo kelias"
       },
       "aggregatesTitle": "Laikotarpio sumos (ne kalendoriaus dienos)",
       "aggregatePeriodUnknownRecorded": "laikotarpis nežinomas · faile užrašyta {date}",
@@ -16291,7 +16296,8 @@
         "scale": "Kalendoriaus mastelis",
         "performed": "atliktas darbas",
         "day": "Diena",
-        "sum": "iš viso"
+        "sum": "iš viso",
+        "actual": "faktas"
       },
       "attention": {
         "decisions": "Sprendimai",

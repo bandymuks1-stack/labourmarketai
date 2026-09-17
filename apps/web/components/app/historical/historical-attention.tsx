@@ -116,7 +116,7 @@ export function HistoricalAttention({
       {blocking.length > 0 && (
         <ul className="flex flex-col gap-3" aria-label={labels.decisions}>
           {blocking.map((i) => (
-            <li key={`${i.kind}:${i.key ?? ""}`} className="flex flex-col gap-3 rounded-md border border-brand-orange/40 bg-brand-orange/5 p-3" data-testid="evidence-issue" data-kind={i.kind} data-blocking="true" data-count={i.count}>
+            <li key={`${i.kind}:${i.key ?? ""}`} className="flex flex-col gap-3 rounded-lg bg-ink-800/40 p-3 ring-1 ring-brand-orange/30" data-testid="evidence-issue" data-kind={i.kind} data-blocking="true" data-count={i.count}>
               <h3 className="flex items-center gap-2 text-support font-semibold text-text-primary">
                 <SemanticIcon concept="warning" label={labels.decisions} className="h-4 w-4 text-brand-orange" />
                 {labels.issue(i.kind, { count: i.count, label: i.label ?? "" })}
@@ -125,7 +125,7 @@ export function HistoricalAttention({
               {i.kind === "time_semantics" && (
                 <ul className="flex flex-col gap-1.5" data-testid="evidence-time-rows">
                   {i.timeRows.map((r) => (
-                    <li key={r.rowId} className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-900 p-2" data-testid="evidence-time-row">
+                    <li key={r.rowId} className="flex flex-col gap-1 py-2" data-testid="evidence-time-row">
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span className="inline-flex items-center gap-2">
                           <span aria-hidden className={cn(TILE, "h-8 w-8 text-meta")}>{playerInitials(r.label)}</span>

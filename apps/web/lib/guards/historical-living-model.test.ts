@@ -7,10 +7,15 @@ import { PLAYER_IDENTITY_VARIANTS } from "@/lib/identity/player-identity";
 import { SEMANTIC_CONCEPTS } from "@/components/app/semantic-icon";
 import {
   buildHistoricalCalendar,
+  dayFormation,
   decisionCount,
+  fieldFormationWeek,
   fieldWeekView,
   objectMonogram,
+  objectStreams,
+  personDaySeries,
   personObjectLanes,
+  personRing,
 } from "@/lib/organization-evidence/import-visual";
 
 import { projectionOfTheSession, renderWorkspace } from "./history-client-boundary.test";
@@ -71,8 +76,11 @@ describe("the reconstruction is ONE workspace whose modes REPLACE the centre", (
     expect(workspace).toMatch(/const \[week, setWeek\]/);
     expect(workspace).toMatch(/const \[person, setPerson\]/);
     expect(workspace).toMatch(/const \[object, setObject\]/);
-    expect(workspace).toMatch(/selection=\{\{ week, person, object \}\}/);
-    expect(workspace).toMatch(/personFilter=\{person\} objectFilter=\{object\}/);
+    expect(workspace).toMatch(/const \[day, setDay\]/);
+    expect(workspace).toMatch(/selection=\{\{ week, person, object, day \}\}/);
+    expect(workspace).toMatch(/personFilter=\{person\}\s+objectFilter=\{object\}/);
+    // the day chosen on the calendar is the day lit on the field, and both open the SAME day formation
+    expect(workspace).toMatch(/\(mode === "calendar" \|\| mode === "field"\) && day/);
   });
   it("the default view is visual, not prose: no paragraph of explanation on the overview or the workspace chrome", () => {
     expect(code(overview)).not.toMatch(/<p\b/);
@@ -104,9 +112,27 @@ describe("the premium player identity is the ONE person identity, in its history
     expect(card.match(/data-identity-variant="history-card"/g)?.length).toBe(2);
     expect(card).toMatch(/export function HistoricalPlayerCompact/);
     expect(card).toMatch(/export function HistoricalPlayerCard/);
-    expect(card).toMatch(/playerInitials\(name\)/);
-    expect(card).toMatch(/PLAYER_IDENTITY_AVATAR_BORDER/);
-    expect(card).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
+    // the identity tile is the ONE mark (historical-marks), which is the canonical foundation
+    expect(card).toMatch(/<PersonMark\s+label=\{name\}/);
+    expect(card).not.toMatch(/rounded-full[^"]*font-display[^"]*font-semibold/);
+    const marks = read("components/app/historical/historical-marks.tsx");
+    expect(marks).toMatch(/playerInitials\(label\)/);
+    expect(marks).toMatch(/PLAYER_IDENTITY_AVATAR_BORDER/);
+    expect(marks).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
+    // the evidence ring is drawn from the period's real weeks and their evidenced days — never from a score
+    expect(marks).toMatch(/function EvidenceRing/);
+    expect(marks).toMatch(/seg\.days \/ 7/);
+    expect(card).toMatch(/ring=\{ring\}/);
+    const ring = personRing(projectionOfTheSession().calendar, "Person A");
+    expect(ring.length).toBe(9);
+    expect(ring.every((r) => r.days >= 0 && r.days <= 7)).toBe(true);
+    expect(personRing(projectionOfTheSession().calendar, "Person G").every((r) => r.days === 0)).toBe(true);
+    // the daily rhythm is the person's dated days with DAILY hours only; an unknown day stays null
+    const days = personDaySeries(projectionOfTheSession().calendar, "Person A");
+    expect(days.length).toBe(40);
+    expect(days.every((d) => d.hours === null || d.hours < 24)).toBe(true);
+    expect(card).toMatch(/data-testid="historical-player-rhythm"/);
+    expect(card).toMatch(/strokeDasharray/);
   });
   it("never a synthesised face, never an image from nowhere — on any view", () => {
     for (const [name, src] of Object.entries(VIEWS)) {
@@ -115,7 +141,7 @@ describe("the premium player identity is the ONE person identity, in its history
   });
   it("carries the ONE provenance derivation — organization-reported evidence, never gold", () => {
     expect(card).toMatch(/<ProvenanceEdge provenanceClass="EVIDENCE_SUPPORTED" \/>/);
-    expect(card).toMatch(/<ProvenanceLine provenanceClass="EVIDENCE_SUPPORTED"/);
+    expect(card).toMatch(/<ProvenanceLine\s+provenanceClass="EVIDENCE_SUPPORTED"/);
     for (const [name, src] of Object.entries(VIEWS)) expect(code(src), name).not.toMatch(/EMPLOYER_CONFIRMED|trust-accent|\bgold\b/);
   });
   it("shows evidence-backed facts as icon · value · unit; the work reality as object lanes on time; and no score", () => {
@@ -133,7 +159,11 @@ describe("the premium player identity is the ONE person identity, in its history
     expect(card).toMatch(/data-testid="historical-player-compact"[\s\S]{0,400}aria-pressed=\{selected\}|aria-pressed=\{selected\}[\s\S]{0,400}data-testid="historical-player-compact"/);
     expect(overview).toMatch(/<HistoricalPlayerCompact/);
     expect(overview).not.toMatch(/<HistoricalPlayerCard\b/);
-    expect(workspace).toMatch(/\{personProjection \? \(\s*<HistoricalPlayerCard/);
+    // the focus card mounts with the product's CSS entrance (rise-in), never a framer `initial` that
+    // would render invisible on the server and stay invisible under reduced motion
+    expect(workspace).toMatch(/\{personProjection \? \(\s*<div[^>]*className=\{RISE\}[^>]*>\s*<HistoricalPlayerCard/);
+    for (const [name, src] of Object.entries(VIEWS)) expect(code(src), name).not.toMatch(/initial=\{\{\s*opacity/);
+    expect(read("app/globals.css")).toMatch(/\.rise-in,[\s\S]{0,400}animation: none/);
   });
   it("says the person's CURRENT state is not inferred — as a token, the sentence on request", () => {
     expect(card).toMatch(/data-testid="historical-player-current"[\s\S]{0,200}title=\{labels\.currentNotInferred\}/);
@@ -156,24 +186,51 @@ describe("the historical field is people in time, read-only, never a team", () =
     expect(board.startsWith('"use client";')).toBe(true);
     expect(board).not.toMatch(/fetch\(|useActionState|createClient|\.rpc\(|from\(|<form/);
   });
-  it("people are rows, time is columns, places are marks; selects by WEEK, PERSON and PLACE", () => {
+  it("is a FORMATION: places are lanes, time is columns, people are tokens; selects by WEEK, PERSON, PLACE and DAY", () => {
     expect(board).toMatch(/data-testid="field-week"/);
     expect(board).toMatch(/data-testid="field-person"/);
     expect(board).toMatch(/data-testid="field-place"/);
+    expect(board).toMatch(/data-testid="field-day"/);
+    expect(board).toMatch(/data-testid="field-lane"/);
+    expect(board).toMatch(/data-testid="field-path"/);
     expect(board).toMatch(/role="rowheader"/);
     expect(board).toMatch(/role="columnheader"/);
-    expect(board).toMatch(/fieldWeekView\(calendar, week\)/);
-    expect(board).toMatch(/fieldPeriodView\(field\)/);
-    // the rejected representation: a grid of place rectangles with people inside
+    expect(board).toMatch(/fieldFormationWeek\(calendar, week\)/);
+    expect(board).toMatch(/fieldFormationPeriod\(calendar\)/);
+    // the rejected representations: a grid of place rectangles with people inside; a person × day matrix of chips
     expect(board).not.toMatch(/data-testid="field-places"/);
+    expect(board).not.toMatch(/<PlaceMark/);
+    // the formation of the real week 45: lanes most-worked first, a person on several places on one day, the unknown split dashed
+    const week = fieldFormationWeek(projectionOfTheSession().calendar, 45);
+    expect(week?.lanes[0]?.name).toBe("Testgracht 3");
+    const friday = week?.days.indexOf("2025-11-07") ?? -1;
+    const onT3 = week?.lanes.find((l) => l.name === "Testgracht 3")?.cells[friday]?.find((t) => t.label === "Person A");
+    const onT5 = week?.lanes.find((l) => l.name === "Testgracht 5")?.cells[friday]?.find((t) => t.label === "Person A");
+    expect(onT3?.hours).toBeNull();
+    expect(onT5?.hours).toBe(8.5);
+    expect(onT3?.dayHours).toBe(9);
+    // the work path steps through the lane with the most stated hours, never invents a step
+    const steps = week?.paths.get("Person A") ?? [];
+    expect(steps.length).toBe(6);
+    expect(steps.find((st) => st.day === friday)?.lane).toBe(week?.lanes.findIndex((l) => l.name === "Testgracht 5"));
+    // the company's objects as streams: most-worked first, one week entry per period week, a person's narrowing never exceeds the whole
+    const streams = objectStreams(projectionOfTheSession().calendar);
+    expect(streams[0]?.name).toBe("Testgracht 3");
+    expect(streams.every((o) => o.weeks.length === 9)).toBe(true);
+    const mine = objectStreams(projectionOfTheSession().calendar, "Person A");
+    for (const o of mine) expect(o.personDays).toBeLessThanOrEqual(streams.find((x) => x.name === o.name)?.personDays ?? 0);
   });
   it("uses the ONE identity mark and the ONE place mark (name first, monogram only as a tooltip), never colour alone", () => {
     const marks = read("components/app/historical/historical-marks.tsx");
     expect(marks).toMatch(/playerInitials\(label\)/);
     expect(marks).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
     expect(marks).toMatch(/title=\{`\$\{name\} \(\$\{objectMonogram\(name\)\}\)/);
-    expect(board).toMatch(/<PersonMark label=\{r\.label\}/);
-    expect(board).toMatch(/<PlaceMark/);
+    expect(marks).toMatch(/export function PersonToken/);
+    expect(marks).toMatch(/data-token-state=\{unknown \? "unknown" : "actual"\}/);
+    expect(marks).toMatch(/outline-dashed/);
+    expect(board).toMatch(/<PersonToken/);
+    expect(board).toMatch(/<ObjectMark/);
+    expect(calendar).toMatch(/<PersonToken/);
     // the code is not the architecture: no monogram is rendered as cell text on the field or the calendar
     for (const src of [board, calendar]) expect(src).not.toMatch(/\{objectMonogram\(/);
     expect(objectMonogram("Hoofdgracht 3")).toBe("H3");
@@ -221,7 +278,9 @@ describe("the calendar is a calendar", () => {
   it("a period aggregate is never a day: the visual module never touches aggregates; the calendar lists them APART", () => {
     expect(code(visual)).not.toMatch(/aggregates/);
     expect(calendar).toMatch(/data-testid="evidence-calendar-aggregates"/);
-    const gridCode = calendar.slice(calendar.indexOf('data-testid="historical-calendar-grid"'), calendar.indexOf("</div>", calendar.indexOf('data-testid="historical-calendar-grid"')));
+    const gridStart = calendar.indexOf('data-testid="historical-calendar-grid"');
+    const gridCode = calendar.slice(gridStart, calendar.indexOf('<p className="flex flex-wrap', gridStart));
+    expect(gridCode.length).toBeGreaterThan(2000);
     expect(gridCode).not.toMatch(/aggregate/);
     const grid = buildHistoricalCalendar({ calendar: projectionOfTheSession().calendar, scale: "month", anchor: "2025-11-01", selected: null });
     const nov17 = grid.weeks.flat().find((c) => c.iso === "2025-11-17");
@@ -232,14 +291,22 @@ describe("the calendar is a calendar", () => {
     expect(semantics).toMatch(/periodStart: null,\s*periodEnd: null,/);
   });
   it("the weekly table is the OPTIONAL report view, never the default", () => {
-    expect(workspace).toMatch(/useState<"calendar" \| "table">\("calendar"\)/);
+    expect(workspace).toMatch(/useState<\s*"calendar" \| "table"\s*>\(\s*"calendar",?\s*\)/);
     expect(calendar).toMatch(/view === "calendar" \? \(/);
     expect(calendar).toMatch(/<WeekTable/);
   });
   it("selecting a day opens the day's actual reality: person → places → hours or ?", () => {
     expect(calendar).toMatch(/export function HistoricalDayReality/);
-    expect(calendar).toMatch(/pl\.hours !== null \? `\$\{fmt\.hours\(pl\.hours\)\} h` : "\?"/);
-    expect(workspace).toMatch(/mode === "calendar" && day\s*\? \{ title: fmt\.day\(day\), node: <HistoricalDayReality/);
+    expect(calendar).toMatch(/dayFormation\(calendar, iso\)/);
+    expect(calendar).toMatch(/data-testid="historical-day-place"/);
+    expect(calendar).toMatch(/p\.hours !== null \? \(\s*`\$\{fmt\.hours\(p\.hours\)\} h`\s*\) : \(\s*<UnknownToken/);
+    expect(workspace).toMatch(/node: dayNode\(day\)/);
+    // the day formation of 7 Nov: places most-people first, Person A's unknown split on Testgracht 3, 8.5 h on Testgracht 5
+    const day = dayFormation(projectionOfTheSession().calendar, "2025-11-07");
+    expect(day?.places[0]?.name).toBe("Testgracht 3");
+    expect(day?.places.find((p) => p.name === "Testgracht 3")?.people.find((t) => t.label === "Person A")?.hours).toBeNull();
+    expect(day?.places.find((p) => p.name === "Testgracht 5")?.people.find((t) => t.label === "Person A")?.hours).toBe(8.5);
+    expect(day?.hours).toBe(54);
   });
 });
 
@@ -250,7 +317,7 @@ describe("objects, attention, the decision bar and the source", () => {
     expect(objects).toMatch(/data-testid="historical-object"/);
     expect(objects).toMatch(/data-testid="historical-object-focus"/);
     expect(objects).toMatch(/data-testid="historical-object-source"/);
-    expect(objects).toMatch(/<details[\s\S]{0,800}data-testid="evidence-place-spellings"/);
+    expect(objects).toMatch(/<details[\s\S]{0,1200}data-testid="evidence-place-spellings"/);
     expect(objects).not.toMatch(/<table/);
   });
   it("attention shows only decisions, the 800/165 case as period-total candidates with remote and period tokens, the source on demand", () => {
@@ -317,8 +384,15 @@ describe("no second model of anything, no write before commit", () => {
     }
   });
   it("the identity comes from the existing foundation; the lanes from the existing player-card band; the sheet from the existing mobile primitive", () => {
-    expect(card).toMatch(/from "@\/lib\/identity\/player-identity"/);
+    expect(read("components/app/historical/historical-marks.tsx")).toMatch(/from "@\/lib\/identity\/player-identity"/);
+    expect(card).toMatch(/from "@\/components\/app\/historical\/historical-marks"/);
     expect(card).toMatch(/from "@\/components\/app\/player-card\/work-history-timeline"/);
+    // the band is the canonical one, composed bare in the evidence tone — extended, not forked
+    expect(card).toMatch(/appearance="bare"/);
+    expect(card).toMatch(/tone="evidence"/);
+    const band = read("components/app/player-card/work-history-timeline.tsx");
+    expect(band).toMatch(/appearance = "boxed"/);
+    expect(band).toMatch(/tone = "brand"/);
     expect(card).toMatch(/from "@\/components\/app\/provenance\/provenance-edge"/);
     expect(workspace).toMatch(/from "@\/components\/ui\/MobileSheet"/);
     expect(workspace).toMatch(/open=\{narrow\}/);

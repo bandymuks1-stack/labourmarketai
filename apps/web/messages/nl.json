@@ -16207,7 +16207,9 @@
         "skills": "vaardigheden",
         "availability": "beschikbaarheid",
         "pay": "loon",
-        "contexts": "Waar gewerkt"
+        "contexts": "Waar gewerkt",
+        "rhythm": "Dagritme",
+        "ring": "aangetoond in {weeks} van {total} weken"
       },
       "interpretation": {
         "typo_same_house_number": "spelfout gekoppeld via huisnummer",
@@ -16233,7 +16235,10 @@
         "hoursUnknownNote": "Uren verschijnen alleen waar de bron ze per plaats verdeelde; elders alleen dagen.",
         "legend": "Plekmarkeringen",
         "notATeamWhy": "Samen in een bestand staan is geen team en geen huidige opstelling. Een ploeg ontstaat alleen met instemming. Samen voorkomen in één bestand is een historische groep, geen huidig team. Uit geschiedenis ontstaat geen lidmaatschap of ploeg.",
-        "weekConflict": "de week in het bestand wijkt af van de datum"
+        "weekConflict": "de week in het bestand wijkt af van de datum",
+        "formation": "Opstelling",
+        "unplaced": "locatie niet vastgesteld",
+        "path": "werkpad"
       },
       "aggregatesTitle": "Periodetotalen (geen kalenderdagen)",
       "aggregatePeriodUnknownRecorded": "periode onbekend · in het bestand genoteerd op {date}",
@@ -16291,7 +16296,8 @@
         "scale": "Kalenderschaal",
         "performed": "verricht werk",
         "day": "Dag",
-        "sum": "totaal"
+        "sum": "totaal",
+        "actual": "feitelijk"
       },
       "attention": {
         "decisions": "Beslissingen",
