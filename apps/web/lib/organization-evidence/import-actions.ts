@@ -83,6 +83,11 @@ export type EvidenceImportActionState =
 /** The workspace this section lives in. It is no longer a route of its own —
  *  see the section component's header for why. */
 // The importer lives on the organization's HISTORY door (IA 2026-09-16).
+// The door is a LOCALISED route (`/[locale]/dashboard/company/history`), so
+// the revalidation must name the route pattern as a page: a literal
+// `/dashboard/company/history` matches no route, nothing is revalidated, and
+// a decision the human just settled stayed "1 decision" on the workspace
+// until a manual reload (found by the visual walk, 2026-09-17).
 const PATH = "/[locale]/dashboard/company/history";
 
 async function caller(): Promise<DomainCaller | null> {

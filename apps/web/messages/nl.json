@@ -15936,7 +15936,7 @@
       "createdObjects": "Locaties aangemaakt"
     },
     "records": {
-      "title": "4. Wat er is vastgelegd",
+      "title": "Wat er is vastgelegd",
       "empty": "Uit deze bron is nog niets vastgelegd.",
       "importedAt": "Geïmporteerd",
       "supplier": "Aangeleverd als",
@@ -16200,7 +16200,16 @@
         "unknowns": "Onbekend",
         "unknownAllocation": "{count} dagen — meerdere plaatsen, verdeling niet opgegeven",
         "unknownPlace": "{count} dagen — plaats niet vastgesteld",
-        "noActivities": "De bron noemt geen activiteit zonder plaats."
+        "noActivities": "De bron noemt geen activiteit zonder plaats.",
+        "currentToken": "nu: ?",
+        "moreLanes": "nog {count} plekken zonder baan",
+        "profession": "beroep",
+        "skills": "vaardigheden",
+        "availability": "beschikbaarheid",
+        "pay": "loon",
+        "contexts": "Waar gewerkt",
+        "rhythm": "Dagritme",
+        "ring": "aangetoond in {weeks} van {total} weken"
       },
       "interpretation": {
         "typo_same_house_number": "spelfout gekoppeld via huisnummer",
@@ -16212,7 +16221,7 @@
         "as_written": "zoals geschreven"
       },
       "field": {
-        "title": "Hoe het team werkte",
+        "title": "Veld: wie werkte waar",
         "subtitle": "Kies een week, een persoon of een plaats — het veld toont wie waar werkte, volgens de bron.",
         "allWeeks": "Hele periode",
         "peopleEvidenced": "Mensen met bewezen werk",
@@ -16222,8 +16231,14 @@
         "clear": "wissen",
         "selectedPerson": "persoon",
         "selectedPlace": "plaats",
-        "notATeam": "Samen in een bestand staan is geen team en geen huidige opstelling. Een ploeg ontstaat alleen met instemming.",
-        "hoursUnknownNote": "Uren verschijnen alleen waar de bron ze per plaats verdeelde; elders alleen dagen."
+        "notATeam": "Historische groep ≠ team",
+        "hoursUnknownNote": "Uren verschijnen alleen waar de bron ze per plaats verdeelde; elders alleen dagen.",
+        "legend": "Plekmarkeringen",
+        "notATeamWhy": "Samen in een bestand staan is geen team en geen huidige opstelling. Een ploeg ontstaat alleen met instemming. Samen voorkomen in één bestand is een historische groep, geen huidig team. Uit geschiedenis ontstaat geen lidmaatschap of ploeg.",
+        "weekConflict": "de week in het bestand wijkt af van de datum",
+        "formation": "Opstelling",
+        "unplaced": "locatie niet vastgesteld",
+        "path": "werkpad"
       },
       "aggregatesTitle": "Periodetotalen (geen kalenderdagen)",
       "aggregatePeriodUnknownRecorded": "periode onbekend · in het bestand genoteerd op {date}",
@@ -16242,7 +16257,69 @@
         "calendar": "Kalender: daguren bereiken het werkjournaal en werk in cijfers pas na koppeling van een account; periodetotalen nooit als dag.",
         "provenance": "Herkomst: elke regel toont het bestand, de rij en elke interpretatie; de hele import kan worden ingetrokken."
       },
-      "impactNote": "Vóór uw bevestiging wordt niets aangemaakt of geschreven."
+      "impactNote": "Vóór uw bevestiging wordt niets aangemaakt of geschreven.",
+      "source": "Bron",
+      "close": "Sluiten",
+      "modesLabel": "Weergave",
+      "nothingWrittenShort": "voorbeeld · niets weggeschreven",
+      "mode": {
+        "overview": "Overzicht",
+        "people": "Mensen",
+        "field": "Veld",
+        "objects": "Objecten",
+        "calendar": "Kalender",
+        "attention": "Aandacht"
+      },
+      "state": {
+        "period": "periode",
+        "people": "mensen",
+        "objects": "objecten",
+        "personDays": "mensdagen",
+        "dailyHours": "daguren",
+        "aggregate": "periodetotaal",
+        "decision": "beslissing",
+        "decisions": "beslissingen"
+      },
+      "icon": {
+        "person": "persoon",
+        "time": "tijd",
+        "evidence": "bewijs",
+        "warning": "aandacht nodig",
+        "object": "locatie"
+      },
+      "calendar": {
+        "prev": "Vorige periode",
+        "next": "Volgende periode",
+        "month": "Maand",
+        "week": "Weekweergave",
+        "table": "Tabel",
+        "scale": "Kalenderschaal",
+        "performed": "verricht werk",
+        "day": "Dag",
+        "sum": "totaal",
+        "actual": "feitelijk"
+      },
+      "attention": {
+        "decisions": "Beslissingen",
+        "observations": "Waarnemingen",
+        "detected": "gedetecteerd",
+        "periodTotal": "periodetotaal",
+        "why": "Waarom dit wordt gevraagd"
+      },
+      "overview": {
+        "footprint": "Wie werkte waar"
+      },
+      "people": {
+        "pick": "Kies een persoon om zijn werkrealiteit te zien."
+      },
+      "bar": {
+        "ready": "gereed",
+        "people": "mensen",
+        "objects": "objecten",
+        "review": "Nakijken",
+        "confirm": "Bevestigen",
+        "blocked": "Eerst {count} beslissing(en) onder Aandacht."
+      }
     }
   },
   "organizationRoster": {

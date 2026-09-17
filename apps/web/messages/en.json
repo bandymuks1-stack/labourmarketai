@@ -15936,7 +15936,7 @@
       "createdObjects": "Sites created"
     },
     "records": {
-      "title": "4. What is recorded",
+      "title": "What is recorded",
       "empty": "Nothing has been recorded from this source yet.",
       "importedAt": "Imported",
       "supplier": "Supplied as",
@@ -16200,7 +16200,16 @@
         "unknowns": "Unknown",
         "unknownAllocation": "{count} days — several places, split not stated",
         "unknownPlace": "{count} days — place not established",
-        "noActivities": "The source names no activity without a place."
+        "noActivities": "The source names no activity without a place.",
+        "currentToken": "current: ?",
+        "moreLanes": "{count} more places without a lane",
+        "profession": "profession",
+        "skills": "skills",
+        "availability": "availability",
+        "pay": "pay",
+        "contexts": "Where they worked",
+        "rhythm": "Daily rhythm",
+        "ring": "evidenced {weeks} of {total} weeks"
       },
       "interpretation": {
         "typo_same_house_number": "misspelling matched by house number",
@@ -16212,7 +16221,7 @@
         "as_written": "as written"
       },
       "field": {
-        "title": "How the team worked",
+        "title": "Field: who worked where",
         "subtitle": "Pick a week, a person or a place — the field shows who worked where, by the source.",
         "allWeeks": "Whole period",
         "peopleEvidenced": "People evidenced working",
@@ -16222,8 +16231,14 @@
         "clear": "clear",
         "selectedPerson": "person",
         "selectedPlace": "place",
-        "notATeam": "Appearing together in a file is not a team and not a current line-up. A brigade is formed only by consent.",
-        "hoursUnknownNote": "Hours appear only where the source split them by place; elsewhere, days only."
+        "notATeam": "Historical group ≠ team",
+        "hoursUnknownNote": "Hours appear only where the source split them by place; elsewhere, days only.",
+        "legend": "Place marks",
+        "notATeamWhy": "Appearing together in a file is not a team and not a current line-up. A brigade is formed only by consent. Co-presence in one file is a historical group, not a current team. No membership or brigade is created from history.",
+        "weekConflict": "the file's week disagrees with the date",
+        "formation": "Formation",
+        "unplaced": "place not established",
+        "path": "work path"
       },
       "aggregatesTitle": "Period aggregates (not calendar days)",
       "aggregatePeriodUnknownRecorded": "period unknown · recorded in the file on {date}",
@@ -16242,7 +16257,69 @@
         "calendar": "Calendar: daily hours reach the work journal and work in numbers only once an account is linked; period aggregates never as a day.",
         "provenance": "Source: every record shows the file, the row and every reading; the whole import can be withdrawn."
       },
-      "impactNote": "Nothing is created or written before you confirm."
+      "impactNote": "Nothing is created or written before you confirm.",
+      "source": "Source",
+      "close": "Close",
+      "modesLabel": "View",
+      "nothingWrittenShort": "preview · nothing written",
+      "mode": {
+        "overview": "Overview",
+        "people": "People",
+        "field": "Field",
+        "objects": "Objects",
+        "calendar": "Calendar",
+        "attention": "Attention"
+      },
+      "state": {
+        "period": "period",
+        "people": "people",
+        "objects": "objects",
+        "personDays": "person-days",
+        "dailyHours": "daily hours",
+        "aggregate": "period total",
+        "decision": "decision",
+        "decisions": "decisions"
+      },
+      "icon": {
+        "person": "person",
+        "time": "time",
+        "evidence": "evidence",
+        "warning": "needs attention",
+        "object": "object"
+      },
+      "calendar": {
+        "prev": "Previous period",
+        "next": "Next period",
+        "month": "Month",
+        "week": "Week",
+        "table": "Table",
+        "scale": "Calendar scale",
+        "performed": "performed work",
+        "day": "Day",
+        "sum": "total",
+        "actual": "actual"
+      },
+      "attention": {
+        "decisions": "Decisions",
+        "observations": "Observations",
+        "detected": "detected",
+        "periodTotal": "period total",
+        "why": "Why this is asked"
+      },
+      "overview": {
+        "footprint": "Who worked where"
+      },
+      "people": {
+        "pick": "Select a person to see their work reality."
+      },
+      "bar": {
+        "ready": "ready",
+        "people": "people",
+        "objects": "objects",
+        "review": "Review",
+        "confirm": "Confirm",
+        "blocked": "{count} decision(s) first, under Attention."
+      }
     }
   },
   "organizationRoster": {
