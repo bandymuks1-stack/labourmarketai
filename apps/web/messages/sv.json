@@ -2211,6 +2211,28 @@
         "no_start_date": "startdatum",
         "pay_not_comparable": "lön ej jämförbar (ej i EUR)"
       }
+    },
+    "vacancyInterest": {
+      "express": "Jag vill ha det här jobbet",
+      "sent": "Intresse registrerat",
+      "withdraw": "Dra tillbaka",
+      "consentLabel": "Nonstop Group får presentera mig för den här arbetsgivaren för det här jobbet.",
+      "consentHint": "(bara dina angivna yrken, färdigheter, språk och tillgänglighet — aldrig din arbetsjournal eller ditt CV; frivilligt)",
+      "handoffTooNew": "Ditt intresse är registrerat och väntar på Nonstop Group. Annonsen är yngre än 30 dagar, så arbetsgivaren får ännu inte kontaktas om den — intresset ligger kvar.",
+      "handoffPending": "Ditt intresse är registrerat. Överlämning till Nonstop Group är ännu inte aktiverad.",
+      "ineligible": {
+        "worker_not_matchable": "Ditt intresse är registrerat. Det kan lämnas vidare till Nonstop Group när din profil säger vilket arbete du utför och vilka färdigheter du har.",
+        "employer_not_identifiable": "Ditt intresse är registrerat. Annonsen anger ingen arbetsgivare, så den kan inte lämnas vidare till Nonstop Group.",
+        "vacancy_not_live": "Ditt intresse är registrerat, men annonsen är inte längre öppen.",
+        "not_public_vacancy": "Ditt intresse är registrerat.",
+        "interest_not_active": "Ditt intresse är registrerat.",
+        "publication_date_unusable": "Ditt intresse är registrerat. Annonsen saknar användbart publiceringsdatum, så den kan inte lämnas vidare till Nonstop Group."
+      },
+      "scopeNote": "Detta är ingen ansökan och inget meddelande går till arbetsgivaren. Man söker fortfarande via originalannonsen.",
+      "error": "Kunde inte spara. Försök igen.",
+      "handoffQueued": "Ditt intresse är registrerat och väntar på att lämnas vidare till Nonstop Groups kommersiella team. LabourMarket.ai har inte skickat något till arbetsgivaren.",
+      "handoffDelivered": "Ditt intresse har lämnats vidare till Nonstop Group. Nonstop kan kontakta arbetsgivaren genom sin egen kommersiella process; LabourMarket.ai har inte skickat något till arbetsgivaren.",
+      "handoffClosed": "Ditt intresse är registrerat. Den tidigare överlämningen till Nonstop Group stängdes när du drog tillbaka; inget skickades."
     }
   },
   "scouting": {

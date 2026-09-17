@@ -109,6 +109,12 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   // what they are looking for, and it reveals nobody else.
   { table: "worker_saved_searches", key: "worker_id" },
   { table: "demand_interest_signals", key: "worker_id" },
+  // Worker → real vacancy → interest → Nonstop commercial handoff v1: the
+  // person's own "I want this job" as it was handed to the partner — which
+  // vacancy, whether they allowed being presented to the employer, the
+  // outreach state recorded, and whether/when it was delivered. Theirs above
+  // all; it names the employer only by the publisher's key.
+  { table: "commercial_handoffs", key: "worker_id" },
   // Universal network v1: the person's own answers to invitations (accepted /
   // declined, what it created) and their review of what an external source
   // declared about them. Theirs above all — it is the provenance of how they

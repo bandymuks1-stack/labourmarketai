@@ -232,6 +232,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    check. It calls exactly one RPC, reads and writes no table directly,
     //    touches no chat table, and sends nothing outbound — the projection it
     //    returns carries no name, email, phone or address by construction.
+    //  - lib/commercial/handoff-dispatch.ts — the outgoing commercial-handoff
+    //    dispatcher (worker → real vacancy → interest → Nonstop, 2026-09-17).
+    //    A cron sweep with no user session. It calls exactly ONE RPC,
+    //    list_queued_commercial_handoffs_v1 — SECURITY DEFINER, granted to
+    //    service_role ONLY by 20260917160000, projecting an allow-listed set
+    //    of declared facts (no note, journal, CV, document or contact column)
+    //    — and updates commercial_handoffs.status (service_role SELECT,UPDATE
+    //    only; never INSERT). service_role holds no table grant on
+    //    worker_skills / worker_professions / worker_languages / profiles
+    //    and needs none. Its one outbound target is the owner-configured
+    //    partner door; while NONSTOP_HANDOFF_ENDPOINT / _TOKEN are unset it
+    //    returns not_configured before touching the key at all. Touches no
+    //    chat table.
     //  - lib/invitations/external-referral-receive.ts — the approved-partner
     //    referral door's writer (universal network v1). The caller is a
     //    MACHINE (a partner's careers intake) with no user session, so there
@@ -391,6 +404,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/customer-store.ts",
       "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
+      "lib/commercial/handoff-dispatch.ts",
       "lib/company/claim-public-intake.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/public-preview.ts",

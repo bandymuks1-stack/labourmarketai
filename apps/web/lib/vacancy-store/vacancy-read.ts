@@ -79,7 +79,7 @@ export type VacancySearchStatus =
 
 export interface VacancySearchResultV1 {
   readonly status: VacancySearchStatus;
-  readonly vacancies: readonly PublicVacancyV1[];
+  readonly vacancies: readonly StoredPublicVacancyV1[];
   /** True when more rows exist past this page. */
   readonly hasMore: boolean;
 }
@@ -171,7 +171,7 @@ export async function getPublicVacancy(
   providerKey: string,
   externalId: string,
 ): Promise<
-  | { readonly status: "ok"; readonly vacancy: PublicVacancyV1 }
+  | { readonly status: "ok"; readonly vacancy: StoredPublicVacancyV1 }
   | { readonly status: "not_found" }
   | { readonly status: "not_provisioned" }
 > {
@@ -226,7 +226,7 @@ export async function getPublicVacancyById(
   client: VacancyDbClient,
   id: string,
 ): Promise<
-  | { readonly status: "ok"; readonly vacancy: PublicVacancyV1 }
+  | { readonly status: "ok"; readonly vacancy: StoredPublicVacancyV1 }
   | { readonly status: "not_found" }
   | { readonly status: "not_provisioned" }
 > {
@@ -370,9 +370,20 @@ function sanitizeSearchTerm(raw: string): string {
  * or promotes a derived guess into a publisher fact, and a unit test catches
  * that where an integration test would not.
  */
+/**
+ * A stored ad = the import contract PLUS the store's own row id. The id is
+ * what a worker-side write (bookmark, interest) must name — the publisher
+ * identity (provider + external id) is for dedupe and attribution. Optional
+ * at the type level only because the same mapper serves rows that were
+ * selected without `id`; every `select("*")` read carries it.
+ */
+export type StoredPublicVacancyV1 = PublicVacancyV1 & {
+  readonly storeId: string | null;
+};
+
 export function fromPublicVacancyRow(
   row: Record<string, unknown>,
-): PublicVacancyV1 {
+): StoredPublicVacancyV1 {
   const str = (k: string): string | null => {
     const v = row[k];
     return typeof v === "string" ? v : null;
@@ -394,6 +405,7 @@ export function fromPublicVacancyRow(
   const translationStatus = str("translation_status");
 
   return {
+    storeId: str("id"),
     providerKey: (str("provider_key") ?? "") as VacancyProviderKey,
     externalId: str("external_id") ?? "",
     contentHash: str("content_hash") ?? "",

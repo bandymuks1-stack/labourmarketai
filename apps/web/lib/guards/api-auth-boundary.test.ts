@@ -66,6 +66,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Billing safety v1: the superadmin's READ-ONLY reconciliation report (local billing tables vs the provider's view). Operator surface for a browser session; it takes no input, writes nothing and never charges — a non-browser caller has no product reason to read an anomaly report.",
   },
+  "cron/commercial-handoffs/route.ts": {
+    class: "public",
+    why: "Vercel cron delivers it (once the owner schedules it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
+  },
   "cron/weekly-digest/route.ts": {
     class: "public",
     why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",

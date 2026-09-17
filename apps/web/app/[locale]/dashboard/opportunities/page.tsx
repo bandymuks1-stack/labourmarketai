@@ -383,6 +383,39 @@ export default async function OpportunitiesPage({
         ? `${need.locationLabel} · ${countryLabel(need.country)}`
         : countryLabel(need.country)
     } · ${startLabel(need.startPeriod)}`;
+  // "I want this job" on a public ad (2026-09-17) — every sentence states
+  // what the action does and does not do; the ineligibility reasons are
+  // stable codes → words, never a raw code on screen.
+  const vacancyInterestLabels = {
+    express: t("vacancyInterest.express"),
+    sent: t("vacancyInterest.sent"),
+    withdraw: t("vacancyInterest.withdraw"),
+    consentLabel: t("vacancyInterest.consentLabel"),
+    consentHint: t("vacancyInterest.consentHint"),
+    handoffQueued: t("vacancyInterest.handoffQueued"),
+    handoffDelivered: t("vacancyInterest.handoffDelivered"),
+    handoffClosed: t("vacancyInterest.handoffClosed"),
+    handoffTooNew: t("vacancyInterest.handoffTooNew"),
+    // A serializable map (client-component prop), one entry per stable code.
+    handoffIneligible: Object.fromEntries(
+      [
+        "worker_not_matchable",
+        "not_public_vacancy",
+        "vacancy_not_live",
+        "interest_not_active",
+        "employer_not_identifiable",
+        "publication_date_unusable",
+      ].map((code) => [
+        code,
+        t.has(`vacancyInterest.ineligible.${code}`)
+          ? (t(`vacancyInterest.ineligible.${code}` as never) as string)
+          : t("vacancyInterest.sent"),
+      ]),
+    ) as Record<string, string>,
+    handoffPending: t("vacancyInterest.handoffPending"),
+    scopeNote: t("vacancyInterest.scopeNote"),
+    error: t("vacancyInterest.error"),
+  };
   const savedLabels = {
     save: t("saved.save"),
     saved: t("saved.saved"),
@@ -485,16 +518,22 @@ export default async function OpportunitiesPage({
             if (when) parts.push(when);
           }
           return {
+            key: r.key,
+            source: r.source,
             requestId: r.requestId,
+            vacancyId: r.vacancyId,
             status: r.status,
             statusText: t(`myInterest.status.${r.status}` as never) as string,
             stillOpen: r.stillOpen,
-            title: roleLabel(r.roleText),
+            // A public ad's title is the publisher's own words — rendered as
+            // written, never passed through the platform role lexicon.
+            title: r.source === "vacancy" ? (r.roleText ?? roleLabel(null)) : roleLabel(r.roleText),
             metaLine: parts.join(" · "),
             nextAction: r.nextAction,
-            cvHref: r.cvTemplate
-              ? `/${locale}/cv?need=${encodeURIComponent(r.requestId)}&template=${encodeURIComponent(r.cvTemplate)}`
-              : null,
+            cvHref:
+              r.cvTemplate && r.requestId
+                ? `/${locale}/cv?need=${encodeURIComponent(r.requestId)}&template=${encodeURIComponent(r.cvTemplate)}`
+                : null,
           };
         })
       : [];
@@ -1018,6 +1057,18 @@ export default async function OpportunitiesPage({
                                 card={row.card}
                                 band={row.band}
                                 whyCodes={whyCodesFor(row)}
+                                interest={
+                                  result.capabilities.vacancyInterestAvailable && row.card.vacancyId
+                                    ? {
+                                        locale,
+                                        status:
+                                          result.vacancyInterestById.get(row.card.vacancyId) ?? null,
+                                        handoff:
+                                          result.handoffByVacancy.get(row.card.vacancyId) ?? null,
+                                        labels: vacancyInterestLabels,
+                                      }
+                                    : null
+                                }
                                 labels={{
                                   bandLabel: bandChip(row.band),
                                   whyLabel: t("world.why"),

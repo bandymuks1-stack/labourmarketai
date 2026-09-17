@@ -25,10 +25,16 @@ import Link from "next/link";
  *     requires it, the boundary guard pins it);
  *   - the provenance note says this is someone's public ad, not a
  *     labourmarket.ai posting;
- *   - the ONLY action on an unclaimed ad is the publisher's original
- *     advertisement. No platform apply, no interest signal, no booking —
- *     the employer never agreed to receive any of that, and a control that
- *     delivers nowhere is a fake control;
+ *   - the employer-facing actions on an unclaimed ad stay refused (no
+ *     platform apply, no shortlist, no booking, no employer inbox — the
+ *     employer never agreed to receive any of that). The publisher's
+ *     original advertisement remains the application route;
+ *   - since 2026-09-17 there is ONE worker-side action: "I want this job".
+ *     It delivers — to Nonstop's commercial workflow through
+ *     `commercial_handoffs` — so it is no longer the fake control this
+ *     contract refused while it delivered nowhere. It is rendered only when
+ *     its store exists (`interest` prop present), never as a dead button,
+ *     and its copy says exactly what it does and does not do;
  *   - pay renders exactly as published (currency preserved, never
  *     converted; the unit is named as "not stated" when the source did not
  *     state one);
@@ -36,6 +42,8 @@ import Link from "next/link";
  *     requirement is not "no language required".
  */
 import { ExternalApplyConfirm } from "@/components/app/external-vacancy-confirm";
+import { VacancyInterestButton } from "@/components/app/vacancy-interest-button";
+import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import { OpportunityDetailsDisclosure } from "@/components/app/opportunity-details-disclosure";
 import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
@@ -182,11 +190,20 @@ export interface ExternalOpportunityRowLabels {
  * provenance notes) sits behind the same details disclosure the platform
  * rows use.
  */
+/** The worker-side interest control, present ONLY when its store exists. */
+export interface ExternalVacancyInterestProps {
+  readonly locale: string;
+  readonly status: InterestStatus | null;
+  readonly handoff: { status: string; outreachState: string } | null;
+  readonly labels: Parameters<typeof VacancyInterestButton>[0]["labels"];
+}
+
 export function ExternalOpportunityRow({
   card,
   band,
   whyCodes,
   labels,
+  interest = null,
 }: {
   readonly card: ExternalOpportunityCardV1;
   readonly band: FitBand;
@@ -194,6 +211,7 @@ export function ExternalOpportunityRow({
    *  the destination decided (gaps → unknowns). */
   readonly whyCodes: readonly string[];
   readonly labels: ExternalOpportunityRowLabels;
+  readonly interest?: ExternalVacancyInterestProps | null;
 }): ReactNode {
   const { key, view, capabilities, match, matchingGaps } = card;
   const why = whyCodes
@@ -295,6 +313,18 @@ export function ExternalOpportunityRow({
             {labels.managementNoteText(view.provenance.managementNoteCode)}
           </p>
         </OpportunityDetailsDisclosure>
+
+        {/* "I want this job" — the one worker-side action, only when it
+            can reach somebody (store applied) and the ad has a store id. */}
+        {interest && card.vacancyId ? (
+          <VacancyInterestButton
+            locale={interest.locale}
+            vacancyId={card.vacancyId}
+            initialStatus={interest.status}
+            initialHandoff={interest.handoff}
+            labels={interest.labels}
+          />
+        ) : null}
 
         {capabilities.canApplyInternally ? null : view.provenance.applicationRoute ===
             "source_original" && view.provenance.applicationUrl ? (

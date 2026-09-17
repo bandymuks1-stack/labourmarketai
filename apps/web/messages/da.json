@@ -2211,6 +2211,28 @@
         "no_start_date": "startdato",
         "pay_not_comparable": "løn ikke sammenlignelig (ikke i EUR)"
       }
+    },
+    "vacancyInterest": {
+      "express": "Jeg vil have dette job",
+      "sent": "Interesse registreret",
+      "withdraw": "Træk tilbage",
+      "consentLabel": "Nonstop Group må præsentere mig for denne arbejdsgiver til dette job.",
+      "consentHint": "(kun dine angivne fag, færdigheder, sprog og tilgængelighed — aldrig din arbejdsjournal eller dit CV; valgfrit)",
+      "handoffTooNew": "Din interesse er registreret og venter på Nonstop Group. Denne annonce er under 30 dage gammel, så arbejdsgiveren må endnu ikke kontaktes om den — interessen bliver stående.",
+      "handoffPending": "Din interesse er registreret. Videregivelse til Nonstop Group er endnu ikke slået til.",
+      "ineligible": {
+        "worker_not_matchable": "Din interesse er registreret. Den kan videregives til Nonstop Group, når din profil siger, hvilket arbejde du udfører, og hvilke færdigheder du har.",
+        "employer_not_identifiable": "Din interesse er registreret. Denne annonce nævner ingen arbejdsgiver, så den kan ikke videregives til Nonstop Group.",
+        "vacancy_not_live": "Din interesse er registreret, men denne annonce er ikke længere åben.",
+        "not_public_vacancy": "Din interesse er registreret.",
+        "interest_not_active": "Din interesse er registreret.",
+        "publication_date_unusable": "Din interesse er registreret. Annoncen har ingen brugbar udgivelsesdato, så den kan ikke videregives til Nonstop Group."
+      },
+      "scopeNote": "Dette er ikke en ansøgning, og der sendes ingen besked til arbejdsgiveren. Man søger stadig gennem den originale annonce.",
+      "error": "Kunne ikke gemme. Prøv igen.",
+      "handoffQueued": "Din interesse er registreret og venter på at blive givet videre til Nonstop Groups kommercielle team. LabourMarket.ai har intet sendt til arbejdsgiveren.",
+      "handoffDelivered": "Din interesse er givet videre til Nonstop Group. Nonstop kan kontakte arbejdsgiveren gennem sin egen kommercielle proces; LabourMarket.ai har intet sendt til arbejdsgiveren.",
+      "handoffClosed": "Din interesse er registreret. Den tidligere videregivelse til Nonstop Group blev lukket, da du trak den tilbage; intet blev sendt."
     }
   },
   "scouting": {

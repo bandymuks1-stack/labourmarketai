@@ -17,6 +17,7 @@ import {
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import { listMyInterestSignals } from "./interest";
+import { listMyHandoffsByVacancy } from "./vacancy-interest";
 import {
   listMySavedOpportunities,
   listSavedPublicVacancyIds,
@@ -25,6 +26,7 @@ import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read
 import type { InterestStatus } from "./interest-snapshot";
 import {
   buildMyInterestView,
+  vacancyLiveKey,
   type LiveNeedFacts,
   type MyInterestViewRow,
 } from "./my-interest-view";
@@ -125,6 +127,15 @@ export type WorkerOpportunitiesResult =
       /** True only when the interest table exists (owner-gated migration) —
        *  the UI offers the express-interest action only then. */
       readonly interestAvailable: boolean;
+      /** True only when the vacancy source of the SAME table exists
+       *  (migration 20260917160000) — the external cards offer "I want this
+       *  job" only then. Never a dead button. */
+      readonly vacancyInterestAvailable: boolean;
+      /** The worker's own interest status per PUBLIC VACANCY id. */
+      readonly vacancyInterestById: ReadonlyMap<string, InterestStatus>;
+      /** The worker's own commercial handoff per vacancy id (own RLS rows) —
+       *  so "the commercial partner was informed" is said only when a row exists. */
+      readonly handoffByVacancy: ReadonlyMap<string, { status: string; outreachState: string }>;
       /** True only when the #723 saved-opportunities store exists — the save
        *  toggle is rendered only then (feature-detected once per load). */
       readonly savedAvailable: boolean;
@@ -254,6 +265,10 @@ export async function loadWorkerOpportunities(
 
   // Own interest map (empty + unavailable until the owner-gated table exists).
   const myInterest = await listMyInterestSignals(supabase, ctx.workerId);
+  // Own handoff rows (empty until migration 20260917160000 is applied).
+  const handoffByVacancy = myInterest.vacancyInterestAvailable
+    ? await listMyHandoffsByVacancy(supabase, ctx.workerId)
+    : new Map<string, { status: string; outreachState: string }>();
 
   // Own PRIVATE bookmarks (P2-PR5) — same honest feature detection: absent
   // store → unavailable, and the board never renders the save toggle.
@@ -353,8 +368,6 @@ export async function loadWorkerOpportunities(
       },
     ]),
   );
-  const myInterestRows = buildMyInterestView(myInterest.rows, liveNeedById);
-
   // External public-source ads, RLS-scoped through the worker's OWN client —
   // a board that needed service_role to render would mean the policy was
   // wrong. Matched with the SAME subject the platform demands used above.
@@ -367,6 +380,18 @@ export async function loadWorkerOpportunities(
       country: options?.externalDiscovery?.country ?? null,
     },
   );
+  // The SAME join for the second source: a vacancy interest whose ad is on
+  // this render is "still open"; one whose ad expired keeps its snapshot.
+  for (const card of externalVacancies.cards) {
+    if (!card.vacancyId) continue;
+    liveNeedById.set(vacancyLiveKey(card.vacancyId), {
+      roleText: card.view.title,
+      companyName: card.view.employerName,
+      locationLabel: card.view.city,
+      country: card.view.country,
+    });
+  }
+  const myInterestRows = buildMyInterestView(myInterest.rows, liveNeedById);
 
   // Own saved PUBLIC VACANCIES — the second source of the same bookmark. The
   // ids come from the worker's own rows; the titles come from the live ads
@@ -400,6 +425,9 @@ export async function loadWorkerOpportunities(
     readiness,
     needsDataAccess,
     interestAvailable: myInterest.available,
+    vacancyInterestAvailable: myInterest.vacancyInterestAvailable,
+    vacancyInterestById: myInterest.byVacancy,
+    handoffByVacancy,
     savedAvailable: mySaved.available,
     savedRequestIds: [...mySaved.requestIds],
     savedVacancies,
