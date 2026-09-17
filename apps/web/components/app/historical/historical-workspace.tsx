@@ -170,6 +170,7 @@ export function HistoricalWorkspace({
     activities: t("card.activities"), evidence: t("card.evidence"), interpretations: t("card.interpretations"), interpretationNames,
     unknowns: t("card.unknowns"), unknownAllocation: t("card.unknownAllocation"), unknownPlace: t("card.unknownPlace"), noActivities: t("card.noActivities"),
     unknown: t("card.unknowns"), person: t("icon.person"), time: t("icon.time"), evidenceIcon: t("icon.evidence"), warning: t("icon.warning"), moreLanes: t("card.moreLanes"),
+    profession: t("card.profession"), skills: t("card.skills"), availability: t("card.availability"), pay: t("card.pay"), contexts: t("card.contexts"), object: t("icon.object"),
   };
   const fieldLabels = {
     title: t("field.title"), allWeeks: t("field.allWeeks"), week: t("weekShort"), noWork: t("field.noWork"), hoursUnknown: t("field.hoursUnknown"),
@@ -180,7 +181,7 @@ export function HistoricalWorkspace({
     title: t("calendarTitle"), prev: t("calendar.prev"), next: t("calendar.next"), month: t("calendar.month"), week: t("calendar.week"), table: t("calendar.table"),
     calendar: t("calendar.scale"), people: t("figures.people"), hours: t("card.hours"), days: t("field.days"), weekShort: t("weekShort"), apart: t("aggregatesTitle"),
     periodUnknown: t("card.aggregatePeriodUnknown"), remote: t("timeRemote"), open: t("aggregateOpen"), weekConflict: t("field.weekConflict"),
-    performed: t("calendar.performed"), noWork: t("field.noWork"), dayLabel: t("calendar.day"), sum: t("calendar.sum"),
+    performed: t("calendar.performed"), noWork: t("field.noWork"), dayLabel: t("calendar.day"), sum: t("calendar.sum"), object: t("icon.object"),
   };
   const objectLabels = {
     title: t("placesTitle", { count: state.objects }), days: t("field.days"), hours: t("card.hours"), people: t("figures.people"), hoursUnknown: t("field.hoursUnknown"),
@@ -228,8 +229,7 @@ export function HistoricalWorkspace({
         <span aria-hidden className="hidden h-6 w-px bg-ink-600 sm:block" />
         <Stat icon="person" value={String(state.people)} label={t("state.people")} compact onClick={() => setMode("people")} />
         <Stat icon="object" value={String(state.objects)} label={t("state.objects")} compact onClick={() => setMode("objects")} />
-        <Stat icon="calendar" value={String(state.personDays)} label={t("state.personDays")} compact onClick={() => setMode("calendar")} />
-        <Stat icon="work" value={`${fmt.hours(state.dailyHours)} h`} label={t("state.dailyHours")} compact />
+        <Stat icon="calendar" value={String(state.personDays)} label={t("state.personDays")} compact onClick={() => setMode("calendar")} title={`${fmt.hours(state.dailyHours)} h`} />
         {state.aggregateRows > 0 && (
           <Stat icon="time" value={`Σ ${fmt.hours(state.aggregateHours)} h`} label={t("state.aggregate")} tone="amber" compact title={t("aggregateLine", { hours: fmt.hours(state.aggregateHours), rows: state.aggregateRows })} onClick={() => setMode("attention")} testid="evidence-aggregate-hours" />
         )}
@@ -273,7 +273,7 @@ export function HistoricalWorkspace({
         {/* SOURCE — not a mode: it opens the raw rows the section keeps below. */}
         <button type="button" onClick={openSource} className="ml-auto inline-flex min-h-11 shrink-0 items-center gap-1.5 px-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary" data-testid="evidence-source-link">
           <SemanticIcon concept="source" label={t("source")} className="h-3.5 w-3.5" />
-          {t("source")} · {projection.company.rows}
+          {t("source")}
         </button>
       </div>
 
@@ -308,7 +308,7 @@ export function HistoricalWorkspace({
       <div className={cn("grid gap-4", detail ? "md:grid-cols-[minmax(0,1fr)_20rem]" : "")} data-testid="historical-workspace">
         <div className="min-w-0">
           {mode === "overview" && (
-            <HistoricalOverview projection={projection} locale={locale} labels={overviewLabels} selectedPerson={person} selectedObject={object} onSelectPerson={goPerson} onSelectObject={goObject} onSelectWeek={goWeek} />
+            <HistoricalOverview projection={projection} locale={locale} labels={overviewLabels} selectedPerson={person} selectedObject={object} onSelectPerson={(l) => focusPerson(person === l ? null : l)} onSelectObject={(n) => focusObject(object === n ? null : n)} onSelectWeek={goWeek} />
           )}
 
           {mode === "people" && (
@@ -322,7 +322,7 @@ export function HistoricalWorkspace({
               </ul>
               <div className="min-w-0 rounded-card border border-ink-600 bg-ink-800/60 p-3 sm:p-4">
                 {personProjection ? (
-                  <HistoricalPlayerCard person={personProjection} personId={`person-${encodeURIComponent(personProjection.label.toLowerCase())}`} formatDate={fmt.day} formatHours={fmt.hours} labels={{ ...cardLabels, state: tx(`personState.${personProjection.state}`) }} />
+                  <HistoricalPlayerCard person={personProjection} personId={`person-${encodeURIComponent(personProjection.label.toLowerCase())}`} formatDate={fmt.day} formatHours={fmt.hours} labels={{ ...cardLabels, state: tx(`personState.${personProjection.state}`) }} onSelectObject={goObject} />
                 ) : (
                   <p className="flex min-h-40 items-center justify-center text-center text-support text-text-muted">{t("people.pick")}</p>
                 )}
@@ -371,13 +371,14 @@ export function HistoricalWorkspace({
         data-blocking={blocking}
         data-ready={readyCount}
         data-in-view={inView ? "true" : "false"}
+        title={t("nothingWrittenShort")}
       >
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-4 gap-y-2">
           <Stat icon="confirmed" value={String(readyCount)} label={t("bar.ready")} tone={readyCount > 0 ? "success" : "muted"} compact />
           <Stat icon="warning" value={String(blocking)} label={blocking === 1 ? t("state.decision") : t("state.decisions")} tone={blocking > 0 ? "orange" : "muted"} compact onClick={() => setMode("attention")} />
           <Stat icon="person" value={`+${projection.commit.createPeople}`} label={t("bar.people")} compact title={t("impact.people", { count: projection.commit.createPeople, total: state.people })} />
           <Stat icon="object" value={`+${projection.commit.createObjects}`} label={t("bar.objects")} compact title={t("impact.places", { count: projection.commit.createObjects, total: state.objects })} />
-          <span className="font-mono text-meta text-text-muted" data-testid="evidence-impact" title={t("impactNote")}>{t("nothingWrittenShort")}</span>
+          <span className="sr-only" data-testid="evidence-impact">{t("nothingWrittenShort")} · {t("impactNote")}</span>
           <div className="ml-auto flex items-center gap-2">
             <button type="button" onClick={() => setMode("attention")} className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary" data-testid="evidence-review">
               {t("bar.review")}

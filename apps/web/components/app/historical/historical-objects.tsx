@@ -2,12 +2,8 @@
 
 import { useMemo } from "react";
 
+import { PersonMark } from "@/components/app/historical/historical-marks";
 import { SemanticIcon } from "@/components/app/semantic-icon";
-import {
-  playerInitials,
-  PLAYER_IDENTITY_AVATAR_BORDER,
-  PLAYER_IDENTITY_FALLBACK_SURFACE,
-} from "@/lib/identity/player-identity";
 import type { CalendarProjection, FieldProjection, PlaceProjection } from "@/lib/organization-evidence/import-projections";
 import { objectMonogram, objectWeeks } from "@/lib/organization-evidence/import-visual";
 import { cn } from "@/lib/utils";
@@ -16,10 +12,12 @@ import { cn } from "@/lib/utils";
  * THE OBJECTS — the real places as compact work-context identities
  * (LABOURMARKET_VISUAL_FIRST constitution 2026-09-16 §V, §BI).
  *
- * Seventeen places are seventeen compact nodes: the place mark, the name, the
- * people evidenced there as identity tiles, the days, the hours the source
- * attributes there explicitly or `?`, and a mark when a decision waits. Not a
- * seventeen-row report. Selecting one focuses the SAME workspace on it: its
+ * Seventeen places are seventeen place identities, most-worked first: the
+ * location glyph, the NAME, the place's active period drawn on the company's
+ * own time span, the people evidenced there as identity marks, and the days
+ * (hours where the source split them, `?` where it did not). The monogram is
+ * a tooltip. Not a seventeen-row report, not a catalogue of equal rows: the
+ * period bar and the marks make each place look like itself. Selecting one focuses the SAME workspace on it: its
  * people with their days, its rhythm by week, its period; the source
  * spellings that folded into it (`Hoofdgraht`, `Hoofdgrat`, …) are LEVEL 3 —
  * behind SOURCE — unless a human decision is needed, in which case the
@@ -48,8 +46,20 @@ export interface ObjectsLabels {
   readonly unknown: string;
 }
 
-const TILE = cn("flex shrink-0 items-center justify-center rounded-full font-display font-semibold", PLAYER_IDENTITY_AVATAR_BORDER, PLAYER_IDENTITY_FALLBACK_SURFACE);
-const MARK = "flex shrink-0 items-center justify-center rounded-md border border-ink-500 bg-ink-700 font-mono font-semibold text-text-primary";
+const MARK = "flex shrink-0 items-center justify-center rounded-md border border-ink-500 bg-ink-700 text-text-primary";
+
+const DAY_MS = 86_400_000;
+/** Where a place's active period sits on the company's span, as fractions. */
+function periodFractions(first: string | null, last: string | null, spanFirst: string | null, spanLast: string | null): { start: number; end: number } | null {
+  if (!first || !last || !spanFirst || !spanLast) return null;
+  const a = Date.parse(`${spanFirst}T00:00:00Z`);
+  const b = Date.parse(`${spanLast}T00:00:00Z`) + DAY_MS;
+  const span = Math.max(DAY_MS, b - a);
+  return {
+    start: Math.max(0, Math.min(1, (Date.parse(`${first}T00:00:00Z`) - a) / span)),
+    end: Math.max(0, Math.min(1, (Date.parse(`${last}T00:00:00Z`) + DAY_MS - a) / span)),
+  };
+}
 
 function useFmt(locale: string) {
   return useMemo(() => {
@@ -59,7 +69,7 @@ function useFmt(locale: string) {
   }, [locale]);
 }
 
-/** The compact nodes. */
+/** The place identities, most-worked first. */
 export function HistoricalObjects({
   places,
   field,
@@ -79,13 +89,19 @@ export function HistoricalObjects({
 }) {
   const fmt = useFmt(locale);
   const peopleAt = useMemo(() => new Map(field.places.map((p) => [p.name, p] as const)), [field]);
+  const spanFirst = field.weeks[0]?.firstDate ?? null;
+  const spanLast = field.weeks[field.weeks.length - 1]?.lastDate ?? null;
   const real = places.filter((p) => p.state !== "ambiguous");
+  const maxDays = Math.max(1, ...real.map((p) => peopleAt.get(p.name)?.days ?? p.rows));
   return (
-    <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3" data-testid="historical-objects" aria-label={labels.title}>
+    <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3" data-testid="historical-objects" aria-label={labels.title}>
       {real.map((pl) => {
         const at = peopleAt.get(pl.name);
+        const days = at?.days ?? pl.rows;
         const lit = selected === pl.name;
         const dim = (selected !== null && !lit) || (personFilter !== null && !(at?.people.some((p) => p.label === personFilter) ?? false));
+        const period = periodFractions(pl.firstDate, pl.lastDate, spanFirst, spanLast);
+        const weight = days / maxDays;
         return (
           <li key={pl.name}>
             <button
@@ -95,29 +111,40 @@ export function HistoricalObjects({
               data-testid="historical-object"
               data-place={pl.name}
               data-state={pl.state}
+              title={`${pl.name} (${objectMonogram(pl.name)})`}
               className={cn(
-                "flex min-h-11 w-full items-center gap-2.5 rounded-md border px-2 py-1.5 text-left transition-colors",
+                "flex min-h-11 w-full flex-col gap-2 rounded-md border p-2.5 text-left transition-colors",
                 lit ? "border-brand-blue bg-brand-blue/10" : "border-ink-600 bg-ink-800/40 hover:border-brand-blue",
                 dim && !lit ? "opacity-35" : "",
               )}
             >
-              <span aria-hidden className={cn(MARK, "h-9 w-9 text-meta")}>{objectMonogram(pl.name)}</span>
-              <span className="sr-only">{labels.object}</span>
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="truncate text-support font-semibold text-text-primary">{pl.name}</span>
-                <span className="flex items-center gap-2 font-mono text-meta tabular-nums text-text-muted">
-                  <span className="inline-flex items-center gap-1"><SemanticIcon concept="calendar" label={labels.days} className="h-3 w-3" />{at?.days ?? pl.rows}</span>
-                  <span className="inline-flex items-center gap-1"><SemanticIcon concept="time" label={labels.hours} className="h-3 w-3" />{pl.statedHours > 0 ? fmt.hours(pl.statedHours) : "?"}</span>
-                  {pl.state === "existing" && <SemanticIcon concept="confirmed" label={labels.state.existing} className="h-3 w-3 text-state-success" />}
-                  {pl.origin === "text" && <SemanticIcon concept="source" label={labels.fromText} className="h-3 w-3" />}
+              <span className="flex items-center gap-2.5">
+                <span aria-hidden className={cn(MARK, weight > 0.5 ? "h-11 w-11" : "h-9 w-9")}>
+                  <SemanticIcon concept="object" label={labels.object} className={weight > 0.5 ? "h-5 w-5" : "h-4 w-4"} strokeWidth={2} />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className={cn("truncate font-display font-semibold text-text-primary", weight > 0.5 ? "text-card-title" : "text-support")}>{pl.name}</span>
+                  <span className="flex items-center gap-2 font-mono text-meta tabular-nums text-text-muted">
+                    <span className="inline-flex items-center gap-1"><SemanticIcon concept="calendar" label={labels.days} className="h-3 w-3" />{days} {labels.days}</span>
+                    <span className="inline-flex items-center gap-1"><SemanticIcon concept="time" label={labels.hours} className="h-3 w-3" />{pl.statedHours > 0 ? `${fmt.hours(pl.statedHours)} h` : "?"}</span>
+                    {pl.state === "existing" && <SemanticIcon concept="confirmed" label={labels.state.existing} className="h-3 w-3 text-state-success" />}
+                  </span>
+                </span>
+                <span className="flex items-center gap-1.5" aria-label={labels.people}>
+                  <span className="flex -space-x-1.5">
+                    {(at?.people ?? []).slice(0, 4).map((p) => (
+                      <PersonMark key={p.label} label={p.label} size="sm" lit={personFilter === p.label} />
+                    ))}
+                  </span>
+                  {(at?.people.length ?? 0) > 4 && <span className="font-mono text-meta text-text-muted">+{(at?.people.length ?? 0) - 4}</span>}
                 </span>
               </span>
-              <span className="flex -space-x-1.5" aria-label={labels.people}>
-                {(at?.people ?? []).slice(0, 4).map((p) => (
-                  <span key={p.label} aria-hidden className={cn(TILE, "h-6 w-6 text-meta", personFilter === p.label ? "ring-1 ring-brand-blue" : "")} title={p.label}>{playerInitials(p.label)}</span>
-                ))}
-                {(at?.people.length ?? 0) > 4 && <span className="ml-2.5 self-center font-mono text-meta text-text-muted">+{(at?.people.length ?? 0) - 4}</span>}
-              </span>
+              {/* WHEN — the place's active period on the company's span */}
+              {period && (
+                <span className="relative block h-1.5 w-full rounded-full bg-ink-700" aria-hidden title={pl.firstDate && pl.lastDate ? `${fmt.day(pl.firstDate)} → ${fmt.day(pl.lastDate)}` : undefined}>
+                  <span className={cn("absolute inset-y-0 rounded-full", lit ? "bg-brand-blue" : "bg-brand-cyan/70")} style={{ left: `${period.start * 100}%`, width: `${Math.max(2, (period.end - period.start) * 100)}%` }} />
+                </span>
+              )}
             </button>
           </li>
         );
@@ -153,7 +180,9 @@ export function HistoricalObjectFocus({
   return (
     <section className="flex flex-col gap-4" data-testid="historical-object-focus" data-place={place.name}>
       <header className="flex items-center gap-3">
-        <span aria-hidden className={cn(MARK, "h-14 w-14 text-card-title")}>{objectMonogram(place.name)}</span>
+        <span aria-hidden className={cn(MARK, "h-14 w-14")} title={objectMonogram(place.name)}>
+          <SemanticIcon concept="object" label={labels.object} className="h-7 w-7" strokeWidth={1.75} />
+        </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <h3 className="truncate font-display text-title font-semibold tracking-tightest text-text-primary">{place.name}</h3>
           <div className="flex flex-wrap items-center gap-1.5 font-mono text-meta">
@@ -197,7 +226,7 @@ export function HistoricalObjectFocus({
         {(at?.people ?? []).map((p) => (
           <li key={p.label}>
             <button type="button" onClick={() => onSelectPerson(p.label)} aria-pressed={personFilter === p.label} className={cn("flex min-h-11 w-full items-center gap-2 rounded-md border px-2 text-left", personFilter === p.label ? "border-brand-blue bg-brand-blue/10" : "border-transparent hover:border-ink-500")}>
-              <span aria-hidden className={cn(TILE, "h-8 w-8 text-meta")}>{playerInitials(p.label)}</span>
+              <PersonMark label={p.label} size="sm" lit={personFilter === p.label} />
               <span className="flex-1 truncate text-support font-semibold text-text-primary">{p.label}</span>
               <span className="font-mono text-meta tabular-nums text-text-muted">{p.days} {labels.days} · {p.hours !== null ? `${fmt.hours(p.hours)} h` : "?"}</span>
             </button>

@@ -16202,7 +16202,12 @@
         "unknownPlace": "{count} дн. — место не установлено",
         "noActivities": "Источник не называет деятельность без объекта.",
         "currentToken": "сейчас: ?",
-        "moreLanes": "ещё {count} объектов без полосы"
+        "moreLanes": "ещё {count} объектов без полосы",
+        "profession": "профессия",
+        "skills": "навыки",
+        "availability": "доступность",
+        "pay": "оплата",
+        "contexts": "Где работал"
       },
       "interpretation": {
         "typo_same_house_number": "опечатка сопоставлена по номеру дома",

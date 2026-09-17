@@ -167,10 +167,15 @@ describe("the historical field is people in time, read-only, never a team", () =
     // the rejected representation: a grid of place rectangles with people inside
     expect(board).not.toMatch(/data-testid="field-places"/);
   });
-  it("uses the same identity tile as the card, and the place mark is text (a monogram), never colour alone", () => {
-    expect(board).toMatch(/playerInitials\(r\.label\)/);
-    expect(board).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
-    expect(board).toMatch(/objectMonogram/);
+  it("uses the ONE identity mark and the ONE place mark (name first, monogram only as a tooltip), never colour alone", () => {
+    const marks = read("components/app/historical/historical-marks.tsx");
+    expect(marks).toMatch(/playerInitials\(label\)/);
+    expect(marks).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
+    expect(marks).toMatch(/title=\{`\$\{name\} \(\$\{objectMonogram\(name\)\}\)/);
+    expect(board).toMatch(/<PersonMark label=\{r\.label\}/);
+    expect(board).toMatch(/<PlaceMark/);
+    // the code is not the architecture: no monogram is rendered as cell text on the field or the calendar
+    for (const src of [board, calendar]) expect(src).not.toMatch(/\{objectMonogram\(/);
     expect(objectMonogram("Hoofdgracht 3")).toBe("H3");
     expect(objectMonogram("Kruisweg 19")).toBe("K19");
     expect(objectMonogram("Vera Voorbeeldlaan 16")).toBe("VV16");

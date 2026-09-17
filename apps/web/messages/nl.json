@@ -16202,7 +16202,12 @@
         "unknownPlace": "{count} dagen — plaats niet vastgesteld",
         "noActivities": "De bron noemt geen activiteit zonder plaats.",
         "currentToken": "nu: ?",
-        "moreLanes": "nog {count} plekken zonder baan"
+        "moreLanes": "nog {count} plekken zonder baan",
+        "profession": "beroep",
+        "skills": "vaardigheden",
+        "availability": "beschikbaarheid",
+        "pay": "loon",
+        "contexts": "Waar gewerkt"
       },
       "interpretation": {
         "typo_same_house_number": "spelfout gekoppeld via huisnummer",

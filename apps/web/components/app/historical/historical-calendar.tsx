@@ -2,17 +2,12 @@
 
 import { useMemo } from "react";
 
+import { PersonMark, PlaceMark } from "@/components/app/historical/historical-marks";
 import { SemanticIcon } from "@/components/app/semantic-icon";
-import {
-  playerInitials,
-  PLAYER_IDENTITY_AVATAR_BORDER,
-  PLAYER_IDENTITY_FALLBACK_SURFACE,
-} from "@/lib/identity/player-identity";
 import { WEEKDAY_ANCHOR_ISO } from "@/lib/journal/journal-calendar";
-import type { CalendarProjection } from "@/lib/organization-evidence/import-projections";
+import type { CalendarPersonDay, CalendarProjection } from "@/lib/organization-evidence/import-projections";
 import {
   buildHistoricalCalendar,
-  objectMonogram,
   type HistoricalCalendarScale,
 } from "@/lib/organization-evidence/import-visual";
 import { cn } from "@/lib/utils";
@@ -59,9 +54,18 @@ export interface HistoricalCalendarLabels {
   readonly noWork: string;
   readonly dayLabel: string;
   readonly sum: string;
+  readonly object: string;
 }
 
-const TILE = cn("flex shrink-0 items-center justify-center rounded-full font-display font-semibold", PLAYER_IDENTITY_AVATAR_BORDER, PLAYER_IDENTITY_FALLBACK_SURFACE);
+/** The place a day's entry is SHOWN under in the month grid: the one with the
+ *  most attributed hours, else the first the source names. The others are a
+ *  `+N` and the day's reality lists them all. */
+function primaryPlace(p: CalendarPersonDay): { name: string; more: number } | null {
+  if (p.places.length === 0) return null;
+  const known = p.places.filter((pl) => pl.hours !== null).sort((a, b) => (b.hours ?? 0) - (a.hours ?? 0));
+  const first = known[0] ?? p.places[0];
+  return { name: first.name, more: p.places.length - 1 };
+}
 
 export function HistoricalCalendar({
   calendar,
@@ -151,8 +155,12 @@ export function HistoricalCalendar({
               const state = cell.isSelected ? "selected" : worked ? "worked" : cell.inPeriod ? "empty" : "outside";
               const title = `${fmt.day(cell.iso)}${worked ? ` · ${cell.people.length} ${labels.people} · ${fmt.hours(cell.hours)} h` : ""}`;
               if (!cell.inScope) {
-                return <span key={cell.iso} aria-hidden data-testid="historical-calendar-day" data-day={cell.iso} data-state="outside" className="min-h-14 rounded-md text-center font-mono text-meta text-text-muted/30">{cell.dayOfMonth}</span>;
+                return <span key={cell.iso} aria-hidden data-testid="historical-calendar-day" data-day={cell.iso} data-state="outside" className="min-h-16 rounded-md p-1 font-mono text-meta text-text-muted/30">{cell.dayOfMonth}</span>;
               }
+              // A month cell shows up to four people; a week cell shows everyone
+              // with every place — the week has the room.
+              const maxRows = scale === "week" ? 12 : 4;
+              const shownPeople = cell.people.slice(0, maxRows);
               return (
                 <button
                   key={cell.iso}
@@ -166,26 +174,46 @@ export function HistoricalCalendar({
                   data-state={state}
                   data-people={cell.people.length}
                   className={cn(
-                    "flex min-h-14 flex-col gap-1 rounded-md border p-1 text-left transition-colors sm:min-h-[4.5rem]",
-                    cell.isSelected ? "border-brand-blue bg-brand-blue/15" : worked ? "border-brand-cyan/30 bg-brand-cyan/5 hover:border-brand-blue" : cell.inPeriod ? "border-ink-600/60" : "border-transparent",
+                    "flex min-h-16 flex-col gap-1 rounded-md border p-1.5 text-left transition-colors",
+                    scale === "week" ? "min-h-40" : "sm:min-h-28",
+                    cell.isSelected ? "border-brand-blue bg-brand-blue/10" : worked ? "border-ink-600 bg-ink-800/50 hover:border-brand-blue" : cell.inPeriod ? "border-ink-600/40" : "border-transparent",
                     dimmed && !cell.isSelected ? "opacity-30" : "",
                   )}
                 >
-                  <span className="flex items-center justify-between font-mono text-meta tabular-nums">
-                    <span className={worked ? "text-text-primary" : "text-text-muted"}>{cell.dayOfMonth}</span>
+                  <span className="flex items-baseline justify-between">
+                    <span className={cn("font-display text-support font-semibold", worked ? "text-text-primary" : "text-text-muted")}>{cell.dayOfMonth}</span>
                     {worked && (
-                      <span className="flex items-center gap-0.5 text-text-secondary">
+                      <span className="flex items-center gap-0.5 font-mono text-meta tabular-nums text-text-secondary">
                         {cell.weekConflict && <SemanticIcon concept="warning" label={labels.weekConflict} className="h-3 w-3 text-state-amber" />}
-                        {cell.hours > 0 ? fmt.hours(cell.hours) : "?"}
+                        {cell.hours > 0 ? `${fmt.hours(cell.hours)} h` : "?"}
                       </span>
                     )}
                   </span>
                   {worked && (
-                    <span className="flex flex-wrap gap-0.5" aria-hidden>
-                      {cell.people.slice(0, 6).map((p) => (
-                        <span key={p.label} className={cn(TILE, "h-5 w-5 text-meta", personFilter === p.label ? "ring-1 ring-brand-blue" : "")} title={`${p.label} · ${p.hours !== null ? `${fmt.hours(p.hours)} h` : "?"}`}>{playerInitials(p.label)}</span>
-                      ))}
-                      {cell.people.length > 6 && <span className="font-mono text-meta text-text-muted">+{cell.people.length - 6}</span>}
+                    <span className="flex flex-col gap-0.5" aria-hidden>
+                      {shownPeople.map((p) => {
+                        const primary = primaryPlace(p);
+                        const personLit = personFilter === null || personFilter === p.label;
+                        return scale === "week" ? (
+                          <span key={p.label} className={cn("flex flex-col gap-0.5 rounded border-l-2 border-brand-cyan/60 bg-brand-cyan/5 py-0.5 pl-1.5", !personLit ? "opacity-30" : "")} data-testid="historical-calendar-entry">
+                            <span className="flex items-center gap-1.5">
+                              <PersonMark label={p.label} size="xs" lit={personFilter === p.label} />
+                              <span className="min-w-0 flex-1 truncate text-meta font-semibold text-text-primary">{p.label}</span>
+                              <span className="font-mono text-meta tabular-nums text-text-secondary">{p.hours !== null ? `${fmt.hours(p.hours)} h` : "?"}</span>
+                            </span>
+                            {p.places.map((pl) => (
+                              <PlaceMark key={pl.name} name={pl.name} figure={pl.hours !== null ? fmt.hours(pl.hours) : "?"} lit={objectFilter === pl.name} dim={objectFilter !== null} dense label={labels.object} />
+                            ))}
+                          </span>
+                        ) : (
+                          <span key={p.label} className={cn("flex items-center gap-1 rounded border-l-2 border-brand-cyan/60 bg-brand-cyan/5 pl-1", !personLit ? "opacity-30" : "", objectFilter !== null && primary && primary.name !== objectFilter && !p.places.some((pl) => pl.name === objectFilter) ? "opacity-30" : "")} data-testid="historical-calendar-entry" title={`${p.label} · ${p.places.map((pl) => `${pl.name} ${pl.hours !== null ? fmt.hours(pl.hours) : "?"}`).join(" · ")}`}>
+                            <PersonMark label={p.label} size="xs" lit={personFilter === p.label} />
+                            <span className={cn("min-w-0 flex-1 truncate text-meta", primary && objectFilter === primary.name ? "font-semibold text-text-primary" : "text-text-secondary")}>{primary ? primary.name : "?"}{primary && primary.more > 0 ? <span className="text-text-muted"> +{primary.more}</span> : null}</span>
+                            <span className="shrink-0 font-mono text-meta tabular-nums text-text-muted">{p.hours !== null ? fmt.hours(p.hours) : "?"}</span>
+                          </span>
+                        );
+                      })}
+                      {cell.people.length > shownPeople.length && <span className="font-mono text-meta text-text-muted">+{cell.people.length - shownPeople.length} {labels.people}</span>}
                     </span>
                   )}
                 </button>
@@ -209,7 +237,7 @@ export function HistoricalCalendar({
         <ul className="flex flex-wrap gap-1.5" data-testid="evidence-calendar-aggregates" aria-label={labels.apart}>
           {calendar.aggregates.map((a, i) => (
             <li key={`${a.label}:${a.recordedOn}:${i}`} className="inline-flex items-center gap-2 rounded-md border border-state-amber/40 bg-state-amber/5 px-2 py-1 font-mono text-meta tabular-nums text-text-secondary" data-testid="evidence-calendar-aggregate" data-open={a.open ? "true" : "false"}>
-              <span aria-hidden className={cn(TILE, "h-5 w-5 text-meta")}>{playerInitials(a.label)}</span>
+              <PersonMark label={a.label} size="xs" />
               <span className="text-text-primary">{a.label}</span>
               <span className="font-display text-support font-bold text-state-amber">{labels.sum} {fmt.hours(a.sourceHours)} h</span>
               <span className="inline-flex items-center gap-1">
@@ -289,7 +317,7 @@ export function HistoricalDayReality({
   calendar: CalendarProjection;
   iso: string;
   locale: string;
-  labels: Pick<HistoricalCalendarLabels, "hours" | "people" | "weekConflict" | "noWork" | "dayLabel" | "performed">;
+  labels: Pick<HistoricalCalendarLabels, "hours" | "people" | "weekConflict" | "noWork" | "dayLabel" | "performed" | "object">;
   onSelectPerson: (label: string) => void;
   onSelectObject: (name: string) => void;
 }) {
@@ -317,7 +345,7 @@ export function HistoricalDayReality({
           {day.people.map((p) => (
             <li key={p.label} className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-2" data-testid="historical-day-person" data-label={p.label}>
               <button type="button" onClick={() => onSelectPerson(p.label)} className="flex min-h-11 items-center gap-2 text-left">
-                <span aria-hidden className={cn(TILE, "h-8 w-8 text-meta")}>{playerInitials(p.label)}</span>
+                <PersonMark label={p.label} size="sm" />
                 <span className="flex-1 truncate text-support font-semibold text-text-primary">{p.label}</span>
                 <span className="flex items-center gap-1 font-display text-card-title font-bold tabular-nums text-text-primary">
                   {p.weekConflict && <SemanticIcon concept="warning" label={labels.weekConflict} className="h-3.5 w-3.5 text-state-amber" />}
@@ -326,13 +354,11 @@ export function HistoricalDayReality({
                 </span>
               </button>
               {p.places.length > 0 && (
-                <ul className="flex flex-col gap-0.5 pl-10">
+                <ul className="flex flex-col gap-1 pl-9">
                   {p.places.map((pl) => (
                     <li key={pl.name}>
-                      <button type="button" onClick={() => onSelectObject(pl.name)} className="flex min-h-8 w-full items-center gap-2 text-left font-mono text-meta tabular-nums">
-                        <span className="w-8 shrink-0 font-semibold text-text-secondary">{objectMonogram(pl.name)}</span>
-                        <span className="flex-1 truncate text-text-primary">{pl.name}</span>
-                        <span className="text-text-secondary">{pl.hours !== null ? `${fmt.hours(pl.hours)} h` : "?"}</span>
+                      <button type="button" onClick={() => onSelectObject(pl.name)} className="flex min-h-8 w-full rounded text-left">
+                        <PlaceMark name={pl.name} figure={pl.hours !== null ? `${fmt.hours(pl.hours)} h` : "?"} label={labels.object} className="w-full" />
                       </button>
                     </li>
                   ))}

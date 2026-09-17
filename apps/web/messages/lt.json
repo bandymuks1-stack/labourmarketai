@@ -16202,7 +16202,12 @@
         "unknownPlace": "{count} d. — vieta nenustatyta",
         "noActivities": "Šaltinis veiklų be objekto neįvardija.",
         "currentToken": "dabartis: ?",
-        "moreLanes": "dar {count} objektai be juostos"
+        "moreLanes": "dar {count} objektai be juostos",
+        "profession": "profesija",
+        "skills": "įgūdžiai",
+        "availability": "prieinamumas",
+        "pay": "atlygis",
+        "contexts": "Kur dirbo"
       },
       "interpretation": {
         "typo_same_house_number": "rašybos klaida sutapatinta pagal namo numerį",

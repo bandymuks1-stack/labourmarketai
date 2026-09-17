@@ -16202,7 +16202,12 @@
         "unknownPlace": "{count} Tage — Ort nicht ermittelt",
         "noActivities": "Die Quelle nennt keine Tätigkeit ohne Ort.",
         "currentToken": "aktuell: ?",
-        "moreLanes": "{count} weitere Orte ohne Spur"
+        "moreLanes": "{count} weitere Orte ohne Spur",
+        "profession": "Beruf",
+        "skills": "Fähigkeiten",
+        "availability": "Verfügbarkeit",
+        "pay": "Lohn",
+        "contexts": "Wo gearbeitet"
       },
       "interpretation": {
         "typo_same_house_number": "Schreibfehler über die Hausnummer zugeordnet",

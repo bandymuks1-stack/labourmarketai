@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { HistoricalPlayerCompact, type HistoricalPlayerCardLabels } from "@/components/app/historical-player-card";
 import { SemanticIcon, type SemanticConcept } from "@/components/app/semantic-icon";
 import type { CompanyProjection, FieldProjection, ImportProjection } from "@/lib/organization-evidence/import-projections";
-import { objectMonogram } from "@/lib/organization-evidence/import-visual";
+import { playerInitials } from "@/lib/identity/player-identity";
 import { cn } from "@/lib/utils";
 
 /**
@@ -14,11 +14,12 @@ import { cn } from "@/lib/utils";
  *
  * WHEN: the period's rhythm, one stacked bar per ISO week (the people's
  * daily hours), each a door into that week of the field. WHO: the people as
- * compact identities. WHERE: the places, and the WORK FOOTPRINT between
- * them — a people ↔ places map whose links are the evidenced days, so the
- * eye reads at once who worked where and how much. UNKNOWN: what the source
- * does not say (client, project, wage, team …) as `?` tokens, never as zero
- * and never as a paragraph.
+ * compact identities. WHERE: the places as a FOOTPRINT — each place with the
+ * bar of its evidenced days. The relationships between them are drawn only
+ * for ONE focused person or place (hover or selection): the owner's walk
+ * showed that every relationship at equal weight is spaghetti. UNKNOWN:
+ * what the source does not say (client, project, wage, team …) as `?`
+ * tokens, never as zero and never as a paragraph.
  *
  * Nothing here is fabricated: no client, no hierarchy, no team, no wage, no
  * capacity, no performance. Selecting a person or a place focuses the same
@@ -69,6 +70,7 @@ export function HistoricalOverview({
   onSelectWeek: (week: number) => void;
 }) {
   const { people, calendar, field, company } = projection;
+  const [hovered, setHovered] = useState<{ kind: "person" | "object"; id: string } | null>(null);
   const fmt = useMemo(() => {
     const num = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
     const day = new Intl.DateTimeFormat(locale, { day: "numeric", month: locale === "lt" ? "long" : "short", timeZone: "UTC" });
@@ -114,28 +116,24 @@ export function HistoricalOverview({
         </section>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[18rem_minmax(0,1fr)]">
-        {/* WHO */}
-        <section className="flex flex-col gap-1" aria-label={labels.people} data-testid="evidence-people">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.people} · {people.length}</span>
-          <ul className="flex flex-col">
+      {/* WHO ↔ WHERE — the footprint: people on the left, places with their
+          days on the right; a relationship is drawn only for the focused one */}
+      <section className="flex flex-col gap-1" aria-label={labels.footprint} data-testid="historical-footprint">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.footprint} · {labels.people} {people.length} · {labels.objects} {company.places}</span>
+        <div className="hidden sm:block">
+          <Footprint field={field} people={people.map((p) => p.label)} selectedPerson={selectedPerson} selectedObject={selectedObject} hovered={hovered} onHover={setHovered} onSelectPerson={onSelectPerson} onSelectObject={onSelectObject} labels={labels} formatHours={fmt.hours} />
+        </div>
+        {/* A phone shows one context at a time: the people, then the places
+            as compact marks, each a door into its focus. */}
+        <div className="flex flex-col gap-2 sm:hidden">
+          <ul className="flex flex-col" data-testid="evidence-people">
             {people.map((p) => (
               <li key={p.label} data-testid="evidence-person-card" data-state={p.state}>
                 <HistoricalPlayerCompact person={p} labels={labels.card} formatHours={fmt.hours} selected={selectedPerson === p.label} dimmed={selectedPerson !== null} onSelect={() => onSelectPerson(p.label)} />
               </li>
             ))}
           </ul>
-        </section>
-
-        {/* WHO ↔ WHERE — the footprint */}
-        <section className="flex flex-col gap-1" aria-label={labels.footprint} data-testid="historical-footprint">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.footprint} · {labels.objects} {company.places}</span>
-          <div className="hidden sm:block">
-            <Footprint field={field} people={people.map((p) => p.label)} selectedPerson={selectedPerson} selectedObject={selectedObject} onSelectPerson={onSelectPerson} onSelectObject={onSelectObject} labels={labels} />
-          </div>
-          {/* A phone shows one context at a time: the places as compact marks,
-              each a door into the object's focus. */}
-          <ul className="flex flex-wrap gap-1 sm:hidden" aria-label={labels.objects}>
+          <ul className="flex flex-wrap gap-1" aria-label={labels.objects}>
             {field.places.map((pl) => (
               <li key={pl.name}>
                 <button
@@ -143,19 +141,19 @@ export function HistoricalOverview({
                   onClick={() => onSelectObject(pl.name)}
                   aria-pressed={selectedObject === pl.name}
                   className={cn(
-                    "inline-flex min-h-11 items-center gap-1.5 rounded-md border px-2 font-mono text-meta tabular-nums",
+                    "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-md border px-2 font-mono text-meta tabular-nums",
                     selectedObject === pl.name ? "border-brand-blue bg-brand-blue/10 text-text-primary" : "border-ink-600 text-text-secondary",
                   )}
                 >
-                  <span className="font-semibold">{objectMonogram(pl.name)}</span>
+                  <span className="truncate">{pl.name}</span>
                   <span className="text-text-muted">{pl.days}</span>
-                  <span className="sr-only">{pl.name} · {pl.days} {labels.days}</span>
+                  <span className="sr-only">{pl.days} {labels.days}</span>
                 </button>
               </li>
             ))}
           </ul>
-        </section>
-      </div>
+        </div>
+      </section>
 
       {/* UNKNOWN — what the source does not say */}
       <ul className="flex flex-wrap gap-1.5" data-testid="evidence-company-unknown" aria-label={labels.unknownTitle}>
@@ -178,77 +176,97 @@ export function HistoricalOverview({
   );
 }
 
-/** The people ↔ places map: a link per (person, place) with the evidenced
- *  days as its weight. SVG, text labels on both sides, nothing invented. */
+/** The footprint: people on the left as identity marks, places on the right
+ *  with the bar of their evidenced days. Edges — the person → place links
+ *  weighted by days — are drawn ONLY for the focused person or place (hover
+ *  or selection), so the default reads as a clean footprint and a focus reads
+ *  as one story. Nothing invented. */
 function Footprint({
   field,
   people,
   selectedPerson,
   selectedObject,
+  hovered,
+  onHover,
   onSelectPerson,
   onSelectObject,
   labels,
+  formatHours,
 }: {
   field: FieldProjection;
   people: readonly string[];
   selectedPerson: string | null;
   selectedObject: string | null;
+  hovered: { kind: "person" | "object"; id: string } | null;
+  onHover: (h: { kind: "person" | "object"; id: string } | null) => void;
   onSelectPerson: (label: string) => void;
   onSelectObject: (name: string) => void;
   labels: OverviewLabels;
+  formatHours: (n: number) => string;
 }) {
   const places = field.places;
   // Drawn at ~1:1 in a ~960 px column, so the 12 px labels stay 12 px.
-  const ROW = 22;
-  const H = Math.max(people.length, places.length) * ROW + 8;
+  const ROW = 26;
+  const H = Math.max(people.length, places.length) * ROW + 12;
   const W = 960;
-  const LEFT = 130;
-  const RIGHT = W - 290;
-  const py = (i: number) => 4 + ROW / 2 + (people.length === 1 ? (H - 8) / 2 : (i * (H - 8 - ROW)) / Math.max(1, people.length - 1));
-  const oy = (i: number) => 4 + ROW / 2 + i * ROW;
-  const maxDays = Math.max(1, ...places.flatMap((p) => p.people.map((pp) => pp.days)));
+  const LEFT = 170;
+  const RIGHT = 470;
+  const BAR = 190; // the days bar after the name; the figure sits after the bar
+  const py = (i: number) => 6 + ROW / 2 + (people.length === 1 ? (H - 12) / 2 : (i * (H - 12 - ROW)) / Math.max(1, people.length - 1));
+  const oy = (i: number) => 6 + ROW / 2 + i * ROW;
+  const maxDays = Math.max(1, ...places.map((p) => p.days));
+  const maxLink = Math.max(1, ...places.flatMap((p) => p.people.map((pp) => pp.days)));
+
+  const focus = selectedPerson ? { kind: "person" as const, id: selectedPerson } : selectedObject ? { kind: "object" as const, id: selectedObject } : hovered;
   const links = places.flatMap((pl, oi) =>
-    pl.people.filter((pp) => people.includes(pp.label)).map((pp) => ({
-      person: pp.label,
-      place: pl.name,
-      days: pp.days,
-      x1: LEFT,
-      y1: py(people.indexOf(pp.label)),
-      x2: RIGHT,
-      y2: oy(oi),
-    })),
+    pl.people
+      .filter((pp) => people.includes(pp.label))
+      .filter((pp) => focus !== null && ((focus.kind === "person" && focus.id === pp.label) || (focus.kind === "object" && focus.id === pl.name)))
+      .map((pp) => ({ person: pp.label, place: pl.name, days: pp.days, hours: pp.hours, x1: LEFT, y1: py(people.indexOf(pp.label)), x2: RIGHT, y2: oy(oi) })),
   );
-  const lit = (person: string, place: string) =>
-    (selectedPerson === null && selectedObject === null) || selectedPerson === person || selectedObject === place;
+  const personLit = (label: string) => focus === null || (focus.kind === "person" ? focus.id === label : places.find((p) => p.name === focus.id)?.people.some((pp) => pp.label === label));
+  const placeLit = (name: string) => focus === null || (focus.kind === "object" ? focus.id === name : places.find((p) => p.name === name)?.people.some((pp) => pp.label === focus.id));
+  const key = (fn: () => void) => (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } };
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[60rem]" role="img" aria-label={labels.footprint} data-testid="historical-footprint-map">
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[60rem]" role="img" aria-label={labels.footprint} data-testid="historical-footprint-map" data-focus={focus ? `${focus.kind}:${focus.id}` : "none"} onMouseLeave={() => onHover(null)}>
       <g aria-hidden>
         {links.map((l) => (
           <path
             key={`${l.person}→${l.place}`}
-            d={`M ${l.x1} ${l.y1} C ${(l.x1 + l.x2) / 2} ${l.y1}, ${(l.x1 + l.x2) / 2} ${l.y2}, ${l.x2} ${l.y2}`}
+            d={`M ${l.x1 + 14} ${l.y1} C ${(l.x1 + l.x2) / 2} ${l.y1}, ${(l.x1 + l.x2) / 2} ${l.y2}, ${l.x2 - 6} ${l.y2}`}
             fill="none"
-            className={cn("stroke-brand-cyan transition-opacity", lit(l.person, l.place) ? "opacity-60" : "opacity-10")}
-            strokeWidth={Math.max(1, (l.days / maxDays) * 6)}
+            className="stroke-brand-cyan opacity-70"
+            strokeWidth={Math.max(1.5, (l.days / maxLink) * 7)}
           />
         ))}
       </g>
-      {people.map((label, i) => (
-        <g key={label} transform={`translate(0 ${py(i)})`} className="cursor-pointer" onClick={() => onSelectPerson(label)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelectPerson(label); } }} aria-label={label} aria-pressed={selectedPerson === label}>
-          <circle cx={LEFT} cy={0} r={4} className={cn(selectedPerson === label ? "fill-brand-blue" : "fill-brand-cyan")} />
-          <text x={LEFT - 10} y={4} textAnchor="end" className={cn("fill-current font-sans text-meta", selectedPerson === label ? "text-text-primary font-semibold" : "text-text-secondary")}>{label}</text>
-        </g>
-      ))}
-      {places.map((pl, i) => (
-        <g key={pl.name} transform={`translate(0 ${oy(i)})`} className="cursor-pointer" onClick={() => onSelectObject(pl.name)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelectObject(pl.name); } }} aria-label={`${pl.name} · ${pl.days} ${labels.days}`} aria-pressed={selectedObject === pl.name}>
-          <rect x={RIGHT - 4} y={-4} width={8} height={8} rx={2} className={cn(selectedObject === pl.name ? "fill-brand-blue" : "fill-text-muted")} />
-          <text x={RIGHT + 10} y={4} className={cn("fill-current font-sans text-meta", selectedObject === pl.name ? "text-text-primary font-semibold" : "text-text-secondary")}>
-            <tspan className="font-mono text-text-muted">{objectMonogram(pl.name)}</tspan>
-            <tspan dx={6}>{pl.name}</tspan>
-          </text>
-        </g>
-      ))}
+      {people.map((label, i) => {
+        const lit = personLit(label);
+        const y = py(i);
+        return (
+          <g key={label} className={cn("cursor-pointer transition-opacity", lit ? "opacity-100" : "opacity-25")} onClick={() => onSelectPerson(label)} onMouseEnter={() => onHover({ kind: "person", id: label })} role="button" tabIndex={0} onKeyDown={key(() => onSelectPerson(label))} onFocus={() => onHover({ kind: "person", id: label })} aria-label={label} aria-pressed={selectedPerson === label}>
+            <circle cx={LEFT} cy={y} r={13} className={cn("stroke-ink-500", selectedPerson === label ? "fill-brand-blue/30" : "fill-ink-700")} strokeWidth={1} />
+            <text x={LEFT} y={y + 4} textAnchor="middle" className="fill-current font-display text-meta font-semibold text-text-primary">{playerInitials(label)}</text>
+            <text x={LEFT - 20} y={y + 4} textAnchor="end" className={cn("fill-current font-sans text-support", selectedPerson === label ? "text-text-primary font-semibold" : "text-text-primary")}>{label}</text>
+          </g>
+        );
+      })}
+      {places.map((pl, i) => {
+        const lit = placeLit(pl.name);
+        const y = oy(i);
+        const at = focus?.kind === "person" ? pl.people.find((pp) => pp.label === focus.id) : null;
+        const days = at ? at.days : pl.days;
+        const w = Math.max(3, (days / maxDays) * BAR);
+        return (
+          <g key={pl.name} className={cn("cursor-pointer transition-opacity", lit ? "opacity-100" : "opacity-25")} onClick={() => onSelectObject(pl.name)} onMouseEnter={() => onHover({ kind: "object", id: pl.name })} role="button" tabIndex={0} onKeyDown={key(() => onSelectObject(pl.name))} onFocus={() => onHover({ kind: "object", id: pl.name })} aria-label={`${pl.name} · ${days} ${labels.days}`} aria-pressed={selectedObject === pl.name}>
+            <rect x={RIGHT - 5} y={y - 5} width={10} height={10} rx={2} className={cn(selectedObject === pl.name ? "fill-brand-blue" : "fill-text-muted")} />
+            <text x={RIGHT + 12} y={y + 4} className={cn("fill-current font-sans text-support", selectedObject === pl.name ? "text-text-primary font-semibold" : "text-text-primary")}>{pl.name}</text>
+            <rect x={RIGHT + 200} y={y - 4} width={w} height={8} rx={2} className={cn(at ? "fill-brand-cyan/80" : "fill-brand-cyan/40")} />
+            <text x={RIGHT + 206 + w} y={y + 4} className="fill-current font-mono text-meta text-text-muted">{days} d{at && at.hours !== null ? ` · ${formatHours(at.hours)} h` : ""}</text>
+          </g>
+        );
+      })}
     </svg>
   );
 }
