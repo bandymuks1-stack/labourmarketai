@@ -10,10 +10,12 @@
 >   `401 unknown_source | unauthorized` to anything but the registered source
 >   with its secret.
 > - Secret: `EXTERNAL_REFERRAL_TOKEN_NONSTOP` is set in the LabourMarket.ai
->   Vercel **Production** environment (rotated once on 2026-09-17 before any
->   hand-off; 48 random bytes, base64url). The value exists only there. The
->   Nonstop side receives it through an owner-controlled channel — never
->   through a file, a chat or a PR.
+>   Vercel **Production** environment (48 random bytes, base64url). Rotated on
+>   2026-09-17 under owner authorization so that the SAME value could be
+>   written to the Nonstop project's `LABOURMARKET_REFERRAL_TOKEN` in one
+>   process — the variable is Vercel-`sensitive` (write-only), so a copy is
+>   only possible at creation time. Exactly one partner secret exists; it is
+>   in no file, chat or PR.
 >
 > **Nonstop may flip `LABOURMARKET_INTEGRATION.live = true` only after** (1)
 > the same secret is configured on the Nonstop side, and (2) one `201`, one
