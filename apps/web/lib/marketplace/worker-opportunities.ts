@@ -9,6 +9,7 @@ import {
 import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
+import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 import type { MyInterestViewRow } from "@/lib/opportunities/my-interest-view";
 import type {
   ExternalOpportunityCardV1,
@@ -81,6 +82,8 @@ export interface MarketplaceCapabilities {
   readonly seenReadDegraded: boolean;
   /** The owner-gated interest table exists. */
   readonly interestAvailable: boolean;
+  /** The vacancy source of the interest table exists (20260917160000). */
+  readonly vacancyInterestAvailable: boolean;
   /** The #723 saved-opportunities store exists. */
   readonly savedAvailable: boolean;
 }
@@ -95,9 +98,13 @@ export type MarketplaceBoardView =
        *  of invented state this layer exists to remove. */
       readonly capabilities: Pick<
         MarketplaceCapabilities,
-        "boardAvailable" | "interestAvailable" | "savedAvailable"
+        "boardAvailable" | "interestAvailable" | "vacancyInterestAvailable" | "savedAvailable"
       >;
       readonly readiness: WorkerReadiness;
+      /** Own interest status per public vacancy id (external cards). */
+      readonly vacancyInterestById: ReadonlyMap<string, InterestStatus>;
+      /** Own commercial handoff per vacancy id (own RLS rows). */
+      readonly handoffByVacancy: ReadonlyMap<string, { status: string; outreachState: string }>;
       /** Ranked, explained cards — best first (shared §19 comparator). */
       readonly opportunities: readonly OpportunityCard[];
       readonly savedRequestIds: readonly string[];
@@ -168,9 +175,12 @@ export async function loadWorkerOpportunityBoard(
     capabilities: {
       boardAvailable: !board.needsDataAccess,
       interestAvailable: board.interestAvailable,
+      vacancyInterestAvailable: board.vacancyInterestAvailable,
       savedAvailable: board.savedAvailable,
     },
     readiness: board.readiness,
+    vacancyInterestById: board.vacancyInterestById,
+    handoffByVacancy: board.handoffByVacancy,
     opportunities: board.opportunities,
     savedRequestIds: board.savedRequestIds,
     savedVacancies: board.savedVacancies,

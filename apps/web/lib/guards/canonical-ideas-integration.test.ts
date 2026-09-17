@@ -59,7 +59,8 @@ describe("A: my-interest list uses OWN rows only and keeps closed demands honest
   it("a signal whose demand left the board stays, marked stillOpen=false", () => {
     const rows: MyInterestRow[] = [
       {
-        requestId: "11111111-1111-4111-8111-111111111111",
+        publicVacancyId: null,
+      requestId: "11111111-1111-4111-8111-111111111111",
         status: "interested",
         matchSnapshot: {
           context: { role_text: "welder", country: "DE", location_label: null, company_name: "Acme GmbH" },
@@ -86,7 +87,8 @@ describe("A: my-interest list uses OWN rows only and keeps closed demands honest
     const view = buildMyInterestView(
       [
         {
-          requestId: "11111111-1111-4111-8111-111111111111",
+          publicVacancyId: null,
+      requestId: "11111111-1111-4111-8111-111111111111",
           status: "interested",
           matchSnapshot: { context: { role_text: "stale", country: "DE", location_label: null, company_name: "Old" } },
           createdAt: null,
@@ -104,7 +106,8 @@ describe("A: my-interest list uses OWN rows only and keeps closed demands honest
     const view = buildMyInterestView(
       [
         {
-          requestId: "22222222-2222-4222-8222-222222222222",
+          publicVacancyId: null,
+      requestId: "22222222-2222-4222-8222-222222222222",
           status: "reviewed",
           matchSnapshot: { status_band: "possible" }, // pre-extension snapshot
           createdAt: null,

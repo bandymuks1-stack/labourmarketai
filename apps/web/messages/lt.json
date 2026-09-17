@@ -9360,6 +9360,26 @@
         "feature-absent": "Dar neprieinama — išsaugotų paieškų atnaujinimas nepritaikytas.",
         "error": "Įvyko klaida. Bandyk dar kartą."
       }
+    },
+    "vacancyInterest": {
+      "express": "Noriu šio darbo",
+      "sent": "Susidomėjimas užfiksuotas",
+      "withdraw": "Atšaukti",
+      "consentLabel": "„Nonstop Group“ gali pristatyti mane šiam darbdaviui dėl šio darbo.",
+      "consentHint": "(tik jūsų nurodytos profesijos, įgūdžiai, kalbos ir prieinamumas — niekada darbo žurnalas ar CV; neprivaloma, galite nežymėti)",
+      "handoffCreated": "„Nonstop Group“ informuota, kad norite šio darbo. „Nonstop“ gali kreiptis į darbdavį savo komerciniu procesu; LabourMarket.ai darbdaviui nieko nesiuntė.",
+      "handoffTooNew": "Susidomėjimas užfiksuotas ir „Nonstop Group“ informuota. Šis skelbimas jaunesnis nei 30 dienų, todėl dėl jo su darbdaviu dar negalima susisiekti — susidomėjimas lieka užfiksuotas.",
+      "handoffPending": "Susidomėjimas užfiksuotas. Perdavimas „Nonstop Group“ dar neįjungtas.",
+      "ineligible": {
+        "worker_not_matchable": "Susidomėjimas užfiksuotas. Jį bus galima perduoti „Nonstop Group“, kai profilyje bus nurodyta, kokį darbą dirbate ir kokius įgūdžius turite.",
+        "employer_not_identifiable": "Susidomėjimas užfiksuotas. Šiame skelbime darbdavys nenurodytas, todėl jo negalima perduoti „Nonstop Group“.",
+        "vacancy_not_live": "Susidomėjimas užfiksuotas, bet šis skelbimas nebegalioja.",
+        "not_public_vacancy": "Susidomėjimas užfiksuotas.",
+        "interest_not_active": "Susidomėjimas užfiksuotas.",
+        "publication_date_unusable": "Susidomėjimas užfiksuotas. Skelbimas neturi tinkamos paskelbimo datos, todėl jo negalima perduoti „Nonstop Group“."
+      },
+      "scopeNote": "Tai ne paraiška, darbdaviui žinutė nesiunčiama. Kandidatuojama ir toliau per originalų skelbimą.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą."
     }
   },
   "workerIntake": {

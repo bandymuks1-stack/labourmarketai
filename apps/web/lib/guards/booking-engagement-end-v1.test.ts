@@ -1361,6 +1361,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // records the owner's explicit RED-1 approval; added in the same commit as
       // docs/launch/OWNER_GATE_MESSAGE_LANGUAGE_SET_2026-09-17.md.
       "20260917140000_widen_original_language_uk_ka.sql",
+      // 2026-09-17 — worker → real vacancy → interest → Nonstop commercial
+      // handoff v1: second source on demand_interest_signals,
+      // commercial_handoffs, two SECDEF functions, a withdrawal trigger. RED,
+      // PREPARED, NOT APPLIED — owner gate; dry-run proven in a rolled-back
+      // production transaction. Paired rollback refuses to drop written rows.
+      "20260917160000_vacancy_interest_commercial_handoff_v1.sql",
 ]);
   });
 

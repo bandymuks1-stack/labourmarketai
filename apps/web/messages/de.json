@@ -9360,6 +9360,26 @@
         "feature-absent": "Noch nicht verfügbar — das Update für gespeicherte Suchen ist nicht angewendet.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
       }
+    },
+    "vacancyInterest": {
+      "express": "Ich möchte diesen Job",
+      "sent": "Interesse vermerkt",
+      "withdraw": "Zurückziehen",
+      "consentLabel": "Nonstop Group darf mich diesem Arbeitgeber für diesen Job vorstellen.",
+      "consentHint": "(nur Ihre angegebenen Berufe, Fähigkeiten, Sprachen und Verfügbarkeit — nie Ihr Arbeitsjournal oder Ihren Lebenslauf; optional)",
+      "handoffCreated": "Nonstop Group wurde informiert, dass Sie diesen Job möchten. Nonstop kann den Arbeitgeber über seinen eigenen kommerziellen Prozess ansprechen; LabourMarket.ai hat dem Arbeitgeber nichts gesendet.",
+      "handoffTooNew": "Ihr Interesse ist vermerkt und Nonstop Group informiert. Diese Anzeige ist jünger als 30 Tage, daher darf der Arbeitgeber dazu noch nicht kontaktiert werden — das Interesse bleibt vermerkt.",
+      "handoffPending": "Ihr Interesse ist vermerkt. Die Weitergabe an Nonstop Group ist noch nicht aktiviert.",
+      "ineligible": {
+        "worker_not_matchable": "Ihr Interesse ist vermerkt. Es kann an Nonstop Group weitergegeben werden, sobald Ihr Profil sagt, welche Arbeit Sie machen und welche Fähigkeiten Sie haben.",
+        "employer_not_identifiable": "Ihr Interesse ist vermerkt. Diese Anzeige nennt keinen Arbeitgeber, daher kann sie nicht an Nonstop Group weitergegeben werden.",
+        "vacancy_not_live": "Ihr Interesse ist vermerkt, aber diese Anzeige ist nicht mehr offen.",
+        "not_public_vacancy": "Ihr Interesse ist vermerkt.",
+        "interest_not_active": "Ihr Interesse ist vermerkt.",
+        "publication_date_unusable": "Ihr Interesse ist vermerkt. Die Anzeige hat kein verwertbares Veröffentlichungsdatum, daher kann sie nicht an Nonstop Group weitergegeben werden."
+      },
+      "scopeNote": "Das ist keine Bewerbung, und es geht keine Nachricht an den Arbeitgeber. Beworben wird weiterhin über die Originalanzeige.",
+      "error": "Konnte nicht gespeichert werden. Bitte erneut versuchen."
     }
   },
   "workerIntake": {

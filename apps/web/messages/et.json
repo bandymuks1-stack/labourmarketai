@@ -2211,6 +2211,26 @@
         "no_start_date": "alguskuupäev",
         "pay_not_comparable": "tasu pole võrreldav (mitte EUR)"
       }
+    },
+    "vacancyInterest": {
+      "express": "Soovin seda tööd",
+      "sent": "Huvi salvestatud",
+      "withdraw": "Võta tagasi",
+      "consentLabel": "Nonstop Group võib mind sellele tööandjale selle töö jaoks esitleda.",
+      "consentHint": "(ainult teie märgitud ametid, oskused, keeled ja saadavus — mitte kunagi tööpäevik ega CV; vabatahtlik)",
+      "handoffCreated": "Nonstop Groupi on teavitatud, et soovite seda tööd. Nonstop võib tööandja poole pöörduda oma äriprotsessi kaudu; LabourMarket.ai ei ole tööandjale midagi saatnud.",
+      "handoffTooNew": "Huvi on salvestatud ja Nonstop Groupi teavitatud. See kuulutus on alla 30 päeva vana, seega tööandjaga ei tohi selle kohta veel ühendust võtta — huvi jääb kirja.",
+      "handoffPending": "Huvi on salvestatud. Edastamine Nonstop Groupile ei ole veel sisse lülitatud.",
+      "ineligible": {
+        "worker_not_matchable": "Huvi on salvestatud. Selle saab Nonstop Groupile edastada, kui profiilis on kirjas, millist tööd teete ja millised oskused teil on.",
+        "employer_not_identifiable": "Huvi on salvestatud. See kuulutus ei nimeta tööandjat, seega seda ei saa Nonstop Groupile edastada.",
+        "vacancy_not_live": "Huvi on salvestatud, kuid see kuulutus ei ole enam avatud.",
+        "not_public_vacancy": "Huvi on salvestatud.",
+        "interest_not_active": "Huvi on salvestatud.",
+        "publication_date_unusable": "Huvi on salvestatud. Kuulutusel puudub kasutatav avaldamiskuupäev, seega seda ei saa Nonstop Groupile edastada."
+      },
+      "scopeNote": "See ei ole kandideerimine ja tööandjale sõnumit ei saadeta. Kandideerimine toimub endiselt algse kuulutuse kaudu.",
+      "error": "Salvestamine ebaõnnestus. Proovige uuesti."
     }
   },
   "scouting": {

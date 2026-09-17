@@ -966,7 +966,9 @@ describe("NO new DB migration in this PR", () => {
     //   RED-1 2026-09-17: CHECK widening +uk,+ka on the four original_language
     //   tables). Not this read layer's file; the global count makes an unrelated
     //   migration visible here, by design. RECOUNTED: `ls …/*.sql | wc -l` = 288.
-    expect(count).toBeLessThanOrEqual(288);
+    // Bumped 288 -> 289 for 20260917160000_vacancy_interest_commercial_handoff_v1
+    //   (RED, PREPARED, NOT APPLIED). Not this read layer's file. RECOUNTED: 289.
+    expect(count).toBeLessThanOrEqual(289);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

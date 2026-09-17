@@ -348,7 +348,10 @@ export async function withdrawInterest(input: {
 /** One of the worker's OWN interest rows (RLS: own worker_id only) with the
  *  stored snapshot — the raw material for the "Mano susidomėjimai" list. */
 export interface MyInterestRow {
-  readonly requestId: string;
+  /** The platform demand, or null for an interest in a PUBLIC VACANCY
+   *  (second source, migration 20260917160000) — exactly one of the two. */
+  readonly requestId: string | null;
+  readonly publicVacancyId: string | null;
   readonly status: InterestStatus;
   /** The stored match_snapshot jsonb (context/cv parsed by pure readers). */
   readonly matchSnapshot: unknown;
@@ -359,12 +362,18 @@ export interface MyInterestRow {
 export interface MyInterestSignals {
   /** request_id → status. Empty when the table is not applied yet. */
   readonly byRequest: ReadonlyMap<string, InterestStatus>;
+  /** public_vacancy_id → status — the external cards' own button state.
+   *  Empty until the vacancy-interest migration is applied. */
+  readonly byVacancy: ReadonlyMap<string, InterestStatus>;
   /** The worker's own rows, newest activity first — INDEPENDENT of current
    *  board visibility (a signal on a closed demand still appears; the view
    *  layer labels it honestly). Empty when the table is not applied yet. */
   readonly rows: readonly MyInterestRow[];
   /** False until the owner-gated migration is applied. */
   readonly available: boolean;
+  /** False until migration 20260917160000 (the vacancy source) is applied —
+   *  the external cards offer the interest control only then. */
+  readonly vacancyInterestAvailable: boolean;
 }
 
 /** The worker's own interest signals (board button states + the aggregated
@@ -373,34 +382,60 @@ export async function listMyInterestSignals(
   supabase: SupabaseClient,
   workerId: string,
 ): Promise<MyInterestSignals> {
+  const empty: MyInterestSignals = {
+    byRequest: new Map(),
+    byVacancy: new Map(),
+    rows: [],
+    available: false,
+    vacancyInterestAvailable: false,
+  };
   try {
-    const { data, error } = await asAny(supabase)
+    // The vacancy column exists only once migration 20260917160000 is
+    // applied. Read WITH it first; on 42703 (undefined column) fall back to
+    // the pre-migration projection, so the board keeps rendering exactly as
+    // before until the owner applies it — honest degradation, never a dead
+    // board and never a fake "no interests".
+    let { data, error } = await asAny(supabase)
       .from("demand_interest_signals")
-      .select("request_id, status, match_snapshot, created_at, updated_at")
+      .select("request_id, public_vacancy_id, status, match_snapshot, created_at, updated_at")
       .eq("worker_id", workerId)
       .order("updated_at", { ascending: false });
-    if (error) return { byRequest: new Map(), rows: [], available: false };
+    let vacancyInterestAvailable = true;
+    if (error && (error as { code?: string }).code === "42703") {
+      vacancyInterestAvailable = false;
+      ({ data, error } = await asAny(supabase)
+        .from("demand_interest_signals")
+        .select("request_id, status, match_snapshot, created_at, updated_at")
+        .eq("worker_id", workerId)
+        .order("updated_at", { ascending: false }));
+    }
+    if (error) return empty;
     const byRequest = new Map<string, InterestStatus>();
+    const byVacancy = new Map<string, InterestStatus>();
     const rows: MyInterestRow[] = [];
     for (const r of (data ?? []) as {
-      request_id: string;
+      request_id: string | null;
+      public_vacancy_id?: string | null;
       status: InterestStatus;
       match_snapshot: unknown;
       created_at: string | null;
       updated_at: string | null;
     }[]) {
-      byRequest.set(r.request_id, r.status);
+      const vacancyId = r.public_vacancy_id ?? null;
+      if (r.request_id) byRequest.set(r.request_id, r.status);
+      if (vacancyId) byVacancy.set(vacancyId, r.status);
       rows.push({
-        requestId: r.request_id,
+        requestId: r.request_id ?? null,
+        publicVacancyId: vacancyId,
         status: r.status,
         matchSnapshot: r.match_snapshot ?? null,
         createdAt: r.created_at ?? null,
         updatedAt: r.updated_at ?? null,
       });
     }
-    return { byRequest, rows, available: true };
+    return { byRequest, byVacancy, rows, available: true, vacancyInterestAvailable };
   } catch {
-    return { byRequest: new Map(), rows: [], available: false };
+    return empty;
   }
 }
 

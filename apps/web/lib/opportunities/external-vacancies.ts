@@ -58,6 +58,15 @@ type VacancyDbClient = Pick<SupabaseClient, "from">;
 export interface ExternalOpportunityCardV1 {
   /** Stable render key: provider + the publisher's own id. */
   readonly key: string;
+  /** The store row id — what an interest write names (null only for a row
+   *  read without `id`, which the board's reads never do). */
+  readonly vacancyId: string | null;
+  /** The publisher's own publication date, for the outreach recency floor
+   *  (`employer-outreach-policy.ts`) — as published, never adjusted. */
+  readonly publishedAt: string;
+  /** Whether the ad names an identifiable employer (name + a stable org id
+   *  or homepage) — the commercial rule's provenance criterion. */
+  readonly employerIdentifiable: boolean;
   readonly view: CanonicalOpportunityViewV1;
   readonly capabilities: OpportunityCapabilitiesV1;
   /** The ONE engine's verdict for this worker against this ad. */
@@ -218,6 +227,14 @@ export async function loadExternalVacancyCards(
       const view = toCanonicalOpportunityView(vacancy);
       return {
         key: `${vacancy.providerKey}:${vacancy.externalId}`,
+        vacancyId: vacancy.storeId,
+        publishedAt: vacancy.publishedAt,
+        employerIdentifiable:
+          Boolean(vacancy.employer.name?.trim()) &&
+          Boolean(
+            vacancy.employer.externalOrgId?.trim() ||
+              vacancy.employer.homepage?.trim(),
+          ),
         view,
         capabilities: opportunityCapabilities(view.provenance),
         match: matchWorkerToNeed(need, subject),

@@ -190,19 +190,25 @@ export const FUNNEL_EVENTS = {
   invitationOpened: "invitation_opened",
   invitationDeclined: "invitation_declined",
   externalReferralReceived: "external_referral_received",
-  // ── Worker first-value funnel (2026-09-17). The states the owner asked to
-  //    measure, as bounded scalars at the real action points: `recognition_*`
-  //    when the person confirms / corrects / rejects a suggestion
-  //    (server-emitted by the existing claim + journal-skill actions),
-  //    `profile_matchable` when the board's own gate reads true for a person
-  //    on a render, `real_opportunities_loaded` when the board rendered ≥1
-  //    real row. No ids, no labels, no counts beyond `success`.
+  // ── Worker → real vacancy → interest → Nonstop commercial handoff
+  //    (2026-09-17). The funnel states the owner asked to measure, as
+  //    bounded scalars at the real action points: `recognition_*` when the
+  //    person confirms / corrects / rejects a suggestion (server-emitted by
+  //    the existing claim + journal-skill actions), `profile_matchable` the
+  //    first time the board's own gate reads true for a person (once per
+  //    board render that crosses it), `real_opportunities_loaded` when the
+  //    board rendered ≥1 real row, `vacancy_interest_expressed` on a stored
+  //    interest in a public vacancy, `commercial_handoff_created` on a NEW
+  //    `commercial_handoffs` row (never on the idempotent replay).
+  //    No ids, no employer names, no counts beyond `success`/`result_kind`.
   recognitionSuggested: "recognition_suggested",
   recognitionConfirmed: "recognition_confirmed",
   recognitionCorrected: "recognition_corrected",
   recognitionRejected: "recognition_rejected",
   profileMatchable: "profile_matchable",
   realOpportunitiesLoaded: "real_opportunities_loaded",
+  vacancyInterestExpressed: "vacancy_interest_expressed",
+  commercialHandoffCreated: "commercial_handoff_created",
 } as const;
 
 export type FunnelEventName =
@@ -220,7 +226,8 @@ export const FUNNEL_EVENT_NAMES: readonly FunnelEventName[] =
 export type FunnelMetadata = {
   /** Source surface, e.g. 'dashboard' | 'profile' | 'google' | 'password'. */
   surface?: string;
-  /** Bounded outcome word (already on the server allowlist). Never free text. */
+  /** Bounded outcome word (already on the server allowlist), e.g. the
+   *  outreach state a commercial handoff was created in. Never free text. */
   result_kind?: string;
   /** A coarse step label inside a multi-step flow, e.g. 'compose'. */
   step?: string;

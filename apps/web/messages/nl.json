@@ -9360,6 +9360,26 @@
         "feature-absent": "Nog niet beschikbaar — de update voor opgeslagen zoekopdrachten is niet toegepast.",
         "error": "Er ging iets mis. Probeer opnieuw."
       }
+    },
+    "vacancyInterest": {
+      "express": "Ik wil deze baan",
+      "sent": "Interesse vastgelegd",
+      "withdraw": "Intrekken",
+      "consentLabel": "Nonstop Group mag mij aan deze werkgever voorstellen voor deze baan.",
+      "consentHint": "(alleen uw opgegeven beroepen, vaardigheden, talen en beschikbaarheid — nooit uw werkjournaal of cv; optioneel)",
+      "handoffCreated": "Nonstop Group is geïnformeerd dat u deze baan wilt. Nonstop kan de werkgever via zijn eigen commerciële proces benaderen; LabourMarket.ai heeft de werkgever niets gestuurd.",
+      "handoffTooNew": "Uw interesse is vastgelegd en Nonstop Group is geïnformeerd. Deze advertentie is jonger dan 30 dagen, dus de werkgever mag er nog niet over benaderd worden — de interesse blijft staan.",
+      "handoffPending": "Uw interesse is vastgelegd. Doorgeven aan Nonstop Group is nog niet ingeschakeld.",
+      "ineligible": {
+        "worker_not_matchable": "Uw interesse is vastgelegd. Die kan aan Nonstop Group worden doorgegeven zodra uw profiel zegt welk werk u doet en welke vaardigheden u heeft.",
+        "employer_not_identifiable": "Uw interesse is vastgelegd. Deze advertentie noemt geen werkgever, dus kan ze niet aan Nonstop Group worden doorgegeven.",
+        "vacancy_not_live": "Uw interesse is vastgelegd, maar deze advertentie staat niet meer open.",
+        "not_public_vacancy": "Uw interesse is vastgelegd.",
+        "interest_not_active": "Uw interesse is vastgelegd.",
+        "publication_date_unusable": "Uw interesse is vastgelegd. De advertentie heeft geen bruikbare publicatiedatum, dus kan ze niet aan Nonstop Group worden doorgegeven."
+      },
+      "scopeNote": "Dit is geen sollicitatie en er gaat geen bericht naar de werkgever. Solliciteren gebeurt nog steeds via de originele advertentie.",
+      "error": "Opslaan is mislukt. Probeer het opnieuw."
     }
   },
   "workerIntake": {

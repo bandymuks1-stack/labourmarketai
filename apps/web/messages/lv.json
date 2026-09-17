@@ -2211,6 +2211,26 @@
         "no_start_date": "sākuma datums",
         "pay_not_comparable": "atalgojums nav salīdzināms (nav EUR)"
       }
+    },
+    "vacancyInterest": {
+      "express": "Vēlos šo darbu",
+      "sent": "Interese reģistrēta",
+      "withdraw": "Atsaukt",
+      "consentLabel": "Nonstop Group drīkst mani piedāvāt šim darba devējam šim darbam.",
+      "consentHint": "(tikai jūsu norādītās profesijas, prasmes, valodas un pieejamība — nekad darba žurnāls vai CV; nav obligāti)",
+      "handoffCreated": "Nonstop Group ir informēta, ka vēlaties šo darbu. Nonstop var vērsties pie darba devēja savā komerciālajā procesā; LabourMarket.ai darba devējam neko nav sūtījis.",
+      "handoffTooNew": "Interese reģistrēta, Nonstop Group informēta. Šis sludinājums ir jaunāks par 30 dienām, tāpēc ar darba devēju par to vēl nedrīkst sazināties — interese paliek reģistrēta.",
+      "handoffPending": "Interese reģistrēta. Nodošana Nonstop Group vēl nav ieslēgta.",
+      "ineligible": {
+        "worker_not_matchable": "Interese reģistrēta. To varēs nodot Nonstop Group, kad profilā būs norādīts, kādu darbu darāt un kādas prasmes jums ir.",
+        "employer_not_identifiable": "Interese reģistrēta. Šajā sludinājumā darba devējs nav norādīts, tāpēc to nevar nodot Nonstop Group.",
+        "vacancy_not_live": "Interese reģistrēta, bet šis sludinājums vairs nav aktīvs.",
+        "not_public_vacancy": "Interese reģistrēta.",
+        "interest_not_active": "Interese reģistrēta.",
+        "publication_date_unusable": "Interese reģistrēta. Sludinājumam nav derīga publicēšanas datuma, tāpēc to nevar nodot Nonstop Group."
+      },
+      "scopeNote": "Tas nav pieteikums, darba devējam ziņa netiek sūtīta. Pieteikšanās joprojām notiek caur oriģinālo sludinājumu.",
+      "error": "Neizdevās saglabāt. Mēģiniet vēlreiz."
     }
   },
   "scouting": {

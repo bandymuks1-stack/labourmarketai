@@ -271,7 +271,13 @@ describe("row -> contract is the exact inverse of contract -> row", () => {
     const row = toPublicVacancyRow(original, NOW, null);
     const back = fromPublicVacancyRow(row as unknown as Record<string, unknown>);
 
-    expect(back).toEqual(original);
+    // The store's own row id rides along when the row carries one (a
+    // `select("*")` read); an unsaved contract has none. Everything else is
+    // the exact inverse.
+    const { storeId, ...contract } = back;
+    expect(storeId).toBeNull();
+    expect(contract).toEqual(original);
+    expect(fromPublicVacancyRow({ ...(row as unknown as Record<string, unknown>), id: "row-1" }).storeId).toBe("row-1");
   });
 
   it("reads numeric columns that PostgREST returns as strings", () => {

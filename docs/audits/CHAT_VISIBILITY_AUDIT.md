@@ -341,3 +341,21 @@ audit.
   object with no addressee, message, need, declared context or id, and the
   module re-applies that allowlist. Pinned in the `chat-visibility-rls.test.ts`
   caller inventory. Contract: `docs/integrations/EXTERNAL_WORKER_REFERRAL_V1.md`.
+
+- **2026-09-17 — `lib/commercial/handoff-dispatch.ts`** (worker → real vacancy
+  → interest → Nonstop commercial handoff v1). A cron sweep with no user
+  session that calls exactly one service_role-ONLY SECURITY DEFINER function
+  from migration `20260917160000` (RED, unapplied at the time of writing),
+  `list_queued_commercial_handoffs_v1`, which projects an allow-listed set of
+  the worker's DECLARED context from the canonical tables at read time — no
+  note, journal, CV, document or contact column — and updates
+  `commercial_handoffs.status` (service_role holds SELECT, UPDATE and never
+  INSERT there; the only insert path is the caller-owned SECDEF
+  `create_commercial_handoff_v1`). The key opens nothing else: service_role
+  has no table grant on `worker_skills`, `worker_professions`,
+  `worker_languages` or `profiles`. Its single outbound target is the
+  owner-configured partner door (`NONSTOP_HANDOFF_ENDPOINT` +
+  `NONSTOP_HANDOFF_TOKEN`); while either is unset the sweep answers
+  `not_configured` before the key is touched. Touches no chat table. Pinned
+  in the `chat-visibility-rls.test.ts` caller inventory. Contract:
+  `docs/integrations/NONSTOP_COMMERCIAL_HANDOFF_V1.md`.

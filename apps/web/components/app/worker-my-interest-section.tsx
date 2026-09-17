@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { withdrawInterestAction } from "@/lib/opportunities/interest-actions";
+import { withdrawVacancyInterestAction } from "@/lib/opportunities/vacancy-interest-actions";
 import { contactEmployerAction } from "@/lib/opportunities/contact-employer";
 import type { MyInterestNextAction } from "@/lib/opportunities/my-interest-view";
 
@@ -25,7 +26,13 @@ import type { MyInterestNextAction } from "@/lib/opportunities/my-interest-view"
  */
 
 export interface MyInterestDisplayRow {
-  readonly requestId: string;
+  /** Stable row key (demand id, or `vacancy:<id>`). */
+  readonly key: string;
+  readonly source: "demand" | "vacancy";
+  /** The platform demand id; null for an interest in a public vacancy. */
+  readonly requestId: string | null;
+  /** The public vacancy id; null for a platform-demand interest. */
+  readonly vacancyId: string | null;
   readonly status: string;
   /** Localized status in human words (Išsiųsta / Peržiūrėta / …). */
   readonly statusText: string;
@@ -70,15 +77,22 @@ export function WorkerMyInterestSection({
 
   if (rows.length === 0) return null;
 
-  const onWithdraw = (requestId: string) =>
+  const onWithdraw = (row: MyInterestDisplayRow) =>
     startTransition(async () => {
-      setPendingId(requestId);
+      setPendingId(row.key);
       setFailedId(null);
-      const r = await withdrawInterestAction(locale, requestId);
+      // Same table, two sources, two existing withdraw flows — the row says
+      // which one it is; nothing is guessed from the id's shape.
+      const r =
+        row.source === "vacancy" && row.vacancyId
+          ? await withdrawVacancyInterestAction(locale, row.vacancyId)
+          : row.requestId
+            ? await withdrawInterestAction(locale, row.requestId)
+            : ({ kind: "invalid" } as const);
       if (r.kind === "ok") {
-        setWithdrawnIds((prev) => new Set([...prev, requestId]));
+        setWithdrawnIds((prev) => new Set([...prev, row.key]));
       } else {
-        setFailedId(requestId);
+        setFailedId(row.key);
       }
       setPendingId(null);
     });
@@ -111,20 +125,21 @@ export function WorkerMyInterestSection({
         <p className="text-xs leading-relaxed text-text-secondary">{labels.intro}</p>
         <ul className="flex flex-col gap-2" data-testid="my-interest-list">
           {rows.map((row) => {
-            const withdrawnNow = withdrawnIds.has(row.requestId);
+            const withdrawnNow = withdrawnIds.has(row.key);
             const statusText = withdrawnNow ? labels.withdrawnStatusText : row.statusText;
             const status = withdrawnNow ? "withdrawn" : row.status;
             const nextAction: MyInterestNextAction = withdrawnNow
-              ? row.stillOpen
+              ? row.stillOpen && row.source === "demand"
                 ? "view_demand"
                 : "none"
               : row.nextAction;
-            const pending = pendingId === row.requestId;
+            const pending = pendingId === row.key;
             return (
               <li
-                key={row.requestId}
+                key={row.key}
                 className="flex flex-col gap-1.5 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2"
-                data-testid={`my-interest-${row.requestId}`}
+                data-testid={`my-interest-${row.key}`}
+                data-source={row.source}
                 data-status={status}
                 data-still-open={row.stillOpen ? "true" : "false"}
               >
@@ -150,10 +165,10 @@ export function WorkerMyInterestSection({
                   </p>
                 ) : null}
                 <div className="flex flex-wrap items-center gap-2">
-                  {nextAction === "contact_employer" ? (
+                  {nextAction === "contact_employer" && row.requestId ? (
                     <button
                       type="button"
-                      onClick={() => onContact(row.requestId)}
+                      onClick={() => onContact(row.requestId as string)}
                       disabled={pending}
                       className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
                       data-testid="my-interest-contact"
@@ -173,7 +188,7 @@ export function WorkerMyInterestSection({
                   {nextAction === "withdraw" ? (
                     <button
                       type="button"
-                      onClick={() => onWithdraw(row.requestId)}
+                      onClick={() => onWithdraw(row)}
                       disabled={pending}
                       className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-state-warning hover:text-text-primary disabled:opacity-50"
                       data-testid="my-interest-withdraw"
@@ -181,7 +196,7 @@ export function WorkerMyInterestSection({
                       {labels.withdraw}
                     </button>
                   ) : null}
-                  {nextAction === "view_demand" ? (
+                  {nextAction === "view_demand" && row.requestId ? (
                     <a
                       href={`#opp-${row.requestId}`}
                       className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
@@ -203,7 +218,7 @@ export function WorkerMyInterestSection({
                     </Link>
                   ) : null}
                 </div>
-                {failedId === row.requestId ? (
+                {failedId === row.key ? (
                   <span role="alert" className="text-meta text-state-warning">
                     {labels.error}
                   </span>
