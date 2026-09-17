@@ -9367,8 +9367,7 @@
       "withdraw": "Intrekken",
       "consentLabel": "Nonstop Group mag mij aan deze werkgever voorstellen voor deze baan.",
       "consentHint": "(alleen uw opgegeven beroepen, vaardigheden, talen en beschikbaarheid — nooit uw werkjournaal of cv; optioneel)",
-      "handoffCreated": "Nonstop Group is geïnformeerd dat u deze baan wilt. Nonstop kan de werkgever via zijn eigen commerciële proces benaderen; LabourMarket.ai heeft de werkgever niets gestuurd.",
-      "handoffTooNew": "Uw interesse is vastgelegd en Nonstop Group is geïnformeerd. Deze advertentie is jonger dan 30 dagen, dus de werkgever mag er nog niet over benaderd worden — de interesse blijft staan.",
+      "handoffTooNew": "Uw interesse is vastgelegd en wacht op Nonstop Group. Deze advertentie is jonger dan 30 dagen, dus de werkgever mag er nog niet over benaderd worden — de interesse blijft staan.",
       "handoffPending": "Uw interesse is vastgelegd. Doorgeven aan Nonstop Group is nog niet ingeschakeld.",
       "ineligible": {
         "worker_not_matchable": "Uw interesse is vastgelegd. Die kan aan Nonstop Group worden doorgegeven zodra uw profiel zegt welk werk u doet en welke vaardigheden u heeft.",
@@ -9379,7 +9378,10 @@
         "publication_date_unusable": "Uw interesse is vastgelegd. De advertentie heeft geen bruikbare publicatiedatum, dus kan ze niet aan Nonstop Group worden doorgegeven."
       },
       "scopeNote": "Dit is geen sollicitatie en er gaat geen bericht naar de werkgever. Solliciteren gebeurt nog steeds via de originele advertentie.",
-      "error": "Opslaan is mislukt. Probeer het opnieuw."
+      "error": "Opslaan is mislukt. Probeer het opnieuw.",
+      "handoffQueued": "Uw interesse is vastgelegd en wacht op doorgifte aan het commerciële team van Nonstop Group. LabourMarket.ai heeft de werkgever niets gestuurd.",
+      "handoffDelivered": "Uw interesse is doorgegeven aan Nonstop Group. Nonstop kan de werkgever via zijn eigen commerciële proces benaderen; LabourMarket.ai heeft de werkgever niets gestuurd.",
+      "handoffClosed": "Uw interesse is vastgelegd. De eerdere doorgifte aan Nonstop Group is gesloten toen u introk; er is niets verstuurd."
     }
   },
   "workerIntake": {

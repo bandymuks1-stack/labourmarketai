@@ -325,6 +325,24 @@ describe("interest on a public vacancy — the same table, honest surfaces", () 
     expect(loader).toContain("vacancyInterestAvailable: myInterest.vacancyInterestAvailable");
   });
 
+  it("the client control receives only serializable labels — no function crosses the RSC boundary", () => {
+    // 2026-09-17 production-data walk of the #1760 build: `handoffIneligible`
+    // was a function in the labels object, the server component passed it to
+    // the client control, and React refused to render the WHOLE board
+    // ("Functions cannot be passed directly to Client Components"). The
+    // control is the first thing that mounts once the migration is applied,
+    // so this would have taken the board down at the exact moment the
+    // feature went live.
+    const btn = read("components", "app", "vacancy-interest-button.tsx");
+    const labelsBlock = btn.slice(btn.indexOf("labels: {"), btn.indexOf("};", btn.indexOf("labels: {")));
+    expect(labelsBlock).not.toMatch(/=>\s*string/);
+    expect(labelsBlock).toContain("handoffIneligible: Readonly<Record<string, string>>");
+    const page = read("app", "[locale]", "dashboard", "opportunities", "page.tsx");
+    const labels = page.slice(page.indexOf("const vacancyInterestLabels = {"), page.indexOf("const savedLabels = {"));
+    expect(labels).not.toMatch(/handoffIneligible:\s*\(/);
+    expect(labels).toContain("Object.fromEntries(");
+  });
+
   it("the button's copy never claims an application, a message or a placement", () => {
     for (const locale of ["en", "lt", "ru", "lv", "et", "pl", "de", "nl", "da", "no", "sv"]) {
       const m = JSON.parse(read("messages", `${locale}.json`)) as {
@@ -332,14 +350,21 @@ describe("interest on a public vacancy — the same table, honest surfaces", () 
       };
       const v = m.opportunities.vacancyInterest;
       expect(v, locale).toBeDefined();
-      for (const k of ["express", "sent", "withdraw", "consentLabel", "consentHint", "handoffCreated", "handoffTooNew", "handoffPending", "scopeNote", "error"]) {
+      for (const k of ["express", "sent", "withdraw", "consentLabel", "consentHint", "handoffQueued", "handoffDelivered", "handoffClosed", "handoffTooNew", "handoffPending", "scopeNote", "error"]) {
         expect(typeof v[k], `${locale}.${k}`).toBe("string");
       }
       const ineligible = v.ineligible as Record<string, string>;
       for (const code of ["worker_not_matchable", "employer_not_identifiable", "vacancy_not_live", "not_public_vacancy", "interest_not_active", "publication_date_unusable"]) {
         expect(typeof ineligible[code], `${locale}.ineligible.${code}`).toBe("string");
       }
-      const sent = String(v.handoffCreated).toLowerCase();
+      // A QUEUED handoff has not reached anybody: the queued / too-new lines
+      // may not say the partner "was informed" (2026-09-17 walk: the copy
+      // claimed delivery that had not happened). Only handoffDelivered may.
+      const informed = /been informed|has been told|was informed|informuota|проинформирован|informēta|teavitatud|poinformowan|informiert|geïnformeerd|informeret|informert|informerats/i;
+      for (const k of ["handoffQueued", "handoffTooNew", "handoffClosed"]) {
+        expect(String(v[k]), `${locale}.${k}`).not.toMatch(informed);
+      }
+      const sent = String(v.handoffQueued).toLowerCase();
       expect(sent).not.toMatch(/application sent|applied|placement confirmed|employer accepted|paraiška išsiųsta|заявка отправлена/);
     }
   });

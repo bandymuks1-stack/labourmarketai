@@ -968,7 +968,9 @@ describe("NO new DB migration in this PR", () => {
     //   migration visible here, by design. RECOUNTED: `ls …/*.sql | wc -l` = 288.
     // Bumped 288 -> 289 for 20260917160000_vacancy_interest_commercial_handoff_v1
     //   (RED, PREPARED, NOT APPLIED). Not this read layer's file. RECOUNTED: 289.
-    expect(count).toBeLessThanOrEqual(289);
+    // Bumped 289 -> 290 for 20260917170000_commercial_handoff_requeue_on_reexpress_v1
+    //   (RED forward fix, NOT APPLIED). Not this read layer's file. RECOUNTED: 290.
+    expect(count).toBeLessThanOrEqual(290);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

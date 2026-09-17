@@ -2218,8 +2218,7 @@
       "withdraw": "Võta tagasi",
       "consentLabel": "Nonstop Group võib mind sellele tööandjale selle töö jaoks esitleda.",
       "consentHint": "(ainult teie märgitud ametid, oskused, keeled ja saadavus — mitte kunagi tööpäevik ega CV; vabatahtlik)",
-      "handoffCreated": "Nonstop Groupi on teavitatud, et soovite seda tööd. Nonstop võib tööandja poole pöörduda oma äriprotsessi kaudu; LabourMarket.ai ei ole tööandjale midagi saatnud.",
-      "handoffTooNew": "Huvi on salvestatud ja Nonstop Groupi teavitatud. See kuulutus on alla 30 päeva vana, seega tööandjaga ei tohi selle kohta veel ühendust võtta — huvi jääb kirja.",
+      "handoffTooNew": "Huvi on salvestatud ja ootab Nonstop Groupi. See kuulutus on alla 30 päeva vana, seega tööandjaga ei tohi selle kohta veel ühendust võtta — huvi jääb kirja.",
       "handoffPending": "Huvi on salvestatud. Edastamine Nonstop Groupile ei ole veel sisse lülitatud.",
       "ineligible": {
         "worker_not_matchable": "Huvi on salvestatud. Selle saab Nonstop Groupile edastada, kui profiilis on kirjas, millist tööd teete ja millised oskused teil on.",
@@ -2230,7 +2229,10 @@
         "publication_date_unusable": "Huvi on salvestatud. Kuulutusel puudub kasutatav avaldamiskuupäev, seega seda ei saa Nonstop Groupile edastada."
       },
       "scopeNote": "See ei ole kandideerimine ja tööandjale sõnumit ei saadeta. Kandideerimine toimub endiselt algse kuulutuse kaudu.",
-      "error": "Salvestamine ebaõnnestus. Proovige uuesti."
+      "error": "Salvestamine ebaõnnestus. Proovige uuesti.",
+      "handoffQueued": "Huvi on salvestatud ja ootab edastamist Nonstop Groupi äritiimile. LabourMarket.ai ei ole tööandjale midagi saatnud.",
+      "handoffDelivered": "Huvi on edastatud Nonstop Groupile. Nonstop võib tööandja poole pöörduda oma äriprotsessi kaudu; LabourMarket.ai ei ole tööandjale midagi saatnud.",
+      "handoffClosed": "Huvi on salvestatud. Varasem edastus Nonstop Groupile suleti, kui selle tagasi võtsite; midagi ei saadetud."
     }
   },
   "scouting": {

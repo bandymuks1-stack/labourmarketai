@@ -48,10 +48,15 @@ export function VacancyInterestButton({
     /** The proposition-consent question, exactly as asked. */
     consentLabel: string;
     consentHint: string;
-    /** After the click: the handoff truth. */
-    handoffCreated: string;
+    /** After the click: the handoff truth, by state. */
+    handoffQueued: string;
+    handoffDelivered: string;
+    handoffClosed: string;
     handoffTooNew: string;
-    handoffIneligible: (reason: string) => string;
+    /** Stable ineligibility code → words. A MAP, not a function: this
+     *  component is a client component and its props cross the RSC
+     *  boundary (a function here crashed the whole board on 2026-09-17). */
+    handoffIneligible: Readonly<Record<string, string>>;
     handoffPending: string;
     scopeNote: string;
     error: string;
@@ -61,9 +66,7 @@ export function VacancyInterestButton({
   const [consent, setConsent] = useState(false);
   const [handoff, setHandoff] = useState<VacancyHandoffOutcome | null>(
     initialHandoff
-      ? initialHandoff.status === "closed"
-        ? null
-        : { kind: "exists", outreachState: initialHandoff.outreachState }
+      ? { kind: "exists", outreachState: initialHandoff.outreachState, status: initialHandoff.status }
       : null,
   );
   const [failed, setFailed] = useState(false);
@@ -95,16 +98,27 @@ export function VacancyInterestButton({
       }
     });
 
+  // What the row may claim, by the handoff's REAL state: queued = waiting to
+  // be passed on (never "passed on"); delivered = passed on; closed = was
+  // closed when the hand was lowered. Nothing here says an employer heard.
   const handoffLine =
     !active || !handoff
       ? null
-      : handoff.kind === "created" || handoff.kind === "exists"
+      : handoff.kind === "created"
         ? handoff.outreachState === "ineligible_too_new"
           ? labels.handoffTooNew
-          : labels.handoffCreated
-        : handoff.kind === "ineligible"
-          ? labels.handoffIneligible(handoff.reason)
-          : labels.handoffPending;
+          : labels.handoffQueued
+        : handoff.kind === "exists"
+          ? handoff.status === "closed"
+            ? labels.handoffClosed
+            : handoff.status === "delivered" || handoff.status === "acknowledged"
+              ? labels.handoffDelivered
+              : handoff.outreachState === "ineligible_too_new"
+                ? labels.handoffTooNew
+                : labels.handoffQueued
+          : handoff.kind === "ineligible"
+            ? (labels.handoffIneligible[handoff.reason] ?? labels.sent)
+            : labels.handoffPending;
 
   return (
     <div

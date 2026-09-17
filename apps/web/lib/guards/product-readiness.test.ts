@@ -2549,7 +2549,11 @@ describe("no migration files added by this sprint", () => {
 // source on demand_interest_signals + commercial_handoffs + two SECDEF
 // functions + a trigger. RED, PREPARED, NOT APPLIED — owner gate; dry-run
 // proven in a rolled-back production transaction. RECOUNTED: 289.
-const SPRINT_BASELINE = 289;
+// Bumped 289 -> 290 for 20260917170000_commercial_handoff_requeue_on_reexpress_v1
+// (forward fix: a closed, never-delivered handoff is re-queued when the hand is
+// raised again; found on the production-data walk of #1760). RED, PREPARED,
+// NOT APPLIED — owner gate; dry-run proven, rolled back. RECOUNTED: 290.
+const SPRINT_BASELINE = 290;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

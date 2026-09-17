@@ -2218,8 +2218,7 @@
       "withdraw": "Wycofaj",
       "consentLabel": "Nonstop Group może przedstawić mnie temu pracodawcy w sprawie tej pracy.",
       "consentHint": "(tylko podane przez Ciebie zawody, umiejętności, języki i dostępność — nigdy dziennik pracy ani CV; opcjonalne)",
-      "handoffCreated": "Nonstop Group została poinformowana, że chcesz tę pracę. Nonstop może zwrócić się do pracodawcy w ramach własnego procesu handlowego; LabourMarket.ai nic pracodawcy nie wysłał.",
-      "handoffTooNew": "Zainteresowanie zapisane, Nonstop Group poinformowana. To ogłoszenie ma mniej niż 30 dni, więc nie można jeszcze kontaktować się z pracodawcą w jego sprawie — zainteresowanie pozostaje zapisane.",
+      "handoffTooNew": "Zainteresowanie zapisane i czeka na Nonstop Group. To ogłoszenie ma mniej niż 30 dni, więc nie można jeszcze kontaktować się z pracodawcą w jego sprawie — zainteresowanie pozostaje zapisane.",
       "handoffPending": "Zainteresowanie zapisane. Przekazywanie do Nonstop Group nie jest jeszcze włączone.",
       "ineligible": {
         "worker_not_matchable": "Zainteresowanie zapisane. Będzie można je przekazać do Nonstop Group, gdy profil będzie mówił, jaką pracę wykonujesz i jakie masz umiejętności.",
@@ -2230,7 +2229,10 @@
         "publication_date_unusable": "Zainteresowanie zapisane. Ogłoszenie nie ma użytecznej daty publikacji, więc nie można go przekazać do Nonstop Group."
       },
       "scopeNote": "To nie jest aplikacja i żadna wiadomość nie trafia do pracodawcy. Aplikowanie nadal odbywa się przez oryginalne ogłoszenie.",
-      "error": "Nie udało się zapisać. Spróbuj ponownie."
+      "error": "Nie udało się zapisać. Spróbuj ponownie.",
+      "handoffQueued": "Zainteresowanie zapisane i czeka na przekazanie zespołowi handlowemu Nonstop Group. LabourMarket.ai nic pracodawcy nie wysłał.",
+      "handoffDelivered": "Zainteresowanie przekazano do Nonstop Group. Nonstop może zwrócić się do pracodawcy w ramach własnego procesu handlowego; LabourMarket.ai nic pracodawcy nie wysłał.",
+      "handoffClosed": "Zainteresowanie zapisane. Wcześniejsze przekazanie do Nonstop Group zostało zamknięte, gdy je wycofano; nic nie zostało wysłane."
     }
   },
   "scouting": {

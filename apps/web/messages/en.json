@@ -9367,8 +9367,7 @@
       "withdraw": "Withdraw",
       "consentLabel": "Nonstop Group may present me to this employer for this job.",
       "consentHint": "(only your declared professions, skills, languages and availability — never your work journal or CV; optional, you can leave it unticked)",
-      "handoffCreated": "Nonstop Group has been informed that you want this job. Nonstop may approach the employer through its own commercial process; nothing has been sent to the employer by LabourMarket.ai.",
-      "handoffTooNew": "Your interest is recorded and Nonstop Group has been informed. This advertisement is under 30 days old, so no employer may be contacted about it yet — the interest stays on file.",
+      "handoffTooNew": "Your interest is recorded and waiting for Nonstop Group. This advertisement is under 30 days old, so no employer may be contacted about it yet — the interest stays on file.",
       "handoffPending": "Your interest is recorded. Passing it on to Nonstop Group is not enabled yet.",
       "ineligible": {
         "worker_not_matchable": "Your interest is recorded. It can be passed on to Nonstop Group once your profile says what work you do and which skills you have.",
@@ -9379,7 +9378,10 @@
         "publication_date_unusable": "Your interest is recorded. The advertisement has no usable publication date, so it cannot be passed on to Nonstop Group."
       },
       "scopeNote": "This is not an application and no message goes to the employer. Applying still happens through the original advertisement.",
-      "error": "Could not save. Try again."
+      "error": "Could not save. Try again.",
+      "handoffQueued": "Your interest is recorded and waiting to be passed to Nonstop Group’s commercial team. Nothing has been sent to the employer by LabourMarket.ai.",
+      "handoffDelivered": "Your interest was passed to Nonstop Group. Nonstop may approach the employer through its own commercial process; LabourMarket.ai has sent nothing to the employer.",
+      "handoffClosed": "Your interest is recorded. The earlier hand-over to Nonstop Group was closed when you withdrew; nothing had been sent."
     }
   },
   "workerIntake": {

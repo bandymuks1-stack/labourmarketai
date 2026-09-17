@@ -2218,8 +2218,7 @@
       "withdraw": "Trekk tilbake",
       "consentLabel": "Nonstop Group kan presentere meg for denne arbeidsgiveren for denne jobben.",
       "consentHint": "(bare dine oppgitte yrker, ferdigheter, språk og tilgjengelighet — aldri arbeidsjournalen eller CV-en din; valgfritt)",
-      "handoffCreated": "Nonstop Group er informert om at du vil ha denne jobben. Nonstop kan kontakte arbeidsgiveren gjennom sin egen kommersielle prosess; LabourMarket.ai har ikke sendt noe til arbeidsgiveren.",
-      "handoffTooNew": "Interessen din er registrert og Nonstop Group er informert. Denne annonsen er under 30 dager gammel, så arbeidsgiveren kan ennå ikke kontaktes om den — interessen blir stående.",
+      "handoffTooNew": "Interessen din er registrert og venter på Nonstop Group. Denne annonsen er under 30 dager gammel, så arbeidsgiveren kan ennå ikke kontaktes om den — interessen blir stående.",
       "handoffPending": "Interessen din er registrert. Videreformidling til Nonstop Group er ennå ikke slått på.",
       "ineligible": {
         "worker_not_matchable": "Interessen din er registrert. Den kan videreformidles til Nonstop Group når profilen din sier hvilket arbeid du gjør og hvilke ferdigheter du har.",
@@ -2230,7 +2229,10 @@
         "publication_date_unusable": "Interessen din er registrert. Annonsen har ingen brukbar publiseringsdato, så den kan ikke videreformidles til Nonstop Group."
       },
       "scopeNote": "Dette er ikke en søknad, og ingen melding går til arbeidsgiveren. Du søker fortsatt gjennom den opprinnelige annonsen.",
-      "error": "Kunne ikke lagre. Prøv igjen."
+      "error": "Kunne ikke lagre. Prøv igjen.",
+      "handoffQueued": "Interessen din er registrert og venter på å bli videreformidlet til Nonstop Groups kommersielle team. LabourMarket.ai har ikke sendt noe til arbeidsgiveren.",
+      "handoffDelivered": "Interessen din er videreformidlet til Nonstop Group. Nonstop kan kontakte arbeidsgiveren gjennom sin egen kommersielle prosess; LabourMarket.ai har ikke sendt noe til arbeidsgiveren.",
+      "handoffClosed": "Interessen din er registrert. Den tidligere videreformidlingen til Nonstop Group ble lukket da du trakk den tilbake; ingenting ble sendt."
     }
   },
   "scouting": {

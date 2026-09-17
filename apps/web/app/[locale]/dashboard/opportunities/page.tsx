@@ -392,12 +392,26 @@ export default async function OpportunitiesPage({
     withdraw: t("vacancyInterest.withdraw"),
     consentLabel: t("vacancyInterest.consentLabel"),
     consentHint: t("vacancyInterest.consentHint"),
-    handoffCreated: t("vacancyInterest.handoffCreated"),
+    handoffQueued: t("vacancyInterest.handoffQueued"),
+    handoffDelivered: t("vacancyInterest.handoffDelivered"),
+    handoffClosed: t("vacancyInterest.handoffClosed"),
     handoffTooNew: t("vacancyInterest.handoffTooNew"),
-    handoffIneligible: (reason: string) =>
-      t.has(`vacancyInterest.ineligible.${reason}`)
-        ? (t(`vacancyInterest.ineligible.${reason}` as never) as string)
-        : t("vacancyInterest.sent"),
+    // A serializable map (client-component prop), one entry per stable code.
+    handoffIneligible: Object.fromEntries(
+      [
+        "worker_not_matchable",
+        "not_public_vacancy",
+        "vacancy_not_live",
+        "interest_not_active",
+        "employer_not_identifiable",
+        "publication_date_unusable",
+      ].map((code) => [
+        code,
+        t.has(`vacancyInterest.ineligible.${code}`)
+          ? (t(`vacancyInterest.ineligible.${code}` as never) as string)
+          : t("vacancyInterest.sent"),
+      ]),
+    ) as Record<string, string>,
     handoffPending: t("vacancyInterest.handoffPending"),
     scopeNote: t("vacancyInterest.scopeNote"),
     error: t("vacancyInterest.error"),

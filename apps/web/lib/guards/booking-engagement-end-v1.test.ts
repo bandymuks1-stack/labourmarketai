@@ -1367,6 +1367,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // PREPARED, NOT APPLIED — owner gate; dry-run proven in a rolled-back
       // production transaction. Paired rollback refuses to drop written rows.
       "20260917160000_vacancy_interest_commercial_handoff_v1.sql",
+      // 2026-09-17 — forward fix to the one above (APPLIED 2026-09-17, ledger
+      // 20260917145229): a closed, never-delivered handoff is re-queued in
+      // place when the worker raises their hand again. RED (SECDEF replace),
+      // PREPARED, NOT APPLIED — owner gate; dry-run proven, rolled back.
+      "20260917170000_commercial_handoff_requeue_on_reexpress_v1.sql",
 ]);
   });
 

@@ -9367,8 +9367,7 @@
       "withdraw": "Atšaukti",
       "consentLabel": "„Nonstop Group“ gali pristatyti mane šiam darbdaviui dėl šio darbo.",
       "consentHint": "(tik jūsų nurodytos profesijos, įgūdžiai, kalbos ir prieinamumas — niekada darbo žurnalas ar CV; neprivaloma, galite nežymėti)",
-      "handoffCreated": "„Nonstop Group“ informuota, kad norite šio darbo. „Nonstop“ gali kreiptis į darbdavį savo komerciniu procesu; LabourMarket.ai darbdaviui nieko nesiuntė.",
-      "handoffTooNew": "Susidomėjimas užfiksuotas ir „Nonstop Group“ informuota. Šis skelbimas jaunesnis nei 30 dienų, todėl dėl jo su darbdaviu dar negalima susisiekti — susidomėjimas lieka užfiksuotas.",
+      "handoffTooNew": "Susidomėjimas užfiksuotas ir laukia „Nonstop Group“. Šis skelbimas jaunesnis nei 30 dienų, todėl dėl jo su darbdaviu dar negalima susisiekti — susidomėjimas lieka užfiksuotas.",
       "handoffPending": "Susidomėjimas užfiksuotas. Perdavimas „Nonstop Group“ dar neįjungtas.",
       "ineligible": {
         "worker_not_matchable": "Susidomėjimas užfiksuotas. Jį bus galima perduoti „Nonstop Group“, kai profilyje bus nurodyta, kokį darbą dirbate ir kokius įgūdžius turite.",
@@ -9379,7 +9378,10 @@
         "publication_date_unusable": "Susidomėjimas užfiksuotas. Skelbimas neturi tinkamos paskelbimo datos, todėl jo negalima perduoti „Nonstop Group“."
       },
       "scopeNote": "Tai ne paraiška, darbdaviui žinutė nesiunčiama. Kandidatuojama ir toliau per originalų skelbimą.",
-      "error": "Nepavyko išsaugoti. Bandykite dar kartą."
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "handoffQueued": "Susidomėjimas užfiksuotas ir laukia perdavimo „Nonstop Group“ komercinei komandai. LabourMarket.ai darbdaviui nieko nesiuntė.",
+      "handoffDelivered": "Susidomėjimas perduotas „Nonstop Group“. „Nonstop“ gali kreiptis į darbdavį savo komerciniu procesu; LabourMarket.ai darbdaviui nieko nesiuntė.",
+      "handoffClosed": "Susidomėjimas užfiksuotas. Ankstesnis perdavimas „Nonstop Group“ buvo uždarytas, kai jį atšaukėte; niekas nebuvo išsiųsta."
     }
   },
   "workerIntake": {

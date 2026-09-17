@@ -80,7 +80,7 @@ function isMissingSchema(error: { code?: string } | null | undefined): boolean {
 
 export type VacancyHandoffOutcome =
   | { readonly kind: "created"; readonly outreachState: string }
-  | { readonly kind: "exists"; readonly outreachState: string }
+  | { readonly kind: "exists"; readonly outreachState: string; readonly status: string }
   | { readonly kind: "ineligible"; readonly reason: CommercialIneligibilityCode }
   | { readonly kind: "needs-migration" }
   | { readonly kind: "error" };
@@ -250,7 +250,7 @@ async function createHandoffForSignal(
     const outreachState = String(row.outreach_state ?? "");
     return row.created === true
       ? { kind: "created", outreachState }
-      : { kind: "exists", outreachState };
+      : { kind: "exists", outreachState, status: String(row.status ?? "") };
   } catch {
     return { kind: "needs-migration" };
   }
@@ -284,6 +284,13 @@ export async function withdrawVacancyInterest(input: {
 
 /** The worker's OWN handoff rows (RLS: own worker_id) — so the board can say
  *  "the commercial partner was informed" only when a row actually exists. */
+/** The handoff is "pending for the partner" only while it is queued — a
+ *  closed one (withdrawn before dispatch) or a delivered one must never be
+ *  described as waiting. */
+export function handoffIsPending(status: string): boolean {
+  return status === "queued";
+}
+
 export async function listMyHandoffsByVacancy(
   supabase: SupabaseClient,
   workerId: string,
