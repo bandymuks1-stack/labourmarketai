@@ -231,3 +231,38 @@ none stores, reads, invents or divides (`hours: null` stays null).
   the card hides the lane band (the footprint list below carries the same
   places), the top state is a 2-column grid, the decision bar shows only the
   counts that decide.
+
+---
+
+## 10. Visual evidence queue — first REAL HUMAN walk (2026-09-17)
+
+Recorded, not fixed. The owner's own screenshots from the first real
+production walk (roster-link offer, own account) prove the foundation was
+NOT consistently propagated. Both surfaces are queued for the GLOBAL PRODUCT
+VISUAL CONSISTENCY PASS, which starts only after the Donatas roster-link path
+is HUMAN_UI_PROVEN. Nothing here authorizes a schema, RLS or authority change.
+
+| Surface | Classification | Owner-observed defects |
+|---|---|---|
+| `/[locale]/dashboard/company/people` | **PARTIAL_LEGACY** | import block dominates the page; native selects / buttons repeated row-by-row; weak hierarchy; people rendered as database rows; linking mechanics dominate instead of people / team; does not read as the established Team / Field product |
+| `/[locale]/dashboard/profile` | **PARTIAL_LEGACY** | narrow form column on a large desktop canvas; stacked forms / cards; weak professional-identity hierarchy; profile presented as editable fields; Living CV / evidence / opportunities not dominant; inconsistent with the intended premium professional identity |
+
+Targets for the pass (owner, 2026-09-17):
+
+- **People** answers, in order: who are my people · who is active · who is
+  linked · who needs action · what have they done · what can I do next.
+  Import becomes secondary ("Add / import people"). Link states read as
+  UNLINKED · OFFER AVAILABLE · OFFER SENT · LINKED · ACTION NEEDED. People are
+  people / team entities, never rows.
+- **Profile** puts professional identity first: person · current
+  professional identity · attested work history · capabilities · current work
+  / availability · evidence · opportunities · Living CV / player identity.
+  Editing stays reachable but secondary.
+
+Functional note from the same walk (fixed, #1770): the pending roster-link
+offer — the one decision somebody else is waiting on — was rendered inside
+the closed `#cv-details` disclosure and was therefore unreachable on arrival.
+It now stands above every overview and disclosure (`RosterLinkOffers`). The
+global pass must keep that surface first; a redesign that buries it again is
+a regression, and the guard in `organization-evidence-import-v1.test.ts`
+pins it.
