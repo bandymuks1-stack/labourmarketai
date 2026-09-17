@@ -1851,8 +1851,13 @@ async function applyPlan(
       const contexts = readPriorContexts(derived);
       if (!contexts) continue;
       let changed = false;
-      const segments = await Promise.all(
-        contexts.segments.map(async (seg): Promise<WorkContextSegment> => {
+      // SEQUENTIAL, not Promise.all (B1 walk, 2026-09-17): one row's segments
+      // can name the SAME canonical place twice — `Travers 19; Travers`, where
+      // the street-only spelling resolves to "Travers 19" — and two concurrent
+      // creations both passed the `byKey` memo before either had written it,
+      // so production received two "Travers 19" objects 2.5 ms apart. In
+      // order, the second segment finds the first one's id.
+      const placeSegment = async (seg: WorkContextSegment): Promise<WorkContextSegment> => {
           if (seg.kind !== "place" || seg.state !== "new" || !seg.name) return seg;
           const key = normalizeLabel(seg.name);
           let objectId = byKey.get(key) ?? null;
@@ -1894,8 +1899,12 @@ async function applyPlan(
           if (!objectId) return seg;
           changed = true;
           return { ...seg, state: "created", workObjectId: objectId };
-        }),
-      ).catch((failure: EvidenceImportFailure) => failure);
+      };
+      const segments = await (async (): Promise<WorkContextSegment[] | EvidenceImportFailure> => {
+        const out: WorkContextSegment[] = [];
+        for (const seg of contexts.segments) out.push(await placeSegment(seg));
+        return out;
+      })().catch((failure: EvidenceImportFailure) => failure);
       if (!Array.isArray(segments)) return segments;
       if (!changed) continue;
       const next: WorkContexts = { ...contexts, segments };
