@@ -156,10 +156,13 @@ describe("the router stays vendor-neutral", () => {
   it("declaring the capability CONNECTS nothing — the grant is still owner-scoped", () => {
     // Capability is not permission. A cloud provider still needs a key AND an
     // egress grant; the grant table names exactly one provider, by owner act.
-    expect(AI_EGRESS_GRANTS).toHaveLength(1);
+    // 2026-09-17 (RED-2): two rows, both Gemini, both task-scoped.
+    expect(AI_EGRESS_GRANTS).toHaveLength(2);
     expect(AI_EGRESS_GRANTS[0].tasks).toEqual(["propose_conversation_intent"]);
+    expect(AI_EGRESS_GRANTS[1].tasks).toEqual(["translate_message"]);
+    const granted = new Set(AI_EGRESS_GRANTS.map((g) => g.provider));
     const cloudWithoutGrant = AI_PROVIDER_PROFILES.filter(
-      (p) => p.locality === "cloud" && p.id !== AI_EGRESS_GRANTS[0].provider,
+      (p) => p.locality === "cloud" && !granted.has(p.id),
     );
     expect(cloudWithoutGrant.length).toBeGreaterThan(0);
     for (const p of cloudWithoutGrant) {

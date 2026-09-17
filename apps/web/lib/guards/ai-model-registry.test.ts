@@ -215,8 +215,11 @@ describe("a verified price is not permission to run", () => {
     // 2026-09-05: the ONE grant that exists is TASK-SCOPED to the conversation
     // intent proposer; for every other task (and for a call that names none)
     // Gemini is exactly as refused as it was with an empty table.
-    expect(AI_EGRESS_GRANTS).toHaveLength(1);
+    // 2026-09-17 (RED-2): a second task-scoped row, `translate_message`.
+    // Both rows name a task, so a call that names none is still refused.
+    expect(AI_EGRESS_GRANTS).toHaveLength(2);
     expect(AI_EGRESS_GRANTS[0].tasks).toEqual(["propose_conversation_intent"]);
+    expect(AI_EGRESS_GRANTS[1].tasks).toEqual(["translate_message"]);
     const geminiProfile = { id: "gemini", locality: "cloud" as const, costClass: "paid" };
     expect(egressPermitted(geminiProfile, "PUBLIC").permitted).toBe(true);
     expect(egressPermitted(geminiProfile, "LOW_RISK_PROJECT_DATA").permitted).toBe(false);

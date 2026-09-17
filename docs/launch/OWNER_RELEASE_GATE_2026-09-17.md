@@ -38,7 +38,7 @@ and that is stated, not hidden.
 | # | Action | Class | Why it gates first use |
 |---|---|---|---|
 | B1 | **Settle the historical session `47627d4a`**: decide 800 h (Person G) and 165 h (Person E) in ATTENTION (period total · remote · period if known), review the impact line (`+7 people · +17 objects · 156 ready`), press **CONFIRM**. Then on People: offer the roster link for each real person to their real account; each person accepts on their own profile. | OWNER_HUMAN_ACTION | Not a blocker for other users; it is the owner's own first real use and the first production record set. Post-commit path is proven locally (#1755). |
-| B2 | **Record ONE egress grant** for task `translate_message` in `lib/ai/runtime/data-egress.ts` — provider `gemini` (already configured in production; covers `ka`/`uk`; paid tier) — one row, one PR, revocable by deleting it. Optional: DeepL key + `AI_DEEPL_ENABLED` for EU languages. | RED decision (authority: private text egress) | Without it every cross-language thread shows originals with a badge. A LT↔RU pilot **can start without it**; a LT↔KA or LT↔UK pilot cannot deliver its core promise (see E). |
+| B2 | ~~Record ONE egress grant~~ **DONE — RED-2 APPROVED (option 1, Gemini only) and applied in code 2026-09-17**; DeepL deferred (owner may add `DEEPL_API_KEY` + `AI_DEEPL_ENABLED` + its own grant row later). | RED decision — CLOSED | Cross-language threads render in the viewer's locale once the carrying deploy is live; badge mode remains the fallback for every refusal/failure. |
 | B3 | **Hand the four walk scripts (D) to one real person per actor** and record HUMAN_UI_PROVEN yourself. | OWNER_HUMAN_ACTION | The only way the count moves. |
 | B4 | GOV-1: add a READ-ONLY `SUPABASE_DB_URL` GitHub Actions secret. | EXTERNAL_ACTION | Does **not** block users; it unblocks the CI ledger gates. Do it when convenient. |
 
@@ -113,7 +113,7 @@ All on `https://labourmarket.ai`, own Google account, own real data. Each walk e
 | ESCO labels | 28 locales incl. `uk`; **not** `ka` | taxonomy only |
 | Translation router | task `translate_message` → DeepL preferred when enabled, LLM tier otherwise; target = viewer's UI locale | viewer target is always one of the 5 |
 | Providers configured in production | **Gemini** (`AI_PROVIDER_MODE`, `GEMINI_API_KEY`, `AI_GEMINI_ENABLED`); **no DeepL** env | Gemini covers `ka` and `uk`; DeepL covers `uk`, **not `ka`** |
-| Egress grant for `translate_message` | **none** | B2 |
+| Egress grant for `translate_message` | **gemini, task-scoped, `SENSITIVE_FREE_TEXT` (RED-2 APPROVED option 1, 2026-09-17)**; DeepL deferred | B2 done in code; DeepL/Anthropic/OpenAI/xAI refused |
 
 **Contract status per language (A = author, B = reader):**
 

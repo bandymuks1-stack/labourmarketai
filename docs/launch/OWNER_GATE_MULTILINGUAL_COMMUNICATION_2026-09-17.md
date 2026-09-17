@@ -6,10 +6,20 @@ Date 2026-09-17 · class **RED (authority: data egress of private messages)**.
 > widening for `uk`+`ka`) is **APPROVED + APPLIED** — see
 > `docs/launch/OWNER_GATE_MESSAGE_LANGUAGE_SET_2026-09-17.md` and
 > `docs/APPLIED_LEDGER.md` (ledger `20260917112002`). **RED-2 — the data-egress
-> grant for `translate_message` — is still PENDING**; nothing about egress is
-> applied. Until a grant row exists, every viewer sees the original + a language
-> badge (including for `uk`/`ka`, whose originals are now preserved). The exact
-> RED-2 proposal is the last section of this document.
+> grant for `translate_message` — is APPROVED (owner decision 2026-09-17,
+> OPTION 1: GEMINI ONLY) and applied in code** as the second row of
+> `AI_EGRESS_GRANTS` (`lib/ai/runtime/data-egress.ts`), task-scoped to
+> `translate_message`, ceiling `SENSITIVE_FREE_TEXT`. DeepL / Anthropic /
+> OpenAI / xAI remain refused for this task; DeepL authorization is explicitly
+> **DEFERRED**, not implied. No schema, RLS, authority or data change. Revocable
+> by deleting the row and redeploying — no data to unwind. The read-side
+> behaviour before a deploy carrying the row, and after any revocation, is
+> unchanged: original + language badge. Bounded review facts that stay
+> explicit: `ai_runs.output_excerpt` may hold up to 4000 chars of the validated
+> translated output JSON (admin-only RLS, append-only, 90-day retention);
+> canonical `conversation_messages.body` is never modified; the input body is
+> never persisted by this feature. The proposal below is kept as the record of
+> what was approved.
 
 ## What is already built and live-safe (GREEN, this PR)
 
@@ -154,4 +164,6 @@ kiekvienas skaito savo kalba". Repo-verified facts only; no secret values.
 Add ONE grant row to `lib/ai/runtime/data-egress.ts` as drafted above (Option A
 DeepL and/or Option B Gemini), with a dated `basis`. That single edit + deploy
 turns translation on; deleting it turns it off. No schema, no RLS, no authority
-change is involved in RED-2. **Not applied — owner decision required.**
+change is involved in RED-2. **APPROVED 2026-09-17 — Option B (Gemini) only;
+Option A (DeepL) DEFERRED. Applied in code; guards pin the table at exactly two
+Gemini rows (`lib/guards/ai-data-egress.test.ts` "RED-2" section).**

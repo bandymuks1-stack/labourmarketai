@@ -119,7 +119,9 @@ describe("the runtime side: one task, one grant, least privilege", () => {
   });
 
   it("the grant table holds exactly the owner's dated, sourced, task-scoped Gemini grant", () => {
-    expect(AI_EGRESS_GRANTS).toHaveLength(1);
+    // 2026-09-17 (RED-2): a second Gemini row exists for `translate_message`;
+    // it is pinned in lib/guards/ai-data-egress.test.ts. THIS row is unchanged.
+    expect(AI_EGRESS_GRANTS).toHaveLength(2);
     const g = AI_EGRESS_GRANTS[0];
     expect(g.provider).toBe("gemini");
     expect(g.maxSensitivity).toBe("SENSITIVE_FREE_TEXT");
@@ -133,7 +135,10 @@ describe("the runtime side: one task, one grant, least privilege", () => {
     expect(egressPermitted(GEMINI, "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, "propose_conversation_intent").permitted).toBe(true);
     expect(egressPermitted(GEMINI, "PERSONAL", AI_EGRESS_GRANTS, "extract_cv").permitted).toBe(false);
     expect(egressPermitted(GEMINI, "PERSONAL", AI_EGRESS_GRANTS, "normalize_work_scope").permitted).toBe(false);
-    expect(egressPermitted(GEMINI, "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, "translate_message").permitted).toBe(false);
+    // `translate_message` is opened by its OWN owner row (RED-2, 2026-09-17),
+    // not by this one — remove that row and this line flips back to false.
+    expect(egressPermitted(GEMINI, "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, "translate_message").permitted).toBe(true);
+    expect(egressPermitted(GEMINI, "PERSONAL", AI_EGRESS_GRANTS, "draft_follow_up").permitted).toBe(false);
     // a call that names no task gets no task-scoped grant (fail closed)
     expect(egressPermitted(GEMINI, "PERSONAL", AI_EGRESS_GRANTS).permitted).toBe(false);
     // PUBLIC never needed a grant and still does not

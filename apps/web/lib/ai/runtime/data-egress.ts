@@ -39,13 +39,15 @@
  * ── DEFAULT DENY IS THE POINT ──────────────────────────────────────────────
  *
  * `AI_EGRESS_GRANTS` was EMPTY from 2026-08-19 to 2026-09-05, and that was the
- * correct state, not an unfinished one. It now holds exactly ONE row — the
- * owner's dated, sourced, TASK-SCOPED grant for the conversation intent
- * proposer (see the row) — and nothing else changed: No external provider is enabled today, and no owner decision
- * has yet permitted any category of private content to leave. An empty grant
- * table means the gate is closed; adding a provider to the runtime cannot open
- * it as a side effect, because opening it is a separate, dated, sourced edit
- * here.
+ * correct state, not an unfinished one. It now holds exactly TWO rows — the
+ * owner's dated, sourced, TASK-SCOPED grants for the conversation intent
+ * proposer (2026-09-05) and for message translation-on-read (RED-2,
+ * 2026-09-17), both for the one production-configured provider — and nothing
+ * else changed: no other external provider is enabled, and no owner decision
+ * has permitted any other category of private content to leave. An empty
+ * grant table means the gate is closed; adding a provider to the runtime
+ * cannot open it as a side effect, because opening it is a separate, dated,
+ * sourced edit here.
  *
  * Since no task is classed `PUBLIC` today (see `TASK_SENSITIVITY` — a recorded
  * finding, not an omission), the live consequence is: every task either runs on
@@ -121,6 +123,29 @@ export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
     basis:
       "Owner approval 2026-09-05 (GEMINI CONVERSATION NLU EGRESS): conversation intent proposal only; existing approved Gemini runtime, paid tier; least-privilege by task; revocable by deleting this row",
     grantedOn: "2026-09-05",
+  },
+  {
+    // OWNER APPROVAL 2026-09-17 — "RED-2 translate_message DATA EGRESS",
+    // OPTION 1: GEMINI ONLY (owner decision message in the release lane;
+    // packet recorded in docs/launch/OWNER_RELEASE_GATE_2026-09-17.md).
+    // Scope: a conversation message the viewer has ALREADY read under the
+    // participant-only RLS (lib/communication/translation-read.ts reads
+    // nothing itself) may leave for the EXISTING production Gemini runtime
+    // (paid tier) so that the viewer gets a rendering in their own locale.
+    // Payload is the task policy's allowedFields only: body (≤8000 chars),
+    // source language, target locale, the fixed "work message between
+    // colleagues" context — never ids, names, roles, attachments, other
+    // rows. The rendering is never stored in conversation_messages; the
+    // original stays canonical and one tap away. Every run (and every
+    // refusal) is an `ai_runs` row. DeepL / Anthropic / OpenAI / xAI stay
+    // refused for this task: DeepL authorization is explicitly DEFERRED, not
+    // implied. Revocable: delete this row and redeploy — no data to unwind.
+    provider: "gemini",
+    maxSensitivity: "SENSITIVE_FREE_TEXT",
+    tasks: ["translate_message"],
+    basis:
+      "Owner approval 2026-09-17 (RED-2 TRANSLATE_MESSAGE EGRESS, option 1 Gemini only): render an already-authorized message into the viewer's locale; existing approved Gemini runtime, paid tier; least-privilege by task; DeepL deferred; revocable by deleting this row",
+    grantedOn: "2026-09-17",
   },
 ];
 
