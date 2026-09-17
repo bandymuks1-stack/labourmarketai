@@ -9,7 +9,7 @@ import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
-import { resolveViewerText } from "@/lib/communication/translation";
+import { resolveViewerTexts } from "@/lib/communication/translation-read";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
@@ -96,6 +96,21 @@ export default async function ConversationDetailPage({
     .order("created_at", { ascending: true })
     .limit(500);
   const messages: MessageRow[] = (messagesRes.data ?? []) as MessageRow[];
+
+  // MULTILINGUAL WORK COMMUNICATION: each message rendered in the VIEWER's
+  // language through the existing AI runtime (egress-gated, audited), the
+  // original always one tap away. Without an owner egress grant every
+  // message comes back as its original — honestly, with a language badge.
+  const viewerTexts = await resolveViewerTexts(
+    messages.map((m) => ({
+      id: m.id,
+      body: m.body,
+      original_language:
+        (m as { original_language?: string | null }).original_language ?? null,
+    })),
+    locale,
+    user.id,
+  );
 
   // Message attachments (user-journey repair v1) — participant-scoped
   // metadata + short-lived signed URLs from the PRIVATE bucket. Degrades to
@@ -274,30 +289,47 @@ export default async function ConversationDetailPage({
                   </span>
                 </div>
                 {(() => {
-                  // §2 stub: ALWAYS the original text (never fake-translated);
-                  // a language badge appears when the author's language is
-                  // known and differs from the viewer's locale.
-                  const vt = resolveViewerText({
-                    body: m.body,
-                    originalLanguage:
-                      (m as { original_language?: string | null })
-                        .original_language ?? null,
-                    viewerLocale: locale,
-                  });
+                  const vt = viewerTexts.get(m.id) ?? {
+                    text: m.body,
+                    kind: "original" as const,
+                    languageBadge: null,
+                    original: m.body,
+                    provider: null,
+                  };
                   return (
                     <>
                       {vt.languageBadge ? (
                         <span
                           className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
                           data-testid={`message-lang-${m.id}`}
+                          data-kind={vt.kind}
                         >
-                          {t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
+                          {vt.kind === "translated"
+                            ? t("translatedFrom", { lang: vt.languageBadge.toUpperCase() })
+                            : t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
                         </span>
                       ) : null}
                       {vt.text.length > 0 ? (
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
+                        <p
+                          className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary"
+                          data-testid={`message-text-${m.id}`}
+                          data-kind={vt.kind}
+                        >
                           {vt.text}
                         </p>
+                      ) : null}
+                      {vt.kind === "translated" ? (
+                        <details
+                          className="text-meta text-text-muted"
+                          data-testid={`message-original-${m.id}`}
+                        >
+                          <summary className="cursor-pointer font-mono uppercase tracking-label">
+                            {t("showOriginal", { lang: (vt.languageBadge ?? "").toUpperCase() })}
+                          </summary>
+                          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
+                            {vt.original}
+                          </p>
+                        </details>
                       ) : null}
                     </>
                   );

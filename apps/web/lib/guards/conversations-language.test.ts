@@ -7,8 +7,10 @@ import { join, resolve } from "node:path";
  *
  * Pins: the language column ships as an additive DRAFT migration only; the
  * send path stamps original_language but degrades (42703) until the owner
- * applies it; the translation layer is a STUB that NEVER fabricates a
- * translation (kind 'original' only); entry points reuse the canonical
+ * applies it; the translation layer NEVER fabricates a translation — a
+ * 'translated' rendering exists only when the egress-gated AI runtime produced
+ * text that differs from the original, and the original is always kept; entry
+ * points reuse the canonical
  * openDirectConversationAction; no parallel messaging tables anywhere.
  */
 
@@ -42,17 +44,30 @@ describe("conversations language — draft migration + honest degrade", () => {
     expect(code).toMatch(/42703/);
   });
 
-  it("translation layer is a stub that never fabricates (kind 'original' only)", () => {
+  it("the translation layer never fabricates: 'translated' only from a provider's text that differs from the original, the original always kept", () => {
     const code = read(STUB);
     expect(code).toMatch(/kind: "original"/);
-    expect(code).not.toMatch(/kind: "translated"/);
-    expect(code).toMatch(/NEVER[\s*]+fabricates/);
+    expect(code).toMatch(/kind: "translated"/);
+    expect(code).toMatch(/NEVER fabricates/);
+    // an empty or echoed translation is refused in code, not in a comment
+    expect(code).toMatch(/t\.length > 0 && t !== args\.body\.trim\(\)/);
+    expect(code).toMatch(/original: args\.body/);
+    // the read side reaches a provider ONLY through the egress-gated runtime — no fetch, no vendor SDK, no stored translation
+    const readSide = read("lib/communication/translation-read.ts");
+    expect(readSide).toMatch(/from "@\/lib\/ai\/run-agent-server"/);
+    expect(readSide).toMatch(/runAiAgent\(\s*"translation_copy"/);
+    expect(readSide).not.toMatch(/fetch\s*\(|deepl|googleapis|https?:\/\//i);
+    expect(readSide).not.toMatch(/\.from\(|\.update\(|\.insert\(|translated_text/);
+    expect(readSide).toMatch(/outcome\.status !== "suggestion"/);
+    expect(readSide).toMatch(/rateLimit\(/);
   });
 
-  it("thread renders the original text with an honest language badge", () => {
+  it("thread renders every message in the viewer's language through the resolver, the original one tap away", () => {
     const page = read(THREAD);
-    expect(page).toMatch(/resolveViewerText\(/);
+    expect(page).toMatch(/resolveViewerTexts\(/);
     expect(page).toMatch(/message-lang-\$\{m\.id\}/);
+    expect(page).toMatch(/message-original-\$\{m\.id\}/);
+    expect(page).toMatch(/vt\.kind === "translated"/);
   });
 
   it("entry points reuse the canonical messaging action (no parallel path)", () => {

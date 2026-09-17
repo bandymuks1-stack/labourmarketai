@@ -6555,7 +6555,9 @@
       "placeholder": "A short reply…",
       "send": "Send",
       "sent": "Reply sent."
-    }
+    },
+    "translatedFrom": "Translated from {lang}",
+    "showOriginal": "Original ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",

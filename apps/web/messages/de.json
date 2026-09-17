@@ -6555,7 +6555,9 @@
       "placeholder": "Eine kurze Antwort…",
       "send": "Senden",
       "sent": "Antwort gesendet."
-    }
+    },
+    "translatedFrom": "Übersetzt aus {lang}",
+    "showOriginal": "Original ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Ihre Organisation",

@@ -6555,7 +6555,9 @@
       "placeholder": "Een kort antwoord…",
       "send": "Verzenden",
       "sent": "Antwoord verzonden."
-    }
+    },
+    "translatedFrom": "Vertaald uit {lang}",
+    "showOriginal": "Origineel ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Jouw organisatie",
