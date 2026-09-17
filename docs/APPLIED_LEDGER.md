@@ -1883,6 +1883,32 @@ error; every other path is unaffected.
 Rollback: `supabase/rollbacks/20260917120000_universal_invitation_referral_network_v1.down.sql`
 — refuses while any referral, acceptance or multi-use row exists.
 
+### `invitation_preview_demand_column_fix_v1` — RED (forward correction) — APPLIED 2026-09-17, ledger `20260917091045`
+
+Repo file `supabase/migrations/20260917130000_invitation_preview_demand_column_fix_v1.sql`
+(sha256 `3494f93bbc6061632038f589033e0d0f5eba844849fa2bf37c6e3dd34b84b55b`),
+applied via Supabase MCP `apply_migration` at PR #1752 head `7c6d85c9` under
+explicit owner APPLY approval ("PR #1752 FINAL OWNER AUTHORIZATION",
+2026-09-17). One identifier in one function: `get_invitation_preview_v2` now
+reads `role_or_work_type` from `customer_requests` (`role_text` does not
+exist there — it is the worker-board RPC's projection name).
+
+**Readback:** signature `(p_token text)` unchanged; `security definer`, owner
+`postgres`, `search_path=public` unchanged; execute `anon=false
+authenticated=true service_role=false` unchanged; body contains
+`select role_or_work_type, country, organization_id` and no `role_text` in
+executable code; still 1 policy on `invitations`, 1 on
+`invitation_acceptances`; table grants unchanged (`authenticated: SELECT`
+only on both). Runtime re-proof on production, zero residue: employer creates
+`invite_to_demand` → non-owner `not_authorized` → wrong invitee by id
+`not_found` → signed-in preview through the PERSISTED function returns
+`welder / LT / E2E Walker UAB` → accept `interest_recorded` → interest row
+`basis=employer_invitation`, no `status_band`, no `matched_skills`; profiles /
+workers / worker_skills / worker_professions / claims Δ0.
+
+Rollback: `supabase/rollbacks/20260917130000_invitation_preview_demand_column_fix_v1.down.sql`
+(drops the function; the app falls back to `get_invitation_preview_v1`).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
