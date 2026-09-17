@@ -14,6 +14,11 @@ import { getOrgMembersData } from "@/lib/operations/org-members";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { getWorkerReadiness } from "@/lib/company/worker-readiness";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
+import {
+  listRosterLinkCandidatesFromEngagements,
+  mergeRosterLinkCandidates,
+} from "@/lib/organization-evidence/roster-link-candidates";
+import { createClient } from "@/lib/supabase/server";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import { isLifecycleNotice } from "@/lib/lifecycle/lifecycle-model";
 import {
@@ -98,6 +103,12 @@ export default async function CompanyPeoplePage({
   const workersResult = rWorkers ?? ({ kind: "ok", rows: [] } as const);
   const invitationsResult = rInvitations ?? ({ kind: "ok", rows: [] } as const);
   const activeWorkerRows = workersResult.kind === "ok" ? workersResult.rows : [];
+  // Roster-link candidates = the DATABASE's rule (active engagement or
+  // membership + a worker row), not the legacy company_workers list alone —
+  // the organization's own owner, named on its timesheet, is eligible too.
+  const engagementCandidates = capabilityOrgId
+    ? await listRosterLinkCandidatesFromEngagements(await createClient(), capabilityOrgId)
+    : [];
   const readinessMap = await getWorkerReadiness(activeWorkerRows.map((w) => w.workerId));
   const readinessRows = activeWorkerRows.map((w) => ({
     workerName: w.displayName ?? (w.email ? w.email.split("@")[0] : "—"),
@@ -212,9 +223,12 @@ export default async function CompanyPeoplePage({
       {capabilityOrgId ? (
         <OrganizationRosterSection
           locale={locale}
-          linkCandidates={activeWorkerRows
-            .filter((w) => w.status === "active")
-            .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId }))}
+          linkCandidates={mergeRosterLinkCandidates(
+            activeWorkerRows
+              .filter((w) => w.status === "active")
+              .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId })),
+            engagementCandidates,
+          )}
         />
       ) : null}
 
