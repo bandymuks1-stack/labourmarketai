@@ -68,9 +68,10 @@ describe("no permanent write before commit; projections are read-only", () => {
   it("the projections module has no client, no rpc, no insert", () => {
     expect(projections).not.toMatch(/from\(|\.rpc\(|\.insert\(|\.upsert\(|\.update\(|createClient/);
   });
-  it("the reconstruction renders projections and forms only", () => {
-    expect(reconstruction).not.toMatch(/from\(|\.rpc\(|\.insert\(|\.upsert\(|createClient/);
-    expect(reconstruction).toMatch(/nothingWritten/);
+  it("the reconstruction renders projections and forms only, and says nothing is written", () => {
+    const workspace = read("components/app/historical/historical-workspace.tsx");
+    for (const src of [reconstruction, workspace]) expect(src).not.toMatch(/from\(|\.rpc\(|\.insert\(|\.upsert\(|createClient/);
+    expect(workspace).toMatch(/nothingWrittenShort/);
   });
   it("label-level and time-semantics decisions write staging rows only", () => {
     const label = core.slice(core.indexOf("export async function resolveContextLabel"), core.indexOf("export interface TimeSemanticsDecision"));
@@ -115,30 +116,33 @@ describe("a figure a day cannot hold is a QUESTION about meaning, never a day's 
   });
 });
 
-describe("the first screen is the reconstruction, not the row sheet", () => {
-  it("understood → issues → people → field → places → calendar → company → impact, in that order, before the plan and the commit", () => {
-    const order = ["evidence-understood", "evidence-issues", "evidence-people", "<HistoricalFieldBoard", "evidence-places", "evidence-calendar", "evidence-company", "evidence-impact"];
-    const at = order.map((id) => reconstruction.indexOf(id.startsWith("<") ? id : `data-testid="${id}"`));
-    for (let i = 0; i < at.length; i++) expect(at[i], order[i]).toBeGreaterThan(-1);
-    for (let i = 1; i < at.length; i++) expect(at[i]).toBeGreaterThan(at[i - 1]);
-    const rendered = section.slice(section.indexOf("return shell(\n    <>\n      {actingFor}\n      {/* THE SOURCE"));
-    expect(rendered.indexOf("<EvidenceImportReconstruction")).toBeGreaterThan(-1);
-    expect(rendered.indexOf("<EvidenceImportReconstruction")).toBeLessThan(rendered.indexOf("{planBlock}"));
+describe("the first screen is the reconstruction workspace, not the row sheet", () => {
+  it("the section renders the workspace, hands it the commit control, and keeps the raw rows behind disclosure after it", () => {
+    const rendered = section.slice(section.indexOf("const commitNode = ("));
     expect(rendered.indexOf("{planBlock}")).toBeLessThan(rendered.indexOf("<EvidenceCommitForm"));
-  });
-  it("the raw rows are behind progressive disclosure, after the commit control", () => {
-    expect(section).toMatch(/<details data-testid="evidence-preview-rows-disclosure">/);
-    expect(section.indexOf('data-testid="evidence-preview-rows-disclosure"')).toBeGreaterThan(section.indexOf("<EvidenceCommitForm"));
-    expect(section).not.toMatch(/data-testid="evidence-preview-counts"/);
-  });
-  it("no score, rating, rank or tier of a person exists in the projection or its views", () => {
-    for (const src of [projections, reconstruction, read("components/app/historical-player-card.tsx"), read("components/app/historical-field-board.tsx")]) {
-      expect(src).not.toMatch(/\b(score|rating|rank|tier|level)\b\s*[:=]/i);
+    expect(rendered.indexOf("<EvidenceImportReconstruction")).toBeGreaterThan(-1);
+    expect(rendered).toMatch(/commit=\{commitNode\}/);
+    expect(rendered.indexOf("<EvidenceImportReconstruction")).toBeLessThan(rendered.indexOf('data-testid="evidence-preview-rows-disclosure"'));
+    expect(reconstruction).toMatch(/<HistoricalWorkspace/);
+    // the rejected document: eight stacked sections in a fixed order
+    for (const id of ["evidence-people", "evidence-places", "evidence-calendar", "evidence-company", "evidence-impact"]) {
+      expect(reconstruction, id).not.toContain(`data-testid="${id}"`);
     }
   });
-  it("the company view lists what the source does not say", () => {
+  it("the raw rows are behind progressive disclosure, reachable from the workspace's SOURCE control", () => {
+    expect(section).toMatch(/<details data-testid="evidence-preview-rows-disclosure" id="evidence-source-rows"/);
+    expect(section).not.toMatch(/data-testid="evidence-preview-counts"/);
+    expect(read("components/app/historical/historical-workspace.tsx")).toMatch(/data-testid="evidence-source-link"/);
+  });
+  it("no score, rating, rank or tier of a person exists in the projection or its views", () => {
+    for (const f of ["components/app/historical-player-card.tsx", "components/app/historical-field-board.tsx", "components/app/historical/historical-workspace.tsx", "components/app/historical/historical-overview.tsx", "components/app/historical/historical-calendar.tsx", "components/app/historical/historical-objects.tsx", "components/app/historical/historical-attention.tsx", "lib/organization-evidence/import-visual.ts"]) {
+      expect(read(f), f).not.toMatch(/\b(score|rating|rank|tier|level)\b\s*[:=]/i);
+    }
+    expect(projections).not.toMatch(/\b(score|rating|rank|tier|level)\b\s*[:=]/i);
+  });
+  it("the company view lists what the source does not say — as UNKNOWN tokens", () => {
     expect(projections).toMatch(/"client", "project", "work_package", "wage", "output", "team",/);
-    expect(reconstruction).toMatch(/data-testid="evidence-company-unknown"/);
+    expect(read("components/app/historical/historical-overview.tsx")).toMatch(/data-testid="evidence-company-unknown"/);
   });
 });
 
