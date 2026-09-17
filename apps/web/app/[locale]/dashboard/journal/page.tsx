@@ -813,6 +813,17 @@ export default async function JournalPage({
   }
   // The calendar reads the SAME day groups the diary renders — one grouping,
   // one set of figures, so a cell can never disagree with the day card.
+  // THE ORGANIZATION'S LAYER on the same calendar (owner §11, PAST = ACTUAL):
+  // the hour records the organization made about this person — the same rows
+  // Work in Numbers names as the second ledger — placed on their dates as
+  // minutes BESIDE the diary's own figures. Rejected rows and rows without a
+  // positive figure are not actual work; a ledger that could not be read
+  // (null) places nothing rather than pretending an empty past (SEP-7).
+  const reportedByDay = new Map<string, number>();
+  for (const r of organizationRecords ?? []) {
+    if (r.status === "rejected" || !Number.isFinite(r.hours) || r.hours <= 0) continue;
+    reportedByDay.set(r.workDate, (reportedByDay.get(r.workDate) ?? 0) + Math.round(r.hours * 60));
+  }
   const calendarGrid = buildJournalCalendar({
     scale: calendarScale,
     anchor: resolveAnchor({
@@ -846,7 +857,13 @@ export default async function JournalPage({
       confirmedCount: g.entries.filter(
         (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
       ).length,
-    })),
+      reportedMinutes: reportedByDay.get(g.isoKey) ?? 0,
+    })).concat(
+      // days the organization recorded and the diary does not hold at all
+      [...reportedByDay.entries()]
+        .filter(([iso]) => !entryDayGroups.some((g) => g.isoKey === iso))
+        .map(([iso, reportedMinutes]) => ({ iso, entryCount: 0, totalMinutes: 0, confirmedCount: 0, reportedMinutes })),
+    ),
   });
   /**
    * WHAT THE DIARY IS SHOWING (owner direction 2026-09-13). Three scopes,

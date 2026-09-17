@@ -209,7 +209,14 @@ export default async function CompanyPeoplePage({
       ) : null}
 
       {/* THE ROSTER, READ BACK — directly under the panel that fills it. */}
-      {capabilityOrgId ? <OrganizationRosterSection locale={locale} /> : null}
+      {capabilityOrgId ? (
+        <OrganizationRosterSection
+          locale={locale}
+          linkCandidates={activeWorkerRows
+            .filter((w) => w.status === "active")
+            .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId }))}
+        />
+      ) : null}
 
       <WorkerReadinessSummary rows={readinessRows} />
 

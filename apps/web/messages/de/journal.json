@@ -872,6 +872,8 @@
       "none": "selbst erfasster Eintrag",
       "partial": "ein Teil der Journaleinträge bestätigt",
       "all": "Journaleintrag bestätigt"
-    }
+    },
+    "reported": "Organisation erfasste {time}",
+    "periodReportedOnly": "Keine eigenen Einträge; die Organisation erfasste {days, plural, one {# Tag} other {# Tage}}, {time}."
   }
 }

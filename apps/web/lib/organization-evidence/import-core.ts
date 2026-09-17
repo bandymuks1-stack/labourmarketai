@@ -537,6 +537,10 @@ export interface PreviewRow {
   readonly duplicateOfRecordId: string | null;
   /** True when this row could be committed as it stands. */
   readonly ready: boolean;
+  /** True once the row HAS been committed: it is a record now, never a
+   *  candidate again, and a later preview must not re-read it as a
+   *  duplicate of its own record. */
+  readonly committed?: boolean;
   /**
    * True when the ONLY thing between this row and `ready` is a structure the
    * source itself names and the commit PLAN prepares: a person not yet on the
@@ -1021,6 +1025,48 @@ export async function buildPreview(
               : personState === "unmatched"
                 ? "person_not_on_roster"
                 : null;
+
+    // A COMMITTED row is a record. Re-opening the session after the commit
+    // used to re-run this loop over it, find its own record's fingerprint,
+    // call it a duplicate and WRITE `status: skipped` over `committed` —
+    // so the door reported "147 already imported" and the ledger lost the
+    // fact that the human had committed them (found on the local proof of
+    // the post-commit path, 2026-09-17). It is carried through untouched.
+    if (s.status === "committed") {
+      preview.push({
+        id: s.id as string,
+        rowIndex: s.row_index as number,
+        personLabel,
+        personState,
+        personId,
+        personName,
+        personConfidence,
+        personCandidates,
+        contextLabel,
+        contextState,
+        workObjectId,
+        workObjectName,
+        contextCandidates,
+        activityDate: (s.activity_date as string | null) ?? null,
+        periodStart: (s.period_start as string | null) ?? null,
+        periodEnd: (s.period_end as string | null) ?? null,
+        hours: s.hours === null || s.hours === undefined ? null : Number(s.hours),
+        activityText: (s.activity_text as string | null) ?? null,
+        factFields: (s.fact_fields as string[] | null) ?? [],
+        derived: (s.derived as Record<string, unknown> | null) ?? {},
+        duplicateState: "new",
+        duplicateOfRecordId: null,
+        ready: false,
+        readyWithPlan: false,
+        contextWillCreate: false,
+        contexts,
+        timeSemantics,
+        timeSemanticsOpen: false,
+        problem: "committed",
+        committed: true,
+      });
+      continue;
+    }
 
     preview.push({
       id: s.id as string,

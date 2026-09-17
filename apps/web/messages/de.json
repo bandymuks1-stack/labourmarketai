@@ -16345,6 +16345,13 @@
       "notAuthorized": "Sie haben in dieser Organisation keine Rolle, die ihre Personen sehen darf.",
       "needsMigration": "Der Personenspeicher ist in dieser Umgebung noch nicht aktiviert.",
       "unavailable": "Die Personenliste konnte nicht gelesen werden. Das ist nicht dasselbe wie eine leere Liste — versuchen Sie es gleich erneut."
+    },
+    "offer": {
+      "label": "Diesen Namen mit einem Arbeitnehmerkonto verknüpfen",
+      "choose": "Arbeitnehmer wählen…",
+      "offer": "Verknüpfung anbieten",
+      "offered": "Verknüpfung angeboten — die Person entscheidet in ihrem Profil",
+      "error": "Die Verknüpfung konnte nicht angeboten werden"
     }
   },
   "peopleImport": {

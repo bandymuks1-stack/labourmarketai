@@ -46,6 +46,16 @@ export interface JournalCalendarDayInput {
    * failure (SEP-3: EVIDENCE ≠ VERIFICATION).
    */
   readonly confirmedCount: number;
+  /**
+   * PAST = ACTUAL, THE ORGANIZATION'S LAYER (owner completion mode 2026-09-17,
+   * §11): minutes the organization itself recorded for this person on this
+   * day — a timesheet line, an imported document — read through the same
+   * ledger Work in Numbers names (`readOrganizationRecords`). Carried BESIDE
+   * the journal figures, never summed with them (SEP-3: a record the
+   * organization made is not the person's own diary), and only when the
+   * person has accepted the link (RLS). Absent / 0 = nothing recorded.
+   */
+  readonly reportedMinutes?: number;
 }
 
 export interface JournalCalendarCell {
@@ -65,6 +75,8 @@ export interface JournalCalendarCell {
    * (design system §M). `none` means the day holds only self-declared work.
    */
   readonly confirmation: "none" | "partial" | "all";
+  /** Minutes the organization recorded for this day (the actual layer), 0 when none. */
+  readonly reportedMinutes: number;
 }
 
 export interface JournalCalendarGrid {
@@ -82,6 +94,9 @@ export interface JournalCalendarGrid {
   readonly recordedDays: number;
   readonly recordedEntries: number;
   readonly recordedMinutes: number;
+  /** The organization's layer over the same days — beside, never added. */
+  readonly reportedDays: number;
+  readonly reportedMinutes: number;
 }
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -195,6 +210,7 @@ export function buildJournalCalendar({
             entryCount: prev.entryCount + d.entryCount,
             totalMinutes: prev.totalMinutes + d.totalMinutes,
             confirmedCount: prev.confirmedCount + d.confirmedCount,
+            reportedMinutes: (prev.reportedMinutes ?? 0) + (d.reportedMinutes ?? 0),
           }
         : d,
     );
@@ -218,6 +234,7 @@ export function buildJournalCalendar({
       entryCount: rec?.entryCount ?? 0,
       totalMinutes: rec?.totalMinutes ?? 0,
       confirmedCount: rec?.confirmedCount ?? 0,
+      reportedMinutes: rec?.reportedMinutes ?? 0,
       confirmation:
         !rec || rec.entryCount === 0 || rec.confirmedCount === 0
           ? "none"
@@ -236,9 +253,16 @@ export function buildJournalCalendar({
   let recordedDays = 0;
   let recordedEntries = 0;
   let recordedMinutes = 0;
+  let reportedDays = 0;
+  let reportedMinutes = 0;
   for (const week of weeks) {
     for (const cell of week) {
-      if (!cell.inScope || cell.entryCount === 0) continue;
+      if (!cell.inScope) continue;
+      if (cell.reportedMinutes > 0) {
+        reportedDays += 1;
+        reportedMinutes += cell.reportedMinutes;
+      }
+      if (cell.entryCount === 0) continue;
       recordedDays += 1;
       recordedEntries += cell.entryCount;
       recordedMinutes += cell.totalMinutes;
@@ -256,6 +280,8 @@ export function buildJournalCalendar({
     recordedDays,
     recordedEntries,
     recordedMinutes,
+    reportedDays,
+    reportedMinutes,
   };
 }
 

@@ -872,6 +872,8 @@
       "none": "self-declared record",
       "partial": "some journal records confirmed",
       "all": "journal record confirmed"
-    }
+    },
+    "reported": "organization recorded {time}",
+    "periodReportedOnly": "No records of your own; the organization recorded {days, plural, one {# day} other {# days}}, {time}."
   }
 }
