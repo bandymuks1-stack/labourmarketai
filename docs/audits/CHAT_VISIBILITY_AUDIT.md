@@ -327,3 +327,17 @@ audit.
   `SUPPLY_FEED_BEARER_TOKEN` is unset. Pinned in the
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
+
+- **2026-09-17 — `lib/invitations/external-referral-receive.ts` and
+  `lib/invitations/public-preview.ts`** (universal invitation / referral
+  network v1). Both call service_role-ONLY SECURITY DEFINER functions from
+  migration `20260917120000` (RED, unapplied at the time of writing) and
+  neither reads or writes a table directly — `service_role` holds no table
+  grant on `invitations` in production, so the key opens only the two doors.
+  The receiver runs behind a per-source machine secret
+  (`lib/api/external-referral-auth.ts`) and the strict envelope contract; the
+  SQL re-checks consent and idempotency and never looks up a person. The
+  preview serves the logged-out `/invite/[token]` landing a fixed minimal
+  object with no addressee, message, need, declared context or id, and the
+  module re-applies that allowlist. Pinned in the `chat-visibility-rls.test.ts`
+  caller inventory. Contract: `docs/integrations/EXTERNAL_WORKER_REFERRAL_V1.md`.

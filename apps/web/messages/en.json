@@ -4624,7 +4624,8 @@
         "event_demand_interest_expressed": "A worker expressed interest in your demand",
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
         "event_weekly_digest": "Your weekly work and opportunities summary is ready",
-        "event_saved_search_match": "A search you saved has new results"
+        "event_saved_search_match": "A search you saved has new results",
+        "event_invitation_accepted": "Somebody accepted your invitation"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -11101,7 +11102,13 @@
         "resend_limit": "Resend limit reached.",
         "invalid_token_hash": "Something went wrong. Please try again.",
         "error": "Something went wrong. Please try again."
-      }
+      },
+      "openLink": "Shared link",
+      "campaignLink": "Campaign link",
+      "seats": "{used}/{max} places",
+      "opened": "Opened {count}×",
+      "joined": "Joined {count}",
+      "declinedCount": "Declined {count}"
     },
     "organizations": {
       "title": "My companies",
@@ -11143,7 +11150,8 @@
         "join_as_employee": "Join as an employee",
         "collaborate_partner": "Collaborate as a partner",
         "join_project": "Join a project",
-        "invite_company": "Invite a company"
+        "invite_company": "Invite a company",
+        "invite_to_demand": "Invite to a work need"
       },
       "organizationLabel": "Company",
       "projectLabel": "Project",
@@ -11175,13 +11183,30 @@
         "not_authorized": "Not allowed",
         "error": "Failed",
         "invalid_relationship": "Not an offerable relationship",
-        "organization_capability_required": "Organization has not declared this yet"
+        "organization_capability_required": "Organization has not declared this yet",
+        "invalid_max_uses": "Too many places for this kind of invitation",
+        "invalid_expiry": "Invalid validity",
+        "demand_required": "Choose a work need",
+        "demand_not_found": "Work need not found",
+        "demand_closed": "This work need is closed"
       },
       "recipientLanguageLabel": "Recipient's language (email and invitation)",
       "capacityLabel": "What will the invited person be in your organization?",
       "capacityHint": "A placement or studies are not employment — it will be recorded exactly as you choose here.",
       "capacityNeedsCapability": "Your organization has not said it provides education yet. State that on the organization page, then you can invite a learner.",
-      "capacityNeedsCapabilityCta": "Open the organization page"
+      "capacityNeedsCapabilityCta": "Open the organization page",
+      "modeLabel": "How it travels",
+      "modes": {
+        "email": "By e-mail address",
+        "link": "One link to share"
+      },
+      "demandLabel": "Work need",
+      "demandHint": "The person you invite decides. The invitation is recorded as yours, never as a system match.",
+      "seatsLabel": "Places (1–{max})",
+      "seatsHint": "1 = one person. More = one controlled link several people may accept, each with their own account.",
+      "campaignLabel": "Name for this link (optional)",
+      "createLink": "Create link",
+      "campaignSeats": "Link for {max} people"
     },
     "invitePage": {
       "eyebrow": "INVITATION",
@@ -11197,7 +11222,8 @@
         "join_as_employee": "Invitation to join as an employee",
         "collaborate_partner": "Invitation to collaborate",
         "join_project": "Invitation to join a project",
-        "invite_company": "Invitation for a company"
+        "invite_company": "Invitation for a company",
+        "invite_to_demand": "An employer invited you to a work need"
       },
       "from": "Invited by {name}",
       "organization": "Company: {name}",
@@ -11210,7 +11236,8 @@
         "accepted": "This invitation was already accepted.",
         "declined": "This invitation was declined.",
         "expired": "This invitation has expired. Ask for a new one.",
-        "revoked": "This invitation was revoked."
+        "revoked": "This invitation was revoked.",
+        "exhausted": "All places on this invitation are taken. Ask for a new link."
       },
       "notices": {
         "not_enabled": "Invitations are not enabled in this environment yet.",
@@ -11220,16 +11247,59 @@
         "declined": "Invitation declined.",
         "no_worker_profile": "Create your worker profile first, then accept the invitation.",
         "not_found": "Invitation not found.",
-        "error": "Something went wrong. Please try again."
+        "error": "Something went wrong. Please try again.",
+        "exhausted": "All places are taken.",
+        "referral_accepted": "Referral accepted. Review below what was declared about you — nothing is verified and nothing was added to your profile."
       },
       "capacity": "Relationship: {capacity}",
-      "capacityNotEmployment": "This is not a job offer and does not create employment."
+      "capacityNotEmployment": "This is not a job offer and does not create employment.",
+      "selfStart": "Create your own account",
+      "anonExplainer": "Register or sign in to answer this invitation. You keep your own account, profile and work record — the person who invited you creates the connection, nothing more.",
+      "register": "Register and continue",
+      "signIn": "I already have an account",
+      "youOwnYourIdentity": "Your professional identity stays yours. Accepting an invitation never creates a verified skill, an employment or an assignment on its own.",
+      "referredVia": "Referred through {source}",
+      "campaign": "Invitation: {label}",
+      "seats": "{used} of {max} places taken",
+      "demand": "Work need: {role} · {country}",
+      "demandNotMatch": "The employer invited you directly — this is not a system match.",
+      "interested": "I am interested",
+      "notInterested": "Not interested"
     },
     "teamEnquiriesTitle": "My enquiries to teams",
     "admin": {
       "title": "Administration",
       "hint": "Approvals, requests and organization rules — opened when you need them.",
       "back": "Back to relationships"
+    },
+    "referralReview": {
+      "title": "What {source} declared about you",
+      "intro": "These lines were sent with your consent. They are declarations, not verified facts. Accept, correct or reject each one — your answer is recorded, and nothing is added to your profile until you add it yourself.",
+      "groups": {
+        "professions": "Trades",
+        "sectors": "Fields of work",
+        "skills": "Skills",
+        "languages": "Languages",
+        "destinations": "Countries",
+        "freeText": "In your own words"
+      },
+      "decisions": {
+        "accepted": "Confirmed",
+        "rejected": "Rejected",
+        "corrected": "Corrected"
+      },
+      "accept": "Correct",
+      "reject": "Not me",
+      "correct": "Fix",
+      "save": "Save",
+      "cancel": "Cancel",
+      "correctionPlaceholder": "Your wording",
+      "failed": {
+        "not_enabled": "Review is not enabled in this environment yet.",
+        "error": "Could not save your answer. Please try again."
+      },
+      "boundary": "Confirming a line here does not create a skill or a profession. Add what is true to your profile yourself:",
+      "toProfile": "open my profile"
     }
   },
   "people": {

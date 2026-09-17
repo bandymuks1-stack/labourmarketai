@@ -60,6 +60,9 @@ const SUBJECT_VARIANT: Record<
   join_organization: "team",
   join_team: "team",
   join_as_employee: "team",
+  // Universal network v1: an employer's invitation to a work need reads as
+  // the project family — a specific piece of work, not a team seat.
+  invite_to_demand: "project",
 };
 
 export function buildInvitationSubject(

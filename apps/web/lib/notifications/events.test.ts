@@ -255,6 +255,9 @@ describe("NOTIFICATION_EVENT_TYPES (runtime list)", () => {
     expect(NOTIFICATION_EVENT_TYPES).toContain("demand_interest_reviewed");
     // v7 (DEM-8): the saved-search alert.
     expect(NOTIFICATION_EVENT_TYPES).toContain("saved_search_match");
-    expect(NOTIFICATION_EVENT_TYPES.length).toBe(21);
+    // v8 (universal invitation/referral network): the inviter learns that
+    // somebody accepted.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("invitation_accepted");
+    expect(NOTIFICATION_EVENT_TYPES.length).toBe(22);
   });
 });

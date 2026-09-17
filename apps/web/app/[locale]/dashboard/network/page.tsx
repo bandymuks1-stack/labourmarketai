@@ -17,6 +17,7 @@ import {
 import { listMyTeamEnquiries } from "@/lib/company/team-enquiries";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { InvitePanel } from "@/components/app/invite-panel";
+import { loadCanonicalDemand } from "@/lib/demand/canonical-demand";
 import {
   IncomingInvitationList,
   SentInvitationList,
@@ -319,6 +320,10 @@ export default async function NetworkPage({
     // W7-S4: joins the existing batch rather than adding a serial stage — the
     // move must not re-introduce the waterfall W7-S3 removed from the profile.
     employerOwnerProfileId,
+    // Universal network v1: the caller's OWN open needs, as targets of an
+    // employer → person invitation. Composed from the ONE canonical demand
+    // read (never a second `customer_requests` reader).
+    canonicalDemand,
   ] = await Promise.all([
     listManagedProjects(),
     listMyEngagements(),
@@ -326,7 +331,17 @@ export default async function NetworkPage({
     listInvitationsForMe(),
     listMyTeamEnquiries(),
     getEmployerOwnerProfileId(),
+    loadCanonicalDemand(),
   ]);
+  const myDemands =
+    canonicalDemand.state === "ok"
+      ? canonicalDemand.rows
+          .filter((r) => r.ownedByViewer && r.source === "customer_request" && r.actionable)
+          .map((r) => ({
+            id: r.id,
+            label: [r.roleText, r.country].filter(Boolean).join(" · ") || r.id.slice(0, 8),
+          }))
+      : [];
   const search = q ? await searchPeopleAndCompanies(q) : null;
 
   return (
@@ -469,6 +484,7 @@ export default async function NetworkPage({
         locale={locale}
         organizations={organizationsWithCapabilities}
         projects={projects.map((p) => ({ id: p.id, title: p.title }))}
+        demands={myDemands}
         defaultType={type}
         defaultOrganizationId={org}
         defaultProjectId={project}

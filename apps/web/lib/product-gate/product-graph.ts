@@ -150,7 +150,10 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
       "Actors with organization-specific capabilities. Capability is a role a body holds, not an industry label it is stamped with.",
     worldElement: "organizations",
     domains: ["organization"],
-    capabilities: ["ORG-1", "ORG-2", "ORG-3", "ORG-4", "ORG-5"],
+    // ORG-11 EXTENDS ORG-3's invitation system into the one distribution
+    // primitive (open link, campaign, demand target, approved external
+    // source) — an edge INTO the graph, not a node beside it.
+    capabilities: ["ORG-1", "ORG-2", "ORG-3", "ORG-4", "ORG-5", "ORG-11"],
   },
   {
     id: "companies",

@@ -57,7 +57,7 @@ export function SentInvitationList({
     try {
       const r = await resendInvitationAction({
         invitationId: row.id,
-        email: row.invitedEmail,
+        email: row.invitedEmail ?? "",
         locale,
         // A resend keeps the invitation's stored RECIPIENT language.
         recipientLocale: row.recipientLocale,
@@ -109,12 +109,37 @@ export function SentInvitationList({
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="min-w-0 break-all font-medium text-text-primary">
                 {row.invitedName ? `${row.invitedName} · ` : ""}
-                {row.invitedEmail}
+                {row.invitedEmail ??
+                  (row.campaignLabel
+                    ? row.campaignLabel
+                    : row.maxUses > 1
+                      ? t("campaignLink")
+                      : t("openLink"))}
               </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {tTypes(row.invitationType)}
               </span>
             </div>
+            {/* INVITER STATUS — only what is evidenced: seats, opens counted
+                by the landing, joins from the acceptance ledger. Never a
+                score, never a name of who opened. */}
+            {(row.maxUses > 1 || row.openCount > 0 || row.acceptedCount > 0 || row.declinedCount > 0) && (
+              <div
+                className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted"
+                data-testid={`sent-invitation-funnel-${row.id}`}
+              >
+                {row.maxUses > 1 && (
+                  <span>{t("seats", { used: row.useCount, max: row.maxUses })}</span>
+                )}
+                <span>{t("opened", { count: row.openCount })}</span>
+                <span className={row.acceptedCount > 0 ? "text-state-success" : ""}>
+                  {t("joined", { count: row.acceptedCount })}
+                </span>
+                {row.declinedCount > 0 && (
+                  <span>{t("declinedCount", { count: row.declinedCount })}</span>
+                )}
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label">
               <span
                 className={

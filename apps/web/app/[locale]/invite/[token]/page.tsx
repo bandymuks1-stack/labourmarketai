@@ -8,19 +8,36 @@ import {
   acceptInviteFormAction,
   declineInviteFormAction,
 } from "@/lib/invitations/invite-page-actions";
+import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
+import { findExternalReferralSource } from "@/lib/invitations/external-sources";
+import { declaredContextItems } from "@/lib/invitations/model";
+import {
+  ReferralContextReview,
+  type ReferralReviewLabels,
+} from "@/components/app/referral-context-review";
 import { formatUtcDate } from "@/lib/time/display";
 // The ONE list that says "this happened and it was a placement, not a job".
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
- * Invitation landing page (core-network area B) — the destination of every
- * emailed / shared invite link.
+ * Invitation landing page (core-network area B; universal network v1) — the
+ * destination of every emailed / shared invite link.
  *
- * Flow: unauthenticated visitors are sent to login/signup with
- * ?next=/{locale}/invite/{token} (the existing safe-return mechanism), so
- * after auth they come straight back here. The preview RPC is token-gated
- * and authenticated-only — the page never reveals whether any email has an
- * account, and the token itself is the only capability.
+ * LOGGED OUT: the minimal preview (what kind of invitation, from whom, in
+ * which capacity, until when — nothing else) and the two doors, register or
+ * sign in, both carrying ?next=/{locale}/invite/{token} so the invitation
+ * survives e-mail confirmation and OAuth (the existing safe-return
+ * mechanism, open-redirect-guarded in lib/auth/redirect.ts). The self-start
+ * path is the same door: a person who arrived with a token may still simply
+ * register and use the product without accepting anything.
+ *
+ * LOGGED IN: the full preview (v2, with the v1 function as fallback while
+ * the owner-gated migration is not applied) and accept / decline. After
+ * accepting an external-source referral the person reviews, item by item,
+ * what the source declared about them — declared input, never evidence.
+ *
+ * The token is the only capability. The page never reveals whether an
+ * e-mail has an account and never renders an addressee to a stranger.
  */
 
 export const dynamic = "force-dynamic";
@@ -32,9 +49,10 @@ function asAny(c: SupabaseClient): any {
 
 type Preview = {
   outcome: string;
+  invitation_id?: string;
   invitation_type?: string;
   status?: string;
-  invited_email?: string;
+  invited_email?: string | null;
   invited_name?: string | null;
   proposed_role?: string | null;
   personal_message?: string | null;
@@ -42,10 +60,53 @@ type Preview = {
   organization_name?: string | null;
   project_title?: string | null;
   inviter_name?: string | null;
-  /** WHAT the invited person is being asked to become. Absent on every
-   *  invitation created before 20260827200000 — the historical default. */
   relationship_slug?: string | null;
+  // v2 only — absent while the v1 function serves the page.
+  max_uses?: number;
+  use_count?: number;
+  campaign_label?: string | null;
+  demand_role_text?: string | null;
+  demand_country?: string | null;
+  external_source_slug?: string | null;
+  my_decision?: string | null;
+  has_declared_context?: boolean;
+  declared_context?: unknown;
+  context_review?: unknown;
 };
+
+/** The person's earlier review decisions, from the v2 preview. Unknown
+ *  shapes yield nothing — never a crash on the person's own page. */
+function readReviews(
+  raw: unknown,
+): Record<string, { decision: "accepted" | "rejected" | "corrected"; correction?: string | null }> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, { decision: "accepted" | "rejected" | "corrected"; correction?: string | null }> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!value || typeof value !== "object") continue;
+    const d = (value as { decision?: unknown }).decision;
+    if (d !== "accepted" && d !== "rejected" && d !== "corrected") continue;
+    const c = (value as { correction?: unknown }).correction;
+    out[key] = { decision: d, correction: typeof c === "string" ? c : null };
+  }
+  return out;
+}
+
+const NOTICES = new Set([
+  "not_enabled",
+  "already_accepted",
+  "exhausted",
+  "expired",
+  "revoked",
+  "declined",
+  "no_worker_profile",
+  "not_found",
+  "error",
+  "referral_accepted",
+]);
+
+function isMissingFunction(error: { code?: string } | null): boolean {
+  return Boolean(error && (error.code === "PGRST202" || error.code === "42883"));
+}
 
 export default async function InvitePage({
   params,
@@ -61,20 +122,7 @@ export default async function InvitePage({
   // The ONE localized relationship vocabulary — the words the CV also prints.
   const tRelationships = await getTranslations("relationshipTypes");
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect(
-      `/${locale}/auth/login?next=${encodeURIComponent(`/${locale}/invite/${token}`)}`,
-    );
-  }
-
-  const { data, error } = await asAny(supabase).rpc("get_invitation_preview_v1", {
-    p_token: token,
-  });
-
+  const returnTo = `/${locale}/invite/${token}`;
   const shell = (children: React.ReactNode) => (
     <main
       className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-4 px-6 py-10"
@@ -84,11 +132,130 @@ export default async function InvitePage({
     </main>
   );
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    const pub = await readPublicInvitationPreview(token);
+    if (pub.kind === "not_enabled") {
+      // Pre-migration behaviour: sign in first, the invitation waits.
+      redirect(`/${locale}/auth/login?next=${encodeURIComponent(returnTo)}`);
+    }
+    if (pub.kind === "unavailable") {
+      return shell(
+        <p className="rounded-md border border-dashed border-ink-500 p-5 text-sm text-text-secondary">
+          {t("loadError")}
+        </p>,
+      );
+    }
+    if (pub.kind === "not_found") {
+      return shell(
+        <>
+          <h1 className="font-display text-2xl font-bold text-text-primary">
+            {t("invalidTitle")}
+          </h1>
+          <p className="text-sm text-text-secondary">{t("invalidBody")}</p>
+          <Link
+            href="/auth/signup"
+            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            data-testid="invite-selfstart"
+          >
+            {t("selfStart")}
+          </Link>
+        </>,
+      );
+    }
+    const p = pub.preview;
+    const closed = p.status !== "pending";
+    const source = findExternalReferralSource(p.externalSourceSlug);
+    return shell(
+      <>
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          {t("eyebrow")}
+        </p>
+        <h1 className="font-display text-2xl font-bold text-text-primary">
+          {t(`titles.${p.invitationType}`)}
+        </h1>
+        <div className="flex flex-col gap-1 text-sm text-text-secondary">
+          {p.inviterName && (
+            <p data-testid="invite-inviter">{t("from", { name: p.inviterName })}</p>
+          )}
+          {source && (
+            <p data-testid="invite-source">{t("referredVia", { source: source.displayName })}</p>
+          )}
+          {p.organizationName && (
+            <p data-testid="invite-org">{t("organization", { name: p.organizationName })}</p>
+          )}
+          {p.projectTitle && (
+            <p data-testid="invite-project">{t("project", { name: p.projectTitle })}</p>
+          )}
+          {p.campaignLabel && (
+            <p data-testid="invite-campaign">{t("campaign", { label: p.campaignLabel })}</p>
+          )}
+          {p.relationshipSlug && (
+            <p data-testid="invite-relationship">
+              {t("capacity", { capacity: tRelationships(p.relationshipSlug) })}
+            </p>
+          )}
+        </div>
+        {closed ? (
+          <p
+            className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
+            data-testid="invite-closed"
+          >
+            {t(`closed.${p.status}`)}
+          </p>
+        ) : (
+          <>
+            <p className="text-sm text-text-secondary" data-testid="invite-anon-explainer">
+              {t("anonExplainer")}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={`/auth/signup?next=${encodeURIComponent(returnTo)}`}
+                className="inline-flex min-h-11 items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+                data-testid="invite-register"
+              >
+                {t("register")}
+              </Link>
+              <Link
+                href={`/auth/login?next=${encodeURIComponent(returnTo)}`}
+                className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-5 py-2 text-sm text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                data-testid="invite-login"
+              >
+                {t("signIn")}
+              </Link>
+            </div>
+            <p className="text-meta text-text-muted" data-testid="invite-owns-identity">
+              {t("youOwnYourIdentity")}
+            </p>
+          </>
+        )}
+        <p className="text-meta text-text-muted">
+          {t("expiresNote", {
+            date: formatUtcDate(p.expiresAt ?? undefined, locale) ?? "—",
+          })}
+        </p>
+      </>,
+    );
+  }
+
+  // Signed in: v2 preview, v1 when v2 is not there yet.
+  let { data, error } = await asAny(supabase).rpc("get_invitation_preview_v2", {
+    p_token: token,
+  });
+  if (isMissingFunction(error)) {
+    ({ data, error } = await asAny(supabase).rpc("get_invitation_preview_v1", {
+      p_token: token,
+    }));
+  }
+
   if (error) {
-    const missing = error.code === "42883";
     return shell(
       <p className="rounded-md border border-dashed border-ink-500 p-5 text-sm text-text-secondary">
-        {missing ? t("notEnabled") : t("loadError")}
+        {isMissingFunction(error) ? t("notEnabled") : t("loadError")}
       </p>,
     );
   }
@@ -112,8 +279,56 @@ export default async function InvitePage({
   }
 
   const status = preview.status ?? "pending";
-  const closed = status !== "pending";
+  const myDecision = preview.my_decision ?? null;
+  const maxUses = preview.max_uses ?? 1;
+  // A campaign link stays open for others after MY answer; my own answer is
+  // what closes it for me.
+  const closed =
+    status !== "pending" || myDecision === "accepted" || myDecision === "declined";
+  const closedKey =
+    myDecision === "accepted"
+      ? "accepted"
+      : myDecision === "declined"
+        ? "declined"
+        : status === "accepted" && maxUses > 1
+          ? "exhausted"
+          : status;
   const relationshipSlug = preview.relationship_slug ?? null;
+  const source = findExternalReferralSource(preview.external_source_slug);
+  const contextItems = declaredContextItems(preview.declared_context);
+  const declaredFreeText = (preview.declared_context as { freeText?: unknown } | null)
+    ?.freeText;
+  const safeNotice = notice && NOTICES.has(notice) ? notice : null;
+  const isDemand = preview.invitation_type === "invite_to_demand";
+  // Resolved here, on the server: the /invite tree ships no `network`
+  // messages to the client (client-messages-allowlist).
+  const tReview = await getTranslations("network.referralReview");
+  const reviewLabels: ReferralReviewLabels = {
+    title: tReview("title", { source: "{source}" }),
+    intro: tReview("intro"),
+    groups: {
+      professions: tReview("groups.professions"),
+      sectors: tReview("groups.sectors"),
+      skills: tReview("groups.skills"),
+      languages: tReview("groups.languages"),
+      destinations: tReview("groups.destinations"),
+      freeText: tReview("groups.freeText"),
+    },
+    decisions: {
+      accepted: tReview("decisions.accepted"),
+      rejected: tReview("decisions.rejected"),
+      corrected: tReview("decisions.corrected"),
+    },
+    accept: tReview("accept"),
+    reject: tReview("reject"),
+    correct: tReview("correct"),
+    save: tReview("save"),
+    cancel: tReview("cancel"),
+    correctionPlaceholder: tReview("correctionPlaceholder"),
+    failed: { not_enabled: tReview("failed.not_enabled"), error: tReview("failed.error") },
+    boundary: tReview("boundary"),
+    toProfile: tReview("toProfile"),
+  };
 
   return shell(
     <>
@@ -127,29 +342,47 @@ export default async function InvitePage({
         {preview.inviter_name && (
           <p data-testid="invite-inviter">{t("from", { name: preview.inviter_name })}</p>
         )}
+        {source && (
+          <p data-testid="invite-source">{t("referredVia", { source: source.displayName })}</p>
+        )}
         {preview.organization_name && (
           <p data-testid="invite-org">{t("organization", { name: preview.organization_name })}</p>
         )}
         {preview.project_title && (
           <p data-testid="invite-project">{t("project", { name: preview.project_title })}</p>
         )}
+        {/* THE NEED the employer invited this person to — what they can say
+            yes or no to, even with an incomplete matching profile. It is the
+            employer's invitation, stated as such; no match is claimed. */}
+        {preview.demand_role_text && (
+          <p data-testid="invite-demand">
+            {t("demand", {
+              role: preview.demand_role_text,
+              country: preview.demand_country ?? "—",
+            })}
+            <span className="ml-1 text-text-muted" data-testid="invite-demand-not-match">
+              {t("demandNotMatch")}
+            </span>
+          </p>
+        )}
+        {preview.campaign_label && (
+          <p data-testid="invite-campaign">{t("campaign", { label: preview.campaign_label })}</p>
+        )}
+        {maxUses > 1 && (
+          <p data-testid="invite-seats" className="text-text-muted">
+            {t("seats", { used: preview.use_count ?? 0, max: maxUses })}
+          </p>
+        )}
         {preview.proposed_role && (
           <p data-testid="invite-role">{t("role", { role: preview.proposed_role })}</p>
         )}
         {/* WHAT YOU ARE AGREEING TO. Acceptance creates a real, attributable
-            relationship, and until 20260827200000 this screen could not say
-            which one — so a learner would have accepted without being told
-            whether they were about to become a STUDENT or an EMPLOYEE of the
-            organization. The name is resolved through the localized
-            `relationshipTypes` catalogue; the slug itself never renders.
-            Absent on every invitation created before that migration, which is
-            exactly when the historical default applies. */}
+            relationship; the name is resolved through the localized
+            `relationshipTypes` catalogue; the slug itself never renders. */}
         {relationshipSlug && (
           <p data-testid="invite-relationship">
             {t("capacity", { capacity: tRelationships(relationshipSlug) })}
-            {(PRACTICE_RELATIONSHIPS as readonly string[]).includes(
-              relationshipSlug,
-            ) && (
+            {(PRACTICE_RELATIONSHIPS as readonly string[]).includes(relationshipSlug) && (
               <span
                 className="ml-1 text-text-muted"
                 data-testid="invite-relationship-not-employment"
@@ -166,13 +399,13 @@ export default async function InvitePage({
         )}
       </div>
 
-      {notice && (
+      {safeNotice && (
         <p
           role="status"
           className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs text-text-secondary"
           data-testid="invite-notice"
         >
-          {t(`notices.${notice}`)}
+          {t(`notices.${safeNotice}`)}
         </p>
       )}
 
@@ -181,7 +414,7 @@ export default async function InvitePage({
           className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
           data-testid="invite-closed"
         >
-          {t(`closed.${status}`)}
+          {t(`closed.${closedKey}`)}
         </p>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
@@ -193,7 +426,7 @@ export default async function InvitePage({
               data-testid="invite-accept"
               className="inline-flex min-h-11 items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
             >
-              {t("accept")}
+              {isDemand ? t("interested") : t("accept")}
             </button>
           </form>
           <form action={declineInviteFormAction}>
@@ -204,10 +437,25 @@ export default async function InvitePage({
               data-testid="invite-decline"
               className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-5 py-2 text-sm text-text-secondary hover:border-brand-blue hover:text-text-primary"
             >
-              {t("decline")}
+              {isDemand ? t("notInterested") : t("decline")}
             </button>
           </form>
         </div>
+      )}
+
+      {/* WHAT WAS DECLARED ABOUT YOU — shown only to the person who accepted,
+          only for an external-source referral, and only as declared input:
+          accept / reject / correct each line. Nothing here is verified and
+          nothing here writes a skill; the profile paths that exist do. */}
+      {myDecision === "accepted" && preview.invitation_id && contextItems.length > 0 && (
+        <ReferralContextReview
+          invitationId={preview.invitation_id}
+          sourceName={source?.displayName ?? preview.external_source_slug ?? ""}
+          items={contextItems}
+          freeText={typeof declaredFreeText === "string" ? declaredFreeText : null}
+          initialReviews={readReviews(preview.context_review)}
+          labels={reviewLabels}
+        />
       )}
 
       <p className="text-meta text-text-muted">

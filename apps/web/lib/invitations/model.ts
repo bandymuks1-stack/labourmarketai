@@ -11,6 +11,11 @@ export const INVITATION_TYPES = [
   "collaborate_partner",
   "join_project",
   "invite_company",
+  // Universal invitation/referral network v1 (20260917120000): THE EMPLOYER
+  // FOUND THE PERSON. Targets the canonical demand object (customer_requests)
+  // and never a vacancy copy. Acceptance records EMPLOYER_INVITED_TO_TARGET
+  // (an interest row whose snapshot names its basis), never a system match.
+  "invite_to_demand",
 ] as const;
 export type InvitationType = (typeof INVITATION_TYPES)[number];
 
@@ -25,6 +30,42 @@ export const ORG_INVITATION_TYPES: readonly InvitationType[] = [
   "join_as_employee",
   "collaborate_partner",
 ];
+
+/** Types whose target is a demand (customer_requests) — the reverse-discovery
+ *  path: employer finds person, employer invites, person decides. */
+export const DEMAND_INVITATION_TYPES: readonly InvitationType[] = ["invite_to_demand"];
+
+/**
+ * MULTI-USE BOUNDS — mirrors `create_invitation_v2`, which is the enforcement
+ * point. A campaign link belongs to a context someone is answerable for (an
+ * organization, a project, a need): up to 500 seats. A plain "invite a
+ * colleague" link is crew-sized: up to 20. 1 = single-use, the default and
+ * every pre-existing invitation.
+ */
+export const MAX_CAMPAIGN_USES_WITH_CONTEXT = 500;
+export const MAX_CAMPAIGN_USES_WITHOUT_CONTEXT = 20;
+export const MAX_INVITATION_EXPIRY_DAYS = 90;
+export const DEFAULT_INVITATION_EXPIRY_DAYS = 14;
+
+/** Whether `type` carries a context an organization/project/need owner is
+ *  answerable for — the condition for a larger campaign. Pure. */
+export function invitationTypeHasContext(type: InvitationType | string): boolean {
+  return (
+    (ORG_INVITATION_TYPES as readonly string[]).includes(type) ||
+    type === "join_project" ||
+    (DEMAND_INVITATION_TYPES as readonly string[]).includes(type)
+  );
+}
+
+/** The seat count a sender may ask for, clamped to what the RPC will accept
+ *  for this type. Never widens; a forged larger value is refused server-side. */
+export function clampCampaignUses(type: InvitationType | string, requested: number): number {
+  const max = invitationTypeHasContext(type)
+    ? MAX_CAMPAIGN_USES_WITH_CONTEXT
+    : MAX_CAMPAIGN_USES_WITHOUT_CONTEXT;
+  if (!Number.isFinite(requested)) return 1;
+  return Math.min(Math.max(1, Math.floor(requested)), max);
+}
 
 export const INVITATION_STATUSES = [
   "pending",
@@ -95,6 +136,11 @@ export function acceptedDestination(input: {
 }): string {
   if (input.invitationType === "join_project" && input.projectId) {
     return `/dashboard/projects/${input.projectId}`;
+  }
+  // The person said "interested" to a specific need — the board's own
+  // interest list is where that answer already lives.
+  if (input.invitationType === "invite_to_demand") {
+    return "/dashboard/opportunities";
   }
   if (
     (ORG_INVITATION_TYPES as readonly string[]).includes(input.invitationType)
@@ -209,3 +255,77 @@ export type InvitationRef =
 /** How many invitations the attention surfaces show at once (the real total is
  *  reported beside them). */
 export const INVITATIONS_ATTENTION_LIMIT = 5;
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * REFERRAL PROVENANCE + DECLARED CONTEXT (universal network v1)
+ *
+ * What an APPROVED EXTERNAL SOURCE may declare about a person, as stored on
+ * `invitations.declared_context`. Declared input, never evidence: the person
+ * reviews every item (accept / reject / correct) and only the profile paths
+ * that already exist may turn any of it into a profile fact.
+ * ──────────────────────────────────────────────────────────────────────── */
+export type DeclaredContextV1 = {
+  readonly v: 1;
+  readonly subjectType?: "INDIVIDUAL_WORKER" | "SPECIALIST" | "TEAM" | "BRIGADE";
+  readonly professions: readonly { readonly id?: string; readonly raw?: string }[];
+  readonly sectors: readonly string[];
+  readonly skills: readonly string[];
+  readonly yearsClaimed?: number;
+  readonly languages: readonly string[];
+  readonly residenceCountry?: string;
+  readonly availability?: string;
+  readonly destinations: readonly string[];
+  readonly mobilityScope?: "LISTED" | "EU_WIDE";
+  readonly freeText?: string;
+};
+
+/** One reviewable line of a declared context, keyed so a review decision can
+ *  name it (`professions:0`, `skills:3`). Pure. */
+export type DeclaredContextItem = {
+  readonly key: string;
+  readonly group: "professions" | "sectors" | "skills" | "languages" | "destinations";
+  readonly label: string;
+};
+
+export const REVIEW_DECISIONS = ["accepted", "rejected", "corrected"] as const;
+export type ReviewDecision = (typeof REVIEW_DECISIONS)[number];
+
+export function isReviewDecision(v: unknown): v is ReviewDecision {
+  return (REVIEW_DECISIONS as readonly string[]).includes(String(v ?? ""));
+}
+
+/** The item keys `review_referral_context_v1` accepts: `<group>:<index>`. */
+export const REVIEW_ITEM_KEY_RX = /^[a-z_]+:[0-9]{1,3}$/;
+
+/** Flatten a declared context into reviewable items. Unknown shapes yield
+ *  nothing rather than throwing — a malformed stored blob renders as "nothing
+ *  to review", never as a crash on the person's own page. */
+export function declaredContextItems(raw: unknown): DeclaredContextItem[] {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
+  const ctx = raw as Partial<DeclaredContextV1>;
+  const out: DeclaredContextItem[] = [];
+  const list = (
+    group: DeclaredContextItem["group"],
+    values: readonly unknown[] | undefined,
+    toLabel: (v: unknown) => string | null,
+  ) => {
+    if (!Array.isArray(values)) return;
+    values.slice(0, 100).forEach((v, i) => {
+      const label = toLabel(v);
+      if (label) out.push({ key: `${group}:${i}`, group, label });
+    });
+  };
+  list("professions", ctx.professions, (v) => {
+    if (!v || typeof v !== "object") return null;
+    const p = v as { id?: unknown; raw?: unknown };
+    const raw = typeof p.raw === "string" ? p.raw.trim() : "";
+    const id = typeof p.id === "string" ? p.id.trim() : "";
+    return raw || id || null;
+  });
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+  list("sectors", ctx.sectors, str);
+  list("skills", ctx.skills, str);
+  list("languages", ctx.languages, str);
+  list("destinations", ctx.destinations, str);
+  return out;
+}

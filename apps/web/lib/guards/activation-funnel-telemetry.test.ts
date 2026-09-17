@@ -124,6 +124,12 @@ const EXPECTED_EVENTS = [
   // Public entry (frozen design contract 2026-09-05, P1): the anonymous
   // visitor's sentence read by the deterministic router before any account.
   "landing_intent",
+  // Universal invitation / referral network v1 (2026-09-17): the referral
+  // funnel's observable stages beside the existing `invitation_accepted`.
+  "invitation_created",
+  "invitation_opened",
+  "invitation_declined",
+  "external_referral_received",
 ] as const;
 
 describe("activation funnel — event registry", () => {

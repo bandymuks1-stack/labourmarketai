@@ -1813,6 +1813,102 @@ exercised in the same proof run — v4 gone, v3 surviving, column and CHECK
 restored, policy gone, and a dispute already written left readable. It removes
 an authority, never a record.
 
+### `universal_invitation_referral_network_v1` — RED — APPLIED 2026-09-17, ledger `20260917080303`
+
+Repo file `supabase/migrations/20260917120000_universal_invitation_referral_network_v1.sql`
+(sha256 `899bbb2c199699e7ff98b99ae8eba8db97ee9bf27895640dc32ae5c838728257`),
+applied via Supabase MCP `apply_migration` at owner-approved PR #1752 head
+`7f9328859fc2162c3f4125e0e7bc743e720d1f0f` (owner authorization 2026-09-17,
+"PR #1752 OWNER-GATED PRODUCTION PROOF"). Version drift as always: repo stem
+`20260917120000`, ledger version `20260917080303` — never `db push`.
+
+**Preconditions re-verified immediately before apply:** PR head unchanged, file
+hash at head == working copy, `origin/main` still `b94ed53c`, no migration in
+#1751, ledger head `20260915185038`, pre-apply snapshot recorded (invitations in
+v1 shape, 2 rows; no v2 function; no `invitation_acceptances`; notification
+CHECKs at v7).
+
+**Post-apply readback (authoritative catalog reads, not the apply's own
+success):** 10 new columns on `invitations` with the intended nullability and
+defaults; `invited_email` / `inviter_profile_id` nullable; CHECKs
+`invitations_uses_chk`, `_origin_chk`, `_campaign_label_chk`,
+`_external_source_slug_chk`, `_external_reference_chk`, `_declared_context_chk`,
+`_consent_record_chk`, `_open_count_chk` present; type CHECK widened by exactly
+`invite_to_demand`; context CHECK widened by exactly the demand arm; unique
+partial index `(external_source_slug, external_reference)`; table
+`invitation_acceptances` with UNIQUE `(invitation_id, profile_id)`, RLS on,
+ONE policy (`invitation_acceptances_select`, SELECT, `{authenticated}`),
+`authenticated: SELECT` only; `invitations_select` byte-identical; notification
+CHECKs widened by exactly `invitation_accepted` / `invitation`. All ten
+functions `security definer`, owner `postgres`, `search_path=public`; execute
+matrix: `accept_invitation_apply_v2` → nobody; the six user doors →
+`authenticated` only; `get_invitation_public_preview_v1`,
+`receive_external_referral_v1`, `mark_external_referral_delivery_v1` →
+`service_role` only; `anon` → nothing anywhere. Existing rows: 2 / 2, both
+still addressed, single-use, with inviter. `service_role` still holds NO
+table grant on `invitations` (proven: a direct SELECT under that role is
+42501) — the two service functions are the only door.
+
+**Runtime-proven AFTER the apply, on production, with zero residue:** one
+`DO` block that ends in `RAISE EXCEPTION` carrying its own transcript ran
+every RPC as the real roles (`set local role anon|authenticated|service_role`
++ JWT claims of the synthetic `e2e-*@labourmarket.ai` identities) — 20 cases:
+open link, logged-out preview + open count, six privilege negatives, existing
+user claims, idempotent re-accept, single-use taken, 2-seat campaign (two
+people, two ledger rows, `exhausted`), crew cap for a contextless link,
+cross-org read isolation (other org owner sees 0, unrelated worker sees 0),
+employer→need invitation (preview shows `welder / LT`, in-app door
+email-bound, interest row `basis=employer_invitation` with NO band, foreign
+id → `not_found`), decline (no interest, ledger `declined`), project
+invitation (existing `can_manage_project` decides for both the worker and the
+owner; acceptance = `assignment_created`, 0 bookings), revoked / expired
+(no ledger row), tampered token (`not_found` on all three doors), external
+referral valid / replay / no consent / wrong consent version / delivery mark,
+existing user claims the referral, declared context disclosed only to the
+acceptor, review accept/correct/reject recorded, foreign reviewer
+`not_found`, notification CHECK accepts the new type. Identity counters
+unchanged throughout: profiles 58 → 58, workers 58 → 58, worker_skills 59 →
+59, worker_professions 20 → 20, profile_skill_claims 28 → 28. Readback after
+the rollback: invitations 2, acceptances 0, v2 audit rows 0.
+
+**Defect found by that proof, corrected forward:** `get_invitation_preview_v2`
+selects `role_text` from `customer_requests`; the column is
+`role_or_work_type` (`role_text` is the worker-board RPC's projection). The
+proof exercised the corrected body inside the rolled-back transaction; the
+persistent fix is `supabase/migrations/20260917130000_invitation_preview_demand_column_fix_v1.sql`
+— **RED, PREPARED, NOT APPLIED** (owner gate; one identifier). Until it is
+applied, a demand invitation's signed-in landing renders the generic load
+error; every other path is unaffected.
+
+Rollback: `supabase/rollbacks/20260917120000_universal_invitation_referral_network_v1.down.sql`
+— refuses while any referral, acceptance or multi-use row exists.
+
+### `invitation_preview_demand_column_fix_v1` — RED (forward correction) — APPLIED 2026-09-17, ledger `20260917091045`
+
+Repo file `supabase/migrations/20260917130000_invitation_preview_demand_column_fix_v1.sql`
+(sha256 `3494f93bbc6061632038f589033e0d0f5eba844849fa2bf37c6e3dd34b84b55b`),
+applied via Supabase MCP `apply_migration` at PR #1752 head `7c6d85c9` under
+explicit owner APPLY approval ("PR #1752 FINAL OWNER AUTHORIZATION",
+2026-09-17). One identifier in one function: `get_invitation_preview_v2` now
+reads `role_or_work_type` from `customer_requests` (`role_text` does not
+exist there — it is the worker-board RPC's projection name).
+
+**Readback:** signature `(p_token text)` unchanged; `security definer`, owner
+`postgres`, `search_path=public` unchanged; execute `anon=false
+authenticated=true service_role=false` unchanged; body contains
+`select role_or_work_type, country, organization_id` and no `role_text` in
+executable code; still 1 policy on `invitations`, 1 on
+`invitation_acceptances`; table grants unchanged (`authenticated: SELECT`
+only on both). Runtime re-proof on production, zero residue: employer creates
+`invite_to_demand` → non-owner `not_authorized` → wrong invitee by id
+`not_found` → signed-in preview through the PERSISTED function returns
+`welder / LT / E2E Walker UAB` → accept `interest_recorded` → interest row
+`basis=employer_invitation`, no `status_band`, no `matched_skills`; profiles /
+workers / worker_skills / worker_professions / claims Δ0.
+
+Rollback: `supabase/rollbacks/20260917130000_invitation_preview_demand_column_fix_v1.down.sql`
+(drops the function; the app falls back to `get_invitation_preview_v1`).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

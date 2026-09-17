@@ -220,7 +220,12 @@ describe("invitation model — pure parsing and destinations", () => {
     ).toBe("/dashboard");
   });
 
-  it("the seven canonical invitation types are frozen", () => {
+  it("the canonical invitation types are frozen — seven, plus the demand target", () => {
+    // `invite_to_demand` (universal network v1, 20260917120000) is a TARGET
+    // TYPE, not a relationship: the employer found the person and invites
+    // them to a specific canonical need (customer_requests). It is the one
+    // addition; a relationship (student, volunteer, …) is still DATA on
+    // `relationship_slug`, never a new type (ARCHITECTURE §6.2).
     expect([...INVITATION_TYPES]).toEqual([
       "join_platform",
       "join_organization",
@@ -229,6 +234,7 @@ describe("invitation model — pure parsing and destinations", () => {
       "collaborate_partner",
       "join_project",
       "invite_company",
+      "invite_to_demand",
     ]);
   });
 });

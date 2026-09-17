@@ -4624,7 +4624,8 @@
         "event_demand_interest_expressed": "Een werknemer heeft interesse getoond in je aanvraag",
         "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd",
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
-        "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten"
+        "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
+        "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -11101,7 +11102,13 @@
         "resend_limit": "Limiet voor opnieuw versturen bereikt.",
         "invalid_token_hash": "Er ging iets mis. Probeer het opnieuw.",
         "error": "Er ging iets mis. Probeer het opnieuw."
-      }
+      },
+      "openLink": "Gedeelde link",
+      "campaignLink": "Campagnelink",
+      "seats": "{used}/{max} plaatsen",
+      "opened": "{count}× geopend",
+      "joined": "{count} aangesloten",
+      "declinedCount": "{count} afgewezen"
     },
     "organizations": {
       "title": "Mijn bedrijven",
@@ -11143,7 +11150,8 @@
         "join_as_employee": "Word lid als medewerker",
         "collaborate_partner": "Samenwerken als partner",
         "join_project": "Word lid van een project",
-        "invite_company": "Een bedrijf uitnodigen"
+        "invite_company": "Een bedrijf uitnodigen",
+        "invite_to_demand": "Uitnodigen voor een werkbehoefte"
       },
       "organizationLabel": "Bedrijf",
       "projectLabel": "Project",
@@ -11175,13 +11183,30 @@
         "not_authorized": "Niet toegestaan",
         "error": "Mislukt",
         "invalid_relationship": "Geen toegestane relatie",
-        "organization_capability_required": "Organisatie heeft dit nog niet aangegeven"
+        "organization_capability_required": "Organisatie heeft dit nog niet aangegeven",
+        "invalid_max_uses": "Te veel plaatsen voor dit soort uitnodiging",
+        "invalid_expiry": "Ongeldige geldigheid",
+        "demand_required": "Kies een werkbehoefte",
+        "demand_not_found": "Werkbehoefte niet gevonden",
+        "demand_closed": "Deze werkbehoefte is gesloten"
       },
       "recipientLanguageLabel": "Taal van de ontvanger (e-mail en uitnodiging)",
       "capacityLabel": "Wat wordt de uitgenodigde persoon in uw organisatie?",
       "capacityHint": "Een stage of studie is geen dienstverband — het wordt vastgelegd precies zoals u hier kiest.",
       "capacityNeedsCapability": "Uw organisatie heeft nog niet aangegeven dat zij opleidt. Geef dat aan op de organisatiepagina, daarna kunt u een lerende uitnodigen.",
-      "capacityNeedsCapabilityCta": "Organisatiepagina openen"
+      "capacityNeedsCapabilityCta": "Organisatiepagina openen",
+      "modeLabel": "Hoe verstuurd",
+      "modes": {
+        "email": "Per e-mailadres",
+        "link": "Eén link om te delen"
+      },
+      "demandLabel": "Werkbehoefte",
+      "demandHint": "De uitgenodigde persoon beslist. De uitnodiging wordt als de jouwe vastgelegd, nooit als systeemmatch.",
+      "seatsLabel": "Plaatsen (1–{max})",
+      "seatsHint": "1 = één persoon. Meer = één gecontroleerde link die meerdere mensen kunnen aannemen, elk met een eigen account.",
+      "campaignLabel": "Naam voor deze link (optioneel)",
+      "createLink": "Link maken",
+      "campaignSeats": "Link voor {max} personen"
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
@@ -11197,7 +11222,8 @@
         "join_as_employee": "Uitnodiging als medewerker",
         "collaborate_partner": "Uitnodiging om samen te werken",
         "join_project": "Uitnodiging voor een project",
-        "invite_company": "Uitnodiging voor een bedrijf"
+        "invite_company": "Uitnodiging voor een bedrijf",
+        "invite_to_demand": "Een werkgever nodigde je uit voor een werkbehoefte"
       },
       "from": "Uitgenodigd door {name}",
       "organization": "Bedrijf: {name}",
@@ -11210,7 +11236,8 @@
         "accepted": "Deze uitnodiging is al geaccepteerd.",
         "declined": "Deze uitnodiging is afgewezen.",
         "expired": "Deze uitnodiging is verlopen. Vraag om een nieuwe.",
-        "revoked": "Deze uitnodiging is ingetrokken."
+        "revoked": "Deze uitnodiging is ingetrokken.",
+        "exhausted": "Alle plaatsen van deze uitnodiging zijn bezet. Vraag een nieuwe link."
       },
       "notices": {
         "not_enabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
@@ -11220,16 +11247,59 @@
         "declined": "Uitnodiging afgewezen.",
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
         "not_found": "Uitnodiging niet gevonden.",
-        "error": "Er ging iets mis. Probeer het opnieuw."
+        "error": "Er ging iets mis. Probeer het opnieuw.",
+        "exhausted": "Alle plaatsen zijn bezet.",
+        "referral_accepted": "Doorverwijzing aangenomen. Bekijk hieronder wat over jou is opgegeven — niets is geverifieerd en niets is aan je profiel toegevoegd."
       },
       "capacity": "Relatie: {capacity}",
-      "capacityNotEmployment": "Dit is geen vacature-aanbod en schept geen dienstverband."
+      "capacityNotEmployment": "Dit is geen vacature-aanbod en schept geen dienstverband.",
+      "selfStart": "Eigen account aanmaken",
+      "anonExplainer": "Registreer of log in om deze uitnodiging te beantwoorden. Je account, profiel en werkgeschiedenis blijven van jou — wie je uitnodigt legt alleen de verbinding.",
+      "register": "Registreren en doorgaan",
+      "signIn": "Ik heb al een account",
+      "youOwnYourIdentity": "Je professionele identiteit blijft van jou. Een uitnodiging aannemen maakt op zichzelf geen geverifieerde vaardigheid, dienstverband of toewijzing aan.",
+      "referredVia": "Doorverwezen via {source}",
+      "campaign": "Uitnodiging: {label}",
+      "seats": "{used} van {max} plaatsen bezet",
+      "demand": "Werkbehoefte: {role} · {country}",
+      "demandNotMatch": "De werkgever nodigde je rechtstreeks uit — dit is geen systeemmatch.",
+      "interested": "Ik heb interesse",
+      "notInterested": "Geen interesse"
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {
       "title": "Beheer",
       "hint": "Goedkeuringen, verzoeken en organisatieregels — open je wanneer je ze nodig hebt.",
       "back": "Terug naar relaties"
+    },
+    "referralReview": {
+      "title": "Wat {source} over jou heeft opgegeven",
+      "intro": "Deze regels zijn met jouw toestemming verzonden. Het zijn verklaringen, geen geverifieerde feiten. Bevestig, corrigeer of wijs elke regel af — je antwoord wordt vastgelegd en er wordt niets aan je profiel toegevoegd tot je dat zelf doet.",
+      "groups": {
+        "professions": "Vakken",
+        "sectors": "Werkgebieden",
+        "skills": "Vaardigheden",
+        "languages": "Talen",
+        "destinations": "Landen",
+        "freeText": "In je eigen woorden"
+      },
+      "decisions": {
+        "accepted": "Bevestigd",
+        "rejected": "Afgewezen",
+        "corrected": "Gecorrigeerd"
+      },
+      "accept": "Klopt",
+      "reject": "Niet ik",
+      "correct": "Corrigeren",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "correctionPlaceholder": "Jouw formulering",
+      "failed": {
+        "not_enabled": "Beoordelen is in deze omgeving nog niet ingeschakeld.",
+        "error": "Je antwoord kon niet worden opgeslagen. Probeer het opnieuw."
+      },
+      "boundary": "Bevestigen maakt hier geen vaardigheid of vak aan. Voeg wat waar is zelf aan je profiel toe:",
+      "toProfile": "mijn profiel openen"
     }
   },
   "people": {

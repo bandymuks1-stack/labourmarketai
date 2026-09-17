@@ -954,7 +954,15 @@ describe("NO new DB migration in this PR", () => {
     //   docs/DECISIONS/RED-4-5-subject-authority-packet.md. The baseline grows
     //   because the FILE exists, not because the authority is live.
     //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
-    expect(count).toBeLessThanOrEqual(285);
+    // Bumped 285 -> 286 for the universal invitation / referral network v1
+    //   migration (20260917120000, RED, PREPARED, NOT APPLIED — draft PR
+    //   behind `needs-human-gate`). Not this read layer's file; the global
+    //   count is what makes an unrelated migration visible here, by design.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
+    // Bumped 286 -> 287 for the forward correction 20260917130000 (one
+    //   identifier in get_invitation_preview_v2; RED, PREPARED, NOT APPLIED).
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
+    expect(count).toBeLessThanOrEqual(287);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

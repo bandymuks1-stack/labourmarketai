@@ -4624,7 +4624,8 @@
         "event_demand_interest_expressed": "Darbuotojas pareiškė susidomėjimą jūsų poreikiu",
         "event_demand_interest_reviewed": "Įmonė pažymėjo jūsų susidomėjimą kaip peržiūrėtą",
         "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
-        "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų"
+        "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų",
+        "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -11101,7 +11102,13 @@
         "resend_limit": "Pasiektas pakartotinio siuntimo limitas.",
         "invalid_token_hash": "Nepavyko. Bandykite dar kartą.",
         "error": "Nepavyko. Bandykite dar kartą."
-      }
+      },
+      "openLink": "Pasidalinta nuoroda",
+      "campaignLink": "Kampanijos nuoroda",
+      "seats": "{used}/{max} vietų",
+      "opened": "Atidaryta {count} k.",
+      "joined": "Prisijungė {count}",
+      "declinedCount": "Atsisakė {count}"
     },
     "organizations": {
       "title": "Mano įmonės",
@@ -11143,7 +11150,8 @@
         "join_as_employee": "Prisijungti kaip darbuotojui",
         "collaborate_partner": "Bendradarbiauti kaip partneriui",
         "join_project": "Prisijungti prie projekto",
-        "invite_company": "Pakviesti įmonę"
+        "invite_company": "Pakviesti įmonę",
+        "invite_to_demand": "Pakviesti į darbo poreikį"
       },
       "organizationLabel": "Įmonė",
       "projectLabel": "Projektas",
@@ -11175,13 +11183,30 @@
         "not_authorized": "Neturite teisės",
         "error": "Nepavyko",
         "invalid_relationship": "Netinkamas ryšio tipas",
-        "organization_capability_required": "Organizacija to dar nenurodė"
+        "organization_capability_required": "Organizacija to dar nenurodė",
+        "invalid_max_uses": "Per daug vietų tokiam kvietimui",
+        "invalid_expiry": "Netinkamas galiojimas",
+        "demand_required": "Pasirinkite darbo poreikį",
+        "demand_not_found": "Darbo poreikis nerastas",
+        "demand_closed": "Šis darbo poreikis uždarytas"
       },
       "recipientLanguageLabel": "Gavėjo kalba (laiškas ir kvietimas)",
       "capacityLabel": "Kuo pakviestas asmuo bus jūsų organizacijoje?",
       "capacityHint": "Praktika ar studijos nėra įdarbinimas — tai bus užrašyta tiksliai taip, kaip pasirinksite.",
       "capacityNeedsCapability": "Jūsų organizacija dar nenurodė, kad vykdo mokymus. Nurodykite tai organizacijos puslapyje, tada galėsite pakviesti besimokantįjį.",
-      "capacityNeedsCapabilityCta": "Atidaryti organizacijos puslapį"
+      "capacityNeedsCapabilityCta": "Atidaryti organizacijos puslapį",
+      "modeLabel": "Kaip perduoti",
+      "modes": {
+        "email": "El. pašto adresu",
+        "link": "Viena nuoroda pasidalinti"
+      },
+      "demandLabel": "Darbo poreikis",
+      "demandHint": "Sprendžia pakviestas žmogus. Kvietimas įrašomas kaip jūsų, niekada kaip sistemos atranka.",
+      "seatsLabel": "Vietos (1–{max})",
+      "seatsHint": "1 = vienas žmogus. Daugiau = viena kontroliuojama nuoroda, kurią gali priimti keli žmonės, kiekvienas su sava paskyra.",
+      "campaignLabel": "Nuorodos pavadinimas (neprivaloma)",
+      "createLink": "Sukurti nuorodą",
+      "campaignSeats": "Nuoroda {max} žmonėms"
     },
     "invitePage": {
       "eyebrow": "KVIETIMAS",
@@ -11197,7 +11222,8 @@
         "join_as_employee": "Kvietimas prisijungti kaip darbuotojui",
         "collaborate_partner": "Kvietimas bendradarbiauti",
         "join_project": "Kvietimas prisijungti prie projekto",
-        "invite_company": "Kvietimas įmonei"
+        "invite_company": "Kvietimas įmonei",
+        "invite_to_demand": "Darbdavys pakvietė jus į darbo poreikį"
       },
       "from": "Kvietė: {name}",
       "organization": "Įmonė: {name}",
@@ -11210,7 +11236,8 @@
         "accepted": "Šis kvietimas jau priimtas.",
         "declined": "Šis kvietimas atmestas.",
         "expired": "Kvietimo galiojimas baigėsi. Paprašykite naujo kvietimo.",
-        "revoked": "Kvietimas atšauktas."
+        "revoked": "Kvietimas atšauktas.",
+        "exhausted": "Visos šio kvietimo vietos užimtos. Paprašykite naujos nuorodos."
       },
       "notices": {
         "not_enabled": "Kvietimai šioje aplinkoje dar neįjungti.",
@@ -11220,16 +11247,59 @@
         "declined": "Kvietimas atmestas.",
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
         "not_found": "Kvietimas nerastas.",
-        "error": "Nepavyko. Bandykite dar kartą."
+        "error": "Nepavyko. Bandykite dar kartą.",
+        "exhausted": "Visos vietos užimtos.",
+        "referral_accepted": "Nukreipimas priimtas. Žemiau peržiūrėkite, kas apie jus buvo nurodyta — niekas nepatvirtinta ir niekas nepridėta į jūsų profilį."
       },
       "capacity": "Ryšys: {capacity}",
-      "capacityNotEmployment": "Tai nėra darbo pasiūlymas ir nesukuria įdarbinimo."
+      "capacityNotEmployment": "Tai nėra darbo pasiūlymas ir nesukuria įdarbinimo.",
+      "selfStart": "Susikurti savo paskyrą",
+      "anonExplainer": "Užsiregistruokite arba prisijunkite, kad atsakytumėte į šį kvietimą. Paskyra, profilis ir darbo istorija lieka jūsų — kvietėjas sukuria tik ryšį.",
+      "register": "Registruotis ir tęsti",
+      "signIn": "Jau turiu paskyrą",
+      "youOwnYourIdentity": "Jūsų profesinė tapatybė lieka jūsų. Kvietimo priėmimas savaime nesukuria nei patvirtinto įgūdžio, nei darbo santykių, nei paskyrimo.",
+      "referredVia": "Nukreipta per {source}",
+      "campaign": "Kvietimas: {label}",
+      "seats": "Užimta {used} iš {max} vietų",
+      "demand": "Darbo poreikis: {role} · {country}",
+      "demandNotMatch": "Darbdavys pakvietė jus tiesiogiai — tai ne sistemos atranka.",
+      "interested": "Man įdomu",
+      "notInterested": "Neįdomu"
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {
       "title": "Administravimas",
       "hint": "Tvirtinimai, prašymai ir organizacijos taisyklės — atidaroma tada, kai reikia.",
       "back": "Grįžti į ryšius"
+    },
+    "referralReview": {
+      "title": "Ką {source} nurodė apie jus",
+      "intro": "Šios eilutės atsiųstos su jūsų sutikimu. Tai deklaracijos, ne patvirtinti faktai. Kiekvieną patvirtinkite, pataisykite arba atmeskite — jūsų atsakymas įrašomas, o į profilį niekas nepridedama, kol nepridėsite patys.",
+      "groups": {
+        "professions": "Specialybės",
+        "sectors": "Darbo sritys",
+        "skills": "Įgūdžiai",
+        "languages": "Kalbos",
+        "destinations": "Šalys",
+        "freeText": "Jūsų žodžiais"
+      },
+      "decisions": {
+        "accepted": "Patvirtinta",
+        "rejected": "Atmesta",
+        "corrected": "Pataisyta"
+      },
+      "accept": "Teisinga",
+      "reject": "Ne apie mane",
+      "correct": "Pataisyti",
+      "save": "Išsaugoti",
+      "cancel": "Atšaukti",
+      "correctionPlaceholder": "Jūsų formuluotė",
+      "failed": {
+        "not_enabled": "Peržiūra šioje aplinkoje dar neįjungta.",
+        "error": "Nepavyko išsaugoti atsakymo. Bandykite dar kartą."
+      },
+      "boundary": "Patvirtinimas čia nesukuria nei įgūdžio, nei specialybės. Kas tiesa — pridėkite į profilį patys:",
+      "toProfile": "atidaryti mano profilį"
     }
   },
   "people": {
