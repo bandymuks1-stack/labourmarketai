@@ -3,11 +3,10 @@
 **Direction:** LabourMarket.ai → Nonstop Group. The mirror of
 [`EXTERNAL_WORKER_REFERRAL_V1.md`](EXTERNAL_WORKER_REFERRAL_V1.md) (Nonstop → LabourMarket).
 
-**Status (2026-09-17):** contract + LabourMarket side WRITTEN, RED migration
-`20260917160000_vacancy_interest_commercial_handoff_v1` **PREPARED, NOT APPLIED**
-(owner gate; dry-run proven in a rolled-back production transaction, zero residue).
-Dispatcher inert until the owner sets `NONSTOP_HANDOFF_ENDPOINT` + `NONSTOP_HANDOFF_TOKEN`.
-**No Nonstop receiver exists yet** — see `NEXT_NONSTOP_COMMAND` at the end.
+**Status (2026-09-17, connected):** both migrations applied (`20260917145229`, `20260917155456`),
+#1760 merged (`9ba3ca6b`), Nonstop durable receiver live (`25b49fc`, Neon), LabourMarket Production
+env set, cron scheduled. LabourMarket → Nonstop is the ONLY outbound edge; Nonstop never contacts an
+employer automatically; Agentai OS starts only after Nonstop accepted the canonical opportunity.
 
 ---
 
@@ -145,8 +144,21 @@ it does not grant contact.
 | guard | `apps/web/lib/guards/worker-vacancy-interest-handoff.test.ts` |
 
 Owner env (LabourMarket Vercel, Production): `NONSTOP_HANDOFF_ENDPOINT`, `NONSTOP_HANDOFF_TOKEN`
-(≥ 32 chars; issued by Nonstop; never printed). Then add the cron entry to `apps/web/vercel.json`
-(e.g. `"/api/cron/commercial-handoffs"`, `"*/30 * * * *"`).
+(≥ 32 chars; issued by Nonstop; never printed) — **set 2026-09-17**.
+
+**Dispatch cadence (connected 2026-09-17):** two triggers, ONE dispatcher, one queue.
+- the interest write path calls `dispatchAfterHandoff()` right after a handoff is created or
+  re-queued → a fresh hand-off reaches the door within seconds (awaited, bounded 10 s, never fails
+  the interest);
+- the Vercel cron `/api/cron/commercial-handoffs` runs **daily at 06:00 UTC** (`0 6 * * *`) as the
+  retry sweep. The project is on the Vercel **Hobby** plan, whose crons fire at most once a day
+  (and at most two per project) — a `*/30` cadence cannot deploy there; upgrading the plan is the
+  only way to a faster sweep, and it is not needed for near-real-time delivery.
+
+**Door answers → row state:** 201 delivered · 200 duplicate → delivered · 409 conflict → fail-closed
+(counted, logged, row stays queued) · 401/403 → auth/config failure, sweep stops · 400/413/422 →
+rejected · 429/5xx/network → retry. One bounded log line per attempt (`[commercial-handoff]`,
+short id + outcome + HTTP) and one run summary; never the bearer, never the payload.
 
 ## 6. Boundaries that survive this
 
