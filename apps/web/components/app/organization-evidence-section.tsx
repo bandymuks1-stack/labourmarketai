@@ -37,9 +37,11 @@ import type {
  *
  * ── CONSENT IS EXPLICIT ────────────────────────────────────────────────────
  * A pending offer shows the organization's name and the name it holds, and
- * offers two answers. Refusing is a first-class action, not a hidden one:
- * being named in someone's records must never be something a person can only
- * accept. An unanswered offer stays pending — silence is not consent.
+ * offers two answers (`RosterLinkOffers`, below — rendered by the profile
+ * page ABOVE its disclosures, not inside this card). Refusing is a
+ * first-class action, not a hidden one: being named in someone's records must
+ * never be something a person can only accept. An unanswered offer stays
+ * pending — silence is not consent.
  */
 
 const CARD = "rounded-md border border-ink-500 bg-ink-900 px-3 py-2";
@@ -192,13 +194,81 @@ function DisputeRecord({
   );
 }
 
+/**
+ * "WAITING FOR YOUR ANSWER" — the pending roster-link offers, as their OWN
+ * surface at the top of the profile.
+ *
+ * Until 2026-09-17 this block lived inside `OrganizationEvidenceSection`,
+ * which the profile page renders INSIDE the closed `#cv-details` disclosure —
+ * the bar reserved for editors "filled in once and revisited rarely". A
+ * decision the person has to make is not one of those. On the first real
+ * offer in production (the owner, on their own account, from
+ * /dashboard/company/people) the target opened /dashboard/profile and saw no
+ * offer and no Accept / Decline at all: the row was persisted, RLS showed it,
+ * the read fetched it, the component rendered it — behind a closed bar with
+ * no indicator. This component is the same offer card, the same server
+ * action and the same two answers, hoisted to where a pending decision is
+ * visible on arrival. It renders nothing when there is nothing to decide.
+ *
+ * Authority is unchanged: the organization offered, only this person can
+ * answer, and `respondToRosterLinkAction` still re-derives the caller and
+ * the database still refuses any row that does not already name them.
+ */
+export function RosterLinkOffers({
+  offers,
+}: {
+  offers: readonly SubjectRosterLink[];
+}) {
+  const t = useTranslations("evidenceImport.mine");
+  if (offers.length === 0) return null;
+  return (
+    <Card compact>
+      <section
+        id="roster-link-offers"
+        className="flex flex-col gap-2 scroll-mt-20"
+        data-testid="organization-evidence-offers"
+        aria-labelledby="roster-link-offers-title"
+      >
+        <p
+          id="roster-link-offers-title"
+          className="font-mono text-meta uppercase tracking-label text-state-amber"
+        >
+          {t("offersTitle")}
+        </p>
+        <p className="text-xs leading-relaxed text-text-secondary">
+          {t("offersHint")}
+        </p>
+        {offers.map((offer) => (
+          <div
+            key={offer.id}
+            className={`${CARD} flex flex-col gap-2`}
+            data-testid="roster-link-offer"
+            data-person-id={offer.id}
+          >
+            <p className="text-sm text-text-primary">
+              {offer.organizationName ?? t("unnamedOrganization")} —{" "}
+              {offer.displayName}
+            </p>
+            <OfferDecision
+              offer={offer}
+              labels={{
+                accept: t("accept"),
+                refuse: t("refuse"),
+                errorMsg: t("decisionFailed"),
+              }}
+            />
+          </div>
+        ))}
+      </section>
+    </Card>
+  );
+}
+
 export function OrganizationEvidenceSection({
   records,
-  pendingOffers,
   needsMigration,
 }: {
   records: readonly EvidenceRecordView[];
-  pendingOffers: readonly SubjectRosterLink[];
   /** The store is not provisioned in this environment. The card still renders,
    *  with its honest note instead of a silently empty list. */
   needsMigration: boolean;
@@ -231,36 +301,6 @@ export function OrganizationEvidenceSection({
             {t("notEnabled")}
           </p>
         ) : null}
-
-        {pendingOffers.length > 0 && (
-          <div
-            className="flex flex-col gap-2"
-            data-testid="organization-evidence-offers"
-          >
-            <p className="font-mono text-meta uppercase tracking-label text-state-amber">
-              {t("offersTitle")}
-            </p>
-            <p className="text-xs leading-relaxed text-text-secondary">
-              {t("offersHint")}
-            </p>
-            {pendingOffers.map((offer) => (
-              <div key={offer.id} className={`${CARD} flex flex-col gap-2`}>
-                <p className="text-sm text-text-primary">
-                  {offer.organizationName ?? t("unnamedOrganization")} —{" "}
-                  {offer.displayName}
-                </p>
-                <OfferDecision
-                  offer={offer}
-                  labels={{
-                    accept: t("accept"),
-                    refuse: t("refuse"),
-                    errorMsg: t("decisionFailed"),
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
 
         {records.length === 0 ? (
           !needsMigration && (

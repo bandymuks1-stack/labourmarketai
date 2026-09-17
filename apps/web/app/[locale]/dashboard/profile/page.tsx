@@ -85,7 +85,10 @@ import {
 } from "@/lib/cv-export/skill-presentation";
 import { groupCvSkillTiers } from "@/lib/cv-export/skill-tiers";
 import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
-import { OrganizationEvidenceSection } from "@/components/app/organization-evidence-section";
+import {
+  OrganizationEvidenceSection,
+  RosterLinkOffers,
+} from "@/components/app/organization-evidence-section";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -917,6 +920,19 @@ export default async function ProfilePage({
         />
       ) : null}
 
+      {/* A DECISION WAITING FOR THIS PERSON (2026-09-17). An organization's
+          offer to link one of its roster records to this account is rendered
+          HERE, above every overview and disclosure, because it is the one
+          thing on this page that somebody else is waiting on. It used to sit
+          inside `OrganizationEvidenceSection`, i.e. inside the closed
+          `#cv-details` bar below — on the first real production offer the
+          target opened this page and saw nothing to accept or refuse. Same
+          read, same offer, same action; only where it stands changed. Empty
+          when nothing is pending. */}
+      <RosterLinkOffers
+        offers={myOrgEvidence.kind === "ok" ? myOrgEvidence.pendingOffers : []}
+      />
+
       {/* W7-S1: the readiness/summary surfaces that used to stand here —
           `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
           standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
@@ -1210,7 +1226,6 @@ export default async function ProfilePage({
           put it there, and in what capacity. Never shown as verified. */}
       <OrganizationEvidenceSection
         records={myOrgEvidence.kind === "ok" ? myOrgEvidence.records : []}
-        pendingOffers={myOrgEvidence.kind === "ok" ? myOrgEvidence.pendingOffers : []}
         needsMigration={myOrgEvidence.kind === "needs-migration"}
       />
 

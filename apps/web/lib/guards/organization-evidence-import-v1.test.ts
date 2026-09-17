@@ -435,6 +435,24 @@ describe("the person the evidence is about can see it, and consented to it", () 
     expect(fn).toMatch(/linkState === "linked"/);
   });
 
+  it("a pending offer is reachable on arrival — never behind a closed disclosure", () => {
+    // Production, 2026-09-17: the first real offer (owner → own account)
+    // was persisted, RLS-visible, fetched and rendered — inside the closed
+    // `#cv-details` bar, so the target opened the profile and saw nothing to
+    // accept or refuse. The offers surface must precede the disclosure in the
+    // page's JSX, and the evidence card no longer carries the decision, so
+    // there is exactly ONE place the person answers from.
+    const page = read(PROFILE);
+    const offers = page.indexOf("<RosterLinkOffers");
+    const disclosure = page.indexOf('id="cv-details"');
+    expect(offers).toBeGreaterThan(-1);
+    expect(disclosure).toBeGreaterThan(-1);
+    expect(offers).toBeLessThan(disclosure);
+    const card = read(SUBJECT_CARD);
+    expect(card).toMatch(/export function RosterLinkOffers\(/);
+    expect(card.match(/<OfferDecision/g)?.length).toBe(1);
+  });
+
   it("refusing is a real, offered answer — not a hidden one", () => {
     const card = read(SUBJECT_CARD);
     expect(card).toContain('value="refuse"');
