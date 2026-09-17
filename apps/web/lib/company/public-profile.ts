@@ -170,7 +170,12 @@ export async function setBusinessPublicProfileAction(
     if (msg.includes("not authorized")) return { kind: "not-authorized" };
     return { kind: "error", message: "publish_failed" };
   }
-  revalidatePath("/dashboard/company");
-  if (input.slug) revalidatePath(`/business/${input.slug.toLowerCase()}`);
+  // Every page lives under app/[locale]/…, so the path must be the ROUTE
+  // PATTERN with the "page" type — a bare "/dashboard/company" tagged nothing
+  // (guard: lib/guards/revalidate-path-locale-route.test.ts). The panel that
+  // writes these settings renders on the settings door; the public page is
+  // the slug route.
+  revalidatePath("/[locale]/dashboard/company/settings", "page");
+  if (input.slug) revalidatePath("/[locale]/business/[slug]", "page");
   return { kind: "ok" };
 }

@@ -207,7 +207,7 @@ export async function createServiceOffering(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/services");
+  revalidatePath("/[locale]/dashboard/services", "page");
   return { kind: "ok", id: data?.id as string | undefined };
 }
 
@@ -234,7 +234,7 @@ export async function updateServiceOffering(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/services");
+  revalidatePath("/[locale]/dashboard/services", "page");
   return { kind: "ok", id };
 }
 
@@ -261,7 +261,7 @@ export async function setServiceOfferingStatus(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/services");
+  revalidatePath("/[locale]/dashboard/services", "page");
   return { kind: "ok", id };
 }
 
@@ -284,6 +284,6 @@ export async function deleteServiceOffering(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/services");
+  revalidatePath("/[locale]/dashboard/services", "page");
   return { kind: "ok", id };
 }

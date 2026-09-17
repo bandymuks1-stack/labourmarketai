@@ -83,7 +83,7 @@ export type EvidenceImportActionState =
 /** The workspace this section lives in. It is no longer a route of its own —
  *  see the section component's header for why. */
 // The importer lives on the organization's HISTORY door (IA 2026-09-16).
-const PATH = "/dashboard/company/history";
+const PATH = "/[locale]/dashboard/company/history";
 
 async function caller(): Promise<DomainCaller | null> {
   const supabase = await createClient();
@@ -279,7 +279,7 @@ export async function startEvidenceImportAction(
     if (res.totalInSession >= MAX_ROWS_PER_SESSION) break;
   }
 
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return {
     kind: "ok",
     sessionId: session.session.id,
@@ -303,7 +303,7 @@ export async function resolveEvidenceRowAction(
     workObjectId: text(form, "work_object_id") || undefined,
   });
   if (res.kind !== "ok") return refuse(res);
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return { kind: "ok", sessionId: text(form, "session_id") || undefined };
 }
 
@@ -337,7 +337,7 @@ export async function resolveEvidenceLabelAction(
   if (!decision) return { kind: "refused", reason: "invalid", detail: "choice" };
   const res = await resolveContextLabel(c, { sessionId, key, decision });
   if (res.kind !== "ok") return refuse(res);
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return { kind: "ok", sessionId, note: `updated:${res.updated}` };
 }
 
@@ -374,7 +374,7 @@ export async function resolveTimeSemanticsAction(
     },
   });
   if (res.kind !== "ok") return refuse(res);
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return { kind: "ok", sessionId, note: `updated:${res.updated}` };
 }
 
@@ -413,7 +413,7 @@ export async function createEvidencePersonAction(
     });
     if (linked.kind !== "ok") return refuse(linked);
   }
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return { kind: "ok", sessionId: text(form, "session_id") || undefined };
 }
 
@@ -478,7 +478,7 @@ export async function commitEvidenceImportAction(
     },
   });
   if (res.kind !== "ok") return refuse(res);
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return {
     kind: "ok",
     sessionId,
@@ -504,7 +504,7 @@ export async function withdrawEvidenceImportAction(
     return { kind: "refused", reason: "invalid", detail: "session" };
   const res = await withdrawImport(c, sessionId, text(form, "note") || null);
   if (res.kind !== "ok") return refuse(res);
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return { kind: "ok", sessionId, note: `withdrawn:${res.affected}` };
 }
 
@@ -533,6 +533,6 @@ export async function attestEvidenceRecordAction(
     note: text(form, "note") || null,
   });
   if (res.kind !== "ok") return refuse(res);
-  revalidatePath(PATH);
+  revalidatePath(PATH, "page");
   return { kind: "ok", sessionId: text(form, "session_id") || undefined };
 }
