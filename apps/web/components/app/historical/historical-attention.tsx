@@ -164,19 +164,25 @@ export function HistoricalAttention({
                           </div>
                         </details>
                       )}
+                      {/* ONE decision per figure (B1 walk, 2026-09-17): two
+                          aggregates in one file are two different people's
+                          periods — 800 h over six months and 165 h over five.
+                          A single form for every open row could only stamp
+                          one period onto all of them, so the human could not
+                          say what each figure means. The server action has
+                          always taken the rows it is given; the form now
+                          gives it exactly this one. */}
+                      <EvidenceTimeSemanticsForm
+                        action={actions.resolveTime}
+                        sessionId={sessionId}
+                        rowIds={[r.rowId]}
+                        suggestedKind={r.machineReading === "period_aggregate" ? "period_aggregate" : "unknown"}
+                        suggestedRemote={r.remote === true ? true : null}
+                        labels={labels.time}
+                      />
                     </li>
                   ))}
                 </ul>
-              )}
-              {i.kind === "time_semantics" && (
-                <EvidenceTimeSemanticsForm
-                  action={actions.resolveTime}
-                  sessionId={sessionId}
-                  rowIds={i.rowIds}
-                  suggestedKind={i.timeRows.every((r) => r.machineReading === "period_aggregate") ? "period_aggregate" : "unknown"}
-                  suggestedRemote={i.timeRows.some((r) => r.remote === true) ? true : null}
-                  labels={labels.time}
-                />
               )}
               {(i.kind === "ambiguous_place" || i.kind === "place_from_text") && labelQuestion(i)}
               {i.kind === "ambiguous_person" && i.sample && <p className="text-meta text-text-secondary">{i.sample}</p>}

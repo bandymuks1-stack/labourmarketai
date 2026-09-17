@@ -328,6 +328,18 @@ describe("objects, attention, the decision bar and the source", () => {
     expect(attention).toMatch(/<details>[\s\S]{0,300}labels\.source/);
     expect(decisionCount(projectionOfTheSession().issues)).toBe(1);
   });
+  it("ONE decision form per aggregate row — two people's periods are never stamped by one form (B1 walk, 2026-09-17)", () => {
+    // The 800 h and the 165 h figures belong to two people and two periods
+    // (six months and five). A single form over `i.rowIds` could only give
+    // both the same period; the form now sits INSIDE the per-row list item
+    // and hands the server action exactly that row.
+    const rowsList = attention.slice(attention.indexOf('data-testid="evidence-time-rows"'), attention.indexOf("</ul>", attention.indexOf('data-testid="evidence-time-rows"')));
+    expect(rowsList).toMatch(/<EvidenceTimeSemanticsForm[\s\S]{0,400}rowIds=\{\[r\.rowId\]\}/);
+    expect(rowsList).toMatch(/suggestedRemote=\{r\.remote === true \? true : null\}/);
+    expect(attention).not.toMatch(/rowIds=\{i\.rowIds\}/);
+    expect(attention).not.toMatch(/i\.timeRows\.every\(/);
+    expect(attention).not.toMatch(/i\.timeRows\.some\(/);
+  });
   it("the decision bar is persistent, CONFIRM is withheld while a decision blocks, the commit control is the existing one", () => {
     expect(workspace).toMatch(/data-testid="evidence-decision-bar"/);
     expect(workspace).toMatch(/fixed inset-x-0 bottom-0/);
