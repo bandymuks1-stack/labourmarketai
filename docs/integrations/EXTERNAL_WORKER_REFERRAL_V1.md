@@ -1,11 +1,23 @@
 # External worker referral — receiving contract v1
 
-> **Status (2026-09-17): code on the branch, database migration RED and
-> UNAPPLIED, no source secret set.** Until the owner applies
-> `20260917120000_universal_invitation_referral_network_v1` and sets the first
-> source secret, the door answers `503 not_enabled` and stores nothing. This
-> document is the exact shape the partner side (`bandymuks1-stack/nonstopgroup-website`,
-> `lib/labourmarket-handoff.ts`) can build its transmission processor against.
+> **Status (2026-09-17, after the owner-gated production proof):**
+> - Database: `20260917120000` **APPLIED** to production (ledger `20260917080303`);
+>   every RPC exercised on production as the real roles in a zero-residue
+>   transaction — see `docs/APPLIED_LEDGER.md`.
+> - Secret: `EXTERNAL_REFERRAL_TOKEN_NONSTOP` **SET** in the LabourMarket.ai
+>   Vercel **Production** environment (48 random bytes, base64url). The value
+>   lives only there; it is not in any file, chat or PR.
+> - Code: PR #1752 **not yet merged** — production still runs `main`, so
+>   `POST /api/referrals/external/v1` is a **404** today (fail-closed). The
+>   door opens on the first deployment after merge.
+> - One forward correction (`20260917130000`, one identifier in the signed-in
+>   preview) is RED and **unapplied**; it affects only demand invitations'
+>   signed-in landing, not this door.
+>
+> **Nonstop may flip `LABOURMARKET_INTEGRATION.live = true` only after** (1)
+> #1752 is merged and deployed, (2) the same secret is configured on the
+> Nonstop side, and (3) one `201`, one `200 duplicate` and one `422` have been
+> observed against the live door.
 
 ## What it is
 
