@@ -41,7 +41,7 @@ export function RosterLinkOfferForm({
   );
   if (state?.ok) {
     return (
-      <span className="font-mono text-meta text-state-success" data-testid={`roster-link-offered-${personId}`}>
+      <span role="status" className="font-mono text-meta text-state-success" data-testid={`roster-link-offered-${personId}`}>
         {labels.offered}
       </span>
     );
@@ -71,12 +71,13 @@ export function RosterLinkOfferForm({
       <button
         type="submit"
         disabled={pending || candidates.length === 0}
+        aria-busy={pending}
         className="min-h-9 rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
       >
-        {labels.offer}
+        {pending ? "…" : labels.offer}
       </button>
       {state && !state.ok ? (
-        <span className="font-mono text-meta text-state-danger" data-testid={`roster-link-error-${personId}`} data-code={state.code}>
+        <span role="alert" className="font-mono text-meta text-state-danger" data-testid={`roster-link-error-${personId}`} data-code={state.code}>
           {labels.error}
         </span>
       ) : null}
