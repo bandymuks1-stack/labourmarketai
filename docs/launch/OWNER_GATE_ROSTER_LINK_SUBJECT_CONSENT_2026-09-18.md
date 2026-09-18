@@ -1,8 +1,13 @@
 # Owner gate — roster-link subject consent guard (RED, 2026-09-18)
 
 **Packet:** `supabase/migrations/20260918070000_roster_link_subject_consent_guard_v1.sql`
-(+ `supabase/rollbacks/…down.sql`). Applied: **NO**. Apply via Supabase MCP
-`apply_migration` after the owner says **"Apply roster consent guard 2026-09-18"**.
+(+ `supabase/rollbacks/…down.sql`). **APPLIED 2026-09-18** under owner approval
+"APPLY ROSTER CONSENT GUARD 2026-09-18" via Supabase MCP `apply_migration` —
+production ledger version **20260918070510**. Live hostile tests (rolled back):
+manager forge 42501 · forge on proposed row 42501 · manager offer rows=1 ·
+manager metadata edit on confirmed row rows=1 · subject accept rows=1
+(`linked_by = subject`) · outsider rows=0. Donatas row `b154ab88` and the 158
+evidence records / 800 h / 1 event unchanged.
 
 ## The defect (found on the first real human walk, #1770)
 

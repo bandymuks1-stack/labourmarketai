@@ -2553,7 +2553,12 @@ describe("no migration files added by this sprint", () => {
 // (forward fix: a closed, never-delivered handoff is re-queued when the hand is
 // raised again; found on the production-data walk of #1760). RED, PREPARED,
 // NOT APPLIED — owner gate; dry-run proven, rolled back. RECOUNTED: 290.
-const SPRINT_BASELINE = 290;
+// Bumped 290 -> 291 for 20260918070000_roster_link_subject_consent_guard_v1
+// (BEFORE UPDATE trigger: only the linked subject may turn a roster row into
+// linked/worker_confirmed; a manager's forgery was ADMITTED live before it).
+// RED, APPLIED 2026-09-18 under owner approval, ledger 20260918070510;
+// hostile tests proven live, rolled back. RECOUNTED: 291.
+const SPRINT_BASELINE = 291;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

@@ -1372,6 +1372,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // place when the worker raises their hand again. RED (SECDEF replace),
       // PREPARED, NOT APPLIED — owner gate; dry-run proven, rolled back.
       "20260917170000_commercial_handoff_requeue_on_reexpress_v1.sql",
+      // 2026-09-18 — roster-link subject consent guard: a BEFORE UPDATE trigger
+      // that refuses anyone but the linked subject from turning a roster row
+      // into (linked, worker_confirmed). The manager policy admitted the
+      // forgery live (#1770 finding). RED, APPLIED 2026-09-18 under owner
+      // approval "APPLY ROSTER CONSENT GUARD 2026-09-18", ledger
+      // 20260918070510; hostile tests proven on the live trigger, rolled back.
+      "20260918070000_roster_link_subject_consent_guard_v1.sql",
 ]);
   });
 
