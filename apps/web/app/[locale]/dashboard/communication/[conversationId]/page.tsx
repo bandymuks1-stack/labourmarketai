@@ -19,6 +19,7 @@ import {
 } from "@/lib/communication/attachments";
 import { isImageAttachmentMime } from "@/lib/communication/attachment-model";
 import { formatUtcDateTime } from "@/lib/time/display";
+import { PersonPresence, PlaceTimeStamp } from "@/components/app/work-world/primitives";
 
 type MessageRow = {
   id: string;
@@ -196,8 +197,15 @@ export default async function ConversationDetailPage({
                 data-testid="thread-counterparty"
               >
                 {/* Permitted real name (safe reader) or the honest i18n
-                    label (e.g. support team) — never invented. */}
-                {card.counterpartyName ?? t(card.counterpartyKey)}
+                    label (e.g. support team) — never invented. A permitted
+                    person is a real PRESENCE (work-world grammar): the same
+                    initial tile the roster draws, never a fabricated face;
+                    the honest label stays plain text. */}
+                {card.counterpartyName ? (
+                  <PersonPresence name={card.counterpartyName} role={t(card.typeKey)} size={28} />
+                ) : (
+                  t(card.counterpartyKey)
+                )}
               </span>
             )}
             <span aria-hidden className="text-text-muted">
@@ -284,9 +292,9 @@ export default async function ConversationDetailPage({
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {isMine ? t("byYou") : t("byOther")}
                   </span>
-                  <span className="font-mono text-meta text-text-muted">
+                  <PlaceTimeStamp>
                     {formatUtcDateTime(m.created_at, locale)}
-                  </span>
+                  </PlaceTimeStamp>
                 </div>
                 {(() => {
                   const vt = viewerTexts.get(m.id) ?? {
