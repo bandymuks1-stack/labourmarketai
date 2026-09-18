@@ -955,6 +955,18 @@ export default async function ProfilePage({
         />
       ) : null}
 
+      {/* THE STUDENT'S IDENTITY, ABOVE THE FOLD (2026-09-18). The Learning
+          Compass — what this person is becoming, in which cohort, and the
+          real demand for it — is a learner's primary identity, so it stands
+          here, not inside the closed `#cv-details` bar where it lived until
+          the two-sided institution walk found a learner who had accepted a
+          cohort could reach its context only by expanding "Details" (the
+          same class-F reachability defect #1770/#1771 fixed for offers and
+          imported history). Student path only; nothing generated. */}
+      {learningCompass?.status === "ok" && learningCompass.student ? (
+        <LearningCompassSection compass={learningCompass.compass} />
+      ) : null}
+
       {/* W7-S1: the readiness/summary surfaces that used to stand here —
           `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
           standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
@@ -1253,13 +1265,6 @@ export default async function ProfilePage({
         />
       )}
 
-      {/* Learning Compass (Track C, 2026-09-03) — the student home's five
-          answers, rendered only on the student path (a current education row
-          or an active learner link). Reads the person's own records and the
-          same match engine the opportunity board uses; nothing generated. */}
-      {learningCompass?.status === "ok" && learningCompass.student ? (
-        <LearningCompassSection compass={learningCompass.compass} />
-      ) : null}
       {workerId && workerAchievements ? (
         <WorkerAchievementsSection
           initial={

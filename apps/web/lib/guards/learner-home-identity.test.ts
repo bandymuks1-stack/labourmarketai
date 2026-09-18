@@ -54,4 +54,20 @@ describe("Guard: learner home identity (person brief)", () => {
       expect(cat.conversation.chat.briefLearner).toContain("{organization}");
     }
   });
+
+  it("the learner's Compass stands above the disclosures, not inside #cv-details", () => {
+    // 2026-09-18 two-sided institution walk: a learner who had accepted a
+    // cohort could reach its programme/cohort context only by expanding the
+    // closed "Details" bar — the same class-F reachability defect #1770/#1771
+    // fixed for offers and imported history. On the student path the Compass
+    // is the person's identity and must precede the disclosure.
+    const page = read("app/[locale]/dashboard/profile/page.tsx");
+    const compass = page.indexOf("<LearningCompassSection");
+    const disclosure = page.indexOf('id="cv-details"');
+    expect(compass).toBeGreaterThan(-1);
+    expect(disclosure).toBeGreaterThan(-1);
+    expect(compass).toBeLessThan(disclosure);
+    // Exactly one placement — the buried copy is gone, not duplicated.
+    expect((page.match(/<LearningCompassSection/g) ?? []).length).toBe(1);
+  });
 });
