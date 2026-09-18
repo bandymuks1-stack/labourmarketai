@@ -21,8 +21,9 @@ describe("Guard: PUBLIC JOBS + LANDING wear the work-world grammar", () => {
     // The three /jobs files carry the same fix on the owner-waived branch
     // (public-acquisition-route-jobs is PR-scoped and owner-expanded); they
     // join this list when that PR merges.
+    // /oauth/consent carries the same fix on the owner-waived branch too
+    // (oauth-consent-auth-infrastructure is PR-scoped, covers #1347 only).
     for (const rel of [
-      "app/[locale]/oauth/consent/page.tsx",
       "components/app/timesheet-import-review.tsx",
       "components/app/work-hours-quick-entry.tsx",
       "components/marketing/save-vacancy-button.tsx",

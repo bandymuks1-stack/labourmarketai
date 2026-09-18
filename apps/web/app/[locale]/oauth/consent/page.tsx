@@ -43,7 +43,7 @@ export default async function OauthConsentPage({
   if (!authorizationId) {
     return (
       <ConsentShell title={t("title")}>
-        <p className="text-sm text-text-muted">
+        <p className="text-sm text-muted-foreground">
           {errorParam ? t("errorUnresolved") : t("errorMissingId")}
         </p>
       </ConsentShell>
@@ -67,7 +67,7 @@ export default async function OauthConsentPage({
   if (error || !details) {
     return (
       <ConsentShell title={t("title")}>
-        <p className="text-sm text-text-muted">{t("errorUnresolved")}</p>
+        <p className="text-sm text-muted-foreground">{t("errorUnresolved")}</p>
       </ConsentShell>
     );
   }
@@ -92,17 +92,17 @@ export default async function OauthConsentPage({
       <dl className="mt-4 space-y-2 text-sm">
         <div>
           <dt className="font-medium">{t("clientLabel")}</dt>
-          <dd className="text-text-muted">{client?.name ?? t("unknownClient")}</dd>
+          <dd className="text-muted-foreground">{client?.name ?? t("unknownClient")}</dd>
         </div>
         <div>
           <dt className="font-medium">{t("redirectLabel")}</dt>
-          <dd className="break-all text-text-muted">{redirectUri}</dd>
+          <dd className="break-all text-muted-foreground">{redirectUri}</dd>
         </div>
         {scopes.length > 0 && (
           <div>
             <dt className="font-medium">{t("scopesLabel")}</dt>
             <dd>
-              <ul className="list-inside list-disc text-text-muted">
+              <ul className="list-inside list-disc text-muted-foreground">
                 {scopes.map((s) => (
                   <li key={s}>{s}</li>
                 ))}
@@ -112,7 +112,7 @@ export default async function OauthConsentPage({
         )}
       </dl>
 
-      <p className="mt-4 text-xs text-text-muted">{t("authorityNote")}</p>
+      <p className="mt-4 text-xs text-muted-foreground">{t("authorityNote")}</p>
 
       <form action={decideOauthConsent} className="mt-6 flex gap-3">
         <input type="hidden" name="authorization_id" value={authorizationId} />
@@ -120,7 +120,7 @@ export default async function OauthConsentPage({
           type="submit"
           name="decision"
           value="approve"
-          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand hover:opacity-90"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
         >
           {t("approve")}
         </button>
@@ -128,7 +128,7 @@ export default async function OauthConsentPage({
           type="submit"
           name="decision"
           value="deny"
-          className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-surface-2"
+          className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
         >
           {t("deny")}
         </button>
