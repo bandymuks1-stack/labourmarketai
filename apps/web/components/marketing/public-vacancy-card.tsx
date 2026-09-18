@@ -2,6 +2,7 @@ import { Link } from "@/lib/i18n/navigation";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { formatUtcDate } from "@/lib/time/display";
+import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
 
 /**
  * One anonymous vacancy row.
@@ -134,7 +135,7 @@ export function PublicVacancyCard({
   return (
     <Link
       href={`/jobs/${vacancy.id}`}
-      className="block rounded-lg border p-4 transition-colors hover:bg-accent/40 focus-visible:outline focus-visible:outline-2"
+      className="block rounded-lg border p-4 transition-colors hover:bg-surface-2/60 focus-visible:outline focus-visible:outline-2"
     >
       <div className="flex items-start justify-between gap-3">
         <h2
@@ -144,14 +145,14 @@ export function PublicVacancyCard({
           {heading}
         </h2>
         {savedLabel && (
-          <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
+          <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-text-muted">
             {savedLabel}
           </span>
         )}
       </div>
 
       {occupationSubline && (
-        <p lang={sourceLang} className="mt-1 text-sm text-muted-foreground">
+        <p lang={sourceLang} className="mt-1 text-sm text-text-muted">
           {occupationSubline}
         </p>
       )}
@@ -161,7 +162,7 @@ export function PublicVacancyCard({
           {chips.map((c) => (
             <li
               key={c}
-              className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
+              className="rounded-full border px-2 py-0.5 text-xs text-text-muted"
             >
               {c}
             </li>
@@ -170,7 +171,9 @@ export function PublicVacancyCard({
       )}
 
       {published && (
-        <p className="mt-2 text-xs text-muted-foreground">{published}</p>
+        <p className="mt-2">
+          <PlaceTimeStamp>{published}</PlaceTimeStamp>
+        </p>
       )}
     </Link>
   );
