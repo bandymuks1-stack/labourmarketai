@@ -837,6 +837,17 @@
       "disputed": "Bestritten",
       "not_applicable": "Hier steht niemand über Ihnen"
     },
+    "standing": {
+      "self_reported": "Eigene Aufzeichnung",
+      "verifier_not_identified": "Niemand benannt",
+      "verifier_available": "Bestätigung nicht aktiv",
+      "verification_pending": "An Führungskraft gesendet",
+      "verified": "Von Führungskraft bestätigt",
+      "self_confirmed": "Selbst bestätigt",
+      "returned": "Zurückgegeben",
+      "disputed": "Bestritten",
+      "not_applicable": "Eigene Organisation"
+    },
     "action": {
       "await_verifier": "Nichts zu tun — es liegt in einer Warteschlange",
       "ask_employer_to_enable_confirmation": "Bitten Sie Ihre Führungskraft, die Bestätigung einzuschalten",

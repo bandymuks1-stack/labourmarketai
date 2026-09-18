@@ -837,6 +837,17 @@
       "disputed": "Disputed",
       "not_applicable": "Nobody stands above you here"
     },
+    "standing": {
+      "self_reported": "Own record",
+      "verifier_not_identified": "No one named",
+      "verifier_available": "Confirmation not enabled",
+      "verification_pending": "Sent to manager",
+      "verified": "Manager confirmed",
+      "self_confirmed": "Self-confirmed",
+      "returned": "Returned",
+      "disputed": "Disputed",
+      "not_applicable": "Own organization"
+    },
     "action": {
       "await_verifier": "Nothing to do — it is in someone's queue",
       "ask_employer_to_enable_confirmation": "Ask your manager to switch confirmation on",

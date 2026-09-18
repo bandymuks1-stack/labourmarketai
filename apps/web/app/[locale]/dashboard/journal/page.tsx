@@ -8,6 +8,15 @@ import {
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import {
+  EvidenceState,
+  PlaceTimeStamp,
+  WorkSpine,
+} from "@/components/app/work-world/primitives";
+import {
+  evidenceStandingOfVerification,
+  spineNodeSolid,
+} from "@/lib/journal/work-verification-standing";
+import {
   WORKSPACE_ACCENT_DOT,
   WORKSPACE_PERSONAL_DOT,
 } from "@/components/app/conversation/chat/workspace-chip";
@@ -1510,7 +1519,12 @@ export default async function JournalPage({
                       </span>
                     </span>
                   </summary>
-                  <ul className="flex flex-col gap-3 px-4 pb-4">
+                  {/* The day's entries are ONE work spine (work-world
+                      grammar): every entry a node whose diamond carries its
+                      honest evidence standing. Same rows, same order, same
+                      words — only the shape is shared with identity/history. */}
+                  <div className="px-4 pb-4">
+                  <WorkSpine>
                     {group.entries.map((e) => {
                       // Evidence Decision Timeline v1 — the real, ordered human-decision
                       // history (append-only rows). Empty while still submitted → the
@@ -1632,6 +1646,10 @@ export default async function JournalPage({
                           key={e.id}
                           entryId={e.id}
                           canDelete={canDelete}
+                          standing={evidenceStandingOfVerification(
+                            verification.state,
+                          )}
+                          standingSolid={spineNodeSolid(verification.state)}
                           editSlot={
                             rowEditingEntry ? (
                               <JournalEntryEditLauncher
@@ -1733,8 +1751,10 @@ export default async function JournalPage({
                               className="text-meta text-text-muted"
                               data-testid={`journal-entry-location-${e.id}`}
                             >
+                              <PlaceTimeStamp>
                               {t("entry.locationLabel")}:{" "}
                               {site?.value_text ?? t("entry.locationUnset")}
+                              </PlaceTimeStamp>
                               {/* Who submitted (owner UX recovery v1) — this
                                   surface is the worker's own diary, so the
                                   submitter is the signed-in worker; named
@@ -1771,17 +1791,36 @@ export default async function JournalPage({
                                 the answer a worker most needs and the one the
                                 product used to withhold. The next action is a
                                 real destination, never advice. */}
-                            {verification.nextAction !== "none" && (
-                              <p
+                            {/* EVIDENCE STANDING (work-world grammar): the
+                                canonical chip names the standing in one
+                                short label — cyan = the person's own record,
+                                champagne = the organization stands behind
+                                it, amber = contested; NEVER green, because a
+                                manager's confirmation is attestation, not
+                                independent verification. The sentence
+                                beneath is the same explanation as before, and
+                                the next action is still a real destination.
+                                Now shown on EVERY entry (a confirmed record
+                                used to carry no standing line at all). */}
+                            <p
                                 className="flex flex-wrap items-center gap-1.5 text-meta text-text-muted"
                                 data-testid={`journal-entry-verification-${e.id}`}
                                 data-verification-state={verification.state}
                                 data-next-action={verification.nextAction}
                               >
+                                <EvidenceState
+                                  state={evidenceStandingOfVerification(
+                                    verification.state,
+                                  )}
+                                  label={tVerify(
+                                    `standing.${verification.state}`,
+                                  )}
+                                />
                                 <span className="text-text-secondary">
                                   {tVerify(`state.${verification.state}`)}
                                 </span>
-                                {verification.nextAction ===
+                                {verification.nextAction !== "none" &&
+                                (verification.nextAction ===
                                 "identify_verifier" ? (
                                   <Link
                                     href={IDENTIFY_VERIFIER_HREF as "/dashboard"}
@@ -1794,9 +1833,8 @@ export default async function JournalPage({
                                   <span>
                                     {tVerify(`action.${verification.nextAction}`)}
                                   </span>
-                                )}
+                                ))}
                               </p>
-                            )}
                           </div>
                           {/* 2 · Sistema suprato — current signals from the current
                         text. Plain labelled values, never a badge wall. */}
@@ -1841,7 +1879,8 @@ export default async function JournalPage({
                         </JournalEntryRow>
                       );
                     })}
-                  </ul>
+                  </WorkSpine>
+                  </div>
                 </details>
               );
             })}

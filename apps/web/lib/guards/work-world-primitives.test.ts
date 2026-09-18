@@ -81,3 +81,41 @@ describe("Guard: the 800 h period reads as a temporal shape, never a lump", () =
     expect(share).not.toMatch(/new Date\([^)]*\)\.getDate|per[- ]?day|dailyRows/i);
   });
 });
+
+describe("Guard: the Journal reads with the work-world grammar (JOURNAL_REACHABLE + EVIDENCE_NOT_VERIFICATION)", () => {
+  const page = read("app/[locale]/dashboard/journal/page.tsx");
+  const row = read("components/app/journal-entry-row.tsx");
+
+  it("a day's entries are one WorkSpine, each entry a WorkSpineNode coloured by its standing", () => {
+    expect(page).toContain('from "@/components/app/work-world/primitives"');
+    expect(page).toContain("<WorkSpine>");
+    expect(page).toMatch(/standing=\{evidenceStandingOfVerification\(/);
+    expect(row).toContain("<WorkSpineNode state={standing}");
+    // a soft-deleted entry is drawn as WITHDRAWN, never silently removed from the spine
+    expect(row).toContain('<WorkSpineNode state="WITHDRAWN">');
+  });
+
+  it("every entry carries the canonical EvidenceState chip on its verification line", () => {
+    expect(page).toMatch(/<EvidenceState[\s\S]{0,200}evidenceStandingOfVerification\(/);
+    expect(page).toMatch(/tVerify\(\s*`standing\.\$\{verification\.state\}`/);
+    // the line is no longer conditional on a next action: a confirmed record shows its standing too
+    expect(page).not.toMatch(/verification\.nextAction !== "none" && \(\s*<p/);
+  });
+
+  it("the journal chip labels exist in every active locale that carries the verification namespace", () => {
+    for (const loc of ["en", "lt", "ru", "de", "nl"]) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
+        verification: { state: Record<string, string>; standing: Record<string, string> };
+      };
+      for (const k of Object.keys(j.verification.state)) {
+        expect(j.verification.standing[k], `${loc} standing.${k}`).toBeTruthy();
+        // a chip label is short — it is the LABEL; the sentence is the explanation
+        expect(j.verification.standing[k].length, `${loc} standing.${k}`).toBeLessThanOrEqual(32);
+      }
+    }
+  });
+
+  it("the entry location is a PlaceTimeStamp (place is machine-precise mono, same words)", () => {
+    expect(page).toMatch(/journal-entry-location-\$\{e\.id\}`\}\s*>\s*<PlaceTimeStamp>/);
+  });
+});
