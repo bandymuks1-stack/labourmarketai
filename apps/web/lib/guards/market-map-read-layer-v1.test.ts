@@ -970,7 +970,10 @@ describe("NO new DB migration in this PR", () => {
     //   (RED, PREPARED, NOT APPLIED). Not this read layer's file. RECOUNTED: 289.
     // Bumped 289 -> 290 for 20260917170000_commercial_handoff_requeue_on_reexpress_v1
     //   (RED forward fix, NOT APPLIED). Not this read layer's file. RECOUNTED: 290.
-    expect(count).toBeLessThanOrEqual(290);
+    // Bumped 290 -> 291 for 20260918070000_roster_link_subject_consent_guard_v1
+    //   (RED trigger, APPLIED 2026-09-18, ledger 20260918070510). Not this read
+    //   layer's file. RECOUNTED: 291.
+    expect(count).toBeLessThanOrEqual(291);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
