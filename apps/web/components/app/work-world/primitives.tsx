@@ -200,6 +200,7 @@ export function PeriodBand({
   totalLabel,
   derivedLabel,
   months,
+  activeMonth = null,
 }: {
   /** The canonical total, already formatted (e.g. "800 h"). */
   totalLabel: string;
@@ -207,6 +208,10 @@ export function PeriodBand({
   derivedLabel: string;
   /** Oldest→newest month shares from the canonical projection. */
   months: readonly { readonly month: string; readonly hours: number }[];
+  /** `YYYY-MM` — the month a calendar is looking at; its segment is drawn
+   *  emphasised so the reader can locate "this month's share" on the band.
+   *  Null (the default) draws every segment alike. */
+  activeMonth?: string | null;
 }) {
   if (months.length === 0) return null;
   return (
@@ -226,9 +231,10 @@ export function PeriodBand({
             key={m.month}
             data-month={m.month}
             data-hours={m.hours.toFixed(2)}
+            data-active={m.month === activeMonth ? "true" : undefined}
             className={`flex flex-1 items-center justify-center ${
               i === 0 ? "" : "border-l border-brand-cyan/25"
-            }`}
+            } ${m.month === activeMonth ? "bg-brand-cyan/15 ring-1 ring-inset ring-brand-cyan/60" : ""}`}
           >
             <span className="font-mono text-meta tabular-nums text-brand-cyan">{m.hours.toFixed(2)}</span>
           </div>
@@ -236,6 +242,56 @@ export function PeriodBand({
       </div>
       <span className="font-mono text-meta uppercase tracking-label text-text-muted">{derivedLabel}</span>
     </div>
+  );
+}
+
+/** The six temporal realities a calendar may state about a row. The names
+ *  are the product's, not a scheduler's: a journal entry is OBSERVED (it
+ *  happened), a month share of a period record is DERIVED (an allocation,
+ *  never a source day), a task due day or a proposed booking is PLANNED, an
+ *  accepted booking / assigned project / approved absence or trip is
+ *  COMMITTED (the person is physically bound), two committed rows on one day
+ *  are a CONFLICT, and a row with no date is UNKNOWN — never zero, never
+ *  today. */
+export type TimeRealityKind =
+  | "observed"
+  | "derived"
+  | "planned"
+  | "committed"
+  | "conflict"
+  | "unknown";
+
+const REALITY_CLASS: Record<TimeRealityKind, string> = {
+  // observed = cyan EVIDENCE (the same colour the journal wears everywhere)
+  observed: "text-brand-cyan border-brand-cyan/40",
+  // derived = the same evidence colour, dashed: real total, allocated months
+  derived: "text-brand-cyan border-dashed border-brand-cyan/40",
+  // committed = gold, the canonical / selected colour: this binds the person
+  committed: "text-brand-blue border-brand-blue/50",
+  planned: "text-text-secondary border-border-subtle",
+  conflict: "text-state-danger border-state-danger/50 bg-state-danger/10",
+  unknown: "text-text-muted border-dashed border-border-subtle",
+};
+
+/** The temporal-reality chip. `label` is caller-localized; `data-kind` lets a
+ *  guard assert that a plan is never painted as an observation. */
+export function TimeReality({
+  kind,
+  label,
+  className = "",
+}: {
+  kind: TimeRealityKind;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <span
+      data-testid="ww-time-reality"
+      data-kind={kind}
+      className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${REALITY_CLASS[kind]} ${className}`}
+    >
+      {label}
+    </span>
   );
 }
 

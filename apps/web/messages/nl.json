@@ -10317,6 +10317,20 @@
       "plannedDays": "{count} geplande werkdagen",
       "actualHours": "{hours} u geregistreerd in het journaal",
       "note": "Geplande dagen komen uit geaccepteerde boekingen en projecttoewijzingen; geregistreerde uren uit uw journaalvermeldingen. Beide worden naast elkaar getoond en nooit in elkaar omgerekend."
+    },
+    "reality": {
+      "observed": "Vastgelegd",
+      "derived": "Afgeleid",
+      "planned": "Gepland",
+      "committed": "Toegezegd",
+      "conflict": "Conflict",
+      "unknown": "Geen datum"
+    },
+    "derived": {
+      "title": "Periodebewijs — afgeleid maandaandeel",
+      "chip": "Afgeleid",
+      "thisMonth": "{hours} u deze maand (afgeleid)",
+      "sourceLink": "Periode-record openen"
     }
   },
   "workforcePlanning": {

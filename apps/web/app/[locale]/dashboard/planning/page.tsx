@@ -36,6 +36,9 @@ import {
   type TimesheetNotice,
 } from "@/lib/timesheets/timesheets-model";
 import { TimesheetsSection } from "./timesheets-section";
+import { TimeReality } from "@/components/app/work-world/primitives";
+import { temporalReality } from "@/lib/planning/temporal-reality";
+import { DerivedPeriodEvidence } from "@/components/app/planning/derived-period-evidence";
 import { createUtcFormatter } from "@/lib/time/display";
 
 /**
@@ -294,6 +297,15 @@ export default async function PlanningPage({
             <span className="min-w-0 break-words text-sm font-semibold text-text-primary">
               {item.label ?? t(`fallback.${item.sourceType}`)}
             </span>
+            {/* TEMPORAL REALITY (work-world grammar): OBSERVED (a journal
+                fact) · COMMITTED (binds the person — exactly the conflict-
+                eligible set) · PLANNED (every other dated row) · UNKNOWN
+                (no date). One rule, `temporalReality`; the conflict flag
+                beside it stays the relation between two committed rows. */}
+            <TimeReality
+              kind={temporalReality(item)}
+              label={t(`reality.${temporalReality(item)}`)}
+            />
             {conflict ? (
               <span
                 className="inline-flex items-center rounded-full border border-state-danger/50 bg-state-danger/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-danger"
@@ -705,6 +717,11 @@ export default async function PlanningPage({
             </span>
           </div>
           <p className="text-xs text-text-muted">{t("month.hint")}</p>
+          {/* DERIVED period evidence for this month — a confirmed period
+              record's even monthly share, on the same PeriodBand the profile
+              draws, with this month emphasised. Never a calendar item, never
+              a day, never counted in a cell (see the component). */}
+          <DerivedPeriodEvidence month={anchor.slice(0, 7)} locale={locale} />
         </section>
       ) : null}
 
