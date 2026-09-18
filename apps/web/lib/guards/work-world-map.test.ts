@@ -21,7 +21,8 @@ describe("Guard: the Map states place precision (MAP_REACHABLE + no inferred pre
   it("a country-only position is dashed, never the stated-place colour", () => {
     expect(PRIM).toMatch(/country:\s*"text-text-secondary border-dashed/);
     expect(PRIM).toMatch(/city:\s*"text-brand-cyan/);
-    expect(PRIM).toMatch(/unknown:\s*"text-text-muted border-dashed border-border-subtle",\n\};\n\n\/\*\* The place-precision chip/);
+    // line-ending tolerant: CRLF on a Windows checkout, LF in CI
+    expect(PRIM).toMatch(/unknown:\s*"text-text-muted border-dashed border-border-subtle",\r?\n\};\r?\n\r?\n\/\*\* The place-precision chip/);
   });
 
   it("the precision labels are translated in every routed locale and never inferred as an address", () => {
