@@ -24,6 +24,7 @@ import { endAssignmentAction } from "@/lib/projects/actions";
 import { sendWorkInstructionAction } from "@/lib/instructions/actions";
 import { setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { Card } from "@/components/ui/Card";
+import { CapacityBand, PlaceTimeStamp } from "@/components/app/work-world/primitives";
 
 /**
  * THE FIELD on the operations page (frozen design contract §5 P4 — the
@@ -271,6 +272,28 @@ export function ProjectField({
 /* Scene — lanes in time, people, slots, the ready edge                */
 /* ------------------------------------------------------------------ */
 
+/** WHO × CAPACITY, as one band (work-world grammar): the people on the
+ *  project against the work slots nobody holds. Both figures are the model's
+ *  own totals — `peopleTotal` and `slotsTotal` — so the band can never claim
+ *  a position the Field does not already list. Nothing to state (no people,
+ *  no slots, or the tasks read unavailable) → nothing drawn. */
+function FieldCapacity({ field }: { field: ProjectField }) {
+  const t = useTranslations("projectField");
+  if (!field.tasksApplied) return null;
+  const total = field.peopleTotal + field.slotsTotal;
+  if (total === 0) return null;
+  return (
+    <div data-testid="project-field-capacity" data-people={field.peopleTotal} data-open={field.slotsTotal}>
+      <CapacityBand
+        filled={field.peopleTotal}
+        total={total}
+        leftLabel={t("capacity.people", { n: field.peopleTotal })}
+        rightLabel={t("capacity.open", { n: field.slotsTotal })}
+      />
+    </div>
+  );
+}
+
 function LaneButton({
   lane,
   pressed,
@@ -326,10 +349,10 @@ function LaneButton({
           </span>
         ) : null}
         {lane.start ? (
-          <span className="font-mono text-meta text-text-muted">
+          <PlaceTimeStamp>
             {day(lane.start)}
             {lane.end && lane.end !== lane.start ? ` → ${day(lane.end)}` : ""}
-          </span>
+          </PlaceTimeStamp>
         ) : null}
       </span>
     </button>
@@ -477,6 +500,7 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
         <h3 className={META}>
           {t("peopleTitle")} · {field.peopleTotal}
         </h3>
+        <FieldCapacity field={field} />
         {field.people.length === 0 ? (
           <p className="text-sm text-text-muted" data-testid="project-field-people-empty">{t("peopleEmpty")}</p>
         ) : (
@@ -574,6 +598,7 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
         <h3 className={META}>
           {t("peopleTitle")} · {field.people.length}/{field.peopleTotal}
         </h3>
+        <FieldCapacity field={field} />
         {field.people.length === 0 ? (
           <p className="text-sm text-text-muted">{t("peopleEmpty")}</p>
         ) : (

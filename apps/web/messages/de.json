@@ -543,7 +543,11 @@
       "free": "diese Woche frei",
       "why": "Warum diese: Personen, die bereits im Projekt sind und deren Checkliste in Ordnung ist, sowie Listenmitglieder ohne genehmigte Abwesenheit diese Woche. Nichts wird gerankt."
     },
-    "assignLink": "Personen auf der Projektseite zuweisen"
+    "assignLink": "Personen auf der Projektseite zuweisen",
+    "capacity": {
+      "people": "{n, plural, one {# Person im Projekt} other {# Personen im Projekt}}",
+      "open": "{n, plural, =0 {keine offenen Plätze} one {# Platz ohne Person} other {# Plätze ohne Person}}"
+    }
   },
   "projectStages": {
     "ganttTitle": "Zeitleiste (Gantt)",
