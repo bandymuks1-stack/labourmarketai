@@ -453,6 +453,28 @@ describe("the person the evidence is about can see it, and consented to it", () 
     expect(card.match(/<OfferDecision/g)?.length).toBe(1);
   });
 
+  it("linked history is reachable on arrival — the same lesson, one card later", () => {
+    // Production, 2026-09-18: the first real accepted link (800 h, one period
+    // record, organization-attested) rendered inside the closed `#cv-details`
+    // bar — the same class-F defect #1770 fixed for the offer. When the
+    // subject HAS linked records the card must precede the disclosure; the
+    // empty/not-enabled state may stay inside it. And the card must say WHICH
+    // organization recorded each row — the record view carries no name, the
+    // roster link does.
+    const page = read(PROFILE);
+    const disclosure = page.indexOf('id="cv-details"');
+    const hoisted = page.indexOf("<OrganizationEvidenceSection");
+    expect(hoisted).toBeGreaterThan(-1);
+    expect(hoisted).toBeLessThan(disclosure);
+    const hoistedBlock = page.slice(hoisted, disclosure);
+    expect(hoistedBlock).toContain("records={myOrgEvidence.records}");
+    expect(hoistedBlock).toContain("organizationNames=");
+    expect(hoistedBlock).toContain("l.organizationName");
+    const card = read(SUBJECT_CARD);
+    expect(card).toContain("organizationNames[rec.personId]");
+    expect(card).toContain("rec.contextLabel");
+  });
+
   it("refusing is a real, offered answer — not a hidden one", () => {
     const card = read(SUBJECT_CARD);
     expect(card).toContain('value="refuse"');

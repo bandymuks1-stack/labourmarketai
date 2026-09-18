@@ -267,11 +267,19 @@ export function RosterLinkOffers({
 export function OrganizationEvidenceSection({
   records,
   needsMigration,
+  organizationNames = {},
 }: {
   records: readonly EvidenceRecordView[];
   /** The store is not provisioned in this environment. The card still renders,
    *  with its honest note instead of a silently empty list. */
   needsMigration: boolean;
+  /** WHICH organization recorded each row, keyed by the roster record
+   *  (`personId`). The record view carries no organization name of its own;
+   *  the subject read already resolves it on the roster link (the ONE
+   *  org-name rule), so the page hands it over — nothing is invented here.
+   *  First real linked history (2026-09-18): the card showed a period, hours
+   *  and a standing with no organization on it. */
+  organizationNames?: Readonly<Record<string, string>>;
 }) {
   const t = useTranslations("evidenceImport.mine");
   const tRole = useTranslations("evidenceImport.role");
@@ -325,6 +333,19 @@ export function OrganizationEvidenceSection({
                   rec.independentlyVerified ? "true" : "false"
                 }
               >
+                {/* The organization first, then the activity the row is about:
+                    a person reads "who recorded this, and as what" before a
+                    figure. Both are the record's own facts. */}
+                {organizationNames[rec.personId] || rec.contextLabel ? (
+                  <p
+                    className="text-sm font-semibold text-text-primary"
+                    data-testid="organization-evidence-record-origin"
+                  >
+                    {organizationNames[rec.personId] ?? ""}
+                    {organizationNames[rec.personId] && rec.contextLabel ? " · " : ""}
+                    {rec.contextLabel ?? ""}
+                  </p>
+                ) : null}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm text-text-primary">
                     {rec.activityDate ??

@@ -933,6 +933,28 @@ export default async function ProfilePage({
         offers={myOrgEvidence.kind === "ok" ? myOrgEvidence.pendingOffers : []}
       />
 
+      {/* WHAT AN ORGANIZATION HAS RECORDED ABOUT THIS PERSON (2026-09-18).
+          The first real accepted roster link (800 h, one period record,
+          organization-attested) rendered — inside the same closed
+          `#cv-details` bar the offer used to hide in. Rendered ≠ reachable
+          (#1770, class F). When there IS linked history it stands here, above
+          the disclosures, because it is real work somebody else put on
+          record about this person; when there is none the card keeps its
+          quiet place inside the bar below (an empty "nothing recorded" line
+          is not worth the first screen). Same read, same card, same
+          derivation — only where it stands changes. */}
+      {myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0 ? (
+        <OrganizationEvidenceSection
+          records={myOrgEvidence.records}
+          needsMigration={false}
+          organizationNames={Object.fromEntries(
+            myOrgEvidence.links.flatMap((l) =>
+              l.organizationName ? [[l.id, l.organizationName] as const] : [],
+            ),
+          )}
+        />
+      ) : null}
+
       {/* W7-S1: the readiness/summary surfaces that used to stand here —
           `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
           standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
@@ -1224,10 +1246,12 @@ export default async function ProfilePage({
           side of the evidence import. It sits beside education because it is
           the same question from the other direction: what is on record, who
           put it there, and in what capacity. Never shown as verified. */}
-      <OrganizationEvidenceSection
-        records={myOrgEvidence.kind === "ok" ? myOrgEvidence.records : []}
-        needsMigration={myOrgEvidence.kind === "needs-migration"}
-      />
+      {myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0 ? null : (
+        <OrganizationEvidenceSection
+          records={[]}
+          needsMigration={myOrgEvidence.kind === "needs-migration"}
+        />
+      )}
 
       {/* Learning Compass (Track C, 2026-09-03) — the student home's five
           answers, rendered only on the student path (a current education row
