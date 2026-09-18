@@ -837,6 +837,17 @@
       "disputed": "Ginčijama",
       "not_applicable": "Čia virš jūsų nieko nėra"
     },
+    "standing": {
+      "self_reported": "Savo įrašas",
+      "verifier_not_identified": "Niekas nenurodytas",
+      "verifier_available": "Vadovas dar neįjungė",
+      "verification_pending": "Išsiųsta vadovui",
+      "verified": "Vadovo patvirtinta",
+      "self_confirmed": "Patvirtinta paties, ne vadovo",
+      "returned": "Grąžinta",
+      "disputed": "Ginčijama",
+      "not_applicable": "Sava organizacija"
+    },
     "action": {
       "await_verifier": "Nieko daryti nereikia — jau kažkieno eilėje",
       "ask_employer_to_enable_confirmation": "Paprašykite vadovo įjungti patvirtinimą",

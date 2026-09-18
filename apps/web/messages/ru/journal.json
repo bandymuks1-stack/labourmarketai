@@ -837,6 +837,17 @@
       "disputed": "Оспаривается",
       "not_applicable": "Здесь над вами никого нет"
     },
+    "standing": {
+      "self_reported": "Своя запись",
+      "verifier_not_identified": "Никто не указан",
+      "verifier_available": "Руководитель не включил",
+      "verification_pending": "Отправлено руководителю",
+      "verified": "Подтверждено руководителем",
+      "self_confirmed": "Подтвердили вы, не руководитель",
+      "returned": "Возвращено",
+      "disputed": "Оспаривается",
+      "not_applicable": "Своя организация"
+    },
     "action": {
       "await_verifier": "Делать ничего не нужно — уже в чьей-то очереди",
       "ask_employer_to_enable_confirmation": "Попросите руководителя включить подтверждение",

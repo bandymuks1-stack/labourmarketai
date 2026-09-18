@@ -11,6 +11,10 @@ import { JournalEntrySkillLinks } from "@/components/app/journal-entry-skill-lin
 import type { EntrySkillSource } from "@/lib/journal/entry-skill-source";
 import type { EntryPendingCandidate } from "@/lib/journal/entry-pending-candidates";
 import { recordEvent } from "@/lib/telemetry/task";
+import {
+  WorkSpineNode,
+  type EvidenceStanding,
+} from "@/components/app/work-world/primitives";
 
 /**
  * One row in the journal entries list. The Delete + Edit controls are only
@@ -28,10 +32,19 @@ export function JournalEntryRow({
   skillLinks,
   statusSlot,
   editSlot,
+  standing = "UNKNOWN",
+  standingSolid = false,
 }: {
   entryId: string;
   canDelete: boolean;
   children: React.ReactNode;
+  /** Work-world grammar: the entry's honest evidence standing, chosen by the
+   *  page from its verification state (`evidenceStandingOfVerification`).
+   *  It colours the spine node only — the row adds no authority of its own.
+   *  Absent → an UNKNOWN (dashed) node, never a guessed one. */
+  standing?: EvidenceStanding;
+  /** Solid node = a real decision row exists behind the entry. */
+  standingSolid?: boolean;
   /** Edit-in-place control (journal compact UX v1): the page passes the
    *  drawer-based edit launcher here so editing opens in a compact drawer
    *  over the list — no navigation, scroll/day position preserved. Absent →
@@ -118,7 +131,8 @@ export function JournalEntryRow({
 
   if (deleted) {
     return (
-      <li
+      <WorkSpineNode state="WITHDRAWN">
+      <div
         className="card-border flex flex-wrap items-center justify-between gap-2 p-4"
         data-testid={`journal-entry-deleted-${entryId}`}
       >
@@ -142,12 +156,16 @@ export function JournalEntryRow({
             {error}
           </span>
         )}
-      </li>
+      </div>
+      </WorkSpineNode>
     );
   }
 
+  // The entry is ONE node on the day's work spine (work-world grammar): the
+  // diamond carries its evidence standing; the card beneath is unchanged.
   return (
-    <li className="card-border flex flex-col gap-3 p-4">
+    <WorkSpineNode state={standing} solid={standingSolid}>
+    <div className="card-border flex flex-col gap-3 p-4" data-testid={`journal-entry-card-${entryId}`}>
       {/* Sections: entry text + "Sistema suprato" come from `children`. */}
       {children}
       {/* Linked skill signals + collapsed "Ankstesni ryšiai" (its own block). */}
@@ -262,6 +280,7 @@ export function JournalEntryRow({
           </span>
         )}
       </div>
-    </li>
+    </div>
+    </WorkSpineNode>
   );
 }
