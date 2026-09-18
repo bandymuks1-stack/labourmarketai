@@ -16,11 +16,11 @@ Playwright as a synthetic identity, desktop 1360 px + mobile 390 px, LT/EN/RU.
 
 | | |
 |---|---|
-| main SHA at package time | `a2bf8ff3` (#1784) |
-| production SHA | `a2bf8ff3` (`/api/health` build field, 15:4x UTC), health OK (auth + db) — main = prod |
-| merged PRs (this run) | #1777 Journal · #1778 Calendar · #1779 Field · #1780 Map · #1781 Chat context · #1782 Communication · #1783 Agency + Institution · #1785 Player Identity · #1784 Landing + dead-class fixes |
+| main SHA at package time | `dd1f45b6` (#1786) |
+| production SHA | `dd1f45b6` (`/api/health` build field), health OK (auth + db) — main = prod |
+| merged PRs (this run) | #1777 Journal · #1778 Calendar · #1779 Field · #1780 Map · #1781 Chat context · #1782 Communication · #1783 Agency + Institution · #1785 Player Identity · #1784 Landing + dead-class fixes · #1786 Jobs + consent (owner-approved waiver extension) · #1787 this package |
 | deployed PRs | all nine above (verified by `/api/health.build` = merge SHA after each wave) |
-| RED (draft, `needs-human-gate`) | #1786 Public Jobs + OAuth consent — see J |
+| RED | NONE remaining — #1786 was approved by the owner on 2026-09-18 and merged |
 | migration state | **unchanged** — zero migrations, zero RLS, zero authority changes in this run |
 | critical software blockers | NONE |
 
@@ -47,8 +47,8 @@ PRODUCTION_DEPLOYED · PRODUCTION_BROWSER_PROVEN.
 | COMMUNICATION (`/dashboard/communication/[id]`) | YES | YES (#1782 PersonPresence for permitted counterpart; PlaceTimeStamp per message) | LOCAL | LOCAL | existing `noMessages` kept | YES | restricted chip keeps lock icon + text | none (36 guard tests) | YES | PENDING |
 | AGENCY (`/company/partners`) | YES | YES (#1783 PersonPresence rows, PlaceTimeStamp) | render-test (no synthetic agency has workers) | – | YES (honest empty) | labels passed in | – | none | YES | PENDING — Ramūnas/Nonstop role truth (see H) |
 | INSTITUTION (`/company/education`) | YES | YES (#1783 learner presences from institution-typed fields; cohort span) | LOCAL | LOCAL | existing empty kept | YES | – | none | YES | PENDING — first real institution (see H) |
-| JOBS (`/jobs`, `/jobs/[id]`) + `/oauth/consent` | YES | READY, **RED-gated** (#1786, two waivers) | LOCAL | LOCAL | n/a (52 594 real vacancies) | YES | – | none | NO (waiver) | – |
-| LANDING (`/`) | YES | YES (#1784: chain wears the evidence diamond; freeze baseline regenerated with note) | LOCAL | LOCAL | n/a | YES | unchanged | none (landing guards green) | YES | – |
+| JOBS (`/jobs`, `/jobs/[id]`) + `/oauth/consent` | YES | YES (#1786) | PROD | PROD | n/a (52 594 real vacancies) | YES | – | none | YES | **YES** — anonymous prod walk: 20 stamps `rgb(163,156,141)`, 0 dead classes, LT/EN/RU, desktop + mobile |
+| LANDING (`/`) | YES | YES (#1784: chain wears the evidence diamond; freeze baseline regenerated with note) | PROD | PROD | n/a | YES | unchanged | none (landing guards green) | YES | **YES** — 6 chain diamonds on production, anonymous |
 
 ## C. CONNECTED WORK WORLD
 
@@ -138,25 +138,11 @@ FOUR_ROLE_CONTROLLED_LAUNCH_READY = **YES** (unchanged by this run).
 
 ## J. OWNER DECISIONS
 
-1. **Two PR-scoped waivers must name #1786.** Both live in
-   `.github/scripts/owner-waivers.mjs` and are expanded only by verbatim
-   owner approval (#1649 note: "NOT general authority to self-approve
-   future waivers"):
-   - `public-acquisition-route-jobs` (covers 1184, 1193, 1203, 1208, 1255,
-     1649) — #1786 fixes the dead classes on `/jobs`, `/jobs/[id]` and the
-     vacancy card, and adds the card stamp + detail place precision.
-   - `oauth-consent-auth-infrastructure` (covers 1347) — #1786 fixes the
-     consent page's primary button, which had **no background** (dead
-     `bg-primary`).
-   Minimum decision (one line): *"I approve adding ONLY PR 1786 to the
-   existing `public-acquisition-route-jobs` and
-   `oauth-consent-auth-infrastructure` waiver `pullRequests` lists."*
-   Safe options: (a) approve → number added to both lists, un-draft,
-   auto-merge; (b) decline → `/jobs` keeps undefined secondary-text colour
-   and the consent primary button stays background-less. Recommended: (a).
-   The waiver file is not touched until approval.
-
-No other owner decision was needed in this run.
+**NONE open.** The one decision this run raised — adding PR 1786 to the
+`public-acquisition-route-jobs` and `oauth-consent-auth-infrastructure`
+waiver lists — was approved by the owner on 2026-09-18 (verbatim in
+`.github/scripts/owner-waivers.mjs` and `scoped-owner-waiver.test.ts`),
+applied as exactly one number per list, and #1786 merged and deployed.
 
 ## K. HUMAN WALK (Donatas, shortest path, product language)
 
