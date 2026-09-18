@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { PlacePrecision } from "@/components/app/work-world/primitives";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
@@ -299,22 +298,6 @@ const NEXT_PROFILE: L = {
   de: "Profil vervollständigen",
 };
 
-/** WHERE-precision of the member's location (work-world grammar): a stated
- *  city is "city", a country alone is "country" — never inferred upward. */
-function locationPrecision(
-  city: string | null,
-  country: string | null,
-): "city" | "country" | null {
-  if (city && city.trim().length > 0) return "city";
-  if (country && country.trim().length > 0) return "country";
-  return null;
-}
-
-const PLACE_PRECISION: Record<"city" | "country", L> = {
-  city: { en: "City", lt: "Miestas", ru: "Город", nl: "Stad", de: "Stadt" },
-  country: { en: "Country only", lt: "Tik šalis", ru: "Только страна", nl: "Alleen land", de: "Nur Land" },
-};
-
 function joinLocation(
   city: string | null,
   region: string | null,
@@ -410,7 +393,7 @@ export default async function JobDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-      <Link href="/jobs" className="text-sm text-text-muted hover:underline">
+      <Link href="/jobs" className="text-sm text-muted-foreground hover:underline">
         {BACK[active]}
       </Link>
 
@@ -425,13 +408,13 @@ export default async function JobDetailPage({
       </h1>
 
       {member?.titleRaw && preview.occupation && (
-        <p lang={sourceLang} className="mt-2 text-base text-text-muted">
+        <p lang={sourceLang} className="mt-2 text-base text-muted-foreground">
           {preview.occupation}
         </p>
       )}
 
       {published && (
-        <p className="mt-4 text-sm text-text-muted">
+        <p className="mt-4 text-sm text-muted-foreground">
           {PUBLISHED[active]}: {published}
         </p>
       )}
@@ -441,7 +424,7 @@ export default async function JobDetailPage({
           <section className="mt-8 space-y-4 rounded-lg border p-5">
             {member.employer.name && (
               <div>
-                <h2 className="text-sm font-medium text-text-muted">
+                <h2 className="text-sm font-medium text-muted-foreground">
                   {EMPLOYER[active]}
                 </h2>
                 <p className="mt-1 text-base">{member.employer.name}</p>
@@ -450,22 +433,10 @@ export default async function JobDetailPage({
 
             {locationLabel && (
               <div>
-                <h2 className="text-sm font-medium text-text-muted">
+                <h2 className="text-sm font-medium text-muted-foreground">
                   {LOCATION[active]}
                 </h2>
-                <p className="mt-1 flex flex-wrap items-center gap-2 text-base">
-                  <span>{locationLabel}</span>
-                  {/* The same place-precision chip the map wears: a stated
-                      city is cyan fact, a country alone is a dashed
-                      approximation. Members only — the anonymous projection
-                      carries no location at all. */}
-                  {(() => {
-                    const kind = locationPrecision(member.location.city, member.location.country);
-                    return kind ? (
-                      <PlacePrecision kind={kind} label={PLACE_PRECISION[kind][active]} />
-                    ) : null;
-                  })()}
-                </p>
+                <p className="mt-1 text-base">{locationLabel}</p>
               </div>
             )}
           </section>
@@ -480,7 +451,7 @@ export default async function JobDetailPage({
                   the string as markup — this is third-party content. */}
               <p
                 lang={sourceLang}
-                className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-muted"
+                className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground"
               >
                 {member.descriptionRaw}
               </p>
@@ -498,7 +469,7 @@ export default async function JobDetailPage({
               >
                 {APPLY[active]}
               </a>
-              <p className="mt-2 text-xs text-text-muted">
+              <p className="mt-2 text-xs text-muted-foreground">
                 {APPLY_NOTE[active]}
               </p>
             </section>
@@ -526,7 +497,7 @@ export default async function JobDetailPage({
               are surfaces that already exist. */}
           <section className="mt-10 rounded-lg border border-dashed p-5">
             <h2 className="text-base font-medium">{NEXT_HEADING[active]}</h2>
-            <p className="mt-1 text-sm text-text-muted">
+            <p className="mt-1 text-sm text-muted-foreground">
               {NEXT_BODY[active]}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -548,7 +519,7 @@ export default async function JobDetailPage({
       ) : (
         <section className="mt-8 rounded-lg border border-dashed p-5">
           <h2 className="text-base font-medium">{LOCKED_TITLE[active]}</h2>
-          <p className="mt-1 text-sm text-text-muted">{LOCKED_BODY[active]}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{LOCKED_BODY[active]}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href={`/auth/signup?next=${next}`}
@@ -567,7 +538,7 @@ export default async function JobDetailPage({
       )}
 
       {attribution && (
-        <p className="mt-8 text-xs text-text-muted">{attribution}</p>
+        <p className="mt-8 text-xs text-muted-foreground">{attribution}</p>
       )}
     </main>
   );

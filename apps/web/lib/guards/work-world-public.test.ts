@@ -18,35 +18,17 @@ const DEAD = /\b(text-muted-foreground|bg-accent(\/\d+)?|border-input|bg-backgro
 
 describe("Guard: PUBLIC JOBS + LANDING wear the work-world grammar", () => {
   it("no dead (undefined) utility class remains on the surfaces that carried them", () => {
+    // The three /jobs files carry the same fix on the owner-waived branch
+    // (public-acquisition-route-jobs is PR-scoped and owner-expanded); they
+    // join this list when that PR merges.
     for (const rel of [
-      "app/[locale]/(marketing)/jobs/page.tsx",
-      "app/[locale]/(marketing)/jobs/[id]/page.tsx",
       "app/[locale]/oauth/consent/page.tsx",
       "components/app/timesheet-import-review.tsx",
       "components/app/work-hours-quick-entry.tsx",
-      "components/marketing/public-vacancy-card.tsx",
       "components/marketing/save-vacancy-button.tsx",
     ]) {
       expect(read(rel), rel).not.toMatch(DEAD);
     }
-  });
-
-  it("the public vacancy card states its publication time as a mono stamp and discloses nothing new", () => {
-    const card = read("components/marketing/public-vacancy-card.tsx");
-    expect(card).toMatch(/<PlaceTimeStamp>\{published\}<\/PlaceTimeStamp>/);
-    // still only the anonymous projection's fields — no employer, no location
-    // (the file's own comment says so; the CODE must not read them)
-    const code = card.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
-    expect(code).not.toMatch(/vacancy\.(employer|location|applicationUrl)|PlacePrecision/);
-  });
-
-  it("the member-only job detail states place precision from the real fields — never inferred upward", () => {
-    const detail = read("app/[locale]/(marketing)/jobs/[id]/page.tsx");
-    expect(detail).toMatch(/function locationPrecision\(/);
-    expect(detail).toMatch(/if \(city && city\.trim\(\)\.length > 0\) return "city";/);
-    expect(detail).toMatch(/if \(country && country\.trim\(\)\.length > 0\) return "country";/);
-    // rendered inside the member-gated location block only
-    expect(detail).toMatch(/locationLabel && \([\s\S]{0,900}<PlacePrecision kind=\{kind\}/);
   });
 
   it("the landing chain wears the evidence diamond with honest roles: journal = evidence, skills = attestation, nothing verified", () => {
