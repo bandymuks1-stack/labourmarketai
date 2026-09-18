@@ -1407,7 +1407,11 @@
         "country": "landen",
         "place": "plaatsen"
       },
-      "placeLinkHint": "Een plaats kiezen brengt je naar de kansenlijst van die plaats."
+      "placeLinkHint": "Een plaats kiezen brengt je naar de kansenlijst van die plaats.",
+      "precision": {
+        "city": "Stad",
+        "country": "Alleen land"
+      }
     }
   },
   "demandLocationCapture": {
