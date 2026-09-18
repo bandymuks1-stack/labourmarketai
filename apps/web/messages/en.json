@@ -10317,6 +10317,20 @@
       "plannedDays": "{count} planned work days",
       "actualHours": "{hours} h recorded in the journal",
       "note": "Planned days come from accepted bookings and project assignments; recorded hours come from your journal entries. The two are shown side by side, never converted into each other."
+    },
+    "reality": {
+      "observed": "Observed",
+      "derived": "Derived",
+      "planned": "Planned",
+      "committed": "Committed",
+      "conflict": "Conflict",
+      "unknown": "No date"
+    },
+    "derived": {
+      "title": "Period evidence — derived monthly share",
+      "chip": "Derived",
+      "thisMonth": "{hours} h this month (derived)",
+      "sourceLink": "Open the period record"
     }
   },
   "workforcePlanning": {

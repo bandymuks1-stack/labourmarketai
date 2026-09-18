@@ -10317,6 +10317,20 @@
       "plannedDays": "{count} suplanuotos darbo dienos",
       "actualHours": "{hours} val. užrašyta žurnale",
       "note": "Suplanuotos dienos ateina iš priimtų rezervacijų ir projektų priskyrimų; užrašytos valandos — iš jūsų žurnalo įrašų. Abu skaičiai rodomi greta, niekada neperskaičiuojami vienas į kitą."
+    },
+    "reality": {
+      "observed": "Įvyko",
+      "derived": "Išvestinė",
+      "planned": "Planuota",
+      "committed": "Įsipareigota",
+      "conflict": "Konfliktas",
+      "unknown": "Be datos"
+    },
+    "derived": {
+      "title": "Laikotarpio įrodymai — išvestinė mėnesio dalis",
+      "chip": "Išvestinė",
+      "thisMonth": "{hours} val. šį mėnesį (išvestinė)",
+      "sourceLink": "Atidaryti laikotarpio įrašą"
     }
   },
   "workforcePlanning": {

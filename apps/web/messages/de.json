@@ -10317,6 +10317,20 @@
       "plannedDays": "{count} geplante Arbeitstage",
       "actualHours": "{hours} Std. im Journal erfasst",
       "note": "Geplante Tage stammen aus angenommenen Buchungen und Projektzuweisungen; erfasste Stunden aus Ihren Journaleinträgen. Beide werden nebeneinander gezeigt und nie ineinander umgerechnet."
+    },
+    "reality": {
+      "observed": "Erfasst",
+      "derived": "Abgeleitet",
+      "planned": "Geplant",
+      "committed": "Verbindlich",
+      "conflict": "Konflikt",
+      "unknown": "Ohne Datum"
+    },
+    "derived": {
+      "title": "Zeitraumnachweis — abgeleiteter Monatsanteil",
+      "chip": "Abgeleitet",
+      "thisMonth": "{hours} h in diesem Monat (abgeleitet)",
+      "sourceLink": "Zeitraumeintrag öffnen"
     }
   },
   "workforcePlanning": {
