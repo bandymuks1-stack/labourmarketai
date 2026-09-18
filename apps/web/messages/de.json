@@ -1799,7 +1799,9 @@
     "interestWaiting": "{count, plural, one {# Person wartet auf eine Antwort} other {# Personen warten auf eine Antwort}}",
     "untitledInquiry": "Anfrage ohne Titel",
     "supplyHeading": "Von Ihnen angebotene Kapazität",
-    "supplyNote": "Das sind Menschen, von denen Sie dem Markt gesagt haben, dass Sie sie HABEN — nicht solche, die Sie suchen. Sie sind gespeichert und für Sie sichtbar. Arbeitgeber können angebotene Kapazität noch nicht durchsuchen, daher hat sich dazu noch niemand gemeldet."
+    "supplyNote": "Das sind Menschen, von denen Sie dem Markt gesagt haben, dass Sie sie HABEN — nicht solche, die Sie suchen. Sie sind gespeichert und für Sie sichtbar. Arbeitgeber können angebotene Kapazität noch nicht durchsuchen, daher hat sich dazu noch niemand gemeldet.",
+    "capacityNeeded": "{count} benötigt",
+    "capacityInterested": "{count} interessiert"
   },
   "journey": {
     "eyebrow": "So funktioniert es",
