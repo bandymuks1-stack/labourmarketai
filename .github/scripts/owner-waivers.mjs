@@ -403,8 +403,32 @@ export const SCOPED_OWNER_WAIVERS = [
      * change, no change to the projection or to what an anonymous visitor may
      * see. The World-State answers stay honestly "no" for the same anonymous
      * caller this surface exists for.
+     *
+     * ── #1786 (2026-09-18) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-18):
+     *   "I approve adding ONLY PR 1786 to the existing
+     *    public-acquisition-route-jobs and oauth-consent-auth-infrastructure
+     *    waiver pullRequests lists."
+     *
+     * Exactly that was done: one number added to `pullRequests` here and one
+     * to the consent waiver below. The axiom, the codes, the surfaces, the
+     * file list, the expected finding set, the expiry and the subset rule are
+     * byte-unchanged, and `product-gate.mjs` is not touched.
+     *
+     * WHAT #1786 ACTUALLY DOES to these surfaces: the list page, the detail
+     * page and the vacancy card used shadcn class names
+     * (`text-muted-foreground`, `hover:bg-accent`, `border-input`,
+     * `bg-background`, `border-foreground`) that were never in the token map
+     * and compiled to NO CSS — secondary text rendered in the primary colour
+     * and the card hover did nothing. They now use the canonical tokens; the
+     * card's publication date is a mono stamp and the MEMBER-ONLY detail
+     * location carries the same place-precision chip the map wears (a stated
+     * city = city, a country alone = country, never inferred upward). No new
+     * route, page, auth change or projection change; the anonymous visitor
+     * still receives no employer, location or apply link (guarded on code in
+     * `work-world-jobs.test.ts`). The World-State answers stay honestly "no".
      */
-    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649],
+    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649, 1786],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
@@ -618,7 +642,12 @@ export const SCOPED_OWNER_WAIVERS = [
     axioms: ["A-01", "A-09"],
     scope:
       "The OAuth 2.1 consent screen /oauth/consent (owner directive 2026-08-29 §4) — the delegated Supabase Authorization Path UI",
-    pullRequests: [1347],
+    // #1786 (2026-09-18): owner approval quoted verbatim in the jobs waiver
+    // above — one number added here, nothing else changed. #1786 replaces the
+    // consent page's dead `bg-primary` / `text-primary-foreground` /
+    // `hover:bg-muted` classes (never in the token map: the primary button
+    // had no background) with the canonical tokens. No auth change.
+    pullRequests: [1347, 1786],
     approvedHeadShas: [],
     postMergeBranches: ["main"],
     files: [
