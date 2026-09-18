@@ -18,6 +18,8 @@ describe("Guard: PUBLIC JOBS wear the work-world grammar", () => {
       "app/[locale]/(marketing)/jobs/page.tsx",
       "app/[locale]/(marketing)/jobs/[id]/page.tsx",
       "components/marketing/public-vacancy-card.tsx",
+      // oauth-consent-auth-infrastructure is PR-scoped too (covers #1347)
+      "app/[locale]/oauth/consent/page.tsx",
     ]) {
       expect(read(rel), rel).not.toMatch(DEAD);
     }
