@@ -190,6 +190,55 @@ export function CapacityBand({
   );
 }
 
+/** A period of real work as a TIME RIBBON, not a lump. One continuous band
+ *  over the whole period, divided into the months it touches, each labelled
+ *  with its DERIVED even share. The total is the one canonical figure; the
+ *  month segments are a display allocation, never source-observed days — the
+ *  caller supplies both the total figure and that warning label. Renders
+ *  nothing when there is nothing honest to derive. */
+export function PeriodBand({
+  totalLabel,
+  derivedLabel,
+  months,
+}: {
+  /** The canonical total, already formatted (e.g. "800 h"). */
+  totalLabel: string;
+  /** "Derived equal monthly share · not source days." */
+  derivedLabel: string;
+  /** Oldest→newest month shares from the canonical projection. */
+  months: readonly { readonly month: string; readonly hours: number }[];
+}) {
+  if (months.length === 0) return null;
+  return (
+    <div data-testid="ww-period-band" className="flex flex-col gap-1.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="font-mono text-sm font-semibold text-brand-cyan" data-testid="ww-period-total">
+          {totalLabel}
+        </span>
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {months[0].month} → {months[months.length - 1].month}
+        </span>
+      </div>
+      {/* The band: one cyan-edged span, divided into equal month segments. */}
+      <div className="flex h-9 overflow-hidden rounded-md border border-brand-cyan/40 bg-brand-cyan/5">
+        {months.map((m, i) => (
+          <div
+            key={m.month}
+            data-month={m.month}
+            data-hours={m.hours.toFixed(2)}
+            className={`flex flex-1 items-center justify-center ${
+              i === 0 ? "" : "border-l border-brand-cyan/25"
+            }`}
+          >
+            <span className="font-mono text-meta tabular-nums text-brand-cyan">{m.hours.toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{derivedLabel}</span>
+    </div>
+  );
+}
+
 /** Canonical spatial/temporal context. Mono, because it is machine-precise. */
 export function PlaceTimeStamp({ children }: { children: ReactNode }) {
   return (
