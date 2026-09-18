@@ -1,5 +1,6 @@
 "use client";
 
+import { PlacePrecision } from "@/components/app/work-world/primitives";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -236,6 +237,12 @@ export function WorkspaceMap({
         {view?.home && (
           <span className="inline-flex items-center gap-1.5 text-meta text-text-muted" data-testid="workspace-map-home-legend">
             <span className="wsmap-legend-home" aria-hidden /> {t("homeLabel")}
+            {/* WHERE-precision (work-world grammar), the same chip the market
+                map wears: a country-level anchor is a dashed approximation in
+                the legend, not only in a hover tooltip. */}
+            {view.home.precision === "country" ? (
+              <PlacePrecision kind="country" label={t("approx")} />
+            ) : null}
           </span>
         )}
         {view && view.unmapped > 0 && (
