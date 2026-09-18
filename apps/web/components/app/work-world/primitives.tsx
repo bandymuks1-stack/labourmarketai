@@ -84,7 +84,7 @@ export function EvidenceState({
       data-testid="ww-evidence-state"
       data-state={state}
       data-variant={variant}
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-label ${VARIANT_CLASS[variant]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${VARIANT_CLASS[variant]} ${className}`}
     >
       <EvidenceDot state={state} />
       {label}
@@ -135,7 +135,7 @@ export function PersonPresence({
     <span className="flex items-center gap-3" data-testid="ww-person">
       <span
         className={`relative grid flex-none place-items-center overflow-hidden rounded-full font-display font-bold ${
-          gold ? "bg-gradient-metallic text-ink-900" : "bg-surface-2 text-text-secondary"
+          gold ? "bg-gradient-metallic text-text-on-brand" : "bg-surface-2 text-text-secondary"
         }`}
         style={{ width: size, height: size, fontSize: Math.round(size * 0.38) }}
       >
@@ -179,7 +179,7 @@ export function CapacityBand({
       className="relative block h-14 overflow-hidden rounded-lg border border-border-subtle bg-surface-1"
     >
       <span
-        className="absolute inset-y-0 left-0 border-r-2 border-brand bg-brand/20"
+        className="absolute inset-y-0 left-0 border-r-2 border-brand-blue bg-brand-blue/20"
         style={{ width: `${pct}%` }}
       />
       <span className="absolute inset-0 flex items-center justify-between px-3.5 font-mono text-xs text-text-secondary">
