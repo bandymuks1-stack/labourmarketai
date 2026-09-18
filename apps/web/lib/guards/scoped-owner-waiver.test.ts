@@ -342,7 +342,13 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // covering nothing beyond the single ai_cannot_work_with_entity finding.
     const oauth = SCOPED_OWNER_WAIVERS[4];
     expect(oauth.axioms).toEqual(["A-01", "A-09"]);
-    expect(oauth.pullRequests).toEqual([1347]);
+    // #1786 (2026-09-18) joins on the owner's verbatim approval — "I approve
+    // adding ONLY PR 1786 to the existing public-acquisition-route-jobs and
+    // oauth-consent-auth-infrastructure waiver pullRequests lists" — for a
+    // dead-class fix: `bg-primary` / `text-primary-foreground` /
+    // `hover:bg-muted` were never tokens (the primary button had no
+    // background). Canonical tokens only; no auth change. Exact list, as ever.
+    expect(oauth.pullRequests).toEqual([1347, 1786]);
     expect(oauth.files).toEqual([
       "/oauth/consent",
       "apps/web/app/[locale]/oauth/consent/page.tsx",
@@ -495,7 +501,21 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // next number drift in without a decision, which is the whole thing this
     // pin exists to prevent. THIS ASSERTION FAILING IS THE FEATURE: it caught
     // the 1649 extension and forced it to be deliberate.
-    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255, 1649]);
+    //
+    // #1786 (2026-09-18) is the seventh, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1786 to the existing
+    // public-acquisition-route-jobs and oauth-consent-auth-infrastructure
+    // waiver pullRequests lists." It replaces shadcn class names that were
+    // never in the token map and compiled to NO CSS (secondary text in the
+    // primary colour, a dead card hover) with the canonical tokens, makes the
+    // card's date a mono stamp and gives the MEMBER-ONLY detail location the
+    // map's place-precision chip. No new route, page, component or auth
+    // change; the anonymous projection still carries no employer, location or
+    // apply link (`work-world-jobs.test.ts` pins that on code, not comments).
+    // Verified by running the gate on the head as PR 1786 vs origin/main:
+    // PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER. It caught this
+    // extension too and forced it to be deliberate.
+    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255, 1649, 1786]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");
