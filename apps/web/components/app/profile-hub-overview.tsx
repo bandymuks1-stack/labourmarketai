@@ -24,6 +24,12 @@ import {
   type CvSectionCard,
 } from "@/components/app/cv-completeness-grid";
 import { formatUtcDate, utcDayKey } from "@/lib/time/display";
+import {
+  PlacePrecision,
+  PlaceTimeStamp,
+  WorkSpine,
+  WorkSpineNode,
+} from "@/components/app/work-world/primitives";
 
 /**
  * THE PROFILE HUB — the ONE overview on `/dashboard/profile` (W7-S1).
@@ -522,41 +528,20 @@ export async function ProfileHubOverview({
         )}
       </div>
 
-      {/* ── WHAT IS ALREADY DONE (progressive disclosure) ────────────────── */}
+      {/* ── WHAT HAVE I ACTUALLY DONE, WHERE, AND WHAT BACKS IT ─────────────
+          Visible ON ARRIVAL (owner target 2026-09-17: person · identity ·
+          attested work history · capabilities · current work · evidence ·
+          opportunities; editing secondary). These four blocks used to sit
+          inside the closed "what is already done" disclosure below — the
+          same closed-details class the first human walk flagged on the
+          roster offer (#1770), the organization history (#1771) and the
+          cohort context (#1773). The checklist and the CV grid stay behind
+          the bar; a person's history, evidence and opportunities do not. */}
       {playerCard && (
-        <details className="group rounded-md border border-border-subtle">
-          <summary
-            className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-            data-testid="profile-hub-done-summary"
-          >
-            <span
-              aria-hidden
-              className="transition-transform group-open:rotate-90"
-            >
-              ›
-            </span>
-            {t("doneDisclosure")}
-          </summary>
-          <div className="flex flex-col gap-5 px-3 pb-4 pt-1">
-            {/* completed steps */}
-            {doneSteps.length > 0 && (
-              <ul
-                className="flex flex-col gap-2"
-                data-testid="profile-hub-done-steps"
-              >
-                {doneSteps.map((s) =>
-                  row(
-                    s.key,
-                    `setup-step-${s.key}`,
-                    s.href,
-                    tStep(`steps.${s.key}.title`),
-                    null,
-                    true,
-                  ),
-                )}
-              </ul>
-            )}
-
+        <div
+          className="flex flex-col gap-5 rounded-md border border-border-subtle px-3 py-4"
+          data-testid="profile-hub-work-world"
+        >
             {/* today's activity — absorbed from ProfileStateStrip */}
             <p
               className="text-sm text-text-secondary"
@@ -581,33 +566,48 @@ export async function ProfileHubOverview({
                 </p>
               ) : (
                 <>
-                  <ul
-                    className="mt-1.5 flex flex-col gap-1"
-                    data-testid="live-profile-history"
-                  >
-                    {playerCard.workHistory.map((e) => (
-                      <li key={e.id} className="text-basis text-text-primary">
-                        {/* An unknown employer or date renders as an honest gap,
-                            not a guess — the model already nulled them. */}
-                        <span>{e.organizationName ?? tLive("orgUnknown")}</span>
-                        {e.title ? (
-                          <span className="text-text-secondary">
-                            {" "}
-                            — {e.title}
+                  {/* WHERE / FOR WHOM / WHEN as ONE work spine (work-world
+                      grammar) — the same line the journal, history and
+                      chat context draw. A node per real engagement; no
+                      standing is claimed on the node (the row carries no
+                      provenance), the dates are a mono stamp, and the
+                      country — the only place the row knows — is the
+                      dashed country-level chip, never a city. */}
+                  <div className="mt-1.5" data-testid="live-profile-history">
+                    <WorkSpine>
+                      {playerCard.workHistory.map((e) => (
+                        <WorkSpineNode key={e.id}>
+                          <span className="flex flex-col gap-0.5 text-basis text-text-primary">
+                            <span>
+                              {/* An unknown employer or date renders as an
+                                  honest gap, not a guess — the model already
+                                  nulled them. */}
+                              <span>{e.organizationName ?? tLive("orgUnknown")}</span>
+                              {e.title ? (
+                                <span className="text-text-secondary">
+                                  {" "}
+                                  — {e.title}
+                                </span>
+                              ) : null}
+                            </span>
+                            <span className="flex flex-wrap items-center gap-2">
+                              <PlaceTimeStamp>
+                                {e.startedAt ?? tLive("dateUnknown")}
+                                {e.current
+                                  ? ` · ${tLive("current")}`
+                                  : e.endedAt
+                                    ? ` — ${e.endedAt}`
+                                    : ""}
+                              </PlaceTimeStamp>
+                              {e.countryCode ? (
+                                <PlacePrecision kind="country" label={e.countryCode} />
+                              ) : null}
+                            </span>
                           </span>
-                        ) : null}
-                        <span className="text-text-muted">
-                          {" "}
-                          · {e.startedAt ?? tLive("dateUnknown")}
-                          {e.current
-                            ? ` · ${tLive("current")}`
-                            : e.endedAt
-                              ? ` — ${e.endedAt}`
-                              : ""}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                        </WorkSpineNode>
+                      ))}
+                    </WorkSpine>
+                  </div>
                   {currentCount > 0 && (
                     <p className="mt-1 text-meta text-text-muted">
                       {tLive("currentCount", { count: currentCount })}
@@ -730,6 +730,44 @@ export async function ProfileHubOverview({
                   </div>
                 )}
               </div>
+            )}
+
+        </div>
+      )}
+
+      {/* ── WHAT IS ALREADY DONE (progressive disclosure) ────────────────── */}
+      {playerCard && (
+        <details className="group rounded-md border border-border-subtle">
+          <summary
+            className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            data-testid="profile-hub-done-summary"
+          >
+            <span
+              aria-hidden
+              className="transition-transform group-open:rotate-90"
+            >
+              ›
+            </span>
+            {t("doneDisclosure")}
+          </summary>
+          <div className="flex flex-col gap-5 px-3 pb-4 pt-1">
+            {/* completed steps */}
+            {doneSteps.length > 0 && (
+              <ul
+                className="flex flex-col gap-2"
+                data-testid="profile-hub-done-steps"
+              >
+                {doneSteps.map((s) =>
+                  row(
+                    s.key,
+                    `setup-step-${s.key}`,
+                    s.href,
+                    tStep(`steps.${s.key}.title`),
+                    null,
+                    true,
+                  ),
+                )}
+              </ul>
             )}
 
             {/* OPTIONAL improvement, explicitly separated from the required
