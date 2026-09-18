@@ -840,10 +840,10 @@
     "standing": {
       "self_reported": "Eigene Aufzeichnung",
       "verifier_not_identified": "Niemand benannt",
-      "verifier_available": "Bestätigung nicht aktiv",
+      "verifier_available": "Von Führungskraft nicht aktiv",
       "verification_pending": "An Führungskraft gesendet",
       "verified": "Von Führungskraft bestätigt",
-      "self_confirmed": "Selbst bestätigt",
+      "self_confirmed": "Selbst bestätigt, nicht Chef",
       "returned": "Zurückgegeben",
       "disputed": "Bestritten",
       "not_applicable": "Eigene Organisation"

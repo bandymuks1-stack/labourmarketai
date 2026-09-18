@@ -840,10 +840,10 @@
     "standing": {
       "self_reported": "Own record",
       "verifier_not_identified": "No one named",
-      "verifier_available": "Confirmation not enabled",
+      "verifier_available": "Not enabled by manager",
       "verification_pending": "Sent to manager",
       "verified": "Manager confirmed",
-      "self_confirmed": "Self-confirmed",
+      "self_confirmed": "Self-confirmed, not manager",
       "returned": "Returned",
       "disputed": "Disputed",
       "not_applicable": "Own organization"

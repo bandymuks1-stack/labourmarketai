@@ -840,10 +840,10 @@
     "standing": {
       "self_reported": "Своя запись",
       "verifier_not_identified": "Никто не указан",
-      "verifier_available": "Подтверждение не включено",
+      "verifier_available": "Руководитель не включил",
       "verification_pending": "Отправлено руководителю",
       "verified": "Подтверждено руководителем",
-      "self_confirmed": "Самоподтверждено",
+      "self_confirmed": "Подтвердили вы, не руководитель",
       "returned": "Возвращено",
       "disputed": "Оспаривается",
       "not_applicable": "Своя организация"

@@ -840,10 +840,10 @@
     "standing": {
       "self_reported": "Eigen registratie",
       "verifier_not_identified": "Niemand genoemd",
-      "verifier_available": "Bevestiging niet ingeschakeld",
+      "verifier_available": "Niet ingeschakeld door manager",
       "verification_pending": "Naar manager gestuurd",
       "verified": "Door manager bevestigd",
-      "self_confirmed": "Zelf bevestigd",
+      "self_confirmed": "Zelf bevestigd, niet manager",
       "returned": "Teruggestuurd",
       "disputed": "Betwist",
       "not_applicable": "Eigen organisatie"
