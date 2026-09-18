@@ -1,6 +1,7 @@
 "use client";
 
 import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
+import { EvidenceState, type EvidenceStanding } from "@/components/app/work-world/primitives";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -370,15 +371,31 @@ export function OrganizationEvidenceSection({
                       className="flex basis-full flex-col gap-0.5"
                     />
                   )}
-                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {rec.withdrawn
-                      ? tRecords("withdrawn")
-                      : rec.attestation
-                        ? rec.attestation.self
-                          ? tRecords("selfAttested")
-                          : tRecords("attested")
-                        : tState(rec.state as never)}
-                  </span>
+                  {/* Canonical evidence-standing chip (work-world primitive):
+                      the ONE component that colours standing, so a
+                      self-attestation reads as cyan EVIDENCE and never as
+                      green verification. Same words as before — the label is
+                      chosen here and handed in; the primitive stays i18n-free. */}
+                  <EvidenceState
+                    state={
+                      (rec.withdrawn
+                        ? "WITHDRAWN"
+                        : rec.attestation
+                          ? rec.attestation.self
+                            ? "SELF_ATTESTED"
+                            : "ORGANIZATION_ATTESTED"
+                          : rec.state) as EvidenceStanding
+                    }
+                    label={
+                      rec.withdrawn
+                        ? tRecords("withdrawn")
+                        : rec.attestation
+                          ? rec.attestation.self
+                            ? tRecords("selfAttested")
+                            : tRecords("attested")
+                          : tState(rec.state as never)
+                    }
+                  />
                 </div>
                 <p className="text-sm text-text-secondary">{rec.text}</p>
                 <p className="text-xs text-text-muted">
