@@ -10323,7 +10323,7 @@
       "derived": "Afgeleid",
       "planned": "Gepland",
       "committed": "Toegezegd",
-      "conflict": "Conflict",
+      "conflict": "Overlap",
       "unknown": "Geen datum"
     },
     "derived": {
