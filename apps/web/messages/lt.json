@@ -543,7 +543,11 @@
       "free": "laisvas šią savaitę",
       "why": "Kodėl šie: žmonės, jau esantys projekte su tvarkingu sąrašu, ir sąrašo nariai be patvirtinto nebuvimo šią savaitę. Niekas nereitinguojama."
     },
-    "assignLink": "Priskirti žmones projektų puslapyje"
+    "assignLink": "Priskirti žmones projektų puslapyje",
+    "capacity": {
+      "people": "{n, plural, one {# žmogus projekte} few {# žmonės projekte} many {# žmonių projekte} other {# žmonių projekte}}",
+      "open": "{n, plural, =0 {laisvų vietų nėra} one {# vieta be žmogaus} few {# vietos be žmogaus} many {# vietų be žmogaus} other {# vietų be žmogaus}}"
+    }
   },
   "projectStages": {
     "ganttTitle": "Laiko juosta (Gantt)",

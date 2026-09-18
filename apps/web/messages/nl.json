@@ -543,7 +543,11 @@
       "free": "deze week vrij",
       "why": "Waarom deze: mensen die al op het project zijn met een schone controlelijst, en lijstleden zonder goedgekeurde afwezigheid deze week. Niets wordt gerangschikt."
     },
-    "assignLink": "Mensen toewijzen op de projectenpagina"
+    "assignLink": "Mensen toewijzen op de projectenpagina",
+    "capacity": {
+      "people": "{n, plural, one {# persoon op het project} other {# personen op het project}}",
+      "open": "{n, plural, =0 {geen open plekken} one {# plek zonder persoon} other {# plekken zonder persoon}}"
+    }
   },
   "projectStages": {
     "ganttTitle": "Tijdlijn (Gantt)",

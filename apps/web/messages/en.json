@@ -543,7 +543,11 @@
       "free": "free this week",
       "why": "Why these: people already on the project whose checklist is clear, and roster members with no approved absence this week. Nothing is ranked."
     },
-    "assignLink": "Assign people on the projects page"
+    "assignLink": "Assign people on the projects page",
+    "capacity": {
+      "people": "{n, plural, one {# person on the project} other {# people on the project}}",
+      "open": "{n, plural, =0 {no open slots} one {# slot without a person} other {# slots without a person}}"
+    }
   },
   "projectStages": {
     "ganttTitle": "Timeline (Gantt)",
