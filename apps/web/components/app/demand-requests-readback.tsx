@@ -6,6 +6,7 @@ import type {
   CustomerRequestsListResult,
 } from "@/lib/buyer/customer-requests";
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
+import { CapacityBand } from "@/components/app/work-world/primitives";
 import { parseStoredEstimate } from "@/lib/estimate/estimate-payload";
 import { EstimateSummary } from "@/components/app/estimate-summary";
 import { DemandLocationCapture } from "@/components/app/demand-location-capture";
@@ -68,6 +69,10 @@ export interface DemandRequestsReadbackLabels {
   /** Neutral label for an unrecognized stored status — never the raw enum
    *  (dead-UI repair, 2026-07-05). */
   readonly statusOther: string;
+  /** Capacity band ends: how many the need declares, how many have responded.
+   *  Functions so the count lives inside the localized phrase (LT/EN/RU). */
+  readonly capacityNeeded: (n: number) => string;
+  readonly capacityInterested: (n: number) => string;
   /** "Submitted details" expander + the labels for each stored payload field. */
   readonly detailsLabel: string;
   readonly fields: Readonly<{
@@ -172,6 +177,21 @@ function RequestRow({
           {labels.status[r.status] ?? labels.statusOther}
         </span>
       </div>
+      {/* The need as capacity (work-world CapacityBand): how many positions,
+          how many have raised their hand. A demand is people × a shape, not a
+          headline — and only when the need declares a size, because inventing
+          a total would be worse than showing none. Interest count is response,
+          never a claim that anyone is committed. */}
+      {r.teamSize && r.teamSize > 0 ? (
+        <div data-testid="demand-readback-capacity">
+          <CapacityBand
+            filled={waiting?.count ?? 0}
+            total={r.teamSize}
+            leftLabel={labels.capacityNeeded(r.teamSize)}
+            rightLabel={labels.capacityInterested(waiting?.count ?? 0)}
+          />
+        </div>
+      ) : null}
       {/* Somebody raised their hand on THIS demand and is still waiting.
           Without this the row looked identical whether five people had applied
           or nobody had, and the only surface that knew was a page the employer

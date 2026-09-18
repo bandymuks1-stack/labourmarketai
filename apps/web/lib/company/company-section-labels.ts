@@ -47,6 +47,8 @@ export async function readDemandReadbackLabels() {
       closed: tReqStatus("closed"),
     },
     statusOther: tReadback("statusOther"),
+    capacityNeeded: (count: number) => tReadback("capacityNeeded", { count }),
+    capacityInterested: (count: number) => tReadback("capacityInterested", { count }),
     detailsLabel: tReadback("detailsLabel"),
     fields: {
       description: tReadback("fields.description"),
