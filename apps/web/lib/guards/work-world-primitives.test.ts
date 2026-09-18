@@ -52,3 +52,32 @@ describe("Guard: work-world primitives", () => {
     expect(page).toContain("<EvidenceState");
   });
 });
+
+describe("Guard: the 800 h period reads as a temporal shape, never a lump", () => {
+  it("PeriodMonthlyShare renders the work-world PeriodBand time ribbon", () => {
+    const src = read("components/app/period-monthly-share.tsx");
+    expect(src).toContain('from "@/components/app/work-world/primitives"');
+    expect(src).toContain("<PeriodBand");
+    // The exact figures stay beside the ribbon (shape + numbers).
+    expect(src).toMatch(/m\.hours\.toFixed\(2\)/);
+  });
+
+  it("PeriodBand shows the total AND per-month segments — no single lump", () => {
+    const src = read("components/app/work-world/primitives.tsx");
+    // one total marker + a per-month segment carrying its derived hours
+    expect(src).toContain('data-testid="ww-period-total"');
+    expect(src).toContain('data-testid="ww-period-band"');
+    expect(src).toMatch(/months\.map\(/);
+    expect(src).toMatch(/data-hours=\{m\.hours\.toFixed\(2\)\}/);
+    // the ribbon is cyan EVIDENCE, and it never claims verification
+    expect(src).toMatch(/text-brand-cyan/);
+    expect(src).not.toMatch(/period[\s\S]{0,80}trust-accent/);
+  });
+
+  it("the period ribbon derives from the canonical projection — no manufactured days", () => {
+    const share = read("components/app/period-monthly-share.tsx");
+    expect(share).toContain("projectPeriodAggregateByMonth");
+    // it must not fabricate day-level rows to fill the ribbon
+    expect(share).not.toMatch(/new Date\([^)]*\)\.getDate|per[- ]?day|dailyRows/i);
+  });
+});
