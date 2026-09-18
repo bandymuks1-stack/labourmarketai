@@ -1407,7 +1407,11 @@
         "country": "šalys",
         "place": "vietos"
       },
-      "placeLinkHint": "Pasirinkę vietą pereisite prie tos vietos galimybių sąrašo."
+      "placeLinkHint": "Pasirinkę vietą pereisite prie tos vietos galimybių sąrašo.",
+      "precision": {
+        "city": "Miestas",
+        "country": "Tik šalis"
+      }
     }
   },
   "demandLocationCapture": {

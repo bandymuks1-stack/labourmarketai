@@ -295,6 +295,43 @@ export function TimeReality({
   );
 }
 
+/** How precisely a place is known. COUNTRY ≠ CITY ≠ ADDRESS ≠ UNKNOWN, and
+ *  the map never infers one from the other: a country-level position is drawn
+ *  as country-level (dashed), a stated city or address as stated (cyan), and
+ *  an unknown place stays UNKNOWN — never a centroid pretending to be a pin. */
+export type PlacePrecisionKind = "address" | "city" | "country" | "unknown";
+
+const PRECISION_CLASS: Record<PlacePrecisionKind, string> = {
+  // a stated place is a FACT of the record — the evidence colour
+  address: "text-brand-cyan border-brand-cyan/40",
+  city: "text-brand-cyan border-brand-cyan/40",
+  // country only = an approximate, derived position — dashed, never cyan
+  country: "text-text-secondary border-dashed border-border-subtle",
+  unknown: "text-text-muted border-dashed border-border-subtle",
+};
+
+/** The place-precision chip. `label` is caller-localized; `data-kind` lets a
+ *  guard assert a country-level place is never painted as a stated one. */
+export function PlacePrecision({
+  kind,
+  label,
+  className = "",
+}: {
+  kind: PlacePrecisionKind;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <span
+      data-testid="ww-place-precision"
+      data-kind={kind}
+      className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${PRECISION_CLASS[kind]} ${className}`}
+    >
+      {label}
+    </span>
+  );
+}
+
 /** Canonical spatial/temporal context. Mono, because it is machine-precise. */
 export function PlaceTimeStamp({ children }: { children: ReactNode }) {
   return (

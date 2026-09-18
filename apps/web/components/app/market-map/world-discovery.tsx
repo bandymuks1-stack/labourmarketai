@@ -1,5 +1,6 @@
 "use client";
 
+import { PlacePrecision } from "@/components/app/work-world/primitives";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -344,12 +345,18 @@ export function WorldDiscovery({
                         <span className="font-normal text-text-secondary"> · {countryName(c.country)}</span>
                       ) : null}
                     </span>
-                    <span className="font-mono text-xs text-text-secondary">
-                      {t("list.count", { count: c.count })}
-                      {" · "}
-                      {t(`provenance.${c.provenance}`)}
-                      {c.precision === "country" ? ` · ${t("list.approx")}` : ""}
-                      {selected ? ` · ${t("list.selected")}` : ""}
+                    <span className="flex flex-wrap items-center gap-1.5 font-mono text-xs text-text-secondary">
+                      {/* WHERE-precision (work-world grammar): a stated city is
+                          cyan fact, a country-only position is a dashed
+                          approximation — the chip says which, so the row can
+                          never read more precisely than the record does. */}
+                      <PlacePrecision kind={c.precision} label={t(`precision.${c.precision}`)} />
+                      <span>
+                        {t("list.count", { count: c.count })}
+                        {" · "}
+                        {t(`provenance.${c.provenance}`)}
+                        {selected ? ` · ${t("list.selected")}` : ""}
+                      </span>
                     </span>
                   </div>
                   {selected && c.members.length > 0 ? (

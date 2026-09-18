@@ -1407,7 +1407,11 @@
         "country": "Länder",
         "place": "Orte"
       },
-      "placeLinkHint": "Ein Ort führt zur Liste der Möglichkeiten dieses Ortes."
+      "placeLinkHint": "Ein Ort führt zur Liste der Möglichkeiten dieses Ortes.",
+      "precision": {
+        "city": "Stadt",
+        "country": "Nur Land"
+      }
     }
   },
   "demandLocationCapture": {
