@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionPrograms } from "@/lib/education/programs";
@@ -128,8 +129,18 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                 <span className="text-text-primary">{c.name}</span>
                                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("members", { count: c.members.filter((m) => m.status === "active").length })}
-                                  {c.startsOn ? ` · ${c.startsOn}` : ""}
-                                  {c.endsOn ? ` → ${c.endsOn}` : ""}
+                                  {/* The cohort's time span as a mono stamp
+                                      (work-world grammar) — the dates the
+                                      institution recorded, nothing derived. */}
+                                  {c.startsOn ? (
+                                    <>
+                                      {" · "}
+                                      <PlaceTimeStamp>
+                                        {c.startsOn}
+                                        {c.endsOn ? ` → ${c.endsOn}` : ""}
+                                      </PlaceTimeStamp>
+                                    </>
+                                  ) : null}
                                 </span>
                               </div>
                               {c.members.filter((m) => m.status === "active").length > 0 ? (

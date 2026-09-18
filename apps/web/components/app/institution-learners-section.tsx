@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
+import { PersonPresence } from "@/components/app/work-world/primitives";
 import { readInstitutionLearners } from "@/lib/education/institution-learners";
 import { OUTCOMES_K_ANONYMITY_FLOOR, readInstitutionLearnerOutcomes } from "@/lib/education/institution-outcomes";
 
@@ -108,9 +109,15 @@ export async function InstitutionLearnersSection({
                   className="flex items-center justify-between gap-3 py-2 text-xs"
                   data-testid={`institution-learner-${row.status}`}
                 >
-                  <span className="min-w-0 truncate text-text-primary">
-                    {row.invitedName ?? row.invitedEmail}
-                  </span>
+                  {/* A learner invitation is a PRESENCE (work-world grammar)
+                      built ONLY from what the institution typed itself — the
+                      name it entered, the e-mail beneath it — never from the
+                      learner's profile (least-privilege ruling 2026-08-27). */}
+                  <PersonPresence
+                    name={row.invitedName ?? row.invitedEmail}
+                    role={row.invitedName ? row.invitedEmail : null}
+                    size={28}
+                  />
                   <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(
                       row.status === "accepted"
