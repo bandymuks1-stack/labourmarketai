@@ -521,7 +521,7 @@ export function TimesheetImportReview({
             <button
               type="submit"
               disabled={!canConfirm}
-              className="min-h-12 self-start rounded-md bg-accent px-4 text-base font-semibold text-white disabled:opacity-60"
+              className="min-h-12 self-start rounded-md bg-brand-blue px-4 text-base font-semibold text-text-on-brand disabled:opacity-60"
               data-testid="timesheet-import-confirm"
             >
               {confirmPending

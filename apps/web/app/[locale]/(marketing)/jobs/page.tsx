@@ -338,7 +338,7 @@ export default async function JobsPage({
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         {H1[active]}
       </h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
+      <p className="mt-3 max-w-2xl text-sm text-text-muted sm:text-base">
         {INTRO[active]}
       </p>
 
@@ -357,7 +357,7 @@ export default async function JobsPage({
           defaultValue={query}
           placeholder={SEARCH_LABEL[active]}
           maxLength={120}
-          className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
         />
         {/* THE FILTER THAT LETS A WORKER SEARCH IN THEIR OWN LANGUAGE. The
             free-text box matches the publisher's own words, so on a supply
@@ -370,7 +370,7 @@ export default async function JobsPage({
           id="profession"
           name="profession"
           defaultValue={profession ?? ""}
-          className="min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="min-w-0 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
         >
           <option value="">{PROFESSION_ANY[active]}</option>
           {professionOptions.map((o) => (
@@ -384,7 +384,7 @@ export default async function JobsPage({
         </button>
       </form>
 
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-2 text-xs text-text-muted">
         {ORIGINAL_LANGUAGE_NOTE[active]}
       </p>
 
@@ -398,8 +398,8 @@ export default async function JobsPage({
             aria-current={showSaved ? undefined : "page"}
             className={
               showSaved
-                ? "rounded-full border px-3 py-1 text-muted-foreground"
-                : "rounded-full border border-foreground px-3 py-1 font-medium"
+                ? "rounded-full border px-3 py-1 text-text-muted"
+                : "rounded-full border border-text-primary px-3 py-1 font-medium"
             }
           >
             {ALL_TAB[active]}
@@ -409,8 +409,8 @@ export default async function JobsPage({
             aria-current={showSaved ? "page" : undefined}
             className={
               showSaved
-                ? "rounded-full border border-foreground px-3 py-1 font-medium"
-                : "rounded-full border px-3 py-1 text-muted-foreground"
+                ? "rounded-full border border-text-primary px-3 py-1 font-medium"
+                : "rounded-full border px-3 py-1 text-text-muted"
             }
           >
             {SAVED_TAB[active]} ({mySaved.vacancyIds.size})
@@ -420,11 +420,11 @@ export default async function JobsPage({
 
       {showSaved ? (
         <>
-          <p className="mt-6 text-sm text-muted-foreground">
+          <p className="mt-6 text-sm text-text-muted">
             {SAVED_NOTE[active]}
           </p>
           {savedPreviews.length === 0 ? (
-            <p className="mt-8 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
+            <p className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted">
               {SAVED_EMPTY[active]}
             </p>
           ) : (
@@ -445,14 +445,14 @@ export default async function JobsPage({
           )}
         </>
       ) : result.status === "not_provisioned" ? (
-        <p className="mt-10 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
+        <p className="mt-10 rounded-md border border-dashed p-6 text-sm text-text-muted">
           {NOT_PROVISIONED[active]}
         </p>
       ) : result.status === "unavailable" ? (
         <p
           role="status"
           data-testid="public-jobs-unavailable"
-          className="mt-10 rounded-md border border-dashed p-6 text-sm text-muted-foreground"
+          className="mt-10 rounded-md border border-dashed p-6 text-sm text-text-muted"
         >
           {UNAVAILABLE[active]}
         </p>
@@ -460,12 +460,12 @@ export default async function JobsPage({
         <>
           {/* role="status": a search is a full navigation, so the result count
               is the one thing a screen reader must hear after it lands. */}
-          <p role="status" className="mt-6 text-sm text-muted-foreground">
+          <p role="status" className="mt-6 text-sm text-text-muted">
             {result.totalCount.toLocaleString()} {RESULTS[active]}
           </p>
 
           {result.vacancies.length === 0 ? (
-            <div className="mt-8 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
+            <div className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted">
               {/* A zero result NAMES the filter that produced it. Ten catalogue
                   professions have no live ad today, and "nothing found" without
                   saying what was asked reads as "the board is broken". */}

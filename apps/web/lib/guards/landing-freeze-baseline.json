@@ -11,12 +11,13 @@
     "app/[locale]/focus-landing/landing-mode-switcher.module.css": "5c7cd0841cb7b002fbd889cd31e9b4c6faeb521dadef5a4afe397adb9c2ad368",
     "components/marketing/public-entry.tsx": "92bd3eb981f42726847fc62e2993a13783350f893527c59ea88ca53bbe600205",
     "lib/marketing/public-entry.ts": "51848fe4a89f9d1cc8d8563c28660cc13b8b989cfdf0163473dbe989ffd61b85",
-    "components/marketing/product-chain-band.tsx": "1eb683851a35252c7a51114c935921fa05a834f2a27f1ead00c53642c572cf60",
+    "components/marketing/product-chain-band.tsx": "d67b32153af82d89fda9202ebbcd4d512bf16e63fcb825573c06d61d01c9173d",
     "components/marketing/market-proof-band.tsx": "20bfa0bbd02d42587225241567df0bfd0ee4409e995d180b017aba43fdbd9a54",
     "components/marketing/player-card-showcase.tsx": "2ec838284901d227f729ee23b4718c311d78a804c8e044615c8e2fcb139ad526",
     "components/marketing/trust-band.tsx": "7388ea7d9e0e0dfe7741aaa3b7028ccbf3dc11c20ef4db6310f1708784c99c6a",
     "components/marketing/final-cta-band.tsx": "c0da1fa999aebf90d3cabb7fac98e62229ade2b353b594cd054ff6b81dfef7c4",
-    "lib/marketing/public-doors.ts": "b4ee7877e636920155748d6eec44f3aff322b934851d602827f973f5d1dc6cc4"
+    "lib/marketing/public-doors.ts": "b4ee7877e636920155748d6eec44f3aff322b934851d602827f973f5d1dc6cc4",
+    "components/app/work-world/primitives.tsx": "4e8858fbed5abddca89919e94085a9f7060ed98b04759f1183cd0cdc883e3bb7"
   },
   "namespaces": {
     "lt.livingMarketReview": "98b406d2fef30e1eefd7d9895a1fbe62e6702fa65231ca764a223a5f989882e6",
