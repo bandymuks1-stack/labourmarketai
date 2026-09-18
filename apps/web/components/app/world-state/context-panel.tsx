@@ -29,6 +29,7 @@ import {
 } from "@/components/app/workspace/result-body";
 import { useWorldState } from "./world-state-provider";
 import { WorkspaceMap } from "./workspace-map";
+import { ContextHistorySpine } from "./context-history-spine";
 
 /**
  * THE CONTEXT PANEL (W3) — the third part of the one workspace.
@@ -525,13 +526,7 @@ function EntityBody({
       {view.history.length > 0 && (
         <>
           <SectionTitle>{t("sectionHistory")}</SectionTitle>
-          <ul className="mt-1.5 flex flex-col gap-1" data-testid="context-panel-history">
-            {view.history.map((h) => (
-              <li key={h.text} className="text-basis text-text-secondary">
-                {h.at ? `${h.at} — ${h.text}` : h.text}
-              </li>
-            ))}
-          </ul>
+          <ContextHistorySpine history={view.history} />
         </>
       )}
 
