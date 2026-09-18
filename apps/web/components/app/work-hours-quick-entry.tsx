@@ -296,7 +296,7 @@ export function WorkHoursQuickEntry({
               // form, decides whether it is a mistake or a second shift.
               if (wouldRepeatLastSave && !duplicateArmed) setDuplicateArmed(true);
             }}
-            className="min-h-12 rounded-md bg-accent px-4 text-base font-semibold text-white disabled:opacity-60"
+            className="min-h-12 rounded-md bg-brand-blue px-4 text-base font-semibold text-text-on-brand disabled:opacity-60"
             data-testid="hours-save"
           >
             {pending ? t("saving") : t("save")}

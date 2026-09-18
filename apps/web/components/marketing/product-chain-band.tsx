@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
+import { EvidenceDot, type EvidenceStanding } from "@/components/app/work-world/primitives";
 
 /**
  * PRODUCT CHAIN BAND (landing rebuild 2026-07-29).
@@ -18,6 +19,19 @@ export async function ProductChainBand() {
   const t = await getTranslations("landing.chain");
 
   const steps = ["need", "person", "work", "journal", "skills", "next"] as const;
+  // The signature evidence diamond, with the colour role it has INSIDE the
+  // product (work-world grammar, propagated 2026-09-18): the journal link is
+  // cyan EVIDENCE, proven skills are champagne ATTESTATION, and every other
+  // link is a reported step. A legend of the grammar a visitor will meet
+  // after signing in — not a claim about anyone's record.
+  const standing: Record<(typeof steps)[number], EvidenceStanding> = {
+    need: "ORGANIZATION_REPORTED",
+    person: "ORGANIZATION_REPORTED",
+    work: "ORGANIZATION_REPORTED",
+    journal: "SELF_REPORTED",
+    skills: "ORGANIZATION_ATTESTED",
+    next: "ORGANIZATION_REPORTED",
+  };
 
   return (
     // NO `id="how-it-works"` HERE. `page.tsx` already wraps this band in
@@ -53,10 +67,11 @@ export async function ProductChainBand() {
                 }`}
               >
                 <span
-                  className={`font-mono text-meta font-semibold ${
+                  className={`inline-flex items-center gap-2 font-mono text-meta font-semibold ${
                     isPivot ? "text-brand-cyan" : "text-text-muted"
                   }`}
                 >
+                  <EvidenceDot state={standing[key]} />
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="text-sm font-semibold text-text-primary">

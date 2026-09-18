@@ -380,6 +380,18 @@ import { join } from "node:path";
  * both directions and in all five routed locales, by
  * `a-person-is-not-a-company-on-import.test.ts`, so the freeze is not the
  * only thing standing between a person and a company they never asked for.
+ *
+ * Work-world propagation — the landing is the entrance to the SAME world
+ * (owner directive 2026-09-18 §19, propagation of the accepted Living Work
+ * World grammar). The product chain band's six step numbers now carry the
+ * shared evidence diamond (`EvidenceDot` from
+ * `components/app/work-world/primitives.tsx`) with the colour role it has
+ * INSIDE the product: the journal link is cyan EVIDENCE, proven skills are
+ * champagne ATTESTATION, every other link is a reported step — a legend of
+ * the grammar a visitor meets after signing in, not a claim about anyone's
+ * record. NO copy, NO data, NO layout and NO namespace changed. The
+ * regeneration touched exactly the product-chain-band.tsx hash, and the
+ * primitives file joined the frozen set (its hash is new, not moved).
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -414,6 +426,11 @@ export const FROZEN_LANDING_FILES = [
   "components/marketing/final-cta-band.tsx",
   // Window 6, 2026-09-06: the pure door registry the band renders from.
   "lib/marketing/public-doors.ts",
+  // Work-world propagation, 2026-09-18: the product chain wears the shared
+  // evidence diamond, so the shared grammar file joins the render tree and
+  // is frozen with it — a later change to the primitives is a landing change
+  // and must regenerate this baseline with its own note.
+  "components/app/work-world/primitives.tsx",
 ] as const;
 
 /**
