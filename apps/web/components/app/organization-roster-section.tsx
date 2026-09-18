@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { PersonPresence } from "@/components/app/work-world/primitives";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import type { DomainCaller } from "@/lib/domain/caller";
@@ -192,20 +193,23 @@ export async function OrganizationRosterSection({
           {res.people.map((p) => (
             <li
               key={p.id}
-              className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2"
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2"
               data-testid={`organization-roster-person-${p.id}`}
             >
-              <span className="text-sm text-text-primary">{p.displayName}</span>
-              {p.relationshipKind ? (
-                <span className="text-xs text-text-secondary">
-                  {/* An unknown slug renders as itself rather than as a blank:
-                      a relationship the vocabulary does not carry is a gap to
-                      see, not one to hide. */}
-                  {tRel.has(p.relationshipKind)
-                    ? tRel(p.relationshipKind)
-                    : p.relationshipKind}
-                </span>
-              ) : null}
+              {/* A person reads as a presence, not a bare string (work-world
+                  PersonPresence). The relationship is their role beside them;
+                  an unknown slug renders as itself — a gap to see, not hide. */}
+              <PersonPresence
+                name={p.displayName}
+                role={
+                  p.relationshipKind
+                    ? tRel.has(p.relationshipKind)
+                      ? tRel(p.relationshipKind)
+                      : p.relationshipKind
+                    : null
+                }
+                size={34}
+              />
               {p.externalRef ? (
                 <span className="font-mono text-meta text-text-muted">{p.externalRef}</span>
               ) : null}
