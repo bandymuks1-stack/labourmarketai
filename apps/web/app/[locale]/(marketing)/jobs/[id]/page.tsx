@@ -15,6 +15,9 @@ import {
 } from "@/lib/opportunities/saved-opportunities";
 import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
+import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildJobDetailJsonLd } from "@/lib/seo/public-job-json-ld";
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 
 /**
  * ONE PUBLIC JOB PAGE — the indexable unit of the acquisition funnel, and the
@@ -392,7 +395,26 @@ export default async function JobDetailPage({
     : undefined;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* K3 (2026-09-02): anonymous-safe JSON-LD — a WebPage about an
+          Occupation with the salary band. Built ONLY from the anonymous
+          preview (never `member`), so employer / location / publisher title /
+          links cannot appear. No JobPosting by design (it would require the
+          employer and the workplace). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdScript(
+            buildJobDetailJsonLd({
+              origin: MARKETING_ORIGIN,
+              locale: active,
+              description: DESCRIPTION[active],
+              preview,
+              genericTitle: GENERIC_TITLE[active],
+            }),
+          ),
+        }}
+      />
       <Link href="/jobs" className="text-sm text-muted-foreground hover:underline">
         {BACK[active]}
       </Link>
@@ -540,6 +562,6 @@ export default async function JobDetailPage({
       {attribution && (
         <p className="mt-8 text-xs text-muted-foreground">{attribution}</p>
       )}
-    </main>
+    </div>
   );
 }
