@@ -24,6 +24,11 @@ import {
   type PersistedFragment,
 } from "@/lib/journal/fragment-skill-evidence";
 import { normalizeSkillLabel } from "@/lib/skills/candidate-skills";
+import {
+  SKILL_FEEDBACK_REASON_MAX,
+  normalizeFeedbackReason,
+  recordSkillFeedbackSignal,
+} from "@/lib/learning/skill-feedback-signal";
 import { normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
 import { foldText } from "@/lib/structuring/normalize";
 
@@ -458,7 +463,16 @@ export async function confirmJournalSkillCandidate(
   if (!member) return { ok: false, code: "candidate_not_found" };
 
   const res = await addSkillAndLink(ctx.sb, ctx.workerId, ctx.entryId, slug);
-  if (res.ok) await recordFragmentSkillEvidence(ctx, slug, member.fragmentIds);
+  if (res.ok) {
+    await recordFragmentSkillEvidence(ctx, slug, member.fragmentIds);
+    // The learning ledger observes the decision (never changes it).
+    await recordSkillFeedbackSignal(ctx.sb, {
+      workerId: ctx.workerId,
+      entryId: ctx.entryId,
+      slug,
+      decision: "confirmed",
+    });
+  }
   return res;
 }
 
@@ -572,12 +586,51 @@ export async function rejectJournalSkillCandidate(
     slug,
   );
   if (!ok) return { ok: false, code: "write_failed" };
+  // The learning ledger observes the correction (never changes the entry).
+  await recordSkillFeedbackSignal(ctx.sb, {
+    workerId: ctx.workerId,
+    entryId: ctx.entryId,
+    slug,
+    decision: "rejected",
+  });
   try {
     revalidatePath("/[locale]/dashboard/journal", "page");
   } catch {
     /* freshness hint only */
   }
   return { ok: true };
+}
+
+/**
+ * The worker SAYS WHY they rejected a recognised skill — optional, after the
+ * fact, in their own words (2026-09-19; the mission's "reject + optional
+ * reason"). It changes NOTHING on the entry: the append-only `skill_rejected`
+ * marker already stands. It appends one more observation to the learning
+ * ledger, membership-checked exactly like the decision itself.
+ */
+export async function noteSkillRejectReason(
+  entryId: string,
+  slug: string,
+  pipelineVersion: number,
+  reason: string,
+): Promise<RejectCandidateResult> {
+  if (typeof slug !== "string" || !SLUG_RE.test(slug)) {
+    return { ok: false, code: "candidate_not_found" };
+  }
+  const clean = normalizeFeedbackReason(reason);
+  if (!clean || clean.length > SKILL_FEEDBACK_REASON_MAX) {
+    return { ok: false, code: "candidate_not_found" };
+  }
+  const ctx = await ownEntryDerivation(entryId, pipelineVersion);
+  if (!ctx.ok) return { ok: false, code: ctx.code };
+  const recorded = await recordSkillFeedbackSignal(ctx.sb, {
+    workerId: ctx.workerId,
+    entryId: ctx.entryId,
+    slug,
+    decision: "rejected",
+    reason: clean,
+  });
+  return recorded ? { ok: true } : { ok: false, code: "write_failed" };
 }
 
 /**

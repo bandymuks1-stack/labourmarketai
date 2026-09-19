@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   confirmJournalSkillCandidate,
+  noteSkillRejectReason,
   rejectJournalSkillCandidate,
 } from "@/lib/journal/skill-pipeline-actions";
+import { SKILL_FEEDBACK_REASON_MAX } from "@/lib/learning/skill-feedback-model";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import type { EntryPendingCandidate } from "@/lib/journal/entry-pending-candidates";
 
@@ -32,6 +34,26 @@ export function JournalEntryCandidateDecision({
 }) {
   const t = useTranslations("journal");
   const [state, setState] = useState<DecisionState>("idle");
+  // Optional "why?" after a rejection — one more observation for the learning
+  // ledger, never a condition of the rejection itself.
+  const [reason, setReason] = useState("");
+  const [reasonState, setReasonState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function sendReason() {
+    if (reason.trim() === "") return;
+    setReasonState("sending");
+    try {
+      const res = await noteSkillRejectReason(
+        entryId,
+        candidate.slug,
+        JOURNAL_PIPELINE_VERSION,
+        reason,
+      );
+      setReasonState(res.ok ? "sent" : "error");
+    } catch {
+      setReasonState("error");
+    }
+  }
 
   async function decide(decision: "confirmed" | "rejected") {
     setState("working");
@@ -72,11 +94,47 @@ export function JournalEntryCandidateDecision({
           ✓ {t("candidateConfirmed")}
         </span>
       ) : state === "rejected" ? (
-        <span
-          className="text-meta text-text-muted"
-          data-testid={`entry-candidate-rejected-${entryId}-${candidate.slug}`}
-        >
-          {t("candidateRejected")}
+        <span className="flex flex-wrap items-center gap-1.5">
+          <span
+            className="text-meta text-text-muted"
+            data-testid={`entry-candidate-rejected-${entryId}-${candidate.slug}`}
+          >
+            {t("candidateRejected")}
+          </span>
+          {reasonState === "sent" ? (
+            <span
+              className="text-meta text-text-secondary"
+              data-testid={`entry-candidate-reject-reason-sent-${entryId}-${candidate.slug}`}
+            >
+              {t("candidateRejectWhyThanks")}
+            </span>
+          ) : (
+            <>
+              <input
+                type="text"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                maxLength={SKILL_FEEDBACK_REASON_MAX}
+                placeholder={t("candidateRejectWhy")}
+                aria-label={t("candidateRejectWhy")}
+                disabled={reasonState === "sending"}
+                data-testid={`entry-candidate-reject-reason-${entryId}-${candidate.slug}`}
+                className="min-h-9 w-44 rounded-md border border-ink-500 bg-ink-700 px-2 text-meta text-text-primary outline-none focus:border-brand-blue"
+              />
+              <button
+                type="button"
+                onClick={() => void sendReason()}
+                disabled={reasonState === "sending" || reason.trim() === ""}
+                data-testid={`entry-candidate-reject-reason-send-${entryId}-${candidate.slug}`}
+                className="rounded-md border border-ink-500 px-2.5 py-1 text-meta text-text-secondary transition-colors hover:border-brand-blue disabled:opacity-50"
+              >
+                {t("candidateRejectWhySend")}
+              </button>
+              {reasonState === "error" ? (
+                <span className="text-meta text-state-danger">{t("candidateError")}</span>
+              ) : null}
+            </>
+          )}
         </span>
       ) : (
         <span className="flex items-center gap-1.5">
