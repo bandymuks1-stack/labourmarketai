@@ -779,3 +779,17 @@ The owner posted the §N2 sentence verbatim. Executed in this order, nothing ski
 Security receipt now: **CRITICAL 0 · HIGH 0 · R-1 CLOSED · R-16 CLOSED.**
 SECURITY_COMPLETE is still not declared: MEDIUM/LOW items and the owner-held
 gates (M3, L3–L7) are unchanged, and #1795 / #1797 / #1798 remain unapplied.
+
+### N11. R-3 — APPLIED (owner sentence received 2026-09-19 ~14:55 UTC)
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | `update_project_facts_v1` absent; `can_manage_project`, `is_assigned_to_project`, `is_admin` present; ledger 294, no row of this name; branch 0 behind main after the restack |
+| apply | Supabase MCP `apply_migration`, name `update_project_facts_v1` → **ledger `20260919145731`, 295 applied** |
+| readback | SECURITY DEFINER, `search_path=public`, args `(uuid, text, text, text, date, date)`, `anon` execute false, `authenticated` true, gate present and the completed check after it |
+| contract (live, one DO block, rolled back) on real project `562c9c3e` | stranger (Ramūnas) → `not_found` · Lithuania → `invalid/country` · end < start → `invalid_dates` · 1-char title → `invalid/title` · owner write `lt` → **`updated, changed=true`**, row `LT / 2026-10-01 → 2026-11-30 / city`, audit +1 · again → `changed=false` · completed → `completed_read_only` |
+| residue | row still `country NULL`, no dates, `draft`; 0 audit rows; 0 of 9 projects carry facts (the write is now available to managers; no data was manufactured) |
+| repo | markers flipped, ledger entry (file sha256 `3a94acc577aa6e885b65f4de38a63311630380e86498454591f74e924b13f7c2`), #1795 ready, squash-merged **`c5cba480`** at 15:08 UTC after green CI (the form + action ship in the same merge, so the edge is complete on deploy) |
+| stack | #1797 (R-13) rebased onto main and retargeted; #1798 (R-9) rebased onto #1797; ratchet comments carry both the R-3 flip and the next bump; guards green on both |
+
+What this unlocks on production once `/api/health.build` reaches `c5cba480`: the operations manage strip of every non-completed project shows the facts form (title, city, country, start, end); the calendar band, the dates chip and the booking-overlap check start working the moment a manager enters dates. Human walk: Donatas → /dashboard/projects/562c9c3e/operations → set country LT and the dates.
