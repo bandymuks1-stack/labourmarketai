@@ -16738,5 +16738,24 @@
       }
     },
     "needsAgency": "Pasiūla"
+  },
+  "rosterLinkEnd": {
+    "title": "Mano komandos",
+    "hint": "Komandos, kurių kvietimą priėmėte. Galite išeiti bet kada; organizacija pasilieka savo įrašus, bet nebelaiko jūsų savo darbuotoju.",
+    "unnamedOrganization": "Neįvardyta organizacija",
+    "since": "nuo {date}",
+    "openSelf": "Čia nebedirbu — išeiti iš komandos",
+    "openOwner": "Pašalinti iš sąrašo",
+    "confirmSelf": "Išėjimas nutraukia šį ryšį dabar: organizacija nebegalės jūsų priskirti, per jį skaityti jūsų privataus profilio ar jūsų siūlyti. Jūsų žurnalas lieka jūsų.",
+    "confirmOwner": "Pašalinimas nutraukia šį ryšį dabar: asmuo nebėra jūsų sąraše ir per jį negali būti priskirtas. Jo žurnalas lieka jo.",
+    "reasonLabel": "Priežastis (neprivaloma, saugoma įraše)",
+    "submit": "Patvirtinti",
+    "cancel": "Atšaukti",
+    "doneSelf": "Išėjote iš šios komandos.",
+    "doneOwner": "Pašalinta iš sąrašo.",
+    "needsMigration": "Ryšio nutraukimas šioje aplinkoje dar neįjungtas.",
+    "notFound": "Šio ryšio nebėra arba negalite jo nutraukti.",
+    "failed": "Nepavyko nutraukti ryšio. Bandykite dar kartą.",
+    "readFailed": "Jūsų komandų dabar nepavyko nuskaityti. Tai nereiškia, kad jų neturite."
   }
 }

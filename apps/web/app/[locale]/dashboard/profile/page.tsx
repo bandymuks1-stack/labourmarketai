@@ -81,6 +81,8 @@ import {
 } from "@/lib/player-card/player-card-result";
 import { WorkCardEditor } from "@/components/app/work-card-editor";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
+import { listMyTeamLinks } from "@/lib/company/team-links";
+import { TeamLinkWithdrawals } from "@/components/app/roster-link-end";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import {
   presentSkills,
@@ -234,6 +236,7 @@ export default async function ProfilePage({
     profRowsRes,
     avatar,
     myOrgEvidence,
+    myTeamLinks,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -276,6 +279,10 @@ export default async function ProfilePage({
      * card's honest note rather than a silently empty list.
      */
     listMyOrganizationEvidence({ supabase, userId: user.id, locale }, { limit: 100 }),
+    // R-9: the person's own active roster links (the relationship they
+    // accepted), so the withdrawal can stand beside the history withdrawal.
+    // Same parallel stage — no new serial stage.
+    listMyTeamLinks(supabase, user.id),
   ]);
   const profile = profileRes.data;
   const worker = workerRes.data;
@@ -980,6 +987,12 @@ export default async function ProfilePage({
       {myOrgEvidence.kind === "ok" ? (
         <RosterLinkWithdrawals links={myOrgEvidence.links} />
       ) : null}
+
+      {/* "I NO LONGER WORK HERE" (R-9). The roster relationship the person
+          accepted (company_workers / agency_workers) had no withdrawal at
+          all — the one relationship on this page that consent created and
+          consent could not end. Empty when there is no active link. */}
+      <TeamLinkWithdrawals result={myTeamLinks} />
 
       {/* THE STUDENT'S IDENTITY, ABOVE THE FOLD (2026-09-18). The Learning
           Compass — what this person is becoming, in which cohort, and the

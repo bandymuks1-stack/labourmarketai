@@ -2072,6 +2072,56 @@ Rollback: `supabase/rollbacks/20260919130000_update_project_facts_v1.down.sql`
 (drops the function; rows written through it are real manager-entered facts
 and stay).
 
+### `end_roster_link_v1` — RED R-9 (new SECURITY DEFINER write) — APPLIED 2026-09-19, ledger `20260919151920`
+
+Repo file `supabase/migrations/20260919150000_end_roster_link_v1.sql`
+(sha256 `ac7d8bf529f4f9e40247ef84a765873662f15bdd083fd8ed9638bfd1146f8eaf`), applied via Supabase MCP `apply_migration` (name
+`end_roster_link_v1`) under the owner's verbatim approval sentence given in
+chat 2026-09-19 ("Apply 20260919150000_end_roster_link_v1 to production. I
+approve creating public.end_roster_link_v1 (SECURITY DEFINER, authenticated
+only) so that the subject worker, the owner of the company/agency, or an admin
+may set a company_workers / agency_workers row to removed and end the matching
+employee engagement, audited, never deleted. Rollback file acknowledged.").
+PR #1798.
+
+Creates `public.end_roster_link_v1(text, uuid, uuid, text default null) →
+jsonb`: row lock on the link per kind; authority ladder admin → owner of THAT
+company/agency (`owns_company` / `owns_agency`) → the subject worker; no
+standing → `not_found`; idempotent (`already_removed`); `status → 'removed'`,
+`journal_review_enabled → false` — never a DELETE; in the same transaction
+the ACTIVE `employee` engagement context of the mirrored organization is
+ended (`end_org_membership_v1` shape); audited with actor capacity,
+`self_initiated`, the ended engagement id and the reason. `authenticated`
+only; `public` and `anon` revoked. No table, policy, row or other function
+touched; project assignments untouched.
+
+Pre-apply drift check: function absent; `owns_company`, `owns_agency`,
+`is_admin`, `end_org_membership_v1`, `caller_manages_worker_by_roster`
+present; the 0027 CHECK still admits `removed`; `ended_at` present on
+`engagement_contexts`; ledger 295, no prior row of this name. Readback:
+296 applied; SECURITY DEFINER, `search_path=public`, `anon` execute false,
+`authenticated` true; all three ladder branches present.
+
+Contract on the LIVE function (real actors under `set local role
+authenticated` with JWT claims incl. e-mail; one DO block aborted by RAISE):
+- setup: owner `invite_company_worker` → `invited`; the WORKER's
+  `accept_company_worker_invitation` → `linked`; active roster row 1,
+  employee context 1
+- stranger (Ramūnas, agency owner, no relation) → `not_found`
+- the WORKER ends it → `removed / self / engagement_ended=true`; again →
+  `already_removed`
+- owner's `caller_manages_worker_by_roster(worker)` afterwards → **false**
+- owner Donatas (platform admin → capacity `admin`) ends the REAL consented
+  row → `removed / admin / engagement_ended=true`
+- wrong kind (`agency` with a company id) → `not_found`
+- after: removed rows 2, active employee contexts 0 for both, audit rows 2
+Residue after rollback: probe worker 0 roster rows / 0 contexts; the real row
+still `active` with its context active; 0 removed rows in the table; 0 audit
+rows of this action; 0 invitations.
+
+Rollback: `supabase/rollbacks/20260919150000_end_roster_link_v1.down.sql`
+(drops the function; rows ended through it are real decisions and stay).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

@@ -28,6 +28,8 @@ function asAny(supabase: SupabaseClient): any {
 }
 
 export interface LinkedCompanyWorker {
+  /** The company the row belongs to — the key `end_roster_link_v1` takes (R-9). */
+  readonly companyId: string;
   readonly workerId: string;
   readonly profileId: string;
   readonly status: string | null;
@@ -118,6 +120,7 @@ export async function listActiveCompanyWorkers(
   const rows: LinkedCompanyWorker[] = (data ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (r: any) => ({
+      companyId,
       workerId: r.worker_id as string,
       profileId: (r.workers?.profile_id as string) ?? "",
       status: (r.status as string | null) ?? null,

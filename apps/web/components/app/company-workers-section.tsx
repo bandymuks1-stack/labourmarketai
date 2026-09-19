@@ -17,6 +17,7 @@ import type {
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
 import { MessageButton } from "@/components/app/message-button";
+import { RosterLinkEndControl } from "@/components/app/roster-link-end";
 import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
 import {
   WorkerOperationsRoleForm,
@@ -237,6 +238,16 @@ export function CompanyWorkersSection({
                         {labels.openProfile}
                       </Link>
                       <MessageButton profileId={w.profileId} labelKey="messageWorker" />
+                      {/* R-9: the owner ends the relationship through the one
+                          gated write (the RPC re-derives ownership). */}
+                      {canAssignRoles && w.companyId ? (
+                        <RosterLinkEndControl
+                          kind="company"
+                          orgLegacyId={w.companyId}
+                          workerId={w.workerId}
+                          side="owner"
+                        />
+                      ) : null}
                     </div>
                     <div className="flex flex-col gap-1 text-xs text-text-secondary">
                       <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
