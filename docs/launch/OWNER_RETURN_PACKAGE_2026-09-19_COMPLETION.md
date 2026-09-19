@@ -31,7 +31,8 @@ branch in six journey-batched commits; everything else is classified below.
 | migration ledger | 291 applied = 291 repo files; **this mission applies ZERO migrations, ZERO RLS changes, ZERO authority changes** |
 | Supabase security advisors | 9 anon SECURITY DEFINER functions = the deliberate public preview set; `worker_absence_scheduling` definer view = documented load-bearing exception; leaked-password protection OFF (owner setting); two `usage_cost_events_*` trigger functions without pinned `search_path` (packet item R-13) |
 | branch | `fix/cc/completion-privacy-journey-2026-09-19` — PR #1789 (GREEN class: code, tests, i18n, docs; no migration; squash auto-merge armed) |
-| production SHA after merge | `________` (filled on merge) |
+| merged | 2026-09-19 08:32 UTC, squash `e37adc9f` (#1789) — quality 9 m 7 s, migration-safety, e2e-smoke, mobile, CodeQL all green |
+| production SHA after merge | `e37adc9f` — `/api/health.build` verified (see §C proof line) |
 
 Live production reality read on 2026-09-19 (counts): 56 profiles, 56 workers,
 17 organizations, 14 companies, 20 demands, 6 interest signals, 1 booking,
@@ -211,7 +212,16 @@ withdrawal controls could not be rendered with the QA identity (it holds no
 granted disclosure and no confirmed roster link) — CODE_PROVEN + guarded;
 Donatas's walk (§K) is the first render with real rows. The landing
 JSON-LD moved to the locale layout after the walk (the landing is a frozen
-composition outside the marketing group) — BUILD_PROVEN, not walked.
+composition outside the marketing group) — BUILD_PROVEN, not walked locally.
+
+PRODUCTION_BROWSER_PROVEN 2026-09-19 08:38 UTC (anonymous, after Vercel
+served `e37adc9f`): `/en/legal/terms` canonical + six hreflang +
+Organization/WebSite JSON-LD; `/en` carries the JSON-LD; `/robots.txt`
+lists `/*/invite` and `/*/oauth`; `/en/invite/<bad token>` renders with
+`noindex, nofollow`; manifest description cross-sector; `/api/health.build =
+e37adc9f`. Authenticated surfaces (profile work card, privacy withdrawals,
+export bundle) are PRODUCTION_DEPLOYED; their PRODUCTION_BROWSER_PROVEN is
+Donatas's walk (§K).
 
 ## D. SECURITY RECEIPT
 
