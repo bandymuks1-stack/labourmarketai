@@ -98,10 +98,12 @@ describe("forms open after an explicit action", () => {
     const src = read("components/app/invite-panel.tsx");
     // Closed by default…
     expect(src).toContain("const [open, setOpen] = useState(");
-    // …unless the caller already named what to invite (?invite=1&type=…&org=…),
-    // which is itself the explicit action and a real entry point.
+    // …unless the caller already named what to invite (?type=…&org=…), or
+    // arrived through the plain `?invite=1` door that an empty search or an
+    // empty relationships list offers (2026-09-19) — each is itself the
+    // explicit action and a real entry point.
     expect(src).toContain(
-      "Boolean(defaultType || defaultOrganizationId || defaultProjectId)",
+      "Boolean(defaultOpen || defaultType || defaultOrganizationId || defaultProjectId)",
     );
     expect(src).toContain('data-testid="invite-panel-open"');
   });

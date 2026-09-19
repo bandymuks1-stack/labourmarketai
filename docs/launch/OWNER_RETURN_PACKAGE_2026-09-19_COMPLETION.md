@@ -627,3 +627,126 @@ narrowed by anything merged. The one stricter behaviour is R-1 itself
 - **Ramūnas (Nonstop):** `/dashboard/company/people` — same block if any
   governance member lacks confirmation authority; otherwise absent.
 - The four RED drafts change nothing in production until approved.
+
+---
+
+## N. CONTINUATION DELTA — 2026-09-19, fourth window ("verify → close approved REDs → continue GREEN → verify production")
+
+Same rules as §M: no re-audit; each line is a targeted trace. §A–§M stay as
+written; corrections live here.
+
+### N1. PRODUCTION (verified at window start, 13:41 UTC)
+
+| | |
+|---|---|
+| main | `5aac765a` (docs #1799) over `b2702a40` (code #1796) — local main was one commit behind and was fast-forwarded |
+| production | `/api/health.build = 5aac765a`, ok, auth 219 ms, db 432 ms, dub1 |
+| migration ledger | **293 applied**, latest `20260919104526 roster_writes_rpc_only_v1` — unchanged since §M |
+| R-1 readback | `authenticated` on `company_workers`: insert/update/delete **false**, select true; on `agency_workers`: all four false (never granted); `engagement_contexts`: writes false, select true |
+| Supabase branching | the `main` branch itself reports `MIGRATIONS_FAILED` (repo filenames ≠ ledger, the known state); the `Supabase Preview` failure on #1795 is that integration, not the R-3 SQL |
+
+### N2. R-16 (#1794) — VERIFIED, NO DRIFT, awaiting the owner sentence
+
+- Branch `fix/cc/r16-add-org-member-consent-v1` at `5659640c`: 2 behind main
+  (the #1796 code and the #1799 docs — neither touches `add_org_member`,
+  the migration set, or the ratchets); `mergeable = CLEAN`; quality,
+  migration-safety, e2e-smoke, mobile, CodeQL all SUCCESS.
+- **Rollback = production, byte for byte:** the `.down.sql` body was created
+  inside an aborted transaction and its `md5(prosrc)` read back as
+  `22167e898cb68a706e7cd4a50f53efc0` — identical to the live function's
+  `md5(prosrc)`. The migration body is that same text plus the one
+  `not_linked` precondition, placed after the worker lookup and before the
+  `already_member` short-circuit, with no role exemption.
+- **Live dry run re-run this window** (new body created inside a DO block,
+  `set local role authenticated` + the real owner's JWT claims incl. e-mail,
+  aborted by RAISE — zero residue): owner Donatas → `add_org_member(org,
+  E2E worker 7c06faf8 with 0 roster rows)` → **`not_linked`**, forged
+  context rows **0**; owner → `add_org_member(org, the one consented roster
+  worker 8af3e334)` → **`already_member`**. Legitimate behaviour unchanged.
+- Prerequisite helpers present on production: `is_admin`,
+  `manages_organization`, `organizations.legacy_company_id /
+  legacy_agency_id` (org `19f47e78` → company `788225e9`, agency NULL).
+- The ONE approval sentence stored in the PR body (verbatim):
+
+> **Apply 20260919120000_add_org_member_requires_consented_roster_v1 to production.** I approve replacing `public.add_org_member` so that it refuses (`not_linked`) unless the worker already holds an active `company_workers` / `agency_workers` row on the organization's legacy company or agency, with no exemption for any role. Rollback file acknowledged.
+
+Security receipt: **CRITICAL 0 · HIGH 1 (R-16 — packet verified, NOT
+applied) · R-1 CLOSED.** SECURITY_COMPLETE is NOT declared.
+
+### N3. R-2 — RECLASSIFIED: the RED half is SUPERSEDED by the consent-first path
+
+The §J proposal (provision an `employee` engagement context inside
+`respond_booking_request_v3` on accept) is **withdrawn**. Traced on
+production this window:
+
+1. booking accept → `company_worker_engagements` row only;
+   `respond_booking_request_v3` does not touch `engagement_contexts`
+   (correct: a booking is not consent to journal access);
+2. the employer sees the booked person on `/dashboard/company/people`
+   (#1793, merged) with the honest state and the ONE exit —
+   `/dashboard/network?type=join_as_employee`;
+3. the WORKER accepts → `accept_invitation_apply_v2` (arm
+   `join_as_employee`, slug `employee`) inserts the `engagement_contexts`
+   row for the invitation's organization — the same row
+   `accept_company_worker_invitation` inserts on the roster path;
+4. the organization enables review on that context
+   (`set_engagement_journal_review`), the worker writes journal entries in
+   it, and `review_journal_entry` admits the organization's reviewer.
+
+booking → visible booked person → explicit employee invitation → worker
+acceptance → engagement context → work → Journal → employer review is
+therefore complete and usable with no new authority. Worker agency is
+preserved at step 3. **R-2 RED: CLOSED (superseded).** No migration.
+
+### N4. R-4 — RECLASSIFIED: CLOSED by existing authority + #1796
+
+`review_journal_entry` (live body read this window) requires BOTH
+`manages_organization(org)` AND an active reviewer engagement
+(`manager` / `owner` / `external_manager`), else `no_reviewer_engagement`.
+`grant_org_manager` (owner-or-admin only) mints the `manager` engagement
+for a profile, audited. #1796 gives the registered owner the list of
+governance members without reviewer authority and the one button that
+calls that RPC, and names the refusal in the inbox. So a membership-only
+manager gains confirmation authority only when the owner grants it —
+explicit, owner-controlled, one manager model. The §J proposal (rebase the
+reviewer check on membership alone) would have made authority implicit and
+is **withdrawn**. **R-4: CLOSED (superseded).** No migration.
+
+### N5. R-3 / R-9 / R-13 — packets verified against production, NOT applied
+
+Common: each branch is 2 behind main (#1796 code + #1799 docs; no
+migration among them); quality, migration-safety, e2e-smoke, mobile, CodeQL
+SUCCESS on every one; the stacked order (#1794 → #1795 → #1797 → #1798)
+still holds; production has none of the three target objects.
+
+| # | PR | Verified this window | Approval sentence (verbatim from the PR body) |
+|---|---|---|---|
+| R-3 | #1795 `4340ab87` | `update_project_facts_v1` absent; helpers `can_manage_project`, `is_assigned_to_project`, `is_admin` present; **9 projects, 0 with country, 0 with start, 0 with end, 0 completed**; the migration is ONE function + privilege floor, no direct client write anywhere in the PR (the reverted approach is not reintroduced) | **Apply 20260919130000_update_project_facts_v1 to production.** I approve creating `public.update_project_facts_v1` (SECURITY DEFINER, `can_manage_project`-gated, `authenticated` only) as the one write for a project's title, city, country, start and end dates, with a completed project read-only. Rollback file acknowledged. |
+| R-9 | #1798 `291521c0` | `end_roster_link_v1` absent; `owns_company`, `owns_agency`, `is_admin`, `end_org_membership_v1` present; the body sets `status='removed'` (never DELETE), clears review, ends the mirrored `employee` engagement in the same transaction, audits actor capacity + self-initiated; stranger → `not_found` | **Apply 20260919150000_end_roster_link_v1 to production.** I approve creating `public.end_roster_link_v1` (SECURITY DEFINER, `authenticated` only) so that the subject worker, the owner of the company/agency, or an admin may set a `company_workers` / `agency_workers` row to `removed` and end the matching employee engagement, audited, never deleted. Rollback file acknowledged. |
+| R-13 | #1797 `59eba302` | both trigger functions still `proconfig = NULL`, `prosecdef = false`; the migration is two `alter function … set search_path = public` statements, nothing else; gate kept as the packet lists it | **Apply 20260919140000_usage_cost_trigger_search_path_v1 to production.** I approve pinning `search_path = public` on `usage_cost_events_forbid_mutation()` and `usage_cost_events_forbid_truncate()`. Rollback file acknowledged. |
+
+Each sentence approves exactly one migration. Approval of one is not
+approval of another.
+
+### N6. GREEN shipped this window
+
+| Item | What | Proof |
+|---|---|---|
+| Network dead ends (the last two of the §B4 list) | `/dashboard/network`: an empty people/company search and an empty "Active relationships" list each carry ONE link to the invite panel on the same page (`?invite=1#network-invite`, search text kept); `InvitePanel` gains `defaultOpen` so the panel is open on arrival without pre-selecting a type; copy ×5 (`network.search.emptyCta`, `network.relationships.emptyCta`) | guard `empty-states-lead-somewhere` (new case); typecheck + lint 0 errors |
+
+### N7. Remaining packets — status after this window
+
+| # | Status |
+|---|---|
+| R-2 | CLOSED (superseded, §N3) |
+| R-4 | CLOSED (superseded, §N4) |
+| R-16, R-3, R-9, R-13 | verified drafts, each waiting for its own sentence (§N2, §N5) |
+| R-12 | code-only, but the `/jobs` files sit under the owner-quoted per-PR scoped waiver (`public-acquisition-route-jobs`); adding a PR number there has been an owner act every time — stays in the owner batch |
+| R-14 | owner design decision, unchanged |
+| R-5, R-6, R-7, R-8, R-10, R-11, R-15 | unchanged packets; no newer work closed or narrowed them |
+| notification backfill (§L3) | production write, owner-run only |
+
+### N8. Capability loss
+
+None. Nothing removed, narrowed, or hidden. Two exits were added to an
+existing page; one optional prop was added to an existing component.

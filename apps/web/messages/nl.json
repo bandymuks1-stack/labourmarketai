@@ -11135,6 +11135,7 @@
       "placeholder": "Naam, bedrijf, stad…",
       "submit": "Zoeken",
       "empty": "Niets gevonden.",
+      "emptyCta": "Nog niet hier? Stuur een uitnodiging per e-mail.",
       "orgType": {
         "company": "Bedrijf",
         "agency": "Bureau",
@@ -11192,6 +11193,7 @@
     "relationships": {
       "title": "Actieve relaties",
       "empty": "Nog geen actieve werkrelaties. Geaccepteerde uitnodigingen en bevestigde werkrelaties verschijnen hier.",
+      "emptyCta": "Uitnodiging sturen",
       "noOrg": "Persoonlijke relatie — niet gekoppeld aan een bedrijf",
       "slug": {
         "employee": "Medewerker",
