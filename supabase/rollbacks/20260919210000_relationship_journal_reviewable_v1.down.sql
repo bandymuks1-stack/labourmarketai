@@ -24,6 +24,9 @@ begin
   return case when p_enabled then 'enabled' else 'disabled' end;
 end $$;
 
+revoke all on function public.set_engagement_journal_review(uuid, boolean) from public, anon;
+grant execute on function public.set_engagement_journal_review(uuid, boolean) to authenticated;
+
 alter table public.relationship_types drop column if exists journal_reviewable;
 
 commit;

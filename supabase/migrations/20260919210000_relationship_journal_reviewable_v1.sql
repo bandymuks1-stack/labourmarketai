@@ -96,4 +96,9 @@ begin
   return case when p_enabled then 'enabled' else 'disabled' end;
 end $$;
 
+-- Anon closure (20260722160000) cannot reach a function created after it:
+-- state the grants explicitly, as every later SECURITY DEFINER does.
+revoke all on function public.set_engagement_journal_review(uuid, boolean) from public, anon;
+grant execute on function public.set_engagement_journal_review(uuid, boolean) to authenticated;
+
 commit;
