@@ -393,6 +393,7 @@ export default async function OpportunitiesPage({
     consentLabel: t("vacancyInterest.consentLabel"),
     consentHint: t("vacancyInterest.consentHint"),
     handoffQueued: t("vacancyInterest.handoffQueued"),
+    handoffQueuedConsentWithheld: t("vacancyInterest.handoffQueuedConsentWithheld"),
     handoffDelivered: t("vacancyInterest.handoffDelivered"),
     handoffClosed: t("vacancyInterest.handoffClosed"),
     handoffTooNew: t("vacancyInterest.handoffTooNew"),

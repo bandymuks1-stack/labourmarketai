@@ -2233,6 +2233,7 @@
       "scopeNote": "Detta är ingen ansökan och inget meddelande går till arbetsgivaren. Man söker fortfarande via originalannonsen.",
       "error": "Kunde inte spara. Försök igen.",
       "handoffQueued": "Ditt intresse är registrerat och väntar på att lämnas vidare till Nonstop Groups kommersiella team. LabourMarket.ai har inte skickat något till arbetsgivaren.",
+      "handoffQueuedConsentWithheld": "Ditt intresse är registrerat. Du kryssade inte i rutan för presentation, så inget om dig lämnas vidare till Nonstop Group. Vill du bli presenterad, återkalla intresset och visa det igen med rutan ikryssad. LabourMarket.ai har inte skickat något till arbetsgivaren.",
       "handoffDelivered": "Ditt intresse har lämnats vidare till Nonstop Group. Nonstop kan kontakta arbetsgivaren genom sin egen kommersiella process; LabourMarket.ai har inte skickat något till arbetsgivaren.",
       "handoffClosed": "Ditt intresse är registrerat. Den tidigare överlämningen till Nonstop Group stängdes när du drog tillbaka; inget skickades."
     }

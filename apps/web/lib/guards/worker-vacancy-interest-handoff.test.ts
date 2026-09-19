@@ -34,6 +34,9 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  *     row delivered only on the door's own answer;
  *   - NO employer is ever contacted from LabourMarket.ai; the only
  *     recipient of anything is the Nonstop partner door;
+ *   - R-14 (2026-09-19): a handoff whose proposition consent is not `true`
+ *     is NEVER posted to that door — it stays queued until the worker says
+ *     yes; the queued-line copy says so instead of promising a hand-over;
  *   - the migration is RED (owner-gated) and ships its rollback.
  */
 
@@ -271,6 +274,12 @@ describe("the dispatcher is inert without the owner's door, and never contacts a
     expect(src).toContain('.eq("status", "queued")');
     // The bearer never reaches a log line.
     expect(src).not.toMatch(/console\.(log|warn|error)\([^)]*token/);
+    // R-14: the consent gate sits BEFORE the post and leaves the row queued.
+    const gate = src.indexOf('if (envelope.interest.propositionConsent.given !== true) {');
+    const post = src.indexOf("await postEnvelope(settings, envelope, fetchImpl);");
+    expect(gate).toBeGreaterThan(-1);
+    expect(post).toBeGreaterThan(gate);
+    expect(src.slice(gate, post)).toMatch(/summary\.withheldConsent \+= 1;[\s\S]*continue;/);
   });
 
   it("the envelope built from a queued row keeps the contract", () => {
@@ -362,7 +371,7 @@ describe("interest on a public vacancy — the same table, honest surfaces", () 
       };
       const v = m.opportunities.vacancyInterest;
       expect(v, locale).toBeDefined();
-      for (const k of ["express", "sent", "withdraw", "consentLabel", "consentHint", "handoffQueued", "handoffDelivered", "handoffClosed", "handoffTooNew", "handoffPending", "scopeNote", "error"]) {
+      for (const k of ["express", "sent", "withdraw", "consentLabel", "consentHint", "handoffQueued", "handoffQueuedConsentWithheld", "handoffDelivered", "handoffClosed", "handoffTooNew", "handoffPending", "scopeNote", "error"]) {
         expect(typeof v[k], `${locale}.${k}`).toBe("string");
       }
       const ineligible = v.ineligible as Record<string, string>;
@@ -373,9 +382,15 @@ describe("interest on a public vacancy — the same table, honest surfaces", () 
       // may not say the partner "was informed" (2026-09-17 walk: the copy
       // claimed delivery that had not happened). Only handoffDelivered may.
       const informed = /been informed|has been told|was informed|informuota|проинформирован|informēta|teavitatud|poinformowan|informiert|geïnformeerd|informeret|informert|informerats/i;
-      for (const k of ["handoffQueued", "handoffTooNew", "handoffClosed"]) {
+      for (const k of ["handoffQueued", "handoffQueuedConsentWithheld", "handoffTooNew", "handoffClosed"]) {
         expect(String(v[k]), `${locale}.${k}`).not.toMatch(informed);
       }
+      // R-14: the withheld line must say the person is NOT passed on, in
+      // every locale — never a hand-over promise for a row the gate holds.
+      const withheld = String(v.handoffQueuedConsentWithheld).toLowerCase();
+      expect(withheld, `${locale}.handoffQueuedConsentWithheld`).toMatch(
+        /nothing about you|nieko neperduodama|ничего о вас|par jums nekas|teie kohta midagi|nic na twój temat|nichts über sie|niets over jou|intet om dig|ingenting om deg|inget om dig/,
+      );
       const sent = String(v.handoffQueued).toLowerCase();
       expect(sent).not.toMatch(/application sent|applied|placement confirmed|employer accepted|paraiška išsiųsta|заявка отправлена/);
     }

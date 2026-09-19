@@ -17,7 +17,7 @@ import {
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import { listMyInterestSignals } from "./interest";
-import { listMyHandoffsByVacancy } from "./vacancy-interest";
+import { listMyHandoffsByVacancy, type MyHandoffRow } from "./vacancy-interest";
 import {
   listMySavedOpportunities,
   listSavedPublicVacancyIds,
@@ -135,7 +135,7 @@ export type WorkerOpportunitiesResult =
       readonly vacancyInterestById: ReadonlyMap<string, InterestStatus>;
       /** The worker's own commercial handoff per vacancy id (own RLS rows) —
        *  so "the commercial partner was informed" is said only when a row exists. */
-      readonly handoffByVacancy: ReadonlyMap<string, { status: string; outreachState: string }>;
+      readonly handoffByVacancy: ReadonlyMap<string, MyHandoffRow>;
       /** True only when the #723 saved-opportunities store exists — the save
        *  toggle is rendered only then (feature-detected once per load). */
       readonly savedAvailable: boolean;
@@ -268,7 +268,7 @@ export async function loadWorkerOpportunities(
   // Own handoff rows (empty until migration 20260917160000 is applied).
   const handoffByVacancy = myInterest.vacancyInterestAvailable
     ? await listMyHandoffsByVacancy(supabase, ctx.workerId)
-    : new Map<string, { status: string; outreachState: string }>();
+    : new Map<string, MyHandoffRow>();
 
   // Own PRIVATE bookmarks (P2-PR5) — same honest feature detection: absent
   // store → unavailable, and the board never renders the save toggle.
