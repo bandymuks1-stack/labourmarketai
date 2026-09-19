@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -78,10 +78,7 @@ describe("R-1 migration — the minimum authority correction", () => {
 describe("no legitimate path writes the roster tables with the caller's own client", () => {
   const files: string[] = [];
   const walk = (dir: string) => {
-    for (const entry of require("node:fs").readdirSync(dir, { withFileTypes: true }) as {
-      name: string;
-      isDirectory(): boolean;
-    }[]) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) {
         if (entry.name === "node_modules" || entry.name === ".next") continue;
