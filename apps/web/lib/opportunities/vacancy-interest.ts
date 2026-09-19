@@ -48,8 +48,13 @@ import {
  *      handoff that cannot be created never fails the interest: the hand
  *      is raised either way, and the outcome says exactly which.
  *
- * NOTHING LEAVES THE PLATFORM HERE. No email, no message, no webhook. The
- * handoff is a row the commercial partner's delivery reads under its own owner gate.
+ * NOTHING LEAVES THE PLATFORM FROM THIS FUNCTION. No email, no message, no
+ * webhook here. The handoff is a row; since 2026-09-17 the daily dispatcher
+ * (`lib/commercial/handoff-dispatch.ts`, cron-gated) posts queued rows to the
+ * commercial partner's durable receiver. Whether a row with
+ * `proposition_consent.given = false` may be dispatched at all is an owner
+ * rule recorded in docs/integrations/NONSTOP_COMMERCIAL_HANDOFF_V1.md — this
+ * function only records the answer; it never decides for the person.
  *
  * CONSENT IS SEPARATE (owner rule §17): interest is not permission to be
  * proposed to the employer. The form asks that question explicitly

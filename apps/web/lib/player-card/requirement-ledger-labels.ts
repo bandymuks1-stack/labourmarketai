@@ -43,6 +43,11 @@ export async function buildRequirementLedgerLabels(): Promise<InstructionLedgerL
       const p = row.provenance;
       switch (p.source) {
         case "own_document":
+          if (p.verified) {
+            return p.validUntil
+              ? t("card.ledger.from.ownDocumentVerifiedUntil", { date: p.validUntil })
+              : t("card.ledger.from.ownDocumentVerified");
+          }
           return p.validUntil
             ? t("card.ledger.from.ownDocumentUntil", { date: p.validUntil })
             : t("card.ledger.from.ownDocument");

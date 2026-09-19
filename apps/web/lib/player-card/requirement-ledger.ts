@@ -74,7 +74,13 @@ export type RequirementSubject =
 
 /** Where the CURRENT STATE comes from — never a claim without a source. */
 export type RequirementProvenance =
-  | { readonly source: "own_document"; readonly validUntil: string | null }
+  | {
+      readonly source: "own_document";
+      readonly validUntil: string | null;
+      /** Reviewer-verified (`worker_documents.verification = 'verified'`) —
+       *  never inferred from the worker's own entry. */
+      readonly verified: boolean;
+    }
   | { readonly source: "own_skill"; readonly verified: boolean }
   | { readonly source: "own_language"; readonly level: string }
   | { readonly source: "own_profile" }
@@ -286,15 +292,24 @@ function ownDocumentStates(
   documents: readonly WorkerDocumentRow[],
   country: string | null,
   now: Date,
-): Map<string, { state: OwnDocState; validUntil: string | null }> {
-  const out = new Map<string, { state: OwnDocState; validUntil: string | null; scoped: boolean }>();
+): Map<string, { state: OwnDocState; validUntil: string | null; verified: boolean }> {
+  const out = new Map<
+    string,
+    { state: OwnDocState; validUntil: string | null; verified: boolean; scoped: boolean }
+  >();
   for (const d of documents) {
     const st = deriveDocumentStatus(d, now);
     const state: OwnDocState = st === "ready" ? "valid" : st === "expiring" ? "expiring" : "missing";
     const scoped = country !== null && d.country === country;
+    const verified = d.verification === "verified";
     const prev = out.get(d.documentTypeSlug);
-    if (!prev || (scoped && !prev.scoped) || (scoped === prev.scoped && rank(state) > rank(prev.state))) {
-      out.set(d.documentTypeSlug, { state, validUntil: d.validUntil, scoped });
+    if (
+      !prev ||
+      (scoped && !prev.scoped) ||
+      (scoped === prev.scoped && rank(state) > rank(prev.state)) ||
+      (scoped === prev.scoped && rank(state) === rank(prev.state) && verified && !prev.verified)
+    ) {
+      out.set(d.documentTypeSlug, { state, validUntil: d.validUntil, verified, scoped });
     }
   }
   return out;
@@ -446,14 +461,15 @@ export function deriveRequirementLedger(input: RequirementLedgerInput): Requirem
         state = "unknown";
         provenance = { source: "not_readable" };
       } else {
-        let best: { state: OwnDocState; validUntil: string | null } | null = null;
+        let best: { state: OwnDocState; validUntil: string | null; verified: boolean } | null =
+          null;
         for (const s of slugs) {
           const o = own.get(s);
           if (o && (!best || rank(o.state) > rank(best.state))) best = o;
         }
         if (best && best.state !== "missing") {
           state = best.state;
-          provenance = { source: "own_document", validUntil: best.validUntil };
+          provenance = { source: "own_document", validUntil: best.validUntil, verified: best.verified };
         } else {
           state = "missing";
           provenance = { source: "none" };
@@ -492,7 +508,7 @@ export function deriveRequirementLedger(input: RequirementLedgerInput): Requirem
       const o = own.get(r.documentTypeSlug);
       if (o && o.state !== "missing") {
         state = o.state;
-        provenance = { source: "own_document", validUntil: o.validUntil };
+        provenance = { source: "own_document", validUntil: o.validUntil, verified: o.verified };
       } else {
         state = "missing";
         provenance = { source: "none" };

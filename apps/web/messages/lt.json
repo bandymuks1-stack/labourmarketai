@@ -5828,6 +5828,8 @@
         "from": {
           "ownDocument": "iš jūsų dokumentų",
           "ownDocumentUntil": "iš jūsų dokumentų, galioja iki {date}",
+          "ownDocumentVerified": "iš jūsų dokumentų, patikrinta tikrintojo",
+          "ownDocumentVerifiedUntil": "iš jūsų dokumentų, patikrinta tikrintojo, galioja iki {date}",
           "ownSkill": "iš jūsų įgūdžių (jūsų įrašas)",
           "ownSkillConfirmed": "iš jūsų įgūdžių (patvirtino vadovas)",
           "ownLanguage": "iš jūsų kalbų ({level})",

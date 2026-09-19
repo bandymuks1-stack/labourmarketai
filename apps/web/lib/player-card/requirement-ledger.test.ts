@@ -143,7 +143,7 @@ describe("same person → three contexts → three different ledgers", () => {
     const byId = new Map(project.rows.map((r) => [r.id, r]));
     // id_document: own ready → valid, from own documents.
     expect(byId.get("checklist:identity_document")?.state).toBe("valid");
-    expect(byId.get("checklist:identity_document")?.provenance).toEqual({ source: "own_document", validUntil: null });
+    expect(byId.get("checklist:identity_document")?.provenance).toEqual({ source: "own_document", validUntil: null, verified: false });
     expect(byId.get("checklist:identity_document")?.subject).toEqual({ kind: "text", text: "Asmens dokumentas" });
     // employment_contract valid until 2026-09-20 → within the 30-day window → expiring.
     expect(byId.get("checklist:employment_contract_or_assignment_basis")?.state).toBe("expiring");
@@ -288,7 +288,7 @@ describe("the ratio recomputes after a state change — the person's side of the
       documents: [...PERSON.documents, doc({ id: "d3", documentTypeSlug: "a1_certificate", country: "LT" })],
     });
     expect(after.ratio).toEqual({ have: 4, total: 6 });
-    expect(after.rows.find((r) => r.id === "checklist:a1_or_posting_document")).toMatchObject({ state: "valid", provenance: { source: "own_document", validUntil: null }, resolutions: [] });
+    expect(after.rows.find((r) => r.id === "checklist:a1_or_posting_document")).toMatchObject({ state: "valid", provenance: { source: "own_document", validUntil: null, verified: false }, resolutions: [] });
 
     const managerChecked = deriveRequirementLedger({
       ...PROJECT,

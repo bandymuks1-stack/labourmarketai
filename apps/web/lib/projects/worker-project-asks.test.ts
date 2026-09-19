@@ -218,3 +218,67 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     }
   });
 });
+
+describe("paper meets a FORMAL requirement only when a reviewer verified it (2026-09-19)", () => {
+  const item = (projectId: string, itemKey: string) => ({
+    projectId,
+    itemKey,
+    label: itemKey,
+    status: "needed" as const,
+  });
+  const EVIDENCE = {
+    independentlyConfirmedEntries: 3,
+    recordedEntries: 5,
+    verifiedSkills: 1,
+    hasValidCredential: false,
+    hasExpiringCredential: false,
+    hasRecognizedEquivalence: false,
+  };
+  const slug = documentTypesForReadinessItem("qualification_or_skill_evidence")[0];
+
+  it("a self-recorded, unverified certificate does NOT satisfy the formal requirement", () => {
+    const asks = deriveWorkerProjectAsks(
+      [item("p1", "qualification_or_skill_evidence")],
+      [{ documentTypeSlug: slug, storedStatus: "ready", validUntil: null, verification: "unverified" }],
+      NOW,
+      EVIDENCE,
+    );
+    const row = asks.get("p1")![0];
+    // The person DOES have it recorded — that fact stays.
+    expect(row.own).toBe("ready");
+    // But the formal answer is not theirs to give.
+    expect(row.capability?.formalRequirementMet).toBe(false);
+    expect(row.capability?.standing).not.toBe("valid_credential");
+    // The real work still speaks, beside the paper.
+    expect(row.capability?.standing).toBe("demonstrated_capability");
+  });
+
+  it("a reviewer-verified certificate satisfies it", () => {
+    const asks = deriveWorkerProjectAsks(
+      [item("p1", "qualification_or_skill_evidence")],
+      [{ documentTypeSlug: slug, storedStatus: "ready", validUntil: null, verification: "verified" }],
+      NOW,
+      EVIDENCE,
+    );
+    const row = asks.get("p1")![0];
+    expect(row.capability).toMatchObject({ standing: "valid_credential", formalRequirementMet: true });
+  });
+
+  it("an absent verification field is unverified — it never defaults to verified", () => {
+    const asks = deriveWorkerProjectAsks(
+      [item("p1", "qualification_or_skill_evidence")],
+      [{ documentTypeSlug: slug, storedStatus: "ready", validUntil: null }],
+      NOW,
+      EVIDENCE,
+    );
+    expect(asks.get("p1")![0].capability?.formalRequirementMet).toBe(false);
+  });
+
+  it("the derivation reads the verification axis, not the worker's own status", () => {
+    const src = read("lib/projects/worker-project-asks.ts");
+    expect(src).toMatch(/hasValidCredential: own === "ready" && ownVerified/);
+    expect(src).not.toMatch(/hasValidCredential: own === "ready",/);
+    const reader = read("lib/documents/readiness.ts");
+    expect(reader).toMatch(/valid_until, note, verification"/);
+  });
+});

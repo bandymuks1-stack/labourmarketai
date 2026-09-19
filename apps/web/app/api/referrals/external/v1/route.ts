@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { outboundLinkOrigin } from "@/lib/domain/canonical";
 import { authorizeExternalReferralRequest } from "@/lib/api/external-referral-auth";
 import { parseExternalWorkerReferral } from "@/lib/invitations/external-referral-contract";
 import { receiveExternalReferral } from "@/lib/invitations/external-referral-receive";
@@ -79,12 +80,16 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   }
 
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "labourmarket.ai";
-  const proto = request.headers.get("x-forwarded-proto") ?? "https";
+  // The partner's request must not choose the host its invitee is sent to —
+  // the link carries the raw token (`outboundLinkOrigin`).
+  const origin = outboundLinkOrigin(
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host"),
+    request.headers.get("x-forwarded-proto"),
+  );
   const result = await receiveExternalReferral({
     source: auth.source,
     envelope: parsed.envelope,
-    origin: `${proto}://${host}`,
+    origin,
   });
 
   switch (result.outcome) {

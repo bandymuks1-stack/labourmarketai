@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getTranslations } from "next-intl/server";
 
+import { outboundLinkOrigin } from "@/lib/domain/canonical";
 import { createClient } from "@/lib/supabase/server";
 import {
   isTransactionalEmailConfigured,
@@ -91,9 +92,12 @@ function mintToken(): { token: string; hash: string } {
 
 async function requestOrigin(): Promise<string> {
   const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "labourmarket.ai";
-  const proto = h.get("x-forwarded-proto") ?? "https";
-  return `${proto}://${host}`;
+  // The link carries the raw token, so its host is never taken from the
+  // request on trust — see `outboundLinkOrigin`.
+  return outboundLinkOrigin(
+    h.get("x-forwarded-host") ?? h.get("host"),
+    h.get("x-forwarded-proto"),
+  );
 }
 
 export type InvitationSendOutcome = {

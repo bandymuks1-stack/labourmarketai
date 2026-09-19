@@ -5828,6 +5828,8 @@
         "from": {
           "ownDocument": "uit uw documenten",
           "ownDocumentUntil": "uit uw documenten, geldig tot {date}",
+          "ownDocumentVerified": "uit uw documenten, geverifieerd door een beoordelaar",
+          "ownDocumentVerifiedUntil": "uit uw documenten, geverifieerd door een beoordelaar, geldig tot {date}",
           "ownSkill": "uit uw vaardigheden (eigen opgave)",
           "ownSkillConfirmed": "uit uw vaardigheden (bevestigd door een leidinggevende)",
           "ownLanguage": "uit uw talen ({level})",

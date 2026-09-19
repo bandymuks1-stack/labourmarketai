@@ -5828,6 +5828,8 @@
         "from": {
           "ownDocument": "из ваших документов",
           "ownDocumentUntil": "из ваших документов, действует до {date}",
+          "ownDocumentVerified": "из ваших документов, проверено проверяющим",
+          "ownDocumentVerifiedUntil": "из ваших документов, проверено проверяющим, действует до {date}",
           "ownSkill": "из ваших навыков (ваша запись)",
           "ownSkillConfirmed": "из ваших навыков (подтвердил руководитель)",
           "ownLanguage": "из ваших языков ({level})",
