@@ -760,3 +760,22 @@ existing page; one optional prop was added to an existing component.
 | main at close | `2caedea8` |
 | ledger | 293, unchanged — nothing applied this window |
 | owner queue | R-16 (#1794) → R-3 (#1795) → R-9 (#1798) → R-13 (#1797): four sentences in §N2 and §N5, one migration each; lower priority batch: R-12 waiver number, R-14, the §L3 notification backfill |
+
+### N10. R-16 — APPLIED (owner sentence received 2026-09-19 ~14:30 UTC)
+
+The owner posted the §N2 sentence verbatim. Executed in this order, nothing skipped:
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | live body md5 `22167e89…` unchanged; ledger 293; no row of this name; branch 5 behind main (#1796, #1799, #1800, #1801, docs — no migration among them) |
+| apply | Supabase MCP `apply_migration` on `gorgitwvdzxbnaxhrsrw`, name `add_org_member_requires_consented_roster_v1` → **ledger `20260919143247`, 294 applied** |
+| readback | new body md5 `11ea34068e0120de244caa77857d8262`; `not_linked` precondition present; no `is_admin` after it; SECURITY DEFINER, `search_path=public`; `anon` execute false, `authenticated` true |
+| hostile (live, rolled back) | owner Donatas → `add_org_member(19f47e78, E2E worker with 0 roster rows)` → **`not_linked`**, forged rows **0** |
+| existing (live, rolled back) | owner → the one consented roster worker → `already_member` |
+| legitimate chain (live, rolled back) | `invite_company_worker` → `invited`; the WORKER's `accept_company_worker_invitation` → `linked`, active roster row 1, employee context 0 → 1; owner `add_org_member` → `already_member` |
+| residue | 0 roster rows, 0 contexts, 0 invitations, 0 audit rows for the probe identity |
+| repo | markers flipped, `docs/APPLIED_LEDGER.md` entry (file sha256 `165bf9142c53806211d0bf05805433a881bc0fa9def9a1567f8d7f6ace8379cf`), #1794 marked ready, squash-merged **`6110e155`** at 14:45 UTC after green CI |
+
+Security receipt now: **CRITICAL 0 · HIGH 0 · R-1 CLOSED · R-16 CLOSED.**
+SECURITY_COMPLETE is still not declared: MEDIUM/LOW items and the owner-held
+gates (M3, L3–L7) are unchanged, and #1795 / #1797 / #1798 remain unapplied.
