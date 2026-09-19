@@ -21,7 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "LabourMarket.ai",
     short_name: "LabourMarket",
     description:
-      "Work journal, worker profiles and construction labour-market tools.",
+      "One work world for workers, employers, agencies and institutions: real work, evidence, skills, demand, matching and workforce operations.",
     id: "/",
     start_url: "/",
     scope: "/",

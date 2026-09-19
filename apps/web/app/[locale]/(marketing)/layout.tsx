@@ -12,6 +12,8 @@ import {
   MARKETING_CLIENT_MESSAGE_ROOTS,
   pickMessages,
 } from "@/lib/i18n/client-messages";
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/answer-engine/answer-seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /** Public marketing shell: ambient glow + global nav/footer wrap every
  *  page in the (marketing) route group. The /design preview lives outside
@@ -41,6 +43,19 @@ export default async function MarketingLayout({
       )}
     >
       <div className="relative min-h-screen">
+        {/* Organization + WebSite structured data on every public page
+            (2026-09-19): until now only the answer-engine pages carried
+            any JSON-LD, so the landing and every marketing page told search
+            engines nothing about who publishes them. Two nodes, real values,
+            no ratings, no fabricated counts. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd(locale)) }}
+        />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:border-brand-blue focus:bg-ink-800 focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:uppercase focus:tracking-label focus:text-text-primary"

@@ -1,4 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 /**
  * Public Terms of Service — core contractual truth (legal-entity truth v1).
@@ -10,6 +12,16 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
  * lawyer-reviewed terms text is still being finalised — no fake legal
  * finality. Guarded by legal-entity-truth.test.ts.
  */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "legal" });
+  return buildPageMetadata({ locale, path: "/legal/terms", title: t("terms.title") });
+}
+
 export default async function LegalPage({
   params,
 }: {

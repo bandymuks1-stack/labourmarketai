@@ -5,6 +5,8 @@ import {
   PLATFORM_OPERATOR,
   PRIVACY_CONTACT_EMAIL,
 } from "@/lib/legal/entity-identity";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 /**
  * Canonical legal notice / imprint (legal-entity truth v1).
@@ -16,6 +18,16 @@ import {
  * i18n. Deliberately NO bank accounts, personal codes or private data.
  * Guarded by legal-entity-truth.test.ts.
  */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "legal.legalNotice" });
+  return buildPageMetadata({ locale, path: "/legal/legal-notice", title: t("title") });
+}
+
 export default async function LegalNoticePage({
   params,
 }: {
