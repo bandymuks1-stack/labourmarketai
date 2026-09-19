@@ -56,6 +56,7 @@ import {
 } from "@/lib/conversation/education-question";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
+import { loadClientBridgeForChat } from "@/lib/conversation/client-bridge";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
@@ -466,6 +467,16 @@ export type ChatLabels = {
   projectCreateIntro: string;
   projectCreatedNext: string;
   clientOffersIntro: string;
+  clientBridgeInvitesIntro: string;
+  clientBridgeShareIntro: string;
+  clientBridgeNone: string;
+  chipConnectionAccept: string;
+  chipConnectionDecline: string;
+  chipShareRequest: string;
+  connectionAccepted: string;
+  connectionDeclined: string;
+  requestShared: string;
+  bridgeActionFailed: string;
   clientOffersNone: string;
   chipOfferAccept: string;
   chipOfferDecline: string;
@@ -3162,6 +3173,88 @@ export function ConversationChat({
    *  demands, from the SAME reads the scouting page renders; each open offer
    *  carries its accept / decline chip. An agency workspace asking this
    *  means its own proposals — routed there, never guessed. */
+  /**
+   * The CLIENT's other two bridge edges by chip (2026-09-19): accept /
+   * decline an agency's invitation, share a need with a connected agency.
+   * Each chip carries ids only; the dispatcher's token + the RPC's own
+   * ownership checks are the authority — exactly the partners page's forms.
+   */
+  const runClientBridgeWrite = useCallback(
+    (
+      actionId: "company.accept-connection" | "company.decline-connection" | "company.share-request",
+      input: { connectionId: string; requestId?: string },
+      done: string,
+    ) => {
+      setTyping(true);
+      prepareConfirmationAction(actionId, input)
+        .then((prep) => {
+          if (!prep.ok) {
+            setTyping(false);
+            assistant(labels.bridgeActionFailed);
+            return;
+          }
+          return dispatchWorkerAction(actionId, input, { locale, confirmationToken: prep.token }).then((res) => {
+            setTyping(false);
+            assistant(res.ok ? done : labels.bridgeActionFailed, [
+              { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
+            ]);
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.bridgeActionFailed);
+        });
+    },
+    [assistant, locale, labels.bridgeActionFailed, labels.chipCompanyHub],
+  );
+
+  const startClientBridge = useCallback(() => {
+    if (identity !== "company") {
+      if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+      else assistant(fallbackText, starterChips);
+      return;
+    }
+    setTyping(true);
+    loadClientBridgeForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind !== "ok") {
+          assistant(labels.agencyUnavailable, [
+            { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
+          ]);
+          return;
+        }
+        if (res.invites.length === 0 && res.shareable.length === 0) {
+          assistant(labels.clientBridgeNone, [
+            { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
+          ]);
+          return;
+        }
+        const lines: string[] = [];
+        const chips: { id: string; label: string }[] = [];
+        if (res.invites.length > 0) {
+          lines.push(labels.clientBridgeInvitesIntro, ...res.invites.map((i) => `• ${i.agencyName}`));
+          for (const i of res.invites) {
+            chips.push({ id: `connection-accept:${i.connectionId}`, label: `${labels.chipConnectionAccept}: ${i.agencyName}` });
+            chips.push({ id: `connection-decline:${i.connectionId}`, label: `${labels.chipConnectionDecline}: ${i.agencyName}` });
+          }
+        }
+        if (res.shareable.length > 0) {
+          lines.push(labels.clientBridgeShareIntro, ...res.shareable.map((r) => `• ${r.demandTitle} → ${r.agencyName}`));
+          for (const r of res.shareable) {
+            chips.push({ id: `share-request:${r.connectionId}:${r.requestId}`, label: `${labels.chipShareRequest}: ${r.demandTitle} → ${r.agencyName}` });
+          }
+        }
+        assistant(lines.join("\n"), chips);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.agencyUnavailable, [
+          { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
+        ]);
+      });
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+
   const startClientOffers = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
@@ -4548,6 +4641,22 @@ export function ConversationChat({
               chip.id.slice(chip.id.indexOf(":") + 1),
               chip.id.startsWith("offer-accept:") ? "accepted" : "declined",
             );
+          } else if (chip.id.startsWith("connection-accept:") || chip.id.startsWith("connection-decline:")) {
+            // The client's answer to an agency's invitation: the chip carries
+            // the connection id only; the RPC re-checks the invited e-mail is
+            // the caller's and the client company is the active workspace.
+            user(chip.label);
+            const accept = chip.id.startsWith("connection-accept:");
+            runClientBridgeWrite(
+              accept ? "company.accept-connection" : "company.decline-connection",
+              { connectionId: chip.id.slice(chip.id.indexOf(":") + 1) },
+              accept ? labels.connectionAccepted : labels.connectionDeclined,
+            );
+          } else if (chip.id.startsWith("share-request:")) {
+            // Share one of the company's OWN needs with a connected agency.
+            user(chip.label);
+            const [, connectionId, requestId] = chip.id.split(":");
+            runClientBridgeWrite("company.share-request", { connectionId, requestId }, labels.requestShared);
           } else if (chip.id.startsWith("agency-propose:")) {
             // The share-bound handoff: the chip carries the share id and
             // NOTHING else; the RPC re-verifies the share is active and the
@@ -5694,6 +5803,7 @@ export function ConversationChat({
         programmes: () => runEducationProgrammes(educationModeFromText(text)),
         createProject: () => startCreateProject(text),
         clientOffers: () => startClientOffers(),
+        clientBridge: () => startClientBridge(),
         addDocument: () => startAddDocument(text),
         addTask: () => startCreateTask(text),
         whoAvailable: () => startWhoAvailable(),

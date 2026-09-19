@@ -527,7 +527,78 @@ export async function getOwnLastDemandPrefill(
     if (lastRes.error || !lastRes.data) return { found: false };
     data = lastRes.data;
   }
+  return toDemandPrefill(data);
+}
 
+/**
+ * REPEAT THIS NEED — a specific past request of the caller's as the starting
+ * point for a new one (2026-09-19; the "next demand" edge). Same mapper as
+ * duplicate-and-edit-from-last, own rows only (RLS `profile_id`), and the
+ * SAME workspace gate. What is cloned is the reusable STRUCTURE of the ask —
+ * role, description, skills, place, country, headcount, offers, tools, the
+ * structured cluster. What is NOT cloned, on purpose: the timing (every date
+ * and the urgency are cleared so the person states them for the new period),
+ * the status (a new row starts as the wizard's own draft/submit), and every
+ * execution fact — interest signals, offers, bookings, assignments, messages,
+ * outcomes and evidence live on the OLD row and stay there.
+ */
+export async function getOwnDemandPrefillById(
+  intent: DemandIntent,
+  requestId: string,
+): Promise<DemandPrefill> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId)) {
+    return { found: false };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { found: false };
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { found: false };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any;
+  const res = await sb
+    .from("customer_requests")
+    .select(
+      "id, status, title, need_summary, country, role_or_work_type, team_size, start_period, payload",
+    )
+    .eq("id", requestId)
+    .eq("profile_id", user.id)
+    .eq("kind", INTENT_KIND[intent])
+    .maybeSingle();
+  if (res.error || !res.data) return { found: false };
+  const base = toDemandPrefill(res.data);
+  if (!base.found) return base;
+  return {
+    ...base,
+    // A repeat is a NEW ask, never a continuation of the old row's draft.
+    source: "request",
+    fields: { ...base.fields, urgency: null },
+    structuredV2: stripTimingForRepeat(base.structuredV2),
+  };
+}
+
+/** Every date and deadline of the structured cluster is cleared for a repeat;
+ *  hours/shifts/notice (the SHAPE of the work) are kept for review. */
+export function stripTimingForRepeat(
+  v2: StructuredDemandV2 | null,
+): StructuredDemandV2 | null {
+  if (!v2 || !v2.time) return v2;
+  const {
+    start_earliest: _s,
+    start_latest: _l,
+    end_date: _e,
+    application_deadline: _d,
+    ...rest
+  } = v2.time;
+  void _s; void _l; void _e; void _d;
+  const time = Object.keys(rest).length > 0 ? rest : undefined;
+  return { ...v2, time };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toDemandPrefill(data: any): DemandPrefill {
   const isDraft = data.status === "draft";
   const payload =
     data.payload && typeof data.payload === "object"

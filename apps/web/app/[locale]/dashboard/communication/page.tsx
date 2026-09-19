@@ -416,9 +416,18 @@ export default async function CommunicationListPage({
       )}
 
       {conversations.length === 0 ? (
-        <p className="card-border p-4 text-sm text-text-secondary">
-          {t("empty")}
-        </p>
+        <div className="card-border flex flex-col gap-3 p-4" data-testid="communication-empty">
+          <p className="text-sm text-text-secondary">{t("empty")}</p>
+          {/* A dead end is not an empty state (2026-09-19): the next useful
+              canonical action is to find someone to work with. */}
+          <Link
+            href="/dashboard/network"
+            className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+            data-testid="communication-empty-cta"
+          >
+            {t("emptyCta")} →
+          </Link>
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           {/* Unread first, as a labelled section — what needs attention is

@@ -65,6 +65,8 @@ export interface DemandRequestsReadbackLabels {
   /** Per-row deep link into scouting for THIS demand (matched workers,
    *  interest signals, acknowledgement, confirm/close controls). */
   readonly scoutLink: string;
+  /** "Repeat this need" — structure only, into the wizard above. */
+  readonly repeatLink: string;
   readonly status: Readonly<Record<CustomerRequestStatus, string>>;
   /** Neutral label for an unrecognized stored status — never the raw enum
    *  (dead-UI repair, 2026-07-05). */
@@ -208,6 +210,17 @@ function RequestRow({
       {/* PR10: every demand row deep-links its OWN scouting view — matched
           workers, interest signals, acknowledgement and the confirm/close
           lifecycle controls. Real route, no new page. */}
+      {/* NEXT DEMAND (2026-09-19): a past ask as the starting point for a new
+          one. Structure only — the old row keeps every execution fact. */}
+      {scoutable && r.status !== "draft" ? (
+        <Link
+          href={`/${locale}/dashboard/company/needs?repeat=${r.id}#demand-intake`}
+          className="inline-flex w-fit items-center gap-1 text-xs font-medium text-text-secondary transition-colors hover:text-brand-blue"
+          data-testid="demand-readback-repeat-link"
+        >
+          ↻ {labels.repeatLink}
+        </Link>
+      ) : null}
       {scoutable ? (
         <Link
           href={`/${locale}/dashboard/company/scouting?request=${r.id}`}

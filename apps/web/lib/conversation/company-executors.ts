@@ -12,7 +12,15 @@ import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
 import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionOk, type ProjectActionResult } from "@/lib/projects/actions";
-import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
+import {
+  acceptConnectionAction,
+  declineConnectionAction,
+  inviteClientAction,
+  respondCandidateOfferAction,
+  shareRequestAction,
+  submitOfferAction,
+  type BridgeActionState,
+} from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
@@ -506,6 +514,33 @@ export const COMPANY_EXECUTORS: {
     // client accepts — the real state, stated as such.
     return r.status === "ok" ? { ok: true, data: { status: "pending" } } : mapBridge(r);
   },
+
+  // The CLIENT's side of the bridge (2026-09-19): accept / decline an
+  // agency's invitation, share one of the company's own needs. The client
+  // company is the ACTIVE workspace's (never client-supplied); the RPCs
+  // re-check ownership and, for the accept, that the invited e-mail is the
+  // caller's own.
+  "company.accept-connection": async (input) => {
+    const company = await requireEmployerCompany();
+    if (!company.ok) return { ok: false, code: "not_authorized" };
+    return mapBridge(
+      await acceptConnectionAction(
+        { status: "idle" },
+        fd({ connectionId: input.connectionId, clientCompanyId: company.companyId }),
+      ),
+    );
+  },
+  "company.decline-connection": async (input) =>
+    mapBridge(
+      await declineConnectionAction({ status: "idle" }, fd({ connectionId: input.connectionId })),
+    ),
+  "company.share-request": async (input) =>
+    mapBridge(
+      await shareRequestAction(
+        { status: "idle" },
+        fd({ connectionId: input.connectionId, requestId: input.requestId }),
+      ),
+    ),
 
   "agency.propose-candidate": async (input) =>
     mapBridge(

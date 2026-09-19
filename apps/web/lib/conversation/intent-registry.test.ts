@@ -94,7 +94,8 @@ describe("the intent registry is the enumerable routing contract", () => {
     // word in the router — so the proposer chose `cv-view` and the chat said
     // the CV was empty about a photo that WAS stored. A read over the ONE
     // personal-gallery projection, shown back inside the thread.
-    expect(entries.length).toBe(76);
+    // 76 → 78 (2026-09-19): agency-invites (client bridge) + propose-booking.
+    expect(entries.length).toBe(78);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

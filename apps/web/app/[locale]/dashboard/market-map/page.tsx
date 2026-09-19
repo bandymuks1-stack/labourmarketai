@@ -300,16 +300,27 @@ export default async function MarketMapPage({
           ) : null}
         </section>
       ) : vacancyVolume.kind === "empty" ? (
-        <p
-          className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-secondary"
+        <div
+          className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-secondary"
           data-testid="market-map-vacancy-volume-none"
         >
-          {tExplanation("noneOpen", {
-            profession: tProfessions.has(vacancyVolume.professionSlug)
-              ? tProfessions(vacancyVolume.professionSlug)
-              : vacancyVolume.professionSlug,
-          })}
-        </p>
+          <p>
+            {tExplanation("noneOpen", {
+              profession: tProfessions.has(vacancyVolume.professionSlug)
+                ? tProfessions(vacancyVolume.professionSlug)
+                : vacancyVolume.professionSlug,
+            })}
+          </p>
+          {/* The next canonical action from an empty pool: widen the work
+              directions the map searches for (2026-09-19). */}
+          <Link
+            href="/dashboard/profile#work-directions"
+            className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue underline-offset-4 hover:underline"
+            data-testid="market-map-vacancy-volume-none-cta"
+          >
+            {tExplanation("noneOpenCta")} →
+          </Link>
+        </div>
       ) : null}
       {/* Unified layers panel — the real visible-now layers WITH state on the
           SAME map: my person signal (active), the selected company (incomplete

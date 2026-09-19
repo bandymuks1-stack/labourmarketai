@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   getOwnLastDemandPrefillAction,
+  getDemandPrefillByIdAction,
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
 import {
@@ -83,10 +84,15 @@ const REQUIRED_TOOL_OPTIONS: readonly string[] = [
 export function DemandRequestButton({
   intent,
   stepTitles,
+  repeatRequestId = null,
 }: {
   intent: "hire_workers" | "partner";
   /** Localized titles for steps 1/2/3 (from auth.dashboard.wow.flow.company). */
   stepTitles: [string, string, string];
+  /** "Repeat this need": a specific past request of the caller's whose
+   *  STRUCTURE prefills the wizard on arrival (dates and urgency cleared,
+   *  execution facts never copied). Own rows only — the server re-checks. */
+  repeatRequestId?: string | null;
 }) {
   const t = useTranslations("auth.dashboard.wow.demand");
   const router = useRouter();
@@ -266,6 +272,17 @@ export function DemandRequestButton({
     autoPrefillRan.current = true;
     void (async () => {
       try {
+        if (repeatRequestId) {
+          // Explicit repeat wins over the draft auto-continue: the person
+          // chose THIS need to start from.
+          const rep = await getDemandPrefillByIdAction(intent, repeatRequestId);
+          if (rep.found && !descRef.current.trim()) {
+            applyPrefill(rep);
+            setDraftSource(false);
+            setPrefillState("done");
+            return;
+          }
+        }
         const res = await getOwnLastDemandPrefillAction(intent);
         if (!res.found || res.source !== "draft") return;
         if (descRef.current.trim()) return; // untouched check at apply time
