@@ -230,6 +230,13 @@ Donatas's walk (§K).
 CRITICAL = 0 · HIGH = 1 (unresolved, RED) · MEDIUM = 2 fixed + 1 owner ·
 LOW = 3 fixed + 5 accepted/owner-semantics.
 
+> **CORRECTION 2026-09-19 (third window, §M):** H1 / R-1 is **CLOSED** —
+> applied to production (ledger `20260919104526`), hostile contract proven
+> live (5 × 42501), merged (#1791). A second HIGH of the same class was found
+> and is RED draft #1794 (R-16, `add_org_member` forge — §M3). The headline
+> therefore stays HIGH = 1, but it is a different issue with a prepared,
+> dry-run-proven fix awaiting one approval sentence.
+
 | # | ISSUE | ATTACK / FAILURE PATH | AFFECTED | CURRENT PROTECTION | WHY INSUFFICIENT | FIX | STATUS | PROOF |
 |---|---|---|---|---|---|---|---|---|
 | H1 | Roster forge on `company_workers` / `agency_workers` | owner POSTs `{company_id: own, worker_id: victim, status: active}` to PostgREST; row now proves a relationship everywhere | every worker; consent axioms | RLS `owns_company` — the forger IS the owner | authority to write the row is the company's own | revoke insert/update from `authenticated`; make `accept_worker_invitation` the only writer, or BEFORE INSERT/UPDATE trigger refusing `active` unless `auth.uid()` = worker's profile or a matching accepted invitation exists; base `caller_manages_worker` on `company_worker_engagements` | **RED R-1** | live `pg_policies` read 2026-09-19 |
@@ -496,3 +503,127 @@ scouting view reads the signals directly (Donatas sees 2 on Klinkerio).
 None. R-1 changes nothing until approved. The chat gained three actions that
 exist as page forms already; no intent, action, route or table was removed.
 The one deletion (`reactivation-model.ts`) had no importer anywhere.
+
+---
+
+## M. CONTINUATION DELTA — 2026-09-19, third window ("continue → secure → complete → verify → deploy")
+
+Proof levels exactly as §preamble. Nothing in this section re-audits; every
+line is a targeted trace that was needed to implement or verify one edge.
+§A–§L above are history and stay as written; where this section corrects
+them, the correction is here (owner section 19 rule).
+
+### M1. PRODUCTION
+
+| | |
+|---|---|
+| main at start | `55e97654` = production build, health ok |
+| main at close | `b2702a40` (#1796) — sequence: #1793 `db859bc7` → #1791 `b68348ab` → #1796 `b2702a40`; docs commit on top |
+| production | `/api/health.build = b68348ab` at 11:56 UTC (auth 145 ms, db 447 ms, dub1); `b2702a40` deploying at close — verify `build` before the walk |
+| migration ledger | **293 applied** (was 292): `20260919104526 roster_writes_rpc_only_v1` — the ONLY apply of this window; repo files 292 + 4 prepared RED files on draft branches (not on main) |
+| Supabase advisors | unchanged except the R-1 policies are gone; R-13 WARN still present (draft #1797) |
+
+### M2. R-1 — CLOSED (applied, hostile-proven, ledgered, merged)
+
+Owner approval received verbatim in the window handoff. Drift check before
+apply: #1791 was 2 commits behind main (no migration among them); every SQL
+writer of both tables is SECURITY DEFINER (0031, 0033, 0036, 20260829120000,
+20260902230000); zero app-side direct writes (guard). The migration matched
+the approval sentence line for line.
+
+- **Applied** via MCP `apply_migration` (target `gorgitwvdzxbnaxhrsrw` verified
+  by project listing): ledger `20260919104526 roster_writes_rpc_only_v1`.
+- **Readback:** `company_workers` relacl `authenticated=r` (was `arwd`);
+  policies left `company_workers_select` + `agency_workers_select` only.
+  **Correction to §B1/§L1:** `agency_workers` NEVER had an `authenticated`
+  grant (relacl was NULL) — its `_write` policy was inert; `company_workers`
+  was the only live hole. The migration's agency half was a harmless no-op.
+- **Hostile contract, live, rolled back** (real actors under
+  `set local role authenticated` + JWT claims): owner Donatas direct INSERT
+  active row naming an isolated E2E worker → **42501**; direct UPDATE
+  `status` → **42501**; direct UPDATE `worker_id` → **42501**; direct DELETE →
+  **42501**; owner SELECT of own roster → 1 row (reads unchanged); agency owner
+  Ramūnas direct INSERT `agency_workers` → **42501**.
+- **Legitimate path, live, rolled back:** `caller_manages_worker` false →
+  `invite_company_worker` → the WORKER's `accept_company_worker_invitation` →
+  active row → `caller_manages_worker` true → `assign_company_worker_role`
+  (row shows `foreman / Brigadininkas`) → `assign_worker_to_project` →
+  `project_worker_assignments` active row. `set_company_worker_journal_review`
+  returned its pre-existing text precondition `role_not_allowed` (needs
+  `company_admin` + engagement context) — not an R-1 effect.
+- **Merged** #1791 squash `b68348ab` after two CI rounds (a `require()` lint
+  in the guard; the marked-migration ratchet list). `docs/APPLIED_LEDGER.md`
+  carries the entry with sha256 `558cd636d618…`.
+- Proof level: PRODUCTION_DEPLOYED for the app; the authority change itself
+  is PRODUCTION-PROVEN by the rolled-back contract above.
+
+### M3. NEW HIGH FOUND WHILE TRACING R-2 — R-16 (RED draft #1794, NOT applied)
+
+`add_org_member(p_org_id, p_worker_id)` — SECURITY DEFINER, granted to
+`authenticated`, callable by an org owner/manager — mints an ACTIVE
+`employee` `engagement_contexts` row for ANY worker id. **Proven live, rolled
+back:** as Donatas, for the E2E worker with NO roster row and NO invitation →
+`added`, forged rows = 1. `relationship_types.employee.grants_worker_visibility
+= true`, so the forged context satisfies the membership branch of
+`can_view_worker` (private worker row readable without discoverability
+consent), appears in the person's own context picker as a claim they never
+made, and is the row the review toggle acts on. Same class as R-1, one table
+over; R-1 and the 2026-09-18 trigger do not reach it. The UI never offers it
+(the members panel's `addable` list is roster-derived — consent-backed since
+R-1); the RPC called directly does not apply that rule.
+
+Draft #1794 `20260919120000_add_org_member_requires_consented_roster_v1`:
+one function body gains `return 'not_linked'` unless an ACTIVE
+`company_workers` / `agency_workers` row exists on the organization's legacy
+company or agency; no exemption for any role; rollback = prior body
+verbatim. **New body dry-run on production (aborted transaction):** forge →
+`not_linked`, 0 rows; invite → the worker accepts → context exists (the
+accept RPC provisions it; `add_org_member` → `already_member`, idempotent).
+Guard `red-add-org-member-consent.test.ts`; ratchets 293.
+
+Security receipt (§D) after this window: **CRITICAL 0 · HIGH 1 (R-16, RED
+draft, NOT applied) · H1 CLOSED** · MEDIUM/LOW unchanged (M3 owner, L3–L7
+owner/accepted). SECURITY_COMPLETE is NOT declared.
+
+### M4. GREEN halves shipped (merged to main)
+
+| Edge | PR | What | Proof |
+|---|---|---|---|
+| R-2 GREEN — booked people visible | #1793 `db859bc7` | `/dashboard/company/people` lists the company's ACTIVE `company_worker_engagements` (RLS-only, bounded 50, roster rows excluded); per person the honest state: **not a member** → "Journal not reviewable yet: a booking does not create a work context. Invite this person to join as an employee — the moment they accept, the context exists… You cannot create it for them." + exit to the canonical `join_as_employee` invitation; **already a member** → governed in the members panel. `OrgMember.profileId` added. Copy ×5. | guard 15/15 incl. static render of both states; 24 guards on touched files 637/637. Production has ONE active booking whose worker is also on the roster → the non-empty state cannot be shown on real data without fabricating a booking; the QA identity is a worker. PRODUCTION_DEPLOYED; browser proof = human walk. |
+| R-4 GREEN — confirmation authority | #1796 `b2702a40` | `getOrgMembersData.governanceWithoutReviewer` (active memberships with the roles `manages_organization()` accepts, minus reviewer-engagement holders, minus the registered owner) + `viewerIsRegisteredOwner`; members panel block "Confirmation authority" drawn ONLY for the registered owner → EXISTING owner-only `grant_org_manager` (had no UI caller). Inbox + quick-confirm: `no_reviewer_engagement` is its own sentence naming who can change it. Role labels `admin` / `external_manager`. Copy ×5. | guard; 18 guards on touched files 462/462; full guards project 16408/16409 (the one failure is the Windows-CRLF-only `booking-atomic-double-booking`, identical on untouched main, green in CI). **Real production case:** the admin `875eb16b` of Labour market ai Sp. z o.o has no reviewer engagement — Donatas will see exactly one person in the block. |
+
+### M5. RED packets prepared as draft PRs (NOT applied; one approval sentence each, in the PR body)
+
+Stack (each draft's base is the previous one; ratchets 293 → 296; merge in
+this order after apply, or rebase whichever is approved first):
+
+| # | PR | Migration | What it closes | Dry run on production (aborted transaction, zero residue) |
+|---|---|---|---|---|
+| R-16 | #1794 | `20260919120000_add_org_member_requires_consented_roster_v1` | the second forge (M3) | forge → `not_linked`; consent-backed → context exists |
+| R-3 | #1795 | `20260919130000_update_project_facts_v1` — ONE SECDEF write for title / city / country / start / end, `can_manage_project`-gated (anti-oracle shape), validation before read, completed = read-only after auth, `granularity` kept truthful (city vs country), never a coordinate, idempotent, audited; **+ the form** (`ProjectFactsForm` in the operations manage strip, `setProjectFactsAction`, copy ×5) so approval + apply = a complete edge | calendar band, dates chip, overlap check, location block — all 9 production projects have country NULL and no dates | stranger → `not_found`; "Lithuania" → `invalid/country`; end < start → `invalid_dates`; 1-char title → `invalid`; owner write → `updated/changed=true` (LT, 2026-10-01→11-30, gran=city); again → `changed=false`; completed → `completed_read_only` |
+| R-13 | #1797 | `20260919140000_usage_cost_trigger_search_path_v1` — `alter function … set search_path = public` on the two cost-ledger trigger functions | advisor WARN | static classifier: zero risk findings (would be GREEN); kept on the gate because the packet lists it |
+| R-9 | #1798 | `20260919150000_end_roster_link_v1` — the worker withdraws the relationship they accepted / the owner removes a person; `end_org_membership_v1` authority ladder (admin / owner of THAT org / subject); `status → removed`, review cleared, the employee engagement ended in the same transaction, audited, never a DELETE; **+ the UI** ("My teams — I no longer work here" on the profile in the existing parallel stage; "Remove from the roster" on the owner's roster rows; one two-step control, authority never a prop) | R-9 + the §F "roster removal UI" gap (the same missing write — since R-1 nobody could end a link) | stranger → `not_found`; worker → `removed/self`, engagement ended; again → `already_removed`; owner's `caller_manages_worker_by_roster` → false; owner → `removed`; wrong kind → `not_found` |
+
+R-2 (booking context provisioning), R-5, R-6, R-7, R-8, R-10, R-11, R-12,
+R-14, R-15 — unchanged packets, no GREEN half found beyond what shipped.
+
+### M6. Capability loss
+
+None. No route, nav id, table, RPC, policy or protected surface removed or
+narrowed by anything merged. The one stricter behaviour is R-1 itself
+(direct roster writes refused), which no product path ever used.
+
+### M7. Human walk additions (Donatas, Ramūnas) — after `/api/health.build = b2702a40`
+
+- **Donatas, employer (Labour market ai):** `/dashboard/company/people` →
+  the members panel now ends with **"Confirmation authority"** listing ONE
+  person (the admin). Press "Grant confirmation authority" only if that
+  person should be able to confirm journal entries; afterwards their review
+  refusals stop. "Booked people" will NOT appear for this company (no direct
+  booking exists) — that is correct, not missing.
+- **Donatas, worker (Journal inbox):** nothing changes for the owner; a
+  membership manager without authority now reads the new sentence instead
+  of "not allowed".
+- **Ramūnas (Nonstop):** `/dashboard/company/people` — same block if any
+  governance member lacks confirmation authority; otherwise absent.
+- The four RED drafts change nothing in production until approved.
