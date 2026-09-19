@@ -88,6 +88,7 @@ import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promot
 import {
   OrganizationEvidenceSection,
   RosterLinkOffers,
+  RosterLinkWithdrawals,
 } from "@/components/app/organization-evidence-section";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
@@ -953,6 +954,15 @@ export default async function ProfilePage({
             ),
           )}
         />
+      ) : null}
+
+      {/* THE LINK CAN BE WITHDRAWN (2026-09-19). A confirmed roster link was
+          the one consent on this page with no way back: the policy admitted
+          "unlinked" from the subject all along, the product offered only the
+          two answers to an OFFER. Stands beside the history it governs; empty
+          when nothing is confirmed. */}
+      {myOrgEvidence.kind === "ok" ? (
+        <RosterLinkWithdrawals links={myOrgEvidence.links} />
       ) : null}
 
       {/* THE STUDENT'S IDENTITY, ABOVE THE FOLD (2026-09-18). The Learning

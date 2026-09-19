@@ -10116,6 +10116,9 @@
         "created": "Wartet auf Sie",
         "accepted": "Angenommen"
       },
+      "withdrawGrant": "Kontaktdaten zurückziehen",
+      "withdrawGrantNote": "Sie können dies jederzeit zurückziehen. Das Unternehmen verliert dann den Zugriff auf die geteilten Daten; was es bereits gelesen hat, bleibt gelesen.",
+      "withdrawnNote": "Zurückgezogen. Dieses Unternehmen hat keinen Zugriff mehr auf Ihre Kontaktdaten.",
       "grantedNote": "Erlaubt. Diese Erlaubnis steht unten in Ihrer Einwilligungshistorie.",
       "declinedNote": "Abgelehnt. Es wurde nichts weitergegeben.",
       "error": "Ihre Antwort konnte nicht gespeichert werden. Bitte erneut versuchen.",
@@ -16146,6 +16149,12 @@
       "accept": "Ja, das bin ich",
       "refuse": "Nein, das bin ich nicht",
       "decisionFailed": "Diese Antwort konnte nicht gespeichert werden. Es hat sich nichts geändert.",
+      "linksTitle": "Bestätigte Verknüpfungen",
+      "linksHint": "Organisationen, deren Einträge Sie als Ihre bestätigt haben. Eine Verknüpfung zurückzuziehen ist eine echte Antwort: Die Organisation behält ihren eigenen Eintrag, nennt Sie nur nicht mehr, und ihre Historie verschwindet aus Ihrem Profil.",
+      "withdrawLink": "Das bin nicht mehr ich — Verknüpfung zurückziehen",
+      "withdrawConfirm": "Zurückziehen",
+      "withdrawCancel": "Verknüpfung behalten",
+      "withdrawDone": "Zurückgezogen. Die Organisation behält ihren eigenen Eintrag; Sie nennt sie nicht mehr.",
       "unnamedOrganization": "Eine Organisation"
     },
     "plan": {

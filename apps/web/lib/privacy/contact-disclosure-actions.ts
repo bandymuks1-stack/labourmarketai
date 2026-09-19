@@ -538,3 +538,70 @@ export async function grantContactDisclosureAction(input: {
   revalidatePath(`/${input.locale}/dashboard/privacy`);
   return { kind: "ok" };
 }
+
+export type WithdrawContactDisclosureGrantResult =
+  | { kind: "ok" }
+  | { kind: "not-authed" }
+  | { kind: "needs-migration" }
+  | { kind: "error" };
+
+/**
+ * THE WORKER TAKES THE PERMISSION BACK. `withdraw_employer_data_disclosure`
+ * has existed in the consent ledger since 2026-07-11, granted to
+ * `authenticated`, latest-wins in `has_employer_data_disclosure` — and until
+ * 2026-09-19 nothing in the product called it. The wording the person agreed
+ * to promises withdrawal ("you can withdraw this at any time"); a promise with
+ * no button is a false statement on a consent screen. This is the button.
+ *
+ * Same shape as the grant: the ask is loaded under RLS, the caller must BE the
+ * subject worker, and the ledger RPC re-checks `auth.uid()` itself. What the
+ * organization already read is not un-read; what changes is that the reader
+ * function answers "no" from this moment on.
+ */
+export async function withdrawContactDisclosureGrantAction(input: {
+  locale: string;
+  id: string;
+}): Promise<WithdrawContactDisclosureGrantResult> {
+  if (!input.id) return { kind: "error" };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  const { data: row, error: rowError } = await asAny(supabase)
+    .from("contact_disclosure_requests")
+    .select("id, request_id, organization_id, worker_id")
+    .eq("id", input.id)
+    .maybeSingle();
+  if (rowError) {
+    if (rowError.code && ABSENT.has(rowError.code)) return { kind: "needs-migration" };
+    return { kind: "error" };
+  }
+  if (!row) return { kind: "error" };
+
+  const { data: worker } = await asAny(supabase)
+    .from("workers")
+    .select("id")
+    .eq("id", row.worker_id)
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (!worker) return { kind: "error" };
+
+  const { data: res, error: rpcError } = await asAny(supabase).rpc(
+    "withdraw_employer_data_disclosure",
+    {
+      p_recipient_organization_id: row.organization_id,
+      p_context_type: "company_need",
+      p_context_id: row.request_id,
+      p_source: "privacy_contact_request",
+    },
+  );
+  if (rpcError) {
+    if (rpcError.code && ABSENT.has(rpcError.code)) return { kind: "needs-migration" };
+    return { kind: "error" };
+  }
+  if (!res?.ok) return { kind: "error" };
+  revalidatePath(`/${input.locale}/dashboard/privacy`);
+  return { kind: "ok" };
+}

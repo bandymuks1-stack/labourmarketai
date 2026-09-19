@@ -56,9 +56,17 @@ describe("the data export reads ONLY the caller's own data", () => {
     );
     expect(fromCalls.sort()).toEqual(ROOT_RELATIONS.slice().sort());
     // And every register entry is joined to the caller by a person column —
-    // never by an id the caller could choose.
+    // never by an id the caller could choose. The two chained keys resolve
+    // from rows the earlier stages returned AS the caller (their roster
+    // links, the evidence records on those links), so they are still the
+    // caller's own identity, one hop removed.
     for (const r of EXPORTED_RELATIONS) {
-      expect(["profile_id", "worker_id"]).toContain(r.key);
+      expect([
+        "profile_id",
+        "worker_id",
+        "organization_person_id",
+        "organization_evidence_record_id",
+      ]).toContain(r.key);
     }
     expect(EXPORTED_RELATIONS.length).toBeGreaterThan(20);
   });

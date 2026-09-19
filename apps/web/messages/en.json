@@ -10116,6 +10116,9 @@
         "created": "Waiting for you",
         "accepted": "Accepted"
       },
+      "withdrawGrant": "Withdraw contact details",
+      "withdrawGrantNote": "You can withdraw this at any time. The company then loses access to the details you shared; what it already read is not unread.",
+      "withdrawnNote": "Withdrawn. This company no longer has access to your contact details.",
       "grantedNote": "Allowed. This permission is recorded in your consent history below.",
       "declinedNote": "Declined. Nothing was shared.",
       "error": "Could not save your answer. Please try again.",
@@ -16146,6 +16149,12 @@
       "accept": "Yes, that is me",
       "refuse": "No, that is not me",
       "decisionFailed": "That answer could not be saved. Nothing changed.",
+      "linksTitle": "Confirmed links",
+      "linksHint": "Organizations whose records you confirmed are about you. Withdrawing a link is a real answer: the organization keeps its own record, it just stops naming you, and its history leaves your profile.",
+      "withdrawLink": "This is no longer me — withdraw the link",
+      "withdrawConfirm": "Withdraw",
+      "withdrawCancel": "Keep the link",
+      "withdrawDone": "Withdrawn. The organization keeps its own record; it no longer names you.",
       "unnamedOrganization": "An organization"
     },
     "plan": {
