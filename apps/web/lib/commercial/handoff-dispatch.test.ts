@@ -107,7 +107,7 @@ describe("dispatchQueuedHandoffs", () => {
 
   it("R-14: a tampered consent shape (given as a string) is withheld too", async () => {
     const tampered = { ...row("t"), proposition_consent: { given: "true", version: "employer-proposition-v1" } };
-    const { admin, updates } = fakeAdmin([tampered as ReturnType<typeof row>]);
+    const { admin, updates } = fakeAdmin([tampered as unknown as ReturnType<typeof row>]);
     const { fetchImpl, calls } = doorAnswering([201]);
     const r = await dispatchQueuedHandoffs({ env: ENV, fetchImpl, adminFactory: () => admin });
     expect(calls).toHaveLength(0);
