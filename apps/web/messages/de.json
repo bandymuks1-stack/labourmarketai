@@ -1800,6 +1800,7 @@
       "opportunityType": "Art"
     },
     "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage",
+    "repeatLink": "Diesen Bedarf wiederholen (Daten und Status neu)",
     "syntheticTitle": {
       "hiringWorkers": "Mitarbeiter gesucht",
       "agencyPartnership": "Partnerschaftsangebot"
@@ -12543,6 +12544,18 @@
           "label": "Arbeitsprüfung einschalten",
           "description": "Die Arbeitseinträge einer Person werden für die Führungskraft sichtbar und bestätigbar."
         },
+        "acceptConnection": {
+          "label": "Einladung einer Agentur annehmen",
+          "description": "Dieses Unternehmen mit der einladenden Agentur verbinden."
+        },
+        "declineConnection": {
+          "label": "Einladung einer Agentur ablehnen",
+          "description": "Die Einladung einer Agentur zur Zusammenarbeit ablehnen."
+        },
+        "shareRequest": {
+          "label": "Einen Bedarf mit einer Agentur teilen",
+          "description": "Einer verbundenen Agentur einen Ihrer Bedarfe zeigen, damit sie Kandidaten vorschlägt."
+        },
         "respondOffer": {
           "label": "Angebot einer Agentur beantworten",
           "description": "Einen von einer Agentur vorgeschlagenen Kandidaten annehmen oder ablehnen."
@@ -13057,6 +13070,16 @@
       "projectCreatedNext": "Projekt angelegt. Weisen Sie hier direkt Leute zu — oder kommen Sie später über „Meine Projekte“ darauf zurück.",
       "clientOffersIntro": "Von Agenturen vorgeschlagene Kandidaten für Ihre Bedarfe:",
       "clientOffersNone": "Noch keine Agentur hat Kandidaten für Ihre offenen Bedarfe vorgeschlagen.",
+      "clientBridgeInvitesIntro": "Agenturen, die Sie zur Zusammenarbeit einladen:",
+      "clientBridgeShareIntro": "Bedarfe, die Sie mit einer verbundenen Agentur teilen können:",
+      "clientBridgeNone": "Keine Agentureinladung wartet und nichts ist mehr zu teilen. Partner verwalten Sie auf der Partnerseite.",
+      "chipConnectionAccept": "Annehmen",
+      "chipConnectionDecline": "Ablehnen",
+      "chipShareRequest": "Teilen",
+      "connectionAccepted": "Verbunden. Sie können nun Bedarfe mit dieser Agentur teilen und ihre Kandidaten erhalten.",
+      "connectionDeclined": "Abgelehnt. Die Agentur sieht Ihre Entscheidung.",
+      "requestShared": "Geteilt. Die Agentur sieht diesen Bedarf und kann Kandidaten dafür vorschlagen.",
+      "bridgeActionFailed": "Das konnte nicht gespeichert werden — die Einladung ist vielleicht schon beantwortet oder der Bedarf geschlossen. Prüfen Sie die Partnerseite.",
       "chipOfferAccept": "Annehmen",
       "chipOfferDecline": "Ablehnen",
       "offerAccepted": "Angenommen. Dem Kandidaten wurde ein Buchungsvorschlag gesendet — seine Antwort sehen Sie hier.",

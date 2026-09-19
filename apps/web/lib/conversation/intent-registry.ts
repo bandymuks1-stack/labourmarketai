@@ -118,6 +118,7 @@ export type IntentHandlerId =
   | "programmes"
   | "createProject"
   | "clientOffers"
+  | "clientBridge"
   | "addDocument"
   | "cvExport"
   // The other two halves of the CV (owner window 11 §5/§30): looking at the
@@ -279,6 +280,15 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The CLIENT's side of the agency bridge: the offers made on the company's
   // own demands, decided in the chat (accept → canonical booking proposed).
   "agency-offers": { domain: "company", access: "read", handler: "clientOffers", ownTyping: true },
+  // The CLIENT's other two bridge edges (2026-09-19): pending agency
+  // invitations and the needs it may share — read in the chat, decided by
+  // chips over `company.accept-connection` / `company.decline-connection` /
+  // `company.share-request` (the canonical bridge actions, token-confirmed).
+  "agency-invites": { domain: "company", access: "read", handler: "clientBridge", ownTyping: true },
+  // The direct employer's offer by sentence: the candidates panel of the open
+  // need answers, and the offer is that panel's token-confirmed
+  // `company.propose-booking` button — a sentence never picks a person.
+  "propose-booking": { domain: "company", access: "read", handler: "findWorkers", ownTyping: true },
   // SUPPLY (owner window 7 §4): "turime 20 suvirintojų, ieškome jiems
   // darbo" — capacity offered to the market. Same canonical intake as a
   // need (`company.create-demand`, intent "partner" → kind agency_offer),

@@ -1800,6 +1800,7 @@
       "opportunityType": "Tipas"
     },
     "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas",
+    "repeatLink": "Pakartoti šį poreikį (datos ir būsena – iš naujo)",
     "syntheticTitle": {
       "hiringWorkers": "Ieškoma darbuotojų",
       "agencyPartnership": "Partnerystės pasiūlymas"
@@ -12543,6 +12544,18 @@
           "label": "Įjungti darbų peržiūrą",
           "description": "Darbuotojo darbo įrašai tampa matomi ir patvirtinami vadovui."
         },
+        "acceptConnection": {
+          "label": "Priimti agentūros kvietimą",
+          "description": "Sujungti šią įmonę su ją pakvietusia agentūra."
+        },
+        "declineConnection": {
+          "label": "Atmesti agentūros kvietimą",
+          "description": "Pasakyti „ne“ agentūros kvietimui bendradarbiauti."
+        },
+        "shareRequest": {
+          "label": "Pasidalinti poreikiu su agentūra",
+          "description": "Leisti prijungtai agentūrai matyti vieną jūsų poreikį ir siūlyti kandidatus."
+        },
         "respondOffer": {
           "label": "Atsakyti į agentūros pasiūlymą",
           "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
@@ -13057,6 +13070,16 @@
       "projectCreatedNext": "Projektas sukurtas. Čia pat priskirkite žmones — arba grįžkite prie jo vėliau iš „Mano projektai“.",
       "clientOffersIntro": "Agentūrų pasiūlyti kandidatai jūsų poreikiams:",
       "clientOffersNone": "Agentūros dar nepasiūlė kandidatų jūsų atviriems poreikiams.",
+      "clientBridgeInvitesIntro": "Agentūros, kviečiančios bendradarbiauti:",
+      "clientBridgeShareIntro": "Poreikiai, kuriais galite pasidalinti su prijungta agentūra:",
+      "clientBridgeNone": "Laukiančių agentūrų kvietimų nėra ir nėra kuo pasidalinti. Partnerius tvarkykite partnerių puslapyje.",
+      "chipConnectionAccept": "Priimti",
+      "chipConnectionDecline": "Atmesti",
+      "chipShareRequest": "Pasidalinti",
+      "connectionAccepted": "Sujungta. Dabar galite dalintis poreikiais su šia agentūra ir gauti jos kandidatus.",
+      "connectionDeclined": "Atmesta. Agentūra matys jūsų sprendimą.",
+      "requestShared": "Pasidalinta. Agentūra mato šį poreikį ir gali siūlyti jam kandidatus.",
+      "bridgeActionFailed": "Nepavyko išsaugoti – kvietimas gal jau atsakytas arba poreikis uždarytas. Patikrinkite partnerių puslapį.",
       "chipOfferAccept": "Priimti",
       "chipOfferDecline": "Atmesti",
       "offerAccepted": "Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas — kai jis atsakys, pamatysite čia.",

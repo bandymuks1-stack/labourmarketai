@@ -212,6 +212,12 @@ export const companyCreateProjectSchema = z.object({
 /** CLIENT: the decision on an agency's candidate offer (canonical:
  *  `respondCandidateOfferAction` → `respond_agency_candidate_offer_v1`, which
  *  re-checks that the caller owns the demand and the offer is open). */
+/** The client's side of the agency bridge, by chip (2026-09-19). Ids only —
+ *  the RPCs re-check the connection/request belong to the ACTIVE company. */
+export const companyAcceptConnectionSchema = z.object({ connectionId: uuid });
+export const companyDeclineConnectionSchema = z.object({ connectionId: uuid });
+export const companyShareRequestSchema = z.object({ connectionId: uuid, requestId: uuid });
+
 export const companyRespondOfferSchema = z.object({
   offerId: uuid,
   decision: z.enum(["accepted", "declined"]),
@@ -319,6 +325,9 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.move-worker": companyMoveWorkerSchema,
   "company.create-project": companyCreateProjectSchema,
   "company.respond-offer": companyRespondOfferSchema,
+  "company.accept-connection": companyAcceptConnectionSchema,
+  "company.decline-connection": companyDeclineConnectionSchema,
+  "company.share-request": companyShareRequestSchema,
   "company.create-task": companyCreateTaskSchema,
   "company.update-stage-status": companyUpdateStageStatusSchema,
   "company.update-task-status": companyUpdateTaskStatusSchema,

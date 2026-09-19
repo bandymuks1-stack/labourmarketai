@@ -37,10 +37,19 @@ const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
  */
 export default async function CompanyNeedsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ repeat?: string }>;
 }) {
   const { locale } = await params;
+  // "Repeat this need": the past request id is only a HINT for the wizard's
+  // prefill; the server action re-checks ownership, kind and workspace.
+  const repeatRaw = (await searchParams)?.repeat ?? "";
+  const repeatRequestId =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(repeatRaw)
+      ? repeatRaw
+      : null;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -153,6 +162,7 @@ export default async function CompanyNeedsPage({
           <DemandRequestButton
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
+            repeatRequestId={repeatRequestId}
           />
           {/* Static-stepper honesty note (guarded): the steps show progress,
               they are not live modules. */}

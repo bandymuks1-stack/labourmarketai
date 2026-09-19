@@ -411,8 +411,11 @@ export const BEHAVIOR_CONFORMANCE = {
   // 2026-09-05 (owner contract 4D): +1 `worker.respond-invitation` (the network
   // page's own accept, from the attention item). Anchored to the network page;
   // keyed to the worker actor type; verdict unchanged.
-  conversationActions: 52,
-  actionsAnchoredToAPage: 52,
+  // 52 → 55 (2026-09-19): the CLIENT's side of the agency bridge by chip —
+  // company.accept-connection / decline-connection / share-request, each the
+  // partners page's own canonical action, anchored to /dashboard/company/partners.
+  conversationActions: 55,
+  actionsAnchoredToAPage: 55,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

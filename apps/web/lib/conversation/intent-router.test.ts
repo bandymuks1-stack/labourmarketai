@@ -900,6 +900,20 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wij hebben 20 lassers beschikbaar.",
     de: "Wir haben 20 Schweisser verfuegbar.",
   },
+  "agency-invites": {
+    lt: "Agentūra mane pakvietė bendradarbiauti",
+    en: "An agency invited us to connect",
+    ru: "Агентство пригласило нас к сотрудничеству",
+    nl: "Een bureau heeft ons uitgenodigd",
+    de: "Eine Agentur hat uns eingeladen",
+  },
+  "propose-booking": {
+    lt: "Noriu pasiūlyti darbą kandidatui",
+    en: "I want to offer the job to a worker",
+    ru: "Хочу предложить работу кандидату",
+    nl: "Ik wil werk aanbieden aan een kandidaat",
+    de: "Ich möchte einem Kandidaten Arbeit anbieten",
+  },
   "agency-offers": {
     lt: "Kokius kandidatus pasiūlė agentūra?",
     en: "Which candidates did the agency offer?",

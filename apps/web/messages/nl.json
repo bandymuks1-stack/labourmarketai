@@ -1800,6 +1800,7 @@
       "opportunityType": "Soort"
     },
     "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag",
+    "repeatLink": "Deze behoefte herhalen (datums en status opnieuw)",
     "syntheticTitle": {
       "hiringWorkers": "Medewerkers gezocht",
       "agencyPartnership": "Samenwerkingsvoorstel"
@@ -12543,6 +12544,18 @@
           "label": "Werkbeoordeling aanzetten",
           "description": "De werkitems van een medewerker worden zichtbaar en bevestigbaar voor de leidinggevende."
         },
+        "acceptConnection": {
+          "label": "Uitnodiging van een bureau accepteren",
+          "description": "Koppel dit bedrijf aan het bureau dat het uitnodigde."
+        },
+        "declineConnection": {
+          "label": "Uitnodiging van een bureau afwijzen",
+          "description": "Wijs de uitnodiging van een bureau om samen te werken af."
+        },
+        "shareRequest": {
+          "label": "Een behoefte met een bureau delen",
+          "description": "Laat een gekoppeld bureau een van uw behoeften zien en kandidaten voorstellen."
+        },
         "respondOffer": {
           "label": "Aanbod van een bureau beantwoorden",
           "description": "Accepteer of wijs een kandidaat af die een bureau voor uw behoefte aanbood."
@@ -13057,6 +13070,16 @@
       "projectCreatedNext": "Project aangemaakt. Wijs hier meteen mensen toe — of kom er later op terug via “Mijn projecten”.",
       "clientOffersIntro": "Kandidaten die bureaus voor uw behoeften hebben aangeboden:",
       "clientOffersNone": "Nog geen bureau heeft kandidaten voor uw open behoeften aangeboden.",
+      "clientBridgeInvitesIntro": "Bureaus die u uitnodigen om samen te werken:",
+      "clientBridgeShareIntro": "Behoeften die u met een gekoppeld bureau kunt delen:",
+      "clientBridgeNone": "Er wacht geen uitnodiging van een bureau en er is niets meer te delen. Beheer partners op de partnerpagina.",
+      "chipConnectionAccept": "Accepteren",
+      "chipConnectionDecline": "Afwijzen",
+      "chipShareRequest": "Delen",
+      "connectionAccepted": "Verbonden. U kunt nu behoeften met dit bureau delen en zijn kandidaten ontvangen.",
+      "connectionDeclined": "Afgewezen. Het bureau ziet uw beslissing.",
+      "requestShared": "Gedeeld. Het bureau ziet deze behoefte en kan er kandidaten voor voorstellen.",
+      "bridgeActionFailed": "Dat kon niet worden opgeslagen — de uitnodiging is misschien al beantwoord of de behoefte gesloten. Controleer de partnerpagina.",
       "chipOfferAccept": "Accepteren",
       "chipOfferDecline": "Afwijzen",
       "offerAccepted": "Geaccepteerd. De kandidaat kreeg een boekingsvoorstel — zijn antwoord ziet u hier.",
