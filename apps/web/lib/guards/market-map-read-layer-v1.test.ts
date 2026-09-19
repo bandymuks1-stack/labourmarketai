@@ -981,8 +981,8 @@ describe("NO new DB migration in this PR", () => {
     //   (RED SECDEF body change, APPLIED 2026-09-19, ledger 20260919143247).
     //   Not this read layer's file. RECOUNTED: 293.
     // Bumped 293 -> 294 for 20260919130000_update_project_facts_v1
-    //   (RED new SECDEF write, NOT APPLIED). Not this read layer's file.
-    //   RECOUNTED: 294.
+    //   (RED new SECDEF write, APPLIED 2026-09-19, ledger 20260919145731).
+    //   Not this read layer's file. RECOUNTED: 294.
     expect(count).toBeLessThanOrEqual(294);
   });
 });

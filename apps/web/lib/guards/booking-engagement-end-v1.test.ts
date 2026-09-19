@@ -1399,8 +1399,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-09-19 — R-3 (completion audit): `update_project_facts_v1`, the ONE
       // gated write for a project's title / city / country / start / end dates
       // (can_manage_project, validation before read, completed = read-only,
-      // granularity kept truthful). RED, PREPARED, NOT APPLIED — owner gate;
-      // proven on production in a rolled-back transaction.
+      // granularity kept truthful). RED, owner-approved and APPLIED 2026-09-19
+      // (ledger 20260919145731); contract run on the live function, rolled back.
       "20260919130000_update_project_facts_v1.sql",
 ]);
   });

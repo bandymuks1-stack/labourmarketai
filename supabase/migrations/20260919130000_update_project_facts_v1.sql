@@ -1,7 +1,10 @@
 -- @human-gate-approved
 -- ============================================================================
 -- 20260919130000_update_project_facts_v1
--- RED — owner gate (R-3 of the 2026-09-19 completion audit). NOT APPLIED.
+-- RED — owner gate (R-3 of the 2026-09-19 completion audit).
+-- APPLIED 2026-09-19 14:57 UTC (ledger 20260919145731) under the owner's verbatim
+-- approval sentence; the seven-case contract run on the LIVE function and rolled
+-- back (see docs/APPLIED_LEDGER.md).
 --
 -- Finding: `projects.title / city / country / start_date / end_date` have NO
 -- valid write path after creation. Production, 2026-09-19: every one of the
