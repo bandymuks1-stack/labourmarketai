@@ -266,7 +266,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["EDU-2"],
         link: "BROKEN",
         because:
-          "Production holds zero cohort members. Programme and cohort exist and no human has ever put a person into one — the vertical is architecture, and calling it release-ready would be false.",
+          "Corrected 2026-09-19: production holds ONE cohort-member row and it is the E2E learner fixture (added 2026-09-18 07:17 UTC through the institution UI and `left` two minutes later, in the cohort named `2026 ruduo (testinė)`), so the write path is proven and the earlier `zero rows` wording was stale — but no REAL learner has ever joined a cohort. The chain exists at every layer; the link is adoption, not code (a fixture is not a person), and calling it release-ready would still be false.",
       },
       {
         step: "A learner's practice is recorded as real work on their own profile",
