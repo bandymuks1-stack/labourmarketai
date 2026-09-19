@@ -2558,7 +2558,12 @@ describe("no migration files added by this sprint", () => {
 // linked/worker_confirmed; a manager's forgery was ADMITTED live before it).
 // RED, APPLIED 2026-09-18 under owner approval, ledger 20260918070510;
 // hostile tests proven live, rolled back. RECOUNTED: 291.
-const SPRINT_BASELINE = 291;
+// Bumped 291 -> 292 for 20260919100000_roster_writes_rpc_only_v1 (R-1 HIGH:
+// revoke direct writes + drop the two FOR ALL write policies on company_workers
+// / agency_workers; every legitimate writer is a SECURITY DEFINER RPC). RED,
+// PREPARED, NOT APPLIED — owner gate; forge ADMITTED live rows=1, rolled back.
+// RECOUNTED: 292.
+const SPRINT_BASELINE = 292;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
