@@ -28,7 +28,7 @@ export default function RootNotFound() {
             This address does not exist
           </h1>
           <p className="max-w-md text-sm leading-relaxed text-text-secondary">
-            Šio adreso nėra. Nothing was found at this path — it may have moved or never existed.
+            <span lang="lt">Šio adreso nėra.</span> Nothing was found at this path — it may have moved or never existed.
           </p>
           <Link
             href="/"

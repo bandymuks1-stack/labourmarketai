@@ -45,7 +45,10 @@ export async function respondToRosterLinkAction(
 
   const personId = String(form.get("person_id") ?? "").trim();
   const raw = String(form.get("decision") ?? "");
-  if (personId === "" || (raw !== "accept" && raw !== "refuse")) {
+  if (
+    personId === "" ||
+    (raw !== "accept" && raw !== "refuse" && raw !== "withdraw")
+  ) {
     return { ok: false, code: "invalid" };
   }
 

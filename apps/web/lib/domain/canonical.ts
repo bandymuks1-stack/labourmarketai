@@ -90,6 +90,37 @@ export function isLegacyRedirectHost(host: string | null | undefined): boolean {
 }
 
 /** Returns true if the host is the canonical apex host. */
+/**
+ * THE ORIGIN A LINK WE E-MAIL MAY CARRY. Invitation and referral links embed
+ * a raw capability token; until 2026-09-19 they were built on the request's
+ * `X-Forwarded-Host` / `Host`, so whatever host a caller could make the
+ * server believe in became the host the recipient was sent to. A link that
+ * leaves the platform is built on the canonical origin, unless the request
+ * host is one of ours (the Vercel production alias, a preview deployment, or
+ * a local development host) — in which case that host is kept so previews
+ * and local runs keep working end to end.
+ */
+export function outboundLinkOrigin(
+  host: string | null | undefined,
+  proto: string | null | undefined,
+): string {
+  const h = (host ?? "").trim().toLowerCase();
+  if (h === "") return CANONICAL_ORIGIN;
+  const hostname = h.replace(/:\d+$/, "");
+  const ours =
+    hostname === CANONICAL_HOST ||
+    hostname === VERCEL_PRODUCTION_ALIAS ||
+    hostname.endsWith(".vercel.app") ||
+    hostname === "localhost" ||
+    hostname === "127.0.0.1";
+  if (!ours) return CANONICAL_ORIGIN;
+  const scheme =
+    hostname === "localhost" || hostname === "127.0.0.1"
+      ? (proto ?? "http")
+      : "https";
+  return `${scheme}://${h}`;
+}
+
 export function isCanonicalHost(host: string | null | undefined): boolean {
   return normalizeHost(host) === CANONICAL_HOST;
 }

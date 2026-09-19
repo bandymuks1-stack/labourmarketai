@@ -134,12 +134,14 @@ function specTestIds(src: string): { exact: Set<string>; prefix: Set<string> } {
  * Fixing one means the same work done here: find what the flow looks like now
  * and repoint the assertion, or delete it if the behaviour was retired.
  */
+// 2026-09-19: `after-shots-shell` and `pr-i-reality-landing` (with the two
+// `before-shots-*` files) left the test directory for `tests/e2e-archive/`:
+// screenshot scripts with no or permanently-red assertions are not tests,
+// and one of them was excluded from CI by name for that reason.
 const KNOWN_ORPHANS: Record<string, string[]> = {
-  "after-shots-shell.spec.ts": ["live-product-demo"],
   "ai-first-intent-coverage.spec.ts": ["msg-employer-match"],
   "one-authenticated-shell.spec.ts": ["account-menu-profile-link", "notification-bell"],
   "pr-i-reality-chat.spec.ts": ["msg-employer-match"],
-  "pr-i-reality-landing.spec.ts": ["live-product-demo"],
   "pr250-company-multisector-smoke.spec.ts": [
     "my-spaces",
     "my-spaces-available",

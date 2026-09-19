@@ -106,7 +106,7 @@ async function readRelations(
   const data: Record<string, unknown> = {};
   const unavailable: string[] = [];
   if (ids.length === 0) {
-    for (const r of relations) data[r.table] = [];
+    for (const r of relations) data[r.as ?? r.table] = [];
     return { data, unavailable };
   }
   const results = await Promise.all(
@@ -114,13 +114,15 @@ async function readRelations(
       db
         .from(r.table)
         .select("*")
-        .in(r.key, ids)
+        // The column that carries the key on THIS table — `recipient_profile_id`,
+        // `user_id`, `subject_profile_id`, … — defaulting to the key's own name.
+        .in(r.column ?? r.key, ids)
         .then((res: { data: unknown[] | null; error: RelationError }) => res)
         .catch(() => ({ data: null, error: { message: "unreadable" } })),
     ),
   );
   results.forEach((res, i) => {
-    const table = relations[i].table;
+    const table = relations[i].as ?? relations[i].table;
     data[table] = res.error ? [] : (res.data ?? []);
     // A RELATION THIS DATABASE DOES NOT HAVE IS EMPTY, NOT UNREAD. Some
     // registered relations ship in migrations that are not applied yet; the
@@ -131,6 +133,19 @@ async function readRelations(
     if (res.error && !isRelationAbsent(res.error)) unavailable.push(table);
   });
   return { data, unavailable };
+}
+
+/** A stage whose parent read failed: every dependent relation is named
+ *  unavailable, and reported empty — never silently absent. */
+function failedStage(key: PersonKey): {
+  data: Record<string, unknown>;
+  unavailable: string[];
+} {
+  const relations = EXPORTED_RELATIONS.filter((r) => r.key === key);
+  return {
+    data: Object.fromEntries(relations.map((r) => [r.as ?? r.table, []])),
+    unavailable: relations.map((r) => r.as ?? r.table),
+  };
 }
 
 export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
@@ -168,18 +183,47 @@ export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
     byWorker = {
       data: Object.fromEntries(
         EXPORTED_RELATIONS.filter((r) => r.key === "worker_id").map((r) => [
-          r.table,
+          r.as ?? r.table,
           [],
         ]),
       ),
       unavailable: EXPORTED_RELATIONS.filter((r) => r.key === "worker_id").map(
-        (r) => r.table,
+        (r) => r.as ?? r.table,
       ),
     };
   } else {
     byWorker = await readRelations(db, "worker_id", workerIds);
   }
   unavailable.push(...byWorker.unavailable);
+
+  // CHAINED KEYS. What an organization recorded about the person hangs off
+  // the `organization_people` row it linked to them, and the events off the
+  // record. Each stage reads only from what the previous stage returned as
+  // the person — if the roster read failed, the dependent relations are named
+  // unavailable rather than reported empty.
+  const rosterRows = byProfile.data.organization_people;
+  const rosterFailed = byProfile.unavailable.includes("organization_people");
+  const personIds: string[] = Array.isArray(rosterRows)
+    ? (rosterRows as { id?: unknown }[])
+        .map((r) => r.id)
+        .filter((id): id is string => typeof id === "string")
+    : [];
+  const byPerson = rosterFailed
+    ? failedStage("organization_person_id")
+    : await readRelations(db, "organization_person_id", personIds);
+  unavailable.push(...byPerson.unavailable);
+
+  const recordRows = byPerson.data.organization_evidence_records;
+  const recordsFailed = byPerson.unavailable.includes("organization_evidence_records");
+  const recordIds: string[] = Array.isArray(recordRows)
+    ? (recordRows as { id?: unknown }[])
+        .map((r) => r.id)
+        .filter((id): id is string => typeof id === "string")
+    : [];
+  const byRecord = recordsFailed
+    ? failedStage("organization_evidence_record_id")
+    : await readRelations(db, "organization_evidence_record_id", recordIds);
+  unavailable.push(...byRecord.unavailable);
 
   return {
     kind: "ok",
@@ -199,6 +243,8 @@ export async function buildPrivacyExport(): Promise<PrivacyExportResult> {
         workers,
         ...byProfile.data,
         ...byWorker.data,
+        ...byPerson.data,
+        ...byRecord.data,
       },
     },
   };

@@ -44,12 +44,36 @@ import "server-only";
  * comment: re-measure before believing any line like the one this replaced.
  */
 
-/** How a relation is joined to the person. */
-export type PersonKey = "profile_id" | "worker_id";
+/**
+ * How a relation is joined to the person. The exporter resolves the id set
+ * for each key in order: the person's `profiles.id`, then their `workers.id`
+ * rows, then the `organization_people` rows an organization linked to them,
+ * then the `organization_evidence_records` written against those rows. A
+ * relation keyed by a later stage is read only from what the earlier stage
+ * actually returned — nothing is guessed.
+ */
+export type PersonKey =
+  | "profile_id"
+  | "worker_id"
+  | "organization_person_id"
+  | "organization_evidence_record_id";
 
 export type ExportedRelation = {
   readonly table: string;
   readonly key: PersonKey;
+  /**
+   * The column that carries the key when the table does not spell it
+   * `profile_id` / `worker_id` (`recipient_profile_id`, `user_id`,
+   * `subject_profile_id`, …). Defaults to the key name. The completeness
+   * guard checks that the column really exists on that table in a migration.
+   */
+  readonly column?: string;
+  /**
+   * Bundle key, when one table is exported twice through two columns (the
+   * experience records a person WROTE and those written ABOUT them are both
+   * theirs, and must not overwrite each other). Defaults to the table name.
+   */
+  readonly as?: string;
 };
 
 /**
@@ -125,8 +149,11 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   // Requests to disclose THIS person's contact details — theirs above all.
   { table: "contact_disclosure_requests", key: "worker_id" },
   { table: "market_intelligence_insight_queries", key: "profile_id" },
-  { table: "demand_interest_seen", key: "worker_id" },
-  { table: "worker_opportunity_seen", key: "worker_id" },
+  // Both key the person by `profile_id` (2026-09-19: they were registered as
+  // `worker_id`, a column neither table has — the exporter's read failed on
+  // every bundle and the guard could not see it. It can now.)
+  { table: "demand_interest_seen", key: "profile_id" },
+  { table: "worker_opportunity_seen", key: "profile_id" },
   { table: "worker_external_profiles", key: "worker_id" },
 
   // ── Account and billing ───────────────────────────────────────────────
@@ -137,6 +164,92 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   // ── Pilot programme participation ─────────────────────────────────────
   { table: "pilot_participants", key: "profile_id" },
   { table: "pilot_events", key: "profile_id" },
+
+  // ── Added 2026-09-19: everything the previous sweep could not see ─────
+  // The first sweep only recognised columns literally named `profile_id` or
+  // `worker_id`. Every relation below keys the person through another column
+  // name and was neither exported nor named — the bundle claimed a
+  // completeness it did not have. Each is read as the person, under RLS.
+
+  // What the platform told the person, and what they consented to.
+  { table: "notification_events", key: "profile_id", column: "recipient_profile_id" },
+  { table: "privacy_consent_events", key: "profile_id", column: "user_id" },
+  { table: "personal_data_disclosures", key: "profile_id", column: "worker_user_id" },
+  { table: "language_feedback", key: "profile_id", column: "user_id" },
+  { table: "booking_requests_seen", key: "profile_id", column: "user_id" },
+  { table: "service_offering_requests_seen", key: "profile_id", column: "user_id" },
+
+  // What others recorded about the person, and what the person answered.
+  { table: "experience_records", key: "profile_id", column: "subject_profile_id" },
+  {
+    table: "experience_records",
+    key: "profile_id",
+    column: "author_profile_id",
+    as: "experience_records_authored",
+  },
+  { table: "experience_responses", key: "profile_id", column: "author_profile_id" },
+  { table: "organization_people", key: "profile_id", column: "linked_profile_id" },
+  { table: "organization_evidence_records", key: "organization_person_id" },
+  { table: "organization_evidence_events", key: "organization_evidence_record_id" },
+  { table: "candidate_drafts", key: "profile_id", column: "linked_profile_id" },
+  {
+    table: "candidate_drafts",
+    key: "profile_id",
+    column: "owner_id",
+    as: "candidate_drafts_owned",
+  },
+  { table: "talent_source_records", key: "profile_id", column: "subject_profile_id" },
+  { table: "identity_resolution_events", key: "profile_id", column: "primary_profile_id" },
+  { table: "performance_reviews", key: "profile_id", column: "subject_profile_id" },
+  { table: "follow_up_tasks", key: "profile_id", column: "subject_profile_id" },
+  { table: "pilot_outcomes", key: "profile_id", column: "participant_profile_id" },
+  { table: "learning_signals", key: "worker_id", column: "subject_worker_id" },
+  { table: "learning_review_queue", key: "worker_id", column: "subject_worker_id" },
+
+  // What the person attested about someone else's work — their own statement.
+  { table: "journal_entry_confirmations", key: "profile_id", column: "confirmer_id" },
+
+  // Work an organization assigned to the person, and what the person asked
+  // of an organization.
+  { table: "work_tasks", key: "profile_id", column: "assignee_profile_id" },
+  { table: "work_objects", key: "profile_id", column: "responsible_profile_id" },
+  { table: "training_assignments", key: "profile_id", column: "assignee_profile_id" },
+  { table: "document_acknowledgements", key: "profile_id", column: "assignee_profile_id" },
+  { table: "defects", key: "profile_id", column: "assignee_profile_id" },
+  { table: "onboarding_run_items", key: "profile_id", column: "responsible_profile_id" },
+  { table: "management_decisions", key: "profile_id", column: "responsible_profile_id" },
+  { table: "employee_requests", key: "profile_id", column: "requester_profile_id" },
+  { table: "procurement_inquiries", key: "profile_id", column: "requester_profile_id" },
+  { table: "workflow_instances", key: "profile_id", column: "requester_profile_id" },
+  { table: "workflow_instance_approvers", key: "profile_id", column: "approver_profile_id" },
+
+  // Invitations the person sent (the answers they gave are above).
+  { table: "invitations", key: "profile_id", column: "inviter_profile_id" },
+  { table: "company_worker_invitations", key: "profile_id", column: "inviter_profile_id" },
+  { table: "agency_worker_invitations", key: "profile_id", column: "inviter_profile_id" },
+
+  // Things the person owns or offers on the market.
+  { table: "organizations", key: "profile_id", column: "owner_profile_id" },
+  { table: "service_offerings", key: "profile_id", column: "provider_id" },
+  { table: "service_offering_requests", key: "profile_id", column: "buyer_id" },
+  {
+    table: "service_offering_requests",
+    key: "profile_id",
+    column: "provider_id",
+    as: "service_offering_requests_received",
+  },
+  { table: "marketplace_listings", key: "profile_id", column: "owner_id" },
+  { table: "proposals", key: "profile_id", column: "owner_id" },
+  { table: "contracts", key: "profile_id", column: "owner_id" },
+  { table: "team_enquiries", key: "profile_id", column: "owner_id" },
+  { table: "company_demand_locations", key: "profile_id", column: "owner_id" },
+  { table: "match_actions", key: "profile_id", column: "actor_id" },
+
+  // Money.
+  { table: "billing_customers", key: "profile_id", column: "owner_id" },
+  { table: "billing_subscriptions", key: "profile_id", column: "owner_id" },
+  { table: "billing_checkout_operations", key: "profile_id", column: "owner_id" },
+  { table: "lmc_transactions", key: "profile_id", column: "actor_profile_id" },
 ];
 
 export type WithheldRelation = {
@@ -197,6 +310,119 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     reason:
       "legacy pilot drafts, superseded by the canonical demand intake — kept only so nothing is lost, not maintained as your record",
   },
+  // Named 2026-09-19 — these were withheld in effect (only the participant
+  // rows were named) but not by name.
+  {
+    table: "conversations",
+    reason:
+      "conversation threads you created — they hold the other party's words as well as yours, so they need a route that can separate the two",
+  },
+  {
+    table: "conversation_messages",
+    reason:
+      "messages you wrote — each sits in a thread with the other party's messages, so they need a route that can separate them from yours",
+  },
+  {
+    table: "conversation_message_attachments",
+    reason:
+      "files you attached to messages — the same thread rule as the messages themselves",
+  },
+  {
+    table: "messages",
+    reason:
+      "a retired message table kept only so nothing is lost — the same thread rule as conversation_messages",
+  },
+  {
+    table: "company_need_public_intakes",
+    reason:
+      "a need someone submitted before signing in, keyed only by an e-mail address — it is matched to an account only when that person claims it, so ask us and we will look it up by the address you used",
+  },
+  {
+    table: "leads",
+    reason:
+      "pre-sign-in enquiries keyed only by e-mail address — matched to you only on request, by the address you used",
+  },
+  {
+    table: "waitlist",
+    reason:
+      "the waiting-list entry keyed only by e-mail address — matched to you only on request, by the address you used",
+  },
+  {
+    table: "agency_clients",
+    reason:
+      "an agency's own client list, which may carry a contact e-mail — it is the agency's business record, not your personal data",
+  },
+  {
+    table: "project_clients",
+    reason:
+      "an organization's own client record on a project, which may carry a contact e-mail — the organization's business record, not yours",
+  },
+];
+
+/**
+ * THE PERSON APPEARS ONLY AS THE ACTOR. These relations carry a person column
+ * that records WHO DID the thing (`created_by`, `actor_id`, `reviewed_by`,
+ * `uploaded_by`, …) on a record whose subject is an organization, a project,
+ * a document or another person. The record is that subject's data; the
+ * person's part in it is the organization's own audit trail and is not
+ * theirs to receive in a subject-access bundle. The guard allows a table here
+ * ONLY when every person column on it is an actor column — the moment one of
+ * them names a subject, the table must be exported or withheld instead.
+ */
+export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  "agency_client_connections",
+  "agency_client_request_shares",
+  "agreement_amendments",
+  "agreement_events",
+  "assets",
+  "audit_logs",
+  "booking_request_events",
+  "business_trip_events",
+  "company_locations",
+  "contact_disclosure_request_events",
+  "decision_document_links",
+  "decision_task_links",
+  "defect_corrections",
+  "document_files",
+  "education_cohorts",
+  "education_programs",
+  "engagement_lifecycle_events",
+  "evidence_import_events",
+  "evidence_import_sessions",
+  "finance_records",
+  "journal_entry_tasks",
+  "learning_policy_settings",
+  "leave_balance_policies",
+  "lmc_settings",
+  "management_decision_events",
+  "market_rate_averages",
+  "offboarding_run_items",
+  "offboarding_runs",
+  "onboarding_runs",
+  "onboarding_templates",
+  "org_document_events",
+  "organization_evidence_parties",
+  "performance_review_events",
+  "pilots",
+  "procurement_events",
+  "procurement_offers",
+  "productivity_units",
+  "project_budgets",
+  "project_handover_entries",
+  "project_stages",
+  "review_cycles",
+  "review_evidence_links",
+  "task_dependencies",
+  "team_enquiry_events",
+  "timesheet_events",
+  "training_assignment_events",
+  "training_programs",
+  "training_skill_links",
+  "work_task_events",
+  "worker_document_events",
+  "workflow_definition_versions",
+  "workflow_definitions",
+  "workflow_transitions",
 ];
 
 /**

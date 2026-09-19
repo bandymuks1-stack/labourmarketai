@@ -99,6 +99,20 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: BRAND_NAME,
     url: MARKETING_ORIGIN,
+    logo: `${MARKETING_ORIGIN}/icon-512.png`,
+  };
+}
+
+/** The site itself, per locale. No SearchAction: the public site has no
+ *  search endpoint, and declaring one would be a false affordance. */
+export function webSiteJsonLd(locale: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: BRAND_NAME,
+    url: `${MARKETING_ORIGIN}/${locale}`,
+    inLanguage: locale,
+    publisher: { "@type": "Organization", name: BRAND_NAME, url: MARKETING_ORIGIN },
   };
 }
 
@@ -152,11 +166,9 @@ export function buildAnswerSitemap(): MetadataRoute.Sitemap {
   const params = publishedParams().slice(0, ANSWER_SITEMAP_MAX);
   return params.map(({ id, locale, slug }) => {
     const a = getAnswer(id, locale)!;
-    const languages: Record<string, string> = {};
-    for (const l of publishedLocales(id)) {
-      const la = getAnswer(id, l);
-      if (la) languages[l] = url(l, questionPath(la.localizedSlug));
-    }
+    // The SAME set the page's <head> declares (incl. x-default) — a sitemap
+    // cluster that disagrees with the page is discarded by crawlers.
+    const languages = questionHreflang(id) ?? {};
     return {
       url: url(locale, questionPath(slug)),
       lastModified: a.reviewDate,

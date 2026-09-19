@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import {
   grantContactDisclosureAction,
   respondContactDisclosureAction,
+  withdrawContactDisclosureGrantAction,
 } from "@/lib/privacy/contact-disclosure-actions";
 import type { ContactDisclosureStatus } from "@/lib/privacy/contact-disclosure-shared";
 
@@ -71,6 +72,9 @@ export function ContactDisclosureRequests({
     showDetails: string;
     grant: string;
     grantedNote: string;
+    withdrawGrant: string;
+    withdrawGrantNote: string;
+    withdrawnNote: string;
     error: string;
   };
 }) {
@@ -78,7 +82,9 @@ export function ContactDisclosureRequests({
   const [answered, setAnswered] = useState<
     Record<string, "accepted" | "declined" | "error">
   >({});
-  const [granted, setGranted] = useState<Record<string, "granted" | "error">>({});
+  const [granted, setGranted] = useState<
+    Record<string, "granted" | "withdrawn" | "error">
+  >({});
   const [, startTransition] = useTransition();
 
   if (requests.length === 0) {
@@ -110,6 +116,15 @@ export function ContactDisclosureRequests({
     });
   }
 
+  function withdrawDisclosure(id: string) {
+    setPendingId(id);
+    startTransition(async () => {
+      const res = await withdrawContactDisclosureGrantAction({ locale, id });
+      setPendingId(null);
+      setGranted((prev) => ({ ...prev, [id]: res.kind === "ok" ? "withdrawn" : "error" }));
+    });
+  }
+
   function grantDisclosure(id: string) {
     setPendingId(id);
     startTransition(async () => {
@@ -125,7 +140,13 @@ export function ContactDisclosureRequests({
         const local = answered[r.id];
         const status: ContactDisclosureStatus =
           local === "accepted" || local === "declined" ? local : r.status;
-        const isGranted = r.disclosureGranted || granted[r.id] === "granted";
+        // The live ledger answer, overridden only by what THIS session just
+        // did: a grant, or a withdrawal of one.
+        const isGranted =
+          granted[r.id] === "withdrawn"
+            ? false
+            : r.disclosureGranted || granted[r.id] === "granted";
+        const justWithdrawn = granted[r.id] === "withdrawn";
         return (
           <li
             key={r.id}
@@ -193,7 +214,7 @@ export function ContactDisclosureRequests({
             {/* Decision 2 (SEPARATE, shared contract): the actual contact-
                 detail disclosure grant — offered only after an accept, with
                 the exact versioned legal wording shown first. */}
-            {status === "accepted" && !isGranted ? (
+            {status === "accepted" && !isGranted && !justWithdrawn ? (
               <div
                 className="flex flex-col gap-2 rounded-md border border-brand-blue/25 bg-brand-blue/5 px-3 py-2"
                 data-testid={`contact-request-grant-block-${r.id}`}
@@ -234,8 +255,37 @@ export function ContactDisclosureRequests({
               </div>
             ) : null}
             {status === "accepted" && isGranted ? (
-              <p className="text-xs text-state-success" data-testid={`contact-request-granted-${r.id}`}>
-                {labels.grantedNote}
+              <div
+                className="flex flex-col gap-2"
+                data-testid={`contact-request-granted-${r.id}`}
+              >
+                <p className="text-xs text-state-success">{labels.grantedNote}</p>
+                {/* WITHDRAWAL IS A FIRST-CLASS ANSWER. The consent wording
+                    promises it; the ledger has supported it since day one;
+                    the person must be able to reach it without asking us. */}
+                <p className="text-xs leading-relaxed text-text-secondary">
+                  {labels.withdrawGrantNote}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => withdrawDisclosure(r.id)}
+                  disabled={pendingId !== null}
+                  data-testid={`contact-request-withdraw-${r.id}`}
+                  className="min-h-11 w-fit rounded-md border border-ink-500 px-4 text-sm font-medium text-text-secondary transition-colors hover:border-state-warning/60 disabled:opacity-60"
+                >
+                  {pendingId === r.id ? labels.working : labels.withdrawGrant}
+                </button>
+                {granted[r.id] === "error" ? (
+                  <p className="text-xs text-state-danger">{labels.error}</p>
+                ) : null}
+              </div>
+            ) : null}
+            {status === "accepted" && justWithdrawn ? (
+              <p
+                className="text-xs text-text-secondary"
+                data-testid={`contact-request-withdrawn-${r.id}`}
+              >
+                {labels.withdrawnNote}
               </p>
             ) : null}
 

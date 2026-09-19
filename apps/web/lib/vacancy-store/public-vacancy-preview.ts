@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 /**
  * PUBLIC VACANCY PREVIEW — the anonymous read path.
  *
@@ -349,7 +351,13 @@ async function runSearch(
   };
 }
 
-export async function getPublicVacancyPreview(
+/**
+ * React-`cache()`d per request: the job page calls this from
+ * `generateMetadata` AND from the page body, and the RPC is a POST that
+ * Next's fetch dedupe never sees — without this every crawl of a job page
+ * cost two identical database calls.
+ */
+export const getPublicVacancyPreview = cache(async function getPublicVacancyPreview(
   id: string,
 ): Promise<PublicVacancyPreview | null | "not_provisioned"> {
   const supabase = await createClient();
@@ -367,7 +375,7 @@ export async function getPublicVacancyPreview(
   const rows = (data ?? []) as PreviewRow[];
   const row = rows[0];
   return row ? toPreview(row) : null;
-}
+});
 
 /**
  * Live governed supply counts. Replaces the pinned landing constant: a number

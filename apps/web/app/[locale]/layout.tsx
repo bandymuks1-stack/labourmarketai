@@ -9,6 +9,8 @@ import {
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { ThemeReapply } from "@/components/app/theme-reapply";
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/answer-engine/answer-seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
 import "../globals.css";
@@ -132,6 +134,18 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Organization + WebSite structured data on EVERY locale page
+            (2026-09-19): the landing is outside the marketing route group
+            and is a frozen composition, so the publisher nodes live here
+            once. Real values only — name, url, logo, language. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd(locale)) }}
+        />
         {/* No-flash theme bootstrap: resolve the theme before paint so the
             light↔dark token swap never flickers. LIGHT is the product default
             (`:root`), so the attribute is always stamped to a definite value —

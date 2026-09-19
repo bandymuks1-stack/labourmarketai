@@ -5828,6 +5828,8 @@
         "from": {
           "ownDocument": "iš jūsų dokumentų",
           "ownDocumentUntil": "iš jūsų dokumentų, galioja iki {date}",
+          "ownDocumentVerified": "iš jūsų dokumentų, patikrinta tikrintojo",
+          "ownDocumentVerifiedUntil": "iš jūsų dokumentų, patikrinta tikrintojo, galioja iki {date}",
           "ownSkill": "iš jūsų įgūdžių (jūsų įrašas)",
           "ownSkillConfirmed": "iš jūsų įgūdžių (patvirtino vadovas)",
           "ownLanguage": "iš jūsų kalbų ({level})",
@@ -7163,6 +7165,7 @@
     "en": "English",
     "notFound": "Tokio puslapio nėra",
     "backHome": "Grįžti į pradžią",
+    "dashboardSections": "Valdymo skydelio skiltys",
     "skipToContent": "Pereiti į turinį"
   },
   "workerInvitations": {
@@ -10116,6 +10119,9 @@
         "created": "Laukia jūsų",
         "accepted": "Priimta"
       },
+      "withdrawGrant": "Atšaukti kontaktinių duomenų dalijimąsi",
+      "withdrawGrantNote": "Galite atšaukti bet kada. Įmonė netenka prieigos prie duomenų, kuriais pasidalijote; to, ką ji jau perskaitė, atšaukti negalima.",
+      "withdrawnNote": "Atšaukta. Ši įmonė nebeturi prieigos prie jūsų kontaktinių duomenų.",
       "grantedNote": "Leista. Šis leidimas įrašytas sutikimų istorijoje žemiau.",
       "declinedNote": "Atmesta. Niekas nebuvo perduota.",
       "error": "Nepavyko išsaugoti jūsų atsakymo. Bandykite dar kartą.",
@@ -16146,6 +16152,12 @@
       "accept": "Taip, tai aš",
       "refuse": "Ne, tai ne aš",
       "decisionFailed": "Šio atsakymo išsaugoti nepavyko. Niekas nepasikeitė.",
+      "linksTitle": "Patvirtinti ryšiai",
+      "linksHint": "Organizacijos, kurių įrašus patvirtinote kaip savo. Ryšio atšaukimas – tikras atsakymas: organizacija pasilieka savo įrašą, tik nebemini jūsų, o jos istorija dingsta iš jūsų profilio.",
+      "withdrawLink": "Tai nebe aš – atšaukti ryšį",
+      "withdrawConfirm": "Atšaukti",
+      "withdrawCancel": "Palikti ryšį",
+      "withdrawDone": "Atšaukta. Organizacija pasilieka savo įrašą; jūsų ji nebemini.",
       "unnamedOrganization": "Organizacija"
     },
     "plan": {

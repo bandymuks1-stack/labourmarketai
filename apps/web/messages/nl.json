@@ -5828,6 +5828,8 @@
         "from": {
           "ownDocument": "uit uw documenten",
           "ownDocumentUntil": "uit uw documenten, geldig tot {date}",
+          "ownDocumentVerified": "uit uw documenten, geverifieerd door een beoordelaar",
+          "ownDocumentVerifiedUntil": "uit uw documenten, geverifieerd door een beoordelaar, geldig tot {date}",
           "ownSkill": "uit uw vaardigheden (eigen opgave)",
           "ownSkillConfirmed": "uit uw vaardigheden (bevestigd door een leidinggevende)",
           "ownLanguage": "uit uw talen ({level})",
@@ -7163,6 +7165,7 @@
     "en": "English",
     "notFound": "Deze pagina bestaat niet",
     "backHome": "Terug naar home",
+    "dashboardSections": "Dashboardsecties",
     "skipToContent": "Direct naar inhoud"
   },
   "workerInvitations": {
@@ -10116,6 +10119,9 @@
         "created": "Wacht op u",
         "accepted": "Geaccepteerd"
       },
+      "withdrawGrant": "Contactgegevens intrekken",
+      "withdrawGrantNote": "U kunt dit op elk moment intrekken. Het bedrijf verliest dan de toegang tot de gegevens die u deelde; wat het al gelezen heeft, wordt niet ongedaan gemaakt.",
+      "withdrawnNote": "Ingetrokken. Dit bedrijf heeft geen toegang meer tot uw contactgegevens.",
       "grantedNote": "Toegestaan. Deze toestemming staat in uw toestemmingsgeschiedenis hieronder.",
       "declinedNote": "Afgewezen. Er is niets gedeeld.",
       "error": "Uw antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
@@ -16146,6 +16152,12 @@
       "accept": "Ja, dat ben ik",
       "refuse": "Nee, dat ben ik niet",
       "decisionFailed": "Dat antwoord kon niet worden opgeslagen. Er is niets gewijzigd.",
+      "linksTitle": "Bevestigde koppelingen",
+      "linksHint": "Organisaties waarvan u bevestigde dat hun gegevens over u gaan. Een koppeling intrekken is een echt antwoord: de organisatie houdt haar eigen record, noemt u alleen niet meer, en haar geschiedenis verdwijnt uit uw profiel.",
+      "withdrawLink": "Dit ben ik niet meer — koppeling intrekken",
+      "withdrawConfirm": "Intrekken",
+      "withdrawCancel": "Koppeling behouden",
+      "withdrawDone": "Ingetrokken. De organisatie houdt haar eigen record; zij noemt u niet meer.",
       "unnamedOrganization": "Een organisatie"
     },
     "plan": {

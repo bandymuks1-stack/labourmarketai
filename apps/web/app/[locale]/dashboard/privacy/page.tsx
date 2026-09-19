@@ -310,6 +310,9 @@ export default async function PrivacyPage({
               showDetails: tc("contactRequests.showDetails"),
               grant: tc("contactRequests.grant"),
               grantedNote: tc("contactRequests.grantedNote"),
+              withdrawGrant: tc("contactRequests.withdrawGrant"),
+              withdrawGrantNote: tc("contactRequests.withdrawGrantNote"),
+              withdrawnNote: tc("contactRequests.withdrawnNote"),
               error: tc("contactRequests.error"),
             }}
           />

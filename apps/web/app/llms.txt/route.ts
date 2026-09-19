@@ -1,3 +1,4 @@
+import { getBillingConfig } from "@/lib/billing/config";
 import { buildLlmsTxt } from "@/lib/seo/llms-txt";
 
 /**
@@ -8,7 +9,7 @@ import { buildLlmsTxt } from "@/lib/seo/llms-txt";
 export const revalidate = 86_400;
 
 export function GET(): Response {
-  return new Response(buildLlmsTxt(), {
+  return new Response(buildLlmsTxt(undefined, { paymentsEnabled: getBillingConfig().paymentsEnabled }), {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "public, max-age=3600",

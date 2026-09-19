@@ -964,7 +964,7 @@ function EmptyState({
             key={a.key}
             href={a.href as "/dashboard"}
             data-testid={a.testid}
-            className="inline-flex min-h-9 items-center rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-medium text-brand-blue transition-colors hover:border-brand-blue"
+            className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-medium text-brand-blue transition-colors hover:border-brand-blue"
           >
             {t(a.key)}
           </Link>

@@ -147,14 +147,14 @@ export async function ProjectMap({
               <Link
                 href={`/${locale}/dashboard/projects/${p.id}/operations`}
                 data-testid="project-operations-link"
-                className="inline-flex min-h-8 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+                className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
               >
                 {t("openArena")} →
               </Link>
               <Link
                 href={`/${locale}/dashboard/communication`}
                 data-testid="project-card-chat-cta"
-                className="inline-flex min-h-8 w-fit items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
+                className="inline-flex min-h-11 w-fit items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
               >
                 <MessageSquare className="h-3.5 w-3.5" aria-hidden />
                 {t("chatCta")}

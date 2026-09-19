@@ -94,7 +94,10 @@ export async function lookupEscoConcepts(
   input: EscoLookupInput,
   client?: SupabaseClient,
 ): Promise<EscoRead<readonly EscoLabelMatch[]>> {
-  const q = input.text.trim().toLowerCase();
+  // LIKE metacharacters are stripped, not escaped: a `%` from the user would
+  // otherwise turn the prefix scan into a full walk of a million-row label
+  // table (public taxonomy, so no disclosure — the cost is the whole point).
+  const q = input.text.trim().toLowerCase().replace(/[%_\\]/g, " ").replace(/\s+/g, " ").trim();
   if (q.length < 2 || input.locales.length === 0) {
     return { status: "ok", value: [] };
   }

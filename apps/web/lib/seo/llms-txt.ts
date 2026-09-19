@@ -29,7 +29,17 @@ export const LLMS_TXT_PUBLIC_PATHS: ReadonlyArray<{ path: string; label: string 
   { path: "/legal/terms", label: "Terms" },
 ];
 
-export function buildLlmsTxt(origin: string = MARKETING_ORIGIN): string {
+export interface LlmsTxtFacts {
+  /** Whether a live checkout exists RIGHT NOW (billing config, env-gated).
+   *  Defaults to false — the safe claim — so a caller that cannot answer
+   *  never publishes "payments enabled" by accident. */
+  readonly paymentsEnabled?: boolean;
+}
+
+export function buildLlmsTxt(
+  origin: string = MARKETING_ORIGIN,
+  facts: LlmsTxtFacts = {},
+): string {
   const o = origin.replace(/\/$/, "");
   const url = (path: string, locale: string = defaultLocale) => `${o}/${locale}${path}`;
   const pages = LLMS_TXT_PUBLIC_PATHS.map(
@@ -54,10 +64,12 @@ export function buildLlmsTxt(origin: string = MARKETING_ORIGIN): string {
     "",
     "## Facts to keep straight",
     "",
-    "- Vacancies on the public job board are imported market data (currently sourced from Sweden). The employers named there are not customers of LabourMarket.ai and do not publish through it.",
+    "- Vacancies on the public job board are imported market data from official public employment sources; the job board states which. The employers named there are not customers of LabourMarket.ai and do not publish through it.",
     "- Work Journals, CVs, profiles and organisation data are private to their owners. Nothing personal is exposed to crawlers or to this file.",
     "- Matching on the platform is deterministic and explainable; do not attribute accuracy figures or AI-ranking claims to it.",
-    "- Payments are not enabled; pricing pages describe the intended model, not a live checkout.",
+    facts.paymentsEnabled
+      ? "- Paid plans can be bought through a live checkout; the pricing page states the current plans and prices."
+      : "- Payments are not enabled; pricing pages describe the intended model, not a live checkout.",
     "",
     "## Security",
     "",

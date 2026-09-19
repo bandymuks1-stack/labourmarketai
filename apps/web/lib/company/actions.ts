@@ -15,6 +15,11 @@ import {
   type EmployerContextReason,
 } from "./employer-company-context";
 import { hasOrganizationCapability } from "./role-capabilities";
+
+/** The two roster RPCs below are `owns_company`-gated in SQL: owner or admin. */
+function isCompanyOwnerOrAdmin(role: string): boolean {
+  return role === "owner" || role === "admin";
+}
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import type { AssignRoleActionState } from "@/lib/operations/assign-operations-role";
@@ -75,7 +80,14 @@ export async function inviteCompanyWorkerAction(
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noCompanyCode(company.reason) };
   // §11 capability matrix: roster writes are operational governance.
-  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+  // `invite_company_worker` / `assign_company_worker_role` are `owns_company`
+  // RPCs (owner or admin membership). A manager passed the capability check
+  // here and then received `not_owner` from the database (2026-09-19); the
+  // gate now says what the database will do.
+  if (
+    !hasOrganizationCapability(company.role, "manage-roster") ||
+    !isCompanyOwnerOrAdmin(company.role)
+  ) {
     return { ok: false, code: "no_company" };
   }
 
@@ -117,7 +129,14 @@ export async function assignCompanyWorkerRoleAction(
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
   // §11 capability matrix: roster writes are operational governance.
-  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+  // `invite_company_worker` / `assign_company_worker_role` are `owns_company`
+  // RPCs (owner or admin membership). A manager passed the capability check
+  // here and then received `not_owner` from the database (2026-09-19); the
+  // gate now says what the database will do.
+  if (
+    !hasOrganizationCapability(company.role, "manage-roster") ||
+    !isCompanyOwnerOrAdmin(company.role)
+  ) {
     return { ok: false, code: "no_org" };
   }
   if (workerId === "") return { ok: false, code: "error" };

@@ -50,7 +50,10 @@ export interface OwnReadinessItemLike {
   readonly status: "needed" | "missing" | "rejected" | "expired";
 }
 
-export type OwnDocumentLike = Pick<WorkerDocumentRow, "documentTypeSlug" | "storedStatus" | "validUntil">;
+export type OwnDocumentLike = Pick<
+  WorkerDocumentRow,
+  "documentTypeSlug" | "storedStatus" | "validUntil" | "verification"
+>;
 
 /** How many asks one project line names. */
 export const WORKER_PROJECT_ASK_LIMIT = 4;
@@ -77,12 +80,24 @@ export function deriveWorkerProjectAsks(
   evidence?: CapabilityEvidence | null,
 ): Map<string, WorkerProjectAsk[]> {
   const byType = new Map<string, OwnDocumentState>();
+  // WHETHER THE BEST RECORD IS VERIFIED. A document the worker recorded
+  // themselves answers "do you have it" (`own`); it does NOT meet a FORMAL
+  // requirement until an authorized reviewer verified it. Until 2026-09-19
+  // `hasValidCredential` was `own === "ready"` — self-recorded paper became
+  // `valid_credential` / `formalRequirementMet: true`, the exact self-award
+  // the doctrine forbids (SEP-6: demonstrated ≠ formal ≠ valid credential).
+  const verifiedByType = new Map<string, boolean>();
   for (const d of documents ?? []) {
     const st = deriveDocumentStatus(d, now);
     const state: OwnDocumentState = st === "ready" ? "ready" : st === "expiring" ? "expiring" : "none";
     const prev = byType.get(d.documentTypeSlug);
     // Best state wins: one ready record answers the row.
-    if (!prev || rank(state) > rank(prev)) byType.set(d.documentTypeSlug, state);
+    if (!prev || rank(state) > rank(prev)) {
+      byType.set(d.documentTypeSlug, state);
+      verifiedByType.set(d.documentTypeSlug, d.verification === "verified");
+    } else if (rank(state) === rank(prev) && d.verification === "verified") {
+      verifiedByType.set(d.documentTypeSlug, true);
+    }
   }
   const out = new Map<string, WorkerProjectAsk[]>();
   for (const it of items) {
@@ -90,11 +105,17 @@ export function deriveWorkerProjectAsks(
     if (list.length >= WORKER_PROJECT_ASK_LIMIT) continue;
     const slugs = documentTypesForReadinessItem(it.itemKey);
     let own: OwnDocumentState | null = null;
+    let ownVerified = false;
     if (slugs.length > 0 && documents !== null) {
       own = "none";
       for (const s of slugs) {
         const st = byType.get(s);
-        if (st && rank(st) > rank(own)) own = st;
+        if (st && rank(st) > rank(own)) {
+          own = st;
+          ownVerified = verifiedByType.get(s) ?? false;
+        } else if (st && rank(st) === rank(own) && verifiedByType.get(s)) {
+          ownVerified = true;
+        }
       }
     }
     // The capability assessment runs only for the capability row, and only
@@ -105,8 +126,11 @@ export function deriveWorkerProjectAsks(
         ? assessCapability(
             {
               ...evidence,
-              hasValidCredential: own === "ready",
-              hasExpiringCredential: own === "expiring",
+              // Only a REVIEWER-VERIFIED record is a credential. An
+              // unverified one leaves the formal answer where it was —
+              // the real-work ladder below still speaks.
+              hasValidCredential: own === "ready" && ownVerified,
+              hasExpiringCredential: own === "expiring" && ownVerified,
             },
             { formalRequirementRequired: true },
           )

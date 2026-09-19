@@ -102,12 +102,20 @@ test.describe("Russian landing hero renders Russian (U-15)", () => {
     }
   });
 
-  test("evidence screenshots at 390 / 768 / 1440", async ({ page }) => {
+  test("renders in Russian without horizontal overflow at 390 / 768 / 1440", async ({ page }) => {
     test.setTimeout(180_000);
     for (const width of [390, 768, 1440]) {
       await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
       await page.goto("/ru", { waitUntil: "networkidle" });
-      await page.waitForTimeout(2000);
+      // The page must be the RU page (not a locale fallback) and must fit
+      // the viewport. Until 2026-09-19 this test only took screenshots and
+      // counted toward the CI floor while never being able to fail.
+      await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      expect(overflow, `horizontal overflow at ${width}px`).toBeLessThanOrEqual(0);
       await page.screenshot({ path: join(OUT, `ru-landing-hero-${width}.png`) });
       await page.screenshot({
         path: join(OUT, `ru-landing-full-${width}.png`),

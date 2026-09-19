@@ -2678,7 +2678,17 @@ export async function offerRosterLink(
  */
 export async function respondToRosterLink(
   caller: DomainCaller,
-  input: { readonly personId: string; readonly decision: "accept" | "refuse" },
+  input: {
+    readonly personId: string;
+    /**
+     * `accept` / `refuse` answer an OFFER. `withdraw` (2026-09-19) is the
+     * subject's later "this is no longer me" on a link they had confirmed —
+     * the same row transition as a refusal, restricted to rows already
+     * `linked`. The policy `organization_people_subject_decides` has admitted
+     * it since the store shipped; the product simply had no control for it.
+     */
+    readonly decision: "accept" | "refuse" | "withdraw";
+  },
 ): Promise<
   EvidenceImportResult<{ readonly linkState: "linked" | "unlinked" }>
 > {
@@ -2698,12 +2708,18 @@ export async function respondToRosterLink(
           linked_at: null,
           updated_at: new Date().toISOString(),
         };
-  const res = await db(caller.supabase)
+  let query = db(caller.supabase)
     .from("organization_people")
     .update(patch)
     .eq("id", input.personId)
-    .eq("linked_profile_id", caller.userId)
-    .select("id");
+    .eq("linked_profile_id", caller.userId);
+  // An answer to an offer acts on an offer; a withdrawal acts on a confirmed
+  // link. Neither may silently do the other's job.
+  query =
+    input.decision === "withdraw"
+      ? query.eq("link_state", "linked")
+      : query.eq("link_state", "link_proposed");
+  const res = await query.select("id");
   if (res.error) return classify(res.error);
   if (!Array.isArray(res.data) || res.data.length === 0)
     return { kind: "not-found" };

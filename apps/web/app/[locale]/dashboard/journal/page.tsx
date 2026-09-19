@@ -1342,7 +1342,7 @@ export default async function JournalPage({
             <Link
               href={"/dashboard/journal#journal-composer" as "/dashboard"}
               data-testid="journal-day-record"
-              className="inline-flex min-h-9 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
             >
               {t("dayNav.recordOnDay")}
             </Link>
@@ -1351,7 +1351,7 @@ export default async function JournalPage({
                 `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
               }
               data-testid="journal-day-open-calendar"
-              className="inline-flex min-h-9 items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue"
+              className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue"
             >
               {t("dayNav.openInCalendar")} →
             </Link>

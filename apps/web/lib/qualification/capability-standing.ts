@@ -91,9 +91,12 @@ export interface CapabilityEvidence {
   readonly recordedEntries: number | null;
   /** Worker skills carrying `verified` — set by a real confirmation only. */
   readonly verifiedSkills: number | null;
-  /** A recorded, in-date credential answering the requirement. */
+  /** An in-date credential answering the requirement — VERIFIED by an
+   *  authorized reviewer (`worker_documents.verification = 'verified'`). A
+   *  document the worker recorded themselves is `own` state, never this:
+   *  since 2026-09-19 no caller derives it from the worker's own entry. */
   readonly hasValidCredential: boolean;
-  /** A recorded credential that is running out. */
+  /** A reviewer-verified credential that is running out. */
   readonly hasExpiringCredential: boolean;
   /** A formal recognition-of-prior-learning decision already exists. */
   readonly hasRecognizedEquivalence: boolean;

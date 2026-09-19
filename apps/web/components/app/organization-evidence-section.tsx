@@ -450,3 +450,132 @@ export function OrganizationEvidenceSection({
     </Card>
   );
 }
+
+/**
+ * "THIS IS NO LONGER ME" — the subject withdraws a link they once confirmed.
+ *
+ * The policy `organization_people_subject_decides` has allowed the linked
+ * person to return the row to `unlinked` since the store shipped
+ * (2026-09-07); the product exposed only Accept / Refuse on an OFFER, so a
+ * person who had said yes could never say "no longer". Consent that cannot
+ * be withdrawn is not consent. This is the withdrawal — two steps, because
+ * the organization's history leaves the profile the moment it succeeds, and
+ * that is not something to do by mis-tap.
+ *
+ * Nothing is deleted: the organization keeps its own record; it stops naming
+ * this person. Renders nothing when there is no confirmed link.
+ */
+export function RosterLinkWithdrawals({
+  links,
+}: {
+  links: readonly SubjectRosterLink[];
+}) {
+  const t = useTranslations("evidenceImport.mine");
+  const confirmed = links.filter((l) => l.linkState === "linked");
+  if (confirmed.length === 0) return null;
+  return (
+    <section
+      id="roster-link-withdrawals"
+      className="flex flex-col gap-2"
+      data-testid="organization-evidence-links"
+      aria-labelledby="roster-link-withdrawals-title"
+    >
+      <p
+        id="roster-link-withdrawals-title"
+        className="font-mono text-meta uppercase tracking-label text-text-muted"
+      >
+        {t("linksTitle")}
+      </p>
+      <p className="text-xs leading-relaxed text-text-secondary">{t("linksHint")}</p>
+      <ul className="flex flex-col gap-2">
+        {confirmed.map((link) => (
+          <li
+            key={link.id}
+            className={`${CARD} flex flex-col gap-2`}
+            data-testid="roster-link-confirmed"
+            data-person-id={link.id}
+          >
+            <p className="text-sm text-text-primary">
+              {link.organizationName ?? t("unnamedOrganization")} — {link.displayName}
+            </p>
+            <WithdrawDecision
+              personId={link.id}
+              labels={{
+                open: t("withdrawLink"),
+                confirm: t("withdrawConfirm"),
+                cancel: t("withdrawCancel"),
+                done: t("withdrawDone"),
+                errorMsg: t("decisionFailed"),
+              }}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function WithdrawDecision({
+  personId,
+  labels,
+}: {
+  personId: string;
+  labels: {
+    open: string;
+    confirm: string;
+    cancel: string;
+    done: string;
+    errorMsg: string;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  const [state, submit, pending] = useActionState<
+    RosterLinkActionResult | null,
+    FormData
+  >(respondToRosterLinkAction, null);
+  if (state?.ok) {
+    return (
+      <p className="text-xs text-text-secondary" data-testid="roster-link-withdrawn">
+        {labels.done}
+      </p>
+    );
+  }
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        data-testid="roster-link-withdraw-open"
+        className="min-h-11 w-fit rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary hover:border-state-warning/60"
+      >
+        {labels.open}
+      </button>
+    );
+  }
+  return (
+    <form action={submit} className="flex flex-wrap items-center gap-2">
+      <input type="hidden" name="person_id" value={personId} />
+      <button
+        type="submit"
+        name="decision"
+        value="withdraw"
+        disabled={pending}
+        data-testid="roster-link-withdraw-confirm"
+        className="min-h-11 rounded-md border border-state-warning/50 bg-state-warning/10 px-3 text-xs font-semibold text-state-warning disabled:opacity-50"
+      >
+        {labels.confirm}
+      </button>
+      <button
+        type="button"
+        onClick={() => setOpen(false)}
+        disabled={pending}
+        className="min-h-11 rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary disabled:opacity-50"
+      >
+        {labels.cancel}
+      </button>
+      <p role="alert" className={state?.ok === false ? "text-xs text-state-warning" : "sr-only"}>
+        {state?.ok === false ? labels.errorMsg : ""}
+      </p>
+    </form>
+  );
+}

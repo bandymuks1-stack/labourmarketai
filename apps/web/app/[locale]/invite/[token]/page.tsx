@@ -18,6 +18,7 @@ import {
 import { formatUtcDate } from "@/lib/time/display";
 // The ONE list that says "this happened and it was a placement, not a job".
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import type { Metadata } from "next";
 
 /**
  * Invitation landing page (core-network area B; universal network v1) — the
@@ -107,6 +108,9 @@ const NOTICES = new Set([
 function isMissingFunction(error: { code?: string } | null): boolean {
   return Boolean(error && (error.code === "PGRST202" || error.code === "42883"));
 }
+
+/** A page reached by a capability token is never a search result. */
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function InvitePage({
   params,

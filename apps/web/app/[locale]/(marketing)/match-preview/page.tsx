@@ -4,6 +4,8 @@ import {
   type MatchPreviewLabels,
 } from "@/components/app/match-preview-form";
 import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 /**
  * Match preview (Staffing Operating Model v1, PR8). NON-PERSISTED. Enter a
@@ -12,6 +14,21 @@ import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
  * booking, no persistence, no contact, no migration. Work-type options come
  * from the shared multi-sector taxonomy (lib/taxonomy/work-categories).
  */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "matchPreview" });
+  return buildPageMetadata({
+    locale,
+    path: "/match-preview",
+    title: t("title"),
+    description: t("subtitle"),
+  });
+}
 
 export default async function MatchPreviewPage({
   params,

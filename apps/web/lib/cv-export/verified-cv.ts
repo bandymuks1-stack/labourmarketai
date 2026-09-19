@@ -2,6 +2,7 @@ import "server-only";
 import { orgDisplayName } from "@/lib/company/org-display";
 
 import { createClient } from "@/lib/supabase/server";
+import { selectStandingConfirmations } from "@/lib/cv-export/confirmation-standing";
 import {
   supportedSkillIds,
   type EntrySkillLinkRow,
@@ -584,7 +585,6 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       .select("entry_id, confirmer_role, created_at, confirmation_scope")
       .in("entry_id", entries.map((e) => e.id))
       .order("created_at", { ascending: false });
-    const seen = new Set<string>();
     const projectIds = new Set<string>();
     const confirmedRows: {
       entryId: string;
@@ -593,15 +593,16 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       automatic: boolean;
       selfConfirmed: boolean;
     }[] = [];
-    for (const c of confs ?? []) {
+    // LATEST DECISION WINS, WHATEVER IT IS. A later rejection or "changes
+    // requested" RETRACTS an earlier confirmation; the ledger's newest row per
+    // entry is the standing one (`selectStandingConfirmations`). Until
+    // 2026-09-19 this loop skipped non-confirm rows and took the older confirm,
+    // printing "Confirmed Work Proof" for work the manager had withdrawn.
+    for (const c of selectStandingConfirmations(confs ?? [])) {
       const scope = c.confirmation_scope as {
         action?: string;
         decision?: string;
       } | null;
-      const isConfirm =
-        scope?.action === "confirm" || scope?.decision === "approved";
-      if (!isConfirm || seen.has(c.entry_id)) continue;
-      seen.add(c.entry_id);
       confirmedRows.push({
         entryId: c.entry_id,
         confirmedAt: c.created_at,

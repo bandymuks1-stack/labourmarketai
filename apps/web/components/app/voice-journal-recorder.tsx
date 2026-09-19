@@ -412,6 +412,7 @@ export function VoiceJournalRecorder({
           <textarea
             value={transcript}
             onChange={(e) => setTranscript(e.target.value)}
+            aria-label={t("reviewTitle")}
             rows={10}
             className="w-full rounded-lg border border-border bg-surface-1 p-3 text-sm leading-relaxed text-text-primary"
             data-testid="voice-transcript"

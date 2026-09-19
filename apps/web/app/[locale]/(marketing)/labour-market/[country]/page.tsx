@@ -8,6 +8,8 @@ import {
   SUPPORTED_COUNTRIES,
   isSupportedCountry,
 } from "@/lib/labour-market/country-evidence";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 /**
  * Per-country labour-market evidence page (Step 5/6). Source-backed, honest:
@@ -16,6 +18,25 @@ import {
  */
 export function generateStaticParams() {
   return SUPPORTED_COUNTRIES.map((c) => ({ country: c.toLowerCase() }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; country: string }>;
+}): Promise<Metadata> {
+  const { locale, country } = await params;
+  const code = country.toUpperCase();
+  if (!(SUPPORTED_COUNTRIES as readonly string[]).includes(code)) {
+    return { robots: { index: false, follow: false } };
+  }
+  const t = await getTranslations({ locale, namespace: "labourMarket" });
+  return buildPageMetadata({
+    locale,
+    path: `/labour-market/${country.toLowerCase()}`,
+    title: t(`countryNames.${code}`),
+    description: t(`countryEvidence.${code}.intro`),
+  });
 }
 
 export default async function CountryPage({
