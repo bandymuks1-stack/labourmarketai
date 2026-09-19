@@ -7236,7 +7236,15 @@
       "collaborator": "Partneris",
       "consultant": "Konsultantas",
       "freelancer": "Laisvai samdomas",
-      "viewer": "Stebėtojas"
+      "viewer": "Stebėtojas",
+      "admin": "Administratorius",
+      "external_manager": "Išorinis vadovas"
+    },
+    "authority": {
+      "title": "Tvirtinimo teisė",
+      "intro": "Šie valdymo nariai mato peržiūros eilę, bet dar negali tvirtinti įrašų — tvirtinimui reikia vadovo ryšio, kurį suteikia tik savininkas.",
+      "grant": "Suteikti tvirtinimo teisę",
+      "granted": "Suteikta. Dabar jie gali tvirtinti žurnalo įrašus."
     }
   },
   "services": {

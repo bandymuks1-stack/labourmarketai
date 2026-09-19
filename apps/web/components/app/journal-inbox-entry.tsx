@@ -94,8 +94,11 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         case "review_not_enabled":
           return { text: t("inbox.result.reviewNotEnabled"), ok: false };
         case "not_authorized":
-        case "no_reviewer_engagement":
           return { text: t("inbox.result.notAuthorized"), ok: false };
+        // R-4: the manager may SEE the entry (membership) but confirming
+        // needs a reviewer engagement the owner grants — its own truth.
+        case "no_reviewer_engagement":
+          return { text: t("inbox.result.noReviewerEngagement"), ok: false };
         case "skill_not_owned":
           return { text: t("inbox.result.skillNotOwned"), ok: false };
         case "no_skills":
@@ -122,8 +125,11 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         case "review_not_enabled":
           return { text: t("inbox.result.reviewNotEnabled"), ok: false };
         case "not_authorized":
-        case "no_reviewer_engagement":
           return { text: t("inbox.result.notAuthorized"), ok: false };
+        // R-4: the manager may SEE the entry (membership) but confirming
+        // needs a reviewer engagement the owner grants — its own truth.
+        case "no_reviewer_engagement":
+          return { text: t("inbox.result.noReviewerEngagement"), ok: false };
         case "needs_migration":
           return { text: t("inbox.result.needsMigration"), ok: false };
         default:

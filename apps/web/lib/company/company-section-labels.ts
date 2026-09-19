@@ -249,9 +249,16 @@ export async function readOrgMembersLabels() {
     removeReasonLabel: tOrg("removeReasonLabel"),
     ownerLocked: tOrg("ownerLocked"),
     removed: tOrg("removed"),
+    // R-4 GREEN — confirmation authority for governance members.
+    authorityTitle: tOrg("authority.title"),
+    authorityIntro: tOrg("authority.intro"),
+    authorityGrant: tOrg("authority.grant"),
+    authorityGranted: tOrg("authority.granted"),
     roles: {
       owner: tOrg("roles.owner"),
+      admin: tOrg("roles.admin"),
       manager: tOrg("roles.manager"),
+      external_manager: tOrg("roles.external_manager"),
       employee: tOrg("roles.employee"),
       collaborator: tOrg("roles.collaborator"),
       consultant: tOrg("roles.consultant"),

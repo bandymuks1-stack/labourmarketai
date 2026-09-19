@@ -260,6 +260,8 @@ export default async function CompanyPeoplePage({
           members={orgMembers.members}
           addable={orgMembers.addable}
           labels={orgMembersLabels}
+          viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
+          governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
         />
       )}
 

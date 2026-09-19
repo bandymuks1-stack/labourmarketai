@@ -118,8 +118,11 @@ export function QuickConfirmCard({
       case "review_not_enabled":
         return t("inbox.result.reviewNotEnabled");
       case "not_authorized":
-      case "no_reviewer_engagement":
         return t("inbox.result.notAuthorized");
+      // R-4: seen by membership, refused on confirm — the owner grants the
+      // reviewer engagement on the People page.
+      case "no_reviewer_engagement":
+        return t("inbox.result.noReviewerEngagement");
       case "skill_not_owned":
         return t("inbox.result.skillNotOwned");
       default:

@@ -7236,7 +7236,15 @@
       "collaborator": "Partner",
       "consultant": "Consultant",
       "freelancer": "Freelancer",
-      "viewer": "Viewer"
+      "viewer": "Viewer",
+      "admin": "Admin",
+      "external_manager": "External manager"
+    },
+    "authority": {
+      "title": "Confirmation authority",
+      "intro": "These governance members can see the review queue but cannot confirm entries yet — confirming needs a manager engagement, which only the owner grants.",
+      "grant": "Grant confirmation authority",
+      "granted": "Granted. They can now confirm journal entries."
     }
   },
   "services": {
