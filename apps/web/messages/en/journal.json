@@ -196,7 +196,8 @@
       "reviewNotEnabled": "Review is not enabled for this worker yet.",
       "entrySuperseded": "The entry was already replaced by a newer version — this card is no longer actionable and will be removed from the list.",
       "entryDeleted": "The entry was deleted — this card is no longer actionable and will be removed from the list.",
-      "staleTerminalHint": "Nothing was recorded. If the worker saved a newer version, it appears in the inbox as a new card."
+      "staleTerminalHint": "Nothing was recorded. If the worker saved a newer version, it appears in the inbox as a new card.",
+      "noReviewerEngagement": "You can see this entry as a manager, but confirming needs confirmation authority. Ask the organization owner to grant it on the People page."
     },
     "showOriginal": "Show original",
     "skills": "Skills",

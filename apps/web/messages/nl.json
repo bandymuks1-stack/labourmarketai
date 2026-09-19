@@ -7236,7 +7236,15 @@
       "collaborator": "Partner",
       "consultant": "Adviseur",
       "freelancer": "Zzp'er",
-      "viewer": "Kijker"
+      "viewer": "Kijker",
+      "admin": "Beheerder",
+      "external_manager": "Externe manager"
+    },
+    "authority": {
+      "title": "Bevestigingsbevoegdheid",
+      "intro": "Deze bestuursleden zien de beoordelingswachtrij maar kunnen nog geen items bevestigen — bevestigen vereist een managersrelatie, die alleen de eigenaar verleent.",
+      "grant": "Bevestigingsbevoegdheid verlenen",
+      "granted": "Verleend. Ze kunnen nu journaalitems bevestigen."
     }
   },
   "services": {

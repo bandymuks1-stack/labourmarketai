@@ -6,9 +6,14 @@ import { Button } from "@/components/ui/Button";
 import {
   addOrgMember,
   endOrgMembership,
+  grantOrgManager,
   setEngagementJournalReview,
 } from "@/lib/operations/org-membership";
-import type { OrgMember, AddableWorker } from "@/lib/operations/org-members";
+import type {
+  OrgMember,
+  AddableWorker,
+  GovernanceWithoutReviewer,
+} from "@/lib/operations/org-members";
 
 export type OrgMembersPanelLabels = {
   title: string;
@@ -31,6 +36,11 @@ export type OrgMembersPanelLabels = {
   removeReasonLabel: string;
   ownerLocked: string;
   removed: string;
+  /** R-4 GREEN — confirmation authority for governance members. */
+  authorityTitle: string;
+  authorityIntro: string;
+  authorityGrant: string;
+  authorityGranted: string;
   roles: Readonly<Record<string, string>>;
 };
 
@@ -46,11 +56,17 @@ export function OrgMembersPanel({
   members,
   addable,
   labels,
+  viewerIsRegisteredOwner = false,
+  governanceWithoutReviewer = [],
 }: {
   orgId: string;
   members: OrgMember[];
   addable: AddableWorker[];
   labels: OrgMembersPanelLabels;
+  /** Only the registered owner may grant (the RPC refuses everyone else);
+   *  the control is not drawn for anyone else. */
+  viewerIsRegisteredOwner?: boolean;
+  governanceWithoutReviewer?: GovernanceWithoutReviewer[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -70,6 +86,22 @@ export function OrgMembersPanel({
       setReason("");
       // `already_ended` is a success (idempotent), so ok covers both.
       setMsg(res.ok ? labels.removed : (res.message ?? res.code));
+      router.refresh();
+    });
+  }
+
+  /**
+   * R-4 GREEN: a governance member (membership role) who can SEE the review
+   * queue but is refused on confirm (`no_reviewer_engagement`). The owner
+   * grants them the reviewer engagement through the canonical, owner-only
+   * `grant_org_manager` — the same authority the queue's confirm path reads.
+   * No new relationship model; the person already holds the managing role.
+   */
+  function grantAuthority(profileId: string) {
+    setMsg(null);
+    startTransition(async () => {
+      const res = await grantOrgManager(orgId, profileId, null);
+      setMsg(res.ok ? labels.authorityGranted : (res.message ?? res.code));
       router.refresh();
     });
   }
@@ -248,6 +280,44 @@ export function OrgMembersPanel({
           </div>
         )}
       </div>
+
+      {viewerIsRegisteredOwner && governanceWithoutReviewer.length > 0 ? (
+        <div
+          className="flex flex-col gap-2 border-t border-ink-600 pt-3"
+          data-testid="org-confirmation-authority"
+        >
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.authorityTitle}
+          </p>
+          <p className="text-sm text-text-secondary">{labels.authorityIntro}</p>
+          <ul className="flex flex-col gap-2">
+            {governanceWithoutReviewer.map((g) => (
+              <li
+                key={g.profileId}
+                className="flex flex-col gap-2 rounded-md border border-ink-600 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                data-testid={`org-authority-${g.profileId}`}
+              >
+                <span className="flex flex-wrap items-center gap-2 text-sm text-text-primary">
+                  <span className="rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                    {labels.roles[g.membershipRole] ?? g.membershipRole}
+                  </span>
+                  {g.name}
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  disabled={pending}
+                  onClick={() => grantAuthority(g.profileId)}
+                  data-testid={`grant-authority-${g.profileId}`}
+                >
+                  {labels.authorityGrant}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {msg ? (
         <p

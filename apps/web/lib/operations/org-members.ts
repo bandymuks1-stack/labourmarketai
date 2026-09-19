@@ -28,6 +28,11 @@ export const MEMBERSHIP_SLUGS = [
   "viewer",
 ] as const;
 
+/** The engagement slugs `review_journal_entry` accepts as a reviewer. */
+const REVIEWER_SLUGS: ReadonlySet<string> = new Set(["manager", "owner", "external_manager"]);
+/** The membership roles `manages_organization()` accepts (see the queue). */
+const GOVERNANCE_ROLES = ["owner", "admin", "manager", "external_manager"] as const;
+
 export type OrgMember = {
   engagementId: string;
   /** The member's profile — lets sibling surfaces (booked people, R-2 GREEN)
@@ -45,10 +50,29 @@ export type OrgMember = {
 
 export type AddableWorker = { workerId: string; name: string };
 
+/**
+ * R-4 GREEN (2026-09-19): a governance member (active `company_memberships`
+ * row with a managing role) who holds NO reviewer engagement context. They
+ * pass `manages_organization()` — so they SEE the review queue — but
+ * `review_journal_entry` requires an active manager/owner/external_manager
+ * engagement and refuses them with `no_reviewer_engagement`. The owner
+ * closes that gap with the existing `grant_org_manager` RPC (owner-only).
+ */
+export type GovernanceWithoutReviewer = {
+  profileId: string;
+  name: string;
+  /** The membership role, verbatim. */
+  membershipRole: string;
+};
+
 export type OrgMembersData = {
   orgId: string;
   members: OrgMember[];
   addable: AddableWorker[];
+  /** Whether the CURRENT viewer is the registered owner — the only actor
+   *  `grant_org_manager` admits. Drives whether the control is offered. */
+  viewerIsRegisteredOwner: boolean;
+  governanceWithoutReviewer: GovernanceWithoutReviewer[];
 };
 
 function nameOf(p: { full_name: string | null; email: string | null } | null): string {
@@ -141,5 +165,43 @@ export async function getOrgMembersData(
     })
     .filter((x): x is AddableWorker => x !== null);
 
-  return { orgId, members, addable };
+  // R-4 GREEN: governance members who can see the queue but cannot confirm.
+  // Read under the membership SELECT policy (an active org member reads the
+  // organization's memberships); compared against the engagement rows read
+  // above. Bounded: an organization's managing memberships are a short list.
+  const reviewerProfileIds = new Set(
+    (ecRows ?? [])
+      .filter((r) => REVIEWER_SLUGS.has(String(r.relationship_slug ?? "")))
+      .map((r) => r.profile_id)
+      .filter((v): v is string => Boolean(v)),
+  );
+  const { data: membershipRows } = await supabase
+    .from("company_memberships")
+    .select("profile_id, role, profiles(full_name, email)")
+    .eq("organization_id", orgId)
+    .eq("status", "active")
+    .in("role", [...GOVERNANCE_ROLES])
+    .limit(100);
+  const governanceWithoutReviewer: GovernanceWithoutReviewer[] = (membershipRows ?? [])
+    .map((r) => {
+      const profileId = (r.profile_id as string | null) ?? null;
+      if (!profileId || reviewerProfileIds.has(profileId)) return null;
+      // The registered owner is never listed: ensure_org_owner_engagement
+      // gives them the owner engagement, and they are the grantor anyway.
+      if (org.ownerProfileId !== null && profileId === org.ownerProfileId) return null;
+      return {
+        profileId,
+        name: profName(r.profiles),
+        membershipRole: String(r.role ?? ""),
+      };
+    })
+    .filter((x): x is GovernanceWithoutReviewer => x !== null);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const viewerIsRegisteredOwner =
+    org.ownerProfileId !== null && user?.id === org.ownerProfileId;
+
+  return { orgId, members, addable, viewerIsRegisteredOwner, governanceWithoutReviewer };
 }

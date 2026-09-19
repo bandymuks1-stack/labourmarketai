@@ -7236,7 +7236,15 @@
       "collaborator": "Partner",
       "consultant": "Berater:in",
       "freelancer": "Freiberuflich",
-      "viewer": "Betrachter:in"
+      "viewer": "Betrachter:in",
+      "admin": "Administrator",
+      "external_manager": "Externer Manager"
+    },
+    "authority": {
+      "title": "Bestätigungsbefugnis",
+      "intro": "Diese Verwaltungsmitglieder sehen die Prüfwarteschlange, können Einträge aber noch nicht bestätigen — dafür ist eine Manager-Beziehung nötig, die nur der Eigentümer vergibt.",
+      "grant": "Bestätigungsbefugnis erteilen",
+      "granted": "Erteilt. Sie können jetzt Journaleinträge bestätigen."
     }
   },
   "services": {

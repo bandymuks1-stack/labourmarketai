@@ -196,7 +196,8 @@
       "reviewNotEnabled": "Die Überprüfung ist für diese Arbeitskraft noch nicht aktiviert.",
       "entrySuperseded": "Der Eintrag wurde bereits durch eine neuere Version ersetzt — diese Karte ist nicht mehr bearbeitbar und wird aus der Liste entfernt.",
       "entryDeleted": "Der Eintrag wurde gelöscht — diese Karte ist nicht mehr bearbeitbar und wird aus der Liste entfernt.",
-      "staleTerminalHint": "Es wurde nichts erfasst. Wenn die Mitarbeiterin oder der Mitarbeiter eine neuere Version gespeichert hat, erscheint sie als neue Karte im Posteingang."
+      "staleTerminalHint": "Es wurde nichts erfasst. Wenn die Mitarbeiterin oder der Mitarbeiter eine neuere Version gespeichert hat, erscheint sie als neue Karte im Posteingang.",
+      "noReviewerEngagement": "Sie sehen diesen Eintrag als Manager, aber zum Bestätigen ist eine Bestätigungsbefugnis nötig. Bitten Sie den Eigentümer der Organisation, sie auf der Seite Personen zu erteilen."
     },
     "showOriginal": "Original anzeigen",
     "skills": "Fähigkeiten",
