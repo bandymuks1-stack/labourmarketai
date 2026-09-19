@@ -85,7 +85,8 @@ jobs:
       # the runner. `mobile-marketing-nav` keeps its mobile-visitor coverage
       # locally; `landing-mobile-overflow` carries that actor in CI.
       #
-      # DELIBERATELY NOT INCLUDED: tests/e2e/pr-i-reality-landing.spec.ts.
+      # DELIBERATELY NOT INCLUDED: tests/e2e-archive/pr-i-reality-landing.spec.ts
+      # (moved out of the test directory 2026-09-19 — permanently red screenshot script).
       # It asserts three surfaces that exist NOWHERE in the product today
       # (`#conversation`, `#partners`, the `live-product-demo` testid), so it
       # is red for a reason nobody has decided yet — see
