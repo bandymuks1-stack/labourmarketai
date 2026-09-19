@@ -16667,7 +16667,17 @@
       "people": {
         "title": "Mensen en team",
         "subtitle": "Wie met u werkt, wie vrij is, wie aandacht nodig heeft — en hoe u mensen toevoegt.",
-        "summary": "{active} actief · {pending} uitnodigingen open · {members} leden · {review} beoordelen dagboeken"
+        "summary": "{active} actief · {pending} uitnodigingen open · {members} leden · {review} beoordelen dagboeken",
+        "booked": {
+          "title": "Geboekte mensen",
+          "intro": "Mensen die u rechtstreeks hebt geboekt. Een boeking is een echte werkrelatie, maar opent op zichzelf geen journaal voor beoordeling.",
+          "since": "Geboekt sinds {date}",
+          "unnamed": "Naam niet gedeeld",
+          "memberState": "Organisatielid — journaalbeoordeling wordt beheerd in het ledenpaneel hieronder.",
+          "notReviewableState": "Journaal nog niet te beoordelen: een boeking maakt geen werkcontext aan. Nodig deze persoon uit om als medewerker toe te treden — zodra hij of zij accepteert, bestaat de context en kunt u beoordeling inschakelen. U kunt die niet namens hem of haar aanmaken.",
+          "inviteExit": "Uitnodigen om als medewerker toe te treden",
+          "error": "De geboekte mensen konden nu niet worden gelezen. Dit betekent niet dat niemand geboekt is."
+        }
       },
       "needs": {
         "title": "Personeelsbehoeften",
