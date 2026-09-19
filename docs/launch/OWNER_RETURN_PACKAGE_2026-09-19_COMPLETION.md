@@ -846,8 +846,8 @@ not from the 2026-09-17 receipts.
 
 | | at window start (16:03 UTC) | at close |
 |---|---|---|
-| main | `3bc58f53` | `143cc6c7` (+ #1808 auto-merging) |
-| production build (`/api/health`) | `3bc58f53` | `143cc6c7`, ok, dub1, auth + db ok |
+| main | `3bc58f53` | `2781956b` (#1802 → `143cc6c7`, §O docs → `961b04fd`, #1808 → `2781956b`) |
+| production build (`/api/health`) | `3bc58f53` | `2781956b`, ok, dub1, auth + db ok (17:11 UTC) — both GREEN PRs PRODUCTION_DEPLOYED |
 | migration ledger | **297**, latest `20260919153945_usage_cost_trigger_search_path_v1` | **297** — nothing applied this window (by design: every RED stayed a draft) |
 | security advisors | ERROR 1 (`worker_absence_scheduling` definer view — documented load-bearing exception) · WARN: 9 anon SECDEF = the public preview set, 404 authenticated SECDEF (class), leaked-password protection OFF (owner setting) | unchanged |
 
@@ -872,9 +872,11 @@ New RED found while tracing the loops: **INSTITUTION EVIDENCE → COMPETENCY** �
 | PR | state | what |
 |---|---|---|
 | **#1802** | MERGED `143cc6c7`, **PRODUCTION_DEPLOYED** | map one tap from PASAULIS + honest map guards; voice retention copy (12 locales); R-5 no-op named; R-7/R-8 runbooks; retention matrix corrected |
-| **#1808** | auto-merge armed (CI running at close) | "Who is committed where" per person/per date on company planning (the last core planning step done in Excel); 44 px client accept/decline on the agency bridge |
+| **#1808** | MERGED `2781956b`, **PRODUCTION_DEPLOYED** | "Who is committed where" per person/per date on company planning (the last core planning step done in Excel); 44 px client accept/decline on the agency bridge |
 
 ### O4. GENUINE RED OWNER BATCH — ordered by impact, one sentence each
+
+CI at close: #1804, #1805, #1806, #1807 all green (quality · e2e-smoke · migration-safety); #1803 red on `quality` by design until the waiver number is added.
 
 1. **R-15 (#1805)** — "Apply R-15: close_demand_v1 / reopen_demand_v1 for creator, admin and has_org_demand_access colleagues — status only, UPDATE policy unchanged, with rollback."
 2. **R-14 (#1804)** — "Must proposition_consent.given = true before a commercial_handoffs row may be POSTed to the Nonstop door? YES → merge #1804. NO → close it; then a second, separate consent line on the interest form is the honest follow-up."
