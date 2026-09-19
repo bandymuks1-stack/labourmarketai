@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LabourMarket.ai — R7</title>
+<link rel="stylesheet" href="r7.css">
+</head>
+<body>
+<!--ARTIFACT-BODY-START-->
+<div id="app" data-view="entry" data-ctx="me">
+
+  <!-- ══ 3D world ground — visible under entry + world views ══ -->
+  <div id="worldLayer">
+    <canvas id="worldCanvas"></canvas>
+    <div id="worldGrade"></div>
+  </div>
+
+  <!-- ══ left rail ══ -->
+  <aside id="rail">
+    <div class="brand" data-go="entry" role="button" tabindex="0">
+      <span class="brand-mark">LM</span>
+      <span class="brand-word">LabourMarket<i>.ai</i></span>
+    </div>
+
+    <div class="ctx-switch" role="tablist" aria-label="Kontekstas">
+      <button class="ctx-btn is-on" data-ctx-btn="me" role="tab">Mano erdvė</button>
+      <button class="ctx-btn" data-ctx-btn="org" role="tab">Organizacija</button>
+    </div>
+
+    <nav class="nav" data-nav="me">
+      <button class="nav-it is-on" data-go="workspace"><span class="ic">◆</span>Erdvė</button>
+      <button class="nav-it" data-go="journal"><span class="ic">▤</span>Dienoraštis<b class="pin" id="pinJournal">3</b></button>
+      <button class="nav-it" data-go="identity"><span class="ic">✳</span>Tapatybė</button>
+      <button class="nav-it" data-go="opps"><span class="ic">◈</span>Kryptys<b class="pin pin-amber" id="pinOpps">2</b></button>
+      <button class="nav-it" data-go="world"><span class="ic">◉</span>Pasaulis</button>
+    </nav>
+
+    <nav class="nav" data-nav="org" hidden>
+      <button class="nav-it is-on" data-go="orgtoday"><span class="ic">◆</span>Šiandien</button>
+      <button class="nav-it" data-go="project"><span class="ic">▦</span>Objektai<b class="pin pin-rose">!</b></button>
+      <button class="nav-it" data-go="inquiry"><span class="ic">◈</span>Užklausos<b class="pin" id="pinInq">1</b></button>
+      <button class="nav-it" data-go="world"><span class="ic">◉</span>Pasaulis</button>
+    </nav>
+
+    <div class="rail-foot">
+      <button class="nav-it" id="bellBtn"><span class="ic">◔</span>Pranešimai<b class="pin pin-amber" id="pinBell">2</b></button>
+      <div class="user-chip" id="userChip">
+        <span class="ava" id="userAva">JV</span>
+        <span class="user-meta"><b id="userName">Jonas Vaitkus</b><i id="userSub">Sandėlys · Göteborg</i></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ stage ══ -->
+  <div id="stage">
+    <header id="topbar">
+      <div class="crumb" id="crumb"><b>Mano erdvė</b><span>›</span><em>Šiandien</em></div>
+      <div class="top-right">
+        <span class="live-dot" title="Rinkos duomenys">
+          <i></i><span id="liveTxt">Rinka gyva · 41 432 · atnaujinta 08-15</span>
+        </span>
+        <button class="chip-btn" id="provBtn">Šaltiniai</button>
+        <span class="clock" id="clock">14:02</span>
+      </div>
+    </header>
+
+    <main id="views">
+
+      <!-- ── 01 ENTRY ─────────────────────────────────────────────── -->
+      <section class="view is-on" data-v="entry">
+        <div class="entry-wrap">
+          <div class="entry-card">
+            <div class="entry-brand"><span class="brand-mark big">LM</span><h1>LabourMarket<i>.ai</i></h1></div>
+            <p class="entry-line">Gyvas darbo pasaulis. Tavo darbas tampa tavo įrodymais.</p>
+            <div class="entry-actions">
+              <button class="btn btn-amber" data-enter="me">Įeiti — Jonas <em>demo asmuo</em></button>
+              <button class="btn btn-ghost" data-enter="org">Organizacijos erdvė</button>
+            </div>
+          </div>
+          <div class="entry-ticker">
+            <span class="tick"><b>41 432</b> aktyvios darbo vietos · Švedija</span>
+            <span class="tick"><b>10 260</b> naujų per 7 d.</span>
+            <span class="tick"><b>7 782</b> darbdaviai</span>
+            <span class="tick dim">šaltinis: Arbetsförmedlingen (CC0) · 08-15 21:20</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 02 PERSONAL WORKSPACE ───────────────────────────────── -->
+      <section class="view" data-v="workspace">
+        <div class="ws-grid">
+          <div class="panel chat-panel">
+            <div class="panel-head">
+              <h2>Pokalbis</h2>
+              <span class="ai-state"><i></i>klauso konteksto</span>
+            </div>
+            <div class="chat-scroll" id="chatScroll"></div>
+            <div class="composer">
+              <button class="comp-ic" title="Nuotrauka">✚</button>
+              <input id="chatInput" type="text" placeholder="Papasakok, ką šiandien nuveikei…" autocomplete="off">
+              <button class="comp-ic" title="Balsu">●</button>
+              <button class="btn btn-amber btn-sm" id="chatSend">Siųsti</button>
+            </div>
+          </div>
+          <div class="ws-side">
+            <div class="panel">
+              <div class="panel-head"><h2>Šiandien</h2><span class="mono dim" id="wsDate">Rugpjūčio 16, sekm.</span></div>
+              <div class="week-strip" id="weekStrip"></div>
+              <div class="shift-row">
+                <span class="shift-time mono">07:00–15:30</span>
+                <span class="shift-what">Pamaina · Terminalas 3</span>
+                <span class="tag tag-ok">vyksta</span>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h2>Savaitės kontekstas</h2></div>
+              <div class="stat-row">
+                <div class="stat"><b class="mono" id="stEntries">9</b><span>įrašai</span></div>
+                <div class="stat"><b class="mono" id="stEv">5</b><span>su įrodymais</span></div>
+                <div class="stat"><b class="mono">4</b><span>gebėjimai augo</span></div>
+              </div>
+              <div class="ev-thumbs" id="evThumbs"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 03 WORK JOURNAL ─────────────────────────────────────── -->
+      <section class="view" data-v="journal">
+        <div class="jr-grid">
+          <div class="panel jr-days">
+            <div class="panel-head"><h2>Dienos</h2></div>
+            <div id="dayRail"></div>
+            <div class="jr-month" id="monthHeat"></div>
+          </div>
+          <div class="panel jr-stream">
+            <div class="panel-head">
+              <h2 id="jrDayTitle">Šiandien</h2>
+              <button class="btn btn-amber btn-sm" id="jrAdd">＋ Įrašas</button>
+            </div>
+            <div class="jr-compose" id="jrCompose" hidden>
+              <input id="jrTxt" type="text" placeholder="Kas padaryta? pvz.: sukrautos 6 paletės išvežimui">
+              <div class="jr-compose-row">
+                <button class="comp-ic" title="Nuotrauka">✚</button>
+                <span class="dim">kontekstas: Terminalas 3</span>
+                <button class="btn btn-amber btn-sm" id="jrSave">Įrašyti</button>
+              </div>
+            </div>
+            <div class="jr-scroll" id="jrStream"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 04 LIVING IDENTITY ──────────────────────────────────── -->
+      <section class="view" data-v="identity">
+        <div class="id-grid">
+          <div class="panel id-summary">
+            <div class="id-head">
+              <span class="ava big">JV</span>
+              <div><b>Jonas Vaitkus</b><i>Gyvoji tapatybė · kaupiama iš darbo įrašų</i></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat"><b class="mono">148</b><span>įrašai</span></div>
+              <div class="stat"><b class="mono">67</b><span>įrodymai</span></div>
+              <div class="stat"><b class="mono">3</b><span>kontekstai</span></div>
+            </div>
+            <div class="id-clusters" id="idClusters"></div>
+            <p class="foot-note">Ne CV — kiekvienas gebėjimas remiasi realiais įrašais ir įrodymais. Spausk mazgą.</p>
+          </div>
+          <div class="panel id-map-panel">
+            <div class="panel-head"><h2>Gebėjimų žemėlapis</h2><span class="dim">dydis = įrašų kiekis · šviesa = įrodymai</span></div>
+            <svg id="capMap" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 05 OPPORTUNITY DISCOVERY ────────────────────────────── -->
+      <section class="view" data-v="opps">
+        <div class="op-grid">
+          <div class="op-main">
+            <div class="op-ask panel">
+              <div class="op-q" id="opQuery">
+                <span class="ava sm">JV</span>
+                <p>Parodyk darbus Göteborge, kuriuose praverstų mano sandėlio patirtis.</p>
+              </div>
+              <div class="op-read" id="opRead">
+                <span class="tag tag-cyan">Göteborg</span>
+                <span class="tag tag-cyan">7 įrodyti sandėlio gebėjimai</span>
+                <span class="tag">klasifikuota rinkos dalis</span>
+              </div>
+              <div class="composer op-composer">
+                <input id="opInput" type="text" placeholder="Klausk kitaip… pvz.: o jei norėčiau vairuoti?" autocomplete="off">
+                <button class="btn btn-amber btn-sm" id="opSend">Ieškoti</button>
+              </div>
+            </div>
+            <div class="op-results" id="opResults"></div>
+          </div>
+          <div class="op-side panel">
+            <div class="panel-head"><h2>Kontekstas</h2></div>
+            <div class="geo-row" data-go="world"><b>Göteborg</b><span class="mono">3 078</span></div>
+            <div class="geo-row sub"><b>Västra Götaland</b><span class="mono">6 289</span></div>
+            <div class="geo-row sub"><b>Švedija</b><span class="mono">41 432</span></div>
+            <button class="btn btn-ghost btn-sm w100" data-go="world">Rodyti pasaulyje ◉</button>
+            <p class="foot-note">Skaičiai — aktyvios darbo vietos, 08-15. Kryptys rodomos pagal faktines sąsajas su tavo įrašais. Jokio balo.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 07 ORG TODAY ────────────────────────────────────────── -->
+      <section class="view" data-v="orgtoday">
+        <div class="ot-strip">
+          <div class="ot-stat"><b class="mono">12</b><span>žmonių pamainoje</span></div>
+          <div class="ot-stat"><b class="mono">3</b><span>objektai</span></div>
+          <div class="ot-stat"><b class="mono">1</b><span>aktyvi užklausa</span></div>
+          <div class="ot-stat is-alert" data-go="project"><b class="mono">−2</b><span>pajėgumo trūkumas</span></div>
+        </div>
+        <div class="ot-grid">
+          <div class="panel">
+            <div class="panel-head"><h2>Vyksta dabar</h2><span class="ai-state"><i></i>gyvas srautas</span></div>
+            <div class="ot-stream" id="orgStream"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Objektai</h2></div>
+            <div id="orgSites"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Žmonės</h2><span class="dim">pamainoje</span></div>
+            <div id="orgPeople"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 08 PROJECT / OBJECT ─────────────────────────────────── -->
+      <section class="view" data-v="project">
+        <div class="pj-head">
+          <div>
+            <h2 class="pj-title">Terminalo plėtra</h2>
+            <span class="dim">Ringön · Göteborg · iki XI.30</span>
+          </div>
+          <div class="pj-prog-wrap"><span class="mono dim">44 %</span><div class="pj-progress"><i style="width:44%"></i></div></div>
+        </div>
+        <div class="tabs" id="pjTabs">
+          <button class="tab is-on" data-tab="today">Šiandien</button>
+          <button class="tab" data-tab="plan">Planas</button>
+          <button class="tab" data-tab="people">Žmonės</button>
+          <button class="tab" data-tab="progress">Eiga</button>
+          <button class="tab tab-alert" data-tab="capacity">Pajėgumas <b>!</b></button>
+        </div>
+        <div class="pj-body">
+          <div class="pj-pane is-on" data-pane="today">
+            <button class="pj-alert" data-pj-tab="capacity">
+              <span class="tag tag-rose">pajėgumas</span>
+              Krovos komandoje trūksta 2 žmonių — Palečių tvarkymas 4/6, Šakinis krautuvas 3/4
+              <b>Žiūrėti →</b>
+            </button>
+            <div class="ot-stream" id="pjStream"></div>
+          </div>
+          <div class="pj-pane" data-pane="plan"><div class="week-grid" id="pjWeek"></div></div>
+          <div class="pj-pane" data-pane="people"><div id="pjPeople"></div></div>
+          <div class="pj-pane" data-pane="progress"><div class="ev-wall" id="pjWall"></div></div>
+          <div class="pj-pane" data-pane="capacity">
+            <div id="pjCap"></div>
+            <p class="foot-note">Pajėgumas = žmonės su įrodytu gebėjimu šiame objekte, palyginti su plano poreikiu.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 09/10 INQUIRY + DISCOVERY ───────────────────────────── -->
+      <section class="view" data-v="inquiry">
+        <div class="iq-grid">
+          <div class="panel iq-draft">
+            <div class="panel-head"><h2>Užklausa</h2><span class="tag" id="iqState">juodraštis</span></div>
+            <div class="iq-stepper" id="iqStepper">
+              <span class="step is-on">Juodraštis</span><span class="step">Aktyvi</span><span class="step">Atitikmenys</span>
+            </div>
+            <div class="iq-field"><label>Objektas</label><b>Terminalo plėtra · Ringön</b></div>
+            <div class="iq-field"><label>Laikotarpis</label><b>IX.1 – XI.30</b></div>
+            <div class="iq-field"><label>Reikia</label>
+              <div class="cap-chips"><span class="tag tag-amber">Palečių tvarkymas</span><span class="tag tag-amber">Šakinis krautuvas</span></div>
+            </div>
+            <div class="iq-field"><label>Kiekis</label><b>2 žmonės</b></div>
+            <p class="foot-note">Sudaryta iš objekto pajėgumo trūkumo — ne iš aprašymo.</p>
+            <button class="btn btn-amber w100" id="iqActivate">Aktyvuoti užklausą</button>
+          </div>
+          <div class="panel iq-results">
+            <div class="panel-head"><h2>Atitikmenys pagal faktus</h2><span class="dim" id="iqResHint">aktyvuok užklausą</span></div>
+            <div class="iq-market" id="iqMarket" hidden>
+              <b>Rinkos kontekstas</b>
+              <p>Göteborge dabar <b class="mono">98</b> aktyvūs sandėlio darbuotojų skelbimai iš <b class="mono">40</b> darbdavių — konkurencija dėl tų pačių žmonių yra reali.</p>
+            </div>
+            <div id="iqSupply" class="iq-supply is-idle"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 11 LIVING WORLD ─────────────────────────────────────── -->
+      <section class="view" data-v="world">
+        <div class="wl-hud">
+          <div class="wl-levels panel-glass" id="wlLevels">
+            <button class="wl-lv is-on" data-lv="0"><b>Švedija</b><span class="mono">41 432</span></button>
+            <button class="wl-lv" data-lv="1"><b>Västra Götaland</b><span class="mono">6 289</span></button>
+            <button class="wl-lv" data-lv="2"><b>Göteborg</b><span class="mono">3 078</span></button>
+          </div>
+          <div class="wl-info panel-glass" id="wlInfo"></div>
+        </div>
+        <div class="wl-enter" id="wlEnter" hidden>
+          <button class="btn btn-amber" id="wlEnterBtn">Atidaryti Göteborg kryptis →</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- mobile tab bar -->
+    <nav id="tabbar">
+      <button class="tb is-on" data-go="workspace"><span class="ic">◆</span>Erdvė</button>
+      <button class="tb" data-go="journal"><span class="ic">▤</span>Žurnalas</button>
+      <button class="tb" data-go="opps"><span class="ic">◈</span>Kryptys</button>
+      <button class="tb" data-go="orgtoday"><span class="ic">▦</span>Org.</button>
+      <button class="tb" data-go="world"><span class="ic">◉</span>Pasaulis</button>
+    </nav>
+  </div>
+
+  <!-- ══ contextual drawer ══ -->
+  <aside id="drawer" aria-hidden="true">
+    <div class="dr-head"><b id="drTitle">—</b><button class="dr-close" id="drClose">✕</button></div>
+    <div class="dr-body" id="drBody"></div>
+  </aside>
+  <div id="drawerScrim"></div>
+
+  <div id="toasts"></div>
+</div>
+<!--ARTIFACT-BODY-END-->
+<script src="r7-images.js"></script>
+<script src="../assets/world-data.js"></script>
+<script src="../assets/world3d.js"></script>
+<script src="r7-data.js"></script>
+<script src="r7.js"></script>
+</body>
+</html>

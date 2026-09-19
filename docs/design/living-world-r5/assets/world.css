@@ -1,0 +1,494 @@
+/* ============================================================================
+   Living Opportunity World R5 — shared world stylesheet.
+
+   ONE camera, ONE light. Every prototype that loads this file inherits the
+   same grade, the same motion law and the same data-honesty chrome, so the
+   flagship and the second domain read as the same world rather than as two
+   designs.
+
+   Motion law: nothing pulses, nothing bounces, nothing glows. The only thing
+   that moves is the CAMERA (transform) and the atmosphere (opacity).
+   ========================================================================= */
+
+:root {
+  /* ---- ONE LIGHT ------------------------------------------------------- */
+  /* A single Nordic morning key. Every photograph is graded toward it; no
+     scene may introduce a second colour temperature. "Dark = premium" is
+     banned — the world's default state is bright. */
+  --key-warm: 34 78% 62%;      /* low sun */
+  --key-cool: 205 42% 74%;     /* sea-reflected fill */
+  --air: 202 30% 92%;          /* atmospheric haze */
+  --ground: 28 14% 16%;        /* wet stone / shadow */
+
+  --paper: #f6f3ee;
+  --ink: #1a1714;
+  --ink-soft: #55504a;
+  --rule: #d9d2c7;
+  --accent: #9a4a24;           /* oxide — Swedish work-building red, muted */
+
+  --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype",
+    Palatino, Georgia, serif;
+  --font-text: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --lower-third: clamp(1rem, 4vh, 3rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: auto; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img { max-width: 100%; display: block; }
+
+/* R&D ribbon — every page carries it, always. --------------------------- */
+.rd-ribbon {
+  position: fixed;
+  z-index: 60;
+  top: 0; left: 0;
+  padding: 0.35rem 0.9rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  border-bottom-right-radius: 3px;
+}
+
+.skip-link {
+  position: fixed; z-index: 70; top: 0.4rem; left: 50%;
+  transform: translate(-50%, -160%);
+  background: var(--ink); color: var(--paper);
+  padding: 0.55rem 1rem; border-radius: 4px;
+  font-size: 0.85rem; text-decoration: none;
+  transition: transform 120ms ease;
+}
+.skip-link:focus { transform: translate(-50%, 0); }
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   THE CAMERA
+   A fixed stage holds every plate. Scroll moves the camera through a nested
+   zoom stack: plate N grows past the frame while plate N+1 rises from deep,
+   so the push reads as ONE continuous move rather than a slideshow.
+   ========================================================================== */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: hsl(var(--air));
+  z-index: 0;
+  perspective: 1400px;
+  perspective-origin: 50% 46%;
+}
+
+/* The 3D landscape. Real coastlines, relief driven by live counts. */
+.world-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: opacity 700ms ease;
+}
+.stage.no-world .world-canvas { display: none; }
+
+/* Photographic acts live in the same perspective volume as the world, so a
+   plate DOLLIES toward the camera rather than scaling flat. */
+.photo-layer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+
+/* The scroll track that drives the camera. Height = beats x viewport. */
+.track { position: relative; z-index: 1; pointer-events: none; }
+
+.plate {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+  transform: scale(1);
+  transform-origin: 50% 50%;
+}
+
+.plate img,
+.plate .plate-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* ---- THE GRADE ---------------------------------------------------------
+     One pass over every photograph so twelve sources read as one shoot:
+     slight desaturation, lifted blacks, warm bias. Applied here and nowhere
+     else — a per-image filter would reintroduce the collage. */
+  filter: saturate(0.82) contrast(1.04) brightness(1.02) sepia(0.1);
+}
+
+/* Atmospheric depth: the further the plate sits in the stack, the more air
+   is between it and the camera. Set per plate via --haze. */
+.plate::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom,
+      hsl(var(--key-cool) / calc(var(--haze, 0.1) * 0.9)) 0%,
+      transparent 42%),
+    linear-gradient(to top,
+      hsl(var(--ground) / 0.5) 0%,
+      transparent 55%),
+    radial-gradient(120% 90% at 22% 8%,
+      hsl(var(--key-warm) / 0.24) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   LOWER THIRD — data appears when it is needed, and leaves.
+   WORLD first, ACTIVITY second, CONTEXT third, DATA fourth, CONTROLS last.
+   ========================================================================== */
+
+.beat-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Lower third: full-bleed scrim so there is never a floating rectangle,
+   with the text held to a readable measure inside it. */
+.beat {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  will-change: opacity, transform;
+  background: linear-gradient(
+    to top,
+    hsl(var(--ground) / 0.86) 0%,
+    hsl(var(--ground) / 0.58) 40%,
+    hsl(var(--ground) / 0) 100%
+  );
+  padding: 4.5rem var(--lower-third) var(--lower-third);
+}
+
+.beat-inner {
+  color: #f6f2ec;
+  max-width: 44rem;
+}
+.beat-inner .t { color: hsl(var(--key-warm)); }
+.beat-inner h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 3.5vw, 2.7rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.55rem;
+  color: #fff;
+}
+.beat-inner p { color: #ded6cb; margin: 0 0 0.6rem; }
+.beat-inner .facts { border-top-color: #ffffff2e; }
+.beat-inner .facts b { color: #fff; }
+.beat-inner .facts span { color: #b9b0a4; }
+.beat-inner .source-note { color: #a99f92; }
+
+.beat-scale {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--key-warm));
+  margin: 0 0 0.5rem;
+}
+
+.beat-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+  line-height: 1.08;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.beat-text {
+  margin: 0;
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  color: #ded6cb;
+  max-width: 34rem;
+}
+
+/* Real-data strip. Every figure here is a live count from the snapshot. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.6rem;
+  margin: 0.95rem 0 0;
+  padding: 0.7rem 0 0;
+  border-top: 1px solid #ffffff26;
+  list-style: none;
+}
+.facts li { margin: 0.15rem 0; }
+.facts b {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.02rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+.facts span {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #b9b0a4;
+}
+
+.source-note {
+  margin: 0.8rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  color: #a99f92;
+}
+
+/* Progress — CONTROLS last, and quiet. */
+.camera-rail {
+  position: fixed;
+  z-index: 30;
+  right: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  pointer-events: auto;
+}
+.camera-rail button {
+  width: 9px; height: 9px; padding: 0;
+  border: 1px solid #ffffff8c;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background 200ms ease, transform 200ms ease;
+}
+.camera-rail button[aria-current="true"] {
+  background: hsl(var(--key-warm));
+  border-color: hsl(var(--key-warm));
+  transform: scale(1.25);
+}
+
+/* ==========================================================================
+   THE STATIC WORLD — L0 / reduced motion / no JS.
+   Not a degraded copy: the same beats, composed as an editorial sequence.
+   Nothing is available ONLY in animation.
+   ========================================================================== */
+
+.static-world {
+  position: relative;
+  z-index: 40;
+  background: var(--paper);
+  padding: clamp(2rem, 6vw, 5rem) clamp(1.1rem, 5vw, 4rem)
+    clamp(3rem, 8vw, 7rem);
+}
+
+.static-world > header { max-width: 46rem; margin: 0 0 clamp(2rem, 5vw, 4rem); }
+.static-world h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.7rem;
+}
+.static-world .lede { font-size: 1.05rem; color: var(--ink-soft); margin: 0; max-width: 36rem; }
+
+.static-beat {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(1.2rem, 3vw, 2.6rem);
+  align-items: start;
+  padding: clamp(1.4rem, 3vw, 2.4rem) 0;
+  border-top: 1px solid var(--rule);
+}
+.static-beat figure { margin: 0; }
+.static-beat img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 2px; filter: saturate(0.82) contrast(1.04) sepia(0.1); }
+.static-beat h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+  line-height: 1.12;
+  margin: 0 0 0.5rem;
+}
+.static-beat .t {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.4rem;
+}
+.static-beat p { margin: 0 0 0.7rem; color: var(--ink-soft); }
+.static-beat .facts { border-top-color: var(--rule); }
+.static-beat .facts b { color: var(--ink); }
+.static-beat .facts span { color: var(--ink-soft); }
+.static-beat .source-note { color: var(--ink-soft); }
+
+/* ==========================================================================
+   HONEST DATA CHROME — used by both prototypes.
+   ========================================================================== */
+
+.basis {
+  border: 1px solid var(--rule);
+  background: #fffdfa;
+  border-radius: 3px;
+  padding: 1rem 1.1rem;
+  margin: 1.1rem 0 0;
+}
+.basis h3 {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 0.7rem;
+  font-weight: 500;
+}
+.basis-row { display: flex; align-items: baseline; gap: 0.6rem; margin: 0 0 0.55rem; }
+.basis-count { font-family: var(--font-mono); font-size: 1.15rem; color: var(--ink); }
+.basis-label { font-size: 0.86rem; color: var(--ink-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 0.35rem; list-style: none; margin: 0; padding: 0; }
+.chips li {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 2px;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  background: #fff;
+}
+.chips li.is-covered { border-color: #2f6b4a55; background: #f0f6f2; color: #2c5a41; }
+.chips li.is-new { border-color: var(--accent); background: #fbf1ec; color: var(--accent); }
+.chips li.is-missing { border-style: dashed; color: #8a8078; }
+
+.tier {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.16rem 0.42rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--ink-soft);
+}
+
+.verdict {
+  border-left: 3px solid var(--rule);
+  padding: 0.55rem 0 0.55rem 0.9rem;
+  margin: 0 0 0.8rem;
+}
+.verdict-kind {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+.verdict-channel { font-size: 0.78rem; color: var(--ink-soft); font-family: var(--font-mono); }
+.verdict-why { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--ink-soft); }
+.verdict.is-check { border-left-color: var(--accent); }
+.verdict.is-check .verdict-kind { color: var(--accent); }
+
+.footnote {
+  max-width: 46rem;
+  margin: clamp(2rem, 5vw, 4rem) 0 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.footnote h2 {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 0.6rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.footnote p { margin: 0 0 0.6rem; }
+.footnote a { color: var(--accent); }
+
+/* ==========================================================================
+   MOBILE — its own direction, not a desktop crop.
+   Vertical depth: the camera PUSHES IN, never pans. One scale per viewport.
+   ========================================================================== */
+
+@media (max-width: 760px) {
+  /* Mobile carries a stronger scrim: one column, text over a bright frame,
+     no room for a subtle gradient to fail. */
+  .beat {
+    padding: 6rem 1.15rem 1.6rem;
+    background: linear-gradient(
+      to top,
+      hsl(var(--ground) / 0.94) 0%,
+      hsl(var(--ground) / 0.86) 34%,
+      hsl(var(--ground) / 0.52) 62%,
+      hsl(var(--ground) / 0) 100%
+    );
+  }
+  .beat-inner h2 { font-size: 1.42rem; }
+  .beat-inner p { font-size: 0.92rem; }
+  .facts { gap: 0 1.1rem; }
+  .facts b { font-size: 0.94rem; }
+  .camera-rail { right: 0.5rem; gap: 0.4rem; }
+  .static-beat { grid-template-columns: 1fr; }
+  .static-beat img { aspect-ratio: 4 / 3; }
+}
+
+/* ==========================================================================
+   REDUCED MOTION — the camera stops. The world does not disappear.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .stage, .beat-layer, .camera-rail, .track { display: none !important; }
+  .static-world { display: block !important; }
+}
+
+/* No JS: same outcome as reduced motion. */
+html:not(.js) .stage,
+html:not(.js) .beat-layer,
+html:not(.js) .camera-rail,
+html:not(.js) .track { display: none; }
+html:not(.js) .static-world { display: block; }
+
+/* When the camera IS running, the static world stays in the DOM for screen
+   readers and for the freeze-frame print, but is visually replaced. */
+html.js .static-world[data-camera-active="true"] {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
