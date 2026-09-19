@@ -65,6 +65,9 @@ export default async function NetworkPage({
     /** Pre-selects the relationship in the invite panel (e.g. `student` from
      *  the institution's "Invite learners"); validated inside the panel. */
     relationship?: string;
+    /** `1` opens the invite panel on arrival — the exit the empty search and
+     *  the empty relationships list offer (no preset, nothing pre-selected). */
+    invite?: string;
     wf?: string;
     req?: string;
     reqStatus?: string;
@@ -80,8 +83,11 @@ export default async function NetworkPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, relationship, wf, req, reqStatus, reqType, rev, dec, area } =
+  const { q, type, org, project, relationship, invite, wf, req, reqStatus, reqType, rev, dec, area } =
     await searchParams;
+  // The invitation door, for the two empty states below. The search text is
+  // kept so the reader lands back on the same screen with the panel open.
+  const inviteHref = `/dashboard/network?${q ? `q=${encodeURIComponent(q)}&` : ""}invite=1#network-invite` as "/dashboard";
   // Approvals-area outcome notice (Workflow & Approval Engine v1) —
   // validated against the closed notice vocabulary, never rendered raw.
   const workflowNotice = wf && isWorkflowNotice(wf) ? wf : null;
@@ -412,7 +418,16 @@ export default async function NetworkPage({
             )}
             {search.people.length === 0 && search.companies.length === 0 ? (
               <p className="text-xs text-text-muted" data-testid="network-search-empty">
-                {t("search.empty")}
+                {t("search.empty")}{" "}
+                {/* Zero results is not a dead end: the person who is not on the
+                    platform (or not discoverable) is reached by invitation. */}
+                <Link
+                  href={inviteHref}
+                  className="font-medium text-brand-blue underline-offset-2 hover:underline"
+                  data-testid="network-search-empty-cta"
+                >
+                  {t("search.emptyCta")}
+                </Link>
               </p>
             ) : (
               <>
@@ -479,17 +494,21 @@ export default async function NetworkPage({
         )}
       </section>
 
-      {/* The canonical Pakviesti action. */}
-      <InvitePanel
-        locale={locale}
-        organizations={organizationsWithCapabilities}
-        projects={projects.map((p) => ({ id: p.id, title: p.title }))}
-        demands={myDemands}
-        defaultType={type}
-        defaultOrganizationId={org}
-        defaultProjectId={project}
-        defaultRelationshipSlug={relationship}
-      />
+      {/* The canonical Pakviesti action. `id` is the anchor the two empty
+          states above link to; `?invite=1` opens it on arrival. */}
+      <div id="network-invite">
+        <InvitePanel
+          locale={locale}
+          organizations={organizationsWithCapabilities}
+          projects={projects.map((p) => ({ id: p.id, title: p.title }))}
+          demands={myDemands}
+          defaultType={type}
+          defaultOrganizationId={org}
+          defaultProjectId={project}
+          defaultRelationshipSlug={relationship}
+          defaultOpen={invite === "1"}
+        />
+      </div>
 
       {/* My sent invitations with the real lifecycle. */}
       <section className="flex flex-col gap-2" data-testid="network-sent">
@@ -636,7 +655,16 @@ export default async function NetworkPage({
           </p>
         )}
         {engagements.length === 0 ? (
-          <p className="text-xs text-text-muted">{t("relationships.empty")}</p>
+          <p className="text-xs text-text-muted" data-testid="network-relationships-empty">
+            {t("relationships.empty")}{" "}
+            <Link
+              href={inviteHref}
+              className="font-medium text-brand-blue underline-offset-2 hover:underline"
+              data-testid="network-relationships-empty-cta"
+            >
+              {t("relationships.emptyCta")}
+            </Link>
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {engagements.map((e) => (

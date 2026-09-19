@@ -37,6 +37,24 @@ describe("empty states lead somewhere", () => {
     for (const l of LOCALES) expect(at(msgs[l], "marketExplanation.noneOpenCta"), l).toBeTruthy();
   });
 
+  it("the network's empty search and empty relationships list open the invitation", () => {
+    // Window 4 (2026-09-19): the last two dead ends of the B4 list. Both
+    // link the SAME door — the invite panel on the same page, opened on
+    // arrival by `?invite=1` — never a second invitation surface.
+    const src = read("app/[locale]/dashboard/network/page.tsx");
+    expect(src).toMatch(/data-testid="network-search-empty-cta"/);
+    expect(src).toMatch(/data-testid="network-relationships-empty-cta"/);
+    expect(src).toMatch(/invite=1#network-invite/);
+    expect(src).toMatch(/<div id="network-invite">/);
+    expect(src).toMatch(/defaultOpen=\{invite === "1"\}/);
+    const panel = read("components/app/invite-panel.tsx");
+    expect(panel).toMatch(/defaultOpen \|\| defaultType \|\| defaultOrganizationId \|\| defaultProjectId/);
+    for (const l of LOCALES) {
+      expect(at(msgs[l], "network.search.emptyCta"), l).toBeTruthy();
+      expect(at(msgs[l], "network.relationships.emptyCta"), l).toBeTruthy();
+    }
+  });
+
   it("the team-roster card links the invitation it describes", () => {
     const src = read("components/app/team-roster-empty-state.tsx");
     expect(src).toMatch(/href="\/dashboard\/network\?type=join_as_employee"/);

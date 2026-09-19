@@ -11135,6 +11135,7 @@
       "placeholder": "Vardas, įmonė, miestas…",
       "submit": "Ieškoti",
       "empty": "Nieko nerasta.",
+      "emptyCta": "Dar nėra? Išsiųskite pakvietimą el. paštu.",
       "orgType": {
         "company": "Įmonė",
         "agency": "Agentūra",
@@ -11192,6 +11193,7 @@
     "relationships": {
       "title": "Aktyvūs ryšiai",
       "empty": "Aktyvių darbo ryšių kol kas nėra. Čia atsiras priimti pakvietimai ir patvirtinti darbo ryšiai.",
+      "emptyCta": "Išsiųsti pakvietimą",
       "noOrg": "Asmeninis ryšys — nesusietas su įmone",
       "slug": {
         "employee": "Darbuotojas",

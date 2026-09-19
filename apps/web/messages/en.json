@@ -11135,6 +11135,7 @@
       "placeholder": "Name, company, city…",
       "submit": "Search",
       "empty": "Nothing found.",
+      "emptyCta": "Not here yet? Send them an invitation by e-mail.",
       "orgType": {
         "company": "Company",
         "agency": "Agency",
@@ -11192,6 +11193,7 @@
     "relationships": {
       "title": "Active relationships",
       "empty": "No active work relationships yet. Accepted invitations and confirmed work relationships appear here.",
+      "emptyCta": "Send an invitation",
       "noOrg": "Personal relationship — not linked to a company",
       "slug": {
         "employee": "Employee",

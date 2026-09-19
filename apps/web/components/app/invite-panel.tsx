@@ -50,6 +50,7 @@ export function InvitePanel({
   defaultOrganizationId,
   defaultProjectId,
   defaultRelationshipSlug,
+  defaultOpen = false,
 }: {
   locale: string;
   /**
@@ -72,6 +73,12 @@ export function InvitePanel({
   defaultProjectId?: string;
   /** Deep-link preset for the relationship control (`?relationship=student`). */
   defaultRelationshipSlug?: string;
+  /**
+   * Open on arrival without pre-selecting anything (`?invite=1`) — the exit
+   * an empty search or an empty relationships list offers. Presets still open
+   * the panel on their own; this only adds the case with no preset.
+   */
+  defaultOpen?: boolean;
 }) {
   const t = useTranslations("network.invite");
   // The ONE localized relationship vocabulary — the same words the CV prints.
@@ -94,7 +101,7 @@ export function InvitePanel({
    * behind its own heading.
    */
   const [open, setOpen] = useState(
-    Boolean(defaultType || defaultOrganizationId || defaultProjectId),
+    Boolean(defaultOpen || defaultType || defaultOrganizationId || defaultProjectId),
   );
   const [type, setType] = useState<InvitationType>(
     (INVITATION_TYPES as readonly string[]).includes(defaultType ?? "")
