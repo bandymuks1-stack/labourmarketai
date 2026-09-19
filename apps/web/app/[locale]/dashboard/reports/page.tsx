@@ -722,7 +722,7 @@ function JournalWindowDetail({
             href={`/dashboard/reports?journalWindow=${key}#journal` as "/dashboard"}
             aria-current={key === windowKey ? "page" : undefined}
             data-testid={`journal-window-link-${key}`}
-            className={`inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+            className={`inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
               key === windowKey
                 ? "border-brand-blue bg-brand-blue/10 font-semibold text-brand-blue"
                 : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"

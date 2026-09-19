@@ -23,7 +23,7 @@ export function NavLinkPending({ className }: { className?: string }) {
       aria-label="Loading"
       data-testid="nav-link-pending"
       className={cn(
-        "inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-r-transparent align-middle",
+        "inline-block h-3 w-3 animate-spin motion-reduce:animate-none rounded-full border-2 border-current border-r-transparent align-middle",
         className,
       )}
     />

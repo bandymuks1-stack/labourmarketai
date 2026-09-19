@@ -38,7 +38,7 @@ export function DashboardTabs({
   const items = isAdmin && !adminUiHidden ? [...primary, ADMIN_NAV_ITEM] : primary;
   return (
     <nav
-      aria-label="Dashboard sections"
+      aria-label={t("common.dashboardSections")}
       className={cn("flex items-center gap-1", className)}
     >
       {items.map(({ id, href, tabLabelKey }) => {

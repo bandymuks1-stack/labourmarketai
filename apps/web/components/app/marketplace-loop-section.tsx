@@ -212,6 +212,7 @@ function RequestAgainButton({
         value={message}
         maxLength={2000}
         rows={3}
+        aria-label={labels.requestAgainNote}
         onChange={(e) => setMessage(e.target.value)}
         className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
       />

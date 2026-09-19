@@ -50,7 +50,7 @@ import { createUtcFormatter } from "@/lib/time/display";
 export const dynamic = "force-dynamic";
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 
 /** Accessible risk tone — always paired with a text label. */
 const RISK_TONE: Record<GapRiskLevel, string> = {
@@ -239,7 +239,7 @@ export default async function CompanyWorkforcePlanningPage({
    *  surface; the demand form opens through the audited server action. */
   function EntryChoices() {
     const linkClass =
-      "inline-flex min-h-9 items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+      "inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
     const links: { key: string; href: string }[] = [
       { key: "project", href: "/dashboard/company/projects/new" },
       { key: "candidates", href: "/dashboard/candidates" },

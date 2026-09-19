@@ -425,6 +425,7 @@ function ChecklistEditor({
         <input
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
+          aria-label={labels.checklist.addPlaceholder}
           placeholder={labels.checklist.addPlaceholder}
           className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 text-meta text-text-primary"
           data-testid="ops-checklist-add-input"

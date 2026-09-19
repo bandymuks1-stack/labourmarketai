@@ -53,7 +53,7 @@ import {
  * (`lib/commercial/handoff-dispatch.ts`, cron-gated) posts queued rows to the
  * commercial partner's durable receiver. Whether a row with
  * `proposition_consent.given = false` may be dispatched at all is an owner
- * rule recorded in docs/integrations/NONSTOP_COMMERCIAL_HANDOFF_V1.md — this
+ * rule recorded with the commercial handoff v1 integration doc — this
  * function only records the answer; it never decides for the person.
  *
  * CONSENT IS SEPARATE (owner rule §17): interest is not permission to be

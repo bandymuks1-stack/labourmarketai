@@ -161,6 +161,7 @@ export function ScoutingShortlistButtons({
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
+            aria-label={reasonMode ? labels.note.reasonTitle : labels.note.label}
             maxLength={SHORTLIST_NOTE_MAX}
             rows={3}
             placeholder={reasonMode ? labels.note.reasonPlaceholder : labels.note.placeholder}

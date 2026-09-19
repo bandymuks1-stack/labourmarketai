@@ -132,7 +132,15 @@ export const getActiveOrganizationContext = cache(
   // single-org default then overruled the person's own choice. The resolvers
   // understand the sentinel now; deciding it here would put the same rule in
   // two places and let them drift apart.
-  const storedId = sessionPointer ?? dbPointer;
+  // NEWEST CHOICE WINS ACROSS CHANNELS (2026-09-19). A switch made through
+  // the MCP door (`context.switch`) writes only the DB pointer — it cannot
+  // set this browser's cookie — so a cookie-first read shadowed it in any
+  // open web session until the person switched again here. An organization
+  // id in the DB pointer is therefore authoritative (both channels write it
+  // on every organization switch); the cookie decides only when the DB
+  // pointer is null, where it alone can carry the "I chose personal"
+  // sentinel (D-20) that a null cannot.
+  const storedId = dbPointer ?? sessionPointer;
 
   const activeOrganizationId = resolveActiveOrganizationId(
     owned.organizations,
