@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { emitJournalEntryConfirmedNotification } from "@/lib/notifications/event-emitters";
 import { applyApprovalSkillEffects } from "./confirm-actions";
 import { confirmEntryAndVerifySkills } from "@/lib/operations/org-membership";
 import {
@@ -125,6 +126,10 @@ export async function reviewJournalEntry(
         confirmerId: user.id,
       });
     }
+    // R-6 (v9): the worker is told their work was confirmed — durable row,
+    // bell + activity feed, href to the journal. Inert (no row, no error)
+    // while the v9 CHECK is not applied; the confirmation already stands.
+    await emitJournalEntryConfirmedNotification({ entryId, actorProfileId: user.id });
   }
 
   revalidatePath(`/${locale}/dashboard/inbox`);

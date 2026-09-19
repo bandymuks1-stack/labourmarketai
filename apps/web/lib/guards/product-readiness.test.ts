@@ -2589,7 +2589,12 @@ describe("no migration files added by this sprint", () => {
 // hygiene only; no body / grant / policy / row change). Listed in the owner
 // packet → kept on the human gate; owner-approved and APPLIED 2026-09-19
 // (ledger 20260919153945), proconfig read back on both (PR #1797). RECOUNTED: 296.
-const SPRINT_BASELINE = 296;
+// Bumped 296 -> 297 for 20260919200000_notification_events_v9_journal_confirmed
+// (R-6: v9 of the two notification_events CHECKs — ONE event type
+// `journal_entry_confirmed`, ONE entity `journal_entry`; the worker is told
+// their work was confirmed). RED (owner-gated CHECK widening), PREPARED
+// 2026-09-19, NOT applied. RECOUNTED: 297.
+const SPRINT_BASELINE = 297;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
