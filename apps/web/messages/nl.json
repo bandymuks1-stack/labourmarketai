@@ -6227,7 +6227,7 @@
         "city": "Stad / plaats",
         "country": "Land",
         "countryNone": "Niet ingesteld",
-        "startDate": "Start",
+        "startDate": "Begin",
         "endDate": "Einde",
         "save": "Feiten opslaan",
         "hint": "Data voeden de kalenderband en de boekingsoverlapcontrole. Een plaats is tekst — nooit een coördinaat.",
