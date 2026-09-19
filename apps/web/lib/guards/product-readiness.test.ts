@@ -2589,7 +2589,12 @@ describe("no migration files added by this sprint", () => {
 // hygiene only; no body / grant / policy / row change). Listed in the owner
 // packet → kept on the human gate; owner-approved and APPLIED 2026-09-19
 // (ledger 20260919153945), proconfig read back on both (PR #1797). RECOUNTED: 296.
-const SPRINT_BASELINE = 296;
+// Bumped 296 -> 297 for 20260919210000_relationship_journal_reviewable_v1
+// (INSTITUTION loop, EVIDENCE → COMPETENCY: the rule "which relationships may
+// be opened to journal review" becomes DATA on relationship_types, seeded for
+// employee + student; set_engagement_journal_review reads it). RED (column +
+// SECDEF redefinition), PREPARED 2026-09-19, NOT applied. RECOUNTED: 297.
+const SPRINT_BASELINE = 297;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
