@@ -810,3 +810,24 @@ Security / consent receipt now: **CRITICAL 0 · HIGH 0 · R-1, R-16 CLOSED · R-
 A roster relationship can now be created only by the worker's acceptance
 (R-1), can no longer be manufactured through the membership RPC (R-16), and
 can be ended by the worker or the owner without deleting history (R-9).
+
+### N13. R-13 — APPLIED (owner sentence received 2026-09-19 ~15:38 UTC) — the RED stack is empty
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | both trigger functions `proconfig NULL`, SECURITY INVOKER, one trigger each; ledger 296, no row of this name; branch 1 behind main (docs only) |
+| apply | Supabase MCP `apply_migration`, name `usage_cost_trigger_search_path_v1` → **ledger `20260919153945`, 297 applied** |
+| readback | `proconfig = {search_path=public}` on both; still SECURITY INVOKER; still one trigger each; bodies still `raise exception` |
+| contract (live, rolled back; 65 rows, nothing changed) | UPDATE → `42501 … UPDATE is not permitted` · DELETE → `42501 … DELETE is not permitted` · TRUNCATE → `42501 … TRUNCATE is not permitted` — the append-only ledger behaves exactly as before |
+| repo | markers flipped, ledger entry (file sha256 `cb42b983bff8fcd093c247cbb66eec5621aab411ee2c512ddf5867379d5768d7`), #1797 ready, squash-merged **`c6ba6a09`** after green CI |
+
+### N14. Close of the RED queue — 2026-09-19
+
+| | |
+|---|---|
+| applied today, in order | R-1 `20260919104526` (window 3) · R-16 `20260919143247` · R-3 `20260919145731` · R-9 `20260919151920` · R-13 `20260919153945` |
+| ledger | **297 applied**; every entry above carries its `docs/APPLIED_LEDGER.md` row with the repo-file sha256, the owner sentence, the readback and the rolled-back contract |
+| drafts left from the 2026-09-19 packet | none — R-2 and R-4 closed as superseded (§N3, §N4); R-5, R-6, R-7, R-8, R-10, R-11, R-12, R-14, R-15 remain unprepared packets exactly as §J lists them |
+| security receipt | **CRITICAL 0 · HIGH 0**; advisor WARN for R-13 gone; MEDIUM/LOW owner-held items (M3, L3–L7) unchanged — SECURITY_COMPLETE is still not declared for that reason |
+| production | build = the last merge (see §N13); `/api/health` ok |
+| human walk additions | **Donatas:** /dashboard/projects/562c9c3e/operations → the facts form (country, dates) in the manage strip; /dashboard/profile → "My teams — I no longer work here" beside the history withdrawal; /dashboard/company/people → "Remove from the roster" on each roster row. **Ramūnas:** the same two roster controls on Nonstop's people page and his own profile. |
