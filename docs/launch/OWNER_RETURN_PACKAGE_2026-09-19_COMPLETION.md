@@ -112,8 +112,10 @@ rows, 99 970 active public vacancies. `matches`, `match_actions`,
 - Post-approval skill-confidence recompute runs under the manager's client
   against owner-only `worker_skills` RLS → silent zero-row update (RED, R-5:
   needs the recompute inside the definer RPC).
-- Skill recognition reject captures no reason; `learning_signals` has zero
-  writers (BUILT_NOT_CONNECTED). GREEN_MISSING, not done.
+- Skill recognition reject captured no reason and `learning_signals` had
+  zero writers (BUILT_NOT_CONNECTED). GREEN, fixed in the follow-up PR
+  #1790 (merged 2026-09-19, squash `98bbefc7`): both worker decisions append an observation, the saved-entry card
+  offers an optional "why not?".
 - Notifications: every emitter has a caller and the service_role grant is
   applied (memory said otherwise — corrected). MISSING event types: journal
   confirmation, new human message (both need the `notification_events`
