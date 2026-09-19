@@ -1800,6 +1800,7 @@
       "opportunityType": "Type"
     },
     "scoutLink": "Matched workers & interest for this inquiry",
+    "repeatLink": "Repeat this inquiry (dates and status start fresh)",
     "syntheticTitle": {
       "hiringWorkers": "Hiring workers",
       "agencyPartnership": "Agency partnership"
@@ -6471,6 +6472,7 @@
     "title": "My messages",
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
     "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
+    "emptyCta": "Find people or companies to work with",
     "counterparty": {
       "support": "Support team",
       "permitted": "Conversation partner",
@@ -6617,13 +6619,15 @@
       "title": "Team core",
       "scope": "Empty state",
       "intro": "This is where your team will appear — real people, their current roles and who is working this week. Nobody has joined yet.",
-      "footnote": "Use “Invite” below: each person accepts their own invitation and appears here. We never add people for you."
+      "footnote": "Use “Invite” below: each person accepts their own invitation and appears here. We never add people for you.",
+      "cta": "Invite the first person"
     },
     "agency": {
       "title": "Candidate bench",
       "scope": "Empty state",
       "intro": "This is where your active candidates will appear — who is ready, who is currently placed, who is waiting for the next season. Nobody has joined yet.",
-      "footnote": "Use “Invite” below: each candidate accepts their own invitation and appears here. We never add people for you."
+      "footnote": "Use “Invite” below: each candidate accepts their own invitation and appears here. We never add people for you.",
+      "cta": "Invite the first candidate"
     }
   },
   "helpRequests": {
@@ -8141,6 +8145,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Discussion points",
+      "met": "Requirements met",
+      "evidenceNote": "Evidence comparison against this need — not a formal qualification, not a ranking. Unknown stays unknown.",
       "missing": "Missing information",
       "blocking": "Blocking requirements"
     },
@@ -12543,6 +12549,18 @@
           "label": "Switch on work review",
           "description": "A worker's work entries become visible to, and confirmable by, the manager."
         },
+        "acceptConnection": {
+          "label": "Accept an agency's invitation",
+          "description": "Connect this company with the agency that invited it."
+        },
+        "declineConnection": {
+          "label": "Decline an agency's invitation",
+          "description": "Say no to an agency's invitation to connect."
+        },
+        "shareRequest": {
+          "label": "Share a need with an agency",
+          "description": "Let a connected agency see one of your needs and propose candidates."
+        },
         "respondOffer": {
           "label": "Answer an agency's offer",
           "description": "Accept or decline a candidate an agency offered for your need."
@@ -13057,6 +13075,16 @@
       "projectCreatedNext": "Project created. Assign people right here — or come back to it later from “My projects”.",
       "clientOffersIntro": "Candidates agencies offered for your needs:",
       "clientOffersNone": "No agency has offered candidates for your open needs yet.",
+      "clientBridgeInvitesIntro": "Agencies inviting you to work together:",
+      "clientBridgeShareIntro": "Needs you could share with a connected agency:",
+      "clientBridgeNone": "No agency invitation is waiting and nothing is left to share. Manage partners on the partners page.",
+      "chipConnectionAccept": "Accept",
+      "chipConnectionDecline": "Decline",
+      "chipShareRequest": "Share",
+      "connectionAccepted": "Connected. You can now share needs with this agency and receive its candidates.",
+      "connectionDeclined": "Declined. The agency will see your decision.",
+      "requestShared": "Shared. The agency sees this need and can propose candidates for it.",
+      "bridgeActionFailed": "That could not be saved — the invitation may already be answered or the need closed. Check the partners page.",
       "chipOfferAccept": "Accept",
       "chipOfferDecline": "Decline",
       "offerAccepted": "Accepted. A booking proposal was sent to the candidate — you will see their answer here.",
@@ -15667,6 +15695,7 @@
     "statNew7d": "Published in 7 days",
     "statNew30d": "Published in 30 days",
     "noneOpen": "Nothing is being advertised for {profession} in this pool right now.",
+    "noneOpenCta": "Change or add the work you look for",
     "skillsTitleAll": "Skills asked for, across every open advertisement",
     "skillsTitleWindow": "Skills asked for, across the {window} most recently published",
     "citiesTitleAll": "Where they are, across every open advertisement",

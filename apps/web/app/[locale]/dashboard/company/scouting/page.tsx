@@ -855,6 +855,48 @@ export default async function CompanyScoutingPage({
                     </span>
                   ) : null}
                 </div>
+                {/* REQUIREMENT LEDGER for the employer (2026-09-19): the
+                    same deterministic per-criterion results the engine
+                    already returns, now ALL rendered — MET (hard criteria
+                    checked and met + weighted strengths) beside FAILED
+                    (blocking) and UNKNOWN (missing facts). Evidence
+                    comparison, never a formal qualification and never a
+                    ranking: an unknown stays unknown. */}
+                {c.match.matchedHard.length + c.match.strengths.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-met-${c.workerId}`}
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("tiers.met")}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[...c.match.matchedHard, ...c.match.strengths].map((m) => (
+                        <span
+                          key={`${m.class}-${m.criterion}`}
+                          className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
+                          data-criterion={m.criterion}
+                          data-class={m.class}
+                          title={m.source}
+                        >
+                          {criterionLabel(m.criterion)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {c.match.matchedHard.length +
+                  c.match.strengths.length +
+                  c.match.blocking.length +
+                  c.match.missingFacts.length >
+                0 ? (
+                  <p
+                    className="text-meta leading-relaxed text-text-muted"
+                    data-testid={`scout-ledger-note-${c.workerId}`}
+                  >
+                    {t("tiers.evidenceNote")}
+                  </p>
+                ) : null}
                 {c.match.blocking.length > 0 ? (
                   <div
                     className="flex flex-col gap-1"

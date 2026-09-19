@@ -150,6 +150,8 @@ export type ConversationIntent =
   | "programmes" // "sukurk programą / grupę" — programmes & cohorts
   | "create-project" // "sukurk projektą Roterdame" — the SITE as a project object (F2)
   | "agency-offers" // "kokius kandidatus pasiūlė agentūra?" — the client's side of the bridge
+  | "agency-invites" // "agentūra mane pakvietė" / "pasidalink poreikiu su agentūra" — the client accepts a connection or shares a request
+  | "propose-booking" // "pasiūlyti darbą kandidatui" — the direct employer's offer, by sentence, from the candidates panel
   | "add-document" // "turiu naują A1 iki 2027-03" — record a document, by sentence
   | "cv-export" // "atsisiųsk / išspausdink mano CV" — take the sheet OUT
   // ── THE CV IS FIVE DIFFERENT REQUESTS (owner window 11 §5/§30) ──────────
@@ -1481,6 +1483,39 @@ const RULES: IntentRule[] = [
       p("(sukur|kurti|prid[eė]|prad[eė]|nauj|create|new|add|start|erstell|anleg|maak|nieuw|создать|создай|нов)\\w*\\s*.{0,20}(projekt|project|проект|objekt|statybviet|baustelle|bouwplaats|стройплощад|объект)", 8),
       // noun → verb: "projektą sukurti", "Projekt anlegen", "project aanmaken"
       p("(projekt|project|проект|objekt|baustelle|bouwplaats|объект)\\w*\\s*.{0,16}(sukur|kurti|prad[eė]|create|erstell|anleg|aanmak|создать|создай)", 8),
+    ],
+  },
+  {
+    intent: "agency-invites",
+    patterns: [
+      // The CLIENT's other two bridge edges (2026-09-19): an agency invited
+      // this company ("agentūra pakvietė", "agency invitation", "агентство
+      // пригласило", "bureau heeft uitgenodigd", "Agentur hat eingeladen"),
+      // and sharing a need WITH an agency ("pasidalinti poreikiu su
+      // agentūra", "share the request with the agency", "поделиться
+      // запросом с агентством", "deel de aanvraag met het bureau",
+      // "Anfrage mit der Agentur teilen"). Same weight class as the offers
+      // read; the agency's own "invite a CLIENT" keeps its client noun.
+      p("(agent[uū]r|agency|agencies|агент|uitzend|bureau|agentur)\\w*\\s*.{0,24}(pakviet|kviet|invit|приглас|приглаш|uitnodig|uitgenodigd|einlad|eingeladen)", 12),
+      p("(pakviet|kviet|invit|приглас|приглаш|uitnodig|uitgenodigd|einlad|eingeladen)\\w*\\s*.{0,24}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 12),
+      p("(pasidal|dalin|dalink|share|подел|deel|teil)\\w*\\s*.{0,40}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 12),
+      p("(agent[uū]r|agency|agencies|агент|bureau|agentur)\\w*\\s*.{0,30}(pasidal|dalin|dalink|share|подел|deel|teil)", 12),
+    ],
+  },
+  {
+    intent: "propose-booking",
+    patterns: [
+      // The DIRECT employer offers work, by sentence ("pasiūlyti darbą
+      // kandidatui", "offer the job to a worker", "предложить работу
+      // кандидату", "werk aanbieden aan een kandidaat", "einem Kandidaten
+      // Arbeit anbieten", "rezervuoti darbuotoją"). The sentence reaches
+      // the candidates panel of the open need; the offer itself is the
+      // panel's token-confirmed button — a sentence never picks a person.
+      p("(pasi[uū]lyt|pasi[uū]lyk|si[uū]l|offer|propos|предлож|aanbied|bied|anbiet|biete)\\w*\\s*.{0,24}(darb[aąo]|work|job|booking|rezerv|работ|бронир|werk|baan|arbeit|auftrag)\\w*\\s*.{0,24}(darbuotoj|worker|candidate|kandida|работник|кандидат|werknemer|arbeiter)", 14),
+      p("(booking|rezervuo|užsakyt|book|бронир|забронир|boek|buch)\\w*\\s*.{0,20}(darbuotoj|worker|kandida|candidate|работник|кандидат|werknemer|arbeiter)", 14),
+      p("(darbuotoj|worker|kandida|candidate|работник|кандидат|werknemer|arbeiter)\\w*\\s*.{0,24}(pasi[uū]lyt|pasi[uū]lyk|offer|propos|предлож|aanbied|anbiet)\\w*\\s*.{0,16}(darb|work|job|работ|werk|arbeit)", 14),
+      p("(darb[aąo]|work|job|работ|werk|baan|arbeit)\\w*\\s*.{0,16}(pasi[uū]lyt|pasi[uū]lyk|si[uū]l|offer|propos|предлож|aanbied|bied|anbiet|biete)\\w*\\s*.{0,24}(darbuotoj|worker|candidate|kandida|работник|кандидат|werknemer|arbeiter)", 14),
+      p("(darbuotoj|worker|candidate|kandida|работник|кандидат|werknemer|arbeiter)\\w*\\s*.{0,24}(darb[aąo]|work|job|работ|werk|baan|arbeit)\\w*\\s*.{0,16}(pasi[uū]lyt|pasi[uū]lyk|si[uū]l|offer|propos|предлож|aanbied|bied|anbiet|biete)", 14),
     ],
   },
   {

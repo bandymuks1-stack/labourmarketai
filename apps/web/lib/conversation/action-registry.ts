@@ -686,6 +686,48 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     advancedRoute: "/dashboard/company/scouting",
     handler: { kind: "server_action", ref: "respondCandidateOfferAction" },
   },
+  // The CLIENT's other two bridge edges (2026-09-19). Same canonical actions
+  // the partners page posts; same RPC authority (owns_company of the client
+  // side + the invited e-mail = the caller's own for the accept).
+  {
+    id: "company.accept-connection",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.acceptConnection.label",
+    descriptionKey: "conversation.actions.company.acceptConnection.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/partners",
+    handler: { kind: "server_action", ref: "acceptConnectionAction" },
+  },
+  {
+    id: "company.decline-connection",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.declineConnection.label",
+    descriptionKey: "conversation.actions.company.declineConnection.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/partners",
+    handler: { kind: "server_action", ref: "declineConnectionAction" },
+  },
+  {
+    id: "company.share-request",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.shareRequest.label",
+    descriptionKey: "conversation.actions.company.shareRequest.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/partners",
+    handler: { kind: "server_action", ref: "shareRequestAction" },
+  },
 
   {
     /**

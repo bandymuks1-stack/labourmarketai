@@ -1800,6 +1800,7 @@
       "opportunityType": "Art"
     },
     "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage",
+    "repeatLink": "Diese Anfrage wiederholen (Daten und Status neu)",
     "syntheticTitle": {
       "hiringWorkers": "Mitarbeiter gesucht",
       "agencyPartnership": "Partnerschaftsangebot"
@@ -6471,6 +6472,7 @@
     "title": "Meine Nachrichten",
     "subtitle": "Was jetzt wichtig ist und worauf sich eine Antwort lohnt. Hier sehen Sie Nachrichten und wichtige Anfragen.",
     "empty": "Noch keine Nachrichten. Wenn Ihnen jemand schreibt oder eine wichtige Anfrage eingeht, sehen Sie sie hier.",
+    "emptyCta": "Menschen oder Unternehmen zum Zusammenarbeiten finden",
     "counterparty": {
       "support": "Support-Team",
       "permitted": "Gesprächspartner",
@@ -6617,13 +6619,15 @@
       "title": "Kernteam",
       "scope": "Leerer Zustand",
       "intro": "Hier erscheint Ihr Team — echte Menschen, ihre aktuellen Rollen und wer diese Woche arbeitet. Noch ist niemand beigetreten.",
-      "footnote": "Nutzen Sie „Einladen“ unten: jede Person nimmt ihre Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu."
+      "footnote": "Nutzen Sie „Einladen“ unten: jede Person nimmt ihre Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu.",
+      "cta": "Die erste Person einladen"
     },
     "agency": {
       "title": "Kandidatenpool",
       "scope": "Leerer Zustand",
       "intro": "Hier erscheinen Ihre aktiven Kandidaten — wer bereit ist, wer gerade vermittelt ist, wer auf die nächste Saison wartet. Noch ist niemand beigetreten.",
-      "footnote": "Nutzen Sie „Einladen“ unten: jeder Kandidat nimmt seine Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu."
+      "footnote": "Nutzen Sie „Einladen“ unten: jeder Kandidat nimmt seine Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu.",
+      "cta": "Den ersten Kandidaten einladen"
     }
   },
   "helpRequests": {
@@ -8141,6 +8145,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Gesprächspunkte",
+      "met": "Erfüllte Anforderungen",
+      "evidenceNote": "Nachweisvergleich mit diesem Bedarf — keine formale Qualifikation, keine Rangfolge. Unbekannt bleibt unbekannt.",
       "missing": "Fehlende Informationen",
       "blocking": "Blockierende Anforderungen"
     },
@@ -12543,6 +12549,18 @@
           "label": "Arbeitsprüfung einschalten",
           "description": "Die Arbeitseinträge einer Person werden für die Führungskraft sichtbar und bestätigbar."
         },
+        "acceptConnection": {
+          "label": "Einladung einer Agentur annehmen",
+          "description": "Dieses Unternehmen mit der einladenden Agentur verbinden."
+        },
+        "declineConnection": {
+          "label": "Einladung einer Agentur ablehnen",
+          "description": "Die Einladung einer Agentur zur Zusammenarbeit ablehnen."
+        },
+        "shareRequest": {
+          "label": "Einen Bedarf mit einer Agentur teilen",
+          "description": "Einer verbundenen Agentur einen Ihrer Bedarfe zeigen, damit sie Kandidaten vorschlägt."
+        },
         "respondOffer": {
           "label": "Angebot einer Agentur beantworten",
           "description": "Einen von einer Agentur vorgeschlagenen Kandidaten annehmen oder ablehnen."
@@ -13057,6 +13075,16 @@
       "projectCreatedNext": "Projekt angelegt. Weisen Sie hier direkt Leute zu — oder kommen Sie später über „Meine Projekte“ darauf zurück.",
       "clientOffersIntro": "Von Agenturen vorgeschlagene Kandidaten für Ihre Bedarfe:",
       "clientOffersNone": "Noch keine Agentur hat Kandidaten für Ihre offenen Bedarfe vorgeschlagen.",
+      "clientBridgeInvitesIntro": "Agenturen, die Sie zur Zusammenarbeit einladen:",
+      "clientBridgeShareIntro": "Bedarfe, die Sie mit einer verbundenen Agentur teilen können:",
+      "clientBridgeNone": "Keine Agentureinladung wartet und nichts ist mehr zu teilen. Partner verwalten Sie auf der Partnerseite.",
+      "chipConnectionAccept": "Annehmen",
+      "chipConnectionDecline": "Ablehnen",
+      "chipShareRequest": "Teilen",
+      "connectionAccepted": "Verbunden. Sie können nun Bedarfe mit dieser Agentur teilen und ihre Kandidaten erhalten.",
+      "connectionDeclined": "Abgelehnt. Die Agentur sieht Ihre Entscheidung.",
+      "requestShared": "Geteilt. Die Agentur sieht diesen Bedarf und kann Kandidaten dafür vorschlagen.",
+      "bridgeActionFailed": "Das konnte nicht gespeichert werden — die Einladung ist vielleicht schon beantwortet oder der Bedarf geschlossen. Prüfen Sie die Partnerseite.",
       "chipOfferAccept": "Annehmen",
       "chipOfferDecline": "Ablehnen",
       "offerAccepted": "Angenommen. Dem Kandidaten wurde ein Buchungsvorschlag gesendet — seine Antwort sehen Sie hier.",
@@ -15667,6 +15695,7 @@
     "statNew7d": "In 7 Tagen veröffentlicht",
     "statNew30d": "In 30 Tagen veröffentlicht",
     "noneOpen": "Für {profession} wird in dieser Sammlung derzeit nichts ausgeschrieben.",
+    "noneOpenCta": "Die gesuchte Arbeit ändern oder ergänzen",
     "skillsTitleAll": "Gefragte Fähigkeiten über alle offenen Anzeigen",
     "skillsTitleWindow": "Gefragte Fähigkeiten in den {window} zuletzt veröffentlichten",
     "citiesTitleAll": "Wo sie sind, über alle offenen Anzeigen",

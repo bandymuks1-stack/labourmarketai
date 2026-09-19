@@ -38,6 +38,7 @@ export async function readDemandReadbackLabels() {
     created: tReadback("created"),
     manageHelp: tReadback("manageHelp"),
     scoutLink: tReadback("scoutLink"),
+    repeatLink: tReadback("repeatLink"),
     status: {
       draft: tReqStatus("draft"),
       submitted: tReqStatus("submitted"),
