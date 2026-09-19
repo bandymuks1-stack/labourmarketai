@@ -84,7 +84,10 @@ export async function inviteCompanyWorkerAction(
   // RPCs (owner or admin membership). A manager passed the capability check
   // here and then received `not_owner` from the database (2026-09-19); the
   // gate now says what the database will do.
-  if (!isCompanyOwnerOrAdmin(company.role)) {
+  if (
+    !hasOrganizationCapability(company.role, "manage-roster") ||
+    !isCompanyOwnerOrAdmin(company.role)
+  ) {
     return { ok: false, code: "no_company" };
   }
 
@@ -130,7 +133,10 @@ export async function assignCompanyWorkerRoleAction(
   // RPCs (owner or admin membership). A manager passed the capability check
   // here and then received `not_owner` from the database (2026-09-19); the
   // gate now says what the database will do.
-  if (!isCompanyOwnerOrAdmin(company.role)) {
+  if (
+    !hasOrganizationCapability(company.role, "manage-roster") ||
+    !isCompanyOwnerOrAdmin(company.role)
+  ) {
     return { ok: false, code: "no_org" };
   }
   if (workerId === "") return { ok: false, code: "error" };
