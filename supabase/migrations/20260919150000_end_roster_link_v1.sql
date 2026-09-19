@@ -2,7 +2,10 @@
 -- ============================================================================
 -- 20260919150000_end_roster_link_v1
 -- RED — owner gate (R-9 of the 2026-09-19 completion audit + the "roster
--- removal UI" gap of §F). NOT APPLIED.
+-- removal UI" gap of §F).
+-- APPLIED 2026-09-19 15:19 UTC (ledger 20260919151920) under the owner's verbatim
+-- approval sentence; the full contract run on the LIVE function and rolled back
+-- (see docs/APPLIED_LEDGER.md).
 --
 -- Finding: a roster relationship (`company_workers` / `agency_workers`) can
 -- be created only through the worker's own acceptance (R-1, applied
