@@ -6218,7 +6218,20 @@
         "needs_migration": "Das ist in dieser Umgebung noch nicht freigeschaltet.",
         "not_authorized": "Das können nur Projektverantwortliche tun.",
         "not_found": "Projekt nicht gefunden.",
-        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "invalid_dates": "Das Enddatum darf nicht vor dem Beginn liegen.",
+        "completed_read_only": "Dieses Projekt ist abgeschlossen; seine Fakten sind schreibgeschützt."
+      },
+      "facts": {
+        "title": "Projekttitel",
+        "city": "Stadt / Ort",
+        "country": "Land",
+        "countryNone": "Nicht gesetzt",
+        "startDate": "Beginn",
+        "endDate": "Ende",
+        "save": "Fakten speichern",
+        "hint": "Daten speisen das Kalenderband und die Buchungsüberschneidungsprüfung. Ein Ort ist Text — nie eine Koordinate.",
+        "completedReadOnly": "Dieses Projekt ist abgeschlossen. Seine Fakten sind schreibgeschützt."
       }
     }
   },

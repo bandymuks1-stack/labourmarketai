@@ -2572,7 +2572,13 @@ describe("no migration files added by this sprint", () => {
 // ADMITTED live rows=1 before, the LIVE function refuses (not_linked / rows=0)
 // after, invite → worker accepts → already_member — all rolled back (PR #1794).
 // RECOUNTED: 293.
-const SPRINT_BASELINE = 293;
+// Bumped 293 -> 294 for 20260919130000_update_project_facts_v1 (R-3: the ONE
+// gated write for projects.title/city/country/start_date/end_date — no write
+// path existed after creation; every production project has country NULL and
+// no dates). RED (new SECURITY DEFINER function), PREPARED, NOT APPLIED —
+// owner gate; the body proven on production in a rolled-back transaction.
+// RECOUNTED: 294.
+const SPRINT_BASELINE = 294;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

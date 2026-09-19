@@ -185,7 +185,12 @@ describe("3. project responsible + lifecycle actions", () => {
       ...ADMIN_ACTIONS.matchAll(/\.rpc\(\s*"([a-z0-9_]+)"/g),
     ].map((m) => m[1]);
     expect(new Set(rpcCalls)).toEqual(
-      new Set(["set_project_status_v1", "set_project_responsible_v1"]),
+      new Set([
+        "set_project_status_v1",
+        "set_project_responsible_v1",
+        // R-3 (2026-09-19): the one gated write for the project facts.
+        "update_project_facts_v1",
+      ]),
     );
     expect(ADMIN_ACTIONS).not.toMatch(/\.insert\(|\.update\(|\.delete\(|\.upsert\(/);
     expect(ADMIN_ACTIONS).toMatch(/notice=/);

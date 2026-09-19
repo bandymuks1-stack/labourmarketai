@@ -1396,6 +1396,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-09-19 (ledger 20260919143247); contract run on the live function,
       // rolled back.
       "20260919120000_add_org_member_requires_consented_roster_v1.sql",
+      // 2026-09-19 — R-3 (completion audit): `update_project_facts_v1`, the ONE
+      // gated write for a project's title / city / country / start / end dates
+      // (can_manage_project, validation before read, completed = read-only,
+      // granularity kept truthful). RED, PREPARED, NOT APPLIED — owner gate;
+      // proven on production in a rolled-back transaction.
+      "20260919130000_update_project_facts_v1.sql",
 ]);
   });
 

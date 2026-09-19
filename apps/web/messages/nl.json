@@ -6218,7 +6218,20 @@
         "needs_migration": "Dit is in deze omgeving nog niet ingeschakeld.",
         "not_authorized": "Alleen projectmanagers kunnen dit doen.",
         "not_found": "Project niet gevonden.",
-        "error": "Er ging iets mis. Probeer het opnieuw."
+        "error": "Er ging iets mis. Probeer het opnieuw.",
+        "invalid_dates": "De einddatum kan niet vóór de startdatum liggen.",
+        "completed_read_only": "Dit project is afgerond; de feiten zijn alleen-lezen."
+      },
+      "facts": {
+        "title": "Projecttitel",
+        "city": "Stad / plaats",
+        "country": "Land",
+        "countryNone": "Niet ingesteld",
+        "startDate": "Start",
+        "endDate": "Einde",
+        "save": "Feiten opslaan",
+        "hint": "Data voeden de kalenderband en de boekingsoverlapcontrole. Een plaats is tekst — nooit een coördinaat.",
+        "completedReadOnly": "Dit project is afgerond. De feiten zijn alleen-lezen."
       }
     }
   },

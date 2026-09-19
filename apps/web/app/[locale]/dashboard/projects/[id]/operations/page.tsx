@@ -26,6 +26,7 @@ import {
 } from "@/components/app/project-operations-board";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
+import { ProjectFactsForm } from "@/components/app/project-facts-form";
 import { ProjectStagesPanel } from "@/components/app/project-stages-panel";
 import { getLearnedStageDurations } from "@/lib/projects/learned-stage-duration";
 import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
@@ -70,6 +71,8 @@ const OPS_NOTICES = new Set([
   "updated",
   "invalid",
   "invalid_transition",
+  "invalid_dates",
+  "completed_read_only",
   "needs_migration",
   "not_authorized",
   "not_found",
@@ -457,6 +460,12 @@ export default async function ProjectOperationsPage({
         data-testid="ops-manage"
       >
         <h2 className={sectionTitleClass}>{t("manage.title")}</h2>
+
+        {/* R-3: the project's FACTS — title, place, dates — through the one
+            gated write (update_project_facts_v1). These are the columns the
+            calendar band, the dates chip above and the booking-overlap check
+            read; until this form they had no write path after creation. */}
+        <ProjectFactsForm locale={locale} projectId={id} project={ops.project} />
 
         <div className="flex flex-wrap items-center gap-2">
           {progress && progress.percent !== null ? (

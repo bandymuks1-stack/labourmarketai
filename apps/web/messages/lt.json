@@ -6218,7 +6218,20 @@
         "needs_migration": "Šioje aplinkoje tai dar neįjungta.",
         "not_authorized": "Tai daryti gali tik projekto vadovai.",
         "not_found": "Projektas nerastas.",
-        "error": "Įvyko klaida. Bandykite dar kartą."
+        "error": "Įvyko klaida. Bandykite dar kartą.",
+        "invalid_dates": "Pabaigos data negali būti ankstesnė už pradžios datą.",
+        "completed_read_only": "Projektas užbaigtas; jo faktai tik skaitomi."
+      },
+      "facts": {
+        "title": "Projekto pavadinimas",
+        "city": "Miestas / vieta",
+        "country": "Šalis",
+        "countryNone": "Nenurodyta",
+        "startDate": "Pradžia",
+        "endDate": "Pabaiga",
+        "save": "Išsaugoti faktus",
+        "hint": "Datos maitina kalendoriaus juostą ir užsakymų persidengimo patikrą. Vieta yra tekstas — niekada ne koordinatė.",
+        "completedReadOnly": "Projektas užbaigtas. Jo faktai tik skaitomi."
       }
     }
   },

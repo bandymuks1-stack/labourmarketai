@@ -6218,7 +6218,20 @@
         "needs_migration": "This isn't switched on in this environment yet.",
         "not_authorized": "Only project managers can do this.",
         "not_found": "Project not found.",
-        "error": "Something went wrong. Try again."
+        "error": "Something went wrong. Try again.",
+        "invalid_dates": "The end date cannot be before the start date.",
+        "completed_read_only": "This project is completed; its facts are read-only."
+      },
+      "facts": {
+        "title": "Project title",
+        "city": "City / place",
+        "country": "Country",
+        "countryNone": "Not set",
+        "startDate": "Start",
+        "endDate": "End",
+        "save": "Save facts",
+        "hint": "Dates feed the calendar band and the booking overlap check. A place is text — never a coordinate.",
+        "completedReadOnly": "This project is completed. Its facts are read-only."
       }
     }
   },
