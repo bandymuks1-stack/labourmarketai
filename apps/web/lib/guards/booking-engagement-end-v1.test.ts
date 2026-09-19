@@ -1412,6 +1412,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // audited, never a DELETE). RED, owner-approved and APPLIED 2026-09-19
       // (ledger 20260919151920); contract run on the live function, rolled back.
       "20260919150000_end_roster_link_v1.sql",
+      // 2026-09-19 — R-6: notification_events v9 CHECK widening (journal_entry_confirmed). RED, PREPARED, NOT applied; marker acknowledges the class (draft PR #1806).
+      "20260919200000_notification_events_v9_journal_confirmed.sql",
 ]);
   });
 
