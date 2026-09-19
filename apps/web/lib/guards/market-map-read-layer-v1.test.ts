@@ -987,8 +987,8 @@ describe("NO new DB migration in this PR", () => {
     //   (RED new SECDEF write, APPLIED 2026-09-19, ledger 20260919151920).
     //   Not this read layer's file. RECOUNTED: 295.
     // Bumped 295 -> 296 for 20260919140000_usage_cost_trigger_search_path_v1
-    //   (R-13 search_path pin, NOT APPLIED). Not this read layer's file.
-    //   RECOUNTED: 296.
+    //   (R-13 search_path pin, APPLIED 2026-09-19, ledger 20260919153945).
+    //   Not this read layer's file. RECOUNTED: 296.
     expect(count).toBeLessThanOrEqual(296);
   });
 });

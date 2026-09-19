@@ -2587,7 +2587,8 @@ describe("no migration files added by this sprint", () => {
 // Bumped 295 -> 296 for 20260919140000_usage_cost_trigger_search_path_v1 (R-13:
 // pin search_path on the two append-only trigger functions — advisor WARN,
 // hygiene only; no body / grant / policy / row change). Listed in the owner
-// packet → kept on the human gate; NOT APPLIED. RECOUNTED: 296.
+// packet → kept on the human gate; owner-approved and APPLIED 2026-09-19
+// (ledger 20260919153945), proconfig read back on both (PR #1797). RECOUNTED: 296.
 const SPRINT_BASELINE = 296;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
