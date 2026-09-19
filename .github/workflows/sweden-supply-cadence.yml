@@ -115,7 +115,7 @@ jobs:
         # printing its accounting — the artifact must survive red runs, since
         # a red run is exactly when the accounting matters most.
         if: always() && steps.gate.outputs.configuration_gated == 'false'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sweden-run-accounting-${{ github.run_id }}
           path: apps/web/run-accounting.json
