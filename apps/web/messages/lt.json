@@ -16667,7 +16667,17 @@
       "people": {
         "title": "Žmonės ir komanda",
         "subtitle": "Kas dirba su jumis, kas laisvas, kam reikia dėmesio — ir kaip įtraukti naujus žmones.",
-        "summary": "{active} aktyvūs · {pending} laukia kvietimo · {members} nariai · {review} peržiūri žurnalus"
+        "summary": "{active} aktyvūs · {pending} laukia kvietimo · {members} nariai · {review} peržiūri žurnalus",
+        "booked": {
+          "title": "Užsakyti žmonės",
+          "intro": "Žmonės, kuriuos užsakėte tiesiogiai. Užsakymas yra tikras darbo ryšys, tačiau pats savaime jis neatveria žurnalo peržiūrai.",
+          "since": "Užsakyta nuo {date}",
+          "unnamed": "Vardas nepasidalintas",
+          "memberState": "Organizacijos narys — žurnalo peržiūra valdoma narių skydelyje žemiau.",
+          "notReviewableState": "Žurnalas dar neperžiūrimas: užsakymas nesukuria darbo konteksto. Pakvieskite šį žmogų prisijungti kaip darbuotoją — vos jam priėmus kvietimą, kontekstas atsiranda ir galėsite įjungti peržiūrą. Sukurti jo už žmogų negalite.",
+          "inviteExit": "Pakviesti prisijungti kaip darbuotoją",
+          "error": "Užsakytų žmonių dabar nepavyko nuskaityti. Tai nereiškia, kad niekas neužsakytas."
+        }
       },
       "needs": {
         "title": "Darbuotojų poreikiai",

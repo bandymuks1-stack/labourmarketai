@@ -25,6 +25,8 @@ import {
   readOrgMembersLabels,
   readWorkersLabels,
 } from "@/lib/company/company-section-labels";
+import { listBookedPeople } from "@/lib/company/booked-people";
+import { BookedPeopleSection } from "@/components/app/booked-people-section";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { TeamRecordedWork } from "@/components/app/organization/team-recorded-work";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
@@ -110,6 +112,17 @@ export default async function CompanyPeoplePage({
     ? await listRosterLinkCandidatesFromEngagements(await createClient(), capabilityOrgId)
     : [];
   const readinessMap = await getWorkerReadiness(activeWorkerRows.map((w) => w.workerId));
+  // Booked people (R-2 GREEN half): the direct-booking relationship, visible
+  // beside the roster it is not part of, with its honest journal state. The
+  // read is RLS-scoped to this company's own engagement rows.
+  const bookedPeople = await listBookedPeople(companyRow.id, {
+    excludeWorkerIds: new Set(activeWorkerRows.map((w) => w.workerId)),
+    memberProfileIds: new Set(
+      (orgMembers?.members ?? [])
+        .map((m) => m.profileId)
+        .filter((v): v is string => Boolean(v)),
+    ),
+  });
   const readinessRows = activeWorkerRows.map((w) => ({
     workerName: w.displayName ?? (w.email ? w.email.split("@")[0] : "—"),
     readiness: readinessMap.get(w.workerId) ?? {
@@ -172,6 +185,11 @@ export default async function CompanyPeoplePage({
           }))}
         />
       </div>
+
+      {/* People the company BOOKED directly: a real work relationship that no
+          roster section shows, with the truthful reason its journal is not
+          reviewable and the one legitimate way to change that. */}
+      <BookedPeopleSection result={bookedPeople} />
 
       {/* Canonical Pakviesti (core-network area B): every invite context
           funnels into the ONE invitation surface on /dashboard/network. */}

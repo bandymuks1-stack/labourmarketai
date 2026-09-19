@@ -16667,7 +16667,17 @@
       "people": {
         "title": "People and team",
         "subtitle": "Who works with you, who is free, who needs attention — and how to bring people in.",
-        "summary": "{active} active · {pending} invitations pending · {members} members · {review} reviewing journals"
+        "summary": "{active} active · {pending} invitations pending · {members} members · {review} reviewing journals",
+        "booked": {
+          "title": "Booked people",
+          "intro": "People you booked directly. A booking is a real work relationship, but on its own it does not open a journal for review.",
+          "since": "Booked since {date}",
+          "unnamed": "Name not shared",
+          "memberState": "Organization member — journal review is governed in the members panel below.",
+          "notReviewableState": "Journal not reviewable yet: a booking does not create a work context. Invite this person to join as an employee — the moment they accept, the context exists and you can enable review. You cannot create it for them.",
+          "inviteExit": "Invite to join as an employee",
+          "error": "The booked people could not be read right now. Nothing here is a claim that nobody is booked."
+        }
       },
       "needs": {
         "title": "Workforce needs",

@@ -30,6 +30,9 @@ export const MEMBERSHIP_SLUGS = [
 
 export type OrgMember = {
   engagementId: string;
+  /** The member's profile — lets sibling surfaces (booked people, R-2 GREEN)
+   *  tell "already a member" from "booked only" without a second read. */
+  profileId: string | null;
   name: string;
   reviewEnabled: boolean;
   /** Canonical relationship_slug — what this membership actually grants. */
@@ -108,6 +111,7 @@ export async function getOrgMembersData(
 
   const members: OrgMember[] = (ecRows ?? []).map((r) => ({
     engagementId: r.id as string,
+    profileId: (r.profile_id as string | null) ?? null,
     name: profName(r.profiles),
     reviewEnabled: r.journal_review_enabled === true,
     role: (r.relationship_slug as string | null) ?? "other",

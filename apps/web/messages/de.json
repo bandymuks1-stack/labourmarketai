@@ -16667,7 +16667,17 @@
       "people": {
         "title": "Menschen und Team",
         "subtitle": "Wer mit Ihnen arbeitet, wer frei ist, wer Aufmerksamkeit braucht — und wie Sie Menschen aufnehmen.",
-        "summary": "{active} aktiv · {pending} Einladungen offen · {members} Mitglieder · {review} prüfen Journale"
+        "summary": "{active} aktiv · {pending} Einladungen offen · {members} Mitglieder · {review} prüfen Journale",
+        "booked": {
+          "title": "Gebuchte Personen",
+          "intro": "Personen, die Sie direkt gebucht haben. Eine Buchung ist eine echte Arbeitsbeziehung, öffnet aber allein kein Journal zur Prüfung.",
+          "since": "Gebucht seit {date}",
+          "unnamed": "Name nicht geteilt",
+          "memberState": "Organisationsmitglied — die Journalprüfung wird im Mitgliederbereich unten verwaltet.",
+          "notReviewableState": "Journal noch nicht prüfbar: eine Buchung erzeugt keinen Arbeitskontext. Laden Sie diese Person ein, als Mitarbeiter beizutreten — sobald sie annimmt, existiert der Kontext und Sie können die Prüfung aktivieren. Sie können ihn nicht für die Person anlegen.",
+          "inviteExit": "Einladen, als Mitarbeiter beizutreten",
+          "error": "Die gebuchten Personen konnten gerade nicht gelesen werden. Das ist keine Aussage, dass niemand gebucht ist."
+        }
       },
       "needs": {
         "title": "Personalbedarf",
