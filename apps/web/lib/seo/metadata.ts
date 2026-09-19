@@ -412,27 +412,27 @@ export const PAGE_SEO: Readonly<
   },
   jobs: {
     en: {
-      title: "Open jobs — LabourMarket.ai",
+      title: "Open jobs",
       description:
         "Browse live vacancies imported from official public employment sources. Job title, category, employment form and working time are open to everyone; sign in free to see the employer, the location and how to apply.",
     },
     lt: {
-      title: "Laisvos darbo vietos — LabourMarket.ai",
+      title: "Laisvos darbo vietos",
       description:
         "Naršyk gyvas darbo vietas iš oficialių viešų užimtumo šaltinių. Pareigos, kategorija, sutarties tipas ir darbo laikas matomi visiems; prisijunk nemokamai, kad matytum darbdavį, vietovę ir kaip kandidatuoti.",
     },
     ru: {
-      title: "Открытые вакансии — LabourMarket.ai",
+      title: "Открытые вакансии",
       description:
         "Смотрите актуальные вакансии из официальных публичных источников занятости. Название, категория, тип занятости и рабочее время открыты всем; зарегистрируйтесь бесплатно, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
     },
     nl: {
-      title: "Openstaande vacatures — LabourMarket.ai",
+      title: "Openstaande vacatures",
       description:
         "Bekijk actuele vacatures uit officiële openbare arbeidsbronnen. Functietitel, categorie, contractvorm en werktijd zijn voor iedereen zichtbaar; maak gratis een account om de werkgever, de locatie en de sollicitatiewijze te zien.",
     },
     de: {
-      title: "Offene Stellen — LabourMarket.ai",
+      title: "Offene Stellen",
       description:
         "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Bezeichnung, Kategorie, Vertragsform und Arbeitszeit sind für alle sichtbar; kostenlos anmelden, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
     },
