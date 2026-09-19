@@ -75,7 +75,7 @@ export default async function CompanyPeoplePage({
     employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
-  if (!companyRow) {
+  if (!companyRow || companyRow.legalName === null) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-people">
         <CompanyNoProfileGuide />

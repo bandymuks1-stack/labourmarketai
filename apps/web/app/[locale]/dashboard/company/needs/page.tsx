@@ -56,7 +56,10 @@ export default async function CompanyNeedsPage({
     employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
-  if (!companyRow) {
+  // Same rule as /dashboard/company: a row with no legal name is the unnamed
+  // shell the setup form completes, not a workspace (2026-09-19 — this page
+  // and /people let the shell through while the hub did not).
+  if (!companyRow || companyRow.legalName === null) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-needs">
         <CompanyNoProfileGuide />

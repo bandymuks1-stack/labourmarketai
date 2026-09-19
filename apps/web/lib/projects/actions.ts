@@ -11,6 +11,8 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
 import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -80,8 +82,16 @@ export async function createProjectAction(
   const title = String(formData.get("title") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim() || null;
 
-  const companyId = await callerCompanyId();
-  if (!companyId) return { ok: false, code: "no_company" };
+  // Same gate as the dedicated create route (`project-context-actions`):
+  // the ACTIVE workspace's company AND the manage-projects capability. Until
+  // 2026-09-19 this inline path checked only the company, so a `member`
+  // governance role could create projects here and not there.
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { ok: false, code: "no_company" };
+  if (!hasOrganizationCapability(company.role, "manage-projects")) {
+    return { ok: false, code: "not_authorized" };
+  }
+  const companyId = company.companyId;
 
   // Rebuild W5: BOTH project-create entry points insert through the ONE core
   // (validation + W10 org binding + insert shape live in exactly one place).

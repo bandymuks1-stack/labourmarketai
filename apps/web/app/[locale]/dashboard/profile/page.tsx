@@ -75,6 +75,11 @@ import {
   type WorkerAchievementsRead,
 } from "@/lib/worker/worker-achievements";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import {
+  loadPlayerCardResult,
+  type PlayerCardResult,
+} from "@/lib/player-card/player-card-result";
+import { WorkCardEditor } from "@/components/app/work-card-editor";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import {
@@ -327,6 +332,12 @@ export default async function ProfilePage({
   // here (server component) so the form gets real saved values, null = "not
   // stated" (never rendered as a fabricated "no").
   let availabilityPrefs: AvailabilityPrefsRead | null = null;
+  // The work card — availability status, available-from, country, pay — is
+  // what the match engine actually reads. Its ONE editor lived only behind
+  // the conversation's player-card result (found 2026-09-19); the profile,
+  // where a person expects to say when and where they are available, could
+  // not reach it. Same loader, same editor, same save RPCs.
+  let playerCardResult: PlayerCardResult | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -382,6 +393,7 @@ export default async function ProfilePage({
       ecRes,
       trust,
       workIntelligence,
+      playerCardRes,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -446,9 +458,13 @@ export default async function ProfilePage({
       loadWorkIntelligence({ supabase, userId: user.id }, workerId).catch(
         () => null,
       ),
+      // The work-card editor's reads, in the SAME parallel stage (the render
+      // path is stage-budgeted by profile-render-stages guards).
+      loadPlayerCardResult().catch((): PlayerCardResult | null => null),
     ]);
 
     availabilityPrefs = prefsRes;
+    playerCardResult = playerCardRes;
     workerLanguages = langsRes;
     externalProfiles = extRes;
     workerEducation = eduRes;
@@ -1156,6 +1172,19 @@ export default async function ProfilePage({
           boolean pref is tri-state so "not stated" stays an honest null. */}
       {workerId && availabilityPrefs ? (
         <div id="cv-availability" className="scroll-mt-20">
+        {playerCardResult?.kind === "card" &&
+        playerCardResult.workEditor &&
+        playerCardResult.workEditorLabels ? (
+          <div className="mb-6 flex flex-col gap-2" data-testid="profile-work-card-editor">
+            <WorkCardEditor
+              state={playerCardResult.workEditor.state}
+              nextHref={playerCardResult.workEditor.next.href}
+              values={playerCardResult.workEditor.values}
+              labels={playerCardResult.workEditorLabels}
+              checks={playerCardResult.workEditor.checks}
+            />
+          </div>
+        ) : null}
         <WorkerAvailabilityPrefsForm
           initial={
             availabilityPrefs.kind === "ok" ? availabilityPrefs.values : EMPTY_PREFS
