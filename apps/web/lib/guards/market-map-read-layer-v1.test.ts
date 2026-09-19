@@ -974,7 +974,8 @@ describe("NO new DB migration in this PR", () => {
     //   (RED trigger, APPLIED 2026-09-18, ledger 20260918070510). Not this read
     //   layer's file. RECOUNTED: 291.
     // Bumped 291 -> 292 for 20260919100000_roster_writes_rpc_only_v1
-    //   (RED grant/policy narrowing, NOT APPLIED). Not this read layer's file.
+    //   (RED grant/policy narrowing, APPLIED 2026-09-19, ledger 20260919104526).
+    //   Not this read layer's file.
     //   RECOUNTED: 292.
     expect(count).toBeLessThanOrEqual(292);
   });

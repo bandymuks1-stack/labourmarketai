@@ -2561,8 +2561,9 @@ describe("no migration files added by this sprint", () => {
 // Bumped 291 -> 292 for 20260919100000_roster_writes_rpc_only_v1 (R-1 HIGH:
 // revoke direct writes + drop the two FOR ALL write policies on company_workers
 // / agency_workers; every legitimate writer is a SECURITY DEFINER RPC). RED,
-// PREPARED, NOT APPLIED — owner gate; forge ADMITTED live rows=1, rolled back.
-// RECOUNTED: 292.
+// APPLIED 2026-09-19 under the owner's verbatim approval, ledger 20260919104526;
+// forge ADMITTED live rows=1 before, 42501 ×5 after, legitimate path proven —
+// all rolled back (PR #1791). RECOUNTED: 292.
 const SPRINT_BASELINE = 292;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —

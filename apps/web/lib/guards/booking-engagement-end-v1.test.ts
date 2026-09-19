@@ -1379,6 +1379,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval "APPLY ROSTER CONSENT GUARD 2026-09-18", ledger
       // 20260918070510; hostile tests proven on the live trigger, rolled back.
       "20260918070000_roster_link_subject_consent_guard_v1.sql",
+      // 2026-09-19 — R-1 (HIGH, completion audit): revoke direct
+      // insert/update/delete on company_workers / agency_workers from
+      // `authenticated` and drop the two FOR ALL write policies; every
+      // legitimate writer is a SECURITY DEFINER RPC (invite → the WORKER
+      // accepts → owner-gated manage). Forge ADMITTED live before (rows=1,
+      // rolled back). RED, APPLIED 2026-09-19 under the owner's verbatim
+      // approval sentence, ledger 20260919104526; hostile contract (5 × 42501)
+      // and the legitimate path proven live, rolled back. PR #1791.
+      "20260919100000_roster_writes_rpc_only_v1.sql",
 ]);
   });
 
