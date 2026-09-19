@@ -750,3 +750,13 @@ approval of another.
 
 None. Nothing removed, narrowed, or hidden. Two exits were added to an
 existing page; one optional prop was added to an existing component.
+
+### N9. Close of the fourth window (14:25 UTC)
+
+| | |
+|---|---|
+| #1800 | network empty-state exits + this §N — squash `b70f201d`, serving on production at 14:21 UTC (`/api/health.build = b70f201d`, auth 114 ms, db 134 ms) — PRODUCTION_DEPLOYED; local build exit 0 (BUILD_PROVEN) |
+| #1801 | register truth: ORG-11 owner gate was stale (#1752 merged 2026-09-17 as `4ff163da`) → PARTIAL, decision removed; J-INSTITUTION-OUTCOME cohort-join wording corrected (the one member row is the E2E learner fixture, left) — squash `2caedea8`; `product-truth` open owner decisions 6 → 5, BLOCKED 3 → 2 |
+| main at close | `2caedea8` |
+| ledger | 293, unchanged — nothing applied this window |
+| owner queue | R-16 (#1794) → R-3 (#1795) → R-9 (#1798) → R-13 (#1797): four sentences in §N2 and §N5, one migration each; lower priority batch: R-12 waiver number, R-14, the §L3 notification backfill |
