@@ -46,8 +46,7 @@ describe("the migration: the rule is data, fail-closed, seeded for exactly two r
     expect(up).not.toMatch(/grants_worker_visibility\s*=/);
     expect(up).not.toMatch(/create policy|alter policy|drop policy|grant |revoke /i);
     // SQL body only — the header prose names the RPL layer to say it is untouched.
-    const body = up.slice(up.indexOf("
-begin;"));
+    const body = up.slice(up.indexOf("\nbegin;"));
     expect(body).not.toMatch(/recogni[sz]ed|equivalence|qualification_asserted/i);
   });
 
