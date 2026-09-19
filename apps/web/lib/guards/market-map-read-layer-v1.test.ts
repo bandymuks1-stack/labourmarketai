@@ -986,7 +986,10 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 294 -> 295 for 20260919150000_end_roster_link_v1
     //   (RED new SECDEF write, APPLIED 2026-09-19, ledger 20260919151920).
     //   Not this read layer's file. RECOUNTED: 295.
-    expect(count).toBeLessThanOrEqual(295);
+    // Bumped 295 -> 296 for 20260919140000_usage_cost_trigger_search_path_v1
+    //   (R-13 search_path pin, APPLIED 2026-09-19, ledger 20260919153945).
+    //   Not this read layer's file. RECOUNTED: 296.
+    expect(count).toBeLessThanOrEqual(296);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

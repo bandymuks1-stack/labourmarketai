@@ -2122,6 +2122,37 @@ rows of this action; 0 invitations.
 Rollback: `supabase/rollbacks/20260919150000_end_roster_link_v1.down.sql`
 (drops the function; rows ended through it are real decisions and stay).
 
+### `usage_cost_trigger_search_path_v1` — R-13 (function attribute, advisor hygiene) — APPLIED 2026-09-19, ledger `20260919153945`
+
+Repo file `supabase/migrations/20260919140000_usage_cost_trigger_search_path_v1.sql`
+(sha256 `cb42b983bff8fcd093c247cbb66eec5621aab411ee2c512ddf5867379d5768d7`), applied via Supabase MCP `apply_migration` (name
+`usage_cost_trigger_search_path_v1`) under the owner's verbatim approval
+sentence given in chat 2026-09-19 ("Apply
+20260919140000_usage_cost_trigger_search_path_v1 to production. I approve
+pinning search_path = public on usage_cost_events_forbid_mutation() and
+usage_cost_events_forbid_truncate(). Rollback file acknowledged."). PR #1797.
+
+Two statements: `alter function public.usage_cost_events_forbid_mutation()
+set search_path = public` and the same for `usage_cost_events_forbid_truncate()`.
+No body, grant, policy, trigger or row change. The static classifier called
+this GREEN; it stayed on the human gate only because the 2026-09-19 owner
+packet listed it.
+
+Pre-apply drift check: both functions `proconfig NULL`, SECURITY INVOKER,
+each attached to exactly one trigger; ledger 296, no prior row of this name.
+Readback: 297 applied; `proconfig = {search_path=public}` on both; still
+SECURITY INVOKER; still one trigger each; bodies still `raise exception`.
+
+Contract on the live triggers (one DO block aborted by RAISE, 65 rows in the
+table, nothing changed): DELETE → `42501 usage_cost_events is append-only:
+DELETE is not permitted`; TRUNCATE → `42501 … TRUNCATE is not permitted`;
+UPDATE (`set event_id = event_id` on one row) → `42501 usage_cost_events is
+append-only: UPDATE is not permitted`. The append-only ledger behaves exactly
+as before.
+
+Rollback: `supabase/rollbacks/20260919140000_usage_cost_trigger_search_path_v1.down.sql`
+(`reset search_path` on both; proconfig back to NULL).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
