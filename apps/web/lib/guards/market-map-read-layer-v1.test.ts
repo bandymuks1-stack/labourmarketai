@@ -973,7 +973,11 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 290 -> 291 for 20260918070000_roster_link_subject_consent_guard_v1
     //   (RED trigger, APPLIED 2026-09-18, ledger 20260918070510). Not this read
     //   layer's file. RECOUNTED: 291.
-    expect(count).toBeLessThanOrEqual(291);
+    // Bumped 291 -> 292 for 20260919100000_roster_writes_rpc_only_v1
+    //   (RED grant/policy narrowing, APPLIED 2026-09-19, ledger 20260919104526).
+    //   Not this read layer's file.
+    //   RECOUNTED: 292.
+    expect(count).toBeLessThanOrEqual(292);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

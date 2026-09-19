@@ -1942,6 +1942,44 @@ down→forward is reversible.
 Rollback: `supabase/rollbacks/20260917140000_widen_original_language_uk_ka.down.sql`
 (restores the 11-locale sets; fails loudly if any `uk`/`ka` row exists).
 
+### `roster_writes_rpc_only_v1` — RED R-1 (HIGH, grant + policy narrowing) — APPLIED 2026-09-19, ledger `20260919104526`
+
+Repo file `supabase/migrations/20260919100000_roster_writes_rpc_only_v1.sql`
+(sha256 `558cd636d61860f0d4b9f28a814c52b38626df8c065d640e30449bb91d38260d`),
+applied via Supabase MCP `apply_migration` (name `roster_writes_rpc_only_v1`)
+under the owner's verbatim approval sentence in the 2026-09-19 window handoff
+("Apply 20260919100000_roster_writes_rpc_only_v1 to production. I approve
+revoking insert/update/delete on public.company_workers and
+public.agency_workers from authenticated and dropping the policies
+company_workers_write and agency_workers_write … Rollback file acknowledged.").
+PR #1791.
+
+Revokes insert/update/delete on `company_workers` and `agency_workers` from
+`authenticated` and drops the two `FOR ALL` write policies. Select policies,
+functions, triggers and rows untouched. Every legitimate writer is a SECURITY
+DEFINER RPC (`invite_*` → the WORKER's `accept_*_worker_invitation` →
+owner-gated `assign_*_worker_role` / `set_*_worker_journal_review`;
+`accept_invitation_v2`).
+
+**Readback (production `gorgitwvdzxbnaxhrsrw`, zero residue):** before —
+`company_workers` relacl `authenticated=arwd`, both `_write` policies present;
+`agency_workers` relacl NULL (it never had an `authenticated` grant — its
+`_write` policy was inert; `company_workers` was the live hole). After —
+`company_workers` `authenticated=r`; `agency_workers` relacl unchanged (null);
+policies left: `company_workers_select`, `agency_workers_select`. Hostile
+contract as the real company owner / agency owner under `set local role
+authenticated` (rolled back): direct INSERT active row naming an isolated E2E
+worker → 42501; direct UPDATE `status` → 42501; direct UPDATE `worker_id` →
+42501; direct DELETE → 42501; agency owner direct INSERT → 42501; owner SELECT
+of own roster → 1 row (reads unchanged). Legitimate path (rolled back):
+`caller_manages_worker` false → `invite_company_worker` → the worker's
+`accept_company_worker_invitation` → active row (1) → `caller_manages_worker`
+true → `assign_company_worker_role` (row shows the role) →
+`assign_worker_to_project` → `project_worker_assignments` active row (1).
+
+Rollback: `supabase/rollbacks/20260919100000_roster_writes_rpc_only_v1.down.sql`
+(restores both policies and both grants verbatim).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
