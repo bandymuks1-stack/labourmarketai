@@ -9420,6 +9420,7 @@
       "scopeNote": "Tai ne paraiška, darbdaviui žinutė nesiunčiama. Kandidatuojama ir toliau per originalų skelbimą.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "handoffQueued": "Susidomėjimas užfiksuotas ir laukia perdavimo „Nonstop Group“ komercinei komandai. LabourMarket.ai darbdaviui nieko nesiuntė.",
+      "handoffQueuedConsentWithheld": "Jūsų susidomėjimas įrašytas. Nepažymėjote pristatymo langelio, todėl „Nonstop Group“ apie jus nieko neperduodama. Jei norite būti pristatytas, atšaukite ir pareikškite susidomėjimą iš naujo pažymėję langelį. LabourMarket.ai darbdaviui nieko neišsiuntė.",
       "handoffDelivered": "Susidomėjimas perduotas „Nonstop Group“. „Nonstop“ gali kreiptis į darbdavį savo komerciniu procesu; LabourMarket.ai darbdaviui nieko nesiuntė.",
       "handoffClosed": "Susidomėjimas užfiksuotas. Ankstesnis perdavimas „Nonstop Group“ buvo uždarytas, kai jį atšaukėte; niekas nebuvo išsiųsta."
     }

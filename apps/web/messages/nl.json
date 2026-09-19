@@ -9420,6 +9420,7 @@
       "scopeNote": "Dit is geen sollicitatie en er gaat geen bericht naar de werkgever. Solliciteren gebeurt nog steeds via de originele advertentie.",
       "error": "Opslaan is mislukt. Probeer het opnieuw.",
       "handoffQueued": "Uw interesse is vastgelegd en wacht op doorgifte aan het commerciële team van Nonstop Group. LabourMarket.ai heeft de werkgever niets gestuurd.",
+      "handoffQueuedConsentWithheld": "Je interesse is vastgelegd. Je hebt het vakje voor voorstellen niet aangevinkt, dus er wordt niets over jou aan Nonstop Group doorgegeven. Wil je worden voorgesteld, trek je interesse dan in en geef die opnieuw aan met het vakje aangevinkt. LabourMarket.ai heeft niets naar de werkgever gestuurd.",
       "handoffDelivered": "Uw interesse is doorgegeven aan Nonstop Group. Nonstop kan de werkgever via zijn eigen commerciële proces benaderen; LabourMarket.ai heeft de werkgever niets gestuurd.",
       "handoffClosed": "Uw interesse is vastgelegd. De eerdere doorgifte aan Nonstop Group is gesloten toen u introk; er is niets verstuurd."
     }

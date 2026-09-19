@@ -2233,6 +2233,7 @@
       "scopeNote": "To nie jest aplikacja i żadna wiadomość nie trafia do pracodawcy. Aplikowanie nadal odbywa się przez oryginalne ogłoszenie.",
       "error": "Nie udało się zapisać. Spróbuj ponownie.",
       "handoffQueued": "Zainteresowanie zapisane i czeka na przekazanie zespołowi handlowemu Nonstop Group. LabourMarket.ai nic pracodawcy nie wysłał.",
+      "handoffQueuedConsentWithheld": "Twoje zainteresowanie jest zapisane. Nie zaznaczyłeś pola o przedstawieniu, więc do Nonstop Group nie trafia nic na Twój temat. Aby zostać przedstawionym, wycofaj i wyraź zainteresowanie ponownie z zaznaczonym polem. LabourMarket.ai nic nie wysłał do pracodawcy.",
       "handoffDelivered": "Zainteresowanie przekazano do Nonstop Group. Nonstop może zwrócić się do pracodawcy w ramach własnego procesu handlowego; LabourMarket.ai nic pracodawcy nie wysłał.",
       "handoffClosed": "Zainteresowanie zapisane. Wcześniejsze przekazanie do Nonstop Group zostało zamknięte, gdy je wycofano; nic nie zostało wysłane."
     }

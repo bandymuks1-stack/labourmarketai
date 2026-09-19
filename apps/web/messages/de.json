@@ -9420,6 +9420,7 @@
       "scopeNote": "Das ist keine Bewerbung, und es geht keine Nachricht an den Arbeitgeber. Beworben wird weiterhin über die Originalanzeige.",
       "error": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
       "handoffQueued": "Ihr Interesse ist vermerkt und wartet auf die Weitergabe an das Vertriebsteam von Nonstop Group. LabourMarket.ai hat dem Arbeitgeber nichts gesendet.",
+      "handoffQueuedConsentWithheld": "Ihr Interesse ist vermerkt. Sie haben das Vorstellungs-Kästchen nicht angehakt, daher wird nichts über Sie an die Nonstop Group weitergegeben. Um vorgestellt zu werden, ziehen Sie das Interesse zurück und bekunden Sie es erneut mit angehaktem Kästchen. LabourMarket.ai hat dem Arbeitgeber nichts gesendet.",
       "handoffDelivered": "Ihr Interesse wurde an Nonstop Group weitergegeben. Nonstop kann den Arbeitgeber über seinen eigenen kommerziellen Prozess ansprechen; LabourMarket.ai hat dem Arbeitgeber nichts gesendet.",
       "handoffClosed": "Ihr Interesse ist vermerkt. Die frühere Weitergabe an Nonstop Group wurde geschlossen, als Sie zurückzogen; nichts wurde gesendet."
     }

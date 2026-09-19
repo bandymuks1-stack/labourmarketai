@@ -40,7 +40,7 @@ export function VacancyInterestButton({
   initialStatus: InterestStatus | null;
   /** Whether a handoff row already exists for this worker+vacancy (own
    *  RLS read), so a reload shows the same truth the click showed. */
-  initialHandoff: { status: string; outreachState: string } | null;
+  initialHandoff: { status: string; outreachState: string; consentGiven?: boolean } | null;
   labels: {
     express: string;
     sent: string;
@@ -50,6 +50,9 @@ export function VacancyInterestButton({
     consentHint: string;
     /** After the click: the handoff truth, by state. */
     handoffQueued: string;
+    /** R-14: queued, but the presentation box was NOT ticked — the gate holds
+     *  the row and nothing about the person is passed on. */
+    handoffQueuedConsentWithheld: string;
     handoffDelivered: string;
     handoffClosed: string;
     handoffTooNew: string;
@@ -66,7 +69,12 @@ export function VacancyInterestButton({
   const [consent, setConsent] = useState(false);
   const [handoff, setHandoff] = useState<VacancyHandoffOutcome | null>(
     initialHandoff
-      ? { kind: "exists", outreachState: initialHandoff.outreachState, status: initialHandoff.status }
+      ? {
+          kind: "exists",
+          outreachState: initialHandoff.outreachState,
+          status: initialHandoff.status,
+          consentGiven: initialHandoff.consentGiven,
+        }
       : null,
   );
   const [failed, setFailed] = useState(false);
@@ -101,13 +109,20 @@ export function VacancyInterestButton({
   // What the row may claim, by the handoff's REAL state: queued = waiting to
   // be passed on (never "passed on"); delivered = passed on; closed = was
   // closed when the hand was lowered. Nothing here says an employer heard.
+  // R-14: a QUEUED row without proposition consent is held by the dispatcher
+  // and never posted, so "waiting to be passed on" would be false for it.
+  // Right after the click the answer is the local checkbox; on a reload it is
+  // the stored `proposition_consent` (own RLS read). Unknown → the plain
+  // queued line, never the stronger claim.
+  const queuedLine = (consentGiven: boolean | undefined) =>
+    consentGiven === false ? labels.handoffQueuedConsentWithheld : labels.handoffQueued;
   const handoffLine =
     !active || !handoff
       ? null
       : handoff.kind === "created"
         ? handoff.outreachState === "ineligible_too_new"
           ? labels.handoffTooNew
-          : labels.handoffQueued
+          : queuedLine(consent)
         : handoff.kind === "exists"
           ? handoff.status === "closed"
             ? labels.handoffClosed
@@ -115,7 +130,7 @@ export function VacancyInterestButton({
               ? labels.handoffDelivered
               : handoff.outreachState === "ineligible_too_new"
                 ? labels.handoffTooNew
-                : labels.handoffQueued
+                : queuedLine(handoff.consentGiven)
           : handoff.kind === "ineligible"
             ? (labels.handoffIneligible[handoff.reason] ?? labels.sent)
             : labels.handoffPending;

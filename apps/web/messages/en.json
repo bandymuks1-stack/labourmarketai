@@ -9420,6 +9420,7 @@
       "scopeNote": "This is not an application and no message goes to the employer. Applying still happens through the original advertisement.",
       "error": "Could not save. Try again.",
       "handoffQueued": "Your interest is recorded and waiting to be passed to Nonstop Group’s commercial team. Nothing has been sent to the employer by LabourMarket.ai.",
+      "handoffQueuedConsentWithheld": "Your interest is recorded. You did not tick the presentation box, so nothing about you is passed to Nonstop Group. To be presented, withdraw and express interest again with the box ticked. Nothing has been sent to the employer by LabourMarket.ai.",
       "handoffDelivered": "Your interest was passed to Nonstop Group. Nonstop may approach the employer through its own commercial process; LabourMarket.ai has sent nothing to the employer.",
       "handoffClosed": "Your interest is recorded. The earlier hand-over to Nonstop Group was closed when you withdrew; nothing had been sent."
     }
