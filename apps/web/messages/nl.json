@@ -4641,6 +4641,7 @@
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
         "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
+        "event_journal_entry_confirmed": "Je journaalitem is bevestigd",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
         "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
       },

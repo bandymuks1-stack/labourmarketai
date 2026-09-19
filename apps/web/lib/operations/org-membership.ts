@@ -3,6 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { emitJournalEntryConfirmedNotification } from "@/lib/notifications/event-emitters";
 import { terminalStaleFromError } from "@/lib/learning/learning-shared";
 
 /**
@@ -174,6 +175,14 @@ export async function confirmEntryAndVerifySkills(
   }
   const code = String(data ?? "");
   if (code.startsWith("verified:")) {
+    // R-6 (v9): the entry was confirmed (with named skills) — tell the worker.
+    // Inert while the v9 CHECK is not applied; the confirmation stands.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      await emitJournalEntryConfirmedNotification({ entryId, actorProfileId: user.id });
+    }
     revalidatePath(`/${locale}/dashboard/inbox`);
     revalidatePath(`/${locale}/dashboard/journal`);
     revalidatePath(`/${locale}/dashboard/profile`);

@@ -690,6 +690,82 @@ export async function emitDemandInterestResponseNotification(input: {
   }
 }
 
+/**
+ * v9 (R-6, 2026-09-19): a manager CONFIRMED a worker's journal entry.
+ *
+ * Recipient: the WORKER who wrote the entry, read through the entry's
+ * `worker_id` → `workers.profile_id` with the admin client (the manager's own
+ * RLS may not reach the worker row; the recipient lookup is not a grant).
+ * The confirming manager is never notified about their own act (a manager
+ * confirming their OWN entry — possible for an owner who also journals — is
+ * the `recipient === actor` case and returns silently).
+ *
+ * POINTER-ONLY, one row per entry: entity_id is the entry id, so with the
+ * UNIQUE (recipient, dedupe_key) constraint a second confirmation of the same
+ * entry (re-review, batch + single) writes nothing new. Metadata stays empty —
+ * the confirmation is in `journal_entry_confirmations` and the badge on
+ * /dashboard/journal renders it; a notification never becomes a second copy.
+ *
+ * Only APPROVALS emit. A rejection or a change request is a conversation the
+ * inbox already carries as the entry's status; telling someone their work
+ * was rejected by bell is a product decision, not a gap to close silently.
+ *
+ * Emission is an enhancement: every failure path returns; the confirmation
+ * itself already succeeded in the RPC before this runs.
+ */
+export async function emitJournalEntryConfirmedNotification(input: {
+  readonly entryId: string;
+  /** The confirming profile — never notified about their own act. */
+  readonly actorProfileId: string;
+}): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data: entry } = await admin
+      .from("journal_entries")
+      .select("worker_id")
+      .eq("id", input.entryId)
+      .maybeSingle();
+    const workerId = (entry as { worker_id?: string } | null)?.worker_id ?? null;
+    if (!workerId) {
+      notDelivered("journal_entry_confirmed", "entry_unreadable");
+      return;
+    }
+    const recipient = await workerProfileId(admin, workerId);
+    if (!recipient || recipient === input.actorProfileId) return;
+
+    const prefRows = await readPrefRowsFailOpen(admin, recipient);
+    if (!resolveChannelEnabled(prefRows, "journal_entry_confirmed", "in_app")) {
+      return;
+    }
+
+    const outcome = await emitNotificationEvent(admin, {
+      recipientProfileId: recipient,
+      eventType: "journal_entry_confirmed",
+      entityType: "journal_entry",
+      entityId: input.entryId,
+      metadata: {},
+    });
+    if (outcome.kind === "unexpected_error") {
+      console.error(
+        `[notifications] journal_entry_confirmed emit failed: ${outcome.code}`,
+      );
+    }
+    if (outcome.kind === "written") {
+      await maybeDispatchNotificationEmail(
+        admin,
+        {
+          recipientProfileId: recipient,
+          eventType: "journal_entry_confirmed",
+          entityType: "journal_entry",
+        },
+        prefRows,
+      );
+    }
+  } catch {
+    // Emission is an enhancement; the confirmation already succeeded.
+  }
+}
+
 /** Absence lifecycle events. `absenceId` is the worker_absences row id. */
 export async function emitAbsenceNotification(
   absenceId: string,

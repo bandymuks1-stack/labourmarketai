@@ -4641,6 +4641,7 @@
         "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
         "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų",
         "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
+        "event_journal_entry_confirmed": "Jūsų žurnalo įrašas patvirtintas",
         "event_weekly_digest_profile_completion": "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
         "event_weekly_digest_journal": "Paruošta tavo savaitės darbo žurnalo apžvalga"
       },

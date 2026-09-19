@@ -108,7 +108,16 @@ export type NotificationEventType =
   // and a campaign link notifies once per invitation — not once per seat,
   // which would turn a 30-person crew into 30 bells for the same fact. The
   // href is the network page, where the sent list already shows who joined.
-  | "invitation_accepted";
+  | "invitation_accepted"
+  // v9 (20260919200000, R-6): a manager CONFIRMED one of the worker's journal
+  // entries. Recipient is the WORKER and only the worker (the confirming
+  // manager is never told about their own act). entity_id is the journal
+  // entry id — with UNIQUE (recipient, dedupe_key) a re-confirmation of the
+  // same entry notifies once. POINTER-ONLY: the confirmation itself lives in
+  // journal_entry_confirmations and the badge on /dashboard/journal renders
+  // it; metadata stays empty. This is the fact the whole flywheel turns on
+  // (REAL WORK → EVIDENCE → IDENTITY) and it had no carrier.
+  | "journal_entry_confirmed";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -136,7 +145,10 @@ export type NotificationEntityType =
   // criteria recomputes the answer live.
   | "saved_search"
   // v8: the canonical invitation row, seen from the inviter's side.
-  | "invitation";
+  | "invitation"
+  // v9: the worker's own journal entry — resolves to the journal page, where
+  // the confirmed badge already renders.
+  | "journal_entry";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -169,6 +181,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   "weekly_digest",
   "saved_search_match",
   "invitation_accepted",
+  "journal_entry_confirmed",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -241,6 +254,9 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // v8: the sent-invitations list on the network page is where an inviter
   // already sees each invitation's state (opened / joined / accepted).
   invitation: "/dashboard/network",
+  // v9: the worker's journal, where the confirmed badge on the entry is the
+  // canonical rendering of the fact the notification points at.
+  journal_entry: "/dashboard/journal",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown
