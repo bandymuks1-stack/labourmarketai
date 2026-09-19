@@ -1402,6 +1402,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // granularity kept truthful). RED, owner-approved and APPLIED 2026-09-19
       // (ledger 20260919145731); contract run on the live function, rolled back.
       "20260919130000_update_project_facts_v1.sql",
+      // 2026-09-19 — R-13: `alter function … set search_path = public` on the
+      // two usage_cost_events trigger functions (advisor WARN; SECURITY INVOKER
+      // bodies that only RAISE). Owner-packet item → human gate; NOT APPLIED.
+      "20260919140000_usage_cost_trigger_search_path_v1.sql",
       // 2026-09-19 — R-9: `end_roster_link_v1` — the worker or the owner ends a
       // roster relationship (status 'removed', employee engagement ended,
       // audited, never a DELETE). RED, owner-approved and APPLIED 2026-09-19
