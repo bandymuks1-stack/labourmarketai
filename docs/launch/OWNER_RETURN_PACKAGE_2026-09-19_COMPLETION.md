@@ -126,12 +126,14 @@ rows, 99 970 active public vacancies. `matches`, `match_actions`,
 - 800 h period record: ONE canonical record, monthly projection sums to
   800.00, no code path turns it into day rows (re-verified, guarded).
 - Subject dispute policy (`20260915185038`) IS applied although its file
-  header still says "PREPARED, NOT APPLIED".
+  header still carries the pre-apply "PREPARED" banner (stale header text,
+  a production fact is the ledger).
 - No deletion executor exists; 57 `ON DELETE NO ACTION` FKs to profiles block
   a hard delete; no organization archival; a worker cannot end their own
-  `company_workers` link; `ai_runs.profile_id` is never nulled; no retention
-  for `usage_cost_events`, `pilot_events`, `notification_events`,
-  `conversation_messages` (all RED, R-7…R-10).
+  `company_workers` link; the applied `ai_runs` retention sweep redacts
+  `output_excerpt` but leaves `profile_id` in place (redaction, not de-linking);
+  `usage_cost_events`, `pilot_events`, `notification_events` and
+  `conversation_messages` have no purge schedule (all RED, R-7…R-10).
 
 ### B4. UX / reachability / mobile / a11y
 - `MobileSheet` (`role=dialog aria-modal`) moved no focus, had no trap and
