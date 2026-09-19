@@ -2,11 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import {
-  SKILL_FEEDBACK_REASON_MAX,
-  buildSkillFeedbackSignal,
-  normalizeFeedbackReason,
-} from "./skill-feedback-signal";
+import { buildSkillFeedbackSignal } from "./skill-feedback-signal";
+import { SKILL_FEEDBACK_REASON_MAX, normalizeFeedbackReason } from "./skill-feedback-model";
 
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
@@ -95,6 +92,9 @@ describe("the ledger has writers now (it had none until 2026-09-19)", () => {
   it("the saved-entry card offers the optional reason after a rejection", () => {
     const card = read("components/app/journal-entry-candidate-decision.tsx");
     expect(card).toMatch(/noteSkillRejectReason/);
+    // A client component may import the model, never the server-only writer.
+    expect(card).toMatch(/from "@\/lib\/learning\/skill-feedback-model"/);
+    expect(card).not.toMatch(/from "@\/lib\/learning\/skill-feedback-signal"/);
     expect(card).toMatch(/entry-candidate-reject-reason-/);
     expect(card).toMatch(/maxLength=\{SKILL_FEEDBACK_REASON_MAX\}/);
     for (const locale of ["en", "lt", "ru", "nl", "de"]) {

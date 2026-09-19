@@ -7,7 +7,7 @@ import {
   noteSkillRejectReason,
   rejectJournalSkillCandidate,
 } from "@/lib/journal/skill-pipeline-actions";
-import { SKILL_FEEDBACK_REASON_MAX } from "@/lib/learning/skill-feedback-signal";
+import { SKILL_FEEDBACK_REASON_MAX } from "@/lib/learning/skill-feedback-model";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import type { EntryPendingCandidate } from "@/lib/journal/entry-pending-candidates";
 

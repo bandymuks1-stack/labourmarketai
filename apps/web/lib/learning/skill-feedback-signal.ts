@@ -2,6 +2,13 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import {
+  SKILL_FEEDBACK_REASON_MAX,
+  normalizeFeedbackReason,
+} from "@/lib/learning/skill-feedback-model";
+
+export { SKILL_FEEDBACK_REASON_MAX, normalizeFeedbackReason };
+
 /**
  * SKILL RECOGNITION FEEDBACK → THE LEARNING LEDGER.
  *
@@ -35,18 +42,6 @@ export interface SkillFeedbackInput {
   /** The person's own words, optional, bounded. Never required: "no" is a
    *  complete answer. */
   readonly reason?: string | null;
-}
-
-export const SKILL_FEEDBACK_REASON_MAX = 300;
-
-/** Trim + bound the reason; empty becomes null, never "". */
-export function normalizeFeedbackReason(reason: string | null | undefined): string | null {
-  if (typeof reason !== "string") return null;
-  const clean = reason.replace(/\s+/g, " ").trim();
-  if (clean === "") return null;
-  return clean.length > SKILL_FEEDBACK_REASON_MAX
-    ? clean.slice(0, SKILL_FEEDBACK_REASON_MAX)
-    : clean;
 }
 
 /** The ledger row, built without touching the database (pure, testable). */
