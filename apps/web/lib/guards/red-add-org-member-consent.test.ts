@@ -137,7 +137,7 @@ describe("the only application caller already passes roster-derived workers", ()
     // `addable` = active rows of the legacy link table (company_workers /
     // agency_workers), which since R-1 only the worker's acceptance writes.
     expect(read).toMatch(/const linkTable = kind === "company" \? "company_workers" : "agency_workers";/);
-    expect(read).toMatch(/\.from\(linkTable\)[^;]*\.eq\("status", "active"\)/s);
+    expect(read).toMatch(/\.from\(linkTable\)[^;]*\.eq\("status", "active"\)/);
   });
 
   it("the roster tables themselves are RPC-only since R-1 (the consent this migration carries forward)", () => {
