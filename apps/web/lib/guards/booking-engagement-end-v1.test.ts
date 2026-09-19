@@ -1388,6 +1388,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval sentence, ledger 20260919104526; hostile contract (5 × 42501)
       // and the legitimate path proven live, rolled back. PR #1791.
       "20260919100000_roster_writes_rpc_only_v1.sql",
+      // 2026-09-19 — R-16 (HIGH, completion window): `add_org_member` minted an
+      // active `employee` engagement context for ANY worker (no roster row, no
+      // invitation, no consent) — proven live, rolled back; the forged row
+      // unlocks can_view_worker. The RPC now requires an active consent-backed
+      // roster row ('not_linked' otherwise). RED, owner-approved and APPLIED
+      // 2026-09-19 (ledger 20260919143247); contract run on the live function,
+      // rolled back.
+      "20260919120000_add_org_member_requires_consented_roster_v1.sql",
 ]);
   });
 

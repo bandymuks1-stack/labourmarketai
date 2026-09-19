@@ -2564,7 +2564,15 @@ describe("no migration files added by this sprint", () => {
 // APPLIED 2026-09-19 under the owner's verbatim approval, ledger 20260919104526;
 // forge ADMITTED live rows=1 before, 42501 ×5 after, legitimate path proven —
 // all rolled back (PR #1791). RECOUNTED: 292.
-const SPRINT_BASELINE = 292;
+// Bumped 292 -> 293 for 20260919120000_add_org_member_requires_consented_roster_v1
+// (R-16 HIGH: add_org_member minted an active employee engagement context for
+// ANY worker — no roster row, no invitation, no consent — which unlocks
+// can_view_worker; the RPC now requires an active consent-backed roster row).
+// RED, owner-approved and APPLIED 2026-09-19 (ledger 20260919143247); forge
+// ADMITTED live rows=1 before, the LIVE function refuses (not_linked / rows=0)
+// after, invite → worker accepts → already_member — all rolled back (PR #1794).
+// RECOUNTED: 293.
+const SPRINT_BASELINE = 293;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

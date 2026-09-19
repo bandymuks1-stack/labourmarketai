@@ -977,7 +977,10 @@ describe("NO new DB migration in this PR", () => {
     //   (RED grant/policy narrowing, APPLIED 2026-09-19, ledger 20260919104526).
     //   Not this read layer's file.
     //   RECOUNTED: 292.
-    expect(count).toBeLessThanOrEqual(292);
+    // Bumped 292 -> 293 for 20260919120000_add_org_member_requires_consented_roster_v1
+    //   (RED SECDEF body change, APPLIED 2026-09-19, ledger 20260919143247).
+    //   Not this read layer's file. RECOUNTED: 293.
+    expect(count).toBeLessThanOrEqual(293);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
