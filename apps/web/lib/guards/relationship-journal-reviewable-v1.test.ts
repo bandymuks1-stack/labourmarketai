@@ -42,11 +42,19 @@ describe("the migration: the rule is data, fail-closed, seeded for exactly two r
     expect(fn).toContain("if not (public.is_admin() or public.manages_organization(v_org)) then return 'not_authorized'; end if;");
   });
 
-  it("does not touch worker visibility, RLS, grants or the RPL layer", () => {
+  it("does not touch worker visibility, RLS, table grants or the RPL layer", () => {
     expect(up).not.toMatch(/grants_worker_visibility\s*=/);
-    expect(up).not.toMatch(/create policy|alter policy|drop policy|grant |revoke /i);
-    // SQL body only — the header prose names the RPL layer to say it is untouched.
+    // SQL body only — the header prose names the layers it does NOT touch.
     const body = up.slice(up.indexOf("\nbegin;"));
+    expect(body).not.toMatch(/create policy|alter policy|drop policy/i);
+    // The ONLY grant/revoke lines are the function's own anon closure +
+    // authenticated execute (required for every SECURITY DEFINER created
+    // after 20260722160000); no table privilege moves.
+    const grantLines = body.split("\n").filter((l) => /^\s*(grant|revoke)\b/i.test(l));
+    expect(grantLines.length).toBe(2);
+    for (const l of grantLines) {
+      expect(l).toContain("on function public.set_engagement_journal_review(uuid, boolean)");
+    }
     expect(body).not.toMatch(/recogni[sz]ed|equivalence|qualification_asserted/i);
   });
 
