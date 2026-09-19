@@ -2578,7 +2578,13 @@ describe("no migration files added by this sprint", () => {
 // no dates). RED (new SECURITY DEFINER function), owner-approved and APPLIED
 // 2026-09-19 (ledger 20260919145731); the seven-case contract run on the LIVE
 // function and rolled back (PR #1795). RECOUNTED: 294.
-const SPRINT_BASELINE = 294;
+// Bumped 294 -> 295 for 20260919150000_end_roster_link_v1 (R-9: the ONE gated
+// end for a roster link — the worker withdraws the relationship they accepted
+// or the owner removes them; status → 'removed', employee engagement ended,
+// audited; never a DELETE). RED (new SECURITY DEFINER function), owner-approved
+// and APPLIED 2026-09-19 (ledger 20260919151920); the contract run on the LIVE
+// function and rolled back (PR #1798). RECOUNTED: 295.
+const SPRINT_BASELINE = 295;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

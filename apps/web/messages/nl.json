@@ -16738,5 +16738,24 @@
       }
     },
     "needsAgency": "Aanbod"
+  },
+  "rosterLinkEnd": {
+    "title": "Mijn teams",
+    "hint": "Teams waarvan u een uitnodiging hebt aanvaard. U kunt op elk moment vertrekken; de organisatie behoudt haar eigen gegevens maar erkent u niet langer als haar werknemer.",
+    "unnamedOrganization": "Organisatie zonder naam",
+    "since": "sinds {date}",
+    "openSelf": "Ik werk hier niet meer — dit team verlaten",
+    "openOwner": "Van de lijst verwijderen",
+    "confirmSelf": "Vertrekken beëindigt deze relatie nu: de organisatie kan u niet meer toewijzen, uw privéprofiel erdoor lezen of u voorstellen. Uw journaal blijft van u.",
+    "confirmOwner": "Verwijderen beëindigt deze relatie nu: de persoon staat niet meer op uw lijst en kan er niet via worden toegewezen. Zijn of haar journaal blijft van hem of haar.",
+    "reasonLabel": "Reden (optioneel, bewaard in het record)",
+    "submit": "Bevestigen",
+    "cancel": "Annuleren",
+    "doneSelf": "U hebt dit team verlaten.",
+    "doneOwner": "Van de lijst verwijderd.",
+    "needsMigration": "Een teamlink beëindigen is in deze omgeving nog niet ingeschakeld.",
+    "notFound": "Deze link bestaat niet meer of u mag hem niet beëindigen.",
+    "failed": "De link kon niet worden beëindigd. Probeer het opnieuw.",
+    "readFailed": "Uw teams konden nu niet worden gelezen. Dit betekent niet dat u er geen hebt."
   }
 }

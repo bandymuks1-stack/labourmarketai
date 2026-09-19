@@ -16738,5 +16738,24 @@
       }
     },
     "needsAgency": "Supply"
+  },
+  "rosterLinkEnd": {
+    "title": "My teams",
+    "hint": "Teams you accepted an invitation to. You can leave at any time; the organization keeps its own records but stops recognising you as its worker.",
+    "unnamedOrganization": "Unnamed organization",
+    "since": "since {date}",
+    "openSelf": "I no longer work here — leave this team",
+    "openOwner": "Remove from the roster",
+    "confirmSelf": "Leaving ends this relationship now: the organization can no longer assign you, read your private profile through it, or propose you. Your journal stays yours.",
+    "confirmOwner": "Removing ends this relationship now: the person is no longer on your roster and cannot be assigned through it. Their journal stays theirs.",
+    "reasonLabel": "Reason (optional, kept in the record)",
+    "submit": "Confirm",
+    "cancel": "Cancel",
+    "doneSelf": "You left this team.",
+    "doneOwner": "Removed from the roster.",
+    "needsMigration": "Ending a roster link isn't switched on in this environment yet.",
+    "notFound": "This link no longer exists or you may not end it.",
+    "failed": "Could not end the link. Try again.",
+    "readFailed": "Your teams could not be read right now. This is not a claim that you are on none."
   }
 }

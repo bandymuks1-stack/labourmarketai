@@ -16738,5 +16738,24 @@
       }
     },
     "needsAgency": "Angebot"
+  },
+  "rosterLinkEnd": {
+    "title": "Meine Teams",
+    "hint": "Teams, deren Einladung Sie angenommen haben. Sie können jederzeit austreten; die Organisation behält ihre eigenen Aufzeichnungen, erkennt Sie aber nicht mehr als ihre Arbeitskraft an.",
+    "unnamedOrganization": "Unbenannte Organisation",
+    "since": "seit {date}",
+    "openSelf": "Ich arbeite hier nicht mehr — Team verlassen",
+    "openOwner": "Aus der Liste entfernen",
+    "confirmSelf": "Der Austritt beendet diese Beziehung jetzt: Die Organisation kann Sie nicht mehr zuweisen, Ihr privates Profil darüber lesen oder Sie vorschlagen. Ihr Journal bleibt Ihres.",
+    "confirmOwner": "Das Entfernen beendet diese Beziehung jetzt: Die Person steht nicht mehr auf Ihrer Liste und kann darüber nicht zugewiesen werden. Ihr Journal bleibt ihres.",
+    "reasonLabel": "Grund (optional, im Eintrag gespeichert)",
+    "submit": "Bestätigen",
+    "cancel": "Abbrechen",
+    "doneSelf": "Sie haben dieses Team verlassen.",
+    "doneOwner": "Aus der Liste entfernt.",
+    "needsMigration": "Das Beenden einer Teamverbindung ist in dieser Umgebung noch nicht aktiviert.",
+    "notFound": "Diese Verbindung existiert nicht mehr oder Sie dürfen sie nicht beenden.",
+    "failed": "Die Verbindung konnte nicht beendet werden. Versuchen Sie es erneut.",
+    "readFailed": "Ihre Teams konnten gerade nicht gelesen werden. Das heißt nicht, dass Sie keine haben."
   }
 }

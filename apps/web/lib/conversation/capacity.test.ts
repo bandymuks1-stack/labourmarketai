@@ -42,6 +42,7 @@ function worker(
   overrides: Pick<LinkedCompanyWorker, "workerId" | "status" | "displayName" | "email">,
 ): LinkedCompanyWorker {
   return {
+    companyId: "company-1",
     profileId: `profile-${overrides.workerId}`,
     createdAt: "2026-09-01T00:00:00Z",
     operationsRole: null,

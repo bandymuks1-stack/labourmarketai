@@ -124,6 +124,9 @@ export const CLIENT_MESSAGE_ROOTS = [
   "relationshipTypes",
   "reports",
   "roleDashboards",
+  /** R-9 (2026-09-19): the roster-link end control (worker "leave" on the
+   *  profile, owner "remove" on the people page) is a client form. */
+  "rosterLinkEnd",
   "salesIntake",
   "shared",
   "skillGroups",
