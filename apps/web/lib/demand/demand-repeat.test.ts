@@ -27,7 +27,7 @@ describe("stripTimingForRepeat — dates never travel to a new period", () => {
   it("clears every date and deadline, keeps the shape of the work", () => {
     const out = stripTimingForRepeat(v2)!;
     expect(out.time).toEqual({ hours_per_week: 40, shifts: ["day"] });
-    expect((out as { languages: unknown }).languages).toEqual([{ code: "lt", level: "B1" }]);
+    expect((out as unknown as { languages: unknown }).languages).toEqual([{ code: "lt", level: "B1" }]);
   });
 
   it("a time block that held only dates disappears entirely", () => {
