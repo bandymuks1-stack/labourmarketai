@@ -6472,6 +6472,7 @@
     "title": "Mano pranešimai",
     "subtitle": "Kas dabar svarbu ir į ką verta atsakyti. Čia matysite žinutes ir svarbius prašymus.",
     "empty": "Kol kas žinučių nėra. Jei kas nors parašys ar atsiras svarbus prašymas, matysite tai čia.",
+    "emptyCta": "Rasti žmonių ar įmonių bendradarbiavimui",
     "counterparty": {
       "support": "Pagalbos komanda",
       "permitted": "Pašnekovas",
@@ -6618,13 +6619,15 @@
       "title": "Komandos branduolys",
       "scope": "Tuščia būsena",
       "intro": "Čia atsiras jūsų komandos žmonės — realūs darbuotojai, dabartiniai vaidmenys ir kas šią savaitę dirba. Kol kas niekas dar neprisijungė.",
-      "footnote": "Naudokite mygtuką „Pakviesti“ žemiau: kiekvienas žmogus pats priima kvietimą ir atsiranda čia. Žmonių už jus nepridedame."
+      "footnote": "Naudokite mygtuką „Pakviesti“ žemiau: kiekvienas žmogus pats priima kvietimą ir atsiranda čia. Žmonių už jus nepridedame.",
+      "cta": "Pakviesti pirmą žmogų"
     },
     "agency": {
       "title": "Kandidatų rezervas",
       "scope": "Tuščia būsena",
       "intro": "Čia atsiras jūsų aktyvūs kandidatai — kas pasiruošęs, kas šiuo metu įdarbintas, kas laukia kito sezono. Kol kas niekas dar neprisijungė.",
-      "footnote": "Naudokite mygtuką „Pakviesti“ žemiau: kiekvienas kandidatas pats priima kvietimą ir atsiranda čia. Žmonių už jus nepridedame."
+      "footnote": "Naudokite mygtuką „Pakviesti“ žemiau: kiekvienas kandidatas pats priima kvietimą ir atsiranda čia. Žmonių už jus nepridedame.",
+      "cta": "Pakviesti pirmą kandidatą"
     }
   },
   "helpRequests": {
@@ -8142,6 +8145,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Aptartini klausimai",
+      "met": "Atitinkami reikalavimai",
+      "evidenceNote": "Įrodymų palyginimas su šiuo poreikiu – ne formali kvalifikacija ir ne reitingas. Nežinoma lieka nežinoma.",
       "missing": "Trūkstama informacija",
       "blocking": "Blokuojantys reikalavimai"
     },
@@ -15690,6 +15695,7 @@
     "statNew7d": "Paskelbta per 7 d.",
     "statNew30d": "Paskelbta per 30 d.",
     "noneOpen": "Šiuo metu šiame rinkinyje {profession} skelbimų nėra.",
+    "noneOpenCta": "Pakeisti ar pridėti ieškomą darbą",
     "skillsTitleAll": "Prašomi įgūdžiai visuose atviruose skelbimuose",
     "skillsTitleWindow": "Prašomi įgūdžiai {window} naujausiuose skelbimuose",
     "citiesTitleAll": "Kur jie yra – visuose atviruose skelbimuose",

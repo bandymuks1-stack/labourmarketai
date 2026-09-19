@@ -6472,6 +6472,7 @@
     "title": "Mijn berichten",
     "subtitle": "Wat er nu toe doet en waar het de moeite waard is op te reageren. Hier zie je berichten en belangrijke aanvragen.",
     "empty": "Nog geen berichten. Als iemand je schrijft of er een belangrijke aanvraag binnenkomt, zie je die hier.",
+    "emptyCta": "Mensen of bedrijven vinden om mee te werken",
     "counterparty": {
       "support": "Supportteam",
       "permitted": "Gesprekspartner",
@@ -6618,13 +6619,15 @@
       "title": "Teamkern",
       "scope": "Lege staat",
       "intro": "Hier verschijnt je team — echte mensen, hun huidige rol en wie deze week werkt. Nog niemand is aangesloten.",
-      "footnote": "Gebruik “Uitnodigen” hieronder: iedereen accepteert zelf de uitnodiging en verschijnt hier. Wij voegen nooit mensen voor je toe."
+      "footnote": "Gebruik “Uitnodigen” hieronder: iedereen accepteert zelf de uitnodiging en verschijnt hier. Wij voegen nooit mensen voor je toe.",
+      "cta": "De eerste persoon uitnodigen"
     },
     "agency": {
       "title": "Kandidatenbank",
       "scope": "Lege staat",
       "intro": "Hier verschijnen je actieve kandidaten — wie klaarstaat, wie nu geplaatst is, wie op het volgende seizoen wacht. Nog niemand is aangesloten.",
-      "footnote": "Gebruik “Uitnodigen” hieronder: elke kandidaat accepteert zelf de uitnodiging en verschijnt hier. Wij voegen nooit mensen voor je toe."
+      "footnote": "Gebruik “Uitnodigen” hieronder: elke kandidaat accepteert zelf de uitnodiging en verschijnt hier. Wij voegen nooit mensen voor je toe.",
+      "cta": "De eerste kandidaat uitnodigen"
     }
   },
   "helpRequests": {
@@ -8142,6 +8145,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Bespreekpunten",
+      "met": "Vervulde eisen",
+      "evidenceNote": "Bewijsvergelijking met deze behoefte — geen formele kwalificatie, geen ranglijst. Onbekend blijft onbekend.",
       "missing": "Ontbrekende informatie",
       "blocking": "Blokkerende eisen"
     },
@@ -15690,6 +15695,7 @@
     "statNew7d": "Geplaatst in 7 dagen",
     "statNew30d": "Geplaatst in 30 dagen",
     "noneOpen": "Er wordt op dit moment niets geadverteerd voor {profession} in deze verzameling.",
+    "noneOpenCta": "Het werk dat u zoekt wijzigen of toevoegen",
     "skillsTitleAll": "Gevraagde vaardigheden, in alle open vacatures",
     "skillsTitleWindow": "Gevraagde vaardigheden, in de {window} meest recent geplaatste",
     "citiesTitleAll": "Waar ze zijn, in alle open vacatures",

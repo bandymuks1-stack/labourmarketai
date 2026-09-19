@@ -6472,6 +6472,7 @@
     "title": "Meine Nachrichten",
     "subtitle": "Was jetzt wichtig ist und worauf sich eine Antwort lohnt. Hier sehen Sie Nachrichten und wichtige Anfragen.",
     "empty": "Noch keine Nachrichten. Wenn Ihnen jemand schreibt oder eine wichtige Anfrage eingeht, sehen Sie sie hier.",
+    "emptyCta": "Menschen oder Unternehmen zum Zusammenarbeiten finden",
     "counterparty": {
       "support": "Support-Team",
       "permitted": "Gesprächspartner",
@@ -6618,13 +6619,15 @@
       "title": "Kernteam",
       "scope": "Leerer Zustand",
       "intro": "Hier erscheint Ihr Team — echte Menschen, ihre aktuellen Rollen und wer diese Woche arbeitet. Noch ist niemand beigetreten.",
-      "footnote": "Nutzen Sie „Einladen“ unten: jede Person nimmt ihre Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu."
+      "footnote": "Nutzen Sie „Einladen“ unten: jede Person nimmt ihre Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu.",
+      "cta": "Die erste Person einladen"
     },
     "agency": {
       "title": "Kandidatenpool",
       "scope": "Leerer Zustand",
       "intro": "Hier erscheinen Ihre aktiven Kandidaten — wer bereit ist, wer gerade vermittelt ist, wer auf die nächste Saison wartet. Noch ist niemand beigetreten.",
-      "footnote": "Nutzen Sie „Einladen“ unten: jeder Kandidat nimmt seine Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu."
+      "footnote": "Nutzen Sie „Einladen“ unten: jeder Kandidat nimmt seine Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu.",
+      "cta": "Den ersten Kandidaten einladen"
     }
   },
   "helpRequests": {
@@ -8142,6 +8145,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Gesprächspunkte",
+      "met": "Erfüllte Anforderungen",
+      "evidenceNote": "Nachweisvergleich mit diesem Bedarf — keine formale Qualifikation, keine Rangfolge. Unbekannt bleibt unbekannt.",
       "missing": "Fehlende Informationen",
       "blocking": "Blockierende Anforderungen"
     },
@@ -15690,6 +15695,7 @@
     "statNew7d": "In 7 Tagen veröffentlicht",
     "statNew30d": "In 30 Tagen veröffentlicht",
     "noneOpen": "Für {profession} wird in dieser Sammlung derzeit nichts ausgeschrieben.",
+    "noneOpenCta": "Die gesuchte Arbeit ändern oder ergänzen",
     "skillsTitleAll": "Gefragte Fähigkeiten über alle offenen Anzeigen",
     "skillsTitleWindow": "Gefragte Fähigkeiten in den {window} zuletzt veröffentlichten",
     "citiesTitleAll": "Wo sie sind, über alle offenen Anzeigen",

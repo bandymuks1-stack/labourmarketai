@@ -6472,6 +6472,7 @@
     "title": "My messages",
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
     "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
+    "emptyCta": "Find people or companies to work with",
     "counterparty": {
       "support": "Support team",
       "permitted": "Conversation partner",
@@ -6618,13 +6619,15 @@
       "title": "Team core",
       "scope": "Empty state",
       "intro": "This is where your team will appear — real people, their current roles and who is working this week. Nobody has joined yet.",
-      "footnote": "Use “Invite” below: each person accepts their own invitation and appears here. We never add people for you."
+      "footnote": "Use “Invite” below: each person accepts their own invitation and appears here. We never add people for you.",
+      "cta": "Invite the first person"
     },
     "agency": {
       "title": "Candidate bench",
       "scope": "Empty state",
       "intro": "This is where your active candidates will appear — who is ready, who is currently placed, who is waiting for the next season. Nobody has joined yet.",
-      "footnote": "Use “Invite” below: each candidate accepts their own invitation and appears here. We never add people for you."
+      "footnote": "Use “Invite” below: each candidate accepts their own invitation and appears here. We never add people for you.",
+      "cta": "Invite the first candidate"
     }
   },
   "helpRequests": {
@@ -8142,6 +8145,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Discussion points",
+      "met": "Requirements met",
+      "evidenceNote": "Evidence comparison against this need — not a formal qualification, not a ranking. Unknown stays unknown.",
       "missing": "Missing information",
       "blocking": "Blocking requirements"
     },
@@ -15690,6 +15695,7 @@
     "statNew7d": "Published in 7 days",
     "statNew30d": "Published in 30 days",
     "noneOpen": "Nothing is being advertised for {profession} in this pool right now.",
+    "noneOpenCta": "Change or add the work you look for",
     "skillsTitleAll": "Skills asked for, across every open advertisement",
     "skillsTitleWindow": "Skills asked for, across the {window} most recently published",
     "citiesTitleAll": "Where they are, across every open advertisement",
