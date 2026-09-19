@@ -2025,6 +2025,53 @@ zero residue verified afterwards: 0 roster rows, 0 contexts, 0 invitations,
 Rollback: `supabase/rollbacks/20260919120000_add_org_member_requires_consented_roster_v1.down.sql`
 (restores the 20260824130000 body verbatim; grants unchanged).
 
+### `update_project_facts_v1` — RED R-3 (new SECURITY DEFINER write) — APPLIED 2026-09-19, ledger `20260919145731`
+
+Repo file `supabase/migrations/20260919130000_update_project_facts_v1.sql`
+(sha256 `3a94acc577aa6e885b65f4de38a63311630380e86498454591f74e924b13f7c2`), applied via Supabase MCP `apply_migration` (name
+`update_project_facts_v1`) under the owner's verbatim approval sentence given
+in chat 2026-09-19 ("Apply 20260919130000_update_project_facts_v1 to
+production. I approve creating public.update_project_facts_v1 (SECURITY
+DEFINER, can_manage_project-gated, authenticated only) as the one write for a
+project's title, city, country, start and end dates, with a completed project
+read-only. Rollback file acknowledged."). PR #1795.
+
+Creates `public.update_project_facts_v1(uuid, text, text, text, date, date)
+→ jsonb`: validation before any read (title 2..200, ISO-3166 alpha-2 country
+or absent, city ≤ 120 or absent, end ≥ start), row lock, the EXISTING
+`can_manage_project` gate with the anti-oracle shape (`not_found` unless
+assigned), `completed` = read-only checked after authority, `granularity`
+kept truthful (city written → `city`, else `country`), idempotent (same
+facts → `changed=false`, no write, no audit row), audited from/to.
+`authenticated` only; `public` and `anon` revoked. No table, policy, row or
+other function touched.
+
+Pre-apply drift check: function absent; `can_manage_project`,
+`is_assigned_to_project`, `is_admin` present; ledger 294, no prior row of
+this name; branch 0 behind main. Readback after apply: 295 applied; SECURITY
+DEFINER, `search_path=public`, `anon` execute false, `authenticated` true,
+`completed_read_only` positioned after the gate.
+
+Contract on the LIVE function (real actors under `set local role
+authenticated` with JWT claims incl. e-mail; one DO block aborted by RAISE),
+on the real project `562c9c3e` (Labour market ai Sp. z o.o, draft, city
+Pasvalys, country NULL):
+- stranger (Ramūnas, agency owner, no relation) → `not_found`
+- owner, country "Lithuania" → `invalid / country`
+- owner, end before start → `invalid_dates`
+- owner, one-character title → `invalid / title`
+- owner write (`lt` → `LT`, 2026-10-01 → 2026-11-30) → `updated, changed=true`;
+  row read back `country=LT start=2026-10-01 end=2026-11-30 granularity=city`,
+  audit delta 1
+- same write again → `updated, changed=false`
+- status flipped to completed inside the transaction → `completed_read_only`
+Residue after rollback: the row still `country NULL, no dates, status draft`;
+0 audit rows of this action; 0 of 9 projects carry facts.
+
+Rollback: `supabase/rollbacks/20260919130000_update_project_facts_v1.down.sql`
+(drops the function; rows written through it are real manager-entered facts
+and stay).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
