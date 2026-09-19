@@ -30,7 +30,7 @@ branch in six journey-batched commits; everything else is classified below.
 | CI on main | Quality Gates green (run 35380066714); health-probe green |
 | migration ledger | 291 applied = 291 repo files; **this mission applies ZERO migrations, ZERO RLS changes, ZERO authority changes** |
 | Supabase security advisors | 9 anon SECURITY DEFINER functions = the deliberate public preview set; `worker_absence_scheduling` definer view = documented load-bearing exception; leaked-password protection OFF (owner setting); two `usage_cost_events_*` trigger functions without pinned `search_path` (packet item R-13) |
-| branch | `fix/cc/completion-privacy-journey-2026-09-19` — PR `#____` (GREEN class: code, tests, i18n, docs; no migration) |
+| branch | `fix/cc/completion-privacy-journey-2026-09-19` — PR #1789 (GREEN class: code, tests, i18n, docs; no migration; squash auto-merge armed) |
 | production SHA after merge | `________` (filled on merge) |
 
 Live production reality read on 2026-09-19 (counts): 56 profiles, 56 workers,
