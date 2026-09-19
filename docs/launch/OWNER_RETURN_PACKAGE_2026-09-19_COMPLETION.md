@@ -428,3 +428,71 @@ After this PR deploys (check `/api/health` build = merge SHA):
 
 Walk hygiene this mission: one minted QA session (allow-listed identity),
 reads only, deleted after the walk; no production rows written.
+
+---
+
+## L. CONTINUATION DELTA — 2026-09-19, second directive ("exhaust the queue")
+
+### L1. R-1 — proven, prepared, NOT applied
+Rolled-back probe on production (DO block + RAISE, nothing persisted): as the
+real owner of Labour market ai Sp. z o.o, `insert into company_workers
+(company_id, worker_id, status) values (own, <QA worker>, 'active')` was
+**ADMITTED — rows = 1**. Every legitimate writer of `company_workers` /
+`agency_workers` is a SECURITY DEFINER RPC (`invite_*`, `accept_*_worker_
+invitation`, `assign_*_worker_role`, `set_*_worker_journal_review`,
+`accept_invitation_v2`); the application never writes either table with the
+caller's own client (guard `red-roster-writes-rpc-only.test.ts` walks
+lib/app/components: zero). **Draft PR #1791** (label `needs-human-gate`,
+`migration-safety` = STRUCTURAL-GREEN / RISK-ACKNOWLEDGED) carries migration
+`20260919100000_roster_writes_rpc_only_v1` (revoke insert/update/delete from
+`authenticated` on both tables; drop `company_workers_write` and
+`agency_workers_write`; select policies untouched), its verbatim rollback, the
+hostile-test contract, and ONE approval statement:
+
+> **Apply 20260919100000_roster_writes_rpc_only_v1 to production.** I approve
+> revoking insert/update/delete on `public.company_workers` and
+> `public.agency_workers` from `authenticated` and dropping the policies
+> `company_workers_write` and `agency_workers_write`, so that a roster
+> relationship can only be created through the invitation → worker-acceptance
+> RPCs and managed through the owner-gated RPCs. Rollback file acknowledged.
+
+Hostile contract to run live (rolled back) right after apply — FAIL 42501:
+owner inserts an arbitrary active company_workers row; agency owner inserts an
+arbitrary active agency_workers row; owner updates an existing row's status /
+worker directly. PASS: invite → the worker accepts → row exists → role /
+journal-review by the owner → project assignment. Reads unchanged.
+
+### L2. GREEN queue — closed (PR #1792, merged 2026-09-19, squash `e37e531e`; three CI rounds: a script import of a "dead" module, a test cast, and the inquiry-terminology guard on the repeat link)
+| Item | Shipped | Proof |
+|---|---|---|
+| A · client side of the agency bridge by sentence | intent `agency-invites` → `loadClientBridgeForChat` (the partners page's three reads) → chips over NEW dispatcher actions `company.accept-connection` / `decline-connection` / `share-request` = the canonical `bridge-actions` (token-confirmed; client company from the ACTIVE workspace; RPCs re-check ownership + invited e-mail) | router sentences ×5 locales; no-direct-write; registry 76→78, actions 52→55; 55 conversation test files green |
+| B · booking by sentence | intent `propose-booking` → the candidates panel of the open need; the panel's token-confirmed `company.propose-booking` button is the offer (a sentence never picks a person) | router ×5; registry |
+| C · empty states | communication → network; market-map empty pool → work directions; team-roster card → the invitation it described | guard `empty-states-lead-somewhere`; communication exit LOCAL_BROWSER_PROVEN (§L4) |
+| D · employer requirement ledger | scouting renders MET (matchedHard + strengths) beside FAILED (blocking) and UNKNOWN (missing facts) + "evidence comparison — not a qualification, not a ranking"; no new read, no score | guard |
+| E · hours reconciliation | already exists on `/dashboard/company/people` (`team-recorded-work`: journal hours and the organization ledger per member, beside, never added). Nothing to build without new accounting semantics — proven unnecessary | code read |
+| F · per-request demand clone | "Repeat this need" on readback rows → `?repeat=<id>#demand-intake` → `getOwnDemandPrefillById` (own row, same workspace gate, same mapper); urgency and every date/deadline cleared; signals / offers / bookings / messages / evidence never read | `demand-repeat.test.ts` |
+| G · dead code | `lib/worker/reactivation-model.ts` (+test) removed. `lib/profile/skill-evidence-state.ts` was removed and RESTORED — `scripts/skills-evidence-report.ts` imports it; the audit's "orphan" list omitted `scripts/`, so the rest of that list stays untouched | CI typecheck |
+
+### L3. Notifications — final verified truth (worker interest → employer)
+Emitter `emitDemandInterestNotification` fires inside `expressInterestCore`;
+the store's service_role grant is applied (ledger 20260908061619). Per signal
+on the real demands: Klinkerio `a2ffd425` — signal 2026-07-05 17:56 HAS a
+durable `demand_interest_expressed` row (unread by Donatas); signal 17:46 has
+none; the Nonstop demand's 2026-07-05 and 2026-08-25 signals have none; every
+signal since the grant (2026-09-17 ×2) has its row. The three missing rows
+fall in the pre-grant window and cannot be re-emitted by the code (dedupe by
+signal id is the only emit path); an owner-run backfill is possible but is a
+production write and is NOT done here. Employer awareness does not depend on
+the durable row: the needs page shows "interest waiting" per demand and the
+scouting view reads the signals directly (Donatas sees 2 on Klinkerio).
+
+### L4. Proof
+- typecheck + lint green on every touched file; product gate PASS_WITH_SCOPED_TRANSITIONAL_WAIVER; migration-safety GREEN (queue) / STRUCTURAL-GREEN RISK-ACKNOWLEDGED (#1791)
+- first CI run of #1792 caught two things the local run missed: a script import of a "dead" module and a test cast — both fixed in the same PR
+- LOCAL_BROWSER_PROVEN (production build, production backend, QA identity, 1360 + 390 px): `/lt/dashboard/communication` renders the empty state with the network exit (localized href `/lt/dashboard/network`), zero horizontal overflow; the map's empty-pool exit could not be rendered with the QA identity (its pool is not empty) — guarded
+- PRODUCTION: `/api/health.build = e37e531e` at 2026-09-19 10:19 UTC (auth + db ok); `/robots.txt` still lists the invite/oauth exclusions from #1789. Authenticated surfaces of #1792 are PRODUCTION_DEPLOYED; their PRODUCTION_BROWSER_PROVEN is the human walk (§K): Donatas — /dashboard/company/needs "Repeat this inquiry" on a past request; scouting cards now show "Requirements met"; in the chat, "agentūra mane pakvietė" and "pasiūlyti darbą kandidatui". Ramūnas — same chat sentences from the Nonstop workspace once an agency invitation exists.
+
+### L5. Capability loss
+None. R-1 changes nothing until approved. The chat gained three actions that
+exist as page forms already; no intent, action, route or table was removed.
+The one deletion (`reactivation-model.ts`) had no importer anywhere.
