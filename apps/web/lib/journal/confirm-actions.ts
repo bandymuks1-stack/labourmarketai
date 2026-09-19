@@ -64,7 +64,15 @@ async function recomputeProfessionSkills(
     lastConfirmationAt,
   });
 
-  await supabase
+  // R-5 honesty (2026-09-19): this UPDATE runs under the CALLER's RLS client.
+  // `worker_skills_write` is `owns_worker(worker_id) or is_admin()`, so for a
+  // manager the statement filters to ZERO rows and PostgREST reports no error
+  // — the recompute silently never landed for every manager approval since
+  // M1. The real fix is a SECURITY DEFINER recompute (owner packet R-5,
+  // blocked on the confidence-bin direction decision); until then the no-op
+  // is at least NAMED: the landed row count is read back and a mismatch is
+  // logged (counts only — no identities, no content).
+  const { data: landed, error } = await supabase
     .from("worker_skills")
     .update({
       confidence_score: score,
@@ -72,7 +80,17 @@ async function recomputeProfessionSkills(
       last_recompute_at: new Date().toISOString(),
     })
     .eq("worker_id", workerId)
-    .in("skill_id", skillIds);
+    .in("skill_id", skillIds)
+    .select("skill_id");
+  const landedCount = landed?.length ?? 0;
+  if (error || landedCount < skillIds.length) {
+    console.warn("[journal.confidence-recompute] not_landed", {
+      reason: error ? "error" : "rls_filtered",
+      code: error?.code ?? null,
+      targeted: skillIds.length,
+      landed: landedCount,
+    });
+  }
 }
 
 /** Side effects of an APPROVED review: recompute confidence for the entry's

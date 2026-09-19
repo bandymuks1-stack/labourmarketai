@@ -290,7 +290,7 @@
     "disclosureTitle": "Ennen tallennusta",
     "disclosureProcessing": "Äänitteesi lähetetään LabourMarket.ai:n hallinnoimalle käsittelypalvelimelle tekstiksi muuntamista varten. Kolmannen osapuolen puhepalveluja ei käytetä.",
     "disclosureWhy": "Sitä käytetään vain alla olevan tekstin luomiseen — ei mihinkään muuhun.",
-    "disclosureRetention": "Äänite säilytetään vain, kunnes tekstisi on valmis (enintään 30 päivää), ja voit poistaa sen milloin tahansa.",
+    "disclosureRetention": "Itse äänitettä ei säilytetä: se poistetaan heti, kun tekstisi on valmis.",
     "disclosureNoAutoWrite": "Mitään ei lisätä päiväkirjaan, profiiliin tai CV:hen ennen kuin olet tarkistanut tekstin ja tallentanut jokaisen kohdan itse.",
     "disclosureAck": "Ymmärrän ja hyväksyn puheen käsittelyn",
     "start": "Aloita tallennus",

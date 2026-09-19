@@ -142,7 +142,7 @@
     "disclosureTitle": "Før du tar opp",
     "disclosureProcessing": "Opptaket ditt sendes til en behandlingsserver kontrollert av LabourMarket.ai for å gjøres om til tekst. Ingen tredjeparts taletjeneste brukes.",
     "disclosureWhy": "Det brukes bare til å lage teksten nedenfor — ikke noe annet.",
-    "disclosureRetention": "Opptaket lagres bare til teksten din er klar (maks 30 dager), og du kan slette det når som helst.",
+    "disclosureRetention": "Selve opptaket lagres ikke: det slettes så snart teksten din er klar.",
     "disclosureNoAutoWrite": "Ingenting legges til i dagboken, profilen eller CV-en din før du har gjennomgått teksten og selv lagret hvert punkt.",
     "disclosureAck": "Jeg forstår og godtar stemmebehandling",
     "start": "Start opptak",

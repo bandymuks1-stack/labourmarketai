@@ -313,7 +313,7 @@
     "disclosureTitle": "Voordat je opneemt",
     "disclosureProcessing": "Je opname wordt naar een door LabourMarket.ai beheerde verwerkingsserver gestuurd om in tekst te worden omgezet. Er wordt geen spraakdienst van derden gebruikt.",
     "disclosureWhy": "De opname wordt alleen gebruikt om de onderstaande tekst te maken — nergens anders voor.",
-    "disclosureRetention": "De opname wordt alleen bewaard tot je tekst klaar is (maximaal 30 dagen) en je kunt hem altijd verwijderen.",
+    "disclosureRetention": "De opname zelf wordt niet bewaard: ze wordt verwijderd zodra je tekst klaar is.",
     "disclosureNoAutoWrite": "Er wordt niets aan je dagboek, profiel of cv toegevoegd totdat je de tekst hebt gecontroleerd en elk onderdeel zelf hebt opgeslagen.",
     "disclosureAck": "Ik begrijp het en ga akkoord met spraakverwerking",
     "start": "Opname starten",

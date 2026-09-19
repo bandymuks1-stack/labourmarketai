@@ -142,7 +142,7 @@
     "disclosureTitle": "Pirms ierakstīšanas",
     "disclosureProcessing": "Jūsu ieraksts tiek nosūtīts uz LabourMarket.ai kontrolētu apstrādes serveri, lai to pārvērstu tekstā. Trešo pušu balss pakalpojumi netiek izmantoti.",
     "disclosureWhy": "Tas tiek izmantots tikai zemāk redzamā teksta izveidei — nekam citam.",
-    "disclosureRetention": "Ieraksts tiek glabāts tikai līdz teksta sagatavošanai (ne ilgāk kā 30 dienas), un jūs to jebkurā brīdī varat izdzēst.",
+    "disclosureRetention": "Pats ieraksts netiek glabāts: tas tiek izdzēsts, tiklīdz jūsu teksts ir gatavs.",
     "disclosureNoAutoWrite": "Nekas netiek pievienots dienasgrāmatai, profilam vai CV, kamēr pats neesat pārskatījis tekstu un saglabājis katru punktu.",
     "disclosureAck": "Saprotu un piekrītu balss apstrādei",
     "start": "Sākt ierakstīšanu",

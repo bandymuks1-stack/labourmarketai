@@ -8,7 +8,7 @@ not keep saying "periods are being prepared" at launch, so this document
 exists to make the decision one sitting long.
 
 Method: implementation facts come from the live schema/migrations
-(`ai_runs` retention draft 20260808130000 UNAPPLIED; consent ledger
+(`ai_runs` retention 20260808130000 + schedule 20260808140000 APPLIED 2026-08 — daily pg_cron `ai-runs-retention-daily` nulls `output_excerpt` past 90 d; `profile_id` is NOT nulled — see `docs/audits/W14_ITEM6_AI_RUNS_RETENTION.md`; consent ledger
 append-only; privacy intake live since 2026-07-06); legal-basis columns
 mirror `docs/legal/legal-basis-matrix-v1.md`. Nothing here invents a legal
 deadline — where a statutory period applies it is named as the REASON.
@@ -30,7 +30,7 @@ deadline — where a statutory period applies it is named as the REASON.
 | Privacy requests | Art. 12-22 handling | 6(1)(c) | kept in customer_requests | 3 years after completion | anonymize requester linkage | supervisory authority defense |
 | Billing/invoices (future) | payment records | 6(1)(c) | not live | statutory accounting period (10 y LT / owner's jurisdiction — LEGAL GATE) | none | tax law |
 | LMC ledger (future) | credit accounting | 6(1)(b)/(c) | not live | as billing | none | tax law |
-| AI runs (output excerpts) | debugging/quality | 6(1)(f) | DRAFT 90-day redaction UNAPPLIED (20260808130000) | apply the existing 90-day redaction | already written + scheduled sweep draft | none |
+| AI runs (output excerpts) | debugging/quality | 6(1)(f) | APPLIED: 90-day `output_excerpt` redaction, daily pg_cron sweep (20260808130000 / 20260808140000); `profile_id` retained (owner decision D1 — the contract doc classes it 90-day-max: the two documents disagree, R-10) | decide `profile_id`: null at 90 d OR record as retained | needs one new SECURITY DEFINER function (no role holds UPDATE on `ai_runs`) | none |
 | Backups | disaster recovery | 6(1)(f) | provider-managed (Supabase PITR) | provider window (state factually, no invented number) | expires by rotation | none |
 
 ## The three decisions the owner/legal actually has to make
