@@ -793,3 +793,20 @@ gates (M3, L3–L7) are unchanged, and #1795 / #1797 / #1798 remain unapplied.
 | stack | #1797 (R-13) rebased onto main and retargeted; #1798 (R-9) rebased onto #1797; ratchet comments carry both the R-3 flip and the next bump; guards green on both |
 
 What this unlocks on production once `/api/health.build` reaches `c5cba480`: the operations manage strip of every non-completed project shows the facts form (title, city, country, start, end); the calendar band, the dates chip and the booking-overlap check start working the moment a manager enters dates. Human walk: Donatas → /dashboard/projects/562c9c3e/operations → set country LT and the dates.
+
+### N12. R-9 — APPLIED (owner sentence received 2026-09-19 ~15:17 UTC)
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | `end_roster_link_v1` absent; `owns_company`, `owns_agency`, `is_admin`, `end_org_membership_v1`, `caller_manages_worker_by_roster` present; the 0027 CHECK admits `removed`; `engagement_contexts.ended_at` present; ledger 295, no row of this name |
+| apply | Supabase MCP `apply_migration`, name `end_roster_link_v1` → **ledger `20260919151920`, 296 applied** |
+| readback | SECURITY DEFINER, `search_path=public`, args `(text, uuid, uuid, text default null)`, `anon` execute false, `authenticated` true, all three ladder branches present |
+| contract (live, one DO block, rolled back) | setup invite → the WORKER accepts (roster 1, context 1) · stranger → `not_found` · the WORKER ends it → **`removed / self / engagement_ended=true`** · again → `already_removed` · owner's `caller_manages_worker_by_roster` afterwards → **false** · owner Donatas (admin capacity) ends the REAL consented row → `removed / admin / engagement_ended=true` · wrong kind → `not_found` · after: 2 removed rows, 0 active employee contexts, 2 audit rows |
+| residue | probe worker 0 roster rows / 0 contexts; the real row still `active` with its context active; 0 removed rows in the table; 0 audit rows; 0 invitations |
+| repo | #1798 rebased DIRECTLY onto main (the unapplied R-13 commit dropped from under it, ratchets 294 → 295, markers flipped in the resolution), ledger entry (file sha256 `ac7d8bf529f4f9e40247ef84a765873662f15bdd083fd8ed9638bfd1146f8eaf`), ready, squash-merged **`5dca2f97`** at 15:32 UTC after green CI (the "I no longer work here" control on the profile and "Remove from the roster" on the people page ship in the same merge) |
+| stack | #1797 (R-13) rebased onto the new main; ratchet comments renumbered 295 → 296; marked-migration list re-sorted by filename; guards green; still a draft, NOT applied |
+
+Security / consent receipt now: **CRITICAL 0 · HIGH 0 · R-1, R-16 CLOSED · R-3, R-9 CLOSED.**
+A roster relationship can now be created only by the worker's acceptance
+(R-1), can no longer be manufactured through the membership RPC (R-16), and
+can be ended by the worker or the owner without deleting history (R-9).
