@@ -1980,6 +1980,51 @@ true → `assign_company_worker_role` (row shows the role) →
 Rollback: `supabase/rollbacks/20260919100000_roster_writes_rpc_only_v1.down.sql`
 (restores both policies and both grants verbatim).
 
+### `add_org_member_requires_consented_roster_v1` — RED R-16 (HIGH, SECURITY DEFINER body change) — APPLIED 2026-09-19, ledger `20260919143247`
+
+Repo file `supabase/migrations/20260919120000_add_org_member_requires_consented_roster_v1.sql`
+(sha256 `165bf9142c53806211d0bf05805433a881bc0fa9def9a1567f8d7f6ace8379cf`),
+applied via Supabase MCP `apply_migration` (name
+`add_org_member_requires_consented_roster_v1`) under the owner's verbatim
+approval sentence given in chat 2026-09-19 ("Apply
+20260919120000_add_org_member_requires_consented_roster_v1 to production. I
+approve replacing public.add_org_member so that it refuses (not_linked) unless
+the worker already holds an active company_workers / agency_workers row on the
+organization's legacy company or agency, with no exemption for any role.
+Rollback file acknowledged."). PR #1794.
+
+Replaces the body of `public.add_org_member(uuid, uuid)`: after the worker
+lookup and before the `already_member` short-circuit it returns
+`not_linked` unless an ACTIVE `company_workers` / `agency_workers` row
+exists on the organization's `legacy_company_id` / `legacy_agency_id` for
+that worker. No role is exempt (admin included). Grants restated unchanged
+(`authenticated` only; `public` and `anon` revoked). No table, policy,
+row or other function touched.
+
+Pre-apply drift check: live body `md5(prosrc)` `22167e898cb68a706e7cd4a50f53efc0`
+= the rollback file's body created in an aborted transaction; ledger 293,
+no prior row of this name. Readback after apply: 294 applied; new body
+`md5(prosrc)` `11ea34068e0120de244caa77857d8262`, precondition present,
+no `is_admin` after it, `prosecdef` true, `search_path=public`,
+`anon` execute false, `authenticated` execute true.
+
+Contract on the LIVE function (real actors under `set local role
+authenticated` with JWT claims incl. e-mail; one DO block aborted by RAISE —
+zero residue verified afterwards: 0 roster rows, 0 contexts, 0 invitations,
+0 audit rows for the probe identity):
+- HOSTILE — owner Donatas → `add_org_member(19f47e78, E2E worker 7c06faf8
+  with no roster row)` → **`not_linked`**, forged context rows **0**.
+- EXISTING — owner → `add_org_member(19f47e78, the one consented roster
+  worker)` → `already_member`.
+- LEGITIMATE CHAIN — owner `invite_company_worker` → `invited`; the WORKER's
+  `accept_company_worker_invitation` → `linked`, active roster row (1),
+  employee context 0 → 1 (the accept RPC provisions it); owner
+  `add_org_member` → `already_member` (idempotent fallback). Audit delta 0
+  for the `added` path, as expected.
+
+Rollback: `supabase/rollbacks/20260919120000_add_org_member_requires_consented_roster_v1.down.sql`
+(restores the 20260824130000 body verbatim; grants unchanged).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

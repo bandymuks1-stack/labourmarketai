@@ -2568,8 +2568,9 @@ describe("no migration files added by this sprint", () => {
 // (R-16 HIGH: add_org_member minted an active employee engagement context for
 // ANY worker — no roster row, no invitation, no consent — which unlocks
 // can_view_worker; the RPC now requires an active consent-backed roster row).
-// RED, PREPARED, NOT APPLIED — owner gate; forge ADMITTED live rows=1, the new
-// body proven live (not_linked / rows=0) in a rolled-back transaction.
+// RED, owner-approved and APPLIED 2026-09-19 (ledger 20260919143247); forge
+// ADMITTED live rows=1 before, the LIVE function refuses (not_linked / rows=0)
+// after, invite → worker accepts → already_member — all rolled back (PR #1794).
 // RECOUNTED: 293.
 const SPRINT_BASELINE = 293;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT

@@ -978,8 +978,8 @@ describe("NO new DB migration in this PR", () => {
     //   Not this read layer's file.
     //   RECOUNTED: 292.
     // Bumped 292 -> 293 for 20260919120000_add_org_member_requires_consented_roster_v1
-    //   (RED SECDEF body change, NOT APPLIED). Not this read layer's file.
-    //   RECOUNTED: 293.
+    //   (RED SECDEF body change, APPLIED 2026-09-19, ledger 20260919143247).
+    //   Not this read layer's file. RECOUNTED: 293.
     expect(count).toBeLessThanOrEqual(293);
   });
 });

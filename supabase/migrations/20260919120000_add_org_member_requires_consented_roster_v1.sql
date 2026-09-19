@@ -2,7 +2,9 @@
 -- ============================================================================
 -- 20260919120000_add_org_member_requires_consented_roster_v1
 -- RED — owner gate (R-16 of the 2026-09-19 completion window, HIGH).
--- NOT APPLIED. Same class as R-1, one table over.
+-- APPLIED 2026-09-19 14:32 UTC (ledger 20260919143247) under the owner's verbatim
+-- approval sentence; hostile + legitimate contract run on the LIVE function and
+-- rolled back (see docs/APPLIED_LEDGER.md). Same class as R-1, one table over.
 --
 -- Finding (proven live 2026-09-19, rolled back): as the real owner of a real
 -- company, `add_org_member(<own org>, <isolated E2E worker with NO roster row,

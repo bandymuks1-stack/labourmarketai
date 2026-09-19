@@ -1392,8 +1392,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // active `employee` engagement context for ANY worker (no roster row, no
       // invitation, no consent) — proven live, rolled back; the forged row
       // unlocks can_view_worker. The RPC now requires an active consent-backed
-      // roster row ('not_linked' otherwise). RED, PREPARED, NOT APPLIED — owner
-      // gate; the new body proven live in a rolled-back transaction.
+      // roster row ('not_linked' otherwise). RED, owner-approved and APPLIED
+      // 2026-09-19 (ledger 20260919143247); contract run on the live function,
+      // rolled back.
       "20260919120000_add_org_member_requires_consented_roster_v1.sql",
 ]);
   });
