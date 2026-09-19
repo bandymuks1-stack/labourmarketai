@@ -142,7 +142,7 @@
     "disclosureTitle": "Før du optager",
     "disclosureProcessing": "Din optagelse sendes til en behandlingsserver kontrolleret af LabourMarket.ai for at blive omdannet til tekst. Der bruges ingen tredjeparts taletjeneste.",
     "disclosureWhy": "Den bruges kun til at lave teksten nedenfor — intet andet.",
-    "disclosureRetention": "Optagelsen opbevares kun, indtil din tekst er klar (højst 30 dage), og du kan altid slette den.",
+    "disclosureRetention": "Selve optagelsen gemmes ikke: den slettes, så snart din tekst er klar.",
     "disclosureNoAutoWrite": "Intet tilføjes til din dagbog, profil eller CV, før du har gennemgået teksten og selv gemt hvert punkt.",
     "disclosureAck": "Jeg forstår og accepterer stemmebehandling",
     "start": "Start optagelse",

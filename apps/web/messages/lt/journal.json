@@ -313,7 +313,7 @@
     "disclosureTitle": "Prieš įrašant",
     "disclosureProcessing": "Jūsų garso įrašas siunčiamas į LabourMarket.ai valdomą apdorojimo serverį, kad būtų paverstas tekstu. Jokia trečiųjų šalių balso paslauga nenaudojama.",
     "disclosureWhy": "Įrašas naudojamas tik žemiau esančiam tekstui sukurti — niekam kitam.",
-    "disclosureRetention": "Įrašas saugomas tik kol paruošiamas tekstas (ne ilgiau kaip 30 dienų), o jūs bet kada galite jį ištrinti.",
+    "disclosureRetention": "Pats įrašas nesaugomas: jis ištrinamas, kai tik jūsų tekstas paruoštas.",
     "disclosureNoAutoWrite": "Į dienoraštį, profilį ar CV niekas nepatenka, kol patys neperžiūrite teksto ir neišsaugote kiekvieno punkto.",
     "disclosureAck": "Suprantu ir sutinku su balso apdorojimu",
     "start": "Pradėti įrašymą",

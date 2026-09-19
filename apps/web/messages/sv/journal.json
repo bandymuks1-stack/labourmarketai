@@ -142,7 +142,7 @@
     "disclosureTitle": "Innan du spelar in",
     "disclosureProcessing": "Din inspelning skickas till en bearbetningsserver som kontrolleras av LabourMarket.ai för att omvandlas till text. Ingen tredjeparts rösttjänst används.",
     "disclosureWhy": "Den används bara för att skapa texten nedan — inget annat.",
-    "disclosureRetention": "Inspelningen sparas bara tills din text är klar (högst 30 dagar) och du kan radera den när som helst.",
+    "disclosureRetention": "Själva inspelningen sparas inte: den raderas så snart din text är klar.",
     "disclosureNoAutoWrite": "Inget läggs till i din dagbok, profil eller ditt CV förrän du har granskat texten och själv sparat varje punkt.",
     "disclosureAck": "Jag förstår och godkänner röstbehandling",
     "start": "Starta inspelning",

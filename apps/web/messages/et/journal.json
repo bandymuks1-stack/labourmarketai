@@ -142,7 +142,7 @@
     "disclosureTitle": "Enne salvestamist",
     "disclosureProcessing": "Teie salvestis saadetakse LabourMarket.ai hallatavasse töötlusserverisse, et muuta see tekstiks. Kolmandate osapoolte kõneteenuseid ei kasutata.",
     "disclosureWhy": "Seda kasutatakse ainult alloleva teksti loomiseks — mitte millekski muuks.",
-    "disclosureRetention": "Salvestist hoitakse ainult seni, kuni tekst on valmis (kuni 30 päeva), ja saate selle igal ajal kustutada.",
+    "disclosureRetention": "Salvestist ennast ei säilitata: see kustutatakse kohe, kui teie tekst on valmis.",
     "disclosureNoAutoWrite": "Päevikusse, profiilile ega CV-sse ei lisata midagi enne, kui olete teksti üle vaadanud ja iga punkti ise salvestanud.",
     "disclosureAck": "Saan aru ja nõustun hääle töötlemisega",
     "start": "Alusta salvestamist",
