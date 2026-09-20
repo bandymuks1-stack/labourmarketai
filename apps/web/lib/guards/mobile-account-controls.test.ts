@@ -67,8 +67,9 @@ describe("native settings — privacy, terms and support reach the canonical web
       "account.openFailed",
     ]) {
       expect(settings).toContain(`t("${key}")`);
-      // Five locales, five definitions — parity is the compiler's, presence is ours.
-      expect(messages.split(`"${key}":`).length - 1, `${key} is not defined in all five locales`).toBe(5);
+      // One definition per active locale (six since PL, 2026-09-20 #1810) — parity is the
+      // compiler's (`Record<ActiveLocale, Catalogue>`), presence is ours.
+      expect(messages.split(`"${key}":`).length - 1, `${key} is not defined in all six locales`).toBe(6);
     }
   });
 });

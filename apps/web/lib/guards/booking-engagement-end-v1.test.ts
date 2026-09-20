@@ -1416,6 +1416,13 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260919190000_demand_lifecycle_colleague_v1.sql",
       // 2026-09-19 — institution loop: relationship_types.journal_reviewable + data-driven set_engagement_journal_review. RED, owner-approved and APPLIED 2026-09-20 (ledger 20260920052103); contract run live and rolled back (PR #1807).
       "20260919210000_relationship_journal_reviewable_v1.sql",
+      // 2026-09-20 — PL consent legal texts (#1810): three data-only UPDATEs
+      // re-pinning privacy_consent_purposes.current_text_hash because
+      // consentTextHash() covers every locale and `pl` joined CONSENT_LOCALES;
+      // versions unchanged, paired rollback. RED by route (data-dml);
+      // owner-approved 2026-09-20 ("APPROVE MIGRATION 20260920173000_…"),
+      // UNAPPLIED until the #1810 deploy — applied in the same step, read back.
+      "20260920173000_privacy_consent_locale_pl_hash_repin_v1.sql",
 ]);
   });
 
