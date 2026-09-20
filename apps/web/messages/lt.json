@@ -7155,6 +7155,22 @@
       "sessionsWithStart": "Sesijos su pradžios įvykiu",
       "sessionsReachedValue": "Sesijos, pasiekusios naudą",
       "firstValueEvent": "Pirmas naudos įvykis (konvertavusios sesijos)"
+    },
+    "campaigns": {
+      "title": "Kampanija → skelbimas → paskyra",
+      "empty": "Šiame lange dar nėra įvykių su kampanijos žyma.",
+      "help": "Pirmojo prisilietimo utm_campaign × utm_content tame pačiame lange ir su ta pačia auditorijos atranka. Tai įvykių skaičiai, ne unikalūs lankytojai — tolesnis stulpelis nėra ankstesniojo poaibis, todėl santykis tarp dviejų stulpelių nėra konversija. Rodoma iki 25 eilučių pagal apsilankymus; nepažymėtas (organinis) srautas nerodomas. Susidomėjimo stulpelis siunčiamas serverio pusėje, kur kampanijos duomenų nėra, todėl jis lieka 0 dėl sandaros — tai neišmatuota, o ne išmatuotas nulis.",
+      "col": {
+        "campaign": "Kampanija / variantas",
+        "landing": "Apsilankymai",
+        "jobOpened": "Atidaryta skelbimų",
+        "ctaClicked": "Paspausta CTA",
+        "registrationStarted": "Pradėta registracijų",
+        "signupCompleted": "Sukurta paskyrų",
+        "returnedToJob": "Grįžo prie skelbimo",
+        "compared": "Palyginta",
+        "interest": "Pareikšta susidomėjimo"
+      }
     }
   },
   "languageFeedback": {

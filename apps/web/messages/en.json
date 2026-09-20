@@ -7155,6 +7155,22 @@
       "sessionsWithStart": "Sessions with a start event",
       "sessionsReachedValue": "Sessions that reached value",
       "firstValueEvent": "First value event (converting sessions)"
+    },
+    "campaigns": {
+      "title": "Campaign → job → account",
+      "empty": "No campaign-tagged events in this window yet.",
+      "help": "First-touch utm_campaign × utm_content over the same window, same population filter. These are event occurrences, not unique visitors — a later column is not a subset of an earlier one, so no ratio between two columns is a conversion rate. Top 25 by landings; untagged (organic) traffic is not listed. The interest column is emitted server-side, where no campaign is available, so it stays 0 by construction — that is a missing measurement, not a measured zero.",
+      "col": {
+        "campaign": "Campaign / variant",
+        "landing": "Landings",
+        "jobOpened": "Job opened",
+        "ctaClicked": "CTA clicked",
+        "registrationStarted": "Registration started",
+        "signupCompleted": "Account created",
+        "returnedToJob": "Returned to job",
+        "compared": "Compared",
+        "interest": "Interest"
+      }
     }
   },
   "languageFeedback": {

@@ -7155,6 +7155,22 @@
       "sessionsWithStart": "Sessies met een startevent",
       "sessionsReachedValue": "Sessies die waarde bereikten",
       "firstValueEvent": "Eerste waarde-event (converterende sessies)"
+    },
+    "campaigns": {
+      "title": "Campagne → vacature → account",
+      "empty": "Nog geen gebeurtenissen met een campagnelabel in dit venster.",
+      "help": "First-touch utm_campaign × utm_content over hetzelfde venster en dezelfde populatiefilter. Dit zijn aantallen gebeurtenissen, geen unieke bezoekers — een latere kolom is geen deelverzameling van een eerdere, dus een verhouding tussen twee kolommen is geen conversie. Maximaal 25 rijen op bezoeken; verkeer zonder label (organisch) wordt niet getoond. De interessekolom wordt server-side verstuurd, waar geen campagne beschikbaar is, dus hij blijft per constructie 0 — dat is een ontbrekende meting, geen gemeten nul.",
+      "col": {
+        "campaign": "Campagne / variant",
+        "landing": "Bezoeken",
+        "jobOpened": "Vacature geopend",
+        "ctaClicked": "CTA geklikt",
+        "registrationStarted": "Registratie gestart",
+        "signupCompleted": "Account aangemaakt",
+        "returnedToJob": "Terug naar vacature",
+        "compared": "Vergeleken",
+        "interest": "Interesse"
+      }
     }
   },
   "languageFeedback": {

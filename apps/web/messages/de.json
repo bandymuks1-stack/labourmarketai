@@ -7155,6 +7155,22 @@
       "sessionsWithStart": "Sitzungen mit Start-Ereignis",
       "sessionsReachedValue": "Sitzungen mit erreichtem Nutzen",
       "firstValueEvent": "Erstes Nutzen-Ereignis (konvertierende Sitzungen)"
+    },
+    "campaigns": {
+      "title": "Kampagne → Stelle → Konto",
+      "empty": "In diesem Zeitfenster gibt es noch keine Ereignisse mit Kampagnenkennung.",
+      "help": "First-Touch utm_campaign × utm_content im selben Zeitfenster und mit derselben Populationsfilterung. Das sind Ereigniszahlen, keine eindeutigen Besucher — eine spätere Spalte ist keine Teilmenge einer früheren, daher ist ein Verhältnis zwischen zwei Spalten keine Conversion. Höchstens 25 Zeilen nach Aufrufen; nicht gekennzeichneter (organischer) Verkehr wird nicht gelistet. Die Interesse-Spalte wird serverseitig gesendet, wo keine Kampagne verfügbar ist, und bleibt daher konstruktionsbedingt 0 — das ist eine fehlende Messung, keine gemessene Null.",
+      "col": {
+        "campaign": "Kampagne / Variante",
+        "landing": "Aufrufe",
+        "jobOpened": "Stelle geöffnet",
+        "ctaClicked": "CTA geklickt",
+        "registrationStarted": "Registrierung gestartet",
+        "signupCompleted": "Konto erstellt",
+        "returnedToJob": "Zurück zur Stelle",
+        "compared": "Verglichen",
+        "interest": "Interesse"
+      }
     }
   },
   "languageFeedback": {

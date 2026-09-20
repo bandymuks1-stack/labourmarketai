@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { consumeSignupPending, trackFunnel } from "@/lib/telemetry/task";
+import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
@@ -57,9 +58,17 @@ export function SessionTelemetry({
     // the dashboard read clears a stale marker (a returning Google login)
     // WITHOUT emitting. signupSurface = 'email' | 'google' (bounded label,
     // no PII).
+    // First-touch campaign attribution rides UNDER the explicit `surface`
+    // (2026-09-20): `registration_started` already carried the campaign, but
+    // the COMPLETION of that same signup did not — so no campaign could ever
+    // be credited with an account. Allowlisted utm_*/referrer_host/
+    // landing_path only; the helper returns {} when storage is unavailable.
     const signupSurface = consumeSignupPending();
     if (signupSurface && surface === "onboarding") {
-      trackFunnel(FUNNEL_EVENTS.signupCompleted, { surface: signupSurface });
+      trackFunnel(FUNNEL_EVENTS.signupCompleted, {
+        ...getFirstTouchAttribution(),
+        surface: signupSurface,
+      });
     }
 
     // return_visit_detected — last-seen day differs from today.

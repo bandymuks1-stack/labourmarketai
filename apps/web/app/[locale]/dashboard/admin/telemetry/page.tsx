@@ -337,6 +337,100 @@ export default async function AdminTelemetryPage({
                 ))
               )}
             </div>
+            {/* Per-campaign handoff (2026-09-20). The source list above
+                averages every variant of a campaign into one row, which is
+                exactly the resolution at which "did that post work?" stops
+                being answerable. Same rows, same window, same population
+                filter — broken down by the published variant
+                (utm_campaign × utm_content). Occurrence counts, NOT unique
+                visitors and NOT per-visitor journeys, so no column is a
+                subset of the one before it and no ratio between two columns
+                is a conversion rate. */}
+            <div className="flex flex-col gap-1">
+              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("campaigns.title")}
+              </h3>
+              {funnel.campaigns.length === 0 ? (
+                <p className="text-xs text-text-secondary">
+                  {t("campaigns.empty")}
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-[760px] text-left text-xs">
+                    <thead className="border-b border-ink-600/60 text-text-muted">
+                      <tr>
+                        <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.campaign")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.landing")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.jobOpened")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.ctaClicked")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.registrationStarted")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.signupCompleted")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.returnedToJob")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.compared")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.interest")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {funnel.campaigns.map((c) => (
+                        <tr
+                          key={JSON.stringify([c.campaign, c.content])}
+                          className="border-b border-ink-700/40 align-top"
+                        >
+                          <td className="px-2 py-1">
+                            <div className="font-mono text-text-primary">
+                              {c.campaign}
+                            </div>
+                            <div className="font-mono text-meta text-text-muted">
+                              {c.content}
+                            </div>
+                          </td>
+                          {(
+                            [
+                              c.landing,
+                              c.jobOpened,
+                              c.ctaClicked,
+                              c.registrationStarted,
+                              c.signupCompleted,
+                              c.returnedToJob,
+                              c.compared,
+                              c.interest,
+                            ] as const
+                          ).map((n, i) => (
+                            <td
+                              key={i}
+                              className="px-2 py-1 text-right font-mono text-text-primary"
+                            >
+                              {funnel.countsAreLowerBound ? `≥ ${n}` : n}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <p className="text-meta text-text-muted">
+                {t("campaigns.help")}
+              </p>
+            </div>
           </div>
         )}
       </section>
@@ -689,14 +783,14 @@ export default async function AdminTelemetryPage({
           <table className="w-full text-left text-sm" data-testid="telemetry-ttfv-table">
             <thead className="text-meta uppercase tracking-label text-text-muted">
               <tr>
-                <th className="py-1 pr-3 font-normal">Actor</th>
-                <th className="py-1 pr-3 font-normal">People</th>
-                <th className="py-1 pr-3 font-normal">Reached action</th>
-                <th className="py-1 pr-3 font-normal">Median to action</th>
-                <th className="py-1 pr-3 font-normal">System result (n)</th>
-                <th className="py-1 pr-3 font-normal">Median to system result</th>
-                <th className="py-1 pr-3 font-normal">Human response (n)</th>
-                <th className="py-1 pr-3 font-normal">Median to human response</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Actor</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">People</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Reached action</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Median to action</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">System result (n)</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Median to system result</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Human response (n)</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Median to human response</th>
               </tr>
             </thead>
             <tbody>
