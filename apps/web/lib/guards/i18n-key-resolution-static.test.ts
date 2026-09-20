@@ -310,7 +310,6 @@ describe("i18n — every statically-written message key resolves in every active
     expect(result.filesWithBindings).toBeGreaterThan(300);
     expect(result.staticChecked).toBeGreaterThan(3000);
     // Reported, not asserted: keys the guard cannot check statically.
-    // eslint-disable-next-line no-console
     console.info(
       `[i18n-key-resolution-static] files=${result.files} withTranslator=${result.filesWithBindings} ` +
         `staticKeysChecked=${result.staticChecked} notStaticallyCheckable=${result.dynamicKeys} ` +

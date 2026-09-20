@@ -22,7 +22,7 @@ RAISE (zero residue).
 | production env (names only) | AI runtime + `GEMINI_API_KEY` present; `CRON_SECRET` present (crons live); **`INVITE_EMAIL_*` absent** → invitation / notification e-mail is `not_configured`; the product degrades honestly to copy/share links (EXTERNAL_GATE, not a defect). |
 | translate_message runs in `ai_runs` | **0** — the live translation path has never executed in production (no cross-language thread exists yet: 18 messages, 12 `lt`, 6 `NULL`). |
 
-## 2. Shipped on the branch (2 commits + wave 2 in progress)
+## 2. Shipped on the branch
 
 `515293ef` **multilingual communication** — author-declared "I am writing in" (13
 communication languages, remembered per browser), `sendMessage(originalLanguage)`
@@ -62,33 +62,27 @@ known Windows CRLF working-copy class (`booking-atomic-double-booking`,
 `PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER` (no waived file touched).
 `pnpm -F web build` NOT yet run on this head.
 
-**Wave 2 (in progress when paused; edits are in the working tree / last commit):**
-chat sentences `accept-offer` (exactly-one resolution → the existing card, never an
-auto-accept) and `write-employer` (exactly-one active interest → the same contact action
-as the button); copy/locale pass (RU corrupted word on Today, internal vocabulary out
-of worker/company surfaces, NL/DE `orgMembers` raw English, card naming, RU/LT grammar,
-term drift) and the static locale-leak guard (`t("key")` resolution against the merged
-catalogs for every active locale). Exact state of wave 2 at the stop (committed as WIP `wip(completion)`):
+**Wave 2 — VERIFIED on resume (commit `131bb46f`):** chat sentences `accept-offer`
+(exactly one proposed offer → its card, the button stays the commitment; one pending
+invitation → its card; otherwise the offers list with "which one?") and `write-employer`
+(exactly one active interest → the interest card's own contact action → the thread;
+none → express interest first; many → pick the card); registry 78 → 79, write-employer
+left the blocked set, five-locale parity row added. Copy/locale pass: RU corrupted word
+on Today; internal vocabulary out of worker/company surfaces; NL/DE `orgMembers`
+translated (ratchet lowered lt 75→72, ru 56→53, nl 279→266, de 222→210); one name per
+locale for the professional identity card (LT "Profesinė kortelė", RU
+"Профессиональная карточка"), work card kept distinct; RU/LT grammar + ICU plurals;
+term drift unified (Prekyvietė, pasirengimas, Užsakovas); internal status rows removed
+from public `/vision`; NEW static locale-leak guard
+`lib/guards/i18n-key-resolution-static.test.ts` (every literal `t("key")` under app/,
+components/, lib/ must resolve in the merged catalog of every active locale; >3,000
+keys checked in ~1 s) — it found two real misses (`conversation.chat.offerCapacity.*`),
+fixed in the five active catalogs.
 
-- Chat: `accept-offer` intent + registry row + proposer hint + pin ref, `write-employer`
-  flipped `blocked` → `write`, resolver `lib/conversation/write-employer-chat.ts`, chat
-  handlers + shared card renderers, 4 labels ×11 catalogs — COMPLETE as code but
-  UNVERIFIED (no typecheck/vitest run). KNOWN RED until fixed:
-  `lib/conversation/intent-registry.test.ts` (count pin 78 → 79; move `write-employer`
-  from the blocked set to the write set; add `accept-offer` to the write set) and
-  `lib/conversation/intent-router.test.ts` (`PARITY_MATRIX` needs an `accept-offer` row
-  with 5-locale sentences); optionally bump `understanding-is-not-only-operations`
-  (`>60` → `>78`); add resolution tests (bare "priimu" → accept-offer, "ką man siūlo"
-  stays `offers`, bare "sutinku" stays `unknown`).
-- Copy/locale: 22 catalog files (164 edits), `labour-market-os-map.tsx` internal rows
-  removed, six guards updated, ratchet baseline lowered (lt 75→72, ru 56→53, nl 279→266,
-  de 222→210), NEW static locale-leak guard `lib/guards/i18n-key-resolution-static.test.ts`
-  — COMPLETE as code; the new guard is RED on two real HEAD misses:
-  `conversation-chat.tsx:5606,5613` `t("offerCapacity.needsCompany"|"personalSpace")`
-  under `conversation.chat` while the copy lives under `workspace.ai.offerCapacity.*`
-  (fix: add the two keys under `conversation.chat.offerCapacity` in the 5 active
-  catalogs or switch the calls to the `tAi` translator). Not yet run: placeholders:check,
-  check:i18n-debt, the i18n guard set, typecheck.
+Proof on `131bb46f`: typecheck clean; lint 0 errors; `lib/guards` 931/933 files green
+(only the CRLF working-copy pair); `lib/conversation` 78 files / 2,668 tests green;
+placeholders / i18n-debt / worker-plain-language OK; product gate on the diff
+`PASS_WITH_SCOPED_TRANSITIONAL_WAIVER`, 0 new surfaces.
 
 ## 3. Audit results that need no further discovery (mark exhausted for this release)
 
