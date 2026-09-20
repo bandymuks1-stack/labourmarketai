@@ -2233,6 +2233,7 @@
       "scopeNote": "See ei ole kandideerimine ja tööandjale sõnumit ei saadeta. Kandideerimine toimub endiselt algse kuulutuse kaudu.",
       "error": "Salvestamine ebaõnnestus. Proovige uuesti.",
       "handoffQueued": "Huvi on salvestatud ja ootab edastamist Nonstop Groupi äritiimile. LabourMarket.ai ei ole tööandjale midagi saatnud.",
+      "handoffQueuedConsentWithheld": "Teie huvi on salvestatud. Te ei märkinud esitlemise kasti, seega Nonstop Groupile teie kohta midagi ei edastata. Kui soovite, et teid esitletaks, võtke huvi tagasi ja väljendage seda uuesti, kast märgituna. LabourMarket.ai ei ole tööandjale midagi saatnud.",
       "handoffDelivered": "Huvi on edastatud Nonstop Groupile. Nonstop võib tööandja poole pöörduda oma äriprotsessi kaudu; LabourMarket.ai ei ole tööandjale midagi saatnud.",
       "handoffClosed": "Huvi on salvestatud. Varasem edastus Nonstop Groupile suleti, kui selle tagasi võtsite; midagi ei saadetud."
     }

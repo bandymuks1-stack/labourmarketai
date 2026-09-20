@@ -51,10 +51,11 @@ import {
  * NOTHING LEAVES THE PLATFORM FROM THIS FUNCTION. No email, no message, no
  * webhook here. The handoff is a row; since 2026-09-17 the daily dispatcher
  * (`lib/commercial/handoff-dispatch.ts`, cron-gated) posts queued rows to the
- * commercial partner's durable receiver. Whether a row with
- * `proposition_consent.given = false` may be dispatched at all is an owner
- * rule recorded with the commercial handoff v1 integration doc — this
- * function only records the answer; it never decides for the person.
+ * commercial partner's durable receiver — and since R-14 (2026-09-19) ONLY
+ * rows whose `proposition_consent.given` is `true`. A row without consent
+ * stays queued and is dispatched the moment the worker re-expresses interest
+ * with the box ticked. This function only records the answer; it never
+ * decides for the person.
  *
  * CONSENT IS SEPARATE (owner rule §17): interest is not permission to be
  * proposed to the employer. The form asks that question explicitly
@@ -86,7 +87,14 @@ function isMissingSchema(error: { code?: string } | null | undefined): boolean {
 
 export type VacancyHandoffOutcome =
   | { readonly kind: "created"; readonly outreachState: string }
-  | { readonly kind: "exists"; readonly outreachState: string; readonly status: string }
+  | {
+      readonly kind: "exists";
+      readonly outreachState: string;
+      readonly status: string;
+      /** R-14: the stored proposition consent, so a QUEUED row can say
+       *  whether it will ever be dispatched. Absent = not read. */
+      readonly consentGiven?: boolean;
+    }
   | { readonly kind: "ineligible"; readonly reason: CommercialIneligibilityCode }
   | { readonly kind: "needs-migration" }
   | { readonly kind: "error" };
@@ -304,24 +312,38 @@ export function handoffIsPending(status: string): boolean {
   return status === "queued";
 }
 
+export interface MyHandoffRow {
+  readonly status: string;
+  readonly outreachState: string;
+  /** R-14: exactly `proposition_consent.given === true`; any other stored
+   *  shape is false — the dispatcher applies the same reading. */
+  readonly consentGiven: boolean;
+}
+
 export async function listMyHandoffsByVacancy(
   supabase: SupabaseClient,
   workerId: string,
-): Promise<ReadonlyMap<string, { status: string; outreachState: string }>> {
-  const out = new Map<string, { status: string; outreachState: string }>();
+): Promise<ReadonlyMap<string, MyHandoffRow>> {
+  const out = new Map<string, MyHandoffRow>();
   try {
     const { data, error } = await asAny(supabase)
       .from("commercial_handoffs")
-      .select("public_vacancy_id, status, outreach_state")
+      .select("public_vacancy_id, status, outreach_state, proposition_consent")
       .eq("worker_id", workerId);
     if (error || !Array.isArray(data)) return out;
     for (const r of data as {
       public_vacancy_id: string | null;
       status: string;
       outreach_state: string;
+      proposition_consent: unknown;
     }[]) {
       if (r.public_vacancy_id) {
-        out.set(r.public_vacancy_id, { status: r.status, outreachState: r.outreach_state });
+        const consent = r.proposition_consent as { given?: unknown } | null;
+        out.set(r.public_vacancy_id, {
+          status: r.status,
+          outreachState: r.outreach_state,
+          consentGiven: consent?.given === true,
+        });
       }
     }
     return out;

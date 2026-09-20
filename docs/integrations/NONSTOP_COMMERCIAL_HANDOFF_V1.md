@@ -58,6 +58,13 @@ worker's words: *"Nonstop Group may present me to this employer for this job (on
 professions, skills, languages and availability — never your work journal or CV)."*
 `{given:false}` ⇒ Nonstop may pursue the vacancy but **may not name the person**.
 
+**R-14 (prepared 2026-09-19, owner decision pending):** the LabourMarket dispatcher posts a
+`commercial_handoffs` row to the door **only when `proposition_consent.given === true`**. A row
+without consent is never posted — it stays `queued`, untouched, and goes out on the first sweep
+after the worker re-expresses interest with the box ticked. The worker's queued line says so
+(`handoffQueuedConsentWithheld`). Until the owner answers, production dispatches every queued
+row and enforcement of "may not name" lives in the Nonstop receiver alone.
+
 ## 4. The envelope
 
 `POST <NONSTOP_HANDOFF_ENDPOINT>` · headers `Authorization: Bearer <NONSTOP_HANDOFF_TOKEN>`,

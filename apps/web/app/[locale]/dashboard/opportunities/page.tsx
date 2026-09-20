@@ -393,6 +393,7 @@ export default async function OpportunitiesPage({
     consentLabel: t("vacancyInterest.consentLabel"),
     consentHint: t("vacancyInterest.consentHint"),
     handoffQueued: t("vacancyInterest.handoffQueued"),
+    handoffQueuedConsentWithheld: t("vacancyInterest.handoffQueuedConsentWithheld"),
     handoffDelivered: t("vacancyInterest.handoffDelivered"),
     handoffClosed: t("vacancyInterest.handoffClosed"),
     handoffTooNew: t("vacancyInterest.handoffTooNew"),
@@ -742,14 +743,30 @@ export default async function OpportunitiesPage({
           >
             {t("world.mapTitle")}
           </h2>
-          {/* One tap past the map for anyone who came for the list. */}
-          <a
-            href="#opportunities-results"
-            data-testid="opportunities-map-skip"
-            className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
-          >
-            {t("world.skipToList")} ↓
-          </a>
+          <div className="flex flex-wrap items-baseline gap-4">
+            {/* The full geographic Map (every layer, the legend, own place)
+                — one tap from the PASAULIS tab, at every width. This is the
+                worker's canonical door to /dashboard/market-map; the phone
+                bar carries no map station (owner IA, R-11) and the primary
+                nav tabs render only in the admin chrome, so without this
+                link the protected MAP capability sat behind a collapsed
+                disclosure at the bottom of the page. */}
+            <Link
+              href={`/${locale}/dashboard/market-map`}
+              data-testid="opportunities-map-full-link"
+              className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
+            >
+              {t("marketMapLink")} →
+            </Link>
+            {/* One tap past the map for anyone who came for the list. */}
+            <a
+              href="#opportunities-results"
+              data-testid="opportunities-map-skip"
+              className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
+            >
+              {t("world.skipToList")} ↓
+            </a>
+          </div>
         </div>
         <WorldDiscovery
           initial={worldView}

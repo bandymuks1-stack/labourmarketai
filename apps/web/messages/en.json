@@ -9420,6 +9420,7 @@
       "scopeNote": "This is not an application and no message goes to the employer. Applying still happens through the original advertisement.",
       "error": "Could not save. Try again.",
       "handoffQueued": "Your interest is recorded and waiting to be passed to Nonstop Group’s commercial team. Nothing has been sent to the employer by LabourMarket.ai.",
+      "handoffQueuedConsentWithheld": "Your interest is recorded. You did not tick the presentation box, so nothing about you is passed to Nonstop Group. To be presented, withdraw and express interest again with the box ticked. Nothing has been sent to the employer by LabourMarket.ai.",
       "handoffDelivered": "Your interest was passed to Nonstop Group. Nonstop may approach the employer through its own commercial process; LabourMarket.ai has sent nothing to the employer.",
       "handoffClosed": "Your interest is recorded. The earlier hand-over to Nonstop Group was closed when you withdrew; nothing had been sent."
     }
@@ -10480,6 +10481,21 @@
       "partial": "{count} of them could not be counted in full — something real has no dates, so the figure above is a floor.",
       "unknown": "{count} could not be read at all. That is not the same as free.",
       "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
+    },
+    "committedWhere": {
+      "title": "Who is committed where",
+      "intro": "Each person's dated commitments — project assignments, accepted bookings and approved business trips — from the same records the calendar and the capacity answer use. Nothing here is inferred.",
+      "kind": {
+        "project": "project",
+        "booking": "booking",
+        "trip": "business trip"
+      },
+      "untitled": "untitled",
+      "openEnded": "from {start}, no end date recorded",
+      "noDates": "no dates recorded",
+      "undated": "assigned to {label} — no dates recorded",
+      "withoutCommitment": "{count, plural, one {# person has} other {# people have}} nothing on record here. That is not the same as free — approved absences are listed separately.",
+      "unavailable": "Commitments could not be read. That is not the same as free."
     }
   },
   "tasks": {

@@ -2233,6 +2233,7 @@
       "scopeNote": "Dette er ikke en ansøgning, og der sendes ingen besked til arbejdsgiveren. Man søger stadig gennem den originale annonce.",
       "error": "Kunne ikke gemme. Prøv igen.",
       "handoffQueued": "Din interesse er registreret og venter på at blive givet videre til Nonstop Groups kommercielle team. LabourMarket.ai har intet sendt til arbejdsgiveren.",
+      "handoffQueuedConsentWithheld": "Din interesse er registreret. Du satte ikke kryds ved præsentation, så intet om dig gives videre til Nonstop Group. Vil du præsenteres, så træk interessen tilbage og vis den igen med krydset sat. LabourMarket.ai har ikke sendt noget til arbejdsgiveren.",
       "handoffDelivered": "Din interesse er givet videre til Nonstop Group. Nonstop kan kontakte arbejdsgiveren gennem sin egen kommercielle proces; LabourMarket.ai har intet sendt til arbejdsgiveren.",
       "handoffClosed": "Din interesse er registreret. Den tidligere videregivelse til Nonstop Group blev lukket, da du trak den tilbage; intet blev sendt."
     }

@@ -19,9 +19,14 @@ const ENV = {
   NONSTOP_HANDOFF_TOKEN: "t".repeat(48),
 };
 
-const row = (id: string) => ({
+/** A queued row. `given` defaults to TRUE because the R-14 consent gate (2026-09-19)
+ *  posts nothing else; the one test that needs a withheld row says so. */
+const row = (id: string, given = true) => ({
   handoff_id: id, created_at: "2026-09-17T12:00:00Z", outreach_state: "ineligible_too_new",
-  employer_key: "arbetsformedlingen:org:1", proposition_consent: { given: false },
+  employer_key: "arbetsformedlingen:org:1",
+  proposition_consent: given
+    ? { given: true, version: "employer-proposition-v1", at: "2026-09-17T12:00:00Z" }
+    : { given: false },
   interest_signal_id: "s-" + id, interest_at: null, interest_status: "interested", match_status: "weak",
   profile_id: "p", worker_id: "w", locale: "ru", profession_slug: "warehouse_worker",
   skill_slugs: ["warehouse-operations"], languages: [], availability_status: null, current_country: "LT", basis: "declared",
@@ -79,13 +84,35 @@ describe("dispatchQueuedHandoffs", () => {
     const { admin, updates } = fakeAdmin([row("a"), row("b"), row("c"), row("d")]);
     const { fetchImpl, calls } = doorAnswering([201, 200, 503, -1]);
     const r = await dispatchQueuedHandoffs({ env: ENV, fetchImpl, adminFactory: () => admin });
-    expect(r).toEqual({ kind: "ran", queued: 4, delivered: 1, duplicates: 1, rejected: 0, conflicts: 0, authFailed: 0, retryLater: 2 });
+    expect(r).toEqual({ kind: "ran", queued: 4, delivered: 1, duplicates: 1, rejected: 0, conflicts: 0, authFailed: 0, retryLater: 2, withheldConsent: 0 });
     expect(updates.map((u) => u.id)).toEqual(["a", "b"]);
     expect(updates[0].patch.status).toBe("delivered");
     expect(calls).toHaveLength(4);
     // The bearer travels in the header; the source header is set.
     expect(calls[0].headers.authorization).toBe(`Bearer ${ENV.NONSTOP_HANDOFF_TOKEN}`);
     expect(calls[0].headers["X-Handoff-Source"]).toBe("labourmarket.ai");
+  });
+
+  it("R-14: a row without proposition consent is never posted — it stays queued, unmarked, and is counted", async () => {
+    const { admin, updates } = fakeAdmin([row("a", false), row("b"), row("c", false)]);
+    const { fetchImpl, calls } = doorAnswering([201]);
+    const r = await dispatchQueuedHandoffs({ env: ENV, fetchImpl, adminFactory: () => admin });
+    // Only the consented row reached the door; the two withheld rows were
+    // neither posted nor touched in the DB (still `queued`, re-dispatchable).
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(calls[0].body).interest.propositionConsent.given).toBe(true);
+    expect(updates.map((u) => u.id)).toEqual(["b"]);
+    expect(r).toEqual({ kind: "ran", queued: 3, delivered: 1, duplicates: 0, rejected: 0, conflicts: 0, authFailed: 0, retryLater: 0, withheldConsent: 2 });
+  });
+
+  it("R-14: a tampered consent shape (given as a string) is withheld too", async () => {
+    const tampered = { ...row("t"), proposition_consent: { given: "true", version: "employer-proposition-v1" } };
+    const { admin, updates } = fakeAdmin([tampered as unknown as ReturnType<typeof row>]);
+    const { fetchImpl, calls } = doorAnswering([201]);
+    const r = await dispatchQueuedHandoffs({ env: ENV, fetchImpl, adminFactory: () => admin });
+    expect(calls).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+    expect(r).toMatchObject({ kind: "ran", withheldConsent: 1, delivered: 0 });
   });
 
   it("409 is a conflict: fail-closed, never marked delivered", async () => {
