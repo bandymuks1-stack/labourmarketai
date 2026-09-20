@@ -188,7 +188,7 @@ describe("the chrome title follows the result's own state (IA 2026-09-13 §4; #1
 
   it("the result really declares that state, and the discovery title exists in every active locale", () => {
     expect(read(MESSAGES)).toMatch(/data-discovery-only=\{discoveryOnly \? "true" : undefined\}/);
-    for (const locale of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const json = JSON.parse(read(`messages/${locale}.json`)) as {
         conversation: { results: { opportunities: Record<string, string> } };
       };

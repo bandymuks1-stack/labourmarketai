@@ -32,7 +32,7 @@ import { join } from "node:path";
  *     [locale] segment pages).
  */
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const web = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(web, rel), "utf8");
 
@@ -140,6 +140,7 @@ describe("auth.legalNotice copy exists in every active locale", () => {
       ru: /соглаша\S* с политикой конфиденциальности/i,
       nl: /akkoord met het privacybeleid/i,
       de: /stimme der datenschutzerkl/i,
+      pl: /zgadzam się z polityką prywatności|wyrażam zgodę na politykę prywatności/i,
     };
     for (const loc of ACTIVE_LOCALES) {
       const n = noticeOf(loc);
@@ -207,7 +208,7 @@ describe("notice placement in the real forms", () => {
     expect(src).toContain('href="/legal/terms"');
     expect(src).toContain('href="/legal/privacy"');
     // A hardcoded locale in the href would double-prefix once Link adds its own.
-    expect(src).not.toMatch(/href="\/(lt|en|ru|nl|de)\//);
+    expect(src).not.toMatch(/href="\/(lt|en|ru|nl|de|pl)\//);
   });
 });
 

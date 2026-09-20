@@ -29,7 +29,7 @@ import { join } from "node:path";
  */
 
 const APP = join(__dirname, "..", "..");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 const catalog = (loc: string) =>
   JSON.parse(readFileSync(join(APP, "messages", `${loc}.json`), "utf8")) as Record<

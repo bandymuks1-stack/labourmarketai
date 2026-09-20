@@ -24,6 +24,9 @@ import { createHash } from "node:crypto";
  *   explanation blocks live here.
  */
 
+// 2026-09-20: PL is an active UI locale but has NO consent legal blocks yet —
+// the wording is an owner item, not a translation task. The UI falls back to
+// "en" (never Lithuanian), same rule as lib/i18n/unsupported-language.ts.
 export const CONSENT_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
 export type ConsentLocale = (typeof CONSENT_LOCALES)[number];
 

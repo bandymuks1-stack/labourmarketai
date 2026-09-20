@@ -45,7 +45,7 @@ function seededSlugs(): Set<string> {
   return out;
 }
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const ALL_LOCALES = ["da", "de", "en", "et", "fi", "lt", "lv", "nl", "no", "pl", "ru", "sv"] as const;
 const labels = (locale: string): Record<string, string> =>
   JSON.parse(read(`apps/web/messages/${locale}/productivity-units.json`));

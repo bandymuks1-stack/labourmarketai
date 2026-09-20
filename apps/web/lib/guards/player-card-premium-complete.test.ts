@@ -126,7 +126,7 @@ describe("§5.2 premium self-check — no zero-as-verdict, no repeated placehold
       ),
     ];
     expect(keys.length).toBeGreaterThan(20);
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as Record<
         string,
         unknown

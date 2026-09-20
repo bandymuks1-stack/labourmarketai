@@ -23,7 +23,7 @@ const COMPOSER = read("lib/market-map/spatial-read.ts");
 const COMPONENT = read("components/app/market-map-entity-layers.tsx");
 const PAGE = read("app/[locale]/dashboard/market-map/page.tsx");
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const mmEntities = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)).marketMap?.entities;
 

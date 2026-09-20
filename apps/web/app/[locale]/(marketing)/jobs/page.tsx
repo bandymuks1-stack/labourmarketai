@@ -58,6 +58,7 @@ const H1: L = {
   ru: "Открытые вакансии",
   nl: "Openstaande vacatures",
   de: "Offene Stellen",
+  pl: "Otwarte oferty pracy",
 };
 
 const INTRO: L = {
@@ -66,6 +67,7 @@ const INTRO: L = {
   ru: "Актуальные вакансии из официальных публичных источников занятости. Войдите, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
   nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+  pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
 };
 
 /** The anonymous search matches the OCCUPATION label (the field the card
@@ -77,6 +79,7 @@ const SEARCH_LABEL: L = {
   ru: "Поиск по профессии",
   nl: "Zoeken op beroep",
   de: "Nach Beruf suchen",
+  pl: "Szukaj według zawodu",
 };
 
 const SEARCH_BUTTON: L = {
@@ -85,6 +88,7 @@ const SEARCH_BUTTON: L = {
   ru: "Искать",
   nl: "Zoeken",
   de: "Suchen",
+  pl: "Szukaj",
 };
 
 const PROFESSION_LABEL: L = {
@@ -93,6 +97,7 @@ const PROFESSION_LABEL: L = {
   ru: "Профессия",
   nl: "Beroep",
   de: "Beruf",
+  pl: "Zawód",
 };
 
 const PROFESSION_ANY: L = {
@@ -101,6 +106,7 @@ const PROFESSION_ANY: L = {
   ru: "Все профессии",
   nl: "Alle beroepen",
   de: "Alle Berufe",
+  pl: "Wszystkie zawody",
 };
 
 const CLEAR_FILTER: L = {
@@ -109,6 +115,7 @@ const CLEAR_FILTER: L = {
   ru: "Сбросить фильтр",
   nl: "Filter wissen",
   de: "Filter zurücksetzen",
+  pl: "Wyczyść filtr",
 };
 
 /** The supply is published in the employer's own language. Say so once, rather
@@ -120,6 +127,7 @@ const ORIGINAL_LANGUAGE_NOTE: L = {
   ru: "Названия профессий показаны на языке, на котором их опубликовал работодатель. Фильтруйте по профессии, чтобы искать на своём языке.",
   nl: "Beroepslabels staan in de taal waarin de werkgever ze publiceerde. Filter op beroep om in je eigen taal te zoeken.",
   de: "Berufsbezeichnungen erscheinen in der Sprache, in der der Arbeitgeber sie veröffentlicht hat. Filtern Sie nach Beruf, um in Ihrer Sprache zu suchen.",
+  pl: "Nazwy zawodów są pokazane w języku, w którym opublikował je pracodawca. Filtruj według zawodu, aby szukać w swoim języku.",
 };
 
 const RESULTS: L = {
@@ -128,6 +136,7 @@ const RESULTS: L = {
   ru: "найдено вакансий",
   nl: "vacatures gevonden",
   de: "Stellen gefunden",
+  pl: "znalezionych ofert pracy",
 };
 
 /** Named, so a zero result is an answer about THIS filter rather than a
@@ -138,6 +147,7 @@ const EMPTY_FOR_PROFESSION: Record<ActiveLocale, (p: string) => string> = {
   ru: (p) => `Сейчас нет открытых вакансий: ${p}.`,
   nl: (p) => `Momenteel geen openstaande vacatures voor ${p}.`,
   de: (p) => `Derzeit keine offenen Stellen für ${p}.`,
+  pl: (p) => `Obecnie brak otwartych ofert pracy: ${p}.`,
 };
 
 /**
@@ -159,6 +169,7 @@ const EMPTY_FOR_PROFESSION_AND_QUERY: Record<
   ru: (p, q) => `Сейчас нет открытых вакансий: ${p} по запросу «${q}».`,
   nl: (p, q) => `Momenteel geen openstaande vacatures voor ${p} met “${q}”.`,
   de: (p, q) => `Derzeit keine offenen Stellen für ${p} mit „${q}“.`,
+  pl: (p, q) => `Obecnie brak otwartych ofert pracy: ${p} dla „${q}”.`,
 };
 
 const EMPTY: L = {
@@ -167,6 +178,7 @@ const EMPTY: L = {
   ru: "По этому запросу вакансий не найдено. Попробуйте более общее название.",
   nl: "Geen vacatures voor deze zoekopdracht. Probeer een bredere functietitel.",
   de: "Keine Stellen für diese Suche. Versuchen Sie eine breitere Bezeichnung.",
+  pl: "Żadna oferta pracy nie pasuje teraz do tego wyszukiwania. Spróbuj ogólniejszej nazwy stanowiska.",
 };
 
 /** Honest state: the feature is not switched on — NOT "there are no jobs". */
@@ -176,6 +188,7 @@ const NOT_PROVISIONED: L = {
   ru: "Публичная доска вакансий ещё не включена.",
   nl: "Het openbare vacaturebord is nog niet ingeschakeld.",
   de: "Das öffentliche Stellenboard ist noch nicht aktiviert.",
+  pl: "Publiczna tablica ofert pracy nie jest jeszcze włączona.",
 };
 
 /** Honest state: the read did not answer in time — NOT "0 vacancies found",
@@ -189,6 +202,7 @@ const UNAVAILABLE: L = {
   ru: "Доска вакансий не ответила вовремя. Попробуйте ещё раз через минуту.",
   nl: "Het vacaturebord antwoordde niet op tijd. Probeer het zo opnieuw.",
   de: "Das Stellenboard hat nicht rechtzeitig geantwortet. Bitte gleich noch einmal versuchen.",
+  pl: "Tablica ofert pracy nie odpowiedziała na czas. Spróbuj ponownie za chwilę.",
 };
 
 const SAVED_TAB: L = {
@@ -197,6 +211,7 @@ const SAVED_TAB: L = {
   ru: "Сохранённые",
   nl: "Bewaard",
   de: "Gemerkt",
+  pl: "Zapisane",
 };
 
 const ALL_TAB: L = {
@@ -205,6 +220,7 @@ const ALL_TAB: L = {
   ru: "Все вакансии",
   nl: "Alle vacatures",
   de: "Alle Stellen",
+  pl: "Wszystkie oferty pracy",
 };
 
 /** The saved list is a PRIVATE bookmark list: nobody but this worker ever sees
@@ -216,6 +232,7 @@ const SAVED_NOTE: L = {
   ru: "Ваши личные закладки. Этот список видите только вы — сохранение ничего не сообщает работодателю.",
   nl: "Je privé-bladwijzers. Alleen jij ziet deze lijst — bewaren laat de werkgever niets weten.",
   de: "Ihre privaten Lesezeichen. Nur Sie sehen diese Liste — das Merken teilt dem Arbeitgeber nichts mit.",
+  pl: "Twoje prywatne zakładki. Tylko Ty widzisz tę listę — zapisanie nic nie mówi pracodawcy.",
 };
 
 const SAVED_EMPTY: L = {
@@ -224,6 +241,7 @@ const SAVED_EMPTY: L = {
   ru: "Вы ещё ничего не сохранили. Откройте вакансию и нажмите «Сохранить».",
   nl: "Je hebt nog niets bewaard. Open een vacature en gebruik Bewaren.",
   de: "Sie haben noch nichts gemerkt. Öffnen Sie eine Stelle und nutzen Sie Merken.",
+  pl: "Nie masz jeszcze zapisanej żadnej oferty pracy. Otwórz ofertę i użyj „Zapisz”.",
 };
 
 const SAVED_BADGE: L = {
@@ -232,6 +250,7 @@ const SAVED_BADGE: L = {
   ru: "Сохранено",
   nl: "Bewaard",
   de: "Gemerkt",
+  pl: "Zapisano",
 };
 
 const PREV: L = {
@@ -240,6 +259,7 @@ const PREV: L = {
   ru: "Назад",
   nl: "Vorige",
   de: "Zurück",
+  pl: "Poprzednia",
 };
 
 const NEXT: L = {
@@ -248,6 +268,7 @@ const NEXT: L = {
   ru: "Далее",
   nl: "Volgende",
   de: "Weiter",
+  pl: "Następna",
 };
 
 export default async function JobsPage({

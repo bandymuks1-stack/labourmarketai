@@ -96,7 +96,7 @@ describe("message language set — one source, no drift", () => {
 
   it("the communication set is non-trivial and includes the active product languages", () => {
     expect(CANON.length).toBeGreaterThanOrEqual(11);
-    for (const l of ["lt", "en", "ru", "nl", "de"]) expect(CANON).toContain(l);
+    for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) expect(CANON).toContain(l);
   });
 
   for (const table of TABLES) {

@@ -222,7 +222,7 @@ describe("company overview decisions strip", () => {
 // ── 7. i18n keys exist in every active locale ───────────────────────────────
 
 describe("company/account i18n keys (lt/en/ru/nl/de)", () => {
-  const locales = ["lt", "en", "ru", "nl", "de"] as const;
+  const locales = ["lt", "en", "ru", "nl", "de", "pl"] as const;
   for (const locale of locales) {
     it(`${locale}: companySwitcher + roleDashboards.company.decisions keys exist and are translated`, () => {
       const m = JSON.parse(read(`messages/${locale}.json`));

@@ -69,7 +69,7 @@ describe("the public site offers a contact channel at all", () => {
   });
 
   it("the contact label is really translated in every active locale", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const messages = JSON.parse(
         readFileSync(join(WEB, "messages", `${locale}.json`), "utf8"),
       );

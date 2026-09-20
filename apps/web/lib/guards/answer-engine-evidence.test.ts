@@ -17,6 +17,7 @@ import { WAVE2D_ANSWERS } from "@/content/answer-engine/wave2d-answers";
 import { PUBLIC_QUESTION_SIGNALS } from "@/content/answer-engine/research/public-question-signals";
 import { WAVE2D_QUESTION_SIGNALS } from "@/content/answer-engine/research/wave2d-question-signals";
 import { ANSWER_QUESTIONS } from "@/lib/answer-engine/registry";
+import { ANSWER_ENGINE_LOCALES } from "@/lib/answer-engine/contract";
 
 const webRoot = resolve(__dirname, "..", "..");
 const registryById = new Map(ANSWER_QUESTIONS.map((q) => [q.canonicalQuestionId, q]));
@@ -114,7 +115,8 @@ describe("answer engine — evidence sources", () => {
     // A country-scoped answer must set countryScope AND its evidence (if any)
     // must carry a scope. Here: the Netherlands language question.
     const nl = WAVE2C_ANSWERS.filter((a) => a.canonicalQuestionId === "AE-0321");
-    expect(nl.length).toBe(5);
+    // One localized answer per ACTIVE locale (6 since PL activated 2026-09-20).
+    expect(nl.length).toBe(ANSWER_ENGINE_LOCALES.length);
     for (const a of nl) expect(a.countryScope, a.locale).toBeTruthy();
   });
 });

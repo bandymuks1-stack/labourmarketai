@@ -62,6 +62,12 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
     description:
       "LabourMarket.ai ist eine allgemeine Arbeitsmarktplattform, auf der Menschen und Unternehmen Bedarfe, Bereitschaft, Fähigkeiten, Arbeitsmöglichkeiten und Marktsignale sehen — lokal und international, über viele Branchen hinweg.",
   },
+  pl: {
+    title:
+      "LabourMarket.ai — pracownicy, pracodawcy, umiejętności i możliwości pracy w Europie",
+    description:
+      "LabourMarket.ai to ogólna platforma rynku pracy, na której ludzie i firmy widzą zapotrzebowanie, gotowość, umiejętności, możliwości pracy i sygnały rynkowe — lokalnie i międzynarodowo, w wielu branżach.",
+  },
 };
 
 /**
@@ -79,6 +85,7 @@ const OG_LOCALE: Readonly<Record<ActiveLocale, string>> = {
   ru: "ru_RU",
   nl: "nl_NL",
   de: "de_DE",
+  pl: "pl_PL",
 };
 
 function isActiveLocale(locale: string): locale is ActiveLocale {
@@ -162,6 +169,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Arbeitskräfte aus vielen Branchen — von Logistik und Produktion bis Gastgewerbe, Pflege, Bau und mehr: Erstellen Sie ein Profil und einen Lebenslauf auf LabourMarket.ai, zeigen Sie Ihre Fähigkeiten und Verfügbarkeit und werden Sie sichtbar für Arbeitsmöglichkeiten und Arbeitgeberbedarfe in ganz Europa.",
     },
+    pl: {
+      title: "Dla pracowników — zbuduj swój profil i CV",
+      description:
+        "Pracownicy z różnych branż — od logistyki i produkcji po hotelarstwo, opiekę, budownictwo i więcej: załóż profil i CV na LabourMarket.ai, pokaż swoje umiejętności i dostępność i bądź widoczny dla ofert pracy oraz zapotrzebowania pracodawców w całej Europie.",
+    },
   },
   companies: {
     // §19 terminology: the employer's SUBMITTED REQUEST is an "inquiry", matching
@@ -193,6 +205,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Arbeitgeber und Auftragnehmer: Beschreiben Sie die Arbeitskräfte, Kolonnen und Fähigkeiten, die Sie benötigen. LabourMarket.ai strukturiert Ihre Personalanfrage und hilft, Auswahl und nächste Schritte in Europa zu organisieren.",
     },
+    pl: {
+      title: "Dla pracodawców — złóż zapytanie o pracowników",
+      description:
+        "Pracodawcy i wykonawcy: opisz pracowników, zespoły i umiejętności, których potrzebujesz. LabourMarket.ai porządkuje Twoje zapytanie o pracowników i pomaga zorganizować dopasowanie oraz kolejne kroki w Europie.",
+    },
   },
   agencies: {
     en: {
@@ -219,6 +236,11 @@ export const PAGE_SEO: Readonly<
       title: "Für Personalagenturen — Koordinieren Sie Arbeitskräfte und Kolonnen",
       description:
         "Personalagenturen: Koordinieren Sie Arbeitskräfte, Kolonnen und Arbeitgeberbedarfe an einem Ort. LabourMarket.ai hilft, Aufnahme, Auswahl und Unterkunft auf europäischen Märkten zu strukturieren.",
+    },
+    pl: {
+      title: "Dla agencji — koordynuj pracowników i zespoły",
+      description:
+        "Agencje pracy: koordynuj pracowników, zespoły i zapotrzebowanie pracodawców w jednym miejscu. LabourMarket.ai pomaga uporządkować przyjmowanie zgłoszeń, dopasowanie i zakwaterowanie na rynkach europejskich.",
     },
   },
   workAbroad: {
@@ -247,6 +269,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Sie überlegen, im Ausland zu arbeiten — in welcher Branche auch immer? Erfahren Sie, wie LabourMarket.ai Fähigkeiten, Auswahl, Dokumente und Unterkunft strukturiert, damit Arbeitskräfte und Arbeitgeber die nächsten Schritte in Europa planen können.",
     },
+    pl: {
+      title: "Praca za granicą — praca w różnych branżach w Europie",
+      description:
+        "Rozważasz pracę za granicą w dowolnej branży? Zobacz, jak LabourMarket.ai porządkuje umiejętności, dopasowanie, dokumenty i zakwaterowanie, aby pracownicy i pracodawcy mogli zaplanować kolejne kroki w Europie.",
+    },
   },
   companyNeed: {
     en: {
@@ -273,6 +300,11 @@ export const PAGE_SEO: Readonly<
       title: "Personalanfrage — Beschreiben Sie die Arbeitskräfte, die Sie benötigen",
       description:
         "Sagen Sie LabourMarket.ai, was Ihr Projekt braucht: Berufe, Fähigkeiten, Teamgröße, Standort und Start. Wir erstellen einen strukturierten Entwurf, den Sie prüfen — nichts wird automatisch veröffentlicht.",
+    },
+    pl: {
+      title: "Zapytanie o pracowników — opisz potrzebną kadrę",
+      description:
+        "Powiedz LabourMarket.ai, czego potrzebuje Twój projekt: zawody, umiejętności, wielkość zespołu, lokalizacja i termin startu. Przygotowujemy ustrukturyzowany szkic, który sprawdzasz — nic nie jest publikowane automatycznie.",
     },
   },
   workerIntake: {
@@ -301,6 +333,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Starten Sie Ihr Profil als Arbeitskraft auf LabourMarket.ai: Berufe, Fähigkeiten, Erfahrung und Verfügbarkeit. Eine strukturierte Aufnahme erstellt Ihren Lebenslauf und bereitet Sie auf Prüfung und Auswahl durch Arbeitgeber vor.",
     },
+    pl: {
+      title: "Zgłoszenie pracownika — utwórz profil i CV",
+      description:
+        "Zacznij swój profil pracownika na LabourMarket.ai: zawody, umiejętności, doświadczenie i dostępność. Ustrukturyzowane zgłoszenie tworzy Twoje CV i przygotowuje Cię do oceny i selekcji przez pracodawców.",
+    },
   },
   labourMarket: {
     en: {
@@ -327,6 +364,11 @@ export const PAGE_SEO: Readonly<
       title: "Arbeitsmarkt — Belege und Ländersignale in Europa",
       description:
         "Quellengestützte Arbeitsmarktsignale für europäische Märkte: Nachfrage nach Arbeitskräften, Fähigkeiten und Mobilität. LabourMarket.ai nutzt ehrliche, qualitative Belege — keine erfundenen Zahlen.",
+    },
+    pl: {
+      title: "Rynek pracy — dowody i sygnały krajowe w Europie",
+      description:
+        "Poparte źródłami sygnały rynku pracy dla rynków europejskich: zapotrzebowanie na pracowników, umiejętności i mobilność. LabourMarket.ai korzysta z uczciwych, jakościowych dowodów — bez wymyślonych liczb.",
     },
   },
   pricing: {
@@ -355,6 +397,11 @@ export const PAGE_SEO: Readonly<
       description:
         "So funktionieren die Preise von LabourMarket.ai während des Early Access. Klare, ehrliche Preise für Arbeitskräfte, Arbeitgeber und Personalagenturen — keine versteckten Gebühren, keine falschen Versprechen.",
     },
+    pl: {
+      title: "Cennik — uczciwy model wczesnego dostępu",
+      description:
+        "Jak działa cennik LabourMarket.ai w okresie wczesnego dostępu. Jasne, uczciwe ceny dla pracowników, pracodawców i agencji — bez ukrytych opłat i bez pustych obietnic.",
+    },
   },
   workOpportunities: {
     en: {
@@ -381,6 +428,11 @@ export const PAGE_SEO: Readonly<
       title: "Arbeitsmöglichkeiten — Arbeit in verschiedenen Branchen finden",
       description:
         "Sie suchen Arbeit in Europa? LabourMarket.ai hilft Arbeitskräften in vielen Branchen — Bau, Logistik, Produktion, Gastgewerbe, Pflege und mehr — ein Profil und einen Lebenslauf zu erstellen und echte Arbeitgeberbedarfe zu erreichen.",
+    },
+    pl: {
+      title: "Możliwości pracy — znajdź pracę w różnych branżach",
+      description:
+        "Szukasz pracy w Europie? LabourMarket.ai pomaga pracownikom z wielu branż — budownictwo, logistyka, produkcja, hotelarstwo, opieka i więcej — zbudować profil i CV oraz dotrzeć do realnego zapotrzebowania pracodawców.",
     },
   },
   skills: {
@@ -409,6 +461,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Zeigen und prüfen Sie echte Fähigkeiten auf LabourMarket.ai. Fähigkeiten werden als verifiziert oder selbst angegeben gekennzeichnet, damit Arbeitskräfte belegen, was sie können, und Arbeitgeber echte Erfahrung sehen.",
     },
+    pl: {
+      title: "Umiejętności — zweryfikowane i zadeklarowane, nigdy mieszane",
+      description:
+        "Pokazuj i sprawdzaj realne umiejętności na LabourMarket.ai. Umiejętności są oznaczone jako zweryfikowane lub zadeklarowane, aby pracownicy mogli udowodnić, co potrafią, a pracodawcy widzieli realne doświadczenie.",
+    },
   },
   jobs: {
     en: {
@@ -435,6 +492,11 @@ export const PAGE_SEO: Readonly<
       title: "Offene Stellen — LabourMarket.ai",
       description:
         "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Bezeichnung, Kategorie, Vertragsform und Arbeitszeit sind für alle sichtbar; kostenlos anmelden, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+    },
+    pl: {
+      title: "Otwarte oferty pracy — LabourMarket.ai",
+      description:
+        "Przeglądaj aktualne oferty pracy z oficjalnych publicznych źródeł zatrudnienia. Nazwa stanowiska, kategoria, forma zatrudnienia i wymiar czasu pracy są widoczne dla wszystkich; załóż darmowe konto, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
     },
   },
   professions: {
@@ -463,6 +525,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Von Bauarbeitern, Schweißern und Fahrern bis zu Lager-, Produktions-, Reinigungs-, Gastgewerbe-, Pflege- und Verwaltungsrollen — LabourMarket.ai deckt Berufe und Branchen in ganz Europa ab, dazu Kolonnen, Personalagenturen und Arbeitgeber.",
     },
+    pl: {
+      title: "Zawody i branże — dla kogo jest LabourMarket.ai",
+      description:
+        "Od pracowników budowlanych, spawaczy i kierowców po magazyn, produkcję, sprzątanie, hotelarstwo, opiekę i administrację — LabourMarket.ai obejmuje zawody i branże w całej Europie, a także zespoły, agencje i pracodawców.",
+    },
   },
   projectCostCalculator: {
     en: {
@@ -490,6 +557,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Kostenloser Arbeits- und Projektkostenrechner: Geben Sie Ihre eigenen Arbeitskräfte, Stunden, Sätze, Material- und Zusatzkosten ein und erhalten Sie eine transparente vorläufige Schätzung. Branchenübergreifend — Logistik, Reinigung, Produktion, Gastgewerbe, Pflege, Bau und mehr. Ohne Konto; Ihre Zahlen werden nicht gespeichert.",
     },
+    pl: {
+      title: "Kalkulator projektu — oszacuj koszty prac i projektu",
+      description:
+        "Darmowy kalkulator kosztów prac i projektu: wpisz własnych pracowników, godziny, stawki, materiały i dodatki i otrzymaj przejrzysty wstępny kosztorys. Dla wielu branż — logistyka, sprzątanie, produkcja, hotelarstwo, opieka, budownictwo i więcej. Konto nie jest potrzebne; Twoje liczby nie są zapisywane.",
+    },
   },
   createCv: {
     en: {
@@ -516,6 +588,11 @@ export const PAGE_SEO: Readonly<
       title: "Kostenloser Lebenslauf-Generator — Professionellen Lebenslauf online erstellen",
       description:
         "Erstellen Sie kostenlos einen professionellen Lebenslauf auf LabourMarket.ai: Importieren Sie ein vorhandenes PDF oder DOCX oder beginnen Sie bei null, prüfen Sie jeden Fakt, wählen Sie eine klare Vorlage und laden Sie als PDF herunter. Optional bauen Sie Ihr Arbeitskraft-Profil auf, strukturieren Ihre Fähigkeiten mit der europäischen ESCO-Taxonomie und sehen echte Stellenanzeigen aus offiziellen öffentlichen Quellen.",
+    },
+    pl: {
+      title: "Darmowy kreator CV — stwórz profesjonalne CV online",
+      description:
+        "Stwórz profesjonalne CV za darmo na LabourMarket.ai: zaimportuj istniejący plik PDF lub DOCX albo zacznij od zera, sprawdź każdy fakt, wybierz czysty szablon i pobierz jako PDF. Opcjonalnie zbuduj swój profil pracownika, uporządkuj umiejętności według europejskiej taksonomii ESCO i zobacz prawdziwe oferty pracy z oficjalnych publicznych źródeł.",
     },
   },
 };

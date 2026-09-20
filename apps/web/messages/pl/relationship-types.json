@@ -1,12 +1,12 @@
 {
-  "collaborator": "[EN] Collaborator",
-  "consultant": "[EN] Consultant",
-  "employee": "[EN] Employee",
-  "freelancer": "[EN] Freelancer",
-  "manager": "[EN] Manager",
-  "owner": "[EN] Owner",
-  "student": "[EN] Student",
-  "unemployed": "[EN] Unemployed",
-  "volunteer": "[EN] Volunteer",
+  "collaborator": "współpracownik",
+  "consultant": "konsultant",
+  "employee": "pracownik",
+  "freelancer": "zleceniobiorca",
+  "manager": "kierownik",
+  "owner": "właściciel",
+  "student": "student",
+  "unemployed": "bezrobotny",
+  "volunteer": "wolontariusz",
   "external_manager": "Kierownik zewnętrzny (zleceniodawca)"
 }

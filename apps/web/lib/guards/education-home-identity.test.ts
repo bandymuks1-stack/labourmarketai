@@ -203,7 +203,7 @@ describe("4. i18n parity for the M10 keys", () => {
   });
 
   it("the routed locales carry REAL translations (no [EN] markers)", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const chat = (
         JSON.parse(read(`messages/${loc}.json`)) as {
           conversation: { chat: Record<string, string> };

@@ -52,7 +52,7 @@ describe("institution learner outcomes — one caller, honest suppression", () =
   });
 
   it("copy exists in the 5 routed catalogs (the roleDashboards namespace lives only there) and the suppression line names the floor", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const blk = JSON.parse(read(`messages/${locale}.json`)).roleDashboards.company.learners as Record<string, string>;
       for (const key of ["outcomesTitle", "outcomesSuppressed", "outcomesActive", "outcomesInterest", "outcomesBookings", "outcomesEngagements"]) {
         expect(blk[key], `${locale}.${key}`).toBeTypeOf("string");

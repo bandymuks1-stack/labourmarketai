@@ -120,7 +120,7 @@ describe("composer attach routes by active flow, never by file name", () => {
 
 /** Every ACTIVE (routable) locale — an untranslated state on a live surface is
  *  a raw key in front of a real worker. */
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("photo progress copy present in every active locale", () => {
   for (const loc of ACTIVE_LOCALES) {

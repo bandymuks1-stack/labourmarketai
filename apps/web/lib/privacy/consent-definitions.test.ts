@@ -62,7 +62,7 @@ describe("all five active locales have complete consent texts (test 23)", () => 
   it.each(CONSENT_DEFINITIONS.map((d) => [d.purpose, d] as const))(
     "%s",
     (_purpose, def) => {
-      expect(CONSENT_LOCALES).toEqual(["lt", "en", "ru", "nl", "de"]);
+      expect(CONSENT_LOCALES).toEqual(["lt", "en", "ru", "nl", "de"]); // PL (UI-active 2026-09-20) has no consent legal blocks yet — owner wording item; the UI falls back to en
       for (const locale of CONSENT_LOCALES) {
         const t = def.texts[locale];
         expect(t, `${def.purpose}/${locale}`).toBeTruthy();

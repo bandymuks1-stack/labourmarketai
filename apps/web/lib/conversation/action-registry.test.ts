@@ -30,7 +30,7 @@ const TIERS: ConfirmationTier[] = [
 ];
 
 const APP_ROOT = process.cwd();
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 function loadMessages(locale: string): Record<string, unknown> {
   return JSON.parse(readFileSync(join(APP_ROOT, "messages", `${locale}.json`), "utf8"));
@@ -86,7 +86,7 @@ describe("conversation action registry — structure", () => {
       expect(a.descriptionKey.startsWith("conversation.actions."), a.id).toBe(true);
       // advanced route is a real, locale-prefix-free app path
       expect(a.advancedRoute.startsWith("/"), `${a.id} route`).toBe(true);
-      expect(a.advancedRoute).not.toMatch(/^\/(lt|en|ru|nl|de)\//); // never locale-prefixed
+      expect(a.advancedRoute).not.toMatch(/^\/(lt|en|ru|nl|de|pl)\//); // never locale-prefixed
       // telemetry event must be a registered funnel event
       expect(FUNNEL_EVENT_NAMES.includes(a.telemetryEvent), `${a.id} telemetry`).toBe(true);
       // handler references an entrypoint, never inline logic

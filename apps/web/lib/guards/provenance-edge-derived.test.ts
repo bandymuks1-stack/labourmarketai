@@ -28,7 +28,7 @@ import { join, relative } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {

@@ -15,7 +15,7 @@ import { test, expect, type Page } from "@playwright/test";
  * see docs/launch/production-ux-root-cause-audit-v2.md.
  */
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const HAS_TEST_SUPABASE = !!process.env.SUPABASE_TEST_URL;
 
 async function setTheme(page: Page, theme: "light" | "dark"): Promise<void> {

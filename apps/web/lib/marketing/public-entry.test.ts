@@ -24,7 +24,8 @@ import {
   readPublicEntry,
 } from "./public-entry";
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const MESSAGES = join(__dirname, "..", "..", "messages");
 
 function entryExamples(locale: string): Record<string, string> {
@@ -112,6 +113,7 @@ describe("public entry — one sentence, the one router (P1 acceptance)", () => 
       ru: /бухгалтер/i,
       nl: /accountant/i,
       de: /buchhalter/i,
+      pl: /księgow/i,
     };
     for (const locale of ACTIVE_LOCALES) {
       expect(entryExamples(locale).professional).toMatch(WORD[locale]);

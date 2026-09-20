@@ -25,10 +25,12 @@ import {
  */
 
 describe("a language code we do not route is not a page name", () => {
-  it("sends the three acquisition languages to the English product", () => {
+  it("sends the unrouted acquisition languages to the English product", () => {
     expect(unsupportedLanguageRedirectPath("/sv")).toBe("/en");
-    expect(unsupportedLanguageRedirectPath("/pl")).toBe("/en");
     expect(unsupportedLanguageRedirectPath("/uk")).toBe("/en");
+    // PL is ROUTED since 2026-09-20 (owner approval): no redirect, the list is
+    // derived from the active set and dropped it by itself.
+    expect(unsupportedLanguageRedirectPath("/pl")).toBeNull();
   });
 
   it("never sends any of them into Lithuanian", () => {
@@ -45,7 +47,7 @@ describe("a language code we do not route is not a page name", () => {
     expect(unsupportedLanguageRedirectPath("/sv/dashboard")).toBe(
       "/en/dashboard",
     );
-    expect(unsupportedLanguageRedirectPath("/pl/for-workers/carpenter")).toBe(
+    expect(unsupportedLanguageRedirectPath("/sv/for-workers/carpenter")).toBe(
       "/en/for-workers/carpenter",
     );
   });

@@ -123,7 +123,7 @@ describe("3b · honesty — a failed tasks read is NAMED, never \"nothing is mis
     expect(FIELD.match(/t\("slotsUnavailable"\)/g)?.length).toBe(2);
   });
   it("the unavailable copy exists in every routed locale and differs from the empty copy", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as { projectField: Record<string, string> };
       expect(typeof m.projectField.slotsUnavailable).toBe("string");
       expect(m.projectField.slotsUnavailable).not.toBe(m.projectField.slotsNone);
@@ -181,7 +181,7 @@ describe("5 · no sports vocabulary in the canonical model; tokens only", () => 
 });
 
 describe("6 · i18n — the namespace exists in the five active locales with honest vocabulary", () => {
-  const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+  const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
   function keyPaths(obj: Record<string, unknown>, prefix = "", out: string[] = []): string[] {
     for (const k of Object.keys(obj)) {

@@ -34,6 +34,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     ru: "Постоянная",
     nl: "Vast",
     de: "Unbefristet",
+    pl: "Na czas nieokreślony",
   },
   temporary: {
     en: "Temporary",
@@ -41,6 +42,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     ru: "Временная",
     nl: "Tijdelijk",
     de: "Befristet",
+    pl: "Na czas określony",
   },
   seasonal: {
     en: "Seasonal",
@@ -48,6 +50,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     ru: "Сезонная",
     nl: "Seizoenswerk",
     de: "Saisonal",
+    pl: "Sezonowa",
   },
 };
 
@@ -58,6 +61,7 @@ const WORKING_TIME: Record<string, L> = {
     ru: "Полная занятость",
     nl: "Voltijd",
     de: "Vollzeit",
+    pl: "Pełny etat",
   },
   part_time: {
     en: "Part time",
@@ -65,6 +69,7 @@ const WORKING_TIME: Record<string, L> = {
     ru: "Частичная занятость",
     nl: "Deeltijd",
     de: "Teilzeit",
+    pl: "Niepełny etat",
   },
 };
 
@@ -74,6 +79,7 @@ const POSITIONS: L = {
   ru: "мест",
   nl: "plaatsen",
   de: "Stellen",
+  pl: "miejsc",
 };
 
 export function PublicVacancyCard({

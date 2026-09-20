@@ -134,7 +134,7 @@ describe("6. signup: one legal notice, the pilot line under the action", () => {
     it(`${locale}: the subcopy no longer promises a "role" step`, () => {
       const sub = messages(locale).auth.signup.subcopy;
       expect(sub).not.toMatch(/vaidmen|your role|роль|je rol|Ihre Rolle/i);
-      expect(sub).toMatch(/kitame žingsnyje|next step|следующем шаге|volgende stap|nächsten Schritt/i);
+      expect(sub).toMatch(/kitame žingsnyje|next step|следующем шаге|volgende stap|nächsten Schritt|następnym kroku/i);
     });
   }
 });

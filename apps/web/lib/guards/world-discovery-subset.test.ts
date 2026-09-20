@@ -48,7 +48,7 @@ const OPPORTUNITIES_PAGE = "app/[locale]/dashboard/opportunities/page.tsx";
 const WORLD_MOUNT_PAGES = [PAGE, OPPORTUNITIES_PAGE] as const;
 const WORLD_FILES = [MODEL, READ, ACTIONS, COMPONENT];
 
-const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 function* walk(dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {

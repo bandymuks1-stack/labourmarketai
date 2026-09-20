@@ -23,7 +23,8 @@ import { describe, expect, it } from "vitest";
 const web = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(web, p), "utf8");
 
-const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const catalogs = Object.fromEntries(
   LOCALES.map((l) => [l, read(`messages/${l}.json`)]),
 ) as Record<(typeof LOCALES)[number], string>;
@@ -176,6 +177,7 @@ describe("forbidden regressions", () => {
       ru: /не назначен/,
       nl: /geen functionaris/i,
       de: /nicht bestellt/i,
+      pl: /nie został wyznaczony/i,
     };
     for (const l of LOCALES) {
       const ln = JSON.parse(catalogs[l]).legal.legalNotice;

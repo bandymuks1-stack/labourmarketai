@@ -84,7 +84,7 @@ describe("honesty — unmeasured facts are said, never zeroed", () => {
   });
 
   it("the copy exists in every active locale", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as {
         reports?: {
           org?: { demand?: Record<string, string> };

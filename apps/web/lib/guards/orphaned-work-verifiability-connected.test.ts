@@ -33,7 +33,7 @@ const WEB = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(WEB, rel), "utf8");
 
 const JOURNAL_PAGE = "app/[locale]/dashboard/journal/page.tsx";
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("the journal surface actually asks the question", () => {
   const page = read(JOURNAL_PAGE);
