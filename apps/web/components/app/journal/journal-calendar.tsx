@@ -8,6 +8,11 @@ import {
   type JournalCalendarScale,
 } from "@/lib/journal/journal-calendar";
 import { formatDuration } from "@/lib/journal/format-duration";
+// The observed-reality colour of the work-world grammar (primitives.tsx
+// REALITY_CLASS.observed). That file is landing-frozen, so the class pair is
+// mirrored here verbatim rather than exported from it; the journal grid must
+// paint a recorded day with the SAME colour the TimeReality chip wears.
+const REALITY_CLASS = { observed: "text-brand-cyan border-brand-cyan/40" } as const;
 
 /**
  * THE WORK JOURNAL CALENDAR — the day navigator on `/dashboard/journal`
@@ -233,9 +238,16 @@ export async function JournalCalendar({
                 cell.isSelected
                   ? "border-brand-blue bg-brand-blue/15 font-semibold text-text-primary"
                   : cell.entryCount > 0
-                    ? "border-brand-blue/30 bg-brand-blue/5 text-text-primary hover:border-brand-blue"
+                    ? // A recorded day is OBSERVED work — the work-world grammar's
+                      // cyan (`REALITY_CLASS.observed`), the same colour the
+                      // planning calendar gives the same day. Blue is the
+                      // selection / commitment colour, never a diary's.
+                      `${REALITY_CLASS.observed} bg-brand-cyan/5 hover:border-brand-cyan`
                     : cell.reportedMinutes > 0
-                      ? "border-brand-cyan/30 text-text-primary hover:border-brand-cyan"
+                      ? // An organization's record of the day is observed too
+                        // (PAST = ACTUAL) — the same reality; the square
+                        // marker below says whose observation it is.
+                        `${REALITY_CLASS.observed} hover:border-brand-cyan`
                       : "border-transparent text-text-secondary hover:border-ink-500"
               } ${cell.isToday && !cell.isSelected ? "ring-1 ring-inset ring-ink-500" : ""}`}
             >
@@ -318,6 +330,17 @@ export async function JournalCalendar({
                 entries: grid.recordedEntries,
               })}
       </p>
+      {/* THE ORGANIZATION'S LAYER COULD NOT BE READ. Nothing was placed on
+          any day above — and that is not the same as "the organization
+          recorded nothing". Said in words, once (SEP-7: UNKNOWN ≠ ZERO). */}
+      {grid.reportedUnknown && (
+        <p
+          className="text-meta leading-relaxed text-text-muted"
+          data-testid="journal-calendar-reported-unknown"
+        >
+          {t("reportedUnknown")}
+        </p>
+      )}
     </section>
   );
 }

@@ -1812,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Arbeidshistorikken din kunne ikke leses akkurat nå."
     },
     "readinessSteps": {
       "pillar": {
@@ -1866,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Stolpelengden er antallet arbeidsoppføringer bak hver ferdighet (full stolpe = {scale}+), ikke en ferdighetsvurdering."
-    }
+      "skillsScaleNote": "Stolpelengden er antallet arbeidsoppføringer bak hver ferdighet (full stolpe = {scale}+), ikke en ferdighetsvurdering.",
+      "historyHours": "{hours} t registrert · {confirmed} t med leders notat",
+      "historyUnavailable": "Arbeidshistorikken din kunne ikke leses akkurat nå."
+    },
+    "skillsUnavailable": "Kunne ikke leses akkurat nå.",
+    "verifiedUnavailable": "Ferdigheter med leders notat kunne ikke leses akkurat nå."
   },
   "projects": {
     "map": {
@@ -2238,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Interessen din er registrert. Du krysset ikke av for presentasjon, så ingenting om deg gis videre til Nonstop Group. Vil du bli presentert, trekk interessen tilbake og vis den på nytt med krysset satt. LabourMarket.ai har ikke sendt noe til arbeidsgiveren.",
       "handoffDelivered": "Interessen din er videreformidlet til Nonstop Group. Nonstop kan kontakte arbeidsgiveren gjennom sin egen kommersielle prosess; LabourMarket.ai har ikke sendt noe til arbeidsgiveren.",
       "handoffClosed": "Interessen din er registrert. Den tidligere videreformidlingen til Nonstop Group ble lukket da du trakk den tilbake; ingenting ble sendt."
+    },
+    "intent": {
+      "label": "Min situasjon",
+      "states": {
+        "AVAILABLE_NOW": "Kan starte nå",
+        "AVAILABLE_FROM": "Kan starte fra en dato",
+        "OPEN_TO_OFFERS": "I arbeid, men åpen for tilbud",
+        "LOOKING_FOR_WORK": "Søker arbeid",
+        "LOOKING_FOR_PROJECTS": "Søker prosjekter"
+      }
     }
   },
   "scouting": {
@@ -2751,7 +2766,9 @@
     "servicesEmpty": "Ingenting tilbudt ennå",
     "servicesUnavailable": "Kunne ikke laste tilbudte tjenester",
     "serviceRemote": "Eksternt",
-    "photoAlt": "Bilde av utført arbeid"
+    "photoAlt": "Bilde av utført arbeid",
+    "historyTitle": "Importert historikk",
+    "historyUnavailable": "Importert historikk kunne ikke leses"
   },
   "marketMapBase": {
     "previewTitle": "Nytt sted valgt — ikke lagret ennå",

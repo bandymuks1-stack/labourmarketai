@@ -24,7 +24,7 @@ against the REAL internal supply:
 
 | Check | Rule |
 |---|---|
-| available | `availability_status !== "unavailable"` AND `available_from <= need start` (when both known) |
+| available | `availability_status` is recorded AND `!== "unavailable"` AND `available_from <= need start` (when both known). A `null` status is UNKNOWN availability (2026-09-20): the worker is reported in `headcountGap.unknownWorkerIds`, never counted as eligible — capability (has the skill) is not available capacity |
 | free | no commitment overlaps the need window — INCLUSIVE calendar-day ranges, the exact booking-accept-guard semantics (`rangesOverlapInclusive`); no window → degrades to availability only |
 | fit | profession matches the requirement, OR the worker covers >= half (rounded up) of the requirement's skills |
 | eligible | available AND free AND fit — counts toward headcount |

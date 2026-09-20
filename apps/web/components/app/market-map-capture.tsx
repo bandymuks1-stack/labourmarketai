@@ -158,6 +158,7 @@ export function MarketMapCapture({
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Inline edit: change this location's visibility. */}
                   <select
+                    aria-label={t("preferred.visibility")}
                     className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
                     value={p.visibilityLevel}
                     disabled={pending}

@@ -4,6 +4,7 @@ import { FileSpreadsheet, ClipboardList } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { EvidenceImportSection } from "@/components/app/evidence-import-section";
+import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
 
 /**
  * ISTORIJA — the historical import door (owner IA correction 2026-09-16,
@@ -52,6 +53,12 @@ export default async function CompanyHistoryPage({
       <div id="evidence-import-zone" className="scroll-mt-20">
         <EvidenceImportSection locale={locale} sessionId={evidenceSession} />
       </div>
+
+      {/* YOUR IMPORTS — every source this organization has read, newest
+          first, each a way back into the section above. Without it a session
+          was reachable only by its bookmark (class F: rendered ≠ reachable). */}
+      <EvidenceImportSessions locale={locale} activeSessionId={evidenceSession ?? null} />
+
 
       {/* Neighbouring doors of the same evidence: the hours surface (whose
           grid this engine also reads) and the evidence reports. */}

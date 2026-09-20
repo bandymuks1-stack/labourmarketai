@@ -232,7 +232,8 @@
       "receipt": "Bestätigt: {title}",
       "receiptSkills": "{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}",
       "skillsUnavailable": "Die Fähigkeitenliste konnte nicht gelesen werden — der Tipp bestätigt nur den Eintrag selbst."
-    }
+    },
+    "loadFailed": "Die Prüfliste konnte nicht geladen werden. Das heißt nicht, dass nichts zu prüfen ist — bitte erneut versuchen."
   },
   "listEmpty": "Sie haben noch keine Arbeitsnachweise — Ihre Einträge werden hier angezeigt.",
   "listEmptyTitle": "Beginnen Sie, Arbeitsnachweise aufzubauen",
@@ -768,7 +769,9 @@
       "approved": "{hours} Std. in einem Stundenzettel genehmigt",
       "linked": "{hours} Std. beschreiben Journaleinträge, die oben bereits gezählt sind",
       "rejected": "{hours} Std. in einem Stundenzettel abgelehnt — nirgends gezählt",
-      "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur ein Journaleintrag."
+      "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur ein Journaleintrag.",
+      "periodRecord": "{hours} Std. über {span} — eine Zahl für den ganzen Zeitraum, nicht auf Tage verteilt",
+      "periodMore": "{count, plural, one {# weiterer Zeitraumeintrag} other {# weitere Zeitraumeinträge}}"
     },
     "growthKindsTitle": "Was deine Einträge zeigen",
     "growthKindsHint": "Jede Zeile ist eine Art, nach einer einfachen Regel aus deinen eigenen Einträgen abgeleitet, mit den Fakten, auf denen sie steht. Keine Eigenschaft, keine Bewertung.",
@@ -889,6 +892,7 @@
       "all": "Journaleintrag bestätigt"
     },
     "reported": "Organisation erfasste {time}",
-    "periodReportedOnly": "Keine eigenen Einträge; die Organisation erfasste {days, plural, one {# Tag} other {# Tage}}, {time}."
+    "periodReportedOnly": "Keine eigenen Einträge; die Organisation erfasste {days, plural, one {# Tag} other {# Tage}}, {time}.",
+    "reportedUnknown": "Die Einträge der Organisation für diesen Zeitraum konnten nicht gelesen werden — das ist nicht dasselbe wie keine."
   }
 }

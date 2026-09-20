@@ -118,6 +118,30 @@ nothing); `buildNumber`; `NSPrivacyTracking: false` backed by a dependency pin.
 `/.well-known/apple-app-site-association` served extensionless as
 `application/json`, as Apple requires.
 
+**CODE-READY (2026-09-20) — the claim was narrowed, on both platforms.** As
+written on 2026-09-14 the AASA claimed `"/": "/*"` and the Android intent
+filter claimed the whole host, while the native app has eight screens
+(`/`, `/sign-in`, `/register`, `/today`, `/journal`, `/log-work`, `/profile`,
+`/settings`) and no locale-prefixed route at all. The documents 404 until the
+identifiers are set, so nothing was broken yet — but the first day they
+worked, every shared web link (`/lt/dashboard/journal`, `/jobs/<id>`) on a
+phone with the app installed would have opened the app on `+not-found`. Both
+documents now claim exactly `NATIVE_APP_PATHS`
+(`apps/web/lib/mobile/app-association.ts`), each Android data entry is
+path-qualified, and `lib/guards/app-association.test.ts` pins the constant to
+the route files under `apps/mobile/app` and pins `app.json` to the constant.
+No `+native-intent.tsx` mapping was added: the web's routes are
+locale-prefixed and named differently (`/lt/auth/login` vs `/sign-in`), so
+there is no clean 1:1 rule. Widen the claim when the app gains the screen.
+
+**CODE-READY (2026-09-20) — App Store 5.1.1(v).** The native Settings screen
+now has a "Privacy & account" group that opens, in the browser and on the
+same origin the build talks to, `/<locale>/dashboard/privacy` (data request
+and account deletion — the existing self-service privacy requests),
+`/<locale>/legal/terms`, and `mailto:info@labourmarket.ai`. Pinned by
+`lib/guards/mobile-account-controls.test.ts`. Deletion is not re-implemented
+on the phone.
+
 **OWNER-CREDENTIAL-GATED** — Apple Developer Program, team id, distribution
 certificate; `APPLE_TEAM_ID`; icon/splash art (as above); App Privacy
 declaration; metadata, support URL, screenshots; a review test account.
@@ -152,6 +176,16 @@ forbidden here and was ruled out by the owner.
 
 **Owner action, if the proof is wanted:** Actions → *iOS* → *Run workflow* →
 branch `claude/labourmarket-audit-ikzeez`. One click, ~40 macOS minutes.
+
+**Superseded 2026-09-20 — the proof landed.** `ios.yml` has since completed
+green twice with the associated-domains configuration in the tree: run
+`34948120288` on `main` at `b34c0cfe` (2026-09-15), and run `35513465253` on
+branch `feat/cc/activate-pl-locale` at `a227ba06` (2026-09-20). "Outstanding
+by push cadence" no longer applies; the native build and the simulator
+journey are proven WITH the deep-link claim. The claim itself was narrowed
+after both runs (above) — that is an `app.json` change under the same
+paths-filter, so the next mobile-touching push re-runs the proof; the
+`app.json` shape is asserted by the guards in the meantime.
 
 **What already covers the change in the meantime:** the `app.json` edits are
 asserted by `lib/guards/mobile-release-config.test.ts` — the app claims the

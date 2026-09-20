@@ -1812,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Jūsu darba vēsturi šobrīd neizdevās nolasīt."
     },
     "readinessSteps": {
       "pillar": {
@@ -1866,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Joslas garums ir jūsu darba ierakstu skaits aiz katras prasmes (pilna josla = {scale}+), nevis prasmes vērtējums."
-    }
+      "skillsScaleNote": "Joslas garums ir jūsu darba ierakstu skaits aiz katras prasmes (pilna josla = {scale}+), nevis prasmes vērtējums.",
+      "historyHours": "{hours} h reģistrētas · {confirmed} h ar vadītāja ierakstu",
+      "historyUnavailable": "Jūsu darba vēsturi šobrīd neizdevās nolasīt."
+    },
+    "skillsUnavailable": "Šobrīd neizdevās nolasīt.",
+    "verifiedUnavailable": "Prasmes ar vadītāja ierakstu šobrīd neizdevās nolasīt."
   },
   "projects": {
     "map": {
@@ -2238,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Jūsu interese ir reģistrēta. Jūs neatzīmējāt pārstāvēšanas lauku, tāpēc Nonstop Group par jums nekas netiek nodots. Ja vēlaties būt pārstāvēts, atsauciet un izsakiet interesi vēlreiz ar atzīmētu lauku. LabourMarket.ai darba devējam nekas nav nosūtīts.",
       "handoffDelivered": "Interese nodota Nonstop Group. Nonstop var vērsties pie darba devēja savā komerciālajā procesā; LabourMarket.ai darba devējam neko nav sūtījis.",
       "handoffClosed": "Interese reģistrēta. Iepriekšējā nodošana Nonstop Group tika slēgta, kad to atsaucāt; nekas netika nosūtīts."
+    },
+    "intent": {
+      "label": "Mana situācija",
+      "states": {
+        "AVAILABLE_NOW": "Varu sākt tūlīt",
+        "AVAILABLE_FROM": "Varu sākt no norādīta datuma",
+        "OPEN_TO_OFFERS": "Strādāju, izskatu piedāvājumus",
+        "LOOKING_FOR_WORK": "Meklēju darbu",
+        "LOOKING_FOR_PROJECTS": "Meklēju projektus"
+      }
     }
   },
   "scouting": {
@@ -2751,7 +2766,9 @@
     "servicesEmpty": "Vēl nekas nav piedāvāts",
     "servicesUnavailable": "Neizdevās ielādēt piedāvātos pakalpojumus",
     "serviceRemote": "Attālināti",
-    "photoAlt": "Paveiktā darba fotoattēls"
+    "photoAlt": "Paveiktā darba fotoattēls",
+    "historyTitle": "Importētā vēsture",
+    "historyUnavailable": "Neizdevās nolasīt importēto vēsturi"
   },
   "marketMapBase": {
     "previewTitle": "Izvēlēta jauna vieta — vēl nav saglabāta",

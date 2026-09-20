@@ -232,7 +232,8 @@
       "receipt": "Patvirtinta: {title}",
       "receiptSkills": "{count, plural, one {# įgūdis} few {# įgūdžiai} other {# įgūdžių}}",
       "skillsUnavailable": "Įgūdžių sąrašo nepavyko nuskaityti — palietimas patvirtins tik patį įrašą."
-    }
+    },
+    "loadFailed": "Peržiūros eilės nepavyko įkelti. Tai nereiškia, kad peržiūrėti nėra ko — pabandykite dar kartą."
   },
   "listEmpty": "Kol kas neturite darbo įrašų — jūsų įrašai atsiras čia.",
   "listEmptyTitle": "Pradėkite kurti darbo įrašus",
@@ -768,7 +769,9 @@
       "approved": "{hours} val. vadovo patvirtinta žiniaraštyje",
       "linked": "{hours} val. aprašo žurnalo įrašus, kurie jau suskaičiuoti aukščiau",
       "rejected": "{hours} val. atmesta žiniaraštyje — niekur neskaičiuojama",
-      "rule": "Valandų įrašas sako kada ir kiek, bet ne ką darėte — todėl šios valandos nepasiekia jokio įgūdžio ir jokios darbo rūšies. Tai daro tik žurnalo įrašas."
+      "rule": "Valandų įrašas sako kada ir kiek, bet ne ką darėte — todėl šios valandos nepasiekia jokio įgūdžio ir jokios darbo rūšies. Tai daro tik žurnalo įrašas.",
+      "periodRecord": "{hours} val. per {span} — vienas skaičius visam laikotarpiui, neskirstomas į dienas",
+      "periodMore": "dar {count, plural, one {# laikotarpio įrašas} few {# laikotarpio įrašai} other {# laikotarpio įrašų}}"
     },
     "growthKindsTitle": "Ką rodo jūsų įrašai",
     "growthKindsHint": "Kiekviena eilutė — rūšis, išvesta pagal paprastą taisyklę iš jūsų pačių įrašų, ir faktai, kuriais ji remiasi. Ne savybė ir ne įvertinimas.",
@@ -889,6 +892,7 @@
       "all": "žurnalo įrašas patvirtintas"
     },
     "reported": "organizacija užfiksavo {time}",
-    "periodReportedOnly": "Jūsų pačių įrašų nėra; organizacija užfiksavo {days, plural, one {# dieną} few {# dienas} other {# dienų}}, {time}."
+    "periodReportedOnly": "Jūsų pačių įrašų nėra; organizacija užfiksavo {days, plural, one {# dieną} few {# dienas} other {# dienų}}, {time}.",
+    "reportedUnknown": "Organizacijos įrašų šiam laikotarpiui nepavyko perskaityti — tai nereiškia, kad jų nėra."
   }
 }

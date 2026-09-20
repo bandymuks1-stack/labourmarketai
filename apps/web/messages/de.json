@@ -789,7 +789,13 @@
       "mainly": "vor allem {activity} · {hours} Std.",
       "mainlyShare": "vor allem {activity} · {hours} Std. ({percent} von {total} Std.)",
       "withoutDuration": "{count, plural, one {# Eintrag in diesem Fenster hat keine Dauer – er wird gezählt, aber nicht in Stunden.} other {# Einträge in diesem Fenster haben keine Dauer – sie werden gezählt, aber nicht in Stunden.}}",
-      "collapse": "Detailbericht ausblenden"
+      "collapse": "Detailbericht ausblenden",
+      "ledger": {
+        "measured": "Eigene Aufzeichnungen Ihrer Organisation in diesem Zeitraum: {hours} Std. bei {workers, plural, one {# Person} other {# Personen}} — getrennt geführt, nie zum Journal addiert.",
+        "none": "Diese Datenbank enthält keine Stundenaufzeichnungen der Organisation.",
+        "unknown": "Die Aufzeichnungen der Organisation konnten nicht gelesen werden — das sind nicht null Stunden.",
+        "truncated": "Beruht auf den ersten {count} Aufzeichnungen."
+      }
     }
   },
   "marketRecognition": {
@@ -6005,7 +6011,18 @@
         "note": "Echte Anzahl der mit diesem Projekt verknüpften Journaleinträge und der Fotos, die Arbeiter an ihre eigenen Einträge angehängt haben.",
         "link": "Projektgalerie öffnen"
       },
-      "honestNote": "Dieses Zentrum setzt nur bereits vorhandene Datensätze zusammen. Meilensteine, Problemregister und Ressourcentabellen existieren noch nicht und werden hier nicht simuliert."
+      "honestNote": "Dieses Zentrum setzt nur bereits vorhandene Datensätze zusammen. Meilensteine, Problemregister und Ressourcentabellen existieren noch nicht und werden hier nicht simuliert.",
+      "hours": {
+        "title": "Stunden in diesem Projekt",
+        "allocated": "Zugewiesen",
+        "journaled": "Im Journal",
+        "confirmed": "Bestätigt",
+        "value": "{hours} Std.",
+        "note": "Zugewiesen — die Stundenaufzeichnungen der Organisation auf den Arbeitsobjekten dieses Projekts; Journal — die Einträge der Personen zu diesem Projekt; bestätigt — Journaleinträge, die eine Führungskraft freigegeben hat. Getrennt geführt, nie zusammengezählt.",
+        "unavailable": "konnte nicht gelesen werden",
+        "noLedger": "keine Stundenaufzeichnung",
+        "truncated": "Die Journalzahlen beruhen auf den ersten {count} Einträgen."
+      }
     },
     "eyebrow": "Projekteinsatz",
     "managerOnly": "Dieses Board ist für Manager eines Unternehmens oder einer Personalagentur.",
@@ -6944,7 +6961,8 @@
         "notOpen": "Diese Anfrage ist nicht mehr offen.",
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
-    }
+    },
+    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich."
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",
@@ -7416,7 +7434,8 @@
       "opportunityCount": "{count} aktuell sichtbare Anfragen passen zu deinem Profil.",
       "opportunityUnavailable": "Offene Anfragen sind für dein Konto noch nicht verfügbar, deshalb wurde das nicht gemessen.",
       "opportunityNoWorker": "Das wird gemessen, sobald du ein Arbeitnehmerprofil hast.",
-      "closestBasis": "Am nächsten — {what}: passt bei {matched} von {required} geforderten Fähigkeiten, {confirmed} mit einem Eintrag der Führungskraft."
+      "closestBasis": "Am nächsten — {what}: passt bei {matched} von {required} geforderten Fähigkeiten, {confirmed} mit einem Eintrag der Führungskraft.",
+      "historyUnavailable": "Ihr Arbeitsverlauf konnte gerade nicht gelesen werden."
     },
     "documentsLabel": "Dokumente",
     "documentsValue": "{valid} gültig",
@@ -7452,8 +7471,12 @@
       "historyRange": "{from} – {to}",
       "historyEmpty": "Noch keine Arbeitszeiträume erfasst.",
       "historyAria": "Arbeitszeiträume auf einer Zeitleiste, von {from} bis {to}.",
-      "skillsScaleNote": "Die Balkenlänge ist die Anzahl Ihrer Arbeitseinträge hinter jeder Fähigkeit (voller Balken = {scale}+), keine Fähigkeitsbewertung."
-    }
+      "skillsScaleNote": "Die Balkenlänge ist die Anzahl Ihrer Arbeitseinträge hinter jeder Fähigkeit (voller Balken = {scale}+), keine Fähigkeitsbewertung.",
+      "historyHours": "{hours} Std. erfasst · {confirmed} Std. mit Eintrag einer Führungskraft",
+      "historyUnavailable": "Ihr Arbeitsverlauf konnte gerade nicht gelesen werden."
+    },
+    "skillsUnavailable": "Konnte gerade nicht gelesen werden.",
+    "verifiedUnavailable": "Fähigkeiten mit Eintrag einer Führungskraft konnten gerade nicht gelesen werden."
   },
   "skillClarify": {
     "title": "Meine Fähigkeiten",
@@ -8057,7 +8080,10 @@
         "title": "Braucht deine Aufmerksamkeit",
         "untimed": "{n, plural, one {# Eintrag} other {# Einträge}} ohne Dauer — Stunden ergänzen",
         "unlabelled": "{n, plural, one {# Eintrag} other {# Einträge}} mit Stunden, aber ohne benannte Arbeitsart",
-        "unknown": "Offene Punkte konnten nicht gelesen werden."
+        "unknown": "Offene Punkte konnten nicht gelesen werden.",
+        "offers": "{n, plural, one {# Buchungsangebot wartet} other {# Buchungsangebote warten}} auf Ihre Antwort",
+        "invitations": "{n, plural, one {# Einladung wartet} other {# Einladungen warten}} auf Ihre Antwort",
+        "unread": "{n, plural, one {# Unterhaltung} other {# Unterhaltungen}} mit ungelesenen Nachrichten"
       },
       "growth": {
         "title": "Wachstum",
@@ -9426,6 +9452,16 @@
       "handoffQueuedConsentWithheld": "Ihr Interesse ist vermerkt. Sie haben das Vorstellungs-Kästchen nicht angehakt, daher wird nichts über Sie an die Nonstop Group weitergegeben. Um vorgestellt zu werden, ziehen Sie das Interesse zurück und bekunden Sie es erneut mit angehaktem Kästchen. LabourMarket.ai hat dem Arbeitgeber nichts gesendet.",
       "handoffDelivered": "Ihr Interesse wurde an Nonstop Group weitergegeben. Nonstop kann den Arbeitgeber über seinen eigenen kommerziellen Prozess ansprechen; LabourMarket.ai hat dem Arbeitgeber nichts gesendet.",
       "handoffClosed": "Ihr Interesse ist vermerkt. Die frühere Weitergabe an Nonstop Group wurde geschlossen, als Sie zurückzogen; nichts wurde gesendet."
+    },
+    "intent": {
+      "label": "Meine Situation",
+      "states": {
+        "AVAILABLE_NOW": "Kann sofort anfangen",
+        "AVAILABLE_FROM": "Kann ab einem Datum anfangen",
+        "OPEN_TO_OFFERS": "Berufstätig, aber offen für Angebote",
+        "LOOKING_FOR_WORK": "Auf Arbeitssuche",
+        "LOOKING_FOR_PROJECTS": "Auf Projektsuche"
+      }
     }
   },
   "workerIntake": {
@@ -9943,12 +9979,12 @@
     "footer": "Dieser Bericht zeigt nur echte Signale. Die Prüfung ist eine menschliche Entscheidung."
   },
   "about": {
-    "metaTitle": "Was ist Labour Market AI",
-    "metaDescription": "Eine Erklärung in einfacher Sprache zu Labour Market AI: wie Arbeitskräfte ein echtes Profil aus echter Arbeit aufbauen, wie Unternehmen Bedarfe beschreiben und Teams finden, und wie die Plattform ehrlich bleibt.",
-    "navLabel": "Über Labour Market AI",
+    "metaTitle": "Was ist LabourMarket.ai",
+    "metaDescription": "Eine Erklärung in einfacher Sprache zu LabourMarket.ai: wie Arbeitskräfte ein echtes Profil aus echter Arbeit aufbauen, wie Unternehmen Bedarfe beschreiben und Teams finden, und wie die Plattform ehrlich bleibt.",
+    "navLabel": "Über LabourMarket.ai",
     "eyebrow": "Über die Plattform",
-    "title": "Was Labour Market AI ist und wie es funktioniert",
-    "lede": "Labour Market AI ist eine Arbeitsmarktplattform, auf der Arbeitskräfte, Unternehmen und Teams echte Fähigkeiten zeigen, echte Bedarfe sehen und echte Arbeit organisieren — lokal und in ganz Europa.",
+    "title": "Was LabourMarket.ai ist und wie es funktioniert",
+    "lede": "LabourMarket.ai ist eine Arbeitsmarktplattform, auf der Arbeitskräfte, Unternehmen und Teams echte Fähigkeiten zeigen, echte Bedarfe sehen und echte Arbeit organisieren — lokal und in ganz Europa.",
     "honesty": "Alles, was auf dieser Seite beschrieben wird, existiert heute im Produkt. Funktionen, die noch vorbereitet werden, sind als solche benannt, und Zahlungen sind noch nicht aktiv.",
     "loops": [
       {
@@ -10375,7 +10411,8 @@
       "title": "Zeitraumnachweis — abgeleiteter Monatsanteil",
       "chip": "Abgeleitet",
       "thisMonth": "{hours} h in diesem Monat (abgeleitet)",
-      "sourceLink": "Zeitraumeintrag öffnen"
+      "sourceLink": "Zeitraumeintrag öffnen",
+      "unavailable": "Zeitraumeinträge konnten gerade nicht gelesen werden — der Plan wird ohne sie angezeigt."
     }
   },
   "workforcePlanning": {
@@ -10498,7 +10535,9 @@
       "noDates": "keine Daten erfasst",
       "undated": "zugewiesen zu {label} — keine Daten erfasst",
       "withoutCommitment": "{count, plural, one {# Person hat} other {# Personen haben}} hier nichts erfasst. Das ist nicht dasselbe wie frei — genehmigte Abwesenheiten stehen separat.",
-      "unavailable": "Verpflichtungen konnten nicht gelesen werden. Das ist nicht dasselbe wie frei."
+      "unavailable": "Verpflichtungen konnten nicht gelesen werden. Das ist nicht dasselbe wie frei.",
+      "conflict": "Überschneidung",
+      "conflictNote": "Überschneidende Termine sind markiert: dieselbe Person ist an diesen Tagen an zwei Orten gebunden. Ein Hinweis, keine Sperre — beide Einträge bleiben."
     }
   },
   "tasks": {
@@ -11243,7 +11282,8 @@
         "unemployed": "Arbeitssuchend",
         "volunteer": "Freiwilliger"
       },
-      "why": "Angezeigt werden nur Ihre aktiven Arbeitsbeziehungen — jede Zeile benennt die Beziehung."
+      "why": "Angezeigt werden nur Ihre aktiven Arbeitsbeziehungen — jede Zeile benennt die Beziehung.",
+      "unavailable": "Ihre Beziehungen konnten nicht geladen werden. Das heißt nicht, dass es keine gibt — bitte erneut versuchen."
     },
     "invite": {
       "title": "Einladen",
@@ -11438,7 +11478,9 @@
     "servicesEmpty": "Noch nichts angeboten",
     "servicesUnavailable": "Angebotene Leistungen konnten nicht geladen werden",
     "serviceRemote": "Ortsunabhängig",
-    "photoAlt": "Foto abgeschlossener Arbeit"
+    "photoAlt": "Foto abgeschlossener Arbeit",
+    "historyTitle": "Importierter Verlauf",
+    "historyUnavailable": "Importierter Verlauf konnte nicht gelesen werden"
   },
   "companyGallery": {
     "title": "Galerie",
@@ -16229,7 +16271,19 @@
       "withdrawConfirm": "Zurückziehen",
       "withdrawCancel": "Verknüpfung behalten",
       "withdrawDone": "Zurückgezogen. Die Organisation behält ihren eigenen Eintrag; Sie nennt sie nicht mehr.",
-      "unnamedOrganization": "Eine Organisation"
+      "unnamedOrganization": "Eine Organisation",
+      "suggestions": {
+        "title": "In den Einträgen einer Organisation genannte Fähigkeiten",
+        "intro": "Die Worte der Organisation über Ihre Arbeit nennen diese Fähigkeiten. Nichts wird hinzugefügt, bis Sie es sagen.",
+        "why": "Genannt als „{terms}“ in {count, plural, one {# Eintrag} other {# Einträgen}}",
+        "add": "Hinzufügen",
+        "adding": "Wird hinzugefügt…",
+        "added": "Zum Profil hinzugefügt",
+        "already": "Bereits in Ihrem Profil",
+        "notNow": "Nicht jetzt",
+        "error": "Konnte nicht hinzugefügt werden. Bitte erneut versuchen.",
+        "selfDeclaredNote": "Eine hinzugefügte Fähigkeit ist selbst angegeben — nicht geprüft."
+      }
     },
     "plan": {
       "title": "Was gefunden und was vorbereitet wurde",
@@ -16730,7 +16784,8 @@
       "partners": {
         "title": "Kunden und Partner",
         "subtitle": "Mit wem Sie arbeiten: Kunden, Agenturen und geteilter Bedarf.",
-        "empty": "Noch keine Kunden- oder Partnerbeziehungen. Eine Agentur kann Sie zur Zusammenarbeit einladen — dann erscheinen ihre Vorschläge hier."
+        "empty": "Noch keine Kunden- oder Partnerbeziehungen. Eine Agentur kann Sie zur Zusammenarbeit einladen — dann erscheinen ihre Vorschläge hier.",
+        "unavailable": "Partnerverbindungen konnten nicht geladen werden. Das heißt nicht, dass es keine gibt — bitte erneut versuchen."
       },
       "education": {
         "title": "Ausbildung und Programme",
@@ -16742,7 +16797,18 @@
         "hoursGridTitle": "Monatlicher Stundenzettel",
         "hoursGridNote": "Derselbe Import versteht auch die Monatstabelle (Person × Tag). Die tägliche Stundenerfassung liegt im Arbeitsstunden-Bereich.",
         "hoursDoor": "Arbeitsstunden",
-        "evidenceReportsDoor": "Nachweisberichte"
+        "evidenceReportsDoor": "Nachweisberichte",
+        "imports": {
+          "title": "Ihre Importe",
+          "empty": "Bisher wurde nichts importiert.",
+          "unavailable": "Die Liste der Importe konnte gerade nicht gelesen werden.",
+          "status": {
+            "staged": "Vorbereitet",
+            "committed": "Erfasst",
+            "withdrawn": "Zurückgezogen",
+            "failed": "Fehlgeschlagen"
+          }
+        }
       },
       "settings": {
         "title": "Organisationseinstellungen",

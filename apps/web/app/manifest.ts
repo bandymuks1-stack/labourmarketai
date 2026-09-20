@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { BRAND_ORGANIZATION_DESCRIPTION } from "@/lib/seo/metadata";
 
 /**
  * PWA web app manifest (audit PR9 — mobile app readiness baseline).
@@ -20,8 +21,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "LabourMarket.ai",
     short_name: "LabourMarket",
-    description:
-      "One work world for workers, employers, agencies and institutions: real work, evidence, skills, demand, matching and workforce operations.",
+    // Single source shared with the Organization JSON-LD (lib/seo/metadata.ts).
+    description: BRAND_ORGANIZATION_DESCRIPTION,
     id: "/",
     start_url: "/",
     scope: "/",

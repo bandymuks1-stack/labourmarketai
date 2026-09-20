@@ -736,10 +736,13 @@ describe("the organization's hour records — a ledger beside the journal, never
       entries: journal,
       organizationRecords: imported,
     });
-    const { organizationRecords: a, checks: ca, ...restA } = without;
-    const { organizationRecords: b, checks: cb, ...restB } = withLedger;
+    const { organizationRecords: a, organizationPeriodRecords: pa, checks: ca, ...restA } = without;
+    const { organizationRecords: b, organizationPeriodRecords: pb, checks: cb, ...restB } = withLedger;
     expect(restB).toEqual(restA);
     expect(a).toBeNull();
+    // the period list follows the ledger: UNKNOWN with it, read-and-empty with it
+    expect(pa).toBeNull();
+    expect(pb).toEqual([]);
     expect(withLedger.totalHours).toBe(14);
     expect(withLedger.periods.find((p) => p.key === "all")!.hours).toBe(14);
     // the skill reading is untouched: 38 recorded hours reach no skill

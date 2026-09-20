@@ -92,7 +92,8 @@
       "entrySuperseded": "Posten har redan ersatts av en nyare version — kortet är inte längre aktuellt och tas bort från listan.",
       "entryDeleted": "Posten har raderats — kortet är inte längre aktuellt och tas bort från listan.",
       "staleTerminalHint": "Ingenting registrerades. Om arbetaren sparade en nyare version visas den som ett nytt kort i inkorgen."
-    }
+    },
+    "loadFailed": "Granskningskön kunde inte läsas in. Det betyder inte att det inte finns något att granska — försök igen."
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

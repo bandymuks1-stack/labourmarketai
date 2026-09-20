@@ -68,6 +68,8 @@ export interface PlayerCardLabels {
   };
   skillsLabel: string;
   skillsHint: string;
+  /** Identity truth: the declared-skills read failed — said, not zeroed. */
+  skillsUnavailable: string;
   candidateLabel: string;
   candidateHint: string;
   evidenceLabel: string;
@@ -106,6 +108,8 @@ export interface PlayerCardLabels {
   workHistoryCurrent: string;
   verifiedTitle: string;
   verifiedEmpty: string;
+  /** Identity truth: the confirmed-skills read failed — said, not "none yet". */
+  verifiedUnavailable: string;
   journalSupportedLabel: string;
   journalSupportedHint: string;
   /** Resolved names for the verified skill badges (parallel to card data). */
@@ -264,6 +268,15 @@ export function WorkerPlayerCard({
    */
   const placedHistoryIds = new Set(historyTimeline.lanes.map((l) => l.id));
   const unplacedHistory = namedHistory.filter((h) => !placedHistoryIds.has(h.id));
+  /**
+   * IDENTITY TRUTH (SEP-7): a dimension whose READ failed keeps its empty
+   * shape in the model and is listed in `card.unavailable`. The card must
+   * then say "could not be read" — never "no history yet" / "none confirmed
+   * yet" / "0 skills" about a read that did not happen.
+   */
+  const historyUnavailable = card.unavailable.includes("workHistory");
+  const verifiedUnavailable = card.unavailable.includes("verifiedSkills");
+  const skillsUnavailable = card.unavailable.includes("skillsDeclared");
   return (
     <section
       className={cn(
@@ -431,7 +444,15 @@ export function WorkerPlayerCard({
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.verifiedTitle}
         </span>
-        {card.verifiedSkills.length > 0 ? (
+        {verifiedUnavailable ? (
+          <p
+            role="status"
+            data-testid="player-card-verified-unavailable"
+            className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-secondary"
+          >
+            {labels.verifiedUnavailable}
+          </p>
+        ) : card.verifiedSkills.length > 0 ? (
           <ul className="flex flex-wrap gap-2">
             {card.verifiedSkills.map((s, i) => (
               <li
@@ -487,15 +508,20 @@ export function WorkerPlayerCard({
       </div>
 
       {/* ── §5.2 WORK HISTORY as a real time band (the text list follows) ── */}
-      <WorkHistoryTimeline timeline={historyTimeline} labels={labels.visuals.history} />
+      <WorkHistoryTimeline
+        timeline={historyTimeline}
+        labels={labels.visuals.history}
+        readState={historyUnavailable ? "unavailable" : "ok"}
+      />
 
-      {/* ── Honest dimensions (real counts, plain zeros) ── */}
+      {/* ── Honest dimensions (real counts, plain zeros — and a named
+            "could not be read" where the read failed, never a zero) ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat
           testid="player-card-skills"
-          value={String(card.skillsDeclared)}
+          value={skillsUnavailable ? "—" : String(card.skillsDeclared)}
           label={labels.skillsLabel}
-          hint={labels.skillsHint}
+          hint={skillsUnavailable ? labels.skillsUnavailable : labels.skillsHint}
           href="/dashboard/profile#capabilities"
         />
         <Stat
@@ -543,6 +569,14 @@ export function WorkerPlayerCard({
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {h.startedAt}
                     {h.current ? ` — ${labels.workHistoryCurrent}` : h.endedAt ? ` — ${h.endedAt}` : ""}
+                  </span>
+                ) : null}
+                {labels.visuals.history.hoursById?.[h.id] ? (
+                  <span
+                    className="text-meta leading-relaxed text-text-secondary"
+                    data-testid="player-card-history-hours"
+                  >
+                    {labels.visuals.history.hoursById[h.id]}
                   </span>
                 ) : null}
               </li>

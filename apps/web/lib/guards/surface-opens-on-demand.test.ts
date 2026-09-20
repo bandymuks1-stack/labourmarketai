@@ -80,7 +80,7 @@ describe("administration opens on demand, it is not served by default", () => {
     // to the relationship screen and must sit AFTER the early return.
     const early = src.indexOf("if (openArea)");
     for (const read of [
-      "listMyEngagements()",
+      "listMyEngagementsResult()",
       "listInvitationsForMe()",
       "listMySentInvitations()",
       "listMyTeamEnquiries()",

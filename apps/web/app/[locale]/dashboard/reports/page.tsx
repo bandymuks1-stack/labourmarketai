@@ -972,6 +972,29 @@ function JournalWindowDetail({
             </div>
           )}
 
+          {/* The organization's OWN hour ledger over the same window — beside
+              the journal figures, never added to them (owner §19). Three
+              states: measured, no ledger installed, could not be read. */}
+          {report.organizationLedger !== null ? (
+            <p
+              className="text-xs text-text-secondary"
+              data-testid="journal-window-organization-ledger"
+              data-state={report.organizationLedger.state}
+            >
+              {report.organizationLedger.state === "measured"
+                ? t("journalWindow.ledger.measured", {
+                    hours: numFmt.format(report.organizationLedger.hours),
+                    workers: report.organizationLedger.workers,
+                  }) +
+                  (report.organizationLedger.truncated
+                    ? ` ${t("journalWindow.ledger.truncated", { count: report.organizationLedger.rows })}`
+                    : "")
+                : report.organizationLedger.state === "none"
+                  ? t("journalWindow.ledger.none")
+                  : t("journalWindow.ledger.unknown")}
+            </p>
+          ) : null}
+
           {/* The calculation basis — including the "no entries ≠ no work" rule. */}
           <p
             className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-meta leading-relaxed text-text-muted"

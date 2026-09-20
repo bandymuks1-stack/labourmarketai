@@ -1812,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Teie töölugu ei õnnestunud praegu lugeda."
     },
     "readinessSteps": {
       "pillar": {
@@ -1866,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Riba pikkus näitab iga oskuse taga olevate töökirjete arvu (täisriba = {scale}+), mitte oskuse hinnet."
-    }
+      "skillsScaleNote": "Riba pikkus näitab iga oskuse taga olevate töökirjete arvu (täisriba = {scale}+), mitte oskuse hinnet.",
+      "historyHours": "{hours} h kirjas · {confirmed} h juhi kirjega",
+      "historyUnavailable": "Teie töölugu ei õnnestunud praegu lugeda."
+    },
+    "skillsUnavailable": "Ei õnnestunud praegu lugeda.",
+    "verifiedUnavailable": "Juhi kirjega oskusi ei õnnestunud praegu lugeda."
   },
   "projects": {
     "map": {
@@ -2238,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Teie huvi on salvestatud. Te ei märkinud esitlemise kasti, seega Nonstop Groupile teie kohta midagi ei edastata. Kui soovite, et teid esitletaks, võtke huvi tagasi ja väljendage seda uuesti, kast märgituna. LabourMarket.ai ei ole tööandjale midagi saatnud.",
       "handoffDelivered": "Huvi on edastatud Nonstop Groupile. Nonstop võib tööandja poole pöörduda oma äriprotsessi kaudu; LabourMarket.ai ei ole tööandjale midagi saatnud.",
       "handoffClosed": "Huvi on salvestatud. Varasem edastus Nonstop Groupile suleti, kui selle tagasi võtsite; midagi ei saadetud."
+    },
+    "intent": {
+      "label": "Minu olukord",
+      "states": {
+        "AVAILABLE_NOW": "Saan alustada kohe",
+        "AVAILABLE_FROM": "Saan alustada alates kuupäevast",
+        "OPEN_TO_OFFERS": "Töötan, kuid olen pakkumistele avatud",
+        "LOOKING_FOR_WORK": "Otsin tööd",
+        "LOOKING_FOR_PROJECTS": "Otsin projekte"
+      }
     }
   },
   "scouting": {
@@ -2751,7 +2766,9 @@
     "servicesEmpty": "Veel pole midagi pakutud",
     "servicesUnavailable": "Pakutavaid teenuseid ei õnnestunud laadida",
     "serviceRemote": "Kaugtöö",
-    "photoAlt": "Tehtud töö foto"
+    "photoAlt": "Tehtud töö foto",
+    "historyTitle": "Imporditud ajalugu",
+    "historyUnavailable": "Imporditud ajalugu ei õnnestunud lugeda"
   },
   "marketMapBase": {
     "previewTitle": "Uus koht valitud — pole veel salvestatud",

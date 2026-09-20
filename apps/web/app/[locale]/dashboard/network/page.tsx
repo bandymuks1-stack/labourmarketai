@@ -10,7 +10,7 @@ import { readOrganizationCapabilities } from "@/lib/organizations/capability-rea
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
   listInvitationsForMe,
-  listMyEngagements,
+  listMyEngagementsResult,
   listMySentInvitations,
   searchPeopleAndCompanies,
 } from "@/lib/invitations/network";
@@ -319,7 +319,7 @@ export default async function NetworkPage({
 
   const [
     projects,
-    engagements,
+    engagementsRead,
     sent,
     incoming,
     myTeamEnquiries,
@@ -332,13 +332,16 @@ export default async function NetworkPage({
     canonicalDemand,
   ] = await Promise.all([
     listManagedProjects(),
-    listMyEngagements(),
+    listMyEngagementsResult(),
     listMySentInvitations(),
     listInvitationsForMe(),
     listMyTeamEnquiries(),
     getEmployerOwnerProfileId(),
     loadCanonicalDemand(),
   ]);
+  // A failed engagement read is UNKNOWN: the section says "could not load"
+  // rather than showing the empty state that invites a first invitation.
+  const engagements = engagementsRead.kind === "ok" ? engagementsRead.rows : [];
   const myDemands =
     canonicalDemand.state === "ok"
       ? canonicalDemand.rows
@@ -654,7 +657,15 @@ export default async function NetworkPage({
             {t("relationships.why")}
           </p>
         )}
-        {engagements.length === 0 ? (
+        {engagementsRead.kind !== "ok" ? (
+          <p
+            role="alert"
+            className="text-xs text-text-secondary"
+            data-testid="network-relationships-unavailable"
+          >
+            {t("relationships.unavailable")}
+          </p>
+        ) : engagements.length === 0 ? (
           <p className="text-xs text-text-muted" data-testid="network-relationships-empty">
             {t("relationships.empty")}{" "}
             <Link

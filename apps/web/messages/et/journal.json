@@ -92,7 +92,8 @@
       "entrySuperseded": "Sissekanne on juba asendatud uuema versiooniga — kaart ei ole enam aktuaalne ja eemaldatakse loendist.",
       "entryDeleted": "Sissekanne on kustutatud — kaart ei ole enam aktuaalne ja eemaldatakse loendist.",
       "staleTerminalHint": "Midagi ei salvestatud. Kui töötaja salvestas uuema versiooni, ilmub see postkasti uue kaardina."
-    }
+    },
+    "loadFailed": "Ülevaatuse järjekorda ei õnnestunud laadida. See ei tähenda, et üle vaadata pole midagi — proovi uuesti."
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

@@ -195,6 +195,21 @@ export type WorkIntelligenceOrganizationRecord = {
   readonly journalEntryId: string | null;
 };
 
+/** One PERIOD record the organization holds about the person: a total over
+ *  a span with NO source days ("800 h, 2025-06-01 → 2025-11-30", from an
+ *  imported document). Carried BESIDE the day records (IA §2), never summed
+ *  into any period's hours and never placed on a day. */
+export type WorkIntelligenceOrganizationPeriodRecord = {
+  readonly id: string;
+  /** ISO days, inclusive. */
+  readonly periodStart: string;
+  readonly periodEnd: string;
+  /** The figure as the organization stated it. */
+  readonly hours: number;
+  readonly source: string;
+  readonly organizationId: string;
+};
+
 export type WorkPeriodKey = "today" | "week" | "month" | "year" | "all";
 export const WORK_PERIOD_KEYS = ["today", "week", "month", "year", "all"] as const;
 
@@ -240,6 +255,11 @@ export type WorkIntelligenceInput = {
   /** The organization's own hour records about this person (owner §19).
    *  `undefined` / `null` = not read (UNKNOWN); `[]` = read, none. */
   readonly organizationRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
+  /** The organization's PERIOD records (a total over a span, no source
+   *  days). Passed through beside the day records; `null` / omitted = not
+   *  read. Ignored when `organizationRecords` is null — a half-read ledger
+   *  would pose as a smaller one. */
+  readonly organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
 };
 
 /** Inclusive UTC calendar-day windows ending today (W12 doctrine: dates are
@@ -437,6 +457,10 @@ export type WorkIntelligence = {
    *  beside the journal, shown beside it, added to nothing. `null` when the
    *  ledger could not be read; every period at zero when it holds nothing. */
   readonly organizationRecords: readonly OrganizationRecordTotals[] | null;
+  /** The organization's PERIOD records, newest span first — a figure of
+   *  their own beside `organizationRecords`, in no period's `hours`, on no
+   *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
+  readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
   /** Every declared skill, hours desc (declared-only skills at zero). */
   readonly skills: readonly SkillWorkTime[];
   readonly activities: readonly ActivityWorkTime[];
@@ -1137,6 +1161,24 @@ export function deriveWorkIntelligence(
           };
         });
 
+  // Period records ride beside the day ledger, untouched by any sum above:
+  // a plausible figure over a well-formed span, newest span first. UNKNOWN
+  // follows the day ledger — one ledger, one answer to "could it be read".
+  const organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null =
+    orgRows === null
+      ? null
+      : (input.organizationPeriodRecords ?? [])
+          .filter(
+            (p) =>
+              Number.isFinite(p.hours) &&
+              p.hours > 0 &&
+              DAY_RX.test(p.periodStart) &&
+              DAY_RX.test(p.periodEnd) &&
+              p.periodStart <= p.periodEnd,
+          )
+          .slice()
+          .sort((a, b) => (a.periodEnd < b.periodEnd ? 1 : a.periodEnd > b.periodEnd ? -1 : 0));
+
   // ── plausibility checks (warn, never corrupt) ─────────────────────────
   // The same records per day, for the DAY check only: an imported
   // timesheet on top of a live journal record is then arithmetic. ONE
@@ -1161,6 +1203,7 @@ export function deriveWorkIntelligence(
     coverage,
     periods,
     organizationRecords,
+    organizationPeriodRecords,
     skills,
     activities,
     contexts,

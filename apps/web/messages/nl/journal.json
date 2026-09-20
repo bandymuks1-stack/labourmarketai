@@ -232,7 +232,8 @@
       "receipt": "Bevestigd: {title}",
       "receiptSkills": "{count, plural, one {# vaardigheid} other {# vaardigheden}}",
       "skillsUnavailable": "De vaardighedenlijst kon niet worden gelezen — de tik bevestigt alleen de invoer zelf."
-    }
+    },
+    "loadFailed": "De beoordelingswachtrij kon niet worden geladen. Dat betekent niet dat er niets te beoordelen is — probeer het opnieuw."
   },
   "listEmpty": "Je hebt nog geen werkregistraties — je items verschijnen hier.",
   "listEmptyTitle": "Begin met het opbouwen van werkregistraties",
@@ -768,7 +769,9 @@
       "approved": "{hours} u goedgekeurd in een urenstaat",
       "linked": "{hours} u beschrijven journaalregistraties die hierboven al zijn geteld",
       "rejected": "{hours} u afgewezen in een urenstaat — nergens geteld",
-      "rule": "Een urenregistratie zegt wanneer en hoe lang, niet wat er is gedaan — daarom bereiken deze uren geen enkele vaardigheid en geen enkel soort werk. Alleen een journaalregistratie doet dat."
+      "rule": "Een urenregistratie zegt wanneer en hoe lang, niet wat er is gedaan — daarom bereiken deze uren geen enkele vaardigheid en geen enkel soort werk. Alleen een journaalregistratie doet dat.",
+      "periodRecord": "{hours} u over {span} — één cijfer voor de hele periode, niet verdeeld over dagen",
+      "periodMore": "{count, plural, one {nog # periode-record} other {nog # periode-records}}"
     },
     "growthKindsTitle": "Wat je vermeldingen laten zien",
     "growthKindsHint": "Elke regel is een soort, afgeleid met een eenvoudige regel uit je eigen vermeldingen, met de feiten waarop die steunt. Geen eigenschap, geen beoordeling.",
@@ -889,6 +892,7 @@
       "all": "journaalregistratie bevestigd"
     },
     "reported": "organisatie registreerde {time}",
-    "periodReportedOnly": "Geen eigen registraties; de organisatie registreerde {days, plural, one {# dag} other {# dagen}}, {time}."
+    "periodReportedOnly": "Geen eigen registraties; de organisatie registreerde {days, plural, one {# dag} other {# dagen}}, {time}.",
+    "reportedUnknown": "De registraties van de organisatie voor deze periode konden niet worden gelezen — dat is niet hetzelfde als geen."
   }
 }

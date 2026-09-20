@@ -32,9 +32,29 @@ plan to "build" the write path that already exists. **A README that says a
 capability is missing is how the same thing gets built twice** — pinned now by
 `apps/web/lib/guards/mobile-release-config.test.ts`.
 
-What is genuinely NOT wired: **context holdings** (`context-provider.tsx` does
+~~What is genuinely NOT wired: **context holdings** (`context-provider.tsx` does
 not perform the holdings read, so holdings are `unknown` and the UI says it
-cannot list contexts yet — never an invented single context).
+cannot list contexts yet — never an invented single context).~~
+**Superseded 2026-09-14 (#1737):** context holdings ARE wired — `heldRoles`
+arrive on `profile.get` and `holdingsFromHeldRoles` (client-core) maps them;
+`unknown` only while the profile loads, `unavailable` on a failed read.
+
+**Deep links claim exactly the screens this app has** (`/`, `/sign-in`,
+`/register`, `/today`, `/journal`, `/log-work`, `/profile`, `/settings`) —
+`NATIVE_APP_PATHS` in `apps/web/lib/mobile/app-association.ts` drives both
+the Apple document and `app.json`'s Android intent filter, pinned to the route
+files by `apps/web/lib/guards/app-association.test.ts`. A web link such as
+`/lt/dashboard/journal` keeps opening in the browser, where that route exists.
+
+**Privacy, terms, support** — Settings links to the web's self-service privacy
+requests (`/<locale>/dashboard/privacy`, including account deletion; App Store
+5.1.1(v)), `/<locale>/legal/terms` and `info@labourmarket.ai`, on the same
+origin the build talks to. Not re-implemented on the phone
+(`mobile-account-controls.test.ts`).
+
+What the app does NOT have, and does not pretend to: Google sign-in,
+onboarding, jobs, interest, messaging, notifications, calendar, camera
+evidence. See `docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md` §1a.
 
 What is NOT PROVEN, which is a different thing from not built: **on-device
 runtime** of any of it against production. `ios.yml` proves the auth-failure
@@ -91,7 +111,7 @@ src/
   domain.ts             the ONLY path to product data — capability() → /api/mcp
   use-capability.ts     one capability read as React state (loading/loaded/failed)
   capability-shapes.ts  presentation mirrors of the read capabilities' payloads
-  context-provider.tsx  one person, many contexts (holdings read not wired yet)
+  context-provider.tsx  one person, many contexts — held roles from profile.get
   i18n/                 five active locales; parity enforced by the compiler
   ui/                   primitives, not product surfaces
   screens/

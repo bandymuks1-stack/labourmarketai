@@ -13,6 +13,8 @@ import {
   type ReadinessPillarKey,
 } from "@/lib/player-card/readiness";
 import { countCurrentEngagements } from "@/lib/player-card/work-history-model";
+import { contextHoursById } from "@/lib/player-card/context-hours";
+import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import {
   buildPlayerCardMinimum,
@@ -106,6 +108,7 @@ export async function ProfileHubOverview({
   avatarUrl,
   cvSections,
   workerId,
+  workContexts = null,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -130,6 +133,10 @@ export async function ProfileHubOverview({
   /** The worker row id, when the viewer has one. Only used to scope today's
    *  journal-entry count — the same prop the absorbed state strip took. */
   workerId?: string | null;
+  /** The journal's per-engagement figures (`WorkIntelligence.contexts`) the
+   *  page already loaded — joined on engagement id so each history row can
+   *  say "recorded h / confirmed h". Null = not loaded → no hours line. */
+  workContexts?: readonly ContextWorkTime[] | null;
 }) {
   /**
    * W7-S3: seven namespaces and the locale in ONE stage. They were eight
@@ -138,7 +145,7 @@ export async function ProfileHubOverview({
    * even be started. `tReview` is the absorbed SkillsReviewBanner's own copy,
    * reused verbatim — the message and destination the worker already knows.
    */
-  const [t, tStep, tState, tLive, tAction, tReview, tSkill, locale] =
+  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, locale] =
     await Promise.all([
       getTranslations("profileHub"),
       getTranslations("setupJourney"),
@@ -147,6 +154,9 @@ export async function ProfileHubOverview({
       getTranslations("playerCard.readinessSteps.action"),
       getTranslations("skills.reviewBanner"),
       getTranslations("skillNames"),
+      // The card's own "recorded h / confirmed h" sentence — ONE key, shared
+      // with the player card's history band.
+      getTranslations("playerCard.visuals"),
       getLocale(),
     ]);
 
@@ -183,6 +193,12 @@ export async function ProfileHubOverview({
     workerId ? countTodayJournalEntries(workerId) : Promise.resolve(0),
   ]);
   const readiness = playerCard ? deriveWorkerReadiness(playerCard) : null;
+  // Hours per engagement — the journal's own per-context figures, joined on
+  // engagement id (no second ledger; nothing summed across engagements).
+  const historyHours = playerCard
+    ? contextHoursById(playerCard.workHistory, workContexts)
+    : new Map<string, never>();
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   const pillarMet = (key: ReadinessPillarKey): boolean =>
     readiness?.pillars.find((p) => p.key === key)?.met ?? false;
 
@@ -557,7 +573,16 @@ export async function ProfileHubOverview({
               <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {tLive("historyTitle")}
               </h3>
-              {playerCard.workHistory.length === 0 ? (
+              {playerCard.unavailable.includes("workHistory") ? (
+                // IDENTITY TRUTH: the read failed — say so, never "none yet".
+                <p
+                  role="status"
+                  className="mt-1.5 text-basis text-text-secondary"
+                  data-testid="live-profile-history-unavailable"
+                >
+                  {tLive("historyUnavailable")}
+                </p>
+              ) : playerCard.workHistory.length === 0 ? (
                 <p
                   className="mt-1.5 text-basis text-text-muted"
                   data-testid="live-profile-history-empty"
@@ -599,6 +624,22 @@ export async function ProfileHubOverview({
                                     ? ` — ${e.endedAt}`
                                     : ""}
                               </PlaceTimeStamp>
+                              {/* The journal's hours in THIS engagement —
+                                  recorded, and how many someone confirmed.
+                                  Only where entries exist; never summed. */}
+                              {historyHours.has(e.id) ? (
+                                <span
+                                  className="text-meta leading-relaxed text-text-secondary"
+                                  data-testid="live-profile-history-hours"
+                                >
+                                  {tVisuals("historyHours", {
+                                    hours: hoursFmt.format(historyHours.get(e.id)!.hours),
+                                    confirmed: hoursFmt.format(
+                                      historyHours.get(e.id)!.confirmedHours,
+                                    ),
+                                  })}
+                                </span>
+                              ) : null}
                               {e.countryCode ? (
                                 <PlacePrecision kind="country" label={e.countryCode} />
                               ) : null}

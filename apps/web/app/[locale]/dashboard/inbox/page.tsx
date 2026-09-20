@@ -46,14 +46,20 @@ export default async function InboxPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // Gated reviewable set (migration 0034). Degrades to an empty inbox until the
-  // RPC is applied (42883) — honest, no mock data.
+  // Gated reviewable set (migration 0034, applied). A failed RPC — an RLS or
+  // network failure, or the function missing (42883) — is UNKNOWN, not an
+  // empty inbox: "nothing to review" is a claim of completeness the page can
+  // only make after a read that answered (SEP-7). `loadFailed` renders an
+  // honest "could not load" state instead.
   let reviewableIds: string[] = [];
+  let loadFailed = false;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: idRows } = await (supabase as any).rpc(
+  const { data: idRows, error: idError } = await (supabase as any).rpc(
     "reviewable_journal_entry_ids",
   );
-  if (Array.isArray(idRows)) {
+  if (idError) {
+    loadFailed = true;
+  } else if (Array.isArray(idRows)) {
     reviewableIds = idRows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((r: any) =>
@@ -65,16 +71,19 @@ export default async function InboxPage({
   }
 
   let pending: InboxEntry[] = [];
-  if (reviewableIds.length > 0) {
-    const { data: rows } = await supabase
+  if (!loadFailed && reviewableIds.length > 0) {
+    const { data: rows, error: rowsError } = await supabase
       .from("journal_entries")
       .select(
         `id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
+    // The ids answered but the entries did not: the manager must not be
+    // shown an empty queue over rows that exist.
+    if (rowsError) loadFailed = true;
 
-    const unconfirmed = rows ?? [];
+    const unconfirmed = rowsError ? [] : (rows ?? []);
 
     // Batch the workers' declared skills WITH ids + verified state — the manager
     // picks which of these the entry proves, to confirm/verify them.
@@ -181,7 +190,9 @@ export default async function InboxPage({
         >
           <span>
             {t("inbox.summary.pending")}:{" "}
-            <span className="font-semibold text-text-primary">{pending.length}</span>
+            <span className="font-semibold text-text-primary">
+              {loadFailed ? "—" : pending.length}
+            </span>
           </span>
           <span>
             {t("inbox.summary.confirmed")}:{" "}
@@ -230,7 +241,15 @@ export default async function InboxPage({
         </div>
       </header>
 
-      {pending.length === 0 ? (
+      {loadFailed ? (
+        <p
+          role="alert"
+          className="rounded-md border border-state-warning/40 bg-state-warning/10 p-4 text-sm text-text-secondary"
+          data-testid="inbox-load-failed"
+        >
+          {t("inbox.loadFailed")}
+        </p>
+      ) : pending.length === 0 ? (
         <EmptyState
           testId="inbox-empty-state"
           title={t("inbox.emptyTitle")}

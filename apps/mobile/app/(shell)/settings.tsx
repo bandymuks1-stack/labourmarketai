@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ACTIVE_LOCALES, isPreviewTranslation } from "@labourmarket/client-core";
 
 import type { ContextListData, ContextSwitchData } from "../../src/capability-shapes";
+import { CONFIG } from "../../src/config";
 import { useActorContext } from "../../src/context-provider";
 import { useProfile } from "../../src/profile-provider";
 import { useAuth } from "../../src/auth-context";
@@ -52,7 +53,21 @@ import { theme } from "../../src/ui/theme";
  * awaiting human review are labelled as previews (doctrine §7.4) — the same
  * honesty the web selector applies. A person choosing Russian should know it
  * has not been read by a Russian speaker yet.
+ *
+ * PRIVACY & ACCOUNT are links, not a second implementation. Data export and
+ * account deletion are the web's self-service privacy requests
+ * (`/<locale>/dashboard/privacy`, `lib/privacy/privacy-request-model.ts`,
+ * kind `account_deletion`); the terms live at `/<locale>/legal/terms`. App
+ * Store guideline 5.1.1(v) requires that a person can reach account deletion
+ * from inside the app, and the honest way to meet it is to open the path that
+ * already exists rather than fork the rule onto a phone. The links are built
+ * on the SAME origin this build talks to (`CONFIG.apiBaseUrl`), so a preview
+ * build reaches its own server and only a production build reaches
+ * production. A link that cannot be opened says so — it never pretends.
  */
+
+/** The one support address the platform publishes (legal notice, footer). */
+const SUPPORT_EMAIL = "info@labourmarket.ai";
 export default function Settings() {
   const { locale, setLocale, t } = useLocale();
   const { holdings } = useActorContext();
@@ -91,6 +106,33 @@ export default function Settings() {
       workspaces.reload();
     },
     [accessToken, locale, t, workspaces],
+  );
+
+  // `CONFIG` is null only on the misconfiguration screen at `_layout`, which
+  // this screen cannot be reached from; the fallback is the public origin.
+  const webOrigin = CONFIG === null ? "https://labourmarket.ai" : CONFIG.apiBaseUrl;
+  const accountLinks = [
+    {
+      key: "privacy",
+      label: t("account.privacy"),
+      url: `${webOrigin}/${locale}/dashboard/privacy`,
+    },
+    { key: "terms", label: t("account.terms"), url: `${webOrigin}/${locale}/legal/terms` },
+    { key: "support", label: t("account.support"), url: `mailto:${SUPPORT_EMAIL}` },
+  ] as const;
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const openLink = useCallback(
+    async (url: string) => {
+      setLinkError(null);
+      try {
+        await Linking.openURL(url);
+      } catch {
+        // No handler on this phone (no mail app, no browser). Nothing was
+        // changed, and the sentence says so.
+        setLinkError(t("account.openFailed"));
+      }
+    },
+    [t],
   );
 
   return (
@@ -209,6 +251,27 @@ export default function Settings() {
 
         <Divider />
 
+        <Title>{t("account.title")}</Title>
+        <Body muted>{t("account.body")}</Body>
+        <View style={styles.list}>
+          {accountLinks.map((link) => (
+            <Pressable
+              key={link.key}
+              testID={`account-${link.key}`}
+              accessibilityRole="link"
+              accessibilityLabel={link.label}
+              onPress={() => void openLink(link.url)}
+              style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            >
+              <Text style={[styles.rowLabel, styles.rowLabelWrap]}>{link.label}</Text>
+              <Text style={styles.tagMuted}>{t("account.external")}</Text>
+            </Pressable>
+          ))}
+        </View>
+        {linkError !== null ? <Body muted>{linkError}</Body> : null}
+
+        <Divider />
+
         {state.status === "signed_in" ? (
           // The account's own identifier, not a name we could only have got by
           // reading a profile we cannot read. Showing the wrong person's name
@@ -248,8 +311,15 @@ const styles = StyleSheet.create({
   },
   rowPressed: { opacity: 0.75 },
   rowLabel: { color: theme.color.text, fontSize: theme.font.body },
+  // A link label is a sentence, not a name: let it wrap inside the row
+  // instead of pushing the tag off the edge at large text sizes.
+  rowLabelWrap: { flex: 1, paddingVertical: theme.space.sm, marginRight: theme.space.sm },
   tag: {
     color: theme.color.warning,
+    fontSize: theme.font.small,
+  },
+  tagMuted: {
+    color: theme.color.textMuted,
     fontSize: theme.font.small,
   },
 });

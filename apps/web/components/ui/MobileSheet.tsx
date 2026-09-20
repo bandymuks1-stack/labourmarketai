@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useDialogFocus } from "@/lib/hooks/use-dialog-focus";
 import { cn } from "@/lib/utils";
 
 /**
@@ -45,44 +46,16 @@ export function MobileSheet({
     if (!open) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    // A modal dialog owns focus while it is open (2026-09-19): focus moves
-    // INTO the sheet, Tab cycles inside it, and the opener gets focus back on
-    // close — without this a screen-reader or keyboard user stayed on the
-    // page underneath a sheet they could not reach.
-    const opener = document.activeElement as HTMLElement | null;
-    const focusables = (): HTMLElement[] =>
-      Array.from(
-        panelRef.current?.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ) ?? [],
-      );
-    const first = focusables()[0] ?? panelRef.current;
-    first?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
-      if (e.key !== "Tab") return;
-      const items = focusables();
-      if (items.length === 0) return;
-      const head = items[0];
-      const tail = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === head) {
-        e.preventDefault();
-        tail.focus();
-      } else if (!e.shiftKey && document.activeElement === tail) {
-        e.preventDefault();
-        head.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
-      window.removeEventListener("keydown", onKey);
-      opener?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
+
+  // A modal dialog owns focus while it is open (2026-09-19): focus moves
+  // INTO the sheet, Tab cycles inside it, Escape closes, and the opener gets
+  // focus back on close — without this a screen-reader or keyboard user
+  // stayed on the page underneath a sheet they could not reach.
+  useDialogFocus(open, onClose, panelRef);
 
   if (!mounted || !open) return null;
 

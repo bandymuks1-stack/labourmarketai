@@ -124,6 +124,34 @@ export function pendingInvites(
   return rows.filter((r) => r.status === "pending");
 }
 
+/**
+ * The client's ONE connection list from its two keyed reads — by invited
+ * email (pending + accepted invites) and by client company (every active
+ * connection the company owns). Pure. Rows are deduplicated by id, newest
+ * first. Either read failing makes the whole list UNKNOWN: a list that
+ * silently dropped one read's rows would present a partial relationship set
+ * as the complete one (SEP-7).
+ */
+export function mergeClientConnectionStates(
+  byEmail: ClientInvitesState,
+  byCompany: ClientInvitesState,
+): ClientInvitesState {
+  if (byEmail.kind === "needs-migration" || byCompany.kind === "needs-migration") {
+    return { kind: "needs-migration" };
+  }
+  if (byEmail.kind !== "ok" || byCompany.kind !== "ok") return { kind: "error" };
+  const byId = new Map<string, ClientConnectionInvite>();
+  for (const r of [...byEmail.rows, ...byCompany.rows]) {
+    const prev = byId.get(r.id);
+    // The joined read may name the agency where the fallback read could not.
+    if (!prev || (prev.agencyName === "\u2014" && r.agencyName !== "\u2014")) byId.set(r.id, r);
+  }
+  return {
+    kind: "ok",
+    rows: [...byId.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+  };
+}
+
 /** Visual tone per derived review stage — display only. */
 export function reviewStageTone(
   stage: OfferReviewStage,

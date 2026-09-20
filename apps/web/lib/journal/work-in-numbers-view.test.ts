@@ -257,7 +257,44 @@ describe("orgLedger — the second ledger beside the journal, never summed", () 
       expect(l.period.hours).toBe(8);
       // the journal figure is untouched by the ledger
       expect(focusPeriod(withRows).hours).toBe(6);
+      expect(l.periodRecords).toEqual([]);
     }
+  });
+
+  it("a PERIOD record is a line of its own — in no period's hours, on no day, and enough for the box", () => {
+    const periodOnly = deriveWorkIntelligence({
+      entries: [entry("e1", "2026-09-10", { hours: 6, linked: ["s-tiling"] })],
+      skills: SKILLS,
+      todayIso: TODAY,
+      organizationRecords: [],
+      organizationPeriodRecords: [
+        { id: "p1", periodStart: "2025-06-01", periodEnd: "2025-11-30", hours: 800, source: "import", organizationId: "org" },
+        // malformed span and a non-positive figure: dropped, never guessed at
+        { id: "p2", periodStart: "2025-12-01", periodEnd: "2025-11-30", hours: 10, source: "import", organizationId: "org" },
+        { id: "p3", periodStart: "2026-01-01", periodEnd: "2026-01-31", hours: 0, source: "import", organizationId: "org" },
+      ],
+    });
+    const l = orgLedger(periodOnly);
+    expect(l.kind).toBe("rows");
+    if (l.kind === "rows") {
+      expect(l.periodRecords.map((p) => p.id)).toEqual(["p1"]);
+      // the 800 h reached no day ledger and no journal figure
+      expect(l.all.hours).toBe(0);
+      expect(l.period.hours).toBe(0);
+      expect(focusPeriod(periodOnly).hours).toBe(6);
+    }
+    // UNKNOWN stays unknown: period rows without a day ledger are not a read
+    const unknown = deriveWorkIntelligence({
+      entries: [],
+      skills: SKILLS,
+      todayIso: TODAY,
+      organizationRecords: null,
+      organizationPeriodRecords: [
+        { id: "p1", periodStart: "2025-06-01", periodEnd: "2025-11-30", hours: 800, source: "import", organizationId: "org" },
+      ],
+    });
+    expect(unknown.organizationPeriodRecords).toBeNull();
+    expect(orgLedger(unknown).kind).toBe("unknown");
   });
 });
 

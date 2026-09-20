@@ -27,6 +27,7 @@
 import type {
   OrganizationRecordTotals,
   OutputTotal,
+  WorkIntelligenceOrganizationPeriodRecord,
   SkillWorkTime,
   WorkIntelligence,
   WorkPeriodScope,
@@ -212,7 +213,9 @@ export function dominantAnswer(
 
 /** The organization's ledger row for the same scope, or the honest states:
  *  `unknown` (the ledger could not be read), `none` (read, nothing recorded
- *  all time). Never summed with anything. */
+ *  all time). Never summed with anything. `periodRecords` are the
+ *  organization's PERIOD records (a total over a span, no source days) —
+ *  lines of their own beside the day figure, in no sum (IA §2). */
 export type OrgLedgerView =
   | { readonly kind: "unknown" }
   | { readonly kind: "none" }
@@ -220,16 +223,19 @@ export type OrgLedgerView =
       readonly kind: "rows";
       readonly period: OrganizationRecordTotals;
       readonly all: OrganizationRecordTotals;
+      readonly periodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[];
     };
 
 export function orgLedger(wi: WorkIntelligence): OrgLedgerView {
   const records = wi.organizationRecords;
   if (records === null) return { kind: "unknown" };
+  const periodRecords = wi.organizationPeriodRecords ?? [];
   const all = records.find((p) => p.key === "all") ?? null;
   const period = records.find((p) => p.key === wi.scope) ?? records.find((p) => p.key === wi.focus) ?? null;
   if (!all || !period) return { kind: "none" };
-  if (all.hours <= 0 && all.rejectedHours <= 0) return { kind: "none" };
-  return { kind: "rows", period, all };
+  // A ledger holding only period records is still a ledger worth the box.
+  if (all.hours <= 0 && all.rejectedHours <= 0 && periodRecords.length === 0) return { kind: "none" };
+  return { kind: "rows", period, all, periodRecords };
 }
 
 /** Open checks first (they need a decision), acknowledged after — both kept

@@ -789,7 +789,13 @@
       "mainly": "daugiausia {activity} · {hours} val.",
       "mainlyShare": "daugiausia {activity} · {hours} val. ({percent} iš {total} val.)",
       "withoutDuration": "{count, plural, one {# įrašas šiame lange neturi trukmės – jis suskaičiuotas, bet ne valandomis.} few {# įrašai šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.} many {# įrašo šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.} other {# įrašų šiame lange neturi trukmės – jie suskaičiuoti, bet ne valandomis.}}",
-      "collapse": "Slėpti detalią ataskaitą"
+      "collapse": "Slėpti detalią ataskaitą",
+      "ledger": {
+        "measured": "Jūsų organizacijos apskaitoje šiame lange: {hours} val. iš {workers, plural, one {# žmogaus} few {# žmonių} other {# žmonių}} — skaičiuojama atskirai, prie žurnalo nepridedama.",
+        "none": "Organizacijos valandų apskaitos šioje duomenų bazėje nėra.",
+        "unknown": "Organizacijos apskaitos nepavyko nuskaityti — tai nėra nulis valandų.",
+        "truncated": "Remiasi pirmais {count} įrašais."
+      }
     }
   },
   "marketRecognition": {
@@ -6005,7 +6011,18 @@
         "note": "Tikri su šiuo projektu susietų žurnalo įrašų ir darbuotojų prie savo įrašų pridėtų nuotraukų skaičiai.",
         "link": "Atidaryti projekto galeriją"
       },
-      "honestNote": "Šis centras sudėlioja tik jau egzistuojančius įrašus. Etapai, problemų registrai ir išteklių lentelės dar nesukurtos ir čia nėra imituojamos."
+      "honestNote": "Šis centras sudėlioja tik jau egzistuojančius įrašus. Etapai, problemų registrai ir išteklių lentelės dar nesukurtos ir čia nėra imituojamos.",
+      "hours": {
+        "title": "Valandos šiame projekte",
+        "allocated": "Apskaitoje",
+        "journaled": "Žurnale",
+        "confirmed": "Patvirtinta",
+        "value": "{hours} val.",
+        "note": "Apskaita — organizacijos valandų įrašai šio projekto objektuose; žurnalas — žmonių įrašai prie šio projekto; patvirtinta — vadovo patvirtinti žurnalo įrašai. Skaičiuojama atskirai, nesumuojama.",
+        "unavailable": "nepavyko nuskaityti",
+        "noLedger": "apskaitos nėra",
+        "truncated": "Žurnalo skaičiai remiasi pirmais {count} įrašais."
+      }
     },
     "eyebrow": "Projekto operacijos",
     "managerOnly": "Ši lenta skirta įmonės arba agentūros vadovui.",
@@ -6944,7 +6961,8 @@
         "notOpen": "Ši užklausa nebėra atvira.",
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
       }
-    }
+    },
+    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima."
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",
@@ -7416,7 +7434,8 @@
       "opportunityCount": "{count} šiuo metu matomos galimybės atitinka tavo profilį.",
       "opportunityUnavailable": "Atviri poreikiai tavo paskyrai dar nepasiekiami, todėl tai nebuvo išmatuota.",
       "opportunityNoWorker": "Tai išmatuojama, kai turi darbuotojo profilį.",
-      "closestBasis": "Artimiausia — {what}: atitinka {matched} iš {required} reikalaujamų įgūdžių, {confirmed} su vadovo įrašu."
+      "closestBasis": "Artimiausia — {what}: atitinka {matched} iš {required} reikalaujamų įgūdžių, {confirmed} su vadovo įrašu.",
+      "historyUnavailable": "Jūsų darbo istorijos šiuo metu nepavyko nuskaityti."
     },
     "documentsLabel": "Dokumentai",
     "documentsValue": "{valid} galiojantys",
@@ -7452,8 +7471,12 @@
       "historyRange": "{from} – {to}",
       "historyEmpty": "Dar nėra įrašytų darbo laikotarpių.",
       "historyAria": "Darbo laikotarpiai laiko juostoje nuo {from} iki {to}.",
-      "skillsScaleNote": "Juostos ilgis — tai darbo įrašų skaičius, pagrindžiantis kiekvieną įgūdį (pilna juosta = {scale}+), o ne įgūdžio balas."
-    }
+      "skillsScaleNote": "Juostos ilgis — tai darbo įrašų skaičius, pagrindžiantis kiekvieną įgūdį (pilna juosta = {scale}+), o ne įgūdžio balas.",
+      "historyHours": "{hours} val. užfiksuota · {confirmed} val. su vadovo įrašu",
+      "historyUnavailable": "Jūsų darbo istorijos šiuo metu nepavyko nuskaityti."
+    },
+    "skillsUnavailable": "Šiuo metu nepavyko nuskaityti.",
+    "verifiedUnavailable": "Įgūdžių su vadovo įrašu šiuo metu nepavyko nuskaityti."
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",
@@ -8057,7 +8080,10 @@
         "title": "Reikia jūsų dėmesio",
         "untimed": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} be trukmės — pridėkite valandas",
         "unlabelled": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}} su valandomis be įvardytos darbo rūšies",
-        "unknown": "Atvirų punktų perskaityti nepavyko."
+        "unknown": "Atvirų punktų perskaityti nepavyko.",
+        "offers": "{n, plural, one {# užsakymo pasiūlymas laukia} few {# užsakymo pasiūlymai laukia} other {# užsakymo pasiūlymų laukia}} jūsų atsakymo",
+        "invitations": "{n, plural, one {# kvietimas laukia} few {# kvietimai laukia} other {# kvietimų laukia}} jūsų atsakymo",
+        "unread": "{n, plural, one {# pokalbis} few {# pokalbiai} other {# pokalbių}} su neskaitytomis žinutėmis"
       },
       "growth": {
         "title": "Augimas",
@@ -9426,6 +9452,16 @@
       "handoffQueuedConsentWithheld": "Jūsų susidomėjimas įrašytas. Nepažymėjote pristatymo langelio, todėl „Nonstop Group“ apie jus nieko neperduodama. Jei norite būti pristatytas, atšaukite ir pareikškite susidomėjimą iš naujo pažymėję langelį. LabourMarket.ai darbdaviui nieko neišsiuntė.",
       "handoffDelivered": "Susidomėjimas perduotas „Nonstop Group“. „Nonstop“ gali kreiptis į darbdavį savo komerciniu procesu; LabourMarket.ai darbdaviui nieko nesiuntė.",
       "handoffClosed": "Susidomėjimas užfiksuotas. Ankstesnis perdavimas „Nonstop Group“ buvo uždarytas, kai jį atšaukėte; niekas nebuvo išsiųsta."
+    },
+    "intent": {
+      "label": "Mano situacija",
+      "states": {
+        "AVAILABLE_NOW": "Galiu pradėti dabar",
+        "AVAILABLE_FROM": "Galiu pradėti nuo nurodytos datos",
+        "OPEN_TO_OFFERS": "Dirbu, svarstau pasiūlymus",
+        "LOOKING_FOR_WORK": "Ieškau darbo",
+        "LOOKING_FOR_PROJECTS": "Ieškau projektų"
+      }
     }
   },
   "workerIntake": {
@@ -9943,12 +9979,12 @@
     "footer": "Ši ataskaita rodo tik realius signalus. Peržiūrą atlieka žmogus."
   },
   "about": {
-    "metaTitle": "Kas yra Labour Market AI",
-    "metaDescription": "Paprastas paaiškinimas, kas yra Labour Market AI: kaip darbuotojai kuria tikrą profilį iš tikro darbo, kaip įmonės aprašo poreikius ir randa komandas ir kaip platforma išlieka sąžininga.",
-    "navLabel": "Apie Labour Market AI",
+    "metaTitle": "Kas yra LabourMarket.ai",
+    "metaDescription": "Paprastas paaiškinimas, kas yra LabourMarket.ai: kaip darbuotojai kuria tikrą profilį iš tikro darbo, kaip įmonės aprašo poreikius ir randa komandas ir kaip platforma išlieka sąžininga.",
+    "navLabel": "Apie LabourMarket.ai",
     "eyebrow": "Apie platformą",
-    "title": "Kas yra Labour Market AI ir kaip ji veikia",
-    "lede": "Labour Market AI — darbo rinkos platforma, kurioje darbuotojai, įmonės ir komandos parodo tikrus įgūdžius, mato tikrus poreikius ir organizuoja tikrą darbą — vietoje ir visoje Europoje.",
+    "title": "Kas yra LabourMarket.ai ir kaip ji veikia",
+    "lede": "LabourMarket.ai — darbo rinkos platforma, kurioje darbuotojai, įmonės ir komandos parodo tikrus įgūdžius, mato tikrus poreikius ir organizuoja tikrą darbą — vietoje ir visoje Europoje.",
     "honesty": "Viskas, kas aprašyta šiame puslapyje, produkte veikia jau šiandien. Dar ruošiamos funkcijos taip ir įvardijamos, o mokėjimai dar neaktyvūs.",
     "loops": [
       {
@@ -10375,7 +10411,8 @@
       "title": "Laikotarpio įrodymai — išvestinė mėnesio dalis",
       "chip": "Išvestinė",
       "thisMonth": "{hours} val. šį mėnesį (išvestinė)",
-      "sourceLink": "Atidaryti laikotarpio įrašą"
+      "sourceLink": "Atidaryti laikotarpio įrašą",
+      "unavailable": "Laikotarpio įrašų dabar nepavyko perskaityti — planas rodomas be jų."
     }
   },
   "workforcePlanning": {
@@ -10498,7 +10535,9 @@
       "noDates": "datos neįrašytos",
       "undated": "priskirtas prie {label} — datos neįrašytos",
       "withoutCommitment": "{count, plural, one {# žmogus čia neturi} few {# žmonės čia neturi} many {# žmogaus čia neturi} other {# žmonių čia neturi}} jokio įrašo. Tai nereiškia, kad laisvas — patvirtinti nebuvimai rodomi atskirai.",
-      "unavailable": "Įsipareigojimų nepavyko nuskaityti. Tai nereiškia, kad visi laisvi."
+      "unavailable": "Įsipareigojimų nepavyko nuskaityti. Tai nereiškia, kad visi laisvi.",
+      "conflict": "sutampa",
+      "conflictNote": "Sutampančios datos pažymėtos: tas pats žmogus tomis dienomis įsipareigojęs dviejose vietose. Tai įspėjimas, ne draudimas — įrašai lieka."
     }
   },
   "tasks": {
@@ -11243,7 +11282,8 @@
         "unemployed": "Ieško darbo",
         "volunteer": "Savanoris"
       },
-      "why": "Rodomi tik aktyvūs jūsų darbo ryšiai — kiekviena eilutė nurodo, koks tai ryšys."
+      "why": "Rodomi tik aktyvūs jūsų darbo ryšiai — kiekviena eilutė nurodo, koks tai ryšys.",
+      "unavailable": "Ryšių nepavyko nuskaityti. Tai nereiškia, kad jų nėra — pabandykite dar kartą."
     },
     "invite": {
       "title": "Pakviesti",
@@ -11438,7 +11478,9 @@
     "servicesEmpty": "Kol kas nieko nesiūloma",
     "servicesUnavailable": "Nepavyko įkelti siūlomų paslaugų",
     "serviceRemote": "Nuotoliniu būdu",
-    "photoAlt": "Atlikto darbo nuotrauka"
+    "photoAlt": "Atlikto darbo nuotrauka",
+    "historyTitle": "Įkelta istorija",
+    "historyUnavailable": "Įkeltos istorijos nepavyko perskaityti"
   },
   "companyGallery": {
     "title": "Galerija",
@@ -16229,7 +16271,19 @@
       "withdrawConfirm": "Atšaukti",
       "withdrawCancel": "Palikti ryšį",
       "withdrawDone": "Atšaukta. Organizacija pasilieka savo įrašą; jūsų ji nebemini.",
-      "unnamedOrganization": "Organizacija"
+      "unnamedOrganization": "Organizacija",
+      "suggestions": {
+        "title": "Įgūdžiai, paminėti organizacijos įrašuose",
+        "intro": "Organizacijos žodžiai apie jūsų darbą mini šiuos įgūdžius. Niekas nepridedama, kol nepasakysite.",
+        "why": "Paminėta kaip „{terms}“ {count, plural, one {# įraše} few {# įrašuose} other {# įrašų}}",
+        "add": "Pridėti",
+        "adding": "Pridedama…",
+        "added": "Pridėta prie profilio",
+        "already": "Jau jūsų profilyje",
+        "notNow": "Ne dabar",
+        "error": "Nepavyko pridėti. Bandykite dar kartą.",
+        "selfDeclaredNote": "Pridėtas įgūdis yra jūsų paties nurodytas — ne patikrintas."
+      }
     },
     "plan": {
       "title": "Ką radau ir ką paruošiau",
@@ -16730,7 +16784,8 @@
       "partners": {
         "title": "Klientai ir partneriai",
         "subtitle": "Su kuo dirbate: klientai, agentūros ir bendri poreikiai.",
-        "empty": "Kol kas nėra klientų ar partnerių ryšių. Agentūra gali pakviesti jus bendradarbiauti — tada čia atsiras jos pasiūlymai."
+        "empty": "Kol kas nėra klientų ar partnerių ryšių. Agentūra gali pakviesti jus bendradarbiauti — tada čia atsiras jos pasiūlymai.",
+        "unavailable": "Partnerių ryšių nepavyko nuskaityti. Tai nereiškia, kad jų nėra — pabandykite dar kartą."
       },
       "education": {
         "title": "Mokymai ir programos",
@@ -16742,7 +16797,18 @@
         "hoursGridTitle": "Mėnesio valandų tabelis",
         "hoursGridNote": "Ta pati įkėlimo sistema supranta ir mėnesio tabelio lentelę (žmogus × diena). Kasdieninis valandų įvedimas — darbo valandų erdvėje.",
         "hoursDoor": "Darbo valandos",
-        "evidenceReportsDoor": "Įrodymų ataskaitos"
+        "evidenceReportsDoor": "Įrodymų ataskaitos",
+        "imports": {
+          "title": "Jūsų įkėlimai",
+          "empty": "Dar nieko neįkelta.",
+          "unavailable": "Įkėlimų sąrašo dabar nepavyko perskaityti.",
+          "status": {
+            "staged": "Paruošta",
+            "committed": "Užfiksuota",
+            "withdrawn": "Atšaukta",
+            "failed": "Nepavyko"
+          }
+        }
       },
       "settings": {
         "title": "Organizacijos nustatymai",

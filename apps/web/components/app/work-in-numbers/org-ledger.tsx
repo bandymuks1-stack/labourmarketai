@@ -1,6 +1,11 @@
 import type { OrgLedgerView } from "@/lib/journal/work-in-numbers-view";
+import { formatUtcDateRange } from "@/lib/time/display";
 
 import { fmtHours, type Translate } from "./format";
+
+/** Period lines shown before the count folds the rest — a person with two
+ *  imported spans reads both; one with forty reads five and a number. */
+const PERIOD_LINES_SHOWN = 5;
 
 /**
  * The organization's OWN hour records (`work_hour_allocations` — timesheet
@@ -8,6 +13,10 @@ import { fmtHours, type Translate } from "./format";
  * organization's ledger and added to nothing (owner §19). `unknown` says the
  * ledger could not be read (never "none"); `none` renders nothing — a
  * ledger that holds nothing is not a fact worth a box.
+ *
+ * PERIOD RECORDS (2026-09-20): an imported total over a span with no source
+ * days ("800 h, Jun–Nov 2025") is listed here as lines of its own, beside
+ * the day figure — never summed into it, never split onto days (IA §2).
  *
  * `periodWord` is the scope in words the figure is named by; `tk` is the
  * audience-aware translator (defaults to `t`).
@@ -33,7 +42,12 @@ export function OrgLedger({
       </p>
     );
   }
-  const { period: orgPeriod, all: orgAll } = view;
+  const { period: orgPeriod, all: orgAll, periodRecords } = view;
+  // A ledger of period records only has no day figure to name — the day
+  // sentence would read "0 h", which is not what the organization said.
+  const hasDayFigure = orgAll.hours > 0 || orgAll.rejectedHours > 0;
+  const shownPeriods = periodRecords.slice(0, PERIOD_LINES_SHOWN);
+  const foldedPeriods = periodRecords.length - shownPeriods.length;
   return (
     <div
       className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/50 px-3 py-2.5"
@@ -42,24 +56,27 @@ export function OrgLedger({
       data-all-hours={orgAll.hours}
       data-imported-hours={orgPeriod.importedHours}
       data-linked-hours={orgPeriod.linkedHours}
+      data-period-records={periodRecords.length}
     >
       <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
         {tk("orgRecords.title")}
       </span>
-      <span className="text-support leading-relaxed text-text-primary" data-testid="wi-org-records-hours">
-        {orgPeriod.hours > 0
-          ? tk("orgRecords.body", {
-              hours: fmtHours(orgPeriod.hours, locale),
-              days: orgPeriod.daysWorked,
-              period: periodWord,
-              organizations: orgPeriod.organizations,
-            })
-          : tk("orgRecords.periodEmpty", {
-              period: periodWord,
-              hours: fmtHours(orgAll.hours, locale),
-              days: orgAll.daysWorked,
-            })}
-      </span>
+      {hasDayFigure && (
+        <span className="text-support leading-relaxed text-text-primary" data-testid="wi-org-records-hours">
+          {orgPeriod.hours > 0
+            ? tk("orgRecords.body", {
+                hours: fmtHours(orgPeriod.hours, locale),
+                days: orgPeriod.daysWorked,
+                period: periodWord,
+                organizations: orgPeriod.organizations,
+              })
+            : tk("orgRecords.periodEmpty", {
+                period: periodWord,
+                hours: fmtHours(orgAll.hours, locale),
+                days: orgAll.daysWorked,
+              })}
+        </span>
+      )}
       {(orgPeriod.importedHours > 0 ||
         orgPeriod.approvedHours > 0 ||
         orgPeriod.linkedHours > 0 ||
@@ -82,6 +99,33 @@ export function OrgLedger({
             .filter((x): x is string => x !== null)
             .join(" · ")}
         </span>
+      )}
+      {/* PERIOD RECORDS — a total over a span, no source days. Each is its
+          own line with its own span; none enters the figure above and none
+          is spread onto days (a month share is a derived view elsewhere). */}
+      {shownPeriods.length > 0 && (
+        <ul className="flex flex-col gap-0.5" data-testid="wi-org-records-periods">
+          {shownPeriods.map((p) => (
+            <li
+              key={p.id}
+              className="text-meta leading-relaxed text-text-secondary"
+              data-testid="wi-org-records-period"
+              data-period-hours={p.hours}
+              data-period-start={p.periodStart}
+              data-period-end={p.periodEnd}
+            >
+              {t("orgRecords.periodRecord", {
+                hours: fmtHours(p.hours, locale),
+                span: formatUtcDateRange(p.periodStart, p.periodEnd, locale) ?? `${p.periodStart} – ${p.periodEnd}`,
+              })}
+            </li>
+          ))}
+          {foldedPeriods > 0 && (
+            <li className="text-meta leading-relaxed text-text-muted" data-testid="wi-org-records-period-more">
+              {t("orgRecords.periodMore", { count: foldedPeriods })}
+            </li>
+          )}
+        </ul>
       )}
       <span className="text-meta leading-relaxed text-text-muted" data-testid="wi-org-records-rule">
         {tk("orgRecords.rule")}

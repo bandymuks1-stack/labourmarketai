@@ -5,6 +5,7 @@ import {
   inWorkWindow,
   journalReportWindow,
   rollUpJournalWindow,
+  rollUpOrganizationLedger,
   windowCreatedAtBounds,
   type JournalWindowEntryRow,
 } from "./journal-window-report";
@@ -260,6 +261,35 @@ describe("deriveWindowWorkTime — the model without skill links", () => {
  * week. `inWorkWindow` is the ONE rule that decides membership after the
  * created-in-window and worked-in-window reads are merged.
  */
+describe("rollUpOrganizationLedger — the org's own ledger beside the journal, three states", () => {
+  const row = (workerId: string, hours: number, status = "recorded") => ({ workerId, hours, status });
+
+  it("measures live rows, keeps rejected hours visible but counted nowhere, counts distinct people", () => {
+    const l = rollUpOrganizationLedger(
+      { kind: "ok", rows: [row("w1", 8), row("w1", 4.5, "approved"), row("w2", 6), row("w2", 3, "rejected")] },
+      2000,
+    );
+    expect(l).toEqual({ state: "measured", hours: 18.5, rows: 3, workers: 2, rejectedHours: 3, truncated: false });
+  });
+
+  it("a read at its ceiling says so", () => {
+    const l = rollUpOrganizationLedger({ kind: "ok", rows: [row("w1", 1), row("w2", 1)] }, 2);
+    expect(l.state === "measured" && l.truncated).toBe(true);
+  });
+
+  it("no store is `none`; a failed read or no company is `unknown` — never 0 h", () => {
+    expect(rollUpOrganizationLedger({ kind: "needs-migration" }, 2000)).toEqual({ state: "none" });
+    expect(rollUpOrganizationLedger({ kind: "error" }, 2000)).toEqual({ state: "unknown" });
+    expect(rollUpOrganizationLedger({ kind: "no-company" }, 2000)).toEqual({ state: "unknown" });
+  });
+
+  it("an empty window is a measured zero, not unknown", () => {
+    expect(rollUpOrganizationLedger({ kind: "ok", rows: [] }, 2000)).toEqual({
+      state: "measured", hours: 0, rows: 0, workers: 0, rejectedHours: 0, truncated: false,
+    });
+  });
+});
+
 describe("inWorkWindow — membership is decided by the work day", () => {
   const today = journalReportWindow("today", TODAY_ISO);
   const week = journalReportWindow("week", TODAY_ISO);

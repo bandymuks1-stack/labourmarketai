@@ -40,10 +40,12 @@ export async function readSavedEntryDayCheck(
   entryId: string,
 ): Promise<WorkDayCheck | null> {
   try {
-    const [read, organizationRecords] = await Promise.all([
+    const [read, organizationLedger] = await Promise.all([
       listJournalEntries(caller, { workerId }),
       readOrganizationRecords(caller.supabase, workerId),
     ]);
+    // Day records only: a period record has no day to add to (IA §2).
+    const organizationRecords = organizationLedger?.records ?? null;
     if (!read.ok) return null;
     const checks = deriveWorkTimeChecks(
       read.entries.map((e) => ({

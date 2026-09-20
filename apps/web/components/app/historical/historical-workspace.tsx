@@ -664,7 +664,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => setWeek("all")}
-                className="inline-flex min-h-8 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta uppercase tracking-label text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta uppercase tracking-label text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-week"
               >
                 <SemanticIcon
@@ -680,7 +680,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => setDay(null)}
-                className="inline-flex min-h-8 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-day"
               >
                 <SemanticIcon
@@ -696,7 +696,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => focusPerson(null)}
-                className="inline-flex min-h-8 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-person"
               >
                 <SemanticIcon
@@ -712,7 +712,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => focusObject(null)}
-                className="inline-flex min-h-8 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-object"
               >
                 <SemanticIcon

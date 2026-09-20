@@ -153,7 +153,7 @@ export function HistoricalAttention({
                       </div>
                       {(r.text || r.context || r.periodWords) && (
                         <details>
-                          <summary className="flex min-h-8 cursor-pointer items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+                          <summary className="flex min-h-11 cursor-pointer items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
                             <SemanticIcon concept="source" label={labels.source} className="h-3 w-3" />
                             {labels.source}
                           </summary>

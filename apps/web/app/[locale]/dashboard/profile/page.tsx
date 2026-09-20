@@ -81,9 +81,11 @@ import {
 } from "@/lib/player-card/player-card-result";
 import { WorkCardEditor } from "@/components/app/work-card-editor";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
+import { OrganizationHistorySkillSuggestionsSection } from "@/components/app/organization-history-skill-suggestions-section";
 import { listMyTeamLinks } from "@/lib/company/team-links";
 import { TeamLinkWithdrawals } from "@/components/app/roster-link-end";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
 import {
   presentSkills,
   skillMagnitude,
@@ -345,6 +347,10 @@ export default async function ProfilePage({
   // where a person expects to say when and where they are available, could
   // not reach it. Same loader, same editor, same save RPCs.
   let playerCardResult: PlayerCardResult | null = null;
+  // The journal's per-engagement figures (the ONE hour ledger), handed to
+  // the hub so each history row can say "recorded h / confirmed h". Stays
+  // null when the journal was not read → no hours line, never "0 h".
+  let workContexts: readonly ContextWorkTime[] | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -472,6 +478,7 @@ export default async function ProfilePage({
 
     availabilityPrefs = prefsRes;
     playerCardResult = playerCardRes;
+    workContexts = workIntelligence?.contexts ?? null;
     workerLanguages = langsRes;
     externalProfiles = extRes;
     workerEducation = eduRes;
@@ -979,6 +986,19 @@ export default async function ProfilePage({
         />
       ) : null}
 
+      {/* SKILLS THOSE RECORDS NAMED (2026-09-20). The competency signals the
+          import derives were written and never read; this is the one place
+          they reach the person — as SUGGESTIONS with their provenance
+          (organization history), accepted only by the person's own tap and
+          then self-declared, never verified. Worker only; nothing when there
+          is nothing to suggest. */}
+      {workerId && myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0 ? (
+        <OrganizationHistorySkillSuggestionsSection
+          records={myOrgEvidence.records}
+          declaredSlugs={skillDots.map((d) => d.slug)}
+        />
+      ) : null}
+
       {/* THE LINK CAN BE WITHDRAWN (2026-09-19). A confirmed roster link was
           the one consent on this page with no way back: the policy admitted
           "unlinked" from the subject all along, the product offered only the
@@ -1033,6 +1053,9 @@ export default async function ProfilePage({
         // Derived ONCE and shared (it was computed three times per render).
         skillEvidence={skillEvidenceSummary}
         cvSections={cvSectionCards}
+        // The journal's per-engagement hours, joined on engagement id in the
+        // hub's history list (the same ledger the skills above read).
+        workContexts={workContexts}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{

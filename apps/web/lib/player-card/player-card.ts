@@ -55,6 +55,16 @@ export interface VerifiedSkillBadge {
   readonly iconSlug: string | null;
 }
 
+/**
+ * A dimension whose read FAILED for this render. The dimension's own field
+ * keeps its empty shape (`[]` / `0`) so every consumer still type-checks —
+ * but a surface that renders that field must read this list first, because
+ * an empty shape with its dimension listed here is UNKNOWN, not zero
+ * (SEP-7): "0 confirmed skills" and "could not read your skills" are two
+ * different sentences, and only one of them is true.
+ */
+export type CardReadDimension = "workHistory" | "verifiedSkills" | "skillsDeclared";
+
 export interface WorkerPlayerCard {
   displayName: string | null;
   /** ALL declared skills — the deduped union of free-text
@@ -106,6 +116,13 @@ export interface WorkerPlayerCard {
    */
   workHistory: readonly WorkHistoryEntry[];
   /**
+   * IDENTITY TRUTH — the dimensions whose read failed this time. Empty when
+   * every read answered. `workHistory: []` with `"workHistory"` listed here
+   * means "could not read", never "no history yet"; the same for the two
+   * skill populations. Sourced from the readers' own error signals.
+   */
+  unavailable: readonly CardReadDimension[];
+  /**
    * §5.2 VISUALIZATION DATA — the owner's audit requires the card to show
    * graphs, skill projections and evidence relationships, not a list of
    * textual statistics. Both series are counts of the worker's OWN rows:
@@ -154,25 +171,36 @@ async function safeCount(
   }
 }
 
-/** Verified (manager-confirmed) skills + their icons. [] on any error. */
+type VerifiedSkillsRead =
+  | { readonly status: "ok"; readonly badges: VerifiedSkillBadge[] }
+  | { readonly status: "unavailable" };
+
+/**
+ * Verified (manager-confirmed) skills + their icons. A failed SKILL read is
+ * `unavailable` (identity truth: it used to return `[]`, and the card then
+ * said "none confirmed yet" about a read that never happened). A failed
+ * ICON read only drops the icons — the icon is decoration, the skill is the
+ * fact.
+ */
 async function verifiedSkillBadges(
   supabase: SupabaseClient,
   workerId: string,
-): Promise<VerifiedSkillBadge[]> {
+): Promise<VerifiedSkillsRead> {
   try {
-    const { data: rows } = await asAny(supabase)
+    const { data: rows, error } = await asAny(supabase)
       .from("worker_skills")
       .select("skill_id, skills(slug)")
       .eq("worker_id", workerId)
       .eq("verified", true)
       .limit(12);
+    if (error) return { status: "unavailable" };
     const skills = ((rows ?? []) as {
       skill_id: string | null;
       skills: { slug: string | null } | null;
     }[])
       .map((r) => ({ id: r.skill_id, slug: r.skills?.slug ?? null }))
       .filter((s): s is { id: string; slug: string } => !!s.id && !!s.slug);
-    if (skills.length === 0) return [];
+    if (skills.length === 0) return { status: "ok", badges: [] };
 
     const { data: iconRows } = await asAny(supabase)
       .from("skill_icons")
@@ -186,12 +214,15 @@ async function verifiedSkillBadges(
         (r) => [r.skill_id, r.icon_slug],
       ),
     );
-    return skills.map((s) => ({
-      slug: s.slug,
-      iconSlug: icons.get(s.id) ?? null,
-    }));
+    return {
+      status: "ok",
+      badges: skills.map((s) => ({
+        slug: s.slug,
+        iconSlug: icons.get(s.id) ?? null,
+      })),
+    };
   } catch {
-    return [];
+    return { status: "unavailable" };
   }
 }
 
@@ -200,8 +231,9 @@ async function verifiedSkillBadges(
  * free-text claims (`profile_skill_claims.normalized_label`) and catalogued
  * `worker_skills` (canonical `skills.slug`; `skill_id` as last resort).
  * Dedup key = lowercased, whitespace-collapsed label, so a claim that
- * mirrors a catalogued skill is counted once. 0 on any read error — never
- * inferred.
+ * mirrors a catalogued skill is counted once. A failed claims read is
+ * NAMED (`status: "unavailable"`) rather than silently counted as zero
+ * claims — the number it would produce is a lower bound posing as a total.
  *
  * P0 nav-performance fix: the catalogued half previously issued its own
  * `worker_skills` select asking for the legacy localized skills name
@@ -214,26 +246,29 @@ async function declaredSkillsUnionCount(
   supabase: SupabaseClient,
   profileId: string,
   skillRows: readonly WorkerSkillRow[],
-): Promise<number> {
+): Promise<{ count: number; status: "ok" | "unavailable" }> {
   const norm = (s: string): string =>
     s.toLowerCase().replace(/\s+/g, " ").trim();
   const labels = new Set<string>();
+  let status: "ok" | "unavailable" = "ok";
   try {
-    const { data: claims } = await asAny(supabase)
+    const { data: claims, error } = await asAny(supabase)
       .from("profile_skill_claims")
       .select("normalized_label")
       .eq("profile_id", profileId);
+    if (error) status = "unavailable";
     for (const c of (claims ?? []) as { normalized_label: string | null }[]) {
       if (c.normalized_label) labels.add(norm(c.normalized_label));
     }
   } catch {
-    /* keep whatever we have — honest degradation */
+    // Keep whatever we have, but say the total is not known.
+    status = "unavailable";
   }
   for (const r of skillRows) {
     const label = r.skills?.slug ?? r.skill_id;
     if (label) labels.add(norm(String(label)));
   }
-  return labels.size;
+  return { count: labels.size, status };
 }
 
 /**
@@ -385,7 +420,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
   // readers (@/lib/data/worker-core) shared with every other per-navigation
   // consumer — this module previously issued its own `workers` select plus
   // three separate `worker_skills` queries per navigation.
-  const [session, worker, skillRows, workHistory] = await Promise.all([
+  const [session, worker, skillRows, workHistoryRead] = await Promise.all([
     getSessionProfile(),
     getWorkerCoreRow(),
     getWorkerSkillRows(),
@@ -394,6 +429,9 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     getOwnWorkHistory(),
   ]);
   const profile = session.profile;
+  // Identity truth: a failed history read keeps its empty shape AND is named.
+  const workHistory: readonly WorkHistoryEntry[] =
+    workHistoryRead.status === "ok" ? workHistoryRead.entries : [];
 
   const workerId: string | null = worker?.id ?? null;
 
@@ -405,12 +443,12 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
   );
 
   const [
-    skillsDeclared,
+    skillsDeclaredRead,
     journalSupportedSkills,
     candidateSkills,
     evidenceEntries,
     attention,
-    verifiedSkills,
+    verifiedSkillsRead,
     managerConfirmations,
     professionSlug,
     latestEntry,
@@ -455,7 +493,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
       .catch(() => 0),
     workerId
       ? verifiedSkillBadges(supabase, workerId)
-      : Promise.resolve([] as VerifiedSkillBadge[]),
+      : Promise.resolve<VerifiedSkillsRead>({ status: "ok", badges: [] }),
     workerId
       ? ownConfirmationsCount(supabase, workerId)
       : Promise.resolve(0),
@@ -507,6 +545,14 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
       : Promise.resolve([] as ProvenanceConfirmation[]),
   ]);
 
+  const skillsDeclared = skillsDeclaredRead.count;
+  const verifiedSkills =
+    verifiedSkillsRead.status === "ok" ? verifiedSkillsRead.badges : [];
+  const unavailable: CardReadDimension[] = [];
+  if (workHistoryRead.status === "unavailable") unavailable.push("workHistory");
+  if (verifiedSkillsRead.status === "unavailable") unavailable.push("verifiedSkills");
+  if (skillsDeclaredRead.status === "unavailable") unavailable.push("skillsDeclared");
+
   return {
     displayName: profile?.full_name ?? null,
     skillsDeclared,
@@ -522,6 +568,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     professionSlug: professionSlug ?? null,
     latestEvidenceAt: latestEntry?.created_at ?? null,
     workHistory,
+    unavailable,
     locationCountry: worker?.current_location_country ?? null,
     documents,
     // §5.2 — geometry comes from the pure derivers, so what the chart draws is

@@ -1812,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Nie udało się teraz odczytać Twojej historii pracy."
     },
     "readinessSteps": {
       "pillar": {
@@ -1866,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Długość paska to liczba Twoich wpisów pracy stojących za każdą umiejętnością (pełny pasek = {scale}+), a nie ocena umiejętności."
-    }
+      "skillsScaleNote": "Długość paska to liczba Twoich wpisów pracy stojących za każdą umiejętnością (pełny pasek = {scale}+), a nie ocena umiejętności.",
+      "historyHours": "{hours} godz. zapisane · {confirmed} godz. z wpisem kierownika",
+      "historyUnavailable": "Nie udało się teraz odczytać Twojej historii pracy."
+    },
+    "skillsUnavailable": "Nie udało się teraz odczytać.",
+    "verifiedUnavailable": "Nie udało się teraz odczytać umiejętności z wpisem kierownika."
   },
   "projects": {
     "map": {
@@ -2238,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Twoje zainteresowanie jest zapisane. Nie zaznaczyłeś pola o przedstawieniu, więc do Nonstop Group nie trafia nic na Twój temat. Aby zostać przedstawionym, wycofaj i wyraź zainteresowanie ponownie z zaznaczonym polem. LabourMarket.ai nic nie wysłał do pracodawcy.",
       "handoffDelivered": "Zainteresowanie przekazano do Nonstop Group. Nonstop może zwrócić się do pracodawcy w ramach własnego procesu handlowego; LabourMarket.ai nic pracodawcy nie wysłał.",
       "handoffClosed": "Zainteresowanie zapisane. Wcześniejsze przekazanie do Nonstop Group zostało zamknięte, gdy je wycofano; nic nie zostało wysłane."
+    },
+    "intent": {
+      "label": "Moja sytuacja",
+      "states": {
+        "AVAILABLE_NOW": "Mogę zacząć od razu",
+        "AVAILABLE_FROM": "Mogę zacząć od podanej daty",
+        "OPEN_TO_OFFERS": "Pracuję, ale rozważam oferty",
+        "LOOKING_FOR_WORK": "Szukam pracy",
+        "LOOKING_FOR_PROJECTS": "Szukam projektów"
+      }
     }
   },
   "scouting": {
@@ -2751,7 +2766,9 @@
     "servicesEmpty": "Nic jeszcze nie zaoferowano",
     "servicesUnavailable": "Nie udało się wczytać oferowanych usług",
     "serviceRemote": "Zdalnie",
-    "photoAlt": "Zdjęcie wykonanej pracy"
+    "photoAlt": "Zdjęcie wykonanej pracy",
+    "historyTitle": "Zaimportowana historia",
+    "historyUnavailable": "Nie udało się odczytać zaimportowanej historii"
   },
   "marketMapBase": {
     "previewTitle": "Wybrano nowe miejsce — jeszcze nie zapisane",
