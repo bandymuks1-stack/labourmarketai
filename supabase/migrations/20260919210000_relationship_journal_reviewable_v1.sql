@@ -2,8 +2,12 @@
 -- ============================================================================
 -- 20260919210000_relationship_journal_reviewable_v1
 -- RED — owner gate (INSTITUTION loop, EVIDENCE → COMPETENCY; found in the
--- 2026-09-19 full-vision trace). PREPARED, NOT APPLIED. The annotation above
--- acknowledges the class; it is not approval.
+-- 2026-09-19 full-vision trace). APPLIED 2026-09-20 05:21 UTC (ledger
+-- 20260920052103) under the owner's verbatim sentence "Apply
+-- relationship_types.journal_reviewable (employee + student) and the
+-- data-driven set_engagement_journal_review, with rollback." Hostile +
+-- legitimate contract run on the LIVE function and rolled back (see
+-- docs/APPLIED_LEDGER.md).
 --
 -- FINDING (traced on production 2026-09-19): a learner (engagement_contexts
 -- relationship_slug = 'student', provisioned by the accepted learner

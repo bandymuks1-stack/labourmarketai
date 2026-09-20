@@ -989,10 +989,15 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 295 -> 296 for 20260919140000_usage_cost_trigger_search_path_v1
     //   (R-13 search_path pin, APPLIED 2026-09-19, ledger 20260919153945).
     //   Not this read layer's file. RECOUNTED: 296.
-    // Bumped 296 -> 297 for 20260919210000_relationship_journal_reviewable_v1
+    // Bumped 296 -> 297 for 20260919190000_demand_lifecycle_colleague_v1
+    //   (R-15: close_demand_v1 / reopen_demand_v1, RED, APPLIED 2026-09-20,
+    //   ledger 20260920051619).
+    //   Not this read layer's file. RECOUNTED: 297.
+    // Bumped 297 -> 298 for 20260919210000_relationship_journal_reviewable_v1
     //   (institution loop: journal review on learner engagements, RED,
-    //   PREPARED not applied). Not this read layer's file. RECOUNTED: 297.
-    expect(count).toBeLessThanOrEqual(297);
+    //   APPLIED 2026-09-20, ledger 20260920052103). Not this read layer's
+    //   file. RECOUNTED: 298.
+    expect(count).toBeLessThanOrEqual(298);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

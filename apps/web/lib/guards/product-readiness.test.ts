@@ -2589,12 +2589,19 @@ describe("no migration files added by this sprint", () => {
 // hygiene only; no body / grant / policy / row change). Listed in the owner
 // packet → kept on the human gate; owner-approved and APPLIED 2026-09-19
 // (ledger 20260919153945), proconfig read back on both (PR #1797). RECOUNTED: 296.
-// Bumped 296 -> 297 for 20260919210000_relationship_journal_reviewable_v1
+// Bumped 296 -> 297 for 20260919190000_demand_lifecycle_colleague_v1 (R-15: the
+// two gated lifecycle writes — close_demand_v1 / reopen_demand_v1 — for the
+// creator, an admin or a colleague with has_org_demand_access; status +
+// updated_at only, UPDATE policy untouched). RED (new SECURITY DEFINER
+// functions), owner-approved and APPLIED 2026-09-20 (ledger 20260920051619);
+// contract run on the LIVE functions and rolled back (PR #1805). RECOUNTED: 297.
+// Bumped 297 -> 298 for 20260919210000_relationship_journal_reviewable_v1
 // (INSTITUTION loop, EVIDENCE → COMPETENCY: the rule "which relationships may
 // be opened to journal review" becomes DATA on relationship_types, seeded for
 // employee + student; set_engagement_journal_review reads it). RED (column +
-// SECDEF redefinition), PREPARED 2026-09-19, NOT applied. RECOUNTED: 297.
-const SPRINT_BASELINE = 297;
+// SECDEF redefinition), owner-approved and APPLIED 2026-09-20 (ledger
+// 20260920052103); contract run live and rolled back (PR #1807). RECOUNTED: 298.
+const SPRINT_BASELINE = 298;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

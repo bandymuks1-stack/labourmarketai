@@ -1412,7 +1412,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // audited, never a DELETE). RED, owner-approved and APPLIED 2026-09-19
       // (ledger 20260919151920); contract run on the live function, rolled back.
       "20260919150000_end_roster_link_v1.sql",
-      // 2026-09-19 — institution loop: relationship_types.journal_reviewable + data-driven set_engagement_journal_review. RED, PREPARED, NOT applied; marker acknowledges the class (draft PR #1807).
+      // 2026-09-19 — R-15: close_demand_v1 / reopen_demand_v1 (colleague lifecycle, status only). RED, owner-approved and APPLIED 2026-09-20 (ledger 20260920051619); contract run live and rolled back (PR #1805).
+      "20260919190000_demand_lifecycle_colleague_v1.sql",
+      // 2026-09-19 — institution loop: relationship_types.journal_reviewable + data-driven set_engagement_journal_review. RED, owner-approved and APPLIED 2026-09-20 (ledger 20260920052103); contract run live and rolled back (PR #1807).
       "20260919210000_relationship_journal_reviewable_v1.sql",
 ]);
   });

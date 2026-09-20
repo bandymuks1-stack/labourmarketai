@@ -2153,6 +2153,98 @@ as before.
 Rollback: `supabase/rollbacks/20260919140000_usage_cost_trigger_search_path_v1.down.sql`
 (`reset search_path` on both; proconfig back to NULL).
 
+### `demand_lifecycle_colleague_v1` — R-15 (two SECURITY DEFINER lifecycle writes) — APPLIED 2026-09-20, ledger `20260920051619`
+
+Repo file `supabase/migrations/20260919190000_demand_lifecycle_colleague_v1.sql`
+(sha256 `e804c553a379e84b1a5a124aaa6e9ddf07add81492531b95b415cf26434ee590`), applied via Supabase MCP `apply_migration` (name
+`20260919190000_demand_lifecycle_colleague_v1`) under the owner's verbatim
+approval sentence given in chat 2026-09-20 ("Apply R-15: close_demand_v1 /
+reopen_demand_v1 for creator, admin and has_org_demand_access colleagues —
+status only, UPDATE policy unchanged, with rollback."). PR #1805.
+
+Two functions: `close_demand_v1(uuid)` (submitted → closed) and
+`reopen_demand_v1(uuid)` (closed → submitted). Authority ladder admin ·
+creator · `has_org_demand_access(organization_id)`; anything else
+`not_found`; writes ONLY `status` + `updated_at`; idempotent
+(`already_closed` / `already_open`); audited with `actor_capacity`.
+`revoke … from public, anon; grant execute … to authenticated`. No table,
+policy, grant-on-table, trigger or row change.
+
+Pre-apply drift check (05:14 UTC): main = origin/main = production build
+`57b278b1`; ledger 297 / `20260919153945`; both functions ABSENT;
+`customer_requests_update` = `(profile_id = auth.uid()) OR is_admin()`;
+PR #1805 diff = exactly the ten prepared files.
+Readback: 298 applied, version `20260920051619`; both functions
+`prosecdef = true`, `proconfig = {search_path=public}`, anon EXECUTE false,
+authenticated EXECUTE true, public false; UPDATE policy byte-identical;
+customer_requests still 4 policies, 2 triggers.
+
+Contract on the LIVE functions (one DO block aborted by RAISE, everything
+rolled back; org `19f47e78`, creator `dc3284ea`, admin-colleague `875eb16b`,
+outsider `0a749ad6`, a temporary `member`-role membership inserted inside the
+same transaction): outsider close → `not_found`; role `member` close →
+`not_found`; colleague close on `draft` → `invalid_transition/draft`;
+colleague close on `submitted` → `closed/colleague`, status read back
+`closed`; colleague raw `UPDATE … set notes` under RLS → **0 rows** (policy
+still owner-only); colleague reopen → `submitted`; reopen again →
+`already_open`; creator close → `closed/admin` (the creator is a platform
+admin, so the ladder answers admin first); close again → `already_closed`;
+creator reopen → `submitted`; outsider reopen on draft → `not_found`; anon
+(no sub) → `42501`; md5 of payload + agency_client_id + notes + title
+identical before/after; 4 audit rows written inside the transaction.
+Residue after rollback: 0 audit rows for these actions, request status
+`submitted`, 0 `member` memberships.
+
+Rollback: `supabase/rollbacks/20260919190000_demand_lifecycle_colleague_v1.down.sql`
+(sha256 `b7fba77f7b9198d77f9ac0ffcca1c52bf03c20d5b75e7dfc3fb73181e31f657a`; drops both functions; the app degrades to the
+owner-only direct update on 42883 / PGRST202).
+
+### `relationship_journal_reviewable_v1` — INSTITUTION loop (rule-as-data column + SECURITY DEFINER redefinition) — APPLIED 2026-09-20, ledger `20260920052103`
+
+Repo file `supabase/migrations/20260919210000_relationship_journal_reviewable_v1.sql`
+(sha256 `291f642bf5047bcfd6a92403c3958596e3bb1cca904f2ff459778cedb7bda175`), applied via Supabase MCP `apply_migration` (name
+`20260919210000_relationship_journal_reviewable_v1`) under the owner's
+verbatim approval sentence given in chat 2026-09-20 ("Apply
+relationship_types.journal_reviewable (employee + student) and the
+data-driven set_engagement_journal_review, with rollback."). PR #1807.
+Owner-stated invariant: the training provider may confirm/review learner
+PRACTICE evidence where the authorized learner/institution relationship
+permits it; this grants no formal recognition, no RPL equivalence, no wider
+worker visibility, no enrolment without consent (ARCH-2 untouched).
+
+One column `relationship_types.journal_reviewable boolean not null default
+false` (fail-closed), seeded TRUE for exactly `employee` and `student`; one
+function redefinition — `set_engagement_journal_review` now reads that column
+instead of the `v_slug <> 'employee'` literal, body otherwise identical,
+SECURITY DEFINER + `set search_path = public` restated; explicit
+`revoke … from public, anon; grant execute … to authenticated`. No policy,
+no table grant, no trigger, no other row change.
+
+Pre-apply drift check (05:14 UTC): column ABSENT; production function body
+carried the `employee` literal; ledger 298 after R-15.
+Readback: 299 applied, version `20260920052103`; relationship_types rows:
+employee(rev=true,vis=true) student(rev=true,vis=false), every other slug
+rev=false, `grants_worker_visibility` unchanged on all ten; function
+`prosecdef = true`, `proconfig = {search_path=public}`, anon EXECUTE false,
+authenticated true, public false, body reads `rt.journal_reviewable`, literal
+gone; the one production student engagement still `journal_review_enabled =
+false`.
+
+Contract on the LIVE function (two DO blocks aborted by RAISE, everything
+rolled back; provider org `a996113c`, provider owner `98212ae5`, learner
+`5b9ea226`, student engagement `923a996d`, other-org manager `875eb16b`):
+other-org manager → `not_authorized`; learner on own engagement →
+`not_authorized`; provider on the student engagement → `enabled` (flag read
+back true), then `disabled`; an existing org owner on an active `employee`
+engagement → `enabled` (pre-existing behaviour identical); an org owner on an
+active non-reviewable relationship (`owner`) → `not_a_member_engagement`;
+anon → `42501`; `student.grants_worker_visibility` still false. Residue: 0
+audit rows for the engagement, flag false.
+
+Rollback: `supabase/rollbacks/20260919210000_relationship_journal_reviewable_v1.down.sql`
+(sha256 `114f4835c7224fa96e620a27106542cb001784f72fe52e13d5b2c4cf79be3047`; restores the employee-literal production function
+byte-for-byte with its grants, drops the column).
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
