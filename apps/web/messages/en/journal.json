@@ -313,7 +313,7 @@
     "disclosureTitle": "Before you record",
     "disclosureProcessing": "Your audio is sent to a LabourMarket.ai-controlled processing server to be turned into text. No third-party speech service is used.",
     "disclosureWhy": "It is used only to create the text below — nothing else.",
-    "disclosureRetention": "The recording is kept only until your text is ready (at most 30 days) and you can delete it at any time.",
+    "disclosureRetention": "The recording itself is not kept: it is deleted as soon as your text is ready.",
     "disclosureNoAutoWrite": "Nothing is added to your journal, profile or CV until you review the text and save each item yourself.",
     "disclosureAck": "I understand and agree to voice processing",
     "start": "Start recording",

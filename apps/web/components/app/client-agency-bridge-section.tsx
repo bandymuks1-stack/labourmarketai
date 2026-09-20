@@ -116,14 +116,14 @@ export function ClientAgencyBridgeSection({
                       <input type="hidden" name="connectionId" value={c.id} />
                       <input type="hidden" name="clientCompanyId" value={clientCompanyId} />
                       <button type="submit" disabled={acceptPending} data-testid={`client-bridge-accept-${c.id}`}
-                        className="inline-flex h-8 items-center gap-1 rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success transition-colors hover:border-state-success disabled:opacity-60">
+                        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success transition-colors hover:border-state-success disabled:opacity-60">
                         <Check className="h-3.5 w-3.5" aria-hidden /> {labels.acceptButton}
                       </button>
                     </form>
                     <form action={declineAction} className="shrink-0">
                       <input type="hidden" name="connectionId" value={c.id} />
                       <button type="submit" title={labels.declineButton} aria-label={labels.declineButton}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
                         <X className="h-3.5 w-3.5" aria-hidden />
                       </button>
                     </form>

@@ -10,6 +10,7 @@ import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
 import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
 import { getRosterUtilisation } from "@/lib/planning/roster-utilisation";
+import { getRosterCommitments } from "@/lib/planning/roster-commitments";
 import { summariseRosterUtilisation } from "@/lib/workforce/utilisation";
 import { getOrganizationToday } from "@/lib/planning/organization-today";
 import { OrganizationTodayPanel } from "@/components/app/organization-today-panel";
@@ -137,7 +138,12 @@ export default async function CompanyWorkforcePlanningPage({
   // for. Same two authorized reads as the availability projection above, over
   // a window instead of at a moment; no new store and no invented working
   // pattern. The DENOMINATOR is calendar days and travels with the number.
-  const utilisation = await getRosterUtilisation(result.workers.map((w) => w.workerId));
+  const rosterWorkerIds = result.workers.map((w) => w.workerId);
+  const utilisation = await getRosterUtilisation(rosterWorkerIds);
+  // Who is committed WHERE, by date — the same authorized commitment read
+  // the ratio above sums, laid out per person (2026-09-19: the last core
+  // planning question a real employer still answered in a spreadsheet).
+  const commitments = await getRosterCommitments(rosterWorkerIds);
   const utilisationSummary =
     utilisation.status === "ok"
       ? summariseRosterUtilisation(utilisation.rows, utilisation.window.days)
@@ -165,6 +171,18 @@ export default async function CompanyWorkforcePlanningPage({
     month: "short",
     year: "numeric",
   });
+  /* Who-is-where date column. Explicit branches: a dated range, a single
+     day, an open-ended start, or "no dates" — never a date invented for a
+     source that recorded none. */
+  const formatCommitmentWhen = (startDate: string | null, endDate: string | null): string => {
+    // An unparseable ISO day prints as itself — never as an empty column.
+    const dd = (iso: string) => dayFmt(iso) ?? iso;
+    if (startDate && endDate) {
+      return endDate === startDate ? dd(startDate) : `${dd(startDate)} – ${dd(endDate)}`;
+    }
+    if (startDate) return t("committedWhere.openEnded", { start: dd(startDate) });
+    return t("committedWhere.noDates");
+  };
   const fmtMonth = (monthIso: string) => monthFmt(`${monthIso}-01`) ?? "";
   const fmtDay = (dayIso: string) => dayFmt(dayIso) ?? "";
 
@@ -397,6 +415,82 @@ export default async function CompanyWorkforcePlanningPage({
       </section>
     ) : null;
 
+  /* Who is committed where — per person, per date. Only the records the
+     calendar and the capacity answer already use (project assignments,
+     accepted bookings, approved trips). Undated work is named as undated;
+     a person with nothing on record is counted, never called free. */
+  const commitmentsSection =
+    rosterWorkerIds.length === 0 ? null : commitments.status !== "ok" ? (
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-commitments-unavailable"
+      >
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("committedWhere.title")}
+        </h2>
+        <p className="text-sm text-text-muted">{t("committedWhere.unavailable")}</p>
+      </section>
+    ) : (
+      <section
+        className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-commitments"
+      >
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("committedWhere.title")}
+        </h2>
+        <p className="text-meta text-text-muted">{t("committedWhere.intro")}</p>
+        {commitments.rows.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {commitments.rows.map((row) => (
+              <li
+                key={row.workerId}
+                className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2"
+                data-testid={`roster-commitment-${row.workerId}`}
+              >
+                <span className="text-sm font-semibold text-text-primary">
+                  {row.workerName ?? t("availability.unnamedWorker")}
+                </span>
+                <ul className="flex flex-col gap-1">
+                  {row.commitments.map((c) => (
+                    <li
+                      key={`${c.kind}:${c.sourceId}`}
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1"
+                    >
+                      <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                        {t(`committedWhere.kind.${c.kind}`)}
+                      </span>
+                      <span className="text-sm text-text-primary">
+                        {c.label ?? t("committedWhere.untitled")}
+                      </span>
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {formatCommitmentWhen(c.startDate, c.endDate)}
+                      </span>
+                    </li>
+                  ))}
+                  {row.undatedProjects.map((u) => (
+                    <li
+                      key={`undated:${u.projectId}`}
+                      className="text-meta text-text-muted"
+                      data-testid="roster-commitment-undated"
+                    >
+                      {t("committedWhere.undated", {
+                        label: u.label ?? t("committedWhere.untitled"),
+                      })}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {commitments.withoutCommitment > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="roster-commitments-without">
+            {t("committedWhere.withoutCommitment", { count: commitments.withoutCommitment })}
+          </p>
+        ) : null}
+      </section>
+    );
+
   const availabilitySection =
     availability.status === "ok" && availability.unavailability.length > 0 ? (
       <section
@@ -449,6 +543,7 @@ export default async function CompanyWorkforcePlanningPage({
             entered — an employer with an empty planning zone is precisely the
             one about to schedule someone. */}
         {utilisationSection}
+        {commitmentsSection}
         {availabilitySection}
         <div
           className="flex flex-col gap-3 rounded-md border border-dashed border-ink-500 p-5"
@@ -481,6 +576,7 @@ export default async function CompanyWorkforcePlanningPage({
       <Notes notes={view.notes} />
 
       {utilisationSection}
+      {commitmentsSection}
       {availabilitySection}
 
       {/* Capacity summary — short numbers + one bar, never a text wall. */}

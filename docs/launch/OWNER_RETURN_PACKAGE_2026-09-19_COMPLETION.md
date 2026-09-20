@@ -831,3 +831,132 @@ can be ended by the worker or the owner without deleting history (R-9).
 | security receipt | **CRITICAL 0 · HIGH 0**; advisor WARN for R-13 gone; MEDIUM/LOW owner-held items (M3, L3–L7) unchanged — SECURITY_COMPLETE is still not declared for that reason |
 | production | build = the last merge (see §N13); `/api/health` ok |
 | human walk additions | **Donatas:** /dashboard/projects/562c9c3e/operations → the facts form (country, dates) in the manage strip; /dashboard/profile → "My teams — I no longer work here" beside the history withdrawal; /dashboard/company/people → "Remove from the roster" on each roster row. **Ramūnas:** the same two roster controls on Nonstop's people page and his own profile. |
+
+---
+
+## O. WINDOW 5 — 2026-09-19 ("remaining RED truth → full-vision gap closure → real-user launch")
+
+Method: no new audit. Nine targeted traces (one per remaining R packet) plus
+four loop traces (worker, employer/company OS, agency, institution/RPL), each
+against CURRENT `main` and CURRENT production (read-only SQL). Every packet
+was reclassified from what the code and the live authority objects do today,
+not from the 2026-09-17 receipts.
+
+### O1. PRODUCTION
+
+| | at window start (16:03 UTC) | at close |
+|---|---|---|
+| main | `3bc58f53` | `2781956b` (#1802 → `143cc6c7`, §O docs → `961b04fd`, #1808 → `2781956b`) |
+| production build (`/api/health`) | `3bc58f53` | `2781956b`, ok, dub1, auth + db ok (17:11 UTC) — both GREEN PRs PRODUCTION_DEPLOYED |
+| migration ledger | **297**, latest `20260919153945_usage_cost_trigger_search_path_v1` | **297** — nothing applied this window (by design: every RED stayed a draft) |
+| security advisors | ERROR 1 (`worker_absence_scheduling` definer view — documented load-bearing exception) · WARN: 9 anon SECDEF = the public preview set, 404 authenticated SECDEF (class), leaked-password protection OFF (owner setting) | unchanged |
+
+### O2. REMAINING RED REGISTER — reclassified from current reality
+
+| R | ORIGINAL | CURRENT (main + prod) | STILL EXISTS | CLASSIFICATION | LAUNCH IMPACT | NEXT ACTION |
+|---|---|---|---|---|---|---|
+| R-5 | post-approval confidence recompute runs under the manager's RLS → silent zero-row update | unchanged: `confirm-actions.ts` UPDATE under caller RLS vs `worker_skills_write = owns_worker or is_admin`; neither RPC recomputes; **nothing renders `confidence_score`** (matching keys on `verified`/`source`, the dot reads `confidence_bin`, which the SECDEF path sets) | YES (dead write, no user-visible damage) | **GREEN half SHIPPED** (#1802: landed-row readback + logged mismatch, counts only) · **RED_REQUIRED** for the real fix · **OWNER_SEMANTICS** first: SQL sets bin `'green'` on confirmation while `binFor` means green = weakest bin — a working recompute would flip manager-confirmed dots green→yellow | POST_LAUNCH_DEPTH | owner decides the bin direction; then one SECDEF recompute inside `confirm_entry_and_verify_skills` + `review_journal_entry` |
+| R-6 | CHECK lacks `journal_entry_confirmed` + `conversation_message` | v8 CHECK verified in prod (22 types, 13 entities). **Messages: CLOSED** — unread count already drives the bell row + Messages badge (honest, clears on read). **Journal confirmation: gap real** — no emitter, no bell, no feed; worker sees it only on the journal page or the 7-day brief line | PARTIAL | **CLOSED** (message half) · **RED_REQUIRED** (journal half) — draft **#1806**: v9 widening + worker-only emitter wired into both confirmation paths | IMPORTANT_NOT_BLOCKING | sentence in O4 |
+| R-7 | no deletion executor; 56–57 `NO ACTION` FKs to profiles | request intake LIVE since 2026-07-06 (`submit_privacy_request_v1`, `customer_requests` row, superadmin queue with read-only E1–E8 preview). **Nothing executes.** 56 NO ACTION FKs still. #1789 withdrawals intact | YES | **GREEN half SHIPPED** (#1802: `docs/runbooks/account-deletion-manual-fulfilment-v1.md` — per-class DELETE / ANONYMIZE / DETACH / RETAIN, owner-run order, where a NO ACTION FK stops it) · **OWNER_SEMANTICS** (Package A Decision 1, contract-claim horizon) · **RED_REQUIRED** (nullable actor columns + superadmin-only `execute_account_deletion_v1`) | IMPORTANT_NOT_BLOCKING (a request can be fulfilled by hand inside Art. 12's month) | Decision 1, then the executor packet |
+| R-8 | no org archival | `organizations` has no lifecycle column (verified); every child object has a canonical end + audited RPC; `archived_at` pattern exists on education programmes | YES | **GREEN half SHIPPED** (#1802: `docs/runbooks/organization-closure-composition-v1.md`) · **RED_REQUIRED** for a durable state (`organizations.archived_at` + read filters + owner-only `archive_organization_v1`) | POST_LAUNCH_DEPTH | sentence in O4 |
+| R-10 | `ai_runs.profile_id` never nulled; no purge for cost/pilot/notification/message | exactly ONE automated retention exists (daily pg_cron nulls `ai_runs.output_excerpt` past 90 d — verified `cron.job`); `usage_cost_events` is trigger-immutable BY DESIGN; ai_runs and cost events are EMPTY in prod; two docs disagree about `profile_id` | YES (mostly documentation) | **GREEN half SHIPPED** (#1802: false "30-day recording" voice copy corrected in 12 locales; retention matrix no longer says the applied migrations are UNAPPLIED) · **OWNER_SEMANTICS** (horizons table, O4) · **POST_LAUNCH** for the purge jobs (empty tables) | POST_LAUNCH_DEPTH | owner sets horizons in one sitting |
+| R-11 | Map not on the worker phone bar; "chat chip only" | **the audit was wrong on current main**: PASAULIS (`/dashboard/opportunities`) EMBEDS the world map at the top; the full map page was linked only inside a collapsed `<details>`; the command search lists `market_map` at every width. Also: the catalogue "primary nav tabs" render ONLY in the admin chrome — two guards asserted a tab no real user sees | NO (reachable) — but three taps + a collapsed disclosure | **GREEN_CLOSED** (#1802: full-map link in the map header, one tap from the tab bar; both guards rewritten to assert the rendered doors) · station-list entry = **OWNER_SEMANTICS** (IA), optional | none | none required |
+| R-12 | `/jobs/[id]` no hreflang, OG overwrite; `/jobs` double brand | all three verified present on main | YES | **GREEN code SHIPPED as draft #1803** · blocked ONLY on the owner waiver number (`public-acquisition-route-jobs`) | POST_LAUNCH_DEPTH (SEO) | sentence in O4 |
+| R-14 | dispatcher posts `given=false` rows | verified LIVE: every `queued` row is POSTed to the Nonstop door within seconds (`dispatchAfterHandoff`) and daily; payload = pseudonymous refs + declared context, no name/contact/CV/journal (guard-pinned); consent box unticked by default; "may not name" enforced only inside the partner receiver. Prod: 1 row (`closed`), 0 queued-without-consent | YES | **OWNER_SEMANTICS** — the "yes" implementation is ready as draft **#1804** (dispatcher gate, withheld copy in 11 locales, own-read carries consent) | IMPORTANT_NOT_BLOCKING | sentence in O4 |
+| R-15 | `customer_requests` UPDATE owner-only | verified: UPDATE policy unchanged since 0028; SELECT widened to `has_org_demand_access`; **no close/reopen RPC exists**; app writes raw UPDATE under the creator's RLS; reads are owner-pinned. Prod: 2 multi-member orgs, 8 needs in them | YES | **RED_REQUIRED** — draft **#1805**: `close_demand_v1` / `reopen_demand_v1` (status only), UPDATE policy untouched, app RPC-first with owner fallback, org-scoped scouting read with `ownedByCaller` | IMPORTANT_NOT_BLOCKING (Nonstop is a multi-member org) | sentence in O4 |
+
+New RED found while tracing the loops: **INSTITUTION EVIDENCE → COMPETENCY** — `set_engagement_journal_review` refuses every slug but `employee` (verified in prod), so a learner's practice can never be confirmed by the training provider. Draft **#1807** makes the rule data (`relationship_types.journal_reviewable`, fail-closed, seeded employee + student) per the learner least-privilege ruling. IMPORTANT_NOT_BLOCKING for controlled launch; BLOCKS the institution role's real value.
+
+### O3. GREEN WORK SHIPPED
+
+| PR | state | what |
+|---|---|---|
+| **#1802** | MERGED `143cc6c7`, **PRODUCTION_DEPLOYED** | map one tap from PASAULIS + honest map guards; voice retention copy (12 locales); R-5 no-op named; R-7/R-8 runbooks; retention matrix corrected |
+| **#1808** | MERGED `2781956b`, **PRODUCTION_DEPLOYED** | "Who is committed where" per person/per date on company planning (the last core planning step done in Excel); 44 px client accept/decline on the agency bridge |
+
+### O4. GENUINE RED OWNER BATCH — ordered by impact, one sentence each
+
+CI at close: #1804, #1805, #1806, #1807 all green (quality · e2e-smoke · migration-safety); #1803 red on `quality` by design until the waiver number is added.
+
+1. **R-15 (#1805)** — "Apply R-15: close_demand_v1 / reopen_demand_v1 for creator, admin and has_org_demand_access colleagues — status only, UPDATE policy unchanged, with rollback."
+2. **R-14 (#1804)** — "Must proposition_consent.given = true before a commercial_handoffs row may be POSTed to the Nonstop door? YES → merge #1804. NO → close it; then a second, separate consent line on the interest form is the honest follow-up."
+3. **INSTITUTION (#1807)** — "Apply relationship_types.journal_reviewable (employee + student) and the data-driven set_engagement_journal_review, with rollback."
+4. **R-6 (#1806)** — "Apply R-6 v9: widen notification_events CHECKs with journal_entry_confirmed / journal_entry, with rollback."
+5. **R-12 (#1803)** — "Extend waiver public-acquisition-route-jobs to PR 1803 for the R-12 metadata fix."
+6. **R-5 semantics** — "Manager-confirmed skills show the bin computed by the §6.1 formula (green = early evidence, yellow = substantiated) — yes / keep the hard-coded green."
+7. **R-7 Decision 1** — "Contract-claim horizon for bookings / engagements / contracts = 6 years (or state another)." Unblocks the executor packet.
+8. **R-10 horizons** — one sitting: `ai_runs.profile_id` null at 90 d OR record as retained; notification_events 12 mo; pilot_events 24 mo; conversation_messages 36 mo after close; usage_cost_events + consent/audit ledgers = never purged (record); storage orphan cleanup; standing approval for rolling deletes (Decision 3).
+9. **R-8** — "Apply R-8: organizations.archived_at + archive_organization_v1, owner-only, with rollback."
+
+Not owner-gated, still open (GREEN backlog, not launch-blocking): bare-verb chat accept ("priimu" without naming the offer) → needs a decision UX, not a pattern; `write-employer` sentence → route to the interest card when exactly one active interest; "how long" total on the identity card; per-project allocated-vs-journaled variance; team-enquiry fan-out to individual bookings; `buildBrigadePlan` read-only mount; agency deployment stage (`accepted` → deployed) and replacement linkage (those two need a schema decision — see O9).
+
+### O5. SECURITY
+
+CRITICAL 0 · HIGH 0 · MEDIUM: unchanged owner-held items (M3 = R-14, decided by O4-2) · LOW: unchanged (L3–L7). Nothing found this window widened any authority. Advisors as in O1.
+
+### O6. MARKETPLACE LOOP — remaining broken transitions only
+
+- COMMUNICATION by sentence (worker → employer): the `write-employer` intent is a hint; the BUTTON path is LIVE from the interest card in chat and on the board. GREEN backlog.
+- OFFER → COMMITMENT by sentence: "priimu pasiūlymą" lands on the offer cards (LIVE); a bare "priimu" falls to the fallback. GREEN backlog with an ambiguity decision (offer vs invitation).
+- NEXT OPPORTUNITY: confirmed skills change the label and the tie-break order only (correct: the 2026-09-19 wording "never the order" was slightly wrong — "only on an exact tie").
+- SUPPLY: the five-state work-seeking intent (`first_party_supply_declarations`) is edited under Privacy and never read by the worker's own board; the board knows only `availability_status`. GREEN (surface + read) — not launch-blocking.
+
+### O7. COMPANY / WORKFORCE OS — remaining broken transitions only
+
+- Required headcount / open positions on a PROJECT: no column, no demand↔project link — RED (schema) — "5 of 12 placed on the Kaunas site" is counted by hand.
+- Project-bound communication thread: `conversations` has no project context — RED (new `source_type`).
+- Employer-initiated agency/partner record: bridge is agency-initiated only — RED for the invite direction; surfacing `agency_clients` to non-agency companies is GREEN.
+- Cross-project assignment overlap on the CALENDAR (today only at pick time) — GREEN model change.
+- Per-project allocated-vs-journaled variance — GREEN read view.
+- Corrections to the 2026-09-19 package: per-request demand clone is LIVE ("Repeat this need"); `company_type` is self-service editable (no admin SQL flip needed for Ramūnas); per-worker side-by-side hours already ship.
+- SHIPPED this window: per-person per-date commitments list (#1808); project facts editable (R-3, window 4).
+
+### O8. WORKER IDENTITY / JOURNAL / EVIDENCE — remaining broken transitions only
+
+- Worker is not told their entry was confirmed (R-6, #1806).
+- "How long" total per engagement on the identity card — the hours exist in the journal, never aggregate onto the card (GREEN).
+- The 800 h period record is classified and counted in the ORG importer; `periodRecords` never reaches the worker's own card/history (GREEN read).
+- Player card lives on `/dashboard/journal`, not `/dashboard/profile` (documented IA decision; not a defect).
+- No score / stars / leaderboard anywhere — re-verified.
+
+### O9. AGENCY / NONSTOP — remaining broken transitions only
+
+- DEPLOYMENT: after client accept + worker consent the assignment onto the CLIENT's project is client-authority only (2026-07-23 ruling); the agency's offer progress tops out at `accepted` — the agency cannot see whether its worker was deployed → tracked off-platform. RED (an agency-visible deployment stage, or a bound assign RPC).
+- REPLACEMENT: ending an assignment writes nothing back to `agency_candidate_offers`; re-propose from scratch, by phone. RED (linkage).
+- REPEAT: clone exists; the share and prior offers do not carry over (two manual steps). GREEN.
+- CREW: composition/presentation LIVE; atomic collective authority NOT_BUILT by decision; fan-out of individual bookings from a team enquiry (`respond_team_enquiry_v1` writes no booking) is GREEN and is the consent-preserving way.
+- SHIPPED: 44 px accept/decline (#1808). Correction: `agency_real_client_bridge` IS applied (ledger `20260723155658`); only `agency_clients` Model-A is parked.
+
+### O10. INSTITUTION / RPL — remaining broken transitions only
+
+- EVIDENCE → COMPETENCY: learner practice unconfirmable (#1807, RED).
+- PLACEMENT: no path from a cohort learner to an employer engagement that keeps the institution link; employer invites separately as `employee` (a job, not a placement). RED.
+- RPL: read-only requirement/evidence comparison exists for COUNTRY × document scope (evidenced / not evidenced / UNKNOWN on `/dashboard/documents`); no PROFESSION axis; SKL-9 formal recognition MISSING by ARCH-2. Nothing anywhere asserts a qualification — re-verified.
+
+### O11. FULL-VISION DELTA
+
+| | |
+|---|---|
+| LIVE_COMPLETE | demand intake; matching; interest + employer notification; booking → commitment → engagement; journal + review + skills confirm (employer side); project facts/status/assignment/stages; calendar bands; roster consent lifecycle (R-1/R-9/R-16); map (embedded + full page, one tap); public jobs; GDPR export + request intake; agency invite → share → propose → decide → worker consent |
+| LIVE_PARTIAL | notifications (journal confirmation missing); chat sentence paths (buttons LIVE, some verbs missing); identity card (no duration total, no period record); calendar (no cross-project overlap on the calendar itself); agency (deployment invisible to the agency; no replacement linkage); institution (confirm blocked) |
+| GENUINELY_NOT_BUILT | account-deletion executor; org archival state; project headcount; project thread; employer-initiated partner records; agency deployment stage; learner placement; profession-axis requirements; retention purge jobs |
+| OWNER_GATED | #1803 #1804 #1805 #1806 #1807 + O4 items 6–9 |
+| POST_LAUNCH_DEPTH | R-5 real fix, R-8, R-10 purges, R-12, RPL profession axis |
+| HUMAN_VALIDATION_PENDING | Donatas, Ramūnas — O13 |
+
+### O12. CAPABILITY LOSS — NONE
+
+Every change this window ADDS a door or names a truth. Protected capabilities re-checked: MAP gained a door; nothing removed, hidden or narrowed. Two guards were rewritten from a false proof to a real one (a guard that could not fail is not a guard).
+
+### O13. REAL-USER LAUNCH
+
+| role | admit now? | exact next production action | concrete blockers |
+|---|---|---|---|
+| WORKER (Donatas) | **YES** | `/dashboard/opportunities` → one tap "Market map" (new) → `/dashboard/profile` (800 h history, work card) → `/dashboard/journal` (write one real entry) → `/dashboard/privacy` (voice line now honest) | none |
+| EMPLOYER (Donatas / Klinkerio) | **YES** | `/dashboard/projects/<id>/operations` (enter REAL dates/place, R-3) → `/dashboard/company/planning` (new: who is committed where) → `/dashboard/company/people` (roster, remove) → confirm one real journal entry | none for a single-owner org; R-15 for a colleague |
+| AGENCY (Ramūnas / Nonstop) | **YES, with one known Excel step** | company settings → company type `staffing_agency` (self-service) → partners → invite the real client → client accepts (44 px now) → share request → propose → worker consents → **deployment / replacement are tracked off-platform (O9)** | O4-2 decides what leaves the platform on interest; R-15 if a second Nonstop member closes needs |
+| INSTITUTION | **YES for invite/enrol; NO for confirming practice** | create programme → invite learner → learner accepts → cohort — stop before "confirm" until #1807 applies | #1807 |
+
+### O14. NEXT ACTION
+
+Owner: answer O4 items 1–3 (R-15, R-14, institution) — three sentences; each draft is a merge away and the migrations are prepared with rollbacks and contracts. Then **Ramūnas walks the real Nonstop client workflow on production** and names the first transition that still forces WhatsApp — deployment visibility is the predicted one, and it is the next RED packet only if a real walk confirms it.
