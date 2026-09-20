@@ -178,7 +178,7 @@ type Call = { name: string; method: "t" | "rich" | "raw"; key: string | null; li
 
 function callsIn(src: string, names: Set<string>): Call[] {
   if (names.size === 0) return [];
-  const alternation = [...names].map((n) => n.replace(/\$/g, "\\$")).join("|");
+  const alternation = [...names].map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   const re = new RegExp(`(?<![\\w$.])(${alternation})(?:\\.(rich|raw|has|markup))?\\s*\\(`, "g");
   const out: Call[] = [];
   for (const m of src.matchAll(re)) {
