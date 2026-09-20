@@ -968,7 +968,7 @@ Owner: answer O4 items 1–3 (R-15, R-14, institution) — three sentences; each
 | | |
 |---|---|
 | main | `11e58866` (#1805 → `2b2c97ff`, #1804 → `327f77fd`, #1807 → `11e58866`) |
-| production build | see the health line recorded below the table |
+| production build | `11e58866` — `/api/health` 05:47:58 UTC: ok, dub1, auth 100 ms, db 60 ms (verified after all three merges; the docs-only commit `56e44b51` follows) |
 | migration ledger | **299** — `20260920051619 20260919190000_demand_lifecycle_colleague_v1`, `20260920052103 20260919210000_relationship_journal_reviewable_v1` |
 | **R-15** | APPLIED + MERGED. Drift check clean (main = origin = prod `57b278b1`, functions absent, UPDATE policy owner-only, diff = the ten prepared files). Readback: both functions SECURITY DEFINER, `search_path=public`, anon EXECUTE false / authenticated true / public false; UPDATE policy byte-identical; 4 policies, 2 triggers unchanged. |
 | **R-14** | MERGED (owner semantics = YES). Diff re-verified = the 20 prepared files; gate `propositionConsent.given !== true → withheld, row stays queued`. Production state: 1 handoff row (`closed`, given=false), 0 queued — the gate has nothing to hold yet; behaviour is pinned by `handoff-dispatch.test.ts` (withheld rows never posted / never touched; tampered `"true"` string withheld) and the handoff guard. |
