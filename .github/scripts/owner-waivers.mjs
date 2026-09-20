@@ -427,8 +427,44 @@ export const SCOPED_OWNER_WAIVERS = [
      * route, page, auth change or projection change; the anonymous visitor
      * still receives no employer, location or apply link (guarded on code in
      * `work-world-jobs.test.ts`). The World-State answers stay honestly "no".
+     *
+     * ── #1809 (2026-09-20) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-20):
+     *   "I approve adding ONLY PR 1809 to the existing
+     *    public-acquisition-route-jobs waiver pullRequests list."
+     *
+     * Exactly that was done: one number added to `pullRequests`. The axiom,
+     * the six codes per surface, the three surfaces, the file list, the
+     * expected finding set, the expiry and the subset rule are byte-unchanged,
+     * and `product-gate.mjs` is not touched by this PR at all.
+     *
+     * Pre-conditions checked by RUNNING the gate on this head, not by
+     * reasoning about it:
+     *   BASE_SHA=origin/main PR_NUMBER=1809 → 18 `not waived` lines, EVERY one
+     *                                         `pr-not-covered` and no other
+     *                                         reason ("covers PR 1184, 1193,
+     *                                         1203, 1208, 1255, 1649, 1786 and
+     *                                         branch main; this run is PR 1809").
+     *   CI quality run 35495974758 (head c061a4a2): the same 18, same reason.
+     * The diff adds ZERO findings; the waiver was working correctly and simply
+     * did not list this PR. The subset rule therefore still binds.
+     *
+     * WHAT #1809 ACTUALLY DOES to these surfaces (owner P0 directive
+     * 2026-09-20, the acquisition loop): the MEMBER half of `/jobs/[id]` reads
+     * the job against the person with the ONE engine (band + one honest
+     * sentence + per-criterion tiers + facts not yet provided + the ad's own
+     * unknowns), mounts the EXISTING "I want this job" control, offers up to
+     * three other live ads of the same profession beside a non-fit, sends a
+     * member without a declared profession to the profile, and tells a member
+     * whose ad closed that the AD changed; the page's own `next` carries
+     * `?via=auth` so the JOB A → REGISTER → JOB A return is measurable; both
+     * surfaces emit the public-job funnel events. No new route, page, auth
+     * change, schema or projection change; the anonymous visitor receives
+     * exactly what they received before. The World-State answers stay honestly
+     * "no" for the anonymous caller this surface exists for — same class as
+     * #1193, #1203, #1786.
      */
-    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649, 1786],
+    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
