@@ -156,7 +156,19 @@ None. Protected surfaces (chat-first, active context, map, journal, calendar, fi
 
 **Merge state (2026-09-20 07:40 UTC).** labourmarketai PR #1809: all checks green except `quality`, which stops at the Product gate with the EXPECTED 18 `not waived — pr-not-covered` lines of the `public-acquisition-route-jobs` waiver (6 codes × 3 surfaces; CI run 35495974758 and the local run agree; **zero** findings with any other reason; the A-09 line in the log is the pre-existing excused `/oauth/consent`). Every prior extension of that waiver quotes an owner sentence approving ONE PR number, and #1649's says it is *not* authority to self-approve — so extending it to #1809 is the owner's act. The exact text is prepared (§T.0); auto-merge is armed and will fire on the next green run. agentai PR #774: the private repo's Actions billing gate fails the job in 2 s with no steps; local typecheck + 431 tests green; a direct merge is a review act the owner performs.
 
-**Browser proof against the production database (local production build, QA worker identity):** see the appended walk section.
+**Browser proof against the production database (local `next start` of build `hRqLv-6H0SZpgytN36hbJ` = head `c061a4a2`, Playwright, QA worker `qa.worker+goal3` — a tiler, read-only, 2026-09-20 07:17 UTC):**
+
+| Step | Observed |
+|---|---|
+| Anonymous `/en/jobs/e3ec6c1e…` | h1 "Svetsare, manuell", published date, locked card; **no comparison**; CTAs `public_job_signup` / `public_job_login` → `/en/auth/signup?next=%2Fen%2Fjobs%2Fe3ec6c1e…%3Fvia%3Dauth` (return path + marker intact). |
+| Member `…?via=auth` | h1 = publisher title "Erfaren svetsare till tunga fordon"; return note rendered; band **`missing_requirement`**; why line: "lacks skills the ad requires · a different profession than yours · requirements were recognized from the ad's text, not yet confirmed · Availability not set"; tiers: FITS `country_location`; MISSING INFORMATION: "You have not stated: Availability", "The company has not stated: Pay"; ad gaps: "start date, language requirements, pay not comparable (not in EUR)"; sentence: "Missing information is not a failed requirement…". |
+| Interest | "I want this job" + the R-14 consent question + "This is not an application and no message goes to the employer." |
+| Alternatives | 3 other live Swedish welder ads (TopWork Sverige AB · Uppvidinge / Vetlanda / Högsby), each "Missing a requirement"; no "closer" claim because no band is stronger (coverage, not opinion). |
+| Member plain visit | no return note (marker-driven, not sticky). |
+| Board `?profession=welder` | 20 cards (warm database; the cold timeout is R-B). |
+| Raw i18n key leaks | none. |
+
+Screenshots: `walk-anon.png`, `walk-member.png` (session scratchpad). Production itself will show the same once #1809 merges; the deployed page is byte-identical to this build.
 
 ## T. HUMAN VALIDATION NEXT ACTION
 
