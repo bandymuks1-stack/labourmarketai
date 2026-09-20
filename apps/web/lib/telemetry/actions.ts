@@ -1,7 +1,15 @@
 "use server";
 
 import "server-only";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import {
+  DEPLOY_ENV_KEY,
+  isLocalHostname,
+  isNonProductionHostname,
+  telemetryAppVersion,
+  telemetryOriginFromEnv,
+} from "./production-host";
 
 /**
  * Pilot telemetry server action — single entry point for any client-side
@@ -22,6 +30,19 @@ import { createClient } from "@/lib/supabase/server";
  *   - We DO NOT log the auth code, cookies, tokens, full URL, or any
  *     free-text profile / journal body. The action returns a tagged
  *     result so callers can tell why a record was rejected.
+ *
+ * Origin contract (2026-09-20, see lib/telemetry/production-host.ts):
+ *   - a write whose request `Host` header is a LOCAL host (localhost,
+ *     loopback, LAN) is REFUSED with `non_production_origin` — a local
+ *     production build walked by a browser must not write into the
+ *     production project's `pilot_events` at all;
+ *   - every accepted row is stamped server-side with `metadata.deploy_env`
+ *     (`production` | `preview` | `local`, from Vercel's own VERCEL_ENV)
+ *     and `app_version` (`<origin>@<commit>`). A client-supplied value for
+ *     either is overwritten: the client never says which build it is.
+ *   - a non-production Host (a *.vercel.app preview) also gets
+ *     `preview_host: true` stamped here, so the client's own marker is no
+ *     longer the only thing keeping preview traffic out of the funnel.
  */
 export type TelemetryEventInput = {
   sessionId: string;
@@ -54,6 +75,7 @@ export type PilotEventErrorCode =
   | "missing_event_name"
   | "metadata_too_large"
   | "metadata_invalid"
+  | "non_production_origin"
   | "insert_failed"
   | "unknown_error";
 
@@ -106,6 +128,10 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "billing_subject", // M-P0-7 canonical subject: 'profile' | 'organization'
   "ref_type", // referenced entity type: 'project' | 'booking' | 'engagement'
   "ref_id", // referenced entity id (opaque uuid)
+  // ── Write origin (2026-09-20). STAMPED SERVER-SIDE below from VERCEL_ENV;
+  //    listed here only so the sanitizer's allowlist and the stamp agree on
+  //    the key. A client-supplied value never survives — it is overwritten.
+  DEPLOY_ENV_KEY, // 'production' | 'preview' | 'local'
 ]);
 
 const SCALAR_VALUE_MAX = 200;
@@ -150,7 +176,33 @@ export async function recordTelemetryEvent(
     };
   }
 
-  const sanitizedMetadata = sanitizeMetadata(input.metadata ?? {});
+  // ── Origin (2026-09-20). The request's own Host header is the evidence a
+  //    local process is writing; it cannot be produced by production traffic
+  //    and the client cannot choose it. Unreadable → null → not refused: a
+  //    header failure must never blank the owner's funnel.
+  const requestHost = await readRequestHost();
+  if (isLocalHostname(requestHost)) {
+    return {
+      ok: false,
+      code: "non_production_origin",
+      message:
+        "pilot_events write refused: the request came from a local host, and local builds must not write telemetry into the production project.",
+    };
+  }
+  // Server-stamped origin — merged OVER the client's metadata inside the
+  // sanitizer, so the stamp wins on key collision and the byte cap is judged
+  // on what is actually inserted. `preview_host` is only ADDED (never
+  // cleared) and only when the header was actually read, so a client marker
+  // stays authoritative when the server cannot see a host.
+  const originStamp: Record<string, unknown> = {
+    [DEPLOY_ENV_KEY]: telemetryOriginFromEnv(),
+    ...(requestHost && isNonProductionHostname(requestHost)
+      ? { preview_host: true }
+      : {}),
+  };
+  const stampedAppVersion = telemetryAppVersion();
+
+  const sanitizedMetadata = sanitizeMetadata(input.metadata ?? {}, originStamp);
   if (sanitizedMetadata === "too_large") {
     return {
       ok: false,
@@ -204,7 +256,10 @@ export async function recordTelemetryEvent(
     result,
     error_code: errorCode,
     metadata: sanitizedMetadata,
-    app_version: appVersion,
+    // The build that wrote the row, decided here. The client's `appVersion`
+    // is kept only as a fallback for a process that knows nothing about
+    // itself — which, after the stamp above, cannot happen.
+    app_version: stampedAppVersion || appVersion,
   });
 
   if (error) {
@@ -218,11 +273,26 @@ export async function recordTelemetryEvent(
   return { ok: true };
 }
 
+/** The request's Host header, or null when there is no request scope (a
+ *  script, a test) or the header cannot be read. Never throws. */
+async function readRequestHost(): Promise<string | null> {
+  try {
+    const h = await headers();
+    return h.get("host");
+  } catch {
+    return null;
+  }
+}
+
 /** Build a safe metadata object: allowlist keys, cap string values,
  *  reject jsonification failures, reject oversized payloads. Returns the
- *  sanitized object on success, `"too_large"` or `"invalid"` otherwise. */
+ *  sanitized object on success, `"too_large"` or `"invalid"` otherwise.
+ *  `stamp` holds the SERVER-decided keys (origin, 2026-09-20): merged after
+ *  the allowlist pass so a client value under the same key is overwritten,
+ *  and before the byte cap so the cap judges the row as inserted. */
 function sanitizeMetadata(
   raw: Record<string, unknown>,
+  stamp: Record<string, unknown> = {},
 ): Record<string, unknown> | "too_large" | "invalid" {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return "invalid";
@@ -245,6 +315,7 @@ function sanitizeMetadata(
       continue;
     }
   }
+  for (const [k, v] of Object.entries(stamp)) out[k] = v;
   let serialized: string;
   try {
     serialized = JSON.stringify(out);

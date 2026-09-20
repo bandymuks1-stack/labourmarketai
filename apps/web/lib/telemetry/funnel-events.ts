@@ -276,8 +276,16 @@ export type FunnelMetadata = {
   success?: boolean;
   /** True when the event was fired from a non-production origin (localhost /
    *  Vercel preview). Stamped automatically by `trackFunnel` so dev/preview
-   *  traffic can be excluded from the owner's real acquisition funnel. */
+   *  traffic can be excluded from the owner's real acquisition funnel. Since
+   *  2026-09-20 the server action ALSO stamps it from the request's Host
+   *  header, so the client marker is no longer the only defence. */
   preview_host?: boolean;
+  /** Where the row was WRITTEN from — 'production' | 'preview' | 'local' —
+   *  stamped SERVER-SIDE from Vercel's own VERCEL_ENV (see
+   *  lib/telemetry/production-host.ts). A client value is overwritten; it is
+   *  typed here only so readers of the metadata know the key exists. Writes
+   *  from a LOCAL host are refused outright and never reach a row. */
+  deploy_env?: "production" | "preview" | "local";
   /** Coarse audience of a public marketing surface: 'workers' | 'companies' | 'agencies' | 'home'. */
   audience?: string;
   /** Stable, non-PII identifier of a CTA button, e.g. 'hero_signup' | 'company_need'. */
