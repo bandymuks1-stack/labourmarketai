@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Original ({lang}) — ingen oversættelse tilgængelig",
+    "loadError": "Beskederne kunne ikke indlæses lige nu. Det, du ser, er ikke det fulde billede — prøv igen."
   },
   "trust": {
     "unreadHint": "Noget af dette kunne ikke tælles lige nu og vises som “—”. Det betyder ikke, at du ingen har — tallene kunne bare ikke læses. Genindlæs om et øjeblik.",

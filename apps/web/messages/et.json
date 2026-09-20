@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Originaal ({lang}) — tõlge pole saadaval",
+    "loadError": "Sõnumeid ei õnnestunud praegu laadida. See, mida näete, pole täielik pilt — proovige uuesti."
   },
   "trust": {
     "unreadHint": "Osa sellest ei õnnestunud praegu kokku lugeda ja on näidatud kui „—“. See ei tähenda, et teil neid ei ole — lihtsalt ei õnnestunud numbreid lugeda. Laadige hetke pärast uuesti.",

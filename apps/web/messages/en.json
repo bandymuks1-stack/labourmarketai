@@ -5780,7 +5780,7 @@
       "workerPlaceholder": "Choose a worker",
       "bodyLabel": "Instruction",
       "bodyPlaceholder": "Write the instruction in your own language…",
-      "languageNote": "Write in your own language. The original is always preserved and workers see your original text — there is no automatic translation.",
+      "languageNote": "Write in your own language. The original is always preserved; workers keep your original text and, when a translation is available, read it in their language.",
       "send": "Send instruction",
       "sending": "Sending…",
       "sent": "Instruction sent",
@@ -6518,7 +6518,7 @@
       "sending": "Sending...",
       "emptyError": "Write a message or add an attachment.",
       "charCount": "{n}/{max}",
-      "languageHint": "Write in your own language — the other person sees your original text. There is no automatic translation.",
+      "languageHint": "Write in your own language. The other person always keeps your original text and, when a translation is available, reads it in their language.",
       "attachments": {
         "addButton": "Add a photo or file",
         "help": "Photos (JPG, PNG, WebP), PDF or a text file, up to 10 MB. At most 5 attachments per message. Only conversation participants can see attachments.",
@@ -6533,7 +6533,8 @@
         "blockedWhileUploading": "Wait until the attachments finish uploading.",
         "blockedFailed": "Remove or re-upload the failed attachment.",
         "partialFailure": "The message was sent, but some attachments couldn't be attached. Try sending them again."
-      }
+      },
+      "languageLabel": "I am writing in"
     },
     "launcher": {
       "openLabel": "Contact support",
@@ -6591,7 +6592,9 @@
       "sent": "Reply sent."
     },
     "translatedFrom": "Translated from {lang}",
-    "showOriginal": "Original ({lang})"
+    "showOriginal": "Original ({lang})",
+    "translationUnavailable": "Original ({lang}) — no translation available",
+    "loadError": "Could not load messages right now. What you see is not the full picture — try again."
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",

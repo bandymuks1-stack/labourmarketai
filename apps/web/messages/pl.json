@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Oryginał ({lang}) — brak tłumaczenia",
+    "loadError": "Nie udało się teraz wczytać wiadomości. To, co widzisz, nie jest pełnym obrazem — spróbuj ponownie."
   },
   "trust": {
     "unreadHint": "Części z tych rzeczy nie udało się teraz policzyć i są pokazane jako „—”. To nie znaczy, że ich nie masz — po prostu nie dało się odczytać liczb. Odśwież za chwilę.",

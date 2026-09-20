@@ -5780,7 +5780,7 @@
       "workerPlaceholder": "Kies een werknemer",
       "bodyLabel": "Instructie",
       "bodyPlaceholder": "Schrijf de instructie in je eigen taal…",
-      "languageNote": "Schrijf in je eigen taal. Het origineel wordt altijd bewaard en werknemers zien jouw originele tekst — er is geen automatische vertaling.",
+      "languageNote": "Schrijf in je eigen taal. Het origineel wordt altijd bewaard; werknemers zien je originele tekst en lezen, als er een vertaling beschikbaar is, in hun eigen taal.",
       "send": "Instructie versturen",
       "sending": "Versturen…",
       "sent": "Instructie verstuurd",
@@ -6518,7 +6518,7 @@
       "sending": "Versturen...",
       "emptyError": "Schrijf een bericht of voeg een bijlage toe.",
       "charCount": "{n}/{max}",
-      "languageHint": "Schrijf in je eigen taal — de ander ziet je originele tekst. Er is geen automatische vertaling.",
+      "languageHint": "Schrijf in je eigen taal. De ander behoudt altijd je originele tekst en leest, als er een vertaling beschikbaar is, in zijn eigen taal.",
       "attachments": {
         "addButton": "Foto of bestand toevoegen",
         "help": "Foto's (JPG, PNG, WebP), PDF of een tekstbestand, tot 10 MB. Maximaal 5 bijlagen per bericht. Alleen gespreksdeelnemers zien bijlagen.",
@@ -6533,7 +6533,8 @@
         "blockedWhileUploading": "Wacht tot de bijlagen zijn geüpload.",
         "blockedFailed": "Verwijder de mislukte bijlage of upload deze opnieuw.",
         "partialFailure": "Het bericht is verzonden, maar sommige bijlagen konden niet worden toegevoegd. Probeer ze opnieuw te verzenden."
-      }
+      },
+      "languageLabel": "Ik schrijf in"
     },
     "launcher": {
       "openLabel": "Neem contact op met support",
@@ -6591,7 +6592,9 @@
       "sent": "Antwoord verzonden."
     },
     "translatedFrom": "Vertaald uit {lang}",
-    "showOriginal": "Origineel ({lang})"
+    "showOriginal": "Origineel ({lang})",
+    "translationUnavailable": "Origineel ({lang}) — geen vertaling beschikbaar",
+    "loadError": "Berichten konden nu niet worden geladen. Wat je ziet is niet het volledige beeld — probeer het opnieuw."
   },
   "orgTier1Warning": {
     "eyebrow": "Jouw organisatie",

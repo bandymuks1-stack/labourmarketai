@@ -128,6 +128,7 @@ export function WorkerInstructionCard({
               const r = await requestInstructionClarificationAction(
                 instruction.conversationId,
                 labels.clarifyBody,
+                locale,
               );
               // Never a silent no-op (audit PR4): failure states its outcome;
               // success links the thread where the manager's reply will land.

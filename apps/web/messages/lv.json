@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Oriģināls ({lang}) — tulkojums nav pieejams",
+    "loadError": "Ziņas šobrīd neizdevās ielādēt. Redzamais nav pilnīga aina — mēģiniet vēlreiz."
   },
   "trust": {
     "unreadHint": "Daļu no tā tikko neizdevās saskaitīt, un tā tiek rādīta kā “—”. Tas nenozīmē, ka jums to nav — vienkārši neizdevās nolasīt skaitļus. Pārlādējiet pēc brīža.",

@@ -71,3 +71,28 @@ export const tier1Locales = ["en", "lt"] as const;
 //   ka — Georgian  (LLM tier capable; DeepL has no Georgian)
 export const communicationLocales = [...locales, "uk", "ka"] as const;
 export type CommunicationLocale = (typeof communicationLocales)[number];
+
+export function isCommunicationLocale(value: string): value is CommunicationLocale {
+  return (communicationLocales as readonly string[]).includes(value);
+}
+
+// Every communication language named in ITSELF — the one label a person
+// recognises regardless of which UI locale they are reading. Used by the
+// message composer's "I am writing in" control and by the translation prompt
+// (a target named in words, never only a code). Locale-independent by design,
+// like the worker-languages and demand-form pickers.
+export const communicationLanguageNames: Record<CommunicationLocale, string> = {
+  en: "English",
+  lt: "Lietuvių",
+  lv: "Latviešu",
+  et: "Eesti",
+  nl: "Nederlands",
+  de: "Deutsch",
+  da: "Dansk",
+  no: "Norsk",
+  sv: "Svenska",
+  pl: "Polski",
+  ru: "Русский",
+  uk: "Українська",
+  ka: "ქართული",
+};

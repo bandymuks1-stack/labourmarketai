@@ -51,6 +51,8 @@ describe("resolveViewerTexts", () => {
     const out = await resolveViewerTexts([lt], "en", "viewer-2");
     expect(out.get("m1")).toEqual({
       kind: "translated",
+      state: "translated",
+      unavailable: null,
       text: "Tomorrow we start at 7 at the Hoofdgracht 3 site.",
       original: lt.body,
       languageBadge: "lt",
@@ -127,7 +129,7 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
       value: { data: { localized_copy: "Supratau, būsiu.", plain_language_version: null, wording_warnings: [] } },
     });
     const out = await resolveViewerTexts([ka], "lt", "viewer-10");
-    expect(out.get("m2")).toEqual({ kind: "translated", text: "Supratau, būsiu.", original: ka.body, languageBadge: "ka", provider: "gemini" });
+    expect(out.get("m2")).toEqual({ kind: "translated", state: "translated", unavailable: null, text: "Supratau, būsiu.", original: ka.body, languageBadge: "ka", provider: "gemini" });
     expect(ka.body).toBe("გასაგებია, ვიქნები."); // the input object is not mutated either
   });
 
@@ -140,9 +142,40 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     expect(Object.keys(input).sort()).toEqual(["canonicalMessage", "context", "locale"]);
     expect((input.canonicalMessage as string).length).toBe(8000);
     expect(input.locale).toBe("de");
-    expect(input.context).toBe("work message between colleagues");
+    // the context names source and target in words (codes alone left a Dutch
+    // or Georgian target ambiguous under the runtime's en/lt/ru prompt hint)
+    expect(input.context).toBe(
+      "work message between colleagues — translate it from Українська (uk) into Deutsch (de); keep the meaning exact",
+    );
     expect(opts).toMatchObject({ language: "uk", inputSource: "conversation_message" });
     expect(JSON.stringify([input, opts])).not.toMatch(/viewer-11|m9|conversation_id|profile|author/);
+  });
+
+  it("every message carries ONE explicit state, and a foreign original says WHY it is not translated", async () => {
+    // declined by the gate → original_foreign / declined
+    runAiAgent.mockResolvedValueOnce({ status: "needs_review", reason: "egress_blocked" });
+    const declined = await resolveViewerTexts([ka, en, { id: "m0", body: "?", original_language: null }], "en", "viewer-12");
+    expect(declined.get("m2")).toMatchObject({ state: "original_foreign", unavailable: "declined", kind: "original" });
+    expect(declined.get("m3")).toMatchObject({ state: "same_language", unavailable: null, languageBadge: null });
+    // UNKNOWN is not "same language": no badge, no attempt, its own state
+    expect(declined.get("m0")).toMatchObject({ state: "unknown_language", unavailable: null, languageBadge: null });
+    expect(runAiAgent).toHaveBeenCalledTimes(1);
+
+    // provider failure → failed; an echo → failed (an echo is not a translation)
+    runAiAgent.mockRejectedValueOnce(new Error("boom"));
+    expect((await resolveViewerTexts([ka], "lt", "viewer-13")).get("m2")).toMatchObject({ state: "original_foreign", unavailable: "failed" });
+    runAiAgent.mockResolvedValueOnce({
+      status: "suggestion", agent: "translation_copy", provider: "gemini", model: "x",
+      value: { data: { localized_copy: ka.body, plain_language_version: null, wording_warnings: [] } },
+    });
+    expect((await resolveViewerTexts([ka], "lt", "viewer-14")).get("m2")).toMatchObject({ state: "original_foreign", unavailable: "failed" });
+
+    // beyond the per-read bound → not_attempted, and the runtime is not called for it
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "egress_blocked" });
+    const many = Array.from({ length: 45 }, (_, i) => ({ id: `x${i}`, body: `t${i}`, original_language: "ka" }));
+    const bounded = await resolveViewerTexts(many, "lt", "viewer-15");
+    expect(bounded.get("x0")).toMatchObject({ state: "original_foreign", unavailable: "not_attempted" });
+    expect(bounded.get("x44")).toMatchObject({ state: "original_foreign", unavailable: "declined" });
   });
 
   it("7. authority before egress: the resolver reads and writes NOTHING — the RLS-scoped page read is the only door", () => {

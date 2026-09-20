@@ -5780,7 +5780,7 @@
       "workerPlaceholder": "Pasirinkite darbuotoją",
       "bodyLabel": "Nurodymas",
       "bodyPlaceholder": "Parašykite nurodymą savo kalba…",
-      "languageNote": "Rašykite savo kalba. Originalas visada išsaugomas ir darbuotojai mato jūsų originalų tekstą — automatinio vertimo nėra.",
+      "languageNote": "Rašykite savo kalba. Originalas visada išsaugomas; darbuotojai mato jūsų originalų tekstą ir, kai vertimas pasiekiamas, skaito jį savo kalba.",
       "send": "Siųsti nurodymą",
       "sending": "Siunčiama…",
       "sent": "Nurodymas išsiųstas",
@@ -6518,7 +6518,7 @@
       "sending": "Siunčiama...",
       "emptyError": "Įrašykite žinutę arba pridėkite priedą.",
       "charCount": "{n}/{max}",
-      "languageHint": "Rašykite savo kalba — kitas žmogus mato jūsų originalų tekstą. Automatinio vertimo nėra.",
+      "languageHint": "Rašykite savo kalba. Kitas žmogus visada išsaugo jūsų originalų tekstą ir, kai vertimas pasiekiamas, skaito jį savo kalba.",
       "attachments": {
         "addButton": "Pridėti nuotrauką ar failą",
         "help": "Nuotraukos (JPG, PNG, WebP), PDF arba tekstinis failas, iki 10 MB. Daugiausia 5 priedai vienoje žinutėje. Priedus mato tik pokalbio dalyviai.",
@@ -6533,7 +6533,8 @@
         "blockedWhileUploading": "Palaukite, kol priedai bus įkelti.",
         "blockedFailed": "Pašalinkite arba iš naujo įkelkite nepavykusį priedą.",
         "partialFailure": "Žinutė išsiųsta, bet dalies priedų prisegti nepavyko. Pabandykite juos išsiųsti dar kartą."
-      }
+      },
+      "languageLabel": "Rašau"
     },
     "launcher": {
       "openLabel": "Susisiekti su pagalba",
@@ -6591,7 +6592,9 @@
       "sent": "Atsakymas išsiųstas."
     },
     "translatedFrom": "Išversta iš {lang}",
-    "showOriginal": "Originalas ({lang})"
+    "showOriginal": "Originalas ({lang})",
+    "translationUnavailable": "Originalas ({lang}) — vertimo nėra",
+    "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matote, nėra visas vaizdas — bandykite dar kartą."
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",

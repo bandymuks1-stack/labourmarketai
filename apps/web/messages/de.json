@@ -5780,7 +5780,7 @@
       "workerPlaceholder": "Arbeitskraft auswählen",
       "bodyLabel": "Anweisung",
       "bodyPlaceholder": "Schreiben Sie die Anweisung in Ihrer eigenen Sprache…",
-      "languageNote": "Schreiben Sie in Ihrer eigenen Sprache. Das Original bleibt immer erhalten, und Arbeitskräfte sehen Ihren Originaltext — es gibt keine automatische Übersetzung.",
+      "languageNote": "Schreiben Sie in Ihrer eigenen Sprache. Das Original bleibt immer erhalten; Arbeitskräfte sehen Ihren Originaltext und lesen ihn, wenn eine Übersetzung verfügbar ist, in ihrer Sprache.",
       "send": "Anweisung senden",
       "sending": "Wird gesendet…",
       "sent": "Anweisung gesendet",
@@ -6518,7 +6518,7 @@
       "sending": "Wird gesendet...",
       "emptyError": "Schreiben Sie eine Nachricht oder fügen Sie einen Anhang hinzu.",
       "charCount": "{n}/{max}",
-      "languageHint": "Schreiben Sie in Ihrer eigenen Sprache — die andere Person sieht Ihren Originaltext. Es gibt keine automatische Übersetzung.",
+      "languageHint": "Schreiben Sie in Ihrer eigenen Sprache. Die andere Person behält immer Ihren Originaltext und liest ihn, wenn eine Übersetzung verfügbar ist, in ihrer Sprache.",
       "attachments": {
         "addButton": "Foto oder Datei hinzufügen",
         "help": "Fotos (JPG, PNG, WebP), PDF oder eine Textdatei, bis 10 MB. Höchstens 5 Anhänge pro Nachricht. Anhänge sehen nur Gesprächsteilnehmer.",
@@ -6533,7 +6533,8 @@
         "blockedWhileUploading": "Warten Sie, bis die Anhänge hochgeladen sind.",
         "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
         "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
-      }
+      },
+      "languageLabel": "Ich schreibe auf"
     },
     "launcher": {
       "openLabel": "Support kontaktieren",
@@ -6591,7 +6592,9 @@
       "sent": "Antwort gesendet."
     },
     "translatedFrom": "Übersetzt aus {lang}",
-    "showOriginal": "Originaltext ({lang})"
+    "showOriginal": "Originaltext ({lang})",
+    "translationUnavailable": "Original ({lang}) — keine Übersetzung verfügbar",
+    "loadError": "Nachrichten konnten gerade nicht geladen werden. Was Sie sehen, ist nicht das vollständige Bild — bitte erneut versuchen."
   },
   "orgTier1Warning": {
     "eyebrow": "Ihre Organisation",

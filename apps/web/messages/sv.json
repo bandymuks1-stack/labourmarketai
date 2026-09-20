@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Original ({lang}) — ingen översättning tillgänglig",
+    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen."
   },
   "trust": {
     "unreadHint": "En del av detta gick inte att räkna just nu och visas som ”—”. Det betyder inte att du saknar dem — siffrorna gick bara inte att läsa. Ladda om om en stund.",

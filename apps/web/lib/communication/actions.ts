@@ -261,6 +261,11 @@ export async function sendMessage(input: {
   conversationId: string;
   body: string;
   locale: string;
+  /** The language the author says they WROTE in, when it differs from the UI
+   *  locale (a Georgian worker reading the product in Russian still writes
+   *  Georgian). Must be a communication locale; anything else falls back to
+   *  the UI-locale rule below. Never a guessed code. */
+  originalLanguage?: string | null;
   /** Already-uploaded attachment descriptors (blobs live in the private
    *  bucket under `<conversationId>/<uid>/…`). Registered via the
    *  SECURITY DEFINER RPC after the message insert. */
@@ -355,9 +360,13 @@ export async function sendMessage(input: {
   // hardcoded list — means widening the communication set widens what messaging
   // preserves, with no hidden drift. An unknown locale stamps NULL (honest
   // "language unknown"), never a guessed code.
-  const originalLanguage = (communicationLocales as readonly string[]).includes(input.locale)
-    ? input.locale
-    : null;
+  const declared =
+    typeof input.originalLanguage === "string" ? input.originalLanguage.trim().toLowerCase() : "";
+  const originalLanguage = (communicationLocales as readonly string[]).includes(declared)
+    ? declared
+    : (communicationLocales as readonly string[]).includes(input.locale)
+      ? input.locale
+      : null;
   let result = await asAny(supabase)
     .from("conversation_messages")
     .insert({
