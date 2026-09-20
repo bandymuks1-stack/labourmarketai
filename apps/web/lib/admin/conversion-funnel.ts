@@ -91,6 +91,16 @@ export const FUNNEL_STAGES = [
   { key: FUNNEL_EVENTS.experienceSubmitted, label: "Experience submitted" },
   { key: FUNNEL_EVENTS.experiencePublished, label: "Experience published" },
   { key: FUNNEL_EVENTS.organizationCreated, label: "Organization created" },
+  // ── Public job acquisition loop (P0, 2026-09-20): a campaign visitor's
+  //    path from one public advertisement to a compared, acted-on
+  //    opportunity. Read from the same table, same window, same cap.
+  { key: FUNNEL_EVENTS.jobBoardViewed, label: "Public job board viewed" },
+  { key: FUNNEL_EVENTS.jobOpened, label: "Public job opened" },
+  { key: FUNNEL_EVENTS.jobReturnedAfterAuth, label: "Returned to the same job after auth" },
+  { key: FUNNEL_EVENTS.jobCompared, label: "Job compared against the profile" },
+  { key: FUNNEL_EVENTS.jobMissingInfoShown, label: "Missing information named" },
+  { key: FUNNEL_EVENTS.vacancyInterestExpressed, label: "Interest in a public job" },
+  { key: FUNNEL_EVENTS.jobAlternativesShown, label: "Alternative jobs shown" },
 ] as const;
 
 const CONVERSION_EVENTS: readonly string[] = [

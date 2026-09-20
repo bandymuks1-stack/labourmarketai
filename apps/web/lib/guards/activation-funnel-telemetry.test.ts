@@ -139,6 +139,14 @@ const EXPECTED_EVENTS = [
   "real_opportunities_loaded",
   "vacancy_interest_expressed",
   "commercial_handoff_created",
+  // Public job acquisition loop (P0, 2026-09-20): one public advertisement →
+  // registration → the SAME advertisement → compared → acted on.
+  "job_board_viewed",
+  "job_opened",
+  "job_returned_after_auth",
+  "job_compared",
+  "job_missing_info_shown",
+  "job_alternatives_shown",
 ] as const;
 
 describe("activation funnel — event registry", () => {

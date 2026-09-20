@@ -16,6 +16,18 @@ import {
 } from "@/lib/opportunities/saved-opportunities";
 import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { TrackedCta } from "@/components/app/tracked-cta";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
+import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
+import { VacancyInterestButton } from "@/components/app/vacancy-interest-button";
+import type { FitBand } from "@/lib/opportunities/fit-band";
+import {
+  readPublicJobForMember,
+  type PublicJobReading,
+} from "@/lib/opportunities/public-job-reading";
+import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
 
 /**
  * ONE PUBLIC JOB PAGE — the indexable unit of the acquisition funnel, and the
@@ -299,6 +311,140 @@ const NEXT_PROFILE: L = {
   de: "Profil vervollständigen",
 };
 
+// ── Acquisition loop P0 (2026-09-20): the member half no longer stops at the
+//    unlocked advertisement. It reads THIS job against THIS person with the
+//    one matching engine and says, requirement by requirement, what is
+//    evidenced, what conflicts and what is not yet known — then offers the
+//    existing interest control and, beside a non-fit, other current ads of
+//    the same profession. Copy follows the page's own 5-locale pattern.
+
+const RETURNED_NOTE: L = {
+  en: "You are back on the job you opened before signing in.",
+  lt: "Grįžai prie skelbimo, kurį atsidarei prieš prisijungdamas.",
+  ru: "Вы вернулись к вакансии, которую открыли до входа.",
+  nl: "Je bent terug bij de vacature die je opende voordat je inlogde.",
+  de: "Du bist zurück bei der Stelle, die du vor der Anmeldung geöffnet hast.",
+};
+
+const COMPARE_TITLE: L = {
+  en: "How this job compares with your profile",
+  lt: "Kaip šis darbas atitinka tavo profilį",
+  ru: "Как эта вакансия соотносится с вашим профилем",
+  nl: "Hoe deze vacature zich verhoudt tot je profiel",
+  de: "Wie diese Stelle zu deinem Profil passt",
+};
+
+/** One honest sentence per band. None of them dismisses the person: a
+ *  missing fact is named as missing, a conflict names the conflicting
+ *  requirement, and "not assessed" says why nothing could be judged. */
+const BAND_SENTENCE: Record<FitBand, L> = {
+  strong: {
+    en: "The information in your profile covers the requirements this advertisement states. Where the advertisement is silent, nothing is assumed.",
+    lt: "Tavo profilio informacija atitinka skelbime nurodytus reikalavimus. Kur skelbimas nieko nenurodo, niekas nespėjama.",
+    ru: "Информация в вашем профиле покрывает требования, указанные в объявлении. Там, где объявление молчит, ничего не предполагается.",
+    nl: "De informatie in je profiel dekt de eisen die deze advertentie noemt. Waar de advertentie zwijgt, wordt niets aangenomen.",
+    de: "Die Angaben in deinem Profil decken die in dieser Anzeige genannten Anforderungen ab. Wo die Anzeige schweigt, wird nichts angenommen.",
+  },
+  possible: {
+    en: "Your profile covers part of the stated requirements. The items below are what is still missing or not yet known.",
+    lt: "Tavo profilis atitinka dalį nurodytų reikalavimų. Žemiau — ko dar trūksta arba kas dar nežinoma.",
+    ru: "Ваш профиль покрывает часть указанных требований. Ниже — чего пока не хватает или что ещё неизвестно.",
+    nl: "Je profiel dekt een deel van de gestelde eisen. Hieronder staat wat nog ontbreekt of nog niet bekend is.",
+    de: "Dein Profil deckt einen Teil der genannten Anforderungen ab. Unten steht, was noch fehlt oder noch nicht bekannt ist.",
+  },
+  missing_requirement: {
+    en: "This advertisement states requirements that your profile does not yet show. Missing information is not a failed requirement — if you have it, add it to your profile.",
+    lt: "Šiame skelbime nurodyti reikalavimai, kurių tavo profilis dar nerodo. Trūkstama informacija nėra neatitikimas — jei ją turi, papildyk profilį.",
+    ru: "В объявлении указаны требования, которых пока нет в вашем профиле. Отсутствие информации — это не несоответствие: если она у вас есть, добавьте её в профиль.",
+    nl: "Deze advertentie noemt eisen die je profiel nog niet toont. Ontbrekende informatie is geen afwijzing — heb je het, voeg het dan toe aan je profiel.",
+    de: "Diese Anzeige nennt Anforderungen, die dein Profil noch nicht zeigt. Fehlende Angaben sind keine Ablehnung — wenn du sie hast, ergänze dein Profil.",
+  },
+  conflict: {
+    en: "One of the stated hard requirements does not match the information in your profile. The conflicting requirement is named below; everything else is shown as it is.",
+    lt: "Vienas iš nurodytų privalomų reikalavimų neatitinka tavo profilio informacijos. Neatitinkantis reikalavimas įvardytas žemiau; visa kita rodoma kaip yra.",
+    ru: "Одно из обязательных требований не совпадает с информацией в вашем профиле. Оно названо ниже; всё остальное показано как есть.",
+    nl: "Een van de gestelde harde eisen komt niet overeen met de informatie in je profiel. De strijdige eis staat hieronder; al het andere wordt getoond zoals het is.",
+    de: "Eine der genannten harten Anforderungen passt nicht zu den Angaben in deinem Profil. Sie ist unten benannt; alles andere wird so gezeigt, wie es ist.",
+  },
+  not_assessed: {
+    en: "This advertisement could not be assessed against your profile: it states no readable requirements, or your profile does not yet say what work you do. Nothing here is a verdict.",
+    lt: "Šio skelbimo nepavyko įvertinti pagal tavo profilį: jame nėra nuskaitomų reikalavimų arba tavo profilis dar nenurodo, kokį darbą dirbi. Tai nėra išvada.",
+    ru: "Это объявление нельзя было сопоставить с вашим профилем: в нём нет распознаваемых требований или ваш профиль ещё не говорит, какую работу вы выполняете. Это не вывод.",
+    nl: "Deze advertentie kon niet tegen je profiel worden beoordeeld: ze noemt geen leesbare eisen, of je profiel zegt nog niet welk werk je doet. Dit is geen oordeel.",
+    de: "Diese Anzeige konnte nicht mit deinem Profil abgeglichen werden: Sie nennt keine lesbaren Anforderungen, oder dein Profil sagt noch nicht, welche Arbeit du machst. Das ist kein Urteil.",
+  },
+};
+
+const NOT_MATCHABLE: L = {
+  en: "To compare this job with your profile, first say what work you do and which skills you have — a sentence is enough.",
+  lt: "Kad galėtume palyginti šį darbą su tavo profiliu, pirmiausia pasakyk, kokį darbą dirbi ir kokius įgūdžius turi — užtenka vieno sakinio.",
+  ru: "Чтобы сопоставить эту вакансию с вашим профилем, сначала скажите, какую работу вы выполняете и какие у вас навыки — достаточно одного предложения.",
+  nl: "Om deze vacature met je profiel te vergelijken, zeg eerst welk werk je doet en welke vaardigheden je hebt — één zin is genoeg.",
+  de: "Um diese Stelle mit deinem Profil zu vergleichen, sag zuerst, welche Arbeit du machst und welche Fähigkeiten du hast — ein Satz genügt.",
+};
+
+const NO_WORKER: L = {
+  en: "This account has no worker profile yet, so there is nothing to compare this job against.",
+  lt: "Ši paskyra dar neturi darbuotojo profilio, todėl nėra su kuo palyginti šio darbo.",
+  ru: "У этого аккаунта пока нет профиля работника, поэтому сравнивать вакансию не с чем.",
+  nl: "Dit account heeft nog geen werknemersprofiel, dus er is niets om deze vacature mee te vergelijken.",
+  de: "Dieses Konto hat noch kein Arbeitnehmerprofil, daher gibt es nichts, womit diese Stelle verglichen werden könnte.",
+};
+
+const INTEREST_TITLE: L = {
+  en: "Interested in this job?",
+  lt: "Domina šis darbas?",
+  ru: "Интересует эта вакансия?",
+  nl: "Interesse in deze vacature?",
+  de: "Interesse an dieser Stelle?",
+};
+
+const ALT_TITLE: L = {
+  en: "Other current advertisements in this profession",
+  lt: "Kiti šiuo metu galiojantys šios profesijos skelbimai",
+  ru: "Другие текущие объявления по этой профессии",
+  nl: "Andere actuele advertenties in dit beroep",
+  de: "Weitere aktuelle Anzeigen in diesem Beruf",
+};
+
+const ALT_NOTE: L = {
+  en: "Judged by the same requirement comparison as the job above. \"Closer\" means the known requirements are covered better — it is not a ranking of you.",
+  lt: "Įvertinti pagal tą patį reikalavimų palyginimą kaip ir darbas aukščiau. „Artimesnis“ reiškia, kad žinomi reikalavimai padengti geriau — tai ne tavo reitingas.",
+  ru: "Оценены тем же сравнением требований, что и вакансия выше. «Ближе» означает, что известные требования покрыты лучше — это не ваш рейтинг.",
+  nl: "Beoordeeld met dezelfde eisenvergelijking als de vacature hierboven. \"Dichterbij\" betekent dat de bekende eisen beter gedekt zijn — het is geen rangschikking van jou.",
+  de: "Beurteilt mit demselben Anforderungsabgleich wie die Stelle oben. „Näher“ heißt, die bekannten Anforderungen sind besser abgedeckt — es ist keine Bewertung deiner Person.",
+};
+
+const ALT_CLOSER: L = {
+  en: "Closer on known requirements",
+  lt: "Artimesnis pagal žinomus reikalavimus",
+  ru: "Ближе по известным требованиям",
+  nl: "Dichterbij op bekende eisen",
+  de: "Näher bei den bekannten Anforderungen",
+};
+
+const CLOSED_TITLE: L = {
+  en: "This advertisement is no longer open",
+  lt: "Šis skelbimas nebegalioja",
+  ru: "Это объявление больше не открыто",
+  nl: "Deze advertentie is niet meer open",
+  de: "Diese Anzeige ist nicht mehr offen",
+};
+
+const CLOSED_BODY: L = {
+  en: "The publisher withdrew it or its validity period ended. Your account is fine — the job is what changed.",
+  lt: "Skelbėjas jį atšaukė arba baigėsi jo galiojimo laikas. Su tavo paskyra viskas gerai — pasikeitė skelbimas.",
+  ru: "Источник снял его или истёк срок действия. С вашим аккаунтом всё в порядке — изменилась вакансия.",
+  nl: "De aanbieder heeft ze ingetrokken of de geldigheid is verlopen. Met je account is niets mis — de vacature is veranderd.",
+  de: "Die ausschreibende Stelle hat sie zurückgezogen oder die Gültigkeit ist abgelaufen. Mit deinem Konto ist alles in Ordnung — die Stelle hat sich geändert.",
+};
+
+/** A plausible BCP-47 subtag or undefined ("we do not know" ≠ "the page's
+ *  language") — the same rule the page applies to its own publisher text. */
+function langTag(value: string | null | undefined): string | undefined {
+  return /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(value ?? "") ? (value as string) : undefined;
+}
+
 /** WHERE-precision of the member's location (work-world grammar): a stated
  *  city is "city", a country alone is "country" — never inferred upward. */
 function locationPrecision(
@@ -328,12 +474,21 @@ function joinLocation(
 
 export default async function JobDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams?: Promise<{ via?: string | string[] }>;
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
   const active = resolveActiveLocale(locale);
+  // `?via=auth` is put on the page's OWN signup/login `next` below, so the
+  // render that follows the auth round trip can be told apart from a plain
+  // member visit — the RETURNED_TO_ORIGINAL_JOB step of the funnel. It is a
+  // bounded marker, never an id or a secret, and the sanitiser keeps it
+  // (it is not on the credential denylist).
+  const sp = (await searchParams) ?? {};
+  const viaAuth = sp.via === "auth";
 
   const supabase = await createClient();
   // No session cookie → provably anonymous, so skip the auth round trip.
@@ -352,10 +507,23 @@ export default async function JobDetailPage({
   // reader declined — an expired ad, a missing table, or no policy match — and
   // the page then renders exactly the anonymous half rather than a broken one.
   const member = user
-    ? await getPublicVacancyById(supabase, id).then((r) =>
-        r.status === "ok" ? r.vacancy : null,
-      )
+    ? await getPublicVacancyById(supabase, id)
+        .then((r): StoredPublicVacancyV1 | null => (r.status === "ok" ? r.vacancy : null))
+        // An unexpected read error is the anonymous half, as the comment
+        // above promises — not the route's error boundary. The reader
+        // throws on codes other than "no table" / "bad uuid".
+        .catch(() => null)
     : null;
+
+  // The member's reading of THIS job: engine verdict, requirement tiers, the
+  // existing interest state and same-profession alternatives. `null` for an
+  // anonymous visitor and for a member whose ad is no longer live.
+  const reading: PublicJobReading | null =
+    user && member
+      ? await readPublicJobForMember(supabase, user.id, member).catch(
+          () => null,
+        )
+      : null;
 
   // Saved state for the signed-in worker, read through the CALLER's own client
   // AND filtered to their own worker row. RLS alone is not enough here: the
@@ -369,10 +537,75 @@ export default async function JobDetailPage({
       ? await isPublicVacancySaved(supabase, id, workerId)
       : { saved: false, available: false };
 
-  const next = encodeURIComponent(`/${active}/jobs/${id}`);
+  // JOB A → REGISTER → JOB A. The return path is this exact page; `via=auth`
+  // marks the render that closes the loop (see `viaAuth` above).
+  const next = encodeURIComponent(`/${active}/jobs/${id}?via=auth`);
   const published = formatUtcDate(preview.publishedAt, active);
 
   const t = await getTranslations({ locale: active });
+  // The comparison speaks the board's OWN vocabulary — criterion names, tier
+  // titles, band chips, the ad-side gap words and the interest control's
+  // copy all come from the `opportunities` namespace the destination already
+  // renders, so the two surfaces can never disagree about a word.
+  const to = await getTranslations({ locale: active, namespace: "opportunities" });
+  const criterionLabel = (c: string) =>
+    to.has(`discovery.criterion.${c}`) ? (to(`discovery.criterion.${c}` as never) as string) : c;
+  const tierLabels = {
+    blockingTitle: to("discovery.tiers.blocking"),
+    strengthsTitle: to("discovery.tiers.strengths"),
+    negotiablesTitle: to("discovery.tiers.negotiables"),
+    missingTitle: to("discovery.tiers.missing"),
+    criterionLabel,
+    missingLabel: (side: "worker" | "demand", label: string) =>
+      side === "worker"
+        ? to("discovery.missing.worker", { criterion: label })
+        : to("discovery.missing.demand", { criterion: label }),
+  };
+  const bandChip = (band: FitBand) => to(`world.chip.${band}` as never) as string;
+  const gapLabel = (gap: string) =>
+    to.has(`external.gap.${gap}`) ? (to(`external.gap.${gap}` as never) as string) : gap;
+  const whyText = (code: string): string | null =>
+    to.has(`fitWhy.${code}`)
+      ? (to(`fitWhy.${code}` as never) as string)
+      : to.has(`gap.${code}`)
+        ? (to(`gap.${code}` as never) as string)
+        : null;
+  const interestLabels = {
+    express: to("vacancyInterest.express"),
+    sent: to("vacancyInterest.sent"),
+    withdraw: to("vacancyInterest.withdraw"),
+    consentLabel: to("vacancyInterest.consentLabel"),
+    consentHint: to("vacancyInterest.consentHint"),
+    handoffQueued: to("vacancyInterest.handoffQueued"),
+    handoffQueuedConsentWithheld: to("vacancyInterest.handoffQueuedConsentWithheld"),
+    handoffDelivered: to("vacancyInterest.handoffDelivered"),
+    handoffClosed: to("vacancyInterest.handoffClosed"),
+    handoffTooNew: to("vacancyInterest.handoffTooNew"),
+    // A serializable map (client-component prop), one entry per stable code —
+    // the same construction the board uses.
+    handoffIneligible: Object.fromEntries(
+      [
+        "worker_not_matchable",
+        "not_public_vacancy",
+        "vacancy_not_live",
+        "interest_not_active",
+        "employer_not_identifiable",
+        "publication_date_unusable",
+      ].map((code) => [
+        code,
+        to.has(`vacancyInterest.ineligible.${code}`)
+          ? (to(`vacancyInterest.ineligible.${code}` as never) as string)
+          : to("vacancyInterest.sent"),
+      ]),
+    ) as Record<string, string>,
+    handoffPending: to("vacancyInterest.handoffPending"),
+    scopeNote: to("vacancyInterest.scopeNote"),
+    error: to("vacancyInterest.error"),
+  };
+  const ready = reading?.kind === "ready" ? reading : null;
+  const whyLine = ready
+    ? ready.whyCodes.map(whyText).filter((s): s is string => s !== null).join(" · ")
+    : "";
   // Named licence attribution is a MEMBER line: the name identifies the source
   // country, and the licensed content (title, description, employer, apply
   // URL) is only displayed to members anyway. Anonymous visitors get the
@@ -410,9 +643,78 @@ export default async function JobDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* FUNNEL (acquisition loop P0): one `job_opened` per page view — the
+          job it was (opaque store id) and who was looking (anonymous or
+          member). `once={false}` because the beacon's tab-session dedupe is
+          keyed per event+surface, which would swallow the second job a
+          visitor opens; a page view IS the unit here. */}
+      <TelemetryView
+        event={FUNNEL_EVENTS.jobOpened}
+        once={false}
+        metadata={{
+          surface: user ? "member" : "anonymous",
+          ref_type: "public_vacancy",
+          ref_id: id,
+          success: member !== null || user === null,
+        }}
+      />
+      {user && viaAuth ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.jobReturnedAfterAuth}
+          once={false}
+          metadata={{ surface: "public_job", ref_type: "public_vacancy", ref_id: id }}
+        />
+      ) : null}
+      {ready ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.jobCompared}
+          once={false}
+          metadata={{
+            surface: "public_job",
+            ref_type: "public_vacancy",
+            ref_id: id,
+            result_kind: ready.band,
+            success: ready.matchable,
+          }}
+        />
+      ) : null}
+      {ready && ready.match.missingFacts.length > 0 ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.jobMissingInfoShown}
+          once={false}
+          metadata={{
+            surface: "public_job",
+            ref_type: "public_vacancy",
+            ref_id: id,
+            unresolved_unknown_count: ready.match.missingFacts.filter(
+              (m) => m.side === "worker",
+            ).length,
+          }}
+        />
+      ) : null}
+      {ready && ready.alternatives.length > 0 ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.jobAlternativesShown}
+          once={false}
+          metadata={{
+            surface: "public_job",
+            ref_type: "public_vacancy",
+            ref_id: id,
+            candidate_count: ready.alternatives.length,
+          }}
+        />
+      ) : null}
       <Link href="/jobs" className="text-sm text-text-muted hover:underline">
         {BACK[active]}
       </Link>
+      {user && viaAuth && member ? (
+        <p
+          className="mt-3 rounded-md border border-state-success/30 bg-state-success/10 px-3 py-2 text-sm"
+          data-testid="public-job-returned"
+        >
+          {RETURNED_NOTE[active]}
+        </p>
+      ) : null}
 
       {/* Members see the publisher's own title; anonymous visitors see the
           occupation label — the raw title embeds employer and location wording
@@ -504,6 +806,122 @@ export default async function JobDetailPage({
             </section>
           )}
 
+          {/* REQUIREMENT BY REQUIREMENT — the ONE engine's reading of this
+              job against this person (acquisition loop P0). Categorical,
+              never a score: band chip, one honest sentence for the band,
+              the hard/weighted/negotiable tiers with the facts still
+              missing, and the ad's own unknowns. */}
+          <section
+            className="mt-8 rounded-lg border p-5"
+            data-testid="public-job-comparison"
+            data-band={ready ? ready.band : undefined}
+          >
+            <h2 className="text-base font-medium">{COMPARE_TITLE[active]}</h2>
+            {reading === null || reading.kind === "no_worker" ? (
+              <>
+                <p className="mt-2 text-sm text-text-muted">{NO_WORKER[active]}</p>
+                <Link
+                  href="/dashboard/profile"
+                  className={`${buttonLinkClassName("secondary")} mt-3`}
+                >
+                  {NEXT_PROFILE[active]}
+                </Link>
+              </>
+            ) : !ready?.matchable ? (
+              <>
+                <p className="mt-2 text-sm text-text-muted">{NOT_MATCHABLE[active]}</p>
+                <Link
+                  href="/dashboard/profile"
+                  className={`${buttonLinkClassName("primary")} mt-3`}
+                >
+                  {NEXT_PROFILE[active]}
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <FitBandChip band={ready.band} label={bandChip(ready.band)} />
+                  {whyLine ? (
+                    <span className="text-sm text-text-muted" data-testid="public-job-why">
+                      {whyLine}
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-3 text-sm text-text-muted">
+                  {BAND_SENTENCE[ready.band][active]}
+                </p>
+                <div className="mt-4">
+                  <MatchTierExplanation
+                    blocking={ready.match.blocking}
+                    strengths={ready.match.strengths}
+                    negotiables={ready.match.negotiables}
+                    missingFacts={ready.match.missingFacts}
+                    labels={tierLabels}
+                    testId="public-job-tiers"
+                  />
+                </div>
+                {ready.adGaps.length > 0 ? (
+                  <p className="mt-4 text-xs text-text-muted" data-testid="public-job-ad-gaps">
+                    {to("external.gapsTitle")}: {ready.adGaps.map(gapLabel).join(", ")}
+                  </p>
+                ) : null}
+              </>
+            )}
+          </section>
+
+          {/* THE ONE WORKER ACTION on a public ad — the existing "I want this
+              job" control, exactly as the board mounts it (same labels, same
+              consent question, same server action). Rendered only when the
+              interest store admits a vacancy source and the person has a
+              worker row; never a dead button. */}
+          {ready && ready.interestAvailable && member.storeId ? (
+            <section className="mt-8" data-testid="public-job-interest">
+              <h2 className="text-base font-medium">{INTEREST_TITLE[active]}</h2>
+              <div className="mt-3">
+                <VacancyInterestButton
+                  locale={active}
+                  vacancyId={member.storeId}
+                  initialStatus={ready.interest.status}
+                  initialHandoff={ready.interest.handoff}
+                  labels={interestLabels}
+                />
+              </div>
+            </section>
+          ) : null}
+
+          {/* NOT A DEAD END. Beside anything short of a full fit, other
+              current ads of the same profession, judged by the same engine.
+              "Closer" is coverage of known requirements — never "better for
+              you", never a rank of the person. */}
+          {ready && ready.alternatives.length > 0 ? (
+            <section className="mt-8" data-testid="public-job-alternatives">
+              <h2 className="text-base font-medium">{ALT_TITLE[active]}</h2>
+              <p className="mt-1 text-xs text-text-muted">{ALT_NOTE[active]}</p>
+              <ul className="mt-3 space-y-2">
+                {ready.alternatives.map((alt) => (
+                  <li key={alt.vacancyId} className="rounded-md border p-3">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <Link
+                        href={`/jobs/${alt.vacancyId}`}
+                        // Each alternative is its OWN publisher's text — its
+                        // own language tag, never this page's.
+                        lang={langTag(alt.sourceLanguage)}
+                        className="font-medium hover:underline"
+                      >
+                        {alt.title}
+                      </Link>
+                      <FitBandChip band={alt.band} label={bandChip(alt.band)} />
+                    </div>
+                    <p className="mt-1 text-xs text-text-muted">
+                      {[alt.employerName, alt.city, alt.country].filter(Boolean).join(" · ")}
+                      {alt.closerThanCurrent ? ` · ${ALT_CLOSER[active]}` : ""}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           {/* PRIVATE BOOKMARK. Rendered only for a signed-in worker whose read
               succeeded — see `savedState.available`. */}
           {savedState.available && (
@@ -545,23 +963,50 @@ export default async function JobDetailPage({
             </div>
           </section>
         </>
+      ) : user ? (
+        /* A MEMBER whose member read returned nothing: the ad went inactive or
+           expired between the anonymous preview and the member read. Telling
+           a signed-in person to "create a free account" was the old defect in
+           a new place — say what actually changed and offer the board. */
+        <section
+          className="mt-8 rounded-lg border border-dashed p-5"
+          data-testid="public-job-closed"
+        >
+          <h2 className="text-base font-medium">{CLOSED_TITLE[active]}</h2>
+          <p className="mt-1 text-sm text-text-muted">{CLOSED_BODY[active]}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/opportunities"
+              className={buttonLinkClassName("primary")}
+            >
+              {NEXT_OPPORTUNITIES[active]}
+            </Link>
+          </div>
+        </section>
       ) : (
         <section className="mt-8 rounded-lg border border-dashed p-5">
           <h2 className="text-base font-medium">{LOCKED_TITLE[active]}</h2>
           <p className="mt-1 text-sm text-text-muted">{LOCKED_BODY[active]}</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link
+            {/* REGISTRATION_CTA of the funnel: the same `cta_clicked` event
+                every acquisition CTA emits, with a stable id per control and
+                the visitor's first-touch attribution merged in. */}
+            <TrackedCta
+              ctaId="public_job_signup"
+              audience="workers"
               href={`/auth/signup?next=${next}`}
               className={buttonLinkClassName("primary")}
             >
               {CTA_SIGNUP[active]}
-            </Link>
-            <Link
+            </TrackedCta>
+            <TrackedCta
+              ctaId="public_job_login"
+              audience="workers"
               href={`/auth/login?next=${next}`}
               className={buttonLinkClassName("secondary")}
             >
               {CTA_LOGIN[active]}
-            </Link>
+            </TrackedCta>
           </div>
         </section>
       )}

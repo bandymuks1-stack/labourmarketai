@@ -9,6 +9,8 @@ import {
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { createClient } from "@/lib/supabase/server";
 import { hasSessionCookie } from "@/lib/supabase/session-cookie";
 import {
@@ -335,6 +337,20 @@ export default async function JobsPage({
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* FUNNEL (acquisition loop P0): JOB_IMPRESSION — one board render per
+          tab session, with how many ads it showed. An `unavailable` read
+          (the search did not answer in time) is `success:false` with a zero
+          count, never "zero jobs": the two are different facts and the
+          owner's question is where visitors leave. */}
+      <TelemetryView
+        event={FUNNEL_EVENTS.jobBoardViewed}
+        metadata={{
+          surface: showSaved ? "public_jobs_saved" : profession ? "public_jobs_profession" : "public_jobs",
+          role_context: user ? "member" : "anonymous",
+          success: result.status !== "unavailable",
+          candidate_count: showSaved ? savedPreviews.length : result.vacancies.length,
+        }}
+      />
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         {H1[active]}
       </h1>
