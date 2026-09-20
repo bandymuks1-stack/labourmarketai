@@ -1181,6 +1181,14 @@ const pl: Catalogue = {
     "Z Twoich własnych wpisów w Dzienniku pracy, według tej samej zasady co strona internetowa. Dni kalendarzowe kończą się dzisiaj (UTC).",
   "today.openJournal": "Otwórz Dziennik pracy",
   "today.openProfile": "Otwórz profil i umiejętności",
+  "account.title": "Prywatność i konto",
+  "account.body":
+    "Te strony otwierają się w przeglądarce, na stronie internetowej. Prośbę o Twoje dane lub o usunięcie konta składasz tam, w sekcji Prywatność.",
+  "account.privacy": "Prywatność, Twoje dane i usunięcie konta",
+  "account.terms": "Warunki korzystania z usługi",
+  "account.support": "Skontaktuj się z pomocą (info@labourmarket.ai)",
+  "account.external": "Przeglądarka",
+  "account.openFailed": "Nie udało się otworzyć linku na tym telefonie. Nic nie zostało zmienione.",
 };
 
 export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl };
