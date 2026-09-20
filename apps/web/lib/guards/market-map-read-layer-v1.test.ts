@@ -990,7 +990,8 @@ describe("NO new DB migration in this PR", () => {
     //   (R-13 search_path pin, APPLIED 2026-09-19, ledger 20260919153945).
     //   Not this read layer's file. RECOUNTED: 296.
     // Bumped 296 -> 297 for 20260919190000_demand_lifecycle_colleague_v1
-    //   (R-15: close_demand_v1 / reopen_demand_v1, RED, PREPARED not applied).
+    //   (R-15: close_demand_v1 / reopen_demand_v1, RED, APPLIED 2026-09-20,
+    //   ledger 20260920051619).
     //   Not this read layer's file. RECOUNTED: 297.
     expect(count).toBeLessThanOrEqual(297);
   });

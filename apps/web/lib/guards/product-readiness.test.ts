@@ -2593,7 +2593,8 @@ describe("no migration files added by this sprint", () => {
 // two gated lifecycle writes — close_demand_v1 / reopen_demand_v1 — for the
 // creator, an admin or a colleague with has_org_demand_access; status +
 // updated_at only, UPDATE policy untouched). RED (new SECURITY DEFINER
-// functions), PREPARED 2026-09-19, NOT applied. RECOUNTED: 297.
+// functions), owner-approved and APPLIED 2026-09-20 (ledger 20260920051619);
+// contract run on the LIVE functions and rolled back (PR #1805). RECOUNTED: 297.
 const SPRINT_BASELINE = 297;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —

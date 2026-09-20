@@ -1,8 +1,12 @@
 -- @human-gate-approved
 -- ============================================================================
 -- 20260919190000_demand_lifecycle_colleague_v1
--- RED — owner gate (R-15 of the 2026-09-19 completion audit). PREPARED, NOT
--- APPLIED. The annotation above acknowledges the class; it is not approval.
+-- RED — owner gate (R-15 of the 2026-09-19 completion audit).
+-- APPLIED 2026-09-20 05:16 UTC (ledger 20260920051619) under the owner's
+-- verbatim sentence "Apply R-15: close_demand_v1 / reopen_demand_v1 for
+-- creator, admin and has_org_demand_access colleagues — status only, UPDATE
+-- policy unchanged, with rollback." Hostile + legitimate contract run on the
+-- LIVE functions and rolled back (see docs/APPLIED_LEDGER.md).
 --
 -- FINDING (traced on production 2026-09-19): `customer_requests_update` is
 -- `profile_id = auth.uid() or is_admin()` — unchanged since 0028. The SELECT
