@@ -6010,10 +6010,10 @@
       "honestNote": "To centrum zestawia już istniejące zapisy. Kamienie milowe, rejestry problemów i tabele zasobów nie są jeszcze zbudowane i nie są tu symulowane.",
       "hours": {
         "title": "Godziny w tym projekcie",
-        "allocated": "Allocated",
-        "journaled": "Journaled",
-        "confirmed": "Confirmed",
-        "value": "{hours} h",
+        "allocated": "Przydzielone",
+        "journaled": "Z dziennika",
+        "confirmed": "Potwierdzone",
+        "value": "{hours} godz.",
         "note": "Przydzielone — zapisy godzin organizacji dla obiektów pracy tego projektu; z dziennika — wpisy osób w tym projekcie; potwierdzone — wpisy dziennika zatwierdzone przez kierownika. Trzymane osobno, nigdy nie sumowane.",
         "unavailable": "nie udało się odczytać",
         "noLedger": "brak zapisów godzin",
@@ -7162,14 +7162,14 @@
       "help": "Pierwszy kontakt utm_campaign × utm_content w tym samym oknie, z tym samym filtrem populacji. To wystąpienia zdarzeń, nie unikalni odwiedzający — późniejsza kolumna nie jest podzbiorem wcześniejszej, więc żaden stosunek dwóch kolumn nie jest współczynnikiem konwersji. 25 najczęstszych według wejść; ruch nieoznaczony (organiczny) nie jest wymieniony. Kolumna zainteresowania jest emitowana po stronie serwera, gdzie kampania nie jest dostępna, więc z założenia pozostaje 0 — to brak pomiaru, nie zmierzone zero.",
       "col": {
         "campaign": "Kampania / wariant",
-        "landing": "Landings",
-        "jobOpened": "Job opened",
-        "ctaClicked": "CTA clicked",
+        "landing": "Wejścia",
+        "jobOpened": "Otwarto ofertę",
+        "ctaClicked": "Kliknięto CTA",
         "registrationStarted": "Rozpoczęto rejestrację",
         "signupCompleted": "Utworzono konto",
         "returnedToJob": "Powrót do oferty",
-        "compared": "Compared",
-        "interest": "Interest"
+        "compared": "Porównano",
+        "interest": "Zainteresowanie"
       }
     }
   },
@@ -10548,7 +10548,7 @@
       "undated": "przypisany(a) do {label} — brak zarejestrowanych dat",
       "withoutCommitment": "{count, plural, one {# osoba nie ma} few {# osoby nie mają} many {# osób nie ma} other {# osoby nie ma}} tutaj żadnego zapisu. To nie to samo, co wolny — zatwierdzone nieobecności są wymienione osobno.",
       "unavailable": "Nie udało się odczytać zaangażowań. To nie to samo, co wolny.",
-      "conflict": "overlap",
+      "conflict": "nakładanie się",
       "conflictNote": "Nakładające się daty są oznaczone: ta sama osoba jest w tych dniach zobowiązana w dwóch miejscach. Ostrzeżenie, nie blokada — oba zapisy pozostają."
     }
   },
@@ -16296,11 +16296,11 @@
         "title": "Umiejętności wymienione w zapisach organizacji",
         "intro": "Słowa organizacji o Twojej pracy wskazują te umiejętności. Nic nie zostanie dodane, dopóki tego nie potwierdzisz.",
         "why": "Wymienione jako „{terms}” w {count, plural, one {# zapisie} few {# zapisach} many {# zapisach} other {# zapisach}}",
-        "add": "Add",
-        "adding": "Adding…",
+        "add": "Dodaj",
+        "adding": "Dodawanie…",
         "added": "Dodano do profilu",
         "already": "Już w Twoim profilu",
-        "notNow": "Not now",
+        "notNow": "Nie teraz",
         "error": "Nie udało się dodać. Spróbuj ponownie.",
         "selfDeclaredNote": "Dodana umiejętność jest zadeklarowana samodzielnie — niezweryfikowana."
       }
@@ -16819,14 +16819,14 @@
         "hoursDoor": "Godziny pracy",
         "evidenceReportsDoor": "Raporty dowodowe",
         "imports": {
-          "title": "Your imports",
+          "title": "Twoje importy",
           "empty": "Nic nie zostało jeszcze zaimportowane.",
           "unavailable": "Nie udało się teraz odczytać listy importów.",
           "status": {
-            "staged": "Prepared",
-            "committed": "Recorded",
-            "withdrawn": "Withdrawn",
-            "failed": "Failed"
+            "staged": "Przygotowany",
+            "committed": "Zapisany",
+            "withdrawn": "Wycofany",
+            "failed": "Nieudany"
           }
         }
       },

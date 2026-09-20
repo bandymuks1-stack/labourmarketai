@@ -505,7 +505,7 @@ export const PAGE_SEO: Readonly<
         "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Bezeichnung, Kategorie, Vertragsform und Arbeitszeit sind für alle sichtbar; kostenlos anmelden, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
     },
     pl: {
-      title: "Otwarte oferty pracy — LabourMarket.ai",
+      title: "Otwarte oferty pracy",
       description:
         "Przeglądaj aktualne oferty pracy z oficjalnych publicznych źródeł zatrudnienia. Nazwa stanowiska, kategoria, forma zatrudnienia i wymiar czasu pracy są widoczne dla wszystkich; załóż darmowe konto, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
     },
