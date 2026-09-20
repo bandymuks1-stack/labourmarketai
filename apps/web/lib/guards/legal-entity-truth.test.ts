@@ -109,7 +109,7 @@ describe("terms: contracting party and governing law", () => {
     expect(all).toContain("302676973");
     expect(all).toContain("Labour Market AI Sp. z o.o.");
     // Lithuanian law named in every locale's own language:
-    expect(all).toMatch(/Lithuania|Lietuvos|Литов|Litouwen|Litauen/);
+    expect(all).toMatch(/Lithuania|Lietuvos|Литов|Litouwen|Litauen|Litw|litewsk/);
   });
 
   it("the terms page renders the structured sections", () => {

@@ -46,7 +46,7 @@
     "openJournal": "Otwórz Dziennik pracy",
     "cohortsTitle": "Twój program",
     "cohortLine": "{program} · rocznik {cohort}",
-    "cohortAt": "at {institution}",
+    "cohortAt": "w {institution}",
     "cohortDirection": "Kierunek: {profession}",
     "cohortDemand": "{count} otwartych ofert pracy dla tego kierunku dzisiaj (zaimportowane dane rynkowe)",
     "cohortDemandUnknown": "Popyt na ten kierunek nie jest jeszcze mierzony",
@@ -115,7 +115,7 @@
     "formDescriptionLabel": "Opis",
     "formDescriptionPlaceholder": "Stan, dostępność, warunki…",
     "formCountryLabel": "Kraj",
-    "formCountryPlaceholder": "e.g. DE",
+    "formCountryPlaceholder": "np. DE",
     "formLabelLabel": "Lokalizacja",
     "formLabelPlaceholder": "Miasto lub region",
     "formPriceLabel": "Cena",
@@ -728,7 +728,7 @@
         "title": "Zadania według statusu",
         "open": "Otwarte",
         "status": {
-          "todo": "To do",
+          "todo": "Do zrobienia",
           "in_progress": "W trakcie",
           "blocked": "Zablokowane"
         },
@@ -2022,7 +2022,7 @@
           "other": "Inne"
         },
         "country": "Kraj",
-        "countryPlaceholder": "e.g. LT",
+        "countryPlaceholder": "np. LT",
         "countryOptions": {
           "LT": "Litwa",
           "LV": "Łotwa",
@@ -2246,11 +2246,11 @@
           },
           "countries": {
             "label": "Kraje",
-            "placeholder": "e.g. LT, LV, EE"
+            "placeholder": "np. LT, LV, EE"
           },
           "languages": {
             "label": "Znajomość języków",
-            "placeholder": "e.g. LT, EN, RU"
+            "placeholder": "np. LT, EN, RU"
           },
           "availability": {
             "label": "Dostępność",
@@ -2456,7 +2456,7 @@
           "other": "Inne"
         },
         "country": "Kraj",
-        "countryPlaceholder": "e.g. LT",
+        "countryPlaceholder": "np. LT",
         "market": "Rynek / region",
         "marketPlaceholder": "np. kraje bałtyckie / UE",
         "needSummary": "Podsumowanie zapytania",
@@ -2499,19 +2499,19 @@
         "fieldNeedSummary": "Podsumowanie zapytania",
         "fieldNeedSummaryPlaceholder": "Krótko, czego szukasz.",
         "fieldCountry": "Kraj",
-        "fieldCountryPlaceholder": "e.g. LT",
+        "fieldCountryPlaceholder": "np. LT",
         "fieldLocation": "Lokalizacja / region",
         "fieldLocationPlaceholder": "np. Wilno",
         "fieldRole": "Rola / rodzaj pracy",
         "fieldRolePlaceholder": "np. dekarz, kucharz",
         "fieldTeamSize": "Wielkość zespołu",
-        "fieldTeamSizePlaceholder": "e.g. 3",
+        "fieldTeamSizePlaceholder": "np. 3",
         "fieldStartPeriod": "Okres rozpoczęcia",
         "fieldStartPeriodPlaceholder": "np. kwiecień 2026",
         "fieldDuration": "Czas trwania",
         "fieldDurationPlaceholder": "np. 2 miesiące",
         "fieldLanguage": "Wymagania językowe",
-        "fieldLanguagePlaceholder": "e.g. LT, EN",
+        "fieldLanguagePlaceholder": "np. LT, EN",
         "fieldNotes": "Notatki",
         "fieldNotesPlaceholder": "Dowolne dodatkowe wymagania.",
         "statusLabel": "Stan",
@@ -2662,7 +2662,7 @@
         },
         "salary": {
           "label": "Wynagrodzenie (€)",
-          "placeholder": "E.g., 2200"
+          "placeholder": "np. 2200"
         },
         "countries": {
           "label": "Preferowane kraje (kody ISO)",
@@ -2789,7 +2789,7 @@
       "profileText": "Opis profilu",
       "claims": "Deklaracje",
       "yes": "tak",
-      "no": "no",
+      "no": "nie",
       "inspect": "Sprawdź →"
     },
     "hub": {
@@ -2976,7 +2976,7 @@
       },
       "transportValue": {
         "yes": "Tak",
-        "no": "No"
+        "no": "Nie"
       },
       "result": {
         "saved": "Zaktualizowano status.",
@@ -3880,7 +3880,7 @@
       "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez Google lub e-mailem i hasłem; w następnym kroku wskażesz, po co tu jesteś.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
-      "divider": "or",
+      "divider": "lub",
       "email_label": "E-mail",
       "email_placeholder": "name@example.com",
       "password_label": "Hasło",
@@ -3909,7 +3909,7 @@
       "subcopy": "Kontynuuj przez Google albo zaloguj się e-mailem i hasłem.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
-      "divider": "or",
+      "divider": "lub",
       "email_label": "E-mail",
       "password_label": "Hasło",
       "forgot_password": "Nie pamiętasz hasła?",
@@ -4113,7 +4113,7 @@
         "nextSteps": {
           "title": "Twoje następne kroki",
           "done": "Gotowe",
-          "todo": "To do",
+          "todo": "Do zrobienia",
           "open": "Otwórz",
           "profession": {
             "title": "Ustaw swój zawód",
@@ -4223,7 +4223,7 @@
               "hoursPerWorker": "Godziny na pracownika",
               "totalHours": "Łączne godziny (opcjonalne nadpisanie)",
               "rate": "Stawka godzinowa / dniówka",
-              "ratePlaceholder": "e.g. 20",
+              "ratePlaceholder": "np. 20",
               "country": "Kraj / lokalizacja",
               "materials": "Materiały",
               "equipment": "Sprzęt / narzędzia",
@@ -4396,7 +4396,7 @@
           "from": "od {date}",
           "payRange": "€{min}–{max}",
           "payFrom": "od {min} €",
-          "payTo": "up to €{max}",
+          "payTo": "do {max} €",
           "skills": "umiejętności: {n}",
           "entries": "wpisy pracy: {n}",
           "set": "Ustaw"
@@ -4694,10 +4694,10 @@
       },
       "subcopy": "Twoja karta jest budowana z Twojej rzeczywistej wykonanej pracy i dowodów z pracy, nie z samodzielnie napisanego CV. Sygnały dopasowania są pokazywane w kontekście — pokrycie i gotowość do konkretnego zapotrzebowania, nigdy jedna uniwersalna ocena.",
       "bullets": [
-        "Work readiness — honest signals (met out of total) with a clear next step. Never one universal rating.",
-        "What I can do — declared skills, journal-supported skills and real confirmations, not just a self-written CV.",
-        "When and where I can work — availability, a from-date and the country, always current.",
-        "Evidence of experience — work history, documents and a growth timeline built from real entries."
+        "Gotowość do pracy — uczciwe sygnały (spełnione z łącznej liczby) i jasny następny krok. Nigdy jedna uniwersalna ocena.",
+        "Co potrafię — zadeklarowane umiejętności, umiejętności poparte wpisami w dzienniku i realne potwierdzenia, a nie tylko samodzielnie napisane CV.",
+        "Kiedy i gdzie mogę pracować — dostępność, data od kiedy oraz kraj, zawsze aktualne.",
+        "Dowody doświadczenia — historia pracy, dokumenty i oś rozwoju zbudowana z realnych wpisów."
       ]
     },
     "journey": {
@@ -4705,20 +4705,20 @@
       "headline": "Twoja droga: od rejestracji do zatrudnienia",
       "steps": [
         {
-          "title": "Build your profile (5 min)",
-          "desc": "Add your trade, experience and availability."
+          "title": "Zbuduj swój profil (5 min)",
+          "desc": "Dodaj swój zawód, doświadczenie i dostępność."
         },
         {
-          "title": "Build your work records",
-          "desc": "Your work records and certificates show what you can do."
+          "title": "Buduj swoje zapisy pracy",
+          "desc": "Twoje zapisy pracy i certyfikaty pokazują, co potrafisz."
         },
         {
-          "title": "See opportunity-fit direction",
-          "desc": "Roles that fit your trade, rate and location find you."
+          "title": "Poznaj kierunek dopasowania do ofert",
+          "desc": "Role pasujące do Twojego zawodu, stawki i lokalizacji same Cię znajdują."
         },
         {
-          "title": "Work, earn, level up",
-          "desc": "Completed work strengthens your records and readiness."
+          "title": "Pracuj, zarabiaj, rozwijaj się",
+          "desc": "Ukończona praca wzmacnia Twoje zapisy i gotowość."
         }
       ]
     },
@@ -4727,28 +4727,28 @@
       "headline": "Zbudowane wokół pracownika, nie pośrednika",
       "items": [
         {
-          "title": "Readiness from real work",
-          "desc": "Your readiness reflects completed work and records, shown in context — not promises."
+          "title": "Gotowość z realnej pracy",
+          "desc": "Twoja gotowość odzwierciedla ukończoną pracę i zapisy, pokazane w kontekście — nie obietnice."
         },
         {
-          "title": "Records-backed skills",
-          "desc": "Built from your work records and certificates."
+          "title": "Umiejętności poparte zapisami",
+          "desc": "Tworzone na podstawie Twoich zapisów pracy i certyfikatów."
         },
         {
-          "title": "Cross-border opportunities",
-          "desc": "Built for cross-border work across Europe."
+          "title": "Oferty transgraniczne",
+          "desc": "Stworzone z myślą o pracy transgranicznej w całej Europie."
         },
         {
-          "title": "Direct employer contact",
-          "desc": "No opaque agents in the middle."
+          "title": "Bezpośredni kontakt z pracodawcą",
+          "desc": "Bez nieprzejrzystych pośredników."
         },
         {
-          "title": "Explainable fit",
-          "desc": "See why a role may fit you."
+          "title": "Wyjaśnialne dopasowanie",
+          "desc": "Zobacz, dlaczego dana rola może do Ciebie pasować."
         },
         {
-          "title": "Growing track record",
-          "desc": "Every job builds a portable history."
+          "title": "Rosnąca historia pracy",
+          "desc": "Każde zlecenie buduje historię, którą zabierasz ze sobą."
         }
       ]
     },
@@ -4757,20 +4757,20 @@
       "headline": "Konkretne odpowiedzi",
       "items": [
         {
-          "q": "Where do skill signals come from?",
-          "a": "From your work-journal records on completed work and uploaded certificates — never a self-written claim alone."
+          "q": "Skąd pochodzą sygnały o umiejętnościach?",
+          "a": "Z wpisów w Dzienniku pracy o ukończonej pracy i z wgranych certyfikatów — nigdy z samej deklaracji napisanej przez Ciebie."
         },
         {
-          "q": "How much does it cost workers?",
-          "a": "Everything is free for individuals — your profile, matches, search and messaging never cost a worker anything. Paid plans exist only for organisations and are published on the pricing page."
+          "q": "Ile to kosztuje pracowników?",
+          "a": "Dla osób fizycznych wszystko jest bezpłatne — profil, dopasowania, wyszukiwanie i wiadomości nigdy nic nie kosztują pracownika. Płatne plany istnieją wyłącznie dla organizacji i są opublikowane na stronie cennika."
         },
         {
-          "q": "Who sees my profile?",
-          "a": "Only registered employers and agencies you're visible to — you control your availability and exposure."
+          "q": "Kto widzi mój profil?",
+          "a": "Tylko zarejestrowani pracodawcy i agencje, dla których jesteś widoczny — to Ty kontrolujesz swoją dostępność i widoczność."
         },
         {
-          "q": "Can I work for multiple companies?",
-          "a": "Yes. Your profile is yours; you can take roles from any company on the platform."
+          "q": "Czy mogę pracować dla kilku firm?",
+          "a": "Tak. Twój profil należy do Ciebie; możesz podejmować role w dowolnej firmie na platformie."
         }
       ]
     },
@@ -4792,10 +4792,10 @@
       },
       "subcopy": "Opublikuj, czego potrzebuje każdy projekt, i zobacz wyjaśnialny kierunek dopasowania od dostępnych pracowników i agencji — w godziny, nie tygodnie.",
       "bullets": [
-        "Project + location — scope each need precisely.",
-        "Headcount — how many of each role you need.",
-        "Required skills — compared with workers' skill records.",
-        "Fit direction — workers whose abilities may fit this need."
+        "Projekt + lokalizacja — precyzyjnie określ zakres każdego zapotrzebowania.",
+        "Liczba osób — ilu pracowników potrzebujesz w każdej roli.",
+        "Wymagane umiejętności — porównywane z zapisami umiejętności pracowników.",
+        "Kierunek dopasowania — pracownicy, których umiejętności mogą pasować do tego zapotrzebowania."
       ]
     },
     "journey": {
@@ -4803,20 +4803,20 @@
       "headline": "Od zapotrzebowania do zatrudnienia",
       "steps": [
         {
-          "title": "Create project + post demand",
-          "desc": "Define roles, headcount and skills."
+          "title": "Utwórz projekt i zgłoś zapotrzebowanie",
+          "desc": "Określ role, liczbę osób i umiejętności."
         },
         {
-          "title": "See who may fit",
-          "desc": "Browse workers and agencies whose records may fit your demand — you choose, nothing is ranked or scored automatically."
+          "title": "Zobacz, kto może pasować",
+          "desc": "Przeglądaj pracowników i agencje, których zapisy mogą pasować do Twojego zapotrzebowania — wybierasz Ty, nic nie jest automatycznie ustawiane w rankingu ani oceniane."
         },
         {
-          "title": "Reach out directly",
-          "desc": "Contact the people you want — no gatekeeper."
+          "title": "Skontaktuj się bezpośrednio",
+          "desc": "Kontaktuj się z osobami, które wybierzesz — bez pośrednika kontrolującego dostęp."
         },
         {
-          "title": "Hire faster",
-          "desc": "Close roles in days, with accountable decisions."
+          "title": "Zatrudniaj szybciej",
+          "desc": "Zamykaj rekrutacje w kilka dni, podejmując decyzje, za które można wziąć odpowiedzialność."
         }
       ]
     },
@@ -4825,28 +4825,28 @@
       "headline": "Podaż, na której możesz działać",
       "items": [
         {
-          "title": "Explainable fit direction",
-          "desc": "Every fit signal shows the reasons behind it."
+          "title": "Wyjaśnialny kierunek dopasowania",
+          "desc": "Każdy sygnał dopasowania pokazuje powody, które za nim stoją."
         },
         {
-          "title": "Cross-border worker pool",
-          "desc": "Supply from every market we operate in, in one place."
+          "title": "Transgraniczna pula pracowników",
+          "desc": "Podaż ze wszystkich rynków, na których działamy, w jednym miejscu."
         },
         {
-          "title": "No opaque middlemen",
-          "desc": "You see and own the relationship."
+          "title": "Bez nieprzejrzystych pośredników",
+          "desc": "Widzisz relację i to Ty jesteś jej właścicielem."
         },
         {
-          "title": "Skill records + fit signals",
-          "desc": "Hire on records, not on claims."
+          "title": "Zapisy umiejętności i sygnały dopasowania",
+          "desc": "Zatrudniaj na podstawie zapisów, a nie deklaracji."
         },
         {
-          "title": "Supply signals",
-          "desc": "See workers' declared availability as profiles are updated."
+          "title": "Sygnały podaży",
+          "desc": "Widzisz zadeklarowaną dostępność pracowników w miarę aktualizowania profili."
         },
         {
-          "title": "Direct contact",
-          "desc": "You own the worker relationship."
+          "title": "Bezpośredni kontakt",
+          "desc": "Relacja z pracownikiem należy do Ciebie."
         }
       ]
     },
@@ -4855,20 +4855,20 @@
       "headline": "Konkretne odpowiedzi",
       "items": [
         {
-          "q": "How are fit signals shown?",
-          "a": "Always against a specific need: coverage and fit from workers' skill records, reliability and on-site records, with the reasons. Never one universal rating comparable across people."
+          "q": "Jak pokazywane są sygnały dopasowania?",
+          "a": "Zawsze względem konkretnego zapotrzebowania: pokrycie i dopasowanie na podstawie zapisów umiejętności pracowników, rzetelności oraz zapisów z budowy, wraz z powodami. Nigdy jedna uniwersalna ocena porównywalna między osobami."
         },
         {
-          "q": "How much does it cost?",
-          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
+          "q": "Ile to kosztuje?",
+          "a": "Ceny są opublikowane na stronie cennika: jedno aktywne stanowisko na organizację jest bezpłatne; więcej stanowisk wymaga planu dla organizacji, aktywowanego na Twoim koncie. Zgłoszenie zapotrzebowania na pracowników jest bezpłatne."
         },
         {
-          "q": "Can we filter by location?",
-          "a": "Yes — by country and region, matched to worker location and willingness to relocate."
+          "q": "Czy możemy filtrować według lokalizacji?",
+          "a": "Tak — według kraju i regionu, z uwzględnieniem lokalizacji pracownika i gotowości do przeprowadzki."
         },
         {
-          "q": "How is worker experience shown?",
-          "a": "Through workers' skill records, structured work history and contextual fit signals — not self-reported CVs."
+          "q": "Jak pokazywane jest doświadczenie pracownika?",
+          "a": "Poprzez zapisy umiejętności pracowników, ustrukturyzowaną historię pracy i kontekstowe sygnały dopasowania — a nie samodzielnie deklarowane CV."
         }
       ]
     },
@@ -4890,10 +4890,10 @@
       },
       "subcopy": "Zarządzaj swoimi pracownikami, łącz ich z zapotrzebowaniami klientów i pośrednicz w przedstawieniach — bez utraty widoczności czy kontroli.",
       "bullets": [
-        "Pool size — every managed worker at a glance.",
-        "Trade breakdown — capacity by skill, as declared in profiles.",
-        "Assignment status — Active, Pending, Available.",
-        "Multi-client — place the right people across clients."
+        "Wielkość puli — wszyscy zarządzani pracownicy na pierwszy rzut oka.",
+        "Podział na zawody — zasoby według umiejętności, zgodnie z deklaracjami w profilach.",
+        "Status przydziału — Aktywny, Oczekujący, Dostępny.",
+        "Wielu klientów — kieruj właściwe osoby do różnych klientów."
       ]
     },
     "journey": {
@@ -4901,20 +4901,20 @@
       "headline": "Prowadź swoją pulę jak dział rekrutacji",
       "steps": [
         {
-          "title": "Onboard your workers",
-          "desc": "Bring your managed pool into one workspace."
+          "title": "Wdróż swoich pracowników",
+          "desc": "Zgromadź zarządzaną przez Ciebie pulę w jednej przestrzeni roboczej."
         },
         {
-          "title": "Connect to client demand",
-          "desc": "Direct your people toward open client roles."
+          "title": "Połącz się z zapotrzebowaniem klientów",
+          "desc": "Kieruj swoich ludzi do otwartych ról u klientów."
         },
         {
-          "title": "Manage assignments",
-          "desc": "Track active, pending and available."
+          "title": "Zarządzaj przydziałami",
+          "desc": "Śledź osoby aktywne, oczekujące i dostępne."
         },
         {
-          "title": "Grow your pool",
-          "desc": "Add capacity where demand is rising."
+          "title": "Powiększaj swoją pulę",
+          "desc": "Dodawaj moce tam, gdzie rośnie popyt."
         }
       ]
     },
@@ -4923,28 +4923,28 @@
       "headline": "Przewaga, nie utrata kontroli",
       "items": [
         {
-          "title": "Manage your pool",
-          "desc": "Workers, availability and status in one place."
+          "title": "Zarządzaj swoją pulą",
+          "desc": "Pracownicy, dostępność i status w jednym miejscu."
         },
         {
-          "title": "Post on behalf of clients",
-          "desc": "Broker demand without losing the relationship."
+          "title": "Publikuj w imieniu klientów",
+          "desc": "Pośrednicz w zapotrzebowaniu, nie tracąc relacji."
         },
         {
-          "title": "Fit direction",
-          "desc": "Place the right people faster."
+          "title": "Kierunek dopasowania",
+          "desc": "Szybciej kieruj właściwe osoby do pracy."
         },
         {
-          "title": "Visibility controls",
-          "desc": "Public, agencies-only or direct — your call."
+          "title": "Kontrola widoczności",
+          "desc": "Publicznie, tylko dla agencji lub bezpośrednio — decydujesz Ty."
         },
         {
-          "title": "Cross-border reach",
-          "desc": "Clients and workers across every market we operate in."
+          "title": "Zasięg transgraniczny",
+          "desc": "Klienci i pracownicy na wszystkich rynkach, na których działamy."
         },
         {
-          "title": "Grow your desk",
-          "desc": "Capacity insights as demand shifts."
+          "title": "Rozwijaj swój dział",
+          "desc": "Wgląd w dostępne moce w miarę zmian popytu."
         }
       ]
     },
@@ -4953,20 +4953,20 @@
       "headline": "Konkretne odpowiedzi",
       "items": [
         {
-          "q": "Do we keep our client relationships?",
-          "a": "Yes. You broker and stay in control — the platform never disintermediates you."
+          "q": "Czy zachowujemy relacje z naszymi klientami?",
+          "a": "Tak. To Ty pośredniczysz i zachowujesz kontrolę — platforma nigdy Cię nie pomija."
         },
         {
-          "q": "How much does it cost agencies?",
-          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
+          "q": "Ile to kosztuje agencje?",
+          "a": "Agencja jest organizacją i korzysta z tych samych planów: jedno aktywne stanowisko jest bezpłatne, więcej wymaga planu dla organizacji ze strony cennika. Nie ma osobnej taryfy dla agencji."
         },
         {
-          "q": "Can we control worker visibility?",
-          "a": "Yes — public, agencies-only or direct, per worker and per demand."
+          "q": "Czy możemy kontrolować widoczność pracowników?",
+          "a": "Tak — publicznie, tylko dla agencji lub bezpośrednio, osobno dla każdego pracownika i każdego zapotrzebowania."
         },
         {
-          "q": "Can one worker serve multiple clients?",
-          "a": "Yes, with assignment status tracking so nothing is double-booked."
+          "q": "Czy jeden pracownik może obsługiwać kilku klientów?",
+          "a": "Tak, ze śledzeniem statusu przydziałów, aby nic nie zostało zarezerwowane podwójnie."
         }
       ]
     },
@@ -5128,20 +5128,20 @@
       "subcopy": "Zbuduj jeden profil, ustaw dostępność i pozwól, by realne zapotrzebowanie znalazło Cię ponad granicami — bez rekruterów pośrodku.",
       "benefits": [
         {
-          "title": "One profile, every market",
-          "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders."
+          "title": "Jeden profil, wszystkie rynki",
+          "body": "Utrzymuj jeden awatar z umiejętnościami popartymi zapisami i z dostępnością — widoczny dla zarejestrowanych pracodawców ponad granicami."
         },
         {
-          "title": "Real demand",
-          "body": "See open work needs relevant to your trade, skills and city — and express interest in one click."
+          "title": "Realny popyt",
+          "body": "Zobacz otwarte zapotrzebowania na pracowników pasujące do Twojego zawodu, umiejętności i miasta — i zgłoś zainteresowanie jednym kliknięciem."
         },
         {
-          "title": "Honest signals",
-          "body": "Transparent, contextual fit signals — no inflated claims, no universal rating, no pay-to-rank."
+          "title": "Uczciwe sygnały",
+          "body": "Przejrzyste, kontekstowe sygnały dopasowania — bez zawyżonych deklaracji, bez uniwersalnej oceny, bez płatnego miejsca w rankingu."
         },
         {
-          "title": "Grows while you work",
-          "body": "Record completed work and results as you go — your professional history becomes richer, and opportunity search keeps getting more precise, even when you are not actively looking."
+          "title": "Rośnie, gdy pracujesz",
+          "body": "Zapisuj ukończoną pracę i wyniki na bieżąco — Twoja historia zawodowa staje się bogatsza, a wyszukiwanie możliwości coraz precyzyjniejsze, nawet gdy aktywnie nie szukasz."
         }
       ],
       "screenshot": "Ścieżka awatara pracownika",
@@ -5154,16 +5154,16 @@
       "subcopy": "Zgłoś, czego potrzebujesz w każdym projekcie, i zobacz, którzy dostępni pracownicy i agencje do tego pasują.",
       "benefits": [
         {
-          "title": "Post demand per project",
-          "body": "Define roles, headcount and skills per project — not vague job ads."
+          "title": "Zgłaszaj zapotrzebowanie dla każdego projektu",
+          "body": "Określ role, liczbę osób i umiejętności dla każdego projektu — zamiast ogólnikowych ogłoszeń o pracę."
         },
         {
-          "title": "Fit to the specific job",
-          "body": "You see which available workers and agencies fit each concrete need — honestly, per need."
+          "title": "Dopasowanie do konkretnego zlecenia",
+          "body": "Widzisz, którzy dostępni pracownicy i które agencje pasują do każdego konkretnego zapotrzebowania — uczciwie, osobno dla każdego zapotrzebowania."
         },
         {
-          "title": "Agencies, when you need them",
-          "body": "Tap registered agency pools for surge capacity without losing visibility."
+          "title": "Agencje, gdy ich potrzebujesz",
+          "body": "Sięgaj po pule zarejestrowanych agencji, gdy potrzebujesz szybko zwiększyć moce, nie tracąc przy tym wglądu."
         }
       ],
       "screenshot": "Ścieżka zapotrzebowania firmy",
@@ -5176,16 +5176,16 @@
       "subcopy": "Zarządzaj swoimi pracownikami, zgłaszaj zapotrzebowanie w imieniu klientów i kojarz strony — wszystko w jednym miejscu.",
       "benefits": [
         {
-          "title": "Manage your pool",
-          "body": "Keep your managed workers, availability and statuses organised in one workspace."
+          "title": "Zarządzaj swoją pulą",
+          "body": "Utrzymuj zarządzanych pracowników, ich dostępność i statusy uporządkowane w jednej przestrzeni roboczej."
         },
         {
-          "title": "Broker with leverage",
-          "body": "Share client needs and place the right people faster with explainable fit direction."
+          "title": "Pośrednicz z przewagą",
+          "body": "Udostępniaj zapotrzebowania klientów i szybciej kieruj właściwe osoby dzięki wyjaśnialnemu kierunkowi dopasowania."
         },
         {
-          "title": "Visibility controls",
-          "body": "Choose what is public, agencies-only, or direct — you control exposure."
+          "title": "Kontrola widoczności",
+          "body": "Wybierz, co jest publiczne, dostępne tylko dla agencji lub bezpośrednie — to Ty kontrolujesz widoczność."
         }
       ],
       "screenshot": "Ścieżka trybu agencji",
@@ -5199,35 +5199,35 @@
       "cta": "Utwórz moje CV — za darmo",
       "benefits": [
         {
-          "title": "Import or start fresh",
-          "body": "Upload an existing CV (PDF, DOCX or text) or start from a blank page. Extracted facts stay suggestions until you accept them."
+          "title": "Zaimportuj lub zacznij od zera",
+          "body": "Wgraj istniejące CV (PDF, DOCX lub tekst) albo zacznij od pustej strony. Wyodrębnione fakty pozostają sugestiami, dopóki ich nie zaakceptujesz."
         },
         {
-          "title": "Honest structure",
-          "body": "Your experience, education, languages and skills are structured for your review — nothing is invented and nothing is saved without your approval."
+          "title": "Uczciwa struktura",
+          "body": "Twoje doświadczenie, wykształcenie, języki i umiejętności są porządkowane do Twojego przeglądu — nic nie jest zmyślane i nic nie jest zapisywane bez Twojej zgody."
         },
         {
-          "title": "Clean templates, real PDF",
-          "body": "Choose a professional template and export to A4 PDF through your browser — no watermark, no paywall."
+          "title": "Czytelne szablony, prawdziwy PDF",
+          "body": "Wybierz profesjonalny szablon i wyeksportuj do PDF w formacie A4 przez przeglądarkę — bez znaku wodnego, bez opłat."
         },
         {
-          "title": "More than a document",
-          "body": "With your explicit consent, the same facts can build your worker profile, connect your skills to the common European skills catalogue and show you matching public job ads. As you record completed work over time, your professional history keeps growing — and opportunity search keeps improving."
+          "title": "Więcej niż dokument",
+          "body": "Za Twoją wyraźną zgodą te same fakty mogą zbudować Twój profil pracownika, powiązać Twoje umiejętności ze wspólnym europejskim katalogiem umiejętności i pokazać Ci pasujące publiczne ogłoszenia o pracę. W miarę jak z czasem zapisujesz ukończoną pracę, Twoja historia zawodowa wciąż rośnie — a wyszukiwanie możliwości staje się coraz lepsze."
         }
       ],
       "stepsTitle": "Jak to działa",
       "steps": [
         {
-          "title": "Sign up free",
-          "body": "An account keeps your CV editable and your data under your control — you can delete it at any time."
+          "title": "Załóż bezpłatne konto",
+          "body": "Konto sprawia, że Twoje CV pozostaje edytowalne, a dane pod Twoją kontrolą — możesz je usunąć w każdej chwili."
         },
         {
-          "title": "Add your experience",
-          "body": "Import your old CV or write it in — then review each fact and decide what to keep before it is used."
+          "title": "Dodaj swoje doświadczenie",
+          "body": "Zaimportuj stare CV lub wpisz dane ręcznie — a następnie sprawdź każdy fakt i zdecyduj, co zachować, zanim zostanie użyty."
         },
         {
-          "title": "Download and decide",
-          "body": "Export your CV as PDF. Becoming discoverable to employers stays a separate, optional choice."
+          "title": "Pobierz i zdecyduj",
+          "body": "Wyeksportuj CV do PDF. Udostępnienie się pracodawcom pozostaje osobnym, opcjonalnym wyborem."
         }
       ],
       "privacyNote": "Twoje CV domyślnie pozostaje prywatne. Nic nie jest udostępniane pracodawcom, dopóki wyraźnie nie włączysz widoczności — a możesz ją wyłączyć w każdej chwili."
@@ -5249,60 +5249,60 @@
         "name": "Bezpłatny",
         "tagline": "Na start",
         "features": [
-          "1 active position",
-          "Matching shortlist and candidate contact",
-          "Bookings, projects, instructions",
-          "Work confirmation by the employer"
+          "1 aktywne stanowisko",
+          "Lista dopasowanych kandydatów i kontakt z kandydatem",
+          "Rezerwacje, projekty, instrukcje",
+          "Potwierdzenie pracy przez pracodawcę"
         ]
       },
       "business": {
         "name": "Organizacja",
         "tagline": "Dla organizacji, które aktywnie rekrutują i budują zespoły",
         "features": [
-          "Up to 10 active positions",
-          "Everything in Free, at operating scale",
-          "One plan for every organization capability",
-          "Project operations, readiness, reports and CSV"
+          "Do 10 aktywnych stanowisk",
+          "Wszystko z planu Free, w skali operacyjnej",
+          "Jeden plan dla wszystkich możliwości organizacji",
+          "Operacje projektowe, gotowość, raporty i CSV"
         ]
       },
       "agency": {
         "name": "Agency",
         "tagline": "Dla partnerów pracy tymczasowej.",
         "features": [
-          "Unlimited managed workers",
-          "Broker tools",
-          "Worker search",
-          "Priority support"
+          "Nieograniczona liczba zarządzanych pracowników",
+          "Narzędzia pośrednika",
+          "Wyszukiwanie pracowników",
+          "Priorytetowe wsparcie"
         ]
       },
       "enterprise": {
         "name": "Enterprise",
         "tagline": "Dla skali i kontroli.",
         "features": [
-          "Unlimited projects",
+          "Nieograniczona liczba projektów",
           "SSO",
           "SLA",
-          "Dedicated support"
+          "Dedykowane wsparcie"
         ]
       }
     },
     "faqTitle": "FAQ dotyczące cennika",
     "faq": [
       {
-        "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
+        "q": "Dlaczego tylko jeden płatny plan?",
+        "a": "Każda organizacja — pracodawca, dostawca pracowników, wykonawca czy instytucja szkoleniowa — otrzymuje ten sam produkt. Zmienia się tylko skala: 1 aktywne stanowisko bezpłatnie, do 10 za 99 €/miesiąc, a powyżej tego — plan indywidualny."
       },
       {
-        "q": "Will the Free tier stay free?",
-        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
+        "q": "Czy plan bezpłatny pozostanie bezpłatny?",
+        "a": "Tak. Dla osób fizycznych pozostaje bezpłatny, a organizacja może bez opłat prowadzić jedno aktywne stanowisko."
       },
       {
-        "q": "How is billing handled?",
-        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
+        "q": "Jak przebiegają rozliczenia?",
+        "a": "Płatność kartą przez Stripe, z podatkiem VAT naliczanym przez Stripe Tax; faktury, rezygnacja i zmiany znajdują się na koncie Twojej organizacji."
       },
       {
-        "q": "What happens above 10 active positions?",
-        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
+        "q": "Co się dzieje powyżej 10 aktywnych stanowisk?",
+        "a": "Nic nie jest automatycznie naliczane ani podwyższane. Prosimy Cię o kontakt i ustalamy plan indywidualny."
       }
     ],
     "priceState": {
@@ -5367,14 +5367,14 @@
       "title": "Zasady rynku",
       "intro": "Te zasady sprawiają, że rynek jest bezpieczny i uczciwy. Obowiązują wszystkich użytkowników i wszystkie oferty.",
       "rules": [
-        "The system never confirms the right to work or legal eligibility without the required documents.",
-        "A verified status appears only after a real human check — never automatically.",
-        "Contacts are not shown without the user's permission.",
-        "Public offers appear only after moderation; untrusted or suspicious offers are hidden.",
-        "Trading regulated or illegal goods and services is prohibited.",
-        "A map point appears only with verified coordinates — no fake markers.",
-        "Payments are not active yet; no payments run through the platform at this stage.",
-        "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
+        "System nigdy nie potwierdza prawa do pracy ani legalnego uprawnienia bez wymaganych dokumentów.",
+        "Status zweryfikowany pojawia się dopiero po realnej kontroli przez człowieka — nigdy automatycznie.",
+        "Dane kontaktowe nie są pokazywane bez zgody użytkownika.",
+        "Publiczne oferty pojawiają się dopiero po moderacji; oferty niewiarygodne lub podejrzane są ukrywane.",
+        "Handel towarami i usługami regulowanymi lub nielegalnymi jest zabroniony.",
+        "Punkt na mapie pojawia się wyłącznie przy zweryfikowanych współrzędnych — żadnych fałszywych znaczników.",
+        "Płatności nie są jeszcze aktywne; na tym etapie żadne płatności nie przechodzą przez platformę.",
+        "Niewłaściwe zachowanie lub podejrzaną aktywność można zgłosić — moderatorzy to sprawdzają."
       ],
       "reviewNote": "Te zasady opisują, jak platforma faktycznie działa dzisiaj. Ostateczne brzmienie prawne wiążących dokumentów jest jeszcze przygotowywane i zostanie sprawdzone przez właściciela oraz prawnika przed rozpoczęciem jakichkolwiek usług płatnych."
     },
@@ -5382,26 +5382,26 @@
       "title": "Regulamin",
       "sections": [
         {
-          "heading": "Who you contract with",
+          "heading": "Z kim zawierasz umowę",
           "items": [
-            "All platform services are provided commercially and sold by UAB “Nonstop Group”, company code 302676973, VAT LT100010790613, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
-            "Your contract for any platform service is concluded with UAB “Nonstop Group”. Invoices are issued by and payments are received by UAB “Nonstop Group”.",
-            "Labour Market AI Sp. z o.o. (Warsaw, Poland; KRS 0001218752) owns the LabourMarket.ai software, brand and related intellectual property and licenses it to UAB “Nonstop Group”. It is not a party to your contract."
+            "Wszystkie usługi platformy są świadczone komercyjnie i sprzedawane przez UAB „Nonstop Group”, kod firmy 302676973, VAT LT100010790613, siedziba Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litwa.",
+            "Twoja umowa na jakąkolwiek usługę platformy jest zawierana z UAB „Nonstop Group”. Faktury wystawia i płatności otrzymuje UAB „Nonstop Group”.",
+            "Labour Market AI Sp. z o.o. (Warszawa, Polska; KRS 0001218752) jest właścicielem oprogramowania LabourMarket.ai, marki i powiązanej własności intelektualnej oraz licencjonuje je na rzecz UAB „Nonstop Group”. Nie jest stroną Twojej umowy."
           ]
         },
         {
-          "heading": "Governing law and disputes",
+          "heading": "Prawo właściwe i spory",
           "items": [
-            "These terms and every customer contract are governed by the law of the Republic of Lithuania, and disputes are resolved by the competent Lithuanian courts, except where mandatory consumer, employment, data-protection or other applicable law gives you rights or a forum that cannot be taken away.",
-            "If you are a consumer, you always keep the mandatory rights of the country where you live."
+            "Niniejsze warunki oraz każda umowa z klientem podlegają prawu Republiki Litewskiej, a spory rozstrzygają właściwe sądy litewskie, z wyjątkiem przypadków, w których bezwzględnie obowiązujące przepisy konsumenckie, przepisy prawa pracy, przepisy o ochronie danych lub inne mające zastosowanie prawo przyznają Ci prawa lub forum, których nie można Ci odebrać.",
+            "Jeśli jesteś konsumentem, zawsze zachowujesz bezwzględnie obowiązujące prawa kraju, w którym mieszkasz."
           ]
         },
         {
-          "heading": "What the platform is and is not",
+          "heading": "Czym platforma jest, a czym nie jest",
           "items": [
-            "The platform supports finding, presenting and coordinating labour-market opportunities with a human operator involved.",
-            "Using the platform does not by itself create an employment relationship and does not promise work or workers.",
-            "Worker profiles, CVs and contact details are shared only under the platform's consent rules — see the Privacy Policy."
+            "Platforma wspiera znajdowanie, prezentowanie i koordynowanie możliwości na rynku pracy z udziałem operatora będącego człowiekiem.",
+            "Korzystanie z platformy samo w sobie nie tworzy stosunku pracy i nie obiecuje pracy ani pracowników.",
+            "Profile pracowników, CV i dane kontaktowe są udostępniane wyłącznie zgodnie z zasadami zgód obowiązującymi na platformie — zobacz Politykę prywatności."
           ]
         }
       ]
@@ -5411,75 +5411,75 @@
       "intro": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj, przed uruchomieniem płatności.",
       "sections": [
         {
-          "heading": "Who is responsible for your data",
+          "heading": "Kto odpowiada za Twoje dane",
           "items": [
-            "The data controller of the LabourMarket.ai platform is UAB “Nonstop Group”, company code 302676973, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
-            "Privacy contact: info@labourmarket.ai. A data protection officer is not appointed.",
-            "Labour Market AI Sp. z o.o. (Warsaw, Poland) owns the platform software and brand and licenses them to UAB “Nonstop Group”. IP ownership gives it no access to your personal data: it has no routine access to the production database, profiles, CVs, contacts or documents.",
-            "You have the right to lodge a complaint with your supervisory authority; for the controller's establishment this is the Lithuanian State Data Protection Inspectorate (VDAI)."
+            "Administratorem danych platformy LabourMarket.ai jest UAB „Nonstop Group”, kod firmy 302676973, siedziba Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litwa.",
+            "Kontakt w sprawach prywatności: info@labourmarket.ai. Inspektor ochrony danych nie został wyznaczony.",
+            "Labour Market AI Sp. z o.o. (Warszawa, Polska) jest właścicielem oprogramowania i marki platformy oraz licencjonuje je na rzecz UAB „Nonstop Group”. Własność intelektualna nie daje jej dostępu do Twoich danych osobowych: nie ma rutynowego dostępu do produkcyjnej bazy danych, profili, CV, kontaktów ani dokumentów.",
+            "Masz prawo wnieść skargę do swojego organu nadzorczego; dla miejsca prowadzenia działalności administratora jest to Państwowa Inspekcja Ochrony Danych (Litwa) (VDAI)."
           ]
         },
         {
-          "heading": "What data the platform uses",
+          "heading": "Jakich danych używa platforma",
           "items": [
-            "Account data: your email address and the sign-in linked to it.",
-            "Content you enter yourself: profile and CV details, skills, work journal entries, photos you attach to entries, and the documents you list in your document inventory.",
-            "Company information entered by company users: company details, needs, projects and bookings.",
-            "Messages you send and receive on the platform.",
-            "Consent records: when you give or revoke a consent, the action and its time are stored.",
-            "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy)."
+            "Dane konta: Twój adres e-mail i powiązany z nim sposób logowania.",
+            "Treści, które wprowadzasz samodzielnie: dane profilu i CV, umiejętności, wpisy w dzienniku pracy, zdjęcia dołączane do wpisów oraz dokumenty wymienione w Twoim wykazie dokumentów.",
+            "Informacje o firmie wprowadzane przez użytkowników firmowych: dane firmy, zapotrzebowania na pracowników, projekty i rezerwacje.",
+            "Wiadomości, które wysyłasz i otrzymujesz na platformie.",
+            "Zapisy zgód: gdy udzielasz lub wycofujesz zgodę, zapisywane są czynność i jej czas.",
+            "Dane techniczne potrzebne do działania usługi, takie jak pliki cookie logowania (zobacz Politykę plików cookie)."
           ]
         },
         {
-          "heading": "What the data is used for",
+          "heading": "Do czego wykorzystywane są dane",
           "items": [
-            "To run the features you use: profile and CV, work journal, skill suggestions you confirm, market map, projects, teams, bookings and messaging.",
-            "To show your information only to people an explicit access rule allows — see the page “Your data and who can see it”.",
-            "To keep an honest history of consents and key access changes.",
-            "The platform does not use third-party advertising or analytics trackers and does not build behavioural profiles."
+            "Aby obsługiwać funkcje, z których korzystasz: profil i CV, dziennik pracy, sugestie umiejętności, które potwierdzasz, mapa rynku, projekty, zespoły, rezerwacje i wiadomości.",
+            "Aby pokazywać Twoje informacje wyłącznie osobom, na które pozwala wyraźna reguła dostępu — zobacz stronę „Twoje dane i kto może je zobaczyć”.",
+            "Aby prowadzić uczciwą historię zgód i kluczowych zmian dostępu.",
+            "Platforma nie korzysta z zewnętrznych trackerów reklamowych ani analitycznych i nie buduje profili behawioralnych."
           ]
         },
         {
-          "heading": "Who can see your data",
+          "heading": "Kto może zobaczyć Twoje dane",
           "items": [
-            "Access is closed by default: data you enter belongs to your account, and other users see nothing unless a specific rule allows it.",
-            "Your professional profile is NOT visible to companies or agencies by default. It can appear in company searches only after you yourself switch on employer visibility in your privacy settings — registration, accepting the terms or filling in your profile never makes it visible.",
-            "Even with visibility on, companies see only a limited professional summary (profession, experience, skills, approximate region, availability, languages, pay expectation if you entered it). Your surname, phone, email, exact address, CV file and documents are never part of it.",
-            "Your CV, contact details or documents reach a specific company only after your separate confirmation for that company and that need. Every completed transfer is recorded in a disclosure log you can see.",
-            "Worker documents are not shown to employers or agencies without the worker's consent, and employers cannot read a worker's saved locations.",
-            "Messages are visible only to the participants of the conversation."
+            "Dostęp jest domyślnie zamknięty: dane, które wprowadzasz, należą do Twojego konta, a inni użytkownicy nie widzą niczego, chyba że pozwala na to konkretna reguła.",
+            "Twój profil zawodowy NIE jest domyślnie widoczny dla firm ani agencji. Może pojawić się w wyszukiwaniach firm dopiero po tym, jak sam włączysz widoczność dla pracodawców w swoich ustawieniach prywatności — rejestracja, akceptacja warunków ani wypełnienie profilu nigdy nie czynią go widocznym.",
+            "Nawet przy włączonej widoczności firmy widzą jedynie ograniczone podsumowanie zawodowe (zawód, doświadczenie, umiejętności, przybliżony region, dostępność, języki, oczekiwania płacowe, jeśli je podałeś). Twoje nazwisko, telefon, e-mail, dokładny adres, plik CV i dokumenty nigdy nie są jego częścią.",
+            "Twoje CV, dane kontaktowe lub dokumenty trafiają do konkretnej firmy dopiero po Twoim odrębnym potwierdzeniu dla tej firmy i tego zapotrzebowania. Każde zrealizowane przekazanie jest zapisywane w rejestrze udostępnień, który możesz zobaczyć.",
+            "Dokumenty pracownika nie są pokazywane pracodawcom ani agencjom bez zgody pracownika, a pracodawcy nie mogą odczytywać zapisanych lokalizacji pracownika.",
+            "Wiadomości są widoczne wyłącznie dla uczestników rozmowy."
           ]
         },
         {
-          "heading": "Consent",
+          "heading": "Zgoda",
           "items": [
-            "Consent purposes are separate: employer visibility of your professional profile and a data transfer to a specific company are two different choices — neither is bundled with the Terms, pre-ticked, or required to use your account, CV or work journal.",
-            "Every consent screen shows the exact versioned text, what becomes visible, what stays private, and both choices side by side (enable / not now). Declining changes nothing about your account.",
-            "You can withdraw any consent at any time in your privacy settings, in one step. After withdrawal your profile stops appearing in new company searches immediately; data a company already lawfully received while the permission was valid may still be held by that company — we say this honestly.",
-            "The consent history is permanent: every grant and every withdrawal is kept as a separate unchangeable record with its text version, language, time and purpose. Nobody — including administrators — can edit or delete it, and no administrator can give consent on your behalf."
+            "Cele zgód są rozdzielone: widoczność Twojego profilu zawodowego dla pracodawców oraz przekazanie danych konkretnej firmie to dwie różne decyzje — żadna z nich nie jest połączona z Warunkami, zaznaczona z góry ani wymagana do korzystania z Twojego konta, CV czy dziennika pracy.",
+            "Każdy ekran zgody pokazuje dokładny tekst z numerem wersji, to, co staje się widoczne, to, co pozostaje prywatne, oraz obie możliwości obok siebie (włącz / nie teraz). Odmowa niczego nie zmienia w Twoim koncie.",
+            "Możesz wycofać każdą zgodę w dowolnym momencie w swoich ustawieniach prywatności, w jednym kroku. Po wycofaniu Twój profil natychmiast przestaje pojawiać się w nowych wyszukiwaniach firm; dane, które firma już zgodnie z prawem otrzymała w czasie obowiązywania zezwolenia, mogą nadal pozostawać w jej posiadaniu — mówimy o tym uczciwie.",
+            "Historia zgód jest trwała: każde udzielenie i każde wycofanie jest przechowywane jako osobny, niezmienialny zapis z wersją tekstu, językiem, czasem i celem. Nikt — również administratorzy — nie może go edytować ani usunąć, a żaden administrator nie może udzielić zgody w Twoim imieniu."
           ]
         },
         {
-          "heading": "Your rights",
+          "heading": "Twoje prawa",
           "items": [
-            "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
-            "Honest current state: you can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. Deletion is still a request a person reviews — there is no instant deletion button; contact us or file the request, and a person will process it.",
-            "Where processing is based on consent, you can withdraw that consent at any time."
+            "Możesz poprosić o wgląd w dane, które Cię dotyczą, o ich poprawienie, o otrzymanie ich kopii, o ograniczenie ich wykorzystania lub o ich usunięcie.",
+            "Uczciwy stan obecny: kopię swoich danych w pliku JSON oraz dziennik pracy w pliku CSV możesz pobrać samodzielnie ze swojego konta. Usunięcie nadal jest wnioskiem rozpatrywanym przez człowieka — nie ma przycisku natychmiastowego usunięcia; skontaktuj się z nami lub złóż wniosek, a rozpatrzy go człowiek.",
+            "Gdy przetwarzanie opiera się na zgodzie, możesz tę zgodę wycofać w dowolnym momencie."
           ]
         },
         {
-          "heading": "How long data is kept",
+          "heading": "Jak długo przechowywane są dane",
           "items": [
-            "Data is kept while your account is active and the feature it belongs to still uses it.",
-            "Consent and audit records are kept as history: a revocation is recorded rather than the record being erased.",
-            "Exact retention periods are part of the final legal wording that is still being prepared."
+            "Dane są przechowywane, dopóki Twoje konto jest aktywne, a funkcja, do której należą, nadal z nich korzysta.",
+            "Zapisy zgód i audytu są przechowywane jako historia: wycofanie jest odnotowywane, zamiast usuwania zapisu.",
+            "Dokładne okresy przechowywania są częścią ostatecznego brzmienia prawnego, które jest wciąż przygotowywane."
           ]
         }
       ],
       "pendingTitle": "Wciąż czeka na ostateczne brzmienie prawne:",
       "pendingItems": [
-        "Exact retention periods for each data category.",
-        "The binding, lawyer-reviewed version of this policy and of the named legal bases."
+        "Dokładne okresy przechowywania dla każdej kategorii danych.",
+        "Wiążąca, sprawdzona przez prawnika wersja tej polityki oraz wskazanych podstaw prawnych."
       ]
     },
     "cookies": {
@@ -5487,16 +5487,16 @@
       "intro": "Ta strona wymienia, co platforma faktycznie przechowuje dzisiaj w Twojej przeglądarce. Celowo jest tego niewiele.",
       "items": [
         {
-          "name": "Sign-in cookies",
-          "purpose": "Set when you sign in, so you stay signed in as you move between pages. Essential — the service cannot keep you signed in without them."
+          "name": "Pliki cookie logowania",
+          "purpose": "Ustawiane przy logowaniu, dzięki czemu pozostajesz zalogowany, przechodząc między stronami. Niezbędne — bez nich usługa nie utrzyma Twojego zalogowania."
         },
         {
-          "name": "Language cookie (NEXT_LOCALE)",
-          "purpose": "May be set to remember your language choice, so pages open in your language."
+          "name": "Plik cookie języka (NEXT_LOCALE)",
+          "purpose": "Może zostać ustawiony, aby zapamiętać wybrany przez Ciebie język, tak by strony otwierały się w Twoim języku."
         },
         {
-          "name": "Administrator display preference (lm_hide_admin_ui)",
-          "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
+          "name": "Preferencja wyświetlania dla administratora (lm_hide_admin_ui)",
+          "purpose": "Używany wyłącznie na kontach administratorów. Zapamiętuje, czy elementy administracyjne są ukryte, i nie zmienia niczego w uprawnieniach."
         }
       ],
       "localStorageNote": "Twój wybór jasnego lub ciemnego motywu jest przechowywany w pamięci lokalnej przeglądarki, a nie w pliku cookie.",
@@ -5518,71 +5518,71 @@
       "intro": "Ta strona wyjaśnia prostymi słowami, jak chronione są dane wewnątrz Labour Market AI. Opisuje wyłącznie to, co jest dziś faktycznie wbudowane w platformę.",
       "sections": [
         {
-          "heading": "Closed by default",
+          "heading": "Domyślnie zamknięte",
           "items": [
-            "User data tables are protected by access rules inside the database itself. If no rule explicitly grants access, the data is not visible — even to other signed-in users.",
-            "These rules work at the database layer, not only in the interface, and are covered by automated tests."
+            "Tabele z danymi użytkowników są chronione regułami dostępu wewnątrz samej bazy danych. Jeśli żadna reguła nie przyznaje wyraźnie dostępu, dane nie są widoczne — nawet dla innych zalogowanych użytkowników.",
+            "Reguły te działają w warstwie bazy danych, a nie tylko w interfejsie, i są objęte automatycznymi testami."
           ]
         },
         {
-          "heading": "History instead of silent changes",
+          "heading": "Historia zamiast cichych zmian",
           "items": [
-            "Access grants are records, not switches: when access is withdrawn, the record is marked as revoked instead of being deleted, so history stays traceable.",
-            "Consent history is kept the same way."
+            "Przyznania dostępu są zapisami, a nie przełącznikami: gdy dostęp zostaje cofnięty, zapis jest oznaczany jako wycofany, zamiast zostać usunięty, dzięki czemu historia pozostaje możliwa do prześledzenia.",
+            "Historia zgód jest przechowywana w ten sam sposób."
           ]
         },
         {
-          "heading": "No trackers, no profiling",
+          "heading": "Bez narzędzi śledzących, bez profilowania",
           "items": [
-            "The platform contains no third-party advertising or analytics trackers, no session-recording tools and no behavioural scoring."
+            "Platforma nie zawiera zewnętrznych trackerów reklamowych ani analitycznych, narzędzi nagrywających sesje ani oceniania behawioralnego."
           ]
         },
         {
-          "heading": "Statistics that protect individuals",
+          "heading": "Statystyki, które chronią osoby",
           "items": [
-            "Market statistics are aggregated. Averages are not shown for samples so small that they could point to a single person, and small samples are flagged.",
-            "Research-type data sets are structurally anonymous: they contain no names, email addresses or personal identifiers."
+            "Statystyki rynkowe są zagregowane. Średnie nie są pokazywane dla prób tak małych, że mogłyby wskazać pojedynczą osobę, a małe próby są oznaczane.",
+            "Zbiory danych o charakterze badawczym są strukturalnie anonimowe: nie zawierają imion i nazwisk, adresów e-mail ani identyfikatorów osobowych."
           ]
         },
         {
-          "heading": "Files and photos",
+          "heading": "Pliki i zdjęcia",
           "items": [
-            "Photos and files are kept in private storage and opened through short-lived links, not public addresses."
+            "Zdjęcia i pliki są przechowywane w prywatnym magazynie i otwierane przez krótko ważne linki, a nie pod publicznymi adresami."
           ]
         },
         {
-          "heading": "Administrator access",
+          "heading": "Dostęp administratora",
           "items": [
-            "Administrator screens are limited to a small set of platform administrators and fail closed: without the administrator role they are not reachable."
+            "Ekrany administracyjne są ograniczone do niewielkiej grupy administratorów platformy i domyślnie blokują dostęp: bez roli administratora są nieosiągalne."
           ]
         },
         {
-          "heading": "Export and deletion",
+          "heading": "Eksport i usuwanie",
           "items": [
-            "You can download your own data as a JSON file and your work journal as a CSV file from your account. Deletion is handled as a reviewed request: nothing is deleted instantly — contact us and a person will process it."
+            "Swoje dane możesz pobrać ze swojego konta w pliku JSON, a dziennik pracy w pliku CSV. Usunięcie jest obsługiwane jako rozpatrywany wniosek: nic nie jest usuwane natychmiast — skontaktuj się z nami, a rozpatrzy je człowiek."
           ]
         },
         {
-          "heading": "Infrastructure providers (subprocessors)",
+          "heading": "Dostawcy infrastruktury (podprocesorzy)",
           "items": [
-            "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
-            "Vercel — application hosting and content delivery.",
-            "GitHub — source code hosting. No user data is stored there.",
-            "No email provider, no AI provider, no translation provider and no payment provider is currently active. If one is activated, this list is updated first."
+            "Supabase — baza danych, logowanie użytkowników i przechowywanie plików. Dane są hostowane w Unii Europejskiej (region eu-west-1).",
+            "Vercel — hosting aplikacji i dostarczanie treści.",
+            "GitHub — hosting kodu źródłowego. Nie są tam przechowywane żadne dane użytkowników.",
+            "Żaden dostawca poczty e-mail, dostawca AI, dostawca tłumaczeń ani dostawca płatności nie jest obecnie aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
           ]
         },
         {
-          "heading": "Honest limits",
+          "heading": "Uczciwe ograniczenia",
           "items": [
-            "No system can promise absolute security. If you notice a problem, contact us — a person will review it."
+            "Żaden system nie może obiecać absolutnego bezpieczeństwa. Jeśli zauważysz problem, skontaktuj się z nami — człowiek to sprawdzi."
           ]
         }
       ],
       "pendingTitle": "Wciąż czeka na ostateczne brzmienie prawne:",
       "pendingItems": [
-        "The formal description of technical and organisational measures.",
-        "Signed data-processing agreements with the infrastructure providers listed above.",
-        "Final retention periods."
+        "Formalny opis środków technicznych i organizacyjnych.",
+        "Podpisane umowy powierzenia przetwarzania danych z wymienionymi wyżej dostawcami infrastruktury.",
+        "Ostateczne okresy przechowywania."
       ]
     },
     "dataAccess": {
@@ -5590,42 +5590,42 @@
       "intro": "Podsumowanie prostym językiem reguł dostępu, które platforma faktycznie dziś egzekwuje. Nie twierdzi nic szerszego, niż robią te reguły.",
       "sections": [
         {
-          "heading": "The starting point",
+          "heading": "Punkt wyjścia",
           "items": [
-            "Your rows are yours: data you enter belongs to your account. Other users see nothing unless a specific access rule allows it."
+            "Twoje wiersze należą do Ciebie: dane, które wprowadzasz, należą do Twojego konta. Inni użytkownicy nie widzą niczego, chyba że pozwala na to konkretna reguła dostępu."
           ]
         },
         {
-          "heading": "What companies can see about workers",
+          "heading": "Co firmy widzą o pracownikach",
           "items": [
-            "In scouting views, worker information appears in an anonymised form, and contact details are never shown without the worker's permission.",
-            "Employers cannot read a worker's saved locations.",
-            "Worker documents are not shown to employers or agencies without the worker's consent — at most, counts that the worker agreed to share."
+            "W widokach poszukiwania pracowników informacje o pracowniku pojawiają się w formie zanonimizowanej, a dane kontaktowe nigdy nie są pokazywane bez zgody pracownika.",
+            "Pracodawcy nie mogą odczytywać zapisanych lokalizacji pracownika.",
+            "Dokumenty pracownika nie są pokazywane pracodawcom ani agencjom bez zgody pracownika — co najwyżej liczby, na których udostępnienie pracownik wyraził zgodę."
           ]
         },
         {
-          "heading": "What workers can see about companies",
+          "heading": "Co pracownicy widzą o firmach",
           "items": [
-            "Workers see what a company chooses to publish: public needs and offers appear only after moderation."
+            "Pracownicy widzą to, co firma zdecyduje się opublikować: publiczne zapotrzebowania i oferty pojawiają się dopiero po moderacji."
           ]
         },
         {
-          "heading": "Messages",
+          "heading": "Wiadomości",
           "items": [
-            "A conversation is visible only to its participants. Colleagues from the same company who are not participants see nothing — not even that the conversation exists.",
-            "If an extra person is granted access (for example the object owner), that access lasts only while the grant is active. When it is revoked, access ends, and the history stays recorded."
+            "Rozmowa jest widoczna wyłącznie dla jej uczestników. Koledzy z tej samej firmy, którzy nie są uczestnikami, nie widzą niczego — nawet tego, że rozmowa istnieje.",
+            "Jeśli dodatkowa osoba otrzyma dostęp (na przykład właściciel obiektu), dostęp ten trwa tylko tak długo, jak długo przyznanie jest aktywne. Gdy zostaje ono cofnięte, dostęp się kończy, a historia pozostaje zapisana."
           ]
         },
         {
-          "heading": "Administrators",
+          "heading": "Administratorzy",
           "items": [
-            "A small set of platform administrators can see the operational queues needed to run the platform, such as support and review queues. Administrator pages are restricted and fail closed."
+            "Niewielka grupa administratorów platformy może widzieć kolejki operacyjne potrzebne do prowadzenia platformy, takie jak kolejki wsparcia i przeglądu. Strony administracyjne są ograniczone i domyślnie blokują dostęp."
           ]
         },
         {
-          "heading": "If something looks wrong",
+          "heading": "Jeśli coś wygląda nieprawidłowo",
           "items": [
-            "The access rules in the database are the source of truth, and this page follows them. If something here does not match what you see, contact us — a person will review it."
+            "Reguły dostępu w bazie danych są źródłem prawdy, a ta strona za nimi podąża. Jeśli coś tutaj nie zgadza się z tym, co widzisz, skontaktuj się z nami — człowiek to sprawdzi."
           ]
         }
       ],
@@ -5647,7 +5647,7 @@
           "yes": "tak",
           "own": "tylko własne",
           "limited": "ograniczony",
-          "no": "no"
+          "no": "nie"
         },
         "rows": {
           "profileAccount": {
@@ -5972,7 +5972,7 @@
       "readinessNone": "nic jeszcze nie śledzone",
       "housingLabel": "Zapewnione zakwaterowanie",
       "housingYes": "Tak",
-      "housingNo": "No",
+      "housingNo": "Nie",
       "housingUnknown": "Nie zapisano",
       "attention": {
         "title": "Wymaga uwagi",
@@ -6282,7 +6282,7 @@
       "professionLabel": "Zawód / usługa",
       "professionPlaceholder": "np. zbrojarz, usługa sprzątania",
       "languageLabel": "Język",
-      "languagePlaceholder": "e.g. LT, EN, PL",
+      "languagePlaceholder": "np. LT, EN, PL",
       "skillsLabel": "Umiejętności / usługi (dowolny tekst)",
       "skillsPlaceholder": "np. zbrojenie, szalunki, 10 lat",
       "notesLabel": "Notatki",
@@ -6419,7 +6419,7 @@
       "policyHeading": "Polityka automatycznego potwierdzania",
       "policyState": "Stan",
       "policyOff": "Wyłączona",
-      "policyOn": "On",
+      "policyOn": "Wł.",
       "note": "Domyślnie wyłączona. Po włączeniu kwalifikujące się pozycje są potwierdzane zwykłą ścieżką weryfikacji i zapisywane jako Twoja decyzja w ramach stałej polityki — w pełni rejestrowana i odwracalna.",
       "status": {
         "pending": "Oczekuje na weryfikację",
@@ -6448,7 +6448,7 @@
       "categoryLabel": "Kategoria",
       "categoryPlaceholder": "np. wykończenia",
       "countryLabel": "Kraj",
-      "countryPlaceholder": "e.g. LT",
+      "countryPlaceholder": "np. LT",
       "remoteLabel": "Można wykonać zdalnie",
       "rateLabel": "Stawka (opcjonalnie)",
       "ratePlaceholder": "np. ok. 25 EUR/godz., do negocjacji",
@@ -6906,7 +6906,7 @@
       "sizeMinLabel": "Najmniejsza ekipa do zadania (opcjonalnie)",
       "sizeMaxLabel": "Największa ekipa do zadania (opcjonalnie)",
       "countriesLabel": "Kraje, w których zespół może pracować",
-      "countriesPlaceholder": "e.g. LT, DE, NO"
+      "countriesPlaceholder": "np. LT, DE, NO"
     },
     "availability": {
       "heading": "Dostępność zespołu",
@@ -7270,58 +7270,58 @@
     "note": "Ceny są orientacyjnymi punktami startowymi dla typowego projektu. Ostateczny zakres i cena są ustalane wspólnie, zanim rozpocznie się jakakolwiek praca, a rozliczenie nigdy nie jest tu uruchamiane za Ciebie — każdy pakiet zaczyna się od rozmowy.",
     "offers": [
       {
-        "name": "AI workflow automation",
-        "summary": "We map a repetitive task in your business and replace the manual steps with a reliable automated workflow you own.",
-        "priceFrom": "From €900",
-        "timeline": "Typical delivery 1–3 weeks",
+        "name": "Automatyzacja przepływów pracy z AI",
+        "summary": "Mapujemy powtarzalne zadanie w Twojej firmie i zastępujemy ręczne kroki niezawodnym, zautomatyzowanym przepływem pracy, który należy do Ciebie.",
+        "priceFrom": "Od 900 €",
+        "timeline": "Typowa realizacja 1–3 tygodnie",
         "includes": [
-          "Process mapping & scoping call",
-          "One end-to-end automated workflow",
-          "Handover docs + a short walkthrough"
+          "Mapowanie procesu i rozmowa o zakresie",
+          "Jeden w pełni zautomatyzowany proces od początku do końca",
+          "Dokumentacja przekazania + krótkie omówienie"
         ]
       },
       {
-        "name": "Integrations · n8n · API workflows",
-        "summary": "We connect the tools you already use — CRM, email, sheets, internal apps — through n8n or direct APIs so data moves without copy-paste.",
-        "priceFrom": "From €600",
-        "timeline": "Typical delivery 1–2 weeks",
+        "name": "Integracje · n8n · przepływy API",
+        "summary": "Łączymy narzędzia, których już używasz — CRM, pocztę, arkusze, aplikacje wewnętrzne — przez n8n lub bezpośrednie API, aby dane przepływały bez kopiowania i wklejania.",
+        "priceFrom": "Od 600 €",
+        "timeline": "Typowa realizacja 1–2 tygodnie",
         "includes": [
-          "Up to 3 connected systems",
-          "n8n or custom API workflow",
-          "Error alerts + retry handling"
+          "Do 3 połączonych systemów",
+          "Przepływ w n8n lub na własnym API",
+          "Alerty o błędach + obsługa ponownych prób"
         ]
       },
       {
-        "name": "Business process automation",
-        "summary": "A larger engagement: several connected workflows that take a whole process — intake, routing, follow-up — off your team's plate.",
-        "priceFrom": "From €1,200",
-        "timeline": "Typical delivery 2–5 weeks",
+        "name": "Automatyzacja procesów biznesowych",
+        "summary": "Większy projekt: kilka połączonych przepływów pracy, które zdejmują z Twojego zespołu cały proces — przyjmowanie zgłoszeń, kierowanie ich dalej i kontakt uzupełniający.",
+        "priceFrom": "Od 1200 €",
+        "timeline": "Typowa realizacja 2–5 tygodni",
         "includes": [
-          "Multi-step process automation",
-          "Dashboards & status visibility",
-          "Two iteration rounds after launch"
+          "Automatyzacja procesu wieloetapowego",
+          "Pulpity i widoczność statusów",
+          "Dwie rundy poprawek po uruchomieniu"
         ]
       },
       {
-        "name": "Custom AI assistant",
-        "summary": "An internal assistant grounded in your own documents and data, built to answer questions and draft work for your team — not a public chatbot.",
-        "priceFrom": "From €1,500",
-        "timeline": "Typical delivery 2–4 weeks",
+        "name": "Asystent AI na zamówienie",
+        "summary": "Wewnętrzny asystent oparty na Twoich własnych dokumentach i danych, zbudowany po to, by odpowiadać na pytania i przygotowywać materiały dla Twojego zespołu — a nie publiczny chatbot.",
+        "priceFrom": "Od 1500 €",
+        "timeline": "Typowa realizacja 2–4 tygodnie",
         "includes": [
-          "Assistant grounded in your content",
-          "Private, access-controlled deployment",
-          "Prompt + guardrail tuning"
+          "Asystent oparty na Twoich treściach",
+          "Prywatne wdrożenie z kontrolą dostępu",
+          "Dostrajanie promptów i zabezpieczeń"
         ]
       },
       {
-        "name": "Website + marketing automation",
-        "summary": "A modern site paired with the automations behind it — lead capture, follow-up sequences, and reporting wired together.",
-        "priceFrom": "From €1,900",
-        "timeline": "Typical delivery 3–6 weeks",
+        "name": "Strona internetowa i automatyzacja marketingu",
+        "summary": "Nowoczesna strona wraz z automatyzacjami, które za nią stoją — pozyskiwanie kontaktów, sekwencje kontaktu uzupełniającego i raportowanie połączone w jedną całość.",
+        "priceFrom": "Od 1900 €",
+        "timeline": "Typowa realizacja 3–6 tygodni",
         "includes": [
-          "Marketing site or landing build",
-          "Lead capture + follow-up automation",
-          "Analytics & reporting setup"
+          "Budowa strony marketingowej lub landing page",
+          "Pozyskiwanie leadów + automatyzacja kontaktu",
+          "Konfiguracja analityki i raportowania"
         ]
       }
     ]
@@ -7778,7 +7778,7 @@
     "ackProgress": "{done}/{total} potwierdzonych",
     "assign": {
       "assigneeLabel": "Poproś o potwierdzenie:",
-      "requiredByLabel": "by",
+      "requiredByLabel": "do",
       "submit": "Wyślij prośbę"
     },
     "archive": "Archiwizuj",
@@ -7937,14 +7937,14 @@
       "toggle": "Uwzględnij oczekiwania płacowe i dostępność w wydruku",
       "title": "Oczekiwania płacowe i dostępność",
       "salaryFrom": "Od {amount}",
-      "salaryTo": "Up to {amount}",
+      "salaryTo": "Do {amount}",
       "salary": "Oczekiwania płacowe (EUR/miesiąc)",
       "availability": "Dostępność",
       "availableFrom": "Dostępny(a) od",
       "relocate": "Gotowość do przeprowadzki",
       "transport": "Może dotrzeć do pracy samodzielnie",
       "yes": "Tak",
-      "no": "No",
+      "no": "Nie",
       "status": {
         "available": "Dostępny(a)",
         "busy": "Zajęty(a)",
@@ -8437,7 +8437,7 @@
       "owner_confirmed": "Ceny są potwierdzone przez właściciela, ale plany pozostają tylko przygotowane — nic nie można kupić, dopóki płatności nie zostaną włączone."
     },
     "featuresLabel": "W zakresie tego planu",
-    "limitValue": "up to {count}",
+    "limitValue": "do {count}",
     "freeToday": {
       "freeTitle": "Darmowe dziś",
       "free": "Wszystko, co obecnie możesz wykorzystać w produkcie, jest darmowe — pilotaż działa bez płatności i nic nie prosi o kartę.",
@@ -8610,7 +8610,7 @@
     "eyebrow": "GOTOWOŚĆ PŁATNOŚCI",
     "title": "Centrum gotowości",
     "intro": "Blokady uniemożliwiające włączenie płatności, w jednym miejscu. Głównie do odczytu; weryfikuj/odrzucaj dokumenty z pełną historią działań.",
-    "on": "On",
+    "on": "Wł.",
     "off": "Wyłączone",
     "tiles": {
       "countryReview": "Zasady krajowe do przejrzenia",
@@ -8674,7 +8674,7 @@
     "title": "Rejestr LMC",
     "intro": "Wewnętrzny kredyt platformy (1 LMC = 1 EUR kredytu wewnętrznego). Stan bazy danych na żywo: wyłączniki awaryjne, zaległe zobowiązania i przyznanie testowe. Wszystkie przełączniki komercyjne domyślnie są WYŁĄCZONE; włączenie któregokolwiek to decyzja właściciela.",
     "unavailable": "Nie udało się odczytać rejestru w tej sesji — to nieudany odczyt, a nie pusty rejestr.",
-    "on": "On",
+    "on": "Wł.",
     "off": "Wyłączone",
     "policy": {
       "admin": "przełączalne przez administratora",
@@ -8717,7 +8717,7 @@
     "eyebrow": "ROZLICZENIA — TRYB TESTOWY",
     "title": "Centrum rozliczeń",
     "intro": "Rozliczenia Stripe w trybie testowym. Płatności są wyłącznie testowe/wyłączone — brak kluczy produkcyjnych, brak prawdziwych pieniędzy, brak realnej płatności.",
-    "on": "On",
+    "on": "Wł.",
     "off": "Wyłączone",
     "testModeOn": "Tryb testowy WŁĄCZONY",
     "testModeOff": "Tryb testowy wyłączony",
@@ -8802,20 +8802,20 @@
     "title": "Jak działa pierwsza płatna usługa",
     "steps": [
       {
-        "title": "Submit your inquiry for free",
-        "body": "Describe the workers or crew you need in the inquiry form. No fee, no card, nothing is published automatically."
+        "title": "Zgłoś zapytanie bezpłatnie",
+        "body": "Opisz w formularzu zapytania, jakich pracowników lub jakiej brygady potrzebujesz. Bez opłat, bez karty, nic nie jest publikowane automatycznie."
       },
       {
-        "title": "A person reviews it",
-        "body": "An operator reads every inquiry, contacts you and clarifies scope, timing and conditions before anything moves."
+        "title": "Zapytanie sprawdza człowiek",
+        "body": "Operator czyta każde zapytanie, kontaktuje się z Tobą i doprecyzowuje zakres, terminy oraz warunki, zanim cokolwiek ruszy."
       },
       {
-        "title": "You get a manually checked shortlist",
-        "body": "Real candidates or crews, checked by a person against your inquiry. If we cannot put together a suitable shortlist, there is no fee — and we never promise that a candidate will always be found."
+        "title": "Otrzymujesz ręcznie sprawdzoną krótką listę",
+        "body": "Prawdziwi kandydaci lub brygady, sprawdzeni przez człowieka pod kątem Twojego zapytania. Jeśli nie uda nam się zebrać odpowiedniej krótkiej listy, nie ma opłaty — i nigdy nie obiecujemy, że kandydat zawsze się znajdzie."
       },
       {
-        "title": "You pay only for delivered service",
-        "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
+        "title": "Płacisz tylko za zrealizowaną usługę",
+        "body": "Stała opłata za sukces obowiązuje za każdego zatrudnionego pracownika, brygadę lub skierowaną firmę. Osobna opłata koordynacyjna obowiązuje wyłącznie wtedy, gdy koordynacja dokumentów lub wdrożenia zostanie faktycznie zrealizowana. Ostateczna cena jest potwierdzana przed rozpoczęciem płatnych prac."
       }
     ],
     "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — jedno aktywne stanowisko bezpłatnie. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Oferowanie lub przypisywanie całej ekipy jako jednej jednostki nie jest jeszcze zbudowane — dziś ekipa jest dopasowywana osoba po osobie.",
@@ -8902,33 +8902,33 @@
     "stepsTitle": "Jak to działa",
     "steps": [
       {
-        "title": "1. Tell us your profession",
-        "body": "Add your profession, experience and availability. It takes a few minutes."
+        "title": "1. Podaj swój zawód",
+        "body": "Dodaj swój zawód, doświadczenie i dostępność. Zajmuje to kilka minut."
       },
       {
-        "title": "2. AI prepares a draft",
-        "body": "The assistant turns your words into a structured profile and CV draft — a suggestion you review and edit. It never invents experience."
+        "title": "2. AI przygotowuje projekt",
+        "body": "Asystent zamienia Twoje słowa w ustrukturyzowany profil i wstępną wersję CV — to sugestia, którą przeglądasz i edytujesz. Nigdy nie wymyśla doświadczenia."
       },
       {
-        "title": "3. Check country readiness",
-        "body": "See what documents and steps are likely required for the country you want — sourced, and not legal advice."
+        "title": "3. Sprawdź gotowość dla danego kraju",
+        "body": "Zobacz, jakie dokumenty i kroki są prawdopodobnie wymagane w wybranym przez Ciebie kraju — ze wskazaniem źródeł i bez charakteru porady prawnej."
       },
       {
-        "title": "4. Get matched",
-        "body": "When an employer's need fits your profession, availability, accommodation, transport and language, it appears on your opportunity board with an honest fit explanation."
+        "title": "4. Otrzymaj dopasowanie",
+        "body": "Gdy zapotrzebowanie pracodawcy pasuje do Twojego zawodu, dostępności, zakwaterowania, transportu i języka, pojawia się na Twojej tablicy możliwości wraz z uczciwym wyjaśnieniem dopasowania."
       },
       {
-        "title": "5. Interest and contact",
-        "body": "Express interest on a need that fits. The company reviews it and you see the honest status — reviewed or contacted. Contracts and payment stay outside the platform for now."
+        "title": "5. Zainteresowanie i kontakt",
+        "body": "Zgłoś zainteresowanie zapotrzebowaniem, które pasuje. Firma je rozpatruje, a Ty widzisz uczciwy status — rozpatrzone lub skontaktowano się. Umowy i płatności pozostają na razie poza platformą."
       }
     ],
     "needTitle": "Czego możesz potrzebować",
     "needItems": [
-      "A profession you work in",
-      "Your availability from a date",
-      "Whether you need accommodation or have your own",
-      "Transport: your own, a licence, or a pickup",
-      "Documents that may be required for the country"
+      "Zawód, w którym pracujesz",
+      "Twoja dostępność od konkretnej daty",
+      "Czy potrzebujesz zakwaterowania, czy masz własne",
+      "Transport: własny, prawo jazdy lub podwiezienie",
+      "Dokumenty, które mogą być wymagane w danym kraju"
     ],
     "directionsTitle": "Gdzie ludzie pracują",
     "directionsNote": "Otwórz strony poszczególnych krajów, aby zobaczyć sygnały rynku pracy ze źródeł.",
@@ -9230,10 +9230,10 @@
       "notProvided": "Firma nie podała jeszcze szczegółowych warunków pracy dla tego ogłoszenia — podane są tylko powyższe fakty.",
       "gapsTitle": "Niepodane przez firmę",
       "yes": "Tak",
-      "no": "No",
+      "no": "Nie",
       "payLabel": "Wynagrodzenie",
       "amountFrom": "od {amount}",
-      "amountUpTo": "up to {amount}",
+      "amountUpTo": "do {amount}",
       "chipPay": "{amount} {currency}/{unit}",
       "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
       "chipHours": "{hours} godz./tydz.",
@@ -9241,8 +9241,8 @@
       "chipStartFrom": "rozpoczęcie od {from}",
       "chipStartWindow": "rozpoczęcie {from} – {to}",
       "chipDeadline": "zgłoszenia do {date}",
-      "days": "{count} d.",
-      "yearsExperience": "{count} yr.",
+      "days": "{count} dn.",
+      "yearsExperience": "{count} lat",
       "km": "{km} km",
       "minutes": "{min} min",
       "probationLabel": "Okres próbny",
@@ -9475,7 +9475,7 @@
     "insurance": "Ubezpieczenie",
     "invoiceReady": "Czy możesz wystawiać faktury?",
     "invoiceYes": "Tak",
-    "invoiceNo": "No",
+    "invoiceNo": "Nie",
     "bridgeNote": "To jest podgląd. Aby zapisać swój profil — umiejętności, doświadczenie, dokumenty, kraj i potrzeby zakwaterowania — utwórz konto.",
     "bridgeSignup": "Utwórz profil pracownika",
     "bridgeLogin": "Masz już konto? Zaloguj się"
@@ -9521,7 +9521,7 @@
     "accNone": "Niezapewnione",
     "transport": "Transport zapewniony",
     "transportYes": "Tak",
-    "transportNo": "No",
+    "transportNo": "Nie",
     "transportOffer": "Transport i dojazd",
     "transProvided": "Zapewniony",
     "transCompensated": "Koszty podróży zwracane",
@@ -9616,13 +9616,13 @@
     "nLanguages": "Wymagania językowe",
     "nAcceptsNonEnglish": "Akceptuje inne języki niż angielski",
     "yes": "Tak",
-    "no": "No",
+    "no": "Nie",
     "submit": "Podgląd dopasowania",
     "scoreTitle": "Dopasowanie",
     "fit": "dopasowanie",
     "mismatch": "niedopasowanie",
     "unknown": "nieznane",
-    "of": "of",
+    "of": "z",
     "dimProfession": "Zawód",
     "dimAccommodation": "Zakwaterowanie",
     "dimTransport": "Dojazd",
@@ -9949,38 +9949,38 @@
     "honesty": "Wszystko opisane na tej stronie istnieje dziś w produkcie. Funkcje wciąż przygotowywane są tak oznaczone, a płatności nie są jeszcze aktywne.",
     "loops": [
       {
-        "heading": "For workers",
+        "heading": "Dla pracowników",
         "points": [
-          "You create your profile — your player card — with your skills and experience.",
-          "You keep a work journal: short entries about the work you actually did.",
-          "The platform reads your journal text and suggests skills it recognises. Recognition is rule-based, it can miss things, and nothing is added to your profile without your confirmation.",
-          "Your profile shows honestly how each skill is supported: entered by you, supported by journal entries, or confirmed by people you actually worked with."
+          "Tworzysz swój profil — swoją kartę zawodową — z umiejętnościami i doświadczeniem.",
+          "Prowadzisz dziennik pracy: krótkie wpisy o pracy, którą faktycznie wykonałeś.",
+          "Platforma czyta tekst Twojego dziennika i proponuje umiejętności, które rozpoznaje. Rozpoznawanie opiera się na regułach, może czegoś nie wychwycić, a nic nie trafia do Twojego profilu bez Twojego potwierdzenia.",
+          "Twój profil uczciwie pokazuje, czym poparta jest każda umiejętność: wpisana przez Ciebie, poparta wpisami w dzienniku albo potwierdzona przez osoby, z którymi faktycznie pracowałeś."
         ]
       },
       {
-        "heading": "For companies",
+        "heading": "Dla firm",
         "points": [
-          "You describe your need: what work, where and when.",
-          "You see the market map and honest market signals instead of promises.",
-          "You can scout for workers: profiles appear anonymised, and contact happens only with permission.",
-          "Projects, teams and bookings keep the work organised in one place."
+          "Opisujesz swoje zapotrzebowanie: jaka praca, gdzie i kiedy.",
+          "Widzisz mapę rynku i uczciwe sygnały rynkowe zamiast obietnic.",
+          "Możesz szukać pracowników: profile pojawiają się zanonimizowane, a kontakt następuje wyłącznie za zgodą.",
+          "Projekty, zespoły i rezerwacje utrzymują pracę uporządkowaną w jednym miejscu."
         ]
       },
       {
-        "heading": "For teams and communication",
+        "heading": "Dla zespołów i komunikacji",
         "points": [
-          "Teams and brigades are managed inside the company workspace.",
-          "Work instructions can be written in your own language — the original text is always kept, and nothing pretends to be translated when it is not.",
-          "Messaging is closed by default: only the participants of a conversation can see it."
+          "Zespołami i brygadami zarządza się wewnątrz przestrzeni roboczej firmy.",
+          "Instrukcje pracy można pisać we własnym języku — oryginalny tekst jest zawsze zachowywany i nic nie udaje przetłumaczonego, gdy takie nie jest.",
+          "Wiadomości są domyślnie zamknięte: widzą je wyłącznie uczestnicy rozmowy."
         ]
       }
     ],
     "notYet": {
       "heading": "Czego platforma nie robi",
       "points": [
-        "It does not mark anyone as confirmed by itself — a confirmed status always comes from a real person.",
-        "Payments do not run through the platform yet, and there is no checkout.",
-        "It does not give legal advice. Document guidance is informational only."
+        "Sama z siebie nie oznacza nikogo jako potwierdzonego — status potwierdzenia zawsze pochodzi od realnej osoby.",
+        "Płatności nie przechodzą jeszcze przez platformę i nie ma finalizacji zamówienia.",
+        "Nie udziela porad prawnych. Wskazówki dotyczące dokumentów mają charakter wyłącznie informacyjny."
       ]
     },
     "sportsModel": {
@@ -9988,24 +9988,24 @@
       "intro": "Produkt zapożycza słownictwo sportowe, ponieważ sprawia ono, że organizacja pracy staje się widoczna. To model działania, nie gra — każda warstwa poniżej to rzeczywisty element produktu.",
       "rows": [
         {
-          "term": "Player card",
-          "meaning": "A worker's capability card: real skills, real work evidence, and confirmations that always come from real people."
+          "term": "Karta zawodowa",
+          "meaning": "Karta kompetencji pracownika: realne umiejętności, realne dowody pracy i potwierdzenia, które zawsze pochodzą od prawdziwych osób."
         },
         {
-          "term": "Team / brigade",
-          "meaning": "A real work unit inside a company — created and managed in the company workspace."
+          "term": "Zespół / brygada",
+          "meaning": "Realna jednostka robocza wewnątrz firmy — tworzona i zarządzana w przestrzeni roboczej firmy."
         },
         {
-          "term": "Object / project",
-          "meaning": "The field of play: the place where work actually happens and where workers are assigned."
+          "term": "Obiekt / projekt",
+          "meaning": "Boisko: miejsce, w którym praca faktycznie się odbywa i do którego przydzielani są pracownicy."
         },
         {
-          "term": "Owner / operator",
-          "meaning": "The person who manages assignments: who works on which object, and when an assignment ends."
+          "term": "Właściciel / operator",
+          "meaning": "Osoba, która zarządza przydziałami: kto pracuje na którym obiekcie i kiedy przydział się kończy."
         },
         {
-          "term": "Divisions / leagues",
-          "meaning": "Optional grouping and status layers for markets and professions — the platform uses them to group, never to rank."
+          "term": "Dywizje / ligi",
+          "meaning": "Opcjonalne warstwy grupowania i statusu dla rynków i zawodów — platforma używa ich do grupowania, nigdy do tworzenia rankingu."
         }
       ],
       "noRanking": "Brak rankingów i punktacji: nic w tym modelu nie ocenia ludzi ani nie porządkuje ich względem siebie. Widzisz jedynie grupowanie i uczciwe sygnały kompetencji."
@@ -10213,7 +10213,7 @@
       "currentReconfirmedAt": "Ostatnio potwierdzone",
       "currentAuthorities": "Pozwolenia",
       "granted": "tak",
-      "denied": "no",
+      "denied": "nie",
       "unknown": "nie podano",
       "reconfirm": "Tak, nadal aktualne",
       "reconfirmed": "Dziękujemy — potwierdzone.",
@@ -10317,7 +10317,7 @@
       "prev": "Poprzedni okres",
       "next": "Następny okres",
       "dateLabel": "Wybierz datę",
-      "go": "Go"
+      "go": "Przejdź"
     },
     "journalStatus": {
       "recorded": "Zarejestrowano"
@@ -10513,7 +10513,7 @@
       "board": "Tablica"
     },
     "status": {
-      "todo": "To do",
+      "todo": "Do zrobienia",
       "in_progress": "W toku",
       "blocked": "Zablokowane",
       "done": "Ukończone",
@@ -11054,7 +11054,7 @@
     "triState": {
       "notStated": "Nie podano",
       "yes": "Tak",
-      "no": "No"
+      "no": "Nie"
     },
     "contract": {
       "employment": "Umowa o pracę",
@@ -12696,9 +12696,9 @@
         "availability": "Dostępność",
         "notStated": "Nie podano",
         "locationCountry": "Twój kraj",
-        "countryCodePlaceholder": "e.g. LT",
+        "countryCodePlaceholder": "np. LT",
         "preferredCountries": "Preferowane kraje",
-        "preferredCountriesPlaceholder": "e.g. NL, DE",
+        "preferredCountriesPlaceholder": "np. NL, DE",
         "salaryMin": "Wynagrodzenie od (€)",
         "salaryMinPlaceholder": "1500",
         "salaryMax": "Wynagrodzenie do (€)",
@@ -12774,7 +12774,7 @@
       },
       "tristate": {
         "yes": "Tak",
-        "no": "No",
+        "no": "Nie",
         "notStated": "—"
       },
       "ui": {
@@ -13418,7 +13418,7 @@
       "lastActivity": "Ostatnia zmiana: {event} — {date}",
       "blockedNoWorker": "To konto nie ma profilu pracownika, więc nie mam tu nic do podsumowania.",
       "blockedNotSignedIn": "Twoja sesja się zakończyła. Zaloguj się ponownie.",
-      "progress": "{done} of {total}",
+      "progress": "{done} z {total}",
       "progressAria": "Elementy podstawowe profilu: zapisano {done} z {total}",
       "doneWord": "Zapisano",
       "missingWord": "Wciąż brakuje"
@@ -15496,13 +15496,13 @@
     "evidenceNote": "Certyfikat tutaj pokazuje, że kurs został ukończony. Nie mówi, jak dobrze ktoś pracuje — to pozostaje w Twoich wpisach pracy i potwierdzeniach kierownika.",
     "notAvailable": "Szkolenia nie są jeszcze włączone w tej przestrzeni roboczej.",
     "status": {
-      "assigned": "To do",
+      "assigned": "Do zrobienia",
       "completed": "Ukończone",
       "expired": "Nieaktualne"
     },
     "mine": {
       "heading": "Twoje szkolenia",
-      "requiredBy": "By {date}",
+      "requiredBy": "Do {date}",
       "complete": "Oznacz jako ukończone",
       "notePlaceholder": "Krótka notatka (opcjonalnie)",
       "completedNote": "Oznaczyłeś to jako ukończone."
@@ -15573,7 +15573,7 @@
       "heading": "Okresy",
       "name": "Nazwa okresu",
       "from": "Od",
-      "to": "To",
+      "to": "Do",
       "create": "Otwórz okres",
       "empty": "Brak okresów.",
       "open": "Otwórz",
@@ -16356,7 +16356,7 @@
       "sameAs": "To samo miejsce co",
       "understoodSentence": "{period}: {people} osób pracowało w {places} miejscach — {personDays} osobodni i {hours} godz. zadeklarowanej codziennej pracy.",
       "spineTitle": "Oś czasu · godziny na tydzień",
-      "weekShort": "Wk",
+      "weekShort": "Tydz.",
       "personDaysShort": "osobodni",
       "aggregateLine": "Osobno: {hours} godz. zadeklarowanych jako suma za okres ({rows} wierszy) — to nie praca jednego dnia i nie wchodzi do sumy żadnego dnia.",
       "aggregateRemote": "źródło mówi o pracy zdalnej ({rows} wierszy)",
@@ -16374,12 +16374,12 @@
       },
       "timeRemote": "Zdalnie / z domu",
       "timeRemoteYes": "Tak",
-      "timeRemoteNo": "No",
+      "timeRemoteNo": "Nie",
       "timeRemoteUnknown": "Nie podano",
       "timePeriod": "Okres (tylko jeśli go znasz)",
       "timePeriodHint": "Zostaw puste, jeśli nie znasz okresu — system nie wymyśla dat. Przy podanym okresie suma jest rejestrowana jako zapis okresowy; bez niego — jako fakt źródłowy o nieznanym czasie trwania.",
       "from": "Od",
-      "to": "To",
+      "to": "Do",
       "timeSave": "Zastosuj do tych wierszy",
       "timeHint": "Liczba źródłowa nie ulega zmianie. Twoja interpretacja jest rejestrowana. Kalendarz, praca w liczbach, tempo i zdolności produkcyjne nigdy nie sumują sumy za okres do jednego dnia.",
       "peopleSubtitle": "Każda karta pokazuje to, co ten plik dowodzi o danej osobie. To nie ocena i nie stan bieżący.",
@@ -16434,7 +16434,7 @@
         "peopleEvidenced": "Osoby z udokumentowaną pracą",
         "noWork": "Brak udokumentowanej pracy w tym tygodniu.",
         "hoursUnknown": "godziny nierozdzielone",
-        "days": "d.",
+        "days": "dn.",
         "clear": "wyczyść",
         "selectedPerson": "osoba",
         "selectedPlace": "miejsce",
