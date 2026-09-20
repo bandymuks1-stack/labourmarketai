@@ -194,7 +194,7 @@ export interface ExternalOpportunityRowLabels {
 export interface ExternalVacancyInterestProps {
   readonly locale: string;
   readonly status: InterestStatus | null;
-  readonly handoff: { status: string; outreachState: string } | null;
+  readonly handoff: { status: string; outreachState: string; consentGiven?: boolean } | null;
   readonly labels: Parameters<typeof VacancyInterestButton>[0]["labels"];
 }
 

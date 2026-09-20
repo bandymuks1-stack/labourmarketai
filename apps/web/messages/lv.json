@@ -2233,6 +2233,7 @@
       "scopeNote": "Tas nav pieteikums, darba devējam ziņa netiek sūtīta. Pieteikšanās joprojām notiek caur oriģinālo sludinājumu.",
       "error": "Neizdevās saglabāt. Mēģiniet vēlreiz.",
       "handoffQueued": "Interese reģistrēta un gaida nodošanu Nonstop Group komerciālajai komandai. LabourMarket.ai darba devējam neko nav sūtījis.",
+      "handoffQueuedConsentWithheld": "Jūsu interese ir reģistrēta. Jūs neatzīmējāt pārstāvēšanas lauku, tāpēc Nonstop Group par jums nekas netiek nodots. Ja vēlaties būt pārstāvēts, atsauciet un izsakiet interesi vēlreiz ar atzīmētu lauku. LabourMarket.ai darba devējam nekas nav nosūtīts.",
       "handoffDelivered": "Interese nodota Nonstop Group. Nonstop var vērsties pie darba devēja savā komerciālajā procesā; LabourMarket.ai darba devējam neko nav sūtījis.",
       "handoffClosed": "Interese reģistrēta. Iepriekšējā nodošana Nonstop Group tika slēgta, kad to atsaucāt; nekas netika nosūtīts."
     }

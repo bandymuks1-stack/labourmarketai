@@ -64,6 +64,10 @@ export type DispatchSummary =
       /** 401 / 403 — the bearer or the door is misconfigured. Nothing moved. */
       readonly authFailed: number;
       readonly retryLater: number;
+      /** R-14 (2026-09-19): rows whose `proposition_consent.given` is not
+       *  `true`. NOT posted — left `queued`, untouched, so they dispatch the
+       *  moment the worker re-expresses interest with the box ticked. */
+      readonly withheldConsent: number;
     };
 
 interface QueuedRow {
@@ -205,7 +209,11 @@ async function postEnvelope(
  *  attempted / delivered / retryable / conflict / auth failure are
  *  distinguishable from the logs and from the run summary alone. */
 export const HANDOFF_DISPATCH_LOG = "[commercial-handoff]";
-function logAttempt(handoffId: string, outcome: PostOutcome, http: number | null): void {
+function logAttempt(
+  handoffId: string,
+  outcome: PostOutcome | "withheld_consent",
+  http: number | null,
+): void {
   console.log(HANDOFF_DISPATCH_LOG, { handoff: handoffId.slice(0, 8), outcome, http });
 }
 
@@ -245,11 +253,26 @@ export async function dispatchQueuedHandoffs(deps?: {
     conflicts: 0,
     authFailed: 0,
     retryLater: 0,
+    withheldConsent: 0,
   };
 
   for (const row of rows) {
     const envelope = envelopeFromQueuedRow(row);
     if (envelope.kind !== HANDOFF_ENVELOPE_KIND) continue;
+    // R-14 CONSENT GATE (owner rule, 2026-09-19). The worker's answer to
+    // "may Nonstop present me to this employer" is `employer-proposition-v1`,
+    // unchecked by default and never inferred. Until it is `true` nothing
+    // about the person leaves the platform: the row is not posted, not
+    // marked, not closed — it stays `queued` and goes out on the first sweep
+    // after the worker re-expresses interest with the box ticked (the RPC
+    // recomputes consent from the current click). `readConsent` has already
+    // coerced every tampered shape to `given:false`, so this single check is
+    // the whole gate. Counted and logged by id prefix only.
+    if (envelope.interest.propositionConsent.given !== true) {
+      summary.withheldConsent += 1;
+      logAttempt(row.handoff_id, "withheld_consent", null);
+      continue;
+    }
     const { outcome, http } = await postEnvelope(settings, envelope, fetchImpl);
     logAttempt(row.handoff_id, outcome, http);
     if (outcome === "delivered" || outcome === "duplicate") {
