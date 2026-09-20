@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { isNonProductionOrigin } from "@/lib/telemetry/production-host";
 
 /**
  * TIME TO FIRST REAL VALUE, PER ACTOR (FIRST REAL ECOSYSTEM USE, 2026-09-03).
@@ -154,7 +155,9 @@ function median(sorted: number[]): number | null {
 
 /** PURE: fold event rows into the per-actor summary. */
 export function summariseTtfv(rows: readonly TtfvRow[]): TtfvSummary {
-  const clean = rows.filter((r) => r.metadata?.["preview_host"] !== true && r.profile_id);
+  // Non-production origins out (client marker OR server-stamped deploy_env —
+  // one shared rule, lib/telemetry/production-host.ts), then identified only.
+  const clean = rows.filter((r) => !isNonProductionOrigin(r.metadata) && r.profile_id);
   const excludedPreview = rows.length - clean.length;
 
   type Agg = {

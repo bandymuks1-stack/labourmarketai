@@ -232,7 +232,7 @@ export default async function AdminTelemetryPage({
             visitors; no revenue attribution. Use the &ldquo;exclude
             admins&rdquo; filter below to remove owner/test navigation.
             {funnel.excludedPreview > 0
-              ? ` ${funnel.excludedPreview} non-production (localhost/preview) event(s) excluded.`
+              ? ` ${funnel.excludedPreview} event(s) from non-production origins (localhost / preview deploy / local build) excluded.`
               : ""}
             {funnel.excludedAdmin > 0
               ? ` ${funnel.excludedAdmin} platform-admin event(s) excluded.`
