@@ -18,10 +18,9 @@ import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/conf
  */
 
 /** Per-locale words for exactly the ACTIVE locales (lib/i18n/config.ts
- *  `activeLocales` — lt, en, ru, nl, de). `Record<ActiveLocale, …>` makes the
+ *  `activeLocales` — lt, en, ru, nl, de, pl). `Record<ActiveLocale, …>` makes the
  *  set exhaustive at compile time: promoting a locale in lib/i18n/config.ts
- *  fails typecheck until a row is added here. PL is deliberately absent — that
- *  locale is being activated on a separate branch. */
+ *  fails typecheck until a row is added here. PL added 2026-09-20 (#1810). */
 const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string }> = {
   lt: {
     body: "Įvyko klaida. Jūsų duomenys išsaugoti — bandykite dar kartą.",
@@ -42,6 +41,10 @@ const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string
   de: {
     body: "Ein Fehler ist aufgetreten. Ihre Daten sind sicher — bitte erneut versuchen.",
     retry: "Erneut versuchen",
+  },
+  pl: {
+    body: "Coś poszło nie tak. Twoje dane są bezpieczne — spróbuj ponownie.",
+    retry: "Spróbuj ponownie",
   },
 };
 

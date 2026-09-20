@@ -2852,8 +2852,11 @@ const RULES: IntentRule[] = [
       p("\\bakkoord\\s+met\\s*.{0,30}(aanbod|aanbieding|uitnodiging|boeking)", 6), // nl
       p("\\b(nehme|nimm|akzeptiere|annehmen|akzeptieren)\\s*.{0,30}(angebot|einladung|buchung|stelle|an\\b)", 6), // de
       p("(angebot|einladung|buchung)\\s*.{0,20}(annehmen|akzeptieren|angenommen)", 6), // de
-      // The whole sentence is the verb: "Priimu." / "Accept" / "Принимаю".
-      p("^\\s*(priimu|priimam|priimame|accept|accepted|i\\s+accept|принимаю|соглас(ен|на)|ik\\s+accepteer|accepteer|ich\\s+nehme\\s+an|ich\\s+akzeptiere|akzeptiere|annehmen)\\s*[.!]*\\s*$", 5),
+      // pl — "przyjmuję ofertę" / "akceptuję zaproszenie" / "zgadzam się na rezerwację"
+      // (2026-09-20, #1810). No bare "pracę" object: "przyjmuję do pracy" is the employer hiring.
+      p("\\b(przyjmuj[eę]|przyjm[eę]|akceptuj[eę]|zgadzam\\s+si[eę]\\s+na)\\s*.{0,30}(ofert|zaproszeni|rezerwacj)", 6), // pl
+      // The whole sentence is the verb: "Priimu." / "Accept" / "Принимаю" / "Przyjmuję".
+      p("^\\s*(priimu|priimam|priimame|accept|accepted|i\\s+accept|принимаю|соглас(ен|на)|ik\\s+accepteer|accepteer|ich\\s+nehme\\s+an|ich\\s+akzeptiere|akzeptiere|annehmen|przyjmuj[eę]|akceptuj[eę])\\s*[.!]*\\s*$", 5),
     ],
   },
   {
