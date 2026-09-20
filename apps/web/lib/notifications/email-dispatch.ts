@@ -80,7 +80,7 @@ export async function maybeDispatchNotificationEmail(
   admin: DbClient,
   input: Pick<
     NotificationEventInput,
-    "recipientProfileId" | "eventType" | "entityType"
+    "recipientProfileId" | "eventType" | "entityType" | "metadata"
   >,
   prefRows: readonly NotificationPreferenceRow[],
 ): Promise<NotificationEmailDispatchOutcome> {
@@ -99,19 +99,24 @@ export async function maybeDispatchNotificationEmail(
     // ran. No row / no value → tagged skip, never a guessed address.
     const { data, error } = await admin
       .from("profiles")
-      .select("email")
+      .select("email, locale")
       .eq("id", input.recipientProfileId)
       .maybeSingle();
-    const email =
-      !error && data ? ((data as { email?: string | null }).email ?? null) : null;
+    const row = !error && data ? (data as { email?: string | null; locale?: string | null }) : null;
+    const email = row?.email ?? null;
     if (!email || !email.includes("@")) {
       return { kind: "no_recipient_email" };
     }
 
-    // 4. Same copy as the bell, absolute canonical-origin deep link.
+    // 4. Same copy as the bell, absolute canonical-origin deep link — in the
+    // recipient's OWN stored locale (`profiles.locale`), with the row's safe
+    // render hints so a focused digest keeps its focus in the subject and
+    // the link. An unknown/absent locale falls back inside the renderer.
     const rendered = await renderNotificationEmail({
       eventType: input.eventType,
       entityType: input.entityType,
+      locale: row?.locale ?? undefined,
+      metadata: input.metadata,
     });
     if (!rendered) return { kind: "render_failed" };
 

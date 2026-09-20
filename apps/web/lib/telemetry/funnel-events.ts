@@ -209,6 +209,34 @@ export const FUNNEL_EVENTS = {
   realOpportunitiesLoaded: "real_opportunities_loaded",
   vacancyInterestExpressed: "vacancy_interest_expressed",
   commercialHandoffCreated: "commercial_handoff_created",
+  // ── Public job acquisition loop (P0, 2026-09-20): the steps a campaign
+  //    visitor takes from one public advertisement to a compared, acted-on
+  //    opportunity — the stages the owner asked to measure "without
+  //    inventing analytics". Anonymous-safe (pilot_events admits
+  //    profile_id NULL). `ref_type`/`ref_id` carry the opaque public
+  //    vacancy id so "where do visitors leave" can be answered PER JOB;
+  //    `surface` says whether the viewer was anonymous or a member.
+  //    - job_board_viewed         the public board rendered (candidate_count
+  //                               = rows shown; `unavailable` rendered as
+  //                               success:false, never as zero jobs)
+  //    - job_opened               one public job page rendered
+  //    - job_returned_after_auth  the same job page rendered right after the
+  //                               auth round trip (`?via=auth` carried by the
+  //                               page's own signup/login `next`)
+  //    - job_compared             the member half rendered the ONE engine's
+  //                               requirement-by-requirement reading
+  //                               (result_kind = the fit band)
+  //    - job_missing_info_shown   that reading named facts the person has
+  //                               not provided (unresolved_unknown_count)
+  //    - job_alternatives_shown   other current ads of the same profession
+  //                               were offered beside a non-fit
+  //                               (candidate_count = how many)
+  jobBoardViewed: "job_board_viewed",
+  jobOpened: "job_opened",
+  jobReturnedAfterAuth: "job_returned_after_auth",
+  jobCompared: "job_compared",
+  jobMissingInfoShown: "job_missing_info_shown",
+  jobAlternativesShown: "job_alternatives_shown",
 } as const;
 
 export type FunnelEventName =
@@ -289,4 +317,8 @@ export type FunnelMetadata = {
   ref_type?: string;
   /** Referenced entity id (opaque uuid). */
   ref_id?: string;
+  /** How many facts a reading named as not yet provided (a count, never the
+   *  facts). Already allowlisted server-side for the journal review flow;
+   *  typed here so the public job comparison can report it. */
+  unresolved_unknown_count?: number;
 };

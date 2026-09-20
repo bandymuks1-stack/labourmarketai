@@ -29,7 +29,11 @@ import {
   type ActiveLocale,
 } from "@/lib/i18n/config";
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
-import { notificationEventHref } from "@/lib/notifications/events";
+import {
+  notificationEventHref,
+  notificationRenderedType,
+  type NotificationEventMetadata,
+} from "@/lib/notifications/events";
 
 export interface RenderedNotificationEmail {
   readonly subject: string;
@@ -65,6 +69,10 @@ export async function renderNotificationEmail(input: {
   readonly eventType: string;
   readonly entityType: string;
   readonly locale?: string;
+  /** The stored row's safe render hints (e.g. a digest's `focus`), so the
+   *  e-mail says exactly what the bell says and links where the bell links.
+   *  Absent = the plain type key, as before. */
+  readonly metadata?: NotificationEventMetadata;
 }): Promise<RenderedNotificationEmail | null> {
   const locale: ActiveLocale =
     input.locale && isActiveLocale(input.locale) ? input.locale : defaultLocale;
@@ -75,18 +83,28 @@ export async function renderNotificationEmail(input: {
     return null;
   }
 
+  // The SAME type key the bell renders (`notificationRenderedType`): a
+  // focused weekly digest is its own key, so an e-mail about the journal is
+  // titled as the journal digest, never as "work and opportunities". A
+  // focused key without copy falls back to the plain type, then to generic.
+  const renderedType = notificationRenderedType(input.eventType, input.metadata);
   const subject =
+    readString(messages, ["auth", "notifications", "types", renderedType]) ??
     readString(messages, [
       "auth",
       "notifications",
       "types",
       `event_${input.eventType}`,
-    ]) ?? readString(messages, ["auth", "notifications", "types", "generic"]);
+    ]) ??
+    readString(messages, ["auth", "notifications", "types", "generic"]);
   if (!subject) return null;
 
-  // The entity's canonical surface — the same href the bell row links.
-  // An unmapped entity falls back to the activity centre (the durable feed).
-  const path = notificationEventHref(input.entityType) ?? "/dashboard/activity";
+  // The entity's canonical surface — the same href the bell row links,
+  // metadata included (a profile-completion digest lands on the profile, a
+  // journal digest on the journal). An unmapped entity falls back to the
+  // activity centre (the durable feed).
+  const path =
+    notificationEventHref(input.entityType, input.metadata) ?? "/dashboard/activity";
   const deepLink = `${CANONICAL_ORIGIN}/${locale}${path}`;
   const manageLink = `${CANONICAL_ORIGIN}/${locale}/dashboard/account`;
 

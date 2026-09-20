@@ -256,6 +256,13 @@ export function notificationEventHref(
   if (entityType === "weekly_digest" && metadata?.focus === "profile_completion") {
     return "/dashboard/profile";
   }
+  // A JOURNAL digest (the cron sweep, which only knows the person logged
+  // work this week) lands on the journal it speaks of — not on the board,
+  // which the bell text never promised. Found while tracing the retention
+  // loop (acquisition loop P0, 2026-09-20).
+  if (entityType === "weekly_digest" && metadata?.focus === "journal") {
+    return "/dashboard/journal";
+  }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
 }
 
