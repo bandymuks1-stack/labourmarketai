@@ -789,7 +789,13 @@
       "mainly": "vooral {activity} · {hours} u",
       "mainlyShare": "vooral {activity} · {hours} u ({percent} van {total} u)",
       "withoutDuration": "{count, plural, one {# registratie in dit venster heeft geen duur – die telt mee, maar niet in uren.} other {# registraties in dit venster hebben geen duur – die tellen mee, maar niet in uren.}}",
-      "collapse": "Gedetailleerd rapport verbergen"
+      "collapse": "Gedetailleerd rapport verbergen",
+      "ledger": {
+        "measured": "Eigen registraties van uw organisatie in dit venster: {hours} u over {workers, plural, one {# persoon} other {# personen}} — apart gehouden, nooit bij het logboek opgeteld.",
+        "none": "Deze database bevat geen uurregistraties van de organisatie.",
+        "unknown": "De registraties van de organisatie konden niet worden gelezen — dat is geen nul uur.",
+        "truncated": "Berust op de eerste {count} registraties."
+      }
     }
   },
   "marketRecognition": {
@@ -3529,10 +3535,6 @@
       "todayLabel": "Vandaag actief",
       "preparingLabel": "In voorbereiding",
       "blockedLabel": "Geblokkeerd",
-      "ownerSmokeLabel": "Productie-smoketest van de eigenaar",
-      "ownerSmokeStatus": "PENDING",
-      "pr18Label": "PR #18 — beveiligingslaag werkjournaal",
-      "pr18Status": "GEBLOKKEERD (issue #32)",
       "nonWorkerLabel": "Ruimtes voor bedrijven / uitzendbureaus / klanten",
       "nonWorkerStatus": "In voorbereiding",
       "fakeClaimsLabel": "Nep-AI / nepmatching / nepreputatie",
@@ -5780,7 +5782,7 @@
       "workerPlaceholder": "Kies een werknemer",
       "bodyLabel": "Instructie",
       "bodyPlaceholder": "Schrijf de instructie in je eigen taal…",
-      "languageNote": "Schrijf in je eigen taal. Het origineel wordt altijd bewaard en werknemers zien jouw originele tekst — er is geen automatische vertaling.",
+      "languageNote": "Schrijf in je eigen taal. Het origineel wordt altijd bewaard; werknemers zien je originele tekst en lezen, als er een vertaling beschikbaar is, in hun eigen taal.",
       "send": "Instructie versturen",
       "sending": "Versturen…",
       "sent": "Instructie verstuurd",
@@ -6005,7 +6007,18 @@
         "note": "Echte aantallen dagboekvermeldingen die aan dit project zijn gekoppeld en de foto's die werknemers aan hun eigen vermeldingen hebben toegevoegd.",
         "link": "Projectgalerij openen"
       },
-      "honestNote": "Dit centrum bundelt alleen records die al bestaan. Mijlpalen, issue-registers en middelentabellen zijn nog niet gebouwd en worden hier niet gesimuleerd."
+      "honestNote": "Dit centrum bundelt alleen records die al bestaan. Mijlpalen, issue-registers en middelentabellen zijn nog niet gebouwd en worden hier niet gesimuleerd.",
+      "hours": {
+        "title": "Uren op dit project",
+        "allocated": "Toegewezen",
+        "journaled": "In het logboek",
+        "confirmed": "Bevestigd",
+        "value": "{hours} u",
+        "note": "Toegewezen — de uurregistraties van de organisatie op de werkobjecten van dit project; logboek — de invoer van mensen op dit project; bevestigd — logboekinvoer die een manager heeft goedgekeurd. Apart gehouden, nooit opgeteld.",
+        "unavailable": "kon niet worden gelezen",
+        "noLedger": "geen uurregistratie",
+        "truncated": "Logboekcijfers berusten op de eerste {count} invoeren."
+      }
     },
     "eyebrow": "Projectoperaties",
     "managerOnly": "Dit bord is voor een manager van een bedrijf of uitzendbureau.",
@@ -6518,7 +6531,7 @@
       "sending": "Versturen...",
       "emptyError": "Schrijf een bericht of voeg een bijlage toe.",
       "charCount": "{n}/{max}",
-      "languageHint": "Schrijf in je eigen taal — de ander ziet je originele tekst. Er is geen automatische vertaling.",
+      "languageHint": "Schrijf in je eigen taal. De ander behoudt altijd je originele tekst en leest, als er een vertaling beschikbaar is, in zijn eigen taal.",
       "attachments": {
         "addButton": "Foto of bestand toevoegen",
         "help": "Foto's (JPG, PNG, WebP), PDF of een tekstbestand, tot 10 MB. Maximaal 5 bijlagen per bericht. Alleen gespreksdeelnemers zien bijlagen.",
@@ -6533,7 +6546,8 @@
         "blockedWhileUploading": "Wacht tot de bijlagen zijn geüpload.",
         "blockedFailed": "Verwijder de mislukte bijlage of upload deze opnieuw.",
         "partialFailure": "Het bericht is verzonden, maar sommige bijlagen konden niet worden toegevoegd. Probeer ze opnieuw te verzenden."
-      }
+      },
+      "languageLabel": "Ik schrijf in"
     },
     "launcher": {
       "openLabel": "Neem contact op met support",
@@ -6591,7 +6605,9 @@
       "sent": "Antwoord verzonden."
     },
     "translatedFrom": "Vertaald uit {lang}",
-    "showOriginal": "Origineel ({lang})"
+    "showOriginal": "Origineel ({lang})",
+    "translationUnavailable": "Origineel ({lang}) — geen vertaling beschikbaar",
+    "loadError": "Berichten konden nu niet worden geladen. Wat je ziet is niet het volledige beeld — probeer het opnieuw."
   },
   "orgTier1Warning": {
     "eyebrow": "Jouw organisatie",
@@ -6941,7 +6957,8 @@
         "notOpen": "Deze aanvraag is niet meer open.",
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
-    }
+    },
+    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk."
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",
@@ -7138,6 +7155,22 @@
       "sessionsWithStart": "Sessies met een startevent",
       "sessionsReachedValue": "Sessies die waarde bereikten",
       "firstValueEvent": "Eerste waarde-event (converterende sessies)"
+    },
+    "campaigns": {
+      "title": "Campagne → vacature → account",
+      "empty": "Nog geen gebeurtenissen met een campagnelabel in dit venster.",
+      "help": "First-touch utm_campaign × utm_content over hetzelfde venster en dezelfde populatiefilter. Dit zijn aantallen gebeurtenissen, geen unieke bezoekers — een latere kolom is geen deelverzameling van een eerdere, dus een verhouding tussen twee kolommen is geen conversie. Maximaal 25 rijen op bezoeken; verkeer zonder label (organisch) wordt niet getoond. De interessekolom wordt server-side verstuurd, waar geen campagne beschikbaar is, dus hij blijft per constructie 0 — dat is een ontbrekende meting, geen gemeten nul.",
+      "col": {
+        "campaign": "Campagne / variant",
+        "landing": "Bezoeken",
+        "jobOpened": "Vacature geopend",
+        "ctaClicked": "CTA geklikt",
+        "registrationStarted": "Registratie gestart",
+        "signupCompleted": "Account aangemaakt",
+        "returnedToJob": "Terug naar vacature",
+        "compared": "Vergeleken",
+        "interest": "Interesse"
+      }
     }
   },
   "languageFeedback": {
@@ -7223,19 +7256,19 @@
     }
   },
   "orgMembers": {
-    "title": "Organization members & review",
-    "intro": "Bring a worker into your organization and open their work journal for review. A manager can then confirm the skills their entries prove.",
-    "reviewOn": "Review on",
-    "reviewOff": "Review off",
-    "enable": "Enable review",
-    "disable": "Disable review",
-    "addTitle": "Add a worker to the organization",
-    "addButton": "Add to organization",
-    "noMembers": "No organization members yet. Add a worker below.",
-    "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
+    "title": "Organisatieleden & beoordeling",
+    "intro": "Haal een werknemer in je organisatie en open zijn of haar werkjournaal voor beoordeling. Een leidinggevende kan daarna de vaardigheden bevestigen die de items aantonen.",
+    "reviewOn": "Beoordeling aan",
+    "reviewOff": "Beoordeling uit",
+    "enable": "Beoordeling inschakelen",
+    "disable": "Beoordeling uitschakelen",
+    "addTitle": "Een werknemer aan de organisatie toevoegen",
+    "addButton": "Aan organisatie toevoegen",
+    "noMembers": "Nog geen organisatieleden. Voeg hieronder een werknemer toe.",
+    "noAddable": "Geen werknemers beschikbaar om toe te voegen. Nodig eerst een werknemer uit; daarna verschijnt die hier.",
     "allAdded": "Alle geaccepteerde werknemers zijn al aan de organisatie toegevoegd.",
-    "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review",
+    "reviewEnabledBadge": "Beoordeling",
+    "reviewDisabledBadge": "Geen beoordeling",
     "remove": "Uit organisatie verwijderen",
     "removeConfirm": "Verwijderen bevestigen",
     "removeCancel": "Annuleren",
@@ -7345,7 +7378,7 @@
     "candidateLabel": "Kandidaat-vaardigheden",
     "candidateHint": "Vaardigheden die je in je eigen woorden hebt toegevoegd (verduidelijking nodig, nog niet beoordeeld).",
     "thermoLabel": "Marktactiviteit",
-    "thermoHint": "(gemiddelde van opgegeven salarisverwachtingen in je project + door de admin ingevoerd marktgemiddelde) / 2 — alleen getoond wanneer beide componenten bestaan.",
+    "thermoHint": "(gemiddelde van opgegeven salarisverwachtingen in je project + marktgemiddelde) / 2 — alleen getoond wanneer beide componenten bestaan.",
     "thermoMissingPosition": "Onvoldoende projectdata",
     "thermoMissingMarket": "Onvoldoende marktdata",
     "thermoMissingBoth": "Onvoldoende marktdata",
@@ -7413,7 +7446,8 @@
       "opportunityCount": "{count} nu zichtbare aanvragen passen bij je profiel.",
       "opportunityUnavailable": "Open aanvragen zijn nog niet beschikbaar voor je account, dus dit is niet gemeten.",
       "opportunityNoWorker": "Dit wordt gemeten zodra je een werknemersprofiel hebt.",
-      "closestBasis": "Dichtstbij — {what}: komt overeen met {matched} van {required} gevraagde vaardigheden, {confirmed} met een registratie van een leidinggevende."
+      "closestBasis": "Dichtstbij — {what}: komt overeen met {matched} van {required} gevraagde vaardigheden, {confirmed} met een registratie van een leidinggevende.",
+      "historyUnavailable": "Uw werkgeschiedenis kon nu niet worden gelezen."
     },
     "documentsLabel": "Documenten",
     "documentsValue": "{valid} geldig",
@@ -7449,8 +7483,12 @@
       "historyRange": "{from} – {to}",
       "historyEmpty": "Nog geen werkperiodes vastgelegd.",
       "historyAria": "Werkperiodes op een tijdbalk, van {from} tot {to}.",
-      "skillsScaleNote": "De balklengte is het aantal werkregistraties achter elke vaardigheid (volle balk = {scale}+), geen vaardigheidsscore."
-    }
+      "skillsScaleNote": "De balklengte is het aantal werkregistraties achter elke vaardigheid (volle balk = {scale}+), geen vaardigheidsscore.",
+      "historyHours": "{hours} u vastgelegd · {confirmed} u met een record van een leidinggevende",
+      "historyUnavailable": "Uw werkgeschiedenis kon nu niet worden gelezen."
+    },
+    "skillsUnavailable": "Kon nu niet worden gelezen.",
+    "verifiedUnavailable": "Vaardigheden met een record van een leidinggevende konden nu niet worden gelezen."
   },
   "skillClarify": {
     "title": "Mijn vaardigheden",
@@ -8054,7 +8092,10 @@
         "title": "Vraagt je aandacht",
         "untimed": "{n, plural, one {# registratie} other {# registraties}} zonder duur — voeg de uren toe",
         "unlabelled": "{n, plural, one {# registratie} other {# registraties}} met uren maar zonder benoemd soort werk",
-        "unknown": "Open punten konden niet worden gelezen."
+        "unknown": "Open punten konden niet worden gelezen.",
+        "offers": "{n, plural, one {# boekingsaanbod wacht} other {# boekingsaanbiedingen wachten}} op uw antwoord",
+        "invitations": "{n, plural, one {# uitnodiging wacht} other {# uitnodigingen wachten}} op uw antwoord",
+        "unread": "{n, plural, one {# gesprek} other {# gesprekken}} met ongelezen berichten"
       },
       "growth": {
         "title": "Groei",
@@ -9423,6 +9464,16 @@
       "handoffQueuedConsentWithheld": "Je interesse is vastgelegd. Je hebt het vakje voor voorstellen niet aangevinkt, dus er wordt niets over jou aan Nonstop Group doorgegeven. Wil je worden voorgesteld, trek je interesse dan in en geef die opnieuw aan met het vakje aangevinkt. LabourMarket.ai heeft niets naar de werkgever gestuurd.",
       "handoffDelivered": "Uw interesse is doorgegeven aan Nonstop Group. Nonstop kan de werkgever via zijn eigen commerciële proces benaderen; LabourMarket.ai heeft de werkgever niets gestuurd.",
       "handoffClosed": "Uw interesse is vastgelegd. De eerdere doorgifte aan Nonstop Group is gesloten toen u introk; er is niets verstuurd."
+    },
+    "intent": {
+      "label": "Mijn situatie",
+      "states": {
+        "AVAILABLE_NOW": "Kan nu beginnen",
+        "AVAILABLE_FROM": "Kan beginnen vanaf een datum",
+        "OPEN_TO_OFFERS": "Werkt, maar staat open voor aanbiedingen",
+        "LOOKING_FOR_WORK": "Op zoek naar werk",
+        "LOOKING_FOR_PROJECTS": "Op zoek naar projecten"
+      }
     }
   },
   "workerIntake": {
@@ -9940,12 +9991,12 @@
     "footer": "Dit rapport toont alleen echte signalen. Beoordeling is een menselijke beslissing."
   },
   "about": {
-    "metaTitle": "Wat is Labour Market AI",
-    "metaDescription": "Een uitleg in duidelijke taal van Labour Market AI: hoe werknemers een echt profiel opbouwen uit echt werk, hoe bedrijven behoeften beschrijven en teams vinden, en hoe het platform eerlijk blijft.",
-    "navLabel": "Over Labour Market AI",
+    "metaTitle": "Wat is LabourMarket.ai",
+    "metaDescription": "Een uitleg in duidelijke taal van LabourMarket.ai: hoe werknemers een echt profiel opbouwen uit echt werk, hoe bedrijven behoeften beschrijven en teams vinden, en hoe het platform eerlijk blijft.",
+    "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
-    "title": "Wat Labour Market AI is en hoe het werkt",
-    "lede": "Labour Market AI is een arbeidsmarktplatform waar werknemers, bedrijven en teams echte vaardigheden tonen, echte behoeften zien en echt werk organiseren — lokaal en in heel Europa.",
+    "title": "Wat LabourMarket.ai is en hoe het werkt",
+    "lede": "LabourMarket.ai is een arbeidsmarktplatform waar werknemers, bedrijven en teams echte vaardigheden tonen, echte behoeften zien en echt werk organiseren — lokaal en in heel Europa.",
     "honesty": "Alles wat op deze pagina wordt beschreven, bestaat vandaag in het product. Functies die nog in voorbereiding zijn, worden als zodanig benoemd, en betalingen zijn nog niet actief.",
     "loops": [
       {
@@ -10160,7 +10211,7 @@
       "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
     },
     "partnerSupply": {
-      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor u zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een geanonimiseerde professionele samenvatting wordt doorgegeven — nooit uw naam of contactgegevens.",
+      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor u zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven — nooit uw naam of contactgegevens.",
       "noWorkerProfile": "U heeft nog geen werknemersprofiel, dus er zou niets vertegenwoordigd worden. Maak eerst uw professionele profiel aan — deze antwoorden blijven bewaard en gaan gelden zodra het bestaat.",
       "statusNotRepresented": "U wordt niet vertegenwoordigd buiten LabourMarket.ai",
       "statusNotRepresentedBody": "Er wordt niets over u buiten dit platform verstuurd. Uw account, cv en werkjournaal werken hier precies hetzelfde zonder.",
@@ -10372,7 +10423,8 @@
       "title": "Periodebewijs — afgeleid maandaandeel",
       "chip": "Afgeleid",
       "thisMonth": "{hours} u deze maand (afgeleid)",
-      "sourceLink": "Periode-record openen"
+      "sourceLink": "Periode-record openen",
+      "unavailable": "Periode-records konden nu niet worden gelezen — het plan wordt zonder getoond."
     }
   },
   "workforcePlanning": {
@@ -10495,7 +10547,9 @@
       "noDates": "geen datums vastgelegd",
       "undated": "toegewezen aan {label} — geen datums vastgelegd",
       "withoutCommitment": "{count, plural, one {# persoon heeft} other {# mensen hebben}} hier niets vastgelegd. Dat is niet hetzelfde als vrij — goedgekeurde afwezigheden staan apart.",
-      "unavailable": "Verplichtingen konden niet worden gelezen. Dat is niet hetzelfde als vrij."
+      "unavailable": "Verplichtingen konden niet worden gelezen. Dat is niet hetzelfde als vrij.",
+      "conflict": "overlapping",
+      "conflictNote": "Overlappende data zijn gemarkeerd: dezelfde persoon is die dagen op twee plaatsen ingezet. Een waarschuwing, geen blokkade — beide records blijven."
     }
   },
   "tasks": {
@@ -10726,7 +10780,7 @@
       },
       "disabledBody": "In deze omgeving is geen externe AI-provider gekoppeld. Alles op deze pagina is volgens vaste regels berekend uit uw eigen gegevens — geen enkele tekst hier is door een taalmodel gemaakt.",
       "whenEnabled": "Zodra de eigenaar een provider koppelt en de auditopslag voor suggesties is toegepast, komen controleerbare conceptsuggesties beschikbaar — altijd als suggesties die een persoon bevestigt, nooit als automatische wijzigingen.",
-      "gates": "Twee poorten staan bewust open: (1) er is geen providersleutel geconfigureerd in productie en (2) de auditopslag voor suggesties (ai_runs / ai_suggestions) is een door de eigenaar goed te keuren migratie. Generatie blijft uit totdat beide gesloten zijn — suggesties zonder auditspoor zouden de eigen regels van het programma schenden.",
+      "gates": "De assistent is in deze omgeving nog niet beschikbaar. Suggesties blijven uit totdat hij is aangesloten — intussen wordt er niets gegenereerd.",
       "providerLabel": "Provider",
       "modelLabel": "Model",
       "notWired": "Genereren staat in deze fase bewust uit — resultaten zouden nog niet traceerbaar zijn. De status hierboven wordt alleen voor transparantie getoond."
@@ -11240,7 +11294,8 @@
         "unemployed": "Werkzoekend",
         "volunteer": "Vrijwilliger"
       },
-      "why": "Alleen uw actieve werkrelaties worden getoond — elke rij benoemt de relatie."
+      "why": "Alleen uw actieve werkrelaties worden getoond — elke rij benoemt de relatie.",
+      "unavailable": "Uw relaties konden niet worden geladen. Dat betekent niet dat u er geen heeft — probeer het opnieuw."
     },
     "invite": {
       "title": "Uitnodigen",
@@ -11435,7 +11490,9 @@
     "servicesEmpty": "Nog niets aangeboden",
     "servicesUnavailable": "Aangeboden diensten konden niet worden geladen",
     "serviceRemote": "Op afstand",
-    "photoAlt": "Foto van uitgevoerd werk"
+    "photoAlt": "Foto van uitgevoerd werk",
+    "historyTitle": "Geïmporteerde geschiedenis",
+    "historyUnavailable": "Geïmporteerde geschiedenis kon niet worden gelezen"
   },
   "companyGallery": {
     "title": "Galerij",
@@ -12866,7 +12923,7 @@
       "switchContextFailed": "Overschakelen is niet gelukt — uw actieve context is ongewijzigd.",
       "switchContextUnavailable": "Contextwisseling is momenteel niet beschikbaar.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
-      "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
+      "writeEmployerHint": "Een werkgever schrijf je vanuit een concrete behoefte: toon eerst interesse, daarna opent het gesprek.",
       "experiencesEligible": "Ik vond afgeronde interacties die je kunt beschrijven. Kies welke.",
       "experiencesAllSubmitted": "Je hebt elke afgeronde interactie al beschreven. Eén interactie, één ervaring.",
       "experiencesNothingYet": "Er is nog geen afgeronde interactie om te beschrijven. Een ervaring is gebaseerd op echt werk dat is afgerond.",
@@ -13337,7 +13394,15 @@
       "workspaceUnnamedNote": "Geen naam opgegeven",
       "workspaceNameThis": "Naam toevoegen",
       "historyImportChip": "Historische gegevens importeren",
-      "historyImportHint": "Upload het bestand — mensen, locaties, datums en uren bereid ik eruit voor; u bevestigt alleen wat onduidelijk is."
+      "historyImportHint": "Upload het bestand — mensen, locaties, datums en uren bereid ik eruit voor; u bevestigt alleen wat onduidelijk is.",
+      "writeEmployerMany": "Je hebt meerdere interesses — kies op de kaart aan welke werkgever je schrijft.",
+      "writeEmployerFailed": "Het gesprek kon niet worden geopend. Probeer het vanaf de kaart van de vacature.",
+      "acceptOfferOne": "Hier is het. Met de knop hieronder bevestig je het.",
+      "acceptOfferWhich": "Welke? Kies hieronder.",
+      "offerCapacity": {
+        "needsCompany": "Mensen aanbieden hoort bij een organisatie, en je zit nu in je persoonlijke ruimte. Kies het bedrijf, dan leg ik het aanbod meteen vast.",
+        "personalSpace": "Mensen of een team aanbieden vraagt om een organisatie, en die heb je nog niet. Je kunt een bedrijf aanmaken, of je eigen dienst aanbieden."
+      }
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -15091,7 +15156,7 @@
   },
   "agreements": {
     "title": "Overeenkomstenregister",
-    "intro": "Het canonieke register van overeenkomsten van {org} — arbeidsgerelateerd en algemeen. Alleen registratie.",
+    "intro": "Het register van overeenkomsten van {org} — arbeidsgerelateerd en algemeen. Alleen registratie.",
     "noSignatureNote": "Statussen in dit register zijn uitsluitend administratieve toestanden — niets hier betekent dat een overeenkomst ondertekend, juridisch geldig of bindend is. LabourMarket.ai voert geen juridische ondertekening uit: ondertekenen gebeurt buiten het platform en een bijgevoegd bestand is alleen door u aangeleverd bewijs.",
     "relationshipNote": "De contractenlijst hierboven is het eerdere persoonlijke commerciële register en blijft ongewijzigd werken. Nieuwe overeenkomsten horen hier.",
     "unavailable": "Het overeenkomstenregister kan nu niet worden getoond.",
@@ -16226,7 +16291,19 @@
       "withdrawConfirm": "Intrekken",
       "withdrawCancel": "Koppeling behouden",
       "withdrawDone": "Ingetrokken. De organisatie houdt haar eigen record; zij noemt u niet meer.",
-      "unnamedOrganization": "Een organisatie"
+      "unnamedOrganization": "Een organisatie",
+      "suggestions": {
+        "title": "Vaardigheden genoemd in de registraties van een organisatie",
+        "intro": "De woorden van de organisatie over uw werk noemen deze vaardigheden. Er wordt niets toegevoegd tot u dat zegt.",
+        "why": "Genoemd als “{terms}” in {count, plural, one {# record} other {# records}}",
+        "add": "Toevoegen",
+        "adding": "Toevoegen…",
+        "added": "Toegevoegd aan profiel",
+        "already": "Staat al op uw profiel",
+        "notNow": "Niet nu",
+        "error": "Kon niet worden toegevoegd. Probeer het opnieuw.",
+        "selfDeclaredNote": "Een toegevoegde vaardigheid is zelf opgegeven — niet geverifieerd."
+      }
     },
     "plan": {
       "title": "Wat is gevonden en wat is voorbereid",
@@ -16727,7 +16804,8 @@
       "partners": {
         "title": "Klanten en partners",
         "subtitle": "Met wie u werkt: klanten, bureaus en gedeelde behoeften.",
-        "empty": "Nog geen klant- of partnerrelaties. Een bureau kan u uitnodigen om samen te werken — dan verschijnen zijn voorstellen hier."
+        "empty": "Nog geen klant- of partnerrelaties. Een bureau kan u uitnodigen om samen te werken — dan verschijnen zijn voorstellen hier.",
+        "unavailable": "Partnerverbindingen konden niet worden geladen. Dat betekent niet dat er geen zijn — probeer het opnieuw."
       },
       "education": {
         "title": "Opleiding en programma's",
@@ -16739,7 +16817,18 @@
         "hoursGridTitle": "Maandelijkse urenstaat",
         "hoursGridNote": "Dezelfde import begrijpt ook de maandtabel (persoon × dag). Dagelijkse ureninvoer staat in het urengedeelte.",
         "hoursDoor": "Werkuren",
-        "evidenceReportsDoor": "Bewijsrapporten"
+        "evidenceReportsDoor": "Bewijsrapporten",
+        "imports": {
+          "title": "Uw imports",
+          "empty": "Er is nog niets geïmporteerd.",
+          "unavailable": "De lijst met imports kon nu niet worden gelezen.",
+          "status": {
+            "staged": "Voorbereid",
+            "committed": "Vastgelegd",
+            "withdrawn": "Ingetrokken",
+            "failed": "Mislukt"
+          }
+        }
       },
       "settings": {
         "title": "Organisatie-instellingen",

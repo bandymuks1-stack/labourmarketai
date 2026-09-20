@@ -862,13 +862,18 @@ describe("supergrand vision surface", () => {
     expect(page).toMatch(/t\("honesty"\)/);
   });
 
-  it("vision control room declares PR #18 BLOCKED + owner smoke PENDING", () => {
+  it("vision control room carries no internal owner-smoke / PR status rows (public page)", () => {
     const lt = JSON.parse(readWeb("messages/lt.json"));
     const en = JSON.parse(readWeb("messages/en.json"));
-    expect(lt.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
-    expect(en.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
-    expect(lt.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
-    expect(en.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
+    // Internal engineering status ("Owner production smoke: PENDING",
+    // "PR #18: BLOCKED (issue #32)") was rendered to the public /vision page
+    // in every locale. Removed 2026-09-20 — the rows and their keys are gone.
+    for (const k of ["ownerSmokeLabel", "ownerSmokeStatus", "pr18Label", "pr18Status"]) {
+      expect(lt.vision.controlRoom[k], `lt vision.controlRoom.${k}`).toBeUndefined();
+      expect(en.vision.controlRoom[k], `en vision.controlRoom.${k}`).toBeUndefined();
+    }
+    const page = readWeb("components/marketing/labour-market-os-map.tsx");
+    expect(page).not.toMatch(/ownerSmoke|pr18/);
     // The fake-claims row must read "never used" in both locales.
     expect(lt.vision.controlRoom.fakeClaimsStatus).toMatch(/Niekada/);
     expect(en.vision.controlRoom.fakeClaimsStatus).toMatch(/Never/);
@@ -2601,7 +2606,14 @@ describe("no migration files added by this sprint", () => {
 // employee + student; set_engagement_journal_review reads it). RED (column +
 // SECDEF redefinition), owner-approved and APPLIED 2026-09-20 (ledger
 // 20260920052103); contract run live and rolled back (PR #1807). RECOUNTED: 298.
-const SPRINT_BASELINE = 298;
+// Bumped 298 -> 299 for 20260920173000_privacy_consent_locale_pl_hash_repin_v1
+// (PL consent legal texts, owner approval 2026-09-20 with the required
+// "without direct identifying data" correction): three data-only UPDATE rows
+// on privacy_consent_purposes re-pinning current_text_hash because
+// consentTextHash() covers every locale in CONSENT_LOCALES and `pl` joined
+// it; versions unchanged, no DDL/grant/policy (GREEN). Paired rollback file.
+// Applied in the same step as the #1810 production deploy. RECOUNTED: 299.
+const SPRINT_BASELINE = 299;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

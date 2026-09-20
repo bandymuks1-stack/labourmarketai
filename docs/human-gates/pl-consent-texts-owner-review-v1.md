@@ -1,7 +1,30 @@
 # PL consent / legal texts — owner review packet v1 (2026-09-20)
 
-Status: **PROPOSED — NOT APPROVED, NOT IN CODE.** `CONSENT_LOCALES` stays lt/en/ru/nl/de until the
-owner approves these texts; until then a Polish member sees the English block (fallback `en`).
+Status: **APPROVED 2026-09-20 — IN CODE (PR #1810).** Owner sentence: "APPROVE PL CONSENT TEXTS v1
+WITH REQUIRED INLINE EDITS". Definitions 1 and 2 landed as drafted below. Definition 3 landed WITH
+the required correction: the exported record is never called anonymised / zanonimizowane /
+de-identified. Canonical term in all six locales: EN "professional summary without direct
+identifying data", PL "podsumowanie zawodowe pozbawione bezpośrednich danych identyfikujących",
+LT "profesinė santrauka be tiesioginių identifikuojančių duomenų", RU "профессиональная сводка
+без прямых идентифицирующих данных", NL "professionele samenvatting zonder directe identificerende
+gegevens", DE "berufliche Zusammenfassung ohne direkt identifizierende Daten" (3.visibleData,
+3.controller, `recipientCategory`, `privacyConsent.partnerSupply.sectionIntro`). The PL table
+below keeps the ORIGINAL proposal for the record; the code is the source of truth.
+
+Verification against production (2026-09-20, read-only SQL + code): the outbound payload is
+`first_party_supply_feed_v1()` — its select list has no name/email/phone/address/CV/document/
+journal field (actorRef = `lm:<type>:<declaration uuid>`), the consumer contract enforces
+`FORBIDDEN_IDENTITY_KEYS` at runtime, and the function is recomputed per call filtered by the
+NEWEST consent event (withdrawal = absent from the next read). `profiles` (email/phone/full_name)
+is readable only by the owner or an admin; `workers` under `can_view_worker` carries no address,
+phone or email column. `withdraw_employer_data_disclosure` appends a `withdrawn` event (readers
+are latest-wins) and stamps `revoked_access_at`; "platform-generated access links" = the
+`contact_disclosure_requests` asks, which expire and are re-checked live via
+`has_employer_data_disclosure`. Controller / software-owner statements are the owner's legal
+declarations (v2 controller-identity migration); this repo asserts them consistently and cannot
+prove corporate facts. Adding `pl` changed every purpose hash → re-pin migration
+`20260920173000_privacy_consent_locale_pl_hash_repin_v1.sql` (GREEN, data-only), applied in the
+same step as the #1810 deploy.
 
 Source of truth: `apps/web/lib/privacy/consent-definitions.ts` (EN column below is verbatim).
 Each definition has seven blocks. Placeholders `{companyName}` / `{contextTitle}` must stay.

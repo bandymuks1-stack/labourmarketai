@@ -27,7 +27,11 @@ import { createHash } from "node:crypto";
 // 2026-09-20: PL is an active UI locale but has NO consent legal blocks yet —
 // the wording is an owner item, not a translation task. The UI falls back to
 // "en" (never Lithuanian), same rule as lib/i18n/unsupported-language.ts.
-export const CONSENT_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: `pl` added on the owner approval "APPROVE PL CONSENT TEXTS v1 WITH
+// REQUIRED INLINE EDITS" (docs/human-gates/pl-consent-texts-owner-review-v1.md).
+// Adding a locale changes every purpose's hash — re-pinned in
+// supabase/migrations/20260920173000_privacy_consent_locale_pl_hash_repin_v1.sql.
+export const CONSENT_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 export type ConsentLocale = (typeof CONSENT_LOCALES)[number];
 
 export const CONSENT_PURPOSES = [
@@ -175,6 +179,21 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
       controller:
         "Verantwortliche für die Datenverarbeitung ist die UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen). Datenschutzkontakt: info@labourmarket.ai. Die Softwareeigentümerin Labour Market AI Sp. z o.o. erhält Ihre personenbezogenen Daten nicht.",
     },
+    pl: {
+      title: "Zezwól firmom na znalezienie mojego profilu zawodowego",
+      summary:
+        "Wybierając tę opcję, zezwalasz zarejestrowanym firmom i agencjom na wgląd w ograniczoną część Twojego profilu zawodowego w celu składania ofert pracy i wyboru kandydatów.",
+      visibleData:
+        "Firmy będą mogły zobaczyć Twój zawód, doświadczenie, umiejętności, preferowany region pracy, dostępność, języki oraz pozostałe informacje zawodowe wyraźnie wymienione w podglądzie.",
+      invisibleData:
+        "Twój numer telefonu, adres e-mail, pełne CV, dokładny adres i prywatne dokumenty nie będą udostępniane bez Twojego odrębnego potwierdzenia.",
+      freedom:
+        "Ten wybór nie jest wymagany, aby korzystać z konta, CV ani dziennika pracy. Jeśli go nie włączysz, Twój profil pozostaje prywatny.",
+      withdrawal:
+        "Możesz to wyłączyć w dowolnym momencie w ustawieniach prywatności. Po wyłączeniu Twój profil nie pojawia się już w nowych wyszukiwaniach firm.",
+      controller:
+        "Administratorem danych jest UAB „Nonstop Group” (kod przedsiębiorstwa 302676973, Litwa). Kontakt w sprawach prywatności: info@labourmarket.ai. Właściciel oprogramowania, Labour Market AI Sp. z o.o., nie otrzymuje Twoich danych osobowych.",
+    },
   },
 };
 
@@ -264,6 +283,21 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
       controller:
         "Die Übermittlung führt die Verantwortliche UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen) durch. Datenschutzkontakt: info@labourmarket.ai. Daten gehen nur an das in der Bestätigung genannte Unternehmen — nicht an die Labour Market AI Sp. z o.o.",
     },
+    pl: {
+      title: "Potwierdź przekazanie danych firmie",
+      summary:
+        "Zezwalasz LabourMarket.ai na przekazanie wymienionych poniżej danych firmie „{companyName}” w związku z „{contextTitle}”.",
+      visibleData:
+        "Przekazane zostaną wyłącznie pola wymienione w tym potwierdzeniu (na przykład imię i nazwisko, dane kontaktowe lub plik CV). Nic więcej nie jest udostępniane.",
+      invisibleData:
+        "Wszystkie pozostałe dane pozostają prywatne. To potwierdzenie nie obowiązuje wobec innych firm ani innych zapytań.",
+      freedom:
+        "Przekazanie następuje wyłącznie po Twoim aktywnym potwierdzeniu. Bez niego żadne dane nie trafiają do firmy, a Twoje konto działa dalej.",
+      withdrawal:
+        "Możesz cofnąć to zezwolenie w ustawieniach prywatności. Nowe przekazania zostają wstrzymane, a wygenerowane przez platformę linki dostępu unieważnione, jednak firma mogła zobaczyć dane w czasie, gdy zezwolenie obowiązywało — mówimy o tym wprost.",
+      controller:
+        "Przekazania dokonuje administrator danych UAB „Nonstop Group” (kod przedsiębiorstwa 302676973, Litwa). Kontakt w sprawach prywatności: info@labourmarket.ai. Dane trafiają wyłącznie do firmy wskazanej w potwierdzeniu — nie do Labour Market AI Sp. z o.o.",
+    },
   },
 };
 
@@ -289,7 +323,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
   purpose: "partner_supply_representation",
   version: "2026-09-04.v1",
   recipientCategory:
-    "Approved partner infrastructure that LabourMarket.ai uses to find work for registered people with employers and projects outside this product. It receives the de-identified projection only, and processes it solely on the controller's instructions",
+    "Approved partner infrastructure that LabourMarket.ai uses to find work for registered people with employers and projects outside this product. It receives only the projection without direct identifying data (an opaque reference plus professional attributes — pseudonymised, not anonymised), and processes it solely on the controller's instructions",
   dataCategories: [
     "an opaque reference that identifies you only inside LabourMarket.ai",
     "profession(s) and trades your evidence supports",
@@ -310,7 +344,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       summary:
         "Pasirinkę šią parinktį leidžiate LabourMarket.ai pristatyti jūsų profesinį prieinamumą partnerių galimybių tinkle, kuris ieško darbo pasiūlymų ir už šios platformos ribų.",
       visibleData:
-        "Perduodama tik neasmenizuota profesinė santrauka: neatpažįstama nuoroda, profesijos, įgūdžiai, patirties metai, pažymėjimų klasės ir jų galiojimas, kalbos, šalys, kuriose galite dirbti, šalys, kuriose sutinkate būti siūlomi, prieinamumas ir pradžios data.",
+        "Perduodama tik profesinė santrauka be tiesioginių identifikuojančių duomenų: neatpažįstama nuoroda, profesijos, įgūdžiai, patirties metai, pažymėjimų klasės ir jų galiojimas, kalbos, šalys, kuriose galite dirbti, šalys, kuriose sutinkate būti siūlomi, prieinamumas ir pradžios data.",
       invisibleData:
         "Vardas, pavardė, el. paštas, telefonas, adresas, CV failas, dokumentų kopijos ir darbo žurnalo turinys NĖRA perduodami. Partneris techniškai negali jų gauti — tokių laukų perduodamame įraše apskritai nėra.",
       freedom:
@@ -318,14 +352,14 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "Sutikimą galite bet kada atšaukti privatumo nustatymuose. Atšaukus, jūsų įrašas dingsta iš kito partnerių tinklo atnaujinimo — jis kuriamas iš naujo kiekvieną kartą, todėl atšauktas sutikimas nelieka kaip istorinis įrašas.",
       controller:
-        "Duomenų valdytoja — UAB „Nonstop Group“ (įmonės kodas 302676973, Lietuva). Privatumo kontaktas: info@labourmarket.ai. Partnerių infrastruktūra duomenis tvarko tik valdytojos nurodymu ir gauna tik šią neasmenizuotą santrauką; programinės įrangos savininkė Labour Market AI Sp. z o.o. jūsų asmens duomenų negauna.",
+        "Duomenų valdytoja — UAB „Nonstop Group“ (įmonės kodas 302676973, Lietuva). Privatumo kontaktas: info@labourmarket.ai. Partnerių infrastruktūra duomenis tvarko tik valdytojos nurodymu ir gauna tik šią santrauką be tiesioginių identifikuojančių duomenų; programinės įrangos savininkė Labour Market AI Sp. z o.o. jūsų asmens duomenų negauna.",
     },
     en: {
       title: "Allow my availability to be represented in the partner opportunity network",
       summary:
         "By choosing this option you allow LabourMarket.ai to represent your professional availability inside the partner opportunity network, which looks for work opportunities outside this platform as well.",
       visibleData:
-        "Only a de-identified professional summary is passed on: an opaque reference, your professions, skills, years of experience, credential classes and whether they are currently valid, languages, the countries you can work in, the countries you agreed to be offered work in, your availability and start date.",
+        "Only a professional summary without direct identifying data is passed on: an opaque reference, your professions, skills, years of experience, credential classes and whether they are currently valid, languages, the countries you can work in, the countries you agreed to be offered work in, your availability and start date.",
       invisibleData:
         "Your name, email address, phone number, address, CV file, document copies and work-journal content are NOT passed on. The partner cannot technically receive them — the record that crosses over has no fields for them at all.",
       freedom:
@@ -333,14 +367,14 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "You can withdraw this at any time in your privacy settings. Once withdrawn, your record disappears from the next partner-network rebuild — that view is rebuilt whole each time, so a withdrawn consent is not left behind as a historical entry.",
       controller:
-        "The data controller is UAB “Nonstop Group” (company code 302676973, Lithuania). Privacy contact: info@labourmarket.ai. The partner infrastructure processes data only on the controller’s instructions and receives only this de-identified summary; the software owner Labour Market AI Sp. z o.o. does not receive your personal data.",
+        "The data controller is UAB “Nonstop Group” (company code 302676973, Lithuania). Privacy contact: info@labourmarket.ai. The partner infrastructure processes data only on the controller’s instructions and receives only this summary without direct identifying data; the software owner Labour Market AI Sp. z o.o. does not receive your personal data.",
     },
     ru: {
       title: "Разрешить представлять мою доступность в партнёрской сети возможностей",
       summary:
         "Выбрав эту настройку, вы разрешаете LabourMarket.ai представлять вашу профессиональную доступность в партнёрской сети возможностей, которая ищет предложения работы в том числе за пределами этой платформы.",
       visibleData:
-        "Передаётся только обезличенная профессиональная сводка: непрозрачная ссылка, профессии, навыки, годы опыта, классы удостоверений и их текущая действительность, языки, страны, где вы можете работать, страны, где вы согласны получать предложения, доступность и дата начала.",
+        "Передаётся только профессиональная сводка без прямых идентифицирующих данных: непрозрачная ссылка, профессии, навыки, годы опыта, классы удостоверений и их текущая действительность, языки, страны, где вы можете работать, страны, где вы согласны получать предложения, доступность и дата начала.",
       invisibleData:
         "Ваше имя, электронная почта, телефон, адрес, файл CV, копии документов и содержимое рабочего журнала НЕ передаются. Партнёр технически не может их получить — в передаваемой записи таких полей нет вообще.",
       freedom:
@@ -348,14 +382,14 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "Вы можете отозвать согласие в любой момент в настройках приватности. После отзыва ваша запись исчезает при следующем обновлении партнёрской сети — представление собирается заново каждый раз, поэтому отозванное согласие не остаётся историческим следом.",
       controller:
-        "Контролёр данных — UAB «Nonstop Group» (код компании 302676973, Литва). Контакт по приватности: info@labourmarket.ai. Партнёрская инфраструктура обрабатывает данные только по указанию контролёра и получает только эту обезличенную сводку; владелец программного обеспечения Labour Market AI Sp. z o.o. ваши персональные данные не получает.",
+        "Контролёр данных — UAB «Nonstop Group» (код компании 302676973, Литва). Контакт по приватности: info@labourmarket.ai. Партнёрская инфраструктура обрабатывает данные только по указанию контролёра и получает только эту сводку без прямых идентифицирующих данных; владелец программного обеспечения Labour Market AI Sp. z o.o. ваши персональные данные не получает.",
     },
     nl: {
       title: "Mijn beschikbaarheid laten vertegenwoordigen in het partnernetwerk",
       summary:
         "Met deze keuze staat u LabourMarket.ai toe uw professionele beschikbaarheid te vertegenwoordigen in het partnernetwerk voor werkgelegenheid, dat ook buiten dit platform naar werk zoekt.",
       visibleData:
-        "Alleen een geanonimiseerde professionele samenvatting wordt doorgegeven: een niet-herleidbare referentie, uw beroepen, vaardigheden, jaren ervaring, certificaatklassen en of ze nu geldig zijn, talen, de landen waar u mag werken, de landen waar u akkoord gaat aangeboden te worden, uw beschikbaarheid en startdatum.",
+        "Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven: een niet-herleidbare referentie, uw beroepen, vaardigheden, jaren ervaring, certificaatklassen en of ze nu geldig zijn, talen, de landen waar u mag werken, de landen waar u akkoord gaat aangeboden te worden, uw beschikbaarheid en startdatum.",
       invisibleData:
         "Uw naam, e-mailadres, telefoonnummer, adres, cv-bestand, documentkopieën en werkjournaal worden NIET doorgegeven. De partner kan ze technisch niet ontvangen — het overgedragen record heeft daar helemaal geen velden voor.",
       freedom:
@@ -363,14 +397,14 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "U kunt dit op elk moment intrekken in uw privacy-instellingen. Na intrekking verdwijnt uw record bij de volgende opbouw van het partnernetwerk — dat overzicht wordt telkens volledig opnieuw gebouwd, dus een ingetrokken toestemming blijft niet als historische vermelding achter.",
       controller:
-        "De verwerkingsverantwoordelijke is UAB “Nonstop Group” (bedrijfscode 302676973, Litouwen). Privacycontact: info@labourmarket.ai. De partnerinfrastructuur verwerkt gegevens uitsluitend in opdracht van de verwerkingsverantwoordelijke en ontvangt alleen deze geanonimiseerde samenvatting; de software-eigenaar Labour Market AI Sp. z o.o. ontvangt uw persoonsgegevens niet.",
+        "De verwerkingsverantwoordelijke is UAB “Nonstop Group” (bedrijfscode 302676973, Litouwen). Privacycontact: info@labourmarket.ai. De partnerinfrastructuur verwerkt gegevens uitsluitend in opdracht van de verwerkingsverantwoordelijke en ontvangt alleen deze samenvatting zonder directe identificerende gegevens; de software-eigenaar Labour Market AI Sp. z o.o. ontvangt uw persoonsgegevens niet.",
     },
     de: {
       title: "Meine Verfügbarkeit im Partner-Chancennetzwerk vertreten lassen",
       summary:
         "Mit dieser Auswahl erlauben Sie LabourMarket.ai, Ihre berufliche Verfügbarkeit im Partner-Chancennetzwerk zu vertreten, das auch außerhalb dieser Plattform nach Arbeit sucht.",
       visibleData:
-        "Weitergegeben wird nur eine anonymisierte berufliche Zusammenfassung: eine nicht auflösbare Referenz, Ihre Berufe, Fähigkeiten, Berufsjahre, Nachweisklassen und deren aktuelle Gültigkeit, Sprachen, die Länder, in denen Sie arbeiten dürfen, die Länder, in denen Sie Angebote erhalten möchten, Ihre Verfügbarkeit und das Startdatum.",
+        "Weitergegeben wird nur eine berufliche Zusammenfassung ohne direkt identifizierende Daten: eine nicht auflösbare Referenz, Ihre Berufe, Fähigkeiten, Berufsjahre, Nachweisklassen und deren aktuelle Gültigkeit, Sprachen, die Länder, in denen Sie arbeiten dürfen, die Länder, in denen Sie Angebote erhalten möchten, Ihre Verfügbarkeit und das Startdatum.",
       invisibleData:
         "Ihr Name, Ihre E-Mail-Adresse, Telefonnummer, Anschrift, Lebenslauf-Datei, Dokumentkopien und Arbeitsjournal-Inhalte werden NICHT weitergegeben. Der Partner kann sie technisch nicht erhalten — der übertragene Datensatz hat dafür überhaupt keine Felder.",
       freedom:
@@ -378,7 +412,22 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "Sie können dies jederzeit in den Datenschutzeinstellungen widerrufen. Nach dem Widerruf verschwindet Ihr Datensatz beim nächsten Neuaufbau des Partnernetzwerks — diese Ansicht wird jedes Mal vollständig neu erzeugt, ein widerrufenes Einverständnis bleibt also nicht als historischer Eintrag zurück.",
       controller:
-        "Verantwortliche ist die UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen). Datenschutzkontakt: info@labourmarket.ai. Die Partnerinfrastruktur verarbeitet Daten ausschließlich auf Weisung der Verantwortlichen und erhält nur diese anonymisierte Zusammenfassung; die Software-Eigentümerin Labour Market AI Sp. z o.o. erhält Ihre personenbezogenen Daten nicht.",
+        "Verantwortliche ist die UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen). Datenschutzkontakt: info@labourmarket.ai. Die Partnerinfrastruktur verarbeitet Daten ausschließlich auf Weisung der Verantwortlichen und erhält nur diese Zusammenfassung ohne direkt identifizierende Daten; die Software-Eigentümerin Labour Market AI Sp. z o.o. erhält Ihre personenbezogenen Daten nicht.",
+    },
+    pl: {
+      title: "Zezwól na reprezentowanie mojej dostępności w partnerskiej sieci ofert pracy",
+      summary:
+        "Wybierając tę opcję, zezwalasz LabourMarket.ai na reprezentowanie Twojej dostępności zawodowej w partnerskiej sieci ofert pracy, która poszukuje możliwości pracy również poza tą platformą.",
+      visibleData:
+        "Przekazywane jest wyłącznie podsumowanie zawodowe pozbawione bezpośrednich danych identyfikujących: nieprzejrzysty identyfikator, Twoje zawody, umiejętności, lata doświadczenia, klasy uprawnień i to, czy są obecnie ważne, języki, kraje, w których możesz pracować, kraje, w których zgodziłeś(-aś) się otrzymywać oferty pracy, Twoja dostępność i data rozpoczęcia.",
+      invisibleData:
+        "Twoje imię i nazwisko, adres e-mail, numer telefonu, adres, plik CV, kopie dokumentów i treść dziennika pracy NIE są przekazywane. Partner nie może ich technicznie otrzymać — przekazywany rekord w ogóle nie ma na nie pól.",
+      freedom:
+        "Ten wybór nie jest wymagany, aby korzystać z konta, CV, dziennika pracy ani aby być widocznym wewnątrz LabourMarket.ai. Jeśli go nie włączysz, Twoja dostępność nie pojawia się w sieci partnerskiej.",
+      withdrawal:
+        "Możesz to wycofać w dowolnym momencie w ustawieniach prywatności. Po wycofaniu Twój rekord znika przy najbliższym przebudowaniu sieci partnerskiej — ten widok jest za każdym razem budowany od nowa w całości, więc wycofana zgoda nie pozostaje jako wpis historyczny.",
+      controller:
+        "Administratorem danych jest UAB „Nonstop Group” (kod przedsiębiorstwa 302676973, Litwa). Kontakt w sprawach prywatności: info@labourmarket.ai. Infrastruktura partnerska przetwarza dane wyłącznie na polecenie administratora i otrzymuje jedynie to podsumowanie pozbawione bezpośrednich danych identyfikujących; właściciel oprogramowania, Labour Market AI Sp. z o.o., nie otrzymuje Twoich danych osobowych.",
     },
   },
 };

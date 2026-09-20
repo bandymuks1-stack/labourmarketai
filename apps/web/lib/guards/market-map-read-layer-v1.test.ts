@@ -997,7 +997,11 @@ describe("NO new DB migration in this PR", () => {
     //   (institution loop: journal review on learner engagements, RED,
     //   APPLIED 2026-09-20, ledger 20260920052103). Not this read layer's
     //   file. RECOUNTED: 298.
-    expect(count).toBeLessThanOrEqual(298);
+    // Bumped 298 -> 299 for 20260920173000_privacy_consent_locale_pl_hash_repin_v1
+    //   (PL consent texts: data-only hash re-pin on privacy_consent_purposes,
+    //   GREEN, applied with the #1810 deploy). Not this read layer's file.
+    //   RECOUNTED: 299.
+    expect(count).toBeLessThanOrEqual(299);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
