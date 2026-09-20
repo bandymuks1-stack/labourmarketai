@@ -481,6 +481,10 @@ export function buildPlanningZoneView(
   // requirements is one person the manager cannot assess, not two.
   const unknownWorkerCount = new Set(
     assessment.requirements.flatMap((r) => [
+      // A fitting worker whose availability was never recorded is neither
+      // capacity nor a miss — the same "cannot tell" as an unrankable level.
+      ...r.headcountGap.unknownWorkerIds,
+      ...(r.supervisorGap?.unknownWorkerIds ?? []),
       ...r.skillGaps.flatMap((g) => [...g.unknownWorkerIds]),
       ...r.languageGaps.flatMap((g) => [...g.unknownWorkerIds]),
       ...r.certificateGaps.flatMap((g) => [...g.unknownWorkerIds]),

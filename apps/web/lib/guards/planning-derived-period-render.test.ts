@@ -95,7 +95,18 @@ describe("calendar month view — derived period evidence", () => {
     expect(await render("2026-09")).toBe("");
   });
 
-  it("renders NOTHING for a withdrawn record, a day-only record, or a failed read", async () => {
+  it("a FAILED read is said as unavailable — never rendered as 'no period record' (SEP-7)", async () => {
+    holder.result = { kind: "unavailable" };
+    const html = await render("2025-09");
+    expect(html).toContain('data-testid="planning-source-note-period-error"');
+    expect(html).toContain("planning.derived.unavailable");
+    expect(html).not.toContain('data-testid="planning-derived-period"');
+    // a store that is not provisioned here is an honest nothing, not a failure
+    holder.result = { kind: "needs-migration" };
+    expect(await render("2025-09")).toBe("");
+  });
+
+  it("renders NOTHING for a withdrawn record or a day-only record", async () => {
     holder.result = { kind: "ok", records: [record({ withdrawn: true })], links: [], pendingOffers: [] };
     expect(await render("2025-09")).toBe("");
     holder.result = {
@@ -104,8 +115,6 @@ describe("calendar month view — derived period evidence", () => {
       links: [],
       pendingOffers: [],
     };
-    expect(await render("2025-09")).toBe("");
-    holder.result = { kind: "unavailable" };
     expect(await render("2025-09")).toBe("");
   });
 

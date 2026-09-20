@@ -225,12 +225,18 @@ export default async function DashboardHomePage({
   // MY SPACE (owner contract 2026-09-04 §4C): the person's own pins for
   // THIS workspace, under RLS. Unavailable (migration unapplied / read
   // failed) → `null` → no row, no ask.
-  const pinsRead = await listMyPins(identity === "company" ? workspace.organizationId : null);
+  // The pins read and the three translation bundles below are independent
+  // of each other — one batch, not four consecutive awaits (measured: the
+  // same reads, issued together).
+  const [pinsRead, tChat, tWorkLog, tCountryNames] = await Promise.all([
+    listMyPins(identity === "company" ? workspace.organizationId : null),
+    getTranslations("conversation.chat"),
+    getTranslations("conversation.worklog"),
+    getTranslations("labourMarket"),
+  ]);
   const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
-  const labels = resolveChatLabels(await getTranslations("conversation.chat"));
-  const workLogLabels = resolveWorkLogLabels(
-    await getTranslations("conversation.worklog"),
-  );
+  const labels = resolveChatLabels(tChat);
+  const workLogLabels = resolveWorkLogLabels(tWorkLog);
 
   /**
    * Localized country names for the demand prefill.
@@ -244,7 +250,6 @@ export default async function DashboardHomePage({
    * `labourMarket.countryNames` is the same node the company page uses; this
    * adds no second source.
    */
-  const tCountryNames = await getTranslations("labourMarket");
   const countryLabels = Object.fromEntries(
     MARKET_COUNTRIES.map((c) => [c, tCountryNames(`countryNames.${c}`)]),
   ) as Record<string, string>;
@@ -254,8 +259,7 @@ export default async function DashboardHomePage({
   // production 2026-09-06: this page ALSO composed its own intro line (the
   // `{institution}` greeting key) from the same engagement, so the learner's
   // first screen said "Mokotės su X" twice. The engagement read above still
-  // decides the person's starters.
-  const tChat = await getTranslations("conversation.chat");
+  // decides the person's starters. (`tChat` is the bundle batched above.)
   // The not-understood answer and the opening line describe the world the
   // person stands in, composed from the capability tracks the workspace
   // genuinely holds — an agency that is also an employer hears BOTH. Phrases
@@ -332,15 +336,14 @@ async function loadActiveLearnerLink(): Promise<string | null> {
  */
 async function loadPersonalIntroPayload(): Promise<PersonalIntroPayload> {
   const intro = await loadPersonalWorkspaceIntro();
-  const labels =
-    intro.kind === "hidden"
-      ? null
-      : resolvePersonalWorkspaceLabels(
-          await getTranslations("personalWorkspace"),
-          await getTranslations("playerCard.readinessSteps.pillar"),
-          await getTranslations("conversation.chat"),
-        );
-  return { intro, labels };
+  if (intro.kind === "hidden") return { intro, labels: null };
+  // Three independent bundles — one batch, not three consecutive awaits.
+  const [tWorkspace, tPillar, tChat] = await Promise.all([
+    getTranslations("personalWorkspace"),
+    getTranslations("playerCard.readinessSteps.pillar"),
+    getTranslations("conversation.chat"),
+  ]);
+  return { intro, labels: resolvePersonalWorkspaceLabels(tWorkspace, tPillar, tChat) };
 }
 
 async function loadBookingOffers(
@@ -367,8 +370,10 @@ async function loadBookingOffers(
     return { offers: [], labels: null };
   }
   if (offers.length === 0) return { offers: [], labels: null };
-  const tB = await getTranslations("bookings.actions");
-  const tC = await getTranslations("conversation.booking");
+  const [tB, tC] = await Promise.all([
+    getTranslations("bookings.actions"),
+    getTranslations("conversation.booking"),
+  ]);
   return {
     offers,
     labels: {

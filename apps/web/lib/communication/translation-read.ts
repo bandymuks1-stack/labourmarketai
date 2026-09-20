@@ -1,9 +1,15 @@
 import "server-only";
 
 import { runAiAgent } from "@/lib/ai/run-agent-server";
+import { communicationLanguageNames, isCommunicationLocale } from "@/lib/i18n/config";
 import { rateLimit } from "@/lib/security/rate-limit";
 
-import { needsTranslation, resolveViewerText, type ViewerText } from "./translation";
+import {
+  needsTranslation,
+  resolveViewerText,
+  type TranslationUnavailableReason,
+  type ViewerText,
+} from "./translation";
 
 /**
  * MULTILINGUAL WORK COMMUNICATION — the READ side (owner P0, 2026-09-17).
@@ -75,20 +81,37 @@ function remember(key: string, value: Cached): void {
   cache.set(key, value);
 }
 
+type TranslateResult =
+  | { readonly ok: true; readonly value: NonNullable<Cached> }
+  | { readonly ok: false; readonly reason: TranslationUnavailableReason };
+
+/** The target and source named in words for the model. The request-level
+ *  `locale` hint below is limited to the AI runtime's three prompt locales, so
+ *  a Dutch, Polish or Georgian reader would otherwise be asked for "en" — the
+ *  context line makes the target unambiguous for EVERY communication language.
+ *  Codes outside the set are passed as codes (never guessed into a name). */
+function translationContext(target: string, source: string | null | undefined): string {
+  const name = (code: string): string =>
+    isCommunicationLocale(code) ? `${communicationLanguageNames[code]} (${code})` : code;
+  const from = source ? ` from ${name(source)}` : "";
+  return `work message between colleagues — translate it${from} into ${name(target)}; keep the meaning exact`;
+}
+
 /** One message → one runtime call, or the cache. Never throws. */
 async function translateOne(
   m: TranslatableMessage,
   viewerLocale: string,
-): Promise<Cached> {
+): Promise<TranslateResult> {
   const key = cacheKey(m, viewerLocale);
-  if (cache.has(key)) return cache.get(key) ?? null;
+  const cached = cache.get(key);
+  if (cached) return { ok: true, value: cached };
   try {
     const outcome = await runAiAgent(
       "translation_copy",
       {
         canonicalMessage: m.body.slice(0, 8000),
         locale: viewerLocale,
-        context: "work message between colleagues",
+        context: translationContext(viewerLocale, m.original_language),
       },
       {
         locale: AI_LOCALES.has(viewerLocale) ? (viewerLocale as "en" | "lt" | "ru") : "en",
@@ -101,17 +124,18 @@ async function translateOne(
     if (outcome.status !== "suggestion") {
       // Blocked by the egress gate, disabled, or sent for review: the
       // original stands. Not cached — a grant can arrive at any time.
-      return null;
+      return { ok: false, reason: "declined" };
     }
     const text = (outcome.value as { data?: { localized_copy?: unknown } }).data?.localized_copy;
     const value: Cached =
       typeof text === "string" && text.trim().length > 0
         ? { text: text.trim(), provider: outcome.provider }
         : null;
-    if (value) remember(key, value);
-    return value;
+    if (!value) return { ok: false, reason: "failed" };
+    remember(key, value);
+    return { ok: true, value };
   } catch {
-    return null;
+    return { ok: false, reason: "failed" };
   }
 }
 
@@ -126,12 +150,17 @@ export async function resolveViewerTexts(
   viewerId: string,
 ): Promise<ReadonlyMap<string, ViewerText>> {
   const out = new Map<string, ViewerText>();
-  const original = (m: TranslatableMessage, translation: Cached = null) =>
+  const original = (
+    m: TranslatableMessage,
+    translation: Cached = null,
+    unavailable: TranslationUnavailableReason | null = null,
+  ) =>
     resolveViewerText({
       body: m.body,
       originalLanguage: m.original_language ?? null,
       viewerLocale,
       translation,
+      unavailable,
     });
 
   const candidates = messages.filter((m) =>
@@ -142,7 +171,10 @@ export async function resolveViewerTexts(
   const chosenIds = new Set(chosen.map((m) => m.id));
 
   for (const m of messages) {
-    if (!chosenIds.has(m.id)) out.set(m.id, original(m));
+    // Same-language and unknown-language messages resolve to their own
+    // state; a foreign message beyond the per-read bound is honestly
+    // "not attempted".
+    if (!chosenIds.has(m.id)) out.set(m.id, original(m, null, "not_attempted"));
   }
 
   // Cached renderings cost nothing and are not rate-limited.
@@ -156,7 +188,7 @@ export async function resolveViewerTexts(
 
   const limited = rateLimit({ name: "message_translation", key: viewerId, ...RATE });
   if (limited.limited) {
-    for (const m of uncached) out.set(m.id, original(m));
+    for (const m of uncached) out.set(m.id, original(m, null, "rate_limited"));
     return out;
   }
 
@@ -166,10 +198,13 @@ export async function resolveViewerTexts(
   for (let i = 0; i < uncached.length; i += CONCURRENCY) {
     const batch = uncached.slice(i, i + CONCURRENCY);
     const results = await Promise.all(batch.map((m) => translateOne(m, viewerLocale)));
-    batch.forEach((m, j) => out.set(m.id, original(m, results[j])));
+    batch.forEach((m, j) => {
+      const r = results[j];
+      out.set(m.id, r.ok ? original(m, r.value) : original(m, null, r.reason));
+    });
     // The gate said no once; it will say no to the rest of this read too.
-    if (results.every((r) => r === null)) {
-      for (const m of uncached.slice(i + CONCURRENCY)) out.set(m.id, original(m));
+    if (results.every((r) => !r.ok && r.reason === "declined")) {
+      for (const m of uncached.slice(i + CONCURRENCY)) out.set(m.id, original(m, null, "declined"));
       break;
     }
   }

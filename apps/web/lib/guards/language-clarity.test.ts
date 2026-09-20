@@ -95,29 +95,53 @@ describe("no unsupported-language claims in active-locale copy", () => {
   }
 });
 
-describe("honesty helper text — write in your own language, no translation engine", () => {
-  const NEGATION: Record<string, RegExp> = {
-    en: /no automatic translation/i,
-    lt: /automatinio vertimo nėra/i,
-    ru: /автоматического перевода нет/i,
+describe("honesty helper text — write in your own language; the original is what is promised", () => {
+  // Translation-on-read is LIVE behind the owner's egress grant (RED-2,
+  // 2026-09-17), so the helper may no longer claim "there is no automatic
+  // translation" (a false negative) — and it may not promise a translation
+  // either (the gate, the provider or the rate cap can say no). What it MUST
+  // say: the other person keeps the ORIGINAL.
+  const ORIGINAL_KEPT: Record<string, RegExp> = {
+    en: /original/i,
+    lt: /original/i,
+    ru: /оригинал/i,
   };
+  const FALSE_NEGATION = /no automatic translation|automatinio vertimo nėra|автоматического перевода нет/i;
+  const GUARANTEE = /always translated|visada išverč|всегда перевод/i;
 
   for (const locale of ["en", "lt", "ru"] as const) {
-    it(`${locale}: chat composer helper exists and says there is NO auto translation`, () => {
+    it(`${locale}: chat composer helper keeps the original as the promise — no false "no translation", no guarantee`, () => {
       const hint = get(loadMessages(locale), "communication.composer.languageHint");
       expect(hint, `${locale} communication.composer.languageHint`).toBeTruthy();
-      expect(hint).toMatch(NEGATION[locale]);
+      expect(hint).toMatch(ORIGINAL_KEPT[locale]);
+      expect(hint).not.toMatch(FALSE_NEGATION);
+      expect(hint).not.toMatch(GUARANTEE);
     });
 
     it(`${locale}: instructions language note is honest and promises nothing`, () => {
       const note = get(loadMessages(locale), "instructions.manager.languageNote");
       expect(note, `${locale} instructions.manager.languageNote`).toBeTruthy();
-      expect(note).toMatch(NEGATION[locale]);
-      // No forward-looking translation promise (the old copy said a
-      // translation "will be added later" — no engine exists, so don't).
+      expect(note).toMatch(ORIGINAL_KEPT[locale]);
+      expect(note).not.toMatch(FALSE_NEGATION);
+      expect(note).not.toMatch(GUARANTEE);
+      // No forward-looking promise either ("will be added later").
       expect(note).not.toMatch(/will be added|bus pridėt|будет добавлен/i);
     });
   }
+
+  it("the composer lets the author declare the language they wrote in, from the communication set", () => {
+    const composer = read("components/app/communication-composer.tsx");
+    expect(composer).toMatch(/data-testid="communication-composer-language"/);
+    expect(composer).toMatch(/communicationLocales\.map\(/);
+    expect(composer).toMatch(/originalLanguage: writeLang/);
+    // the server accepts only communication locales — never a guessed code
+    const actions = read("lib/communication/actions.ts");
+    expect(actions).toMatch(/includes\(declared\)/);
+    // the worker's clarification reply is stamped the same way
+    const instr = read("lib/instructions/actions.ts");
+    expect(instr).toMatch(/isCommunicationLocale\(locale\)/);
+    expect(instr).toMatch(/original_language: originalLanguage/);
+  });
 
   it("the chat composer renders the helper line", () => {
     const composer = read("components/app/communication-composer.tsx");

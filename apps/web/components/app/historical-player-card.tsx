@@ -602,12 +602,12 @@ export function HistoricalPlayerCard({
                     <button
                       type="button"
                       onClick={() => onSelectObject(p.name)}
-                      className="flex min-h-9 max-w-52 items-center gap-2 rounded-md text-left hover:bg-ink-800/70"
+                      className="flex min-h-11 max-w-52 items-center gap-2 rounded-md text-left hover:bg-ink-800/70"
                     >
                       {inner}
                     </button>
                   ) : (
-                    <span className="flex min-h-9 max-w-52 items-center gap-2">
+                    <span className="flex min-h-11 max-w-52 items-center gap-2">
                       {inner}
                     </span>
                   )}
@@ -622,7 +622,7 @@ export function HistoricalPlayerCard({
             {person.activities.map((a) => (
               <li
                 key={a}
-                className="inline-flex min-h-9 items-center gap-1.5 text-support text-text-secondary"
+                className="inline-flex min-h-11 items-center gap-1.5 text-support text-text-secondary"
               >
                 <span className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-dashed border-ink-500">
                   <SemanticIcon

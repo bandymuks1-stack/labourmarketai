@@ -26,9 +26,11 @@ import {
  * W4 review found in the project reads — an `!inner` join for an optional
  * display name silently deletes the row it was decorating.)
  *
- * Degrades to `[]` on any read failure — an unreadable history is an empty
- * one for rendering purposes, and the caller shows its honest empty state. It
- * never invents an engagement.
+ * A FAILED READ IS NOT AN EMPTY HISTORY (SEP-7). This used to degrade to `[]`,
+ * and the card then rendered a read that had failed as "no history yet" —
+ * the same defect the company-side twin below had already fixed. Both reads
+ * now answer with the same three-outcome union: rows, no rows, or
+ * `unavailable`. Nothing here ever invents an engagement.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,12 +42,17 @@ function asAny(c: SupabaseClient): any {
  *  identity summary, not an employment archive. */
 export const WORK_HISTORY_LIMIT = 20;
 
-export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryEntry[]> => {
+export type WorkHistoryRead =
+  | { readonly status: "ok"; readonly entries: readonly WorkHistoryEntry[] }
+  | { readonly status: "unavailable" };
+
+export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryRead> => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return [];
+  // No session is not a failed read: there is nobody whose history to read.
+  if (!user) return { status: "ok", entries: [] };
 
   try {
     const res = await asAny(supabase)
@@ -62,10 +69,13 @@ export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryEntry[]> => 
       .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS])
       .order("started_at", { ascending: false, nullsFirst: false })
       .limit(WORK_HISTORY_LIMIT);
-    if (res.error) return [];
-    return deriveWorkHistory((res.data ?? []) as WorkHistorySourceRow[]);
+    if (res.error) return { status: "unavailable" };
+    return {
+      status: "ok",
+      entries: deriveWorkHistory((res.data ?? []) as WorkHistorySourceRow[]),
+    };
   } catch {
-    return [];
+    return { status: "unavailable" };
   }
 });
 
@@ -88,15 +98,10 @@ export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryEntry[]> => 
  * claiming to show a complete history — it is the part the viewer is entitled
  * to, which is not the same thing.
  *
- * A FAILED READ IS NOT AN EMPTY HISTORY. `getOwnWorkHistory` above degrades to
- * `[]` because the owner's card has other signals around it; here the section
- * IS the signal, so a broken read must never render as "this person has done
- * nothing". The three outcomes stay three.
+ * A FAILED READ IS NOT AN EMPTY HISTORY. A broken read must never render as
+ * "this person has done nothing". The three outcomes stay three — and since
+ * the identity-truth fix the owner's own read above keeps them too.
  */
-export type WorkHistoryRead =
-  | { readonly status: "ok"; readonly entries: readonly WorkHistoryEntry[] }
-  | { readonly status: "unavailable" };
-
 export async function readRecordedWorkFor(
   profileId: string,
 ): Promise<WorkHistoryRead> {

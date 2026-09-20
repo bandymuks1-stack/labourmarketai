@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { SAVE_TIMEOUT_MS } from "@/lib/async/with-timeout";
+import { useDialogFocus } from "@/lib/hooks/use-dialog-focus";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "sending" | "success" | "duplicate" | "error";
@@ -31,19 +32,10 @@ export function WaitlistModal({
   const dialogRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.activeElement as HTMLElement | null;
-    emailRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      prev?.focus?.();
-    };
-  }, [open]);
+  // Modal focus contract: e-mail field focused, Tab trapped, Escape closes,
+  // opener restored.
+  const closeOnEscape = useCallback(() => setOpen(false), []);
+  useDialogFocus(open, closeOnEscape, dialogRef, emailRef);
 
   function close() {
     setOpen(false);

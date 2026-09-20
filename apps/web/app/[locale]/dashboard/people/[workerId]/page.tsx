@@ -35,6 +35,7 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
 import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
+import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
 
 export const dynamic = "force-dynamic";
 
@@ -608,6 +609,12 @@ export default async function PersonPage({
           {t("workScopeNote")}
         </p>
       </section>
+
+      {/* WHAT THIS ORGANIZATION IMPORTED ABOUT THEM. The page read no
+          imported history at all (2026-09-20): the ONE evidence read, through
+          the person's LINKED roster row, rendered with the shared evidence
+          primitives. Nothing when there is none; said when it cannot be read. */}
+      <PersonImportedHistory workerId={worker.id as string} locale={locale} />
     </div>
   );
 }

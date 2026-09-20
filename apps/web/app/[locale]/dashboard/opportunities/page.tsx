@@ -55,6 +55,11 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-read";
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
+import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
+import {
+  WORKER_INTENT_STATES,
+  type WorkerIntentState,
+} from "@/lib/supply-bridge/first-party-signal-contract";
 import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
 import { MarketExplanationPanel } from "@/components/app/market-explanation-panel";
 import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
@@ -203,9 +208,10 @@ export default async function OpportunitiesPage({
   // their own authorization. Unavailable (owner-gated migration unapplied, or
   // a failed read) renders no controls at all.
   const savedSearches = await getMySavedSearches();
-  // Board + salary benchmark + weekly digest are independent reads — one
-  // combined await so TTFB pays the slowest of the three, not their sum.
-  const [result, salaryIntel, weekly, worldView] = await Promise.all([
+  // Board + salary benchmark + weekly digest + world view + the person's
+  // own work-seeking intent are independent reads — one combined await so
+  // TTFB pays the slowest of them, not their sum.
+  const [result, salaryIntel, weekly, worldView, partnerSupply] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
@@ -224,7 +230,22 @@ export default async function OpportunitiesPage({
       zoom: DEFAULT_WORLD_ZOOM,
       layer: "demand",
     }),
+    // The five-state work-seeking intent the person declared under
+    // /dashboard/privacy (`first_party_supply_declarations`) — the SAME
+    // reader that page uses, so the board shows what the person said about
+    // themselves beside what the board says about their readiness. Any
+    // non-ok state (not declared / withdrawn / unreadable) → no chip: the
+    // board never says "not looking" on the person's behalf.
+    getMyPartnerSupplyState().catch(() => null),
   ]);
+  const declaredIntent: WorkerIntentState | null = (() => {
+    if (!partnerSupply || partnerSupply.kind !== "ok") return null;
+    const d = partnerSupply.declaration;
+    if (!d || d.withdrawnAt || !d.intentState) return null;
+    return (WORKER_INTENT_STATES as readonly string[]).includes(d.intentState)
+      ? (d.intentState as WorkerIntentState)
+      : null;
+  })();
 
   // DEM-8 — each saved question read against the cards this worker's own
   // board read returned. `applyDiscoveryFilters` is the board's own matcher,
@@ -1852,6 +1873,23 @@ export default async function OpportunitiesPage({
                     </li>
                   ))}
                 </ul>
+                {/* WHAT THE PERSON SAID — the declared work-seeking intent,
+                    beside what the board reads. Rendered ONLY for a live
+                    declaration; a chip is a door to the ONE place it is
+                    edited, never a second editor. */}
+                {declaredIntent ? (
+                  <Link
+                    href={`/${locale}/dashboard/privacy#partner-supply`}
+                    data-testid="opportunities-intent-chip"
+                    data-intent={declaredIntent}
+                    className="inline-flex min-h-11 w-fit flex-wrap items-center gap-x-2 rounded-md border border-ink-500 bg-ink-800 px-2.5 text-basis text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("intent.label")}
+                    </span>
+                    <span className="text-text-primary">{t(`intent.states.${declaredIntent}`)}</span>
+                  </Link>
+                ) : null}
                 <Link
                   href={profileHref}
                   className="inline-flex min-h-11 w-fit items-center rounded-md bg-brand-blue px-4 text-support font-semibold text-text-on-brand hover:bg-brand-blue/80"

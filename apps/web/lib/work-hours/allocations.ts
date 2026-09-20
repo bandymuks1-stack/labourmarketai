@@ -205,6 +205,44 @@ export async function getAllocationsForMonth(
 }
 
 /**
+ * An inclusive calendar-day window of the organization's live hour records
+ * — the org-keyed read the windowed journal report composes BESIDE its
+ * journal figures (owner §19: one ledger next to the other, never summed).
+ * Same resolver, same RLS, same bound as the month grid.
+ */
+export async function getAllocationsForRange(
+  startIso: string,
+  endIso: string,
+): Promise<AllocationsResult> {
+  return readAllocations((q) =>
+    q
+      .gte("work_date", startIso)
+      .lte("work_date", endIso)
+      .is("superseded_by", null)
+      .order("work_date", { ascending: true })
+      .limit(ALLOCATION_READ_LIMIT),
+  );
+}
+
+/**
+ * The organization's live hour records on a set of work objects — the
+ * per-project reading (a project's objects carry `work_objects.project_id`).
+ * `objectIds` NARROWS the org-keyed read; it never widens it.
+ */
+export async function getAllocationsForObjects(
+  objectIds: readonly string[],
+): Promise<AllocationsResult> {
+  const ids = objectIds.slice(0, 100);
+  return readAllocations((q) =>
+    q
+      .in("work_object_id", ids)
+      .is("superseded_by", null)
+      .order("work_date", { ascending: true })
+      .limit(ALLOCATION_READ_LIMIT),
+  );
+}
+
+/**
  * The caller's most recent allocations, used ONLY to warn about an accidental
  * re-submit. Superseded rows are included deliberately: a correction should
  * not make the original invisible to the duplicate check.

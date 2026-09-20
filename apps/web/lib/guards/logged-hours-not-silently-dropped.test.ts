@@ -74,7 +74,7 @@ describe("the save path refuses to drop reviewed-pending durations", () => {
       const node = raw.journal ?? (raw as unknown as Record<string, string>);
       const msg = (node as Record<string, string>).unconfirmedTimeBlocked;
       expect(msg, `${loc} unconfirmedTimeBlocked`).toBeTruthy();
-      expect(msg, `${loc} must name the count`).toContain("{count}");
+      expect(msg, `${loc} must name the count`).toMatch(/\{count[,}]/);
       expect(msg, `${loc} must not be a placeholder`).not.toMatch(/^\[EN\]/);
     }
   });

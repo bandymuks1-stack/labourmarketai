@@ -10,8 +10,13 @@
  *
  * Matching rules (documented in
  * docs/product/workforce-capacity-skill-gap-contract-v1.md):
- *   available  availability_status !== "unavailable" AND (available_from
- *              <= need start when both are known).
+ *   available  availability_status is KNOWN and !== "unavailable" AND
+ *              (available_from <= need start when both are known). A null
+ *              status is UNKNOWN availability, not free capacity: the worker
+ *              is reported in the headcount gap's `unknownWorkerIds`, never
+ *              counted as eligible (SEP-7 — the same null `match-v1` maps to
+ *              `unknown`). CAPABILITY (has the skill) stays a separate
+ *              question from AVAILABLE CAPACITY.
  *   free       no planned commitment overlaps the need window — INCLUSIVE
  *              calendar-day ranges, the exact booking-accept-guard
  *              semantics (rangesOverlapInclusive). Without a need window
@@ -122,13 +127,15 @@ export interface CapacityGap {
   /**
    * Workers whose coverage of this dimension COULD NOT BE DETERMINED — as
    * opposed to determined-and-negative, which is simply absence from
-   * `matchedWorkerIds`. Today only the language dimension can produce this:
-   * a stated level outside the closed CEFR set ranks `null`, and guessing
-   * either way would put a number in front of an employer that the data does
-   * not support. `shortfall` counts these as NOT covered (the cautious
-   * reading), so a surface that ignores this field is conservative rather
-   * than wrong — but a surface that shows the shortfall should say how much
-   * of it is unknown rather than missing.
+   * `matchedWorkerIds`. Two dimensions produce this: the language dimension
+   * (a stated level outside the closed CEFR set ranks `null`) and the
+   * headcount / supervisor dimensions (a worker who FITS but whose
+   * availability status was never recorded). Guessing either way would put
+   * a number in front of an employer that the data does not support.
+   * `shortfall` counts these as NOT covered (the cautious reading), so a
+   * surface that ignores this field is conservative rather than wrong — but
+   * a surface that shows the shortfall should say how much of it is unknown
+   * rather than missing.
    */
   readonly unknownWorkerIds: readonly string[];
   readonly shortfall: number;
@@ -156,6 +163,9 @@ export interface RequirementCapacity {
   readonly matchedWorkerIds: readonly string[];
   /** Fit + available but committed in the window — transfer candidates. */
   readonly busyMatchedWorkerIds: readonly string[];
+  /** Fit, but availability was never recorded — neither capacity nor a
+   *  proven miss. Also carried in `headcountGap.unknownWorkerIds`. */
+  readonly unknownAvailabilityWorkerIds: readonly string[];
   /** Right profession but missing required skills — training candidates. */
   readonly nearMissWorkerIds: readonly string[];
   readonly headcountGap: CapacityGap;
@@ -235,15 +245,25 @@ export function workerFitsRequirement(
   return covered >= Math.ceil(requirement.skills.length / 2);
 }
 
-function isAvailable(
-  worker: WorkerCapacityInput,
+export type CapacityAvailability = "available" | "unavailable" | "unknown";
+
+/**
+ * THREE answers, not two. A worker whose `availability_status` was never
+ * recorded is UNKNOWN — not free. Before 2026-09-20 this returned `true` for
+ * `null`, so every unmeasured person on the roster counted as eligible
+ * capacity while `match-v1` mapped the same null to `unknown`.
+ */
+export function availabilityOf(
+  worker: Pick<WorkerCapacityInput, "availabilityStatus" | "availableFrom">,
   needStart: string | null,
-): boolean {
-  if (worker.availabilityStatus === "unavailable") return false;
+): CapacityAvailability {
+  const status = (worker.availabilityStatus ?? "").trim();
+  if (status.length === 0) return "unknown";
+  if (status === "unavailable") return "unavailable";
   if (worker.availableFrom && needStart && worker.availableFrom > needStart) {
-    return false;
+    return "unavailable";
   }
-  return true;
+  return "available";
 }
 
 function isFree(
@@ -323,9 +343,11 @@ function assessRequirement(
   const eligible: string[] = [];
   const busyFit: string[] = [];
   const nearMiss: string[] = [];
+  const unknownAvailability: string[] = [];
 
   for (const w of workers) {
-    const available = isAvailable(w, needStart);
+    const availability = availabilityOf(w, needStart);
+    const available = availability === "available";
     const fit = workerFitsRequirement(w, requirement);
     const free = isFree(
       commitmentsByWorker.get(w.workerId) ?? w.plannedCommitments,
@@ -334,6 +356,7 @@ function assessRequirement(
     );
     if (fit && available && free) eligible.push(w.workerId);
     else if (fit && available && !free) busyFit.push(w.workerId);
+    else if (fit && availability === "unknown") unknownAvailability.push(w.workerId);
     if (
       !fit &&
       requirement.professionSlug !== null &&
@@ -359,6 +382,7 @@ function assessRequirement(
     null,
     requirement.headcount,
     eligible,
+    unknownAvailability,
   );
 
   const requiredHours = requirement.totalHours;
@@ -439,12 +463,20 @@ function assessRequirement(
             .filter(
               (w) =>
                 workerCanSupervise(w) &&
-                isAvailable(w, needStart) &&
+                availabilityOf(w, needStart) === "available" &&
                 isFree(
                   commitmentsByWorker.get(w.workerId) ?? w.plannedCommitments,
                   needStart,
                   needEnd,
                 ),
+            )
+            .map((w) => w.workerId),
+          // A supervisor whose availability was never recorded is UNKNOWN
+          // supervision capacity — reported, never counted.
+          workers
+            .filter(
+              (w) =>
+                workerCanSupervise(w) && availabilityOf(w, needStart) === "unknown",
             )
             .map((w) => w.workerId),
         )
@@ -493,6 +525,7 @@ function assessRequirement(
     headcountRequired: requirement.headcount,
     matchedWorkerIds: eligible,
     busyMatchedWorkerIds: busyFit,
+    unknownAvailabilityWorkerIds: unknownAvailability,
     nearMissWorkerIds: nearMiss,
     headcountGap,
     hoursGap,

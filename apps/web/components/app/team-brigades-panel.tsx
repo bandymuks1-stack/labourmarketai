@@ -329,6 +329,14 @@ export function TeamBrigadesPanel({
                 >
                   {t("inviteNotEnabled")}
                 </p>
+              ) : team.addable === null ? (
+                <p
+                  role="alert"
+                  className="text-meta text-text-secondary"
+                  data-testid={`team-addable-unavailable-${team.id}`}
+                >
+                  {t("addableUnavailable")}
+                </p>
               ) : team.addable.length === 0 ? (
                 <p className="text-meta text-text-muted">{t("noAddable")}</p>
               ) : (

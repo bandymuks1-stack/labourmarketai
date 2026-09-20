@@ -73,6 +73,8 @@ describe("generic A→B rendering and B→A reply — no pair hardcoded", () => 
       const out = await resolveViewerTexts([msg(A)], B, `v-${B}`);
       expect(out.get(`m-${A}`)).toEqual({
         kind: "translated",
+        state: "translated",
+        unavailable: null,
         text: `[${B}] rendered`,
         original: `orig-${A}`,
         languageBadge: A,

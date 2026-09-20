@@ -67,12 +67,17 @@ export default async function CommunicationListPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/communication`);
 
-  const { data: conversationsRaw } = await asAny(supabase)
+  const conversationsRes = await asAny(supabase)
     .from("conversations")
     .select("id, subject, kind, created_by, updated_at")
     .order("updated_at", { ascending: false })
     .limit(100);
-  const fetched: ConversationRow[] = (conversationsRaw ?? []) as ConversationRow[];
+  // FAILED ≠ EMPTY: a read that errored must not render as "no conversations
+  // yet" — the person would believe their threads are gone.
+  const conversationsFailed = Boolean(conversationsRes.error);
+  const fetched: ConversationRow[] = conversationsFailed
+    ? []
+    : ((conversationsRes.data ?? []) as ConversationRow[]);
 
   // REAL unread state (audit PR5): a counterpart message newer than the
   // caller's last_read_at — shared with the nav badge and the bell, so the
@@ -244,6 +249,17 @@ export default async function CommunicationListPage({
                       : (card.counterpartyName ?? t("byOther")))}
                 {": "}
               </span>
+              {/* The list shows the ORIGINAL first line; when it was written
+                  in another language the same badge as the thread says so —
+                  translation happens on the thread read, never on a list. */}
+              {preview.originalLanguage && preview.originalLanguage !== locale ? (
+                <span
+                  className="mr-1 rounded-sm border border-ink-500 px-1 font-mono text-meta uppercase tracking-label text-text-muted"
+                  data-testid={`conversation-preview-lang-${c.id}`}
+                >
+                  {preview.originalLanguage}
+                </span>
+              ) : null}
               {preview.text.length > 0
                 ? preview.text
                 : t("preview.attachmentOnly")}
@@ -415,7 +431,15 @@ export default async function CommunicationListPage({
         </Link>
       )}
 
-      {conversations.length === 0 ? (
+      {conversationsFailed ? (
+        <p
+          role="alert"
+          className="card-border border-state-danger/40 p-4 text-sm text-text-secondary"
+          data-testid="communication-load-error"
+        >
+          {t("loadError")}
+        </p>
+      ) : conversations.length === 0 ? (
         <div className="card-border flex flex-col gap-3 p-4" data-testid="communication-empty">
           <p className="text-sm text-text-secondary">{t("empty")}</p>
           {/* A dead end is not an empty state (2026-09-19): the next useful

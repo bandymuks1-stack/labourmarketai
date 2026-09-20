@@ -512,6 +512,9 @@ describe("the ChatGPT / MCP surface carries the canonical brand", () => {
       "icon-512.png",
       "icon-maskable-192.png",
       "icon-maskable-512.png",
+      // app/apple-icon.png — the same generator, 180 px, for iOS home-screen
+      // install (`lib/guards/pwa-install-assets.test.ts` pins its pixels).
+      "apple-icon.png",
     ]) {
       CANONICAL_MARKS.add(generated);
     }

@@ -96,7 +96,10 @@ export default async function ConversationDetailPage({
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
     .limit(500);
-  const messages: MessageRow[] = (messagesRes.data ?? []) as MessageRow[];
+  // A failed read is NOT an empty thread (FAILED ≠ EMPTY): the page says so
+  // instead of rendering "no messages yet" over a conversation that exists.
+  const messagesFailed = Boolean(messagesRes.error);
+  const messages: MessageRow[] = messagesFailed ? [] : ((messagesRes.data ?? []) as MessageRow[]);
 
   // MULTILINGUAL WORK COMMUNICATION: each message rendered in the VIEWER's
   // language through the existing AI runtime (egress-gated, audited), the
@@ -272,7 +275,15 @@ export default async function ConversationDetailPage({
         isParticipant={viewerIsParticipant}
       />
 
-      {messages.length === 0 ? (
+      {messagesFailed ? (
+        <p
+          role="alert"
+          className="card-border border-state-danger/40 p-4 text-sm text-text-secondary"
+          data-testid="conversation-messages-load-error"
+        >
+          {t("loadError")}
+        </p>
+      ) : messages.length === 0 ? (
         <p className="card-border p-4 text-sm text-text-secondary">
           {t("noMessages")}
         </p>
@@ -300,6 +311,8 @@ export default async function ConversationDetailPage({
                   const vt = viewerTexts.get(m.id) ?? {
                     text: m.body,
                     kind: "original" as const,
+                    state: "unknown_language" as const,
+                    unavailable: null,
                     languageBadge: null,
                     original: m.body,
                     provider: null,
@@ -311,10 +324,14 @@ export default async function ConversationDetailPage({
                           className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
                           data-testid={`message-lang-${m.id}`}
                           data-kind={vt.kind}
+                          data-state={vt.state}
+                          data-unavailable={vt.unavailable ?? undefined}
                         >
                           {vt.kind === "translated"
                             ? t("translatedFrom", { lang: vt.languageBadge.toUpperCase() })
-                            : t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
+                            : vt.state === "original_foreign"
+                              ? t("translationUnavailable", { lang: vt.languageBadge.toUpperCase() })
+                              : t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
                         </span>
                       ) : null}
                       {vt.text.length > 0 ? (

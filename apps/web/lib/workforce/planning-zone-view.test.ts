@@ -485,5 +485,9 @@ describe("an unassessable person is counted and said, not silently absorbed", ()
         `r.${dim}.flatMap`,
       );
     }
+    // 2026-09-20: a fitting worker whose availability was never recorded is
+    // the headcount dimension's own "cannot tell" — it reaches the same count.
+    expect(src).toContain("...r.headcountGap.unknownWorkerIds");
+    expect(src).toContain("...(r.supervisorGap?.unknownWorkerIds ?? [])");
   });
 });

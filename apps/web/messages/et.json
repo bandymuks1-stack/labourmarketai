@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Originaal ({lang}) — tõlge pole saadaval",
+    "loadError": "Sõnumeid ei õnnestunud praegu laadida. See, mida näete, pole täielik pilt — proovige uuesti."
   },
   "trust": {
     "unreadHint": "Osa sellest ei õnnestunud praegu kokku lugeda ja on näidatud kui „—“. See ei tähenda, et teil neid ei ole — lihtsalt ei õnnestunud numbreid lugeda. Laadige hetke pärast uuesti.",
@@ -1810,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Teie töölugu ei õnnestunud praegu lugeda."
     },
     "readinessSteps": {
       "pillar": {
@@ -1864,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Riba pikkus näitab iga oskuse taga olevate töökirjete arvu (täisriba = {scale}+), mitte oskuse hinnet."
-    }
+      "skillsScaleNote": "Riba pikkus näitab iga oskuse taga olevate töökirjete arvu (täisriba = {scale}+), mitte oskuse hinnet.",
+      "historyHours": "{hours} h kirjas · {confirmed} h juhi kirjega",
+      "historyUnavailable": "Teie töölugu ei õnnestunud praegu lugeda."
+    },
+    "skillsUnavailable": "Ei õnnestunud praegu lugeda.",
+    "verifiedUnavailable": "Juhi kirjega oskusi ei õnnestunud praegu lugeda."
   },
   "projects": {
     "map": {
@@ -2236,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Teie huvi on salvestatud. Te ei märkinud esitlemise kasti, seega Nonstop Groupile teie kohta midagi ei edastata. Kui soovite, et teid esitletaks, võtke huvi tagasi ja väljendage seda uuesti, kast märgituna. LabourMarket.ai ei ole tööandjale midagi saatnud.",
       "handoffDelivered": "Huvi on edastatud Nonstop Groupile. Nonstop võib tööandja poole pöörduda oma äriprotsessi kaudu; LabourMarket.ai ei ole tööandjale midagi saatnud.",
       "handoffClosed": "Huvi on salvestatud. Varasem edastus Nonstop Groupile suleti, kui selle tagasi võtsite; midagi ei saadetud."
+    },
+    "intent": {
+      "label": "Minu olukord",
+      "states": {
+        "AVAILABLE_NOW": "Saan alustada kohe",
+        "AVAILABLE_FROM": "Saan alustada alates kuupäevast",
+        "OPEN_TO_OFFERS": "Töötan, kuid olen pakkumistele avatud",
+        "LOOKING_FOR_WORK": "Otsin tööd",
+        "LOOKING_FOR_PROJECTS": "Otsin projekte"
+      }
     }
   },
   "scouting": {
@@ -2749,7 +2766,9 @@
     "servicesEmpty": "Veel pole midagi pakutud",
     "servicesUnavailable": "Pakutavaid teenuseid ei õnnestunud laadida",
     "serviceRemote": "Kaugtöö",
-    "photoAlt": "Tehtud töö foto"
+    "photoAlt": "Tehtud töö foto",
+    "historyTitle": "Imporditud ajalugu",
+    "historyUnavailable": "Imporditud ajalugu ei õnnestunud lugeda"
   },
   "marketMapBase": {
     "previewTitle": "Uus koht valitud — pole veel salvestatud",
@@ -3769,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -4092,7 +4111,11 @@
         "usingProfile": "Midagi pole vaja üles laadida — otsin selle põhjal, mis su profiilis juba on.",
         "usingProfileNarrowed": "Midagi pole vaja üles laadida — otsin su profiili ja seni öeldu põhjal.",
         "profileEmpty": "Sinu profiilis pole veel midagi, seega ei saa ma selle järgi otsida. Kirjuta üles üks töö või ütle oma amet — ja ma otsin kohe."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5579,7 +5602,7 @@
   },
   "agreements": {
     "title": "Lepinguregister",
-    "intro": "{org} lepingute kanooniline register — töösuhtega seotud ja üldised. Ainult arvestus.",
+    "intro": "{org} lepingute register — töösuhtega seotud ja üldised. Ainult arvestus.",
     "noSignatureNote": "Selle registri staatused on üksnes arvestusseisundid — miski siin ei tähenda, et leping on allkirjastatud, juriidiliselt kehtiv või siduv. LabourMarket.ai ei teosta juriidilist allkirjastamist: allkirjastamine toimub väljaspool platvormi ja lisatud fail on vaid teie esitatud tõend.",
     "relationshipNote": "Ülal olev lepingute loend on varasem isiklik äriregister ja töötab muutumatult edasi. Uued lepingud kuuluvad siia.",
     "unavailable": "Lepinguregistrit ei saa praegu kuvada.",

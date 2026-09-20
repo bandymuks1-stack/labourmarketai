@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Original ({lang}) — ingen oversættelse tilgængelig",
+    "loadError": "Beskederne kunne ikke indlæses lige nu. Det, du ser, er ikke det fulde billede — prøv igen."
   },
   "trust": {
     "unreadHint": "Noget af dette kunne ikke tælles lige nu og vises som “—”. Det betyder ikke, at du ingen har — tallene kunne bare ikke læses. Genindlæs om et øjeblik.",
@@ -1810,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Din arbejdshistorik kunne ikke læses lige nu."
     },
     "readinessSteps": {
       "pillar": {
@@ -1864,8 +1867,12 @@
       "historyRange": "{from} – {to}",
       "historyEmpty": "Ingen arbejdsperioder registreret endnu.",
       "historyAria": "Arbejdsperioder på en tidslinje, fra {from} til {to}.",
-      "skillsScaleNote": "Bjælkens længde er antallet af dine arbejdsregistreringer bag hver færdighed (fuld bjælke = {scale}+), ikke en færdighedsvurdering."
-    }
+      "skillsScaleNote": "Bjælkens længde er antallet af dine arbejdsregistreringer bag hver færdighed (fuld bjælke = {scale}+), ikke en færdighedsvurdering.",
+      "historyHours": "{hours} t registreret · {confirmed} t med lederens notering",
+      "historyUnavailable": "Din arbejdshistorik kunne ikke læses lige nu."
+    },
+    "skillsUnavailable": "Kunne ikke læses lige nu.",
+    "verifiedUnavailable": "Færdigheder med lederens notering kunne ikke læses lige nu."
   },
   "projects": {
     "map": {
@@ -2236,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Din interesse er registreret. Du satte ikke kryds ved præsentation, så intet om dig gives videre til Nonstop Group. Vil du præsenteres, så træk interessen tilbage og vis den igen med krydset sat. LabourMarket.ai har ikke sendt noget til arbejdsgiveren.",
       "handoffDelivered": "Din interesse er givet videre til Nonstop Group. Nonstop kan kontakte arbejdsgiveren gennem sin egen kommercielle proces; LabourMarket.ai har intet sendt til arbejdsgiveren.",
       "handoffClosed": "Din interesse er registreret. Den tidligere videregivelse til Nonstop Group blev lukket, da du trak den tilbage; intet blev sendt."
+    },
+    "intent": {
+      "label": "Min situation",
+      "states": {
+        "AVAILABLE_NOW": "Kan starte nu",
+        "AVAILABLE_FROM": "Kan starte fra en dato",
+        "OPEN_TO_OFFERS": "I arbejde, men åben for tilbud",
+        "LOOKING_FOR_WORK": "Søger arbejde",
+        "LOOKING_FOR_PROJECTS": "Søger projekter"
+      }
     }
   },
   "scouting": {
@@ -2749,7 +2766,9 @@
     "servicesEmpty": "Intet tilbudt endnu",
     "servicesUnavailable": "Tilbudte ydelser kunne ikke indlæses",
     "serviceRemote": "Fjernarbejde",
-    "photoAlt": "Foto af udført arbejde"
+    "photoAlt": "Foto af udført arbejde",
+    "historyTitle": "Importeret historik",
+    "historyUnavailable": "Importeret historik kunne ikke læses"
   },
   "marketMapBase": {
     "previewTitle": "Nyt sted valgt — endnu ikke gemt",
@@ -3769,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "Jeg fandt afsluttede samarbejder, du kan beskrive. Vælg hvilket.",
       "experiencesAllSubmitted": "Du har allerede beskrevet alle afsluttede samarbejder. Ét samarbejde, én erfaring.",
       "experiencesNothingYet": "Der er endnu ikke et afsluttet samarbejde at beskrive. En erfaring bygger på reelt arbejde, der er afsluttet.",
@@ -4092,7 +4111,11 @@
         "usingProfile": "Du behøver ikke uploade noget — jeg søger ud fra det, der allerede står i din profil.",
         "usingProfileNarrowed": "Du behøver ikke uploade noget — jeg søger ud fra din profil og det, du har fortalt indtil nu.",
         "profileEmpty": "Der står endnu ikke noget i din profil, så jeg kan ikke søge ud fra den. Registrér ét job eller fortæl hvilket fag du har — så søger jeg med det samme."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5579,7 +5602,7 @@
   },
   "agreements": {
     "title": "Aftaleregister",
-    "intro": "Det kanoniske register over {org}s aftaler — ansættelsesrelaterede og generelle. Kun registrering.",
+    "intro": "Registret over {org}s aftaler — ansættelsesrelaterede og generelle. Kun registrering.",
     "noSignatureNote": "Statusser i dette register er kun registreringstilstande — intet her betyder, at en aftale er underskrevet, juridisk gyldig eller bindende. LabourMarket.ai udfører ingen juridisk underskrift: der underskrives uden for platformen, og en vedhæftet fil er kun dokumentation, du selv leverer.",
     "relationshipNote": "Kontraktlisten ovenfor er det tidligere personlige kommercielle register og fungerer uændret. Nye aftaler hører til her.",
     "unavailable": "Aftaleregistret kan ikke vises lige nu.",

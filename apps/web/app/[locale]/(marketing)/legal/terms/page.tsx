@@ -19,7 +19,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "legal" });
-  return buildPageMetadata({ locale, path: "/legal/terms", title: t("terms.title") });
+  return buildPageMetadata({
+    locale,
+    path: "/legal/terms",
+    title: t("terms.title"),
+    // Own copy (the contracting-party line), not the inherited homepage
+    // description that every legal page duplicated (SEO gap, 2026-09-20).
+    description: t("terms.sections.0.items.1" as never),
+  });
 }
 
 export default async function LegalPage({

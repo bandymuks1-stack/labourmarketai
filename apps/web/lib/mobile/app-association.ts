@@ -39,6 +39,46 @@ export const IOS_BUNDLE_ID = "ai.labourmarket.app";
 /** Ours, and fixed — `apps/mobile/app.json`'s `android.package`. */
 export const ANDROID_PACKAGE = "ai.labourmarket.app";
 
+/**
+ * THE PATHS THE NATIVE APP CAN ACTUALLY OPEN — and therefore the ONLY paths
+ * either association document may claim.
+ *
+ * This is `apps/mobile/app/`'s route table, read as URL paths: `index.tsx`
+ * is `/`, `sign-in.tsx` is `/sign-in`, and the `(shell)` group's screens are
+ * reachable without the group segment. It is NOT the web's route table.
+ *
+ * WHY NOT `/*`. Until 2026-09-20 the Apple document claimed every path and
+ * the Android intent filter claimed the whole host. The native app has eight
+ * screens; the web has some forty locale-prefixed routes
+ * (`/lt/dashboard/journal`, `/jobs/<id>`, …) that the app does not have. The
+ * moment the owner set `APPLE_TEAM_ID` / `ANDROID_CERT_FINGERPRINTS`, every
+ * shared web link on a phone with the app installed would have opened the
+ * app and landed on `+not-found` — a working association that breaks every
+ * real link. A claim is a promise to handle; this list is exactly what is
+ * handled.
+ *
+ * NOT A MAPPING. A web URL such as `/lt/dashboard/journal` is not rewritten
+ * to `/journal` here or in the app (no `+native-intent.tsx`): the web's
+ * routes are locale-prefixed and named differently (`/lt/auth/login` vs
+ * `/sign-in`), so there is no clean 1:1 rule, and a partial one would open
+ * the app for some links and the browser for others. Widen this list only
+ * when the app gains the screen — the guard reads the route directory and
+ * refuses a path with no file behind it.
+ *
+ * Both documents are derived from the same constant so the two halves cannot
+ * disagree; `lib/guards/app-association.test.ts` pins `app.json` to it too.
+ */
+export const NATIVE_APP_PATHS: readonly string[] = [
+  "/",
+  "/sign-in",
+  "/register",
+  "/today",
+  "/journal",
+  "/log-work",
+  "/profile",
+  "/settings",
+];
+
 /** An Apple Team ID is 10 uppercase alphanumerics. */
 const TEAM_ID_RE = /^[A-Z0-9]{10}$/;
 
@@ -73,9 +113,9 @@ export type AppleAppSiteAssociation = {
  * Build the Apple App Site Association document, or `null` when the Team ID
  * is absent or malformed.
  *
- * The component list claims EVERY path. That is deliberate and correct here:
- * this product's deep links are ordinary product routes, and a person
- * following any link to their own work should land in the app they installed.
+ * The component list claims EXACTLY `NATIVE_APP_PATHS` — each as an exact
+ * match, no wildcard. Any other `https://labourmarket.ai/...` link keeps
+ * opening in the browser, which is where that route exists.
  */
 export function buildAppleAppSiteAssociation(
   teamId: string | undefined | null,
@@ -87,7 +127,10 @@ export function buildAppleAppSiteAssociation(
       details: [
         {
           appIDs: [`${id}.${IOS_BUNDLE_ID}`],
-          components: [{ "/": "/*", comment: "All product routes open in the app." }],
+          components: NATIVE_APP_PATHS.map((path) => ({
+            "/": path,
+            comment: `A screen the native app has (${path}).`,
+          })),
         },
       ],
     },

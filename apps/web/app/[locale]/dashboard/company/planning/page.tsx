@@ -14,6 +14,7 @@ import { getRosterCommitments } from "@/lib/planning/roster-commitments";
 import { summariseRosterUtilisation } from "@/lib/workforce/utilisation";
 import { getOrganizationToday } from "@/lib/planning/organization-today";
 import { OrganizationTodayPanel } from "@/components/app/organization-today-panel";
+import { TimeReality } from "@/components/app/work-world/primitives";
 import {
   buildPlanningZoneView,
   type PlanningZoneEntry,
@@ -465,6 +466,15 @@ export default async function CompanyWorkforcePlanningPage({
                       <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {formatCommitmentWhen(c.startDate, c.endDate)}
                       </span>
+                      {/* Two committed rows on one day — the calendar's own
+                          conflict token. A warning, never a prohibition
+                          (SEP-2): both rows stay, nothing is hidden. */}
+                      {c.conflict ? (
+                        <TimeReality
+                          kind="conflict"
+                          label={t("committedWhere.conflict")}
+                        />
+                      ) : null}
                     </li>
                   ))}
                   {row.undatedProjects.map((u) => (
@@ -482,6 +492,11 @@ export default async function CompanyWorkforcePlanningPage({
               </li>
             ))}
           </ul>
+        ) : null}
+        {commitments.rows.some((row) => row.overlaps > 0) ? (
+          <p className="text-meta text-text-muted" data-testid="roster-commitments-conflict-note">
+            {t("committedWhere.conflictNote")}
+          </p>
         ) : null}
         {commitments.withoutCommitment > 0 ? (
           <p className="text-meta text-text-muted" data-testid="roster-commitments-without">

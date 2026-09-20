@@ -544,7 +544,7 @@ export default async function JournalPage({
   // `esco_occupations.isco_group`), so the editors compose exactly the module
   // fields that family logs. Two bounded reads inside one batch slot; an
   // unmapped profession carries null and composes nothing.
-  const [ownPath, { data: skillIdRows }, linkRead, entriesRead, organizationRecords] =
+  const [ownPath, { data: skillIdRows }, linkRead, entriesRead, organizationLedger] =
     await Promise.all([
       readOwnOccupationPath(supabase, worker.id),
       supabase
@@ -565,6 +565,11 @@ export default async function JournalPage({
       // RLS: the person's own rows. A failed read is null (UNKNOWN).
       readOrganizationRecords(supabase, worker.id),
     ]);
+  // The DAY records (what the calendar places and the day checks add) and
+  // the PERIOD records (beside, never on a day) — one reading, split here.
+  // Both null when the ledger could not be read (UNKNOWN ≠ ZERO).
+  const organizationRecords = organizationLedger?.records ?? null;
+  const organizationPeriodRecords = organizationLedger?.periodRecords ?? null;
   const directions = ownPath.directions.map((d) => ({
     slug: d.slug,
     name: tProf(d.slug),
@@ -873,6 +878,9 @@ export default async function JournalPage({
         .filter(([iso]) => !entryDayGroups.some((g) => g.isoKey === iso))
         .map(([iso, reportedMinutes]) => ({ iso, entryCount: 0, totalMinutes: 0, confirmedCount: 0, reportedMinutes })),
     ),
+    // A ledger that could not be read placed nothing above; the grid says
+    // so instead of wearing an empty past (SEP-7: UNKNOWN ≠ ZERO).
+    reportedUnknown: organizationRecords === null,
   });
   /**
    * WHAT THE DIARY IS SHOWING (owner direction 2026-09-13). Three scopes,
@@ -975,6 +983,7 @@ export default async function JournalPage({
             entries.map((e) => e.id),
           ),
           organizationRecords,
+          organizationPeriodRecords,
         })
       : null;
   // THE STRIP'S MONTH IS THE MODEL'S (issue #1689, lane B). This counted
@@ -1011,7 +1020,10 @@ export default async function JournalPage({
   ]);
   const [manoCardLabels, manoThermometer] = manoCard
     ? await Promise.all([
-        buildPlayerCardLabels(manoCard),
+        // Hours per engagement on the card — the SAME journal model this
+        // page already assembled above, joined on engagement id; no second
+        // read, no second ledger.
+        buildPlayerCardLabels(manoCard, { contexts: workIntelligence?.contexts ?? null }),
         getOwnThermometer().then(toThermometerView),
       ])
     : [null, null];

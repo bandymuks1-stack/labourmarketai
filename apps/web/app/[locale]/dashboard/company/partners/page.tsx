@@ -8,7 +8,7 @@ import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { listAgencyClients, listAgencyDemands } from "@/lib/agency/clients";
 import {
   listAgencyConnections,
-  listMyConnectionInvites,
+  listMyClientBridgeConnections,
   listSharedRequestsByClient,
   listSharedRequestsForAgency,
   listAgencyOfferProgress,
@@ -192,9 +192,11 @@ export default async function CompanyPartnersPage({
 
   // Client side: a real (non-agency) company accepts a staffing agency's
   // connection, shares specific OWN requests, and reviews proposed candidates
-  // on its OWN scouting surface.
+  // on its OWN scouting surface. "Your agencies" = the invites addressed to
+  // the caller's email PLUS every active connection the COMPANY owns (the
+  // connection policy already admits both; only the email read ran before).
   const [clientInvites, clientDemands, clientBridgeLabels] = await Promise.all([
-    listMyConnectionInvites(),
+    listMyClientBridgeConnections(ownCompany.id),
     listAgencyDemands(),
     readClientBridgeLabels(),
   ]);
@@ -216,7 +218,15 @@ export default async function CompanyPartnersPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-partners">
       {header}
-      {clientInvites.kind === "ok" && clientInvites.rows.length > 0 ? (
+      {clientInvites.kind === "error" ? (
+        <p
+          role="alert"
+          className="rounded-card border border-state-warning/40 bg-state-warning/10 p-4 text-sm text-text-secondary"
+          data-testid="company-partners-unavailable"
+        >
+          {t("unavailable")}
+        </p>
+      ) : clientInvites.kind === "ok" && clientInvites.rows.length > 0 ? (
         <div id="company-partners-bridge" className="scroll-mt-20">
           <ClientAgencyBridgeSection
             invites={clientInvites}

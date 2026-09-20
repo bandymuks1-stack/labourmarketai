@@ -33,7 +33,7 @@ claims an approval.
 | Android runtime on a device | **NOT PROVEN** | no emulator image, no device attached |
 | Product data on device | transport **open** — Today / Journal / Profile read live through `/api/mcp` | `DOMAIN_TRANSPORT_STATUS.open === true` |
 | Journal writes from the device | **WIRED** — `/(shell)/log-work` → `JournalComposer` → `journal.create_draft` → `journal.confirm` → `createJournalEntryCore`, the one canonical write | the code, read 2026-09-13 |
-| Context holdings | **NOT WIRED** — holdings read `unknown`; the UI says it cannot list contexts, never invents one | `apps/mobile/src/context-provider.tsx` |
+| Context holdings | ~~**NOT WIRED**~~ → **WIRED** (superseded 2026-09-14, #1737) — `heldRoles` arrive on `profile.get` and `holdingsFromHeldRoles` (client-core) maps them; `unknown` only while loading, `unavailable` on a failed read, never an invented context | `apps/mobile/src/context-provider.tsx` |
 | Signing, store listing, submission | **NOT STARTED**, owner-gated | — |
 
 **This paragraph said the opposite when this document was first written, and
@@ -52,6 +52,50 @@ is missing on the native side is **context holdings** and, separately, **any
 runtime proof on a real device** — proof, not construction. The README is
 corrected and the claim is now pinned by a guard, so this particular lie
 cannot be told again.
+
+**Superseded 2026-09-14 (#1737), recorded 2026-09-20:** context holdings are
+wired — see the table row above. The sentence "what is missing … is context
+holdings" is no longer true; what remains missing is listed honestly in §1a.
+
+---
+
+## 1a. Honest state — 2026-09-20
+
+Recorded against `feat/cc/launch-completion-2026-09-20`. Status words are
+the ones the launch register uses; none of them means "in a store".
+
+| | status | meaning |
+|---|---|---|
+| `IOS_STATUS` | **READY_FOR_INTERNAL_TEST** (simulator) | `ios.yml` builds and launches on a CI simulator and walks the auth-failure journey (green on `main` 2026-09-15, run `34948120288`; again 2026-09-20 on `feat/cc/activate-pl-locale`, run `35513465253`). Unsigned; no device; no TestFlight. |
+| `ANDROID_STATUS` | **READY_FOR_INTERNAL_TEST** (debug / emulator) | `gradlew assembleDebug` proven (2026-08-30); on an emulator (2026-08-31) the debug build renders the honest misconfiguration gate, accepts the production config, and completes a real wrong-password auth round-trip against production with the honest refusal. No authenticated session on a device yet; no release signing; no Play upload. |
+
+**Journey matrix — what the native app does today.**
+
+| implemented | not implemented (opens nothing, claims nothing) |
+|---|---|
+| install / cold start with the four-state entry gate | Google sign-in (mobile is password-only by owner decision) |
+| email + password sign-in and registration | onboarding / first-run guidance |
+| language choice across the five active locales, previews labelled | jobs / opportunities board |
+| profile read (`profile.get`, `living_cv.skills.get`) | expressing interest |
+| journal list + compose (`journal.list`, `journal.create_draft` → `journal.confirm`) | messaging / conversations |
+| Today figures (`journal.work_intelligence.get`) | push notifications (deliberately no module) |
+| settings: workspace switch, participation context, privacy / terms / support links | calendar / availability |
+| sign-out | camera or file evidence (storage permissions blocked) |
+| network failure rendered as failure, with retry — never as an empty list | account deletion IN-APP — reached by link to `/<locale>/dashboard/privacy` (5.1.1(v) satisfied by the canonical web path, not by a phone-side rule) |
+
+**Gates, by who can close them.**
+
+| EXTERNAL (a third party must grant) | OWNER (a decision, no third party) |
+|---|---|
+| Apple Developer Program membership, Team ID (`APPLE_TEAM_ID`), distribution certificate / provisioning | App icon and splash art (or approval to derive from `apps/web/public/app-icon.svg`) |
+| Google Play Console account, upload key, Play App Signing SHA-256 (`ANDROID_CERT_FINGERPRINTS`) | Final privacy and support URLs for the store listings (the app links `/<locale>/dashboard/privacy`, `/<locale>/legal/terms`, `info@labourmarket.ai` today) |
+| EAS project id and owner (`eas.json` `submit` stays empty until then) | Store listing wording, category, content rating answers |
+| App Store Connect record; Play Data Safety form; App Privacy declaration (submitted to the store) | Confirmation that the collected-data list in `app.json` is COMPLETE (legal sign-off) |
+| A review account the stores can sign in with | Screenshots from a real signed-in session |
+
+Nothing above is agent-closable. Everything the code can carry before those
+gates is carried and guard-pinned (`mobile-release-config.test.ts`,
+`app-association.test.ts`, `mobile-account-controls.test.ts`).
 
 ---
 
@@ -113,9 +157,10 @@ In value order. None needs a credential.
    stores would receive the Expo placeholder. The brand source
    (`apps/web/public/app-icon.svg`) exists and generation is mechanical —
    but §4.1 is the owner's approval to use it as-is.
-3. **Context holdings.** `context-provider.tsx` performs no holdings read, so
+3. ~~**Context holdings.** `context-provider.tsx` performs no holdings read, so
    a person with several contexts is told the app cannot list them. Honest,
-   and incomplete.
+   and incomplete.~~ **DONE 2026-09-14 (#1737)** — held roles from
+   `profile.get`, mapped by `holdingsFromHeldRoles`; see §1.
 4. ~~**Deep links as universal links.**~~ **DONE 2026-09-14** — see
    [`../launch/DISTRIBUTION_SURFACE_READINESS_2026-09-14.md`](../launch/DISTRIBUTION_SURFACE_READINESS_2026-09-14.md)
    §2–3. Both `.well-known` documents are served as route handlers, and
@@ -128,6 +173,12 @@ In value order. None needs a credential.
    so a placeholder keeps links broken after the real value arrives. The
    remaining owner action is therefore **one environment variable per
    platform, and no code change** (§4.2, §4.3).
+
+   **Narrowed 2026-09-20.** The first version claimed every path (`/*` /
+   the whole host); both sides now claim exactly the native route table
+   (`NATIVE_APP_PATHS` in `apps/web/lib/mobile/app-association.ts`), so a
+   shared web link keeps opening in the browser where that route exists.
+   Guard: `app-association.test.ts`.
 
 ---
 

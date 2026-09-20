@@ -1,12 +1,41 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync, readdirSync } from "node:fs";
+import { join, resolve } from "node:path";
 
 import {
   ANDROID_PACKAGE,
   IOS_BUNDLE_ID,
+  NATIVE_APP_PATHS,
   buildAppleAppSiteAssociation,
   buildAssetLinks,
   normalizeFingerprint,
 } from "@/lib/mobile/app-association";
+
+const REPO = resolve(__dirname, "../../../..");
+const NATIVE_HOSTS = ["labourmarket.ai", "www.labourmarket.ai"];
+
+/**
+ * The native route table as URL paths, from the files that define it.
+ * expo-router: `index.tsx` is `/`, `name.tsx` is `/name`, a `(group)`
+ * directory adds no segment, and `_layout` / `+not-found` / `+native-intent`
+ * are not destinations.
+ */
+function nativeRoutePaths(dir: string, prefix = ""): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      const seg = /^\(.*\)$/.test(entry.name) ? prefix : `${prefix}/${entry.name}`;
+      out.push(...nativeRoutePaths(join(dir, entry.name), seg));
+      continue;
+    }
+    const m = /^(.+)\.tsx$/.exec(entry.name);
+    if (!m) continue;
+    const name = m[1];
+    if (name.startsWith("_") || name.startsWith("+")) continue;
+    out.push(name === "index" ? prefix || "/" : `${prefix}/${name}`);
+  }
+  return out;
+}
 
 /**
  * WHAT THIS PROTECTS — that the two deep-link association documents are
@@ -128,5 +157,64 @@ describe("Android asset links", () => {
 
   it("binds to OUR package and nothing else", () => {
     expect(ANDROID_PACKAGE).toBe("ai.labourmarket.app");
+  });
+});
+
+/**
+ * THE CLAIM IS EXACTLY THE NATIVE ROUTE TABLE — on both sides.
+ *
+ * Until 2026-09-20 the Apple document claimed `/*` and the Android intent
+ * filter claimed the whole host. Nothing failed, because both documents 404
+ * until the owner sets the identifiers — and that is exactly why it was
+ * dangerous: the first day the association worked, every shared web link
+ * (`/lt/dashboard/journal`, `/jobs/<id>`) on a phone with the app installed
+ * would have opened the app and landed on `+not-found`. A claim is a promise
+ * to handle. So the claimed paths are pinned to the files that can handle
+ * them, and the two halves are pinned to each other, because either one
+ * drifting alone is a link that opens the wrong thing.
+ */
+describe("deep-link claim — exactly the screens the app has", () => {
+  const routes = nativeRoutePaths(resolve(REPO, "apps/mobile/app")).sort();
+
+  it("NATIVE_APP_PATHS is the route table under apps/mobile/app, no more and no less", () => {
+    expect([...NATIVE_APP_PATHS].sort()).toEqual(routes);
+    // Sanity: the table this pin was written against. A shrink here is a
+    // removed screen and must be a deliberate change on both sides.
+    expect(routes).toEqual(
+      ["/", "/journal", "/log-work", "/profile", "/register", "/settings", "/sign-in", "/today"],
+    );
+  });
+
+  it("the Apple document claims those paths exactly — no wildcard, no prefix", () => {
+    const doc = buildAppleAppSiteAssociation("ABCDE12345");
+    const claimed = doc?.applinks.details[0].components.map((c) => c["/"]) ?? [];
+    expect(claimed).toEqual([...NATIVE_APP_PATHS]);
+    for (const p of claimed) {
+      expect(String(p), `${String(p)} widens the claim beyond a screen the app has`).not.toMatch(/[*?]/);
+    }
+  });
+
+  it("the Android intent filter claims host × those paths exactly, each entry path-qualified", () => {
+    const app = JSON.parse(readFileSync(resolve(REPO, "apps/mobile/app.json"), "utf8")).expo;
+    const filters = (app.android.intentFilters ?? []) as {
+      data?: { scheme?: string; host?: string; path?: string; pathPrefix?: string; pathPattern?: string }[];
+    }[];
+    const pairs: string[] = [];
+    for (const f of filters) {
+      for (const d of f.data ?? []) {
+        // A data element with a host and no `path` claims EVERY path on that
+        // host, and `pathPrefix: "/"` or a pattern is the same claim spelled
+        // differently. Only an exact path is a claim this app can keep.
+        expect(d.pathPrefix, `pathPrefix on ${d.host} claims paths the app does not have`).toBeUndefined();
+        expect(d.pathPattern, `pathPattern on ${d.host} claims paths the app does not have`).toBeUndefined();
+        expect(typeof d.path, `${d.host} is claimed with no path — that is the whole host`).toBe("string");
+        pairs.push(`${d.host} ${d.path}`);
+      }
+    }
+    const expected = NATIVE_HOSTS.flatMap((h) => NATIVE_APP_PATHS.map((p) => `${h} ${p}`));
+    expect(pairs.sort()).toEqual(expected.sort());
+    // The iOS half claims the same two hosts; the AASA served there carries
+    // the same paths (asserted above), so both platforms agree.
+    for (const h of NATIVE_HOSTS) expect(app.ios.associatedDomains).toContain(`applinks:${h}`);
   });
 });

@@ -789,7 +789,13 @@
       "mainly": "mainly {activity} · {hours} h",
       "mainlyShare": "mainly {activity} · {hours} h ({percent} of {total} h)",
       "withoutDuration": "{count, plural, one {# entry in this window records no duration — it is counted, not timed.} other {# entries in this window record no duration — they are counted, not timed.}}",
-      "collapse": "Hide the detailed report"
+      "collapse": "Hide the detailed report",
+      "ledger": {
+        "measured": "Your organization's own records in this window: {hours} h across {workers, plural, one {# person} other {# people}} — kept apart, never added to the journal.",
+        "none": "This database holds no organization hour records.",
+        "unknown": "The organization's records could not be read — that is not zero hours.",
+        "truncated": "Rests on the first {count} records."
+      }
     }
   },
   "marketRecognition": {
@@ -3529,10 +3535,6 @@
       "todayLabel": "Active today",
       "preparingLabel": "Preparing",
       "blockedLabel": "Blocked",
-      "ownerSmokeLabel": "Owner production smoke",
-      "ownerSmokeStatus": "PENDING",
-      "pr18Label": "PR #18 — journal security layer",
-      "pr18Status": "BLOCKED (issue #32)",
       "nonWorkerLabel": "Company / agency / customer spaces",
       "nonWorkerStatus": "Preparing",
       "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
@@ -5780,7 +5782,7 @@
       "workerPlaceholder": "Choose a worker",
       "bodyLabel": "Instruction",
       "bodyPlaceholder": "Write the instruction in your own language…",
-      "languageNote": "Write in your own language. The original is always preserved and workers see your original text — there is no automatic translation.",
+      "languageNote": "Write in your own language. The original is always preserved; workers keep your original text and, when a translation is available, read it in their language.",
       "send": "Send instruction",
       "sending": "Sending…",
       "sent": "Instruction sent",
@@ -6005,7 +6007,18 @@
         "note": "Real counts of journal entries linked to this project and the photos workers attached to their own entries.",
         "link": "Open the project gallery"
       },
-      "honestNote": "This centre composes records that already exist. Milestones, issue registers and resource tables are not built yet and are not simulated here."
+      "honestNote": "This centre composes records that already exist. Milestones, issue registers and resource tables are not built yet and are not simulated here.",
+      "hours": {
+        "title": "Hours on this project",
+        "allocated": "Allocated",
+        "journaled": "Journaled",
+        "confirmed": "Confirmed",
+        "value": "{hours} h",
+        "note": "Allocated — the organization's hour records on this project's work objects; journaled — people's entries on this project; confirmed — journal entries a manager approved. Kept apart, never added together.",
+        "unavailable": "could not be read",
+        "noLedger": "no hour records",
+        "truncated": "Journal figures rest on the first {count} entries."
+      }
     },
     "eyebrow": "Project operations",
     "managerOnly": "This board is for a company or agency manager.",
@@ -6518,7 +6531,7 @@
       "sending": "Sending...",
       "emptyError": "Write a message or add an attachment.",
       "charCount": "{n}/{max}",
-      "languageHint": "Write in your own language — the other person sees your original text. There is no automatic translation.",
+      "languageHint": "Write in your own language. The other person always keeps your original text and, when a translation is available, reads it in their language.",
       "attachments": {
         "addButton": "Add a photo or file",
         "help": "Photos (JPG, PNG, WebP), PDF or a text file, up to 10 MB. At most 5 attachments per message. Only conversation participants can see attachments.",
@@ -6533,7 +6546,8 @@
         "blockedWhileUploading": "Wait until the attachments finish uploading.",
         "blockedFailed": "Remove or re-upload the failed attachment.",
         "partialFailure": "The message was sent, but some attachments couldn't be attached. Try sending them again."
-      }
+      },
+      "languageLabel": "I am writing in"
     },
     "launcher": {
       "openLabel": "Contact support",
@@ -6591,7 +6605,9 @@
       "sent": "Reply sent."
     },
     "translatedFrom": "Translated from {lang}",
-    "showOriginal": "Original ({lang})"
+    "showOriginal": "Original ({lang})",
+    "translationUnavailable": "Original ({lang}) — no translation available",
+    "loadError": "Could not load messages right now. What you see is not the full picture — try again."
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
@@ -6941,7 +6957,8 @@
         "notOpen": "This enquiry is no longer open.",
         "error": "Could not save the answer. Nothing was changed."
       }
-    }
+    },
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
@@ -7345,7 +7362,7 @@
     "candidateLabel": "Candidate skills",
     "candidateHint": "Skills you added in your own words (needs clarification, not reviewed yet).",
     "thermoLabel": "Market activity",
-    "thermoHint": "(average of declared salary expectations in your project + admin-entered market average) / 2 — shown only when both components exist.",
+    "thermoHint": "(average of declared salary expectations in your project + market average) / 2 — shown only when both components exist.",
     "thermoMissingPosition": "Insufficient project data",
     "thermoMissingMarket": "Insufficient market data",
     "thermoMissingBoth": "Insufficient market data",
@@ -7413,7 +7430,8 @@
       "opportunityCount": "{count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "This is measured once you have a worker profile.",
-      "closestBasis": "Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Your work history could not be read right now."
     },
     "documentsLabel": "Documents",
     "documentsValue": "{valid} valid",
@@ -7449,8 +7467,12 @@
       "historyRange": "{from} – {to}",
       "historyEmpty": "No work periods recorded yet.",
       "historyAria": "Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Bar length is the number of your work records behind each skill (a full bar = {scale}+), not a skill score."
-    }
+      "skillsScaleNote": "Bar length is the number of your work records behind each skill (a full bar = {scale}+), not a skill score.",
+      "historyHours": "{hours} h recorded · {confirmed} h with a manager record",
+      "historyUnavailable": "Your work history could not be read right now."
+    },
+    "skillsUnavailable": "Could not be read right now.",
+    "verifiedUnavailable": "Skills with a manager record could not be read right now."
   },
   "skillClarify": {
     "title": "My skills",
@@ -8054,7 +8076,10 @@
         "title": "Needs your attention",
         "untimed": "{n, plural, one {# record} other {# records}} without a duration — add the hours",
         "unlabelled": "{n, plural, one {# record} other {# records}} with hours but no kind of work named",
-        "unknown": "Open items could not be read."
+        "unknown": "Open items could not be read.",
+        "offers": "{n, plural, one {# booking offer} other {# booking offers}} waiting for your answer",
+        "invitations": "{n, plural, one {# invitation} other {# invitations}} waiting for your answer",
+        "unread": "{n, plural, one {# conversation} other {# conversations}} with unread messages"
       },
       "growth": {
         "title": "Growth",
@@ -9423,6 +9448,16 @@
       "handoffQueuedConsentWithheld": "Your interest is recorded. You did not tick the presentation box, so nothing about you is passed to Nonstop Group. To be presented, withdraw and express interest again with the box ticked. Nothing has been sent to the employer by LabourMarket.ai.",
       "handoffDelivered": "Your interest was passed to Nonstop Group. Nonstop may approach the employer through its own commercial process; LabourMarket.ai has sent nothing to the employer.",
       "handoffClosed": "Your interest is recorded. The earlier hand-over to Nonstop Group was closed when you withdrew; nothing had been sent."
+    },
+    "intent": {
+      "label": "My situation",
+      "states": {
+        "AVAILABLE_NOW": "Can start now",
+        "AVAILABLE_FROM": "Can start from a set date",
+        "OPEN_TO_OFFERS": "Working, open to offers",
+        "LOOKING_FOR_WORK": "Looking for work",
+        "LOOKING_FOR_PROJECTS": "Looking for projects"
+      }
     }
   },
   "workerIntake": {
@@ -9940,12 +9975,12 @@
     "footer": "This report shows real signals only. Review is a human decision."
   },
   "about": {
-    "metaTitle": "What is Labour Market AI",
-    "metaDescription": "A plain-language explanation of Labour Market AI: how workers build a real profile from real work, how companies describe needs and find teams, and how the platform stays honest.",
-    "navLabel": "About Labour Market AI",
+    "metaTitle": "What is LabourMarket.ai",
+    "metaDescription": "A plain-language explanation of LabourMarket.ai: how workers build a real profile from real work, how companies describe needs and find teams, and how the platform stays honest.",
+    "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
-    "title": "What Labour Market AI is and how it works",
-    "lede": "Labour Market AI is a labour-market platform where workers, companies and teams show real skills, see real needs and organise real work — locally and across Europe.",
+    "title": "What LabourMarket.ai is and how it works",
+    "lede": "LabourMarket.ai is a labour-market platform where workers, companies and teams show real skills, see real needs and organise real work — locally and across Europe.",
     "honesty": "Everything described on this page exists in the product today. Features still being prepared are named as such, and payments are not active yet.",
     "loops": [
       {
@@ -10372,7 +10407,8 @@
       "title": "Period evidence — derived monthly share",
       "chip": "Derived",
       "thisMonth": "{hours} h this month (derived)",
-      "sourceLink": "Open the period record"
+      "sourceLink": "Open the period record",
+      "unavailable": "Period records could not be read right now — the plan is shown without them."
     }
   },
   "workforcePlanning": {
@@ -10495,7 +10531,9 @@
       "noDates": "no dates recorded",
       "undated": "assigned to {label} — no dates recorded",
       "withoutCommitment": "{count, plural, one {# person has} other {# people have}} nothing on record here. That is not the same as free — approved absences are listed separately.",
-      "unavailable": "Commitments could not be read. That is not the same as free."
+      "unavailable": "Commitments could not be read. That is not the same as free.",
+      "conflict": "overlap",
+      "conflictNote": "Overlapping dates are marked: the same person is committed in two places on those days. A warning, not a block — both records stay."
     }
   },
   "tasks": {
@@ -10726,7 +10764,7 @@
       },
       "disabledBody": "No external AI provider is connected in this environment. Everything on this page is computed from your own records by fixed rules — no text here was produced by a language model.",
       "whenEnabled": "Once the owner connects a provider and the suggestion audit storage is applied, reviewable drafting suggestions become available — always as suggestions a person confirms, never as automatic changes.",
-      "gates": "Two gates are open on purpose: (1) no provider key is configured in production, and (2) the suggestion audit store (ai_runs / ai_suggestions) is an owner-gated migration. Generation stays off until both close — producing suggestions without the audit trail would break the programme's own rules.",
+      "gates": "The assistant is not available in this environment yet. Suggestions stay off until it is connected — nothing is generated in the meantime.",
       "providerLabel": "Provider",
       "modelLabel": "Model",
       "notWired": "Generation is deliberately not switched on at this stage — outputs could not be traced yet. The status above is shown for transparency only."
@@ -11240,7 +11278,8 @@
         "unemployed": "Looking for work",
         "volunteer": "Volunteer"
       },
-      "why": "Only your active work relationships are shown — each row names the relationship."
+      "why": "Only your active work relationships are shown — each row names the relationship.",
+      "unavailable": "Your relationships could not be loaded. That does not mean you have none — try again."
     },
     "invite": {
       "title": "Invite",
@@ -11435,7 +11474,9 @@
     "servicesEmpty": "Nothing offered yet",
     "servicesUnavailable": "Offered services could not be loaded",
     "serviceRemote": "Remote",
-    "photoAlt": "Photo of completed work"
+    "photoAlt": "Photo of completed work",
+    "historyTitle": "Imported history",
+    "historyUnavailable": "Imported history could not be read"
   },
   "companyGallery": {
     "title": "Gallery",
@@ -12866,7 +12907,7 @@
       "switchContextFailed": "The switch didn't go through — your active context is unchanged.",
       "switchContextUnavailable": "Context switching isn't available right now.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -13337,7 +13378,15 @@
       "workspaceUnnamedNote": "No name provided",
       "workspaceNameThis": "Add a name",
       "historyImportChip": "Historical data import",
-      "historyImportHint": "Upload the file — I will prepare people, sites, dates and hours from it; you confirm only what is unclear."
+      "historyImportHint": "Upload the file — I will prepare people, sites, dates and hours from it; you confirm only what is unclear.",
+      "writeEmployerMany": "You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "Here it is. The button below confirms it.",
+      "acceptOfferWhich": "Which one? Choose below.",
+      "offerCapacity": {
+        "needsCompany": "Offering people belongs to an organisation, and you are in your personal space right now. Choose the company and I will record the offer.",
+        "personalSpace": "Offering people or a team needs an organisation, and you do not have one yet. You can create a company, or offer your own service instead."
+      }
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -15091,7 +15140,7 @@
   },
   "agreements": {
     "title": "Agreement register",
-    "intro": "The canonical register of {org} agreements — employment-related and general. Record keeping only.",
+    "intro": "The register of {org} agreements — employment-related and general. Record keeping only.",
     "noSignatureNote": "Statuses in this register are record-keeping states only — nothing here means an agreement is signed, legally valid or binding. LabourMarket.ai does not execute legal signatures: any signature happens outside the platform, and an attached file is only evidence you provide.",
     "relationshipNote": "The contracts list above is the earlier personal commercial register and keeps working unchanged. New agreements belong here.",
     "unavailable": "The agreement register cannot be shown right now.",
@@ -16226,7 +16275,19 @@
       "withdrawConfirm": "Withdraw",
       "withdrawCancel": "Keep the link",
       "withdrawDone": "Withdrawn. The organization keeps its own record; it no longer names you.",
-      "unnamedOrganization": "An organization"
+      "unnamedOrganization": "An organization",
+      "suggestions": {
+        "title": "Skills named in an organization's records",
+        "intro": "The organization's words about your work name these skills. Nothing is added until you say so.",
+        "why": "Named as “{terms}” in {count, plural, one {# record} other {# records}}",
+        "add": "Add",
+        "adding": "Adding…",
+        "added": "Added to profile",
+        "already": "Already on your profile",
+        "notNow": "Not now",
+        "error": "Could not add it. Please try again.",
+        "selfDeclaredNote": "An added skill is self-declared — not verified."
+      }
     },
     "plan": {
       "title": "What was found and what is prepared",
@@ -16727,7 +16788,8 @@
       "partners": {
         "title": "Clients and partners",
         "subtitle": "Who you work with: clients, agencies and shared needs.",
-        "empty": "No client or partner relationships yet. An agency can invite you to work together — its proposals will appear here."
+        "empty": "No client or partner relationships yet. An agency can invite you to work together — its proposals will appear here.",
+        "unavailable": "Partner connections could not be loaded. That does not mean there are none — try again."
       },
       "education": {
         "title": "Learning and programmes",
@@ -16739,7 +16801,18 @@
         "hoursGridTitle": "Monthly hours grid",
         "hoursGridNote": "The same import understands the monthly grid (person × day). Day-to-day hours entry lives in the work-hours area.",
         "hoursDoor": "Work hours",
-        "evidenceReportsDoor": "Evidence reports"
+        "evidenceReportsDoor": "Evidence reports",
+        "imports": {
+          "title": "Your imports",
+          "empty": "Nothing has been imported yet.",
+          "unavailable": "The list of imports could not be read right now.",
+          "status": {
+            "staged": "Prepared",
+            "committed": "Recorded",
+            "withdrawn": "Withdrawn",
+            "failed": "Failed"
+          }
+        }
       },
       "settings": {
         "title": "Organization settings",

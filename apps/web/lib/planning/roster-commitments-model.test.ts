@@ -47,6 +47,33 @@ describe("buildRosterCommitmentsView — per person, per date, nothing inferred"
     expect(v.withoutCommitment).toBe(1);
   });
 
+  it("two commitments of ONE person on the same day wear the conflict flag — warn only, both rows stay", () => {
+    const v = buildRosterCommitmentsView(people, {
+      status: "ok",
+      commitments: [
+        { workerId: "w1", kind: "project", sourceId: "p1", label: "Kaunas", startDate: "2026-10-01", endDate: "2026-10-10" },
+        // touches the edge: ends the day the booking starts — inclusive overlap
+        { workerId: "w1", kind: "booking", sourceId: "b1", label: null, startDate: "2026-10-10", endDate: "2026-10-12" },
+        { workerId: "w1", kind: "trip", sourceId: "t1", label: "Oslo", startDate: "2026-11-01", endDate: null },
+        // another person on the same days is NOT a conflict — overlap is per person
+        { workerId: "w3", kind: "project", sourceId: "p2", label: null, startDate: "2026-10-05", endDate: "2026-10-06" },
+      ],
+      undatedProjects: [],
+    });
+    if (v.status !== "ok") throw new Error("expected ok");
+    const w1 = v.rows.find((r) => r.workerId === "w1")!;
+    expect(w1.overlaps).toBe(1);
+    expect(w1.commitments.map((c) => [c.sourceId, c.conflict])).toEqual([
+      ["p1", true],
+      ["b1", true],
+      ["t1", false],
+    ]);
+    expect(w1.commitments).toHaveLength(3); // nothing hidden, nothing blocked
+    const w3 = v.rows.find((r) => r.workerId === "w3")!;
+    expect(w3.overlaps).toBe(0);
+    expect(w3.commitments[0].conflict).toBe(false);
+  });
+
   it("a failed or unprovisioned read is passed through — never an empty roster that looks free", () => {
     expect(buildRosterCommitmentsView(people, { status: "unavailable" })).toEqual({ status: "unavailable" });
     expect(buildRosterCommitmentsView(people, { status: "needs-migration" })).toEqual({ status: "needs-migration" });
@@ -66,6 +93,9 @@ describe("the surface: rendered on company planning, labelled in every routed lo
     const page = readFileSync(join(WEB, "app", "[locale]", "dashboard", "company", "planning", "page.tsx"), "utf8");
     expect(page).toContain('data-testid="roster-commitments"');
     expect(page).toContain('data-testid="roster-commitments-unavailable"');
+    // The overlap wears the calendar's own conflict token, never a new one.
+    expect(page).toMatch(/c\.conflict \? \(\s*<TimeReality\s+kind="conflict"/);
+    expect(page).toContain('data-testid="roster-commitments-conflict-note"');
     expect((page.match(/\{utilisationSection\}\s*\n\s*\{commitmentsSection\}/g) ?? []).length).toBe(2);
     // The read is the existing authorized commitment read — no new table.
     const read = readFileSync(join(WEB, "lib", "planning", "roster-commitments.ts"), "utf8");
@@ -79,7 +109,7 @@ describe("the surface: rendered on company planning, labelled in every routed lo
         workforcePlanning: { committedWhere: Record<string, unknown> & { kind: Record<string, string> } };
       };
       const c = m.workforcePlanning.committedWhere;
-      for (const k of ["title", "intro", "untitled", "openEnded", "noDates", "undated", "withoutCommitment", "unavailable"]) {
+      for (const k of ["title", "intro", "untitled", "openEnded", "noDates", "undated", "withoutCommitment", "unavailable", "conflict", "conflictNote"]) {
         expect(typeof c[k], `${loc}.${k}`).toBe("string");
       }
       for (const k of ["project", "booking", "trip"]) expect(typeof c.kind[k], `${loc}.kind.${k}`).toBe("string");

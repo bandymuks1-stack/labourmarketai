@@ -47,7 +47,7 @@
   "example4": "Ein Team geleitet, Aufgaben verteilt und das Ergebnis geprüft.",
   "savedTitle": "Eintrag gespeichert",
   "savedBody": "Ihre gespeicherten Angaben wurden Ihrem Arbeitsverlauf hinzugefügt.",
-  "savedBodyWithDetails": "Mit {count} strukturierten Detail(s) in Ihrem Arbeitsverlauf gespeichert.",
+  "savedBodyWithDetails": "Mit {count, plural, one {# strukturierten Detail} other {# strukturierten Details}} in Ihrem Arbeitsverlauf gespeichert.",
   "savedConfirmNote": "Der Eintrag ist privat.",
   "whoCanConfirm": "Einträge sind nur für Sie sichtbar, bis Sie es anders festlegen. Fähigkeiten, die Sie mit Einträgen verknüpfen, fließen in Ihren Lebenslauf ein.",
   "savedSeeEntries": "Ihre Einträge ansehen",
@@ -78,7 +78,7 @@
   "engagement": "Kontext",
   "engagementChoose": "Beschäftigung wählen…",
   "engagementAmbiguous": "Diese Arbeit könnte zu mehr als einer Beschäftigung gehören. Wählen Sie vor dem Speichern aus, zu welcher.",
-  "unconfirmedTimeBlocked": "{count} erfasste Dauer(n) warten noch auf Ihre Durchsicht und würden nicht gespeichert. Behalten oder entfernen Sie sie zuerst.",
+  "unconfirmedTimeBlocked": "{count, plural, one {# erfasste Dauer wartet noch auf Ihre Durchsicht und würde nicht gespeichert.} other {# erfasste Dauern warten noch auf Ihre Durchsicht und würden nicht gespeichert.}} Behalten oder entfernen Sie sie zuerst.",
   "entry": {
     "reviewedBy": "Überprüft von",
     "confirmerRole": {
@@ -232,7 +232,8 @@
       "receipt": "Bestätigt: {title}",
       "receiptSkills": "{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}",
       "skillsUnavailable": "Die Fähigkeitenliste konnte nicht gelesen werden — der Tipp bestätigt nur den Eintrag selbst."
-    }
+    },
+    "loadFailed": "Die Prüfliste konnte nicht geladen werden. Das heißt nicht, dass nichts zu prüfen ist — bitte erneut versuchen."
   },
   "listEmpty": "Sie haben noch keine Arbeitsnachweise — Ihre Einträge werden hier angezeigt.",
   "listEmptyTitle": "Beginnen Sie, Arbeitsnachweise aufzubauen",
@@ -608,7 +609,7 @@
     "engagementRequired": "Wähle den Arbeitskontext (Organisation oder Projekt), zu dem dieser Eintrag gehört.",
     "notesRequired": "Beschreibe, was du gearbeitet hast — der Freitext ist der Kern dieses Eintrags.",
     "quantityInvalid": "Die Menge muss eine nicht negative Zahl sein.",
-    "unitSlugUnknown": "Noch nicht im Einheitenregister: {units}. Bitte einen Administrator, Migration 0017 (den productivity_units-Seed) anzuwenden, und versuche es erneut.",
+    "unitSlugUnknown": "Diese Einheit wird noch nicht erkannt: {units}. Wählen Sie eine andere Einheit oder versuchen Sie es später erneut.",
     "sourceDocumentInvalid": "Das angegebene Quelldokument wurde in deinen Dokumenten nicht gefunden.",
     "saveFailed": "Der Eintrag konnte nicht gespeichert werden: {reason}",
     "unknownReason": "unbekannter Fehler",
@@ -620,7 +621,7 @@
     "entryNotFound": "Eintrag nicht gefunden.",
     "deleteFailed": "Der Eintrag konnte nicht entfernt werden: {reason}",
     "restoreFailed": "Der Eintrag konnte nicht wiederhergestellt werden: {reason}",
-    "rpcUnavailable": "Die Korrekturfunktion ist in dieser Umgebung noch nicht eingerichtet. Bitte einen Administrator, die neueste Journal-Migration anzuwenden (0018 / 20260720100000).",
+    "rpcUnavailable": "Korrekturen können gerade nicht gespeichert werden. Versuchen Sie es später erneut.",
     "entryNotFoundMaybeDeleted": "Eintrag nicht gefunden (möglicherweise wurde er bereits entfernt).",
     "notOwner": "Ein fremder Eintrag kann nicht geändert werden.",
     "alreadyConfirmed": "Dieser Eintrag kann nicht mehr entfernt werden — eine andere Partei hat ihn bereits geprüft. Sende statt einer Löschung eine Korrekturanfrage.",
@@ -768,7 +769,9 @@
       "approved": "{hours} Std. in einem Stundenzettel genehmigt",
       "linked": "{hours} Std. beschreiben Journaleinträge, die oben bereits gezählt sind",
       "rejected": "{hours} Std. in einem Stundenzettel abgelehnt — nirgends gezählt",
-      "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur ein Journaleintrag."
+      "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur ein Journaleintrag.",
+      "periodRecord": "{hours} Std. über {span} — eine Zahl für den ganzen Zeitraum, nicht auf Tage verteilt",
+      "periodMore": "{count, plural, one {# weiterer Zeitraumeintrag} other {# weitere Zeitraumeinträge}}"
     },
     "growthKindsTitle": "Was deine Einträge zeigen",
     "growthKindsHint": "Jede Zeile ist eine Art, nach einer einfachen Regel aus deinen eigenen Einträgen abgeleitet, mit den Fakten, auf denen sie steht. Keine Eigenschaft, keine Bewertung.",
@@ -889,6 +892,7 @@
       "all": "Journaleintrag bestätigt"
     },
     "reported": "Organisation erfasste {time}",
-    "periodReportedOnly": "Keine eigenen Einträge; die Organisation erfasste {days, plural, one {# Tag} other {# Tage}}, {time}."
+    "periodReportedOnly": "Keine eigenen Einträge; die Organisation erfasste {days, plural, one {# Tag} other {# Tage}}, {time}.",
+    "reportedUnknown": "Die Einträge der Organisation für diesen Zeitraum konnten nicht gelesen werden — das ist nicht dasselbe wie keine."
   }
 }

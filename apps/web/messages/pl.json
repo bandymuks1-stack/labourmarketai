@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Oryginał ({lang}) — brak tłumaczenia",
+    "loadError": "Nie udało się teraz wczytać wiadomości. To, co widzisz, nie jest pełnym obrazem — spróbuj ponownie."
   },
   "trust": {
     "unreadHint": "Części z tych rzeczy nie udało się teraz policzyć i są pokazane jako „—”. To nie znaczy, że ich nie masz — po prostu nie dało się odczytać liczb. Odśwież za chwilę.",
@@ -1810,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Nie udało się teraz odczytać Twojej historii pracy."
     },
     "readinessSteps": {
       "pillar": {
@@ -1864,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Długość paska to liczba Twoich wpisów pracy stojących za każdą umiejętnością (pełny pasek = {scale}+), a nie ocena umiejętności."
-    }
+      "skillsScaleNote": "Długość paska to liczba Twoich wpisów pracy stojących za każdą umiejętnością (pełny pasek = {scale}+), a nie ocena umiejętności.",
+      "historyHours": "{hours} godz. zapisane · {confirmed} godz. z wpisem kierownika",
+      "historyUnavailable": "Nie udało się teraz odczytać Twojej historii pracy."
+    },
+    "skillsUnavailable": "Nie udało się teraz odczytać.",
+    "verifiedUnavailable": "Nie udało się teraz odczytać umiejętności z wpisem kierownika."
   },
   "projects": {
     "map": {
@@ -2236,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Twoje zainteresowanie jest zapisane. Nie zaznaczyłeś pola o przedstawieniu, więc do Nonstop Group nie trafia nic na Twój temat. Aby zostać przedstawionym, wycofaj i wyraź zainteresowanie ponownie z zaznaczonym polem. LabourMarket.ai nic nie wysłał do pracodawcy.",
       "handoffDelivered": "Zainteresowanie przekazano do Nonstop Group. Nonstop może zwrócić się do pracodawcy w ramach własnego procesu handlowego; LabourMarket.ai nic pracodawcy nie wysłał.",
       "handoffClosed": "Zainteresowanie zapisane. Wcześniejsze przekazanie do Nonstop Group zostało zamknięte, gdy je wycofano; nic nie zostało wysłane."
+    },
+    "intent": {
+      "label": "Moja sytuacja",
+      "states": {
+        "AVAILABLE_NOW": "Mogę zacząć od razu",
+        "AVAILABLE_FROM": "Mogę zacząć od podanej daty",
+        "OPEN_TO_OFFERS": "Pracuję, ale rozważam oferty",
+        "LOOKING_FOR_WORK": "Szukam pracy",
+        "LOOKING_FOR_PROJECTS": "Szukam projektów"
+      }
     }
   },
   "scouting": {
@@ -2749,7 +2766,9 @@
     "servicesEmpty": "Nic jeszcze nie zaoferowano",
     "servicesUnavailable": "Nie udało się wczytać oferowanych usług",
     "serviceRemote": "Zdalnie",
-    "photoAlt": "Zdjęcie wykonanej pracy"
+    "photoAlt": "Zdjęcie wykonanej pracy",
+    "historyTitle": "Zaimportowana historia",
+    "historyUnavailable": "Nie udało się odczytać zaimportowanej historii"
   },
   "marketMapBase": {
     "previewTitle": "Wybrano nowe miejsce — jeszcze nie zapisane",
@@ -3769,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -4092,7 +4111,11 @@
         "usingProfile": "Nie musisz nic wgrywać — szukam na podstawie tego, co już jest w Twoim profilu.",
         "usingProfileNarrowed": "Nie musisz nic wgrywać — szukam na podstawie Twojego profilu i tego, co już podałeś.",
         "profileEmpty": "W Twoim profilu nie ma jeszcze nic, więc nie mogę na nim oprzeć wyszukiwania. Zapisz jedną pracę albo podaj zawód — od razu zacznę szukać."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5579,7 +5602,7 @@
   },
   "agreements": {
     "title": "Rejestr umów",
-    "intro": "Kanoniczny rejestr umów {org} — pracowniczych i ogólnych. Wyłącznie ewidencja.",
+    "intro": "Rejestr umów {org} — pracowniczych i ogólnych. Wyłącznie ewidencja.",
     "noSignatureNote": "Statusy w tym rejestrze to wyłącznie stany ewidencyjne — nic tutaj nie oznacza, że umowa jest podpisana, prawnie ważna lub wiążąca. LabourMarket.ai nie wykonuje podpisów prawnych: podpisanie odbywa się poza platformą, a załączony plik to jedynie dostarczony przez Ciebie dowód.",
     "relationshipNote": "Lista kontraktów powyżej to wcześniejszy osobisty rejestr handlowy i działa bez zmian. Nowe umowy należą tutaj.",
     "unavailable": "Rejestru umów nie można teraz wyświetlić.",
