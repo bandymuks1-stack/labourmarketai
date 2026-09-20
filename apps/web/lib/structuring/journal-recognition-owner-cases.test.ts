@@ -702,7 +702,7 @@ describe("production walk 2026-09-12 (#1689) — a fully linked entry never read
   });
 
   it("the sentence exists in every catalogue that carries the namespace", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const messages = JSON.parse(
         readFileSync(join(ROOT, `messages/${loc}.json`), "utf8"),
       ) as { journalSkillLinks: Record<string, string> };

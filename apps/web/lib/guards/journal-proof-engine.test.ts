@@ -123,7 +123,7 @@ describe("proof-engine loop strip — real counts on the journal page", () => {
 });
 
 describe("i18n copy present (launch locales)", () => {
-  for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+  for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
     it(`${loc}: spreadsheet / templates / aiSuggest / proofLoop keys exist`, () => {
       const j = JSON.parse(read(`messages/${loc}/journal.json`));
       for (const k of [

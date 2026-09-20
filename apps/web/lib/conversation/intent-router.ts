@@ -316,7 +316,10 @@ function pNoSeek(source: string, weight = 1): Pattern {
  * examples, 2026-09-06).
  */
 const SEEK_GUARD_SOURCE =
-  "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch";
+  // 2026-09-20: `szuka` / `poszukuj` / `potrzebuj` join the list for Polish —
+  // "Jestem spawaczem, szukam pracy" must run the search exactly like its lt /
+  // en / ru / nl / de twins do, instead of stopping at the self-introduction.
+  "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch|\\bszuka|\\bposzukuj|\\bpotrzebuj";
 
 /**
  * AN OPTIONAL PLACE PHRASE, between a verb and the time word after it.
@@ -379,7 +382,9 @@ const RULES: IntentRule[] = [
       // "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose."
       // "We have workers and we are looking for employers."
       // "Мы имеем 20 сварщиков и ищем для них работу."
-      p(`(turim|turiu|disponuoj|have|hebben|haben|имеем|располага)\\w*\\s*.{0,20}([0-9]{1,4}|${OWN_PEOPLE_SOURCE})\\w*\\s*.{0,40}(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу|reikia|nodig|brauch|нужн)\\w*\\s*.{0,30}(darb|work|job|projekt|project|employer|užsakym|werk|opdracht|werkgever|arbeit|auftrag|arbeitgeb|работ|проект|заказ)`, 10),
+      // 2026-09-20 pl: `\bmam` (mam / mamy), `szuka` (szukam / szukamy) and
+      // `prac` (pracy / pracę) — "Mamy 20 spawaczy i szukamy dla nich pracy."
+      p(`(turim|turiu|disponuoj|have|hebben|haben|имеем|располага|\\bmam|posiadam)\\w*\\s*.{0,20}([0-9]{1,4}|${OWN_PEOPLE_SOURCE})\\w*\\s*.{0,40}(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|szuka|poszukuj|ищем|ищу|reikia|nodig|brauch|potrzebuj|нужн)\\w*\\s*.{0,30}(darb|work|job|projekt|project|employer|užsakym|werk|opdracht|werkgever|arbeit|auftrag|arbeitgeb|prac|zlecen|работ|проект|заказ)`, 10),
       // SEEKING WORK **FOR OUR PEOPLE** — the possessive is what makes it
       // supply. "Ieškome darbo savo darbuotojams", "looking for work for our
       // people", "Arbeit für unsere Mitarbeiter".
@@ -396,7 +401,7 @@ const RULES: IntentRule[] = [
       ),
       // WORK **FOR THEM** — the pronoun carries the same possession.
       // "turim 20 suvirintoju, reikia jiems projektu".
-      p("(jiems|joms|them|voor\\s+hen|für\\s+sie|ihnen|для\\s+них|им)\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|работ|проект)", 10),
+      p("(jiems|joms|them|voor\\s+hen|für\\s+sie|ihnen|dla\\s+nich|для\\s+них|им)\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|prac|работ|проект)", 10),
       // WE CAN OFFER … "Galime pasiūlyti 15 statybininkų", "we can offer",
       // "wir können … anbieten", "we kunnen … aanbieden".
       //
@@ -424,13 +429,13 @@ const RULES: IntentRule[] = [
       // and `unrecognised` in the other four active locales for the single
       // most ordinary way to say it. Found by putting the sentence on the
       // landing in five languages, not by a test.
-      p("(turim|turiu|have|hebben|haben|имеем|располага|у\\s+нас|у\\s+меня)\\w*\\s*.{0,10}[0-9]{1,4}\\s*.{0,30}(laisv|available|\\bfree\\b|beschikbaar|\\bvrij|verfügbar|verfuegbar|\\bfrei\\b|свобод|доступ)", 10),
+      p("(turim|turiu|have|hebben|haben|имеем|располага|у\\s+нас|у\\s+меня|\\bmam)\\w*\\s*.{0,10}[0-9]{1,4}\\s*.{0,30}(laisv|available|\\bfree\\b|beschikbaar|\\bvrij|verfügbar|verfuegbar|\\bfrei\\b|свобод|доступ|\\bwoln|dost[eę]pn)", 10),
       // …and the same sentence with the adjective BEFORE the noun, which is
       // where Lithuanian, Russian and Dutch put it: "Turime 7 LAISVUS
       // elektrikus", "У нас 7 СВОБОДНЫХ электриков", "Wij hebben 7 VRIJE
       // elektriciens". Covered by the rule above only when the adjective
       // follows the count closely enough; this states it plainly.
-      p("(turim|turiu|have|hebben|haben|имеем|у\\s+нас|у\\s+меня)\\w*\\s*.{0,10}[0-9]{1,4}\\s+(laisv|free|vrij|frei|свобод|beschikbar|verfügbar)", 10),
+      p("(turim|turiu|have|hebben|haben|имеем|у\\s+нас|у\\s+меня|\\bmam)\\w*\\s*.{0,10}[0-9]{1,4}\\s+(laisv|free|vrij|frei|свобод|beschikbar|verfügbar|\\bwoln|dost[eę]pn)", 10),
       // AN AGENCY SAYING IT HAS PEOPLE. Only a supplier describes itself this
       // way, so the sentence needs no second market-facing clause.
       // `turi` — the THIRD person — was missing, so "mūsų agentūra turi 15
@@ -585,22 +590,28 @@ const RULES: IntentRule[] = [
       p("^\\s*чего\\s+(мне\\s+)?не\\s+хватает\\s*\\??\\s*$", 6),
       p("^\\s*was\\s+fehlt(\\s+mir)?(\\s+noch)?\\s*\\??\\s*$", 6),
       p("^\\s*wat\\s+(mis\\s+ik|ontbreekt\\s+er)\\s*\\??\\s*$", 6),
+      // pl (2026-09-20) — "Jakich umiejętności mi brakuje?" / "Czego mi
+      // brakuje?". The GAP verb is required, exactly as in de/nl above, so
+      // "jakie mam umiejętności" stays a profile question.
+      p("(jakich|jakie|kt[oó]rych)\\s+.{0,12}(umiej[eę]tno|kwalifikacj|kompetencj)", 5),
+      p("brakuje\\s+mi\\s*.{0,16}(umiej[eę]tno|kwalifikacj|kompetencj)", 5),
+      p("^\\s*czego\\s+mi\\s+brakuje\\s*\\??\\s*$", 6),
     ],
   },
   {
     intent: "journal-recent",
     patterns: [
-      p("(parodyk|rodyk|show|покажи|zeig|toon|laat)\\s*.{0,20}(žurnal|journal|дневник|tagebuch|dagboek)", 5),
-      p("(paskutin|latest|last|последн|letzte|laatste)\\s*.{0,18}(įraš|entr|запис|eintrag|einträge)", 5),
-      p("(mano|my|мой|mein|mijn)\\s+(žurnal|journal|дневник|tagebuch|dagboek)", 4),
+      p("(parodyk|rodyk|show|покажи|zeig|toon|laat|poka[zż]|wy[sś]wietl)\\s*.{0,20}(žurnal|journal|дневник|tagebuch|dagboek|dziennik)", 5),
+      p("(paskutin|latest|last|последн|letzte|laatste|ostatni)\\s*.{0,18}(įraš|entr|запис|eintrag|einträge|wpis)", 5),
+      p("(mano|my|мой|mein|mijn|m[oó]j)\\s+(žurnal|journal|дневник|tagebuch|dagboek|dziennik)", 4),
       // A QUESTION about hours worked is a journal READ, not a log-work
       // intake. "Kiek valandų dirbau šiandien?" used to score log-work via
       // the bare past-tense verb and answered with the log-work template —
       // the assistant asking you to record the very thing it should be
       // reporting (owner visual acceptance P0-5). The interrogative +
       // hours/worked pairing outweighs log-work's verb+today signals.
-      p("(kiek|how\\s+(many|much)|сколько|hoeveel|wie\\s+viele?)\\s*.{0,24}(valand|hour|час|stunden|uur|uren)", 7),
-      p("(kiek|how\\s+(many|much)|сколько|hoeveel|wie\\s+viele?)\\s*.{0,24}(dirbau|dirbome|worked|работал|gearbeitet|gewerkt)", 7),
+      p("(kiek|how\\s+(many|much)|сколько|hoeveel|wie\\s+viele?|\\bile\\b)\\s*.{0,24}(valand|hour|час|stunden|uur|uren|godzin)", 7),
+      p("(kiek|how\\s+(many|much)|сколько|hoeveel|wie\\s+viele?|\\bile\\b)\\s*.{0,24}(dirbau|dirbome|worked|работал|gearbeitet|gewerkt|pracowa[lł])", 7),
       // The same rule for the WHAT question. "Ką šiandien dariau?" asks what
       // was RECORDED; it matched calendar-view's (ką + šiandien) pairing and
       // came back with the day's PLAN — the future answering a question about
@@ -613,7 +624,7 @@ const RULES: IntentRule[] = [
       // "vakar dirbau 8 valandas" (a plain work log) was pulled into the
       // journal read. The boundary is what makes this a question test.
       p(
-        "\\b(ką|what|что|was|wat)\\b\\s*.{0,24}(dariau|dirbau|dirbome|nuveikiau|did\\s+i\\s+do|делал|сделал|gemacht|getan|gedaan|gewerkt|gearbeitet)",
+        "\\b(ką|what|что|was|wat|co)\\b\\s*.{0,24}(dariau|dirbau|dirbome|nuveikiau|did\\s+i\\s+do|делал|сделал|gemacht|getan|gedaan|gewerkt|gearbeitet|robi[lł]em|zrobi[lł]em|pracowa[lł]em)",
         7,
       ),
     ],
@@ -652,13 +663,19 @@ const RULES: IntentRule[] = [
       p("^\\s*wie\\s+(viel|oft|lange)\\s+habe\\s+ich\\s+(?!gearbeitet)[^\\s]+", 8),
       // nl — "Hoeveel heb ik geprogrammeerd?"
       p("^\\s*hoeveel\\s+heb\\s+ik\\s+(?!gewerkt)[^\\s]+", 8),
+      // pl (2026-09-20) — "Ile programowałem?", "Ile godzin układałem
+      // płytki?". Polish marks the first-person past in the ending (-łem /
+      // -łam), which folds to -lem / -lam; `pracowa` is excluded so "Ile
+      // godzin pracowałem?" keeps `journal-recent`, exactly as `dirb` is
+      // excluded from the Lithuanian shape above.
+      p("^\\s*ile\\s+(?:godzin[^\\s]*\\s+)?(?:[^\\s]+\\s+){0,2}?(?!pracowa|zarobi|dosta|mia)[^\\s]+[lł](em|am)\\b", 8),
       // WHERE was a skill used — the contexts / entries it sits on. The
       // en/de/nl shapes carry the past-tense auxiliary ("where did I use",
       // "wo habe ich … verwendet"), so "where can I use my skills" — a
       // question about the future — is not pulled into a journal read.
-      p("(kur|где)\\s*.{0,24}(naudoj|использ)", 8),
+      p("(kur|где|gdzie)\\s*.{0,24}(naudoj|использ|u[zż]ywa[lł]|wykorzysta[lł])", 8),
       p("(where|wo|waar)\\s+(did|have|habe|heb)\\s+(i|ich|ik)\\b.{0,24}(use|verwend|benutz|eingesetzt|gebruik|ingezet)", 8),
-      p("(kur|где)\\s*.{0,30}(įgūd|навык)", 4),
+      p("(kur|где|gdzie)\\s*.{0,30}(įgūd|навык|umiej[eę]tno)", 4),
       p("(where|wo|waar)\\s+(did|have|habe|heb)\\s+(i|ich|ik)\\b.{0,30}(skill|fähigkeit|vaardigh)", 4),
     ],
   },
@@ -670,7 +687,7 @@ const RULES: IntentRule[] = [
       // nutze ich am meisten?" / "Welke vaardigheden gebruik ik het meest?"
       // Interrogative-gated, so "use my skills in Germany" stays a search.
       p(
-        "(kokius|kokiu|kurius|kuriu|which|what|какие|каких|welche|welke)\\s+.{0,12}(įgūd|skill|навык|fähigkeit|kompetenz|vaardigh|competent)[^\\s]*\\s*.{0,20}(naudoj|use|использ|nutze|benutze|verwende|gebruik)",
+        "(kokius|kokiu|kurius|kuriu|which|what|какие|каких|welche|welke|jakich|jakie|kt[oó]rych)\\s+.{0,12}(įgūd|skill|навык|fähigkeit|kompetenz|vaardigh|competent|umiej[eę]tno|kompetencj)[^\\s]*\\s*.{0,20}(naudoj|use|использ|nutze|benutze|verwende|gebruik|u[zż]ywam|u[zż]ywa|korzystam|wykorzystuj)",
         8,
       ),
     ],
@@ -683,15 +700,15 @@ const RULES: IntentRule[] = [
       // времени?" / "Welche Tätigkeit nimmt die meiste Zeit?" / "Welke
       // activiteit kost de meeste tijd?"
       p(
-        "(veikl|activit|деятельност|занят|tätigkeit|activiteit|bezigheid)[^\\s]*\\s*.{0,40}(daugiausia|most|больше\\s+всего|meiste|meest)",
+        "(veikl|activit|деятельност|занят|tätigkeit|activiteit|bezigheid|czynno[sś]|aktywno[sś])[^\\s]*\\s*.{0,40}(daugiausia|most|больше\\s+всего|meiste|meest|najwi[eę]cej)",
         8,
       ),
       // "Kur praleidžiu daugiausia laiko?" / "Womit verbringe ich die meiste
       // Zeit?" / "Waar besteed ik de meeste tijd aan?"
-      p("(daugiausia|most\\s+of|больше\\s+всего|meiste|meeste)\\s*.{0,24}(laik|time|времен|zeit|tijd)", 8),
+      p("(daugiausia|most\\s+of|больше\\s+всего|meiste|meeste|najwi[eę]cej)\\s*.{0,24}(laik|time|времен|zeit|tijd|czasu|czas\\b)", 8),
       // "Ką daugiausia dirbau?" — outweighs journal-recent's ką…dirbau (7).
       p(
-        "\\b(ką|what|что|was|wat)\\b\\s*.{0,16}(daugiausia|most|больше\\s+всего|meisten|meest)\\s*.{0,16}(dirbau|dariau|did|делал|gemacht|gedaan)",
+        "\\b(ką|what|что|was|wat|co)\\b\\s*.{0,16}(daugiausia|most|больше\\s+всего|meisten|meest|najwi[eę]cej)\\s*.{0,16}(dirbau|dariau|did|делал|gemacht|gedaan|robi[lł]em|pracowa[lł]em)",
         8,
       ),
     ],
@@ -701,13 +718,13 @@ const RULES: IntentRule[] = [
     patterns: [
       // "Kas patvirtinta?" / "What is confirmed?" / "Что подтверждено?" /
       // "Was ist bestätigt?" / "Wat is bevestigd?"
-      p("^\\s*(kas|what|что|was|wat)\\s+(yra\\s+|is\\s+|ist\\s+)?(jau\\s+|already\\s+|уже\\s+|schon\\s+|al\\s+)?(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)", 8),
+      p("^\\s*(kas|what|что|was|wat|co)\\s+(yra\\s+|is\\s+|ist\\s+|jest\\s+)?(jau\\s+|already\\s+|уже\\s+|schon\\s+|al\\s+|ju[zż]\\s+)?(patvirtint|confirmed|подтвержд|bestätigt|bevestigd|potwierdz)", 8),
       // "kiek valandų patvirtinta?" — outweighs journal-recent's kiek…valand
       // (7); "show my approved hours" stays `figures` (no interrogative).
-      p("(kiek|how\\s+(much|many)|сколько|wie\\s+viel|hoeveel)\\s*.{0,24}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)", 8),
+      p("(kiek|how\\s+(much|many)|сколько|wie\\s+viel|hoeveel|\\bile\\b)\\s*.{0,24}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd|potwierdz)", 8),
       // "kurie įrašai patvirtinti?" / "which entries are confirmed?"
       p(
-        "(kurie|kuriuos|which|какие|welche|welke)\\s*.{0,16}(įraš|entr|запис|eintr|invoer|registr)[^\\s]*\\s*.{0,12}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd)",
+        "(kurie|kuriuos|which|какие|welche|welke|kt[oó]re|jakie)\\s*.{0,16}(įraš|entr|запис|eintr|invoer|registr|wpis)[^\\s]*\\s*.{0,12}(patvirtint|confirmed|подтвержд|bestätigt|bevestigd|potwierdz)",
         8,
       ),
     ],
@@ -721,15 +738,15 @@ const RULES: IntentRule[] = [
       // The noun alone is enough: a person asking about growth potential is
       // asking for the reading of their own evidence, not for a course
       // (learning-compass) and not for a gap list (skill-gap, 5).
-      p("(augimo|growth|роста|wachstums|groei)[^\\s]*\\s*.{0,6}(potencial|potential|потенциал|potenzial|potentieel)", 8),
-      p("(potencial|potential|потенциал|potenzial|potentieel)[^\\s]*\\s*.{0,10}(aug|grow|рост|wachs|groei)", 8),
+      p("(augimo|growth|роста|wachstums|groei|rozwoju|rozwojow)[^\\s]*\\s*.{0,6}(potencial|potential|потенциал|potenzial|potentieel|potencja)", 8),
+      p("(potencial|potential|потенциал|potenzial|potentieel|potencja)[^\\s]*\\s*.{0,10}(aug|grow|рост|wachs|groei|rozwoj|rozwij)", 8),
       // "Kur galėčiau augti / tobulėti?", "Where could I grow?", "Где я
       // могу расти?", "Wo kann ich wachsen?", "Waar kan ik groeien?" — an
       // interrogative + a first-person modal + the growth verb, so
       // "augalai" and "the company grows" never land here.
-      p("(kur|kaip|kame|where|how|где|куда|как|wo|wie|waar|hoe)\\s*.{0,24}(galėčiau|galiu|galėsiu|could\\s+i|can\\s+i|might\\s+i|могу|мог\\s+бы|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik)\\s*.{0,16}(augti|tobulėti|gilinti|plėsti|grow|deepen|expand|develop|расти|углуб|развива|wachsen|vertiefen|erweitern|groeien|verdiepen|uitbreiden)", 8),
+      p("(kur|kaip|kame|where|how|где|куда|как|wo|wie|waar|hoe|gdzie|\\bjak\\b)\\s*.{0,24}(galėčiau|galiu|galėsiu|could\\s+i|can\\s+i|might\\s+i|могу|мог\\s+бы|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik|mog[eę]|m[oó]g[lł]bym)\\s*.{0,16}(augti|tobulėti|gilinti|plėsti|grow|deepen|expand|develop|расти|углуб|развива|wachsen|vertiefen|erweitern|groeien|verdiepen|uitbreiden|rozwija|rozwin|pog[lł][eę]bi|poszerzy)", 8),
       // "Ką galėčiau gilinti / plėsti?", "What could I deepen?"
-      p("(ką|ka|what|что|was|wat)\\s*.{0,10}(galėčiau|galiu|could\\s+i|can\\s+i|могу|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik)\\s*.{0,10}(gilinti|plėsti|deepen|expand|углуб|расшир|vertiefen|erweitern|verdiepen|uitbreiden)", 8),
+      p("(ką|ka|what|что|was|wat|\\bco\\b)\\s*.{0,10}(galėčiau|galiu|could\\s+i|can\\s+i|могу|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik|mog[eę]|m[oó]g[lł]bym)\\s*.{0,10}(gilinti|plėsti|deepen|expand|углуб|расшир|vertiefen|erweitern|verdiepen|uitbreiden|pog[lł][eę]bi|poszerzy|rozwin)", 8),
     ],
   },
   {
@@ -739,13 +756,16 @@ const RULES: IntentRule[] = [
       // CONFIRMED entries, and the workflow says so rather than inventing a
       // number. Recognising the question is what lets it answer honestly.
       p(
-        "(patvirtint|approved|confirmed|подтвержд|bestätigt|bevestigd)\\s*.{0,18}(valand|hour|час|įraš|entr|запис|stunden|uren|uur)",
+        "(patvirtint|approved|confirmed|подтвержд|bestätigt|bevestigd|potwierdzon)\\s*.{0,18}(valand|hour|час|įraš|entr|запис|stunden|uren|uur|godzin)",
         5,
       ),
       p("\\bataskait", 4),
       p("\\breport\\b", 4),
       p("(отчёт|отчет)", 4),
+      p("\\braport", 4), // pl — "przygotuj raport" (not the nl `rapport`)
       p("(bericht|rapport)", 3),
+      // pl — "przygotuj zestawienie godzin"
+      p("(przygotuj|zr[oó]b|wygeneruj)\\s*.{0,16}(raport|zestawieni|podsumowani)", 5),
     ],
   },
   {
@@ -764,11 +784,11 @@ const RULES: IntentRule[] = [
      */
     intent: "projects",
     patterns: [
-      p("(parodyk|rodyk|show|list|покажи|zeig|toon|laat)\\s*.{0,15}(projekt|project|проект)", 6),
-      p("(mano|my|мои|meine|mijn)\\s+(projekt|project|проект)", 6),
-      p("(kur|where\\s+are|где|wo\\s+sind|waar\\s+zijn)\\s*.{0,10}(projekt|project|проект)", 5),
-      // Bare plural — LT projektai/projektus + DE Projekte(n).
-      p("\\bprojekt(ai|us|ų|uose|e|en)\\b", 3),
+      p("(parodyk|rodyk|show|list|покажи|zeig|toon|laat|poka[zż]|wy[sś]wietl)\\s*.{0,15}(projekt|project|проект)", 6),
+      p("(mano|my|мои|meine|mijn|moje|moich)\\s+(projekt|project|проект)", 6),
+      p("(kur|where\\s+are|где|wo\\s+sind|waar\\s+zijn|gdzie\\s+s[aą])\\s*.{0,10}(projekt|project|проект)", 5),
+      // Bare plural — LT projektai/projektus + DE Projekte(n) + PL projekty.
+      p("\\bprojekt(ai|us|ų|uose|e|en|y|ach|[oó]w)\\b", 3),
       p("\\bproject(s|en)\\b", 3), // en + nl projecten
       p("\\bпроект(ы|ов|ах)\\b", 3),
     ],
@@ -778,8 +798,8 @@ const RULES: IntentRule[] = [
     patterns: [
       // `projekt` is the LT/DE stem and `project` the EN/NL spelling — both
       // are needed, or "Open this project" silently classifies as unknown.
-      p("(atidaryk|atidaryti|atverk|open|открой|öffne)\\s*.{0,15}(projekt|project|проект)", 5),
-      p("(šį|šitą|this|этот|dit|dieses)\\s+(projekt|project|проект)", 4),
+      p("(atidaryk|atidaryti|atverk|open|открой|öffne|otw[oó]rz)\\s*.{0,15}(projekt|project|проект)", 5),
+      p("(šį|šitą|this|этот|dit|dieses|\\bten\\b|\\bt[eę]\\b)\\s+(projekt|project|проект)", 4),
       // "Kas vyksta mano objekte?" — an OBJEKTAS is a project in this
       // product, and the sentence is a QUESTION about it. It used to reach
       // log-work on the bare `objekt` stem (weight 1) and open the work-log
@@ -787,7 +807,7 @@ const RULES: IntentRule[] = [
       // write down hours. Asking about a site is opening it. The "kas vyksta"
       // prefix is required, so "dirbau objekte" still records work.
       p(
-        "(kas\\s+vyksta|kas\\s+naujo|what.{0,12}(happening|going\\s+on)|что\\s+происходит|was\\s+passiert|wat\\s+gebeurt)\\s*.{0,20}(objekt|statyb|projekt|project|объект|проект)",
+        "(kas\\s+vyksta|kas\\s+naujo|what.{0,12}(happening|going\\s+on)|что\\s+происходит|was\\s+passiert|wat\\s+gebeurt|co\\s+si[eę]\\s+dzieje|co\\s+nowego)\\s*.{0,20}(objekt|statyb|projekt|project|объект|проект|budow)",
         6,
       ),
     ],
@@ -806,13 +826,14 @@ const RULES: IntentRule[] = [
     intent: "candidates",
     patterns: [
       p("\\bkandidat", 6), // lt kandidatai / de Kandidaten / nl kandidaten
+      p("\\bkandydat", 6), // pl — the y-spelling never reaches `kandidat`
       p("кандидат", 6), // ru
       p("\\bcandidates?\\b", 6), // en
       p("(bewerber|sollicitant)", 5), // de Bewerber / nl sollicitanten
       // "who is waiting (on my need)" — the employer's other way to ask.
       // Deliberately NO Lithuanian "kas laukia" here: it usually means "what
       // awaits (me)" — a day question, not a hiring one.
-      p("(who\\s+is\\s+waiting|wer\\s+wartet|wie\\s+wacht|кто\\s+(ждет|ожидает))", 4),
+      p("(who\\s+is\\s+waiting|wer\\s+wartet|wie\\s+wacht|кто\\s+(ждет|ожидает)|kto\\s+czeka)", 4),
     ],
   },
   {
@@ -839,6 +860,10 @@ const RULES: IntentRule[] = [
       // in `need-workers` via the worker-noun stems there.
       p("(finde|zeig)\\s*.{0,24}(arbeiter|leute|mitarbeiter)", 6), // de
       p("(vind|toon|laat)\\s*.{0,24}(arbeiders|mensen|vakmensen|werkers)", 6), // nl
+      // pl — the SCOUTING imperative, exactly like "surask darbuotojų".
+      // "Potrzebujemy pracowników" carries no find/show verb and stays
+      // `need-workers`, the same split the lt/de/nl rules above keep.
+      p("(znajd[zź]|poka[zż]|wyszukaj|wyszuka[cć]|przeszukaj)\\s*.{0,24}(pracownik|robotnik|ludzi|fachowc)", 6), // pl
       p("\\bscouting\\b", 4),
       // ── A BRIGADE FOR A SITE IS DEMAND, NOT A JOB SEARCH ────────────────
       // Owner window 11 §18 names "Ieškau brigados objektui" as a landing
@@ -851,10 +876,10 @@ const RULES: IntentRule[] = [
       // a team to JOIN, and the product may not guess between the two. What
       // resolves it is the WORK OBJECT the team is wanted for — a site, a
       // project, named work — so all three parts are required.
-      p("(iesk|ieškau|ieškom|surask|reikia|need|looking\\s+for|search|suche|zoek|ищу|ищем|нужн)\\w*\\s*.{0,20}(brigad|komand|\\bteam\\b|\\bcrew\\b|ploeg|kolonne|бригад)\\w*\\s*.{0,24}(objekt|projekt|statyb|darbam|darbams|\\bsite\\b|\\bjob\\s+site\\b|project|baustelle|bouwplaats|объект|стройк)", 8),
+      p("(iesk|ieškau|ieškom|surask|reikia|need|looking\\s+for|search|suche|zoek|ищу|ищем|нужн|szuka|poszukuj|potrzebuj)\\w*\\s*.{0,20}(brigad|komand|\\bteam\\b|\\bcrew\\b|ploeg|kolonne|бригад|brygad|ekip)\\w*\\s*.{0,24}(objekt|projekt|statyb|darbam|darbams|\\bsite\\b|\\bjob\\s+site\\b|project|baustelle|bouwplaats|объект|стройк|budow)", 8),
       // …and the same sentence with the object first: "objektui ieškau
       // brigados", "voor het project zoek ik een ploeg".
-      p("(objekt|projekt|statyb|\\bsite\\b|baustelle|bouwplaats|объект|стройк)\\w*\\s*.{0,24}(iesk|ieškau|surask|reikia|need|looking\\s+for|suche|zoek|ищу|нужн)\\w*\\s*.{0,20}(brigad|komand|\\bteam\\b|\\bcrew\\b|ploeg|kolonne|бригад)", 8),
+      p("(objekt|projekt|statyb|\\bsite\\b|baustelle|bouwplaats|объект|стройк|budow)\\w*\\s*.{0,24}(iesk|ieškau|surask|reikia|need|looking\\s+for|suche|zoek|ищу|нужн|szuka|poszukuj|potrzebuj)\\w*\\s*.{0,20}(brigad|komand|\\bteam\\b|\\bcrew\\b|ploeg|kolonne|бригад|brygad|ekip)", 8),
     ],
   },
   {
@@ -875,11 +900,11 @@ const RULES: IntentRule[] = [
     intent: "company-overview",
     patterns: [
       p(
-        "(kas\\s+vyksta|kas\\s+naujo|what.{0,12}(happening|going\\s+on)|что\\s+происходит|was\\s+passiert|wat\\s+gebeurt)\\s*.{0,20}(įmon|organizacij|company|компани|firma|unternehmen|bedrijf)",
+        "(kas\\s+vyksta|kas\\s+naujo|what.{0,12}(happening|going\\s+on)|что\\s+происходит|was\\s+passiert|wat\\s+gebeurt|co\\s+si[eę]\\s+dzieje|co\\s+nowego)\\s*.{0,20}(įmon|organizacij|company|компани|firm|unternehmen|bedrijf)",
         6,
       ),
       p(
-        "(kaip\\s+sekasi|how\\s+is|wie\\s+geht\\s+es|wie\\s+läuft|hoe\\s+gaat\\s+het)\\s*.{0,16}(įmon|company|компани|firma|unternehmen|bedrijf)",
+        "(kaip\\s+sekasi|how\\s+is|wie\\s+geht\\s+es|wie\\s+läuft|hoe\\s+gaat\\s+het|jak\\s+idzie|jak\\s+sobie\\s+radzi)\\s*.{0,16}(įmon|company|компани|firm|unternehmen|bedrijf)",
         5,
       ),
     ],
@@ -910,12 +935,12 @@ const RULES: IntentRule[] = [
     patterns: [
       // verb -> noun: "sukurk imone", "create a company", "sozdat kompaniyu"
       p(
-        "(sukur|uzregistruo|registruo|isteig|pradėti(?=\\s+versl)|noriu\\s+sukurti|create|register|set\\s+up|start(?=\\s+a?\\s*(company|business|firm))|создать|создай|создам|зарегистрир|aanmaken|oprichten|registreren|erstellen|anlegen|gründen)\\s*.{0,24}(įmon|organizacij|firm|bendrov|versl|company|organisation|organization|business|компани|организаци|фирм|bedrijf|unternehmen)",
+        "(sukur|uzregistruo|registruo|isteig|pradėti(?=\\s+versl)|noriu\\s+sukurti|create|register|set\\s+up|start(?=\\s+a?\\s*(company|business|firm))|создать|создай|создам|зарегистрир|aanmaken|oprichten|registreren|erstellen|anlegen|gründen|utw[oó]rz|stw[oó]rz|za[lł][oó][zż]|zarejestruj)\\s*.{0,24}(įmon|organizacij|firm|bendrov|versl|company|organisation|organization|business|компани|организаци|фирм|bedrijf|unternehmen|sp[oó][lł]k|dzia[lł]alno[sś])",
         6,
       ),
       // noun -> verb: "imone sukurti", "bedrijf aanmaken", "Firma anlegen"
       p(
-        "(įmon|organizacij|firm|bendrov|versl|company|organisation|organization|business|компани|организаци|фирм|bedrijf|unternehmen)\\w*\\s*.{0,24}(sukurti|uzregistruoti|įsteigti|create|register|aanmaken|oprichten|registreren|erstellen|anlegen|gründen|создать|зарегистрировать)",
+        "(įmon|organizacij|firm|bendrov|versl|company|organisation|organization|business|компани|организаци|фирм|bedrijf|unternehmen|sp[oó][lł]k|dzia[lł]alno[sś])\\w*\\s*.{0,24}(sukurti|uzregistruoti|įsteigti|create|register|aanmaken|oprichten|registreren|erstellen|anlegen|gründen|создать|зарегистрировать|utworzy[cć]|za[lł]o[zż]y[cć]|zarejestrowa[cć])",
         6,
       ),
     ],
@@ -932,9 +957,9 @@ const RULES: IntentRule[] = [
       // verb → client: "noriu pakviesti klientą", "pridėti klientą", "noriu
       // prijungti įmonę kaip klientą", "invite a client", "Kunden einladen",
       // "klant uitnodigen", "пригласить клиента"
-      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|prijung|prisijung|add|invite|connect|onboard|einlad|hinzuf|verbind|uitnodig|toevoeg|koppel|приглас|добав|подключ)\\w*\\s*.{0,30}(klient|client|kunde|klant|užsakov|клиент|заказчик)", 8),
+      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|prijung|prisijung|add|invite|connect|onboard|einlad|hinzuf|verbind|uitnodig|toevoeg|koppel|приглас|добав|подключ|zapro[sś]|zaprasza|pod[lł][aą]cz)\\w*\\s*.{0,30}(klient|client|kunde|klant|užsakov|клиент|заказчик|zleceniodawc)", 8),
       // client → verb: "klientą pakviesti", "Kunde hinzufügen", "клиента добавить"
-      p("(klient|client|kunde|klant|užsakov|клиент|заказчик)\\w*\\s*.{0,24}(pakvies|kviest|prijung|prid[eė]t|invite|add|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)", 8),
+      p("(klient|client|kunde|klant|užsakov|клиент|заказчик|zleceniodawc)\\w*\\s*.{0,24}(pakvies|kviest|prijung|prid[eė]t|invite|add|einlad|hinzuf|uitnodig|toevoeg|приглас|добав|zapro[sś]|zaprosi|doda[cć])", 8),
     ],
   },
   {
@@ -943,12 +968,12 @@ const RULES: IntentRule[] = [
       // "pakviesk darbuotoją / kandidatą", "pridėti darbuotoją į komandą",
       // "invite a worker", "Mitarbeiter einladen", "medewerker uitnodigen",
       // "пригласить работника"
-      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|prijung|add|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)\\w*\\s*.{0,30}(kandidat|darbuotoj|specialist|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник|кандидат)", 8),
+      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|prijung|add|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав|zapro[sś]|zaprasza)\\w*\\s*.{0,30}(kandidat|darbuotoj|specialist|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник|кандидат|pracownik|kandydat)", 8),
       // "į komandą" / "to the team" / "zum Team" / "aan het team" / "в команду"
-      p("(pakvies|pakviesk|kviesk|prid[eė]|add|invite|einlad|uitnodig|приглас|добав)\\w*\\s*.{0,24}(į\\s+komand|komandos\\s+nar|to\\s+(the\\s+)?team|team\\s+member|zum\\s+team|aan\\s+het\\s+team|в\\s+команд)", 8),
+      p("(pakvies|pakviesk|kviesk|prid[eė]|add|invite|einlad|uitnodig|приглас|добав|zapro[sś])\\w*\\s*.{0,24}(į\\s+komand|komandos\\s+nar|to\\s+(the\\s+)?team|team\\s+member|zum\\s+team|aan\\s+het\\s+team|в\\s+команд|do\\s+zespo[lł]|do\\s+ekip)", 8),
       // noun → verb (DE/NL word order, LT object-first): "Mitarbeiter
       // einladen", "medewerker uitnodigen", "darbuotoją pakviesti"
-      p("(kandidat|darbuotoj|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник)\\w*\\s*.{0,20}(pakvies|kviest|prid[eė]t|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)", 8),
+      p("(kandidat|darbuotoj|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник|pracownik|kandydat)\\w*\\s*.{0,20}(pakvies|kviest|prid[eė]t|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав|zapro[sś]|zaprosi)", 8),
     ],
   },
   {
@@ -956,8 +981,8 @@ const RULES: IntentRule[] = [
     patterns: [
       // "kliento poreikis", "klientų užklausos", "client demand / requests",
       // "Kundenbedarf", "aanvraag van de klant", "запрос клиента"
-      p("(klient|client|kunde|klant|užsakov|клиент|заказчик)\\w*\\s*.{0,24}(poreik|užklaus|paklaus|demand|need|request|order|bedarf|anfrage|auftrag|aanvra|vraag|behoefte|потребн|запрос|заявк)", 7),
-      p("(poreik|užklaus|demand|request|bedarf|anfrage|aanvra|запрос)\\w*\\s*.{0,24}(klient|client|kunde|klant|užsakov|клиент|заказчик)", 7),
+      p("(klient|client|kunde|klant|užsakov|клиент|заказчик)\\w*\\s*.{0,24}(poreik|užklaus|paklaus|demand|need|request|order|bedarf|anfrage|auftrag|aanvra|vraag|behoefte|потребн|запрос|заявк|zapotrzebowan|zapytani|zlecen)", 7),
+      p("(poreik|užklaus|demand|request|bedarf|anfrage|aanvra|запрос|zapotrzebowan|zapytani|zlecen)\\w*\\s*.{0,24}(klient|client|kunde|klant|užsakov|клиент|заказчик)", 7),
       // "pasidalinti poreikiai" / "shared requests" — what the client let the
       // agency see, in the client's own words for it.
       p("(pasidalin|pasidalyt|shared|geteilt|gedeeld|поделил)\\w*\\s*.{0,20}(poreik|užklaus|request|demand|need|bedarf|anfrage|aanvra|запрос)", 7),
@@ -971,10 +996,13 @@ const RULES: IntentRule[] = [
     patterns: [
       // "pasiūlyk kandidatą", "siūlyti darbuotoją", "propose a candidate",
       // "Kandidaten vorschlagen", "kandidaat voorstellen", "предложить кандидата"
-      p("(pasiūl|siūl|propose|offer|suggest|put\\s+forward|vorschlag|schlage|voorstel|voordragen|предлож|предлага)\\w*\\s*.{0,24}(kandidat|darbuotoj|žmog|specialist|worker|candidate|person|mitarbeiter|kandida|medewerker|работник|кандидат)", 8),
+      // pl: `zaproponuj` / `proponu` only — the INFINITIVE `zaproponować`
+      // deliberately stays out, so "Chcę zaproponować pracę kandydatowi"
+      // keeps `propose-booking` (the direct employer's job offer) below.
+      p("(pasiūl|siūl|propose|offer|suggest|put\\s+forward|vorschlag|schlage|voorstel|voordragen|предлож|предлага|zaproponuj|proponu)\\w*\\s*.{0,24}(kandidat|darbuotoj|žmog|specialist|worker|candidate|person|mitarbeiter|kandida|medewerker|работник|кандидат|kandydat|pracownik)", 8),
       // noun → verb: "Kandidaten vorschlagen", "kandidaat voorstellen",
       // "kandidatą pasiūlyti", "кандидата предложить"
-      p("(kandidat|darbuotoj|worker|candidate|mitarbeiter|kandida|medewerker|работник|кандидат)\\w*\\s*.{0,20}(pasiūl|siūl|propose|vorschlag|voorschlag|voorstel|voordrag|предлож)", 8),
+      p("(kandidat|darbuotoj|worker|candidate|mitarbeiter|kandida|medewerker|работник|кандидат|kandydat)\\w*\\s*.{0,20}(pasiūl|siūl|propose|vorschlag|voorschlag|voorstel|voordrag|предлож|zaproponuj|proponu)", 8),
     ],
   },
   {
@@ -982,9 +1010,9 @@ const RULES: IntentRule[] = [
     patterns: [
       // "pasiūlymų būsena", "kaip sekasi mano pasiūlymams", "proposal status",
       // "Stand der Vorschläge", "status van mijn voorstellen", "статус предложений"
-      p("(pasiūlym|proposal|offer|vorschl|voorstel|предлож)\\w*\\s*.{0,20}(būsen|status|eig|progress|stadij|stand|состоян|статус)", 7),
-      p("(būsen|status|статус|stand)\\w*\\s*.{0,20}(pasiūlym|proposal|offer|vorschl|voorstel|kandidat|candidate|предлож|кандидат)", 7),
-      p("(kaip\\s+sekasi|how\\s+(are|is)\\s+.{0,12}(going|doing)|wie\\s+steht|hoe\\s+staat|как\\s+(идут|дела))\\s*.{0,24}(pasiūlym|kandidat|proposal|candidate|offer|vorschl|kandida|предлож|кандидат)", 7),
+      p("(pasiūlym|proposal|offer|vorschl|voorstel|предлож|propozycj)\\w*\\s*.{0,20}(būsen|status|eig|progress|stadij|stand|состоян|статус)", 7),
+      p("(būsen|status|статус|stand)\\w*\\s*.{0,20}(pasiūlym|proposal|offer|vorschl|voorstel|kandidat|candidate|предлож|кандидат|propozycj|kandydat)", 7),
+      p("(kaip\\s+sekasi|how\\s+(are|is)\\s+.{0,12}(going|doing)|wie\\s+steht|hoe\\s+staat|как\\s+(идут|дела)|jak\\s+(id[aą]|idzie|stoj[aą]))\\s*.{0,24}(pasiūlym|kandidat|proposal|candidate|offer|vorschl|kandida|предлож|кандидат|propozycj|kandydat)", 7),
     ],
   },
   // ── STUDENT / EDUCATION INSTITUTION (route-class) ─────────────────────────
@@ -1005,9 +1033,9 @@ const RULES: IntentRule[] = [
     patterns: [
       // "pakviesk studentą / mokinį", "invite a learner", "Schüler einladen",
       // "student uitnodigen", "пригласить студента"
-      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|invite|add|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)\\w*\\s*.{0,24}(student|mokin|besimokan|learner|studier|schüler|leerling|студент|учащ|ученик)", 8),
+      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|invite|add|einlad|hinzuf|uitnodig|toevoeg|приглас|добав|zapro[sś]|zaprasza)\\w*\\s*.{0,24}(student|mokin|besimokan|learner|studier|schüler|leerling|студент|учащ|ученик|ucze[nń]|uczni|s[lł]uchacz)", 8),
       // noun → verb: "Leerling uitnodigen", "Schüler einladen", "studentą pakviesti"
-      p("(student|mokin|besimokan|learner|schüler|leerling|студент|учащ)\\w*\\s*.{0,20}(pakvies|kviest|invite|einlad|uitnodig|приглас)", 8),
+      p("(student|mokin|besimokan|learner|schüler|leerling|студент|учащ|ucze[nń]|uczni)\\w*\\s*.{0,20}(pakvies|kviest|invite|einlad|uitnodig|приглас|zapro[sś]|zaprosi)", 8),
     ],
   },
   {
@@ -1024,13 +1052,13 @@ const RULES: IntentRule[] = [
       // institution does not "create" its programme, it registers it.
       // Collision-safe: every one of these still requires a programme noun
       // within 20 characters, so "registruoti darbo laiką" cannot reach here.
-      p("(sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов|registruo|[iį]registr|register|registrier|registreer|registrer|регистр)\\w*\\s*.{0,20}(program|kurs|grup|kohort|cohort|kursus|opleiding|программ|курс|групп|когорт)", 7),
-      p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|наши)\\s+(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)", 6),
+      p("(sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов|registruo|[iį]registr|register|registrier|registreer|registrer|регистр|utw[oó]rz|stw[oó]rz|za[lł][oó][zż]|zarejestruj)\\w*\\s*.{0,20}(program|kurs|grup|kohort|cohort|kursus|opleiding|программ|курс|групп|когорт|szkoleni|nab[oó]r)", 7),
+      p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|наши|moje|nasze|moich|naszych)\\s+(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт|szkoleni)", 6),
       // noun → verb: "Programm anlegen", "opleiding aanmaken", "programą sukurti"
       // Same verb family in the noun-first order German and Dutch actually
       // use: "Ausbildungsprogramm registrieren", "opleidingsprogramma
       // registreren".
-      p("(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)\\w*\\s*.{0,16}(sukur|kurti|create|erstell|anleg|aanmak|создать|создай|registruo|register|registrier|registrer|registreer)", 7),
+      p("(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт|szkoleni)\\w*\\s*.{0,16}(sukur|kurti|create|erstell|anleg|aanmak|создать|создай|registruo|register|registrier|registrer|registreer|utworzy[cć]|za[lł]o[zż]y[cć]|zarejestrowa[cć])", 7),
       // Owner contract 2026-09-04 §15 — the institution's other two commands
       // by sentence: "priskirk studentą grupei" (assign a learner to a
       // cohort) and "parodyk programas / grupes" (read). Both land here; the
@@ -1045,8 +1073,8 @@ const RULES: IntentRule[] = [
       // the owner's own internship search). "My students" is the institution
       // speaking; the handler reads the question and answers from the
       // institution's real reads (outcomes) or states the privacy boundary.
-      p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|моих|наши|наших)\\s+(student|mokin|besimokan|learner|schüler|leerling|студент|учащ)", 9),
-      p("(kurie|kuris|which|welche|welke|какие|кто\\s+из)\\s+(student|mokin|besimokan|learner|schüler|leerling|студент|учащ)", 9),
+      p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|моих|наши|наших|moje|moich|nasi|naszych)\\s+(student|mokin|besimokan|learner|schüler|leerling|студент|учащ|ucze[nń]|uczni)", 9),
+      p("(kurie|kuris|which|welche|welke|какие|кто\\s+из|kt[oó]rzy|kt[oó]ry)\\s+(student|mokin|besimokan|learner|schüler|leerling|студент|учащ|ucze[nń]|uczni)", 9),
       p("(student|mokin|besimokan|learner|absolvent|schüler|leerling|студент|program|opleiding|программ)\\w*\\s*.{0,24}(rezultat|outcome|result|ergebnis|resultat|uitkomst|результат)", 8),
       p("(rezultat|outcome|result|ergebnis|resultat|uitkomst|результат)\\w*\\s*.{0,24}(student|mokin|besimokan|learner|absolvent|schüler|leerling|студент|program|opleiding|программ)", 8),
     ],
@@ -1055,6 +1083,8 @@ const RULES: IntentRule[] = [
     intent: "context",
     patterns: [
       p("(ką\\s+tu\\s+(apie\\s+mane\\s+)?žinai|what\\s+do\\s+you\\s+know|что\\s+ты\\s+знаешь)", 5),
+      // pl — "Co o mnie wiesz?" / "Co wiesz o mnie?"
+      p("(co\\s+o\\s+mnie\\s+wiesz|co\\s+wiesz\\s+o\\s+mnie)", 5),
       // de "Was weißt du über mich?" (also typed "weisst") / nl "Wat weet je
       // over mij?"
       p("(was\\s+wei(ß|ss)t\\s+du|wat\\s+weet\\s+je)", 5),
@@ -1105,6 +1135,13 @@ const RULES: IntentRule[] = [
       p("что\\s+(здесь|тут)\\s+можно\\s+(с)?делать", 6),
       p("wat\\s+kan\\s+ik\\s+(hier\\s+)?doen", 6),
       p("was\\s+kann\\s+ich\\s+(hier\\s+)?(machen|tun)", 6),
+      // pl — "Co mogę tutaj zrobić?" / "Co można tu zrobić?". A CAN verb
+      // bound to a DO verb, exactly like the four above, so "Co powinienem
+      // zrobić dalej?" (obligation) stays `next-action` and "Jakie mam
+      // możliwości?" stays the opportunity board.
+      p("co\\s+(ja\\s+)?mog[eę]\\s*.{0,20}(zrobi[cć]|robi[cć])", 6),
+      p("co\\s+(tu|tutaj)\\s+mo[zż]na\\s*.{0,12}(zrobi[cć]|robi[cć])", 6),
+      p("co\\s+mo[zż]e\\s+(nasza|nasz|moja|m[oó]j|ta)\\s+[^.]{0,16}(agencj|firm|organizacj|szko[lł]|sp[oó][lł]k)", 6),
     ],
   },
   {
@@ -1135,6 +1172,12 @@ const RULES: IntentRule[] = [
       p("(wechsle|wechsel|wechseln)\\s+(zu|in|auf)", 5), // de
       p("zurück\\s+zu\\s+(meinem\\s+)?persönlich", 5),
       p("(arbeite|arbeiten|handle)\\s+als\\s+(firma|unternehmen|arbeitgeber|arbeitnehmer|organisation)", 5),
+      // pl — the switching verb itself, and the way back to the personal
+      // space. "Przenieś …" (move a worker) is a different verb and keeps
+      // its own intent.
+      p("(prze[lł][aą]cz|przelacz)", 5),
+      p("(wr[oó][cć]|powr[oó][tć])\\s*.{0,12}(do\\s+)?(mojej\\s+)?(przestrzeni\\s+)?(osobist|prywatn)", 5),
+      p("(pracuj[eę]|dzia[lł]am)\\s+(teraz\\s+)?jako\\s+(firm|pracownik|organizacj|osob)", 5),
     ],
   },
   {
@@ -1164,9 +1207,10 @@ const RULES: IntentRule[] = [
       // Student value: an internship / apprenticeship / traineeship IS an
       // opportunity on the same board (opportunity_type is a declared value
       // on the demand) — the same engine answers, never a second one.
-      p("(praktik|stažuot|stazuot|internship|apprentice|trainee|praktikum|ausbildung|\\bstage\\b|stagiair|стажир|практик)", 4),
+      p("(praktik|stažuot|stazuot|internship|apprentice|trainee|praktikum|ausbildung|\\bstage\\b|stagiair|стажир|практик|praktyk|\\bsta[zż]\\b|\\bsta[zż]u\\b)", 4),
       p("(what|which)\\s+.{0,12}(suits?|fits?)\\s+me", 3),
       p("что\\s+мне\\s+подходит", 3),
+      p("co\\s+(mi|dla\\s+mnie)\\s+.{0,12}(pasuje|odpowiada)", 3), // pl
     ],
   },
   {
@@ -1190,6 +1234,11 @@ const RULES: IntentRule[] = [
       p("(geinteresseerd|belangstelling)", 5), // nl — geïnteresseerd folds
       p("\\bshowed\\s+interest", 6),
       p("(kas|ar\\s+kas)\\s+.{0,24}(atsakė|atsiliepė)", 5),
+      // pl — "Kto jest zainteresowany moim zapotrzebowaniem?" / "kto się
+      // zainteresował". The interest stem carries the signal, exactly as
+      // `susidomėj` and `заинтересовал` do.
+      p("zainteresowa", 6),
+      p("(kto|kt[oó]ra?)\\s+.{0,24}(odpowiedzia[lł]|zg[lł]osi)", 5),
     ],
   },
   {
@@ -1216,6 +1265,12 @@ const RULES: IntentRule[] = [
       p("genehmig", 4), // de — "Was muss ich genehmigen?" / Genehmigungen
       p("\\bgoedkeuring", 4), // nl
       p("goedkeuren", 4), // nl — the verb form "wat moet ik goedkeuren?"
+      // pl — "Co muszę zatwierdzić?" / "zatwierdzenia". The APPROVE verb is
+      // `zatwierdz`, never `potwierdz` (that is `confirm-work` /
+      // `who-verifies-work`), so the two loops cannot swap sentences.
+      p("(co|kt[oó]re)\\s+.{0,16}(zatwierdzi|zaakceptowa)", 6),
+      p("zatwierdz", 4),
+      p("akceptacj", 4),
     ],
   },
   {
@@ -1246,6 +1301,11 @@ const RULES: IntentRule[] = [
       // nl — both orders: "urenstaat importeren" / "importeer de uren"
       p("(urenstaat|urenbriefje|uren|excel)\\w*\\s*.{0,16}(importeren|uploaden|inlezen)", 8),
       p("(importeer|upload|lees)\\s*.{0,20}(urenstaat|urenbriefje|uren|excel)", 8),
+      // pl — both orders: "zaimportuj ewidencję czasu pracy" / "ewidencję
+      // czasu pracy zaimportuj". The IMPORT verb is required exactly as
+      // above, so "Otwórz moją ewidencję czasu pracy" stays `timesheets`.
+      p("(zaimportuj|importuj|wgraj|wgra[cć]|za[lł]aduj|prze[sś]lij|wczytaj)\\s*.{0,20}(ewidencj|kart[eęy]\\s+czasu|godzin|excel|xlsx|arkusz)", 8),
+      p("(ewidencj|kart[aeęy]\\s+czasu|godzin|excel)\\w*\\s*.{0,20}(zaimportowa|zaimportuj|wgra[cć]|wczyta)", 8),
       // ── "I WANT TO BRING MY PAST WORK IN" ───────────────────────────────
       //
       // Every rule above needs the word TIMESHEET (or hours, or excel). Nobody
@@ -1309,6 +1369,15 @@ const RULES: IntentRule[] = [
       p("arbeitszeitnachweis", 6), // de — the formal word for the same document
       p("urenstaat", 6), // nl
       p("urenbriefje", 6), // nl
+      // pl — "ewidencja czasu pracy" / "karta czasu pracy". The compound is
+      // required: a bare "karta" is the player card, exactly as a bare
+      // "Karte" / "kaart" is in de/nl.
+      p("ewidencj\\w*\\s+czasu", 6),
+      // Weight 8: a bare "kartę" is the player card (7), so the timesheet
+      // COMPOUND has to outscore it — the same trick `market-map` uses for
+      // "Arbeitsmarktkarte" against `player-card`'s bare "Karte".
+      p("kart[aeęy]\\s+czasu\\s+pracy", 8),
+      p("lista\\s+obecno[sś]ci", 6),
     ],
   },
   {
@@ -1340,8 +1409,10 @@ const RULES: IntentRule[] = [
       p("(рабочие\\s+часы|рабочих\\s+часов|учет\\s+часов|учёт\\s+часов)", 5), // ru
       p("(arbeitsstunden|arbeitszeiten)", 5), // de
       p("(werkuren|urenregistratie)", 5), // nl
+      p("godzin\\w*\\s+pracy", 5), // pl — "godziny pracy" / "godzin pracy"
+      p("(rejestr|ewidencj)\\w*\\s+godzin", 5), // pl
       // The OPEN framing, deliberately weaker than the document rules above.
-      p("(atidaryk|atverk|open|открой|öffne)\\s*.{0,12}(valand|hour|час|stunden|uren|uur)", 4),
+      p("(atidaryk|atverk|open|открой|öffne|otw[oó]rz)\\s*.{0,12}(valand|hour|час|stunden|uren|uur|godzin)", 4),
     ],
   },
   {
@@ -1378,6 +1449,13 @@ const RULES: IntentRule[] = [
       // nl
       p("(verlofsaldo|verlofdagen|vakantiedagen|afwezigheid)", 6),
       p("wie\\s+is\\s+(afwezig|ziek|met\\s+verlof)", 8),
+      // pl — the BALANCE half. `admin-requests` keeps FILING a leave
+      // request ("Chcę złożyć wniosek urlopowy"), which carries no "ile"
+      // and no balance noun, exactly as in the four locales above.
+      p("(\\bile\\b|zosta[lł]o)\\s*.{0,24}(urlop|dni\\s+wolnego|dni\\s+wolnych)", 8),
+      p("(urlopu|urlopowych)\\s+(zosta|dni|saldo)", 8),
+      p("kto\\s+(jest\\s+)?(na\\s+urlopie|nieobecn|chory|choruje)", 8),
+      p("nieobecno[sś]", 5),
     ],
   },
   {
@@ -1394,6 +1472,10 @@ const RULES: IntentRule[] = [
       p("\\bзаявлени", 4),
       p("\\burlaub", 5), // de
       p("\\bverlof", 5), // nl
+      p("\\burlop", 5), // pl — urlop / urlopowy / urlopu
+      p("\\bwniosek\\b|\\bwniosk", 4), // pl
+      p("(z[lł]o[zż]y[cć]|napisa[cć]|sk[lł]ada[cć]|chc[eę])\\s*.{0,16}wniosek", 6), // pl
+      p("\\bzwolnieni[ea]\\s+lekarskie", 5), // pl — sick note
     ],
   },
   {
@@ -1414,7 +1496,7 @@ const RULES: IntentRule[] = [
       p("\\bдокумент", 5), // ru
       // The things people actually keep there, when they name the thing
       // rather than the folder.
-      p("(pažymėjim|sertifikat|certificate|zertifikat|certificaat)", 4),
+      p("(pažymėjim|sertifikat|certificate|zertifikat|certificaat|certyfikat|za[sś]wiadczeni)", 4),
       p("\\bсертификат", 4),
       // Owner contract 2026-09-04 §12 — "what expires / what document am I
       // missing": expiry and permit words are document questions even when
@@ -1423,7 +1505,8 @@ const RULES: IntentRule[] = [
       p("\\b(expir(es|ing|y|ed)|runs?\\s+out)\\b", 5),
       p("(истека|заканчива).{0,12}(срок|действ)", 5),
       p("\\b(verloopt|verlopen|läuft\\s+ab|laeuft\\s+ab|abgelaufen)\\b", 5),
-      p("(leidim|permit|a1\\b|razrešen|разрешени)", 4),
+      p("\\b(wygasa|wygasaj|wyga[sś]|traci\\s+wa[zż]no[sś])", 5), // pl
+      p("(leidim|permit|a1\\b|razrešen|разрешени|pozwoleni)", 4),
     ],
   },
   {
@@ -1448,6 +1531,9 @@ const RULES: IntentRule[] = [
       p("karte\\s+(des|vom)\\s+arbeitsmarkt", 8), // de
       p("(arbeidsmarkt|markt)kaart", 8), // nl
       p("kaart\\s+van\\s+de\\s+arbeidsmarkt", 8), // nl
+      // pl — "mapa rynku pracy". The compound is required for the same
+      // reason as in de/nl: a bare "kartę" is the player card.
+      p("map[aeęy]\\s*.{0,16}(rynku|pracy|rynek)", 8),
     ],
   },
   {
@@ -1471,14 +1557,17 @@ const RULES: IntentRule[] = [
       p("\\bуведомлени", 5), // ru
       p("\\bmelding", 5), // nl — bounded, so "aanmelding" is not a notification
       p("benachrichtigung", 7), // de — see the trap above
-      p("(veiklos\\s+sraut|activity\\s+(centre|center|feed)|лента\\s+событ|activiteitencentrum|aktivitäten)", 5),
+      // pl — the SAME trap as German: "poWIADOMienia" is not "wiadomości".
+      // The two stems share no prefix, so the split needs no weight trick.
+      p("\\bpowiadomieni", 5),
+      p("(veiklos\\s+sraut|activity\\s+(centre|center|feed)|лента\\s+событ|activiteitencentrum|aktivitäten|centrum\\s+aktywno[sś])", 5),
       p(
         "(ką\\s+reikia\\s+peržiūrėti|needs\\s+my\\s+attention|требует\\s+внимания|erfordert\\s+meine\\s+aufmerksamkeit|vraagt\\s+mijn\\s+aandacht)",
         6,
       ),
       // A bare "what's new?" with no company/project noun after it — the
       // rules above keep those, because they name what is being asked about.
-      p("(kas\\s+naujo|what'?s\\s+new|что\\s+нового|was\\s+ist\\s+neu|wat\\s+is\\s+er\\s+nieuw)", 4),
+      p("(kas\\s+naujo|what'?s\\s+new|что\\s+нового|was\\s+ist\\s+neu|wat\\s+is\\s+er\\s+nieuw|co\\s+nowego)", 4),
     ],
   },
   {
@@ -1487,9 +1576,9 @@ const RULES: IntentRule[] = [
       // F2 — "sukurk projektą Roterdame", "naujas objektas Vilniuje", "new
       // project in Rotterdam", "neues Projekt / Baustelle anlegen", "nieuw
       // project", "создай проект / объект": a SITE as a project object.
-      p("(sukur|kurti|prid[eė]|prad[eė]|nauj|create|new|add|start|erstell|anleg|maak|nieuw|создать|создай|нов)\\w*\\s*.{0,20}(projekt|project|проект|objekt|statybviet|baustelle|bouwplaats|стройплощад|объект)", 8),
+      p("(sukur|kurti|prid[eė]|prad[eė]|nauj|create|new|add|start|erstell|anleg|maak|nieuw|создать|создай|нов|utw[oó]rz|stw[oó]rz|za[lł][oó][zż])\\w*\\s*.{0,20}(projekt|project|проект|objekt|statybviet|baustelle|bouwplaats|стройплощад|объект|budow)", 8),
       // noun → verb: "projektą sukurti", "Projekt anlegen", "project aanmaken"
-      p("(projekt|project|проект|objekt|baustelle|bouwplaats|объект)\\w*\\s*.{0,16}(sukur|kurti|prad[eė]|create|erstell|anleg|aanmak|создать|создай)", 8),
+      p("(projekt|project|проект|objekt|baustelle|bouwplaats|объект|budow)\\w*\\s*.{0,16}(sukur|kurti|prad[eė]|create|erstell|anleg|aanmak|создать|создай|utworzy[cć]|za[lł]o[zż]y[cć])", 8),
     ],
   },
   {
@@ -1503,10 +1592,10 @@ const RULES: IntentRule[] = [
       // запросом с агентством", "deel de aanvraag met het bureau",
       // "Anfrage mit der Agentur teilen"). Same weight class as the offers
       // read; the agency's own "invite a CLIENT" keeps its client noun.
-      p("(agent[uū]r|agency|agencies|агент|uitzend|bureau|agentur)\\w*\\s*.{0,24}(pakviet|kviet|invit|приглас|приглаш|uitnodig|uitgenodigd|einlad|eingeladen)", 12),
-      p("(pakviet|kviet|invit|приглас|приглаш|uitnodig|uitgenodigd|einlad|eingeladen)\\w*\\s*.{0,24}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 12),
-      p("(pasidal|dalin|dalink|share|подел|deel|teil)\\w*\\s*.{0,40}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 12),
-      p("(agent[uū]r|agency|agencies|агент|bureau|agentur)\\w*\\s*.{0,30}(pasidal|dalin|dalink|share|подел|deel|teil)", 12),
+      p("(agent[uū]r|agency|agencies|агент|uitzend|bureau|agentur|agencj)\\w*\\s*.{0,24}(pakviet|kviet|invit|приглас|приглаш|uitnodig|uitgenodigd|einlad|eingeladen|zaprosi|zaprasza|zapro[sś])", 12),
+      p("(pakviet|kviet|invit|приглас|приглаш|uitnodig|uitgenodigd|einlad|eingeladen|zaprosi|zaprasza|zapro[sś])\\w*\\s*.{0,24}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 12),
+      p("(pasidal|dalin|dalink|share|подел|deel|teil|podziel|udost[eę]pni)\\w*\\s*.{0,40}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 12),
+      p("(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)\\w*\\s*.{0,30}(pasidal|dalin|dalink|share|подел|deel|teil|podziel|udost[eę]pni)", 12),
     ],
   },
   {
@@ -1518,8 +1607,13 @@ const RULES: IntentRule[] = [
       // Arbeit anbieten", "rezervuoti darbuotoją"). The sentence reaches
       // the candidates panel of the open need; the offer itself is the
       // panel's token-confirmed button — a sentence never picks a person.
-      p("(pasi[uū]lyt|pasi[uū]lyk|si[uū]l|offer|propos|предлож|aanbied|bied|anbiet|biete)\\w*\\s*.{0,24}(darb[aąo]|work|job|booking|rezerv|работ|бронир|werk|baan|arbeit|auftrag)\\w*\\s*.{0,24}(darbuotoj|worker|candidate|kandida|работник|кандидат|werknemer|arbeiter)", 14),
-      p("(booking|rezervuo|užsakyt|book|бронир|забронир|boek|buch)\\w*\\s*.{0,20}(darbuotoj|worker|kandida|candidate|работник|кандидат|werknemer|arbeiter)", 14),
+      // pl (2026-09-20): the offer verb group gains `zaproponow` /
+      // `zaoferow` and the work-noun group gains `prac` — "Chcę
+      // zaproponować pracę kandydatowi". `propose-candidate` above keeps
+      // only `zaproponuj` / `proponu`, which do not match the infinitive,
+      // so the two agency acts cannot swap sentences.
+      p("(pasi[uū]lyt|pasi[uū]lyk|si[uū]l|offer|propos|предлож|aanbied|bied|anbiet|biete|zaproponow|zaoferow)\\w*\\s*.{0,24}(darb[aąo]|work|job|booking|rezerv|работ|бронир|werk|baan|arbeit|auftrag|prac[aeęy])\\w*\\s*.{0,24}(darbuotoj|worker|candidate|kandida|работник|кандидат|werknemer|arbeiter|kandydat|pracownik)", 14),
+      p("(booking|rezervuo|užsakyt|book|бронир|забронир|boek|buch|zarezerwuj|zarezerwowa)\\w*\\s*.{0,20}(darbuotoj|worker|kandida|candidate|работник|кандидат|werknemer|arbeiter|kandydat|pracownik)", 14),
       p("(darbuotoj|worker|kandida|candidate|работник|кандидат|werknemer|arbeiter)\\w*\\s*.{0,24}(pasi[uū]lyt|pasi[uū]lyk|offer|propos|предлож|aanbied|anbiet)\\w*\\s*.{0,16}(darb|work|job|работ|werk|arbeit)", 14),
       p("(darb[aąo]|work|job|работ|werk|baan|arbeit)\\w*\\s*.{0,16}(pasi[uū]lyt|pasi[uū]lyk|si[uū]l|offer|propos|предлож|aanbied|bied|anbiet|biete)\\w*\\s*.{0,24}(darbuotoj|worker|candidate|kandida|работник|кандидат|werknemer|arbeiter)", 14),
       p("(darbuotoj|worker|candidate|kandida|работник|кандидат|werknemer|arbeiter)\\w*\\s*.{0,24}(darb[aąo]|work|job|работ|werk|baan|arbeit)\\w*\\s*.{0,16}(pasi[uū]lyt|pasi[uū]lyk|si[uū]l|offer|propos|предлож|aanbied|bied|anbiet|biete)", 14),
@@ -1533,12 +1627,13 @@ const RULES: IntentRule[] = [
       // candidates", "предложенные кандидаты", "aangeboden kandidaten",
       // "vorgeschlagene Kandidaten". Identity-routed in the chat: an agency
       // workspace reads it as its own proposal status.
-      p("(agent[uū]r|agency|agencies|агент|uitzend|bureau|agentur)\\w*\\s*.{0,24}(pasi[uū]l|si[uū]lo|kandidat|offer|propos|candidate|предлож|кандидат|voorstel|aanbod|kandida|vorschl|angebot)", 9),
-      p("(pasi[uū]lyt|si[uū]lom|offered|proposed|предложен|aangeboden|voorgesteld|vorgeschlagen|angebotene)\\w*\\s*.{0,12}(kandidat|candidate|кандидат|kandida)", 9),
+      p("(agent[uū]r|agency|agencies|агент|uitzend|bureau|agentur|agencj)\\w*\\s*.{0,24}(pasi[uū]l|si[uū]lo|kandidat|offer|propos|candidate|предлож|кандидат|voorstel|aanbod|kandida|vorschl|angebot|kandydat|propozycj|zaproponow)", 9),
+      p("(pasi[uū]lyt|si[uū]lom|offered|proposed|предложен|aangeboden|voorgesteld|vorgeschlagen|angebotene|zaproponowa|zg[lł]oszon)\\w*\\s*.{0,12}(kandidat|candidate|кандидат|kandida|kandydat)", 9),
       // noun first: "kandidatus pasiūlė agentūra", "Kandidaten … die Agentur",
-      // "kandidaten … het bureau", "кандидатов предложило агентство"
-      p("(kandidat|candidate|кандидат|kandida)\\w*\\s*.{0,28}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 9),
-      p("(pasi[uū]l|si[uū]l|offer|propos|предлож|aangebod|aanbied|vorschl|vorgeschlag)\\w*\\s*.{0,20}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 9),
+      // "kandidaten … het bureau", "кандидатов предложило агентство",
+      // "kandydatów zaproponowała agencja"
+      p("(kandidat|candidate|кандидат|kandida|kandydat)\\w*\\s*.{0,28}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 9),
+      p("(pasi[uū]l|si[uū]l|offer|propos|предлож|aangebod|aanbied|vorschl|vorgeschlag|zaproponow|zaoferow)\\w*\\s*.{0,20}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 9),
     ],
   },
   {
@@ -1548,8 +1643,8 @@ const RULES: IntentRule[] = [
       // pažymėjimą", "I have a new VCA", "renewed my certificate", "habe
       // einen neuen Ausweis", "ik heb een nieuwe vergunning", "получил
       // разрешение": a document to RECORD, not the documents folder to open.
-      p("(turiu|gavau|atsinaujin|prat[eę]s|prid[eė]|[iį]kel|u[zž]ra[sš]|užregistr|have|got|renewed|add|upload|record|habe|bekommen|erneuert|hinzuf|heb|gekregen|verlengd|toevoeg|получил|продлил|добав|загруз|запиш)\\w*\\s*.{0,24}(dokument|pa[zž]ym|sertifik|certif|leidim|permit|pas[aą]\\b|passport|\\ba1\\b|\\bvca\\b|zertifik|ausweis|vergunning|paspoort|документ|сертиф|разрешен|паспорт)", 9),
-      p("(nauj|new|neu|nieuw|нов)\\w*\\s*.{0,10}(pa[zž]ym|sertifik|certificate|zertifikat|certificaat|сертификат|leidim|permit|vergunning|\\ba1\\b|\\bvca\\b)", 9),
+      p("(turiu|gavau|atsinaujin|prat[eę]s|prid[eė]|[iį]kel|u[zž]ra[sš]|užregistr|have|got|renewed|add|upload|record|habe|bekommen|erneuert|hinzuf|heb|gekregen|verlengd|toevoeg|получил|продлил|добав|загруз|запиш|\\bmam\\b|otrzyma|przed[lł]u[zż]y|dosta[lł])\\w*\\s*.{0,24}(dokument|pa[zž]ym|sertifik|certif|certyfik|za[sś]wiadczeni|leidim|permit|pozwoleni|pas[aą]\\b|passport|\\ba1\\b|\\bvca\\b|zertifik|ausweis|vergunning|paspoort|документ|сертиф|разрешен|паспорт)", 9),
+      p("(nauj|new|neu|nieuw|нов|\\bnow)\\w*\\s*.{0,10}(pa[zž]ym|sertifik|certificate|zertifikat|certificaat|certyfik|za[sś]wiadczeni|сертификат|leidim|permit|pozwoleni|vergunning|\\ba1\\b|\\bvca\\b)", 9),
     ],
   },
   /**
@@ -1575,31 +1670,31 @@ const RULES: IntentRule[] = [
       // SHOW / SEE / CHECK … PHOTO. "parodyk (įkeltą) nuotrauką", "show the
       // photo I just uploaded", "покажи загруженное фото", "laat de foto
       // zien", "zeig das Foto", "Foto anzeigen".
-      p("(parodyk|rodyk|pamaty|matyt|perzi[uū]r|peržiūr|patikrin|atidaryk|show|see\\b|view|check|open|покаж|посмотр|провер|открой|laat|toon|bekijk|zeig|anzeig|ansehen|sehen|pr[uü]f)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|\\bimage|фото|снимк|afbeelding|\\bbild)", 8),
+      p("(parodyk|rodyk|pamaty|matyt|perzi[uū]r|peržiūr|patikrin|atidaryk|show|see\\b|view|check|open|покаж|посмотр|провер|открой|laat|toon|bekijk|zeig|anzeig|ansehen|sehen|pr[uü]f|poka[zż]|zobacz|obejrz|sprawd[zź]|wy[sś]wietl)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|\\bimage|фото|снимк|afbeelding|\\bbild|zdj[eę]ci)", 8),
       // PHOTO … SHOW (verb last: "die Fotos anzeigen", "de foto's bekijken",
       // "nuotrauką parodyk").
-      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild)\\w*\\s*.{0,16}(parodyk|rodyk|pamaty|perzi[uū]r|peržiūr|show|see\\b|view|open|bekijk|zien|tonen|anzeig|ansehen|zeig|покаж|посмотр)", 8),
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|zdj[eę]ci)\\w*\\s*.{0,16}(parodyk|rodyk|pamaty|perzi[uū]r|peržiūr|show|see\\b|view|open|bekijk|zien|tonen|anzeig|ansehen|zeig|покаж|посмотр|poka[zż]|zobacz|obejrz)", 8),
       // DID IT SAVE? "ar nuotrauka išsisaugojo", "did my photo save", "is the
       // file saved", "сохранилось ли фото", "is de foto opgeslagen", "wurde
       // das Foto gespeichert" — in both orders.
-      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|\\bfailas|файл|bestand|datei)\\w*\\s*.{0,24}(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|ikelt|įkelt|\\bsave|uploaded|сохран|загруж|opgeslagen|ge[uü]pload|gespeichert|hochgeladen)", 8),
-      p("(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|\\bsaved|\\bsave\\b|сохрани|opgeslagen|gespeichert)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)", 8),
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|zdj[eę]ci|\\bfail[aąuoi]|\\bfile|\\bfailas|файл|bestand|datei|\\bplik)\\w*\\s*.{0,24}(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|ikelt|įkelt|\\bsave|uploaded|сохран|загруж|opgeslagen|ge[uü]pload|gespeichert|hochgeladen|zapisa|wgran|przes[lł]an)", 8),
+      p("(issisaugo|išsisaugo|issaugo|išsaugo|isliko|išliko|\\bsaved|\\bsave\\b|сохрани|opgeslagen|gespeichert|zapisa)\\w*\\s*.{0,24}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|zdj[eę]ci|\\bfail[aąuoi]|\\bfile|файл|bestand|datei|\\bplik)", 8),
       // THE ONE JUST UPLOADED: "ką tik įkeltas failas", "the photo I just
       // uploaded", "загруженный файл", "das hochgeladene Foto", "de
       // geüploade foto" — a past form beside a photo / file noun.
-      p("(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload)\\w*\\s*.{0,16}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)", 8),
-      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|\\bfail[aąuoi]|\\bfile|файл|bestand|datei)\\w*\\s*.{0,24}(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload)", 8),
+      p("(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload|wgran|przes[lł]an|za[lł]adowan)\\w*\\s*.{0,16}(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|zdj[eę]ci|\\bfail[aąuoi]|\\bfile|файл|bestand|datei|\\bplik)", 8),
+      p("(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|zdj[eę]ci|\\bfail[aąuoi]|\\bfile|файл|bestand|datei|\\bplik)\\w*\\s*.{0,24}(ikelt|įkelt|uploaded|загружен|hochgeladen|ge[uü]pload|wgran|przes[lł]an|za[lł]adowan)", 8),
       // THAT / THIS PHOTO — the demonstrative alone points at the one just
       // handed over: "ta nuotrauka", "šita nuotrauka", "that photo", "это
       // фото", "die foto", "das Bild".
-      p("\\b(ta|toji|sita|šita|si|ši|that|this|та|эта|это|dat|die|deze|das|dieses|jenes)\\s+(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild)", 8),
+      p("\\b(ta|toji|sita|šita|si|ši|that|this|та|эта|это|dat|die|deze|das|dieses|jenes|to|tamto)\\s+(nuotrauk|\\bfoto|photo|picture|фото|снимк|afbeelding|\\bbild|zdj[eę]ci)", 8),
       // WHAT YOU SAVED — second person, so "parodyk išsaugotus kriterijus"
       // (a criteria readback) stays where it is: "parodyk ką išsaugojai",
       // "show what you saved", "покажи что сохранил", "laat zien wat je hebt
       // opgeslagen", "zeig was du gespeichert hast".
-      p("(parodyk|rodyk|show|покаж|laat|toon|zeig)\\w*\\s*.{0,16}(issaugojai|išsaugojai|issaugojote|išsaugojote|you\\s+saved|you\\s+(just\\s+)?stored|сохранил|je\\s+(hebt|had)\\s+opgeslagen|opgeslagen\\s+hebt|du\\s+gespeichert\\s+hast|gespeichert\\s+hast)", 8),
+      p("(parodyk|rodyk|show|покаж|laat|toon|zeig|poka[zż])\\w*\\s*.{0,16}(issaugojai|išsaugojai|issaugojote|išsaugojote|you\\s+saved|you\\s+(just\\s+)?stored|сохранил|je\\s+(hebt|had)\\s+opgeslagen|opgeslagen\\s+hebt|du\\s+gespeichert\\s+hast|gespeichert\\s+hast|co\\s+zapisa[lł]e[sś])", 8),
       // THE GALLERY BY NAME: "mano galerija", "open the gallery", "галерея".
-      p("(galerij|gallery|галере|galerie)", 8),
+      p("(galerij|gallery|галере|galerie|galeri)", 8),
     ],
   },
   /**
@@ -1627,8 +1722,8 @@ const RULES: IntentRule[] = [
       // export / print my CV", "скачай моё резюме", "Lebenslauf herunterladen".
       // `parodyk`/`show` moved to `cv-view` below — showing is not exporting,
       // and the page reached is the same either way.
-      p("(atsisi[uų]s|atsisiųsk|eksportuo|spausdin|download|export|print|скача|экспорт|распечат|exporteer|print|herunterlad|exportier|druck)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
-      p("(\\bcv\\b|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,8}(pdf|atsisi[uų]st|export|herunterlad|скача)", 8),
+      p("(atsisi[uų]s|atsisiųsk|eksportuo|spausdin|download|export|print|скача|экспорт|распечат|exporteer|print|herunterlad|exportier|druck|pobierz|pobra[cć]|wyeksportuj|wydrukuj)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf|[zż]yciorys)", 8),
+      p("(\\bcv\\b|résumé|resume|резюме|lebenslauf|[zż]yciorys)\\w*\\s*.{0,8}(pdf|atsisi[uų]st|export|herunterlad|скача|pobra|pobierz)", 8),
     ],
   },
   {
@@ -1640,22 +1735,22 @@ const RULES: IntentRule[] = [
       // EN: see / view / open / look at / check
       // RU: посмотреть / увидеть / открой / глянуть / покажи
       // NL: bekijken / zien / openen / tonen   DE: sehen / ansehen / öffnen / zeigen
-      p("(pamaty|maty[ct]|perzi[uū]r|peržiūr|atidary|atvert|atverk|rodyk|parodyk|see\\b|view|open|show|look\\s+at|check|посмотр|увидет|открой|открыт|гляну|покаж|bekijk|zien|openen|tonen|toon|sehen|ansehen|anschau|[oö]ffnen|zeig)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
+      p("(pamaty|maty[ct]|perzi[uū]r|peržiūr|atidary|atvert|atverk|rodyk|parodyk|see\\b|view|open|show|look\\s+at|check|посмотр|увидет|открой|открыт|гляну|покаж|bekijk|zien|openen|tonen|toon|sehen|ansehen|anschau|[oö]ffnen|zeig|zobacz|obejrz|przejrz|przegl[aą]d|otw[oó]rz|poka[zż]|wy[sś]wietl|sprawd[zź])\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf|[zż]yciorys)", 8),
       // VERB LAST — Dutch and German put it there ("Ik wil mijn cv BEKIJKEN",
       // "Ich möchte meinen Lebenslauf ANSEHEN"), and Lithuanian often does
       // too ("Mano CV parodyk"). Measured: both nl/de parity sentences fell
       // through to `cv-choose` with only the verb-first rule above, which is
       // the exact G3 failure mode — a capability reachable in three languages
       // and silently unreachable in the other two.
-      p("(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,16}(pamaty|perzi[uū]r|peržiūr|atidary|atvert|rodyk|parodyk|\\bsee\\b|view|open|show|bekijk|zien|openen|tonen|sehen|ansehen|anschau|[oö]ffnen|zeig|посмотр|увидет|открыт)", 8),
+      p("(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf|[zż]yciorys)\\w*\\s*.{0,16}(pamaty|perzi[uū]r|peržiūr|atidary|atvert|rodyk|parodyk|\\bsee\\b|view|open|show|bekijk|zien|openen|tonen|sehen|ansehen|anschau|[oö]ffnen|zeig|посмотр|увидет|открыт|zobacz|obejrz|otworzy)", 8),
       // LOCATING it: "kur mano CV", "where is my CV", "где моё резюме",
-      // "waar is mijn cv", "wo ist mein Lebenslauf".
-      p("(\\bkur\\b|\\bwhere\\b|\\bгде\\b|\\bwaar\\b|\\bwo\\b)\\s*.{0,20}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
+      // "waar is mijn cv", "wo ist mein Lebenslauf", "gdzie jest moje cv".
+      p("(\\bkur\\b|\\bwhere\\b|\\bгде\\b|\\bwaar\\b|\\bwo\\b|\\bgdzie\\b)\\s*.{0,20}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf|[zż]yciorys)", 8),
       // READING BACK its content: "ką dabar rodo mano CV", "what does my CV
       // say", "что показывает моё резюме" — a question about the state, in
       // both word orders.
-      p("(rodo|rodys|shows|says|показыв|говорит|zeigt|laat\\s+zien|staat)\\s*.{0,16}(\\bcv\\b|résumé|resume|резюме|lebenslauf)", 8),
-      p("(\\bcv\\b|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,16}(rodo|rodys|shows|says|показыв|говорит|zeigt|staat)", 8),
+      p("(rodo|rodys|shows|says|показыв|говорит|zeigt|laat\\s+zien|staat|pokazuje)\\s*.{0,16}(\\bcv\\b|résumé|resume|резюме|lebenslauf|[zż]yciorys)", 8),
+      p("(\\bcv\\b|résumé|resume|резюме|lebenslauf|[zż]yciorys)\\w*\\s*.{0,16}(rodo|rodys|shows|says|показыв|говорит|zeigt|staat|pokazuje)", 8),
     ],
   },
   {
@@ -1664,8 +1759,8 @@ const RULES: IntentRule[] = [
       // PROJECT → WORK: "pridėk užduotį", "nauja užduotis projektui", "add a
       // task", "neue Aufgabe", "nieuwe taak", "добавь задачу" — a work
       // package on the company's project, by sentence.
-      p("(prid[eė]|sukur|nauj|u[zž]ra[sš]|create|add|new|erstell|neu|maak|nieuw|добав|создай|нов)\\w*\\s*.{0,16}(u[zž]duot|task|aufgabe|taak|задач)", 9),
-      p("(u[zž]duot|task|aufgabe|taak|задач)\\w*\\s*.{0,12}(prid[eė]|sukur|create|add|erstell|anleg|toevoeg|aanmak|добав|создай)", 9),
+      p("(prid[eė]|sukur|nauj|u[zž]ra[sš]|create|add|new|erstell|neu|maak|nieuw|добав|создай|нов|dodaj|doda[cć]|utw[oó]rz|nowe\\s+zadan)\\w*\\s*.{0,16}(u[zž]duot|task|aufgabe|taak|задач|zadani)", 9),
+      p("(u[zž]duot|task|aufgabe|taak|задач|zadani)\\w*\\s*.{0,12}(prid[eė]|sukur|create|add|erstell|anleg|toevoeg|aanmak|добав|создай|dodaj|doda[cć])", 9),
     ],
   },
   {
@@ -1689,8 +1784,8 @@ const RULES: IntentRule[] = [
       //
       // Weight 5: above the bare noun's 4, below every real capacity rule.
       p(
-        "(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)" +
-          "\\w*\\s*.{0,30}(darbuotoj|worker|werknemer|medewerk|mitarbeit|arbeitskr|работник)",
+        "(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага|\\bmamy\\b|\\bmam\\b)" +
+          "\\w*\\s*.{0,30}(darbuotoj|worker|werknemer|medewerk|mitarbeit|arbeitskr|работник|pracownik)",
         5,
       ),
       // CAPACITY: "kas laisvas šią savaitę?", "kas gali dirbti rytoj?", "kas
@@ -1706,8 +1801,8 @@ const RULES: IntentRule[] = [
       // participles **ge-werkt** / **ge-arbeitet**. Neither half is unusual;
       // together they invert the direction of the sentence. `\b` here is the
       // Unicode-safe boundary, so the launch alphabets are covered too.
-      p("(\\bkas\\b|\\bwho\\b|\\bwer\\b|\\bwie\\b|\\bкто\\b)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск)", 9),
-      p("(laisv\\w*\\s+(žmon|darbuotoj|komand)|available\\s+(people|workers|team)|verfügbare\\s+(leute|mitarbeiter)|beschikbare\\s+(mensen|medewerkers)|свободные\\s+(люди|работники))", 8),
+      p("(\\bkas\\b|\\bwho\\b|\\bwer\\b|\\bwie\\b|\\bкто\\b|\\bkto\\b)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск|dost[eę]pn|wolny|wolni|mo[zż]e\\s+pracowa|na\\s+urlopie)", 9),
+      p("(laisv\\w*\\s+(žmon|darbuotoj|komand)|available\\s+(people|workers|team)|verfügbare\\s+(leute|mitarbeiter)|beschikbare\\s+(mensen|medewerkers)|свободные\\s+(люди|работники)|dost[eę]pni\\s+(ludzie|pracownic))", 8),
       // Prod walk D1 (2026-09-05): "Sužinok, kurie darbuotojai nebus užimti
       // per artimiausias dienas" scored 0 here — the first rule needs "kas /
       // who" and the second needs "laisvi" BEFORE the noun — and the bare
@@ -1717,7 +1812,7 @@ const RULES: IntentRule[] = [
       // its subject named. Weight 9 so the bare noun stems cannot pull it
       // back. JS \w is ASCII-only, so the LT noun endings are consumed by
       // the gap, not by \w.
-      p("(\\bkurie\\b|\\bkuris\\b|\\bkas\\b|\\bwhich\\b|\\bwho\\b|\\bwer\\b|\\bwelche|\\bwie\\b|\\bкто\\b|\\bкакие\\b)\\s+.{0,24}?(darbuotoj|žmon|komand|worker|people|staff|mitarbeiter|leute|medewerker|mensen|работник|люди)\\w*\\s*.{0,24}?(laisv|neužimt|nebus\\s+užimt|available|free|not\\s+busy|frei|verfügbar|vrij|beschikbaar|свобод|не\\s+занят)", 9),
+      p("(\\bkurie\\b|\\bkuris\\b|\\bkas\\b|\\bwhich\\b|\\bwho\\b|\\bwer\\b|\\bwelche|\\bwie\\b|\\bкто\\b|\\bкакие\\b|\\bkt[oó]rzy\\b|\\bkto\\b)\\s+.{0,24}?(darbuotoj|žmon|komand|worker|people|staff|mitarbeiter|leute|medewerker|mensen|работник|люди|pracownic|pracownik|ludzie)\\w*\\s*.{0,24}?(laisv|neužimt|nebus\\s+užimt|available|free|not\\s+busy|frei|verfügbar|vrij|beschikbaar|свобод|не\\s+занят|dost[eę]pn|wolni|nie\\s+b[eę]d[aą]\\s+zaj[eę])", 9),
       // Prod walk O1 (2026-09-06): "Kas rytoj dirba objekte X?" — a company
       // asking WHO IS ON a site tomorrow — scored 0 on every rule above (it
       // says "dirba", not "gali dirbti" and not "laisvas") and 1 on `log-work`,
@@ -1873,8 +1968,8 @@ const RULES: IntentRule[] = [
       // PROJECT → PROGRESS: "etapas pamatai baigtas", "pradėjome stogo etapą",
       // "etapas užstrigo", "stage foundations done", "Phase Rohbau fertig",
       // "fase fundering afgerond", "этап фундамент завершён".
-      p("(etap|stage|phase|fase|этап)\\w*\\s+.{0,40}(baigt|atlikt|u[zž]baig|done|finished|complet|fertig|abgeschlossen|erledigt|klaar|afgerond|заверш|готов|сделан|prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял)", 9),
-      p("(baigt|atlikt|u[zž]baig|done|finished|complet|fertig|abgeschlossen|erledigt|klaar|afgerond|заверш|готов|prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял)\\w*\\s+.{0,20}(etap|stage|phase|fase|этап)", 9),
+      p("(etap|stage|phase|fase|этап)\\w*\\s+.{0,40}(baigt|atlikt|u[zž]baig|done|finished|complet|fertig|abgeschlossen|erledigt|klaar|afgerond|заверш|готов|сделан|zako[nń]cz|uko[nń]cz|gotow|prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz|u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok|utkn)", 9),
+      p("(baigt|atlikt|u[zž]baig|done|finished|complet|fertig|abgeschlossen|erledigt|klaar|afgerond|заверш|готов|zako[nń]cz|uko[nń]cz|prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz|u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok)\\w*\\s+.{0,20}(etap|stage|phase|fase|этап)", 9),
     ],
   },
   {
@@ -1887,18 +1982,21 @@ const RULES: IntentRule[] = [
       p("работал", 3),
       p("\\bgewerkt\\b", 3), // nl
       p("\\bgearbeitet\\b", 3), // de
+      p("\\b(prze)?pracowa[lł](em|am|i|y|o|a)?\\b", 3), // pl — (prze)pracowałem
+      p("\\b(prze)?pracowali[sś]my\\b", 3), // pl
       // an explicit worked-time span "nuo 8 iki 17", "from 8 to 5", "с 8 до 17"
       p("\\bnuo\\s*\\d{1,2}\\D{0,4}iki\\s*\\d{1,2}", 3),
       p("\\bfrom\\s*\\d{1,2}\\D{0,4}to\\s*\\d{1,2}", 3),
       p("с\\s*\\d{1,2}\\D{0,4}до\\s*\\d{1,2}", 3),
       p("\\bvon\\s*\\d{1,2}\\D{0,4}bis\\s*\\d{1,2}", 3), // de "von 8 bis 17"
       p("\\bvan\\s*\\d{1,2}\\D{0,4}tot\\s*\\d{1,2}", 3), // nl "van 8 tot 17"
-      // "8 valandas / hours / часов / Stunden / uur"
-      p("\\d{1,2}\\s*(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren)", 2),
+      p("\\bod\\s*\\d{1,2}\\D{0,4}do\\s*\\d{1,2}", 3), // pl "od 8 do 17"
+      // "8 valandas / hours / часов / Stunden / uur / godzin"
+      p("\\d{1,2}\\s*(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)", 2),
       // break / lunch minutes
-      p("(pertrauk|pietūs|pietus|break|lunch|обед|перерыв)", 1),
+      p("(pertrauk|pietūs|pietus|break|lunch|обед|перерыв|przerw|obiad)", 1),
       // "objekte / site / на объекте" — a work site
-      p("(objekt|statyb|site|site\\b|стройк|объект)", 1),
+      p("(objekt|statyb|site|site\\b|стройк|объект|budow)", 1),
       // explicit journal words. The LT stem was the only one here, so an
       // English "fill in my work journal" or a Russian "запиши работу в
       // журнал" fell through to the unknown fallback while the identical
@@ -1906,7 +2004,7 @@ const RULES: IntentRule[] = [
       // through its own single intake. The other launch locales' words for
       // the journal belong here for the same reason.
       p("(žurnal|journal|журнал|tagebuch|dagboek)", 2),
-      p("(įrašyk\\s+darb|log\\s+work|record\\s+work|записать\\s+работу)", 2),
+      p("(įrašyk\\s+darb|log\\s+work|record\\s+work|записать\\s+работу|zapisz\\s+prac)", 2),
       // ADDING work is recording it, not searching for it. "Pridėk šiandienos
       // darbą" scored 0 here and 1 on find-work (whose noun list holds a bare
       // "darbą"), so a person asking to write down what they did today was
@@ -1931,6 +2029,10 @@ const RULES: IntentRule[] = [
       p("(trage|erfasse|notiere)\\s*.{0,20}\\b(arbeit|stunden)\\b", 4),
       p("\\b(werk|uren)\\b\\s*.{0,16}(invoeren|registreren|noteren|vastleggen)", 4),
       p("(registreer|noteer|voer)\\s*.{0,20}\\b(werk|uren)\\b", 4),
+      // pl — "zapisz pracę", "wprowadź godziny", "wpisz dzisiejszą pracę"
+      p("(zapisz|zapisa[cć]|wpisz|wprowad[zź]|odnotuj|zanotuj)\\s*.{0,20}(prac|godzin)", 4),
+      p("(prac[eęy]|godzin)\\w*\\s*.{0,16}(zapisa[cć]|wprowadzi[cć]|odnotowa[cć])", 4),
+      p("(dziennik\\s+pracy|w\\s+dzienniku)", 2), // pl — the journal by name
     ],
   },
   {
@@ -1997,6 +2099,14 @@ const RULES: IntentRule[] = [
       pNoSeek(`\\bverfugbar\\s+${WHERE_GAP}(ab|von)\\b`, 5),
       pNoSeek(`\\bkan\\s+${WHERE_GAP}(vanaf|per|na)\\b.{0,20}(werken|beginnen|starten)`, 5),
       pNoSeek(`\\bbeschikbaar\\s+${WHERE_GAP}(vanaf|per)\\b`, 5),
+      // pl (2026-09-20) — "Mogę pracować od października", "Mogę zacząć od
+      // poniedziałku", "Jestem dostępny od 1 marca". Same closed shape as
+      // the four locales above: a CAN/AM-FREE verb bound to a from-word,
+      // with the optional place phrase between them.
+      pNoSeek(`\\bmog[eę]\\s+(zacz[aą][cć]\\s+)?pracowa[cć]\\s+${WHERE_GAP}(od|po|za)\\b`, 5),
+      pNoSeek(`\\bmog[eę]\\s+(zacz[aą][cć]|zaczyna[cć]|wyj[sś][cć])\\s+${WHERE_GAP}(od|po|za)\\b`, 5),
+      pNoSeek(`\\b(jestem|b[eę]d[eę])\\s+(dost[eę]pn|woln)[a-z]{0,4}\\s+${WHERE_GAP}(od|po|do)\\b`, 5),
+      pNoSeek(`\\bdost[eę]pn[a-z]{0,4}\\s+${WHERE_GAP}(od|po)\\b`, 5),
     ],
   },
   {
@@ -2021,6 +2131,7 @@ const RULES: IntentRule[] = [
       p("\\bsell(ing)?\\b", 4),
       p("verkauf", 4), // de verkaufen / zu verkaufen / Verkauf
       p("(verkopen|verkoop|te\\s+koop)", 4), // nl
+      p("(sprzeda[cćjmę]|sprzedaw|na\\s+sprzeda)", 4), // pl sprzedać / sprzedam
       p("\\bsiūlau\\b", 3),
       p("предлагаю", 3),
       // ── "NORIU PASIŪLYTI SAVO PASLAUGAS" ────────────────────────────────
@@ -2032,8 +2143,8 @@ const RULES: IntentRule[] = [
       // Weight 6 so an explicit offer outranks the 5 of the activity-verb
       // rule; the SEEK guard above still keeps "siūlau paslaugas, ieškau
       // klientų" in its own lane.
-      p("(pasi[uū]ly|pasi[uū]lyt|offer|aanbied|anbiet|предлож)\\w*\\s*.{0,24}(paslaug|service|dienst|услуг)", 6),
-      p("(noriu|galiu|want\\s+to|would\\s+like\\s+to|m[oö]chte|wil|хочу|могу)\\s*.{0,16}(pasi[uū]ly|offer|aanbied|anbiet|предлож)", 6),
+      p("(pasi[uū]ly|pasi[uū]lyt|offer|aanbied|anbiet|предлож|oferuj|oferow|zaoferow)\\w*\\s*.{0,24}(paslaug|service|dienst|услуг|us[lł]ug)", 6),
+      p("(noriu|galiu|want\\s+to|would\\s+like\\s+to|m[oö]chte|wil|хочу|могу|chc[eę]|mog[eę])\\s*.{0,16}(pasi[uū]ly|offer|aanbied|anbiet|предлож|zaoferow|oferow)", 6),
       p("\\bbiete\\b", 3), // de "ich biete …"
       p("\\bbied\\b|aanbieden", 3), // nl "ik bied … aan"
       p("\\bturiu\\b\\s*.{0,24}\\b(kg|vnt|tonn|litr|ha)", 4),
@@ -2057,9 +2168,12 @@ const RULES: IntentRule[] = [
       p("\\b(galiu|siulau|siulyti|teikiu|can|могу|biete|bied)\\b\\s+(?:[^\\s]+\\s+){0,2}?(kirp|dazy|valy|mokyt[iu]\\b|tvarky|siuv|montuo|pjau|priziur|programuo|konsultuo|apskait|vez[tu]|remont|taisy|paint|clean|teach|tutor|mow|install|sew|babysit|garden|\\bfix\\b)", 5),
       // "noriu siūlyti buhalterijos paslaugas" — the service NOUN with an
       // offer verb is an offer of a service, whatever the service is.
-      p("\\b(siulau|siulyti|siulome|teikiu|teikiame|offer|предлага|biete|bied)\\b.{0,40}(paslaug|\\bservices?\\b|услуг|dienst)", 5),
+      // `oferuj` is NOT listed here: `\b…\b` closes the token and Polish
+      // inflects it ("oferuję", "oferujemy"). The verb+service rule above
+      // carries the Polish offer, stem-anchored, at weight 6.
+      p("\\b(siulau|siulyti|siulome|teikiu|teikiame|offer|предлага|biete|bied)\\b.{0,40}(paslaug|\\bservices?\\b|услуг|dienst|us[lł]ug)", 5),
       p("free\\s+days?", 3),
-      p("(freie?\\s+tage|vrije\\s+dag(en)?)", 3), // de / nl free days
+      p("(freie?\\s+tage|vrije\\s+dag(en)?|wolne\\s+dni|wolnych\\s+dni)", 3), // de / nl / pl free days
       p("\\b(habe|heb)\\b\\s*.{0,24}\\b(kg|stück|tonnen|liter|paletten|stuks)", 3),
       // `.{0,4}` (not \w): the Cyrillic inflection ("свободные") is outside
       // ASCII \w, and the folded text keeps Cyrillic letters as-is.
@@ -2078,10 +2192,12 @@ const RULES: IntentRule[] = [
       p("сотрудник", 4),
       p("\\b(mitarbeiter|arbeiter|arbeitskräfte|fachkräfte)\\b", 4), // de
       p("\\b(medewerkers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl
+      p("(pracownik|robotnik|pracownic)", 4), // pl — pracownicy / pracowników
       p("\\b(hire|hiring|recruit(ing|ment)?|staffing)\\b", 3),
       p("(нанять|наним|найм)", 3),
       p("\\beinstellen\\b", 3), // de "Leute einstellen"
       p("\\baannemen\\b", 3), // nl "mensen aannemen"
+      p("(zatrudni|rekrutacj|rekrutuj)", 3), // pl
       p("\\breikia\\s+žmoni", 3), // "reikia žmonių"
       // SOMEBODY, WITHOUT NAMING A TRADE — in the other four locales. The
       // line above has covered Lithuanian since the demand path was built;
@@ -2102,6 +2218,13 @@ const RULES: IntentRule[] = [
         `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|žmoni|zmoni)`,
         5,
       ),
+      // pl (2026-09-20). `SEEK_VERB_SOURCE` lives in lib/structuring and
+      // carries no Polish, so the Polish need verbs are stated here beside
+      // the generic person nouns — "Potrzebujemy ludzi w Rotterdamie".
+      p("(potrzebuj|poszukuj|szuka|brakuje\\s+nam)\\w*\\s*(?:[^\\s]+\\s+){0,3}?(ludzi|os[oó]b|pracownik|pracownic|robotnik|r[aą]k\\s+do\\s+pracy)", 5),
+      // …and the same verbs beside a TRADE, which is the vocabulary
+      // `TRADE_STEM_SOURCE` already shares with the supply direction.
+      p(`(potrzebuj|poszukuj|szukam[y]?|brakuje\\s+nam|zatrudni)\\w*\\s*.{0,30}(?:${TRADE_STEM_SOURCE})`, 6),
       // DUTCH PUTS THE VERB LAST. "wij hebben 12 lassers nodig" is the
       // ordinary way to say "we need 12 welders", and it measured `unknown`:
       // every demand rule here expects the seek verb BEFORE the noun, which
@@ -2222,6 +2345,13 @@ const RULES: IntentRule[] = [
       p("\\biemand\\s*.{0,20}(repareren|schoonmaken|schilderen|installeren)", 6),
       // DE
       p("jemand(en)?\\s*.{0,20}(reparier|putz|streich|installier)", 6),
+      // PL — "Potrzebuję kogoś do naprawy dachu", "Szukam kogoś, kto
+      // pomaluje ściany". A named TRADE ("potrzebuję dekarza") carries no
+      // indefinite agent and keeps the employer route above.
+      p("(kogo[sś]|kto[sś]|fachowc|z[lł]ot[aą]\\s+r[aą]czk)\\w*\\s*.{0,25}(napraw|remont|sprz[aą]ta|posprz[aą]ta|malow|pomalow|instal|zainstal|wymian|wymien|koszen|czyszcz|wyczy[sś]ci|pod[lł][aą]cz)", 6),
+      // PL — a seek verb bound to the SERVICE itself, the same shape as the
+      // shared-vocabulary rule below ("potrzebuję usług księgowych").
+      p("(potrzebuj|poszukuj|szuka|zam[oó]wi)\\w*\\s*(?:[^\\s]+\\s+){0,3}?(us[lł]ug|remont|sprz[aą]tani|naprawy|malowani)", 13),
       // A seek verb followed by the SERVICE itself — "reikia valymo
       // paslaugų", "reikia automobilio remonto", "need a repair" — is a job
       // to be done. A named TRADE ("reikia valytojo", "reikia dažytojo")
@@ -2320,9 +2450,18 @@ const RULES: IntentRule[] = [
       p("\\bdarb(us|ai|ų|ams|uose)\\b", 2),
       p("\\bjob\\b", 1),
       p("работу", 2),
-      p("\\bvacancy|vacature|vakans", 1),
+      p("\\bvacancy|vacature|vakans|wakat", 1),
+      // ── pl (2026-09-20) ────────────────────────────────────────────────
+      // FIRST PERSON SINGULAR + the WORK noun, the same direction rule the
+      // weight-10 pattern at the top of this list encodes: `\bszukam\b` is
+      // closed, so the agency plural "szukamy" (supply, `offer-capacity`)
+      // can never reach it.
+      p("\\bszukam\\b\\s*(?:[^\\s]+\\s+){0,3}?\\bprac", 3),
+      p("\\b(chc[eę]|potrzebuj[eę])\\s+(pracowa[cć]|pracy|prac[eę])", 3),
+      p("\\bprac(a|y|e|ę|ach)\\b", 1),
+      p("\\boferty?\\s+pracy\\b", 2),
       // "in the Netherlands / country" — a search location
-      p("(nyderland|olandij|netherland|holland|нидерланд|deutschland|germanij)", 1),
+      p("(nyderland|olandij|netherland|holland|holandi|нидерланд|deutschland|germanij|niemcz|norwegi|niderland)", 1),
     ],
   },
   {
@@ -2389,6 +2528,29 @@ const RULES: IntentRule[] = [
         `\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE})|(?:${TRADE_STEM_SOURCE}))`,
         6,
       ),
+      // ── pl (2026-09-20) ────────────────────────────────────────────────
+      //
+      // `PROFESSION_STATEMENT_ANCHOR_SOURCE` lives in lib/structuring and
+      // carries no Polish anchor, and the Polish profession nouns inflect
+      // in ways neither the Lithuanian suffix lists nor the shared trade
+      // stems reach ("księgowym", "elektrykiem" — `elektrik` is the LT
+      // spelling, `elektryk` the Polish one). So the Polish shape is stated
+      // here, in the SAME closed form: a FIRST-PERSON-SINGULAR anchor
+      // ("jestem", "pracuję jako") plus a professional or trade noun.
+      //
+      // It is `pNoSeek` like the rule above, so "Jestem księgowym i szukam
+      // pracy w Wilnie" runs the search and the statement is read beside
+      // it — `SEEK_GUARD_SOURCE` gained `szuka` / `poszukuj` / `potrzebuj`
+      // for exactly that sentence.
+      pNoSeek(
+        "\\b(jestem|pracuj[eę]\\s+jako|pracowa[lł](em|am)\\s+jako)\\s+(?:[^\\s]+\\s+){0,2}?" +
+          "(ksi[eę]gow|prawnik|adwokat|in[zż]ynier|projektant|architekt|analityk|ekonomist|" +
+          "konsultant|doradc|programist|programuj|deweloper|nauczyciel|wyk[lł]adowc|" +
+          "\\btechnik|specjalist|mened[zż]er|kierownik|magazynier|operator|mechanik|" +
+          "spawacz|elektryk|hydraulik|stolarz|cie[sś]l|malarz|dekarz|murarz|glazurnik|" +
+          "kierowc|kucharz|kelner|sprz[aą]tacz|monter|zbrojarz|betoniarz|tynkarz)",
+        6,
+      ),
     ],
   },
   {
@@ -2399,12 +2561,12 @@ const RULES: IntentRule[] = [
     intent: "player-card",
     patterns: [
       p(
-        "(parodyk|rodyk|atidaryk|show|open|покажи|открой|zeig|toon|laat)\\s*.{0,14}(kortel|card\\b|карточк|karte\\b|kaart\\b)",
+        "(parodyk|rodyk|atidaryk|show|open|покажи|открой|zeig|toon|laat|poka[zż]|otw[oó]rz|wy[sś]wietl)\\s*.{0,14}(kortel|card\\b|карточк|karte\\b|kaart\\b|kart[aeoy]\\b|kart[eę]\\b)",
         7,
       ),
-      p("(mano|my|моя|meine|mijn)\\s+(kortel|card\\b|карточк|karte\\b|kaart\\b)", 6),
+      p("(mano|my|моя|meine|mijn|moj[aą]|moja)\\s+(kortel|card\\b|карточк|karte\\b|kaart\\b|kart[aeoy]\\b)", 6),
       p("player\\s*card", 6),
-      p("(darbuotojo|worker)\\s+(kortel|card\\b)", 5),
+      p("(darbuotojo|worker|pracownika)\\s+(kortel|card\\b|kart[aeoy]\\b)", 5),
     ],
   },
   {
@@ -2415,9 +2577,10 @@ const RULES: IntentRule[] = [
     // interactions, and the form belongs to one of those.
     intent: "experiences",
     patterns: [
-      p("(patirt|experienc|опыт\\s+взаимодейств|ervaring|erfahrung)", 6),
-      p("(palikti|parašyti|pateikti|leave|write|submit|оставить)\\s*.{0,14}(patirt|experienc|отзыв\\s+о\\s+взаимодейств)", 7),
+      p("(patirt|experienc|опыт\\s+взаимодейств|ervaring|erfahrung|do[sś]wiadczeni)", 6),
+      p("(palikti|parašyti|pateikti|leave|write|submit|оставить|zostawi|napisa[cć]\\s+opini|wystawi)\\s*.{0,14}(patirt|experienc|отзыв\\s+о\\s+взаимодейств|opini|do[sś]wiadczeni)", 7),
       p("(patirtys|patirtis)\\s+(apie|about)\\s+(mane|me)", 7),
+      p("(opini|do[sś]wiadczeni)\\w*\\s+(o\\s+mnie|o\\s+wsp[oó][lł]prac)", 7), // pl
     ],
   },
   {
@@ -2439,8 +2602,10 @@ const RULES: IntentRule[] = [
      */
     intent: "engagements",
     patterns: [
-      p("(darbo\\s+santyk|work\\s+relationship|working\\s+relationship|рабочие\\s+отношени|werkrelatie|arbeitsbeziehung)", 7),
+      p("(darbo\\s+santyk|work\\s+relationship|working\\s+relationship|рабочие\\s+отношени|werkrelatie|arbeitsbeziehung|stosunek\\s+pracy|relacj\\w*\\s+zawodow)", 7),
       p("(su\\s+kuo)\\s*.{0,14}(dirb)", 7),
+      p("(z\\s+kim)\\s*.{0,14}(pracuj|wsp[oó][lł]prac)", 7), // pl
+      p("(kto\\s+(u\\s+mnie|dla\\s+mnie|w\\s+mojej\\s+firmie))\\s*.{0,14}pracuj", 7), // pl
       p("(kas)\\s+(pas\\s+mane|man)\\s+dirba", 7),
       // de "Mit wem arbeite ich?" / nl "Met wie werk ik?" — and the roster
       // question "wer arbeitet für uns / wie werkt er voor ons".
@@ -2462,11 +2627,11 @@ const RULES: IntentRule[] = [
     intent: "messages-view",
     patterns: [
       p(
-        "(parodyk|rodyk|atidaryk|open|show|покажи|открой|zeig|toon|laat)\\s*.{0,14}(žinut|messages?|сообщени|berichten|nachrichten)",
+        "(parodyk|rodyk|atidaryk|open|show|покажи|открой|zeig|toon|laat|poka[zż]|otw[oó]rz|wy[sś]wietl)\\s*.{0,14}(žinut|messages?|сообщени|berichten|nachrichten|wiadomo[sś]c)",
         6,
       ),
-      p("(mano|my|мои|meine|mijn)\\s+(žinut|messages?|сообщени|nachrichten|berichten)", 5),
-      p("(neperskaityt|unread|непрочитан|ungelesen|ongelezen)", 4),
+      p("(mano|my|мои|meine|mijn|moje|moich)\\s+(žinut|messages?|сообщени|nachrichten|berichten|wiadomo[sś]c)", 5),
+      p("(neperskaityt|unread|непрочитан|ungelesen|ongelezen|nieprzeczytan)", 4),
     ],
   },
   {
@@ -2486,6 +2651,7 @@ const RULES: IntentRule[] = [
       p("\\bišversk\\b", 3),
       p("\\bversti\\b", 2),
       p("\\btranslate\\b", 3),
+      p("(przet[lł]umacz|t[lł]umacz)", 4), // pl — przetłumacz / tłumaczenie
       // Weight 4, not 3: "Vertaal dit bericht" must beat the figures rule's
       // bare (bericht|rapport) stem — a translation request names a message,
       // and the report stem must not steal it on a tie.
@@ -2510,7 +2676,9 @@ const RULES: IntentRule[] = [
       // "schreiben" never claims unrelated sentences.
       p("(schreib|schrijf)\\s*.{0,24}(firma|unternehmen|arbeitgeber|bedrijf|werkgever)", 3),
       p("сообщение", 1),
-      p("(šiai\\s+įmonei|darbdaviui|to\\s+the\\s+employer|работодател|dem\\s+arbeitgeber|de\\s+werkgever)", 2),
+      p("\\bnapisz\\b", 3), // pl
+      p("(napisz|napisa[cć]|wy[sś]lij)\\s*.{0,24}(pracodawc|firm|klient)", 3), // pl
+      p("(šiai\\s+įmonei|darbdaviui|to\\s+the\\s+employer|работодател|dem\\s+arbeitgeber|de\\s+werkgever|pracodawc|do\\s+tej\\s+firmy)", 2),
       p("\\bžinut", 1),
     ],
   },
@@ -2525,36 +2693,40 @@ const RULES: IntentRule[] = [
       p("напоминани", 2),
       p("erinner", 3), // de "erinnere mich" / Erinnerung
       p("herinner", 3), // nl "herinner me eraan" / herinnering
+      p("przypomn", 3), // pl "przypomnij mi" / przypomnienie
     ],
   },
   {
     intent: "calendar-view",
     patterns: [
-      p("(kada|when|wann|wanneer).{0,20}(susitikim|meeting|pamain|shift|event|įvyk|termin|afspraak)", 3),
+      p("(kada|when|wann|wanneer|kiedy).{0,20}(susitikim|meeting|pamain|shift|event|įvyk|termin|afspraak|spotkani|zmian[aęy]\\b|wydarzeni)", 3),
       p("\\bkalendor", 3),
       p("\\bcalendar\\b", 3),
       p("календар", 3),
       p("\\bkalender\\b", 3), // de / nl
+      p("\\bkalendarz", 3), // pl
       p("\\bagenda\\b", 2), // nl — the schedule itself
       p("(mano|šios savaitės|today'?s|this week'?s)\\s+(plan|tvarkaraš|schedule|расписани)", 2),
       // Context Intelligence (rebuild phase 3): "what do I have to do TODAY"
       // is the work-context readback, not a profile question. The pairing of
       // a question word / doing-verb with the TODAY word is the signal —
       // "šiandien dirbau…" (past tense, log-work) never matches these.
-      p("(ką|what|что|was|wat).{0,30}(šiandien|today|сегодня|heute|vandaag)", 3),
-      p("(šiandien|today|сегодня|heute|vandaag).{0,30}(padaryti|daryti|nuveikti|to\\s+do|сделать|делать|zu\\s+tun|te\\s+doen)", 3),
+      p("(ką|what|что|was|wat|\\bco\\b).{0,30}(šiandien|today|сегодня|heute|vandaag|dzisiaj|\\bdzi[sś]\\b)", 3),
+      p("(šiandien|today|сегодня|heute|vandaag|dzisiaj|\\bdzi[sś]\\b).{0,30}(padaryti|daryti|nuveikti|to\\s+do|сделать|делать|zu\\s+tun|te\\s+doen|do\\s+zrobieni|zrobi[cć])", 3),
       p("(dienos|šiandienos)\\s+plan", 3),
+      p("(dzisiejsz|jutrzejsz)\\w*\\s+(plan|grafik|harmonogram)", 3), // pl
       // TOMORROW. Every pattern here read TODAY or a bare "mano planas", so
       // "Parodyk mano rytojaus planą" — the owner's own example for this
       // workflow — matched nothing at all and reached the not-understood
       // fallback. The agenda reader already answers for any day; only the
       // word for the next one was missing.
-      p("(rytoj|rytojaus|tomorrow|завтра|morgen|morgendlich)\\s*.{0,24}(plan|tvarkaraš|grafik|schedule|agenda|расписани|darb)", 3),
-      p("(my|мой)\\s+(plan|план)\\b", 2),
+      p("(rytoj|rytojaus|tomorrow|завтра|morgen|morgendlich|jutro|jutrzejsz)\\s*.{0,24}(plan|tvarkaraš|grafik|schedule|agenda|расписани|darb|harmonogram)", 3),
+      p("(my|мой|m[oó]j)\\s+(plan|план)\\b", 2),
       p("\\bmano\\s+planas\\b", 2),
       p("\\bsusitikim", 1),
       p("\\bmeeting\\b", 1),
       p("планы", 1),
+      p("\\bspotkani", 1), // pl
     ],
   },
   /**
@@ -2569,8 +2741,8 @@ const RULES: IntentRule[] = [
   {
     intent: "cv",
     patterns: [
-      p("(įkel|ikel|[iį]ked|prisek|prisegt|prikabin|importuo|nuskaityk|upload|uploaden|import|attach|hochlad|einles|загруз|прикреп|импортир)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
-      p("(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,16}(įkel|ikel|upload|uploaden|import|прикреп|загруз|hochlad)", 8),
+      p("(įkel|ikel|[iį]ked|prisek|prisegt|prikabin|importuo|nuskaityk|upload|uploaden|import|attach|hochlad|einles|загруз|прикреп|импортир|wgra|za[lł]aduj|prze[sś]lij|do[lł][aą]cz)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf|[zż]yciorys)", 8),
+      p("(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf|[zż]yciorys)\\w*\\s*.{0,16}(įkel|ikel|upload|uploaden|import|прикреп|загруз|hochlad|wgra|za[lł]adowa|prze[sś]la)", 8),
     ],
   },
   /**
@@ -2592,6 +2764,7 @@ const RULES: IntentRule[] = [
       p("(gyvenimo\\s+apraš|curriculum|résumé|resume)", 3),
       p("резюме", 3),
       p("\\blebenslauf\\b", 3),
+      p("\\b[zż]yciorys", 3), // pl
     ],
   },
   {
@@ -2610,13 +2783,15 @@ const RULES: IntentRule[] = [
       p("\\bskill", 2),
       p("навык", 2),
       p("(fähigkeit|vaardighed|competen)", 2), // de / nl skills
+      p("(umiej[eę]tno|kompetencj)", 2), // pl skills
       p(
-        "(pridėk|add|добавь|füge|voeg)\\s+.{0,12}(kalb|language|язык|patirt|experience|опыт|išsilavin|education|образовани|sprache|taal|erfahrung|ervaring|ausbildung|opleiding)",
+        "(pridėk|add|добавь|füge|voeg|dodaj)\\s+.{0,12}(kalb|language|язык|patirt|experience|опыт|išsilavin|education|образовани|sprache|taal|erfahrung|ervaring|ausbildung|opleiding|j[eę]zyk|wykszta[lł]ceni)",
         2,
       ),
       p("\\bkalb(a|ą|as|os)\\b", 1),
       p("\\blanguage", 1),
       p("\\b(sprache|taal)\\b", 1),
+      p("\\bj[eę]zyk", 1), // pl
     ],
   },
   /**
@@ -2643,14 +2818,14 @@ const RULES: IntentRule[] = [
       // catalogue either.
       p("\\blmc\\b", 5),
       p(
-        "(kiek|how\\s+much|сколько|wie\\s+viel|hoeveel)\\s*.{0,20}(kredit|credit|likut|balans|баланс|guthaben|saldo|krediet|tegoed)",
+        "(kiek|how\\s+much|сколько|wie\\s+viel|hoeveel|\\bile\\b)\\s*.{0,20}(kredit|credit|likut|balans|баланс|guthaben|saldo|krediet|tegoed)",
         4,
       ),
-      p("(kredit|credit|likut|balans|баланс|guthaben|saldo|krediet|tegoed)\\s*.{0,20}(istorij|history|истори|verlauf|geschiedenis)", 4),
-      p("(papildy|top\\s*up|пополн|auflad|opwaarder)", 4),
+      p("(kredit|credit|likut|balans|баланс|guthaben|saldo|krediet|tegoed)\\s*.{0,20}(istorij|history|истори|verlauf|geschiedenis|histori)", 4),
+      p("(papildy|top\\s*up|пополн|auflad|opwaarder|do[lł]aduj|zasil)", 4),
       // "what was I charged for" — the question a debited user actually asks.
       p(
-        "(už\\s+ką|for\\s+what|за\\s+что|wofür|waarvoor)\\s*.{0,20}(nuskait|charg|списал|сняли|abgebucht|abgezogen|afgeschreven)",
+        "(už\\s+ką|for\\s+what|за\\s+что|wofür|waarvoor|za\\s+co)\\s*.{0,20}(nuskait|charg|списал|сняли|abgebucht|abgezogen|afgeschreven|pobran|naliczon)",
         5,
       ),
     ],
@@ -2677,8 +2852,11 @@ const RULES: IntentRule[] = [
       p("\\bakkoord\\s+met\\s*.{0,30}(aanbod|aanbieding|uitnodiging|boeking)", 6), // nl
       p("\\b(nehme|nimm|akzeptiere|annehmen|akzeptieren)\\s*.{0,30}(angebot|einladung|buchung|stelle|an\\b)", 6), // de
       p("(angebot|einladung|buchung)\\s*.{0,20}(annehmen|akzeptieren|angenommen)", 6), // de
-      // The whole sentence is the verb: "Priimu." / "Accept" / "Принимаю".
-      p("^\\s*(priimu|priimam|priimame|accept|accepted|i\\s+accept|принимаю|соглас(ен|на)|ik\\s+accepteer|accepteer|ich\\s+nehme\\s+an|ich\\s+akzeptiere|akzeptiere|annehmen)\\s*[.!]*\\s*$", 5),
+      // pl — "przyjmuję ofertę" / "akceptuję zaproszenie" / "zgadzam się na rezerwację"
+      // (2026-09-20, #1810). No bare "pracę" object: "przyjmuję do pracy" is the employer hiring.
+      p("\\b(przyjmuj[eę]|przyjm[eę]|akceptuj[eę]|zgadzam\\s+si[eę]\\s+na)\\s*.{0,30}(ofert|zaproszeni|rezerwacj)", 6), // pl
+      // The whole sentence is the verb: "Priimu." / "Accept" / "Принимаю" / "Przyjmuję".
+      p("^\\s*(priimu|priimam|priimame|accept|accepted|i\\s+accept|принимаю|соглас(ен|на)|ik\\s+accepteer|accepteer|ich\\s+nehme\\s+an|ich\\s+akzeptiere|akzeptiere|annehmen|przyjmuj[eę]|akceptuj[eę])\\s*[.!]*\\s*$", 5),
     ],
   },
   {
@@ -2690,7 +2868,8 @@ const RULES: IntentRule[] = [
       p("предложени", 3),
       p("angebot", 3), // de Angebot / Angebote
       p("(aanbieding|\\baanbod\\b)", 3), // nl
-      p("(ką\\s+man\\s+siūlo|what.{0,8}offered|что.{0,8}предлага|was\\s+wird\\s+mir\\s+angeboten|wat\\s+wordt\\s+mij\\s+aangeboden)", 2),
+      p("\\bofert", 3), // pl — oferta / oferty / ofert
+      p("(ką\\s+man\\s+siūlo|what.{0,8}offered|что.{0,8}предлага|was\\s+wird\\s+mir\\s+angeboten|wat\\s+wordt\\s+mij\\s+aangeboden|co\\s+mi\\s+(proponuj|oferuj))", 2),
     ],
   },
   {
@@ -2705,8 +2884,10 @@ const RULES: IntentRule[] = [
       p("kriteri", 4), // lt kriterijai / de Kriterien
       p("criteri", 4), // en criteria / nl (zoek)criteria
       p("критери", 4),
+      p("kryteri", 4), // pl — the y-spelling never reaches `kriteri`
       p("(paieškos|search)\\s+(nustatym|settings|filtr)", 3),
       p("(such|zoek)(einstellung|instelling|filter)", 3), // de / nl compounds
+      p("(wyszukiwani|wyszukiwan)\\w*\\s*.{0,12}(ustawieni|filtr)", 3), // pl
       p("(pagal\\s+ką\\s+(man\\s+)?ieško)", 3),
       p("(what\\s+am\\s+i\\s+search(ing)?\\s+(by|with))", 3),
       p("(по\\s+каким\\s+(параметрам|критериям))", 3),
@@ -2722,9 +2903,12 @@ const RULES: IntentRule[] = [
       p("was\\s+(soll|muss)\\s+ich\\s+(noch|als\\s+nächstes|jetzt)", 3),
       // nl "Wat moet ik nog / nu / hierna doen?"
       p("wat\\s+moet\\s+ik\\s+(nog|nu|hierna)", 3),
+      // pl — "Co powinienem zrobić dalej?", "Co jeszcze muszę zrobić?"
+      p("co\\s+(jeszcze|dalej|powinienem|powinnam|musz[eę])\\b", 3),
       p("\\bnext\\s+step", 2),
       p("\\bkitas\\s+žingsn", 2),
       p("(nächste(r)?\\s+schritt|volgende\\s+stap)", 2),
+      p("(nast[eę]pny\\s+krok|kolejny\\s+krok)", 2), // pl
     ],
   },
   {
@@ -2735,9 +2919,13 @@ const RULES: IntentRule[] = [
       p("на\\s+чём\\s+я\\s+остановил", 3),
       p("wo\\s+(war|bin)\\s+ich\\s+(stehen|zuletzt)", 3), // de "…stehengeblieben"
       p("waar\\s+was\\s+ik\\s+(gebleven|gestopt)", 3), // nl
+      // pl — "Gdzie skończyłem?" / "Na czym stanąłem?"
+      p("gdzie\\s+(sko[nń]czy|przerwa|zosta[lł]em|stan[aą][lł]em)", 3),
+      p("na\\s+czym\\s+(sko[nń]czy|stan[aą][lł])", 3),
       p("\\bcontinue\\b", 1),
       p("\\btęsti\\b", 1),
       p("(weitermachen|verdergaan|doorgaan)", 1),
+      p("(kontynuuj|kontynuowa[cć])", 1), // pl
     ],
   },
 ];
@@ -2799,12 +2987,14 @@ export function classifyIntent(text: string): IntentMatch {
 const JOURNAL_REQUEST_PATTERNS: readonly RegExp[] = [
   // the journal named directly (LT žurnalas / EN journal / RU журнал /
   // DE Tagebuch / NL dagboek — the launch locales' own word)
-  p("(zurnal|journal|журнал|tagebuch|dagboek)").re,
+  p("(zurnal|journal|журнал|tagebuch|dagboek|dziennik)").re,
   // an imperative to record work, with no journal word ("įrašyk darbą")
   p("(irasyk|uzfiksuok|uzrasyk|log)\\s+(mano\\s+)?darb").re,
   p("(irasyti|irasau|uzfiksuoti|uzrasyti|suvesti|fiksuoti)\\s*.{0,20}darb").re,
   p("record\\s+(my\\s+)?work").re,
   p("записать\\s+работу").re,
+  // pl — "zapisz pracę", "wprowadź godziny", "uzupełnij dziennik pracy"
+  p("(zapisz|zapisa[cć]|wpisz|wprowad[zź]|uzupe[lł]nij|odnotuj)\\s*.{0,20}(prac|godzin)").re,
 ];
 
 export function isExplicitJournalRequest(text: string): boolean {

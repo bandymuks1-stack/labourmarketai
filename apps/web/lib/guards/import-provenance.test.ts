@@ -38,7 +38,7 @@ import { join } from "node:path";
 
 const APP = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf8");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 const METRIC_SOURCE_ENUM = ["worker_input", "ai_extracted", "manager_corrected"] as const;
 /** `worker_skills.source` — the other provenance column the skill pipeline

@@ -271,7 +271,7 @@ describe("6 · i18n in every active locale", () => {
     "checks.ackOpen",
     "checks.openInJournal",
   ];
-  for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+  for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
     it(`${loc}: journal.intelligence carries the required keys with real text`, () => {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as Record<string, unknown>;
       const intel = j.intelligence as Record<string, unknown>;
@@ -363,7 +363,7 @@ describe("8 · the organization view composes the same reader (owner §14)", () 
     expect(personPage).toMatch(/periodHref: \(key\) =>\s*`\/dashboard\/people\/\$\{workerId\}\?period=\$\{key\}#work-intelligence`/);
   });
   it("the organization wording exists in every active locale, addressed to the organization, not to 'you' the worker", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as Record<string, unknown>;
       const org = (j.intelligence as Record<string, unknown>).org as Record<string, unknown>;
       for (const key of [
@@ -431,7 +431,7 @@ describe("9 · the organization's per-member roll-up rides the same model (owner
     expect(reportsPage).not.toMatch(/journal_entry_metrics|fragment_time|deriveEntryWorkTime|original_text/);
   });
   it("the roll-up wording exists in every active locale and names hours, confirmed hours and the returned state", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const base = JSON.parse(read(`messages/${loc}.json`)) as { reports: { journalWindow: Record<string, unknown> } };
       const jw = base.reports.journalWindow;
       const table = jw.table as Record<string, string>;
@@ -561,7 +561,7 @@ describe("10 · archetype module fields — composed from the relationship, one 
     // the occupation path makes the WHOLE catalogue reachable — a family that
     // composed a module with no label would show the person a raw key
     expect([...reachable.keys()].sort()).toEqual(Object.keys(JOURNAL_MODULES).sort());
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         moduleFields: { title: string; hint: string; modules: Record<string, string>; fields: Record<string, string> };
       };
@@ -669,7 +669,7 @@ describe("11 · coverage semantics: shares name their base, hours never vanish",
       "confirmedOfDays",
       "confirmedNoDuration",
     ];
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: Record<string, string>;
       };
@@ -769,7 +769,7 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
   });
 
   it("every ledger sentence has copy in each locale the section is published in, and none of it sums the two ledgers", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: {
           orgRecords: Record<string, string>;
@@ -892,7 +892,7 @@ describe("13 · the five rules the re-audit pinned (2026-09-11, F8–F12)", () =
   });
 
   it("every F9/F10/F12 sentence has copy in each locale the surfaces are published in, and none of it exposes internal vocabulary", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { intelligence: Record<string, string> };
       expect(j.intelligence.dayInferred, `${loc}.intelligence.dayInferred`).toContain("{count, plural,");
       expect(j.intelligence.dayInferred).not.toMatch(/work_date|created_at|UTC|timezone/i);
@@ -968,7 +968,7 @@ describe("14 · the growth reading (owner line 8): one derivation, fact apart fr
     for (const m of typeBlock.matchAll(/readonly (\w+)[?]?:/g)) {
       expect(m[1]!.toLowerCase(), m[1]).not.toMatch(/score|rating|rank|tier|level|ovr|grade/);
     }
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: Record<string, string> & { deepen: Record<string, string> };
       };
@@ -1017,7 +1017,7 @@ describe("15 · a capped list says it is capped (#1689, REMAINING 2 of the recei
   });
 
   it("the two cap sentences exist in every published locale, carry both figures, and name no internal vocabulary", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: Record<string, string>;
       };
@@ -1049,7 +1049,7 @@ describe("15b · the reading's own caps and the chat's lists say what they leave
     expect(workflows).toMatch(/Math\.min\(ANSWER_LIMIT, growth\.deepen\.length\),\s+growth\.deepenTotal,/);
     expect(workflows).toMatch(/Math\.min\(ANSWER_LIMIT, growth\.expand\.length\),\s+growth\.expand\.length,/);
     expect(workflows).toMatch(/Math\.min\(ANSWER_LIMIT, growth\.demand\.length\),\s+growth\.demandTotal \?\? growth\.demand\.length,/);
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const j = JSON.parse(read(`messages/${loc}.json`)) as { workspace: { ai: Record<string, string> } };
       const s = j.workspace.ai.wiGrowthMore;
       expect(typeof s, `${loc}.workspace.ai.wiGrowthMore`).toBe("string");
@@ -1090,7 +1090,7 @@ describe("16 · the owner's `skillTimeAttribution` column is READ by the analyti
     // there with their block — target worker IA 2026-09-13)
     expect(stationPage).toContain("deriveAttributionExpectation(ownPath?.iscoGroups ?? [], wi)");
     expect(stationPage).toContain("readOwnOccupationPath(supabase, worker.id)");
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: { attribution: Record<string, string> };
       };
@@ -1209,7 +1209,7 @@ describe("14 · ONE time scope (issue #1689, lane B): bounded reads say so, diar
   });
 
   it("every new sentence has copy in each routed locale, and the truncation sentence names the count", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: Record<string, string>;
         proofLoop: Record<string, string>;
@@ -1304,7 +1304,7 @@ describe("17 · the Work-in-Numbers station (target worker IA 2026-09-13)", () =
   });
 
   it("no score, rating, rank, tier, level or grade word reaches the person from the station copy", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         intelligence: { numbers: Record<string, unknown> };
         record: Record<string, string>;

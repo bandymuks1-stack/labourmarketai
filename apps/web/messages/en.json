@@ -10211,7 +10211,7 @@
       "grantIntro": "This is a separate decision. Only the details listed below would be passed to this company, and only for this need."
     },
     "partnerSupply": {
-      "sectionIntro": "Being compared against a job and being named are not the same thing. This permission lets LabourMarket.ai look for suitable work for you with employers and projects outside this platform, through approved partner infrastructure. Only a de-identified professional summary is passed on — never your name or contact details.",
+      "sectionIntro": "Being compared against a job and being named are not the same thing. This permission lets LabourMarket.ai look for suitable work for you with employers and projects outside this platform, through approved partner infrastructure. Only a professional summary without direct identifying data is passed on — never your name or contact details.",
       "noWorkerProfile": "You do not have a worker profile yet, so nothing would be represented. Create your professional profile first — these answers are kept and start applying once it exists.",
       "statusNotRepresented": "You are not represented outside LabourMarket.ai",
       "statusNotRepresentedBody": "Nothing about you is sent anywhere outside this platform. Your account, CV and work journal work exactly the same without this.",

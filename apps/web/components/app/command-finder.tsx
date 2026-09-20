@@ -116,6 +116,7 @@ const SPEECH_LANG: Record<ActiveLocale, string> = {
   ru: "ru-RU",
   nl: "nl-NL",
   de: "de-DE",
+  pl: "pl-PL",
 };
 
 /** Parse the stored recent-command ids — ids only, anything else discarded. */

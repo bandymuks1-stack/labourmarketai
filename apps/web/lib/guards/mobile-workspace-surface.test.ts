@@ -169,7 +169,7 @@ describe("mobile workspace surface — real, and not confused with participation
     expect(settings).toContain("context.unavailable.title");
   });
 
-  it("every workspace string exists in all five active mobile locales", () => {
+  it("every workspace string exists in all six active mobile locales", () => {
     const messages = read("apps/mobile/src/i18n/messages.ts");
     const keys = [
       "workspace.title",
@@ -186,7 +186,7 @@ describe("mobile workspace surface — real, and not confused with participation
     ];
     for (const key of keys) {
       const occurrences = messages.split(`"${key}":`).length - 1;
-      expect(occurrences, `${key} appears ${occurrences}× — expected one per active locale`).toBe(5);
+      expect(occurrences, `${key} appears ${occurrences}× — expected one per active locale`).toBe(6); // 2026-09-20: PL activated
     }
   });
 });

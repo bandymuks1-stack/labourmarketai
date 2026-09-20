@@ -22,7 +22,7 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const messages = (loc: string): Record<string, unknown> =>
   JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
 

@@ -114,7 +114,7 @@ describe("the surface: rendered on company planning, labelled in every routed lo
       }
       for (const k of ["project", "booking", "trip"]) expect(typeof c.kind[k], `${loc}.kind.${k}`).toBe("string");
       // The "nothing on record" line must never say "free" as a fact.
-      expect(String(c.withoutCommitment).toLowerCase()).toMatch(/not the same as free|nereiškia, kad laisvas|не значит «свободен»|niet hetzelfde als vrij|nicht dasselbe wie frei/);
+      expect(String(c.withoutCommitment).toLowerCase()).toMatch(/not the same as free|nereiškia, kad laisvas|не значит «свободен»|niet hetzelfde als vrij|nicht dasselbe wie frei|to nie to samo, co wolny/);
     });
   }
 });

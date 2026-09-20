@@ -15,8 +15,8 @@ import type { ActiveLocale } from "@labourmarket/client-core";
  * missing translation is a typecheck failure, not a string that quietly falls
  * back to English on someone's phone.
  *
- * The five locales here are exactly the ACTIVE set (doctrine §2.4 / the web
- * app's `activeLocales`). The other six exist in the platform's catalogues but
+ * The six locales here are exactly the ACTIVE set (doctrine §2.4 / the web
+ * app's `activeLocales`). The other five exist in the platform's catalogues but
  * are not offered to anyone yet, on any client.
  */
 
@@ -997,7 +997,201 @@ const de: Catalogue = {
   "today.openProfile": "Profil und Fähigkeiten öffnen",
 };
 
-export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de };
+const pl: Catalogue = {
+  "app.name": "LabourMarket.ai",
+
+  "nav.today": "Dziś",
+  "nav.journal": "Dziennik pracy",
+  "nav.profile": "Profil",
+  "nav.settings": "Ustawienia",
+
+  "auth.checking": "Sprawdzamy Twoją sesję…",
+  "auth.signIn.title": "Zaloguj się",
+  "auth.signIn.email": "E-mail",
+  "auth.signIn.password": "Hasło",
+  "auth.signIn.submit": "Zaloguj się",
+  "auth.signIn.toRegister": "Załóż konto",
+  "auth.register.title": "Załóż konto",
+  "auth.register.submit": "Załóż konto",
+  "auth.register.toSignIn": "Mam już konto",
+  "auth.error.rejected": "Ten e-mail i hasło do siebie nie pasują.",
+  "auth.error.unreachable":
+    "Nie udało się połączyć z serwerem, więc nie wiemy, czy te dane są poprawne. Sprawdź połączenie i spróbuj ponownie.",
+  "auth.error.confirmationRequired":
+    "Twoje konto zostało utworzone. Potwierdź link w e-mailu, a potem zaloguj się.",
+  "auth.error.notConfigured":
+    "Ta wersja nie ma konfiguracji serwera, więc nie może nikogo zalogować.",
+  "auth.signOut": "Wyloguj się",
+
+  "session.unavailable.title": "Nie udało się sprawdzić Twojej sesji",
+  "session.unavailable.body":
+    "To nie to samo co wylogowanie — bezpieczna pamięć Twojego telefonu nie odpowiedziała. Spróbuj ponownie.",
+  "session.unavailable.retry": "Spróbuj ponownie",
+
+  "route.notFound.title": "Tego ekranu nie ma w tej aplikacji",
+  "route.notFound.body":
+    "Link, który tu prowadzi, nigdzie w tej aplikacji nie trafia. Może należeć do strony internetowej albo być nieaktualny. Nic nigdzie nie zostało wysłane.",
+  "route.notFound.action": "Wróć do aplikacji",
+
+  "crash.title": "W aplikacji wystąpił błąd",
+  "crash.body":
+    "To błąd samej aplikacji, a nie Twoje działanie, i nic nigdzie nie zostało wysłane. Spróbuj ponownie — jeśli powtarza się dalej, zamknij aplikację i otwórz ją od nowa.",
+
+  "config.problem.title": "Ta wersja nie jest skonfigurowana",
+  "config.problem.body":
+    "Aplikacja nie uruchomi się, dopóki te wartości nie zostaną ustawione. Żadne dane nigdzie nie zostały wysłane.",
+
+  "workspace.title": "Działasz w imieniu",
+  "workspace.loading": "Wczytujemy Twoje przestrzenie robocze…",
+  "workspace.active": "Aktywna",
+  "workspace.switching": "Przełączanie…",
+  "workspace.failed.title": "Nie udało się odczytać Twoich przestrzeni roboczych",
+  "workspace.failed.body":
+    "To nieudany odczyt, a nie odpowiedź: nie oznacza, że nie należysz do żadnej organizacji. Spróbuj za chwilę.",
+  "workspace.pointerUnavailable":
+    "To jest wyliczane z tego, do czego należysz, a nie zapisany dla Ciebie wybór, i nie da się tego tutaj jeszcze zmienić.",
+  "workspace.switchFailed": "Przestrzeń robocza nie została zmieniona. Nic nie zostało przeniesione.",
+  "context.loading": "Wczytujemy Twoje role…",
+  "context.active": "Aktywna",
+  "context.none": "Na tym koncie nie zapisano jeszcze żadnej roli uczestnictwa. Tyle odczytaliśmy — to nie błąd aplikacji.",
+  "context.title": "Pracujesz jako",
+  "context.unavailable.title": "Nie możemy jeszcze pokazać Twoich kontekstów",
+  "context.unavailable.body":
+    "Aplikacja potrafi Cię zalogować, ale nie potrafi jeszcze odczytać, do których organizacji należysz. W Twoim koncie niczego nie brakuje — ten klient po prostu nie umie jeszcze o to zapytać.",
+  "context.mode.worker": "Ja",
+  "context.mode.company": "Firma",
+  "context.mode.agency": "Agencja",
+  "context.mode.customer": "Zleceniodawca",
+
+  "language.title": "Język",
+  "language.preview": "Tłumaczenie poglądowe",
+
+  "domain.loading": "Pytamy serwer…",
+  "domain.retry": "Spróbuj ponownie",
+  "domain.failedTitle": "Nie udało się tego wczytać",
+  "domain.unavailable.notConnectedYet": "Jeszcze niepołączone",
+  "domain.unavailable.signInAgain": "Zaloguj się ponownie.",
+  "domain.unavailable.offline": "Brak połączenia. Nic nie zostało wysłane.",
+  "domain.unavailable.unexpectedAnswer":
+    "Serwer odpowiedział czymś, czego ta aplikacja nie zrozumiała.",
+  "domain.refused.no_credentials": "Zaloguj się ponownie.",
+  "domain.refused.invalid_token":
+    "Twoja sesja wygasła. Zaloguj się ponownie.",
+  "domain.refused.no_profile": "To konto nie ma jeszcze profilu.",
+  "domain.refused.not_authorized":
+    "Serwer odrzucił to żądanie dla tego konta.",
+  "domain.refused.rate_limited":
+    "Serwer poprosił aplikację o zwolnienie tempa. Spróbuj za chwilę.",
+  "domain.refused.capability": "Serwer odrzucił to żądanie.",
+  "domain.refused.identity_unavailable":
+    "Nie udało się potwierdzić, kim jesteś. To nie jest odmowa — spróbuj ponownie.",
+
+  "today.signedInAs": "Zalogowano jako",
+  "today.recentWork": "Ostatnie prace",
+  "journal.empty": "W Dzienniku pracy nie ma jeszcze żadnych wpisów.",
+  "journal.logWork": "Zapisz pracę",
+  "journal.compose.title": "Zapisz pracę",
+  "journal.compose.intro":
+    "Opisz własnymi słowami swoją pracę. Twój Dziennik pracy zapisuje dokładnie to, co napiszesz.",
+  "journal.compose.date": "Data pracy",
+  "journal.compose.dateHint": "Rok-miesiąc-dzień, na przykład 2026-09-01",
+  "journal.compose.today": "Dziś",
+  "journal.compose.yesterday": "Wczoraj",
+  "journal.compose.notes": "Co zostało zrobione",
+  "journal.compose.notesHint":
+    "Własnymi słowami. Godziny i miejsca też należą tutaj.",
+  "journal.compose.site": "Budowa lub miejsce (opcjonalnie)",
+  "journal.compose.context": "Kontekst pracy",
+  "journal.compose.contextUnnamed": "Nie podano",
+  "journal.compose.review": "Sprawdź przed zapisaniem",
+  "journal.compose.previewTitle": "Sprawdź to, zanim zostanie zapisane",
+  "journal.compose.previewNothingSaved":
+    "Nic jeszcze nie zostało zapisane. Dokładnie to zostanie zarejestrowane.",
+  "journal.compose.save": "Zapisz w moim Dzienniku pracy",
+  "journal.compose.edit": "Zmień coś",
+  "journal.compose.chooseContext": "Do której pracy to należy?",
+  "journal.compose.chooseContextBody":
+    "Ten wpis mógłby należeć do więcej niż jednego z Twoich kontekstów pracy, więc nic nie zostało przygotowane ani zapisane. Wybierz jeden.",
+  "journal.compose.savedTitle": "Zapisano w Twoim Dzienniku pracy",
+  "journal.compose.savedBody":
+    "To jest już zarejestrowany wpis. Dokładnie to zapisał serwer.",
+  "journal.compose.another": "Zapisz kolejny wpis",
+  "journal.compose.backToJournal": "Wróć do dziennika",
+  "journal.compose.checkThis": "Najpierw to sprawdź",
+  "journal.compose.invalidDate":
+    "Datę zapisz jako rok-miesiąc-dzień, na przykład 2026-09-01. Nic nie zostało wysłane.",
+  "journal.compose.notesRequired":
+    "Przed zapisaniem opisz, co zostało zrobione. Nic nie zostało wysłane.",
+  "journal.compose.draftFailedTitle": "Nie udało się przygotować tego wpisu",
+  "journal.compose.saveFailedTitle": "Nie udało się zapisać tego wpisu",
+  "journal.compose.staleDraft":
+    "Nie zapisano: Twój dziennik zmienił się po przygotowaniu tego wpisu, więc sprawdzenie, na którym się opierał, jest nieaktualne. Przejrzyj go jeszcze raz.",
+  "journal.compose.noContext":
+    "To konto nie ma aktywnego kontekstu pracy, więc wpis nie ma gdzie zostać zarejestrowany. Najpierw wskaż na stronie internetowej, gdzie pracujesz, a potem zapisuj pracę tutaj.",
+  "journal.compose.unsureSaved":
+    "Połączenie zerwało się już po wysłaniu, więc nie wiemy, czy wpis dotarł. Zanim napiszesz go ponownie, otwórz Dziennik pracy i sprawdź. Ponowna próba nie utworzy duplikatu.",
+  "journal.compose.skillsAdded": "Nowo zapisane umiejętności",
+  "journal.compose.skillsStrengthened": "Umiejętności z nowym dowodem",
+  "journal.compose.skillsClaims": "Kompetencje zauważone w Twoich słowach",
+  "journal.compose.skillsReview": "Czeka na Twoje sprawdzenie",
+  "journal.compose.noCvChange":
+    "Z tego wpisu nie dodano nic nowego do Twojego Living CV.",
+  "journal.compose.skillsPartial":
+    "Część aktualizacji Living CV nie została ukończona. Sam wpis jest zapisany.",
+  "journal.compose.skillsFailed":
+    "Aktualizacja Living CV tym razem nie została wykonana. Sam wpis jest zapisany.",
+  "journal.compose.reviewOnWeb":
+    "To, co czeka na sprawdzenie, potwierdza się na stronie internetowej.",
+  "profile.skillsEmpty": "Nie zapisano jeszcze żadnych umiejętności.",
+  "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
+  "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
+  "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",
+  "profile.groupJournalBacked": "Poparte Twoim Dziennikiem pracy",
+  "profile.groupDeclared": "Zadeklarowane przez Ciebie",
+  "profile.figuresUnavailable":
+    "Godzin, udziału i wpisów nie udało się tym razem odczytać. Umiejętności poniżej nadal są Twoimi zapisanymi umiejętnościami — nic nie jest pokazywane jako 0.",
+  "profile.figuresLegend":
+    "Godziny · udział w godzinach przypisanych do umiejętności · wpisy, od początku. Te same liczby co na stronie internetowej.",
+  "profile.figuresNotRead": "nie udało się odczytać liczb",
+  "profile.noFigures": "brak zapisanych godzin",
+  "profile.hoursShort": "godz.",
+  "profile.entriesLabel": "wpisy",
+  "profile.selfStatedMissing":
+    "Kompetencje zapisane przez Ciebie własnymi słowami nie trafiają jeszcze na ten ekran; strona internetowa pokazuje je przy Twoich umiejętnościach.",
+  "profile.openJournal": "Otwórz Dziennik pracy",
+  "journal.openProfile": "Zobacz w profilu, co dają te wpisy",
+
+  "today.figuresTitle": "Twoja praca w liczbach",
+  "today.periodToday": "Dziś",
+  "today.periodWeek": "Ostatnie 7 dni",
+  "today.hoursLabel": "Godziny",
+  "today.daysUnitLabel": "zapisane w dniach",
+  "today.entriesLabel": "Wpisy",
+  "today.daysLabel": "Dni",
+  "today.confirmedLabel": "Potwierdzone przez kierownika, godz.",
+  "today.periodEmpty": "W tym okresie nic nie zapisano.",
+  "today.periodMissing": "Serwer nie przysłał liczby dla tego okresu.",
+  "today.dominantTitle": "Największy udział Twoich godzin, ostatnie 7 dni",
+  "today.dominantShare": "godzin przypisanych do umiejętności",
+  "today.dominantNone":
+    "W ostatnich 7 dniach żadnej pojedynczej umiejętności nie przypisano godzin.",
+  "today.coverageTruncated":
+    "Te liczby opierają się na ostatnio odczytanych wpisach — starsze wpisy nie są uwzględnione.",
+  "today.figuresScope":
+    "Z Twoich własnych wpisów w Dzienniku pracy, według tej samej zasady co strona internetowa. Dni kalendarzowe kończą się dzisiaj (UTC).",
+  "today.openJournal": "Otwórz Dziennik pracy",
+  "today.openProfile": "Otwórz profil i umiejętności",
+  "account.title": "Prywatność i konto",
+  "account.body":
+    "Te strony otwierają się w przeglądarce, na stronie internetowej. Prośbę o Twoje dane lub o usunięcie konta składasz tam, w sekcji Prywatność.",
+  "account.privacy": "Prywatność, Twoje dane i usunięcie konta",
+  "account.terms": "Warunki korzystania z usługi",
+  "account.support": "Skontaktuj się z pomocą (info@labourmarket.ai)",
+  "account.external": "Przeglądarka",
+  "account.openFailed": "Nie udało się otworzyć linku na tym telefonie. Nic nie zostało zmienione.",
+};
+
+export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl };
 
 export const LANGUAGE_NAMES: Record<ActiveLocale, string> = {
   // Each language named in itself — a person looking for their own language
@@ -1007,4 +1201,5 @@ export const LANGUAGE_NAMES: Record<ActiveLocale, string> = {
   ru: "Русский",
   nl: "Nederlands",
   de: "Deutsch",
+  pl: "Polski",
 };

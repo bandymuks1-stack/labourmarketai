@@ -145,7 +145,7 @@ describe("work-log context labels", () => {
 });
 
 describe("the canonical catalogue can actually name a placement", () => {
-  const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+  const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
   const names = (loc: string) =>
     JSON.parse(
       readFileSync(

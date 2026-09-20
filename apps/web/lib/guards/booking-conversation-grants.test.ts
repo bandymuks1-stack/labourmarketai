@@ -239,7 +239,7 @@ describe("booking-state.ts contains no writer of 'expired' — display-only modu
   });
 
   it("the stale display copy says 'no response yet' — never 'expired' (lt/en/ru/nl/de)", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const messages = JSON.parse(read(`messages/${loc}.json`)) as {
         bookings: { displayState: Record<string, string>; status: Record<string, string> };
       };

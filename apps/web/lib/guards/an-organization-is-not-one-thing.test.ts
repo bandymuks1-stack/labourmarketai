@@ -178,7 +178,7 @@ describe("G — activity and relationship are different axes", () => {
   it("the setup help says the industry does not decide what the organization DOES", () => {
     // Choosing "construction" used to read as "you are not an agency": the
     // help named only the per-need role and never the capability question.
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const help = (
         JSON.parse(read(join("messages", `${locale}.json`))) as {
           roleDashboards: { company: { setup: Record<string, string> } };

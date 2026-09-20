@@ -67,10 +67,12 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
+// 2026-09-20: PL is an active UI locale without its own consent blocks yet;
+// English is the honest fallback, never Lithuanian (lib/i18n/unsupported-language.ts).
 function toConsentLocale(locale: string): ConsentLocale {
   return (CONSENT_LOCALES as readonly string[]).includes(locale)
     ? (locale as ConsentLocale)
-    : "lt";
+    : "en";
 }
 
 // ─── Employer side ───────────────────────────────────────────────────────────

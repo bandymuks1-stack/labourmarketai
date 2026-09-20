@@ -84,7 +84,7 @@ describe("a work package by sentence", () => {
       for (const key of ["taskTitle", "taskTitlePlaceholder", "taskProject", "taskDue", "taskPriority"]) expect(cat.conversation.forms.fields[key], `${locale}.${key}`).toBeTypeOf("string");
       for (const key of ["taskCreateIntro", "taskCreatedNext"]) expect(cat.conversation.chat[key], `${locale}.${key}`).toBeTypeOf("string");
       // The priority labels live in the routed catalogs' `tasks` namespace (fallback covers the rest).
-      if (["lt", "en", "ru", "nl", "de"].includes(locale)) expect(cat.tasks.priority.normal).toBeTypeOf("string");
+      if (["lt", "en", "ru", "nl", "de", "pl"].includes(locale)) expect(cat.tasks.priority.normal).toBeTypeOf("string");
     }
   });
 });

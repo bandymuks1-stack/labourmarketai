@@ -112,6 +112,7 @@ const DESCRIPTION: L = {
   ru: "Открытая вакансия на LabourMarket.ai. Войдите, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
   nl: "Openstaande vacature op LabourMarket.ai. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Offene Stelle auf LabourMarket.ai. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+  pl: "Otwarta oferta pracy na LabourMarket.ai. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
 };
 
 /** Metadata/heading fallback when even the occupation label is missing. */
@@ -121,6 +122,7 @@ const GENERIC_TITLE: L = {
   ru: "Открытая вакансия",
   nl: "Openstaande vacature",
   de: "Offene Stelle",
+  pl: "Otwarta oferta pracy",
 };
 
 /** Anonymous source line. Deliberately generic: naming the source employment
@@ -132,6 +134,7 @@ const ANONYMOUS_SOURCE: L = {
   ru: "Источник: официальная публичная служба занятости. Содержание объявления принадлежит опубликовавшему его работодателю.",
   nl: "Bron: een officiële openbare arbeidsbemiddelingsdienst. De inhoud van de advertentie is van de werkgever die haar publiceerde.",
   de: "Quelle: eine offizielle öffentliche Arbeitsvermittlung. Der Inhalt der Anzeige gehört dem veröffentlichenden Arbeitgeber.",
+  pl: "Źródło: oficjalna publiczna służba zatrudnienia. Treść ogłoszenia należy do pracodawcy, który je opublikował.",
 };
 
 const LOCKED_TITLE: L = {
@@ -140,6 +143,7 @@ const LOCKED_TITLE: L = {
   ru: "Работодатель, местоположение и как откликнуться",
   nl: "Werkgever, locatie en hoe te solliciteren",
   de: "Arbeitgeber, Ort und Bewerbungsweg",
+  pl: "Pracodawca, lokalizacja i sposób aplikowania",
 };
 
 const LOCKED_BODY: L = {
@@ -148,6 +152,7 @@ const LOCKED_BODY: L = {
   ru: "Эти данные доступны участникам. Регистрация бесплатна.",
   nl: "Deze gegevens zijn beschikbaar voor leden. Een account aanmaken is gratis.",
   de: "Diese Angaben sind für Mitglieder verfügbar. Ein Konto ist kostenlos.",
+  pl: "Te dane są dostępne dla członków. Założenie konta jest bezpłatne.",
 };
 
 const CTA_SIGNUP: L = {
@@ -156,6 +161,7 @@ const CTA_SIGNUP: L = {
   ru: "Создать бесплатный аккаунт",
   nl: "Gratis account aanmaken",
   de: "Kostenloses Konto erstellen",
+  pl: "Załóż darmowe konto",
 };
 
 const CTA_LOGIN: L = {
@@ -164,6 +170,7 @@ const CTA_LOGIN: L = {
   ru: "У меня уже есть аккаунт",
   nl: "Ik heb al een account",
   de: "Ich habe bereits ein Konto",
+  pl: "Mam już konto",
 };
 
 const BACK: L = {
@@ -172,6 +179,7 @@ const BACK: L = {
   ru: "← Все вакансии",
   nl: "← Alle vacatures",
   de: "← Alle Stellen",
+  pl: "← Wszystkie oferty pracy",
 };
 
 const PUBLISHED: L = {
@@ -180,6 +188,7 @@ const PUBLISHED: L = {
   ru: "Опубликовано",
   nl: "Geplaatst",
   de: "Veröffentlicht",
+  pl: "Opublikowano",
 };
 
 // ── Member-only labels ─────────────────────────────────────────────────────
@@ -190,6 +199,7 @@ const EMPLOYER: L = {
   ru: "Работодатель",
   nl: "Werkgever",
   de: "Arbeitgeber",
+  pl: "Pracodawca",
 };
 
 const LOCATION: L = {
@@ -198,6 +208,7 @@ const LOCATION: L = {
   ru: "Местоположение",
   nl: "Locatie",
   de: "Ort",
+  pl: "Lokalizacja",
 };
 
 const DESCRIPTION_HEADING: L = {
@@ -206,6 +217,7 @@ const DESCRIPTION_HEADING: L = {
   ru: "Описание вакансии",
   nl: "Functieomschrijving",
   de: "Stellenbeschreibung",
+  pl: "Opis stanowiska",
 };
 
 const APPLY: L = {
@@ -214,6 +226,7 @@ const APPLY: L = {
   ru: "Откликнуться на сайте источника",
   nl: "Solliciteer op de bronsite",
   de: "Auf der Quellseite bewerben",
+  pl: "Aplikuj na stronie źródłowej",
 };
 
 /** Honest: we hand the worker onward, we do not apply for them. */
@@ -223,6 +236,7 @@ const APPLY_NOTE: L = {
   ru: "Отклики обрабатывает источник объявления, а не LabourMarket.ai.",
   nl: "Sollicitaties worden afgehandeld door de aanbieder, niet door LabourMarket.ai.",
   de: "Bewerbungen bearbeitet die ausschreibende Stelle, nicht LabourMarket.ai.",
+  pl: "Aplikacje obsługuje wydawca ogłoszenia, nie LabourMarket.ai.",
 };
 
 /* ── SAVE (private bookmark) ────────────────────────────────────────────────
@@ -237,6 +251,7 @@ const SAVE: L = {
   ru: "Сохранить вакансию",
   nl: "Vacature bewaren",
   de: "Stelle merken",
+  pl: "Zapisz tę ofertę pracy",
 };
 
 const SAVED: L = {
@@ -245,6 +260,7 @@ const SAVED: L = {
   ru: "Сохранено",
   nl: "Bewaard",
   de: "Gemerkt",
+  pl: "Zapisano",
 };
 
 const UNSAVE: L = {
@@ -253,6 +269,7 @@ const UNSAVE: L = {
   ru: "Убрать из сохранённых",
   nl: "Uit bewaard verwijderen",
   de: "Aus Gemerkt entfernen",
+  pl: "Usuń z zapisanych",
 };
 
 const SAVE_NOTE: L = {
@@ -261,6 +278,7 @@ const SAVE_NOTE: L = {
   ru: "Сохранённые вакансии видите только вы. Сохранение — это не отклик: работодатель не получает уведомления.",
   nl: "Alleen jij ziet je bewaarde vacatures. Bewaren is geen sollicitatie — de werkgever krijgt geen melding.",
   de: "Nur du siehst deine gemerkten Stellen. Merken ist keine Bewerbung — der Arbeitgeber wird nicht benachrichtigt.",
+  pl: "Tylko Ty widzisz swoje zapisane oferty pracy. Zapisanie nie jest aplikacją — pracodawca nie dostaje powiadomienia.",
 };
 
 const SAVE_FAILED: L = {
@@ -269,6 +287,7 @@ const SAVE_FAILED: L = {
   ru: "Не удалось сохранить. Попробуйте ещё раз.",
   nl: "Bewaren is niet gelukt. Probeer het opnieuw.",
   de: "Das Merken hat nicht geklappt. Bitte versuche es erneut.",
+  pl: "Nie udało się zapisać. Spróbuj ponownie.",
 };
 
 const SAVE_CLOSED: L = {
@@ -277,6 +296,7 @@ const SAVE_CLOSED: L = {
   ru: "Эта вакансия больше не активна, сохранить её нельзя.",
   nl: "Deze vacature is niet meer open en kan niet worden bewaard.",
   de: "Diese Stelle ist nicht mehr offen und kann nicht gemerkt werden.",
+  pl: "Ta oferta pracy nie jest już otwarta, więc nie można jej zapisać.",
 };
 
 const NEXT_HEADING: L = {
@@ -285,6 +305,7 @@ const NEXT_HEADING: L = {
   ru: "Получайте подходящие предложения",
   nl: "Word gematcht met werk zoals dit",
   de: "Passende Stellen erhalten",
+  pl: "Otrzymuj dopasowania do takiej pracy",
 };
 
 const NEXT_BODY: L = {
@@ -293,6 +314,7 @@ const NEXT_BODY: L = {
   ru: "Ваш профиль и навыки определяют, какие возможности до вас доходят. Чем они полнее, тем точнее подбор.",
   nl: "Je profiel en vaardigheden bepalen welke kansen je bereiken. Hoe vollediger, hoe beter de match.",
   de: "Ihr Profil und Ihre Fähigkeiten bestimmen, welche Angebote Sie erreichen. Je vollständiger, desto besser die Übereinstimmung.",
+  pl: "To Twój profil i umiejętności decydują, które możliwości do Ciebie trafiają. Im są pełniejsze, tym lepsze dopasowanie.",
 };
 
 const NEXT_OPPORTUNITIES: L = {
@@ -301,6 +323,7 @@ const NEXT_OPPORTUNITIES: L = {
   ru: "Смотреть возможности",
   nl: "Bekijk je kansen",
   de: "Ihre Angebote ansehen",
+  pl: "Zobacz swoje możliwości",
 };
 
 const NEXT_PROFILE: L = {
@@ -309,6 +332,7 @@ const NEXT_PROFILE: L = {
   ru: "Заполнить профиль",
   nl: "Profiel aanvullen",
   de: "Profil vervollständigen",
+  pl: "Uzupełnij swój profil",
 };
 
 // ── Acquisition loop P0 (2026-09-20): the member half no longer stops at the
@@ -324,6 +348,7 @@ const RETURNED_NOTE: L = {
   ru: "Вы вернулись к вакансии, которую открыли до входа.",
   nl: "Je bent terug bij de vacature die je opende voordat je inlogde.",
   de: "Du bist zurück bei der Stelle, die du vor der Anmeldung geöffnet hast.",
+  pl: "Jesteś z powrotem przy ofercie pracy otwartej przed zalogowaniem.",
 };
 
 const COMPARE_TITLE: L = {
@@ -332,6 +357,7 @@ const COMPARE_TITLE: L = {
   ru: "Как эта вакансия соотносится с вашим профилем",
   nl: "Hoe deze vacature zich verhoudt tot je profiel",
   de: "Wie diese Stelle zu deinem Profil passt",
+  pl: "Jak ta oferta pracy wypada w porównaniu z Twoim profilem",
 };
 
 /** One honest sentence per band. None of them dismisses the person: a
@@ -344,6 +370,7 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Информация в вашем профиле покрывает требования, указанные в объявлении. Там, где объявление молчит, ничего не предполагается.",
     nl: "De informatie in je profiel dekt de eisen die deze advertentie noemt. Waar de advertentie zwijgt, wordt niets aangenomen.",
     de: "Die Angaben in deinem Profil decken die in dieser Anzeige genannten Anforderungen ab. Wo die Anzeige schweigt, wird nichts angenommen.",
+    pl: "Informacje w Twoim profilu pokrywają wymagania podane w tym ogłoszeniu. Tam, gdzie ogłoszenie milczy, nic nie jest zakładane.",
   },
   possible: {
     en: "Your profile covers part of the stated requirements. The items below are what is still missing or not yet known.",
@@ -351,6 +378,7 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Ваш профиль покрывает часть указанных требований. Ниже — чего пока не хватает или что ещё неизвестно.",
     nl: "Je profiel dekt een deel van de gestelde eisen. Hieronder staat wat nog ontbreekt of nog niet bekend is.",
     de: "Dein Profil deckt einen Teil der genannten Anforderungen ab. Unten steht, was noch fehlt oder noch nicht bekannt ist.",
+    pl: "Twój profil pokrywa część podanych wymagań. Poniżej jest to, czego jeszcze brakuje lub co nie jest znane.",
   },
   missing_requirement: {
     en: "This advertisement states requirements that your profile does not yet show. Missing information is not a failed requirement — if you have it, add it to your profile.",
@@ -358,6 +386,7 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "В объявлении указаны требования, которых пока нет в вашем профиле. Отсутствие информации — это не несоответствие: если она у вас есть, добавьте её в профиль.",
     nl: "Deze advertentie noemt eisen die je profiel nog niet toont. Ontbrekende informatie is geen afwijzing — heb je het, voeg het dan toe aan je profiel.",
     de: "Diese Anzeige nennt Anforderungen, die dein Profil noch nicht zeigt. Fehlende Angaben sind keine Ablehnung — wenn du sie hast, ergänze dein Profil.",
+    pl: "To ogłoszenie podaje wymagania, których Twój profil jeszcze nie pokazuje. Brak informacji nie oznacza niespełnionego wymagania — jeśli je masz, dodaj je do profilu.",
   },
   conflict: {
     en: "One of the stated hard requirements does not match the information in your profile. The conflicting requirement is named below; everything else is shown as it is.",
@@ -365,6 +394,7 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Одно из обязательных требований не совпадает с информацией в вашем профиле. Оно названо ниже; всё остальное показано как есть.",
     nl: "Een van de gestelde harde eisen komt niet overeen met de informatie in je profiel. De strijdige eis staat hieronder; al het andere wordt getoond zoals het is.",
     de: "Eine der genannten harten Anforderungen passt nicht zu den Angaben in deinem Profil. Sie ist unten benannt; alles andere wird so gezeigt, wie es ist.",
+    pl: "Jedno z podanych twardych wymagań nie zgadza się z informacjami w Twoim profilu. Sprzeczne wymaganie jest wymienione poniżej; reszta jest pokazana bez zmian.",
   },
   not_assessed: {
     en: "This advertisement could not be assessed against your profile: it states no readable requirements, or your profile does not yet say what work you do. Nothing here is a verdict.",
@@ -372,6 +402,7 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Это объявление нельзя было сопоставить с вашим профилем: в нём нет распознаваемых требований или ваш профиль ещё не говорит, какую работу вы выполняете. Это не вывод.",
     nl: "Deze advertentie kon niet tegen je profiel worden beoordeeld: ze noemt geen leesbare eisen, of je profiel zegt nog niet welk werk je doet. Dit is geen oordeel.",
     de: "Diese Anzeige konnte nicht mit deinem Profil abgeglichen werden: Sie nennt keine lesbaren Anforderungen, oder dein Profil sagt noch nicht, welche Arbeit du machst. Das ist kein Urteil.",
+    pl: "Tego ogłoszenia nie dało się porównać z Twoim profilem: nie podaje czytelnych wymagań albo Twój profil nie mówi jeszcze, jaką pracę wykonujesz. Nic tutaj nie jest werdyktem.",
   },
 };
 
@@ -381,6 +412,7 @@ const NOT_MATCHABLE: L = {
   ru: "Чтобы сопоставить эту вакансию с вашим профилем, сначала скажите, какую работу вы выполняете и какие у вас навыки — достаточно одного предложения.",
   nl: "Om deze vacature met je profiel te vergelijken, zeg eerst welk werk je doet en welke vaardigheden je hebt — één zin is genoeg.",
   de: "Um diese Stelle mit deinem Profil zu vergleichen, sag zuerst, welche Arbeit du machst und welche Fähigkeiten du hast — ein Satz genügt.",
+  pl: "Aby porównać tę ofertę pracy z Twoim profilem, najpierw napisz, jaką pracę wykonujesz i jakie masz umiejętności — wystarczy jedno zdanie.",
 };
 
 const NO_WORKER: L = {
@@ -389,6 +421,7 @@ const NO_WORKER: L = {
   ru: "У этого аккаунта пока нет профиля работника, поэтому сравнивать вакансию не с чем.",
   nl: "Dit account heeft nog geen werknemersprofiel, dus er is niets om deze vacature mee te vergelijken.",
   de: "Dieses Konto hat noch kein Arbeitnehmerprofil, daher gibt es nichts, womit diese Stelle verglichen werden könnte.",
+  pl: "To konto nie ma jeszcze profilu pracownika, więc nie ma z czym porównać tej oferty pracy.",
 };
 
 const INTEREST_TITLE: L = {
@@ -397,6 +430,7 @@ const INTEREST_TITLE: L = {
   ru: "Интересует эта вакансия?",
   nl: "Interesse in deze vacature?",
   de: "Interesse an dieser Stelle?",
+  pl: "Interesuje Cię ta oferta pracy?",
 };
 
 const ALT_TITLE: L = {
@@ -405,6 +439,7 @@ const ALT_TITLE: L = {
   ru: "Другие текущие объявления по этой профессии",
   nl: "Andere actuele advertenties in dit beroep",
   de: "Weitere aktuelle Anzeigen in diesem Beruf",
+  pl: "Inne aktualne ogłoszenia w tym zawodzie",
 };
 
 const ALT_NOTE: L = {
@@ -413,6 +448,7 @@ const ALT_NOTE: L = {
   ru: "Оценены тем же сравнением требований, что и вакансия выше. «Ближе» означает, что известные требования покрыты лучше — это не ваш рейтинг.",
   nl: "Beoordeeld met dezelfde eisenvergelijking als de vacature hierboven. \"Dichterbij\" betekent dat de bekende eisen beter gedekt zijn — het is geen rangschikking van jou.",
   de: "Beurteilt mit demselben Anforderungsabgleich wie die Stelle oben. „Näher“ heißt, die bekannten Anforderungen sind besser abgedeckt — es ist keine Bewertung deiner Person.",
+  pl: "Oceniane tym samym porównaniem wymagań co oferta pracy powyżej. „Bliżej” znaczy, że znane wymagania są lepiej pokryte — to nie jest ranking Twojej osoby.",
 };
 
 const ALT_CLOSER: L = {
@@ -421,6 +457,7 @@ const ALT_CLOSER: L = {
   ru: "Ближе по известным требованиям",
   nl: "Dichterbij op bekende eisen",
   de: "Näher bei den bekannten Anforderungen",
+  pl: "Bliżej pod względem znanych wymagań",
 };
 
 const CLOSED_TITLE: L = {
@@ -429,6 +466,7 @@ const CLOSED_TITLE: L = {
   ru: "Это объявление больше не открыто",
   nl: "Deze advertentie is niet meer open",
   de: "Diese Anzeige ist nicht mehr offen",
+  pl: "To ogłoszenie nie jest już otwarte",
 };
 
 const CLOSED_BODY: L = {
@@ -437,6 +475,7 @@ const CLOSED_BODY: L = {
   ru: "Источник снял его или истёк срок действия. С вашим аккаунтом всё в порядке — изменилась вакансия.",
   nl: "De aanbieder heeft ze ingetrokken of de geldigheid is verlopen. Met je account is niets mis — de vacature is veranderd.",
   de: "Die ausschreibende Stelle hat sie zurückgezogen oder die Gültigkeit ist abgelaufen. Mit deinem Konto ist alles in Ordnung — die Stelle hat sich geändert.",
+  pl: "Wydawca je wycofał albo skończył się okres jego ważności. Z Twoim kontem wszystko w porządku — zmieniła się oferta pracy.",
 };
 
 /** A plausible BCP-47 subtag or undefined ("we do not know" ≠ "the page's
@@ -457,8 +496,8 @@ function locationPrecision(
 }
 
 const PLACE_PRECISION: Record<"city" | "country", L> = {
-  city: { en: "City", lt: "Miestas", ru: "Город", nl: "Stad", de: "Stadt" },
-  country: { en: "Country only", lt: "Tik šalis", ru: "Только страна", nl: "Alleen land", de: "Nur Land" },
+  city: { en: "City", lt: "Miestas", ru: "Город", nl: "Stad", de: "Stadt", pl: "Miasto" },
+  country: { en: "Country only", lt: "Tik šalis", ru: "Только страна", nl: "Alleen land", de: "Nur Land", pl: "Tylko kraj" },
 };
 
 function joinLocation(

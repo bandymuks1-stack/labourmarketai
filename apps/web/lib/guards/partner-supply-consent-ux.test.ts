@@ -36,7 +36,7 @@ const componentCode = code(component);
 const actions = read("lib/privacy/partner-supply-actions.ts");
 const page = read("app/[locale]/dashboard/privacy/page.tsx");
 const definitions = read("lib/privacy/consent-definitions.ts");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 function partnerSupply(locale: string): Record<string, string> {
   const catalog = JSON.parse(read(`messages/${locale}.json`));

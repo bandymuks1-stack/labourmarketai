@@ -133,7 +133,7 @@ describe("invitation attention journey — reachable by sentence, in five locale
   });
 
   it("copy exists in the five routed locales; the brief line carries the inviter and the count", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));
       const chat = cat.conversation?.chat ?? {};
       for (const k of ["briefInvitations", "chipInvitations", "invitationSomeone", "invitationsIntro", "invitationsEmpty", "invAccept", "invLater", "invConfirmNote", "invDone", "invAlreadyAnswered"]) {

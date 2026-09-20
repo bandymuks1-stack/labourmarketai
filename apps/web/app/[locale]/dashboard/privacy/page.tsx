@@ -81,11 +81,13 @@ export default async function PrivacyPage({
     getMyPartnerSupplyState(),
   ]);
 
+  // 2026-09-20: PL is an active UI locale without its own consent blocks yet;
+  // English is the honest fallback, never Lithuanian (lib/i18n/unsupported-language.ts).
   const consentLocale: ConsentLocale = (
     CONSENT_LOCALES as readonly string[]
   ).includes(locale)
     ? (locale as ConsentLocale)
-    : "lt";
+    : "en";
   const legal = PROFILE_DISCOVERABILITY_V1.texts[consentLocale];
   const partnerLegal = PARTNER_SUPPLY_REPRESENTATION_V1.texts[consentLocale];
 

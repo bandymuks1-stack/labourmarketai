@@ -10211,7 +10211,7 @@
       "grantIntro": "Dies ist eine separate Entscheidung. Nur die unten aufgeführten Daten würden an dieses Unternehmen weitergegeben, und nur für diesen Bedarf."
     },
     "partnerSupply": {
-      "sectionIntro": "Mit einer Stelle verglichen zu werden und namentlich genannt zu werden, ist nicht dasselbe. Diese Erlaubnis erlaubt LabourMarket.ai, über geprüfte Partnerinfrastruktur passende Arbeit für Sie bei Arbeitgebern und Projekten außerhalb dieser Plattform zu suchen. Weitergegeben wird nur eine anonymisierte berufliche Zusammenfassung — niemals Ihr Name oder Ihre Kontaktdaten.",
+      "sectionIntro": "Mit einer Stelle verglichen zu werden und namentlich genannt zu werden, ist nicht dasselbe. Diese Erlaubnis erlaubt LabourMarket.ai, über geprüfte Partnerinfrastruktur passende Arbeit für Sie bei Arbeitgebern und Projekten außerhalb dieser Plattform zu suchen. Weitergegeben wird nur eine berufliche Zusammenfassung ohne direkt identifizierende Daten — niemals Ihr Name oder Ihre Kontaktdaten.",
       "noWorkerProfile": "Sie haben noch kein Arbeitnehmerprofil, es gäbe also nichts zu vertreten. Legen Sie zuerst Ihr berufliches Profil an — diese Antworten bleiben gespeichert und gelten, sobald es existiert.",
       "statusNotRepresented": "Außerhalb von LabourMarket.ai werden Sie nicht vertreten",
       "statusNotRepresentedBody": "Nichts über Sie wird außerhalb dieser Plattform gesendet. Konto, Lebenslauf und Arbeitsjournal funktionieren auch ohne dies genauso.",

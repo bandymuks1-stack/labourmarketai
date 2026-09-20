@@ -14,11 +14,12 @@
  *    schemas use `z.string()`), so adding slugs needs NO migration and is fully
  *    backward-compatible: every slug that already existed in the construction
  *    list is kept verbatim here.
- *  - Labels are inline (lt/en/ru/nl/de) so the taxonomy stays in one place and
- *    does not fan out into 11 message catalogs. NL + DE added 2026-09-20 —
+ *  - Labels are inline (lt/en/ru/nl/de/pl) so the taxonomy stays in one place
+ *    and does not fan out into 11 message catalogs. NL + DE added 2026-09-20 —
  *    they have been ACTIVE UI locales since 2026-07-11 (lib/i18n/config.ts
  *    `activeLocales`) but this file had no branch for them, so Dutch and
  *    German visitors were served LITHUANIAN sector and work-type names.
+ *    PL added the same day, when PL became an active UI locale (#1810).
  *
  * Adding a sector or work type is a one-row edit here — no component change.
  */
@@ -43,6 +44,9 @@ export interface WorkLabel {
    *  resolver below fell through to the Lithuanian label. */
   readonly nl: string;
   readonly de: string;
+  /** 2026-09-20: PL became an active UI locale (#1810); Polish visitors were
+   *  served the Lithuanian fallback labels until this field existed. */
+  readonly pl: string;
 }
 
 export interface WorkType extends WorkLabel {
@@ -64,24 +68,25 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Строительство",
     nl: "Bouw",
     de: "Bau",
+    pl: "Budownictwo",
     types: [
-      { slug: "general_laborer", lt: "Statybos pagalbinis darbininkas", en: "General laborer", ru: "Разнорабочий", nl: "Algemeen bouwmedewerker", de: "Bauhelfer" },
-      { slug: "carpenter", lt: "Stalius", en: "Carpenter", ru: "Плотник", nl: "Timmerman", de: "Zimmerer" },
-      { slug: "mason", lt: "Mūrininkas", en: "Mason", ru: "Каменщик", nl: "Metselaar", de: "Maurer" },
-      { slug: "electrician", lt: "Elektrikas", en: "Electrician", ru: "Электрик", nl: "Elektricien", de: "Elektriker" },
-      { slug: "plumber", lt: "Santechnikas", en: "Plumber", ru: "Сантехник", nl: "Loodgieter", de: "Klempner" },
-      { slug: "painter", lt: "Dažytojas", en: "Painter", ru: "Маляр", nl: "Schilder", de: "Maler" },
-      { slug: "tiler", lt: "Plytelių klojėjas", en: "Tiler", ru: "Плиточник", nl: "Tegelzetter", de: "Fliesenleger" },
-      { slug: "welder", lt: "Suvirintojas", en: "Welder", ru: "Сварщик", nl: "Lasser", de: "Schweißer" },
-      { slug: "roofer", lt: "Stogdengys", en: "Roofer", ru: "Кровельщик", nl: "Dakdekker", de: "Dachdecker" },
+      { slug: "general_laborer", lt: "Statybos pagalbinis darbininkas", en: "General laborer", ru: "Разнорабочий", nl: "Algemeen bouwmedewerker", de: "Bauhelfer", pl: "Pracownik ogólnobudowlany" },
+      { slug: "carpenter", lt: "Stalius", en: "Carpenter", ru: "Плотник", nl: "Timmerman", de: "Zimmerer", pl: "Cieśla" },
+      { slug: "mason", lt: "Mūrininkas", en: "Mason", ru: "Каменщик", nl: "Metselaar", de: "Maurer", pl: "Murarz" },
+      { slug: "electrician", lt: "Elektrikas", en: "Electrician", ru: "Электрик", nl: "Elektricien", de: "Elektriker", pl: "Elektryk" },
+      { slug: "plumber", lt: "Santechnikas", en: "Plumber", ru: "Сантехник", nl: "Loodgieter", de: "Klempner", pl: "Hydraulik" },
+      { slug: "painter", lt: "Dažytojas", en: "Painter", ru: "Маляр", nl: "Schilder", de: "Maler", pl: "Malarz" },
+      { slug: "tiler", lt: "Plytelių klojėjas", en: "Tiler", ru: "Плиточник", nl: "Tegelzetter", de: "Fliesenleger", pl: "Glazurnik" },
+      { slug: "welder", lt: "Suvirintojas", en: "Welder", ru: "Сварщик", nl: "Lasser", de: "Schweißer", pl: "Spawacz" },
+      { slug: "roofer", lt: "Stogdengys", en: "Roofer", ru: "Кровельщик", nl: "Dakdekker", de: "Dachdecker", pl: "Dekarz" },
       // Owner contract 2026-09-04 §9 — "I need 12 scaffolders in Rotterdam
       // from 5 October" classified as UNKNOWN because the intake could not
       // name the trade. Five construction trades employers actually ask for.
-      { slug: "scaffolder", lt: "Pastolininkas", en: "Scaffolder", ru: "Монтажник строительных лесов", nl: "Steigerbouwer", de: "Gerüstbauer" },
-      { slug: "concrete_worker", lt: "Betonuotojas", en: "Concrete worker", ru: "Бетонщик", nl: "Betonwerker", de: "Betonbauer" },
-      { slug: "plasterer", lt: "Tinkuotojas", en: "Plasterer", ru: "Штукатур", nl: "Stukadoor", de: "Verputzer" },
-      { slug: "steel_fixer", lt: "Armatūrininkas", en: "Steel fixer", ru: "Арматурщик", nl: "Betonstaalvlechter", de: "Eisenflechter" },
-      { slug: "insulation_worker", lt: "Izoliuotojas", en: "Insulation worker", ru: "Изолировщик", nl: "Isolatiemonteur", de: "Isolierer" },
+      { slug: "scaffolder", lt: "Pastolininkas", en: "Scaffolder", ru: "Монтажник строительных лесов", nl: "Steigerbouwer", de: "Gerüstbauer", pl: "Monter rusztowań" },
+      { slug: "concrete_worker", lt: "Betonuotojas", en: "Concrete worker", ru: "Бетонщик", nl: "Betonwerker", de: "Betonbauer", pl: "Betoniarz" },
+      { slug: "plasterer", lt: "Tinkuotojas", en: "Plasterer", ru: "Штукатур", nl: "Stukadoor", de: "Verputzer", pl: "Tynkarz" },
+      { slug: "steel_fixer", lt: "Armatūrininkas", en: "Steel fixer", ru: "Арматурщик", nl: "Betonstaalvlechter", de: "Eisenflechter", pl: "Zbrojarz" },
+      { slug: "insulation_worker", lt: "Izoliuotojas", en: "Insulation worker", ru: "Изолировщик", nl: "Isolatiemonteur", de: "Isolierer", pl: "Monter izolacji" },
     ],
   },
   {
@@ -91,11 +96,12 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Производство",
     nl: "Productie",
     de: "Produktion",
+    pl: "Produkcja",
     types: [
-      { slug: "production_worker", lt: "Gamybos darbininkas", en: "Production worker", ru: "Производственный рабочий", nl: "Productiemedewerker", de: "Produktionsmitarbeiter" },
-      { slug: "assembler", lt: "Surinkėjas", en: "Assembler", ru: "Сборщик", nl: "Monteur", de: "Monteur" },
-      { slug: "machine_operator", lt: "Staklių operatorius", en: "Machine operator", ru: "Оператор станка", nl: "Machinebediener", de: "Maschinenbediener" },
-      { slug: "quality_control", lt: "Kokybės kontrolierius", en: "Quality control", ru: "Контролёр качества", nl: "Kwaliteitscontroleur", de: "Qualitätsprüfer" },
+      { slug: "production_worker", lt: "Gamybos darbininkas", en: "Production worker", ru: "Производственный рабочий", nl: "Productiemedewerker", de: "Produktionsmitarbeiter", pl: "Pracownik produkcji" },
+      { slug: "assembler", lt: "Surinkėjas", en: "Assembler", ru: "Сборщик", nl: "Monteur", de: "Monteur", pl: "Monter" },
+      { slug: "machine_operator", lt: "Staklių operatorius", en: "Machine operator", ru: "Оператор станка", nl: "Machinebediener", de: "Maschinenbediener", pl: "Operator maszyn" },
+      { slug: "quality_control", lt: "Kokybės kontrolierius", en: "Quality control", ru: "Контролёр качества", nl: "Kwaliteitscontroleur", de: "Qualitätsprüfer", pl: "Kontroler jakości" },
     ],
   },
   {
@@ -105,11 +111,12 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Склады и логистика",
     nl: "Magazijn en logistiek",
     de: "Lager und Logistik",
+    pl: "Magazyny i logistyka",
     types: [
-      { slug: "warehouse_worker", lt: "Sandėlio darbininkas", en: "Warehouse worker", ru: "Складской работник", nl: "Magazijnmedewerker", de: "Lagermitarbeiter" },
-      { slug: "order_picker", lt: "Prekių rinkėjas", en: "Order picker", ru: "Комплектовщик", nl: "Orderpicker", de: "Kommissionierer" },
-      { slug: "forklift_operator", lt: "Krautuvo vairuotojas", en: "Forklift operator", ru: "Водитель погрузчика", nl: "Heftruckchauffeur", de: "Staplerfahrer" },
-      { slug: "packer", lt: "Pakuotojas", en: "Packer", ru: "Упаковщик", nl: "Inpakker", de: "Verpacker" },
+      { slug: "warehouse_worker", lt: "Sandėlio darbininkas", en: "Warehouse worker", ru: "Складской работник", nl: "Magazijnmedewerker", de: "Lagermitarbeiter", pl: "Pracownik magazynu" },
+      { slug: "order_picker", lt: "Prekių rinkėjas", en: "Order picker", ru: "Комплектовщик", nl: "Orderpicker", de: "Kommissionierer", pl: "Kompletator" },
+      { slug: "forklift_operator", lt: "Krautuvo vairuotojas", en: "Forklift operator", ru: "Водитель погрузчика", nl: "Heftruckchauffeur", de: "Staplerfahrer", pl: "Operator wózka widłowego" },
+      { slug: "packer", lt: "Pakuotojas", en: "Packer", ru: "Упаковщик", nl: "Inpakker", de: "Verpacker", pl: "Pakowacz" },
     ],
   },
   {
@@ -119,11 +126,12 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Транспорт",
     nl: "Transport",
     de: "Transport",
+    pl: "Transport",
     types: [
-      { slug: "delivery_driver", lt: "Pristatymo vairuotojas", en: "Delivery driver", ru: "Водитель-курьер", nl: "Bezorger", de: "Auslieferungsfahrer" },
-      { slug: "truck_driver_c", lt: "Sunkvežimio vairuotojas (C)", en: "Truck driver (C)", ru: "Водитель грузовика (C)", nl: "Vrachtwagenchauffeur (C)", de: "LKW-Fahrer (C)" },
-      { slug: "truck_driver_ce", lt: "Vilkiko vairuotojas (CE)", en: "Truck driver (CE)", ru: "Водитель фуры (CE)", nl: "Trekkerchauffeur (CE)", de: "Sattelzugfahrer (CE)" },
-      { slug: "courier", lt: "Kurjeris", en: "Courier", ru: "Курьер", nl: "Koerier", de: "Kurier" },
+      { slug: "delivery_driver", lt: "Pristatymo vairuotojas", en: "Delivery driver", ru: "Водитель-курьер", nl: "Bezorger", de: "Auslieferungsfahrer", pl: "Kierowca dostawczy" },
+      { slug: "truck_driver_c", lt: "Sunkvežimio vairuotojas (C)", en: "Truck driver (C)", ru: "Водитель грузовика (C)", nl: "Vrachtwagenchauffeur (C)", de: "LKW-Fahrer (C)", pl: "Kierowca ciężarówki (C)" },
+      { slug: "truck_driver_ce", lt: "Vilkiko vairuotojas (CE)", en: "Truck driver (CE)", ru: "Водитель фуры (CE)", nl: "Trekkerchauffeur (CE)", de: "Sattelzugfahrer (CE)", pl: "Kierowca ciągnika siodłowego (CE)" },
+      { slug: "courier", lt: "Kurjeris", en: "Courier", ru: "Курьер", nl: "Koerier", de: "Kurier", pl: "Kurier" },
     ],
   },
   {
@@ -133,10 +141,11 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Сельское хозяйство",
     nl: "Landbouw",
     de: "Landwirtschaft",
+    pl: "Rolnictwo",
     types: [
-      { slug: "farm_worker", lt: "Žemės ūkio darbininkas", en: "Farm worker", ru: "Сельхозработник", nl: "Landbouwmedewerker", de: "Landarbeiter" },
-      { slug: "harvest_worker", lt: "Derliaus rinkėjas", en: "Harvest worker", ru: "Сборщик урожая", nl: "Oogstmedewerker", de: "Erntehelfer" },
-      { slug: "greenhouse_worker", lt: "Šiltnamio darbininkas", en: "Greenhouse worker", ru: "Тепличный работник", nl: "Kasmedewerker", de: "Gewächshausarbeiter" },
+      { slug: "farm_worker", lt: "Žemės ūkio darbininkas", en: "Farm worker", ru: "Сельхозработник", nl: "Landbouwmedewerker", de: "Landarbeiter", pl: "Pracownik rolny" },
+      { slug: "harvest_worker", lt: "Derliaus rinkėjas", en: "Harvest worker", ru: "Сборщик урожая", nl: "Oogstmedewerker", de: "Erntehelfer", pl: "Zbieracz plonów" },
+      { slug: "greenhouse_worker", lt: "Šiltnamio darbininkas", en: "Greenhouse worker", ru: "Тепличный работник", nl: "Kasmedewerker", de: "Gewächshausarbeiter", pl: "Pracownik szklarni" },
     ],
   },
   {
@@ -146,10 +155,11 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Уборка и обслуживание",
     nl: "Schoonmaak en gebouwbeheer",
     de: "Reinigung und Gebäudeservice",
+    pl: "Sprzątanie i utrzymanie obiektów",
     types: [
-      { slug: "cleaner", lt: "Valytojas", en: "Cleaner", ru: "Уборщик", nl: "Schoonmaker", de: "Reinigungskraft" },
-      { slug: "industrial_cleaner", lt: "Pramoninis valytojas", en: "Industrial cleaner", ru: "Промышленный уборщик", nl: "Industrieel schoonmaker", de: "Industriereiniger" },
-      { slug: "facility_worker", lt: "Patalpų prižiūrėtojas", en: "Facility worker", ru: "Работник по обслуживанию", nl: "Gebouwbeheerder", de: "Hausmeister" },
+      { slug: "cleaner", lt: "Valytojas", en: "Cleaner", ru: "Уборщик", nl: "Schoonmaker", de: "Reinigungskraft", pl: "Sprzątacz" },
+      { slug: "industrial_cleaner", lt: "Pramoninis valytojas", en: "Industrial cleaner", ru: "Промышленный уборщик", nl: "Industrieel schoonmaker", de: "Industriereiniger", pl: "Sprzątacz przemysłowy" },
+      { slug: "facility_worker", lt: "Patalpų prižiūrėtojas", en: "Facility worker", ru: "Работник по обслуживанию", nl: "Gebouwbeheerder", de: "Hausmeister", pl: "Konserwator obiektu" },
     ],
   },
   {
@@ -159,12 +169,13 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Гостиницы и общепит",
     nl: "Horeca",
     de: "Hotel und Gastronomie",
+    pl: "Hotelarstwo i gastronomia",
     types: [
-      { slug: "kitchen_helper", lt: "Virtuvės pagalbininkas", en: "Kitchen helper", ru: "Помощник повара", nl: "Keukenhulp", de: "Küchenhilfe" },
-      { slug: "cook", lt: "Virėjas", en: "Cook", ru: "Повар", nl: "Kok", de: "Koch" },
-      { slug: "waiter", lt: "Padavėjas", en: "Waiter", ru: "Официант", nl: "Kelner", de: "Kellner" },
-      { slug: "housekeeper", lt: "Kambarinė", en: "Housekeeper", ru: "Горничная", nl: "Kamermeisje", de: "Zimmermädchen" },
-      { slug: "dishwasher", lt: "Indų plovėjas", en: "Dishwasher", ru: "Посудомойщик", nl: "Afwasser", de: "Spüler" },
+      { slug: "kitchen_helper", lt: "Virtuvės pagalbininkas", en: "Kitchen helper", ru: "Помощник повара", nl: "Keukenhulp", de: "Küchenhilfe", pl: "Pomoc kuchenna" },
+      { slug: "cook", lt: "Virėjas", en: "Cook", ru: "Повар", nl: "Kok", de: "Koch", pl: "Kucharz" },
+      { slug: "waiter", lt: "Padavėjas", en: "Waiter", ru: "Официант", nl: "Kelner", de: "Kellner", pl: "Kelner" },
+      { slug: "housekeeper", lt: "Kambarinė", en: "Housekeeper", ru: "Горничная", nl: "Kamermeisje", de: "Zimmermädchen", pl: "Pokojowa" },
+      { slug: "dishwasher", lt: "Indų plovėjas", en: "Dishwasher", ru: "Посудомойщик", nl: "Afwasser", de: "Spüler", pl: "Zmywacz naczyń" },
     ],
   },
   {
@@ -174,10 +185,11 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Уход и помощь",
     nl: "Zorg en ondersteuning",
     de: "Pflege und Betreuung",
+    pl: "Opieka i wsparcie",
     types: [
-      { slug: "care_assistant", lt: "Slaugos pagalbininkas", en: "Care assistant", ru: "Помощник по уходу", nl: "Zorgassistent", de: "Pflegehelfer" },
-      { slug: "support_worker", lt: "Pagalbos darbuotojas", en: "Support worker", ru: "Социальный работник", nl: "Ondersteunend medewerker", de: "Betreuungskraft" },
-      { slug: "elderly_carer", lt: "Pagyvenusių žmonių slaugytojas", en: "Elderly carer", ru: "Сиделка", nl: "Ouderenverzorger", de: "Altenpfleger" },
+      { slug: "care_assistant", lt: "Slaugos pagalbininkas", en: "Care assistant", ru: "Помощник по уходу", nl: "Zorgassistent", de: "Pflegehelfer", pl: "Opiekun / asystent opieki" },
+      { slug: "support_worker", lt: "Pagalbos darbuotojas", en: "Support worker", ru: "Социальный работник", nl: "Ondersteunend medewerker", de: "Betreuungskraft", pl: "Pracownik wsparcia" },
+      { slug: "elderly_carer", lt: "Pagyvenusių žmonių slaugytojas", en: "Elderly carer", ru: "Сиделка", nl: "Ouderenverzorger", de: "Altenpfleger", pl: "Opiekun osób starszych" },
     ],
   },
   {
@@ -187,10 +199,11 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Техника и операторы",
     nl: "Machines en machinisten",
     de: "Maschinen und Bediener",
+    pl: "Maszyny i operatorzy",
     types: [
-      { slug: "crane_operator", lt: "Krano operatorius", en: "Crane operator", ru: "Крановщик", nl: "Kraanmachinist", de: "Kranführer" },
-      { slug: "excavator_operator", lt: "Ekskavatoriaus operatorius", en: "Excavator operator", ru: "Экскаваторщик", nl: "Graafmachinist", de: "Baggerfahrer" },
-      { slug: "heavy_equipment_operator", lt: "Sunkiosios technikos operatorius", en: "Heavy equipment operator", ru: "Оператор спецтехники", nl: "Machinist zwaar materieel", de: "Baumaschinenführer" },
+      { slug: "crane_operator", lt: "Krano operatorius", en: "Crane operator", ru: "Крановщик", nl: "Kraanmachinist", de: "Kranführer", pl: "Operator dźwigu" },
+      { slug: "excavator_operator", lt: "Ekskavatoriaus operatorius", en: "Excavator operator", ru: "Экскаваторщик", nl: "Graafmachinist", de: "Baggerfahrer", pl: "Operator koparki" },
+      { slug: "heavy_equipment_operator", lt: "Sunkiosios technikos operatorius", en: "Heavy equipment operator", ru: "Оператор спецтехники", nl: "Machinist zwaar materieel", de: "Baumaschinenführer", pl: "Operator maszyn ciężkich" },
     ],
   },
   {
@@ -200,8 +213,9 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
     ru: "Другая работа",
     nl: "Overig werk",
     de: "Sonstige Arbeit",
+    pl: "Inne prace",
     types: [
-      { slug: "other_general", lt: "Kita / pagalbinis darbas", en: "Other / general work", ru: "Другая / подсобная работа", nl: "Overig / hulpwerk", de: "Sonstiges / Hilfsarbeit" },
+      { slug: "other_general", lt: "Kita / pagalbinis darbas", en: "Other / general work", ru: "Другая / подсобная работа", nl: "Overig / hulpwerk", de: "Sonstiges / Hilfsarbeit", pl: "Inne / prace pomocnicze" },
     ],
   },
 ];
@@ -220,6 +234,7 @@ function pick(label: WorkLabel, locale: string): string {
   if (locale === "ru") return label.ru;
   if (locale === "nl") return label.nl;
   if (locale === "de") return label.de;
+  if (locale === "pl") return label.pl;
   return label.lt;
 }
 

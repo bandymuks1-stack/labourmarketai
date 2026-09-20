@@ -10211,7 +10211,7 @@
       "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
     },
     "partnerSupply": {
-      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor u zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een geanonimiseerde professionele samenvatting wordt doorgegeven — nooit uw naam of contactgegevens.",
+      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor u zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven — nooit uw naam of contactgegevens.",
       "noWorkerProfile": "U heeft nog geen werknemersprofiel, dus er zou niets vertegenwoordigd worden. Maak eerst uw professionele profiel aan — deze antwoorden blijven bewaard en gaan gelden zodra het bestaat.",
       "statusNotRepresented": "U wordt niet vertegenwoordigd buiten LabourMarket.ai",
       "statusNotRepresentedBody": "Er wordt niets over u buiten dit platform verstuurd. Uw account, cv en werkjournaal werken hier precies hetzelfde zonder.",

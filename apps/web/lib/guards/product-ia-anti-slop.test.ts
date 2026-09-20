@@ -207,7 +207,7 @@ describe("synthetic fixtures stay out of normal surfaces", () => {
     });
   }
   it("no active-locale product copy carries a fixture marker or QA instruction", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const text = read(`messages/${locale}.json`);
       expect(text, `${locale}: QA-SYNTHETIC`).not.toMatch(/QA[-_ ]SYNTHETIC/i);
       expect(text, `${locale}: E2E fixture`).not.toMatch(/E2E[-_ ]FIXTURE/i);

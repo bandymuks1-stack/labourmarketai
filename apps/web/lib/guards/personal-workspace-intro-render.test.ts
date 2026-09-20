@@ -21,7 +21,7 @@ import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-work
  */
 
 const APP = join(__dirname, "..", "..");
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 const catalogs: Record<string, Record<string, unknown>> = {};
 const catalog = (loc: string): Record<string, unknown> =>

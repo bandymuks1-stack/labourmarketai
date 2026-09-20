@@ -77,7 +77,7 @@ describe("a stage moved to a real status", () => {
       for (const key of ["stageAsk", "stageNotFound", "stageNone", "stageDone", "stageStarted", "stageBlocked", "stageFailed", "chipStagePrefix"]) {
         expect(cat.conversation.chat[key], `${locale}.${key}`).toBeTypeOf("string");
       }
-      if (["lt", "en", "ru", "nl", "de"].includes(locale)) expect(cat.conversation.results.projectStageMarkDone).toBeTypeOf("string");
+      if (["lt", "en", "ru", "nl", "de", "pl"].includes(locale)) expect(cat.conversation.results.projectStageMarkDone).toBeTypeOf("string");
     }
   });
 });

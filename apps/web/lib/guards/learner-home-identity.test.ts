@@ -46,7 +46,7 @@ describe("Guard: learner home identity (person brief)", () => {
   });
 
   it("copy exists in the five routed locales", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));
       for (const k of ["briefLearner", "briefLearnerUnnamed", "chipLogLearning"]) {
         expect(cat.conversation?.chat?.[k], `${locale} conversation.chat.${k}`).toBeTruthy();

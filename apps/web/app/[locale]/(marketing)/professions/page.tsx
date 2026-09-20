@@ -29,6 +29,7 @@ const CTA_PROFILE: L = {
   ru: "Создать профиль / CV →",
   nl: "Maak je profiel / CV →",
   de: "Profil / Lebenslauf erstellen →",
+  pl: "Zbuduj swój profil / CV →",
 };
 
 const CTA_NEED: L = {
@@ -37,6 +38,7 @@ const CTA_NEED: L = {
   ru: "Подать кадровую потребность",
   nl: "Dien een personeelsbehoefte in",
   de: "Personalbedarf einreichen",
+  pl: "Zgłoś zapotrzebowanie kadrowe",
 };
 
 const CTA_AGENCIES: L = {
@@ -45,6 +47,7 @@ const CTA_AGENCIES: L = {
   ru: "Агентствам",
   nl: "Voor uitzendbureaus",
   de: "Für Personalagenturen",
+  pl: "Dla agencji",
 };
 
 const INTRO: Record<string, L> = {
@@ -54,6 +57,7 @@ const INTRO: Record<string, L> = {
     ru: "Профессии и секторы",
     nl: "Beroepen & sectoren",
     de: "Berufe & Branchen",
+    pl: "Zawody i branże",
   },
   title: {
     en: "Every profession, not one platform for one trade",
@@ -61,6 +65,7 @@ const INTRO: Record<string, L> = {
     ru: "Все профессии, а не платформа для одной специальности",
     nl: "Elk beroep, niet één platform voor één vak",
     de: "Jeder Beruf, nicht eine Plattform für ein einzelnes Gewerk",
+    pl: "Każdy zawód, nie platforma dla jednej branży",
   },
   subcopy: {
     en: "LabourMarket.ai is a broad labour-market platform for every profession — construction and logistics as much as accounting, law, engineering, IT, sales, education and design. It also covers services: when you need someone to do a job, or you offer yours. Here are the professions, teams and employers it is built for.",
@@ -68,6 +73,7 @@ const INTRO: Record<string, L> = {
     ru: "LabourMarket.ai — широкая платформа рынка труда для всех профессий: строительство и логистика так же, как бухгалтерия, право, инженерия, IT, продажи, образование и дизайн. Она охватывает и услуги — когда нужно, чтобы кто-то выполнил работу, или когда вы предлагаете свою. Вот профессии, бригады и работодатели, для которых она создана.",
     nl: "LabourMarket.ai is een breed arbeidsmarktplatform voor elk beroep — bouw en logistiek net zo goed als boekhouding, recht, engineering, IT, verkoop, onderwijs en design. Het omvat ook diensten: wanneer je iemand nodig hebt voor een klus, of je eigen dienst aanbiedt. Dit zijn de beroepen, teams en werkgevers waarvoor het is gebouwd.",
     de: "LabourMarket.ai ist eine breite Arbeitsmarktplattform für jeden Beruf — Bau und Logistik genauso wie Buchhaltung, Recht, Ingenieurwesen, IT, Vertrieb, Bildung und Design. Sie umfasst auch Dienstleistungen: wenn Sie jemanden für eine Arbeit brauchen oder Ihre eigene anbieten. Hier sind die Berufe, Teams und Arbeitgeber, für die sie gebaut wurde.",
+    pl: "LabourMarket.ai to szeroka platforma rynku pracy dla każdego zawodu — budownictwo i logistyka na równi z księgowością, prawem, inżynierią, IT, sprzedażą, edukacją i projektowaniem. Obejmuje też usługi: kiedy potrzebujesz kogoś do wykonania pracy albo sam ją oferujesz. Oto zawody, zespoły i pracodawcy, dla których powstała.",
   },
   profTitle: {
     en: "Professions we cover",
@@ -75,6 +81,7 @@ const INTRO: Record<string, L> = {
     ru: "Профессии, которые мы охватываем",
     nl: "Beroepen die we bestrijken",
     de: "Berufe, die wir abdecken",
+    pl: "Zawody, które obejmujemy",
   },
   actorTitle: {
     en: "Teams, agencies and employers",
@@ -82,6 +89,7 @@ const INTRO: Record<string, L> = {
     ru: "Бригады, агентства и работодатели",
     nl: "Teams, uitzendbureaus en werkgevers",
     de: "Teams, Agenturen und Arbeitgeber",
+    pl: "Zespoły, agencje i pracodawcy",
   },
   problemsTitle: {
     en: "Real questions LabourMarket.ai answers",
@@ -89,25 +97,26 @@ const INTRO: Record<string, L> = {
     ru: "Реальные вопросы, на которые отвечает LabourMarket.ai",
     nl: "Echte vragen die LabourMarket.ai beantwoordt",
     de: "Echte Fragen, die LabourMarket.ai beantwortet",
+    pl: "Realne pytania, na które odpowiada LabourMarket.ai",
   },
 };
 
 const SECTOR_LABEL: Record<SectorKey, L> = {
-  construction: { en: "Construction", lt: "Statyba", ru: "Строительство", nl: "Bouw", de: "Bau" },
-  manufacturing: { en: "Manufacturing", lt: "Gamyba", ru: "Производство", nl: "Productie", de: "Produktion" },
-  transport_logistics: { en: "Transport & logistics", lt: "Transportas ir logistika", ru: "Транспорт и логистика", nl: "Transport & logistiek", de: "Transport & Logistik" },
-  retail_sales: { en: "Retail & sales", lt: "Prekyba", ru: "Торговля и продажи", nl: "Retail & verkoop", de: "Handel & Vertrieb" },
-  hospitality_food: { en: "Hospitality & food", lt: "Apgyvendinimas ir maitinimas", ru: "Гостеприимство и питание", nl: "Horeca & voeding", de: "Gastgewerbe & Gastronomie" },
-  care_health: { en: "Care & health", lt: "Priežiūra ir sveikata", ru: "Уход и здоровье", nl: "Zorg & gezondheid", de: "Pflege & Gesundheit" },
-  office_admin: { en: "Office & admin", lt: "Biuras ir administravimas", ru: "Офис и администрирование", nl: "Kantoor & administratie", de: "Büro & Verwaltung" },
-  it_software: { en: "IT & software", lt: "IT ir programinė įranga", ru: "IT и ПО", nl: "IT & software", de: "IT & Software" },
-  education: { en: "Education & training", lt: "Švietimas ir mokymai", ru: "Образование и обучение", nl: "Onderwijs & training", de: "Bildung & Schulung" },
-  cleaning_facility: { en: "Cleaning & facilities", lt: "Valymas ir patalpos", ru: "Уборка и помещения", nl: "Schoonmaak & facilitair", de: "Reinigung & Gebäudeservice" },
-  agriculture: { en: "Agriculture", lt: "Žemės ūkis", ru: "Сельское хозяйство", nl: "Landbouw", de: "Landwirtschaft" },
-  repair_maintenance: { en: "Repair & maintenance", lt: "Remontas ir priežiūra", ru: "Ремонт и обслуживание", nl: "Reparatie & onderhoud", de: "Reparatur & Instandhaltung" },
-  beauty_services: { en: "Beauty & personal services", lt: "Grožio paslaugos", ru: "Красота и персональные услуги", nl: "Beauty & persoonlijke verzorging", de: "Schönheit & persönliche Dienstleistungen" },
-  hr_recruitment: { en: "HR & recruitment", lt: "Personalas ir atranka", ru: "HR и подбор персонала", nl: "HR & werving", de: "HR & Recruiting" },
-  other: { en: "Other", lt: "Kita", ru: "Другое", nl: "Overig", de: "Sonstiges" },
+  construction: { en: "Construction", lt: "Statyba", ru: "Строительство", nl: "Bouw", de: "Bau", pl: "Budownictwo" },
+  manufacturing: { en: "Manufacturing", lt: "Gamyba", ru: "Производство", nl: "Productie", de: "Produktion", pl: "Produkcja" },
+  transport_logistics: { en: "Transport & logistics", lt: "Transportas ir logistika", ru: "Транспорт и логистика", nl: "Transport & logistiek", de: "Transport & Logistik", pl: "Transport i logistyka" },
+  retail_sales: { en: "Retail & sales", lt: "Prekyba", ru: "Торговля и продажи", nl: "Retail & verkoop", de: "Handel & Vertrieb", pl: "Handel i sprzedaż" },
+  hospitality_food: { en: "Hospitality & food", lt: "Apgyvendinimas ir maitinimas", ru: "Гостеприимство и питание", nl: "Horeca & voeding", de: "Gastgewerbe & Gastronomie", pl: "Hotelarstwo i gastronomia" },
+  care_health: { en: "Care & health", lt: "Priežiūra ir sveikata", ru: "Уход и здоровье", nl: "Zorg & gezondheid", de: "Pflege & Gesundheit", pl: "Opieka i zdrowie" },
+  office_admin: { en: "Office & admin", lt: "Biuras ir administravimas", ru: "Офис и администрирование", nl: "Kantoor & administratie", de: "Büro & Verwaltung", pl: "Biuro i administracja" },
+  it_software: { en: "IT & software", lt: "IT ir programinė įranga", ru: "IT и ПО", nl: "IT & software", de: "IT & Software", pl: "IT i oprogramowanie" },
+  education: { en: "Education & training", lt: "Švietimas ir mokymai", ru: "Образование и обучение", nl: "Onderwijs & training", de: "Bildung & Schulung", pl: "Edukacja i szkolenia" },
+  cleaning_facility: { en: "Cleaning & facilities", lt: "Valymas ir patalpos", ru: "Уборка и помещения", nl: "Schoonmaak & facilitair", de: "Reinigung & Gebäudeservice", pl: "Sprzątanie i obsługa obiektów" },
+  agriculture: { en: "Agriculture", lt: "Žemės ūkis", ru: "Сельское хозяйство", nl: "Landbouw", de: "Landwirtschaft", pl: "Rolnictwo" },
+  repair_maintenance: { en: "Repair & maintenance", lt: "Remontas ir priežiūra", ru: "Ремонт и обслуживание", nl: "Reparatie & onderhoud", de: "Reparatur & Instandhaltung", pl: "Naprawy i utrzymanie" },
+  beauty_services: { en: "Beauty & personal services", lt: "Grožio paslaugos", ru: "Красота и персональные услуги", nl: "Beauty & persoonlijke verzorging", de: "Schönheit & persönliche Dienstleistungen", pl: "Uroda i usługi osobiste" },
+  hr_recruitment: { en: "HR & recruitment", lt: "Personalas ir atranka", ru: "HR и подбор персонала", nl: "HR & werving", de: "HR & Recruiting", pl: "HR i rekrutacja" },
+  other: { en: "Other", lt: "Kita", ru: "Другое", nl: "Overig", de: "Sonstiges", pl: "Inne" },
 };
 
 export default async function ProfessionsPage({

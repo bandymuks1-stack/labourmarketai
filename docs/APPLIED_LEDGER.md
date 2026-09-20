@@ -2245,6 +2245,33 @@ Rollback: `supabase/rollbacks/20260919210000_relationship_journal_reviewable_v1.
 (sha256 `114f4835c7224fa96e620a27106542cb001784f72fe52e13d5b2c4cf79be3047`; restores the employee-literal production function
 byte-for-byte with its grants, drops the column).
 
+### `privacy_consent_locale_pl_hash_repin_v1` — GREEN data-only hash re-pin (PL consent texts) — UNAPPLIED, apply in the same step as the #1810 production deploy
+
+Repo file `supabase/migrations/20260920173000_privacy_consent_locale_pl_hash_repin_v1.sql`
+(sha256 `16dc82a50d9852d9c46016ff48cc089396d4e83337cbec1aab64bf5d7f132627`); rollback
+`supabase/rollbacks/20260920173000_privacy_consent_locale_pl_hash_repin_v1.down.sql`
+(sha256 `99b287689f41b7dd9e355c8c0d6531f79120f0766247fbae8097b8256de686f9`, restores the
+three 5-locale hashes). Owner approval 2026-09-20: "APPROVE PL CONSENT TEXTS v1 WITH
+REQUIRED INLINE EDITS" (docs/human-gates/pl-consent-texts-owner-review-v1.md). PR #1810.
+
+Three UPDATE rows on `privacy_consent_purposes`: `current_text_hash` only — versions stay
+2026-07-11.v2 / 2026-07-11.v2 / 2026-09-04.v1 because `consentTextHash()` hashes every
+locale in `CONSENT_LOCALES` and `pl` joined it; the partner_supply_representation texts
+also carry the owner's required correction (professional summary WITHOUT DIRECT
+IDENTIFYING DATA, never "anonymised") in all six locales — scope/recipients/data
+unchanged, verified against the live `first_party_supply_feed_v1()` body.
+
+Pre-authoring production read (2026-09-20): pins 4562…acf4 / 7d57…ba1a / 1e75…788f matched
+the registry on main exactly (recomputed with the real `consentTextHash`);
+profile_discoverability 8 events / 5 grants at v2 (stay `granted` — the readers compare
+VERSION only), employer_data_disclosure 0 events, partner_supply_representation 0 events,
+0 declarations, 0 feed rows. Grant RPCs compare version AND hash and fail closed, so the
+apply and the registry deploy belong to one step; in between a new grant is refused
+(`stale_consent_version`), never recorded against the wrong text.
+
+Apply path: Supabase MCP `apply_migration` (never `db push`), then read back the three
+rows and record the verification output here.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

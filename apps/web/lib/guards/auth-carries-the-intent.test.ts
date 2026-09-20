@@ -22,7 +22,7 @@ import { AUTH_CLIENT_MESSAGE_ROOTS } from "@/lib/i18n/client-messages";
 
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("the sentence survives the round trip", () => {
   it("comes back out of the value the door put it in", () => {

@@ -37,7 +37,7 @@ describe("project pulse — one set of canonical reads, honest absence", () => {
   });
 
   it("copy exists in the five routed catalogs (conversation.results lives only there)", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const r = JSON.parse(read(`messages/${locale}.json`)).conversation.results as Record<string, string>;
       for (const key of ["pulseTitle", "pulseToday", "pulseEvidence", "pulseEvidenceValue", "pulseTasks", "pulseTasksValue", "pulseReadiness", "pulseNextAssign", "pulseNextOverdue", "pulseNextDocs", "pulseNextNoWork"]) {
         expect(r[key], `${locale}.${key}`).toBeTypeOf("string");

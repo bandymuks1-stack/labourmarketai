@@ -233,7 +233,7 @@ describe("an organization with no name still has a label", () => {
   });
 
   it("uses the same unnamed vocabulary the switcher uses, in every active locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const messages = JSON.parse(read(`messages/${loc}.json`));
       const chat = messages.conversation?.chat;
       for (const key of [
@@ -319,7 +319,7 @@ describe("the surfaces that moved are still reachable in words", () => {
   });
 
   it("carries all three routing strings in every active locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const messages = JSON.parse(read(`messages/${loc}.json`));
       const chat = messages.conversation?.chat ?? {};
       for (const key of ["adminRouteHint", "adminApprovalsChip", "adminRequestsChip"]) {

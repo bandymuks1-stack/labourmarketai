@@ -22,7 +22,7 @@ import { CONVERSATION_ACTION_IDS } from "@/lib/conversation/action-registry";
  */
 
 const APP_ROOT = process.cwd();
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const CONTEXTS = ["personal", "organization", "project"] as const;
 
 function loadMessages(locale: string): Record<string, unknown> {
@@ -50,7 +50,7 @@ describe("result registry — structure", () => {
       // advancedRoute must stay a real, locale-prefix-free route: it is the
       // fallback the user still reaches when a result cannot render.
       expect(r.advancedRoute, `${r.kind} advancedRoute`).toMatch(/^\//);
-      expect(r.advancedRoute).not.toMatch(/^\/(lt|en|ru|nl|de)\//);
+      expect(r.advancedRoute).not.toMatch(/^\/(lt|en|ru|nl|de|pl)\//);
     }
   });
 });

@@ -61,7 +61,7 @@ const sqlFlat = norm(sql);
  */
 const sqlCode = norm(sql.replace(/--[^\n]*/g, " "));
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const messages = (loc: string) =>
   JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8"));
 const relationshipNames = (loc: string) =>

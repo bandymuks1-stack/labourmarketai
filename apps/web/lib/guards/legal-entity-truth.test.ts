@@ -23,7 +23,8 @@ import { describe, expect, it } from "vitest";
 const web = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(web, p), "utf8");
 
-const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const catalogs = Object.fromEntries(
   LOCALES.map((l) => [l, read(`messages/${l}.json`)]),
 ) as Record<(typeof LOCALES)[number], string>;
@@ -108,7 +109,7 @@ describe("terms: contracting party and governing law", () => {
     expect(all).toContain("302676973");
     expect(all).toContain("Labour Market AI Sp. z o.o.");
     // Lithuanian law named in every locale's own language:
-    expect(all).toMatch(/Lithuania|Lietuvos|Литов|Litouwen|Litauen/);
+    expect(all).toMatch(/Lithuania|Lietuvos|Литов|Litouwen|Litauen|Litw|litewsk/);
   });
 
   it("the terms page renders the structured sections", () => {
@@ -176,6 +177,7 @@ describe("forbidden regressions", () => {
       ru: /не назначен/,
       nl: /geen functionaris/i,
       de: /nicht bestellt/i,
+      pl: /nie został wyznaczony/i,
     };
     for (const l of LOCALES) {
       const ln = JSON.parse(catalogs[l]).legal.legalNotice;

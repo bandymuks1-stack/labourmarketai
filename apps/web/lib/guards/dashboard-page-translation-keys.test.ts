@@ -28,7 +28,7 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 /** Locales that really route (lib/i18n/config.ts `activeLocales`). */
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 /**
  * Pages whose namespace usage is simple enough to verify statically: ONE

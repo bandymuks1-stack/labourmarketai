@@ -307,7 +307,7 @@ describe("B: shortlist note bounds + not_fit reason (server-enforced)", () => {
 /* ── i18n — every new key in the 5 ACTIVE locales, really translated ───── */
 
 describe("new copy exists in lt/en/ru/nl/de (no [EN] markers)", () => {
-  const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+  const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
   const MY_INTEREST_KEYS = ["title", "summary", "intro", "closed", "viewDemand", "cvLink"];
   const MY_INTEREST_STATUSES = ["interested", "reviewed", "contacted", "withdrawn"];
   const NOTE_KEYS = [

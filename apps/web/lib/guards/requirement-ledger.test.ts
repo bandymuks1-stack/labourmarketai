@@ -186,7 +186,7 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
       "rejected",
     ];
     const get = (obj: unknown, path: string): unknown => path.split(".").reduce<unknown>((o, k) => (o && typeof o === "object" ? (o as Record<string, unknown>)[k] : undefined), obj);
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const ledger = get(JSON.parse(read(`messages/${locale}.json`)), "instructions.card.ledger");
       expect(ledger, locale).toBeDefined();
       for (const key of REQUIRED_KEYS) {

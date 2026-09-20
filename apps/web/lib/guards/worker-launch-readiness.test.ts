@@ -28,7 +28,7 @@ const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), "utf-8")
 const msg = (loc: string): Record<string, unknown> =>
   JSON.parse(read(join("messages", `${loc}.json`)));
 
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 function deep(obj: unknown, path: string): unknown {
   return path.split(".").reduce<unknown>((acc, k) => {

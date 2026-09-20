@@ -46,7 +46,7 @@ const MARKET_RESULT = "lib/market-map/market-result.ts";
 const CANONICAL_IO = "lib/demand/canonical-demand.ts";
 
 /** The locales that carry the `conversation.results` namespace today. */
-const RESULT_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const RESULT_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 // ── W4.1 — the geography contract ──────────────────────────────────────────
 

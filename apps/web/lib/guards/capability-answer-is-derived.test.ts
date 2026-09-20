@@ -47,7 +47,7 @@ function handlerBody(): string {
   return CHAT.slice(start, end);
 }
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("the question is reachable at all", () => {
   it("it has an id, so BOTH routers can reach it", () => {

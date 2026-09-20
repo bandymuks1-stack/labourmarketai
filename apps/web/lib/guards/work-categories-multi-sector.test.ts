@@ -43,7 +43,7 @@ describe("P0 work-category taxonomy is broad, not construction-only", () => {
   // Widened 2026-09-20: nl + de added to the pinned label key set. NL and DE
   // have been ACTIVE UI locales since 2026-07-11, but the taxonomy carried no
   // Dutch/German labels, so those visitors were served Lithuanian names.
-  it("every sector has at least one work type and full lt/en/ru/nl/de labels", () => {
+  it("every sector has at least one work type and full lt/en/ru/nl/de/pl labels", () => {
     for (const c of WORK_CATEGORIES) {
       expect(c.types.length, `${c.key} has no work types`).toBeGreaterThanOrEqual(1);
       for (const label of [c, ...c.types]) {
@@ -52,6 +52,9 @@ describe("P0 work-category taxonomy is broad, not construction-only", () => {
         expect(label.ru.length).toBeGreaterThan(0);
         expect(label.nl.length, `${c.key}: missing nl label`).toBeGreaterThan(0);
         expect(label.de.length, `${c.key}: missing de label`).toBeGreaterThan(0);
+        // 2026-09-20 (#1810): PL is an active UI locale; a missing Polish label
+        // would silently serve the Lithuanian fallback.
+        expect(label.pl.length, `${c.key}: missing pl label`).toBeGreaterThan(0);
       }
     }
   });
@@ -100,5 +103,20 @@ describe("P0 work-category taxonomy is broad, not construction-only", () => {
     expect(en[0].sector).not.toBe(ru[0].sector);
     // first option of the first sector is localized too
     expect(lt[0].options[0].label).not.toBe(en[0].options[0].label);
+  });
+
+  // 2026-09-20: PL is an active UI locale — it must resolve to Polish, never to
+  // the Lithuanian fallback that every unlisted locale still receives.
+  it("resolves pl to the Polish labels, not the Lithuanian fallback", () => {
+    const pl = buildWorkCategoryOptions("pl");
+    const lt = buildWorkCategoryOptions("lt");
+    expect(pl.length).toBe(WORK_CATEGORIES.length);
+    expect(pl[0].sector).toBe("Budownictwo");
+    expect(pl[0].sector).not.toBe(lt[0].sector);
+    for (let i = 0; i < pl.length; i += 1) {
+      for (let j = 0; j < pl[i].options.length; j += 1) {
+        expect(pl[i].options[j].label.length, `empty pl label at ${i}/${j}`).toBeGreaterThan(0);
+      }
+    }
   });
 });

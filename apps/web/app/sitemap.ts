@@ -8,7 +8,7 @@ import { publishedCategories } from "@/lib/answer-engine/publishing";
 /**
  * /sitemap.xml — only public, indexable marketing pages, on the apex
  * (https://labourmarket.ai). Every entry is emitted per active locale
- * (lt / en / ru) and carries hreflang alternates so Google maps the
+ * (every code in `activeLocales`) and carries hreflang alternates so Google maps the
  * localized versions to each other. No app / dashboard / auth / preview
  * URLs, no localhost, no app subdomain (enforced by the SEO guard).
  */

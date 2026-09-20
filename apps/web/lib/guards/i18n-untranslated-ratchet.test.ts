@@ -70,6 +70,7 @@ const FIRST_SCREEN_BASELINE: Readonly<Record<string, number>> = {
   ru: 0,
   nl: 0,
   de: 0,
+  pl: 0, // 2026-09-20: PL active; measured 0 English values on the first screen
 };
 
 type Catalogue = Record<string, string>;

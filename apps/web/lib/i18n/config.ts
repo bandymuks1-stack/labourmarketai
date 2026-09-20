@@ -41,7 +41,12 @@ export type Locale = (typeof locales)[number];
 // guarded by lib/guards/i18n-lt-en-parity.test.ts and the i18n-debt
 // zero baselines. RU/NL/DE are AI-seeded full translations pending human
 // review (§7.4) — the language selector preview-tags non-Tier-1 locales.
-export const activeLocales = ["lt", "en", "ru", "nl", "de"] as const;
+// PL activated 2026-09-20 (owner approval, acquisition loop P0): the first
+// Polish-language campaign for a Swedish welder job sent every Polish reader
+// to /en because /pl was not routed. Same rule as NL/DE: activated only
+// after the base catalog + 6 taxonomy files reached full parity with EN
+// (AI-seeded, preview-tagged, pending §7.4 human review).
+export const activeLocales = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 export type ActiveLocale = (typeof activeLocales)[number];
 
 export const defaultLocale: ActiveLocale = "lt";

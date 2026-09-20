@@ -572,7 +572,7 @@ describe("a candidate on a SAVED entry is decidable on its card (#1689, 2026-09-
     expect(ROW).toContain('useTranslations("journal")');
     for (const key of ["resultNeedsConfirm", "candidateConfirm", "candidateConfirming", "candidateReject", "candidateConfirmed", "candidateRejected", "candidateError"]) {
       expect(ROW).toContain(`t("${key}")`);
-      for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
         const journal = JSON.parse(read(`messages/${loc}/journal.json`)) as Record<string, unknown>;
         expect(typeof journal[key], `${loc}.journal.${key}`).toBe("string");
       }

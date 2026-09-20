@@ -10211,7 +10211,7 @@
       "grantIntro": "Tai atskiras sprendimas. Šiai įmonei ir tik šiam poreikiui būtų perduoti tik žemiau išvardyti duomenys."
     },
     "partnerSupply": {
-      "sectionIntro": "Būti palygintam su darbo pasiūlymu ir būti įvardytam — ne tas pat. Šis leidimas leidžia LabourMarket.ai ieškoti jums tinkamo darbo pas darbdavius ir projektuose už šios platformos ribų, per patvirtintą partnerių infrastruktūrą. Perduodama tik neasmenizuota profesinė santrauka — niekada vardas ar kontaktai.",
+      "sectionIntro": "Būti palygintam su darbo pasiūlymu ir būti įvardytam — ne tas pat. Šis leidimas leidžia LabourMarket.ai ieškoti jums tinkamo darbo pas darbdavius ir projektuose už šios platformos ribų, per patvirtintą partnerių infrastruktūrą. Perduodama tik profesinė santrauka be tiesioginių identifikuojančių duomenų — niekada vardas ar kontaktai.",
       "noWorkerProfile": "Kol kas neturite darbuotojo profilio, todėl niekas nebūtų pristatoma. Pirmiausia susikurkite profesinį profilį — šie atsakymai išsaugomi ir pradės galioti, kai jis atsiras.",
       "statusNotRepresented": "Už LabourMarket.ai ribų jūs neatstovaujami",
       "statusNotRepresentedBody": "Niekas apie jus nesiunčiama už šios platformos ribų. Paskyra, CV ir darbo žurnalas be šio leidimo veikia lygiai taip pat.",

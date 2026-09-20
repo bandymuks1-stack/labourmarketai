@@ -528,7 +528,18 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // 1809 vs origin/main: 18 findings, every one `pr-not-covered` before the
     // extension; PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER after. It
     // caught this extension too and forced it to be deliberate.
-    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809]);
+    //
+    // #1810 (2026-09-20) is the ninth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1810 to the existing
+    // public-acquisition-route-jobs waiver pullRequests list. Do not broaden
+    // the waiver." It activates `pl` as a UI locale: the `/jobs` pages and the
+    // public vacancy card gain Polish entries in their exhaustive
+    // `Record<ActiveLocale, …>` copy maps. No new route, page, auth change,
+    // schema or projection change; the anonymous projection is unchanged.
+    // Verified by running the gate on the merged head df8bc6ed as PR 1810 vs
+    // origin/main: 42 findings, every one `pr-not-covered` before the
+    // extension. It caught this extension too and forced it to be deliberate.
+    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");

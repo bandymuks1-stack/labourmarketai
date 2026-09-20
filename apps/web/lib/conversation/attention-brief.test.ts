@@ -111,7 +111,7 @@ describe("the employer brief carries agency and institution attention", () => {
   });
 
   it("the brief copy exists in the five routed locales (same parity as the existing brief keys)", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const chat = JSON.parse(readFileSync(join(APP, "messages", `${locale}.json`), "utf8")).conversation.chat as Record<string, string>;
       for (const key of ["briefAgencyOffersAwaiting", "briefAgencySharedWithoutOffer", "briefAgencyClientsPending", "briefEduLearnerInvitesPending", "briefDocumentsExpiring", "briefDocumentsMissing", "briefEmployerInterestWaiting", "briefEmployerAgencyOffersWaiting", "briefInterestContacted"]) {
         expect(chat[key], `${locale}.${key}`).toMatch(/\{count, plural/);

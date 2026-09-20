@@ -35,7 +35,7 @@ const stripComments = (s: string) =>
 const COMPONENT = "components/marketing/public-entry.tsx";
 const HOOK = "lib/marketing/public-entry.ts";
 const FOCUS = "app/[locale]/focus-landing/focus-landing.tsx";
-const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 type Entry = Record<string, unknown>;
 function entryOf(locale: string): Entry {

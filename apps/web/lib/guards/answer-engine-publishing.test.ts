@@ -11,8 +11,13 @@ import { describe, it, expect, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-type Loc = "lt" | "en" | "ru" | "nl" | "de";
-const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de"];
+type Loc = "lt" | "en" | "ru" | "nl" | "de" | "pl";
+// 2026-09-20: PL re-added. This proof is fixture-driven — it exercises the real
+// publishing/SEO logic and the real AnswerArticle render over synthetic answers,
+// so its per-locale evidence is the answer-engine content layer, not
+// messages/pl.json. The four content files now carry a reviewed `pl` body for
+// every published question, so `pl` asserts coverage that exists.
+const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de", "pl"];
 
 function ans(id: string, locale: Loc, slug: string, status = "HUMAN_APPROVED") {
   return {

@@ -30,7 +30,7 @@ import {
 } from "@/lib/answer-engine/publishing";
 
 const OG_LOCALE: Record<ActiveLocale, string> = {
-  en: "en_GB", lt: "lt_LT", ru: "ru_RU", nl: "nl_NL", de: "de_DE",
+  en: "en_GB", lt: "lt_LT", ru: "ru_RU", nl: "nl_NL", de: "de_DE", pl: "pl_PL",
 };
 
 const url = (locale: ActiveLocale, path: string) => `${MARKETING_ORIGIN}/${locale}${path}`;
