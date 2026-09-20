@@ -26,6 +26,13 @@ export const MEMBERSHIP_SLUGS = [
   "consultant",
   "freelancer",
   "viewer",
+  // Institution loop (2026-09-19): a learner's `student` engagement is a
+  // membership of the training provider's organization — listing it is what
+  // lets the existing journal-review toggle reach it. The toggle only LANDS
+  // once migration 20260919210000 (relationship_types.journal_reviewable)
+  // is applied; until then the RPC answers `not_a_member_engagement`, which
+  // the panel already renders honestly.
+  "student",
 ] as const;
 
 /** The engagement slugs `review_journal_entry` accepts as a reviewer. */

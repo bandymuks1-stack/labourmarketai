@@ -993,7 +993,11 @@ describe("NO new DB migration in this PR", () => {
     //   (R-15: close_demand_v1 / reopen_demand_v1, RED, APPLIED 2026-09-20,
     //   ledger 20260920051619).
     //   Not this read layer's file. RECOUNTED: 297.
-    expect(count).toBeLessThanOrEqual(297);
+    // Bumped 297 -> 298 for 20260919210000_relationship_journal_reviewable_v1
+    //   (institution loop: journal review on learner engagements, RED,
+    //   APPLIED 2026-09-20, ledger 20260920052103). Not this read layer's
+    //   file. RECOUNTED: 298.
+    expect(count).toBeLessThanOrEqual(298);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
