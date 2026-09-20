@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Taal van berichten",
+    "intro": "Werkberichten en instructies die in een andere taal zijn geschreven, worden voor u vertaald in deze taal getoond. Laat de interfacetaal staan, tenzij u een andere taal beter leest.",
+    "label": "Ik lees berichten in",
+    "sameAsInterface": "Zelfde als de interface",
+    "saved": "Opgeslagen.",
+    "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
+    "unavailable": "Deze instelling is nog niet beschikbaar — berichten volgen tot die tijd de interfacetaal."
+  },
   "publicDemand": {
     "title": "Actuele marktvraag",
     "subtitleAgency": "Wat de publieke markt nu vraagt — dezelfde pool die je kandidaten op het bord zien.",

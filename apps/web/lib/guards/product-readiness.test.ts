@@ -2606,7 +2606,15 @@ describe("no migration files added by this sprint", () => {
 // employee + student; set_engagement_journal_review reads it). RED (column +
 // SECDEF redefinition), owner-approved and APPLIED 2026-09-20 (ledger
 // 20260920052103); contract run live and rolled back (PR #1807). RECOUNTED: 298.
-const SPRINT_BASELINE = 298;
+// Bumped 298 -> 299 for 20260920122000_profiles_communication_locale_v1
+// (COMM-1: the READ side of "each recipient sees the message in THEIR
+// language" — one nullable column on the person's own profiles row, CHECK =
+// the 13-language communication set, NULL = follow the UI locale; written
+// only by the person through persistCommunicationLocaleAction, read by the
+// thread / instructions / account pages, both degrading on 42703). RED by
+// owner classification (profiles column + the code behind it), DRAFT
+// needs-human-gate, NOT applied. RECOUNTED: 299.
+const SPRINT_BASELINE = 299;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

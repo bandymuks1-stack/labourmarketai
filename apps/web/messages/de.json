@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Sprache der Nachrichten",
+    "intro": "Arbeitsnachrichten und Anweisungen, die in einer anderen Sprache geschrieben wurden, werden Ihnen in diese Sprache übersetzt angezeigt. Lassen Sie die Oberflächensprache stehen, sofern Sie eine andere Sprache nicht besser lesen.",
+    "label": "Ich lese Nachrichten auf",
+    "sameAsInterface": "Wie die Oberfläche",
+    "saved": "Gespeichert.",
+    "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte erneut versuchen.",
+    "unavailable": "Diese Einstellung ist noch nicht verfügbar — bis dahin folgen Nachrichten der Oberflächensprache."
+  },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
     "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",

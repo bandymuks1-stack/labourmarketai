@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Sprog for beskeder",
+    "intro": "Arbejdsbeskeder og instruktioner skrevet på et andet sprog vises for dig oversat til dette sprog. Behold grænsefladens sprog, medmindre du læser et andet sprog bedre.",
+    "label": "Jeg læser beskeder på",
+    "sameAsInterface": "Samme som grænsefladen",
+    "saved": "Gemt.",
+    "error": "Ændringen kunne ikke gemmes og blev fortrudt. Prøv igen.",
+    "unavailable": "Denne indstilling er endnu ikke tilgængelig — indtil da følger beskeder grænsefladens sprog."
+  },
   "demandReadback": {
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",

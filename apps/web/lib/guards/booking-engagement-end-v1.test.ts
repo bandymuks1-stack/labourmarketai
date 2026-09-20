@@ -1416,6 +1416,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260919190000_demand_lifecycle_colleague_v1.sql",
       // 2026-09-19 — institution loop: relationship_types.journal_reviewable + data-driven set_engagement_journal_review. RED, owner-approved and APPLIED 2026-09-20 (ledger 20260920052103); contract run live and rolled back (PR #1807).
       "20260919210000_relationship_journal_reviewable_v1.sql",
+      // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
+      "20260920122000_profiles_communication_locale_v1.sql",
 ]);
   });
 

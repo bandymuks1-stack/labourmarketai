@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Žinučių kalba",
+    "intro": "Kita kalba parašytos darbo žinutės ir nurodymai jums rodomi išversti į šią kalbą. Palikite sąsajos kalbą, nebent kitą kalbą skaitote geriau.",
+    "label": "Žinutes skaitau",
+    "sameAsInterface": "Tokia pati kaip sąsajos",
+    "saved": "Išsaugota.",
+    "error": "Pakeitimo nepavyko išsaugoti, jis atšauktas. Bandykite dar kartą.",
+    "unavailable": "Šis nustatymas dar neveikia — kol kas žinutės rodomos sąsajos kalba."
+  },
   "publicDemand": {
     "title": "Gyva rinkos paklausa",
     "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",
