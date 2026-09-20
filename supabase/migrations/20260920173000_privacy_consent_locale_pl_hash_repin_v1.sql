@@ -1,6 +1,12 @@
+-- @human-gate-approved
+-- Owner authorization (2026-09-20, verbatim): "APPROVE MIGRATION
+-- 20260920173000_privacy_consent_locale_pl_hash_repin_v1. Apply only the
+-- reviewed migration. Preserve historical consent evidence and verify all
+-- three resulting pins by read-back after application."
+--
 -- privacy_consent_locale_pl_hash_repin_v1
 -- ========================================
--- GREEN, data-only re-pin: three UPDATE rows on public.privacy_consent_purposes.
+-- Data-only re-pin (RED `data-dml` by route, owner-gated above): three UPDATE rows on public.privacy_consent_purposes.
 -- No DDL, no grant, no policy, no SECURITY DEFINER, no row added or removed.
 --
 -- WHY THE HASHES MOVE WHILE THE VERSIONS DO NOT
