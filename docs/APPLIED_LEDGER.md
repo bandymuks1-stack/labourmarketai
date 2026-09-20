@@ -2245,7 +2245,7 @@ Rollback: `supabase/rollbacks/20260919210000_relationship_journal_reviewable_v1.
 (sha256 `114f4835c7224fa96e620a27106542cb001784f72fe52e13d5b2c4cf79be3047`; restores the employee-literal production function
 byte-for-byte with its grants, drops the column).
 
-### `privacy_consent_locale_pl_hash_repin_v1` — GREEN data-only hash re-pin (PL consent texts) — UNAPPLIED, apply in the same step as the #1810 production deploy
+### `privacy_consent_locale_pl_hash_repin_v1` — data-only hash re-pin (PL consent texts), RED `data-dml` by route, owner-approved — APPLIED 2026-09-20, ledger `20260920185851`
 
 Repo file `supabase/migrations/20260920173000_privacy_consent_locale_pl_hash_repin_v1.sql`
 (sha256 `16dc82a50d9852d9c46016ff48cc089396d4e83337cbec1aab64bf5d7f132627`); rollback
@@ -2269,8 +2269,22 @@ VERSION only), employer_data_disclosure 0 events, partner_supply_representation 
 apply and the registry deploy belong to one step; in between a new grant is refused
 (`stale_consent_version`), never recorded against the wrong text.
 
-Apply path: Supabase MCP `apply_migration` (never `db push`), then read back the three
-rows and record the verification output here.
+Owner approval (2026-09-20, verbatim): "APPROVE MIGRATION 20260920173000_privacy_consent_locale_pl_hash_repin_v1.
+Apply only the reviewed migration. Preserve historical consent evidence and verify all three resulting
+pins by read-back after application." #1810 squash-merged as `c289ac57` (required checks quality +
+migration-safety green); Vercel production deployment 6556470209 success; then applied via Supabase MCP
+`apply_migration` (name `20260920173000_privacy_consent_locale_pl_hash_repin_v1`, the file on main,
+sha256 `4dcca3d06c5d8d6940a962892b56295561be875c5cee93c64992deb65c0782cb`) — never `db push`.
+
+Read-back (18:58:51Z, immediately after apply): `profile_discoverability` 2026-07-11.v2 →
+`d4145ac3d118b17e5bc3bd68c3f2737ff0c872e08a38df034464213aad534549`; `employer_data_disclosure`
+2026-07-11.v2 → `6f57d9167a6313220ba34ae46a1ca03357db0737d17f5985b3dd5f1e75b6fb81`;
+`partner_supply_representation` 2026-09-04.v1 → `28b2a552ae56b5e0f260896664a9f5f7a5a918fe536e613c62c0028ac267db7f`;
+all three `updated_at = 2026-09-20 18:58:51Z`, versions unchanged. `privacy_consent_events` untouched:
+profile_discoverability 8 events / 5 grants, all 5 at the current version (still `granted`);
+employer_data_disclosure 0; partner_supply_representation 0. `schema_migrations` newest row
+`20260920185851` = this migration. Production `/pl/jobs/e3ec6c1e…` answered `lang="pl"` with Polish copy,
+0 `[EN]` markers and `/pl/auth/signup?next=/pl/jobs/…?via=auth` CTAs at 18:59Z.
 
 ## Deferred / rejected — NEVER-APPLY register
 
