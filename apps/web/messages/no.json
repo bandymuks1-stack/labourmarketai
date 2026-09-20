@@ -3788,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -4111,7 +4111,11 @@
         "usingProfile": "Du trenger ikke laste opp noe — jeg søker med det som allerede står i profilen din.",
         "usingProfileNarrowed": "Du trenger ikke laste opp noe — jeg søker med profilen din og det du har fortalt så langt.",
         "profileEmpty": "Det står ingenting i profilen din ennå, så jeg kan ikke søke ut fra den. Registrer én jobb eller si hvilket yrke du har — så søker jeg med en gang."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5598,7 +5602,7 @@
   },
   "agreements": {
     "title": "Avtaleregister",
-    "intro": "Det kanoniske registeret over {org}s avtaler — arbeidsrelaterte og generelle. Kun registrering.",
+    "intro": "Registeret over {org}s avtaler — arbeidsrelaterte og generelle. Kun registrering.",
     "noSignatureNote": "Statusene i dette registeret er kun registreringstilstander — ingenting her betyr at en avtale er signert, juridisk gyldig eller bindende. LabourMarket.ai utfører ingen juridisk signering: signering skjer utenfor plattformen, og en vedlagt fil er bare dokumentasjon du selv leverer.",
     "relationshipNote": "Kontraktlisten ovenfor er det tidligere personlige kommersielle registeret og fungerer uendret. Nye avtaler hører hjemme her.",
     "unavailable": "Avtaleregisteret kan ikke vises akkurat nå.",

@@ -25,6 +25,8 @@ const SENTENCE_REFS: Partial<Record<ConversationIntent, { ref: string; company?:
   "player-card": { ref: "cv" },
   profile: { ref: "profile" },
   offers: { ref: "offers" },
+  // "priimu pasiūlymą" resolves inside the SAME offers surface the chip opens.
+  "accept-offer": { ref: "offers" },
   "calendar-view": { ref: "agenda" },
   engagements: { ref: "engagements" },
   documents: { ref: "documents-centre" },

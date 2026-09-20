@@ -123,6 +123,11 @@ const CHAT_KEYS = [
   "marketMapChip",
   "activityChip",
   "writeEmployerHint",
+  // Launch completion 2026-09-20: write to the employer / accept, by sentence.
+  "writeEmployerMany",
+  "writeEmployerFailed",
+  "acceptOfferOne",
+  "acceptOfferWhich",
   // W7 slice 2 — intent-aware attach.
   "attachChoice",
   "chipAttachPhoto",

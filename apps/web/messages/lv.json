@@ -3788,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -4111,7 +4111,11 @@
         "usingProfile": "Nekas nav jāaugšupielādē — meklēju pēc tā, kas jau ir tavā profilā.",
         "usingProfileNarrowed": "Nekas nav jāaugšupielādē — meklēju pēc tava profila un tā, ko jau esi norādījis.",
         "profileEmpty": "Tavā profilā pagaidām nekā nav, tāpēc pēc tā meklēt nevaru. Pieraksti vienu darbu vai nosauc savu profesiju — un es uzreiz meklēšu."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5598,7 +5602,7 @@
   },
   "agreements": {
     "title": "Līgumu reģistrs",
-    "intro": "Kanoniskais {org} līgumu reģistrs — darba attiecību un vispārīgie. Tikai uzskaite.",
+    "intro": "{org} līgumu reģistrs — darba attiecību un vispārīgie. Tikai uzskaite.",
     "noSignatureNote": "Šī reģistra statusi ir tikai uzskaites stāvokļi — nekas šeit nenozīmē, ka līgums ir parakstīts, juridiski spēkā vai saistošs. LabourMarket.ai neveic juridisku parakstīšanu: parakstīšana notiek ārpus platformas, un pievienotais fails ir tikai jūsu iesniegts pierādījums.",
     "relationshipNote": "Augstāk esošais kontraktu saraksts ir agrākais personīgais komerciālais reģistrs un turpina darboties bez izmaiņām. Jauni līgumi pieder šeit.",
     "unavailable": "Līgumu reģistru šobrīd nevar parādīt.",

@@ -48,6 +48,13 @@ export type ConversationIntent =
   | "cv" // "įkelk šį CV" / "parodyk mano CV"
   | "profile" // "pridėk kalbą / įgūdį / patirtį"
   | "offers" // "ką man siūlo" — incoming booking offers
+  // ── ACCEPT BY SENTENCE (launch completion 2026-09-20, GREEN_COMPLETE):
+  //    "priimu pasiūlymą" landed on the offers LIST and a bare "priimu"
+  //    scored 0. The sentence now resolves to the ONE thing waiting (the
+  //    proposed offer, or the pending invitation) and shows its existing
+  //    accept card — the button stays the commitment; a sentence never
+  //    performs the irreversible accept itself. ──────────────────────────
+  | "accept-offer"
   | "need-workers" // "reikia darbuotojų" — employer demand intake (rebuild W4)
   | "criteria" // "kokie kriterijai pas mane nurodyti?" — search-criteria readback
   | "next-action" // "ką dar turiu padaryti?"
@@ -2646,6 +2653,32 @@ const RULES: IntentRule[] = [
         "(už\\s+ką|for\\s+what|за\\s+что|wofür|waarvoor)\\s*.{0,20}(nuskait|charg|списал|сняли|abgebucht|abgezogen|afgeschreven)",
         5,
       ),
+    ],
+  },
+  {
+    // ACCEPT what is waiting (launch completion 2026-09-20). Placed BEFORE
+    // `offers` so the accept verb outranks the list: "priimu pasiūlymą" is a
+    // decision, "ką man siūlo" is a question. The verb needs the THING it
+    // accepts (offer / invitation / booking / job) — except for the bare
+    // one-word sentence, where the verb IS the whole message. The bare forms
+    // deliberately leave out the words the goal layer already reads as a
+    // plain YES to an in-flight question ("sutinku", "akkoord",
+    // "einverstanden" — see `conversation-goal.ts` CONFIRMATION), so a yes
+    // to "search all of Europe?" is not turned into an acceptance of an
+    // offer nobody mentioned. `\w` is ASCII-only: every stem is spelled out.
+    intent: "accept-offer",
+    patterns: [
+      // No bare "darbą" / "работу" object: "priimu į darbą" / "принять на
+      // работу" is the EMPLOYER hiring, not the worker accepting.
+      p("\\b(priimu|priimam|priimame|priimsiu|priimk|priimti|sutinku|sutinkam|sutinkame|sutikti|patvirtinu)\\b\\s*.{0,30}(pasiulym|kvietim|uzsakym|rezervacij|booking)", 6), // lt
+      p("\\b(accept|accepting|i'?ll\\s+take|i\\s+take)\\s*.{0,30}\\b(offer|invitation|invite|booking|job|it)\\b", 6), // en
+      p("(принимаю|принять|приму|соглас(ен|на|ны)|беру)\\s*.{0,30}(предложени|приглашени|бронировани)", 6), // ru
+      p("\\b(accepteer|aanvaard|neem)\\s*.{0,30}(aanbod|aanbieding|uitnodiging|boeking|baan|aan\\b)", 6), // nl
+      p("\\bakkoord\\s+met\\s*.{0,30}(aanbod|aanbieding|uitnodiging|boeking)", 6), // nl
+      p("\\b(nehme|nimm|akzeptiere|annehmen|akzeptieren)\\s*.{0,30}(angebot|einladung|buchung|stelle|an\\b)", 6), // de
+      p("(angebot|einladung|buchung)\\s*.{0,20}(annehmen|akzeptieren|angenommen)", 6), // de
+      // The whole sentence is the verb: "Priimu." / "Accept" / "Принимаю".
+      p("^\\s*(priimu|priimam|priimame|accept|accepted|i\\s+accept|принимаю|соглас(ен|на)|ik\\s+accepteer|accepteer|ich\\s+nehme\\s+an|ich\\s+akzeptiere|akzeptiere|annehmen)\\s*[.!]*\\s*$", 5),
     ],
   },
   {

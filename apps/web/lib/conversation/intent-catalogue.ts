@@ -29,6 +29,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   experiences: "the person's work experience list",
   engagements: "the person's engagements, contracts and memberships",
   offers: "incoming booking offers the person received",
+  "accept-offer":
+    "the person ACCEPTS what is waiting for them — the work offer or the invitation they received ('priimu pasiūlymą', 'I accept'); shows the accept card, never accepts by itself",
   "interest-inbox": "responses to the person's own interest in opportunities",
   criteria: "read back the person's search criteria or preferences",
   "next-action": "what the person should do next",

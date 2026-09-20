@@ -3788,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -4111,7 +4111,11 @@
         "usingProfile": "Nie musisz nic wgrywać — szukam na podstawie tego, co już jest w Twoim profilu.",
         "usingProfileNarrowed": "Nie musisz nic wgrywać — szukam na podstawie Twojego profilu i tego, co już podałeś.",
         "profileEmpty": "W Twoim profilu nie ma jeszcze nic, więc nie mogę na nim oprzeć wyszukiwania. Zapisz jedną pracę albo podaj zawód — od razu zacznę szukać."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5598,7 +5602,7 @@
   },
   "agreements": {
     "title": "Rejestr umów",
-    "intro": "Kanoniczny rejestr umów {org} — pracowniczych i ogólnych. Wyłącznie ewidencja.",
+    "intro": "Rejestr umów {org} — pracowniczych i ogólnych. Wyłącznie ewidencja.",
     "noSignatureNote": "Statusy w tym rejestrze to wyłącznie stany ewidencyjne — nic tutaj nie oznacza, że umowa jest podpisana, prawnie ważna lub wiążąca. LabourMarket.ai nie wykonuje podpisów prawnych: podpisanie odbywa się poza platformą, a załączony plik to jedynie dostarczony przez Ciebie dowód.",
     "relationshipNote": "Lista kontraktów powyżej to wcześniejszy osobisty rejestr handlowy i działa bez zmian. Nowe umowy należą tutaj.",
     "unavailable": "Rejestru umów nie można teraz wyświetlić.",

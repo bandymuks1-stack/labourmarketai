@@ -101,7 +101,7 @@ export function OrganizationHistorySkillSuggestions({
                       disabled={st === "adding"}
                       onClick={() => setHidden((h) => ({ ...h, [s.slug]: true }))}
                       data-testid={`organization-history-skill-not-now-${s.slug}`}
-                      className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-ink-400 disabled:opacity-50"
+                      className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue disabled:opacity-50"
                     >
                       {t("notNow")}
                     </button>

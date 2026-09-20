@@ -862,13 +862,18 @@ describe("supergrand vision surface", () => {
     expect(page).toMatch(/t\("honesty"\)/);
   });
 
-  it("vision control room declares PR #18 BLOCKED + owner smoke PENDING", () => {
+  it("vision control room carries no internal owner-smoke / PR status rows (public page)", () => {
     const lt = JSON.parse(readWeb("messages/lt.json"));
     const en = JSON.parse(readWeb("messages/en.json"));
-    expect(lt.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
-    expect(en.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
-    expect(lt.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
-    expect(en.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
+    // Internal engineering status ("Owner production smoke: PENDING",
+    // "PR #18: BLOCKED (issue #32)") was rendered to the public /vision page
+    // in every locale. Removed 2026-09-20 — the rows and their keys are gone.
+    for (const k of ["ownerSmokeLabel", "ownerSmokeStatus", "pr18Label", "pr18Status"]) {
+      expect(lt.vision.controlRoom[k], `lt vision.controlRoom.${k}`).toBeUndefined();
+      expect(en.vision.controlRoom[k], `en vision.controlRoom.${k}`).toBeUndefined();
+    }
+    const page = readWeb("components/marketing/labour-market-os-map.tsx");
+    expect(page).not.toMatch(/ownerSmoke|pr18/);
     // The fake-claims row must read "never used" in both locales.
     expect(lt.vision.controlRoom.fakeClaimsStatus).toMatch(/Niekada/);
     expect(en.vision.controlRoom.fakeClaimsStatus).toMatch(/Never/);

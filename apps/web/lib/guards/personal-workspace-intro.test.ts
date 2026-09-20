@@ -290,7 +290,7 @@ describe("copy is human, present in all 11 catalogs, and free of technical state
     };
     expect(lt.title).toBe("Mano erdvė");
     expect(lt.workProfile).toBe("Mano darbo profilis");
-    expect(lt.readiness.label).toBe("Darbo pasiruošimas");
+    expect(lt.readiness.label).toBe("Darbo pasirengimas");
     expect(Object.values(lt.dimension)).toEqual([
       "Ką moku",
       "Ko ieškau",

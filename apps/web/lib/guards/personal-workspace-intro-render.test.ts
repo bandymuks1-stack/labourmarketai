@@ -122,7 +122,7 @@ describe("what each kind of account actually sees", () => {
     expect(html).toContain("Jonas Petraitis");
     expect(html).toContain("Asmeninė erdvė");
     expect(html).toContain("Mano darbo profilis");
-    expect(html).toContain("Darbo pasiruošimas");
+    expect(html).toContain("Darbo pasirengimas");
     expect(html).toContain("Pradėti nuo savęs");
     // Nothing is met yet — the "already set" line must be absent, not "0".
     expect(html).not.toContain("personal-workspace-intro-known");
@@ -160,7 +160,7 @@ describe("what each kind of account actually sees", () => {
 
   it("a readiness failure says so plainly — no raw state, no readiness CTA", () => {
     const html = render(model({ readiness: null }));
-    expect(html).toContain("Darbo pasiruošimo dabar parodyti nepavyko");
+    expect(html).toContain("Darbo pasirengimo dabar parodyti nepavyko");
     expect(html).not.toContain("<button");
     expect(html).not.toMatch(/needs_migration|SQLSTATE|undefined|null|Error/);
   });
