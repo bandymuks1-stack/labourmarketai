@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import { Paperclip, RotateCw, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { sendMessage } from "@/lib/communication/actions";
+import {
+  communicationLanguageNames,
+  communicationLocales,
+  isCommunicationLocale,
+} from "@/lib/i18n/config";
 import { createClient as createBrowserSupabaseClient } from "@/lib/supabase/client";
 import {
   CONVERSATION_ATTACHMENT_ALLOWED_MIME,
@@ -55,6 +60,10 @@ type TrayAttachment = {
   errorText: string | null;
 };
 
+/** Per-browser memory of the "I am writing in" choice (a convenience; the
+ *  language of record is `conversation_messages.original_language`). */
+const WRITE_LANG_STORAGE_KEY = "lm.communication.writeLanguage";
+
 export function CommunicationComposer({
   conversationId,
   locale,
@@ -65,6 +74,31 @@ export function CommunicationComposer({
   const t = useTranslations("communication");
   const router = useRouter();
   const [body, setBody] = useState("");
+  // MULTILINGUAL WORK COMMUNICATION — the author's language. The UI locale is
+  // the default, but a person reading the product in Russian may write
+  // Georgian: the choice is stamped on the message (`original_language`) so
+  // every reader gets an honest badge and a correctly-sourced translation.
+  // Remembered per browser as a convenience only (the truth is on each row).
+  const [writeLang, setWriteLang] = useState<string>(() =>
+    isCommunicationLocale(locale) ? locale : "",
+  );
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(WRITE_LANG_STORAGE_KEY);
+      if (saved && isCommunicationLocale(saved)) setWriteLang(saved);
+    } catch {
+      /* private mode / blocked storage: the UI locale stands */
+    }
+  }, []);
+  function onWriteLangChange(next: string) {
+    setWriteLang(next);
+    try {
+      if (next === locale) window.localStorage.removeItem(WRITE_LANG_STORAGE_KEY);
+      else window.localStorage.setItem(WRITE_LANG_STORAGE_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  }
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<TrayAttachment[]>([]);
@@ -226,6 +260,7 @@ export function CommunicationComposer({
         conversationId,
         body: trimmed,
         locale,
+        originalLanguage: writeLang || null,
         attachments: uploaded.map((a) => ({
           id: a.id,
           fileName: a.fileName,
@@ -264,8 +299,31 @@ export function CommunicationComposer({
   return (
     <form onSubmit={onSubmit} className="card-border flex flex-col gap-3 p-4">
       <label className="flex flex-col gap-1.5">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("composer.label")}
+        <span className="flex items-center justify-between gap-3">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("composer.label")}
+          </span>
+          {/* "I am writing in …" — one control, every communication language
+              named in itself. The reader sees the original plus, when a
+              rendering is available, a translation into their own language. */}
+          <span className="flex items-center gap-1.5">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {t("composer.languageLabel")}
+            </span>
+            <select
+              aria-label={t("composer.languageLabel")}
+              value={writeLang}
+              onChange={(e) => onWriteLangChange(e.target.value)}
+              className="min-h-9 rounded-md border border-ink-500 bg-ink-700 px-2 text-xs text-text-primary outline-none focus:border-brand-blue"
+              data-testid="communication-composer-language"
+            >
+              {communicationLocales.map((code) => (
+                <option key={code} value={code}>
+                  {communicationLanguageNames[code]}
+                </option>
+              ))}
+            </select>
+          </span>
         </span>
         <textarea
           value={body}
@@ -334,9 +392,10 @@ export function CommunicationComposer({
         </ul>
       )}
 
-      {/* WAGON 5 honesty helper: users may write in their own language; the
-          counterpart sees the ORIGINAL text — there is no automatic
-          translation, and this line says so instead of hiding it. */}
+      {/* Honesty helper: write in your own language; the counterpart always
+          keeps your ORIGINAL and, when the egress-gated runtime produces a
+          rendering, reads it in their language. The line promises the
+          original, never a translation. */}
       <p
         className="text-meta leading-relaxed text-text-muted"
         data-testid="communication-language-hint"

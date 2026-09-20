@@ -28,6 +28,14 @@ import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/conf
 /** Brand name as it must appear in public SEO signals. */
 export const BRAND_NAME = "LabourMarket.ai";
 
+/**
+ * One-sentence organisation description (owner-approved manifest text).
+ * The SINGLE source for app/manifest.ts `description` and the Organization
+ * JSON-LD `description` — never duplicate the literal.
+ */
+export const BRAND_ORGANIZATION_DESCRIPTION =
+  "One work world for workers, employers, agencies and institutions: real work, evidence, skills, demand, matching and workforce operations.";
+
 type BrandCopy = { title: string; description: string };
 
 /** Per-locale brand title + description (homepage / site default). */
@@ -467,29 +475,32 @@ export const PAGE_SEO: Readonly<
         "Pokazuj i sprawdzaj realne umiejętności na LabourMarket.ai. Umiejętności są oznaczone jako zweryfikowane lub zadeklarowane, aby pracownicy mogli udowodnić, co potrafią, a pracodawcy widzieli realne doświadczenie.",
     },
   },
+  // Titles carry NO brand: buildPageMetadata appends " · LabourMarket.ai"
+  // once. Embedding it here rendered "Open jobs — LabourMarket.ai ·
+  // LabourMarket.ai" on every locale (SEO/GEO gap, 2026-09-20).
   jobs: {
     en: {
-      title: "Open jobs — LabourMarket.ai",
+      title: "Open jobs",
       description:
         "Browse live vacancies imported from official public employment sources. Job title, category, employment form and working time are open to everyone; sign in free to see the employer, the location and how to apply.",
     },
     lt: {
-      title: "Laisvos darbo vietos — LabourMarket.ai",
+      title: "Laisvos darbo vietos",
       description:
         "Naršyk gyvas darbo vietas iš oficialių viešų užimtumo šaltinių. Pareigos, kategorija, sutarties tipas ir darbo laikas matomi visiems; prisijunk nemokamai, kad matytum darbdavį, vietovę ir kaip kandidatuoti.",
     },
     ru: {
-      title: "Открытые вакансии — LabourMarket.ai",
+      title: "Открытые вакансии",
       description:
         "Смотрите актуальные вакансии из официальных публичных источников занятости. Название, категория, тип занятости и рабочее время открыты всем; зарегистрируйтесь бесплатно, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
     },
     nl: {
-      title: "Openstaande vacatures — LabourMarket.ai",
+      title: "Openstaande vacatures",
       description:
         "Bekijk actuele vacatures uit officiële openbare arbeidsbronnen. Functietitel, categorie, contractvorm en werktijd zijn voor iedereen zichtbaar; maak gratis een account om de werkgever, de locatie en de sollicitatiewijze te zien.",
     },
     de: {
-      title: "Offene Stellen — LabourMarket.ai",
+      title: "Offene Stellen",
       description:
         "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Bezeichnung, Kategorie, Vertragsform und Arbeitszeit sind für alle sichtbar; kostenlos anmelden, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
     },

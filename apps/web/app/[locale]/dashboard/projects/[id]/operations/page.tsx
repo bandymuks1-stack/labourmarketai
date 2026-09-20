@@ -49,6 +49,7 @@ import { buildProjectField } from "@/lib/projects/field-model";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { getProjectManageFacts } from "@/lib/projects/responsible";
 import { listOrganizationMembers } from "@/lib/company/memberships";
+import { getProjectHoursSideBySide } from "@/lib/projects/project-hours";
 
 export const dynamic = "force-dynamic";
 
@@ -164,6 +165,9 @@ export default async function ProjectOperationsPage({
     defects,
     capacity,
     learnedStageDurations,
+    // Allocated vs journaled hours — the organization's ledger BESIDE the
+    // people's journal, each through its own reader, never summed.
+    projectHours,
   ] = await Promise.all([
       getProjectsProgress([id]),
       getProjectManageFacts(id),
@@ -178,6 +182,7 @@ export default async function ProjectOperationsPage({
       // from the SAME project_stages rows, never stored, and authorized by
       // the same policy: a caller learns only from stages they can open.
       getLearnedStageDurations(),
+      getProjectHoursSideBySide(id),
     ]);
   const progress = progressById[id] ?? null;
   const projectOrgId: string | null = manageFacts?.organizationId ?? null;
@@ -345,6 +350,7 @@ export default async function ProjectOperationsPage({
   const openTasks = openProjectTasks(taskList);
   const openTaskCount = openProjectTasks(taskList, taskList.length).length;
   const readiness = deriveProjectReadinessRatio(ops.workers);
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   const now = new Date();
   const attention = deriveAttention({
     workers: ops.workers,
@@ -449,6 +455,48 @@ export default async function ProjectOperationsPage({
                 : tCentre("housingUnknown")}
           </span>
         </div>
+      </section>
+
+      {/* ── Hours on this project, two ledgers side by side: what the
+            organization allocated (its own hour records on the project's
+            work objects) and what people journaled (their entries on this
+            project, confirmed = approved review). Bridged, never merged:
+            no total across the two, and a failed read says so. ── */}
+      <section
+        className="card-border flex flex-col gap-2 p-5"
+        data-testid="ops-centre-hours"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("hours.title")}</h2>
+        <div className="flex flex-wrap gap-2">
+          <span className={chipClass} data-testid="ops-centre-hours-allocated">
+            {tCentre("hours.allocated")}:{" "}
+            {projectHours.allocated.state === "measured"
+              ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.allocated.hours) })
+              : projectHours.allocated.state === "none"
+                ? tCentre("hours.noLedger")
+                : tCentre("hours.unavailable")}
+          </span>
+          <span className={chipClass} data-testid="ops-centre-hours-journaled">
+            {tCentre("hours.journaled")}:{" "}
+            {projectHours.journaled.state === "measured"
+              ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.journaled.hours) })
+              : tCentre("hours.unavailable")}
+          </span>
+          <span className={chipClass} data-testid="ops-centre-hours-confirmed">
+            {tCentre("hours.confirmed")}:{" "}
+            {projectHours.journaled.state === "measured"
+              ? tCentre("hours.value", {
+                  hours: hoursFmt.format(projectHours.journaled.confirmedHours),
+                })
+              : tCentre("hours.unavailable")}
+          </span>
+        </div>
+        <p className="text-meta leading-relaxed text-text-muted">
+          {tCentre("hours.note")}
+          {projectHours.journaled.state === "measured" && projectHours.journaled.truncated
+            ? ` ${tCentre("hours.truncated", { count: projectHours.journaled.entries })}`
+            : ""}
+        </p>
       </section>
 
       {/* ── Train D: project management strip — derived progress (never a

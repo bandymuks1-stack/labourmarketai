@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isBridgeUuid,
+  mergeClientConnectionStates,
   pendingInvites,
   reviewStageTone,
   validateInviteEmail,
@@ -46,6 +47,33 @@ describe("pendingInvites", () => {
       { id: "3", agencyName: "A", invitedEmail: "e", status: "revoked", createdAt: "" },
     ];
     expect(pendingInvites(rows).map((r) => r.id)).toEqual(["1"]);
+  });
+});
+
+describe("mergeClientConnectionStates — one client list from the email-keyed and company-keyed reads", () => {
+  const inv = (id: string, status: ClientConnectionInvite["status"], createdAt: string, agencyName = "Agency A"): ClientConnectionInvite => ({
+    id,
+    agencyName,
+    invitedEmail: "c@x.lt",
+    status,
+    createdAt,
+  });
+
+  it("unions by id, newest first, and lets the joined read name an agency the fallback could not", () => {
+    const m = mergeClientConnectionStates(
+      { kind: "ok", rows: [inv("a", "pending", "2026-09-01"), inv("b", "active", "2026-09-02", "\u2014")] },
+      { kind: "ok", rows: [inv("b", "active", "2026-09-02", "Agency B"), inv("c", "active", "2026-09-03")] },
+    );
+    expect(m.kind).toBe("ok");
+    if (m.kind !== "ok") return;
+    expect(m.rows.map((r) => r.id)).toEqual(["c", "b", "a"]);
+    expect(m.rows.find((r) => r.id === "b")!.agencyName).toBe("Agency B");
+  });
+
+  it("either read failing makes the whole list UNKNOWN — never a partial list posing as complete", () => {
+    expect(mergeClientConnectionStates({ kind: "ok", rows: [] }, { kind: "error" })).toEqual({ kind: "error" });
+    expect(mergeClientConnectionStates({ kind: "error" }, { kind: "ok", rows: [] })).toEqual({ kind: "error" });
+    expect(mergeClientConnectionStates({ kind: "needs-migration" }, { kind: "error" })).toEqual({ kind: "needs-migration" });
   });
 });
 

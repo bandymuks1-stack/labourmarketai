@@ -6,6 +6,7 @@ import {
   type VerifierContextFacts,
   type VerifierResolution,
 } from "@/lib/journal/work-verification-state";
+import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
  * "KAM PATEIKTI ATLIKTĄ DARBĄ?" — the read behind the answer.
@@ -25,7 +26,15 @@ import {
  * second when the first is true is the defect this whole slice exists to end.
  */
 
-/** Relationships in which a person performs work for an organization. */
+/**
+ * Relationships in which a person performs work for an organization — the
+ * employment set PLUS the practice set (`student`, `volunteer`, the ONE list
+ * every history surface filters by). An institution that enabled journal
+ * review for its learners is a real confirmer; until 2026-09-20 this list
+ * omitted the practice relationships, so a learner asking "who can confirm
+ * my work?" was told nobody could, with the institution's `journal_review_
+ * enabled` row sitting right there.
+ */
 const WORK_RELATIONSHIPS = [
   "employee",
   "contractor",
@@ -33,6 +42,7 @@ const WORK_RELATIONSHIPS = [
   "owner",
   "founder",
   "sole_trader",
+  ...PRACTICE_RELATIONSHIPS,
 ] as const;
 
 export interface VerifierOption {

@@ -106,6 +106,8 @@ export type IntentHandlerId =
   | "messages"
   | "invitations"
   | "writeEmployer"
+  // Launch completion 2026-09-20: accept what is waiting, by sentence.
+  | "acceptOffer"
   // Agency (real recruiter pilot, 2026-09-04) — the canonical bridge actions,
   // reachable by sentence; student / institution route handlers.
   | "inviteClient"
@@ -213,6 +215,12 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // ── synchronous answers inside the thread's typing tick ──────────────────
   cv: { domain: "cv", access: "read", handler: "cvChip", ownTyping: false },
   offers: { domain: "matching", access: "read", handler: "offersChip", ownTyping: false },
+  // ACCEPT BY SENTENCE (launch completion 2026-09-20, GREEN_COMPLETE).
+  // `write` because it opens the ONE existing accept card — the proposed
+  // booking offer or the pending invitation — whose button carries the
+  // strong-tier confirmation; the sentence itself never accepts. With
+  // nothing or several waiting it shows the list and asks which one.
+  "accept-offer": { domain: "matching", access: "write", handler: "acceptOffer", ownTyping: true },
   // Opens the confirm-gated journal write flow — the intent itself persists
   // nothing; the flow's explicit save does.
   "log-work": { domain: "journal", access: "write", handler: "logWork", ownTyping: false },
@@ -339,9 +347,14 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },
   translate: { domain: "communication", access: "blocked", handler: "translateBlocked", ownTyping: false },
-  // Neither acts nor refuses cleanly — recorded as gap G18; the registry
-  // states what IS, not what should be.
-  "write-employer": { domain: "communication", access: "blocked", handler: "writeEmployer", ownTyping: false },
+  // WRITE TO THE EMPLOYER (launch completion 2026-09-20, GREEN_CONNECT) —
+  // gap G18 closed. `write`, not `blocked`: the sentence resolves the
+  // caller's own ACTIVE interest signals (own rows only) and, for exactly
+  // one, opens the in-app thread through the SAME `contactEmployerAction`
+  // the interest card's button runs (server-side re-verification, nothing
+  // sent outside). None → the board with the honest "show interest first"
+  // line; several → the board, so the person picks the card.
+  "write-employer": { domain: "communication", access: "write", handler: "writeEmployer", ownTyping: true },
 };
 
 /** The component supplies one implementation per declared handler id.

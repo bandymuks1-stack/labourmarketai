@@ -1148,7 +1148,7 @@ export function JournalEntryComposer({
         className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
         data-testid="journal-photo-field"
       >
-        <Label>{t("photo.label")}</Label>
+        <Label htmlFor="journal-photo">{t("photo.label")}</Label>
         {mode === "photo" && (
           <p
             className="text-meta leading-relaxed text-text-secondary"
@@ -1158,6 +1158,7 @@ export function JournalEntryComposer({
           </p>
         )}
         <input
+          id="journal-photo"
           type="file"
           accept="image/jpeg,image/png,image/webp"
           data-testid="journal-photo-input"

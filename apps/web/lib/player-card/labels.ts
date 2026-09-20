@@ -6,17 +6,25 @@ import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import { contextHoursById } from "@/lib/player-card/context-hours";
 import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
 import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
+import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
  * labels (doctrine §2: slug → JSON, nothing user-facing hardcoded). Shared by
  * every mount of the card (dashboard today screen + /dashboard/player-card) —
  * zero duplication (DESIGN_SOUL §1).
+ *
+ * `contexts` — the journal's per-engagement figures (`WorkIntelligence.contexts`,
+ * the ONE hour ledger) when the mounting surface has already loaded them; the
+ * card then says "recorded h / confirmed h" beside each engagement. Absent →
+ * no hours line (not "0 h": the journal was not read here).
  */
 export async function buildPlayerCardLabels(
   card: WorkerPlayerCard,
+  opts: { readonly contexts?: readonly ContextWorkTime[] | null } = {},
 ): Promise<PlayerCardLabels> {
   const locale = await getLocale();
   const t = await getTranslations("playerCard");
@@ -64,6 +72,18 @@ export async function buildPlayerCardLabels(
   });
   // The history band is derived from the SAME rows the card's text list uses.
   const history = deriveWorkHistoryTimeline(card.workHistory, new Date());
+  // Hours per engagement — the journal's own per-context figures joined on
+  // `engagement_contexts.id`; org-reported minutes never enter these numbers
+  // (they stay beside, on the journal's own checks).
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const hoursById: Record<string, string> = {};
+  for (const [id, h] of contextHoursById(card.workHistory, opts.contexts ?? null)) {
+    hoursById[id] = t("visuals.historyHours", {
+      hours: hoursFmt.format(h.hours),
+      confirmed: hoursFmt.format(h.confirmedHours),
+    });
+  }
+  const historyUnavailable = card.unavailable.includes("workHistory");
 
   return {
     title: t("title"),
@@ -83,6 +103,7 @@ export async function buildPlayerCardLabels(
     },
     skillsLabel: t("skillsLabel"),
     skillsHint: t("skillsHint"),
+    skillsUnavailable: t("skillsUnavailable"),
     candidateLabel: t("candidateLabel"),
     candidateHint: t("candidateHint"),
     evidenceLabel: t("evidenceLabel"),
@@ -145,6 +166,7 @@ export async function buildPlayerCardLabels(
     workHistoryCurrent: t("workHistoryCurrent"),
     verifiedTitle: t("verifiedTitle"),
     verifiedEmpty: t("verifiedEmpty"),
+    verifiedUnavailable: t("verifiedUnavailable"),
     journalSupportedLabel: t("journalSupportedLabel"),
     journalSupportedHint: t("journalSupportedHint"),
     verifiedSkillNames: card.verifiedSkills.map((s) =>
@@ -248,8 +270,11 @@ export async function buildPlayerCardLabels(
           return from && to ? `${from} — ${to}` : (from ?? "");
         }),
         empty: t("visuals.historyEmpty"),
-        ariaLabel:
-          history.fromIso && history.toIso
+        unavailable: t("visuals.historyUnavailable"),
+        hoursById,
+        ariaLabel: historyUnavailable
+          ? t("visuals.historyUnavailable")
+          : history.fromIso && history.toIso
             ? t("visuals.historyAria", {
                 from: dateFmt.format(new Date(`${history.fromIso}T00:00:00Z`)),
                 to: dateFmt.format(new Date(`${history.toIso}T00:00:00Z`)),

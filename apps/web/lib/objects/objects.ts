@@ -143,6 +143,39 @@ export async function getOrgWorkObjects(): Promise<OrgWorkObjectsResult> {
   return { kind: "ok", organizationId: ctx.organizationId, rows };
 }
 
+export type ProjectObjectIdsResult =
+  | { readonly kind: "ok"; readonly ids: readonly string[] }
+  | { readonly kind: "needs-migration" }
+  | { readonly kind: "error" };
+
+/**
+ * The ids of the work objects that belong to ONE project (`work_objects.
+ * project_id`) — the handle the organization's hour ledger is keyed on.
+ * Ids only, bounded, RLS-scoped: a project the caller cannot see yields
+ * nothing. A failed read is `error`, never an empty list (SEP-7).
+ */
+export async function listWorkObjectIdsForProject(
+  projectId: string,
+): Promise<ProjectObjectIdsResult> {
+  const supabase = await createClient();
+  const res = (await asAny(supabase)
+    .from("work_objects")
+    .select("id")
+    .eq("project_id", projectId)
+    .limit(WORK_OBJECT_READ_LIMIT)) as {
+    data: { id: string }[] | null;
+    error: { code?: string } | null;
+  };
+  if (res.error) {
+    if (isObjectMigrationMissingCode(res.error.code)) {
+      return { kind: "needs-migration" };
+    }
+    console.error("[work-objects] project ids read failed:", res.error.code);
+    return { kind: "error" };
+  }
+  return { kind: "ok", ids: (res.data ?? []).map((r) => r.id) };
+}
+
 export type VisibleObjectsResult =
   | { readonly kind: "ok"; readonly rows: readonly WorkObject[] }
   | { readonly kind: "needs-migration" }

@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 
 /**
  * Teams / brigades on the org spine (product-tree branch 13, §8.3) +
@@ -114,8 +115,10 @@ export type TeamBrigade = {
   /** Read-only honest counts from members' existing worker_skills; null when
    *  the summary RPC could not be read (never fabricated). */
   readonly capability: readonly TeamCapabilitySkill[] | null;
-  /** Company-linked workers not yet members of THIS team. */
-  readonly addable: readonly AddableTeamWorker[];
+  /** Company-linked workers not yet members of THIS team. `null` when the
+   *  company roster could not be read — UNKNOWN, never an empty picker that
+   *  claims nobody is left to add. */
+  readonly addable: readonly AddableTeamWorker[] | null;
   /** Team-scoped details (20260716130000); null = not saved yet OR the
    *  migration is not applied (see detailsApplied on the parent). */
   readonly details: TeamDetails | null;
@@ -169,6 +172,9 @@ function profEmail(v: unknown): string | null {
 }
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
+/** The invitable-pool ceiling — the canonical roster read's own bound. */
+const POOL_READ_LIMIT = 50;
 
 /**
  * Readiness probe: the capability RPC only exists once the owner applied
@@ -423,16 +429,28 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
   // Invitable pool: workers ALREADY linked to the caller's company via the
   // existing invite/accept flow (company_workers, RLS owns_company). We never
   // enumerate strangers — same rule as lib/operations/org-members.ts. The
-  // email is used ONLY server-side to match pending invitations; it is never
-  // exported to the client.
-  const { data: linkRows } = await asAny(supabase)
-    .from("company_workers")
-    .select("worker_id, workers(profile_id, profiles(full_name, email))")
-    .eq("status", "active");
-  const pool: { worker: AddableTeamWorker; email: string | null }[] = (
-    (linkRows ?? []) as { worker_id: string | null; workers: unknown }[]
-  )
-    .map((r) => {
+  // email is used ONLY server-side to match pending invitations (the ledger
+  // is email-keyed); it is never exported to the client.
+  //
+  // SCOPED AND BOUNDED (scale contract, >= 1M users): the read names the
+  // company the caller is acting for (the ONE employer context resolver —
+  // RLS's owns_company stays the second lock) and takes at most
+  // POOL_READ_LIMIT rows, the same ceiling the canonical roster read uses.
+  // A failed read is UNKNOWN (`pool = null`), never an empty picker.
+  const employer = await resolveEmployerCompanyContext();
+  const companyId = employer.kind === "ok" ? employer.companyId : null;
+  const linkRes = companyId
+    ? await asAny(supabase)
+        .from("company_workers")
+        .select("worker_id, workers(profile_id, profiles(full_name, email))")
+        .eq("company_id", companyId)
+        .eq("status", "active")
+        .limit(POOL_READ_LIMIT)
+    : { data: null, error: { code: "no-company" } };
+  const linkRows = linkRes.error ? null : (linkRes.data ?? []);
+  const pool: { worker: AddableTeamWorker; email: string | null }[] | null = (
+    linkRows as { worker_id: string | null; workers: unknown }[] | null
+  )?.map((r) => {
       const w = (Array.isArray(r.workers) ? r.workers[0] : r.workers) as
         | { profile_id: string | null; profiles: unknown }
         | null;
@@ -447,7 +465,7 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
         email: profEmail(w.profiles),
       };
     })
-    .filter((x): x is { worker: AddableTeamWorker; email: string | null } => x !== null);
+    .filter((x): x is { worker: AddableTeamWorker; email: string | null } => x !== null) ?? null;
 
   const teams: TeamBrigade[] = [];
   for (const t of teamRows) {
@@ -486,13 +504,16 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
       createdAt: t.created_at,
       members,
       capability,
-      addable: pool
-        .filter((p) => !memberProfileIds.has(p.worker.profileId))
-        .map((p) => ({
-          ...p.worker,
-          invitePending:
-            p.email !== null && (pendingEmails?.has(p.email) ?? false),
-        })),
+      addable:
+        pool === null
+          ? null
+          : pool
+              .filter((p) => !memberProfileIds.has(p.worker.profileId))
+              .map((p) => ({
+                ...p.worker,
+                invitePending:
+                  p.email !== null && (pendingEmails?.has(p.email) ?? false),
+              })),
       details: details.byTeam.get(t.id) ?? null,
       enquiries: enquiries.byTeam.get(t.id) ?? [],
     });

@@ -184,6 +184,15 @@ export async function expressVacancyInterestCore(
   }
   const signalId = (signalRow as { id?: string } | null)?.id ?? null;
 
+  // NO first-touch campaign attribution here, deliberately: this is a
+  // SERVER emission and first-touch lives in the visitor's own localStorage
+  // (`lib/telemetry/attribution.ts`), which the server cannot read. Carrying
+  // it would mean shipping the campaign from the client on a product action —
+  // a new trusted-input surface for one column. The campaign read-out in
+  // `lib/admin/conversion-funnel.ts` therefore reports this column as 0 for
+  // every campaign row until the attribution reaches the server by some
+  // deliberate, reviewed route; the client-emitted columns beside it are the
+  // measured ones.
   emitServerFunnelEvent(FUNNEL_EVENTS.vacancyInterestExpressed, {
     source: "opportunities",
     route: "/dashboard/opportunities",

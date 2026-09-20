@@ -7,10 +7,15 @@ import {
   deriveTodayGrowth,
   deriveTodayOpenItems,
   deriveTodayWork,
+  unknownTodayDoors,
   type TodayOpenItem,
 } from "@/lib/today/today-model";
 import { TODAY_STATIONS, type TodayStationId } from "@/lib/today/today-route";
-import { loadTodayGrowth, loadTodayWorkIntelligence } from "@/lib/today/today-server";
+import {
+  loadTodayAttention,
+  loadTodayGrowth,
+  loadTodayWorkIntelligence,
+} from "@/lib/today/today-server";
 
 const stationHref = (id: TodayStationId): string =>
   TODAY_STATIONS.find((s) => s.id === id)!.href;
@@ -23,13 +28,19 @@ const stationHref = (id: TodayStationId): string =>
  * plausibility checks is the journal's own (`journal.intelligence.checks`),
  * so a check reads the same here and on the journal page — one truth.
  *
+ * The open items also carry the DOORS (`loadTodayAttention`): a booking
+ * offer to answer, an invitation to answer, a message to read — each a link
+ * to the surface that already handles it. A door reader that could not
+ * answer is named on the section (`data-attention-unknown`), never shown as
+ * "nothing waiting".
+ *
  * UNKNOWN ≠ ZERO: a null read renders "could not read", with the journal
  * link still offered; an EMPTY day renders "nothing recorded today".
  * "Tuščia = tvarkinga" (design system §A.8): with no open item the open
  * block is simply absent.
  */
 export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
-  const [t, tJournal, tUnits, tSkill, tProf, wi, growth] = await Promise.all([
+  const [t, tJournal, tUnits, tSkill, tProf, wi, growth, attention] = await Promise.all([
     getTranslations("todayScreen.home"),
     getTranslations("journal.intelligence"),
     getTranslations("productivityUnits"),
@@ -37,6 +48,7 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
     getTranslations("professions"),
     loadTodayWorkIntelligence(),
     loadTodayGrowth(),
+    loadTodayAttention(),
   ]);
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
@@ -47,11 +59,23 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
   const unitName = (slug: string) => (tUnits.has(slug) ? tUnits(slug) : slug);
 
   const work = deriveTodayWork(wi);
-  const open = deriveTodayOpenItems(wi);
+  const open = deriveTodayOpenItems(wi, attention);
+  const doorsUnknown = unknownTodayDoors(attention);
   const growthLine = deriveTodayGrowth(growth);
+
+  /** Where an item opens: a door carries its own route; the journal's own
+   *  items open the journal, where the review chain lives. */
+  const openItemHref = (item: TodayOpenItem): string =>
+    "href" in item ? item.href : "/dashboard/journal";
 
   const openItemText = (item: TodayOpenItem): string => {
     switch (item.kind) {
+      case "offers":
+        return t("open.offers", { n: item.count });
+      case "invitations":
+        return t("open.invitations", { n: item.count });
+      case "unread":
+        return t("open.unread", { n: item.count });
       case "untimed":
         return t("open.untimed", { n: item.entries });
       case "unlabelled":
@@ -140,11 +164,14 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
         </StationLink>
       </section>
 
-      {/* OPEN ITEMS — one line each, each a door to the journal. */}
+      {/* OPEN ITEMS — one line each, each a door: the offers, invitations
+          and messages open their own surfaces; the journal's items open the
+          journal. */}
       {open.kind === "known" && open.items.length > 0 && (
         <section
           aria-labelledby="today-open-title"
           data-testid="today-open"
+          data-attention-unknown={doorsUnknown.length > 0 ? doorsUnknown.join(" ") : undefined}
           className="flex flex-col gap-2"
         >
           <h2 id="today-open-title" className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -154,7 +181,7 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
             {open.items.map((item, i) => (
               <li key={item.kind === "check" ? item.check.key : `${item.kind}-${i}`}>
                 <Link
-                  href="/dashboard/journal"
+                  href={openItemHref(item) as "/dashboard"}
                   data-testid={`today-open-${item.kind}`}
                   className="inline-flex min-h-11 items-center text-support text-text-primary underline-offset-4 hover:text-brand-blue hover:underline"
                 >

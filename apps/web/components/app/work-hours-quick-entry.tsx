@@ -187,8 +187,11 @@ export function WorkHoursQuickEntry({
         </label>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">{t("worker")}</span>
+          <label htmlFor="hours-worker" className="text-sm font-medium">
+            {t("worker")}
+          </label>
           <select
+            id="hours-worker"
             value={workerId}
             onChange={(e) => setWorkerId(e.target.value)}
             className="min-h-12 rounded-md border border-border-subtle bg-surface-1 px-3 text-base"

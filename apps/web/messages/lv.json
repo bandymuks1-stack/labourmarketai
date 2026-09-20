@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Oriģināls ({lang}) — tulkojums nav pieejams",
+    "loadError": "Ziņas šobrīd neizdevās ielādēt. Redzamais nav pilnīga aina — mēģiniet vēlreiz."
   },
   "trust": {
     "unreadHint": "Daļu no tā tikko neizdevās saskaitīt, un tā tiek rādīta kā “—”. Tas nenozīmē, ka jums to nav — vienkārši neizdevās nolasīt skaitļus. Pārlādējiet pēc brīža.",
@@ -1810,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Jūsu darba vēsturi šobrīd neizdevās nolasīt."
     },
     "readinessSteps": {
       "pillar": {
@@ -1864,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Joslas garums ir jūsu darba ierakstu skaits aiz katras prasmes (pilna josla = {scale}+), nevis prasmes vērtējums."
-    }
+      "skillsScaleNote": "Joslas garums ir jūsu darba ierakstu skaits aiz katras prasmes (pilna josla = {scale}+), nevis prasmes vērtējums.",
+      "historyHours": "{hours} h reģistrētas · {confirmed} h ar vadītāja ierakstu",
+      "historyUnavailable": "Jūsu darba vēsturi šobrīd neizdevās nolasīt."
+    },
+    "skillsUnavailable": "Šobrīd neizdevās nolasīt.",
+    "verifiedUnavailable": "Prasmes ar vadītāja ierakstu šobrīd neizdevās nolasīt."
   },
   "projects": {
     "map": {
@@ -2236,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Jūsu interese ir reģistrēta. Jūs neatzīmējāt pārstāvēšanas lauku, tāpēc Nonstop Group par jums nekas netiek nodots. Ja vēlaties būt pārstāvēts, atsauciet un izsakiet interesi vēlreiz ar atzīmētu lauku. LabourMarket.ai darba devējam nekas nav nosūtīts.",
       "handoffDelivered": "Interese nodota Nonstop Group. Nonstop var vērsties pie darba devēja savā komerciālajā procesā; LabourMarket.ai darba devējam neko nav sūtījis.",
       "handoffClosed": "Interese reģistrēta. Iepriekšējā nodošana Nonstop Group tika slēgta, kad to atsaucāt; nekas netika nosūtīts."
+    },
+    "intent": {
+      "label": "Mana situācija",
+      "states": {
+        "AVAILABLE_NOW": "Varu sākt tūlīt",
+        "AVAILABLE_FROM": "Varu sākt no norādīta datuma",
+        "OPEN_TO_OFFERS": "Strādāju, izskatu piedāvājumus",
+        "LOOKING_FOR_WORK": "Meklēju darbu",
+        "LOOKING_FOR_PROJECTS": "Meklēju projektus"
+      }
     }
   },
   "scouting": {
@@ -2749,7 +2766,9 @@
     "servicesEmpty": "Vēl nekas nav piedāvāts",
     "servicesUnavailable": "Neizdevās ielādēt piedāvātos pakalpojumus",
     "serviceRemote": "Attālināti",
-    "photoAlt": "Paveiktā darba fotoattēls"
+    "photoAlt": "Paveiktā darba fotoattēls",
+    "historyTitle": "Importētā vēsture",
+    "historyUnavailable": "Neizdevās nolasīt importēto vēsturi"
   },
   "marketMapBase": {
     "previewTitle": "Izvēlēta jauna vieta — vēl nav saglabāta",
@@ -3769,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -4092,7 +4111,11 @@
         "usingProfile": "Nekas nav jāaugšupielādē — meklēju pēc tā, kas jau ir tavā profilā.",
         "usingProfileNarrowed": "Nekas nav jāaugšupielādē — meklēju pēc tava profila un tā, ko jau esi norādījis.",
         "profileEmpty": "Tavā profilā pagaidām nekā nav, tāpēc pēc tā meklēt nevaru. Pieraksti vienu darbu vai nosauc savu profesiju — un es uzreiz meklēšu."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5579,7 +5602,7 @@
   },
   "agreements": {
     "title": "Līgumu reģistrs",
-    "intro": "Kanoniskais {org} līgumu reģistrs — darba attiecību un vispārīgie. Tikai uzskaite.",
+    "intro": "{org} līgumu reģistrs — darba attiecību un vispārīgie. Tikai uzskaite.",
     "noSignatureNote": "Šī reģistra statusi ir tikai uzskaites stāvokļi — nekas šeit nenozīmē, ka līgums ir parakstīts, juridiski spēkā vai saistošs. LabourMarket.ai neveic juridisku parakstīšanu: parakstīšana notiek ārpus platformas, un pievienotais fails ir tikai jūsu iesniegts pierādījums.",
     "relationshipNote": "Augstāk esošais kontraktu saraksts ir agrākais personīgais komerciālais reģistrs un turpina darboties bez izmaiņām. Jauni līgumi pieder šeit.",
     "unavailable": "Līgumu reģistru šobrīd nevar parādīt.",

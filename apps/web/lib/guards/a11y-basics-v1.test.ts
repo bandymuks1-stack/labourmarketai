@@ -62,6 +62,25 @@ describe("a11y basics v1", () => {
     expect(src).toContain("<Label htmlFor={`reopen-note-${sheet.id}`}>");
   });
 
+  it("work-hours quick entry: the worker select is labelled by a bound <label>", () => {
+    const src = read("components/app/work-hours-quick-entry.tsx");
+    expect(src).toMatch(/<label htmlFor="hours-worker"/);
+    expect(src).toMatch(/<select\s+id="hours-worker"/);
+  });
+
+  it("market map capture: the inline visibility select carries the visible caption as its name", () => {
+    const src = read("components/app/market-map-capture.tsx");
+    expect(src).toMatch(
+      /<select\s+aria-label=\{t\("preferred\.visibility"\)\}[\s\S]{0,400}data-testid="capture-preferred-visibility"/,
+    );
+  });
+
+  it("journal composer: the photo file input is bound to its <Label>", () => {
+    const src = read("components/app/journal-entry-composer.tsx");
+    expect(src).toContain('<Label htmlFor="journal-photo">');
+    expect(src).toMatch(/<input\s+id="journal-photo"\s+type="file"/);
+  });
+
   it("benefit cards use h2 (first heading level after the page h1)", () => {
     const src = read("components/marketing/benefit-cards.tsx");
     expect(src).not.toMatch(/<h3/);

@@ -46,6 +46,15 @@ const en = {
     "This build has no server configuration, so it cannot sign anyone in.",
   "auth.signOut": "Sign out",
 
+  "account.title": "Privacy & account",
+  "account.body":
+    "These open in your browser, on the website. Asking for your data, or for your account to be deleted, is done there under Privacy.",
+  "account.privacy": "Privacy, your data and deleting your account",
+  "account.terms": "Terms of service",
+  "account.support": "Contact support (info@labourmarket.ai)",
+  "account.external": "Browser",
+  "account.openFailed": "The link could not be opened on this phone. Nothing was changed.",
+
   "session.unavailable.title": "We could not check your session",
   "session.unavailable.body":
     "This is not the same as being signed out — your phone's secure storage did not answer. Try again.",
@@ -235,6 +244,15 @@ const lt: Catalogue = {
     "Ši versija neturi serverio konfigūracijos, todėl prijungti negali.",
   "auth.signOut": "Atsijungti",
 
+  "account.title": "Privatumas ir paskyra",
+  "account.body":
+    "Šios nuorodos atidaromos naršyklėje, svetainėje. Savo duomenų arba paskyros ištrynimo prašymas pateikiamas ten, skiltyje „Privatumas“.",
+  "account.privacy": "Privatumas, jūsų duomenys ir paskyros ištrynimas",
+  "account.terms": "Naudojimo sąlygos",
+  "account.support": "Susisiekti su pagalba (info@labourmarket.ai)",
+  "account.external": "Naršyklė",
+  "account.openFailed": "Nuorodos šiame telefone atidaryti nepavyko. Niekas nepakeista.",
+
   "session.unavailable.title": "Nepavyko patikrinti jūsų seanso",
   "session.unavailable.body":
     "Tai nereiškia, kad esate atsijungę — telefono saugykla neatsakė. Bandykite dar kartą.",
@@ -419,6 +437,15 @@ const ru: Catalogue = {
   "auth.error.notConfigured":
     "В этой сборке нет настроек сервера, поэтому вход невозможен.",
   "auth.signOut": "Выйти",
+
+  "account.title": "Конфиденциальность и аккаунт",
+  "account.body":
+    "Эти ссылки открываются в браузере, на сайте. Запросить свои данные или удаление аккаунта можно там, в разделе «Конфиденциальность».",
+  "account.privacy": "Конфиденциальность, ваши данные и удаление аккаунта",
+  "account.terms": "Условия использования",
+  "account.support": "Связаться с поддержкой (info@labourmarket.ai)",
+  "account.external": "Браузер",
+  "account.openFailed": "Не удалось открыть ссылку на этом телефоне. Ничего не изменено.",
 
   "session.unavailable.title": "Не удалось проверить вашу сессию",
   "session.unavailable.body":
@@ -605,6 +632,15 @@ const nl: Catalogue = {
     "Deze versie heeft geen serverconfiguratie en kan daarom niemand inloggen.",
   "auth.signOut": "Uitloggen",
 
+  "account.title": "Privacy en account",
+  "account.body":
+    "Deze links openen in je browser, op de website. Je gegevens opvragen of je account laten verwijderen doe je daar, onder Privacy.",
+  "account.privacy": "Privacy, je gegevens en je account verwijderen",
+  "account.terms": "Gebruiksvoorwaarden",
+  "account.support": "Contact met support (info@labourmarket.ai)",
+  "account.external": "Browser",
+  "account.openFailed": "De link kon op deze telefoon niet worden geopend. Er is niets gewijzigd.",
+
   "session.unavailable.title": "We konden je sessie niet controleren",
   "session.unavailable.body":
     "Dit betekent niet dat je bent uitgelogd — de beveiligde opslag van je telefoon gaf geen antwoord. Probeer het opnieuw.",
@@ -789,6 +825,15 @@ const de: Catalogue = {
   "auth.error.notConfigured":
     "Diese Version hat keine Serverkonfiguration und kann daher niemanden anmelden.",
   "auth.signOut": "Abmelden",
+
+  "account.title": "Datenschutz und Konto",
+  "account.body":
+    "Diese Links öffnen sich in deinem Browser, auf der Website. Deine Daten anfordern oder dein Konto löschen lassen kannst du dort unter „Datenschutz“.",
+  "account.privacy": "Datenschutz, deine Daten und das Löschen deines Kontos",
+  "account.terms": "Nutzungsbedingungen",
+  "account.support": "Support kontaktieren (info@labourmarket.ai)",
+  "account.external": "Browser",
+  "account.openFailed": "Der Link konnte auf diesem Telefon nicht geöffnet werden. Es wurde nichts geändert.",
 
   "session.unavailable.title": "Wir konnten deine Sitzung nicht prüfen",
   "session.unavailable.body":

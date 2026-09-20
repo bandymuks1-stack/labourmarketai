@@ -24,6 +24,8 @@ import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
 } from "@/lib/journal/worker-name";
+import { getAllocationsForRange } from "@/lib/work-hours/allocations";
+import { ALLOCATION_READ_LIMIT } from "@/lib/work-hours/allocations-model";
 
 /**
  * Windowed journal report (V8 employer daily loop, GAP 4).
@@ -53,6 +55,15 @@ import {
  * "how much, on what, backed by what"; the per-member skill reading lives
  * on the person page. Without the option the figures are `null` — NOT
  * MEASURED, never zero (SEP-7).
+ *
+ * ── THE ORGANIZATION'S OWN LEDGER, BESIDE (2026-09-20) ────────────────────
+ * The team tile reads each member's `work_hour_allocations` beside their
+ * journal (`readOrganizationRecords`); this report read the journal only,
+ * so /dashboard/reports and the team roll-up named different totals for
+ * the same window. With `workTime` the SAME window is now read from the
+ * organization's hour ledger through its own org-keyed reader
+ * (`getAllocationsForRange`) and returned as `organizationLedger` — a
+ * figure of its own with its own state, never added to `totals.work`.
  *
  * ── REVIEW STATE (fixed 2026-09-11) ───────────────────────────────────────
  * `confirmed` counts entries whose current review result is APPROVED
@@ -198,6 +209,26 @@ export interface JournalWindowWorkerRow {
   readonly work: JournalWindowWorkTime | null;
 }
 
+/** The organization's own hour records over the same window — read beside
+ *  the journal, shown beside it, added to nothing (owner §19). */
+export type JournalWindowOrganizationLedger =
+  | {
+      readonly state: "measured";
+      /** Hours on live rows the organization has not rejected. */
+      readonly hours: number;
+      readonly rows: number;
+      /** Distinct people the rows name. */
+      readonly workers: number;
+      /** Hours on rows a timesheet rejected — visible, counted nowhere. */
+      readonly rejectedHours: number;
+      /** The read stopped at its ceiling — the figure rests on the first N. */
+      readonly truncated: boolean;
+    }
+  /** The ledger is not installed in this database — no store, not "0 h". */
+  | { readonly state: "none" }
+  /** The ledger read failed — UNKNOWN, never zero. */
+  | { readonly state: "unknown" };
+
 export type JournalWindowReport =
   | {
       readonly applied: true;
@@ -212,6 +243,9 @@ export type JournalWindowReport =
         /** Sum over members; `null` when work time was not measured. */
         readonly work: JournalWindowWorkTime | null;
       };
+      /** The organization's own ledger for the window; `null` when work
+       *  time was not measured (the count-sized tile), never "no hours". */
+      readonly organizationLedger: JournalWindowOrganizationLedger | null;
     }
   | {
       readonly applied: false;
@@ -221,6 +255,42 @@ export type JournalWindowReport =
 /** Bounded reads — the report never streams unbounded rows. */
 const CONTEXT_READ_LIMIT = 500;
 const ENTRY_READ_LIMIT = 1000;
+/** The org ledger's own ceiling (`getAllocationsForRange`). */
+const ORG_LEDGER_READ_LIMIT = ALLOCATION_READ_LIMIT;
+
+/** Pure roll-up of the org ledger's window rows into its own figure. */
+export function rollUpOrganizationLedger(
+  read:
+    | { readonly kind: "ok"; readonly rows: readonly { readonly workerId: string; readonly hours: number; readonly status: string }[] }
+    | { readonly kind: "needs-migration" }
+    | { readonly kind: "no-company" }
+    | { readonly kind: "error" },
+  readLimit: number,
+): JournalWindowOrganizationLedger {
+  if (read.kind === "needs-migration") return { state: "none" };
+  if (read.kind !== "ok") return { state: "unknown" };
+  let hours = 0;
+  let rejectedHours = 0;
+  let rows = 0;
+  const workers = new Set<string>();
+  for (const r of read.rows) {
+    if (r.status === "rejected") {
+      rejectedHours += r.hours;
+      continue;
+    }
+    hours += r.hours;
+    rows += 1;
+    workers.add(r.workerId);
+  }
+  return {
+    state: "measured",
+    hours: Math.round(hours * 100) / 100,
+    rows,
+    workers: workers.size,
+    rejectedHours: Math.round(rejectedHours * 100) / 100,
+    truncated: read.rows.length >= readLimit,
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -422,6 +492,15 @@ export async function getJournalWindowReport(
   const window = journalReportWindow(windowKey, todayIso);
   const supabase = await createClient();
 
+  // The organization's OWN ledger over the same window — only when the
+  // caller asked for work time (the hub tile stays count-sized). Read in
+  // parallel with the contexts; never folded into the journal figures.
+  const ledgerRead = opts.workTime
+    ? getAllocationsForRange(window.startIso, window.endIso).then((r) =>
+        rollUpOrganizationLedger(r, ORG_LEDGER_READ_LIMIT),
+      )
+    : Promise.resolve(null);
+
   // The org's engagement contexts — the person↔org spine the entries hang on.
   // Statuses are deliberately NOT filtered: an entry recorded under a since-
   // ended engagement is still work that happened in this organization.
@@ -446,6 +525,7 @@ export async function getJournalWindowReport(
         workers: 0,
         work: opts.workTime ? sumWorkTime([]) : null,
       },
+      organizationLedger: await ledgerRead,
     };
   }
 
@@ -528,5 +608,5 @@ export async function getJournalWindowReport(
     workTime: opts.workTime === true,
     todayIso: window.endIso,
   });
-  return { applied: true, window, workers, totals };
+  return { applied: true, window, workers, totals, organizationLedger: await ledgerRead };
 }

@@ -25,7 +25,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "legal.legalNotice" });
-  return buildPageMetadata({ locale, path: "/legal/legal-notice", title: t("title") });
+  return buildPageMetadata({
+    locale,
+    path: "/legal/legal-notice",
+    title: t("title"),
+    // The page's own intro, not the inherited homepage description.
+    description: t("intro"),
+  });
 }
 
 export default async function LegalNoticePage({

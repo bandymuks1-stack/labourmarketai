@@ -92,7 +92,8 @@
       "entrySuperseded": "Posten er allerede erstattet af en nyere version — kortet er ikke længere aktuelt og fjernes fra listen.",
       "entryDeleted": "Posten er blevet slettet — kortet er ikke længere aktuelt og fjernes fra listen.",
       "staleTerminalHint": "Der blev ikke registreret noget. Hvis medarbejderen gemte en nyere version, vises den som et nyt kort i indbakken."
-    }
+    },
+    "loadFailed": "Gennemgangskøen kunne ikke indlæses. Det betyder ikke, at der ikke er noget at gennemgå — prøv igen."
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",
@@ -244,7 +245,7 @@
     "engagementRequired": "Vælg den arbejdskontekst (organisation eller projekt), som denne post hører til.",
     "notesRequired": "Beskriv hvad du arbejdede med — friteksten er kernen i posten.",
     "quantityInvalid": "Mængden skal være et ikke-negativt tal.",
-    "unitSlugUnknown": "Findes endnu ikke i enhedsregistret: {units}. Bed en administrator om at anvende migration 0017 (productivity_units-seedet), og prøv igen.",
+    "unitSlugUnknown": "Denne enhed genkendes endnu ikke: {units}. Vælg en anden enhed, eller prøv igen senere.",
     "sourceDocumentInvalid": "Det angivne kildedokument blev ikke fundet blandt dine dokumenter.",
     "saveFailed": "Posten kunne ikke gemmes: {reason}",
     "unknownReason": "ukendt fejl",
@@ -256,7 +257,7 @@
     "entryNotFound": "Posten blev ikke fundet.",
     "deleteFailed": "Posten kunne ikke fjernes: {reason}",
     "restoreFailed": "Posten kunne ikke gendannes: {reason}",
-    "rpcUnavailable": "Rettelsesfunktionen er endnu ikke anvendt i dette miljø. Bed en administrator om at anvende den nyeste journalmigration (0018 / 20260720100000).",
+    "rpcUnavailable": "Rettelser kan ikke gemmes lige nu. Prøv igen senere.",
     "entryNotFoundMaybeDeleted": "Posten blev ikke fundet (den kan allerede være fjernet).",
     "notOwner": "Du kan ikke ændre en andens post.",
     "alreadyConfirmed": "Denne post kan ikke længere fjernes — en anden part har allerede gennemgået den. Send en rettelsesanmodning i stedet for at slette.",

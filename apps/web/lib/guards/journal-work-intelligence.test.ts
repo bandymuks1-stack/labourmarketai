@@ -700,7 +700,9 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
     expect(reader).toMatch(/readOrganizationRecords\(caller\.supabase, workerId\),/);
     // the journal page reads the ledger in the same batch and hands it to the same assembly
     expect(page).toMatch(/readOrganizationRecords\(supabase, worker\.id\),/);
-    expect(page).toMatch(/organizationRecords,\s*\}\)\s*: null;/);
+    // 2026-09-20: the same batch hands the PERIOD records beside the day
+    // records — one ledger read, two figures, neither summed into the other.
+    expect(page).toMatch(/organizationRecords,\s*organizationPeriodRecords,\s*\}\)\s*: null;/);
     // nothing else in the app reads the table for a person's figures
     expect(component).not.toMatch(/\.from\("|createClient|readAllocationsForWorker/);
     expect(cv).not.toMatch(/\.from\("work_hour_allocations"|readAllocationsForWorker/);

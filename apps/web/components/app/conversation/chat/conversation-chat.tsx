@@ -128,6 +128,9 @@ import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat, type ChatInboxThread } from "@/lib/conversation/messages-chat";
 import { loadInvitationsForChat } from "@/lib/conversation/invitations-chat";
+import type { ChatInvitation } from "@/lib/conversation/invitations-chat-contract";
+import { resolveWriteEmployerTarget } from "@/lib/conversation/write-employer-chat";
+import { contactEmployerAction } from "@/lib/opportunities/contact-employer";
 import { loadEmployerDemandsForChat } from "@/lib/conversation/employer-workspace";
 import { loadEngagementsForResult } from "@/lib/engagements/engagements-result";
 import {
@@ -360,6 +363,12 @@ export type ChatLabels = {
   marketMapChip: string;
   activityChip: string;
   writeEmployerHint: string;
+  /** Launch completion 2026-09-20 — write to the employer by sentence. */
+  writeEmployerMany: string;
+  writeEmployerFailed: string;
+  /** Accept by sentence: the one waiting card, or "which one?". */
+  acceptOfferOne: string;
+  acceptOfferWhich: string;
   /** W7 slice 2 — the paperclip's one-off "what is this file for?" turn, shown
    *  ONLY when no flow that owns files is open. */
   attachChoice: string;
@@ -2505,6 +2514,65 @@ export function ConversationChat({
    * tier, explicit confirm) through the SAME accept those pages call. The
    * network page stays one chip away.
    */
+  /**
+   * THE ONE invitation card, wherever the chat shows it — the invitations
+   * list and the accept-by-sentence door render the SAME `WorkerInvitationAction`
+   * (its button carries the strong-tier confirmation; nothing here accepts).
+   */
+  const renderInvitationCard = useCallback(
+    (inv: ChatInvitation) => {
+      const who = inv.organizationName ?? inv.inviterName ?? labels.invitationSomeone;
+      // The relationship word comes from the ONE localized vocabulary the
+      // CV prints; " · " is layout, not language, so it is composed here.
+      const role = inv.relationshipSlug ? (tRelationships.has(inv.relationshipSlug) ? String(tRelationships(inv.relationshipSlug as never)) : inv.relationshipSlug) : null;
+      pushEmbed(
+        <WorkerInvitationAction
+          invitationRef={inv.ref}
+          locale={locale}
+          title={role ? `${who} · ${role}` : who}
+          subtitle={[inv.projectTitle, inv.personalMessage].filter(Boolean).join(" · ") || null}
+          labels={{
+            accept: labels.invAccept,
+            later: labels.invLater,
+            confirmTitle: labels.invConfirmTitle,
+            confirmNote: labels.invConfirmNote,
+            confirm: labels.invConfirm,
+            cancel: labels.invCancel,
+            working: labels.invWorking,
+            done: labels.invDone,
+            alreadyAnswered: labels.invAlreadyAnswered,
+            errorStale: labels.invErrorStale,
+            errorGeneric: labels.invErrorGeneric,
+          }}
+        />,
+      );
+    },
+    [pushEmbed, locale, labels, tRelationships],
+  );
+
+  /**
+   * THE ONE booking-offer card (`WorkerBookingAction`), for the offers chip
+   * and the accept-by-sentence door alike. Renders nothing when the page
+   * shipped no offer labels (it ships them only with at least one offer).
+   */
+  const renderOfferCards = useCallback(
+    (offers: readonly BookingOffer[]) => {
+      if (!bookingLabels) return;
+      offers.forEach((o) =>
+        pushEmbed(
+          <WorkerBookingAction
+            bookingId={o.bookingId}
+            locale={locale}
+            title={o.title || bookingLabels.offerFrom}
+            subtitle={o.subtitle}
+            labels={bookingLabels}
+          />,
+        ),
+      );
+    },
+    [bookingLabels, pushEmbed, locale],
+  );
+
   const startInvitations = useCallback(() => {
     setTyping(true);
     loadInvitationsForChat()
@@ -2515,39 +2583,65 @@ export function ConversationChat({
           return;
         }
         assistant(labels.invitationsIntro.replace("{count}", String(res.total)), [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
-        for (const inv of res.items) {
-          const who = inv.organizationName ?? inv.inviterName ?? labels.invitationSomeone;
-          // The relationship word comes from the ONE localized vocabulary the
-          // CV prints; " · " is layout, not language, so it is composed here.
-          const role = inv.relationshipSlug ? (tRelationships.has(inv.relationshipSlug) ? String(tRelationships(inv.relationshipSlug as never)) : inv.relationshipSlug) : null;
-          pushEmbed(
-            <WorkerInvitationAction
-              invitationRef={inv.ref}
-              locale={locale}
-              title={role ? `${who} · ${role}` : who}
-              subtitle={[inv.projectTitle, inv.personalMessage].filter(Boolean).join(" · ") || null}
-              labels={{
-                accept: labels.invAccept,
-                later: labels.invLater,
-                confirmTitle: labels.invConfirmTitle,
-                confirmNote: labels.invConfirmNote,
-                confirm: labels.invConfirm,
-                cancel: labels.invCancel,
-                working: labels.invWorking,
-                done: labels.invDone,
-                alreadyAnswered: labels.invAlreadyAnswered,
-                errorStale: labels.invErrorStale,
-                errorGeneric: labels.invErrorGeneric,
-              }}
-            />,
-          );
-        }
+        for (const inv of res.items) renderInvitationCard(inv);
       })
       .catch(() => {
         setTyping(false);
         assistant(labels.invitationsUnavailable, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
       });
-  }, [assistant, pushEmbed, locale, labels, tRelationships]);
+  }, [assistant, labels, renderInvitationCard]);
+
+  /**
+   * ACCEPT BY SENTENCE (launch completion 2026-09-20, GREEN_COMPLETE).
+   * "Priimu pasiūlymą" resolves to the ONE thing waiting and shows its
+   * EXISTING accept card; the button is the commitment — a sentence never
+   * performs the irreversible accept itself. Exactly one proposed offer →
+   * that offer's card. No offer and exactly one pending invitation → that
+   * invitation's card. Several of either → the list and "which one?". None
+   * at all → the same honest empty answer the offers chip gives.
+   */
+  const startAcceptOffer = useCallback(() => {
+    if (bookingOffers.length === 1) {
+      withTyping(() => {
+        assistant(labels.acceptOfferOne);
+        renderOfferCards(bookingOffers);
+      });
+      return;
+    }
+    if (bookingOffers.length > 1) {
+      withTyping(() => {
+        assistant(labels.acceptOfferWhich);
+        renderOfferCards(bookingOffers);
+      });
+      return;
+    }
+    setTyping(true);
+    loadInvitationsForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "ok" && res.items.length === 1) {
+          assistant(labels.acceptOfferOne);
+          renderInvitationCard(res.items[0]);
+          return;
+        }
+        if (res.kind === "ok") {
+          assistant(labels.acceptOfferWhich, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+          for (const inv of res.items) renderInvitationCard(inv);
+          return;
+        }
+        // Nothing waiting (or the invitations could not be read): the offers
+        // answer, which points at the search — not at a menu.
+        assistant(res.kind === "empty" ? labels.offersEmpty : labels.invitationsUnavailable, [
+          { id: "jobs", label: labels.chipJobs },
+          { id: "engagements", label: labels.chipEngagements },
+          { id: "profile", label: labels.chipProfile },
+        ]);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.invitationsUnavailable, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+      });
+  }, [assistant, bookingOffers, labels, renderInvitationCard, renderOfferCards, withTyping]);
 
   /**
    * THE PHOTO SHOWN BACK (issue #1689, defect G). "Parodyk įkeltą nuotrauką,
@@ -4436,17 +4530,7 @@ export function ConversationChat({
           user(labels.userOffers);
           withTyping(() => {
             if (bookingOffers.length > 0 && bookingLabels) {
-              bookingOffers.forEach((o) =>
-                pushEmbed(
-                  <WorkerBookingAction
-                    bookingId={o.bookingId}
-                    locale={locale}
-                    title={o.title || bookingLabels.offerFrom}
-                    subtitle={o.subtitle}
-                    labels={bookingLabels}
-                  />,
-                ),
-              );
+              renderOfferCards(bookingOffers);
             } else {
               // No offers: the contextual next step is a search, not a menu.
               //
@@ -4710,7 +4794,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
@@ -5851,7 +5935,57 @@ export function ConversationChat({
         invitations: () => startInvitations(),
         // The stored work photos, shown back (issue #1689, defect G).
         evidencePhotos: () => startEvidencePhotos(),
-        writeEmployer: () => assistant(labels.writeEmployerHint),
+        // ACCEPT BY SENTENCE (launch completion 2026-09-20): the one waiting
+        // card — never the accept itself.
+        acceptOffer: () => startAcceptOffer(),
+        /**
+         * WRITE TO THE EMPLOYER (launch completion 2026-09-20, GREEN_CONNECT
+         * — gap G18 closed). The person's own ACTIVE interest signals decide
+         * whom the sentence can reach: exactly one → the in-app thread opens
+         * through the SAME `contactEmployerAction` the interest card's button
+         * runs (server-side re-verification, nothing sent outside) and the
+         * chat hands over to it; several → the board, so the person picks the
+         * card; none → the board with the honest "show interest first" line.
+         * A company context has no employer to write to from here.
+         */
+        writeEmployer: () => {
+          if (identity === "company") {
+            withTyping(() => assistant(labels.writeEmployerHint));
+            return;
+          }
+          const failed = () =>
+            assistant(labels.writeEmployerFailed, [{ id: "jobs", label: labels.chipJobs }]);
+          setTyping(true);
+          resolveWriteEmployerTarget()
+            .then(async (res) => {
+              if (res.kind === "one") {
+                const r = await contactEmployerAction({ locale, requestId: res.requestId });
+                setTyping(false);
+                if (r.ok) {
+                  router.push(`/dashboard/communication/${r.conversationId}` as "/dashboard");
+                  return;
+                }
+                failed();
+                return;
+              }
+              setTyping(false);
+              if (res.kind === "unavailable") {
+                failed();
+                return;
+              }
+              if (res.kind === "many") {
+                assistant(labels.writeEmployerMany);
+              } else {
+                // none / no-worker: the door is "show interest first".
+                assistant(labels.writeEmployerHint);
+              }
+              runWorkflow(() => runFindWork(text));
+            })
+            .catch(() => {
+              setTyping(false);
+              failed();
+            });
+        },
       };
       const fallback = () => assistant(fallbackText, starterChips);
       if (intent !== "unknown") {
@@ -5909,7 +6043,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startEvidencePhotos, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos,startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**

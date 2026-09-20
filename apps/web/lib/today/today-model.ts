@@ -66,7 +66,36 @@ export type TodayWork =
     }
   | { readonly kind: "unknown" };
 
+/**
+ * WHAT IS WAITING ON THE PERSON outside the journal — a booking offer they
+ * have not answered, an invitation addressed to them, a conversation with a
+ * message they have not read. Each figure is the domain reader's OWN count
+ * (`listMyBookings`, `listInvitationsAddressedToMe`,
+ * `getUnreadConversationIds`); `null` means that reader could not answer
+ * (SEP-7: UNKNOWN ≠ ZERO — a failed read is never "nothing waiting").
+ */
+export type TodayAttention = {
+  /** Booking offers proposed TO the person, still unanswered. */
+  readonly offers: number | null;
+  /** Pending invitations addressed to the person (both invitation systems). */
+  readonly invitations: number | null;
+  /** Unread conversations; `onlyId` when exactly one, so the door opens it. */
+  readonly unread: { readonly count: number; readonly onlyId: string | null } | null;
+};
+
+export type TodayDoorKind = "offers" | "invitations" | "unread";
+
+/** The EXISTING doors each attention item opens — no new route. */
+export const TODAY_DOOR_HREFS: Readonly<Record<TodayDoorKind, string>> = {
+  offers: "/dashboard/bookings",
+  invitations: "/dashboard/network",
+  unread: "/dashboard/communication",
+};
+
 export type TodayOpenItem =
+  | { readonly kind: "offers"; readonly count: number; readonly href: string }
+  | { readonly kind: "invitations"; readonly count: number; readonly href: string }
+  | { readonly kind: "unread"; readonly count: number; readonly href: string }
   | { readonly kind: "untimed"; readonly entries: number }
   | { readonly kind: "unlabelled"; readonly entries: number }
   | { readonly kind: "check"; readonly check: WorkTimeCheck };
@@ -168,16 +197,71 @@ export function deriveTodayWork(wi: WorkIntelligence | null): TodayWork {
 }
 
 /**
- * Open items — what still needs a figure, a name or a look. The counts are
- * the model's own (`entriesWithoutDuration` of the week, `unlabelledEntries`)
- * and the checks are the model's plausibility checks that nobody has
- * explained yet. Ordered: untimed, unlabelled, then checks in the model's
- * own order; capped at MAX_OPEN_ITEMS (the journal shows the rest).
+ * The doors — one item per kind of thing waiting on the person, in the order
+ * someone else is waiting: an offer to answer, an invitation to answer, a
+ * message to read. A reader that answered `null` contributes NO item (the
+ * section names it as unread through a data attribute); a reader that
+ * answered 0 contributes no item either — nothing is waiting.
  */
-export function deriveTodayOpenItems(wi: WorkIntelligence | null): TodayOpenItems {
-  if (!wi) return { kind: "unknown" };
-  const week = period(wi, "week");
-  if (!week) return { kind: "unknown" };
+export function deriveTodayDoors(attention: TodayAttention | null): TodayOpenItem[] {
+  if (!attention) return [];
+  const items: TodayOpenItem[] = [];
+  if (attention.offers !== null && attention.offers > 0) {
+    items.push({ kind: "offers", count: attention.offers, href: TODAY_DOOR_HREFS.offers });
+  }
+  if (attention.invitations !== null && attention.invitations > 0) {
+    items.push({
+      kind: "invitations",
+      count: attention.invitations,
+      href: TODAY_DOOR_HREFS.invitations,
+    });
+  }
+  if (attention.unread !== null && attention.unread.count > 0) {
+    items.push({
+      kind: "unread",
+      count: attention.unread.count,
+      href: attention.unread.onlyId
+        ? `${TODAY_DOOR_HREFS.unread}/${attention.unread.onlyId}`
+        : TODAY_DOOR_HREFS.unread,
+    });
+  }
+  return items;
+}
+
+/** Which attention readers could not answer — named, never rendered as 0. */
+export function unknownTodayDoors(attention: TodayAttention | null): TodayDoorKind[] {
+  if (!attention) return ["offers", "invitations", "unread"];
+  const out: TodayDoorKind[] = [];
+  if (attention.offers === null) out.push("offers");
+  if (attention.invitations === null) out.push("invitations");
+  if (attention.unread === null) out.push("unread");
+  return out;
+}
+
+/**
+ * Open items — what still needs an answer, a figure, a name or a look.
+ *
+ * First the DOORS (`deriveTodayDoors`): someone else is waiting, and no
+ * other place on ŠIANDIEN says so. Then the journal's own: the counts are the
+ * model's (`entriesWithoutDuration` of the week, `unlabelledEntries`) and
+ * the checks are the model's plausibility checks that nobody has explained
+ * yet. Ordered: untimed, unlabelled, then checks in the model's own order;
+ * the journal part is capped at MAX_OPEN_ITEMS (the journal shows the rest);
+ * the doors are never capped — there is no "rest" surface for them.
+ *
+ * A journal that could not be read is `unknown` — unless a door is open, in
+ * which case the door is still shown (the work block already says the
+ * journal could not be read).
+ */
+export function deriveTodayOpenItems(
+  wi: WorkIntelligence | null,
+  attention: TodayAttention | null = null,
+): TodayOpenItems {
+  const doors = deriveTodayDoors(attention);
+  const week = wi ? period(wi, "week") : null;
+  if (!wi || !week) {
+    return doors.length > 0 ? { kind: "known", items: doors } : { kind: "unknown" };
+  }
   const items: TodayOpenItem[] = [];
   if (week.entriesWithoutDuration > 0) {
     items.push({ kind: "untimed", entries: week.entriesWithoutDuration });
@@ -189,7 +273,7 @@ export function deriveTodayOpenItems(wi: WorkIntelligence | null): TodayOpenItem
     if (check.acknowledged !== null) continue;
     items.push({ kind: "check", check });
   }
-  return { kind: "known", items: items.slice(0, MAX_OPEN_ITEMS) };
+  return { kind: "known", items: [...doors, ...items.slice(0, MAX_OPEN_ITEMS)] };
 }
 
 export function deriveTodayGrowth(growth: GrowthReading | null): TodayGrowth {
@@ -237,6 +321,8 @@ export function deriveTodayModel(input: {
   readonly workIntelligence: WorkIntelligence | null;
   readonly growth: GrowthReading | null;
   readonly opportunities: OpportunitiesResultView | null;
+  /** Optional: what is waiting on the person (doors). Absent = not read. */
+  readonly attention?: TodayAttention | null;
 }): TodayModel {
   return {
     header: {
@@ -246,7 +332,7 @@ export function deriveTodayModel(input: {
     },
     next: deriveTodayNext(input.workCard),
     work: deriveTodayWork(input.workIntelligence),
-    openItems: deriveTodayOpenItems(input.workIntelligence),
+    openItems: deriveTodayOpenItems(input.workIntelligence, input.attention ?? null),
     growth: deriveTodayGrowth(input.growth),
     opportunity: deriveTodayOpportunity(input.opportunities),
   };

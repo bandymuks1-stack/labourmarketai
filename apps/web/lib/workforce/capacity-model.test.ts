@@ -282,6 +282,37 @@ describe("assessCapacity", () => {
     expect(result.requirements[0].matchedWorkerIds).toEqual(["ok"]);
   });
 
+  it("UNKNOWN availability (null status) is neither capacity nor a miss — reported, never eligible", () => {
+    // Before 2026-09-20 a null status counted as available, so every
+    // unmeasured person on the roster was free capacity while match-v1
+    // mapped the same null to `unknown`.
+    const result = assess(
+      [requirement()],
+      supply({
+        workers: [
+          worker({ workerId: "unmeasured", availabilityStatus: null }),
+          worker({ workerId: "blank", availabilityStatus: "  " }),
+          worker({ workerId: "ok" }),
+        ],
+      }),
+    );
+    const r = result.requirements[0];
+    expect(r.matchedWorkerIds).toEqual(["ok"]);
+    expect(r.busyMatchedWorkerIds).toEqual([]);
+    expect(r.unknownAvailabilityWorkerIds).toEqual(["unmeasured", "blank"]);
+    expect(r.headcountGap.unknownWorkerIds).toEqual(["unmeasured", "blank"]);
+    // Cautious shortfall: 2 needed, 1 proven — the unknowns do not cover it.
+    expect(r.headcountGap.shortfall).toBe(1);
+    // A worker who does NOT fit is not "unknown" either — capability first.
+    const unfit = assess(
+      [requirement()],
+      supply({
+        workers: [worker({ workerId: "nofit", availabilityStatus: null, skills: [], professions: [] })],
+      }),
+    );
+    expect(unfit.requirements[0].unknownAvailabilityWorkerIds).toEqual([]);
+  });
+
   it("committed workers in the window are busy-fit, not capacity (inclusive overlap)", () => {
     const result = assess(
       [requirement()],

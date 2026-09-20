@@ -240,7 +240,7 @@ export function HistoricalCalendar({
               aria-pressed={view === "calendar" && scale === s}
               data-testid={`historical-calendar-scale-${s}`}
               className={cn(
-                "inline-flex min-h-9 items-center rounded-full px-3 font-mono text-meta uppercase tracking-label transition-colors duration-fast",
+                "inline-flex min-h-11 items-center rounded-full px-3 font-mono text-meta uppercase tracking-label transition-colors duration-fast",
                 view === "calendar" && scale === s
                   ? "bg-brand-blue/20 text-text-primary"
                   : "text-text-secondary hover:text-text-primary",
@@ -255,7 +255,7 @@ export function HistoricalCalendar({
             aria-pressed={view === "table"}
             data-testid="historical-calendar-view-table"
             className={cn(
-              "inline-flex min-h-9 items-center gap-1 rounded-full px-3 font-mono text-meta uppercase tracking-label transition-colors duration-fast",
+              "inline-flex min-h-11 items-center gap-1 rounded-full px-3 font-mono text-meta uppercase tracking-label transition-colors duration-fast",
               view === "table"
                 ? "bg-brand-blue/20 text-text-primary"
                 : "text-text-secondary hover:text-text-primary",
@@ -812,7 +812,7 @@ export function HistoricalDayReality({
                       onClick={() => onSelectPerson(p.label)}
                       aria-pressed={personFilter === p.label}
                       className={cn(
-                        "flex min-h-9 w-full items-center gap-2 rounded-md text-left transition-colors duration-fast hover:bg-ink-800/70",
+                        "flex min-h-11 w-full items-center gap-2 rounded-md text-left transition-colors duration-fast hover:bg-ink-800/70",
                         personFilter === p.label ? "bg-brand-blue/10" : "",
                       )}
                     >
@@ -883,7 +883,7 @@ export function HistoricalDayReality({
                     <button
                       type="button"
                       onClick={() => onSelectPerson(p.label)}
-                      className="flex min-h-9 w-full items-center gap-2 rounded-md text-left hover:bg-ink-800/70"
+                      className="flex min-h-11 w-full items-center gap-2 rounded-md text-left hover:bg-ink-800/70"
                     >
                       <PersonToken
                         label={p.label}

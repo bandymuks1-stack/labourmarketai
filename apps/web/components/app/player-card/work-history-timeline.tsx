@@ -24,6 +24,12 @@ export interface HistoryTimelineLabels {
   readonly laneDetails: readonly string[];
   readonly empty: string;
   readonly ariaLabel: string;
+  /** "could not be read" — rendered when `readState` is `unavailable`. */
+  readonly unavailable?: string;
+  /** "{hours} h recorded · {confirmed} h confirmed", per engagement id — the
+   *  journal's own per-context figures (`WorkIntelligence.contexts`) joined
+   *  on `engagement_contexts.id`. Absent id = nothing recorded there. */
+  readonly hoursById?: Readonly<Record<string, string>>;
 }
 
 export function WorkHistoryTimeline({
@@ -31,9 +37,13 @@ export function WorkHistoryTimeline({
   labels,
   appearance = "boxed",
   tone = "brand",
+  readState = "ok",
 }: {
   timeline: HistoryTimeline;
   labels: HistoryTimelineLabels;
+  /** `unavailable` — the history READ failed: the band says so instead of
+   *  posing as "no history yet" (identity truth, SEP-7). */
+  readState?: "ok" | "unavailable";
   /** `boxed` (default) — its own bordered panel; `bare` — the band alone,
    *  for a surface that composes it into a larger identity object. */
   appearance?: "boxed" | "bare";
@@ -49,6 +59,24 @@ export function WorkHistoryTimeline({
     tone === "evidence"
       ? "bg-brand-cyan/20 ring-1 ring-inset ring-brand-cyan/50"
       : "bg-brand-blue/25 ring-1 ring-inset ring-brand-blue/50";
+  if (readState === "unavailable") {
+    // A FAILED read is not an empty history — it is named, with no lanes.
+    return (
+      <section
+        className={`flex flex-col gap-1.5 ${frame}`}
+        data-testid="player-card-history-timeline"
+        data-chart-state="unavailable"
+        role="status"
+      >
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {labels.title}
+        </span>
+        <p className="text-meta leading-relaxed text-text-secondary">
+          {labels.unavailable ?? labels.empty}
+        </p>
+      </section>
+    );
+  }
   if (timeline.lanes.length === 0) {
     // Nothing placeable. When there is not even an undated row, the whole
     // block would say nothing at all — so it renders nothing.
@@ -134,6 +162,16 @@ export function WorkHistoryTimeline({
             {labels.laneDetails[i] ? (
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {labels.laneDetails[i]}
+              </span>
+            ) : null}
+            {/* The journal's hours in THIS engagement — recorded, and how
+                many of them someone confirmed. Only where entries exist. */}
+            {labels.hoursById?.[lane.id] ? (
+              <span
+                className="text-meta leading-relaxed text-text-secondary"
+                data-testid="player-card-history-hours"
+              >
+                {labels.hoursById[lane.id]}
               </span>
             ) : null}
           </div>

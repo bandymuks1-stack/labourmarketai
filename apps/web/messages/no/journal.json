@@ -92,7 +92,8 @@
       "entrySuperseded": "Oppføringen er allerede erstattet av en nyere versjon — kortet er ikke lenger aktuelt og fjernes fra listen.",
       "entryDeleted": "Oppføringen er slettet — kortet er ikke lenger aktuelt og fjernes fra listen.",
       "staleTerminalHint": "Ingenting ble registrert. Hvis arbeideren lagret en nyere versjon, vises den som et nytt kort i innboksen."
-    }
+    },
+    "loadFailed": "Gjennomgangskøen kunne ikke lastes. Det betyr ikke at det ikke er noe å gjennomgå — prøv igjen."
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",
@@ -244,7 +245,7 @@
     "engagementRequired": "Velg arbeidskonteksten (organisasjon eller prosjekt) som denne oppføringen hører til.",
     "notesRequired": "Beskriv hva du jobbet med — friteksten er kjernen i oppføringen.",
     "quantityInvalid": "Mengden må være et ikke-negativt tall.",
-    "unitSlugUnknown": "Finnes ennå ikke i enhetsregisteret: {units}. Be en administrator om å kjøre migrasjon 0017 (productivity_units-seedet), og prøv igjen.",
+    "unitSlugUnknown": "Denne enheten gjenkjennes ennå ikke: {units}. Velg en annen enhet, eller prøv igjen senere.",
     "sourceDocumentInvalid": "Det angitte kildedokumentet ble ikke funnet blant dokumentene dine.",
     "saveFailed": "Kunne ikke lagre oppføringen: {reason}",
     "unknownReason": "ukjent feil",
@@ -256,7 +257,7 @@
     "entryNotFound": "Fant ikke oppføringen.",
     "deleteFailed": "Kunne ikke fjerne oppføringen: {reason}",
     "restoreFailed": "Kunne ikke gjenopprette oppføringen: {reason}",
-    "rpcUnavailable": "Korreksjonsfunksjonen er ennå ikke tatt i bruk i dette miljøet. Be en administrator om å kjøre den nyeste journalmigrasjonen (0018 / 20260720100000).",
+    "rpcUnavailable": "Korreksjoner kan ikke lagres akkurat nå. Prøv igjen senere.",
     "entryNotFoundMaybeDeleted": "Fant ikke oppføringen (den kan allerede være fjernet).",
     "notOwner": "Du kan ikke endre en annens oppføring.",
     "alreadyConfirmed": "Denne oppføringen kan ikke lenger fjernes — en annen part har allerede gjennomgått den. Send en korreksjonsforespørsel i stedet for å slette.",

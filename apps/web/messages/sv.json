@@ -1700,7 +1700,9 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Original ({lang}) — ingen översättning tillgänglig",
+    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen."
   },
   "trust": {
     "unreadHint": "En del av detta gick inte att räkna just nu och visas som ”—”. Det betyder inte att du saknar dem — siffrorna gick bara inte att läsa. Ladda om om en stund.",
@@ -1810,7 +1812,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Din arbetshistorik kunde inte läsas just nu."
     },
     "readinessSteps": {
       "pillar": {
@@ -1864,8 +1867,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Stapelns längd är antalet arbetsposter bakom varje färdighet (full stapel = {scale}+), inte ett färdighetsbetyg."
-    }
+      "skillsScaleNote": "Stapelns längd är antalet arbetsposter bakom varje färdighet (full stapel = {scale}+), inte ett färdighetsbetyg.",
+      "historyHours": "{hours} h registrerade · {confirmed} h med chefens notering",
+      "historyUnavailable": "Din arbetshistorik kunde inte läsas just nu."
+    },
+    "skillsUnavailable": "Kunde inte läsas just nu.",
+    "verifiedUnavailable": "Färdigheter med chefens notering kunde inte läsas just nu."
   },
   "projects": {
     "map": {
@@ -2236,6 +2243,16 @@
       "handoffQueuedConsentWithheld": "Ditt intresse är registrerat. Du kryssade inte i rutan för presentation, så inget om dig lämnas vidare till Nonstop Group. Vill du bli presenterad, återkalla intresset och visa det igen med rutan ikryssad. LabourMarket.ai har inte skickat något till arbetsgivaren.",
       "handoffDelivered": "Ditt intresse har lämnats vidare till Nonstop Group. Nonstop kan kontakta arbetsgivaren genom sin egen kommersiella process; LabourMarket.ai har inte skickat något till arbetsgivaren.",
       "handoffClosed": "Ditt intresse är registrerat. Den tidigare överlämningen till Nonstop Group stängdes när du drog tillbaka; inget skickades."
+    },
+    "intent": {
+      "label": "Min situation",
+      "states": {
+        "AVAILABLE_NOW": "Kan börja nu",
+        "AVAILABLE_FROM": "Kan börja från ett datum",
+        "OPEN_TO_OFFERS": "Arbetar, men öppen för erbjudanden",
+        "LOOKING_FOR_WORK": "Söker arbete",
+        "LOOKING_FOR_PROJECTS": "Söker projekt"
+      }
     }
   },
   "scouting": {
@@ -2749,7 +2766,9 @@
     "servicesEmpty": "Inget erbjudet ännu",
     "servicesUnavailable": "Kunde inte ladda erbjudna tjänster",
     "serviceRemote": "På distans",
-    "photoAlt": "Foto på utfört arbete"
+    "photoAlt": "Foto på utfört arbete",
+    "historyTitle": "Importerad historik",
+    "historyUnavailable": "Importerad historik kunde inte läsas"
   },
   "marketMapBase": {
     "previewTitle": "Ny plats vald — inte sparad ännu",
@@ -3769,7 +3788,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -4092,7 +4111,11 @@
         "usingProfile": "Du behöver inte ladda upp något — jag söker med det som redan finns i din profil.",
         "usingProfileNarrowed": "Du behöver inte ladda upp något — jag söker med din profil och det du har berättat hittills.",
         "profileEmpty": "Det finns ännu inget i din profil, så jag kan inte söka utifrån den. Registrera ett jobb eller säg vilket yrke du har — så söker jag direkt."
-      }
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -5579,7 +5602,7 @@
   },
   "agreements": {
     "title": "Avtalsregister",
-    "intro": "Det kanoniska registret över {org}s avtal — anställningsrelaterade och allmänna. Endast registrering.",
+    "intro": "Registret över {org}s avtal — anställningsrelaterade och allmänna. Endast registrering.",
     "noSignatureNote": "Statusarna i det här registret är enbart registreringstillstånd — inget här betyder att ett avtal är undertecknat, juridiskt giltigt eller bindande. LabourMarket.ai utför ingen juridisk signering: signering sker utanför plattformen, och en bifogad fil är bara underlag du själv tillhandahåller.",
     "relationshipNote": "Kontraktslistan ovan är det tidigare personliga kommersiella registret och fortsätter fungera oförändrat. Nya avtal hör hemma här.",
     "unavailable": "Avtalsregistret kan inte visas just nu.",

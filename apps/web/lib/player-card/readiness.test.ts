@@ -20,6 +20,7 @@ const EMPTY: WorkerPlayerCard = {
   professionSlug: null,
   latestEvidenceAt: null,
   workHistory: [],
+  unavailable: [],
   locationCountry: null,
   documents: null,
   evidenceTimeline: [],

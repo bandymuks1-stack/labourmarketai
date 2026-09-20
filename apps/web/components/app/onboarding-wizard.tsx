@@ -7,6 +7,7 @@ import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
 import { trackFunnel } from "@/lib/telemetry/task";
+import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
 import { countryDisplayName } from "@/lib/location/country-model";
@@ -240,7 +241,13 @@ export function OnboardingWizard({
         // Reached only if the runtime resolves the action instead of
         // throwing NEXT_REDIRECT — exactly one of these two success
         // paths runs, so the event never double-fires.
+        // First-touch campaign attribution rides UNDER the explicit keys
+        // (2026-09-20): onboarding completion is the END of the campaign →
+        // job → registration handoff and was the one step carrying no
+        // campaign at all. BOTH success paths merge it, or the redirect path
+        // (the usual one) would silently drop the attribution.
         trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
+          ...getFirstTouchAttribution(),
           role_context: primaryRole,
           // The precise actor (student / education / agency …) — without it
           // the TTFV bucketing only had the coarse identity on this row.
@@ -253,6 +260,7 @@ export function OnboardingWizard({
         // fire-and-forget, safe before the rethrow.
         if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) {
           trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
+            ...getFirstTouchAttribution(),
             role_context: primaryRole,
             intent: intentList.join(","),
           });

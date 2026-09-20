@@ -15,6 +15,11 @@ import {
 } from "./evidence-state";
 import { chainHash, recordFingerprint } from "./fingerprint";
 import {
+  deriveImportSessionStatus,
+  type ImportSessionEvent,
+  type ImportSessionStatus,
+} from "./import-session-status";
+import {
   matchPerson,
   personKey,
   type RosterPerson,
@@ -2535,6 +2540,93 @@ export async function listEvidenceRecords(
   });
 
   return { kind: "ok", records };
+}
+
+// ── the organization's own imports ──────────────────────────────────────────
+
+/** One import session as the history door lists it: the source's name, when
+ *  it was read, and the ONE derived status word. No row contents. */
+export interface ImportSessionView {
+  readonly id: string;
+  readonly sourceKind: string;
+  readonly sourceFilename: string | null;
+  readonly sourceReference: string | null;
+  readonly createdAt: string;
+  readonly status: ImportSessionStatus;
+}
+
+/** Newest-first ceiling for the history door's list. */
+export const IMPORT_SESSIONS_LIST_LIMIT = 20;
+
+/**
+ * "YOUR IMPORTS" — the sessions the acting organization has read, newest
+ * first, bounded, with each one's derived status.
+ *
+ * Until 2026-09-20 a staged or committed import was reachable only by its
+ * `?evidenceSession=` bookmark: close the tab and the session was gone from
+ * the product's surface (still in the database, unreachable — class F). This
+ * is the list that door was missing. RLS scopes the sessions to the
+ * organizations the caller manages; the acting organization is resolved the
+ * way every other read here resolves it. Two bounded reads: the sessions,
+ * then their events (the status trail). Nothing from the staged rows and
+ * nothing from the records is selected — a list of files is not a place to
+ * leak the people in them.
+ */
+export async function listImportSessions(
+  caller: DomainCaller,
+  input: { readonly organizationId?: string | null; readonly limit?: number | null } = {},
+): Promise<EvidenceImportResult<{ organizationId: string; sessions: readonly ImportSessionView[] }>> {
+  const org = await resolveEvidenceOrganization(caller, input.organizationId);
+  if (!org.ok) {
+    return org.reason === "choice-required" || org.reason === "not-a-member"
+      ? { kind: "choice-required", options: org.options ?? [] }
+      : { kind: "not-authorized", reason: org.reason };
+  }
+  const limit = Math.min(Math.max(input.limit ?? IMPORT_SESSIONS_LIST_LIMIT, 1), 100);
+  const res = await db(caller.supabase)
+    .from("evidence_import_sessions")
+    .select("id, source_kind, source_filename, source_reference, created_at")
+    .eq("organization_id", org.organizationId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (res.error) return classify(res.error);
+  const rows = (res.data ?? []) as Record<string, unknown>[];
+  if (rows.length === 0) return { kind: "ok", organizationId: org.organizationId, sessions: [] };
+
+  const ids = rows.map((r) => r.id as string);
+  // The trail is append-only and short per session; the ceiling is a bound,
+  // not a coverage claim — the decisive events are the ones that matter and
+  // the newest of them is what the status reads.
+  const ev = await db(caller.supabase)
+    .from("evidence_import_events")
+    .select("session_id, event_type, created_at")
+    .in("session_id", ids)
+    .order("created_at", { ascending: false })
+    .limit(ids.length * 40);
+  if (ev.error) return classify(ev.error);
+  const eventsBySession = new Map<string, ImportSessionEvent[]>();
+  for (const e of (ev.data ?? []) as Record<string, unknown>[]) {
+    const sid = e.session_id as string;
+    const list = eventsBySession.get(sid) ?? [];
+    list.push({
+      eventType: (e.event_type as string) ?? "",
+      createdAt: (e.created_at as string | null) ?? null,
+    });
+    eventsBySession.set(sid, list);
+  }
+
+  return {
+    kind: "ok",
+    organizationId: org.organizationId,
+    sessions: rows.map((r) => ({
+      id: r.id as string,
+      sourceKind: (r.source_kind as string) ?? "",
+      sourceFilename: (r.source_filename as string | null) ?? null,
+      sourceReference: (r.source_reference as string | null) ?? null,
+      createdAt: (r.created_at as string) ?? "",
+      status: deriveImportSessionStatus(eventsBySession.get(r.id as string) ?? []),
+    })),
+  };
 }
 
 // ── the subject's side ──────────────────────────────────────────────────────

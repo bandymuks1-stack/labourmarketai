@@ -262,6 +262,97 @@ describe("activation funnel — uses the existing RLS-safe pipe (no DB/RLS chang
   });
 });
 
+/**
+ * ── THE ATTRIBUTION HOLE, PINNED (2026-09-20) ───────────────────────────────
+ *
+ * First-touch attribution was merged into `landing_viewed`, `cta_clicked`,
+ * `registration_started` and `company_need_submitted` — and into nothing
+ * else. Every step of the public job acquisition loop (`job_opened`,
+ * `job_board_viewed`, `job_returned_after_auth`, `job_compared`, …) goes
+ * through ONE component, `TelemetryView`, which did not merge it; neither did
+ * `signup_completed` or `onboarding_completed`. A production probe on
+ * 2026-09-20 12:52Z caught the consequence in a single session:
+ * `landing_viewed` carried `utm_content`, `job_opened` did not. The campaign →
+ * job → registration handoff was therefore not measurable at all — not
+ * "measured as zero", NOT MEASURED.
+ *
+ * These assertions pin the emission sites, and specifically the SPREAD ORDER:
+ * attribution goes UNDER the caller's explicit metadata, so a stored campaign
+ * value can never overwrite what a surface deliberately said about itself.
+ * The runtime behaviour of the helper itself (never throws, original campaign
+ * wins) is proven in lib/telemetry/attribution.test.ts.
+ */
+describe("first-touch attribution rides on EVERY client conversion step", () => {
+  const SURFACES = [
+    // One component covers the whole public job loop.
+    "components/app/telemetry-view.tsx",
+    "components/app/session-telemetry.tsx",
+    "components/app/onboarding-wizard.tsx",
+    // The four that already carried it — pinned so a refactor cannot
+    // quietly drop them while the new ones pass.
+    "components/app/marketing-funnel-beacon.tsx",
+    "components/app/tracked-cta.tsx",
+    "components/app/google-button.tsx",
+    "components/app/company-need-form.tsx",
+  ];
+
+  for (const rel of SURFACES) {
+    it(`${rel} merges getFirstTouchAttribution() into its emission`, () => {
+      const src = readApp(rel);
+      expect(src).toMatch(
+        /from "@\/lib\/telemetry\/attribution"/,
+      );
+      expect(src).toMatch(/\.\.\.getFirstTouchAttribution\(\)/);
+    });
+  }
+
+  it("TelemetryView merges attribution UNDER the caller's metadata", () => {
+    const src = readApp("components/app/telemetry-view.tsx");
+    // The spread must precede `...metadata` in the same object literal, or an
+    // explicit key a surface set (e.g. `landing_path`) would be overwritten
+    // by a stored one.
+    expect(src).toMatch(
+      /trackFunnel\(\s*event,\s*\{\s*\.\.\.getFirstTouchAttribution\(\),\s*\.\.\.metadata\s*\}\s*\)/,
+    );
+    // The once/sessionStorage dedupe is untouched by the merge.
+    expect(src).toMatch(/lm\.funnel\.\$\{event\}\$\{surface\}/);
+    expect(src).toMatch(/window\.sessionStorage\.setItem\(key, "1"\)/);
+  });
+
+  it("signup_completed carries attribution beneath its explicit surface", () => {
+    const src = readApp("components/app/session-telemetry.tsx");
+    expect(src).toMatch(
+      /FUNNEL_EVENTS\.signupCompleted,\s*\{\s*\.\.\.getFirstTouchAttribution\(\),\s*surface: signupSurface,/,
+    );
+  });
+
+  it("BOTH onboarding_completed call sites carry it — the redirect path too", () => {
+    const src = readApp("components/app/onboarding-wizard.tsx");
+    const sites = src.match(
+      /FUNNEL_EVENTS\.onboardingCompleted,\s*\{\s*\.\.\.getFirstTouchAttribution\(\),/g,
+    );
+    // A successful onboarding normally ends in NEXT_REDIRECT, so the catch
+    // branch is the one that actually fires in production. Missing it would
+    // leave the completion unattributed in exactly the common case.
+    expect(sites, "both success paths must merge attribution").toHaveLength(2);
+    expect(
+      src.match(/FUNNEL_EVENTS\.onboardingCompleted/g),
+    ).toHaveLength(2);
+  });
+
+  it("vacancy_interest_expressed stays SERVER-emitted and unattributed", () => {
+    // Not an oversight: first-touch lives in the visitor's localStorage and
+    // the server cannot read it. Shipping it up from the client on a product
+    // action would create a trusted-input surface for one funnel column.
+    const src = readApp("lib/opportunities/vacancy-interest.ts");
+    expect(src).toMatch(/^import "server-only";/m);
+    expect(src).toMatch(
+      /emitServerFunnelEvent\(FUNNEL_EVENTS\.vacancyInterestExpressed/,
+    );
+    expect(src).not.toMatch(/getFirstTouchAttribution/);
+  });
+});
+
 describe("activation funnel — key surfaces emit their events", () => {
   const cases: Array<{ file: string; mustContain: string[] }> = [
     {

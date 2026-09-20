@@ -3,6 +3,7 @@ import { activeLocales } from "@/lib/i18n/config";
 import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
 import { isVisionPublic } from "@/lib/config/vision-publication";
+import { publishedCategories } from "@/lib/answer-engine/publishing";
 
 /**
  * /sitemap.xml — only public, indexable marketing pages, on the apex
@@ -49,6 +50,10 @@ const STATIC_PATHS: readonly string[] = [
   "/legal/data-access",
   // Canonical legal notice / imprint (legal-entity truth v1).
   "/legal/legal-notice",
+  // Answer-engine hub. llms.txt advertised it and every answer page
+  // breadcrumbs to it, but no sitemap listed it (SEO/GEO gap, 2026-09-20).
+  // Individual answers ride /questions-sitemap.xml.
+  "/questions",
 ];
 
 /** `/vision` follows its publication flag: while the page emits
@@ -56,6 +61,39 @@ const STATIC_PATHS: readonly string[] = [
  *  contradictory crawler signals). The owner's one-line flag flip makes it
  *  reappear here with no further edits. */
 const FLAGGED_PATHS: readonly string[] = isVisionPublic() ? ["/vision"] : [];
+
+/**
+ * Answer-engine category pages, e.g. /questions/category/skills_competencies.
+ * Derived from the publishing layer, NEVER from the full ANSWER_CATEGORIES
+ * list: the category route 404s in a locale with no published answer, so a
+ * hard-coded list would advertise dead URLs. Emitted per locale where the
+ * category is published; the hreflang cluster is limited to the same set.
+ */
+function answerCategoryEntries(): MetadataRoute.Sitemap {
+  const byCategory = new Map<string, (typeof activeLocales)[number][]>();
+  for (const locale of activeLocales) {
+    for (const category of publishedCategories(locale)) {
+      const list = byCategory.get(category) ?? [];
+      list.push(locale);
+      byCategory.set(category, list);
+    }
+  }
+  const entries: MetadataRoute.Sitemap = [];
+  for (const [category, publishedIn] of byCategory) {
+    const path = `/questions/category/${category}`;
+    const languages: Record<string, string> = {};
+    for (const locale of publishedIn) languages[locale] = localizedUrl(locale, path);
+    for (const locale of publishedIn) {
+      entries.push({
+        url: localizedUrl(locale, path),
+        changeFrequency: "monthly",
+        priority: 0.6,
+        alternates: { languages },
+      });
+    }
+  }
+  return entries;
+}
 
 /** Per-country labour-market evidence pages, e.g. /labour-market/lt. */
 const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.map(
@@ -101,6 +139,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     }
   }
+
+  entries.push(...answerCategoryEntries());
 
   return entries;
 }

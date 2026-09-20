@@ -32,6 +32,15 @@ const SOURCE = resolve(WEB_ROOT, "public/app-icon.svg");
 const SIZES = [192, 512] as const;
 
 /**
+ * iOS "Add to Home Screen" reads `<link rel="apple-touch-icon">`, which Next
+ * emits from the file convention `app/apple-icon.png`. Safari ignores the
+ * manifest icons, composites onto an OPAQUE plate (transparent pixels turn
+ * black) and rounds the corners itself — so this is the maskable composition
+ * (ink plate, mark in the safe zone) at Apple's 180 px, not a new drawing.
+ */
+const APPLE_TOUCH_SIZE = 180;
+
+/**
  * An Android launcher crops a maskable icon to a safe zone of roughly 80% of
  * the icon's width. The mark is therefore drawn at 80% on a full-bleed plate
  * — the same reason the manifest declares maskable as its own file rather
@@ -71,6 +80,21 @@ async function main(): Promise<void> {
       .png({ compressionLevel: 9 })
       .toFile(out);
     written.push(`icon-maskable-${size}.png`);
+  }
+
+  {
+    const size = APPLE_TOUCH_SIZE;
+    const inner = Math.round(size * MASKABLE_SAFE_ZONE);
+    const pad = Math.round((size - inner) / 2);
+    const mark = await sharp(svg, { density: DENSITY })
+      .resize(inner, inner, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png()
+      .toBuffer();
+    await sharp({ create: { width: size, height: size, channels: 4, background: PLATE } })
+      .composite([{ input: mark, top: pad, left: pad }])
+      .png({ compressionLevel: 9 })
+      .toFile(resolve(WEB_ROOT, "app/apple-icon.png"));
+    written.push("../app/apple-icon.png");
   }
 
   console.log(`generate-icons: wrote ${written.length} files from public/app-icon.svg`);

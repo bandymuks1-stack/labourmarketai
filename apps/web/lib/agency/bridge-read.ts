@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   isMissingRpcCode,
   isMissingTableCode,
+  mergeClientConnectionStates,
   type AgencyConnection,
   type AgencyConnectionsState,
   type ClientConnectionInvite,
@@ -129,6 +130,76 @@ export async function listMyConnectionInvites(): Promise<ClientInvitesState> {
   } catch {
     return { kind: "error" };
   }
+}
+
+/**
+ * CLIENT side, keyed by the COMPANY: active connections whose
+ * `client_company_id` is the caller's own company. The invite read above is
+ * keyed by the invited EMAIL, so a connection accepted by another owner of
+ * the same company, or under an address the caller no longer signs in with,
+ * never reached the partners door although the connection SELECT policy
+ * (migration 20260723180000 §1, `owns_company(client_company_id)`) already
+ * admits it. Same table, same policy, one bounded read — `agency_clients`
+ * is NOT used (it carries no client-side predicate).
+ */
+export async function listMyClientConnections(
+  clientCompanyId: string,
+): Promise<ClientInvitesState> {
+  const supabase = await createClient();
+  const toRow = (r: Record<string, unknown>): ClientConnectionInvite => {
+    const co = (r.companies ?? {}) as { display_name?: string; legal_name?: string };
+    return {
+      id: r.id as string,
+      agencyName: co.display_name || co.legal_name || "\u2014",
+      invitedEmail: r.invited_email as string,
+      status: r.status as ClientConnectionInvite["status"],
+      createdAt: r.created_at as string,
+    };
+  };
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("agency_client_connections")
+      .select("id, invited_email, status, created_at, agency_company_id, companies!agency_client_connections_agency_company_id_fkey(display_name, legal_name)")
+      .eq("client_company_id", clientCompanyId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) {
+      if (isMissingTableCode(error.code)) return { kind: "needs-migration" };
+      // The embedded FK alias may not resolve in every schema cache; fall back.
+      const fb = await asAny(supabase)
+        .from("agency_client_connections")
+        .select("id, invited_email, status, created_at")
+        .eq("client_company_id", clientCompanyId)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (fb.error) {
+        if (isMissingTableCode(fb.error.code)) return { kind: "needs-migration" };
+        console.error("[bridge] client connections read failed:", fb.error.code);
+        return { kind: "error" };
+      }
+      return { kind: "ok", rows: (fb.data ?? []).map(toRow) };
+    }
+    return { kind: "ok", rows: (data ?? []).map(toRow) };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/**
+ * CLIENT side, complete: the invites addressed to the caller's email PLUS
+ * every active connection the caller's company owns, as ONE list (pure
+ * merge in `bridge-model`). Either read failing makes the list UNKNOWN.
+ */
+export async function listMyClientBridgeConnections(
+  clientCompanyId: string,
+): Promise<ClientInvitesState> {
+  const [byEmail, byCompany] = await Promise.all([
+    listMyConnectionInvites(),
+    listMyClientConnections(clientCompanyId),
+  ]);
+  return mergeClientConnectionStates(byEmail, byCompany);
 }
 
 /** AGENCY side: requests connected clients shared with the caller-agency. */

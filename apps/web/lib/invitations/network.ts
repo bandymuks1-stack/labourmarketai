@@ -385,13 +385,23 @@ export type NetworkRelationship = {
   title: string | null;
 };
 
-/** The caller's own active engagements (their side of the network). */
-export async function listMyEngagements(): Promise<NetworkRelationship[]> {
+export type MyEngagementsResult =
+  | { readonly kind: "ok"; readonly rows: readonly NetworkRelationship[] }
+  /** The read failed (or no session) — UNKNOWN, never "no relationships". */
+  | { readonly kind: "unavailable" };
+
+/**
+ * The caller's own active engagements (their side of the network), with
+ * the read's outcome kept apart from its rows: a surface that LISTS the
+ * relationships (`/dashboard/network`) renders `unavailable` as "could not
+ * load", never as the empty state that invites a first invitation.
+ */
+export async function listMyEngagementsResult(): Promise<MyEngagementsResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) return { kind: "unavailable" };
   const { data, error } = await asAny(supabase)
     .from("engagement_contexts")
     .select("id, relationship_slug, organization_id, started_at, title, organizations(display_name, legal_name)")
@@ -399,7 +409,7 @@ export async function listMyEngagements(): Promise<NetworkRelationship[]> {
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(50);
-  if (error) return [];
+  if (error) return { kind: "unavailable" };
   type Row = {
     id: string;
     relationship_slug: string;
@@ -408,13 +418,28 @@ export async function listMyEngagements(): Promise<NetworkRelationship[]> {
     title: string | null;
     organizations: { display_name: string | null; legal_name: string | null } | null;
   };
-  return ((data ?? []) as Row[]).map((r) => ({
-    engagementId: r.id,
-    relationshipSlug: r.relationship_slug,
-    organizationId: r.organization_id ?? null,
-    organizationName:
-      r.organizations?.display_name ?? r.organizations?.legal_name ?? null,
-    startedAt: r.started_at,
-    title: r.title,
-  }));
+  return {
+    kind: "ok",
+    rows: ((data ?? []) as Row[]).map((r) => ({
+      engagementId: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      organizationName:
+        r.organizations?.display_name ?? r.organizations?.legal_name ?? null,
+      startedAt: r.started_at,
+      title: r.title,
+    })),
+  };
+}
+
+/**
+ * The rows alone — for consumers that DELIBERATELY treat the read as an
+ * optional signal (the opening brief, the learning compass, the education
+ * next steps, the dashboard greeting): each of them already degrades to "no
+ * link named" on failure and never renders an empty relationship list as a
+ * fact. A surface that lists relationships uses `listMyEngagementsResult`.
+ */
+export async function listMyEngagements(): Promise<NetworkRelationship[]> {
+  const read = await listMyEngagementsResult();
+  return read.kind === "ok" ? [...read.rows] : [];
 }

@@ -97,6 +97,13 @@ export interface JournalCalendarGrid {
   /** The organization's layer over the same days — beside, never added. */
   readonly reportedDays: number;
   readonly reportedMinutes: number;
+  /**
+   * The organization's ledger could NOT be read for this grid (the reader
+   * returned null). Every `reportedMinutes` above is then 0 because nothing
+   * was placed, not because nothing was recorded — the grid says so in words
+   * rather than posing as an empty past (SEP-7: UNKNOWN ≠ ZERO).
+   */
+  readonly reportedUnknown: boolean;
 }
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -184,6 +191,7 @@ export function buildJournalCalendar({
   today,
   selected,
   days,
+  reportedUnknown = false,
 }: {
   readonly scale: JournalCalendarScale;
   /** Any day inside the period; normalised here. */
@@ -191,6 +199,8 @@ export function buildJournalCalendar({
   readonly today: string;
   readonly selected?: string | null;
   readonly days: readonly JournalCalendarDayInput[];
+  /** True when the organization's ledger failed to read (see the grid field). */
+  readonly reportedUnknown?: boolean;
 }): JournalCalendarGrid {
   const periodStart = startOfScale(anchor, scale);
   const periodEnd =
@@ -282,6 +292,7 @@ export function buildJournalCalendar({
     recordedMinutes,
     reportedDays,
     reportedMinutes,
+    reportedUnknown,
   };
 }
 

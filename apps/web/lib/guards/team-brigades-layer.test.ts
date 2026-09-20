@@ -286,6 +286,13 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(lib).toMatch(/\.from\("engagement_contexts"\)/);
     expect(lib).toMatch(/\.eq\("relationship_slug", "employee"\)/);
     expect(lib).toMatch(/\.from\("company_workers"\)/);
+    // The invitable-pool read is SCOPED to the company the caller acts for
+    // and BOUNDED (scale contract) — never an unscoped, unbounded roster
+    // pull; and a failed read is UNKNOWN (`null`), never an empty picker.
+    const pool = lib.slice(lib.indexOf("// Invitable pool:"), lib.indexOf("const teams: TeamBrigade[] = [];"));
+    expect(pool).toMatch(/\.from\("company_workers"\)[\s\S]{0,200}\.eq\("company_id", companyId\)[\s\S]{0,120}\.limit\(POOL_READ_LIMIT\)/);
+    expect(pool).toMatch(/resolveEmployerCompanyContext\(\)/);
+    expect(lib).toMatch(/readonly addable: readonly AddableTeamWorker\[\] \| null;/);
     // No parallel team tables anywhere on the read path.
     expect(lib).not.toMatch(/\.from\("teams?"\)/);
     expect(lib).not.toMatch(/\.from\("team_members"\)/);

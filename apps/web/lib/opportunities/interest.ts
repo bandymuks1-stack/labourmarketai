@@ -527,6 +527,8 @@ export async function listDemandInterestForCompany(
   | { kind: "ok"; byWorker: ReadonlyMap<string, InterestStatus> }
   | { kind: "not-owner" }
   | { kind: "needs-migration" }
+  /** The ownership read itself failed — UNKNOWN, not "not yours". */
+  | { kind: "unavailable" }
 > {
   const supabase = await createClient();
   const {
@@ -541,12 +543,16 @@ export async function listDemandInterestForCompany(
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "not-owner" };
 
-  const { data: req } = await asAny(supabase)
+  const { data: req, error: reqError } = await asAny(supabase)
     .from("customer_requests")
     .select("id")
     .eq("id", requestId)
     .eq("profile_id", user.id)
     .maybeSingle();
+  // A FAILED ownership read is not a negative answer: `not-owner` would
+  // tell the owner of the demand that it is not theirs. The caller renders
+  // `unavailable` as "could not load" (SEP-7).
+  if (reqError) return { kind: "unavailable" };
   if (!req) return { kind: "not-owner" };
 
   try {

@@ -153,15 +153,110 @@ describe("evidence reaches the ONE work model — through the linked roster row 
     expect(intelligenceRead).toMatch(/readEvidenceRecordsForWorker\(supabase, workerId\)/);
     expect(existsSync(path.join(dir, "lib/journal/work-intelligence-evidence.ts"))).toBe(false);
   });
-  it("only linked people, only live records, only plausible dated hours", () => {
+  it("only linked people, only live records, only plausible dated hours on the DAY ledger", () => {
     expect(workerRead).toMatch(/\.eq\("linked_worker_id", workerId\)\s*\.eq\("link_state", "linked"\)/);
     expect(workerRead).toMatch(/if \(standing\.withdrawn\) continue;/);
-    expect(workerRead).toMatch(/\.not\("activity_date", "is", null\)/);
+    // 2026-09-20: the `.not("activity_date", "is", null)` filter is GONE on
+    // purpose — it dropped every period record before the person's timeline
+    // could see it. A period row now travels as `periodRows`; a dated row
+    // still reaches the day ledger only when it counts as daily hours.
+    expect(workerRead).not.toMatch(/\.not\("activity_date", "is", null\)/);
+    expect(workerRead).toMatch(/if \(!countsAsDailyHours\(ts\)\) continue;/);
+    expect(workerRead).toMatch(/if \(!workDate\) continue;/);
+  });
+  it("a period record is a figure BESIDE the day ledger — never a day, never summed (IA §2)", () => {
+    expect(workerRead).toMatch(/readonly periodRows: readonly WorkerEvidencePeriodRow\[\];/);
+    expect(workerRead).toMatch(/if \(periodStart && periodEnd && ISO_DAY\.test\(periodStart\) && ISO_DAY\.test\(periodEnd\)\) \{\s*\/\/[^\n]*\n\s*periodRows\.push\(/);
+    // the reader hands them to the model as their own list, not as day rows
+    expect(intelligenceRead).toMatch(/evidence\.periodRows\.map\(\(r\) => \(\{/);
+    expect(intelligenceRead).toMatch(/return \{ records: \[\.\.\.fromAllocations, \.\.\.fromEvidence\], periodRecords \};/);
+    const model = read("lib/journal/work-intelligence.ts");
+    expect(model).toMatch(/readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord\[\] \| null;/);
+    // no period figure enters a period total or a day map
+    expect(model).not.toMatch(/organizationPeriodRecords[\s\S]{0,400}hours \+=/);
+    // the journal calendar places DAY records only
+    const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
+    expect(journalPage).toMatch(/const organizationRecords = organizationLedger\?\.records \?\? null;/);
+    expect(journalPage).not.toMatch(/organizationPeriodRecords[^\n]*reportedByDay/);
+    // Work in Numbers lists them as lines of their own
+    const tile = read("components/app/work-in-numbers/org-ledger.tsx");
+    expect(tile).toContain('data-testid="wi-org-records-period"');
+    expect(tile).toMatch(/t\("orgRecords\.periodRecord", \{/);
+    expect(tile).not.toMatch(/orgPeriod\.hours \+|\+ p\.hours|periodRecords\.reduce/);
   });
   it("the read is bounded and degrades honestly", () => {
     expect(workerRead).toMatch(/\.limit\(READ_LIMIT\)/);
     expect(workerRead).toMatch(/return \{ kind: "needs-migration" \}/);
     expect(workerRead).toMatch(/return \{ kind: "error" \}/);
+  });
+});
+
+describe("the history door lists the organization's imports (2026-09-20) — a session is reachable without its bookmark", () => {
+  const door = read("app/[locale]/dashboard/company/history/page.tsx");
+  const list = read("components/app/organization/evidence-import-sessions.tsx");
+  it("the door mounts the list beside the import section, and the list links each session back into it", () => {
+    expect(door).toMatch(/<EvidenceImportSessions locale=\{locale\} activeSessionId=\{evidenceSession \?\? null\} \/>/);
+    expect(list).toMatch(/\/dashboard\/company\/history\?evidenceSession=\$\{s\.id\}#evidence-import-zone/);
+    expect(list).toContain('data-testid="company-history-import"');
+  });
+  it("reads through the one core read, bounded, newest first, with no row contents", () => {
+    expect(list).toMatch(/listImportSessions\(\{ supabase, userId: user\.id, locale \}\)/);
+    const fn = core.slice(core.indexOf("export async function listImportSessions"), core.indexOf("// ── the subject's side"));
+    expect(fn).toMatch(/\.select\("id, source_kind, source_filename, source_reference, created_at"\)/);
+    expect(fn).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.limit\(limit\)/);
+    expect(fn).not.toMatch(/evidence_import_rows|organization_evidence_records|activity_text|person_label/);
+    expect(core).toMatch(/export const IMPORT_SESSIONS_LIST_LIMIT = 20;/);
+  });
+  it("the status is derived from the append-only trail, never stored on the immutable session", () => {
+    expect(fnStatus()).toMatch(/deriveImportSessionStatus\(eventsBySession\.get\(r\.id as string\) \?\? \[\]\)/);
+    expect(core).not.toMatch(/from\("evidence_import_sessions"\)\s*\.update\(/);
+  });
+  it("a failed read is said, an empty list is an honest empty — never a blank door", () => {
+    expect(list).toContain('data-testid="company-history-imports-unavailable"');
+    expect(list).toContain('data-testid="company-history-imports-empty"');
+  });
+  function fnStatus() {
+    return core.slice(core.indexOf("export async function listImportSessions"), core.indexOf("// ── the subject's side"));
+  }
+});
+
+describe("the company person page composes imported history (2026-09-20)", () => {
+  const page = read("app/[locale]/dashboard/people/[workerId]/page.tsx");
+  const section = read("components/app/people/person-imported-history.tsx");
+  it("through the ONE evidence read, via the person's LINKED roster row, with the shared primitives", () => {
+    expect(page).toMatch(/<PersonImportedHistory workerId=\{worker\.id as string\} locale=\{locale\} \/>/);
+    expect(section).toMatch(/\.eq\("linked_worker_id", workerId\)\s*\.eq\("link_state", "linked"\)/);
+    expect(section).toMatch(/listEvidenceRecords\(\s*\{ supabase, userId: user\.id, locale \},\s*\{ organizationPersonIds: personIds, limit: READ_LIMIT \},\s*\)/);
+    expect(section).toMatch(/import \{\s*EvidenceState,\s*PeriodBand,/);
+    expect(section).not.toMatch(/createAdminClient|service_role|security definer/i);
+  });
+  it("UNKNOWN is said; a period record is a band, never days", () => {
+    expect(section).toContain('data-testid="person-history-unavailable"');
+    expect(section).toMatch(/if \(res\.kind !== "ok"\) return unavailable;/);
+    expect(section).toMatch(/projectPeriodAggregateByMonth\(\{/);
+    expect(section).not.toMatch(/reportedByDay|workDate/);
+  });
+});
+
+describe("competency signals reach the SUBJECT as suggestions (2026-09-20) — written AND read", () => {
+  const readSignals = read("lib/organization-evidence/competency-signals-read.ts");
+  const action = read("lib/organization-evidence/competency-signal-actions.ts");
+  const list = read("components/app/organization-history-skill-suggestions.tsx");
+  const profile = read("app/[locale]/dashboard/profile/page.tsx");
+  it("a bounded subject read over the records the profile already holds", () => {
+    expect(readSignals).toMatch(/from\("organization_evidence_competency_signals"\)/);
+    expect(readSignals).toMatch(/\.in\("record_id", chunk\)/);
+    expect(readSignals).toMatch(/\.limit\(SIGNAL_READ_LIMIT\)/);
+    expect(profile).toMatch(/<OrganizationHistorySkillSuggestionsSection\s+records=\{myOrgEvidence\.records\}/);
+  });
+  it("suggestion only: accepted by the person, self-declared, never verified, membership re-derived", () => {
+    expect(action).toMatch(/source: "self_declared",/);
+    expect(action).toMatch(/verified: false,/);
+    expect(action).not.toMatch(/verified: true|source: "manager_confirmed"|source: "work_journal"/);
+    expect(action).toMatch(/signals\.signals\.some\(\(s\) => s\.slug === slug\)/);
+    // nothing auto-attaches: the only write is behind the person's tap
+    expect(list).toMatch(/onClick=\{\(\) => add\(s\.slug\)\}/);
+    expect(readSignals).not.toMatch(/\.insert\(|\.upsert\(|\.update\(/);
   });
 });
 

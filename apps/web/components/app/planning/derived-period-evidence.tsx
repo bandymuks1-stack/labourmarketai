@@ -43,7 +43,20 @@ export async function DerivedPeriodEvidence({
     { supabase, userId: user.id, locale },
     { limit: 100 },
   );
-  if (res.kind !== "ok") return null;
+  if (res.kind === "needs-migration") return null;
+  if (res.kind !== "ok") {
+    // A FAILED read is not "no period record". Said the way the plan says
+    // every other source it could not read (SEP-7: UNKNOWN ≠ ZERO).
+    const tUnavailable = await getTranslations("planning.derived");
+    return (
+      <p
+        className="text-meta leading-relaxed text-text-muted"
+        data-testid="planning-source-note-period-error"
+      >
+        {tUnavailable("unavailable")}
+      </p>
+    );
+  }
 
   const orgNameByPerson = new Map(
     res.links.flatMap((l) => (l.organizationName ? [[l.id, l.organizationName] as const] : [])),

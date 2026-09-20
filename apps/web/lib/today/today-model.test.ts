@@ -10,7 +10,9 @@ import { deriveWorkCardState, type WorkCardSignals } from "@/lib/worker/work-car
 
 import {
   MAX_OPEN_ITEMS,
+  TODAY_DOOR_HREFS,
   WORK_CARD_EDITOR_HREF,
+  deriveTodayDoors,
   deriveTodayGrowth,
   deriveTodayModel,
   deriveTodayNext,
@@ -18,6 +20,8 @@ import {
   deriveTodayOpportunity,
   deriveTodayState,
   deriveTodayWork,
+  unknownTodayDoors,
+  type TodayAttention,
 } from "./today-model";
 
 /**
@@ -199,6 +203,96 @@ describe("open items — what still needs a figure, a name or a look", () => {
   it("a clean week has no open items — an empty list, not an unknown", () => {
     const wi = deriveWorkIntelligence({ entries: [labelled("e1", TODAY, 4)], skills: SKILLS, todayIso: TODAY, focus: "today" });
     expect(deriveTodayOpenItems(wi)).toEqual({ kind: "known", items: [] });
+  });
+});
+
+describe("the doors — who is waiting on the person, from the domain readers' own counts", () => {
+  const clean = deriveWorkIntelligence({ entries: [labelled("e1", TODAY, 4)], skills: SKILLS, todayIso: TODAY, focus: "today" });
+  const ATTENTION: TodayAttention = {
+    offers: 2,
+    invitations: 1,
+    unread: { count: 3, onlyId: null },
+  };
+
+  it("an offer, an invitation and unread messages each become ONE item with the EXISTING door", () => {
+    expect(deriveTodayDoors(ATTENTION)).toEqual([
+      { kind: "offers", count: 2, href: "/dashboard/bookings" },
+      { kind: "invitations", count: 1, href: "/dashboard/network" },
+      { kind: "unread", count: 3, href: "/dashboard/communication" },
+    ]);
+    expect(TODAY_DOOR_HREFS).toEqual({
+      offers: "/dashboard/bookings",
+      invitations: "/dashboard/network",
+      unread: "/dashboard/communication",
+    });
+  });
+
+  it("exactly one unread conversation opens THAT conversation", () => {
+    const doors = deriveTodayDoors({ offers: 0, invitations: 0, unread: { count: 1, onlyId: "c-1" } });
+    expect(doors).toEqual([{ kind: "unread", count: 1, href: "/dashboard/communication/c-1" }]);
+  });
+
+  it("UNKNOWN ≠ ZERO — a reader that answered null yields no item and is NAMED as unknown", () => {
+    const partial: TodayAttention = { offers: null, invitations: 0, unread: null };
+    expect(deriveTodayDoors(partial)).toEqual([]);
+    expect(unknownTodayDoors(partial)).toEqual(["offers", "unread"]);
+    expect(unknownTodayDoors(null)).toEqual(["offers", "invitations", "unread"]);
+    expect(unknownTodayDoors(ATTENTION)).toEqual([]);
+    // NEGATIVE CONTROL: nothing in a null reader ever reads as a count.
+    expect(JSON.stringify(deriveTodayDoors({ offers: null, invitations: null, unread: null }))).toBe("[]");
+  });
+
+  it("doors come first and are not counted against the journal's cap", () => {
+    const wi = deriveWorkIntelligence({
+      entries: [
+        entry("e1", TODAY, null),
+        entry("e2", TODAY, 30),
+        { ...entry("e3", TODAY, 2, []), originalText: "" },
+      ],
+      skills: SKILLS,
+      todayIso: TODAY,
+      focus: "today",
+    });
+    const open = deriveTodayOpenItems(wi, ATTENTION);
+    expect(open.kind).toBe("known");
+    if (open.kind !== "known") return;
+    expect(open.items.map((i) => i.kind)).toEqual([
+      "offers",
+      "invitations",
+      "unread",
+      "untimed",
+      "unlabelled",
+      "check",
+    ]);
+    expect(open.items.filter((i) => !("href" in i)).length).toBeLessThanOrEqual(MAX_OPEN_ITEMS);
+  });
+
+  it("a clean week with an open door lists only the door; no attention leaves the journal's answer unchanged", () => {
+    expect(deriveTodayOpenItems(clean, ATTENTION)).toMatchObject({ kind: "known" });
+    expect(deriveTodayOpenItems(clean, { offers: 0, invitations: 0, unread: { count: 0, onlyId: null } })).toEqual({ kind: "known", items: [] });
+    expect(deriveTodayOpenItems(clean, null)).toEqual(deriveTodayOpenItems(clean));
+  });
+
+  it("a journal that could not be read still shows an open door; with no door it stays unknown", () => {
+    expect(deriveTodayOpenItems(null, ATTENTION)).toEqual({
+      kind: "known",
+      items: deriveTodayDoors(ATTENTION),
+    });
+    expect(deriveTodayOpenItems(null, { offers: 0, invitations: null, unread: null })).toEqual({ kind: "unknown" });
+  });
+
+  it("the whole model carries the doors inside openItems, without a new block", () => {
+    const model = deriveTodayModel({
+      displayName: null,
+      professionSlug: null,
+      workCard: null,
+      workIntelligence: clean,
+      growth: null,
+      opportunities: null,
+      attention: ATTENTION,
+    });
+    expect(Object.keys(model).sort()).toEqual(["growth", "header", "next", "openItems", "opportunity", "work"]);
+    expect(model.openItems.kind === "known" && model.openItems.items.map((i) => i.kind)).toEqual(["offers", "invitations", "unread"]);
   });
 });
 

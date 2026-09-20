@@ -17,6 +17,7 @@ import {
   type WorkIntelligence,
   type WorkIntelligenceCoverage,
   type WorkIntelligenceEntry,
+  type WorkIntelligenceOrganizationPeriodRecord,
   type WorkIntelligenceOrganizationRecord,
   type WorkIntelligenceSkillRow,
   type WorkPeriodKey,
@@ -86,6 +87,9 @@ export function assembleWorkIntelligence(input: {
   /** The organization's hour records (from `readOrganizationRecords`);
    *  `null` / omitted when the ledger could not be read. */
   organizationRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
+  /** The organization's PERIOD records from the same read — beside the
+   *  day records, summed into nothing. */
+  organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
 }): WorkIntelligence {
   const entries: WorkIntelligenceEntry[] = input.entries.map((e) => ({
     entryId: e.id,
@@ -117,8 +121,19 @@ export function assembleWorkIntelligence(input: {
     focusRange: input.focusRange ?? null,
     coverage: input.coverage,
     organizationRecords: input.organizationRecords ?? null,
+    organizationPeriodRecords: input.organizationPeriodRecords ?? null,
   });
 }
+
+/**
+ * The organization's ledger about one person, as ONE reading: the day
+ * records a day ledger may sum, and the PERIOD records (a total over a span,
+ * no source days) that stand beside them. `null` = UNKNOWN for both.
+ */
+export type OrganizationLedgerRead = {
+  readonly records: readonly WorkIntelligenceOrganizationRecord[];
+  readonly periodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[];
+};
 
 /**
  * The organization's hour records about one person, as the model reads
@@ -130,7 +145,7 @@ export function assembleWorkIntelligence(input: {
 export async function readOrganizationRecords(
   supabase: SupabaseClient,
   workerId: string,
-): Promise<readonly WorkIntelligenceOrganizationRecord[] | null> {
+): Promise<OrganizationLedgerRead | null> {
   // TWO ledgers the organization keeps about the person, ONE reading:
   // typed hour lines (`work_hour_allocations`) and imported historical
   // evidence (`organization_evidence_records`, through the person's
@@ -167,7 +182,20 @@ export async function readOrganizationRecords(
           organizationId: r.organizationId,
           journalEntryId: null,
         }));
-  return [...fromAllocations, ...fromEvidence];
+  // PERIOD records come only from imported documents (a timesheet line is
+  // a day by construction). Beside the day rows, in the same reading.
+  const periodRecords: WorkIntelligenceOrganizationPeriodRecord[] =
+    evidence.kind === "needs-migration"
+      ? []
+      : evidence.periodRows.map((r) => ({
+          id: r.id,
+          periodStart: r.periodStart,
+          periodEnd: r.periodEnd,
+          hours: r.hours,
+          source: "import",
+          organizationId: r.organizationId,
+        }));
+  return { records: [...fromAllocations, ...fromEvidence], periodRecords };
 }
 
 /** Entry ids per `.in()` filter — a URL-length bound, not a coverage cap:
@@ -233,7 +261,7 @@ export async function loadWorkIntelligence(
   workerId: string,
   opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
 ): Promise<WorkIntelligence | null> {
-  const [entriesRead, linkRead, skillsRead, organizationRecords] = await Promise.all([
+  const [entriesRead, linkRead, skillsRead, organizationLedger] = await Promise.all([
     listJournalEntries(caller, { workerId }),
     readWorkerEntrySkillLinks(caller.supabase, workerId),
     caller.supabase
@@ -268,7 +296,8 @@ export async function loadWorkIntelligence(
       linksTruncated: linkRead.truncated,
     },
     photoCountByEntry,
-    organizationRecords,
+    organizationRecords: organizationLedger?.records ?? null,
+    organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
   });
 }
 

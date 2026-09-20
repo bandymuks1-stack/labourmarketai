@@ -92,14 +92,22 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            {
-              "scheme": "https",
-              "host": "labourmarket.ai"
-            },
-            {
-              "scheme": "https",
-              "host": "www.labourmarket.ai"
-            }
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/sign-in" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/register" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/today" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/journal" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/log-work" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/profile" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/settings" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/sign-in" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/register" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/today" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/journal" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/log-work" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/profile" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/settings" }
           ],
           "category": [
             "BROWSABLE",
@@ -121,7 +129,8 @@
       "typedRoutes": true
     },
     "extra": {
-      "//": "PUBLIC values only. A device build cannot hold a secret: the binary is on the user's phone and cannot be edited afterwards. These are read through EXPO_PUBLIC_* at build time and validated by @labourmarket/client-core, which REFUSES a key that bypasses RLS."
+      "//": "PUBLIC values only. A device build cannot hold a secret: the binary is on the user's phone and cannot be edited afterwards. These are read through EXPO_PUBLIC_* at build time and validated by @labourmarket/client-core, which REFUSES a key that bypasses RLS.",
+      "//intentFilters": "Every android.intentFilters data entry names a PATH. A host with no path claims every URL on it, and the app has eight screens while the website has some forty — an unqualified claim would open the app for every shared web link and land on +not-found. The list is the native route table (apps/mobile/app), pinned to apps/web/lib/mobile/app-association.ts NATIVE_APP_PATHS by apps/web/lib/guards/app-association.test.ts; widen it only when the app gains the screen."
     }
   }
 }

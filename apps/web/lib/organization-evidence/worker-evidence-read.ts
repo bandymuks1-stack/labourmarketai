@@ -29,10 +29,16 @@ import {
  *     an identity);
  *   · only live records — a withdrawn import stays readable in the history
  *     door but counts nowhere;
- *   · only dated, plausible hours. A row the import flagged as more than a
- *     day holds (and a human kept AS STATED) is evidence, not a day's
- *     hours: it is shown on the evidence surfaces and summed by no ledger.
- *     Period rows without a single date are likewise not a day.
+ *   · DAY rows: dated, plausible hours. A row the import flagged as more
+ *     than a day holds (and a human kept AS STATED) is evidence, not a
+ *     day's hours: it is shown on the evidence surfaces and summed by no
+ *     ledger.
+ *   · PERIOD rows (2026-09-20): a record with a start and an end and no
+ *     single day ("800 h, 2025-06 → 2025-11") is REAL work with no source
+ *     days. It used to be dropped here entirely, so the person's own Work
+ *     History never showed it. It now travels as a `periodRows` figure of
+ *     its own — shown BESIDE the day ledger (IA §2), never summed into
+ *     daily hours and never painted onto a day.
  *
  * Bounded: one read of the worker's roster links, one read of records.
  * Honest degradation matches the allocation read: a missing table is an
@@ -52,8 +58,24 @@ export interface WorkerEvidenceRecordRow {
   readonly hours: number;
 }
 
+/** One period record: the organization's total over a span, no source days.
+ *  `periodStart`/`periodEnd` are ISO days; `hours` is the figure as stated. */
+export interface WorkerEvidencePeriodRow {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly periodStart: string;
+  readonly periodEnd: string;
+  readonly hours: number;
+}
+
 export type WorkerEvidenceRead =
-  | { readonly kind: "ok"; readonly rows: readonly WorkerEvidenceRecordRow[] }
+  | {
+      readonly kind: "ok";
+      /** Day rows — the ones a day ledger may sum. */
+      readonly rows: readonly WorkerEvidenceRecordRow[];
+      /** Period rows — beside the day ledger, added to nothing. */
+      readonly periodRows: readonly WorkerEvidencePeriodRow[];
+    }
   | { readonly kind: "needs-migration" }
   | { readonly kind: "error" };
 
@@ -63,6 +85,8 @@ export type WorkerEvidenceRead =
 function db(c: SupabaseClient): any {
   return c;
 }
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function readEvidenceRecordsForWorker(
   supabase: SupabaseClient,
@@ -80,16 +104,18 @@ export async function readEvidenceRecordsForWorker(
     return { kind: "error" };
   }
   const personIds = ((people.data ?? []) as { id: string }[]).map((p) => p.id);
-  if (personIds.length === 0) return { kind: "ok", rows: [] };
+  if (personIds.length === 0) return { kind: "ok", rows: [], periodRows: [] };
 
+  // Dated AND period records in ONE bounded read: a period row has no
+  // activity_date, so the old "activity_date is not null" filter was
+  // exactly what made imported history invisible on the person's timeline.
   const res = await db(supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_id, organization_person_id, activity_date, hours, evidence_state, derived, organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+      "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
     )
     .in("organization_person_id", personIds)
-    .not("activity_date", "is", null)
-    .order("activity_date", { ascending: false })
+    .order("activity_date", { ascending: false, nullsFirst: false })
     .limit(READ_LIMIT);
   if (res.error) {
     if (MISSING_OBJECT_CODES.has(res.error.code ?? "")) return { kind: "needs-migration" };
@@ -98,16 +124,10 @@ export async function readEvidenceRecordsForWorker(
   }
 
   const rows: WorkerEvidenceRecordRow[] = [];
+  const periodRows: WorkerEvidencePeriodRow[] = [];
   for (const r of (res.data ?? []) as Record<string, unknown>[]) {
     const hours = r.hours === null || r.hours === undefined ? null : Number(r.hours);
     if (hours === null || !Number.isFinite(hours) || hours <= 0) continue;
-    const derived = (r.derived as Record<string, unknown> | null) ?? {};
-    // A period aggregate or an unknown figure is evidence, not a day's
-    // duration; a legacy "exceeds a day" flag without a classification is
-    // treated the same way. Only DAILY hours reach the ledger.
-    const ts = (derived.timeSemantics as TimeSemantics | undefined) ?? null;
-    if (!countsAsDailyHours(ts)) continue;
-    if (!ts && (derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD) continue;
     const events = ((r.organization_evidence_events as Record<string, unknown>[] | null) ?? []).map(
       (e): RecordLifecycleEvent => ({
         eventType: e.event_type as RecordLifecycleEvent["eventType"],
@@ -118,12 +138,36 @@ export async function readEvidenceRecordsForWorker(
     );
     const standing = deriveEvidenceStanding(r.evidence_state as ReportedEvidenceState, events);
     if (standing.withdrawn) continue;
+
+    const periodStart = (r.period_start as string | null) ?? null;
+    const periodEnd = (r.period_end as string | null) ?? null;
+    if (periodStart && periodEnd && ISO_DAY.test(periodStart) && ISO_DAY.test(periodEnd)) {
+      // A period aggregate: one figure over a span. Never a day.
+      periodRows.push({
+        id: r.id as string,
+        organizationId: r.organization_id as string,
+        periodStart,
+        periodEnd,
+        hours,
+      });
+      continue;
+    }
+
+    const workDate = (r.activity_date as string | null) ?? null;
+    if (!workDate) continue;
+    const derived = (r.derived as Record<string, unknown> | null) ?? {};
+    // A period aggregate or an unknown figure is evidence, not a day's
+    // duration; a legacy "exceeds a day" flag without a classification is
+    // treated the same way. Only DAILY hours reach the day ledger.
+    const ts = (derived.timeSemantics as TimeSemantics | undefined) ?? null;
+    if (!countsAsDailyHours(ts)) continue;
+    if (!ts && (derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD) continue;
     rows.push({
       id: r.id as string,
       organizationId: r.organization_id as string,
-      workDate: r.activity_date as string,
+      workDate,
       hours,
     });
   }
-  return { kind: "ok", rows };
+  return { kind: "ok", rows, periodRows };
 }

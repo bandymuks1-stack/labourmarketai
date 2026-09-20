@@ -527,6 +527,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Zeig mein Profil",
     pl: "Pokaż mój profil",
   },
+  "accept-offer": {
+    lt: "Priimu pasiūlymą",
+    en: "I accept the offer",
+    ru: "Принимаю предложение",
+    nl: "Ik accepteer het aanbod",
+    de: "Ich nehme das Angebot an",
+  },
   offers: {
     lt: "Ką man siūlo?",
     en: "Show my offers",

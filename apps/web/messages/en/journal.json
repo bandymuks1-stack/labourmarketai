@@ -47,7 +47,7 @@
   "example4": "Led a team, assigned tasks, and checked the result.",
   "savedTitle": "Entry saved",
   "savedBody": "Your saved details were added to your work history.",
-  "savedBodyWithDetails": "Saved to your work history with {count} structured detail(s).",
+  "savedBodyWithDetails": "Saved to your work history with {count, plural, one {# structured detail} other {# structured details}}.",
   "savedConfirmNote": "Entry is private.",
   "whoCanConfirm": "Entries are visible only to you until you choose otherwise. Skills you link to entries feed your CV.",
   "savedSeeEntries": "See your entries",
@@ -78,7 +78,7 @@
   "engagement": "Context",
   "engagementChoose": "Choose the engagement…",
   "engagementAmbiguous": "This work could belong to more than one engagement. Choose which one before saving.",
-  "unconfirmedTimeBlocked": "{count} logged duration(s) still await your review and would not be saved. Keep or remove them first.",
+  "unconfirmedTimeBlocked": "{count, plural, one {# logged duration still awaits your review and would not be saved.} other {# logged durations still await your review and would not be saved.}} Keep or remove them first.",
   "entry": {
     "reviewedBy": "Reviewed by",
     "confirmerRole": {
@@ -232,7 +232,8 @@
       "receipt": "Confirmed: {title}",
       "receiptSkills": "{count, plural, one {# skill} other {# skills}}",
       "skillsUnavailable": "The skill list could not be read — the tap confirms the entry only."
-    }
+    },
+    "loadFailed": "The review queue could not be loaded. That does not mean there is nothing to review — try again."
   },
   "listEmpty": "You don't have any work records yet — your entries will show up here.",
   "listEmptyTitle": "Start building work records",
@@ -608,7 +609,7 @@
     "engagementRequired": "Choose the work context (organization or project) this entry belongs to.",
     "notesRequired": "Describe what you worked on — the free text is the core of the entry.",
     "quantityInvalid": "Quantity must be a non-negative number.",
-    "unitSlugUnknown": "Not yet in the unit registry: {units}. Ask an administrator to apply migration 0017 (the productivity_units seed), then try again.",
+    "unitSlugUnknown": "This unit is not recognised yet: {units}. Choose another unit or try again later.",
     "sourceDocumentInvalid": "The referenced source document was not found among your documents.",
     "saveFailed": "Failed to save the entry: {reason}",
     "unknownReason": "unknown error",
@@ -620,7 +621,7 @@
     "entryNotFound": "Entry not found.",
     "deleteFailed": "Failed to remove the entry: {reason}",
     "restoreFailed": "Failed to restore the entry: {reason}",
-    "rpcUnavailable": "The corrections function is not yet applied in this environment. Ask an administrator to apply the latest journal migration (0018 / 20260720100000).",
+    "rpcUnavailable": "Corrections can't be saved right now. Try again later.",
     "entryNotFoundMaybeDeleted": "Entry not found (it may already have been removed).",
     "notOwner": "You cannot modify an entry that belongs to someone else.",
     "alreadyConfirmed": "This entry can no longer be removed — another party has already reviewed it. Send a correction request instead of deleting.",
@@ -768,7 +769,9 @@
       "approved": "{hours} h approved in a timesheet",
       "linked": "{hours} h describe journal entries already counted above",
       "rejected": "{hours} h rejected in a timesheet — counted nowhere",
-      "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only a journal entry does that."
+      "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only a journal entry does that.",
+      "periodRecord": "{hours} h over {span} — one figure for the whole period, not spread onto days",
+      "periodMore": "{count, plural, one {# more period record} other {# more period records}}"
     },
     "growthKindsTitle": "What your entries show",
     "growthKindsHint": "Each line is a kind read by a plain rule from your own entries, with the facts it stands on. Not a trait, not a rating.",
@@ -889,6 +892,7 @@
       "all": "journal record confirmed"
     },
     "reported": "organization recorded {time}",
-    "periodReportedOnly": "No records of your own; the organization recorded {days, plural, one {# day} other {# days}}, {time}."
+    "periodReportedOnly": "No records of your own; the organization recorded {days, plural, one {# day} other {# days}}, {time}.",
+    "reportedUnknown": "The organization's records for this period could not be read — that is not the same as none."
   }
 }

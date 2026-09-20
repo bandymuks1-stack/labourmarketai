@@ -789,7 +789,13 @@
       "mainly": "głównie {activity} · {hours} h",
       "mainlyShare": "głównie {activity} · {hours} h ({percent} z {total} h)",
       "withoutDuration": "{count, plural, one {# wpis w tym okresie nie ma zarejestrowanego czasu trwania — jest liczony, ale nie mierzony czasowo.} few {# wpisy w tym okresie nie mają zarejestrowanego czasu trwania — są liczone, ale nie mierzone czasowo.} many {# wpisów w tym okresie nie ma zarejestrowanego czasu trwania — są liczone, ale nie mierzone czasowo.} other {# wpisu w tym okresie nie ma zarejestrowanego czasu trwania — są liczone, ale nie mierzone czasowo.}}",
-      "collapse": "Ukryj szczegółowy raport"
+      "collapse": "Ukryj szczegółowy raport",
+      "ledger": {
+        "measured": "Własne zapisy Twojej organizacji w tym oknie: {hours} godz. u {workers, plural, one {# osoby} few {# osób} many {# osób} other {# osoby}} — trzymane osobno, nigdy nie dodawane do dziennika.",
+        "none": "Ta baza danych nie zawiera zapisów godzin organizacji.",
+        "unknown": "Nie udało się odczytać zapisów organizacji — to nie oznacza zera godzin.",
+        "truncated": "Opiera się na pierwszych {count} zapisach."
+      }
     }
   },
   "marketRecognition": {
@@ -3529,10 +3535,6 @@
       "todayLabel": "Aktywne dziś",
       "preparingLabel": "W przygotowaniu",
       "blockedLabel": "Zablokowane",
-      "ownerSmokeLabel": "Test dymny produkcyjny właściciela",
-      "ownerSmokeStatus": "OCZEKUJE",
-      "pr18Label": "PR #18 — warstwa bezpieczeństwa dziennika",
-      "pr18Status": "ZABLOKOWANE (zgłoszenie #32)",
       "nonWorkerLabel": "Przestrzenie firmy / agencji / klienta",
       "nonWorkerStatus": "W przygotowaniu",
       "fakeClaimsLabel": "Fałszywe AI / fałszywe dopasowanie / fałszywa reputacja",
@@ -6005,7 +6007,18 @@
         "note": "Rzeczywiste liczby wpisów w dzienniku powiązanych z tym projektem oraz zdjęć dołączonych przez pracowników do swoich wpisów.",
         "link": "Otwórz galerię projektu"
       },
-      "honestNote": "To centrum zestawia już istniejące zapisy. Kamienie milowe, rejestry problemów i tabele zasobów nie są jeszcze zbudowane i nie są tu symulowane."
+      "honestNote": "To centrum zestawia już istniejące zapisy. Kamienie milowe, rejestry problemów i tabele zasobów nie są jeszcze zbudowane i nie są tu symulowane.",
+      "hours": {
+        "title": "Godziny w tym projekcie",
+        "allocated": "Allocated",
+        "journaled": "Journaled",
+        "confirmed": "Confirmed",
+        "value": "{hours} h",
+        "note": "Przydzielone — zapisy godzin organizacji dla obiektów pracy tego projektu; z dziennika — wpisy osób w tym projekcie; potwierdzone — wpisy dziennika zatwierdzone przez kierownika. Trzymane osobno, nigdy nie sumowane.",
+        "unavailable": "nie udało się odczytać",
+        "noLedger": "brak zapisów godzin",
+        "truncated": "Liczby z dziennika opierają się na pierwszych {count} wpisach."
+      }
     },
     "eyebrow": "Operacje projektowe",
     "managerOnly": "Ta tablica jest przeznaczona dla kierownika firmy lub agencji.",
@@ -6533,7 +6546,8 @@
         "blockedWhileUploading": "Poczekaj, aż załączniki zostaną przesłane.",
         "blockedFailed": "Usuń lub prześlij ponownie nieudany załącznik.",
         "partialFailure": "Wiadomość została wysłana, ale niektórych załączników nie udało się dołączyć. Spróbuj wysłać je ponownie."
-      }
+      },
+      "languageLabel": "Piszę w języku"
     },
     "launcher": {
       "openLabel": "Skontaktuj się ze wsparciem",
@@ -6591,7 +6605,9 @@
       "sent": "Odpowiedź wysłana."
     },
     "translatedFrom": "Przetłumaczono z {lang}",
-    "showOriginal": "Oryginał ({lang})"
+    "showOriginal": "Oryginał ({lang})",
+    "translationUnavailable": "Oryginał ({lang}) — brak tłumaczenia",
+    "loadError": "Nie udało się teraz wczytać wiadomości. To, co widzisz, nie jest pełnym obrazem — spróbuj ponownie."
   },
   "orgTier1Warning": {
     "eyebrow": "Twoja organizacja",
@@ -6941,7 +6957,8 @@
         "notOpen": "To zapytanie nie jest już otwarte.",
         "error": "Nie udało się zapisać odpowiedzi. Nic nie zostało zmienione."
       }
-    }
+    },
+    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe."
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",
@@ -7138,6 +7155,22 @@
       "sessionsWithStart": "Sesje ze zdarzeniem startu",
       "sessionsReachedValue": "Sesje, które osiągnęły wartość",
       "firstValueEvent": "Pierwsze zdarzenie wartości (sesje konwertujące)"
+    },
+    "campaigns": {
+      "title": "Kampania → oferta → konto",
+      "empty": "W tym oknie nie ma jeszcze zdarzeń oznaczonych kampanią.",
+      "help": "Pierwszy kontakt utm_campaign × utm_content w tym samym oknie, z tym samym filtrem populacji. To wystąpienia zdarzeń, nie unikalni odwiedzający — późniejsza kolumna nie jest podzbiorem wcześniejszej, więc żaden stosunek dwóch kolumn nie jest współczynnikiem konwersji. 25 najczęstszych według wejść; ruch nieoznaczony (organiczny) nie jest wymieniony. Kolumna zainteresowania jest emitowana po stronie serwera, gdzie kampania nie jest dostępna, więc z założenia pozostaje 0 — to brak pomiaru, nie zmierzone zero.",
+      "col": {
+        "campaign": "Kampania / wariant",
+        "landing": "Landings",
+        "jobOpened": "Job opened",
+        "ctaClicked": "CTA clicked",
+        "registrationStarted": "Rozpoczęto rejestrację",
+        "signupCompleted": "Utworzono konto",
+        "returnedToJob": "Powrót do oferty",
+        "compared": "Compared",
+        "interest": "Interest"
+      }
     }
   },
   "languageFeedback": {
@@ -7413,7 +7446,8 @@
       "opportunityCount": "{count} obecnie widocznych ofert pasuje do Twojego profilu.",
       "opportunityUnavailable": "Otwarte zapotrzebowania nie są jeszcze dostępne dla Twojego konta, więc tego nie zmierzono.",
       "opportunityNoWorker": "To jest mierzone dopiero po utworzeniu profilu pracownika.",
-      "closestBasis": "Najbliżej — {what}: pasuje {matched} z {required} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika."
+      "closestBasis": "Najbliżej — {what}: pasuje {matched} z {required} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika.",
+      "historyUnavailable": "Nie udało się teraz odczytać Twojej historii pracy."
     },
     "documentsLabel": "Dokumenty",
     "documentsValue": "{valid} ważnych",
@@ -7449,8 +7483,12 @@
       "historyRange": "{from} – {to}",
       "historyEmpty": "Jeszcze nie zarejestrowano okresów pracy.",
       "historyAria": "Okresy pracy na osi czasu, od {from} do {to}.",
-      "skillsScaleNote": "Długość paska to liczba Twoich wpisów pracy stojących za każdą umiejętnością (pełny pasek = {scale}+), a nie ocena umiejętności."
-    }
+      "skillsScaleNote": "Długość paska to liczba Twoich wpisów pracy stojących za każdą umiejętnością (pełny pasek = {scale}+), a nie ocena umiejętności.",
+      "historyHours": "{hours} godz. zapisane · {confirmed} godz. z wpisem kierownika",
+      "historyUnavailable": "Nie udało się teraz odczytać Twojej historii pracy."
+    },
+    "skillsUnavailable": "Nie udało się teraz odczytać.",
+    "verifiedUnavailable": "Nie udało się teraz odczytać umiejętności z wpisem kierownika."
   },
   "skillClarify": {
     "title": "Moje umiejętności",
@@ -8054,7 +8092,10 @@
         "title": "Wymaga Twojej uwagi",
         "untimed": "{n, plural, one {# zapis} few {# zapisy} many {# zapisów} other {# zapisu}} bez czasu trwania — dodaj godziny",
         "unlabelled": "{n, plural, one {# zapis} few {# zapisy} many {# zapisów} other {# zapisu}} z godzinami, ale bez podanego rodzaju pracy",
-        "unknown": "Nie udało się odczytać otwartych pozycji."
+        "unknown": "Nie udało się odczytać otwartych pozycji.",
+        "offers": "{n, plural, one {# propozycja rezerwacji czeka} few {# propozycje rezerwacji czekają} many {# propozycji rezerwacji czeka} other {# propozycji rezerwacji czeka}} na Twoją odpowiedź",
+        "invitations": "{n, plural, one {# zaproszenie czeka} few {# zaproszenia czekają} many {# zaproszeń czeka} other {# zaproszenia czeka}} na Twoją odpowiedź",
+        "unread": "{n, plural, one {# rozmowa} few {# rozmowy} many {# rozmów} other {# rozmowy}} z nieprzeczytanymi wiadomościami"
       },
       "growth": {
         "title": "Rozwój",
@@ -9423,6 +9464,16 @@
       "handoffQueuedConsentWithheld": "Twoje zainteresowanie jest zapisane. Nie zaznaczyłeś pola o przedstawieniu, więc do Nonstop Group nie trafia nic na Twój temat. Aby zostać przedstawionym, wycofaj i wyraź zainteresowanie ponownie z zaznaczonym polem. LabourMarket.ai nic nie wysłał do pracodawcy.",
       "handoffDelivered": "Zainteresowanie przekazano do Nonstop Group. Nonstop może zwrócić się do pracodawcy w ramach własnego procesu handlowego; LabourMarket.ai nic pracodawcy nie wysłał.",
       "handoffClosed": "Zainteresowanie zapisane. Wcześniejsze przekazanie do Nonstop Group zostało zamknięte, gdy je wycofano; nic nie zostało wysłane."
+    },
+    "intent": {
+      "label": "Moja sytuacja",
+      "states": {
+        "AVAILABLE_NOW": "Mogę zacząć od razu",
+        "AVAILABLE_FROM": "Mogę zacząć od podanej daty",
+        "OPEN_TO_OFFERS": "Pracuję, ale rozważam oferty",
+        "LOOKING_FOR_WORK": "Szukam pracy",
+        "LOOKING_FOR_PROJECTS": "Szukam projektów"
+      }
     }
   },
   "workerIntake": {
@@ -10160,7 +10211,7 @@
       "grantIntro": "To osobna decyzja. Tej firmie zostałyby przekazane wyłącznie dane wymienione poniżej i tylko do tego zapotrzebowania."
     },
     "partnerSupply": {
-      "sectionIntro": "Porównanie z ofertą pracy i wskazanie Twojego nazwiska to nie to samo. To pozwolenie umożliwia LabourMarket.ai szukanie dla Ciebie odpowiedniej pracy u pracodawców i w projektach poza tą platformą, przez zatwierdzoną infrastrukturę partnerską. Przekazywane jest wyłącznie zanonimizowane podsumowanie zawodowe — nigdy Twoje imię i nazwisko ani dane kontaktowe.",
+      "sectionIntro": "Porównanie z ofertą pracy i wskazanie Twojego nazwiska to nie to samo. To pozwolenie umożliwia LabourMarket.ai szukanie dla Ciebie odpowiedniej pracy u pracodawców i w projektach poza tą platformą, przez zatwierdzoną infrastrukturę partnerską. Przekazywane jest wyłącznie podsumowanie zawodowe pozbawione bezpośrednich danych identyfikujących — nigdy Twoje imię i nazwisko ani dane kontaktowe.",
       "noWorkerProfile": "Nie masz jeszcze profilu pracownika, więc nie byłoby czego reprezentować. Najpierw utwórz swój profil zawodowy — te odpowiedzi zostaną zachowane i zaczną obowiązywać, gdy profil powstanie.",
       "statusNotRepresented": "Nie jesteś reprezentowany poza LabourMarket.ai",
       "statusNotRepresentedBody": "Nic na Twój temat nie jest wysyłane poza tę platformę. Twoje konto, CV i dziennik pracy działają dokładnie tak samo bez tego.",
@@ -10372,7 +10423,8 @@
       "title": "Dowód okresu — wyliczony udział miesięczny",
       "chip": "Wyliczone",
       "thisMonth": "{hours} godz. w tym miesiącu (wyliczone)",
-      "sourceLink": "Otwórz zapis okresu"
+      "sourceLink": "Otwórz zapis okresu",
+      "unavailable": "Nie udało się teraz odczytać zapisów okresowych — plan jest pokazany bez nich."
     }
   },
   "workforcePlanning": {
@@ -10495,7 +10547,9 @@
       "noDates": "brak zarejestrowanych dat",
       "undated": "przypisany(a) do {label} — brak zarejestrowanych dat",
       "withoutCommitment": "{count, plural, one {# osoba nie ma} few {# osoby nie mają} many {# osób nie ma} other {# osoby nie ma}} tutaj żadnego zapisu. To nie to samo, co wolny — zatwierdzone nieobecności są wymienione osobno.",
-      "unavailable": "Nie udało się odczytać zaangażowań. To nie to samo, co wolny."
+      "unavailable": "Nie udało się odczytać zaangażowań. To nie to samo, co wolny.",
+      "conflict": "overlap",
+      "conflictNote": "Nakładające się daty są oznaczone: ta sama osoba jest w tych dniach zobowiązana w dwóch miejscach. Ostrzeżenie, nie blokada — oba zapisy pozostają."
     }
   },
   "tasks": {
@@ -11240,7 +11294,8 @@
         "unemployed": "Szuka pracy",
         "volunteer": "Wolontariusz"
       },
-      "why": "Pokazywane są tylko Twoje aktywne relacje zawodowe — każdy wiersz nazywa relację."
+      "why": "Pokazywane są tylko Twoje aktywne relacje zawodowe — każdy wiersz nazywa relację.",
+      "unavailable": "Nie udało się wczytać Twoich relacji. To nie znaczy, że ich nie masz — spróbuj ponownie."
     },
     "invite": {
       "title": "Zaproś",
@@ -11435,7 +11490,9 @@
     "servicesEmpty": "Nic jeszcze nie zaoferowano",
     "servicesUnavailable": "Nie udało się wczytać oferowanych usług",
     "serviceRemote": "Zdalnie",
-    "photoAlt": "Zdjęcie wykonanej pracy"
+    "photoAlt": "Zdjęcie wykonanej pracy",
+    "historyTitle": "Zaimportowana historia",
+    "historyUnavailable": "Nie udało się odczytać zaimportowanej historii"
   },
   "companyGallery": {
     "title": "Galeria",
@@ -12866,7 +12923,7 @@
       "switchContextFailed": "Przełączenie się nie powiodło — Twoja aktywna przestrzeń pozostaje bez zmian.",
       "switchContextUnavailable": "Przełączanie przestrzeni jest teraz niedostępne.",
       "translateBlocked": "Nie mam jeszcze prawdziwego mechanizmu tłumaczenia, więc nie podam fałszywego tłumaczenia. Zobaczysz wiadomość w oryginalnym języku; gdy tłumaczenie zostanie włączone, dodam oba teksty.",
-      "writeEmployerHint": "Możesz napisać do pracodawcy z poziomu konkretnej oferty. Wpisz „znajdź pracę”, a pokażę realne potrzeby — stamtąd możesz się odezwać.",
+      "writeEmployerHint": "Do pracodawcy piszesz z poziomu konkretnego zapotrzebowania: najpierw wyraź zainteresowanie, a wtedy otworzy się rozmowa.",
       "experiencesEligible": "Znalazłem zakończone relacje, które możesz opisać. Wybierz, którą.",
       "experiencesAllSubmitted": "Opisałeś/aś już każdą zakończoną relację. Jedna relacja, jedno doświadczenie.",
       "experiencesNothingYet": "Nie ma jeszcze zakończonej relacji do opisania. Doświadczenie opiera się na realnej pracy, która się zakończyła.",
@@ -13337,7 +13394,15 @@
       "workspaceUnnamedNote": "Nie podano nazwy",
       "workspaceNameThis": "Dodaj nazwę",
       "historyImportChip": "Import danych historycznych",
-      "historyImportHint": "Prześlij plik — przygotuję z niego ludzi, budowy, daty i godziny; potwierdzasz tylko to, co jest niejasne."
+      "historyImportHint": "Prześlij plik — przygotuję z niego ludzi, budowy, daty i godziny; potwierdzasz tylko to, co jest niejasne.",
+      "writeEmployerMany": "Masz kilka zainteresowań — wybierz na karcie, do którego pracodawcy piszesz.",
+      "writeEmployerFailed": "Nie udało się otworzyć rozmowy. Spróbuj z karty oferty.",
+      "acceptOfferOne": "Oto ona. Przycisk poniżej ją potwierdza.",
+      "acceptOfferWhich": "Którą? Wybierz poniżej.",
+      "offerCapacity": {
+        "needsCompany": "Oferowanie ludzi należy do organizacji, a Ty jesteś teraz w swojej przestrzeni osobistej. Wybierz firmę, a zapiszę ofertę.",
+        "personalSpace": "Oferowanie ludzi lub zespołu wymaga organizacji, a Ty jeszcze jej nie masz. Możesz założyć firmę albo zamiast tego zaoferować własną usługę."
+      }
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -15091,7 +15156,7 @@
   },
   "agreements": {
     "title": "Rejestr umów",
-    "intro": "Kanoniczny rejestr umów {org} — pracowniczych i ogólnych. Wyłącznie ewidencja.",
+    "intro": "Rejestr umów {org} — pracowniczych i ogólnych. Wyłącznie ewidencja.",
     "noSignatureNote": "Statusy w tym rejestrze to wyłącznie stany ewidencyjne — nic tutaj nie oznacza, że umowa jest podpisana, prawnie ważna lub wiążąca. LabourMarket.ai nie wykonuje podpisów prawnych: podpisanie odbywa się poza platformą, a załączony plik to jedynie dostarczony przez Ciebie dowód.",
     "relationshipNote": "Lista kontraktów powyżej to wcześniejszy osobisty rejestr handlowy i działa bez zmian. Nowe umowy należą tutaj.",
     "unavailable": "Rejestru umów nie można teraz wyświetlić.",
@@ -16226,7 +16291,19 @@
       "withdrawConfirm": "Wycofaj",
       "withdrawCancel": "Zachowaj powiązanie",
       "withdrawDone": "Wycofano. Organizacja zachowuje swój zapis; nie wskazuje już Ciebie.",
-      "unnamedOrganization": "Organizacja"
+      "unnamedOrganization": "Organizacja",
+      "suggestions": {
+        "title": "Umiejętności wymienione w zapisach organizacji",
+        "intro": "Słowa organizacji o Twojej pracy wskazują te umiejętności. Nic nie zostanie dodane, dopóki tego nie potwierdzisz.",
+        "why": "Wymienione jako „{terms}” w {count, plural, one {# zapisie} few {# zapisach} many {# zapisach} other {# zapisach}}",
+        "add": "Add",
+        "adding": "Adding…",
+        "added": "Dodano do profilu",
+        "already": "Już w Twoim profilu",
+        "notNow": "Not now",
+        "error": "Nie udało się dodać. Spróbuj ponownie.",
+        "selfDeclaredNote": "Dodana umiejętność jest zadeklarowana samodzielnie — niezweryfikowana."
+      }
     },
     "plan": {
       "title": "Co znaleziono i co jest przygotowane",
@@ -16727,7 +16804,8 @@
       "partners": {
         "title": "Klienci i partnerzy",
         "subtitle": "Z kim współpracujesz: klienci, agencje i wspólne potrzeby.",
-        "empty": "Nie ma jeszcze relacji z klientami ani partnerami. Agencja może zaprosić Cię do współpracy — jej propozycje pojawią się tutaj."
+        "empty": "Nie ma jeszcze relacji z klientami ani partnerami. Agencja może zaprosić Cię do współpracy — jej propozycje pojawią się tutaj.",
+        "unavailable": "Nie udało się wczytać połączeń partnerskich. To nie znaczy, że ich nie ma — spróbuj ponownie."
       },
       "education": {
         "title": "Nauka i programy",
@@ -16739,7 +16817,18 @@
         "hoursGridTitle": "Miesięczna siatka godzin",
         "hoursGridNote": "Ten sam import rozumie siatkę miesięczną (osoba × dzień). Codzienne wprowadzanie godzin znajduje się w obszarze godzin pracy.",
         "hoursDoor": "Godziny pracy",
-        "evidenceReportsDoor": "Raporty dowodowe"
+        "evidenceReportsDoor": "Raporty dowodowe",
+        "imports": {
+          "title": "Your imports",
+          "empty": "Nic nie zostało jeszcze zaimportowane.",
+          "unavailable": "Nie udało się teraz odczytać listy importów.",
+          "status": {
+            "staged": "Prepared",
+            "committed": "Recorded",
+            "withdrawn": "Withdrawn",
+            "failed": "Failed"
+          }
+        }
       },
       "settings": {
         "title": "Ustawienia organizacji",
