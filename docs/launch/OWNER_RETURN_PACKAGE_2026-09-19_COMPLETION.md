@@ -960,3 +960,34 @@ Every change this window ADDS a door or names a truth. Protected capabilities re
 ### O14. NEXT ACTION
 
 Owner: answer O4 items 1–3 (R-15, R-14, institution) — three sentences; each draft is a merge away and the migrations are prepared with rollbacks and contracts. Then **Ramūnas walks the real Nonstop client workflow on production** and names the first transition that still forces WhatsApp — deployment visibility is the predicted one, and it is the next RED packet only if a real walk confirms it.
+
+---
+
+## P. WINDOW 6 — 2026-09-20 — owner decisions 1–3 applied, verified; development stopped
+
+| | |
+|---|---|
+| main | `11e58866` (#1805 → `2b2c97ff`, #1804 → `327f77fd`, #1807 → `11e58866`) |
+| production build | see the health line recorded below the table |
+| migration ledger | **299** — `20260920051619 20260919190000_demand_lifecycle_colleague_v1`, `20260920052103 20260919210000_relationship_journal_reviewable_v1` |
+| **R-15** | APPLIED + MERGED. Drift check clean (main = origin = prod `57b278b1`, functions absent, UPDATE policy owner-only, diff = the ten prepared files). Readback: both functions SECURITY DEFINER, `search_path=public`, anon EXECUTE false / authenticated true / public false; UPDATE policy byte-identical; 4 policies, 2 triggers unchanged. |
+| **R-14** | MERGED (owner semantics = YES). Diff re-verified = the 20 prepared files; gate `propositionConsent.given !== true → withheld, row stays queued`. Production state: 1 handoff row (`closed`, given=false), 0 queued — the gate has nothing to hold yet; behaviour is pinned by `handoff-dispatch.test.ts` (withheld rows never posted / never touched; tampered `"true"` string withheld) and the handoff guard. |
+| **INSTITUTION** | APPLIED + MERGED. Readback: `relationship_types.journal_reviewable` employee=true, student=true, all others false; `grants_worker_visibility` unchanged on all ten (student still false); function SECURITY DEFINER, `search_path=public`, reads `rt.journal_reviewable`, literal gone, anon EXECUTE false / authenticated true; the one production student engagement still `journal_review_enabled=false`. |
+| **hostile / legitimate contracts** (live functions, every block aborted by RAISE, zero residue) | R-15: outsider → `not_found`; role `member` → `not_found`; colleague on draft → `invalid_transition`; colleague close → `closed/colleague`; colleague raw UPDATE under RLS → **0 rows**; colleague reopen → `submitted`, again → `already_open`; creator close/again/reopen → `closed/admin`, `already_closed`, `submitted`; outsider reopen → `not_found`; anon → `42501`; payload + agency_client_id + notes + title md5 identical; residue 0 audit rows, status `submitted`, 0 probe memberships. INSTITUTION: other-org manager → `not_authorized`; learner on own engagement → `not_authorized`; provider on student → `enabled` (flag true) then `disabled`; org owner on an active `employee` → `enabled` (identical to before); org owner on a non-reviewable relationship (`owner`) → `not_a_member_engagement`; anon → `42501`; `student.grants_worker_visibility` false; residue 0. |
+| **security** | CRITICAL 0 · HIGH 0. Advisors unchanged: ERROR 1 (`worker_absence_scheduling` definer view — documented exception), WARN 9 anon SECDEF (public preview set), 406 authenticated SECDEF (class; +2 = the two new gated functions), leaked-password protection OFF (owner setting). |
+| **capability loss** | NONE. UPDATE policy on demand untouched; worker visibility untouched; ARCH-2 untouched; every pre-existing path returns the same answer in the contracts. |
+| **drafts left** | #1803 (R-12, owner waiver number), #1806 (R-6 v9; ratchets need a restack to 299 before merge). Both remain classified per §O. |
+
+Development stopped here by owner instruction. Nothing from §O4 items 4–9, no
+agency deployment/replacement schema, no headcount, no project thread, no RPL
+expansion, no redesign.
+
+**Real-user phase:** `docs/launch/RAMUNAS_NONSTOP_REAL_WALK_2026-09-20.md` —
+the shortest real production walk for Ramūnas, starting from the production
+facts (Nonstop is `company_type = construction` today, has 2 roster workers,
+2 submitted needs and **no real client connection**), thirteen steps with the
+seven-field record per step, and the one question that decides the next P0.
+
+**Launch rule now in force:** worker admit · employer admit · agency admit
+with the known off-platform limitation · institution practice-confirmation
+eligible for real validation (applied 05:21 UTC).
