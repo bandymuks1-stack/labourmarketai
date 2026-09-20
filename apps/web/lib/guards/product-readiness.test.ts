@@ -2601,7 +2601,14 @@ describe("no migration files added by this sprint", () => {
 // employee + student; set_engagement_journal_review reads it). RED (column +
 // SECDEF redefinition), owner-approved and APPLIED 2026-09-20 (ledger
 // 20260920052103); contract run live and rolled back (PR #1807). RECOUNTED: 298.
-const SPRINT_BASELINE = 298;
+// Bumped 298 -> 299 for 20260920120000_search_previews_plpgsql_v1 (R-B: the
+// anonymous board's search_public_vacancy_previews_v1 rewritten in plpgsql
+// with one static-predicate branch per parameter shape so the profession
+// filter is served by public_vacancies_active_profession_idx — 617 buffers /
+// 387 ms vs ~14,878 / 8.3 s; same signature, ACL, RETURNS TABLE and NULL
+// projection). RED (SECURITY DEFINER replace), DRAFT needs-human-gate, NOT
+// applied; dry-run proven on production in an aborted DO block. RECOUNTED: 299.
+const SPRINT_BASELINE = 299;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
