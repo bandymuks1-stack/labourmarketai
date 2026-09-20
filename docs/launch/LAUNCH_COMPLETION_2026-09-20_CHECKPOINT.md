@@ -5,8 +5,9 @@ name only the genuine RED / external / human gates). This file is the save point
 that pass. It extends `OWNER_RETURN_PACKAGE_2026-09-19_COMPLETION.md` (§P is the last
 receipt); nothing here supersedes an owner decision recorded there.
 
-**State at pause:** branch `feat/cc/launch-completion-2026-09-20`, pushed, NO pull
-request yet. Base = main = production `49572592` (health ok, dub1). Migration ledger
+**State:** branch `feat/cc/launch-completion-2026-09-20` — GREEN pull request #1812
+MERGED 2026-09-20 17:09 UTC (squash `b06ce8f3`); the CodeQL regex-escaping
+follow-up landed on main right after; the three RED drafts are separate PRs (see 4). Base = main = production `49572592` (health ok, dub1). Migration ledger
 299 = repo (last `20260920052103`). Nothing was applied to production; no production
 row was written; every production probe ran read-only or inside a DO block aborted by
 RAISE (zero residue).
