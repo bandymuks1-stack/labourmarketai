@@ -313,7 +313,7 @@
     "disclosureTitle": "Vor der Aufnahme",
     "disclosureProcessing": "Ihre Aufnahme wird an einen von LabourMarket.ai kontrollierten Verarbeitungsserver gesendet, um in Text umgewandelt zu werden. Es wird kein Sprachdienst von Drittanbietern genutzt.",
     "disclosureWhy": "Sie wird nur zur Erstellung des folgenden Textes verwendet — für nichts anderes.",
-    "disclosureRetention": "Die Aufnahme wird nur aufbewahrt, bis Ihr Text fertig ist (höchstens 30 Tage), und Sie können sie jederzeit löschen.",
+    "disclosureRetention": "Die Aufnahme selbst wird nicht aufbewahrt: Sie wird gelöscht, sobald Ihr Text fertig ist.",
     "disclosureNoAutoWrite": "Nichts wird zu Ihrem Tagebuch, Profil oder Lebenslauf hinzugefügt, bevor Sie den Text geprüft und jeden Punkt selbst gespeichert haben.",
     "disclosureAck": "Ich verstehe und stimme der Sprachverarbeitung zu",
     "start": "Aufnahme starten",

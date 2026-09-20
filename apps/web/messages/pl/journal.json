@@ -142,7 +142,7 @@
     "disclosureTitle": "Przed nagraniem",
     "disclosureProcessing": "Twoje nagranie jest wysyłane na serwer przetwarzania kontrolowany przez LabourMarket.ai w celu zamiany na tekst. Nie są używane zewnętrzne usługi głosowe.",
     "disclosureWhy": "Nagranie służy wyłącznie do utworzenia poniższego tekstu — niczemu innemu.",
-    "disclosureRetention": "Nagranie jest przechowywane tylko do momentu przygotowania tekstu (maksymalnie 30 dni) i możesz je usunąć w każdej chwili.",
+    "disclosureRetention": "Samo nagranie nie jest przechowywane: jest usuwane, gdy tylko Twój tekst jest gotowy.",
     "disclosureNoAutoWrite": "Nic nie trafia do dziennika, profilu ani CV, dopóki sam nie sprawdzisz tekstu i nie zapiszesz każdej pozycji.",
     "disclosureAck": "Rozumiem i zgadzam się na przetwarzanie głosu",
     "start": "Rozpocznij nagrywanie",

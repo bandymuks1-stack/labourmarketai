@@ -10481,6 +10481,21 @@
       "partial": "{count} davon konnten nicht vollständig gezählt werden — etwas Reales hat keine Daten, die Zahl oben ist also eine Untergrenze.",
       "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
       "denominatorNote": "Gezählt in Kalendertagen. Vertragsstunden werden nicht erfasst, dies ist also keine VZÄ-Kennzahl."
+    },
+    "committedWhere": {
+      "title": "Wer ist wo gebunden",
+      "intro": "Die datierten Verpflichtungen jeder Person — Projektzuweisungen, angenommene Buchungen und genehmigte Dienstreisen — aus denselben Datensätzen, die Kalender und Kapazitätsantwort nutzen. Nichts hier ist abgeleitet.",
+      "kind": {
+        "project": "Projekt",
+        "booking": "Buchung",
+        "trip": "Dienstreise"
+      },
+      "untitled": "ohne Titel",
+      "openEnded": "ab {start}, kein Enddatum erfasst",
+      "noDates": "keine Daten erfasst",
+      "undated": "zugewiesen zu {label} — keine Daten erfasst",
+      "withoutCommitment": "{count, plural, one {# Person hat} other {# Personen haben}} hier nichts erfasst. Das ist nicht dasselbe wie frei — genehmigte Abwesenheiten stehen separat.",
+      "unavailable": "Verpflichtungen konnten nicht gelesen werden. Das ist nicht dasselbe wie frei."
     }
   },
   "tasks": {

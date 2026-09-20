@@ -7,7 +7,7 @@ import {
   getModuleRoute,
   moduleAttentionSignalsAreValid,
 } from "@/lib/dashboard/dashboard-module-registry";
-import { VISIBLE_PRIMARY_NAV_ITEMS } from "@/lib/config/navigation";
+import { WORKER_TABS } from "@/lib/today/today-route";
 import { activeLocales } from "@/lib/i18n/config";
 import type { Role } from "@/lib/auth/actions";
 
@@ -26,7 +26,7 @@ import type { Role } from "@/lib/auth/actions";
  * inside the owner-frozen IA (map-first, six primary tabs, utility-only
  * account menu):
  *
- *   Žemėlapis primary tab → /dashboard/market-map
+ *   PASAULIS tab → embedded world map + full-map link → /dashboard/market-map
  *     → connections bridge → /dashboard/service-requests  (FIND half)
  *     → connections bridge → /dashboard/services          (OFFER half)
  *   plus the halves cross-link each other, the command palette carries both,
@@ -42,12 +42,28 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const ALL_ROLES: readonly Role[] = ["worker", "company", "agency", "customer"];
 
 describe("the door: the loop hangs off a primary nav tab that really exists", () => {
-  it("Žemėlapis (market_map) is a primary nav tab at /dashboard/market-map", () => {
-    // The map is the marketplace's owner-designated primary surface
-    // (map-first correction). If the map tab is ever demoted, the loop
-    // loses its door and this guard must fail.
-    const tab = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "market_map");
-    expect(tab?.href).toBe("/dashboard/market-map");
+  it("the map is reached from the worker's PASAULIS tab and from the universal command search", () => {
+    // R-11 reclassification (2026-09-19): the catalogue primary nav tabs
+    // render only in the admin `full` chrome, so asserting a `market_map`
+    // entry in VISIBLE_PRIMARY_NAV_ITEMS was a proof that could not fail while
+    // no real user saw the tab. The door that really renders: PASAULIS
+    // (WORKER_TABS.world → /dashboard/opportunities) embeds the world map in a
+    // top-level section and links the full map page from its header, both
+    // before the first collapsed <details>; the top-bar command search lists
+    // `market_map` as a starter command at every width.
+    const world = WORKER_TABS.find((t) => t.id === "world");
+    expect(world?.href).toBe("/dashboard/opportunities");
+    const page = read("app/[locale]/dashboard/opportunities/page.tsx");
+    const mapSection = page.indexOf('data-testid="opportunities-map"');
+    const fullMapLink = page.indexOf('data-testid="opportunities-map-full-link"');
+    const firstDetails = page.indexOf("<details");
+    expect(mapSection).toBeGreaterThan(-1);
+    expect(fullMapLink).toBeGreaterThan(-1);
+    expect(mapSection).toBeLessThan(firstDetails);
+    expect(fullMapLink).toBeLessThan(firstDetails);
+    expect(page).toMatch(/href=\{`\/\$\{locale\}\/dashboard\/market-map`\}/);
+    const finder = read("components/app/command-finder.tsx");
+    expect(finder).toMatch(/STARTER_COMMAND_IDS[^;]*"market_map"/);
   });
 
   it("the map's connections bridge links BOTH loop halves", () => {

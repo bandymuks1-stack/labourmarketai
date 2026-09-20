@@ -10481,6 +10481,21 @@
       "partial": "{count} iš jų nepavyko suskaičiuoti iki galo — kai kas neturi datų, todėl skaičius viršuje yra minimumas.",
       "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
       "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
+    },
+    "committedWhere": {
+      "title": "Kas kur įsipareigojęs",
+      "intro": "Kiekvieno žmogaus įsipareigojimai su datomis — priskyrimai projektams, priimti užsakymai ir patvirtintos komandiruotės — iš tų pačių įrašų, kuriuos naudoja kalendorius ir pajėgumų atsakymas. Nieko čia nespėjama.",
+      "kind": {
+        "project": "projektas",
+        "booking": "užsakymas",
+        "trip": "komandiruotė"
+      },
+      "untitled": "be pavadinimo",
+      "openEnded": "nuo {start}, pabaigos data neįrašyta",
+      "noDates": "datos neįrašytos",
+      "undated": "priskirtas prie {label} — datos neįrašytos",
+      "withoutCommitment": "{count, plural, one {# žmogus čia neturi} few {# žmonės čia neturi} many {# žmogaus čia neturi} other {# žmonių čia neturi}} jokio įrašo. Tai nereiškia, kad laisvas — patvirtinti nebuvimai rodomi atskirai.",
+      "unavailable": "Įsipareigojimų nepavyko nuskaityti. Tai nereiškia, kad visi laisvi."
     }
   },
   "tasks": {
