@@ -10,6 +10,7 @@ import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
+import { readCommunicationLocale, viewerLocaleFor } from "@/lib/i18n/communication-locale";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
@@ -105,6 +106,14 @@ export default async function ConversationDetailPage({
   // language through the existing AI runtime (egress-gated, audited), the
   // original always one tap away. Without an owner egress grant every
   // message comes back as its original — honestly, with a language badge.
+  //
+  // COMM-1: the viewer's language is the one they chose to READ messages in
+  // (profiles.communication_locale — any of the 13 communication languages,
+  // including uk / ka which have no UI route), falling back to the page's UI
+  // locale exactly as before while nothing is chosen or the owner-gated
+  // column is not applied.
+  const communicationLocale = await readCommunicationLocale(supabase, user.id);
+  const viewerLocale = viewerLocaleFor(communicationLocale, locale);
   const viewerTexts = await resolveViewerTexts(
     messages.map((m) => ({
       id: m.id,
@@ -112,7 +121,7 @@ export default async function ConversationDetailPage({
       original_language:
         (m as { original_language?: string | null }).original_language ?? null,
     })),
-    locale,
+    viewerLocale,
     user.id,
   );
 

@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Message language",
+    "intro": "Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "I read messages in",
+    "sameAsInterface": "Same as the interface",
+    "saved": "Saved.",
+    "error": "The change could not be saved and was reverted. Please try again.",
+    "unavailable": "This setting is not available yet — messages follow the interface language until it is."
+  },
   "publicDemand": {
     "title": "Live market demand",
     "subtitleAgency": "What the public market asks for right now — the same pool your candidates see on the board.",
