@@ -997,7 +997,12 @@ describe("NO new DB migration in this PR", () => {
     //   (institution loop: journal review on learner engagements, RED,
     //   APPLIED 2026-09-20, ledger 20260920052103). Not this read layer's
     //   file. RECOUNTED: 298.
-    expect(count).toBeLessThanOrEqual(298);
+    // Bumped 298 -> 299 for 20260920121000_agency_offered_candidates_v2_revocation_v1
+    //   (ARCH-4: active-connection / active-share gate on
+    //   list_agency_offered_candidates_for_request_v2, RED DRAFT,
+    //   needs-human-gate, NOT applied). Not this read layer's file.
+    //   RECOUNTED: 299.
+    expect(count).toBeLessThanOrEqual(299);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -1416,6 +1416,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260919190000_demand_lifecycle_colleague_v1.sql",
       // 2026-09-19 — institution loop: relationship_types.journal_reviewable + data-driven set_engagement_journal_review. RED, owner-approved and APPLIED 2026-09-20 (ledger 20260920052103); contract run live and rolled back (PR #1807).
       "20260919210000_relationship_journal_reviewable_v1.sql",
+      // 2026-09-20 — ARCH-4: list_agency_offered_candidates_for_request_v2 gains the active-connection / active-share gate v1 already carries (same signature / RETURNS TABLE / ACL). RED (SECURITY DEFINER replace), DRAFT needs-human-gate, NOT applied.
+      "20260920121000_agency_offered_candidates_v2_revocation_v1.sql",
 ]);
   });
 

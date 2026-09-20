@@ -2606,7 +2606,14 @@ describe("no migration files added by this sprint", () => {
 // employee + student; set_engagement_journal_review reads it). RED (column +
 // SECDEF redefinition), owner-approved and APPLIED 2026-09-20 (ledger
 // 20260920052103); contract run live and rolled back (PR #1807). RECOUNTED: 298.
-const SPRINT_BASELINE = 298;
+// Bumped 298 -> 299 for 20260920121000_agency_offered_candidates_v2_revocation_v1
+// (ARCH-4: list_agency_offered_candidates_for_request_v2 — the function
+// bridge-read.ts prefers — gains the active-connection AND active-share joins
+// v1 already carries, so a severed client no longer reads the agency's
+// accepted / declined offers (note + worker_id). Same signature, RETURNS TABLE
+// and ACL; no grant, policy, table or row). RED (SECURITY DEFINER replace),
+// DRAFT needs-human-gate, NOT applied. RECOUNTED: 299.
+const SPRINT_BASELINE = 299;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
