@@ -74,6 +74,10 @@ export interface CompanyDemand {
    *  expansion. Null ⇒ nothing derivable (honest unstructured). */
   readonly needSource: NeedSkillSource | null;
   readonly createdAt: string;
+  /** R-15: true when the caller created the row. Close/reopen are shared with
+   *  colleagues (has_org_demand_access); the §19 confirm act and every field
+   *  edit stay the creator's, and the surface offers only what will land. */
+  readonly ownedByCaller: boolean;
 }
 
 // Canonical demand → MatchNeed derivation now lives in
@@ -101,17 +105,22 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return [];
-  if ((await resolveEmployerCompanyContext()).kind !== "ok") return [];
+  const ctx = await resolveEmployerCompanyContext();
+  if (ctx.kind !== "ok") return [];
   try {
     // DIRECTION (SEP-4). Scouting looks for PEOPLE to fill a need. An agency's
     // own `agency_offer` is a declaration that it HAS people, and it lives in
     // the same table with the same columns — listing it here offered to scout
     // candidates for a need that was never recorded. Classified rather than
     // filtered in the query, so an unrecognised kind is dropped, never guessed.
+    // R-15: the ORGANIZATION's needs — own rows plus rows stamped with the
+    // active workspace's organization (the SELECT policy already grants a
+    // colleague with has_org_demand_access exactly that; this read just
+    // stopped asking for less than it was allowed).
     const { data } = await asAny(supabase)
       .from("customer_requests")
-      .select("id, title, status, payload, created_at, kind")
-      .eq("profile_id", user.id)
+      .select("id, title, status, payload, created_at, kind, profile_id")
+      .or(`profile_id.eq.${user.id},organization_id.eq.${ctx.organizationId}`)
       .order("created_at", { ascending: false })
       .limit(50);
     return ((data ?? []) as {
@@ -121,7 +130,9 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
       payload: unknown;
       created_at: string;
       kind: string | null;
+      profile_id: string | null;
     }[]).filter((r) => isDemandKind(r.kind)).map((r) => ({
+      ownedByCaller: r.profile_id === user.id,
       id: r.id,
       // RAW stored title. The data layer does not get to pick a display
       // string: an em-dash here would have been an internal placeholder
@@ -189,14 +200,16 @@ export async function runScouting(
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "no-company-context", reason: employer.reason };
 
-  // Own demand only (RLS also enforces profile_id = auth.uid()).
+  // R-15: own row OR a row of the active workspace's organization (SELECT
+  // policy: creator or has_org_demand_access). Pinned to the active org so a
+  // deep link from another workspace still resolves to nothing here.
   const { data: req, error } = await asAny(supabase)
     .from("customer_requests")
     .select(
-      "id, title, status, need_summary, role_or_work_type, notes, country, location, language_requirement, payload, created_at",
+      "id, title, status, need_summary, role_or_work_type, notes, country, location, language_requirement, payload, created_at, profile_id",
     )
     .eq("id", requestId)
-    .eq("profile_id", user.id)
+    .or(`profile_id.eq.${user.id},organization_id.eq.${employer.organizationId}`)
     .maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND || error.code === UNDEFINED_COLUMN) {
@@ -250,6 +263,7 @@ export async function runScouting(
     structured: parseStructuredNeed(req.payload) !== null,
     needSource: source,
     createdAt: req.created_at,
+    ownedByCaller: req.profile_id === user.id,
   };
   // Nothing derivable at all (no human structure, nothing recognizable in
   // the text, no detectable profession) → honest unstructured state.

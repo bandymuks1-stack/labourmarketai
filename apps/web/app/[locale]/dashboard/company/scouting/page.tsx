@@ -491,8 +491,9 @@ export default async function CompanyScoutingPage({
           requestId={result.demand.id}
           status={result.demand.status}
           showConfirm={
-            result.demand.needSource === "recognized_from_text" ||
-            result.demand.needSource === "profession_expanded"
+            result.demand.ownedByCaller &&
+            (result.demand.needSource === "recognized_from_text" ||
+              result.demand.needSource === "profession_expanded")
           }
           labels={{
             confirm: t("lifecycle.confirm"),
