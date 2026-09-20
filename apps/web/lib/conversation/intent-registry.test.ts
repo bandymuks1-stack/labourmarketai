@@ -95,7 +95,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // the CV was empty about a photo that WAS stored. A read over the ONE
     // personal-gallery projection, shown back inside the thread.
     // 76 → 78 (2026-09-19): agency-invites (client bridge) + propose-booking.
-    expect(entries.length).toBe(78);
+    // 78 → 79 (2026-09-20): accept-offer — a decision by sentence lands on the
+    // ONE offer card (the button stays the commitment).
+    expect(entries.length).toBe(79);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -104,15 +106,18 @@ describe("the intent registry is the enumerable routing contract", () => {
     // neither acts nor refuses cleanly — the recorded gap G18. Growing this
     // set silently would hide product shrinkage; shrinking it means an
     // engine shipped and the copy must change with it.
+    // write-employer left this set 2026-09-20: it now resolves the ONE active
+    // interest to the same contact action the interest card uses.
     expect(intentsWhere((d) => d.access === "blocked")).toEqual([
       "reminder",
       "translate",
-      "write-employer",
     ]);
   });
 
   it("the write set is exactly the flows that can persist — all behind explicit confirmation", () => {
     expect(intentsWhere((d) => d.access === "write")).toEqual([
+      // "priimu pasiūlymą" — resolves to the one offer card; the button commits.
+      "accept-offer",
       // Documents first-class: a document recorded by sentence.
       "add-document",
       // PROJECT → WORK: a work package by sentence.
@@ -142,6 +147,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       "switch-context",
       // §14 WORK PERFORMED → RESULT: a task moved to a real status, by sentence.
       "task-status",
+      // "parašyk darbdaviui" — the one active interest opens its conversation.
+      "write-employer",
     ]);
   });
 

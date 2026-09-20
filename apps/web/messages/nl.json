@@ -13382,7 +13382,11 @@
       "writeEmployerMany": "Je hebt meerdere interesses — kies op de kaart aan welke werkgever je schrijft.",
       "writeEmployerFailed": "Het gesprek kon niet worden geopend. Probeer het vanaf de kaart van de vacature.",
       "acceptOfferOne": "Hier is het. Met de knop hieronder bevestig je het.",
-      "acceptOfferWhich": "Welke? Kies hieronder."
+      "acceptOfferWhich": "Welke? Kies hieronder.",
+      "offerCapacity": {
+        "needsCompany": "Mensen aanbieden hoort bij een organisatie, en je zit nu in je persoonlijke ruimte. Kies het bedrijf, dan leg ik het aanbod meteen vast.",
+        "personalSpace": "Mensen of een team aanbieden vraagt om een organisatie, en die heb je nog niet. Je kunt een bedrijf aanmaken, of je eigen dienst aanbieden."
+      }
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

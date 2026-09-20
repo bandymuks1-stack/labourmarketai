@@ -13382,7 +13382,11 @@
       "writeEmployerMany": "You have several interests — pick on the card which employer you're writing to.",
       "writeEmployerFailed": "The conversation couldn't be opened. Try from the opening's card.",
       "acceptOfferOne": "Here it is. The button below confirms it.",
-      "acceptOfferWhich": "Which one? Choose below."
+      "acceptOfferWhich": "Which one? Choose below.",
+      "offerCapacity": {
+        "needsCompany": "Offering people belongs to an organisation, and you are in your personal space right now. Choose the company and I will record the offer.",
+        "personalSpace": "Offering people or a team needs an organisation, and you do not have one yet. You can create a company, or offer your own service instead."
+      }
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

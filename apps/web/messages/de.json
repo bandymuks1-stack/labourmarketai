@@ -13382,7 +13382,11 @@
       "writeEmployerMany": "Du hast mehrere Interessen — wähl auf der Karte, welchem Arbeitgeber du schreibst.",
       "writeEmployerFailed": "Das Gespräch konnte nicht geöffnet werden. Versuch es über die Karte des Angebots.",
       "acceptOfferOne": "Hier ist es. Mit dem Button unten bestätigst du es.",
-      "acceptOfferWhich": "Welches? Wähl unten aus."
+      "acceptOfferWhich": "Welches? Wähl unten aus.",
+      "offerCapacity": {
+        "needsCompany": "Menschen anzubieten gehört zu einer Organisation, und du bist gerade in deinem persönlichen Bereich. Wähle das Unternehmen — dann halte ich das Angebot sofort fest.",
+        "personalSpace": "Um Menschen oder ein Team anzubieten, braucht es eine Organisation, und du hast noch keine. Du kannst ein Unternehmen anlegen oder deine eigene Leistung anbieten."
+      }
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

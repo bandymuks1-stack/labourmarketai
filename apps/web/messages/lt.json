@@ -13382,7 +13382,11 @@
       "writeEmployerMany": "Susidomėjimų turi kelis — pasirink kortelėje, kuriam darbdaviui rašai.",
       "writeEmployerFailed": "Pokalbio atidaryti nepavyko. Pabandyk iš pasiūlymo kortelės.",
       "acceptOfferOne": "Štai. Patvirtinsi mygtuku žemiau.",
-      "acceptOfferWhich": "Kurį? Pasirink žemiau."
+      "acceptOfferWhich": "Kurį? Pasirink žemiau.",
+      "offerCapacity": {
+        "needsCompany": "Darbuotojų pasiūlymas priklauso organizacijai, o dabar dirbi asmeninėje erdvėje. Pasirink įmonę — ir iškart užrašysiu pasiūlymą.",
+        "personalSpace": "Kad galėtum siūlyti žmones ar komandą, reikia organizacijos — kol kas jos neturi. Gali sukurti įmonę arba pasiūlyti savo paties paslaugą."
+      }
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
