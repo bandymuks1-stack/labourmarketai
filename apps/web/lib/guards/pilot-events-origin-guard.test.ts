@@ -43,7 +43,9 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-const insertMock = vi.fn(async () => ({ error: null }));
+const insertMock = vi.fn<(row: Record<string, unknown>) => Promise<{ error: null }>>(
+  async () => ({ error: null }),
+);
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
     auth: { getUser: async () => ({ data: { user: null }, error: null }) },
