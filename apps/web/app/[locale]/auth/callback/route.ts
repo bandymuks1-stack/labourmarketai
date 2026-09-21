@@ -212,6 +212,22 @@ export async function GET(
           code: nameRepairError.code,
         });
       }
+      else {
+        // Keep the worker projection aligned when it contains the same legacy
+        // synthetic value. The equality guard prevents overwriting a worker
+        // display name the person deliberately changed elsewhere.
+        const { error: workerNameRepairError } = await supabase
+          .from("workers")
+          .update({ display_name: providerName })
+          .eq("profile_id", user.id)
+          .eq("display_name", storedName);
+        if (workerNameRepairError) {
+          console.warn("[auth/callback] worker OAuth display-name repair skipped", {
+            trace: traceId,
+            code: workerNameRepairError.code,
+          });
+        }
+      }
     }
 
     // V8 W4-B item 2: honor the ACCOUNT language on a device that carries no
