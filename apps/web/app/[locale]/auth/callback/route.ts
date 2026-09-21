@@ -7,6 +7,7 @@ import {
   resolvePostLoginLocale,
 } from "@/lib/auth/locale-preference";
 import { readOauthTraceId } from "@/lib/auth/oauth-trace";
+import { decideOauthDisplayNameRepair } from "@/lib/auth/oauth-display-name";
 import {
   classifyAuthRedirectError,
   classifyExchangeFailure,
@@ -173,9 +174,53 @@ export async function GET(
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("onboarded_at, locale")
+      .select("onboarded_at, locale, full_name, email")
       .eq("id", user.id)
       .single();
+
+    // Social OAuth identity repair (lib/auth/oauth-display-name.ts): a
+    // profile whose full_name is still the onboarding e-mail-local-part
+    // default gets the provider's real name on a successful callback. The
+    // decision is pure and pinned by tests; the writes below are own-row RLS
+    // and compare-and-set on the exact stored value, so a human edit that
+    // races this callback is never overwritten. Best-effort: a write failure
+    // is logged and the sign-in proceeds.
+    const profileRow = profile as { full_name?: string | null; email?: string | null } | null;
+    const repair = decideOauthDisplayNameRepair({
+      storedFullName: profileRow?.full_name,
+      profileEmail: profileRow?.email,
+      userEmail: user.email,
+      userMetadata: (user.user_metadata ?? {}) as Record<string, unknown>,
+    });
+    if (repair.repair) {
+      const { error: nameRepairError } = await supabase
+        .from("profiles")
+        .update({ full_name: repair.providerName })
+        .eq("id", user.id)
+        .eq("full_name", repair.syntheticName);
+      if (nameRepairError) {
+        console.warn("[auth/callback] OAuth display-name repair skipped after write failure", {
+          trace: traceId,
+          code: nameRepairError.code,
+        });
+      } else {
+        // Keep the worker projection aligned when it carries the same
+        // synthetic value (20260805090100 backfilled it from full_name). The
+        // equality guard leaves a display name the person changed elsewhere
+        // untouched.
+        const { error: workerNameRepairError } = await supabase
+          .from("workers")
+          .update({ display_name: repair.providerName })
+          .eq("profile_id", user.id)
+          .eq("display_name", repair.syntheticName);
+        if (workerNameRepairError) {
+          console.warn("[auth/callback] worker OAuth display-name repair skipped", {
+            trace: traceId,
+            code: workerNameRepairError.code,
+          });
+        }
+      }
+    }
 
     // V8 W4-B item 2: honor the ACCOUNT language on a device that carries no
     // explicit choice. Priority (pinned by lib/auth/locale-preference.test.ts):

@@ -3856,7 +3856,7 @@
       "rateLimited": "Per daug bandymų. Pabandyk vėliau.",
       "generic": "Įvyko klaida. Bandyk dar kartą.",
       "oauth": {
-        "missing_code": "Google grąžino atgal be prisijungimo kodo. Pabandykite dar kartą — jei kartojasi, perkraukite naršyklę.",
+        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandykite dar kartą — jei kartojasi, perkraukite naršyklę.",
         "exchange_failed": "Prisijungti nepavyko. Pabandykite dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
         "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunkite ir prisijunkite iš naujo.",
         "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandykite dar kartą — jei tęsiasi, atsiųskite žemiau pateiktą trace ID.",
@@ -3879,7 +3879,7 @@
         "service_provider": "Paslaugų teikėjas",
         "admin": "Administratorius"
       },
-      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — kitame žingsnyje patikslinsi, ko atėjai.",
+      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su socialine paskyra arba el. paštu ir slaptažodžiu — kitame žingsnyje patikslinsi, ko atėjai.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
@@ -3908,7 +3908,7 @@
     },
     "login": {
       "headline": "Prisijungti",
-      "subcopy": "Prisijunk su Google arba el. paštu ir slaptažodžiu.",
+      "subcopy": "Prisijunk su socialine paskyra arba el. paštu ir slaptažodžiu.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
@@ -3926,7 +3926,7 @@
       "error_email": "Įveskite teisingą el. pašto adresą.",
       "error_password_required": "Įveskite slaptažodį.",
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
-      "google_hint": "Registravotės su „Google“? Tuomet slaptažodžio nereikia — spauskite „Tęsti su Google“ viršuje.",
+      "google_hint": "Registravotės su socialine paskyra („Google“, „LinkedIn“ ar „Facebook“)? Tuomet slaptažodžio nereikia — spauskite tos paslaugos mygtuką viršuje.",
       "preview_host_notice": "Esate peržiūros (preview) versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidarykite https://labourmarket.ai ir prisijunkite ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
       "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)",
       "resend_confirmation": "Siųsti naują patvirtinimo nuorodą",

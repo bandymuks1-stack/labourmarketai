@@ -3856,7 +3856,7 @@
       "rateLimited": "Zbyt wiele prób. Spróbuj ponownie później.",
       "generic": "Coś poszło nie tak. Spróbuj ponownie.",
       "oauth": {
-        "missing_code": "Google odesłał Cię bez kodu logowania. Spróbuj ponownie — jeśli się powtórzy, przeładuj stronę.",
+        "missing_code": "Usługa logowania odesłała Cię bez kodu logowania. Spróbuj ponownie — jeśli się powtórzy, przeładuj stronę.",
         "exchange_failed": "Logowanie nie zostało dokończone. Spróbuj ponownie — kod logowania działa raz i szybko wygasa.",
         "no_user": "Logowanie się powiodło, ale nie udało się sięgnąć do Twojego konta. Wyloguj się i zaloguj ponownie.",
         "callback": "Nieoczekiwany błąd podczas logowania. Spróbuj ponownie — jeśli się utrzymuje, podaj identyfikator śledzenia poniżej.",
@@ -3879,7 +3879,7 @@
         "service_provider": "Usługodawca",
         "admin": "Administrator"
       },
-      "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez Google lub e-mailem i hasłem; w następnym kroku wskażesz, po co tu jesteś.",
+      "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez konto społecznościowe lub e-mailem i hasłem; w następnym kroku wskażesz, po co tu jesteś.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -3908,7 +3908,7 @@
     },
     "login": {
       "headline": "Zaloguj się",
-      "subcopy": "Kontynuuj przez Google albo zaloguj się e-mailem i hasłem.",
+      "subcopy": "Kontynuuj przez konto społecznościowe albo zaloguj się e-mailem i hasłem.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -3926,7 +3926,7 @@
       "error_email": "Podaj prawidłowy adres e-mail.",
       "error_password_required": "Wpisz swoje hasło.",
       "error_invalid_credentials": "Nieprawidłowy e-mail lub hasło.",
-      "google_hint": "Rejestracja przez Google? W takim razie nie masz hasła — użyj powyżej „Kontynuuj przez Google”.",
+      "google_hint": "Rejestracja przez konto społecznościowe (Google, LinkedIn lub Facebook)? W takim razie nie masz hasła — użyj powyżej przycisku tego dostawcy.",
       "preview_host_notice": "Jesteś na wersji podglądowej serwisu. Logowanie Google działa tylko na wersji produkcyjnej — otwórz https://labourmarket.ai, aby z niego skorzystać. Logowanie e-mailem i hasłem działa tutaj normalnie.",
       "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)",
       "resend_confirmation": "Wyślij nowy link potwierdzający",

@@ -465,3 +465,142 @@ describe("auth/callback route", () => {
     });
   });
 });
+
+/** #1820 — OAuth display-name repair. The route may replace a SYNTHETIC
+ *  profiles.full_name (the onboarding e-mail-local-part default) with the
+ *  provider's real name, compare-and-set on the exact stored value, and
+ *  align workers.display_name under the same guard. It must never touch a
+ *  human-entered name, and a write failure never blocks the sign-in. */
+describe("auth/callback route — OAuth display-name repair (#1820)", () => {
+  type Write = { table: string; patch: Record<string, unknown>; eqs: [string, unknown][] };
+
+  function tableMock(opts: {
+    profile: Record<string, unknown>;
+    writes: Write[];
+    failProfileUpdate?: boolean;
+  }) {
+    fromMock.mockImplementation((table: string) => ({
+      select: () => ({
+        eq: () => ({ single: async () => ({ data: opts.profile }) }),
+      }),
+      update: (patch: Record<string, unknown>) => {
+        const w: Write = { table, patch, eqs: [] };
+        opts.writes.push(w);
+        const chain = {
+          eq: (col: string, val: unknown) => {
+            w.eqs.push([col, val]);
+            return chain;
+          },
+          then: (resolve: (v: { error: unknown }) => void) =>
+            resolve({
+              error:
+                table === "profiles" && opts.failProfileUpdate
+                  ? { code: "42501", message: "denied" }
+                  : null,
+            }),
+        };
+        return chain;
+      },
+    }));
+  }
+
+  const onboarded = "2025-01-01T00:00:00Z";
+
+  it("repairs a synthetic name on profiles AND workers with an exact compare-and-set guard", async () => {
+    exchangeMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({
+      data: {
+        user: {
+          id: "u1",
+          email: "jonas.p@example.lt",
+          user_metadata: { full_name: "Jonas Petraitis" },
+        },
+      },
+    });
+    const writes: Write[] = [];
+    tableMock({
+      profile: { onboarded_at: onboarded, full_name: "jonas.p", email: "jonas.p@example.lt" },
+      writes,
+    });
+
+    const res = await GET(buildRequest("code=X"), { params: Promise.resolve({ locale: "lt" }) });
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard`);
+    expect(writes).toEqual([
+      {
+        table: "profiles",
+        patch: { full_name: "Jonas Petraitis" },
+        eqs: [["id", "u1"], ["full_name", "jonas.p"]],
+      },
+      {
+        table: "workers",
+        patch: { display_name: "Jonas Petraitis" },
+        eqs: [["profile_id", "u1"], ["display_name", "jonas.p"]],
+      },
+    ]);
+  });
+
+  it("never overwrites a human-entered name", async () => {
+    exchangeMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({
+      data: {
+        user: {
+          id: "u1",
+          email: "jonas.p@example.lt",
+          user_metadata: { full_name: "Jonas Petraitis" },
+        },
+      },
+    });
+    const writes: Write[] = [];
+    tableMock({
+      profile: { onboarded_at: onboarded, full_name: "Jonas P.", email: "jonas.p@example.lt" },
+      writes,
+    });
+
+    const res = await GET(buildRequest("code=X"), { params: Promise.resolve({ locale: "lt" }) });
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard`);
+    expect(writes).toEqual([]);
+  });
+
+  it("a user with no user_metadata (password / e-mail confirm) signs in untouched", async () => {
+    exchangeMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1", email: "jonas.p@example.lt" } } });
+    const writes: Write[] = [];
+    tableMock({
+      profile: { onboarded_at: onboarded, full_name: "jonas.p", email: "jonas.p@example.lt" },
+      writes,
+    });
+
+    const res = await GET(buildRequest("code=X"), { params: Promise.resolve({ locale: "lt" }) });
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard`);
+    expect(writes).toEqual([]);
+  });
+
+  it("a failed profile write is logged, the worker write is skipped, the sign-in proceeds", async () => {
+    exchangeMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({
+      data: {
+        user: {
+          id: "u1",
+          email: "jonas.p@example.lt",
+          user_metadata: { name: "Jonas Petraitis" },
+        },
+      },
+    });
+    const writes: Write[] = [];
+    tableMock({
+      profile: { onboarded_at: onboarded, full_name: "jonas.p", email: "jonas.p@example.lt" },
+      writes,
+      failProfileUpdate: true,
+    });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const res = await GET(buildRequest("code=X"), { params: Promise.resolve({ locale: "lt" }) });
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard`);
+    expect(writes.map((w) => w.table)).toEqual(["profiles"]);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("display-name repair skipped"),
+      expect.objectContaining({ code: "42501" }),
+    );
+    warnSpy.mockRestore();
+  });
+});

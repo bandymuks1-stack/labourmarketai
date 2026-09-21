@@ -3856,7 +3856,7 @@
       "rateLimited": "Te veel pogingen. Probeer het later opnieuw.",
       "generic": "Er is iets misgegaan. Probeer het opnieuw.",
       "oauth": {
-        "missing_code": "Google kwam terug zonder aanmeldcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
+        "missing_code": "De aanmelddienst kwam terug zonder aanmeldcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
         "exchange_failed": "Aanmelden is niet gelukt. Probeer het opnieuw — de aanmeldcode werkt één keer en verloopt snel.",
         "no_user": "Je bent aangemeld, maar je account is niet bereikbaar. Log uit en weer in.",
         "callback": "Onverwachte fout tijdens het inloggen. Probeer het opnieuw — als het aanhoudt, deel dan het trace-ID hieronder.",
@@ -3879,7 +3879,7 @@
         "service_provider": "Dienstverlener",
         "admin": "Beheerder"
       },
-      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; in de volgende stap zeg je waarvoor je komt.",
+      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met een sociaal account, of met je e-mailadres en wachtwoord; in de volgende stap zeg je waarvoor je komt.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -3908,7 +3908,7 @@
     },
     "login": {
       "headline": "Inloggen",
-      "subcopy": "Ga verder met Google, of log in met je e-mailadres en wachtwoord.",
+      "subcopy": "Ga verder met een sociaal account, of log in met je e-mailadres en wachtwoord.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -3926,7 +3926,7 @@
       "error_email": "Voer een geldig e-mailadres in.",
       "error_password_required": "Voer je wachtwoord in.",
       "error_invalid_credentials": "Ongeldig e-mailadres of wachtwoord.",
-      "google_hint": "Geregistreerd met Google? Dan heb je geen wachtwoord — gebruik \"Doorgaan met Google\" hierboven.",
+      "google_hint": "Geregistreerd met een sociaal account (Google, LinkedIn of Facebook)? Dan heb je geen wachtwoord — gebruik hierboven de knop van die aanbieder.",
       "preview_host_notice": "Je bekijkt een previewversie van de site. Inloggen met Google werkt alleen op de live site — open https://labourmarket.ai om het te gebruiken. Inloggen met e-mailadres en wachtwoord werkt hier gewoon.",
       "google_recovery_label": "Inloggen met Google — reserveroute (tijdelijk, via een externe inlogpagina)",
       "resend_confirmation": "Nieuwe bevestigingslink sturen",
