@@ -3856,7 +3856,7 @@
       "rateLimited": "Per daug bandymų. Pabandyk vėliau.",
       "generic": "Įvyko klaida. Bandyk dar kartą.",
       "oauth": {
-        "missing_code": "Google grąžino atgal be prisijungimo kodo. Pabandykite dar kartą — jei kartojasi, perkraukite naršyklę.",
+        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandykite dar kartą — jei kartojasi, perkraukite naršyklę.",
         "exchange_failed": "Prisijungti nepavyko. Pabandykite dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
         "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunkite ir prisijunkite iš naujo.",
         "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandykite dar kartą — jei tęsiasi, atsiųskite žemiau pateiktą trace ID.",

@@ -3856,7 +3856,7 @@
       "rateLimited": "Too many attempts. Please try again later.",
       "generic": "Something went wrong. Please try again.",
       "oauth": {
-        "missing_code": "Google bounced back without a sign-in code. Try again — if it repeats, reload the page.",
+        "missing_code": "The sign-in provider bounced back without a sign-in code. Try again — if it repeats, reload the page.",
         "exchange_failed": "Sign-in didn't complete. Try again — the sign-in code works once and expires quickly.",
         "no_user": "You signed in, but your account couldn't be reached. Sign out and back in.",
         "callback": "Unexpected error during sign-in. Try again — if it persists, share the trace ID below.",

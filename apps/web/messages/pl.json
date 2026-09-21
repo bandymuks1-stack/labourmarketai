@@ -3856,7 +3856,7 @@
       "rateLimited": "Zbyt wiele prób. Spróbuj ponownie później.",
       "generic": "Coś poszło nie tak. Spróbuj ponownie.",
       "oauth": {
-        "missing_code": "Google odesłał Cię bez kodu logowania. Spróbuj ponownie — jeśli się powtórzy, przeładuj stronę.",
+        "missing_code": "Usługa logowania odesłała Cię bez kodu logowania. Spróbuj ponownie — jeśli się powtórzy, przeładuj stronę.",
         "exchange_failed": "Logowanie nie zostało dokończone. Spróbuj ponownie — kod logowania działa raz i szybko wygasa.",
         "no_user": "Logowanie się powiodło, ale nie udało się sięgnąć do Twojego konta. Wyloguj się i zaloguj ponownie.",
         "callback": "Nieoczekiwany błąd podczas logowania. Spróbuj ponownie — jeśli się utrzymuje, podaj identyfikator śledzenia poniżej.",

@@ -7,6 +7,7 @@ import {
   resolvePostLoginLocale,
 } from "@/lib/auth/locale-preference";
 import { readOauthTraceId } from "@/lib/auth/oauth-trace";
+import { decideOauthDisplayNameRepair } from "@/lib/auth/oauth-display-name";
 import {
   classifyAuthRedirectError,
   classifyExchangeFailure,
@@ -177,50 +178,41 @@ export async function GET(
       .eq("id", user.id)
       .single();
 
-    // Social OAuth identity repair: legacy/email-first accounts can carry an
-    // email local-part in profiles.full_name even though the provider returned
-    // a real human name. Repair ONLY that clearly synthetic value; never
-    // overwrite a name the person entered themselves. This keeps existing
-    // profiles authoritative while letting Facebook/LinkedIn/Google metadata
-    // correct the old fallback on a successful OAuth callback.
-    const profileEmail = (profile as { email?: string | null } | null)?.email ?? user.email ?? null;
-    const storedName = (profile as { full_name?: string | null } | null)?.full_name?.trim() ?? "";
-    const emailLocalPart = profileEmail?.split("@")[0]?.trim() ?? "";
-    const metadata = user.user_metadata as Record<string, unknown>;
-    const providerNameCandidates = [metadata.full_name, metadata.name];
-    const providerName = providerNameCandidates.find(
-      (value): value is string =>
-        typeof value === "string" &&
-        value.trim().length >= 2 &&
-        value.trim().length <= 120 &&
-        !value.includes("@"),
-    )?.trim() ?? null;
-    const shouldRepairName =
-      Boolean(providerName) &&
-      Boolean(emailLocalPart) &&
-      storedName.toLocaleLowerCase() === emailLocalPart.toLocaleLowerCase();
-
-    if (shouldRepairName && providerName) {
+    // Social OAuth identity repair (lib/auth/oauth-display-name.ts): a
+    // profile whose full_name is still the onboarding e-mail-local-part
+    // default gets the provider's real name on a successful callback. The
+    // decision is pure and pinned by tests; the writes below are own-row RLS
+    // and compare-and-set on the exact stored value, so a human edit that
+    // races this callback is never overwritten. Best-effort: a write failure
+    // is logged and the sign-in proceeds.
+    const profileRow = profile as { full_name?: string | null; email?: string | null } | null;
+    const repair = decideOauthDisplayNameRepair({
+      storedFullName: profileRow?.full_name,
+      profileEmail: profileRow?.email,
+      userEmail: user.email,
+      userMetadata: (user.user_metadata ?? {}) as Record<string, unknown>,
+    });
+    if (repair.repair) {
       const { error: nameRepairError } = await supabase
         .from("profiles")
-        .update({ full_name: providerName })
+        .update({ full_name: repair.providerName })
         .eq("id", user.id)
-        .eq("full_name", storedName);
+        .eq("full_name", repair.syntheticName);
       if (nameRepairError) {
         console.warn("[auth/callback] OAuth display-name repair skipped after write failure", {
           trace: traceId,
           code: nameRepairError.code,
         });
-      }
-      else {
-        // Keep the worker projection aligned when it contains the same legacy
-        // synthetic value. The equality guard prevents overwriting a worker
-        // display name the person deliberately changed elsewhere.
+      } else {
+        // Keep the worker projection aligned when it carries the same
+        // synthetic value (20260805090100 backfilled it from full_name). The
+        // equality guard leaves a display name the person changed elsewhere
+        // untouched.
         const { error: workerNameRepairError } = await supabase
           .from("workers")
-          .update({ display_name: providerName })
+          .update({ display_name: repair.providerName })
           .eq("profile_id", user.id)
-          .eq("display_name", storedName);
+          .eq("display_name", repair.syntheticName);
         if (workerNameRepairError) {
           console.warn("[auth/callback] worker OAuth display-name repair skipped", {
             trace: traceId,

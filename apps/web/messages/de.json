@@ -3856,7 +3856,7 @@
       "rateLimited": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
       "oauth": {
-        "missing_code": "Google hat ohne Anmeldecode zurückverwiesen. Versuchen Sie es erneut — falls es sich wiederholt, laden Sie die Seite neu.",
+        "missing_code": "Der Anmeldedienst hat ohne Anmeldecode zurückverwiesen. Versuchen Sie es erneut — falls es sich wiederholt, laden Sie die Seite neu.",
         "exchange_failed": "Die Anmeldung hat nicht geklappt. Versuchen Sie es erneut — der Anmeldecode gilt nur einmal und läuft schnell ab.",
         "no_user": "Sie sind angemeldet, aber Ihr Konto ist nicht erreichbar. Melden Sie sich ab und wieder an.",
         "callback": "Unerwarteter Fehler bei der Anmeldung. Versuchen Sie es erneut — falls das Problem bestehen bleibt, teilen Sie die unten stehende Trace-ID mit.",
