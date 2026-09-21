@@ -3879,7 +3879,7 @@
         "service_provider": "Paslaugų teikėjas",
         "admin": "Administratorius"
       },
-      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — kitame žingsnyje patikslinsi, ko atėjai.",
+      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su socialine paskyra arba el. paštu ir slaptažodžiu — kitame žingsnyje patikslinsi, ko atėjai.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
@@ -3908,7 +3908,7 @@
     },
     "login": {
       "headline": "Prisijungti",
-      "subcopy": "Prisijunk su Google arba el. paštu ir slaptažodžiu.",
+      "subcopy": "Prisijunk su socialine paskyra arba el. paštu ir slaptažodžiu.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",

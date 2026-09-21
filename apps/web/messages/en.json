@@ -3879,7 +3879,7 @@
         "service_provider": "Service provider",
         "admin": "Admin"
       },
-      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; in the next step you'll say what you came for.",
+      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with a social account or with email and password; in the next step you'll say what you came for.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
@@ -3908,7 +3908,7 @@
     },
     "login": {
       "headline": "Sign in",
-      "subcopy": "Continue with Google, or sign in with your email and password.",
+      "subcopy": "Continue with a social account, or sign in with your email and password.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",

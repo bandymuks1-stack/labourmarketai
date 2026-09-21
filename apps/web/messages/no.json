@@ -338,7 +338,7 @@
       "password_label": "[EN] Password",
       "signing": "[EN] Signing in...",
       "signup_link": "[EN] Sign up",
-      "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
+      "subcopy": "[EN] Continue with a social account, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
       "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
       "resend_confirmation": "Send en ny bekreftelseslenke",
@@ -496,7 +496,7 @@
         "admin": "Administrator"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
+      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with a social account or with email and password; you'll pick your role next.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Send lenken på nytt",
       "resend_sent": "Sendt på nytt. Sjekk innboksen og søppelpostmappen.",

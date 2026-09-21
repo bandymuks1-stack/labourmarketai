@@ -3879,7 +3879,7 @@
         "service_provider": "Usługodawca",
         "admin": "Administrator"
       },
-      "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez Google lub e-mailem i hasłem; w następnym kroku wskażesz, po co tu jesteś.",
+      "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez konto społecznościowe lub e-mailem i hasłem; w następnym kroku wskażesz, po co tu jesteś.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -3908,7 +3908,7 @@
     },
     "login": {
       "headline": "Zaloguj się",
-      "subcopy": "Kontynuuj przez Google albo zaloguj się e-mailem i hasłem.",
+      "subcopy": "Kontynuuj przez konto społecznościowe albo zaloguj się e-mailem i hasłem.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
