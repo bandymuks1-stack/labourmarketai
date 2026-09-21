@@ -159,6 +159,7 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
       availabilityOptionBusy: tw("editor.availabilityOption.busy"),
       availabilityOptionUnavailable: tw("editor.availabilityOption.unavailable"),
       availabilityOptionNone: tw("editor.availabilityOption.none"),
+      keepOnlyHint: tw("editor.keepOnlyHint"),
       availableFromLabel: tw("editor.availableFromLabel"),
       locationLabel: tw("editor.locationLabel"),
       locationHint: tw("editor.locationHint"),

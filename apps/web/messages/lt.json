@@ -330,7 +330,9 @@
       "not_found": "Tokio įrašo nebeėra. Atnaujinkite ir bandykite dar kartą.",
       "error": "Įvyko klaida. Bandykite dar kartą."
     },
-    "myEmpty": "Tau priskirtų įrankių ar technikos šiuo metu nėra."
+    "myEmpty": "Tau priskirtų įrankių ar technikos šiuo metu nėra.",
+    "unnamedOrganization": "Organizacija be pavadinimo",
+    "unnamedWorker": "Darbuotojas be vardo"
   },
   "projectEconomics": {
     "title": "Biudžetas ir ekonomika",
@@ -4424,7 +4426,8 @@
           "saving": "Saugoma...",
           "saved": "Išsaugota",
           "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
-          "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
+          "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
+          "keepOnlyHint": "Išsaugotus duomenis čia galima pakeisti, bet ne ištrinti: tuščias laukas palieka tai, kas išsaugota."
         },
         "checks": {
           "eyebrow": "Patikrink, ar taip ir turėjai omeny",
@@ -5758,6 +5761,28 @@
       "privacyContact": "Privatumo kontaktas",
       "dpoLine": "Duomenų apsaugos pareigūnas nepaskirtas. Privatumo klausimai: info@labourmarket.ai.",
       "openSourceNote": "Platformoje naudojami atvirojo kodo komponentai lieka galioti pagal jų pačių licencijas ir nepriklauso nė vienai iš įmonių."
+    },
+    "dataDeletion": {
+      "title": "Paskyros ir duomenų ištrynimas",
+      "description": "Kaip paprašyti ištrinti savo LabourMarket.ai paskyrą ir asmens duomenis.",
+      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Šiuo metu ištrynimas vykdomas kaip prašymas, kurį peržiūri žmogus; momentinio paskyros ištrynimo mygtuko nėra.",
+      "howTitle": "Kaip paprašyti ištrynimo",
+      "howSteps": [
+        "Parašykite el. laišką adresu {email} iš el. pašto adreso, susieto su jūsų LabourMarket.ai paskyra.",
+        "Laiško temoje nurodykite „Paskyros ir duomenų ištrynimo prašymas“ ir parašykite, kad norite, jog jūsų LabourMarket.ai paskyra ir asmens duomenys būtų ištrinti.",
+        "Prieš vykdydami prašymą galime paprašyti patvirtinti, kad jį pateikė paskyros savininkas.",
+        "Prašymą peržiūrės ir įvykdys žmogus; jei reikės patvirtinimo ar patikslinimo, su jumis susisieksime."
+      ],
+      "mailSubject": "Paskyros ir duomenų ištrynimo prašymas",
+      "coversTitle": "Ką apima ištrynimas",
+      "coversBody": "Prašymas taikomas jūsų LabourMarket.ai paskyrai ir platformoje saugomiems jūsų asmens duomenims. Kai kuriuos įrašus gali reikėti išsaugoti, jei to reikalauja taikytini teisės aktai arba jei audito, sutikimo, saugumo, ginčo ar kitą įrašą privaloma teisėtai išsaugoti. Duomenims, kurie jau teisėtai atskleisti kitam nepriklausomam gavėjui, toliau gali būti taikomos to gavėjo teisinės pareigos.",
+      "facebookTitle": "Prisijungimas per „Facebook“",
+      "facebookBody": "Jei prisijungėte per „Facebook“, tuo pačiu aukščiau aprašytu būdu galite paprašyti ištrinti su tuo prisijungimu susietą LabourMarket.ai paskyrą ir duomenis. LabourMarket.ai pašalinimas iš „Facebook“ savaime nepakeičia ištrynimo prašymo LabourMarket.ai.",
+      "controllerTitle": "Duomenų valdytojas",
+      "controllerBody": "LabourMarket.ai duomenų valdytojas yra UAB „Nonstop Group“, įmonės kodas 302676973, buveinė Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lietuva. Kontaktas privatumo klausimais: {email}.",
+      "relatedLabel": "Susiję puslapiai",
+      "relatedPrivacy": "Privatumo politika",
+      "relatedDataAccess": "Jūsų duomenys ir kas juos mato"
     }
   },
   "instructions": {

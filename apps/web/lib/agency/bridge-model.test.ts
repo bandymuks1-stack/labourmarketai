@@ -3,6 +3,7 @@ import {
   isBridgeUuid,
   mergeClientConnectionStates,
   pendingInvites,
+  effectiveReviewStage,
   reviewStageTone,
   validateInviteEmail,
   validateOfferNote,
@@ -85,5 +86,25 @@ describe("reviewStageTone", () => {
     expect(reviewStageTone("rejected")).toBe("warning");
     expect(reviewStageTone("offered")).toBe("muted");
     expect(reviewStageTone("reviewed")).toBe("muted");
+  });
+});
+
+describe("effectiveReviewStage — a closed offer never wears another offer's booking stage", () => {
+  it("declined offer on a pair whose OTHER offer was accepted → rejected (production 2026-09-21 case)", () => {
+    expect(effectiveReviewStage("declined", "accepted")).toBe("rejected");
+    expect(effectiveReviewStage("declined", "booking_started")).toBe("rejected");
+    expect(effectiveReviewStage("declined", "offered")).toBe("rejected");
+  });
+
+  it("withdrawn offer stays at offered whatever the pair-derived stage says", () => {
+    expect(effectiveReviewStage("withdrawn", "accepted")).toBe("offered");
+    expect(effectiveReviewStage("withdrawn", "contacted")).toBe("offered");
+  });
+
+  it("open and accepted offers keep the derived stage", () => {
+    expect(effectiveReviewStage("offered", "reviewed")).toBe("reviewed");
+    expect(effectiveReviewStage("offered", "contacted")).toBe("contacted");
+    expect(effectiveReviewStage("accepted", "accepted")).toBe("accepted");
+    expect(effectiveReviewStage("accepted", "booking_started")).toBe("booking_started");
   });
 });

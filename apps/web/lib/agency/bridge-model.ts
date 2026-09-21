@@ -152,6 +152,29 @@ export function mergeClientConnectionStates(
   };
 }
 
+/**
+ * The review stage THIS offer may wear.
+ *
+ * `list_agency_offer_progress_v1` derives `review_stage` per (request, worker)
+ * pair — a booking / shortlist / thread for that worker on that request — and
+ * never looks at the offer's own status. So when the same worker was offered
+ * twice on one request and the client accepted the second offer, the FIRST,
+ * declined offer also reads `accepted` ("booking accepted · client declined"
+ * on one row — production 2026-09-21). A closed offer cannot carry a live
+ * booking stage: a declined offer is `rejected`, a withdrawn one stays at
+ * `offered`. Open and accepted offers keep the derived stage. Correcting the
+ * derivation itself (key on `o.booking_id` / `o.status`) is a SECDEF body
+ * change = RED; this is the honest presentation until that is applied.
+ */
+export function effectiveReviewStage(
+  offerStatus: OfferStatus,
+  reviewStage: OfferReviewStage,
+): OfferReviewStage {
+  if (offerStatus === "declined") return "rejected";
+  if (offerStatus === "withdrawn") return "offered";
+  return reviewStage;
+}
+
 /** Visual tone per derived review stage — display only. */
 export function reviewStageTone(
   stage: OfferReviewStage,

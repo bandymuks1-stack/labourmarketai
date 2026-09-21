@@ -330,7 +330,9 @@
       "not_found": "Dieser Eintrag existiert nicht mehr. Bitte neu laden.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     },
-    "myEmpty": "Dir sind derzeit keine Werkzeuge oder Geräte zugewiesen."
+    "myEmpty": "Dir sind derzeit keine Werkzeuge oder Geräte zugewiesen.",
+    "unnamedOrganization": "Organisation ohne Namen",
+    "unnamedWorker": "Mitarbeiter ohne Namen"
   },
   "projectEconomics": {
     "title": "Budget & Wirtschaftlichkeit",
@@ -4424,7 +4426,8 @@
           "saving": "Wird gespeichert...",
           "saved": "Gespeichert",
           "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
-          "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
+          "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+          "keepOnlyHint": "Gespeicherte Angaben lassen sich hier ändern, nicht löschen: ein leeres Feld behält das Gespeicherte."
         },
         "checks": {
           "eyebrow": "Prüfe, ob du das gemeint hast",
@@ -5758,6 +5761,28 @@
       "privacyContact": "Datenschutzkontakt",
       "dpoLine": "Ein Datenschutzbeauftragter ist nicht bestellt. Datenschutzfragen: info@labourmarket.ai.",
       "openSourceNote": "Die Plattform enthält Open-Source-Komponenten, die unter ihren eigenen Lizenzen verbleiben und keinem der beiden Unternehmen gehören."
+    },
+    "dataDeletion": {
+      "title": "Konto- und Datenlöschung",
+      "description": "So beantragen Sie die Löschung Ihres LabourMarket.ai-Kontos und Ihrer personenbezogenen Daten.",
+      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Die Löschung wird derzeit als Antrag bearbeitet, den eine Person prüft; es gibt keine Schaltfläche zur sofortigen Kontolöschung.",
+      "howTitle": "So beantragen Sie die Löschung",
+      "howSteps": [
+        "Schreiben Sie an {email} von der E-Mail-Adresse, die mit Ihrem LabourMarket.ai-Konto verknüpft ist.",
+        "Verwenden Sie den Betreff „Antrag auf Konto- und Datenlöschung“ und erklären Sie, dass Ihr LabourMarket.ai-Konto und Ihre personenbezogenen Daten gelöscht werden sollen.",
+        "Vor der Bearbeitung müssen wir gegebenenfalls prüfen, ob der Antrag vom Kontoinhaber stammt.",
+        "Eine Person prüft und bearbeitet den Antrag und meldet sich bei Ihnen, falls eine Verifizierung oder Klärung nötig ist."
+      ],
+      "mailSubject": "Antrag auf Konto- und Datenlöschung",
+      "coversTitle": "Was die Löschung umfasst",
+      "coversBody": "Der Antrag betrifft Ihr LabourMarket.ai-Konto und die von der Plattform gespeicherten personenbezogenen Daten. Einige Aufzeichnungen müssen möglicherweise aufbewahrt werden, wenn geltendes Recht dies verlangt oder wenn ein Prüf-, Einwilligungs-, Sicherheits-, Streit- oder sonstiger Nachweis rechtmäßig aufbewahrt werden muss. Daten, die bereits rechtmäßig an einen anderen unabhängigen Empfänger weitergegeben wurden, können weiterhin dessen eigenen rechtlichen Pflichten unterliegen.",
+      "facebookTitle": "Anmeldung mit Facebook",
+      "facebookBody": "Wenn Sie sich mit Facebook angemeldet haben, können Sie über denselben oben beschriebenen Weg die Löschung des LabourMarket.ai-Kontos und der mit dieser Anmeldung verbundenen Daten beantragen. Das Entfernen von LabourMarket.ai aus Facebook ersetzt für sich genommen keinen Löschantrag an LabourMarket.ai.",
+      "controllerTitle": "Verantwortlicher",
+      "controllerBody": "Verantwortlicher für LabourMarket.ai ist UAB „Nonstop Group“, Unternehmenscode 302676973, Sitz Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litauen. Datenschutzkontakt: {email}.",
+      "relatedLabel": "Verwandte Seiten",
+      "relatedPrivacy": "Datenschutzerklärung",
+      "relatedDataAccess": "Ihre Daten und wer sie sehen kann"
     }
   },
   "instructions": {

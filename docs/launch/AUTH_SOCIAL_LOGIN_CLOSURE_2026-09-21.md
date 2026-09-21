@@ -46,20 +46,21 @@ production PASS. No Meta / Supabase provider configuration was touched in this w
 
 ## EXTERNAL BLOCKERS
 
-- **Facebook for public (non-role) users — EXTERNAL_BLOCKED_BY_META_REVIEW.** Status recorded as
-  `TECHNICALLY_PROVEN / PUBLIC_EXTERNAL_GATE_PENDING`. Until Meta approves and the owner publishes
-  the app, a non-role person pressing "Continue with Facebook" reaches Meta's "app not available"
-  page and is not bounced back to `/auth/login` (Meta never redirects). Not a product-code defect.
+- **Facebook for public (non-role) users — CLOSED 2026-09-21 (owner-confirmed, later the same day).**
+  Meta App Review approved `email` + `public_profile` for app `1088055617411429`; the owner
+  switched the app to **Published**; a public (non-role) production Facebook login returned to
+  LabourMarket.ai successfully with the correct profile name. Status: **`FACEBOOK_PUBLIC_E2E_PASS`**
+  (supersedes `TECHNICALLY_PROVEN / PUBLIC_EXTERNAL_GATE_PENDING` above). LinkedIn OIDC remains
+  PRODUCTION_PROVEN. No repo, Supabase provider or Meta configuration change was needed or made
+  for this closure; the "app not available" dead end no longer exists. Social OAuth is closed —
+  do not redo or modify it.
 - Unchanged from the 2026-09-20 checkpoint §5: `INVITE_EMAIL_*` (e-mail channel), Apple / Google
   Play / EAS accounts, store listings, social profile URLs, a real ka/uk participant, PL consent text.
 
 ## OWNER ACTIONS REQUIRED
 
-1. Meta: when App Review approves, switch the app to Live (no repo change).
-2. Decide for the review window only: leave the Facebook button visible (dead end for non-role
-   users, reviewers can test) **or** toggle Facebook OFF in the Supabase dashboard until approval
-   (reversible; the button disappears within the 300 s settings cache; no deploy). Not done by the
-   agent — the instruction was not to change provider configuration.
+1. ~~Meta: when App Review approves, switch the app to Live.~~ DONE 2026-09-21 (`FACEBOOK_PUBLIC_E2E_PASS`).
+2. ~~Review-window choice for the Facebook button.~~ MOOT — the app is Published.
 3. The RED packet of the 2026-09-20 checkpoint §4 (W-1, R-B #1813, ARCH-4 v2 #1815, COMM-1 #1816,
    CAL-7) — one sentence each; nothing applied.
 4. The 12-step human acceptance walk (2026-09-20 checkpoint §6) with real accounts.
@@ -67,4 +68,5 @@ production PASS. No Meta / Supabase provider configuration was touched in this w
 ## REMAINING LAUNCH BLOCKERS (exact)
 
 - None that code can close without an owner decision. Everything above is either LIVE + verified,
-  an external gate (Meta review, e-mail provider, store accounts), or a RED owner-sentence item.
+  an external gate (e-mail provider, store accounts), or a RED owner-sentence item. Social login
+  (Google, LinkedIn, Facebook) is fully PRODUCTION_PROVEN for public users as of 2026-09-21.

@@ -39,7 +39,9 @@ export interface AssetRow {
 
 export interface OrgOption {
   readonly id: string;
-  readonly name: string;
+  /** null when the organization has neither a display nor a legal name — the
+   *  UI says so in words; a raw id is never shown to a person. */
+  readonly name: string | null;
 }
 export interface ProjectOption {
   readonly id: string;
@@ -47,7 +49,8 @@ export interface ProjectOption {
 }
 export interface WorkerOption {
   readonly id: string;
-  readonly name: string;
+  /** null when the worker row carries no display name (see OrgOption.name). */
+  readonly name: string | null;
 }
 
 export type AssetsOverview =

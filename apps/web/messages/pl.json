@@ -330,7 +330,9 @@
       "not_found": "Ten zapis już nie istnieje. Odśwież i spróbuj ponownie.",
       "error": "Coś poszło nie tak. Spróbuj ponownie."
     },
-    "myEmpty": "Obecnie nie masz przypisanych żadnych narzędzi ani sprzętu."
+    "myEmpty": "Obecnie nie masz przypisanych żadnych narzędzi ani sprzętu.",
+    "unnamedOrganization": "Organizacja bez nazwy",
+    "unnamedWorker": "Pracownik bez imienia"
   },
   "projectEconomics": {
     "title": "Budżet i ekonomika",
@@ -4424,7 +4426,8 @@
           "saving": "Zapisywanie...",
           "saved": "Zapisano",
           "error": "Nie udało się zapisać. Spróbuj ponownie.",
-          "needsMigration": "Nie udało się wykonać działania. Spróbuj ponownie."
+          "needsMigration": "Nie udało się wykonać działania. Spróbuj ponownie.",
+          "keepOnlyHint": "Zapisane dane można tu zmienić, ale nie usunąć: puste pole zachowuje to, co zapisano."
         },
         "checks": {
           "eyebrow": "Sprawdź, czy o to Ci chodziło",
@@ -5758,6 +5761,28 @@
       "privacyContact": "Kontakt w sprawach prywatności",
       "dpoLine": "Inspektor ochrony danych nie został wyznaczony. Pytania dotyczące prywatności: info@labourmarket.ai.",
       "openSourceNote": "Platforma zawiera komponenty open source, które pozostają na swoich licencjach i nie należą do żadnej z tych spółek."
+    },
+    "dataDeletion": {
+      "title": "Usunięcie konta i danych",
+      "description": "Jak poprosić o usunięcie konta LabourMarket.ai i danych osobowych.",
+      "intro": "Możesz poprosić LabourMarket.ai o usunięcie konta i danych osobowych. Usunięcie jest obecnie realizowane jako wniosek rozpatrywany przez człowieka; nie ma przycisku natychmiastowego usunięcia konta.",
+      "howTitle": "Jak poprosić o usunięcie",
+      "howSteps": [
+        "Napisz na {email} z adresu e-mail powiązanego z Twoim kontem LabourMarket.ai.",
+        "W temacie wpisz „Wniosek o usunięcie konta i danych” i napisz, że chcesz usunąć swoje konto LabourMarket.ai oraz dane osobowe.",
+        "Przed realizacją możemy potrzebować potwierdzenia, że wniosek pochodzi od właściciela konta.",
+        "Wniosek rozpatrzy i zrealizuje człowiek; jeśli potrzebne będzie potwierdzenie lub wyjaśnienie, skontaktujemy się z Tobą."
+      ],
+      "mailSubject": "Wniosek o usunięcie konta i danych",
+      "coversTitle": "Co obejmuje usunięcie",
+      "coversBody": "Wniosek dotyczy Twojego konta LabourMarket.ai i danych osobowych przechowywanych przez platformę. Niektóre zapisy mogą wymagać zachowania, jeśli wymaga tego obowiązujące prawo lub jeśli zapis dotyczący audytu, zgody, bezpieczeństwa, sporu lub inny zapis musi zostać zgodnie z prawem zachowany. Dane już zgodnie z prawem ujawnione innemu niezależnemu odbiorcy mogą nadal podlegać jego własnym obowiązkom prawnym.",
+      "facebookTitle": "Logowanie przez Facebook",
+      "facebookBody": "Jeśli logujesz się przez Facebook, w ten sam sposób opisany powyżej możesz poprosić o usunięcie konta LabourMarket.ai i danych powiązanych z tym logowaniem. Usunięcie LabourMarket.ai z Facebooka samo w sobie nie zastępuje wniosku o usunięcie skierowanego do LabourMarket.ai.",
+      "controllerTitle": "Administrator danych",
+      "controllerBody": "Administratorem danych LabourMarket.ai jest UAB „Nonstop Group”, numer firmy 302676973, siedziba Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litwa. Kontakt w sprawie prywatności: {email}.",
+      "relatedLabel": "Powiązane strony",
+      "relatedPrivacy": "Polityka prywatności",
+      "relatedDataAccess": "Twoje dane i kto je widzi"
     }
   },
   "instructions": {

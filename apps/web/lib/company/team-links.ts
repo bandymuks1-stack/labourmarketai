@@ -17,6 +17,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  */
 
 const RELATION_ABSENT = new Set(["42P01", "42703"]);
+/**
+ * `agency_workers` is the LEGACY agency key space (agencies are companies
+ * with `company_type = staffing_agency` since Direction A; the legacy table
+ * holds 0 rows in production and the API role holds no SELECT grant on it —
+ * production readback 2026-09-21: every authenticated read returns 42501).
+ * A privilege-denied answer from that source is therefore "this source is
+ * not exposed", not a failed read of the person's teams. It must never turn
+ * the live `company_workers` answer into "could not read your teams" — that
+ * was exactly the production defect: every worker's profile said the teams
+ * read failed and the R-9 withdrawal control never rendered.
+ */
+const SOURCE_NOT_EXPOSED = new Set(["42501"]);
 export const TEAM_LINKS_LIMIT = 50;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,11 +71,16 @@ export async function listMyTeamLinks(
       .limit(TEAM_LINKS_LIMIT),
   ]);
 
-  for (const res of [cw, aw]) {
-    if (res.error) {
-      if (RELATION_ABSENT.has(res.error.code ?? "")) return { kind: "needs-migration" };
-      return { kind: "error", message: res.error.message };
-    }
+  // The live source (company_workers) decides the result kind; the legacy
+  // agency source may only ADD rows. A privilege denial on the legacy source
+  // means it is not exposed to the API role and contributes nothing.
+  if (cw.error) {
+    if (RELATION_ABSENT.has(cw.error.code ?? "")) return { kind: "needs-migration" };
+    return { kind: "error", message: cw.error.message };
+  }
+  const legacyExposed = !aw.error;
+  if (aw.error && !RELATION_ABSENT.has(aw.error.code ?? "") && !SOURCE_NOT_EXPOSED.has(aw.error.code ?? "")) {
+    return { kind: "error", message: aw.error.message };
   }
 
   type CwRow = {
@@ -91,7 +108,7 @@ export async function listMyTeamLinks(
       since: r.created_at,
     });
   }
-  for (const r of (aw.data ?? []) as AwRow[]) {
+  for (const r of (legacyExposed ? (aw.data ?? []) : []) as AwRow[]) {
     if (!r.agency_id || !r.worker_id || !r.created_at) continue;
     rows.push({
       kind: "agency",
