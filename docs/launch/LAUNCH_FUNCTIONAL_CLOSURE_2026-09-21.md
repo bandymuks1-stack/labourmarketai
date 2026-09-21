@@ -77,7 +77,7 @@ LinkedIn OIDC PRODUCTION_PROVEN, Google PRODUCTION_PROVEN. Not touched.
 | institution ↔ employer demand hand-off | LIVE read (public demand count per direction), NOT_LIVE write (no employer internship posting exists: 0 of 17 demand rows declare a type) | unchanged |
 | minor: the learners list is an invitation list — a person who accepted two invitations appears twice while the count says 1 joined | truthful (two invitations) but confusing | not changed; noted for the copy owner |
 
-## 5. Defects found → fixed in this pass (PR #TBD, GREEN, no migration)
+## 5. Defects found → fixed in this pass (PR #1821, GREEN, no migration — MERGED)
 
 | # | defect (production, reproduced) | root cause | fix | regression test |
 |---|---|---|---|---|
@@ -132,11 +132,11 @@ Known-open, owner-gated (NOT fixed here, by rule): `companies_select = auth.uid(
 
 ## 10. Receipt
 
-- **PRODUCTION_SHA**: start `ef862d7a` (= main); this PR's squash → see §11 when merged.
-- **DEPLOYMENT**: Vercel production, region dub1, health ok at start; post-merge health recorded in §11.
+- **PRODUCTION_SHA**: start `ef862d7a`; after this pass **`051c825d`** (= main = production).
+- **DEPLOYMENT**: Vercel production, dub1; `/api/health` → `build: 051c825d`, auth + db ok (19:02 UTC).
 - **FLOWS_PROVEN** (this pass, production): worker journal write + evidence + skill projection; availability write + readiness update; notification read-marker persistence; 27 worker / 35 employer / 10 agency / 5 learner routes read-proven; board lifecycle (closed/draft/agency_offer excluded); institution surface LIVE inventory; RLS actor matrix.
 - **DEFECTS_FOUND**: 6 (D-1…D-6) + 3 RED-class root causes (R-P1…R-P3).
-- **FIXES_MERGED**: D-1…D-6 (one GREEN PR).
+- **FIXES_MERGED**: D-1…D-6 — PR [#1821](https://github.com/bandymuks1-stack/labourmarketai/pull/1821), squash `051c825d`, auto-merged after `quality`, `migration-safety`, `e2e-smoke`, `mobile`, CodeQL green; production-proven (§11).
 - **DB/RLS_PROOF**: §6.
 - **LIFECYCLE_PROOF**: board excludes closed/draft/supply; ended assignment not actionable, row preserved; expired invitation not acceptable, row preserved; closed need keeps its candidates door (history) but no offer control.
 - **LOCALE/MOBILE/PWA**: §8.
@@ -146,6 +146,21 @@ Known-open, owner-gated (NOT fixed here, by rule): `companies_select = auth.uid(
 - **EXTERNAL_BLOCKERS**: `INVITE_EMAIL_*` (e-mail channel), Apple / Google Play / EAS accounts, store listings, social profile URLs, PL consent legal text (unchanged from checkpoint §5).
 - **EXACT_NEXT_OWNER_WALK_STEP**: open `https://labourmarket.ai/lt/dashboard/profile` as Donatas — the "MANO KOMANDOS" section must no longer say "nepavyko nuskaityti"; if he is on a roster the withdrawal control is visible. Then checkpoint §6 step 1.
 
-## 11. Merge / deploy record
+## 11. Merge / deploy record — PRODUCTION_PROVEN on `051c825d`
 
-Filled after auto-merge (see the commit that updates this section).
+- PR #1821 merged 2026-09-21 ~18:55 UTC (squash `051c825d`); Vercel production served
+  `build: 051c825d` by 19:02 UTC (health ok, dub1).
+- **D-1** QA worker `/lt/dashboard/profile`: `team-links-error` 0, no "nepavyko nuskaityti";
+  **e2e-worker2** (two active roster links): `team-links` section rendered with 2 rows
+  (E2E Agentūra UAB since 2026-09-04, E2E Walker UAB since 2026-09-02), each with the R-9
+  withdrawal control "Čia nebedirbu — išeiti iš komandos" — the first time this control was
+  reachable on production.
+- **D-2** agency partners (`e2e-timing`): rows `data-stage=accepted` "REZERVACIJA PRIIMTA ·
+  KLIENTAS PRIĖMĖ" and `data-stage=rejected` "ATMESTA · KLIENTAS ATMETĖ".
+- **D-4** `/lt/dashboard/projects/d9af86de…/operations`: "BŪSENA: JUODRAŠTIS".
+- **D-6** `/lt` "Paskyros ir duomenų ištrynimas", `/ru` "Удаление аккаунта и данных",
+  `/pl` "Usunięcie konta i danych", `/en` unchanged — title and h1.
+- D-3 / D-5 are proven by their guards and typecheck (no nameless organization exists on a
+  production surface the synthetic identities can reach after the shell org is named; the
+  work-card keep-only hint renders once anything is saved — QA worker's row carries
+  `availability_status = available` from this pass's walk, so the hint is live for it).
