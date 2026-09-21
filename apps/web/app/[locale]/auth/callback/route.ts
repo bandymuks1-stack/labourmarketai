@@ -173,9 +173,46 @@ export async function GET(
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("onboarded_at, locale")
+      .select("onboarded_at, locale, full_name, email")
       .eq("id", user.id)
       .single();
+
+    // Social OAuth identity repair: legacy/email-first accounts can carry an
+    // email local-part in profiles.full_name even though the provider returned
+    // a real human name. Repair ONLY that clearly synthetic value; never
+    // overwrite a name the person entered themselves. This keeps existing
+    // profiles authoritative while letting Facebook/LinkedIn/Google metadata
+    // correct the old fallback on a successful OAuth callback.
+    const profileEmail = (profile as { email?: string | null } | null)?.email ?? user.email ?? null;
+    const storedName = (profile as { full_name?: string | null } | null)?.full_name?.trim() ?? "";
+    const emailLocalPart = profileEmail?.split("@")[0]?.trim() ?? "";
+    const metadata = user.user_metadata as Record<string, unknown>;
+    const providerNameCandidates = [metadata.full_name, metadata.name];
+    const providerName = providerNameCandidates.find(
+      (value): value is string =>
+        typeof value === "string" &&
+        value.trim().length >= 2 &&
+        value.trim().length <= 120 &&
+        !value.includes("@"),
+    )?.trim() ?? null;
+    const shouldRepairName =
+      Boolean(providerName) &&
+      Boolean(emailLocalPart) &&
+      storedName.toLocaleLowerCase() === emailLocalPart.toLocaleLowerCase();
+
+    if (shouldRepairName && providerName) {
+      const { error: nameRepairError } = await supabase
+        .from("profiles")
+        .update({ full_name: providerName })
+        .eq("id", user.id)
+        .eq("full_name", storedName);
+      if (nameRepairError) {
+        console.warn("[auth/callback] OAuth display-name repair skipped after write failure", {
+          trace: traceId,
+          code: nameRepairError.code,
+        });
+      }
+    }
 
     // V8 W4-B item 2: honor the ACCOUNT language on a device that carries no
     // explicit choice. Priority (pinned by lib/auth/locale-preference.test.ts):
