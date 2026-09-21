@@ -160,7 +160,8 @@ Known-open, owner-gated (NOT fixed here, by rule): `companies_select = auth.uid(
 - **D-4** `/lt/dashboard/projects/d9af86de…/operations`: "BŪSENA: JUODRAŠTIS".
 - **D-6** `/lt` "Paskyros ir duomenų ištrynimas", `/ru` "Удаление аккаунта и данных",
   `/pl` "Usunięcie konta i danych", `/en` unchanged — title and h1.
-- D-3 / D-5 are proven by their guards and typecheck (no nameless organization exists on a
-  production surface the synthetic identities can reach after the shell org is named; the
-  work-card keep-only hint renders once anything is saved — QA worker's row carries
-  `availability_status = available` from this pass's walk, so the hint is live for it).
+- **D-3** `/lt/dashboard/assets` (E2E Walker owner): no uuid in the page text; the nameless
+  shell organization is labelled "Organizacija be pavadinimo".
+- **D-5** QA worker (row carries `availability_status = available` from this pass's walk):
+  editor shows the keep-only hint and offers only the three real states — no "Nenurodyta"
+  choice that could not persist.
