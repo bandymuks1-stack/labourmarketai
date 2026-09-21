@@ -3926,7 +3926,7 @@
       "error_email": "Įveskite teisingą el. pašto adresą.",
       "error_password_required": "Įveskite slaptažodį.",
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
-      "google_hint": "Registravotės su „Google“? Tuomet slaptažodžio nereikia — spauskite „Tęsti su Google“ viršuje.",
+      "google_hint": "Registravotės su socialine paskyra („Google“, „LinkedIn“ ar „Facebook“)? Tuomet slaptažodžio nereikia — spauskite tos paslaugos mygtuką viršuje.",
       "preview_host_notice": "Esate peržiūros (preview) versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidarykite https://labourmarket.ai ir prisijunkite ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
       "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)",
       "resend_confirmation": "Siųsti naują patvirtinimo nuorodą",

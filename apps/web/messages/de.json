@@ -3926,7 +3926,7 @@
       "error_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
       "error_password_required": "Bitte geben Sie Ihr Passwort ein.",
       "error_invalid_credentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
-      "google_hint": "Mit Google registriert? Dann haben Sie kein Passwort — nutzen Sie oben \"Mit Google fortfahren\".",
+      "google_hint": "Mit einem sozialen Konto (Google, LinkedIn oder Facebook) registriert? Dann haben Sie kein Passwort — nutzen Sie oben die Schaltfläche dieses Anbieters.",
       "preview_host_notice": "Sie befinden sich auf einer Vorschauversion der Website. Die Google-Anmeldung funktioniert nur auf der Live-Website — öffnen Sie https://labourmarket.ai, um sie zu nutzen. Die Anmeldung mit E-Mail-Adresse und Passwort funktioniert hier wie gewohnt.",
       "google_recovery_label": "Mit Google anmelden — Ausweichweg (vorübergehend, über eine externe Anmeldeseite)",
       "resend_confirmation": "Neuen Bestätigungslink senden",

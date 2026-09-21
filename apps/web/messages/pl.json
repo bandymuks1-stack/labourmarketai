@@ -3926,7 +3926,7 @@
       "error_email": "Podaj prawidłowy adres e-mail.",
       "error_password_required": "Wpisz swoje hasło.",
       "error_invalid_credentials": "Nieprawidłowy e-mail lub hasło.",
-      "google_hint": "Rejestracja przez Google? W takim razie nie masz hasła — użyj powyżej „Kontynuuj przez Google”.",
+      "google_hint": "Rejestracja przez konto społecznościowe (Google, LinkedIn lub Facebook)? W takim razie nie masz hasła — użyj powyżej przycisku tego dostawcy.",
       "preview_host_notice": "Jesteś na wersji podglądowej serwisu. Logowanie Google działa tylko na wersji produkcyjnej — otwórz https://labourmarket.ai, aby z niego skorzystać. Logowanie e-mailem i hasłem działa tutaj normalnie.",
       "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)",
       "resend_confirmation": "Wyślij nowy link potwierdzający",
