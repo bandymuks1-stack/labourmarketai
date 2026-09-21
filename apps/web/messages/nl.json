@@ -330,7 +330,9 @@
       "not_found": "Dit item bestaat niet meer. Ververs en probeer opnieuw.",
       "error": "Er ging iets mis. Probeer opnieuw."
     },
-    "myEmpty": "Er zijn momenteel geen gereedschappen of apparatuur aan je toegewezen."
+    "myEmpty": "Er zijn momenteel geen gereedschappen of apparatuur aan je toegewezen.",
+    "unnamedOrganization": "Organisatie zonder naam",
+    "unnamedWorker": "Werknemer zonder naam"
   },
   "projectEconomics": {
     "title": "Budget & economie",
@@ -4424,7 +4426,8 @@
           "saving": "Opslaan...",
           "saved": "Opgeslagen",
           "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
-          "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw."
+          "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
+          "keepOnlyHint": "Opgeslagen gegevens kunt u hier wijzigen, niet wissen: een leeg veld behoudt wat is opgeslagen."
         },
         "checks": {
           "eyebrow": "Controleer of je dit bedoelde",
@@ -5758,6 +5761,28 @@
       "privacyContact": "Privacycontact",
       "dpoLine": "Er is geen functionaris voor gegevensbescherming aangesteld. Privacyvragen: info@labourmarket.ai.",
       "openSourceNote": "Het platform bevat open-sourcecomponenten die onder hun eigen licenties blijven vallen en geen eigendom zijn van een van beide bedrijven."
+    },
+    "dataDeletion": {
+      "title": "Account en gegevens verwijderen",
+      "description": "Hoe u verwijdering van uw LabourMarket.ai-account en persoonsgegevens aanvraagt.",
+      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Verwijdering wordt momenteel afgehandeld als een verzoek dat door een persoon wordt beoordeeld; er is geen knop om een account direct te verwijderen.",
+      "howTitle": "Hoe u verwijdering aanvraagt",
+      "howSteps": [
+        "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",
+        "Gebruik als onderwerp “Verzoek tot verwijdering van account en gegevens” en geef aan dat u wilt dat uw LabourMarket.ai-account en persoonsgegevens worden verwijderd.",
+        "Mogelijk moeten wij eerst verifiëren dat het verzoek van de accounthouder afkomstig is.",
+        "Een persoon beoordeelt en verwerkt het verzoek en neemt contact met u op als verificatie of verduidelijking nodig is."
+      ],
+      "mailSubject": "Verzoek tot verwijdering van account en gegevens",
+      "coversTitle": "Wat verwijdering omvat",
+      "coversBody": "Het verzoek geldt voor uw LabourMarket.ai-account en de persoonsgegevens die het platform bewaart. Sommige gegevens moeten mogelijk worden bewaard wanneer de toepasselijke wetgeving dat vereist of wanneer een audit-, toestemmings-, beveiligings-, geschil- of ander record rechtmatig bewaard moet blijven. Gegevens die al rechtmatig aan een andere onafhankelijke ontvanger zijn verstrekt, kunnen onder de eigen wettelijke verplichtingen van die ontvanger blijven vallen.",
+      "facebookTitle": "Inloggen met Facebook",
+      "facebookBody": "Als u met Facebook hebt ingelogd, kunt u via dezelfde procedure hierboven verwijdering aanvragen van het LabourMarket.ai-account en de gegevens die aan die login zijn gekoppeld. LabourMarket.ai uit Facebook verwijderen vervangt op zichzelf geen verwijderingsverzoek aan LabourMarket.ai.",
+      "controllerTitle": "Verwerkingsverantwoordelijke",
+      "controllerBody": "De verwerkingsverantwoordelijke van LabourMarket.ai is UAB “Nonstop Group”, bedrijfscode 302676973, statutaire zetel Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litouwen. Privacycontact: {email}.",
+      "relatedLabel": "Gerelateerde pagina’s",
+      "relatedPrivacy": "Privacybeleid",
+      "relatedDataAccess": "Uw gegevens en wie ze kan zien"
     }
   },
   "instructions": {

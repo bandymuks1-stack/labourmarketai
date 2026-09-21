@@ -11,6 +11,7 @@ import {
 } from "@/lib/projects/operations-derive";
 import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
 import { getOperationsCentre } from "@/lib/projects/operations-centre";
+import { isProjectStatus } from "@/lib/projects/project-lifecycle-model";
 import {
   OPS_BOARD_ANCHOR,
   OPS_CENTRE_ATTENTION_MAX,
@@ -232,6 +233,14 @@ export default async function ProjectOperationsPage({
     todayIso: readAt.slice(0, 10),
   });
   const tAssets = await getTranslations("assets");
+  // The stored lifecycle value in the person's language (the same label set
+  // the projects map and the planning page use). An unknown value is shown
+  // as stored — never invented — but the four canonical states no longer
+  // leak the raw English enum ("BŪSENA: DRAFT" on /lt, production 2026-09-21).
+  const tProjectStatus = await getTranslations("projects.map.status");
+  const projectStatusText = isProjectStatus(ops.project.status)
+    ? tProjectStatus(ops.project.status)
+    : (ops.project.status ?? t("notSet"));
 
   const labels: OperationsBoardLabels = {
     eyebrow: t("eyebrow"),
@@ -419,7 +428,7 @@ export default async function ProjectOperationsPage({
         <h2 className={sectionTitleClass}>{tCentre("summaryTitle")}</h2>
         <div className="flex flex-wrap gap-2">
           <span className={chipClass} data-testid="ops-centre-status">
-            {t("statusLabel")}: {ops.project.status ?? t("notSet")}
+            {t("statusLabel")}: {projectStatusText}
           </span>
           <span className={chipClass} data-testid="ops-centre-dates">
             {tCentre("datesLabel")}: {ops.project.startDate ?? t("notSet")} →{" "}
@@ -736,7 +745,7 @@ export default async function ProjectOperationsPage({
 
       <div id={OPS_BOARD_ANCHOR.slice(1)} className="flex flex-col gap-6">
         <ProjectOperationsBoard
-          ops={ops}
+          ops={{ ...ops, project: { ...ops.project, status: projectStatusText } }}
           labels={labels}
           locale={locale}
           projectId={id}

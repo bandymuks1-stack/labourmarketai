@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Link2, Trash2, UserPlus, ArrowUpRight } from "lucide-react";
 
 import {
+  effectiveReviewStage,
   reviewStageTone,
   type AgencyConnectionsState,
   type OfferProgressState,
@@ -220,10 +221,11 @@ export function AgencyBridgeSection({
               <ul className="flex flex-col gap-1.5">
                 {progressRows.map((p) => {
                   void stageByWorker;
+                  const stage = effectiveReviewStage(p.offerStatus, p.reviewStage);
                   return (
-                    <li key={p.offerId} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-progress-row">
-                      <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE[reviewStageTone(p.reviewStage)]}`}>
-                        {labels.stageLabels[p.reviewStage] ?? p.reviewStage}
+                    <li key={p.offerId} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-progress-row" data-stage={stage}>
+                      <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE[reviewStageTone(stage)]}`}>
+                        {labels.stageLabels[stage] ?? stage}
                       </span>
                       {/* The CLIENT's explicit decision on this candidate
                           (migration 20260903101000): accepted → a booking was

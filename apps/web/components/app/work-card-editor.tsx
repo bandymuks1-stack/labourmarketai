@@ -45,6 +45,10 @@ export interface WorkCardLabels {
   availabilityOptionBusy: string;
   availabilityOptionUnavailable: string;
   availabilityOptionNone: string;
+  /** Saved figures can be changed, not cleared (save_worker_card coalesces
+   *  null = keep); shown once anything is saved so an empty field never
+   *  reads as "cleared". */
+  keepOnlyHint: string;
   availableFromLabel: string;
   locationLabel: string;
   locationHint: string;
@@ -108,6 +112,12 @@ export function WorkCardEditor({
   >(saveWorkerCardAction, null);
   const [confirmPending, startConfirm] = useTransition();
   const [confirmDone, setConfirmDone] = useState(false);
+  const hasSavedFigures =
+    values.availabilityStatus !== null ||
+    values.availableFrom !== null ||
+    values.locationCountry !== null ||
+    values.salaryMin !== null ||
+    values.salaryMax !== null;
 
   const why = (
     <p className="max-w-prose text-xs leading-relaxed text-text-muted">
@@ -231,6 +241,18 @@ export function WorkCardEditor({
               {labels.editorTitle}
             </p>
 
+            {/* Saved figures can be CHANGED here, not cleared: the RPC keeps
+                the stored value for every empty field (coalesce). Production
+                2026-09-21: choosing "not stated" over a saved status showed
+                "Saved" while the row kept `available`. So the empty choice is
+                offered only while nothing is saved, and the hint below says
+                what an empty field means once something is. Clearing needs a
+                write path with explicit clear flags (RED follow-up). */}
+            {hasSavedFigures ? (
+              <p className="text-xs leading-relaxed text-text-muted" data-testid="work-card-keep-only-hint">
+                {labels.keepOnlyHint}
+              </p>
+            ) : null}
             {/* kada — availability */}
             <label className="flex flex-col gap-1 text-xs">
               <span className="font-mono uppercase tracking-label text-text-muted">
@@ -241,7 +263,9 @@ export function WorkCardEditor({
                 defaultValue={values.availabilityStatus ?? ""}
                 className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
               >
-                <option value="">{labels.availabilityOptionNone}</option>
+                {values.availabilityStatus ? null : (
+                  <option value="">{labels.availabilityOptionNone}</option>
+                )}
                 <option value="available">
                   {labels.availabilityOptionAvailable}
                 </option>

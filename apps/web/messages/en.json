@@ -330,7 +330,9 @@
       "not_found": "That record no longer exists. Refresh and try again.",
       "error": "Something went wrong. Please try again."
     },
-    "myEmpty": "No tools or equipment are currently assigned to you."
+    "myEmpty": "No tools or equipment are currently assigned to you.",
+    "unnamedOrganization": "Organization without a name",
+    "unnamedWorker": "Worker without a name"
   },
   "projectEconomics": {
     "title": "Budget & economics",
@@ -4424,7 +4426,8 @@
           "saving": "Saving...",
           "saved": "Saved",
           "error": "Could not save. Please try again.",
-          "needsMigration": "Couldn’t complete the action. Please try again."
+          "needsMigration": "Couldn’t complete the action. Please try again.",
+          "keepOnlyHint": "Saved figures can be changed here, not cleared: an empty field keeps what is saved."
         },
         "checks": {
           "eyebrow": "Check this is what you meant",
@@ -5758,6 +5761,28 @@
       "privacyContact": "Privacy contact",
       "dpoLine": "A data protection officer is not appointed. Privacy questions: info@labourmarket.ai.",
       "openSourceNote": "The platform includes open-source components that remain under their respective licences and are not owned by either company."
+    },
+    "dataDeletion": {
+      "title": "Account and data deletion",
+      "description": "How to request deletion of your LabourMarket.ai account and personal data.",
+      "intro": "You can ask LabourMarket.ai to delete your account and personal data. Deletion is currently handled as a request reviewed by a person; there is no instant account deletion button.",
+      "howTitle": "How to request deletion",
+      "howSteps": [
+        "Email {email} from the email address associated with your LabourMarket.ai account.",
+        "Use the subject “Account and data deletion request” and state that you want your LabourMarket.ai account and personal data deleted.",
+        "We may need to verify that the request comes from the account holder before processing it.",
+        "A person will review and process the request and will contact you if verification or clarification is required."
+      ],
+      "mailSubject": "Account and data deletion request",
+      "coversTitle": "What deletion covers",
+      "coversBody": "The request applies to your LabourMarket.ai account and personal data held by the platform. Some records may need to be retained where applicable law requires it or where an audit, consent, security, dispute, or other record must lawfully be preserved. Data already lawfully disclosed to another independent recipient may also remain subject to that recipient’s own legal obligations.",
+      "facebookTitle": "Facebook sign-in",
+      "facebookBody": "If you used Facebook to sign in, you can use the same process above to request deletion of the LabourMarket.ai account and data associated with that sign-in. Removing LabourMarket.ai from Facebook does not by itself replace a deletion request to LabourMarket.ai.",
+      "controllerTitle": "Data controller",
+      "controllerBody": "The data controller of LabourMarket.ai is UAB “Nonstop Group”, company code 302676973, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania. Privacy contact: {email}.",
+      "relatedLabel": "Related pages",
+      "relatedPrivacy": "Privacy Policy",
+      "relatedDataAccess": "Your data and who can see it"
     }
   },
   "instructions": {
