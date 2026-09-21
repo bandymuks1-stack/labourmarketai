@@ -427,8 +427,13 @@ describe("6. the page keeps the board AND renders the composed sections honestly
     expect(PAGE).toMatch(/ops-centre-honest-note/);
   });
 
-  it("status enum renders VERBATIM and counts come from the composed reads", () => {
-    expect(PAGE).toMatch(/\{ops\.project\.status \?\? t\("notSet"\)\}/);
+  it("status is the STORED lifecycle value (labelled, never derived) and counts come from the composed reads", () => {
+    // 2026-09-21: the four canonical states render through the ONE existing
+    // label set (`projects.map.status.*`) so `/lt` no longer shows the raw
+    // English enum; an unknown value is still shown exactly as stored.
+    expect(PAGE).toMatch(/isProjectStatus\(ops\.project\.status\)\s*\?\s*tProjectStatus\(ops\.project\.status\)\s*:\s*\(ops\.project\.status \?\? t\("notSet"\)\)/);
+    expect(PAGE).toMatch(/getTranslations\("projects\.map\.status"\)/);
+    expect(PAGE).toMatch(/\{t\("statusLabel"\)\}: \{projectStatusText\}/);
     expect(PAGE).toMatch(/ops\.counters\.totalAssigned/);
     expect(PAGE).toMatch(/readiness\.checked\}\/\{readiness\.total/);
     expect(PAGE).toMatch(/evidence\.entryCount/);
