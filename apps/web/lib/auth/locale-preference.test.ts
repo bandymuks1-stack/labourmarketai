@@ -165,7 +165,10 @@ describe("the auth callback actually consults the resolver", () => {
   );
 
   it("reads profiles.locale alongside onboarded_at", () => {
-    expect(src).toContain('select("onboarded_at, locale")');
+    // ONE profiles read serves the locale decision and the OAuth display-name
+    // repair (#1820): the projection may grow, but `onboarded_at, locale` must
+    // stay in it — a second round trip for the locale is what this pins out.
+    expect(src).toMatch(/\.select\("onboarded_at, locale(?:, [a-z_]+)*"\)/);
   });
 
   it("routes the decision through resolvePostLoginLocale and sets the cookie only on override", () => {
