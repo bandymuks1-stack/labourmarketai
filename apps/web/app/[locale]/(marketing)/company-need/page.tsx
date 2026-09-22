@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 
@@ -18,7 +19,6 @@ import {
 } from "@/components/app/company-need-form";
 import {
   buildWorkCategoryOptions,
-  MARKET_COUNTRIES,
 } from "@/lib/taxonomy/work-categories";
 
 /**
@@ -35,7 +35,6 @@ export default async function CompanyNeedPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("companyNeed");
-  const tCountries = await getTranslations("labourMarket");
 
   const labels: CompanyNeedFormLabels = {
     title: t("title"),
@@ -126,10 +125,11 @@ export default async function CompanyNeedPage({
   // Nothing widens downstream: `customer_requests.country` is free text with
   // no CHECK constraint, so this needs no migration, and this public form
   // persists nothing at all (it prepares a draft — see the honest note).
-  const countryOptions = MARKET_COUNTRIES.map((code) => ({
-    code,
-    label: tCountries(`countryNames.${code}`),
-  }));
+  // 2026-09-22 (global-access rule): every ISO country, active markets first — the RPC
+  // behind this form now accepts any code in public.countries (20260922130000), so the
+  // select offers the world; MARKET_COUNTRIES only orders it. Labels come from CLDR
+  // (countryDisplayName) for the 232 countries that have no translation key.
+  const countryOptions = countryOptionsForLocale(locale).map((o) => ({ code: o.value, label: o.label }));
 
   return (
     <div
