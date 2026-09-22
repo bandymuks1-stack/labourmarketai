@@ -381,7 +381,10 @@ describe("first-touch attribution rides on EVERY client conversion step", () => 
     // The reader is pure and allowlisted — exactly the six keys, no utm_term
     // (a search campaign can put the visitor's own typed query there).
     const reader = readApp("lib/telemetry/first-touch-user-metadata.ts");
-    expect(reader).not.toMatch(/^import "server-only"|from "@\/lib\/supabase/m);
+    // Two separate assertions: one anchored import line, one substring. A single
+    // alternation would anchor only the first branch (CodeQL js/regex/missing-regexp-anchor).
+    expect(reader).not.toMatch(/^import "server-only"/m);
+    expect(reader).not.toMatch(/from "@\/lib\/supabase/);
     expect(reader).toMatch(
       /USER_METADATA_FIRST_TOUCH_KEYS = \[\s*"utm_source",\s*"utm_medium",\s*"utm_campaign",\s*"utm_content",\s*"referrer_host",\s*"landing_path",\s*\] as const/,
     );
