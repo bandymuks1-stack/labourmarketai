@@ -7,6 +7,7 @@ import { VACANCY_TRANSLATION_MAX_ITEMS } from "@/lib/ai/registry/agents/vacancy-
 import { rateLimit } from "@/lib/security/rate-limit";
 
 import type { StoredPublicVacancyV1, VacancyLocaleTranslationV1 } from "./vacancy-read";
+import { redactContactData, restoreRedactions } from "./vacancy-redaction";
 
 /**
  * FOREIGN-LANGUAGE VACANCIES IN THE READER'S LOCALE — the read side
@@ -32,10 +33,22 @@ import type { StoredPublicVacancyV1, VacancyLocaleTranslationV1 } from "./vacanc
  *
  * WHAT GUARDS IT. `runAiAgent("vacancy_translation")` routes the task
  * `translate_vacancy` through `lib/ai/runtime`: the free-first provider
- * chain, the cost ceiling, the audit row in `ai_runs`. The task is classed
- * `PUBLIC` (the argument is the field list in `TASK_POLICIES` — the text is
- * a public advertisement, and the payload carries no employer identity, no
- * URL, no coordinates, no LabourMarket person), so it needs no egress grant.
+ * chain, the cost ceiling, the audit row in `ai_runs`, and the DATA EGRESS
+ * GATE. Owner decision 2026-09-22: "Public source content does not
+ * automatically authorize unrestricted third-party AI transmission." The
+ * task is classed `SENSITIVE_FREE_TEXT`, so an external provider receives it
+ * ONLY under an owner grant in `AI_EGRESS_GRANTS` naming this task. No such
+ * grant exists today: every run is refused, audited as blocked, and the
+ * reader shows the publisher's own words with the advertisement's language
+ * named. Nothing here is a second egress path — this module owns no
+ * provider, no key and no decision about either.
+ *
+ * WHAT TRAVELS. Four fields (title, description, two locale codes), and the
+ * description is REDACTED first: e-mail addresses, phone numbers and URLs
+ * become opaque tokens (`vacancy-redaction.ts`) and are restored from the
+ * PUBLISHER'S OWN characters afterwards, so contact data never leaves while
+ * the reader still sees it. A rendering that lost or invented a token is
+ * refused rather than shown.
  *
  * WHAT IS CHECKED BEFORE A RENDERING IS ACCEPTED. Same id set back; a
  * non-empty title; every digit run of the original present in the rendering
@@ -231,8 +244,14 @@ export async function resolveVacancyTitles(
   const writes: Promise<void>[] = [];
   for (const [sourceLocale, group] of bySource) {
     const byId = new Map(group.map((v, i) => [`v${i}`, v] as const));
+    // Same minimisation as the description path: a headline can carry a URL
+    // or a contact number too, and the tokens are restored from the
+    // publisher's own characters.
+    const redactedById = new Map(
+      [...byId].map(([id, v]) => [id, redactContactData(v.titleRaw)] as const),
+    );
     const result = await translateBatch(
-      [...byId].map(([id, v]) => ({ id, title: v.titleRaw })),
+      [...byId].map(([id]) => ({ id, title: redactedById.get(id)!.text })),
       sourceLocale,
       viewerLocale,
     );
@@ -241,14 +260,18 @@ export async function resolveVacancyTitles(
     const returned = new Map(result.items.map((i) => [i.id, i] as const));
     for (const [id, v] of byId) {
       const item = returned.get(id);
+      const sent = redactedById.get(id)!;
+      const restored =
+        item?.title == null ? null : restoreRedactions(item.title, sent.tokens);
       const ok =
         item?.title !== null &&
         item?.title !== undefined &&
-        item.title !== v.titleRaw &&
-        digitsPreserved(v.titleRaw, item.title);
+        item.title !== sent.text &&
+        digitsPreserved(sent.text, item.title) &&
+        restored?.ok === true;
       const entry: VacancyLocaleTranslationV1 = {
         status: ok ? "available" : "needs_review",
-        title: ok ? item!.title : null,
+        title: ok && restored?.ok ? restored.text : null,
         description: null,
         sourceLanguage: sourceLocale,
         sourceHash: v.contentHash,
@@ -286,24 +309,42 @@ export async function resolveVacancyDescription(
   if (limited.limited) return stored;
 
   const sourceLocale = v.sourceLanguage.toLowerCase().slice(0, 2);
+  // MINIMISATION (owner decision 2026-09-22): contact data is replaced by
+  // opaque tokens before the call and restored from the publisher's own
+  // characters after it. The checks below therefore run against the REDACTED
+  // source — the same text the provider saw — so a phone number's digits
+  // cannot make the digit check pass or fail by accident.
+  const title = redactContactData(v.titleRaw);
+  const description = redactContactData(v.descriptionRaw.slice(0, 12_000));
   const result = await translateBatch(
-    [{ id: "v0", title: v.titleRaw, description: v.descriptionRaw.slice(0, 12_000) }],
+    [{ id: "v0", title: title.text, description: description.text }],
     sourceLocale,
     viewerLocale,
   );
   const item = result?.items.find((i) => i.id === "v0");
   if (!result || !item) return stored;
 
+  const restoredTitle =
+    item.title === null ? null : restoreRedactions(item.title, title.tokens);
+  const restoredDescription =
+    item.description === null
+      ? null
+      : restoreRedactions(item.description, description.tokens);
   const titleOk =
-    item.title !== null && item.title !== v.titleRaw && digitsPreserved(v.titleRaw, item.title);
+    item.title !== null &&
+    item.title !== title.text &&
+    digitsPreserved(title.text, item.title) &&
+    restoredTitle?.ok === true;
   const descriptionOk =
     item.description !== null &&
-    item.description !== v.descriptionRaw &&
-    digitsPreserved(v.descriptionRaw, item.description);
+    item.description !== description.text &&
+    digitsPreserved(description.text, item.description) &&
+    restoredDescription?.ok === true;
   const entry: VacancyLocaleTranslationV1 = {
     status: titleOk ? "available" : "needs_review",
-    title: titleOk ? item.title : (stored?.title ?? null),
-    description: titleOk && descriptionOk ? item.description : null,
+    title: titleOk && restoredTitle?.ok ? restoredTitle.text : (stored?.title ?? null),
+    description:
+      titleOk && descriptionOk && restoredDescription?.ok ? restoredDescription.text : null,
     sourceLanguage: sourceLocale,
     sourceHash: v.contentHash,
     provider: result.provider,

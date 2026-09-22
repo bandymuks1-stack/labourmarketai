@@ -446,25 +446,31 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     humanReview: false,
   },
   /**
-   * THE SECOND PUBLIC TASK (2026-09-22).
+   * TRANSLATE A PUBLISHED ADVERTISEMENT INTO THE READER'S LOCALE.
    *
-   * `allowedFields` is the whole classification argument, exactly as for
-   * `explain_market_demand`. `vacancy_title` and `vacancy_description` are
-   * the verbatim text of a job advertisement a public employment service
-   * already published to everyone under an open-data licence (the row's
-   * attribution_code names it); the platform mirrors, it does not author.
-   * Nothing joins the text to a LabourMarket person, and the payload carries
-   * no employer identity, no URL, no coordinates — those stay in the row and
-   * are rendered verbatim, never translated. An ad MAY itself name a contact
-   * person at the employer; that name was published to the world by the
-   * employer, and sending the same public text to a translator discloses
-   * nothing new. That is the argument; the guard checks the field list.
+   * GRANT-GATED, not public (owner decision 2026-09-22): "Public source
+   * content does not automatically authorize unrestricted third-party AI
+   * transmission." `TASK_SENSITIVITY` classes this `SENSITIVE_FREE_TEXT`
+   * because `vacancy_description` is unbounded text a third party wrote, so
+   * an external provider receives it only under an owner grant naming this
+   * task. There is no such grant today; the runtime refuses and the reader
+   * shows the publisher's own words.
+   *
+   * MINIMUM NECESSARY FIELDS (owner decision 2026-09-22). Four, and the
+   * schema is `.strict()` so a caller cannot widen them: the title, the
+   * description, and the two locale codes. Employer identity, employer org
+   * id, application URL, coordinates, the reader, and the match result are
+   * all listed as prohibited and none is assembled anywhere. Before the call
+   * the reader additionally REDACTS e-mail addresses, phone numbers and URLs
+   * out of the description into opaque tokens and restores them afterwards,
+   * so contact data never leaves even though the reader still shows it.
    *
    * `low_cost` on both tiers, NO escalation, a tight ceiling: translating
    * twenty short titles does not get better with a frontier model, and a
    * board that could silently escalate is a board with an unbounded bill.
    * The reader batches (one call per board render) and PERSISTS the result
-   * beside the original, so no ad is ever translated twice for one locale.
+   * beside the original keyed by source hash + target locale, so an ad is
+   * translated ONCE per locale and never again per page view.
    */
   translate_vacancy: {
     taskType: "translate_vacancy",

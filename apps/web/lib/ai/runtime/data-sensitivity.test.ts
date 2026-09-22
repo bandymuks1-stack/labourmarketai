@@ -71,7 +71,7 @@ describe("every task is classified, and the table matches the shipped profiles",
     }
   });
 
-  it("the PUBLIC set is exactly the two tasks that were reviewed for it", () => {
+  it("the PUBLIC set is exactly the one task that was reviewed for it", () => {
     // SUPERSEDES "no task claims PUBLIC — that is a finding, not an omission",
     // which said: if a genuinely public reference task is ever added, THIS is
     // the expectation that must change deliberately, with the task named.
@@ -85,15 +85,15 @@ describe("every task is classified, and the table matches the shipped profiles",
     // reason as before: the risk is a second task being relabelled quietly,
     // and a count would go green on a swap.
     //
-    // 2026-09-22: `translate_vacancy` is the second, and it is named here.
-    // Its payload is the verbatim text of a job advertisement a public
-    // employment service already published to the whole internet under an
-    // open-data licence; no employer identity, URL, coordinates or
-    // LabourMarket person travels with it (its own `TASK_POLICIES` entry).
+    // 2026-09-22: `translate_vacancy` was PROPOSED as the second and the
+    // owner refused it — "public source content does not automatically
+    // authorize unrestricted third-party AI transmission" — so it is
+    // SENSITIVE_FREE_TEXT and grant-gated. The set is still one, and that
+    // refusal is the fact worth pinning.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
     );
-    expect(publicTasks).toEqual(["explain_market_demand", "translate_vacancy"]);
+    expect(publicTasks).toEqual(["explain_market_demand"]);
   });
 });
 

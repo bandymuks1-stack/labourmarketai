@@ -216,31 +216,23 @@ describe("the classification the gate depends on stays honest", () => {
     // payload assembler is pinned separately by
     // `public-market-facts-payload.test.ts`.
     //
-    // `translate_vacancy` joins it on 2026-09-22 (owner P0 §9), and the
-    // reasoning is written down as this guard demands. The payload is the
-    // verbatim TITLE and DESCRIPTION of a job advertisement a public
-    // employment service already published to the whole internet under an
-    // open-data licence (the row's `attribution_code` names the source);
-    // LabourMarket.ai mirrors that text with attribution and does not author
-    // it, so sending the same words to a translator discloses nothing that
-    // is not already public. What the payload may NOT carry is the
-    // enforcement: `TASK_POLICIES.translate_vacancy.allowedFields` is exactly
-    // `vacancy_title`, `vacancy_description`, `source_locale`,
-    // `target_locale`, and employer name, employer org id, application URL,
-    // coordinates, any LabourMarket person and any match result are listed as
-    // prohibited. The agent's input schema is `.strict()`, so a caller cannot
-    // widen it — `ai-wired-surface-sensitivity.test.ts` proves that with a
-    // rejected payload.
-    //
-    // It is NOT a licence to relabel a third task: this argument has to be
-    // made again, field by field, for any new entry.
+    // THE ALLOWLIST STAYED AT ONE ON 2026-09-22, and that is the record worth
+    // keeping. `translate_vacancy` was first proposed as the second PUBLIC
+    // task on the argument that an advertisement's text is already published
+    // to the whole internet. The owner overruled it in the same review:
+    // "Public source content does not automatically authorize unrestricted
+    // third-party AI transmission. Gate external-provider translation through
+    // the existing canonical egress/grant governance." It is therefore
+    // `SENSITIVE_FREE_TEXT` — unbounded third-party prose — and reaches an
+    // external provider only under a grant naming it. This guard is where
+    // that decision is visible: the set below did not grow.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
     ).sort();
     expect(
       publicTasks,
       "a task became PUBLIC — verify its payload really carries no project or personal data",
-    ).toEqual(["explain_market_demand", "translate_vacancy"]);
+    ).toEqual(["explain_market_demand"]);
   });
 });
 

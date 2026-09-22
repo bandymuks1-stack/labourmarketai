@@ -39,7 +39,7 @@ import {
   sensitivityForTask,
   type AiDataSensitivity,
 } from "@/lib/ai/runtime/data-sensitivity";
-import { MAX_GRANTABLE_FOR_FREE_TIER } from "@/lib/ai/runtime/data-egress";
+import { AI_EGRESS_GRANTS, MAX_GRANTABLE_FOR_FREE_TIER } from "@/lib/ai/runtime/data-egress";
 import type { AiAgentKey } from "@/lib/ai/registry/types";
 import { vacancyTranslationInputSchema } from "@/lib/ai/registry/agents/vacancy-translation";
 
@@ -72,12 +72,14 @@ const WIRED_AGENT_SENSITIVITY = {
   // `translate_message` (none recorded yet), so today the runtime refuses and
   // the original is shown.
   translation_copy: "SENSITIVE_FREE_TEXT",
-  // The verbatim text of a PUBLICLY published job advertisement, rendered in
-  // the reader's locale (wired 2026-09-22, lib/vacancy-store/
-  // vacancy-translation-read.ts). The second PUBLIC surface: the platform
-  // mirrors an open-data ad it does not author; the payload carries no
-  // employer identity, URL, coordinates or LabourMarket person.
-  vacancy_translation: "PUBLIC",
+  // A published job advertisement rendered in the reader's locale (wired
+  // 2026-09-22, lib/vacancy-store/vacancy-translation-read.ts). Proposed as
+  // PUBLIC and OVERRULED by the owner in review — "public source content does
+  // not automatically authorize unrestricted third-party AI transmission" —
+  // so it is unbounded third-party prose, grant-gated like every other
+  // free-text task. No grant names it today; the runtime refuses and the
+  // reader shows the publisher's own words.
+  vacancy_translation: "SENSITIVE_FREE_TEXT",
 } as const satisfies Partial<Record<AiAgentKey, AiDataSensitivity>>;
 
 // ── The wired list is derived from source, not maintained by hand ──────────
@@ -131,7 +133,7 @@ describe("the wired set and its classification stay in lockstep", () => {
     },
   );
 
-  it("exactly five wired surfaces describe a person; four stay refused, the granted one only for its own task", () => {
+  it("six wired surfaces carry unbounded or personal text; five stay refused, the granted ones only for their own tasks", () => {
     // This is the sentence the gate makes to the owner, expressed as a check:
     // the surfaces that read a person are refused by a free-tier ceiling —
     // and by any ungranted provider — by exactly the rule that refused them
@@ -142,7 +144,17 @@ describe("the wired set and its classification stay in lockstep", () => {
       .sort();
     // translation_copy joined on 2026-09-17 (a work message another person
     // wrote) — refused by every provider until an owner grant names its task.
-    expect(personal).toEqual(["conversation_intent", "matching_explanation", "translation_copy", "work_journal", "worker_profile"]);
+    // vacancy_translation joined on 2026-09-22 by OWNER DECISION, after being
+    // proposed as PUBLIC: an advertisement's body is unbounded prose this
+    // platform did not author, and a public source is not an authorization.
+    expect(personal).toEqual([
+      "conversation_intent",
+      "matching_explanation",
+      "translation_copy",
+      "vacancy_translation",
+      "work_journal",
+      "worker_profile",
+    ]);
     for (const agent of personal) {
       const sensitivity = sensitivityForTask(taskTypeForAgent(agent as AiAgentKey));
       expect(sensitivity).not.toBe(MAX_GRANTABLE_FOR_FREE_TIER);
@@ -181,7 +193,7 @@ describe("the classes the gate names have not moved", () => {
     ]);
   });
 
-  it("the PUBLIC set is an allowlist of two, and the gate document says so", () => {
+  it("the PUBLIC set is an allowlist of one, and the gate document says so", () => {
     // SUPERSEDES "no task is PUBLIC — the reason a grant is needed at all".
     //
     // That was true for the whole life of this file until 2026-08-24 and was
@@ -198,13 +210,20 @@ describe("the classes the gate names have not moved", () => {
       .filter(([, s]) => s === "PUBLIC")
       .map(([task]) => task)
       .sort();
-    // `translate_vacancy` joined 2026-09-22 with its own field-by-field
-    // argument (task-routing.ts) — the ad text is already public to the
-    // whole internet; the platform mirrors it with attribution.
-    expect(publicTasks).toEqual(["explain_market_demand", "translate_vacancy"]);
+    // `translate_vacancy` was proposed for this set on 2026-09-22 and the
+    // owner refused it: a public SOURCE is not an authorization to transmit.
+    // The set is still one.
+    expect(publicTasks).toEqual(["explain_market_demand"]);
   });
 
-  it("the vacancy-translation task admits ONLY the public ad text and the two locales", () => {
+  it("the vacancy-translation task is grant-gated and admits ONLY the ad text and the two locales", () => {
+    // The gate first: no grant names this task, so an external provider may
+    // receive PUBLIC only and this task is not PUBLIC.
+    expect(sensitivityForTask("translate_vacancy")).toBe("SENSITIVE_FREE_TEXT");
+    expect(
+      AI_EGRESS_GRANTS.some((g) => (g.tasks ?? []).includes("translate_vacancy")),
+      "no owner grant may name translate_vacancy without an owner decision recorded in data-egress.ts",
+    ).toBe(false);
     const policy = TASK_POLICIES.translate_vacancy;
     expect([...policy.allowedFields].sort()).toEqual(
       ["source_locale", "target_locale", "vacancy_description", "vacancy_title"].sort(),

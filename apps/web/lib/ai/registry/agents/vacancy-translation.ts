@@ -1,19 +1,25 @@
 /**
  * Vacancy Translation agent — registry entry.
  *
- * THE SECOND AGENT WHOSE PAYLOAD CARRIES NO DATA SUBJECT OF THIS PLATFORM.
+ * GRANT-GATED (owner decision 2026-09-22): "Public source content does not
+ * automatically authorize unrestricted third-party AI transmission."
  *
- * Its input is the verbatim TITLE (and, on request, the DESCRIPTION) of job
- * advertisements that a public employment service already published to the
- * whole internet under an open-data licence (Arbetsförmedlingen / JobTech —
- * the row's `attribution_code` names the source). LabourMarket.ai is not the
- * controller of that text; it mirrors it with attribution. Sending the same
- * public text to a translation provider discloses nothing that is not
- * already public. What the payload deliberately EXCLUDES is pinned by the
- * task policy (`translate_vacancy` in task-routing.ts): no employer name, no
- * application URL, no employer id, no coordinates, no LabourMarket person,
- * no matching data. The classification (`PUBLIC`) is therefore a statement
- * about the fields, checkable in `ai-wired-surface-sensitivity.test.ts`.
+ * Its input is the TITLE (and, on request, the DESCRIPTION) of job
+ * advertisements a public employment service already published under an
+ * open-data licence (Arbetsförmedlingen / JobTech — the row's
+ * `attribution_code` names the source). That the source is public does NOT
+ * make the transmission free: the task is classed `SENSITIVE_FREE_TEXT`
+ * because an advertisement's body is unbounded third-party prose, so it
+ * reaches an external provider only under an owner grant naming it
+ * (`AI_EGRESS_GRANTS`). None exists today.
+ *
+ * What the payload EXCLUDES is pinned by the task policy
+ * (`translate_vacancy` in task-routing.ts): no employer name, no application
+ * URL, no employer id, no coordinates, no LabourMarket person, no matching
+ * data. What it MINIMISES is done by the caller: e-mail addresses, phone
+ * numbers and URLs inside the text are replaced by opaque `[[n]]` tokens
+ * before the call and restored from the publisher's own characters
+ * afterwards (`lib/vacancy-store/vacancy-redaction.ts`).
  *
  * ── WHAT THIS AGENT IS FOR (doctrine §7.1: translator, not author) ─────────
  *
@@ -91,7 +97,10 @@ export const vacancyTranslationEntry: PromptRegistryEntry = {
     "You translate the TITLE and, when given, the DESCRIPTION of publicly published",
     "job advertisements from `sourceLocale` into `targetLocale`. Return one output",
     "item per input item, with the SAME `id`. Keep every number, currency, date,",
-    "unit, time, employer/brand/product name and URL EXACTLY as written. Do not add,",
+    "unit, time, employer/brand/product name and URL EXACTLY as written. Some spans",
+    "are replaced by opaque tokens of the form [[0]], [[1]] — copy each one through",
+    "UNCHANGED, in place, exactly once; never translate, reorder, drop or invent one.",
+    "Do not add,",
     "remove or soften any requirement, condition or disclaimer. Do not summarise.",
     "Do not add information. Keep formatting (line breaks, bullet marks) of a",
     "description. If an item cannot be rendered faithfully, return `title: null`",
@@ -102,6 +111,7 @@ export const vacancyTranslationEntry: PromptRegistryEntry = {
   outputSchema: vacancyTranslationOutputSchema,
   safetyRules: [
     "Never change a number, currency, date, unit, proper name or URL.",
+    "Copy every [[n]] token through unchanged, exactly once — never translate or drop one.",
     "Never add, drop or soften a requirement, condition or disclaimer.",
     "Never summarise or add information; translate only.",
     "Return null for an item that cannot be rendered faithfully.",

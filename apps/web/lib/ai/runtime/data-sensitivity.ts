@@ -66,7 +66,7 @@ const SENSITIVITY_RANK: Record<AiDataSensitivity, number> = {
  * (`TASK_POLICIES[t].allowedFields` in task-routing.ts) — not from the task's
  * name and not from how it feels.
  *
- * EXACTLY TWO TASKS ARE `PUBLIC` (one on 2026-08-24, one on 2026-09-22). For the whole life of this file
+ * EXACTLY ONE TASK IS `PUBLIC` (2026-08-24). For the whole life of this file
  * until then, none was — recorded here as a finding rather than an omission,
  * because every task this platform ran was about either a business's own work
  * or a specific person, and inventing a `PUBLIC` mapping to make the table
@@ -124,14 +124,27 @@ export const TASK_SENSITIVITY: Record<AiTaskType, AiDataSensitivity> = {
   // task only (`data-egress.ts`).
   propose_conversation_intent: "SENSITIVE_FREE_TEXT",
   explain_market_demand: "PUBLIC",
-  // THE SECOND PUBLIC TASK (2026-09-22). The verbatim title/description of a
-  // job advertisement a public employment service already published to the
-  // whole internet under an open-data licence. The platform is not its
-  // controller; the payload carries no employer identity, URL, coordinates
-  // or LabourMarket person (see `TASK_POLICIES.translate_vacancy`). The
-  // argument was made field by field, as this file requires, and the guard
-  // `ai-wired-surface-sensitivity.test.ts` allowlists exactly two.
-  translate_vacancy: "PUBLIC",
+  // OWNER DECISION 2026-09-22, overruling the PUBLIC classification this task
+  // was first proposed with: "Public source content does not automatically
+  // authorize unrestricted third-party AI transmission. Gate external-provider
+  // translation through the existing canonical egress/grant governance."
+  //
+  // The classification follows this file's own rule — derived from the fields
+  // the policy admits, not from the task's name. `vacancy_description` is
+  // UNBOUNDED text a third party wrote: the platform did not author it and
+  // cannot know what is in it, and a real advertisement may name a contact
+  // person. That is the definition of `SENSITIVE_FREE_TEXT`, and it is the
+  // same reasoning that classes `translate_message` and
+  // `propose_conversation_intent`. Minimisation reduces what travels (the
+  // reader redacts e-mail addresses, phone numbers and URLs to opaque tokens
+  // before the call and restores them afterwards), but minimisation is not a
+  // reclassification: a redactor is a filter, not a guarantee about prose.
+  //
+  // Consequence, by design: an external provider receives this task ONLY under
+  // an owner grant naming it (`AI_EGRESS_GRANTS`). No such grant exists today,
+  // so every run is refused and the reader falls back to the publisher's own
+  // words — visibly, with the advertisement's language named.
+  translate_vacancy: "SENSITIVE_FREE_TEXT",
 };
 
 export function sensitivityForTask(task: AiTaskType): AiDataSensitivity {
