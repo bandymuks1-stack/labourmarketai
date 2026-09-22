@@ -86,14 +86,16 @@ describe("needs reach workers only after verification — the copy says so (2026
     }
     const en = JSON.parse(read("messages/en.json"));
     expect(en.demandReadback.notVerifiedYet).toMatch(/not verified yet/i);
-    expect(en.demandReadback.notVerifiedYet).toMatch(/not shown to workers until verification/i);
+    // "inquiries", never "needs": demandReadback.* is inside the inquiry
+    // terminology chain (lib/guards/inquiry-terminology.test.ts).
+    expect(en.demandReadback.notVerifiedYet).toMatch(/the inquiries you submit here are not shown to workers until verification/i);
   });
 
   it("every non-verified setup explainer (active locales) says needs reach workers only after verification", () => {
     // One word each locale's sentence must carry — the verification term.
     const TERM: Record<(typeof ACTIVE)[number], RegExp> = {
       en: /shown to workers only after your company is verified/i,
-      lt: /darbuotojams rodomi tik po įmonės verifikacijos/i,
+      lt: /darbuotojams rodomos tik po įmonės verifikacijos/i,
       ru: /показываются работникам только после верификации/i,
       nl: /pas na verificatie van je bedrijf aan werknemers getoond/i,
       de: /erst nach der Verifizierung Ihres Unternehmens angezeigt/i,

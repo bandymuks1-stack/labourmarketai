@@ -42,7 +42,18 @@ describe("Guard: the company dashboard exposes the canonical demand intake", () 
     // active_unverified must be enough — the page is role-gated only.
     expect(page).toMatch(/requireRoleOrRedirect\(\s*locale\s*,\s*["']company["']\)/);
     expect(page).not.toMatch(/===\s*["']verified["']/);
-    expect(page).not.toMatch(/!==\s*["']verified["']/);
+    // Re-pinned 2026-09-22 (global-access closure, copy honesty): the page
+    // holds exactly ONE `!== "verified"` and it renders the honest
+    // worker-visibility note — `list_open_demand_for_workers` shows an
+    // inquiry to workers only for a verified company — never a gate. The
+    // wizard mount stays unconditional and precedes it.
+    const verifiedComparisons = page.match(/!==\s*["']verified["']/g) ?? [];
+    expect(verifiedComparisons).toHaveLength(1);
+    expect(page).toMatch(
+      /companyRow\.verificationStatus !== "verified" \? \(\s*<p[\s\S]*?data-testid="company-needs-not-verified-note"/,
+    );
+    expect(page.indexOf("<DemandRequestButton")).toBeGreaterThan(0);
+    expect(page.indexOf("<DemandRequestButton")).toBeLessThan(page.indexOf('!== "verified"'));
   });
 
   it("keeps the PR #254 demand CTA pointing at the request section", () => {
