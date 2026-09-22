@@ -58,6 +58,36 @@
 
 # Applied Migration Ledger
 
+## Applied 2026-09-22 — countries: every ISO-3166-1 alpha-2 code (global-access rule v1)
+
+### ✅ APPLIED TO PROD — `20260922120000_countries_all_iso_v1` (owner decision "APPLY COUNTRIES SEED", 2026-09-22)
+
+Owner rule (2026-09-22): LabourMarket.ai is GLOBAL by default — MARKET PRIORITY ≠ ACCESS PERMISSION.
+`organizations.country` and `engagement_contexts.country_code` carry FKs to `public.countries(code)`,
+which held 10 rows (DE DK EE FI LT LV NL NO PL SE), so a company in Ireland, Vietnam or the United
+States could not exist in the system. PR #1825 (`3b41bc423`, deployed 06:58Z) shipped the file with its
+paired `supabase/rollbacks/20260922120000_countries_all_iso_v1.down.sql` (deletes only unreferenced
+`is_target_market = false` rows); migration-safety GREEN (additive `insert … on conflict do nothing`).
+
+Applied via Supabase MCP `apply_migration` (name `countries_all_iso_v1`, the statement from the file on
+main, sha256 of the file `5daa073f656a1fd8…`) at 07:05:48Z — never `db push`.
+`schema_migrations` row: `20260922070548` / `countries_all_iso_v1`.
+
+Pre-apply read: 10 rows, 10 target markets, 18 organizations, 0 dangling FKs.
+Read-back (immediately after): **249 rows**, `is_target_market = true` still exactly the 10
+(`DE,DK,EE,FI,LT,LV,NL,NO,PL,SE` — untouched), representative codes present
+(`LT SE DE IE VN US SA GE PH` with CLDR `name_en`/`name_lt`), 0 dangling `organizations.country`,
+0 dangling `engagement_contexts.country_code`, 18 organizations unchanged, 0 empty names.
+`is_target_market` stays a priority/data attribute; nothing reads it as an access gate.
+
+Still explicit and unwidened after this apply: `submit_company_need_public_v1` (anonymous intake,
+SECURITY DEFINER) keeps its 10-code list — its own comment says "PR #675 10-market target list", i.e. a
+market gate, not an abuse control; the one-condition replacement (`exists (select 1 from
+public.countries c where c.code = v_country)`) is an owner-applied RED change (see the 2026-09-22
+execution receipt). `market_rate_averages` and `country_document_requirements` CHECKs are data-domain
+coverage, not access.
+
+
 ## Applied 2026-09-14 — owner decision round (items 2a, 4b, 4c, 4d)
 
 > Four migrations applied via Supabase MCP `apply_migration` after explicit
