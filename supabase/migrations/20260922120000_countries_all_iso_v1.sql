@@ -20,6 +20,11 @@
 -- CHECK. Those are explicit, documented, narrowly scoped restrictions and are
 -- listed in the audit, not changed here.
 --
+-- ROLLBACK (down): supabase/rollbacks/20260922120000_countries_all_iso_v1.down.sql
+-- deletes ONLY rows this migration inserted: is_target_market = false AND no
+-- organizations / engagement_contexts row references the code (a referenced
+-- row means a real company now lives there and must not be orphaned).
+--
 -- GATE: additive insert ... on conflict do nothing (GREEN by shape). Apply only
 -- via the owner-gated production path (Supabase MCP apply_migration after the
 -- PR gate report), never `db push`. Precedent: 20260717130000 (six markets).
