@@ -1,6 +1,8 @@
 -- ============================================================================
 -- 20260922150000_public_vacancy_translations_v1
 -- GREEN — additive: ONE jsonb column on the existing public_vacancies table.
+-- APPLIED 2026-09-22 10:22 UTC (ledger 20260922102211) under the GREEN
+-- prod-apply policy; readback in docs/APPLIED_LEDGER.md.
 --
 -- Finding (owner production walk, 2026-09-22): a Lithuanian-interface worker
 -- reads Swedish. Production holds 101,885 published Arbetsförmedlingen ads
