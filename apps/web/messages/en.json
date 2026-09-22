@@ -11961,6 +11961,7 @@
       "statGovLt": "Statistics Lithuania (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen (Swedish Public Employment Service)",
+      "nav": "NAV / Arbeidsplassen.no (Norwegian Labour and Welfare Administration)",
       "cvbankasSalary": "CVbankas salary data — proposed external benchmark (not active)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai internal aggregates",
@@ -11977,6 +11978,7 @@
         "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
         "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
         "arbetsformedlingen": "Active source. Usage terms confirmed: a free public data source (CC0). Attribution is shown with every advertisement, and each advertisement links back to the original posting.",
+        "nav": "Proposed source. NAV's API terms permit republication with ongoing duties: a withdrawn advertisement must be removed immediately, an updated one refreshed immediately, and the apply link must lead to the original posting. Accepting the terms and obtaining a token require owner action — nothing is fetched today.",
         "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
         "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
         "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
@@ -14680,7 +14682,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Source: Arbetsförmedlingen (JobTech Development). The advertisement content belongs to the publishing employer."
+      "arbetsformedlingen": "Source: Arbetsförmedlingen (JobTech Development). The advertisement content belongs to the publishing employer.",
+      "nav": "Source: NAV / Arbeidsplassen.no. The advertisement content belongs to the publishing employer; applications go through the original posting."
     },
     "provenance": {
       "externalPublicSource": "Published on a public employment service. Listed here so you can find it — it is not a labourmarket.ai job posting.",

@@ -49,6 +49,7 @@ import {
   type VacancyImportResultV1,
 } from "@/lib/vacancy-import/vacancy-importer";
 import { vacancySwitchState } from "@/lib/vacancy-import/vacancy-kill-switch";
+import { providerApiToken } from "@/lib/vacancy-import/vacancy-provider-secret";
 import {
   VACANCY_PROVIDERS,
   type VacancyProviderDescriptorV1,
@@ -203,6 +204,16 @@ export async function runVacancyIngestionSession(
     // traces back to exactly one ingestion session.
     const sessionId = `${provider.key}-${req.channel}-${req.nowIso}`;
 
+    // The provider's credential, when its endpoints need one, read from the
+    // conventional per-provider env NAME (VACANCY_SOURCE_<KEY>_API_TOKEN)
+    // and handed to the adapter as a header — never logged, never stored,
+    // never in `requestRef`. Keyless providers get null and nothing changes;
+    // a key-requiring provider without one is refused by the adapter
+    // (`api_key_required`) before any request. Provisioning is an owner gate.
+    const apiKey = provider.endpoints.some((e) => e.requiresApiKey)
+      ? providerApiToken(provider.key)
+      : null;
+
     const result = await runVacancyImport({
       provider,
       channel: req.channel,
@@ -213,6 +224,7 @@ export async function runVacancyIngestionSession(
       capturedAt: req.nowIso,
       dedupState,
       cursor: cursor.cursorValue,
+      apiKey,
       persist: async (rows) => {
         const outcome = await persistVacancies(client, rows, req.nowIso, sessionId);
         persistedInserted = outcome.inserted;

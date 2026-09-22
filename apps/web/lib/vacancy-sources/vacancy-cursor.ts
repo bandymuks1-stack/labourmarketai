@@ -139,6 +139,92 @@ export function decodeRecordOffsetCursor(cursor: string | null): number | null {
   return Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
+// ── CONTINUATION-TOKEN CHECKPOINT ───────────────────────────────────────────
+/**
+ * A `cursor` channel (a feed that hands back the token naming its next page)
+ * checkpoints on the publisher's OWN continuation token. It shares the same
+ * opaque `cursor_value` column as the two checkpoints above, so it carries
+ * its own prefix for the same reason the record offset does: the three kinds
+ * must never be confusable. `decodeContinuationTokenCursor` returns null for
+ * a timestamp or an offset, and both older decoders return null for a
+ * prefixed token — every direction fails CLOSED.
+ *
+ * The token is bounded because it is stored and echoed back on the wire:
+ * a publisher (or a corrupted row) handing back a multi-kilobyte "token"
+ * must not become a multi-kilobyte query string. Added 2026-09-22 for the
+ * NAV scaffold; no provider is walked this way until that gate opens.
+ */
+export const VACANCY_CONTINUATION_TOKEN_PREFIX = "continuation-token:";
+/** Longest token accepted, in characters. */
+export const VACANCY_CONTINUATION_TOKEN_MAX_CHARS = 512;
+
+/** Only characters a URL-safe token can carry. Anything else is refused —
+ *  a token is never a place to smuggle a path, a scheme or whitespace. */
+const CONTINUATION_TOKEN_SHAPE = /^[A-Za-z0-9._~:-]+$/;
+
+/** Encode a publisher continuation token as the stored checkpoint, or null
+ *  when the value is empty, over-long or not token-shaped. */
+export function encodeContinuationTokenCursor(token: string): string | null {
+  const trimmed = token.trim();
+  if (
+    trimmed.length === 0 ||
+    trimmed.length > VACANCY_CONTINUATION_TOKEN_MAX_CHARS ||
+    !CONTINUATION_TOKEN_SHAPE.test(trimmed)
+  ) {
+    return null;
+  }
+  return `${VACANCY_CONTINUATION_TOKEN_PREFIX}${trimmed}`;
+}
+
+/** The continuation token a stored checkpoint carries, or null when the value
+ *  is absent, is a timestamp, is an offset, or is malformed. Null means
+ *  "walk from the head of the feed" — the cold start a feed is designed for. */
+export function decodeContinuationTokenCursor(
+  cursor: string | null,
+): string | null {
+  if (typeof cursor !== "string") return null;
+  const trimmed = cursor.trim();
+  if (!trimmed.startsWith(VACANCY_CONTINUATION_TOKEN_PREFIX)) return null;
+  const raw = trimmed.slice(VACANCY_CONTINUATION_TOKEN_PREFIX.length);
+  if (
+    raw.length === 0 ||
+    raw.length > VACANCY_CONTINUATION_TOKEN_MAX_CHARS ||
+    !CONTINUATION_TOKEN_SHAPE.test(raw)
+  ) {
+    return null;
+  }
+  return raw;
+}
+
+/**
+ * Read the next continuation token off a response body at the descriptor's
+ * declared path. Returns null when the path is absent, the value is not a
+ * non-empty string, or it fails the token shape — all of which mean "no
+ * further page", never an error. Pure and total over `unknown`.
+ */
+export function readContinuationToken(
+  body: unknown,
+  path: readonly string[],
+): string | null {
+  let node: unknown = body;
+  for (const key of path) {
+    if (node === null || typeof node !== "object" || Array.isArray(node)) {
+      return null;
+    }
+    node = (node as Record<string, unknown>)[key];
+  }
+  if (typeof node !== "string") return null;
+  const trimmed = node.trim();
+  if (
+    trimmed.length === 0 ||
+    trimmed.length > VACANCY_CONTINUATION_TOKEN_MAX_CHARS ||
+    !CONTINUATION_TOKEN_SHAPE.test(trimmed)
+  ) {
+    return null;
+  }
+  return trimmed;
+}
+
 // ── TIME-WINDOW WALK ────────────────────────────────────────────────────────
 /**
  * Why a stream must be walked in SLICES rather than asked for in one go.

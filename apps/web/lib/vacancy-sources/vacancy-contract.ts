@@ -34,7 +34,17 @@ export type VacancyCountryIso = string;
  * registry key for the same source — one governance row per provider, never a
  * second allowlist. Adding a country adds one entry in both places.
  */
-export type VacancyProviderKey = "arbetsformedlingen";
+export type VacancyProviderKey =
+  | "arbetsformedlingen"
+  /**
+   * NAV — Arbeidsplassen.no (Norway), the `pam-stilling-feed`. SCAFFOLD ONLY
+   * (2026-09-22): registered so the pipeline's shapes (bearer auth,
+   * continuation-token paging, per-provider secret) exist end to end, while
+   * the governance row stays `unconfirmed` / `off` and the env switch stays
+   * closed. No request reaches a nav.no host until the owner records the
+   * decision in docs/human-gates/nav-activation-gate.md.
+   */
+  | "nav";
 
 /**
  * How the batch reached us. Every public employment service offers some
