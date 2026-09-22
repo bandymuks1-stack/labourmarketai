@@ -110,6 +110,7 @@ export type ConversationIntent =
   | "documents" // "parodyk mano dokumentus" — the document centre
   | "market-map" // "parodyk rinkos žemėlapį" — the labour-market map
   | "activity" // "parodyk pranešimus" — the unified activity centre
+  | "my-team" // "parodyk mano komandą" — the people the speaker works with
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "invitations" // "mano kvietimai" — invitations addressed to me (4D)
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
@@ -1507,6 +1508,40 @@ const RULES: IntentRule[] = [
       p("\\b(verloopt|verlopen|läuft\\s+ab|laeuft\\s+ab|abgelaufen)\\b", 5),
       p("\\b(wygasa|wygasaj|wyga[sś]|traci\\s+wa[zż]no[sś])", 5), // pl
       p("(leidim|permit|a1\\b|razrešen|разрешени|pozwoleni)", 4),
+      // ── WHAT A COUNTRY REQUIRES (owner P0 2026-09-22 §5) ────────────────
+      //
+      // "Ką turiu pateikti darbui Norvegijoje?" scored 0 everywhere, while
+      // `/dashboard/documents` already computes exactly that answer
+      // (`computeCountryReadiness` + `?country=`): the person asking what a
+      // market requires of them was answered by the not-understood menu.
+      // The shape is closed — a WHAT + a must/need word + a submit/have
+      // word — so it cannot swallow a general question, and the country
+      // itself is read downstream from the same sentence.
+      p(
+        "(k[aą]|what|что|was|wat|co)\\s+(?:[^\\s]+\\s+){0,3}?" +
+          "(turiu|reikia|reikės|need|must|нужно|должен|brauche|muss|moet|" +
+          "potrzebuj|musz[eę])\\s*.{0,24}" +
+          "(pateikt|tur[eė]t|paruo[sš]t|submit|provide|bring|have|show|" +
+          "предостав|подат|иметь|vorlegen|mitbringen|haben|indienen|" +
+          "meenemen|hebben|z[lł]o[zż]y[cć]|przedstawi[cć]|mie[cć])",
+        5,
+      ),
+      // …and the PURPOSE phrase, as a second independent signal. "for work
+      // in Norway" / "darbui Norvegijoje" says the question is about what
+      // working THERE requires. Measured: the English sentence also matched
+      // find-work's "I need … work" seek shape (10) — "need to submit for
+      // work" is not seeking work — so the requirement reading needs both
+      // signals to outrank it (5 + 6 = 11). A real job search ("I'm looking
+      // for work in Norway") matches only THIS pattern (6) and stays on
+      // find-work: that is the control which keeps the pair honest.
+      p(
+        "(pateikt|paruo[sš]t|tur[eė]t|submit|provide|bring|have|show|" +
+          "предостав|подат|иметь|vorlegen|mitbringen|haben|indienen|meenemen|" +
+          "hebben|z[lł]o[zż]y[cć]|przedstawi[cć]|mie[cć])\\s*.{0,16}" +
+          "(darbui|darbo\\s+vietai|for\\s+work|for\\s+a\\s+job|для\\s+работы|" +
+          "f[uü]r\\s+die\\s+arbeit|zum\\s+arbeiten|voor\\s+werk|do\\s+pracy)",
+        6,
+      ),
     ],
   },
   {
@@ -1549,6 +1584,32 @@ const RULES: IntentRule[] = [
      * notification word is therefore weighted 7 in German specifically — the
      * longer, more specific word wins, and a plain "Zeig meine Nachrichten"
      * still opens messages because it never reaches this rule.
+     */
+    intent: "my-team",
+    patterns: [
+      p(
+        "(mano|my|моя|мою|meine|mijn|moj[aąeę])\\s*.{0,12}" +
+          "(komand|team\\b|brigad|команд|бригад|ploeg|mannschaft|zesp[oó][lł]|za[lł]og)",
+        6,
+      ),
+      p(
+        "(parodyk|rodyk|atidaryk|show|open|покажи|открой|zeig|toon|laat|poka[zż]|wy[sś]wietl)" +
+          "\\s*.{0,14}(komand|team\\b|brigad|команд|бригад|ploeg|mannschaft|zesp[oó][lł]|za[lł]og)",
+        6,
+      ),
+      // The people themselves, named as a relationship rather than a noun
+      // the whole product uses ("kolegos", "colleagues", "коллеги").
+      p("(koleg[oaų]|colleague|коллег|kollege|collega|wsp[oó][lł]pracownik)", 5),
+    ],
+  },
+  {
+    /**
+     * MY TEAM (owner P0 2026-09-22 §5) is the rule ABOVE this one.
+     * `/dashboard/network` — the relationships surface the primary nav
+     * carries and the invitation answers already chip to — is the answer to
+     * "Parodyk mano komandą", which scored 0 everywhere before. A possessive
+     * (or a show-verb) plus a team word; never a bare "žmonės/people", which
+     * would swallow half the product's sentences.
      */
     intent: "activity",
     patterns: [
@@ -2033,6 +2094,28 @@ const RULES: IntentRule[] = [
       p("(zapisz|zapisa[cć]|wpisz|wprowad[zź]|odnotuj|zanotuj)\\s*.{0,20}(prac|godzin)", 4),
       p("(prac[eęy]|godzin)\\w*\\s*.{0,16}(zapisa[cć]|wprowadzi[cć]|odnotowa[cć])", 4),
       p("(dziennik\\s+pracy|w\\s+dzienniku)", 2), // pl — the journal by name
+      // ── A MEASURED OUTPUT IS RECORDED WORK (owner P0 2026-09-22 §5) ──────
+      //
+      // "Šiandien sumontavau 24 m²" scored 0 everywhere and was answered by
+      // the not-understood menu, although the units it names are a shipped
+      // capability (`messages/<locale>/productivity-units.json`, #1696) and
+      // the journal stores exactly this. The hours case was already covered
+      // one rule up; every OTHER unit was not, so the person who states an
+      // area, a distance or a count was refused while the person who states
+      // hours was served.
+      //
+      // The signal is the NUMBER + a canonical unit, never a verb list: a
+      // verb list is the vocabulary trap this file keeps re-learning, and
+      // the unit set is closed, owned by the taxonomy, and cannot be typed
+      // by accident. Weight 3 = the "worked" stems; a sentence that also
+      // SEEKS keeps find-work through the seek guard, and "Ieškau 5
+      // suvirintojų" is untouched because a profession is not a unit.
+      p(
+        "\\d+([.,]\\d+)?\\s*(m²|m2|kv\\.?\\s*m|m\\s*²|km\\b|vnt\\.?|kg\\b|" +
+          "palet|padėkl|pakuot|pcs\\b|szt\\.?|stuks|st[uü]ck|paczek|palett|" +
+          "м²|м2|кв\\.?\\s*м|км\\b|шт\\.?|кг\\b|паллет|поддон)",
+        3,
+      ),
     ],
   },
   {
@@ -2567,6 +2650,20 @@ const RULES: IntentRule[] = [
       p("(mano|my|моя|meine|mijn|moj[aą]|moja)\\s+(kortel|card\\b|карточк|karte\\b|kaart\\b|kart[aeoy]\\b)", 6),
       p("player\\s*card", 6),
       p("(darbuotojo|worker|pracownika)\\s+(kortel|card\\b|kart[aeoy]\\b)", 5),
+      // CHANGING WHAT THE CARD HOLDS IS OPENING THE CARD (owner P0
+      // 2026-09-22 §5). "Pakeisk mano pasirengimą darbui" scored 0: the
+      // work-card editor lives IN the player-card result
+      // (`/dashboard?result=player-card`), and the person who asks to change
+      // their readiness was answered by the not-understood menu. A read that
+      // carries the editor is the honest answer to an edit request — nothing
+      // is written by the sentence.
+      p(
+        "(pakeisk|pakeisti|atnaujink|atnaujinti|redaguok|change|update|edit|" +
+          "измени|обнови|[aä]ndere|aktualisiere|wijzig|werk\\s+bij|zmie[nń]|zaktualizuj)" +
+          "\\s*.{0,24}(pasirengim|pasiruošim|readiness|готовност|bereitschaft|" +
+          "gereedheid|gotowo[sś])",
+        6,
+      ),
     ],
   },
   {

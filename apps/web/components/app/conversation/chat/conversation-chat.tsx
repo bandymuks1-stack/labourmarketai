@@ -5847,6 +5847,13 @@ export function ConversationChat({
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/activity", label: labels.activityChip },
           ]),
+        // "Parodyk mano komandą" — the people surface both identities
+        // already have (a worker's relationships, an organization's
+        // members). Same chip the invitation answers use.
+        networkPeople: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/network", label: labels.chipNetwork },
+          ]),
         // No scheduler exists — never a fake reminder (honest degradation).
         // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────
         // "noriu pakviesti klientą" → the ONE missing question (e-mail) → the

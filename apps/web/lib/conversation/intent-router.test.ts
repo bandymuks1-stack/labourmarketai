@@ -792,6 +792,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Zeig meine Benachrichtigungen",
     pl: "Pokaż powiadomienia",
   },
+  "my-team": {
+    lt: "Parodyk mano komandą",
+    en: "Show my team",
+    ru: "Покажи мою команду",
+    nl: "Toon mijn team",
+    de: "Zeig mein Team",
+    pl: "Pokaż mój zespół",
+  },
   "messages-view": {
     lt: "Parodyk žinutes",
     en: "Show my messages",

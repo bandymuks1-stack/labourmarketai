@@ -42,6 +42,7 @@ export type IntentDomain =
   // §9 chat-first coverage — domains that existed in the product but had no
   // sentence that could reach them.
   | "documents"
+  | "network"
   | "market"
   | "activity";
 
@@ -101,6 +102,7 @@ export type IntentHandlerId =
   | "documents"
   | "marketMap"
   | "activityCentre"
+  | "networkPeople"
   | "reminderBlocked"
   | "translateBlocked"
   | "messages"
@@ -257,6 +259,11 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   documents: { domain: "documents", access: "route", handler: "documents", ownTyping: false },
   "market-map": { domain: "market", access: "route", handler: "marketMap", ownTyping: false },
   activity: { domain: "activity", access: "route", handler: "activityCentre", ownTyping: false },
+  // "Parodyk mano komandą" (owner P0 2026-09-22 §5). The people a person
+  // works with — /dashboard/network, the EXISTING relationships surface the
+  // primary nav already carries. A route, not a new read: the chat opens the
+  // canonical page it always had a chip for.
+  "my-team": { domain: "network", access: "route", handler: "networkPeople", ownTyping: false },
   "messages-view": { domain: "communication", access: "read", handler: "messages", ownTyping: false },
   invitations: { domain: "communication", access: "read", handler: "invitations", ownTyping: false },
 
