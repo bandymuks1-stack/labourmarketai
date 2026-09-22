@@ -8459,6 +8459,10 @@
       "duration": "Voor",
       "declared": "Opgegeven",
       "privacyNote": "Namen en contactgegevens worden hier bewust niet getoond. Contact opnemen is een aparte stap waarmee de andere partij moet instemmen."
+    },
+    "actionability": {
+      "availableFromChip": "Beschikbaar vanaf {date}",
+      "availableFromNote": "Niet beschikbaar op de door u gevraagde startdatum — deze persoon geeft een latere start op. Hun eigen datum, geen schatting."
     }
   },
   "planBoundary": {

@@ -8459,6 +8459,10 @@
       "duration": "For",
       "declared": "Declared",
       "privacyNote": "Names and contact details are deliberately not shown here. Reaching out is a separate step that the other side has to agree to."
+    },
+    "actionability": {
+      "availableFromChip": "Available from {date}",
+      "availableFromNote": "Not available at the start you asked for — this person states a later start. Their own date, not an estimate."
     }
   },
   "planBoundary": {

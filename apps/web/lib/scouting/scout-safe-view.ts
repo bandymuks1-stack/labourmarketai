@@ -23,6 +23,10 @@ import {
   type CompanyCandidateReadiness,
 } from "@/lib/scouting/candidate-readiness";
 import type { LastActiveBucket } from "@/lib/scouting/profile-freshness";
+import {
+  mayOfferEmployerActions,
+  type CandidateActionabilityV1,
+} from "@/lib/scouting/candidate-actionability";
 
 export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
 
@@ -47,6 +51,14 @@ export interface ScoutSafeCandidate {
   /** Honest profile freshness (Wagon 1) — from the worker row's real
    *  updated_at/created_at, never fabricated. Non-PII. */
   readonly lastActiveBucket: LastActiveBucket;
+  /**
+   * CURRENT actionability for THIS need (owner ruling 2026-09-22), decided
+   * once by `lib/scouting/candidate-actionability.ts`. A candidate that
+   * reached this view is actionable now or actionable LATER — the surface
+   * must read this before implying "available now", and must not offer an
+   * action the verdict does not allow.
+   */
+  readonly actionability: CandidateActionabilityV1;
 }
 
 /** Real evidence (beyond self-declared) count for the worker's skills. */
@@ -72,6 +84,10 @@ export function toScoutSafeCandidate(input: {
   /** The company's own stored note for this pair (optional; default null). */
   readonly shortlistNote?: string | null;
   readonly lastActiveBucket: LastActiveBucket;
+  /** The canonical verdict for this candidate on this need. Required: a
+   *  caller that had to decide it anyway must hand it over, so no surface
+   *  can assemble a candidate without one. */
+  readonly actionability: CandidateActionabilityV1;
 }): ScoutSafeCandidate {
   const preview = toShortlistSafePreview({
     id: input.workerId,
@@ -90,10 +106,16 @@ export function toScoutSafeCandidate(input: {
   // Runtime safety net at the company-facing boundary.
   assertContactSafe(preview as unknown as Record<string, unknown>);
 
-  const canContact = canStartCommunicationOrBooking({
-    availabilityStatus: input.subject.availabilityStatus ?? null,
-    availableFrom: input.subject.availableFrom ?? null,
-  });
+  // TWO GATES, AND BOTH MUST PASS. The schedule gate asks "is there a date
+  // to talk about"; the actionability verdict asks "is this still a live
+  // proposal". A withdrawn worker with a perfectly good calendar passes the
+  // first and must still fail the second.
+  const canContact =
+    mayOfferEmployerActions(input.actionability) &&
+    canStartCommunicationOrBooking({
+      availabilityStatus: input.subject.availabilityStatus ?? null,
+      availableFrom: input.subject.availableFrom ?? null,
+    });
 
   const readiness = companyCandidateReadiness(input.needCountry, preview);
 
@@ -107,6 +129,7 @@ export function toScoutSafeCandidate(input: {
     shortlistStatus: input.shortlistStatus,
     shortlistNote: input.shortlistNote ?? null,
     lastActiveBucket: input.lastActiveBucket,
+    actionability: input.actionability,
   };
 }
 

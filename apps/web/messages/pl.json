@@ -8459,6 +8459,10 @@
       "duration": "Na",
       "declared": "Zgłoszono",
       "privacyNote": "Imiona i dane kontaktowe celowo nie są tu pokazywane. Kontakt to osobny krok, na który musi zgodzić się druga strona."
+    },
+    "actionability": {
+      "availableFromChip": "Dostępny od {date}",
+      "availableFromNote": "Niedostępny na wskazany termin rozpoczęcia — ta osoba podaje późniejszy start. To jej własna data, nie szacunek."
     }
   },
   "planBoundary": {

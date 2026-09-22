@@ -8459,6 +8459,10 @@
       "duration": "Trukmė",
       "declared": "Nurodyta",
       "privacyNote": "Vardai ir kontaktai čia sąmoningai nerodomi. Susisiekimas yra atskiras žingsnis, kuriam kita pusė turi sutikti."
+    },
+    "actionability": {
+      "availableFromChip": "Laisvas nuo {date}",
+      "availableFromNote": "Nurodytu pradžios laiku dar neprieinamas — šis žmogus nurodė vėlesnę pradžią. Tai jo paties data, ne prognozė."
     }
   },
   "planBoundary": {
