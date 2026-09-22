@@ -425,7 +425,7 @@ export default async function CommunicationListPage({
             <span className="font-medium">{tBookings("pendingLink")}</span>
             <span className="text-meta text-text-muted">{tBookings("pendingNote")}</span>
           </span>
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-text-on-brand">
             {pendingBookings}
           </span>
         </Link>

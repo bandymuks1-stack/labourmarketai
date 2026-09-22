@@ -42,7 +42,7 @@ export async function ConfirmPulse() {
           <Link
             href={"/dashboard/inbox/quick" as "/dashboard"}
             data-testid="confirm-pulse-cta"
-            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5 sm:w-auto sm:justify-start"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-gradient-cta px-5 py-3 text-sm font-semibold text-text-on-brand transition-transform duration-fast ease-out hover:-translate-y-0.5 sm:w-auto sm:justify-start"
           >
             {t("cta")} →
           </Link>

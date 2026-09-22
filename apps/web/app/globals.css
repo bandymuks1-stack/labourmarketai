@@ -104,6 +104,10 @@
      only measures text on the PAGE. Near-black is 9.42:1 on the flat gold and
      5.66:1 on the darkest stop of the CTA gradient. */
   --c-text-on-brand: 10 10 10;
+  /* FOREGROUND ON A DANGER FILL. Same polarity rule as on-brand: state-danger
+     is a LIGHT red in dark (#ff5c5c — white on it is 3.03:1), so the label is
+     near-black (6.54:1); light's deep red takes white (5.45:1). */
+  --c-text-on-danger: 10 10 10;
   /* BRAND GRADIENTS ARE THEME-AWARE TOO. They used to be fixed hex ramps, which
      is fine while only one theme exists and a silent AA failure the moment two
      do: a LIGHT gold ramp under the light theme's WHITE on-brand text measured
@@ -141,7 +145,9 @@
      primary button would read as a confirmation. So confirmation moves to the
      verification green, which stays distinct from the evidence cyan above and
      from the gold brand. The DISTINCTION is what the doctrine protects — not
-     the specific hue. Flagged for owner review. */
+     the specific hue. OWNER-RATIFIED 2026-09-22: employer-confirmed =
+     trust-accent green; gold = brand / action / waiting / informative, never
+     verification or confirmation. */
   --c-trust-accent: 52 211 153;
 
   color-scheme: dark;
@@ -169,15 +175,15 @@
      LESS contrast, so the highlight role inverts: it goes deeper than the brand
      (#6B5210, 6.84:1 on the page) instead of brighter. */
   --c-brand-champagne: 107 82 16;
-  --c-brand-cyan: 0 150 198;
+  --c-brand-cyan: 0 117 156; /* #00759c — was 0 150 198 (3.40:1 on a card). 5.22:1 card / 4.83:1 page / 4.57:1 nested (owner ratified 2026-09-22: AA over the exact legacy light hue) */
   --c-brand-violet: 106 69 240;
   --c-brand-purple: 140 86 224;
-  --c-brand-orange: 224 84 8;
+  --c-brand-orange: 188 69 6; /* #bc4506 — was 224 84 8 (3.86:1). 5.26:1 card / 4.87:1 page / 4.61:1 nested */
   /* state */
-  --c-state-live: 0 168 86;
-  --c-state-success: 17 132 90;
-  --c-state-warning: 168 104 0;
-  --c-state-amber: 190 100 16;
+  --c-state-live: 0 126 73; /* #007e49 — was 0 168 86 (3.12:1). 5.15:1 card / 4.76:1 page / 4.51:1 nested */
+  --c-state-success: 16 122 83; /* #107a53 — was 17 132 90 (4.34:1 on the page). 5.34:1 card / 4.94:1 page / 4.68:1 nested */
+  --c-state-warning: 156 96 0; /* #9c6000 — was 168 104 0 (4.18:1 on the page). 5.14:1 card / 4.75:1 page / 4.50:1 nested */
+  --c-state-amber: 165 89 16; /* #a55910 — was 190 100 16 (4.18:1). 5.20:1 card / 4.81:1 page / 4.56:1 nested */
   --c-state-danger: 200 44 44;
   /* text */
   --c-text-primary: 11 13 23; /* near-black on light */
@@ -186,6 +192,7 @@
   /* On light the brand is the DEEP gold #8A6A12, so the polarity flips back:
      white is 5.06:1 on it, near-black only 3.91:1. */
   --c-text-on-brand: 255 255 255;
+  --c-text-on-danger: 255 255 255;
   /* Deep end of the metallic ramp (see the dark block): white text clears AA on
      every stop here, and the accent word clears it against the white page. */
   --gradient-cta: linear-gradient(135deg, #8c6a16 0%, #6b5210 52%, #57420d 100%);
@@ -193,7 +200,14 @@
   /* tier — rank ladder; the light-ground gold rank */
   --c-tier-gold: 150 104 0;
   /* trust — the verification green, mirroring dark (see the note above) */
-  --c-trust-accent: 17 132 90;
+  --c-trust-accent: 16 122 83;
+  /* tier — RANK marks. The shared bright values (#5be0ff / #c6cdd8 / #c7895a)
+     are 1.55 / 1.60 / 2.94:1 on white, so light gets deepened rank hues:
+     5.22 / 5.80 / 6.53:1 on a card, all >= 4.5:1 on the nested ink-700 too. Rank is a rank axis, never a trust or
+     quality score (owner decision 2026-09-22). */
+  --c-tier-diamond: 0 118 149;
+  --c-tier-silver: 93 102 117;
+  --c-tier-bronze: 138 79 29;
 
   color-scheme: light;
 }

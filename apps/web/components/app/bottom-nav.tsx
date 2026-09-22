@@ -179,7 +179,7 @@ export function BottomNav({
                   <NavLinkPending className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2" />
                   {badge > 0 && (
                     <span
-                      className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-meta font-bold leading-none text-white"
+                      className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-meta font-bold leading-none text-text-on-brand"
                       data-testid={`bottom-nav-badge-${id}`}
                     >
                       {badge > 9 ? "9+" : badge}

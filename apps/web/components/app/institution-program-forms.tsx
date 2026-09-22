@@ -41,7 +41,7 @@ export type ProgramFormLabels = {
 const inputCls =
   "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 const btnCls =
-  "inline-flex items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-60";
+  "inline-flex items-center rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60";
 
 function StateLine({ state, labels }: { state: ProgramActionState; labels: ProgramFormLabels }) {
   if (state.status === "idle") return null;

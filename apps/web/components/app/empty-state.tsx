@@ -31,7 +31,7 @@ export function EmptyState({
 }) {
   // min-h-11 = 44px touch targets (audit PR8).
   const PRIMARY =
-    "mt-1 inline-flex min-h-11 w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+    "mt-1 inline-flex min-h-11 w-fit items-center gap-2 rounded-md bg-gradient-cta px-4 text-sm font-semibold text-text-on-brand transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
   const SECONDARY =
     "mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
   const cls = cta?.variant === "secondary" ? SECONDARY : PRIMARY;

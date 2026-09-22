@@ -352,7 +352,7 @@ export default async function ProjectStadiumPage({
             <Link
               href={`/${locale}/dashboard/projects`}
               data-testid="stadium-draft-cta"
-              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-cta px-5 py-3 text-sm font-semibold text-text-on-brand transition-transform duration-fast ease-out hover:-translate-y-0.5"
             >
               {t("emptyTeamCta")} →
             </Link>

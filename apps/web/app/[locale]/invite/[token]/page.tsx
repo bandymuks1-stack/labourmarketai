@@ -219,7 +219,7 @@ export default async function InvitePage({
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 href={`/auth/signup?next=${encodeURIComponent(returnTo)}`}
-                className="inline-flex min-h-11 items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+                className="inline-flex min-h-11 items-center rounded-md bg-gradient-cta px-5 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
                 data-testid="invite-register"
               >
                 {t("register")}
@@ -428,7 +428,7 @@ export default async function InvitePage({
             <button
               type="submit"
               data-testid="invite-accept"
-              className="inline-flex min-h-11 items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+              className="inline-flex min-h-11 items-center rounded-md bg-gradient-cta px-5 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
             >
               {isDemand ? t("interested") : t("accept")}
             </button>

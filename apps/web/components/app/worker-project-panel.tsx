@@ -95,7 +95,7 @@ export async function WorkerProjectPanel({
         <Link
           href={`/${locale}/dashboard/journal`}
           data-testid="worker-project-journal-cta"
-          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-cta px-5 py-3 text-sm font-semibold text-text-on-brand transition-transform duration-fast ease-out hover:-translate-y-0.5"
         >
           <NotebookPen className="h-4 w-4" aria-hidden />
           {t("journalCta")}
