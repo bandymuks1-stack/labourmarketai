@@ -10,6 +10,8 @@ import {
   emitDemandInterestResponseNotification,
 } from "@/lib/notifications/event-emitters";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext, buildOwnWorkerContextCore } from "./worker-subject";
@@ -271,6 +273,25 @@ export async function expressInterestCore(
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
   }
+
+  // EMPLOYER FUNNEL CLOSURE (owner §23 canonical chain, 2026-09-22): the
+  // interest is STORED at this line — the sibling of
+  // `vacancy_interest_expressed` for the employer's OWN requirement. Emitted
+  // here, after the upsert and before the notification, so it is counted
+  // whether or not the owner could be told. Entity ids only (the request id
+  // is an opaque uuid) — never the note, the snapshot or the company name.
+  // Fire-and-forget through the shared server emitter.
+  emitServerFunnelEvent(FUNNEL_EVENTS.demandInterestExpressed, {
+    source: "opportunities",
+    route: "/dashboard/opportunities",
+    metadata: {
+      surface: "employer_requirement",
+      role_context: "worker",
+      ref_type: "customer_request",
+      ref_id: input.requestId,
+      success: true,
+    },
+  });
 
   // THE SIGNAL NOW REACHES SOMEONE — after the domain write succeeded and
   // never in front of it. Recipient resolution lives entirely in the emitter,

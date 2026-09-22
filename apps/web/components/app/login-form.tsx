@@ -322,7 +322,10 @@ export function LoginForm({
           form exactly: first-touch attribution + `registration_started` +
           the pending-signup marker. A returning login is never mis-counted:
           only the /onboarding surface (which a returning user never mounts)
-          emits `signup_completed` from that marker. */}
+          emits `signup_completed` from that marker.
+          `registrationStep="login_page"` (2026-09-22) names THIS page on the
+          event, so the admin funnel can keep the raw count and stop counting
+          a returning user's login-page press as a registration conversion. */}
       <GoogleButton
         label={t("google_label")}
         redirectingLabel={t("google_redirecting")}
@@ -330,6 +333,7 @@ export function LoginForm({
         disabled={disabled}
         nextPath={nextPath}
         context="signup"
+        registrationStep="login_page"
       />
 
       {/* LinkedIn/Facebook render ONLY when the auth server reports the
@@ -343,6 +347,7 @@ export function LoginForm({
           disabled={disabled}
           nextPath={nextPath}
           context="signup"
+          registrationStep="login_page"
         />
       )}
       {facebookEnabled && (
@@ -353,6 +358,7 @@ export function LoginForm({
           disabled={disabled}
           nextPath={nextPath}
           context="signup"
+          registrationStep="login_page"
         />
       )}
 

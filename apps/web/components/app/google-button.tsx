@@ -10,7 +10,10 @@ import {
   withOauthTraceId,
 } from "@/lib/auth/oauth-trace";
 import { markSignupPending, recordEvent, trackFunnel } from "@/lib/telemetry/task";
-import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  FUNNEL_EVENTS,
+  type RegistrationStep,
+} from "@/lib/telemetry/funnel-events";
 import {
   captureFirstTouchAttribution,
   getFirstTouchAttribution,
@@ -110,6 +113,14 @@ type OAuthButtonProps = {
    *  Default "login" (a conservative default for future surfaces that are
    *  genuinely login-only). */
   context?: "signup" | "login";
+  /** WHICH auth page hosts the press (2026-09-22) — the bounded `step` on
+   *  the `registration_started` event. Both pages pass `context="signup"`
+   *  (see above), so without this the admin funnel counted every returning
+   *  user's login-page press as a registration CONVERSION. The event still
+   *  fires from both pages (raw count, attribution, pending marker are
+   *  unchanged); only `lib/admin/conversion-funnel.ts` reads the step, and
+   *  it counts a conversion for `signup_page` alone. */
+  registrationStep?: RegistrationStep;
 };
 
 /**
@@ -146,6 +157,7 @@ function OAuthProviderButton({
   disabled,
   nextPath,
   context = "login",
+  registrationStep,
 }: OAuthButtonProps & { provider: OAuthProviderConfig }) {
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
@@ -192,6 +204,9 @@ function OAuthProviderButton({
         captureFirstTouchAttribution();
         trackFunnel(FUNNEL_EVENTS.registrationStarted, {
           surface: provider.id,
+          // The hosting page's bounded step (login_page | signup_page) —
+          // absent when a surface did not say, never a guessed page.
+          ...(registrationStep ? { step: registrationStep } : {}),
           ...getFirstTouchAttribution(),
         });
         // The callback routes a NEW user to /onboarding; mark the pending

@@ -161,6 +161,10 @@ export function SignupForm({
     captureFirstTouchAttribution();
     trackFunnel(FUNNEL_EVENTS.registrationStarted, {
       surface: "email",
+      // The bounded page step (2026-09-22): the admin funnel counts a
+      // registration CONVERSION only for `signup_page`, because the login
+      // page's OAuth buttons emit the same event for returning users.
+      step: "signup_page",
       ...getFirstTouchAttribution(),
     });
     try {
@@ -305,6 +309,7 @@ export function SignupForm({
         disabled={disabled}
         nextPath={nextPath}
         context="signup"
+        registrationStep="signup_page"
       />
 
       {/* LinkedIn/Facebook render ONLY when the auth server reports the
@@ -318,6 +323,7 @@ export function SignupForm({
           disabled={disabled}
           nextPath={nextPath}
           context="signup"
+          registrationStep="signup_page"
         />
       )}
       {facebookEnabled && (
@@ -328,6 +334,7 @@ export function SignupForm({
           disabled={disabled}
           nextPath={nextPath}
           context="signup"
+          registrationStep="signup_page"
         />
       )}
 

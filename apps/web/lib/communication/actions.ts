@@ -20,6 +20,8 @@ import {
   validateConversationAttachments,
   type ConversationAttachmentInput,
 } from "@/lib/communication/attachment-model";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Communication v1 server actions. Read paths live in the page components
@@ -444,6 +446,22 @@ export async function sendMessage(input: {
       );
     }
   }
+
+  // EMPLOYER FUNNEL CLOSURE (owner §23 canonical chain, 2026-09-22): ONE
+  // message row was inserted (the insert above returned its id). Entity ids
+  // only — the conversation id is an opaque uuid; the body, the attachments
+  // and the author never reach the event. Fire-and-forget through the shared
+  // server emitter: telemetry can never un-send or fail a message.
+  emitServerFunnelEvent(FUNNEL_EVENTS.conversationMessageSent, {
+    source: "communication",
+    route: "/dashboard/communication",
+    metadata: {
+      surface: "communication",
+      ref_type: "conversation",
+      ref_id: input.conversationId,
+      success: true,
+    },
+  });
 
   // Bump conversation.updated_at so the thread list sorts correctly.
   // updated_at is owner-side (RLS allows the creator to update; others
