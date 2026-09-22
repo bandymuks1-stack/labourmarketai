@@ -521,7 +521,7 @@ export default async function AdminDashboardPage({
                 data-testid={`admin-attention-${a.key}`}
                 className="inline-flex min-h-11 items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-orange"
               >
-                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white tabular-nums">
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-text-on-brand tabular-nums">
                   {num(a.count)}
                 </span>
                 {a.label}

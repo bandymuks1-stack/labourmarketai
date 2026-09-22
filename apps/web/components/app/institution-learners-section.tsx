@@ -144,7 +144,7 @@ export async function InstitutionLearnersSection({
           collapsed-panel steps. Same pattern the chat home uses. */}
       <Link
         href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
-        className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90"
+        className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90"
         data-testid="institution-learners-invite"
       >
         {t("invite")} →

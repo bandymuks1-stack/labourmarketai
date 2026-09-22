@@ -483,7 +483,7 @@ export async function ProfileHubOverview({
         {journalIsPrimary ? (
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3.5 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
             data-testid="profile-hub-primary-action"
           >
             {t(nextAction.labelKey)} →
@@ -491,7 +491,7 @@ export async function ProfileHubOverview({
         ) : (
           <a
             href="#profile-edit"
-            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3.5 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
             data-testid="profile-hub-primary-action"
           >
             {t(nextAction.labelKey)} ↓

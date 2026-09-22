@@ -311,7 +311,7 @@ export function IncomingInvitationList({
                 onClick={() => onAccept(row.id)}
                 disabled={busyId === row.id}
                 data-testid={`incoming-invitation-accept-${row.id}`}
-                className="inline-flex min-h-9 items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="inline-flex min-h-9 items-center rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {busyId === row.id ? t("accepting") : t("accept")}
               </button>

@@ -104,7 +104,7 @@ export function JournalWorkTimeCheckAck({
         <button
           type="submit"
           disabled={!valid || pending}
-          className="min-h-9 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 text-meta font-semibold text-ink-900 disabled:opacity-50"
+          className="min-h-9 rounded-md bg-gradient-cta px-3 text-meta font-semibold text-text-on-brand disabled:opacity-50"
           data-testid={`${id}-submit`}
         >
           {pending ? t("ackWorking") : t("ackSubmit")}

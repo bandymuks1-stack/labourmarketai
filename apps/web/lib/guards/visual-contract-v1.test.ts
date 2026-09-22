@@ -75,9 +75,10 @@ describe("Ratchet: raw card styling only shrinks", () => {
     ).toBeLessThanOrEqual(PILL_BASELINE);
   });
 
-  // Baseline at S1: 4 arbitrary z-[n] values. New stacking uses the named
+  // Baseline at S1 was 4 arbitrary z-[n] values; 0 since 2026-09-22 (the
+  // anchored-overlay and command-search tiers are z-modal / z-toast). All stacking uses the named
   // scale (z-sticky, z-modal, …) from tokens/zindex.ts.
-  const Z_ARBITRARY_BASELINE = 4;
+  const Z_ARBITRARY_BASELINE = 0;
 
   it(`arbitrary z-[n] usage stays ≤ ${Z_ARBITRARY_BASELINE}`, () => {
     const total = surfaceFiles().reduce(

@@ -184,7 +184,7 @@ export default async function ActivityCentrePage({
                   </span>
                 </span>
                 {row.count > 0 ? (
-                  <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold leading-none text-white tabular-nums">
+                  <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold leading-none text-text-on-brand tabular-nums">
                     {row.count}
                   </span>
                 ) : (

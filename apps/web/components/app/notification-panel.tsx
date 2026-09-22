@@ -258,7 +258,7 @@ function NotificationsBody({
                     {tTypes.has(n.type) ? tTypes(n.type as never) : tTypes("generic")}
                   </span>
                   {typeof n.count === "number" && (
-                    <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white tabular-nums">
+                    <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-text-on-brand tabular-nums">
                       {n.count}
                     </span>
                   )}

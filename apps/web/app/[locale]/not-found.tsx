@@ -41,7 +41,7 @@ export default async function NotFound() {
       </p>
       <Link
         href="/"
-        className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+        className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
         data-testid="not-found-home-cta"
       >
         {t("cta")}

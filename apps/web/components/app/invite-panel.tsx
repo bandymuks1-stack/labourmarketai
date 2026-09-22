@@ -533,7 +533,7 @@ export function InvitePanel({
           type="submit"
           disabled={sending || (mode === "email" && emails.trim().length === 0)}
           data-testid="invite-submit"
-          className="inline-flex min-h-10 items-center justify-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex min-h-10 items-center justify-center rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {sending ? t("sending") : mode === "link" ? t("createLink") : t("send")}
         </button>

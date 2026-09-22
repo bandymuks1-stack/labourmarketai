@@ -209,7 +209,7 @@ export async function LearningCompassSection({
             ))}
           </ol>
           <div className="mt-1 flex flex-wrap gap-2">
-            <Link href="/dashboard/journal" className="rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90">
+            <Link href="/dashboard/journal" className="rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90">
               {t("openJournal")}
             </Link>
           </div>
