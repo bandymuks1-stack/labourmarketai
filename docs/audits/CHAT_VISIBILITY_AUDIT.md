@@ -301,6 +301,36 @@ audit.
   so the first spend caller can pair its failure path with compensation.
   Pinned in the `chat-visibility-rls.test.ts` caller inventory.
 
+- **2026-09-22 — `lib/vacancy-store/vacancy-translation-read.ts`** (reader-locale
+  rendering of PUBLIC job advertisements, owner P0 2026-09-22 §9). Touches ONE
+  table, `public_vacancies`, and within it only the `translations` column added
+  by migration `20260922150000`. Service role is genuinely required rather than
+  convenient: `20260809160000_public_vacancy_persistence_v1` grants
+  `authenticated` SELECT on that table and nothing else BY DESIGN ("there is
+  deliberately no INSERT, UPDATE or DELETE policy — ingestion runs as a trusted
+  server job"), so a rendering cannot be stored beside the original under the
+  reader's own client. The reads that DECIDE anything still run under the
+  caller's RLS: the board and `/jobs/[id]` fetch the vacancy rows themselves
+  through the signed-in client, and this module is handed those rows.
+
+  What it writes is DERIVED and regenerable: per-locale
+  `{status,title,description,sourceLanguage,sourceHash,provider,model,generatedAt}`
+  entries keyed by target locale. The publisher's own columns (`title_raw`,
+  `description_raw`, `source_language`) are never written. An entry is valid
+  only while its `sourceHash` equals the row's `content_hash`, so a re-imported
+  revision invalidates the rendering instead of outliving it.
+
+  It reads nothing about a person and stores nothing about one: the only
+  identity it takes is a viewer id, used solely as the key of an in-process
+  rate limit. Anonymous readers never reach the writer at all (the crawlable
+  `/jobs/[id]` page resolves renderings only for a signed-in member), so a
+  crawler cannot cause a vendor call or a write. Outbound traffic goes through
+  the audited AI runtime as task `translate_vacancy` (classified PUBLIC — see
+  `lib/ai/runtime/data-sensitivity.ts` and `ai-data-egress.test.ts`), which
+  admits only the advertisement's title, description and the two locale codes.
+  Touches no chat table. Pinned in the `chat-visibility-rls.test.ts` caller
+  inventory.
+
 - **2026-09-04 — `lib/supply-bridge/feed-source.ts`** (first-party supply feed
   reader, Agentai OS `FIRST_PARTY_SUPPLY_FEED` contract). Calls exactly one
   RPC, `first_party_supply_feed_v1()`, and reads or writes no table directly.

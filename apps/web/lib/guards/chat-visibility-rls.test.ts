@@ -219,6 +219,17 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    DESIGN (0005 — anon INSERT only, reads restricted to service
     //    role), the call is fenced behind an explicit isSuperadmin()
     //    re-check, SELECTs only `waitlist`, and writes nothing.
+    //  - lib/vacancy-store/vacancy-translation-read.ts — the reader-locale
+    //    rendering of PUBLIC job advertisements (owner P0 2026-09-22 Section 9).
+    //    Service role is genuinely required, not convenient: migration
+    //    20260809160000 grants `authenticated` SELECT on public_vacancies and
+    //    NOTHING else by design (ingestion is a trusted server job), so the
+    //    rendering cannot be written back beside the original under the
+    //    caller's own client. It touches ONE table, `public_vacancies`, and
+    //    only its `translations` column; it reads nothing about a person; the
+    //    rows it writes are DERIVED renderings of text that is already public
+    //    to the whole internet. The originals are never overwritten. Touches
+    //    no chat table; sends nothing outbound beyond the audited AI runtime.
     //  - lib/supply-bridge/feed-source.ts — the first-party supply feed
     //    reader. Service role is genuinely required, not convenient: the
     //    human-gated migration 20260904120000 grants EXECUTE on
@@ -436,6 +447,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/supply-bridge/feed-source.ts",
       "lib/usage/usage-cost-store.ts",
       "lib/vacancy-runner/vacancy-admin-actions.ts",
+      "lib/vacancy-store/vacancy-translation-read.ts",
     ]);
   });
 

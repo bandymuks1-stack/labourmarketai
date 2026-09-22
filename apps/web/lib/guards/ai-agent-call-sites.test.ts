@@ -95,6 +95,9 @@ describe("AI-3 call sites are counted, not remembered", () => {
         "market_explanation",
         "matching_explanation",
         "translation_copy",
+        // Wired 2026-09-22 (owner P0 §9): the reader-locale rendering of a
+        // PUBLIC job advertisement — lib/vacancy-store/vacancy-translation-read.ts.
+        "vacancy_translation",
         "work_journal",
         "worker_profile",
       ].sort(),

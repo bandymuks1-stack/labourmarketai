@@ -215,13 +215,32 @@ describe("the classification the gate depends on stays honest", () => {
     // `data-sensitivity.ts`, its field list is in `TASK_POLICIES`, and the
     // payload assembler is pinned separately by
     // `public-market-facts-payload.test.ts`.
+    //
+    // `translate_vacancy` joins it on 2026-09-22 (owner P0 §9), and the
+    // reasoning is written down as this guard demands. The payload is the
+    // verbatim TITLE and DESCRIPTION of a job advertisement a public
+    // employment service already published to the whole internet under an
+    // open-data licence (the row's `attribution_code` names the source);
+    // LabourMarket.ai mirrors that text with attribution and does not author
+    // it, so sending the same words to a translator discloses nothing that
+    // is not already public. What the payload may NOT carry is the
+    // enforcement: `TASK_POLICIES.translate_vacancy.allowedFields` is exactly
+    // `vacancy_title`, `vacancy_description`, `source_locale`,
+    // `target_locale`, and employer name, employer org id, application URL,
+    // coordinates, any LabourMarket person and any match result are listed as
+    // prohibited. The agent's input schema is `.strict()`, so a caller cannot
+    // widen it — `ai-wired-surface-sensitivity.test.ts` proves that with a
+    // rejected payload.
+    //
+    // It is NOT a licence to relabel a third task: this argument has to be
+    // made again, field by field, for any new entry.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
     ).sort();
     expect(
       publicTasks,
       "a task became PUBLIC — verify its payload really carries no project or personal data",
-    ).toEqual(["explain_market_demand"]);
+    ).toEqual(["explain_market_demand", "translate_vacancy"]);
   });
 });
 
