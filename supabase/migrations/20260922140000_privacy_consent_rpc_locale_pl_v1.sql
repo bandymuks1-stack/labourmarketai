@@ -181,3 +181,17 @@ begin
   return jsonb_build_object('ok', true, 'status', 'granted', 'consent_event_id', v_id);
 end;
 $function$;
+
+-- Grants re-asserted byte-for-byte with 20260711130000 (authenticated only; PUBLIC and anon
+-- explicitly revoked) so the SECDEF hygiene guard sees the closure on this file too.
+revoke all on function public.grant_profile_discoverability_consent(text, text, text, text) from public;
+revoke all on function public.grant_profile_discoverability_consent(text, text, text, text) from anon;
+grant execute on function public.grant_profile_discoverability_consent(text, text, text, text) to authenticated;
+
+revoke all on function public.grant_partner_supply_representation_consent(text, text, text, text) from public;
+revoke all on function public.grant_partner_supply_representation_consent(text, text, text, text) from anon;
+grant execute on function public.grant_partner_supply_representation_consent(text, text, text, text) to authenticated;
+
+revoke all on function public.grant_employer_data_disclosure(text, text, text, text, uuid, text, uuid, jsonb) from public;
+revoke all on function public.grant_employer_data_disclosure(text, text, text, text, uuid, text, uuid, jsonb) from anon;
+grant execute on function public.grant_employer_data_disclosure(text, text, text, text, uuid, text, uuid, jsonb) to authenticated;
