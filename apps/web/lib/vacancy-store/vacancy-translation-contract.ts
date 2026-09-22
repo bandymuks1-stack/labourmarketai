@@ -8,6 +8,9 @@
 
 /** Why no rendering — never a technical enum on screen; the surface maps it. */
 export type TranslateVacancyUnavailableReason =
+  /** The owner has not set a translation quantity yet — nothing was spent,
+   *  because there is nothing to spend from. Today's state for every plan. */
+  | "not_configured"
   | "no_provider"
   | "refused"
   | "rate_limited";

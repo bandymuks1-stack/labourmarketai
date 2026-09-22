@@ -37,27 +37,7 @@ export const ORGANIZATION_PLAN_KEY = "company_pilot" as const;
 /** The paid ceiling; at or above it the next step is a conversation, not a tier. */
 export const OPEN_NEEDS_CONTACT_THRESHOLD = 10 as const;
 
-/**
- * PROVISIONAL included on-demand vacancy translations (owner decision
- * 2026-09-22). The owner named three tiers for the canonical model —
- * FREE_INCLUDED, SUBSCRIPTION_INCLUDED and CREDIT — and explicitly did NOT
- * set the commercial figures. These two are the placeholders the mechanism
- * is built and measured against, deliberately in ONE place so the owner
- * sets the real numbers with a two-line edit.
- *
- * They are NOT equal on purpose: a paid plan must buy a higher ceiling, not
- * the same one (the rule `lib/guards/billing-readiness.test.ts` enforces for
- * every numeric entitlement — "the paid plan buys the ceiling, not the
- * capability"). Charging for an identical allowance would be the fake-value
- * defect that guard exists to catch.
- *
- * CREDIT_TRANSLATIONS is deliberately NOT wired. LMC credit spend has a
- * known un-reversed-spend gap, and the owner's instruction is to wire only
- * capabilities that actually exist — so translations are included-allowance
- * only, and no credit path is implied anywhere in the product.
- */
-export const PROVISIONAL_FREE_INCLUDED_TRANSLATIONS = 10 as const;
-export const PROVISIONAL_SUBSCRIPTION_INCLUDED_TRANSLATIONS = 100 as const;
+
 /** Plans that exist in the registry but are not offered at launch. */
 export const DEFERRED_PLAN_KEYS = ["worker_plus", "agency_pilot"] as const;
 
@@ -85,18 +65,22 @@ export type FeatureKey =
   | "expanded_cv"
   | "priority_visibility"
   /**
-   * numeric: how many foreign-language advertisements this plan may have
-   * rendered into the reader's language ON DEMAND (owner decision
-   * 2026-09-22). Not a worker-only feature — an employer or agency reading
-   * a foreign ad asks the same question — so it is carried by every
-   * audience's plan below.
+   * On-demand rendering of a foreign-language advertisement into the
+   * reader's language (owner decision 2026-09-22). Not a worker-only
+   * feature — an employer or agency reading a foreign ad asks the same
+   * question — so every audience's plan carries it below.
    *
-   * THE FIGURES ARE PROVISIONAL. The owner has explicitly not set the
-   * commercial quota; these carry
-   * `PROVISIONAL_FREE_INCLUDED_TRANSLATIONS` / the subscription figure so
-   * the mechanism exists and is
-   * measurable, and setting the real numbers later is an edit to these
-   * lines alone. See lib/vacancy-store/vacancy-translation-entitlement.ts.
+   * UNCONFIGURED TODAY, AND THAT IS THE POINT. The owner approved the
+   * commercial MODEL (user-requested; a limited free amount; a limited
+   * subscription amount; credits possibly later; no plan unlimited) and
+   * explicitly NOT the quantities: "exact quantities and prices are NOT YET
+   * DECIDED". So every plan declares `false` — the `priority_visibility`
+   * precedent — which is neither an invented number nor an unlimited grant.
+   *
+   * Setting a real allowance later is ONE edit per plan: replace `false`
+   * with the owner's number. Nothing in the mechanism changes, because the
+   * gate reads this registry rather than a constant of its own.
+   * See lib/vacancy-store/vacancy-translation-entitlement.ts.
    */
   | "vacancy_translations"
   // company
@@ -141,7 +125,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
       worker_journal: true,
       worker_basic_skills: true,
       readiness_checklist_countries: 1,
-      vacancy_translations: PROVISIONAL_FREE_INCLUDED_TRANSLATIONS,
+      vacancy_translations: false, // quantities NOT set by the owner yet
     },
   },
   {
@@ -160,7 +144,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
       expanded_cv: true,
       readiness_checklist_countries: 10,
       document_expiry_reminders: true,
-      vacancy_translations: PROVISIONAL_SUBSCRIPTION_INCLUDED_TRANSLATIONS,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       priority_visibility: false, // later — never claimed active now
     },
   },
@@ -177,7 +161,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     labelKey: "free_organization",
     entitlements: {
       company_create_needs: 1,
-      vacancy_translations: PROVISIONAL_FREE_INCLUDED_TRANSLATIONS,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       candidate_readiness_summaries: true,
       booking_requests: true,
       communication: true,
@@ -201,7 +185,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     launch: "sellable",
     entitlements: {
       company_create_needs: OPEN_NEEDS_CONTACT_THRESHOLD,
-      vacancy_translations: PROVISIONAL_SUBSCRIPTION_INCLUDED_TRANSLATIONS,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       candidate_readiness_summaries: true,
       booking_requests: true,
       communication: true,
@@ -228,7 +212,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
       doc_readiness_tracking: true,
       booking_pipeline: true,
       company_create_needs: 25,
-      vacancy_translations: PROVISIONAL_SUBSCRIPTION_INCLUDED_TRANSLATIONS,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       candidate_readiness_summaries: true,
       booking_requests: true,
       communication: true,
@@ -242,7 +226,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     labelKey: "admin_internal",
     entitlements: {
       verify_documents: true,
-      vacancy_translations: PROVISIONAL_SUBSCRIPTION_INCLUDED_TRANSLATIONS,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       manage_country_rules: true,
       manage_pilots: true,
     },

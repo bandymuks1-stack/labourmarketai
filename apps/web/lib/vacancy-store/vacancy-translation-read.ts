@@ -261,7 +261,7 @@ export type TranslateOnDemandResultV1 =
    */
   | {
       readonly kind: "unavailable";
-      readonly reason: "no_provider" | "refused" | "rate_limited";
+      readonly reason: "not_configured" | "no_provider" | "refused" | "rate_limited";
       readonly allowance: TranslationAllowanceV1 | null;
     };
 
@@ -303,11 +303,19 @@ export async function translateVacancyOnDemand(
   }
 
   // 4. THE ENTITLEMENT, and with it the reader's identity — resolved from
-  // the SESSION inside the gate, never passed in. A signed-out reader is
-  // `allowed: false` with no profile, so the branch below covers both "not
-  // signed in" and "nothing left" without this module ever handling an id
-  // it did not verify.
+  // the SESSION inside the gate, never passed in.
   const allowance = await translationAllowance();
+  // UNCONFIGURED is not EXHAUSTED. The owner has approved the model but not
+  // the quantities, so there is no allowance to be over; saying "you have
+  // used them all" would invent a quota in the copy that the registry
+  // deliberately does not carry. Nothing is sent anywhere, nothing is spent,
+  // and the advertisement stays readable in its own language.
+  if (!allowance.configured) {
+    return { kind: "unavailable", reason: "not_configured", allowance };
+  }
+  // A signed-out reader is `allowed: false` with no profile, so this covers
+  // both "not signed in" and "nothing left" without this module ever
+  // handling an id it did not verify.
   if (!allowance.allowed || !allowance.profileId) {
     return { kind: "over_allowance", allowance };
   }

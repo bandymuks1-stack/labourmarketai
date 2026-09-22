@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getEffectiveEntitlements, hasFeature } from "@/lib/billing/effective-entitlements";
 import { entitlementAllows } from "@/lib/billing/entitlements-v1";
 import { limitFor } from "@/lib/billing/entitlements";
-import { PROVISIONAL_FREE_INCLUDED_TRANSLATIONS, getPlan } from "@/lib/billing/plans";
+import { getPlan } from "@/lib/billing/plans";
 
 /**
  * TRANSLATION ALLOWANCE — the entitlement seam for on-demand vacancy
@@ -33,11 +33,20 @@ import { PROVISIONAL_FREE_INCLUDED_TRANSLATIONS, getPlan } from "@/lib/billing/p
  *      edit changes `content_hash`, which changes the id — a genuinely new
  *      rendering, genuinely counted.
  *
- *   3. THE FIGURE IS CONFIGURABLE, NOT INVENTED. The owner has not set the
- *      final commercial quota. {@link PROVISIONAL_FREE_INCLUDED_TRANSLATIONS} is a
- *      placeholder carried in the plan registry like every other limit, so
- *      setting the real number later is a one-line plan edit and touches no
- *      mechanism here.
+ *   3. THE QUANTITY IS THE OWNER'S, AND IS NOT SET. The owner approved the
+ *      MODEL — user-requested; a limited free amount; a limited subscription
+ *      amount; credits possibly later; no plan unlimited — and explicitly
+ *      not the figures: "exact quantities and prices are NOT YET DECIDED".
+ *      So the allowance is UNCONFIGURED: every plan declares
+ *      `vacancy_translations: false`, and this module reads that registry
+ *      rather than carrying a number of its own.
+ *
+ *      UNCONFIGURED MEANS DISABLED, NOT UNLIMITED. That is the whole risk of
+ *      the state: an absent limit read as "no ceiling" would hand out an
+ *      uncapped vendor budget the owner never agreed to. So an unconfigured
+ *      allowance refuses NEW renderings — while cache hits stay free,
+ *      because those were already paid for and cost nothing to serve.
+ *      Turning it on is one edit per plan: `false` -> the owner's number.
  *
  *   4. EXHAUSTION NEVER BREAKS THE AD. Running out removes a convenience,
  *      not the opportunity: the publisher's own words stay fully readable
@@ -68,24 +77,18 @@ import { PROVISIONAL_FREE_INCLUDED_TRANSLATIONS, getPlan } from "@/lib/billing/p
 /** `usage_cost_events.feature_code` for one accepted vacancy rendering. */
 export const VACANCY_TRANSLATION_FEATURE_CODE = "vacancy_translation";
 
-/**
- * PROVISIONAL, and defined ONCE — in the plan registry beside every other
- * limit. The owner has explicitly NOT set the commercial quota ("Do NOT
- * invent the final commercial quota"); this re-export exists so the
- * translation code reads one name, and changing the figure stays a plan
- * edit rather than a rewrite. It is never presented to a person as a
- * commercial promise — the surface says how many remain, not what the
- * package is.
- */
-export { PROVISIONAL_FREE_INCLUDED_TRANSLATIONS };
-
 export interface TranslationAllowanceV1 {
   /** WHO the allowance belongs to, resolved from the SESSION — never from a
    *  caller-supplied argument. null = nobody is signed in. */
   readonly profileId: string | null;
-  /** Included renderings for the reader's plan. Always a real figure —
-   *  there is deliberately no "unlimited" value to fall into. */
-  readonly limit: number;
+  /**
+   * Whether the owner has set a quantity for this plan at all. False today
+   * for every plan. A caller must NEVER read `false` as "no ceiling".
+   */
+  readonly configured: boolean;
+  /** Included renderings for the reader's plan; null while UNCONFIGURED.
+   *  There is deliberately no value meaning "unlimited". */
+  readonly limit: number | null;
   /** Renderings this person has already been charged for. Measured. */
   readonly used: number;
   /** What is left. Never negative. null ONLY when the count could not be
@@ -100,18 +103,19 @@ export interface TranslationAllowanceV1 {
 }
 
 /**
- * The person's plan limit for translations. Pure.
+ * The person's plan quantity for translations, or null when the owner has
+ * not set one. Pure.
  *
- * NEVER returns null for an unrecognised or incompletely-configured plan.
- * `limitFor` answers null both for "no numeric limit" and for "this plan
- * does not carry the key at all", and treating that null as UNLIMITED is
- * how a configuration gap silently becomes a free vendor budget. An unknown
- * plan falls back to the FREE included figure — the cautious direction.
+ * null means UNCONFIGURED and is read as DISABLED everywhere — never as
+ * "no ceiling". `limitFor` already answers null both for "not a numeric
+ * entitlement" and for "this plan does not carry the key", and those
+ * collapse to the same honest answer here: nobody has decided a quantity,
+ * so no new rendering is authorised.
  */
-export function translationLimitFor(planKey: string): number {
+export function translationLimitFor(planKey: string): number | null {
   const plan = getPlan(planKey);
-  if (!plan) return PROVISIONAL_FREE_INCLUDED_TRANSLATIONS;
-  return limitFor(plan, "vacancy_translations") ?? PROVISIONAL_FREE_INCLUDED_TRANSLATIONS;
+  if (!plan) return null;
+  return limitFor(plan, "vacancy_translations");
 }
 
 /**
@@ -192,15 +196,26 @@ export async function translationAllowance(): Promise<TranslationAllowanceV1> {
   const included =
     (await hasFeature("vacancy_translations")) && entitlementAllows(ctx, "vacancy_translations");
 
-  const base = { profileId: ctx.profileId, limit, enforced, planKey } as const;
+  // CONFIGURED = the owner has set a real quantity AND the plan includes the
+  // feature. Both halves matter: a plan carrying `false` is not configured,
+  // and a plan the entitlement seam refuses is not either.
+  const configured = limit !== null && included;
+  const base = { profileId: ctx.profileId, configured, limit, enforced, planKey } as const;
 
   // Nobody signed in: nothing to meter and nothing to spend.
   if (!ctx.profileId) {
     return { ...base, used: 0, remaining: limit, allowed: false };
   }
-  if (enforced && !included) {
-    return { ...base, used: 0, remaining: 0, allowed: false };
+
+  // UNCONFIGURED -> DISABLED. Today's state for every plan. Deliberately NOT
+  // "unlimited": the owner has approved the model, not a quantity, so no new
+  // rendering is authorised and nothing is sent anywhere. A rendering that
+  // already exists is still served — it costs nothing and was already paid
+  // for — so this removes a convenience, never the advertisement.
+  if (!configured) {
+    return { ...base, used: 0, remaining: null, allowed: false };
   }
+
   const used = await countTranslationsUsed(ctx.profileId);
   if (used === null) {
     return { ...base, used: 0, remaining: null, allowed: !enforced };

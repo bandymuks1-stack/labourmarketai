@@ -2,13 +2,12 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { PRE_PAYMENT_PLANS } from "@/lib/billing/plans";
+import { limitFor, planIncludes } from "@/lib/billing/entitlements";
 import {
-  PRE_PAYMENT_PLANS,
-  PROVISIONAL_FREE_INCLUDED_TRANSLATIONS,
-  PROVISIONAL_SUBSCRIPTION_INCLUDED_TRANSLATIONS,
-} from "@/lib/billing/plans";
-import { limitFor } from "@/lib/billing/entitlements";
-import { translationEventId } from "./vacancy-translation-entitlement";
+  translationEventId,
+  translationLimitFor,
+} from "./vacancy-translation-entitlement";
 import { storedVacancyTitles } from "./vacancy-translation-read";
 import type { StoredPublicVacancyV1 } from "./vacancy-read";
 
@@ -165,24 +164,57 @@ describe("the allowance is charged for a usable result and nothing else", () => 
   });
 });
 
-describe("the commercial model is configurable and honest", () => {
-  it("a paid plan buys a higher ceiling than the free one", () => {
-    expect(PROVISIONAL_SUBSCRIPTION_INCLUDED_TRANSLATIONS).toBeGreaterThan(
-      PROVISIONAL_FREE_INCLUDED_TRANSLATIONS,
-    );
-  });
-
-  it("every plan states a real numeric allowance — none is silently unlimited", () => {
+describe("the owner set the model, not the quantities", () => {
+  /**
+   * OWNER CORRECTION 2026-09-22: "DO NOT establish invented FREE or
+   * SUBSCRIPTION translation quantities... exact quantities and prices are
+   * NOT YET DECIDED." An earlier revision of this branch carried two
+   * provisional figures. They are gone, and this is what stops them coming
+   * back as a "temporary" default.
+   */
+  it("no plan states a translation quantity", () => {
     for (const plan of PRE_PAYMENT_PLANS) {
-      const limit = limitFor(plan, "vacancy_translations");
-      expect(typeof limit, plan.slug).toBe("number");
-      expect(limit, plan.slug).toBeGreaterThan(0);
+      expect(limitFor(plan, "vacancy_translations"), plan.slug).toBeNull();
+      expect(planIncludes(plan, "vacancy_translations"), plan.slug).toBe(false);
     }
   });
 
+  it("every plan declares the feature, so turning it on is one edit", () => {
+    // Declared-and-false, not absent: the model is visible in the registry
+    // where the owner will set the real number.
+    for (const plan of PRE_PAYMENT_PLANS) {
+      expect(plan.entitlements.vacancy_translations, plan.slug).toBe(false);
+    }
+  });
+
+  it("no provisional quantity survives anywhere in the mechanism", () => {
+    const src =
+      read("lib/billing/plans.ts") +
+      read("lib/vacancy-store/vacancy-translation-entitlement.ts") +
+      read("lib/vacancy-store/vacancy-translation-read.ts");
+    expect(src).not.toMatch(/PROVISIONAL_(FREE|SUBSCRIPTION)_INCLUDED_TRANSLATIONS/);
+  });
+
   /**
-   * "Do not invent a paid package or price." The allowance mechanism must
-   * not grow a credit/top-up path while LMC spend reversal is unresolved.
+   * THE DANGEROUS READING. An unconfigured entitlement that resolved to "no
+   * ceiling" would be an uncapped vendor budget nobody approved — the exact
+   * opposite of what the owner asked for ("no plan is assumed unlimited").
+   */
+  it("unconfigured resolves to null, and null is never a licence", () => {
+    for (const plan of PRE_PAYMENT_PLANS) {
+      expect(translationLimitFor(plan.slug), plan.slug).toBeNull();
+    }
+    expect(translationLimitFor("no_such_plan")).toBeNull();
+
+    const src = read("lib/vacancy-store/vacancy-translation-entitlement.ts");
+    // The gate must refuse on unconfigured, not fall through to allowed.
+    expect(src).toContain("if (!configured) {");
+    expect(src).toMatch(/if \(!configured\) \{\s*return \{ \.\.\.base, used: 0, remaining: null, allowed: false \};/);
+  });
+
+  /**
+   * "Do not invent a paid package or price." No credit/top-up path while LMC
+   * spend reversal is unresolved.
    */
   it("no credit or top-up path is wired into translation", () => {
     const src =
