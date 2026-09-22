@@ -1,7 +1,10 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  FUNNEL_EVENTS,
+  REGISTRATION_CONVERSION_STEP,
+} from "@/lib/telemetry/funnel-events";
 import {
   classifyEvent,
   isBusinessFunnelCountable,
@@ -105,12 +108,38 @@ export const FUNNEL_STAGES = [
   { key: FUNNEL_EVENTS.jobMissingInfoShown, label: "Missing information named" },
   { key: FUNNEL_EVENTS.vacancyInterestExpressed, label: "Interest in a public job" },
   { key: FUNNEL_EVENTS.jobAlternativesShown, label: "Alternative jobs shown" },
+  // ── Employer funnel closure (owner §23 canonical chain, 2026-09-22): the
+  //    logged-in employer's own requirement, the worker's interest in it and
+  //    the first message — server-emitted at the real write points.
+  { key: FUNNEL_EVENTS.requirementActivated, label: "Requirement activated" },
+  { key: FUNNEL_EVENTS.demandInterestExpressed, label: "Interest in an employer requirement" },
+  { key: FUNNEL_EVENTS.conversationMessageSent, label: "Conversation message sent" },
 ] as const;
 
-const CONVERSION_EVENTS: readonly string[] = [
-  FUNNEL_EVENTS.registrationStarted,
-  FUNNEL_EVENTS.companyNeedSubmitted,
-];
+/**
+ * WHICH ROWS ARE CONVERSIONS for the first-touch `sources` breakdown.
+ *
+ * `registration_started` fires from BOTH auth pages: the login page's OAuth
+ * buttons are account-creating for a new identity, so they emit it too — and
+ * every returning user's login-page press was being counted here as a
+ * registration conversion. Since 2026-09-22 the emitting page names itself
+ * through the bounded `step` (`login_page` | `signup_page`,
+ * lib/telemetry/funnel-events.ts) and ONLY `signup_page` counts as a
+ * conversion. The raw `registration_started` count (the stage tile and the
+ * campaign column) still includes both pages, deliberately: the number of
+ * presses is a real measurement and stays visible; only the conversion
+ * reading is narrowed. Rows written before the step existed carry none and
+ * are raw-counted only — never guessed onto either page.
+ */
+export function isConversionRow(
+  eventName: string,
+  metadata: Record<string, unknown> | null | undefined,
+): boolean {
+  if (eventName === FUNNEL_EVENTS.registrationStarted) {
+    return metadata?.["step"] === REGISTRATION_CONVERSION_STEP;
+  }
+  return eventName === FUNNEL_EVENTS.companyNeedSubmitted;
+}
 
 /**
  * ── PER-CAMPAIGN READ-OUT (2026-09-20) ──────────────────────────────────────
@@ -454,7 +483,7 @@ export function summariseFunnel(
       }
     }
 
-    if (CONVERSION_EVENTS.includes(r.event_name)) {
+    if (isConversionRow(r.event_name, r.metadata)) {
       const src = r.metadata?.["utm_source"];
       const key =
         typeof src === "string" && src.trim().length > 0

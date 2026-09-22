@@ -21,6 +21,9 @@ import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { gateOpenNeeds } from "@/lib/billing/open-needs-gate";
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import { serverEventLocale } from "@/lib/telemetry/server-locale";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { requirementFunnelEvents } from "@/lib/telemetry/requirement-funnel";
+import type { RequirementStatus } from "@/lib/telemetry/funnel-events";
 import {
   hasMeaningfulEstimate,
   validateEstimateInputs,
@@ -375,6 +378,37 @@ export async function submitDemandRequestCore(
   }
 
   const requestId = typeof data === "string" ? data : null;
+
+  // EMPLOYER FUNNEL CLOSURE (owner §23 canonical chain, 2026-09-22). This is
+  // the canonical logged-in requirement write, and until now it emitted NO
+  // pilot_event — the chain went dark exactly where a company states a real
+  // need. Both RPCs (`submit_demand_request`, and `_v2` which delegates to
+  // it) hardcode status='submitted' on the row they return the id of
+  // (migration 20260530150000), so the status carried here is the RPC's
+  // contract for THIS row, not a guess and not a second read. The events
+  // (`demand_saved` with `status`, then `requirement_activated` because
+  // `submitted` is worker-visible) are decided by the ONE pure mapping in
+  // lib/telemetry/requirement-funnel.ts. Entity ids only — never the title,
+  // the need summary or the payload. Fire-and-forget through the shared
+  // server emitter: a lost telemetry row never fails a saved requirement.
+  if (requestId) {
+    const status: RequirementStatus = "submitted";
+    for (const event of requirementFunnelEvents(status)) {
+      emitServerFunnelEvent(event, {
+        source: "demand-request",
+        route: "/dashboard/company/needs",
+        metadata: {
+          entity_type: "customer_request",
+          ref_type: "customer_request",
+          ref_id: requestId,
+          status,
+          role_context: intent === "partner" ? "agency" : "company",
+          surface: "dashboard_demand",
+          success: true,
+        },
+      });
+    }
+  }
 
   // Populate the structured, worker-board-safe COLUMNS on the row just created
   // — an owner-scoped UPDATE under the existing customer_requests RLS

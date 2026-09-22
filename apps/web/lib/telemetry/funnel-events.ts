@@ -237,7 +237,61 @@ export const FUNNEL_EVENTS = {
   jobCompared: "job_compared",
   jobMissingInfoShown: "job_missing_info_shown",
   jobAlternativesShown: "job_alternatives_shown",
+  // ── Employer funnel closure (owner §23 canonical chain, 2026-09-22). The
+  //    logged-in employer's own requirement path (`submit_demand_request_v2`
+  //    → `customer_requests`) emitted NO pilot_event, so the chain stopped
+  //    being measurable exactly where a company first states a real need.
+  //    All three are SERVER-emitted at the real write points, through the
+  //    same RLS-safe insert path, with entity ids only — never a title, a
+  //    need summary, a note or a message body.
+  //    - requirement_activated      the stored requirement's status is one a
+  //                                 worker can see (`submitted` | `approved`);
+  //                                 `demand_saved` (above) carries the write
+  //                                 itself with `status` for the other cases.
+  //    - demand_interest_expressed  a worker stored interest in an employer's
+  //                                 OWN requirement (ref_type
+  //                                 `customer_request`) — the sibling of
+  //                                 `vacancy_interest_expressed`, which is the
+  //                                 public-vacancy source of the same object.
+  //    - conversation_message_sent  one message row was inserted through the
+  //                                 communication composer (ref_type
+  //                                 `conversation`, ref_id = the conversation).
+  requirementActivated: "requirement_activated",
+  demandInterestExpressed: "demand_interest_expressed",
+  conversationMessageSent: "conversation_message_sent",
 } as const;
+
+/**
+ * The bounded `step` a `registration_started` event may carry (2026-09-22).
+ *
+ * BOTH auth pages render the OAuth buttons with `context="signup"` because a
+ * new Google identity creates an account from either page — so the login
+ * page's returning users were being counted as registration CONVERSIONS
+ * (`lib/admin/conversion-funnel.ts`). The page now says WHICH page the press
+ * came from through this closed set; the admin funnel counts a conversion
+ * only for `signup_page` and keeps the raw `registration_started` count
+ * visible for both. Rows written before this step existed carry no `step`
+ * and are therefore raw-counted only.
+ */
+export const REGISTRATION_STEPS = ["login_page", "signup_page"] as const;
+export type RegistrationStep = (typeof REGISTRATION_STEPS)[number];
+/** The one `step` value the admin funnel counts as a registration conversion. */
+export const REGISTRATION_CONVERSION_STEP: RegistrationStep = "signup_page";
+
+/**
+ * The bounded `status` a requirement funnel event may carry (2026-09-22):
+ * the `customer_requests` status set, never free text. Mirrors the admin
+ * pipeline statuses documented in lib/demand/demand-lifecycle-model.ts.
+ */
+export const REQUIREMENT_STATUSES = [
+  "draft",
+  "submitted",
+  "in_review",
+  "needs_followup",
+  "approved",
+  "closed",
+] as const;
+export type RequirementStatus = (typeof REQUIREMENT_STATUSES)[number];
 
 export type FunnelEventName =
   (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];
@@ -329,4 +383,9 @@ export type FunnelMetadata = {
    *  facts). Already allowlisted server-side for the journal review flow;
    *  typed here so the public job comparison can report it. */
   unresolved_unknown_count?: number;
+  /** The stored requirement's status at emission time (2026-09-22) — one of
+   *  `REQUIREMENT_STATUSES`, never free text. Carried by `demand_saved` from
+   *  the server submit path so a draft, a submitted and an approved
+   *  requirement are distinguishable without a second event per status. */
+  status?: RequirementStatus;
 };

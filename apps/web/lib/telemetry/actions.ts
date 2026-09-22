@@ -128,6 +128,10 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "billing_subject", // M-P0-7 canonical subject: 'profile' | 'organization'
   "ref_type", // referenced entity type: 'project' | 'booking' | 'engagement'
   "ref_id", // referenced entity id (opaque uuid)
+  // ── Employer funnel closure (2026-09-22): the stored requirement's status
+  //    at emission time — the closed `customer_requests` status set
+  //    (REQUIREMENT_STATUSES in funnel-events.ts), never free text.
+  "status",
   // ── Write origin (2026-09-20). STAMPED SERVER-SIDE below from VERCEL_ENV;
   //    listed here only so the sanitizer's allowlist and the stamp agree on
   //    the key. A client-supplied value never survives — it is overwritten.

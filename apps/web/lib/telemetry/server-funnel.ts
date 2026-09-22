@@ -67,6 +67,11 @@ export function emitServerFunnelEvent(
   // billing_subject) — resolved HERE so all emit sites inherit it and no
   // call site can fabricate an organization. Explicit metadata wins on key
   // collision (there is none today; the attribution keys are reserved).
+  // Since 2026-09-22 the same resolver also carries the authenticated user's
+  // OWN first-touch campaign keys (utm_* / referrer_host / landing_path) read
+  // back from their auth user_metadata — the record the signup form stored
+  // — so a server-emitted conversion is attributable to the campaign that
+  // brought the person, with no client-supplied value on a product action.
   void Promise.all([
     analyticsAttributionMetadata(),
     serverEventLocale(),
