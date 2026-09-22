@@ -37,7 +37,10 @@
   padding: 0 10px;
   color: rgba(226, 235, 233, 0.58);
   background: transparent;
-  font-size: 7px;
+  /* 12px is the product floor (owner-ratified 2026-09-22: nothing below 12px
+     on a product surface); the label was 7px, unreadable on the primary
+     landing. The 44px hit area is unchanged. */
+  font-size: 12px;
   font-weight: 780;
   letter-spacing: 0.11em;
   cursor: pointer;
