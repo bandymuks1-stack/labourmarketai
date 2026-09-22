@@ -559,9 +559,13 @@ export default async function JobDetailPage({
   // anonymous visitor and for a member whose ad is no longer live.
   const reading: PublicJobReading | null =
     user && member
-      ? await readPublicJobForMember(supabase, user.id, member).catch(
-          () => null,
-        )
+      ? await readPublicJobForMember(
+          supabase,
+          user.id,
+          member,
+          undefined,
+          active,
+        ).catch(() => null)
       : null;
 
   // Saved state for the signed-in worker, read through the CALLER's own client
@@ -657,6 +661,21 @@ export default async function JobDetailPage({
       attribution = ANONYMOUS_SOURCE[active];
     }
   }
+
+  const tLang = await getTranslations({
+    locale: active,
+    namespace: "vacancySources.language",
+  });
+  /** A language code named in the reader's own locale ("sv" -> "svedu"), the
+   *  same way the criteria summary and the board name one; the code itself
+   *  when the runtime cannot (never a guess). */
+  const languageName = (code: string): string => {
+    try {
+      return new Intl.DisplayNames([active], { type: "language" }).of(code) ?? code;
+    } catch {
+      return code;
+    }
+  };
 
   const locationLabel = member
     ? joinLocation(
@@ -758,12 +777,48 @@ export default async function JobDetailPage({
       {/* Members see the publisher's own title; anonymous visitors see the
           occupation label — the raw title embeds employer and location wording
           (owner directive 2026-08-24). */}
+      {/* ONE PRESENTATION OF A VACANCY (owner decision 2026-09-22 §2). The
+          member half used to render `titleRaw` / `descriptionRaw` straight
+          off the store row — a second presentation beside the canonical one
+          the board uses, and the reason this page could not say which
+          language the reader was looking at. It now renders the SAME
+          `CanonicalOpportunityViewV1` the board renders, so the language
+          provenance travels with the text instead of being bolted on.
+          `ready.view` exists only for a signed-in member whose ad is live;
+          the raw title stays as the fallback for the member whose reading
+          degraded, and the occupation label for the anonymous visitor. */}
       <h1
-        lang={sourceLang}
+        lang={ready?.view.presentedLanguage ?? sourceLang}
         className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
       >
-        {member?.titleRaw ?? preview.occupation ?? GENERIC_TITLE[active]}
+        {ready?.view.title ?? member?.titleRaw ?? preview.occupation ?? GENERIC_TITLE[active]}
       </h1>
+
+      {/* WHICH LANGUAGE THE MEMBER IS READING. A rendering is named as a
+          rendering with the publisher's own words one tap away (the original
+          is the FACT); an advertisement still in its source language is named
+          as such, so a Lithuanian reader is never left to guess why a title
+          is Swedish. */}
+      {ready?.view.sourceLanguage &&
+      ready.view.presentedLanguage !== ready.view.sourceLanguage ? (
+        <details className="group mt-2 text-sm text-text-muted" data-testid="job-translated">
+          <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            {tLang("translatedFrom", { language: languageName(ready.view.sourceLanguage) })}
+            {" · "}
+            <span className="underline underline-offset-4 group-open:hidden">{tLang("showOriginal")}</span>
+            <span className="hidden underline underline-offset-4 group-open:inline">{tLang("hideOriginal")}</span>
+          </summary>
+          <p lang={ready.view.sourceLanguage} className="mt-1 text-text-secondary" data-testid="job-title-original">
+            <span className="text-text-muted">{tLang("originalTitle")}: </span>
+            {ready.view.titleOriginal}
+          </p>
+          <p className="mt-1">{tLang("machineNote")}</p>
+        </details>
+      ) : member && sourceLang && sourceLang.slice(0, 2) !== active ? (
+        <p className="mt-2 text-sm text-text-muted" data-testid="job-source-language">
+          {tLang("originalIn", { language: languageName(sourceLang) })}
+        </p>
+      ) : null}
 
       {member?.titleRaw && preview.occupation && (
         <p lang={sourceLang} className="mt-2 text-base text-text-muted">
@@ -811,7 +866,7 @@ export default async function JobDetailPage({
             )}
           </section>
 
-          {member.descriptionRaw.trim().length > 0 && (
+          {(ready?.view.description ?? member.descriptionRaw).trim().length > 0 && (
             <section className="mt-8">
               <h2 className="text-base font-medium">
                 {DESCRIPTION_HEADING[active]}
@@ -820,11 +875,26 @@ export default async function JobDetailPage({
                   keeps their paragraph breaks without interpreting anything in
                   the string as markup — this is third-party content. */}
               <p
-                lang={sourceLang}
+                lang={ready?.view.description ? active : sourceLang}
                 className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-muted"
+                data-testid="job-description"
               >
-                {member.descriptionRaw}
+                {ready?.view.description ?? member.descriptionRaw}
               </p>
+              {/* The publisher's own body stays reachable whenever a rendering
+                  is shown in its place — it is the fact; the rendering is not. */}
+              {ready?.view.description &&
+              ready.view.description !== ready.view.descriptionOriginal ? (
+                <details className="group mt-3 text-sm text-text-muted" data-testid="job-description-original">
+                  <summary className="cursor-pointer list-none underline underline-offset-4 [&::-webkit-details-marker]:hidden">
+                    <span className="group-open:hidden">{tLang("showOriginal")}</span>
+                    <span className="hidden group-open:inline">{tLang("hideOriginal")}</span>
+                  </summary>
+                  <p lang={sourceLang} className="mt-2 whitespace-pre-line leading-relaxed text-text-secondary">
+                    {ready.view.descriptionOriginal}
+                  </p>
+                </details>
+              ) : null}
             </section>
           )}
 

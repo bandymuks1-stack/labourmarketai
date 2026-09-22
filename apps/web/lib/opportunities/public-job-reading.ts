@@ -7,7 +7,11 @@ import { listMyInterestSignals } from "@/lib/opportunities/interest";
 import { listMyHandoffsByVacancy, type MyHandoffRow } from "@/lib/opportunities/vacancy-interest";
 import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 import { buildNeedFromVacancy, type VacancyMatchingGap } from "@/lib/vacancy-sources/vacancy-need";
-import { toCanonicalOpportunityView } from "@/lib/vacancy-sources/vacancy-presentation";
+import {
+  toCanonicalOpportunityView,
+  type CanonicalOpportunityViewV1,
+} from "@/lib/vacancy-sources/vacancy-presentation";
+import { resolveVacancyDescription } from "@/lib/vacancy-store/vacancy-translation-read";
 import {
   compareMatches,
   matchWorkerToNeed,
@@ -99,6 +103,25 @@ export type PublicJobReading =
       readonly interestAvailable: boolean;
       readonly interest: PublicJobInterestState;
       readonly alternatives: readonly PublicJobAlternative[];
+      /**
+       * THE CANONICAL PRESENTATION of this advertisement for THIS member
+       * (`toCanonicalOpportunityView`) — the same contract the board renders.
+       *
+       * Why it belongs here: the member half of `/jobs/[id]` used to read
+       * `titleRaw` / `descriptionRaw` straight off the store row, which is a
+       * SECOND presentation of a vacancy beside the canonical one. That is
+       * why the page could not say which language the reader was looking at:
+       * a hand-rolled renderer never asks the canonical layer, and the
+       * language provenance lives on the canonical view
+       * (`sourceLanguage` / `presentedLanguage` / `titleOriginal` /
+       * `descriptionOriginal` / `translationProvider`).
+       *
+       * With the view here, the page renders what the board renders and the
+       * disclosure travels with it. The publisher's own words are still
+       * carried on the same object, so nothing is lost by presenting the
+       * reader's language first.
+       */
+      readonly view: CanonicalOpportunityViewV1;
     };
 
 function bandRank(band: FitBand): number {
@@ -165,6 +188,8 @@ export async function readPublicJobForMember(
   userId: string,
   vacancy: StoredPublicVacancyV1,
   nowIso: string = new Date().toISOString(),
+  /** The member's UI locale — what the canonical view is presented in. */
+  viewerLocale: string = "en",
 ): Promise<PublicJobReading> {
   const ctx = await buildOwnWorkerContext(supabase, userId);
   if (!ctx) return { kind: "no_worker" };
@@ -187,9 +212,29 @@ export async function readPublicJobForMember(
       : readSameProfessionAlternatives(supabase, vacancy, ctx.subject, band, nowIso),
   ]);
 
+  // THE READER'S LANGUAGE, resolved for the ONE advertisement they opened.
+  // Grant-gated (owner decision 2026-09-22): with no grant naming
+  // `translate_vacancy` this returns null, and the canonical view then
+  // presents the publisher's own words with their language named — never a
+  // rendering that does not exist.
+  const rendering = await resolveVacancyDescription(vacancy, viewerLocale, userId).catch(
+    () => null,
+  );
+  const view = toCanonicalOpportunityView(vacancy, {
+    translation: rendering
+      ? {
+          targetLanguage: viewerLocale,
+          title: rendering.title,
+          description: rendering.description,
+          provider: rendering.provider,
+        }
+      : null,
+  });
+
   const vacancyId = vacancy.storeId;
   return {
     kind: "ready",
+    view,
     workerId: ctx.workerId,
     matchable,
     match,
