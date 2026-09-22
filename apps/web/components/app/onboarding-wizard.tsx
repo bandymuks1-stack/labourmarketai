@@ -9,8 +9,7 @@ import { RoleIcon } from "@/components/app/role-icon";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
-import { countryDisplayName } from "@/lib/location/country-model";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
   FIRST_RUN_INTENTS,
@@ -106,6 +105,13 @@ export function OnboardingWizard({
       label: tProfession(slug),
     })).sort((a, b) => collator.compare(a.label, b.label));
   }, [locale, tProfession]);
+  // Every ISO country, the active markets first (global-access rule
+  // 2026-09-22, same list the company setup and the demand wizard offer). A
+  // market list ORDERS this select; it never shortens it — a person in
+  // Ireland, Vietnam or the Philippines is not stopped at the first question.
+  // `complete_onboarding` already accepted any code; only the question was
+  // gated. 249 CLDR lookups + a collator: memoised per locale.
+  const countryOptions = useMemo(() => countryOptionsForLocale(locale), [locale]);
   const [step, setStep] = useState<1 | 2>(1);
   // Pre-ticked from the landing sentence when one travelled here; the person
   // still sees the tick, can remove it, and must press Continue.
@@ -451,9 +457,9 @@ export function OnboardingWizard({
           <option value="" disabled>
             {t("country_placeholder")}
           </option>
-          {ACTIVE_MARKETS.map((c) => (
-            <option key={c} value={c}>
-              {countryDisplayName(c, locale)}
+          {countryOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
             </option>
           ))}
         </select>
