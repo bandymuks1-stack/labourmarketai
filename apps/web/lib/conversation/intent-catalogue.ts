@@ -93,6 +93,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "market-map": "the labour-market map",
   activity: "the activity centre / recent activity",
   "messages-view": "messages and conversations inbox",
+  "my-team": "the people the speaker works with — their team, colleagues, crew or the organization's members",
   invitations: "invitations addressed to me (join an organization, become a student or an employee)",
 };
 

@@ -97,7 +97,11 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 76 → 78 (2026-09-19): agency-invites (client bridge) + propose-booking.
     // 78 → 79 (2026-09-20): accept-offer — a decision by sentence lands on the
     // ONE offer card (the button stays the commitment).
-    expect(entries.length).toBe(79);
+    // 79 → 80 (2026-09-22, owner P0 §5): my-team — "Parodyk mano komandą"
+    // scored 0 everywhere while /dashboard/network, the relationships
+    // surface the primary nav carries and the invitation answers already
+    // chip to, was the answer. A ROUTE to that page; no new read, no new UI.
+    expect(entries.length).toBe(80);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -175,6 +179,10 @@ describe("the intent registry is the enumerable routing contract", () => {
       "hours-import",
       "lmc",
       "market-map",
+      // "Parodyk mano komandą" (owner P0 2026-09-22 §5) — one chip to
+      // /dashboard/network, the relationships surface the primary nav
+      // already carries. Route-class for exactly the reason above.
+      "my-team",
       "need-service",
       "timesheets",
       "work-hours",

@@ -62,6 +62,10 @@ export const AI_TASK_TYPES = [
    *  EXISTING conversation intent id (owner approval 2026-09-05). Unbounded
    *  free text; Gemini-only by a task-scoped grant. */
   "propose_conversation_intent",
+  /** The verbatim title/description of a PUBLICLY published job advertisement
+   *  → the same words in the reader's locale. The second PUBLIC task; its
+   *  argument is the field list in `TASK_POLICIES.translate_vacancy`. */
+  "translate_vacancy",
 ] as const;
 export type AiTaskType = (typeof AI_TASK_TYPES)[number];
 
@@ -441,6 +445,63 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     // every write through the dispatcher's own confirmation tiers.
     humanReview: false,
   },
+  /**
+   * TRANSLATE A PUBLISHED ADVERTISEMENT INTO THE READER'S LOCALE.
+   *
+   * GRANT-GATED, not public (owner decision 2026-09-22): "Public source
+   * content does not automatically authorize unrestricted third-party AI
+   * transmission." `TASK_SENSITIVITY` classes this `SENSITIVE_FREE_TEXT`
+   * because `vacancy_description` is unbounded text a third party wrote, so
+   * an external provider receives it only under an owner grant naming this
+   * task. There is no such grant today; the runtime refuses and the reader
+   * shows the publisher's own words.
+   *
+   * MINIMUM NECESSARY FIELDS (owner decision 2026-09-22). Four, and the
+   * schema is `.strict()` so a caller cannot widen them: the title, the
+   * description, and the two locale codes. Employer identity, employer org
+   * id, application URL, coordinates, the reader, and the match result are
+   * all listed as prohibited and none is assembled anywhere. Before the call
+   * the reader additionally REDACTS e-mail addresses, phone numbers and URLs
+   * out of the description into opaque tokens and restores them afterwards,
+   * so contact data never leaves even though the reader still shows it.
+   *
+   * `low_cost` on both tiers, NO escalation, a tight ceiling: translating
+   * twenty short titles does not get better with a frontier model, and a
+   * board that could silently escalate is a board with an unbounded bill.
+   * The reader batches (one call per board render) and PERSISTS the result
+   * beside the original keyed by source hash + target locale, so an ad is
+   * translated ONCE per locale and never again per page view.
+   */
+  translate_vacancy: {
+    taskType: "translate_vacancy",
+    riskLevel: "low",
+    allowedFields: ["vacancy_title", "vacancy_description", "source_locale", "target_locale"],
+    prohibitedFields: [
+      "full_cv",
+      "worker_profile",
+      "journal_entry_text",
+      "employer_name",
+      "employer_external_org_id",
+      "application_url",
+      "worker_name",
+      "profile_id",
+      "worker_id",
+      "match_result",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "vacancyTranslationOutputSchema",
+    minQuality: 0.55,
+    maxEstimatedCostUsd: 0.03,
+    expectedOutputTokens: 1_500,
+    maxLatencyMs: 20_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // A rendering shown beside the original with its provenance named; the
+    // human decision it supports is reading. Never a record of fact.
+    humanReview: false,
+  },
   draft_follow_up: {
     taskType: "draft_follow_up",
     riskLevel: "medium",
@@ -485,6 +546,7 @@ export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   translation_copy: "translate_message",
   market_explanation: "explain_market_demand",
   conversation_intent: "propose_conversation_intent", // one typed sentence → one EXISTING intent id (proposer, not router)
+  vacancy_translation: "translate_vacancy",
 };
 
 export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {

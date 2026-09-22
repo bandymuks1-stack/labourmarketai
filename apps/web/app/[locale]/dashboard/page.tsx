@@ -50,39 +50,40 @@ import {
   type DurablePointerKind,
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
-import { dashboardRootSurface, isWorkerPersonalSpace } from "@/lib/today/today-route";
+import { conversationOpeningContext } from "@/lib/today/today-route";
 
 /**
- * Dashboard root — ONE route, two compositions, decided by ONE pure predicate
- * (`lib/today/today-route.ts`; the chrome reads the same one):
+ * Dashboard root — the ONE authenticated home: the conversation, for EVERY
+ * identity (owner decision 0017, 2026-09-22). What differs per person is the
+ * OPENING CONTEXT the conversation composes above its greeting, decided by
+ * ONE pure predicate (`lib/today/today-route.ts`):
  *
- *   ŠIANDIEN (worker, personal space, no conversation parameter) — the
- *   worker's home as a PAGE (`docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md`
- *   §2): name · profession · today's state, ONE next action, today's recorded
- *   work, open items, one growth sentence, one opportunity sentence, a quiet
- *   door to the conversation, the stations as text links. It REPLACES the
+ *   ŠIANDIEN (worker, personal space) — the worker's "now"
+ *   (`docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md` §2 composition):
+ *   name · profession · today's state, ONE next action, today's recorded
+ *   work, open items, one growth sentence, one opportunity sentence, the
+ *   contextual workspaces as text links. It stands INSIDE the conversation's
+ *   opening composition, with the composer right under it, and REPLACES the
  *   opening intro card for the worker (owner direction 2026-09-13: no welcome
- *   card, no legacy popup composition).
+ *   card). It is not a page and not a second home — the 2026-09-13 root
+ *   split (ŠIANDIEN page · PAKLAUSK `?ask=1` tab) is retired.
  *
- *   THE CONVERSATION — for every other identity, for a worker acting inside
- *   an organization, and for the worker ON DEMAND (frozen contract §2.1):
- *   the PAKLAUSK tab (`?ask=1`) and every existing deep link (`?result=`,
- *   `?say=`, `?intent=`, …) open the same chat they always did. The former
- *   card control room (`/dashboard/advanced`) was DELETED by W3 Package 4 —
- *   nothing here brings a card wall back.
+ *   THE WORKSPACE COMPOSITION — for every other identity and for a worker
+ *   acting inside an organization: the opening brief, the "Mano erdvė"
+ *   block and the starters they already had. Every existing deep link
+ *   (`?result=`, `?say=`, `?intent=`, …) opens the same chat it always did.
+ *   The former card control room (`/dashboard/advanced`) was DELETED by W3
+ *   Package 4 — nothing here brings a card wall back.
  *
- * The wide module navbar is NOT hidden with an overlay any more: the layout's
- * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is absent,
- * not painted over). In the conversation the chat fills the viewport and
- * supplies its own header; in ŠIANDIEN the chrome supplies the one top bar and
- * the worker's 3-tab bar. Deterministic (LLM off).
+ * The wide module navbar is NOT hidden with an overlay: the layout's
+ * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is
+ * absent, not painted over). The chat fills the viewport and supplies the one
+ * top bar. Deterministic (LLM off).
  */
 export default async function DashboardHomePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -139,36 +140,18 @@ export default async function DashboardHomePage({
   }
   const activeRole: Role = decision.role;
 
-  // ŠIANDIEN or the conversation — the ONE decision, from the identity the
-  // role decision produced, the workspace the chip resolves (request-cached;
-  // the layout already ran it) and the query string. A worker in their
-  // personal space lands on their day; `?ask=1` and the chat's own deep
-  // links keep opening the conversation.
+  // WHICH opening context the ONE conversation composes — from the identity
+  // the role decision produced and the workspace the chip resolves
+  // (request-cached; the layout already ran it). A worker in their personal
+  // space opens with ŠIANDIEN above the greeting; everyone else with the
+  // workspace composition.
   const identity = baseIdentityForRole(activeRole) ?? "person";
   const rootWorkspace = await getWorkspaceContext(identity);
-  const rootSurface = dashboardRootSurface({
-    activeRole,
-    activeWorkspaceId: rootWorkspace.activeWorkspaceId,
-    query: await searchParams,
-  });
-  if (rootSurface === "today") {
-    return (
-      <>
-        <TelemetryView
-          event={FUNNEL_EVENTS.dashboardViewed}
-          metadata={{ surface: "dashboard_root", step: "today" }}
-        />
-        <TodayScreen locale={locale as ActiveLocale} />
-      </>
-    );
-  }
-  // The worker reached the conversation on demand (PAKLAUSK / a deep link).
-  // Their "now" lives on ŠIANDIEN, so the opening intro card — the block
-  // ŠIANDIEN's header replaces — is not shown again here.
-  const workerOnDemand = isWorkerPersonalSpace({
-    activeRole,
-    activeWorkspaceId: rootWorkspace.activeWorkspaceId,
-  });
+  const workerToday =
+    conversationOpeningContext({
+      activeRole,
+      activeWorkspaceId: rootWorkspace.activeWorkspaceId,
+    }) === "today";
 
   // "Mano erdvė" (S2) — resolved on the server from the readers this request
   // already runs (session profile, workspace context, worker activity, the
@@ -187,10 +170,10 @@ export default async function DashboardHomePage({
   // conversation surface reaches the shell for every identity, and the intro
   // block appears the moment it is known.
   //
-  // For the worker who opened the conversation ON DEMAND the block is
-  // hidden with its reason named: ŠIANDIEN's header is where their space is
-  // introduced now (IA §4: the intro card is REPLACED, not shown twice).
-  const personalIntroPayload: Promise<PersonalIntroPayload> = workerOnDemand
+  // For the worker in their personal space the block is hidden with its
+  // reason named: ŠIANDIEN's header is where their space is introduced (IA
+  // §4: the intro card is REPLACED, not shown twice).
+  const personalIntroPayload: Promise<PersonalIntroPayload> = workerToday
     ? Promise.resolve({ intro: { kind: "hidden", reason: "replaced-by-today" }, labels: null })
     : loadPersonalIntroPayload();
   // STARTERS ARE SUGGESTIONS, NOT A ROLE MENU (owner contract 2026-09-04
@@ -297,6 +280,10 @@ export default async function DashboardHomePage({
         bookingOffers={offers}
         bookingLabels={bookingLabels}
         personalIntroPayload={personalIntroPayload}
+        // ŠIANDIEN — server-rendered, streamed section by section inside the
+        // chat's own opening composition (the worker's "now" above the
+        // greeting and the composer). One home, one conversation.
+        openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : null}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}

@@ -377,9 +377,56 @@ function sanitizeSearchTerm(raw: string): string {
  * at the type level only because the same mapper serves rows that were
  * selected without `id`; every `select("*")` read carries it.
  */
+/**
+ * ONE per-locale rendering of the original (`public_vacancies.translations`,
+ * migration 20260922150000). DERIVED, never the fact: it is valid only while
+ * `sourceHash` equals the row's `contentHash` — a re-imported revision makes
+ * it stale and the reader treats stale as absent.
+ */
+export interface VacancyLocaleTranslationV1 {
+  readonly status: "available" | "needs_review" | "failed";
+  /** Non-null ONLY when status === "available". Never the original echoed. */
+  readonly title: string | null;
+  /** Null until a reader asked for the body of THIS ad in THIS locale. */
+  readonly description: string | null;
+  readonly sourceLanguage: string;
+  readonly sourceHash: string;
+  readonly provider: string | null;
+  readonly model: string | null;
+  readonly generatedAt: string;
+}
+
 export type StoredPublicVacancyV1 = PublicVacancyV1 & {
   readonly storeId: string | null;
+  /** Per-locale renderings keyed by target locale (`{}` when none). */
+  readonly translations: Readonly<Record<string, VacancyLocaleTranslationV1>>;
 };
+
+function readTranslations(
+  raw: unknown,
+): Readonly<Record<string, VacancyLocaleTranslationV1>> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, VacancyLocaleTranslationV1> = {};
+  for (const [locale, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!v || typeof v !== "object") continue;
+    const e = v as Record<string, unknown>;
+    const status = e.status;
+    if (status !== "available" && status !== "needs_review" && status !== "failed") continue;
+    if (typeof e.sourceHash !== "string" || typeof e.sourceLanguage !== "string") continue;
+    out[locale] = {
+      status,
+      title: typeof e.title === "string" && e.title.trim() ? e.title : null,
+      description:
+        typeof e.description === "string" && e.description.trim() ? e.description : null,
+      sourceLanguage: e.sourceLanguage,
+      sourceHash: e.sourceHash,
+      provider: typeof e.provider === "string" ? e.provider : null,
+      model: typeof e.model === "string" ? e.model : null,
+      generatedAt: typeof e.generatedAt === "string" ? e.generatedAt : "",
+    };
+  }
+  return out;
+}
 
 export function fromPublicVacancyRow(
   row: Record<string, unknown>,
@@ -472,6 +519,10 @@ export function fromPublicVacancyRow(
 
     transformVersion: str("transform_version") ?? "",
     requestRef: str("request_ref") ?? "",
+
+    // A row read before migration 20260922150000 (or through a column list
+    // that omits it) simply has no renderings — never a fabricated one.
+    translations: readTranslations(row.translations),
   };
 }
 

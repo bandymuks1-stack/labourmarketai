@@ -37,9 +37,9 @@ Faktinė būsena kontrakto užšaldymo metu (nespėliota): `main` = `e7964b8` (#
 
 | # | Sprendimas |
 |---|---|
-| 2.1 | Conversation = pagal poreikį iškviečiamas pirmos klasės valdymo paviršius, ne nuolatinis dominuojantis stulpelis |
+| 2.1 | ~~Conversation = pagal poreikį iškviečiamas pirmos klasės valdymo paviršius, ne nuolatinis dominuojantis stulpelis~~ — **PAKEISTA savininko sprendimu 0017 (2026-09-22):** pokalbis YRA kanoniniai namai ir valdymo plokštuma (`/dashboard`); vizualūs paviršiai — kontekstinės darbo erdvės aplink jį. Žr. `docs/DECISIONS/0017-one-product-chat-first.md`. |
 | 2.2 | Erdvinis modelis: WORLD → FIELD → CONTEXT/OBJECT |
-| 2.3 | Mobile V1 prototipas: ŠIANDIEN · PASAULIS · PAKLAUSK; Field/Context — kontekstiniai; tikslūs skirtukų pavadinimai — hipotezė, ne negrįžtama architektūra |
+| 2.3 | ~~Mobile V1 prototipas: ŠIANDIEN · PASAULIS · PAKLAUSK; Field/Context — kontekstiniai; tikslūs skirtukų pavadinimai — hipotezė, ne negrįžtama architektūra~~ — **hipotezė UŽDARYTA sprendimu 0017 (2026-09-22):** ŠIANDIEN = darbuotojo pokalbio atidarymo kontekstas (ne atskiri namai); PASAULIS = kontekstinė galimybių erdvė (`/dashboard/opportunities`, ne šaknis); PAKLAUSK — sąvoka panaikinta (rašymo laukas visada matomas namuose). Trijų skirtukų juostos nebėra. |
 | 2.4 | Player: K1 „Pasas su kraštu" šeima (compact / standard / expanded / project / opportunity / team / mobile) |
 | 2.5 | Field: F1 laikas/zonos operacinis laukas — pagrindinis; F2 tik kur yra reali geometrija |
 | 2.6 | Company: C1 projektai laike × pajėgumas |

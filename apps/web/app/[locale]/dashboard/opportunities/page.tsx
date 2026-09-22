@@ -294,6 +294,16 @@ export default async function OpportunitiesPage({
   // render exactly the rows the line says are shown.
   const externalView = selectExternalFirstView(externalCards, externalInitialCount);
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
+  // A language code named in the reader's own locale ("sv" → "švedų"), the
+  // same way the criteria summary names one; the code itself when the
+  // runtime cannot (never a guess).
+  const languageName = (code: string): string => {
+    try {
+      return new Intl.DisplayNames([locale], { type: "language" }).of(code) ?? code;
+    } catch {
+      return code;
+    }
+  };
 
   // ── Market context (Contextual Intelligence UI v1): the worker's OWN
   //    deterministic salary-vs-benchmark trust card plus the four honest
@@ -1137,6 +1147,15 @@ export default async function OpportunitiesPage({
                                   skillLabel,
                                   detailsShow: t("discovery.details.show"),
                                   detailsHide: t("discovery.details.hide"),
+                                  languageName,
+                                  translatedFrom: (language) =>
+                                    tRoot("vacancySources.language.translatedFrom", { language }),
+                                  originalIn: (language) =>
+                                    tRoot("vacancySources.language.originalIn", { language }),
+                                  showOriginal: tRoot("vacancySources.language.showOriginal"),
+                                  hideOriginal: tRoot("vacancySources.language.hideOriginal"),
+                                  machineNote: tRoot("vacancySources.language.machineNote"),
+                                  originalTitle: tRoot("vacancySources.language.originalTitle"),
                                 }}
                               />
                             ) : (

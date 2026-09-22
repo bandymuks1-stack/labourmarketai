@@ -2286,6 +2286,27 @@ employer_data_disclosure 0; partner_supply_representation 0. `schema_migrations`
 `20260920185851` = this migration. Production `/pl/jobs/e3ec6c1e…` answered `lang="pl"` with Polish copy,
 0 `[EN]` markers and `/pl/auth/signup?next=/pl/jobs/…?via=auth` CTAs at 18:59Z.
 
+### `public_vacancy_translations_v1` — GREEN (ONE additive jsonb column, no grant/policy/row change) — APPLIED 2026-09-22, ledger `20260922102211`
+
+Repo file `supabase/migrations/20260922150000_public_vacancy_translations_v1.sql`
+(paired `supabase/rollbacks/…down.sql`). Owner P0 2026-09-22 §9 (foreign-language
+vacancies in the reader's locale). Finding: 101,885 published SV ads, 100%
+`translation_status='unavailable'`, provider null — the importer's translation
+stage ran with `NO_PROVIDER_CONFIGURED` into ONE target language. Change:
+`public_vacancies.translations jsonb not null default '{}'` + CHECK
+`jsonb_typeof(translations) = 'object'` + column comment. A column, not a table,
+because `pg_default_acl` is empty on this project (a new table would need GRANTs
+→ RED); the existing `authenticated` SELECT under `is_active` and `service_role`
+ALL cover the column. Entries are DERIVED per-locale renderings (status, title,
+description, sourceLanguage, sourceHash = `content_hash` at generation, provider,
+model, generatedAt) written on read by the ONE AI runtime for a signed-in
+reader's bounded set (task `translate_vacancy`, PUBLIC); the originals are
+untouched. Readback after apply: column present (`jsonb`, default `'{}'::jsonb`),
+103,406 rows, 0 renderings (generated on read, as designed); `schema_migrations`
+newest row `20260922102211` = this migration. Applied autonomously under the
+GREEN prod-apply policy (AGENTS.md → PROD APPLY AUTONOMY): static gate GREEN,
+reviewed, reversible, tests green, target verified.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

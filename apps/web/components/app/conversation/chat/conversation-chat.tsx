@@ -765,6 +765,7 @@ export function ConversationChat({
   script,
   mobile = false,
   personalIntroPayload = null,
+  openingContext = null,
   countryLabels,
   agencyWorkspace = false,
   // Declared in the props type since the education slice but never read here
@@ -794,6 +795,13 @@ export function ConversationChat({
    *  (the design preview) renders nothing at all; a resolved `hidden`
    *  model renders nothing either — exactly as before. */
   personalIntroPayload?: Promise<PersonalIntroPayload> | null;
+  /** ŠIANDIEN — the worker's opening context (owner decision 0017): a
+   *  server-rendered block the page composes for a worker in their personal
+   *  space. It takes the SAME intro slot the S2 block uses (above the
+   *  greeting, above the composer, gone after the first real turn), so the
+   *  home stays ONE conversation for every identity. When present it wins
+   *  over the S2 payload — the page hands only one of the two. */
+  openingContext?: ReactNode;
   /** Localized country names, resolved server-side. The demand prefill needs a
    *  WORD for the location field — the ISO code is an internal value (§23). */
   countryLabels?: Record<string, string>;
@@ -5839,6 +5847,13 @@ export function ConversationChat({
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/activity", label: labels.activityChip },
           ]),
+        // "Parodyk mano komandą" — the people surface both identities
+        // already have (a worker's relationships, an organization's
+        // members). Same chip the invitation answers use.
+        networkPeople: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/network", label: labels.chipNetwork },
+          ]),
         // No scheduler exists — never a fake reminder (honest degradation).
         // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────
         // "noriu pakviesti klientą" → the ONE missing question (e-mail) → the
@@ -6280,7 +6295,9 @@ export function ConversationChat({
                  through the SAME dispatcher every chip uses — one set of
                  flows, no second action system. */
               intro={
-                personalIntroPayload && !script ? (
+                openingContext && !script ? (
+                  openingContext
+                ) : personalIntroPayload && !script ? (
                   /* Invisible boundary (#1011): the intro's slow readiness
                      reads stream in AFTER the shell — the opening composition
                      renders immediately and the block appears when known,
@@ -6302,19 +6319,31 @@ export function ConversationChat({
               // While the conversation is opening the composer renders inside
               // the centred composition (owner audit §4.1); afterwards the
               // thread ignores this prop and the sticky bar below takes over.
+              //
+              // NOT when an OPENING CONTEXT is on screen (owner constraint
+              // 2026-09-22: "removing the separate ask door is correct only if
+              // the composer remains immediately available from the canonical
+              // root"). Measured at 375x812 on the first walk of this change:
+              // with ŠIANDIEN above it, the inline composer sat below the fold
+              // and the person had to scroll past their whole day to type —
+              // the `?ask=1` door removed and nothing put in its place. The
+              // sticky bar below takes over instead, so the composer is on
+              // screen at every width from the first frame.
               composer={
-                <Composer
-                  variant="inline"
-                  placeholder={labels.composerPlaceholder}
-                  attachLabel={labels.attach}
-                  sendLabel={labels.send}
-                  onSend={handleSend}
-                  onAttach={handleAttach}
-                  prefill={sayPrefill}
-                />
+                openingContext ? undefined : (
+                  <Composer
+                    variant="inline"
+                    placeholder={labels.composerPlaceholder}
+                    attachLabel={labels.attach}
+                    sendLabel={labels.send}
+                    onSend={handleSend}
+                    onAttach={handleAttach}
+                    prefill={sayPrefill}
+                  />
+                )
               }
             />
-            {opening ? null : (
+            {opening && !openingContext ? null : (
               <Composer
                 placeholder={labels.composerPlaceholder}
                 attachLabel={labels.attach}

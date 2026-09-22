@@ -175,22 +175,23 @@ describe("structure — exactly one conversation surface", () => {
     }
   });
 
-  it("/dashboard mounts exactly one chat — the conversation on demand — beside ONE ŠIANDIEN", () => {
-    // RETIRED (worker mobile IA 2026-09-13 §2): "/dashboard IS the
-    // conversation". The worker in their personal space opens ŠIANDIEN (a
-    // page); the chat stays the ONE conversation surface, opened on demand
-    // (`?ask=1`, every existing deep link) and for every other identity.
-    // What is pinned is still "one chat" — a second `<ConversationChat`
-    // would be the parallel product this guard exists to prevent.
+  it("/dashboard IS the conversation for every identity — ŠIANDIEN is its opening context, not a second root", () => {
+    // Owner decision 0017 (2026-09-22) retired the 2026-09-13 root split
+    // (ŠIANDIEN page · PAKLAUSK `?ask=1` tab). What is pinned is still "one
+    // chat" — a second `<ConversationChat` would be the parallel product this
+    // guard exists to prevent — and now also "one root": the worker's
+    // ŠIANDIEN renders INSIDE that chat's opening slot, never as a page
+    // returned instead of it.
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/<ConversationChat\b/);
     expect(page.match(/<ConversationChat\b/g)).toHaveLength(1);
-    expect(page).toMatch(/<TodayScreen\b/);
     expect(page.match(/<TodayScreen\b/g)).toHaveLength(1);
-    // The split is the ONE pure predicate the chrome reads too — never a
-    // page-local role check that could disagree with the shell around it.
-    expect(page).toMatch(/dashboardRootSurface\(\{/);
-    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/hasConversationParams\(/);
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
+    // The opening decision is the ONE pure predicate — never a page-local
+    // role check.
+    expect(page).toMatch(/conversationOpeningContext\(\{/);
+    expect(page).not.toMatch(/dashboardRootSurface|hasConversationParams/);
+    expect(read("components/app/dashboard-chrome.tsx")).not.toMatch(/hasConversationParams|useSearchParams/);
     // ŠIANDIEN carries no conversation of its own.
     const today = read("components/app/today/today-screen.tsx");
     expect(today).not.toMatch(/ConversationChat|ConversationThread|useConversation/);

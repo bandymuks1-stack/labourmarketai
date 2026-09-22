@@ -17,8 +17,6 @@ import { SpineStream } from "@/components/app/spine-stream";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
-import type { WorkerNavLabels } from "@/components/app/today/worker-bottom-nav";
-import { isWorkerPersonalSpace } from "@/lib/today/today-route";
 import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
 import { Link } from "@/lib/i18n/navigation";
@@ -42,13 +40,15 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  * client `AuthProvider` so every downstream widget (RoleSwitcher,
  * NotificationPanel, DashboardTabs, the simple-mode header) stays in sync. The
  * chrome itself is chosen per-route by the client `<DashboardChrome>`:
- *   - `/dashboard` (worker, personal space)     → ŠIANDIEN (one top bar, the
- *                                                  page, the worker's 3-tab bar)
- *   - `/dashboard` (everyone else; `?ask=1`)    → conversation (bare; the chat
- *                                                  supplies its own simple nav)
- *   - `/dashboard/communication|planning|profile` → simple-mode shell (5-item nav)
- *   - every other module route (detail/admin surfaces) → the full module chrome
- *     (`/dashboard/advanced` itself was deleted by W3 Package 4)
+ *   - `/dashboard` (EVERY identity)              → the conversation — the ONE
+ *                                                  authenticated home (bare; the
+ *                                                  chat supplies the one top bar)
+ *   - every other product route                  → panel: the same one top bar
+ *                                                  over a contextual workspace
+ *   - `/dashboard/admin/*`                       → the full module chrome (the
+ *                                                  internal operator console only;
+ *                                                  `/dashboard/advanced` itself was
+ *                                                  deleted by W3 Package 4)
  *
  * This is the real replacement for the previous `fixed inset-0` overlay: the
  * wide navbar is not painted over in simple mode — it is simply never rendered
@@ -185,28 +185,8 @@ export default async function DashboardLayout({
   // to the client chrome selector (which needs no data fetch of its own).
   const tChat = await getTranslations("conversation.chat");
   const tFooter = await getTranslations("footer");
-  // THE WORKER'S THREE TABS (IA 2026-09-13 §2; frozen contract §2.3). Only a
-  // worker standing in their PERSONAL space gets the bar — the same predicate
-  // the dashboard root uses to decide ŠIANDIEN vs the conversation
-  // (`lib/today/today-route.ts`). Labels are resolved here, server-side, so
-  // no client message namespace is added. For that worker the "back to
-  // chat" affordance on projection routes leads to ŠIANDIEN, so it is
-  // named as such.
-  const workerPersonal = isWorkerPersonalSpace({
-    activeRole,
-    activeWorkspaceId: workspace.activeWorkspaceId,
-  });
-  const tToday = await getTranslations("todayScreen.nav");
-  const workerNav: WorkerNavLabels | null = workerPersonal
-    ? {
-        today: tToday("today"),
-        world: tToday("world"),
-        ask: tToday("ask"),
-        aria: tToday("aria"),
-      }
-    : null;
   const nav: ConversationNavLabels = {
-    chat: workerPersonal ? tToday("today") : tChat("navChat"),
+    chat: tChat("navChat"),
     journal: tChat("navJournal"),
     messages: tChat("navMessages"),
     calendar: tChat("navCalendar"),
@@ -223,6 +203,7 @@ export default async function DashboardLayout({
         {/* App-shell logo links to the dashboard, NOT the public home. */}
         <Link
           href="/dashboard"
+          data-testid="shell-logo-home"
           className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
         >
           LabourMarket<span className="text-gradient-accent">.ai</span>
@@ -319,7 +300,6 @@ export default async function DashboardLayout({
         <DashboardChrome
           nav={nav}
           headerTitle={tChat("headerTitle")}
-          workerNav={workerNav}
           fullHeader={fullHeader}
           fullBottomNav={<BottomNav />}
           rexora={rexora}

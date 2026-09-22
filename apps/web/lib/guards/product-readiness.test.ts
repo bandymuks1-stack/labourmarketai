@@ -2620,7 +2620,15 @@ describe("no migration files added by this sprint", () => {
 // locale pl; RED SECDEF body replace, human-gated; owner-applied). RECOUNTED: 301.
 // Bumped 301 -> 302 for 20260922130000_company_need_intake_country_registry_v1 (anonymous company-need
 // intake accepts any code in public.countries; RED SECDEF body replace, human-gated; owner-applied). RECOUNTED: 302.
-const SPRINT_BASELINE = 302;
+// Bumped 302 -> 303 for 20260922150000_public_vacancy_translations_v1 (owner P0
+// §9 foreign-language vacancies): ONE additive jsonb column
+// public_vacancies.translations holding per-locale DERIVED renderings beside the
+// original (status, title, description, sourceLanguage, sourceHash, provider,
+// model, generatedAt) + an object-shape CHECK. No grant, policy or row change -
+// a column, not a table, because pg_default_acl is empty and a table would need
+// GRANTs (RED). GREEN by shape; paired .down.sql; APPLIED 2026-09-22, ledger
+// 20260922102211. RECOUNTED: 303.
+const SPRINT_BASELINE = 303;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

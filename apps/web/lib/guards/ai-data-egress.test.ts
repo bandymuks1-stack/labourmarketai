@@ -215,6 +215,17 @@ describe("the classification the gate depends on stays honest", () => {
     // `data-sensitivity.ts`, its field list is in `TASK_POLICIES`, and the
     // payload assembler is pinned separately by
     // `public-market-facts-payload.test.ts`.
+    //
+    // THE ALLOWLIST STAYED AT ONE ON 2026-09-22, and that is the record worth
+    // keeping. `translate_vacancy` was first proposed as the second PUBLIC
+    // task on the argument that an advertisement's text is already published
+    // to the whole internet. The owner overruled it in the same review:
+    // "Public source content does not automatically authorize unrestricted
+    // third-party AI transmission. Gate external-provider translation through
+    // the existing canonical egress/grant governance." It is therefore
+    // `SENSITIVE_FREE_TEXT` — unbounded third-party prose — and reaches an
+    // external provider only under a grant naming it. This guard is where
+    // that decision is visible: the set below did not grow.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
     ).sort();

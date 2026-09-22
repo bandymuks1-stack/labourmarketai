@@ -1011,7 +1011,12 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 301 -> 302 for 20260922130000_company_need_intake_country_registry_v1 (anonymous
     //   company-need intake accepts any code in public.countries; RED SECDEF body replace,
     //   human-gated; owner-applied). Not this read layer's file. RECOUNTED: 302.
-    expect(count).toBeLessThanOrEqual(302);
+    // Bumped 302 -> 303 for 20260922150000_public_vacancy_translations_v1 (owner
+    //   P0 §9: ONE additive jsonb column public_vacancies.translations — per-locale
+    //   renderings stored beside the original; no grant/policy/row change; GREEN by
+    //   shape; paired .down.sql; APPLIED 2026-09-22, ledger 20260922102211). Not
+    //   this read layer's file. RECOUNTED: 303.
+    expect(count).toBeLessThanOrEqual(303);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

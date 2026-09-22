@@ -29,6 +29,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   searchPublicVacancies,
   readSupplyLastRefreshedAt,
+  type StoredPublicVacancyV1,
   type VacancySearchFiltersV1,
 } from "@/lib/vacancy-store/vacancy-read";
 import {
@@ -108,7 +109,15 @@ export async function loadExternalVacancyCards(
   options: Pick<
     VacancySearchFiltersV1,
     "country" | "professionSlug" | "query" | "nowIso"
-  >,
+  > & {
+    /**
+     * WHO is reading, for the reader-locale rendering of the titles
+     * (owner P0 2026-09-22 §9). The board renders in the viewer's UI
+     * locale; the id bounds the per-viewer translation rate. Omitted →
+     * the originals stand (a test, or a caller without a session).
+     */
+    readonly viewerId?: string | null;
+  },
 ): Promise<ExternalVacanciesResultV1> {
   const explicitProfession = options.professionSlug ?? null;
   const nowIso = options.nowIso ?? new Date().toISOString();
@@ -209,7 +218,10 @@ export async function loadExternalVacancyCards(
     if (!byKey.has(key)) byKey.set(key, v);
   }
 
-  const cards = [...byKey.values()]
+  const vacancyByKey = new Map<string, StoredPublicVacancyV1>(
+    [...byKey.values()].map((v) => [`${v.providerKey}:${v.externalId}`, v] as const),
+  );
+  const ranked = [...byKey.values()]
     .map((vacancy): ExternalOpportunityCardV1 => {
       // Skill slugs on a stored vacancy were derived by the platform's own
       // text recognizer at import time — the categorizer's tier, declared
@@ -247,5 +259,52 @@ export async function loadExternalVacancyCards(
     // cap keeps HOW MANY render unchanged.
     .slice(0, BOARD_LIMIT);
 
+  // THE READER'S LANGUAGE — for exactly the cards that render, after the
+  // ranking (ranking reads slugs and facts, never words, so it is
+  // language-neutral by construction). Stored renderings cost nothing; the
+  // missing ones are ONE batched runtime call, persisted beside the
+  // original. A refused/absent rendering leaves the publisher's words,
+  // named as the original.
+  const cards = options.viewerId
+    ? await withReaderLanguage(ranked, vacancyByKey, options.viewerId)
+    : ranked;
+
   return { available: true, cards, freshness };
+}
+
+async function withReaderLanguage(
+  cards: readonly ExternalOpportunityCardV1[],
+  vacancyByKey: ReadonlyMap<string, StoredPublicVacancyV1>,
+  viewerId: string,
+): Promise<readonly ExternalOpportunityCardV1[]> {
+  // Loaded here, not at module top: the translation reader carries the AI
+  // runtime graph, and this module is imported by every board read (and by
+  // the intent-router tests, whose 5 s budget a static import would eat).
+  const [{ getLocale }, { resolveVacancyTitles }] = await Promise.all([
+    import("next-intl/server"),
+    import("@/lib/vacancy-store/vacancy-translation-read"),
+  ]);
+  const locale = await getLocale();
+  const vacancies = cards.flatMap((c) => {
+    const v = vacancyByKey.get(c.key);
+    return v ? [v] : [];
+  });
+  const renderings = await resolveVacancyTitles(vacancies, locale, viewerId);
+  if (renderings.size === 0) return cards;
+  return cards.map((card) => {
+    const v = vacancyByKey.get(card.key);
+    const r = v?.storeId ? renderings.get(v.storeId) : undefined;
+    if (!v || !r) return card;
+    return {
+      ...card,
+      view: toCanonicalOpportunityView(v, {
+        translation: {
+          targetLanguage: locale,
+          title: r.title,
+          description: r.description,
+          provider: r.provider,
+        },
+      }),
+    };
+  });
 }

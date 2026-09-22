@@ -164,6 +164,8 @@ export default async function CompanyScoutingPage({
     demands[0]?.id ??
     null;
   const result = selected ? await runScouting(selected, requestedFilters) : null;
+  // A need that is not closed takes decisions; a closed one shows history.
+  const needOpen = result?.kind === "ok" ? result.demand.status !== "closed" : true;
   // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
   // returns rows only to the request owner). Empty until the owner-gated bridge
   // migration is applied.
@@ -506,6 +508,19 @@ export default async function CompanyScoutingPage({
             limitIndividual: t("lifecycle.limitIndividual"),
           }}
         />
+      ) : null}
+
+      {/* LIFECYCLE (owner P0 2026-09-22 §12): on a CLOSED need the candidate
+          list is HISTORY — who was compared and what was decided — never an
+          actionable shortlist. The controls below are gated on `needOpen`
+          and the write itself refuses (`setShortlist` → `closed`). */}
+      {result?.kind === "ok" && result.demand.status === "closed" ? (
+        <p
+          className="rounded-md border border-ink-500 bg-ink-800/60 px-4 py-3 text-sm text-text-secondary"
+          data-testid="scouting-closed-history"
+        >
+          {t("lifecycle.closedCandidatesHistory")}
+        </p>
       ) : null}
 
       {/* Results */}
@@ -1026,13 +1041,17 @@ export default async function CompanyScoutingPage({
                 <div
                   className="flex flex-col gap-2 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-2"
                   data-testid={`scout-comms-${c.workerId}`}
-                  data-can-contact={c.canContact ? "true" : "false"}
+                  data-can-contact={c.canContact && needOpen ? "true" : "false"}
                 >
                   <p className="flex items-center gap-1.5 text-meta text-text-muted">
-                    <span aria-hidden>{c.canContact ? "💬" : "⏳"}</span>
-                    {c.canContact ? t("comms.eligible") : t("comms.blocked")}
+                    <span aria-hidden>{c.canContact && needOpen ? "💬" : "⏳"}</span>
+                    {!needOpen
+                      ? t("lifecycle.closedNote")
+                      : c.canContact
+                        ? t("comms.eligible")
+                        : t("comms.blocked")}
                   </p>
-                  {c.canContact ? (
+                  {c.canContact && needOpen ? (
                     <div className="flex flex-col gap-2">
                       <RequestCommunicationButton
                         locale={locale}
@@ -1131,6 +1150,7 @@ export default async function CompanyScoutingPage({
                   />
                 ) : null}
 
+                {needOpen ? (
                 <ScoutingShortlistButtons
                   locale={locale}
                   requestId={result.demand.id}
@@ -1157,6 +1177,13 @@ export default async function CompanyScoutingPage({
                     },
                   }}
                 />
+                ) : c.shortlistStatus ? (
+                  /* History: the decision that was recorded while the need
+                     was open, as a fact — no control. */
+                  <p className="text-meta text-text-muted" data-testid={`scout-shortlist-history-${c.workerId}`}>
+                    {shortlistLabels[c.shortlistStatus] ?? c.shortlistStatus}
+                  </p>
+                ) : null}
               </li>
             );
           })}

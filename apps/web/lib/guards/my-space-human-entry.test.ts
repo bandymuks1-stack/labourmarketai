@@ -38,15 +38,15 @@ const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
 describe("worker entry is ŠIANDIEN — a page, not the chat and not a card stack (IA 2026-09-13)", () => {
   // RETIRED: "the worker's calm entry is the workspace (the chat) with the
-  // intro card". The worker in their personal space lands on ŠIANDIEN:
-  // header · ONE next action · today's work · open items · one growth line ·
-  // one opportunity line · a quiet door to the conversation · stations.
+  // intro card". The worker in their personal space opens the conversation
+  // with ŠIANDIEN as its opening context (owner decision 0017): header · ONE
+  // next action · today's work · open items · one growth line · one
+  // opportunity line · stations — and the composer right under it.
   const SCREEN = "components/app/today/today-screen.tsx";
 
-  it("the dashboard root renders ŠIANDIEN for the worker and keeps the chat on demand", () => {
+  it("the dashboard root composes ŠIANDIEN into the worker's conversation and hides the intro card", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/rootSurface === "today"/);
-    expect(page).toMatch(/<TodayScreen\b/);
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     expect(page).toMatch(/reason: "replaced-by-today"/);
   });
 

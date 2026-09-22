@@ -32,7 +32,7 @@ const FREE_CLOUD = { id: "gemini", costClass: "free_tier", locality: "cloud" } a
 describe("every task is classified, and the table matches the shipped profiles", () => {
   it("covers all 12 task types", () => {
     // 11 → 12 on 2026-09-05: `propose_conversation_intent`, SENSITIVE_FREE_TEXT.
-    expect(AI_TASK_TYPES.length).toBe(12);
+    expect(AI_TASK_TYPES.length).toBe(13);
     for (const t of AI_TASK_TYPES) {
       expect(TASK_SENSITIVITY[t], `missing sensitivity for ${t}`).toBeDefined();
       expect(AI_DATA_SENSITIVITY_CLASSES).toContain(TASK_SENSITIVITY[t]);
@@ -84,6 +84,12 @@ describe("every task is classified, and the table matches the shipped profiles",
     // Still an equality against a NAMED list rather than a count, for the same
     // reason as before: the risk is a second task being relabelled quietly,
     // and a count would go green on a swap.
+    //
+    // 2026-09-22: `translate_vacancy` was PROPOSED as the second and the
+    // owner refused it — "public source content does not automatically
+    // authorize unrestricted third-party AI transmission" — so it is
+    // SENSITIVE_FREE_TEXT and grant-gated. The set is still one, and that
+    // refusal is the fact worth pinning.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
     );

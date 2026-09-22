@@ -17,12 +17,12 @@ import {
 import type { AiAgentKey } from "../ai/registry/types";
 
 describe("prompt registry is the source of truth", () => {
-  it("registers ALL thirteen product agents (12 → 13 on 2026-09-05: conversation_intent, the Gemini proposer)", () => {
+  it("registers ALL fourteen product agents (13 → 14 on 2026-09-22: vacancy_translation)", () => {
     for (const key of ALL_AGENT_KEYS) {
       expect(REGISTERED_AGENTS, `${key} must be registered`).toContain(key);
       expect(hasPromptEntry(key)).toBe(true);
     }
-    expect(REGISTERED_AGENTS.length).toBe(13);
+    expect(REGISTERED_AGENTS.length).toBe(14);
   });
 
   it("every registered entry is well-formed", () => {

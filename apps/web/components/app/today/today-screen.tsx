@@ -2,21 +2,26 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
-import { buttonLinkClassName, pillLinkClassName } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
 import { deriveTodayNext, deriveTodayState } from "@/lib/today/today-model";
-import { ASK_PARAM, TODAY_STATIONS } from "@/lib/today/today-route";
+import { TODAY_STATIONS } from "@/lib/today/today-route";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
 
 import { TodayOpportunitySection } from "./today-opportunity-section";
 import { TodayWorkSection } from "./today-work-section";
 
 /**
- * ŠIANDIEN — the worker's home (`docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md`
- * §2, §5; owner direction 2026-09-13).
+ * ŠIANDIEN — the worker's OPENING CONTEXT inside the ONE conversation
+ * (owner decision 0017, 2026-09-22; composition from
+ * `docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md` §2, §5).
  *
- * A PAGE, not a stack of cards, top to bottom:
+ * It is not a page and not a second home: the conversation's thread renders
+ * it ABOVE the greeting while the conversation is opening, and the composer
+ * sits right under it — the person reads their "now" and types into the same
+ * screen. The first real turn replaces it with the conversation. Top to
+ * bottom:
  *
  *   1. header      name · profession · today's state
  *                  (replaces the opening intro card for the worker)
@@ -25,9 +30,11 @@ import { TodayWorkSection } from "./today-work-section";
  *   3. work        today · this week · what still needs a figure or a
  *                  look · one growth sentence  (streams: one journal read)
  *   4. world       one opportunity sentence with band counts  (streams)
- *   5. ask         a quiet door to the conversation — reachable, not
- *                  dominant (frozen contract §2.1)
- *   6. stations    the secondary destinations, as text links, one tap
+ *   5. stations    the contextual workspaces, as text links, one tap —
+ *                  opportunities (the former PASAULIS tab) first
+ *
+ * There is no "ask" door any more: the composer IS the door, and the
+ * conversation is the home (the former PAKLAUSK tab is retired).
  *
  * Every figure is a reader's figure (`lib/today/today-server.ts`) read
  * through the pure model (`lib/today/today-model.ts`); a reader that could
@@ -36,7 +43,8 @@ import { TodayWorkSection } from "./today-work-section";
  * Progressive disclosure: three first-level items above the fold on a
  * 390 px viewport (header, the action, today's work); the rest below.
  * Secondary actions are text links, not buttons (IA §5.1). No quick-nav
- * strip — the tab bar and the station links carry navigation (IA §4).
+ * strip — the one top bar, the station links and the conversation carry
+ * navigation.
  */
 export async function TodayScreen({ locale }: { locale: ActiveLocale }) {
   const [t, tCard, tProf, head] = await Promise.all([
@@ -54,7 +62,7 @@ export async function TodayScreen({ locale }: { locale: ActiveLocale }) {
   return (
     <div
       data-testid="today-screen"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-9 pb-4"
+      className="mx-auto flex w-full max-w-2xl flex-col gap-8"
     >
       {/* 1 · HEADER — who, what they do, where today stands. */}
       <header data-testid="today-header" className="flex flex-col gap-2">
@@ -119,27 +127,7 @@ export async function TodayScreen({ locale }: { locale: ActiveLocale }) {
         <TodayOpportunitySection />
       </Suspense>
 
-      {/* 5 · PAKLAUSK — the conversation, on demand. A quiet door: it is one
-          of the three tabs too, so it is never buried and never dominant. */}
-      <section
-        aria-labelledby="today-ask-title"
-        data-testid="today-ask"
-        className="flex flex-col gap-2 border-t border-ink-600 pt-6"
-      >
-        <h2 id="today-ask-title" className="font-display text-card-title font-semibold text-text-primary">
-          {t("ask.title")}
-        </h2>
-        <p className="text-support text-text-secondary">{t("ask.body")}</p>
-        <Link
-          href={`/dashboard?${ASK_PARAM}=1` as "/dashboard"}
-          data-testid="today-ask-cta"
-          className={`${pillLinkClassName} self-start`}
-        >
-          {t("ask.cta")}
-        </Link>
-      </section>
-
-      {/* 6 · STATIONS — text links, one tap (IA §2 secondary). */}
+      {/* 5 · STATIONS — the contextual workspaces as text links, one tap. */}
       <nav
         aria-label={t("stations.title")}
         data-testid="today-stations"
@@ -148,7 +136,7 @@ export async function TodayScreen({ locale }: { locale: ActiveLocale }) {
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("stations.title")}
         </p>
-        <ul className="flex flex-col">
+        <ul className="flex flex-wrap gap-x-5 gap-y-0">
           {TODAY_STATIONS.map((s) => (
             <li key={s.id}>
               <Link

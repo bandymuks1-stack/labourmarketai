@@ -508,7 +508,6 @@
     "backHome": "[EN] Back to home",
     "en": "[EN] English",
     "localeSwitch": "[EN] Language",
-    "localePreview": "[EN] preview",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content"
@@ -2349,7 +2348,8 @@
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again.",
       "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "verdict": {
       "eligible": "Uppfyller de angivna kraven",
@@ -4996,6 +4996,14 @@
       "stateNoRunYet": "Ingen körning ännu",
       "stateOk": "Senaste körning OK",
       "stateFailing": "Misslyckas"
+    },
+    "language": {
+      "translatedFrom": "[EN] Translated from {language}",
+      "originalIn": "[EN] Advertisement language: {language}",
+      "showOriginal": "[EN] Show original",
+      "hideOriginal": "[EN] Hide original",
+      "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
+      "originalTitle": "[EN] Original title"
     }
   },
   "profileIdentityNotice": {
@@ -6480,6 +6488,13 @@
         "exportReport": "[EN] Download the report (CSV)",
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       }
+    }
+  },
+  "evidenceImport": {
+    "records": {
+      "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
+      "periodDerived": "[EN] Period derived — the source stated no dates",
+      "sourceStatement": "[EN] Source statement (fact)"
     }
   }
 }

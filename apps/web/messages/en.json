@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Language",
-    "localePreview": "preview",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "This page does not exist",
@@ -8151,25 +8150,15 @@
         "unknown": "No data — postings could not be read.",
         "open": "Open World"
       },
-      "ask": {
-        "title": "Ask",
-        "body": "Record work in one sentence, ask about your skills, or open any place.",
-        "cta": "Write"
-      },
       "stations": {
         "title": "Other places",
         "journal": "My work",
         "numbers": "My activity in numbers",
         "profile": "Professional profile",
         "cv": "Living CV",
-        "gallery": "Gallery"
+        "gallery": "Gallery",
+        "world": "World"
       }
-    },
-    "nav": {
-      "today": "Today",
-      "world": "World",
-      "ask": "Ask",
-      "aria": "Primary navigation"
     }
   },
   "agencyPool": {
@@ -8398,7 +8387,8 @@
       "closedNote": "Closed — hidden from workers.",
       "error": "Could not save. Try again.",
       "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "closedCandidatesHistory": "This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "freshness": {
       "active": "Recently updated",
@@ -14733,6 +14723,14 @@
       "stateNoRunYet": "No run yet",
       "stateOk": "Last run OK",
       "stateFailing": "Failing"
+    },
+    "language": {
+      "translatedFrom": "Translated from {language}",
+      "originalIn": "Advertisement language: {language}",
+      "showOriginal": "Show original",
+      "hideOriginal": "Hide original",
+      "machineNote": "Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
+      "originalTitle": "Original title"
     }
   },
   "invitations": {
@@ -16256,7 +16254,10 @@
       "disputeFailed": "Could not record the objection. Please try again.",
       "monthlyShare": "Derived equal monthly share · not source days",
       "attestAll": "Attest all {count} records",
-      "attestAllHint": "The organization stands behind every not-yet-attested record from this source ({count}). One attestation event per record, with role and note; hours, source facts and records are not changed. This is not independent verification."
+      "attestAllHint": "The organization stands behind every not-yet-attested record from this source ({count}). One attestation event per record, with role and note; hours, source facts and records are not changed. This is not independent verification.",
+      "periodDerivedHuman": "Period set at import (human choice) — the source stated no dates",
+      "periodDerived": "Period derived — the source stated no dates",
+      "sourceStatement": "Source statement (fact)"
     },
     "withdraw": {
       "title": "Undo this import",

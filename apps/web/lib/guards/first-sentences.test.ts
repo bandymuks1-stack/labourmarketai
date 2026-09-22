@@ -81,12 +81,11 @@ describe("4. a named profession reaches the need form's role field", () => {
  *    brief and its first sentences (§3 above) still govern the conversation
  *    the moment it is opened (PAKLAUSK, or any deep link).
  */
-describe("6. the worker's first screen is ŠIANDIEN; the conversation's first sentences stay on demand", () => {
-  it("the dashboard root decides by the ONE pure predicate and renders the header first", () => {
+describe("6. the worker's first screen is the conversation opening with ŠIANDIEN; the header comes first", () => {
+  it("the dashboard root decides by the ONE pure predicate and composes ŠIANDIEN into the chat's opening slot", () => {
     const page = read("app", "[locale]", "dashboard", "page.tsx");
-    expect(page).toMatch(/dashboardRootSurface\(\{/);
-    expect(page.indexOf("<TodayScreen")).toBeGreaterThan(-1);
-    expect(page.indexOf("<TodayScreen")).toBeLessThan(page.indexOf("<ConversationChat"));
+    expect(page).toMatch(/conversationOpeningContext\(\{/);
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     const screen = read("components", "app", "today", "today-screen.tsx");
     const header = screen.indexOf('data-testid="today-header"');
     const next = screen.indexOf('data-testid="today-next"');

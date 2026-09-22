@@ -378,6 +378,8 @@ export async function runScouting(
 export type ShortlistWriteResult =
   | { kind: "ok"; status: ShortlistStatus; note: string | null }
   | { kind: "invalid" }
+  /** The need is closed — its candidates are history, not decisions. */
+  | { kind: "closed" }
   /** `not_fit` needs a short reason and neither this write nor the stored
    *  row carries one (extension B — server-enforced, never client-trusted). */
   | { kind: "reason-required" }
@@ -424,11 +426,17 @@ export async function setShortlist(input: {
   // a clean not-owner signal, not a silent FK error).
   const { data: req } = await asAny(supabase)
     .from("customer_requests")
-    .select("id")
+    .select("id, status")
     .eq("id", input.requestId)
     .eq("profile_id", user.id)
     .maybeSingle();
   if (!req) return { kind: "not-owner" };
+  // LIFECYCLE (owner P0 2026-09-22 §12): a candidate on a CLOSED need is a
+  // historical relationship, not an actionable one. The shortlist rows stay
+  // (audit/history); no new decision may be written against a need that is
+  // not open — the surface hides the controls, and this is the rule behind
+  // it, so a stale tab or a hand-made request cannot get around it.
+  if (req.status === "closed") return { kind: "closed" };
 
   // Current stored note (own row via RLS) — needed both to preserve it on a
   // note-less write and to satisfy the not_fit reason rule honestly.

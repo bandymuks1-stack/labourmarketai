@@ -265,6 +265,32 @@ export function RosterLinkOffers({
   );
 }
 
+/**
+ * How the record's WHEN came to be. `source` when the record's own
+ * provenance carries no derivation for it; otherwise the method recorded in
+ * `derived.timeSemantics` (a period aggregate decided at import —
+ * `human_choice` when a person chose the period, any other method when it
+ * was inferred) or in a derived date field. Pure; it reads the record's own
+ * provenance and never guesses.
+ */
+export function periodProvenance(rec: {
+  readonly activityDate: string | null;
+  readonly periodStart: string | null;
+  readonly factFields: readonly string[];
+  readonly derived: Record<string, unknown>;
+}): "source" | "human_choice" | "derived" {
+  const method = (key: string): string | null => {
+    const d = rec.derived?.[key] as { method?: unknown } | undefined;
+    return d && typeof d === "object" && typeof d.method === "string" ? d.method : null;
+  };
+  if (rec.factFields.some((f) => /^(workDate|periodStart|periodEnd|activity_date|period_start)$/i.test(f))) {
+    return "source";
+  }
+  const m = rec.periodStart ? method("timeSemantics") : (method("workDate") ?? method("activityDate"));
+  if (m === null) return "source";
+  return m === "human_choice" ? "human_choice" : "derived";
+}
+
 export function OrganizationEvidenceSection({
   records,
   needsMigration,
@@ -348,12 +374,32 @@ export function OrganizationEvidenceSection({
                   </p>
                 ) : null}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm text-text-primary">
+                  <span
+                    className="text-sm text-text-primary"
+                    data-testid="organization-evidence-record-when"
+                    data-provenance={periodProvenance(rec)}
+                  >
                     {rec.activityDate ??
                       [rec.periodStart, rec.periodEnd]
                         .filter(Boolean)
                         .join(" – ")}
                   </span>
+                  {/* SOURCE FACT ≠ DERIVED (owner P0 2026-09-22 §11). A period
+                      the source never stated — chosen by a person at import
+                      ("800 h, at least 16 months × 50 h" became 2025-06 →
+                      2025-11) — must not read like an observed date. The
+                      record's own `derived.timeSemantics` says how the period
+                      came to be; the reader sees that beside it. */}
+                  {periodProvenance(rec) !== "source" ? (
+                    <span
+                      className="text-xs text-text-muted"
+                      data-testid="organization-evidence-record-period-derived"
+                    >
+                      {periodProvenance(rec) === "human_choice"
+                        ? tRecords("periodDerivedHuman")
+                        : tRecords("periodDerived")}
+                    </span>
+                  ) : null}
                   {rec.hours !== null && (
                     <span className="text-xs text-text-secondary">
                       {rec.hours} h
@@ -397,7 +443,13 @@ export function OrganizationEvidenceSection({
                     }
                   />
                 </div>
-                <p className="text-sm text-text-secondary">{rec.text}</p>
+                {/* The publisher's own words are THE fact of this record —
+                    named as such, so a precise-looking derived period above
+                    never outranks the imprecise sentence it was made from. */}
+                <p className="text-sm text-text-secondary" data-testid="organization-evidence-record-text">
+                  <span className="text-xs text-text-muted">{tRecords("sourceStatement")}: </span>
+                  {rec.text}
+                </p>
                 <p className="text-xs text-text-muted">
                   {tRecords("supplier")}: {tRole(rec.supplierRole as never)} ·{" "}
                   {tRecords("importedAt")}: {rec.importedAt.slice(0, 10)}

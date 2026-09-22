@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Sprache",
-    "localePreview": "Vorschau",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "Diese Seite existiert nicht",
@@ -8151,25 +8150,15 @@
         "unknown": "Keine Daten — Anzeigen konnten nicht gelesen werden.",
         "open": "Welt öffnen"
       },
-      "ask": {
-        "title": "Fragen",
-        "body": "Erfasse Arbeit in einem Satz, frag nach deinen Fähigkeiten oder öffne jeden Ort.",
-        "cta": "Schreiben"
-      },
       "stations": {
         "title": "Weitere Orte",
         "journal": "Meine Arbeit",
         "numbers": "Meine Tätigkeit in Zahlen",
         "profile": "Berufsprofil",
         "cv": "Lebendiger Lebenslauf",
-        "gallery": "Galerie"
+        "gallery": "Galerie",
+        "world": "Welt"
       }
-    },
-    "nav": {
-      "today": "Heute",
-      "world": "Welt",
-      "ask": "Fragen",
-      "aria": "Hauptnavigation"
     }
   },
   "agencyPool": {
@@ -8398,7 +8387,8 @@
       "closedNote": "Geschlossen — für Arbeitskräfte nicht sichtbar.",
       "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut.",
       "limitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
-      "limitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan."
+      "limitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan.",
+      "closedCandidatesHistory": "Dieser Bedarf ist geschlossen. Unten steht, wer verglichen und was entschieden wurde, solange er offen war – Historie, keine Aktionsliste. Öffnen Sie den Bedarf erneut, um Kandidaten wieder zu bewerten."
     },
     "freshness": {
       "active": "Kürzlich aktualisiert",
@@ -14733,6 +14723,14 @@
       "stateNoRunYet": "Noch kein Lauf",
       "stateOk": "Letzter Lauf OK",
       "stateFailing": "Fehlerhaft"
+    },
+    "language": {
+      "translatedFrom": "Übersetzt aus {language}",
+      "originalIn": "Sprache der Anzeige: {language}",
+      "showOriginal": "Original anzeigen",
+      "hideOriginal": "Original ausblenden",
+      "machineNote": "Automatische Übersetzung. Zahlen, Währung, Daten und Namen wie im Original; das Original bleibt maßgeblich.",
+      "originalTitle": "Originaltitel"
     }
   },
   "invitations": {
@@ -16256,7 +16254,10 @@
       "disputeFailed": "Der Widerspruch konnte nicht festgehalten werden. Bitte erneut versuchen.",
       "monthlyShare": "Abgeleitete gleichmäßige Monatsverteilung · keine Quelltage",
       "attestAll": "Alle {count} Einträge bestätigen",
-      "attestAllHint": "Die Organisation steht hinter jedem noch nicht bestätigten Eintrag aus dieser Quelle ({count}). Ein Bestätigungsereignis je Eintrag, mit Rolle und Notiz; Stunden, Quellfakten und Einträge bleiben unverändert. Keine unabhängige Prüfung."
+      "attestAllHint": "Die Organisation steht hinter jedem noch nicht bestätigten Eintrag aus dieser Quelle ({count}). Ein Bestätigungsereignis je Eintrag, mit Rolle und Notiz; Stunden, Quellfakten und Einträge bleiben unverändert. Keine unabhängige Prüfung.",
+      "periodDerivedHuman": "Zeitraum beim Import festgelegt (menschliche Entscheidung) – die Quelle nannte keine Daten",
+      "periodDerived": "Zeitraum abgeleitet – die Quelle nannte keine Daten",
+      "sourceStatement": "Quellentext (Fakt)"
     },
     "withdraw": {
       "title": "Diesen Import rückgängig machen",

@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Kalba",
-    "localePreview": "peržiūra",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "Tokio puslapio nėra",
@@ -8151,25 +8150,15 @@
         "unknown": "Nėra duomenų — skelbimų perskaityti nepavyko.",
         "open": "Atidaryti Pasaulį"
       },
-      "ask": {
-        "title": "Paklausk",
-        "body": "Užrašykite darbą vienu sakiniu, paklauskite apie savo įgūdžius ar atidarykite bet kurią vietą.",
-        "cta": "Rašyti"
-      },
       "stations": {
         "title": "Kitos vietos",
         "journal": "Mano darbas",
         "numbers": "Mano veikla skaičiais",
         "profile": "Profesinis profilis",
         "cv": "Gyvas CV",
-        "gallery": "Galerija"
+        "gallery": "Galerija",
+        "world": "Pasaulis"
       }
-    },
-    "nav": {
-      "today": "Šiandien",
-      "world": "Pasaulis",
-      "ask": "Paklausk",
-      "aria": "Pagrindinė navigacija"
     }
   },
   "agencyPool": {
@@ -8398,7 +8387,8 @@
       "closedNote": "Uždaryta — darbuotojams nerodoma.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "limitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
-      "limitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano."
+      "limitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano.",
+      "closedCandidatesHistory": "Šis poreikis uždarytas. Žemiau — kas buvo palyginta ir nuspręsta, kol jis buvo atviras: istorija, ne veiksmų sąrašas. Norėdami vėl vertinti kandidatus, atidarykite poreikį iš naujo."
     },
     "freshness": {
       "active": "Neseniai atnaujintas",
@@ -14733,6 +14723,14 @@
       "stateNoRunYet": "Dar nepaleista",
       "stateOk": "Paskutinis paleidimas pavyko",
       "stateFailing": "Nepavyksta"
+    },
+    "language": {
+      "translatedFrom": "Išversta iš {language} k.",
+      "originalIn": "Skelbimo kalba: {language}",
+      "showOriginal": "Rodyti originalą",
+      "hideOriginal": "Slėpti originalą",
+      "machineNote": "Automatinis vertimas. Skaičiai, valiuta, datos ir pavadinimai — kaip originale; originalas lieka faktas.",
+      "originalTitle": "Originalus pavadinimas"
     }
   },
   "invitations": {
@@ -16256,7 +16254,10 @@
       "disputeFailed": "Nepavyko užfiksuoti prieštaravimo. Bandykite dar kartą.",
       "monthlyShare": "Išvestinis lygus mėnesio paskirstymas · ne šaltinio dienos",
       "attestAll": "Patvirtinti visus {count} įrašus",
-      "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas."
+      "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas.",
+      "periodDerivedHuman": "Laikotarpis nustatytas importo metu (žmogaus sprendimas) — šaltinis datų nenurodė",
+      "periodDerived": "Laikotarpis išvestas — šaltinis datų nenurodė",
+      "sourceStatement": "Šaltinio tekstas (faktas)"
     },
     "withdraw": {
       "title": "Atšaukti šį importą",

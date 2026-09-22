@@ -34,6 +34,47 @@ import type { VocabularyTerm, WorldStateDimension } from "./world-state-language
  * both are their own words.
  */
 
+/**
+ * Everyday words for an ENUM value, per dimension — the stems a person types
+ * instead of the catalogue label. Closed, and additive only: a word here can
+ * make an existing value recognisable, never create a value or a filter.
+ *
+ * "Su būstu" / "with housing" is asked as a YES, and the board's yes is
+ * `provided_*`: the person means "an ad that provides accommodation", so the
+ * same words belong to each providing value. `not_provided` keeps only its
+ * label plus the explicit negatives, so "be būsto" never narrows to "with".
+ */
+const EVERYDAY_ENUM_WORDS: Readonly<
+  Partial<Record<WorldStateDimension, Readonly<Record<string, readonly string[]>>>>
+> = {
+  accommodation: {
+    provided_free: [
+      "su būstu", "būstas", "apgyvendinimu", "apgyvendinimas", "nakvyne", "nakvynė",
+      "with housing", "with accommodation", "housing", "accommodation", "lodging",
+      "с жильем", "с жильём", "жилье", "жильё", "проживание", "проживанием",
+      "met huisvesting", "huisvesting", "onderdak",
+      "mit unterkunft", "unterkunft", "wohnung gestellt",
+      "z zakwaterowaniem", "zakwaterowanie", "mieszkanie zapewnione",
+    ],
+    provided_paid: [
+      "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
+      "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
+      "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+    ],
+    provided_deducted: [
+      "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
+      "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
+      "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+    ],
+    not_provided: [
+      "be būsto", "be apgyvendinimo", "without housing", "no accommodation",
+      "без жилья", "zonder huisvesting", "ohne unterkunft", "bez zakwaterowania",
+    ],
+  },
+};
+
 /** Enum dimensions and the `opportunities.*` subtree that labels each one. */
 const ENUM_LABEL_NAMESPACES = {
   accommodation: "accommodation",
@@ -116,6 +157,14 @@ export async function buildWorkspaceVocabulary(
       for (const t of catalogues) {
         if (t.has(value)) names.add(t(value) as string);
       }
+      // THE WORDS PEOPLE ACTUALLY TYPE (owner P0 2026-09-22 §5). Measured:
+      // the accommodation vocabulary held ONLY the enum LABELS
+      // ("Suteikiamas, nemokamai"), which nobody writes — so "Tik su būstu"
+      // read as nothing and the refinement silently did not happen. This
+      // file's own docstring used that very sentence as an example. Same
+      // idiom as EVERYDAY_TYPE_WORDS below: the catalogue labels stay the
+      // display names; the everyday stems only make the value recognisable.
+      for (const word of EVERYDAY_ENUM_WORDS[dimension]?.[value] ?? []) names.add(word);
       if (names.size > 0) {
         terms.push({ dimension, value, terms: [...names], available: true });
       }

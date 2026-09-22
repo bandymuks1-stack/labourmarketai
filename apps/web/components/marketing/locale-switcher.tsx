@@ -5,11 +5,9 @@ import { Check, ChevronDown, Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
-import { activeLocales, tier1Locales } from "@/lib/i18n/config";
+import { activeLocales } from "@/lib/i18n/config";
 import { persistLocalePreferenceAction } from "@/lib/i18n/locale-actions";
 import { cn } from "@/lib/utils";
-
-const TIER1 = new Set<string>(tier1Locales);
 
 // Native language names — language-invariant, so not in the i18n bundle.
 // Exported for other language pickers (the invitation recipient-language
@@ -32,8 +30,15 @@ export const NATIVE_LOCALE_NAMES: Record<string, string> = {
  * Compact premium locale selector (§2.4, 10 locales). Replaces the long inline
  * code list with a globe + current-language button that opens a tidy popover of
  * language NAMES. `usePathname` returns the path without the locale prefix, so
- * each entry re-links the same page in another language. Non-Tier-1 locales are
- * tagged as preview ([EN] placeholders until translated).
+ * each entry re-links the same page in another language.
+ *
+ * NO STATUS BADGE ON A LANGUAGE (owner ruling 2026-09-22). Every ACTIVE locale
+ * ships a complete catalog (zero `[EN]` placeholders — guarded by the i18n
+ * debt ratchets), so the person sees clean language names. Which locales are
+ * human-verified (Tier 1) versus AI-seeded pending §7.4 review (Tier 2) is an
+ * OPERATIONS fact, tracked in `lib/i18n/config.ts` + `docs/LANGUAGE_MATRIX.md`
+ * — it is not a label a person choosing their language has to read. The old
+ * "peržiūra" / "preview" tag leaked an internal state into the product.
  *
  * Changing language must change ONLY the locale: the same page, the same
  * query string (?next=, ?editing=, ?view=…) and the same #hash travel with
@@ -166,7 +171,6 @@ export function LocaleSwitcher({
           )}
         >
           {activeLocales.map((l) => {
-            const preview = !TIER1.has(l);
             const isActive = l === active;
             return (
               <Link
@@ -195,14 +199,7 @@ export function LocaleSwitcher({
                     : "text-text-secondary hover:bg-ink-800 hover:text-text-primary",
                 )}
               >
-                <span className="flex items-center gap-2">
-                  {NATIVE_LOCALE_NAMES[l] ?? l.toUpperCase()}
-                  {preview && (
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("localePreview")}
-                    </span>
-                  )}
-                </span>
+                <span>{NATIVE_LOCALE_NAMES[l] ?? l.toUpperCase()}</span>
                 {isActive && (
                   <Check aria-hidden className="h-3.5 w-3.5 text-brand-blue" />
                 )}
