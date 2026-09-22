@@ -11961,6 +11961,7 @@
       "statGovLt": "Statystyka Litwy (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen (Szwedzki Urząd Pracy)",
+      "nav": "NAV / Arbeidsplassen.no (Norweski Urząd Pracy i Opieki Społecznej)",
       "cvbankasSalary": "Dane płacowe CVbankas — proponowane zewnętrzne odniesienie (nieaktywne)",
       "key": {
         "internal_platform_aggregates": "Wewnętrzne agregaty LabourMarket.ai",
@@ -11977,6 +11978,7 @@
         "statGovLt": "Statystyka urzędowa; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
         "eurostat": "Urzędowa statystyka UE; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
         "arbetsformedlingen": "Aktywne źródło. Warunki użytkowania potwierdzone: bezpłatne publiczne źródło danych (CC0). Przy każdym ogłoszeniu podawane jest źródło, a ogłoszenie prowadzi do oryginalnej publikacji.",
+        "nav": "Źródło zaproponowane. Warunki API NAV zezwalają na ponowną publikację z bieżącymi obowiązkami: wycofane ogłoszenie musi zostać natychmiast usunięte, zaktualizowane — natychmiast odświeżone, a link do aplikowania musi prowadzić do pierwotnego ogłoszenia. Akceptacja warunków i uzyskanie tokenu wymagają działania właściciela — dziś nic nie jest pobierane.",
         "cvbankas": "Tylko propozycja — zgoda na użycie niepotwierdzona; nigdy nie mieszane z liczbami wewnętrznymi.",
         "eures": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane.",
         "uztLt": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane."
@@ -14680,7 +14682,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Źródło: Arbetsförmedlingen (JobTech Development). Treść ogłoszenia należy do publikującego je pracodawcy."
+      "arbetsformedlingen": "Źródło: Arbetsförmedlingen (JobTech Development). Treść ogłoszenia należy do publikującego je pracodawcy.",
+      "nav": "Źródło: NAV / Arbeidsplassen.no. Treść ogłoszenia należy do publikującego je pracodawcy; aplikowanie odbywa się przez pierwotne ogłoszenie."
     },
     "provenance": {
       "externalPublicSource": "Opublikowane przez publiczną służbę zatrudnienia. Pokazujemy tutaj, abyś mógł je znaleźć — to nie jest ogłoszenie labourmarket.ai.",

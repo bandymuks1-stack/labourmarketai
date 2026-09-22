@@ -3018,6 +3018,7 @@
       "statGovLt": "Lietuvas statistika (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen (Zviedrijas Nodarbinātības dienests)",
+      "nav": "NAV / Arbeidsplassen.no (Norvēģijas Darba un labklājības pārvalde)",
       "cvbankasSalary": "CVbankas algu dati — ierosināta ārējā atsauce (nav aktīva)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai iekšējie kopsavilkumi",
@@ -3034,6 +3035,7 @@
         "statGovLt": "Oficiālā statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
         "eurostat": "Oficiālā ES statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
         "arbetsformedlingen": "Aktīvs avots. Lietošanas noteikumi apstiprināti: bezmaksas publisks datu avots (CC0). Pie katra sludinājuma tiek norādīts avots, un katrs sludinājums ved uz oriģinālo publikāciju.",
+        "nav": "Ierosināts avots. NAV API noteikumi atļauj atkārtotu publicēšanu ar pastāvīgiem pienākumiem: atsaukts sludinājums jānoņem nekavējoties, atjaunināts — jāatjaunina nekavējoties, un pieteikšanās saitei jāved uz sākotnējo sludinājumu. Noteikumu pieņemšanai un piekļuves atslēgai nepieciešama īpašnieka rīcība — šodien nekas netiek ielādēts.",
         "cvbankas": "Tikai priekšlikums — lietošanas atļauja nav apstiprināta; nekad netiek jaukts ar iekšējiem skaitļiem.",
         "eures": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts.",
         "uztLt": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts."
@@ -4945,7 +4947,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Avots: Arbetsförmedlingen (JobTech Development). Sludinājuma saturs pieder darba devējam, kurš to publicējis."
+      "arbetsformedlingen": "Avots: Arbetsförmedlingen (JobTech Development). Sludinājuma saturs pieder darba devējam, kurš to publicējis.",
+      "nav": "Avots: NAV / Arbeidsplassen.no. Sludinājuma saturs pieder darba devējam, kurš to publicējis; pieteikšanās notiek caur sākotnējo sludinājumu."
     },
     "provenance": {
       "externalPublicSource": "Publicējis valsts nodarbinātības dienests. Rādām šeit, lai jūs to atrastu — tas nav labourmarket.ai sludinājums.",

@@ -202,6 +202,41 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       importPolicy: null,
     },
     {
+      // NAV / Arbeidsplassen.no — the Norwegian Labour and Welfare
+      // Administration's job vacancy feed (`pam-stilling-feed`). Governance
+      // row for the VACANCY pipeline provider `nav`
+      // (lib/vacancy-sources/vacancy-provider-registry.ts), registered as a
+      // SCAFFOLD on 2026-09-22.
+      //
+      // LEGAL STATUS: "unconfirmed". The research matrix
+      // (docs/research/eu-vacancy-source-matrix-2026-08-18.md §3) records
+      // that republication is permitted under arbeidsplassen.nav.no/vilkar-api
+      // with ONGOING duties (immediate removal of withdrawn ads, immediate
+      // updates, deep-link the apply function to the original supplier, no
+      // contact data on inactive ads) — but written acceptance of those terms
+      // and a private token are an OWNER + NAV action that has not happened.
+      // A research fact is not a provider answer; this row stays a proposal.
+      //
+      // ACTIVATION: "off". Flipping it is the owner decision recorded in
+      // docs/human-gates/nav-activation-gate.md, and even then the provider
+      // imports nothing until VACANCY_SOURCE_NAV_ENABLED is set and the
+      // bearer token VACANCY_SOURCE_NAV_API_TOKEN is provisioned.
+      key: "nav",
+      displayNameCode: "intelligence.sources.nav",
+      sourceKind: "public_official",
+      legalStatus: "unconfirmed",
+      activation: "off",
+      termsNoteCode: "intelligence.sources.terms.nav",
+      // Not stated by NAV's terms; required by our own product policy for
+      // every external ad, exactly as for arbetsformedlingen.
+      attributionRequired: true,
+      homepage: "arbeidsplassen.nav.no",
+      proposedOnly: true,
+      // Vacancies are never metric observations — fail-closed null, as the
+      // boundary guard requires of every non-eurostat external source.
+      importPolicy: null,
+    },
+    {
       // CVbankas may only ever be a PROPOSED external benchmark until access
       // and usage permission are confirmed by the owner. Even then, an
       // external figure must NEVER be labelled a LabourMarket.ai average —

@@ -112,11 +112,39 @@ export function buildVacancyRequestUrl(
   query: Readonly<Record<string, string | number>> = {},
 ): string {
   const url = new URL(endpoint.path, `https://${endpoint.host}`);
+  // A `cursor` endpoint's continuation-token key is part of the closed set
+  // too — it is DECLARED on the descriptor, not supplied by a caller, so the
+  // allowlist stays closed while the adapter stays provider-agnostic.
+  const cursorKey =
+    endpoint.pagination === "cursor" ? (endpoint.cursor?.queryKey ?? null) : null;
   for (const [key, value] of Object.entries(query)) {
-    if (!ALLOWED_QUERY_KEYS.has(key)) continue;
+    if (!ALLOWED_QUERY_KEYS.has(key) && key !== cursorKey) continue;
     url.searchParams.set(key, String(value));
   }
   return url.toString();
+}
+
+/**
+ * The request headers for one endpoint: the Accept type plus, for a
+ * key-requiring endpoint that has its key, the credential in the header shape
+ * the descriptor declares. `api-key` is the default so every existing
+ * endpoint is byte-identical; `bearer` is `Authorization: Bearer <secret>`.
+ * The secret never goes anywhere else — not the URL, not `requestRef`, not a
+ * log line. Exported for the guard that pins the two shapes.
+ */
+export function buildVacancyRequestHeaders(
+  endpoint: Pick<VacancyChannelEndpointV1, "requiresApiKey" | "authScheme">,
+  accept: string,
+  apiKey: string | null | undefined,
+): Record<string, string> {
+  const headers: Record<string, string> = { Accept: accept };
+  if (!endpoint.requiresApiKey || !apiKey) return headers;
+  if ((endpoint.authScheme ?? "api-key") === "bearer") {
+    headers.Authorization = `Bearer ${apiKey}`;
+  } else {
+    headers["api-key"] = apiKey;
+  }
+  return headers;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -163,10 +191,11 @@ export async function fetchVacancyPage(
     detail: "no_attempt",
   };
 
-  const headers: Record<string, string> = { Accept: "application/json" };
-  if (endpoint.requiresApiKey && req.apiKey) {
-    headers["api-key"] = req.apiKey;
-  }
+  const headers = buildVacancyRequestHeaders(
+    endpoint,
+    "application/json",
+    req.apiKey,
+  );
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
@@ -378,10 +407,11 @@ export async function fetchVacancyJsonLines(
   }
 
   const bounds = resolveProviderBounds(req.provider);
-  const headers: Record<string, string> = { Accept: "application/jsonl" };
-  if (endpoint.requiresApiKey && req.apiKey) {
-    headers["api-key"] = req.apiKey;
-  }
+  const headers = buildVacancyRequestHeaders(
+    endpoint,
+    "application/jsonl",
+    req.apiKey,
+  );
 
   const maxAttempts = bounds.maxRetries + 1;
   let lastError: { errorCode: VacancyFetchErrorCode; detail: string } = {

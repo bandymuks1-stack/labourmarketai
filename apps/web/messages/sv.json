@@ -3018,6 +3018,7 @@
       "statGovLt": "Litauens statistik (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen",
+      "nav": "NAV / Arbeidsplassen.no (Norges arbets- och välfärdsförvaltning)",
       "cvbankasSalary": "CVbankas lönedata — föreslagen extern referens (inte aktiv)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai interna aggregat",
@@ -3034,6 +3035,7 @@
         "statGovLt": "Officiell statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
         "eurostat": "Officiell EU-statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
         "arbetsformedlingen": "Aktiv källa. Användningsvillkor bekräftade: en kostnadsfri offentlig datakälla (CC0). Källan visas vid varje annons, och varje annons länkar tillbaka till den ursprungliga annonsen.",
+        "nav": "Föreslagen källa. NAV:s API-villkor tillåter återpublicering med löpande skyldigheter: en återkallad annons måste tas bort omedelbart, en uppdaterad annons uppdateras omedelbart, och ansökningslänken måste leda till den ursprungliga annonsen. Att godkänna villkoren och få en token kräver ägarens åtgärd — inget hämtas i dag.",
         "cvbankas": "Endast ett förslag — användningstillstånd obekräftat; blandas aldrig med interna siffror.",
         "eures": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag.",
         "uztLt": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag."
@@ -4945,7 +4947,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Källa: Arbetsförmedlingen (JobTech Development). Annonsens innehåll tillhör den arbetsgivare som publicerat den."
+      "arbetsformedlingen": "Källa: Arbetsförmedlingen (JobTech Development). Annonsens innehåll tillhör den arbetsgivare som publicerat den.",
+      "nav": "Källa: NAV / Arbeidsplassen.no. Annonsens innehåll tillhör den arbetsgivare som publicerat den; ansökningar går via den ursprungliga annonsen."
     },
     "provenance": {
       "externalPublicSource": "Publicerad av en offentlig arbetsförmedling. Visas här så att du kan hitta den — det är inte en labourmarket.ai-annons.",

@@ -11961,6 +11961,7 @@
       "statGovLt": "Statistik Litauen (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen (Schwedische Arbeitsvermittlung)",
+      "nav": "NAV / Arbeidsplassen.no (Norwegische Arbeits- und Wohlfahrtsverwaltung)",
       "cvbankasSalary": "CVbankas-Gehaltsdaten — vorgeschlagener externer Referenzwert (nicht aktiv)",
       "key": {
         "internal_platform_aggregates": "Interne Aggregate von LabourMarket.ai",
@@ -11977,6 +11978,7 @@
         "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "arbetsformedlingen": "Aktive Quelle. Nutzungsbedingungen bestätigt: eine kostenlose öffentliche Datenquelle (CC0). Bei jeder Anzeige wird die Quelle genannt, und jede Anzeige verlinkt zurück auf die Originalveröffentlichung.",
+        "nav": "Vorgeschlagene Quelle. Die API-Bedingungen von NAV erlauben die Weiterveröffentlichung mit laufenden Pflichten: Eine zurückgezogene Anzeige muss sofort entfernt, eine aktualisierte sofort aktualisiert werden, und der Bewerbungslink muss zur ursprünglichen Anzeige führen. Die Annahme der Bedingungen und ein Token erfordern eine Handlung des Inhabers — heute wird nichts abgerufen.",
         "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt.",
         "eures": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
         "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen."
@@ -14680,7 +14682,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Quelle: Arbetsförmedlingen (JobTech Development). Der Anzeigeninhalt gehört dem veröffentlichenden Arbeitgeber."
+      "arbetsformedlingen": "Quelle: Arbetsförmedlingen (JobTech Development). Der Anzeigeninhalt gehört dem veröffentlichenden Arbeitgeber.",
+      "nav": "Quelle: NAV / Arbeidsplassen.no. Der Anzeigeninhalt gehört dem veröffentlichenden Arbeitgeber; Bewerbungen laufen über die ursprüngliche Anzeige."
     },
     "provenance": {
       "externalPublicSource": "Von einer öffentlichen Arbeitsvermittlung veröffentlicht. Hier gelistet, damit Sie es finden — es ist keine labourmarket.ai-Stellenanzeige.",

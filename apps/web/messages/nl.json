@@ -11961,6 +11961,7 @@
       "statGovLt": "Statistiek Litouwen (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen (Zweedse arbeidsbemiddeling)",
+      "nav": "NAV / Arbeidsplassen.no (Noorse arbeids- en welzijnsdienst)",
       "cvbankasSalary": "CVbankas-salarisgegevens — voorgestelde externe referentie (niet actief)",
       "key": {
         "internal_platform_aggregates": "Interne aggregaten van LabourMarket.ai",
@@ -11977,6 +11978,7 @@
         "statGovLt": "Officiële statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
         "eurostat": "Officiële EU-statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
         "arbetsformedlingen": "Actieve bron. Gebruiksvoorwaarden bevestigd: een gratis openbare gegevensbron (CC0). Bij elke advertentie wordt de bron vermeld en elke advertentie linkt terug naar de oorspronkelijke publicatie.",
+        "nav": "Voorgestelde bron. De API-voorwaarden van NAV staan herpublicatie toe met doorlopende verplichtingen: een ingetrokken advertentie moet direct worden verwijderd, een bijgewerkte direct worden bijgewerkt, en de sollicitatielink moet naar de oorspronkelijke advertentie leiden. Het aanvaarden van de voorwaarden en een token vereisen een handeling van de eigenaar — er wordt vandaag niets opgehaald.",
         "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd.",
         "eures": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald.",
         "uztLt": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald."
@@ -14680,7 +14682,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Bron: Arbetsförmedlingen (JobTech Development). De inhoud van de advertentie behoort toe aan de publicerende werkgever."
+      "arbetsformedlingen": "Bron: Arbetsförmedlingen (JobTech Development). De inhoud van de advertentie behoort toe aan de publicerende werkgever.",
+      "nav": "Bron: NAV / Arbeidsplassen.no. De inhoud van de advertentie behoort toe aan de publicerende werkgever; solliciteren verloopt via de oorspronkelijke advertentie."
     },
     "provenance": {
       "externalPublicSource": "Gepubliceerd door een openbare arbeidsbemiddeling. Hier vermeld zodat u het kunt vinden — het is geen labourmarket.ai-vacature.",

@@ -11961,6 +11961,7 @@
       "statGovLt": "Lietuvos statistika (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen (Švedijos užimtumo tarnyba)",
+      "nav": "NAV / Arbeidsplassen.no (Norvegijos darbo ir gerovės tarnyba)",
       "cvbankasSalary": "CVbankas atlyginimų duomenys — siūlomas išorinis atskaitos šaltinis (neaktyvus)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai vidinės suvestinės",
@@ -11977,6 +11978,7 @@
         "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "arbetsformedlingen": "Aktyvus šaltinis. Naudojimo sąlygos patvirtintos: nemokamas viešas duomenų šaltinis (CC0). Prie kiekvieno skelbimo nurodomas šaltinis, o skelbimas veda atgal į originalų skelbimą.",
+        "nav": "Siūlomas šaltinis. NAV API sąlygos leidžia pakartotinai skelbti su nuolatinėmis pareigomis: atšauktas skelbimas turi būti pašalintas nedelsiant, atnaujintas — atnaujintas nedelsiant, o kandidatavimo nuoroda turi vesti į pirminį skelbimą. Sąlygų priėmimas ir prieigos raktas reikalauja savininko veiksmo — šiandien niekas neatsiunčiama.",
         "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais.",
         "eures": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
         "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama."
@@ -14680,7 +14682,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Šaltinis: Arbetsförmedlingen (JobTech Development). Skelbimo turinys priklauso jį paskelbusiam darbdaviui."
+      "arbetsformedlingen": "Šaltinis: Arbetsförmedlingen (JobTech Development). Skelbimo turinys priklauso jį paskelbusiam darbdaviui.",
+      "nav": "Šaltinis: NAV / Arbeidsplassen.no. Skelbimo turinys priklauso jį paskelbusiam darbdaviui; kandidatuojama per pirminį skelbimą."
     },
     "provenance": {
       "externalPublicSource": "Paskelbta valstybinėje užimtumo tarnyboje. Rodome čia, kad rastumėte — tai nėra labourmarket.ai skelbimas.",

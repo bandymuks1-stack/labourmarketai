@@ -68,11 +68,29 @@ export interface VacancyChannelEndpointV1 {
    */
   readonly window?: VacancyChannelWindowV1;
   /**
+   * Continuation-token configuration for a `cursor` endpoint. Required for
+   * that mode and meaningless otherwise. The importer refuses to walk a
+   * `cursor` endpoint that omits it (fail closed), exactly as a
+   * `record_offset` endpoint without `json_lines` is refused.
+   */
+  readonly cursor?: VacancyChannelCursorV1;
+  /**
    * True when the endpoint requires an API key. The adapter refuses to run a
    * key-requiring endpoint unless the owner has provisioned the secret — it
    * never falls back to an unauthenticated call, and never logs the key.
    */
   readonly requiresApiKey: boolean;
+  /**
+   * HOW the provisioned secret travels, when `requiresApiKey` is true:
+   *   - `api-key`  an `api-key: <secret>` request header (the shape every
+   *                JobTech-style endpoint documents);
+   *   - `bearer`   an `Authorization: Bearer <secret>` header — the shape a
+   *                signed-JWT feed such as NAV's requires.
+   * Absent means `api-key`, so no existing endpoint changes behaviour. In
+   * both cases the secret is a HEADER: never a query parameter, never part of
+   * `requestRef`, never logged. Added 2026-09-22 for the NAV scaffold.
+   */
+  readonly authScheme?: "api-key" | "bearer";
   /**
    * How often this channel should run, and whether it repeats at all. This is
    * the PROVIDER'S OWN recommendation, recorded here so an operator schedule
@@ -133,6 +151,27 @@ export interface VacancyChannelWindowV1 {
    * a record landing just after a window closed would be skipped forever.
    */
   readonly safetyLagSeconds: number;
+}
+
+/**
+ * How a `cursor` channel continues. A continuation-token feed hands back, in
+ * each response, the token that names the NEXT page; the importer sends it
+ * on the next request and stores it as the channel checkpoint (through the
+ * existing `vacancy_import_cursors` row — `cursor_value` is already an opaque
+ * publisher token by the schema's own definition, so no new column or table
+ * is needed). The publisher's parameter NAME and the body path of the token
+ * live here for the same reason the time-window query keys do: a shared
+ * stage must never learn one publisher's vocabulary.
+ */
+export interface VacancyChannelCursorV1 {
+  /** Query key carrying the continuation token on the NEXT request. */
+  readonly queryKey: string;
+  /**
+   * Path of keys, root first, to where the response body carries the next
+   * token. A missing, empty or non-string value at that path means the walk
+   * has reached the head of the feed (drained) — never an error.
+   */
+  readonly nextTokenPath: readonly string[];
 }
 
 export interface VacancyProviderDescriptorV1 {
@@ -295,8 +334,100 @@ const ARBETSFORMEDLINGEN: VacancyProviderDescriptorV1 = {
   transformVersion: "vacancy-arbetsformedlingen-v2",
 };
 
+/**
+ * NAV — Arbeids- og velferdsetaten, Norway, publishing through
+ * Arbeidsplassen.no's `pam-stilling-feed`. SCAFFOLD, registered 2026-09-22.
+ *
+ * WHAT IS RECORDED (docs/research/eu-vacancy-source-matrix-2026-08-18.md
+ * §3 and the reuse table at line 462 — research facts, NOT provider answers):
+ *   - type: documented, versioned, OpenAPI feed; base host
+ *     `pam-stilling-feed.nav.no`, API prefix `/api/v1/`;
+ *   - auth: signed JWT BEARER token. A public token exists (rotates
+ *     irregularly, no registration); a private token requires e-mailing the
+ *     NAV team with company + contact details and written acceptance of the
+ *     terms at `arbeidsplassen.nav.no/vilkar-api`;
+ *   - cost: free; rate limits: not specified — UNCONFIRMED;
+ *   - licence: republication IS permitted, including statistical/analytical
+ *     use, WITH ONGOING DUTIES: (a) an ad removed from NAV must be removed
+ *     from our result lists IMMEDIATELY; (b) an ad updated in the API must
+ *     be updated immediately; (c) the "apply" function must deep-link back
+ *     to the original system supplier's application function; (d) contact
+ *     information must not be exposed for inactive vacancies;
+ *   - attribution: not stated in the terms text fetched — required by OUR
+ *     product policy regardless;
+ *   - yield: NAV states the majority of publicly advertised Norwegian
+ *     vacancies since ~2019 (Finn.no excluded); absolute count UNCONFIRMED.
+ *
+ * WHAT IS NOT RECORDED, and therefore why this imports nothing:
+ *   - the governance row (source-governance.ts) is `legalStatus:
+ *     "unconfirmed"`, `activation: "off"`, `proposedOnly: true` — the
+ *     vilkar-api acceptance is an OWNER + NAV action, not a code fact;
+ *   - the env switch VACANCY_SOURCE_NAV_ENABLED is absent (fail-closed), and
+ *     the token env VACANCY_SOURCE_NAV_API_TOKEN is unprovisioned — the
+ *     adapter refuses a key-requiring endpoint without one;
+ *   - the exact feed path, the continuation-token parameter name and the
+ *     response path of the next token are ASSUMED from the docs matrix
+ *     (the docs site was fetched by the research pass, the feed itself was
+ *     never called). Every ASSUMED value is marked below and re-verified as
+ *     the first step of the activation gate
+ *     (docs/human-gates/nav-activation-gate.md).
+ *
+ * Nothing here can reach a nav.no host on its own: the adapter asserts the
+ * kill switch before the first request, and an empty environment blocks it.
+ */
+const NAV: VacancyProviderDescriptorV1 = {
+  key: "nav",
+  governanceSourceKey: "nav",
+  countryIso: "NO",
+  displayNameCode: "intelligence.sources.nav",
+  attributionCode: "vacancySources.attribution.nav",
+  // Norwegian Bokmål — the language Arbeidsplassen.no publishes in. Declared
+  // from the matrix, never sniffed from the text.
+  sourceLanguage: "nb",
+  defaultTargetLanguage: "en",
+  endpoints: [
+    {
+      // The feed is a CHANGE feed walked forward by continuation token: the
+      // same body serves the cold start (walk from the head) and the ongoing
+      // poll (resume from the stored token), so it is modelled as the one
+      // `stream` channel. There is no separate snapshot endpoint recorded.
+      channel: "stream",
+      host: "pam-stilling-feed.nav.no",
+      // ASSUMED from the docs matrix (`/api/v1/` base + the documented feed
+      // resource). Re-verify against the OpenAPI document before activation.
+      path: "/api/v1/feed",
+      pagination: "cursor",
+      cursor: {
+        // ASSUMED: the query parameter that carries the continuation token.
+        queryKey: "last",
+        // ASSUMED: where each page names its successor. A missing value
+        // means the head of the feed was reached.
+        nextTokenPath: ["next_id"],
+      },
+      // RECORDED: a signed JWT, sent as `Authorization: Bearer <token>`.
+      requiresApiKey: true,
+      authScheme: "bearer",
+      cadence: {
+        // No provider recommendation is recorded. Polling once an hour is
+        // the conservative placeholder until NAV states one; the duties in
+        // the terms (immediate removal/update) may require a tighter
+        // interval, which is an activation-gate decision, not a code default.
+        intervalSeconds: 60 * 60,
+        runOnce: false,
+        // Resumes from the stored continuation token. A missing token is a
+        // cold start from the head of the feed — by the publisher's own
+        // design the feed IS the snapshot — and is bounded by
+        // maxPagesPerSession like every other paged walk.
+        checkpointed: true,
+      },
+    },
+  ],
+  transformVersion: "vacancy-nav-v0-scaffold",
+};
+
 export const VACANCY_PROVIDERS: readonly VacancyProviderDescriptorV1[] = [
   ARBETSFORMEDLINGEN,
+  NAV,
 ];
 
 export function getVacancyProvider(
