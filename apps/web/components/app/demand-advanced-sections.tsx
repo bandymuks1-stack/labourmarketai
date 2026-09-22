@@ -19,7 +19,7 @@
  * buttons with aria-expanded; chips use aria-pressed.
  */
 import { useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -51,7 +51,7 @@ import type {
   DeductionRow,
   LanguageRow,
 } from "@/lib/demand/structured-demand-form";
-import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 /** Language display names in their own language — locale-independent by
  *  design (the standard picker convention), so no 11-locale key set. */
@@ -417,7 +417,7 @@ export function DemandAdvancedSections({
             label={t("contractCountryLabel")}
             value={state.contractCountry}
             onValue={(v) => onChange({ contractCountry: v })}
-            options={MARKET_COUNTRIES.map((c) => ({ value: c, label: c }))}
+            options={countryOptionsForLocale(useLocale())}
             testId="sdv2-contract-country"
           />
         </div>

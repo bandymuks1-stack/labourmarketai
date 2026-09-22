@@ -15,7 +15,7 @@ import {
  *  - it NEVER sets geocode_status='verified' (only 'pending');
  *  - it NEVER sets geo_precision='coordinates';
  *  - it writes owner_id = auth.uid() and only onto the caller's OWN demand;
- *  - it validates country against the market set;
+ *  - it validates country against the ISO registry (any country; markets only order the select);
  *  - no external geocoding API / key / network;
  *  - signal-only rows are never mappable → 0 markers;
  *  - copy is honest and present in every active locale.
@@ -114,8 +114,9 @@ describe("demand-location write path — signal-only, never coordinates/verified
     expect(code).toMatch(/from\(["']customer_requests["']\)[\s\S]*?\.eq\(["']profile_id["'],\s*user\.id\)/);
   });
 
-  it("validates the country against the market set", () => {
-    expect(code).toMatch(/isMarketCountry/);
+  it("validates the country against the ISO registry — never the market set (global-access rule 2026-09-22)", () => {
+    expect(code).toMatch(/isIsoCountry\(countryCode\)/);
+    expect(code).not.toMatch(/isMarketCountry/);
   });
 
   it("has NO external geocoding API / key / network call", () => {

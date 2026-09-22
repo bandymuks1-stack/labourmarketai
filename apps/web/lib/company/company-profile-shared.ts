@@ -1,3 +1,5 @@
+import { isIsoCountry } from "@/lib/location/country-model";
+
 /**
  * Client-safe shared constants/types for the canonical company profile.
  * (No "server-only" import — the setup form renders these in the browser;
@@ -27,12 +29,13 @@ export const COMPANY_TYPES: readonly CompanyType[] = [
   "other",
 ];
 
-/** Country codes seeded in public.countries (0002_reference_data.sql).
- *  companies.country is mirrored into organizations.country which has a
- *  FOREIGN KEY to countries(code) — only these codes are safe to persist.
- *  The setup form renders a select over this list (free text caused the
- *  organizations_country_fkey crash the owner hit in smoke). */
-export const COMPANY_COUNTRY_CODES = [
+/** The countries a company may be registered in: EVERY ISO country (global-access rule,
+ *  owner 2026-09-22). `organizations.country` carries a FOREIGN KEY to `public.countries(code)`;
+ *  the migration `20260922120000_countries_all_iso_v1` seeds every code there, and until it is
+ *  applied a not-yet-seeded country is refused by the FK and shown as the explicit
+ *  `invalid-country` state (never a silent drop, never a crash). `COMPANY_PRIORITY_COUNTRY_CODES`
+ *  are the seeded target markets, rendered first in the select. */
+export const COMPANY_PRIORITY_COUNTRY_CODES = [
   "LT",
   "LV",
   "EE",
@@ -42,10 +45,16 @@ export const COMPANY_COUNTRY_CODES = [
   "DE",
   "SE",
   "NO",
+  "FI",
 ] as const;
+
+/** Back-compat name: the priority list. It is NOT the eligibility list any more. */
+export const COMPANY_COUNTRY_CODES = COMPANY_PRIORITY_COUNTRY_CODES;
 
 export type CompanyCountryCode = (typeof COMPANY_COUNTRY_CODES)[number];
 
-export function isKnownCountryCode(v: string): v is CompanyCountryCode {
-  return (COMPANY_COUNTRY_CODES as readonly string[]).includes(v);
+/** Any assigned ISO-3166-1 alpha-2 code. The priority list orders the select; it does not
+ *  decide which country a company may be in. */
+export function isKnownCountryCode(v: string): boolean {
+  return isIsoCountry(v);
 }

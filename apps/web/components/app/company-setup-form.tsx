@@ -1,5 +1,7 @@
 "use client";
 
+import { countryOptionsForLocale } from "@/lib/location/country-options";
+
 import { useActionState, useRef } from "react";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -8,7 +10,6 @@ import {
   type CompanySetupFormState,
 } from "@/lib/company/setup-actions";
 import {
-  COMPANY_COUNTRY_CODES,
   COMPANY_TYPES,
   type CompanyType,
 } from "@/lib/company/company-profile-shared";
@@ -44,6 +45,8 @@ export interface CompanySetupFormLabels {
   readonly countryPlaceholder: string;
   /** countries.code → localized country name (only seeded codes). */
   readonly countryOptions: Record<string, string>;
+  /** The page locale — country labels for the whole world come from CLDR in it. */
+  readonly locale: string;
   readonly statusInvalidCountry: string;
   readonly registrationCode: string;
   readonly registrationCodeHelp: string;
@@ -254,9 +257,9 @@ export function CompanySetupForm({
           <option value="" disabled>
             {labels.countryPlaceholder}
           </option>
-          {COMPANY_COUNTRY_CODES.map((code) => (
-            <option key={code} value={code}>
-              {labels.countryOptions[code] ?? code}
+          {countryOptionsForLocale(labels.locale).map((o) => (
+            <option key={o.value} value={o.value}>
+              {labels.countryOptions[o.value] ?? o.label}
             </option>
           ))}
         </select>

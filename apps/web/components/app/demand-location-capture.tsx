@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { addDemandLocationAction } from "@/lib/demand/demand-location-actions";
-import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 /**
  * Demand location capture (v1) — a SIGNAL-ONLY entry for one of the owner's
@@ -19,6 +19,9 @@ import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 export function DemandLocationCapture({ requestId }: { requestId: string }) {
   const t = useTranslations("demandLocationCapture");
   const tlm = useTranslations("labourMarket");
+  const locale = useLocale();
+  // Every ISO country, active markets first — a market list orders, it never shortens.
+  const countryOptions = countryOptionsForLocale(locale);
   const [open, setOpen] = useState(false);
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
@@ -103,9 +106,9 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
               className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
             >
               <option value="">—</option>
-              {MARKET_COUNTRIES.map((code) => (
-                <option key={code} value={code}>
-                  {tlm(`countryNames.${code}`)}
+              {countryOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
                 </option>
               ))}
             </select>

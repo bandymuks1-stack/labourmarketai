@@ -165,6 +165,7 @@ export default async function CompanyStartPage({
     countryOptions: Object.fromEntries(
       COMPANY_COUNTRY_CODES.map((code) => [code, t(`countryOptions.${code}`)]),
     ),
+    locale,
     statusInvalidCountry: t("statusInvalidCountry"),
     registrationCode: t("registrationCode"),
     registrationCodeHelp: t("registrationCodeHelp"),
