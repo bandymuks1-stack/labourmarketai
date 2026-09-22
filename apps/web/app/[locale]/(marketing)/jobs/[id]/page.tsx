@@ -8,7 +8,6 @@ import { resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { getPublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
-import { resolveVacancyDescription } from "@/lib/vacancy-store/vacancy-translation-read";
 import { hasSessionCookie } from "@/lib/supabase/session-cookie";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -555,24 +554,6 @@ export default async function JobDetailPage({
         .catch(() => null)
     : null;
 
-  // THE READER'S LANGUAGE (owner P0 2026-09-22 §9). For a signed-in member
-  // the title and the body render in their locale when a rendering exists —
-  // stored beside the original, generated once for THIS ad, the original
-  // one tap away. An anonymous visitor never triggers a vendor call (this
-  // page is crawlable), and gets the anonymous half anyway.
-  const rendering =
-    user && member
-      ? await resolveVacancyDescription(member, active, user.id).catch(() => null)
-      : null;
-  const tLang = await getTranslations({ locale: active, namespace: "vacancySources.language" });
-  const languageName = (code: string): string => {
-    try {
-      return new Intl.DisplayNames([active], { type: "language" }).of(code) ?? code;
-    } catch {
-      return code;
-    }
-  };
-
   // The member's reading of THIS job: engine verdict, requirement tiers, the
   // existing interest state and same-profession alternatives. `null` for an
   // anonymous visitor and for a member whose ad is no longer live.
@@ -778,34 +759,11 @@ export default async function JobDetailPage({
           occupation label — the raw title embeds employer and location wording
           (owner directive 2026-08-24). */}
       <h1
-        lang={rendering?.title ? active : sourceLang}
+        lang={sourceLang}
         className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
       >
-        {rendering?.title ?? member?.titleRaw ?? preview.occupation ?? GENERIC_TITLE[active]}
+        {member?.titleRaw ?? preview.occupation ?? GENERIC_TITLE[active]}
       </h1>
-
-      {/* WHICH LANGUAGE THE MEMBER IS READING — a rendering is named as a
-          rendering with the original one tap away; a source-language ad is
-          named as such. */}
-      {member && rendering?.title && sourceLang ? (
-        <details className="group mt-2 text-sm text-text-muted" data-testid="job-translated">
-          <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-            {tLang("translatedFrom", { language: languageName(sourceLang) })}
-            {" · "}
-            <span className="underline underline-offset-4 group-open:hidden">{tLang("showOriginal")}</span>
-            <span className="hidden underline underline-offset-4 group-open:inline">{tLang("hideOriginal")}</span>
-          </summary>
-          <p lang={sourceLang} className="mt-1 text-text-secondary" data-testid="job-title-original">
-            <span className="text-text-muted">{tLang("originalTitle")}: </span>
-            {member.titleRaw}
-          </p>
-          <p className="mt-1">{tLang("machineNote")}</p>
-        </details>
-      ) : member && sourceLang && sourceLang.slice(0, 2) !== active ? (
-        <p className="mt-2 text-sm text-text-muted" data-testid="job-source-language">
-          {tLang("originalIn", { language: languageName(sourceLang) })}
-        </p>
-      ) : null}
 
       {member?.titleRaw && preview.occupation && (
         <p lang={sourceLang} className="mt-2 text-base text-text-muted">
@@ -862,25 +820,11 @@ export default async function JobDetailPage({
                   keeps their paragraph breaks without interpreting anything in
                   the string as markup — this is third-party content. */}
               <p
-                lang={rendering?.description ? active : sourceLang}
+                lang={sourceLang}
                 className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-muted"
-                data-testid="job-description"
               >
-                {rendering?.description ?? member.descriptionRaw}
+                {member.descriptionRaw}
               </p>
-              {/* The ORIGINAL body stays reachable whenever a rendering is
-                  shown in its place — it is the fact; the rendering is not. */}
-              {rendering?.description ? (
-                <details className="group mt-3 text-sm text-text-muted" data-testid="job-description-original">
-                  <summary className="cursor-pointer list-none underline underline-offset-4 [&::-webkit-details-marker]:hidden">
-                    <span className="group-open:hidden">{tLang("showOriginal")}</span>
-                    <span className="hidden group-open:inline">{tLang("hideOriginal")}</span>
-                  </summary>
-                  <p lang={sourceLang} className="mt-2 whitespace-pre-line leading-relaxed text-text-secondary">
-                    {member.descriptionRaw}
-                  </p>
-                </details>
-              ) : null}
             </section>
           )}
 
