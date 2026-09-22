@@ -2246,6 +2246,7 @@
     },
     "intent": {
       "label": "Min situation",
+      "notDeclared": "Inte angivet ännu — berätta om du söker jobb och var du får arbeta",
       "states": {
         "AVAILABLE_NOW": "Kan börja nu",
         "AVAILABLE_FROM": "Kan börja från ett datum",

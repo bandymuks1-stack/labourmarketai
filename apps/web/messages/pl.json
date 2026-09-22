@@ -9492,6 +9492,7 @@
     },
     "intent": {
       "label": "Moja sytuacja",
+      "notDeclared": "Jeszcze nie podano — powiedz, czy szukasz pracy i gdzie możesz pracować",
       "states": {
         "AVAILABLE_NOW": "Mogę zacząć od razu",
         "AVAILABLE_FROM": "Mogę zacząć od podanej daty",

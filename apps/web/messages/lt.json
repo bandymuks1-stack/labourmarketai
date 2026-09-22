@@ -9492,6 +9492,7 @@
     },
     "intent": {
       "label": "Mano situacija",
+      "notDeclared": "Dar nenurodyta — pasakykite, ar ieškote darbo ir kur galite dirbti",
       "states": {
         "AVAILABLE_NOW": "Galiu pradėti dabar",
         "AVAILABLE_FROM": "Galiu pradėti nuo nurodytos datos",
