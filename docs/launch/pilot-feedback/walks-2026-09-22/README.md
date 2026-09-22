@@ -97,8 +97,29 @@ country iteration upserts the same row; a pre-existing draft of the manager is o
 its baseline payload is logged in `L0_baseline`). QA rows are excludable from pilot metrics by
 the two `profile_ids` + the `organization_ids` + the run window.
 
-## Local counterpart
+## Local counterpart — RUN, 29/29 green (2026-09-22)
 `apps/web/tests/e2e/global-access-countries.spec.ts` exercises the same three surfaces per
 code (plus the onboarding select with a throwaway LOCAL identity) against the local Supabase
 stack: `pnpm -C apps/web e2e:local tests/e2e/global-access-countries.spec.ts`. It never targets
 the cloud (loopback-guarded DB helper) and needs `20260922120000` applied locally.
+
+Measured: countries table 9/9 · company setup 9/9 (`companies.country` + the `organizations`
+mirror) · work card 9/9 (`Vietnamas`/`Airija`/`Saudo Arabija` → `VN`/`IE`/`SA`, preferred list →
+the nine codes) · demand DRAFT 9/9 (`customer_requests.country` = code, `payload.country` =
+code, 0 submitted) · onboarding select 249 options including all nine, LT before VN. Fixture
+rows restored afterwards (companies `NL`, worker columns `null`, no leftover draft).
+
+### Four dev-server behaviours these runs measured — the walk carries the same guards
+1. **A client form submitted before hydration does nothing useful.** The login form answered
+   `POST 200` with the same page; `company-setup-save-draft` posted the bare form to
+   `/lt/dashboard` and no banner rendered. Load to `networkidle` and retry the click.
+2. **An uncontrolled select's pick is reverted by hydration.** Picked `SA`, the select read
+   `US`, the banner still said "saved" — and the row kept the PREVIOUS country. Re-pick until
+   `inputValue()` holds, and let the ROW decide when the save is done.
+3. **A controlled field ignores a re-fill of the SAME text.** React's value tracker sees no
+   change, so no `onChange` fires and `demand-next` stays disabled forever (30 re-fills over
+   120 s). Clear the field before every retry.
+4. **At phone width the context panel is folded.** `player-card-work-editor` resolves but stays
+   hidden, and `revalidatePath` re-folds it after each save — so the success line is in the DOM
+   while hidden (`innerText()` of a hidden node is empty; read `textContent`). Open it through
+   `context-panel-toggle`, and assert the status is ATTACHED, not visible.

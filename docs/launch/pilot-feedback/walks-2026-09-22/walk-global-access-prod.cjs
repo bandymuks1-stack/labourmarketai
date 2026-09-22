@@ -139,7 +139,10 @@ const DRAFT_DESCRIPTION = "Reikia 1 darbuotojo — E2E global-access patikra, ju
 
   // (1) company setup — the SELECT over every ISO country; save draft; read back the mirror
   const companySetup = async (code) => {
-    await o.goto(HOST + `/${UI_LOCALE}/dashboard/start/company`, { waitUntil: "domcontentloaded", timeout: 60000 });
+    // network-idle, not domcontentloaded: "Save draft" is a CLIENT button (it sets the hidden
+    // `intent` through a ref), so a click before hydration posts the bare form and no banner ever
+    // renders — measured on the local stack 2026-09-22.
+    await o.goto(HOST + `/${UI_LOCALE}/dashboard/start/company`, { waitUntil: "networkidle", timeout: 120000 });
     await o.getByTestId("company-setup-form").waitFor({ timeout: 60000 });
     const sel = o.getByTestId("company-setup-country");
     const options = await sel.locator("option").evaluateAll((os) => os.map((x) => x.value).filter(Boolean));
@@ -148,17 +151,31 @@ const DRAFT_DESCRIPTION = "Reikia 1 darbuotojo — E2E global-access patikra, ju
     const before = await sel.inputValue().catch(() => null);
     if (disabled) { mark(code, "company", false, { reason: "country_locked_verified", listed, optionCount: options.length, before }); await shot(o, `${code}-1-company-locked`); return; }
     if (!listed) { mark(code, "company", false, { reason: "option_missing_in_select", optionCount: options.length, before }); await shot(o, `${code}-1-company-option-missing`); return; }
-    await sel.selectOption(code);
     await shot(o, `${code}-1-company-form`);
-    await o.getByTestId("company-setup-save-draft").click();
-    await o.getByTestId("company-setup-result").waitFor({ timeout: 60000 });
-    const result = (await o.getByTestId("company-setup-result").innerText()).replace(/\s+/g, " ").trim();
-    const invalidCountry = result.startsWith(INVALID_COUNTRY_TEXT);
+    // The select is UNCONTROLLED (defaultValue) and "Save draft" is a CLIENT button. A pick made
+    // before hydration is reset to the stored value, and the banner then says "saved" while the
+    // row keeps the PREVIOUS country (local stack 2026-09-22). So the pick-save-readback is one
+    // retried attempt and the ROW decides, never the banner.
+    let result = null, invalidCountry = false, companies = [], orgs = [], companyOk = false, orgOk = false;
+    for (let attempt = 1; attempt <= 3 && !companyOk; attempt++) {
+      // Re-pick until the value HOLDS: hydration re-renders the select from its stored
+      // `defaultValue`, so a pick made a moment too early is silently reverted.
+      let posts = null;
+      for (let pick = 1; pick <= 10 && posts !== code; pick++) { await sel.selectOption(code); posts = await sel.inputValue(); if (posts !== code) await o.waitForTimeout(1000); }
+      if (posts !== code) { log({ step: `${code}_company_pick_not_held`, attempt, posts }); await o.waitForTimeout(3000); continue; }
+      await o.getByTestId("company-setup-save-draft").click();
+      const banner = await o.getByTestId("company-setup-result").waitFor({ timeout: 90000 }).then(() => true).catch(() => false);
+      if (banner) { result = (await o.getByTestId("company-setup-result").innerText()).replace(/\s+/g, " ").trim(); invalidCountry = result.startsWith(INVALID_COUNTRY_TEXT); }
+      for (let i = 0; i < 15 && !companyOk; i++) {
+        companies = (await companiesOf()).rows;
+        orgs = companies.length ? (await orgsOf(companies.map((c) => c.id))).rows : [];
+        companyOk = companies.length > 0 && companies.every((c) => c.country === code);
+        orgOk = orgs.length > 0 && orgs.every((x) => x.country === code);
+        if (!companyOk) await o.waitForTimeout(3000);
+      }
+      if (!companyOk) await o.reload({ waitUntil: "networkidle", timeout: 120000 }).catch(() => {});
+    }
     await shot(o, `${code}-1-company-saved`);
-    const companies = (await companiesOf()).rows;
-    const orgs = companies.length ? (await orgsOf(companies.map((c) => c.id))).rows : [];
-    const companyOk = companies.length > 0 && companies.every((c) => c.country === code);
-    const orgOk = orgs.length > 0 && orgs.every((x) => x.country === code);
     mark(code, "company", !invalidCountry && companyOk && orgOk, { optionCount: options.length, before, result, invalidCountry, companies: companies.map((c) => ({ id: c.id, country: c.country })), organizations: orgs.map((x) => ({ id: x.id, country: x.country })), readback: { companiesCountry: companyOk, organizationsCountry: orgOk } });
   };
 
@@ -190,7 +207,10 @@ const DRAFT_DESCRIPTION = "Reikia 1 darbuotojo — E2E global-access patikra, ju
     await shot(w, `${code}-2-workcard-form`);
     await form.locator('button[type="submit"]').first().click();
     let status = null, tone = null;
-    for (let i = 0; i < 20; i++) { await w.waitForTimeout(1500); const s = form.locator('[role="status"]').first(); if ((await s.count()) > 0) { status = (await s.innerText()).trim(); tone = /text-state-danger/.test((await s.getAttribute("class")) || "") ? "danger" : "success"; break; } }
+    // ATTACHED, not visible: revalidatePath re-renders the panel and at phone width it re-folds,
+    // so the success line is in the DOM while hidden (local stack 2026-09-22) — and innerText() of
+    // a hidden node is empty, so the text is read with textContent.
+    for (let i = 0; i < 40; i++) { await w.waitForTimeout(1500); const s = form.locator('[role="status"]').first(); if ((await s.count()) > 0) { status = ((await s.textContent()) || "").trim(); tone = /text-state-danger/.test((await s.getAttribute("class")) || "") ? "danger" : "success"; break; } }
     await shot(w, `${code}-2-workcard-saved`);
     const row = (await workerRow()).rows[0] || null;
     const locationOk = Boolean(row && row.current_location_country === code);
