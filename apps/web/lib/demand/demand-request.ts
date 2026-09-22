@@ -27,7 +27,8 @@ import {
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
 import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
-import { isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
+import { isIsoCountry } from "@/lib/location/country-model";
 import type { DomainCaller } from "@/lib/domain/caller";
 import {
   readStructuredDemandV2,
@@ -260,7 +261,7 @@ export async function submitDemandRequestCore(
       ? fields.workType
       : null;
   const country =
-    typeof fields?.country === "string" && isMarketCountry(fields.country.toUpperCase())
+    typeof fields?.country === "string" && isIsoCountry(fields.country.toUpperCase())
       ? fields.country.toUpperCase()
       : null;
   const teamSize =
@@ -640,7 +641,7 @@ function toDemandPrefill(data: any): DemandPrefill {
           ? data.role_or_work_type
           : null,
       country:
-        typeof data.country === "string" && isMarketCountry(data.country)
+        typeof data.country === "string" && isIsoCountry(data.country)
           ? data.country
           : null,
       teamSize: typeof data.team_size === "number" ? data.team_size : null,

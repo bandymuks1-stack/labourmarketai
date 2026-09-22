@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -33,7 +34,6 @@ import {
 } from "@/lib/demand/structured-demand-v2";
 import {
   buildWorkCategoryOptions,
-  MARKET_COUNTRIES,
 } from "@/lib/taxonomy/work-categories";
 import { structureNeed } from "@/lib/structuring/structure-need";
 import { EstimateBuilder } from "@/components/app/estimate-builder";
@@ -159,11 +159,8 @@ export function DemandRequestButton({
     workCategories.flatMap((c) =>
       c.options.map((o) => ({ value: o.slug, label: `${o.label} · ${c.sector}` })),
     );
-  const countryOptions: { value: string; label: string }[] =
-    MARKET_COUNTRIES.map((code) => ({
-      value: code,
-      label: tlm(`countryNames.${code}`),
-    }));
+  // Every ISO country, active markets first — a market list orders, it never shortens.
+  const countryOptions: { value: string; label: string }[] = countryOptionsForLocale(locale);
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);

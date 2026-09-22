@@ -1001,7 +1001,11 @@ describe("NO new DB migration in this PR", () => {
     //   (PL consent texts: data-only hash re-pin on privacy_consent_purposes,
     //   GREEN, applied with the #1810 deploy). Not this read layer's file.
     //   RECOUNTED: 299.
-    expect(count).toBeLessThanOrEqual(299);
+    // Bumped 299 -> 300 for 20260922120000_countries_all_iso_v1 (global-access rule:
+    //   every ISO code seeded into public.countries, is_target_market=false, insert ...
+    //   on conflict do nothing, GREEN by shape, owner-gated apply). Not this read
+    //   layer's file. RECOUNTED: 300.
+    expect(count).toBeLessThanOrEqual(300);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -2613,7 +2613,10 @@ describe("no migration files added by this sprint", () => {
 // consentTextHash() covers every locale in CONSENT_LOCALES and `pl` joined
 // it; versions unchanged, no DDL/grant/policy (GREEN). Paired rollback file.
 // Applied in the same step as the #1810 production deploy. RECOUNTED: 299.
-const SPRINT_BASELINE = 299;
+// Bumped 299 -> 300 for 20260922120000_countries_all_iso_v1 (global-access rule: every
+// ISO code seeded into public.countries with is_target_market=false; additive insert ...
+// on conflict do nothing; owner-gated apply). RECOUNTED: 300.
+const SPRINT_BASELINE = 300;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

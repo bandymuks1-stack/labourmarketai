@@ -10,7 +10,8 @@
  * a suggestion can be applied to the structured columns the worker board reads
  * without ever exposing free text.
  */
-import { ALL_WORK_TYPE_SLUGS, MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { ALL_WORK_TYPE_SLUGS } from "@/lib/taxonomy/work-categories";
+import { isIsoCountry } from "@/lib/location/country-model";
 
 export type StartPeriod = "flexible" | "this_week" | "urgent";
 export type AccommodationOffer =
@@ -125,7 +126,6 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "US", needles: ["u.s.", "united states", "amerik", "америк", "сша", "штаты", "new york", "los angeles", "chicago", "houston", "miami", "dallas", "phoenix", "philadelphia", "atlanta", "seattle", "boston", "denver", "washington"] },
 ];
 
-const KNOWN_COUNTRIES = new Set<string>(MARKET_COUNTRIES);
 
 /**
  * CITY LABELS — which COUNTRY_RULES needles name a city, and how that city is
@@ -301,7 +301,7 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
   if (workType) reasons.push(`work_type:${workType}`);
 
   const cc = firstMatch(COUNTRY_RULES, locHay);
-  const country = cc && KNOWN_COUNTRIES.has(cc.code) ? cc.code : null;
+  const country = cc && isIsoCountry(cc.code) ? cc.code : null;
   if (country) reasons.push(`country:${country}`);
 
   // Only the needle of a RECOGNISED work type is handed to the counter — an
