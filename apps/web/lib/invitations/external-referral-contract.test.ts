@@ -92,7 +92,7 @@ describe("external worker referral contract v1", () => {
 
   it("a country NAME is a residence, not a refusal (lead_4735a23a, 2026-09-22: \"Vietnam\" was refused and a consenting worker's referral was lost)", () => {
     const w = (residenceCountry: unknown) => ({ ...(envelope().worker as Record<string, unknown>), residenceCountry });
-    for (const [typed, iso] of [["Vietnam", "VN"], ["vietnam", "VN"], ["Vietnamas", "VN"], ["Вьетнам", "VN"], ["VN", "VN"], ["vn", "VN"], ["Lithuania", "LT"], ["Saudi Arabia", "SA"], ["Polska", "PL"], ["Deutschland", "DE"], ["Oman", "OM"], ["Albania", "AL"]] as const) {
+    for (const [typed, iso] of [["Vietnam", "VN"], ["vietnam", "VN"], ["Viet Nam", "VN"], ["Việt Nam", "VN"], ["Vietnamas", "VN"], ["Вьетнам", "VN"], ["VN", "VN"], ["vn", "VN"], ["Lithuania", "LT"], ["Ireland", "IE"], ["Saudi Arabia", "SA"], ["Polska", "PL"], ["Deutschland", "DE"], ["Oman", "OM"], ["Albania", "AL"], ["Bangladesh", "BD"], ["India", "IN"], ["Tunisia", "TN"], ["USA", "US"]] as const) {
       const r = parseExternalWorkerReferral(envelope({ worker: w(typed) }));
       expect(r.ok, typed).toBe(true);
       if (r.ok) expect(r.envelope.worker.residenceCountry, typed).toBe(iso);
@@ -110,8 +110,20 @@ describe("external worker referral contract v1", () => {
     expect(parseExternalWorkerReferral(envelope({ worker: w("") })).ok).toBe(false);
     expect(parseExternalWorkerReferral(envelope({ worker: w("x".repeat(81)) })).ok).toBe(false);
     expect(resolveCountryIso2("Vietnam")).toBe("VN");
-    expect(resolveCountryIso2("Viet Nam")).toBeNull();
+    expect(resolveCountryIso2("Viet Nam")).toBe("VN");
     expect(resolveCountryIso2("")).toBeNull();
+  });
+
+  it("destinations accept names or codes; an unresolvable wish is dropped from the LIST, the person is kept", () => {
+    const w = (destinations: unknown) => ({ ...(envelope().worker as Record<string, unknown>), destinations });
+    const r = parseExternalWorkerReferral(envelope({ worker: w(["Norway", "se", "Vietnam", "Mars", "NO"]) }));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.envelope.worker.destinations).toEqual(["NO", "SE", "VN"]);
+    // Malformed entries are still a schema refusal: empty string, an essay, a non-string.
+    expect(parseExternalWorkerReferral(envelope({ worker: w([""]) })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w(["x".repeat(81)]) })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w([42]) })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w("NO") })).ok).toBe(false);
   });
 
   it("issues name paths and codes only — never the values a person typed", () => {

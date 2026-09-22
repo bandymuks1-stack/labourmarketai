@@ -84,8 +84,14 @@ describe("normalizeCountryList — null keeps, [] clears, garbage keeps", () => 
   it("an all-invalid list → null (keep), never a silent clear", () => {
     expect(normalizeCountryList(["xyz", ""])).toBeNull();
   });
+  it("a country NAME is a country (global-access rule 2026-09-22): names in any product language resolve, unresolvable entries are left out, the rest kept", () => {
+    expect(normalizeCountryList(["Vietnam"])).toEqual(["VN"]);
+    expect(normalizeCountryList(["Viet Nam", "Norvegija", "Saudi Arabia", "Hanoi", "ie"])).toEqual(["VN", "NO", "SA", "IE"]);
+    expect(normalizeCountryList(["Hanoi"])).toBeNull();
+  });
   it("valid codes are uppercased, capped at 12", () => {
     expect(normalizeCountryList(["no", " se "])).toEqual(["NO", "SE"]);
-    expect(normalizeCountryList(Array.from({ length: 15 }, () => "DE"))).toHaveLength(12);
+    expect(normalizeCountryList(["DE", "de", " DE "])).toEqual(["DE"]);
+    expect(normalizeCountryList(["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT"])).toHaveLength(12);
   });
 });

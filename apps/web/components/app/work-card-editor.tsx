@@ -296,10 +296,10 @@ export function WorkCardEditor({
               <input
                 type="text"
                 name="location_country"
-                maxLength={2}
+                maxLength={80}
                 placeholder={labels.locationHint}
                 defaultValue={values.locationCountry ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
+                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
               />
             </label>
 

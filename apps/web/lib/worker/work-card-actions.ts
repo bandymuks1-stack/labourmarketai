@@ -53,10 +53,12 @@ function parseIntOrNull(raw: FormDataEntryValue | null): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
+/** Split on commas / semicolons / newlines ONLY — "Saudi Arabia" is one country, not two
+ *  tokens. Resolution to ISO happens in the core (`normalizeCountryList`). */
 function parseCountries(raw: FormDataEntryValue | null): string[] | null {
   const s = String(raw ?? "").trim();
   if (s === "") return null;
-  const codes = s.split(/[,\s]+/).filter((c) => c.trim() !== "");
+  const codes = s.split(/[,;\n]+/).map((c) => c.trim()).filter((c) => c !== "");
   return codes.length > 0 ? codes : null;
 }
 

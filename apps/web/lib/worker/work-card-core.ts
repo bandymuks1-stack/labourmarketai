@@ -1,3 +1,4 @@
+import { resolveCountryCode, resolveCountryList } from "@/lib/location/country-model";
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -84,10 +85,14 @@ export async function saveWorkerCardCore(
     return { ok: false, code: "invalid", message: "salary_range" };
   }
 
-  const locationCountry =
-    input.locationCountry?.trim() === "" || input.locationCountry == null
-      ? null
-      : input.locationCountry.trim().toUpperCase().slice(0, 2);
+  // "Vietnam", "vn" and "VN" are one country; a name that does not resolve is REFUSED with
+  // its own code (the person sees it), never truncated to its first two letters ("VI" for
+  // Vietnam was the old behaviour — the Virgin Islands).
+  const locationRaw = input.locationCountry?.trim() ?? "";
+  const locationCountry = locationRaw === "" ? null : normalizeCountry(locationRaw);
+  if (locationRaw !== "" && locationCountry === null) {
+    return { ok: false, code: "invalid", message: "location_country" };
+  }
   const preferredCountries = normalizeCountryList(input.preferredCountries);
 
   const { error } = await asAny(caller.supabase).rpc("save_worker_card", {
@@ -107,19 +112,22 @@ export async function saveWorkerCardCore(
   return { ok: true };
 }
 
-/** Uppercased two-letter codes only, max 12 — same rule as the web form's
- *  parser; anything else is dropped. `null`/absent is null (= keep, the RPC
- *  coalesces); an EXPLICIT `[]` stays `[]` (= clear, W6) — the one way a
- *  person can empty the list; a list whose every entry is invalid is null
- *  (= keep), never a silent clear. */
+/** ISO codes OR country names ("LT, Vietnam, viet nam"), max 12 — resolved through the
+ *  canonical `resolveCountryCode`, so a person who types the name of their country is
+ *  not silently narrowed (global-access rule, 2026-09-22). `null`/absent is null (= keep,
+ *  the RPC coalesces); an EXPLICIT `[]` stays `[]` (= clear, W6) — the one way a person
+ *  can empty the list; a list whose every entry is unresolvable is null (= keep), never a
+ *  silent clear. */
 export function normalizeCountryList(raw: string[] | null | undefined): string[] | null {
   if (!raw) return null;
   if (raw.length === 0) return [];
-  const codes = raw
-    .map((c) => c.trim().toUpperCase())
-    .filter((c) => /^[A-Z]{2}$/.test(c))
-    .slice(0, 12);
+  const codes = resolveCountryList(raw).codes.slice(0, 12);
   return codes.length > 0 ? codes : null;
+}
+
+/** One typed country (code or name) → ISO code; anything unresolvable is null (= keep). */
+export function normalizeCountry(raw: string | null | undefined): string | null {
+  return resolveCountryCode(raw);
 }
 
 /**
