@@ -13094,7 +13094,8 @@
       "availability": {
         "understood": "Verstanden — du kannst arbeiten. Tragen wir es in deine Arbeitskarte ein: gib das Datum an, ab wann.",
         "understoodFrom": "Verstanden: du kannst ab {date} arbeiten. Tragen wir es in deine Arbeitskarte ein — das Datum steht schon drin, prüfen und speichern.",
-        "notInCompany": "Ab wann du arbeiten kannst, ist dein eigener Fakt, nicht der des Unternehmens. Wechsle in deinen persönlichen Bereich und sag es noch einmal."
+        "notInCompany": "Ab wann du arbeiten kannst, ist dein eigener Fakt, nicht der des Unternehmens. Wechsle in deinen persönlichen Bereich und sag es noch einmal.",
+        "changeRequested": "Ich öffne deine Arbeitskarte — gib an, ab wann du arbeiten kannst, und speichere. Bis dahin ändert sich nichts."
       },
       "findWorkInCompanyContext": "Die Jobsuche ist deine eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und frag noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus deinem persönlichen Bereich.",

@@ -13094,7 +13094,8 @@
       "availability": {
         "understood": "Understood — you can work. Let's put it on your work card: set the date you can start from.",
         "understoodFrom": "Understood: you can work from {date}. Let's put it on your work card — the date is already in, review and save.",
-        "notInCompany": "When you can work is your own fact, not the company's. Switch to your personal space and say it again."
+        "notInCompany": "When you can work is your own fact, not the company's. Switch to your personal space and say it again.",
+        "changeRequested": "Opening your work card — set when you can work and save. Nothing is changed until you do."
       },
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
