@@ -8459,6 +8459,10 @@
       "duration": "Voor",
       "declared": "Opgegeven",
       "privacyNote": "Namen en contactgegevens worden hier bewust niet getoond. Contact opnemen is een aparte stap waarmee de andere partij moet instemmen."
+    },
+    "actionability": {
+      "availableFromChip": "Beschikbaar vanaf {date}",
+      "availableFromNote": "Niet beschikbaar op de door u gevraagde startdatum — deze persoon geeft een latere start op. Hun eigen datum, geen schatting."
     }
   },
   "planBoundary": {
@@ -13090,7 +13094,8 @@
       "availability": {
         "understood": "Begrepen — je kunt werken. Laten we het op je werkkaart zetten: geef de datum aan vanaf wanneer.",
         "understoodFrom": "Begrepen: je kunt werken vanaf {date}. Laten we het op je werkkaart zetten — de datum staat er al in, controleer en sla op.",
-        "notInCompany": "Vanaf wanneer je kunt werken is jouw eigen gegeven, niet dat van het bedrijf. Schakel over naar je persoonlijke ruimte en zeg het opnieuw."
+        "notInCompany": "Vanaf wanneer je kunt werken is jouw eigen gegeven, niet dat van het bedrijf. Schakel over naar je persoonlijke ruimte en zeg het opnieuw.",
+        "changeRequested": "Ik open je werkkaart — geef aan vanaf wanneer je kunt werken en sla op. Er verandert niets tot je dat doet."
       },
       "findWorkInCompanyContext": "Werk zoeken is je eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar je persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit je persoonlijke ruimte.",

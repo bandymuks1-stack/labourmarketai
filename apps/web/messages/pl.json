@@ -8459,6 +8459,10 @@
       "duration": "Na",
       "declared": "Zgłoszono",
       "privacyNote": "Imiona i dane kontaktowe celowo nie są tu pokazywane. Kontakt to osobny krok, na który musi zgodzić się druga strona."
+    },
+    "actionability": {
+      "availableFromChip": "Dostępny od {date}",
+      "availableFromNote": "Niedostępny na wskazany termin rozpoczęcia — ta osoba podaje późniejszy start. To jej własna data, nie szacunek."
     }
   },
   "planBoundary": {
@@ -13090,7 +13094,8 @@
       "availability": {
         "understood": "Rozumiem — możesz pracować. Zapiszmy to w karcie pracy: podaj datę, od kiedy.",
         "understoodFrom": "Rozumiem: możesz pracować od {date}. Zapiszmy to w karcie pracy — data jest już wpisana, sprawdź i zapisz.",
-        "notInCompany": "Od kiedy możesz pracować to Twój własny fakt, nie firmy. Przełącz się na przestrzeń osobistą i napisz ponownie."
+        "notInCompany": "Od kiedy możesz pracować to Twój własny fakt, nie firmy. Przełącz się na przestrzeń osobistą i napisz ponownie.",
+        "changeRequested": "Otwieram twoją kartę pracy — wskaż, od kiedy możesz pracować, i zapisz. Nic się nie zmieni, dopóki tego nie zrobisz."
       },
       "findWorkInCompanyContext": "Szukanie pracy to Twoje własne działanie — w przestrzeni firmy go nie uruchamiam. Przełącz się na przestrzeń osobistą i zapytaj ponownie.",
       "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Twojej przestrzeni osobistej.",

@@ -774,10 +774,25 @@ export default async function CompanyScoutingPage({
                     <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.availability")}
                     </dt>
-                    <dd className="truncate text-xs text-text-primary">
+                    <dd className="text-xs text-text-primary">
                       {availabilityLabel(p.availability)}
                       {p.availableFrom ? (
                         <span className="text-text-secondary"> · {p.availableFrom}</span>
+                      ) : null}
+                      {/* ACTIONABLE LATER (owner ruling 2026-09-22). Real
+                          future supply: kept in the list, never presented as
+                          available now. The date is the worker's OWN stated
+                          one — the canonical verdict carries it, so nothing
+                          here estimates anything. */}
+                      {c.actionability.kind === "actionable_later" ? (
+                        <span
+                          className="mt-1 block text-text-secondary"
+                          data-testid="candidate-available-later"
+                        >
+                          {t("actionability.availableFromChip", {
+                            date: c.actionability.availableFrom,
+                          })}
+                        </span>
                       ) : null}
                     </dd>
                   </div>

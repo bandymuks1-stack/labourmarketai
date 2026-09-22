@@ -2190,6 +2190,32 @@ const RULES: IntentRule[] = [
       pNoSeek(`\\bmog[eę]\\s+(zacz[aą][cć]|zaczyna[cć]|wyj[sś][cć])\\s+${WHERE_GAP}(od|po|za)\\b`, 5),
       pNoSeek(`\\b(jestem|b[eę]d[eę])\\s+(dost[eę]pn|woln)[a-z]{0,4}\\s+${WHERE_GAP}(od|po|do)\\b`, 5),
       pNoSeek(`\\bdost[eę]pn[a-z]{0,4}\\s+${WHERE_GAP}(od|po)\\b`, 5),
+      // ── "PAKEISK MANO PRIEINAMUMĄ" (owner P0 2026-09-22, section A) ──────
+      //
+      // Every pattern above binds an availability word to a FROM/UNTIL time
+      // word, because each states a DATE. The owner's own example states
+      // none: "Pakeisk mano prieinamumą" is a request to CHANGE the fact,
+      // not a statement of it. Measured 2026-09-22: `unknown`, score 0 — one
+      // of the six sentences the owner listed as the chat-first minimum, and
+      // the only one with no route at all.
+      //
+      // Nothing new is built for it. The `availabilityStatement` handler
+      // already opens the canonical `worker.save-work-card` form, the ONE
+      // business action that writes availability; this is the missing door,
+      // not a second one. The handler tells a change REQUEST from a
+      // statement (`isAvailabilityChangeRequest`) so a person who said
+      // "change" is never recorded as having said "available".
+      //
+      // A CHANGE VERB BOUND TO AN AVAILABILITY NOUN, in the six served
+      // locales. Both halves are required: a bare "pakeisk" is every other
+      // edit in the product, and a bare "prieinamumas" is the noun in a
+      // dozen honest questions.
+      p(`\\b(pakeisk|pakeisti|keisk|atnaujink|atnaujinti|nustatyk)\\b.{0,24}(prieinamum|galimum|laisvum)`, 6),
+      p(`\\b(change|update|set|edit)\\b.{0,24}(availability|when\\s+i\\s+can\\s+(work|start))`, 6),
+      p(`\\b(измени|изменить|обнови|обновить|поменять|установи)\\b.{0,24}(доступност|занятост)`, 6),
+      p(`\\b(wijzig|verander|aanpassen)\\w*\\b.{0,24}(beschikbaarheid)`, 6),
+      p(`\\b(ändere|andere|aktualisiere|setze)\\b.{0,24}(verfügbarkeit)`, 6),
+      p(`\\b(zmień|zmienić|zaktualizuj|ustaw)\\b.{0,24}(dostępność|dostępnosc)`, 6),
     ],
   },
   {
@@ -3032,6 +3058,38 @@ const RULES: IntentRule[] = [
  * (score 0) when nothing matched, so the caller can degrade to an honest
  * fallback + starter chips (never a fabricated action).
  */
+/** The change-REQUEST shapes of the availability intent, mirroring the
+ *  patterns beside them. Built with `p()` — the SAME helper the patterns
+ *  use — so the diacritic fold and the Unicode word boundary are applied
+ *  identically. A hand-rolled `new RegExp` here kept ASCII , which does not
+ *  match before Cyrillic, so "Измени мою доступность" routed correctly and
+ *  then failed this check: one rule, two boundary conventions. */
+const AVAILABILITY_CHANGE_REQUEST = p(
+    "\\b(pakeisk|pakeisti|keisk|atnaujink|atnaujinti|nustatyk" +
+      "|change|update|set|edit" +
+      "|измени|изменить|обнови|обновить|поменять|установи" +
+      "|wijzig|verander|aanpassen" +
+      "|ändere|andere|aktualisiere|setze" +
+      "|zmień|zmienić|zaktualizuj|ustaw)\\b" +
+      ".{0,24}" +
+      "(prieinamum|galimum|laisvum|availability|доступност|занятост" +
+      "|beschikbaarheid|verfügbarkeit|dostępność|dostępnosc)",
+).re;
+
+/**
+ * Is this a request to CHANGE availability rather than a statement of it?
+ *
+ * An honesty distinction, not a routing one — both land on the same intent
+ * and the same business action. "I can work from Monday" STATES that the
+ * person is available; "change my availability" states nothing, so
+ * pre-filling the card with "available" would put words in their mouth and
+ * record a fact they never gave. The caller uses this to open the card with
+ * no presumed status.
+ */
+export function isAvailabilityChangeRequest(text: string): boolean {
+  return AVAILABILITY_CHANGE_REQUEST.test(fold(text));
+}
+
 export function classifyIntent(text: string): IntentMatch {
   // Folded to base letters so a sentence typed WITHOUT diacritics — the norm
   // on most keyboards — reaches exactly the same intent as one typed with

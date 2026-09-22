@@ -8459,6 +8459,10 @@
       "duration": "Trukmė",
       "declared": "Nurodyta",
       "privacyNote": "Vardai ir kontaktai čia sąmoningai nerodomi. Susisiekimas yra atskiras žingsnis, kuriam kita pusė turi sutikti."
+    },
+    "actionability": {
+      "availableFromChip": "Laisvas nuo {date}",
+      "availableFromNote": "Nurodytu pradžios laiku dar neprieinamas — šis žmogus nurodė vėlesnę pradžią. Tai jo paties data, ne prognozė."
     }
   },
   "planBoundary": {
@@ -13090,7 +13094,8 @@
       "availability": {
         "understood": "Supratau — gali dirbti. Įrašykime tai į darbo kortelę: patikslink datą, nuo kada.",
         "understoodFrom": "Supratau: gali dirbti nuo {date}. Įrašykime tai į darbo kortelę — datą jau įrašiau, peržiūrėk ir išsaugok.",
-        "notInCompany": "Kada gali dirbti — tai tavo asmeninis faktas, ne įmonės. Persijunk į asmeninę erdvę ir parašyk dar kartą."
+        "notInCompany": "Kada gali dirbti — tai tavo asmeninis faktas, ne įmonės. Persijunk į asmeninę erdvę ir parašyk dar kartą.",
+        "changeRequested": "Atidarau tavo darbo kortelę — nurodyk, nuo kada gali dirbti, ir išsaugok. Kol neišsaugosi, niekas nepasikeis."
       },
       "findWorkInCompanyContext": "Darbo paieška yra tavo asmeninis veiksmas — įmonės erdvėje jos nevykdau. Persijunk į asmeninę erdvę ir paklausk dar kartą.",
       "findWorkInCompanyWhy": "Darbo ieško žmogus, ne įmonė — atsakau iš tavo asmeninės erdvės.",

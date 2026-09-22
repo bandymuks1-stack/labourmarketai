@@ -64,7 +64,16 @@ describe("A3 — availability is registered and opens the ONE work-card form wit
     expect(registry).toMatch(/availability: \{ domain: "profile", access: "write", handler: "availabilityStatement"/);
     const handler = chat.slice(chat.indexOf("availabilityStatement: () => {"), chat.indexOf("skillGap: () =>"));
     expect(handler).toContain("const from = parseStartDate(text, todayIso());");
-    expect(handler).toMatch(/openForm\("worker\.save-work-card", undefined, undefined, \{\s*availabilityStatus: "available",/);
+    // Owner P0 2026-09-22 (section A): the SAME one form, now reached by two
+    // sentence shapes. A STATEMENT ("galiu dirbti nuo pirmadienio") still
+    // pre-fills the card with the availability the person stated; a change
+    // REQUEST ("pakeisk mano prieinamumą") opens the card with nothing
+    // pre-filled, because that sentence states no fact to record. Still ONE
+    // form and still no direct write — only which fields arrive pre-filled.
+    expect(handler).toContain("const changeRequest = isAvailabilityChangeRequest(text);");
+    expect(handler).toMatch(/openForm\(\s*"worker\.save-work-card",/);
+    expect(handler).toMatch(/changeRequest\s*\?\s*\{\}/);
+    expect(handler).toMatch(/availabilityStatus: "available",/);
     expect(handler).not.toMatch(/dispatch|execute|\.from\(/);
   });
 });

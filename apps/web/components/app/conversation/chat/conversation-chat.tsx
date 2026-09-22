@@ -115,6 +115,7 @@ import { useRouter } from "@/lib/i18n/navigation";
 import {
   classifyIntent,
   fold,
+  isAvailabilityChangeRequest,
   isExplicitJournalRequest,
 } from "@/lib/conversation/intent-router";
 import {
@@ -5502,11 +5503,31 @@ export function ConversationChat({
             return;
           }
           const from = parseStartDate(text, todayIso());
-          assistant(from ? t("availability.understoodFrom", { date: from }) : t("availability.understood"));
-          openForm("worker.save-work-card", undefined, undefined, {
-            availabilityStatus: "available",
-            ...(from ? { availableFrom: from } : {}),
-          });
+          // A CHANGE REQUEST STATES NOTHING (owner P0 2026-09-22, section A).
+          // "Pakeisk mano prieinamumą" asks to edit the fact; it does not
+          // claim availability. Pre-filling `available` there would record a
+          // fact the person never gave — the same card, but words in their
+          // mouth. A STATEMENT ("galiu dirbti nuo pirmadienio") still
+          // pre-fills, because they did say it.
+          const changeRequest = isAvailabilityChangeRequest(text);
+          assistant(
+            changeRequest
+              ? t("availability.changeRequested")
+              : from
+                ? t("availability.understoodFrom", { date: from })
+                : t("availability.understood"),
+          );
+          openForm(
+            "worker.save-work-card",
+            undefined,
+            undefined,
+            changeRequest
+              ? {}
+              : {
+                  availabilityStatus: "available",
+                  ...(from ? { availableFrom: from } : {}),
+                },
+          );
         },
         skillGap: () => runWorkflow(() => runSkillGap()),
         recentJournal: () => runWorkflow(() => runRecentJournal(text)),

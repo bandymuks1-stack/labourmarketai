@@ -21,6 +21,11 @@ import {
 } from "@/lib/scouting/scout-safe-view";
 import { freshnessDemotionRank } from "@/lib/scouting/profile-freshness";
 import {
+  candidateActionability,
+  mayOfferEmployerActions,
+} from "@/lib/scouting/candidate-actionability";
+import { readStructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
+import {
   allowlistScoutFilters,
   applyScoutFilters,
   buildScoutFacets,
@@ -287,7 +292,13 @@ export async function runScouting(
       .select("worker_id, status")
       .eq("request_id", requestId);
     for (const r of (ints ?? []) as { worker_id: string; status: string }[]) {
-      if (r.status !== "withdrawn") interestByWorker[r.worker_id] = r.status;
+      // WITHDRAWN IS KEPT, not dropped (owner ruling 2026-09-22). Filtering
+      // it out here turned "this person withdrew from your opportunity" into
+      // "this person never answered" — the same screen, two opposite facts.
+      // `candidateActionability` needs to SEE the withdrawal to refuse the
+      // proposal; the display map below still hides it from the interest
+      // chip, which is a presentation choice, not a loss of the fact.
+      interestByWorker[r.worker_id] = r.status;
     }
   } catch {
     // owner-gated migration not applied yet → no interest signals
@@ -321,8 +332,40 @@ export async function runScouting(
   const filters = allowlistScoutFilters(requestedFilters, facets);
   const filteredSupply = applyScoutFilters(supply, filters);
 
+  // CURRENT ACTIONABILITY, decided in ONE place for every candidate
+  // (lib/scouting/candidate-actionability.ts). A person the canonical state
+  // says is not a live proposal — the need is closed, they withdrew, their
+  // consent is gone — is removed from the CURRENT list here rather than in
+  // each surface's own conditionals. Nothing is deleted: the shortlist row,
+  // the interest row and their provenance are untouched, and the employer's
+  // own recorded decisions stay readable as history.
+  const nowIso = new Date().toISOString();
+  // The need's own stated start, from the canonical structured payload —
+  // the SAME field `compareStartDateV2` reads, so the two never disagree.
+  // Absent → the caller's "now", i.e. an employer who states no date is
+  // asking about today.
+  const v2Time = readStructuredDemandV2(req.payload)?.time;
+  const needStartsOn = v2Time?.start_latest ?? v2Time?.start_earliest ?? null;
   const candidates: ScoutSafeCandidate[] = filteredSupply
-    .map((c) =>
+    .map((c) => ({
+      c,
+      actionability: candidateActionability(
+        {
+          needStatus: req.status,
+          needStartsOn,
+          workerRecordPresent: true,
+          interestStatus: interestByWorker[c.workerId] ?? null,
+          shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+          availabilityStatus: c.subject.availabilityStatus ?? null,
+          availableFrom: c.subject.availableFrom ?? null,
+        },
+        nowIso,
+      ),
+    }))
+    // `actionable_later` SURVIVES: real future supply, kept and labelled by
+    // the surface, never silently presented as available now.
+    .filter(({ actionability }) => mayOfferEmployerActions(actionability))
+    .map(({ c, actionability }) =>
       toScoutSafeCandidate({
         workerId: c.workerId,
         professionSlug: c.professionSlug,
@@ -332,6 +375,7 @@ export async function runScouting(
         shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
         shortlistNote: shortlist.get(c.workerId)?.note ?? null,
         lastActiveBucket: c.lastActiveBucket,
+        actionability,
       }),
     )
     // Rank via the SHARED need-context comparator (§19 — strength, coverage,
