@@ -29,6 +29,27 @@ import { CANONICAL_HOME, dashboardChromeMode as modeFor } from "@/lib/config/nav
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
+describe("the composer stays immediately available on the canonical home", () => {
+  /**
+   * OWNER CONSTRAINT (2026-09-22): "removing the separate `ask` door is
+   * correct only if the composer/conversation remains immediately available
+   * from the canonical root."
+   *
+   * Measured at 375x812 on the first walk of this change: with ŠIANDIEN in
+   * the opening slot, the INLINE composer (owner audit §4.1, centred under
+   * the greeting) sat at y=1356 in an 812px viewport — the `?ask=1` door
+   * removed and nothing put in its place. With an opening context the sticky
+   * bottom composer takes over instead, and the inline one is not rendered at
+   * all (two composers would be two send buttons for one thread).
+   * Re-measured after the fix: y=693 of 812, in viewport.
+   */
+  it("an opening context hands the composer to the sticky bar, not the inline slot", () => {
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect(chat).toMatch(/composer=\{\s*openingContext \? undefined : \(/);
+    expect(chat).toMatch(/\{opening && !openingContext \? null : \(/);
+  });
+});
+
 describe("the logo is the way home from every authenticated route", () => {
   it("the ONE top bar renders the mark as a Link to /dashboard (not a dead span)", () => {
     const header = read("components/app/conversation/chat/conversation-header.tsx");

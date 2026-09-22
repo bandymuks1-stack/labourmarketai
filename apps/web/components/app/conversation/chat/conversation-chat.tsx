@@ -6319,19 +6319,31 @@ export function ConversationChat({
               // While the conversation is opening the composer renders inside
               // the centred composition (owner audit §4.1); afterwards the
               // thread ignores this prop and the sticky bar below takes over.
+              //
+              // NOT when an OPENING CONTEXT is on screen (owner constraint
+              // 2026-09-22: "removing the separate ask door is correct only if
+              // the composer remains immediately available from the canonical
+              // root"). Measured at 375x812 on the first walk of this change:
+              // with ŠIANDIEN above it, the inline composer sat below the fold
+              // and the person had to scroll past their whole day to type —
+              // the `?ask=1` door removed and nothing put in its place. The
+              // sticky bar below takes over instead, so the composer is on
+              // screen at every width from the first frame.
               composer={
-                <Composer
-                  variant="inline"
-                  placeholder={labels.composerPlaceholder}
-                  attachLabel={labels.attach}
-                  sendLabel={labels.send}
-                  onSend={handleSend}
-                  onAttach={handleAttach}
-                  prefill={sayPrefill}
-                />
+                openingContext ? undefined : (
+                  <Composer
+                    variant="inline"
+                    placeholder={labels.composerPlaceholder}
+                    attachLabel={labels.attach}
+                    sendLabel={labels.send}
+                    onSend={handleSend}
+                    onAttach={handleAttach}
+                    prefill={sayPrefill}
+                  />
+                )
               }
             />
-            {opening ? null : (
+            {opening && !openingContext ? null : (
               <Composer
                 placeholder={labels.composerPlaceholder}
                 attachLabel={labels.attach}
