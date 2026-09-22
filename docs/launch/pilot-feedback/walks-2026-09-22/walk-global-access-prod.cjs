@@ -162,13 +162,20 @@ const DRAFT_DESCRIPTION = "Reikia 1 darbuotojo — E2E global-access patikra, ju
     mark(code, "company", !invalidCountry && companyOk && orgOk, { optionCount: options.length, before, result, invalidCountry, companies: companies.map((c) => ({ id: c.id, country: c.country })), organizations: orgs.map((x) => ({ id: x.id, country: x.country })), readback: { companiesCountry: companyOk, organizationsCountry: orgOk } });
   };
 
+  // Phone width: the context panel body is folded until its own toggle opens it (context-panel.tsx
+  // `expanded`; desktop ignores it) — measured on the local stack 2026-09-22 at 390 px.
+  const unfoldContextPanel = async () => {
+    const toggle = w.getByTestId("context-panel-toggle");
+    if ((await toggle.isVisible().catch(() => false)) && (await toggle.getAttribute("aria-expanded")) !== "true") { await toggle.click(); await w.waitForTimeout(500); }
+  };
   // (2) work card — country NAMES typed in the UI locale; the row must hold CODES
   const workCard = async (code) => {
     const locationName = nameOf(code);
     const preferredNames = CODES.map((c) => nameOf(c));
     await w.goto(HOST + `/${UI_LOCALE}/dashboard?result=player-card`, { waitUntil: "domcontentloaded", timeout: 60000 });
     let editorHost = w.getByTestId("player-card-work-editor");
-    const onResult = await editorHost.waitFor({ timeout: 45000 }).then(() => true).catch(() => false);
+    const onResult = await editorHost.waitFor({ state: "attached", timeout: 45000 }).then(() => true).catch(() => false);
+    if (onResult) await unfoldContextPanel();
     if (!onResult) {
       await w.goto(HOST + `/${UI_LOCALE}/dashboard/profile`, { waitUntil: "domcontentloaded", timeout: 60000 });
       editorHost = w.locator("body");
@@ -286,7 +293,7 @@ const DRAFT_DESCRIPTION = "Reikia 1 darbuotojo — E2E global-access patikra, ju
       const base = baseline.worker;
       if (!base || (!base.current_location_country && !(base.preferred_countries || []).length)) { restore.workCard = "no_baseline_values (the editor cannot CLEAR a saved field — see work-card-editor.tsx keepOnlyHint; restore statement printed in the residue register)"; return; }
       await w.goto(HOST + `/${UI_LOCALE}/dashboard?result=player-card`, { waitUntil: "domcontentloaded", timeout: 60000 });
-      const host = w.getByTestId("player-card-work-editor"); await host.waitFor({ timeout: 45000 });
+      const host = w.getByTestId("player-card-work-editor"); await host.waitFor({ state: "attached", timeout: 45000 }); await unfoldContextPanel();
       if ((await host.getByTestId("work-card-editor").count()) === 0) await host.getByTestId("work-card-editor-toggle").first().click();
       const form = host.getByTestId("work-card-editor").first(); await form.waitFor({ timeout: 30000 });
       if (base.current_location_country) await form.locator('input[name="location_country"]').fill(base.current_location_country);

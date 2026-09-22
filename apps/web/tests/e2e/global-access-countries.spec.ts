@@ -223,7 +223,9 @@ test.describe("global access — LT SE DE IE VN US SA GE PH through the shipped 
         await select.selectOption(code);
         await page.getByTestId("company-setup-save-draft").click();
         const result = page.getByTestId("company-setup-result");
-        await expect(result).toBeVisible({ timeout: 60_000 });
+        // The save is a server action; on a loaded dev server one POST has been
+        // measured at 62 s (2026-09-22). The row read-back below is the proof.
+        await expect(result).toBeVisible({ timeout: 120_000 });
         const text = (await result.innerText()).trim();
         expect(text.startsWith(INVALID_COUNTRY_PREFIX), `${code}: no invalid-country banner`).toBe(false);
         await page.screenshot({ path: join(SHOTS, `${code}-1-company.png`), fullPage: true });
@@ -248,6 +250,13 @@ test.describe("global access — LT SE DE IE VN US SA GE PH through the shipped 
       {
         await page.goto(`/${UI_LOCALE}/dashboard?result=player-card`, { waitUntil: "domcontentloaded" });
         const host = page.getByTestId("player-card-work-editor");
+        await host.waitFor({ state: "attached", timeout: 60_000 });
+        // Phone width: the context panel body is folded until its own toggle
+        // opens it (context-panel.tsx `expanded`; desktop ignores it).
+        const toggle = page.getByTestId("context-panel-toggle");
+        if ((await toggle.isVisible().catch(() => false)) && (await toggle.getAttribute("aria-expanded")) !== "true") {
+          await toggle.click();
+        }
         await expect(host).toBeVisible({ timeout: 60_000 });
         if ((await host.getByTestId("work-card-editor").count()) === 0) {
           await host.getByTestId("work-card-editor-toggle").click();
