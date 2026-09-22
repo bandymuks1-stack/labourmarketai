@@ -8511,6 +8511,7 @@
       "document_expiry_reminders": "Przypomnienia o wygasających dokumentach",
       "expanded_cv": "Rozszerzone CV",
       "priority_visibility": "Priorytetowa widoczność",
+      "vacancy_translations": "Tłumaczenia ogłoszeń",
       "company_create_needs": "Otwarte zapotrzebowanie na pracowników",
       "candidate_readiness_summaries": "Podsumowania gotowości kandydatów",
       "booking_requests": "Zapytania o rezerwację",
@@ -14730,7 +14731,14 @@
       "showOriginal": "Pokaż oryginał",
       "hideOriginal": "Ukryj oryginał",
       "machineNote": "Tłumaczenie automatyczne. Liczby, waluta, daty i nazwy jak w oryginale; oryginał pozostaje faktem.",
-      "originalTitle": "Oryginalny tytuł"
+      "originalTitle": "Oryginalny tytuł",
+      "translate": "Przetłumacz na {language}",
+      "translating": "Tłumaczenie…",
+      "showTranslation": "Pokaż tłumaczenie",
+      "allowanceRemaining": "Pozostało {count} z {limit} tłumaczeń",
+      "allowanceExhausted": "Wykorzystano wszystkie {limit} tłumaczeń zawartych w planie. Ogłoszenie nadal można czytać w języku oryginału.",
+      "unavailable": "Nie udało się teraz przetłumaczyć tego ogłoszenia. Poniżej słowa samego ogłoszeniodawcy.",
+      "signedOut": "Zaloguj się, aby przetłumaczyć to ogłoszenie."
     }
   },
   "invitations": {

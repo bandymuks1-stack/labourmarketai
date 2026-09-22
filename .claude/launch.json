@@ -29,7 +29,11 @@
     {
       "name": "dev",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev", "-p", "3000"],
+      "runtimeArgs": [
+        "dev",
+        "-p",
+        "3000"
+      ],
       "cwd": "apps/web",
       "port": 3000
     },
@@ -44,6 +48,17 @@
       ],
       "cwd": "apps/web",
       "port": 3300
+    },
+    {
+      "name": "verify-fresh",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start"
+      ],
+      "cwd": "apps/web",
+      "port": 3400,
+      "autoPort": true
     }
   ]
 }
