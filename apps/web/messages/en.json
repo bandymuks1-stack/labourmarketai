@@ -16254,7 +16254,10 @@
       "disputeFailed": "Could not record the objection. Please try again.",
       "monthlyShare": "Derived equal monthly share · not source days",
       "attestAll": "Attest all {count} records",
-      "attestAllHint": "The organization stands behind every not-yet-attested record from this source ({count}). One attestation event per record, with role and note; hours, source facts and records are not changed. This is not independent verification."
+      "attestAllHint": "The organization stands behind every not-yet-attested record from this source ({count}). One attestation event per record, with role and note; hours, source facts and records are not changed. This is not independent verification.",
+      "periodDerivedHuman": "Period set at import (human choice) — the source stated no dates",
+      "periodDerived": "Period derived — the source stated no dates",
+      "sourceStatement": "Source statement (fact)"
     },
     "withdraw": {
       "title": "Undo this import",

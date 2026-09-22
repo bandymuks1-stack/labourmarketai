@@ -6489,5 +6489,12 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       }
     }
+  },
+  "evidenceImport": {
+    "records": {
+      "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
+      "periodDerived": "[EN] Period derived — the source stated no dates",
+      "sourceStatement": "[EN] Source statement (fact)"
+    }
   }
 }

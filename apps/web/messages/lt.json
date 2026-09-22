@@ -16254,7 +16254,10 @@
       "disputeFailed": "Nepavyko užfiksuoti prieštaravimo. Bandykite dar kartą.",
       "monthlyShare": "Išvestinis lygus mėnesio paskirstymas · ne šaltinio dienos",
       "attestAll": "Patvirtinti visus {count} įrašus",
-      "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas."
+      "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas.",
+      "periodDerivedHuman": "Laikotarpis nustatytas importo metu (žmogaus sprendimas) — šaltinis datų nenurodė",
+      "periodDerived": "Laikotarpis išvestas — šaltinis datų nenurodė",
+      "sourceStatement": "Šaltinio tekstas (faktas)"
     },
     "withdraw": {
       "title": "Atšaukti šį importą",

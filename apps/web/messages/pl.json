@@ -16254,7 +16254,10 @@
       "disputeFailed": "Nie udało się zarejestrować sprzeciwu. Spróbuj ponownie.",
       "monthlyShare": "Wyliczony równy udział miesięczny · nie dni źródłowe",
       "attestAll": "Potwierdź wszystkie {count} zapisów",
-      "attestAllHint": "Organizacja potwierdza każdy jeszcze niepotwierdzony zapis z tego źródła ({count}). Jedno zdarzenie potwierdzenia na zapis, z rolą i notatką; godziny, fakty źródłowe i zapisy nie ulegają zmianie. To nie jest niezależna weryfikacja."
+      "attestAllHint": "Organizacja potwierdza każdy jeszcze niepotwierdzony zapis z tego źródła ({count}). Jedno zdarzenie potwierdzenia na zapis, z rolą i notatką; godziny, fakty źródłowe i zapisy nie ulegają zmianie. To nie jest niezależna weryfikacja.",
+      "periodDerivedHuman": "Okres ustalony przy imporcie (decyzja człowieka) — źródło nie podało dat",
+      "periodDerived": "Okres wyprowadzony — źródło nie podało dat",
+      "sourceStatement": "Treść źródła (fakt)"
     },
     "withdraw": {
       "title": "Cofnij ten import",

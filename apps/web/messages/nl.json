@@ -16254,7 +16254,10 @@
       "disputeFailed": "Het bezwaar kon niet worden vastgelegd. Probeer het opnieuw.",
       "monthlyShare": "Afgeleide gelijke maandverdeling · geen brondagen",
       "attestAll": "Alle {count} records bevestigen",
-      "attestAllHint": "De organisatie staat achter elk nog niet bevestigd record uit deze bron ({count}). Eén bevestigingsgebeurtenis per record, met rol en notitie; uren, bronfeiten en records veranderen niet. Dit is geen onafhankelijke verificatie."
+      "attestAllHint": "De organisatie staat achter elk nog niet bevestigd record uit deze bron ({count}). Eén bevestigingsgebeurtenis per record, met rol en notitie; uren, bronfeiten en records veranderen niet. Dit is geen onafhankelijke verificatie.",
+      "periodDerivedHuman": "Periode bij import vastgesteld (menselijke keuze) — de bron noemde geen data",
+      "periodDerived": "Periode afgeleid — de bron noemde geen data",
+      "sourceStatement": "Brontekst (feit)"
     },
     "withdraw": {
       "title": "Deze import ongedaan maken",
