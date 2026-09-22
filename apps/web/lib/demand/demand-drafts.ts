@@ -19,6 +19,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { resolveCountryCode } from "@/lib/location/country-model";
 
 export type DraftType =
   | "company_request"
@@ -63,6 +64,15 @@ export type CompanyRequestPayload = {
    * prefill against the closed set, never inferred.
    */
   opportunityType?: string;
+  /**
+   * The COUNTRY the employer picked on the criteria step (ISO-3166 alpha-2).
+   * Until 2026-09-22 "save as draft" discarded it — the same silent-loss class
+   * as `teamSize` / `opportunityType` — and the prefill reads the draft's
+   * `customer_requests.country` COLUMN, so a company in Vietnam continued its
+   * draft with no country at all. Kept here AND stamped onto the column by
+   * `saveDemandDraft` (owner-scoped UPDATE, ISO-validated, never a guess).
+   */
+  country?: string;
   /** Organisation's role ON THIS need — situational, not a permanent identity. */
   projectRole?:
     | "client"
@@ -129,6 +139,7 @@ const ALLOWED_KEYS: Record<DraftType, ReadonlySet<string>> = {
     "teamSize",
     "projectRole",
     "opportunityType",
+    "country",
     "accommodation",
     "languages",
     "notes",
@@ -278,12 +289,12 @@ export async function saveDemandDraft(
     p_payload: payload,
     p_original_language: "lt",
   };
-  let { error } = await (supabase as unknown as DemandClient).rpc(
+  let { data, error } = await (supabase as unknown as DemandClient).rpc(
     "save_demand_draft_v2",
     { ...draftArgs, p_organization_id: organizationId },
   );
   if (error && ["42883", "PGRST202"].includes(error.code ?? "")) {
-    ({ error } = await (supabase as unknown as DemandClient).rpc(
+    ({ data, error } = await (supabase as unknown as DemandClient).rpc(
       "save_demand_draft",
       draftArgs,
     ));
@@ -292,6 +303,31 @@ export async function saveDemandDraft(
   if (error) {
     console.error("[demand-draft] save failed:", error.message);
     throw new Error(`save failed: ${error.message}`);
+  }
+
+  // Global-access rule (2026-09-22): the draft's country lives on the SAME
+  // column the submit path stamps and the prefill reads
+  // (`customer_requests.country`), not only inside the payload — an
+  // owner-scoped UPDATE under the existing RLS (profile_id = auth.uid()), the
+  // identical pattern `submitDemandRequestCore` uses. Only a resolvable ISO
+  // code is written (any of the 249 countries, never a market-gated subset);
+  // an unresolvable value is dropped here rather than stored as junk. A
+  // failure of this leg never fails the save — the draft already exists — but
+  // it is logged, never swallowed silently.
+  const draftId = typeof data === "string" ? data : null;
+  const draftCountry =
+    type === "company_request"
+      ? resolveCountryCode((payload as CompanyRequestPayload).country)
+      : null;
+  if (draftId && draftCountry) {
+    const { error: countryError } = await cr(supabase)
+      .update({ country: draftCountry })
+      .eq("id", draftId)
+      .eq("profile_id", user.id)
+      .eq("status", "draft");
+    if (countryError) {
+      console.error("[demand-draft] country stamp failed:", countryError.message);
+    }
   }
 
   revalidatePath("/", "layout");

@@ -74,7 +74,13 @@ describe("(b) no silent 'LT' country default", () => {
     expect(src).not.toMatch(/useState<string>\(\s*["']LT["']\s*\)/);
     expect(src).toMatch(/country_placeholder/);
     expect(src).toMatch(/error_country_required/);
-    expect(src).toMatch(/ACTIVE_MARKETS/);
+    // Re-pinned 2026-09-22 (global-access rule): the select is fed by
+    // `countryOptionsForLocale` — every ISO country, active markets FIRST —
+    // instead of a bare ACTIVE_MARKETS map. The market list still orders the
+    // options (inside that helper); it no longer shortens them. See
+    // lib/guards/global-access-person-and-draft.test.ts.
+    expect(src).toMatch(/countryOptionsForLocale\(locale\)/);
+    expect(src).not.toMatch(/ACTIVE_MARKETS\.map\(/);
   });
 
   it("company setup form has no LT fallback (placeholder + honest empty)", () => {

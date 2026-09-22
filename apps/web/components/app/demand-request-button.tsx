@@ -210,6 +210,10 @@ export function DemandRequestButton({
         // draft" while the UI reported success (same class as the teamSize
         // loss fixed earlier).
         opportunityType: adv.opportunityType || undefined,
+        // The picked country (any ISO country — global-access rule 2026-09-22)
+        // used to be dropped by the draft leg too; the prefill reads it from
+        // `customer_requests.country`, which the action stamps.
+        country: country || undefined,
         notes,
       });
       setDraftSource(true);
