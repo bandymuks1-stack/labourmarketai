@@ -2246,6 +2246,7 @@
     },
     "intent": {
       "label": "Mana situācija",
+      "notDeclared": "Vēl nav norādīts — pastāstiet, vai meklējat darbu un kur drīkstat strādāt",
       "states": {
         "AVAILABLE_NOW": "Varu sākt tūlīt",
         "AVAILABLE_FROM": "Varu sākt no norādīta datuma",

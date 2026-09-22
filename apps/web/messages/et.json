@@ -2246,6 +2246,7 @@
     },
     "intent": {
       "label": "Minu olukord",
+      "notDeclared": "Veel märkimata — öelge, kas otsite tööd ja kus tohite töötada",
       "states": {
         "AVAILABLE_NOW": "Saan alustada kohe",
         "AVAILABLE_FROM": "Saan alustada alates kuupäevast",

@@ -1889,6 +1889,22 @@ export default async function OpportunitiesPage({
                     </span>
                     <span className="text-text-primary">{t(`intent.states.${declaredIntent}`)}</span>
                   </Link>
+                ) : partnerSupply && partnerSupply.kind === "ok" && partnerSupply.hasWorkerProfile ? (
+                  /* MEASURED 2026-09-22: 59 workers, 0 declarations, /dashboard/privacy
+                     visited 3 times ever. The chip above is the board's only door to
+                     the declaration and it rendered ONLY for a person who had already
+                     declared — the undeclared saw nothing. This is the same door for
+                     them: same target, same editor, plain words, no default chosen. */
+                  <Link
+                    href={`/${locale}/dashboard/privacy#partner-supply`}
+                    data-testid="opportunities-intent-door"
+                    className="inline-flex min-h-11 w-fit flex-wrap items-center gap-x-2 rounded-md border border-state-amber/40 bg-state-amber/5 px-2.5 text-basis text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("intent.label")}
+                    </span>
+                    <span className="text-text-primary">{t("intent.notDeclared")}</span>
+                  </Link>
                 ) : null}
                 <Link
                   href={profileHref}

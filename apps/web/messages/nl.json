@@ -9492,6 +9492,7 @@
     },
     "intent": {
       "label": "Mijn situatie",
+      "notDeclared": "Nog niet opgegeven — laat weten of u werk zoekt en waar u mag werken",
       "states": {
         "AVAILABLE_NOW": "Kan nu beginnen",
         "AVAILABLE_FROM": "Kan beginnen vanaf een datum",
