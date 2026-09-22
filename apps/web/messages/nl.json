@@ -8511,6 +8511,7 @@
       "document_expiry_reminders": "Herinneringen bij verlopende documenten",
       "expanded_cv": "Uitgebreid cv",
       "priority_visibility": "Prioriteitszichtbaarheid",
+      "vacancy_translations": "Vertalingen van vacatures",
       "company_create_needs": "Open personeelsbehoeften",
       "candidate_readiness_summaries": "Gereedheidssamenvattingen van kandidaten",
       "booking_requests": "Boekingsaanvragen",
@@ -14730,7 +14731,14 @@
       "showOriginal": "Origineel tonen",
       "hideOriginal": "Origineel verbergen",
       "machineNote": "Automatische vertaling. Getallen, valuta, data en namen zoals in het origineel; het origineel blijft het feit.",
-      "originalTitle": "Oorspronkelijke titel"
+      "originalTitle": "Oorspronkelijke titel",
+      "translate": "Vertalen naar het {language}",
+      "translating": "Bezig met vertalen…",
+      "showTranslation": "Vertaling tonen",
+      "allowanceRemaining": "Nog {count} van {limit} vertalingen over",
+      "allowanceExhausted": "U hebt al uw {limit} inbegrepen vertalingen gebruikt. De vacature blijft volledig leesbaar in de oorspronkelijke taal.",
+      "unavailable": "Deze vacature kon nu niet worden vertaald. Hieronder staan de eigen woorden van de adverteerder.",
+      "signedOut": "Meld u aan om deze vacature te vertalen."
     }
   },
   "invitations": {

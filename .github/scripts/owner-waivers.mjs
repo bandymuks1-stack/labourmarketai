@@ -489,8 +489,39 @@ export const SCOPED_OWNER_WAIVERS = [
      * change; the anonymous visitor receives the same projection, now also in
      * Polish. The World-State answers stay honestly "no" — same class as
      * #1193, #1203, #1786, #1809.
+     *
+     * ── #1838 (2026-09-22) ──────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-22):
+     *   "I approve adding ONLY PR 1838 to the existing
+     *    public-acquisition-route-jobs waiver pullRequests list.
+     *    Do not broaden the waiver."
+     * The same ruling adds: "Do not add another route, finding class or
+     * permanent exception."
+     *
+     * Exactly that was done: one number added to `pullRequests`. Axiom, codes,
+     * surfaces, file list, expected finding set, expiry and subset rule are
+     * byte-unchanged; `product-gate.mjs` is not touched.
+     *
+     * Pre-conditions checked by RUNNING the gate, not by reasoning:
+     *   CI quality run 35743586467 (head 2bb419d1): 42 `not waived` lines,
+     *   EVERY one `pr-not-covered` and no other reason ("covers PR 1184, 1193,
+     *   1203, 1208, 1255, 1649, 1786, 1809, 1810 and branch main; this run is
+     *   PR 1838"). The diff adds ZERO findings.
+     *
+     * WHAT #1838 ACTUALLY DOES to these surfaces (owner decision 2026-09-22,
+     * the vacancy translation policy): it STOPS the board translating — the
+     * reader-locale path becomes a synchronous read of renderings that already
+     * exist, so no page view can reach a provider — and adds, inside the
+     * EXISTING member-only branch of `/jobs/[id]`, the advertisement's own
+     * language plus ONE explicit "translate this advertisement" control.
+     * Entitlement-gated, charged only on a usable result. No new route, page,
+     * auth change, schema or projection change; the ANONYMOUS visitor receives
+     * exactly what they received before and carries ZERO translate controls in
+     * all six served locales (verified on the built app). The World-State
+     * answers stay honestly "no" for the anonymous caller this surface exists
+     * for — same class as #1193, #1203, #1786, #1809, #1810.
      */
-    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810],
+    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],

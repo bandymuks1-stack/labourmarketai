@@ -109,15 +109,7 @@ export async function loadExternalVacancyCards(
   options: Pick<
     VacancySearchFiltersV1,
     "country" | "professionSlug" | "query" | "nowIso"
-  > & {
-    /**
-     * WHO is reading, for the reader-locale rendering of the titles
-     * (owner P0 2026-09-22 §9). The board renders in the viewer's UI
-     * locale; the id bounds the per-viewer translation rate. Omitted →
-     * the originals stand (a test, or a caller without a session).
-     */
-    readonly viewerId?: string | null;
-  },
+  >,
 ): Promise<ExternalVacanciesResultV1> {
   const explicitProfession = options.professionSlug ?? null;
   const nowIso = options.nowIso ?? new Date().toISOString();
@@ -261,13 +253,16 @@ export async function loadExternalVacancyCards(
 
   // THE READER'S LANGUAGE — for exactly the cards that render, after the
   // ranking (ranking reads slugs and facts, never words, so it is
-  // language-neutral by construction). Stored renderings cost nothing; the
-  // missing ones are ONE batched runtime call, persisted beside the
-  // original. A refused/absent rendering leaves the publisher's words,
-  // named as the original.
-  const cards = options.viewerId
-    ? await withReaderLanguage(ranked, vacancyByKey, options.viewerId)
-    : ranked;
+  // language-neutral by construction).
+  //
+  // OWNER DECISION 2026-09-22: this reads ONLY renderings that already
+  // exist. The board no longer translates. A foreign ad the platform has
+  // never been asked to render shows the publisher's own words with its
+  // language named, and the reader may ask for a rendering on the ad
+  // itself. Because a stored rendering costs nothing, it is applied for
+  // EVERY reader including anonymous ones — a crawler cannot trigger a
+  // vendor call because there is no vendor call on this path at all.
+  const cards = await withReaderLanguage(ranked, vacancyByKey);
 
   return { available: true, cards, freshness };
 }
@@ -275,21 +270,32 @@ export async function loadExternalVacancyCards(
 async function withReaderLanguage(
   cards: readonly ExternalOpportunityCardV1[],
   vacancyByKey: ReadonlyMap<string, StoredPublicVacancyV1>,
-  viewerId: string,
 ): Promise<readonly ExternalOpportunityCardV1[]> {
   // Loaded here, not at module top: the translation reader carries the AI
   // runtime graph, and this module is imported by every board read (and by
   // the intent-router tests, whose 5 s budget a static import would eat).
-  const [{ getLocale }, { resolveVacancyTitles }] = await Promise.all([
+  const [{ getLocale }, { storedVacancyTitles }] = await Promise.all([
     import("next-intl/server"),
     import("@/lib/vacancy-store/vacancy-translation-read"),
   ]);
-  const locale = await getLocale();
+  // NO READER LOCALE, NO SUBSTITUTION. `getLocale()` needs a request scope;
+  // outside one (a unit test, a background job) there is no reader whose
+  // language we could be rendering into. Falling back to the publisher's own
+  // words is not a swallowed error — the original IS the fact, and it is
+  // what the card renders whenever a rendering is absent for any reason.
+  // Guessing a locale here is the one thing that WOULD be wrong: it would
+  // show a Lithuanian rendering to a reader who never asked for one.
+  let locale: string;
+  try {
+    locale = await getLocale();
+  } catch {
+    return cards;
+  }
   const vacancies = cards.flatMap((c) => {
     const v = vacancyByKey.get(c.key);
     return v ? [v] : [];
   });
-  const renderings = await resolveVacancyTitles(vacancies, locale, viewerId);
+  const renderings = storedVacancyTitles(vacancies, locale);
   if (renderings.size === 0) return cards;
   return cards.map((card) => {
     const v = vacancyByKey.get(card.key);

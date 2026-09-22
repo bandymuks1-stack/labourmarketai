@@ -230,6 +230,17 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    rows it writes are DERIVED renderings of text that is already public
     //    to the whole internet. The originals are never overwritten. Touches
     //    no chat table; sends nothing outbound beyond the audited AI runtime.
+    //  - lib/vacancy-store/vacancy-translation-entitlement.ts — the TRANSLATION
+    //    ALLOWANCE meter (owner decision 2026-09-22). Service role is genuinely
+    //    required, not convenient: `usage_cost_events` has NO insert policy or
+    //    grant for `authenticated` BY DESIGN (migration 20260728114008 — admin
+    //    SELECT only, append-only, service role is the single write path), which
+    //    is the same reason lib/usage/usage-cost-store.ts is on this list. It
+    //    touches ONE table, counts and appends rows keyed to the CALLER'S OWN
+    //    profile id (resolved server-side from the session, never from an
+    //    argument), stores no advertisement text and no personal data beyond
+    //    that id, and reads nothing about anyone else. Touches no chat table;
+    //    sends nothing outbound.
     //  - lib/supply-bridge/feed-source.ts — the first-party supply feed
     //    reader. Service role is genuinely required, not convenient: the
     //    human-gated migration 20260904120000 grants EXECUTE on
@@ -447,6 +458,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/supply-bridge/feed-source.ts",
       "lib/usage/usage-cost-store.ts",
       "lib/vacancy-runner/vacancy-admin-actions.ts",
+      "lib/vacancy-store/vacancy-translation-entitlement.ts",
       "lib/vacancy-store/vacancy-translation-read.ts",
     ]);
   });

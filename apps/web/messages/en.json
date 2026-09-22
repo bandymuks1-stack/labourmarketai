@@ -8511,6 +8511,7 @@
       "document_expiry_reminders": "Document expiry reminders",
       "expanded_cv": "Expanded CV",
       "priority_visibility": "Priority visibility",
+      "vacancy_translations": "Advertisement translations",
       "company_create_needs": "Open worker needs",
       "candidate_readiness_summaries": "Candidate readiness summaries",
       "booking_requests": "Booking requests",
@@ -14730,7 +14731,14 @@
       "showOriginal": "Show original",
       "hideOriginal": "Hide original",
       "machineNote": "Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
-      "originalTitle": "Original title"
+      "originalTitle": "Original title",
+      "translate": "Translate into {language}",
+      "translating": "Translating…",
+      "showTranslation": "Show translation",
+      "allowanceRemaining": "{count} of {limit} translations left",
+      "allowanceExhausted": "You have used all {limit} of your included translations. The advertisement stays fully readable in its original language.",
+      "unavailable": "This advertisement could not be translated right now. The publisher's own words are shown below.",
+      "signedOut": "Sign in to translate this advertisement."
     }
   },
   "invitations": {

@@ -104,6 +104,15 @@ export const FEATURE_ENFORCEMENT: Readonly<
     kind: "declared_boundary_only",
     site: ENTITLEMENT_SEAM,
   },
+  vacancy_translations: {
+    // Owner decision 2026-09-22 (vacancy translation policy): a REAL server
+    // gate, not a declared boundary. The allowance is read before any text
+    // leaves the building and spent only after the reader receives a usable
+    // rendering; an exhausted allowance removes the convenience and never
+    // the advertisement.
+    kind: "server_gate",
+    site: "lib/vacancy-store/vacancy-translation-entitlement.ts",
+  },
   // company
   company_create_needs: {
     // Owner launch pricing 2026-09-05: enforced on the ONE canonical demand

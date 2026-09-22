@@ -36,6 +36,8 @@ export const FREE_ORGANIZATION_PLAN_KEY = "free_organization" as const;
 export const ORGANIZATION_PLAN_KEY = "company_pilot" as const;
 /** The paid ceiling; at or above it the next step is a conversation, not a tier. */
 export const OPEN_NEEDS_CONTACT_THRESHOLD = 10 as const;
+
+
 /** Plans that exist in the registry but are not offered at launch. */
 export const DEFERRED_PLAN_KEYS = ["worker_plus", "agency_pilot"] as const;
 
@@ -62,6 +64,25 @@ export type FeatureKey =
   | "document_expiry_reminders"
   | "expanded_cv"
   | "priority_visibility"
+  /**
+   * On-demand rendering of a foreign-language advertisement into the
+   * reader's language (owner decision 2026-09-22). Not a worker-only
+   * feature — an employer or agency reading a foreign ad asks the same
+   * question — so every audience's plan carries it below.
+   *
+   * UNCONFIGURED TODAY, AND THAT IS THE POINT. The owner approved the
+   * commercial MODEL (user-requested; a limited free amount; a limited
+   * subscription amount; credits possibly later; no plan unlimited) and
+   * explicitly NOT the quantities: "exact quantities and prices are NOT YET
+   * DECIDED". So every plan declares `false` — the `priority_visibility`
+   * precedent — which is neither an invented number nor an unlimited grant.
+   *
+   * Setting a real allowance later is ONE edit per plan: replace `false`
+   * with the owner's number. Nothing in the mechanism changes, because the
+   * gate reads this registry rather than a constant of its own.
+   * See lib/vacancy-store/vacancy-translation-entitlement.ts.
+   */
+  | "vacancy_translations"
   // company
   | "company_create_needs" // numeric: concurrent open needs
   | "candidate_readiness_summaries"
@@ -104,6 +125,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
       worker_journal: true,
       worker_basic_skills: true,
       readiness_checklist_countries: 1,
+      vacancy_translations: false, // quantities NOT set by the owner yet
     },
   },
   {
@@ -122,6 +144,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
       expanded_cv: true,
       readiness_checklist_countries: 10,
       document_expiry_reminders: true,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       priority_visibility: false, // later — never claimed active now
     },
   },
@@ -138,6 +161,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     labelKey: "free_organization",
     entitlements: {
       company_create_needs: 1,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       candidate_readiness_summaries: true,
       booking_requests: true,
       communication: true,
@@ -161,6 +185,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     launch: "sellable",
     entitlements: {
       company_create_needs: OPEN_NEEDS_CONTACT_THRESHOLD,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       candidate_readiness_summaries: true,
       booking_requests: true,
       communication: true,
@@ -187,6 +212,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
       doc_readiness_tracking: true,
       booking_pipeline: true,
       company_create_needs: 25,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       candidate_readiness_summaries: true,
       booking_requests: true,
       communication: true,
@@ -200,6 +226,7 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     labelKey: "admin_internal",
     entitlements: {
       verify_documents: true,
+      vacancy_translations: false, // quantities NOT set by the owner yet
       manage_country_rules: true,
       manage_pilots: true,
     },

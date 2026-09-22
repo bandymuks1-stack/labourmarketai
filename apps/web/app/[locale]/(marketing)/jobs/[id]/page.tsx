@@ -22,6 +22,10 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import { VacancyInterestButton } from "@/components/app/vacancy-interest-button";
+import {
+  VacancyTranslateControl,
+  displayLanguageName,
+} from "@/components/app/vacancy-translate-control";
 import type { FitBand } from "@/lib/opportunities/fit-band";
 import {
   readPublicJobForMember,
@@ -810,6 +814,39 @@ export default async function JobDetailPage({
               </div>
             )}
           </section>
+
+          {/* THE ADVERTISEMENT'S LANGUAGE, AND THE READER'S CHOICE
+              (owner decision 2026-09-22). A foreign-language ad names its
+              language and offers ONE explicit act: render it into the
+              reader's language. Nothing is translated on the way here — the
+              words below are the publisher's own until a person asks
+              otherwise, and they stay on the page afterwards either way. */}
+          {sourceLang && sourceLang.slice(0, 2) !== active ? (
+            <section className="mt-8" data-testid="vacancy-language">
+              <p className="text-sm text-text-muted" data-testid="vacancy-source-language">
+                {t("vacancySources.language.originalIn", {
+                  language: displayLanguageName(sourceLang, active),
+                })}
+              </p>
+              <VacancyTranslateControl
+                vacancyId={id}
+                descriptionHeading={DESCRIPTION_HEADING[active]}
+                labels={{
+                  translate: t("vacancySources.language.translate", {
+                    language: displayLanguageName(active, active),
+                  }),
+                  translating: t("vacancySources.language.translating"),
+                  machineNote: t("vacancySources.language.machineNote"),
+                  remaining: (count, limit) =>
+                    t("vacancySources.language.allowanceRemaining", { count, limit }),
+                  exhausted: (limit) =>
+                    t("vacancySources.language.allowanceExhausted", { limit }),
+                  unavailable: t("vacancySources.language.unavailable"),
+                  signedOut: t("vacancySources.language.signedOut"),
+                }}
+              />
+            </section>
+          ) : null}
 
           {member.descriptionRaw.trim().length > 0 && (
             <section className="mt-8">

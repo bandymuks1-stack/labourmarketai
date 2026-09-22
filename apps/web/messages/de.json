@@ -8511,6 +8511,7 @@
       "document_expiry_reminders": "Erinnerungen an ablaufende Dokumente",
       "expanded_cv": "Erweiterter Lebenslauf",
       "priority_visibility": "Prioritäts-Sichtbarkeit",
+      "vacancy_translations": "Übersetzungen von Anzeigen",
       "company_create_needs": "Personalbedarfe anlegen",
       "candidate_readiness_summaries": "Bereitschaftsübersichten für Kandidaten",
       "booking_requests": "Buchungsanfragen",
@@ -14730,7 +14731,14 @@
       "showOriginal": "Original anzeigen",
       "hideOriginal": "Original ausblenden",
       "machineNote": "Automatische Übersetzung. Zahlen, Währung, Daten und Namen wie im Original; das Original bleibt maßgeblich.",
-      "originalTitle": "Originaltitel"
+      "originalTitle": "Originaltitel",
+      "translate": "Ins {language} übersetzen",
+      "translating": "Wird übersetzt…",
+      "showTranslation": "Übersetzung anzeigen",
+      "allowanceRemaining": "Noch {count} von {limit} Übersetzungen übrig",
+      "allowanceExhausted": "Sie haben alle {limit} enthaltenen Übersetzungen verbraucht. Die Anzeige bleibt in der Originalsprache vollständig lesbar.",
+      "unavailable": "Diese Anzeige konnte gerade nicht übersetzt werden. Unten stehen die eigenen Worte des Inserenten.",
+      "signedOut": "Melden Sie sich an, um diese Anzeige zu übersetzen."
     }
   },
   "invitations": {

@@ -8511,6 +8511,7 @@
       "document_expiry_reminders": "Priminimai apie dokumentų galiojimą",
       "expanded_cv": "Išplėstas CV",
       "priority_visibility": "Prioritetinis matomumas",
+      "vacancy_translations": "Skelbimų vertimai",
       "company_create_needs": "Atviri darbuotojų poreikiai",
       "candidate_readiness_summaries": "Kandidatų pasirengimo santraukos",
       "booking_requests": "Rezervacijos užklausos",
@@ -14730,7 +14731,14 @@
       "showOriginal": "Rodyti originalą",
       "hideOriginal": "Slėpti originalą",
       "machineNote": "Automatinis vertimas. Skaičiai, valiuta, datos ir pavadinimai — kaip originale; originalas lieka faktas.",
-      "originalTitle": "Originalus pavadinimas"
+      "originalTitle": "Originalus pavadinimas",
+      "translate": "Versti į {language} kalbą",
+      "translating": "Verčiama…",
+      "showTranslation": "Rodyti vertimą",
+      "allowanceRemaining": "Liko {count} iš {limit} vertimų",
+      "allowanceExhausted": "Išnaudojote visus {limit} jums skirtus vertimus. Skelbimą ir toliau galima skaityti originalo kalba.",
+      "unavailable": "Šio skelbimo dabar išversti nepavyko. Žemiau rodomi paties skelbėjo žodžiai.",
+      "signedOut": "Prisijunkite, kad galėtumėte išversti šį skelbimą."
     }
   },
   "invitations": {
