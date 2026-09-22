@@ -1790,6 +1790,7 @@
     }
   },
   "demandReadback": {
+    "notVerifiedYet": "Twoja firma nie jest jeszcze zweryfikowana, dlatego zgłoszone tu zapytania nie są pokazywane pracownikom do czasu zakończenia weryfikacji.",
     "statusOther": "W trakcie przeglądu",
     "heading": "Twoje przesłane zapytania",
     "note": "Zapisane w Twojej prywatnej przestrzeni i sprawdzane ręcznie — nie proponujemy kandydatów automatycznie. Aktualizacje statusu pojawiają się tutaj.",
@@ -2081,10 +2082,10 @@
         },
         "verificationExplainer": {
           "draft": "Szkic. Zapisz, aby aktywować firmę — staje się od razu użyteczna.",
-          "active_unverified": "Aktywna i użyteczna już teraz. Podstawowe automatyczne sprawdzenia zaliczone. Jeszcze niezweryfikowana tożsamościowo — to osobny, silniejszy krok.",
-          "needs_checks": "Aktywna i użyteczna, ale podstawowe sprawdzenie wymaga uwagi (np. dodaj kraj albo popraw nieprawidłowy numer / stronę / e-mail).",
-          "pending_verification": "Poprosiłeś o opcjonalną ręczną weryfikację. Twoja firma pozostaje w pełni użyteczna w czasie oczekiwania.",
-          "unverified": "Niezweryfikowana. Możesz normalnie korzystać ze swojej firmy.",
+          "active_unverified": "Aktywna i użyteczna już teraz. Podstawowe automatyczne sprawdzenia zaliczone. Jeszcze niezweryfikowana tożsamościowo — to osobny, silniejszy krok. Twoje zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
+          "needs_checks": "Aktywna i użyteczna, ale podstawowe sprawdzenie wymaga uwagi (np. dodaj kraj albo popraw nieprawidłowy numer / stronę / e-mail). Twoje zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
+          "pending_verification": "Poprosiłeś o opcjonalną ręczną weryfikację. Twoja firma pozostaje w pełni użyteczna w czasie oczekiwania. Twoje zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
+          "unverified": "Niezweryfikowana. Możesz normalnie korzystać ze swojej firmy. Twoje zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
           "verified": "Zweryfikowana — silniejszy stan zaufania, przyznawany wyłącznie po realnej kontroli."
         },
         "goToWorkspace": "Otwórz przestrzeń roboczą firmy",

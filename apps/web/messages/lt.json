@@ -1790,6 +1790,7 @@
     }
   },
   "demandReadback": {
+    "notVerifiedYet": "Jūsų įmonė dar neverifikuota, todėl čia pateikti poreikiai darbuotojams nerodomi, kol verifikacija nebaigta.",
     "statusOther": "Peržiūrima",
     "heading": "Jūsų pateiktos užklausos",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
@@ -2081,10 +2082,10 @@
         },
         "verificationExplainer": {
           "draft": "Juodraštis. Išsaugokite, kad aktyvuotumėte įmonę — ji iškart taps naudojama.",
-          "active_unverified": "Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis.",
-          "needs_checks": "Aktyvi ir naudojama, bet vieną bazinę patikrą reikia patikslinti (pvz., nurodyti šalį arba pataisyti netaisyklingą kodą / svetainę / el. paštą).",
-          "pending_verification": "Paprašėte neprivalomos rankinės peržiūros. Įmonė lieka pilnai naudojama, kol laukiama.",
-          "unverified": "Nepatvirtinta. Galite toliau normaliai naudotis įmone.",
+          "active_unverified": "Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis. Jūsų skelbiami poreikiai darbuotojams rodomi tik po įmonės verifikacijos.",
+          "needs_checks": "Aktyvi ir naudojama, bet vieną bazinę patikrą reikia patikslinti (pvz., nurodyti šalį arba pataisyti netaisyklingą kodą / svetainę / el. paštą). Jūsų skelbiami poreikiai darbuotojams rodomi tik po įmonės verifikacijos.",
+          "pending_verification": "Paprašėte neprivalomos rankinės peržiūros. Įmonė lieka pilnai naudojama, kol laukiama. Jūsų skelbiami poreikiai darbuotojams rodomi tik po įmonės verifikacijos.",
+          "unverified": "Nepatvirtinta. Galite toliau normaliai naudotis įmone. Jūsų skelbiami poreikiai darbuotojams rodomi tik po įmonės verifikacijos.",
           "verified": "Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros."
         },
         "goToWorkspace": "Atidaryti įmonės darbo erdvę",

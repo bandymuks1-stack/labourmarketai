@@ -1,5 +1,6 @@
 {
   "demandReadback": {
+    "notVerifiedYet": "Din virksomhed er endnu ikke verificeret, så de behov, du indsender her, vises ikke for arbejdere, før verificeringen er gennemført.",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",

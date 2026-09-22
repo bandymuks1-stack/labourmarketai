@@ -1790,6 +1790,7 @@
     }
   },
   "demandReadback": {
+    "notVerifiedYet": "Your company is not verified yet, so the needs you submit here are not shown to workers until verification is complete.",
     "statusOther": "In review",
     "heading": "Your submitted inquiries",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -2081,10 +2082,10 @@
         },
         "verificationExplainer": {
           "draft": "Draft. Save to activate your company — it becomes usable straight away.",
-          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step.",
-          "needs_checks": "Active and usable, but a basic check needs attention (e.g. add your country, or fix a malformed code / website / email).",
-          "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits.",
-          "unverified": "Not verified. You can keep using your company normally.",
+          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step. Needs you post are shown to workers only after your company is verified.",
+          "needs_checks": "Active and usable, but a basic check needs attention (e.g. add your country, or fix a malformed code / website / email). Needs you post are shown to workers only after your company is verified.",
+          "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits. Needs you post are shown to workers only after your company is verified.",
+          "unverified": "Not verified. You can keep using your company normally. Needs you post are shown to workers only after your company is verified.",
           "verified": "Verified — a stronger trust state, granted only after a real check."
         },
         "goToWorkspace": "Open the company workspace",

@@ -42,6 +42,24 @@ const numOrNull = (v: unknown) => {
   return Number.isFinite(n) ? n : null;
 };
 
+/** One typed country field holds a code OR a name; the longest CLDR country
+ *  name in any product language is well under this, and the zod schema
+ *  (`workerSaveWorkCardFields`) carries the same ceiling. */
+export const COUNTRY_TEXT_MAX = 80;
+
+/** "LT, Vietnam; viet nam" → ["LT", "Vietnam", "viet nam"] — split on the
+ *  same separators as the canonical `resolveCountryList` (commas, semicolons,
+ *  newlines ONLY), so a multi-word name survives; blanks are dropped. An
+ *  input that holds nothing but separators is `undefined` (= keep), never the
+ *  explicit clear `[]` (W6). */
+export function splitCountryText(raw: string): string[] | undefined {
+  const parts = raw
+    .split(/[,;\n]+/)
+    .map((c) => c.trim())
+    .filter((c) => c !== "");
+  return parts.length > 0 ? parts : undefined;
+}
+
 const languageOptions = WORKER_LANGUAGES.map((code) => ({
   value: code,
   label: WORKER_LANGUAGE_NATIVE_NAMES[code] ?? code,
@@ -144,7 +162,12 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
       // stores (`available_from`; the schema and executor carried it, the
       // form did not). Prefilled from the sentence, editable, ISO day.
       { name: "availableFrom", kind: "text", labelKey: "conversation.forms.fields.availableFrom", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
-      { name: "locationCountry", kind: "text", labelKey: "conversation.forms.fields.locationCountry", placeholderKey: "conversation.forms.fields.countryCodePlaceholder", maxLength: 2 },
+      // A country is a CODE or a NAME ("VN", "Vietnam", "Viet Nam"): the raw
+      // text travels as typed and `lib/worker/work-card-core` resolves it
+      // through the canonical `resolveCountryCode` (global-access rule
+      // 2026-09-22). Measured before this: `maxLength: 2` truncated a typed
+      // name to its first two letters ("VI" for Vietnam — the Virgin Islands).
+      { name: "locationCountry", kind: "text", labelKey: "conversation.forms.fields.locationCountry", placeholderKey: "conversation.forms.fields.countryCodePlaceholder", maxLength: COUNTRY_TEXT_MAX },
       { name: "preferredCountries", kind: "text", labelKey: "conversation.forms.fields.preferredCountries", placeholderKey: "conversation.forms.fields.preferredCountriesPlaceholder" },
       { name: "salaryMin", kind: "number", labelKey: "conversation.forms.fields.salaryMin", placeholderKey: "conversation.forms.fields.salaryMinPlaceholder", min: 0, max: 100000 },
       { name: "salaryMax", kind: "number", labelKey: "conversation.forms.fields.salaryMax", placeholderKey: "conversation.forms.fields.salaryMaxPlaceholder", min: 0, max: 100000 },
@@ -158,12 +181,18 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
     // not produce it. The form opens PREFILLED from the current card
     // (`workCardPrefillFromCard`), so what the person edits is the whole
     // list, never an empty box whose one new entry replaces the rest.
+    //
+    // Countries pass through as TYPED (trimmed, never upper-cased, never
+    // clamped to two characters): the executor → `saveWorkerCardCore` →
+    // `normalizeCountry` / `normalizeCountryList` resolve a code OR a name
+    // and REFUSE what does not resolve (global-access rule 2026-09-22; before
+    // this, `.filter((c) => c.length === 2)` silently dropped "Vietnam").
     build: (st) => ({
       availabilityStatus: s(st.availabilityStatus) || null,
       availableFrom: /^\d{4}-\d{2}-\d{2}$/.test(s(st.availableFrom)) ? s(st.availableFrom) : null,
-      locationCountry: s(st.locationCountry).toUpperCase() || null,
+      locationCountry: s(st.locationCountry) || null,
       preferredCountries: s(st.preferredCountries)
-        ? s(st.preferredCountries).split(",").map((c) => c.trim().toUpperCase()).filter((c) => c.length === 2)
+        ? splitCountryText(s(st.preferredCountries))
         : undefined,
       salaryMin: numOrNull(st.salaryMin),
       salaryMax: numOrNull(st.salaryMax),

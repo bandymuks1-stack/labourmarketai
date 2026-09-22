@@ -74,7 +74,12 @@ describe("(b) no silent 'LT' country default", () => {
     expect(src).not.toMatch(/useState<string>\(\s*["']LT["']\s*\)/);
     expect(src).toMatch(/country_placeholder/);
     expect(src).toMatch(/error_country_required/);
-    expect(src).toMatch(/ACTIVE_MARKETS/);
+    // Re-pinned 2026-09-22 (global-access rule: MARKET PRIORITY ≠ ACCESS
+    // PERMISSION). The select used to render ACTIVE_MARKETS only (17), so
+    // VN / IE / SA / PH could not be chosen; it now renders every ISO country
+    // through the canonical `countryOptionsForLocale` (markets first).
+    expect(src).toMatch(/countryOptionsForLocale\(locale\)/);
+    expect(src).not.toMatch(/ACTIVE_MARKETS\.map\(/);
   });
 
   it("company setup form has no LT fallback (placeholder + honest empty)", () => {
