@@ -1008,7 +1008,10 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 300 -> 301 for 20260922140000_privacy_consent_rpc_locale_pl_v1 (consent grant RPCs
     //   accept locale pl; RED SECDEF body replace, human-gated; owner-applied). Not this read
     //   layer's file. RECOUNTED: 301.
-    expect(count).toBeLessThanOrEqual(301);
+    // Bumped 301 -> 302 for 20260922130000_company_need_intake_country_registry_v1 (anonymous
+    //   company-need intake accepts any code in public.countries; RED SECDEF body replace,
+    //   human-gated; owner-applied). Not this read layer's file. RECOUNTED: 302.
+    expect(count).toBeLessThanOrEqual(302);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

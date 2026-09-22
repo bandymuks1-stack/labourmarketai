@@ -140,6 +140,13 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
       "20260707120000_company_need_public_intake.sql",
       "20260713190000_company_need_intake_service_grants.sql",
       "20260829130000_anon_write_bounds_v1.sql",
+      // company_need_intake_country_registry_v1 (2026-09-22) is the fourth: it
+      // re-creates the public RPC with ONE changed condition — the country must
+      // exist in public.countries (249 rows) instead of a 10-market list (owner
+      // global-access rule). It grants nothing on the table, adds no policy,
+      // and leaves every anon_write_bounds_v1 ceiling in place; the queue's
+      // service-role-only read model is unchanged.
+      "20260922130000_company_need_intake_country_registry_v1.sql",
     ]);
     const grants = readFileSync(
       join(migDir, "20260713190000_company_need_intake_service_grants.sql"),
