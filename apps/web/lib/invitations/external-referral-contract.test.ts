@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   parseExternalWorkerReferral,
+  resolveCountryIso2,
   toDeclaredContext,
 } from "./external-referral-contract";
 import { declaredContextItems } from "./model";
@@ -87,6 +88,30 @@ describe("external worker referral contract v1", () => {
     expect(parseExternalWorkerReferral(envelope({ v: 2 })).ok).toBe(false);
     expect(parseExternalWorkerReferral(envelope({ leadId: "x".repeat(121) })).ok).toBe(false);
     expect(parseExternalWorkerReferral(envelope({ leadId: "" })).ok).toBe(false);
+  });
+
+  it("a country NAME is a residence, not a refusal (lead_4735a23a, 2026-09-22: \"Vietnam\" was refused and a consenting worker's referral was lost)", () => {
+    const w = (residenceCountry: unknown) => ({ ...(envelope().worker as Record<string, unknown>), residenceCountry });
+    for (const [typed, iso] of [["Vietnam", "VN"], ["vietnam", "VN"], ["Vietnamas", "VN"], ["Вьетнам", "VN"], ["VN", "VN"], ["vn", "VN"], ["Lithuania", "LT"], ["Saudi Arabia", "SA"], ["Polska", "PL"], ["Deutschland", "DE"], ["Oman", "OM"], ["Albania", "AL"]] as const) {
+      const r = parseExternalWorkerReferral(envelope({ worker: w(typed) }));
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) expect(r.envelope.worker.residenceCountry, typed).toBe(iso);
+    }
+    // Not a country: the field is dropped, the consent is kept, nothing is guessed.
+    for (const typed of ["Hanoi", "Europe", "somewhere in the Gulf", "ZZ", "x".repeat(80)]) {
+      const r = parseExternalWorkerReferral(envelope({ worker: w(typed) }));
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) {
+        expect(r.envelope.worker.residenceCountry, typed).toBeUndefined();
+        expect(toDeclaredContext(r.envelope)).not.toHaveProperty("residenceCountry");
+      }
+    }
+    // Still bounded: an empty string or an essay is a schema refusal, as before.
+    expect(parseExternalWorkerReferral(envelope({ worker: w("") })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w("x".repeat(81)) })).ok).toBe(false);
+    expect(resolveCountryIso2("Vietnam")).toBe("VN");
+    expect(resolveCountryIso2("Viet Nam")).toBeNull();
+    expect(resolveCountryIso2("")).toBeNull();
   });
 
   it("issues name paths and codes only — never the values a person typed", () => {
