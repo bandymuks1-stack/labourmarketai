@@ -4995,6 +4995,14 @@
       "stateNoRunYet": "Ingen kørsel endnu",
       "stateOk": "Seneste kørsel OK",
       "stateFailing": "Fejler"
+    },
+    "language": {
+      "translatedFrom": "[EN] Translated from {language}",
+      "originalIn": "[EN] Advertisement language: {language}",
+      "showOriginal": "[EN] Show original",
+      "hideOriginal": "[EN] Hide original",
+      "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
+      "originalTitle": "[EN] Original title"
     }
   },
   "profileIdentityNotice": {

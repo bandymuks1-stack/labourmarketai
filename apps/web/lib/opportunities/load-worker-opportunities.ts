@@ -378,6 +378,8 @@ export async function loadWorkerOpportunities(
       nowIso: new Date().toISOString(),
       professionSlug: options?.externalDiscovery?.professionSlug ?? null,
       country: options?.externalDiscovery?.country ?? null,
+      // The signed-in reader: their titles render in their locale.
+      viewerId: user.id,
     },
   );
   // The SAME join for the second source: a vacancy interest whose ad is on

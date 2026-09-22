@@ -14722,6 +14722,14 @@
       "stateNoRunYet": "Dar nepaleista",
       "stateOk": "Paskutinis paleidimas pavyko",
       "stateFailing": "Nepavyksta"
+    },
+    "language": {
+      "translatedFrom": "Išversta iš {language} k.",
+      "originalIn": "Skelbimo kalba: {language}",
+      "showOriginal": "Rodyti originalą",
+      "hideOriginal": "Slėpti originalą",
+      "machineNote": "Automatinis vertimas. Skaičiai, valiuta, datos ir pavadinimai — kaip originale; originalas lieka faktas.",
+      "originalTitle": "Originalus pavadinimas"
     }
   },
   "invitations": {

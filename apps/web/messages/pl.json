@@ -14722,6 +14722,14 @@
       "stateNoRunYet": "Jeszcze nie uruchomiono",
       "stateOk": "Ostatnie uruchomienie OK",
       "stateFailing": "Błąd"
+    },
+    "language": {
+      "translatedFrom": "Przetłumaczono z: {language}",
+      "originalIn": "Język ogłoszenia: {language}",
+      "showOriginal": "Pokaż oryginał",
+      "hideOriginal": "Ukryj oryginał",
+      "machineNote": "Tłumaczenie automatyczne. Liczby, waluta, daty i nazwy jak w oryginale; oryginał pozostaje faktem.",
+      "originalTitle": "Oryginalny tytuł"
     }
   },
   "invitations": {

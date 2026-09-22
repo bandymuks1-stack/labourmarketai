@@ -14722,6 +14722,14 @@
       "stateNoRunYet": "No run yet",
       "stateOk": "Last run OK",
       "stateFailing": "Failing"
+    },
+    "language": {
+      "translatedFrom": "Translated from {language}",
+      "originalIn": "Advertisement language: {language}",
+      "showOriginal": "Show original",
+      "hideOriginal": "Hide original",
+      "machineNote": "Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
+      "originalTitle": "Original title"
     }
   },
   "invitations": {

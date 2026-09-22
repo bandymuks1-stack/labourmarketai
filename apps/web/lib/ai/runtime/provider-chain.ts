@@ -182,6 +182,9 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       // AND an owner egress grant (the grant table names gemini only), and
       // the local runtime still needs an operator actually running one.
       "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     // Small local models drift from a schema more often than the frontier
     // cloud models do, so the runtime keeps its JSON repair pass for them.
@@ -205,6 +208,9 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       "draft_follow_up",
       "explain_market_demand",
       "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 10,
@@ -233,6 +239,9 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       // AND an owner egress grant (the grant table names gemini only), and
       // the local runtime still needs an operator actually running one.
       "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 20,
@@ -261,6 +270,9 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       // AND an owner egress grant (the grant table names gemini only), and
       // the local runtime still needs an operator actually running one.
       "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 30,
@@ -289,6 +301,9 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       // AND an owner egress grant (the grant table names gemini only), and
       // the local runtime still needs an operator actually running one.
       "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 40,

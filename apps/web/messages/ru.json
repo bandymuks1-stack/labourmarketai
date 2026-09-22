@@ -14722,6 +14722,14 @@
       "stateNoRunYet": "Запусков ещё не было",
       "stateOk": "Последний запуск успешен",
       "stateFailing": "Сбой"
+    },
+    "language": {
+      "translatedFrom": "Переведено с {language}",
+      "originalIn": "Язык объявления: {language}",
+      "showOriginal": "Показать оригинал",
+      "hideOriginal": "Скрыть оригинал",
+      "machineNote": "Автоматический перевод. Числа, валюта, даты и названия — как в оригинале; оригинал остаётся фактом.",
+      "originalTitle": "Оригинальное название"
     }
   },
   "invitations": {

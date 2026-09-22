@@ -66,7 +66,7 @@ const SENSITIVITY_RANK: Record<AiDataSensitivity, number> = {
  * (`TASK_POLICIES[t].allowedFields` in task-routing.ts) — not from the task's
  * name and not from how it feels.
  *
- * EXACTLY ONE TASK IS `PUBLIC` (2026-08-24). For the whole life of this file
+ * EXACTLY TWO TASKS ARE `PUBLIC` (one on 2026-08-24, one on 2026-09-22). For the whole life of this file
  * until then, none was — recorded here as a finding rather than an omission,
  * because every task this platform ran was about either a business's own work
  * or a specific person, and inventing a `PUBLIC` mapping to make the table
@@ -124,6 +124,14 @@ export const TASK_SENSITIVITY: Record<AiTaskType, AiDataSensitivity> = {
   // task only (`data-egress.ts`).
   propose_conversation_intent: "SENSITIVE_FREE_TEXT",
   explain_market_demand: "PUBLIC",
+  // THE SECOND PUBLIC TASK (2026-09-22). The verbatim title/description of a
+  // job advertisement a public employment service already published to the
+  // whole internet under an open-data licence. The platform is not its
+  // controller; the payload carries no employer identity, URL, coordinates
+  // or LabourMarket person (see `TASK_POLICIES.translate_vacancy`). The
+  // argument was made field by field, as this file requires, and the guard
+  // `ai-wired-surface-sensitivity.test.ts` allowlists exactly two.
+  translate_vacancy: "PUBLIC",
 };
 
 export function sensitivityForTask(task: AiTaskType): AiDataSensitivity {

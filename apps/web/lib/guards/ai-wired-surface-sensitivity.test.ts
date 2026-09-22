@@ -41,6 +41,7 @@ import {
 } from "@/lib/ai/runtime/data-sensitivity";
 import { MAX_GRANTABLE_FOR_FREE_TIER } from "@/lib/ai/runtime/data-egress";
 import type { AiAgentKey } from "@/lib/ai/registry/types";
+import { vacancyTranslationInputSchema } from "@/lib/ai/registry/agents/vacancy-translation";
 
 /**
  * Every agent key the product invokes today, with the sensitivity class this
@@ -71,6 +72,12 @@ const WIRED_AGENT_SENSITIVITY = {
   // `translate_message` (none recorded yet), so today the runtime refuses and
   // the original is shown.
   translation_copy: "SENSITIVE_FREE_TEXT",
+  // The verbatim text of a PUBLICLY published job advertisement, rendered in
+  // the reader's locale (wired 2026-09-22, lib/vacancy-store/
+  // vacancy-translation-read.ts). The second PUBLIC surface: the platform
+  // mirrors an open-data ad it does not author; the payload carries no
+  // employer identity, URL, coordinates or LabourMarket person.
+  vacancy_translation: "PUBLIC",
 } as const satisfies Partial<Record<AiAgentKey, AiDataSensitivity>>;
 
 // ── The wired list is derived from source, not maintained by hand ──────────
@@ -174,7 +181,7 @@ describe("the classes the gate names have not moved", () => {
     ]);
   });
 
-  it("the PUBLIC set is an allowlist of one, and the gate document says so", () => {
+  it("the PUBLIC set is an allowlist of two, and the gate document says so", () => {
     // SUPERSEDES "no task is PUBLIC — the reason a grant is needed at all".
     //
     // That was true for the whole life of this file until 2026-08-24 and was
@@ -191,7 +198,43 @@ describe("the classes the gate names have not moved", () => {
       .filter(([, s]) => s === "PUBLIC")
       .map(([task]) => task)
       .sort();
-    expect(publicTasks).toEqual(["explain_market_demand"]);
+    // `translate_vacancy` joined 2026-09-22 with its own field-by-field
+    // argument (task-routing.ts) — the ad text is already public to the
+    // whole internet; the platform mirrors it with attribution.
+    expect(publicTasks).toEqual(["explain_market_demand", "translate_vacancy"]);
+  });
+
+  it("the vacancy-translation task admits ONLY the public ad text and the two locales", () => {
+    const policy = TASK_POLICIES.translate_vacancy;
+    expect([...policy.allowedFields].sort()).toEqual(
+      ["source_locale", "target_locale", "vacancy_description", "vacancy_title"].sort(),
+    );
+    // Everything that would tie the text to a party is stated as prohibited,
+    // not merely absent.
+    for (const must of [
+      "employer_name",
+      "employer_external_org_id",
+      "application_url",
+      "worker_profile",
+      "profile_id",
+      "worker_id",
+      "match_result",
+      "exact_coordinates",
+    ]) {
+      expect(policy.prohibitedFields, must).toContain(must);
+    }
+    // No escalation and a low ceiling: a board cannot silently run up a bill.
+    expect(policy.escalationConditions).toEqual([]);
+    expect(policy.preferredTier).toBe("low_cost");
+    expect(policy.fallbackTier).toBe("low_cost");
+    expect(policy.maxEstimatedCostUsd).toBeLessThanOrEqual(0.03);
+    // The input schema is strict: a caller cannot widen the payload.
+    const widened = vacancyTranslationInputSchema.safeParse({
+      sourceLocale: "sv",
+      targetLocale: "lt",
+      items: [{ id: "v0", title: "Svetsare", employerName: "X AB" }],
+    });
+    expect(widened.success).toBe(false);
   });
 
   it("the PUBLIC task's own policy admits nothing that describes a person", () => {

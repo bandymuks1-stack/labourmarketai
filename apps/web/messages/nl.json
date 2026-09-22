@@ -14722,6 +14722,14 @@
       "stateNoRunYet": "Nog geen run",
       "stateOk": "Laatste run OK",
       "stateFailing": "Faalt"
+    },
+    "language": {
+      "translatedFrom": "Vertaald uit het {language}",
+      "originalIn": "Taal van de advertentie: {language}",
+      "showOriginal": "Origineel tonen",
+      "hideOriginal": "Origineel verbergen",
+      "machineNote": "Automatische vertaling. Getallen, valuta, data en namen zoals in het origineel; het origineel blijft het feit.",
+      "originalTitle": "Oorspronkelijke titel"
     }
   },
   "invitations": {

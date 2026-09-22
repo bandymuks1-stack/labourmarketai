@@ -62,6 +62,10 @@ export const AI_TASK_TYPES = [
    *  EXISTING conversation intent id (owner approval 2026-09-05). Unbounded
    *  free text; Gemini-only by a task-scoped grant. */
   "propose_conversation_intent",
+  /** The verbatim title/description of a PUBLICLY published job advertisement
+   *  → the same words in the reader's locale. The second PUBLIC task; its
+   *  argument is the field list in `TASK_POLICIES.translate_vacancy`. */
+  "translate_vacancy",
 ] as const;
 export type AiTaskType = (typeof AI_TASK_TYPES)[number];
 
@@ -441,6 +445,57 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     // every write through the dispatcher's own confirmation tiers.
     humanReview: false,
   },
+  /**
+   * THE SECOND PUBLIC TASK (2026-09-22).
+   *
+   * `allowedFields` is the whole classification argument, exactly as for
+   * `explain_market_demand`. `vacancy_title` and `vacancy_description` are
+   * the verbatim text of a job advertisement a public employment service
+   * already published to everyone under an open-data licence (the row's
+   * attribution_code names it); the platform mirrors, it does not author.
+   * Nothing joins the text to a LabourMarket person, and the payload carries
+   * no employer identity, no URL, no coordinates — those stay in the row and
+   * are rendered verbatim, never translated. An ad MAY itself name a contact
+   * person at the employer; that name was published to the world by the
+   * employer, and sending the same public text to a translator discloses
+   * nothing new. That is the argument; the guard checks the field list.
+   *
+   * `low_cost` on both tiers, NO escalation, a tight ceiling: translating
+   * twenty short titles does not get better with a frontier model, and a
+   * board that could silently escalate is a board with an unbounded bill.
+   * The reader batches (one call per board render) and PERSISTS the result
+   * beside the original, so no ad is ever translated twice for one locale.
+   */
+  translate_vacancy: {
+    taskType: "translate_vacancy",
+    riskLevel: "low",
+    allowedFields: ["vacancy_title", "vacancy_description", "source_locale", "target_locale"],
+    prohibitedFields: [
+      "full_cv",
+      "worker_profile",
+      "journal_entry_text",
+      "employer_name",
+      "employer_external_org_id",
+      "application_url",
+      "worker_name",
+      "profile_id",
+      "worker_id",
+      "match_result",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "vacancyTranslationOutputSchema",
+    minQuality: 0.55,
+    maxEstimatedCostUsd: 0.03,
+    expectedOutputTokens: 1_500,
+    maxLatencyMs: 20_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // A rendering shown beside the original with its provenance named; the
+    // human decision it supports is reading. Never a record of fact.
+    humanReview: false,
+  },
   draft_follow_up: {
     taskType: "draft_follow_up",
     riskLevel: "medium",
@@ -485,6 +540,7 @@ export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   translation_copy: "translate_message",
   market_explanation: "explain_market_demand",
   conversation_intent: "propose_conversation_intent", // one typed sentence → one EXISTING intent id (proposer, not router)
+  vacancy_translation: "translate_vacancy",
 };
 
 export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {

@@ -14722,6 +14722,14 @@
       "stateNoRunYet": "Noch kein Lauf",
       "stateOk": "Letzter Lauf OK",
       "stateFailing": "Fehlerhaft"
+    },
+    "language": {
+      "translatedFrom": "Übersetzt aus {language}",
+      "originalIn": "Sprache der Anzeige: {language}",
+      "showOriginal": "Original anzeigen",
+      "hideOriginal": "Original ausblenden",
+      "machineNote": "Automatische Übersetzung. Zahlen, Währung, Daten und Namen wie im Original; das Original bleibt maßgeblich.",
+      "originalTitle": "Originaltitel"
     }
   },
   "invitations": {

@@ -180,6 +180,18 @@ export interface ExternalOpportunityRowLabels {
   readonly skillLabel: (slug: string) => string;
   readonly detailsShow: string;
   readonly detailsHide: string;
+  /**
+   * LANGUAGE PROVENANCE (owner P0 2026-09-22 §9). `languageName` renders a
+   * code in the reader's locale ("sv" → "švedų"); the two sentences name
+   * either the rendering or the original, never neither.
+   */
+  readonly languageName: (code: string) => string;
+  readonly translatedFrom: (language: string) => string;
+  readonly originalIn: (language: string) => string;
+  readonly showOriginal: string;
+  readonly hideOriginal: string;
+  readonly machineNote: string;
+  readonly originalTitle: string;
 }
 
 /**
@@ -228,11 +240,35 @@ export function ExternalOpportunityRow({
     <li data-testid="external-vacancy-card" data-band={band} className="min-w-0">
       <Card compact variant="interactive" className="flex flex-col gap-2">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <p className="min-w-0 font-display text-card-title font-bold text-text-primary">
+          <p className="min-w-0 font-display text-card-title font-bold text-text-primary" lang={view.presentedLanguage ?? undefined}>
             {view.title}
           </p>
           <FitBandChip band={band} label={labels.bandLabel} />
         </div>
+
+        {/* WHICH LANGUAGE THE READER IS LOOKING AT. A rendering is named as a
+            rendering with the original one tap away (the original is the
+            FACT); an ad still in its source language is named as such — a
+            Lithuanian reader is never left to guess why a title is Swedish. */}
+        {view.sourceLanguage && view.presentedLanguage !== view.sourceLanguage ? (
+          <details className="group text-meta text-text-muted" data-testid="external-vacancy-translated">
+            <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+              {labels.translatedFrom(labels.languageName(view.sourceLanguage))}
+              {" · "}
+              <span className="underline underline-offset-4 group-open:hidden">{labels.showOriginal}</span>
+              <span className="hidden underline underline-offset-4 group-open:inline">{labels.hideOriginal}</span>
+            </summary>
+            <p className="mt-1 text-text-secondary" lang={view.sourceLanguage} data-testid="external-vacancy-title-original">
+              <span className="text-text-muted">{labels.originalTitle}: </span>
+              {view.titleOriginal}
+            </p>
+            <p className="mt-1">{labels.machineNote}</p>
+          </details>
+        ) : view.sourceLanguage ? (
+          <p className="text-meta text-text-muted" data-testid="external-vacancy-source-language">
+            {labels.originalIn(labels.languageName(view.sourceLanguage))}
+          </p>
+        ) : null}
 
         {/* Organization / source · place · published. */}
         <p className="text-basis text-text-secondary">

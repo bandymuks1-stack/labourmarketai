@@ -8356,6 +8356,7 @@ export type Database = {
           translation_status: string | null
           translation_target_language: string | null
           translation_title_text: string | null
+          translations: Json
           updated_at: string
           working_time: string
         }
@@ -8406,6 +8407,7 @@ export type Database = {
           translation_status?: string | null
           translation_target_language?: string | null
           translation_title_text?: string | null
+          translations?: Json
           updated_at?: string
           working_time?: string
         }
@@ -8456,6 +8458,7 @@ export type Database = {
           translation_status?: string | null
           translation_target_language?: string | null
           translation_title_text?: string | null
+          translations?: Json
           updated_at?: string
           working_time?: string
         }

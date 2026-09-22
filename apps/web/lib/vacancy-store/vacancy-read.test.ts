@@ -274,8 +274,11 @@ describe("row -> contract is the exact inverse of contract -> row", () => {
     // The store's own row id rides along when the row carries one (a
     // `select("*")` read); an unsaved contract has none. Everything else is
     // the exact inverse.
-    const { storeId, ...contract } = back;
+    // …and so do the per-locale renderings (`{}` on a row that has none —
+    // migration 20260922150000), which are a store fact, not a contract one.
+    const { storeId, translations, ...contract } = back;
     expect(storeId).toBeNull();
+    expect(translations).toEqual({});
     expect(contract).toEqual(original);
     expect(fromPublicVacancyRow({ ...(row as unknown as Record<string, unknown>), id: "row-1" }).storeId).toBe("row-1");
   });
