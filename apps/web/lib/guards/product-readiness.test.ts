@@ -2616,7 +2616,9 @@ describe("no migration files added by this sprint", () => {
 // Bumped 299 -> 300 for 20260922120000_countries_all_iso_v1 (global-access rule: every
 // ISO code seeded into public.countries with is_target_market=false; additive insert ...
 // on conflict do nothing; owner-gated apply). RECOUNTED: 300.
-const SPRINT_BASELINE = 300;
+// Bumped 300 -> 301 for 20260922140000_privacy_consent_rpc_locale_pl_v1 (consent grant RPCs accept
+// locale pl; RED SECDEF body replace, human-gated; owner-applied). RECOUNTED: 301.
+const SPRINT_BASELINE = 301;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

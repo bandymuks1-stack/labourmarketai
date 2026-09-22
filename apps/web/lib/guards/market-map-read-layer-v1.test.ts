@@ -1005,7 +1005,10 @@ describe("NO new DB migration in this PR", () => {
     //   every ISO code seeded into public.countries, is_target_market=false, insert ...
     //   on conflict do nothing, GREEN by shape, owner-gated apply). Not this read
     //   layer's file. RECOUNTED: 300.
-    expect(count).toBeLessThanOrEqual(300);
+    // Bumped 300 -> 301 for 20260922140000_privacy_consent_rpc_locale_pl_v1 (consent grant RPCs
+    //   accept locale pl; RED SECDEF body replace, human-gated; owner-applied). Not this read
+    //   layer's file. RECOUNTED: 301.
+    expect(count).toBeLessThanOrEqual(301);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
