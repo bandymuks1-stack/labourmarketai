@@ -14166,6 +14166,13 @@
     }
   },
   "workspace": {
+    "accessNotice": {
+      "operator": "That link leads to an internal operator view. Your account does not have it.",
+      "company": "That link leads to the employer space. Your account does not have it yet.",
+      "worker": "That link leads to the personal work space. Your account does not have it yet.",
+      "customer": "That link leads to the buyer space. Your account does not have it yet.",
+      "setupCta": "Add a space"
+    },
     "readFailed": {
       "body": "Your account could not be read just now, so no space was chosen for you.",
       "choose": "Choose a space or try again.",

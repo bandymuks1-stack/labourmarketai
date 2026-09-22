@@ -14166,6 +14166,13 @@
     }
   },
   "workspace": {
+    "accessNotice": {
+      "operator": "Die link leidt naar een interne beheerweergave. Je account heeft die niet.",
+      "company": "Die link leidt naar de werkgeversruimte. Je account heeft die nog niet.",
+      "worker": "Die link leidt naar de persoonlijke werkruimte. Je account heeft die nog niet.",
+      "customer": "Die link leidt naar de kopersruimte. Je account heeft die nog niet.",
+      "setupCta": "Ruimte toevoegen"
+    },
     "readFailed": {
       "body": "Uw account kon zojuist niet worden gelezen, dus er is geen ruimte voor u gekozen.",
       "choose": "Kies een ruimte of probeer het opnieuw.",

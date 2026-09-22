@@ -768,6 +768,7 @@ export function ConversationChat({
   mobile = false,
   personalIntroPayload = null,
   openingContext = null,
+  accessNotice = null,
   countryLabels,
   agencyWorkspace = false,
   // Declared in the props type since the education slice but never read here
@@ -804,6 +805,11 @@ export function ConversationChat({
    *  home stays ONE conversation for every identity. When present it wins
    *  over the S2 payload — the page hands only one of the two. */
   openingContext?: ReactNode;
+  /** One line explaining why this home is the screen the person got, when a
+   *  role gate sent them here. Server-resolved and already localized, so the
+   *  internal `needs_<role>_role` token never crosses into the client bundle.
+   *  `null` on every ordinary visit — which is almost all of them. */
+  accessNotice?: ReactNode;
   /** Localized country names, resolved server-side. The demand prefill needs a
    *  WORD for the location field — the ISO code is an internal value (§23). */
   countryLabels?: Record<string, string>;
@@ -6389,6 +6395,10 @@ export function ConversationChat({
         data-testid="conversation-chat"
       >
         <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
+        {/* Directly under the one top bar, above everything the person came
+            here to do: the answer to "why am I on this screen?" has to arrive
+            before they start reading the conversation, not after. */}
+        {accessNotice}
         <MySpaceRow
           pins={pinned.map((p) => ({ ref: p.ref, label: p.label ?? pinLabelFor(p.ref) }))}
           title={labels.mySpaceTitle}

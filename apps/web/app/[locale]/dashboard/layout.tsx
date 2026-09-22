@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -24,6 +25,11 @@ import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
+import {
+  DASHBOARD_PATHNAME_HEADER,
+  refusalDestination,
+  routeRequirement,
+} from "@/lib/auth/role-gated-routes";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -135,6 +141,49 @@ export default async function DashboardLayout({
     activeRole: profile?.active_role ?? null,
     profileRoles: rolesRows ?? [],
   });
+
+  // ── THE ROLE GATE, WHERE IT CAN STILL BE AN HTTP REDIRECT ─────────────────
+  //
+  // Measured 2026-09-22 on the local production build: a worker opening
+  // `/lt/dashboard/company` got `HTTP 200`, 600 627 bytes of this very shell,
+  // and then ~600 ms of Next's "Application error: a client-side exception has
+  // occurred" before the browser performed the redirect itself. The gate was
+  // correct — the system WAS refusing — but it announced the refusal as a
+  // crash, and it shipped the whole authenticated shell to someone being
+  // turned away. The page-level `requireRoleOrRedirect` (and the admin
+  // subtree's `requireSuperadmin`) both sit under
+  // `app/[locale]/dashboard/loading.tsx`, and a `redirect()` thrown inside a
+  // Suspense boundary can no longer become an HTTP redirect — the response is
+  // already committed. Isolated with two same-shaped page redirects:
+  // `/lt/onboarding` (has a `loading.tsx` above it) answers 200 and redirects
+  // on the client; `/lt/live-market-review` (has none) answers a real 307.
+  //
+  // This layout is the last frame ABOVE that boundary, and it is ALSO where
+  // both signals already exist: `rolesRows` (one `profile_roles` read, honest
+  // about a failed read because `readActiveProfileRoles` throws rather than
+  // answering) and `isAdmin` (the dual signal). So the refusal is decided from
+  // the reads the shell performs anyway — no second permission model, no extra
+  // round-trip, and one fewer duplicate read on every gated navigation.
+  //
+  // The page-level gates STAY. They are the authority on a soft navigation
+  // (React reuses this layout, so it does not re-run) and on any request where
+  // the middleware header never arrived. Nothing here can grant access that
+  // they would refuse: this gate only ever refuses EARLIER.
+  const gatedPath = (await headers()).get(DASHBOARD_PATHNAME_HEADER);
+  const requirement = gatedPath ? routeRequirement(gatedPath) : null;
+  if (requirement) {
+    const refused =
+      requirement.kind === "admin"
+        ? // A FAILED profile read is not "not an admin". `deriveIsAdmin` reads
+          // `profiles.active_role`, and when that row did not answer the
+          // dual signal is only half known — refusing on it would be the same
+          // false claim the honesty work removed elsewhere. Hand those to
+          // `requireSuperadmin`, which throws onto the honest error surface.
+          session.profileRead !== "failed" && !isAdmin
+        : !roles.includes(requirement.role);
+    if (refused) redirect(refusalDestination(locale, requirement));
+  }
+
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
   const activeRole = ROLES.has(profile?.active_role as Role)
     ? (profile?.active_role as Role)

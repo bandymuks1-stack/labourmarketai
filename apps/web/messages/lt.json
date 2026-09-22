@@ -14166,6 +14166,13 @@
     }
   },
   "workspace": {
+    "accessNotice": {
+      "operator": "Nuoroda vedė į vidinį tvarkytojo rodinį. Jūsų paskyra jo neturi.",
+      "company": "Nuoroda vedė į darbdavio erdvę. Jūsų paskyroje tokios erdvės kol kas nėra.",
+      "worker": "Nuoroda vedė į asmeninę darbo erdvę. Jūsų paskyroje tokios erdvės kol kas nėra.",
+      "customer": "Nuoroda vedė į pirkėjo erdvę. Jūsų paskyroje tokios erdvės kol kas nėra.",
+      "setupCta": "Pridėti erdvę"
+    },
     "readFailed": {
       "body": "Jūsų paskyros duomenų dabar nepavyko perskaityti, todėl erdvės už jus nepasirinkome.",
       "choose": "Pasirinkite erdvę arba pabandykite dar kartą.",

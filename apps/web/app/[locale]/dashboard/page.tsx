@@ -51,6 +51,12 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { conversationOpeningContext } from "@/lib/today/today-route";
+import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
+import {
+  accessNoticeMessageKey,
+  accessNoticeOffersSetup,
+  parseAccessNotice,
+} from "@/lib/auth/access-notice";
 
 /**
  * Dashboard root — the ONE authenticated home: the conversation, for EVERY
@@ -82,8 +88,10 @@ import { conversationOpeningContext } from "@/lib/today/today-route";
  */
 export default async function DashboardHomePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -221,6 +229,32 @@ export default async function DashboardHomePage({
   const labels = resolveChatLabels(tChat);
   const workLogLabels = resolveWorkLogLabels(tWorkLog);
 
+  // WHY THE PERSON IS HERE, when they did not choose to be.
+  //
+  // A role gate sends someone to this home carrying `?notice=needs_<role>_role`
+  // — and until 2026-09-22 nothing read it, so the refusal landed as a silent
+  // teleport. Resolved on the SERVER: the chat receives a finished element,
+  // so no message namespace is added to the client bundle and the internal
+  // token never travels to the browser. An unknown `?notice=` yields null and
+  // renders nothing, rather than echoing whatever was typed into the URL.
+  const noticeParam = (await searchParams).notice;
+  const refusedRole = parseAccessNotice(
+    typeof noticeParam === "string" ? noticeParam : null,
+  );
+  const tAccess = refusedRole ? await getTranslations("workspace") : null;
+  const accessNotice =
+    refusedRole && tAccess ? (
+      <AccessRefusalNotice
+        reason={refusedRole}
+        labels={{
+          body: tAccess(accessNoticeMessageKey(refusedRole)),
+          setupCta: accessNoticeOffersSetup(refusedRole)
+            ? tAccess("accessNotice.setupCta")
+            : null,
+        }}
+      />
+    ) : null;
+
   /**
    * Localized country names for the demand prefill.
    *
@@ -275,6 +309,11 @@ export default async function DashboardHomePage({
       />
       <ConversationChat
         locale={locale as ActiveLocale}
+        /* Why this home is the screen they got, when a link asked for a space
+           they do not hold. Inside the chat rather than above it: the chat is
+           `h-[100dvh]` and owns the viewport, so a sibling banner would push
+           the composer off the bottom on a phone. */
+        accessNotice={accessNotice}
         labels={labels}
         workLogLabels={workLogLabels}
         bookingOffers={offers}

@@ -14166,6 +14166,13 @@
     }
   },
   "workspace": {
+    "accessNotice": {
+      "operator": "Dieser Link führt zu einer internen Betreiberansicht. Ihr Konto hat sie nicht.",
+      "company": "Dieser Link führt in den Arbeitgeberbereich. Ihr Konto hat ihn noch nicht.",
+      "worker": "Dieser Link führt in den persönlichen Arbeitsbereich. Ihr Konto hat ihn noch nicht.",
+      "customer": "Dieser Link führt in den Käuferbereich. Ihr Konto hat ihn noch nicht.",
+      "setupCta": "Bereich hinzufügen"
+    },
     "readFailed": {
       "body": "Ihr Konto konnte gerade nicht gelesen werden, deshalb wurde kein Bereich für Sie gewählt.",
       "choose": "Wählen Sie einen Bereich oder versuchen Sie es erneut.",

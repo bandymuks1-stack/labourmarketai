@@ -5,6 +5,7 @@ import {
   RoleSignalUnavailableError,
   readRoleSignal,
 } from "@/lib/auth/profile-roles";
+import { OPERATOR_ACCESS_NOTICE } from "@/lib/auth/role-gated-routes";
 
 /**
  * Server-side superadmin authorization.
@@ -110,7 +111,8 @@ export async function isSuperadmin(): Promise<boolean> {
  *
  * Behavior:
  *   - unauthenticated user → redirect to /<locale>/auth/login;
- *   - authenticated non-admin → redirect to /<locale>/dashboard;
+ *   - authenticated non-admin → redirect to /<locale>/dashboard, carrying
+ *     the operator reason so the home can SAY why (2026-09-22);
  *   - admin (active_role='admin' OR profile_roles has 'admin') → returns user.id;
  *   - the admin signals could not be READ → the error propagates (fails
  *     closed: the admin tree does not render) rather than pretending the
@@ -127,7 +129,14 @@ export async function requireSuperadmin(locale: string): Promise<string> {
     user.id,
   );
   if (!activeRoleAdmin && !profileRolesAdmin) {
-    redirect(`/${locale}/dashboard`);
+    // Never a silent bounce. Until 2026-09-22 this sent the person to the bare
+    // home with nothing said, so opening a stale operator link read as a
+    // broken product rather than a refusal. The reason rides the SAME
+    // `?notice=` channel the role gate uses, and the dashboard layout's
+    // earlier gate emits the identical value — one destination, one sentence,
+    // whichever gate got there first. Reached ONLY when both signals were
+    // READ (an unread signal throws above), so the sentence is always true.
+    redirect(`/${locale}/dashboard?notice=${OPERATOR_ACCESS_NOTICE}`);
   }
   return user.id;
 }
