@@ -14166,6 +14166,13 @@
     }
   },
   "workspace": {
+    "accessNotice": {
+      "operator": "Ten link prowadzi do wewnętrznego widoku operatora. Twoje konto go nie ma.",
+      "company": "Ten link prowadzi do przestrzeni pracodawcy. Twoje konto jeszcze jej nie ma.",
+      "worker": "Ten link prowadzi do osobistej przestrzeni pracy. Twoje konto jeszcze jej nie ma.",
+      "customer": "Ten link prowadzi do przestrzeni kupującego. Twoje konto jeszcze jej nie ma.",
+      "setupCta": "Dodaj przestrzeń"
+    },
     "readFailed": {
       "body": "Nie udało się teraz odczytać Twojego konta, więc nie wybraliśmy przestrzeni za Ciebie.",
       "choose": "Wybierz przestrzeń albo spróbuj ponownie.",

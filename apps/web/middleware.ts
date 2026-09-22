@@ -1,7 +1,12 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/lib/i18n/routing";
+import {
+  DASHBOARD_PATHNAME_HEADER,
+  isDashboardPath,
+  stripLocaleSegment,
+} from "@/lib/auth/role-gated-routes";
 import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
 import { LANDING_MODE_COOKIE } from "@/lib/telemetry/landing-experience";
 import { env } from "@/lib/env";
@@ -158,6 +163,43 @@ function hasFreshAccessToken(request: NextRequest): boolean {
   return exp - Math.floor(Date.now() / 1000) > TOKEN_FRESH_MARGIN_S;
 }
 
+/**
+ * Hand the authenticated shell the path it is rendering — nothing else.
+ *
+ * `app/[locale]/dashboard/layout.tsx` is the LAST place in the tree that can
+ * still refuse with a real HTTP redirect: everything below it sits inside the
+ * Suspense boundary that `dashboard/loading.tsx` creates, and a `redirect()`
+ * thrown inside a Suspense boundary is downgraded to a 200 document that
+ * redirects itself on the client (measured: a 600 kB authenticated shell plus
+ * ~600 ms of Next's "Application error" text before the browser moved). The
+ * shell already knows WHO is asking; it cannot know WHAT was asked for.
+ *
+ * Deliberately narrow:
+ *   - only for the `/dashboard` tree, so the static landing path and every
+ *     public route keep the exact request they have today (the 2026-08-31
+ *     cold-entry P0 is not worth re-litigating for a header nothing reads);
+ *   - the header is set on the request handed to `next-intl`, which copies
+ *     `new Headers(request.headers)` into its own `NextResponse.next({request})`
+ *     override — so this rides the mechanism next-intl already uses for
+ *     `x-next-intl-locale` rather than adding a second one;
+ *   - an inbound header of the same name is REPLACED, never trusted: it is a
+ *     value this function computes, so a client cannot forge a path.
+ */
+function withDashboardPathHeader(request: NextRequest): NextRequest {
+  // GET ONLY, and not for lack of ambition. Per the Fetch spec, constructing a
+  // Request from another Request adopts its body and marks the original as
+  // used — so cloning a server-action POST here could disturb the body before
+  // the action ever reads it. A navigation that renders the shell is always a
+  // GET; a POST re-renders through the page, where `requireRoleOrRedirect`
+  // still stands. Nothing is weakened, and no write path is touched.
+  if (request.method !== "GET") return request;
+  const rest = stripLocaleSegment(request.nextUrl.pathname, routing.locales);
+  if (!isDashboardPath(rest)) return request;
+  const headers = new Headers(request.headers);
+  headers.set(DASHBOARD_PATHNAME_HEADER, rest);
+  return new NextRequest(request, { headers });
+}
+
 export async function middleware(request: NextRequest) {
   // 0. Host normalization runs BEFORE locale/intl + auth so legacy
   //    aliases (www + app) never reach the app shell — they 308
@@ -179,7 +221,7 @@ export async function middleware(request: NextRequest) {
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)
   //    we return it as-is; the redirected request re-enters middleware with a
   //    locale prefix and the session/auth logic runs then.
-  const intlResponse = intl(request);
+  const intlResponse = intl(withDashboardPathHeader(request));
   if (intlResponse.headers.get("location")) return intlResponse;
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
