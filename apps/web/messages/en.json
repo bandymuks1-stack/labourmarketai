@@ -10102,7 +10102,9 @@
     "returned": {
       "success": "Test-mode checkout completed. No real money moved; the subscription state below syncs from the payment provider's signature-verified webhook and can take a moment to appear.",
       "cancelled": "Checkout was cancelled. Nothing was charged and nothing changed on your account.",
-      "portal": "You are back from the billing portal. Any change you made there syncs to this page automatically."
+      "portal": "You are back from the billing portal. Any change you made there syncs to this page automatically.",
+      "successLive": "Checkout completed. The subscription state below syncs from the payment provider's signature-verified confirmation and can take a moment to appear.",
+      "syncing": "Syncing with the payment provider — your subscription will appear here in a moment. Nothing needs to be ordered again."
     },
     "disabled": "Payments are not enabled. Paid plans are prepared drafts — nothing is purchasable here and no payment method is needed.",
     "none": "No subscription on this account.",

@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isSuperadmin } from "@/lib/auth/superadmin";
 import { getBillingConfig } from "@/lib/billing/config";
 import {
@@ -90,12 +91,49 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
   let subscriptionPlanKey: string | null = null;
   let subscriptionStatus: SubStatus | null = null;
   let manualOverridePlanKey: string | null = null;
+  // MODE SCOPE (production defect measured 2026-09-22): admission
+  // (`findScopedSubscription`) and the customer lookup filter by the
+  // adapter's mode, this read did not — a TEST-mode row (test_mode=true,
+  // the column's default) could entitle a LIVE workspace and vice versa.
+  // Every query below carries `.eq("test_mode", config.testMode)`.
   let subsQueryResult;
   if (subject && subject.type === "organization") {
-    subsQueryResult = await asAny(supabase)
+    // ORGANIZATION SUBJECT — read through the service-role client, scoped by
+    // the SERVER-RESOLVED subject. Why (production defect measured
+    // 2026-09-22): `billing_subscriptions` carries ONE SELECT policy,
+    // `owner_id = auth.uid() or is_admin()` (20260613200000). Through the
+    // user client an organization's row was therefore visible ONLY to the
+    // profile that paid; a co-manager holding `manage-billing`, or any other
+    // governance-role member acting inside the same organization workspace,
+    // read zero rows and resolved as free — the purchaser alone got the
+    // 10-position limit. The entitlement belongs to the ORGANIZATION
+    // (M-P0-7), not to the payer, so the read must not depend on who paid.
+    // AUTHORITY: `subject.id` comes from `resolveBillingSubject` →
+    // `resolveEmployerCompanyContext`, which proves the caller's governance
+    // role from THEIR OWN active `company_memberships` row (or the creator
+    // compatibility arm) through the RLS-scoped session — never from a
+    // client value, a cookie alone or a query parameter. The service key
+    // opens the table; the proven membership is the authorisation — the
+    // same subject the checkout route binds a session to. The projection is
+    // plan_key / status / provider_subscription_id / updated_at — no payer
+    // identity, no customer id, no amounts — and this path writes nothing
+    // (P7 guard). No RLS change: the policy stays owner-or-admin.
+    // Personal subjects keep the user-scoped read below: `owner_id =
+    // auth.uid()` IS the policy, so RLS already answers correctly there.
+    // Without a service key (local/preview without SUPABASE_SERVICE_ROLE_KEY)
+    // the read falls back to the user client — the purchaser still resolves,
+    // exactly the pre-fix floor — instead of throwing into a page.
+    let reader: SupabaseClient = supabase;
+    try {
+      reader = createAdminClient() as unknown as SupabaseClient;
+    } catch {
+      reader = supabase;
+    }
+    subsQueryResult = await asAny(reader)
       .from("billing_subscriptions")
       .select("plan_key, status, provider_subscription_id, updated_at")
       .eq("organization_id", subject.id)
+      .eq("test_mode", config.testMode)
       .order("updated_at", { ascending: false });
     if (subsQueryResult.error?.code === UNDEFINED_COLUMN) {
       // multi-subject schema unapplied — an org subject has no rows yet
@@ -106,6 +144,7 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
       .from("billing_subscriptions")
       .select("plan_key, status, provider_subscription_id, updated_at, origin_organization_id")
       .eq("owner_id", user.id)
+      .eq("test_mode", config.testMode)
       .is("origin_organization_id", null)
       .order("updated_at", { ascending: false });
     if (subsQueryResult.error?.code === UNDEFINED_COLUMN) {
@@ -114,6 +153,7 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
         .from("billing_subscriptions")
         .select("plan_key, status, provider_subscription_id, updated_at")
         .eq("owner_id", user.id)
+        .eq("test_mode", config.testMode)
         .order("updated_at", { ascending: false });
     }
   }

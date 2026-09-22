@@ -15,6 +15,7 @@ import { PricingTable } from "@/components/marketing/pricing-table";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
 import { getBillingConfig } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
+import { isCheckoutCancelledReturn } from "@/lib/billing/checkout-return-core";
 import {
   ConciergeAccessBanner,
   ConciergeOfferSection,
@@ -32,11 +33,14 @@ export default async function PricingPage({
   searchParams: Promise<{ billing?: string }>;
 }) {
   const { locale } = await params;
-  // Native-nav `?billing=test_cancelled` return feedback: the test-checkout
-  // route's cancel URL points here, and until now nothing read it — a person
-  // backing out of a TEST checkout landed with no acknowledgement. The notice
-  // states only what is true (nothing charged, nothing changed); it never
-  // implies a purchase was possible.
+  // Native-nav `?billing=test_cancelled` / `?billing=cancelled` return
+  // feedback: the checkout route's cancel URL points here (the `test_`
+  // prefix follows the adapter's mode), and until now nothing read it — a
+  // person backing out of a checkout landed with no acknowledgement. The
+  // notice states only what is true (nothing charged, nothing changed); it
+  // never implies a purchase was possible. 2026-09-22: the LIVE flag was
+  // measured unrecognised (only `test_cancelled` rendered); both now classify
+  // through checkout-return-core.
   const { billing } = await searchParams;
   // LIVE Stripe (owner-armed) changes the page's own words: the hero no longer
   // says prices are not final, and the pre-payment boundary is not shown.
@@ -56,7 +60,7 @@ export default async function PricingPage({
         ctaLabel={t("planCta")}
         ctaSource="pricing_hero"
       />
-      {billing === "test_cancelled" ? (
+      {isCheckoutCancelledReturn(billing) ? (
         <div className="mx-auto max-w-container px-6 sm:px-12">
           <p
             className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-4 py-3 text-sm text-text-primary"

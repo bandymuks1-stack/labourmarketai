@@ -10102,7 +10102,9 @@
     "returned": {
       "success": "Test-checkout afgerond. Er is geen echt geld bewogen; de abonnementsstatus hieronder synchroniseert via de handtekening-geverifieerde webhook van de betaalprovider en kan even op zich laten wachten.",
       "cancelled": "De checkout is geannuleerd. Er is niets afgeschreven en er is niets veranderd aan je account.",
-      "portal": "Je bent terug uit het factureringsportaal. Wijzigingen die je daar maakte, synchroniseren hier automatisch."
+      "portal": "Je bent terug uit het factureringsportaal. Wijzigingen die je daar maakte, synchroniseren hier automatisch.",
+      "successLive": "Checkout afgerond. De abonnementsstatus hieronder synchroniseert vanuit de door handtekening geverifieerde bevestiging van de betaalprovider en kan even duren.",
+      "syncing": "Synchroniseren met de betaalprovider — je abonnement verschijnt hier zo meteen. Opnieuw bestellen is niet nodig."
     },
     "disabled": "Betalingen zijn niet ingeschakeld. Betaalde abonnementen zijn voorbereide concepten — hier is niets te koop en er is geen betaalmethode nodig.",
     "none": "Geen abonnement op dit account.",

@@ -386,6 +386,27 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    app gate. Writes NOTHING (the report states writesPerformed: 0);
     //    provider access is the adapter's read-only methods; never a charge;
     //    touches no chat table; sends nothing outbound.
+    //  - lib/billing/effective-entitlements.ts — payments production calm v1
+    //    (2026-09-22): the ORGANIZATION-subject entitlement read. READ-ONLY
+    //    over billing_subscriptions, and only when the server-resolved
+    //    billing subject is an organization. Service role is genuinely
+    //    required, not convenient: the table's ONLY SELECT policy is
+    //    `owner_id = auth.uid() or is_admin()` (20260613200000), so through
+    //    the user client an organization's plan was visible solely to the
+    //    profile that paid — a co-manager holding manage-billing in the same
+    //    workspace resolved as free and never got the 10-position limit.
+    //    The authority is the SERVER-resolved subject (resolveBillingSubject
+    //    → resolveEmployerCompanyContext: the caller's own active
+    //    company_memberships row through the RLS-scoped session — the same
+    //    subject the checkout route binds a session to), never a client
+    //    value; the query is filtered by that organization id AND the
+    //    adapter mode; the projection is plan_key / status /
+    //    provider_subscription_id / updated_at (no payer identity, no
+    //    customer id, no amount); it writes nothing (P7 guard) and falls
+    //    back to the user client when no service key is configured.
+    //    Personal subjects keep the user-scoped read (owner_id = auth.uid()
+    //    IS the policy). No RLS change; touches no chat table; sends
+    //    nothing outbound.
     //
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
@@ -402,6 +423,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/ai/runtime/audit-store.ts",
       "lib/billing/checkout-operations-store.ts",
       "lib/billing/customer-store.ts",
+      "lib/billing/effective-entitlements.ts",
       "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
       "lib/commercial/handoff-dispatch.ts",
