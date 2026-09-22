@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { WORKER_TABS } from "../today/today-route";
+import { TODAY_STATIONS } from "../today/today-route";
 
 /**
  * Market Map first-class navigation guard.
@@ -24,16 +24,17 @@ describe("market map is exposed in the primary nav + opportunities", () => {
   it("the PASAULIS tab destination embeds the geographic map and links the full map before any disclosure", () => {
     // Honest door (R-11 reclassification, 2026-09-19). The catalogue's
     // primary nav tabs (VISIBLE_PRIMARY_NAV_ITEMS) render only in the admin
-    // `full` chrome (dashboard-chrome.tsx: modeFor → "full" = /dashboard/admin
+    // `full` chrome (lib/config/navigation.ts: dashboardChromeMode → "full" = /dashboard/admin
     // only), so "market_map is a primary nav tab" proved nothing for a real
     // user — the earlier version of this test was a reachability proof that
     // could not fail while the tab was invisible to everyone but an admin.
-    // What a worker really walks: PASAULIS (WORKER_TABS.world →
-    // /dashboard/opportunities) embeds WorldDiscovery — THE WORLD layer — in
-    // a top-level section, and the map header links the full
-    // /dashboard/market-map page. Both sit BEFORE the first collapsed
-    // <details>, i.e. one tap from the tab bar at every width.
-    const world = WORKER_TABS.find((t) => t.id === "world");
+    // What a worker really walks: the opportunities station (TODAY_STATIONS
+    // `world` → /dashboard/opportunities, one tap from ŠIANDIEN inside the
+    // conversation; also the find-work intent and a search command) embeds
+    // WorldDiscovery — THE WORLD layer — in a top-level section, and the map
+    // header links the full /dashboard/market-map page. Both sit BEFORE the
+    // first collapsed <details>.
+    const world = TODAY_STATIONS.find((t) => t.id === "world");
     expect(world?.href).toBe("/dashboard/opportunities");
     const mapSection = opportunities.indexOf('data-testid="opportunities-map"');
     const fullMapLink = opportunities.indexOf('data-testid="opportunities-map-full-link"');

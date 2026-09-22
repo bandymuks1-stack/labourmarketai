@@ -50,7 +50,7 @@ describe("UI tier truth (routing + selector + sitemap)", () => {
     const src = read("components/marketing/locale-switcher.tsx");
     expect(src).toMatch(/activeLocales/);
     expect(src).not.toMatch(/\bfi:\s*"/); // no Finnish entry in NATIVE names
-    expect(src).toMatch(/tier1Locales/); // non-Tier-1 stays preview-tagged
+    expect(src).not.toMatch(/tier1Locales|localePreview/); // no tier badge in the selector (owner 2026-09-22)
   });
 
   it("the sitemap emits only active locales", () => {

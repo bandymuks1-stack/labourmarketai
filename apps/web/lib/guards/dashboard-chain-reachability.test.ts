@@ -115,14 +115,15 @@ describe("the chain is reachable from the worker's home — ŠIANDIEN (IA 2026-0
   // The worker's `/dashboard` is a page now, not the chat. Its open items
   // (entries owed a figure, unexplained plausibility checks) and its "my
   // work" station link to the journal, where the review chain lives; the
-  // conversation — and the panel with the invitation control — stays one
-  // tab (PAKLAUSK) away. Nothing on the page writes.
-  it("open items and the work station link to /dashboard/journal; PAKLAUSK links to the chat", () => {
+  // conversation — and the panel with the invitation control — is the
+  // composer right under ŠIANDIEN (owner decision 0017: the chat is the
+  // home, not a tab). Nothing on the page writes.
+  it("open items and the work station link to /dashboard/journal; no separate door to the chat", () => {
     const work = read("components/app/today/today-work-section.tsx");
     expect(work).toMatch(/href="\/dashboard\/journal"/);
     expect(work).toMatch(/today-open-\$\{item\.kind\}/);
     const screen = read("components/app/today/today-screen.tsx");
-    expect(screen).toMatch(/\/dashboard\?\$\{ASK_PARAM\}=1/);
+    expect(screen).not.toMatch(/ask=1|ASK_PARAM/);
   });
 
   it("ŠIANDIEN performs no write of its own", () => {

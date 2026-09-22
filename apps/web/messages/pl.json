@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Język",
-    "localePreview": "podgląd",
     "lt": "Litewski",
     "en": "Angielski",
     "notFound": "Ta strona nie istnieje",
@@ -8151,25 +8150,15 @@
         "unknown": "Brak danych — nie udało się odczytać ogłoszeń.",
         "open": "Otwórz Świat"
       },
-      "ask": {
-        "title": "Zapytaj",
-        "body": "Zarejestruj pracę w jednym zdaniu, zapytaj o swoje umiejętności albo otwórz dowolne miejsce.",
-        "cta": "Napisz"
-      },
       "stations": {
         "title": "Inne miejsca",
         "journal": "Moja praca",
         "numbers": "Moja aktywność w liczbach",
         "profile": "Profil zawodowy",
         "cv": "Żywe CV",
-        "gallery": "Galeria"
+        "gallery": "Galeria",
+        "world": "Świat"
       }
-    },
-    "nav": {
-      "today": "Dzisiaj",
-      "world": "Świat",
-      "ask": "Zapytaj",
-      "aria": "Nawigacja główna"
     }
   },
   "agencyPool": {

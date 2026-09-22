@@ -25,8 +25,9 @@ export type ConversationNavLabels = {
  * brief, the command search) — never from a parallel tab system. The bar
  * therefore carries exactly the canonical set and nothing else:
  *
- *   left:  ← back-to-chat (on projection screens only) · LabourMarket
- *          identity · the ACTIVE WORKSPACE chip (real switching, P0.1)
+ *   left:  ← back-home (on contextual workspaces only) · the LabourMarket
+ *          logo — a LINK to the canonical home from every route (owner
+ *          decision 0017) · the ACTIVE WORKSPACE chip (real switching, P0.1)
  *   right: search · language · notifications · ONE avatar (profile,
  *          settings, theme, sign-out live inside the menu)
  *
@@ -63,8 +64,22 @@ export function ConversationHeader({
             <ArrowLeft {...iconControl()} aria-hidden />
           </Link>
         )}
-        <span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-text-on-brand">L</span>
-        <span className={`font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden lg:inline"}`}>{title}</span>
+        {/* THE LOGO IS THE WAY HOME (owner decision 0017, 2026-09-22): from
+            ANY authenticated route the LabourMarket mark leads to the
+            canonical home — the conversation — for the current identity and
+            context. Never the marketing landing, never a role-specific
+            dashboard, never a nested surface. On the home itself it is a
+            no-op link, not a dead span, so the affordance is the same
+            everywhere. Pinned by lib/guards/logo-home-contract.test.ts. */}
+        <Link
+          href="/dashboard"
+          data-testid="shell-logo-home"
+          aria-label={title}
+          className="flex min-w-0 items-center gap-2 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
+        >
+          <span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-text-on-brand" aria-hidden>L</span>
+          <span className={`font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden lg:inline"}`}>{title}</span>
+        </Link>
         {/* The ACTIVE WORKSPACE, always visible beside the conversation —
             the user must never have to guess which work context they are in.
             min-w-0 so the chip TRUNCATES on a phone instead of ramming into

@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Sprache",
-    "localePreview": "Vorschau",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "Diese Seite existiert nicht",
@@ -8151,25 +8150,15 @@
         "unknown": "Keine Daten — Anzeigen konnten nicht gelesen werden.",
         "open": "Welt öffnen"
       },
-      "ask": {
-        "title": "Fragen",
-        "body": "Erfasse Arbeit in einem Satz, frag nach deinen Fähigkeiten oder öffne jeden Ort.",
-        "cta": "Schreiben"
-      },
       "stations": {
         "title": "Weitere Orte",
         "journal": "Meine Arbeit",
         "numbers": "Meine Tätigkeit in Zahlen",
         "profile": "Berufsprofil",
         "cv": "Lebendiger Lebenslauf",
-        "gallery": "Galerie"
+        "gallery": "Galerie",
+        "world": "Welt"
       }
-    },
-    "nav": {
-      "today": "Heute",
-      "world": "Welt",
-      "ask": "Fragen",
-      "aria": "Hauptnavigation"
     }
   },
   "agencyPool": {

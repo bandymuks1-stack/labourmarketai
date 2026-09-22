@@ -226,17 +226,27 @@ describe("message language chip — data-backed only, never guessed", () => {
 });
 
 describe("UI language status stays honest and discoverable", () => {
-  it("active locales are exactly lt/en/ru/nl/de; RU/NL/DE stay non-Tier-1 (preview)", () => {
-    // NL + DE activated 2026-07-11 (launch repair Scope D) with full-parity
-    // AI-seeded catalogs pending §7.4 human review — preview-tagged like RU.
+  it("active locales are exactly lt/en/ru/nl/de/pl; RU/NL/DE/PL stay Tier 2 in config (not in the UI)", () => {
+    // NL + DE activated 2026-07-11 (launch repair Scope D), PL 2026-09-20,
+    // with full-parity AI-seeded catalogs pending §7.4 human review. The tier
+    // is tracked here, never shown to the person as a badge.
     expect([...activeLocales]).toEqual(["lt", "en", "ru", "nl", "de", "pl"]);
     expect([...tier1Locales]).toEqual(["en", "lt"]);
   });
 
-  it("the locale switcher tags non-Tier-1 locales as preview", () => {
+  it("the locale switcher shows clean language names — no tier/preview badge (owner 2026-09-22)", () => {
+    // The Tier-2 ("AI-seeded, pending §7.4 review") status is an operations
+    // fact tracked in config + docs/LANGUAGE_MATRIX.md. It used to render as
+    // a "PERŽIŪRA" tag beside Русский / Nederlands / Deutsch / Polski in the
+    // production selector — an internal state leaking into the product.
     const switcher = read("components/marketing/locale-switcher.tsx");
-    expect(switcher).toMatch(/tier1Locales/);
-    expect(switcher).toMatch(/localePreview/);
+    expect(switcher).not.toMatch(/tier1Locales/);
+    expect(switcher).not.toMatch(/localePreview/);
+    // The key is gone from every catalog, so nothing can render it again.
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+      const common = loadMessages(locale).common as Record<string, unknown>;
+      expect(common.localePreview, `${locale}.common.localePreview`).toBeUndefined();
+    }
   });
 
   /**

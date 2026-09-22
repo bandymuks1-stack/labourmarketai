@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Taal",
-    "localePreview": "preview",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "Deze pagina bestaat niet",
@@ -8151,25 +8150,15 @@
         "unknown": "Geen gegevens — advertenties konden niet worden gelezen.",
         "open": "Wereld openen"
       },
-      "ask": {
-        "title": "Vraag",
-        "body": "Leg werk vast in één zin, vraag naar je vaardigheden of open elke plek.",
-        "cta": "Schrijven"
-      },
       "stations": {
         "title": "Andere plekken",
         "journal": "Mijn werk",
         "numbers": "Mijn activiteit in cijfers",
         "profile": "Beroepsprofiel",
         "cv": "Levend cv",
-        "gallery": "Galerij"
+        "gallery": "Galerij",
+        "world": "Wereld"
       }
-    },
-    "nav": {
-      "today": "Vandaag",
-      "world": "Wereld",
-      "ask": "Vraag",
-      "aria": "Hoofdnavigatie"
     }
   },
   "agencyPool": {

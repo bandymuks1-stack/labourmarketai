@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Language",
-    "localePreview": "preview",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "This page does not exist",
@@ -8151,25 +8150,15 @@
         "unknown": "No data — postings could not be read.",
         "open": "Open World"
       },
-      "ask": {
-        "title": "Ask",
-        "body": "Record work in one sentence, ask about your skills, or open any place.",
-        "cta": "Write"
-      },
       "stations": {
         "title": "Other places",
         "journal": "My work",
         "numbers": "My activity in numbers",
         "profile": "Professional profile",
         "cv": "Living CV",
-        "gallery": "Gallery"
+        "gallery": "Gallery",
+        "world": "World"
       }
-    },
-    "nav": {
-      "today": "Today",
-      "world": "World",
-      "ask": "Ask",
-      "aria": "Primary navigation"
     }
   },
   "agencyPool": {

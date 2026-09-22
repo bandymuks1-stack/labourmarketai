@@ -7236,7 +7236,6 @@
   },
   "common": {
     "localeSwitch": "Kalba",
-    "localePreview": "peržiūra",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "Tokio puslapio nėra",
@@ -8151,25 +8150,15 @@
         "unknown": "Nėra duomenų — skelbimų perskaityti nepavyko.",
         "open": "Atidaryti Pasaulį"
       },
-      "ask": {
-        "title": "Paklausk",
-        "body": "Užrašykite darbą vienu sakiniu, paklauskite apie savo įgūdžius ar atidarykite bet kurią vietą.",
-        "cta": "Rašyti"
-      },
       "stations": {
         "title": "Kitos vietos",
         "journal": "Mano darbas",
         "numbers": "Mano veikla skaičiais",
         "profile": "Profesinis profilis",
         "cv": "Gyvas CV",
-        "gallery": "Galerija"
+        "gallery": "Galerija",
+        "world": "Pasaulis"
       }
-    },
-    "nav": {
-      "today": "Šiandien",
-      "world": "Pasaulis",
-      "ask": "Paklausk",
-      "aria": "Pagrindinė navigacija"
     }
   },
   "agencyPool": {

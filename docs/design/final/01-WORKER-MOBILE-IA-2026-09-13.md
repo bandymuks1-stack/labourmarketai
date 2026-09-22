@@ -1,5 +1,16 @@
 # LABOURMARKET.AI — TARGET WORKER MOBILE INFORMATION ARCHITECTURE (2026-09-13)
 
+> **SUPERSEDED IN PART — owner decision 0017 (2026-09-22,
+> `docs/DECISIONS/0017-one-product-chat-first.md`).** §2 "Tab bar (3 tabs)"
+> and every "PAKLAUSK / conversation on demand" sentence below are retired:
+> `/dashboard` is the ONE conversation for every identity; ŠIANDIEN (the §2/§5
+> composition) is that conversation's opening context, rendered above the
+> greeting with the composer under it; PASAULIS is the opportunities
+> workspace reached as a station, an intent, a search command or a deep link.
+> The rest of this document (what ŠIANDIEN shows, the stations, §5 premium
+> rules, §6 journey, §7 guard map) still describes the composition and stays
+> in force.
+
 Status: **TARGET — owner direction 2026-09-13 ("CRITICAL PRODUCT-DIRECTION
 CORRECTION")**, applied inside the #1724 continuation. Additive to
 `00-FROZEN-DESIGN-CONTRACT.md` (§1.5: no destructive change to existing

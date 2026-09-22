@@ -765,6 +765,7 @@ export function ConversationChat({
   script,
   mobile = false,
   personalIntroPayload = null,
+  openingContext = null,
   countryLabels,
   agencyWorkspace = false,
   // Declared in the props type since the education slice but never read here
@@ -794,6 +795,13 @@ export function ConversationChat({
    *  (the design preview) renders nothing at all; a resolved `hidden`
    *  model renders nothing either — exactly as before. */
   personalIntroPayload?: Promise<PersonalIntroPayload> | null;
+  /** ŠIANDIEN — the worker's opening context (owner decision 0017): a
+   *  server-rendered block the page composes for a worker in their personal
+   *  space. It takes the SAME intro slot the S2 block uses (above the
+   *  greeting, above the composer, gone after the first real turn), so the
+   *  home stays ONE conversation for every identity. When present it wins
+   *  over the S2 payload — the page hands only one of the two. */
+  openingContext?: ReactNode;
   /** Localized country names, resolved server-side. The demand prefill needs a
    *  WORD for the location field — the ISO code is an internal value (§23). */
   countryLabels?: Record<string, string>;
@@ -6280,7 +6288,9 @@ export function ConversationChat({
                  through the SAME dispatcher every chip uses — one set of
                  flows, no second action system. */
               intro={
-                personalIntroPayload && !script ? (
+                openingContext && !script ? (
+                  openingContext
+                ) : personalIntroPayload && !script ? (
                   /* Invisible boundary (#1011): the intro's slow readiness
                      reads stream in AFTER the shell — the opening composition
                      renders immediately and the block appears when known,

@@ -154,10 +154,14 @@ describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)",
     // guarantee got stronger, so the assertion has to pin the stronger fact —
     // a route the author forgot can no longer fall through to the legacy
     // module chrome, because there is no fall-through left.
-    expect(chrome).toMatch(/return "panel";/);
+    // The rule is the pure `dashboardChromeMode` in lib/config/navigation.ts
+    // (owner decision 0017 moved it beside the canonical admin nav item).
+    const rule = read("lib/config/navigation.ts");
+    expect(rule).toMatch(/return "panel";/);
+    expect(chrome).toMatch(/dashboardChromeMode\(pathname\)/);
     // The ONE escape is the internal operator console, and it is named by the
     // canonical admin nav item — never re-spelled as a literal here.
-    expect(chrome).toMatch(/ADMIN_NAV_ITEM\.href/);
+    expect(rule).toMatch(/ADMIN_NAV_ITEM\.href/);
     // No second list of "routes that get the simple shell" may come back:
     // that list is exactly what let the ruling apply to four routes only.
     expect(chrome).not.toMatch(/PANEL_PREFIXES/);
