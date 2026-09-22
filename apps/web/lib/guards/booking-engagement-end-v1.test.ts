@@ -1423,6 +1423,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // owner-approved 2026-09-20 ("APPROVE MIGRATION 20260920173000_…"),
       // UNAPPLIED until the #1810 deploy — applied in the same step, read back.
       "20260920173000_privacy_consent_locale_pl_hash_repin_v1.sql",
+      // 2026-09-22: submit_company_need_public_v1 kept a 10-market country list that
+      // its own comment calls the "PR #675 10-market target list" — a market gate, not
+      // an abuse control; one condition becomes membership in public.countries.
+      // RED by route (SECDEF body replace); marker added under the owner directive
+      // of 2026-09-22 ("Complete and production-verify #1829"), PR #1829.
+      "20260922130000_company_need_intake_country_registry_v1.sql",
       // 2026-09-22: the three consent grant RPCs still refused p_locale = pl while
       // CONSENT_LOCALES carries it (measured on production) — one condition per
       // function, bodies byte-identical to production, paired rollback. RED by

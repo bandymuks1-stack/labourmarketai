@@ -2618,7 +2618,9 @@ describe("no migration files added by this sprint", () => {
 // on conflict do nothing; owner-gated apply). RECOUNTED: 300.
 // Bumped 300 -> 301 for 20260922140000_privacy_consent_rpc_locale_pl_v1 (consent grant RPCs accept
 // locale pl; RED SECDEF body replace, human-gated; owner-applied). RECOUNTED: 301.
-const SPRINT_BASELINE = 301;
+// Bumped 301 -> 302 for 20260922130000_company_need_intake_country_registry_v1 (anonymous company-need
+// intake accepts any code in public.countries; RED SECDEF body replace, human-gated; owner-applied). RECOUNTED: 302.
+const SPRINT_BASELINE = 302;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
