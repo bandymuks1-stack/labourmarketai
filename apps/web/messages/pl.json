@@ -10102,7 +10102,9 @@
     "returned": {
       "success": "Zakup w trybie testowym zakończony. Żadne prawdziwe pieniądze nie zostały przesłane; stan subskrypcji poniżej synchronizuje się z webhookiem dostawcy płatności zweryfikowanym podpisem i pojawienie się może chwilę potrwać.",
       "cancelled": "Zakup został anulowany. Nic nie zostało obciążone i nic nie zmieniło się na Twoim koncie.",
-      "portal": "Wróciłeś/aś z portalu rozliczeniowego. Każda zmiana dokonana tam synchronizuje się z tą stroną automatycznie."
+      "portal": "Wróciłeś/aś z portalu rozliczeniowego. Każda zmiana dokonana tam synchronizuje się z tą stroną automatycznie.",
+      "successLive": "Płatność zakończona. Stan subskrypcji poniżej synchronizuje się z potwierdzenia dostawcy płatności ze zweryfikowanym podpisem i może pojawić się z opóźnieniem.",
+      "syncing": "Trwa synchronizacja z dostawcą płatności — subskrypcja pojawi się tutaj za chwilę. Nie trzeba zamawiać ponownie."
     },
     "disabled": "Płatności nie są włączone. Plany płatne to przygotowane szkice — nic tu nie można kupić i nie jest potrzebna żadna metoda płatności.",
     "none": "Brak subskrypcji na tym koncie.",

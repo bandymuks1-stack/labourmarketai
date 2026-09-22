@@ -10102,7 +10102,9 @@
     "returned": {
       "success": "Testinis apmokėjimas užbaigtas. Tikri pinigai nejudėjo; prenumeratos būsena žemiau sinchronizuojama per parašu patvirtintą mokėjimų teikėjo webhook ir gali atsirasti ne iš karto.",
       "cancelled": "Apmokėjimas atšauktas. Niekas nenuskaičiuota ir jūsų paskyroje niekas nepasikeitė.",
-      "portal": "Grįžote iš mokėjimų portalo. Ten atlikti pakeitimai šiame puslapyje susinchronizuojami automatiškai."
+      "portal": "Grįžote iš mokėjimų portalo. Ten atlikti pakeitimai šiame puslapyje susinchronizuojami automatiškai.",
+      "successLive": "Apmokėjimas užbaigtas. Prenumeratos būsena žemiau sinchronizuojama iš parašu patvirtinto mokėjimų teikėjo patvirtinimo ir gali atsirasti ne iš karto.",
+      "syncing": "Sinchronizuojama su mokėjimų teikėju — prenumerata čia atsiras po akimirkos. Užsakyti dar kartą nereikia."
     },
     "disabled": "Mokėjimai neįjungti. Mokami planai — paruošti juodraščiai: čia nieko negalima nusipirkti ir mokėjimo priemonės nereikia.",
     "none": "Šioje paskyroje prenumeratos nėra.",

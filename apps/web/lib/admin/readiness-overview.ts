@@ -4,7 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { isSuperadmin } from "@/lib/auth/superadmin";
 import { countryRulesNeedingReview, type CountryReviewItem } from "@/lib/country-readiness/review-queue";
-import { PAYMENTS_ENABLED, PRE_PAYMENT_PLANS } from "@/lib/billing/plans";
+import { PRE_PAYMENT_PLANS } from "@/lib/billing/plans";
+import { getBillingConfig } from "@/lib/billing/config";
 
 /**
  * Admin readiness control-center data (Stage 9). Aggregates the
@@ -53,7 +54,12 @@ export async function getAdminReadinessOverview(): Promise<AdminReadinessOvervie
     companiesNeedingAttention: 0,
     bookingsByStatus: {},
     bookingsAvailable: false,
-    paymentsEnabled: PAYMENTS_ENABLED,
+    // The RESOLVED billing config, not the static pre-payment constant:
+    // `PAYMENTS_ENABLED` in plans.ts is a code pin that never leaves `false`
+    // (guarded), so the readiness tile reported "off" while Stripe was live
+    // (measured 2026-09-22). `getBillingConfig()` is the same server-only
+    // truth the admin billing overview and llms.txt already report.
+    paymentsEnabled: getBillingConfig().paymentsEnabled,
     paidPlanCount: PRE_PAYMENT_PLANS.filter((p) => p.accessState === "payment_not_enabled").length,
   };
   if (!admin) return base;

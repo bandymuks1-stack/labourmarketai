@@ -10102,7 +10102,9 @@
     "returned": {
       "success": "Test-Checkout abgeschlossen. Es ist kein echtes Geld geflossen; der Abonnementstatus unten wird über den signaturgeprüften Webhook des Zahlungsanbieters synchronisiert und kann einen Moment brauchen.",
       "cancelled": "Der Checkout wurde abgebrochen. Es wurde nichts abgebucht und an Ihrem Konto hat sich nichts geändert.",
-      "portal": "Sie sind zurück aus dem Abrechnungsportal. Dort vorgenommene Änderungen werden hier automatisch synchronisiert."
+      "portal": "Sie sind zurück aus dem Abrechnungsportal. Dort vorgenommene Änderungen werden hier automatisch synchronisiert.",
+      "successLive": "Checkout abgeschlossen. Der Abonnementstatus unten wird aus der signaturgeprüften Bestätigung des Zahlungsanbieters übernommen und kann einen Moment dauern.",
+      "syncing": "Abgleich mit dem Zahlungsanbieter läuft — Ihr Abonnement erscheint hier in Kürze. Eine erneute Bestellung ist nicht nötig."
     },
     "disabled": "Zahlungen sind nicht aktiviert. Bezahlpläne sind vorbereitete Entwürfe — hier ist nichts kaufbar und keine Zahlungsmethode nötig.",
     "none": "Kein Abonnement auf diesem Konto.",

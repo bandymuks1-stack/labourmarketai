@@ -8,6 +8,10 @@ import { TestCheckoutButton } from "@/components/marketing/test-checkout-button"
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
 import { subscriptionBlocksCheckout } from "@/lib/billing/checkout-operations-core";
+import {
+  awaitingProviderSync,
+  classifyCheckoutReturn,
+} from "@/lib/billing/checkout-return-core";
 import { Card } from "@/components/ui/Card";
 
 /**
@@ -40,12 +44,16 @@ export async function AccountBillingSection({
   const cfg = getBillingConfig();
   const ent = await getEffectiveEntitlements();
 
+  const returnKind = classifyCheckoutReturn(billingReturn);
+  // The success words follow the ADAPTER MODE, not the flag: `returned.success`
+  // says "test-mode … no real money moved", which was rendered for a LIVE
+  // success return too (measured 2026-09-22). Live gets the live sentence.
   const returnNotice =
-    billingReturn === "test_success" || billingReturn === "success"
-      ? t("returned.success")
-      : billingReturn === "test_cancelled" || billingReturn === "cancelled"
+    returnKind === "success"
+      ? (cfg.testMode ? t("returned.success") : t("returned.successLive"))
+      : returnKind === "cancelled"
         ? t("returned.cancelled")
-        : billingReturn === "portal_return"
+        : returnKind === "portal"
           ? t("returned.portal")
           : null;
 
@@ -53,6 +61,18 @@ export async function AccountBillingSection({
   const hasSubscription = ent.source === "subscription";
   // D3: the section is live for BOTH adapter states; the TEST badge only in test.
   const billingOn = cfg.state === "stripe_test" || cfg.state === "stripe_live";
+  // Payments production calm v1 (owner §6, measured 2026-09-22): after a
+  // paid return with NO subscription row yet (the webhook is still in
+  // flight) the section used to say "No subscription" and offer the Order
+  // button again. While the return says success and no row exists, the
+  // button is withheld and a "syncing with the payment provider" notice
+  // replaces it. UI withholding only — the flag activates nothing (P7); the
+  // checkout route is untouched and still refuses a duplicate on its own.
+  const syncing = awaitingProviderSync({
+    billingOn,
+    billingReturn,
+    subscriptionStatus: ent.subscriptionStatus,
+  });
 
   // The portal opens ONLY for a stored billing customer — never offered
   // while payments are disabled, and never a dead button.
@@ -74,7 +94,8 @@ export async function AccountBillingSection({
   const canOrder =
     Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) &&
     !hasSubscription &&
-    !subscriptionBlocksCheckout(status);
+    !subscriptionBlocksCheckout(status) &&
+    !syncing;
 
   return (
     <Card compact>
@@ -124,7 +145,16 @@ export async function AccountBillingSection({
             </>
           ) : (
             <>
-              <p className="text-sm text-text-secondary">{t("none")}</p>
+              {syncing ? (
+                <p
+                  className="text-sm text-text-secondary"
+                  data-testid="account-billing-syncing"
+                >
+                  {t("returned.syncing")}
+                </p>
+              ) : (
+                <p className="text-sm text-text-secondary">{t("none")}</p>
+              )}
               {canOrder ? (
                 <div className="flex flex-col gap-1" data-testid="account-billing-order">
                   <p className="text-sm font-semibold text-text-primary">{t("subscribe.title")}</p>
