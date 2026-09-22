@@ -74,8 +74,12 @@ export const workerSaveWorkCardFields = z.object({
   availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
   salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
   salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
-  locationCountry: z.string().trim().length(2).nullable().optional(),
-  preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
+  // A country is a CODE or a NAME (global-access rule 2026-09-22): the text
+  // travels as typed and `lib/worker/work-card-core` resolves it through the
+  // canonical `resolveCountryCode`, refusing what does not resolve. The old
+  // `.length(2)` rejected "Vietnam" before the resolver could see it.
+  locationCountry: z.string().trim().min(1).max(80).nullable().optional(),
+  preferredCountries: z.array(z.string().trim().min(1).max(80)).max(12).optional(),
 });
 
 export const workerSaveWorkCardSchema = workerSaveWorkCardFields

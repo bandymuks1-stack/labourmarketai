@@ -164,6 +164,23 @@ export default async function CompanyNeedsPage({
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
           />
+          {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
+              shows a need to workers ONLY when companies.verification_status
+              = 'verified' (migration 20260906140000, the join on
+              c.verification_status). Every other status — active_unverified,
+              needs_checks, pending_verification, unverified, draft — keeps the
+              need private to this company and the review team, so the page
+              says so in the person's language instead of implying a reach it
+              does not have. Status-aware: a verified company never sees it. */}
+          {companyRow.verificationStatus !== "verified" ? (
+            <p
+              className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
+              data-testid="company-needs-not-verified-note"
+              data-verification-status={companyRow.verificationStatus}
+            >
+              {tReadback("notVerifiedYet")}
+            </p>
+          ) : null}
           {/* Static-stepper honesty note (guarded): the steps show progress,
               they are not live modules. */}
           <p

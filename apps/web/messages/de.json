@@ -1790,6 +1790,7 @@
     }
   },
   "demandReadback": {
+    "notVerifiedYet": "Ihr Unternehmen ist noch nicht verifiziert; die hier eingereichten Anfragen werden Arbeitskräften erst nach Abschluss der Verifizierung angezeigt.",
     "statusOther": "In Prüfung",
     "heading": "Ihre eingereichten Anfragen",
     "note": "In Ihrem privaten Bereich gespeichert und manuell geprüft — wir schlagen keine Kandidaten automatisch vor. Statusaktualisierungen erscheinen hier.",
@@ -2081,10 +2082,10 @@
         },
         "verificationExplainer": {
           "draft": "Entwurf. Speichern Sie, um Ihr Unternehmen zu aktivieren — es wird sofort nutzbar.",
-          "active_unverified": "Jetzt aktiv und nutzbar. Grundlegende automatische Prüfungen bestanden. Noch nicht identitätsverifiziert — das ist ein separater, stärkerer Schritt.",
-          "needs_checks": "Aktiv und nutzbar, aber eine grundlegende Prüfung benötigt Aufmerksamkeit (z. B. Land ergänzen oder eine fehlerhafte Nummer / Website / E-Mail korrigieren).",
-          "pending_verification": "Sie haben eine optionale manuelle Prüfung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar.",
-          "unverified": "Nicht verifiziert. Sie können Ihr Unternehmen normal weiter nutzen.",
+          "active_unverified": "Jetzt aktiv und nutzbar. Grundlegende automatische Prüfungen bestanden. Noch nicht identitätsverifiziert — das ist ein separater, stärkerer Schritt. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
+          "needs_checks": "Aktiv und nutzbar, aber eine grundlegende Prüfung benötigt Aufmerksamkeit (z. B. Land ergänzen oder eine fehlerhafte Nummer / Website / E-Mail korrigieren). Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
+          "pending_verification": "Sie haben eine optionale manuelle Prüfung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
+          "unverified": "Nicht verifiziert. Sie können Ihr Unternehmen normal weiter nutzen. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
           "verified": "Verifiziert — ein stärkerer Vertrauensstatus, der nur nach einer echten Prüfung vergeben wird."
         },
         "goToWorkspace": "Unternehmens-Arbeitsbereich öffnen",

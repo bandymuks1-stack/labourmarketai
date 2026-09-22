@@ -1790,6 +1790,7 @@
     }
   },
   "demandReadback": {
+    "notVerifiedYet": "Je bedrijf is nog niet geverifieerd; de aanvragen die je hier indient worden pas aan werknemers getoond zodra de verificatie is afgerond.",
     "statusOther": "In beoordeling",
     "heading": "Je ingediende aanvragen",
     "note": "Opgeslagen in je privéruimte en handmatig beoordeeld — we stellen niet automatisch kandidaten voor. Statusupdates verschijnen hier.",
@@ -2081,10 +2082,10 @@
         },
         "verificationExplainer": {
           "draft": "Concept. Sla op om je bedrijf te activeren — het wordt direct bruikbaar.",
-          "active_unverified": "Nu actief en bruikbaar. Basale automatische controles geslaagd. Nog niet identiteitsgeverifieerd — dat is een aparte, sterkere stap.",
-          "needs_checks": "Actief en bruikbaar, maar een basiscontrole vraagt aandacht (bijv. voeg je land toe, of corrigeer een onjuiste code / website / e-mail).",
-          "pending_verification": "Je hebt een optionele handmatige beoordeling aangevraagd. Je bedrijf blijft volledig bruikbaar terwijl die wacht.",
-          "unverified": "Niet geverifieerd. Je kunt je bedrijf gewoon blijven gebruiken.",
+          "active_unverified": "Nu actief en bruikbaar. Basale automatische controles geslaagd. Nog niet identiteitsgeverifieerd — dat is een aparte, sterkere stap. Je geplaatste aanvragen worden pas na verificatie van je bedrijf aan werknemers getoond.",
+          "needs_checks": "Actief en bruikbaar, maar een basiscontrole vraagt aandacht (bijv. voeg je land toe, of corrigeer een onjuiste code / website / e-mail). Je geplaatste aanvragen worden pas na verificatie van je bedrijf aan werknemers getoond.",
+          "pending_verification": "Je hebt een optionele handmatige beoordeling aangevraagd. Je bedrijf blijft volledig bruikbaar terwijl die wacht. Je geplaatste aanvragen worden pas na verificatie van je bedrijf aan werknemers getoond.",
+          "unverified": "Niet geverifieerd. Je kunt je bedrijf gewoon blijven gebruiken. Je geplaatste aanvragen worden pas na verificatie van je bedrijf aan werknemers getoond.",
           "verified": "Geverifieerd — een sterkere vertrouwensstatus, alleen toegekend na een echte controle."
         },
         "goToWorkspace": "Bedrijfswerkruimte openen",

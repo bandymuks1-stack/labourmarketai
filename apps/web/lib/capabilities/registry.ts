@@ -38,6 +38,7 @@ import {
   workerSaveWorkCardSchema,
 } from "@/lib/conversation/worker-schemas";
 import {
+  normalizeCountry,
   normalizeCountryList,
   saveWorkerCardCore,
   workCardStateFingerprint,
@@ -1326,7 +1327,10 @@ const workCardSaveDraft: CapabilityDescriptor = {
         field === "preferredCountries"
           ? normalizeCountryList(draft.preferredCountries ?? null)
           : field === "locationCountry"
-            ? (draft.locationCountry?.toUpperCase() ?? null)
+            // The preview shows the ISO code the save will write; a typed
+            // country that does not resolve is shown as typed — the save
+            // itself refuses it (`location_country`), never truncates it.
+            ? (normalizeCountry(draft.locationCountry) ?? draft.locationCountry?.trim() ?? null)
             : (draft[field as keyof WorkCardDraft] ?? null),
     }));
 

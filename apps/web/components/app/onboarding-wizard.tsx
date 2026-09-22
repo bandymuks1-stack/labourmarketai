@@ -9,8 +9,7 @@ import { RoleIcon } from "@/components/app/role-icon";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
-import { countryDisplayName } from "@/lib/location/country-model";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
   FIRST_RUN_INTENTS,
@@ -48,9 +47,10 @@ const INTENT_ICON_ROLE: Record<FirstRunIntent, Role> = {
 };
 
 // Country names come from the canonical global country model (Intl-backed,
-// localized, no hand-translated catalogue). The select offers the ACTIVE
-// markets — incl. GE and US — with NO pre-selected country (PR-G: no silent
-// Lithuania default; the user must actively choose).
+// localized, no hand-translated catalogue). The select offers EVERY ISO
+// country — the active markets (incl. GE and US) first, then the world — with
+// NO pre-selected country (PR-G: no silent Lithuania default; the user must
+// actively choose). See lib/location/country-options.ts.
 
 /** Person-first onboarding. Two steps: (1) pick one OR MORE roles (the same
  *  person can be a worker, run an agency, and buy services), (2) basic profile
@@ -106,6 +106,11 @@ export function OnboardingWizard({
       label: tProfession(slug),
     })).sort((a, b) => collator.compare(a.label, b.label));
   }, [locale, tProfession]);
+  // Every ISO country, active markets first (global-access rule 2026-09-22:
+  // MARKET PRIORITY ≠ ACCESS PERMISSION). Measured before this: the select
+  // offered the 17 ACTIVE_MARKETS only, so a person in Vietnam, Ireland,
+  // Saudi Arabia or the Philippines could not name their own country.
+  const countryOptions = useMemo(() => countryOptionsForLocale(locale), [locale]);
   const [step, setStep] = useState<1 | 2>(1);
   // Pre-ticked from the landing sentence when one travelled here; the person
   // still sees the tick, can remove it, and must press Continue.
@@ -451,9 +456,9 @@ export function OnboardingWizard({
           <option value="" disabled>
             {t("country_placeholder")}
           </option>
-          {ACTIVE_MARKETS.map((c) => (
-            <option key={c} value={c}>
-              {countryDisplayName(c, locale)}
+          {countryOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
             </option>
           ))}
         </select>
