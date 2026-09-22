@@ -148,9 +148,12 @@ type Intent = (typeof INTENTS)[number];
  *  and it REFUSES rather than dropping — silently discarding a country a person
  *  typed would narrow their reach without telling them. */
 function parseCountries(raw: string): string[] {
+  // Commas / semicolons / newlines only: "Saudi Arabia" is one entry. Names and codes are
+  // resolved to ISO by the server action; what cannot be resolved is refused with its own
+  // reason, never dropped.
   return raw
-    .split(/[,;\s]+/)
-    .map((c) => c.trim().toUpperCase())
+    .split(/[,;\n]+/)
+    .map((c) => c.trim())
     .filter((c) => c !== "");
 }
 

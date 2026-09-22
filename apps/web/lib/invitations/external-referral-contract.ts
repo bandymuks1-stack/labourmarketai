@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { DeclaredContextV1 } from "@/lib/invitations/model";
+import { resolveCountryCode } from "@/lib/location/country-model";
 
 /**
  * EXTERNAL WORKER REFERRAL — the receiving contract (universal network v1).
@@ -63,10 +64,23 @@ export const externalWorkerReferralV1Schema = z
           .trim()
           .min(1)
           .max(80)
-          .transform((v) => resolveCountryIso2(v) ?? undefined)
+          .transform((v) => resolveCountryCode(v) ?? undefined)
           .optional(),
         availability: bounded(40).optional(),
-        destinations: z.array(z.string().regex(/^[A-Z]{2}$/)).max(40).default([]),
+        /** Where they wish to work — codes or names; what does not resolve is dropped from
+         *  the list (it was a wish, not an identity), never a refusal of the person. */
+        destinations: z
+          .array(z.string().trim().min(1).max(80))
+          .max(40)
+          .default([])
+          .transform((xs) => {
+            const out: string[] = [];
+            for (const x of xs) {
+              const code = resolveCountryCode(x);
+              if (code && !out.includes(code)) out.push(code);
+            }
+            return out;
+          }),
         mobilityScope: z.enum(["LISTED", "EU_WIDE"]).optional(),
         freeText: z.string().trim().max(4000).optional(),
         contact: z
@@ -95,61 +109,8 @@ export const externalWorkerReferralV1Schema = z
 
 export type ExternalWorkerReferralV1 = z.infer<typeof externalWorkerReferralV1Schema>;
 
-/** The languages a partner's form may be answered in (the product's own locales + the
- *  partner's). A name is matched EXACTLY (case-folded, trimmed) against the region display
- *  name in each of them; two codes sharing a name would be ambiguous and resolve to nothing. */
-const COUNTRY_NAME_LOCALES = ["en", "lt", "pl", "ru", "uk", "de", "nl", "sv", "no", "da", "fi", "fr", "es", "it", "pt", "ro", "tr", "vi"] as const;
-
-let countryNameIndex: Map<string, string> | null = null;
-
-/**
- * ISO 3166-1 alpha-2, the 249 officially assigned codes (plus XK, Kosovo, which every partner form
- * offers). A static list on purpose: ICU also names DEPRECATED codes — "VD" (North Vietnam) is
- * "Vietnam" in eleven languages, which made the name ambiguous and resolved nothing.
- */
-const ISO_3166_ALPHA2 = "AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW XK".split(" ");
-
-const knownIso2Codes = new Set(ISO_3166_ALPHA2);
-
-function buildCountryNameIndex(): Map<string, string> {
-  const index = new Map<string, string>();
-  const ambiguous = new Set<string>();
-  for (const locale of COUNTRY_NAME_LOCALES) {
-    let names: Intl.DisplayNames;
-    try {
-      names = new Intl.DisplayNames([locale], { type: "region", fallback: "none" });
-    } catch {
-      continue;
-    }
-    for (const code of ISO_3166_ALPHA2) {
-      const name = names.of(code);
-      if (!name) continue;
-      const key = name.trim().toLowerCase();
-      const seen = index.get(key);
-      if (seen !== undefined && seen !== code) ambiguous.add(key);
-      else index.set(key, code);
-    }
-  }
-  for (const key of ambiguous) index.delete(key);
-  return index;
-}
-
-/**
- * ISO-3166 alpha-2 for what a person typed as their country: the code itself ("VN", "vn"), or
- * the country's name in any of the listed languages ("Vietnam", "Vietnamas", "Вьетнам").
- * Null when it is neither — the caller drops the field. Exact name match only: "Viet Nam" or
- * a city is not a country here, and nothing is inferred from a substring.
- */
-export function resolveCountryIso2(value: string): string | null {
-  const t = value.trim();
-  if (t === "") return null;
-  if (/^[A-Za-z]{2}$/.test(t)) {
-    const code = t.toUpperCase();
-    return knownIso2Codes.has(code) ? code : null;
-  }
-  countryNameIndex ??= buildCountryNameIndex();
-  return countryNameIndex.get(t.toLowerCase()) ?? null;
-}
+/** Country resolution lives in `lib/location/country-model` (`resolveCountryCode`) — one resolver for every boundary. */
+export const resolveCountryIso2 = resolveCountryCode;
 
 /**
  * The envelope → what the invitation stores. Contact is split off: the

@@ -11,6 +11,7 @@ import {
   consentTextHash,
   type ConsentLocale,
 } from "@/lib/privacy/consent-definitions";
+import { resolveCountryList } from "@/lib/location/country-model";
 import { createClient } from "@/lib/supabase/server";
 import { WORKER_INTENT_STATES } from "@/lib/supply-bridge/first-party-signal-contract";
 
@@ -268,14 +269,22 @@ export async function upsertMySupplyDeclaration(
   if (!(WORKER_INTENT_STATES as readonly string[]).includes(input.intentState)) {
     return { kind: "invalid", reason: "unknown_intent_state" };
   }
+  // Codes or names, in any product language, → ISO (canonical resolver). An entry that does
+  // not resolve is REFUSED by name — the person sees which one — never silently dropped and
+  // never a reason to keep them out of the declaration.
+  const geo = resolveCountryList(input.workAuthorisedCountries);
+  const markets = resolveCountryList(input.allowedMarkets);
+  if (geo.unresolved.length > 0 || markets.unresolved.length > 0) {
+    return { kind: "invalid", reason: `country_not_recognised:${[...geo.unresolved, ...markets.unresolved].slice(0, 5).join(", ")}` };
+  }
 
   const { data, error } = await asAny(supabase).rpc(
     "upsert_my_first_party_supply_declaration",
     {
       p_intent_state: input.intentState,
       p_available_from: input.availableFrom,
-      p_work_authorised_countries: input.workAuthorisedCountries,
-      p_allowed_markets: input.allowedMarkets,
+      p_work_authorised_countries: geo.codes,
+      p_allowed_markets: markets.codes,
       p_allowed_channels: input.allowedChannels,
       // Never defaulted to true anywhere in this chain. A caller that omits an
       // authority is a caller that was not told to grant it.

@@ -24,6 +24,9 @@ import {
   getSubdivisions,
   isIsoCountry,
   requiresPostalCode,
+  resolveCountryCode,
+  resolveCountryList,
+  countryNameKey,
 } from "./country-model";
 import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
 
@@ -175,5 +178,58 @@ describe("country-model — currency formatting", () => {
   it("returns null (honest absence) for unknown or currency-less countries", () => {
     expect(formatCurrencyForCountry(1, "ZZ", "en")).toBeNull();
     expect(formatCurrencyForCountry(1, "AQ", "en")).toBeNull();
+  });
+});
+
+describe("country-model — resolveCountryCode (global-access rule, 2026-09-22: a country NAME is a country)", () => {
+  it("the Vietnam case, every representation → VN", () => {
+    for (const typed of ["VN", "vn", " Vn ", "Vietnam", "vietnam", "VIETNAM", "Viet Nam", "viet-nam", "Việt Nam", "Vietnamas", "Wietnam", "Вьетнам", "Vietnã"]) {
+      expect(resolveCountryCode(typed), typed).toBe("VN");
+    }
+  });
+  it("EU and non-EU, code or name in several product languages — none is refused", () => {
+    const cases: Array<[string, string]> = [
+      ["LT", "LT"], ["Lithuania", "LT"], ["Lietuva", "LT"], ["Litwa", "LT"], ["Литва", "LT"],
+      ["Poland", "PL"], ["Polska", "PL"], ["Lenkija", "PL"],
+      ["Germany", "DE"], ["Deutschland", "DE"], ["Vokietija", "DE"],
+      ["Sweden", "SE"], ["Sverige", "SE"], ["Ireland", "IE"], ["Airija", "IE"],
+      ["Saudi Arabia", "SA"], ["Saudo Arabija", "SA"], ["KSA", "SA"],
+      ["Bangladesh", "BD"], ["Bangladešas", "BD"], ["Oman", "OM"], ["Albania", "AL"], ["Albanija", "AL"],
+      ["India", "IN"], ["Pakistan", "PK"], ["Nepal", "NP"], ["Philippines", "PH"], ["Tunisia", "TN"], ["Tunisie", "TN"],
+      ["United Kingdom", "GB"], ["UK", "GB"], ["Great Britain", "GB"], ["USA", "US"], ["United States", "US"],
+      ["Czech Republic", "CZ"], ["Czechia", "CZ"], ["Turkey", "TR"], ["Türkiye", "TR"], ["Russia", "RU"],
+      ["South Korea", "KR"], ["Côte d'Ivoire", "CI"], ["Ivory Coast", "CI"], ["Georgia", "GE"], ["Sakartvelo", "GE"],
+    ];
+    for (const [typed, iso] of cases) expect(resolveCountryCode(typed), typed).toBe(iso);
+  });
+  it("what is NOT a country resolves to nothing — never a guess, never a default, never a substring", () => {
+    for (const typed of ["", "   ", "Hanoi", "Europe", "EU", "somewhere in the Gulf", "ZZ", "XX", "V", "VNM", "Vietnam and Thailand", "north", "12", "the", "Sakartvelo Georgia", "Georgia state"]) {
+      expect(resolveCountryCode(typed), typed).toBeNull();
+    }
+    expect(resolveCountryCode(null)).toBeNull();
+    expect(resolveCountryCode(undefined)).toBeNull();
+  });
+  it("CLDR collisions are ambiguous, not guessed; the alias table only names assigned codes", () => {
+    // "Georgia" is a country AND a US state, but only one ISO region; the state is a subdivision.
+    expect(resolveCountryCode("Georgia")).toBe("GE");
+    expect(countryNameKey("  Viet-Nam. ")).toBe("viet nam");
+    expect(countryNameKey("Việt Nam")).toBe("viet nam");
+  });
+  it("a typed list splits on , ; and newlines only, resolves each part, dedupes, and REPORTS what did not resolve", () => {
+    const r = resolveCountryList("LT, Vietnam; viet nam\nSaudi Arabia, Hanoi, vn");
+    expect(r.codes).toEqual(["LT", "VN", "SA"]);
+    expect(r.unresolved).toEqual(["Hanoi"]);
+    expect(resolveCountryList(["no", " se ", "Saudi Arabia"]).codes).toEqual(["NO", "SE", "SA"]);
+    expect(resolveCountryList(null)).toEqual({ codes: [], unresolved: [] });
+    expect(resolveCountryList("")).toEqual({ codes: [], unresolved: [] });
+  });
+  it("every ISO code resolves to itself, and its English display name resolves back to it", () => {
+    for (const code of ALL_ISO_COUNTRIES) {
+      expect(resolveCountryCode(code), code).toBe(code);
+      const name = countryDisplayName(code, "en");
+      // A handful of CLDR English names collide across locales or are shared regions; those resolve to null, never to another code.
+      const back = resolveCountryCode(name);
+      expect(back === null || back === code, `${code} ${name} → ${back}`).toBe(true);
+    }
   });
 });
