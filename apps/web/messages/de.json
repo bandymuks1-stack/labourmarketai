@@ -8387,7 +8387,8 @@
       "closedNote": "Geschlossen — für Arbeitskräfte nicht sichtbar.",
       "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut.",
       "limitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
-      "limitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan."
+      "limitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan.",
+      "closedCandidatesHistory": "Dieser Bedarf ist geschlossen. Unten steht, wer verglichen und was entschieden wurde, solange er offen war – Historie, keine Aktionsliste. Öffnen Sie den Bedarf erneut, um Kandidaten wieder zu bewerten."
     },
     "freshness": {
       "active": "Kürzlich aktualisiert",

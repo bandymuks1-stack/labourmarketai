@@ -8387,7 +8387,8 @@
       "closedNote": "Gesloten — verborgen voor werknemers.",
       "error": "Kon niet opslaan. Probeer het opnieuw.",
       "limitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand, tot 10) in uw organisatieaccount.",
-      "limitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan."
+      "limitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan.",
+      "closedCandidatesHistory": "Deze behoefte is gesloten. Hieronder staat wie vergeleken werd en wat besloten is toen ze open was — geschiedenis, geen actielijst. Heropen de behoefte om kandidaten opnieuw te beoordelen."
     },
     "freshness": {
       "active": "Onlangs bijgewerkt",

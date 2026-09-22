@@ -8387,7 +8387,8 @@
       "closedNote": "Uždaryta — darbuotojams nerodoma.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "limitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
-      "limitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano."
+      "limitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano.",
+      "closedCandidatesHistory": "Šis poreikis uždarytas. Žemiau — kas buvo palyginta ir nuspręsta, kol jis buvo atviras: istorija, ne veiksmų sąrašas. Norėdami vėl vertinti kandidatus, atidarykite poreikį iš naujo."
     },
     "freshness": {
       "active": "Neseniai atnaujintas",

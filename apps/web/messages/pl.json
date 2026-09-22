@@ -8387,7 +8387,8 @@
       "closedNote": "Zamknięta — ukryta przed pracownikami.",
       "error": "Nie udało się zapisać. Spróbuj ponownie.",
       "limitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies., do 10) na koncie organizacji.",
-      "limitIndividual": "Ta organizacja osiągnęła limit 10 aktywnych pozycji planu Organizacja. Nic nie pobrano ani nie zmieniono. Powyżej 10 skontaktuj się z nami w sprawie planu indywidualnego."
+      "limitIndividual": "Ta organizacja osiągnęła limit 10 aktywnych pozycji planu Organizacja. Nic nie pobrano ani nie zmieniono. Powyżej 10 skontaktuj się z nami w sprawie planu indywidualnego.",
+      "closedCandidatesHistory": "To zapotrzebowanie jest zamknięte. Poniżej — kogo porównano i co zdecydowano, gdy było otwarte: historia, nie lista działań. Aby ponownie oceniać kandydatów, otwórz zapotrzebowanie ponownie."
     },
     "freshness": {
       "active": "Niedawno zaktualizowane",
