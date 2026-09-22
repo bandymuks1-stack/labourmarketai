@@ -13429,6 +13429,17 @@
       "offerCapacity": {
         "needsCompany": "Oferowanie ludzi należy do organizacji, a Ty jesteś teraz w swojej przestrzeni osobistej. Wybierz firmę, a zapiszę ofertę.",
         "personalSpace": "Oferowanie ludzi lub zespołu wymaga organizacji, a Ty jeszcze jej nie masz. Możesz założyć firmę albo zamiast tego zaoferować własną usługę."
+      },
+      "compoundStatement": {
+        "intro": "W jednym zdaniu odczytałem kilka faktów. Nic nie zostało jeszcze zapisane — wybierz, co potwierdzić.",
+        "lineProfession": "Zawód: {value}",
+        "lineExperience": "Doświadczenie: {value}, {years} lat",
+        "lineSkill": "Umiejętność: {value}",
+        "lineCredential": "Certyfikat: mówisz, że go masz. Dopóki nie dodasz dokumentu, pozostaje to twoim oświadczeniem, a nie potwierdzoną kwalifikacją.",
+        "selfDeclared": "To wszystko podałeś samodzielnie — zapisujemy jako niepotwierdzone.",
+        "chipProfile": "Potwierdź w profilu",
+        "chipExperience": "Zapisz doświadczenie",
+        "chipDocument": "Dodaj dokument"
       }
     },
     "worklog": {

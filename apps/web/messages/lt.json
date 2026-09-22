@@ -13429,6 +13429,17 @@
       "offerCapacity": {
         "needsCompany": "Darbuotojų pasiūlymas priklauso organizacijai, o dabar dirbi asmeninėje erdvėje. Pasirink įmonę — ir iškart užrašysiu pasiūlymą.",
         "personalSpace": "Kad galėtum siūlyti žmones ar komandą, reikia organizacijos — kol kas jos neturi. Gali sukurti įmonę arba pasiūlyti savo paties paslaugą."
+      },
+      "compoundStatement": {
+        "intro": "Iš vieno sakinio supratau kelis dalykus. Kol kas nieko neįrašiau — pasirink, ką patvirtinti.",
+        "lineProfession": "Profesija: {value}",
+        "lineExperience": "Patirtis: {value}, {years} m.",
+        "lineSkill": "Įgūdis: {value}",
+        "lineCredential": "Pažymėjimas: sakei, kad jį turi. Kol nepridėsi dokumento, tai lieka tavo paties nurodytas faktas, o ne patvirtinta kvalifikacija.",
+        "selfDeclared": "Visa tai — tavo paties nurodyti faktai; įrašoma kaip nepatvirtinta.",
+        "chipProfile": "Patvirtinti profilyje",
+        "chipExperience": "Įrašyti patirtį",
+        "chipDocument": "Pridėti dokumentą"
       }
     },
     "worklog": {
