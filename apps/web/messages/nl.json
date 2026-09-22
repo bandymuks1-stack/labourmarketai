@@ -13429,6 +13429,17 @@
       "offerCapacity": {
         "needsCompany": "Mensen aanbieden hoort bij een organisatie, en je zit nu in je persoonlijke ruimte. Kies het bedrijf, dan leg ik het aanbod meteen vast.",
         "personalSpace": "Mensen of een team aanbieden vraagt om een organisatie, en die heb je nog niet. Je kunt een bedrijf aanmaken, of je eigen dienst aanbieden."
+      },
+      "compoundStatement": {
+        "intro": "Ik las meerdere dingen in die ene zin. Er is nog niets opgeslagen — kies wat je wilt bevestigen.",
+        "lineProfession": "Beroep: {value}",
+        "lineExperience": "Ervaring: {value}, {years} jaar",
+        "lineSkill": "Vaardigheid: {value}",
+        "lineCredential": "Certificaat: je zei dat je het hebt. Zolang je het document niet toevoegt, blijft het je eigen verklaring en geen geverifieerde kwalificatie.",
+        "selfDeclared": "Dit is allemaal wat je zelf hebt verteld — vastgelegd als niet-geverifieerd.",
+        "chipProfile": "Bevestig in profiel",
+        "chipExperience": "Ervaring vastleggen",
+        "chipDocument": "Document toevoegen"
       }
     },
     "worklog": {

@@ -13429,6 +13429,17 @@
       "offerCapacity": {
         "needsCompany": "Offering people belongs to an organisation, and you are in your personal space right now. Choose the company and I will record the offer.",
         "personalSpace": "Offering people or a team needs an organisation, and you do not have one yet. You can create a company, or offer your own service instead."
+      },
+      "compoundStatement": {
+        "intro": "I read several things in that one sentence. Nothing is saved yet — pick what to confirm.",
+        "lineProfession": "Occupation: {value}",
+        "lineExperience": "Experience: {value}, {years} years",
+        "lineSkill": "Skill: {value}",
+        "lineCredential": "Certificate: you said you hold one. Until you add the document it stays your own statement, not a verified qualification.",
+        "selfDeclared": "All of this is what you told me — recorded as self-declared, not verified.",
+        "chipProfile": "Confirm in profile",
+        "chipExperience": "Record experience",
+        "chipDocument": "Add the document"
       }
     },
     "worklog": {

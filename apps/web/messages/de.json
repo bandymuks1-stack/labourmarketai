@@ -13429,6 +13429,17 @@
       "offerCapacity": {
         "needsCompany": "Menschen anzubieten gehört zu einer Organisation, und du bist gerade in deinem persönlichen Bereich. Wähle das Unternehmen — dann halte ich das Angebot sofort fest.",
         "personalSpace": "Um Menschen oder ein Team anzubieten, braucht es eine Organisation, und du hast noch keine. Du kannst ein Unternehmen anlegen oder deine eigene Leistung anbieten."
+      },
+      "compoundStatement": {
+        "intro": "Ich habe in diesem einen Satz mehrere Dinge gelesen. Noch ist nichts gespeichert — wähle, was du bestätigen willst.",
+        "lineProfession": "Beruf: {value}",
+        "lineExperience": "Erfahrung: {value}, {years} Jahre",
+        "lineSkill": "Fähigkeit: {value}",
+        "lineCredential": "Nachweis: du sagst, du hast ihn. Solange das Dokument fehlt, bleibt es deine eigene Angabe und keine geprüfte Qualifikation.",
+        "selfDeclared": "All das hast du selbst angegeben — als nicht geprüft erfasst.",
+        "chipProfile": "Im Profil bestätigen",
+        "chipExperience": "Erfahrung erfassen",
+        "chipDocument": "Dokument hinzufügen"
       }
     },
     "worklog": {

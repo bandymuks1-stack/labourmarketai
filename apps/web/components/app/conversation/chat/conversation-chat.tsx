@@ -183,6 +183,7 @@ import {
   type ValueStatement,
 } from "@/lib/structuring/value-statement";
 import { readProfessionStatement } from "@/lib/structuring/role-label";
+import { readCompoundStatement } from "@/lib/conversation/compound-statement";
 import { applyCorrection } from "@/lib/structuring/apply-correction";
 import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -3400,6 +3401,78 @@ export function ConversationChat({
    *  turn; what the sentence said (type, valid-until) pre-fills it — visible,
    *  editable, confirmed. After the save the readiness answer re-runs, so the
    *  person sees the gap close (or not). Person identity only. */
+  /**
+   * ONE GROUPED CONFIRMATION, not four forms (owner P0 2026-09-22 §1).
+   *
+   * Every row shows the person's OWN words — `statedAs` — rather than a
+   * catalogue label they did not use. That is provenance, it is locale-neutral,
+   * and it cannot put a word in their mouth. The canonical slug rides along for
+   * the write; it is never what the sentence claims to have understood.
+   *
+   * NOTHING IS PERSISTED HERE. The chips open the EXISTING canonical surfaces
+   * — the profile (where `profile_skill_claims` are confirmed and saved as
+   * `self_declared`), the work-history form, and the SAME `add-document:<type>`
+   * chip the projects answer already uses. No second store, no second write.
+   *
+   * THE CREDENTIAL IS A CLAIM. Its line says so in words: until the document
+   * is added it stays self-declared, not a verified qualification. The owner's
+   * rule, on the one screen where a person might otherwise believe otherwise.
+   */
+  const presentCompoundStatement = useCallback(
+    (reading: ReturnType<typeof readCompoundStatement>) => {
+      const lines: string[] = [t("compoundStatement.intro")];
+      const chips: ChoiceChip[] = [];
+      let credentialSlug: string | null = null;
+
+      for (const fact of reading.facts) {
+        if (fact.kind === "experience") {
+          lines.push(
+            t("compoundStatement.lineExperience", {
+              value: fact.statedAs,
+              years: fact.years ?? 0,
+            }),
+          );
+          continue;
+        }
+        if (fact.kind === "credential") {
+          credentialSlug = fact.canonicalSlug;
+          lines.push(t("compoundStatement.lineCredential"));
+          continue;
+        }
+        lines.push(
+          t(
+            fact.kind === "profession"
+              ? "compoundStatement.lineProfession"
+              : "compoundStatement.lineSkill",
+            { value: fact.statedAs },
+          ),
+        );
+      }
+
+      // The honesty footer applies to EVERY row, not only the credential.
+      lines.push(t("compoundStatement.selfDeclared"));
+
+      const kinds = new Set(reading.facts.map((f) => f.kind));
+      if (kinds.has("profession") || kinds.has("skill")) {
+        chips.push({ id: "link:/dashboard/profile", label: t("compoundStatement.chipProfile") });
+      }
+      if (kinds.has("experience")) {
+        chips.push({ id: "f:worker.add-work-history", label: t("compoundStatement.chipExperience") });
+      }
+      if (credentialSlug) {
+        // The EXISTING chip format: `add-document:<type>` opens the one
+        // document flow with the type already chosen.
+        chips.push({
+          id: `add-document:${credentialSlug}`,
+          label: t("compoundStatement.chipDocument"),
+        });
+      }
+
+      assistant(lines.join("\n"), chips.length > 0 ? chips : undefined);
+    },
+    [assistant, t],
+  );
+
   const startAddDocument = useCallback(
     (sentence: string, explicit?: { typeSlug?: string; thenReply?: ChatInboxThread }) => {
       if (identity !== "person") {
@@ -6024,6 +6097,28 @@ export function ConversationChat({
         },
       };
       const fallback = () => assistant(fallbackText, starterChips);
+
+      // ── ONE SENTENCE, SEVERAL FACTS (owner P0 2026-09-22 §1) ─────────────
+      //
+      // "Esu suvirintojas, 8 metus dirbu MIG/MAG, turiu VCA." routed ENTIRELY
+      // to add-document, because "turiu VCA" outscored everything else: the
+      // person stated four things and the product answered one. The check sits
+      // BEFORE the single-route dispatch because that is the defect — not a
+      // wrong route, but a whole sentence forced through one.
+      //
+      // It is deliberately NARROW. `isCompound` demands two DISTINCT kinds, so
+      // every single-fact sentence stays on the route that already answers it
+      // correctly. And it is person-only: a profession/credential claim is a
+      // personal fact, so in a company or agency space the existing routes
+      // keep the sentence (the same rule `availabilityStatement` follows).
+      if (identity === "person") {
+        const compound = readCompoundStatement(text);
+        if (compound.isCompound) {
+          presentCompoundStatement(compound);
+          return;
+        }
+      }
+
       if (intent !== "unknown") {
         dispatchIntent(intent, handlers, withTyping, fallback);
         return;
