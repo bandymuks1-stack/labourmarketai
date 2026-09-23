@@ -22,11 +22,13 @@ and none of them makes the owner's PC part of the product.
 | ----- | ---- | ----- | ------------- |
 | **UNIT / STATIC / GUARD** | vitest unit tests, source guards (`lib/guards/`), copy/constitution checks | Node only — **no Docker, no network, no credentials** | `pnpm -F web test`; CI `quality.yml` on every PR |
 | **LOCAL INTEGRATION** | `e2e:local`, `db:fixtures:local`, `dev:acceptance`, `scripts/e2e-mint-session.ts`, `scripts/owner-acceptance-walk.mjs` | an isolated local Supabase via Docker Desktop + `npx supabase start` — Docker is a `LOCAL_TEST_DEPENDENCY` only | a developer machine, on demand |
-| **PRODUCTION E2E** | the prod-qa chain: `lib/testing/prod-qa-guard.ts`, `scripts/prod-qa-provision.ts`, `scripts/prod-qa-mint-session.ts`, `scripts/prod-qa-gate.ts`, `tests/e2e/employee-beta-gate.spec.ts` | three `PROD_QA_*` env vars through the approved secret path | against `https://labourmarket.ai` as code-allowlisted synthetic identities only; read-only; the PC is only a client |
+| **PRODUCTION E2E** | the prod-qa chain: `lib/testing/prod-qa-guard.ts`, `scripts/prod-qa-provision.ts`, `scripts/prod-qa-mint-session.ts`, `scripts/prod-qa-gate.ts`, `tests/e2e/employee-beta-gate.spec.ts` | three `PROD_QA_*` env vars through the approved secret path | against `https://labourmarket.ai` as code-allowlisted synthetic identities only; no production domain writes beyond the synthetic identity's own chat turn / telemetry; the PC is only a client |
 | **PRODUCT RUNTIME** | the product itself | Vercel + hosted Supabase; GitHub Actions cadence jobs; Vercel cron / `pg_cron` | never the owner's PC |
 
-When the local stack is not running, every LOCAL INTEGRATION entry point stops
-with **`LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER`** (exit 3) and says what to do.
+When the local stack is not running, every LOCAL INTEGRATION entry point that
+resolves the stack stops with **`LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER`**
+(exit 3) and says what to do (`owner-acceptance-walk.mjs` first checks that the
+app itself is reachable and exits 1 with a `PREFLIGHT` line when it is not).
 That is an availability failure, not a security one — nothing was resolved, so
 nothing was touched. `REFUSED_NON_LOCAL_E2E_SESSION_MINT` (exit 1) is reserved
 for a target that DID resolve and is not the local stack. Production is never
@@ -116,9 +118,11 @@ The production project (`gorgitwvdzxbnaxhrsrw`) stays real-data-only
 hard-refuse non-local URLs. The ONE sanctioned exception is the read-only
 PRODUCTION E2E class above: the prod-qa chain, fail-closed by its own guard
 (`lib/testing/prod-qa-guard.ts`) to the production project AND a code-reviewed
-allowlist of synthetic identities. It writes no production domain data — its
-only production write is provisioning that one synthetic auth user — and its
-minted session passes the same gitignore guard as the local one.
+allowlist of synthetic identities. Its production writes are limited to
+provisioning that synthetic auth user and whatever the synthetic identity's own
+chat turn records (the gate's G4 step sends one sentence) — never another
+person's data — and its minted session passes the same gitignore guard as the
+local one.
 
 ## Run
 
