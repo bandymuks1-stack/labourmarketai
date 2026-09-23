@@ -69,6 +69,7 @@ export default async function ForWorkersPage({
                 labels={cardLabels}
                 thermometer={null}
                 avatarUrl={null}
+                sample
               />
             </div>
           </ExamplePreviewFrame>

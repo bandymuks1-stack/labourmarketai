@@ -216,4 +216,21 @@ describe("landing market-proof band honesty", () => {
     expect(band).toMatch(/professions\(slug\)/);
     expect(band).not.toMatch(/adsCount|employerCount|perProfession/);
   });
+
+  /**
+   * NO RANK NUMBERS (owner directive 2026-09-23, landing §22). The list is a
+   * constant read back once; "01 · 02 · 03" under "right now" presented it as
+   * a CURRENT ranking the page never computes. The names stay, the ordinals
+   * and the ordered-list semantics go, and the coverage note stays (pinned
+   * per locale above).
+   */
+  it("prints no ordinal rank beside the professions", () => {
+    const code = band.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    const ranks = (src: string) =>
+      /padStart\(|String\(\s*i\s*\+\s*1\s*\)|<ol\b/.test(src);
+    expect(ranks(code)).toBe(false);
+    expect(code).toMatch(/<ul[\s\S]{0,120}data-testid="market-proof-professions"/);
+    // Control: the ranked rendering this replaced is caught.
+    expect(ranks('<ol><span>{String(i + 1).padStart(2, "0")}</span></ol>')).toBe(true);
+  });
 });

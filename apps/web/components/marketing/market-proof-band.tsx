@@ -45,10 +45,13 @@ import { Card } from "@/components/ui/Card";
  * removed rather than demoted; the grid drops to two columns and nothing else
  * about the composition moves.
  *
- * TOP PROFESSIONS: unchanged. The ranking is a bounded, data-derived ordering
- * of profession families, shown WITHOUT absolute counts because grouping
- * covers only part of the listings (the visible note says so). Names render
- * from the canonical `professions` taxonomy catalogs — never ad-hoc labels.
+ * TOP PROFESSIONS: a bounded list of profession families that led the
+ * active-ad count when it was read back (below), shown WITHOUT absolute counts
+ * because grouping covers only part of the listings (the visible note says
+ * so) and — since 2026-09-23 — WITHOUT rank numbers, because that read-back
+ * is not recomputed per render and "01 · 02 · 03" presented it as a current
+ * ranking. Names render from the canonical `professions` taxonomy catalogs —
+ * never ad-hoc labels.
  *
  * LCP: server component. Its one data dependency is the shared cached
  * snapshot the page already awaited, so this adds no request-time work.
@@ -162,32 +165,35 @@ export async function MarketProofBand({
         </Reveal>
       ) : null}
 
-      {/* ── Top professions in demand — ranking only, no absolute counts:
-             profession grouping covers part of the listings, so counts over
-             the grouped subset would understate the market while reading as
-             totals. The ranking itself is stable and safe. ─────────────── */}
+      {/* ── Professions in demand — no absolute counts: profession grouping
+             covers part of the listings, so counts over the grouped subset
+             would understate the market while reading as totals.
+
+             NO RANK NUMBERS (owner directive 2026-09-23, landing §22). The
+             order is a constant read back once (see the list's header), and
+             "01 · 02 · 03" under a heading that says "right now" claimed a
+             CURRENT ranking the page does not compute. The names stay; the
+             ordinals, and the ordered-list semantics that announced them to a
+             screen reader, are gone. The coverage note below stays. ─────── */}
       <Reveal delay={0.14}>
         <h3 className="mt-10 font-display text-xl font-semibold tracking-tightest text-text-primary">
           {t("topTitle")}
         </h3>
-        <ol
+        <ul
           className="mt-4 flex flex-wrap gap-2"
           data-testid="market-proof-professions"
         >
-          {TOP_PROFESSION_FAMILY_SLUGS.map((slug, i) => (
+          {TOP_PROFESSION_FAMILY_SLUGS.map((slug) => (
             <li
               key={slug}
               className="flex items-center gap-2 rounded-full border border-ink-500 bg-ink-800/40 px-3.5 py-1.5"
             >
-              <span className="font-mono text-meta font-semibold text-brand-cyan">
-                {String(i + 1).padStart(2, "0")}
-              </span>
               <span className="text-sm font-medium text-text-primary">
                 {professions(slug)}
               </span>
             </li>
           ))}
-        </ol>
+        </ul>
         <p className="mt-3 max-w-2xl text-meta text-text-muted">
           {t("topNote")}
         </p>

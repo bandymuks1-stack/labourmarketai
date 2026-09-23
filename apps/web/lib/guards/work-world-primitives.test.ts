@@ -49,6 +49,50 @@ describe("Guard: work-world primitives", () => {
     expect(src).toMatch(/verified:\s*"text-trust-accent/);
   });
 
+  /**
+   * DESIGN RULE #4 (owner-ratified 2026-09-22): employer-confirmed =
+   * trust-accent GREEN; gold never means confirmation. `attested` — an
+   * organisation or a third party standing behind the record — used to wear
+   * champagne, a gold, so a manager's confirmation read as a brand accent.
+   * It now wears the confirmation green in all three places a variant is
+   * painted: the chip, the diamond and the spine node.
+   */
+  it("an attestation is painted in the trust-accent green, never a gold", () => {
+    const src = read("components/app/work-world/primitives.tsx");
+    const GOLD = /brand-champagne|brand-blue|metallic|gold/;
+    const classOf = (table: string, variant: string) =>
+      new RegExp(`const ${table}[^{]*\\{[\\s\\S]*?\\n\\s*${variant}:\\s*"([^"]+)"`).exec(src)?.[1] ?? "";
+
+    for (const table of ["VARIANT_CLASS", "DOT_CLASS"]) {
+      for (const variant of ["attested", "verified"]) {
+        const cls = classOf(table, variant);
+        expect(cls, `${table}.${variant} not found`).not.toBe("");
+        expect(cls, `${table}.${variant}`).toMatch(/trust-accent/);
+        expect(cls, `${table}.${variant} wears a gold`).not.toMatch(GOLD);
+      }
+    }
+    // The spine node's border for an attestation is the same green.
+    const node = src.slice(src.indexOf("export function WorkSpineNode"));
+    expect(node).toMatch(/variant === "attested"[\s\S]{0,80}"border-trust-accent"/);
+    expect(node).not.toMatch(GOLD);
+
+    // Control: the champagne mapping this replaced is caught by the same check.
+    expect('attested: "text-brand-champagne border-brand-champagne/40"').toMatch(GOLD);
+    // …and the extractor is real: it finds the evidence row too.
+    expect(classOf("VARIANT_CLASS", "evidence")).toMatch(/brand-cyan/);
+  });
+
+  it("attested and verified stay DISTINCT variants — same green, different standing", () => {
+    // The colour is shared; the meaning is not. A guard or a screen reader
+    // label can still tell an organisation's attestation from independent
+    // verification through `data-variant`.
+    expect(evidenceVariant("ORGANIZATION_ATTESTED")).toBe("attested");
+    expect(evidenceVariant("INDEPENDENTLY_VERIFIED")).toBe("verified");
+    expect(evidenceVariant("ORGANIZATION_ATTESTED")).not.toBe(
+      evidenceVariant("INDEPENDENTLY_VERIFIED"),
+    );
+  });
+
   it("the subject evidence surface consumes the canonical primitive", () => {
     const page = read("components/app/organization-evidence-section.tsx");
     expect(page).toContain('from "@/components/app/work-world/primitives"');

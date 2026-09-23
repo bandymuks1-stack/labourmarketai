@@ -16,9 +16,10 @@ import styles from "./landing-mode-switcher.module.css";
  * FOCUS is the default, so this control's job is no longer just "go back" —
  * it is the ONLY invitation to discover that a living market exists here
  * (owner command §6). The invitation is the control itself: a small status
- * dot beside LIVE that breathes, plus one short attention sequence once the
- * page has settled. No popup, no banner, no toast, no tooltip, no glow, and
- * not one word added to the restored composition, which stays untouched.
+ * dot beside LIVE that breathes. The one-off attention pulse it also ran
+ * after load was removed on 2026-09-23 (landing §22: the first seconds belong
+ * to the product's value, not to a control). No popup, no banner, no toast,
+ * no tooltip, no glow, and not one word added to the landing.
  *
  * PERSISTENCE IS EXPLICIT-ONLY. This component deliberately writes nothing on
  * mount. The server resolves the arm from the cookie, and the cookie's whole

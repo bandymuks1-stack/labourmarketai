@@ -14099,8 +14099,8 @@
       "noStars": "Nigdzie nie ma ocen w gwiazdkach: człowiek nigdy nie jest sprowadzany do punktacji. Każde dopasowanie jest wyjaśnione wobec konkretnego zapotrzebowania — z widocznymi liczbami."
     },
     "hero": {
-      "headline": "Powiedz własnymi słowami, czego potrzebujesz w pracy.",
-      "sub": "Praca i ludzie, zespoły i usługi, wolne moce, wykonana praca i jej dowód — jeden rynek, w realnych miejscach. Nie musisz najpierw decydować, kim jesteś."
+      "headline": "Jeden rynek pracy dla ludzi i firm.",
+      "sub": "Znajdź pracę lub ludzi, zapisuj wykonaną pracę i pozwól jej mówić za ciebie — twoja kolejna szansa opiera się na pracy, którą naprawdę wykonujesz, a nie na deklaracjach w CV."
     },
     "entry": {
       "label": "Napisz, czego potrzebujesz — własnymi słowami",
@@ -14168,6 +14168,8 @@
       },
       "numbers": "Teraz na platformie: {vacancies} aktywnych ogłoszeń o pracę · {employers} pracodawców",
       "refreshed": "odświeżono {date}",
+      "moreExamples": "Więcej przykładów",
+      "browseJobs": "Przeglądaj oferty pracy",
       "exampleLabels": {
         "hire": "Potrzebuję pracowników",
         "work": "Szukam pracy",
@@ -14180,6 +14182,12 @@
         "logWork": "Zapisz wykonaną pracę",
         "verifyWork": "Kto może to potwierdzić"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Oferty pracy",
+      "title": "Prawdziwe oferty pracy, otwarte teraz.",
+      "sub": "Kilka aktualnych ogłoszeń z oficjalnych publicznych źródeł zatrudnienia. Przeglądanie nie wymaga konta; po zalogowaniu zobaczysz pracodawcę, miejsce i sposób aplikowania.",
+      "all": "Wszystkie oferty pracy"
     },
     "marketProof": {
       "eyebrow": "Teraz na platformie",

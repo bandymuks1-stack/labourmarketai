@@ -83,6 +83,18 @@ beforeEach(() => {
   vi.setSystemTime(new Date("2026-09-08T15:00:00Z"));
 });
 
+/** A PROFESSION read is a filtered search. Since 2026-09-23 the snapshot
+ *  also takes ONE unfiltered search (the landing's real-job sample), which
+ *  carries no slug — so the two are told apart by the slug, not the name. */
+const professionReads = (calls: readonly Call[]) =>
+  calls.filter(
+    (call) => call.name === "search_public_vacancy_previews_v1" && call.slug !== null,
+  );
+const unfilteredReads = (calls: readonly Call[]) =>
+  calls.filter(
+    (call) => call.name === "search_public_vacancy_previews_v1" && call.slug === null,
+  );
+
 describe("one landing snapshot never puts ten statements in flight", () => {
   it("issues the profession reads ONE AT A TIME", async () => {
     const c = makeClient({ rows: [VACANCY_ROW] });
@@ -96,11 +108,11 @@ describe("one landing snapshot never puts ten statements in flight", () => {
     const c = makeClient({ rows: [VACANCY_ROW] });
     await readFreshLiveMarketLandingSnapshot(c.client);
 
-    const professionCalls = c.calls.filter(
-      (call) => call.name === "search_public_vacancy_previews_v1",
-    );
+    const professionCalls = professionReads(c.calls);
     expect(professionCalls).toHaveLength(10);
     expect(new Set(professionCalls.map((call) => call.slug)).size).toBe(10);
+    // …plus the one unfiltered sample page, never more.
+    expect(unfilteredReads(c.calls)).toHaveLength(1);
   });
 
   it("NEGATIVE CONTROL — the concurrency probe can actually observe overlap", async () => {
@@ -126,9 +138,7 @@ describe("the snapshot stops working instead of spending forever", () => {
     const c = makeClient({ costMs: 1_000, rows: [VACANCY_ROW] });
     const snapshot = await readFreshLiveMarketLandingSnapshot(c.client);
 
-    const professionCalls = c.calls.filter(
-      (call) => call.name === "search_public_vacancy_previews_v1",
-    );
+    const professionCalls = professionReads(c.calls);
     expect(professionCalls.length).toBeLessThan(10);
     expect(professionCalls.length).toBeGreaterThan(0);
 
@@ -153,13 +163,14 @@ describe("the snapshot stops working instead of spending forever", () => {
 
 describe("NEGATIVE CONTROL — this reader adds no retries of its own", () => {
   it("a throwing read is not repeated", async () => {
-    // Only the FIRST profession read throws. A one-shot retry would issue an
-    // eleventh call and re-ask the same slug; that is what doubled every wave.
+    // Only the FIRST profession read throws — call 3, after the count (1) and
+    // the unfiltered sample page (2). A one-shot retry would issue another
+    // call and re-ask the same slug; that is what doubled every wave.
     let thrown = 0;
     const c = makeClient({
       rows: [VACANCY_ROW],
       throwOn: (call) => {
-        if (call === 2 && thrown === 0) {
+        if (call === 3 && thrown === 0) {
           thrown += 1;
           return true;
         }
@@ -168,9 +179,8 @@ describe("NEGATIVE CONTROL — this reader adds no retries of its own", () => {
     });
     const snapshot = await readFreshLiveMarketLandingSnapshot(c.client);
 
-    const slugs = c.calls
-      .filter((call) => call.name === "search_public_vacancy_previews_v1")
-      .map((call) => call.slug);
+    expect(thrown).toBe(1);
+    const slugs = professionReads(c.calls).map((call) => call.slug);
     expect(slugs).toHaveLength(10);
     expect(new Set(slugs).size).toBe(10);
 
@@ -188,15 +198,94 @@ describe("FOCUS does not pay for reads it never renders", () => {
    * TOP_PROFESSION_FAMILY_SLUGS list in market-proof-band.tsx, a different
    * set from PROFESSION_FILTER_SLUGS and not derived from live data.
    */
-  it("issues ONE read, and zero profession reads", async () => {
+  it("issues the count and exactly one unfiltered page read, sequentially — zero profession reads", async () => {
+    // 2026-09-23 (owner directive PUBLIC_LANDING_REAL_JOB_DISCOVERY): FOCUS
+    // now renders a few real vacancies, so it pays for exactly the ONE read
+    // that band needs — the board's unfiltered first page — and still for no
+    // profession read at all. A filtered read here is the cold-timeout class
+    // the file header documents.
     const c = makeClient({ rows: [VACANCY_ROW] });
     await readFreshLiveMarketLandingSnapshot(c.client, false);
 
-    expect(c.calls).toHaveLength(1);
-    expect(c.calls[0].name).toBe("count_public_vacancies_v1");
-    expect(
-      c.calls.filter((call) => call.name === "search_public_vacancy_previews_v1"),
-    ).toHaveLength(0);
+    expect(c.calls.map((call) => call.name)).toEqual([
+      "count_public_vacancies_v1",
+      "search_public_vacancy_previews_v1",
+    ]);
+    expect(unfilteredReads(c.calls)).toHaveLength(1);
+    expect(professionReads(c.calls)).toHaveLength(0);
+    // Sequential: never both statements in flight at once.
+    expect(c.maxInFlight).toBe(1);
+  });
+
+  it("NEGATIVE CONTROL — the profession-read filter can see a filtered read", () => {
+    // If `professionReads` could not recognise a filtered search, "zero
+    // profession reads" above would be vacuous.
+    const filtered: Call[] = [
+      { name: "search_public_vacancy_previews_v1", slug: "electrician" },
+      { name: "search_public_vacancy_previews_v1", slug: null },
+    ];
+    expect(professionReads(filtered)).toHaveLength(1);
+    expect(unfilteredReads(filtered)).toHaveLength(1);
+  });
+
+  it("the sample is the board's own rows, bounded, slugged first — and keeps the anonymous boundary", async () => {
+    const row = (i: number, slug: string | null, occupation: string | null) => ({
+      ...VACANCY_ROW,
+      id: `11111111-1111-4111-8111-${String(i).padStart(12, "0")}`,
+      profession_slug: slug,
+      occupation_raw: occupation,
+      // Even if the projection ever regressed and sent these, the ONE
+      // anonymous reader drops them before any component sees a row.
+      title_raw: "Väktare till Exempelbolaget i Lund",
+      attribution_code: "named-source",
+    });
+    const rows = [
+      row(1, null, "Undersköterska"),
+      row(2, "electrician", "Elektriker"),
+      row(3, null, null),
+      row(4, "cook", "Kock"),
+      row(5, "driver", "Chaufför"),
+      row(6, "cleaner", "Städare"),
+      row(7, "caregiver", "Vårdbiträde"),
+    ];
+    const snapshot = await readFreshLiveMarketLandingSnapshot(
+      makeClient({ rows }).client,
+      false,
+    );
+
+    expect(snapshot.sample.basis).toBe("live");
+    // Four at most; slugged rows first IN THE BOARD'S ORDER; a row with
+    // neither a slug nor an occupation is never chosen.
+    expect(snapshot.sample.vacancies.map((v) => v.professionSlug)).toEqual([
+      "electrician",
+      "cook",
+      "driver",
+      "cleaner",
+    ]);
+    for (const v of snapshot.sample.vacancies) {
+      expect(v.title).toBeNull();
+      expect(v.attributionCode).toBeNull();
+    }
+  });
+
+  it("an unfilled page still yields a sample from occupation-only rows", async () => {
+    const onlyOccupation = [
+      { ...VACANCY_ROW, profession_slug: null, occupation_raw: "Kock" },
+    ];
+    const snapshot = await readFreshLiveMarketLandingSnapshot(
+      makeClient({ rows: onlyOccupation }).client,
+      false,
+    );
+    expect(snapshot.sample.vacancies).toHaveLength(1);
+    expect(snapshot.sample.vacancies[0].occupation).toBe("Kock");
+  });
+
+  it("a sample read that throws is `unavailable` with no rows — never a fabricated board", async () => {
+    const c = makeClient({ rows: [VACANCY_ROW], throwOn: (call) => call === 2 });
+    const snapshot = await readFreshLiveMarketLandingSnapshot(c.client, false);
+    expect(snapshot.sample).toEqual({ basis: "unavailable", vacancies: [] });
+    // …and it was not retried.
+    expect(unfilteredReads(c.calls)).toHaveLength(1);
   });
 
   it("LIVE still gets every profession it genuinely renders", async () => {
@@ -205,9 +294,7 @@ describe("FOCUS does not pay for reads it never renders", () => {
     const c = makeClient({ rows: [VACANCY_ROW] });
     const snapshot = await readFreshLiveMarketLandingSnapshot(c.client, true);
 
-    expect(
-      c.calls.filter((call) => call.name === "search_public_vacancy_previews_v1"),
-    ).toHaveLength(10);
+    expect(professionReads(c.calls)).toHaveLength(10);
     expect(snapshot.professions.every((p) => p.basis === "live")).toBe(true);
     expect(snapshot.professions.some((p) => p.jobs.length > 0)).toBe(true);
   });
@@ -229,6 +316,7 @@ describe("FOCUS does not pay for reads it never renders", () => {
     expect(focus.lastRefreshedAt).toBe(live.lastRefreshedAt);
     expect(focus.basis).toBe(live.basis);
     expect(focus.professions).toHaveLength(live.professions.length);
+    expect(focus.sample).toEqual(live.sample);
   });
 
   it("an unresolved profession is `unavailable` and null, NEVER zero", async () => {
@@ -251,9 +339,7 @@ describe("FOCUS does not pay for reads it never renders", () => {
     // default of `false` would strip /live-market-review without a diff.
     const c = makeClient({ rows: [VACANCY_ROW] });
     await readFreshLiveMarketLandingSnapshot(c.client);
-    expect(
-      c.calls.filter((call) => call.name === "search_public_vacancy_previews_v1"),
-    ).toHaveLength(10);
+    expect(professionReads(c.calls)).toHaveLength(10);
   });
 
   it("FOCUS wires the skip - restoring the fan-out there fails here", async () => {

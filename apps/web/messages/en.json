@@ -14099,8 +14099,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "Say what you need at work, in your own words.",
-      "sub": "Work and people, teams and services, spare capacity, work done and the proof of it — one market, in real places. You do not have to decide who you are first."
+      "headline": "One labour market for people and companies.",
+      "sub": "Find work or find people, record the work you do, and let it speak for you — your next opportunity is argued from what you actually did, not from what a CV claims."
     },
     "entry": {
       "label": "Write what you need — in your own words",
@@ -14168,6 +14168,8 @@
       },
       "numbers": "On the platform now: {vacancies} active job listings · {employers} employers",
       "refreshed": "refreshed {date}",
+      "moreExamples": "More examples",
+      "browseJobs": "Browse open jobs",
       "exampleLabels": {
         "hire": "I need workers",
         "work": "I am looking for work",
@@ -14180,6 +14182,12 @@
         "logWork": "Record work I did",
         "verifyWork": "Who can confirm this"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Open jobs",
+      "title": "Real jobs, open right now.",
+      "sub": "A few current listings from official public employment sources. Looking needs no account; sign in to see the employer, the place and how to apply.",
+      "all": "All jobs"
     },
     "marketProof": {
       "eyebrow": "On the platform right now",

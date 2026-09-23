@@ -14099,8 +14099,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Sagen Sie in eigenen Worten, was Sie bei der Arbeit brauchen.",
-      "sub": "Arbeit und Menschen, Kolonnen und Dienstleistungen, freie Kapazität, geleistete Arbeit und ihr Nachweis — ein Markt, an echten Orten. Sie müssen vorher nicht entscheiden, wer Sie sind."
+      "headline": "Ein Arbeitsmarkt für Menschen und Unternehmen.",
+      "sub": "Finden Sie Arbeit oder Menschen, halten Sie Ihre Arbeit fest und lassen Sie sie für sich sprechen — Ihre nächste Chance stützt sich auf das, was Sie wirklich getan haben, nicht auf das, was ein Lebenslauf behauptet."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
@@ -14168,6 +14168,8 @@
       },
       "numbers": "Jetzt auf der Plattform: {vacancies} aktive Stellenanzeigen · {employers} Arbeitgeber",
       "refreshed": "aktualisiert {date}",
+      "moreExamples": "Weitere Beispiele",
+      "browseJobs": "Stellenangebote ansehen",
       "exampleLabels": {
         "hire": "Wir brauchen Leute",
         "work": "Ich suche Arbeit",
@@ -14180,6 +14182,12 @@
         "logWork": "Geleistete Arbeit erfassen",
         "verifyWork": "Wer bestätigt das"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Stellenangebote",
+      "title": "Echte Stellen, jetzt offen.",
+      "sub": "Einige aktuelle Anzeigen aus offiziellen öffentlichen Arbeitsmarktquellen. Ansehen geht ohne Konto; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+      "all": "Alle Stellenangebote"
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",

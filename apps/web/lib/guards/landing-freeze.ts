@@ -392,6 +392,76 @@ import { join } from "node:path";
  * record. NO copy, NO data, NO layout and NO namespace changed. The
  * regeneration touched exactly the product-chain-band.tsx hash, and the
  * primitives file joined the frozen set (its hash is new, not moved).
+ *
+ * VALUE FIRST + REAL JOBS + GREEN MEANS CONFIRMED (OWNER DIRECTIVES
+ * 2026-09-23, recorded in substance; they EXPLICITLY authorise editing the
+ * frozen landing and regenerating this baseline):
+ *
+ *   A. Landing §22 — "fix the story, not CSS". The landing over-emphasised
+ *      controls and the map before it said what the product is, and offered
+ *      about ten equal choices before any value; a visitor must be able to
+ *      answer WHAT it is, WHO it is for, WHAT they accomplish, WHY it is
+ *      different and WHAT to do next within 3–5 seconds. The owner
+ *      EXPLICITLY SUPERSEDES two window-11 (#1609) readings — §16's
+ *      instruction-style h1 ("say what you need…", which the entry's own
+ *      label already repeated) and the §18 reading that all ten example
+ *      chips must be visible by default — and KEEPS §17 map honesty and §20
+ *      contexts-not-identities.
+ *
+ *   B. PUBLIC_LANDING_REAL_JOB_DISCOVERY — expose a bounded section of REAL,
+ *      CURRENT vacancies on the landing; reuse the canonical public jobs
+ *      query, card and presentation; do not create a second jobs
+ *      implementation; do not accidentally expose gated fields.
+ *
+ *   C. Design rule #4 (owner-ratified 2026-09-22) — employer-confirmed =
+ *      trust-accent GREEN; gold never means confirmation — and the 12px type
+ *      floor ratified the same day.
+ *
+ * What changed, and nothing else: (1) `landing.hero.headline/sub` rewritten
+ * in the six active catalogs to state what/who/why (the hero keeps exactly
+ * those two keys); (2) one next step — `landing-primary-actions.tsx`
+ * (create an account + the public job board, the header's own labels) under
+ * the hero sub and again as a closing band after the trust band, reported
+ * as `cta_clicked` surface `landing_hero` / `landing_close` through the
+ * entry's own capture wrapper; (3) the entry MOUNTS four example chips and
+ * mounts the other six on demand (`landing.entry.moreExamples`), and a
+ * reading of looking-for-work offers the public board beside sign-up
+ * (`landing.entry.browseJobs`); (4) `landing-open-jobs-band.tsx` renders up
+ * to four vacancies from ONE extra unfiltered page-1 read in this same
+ * snapshot reader, through the unmodified `<PublicVacancyCard>`
+ * (`landing.openJobs`); (5) the market band's profession list lost its rank
+ * numbers, which presented a one-off read-back as a current ranking; (6) the
+ * sample Player Card withholds its /dashboard links; (7) the FOCUS switcher
+ * lost its load-time attention pulse and its label went from 7px to 12px;
+ * (8) the work-world `attested` variant — chip, diamond, spine node — moved
+ * from champagne to the trust-accent green, which is how the product chain's
+ * "proven skills" diamond reaches the landing.
+ *
+ * The frozen set was also CORRECTED: #1609 rendered `starting-contexts-band`
+ * and `public-market-map-band` without freezing them, so two of the sections
+ * a visitor sees could change without tripping this guard. Both joined,
+ * with the two new bands. `final-cta-band.tsx` stays frozen although nothing
+ * renders it any more, because `cta-not-nested-interactive.test.ts` still
+ * renders it; retiring it is a separate decision.
+ *
+ * The regeneration moved EXACTLY: nine file hashes — live-market-landing.ts,
+ * focus-landing.tsx, landing-mode-switcher.tsx, landing-mode-switcher.module
+ * .css, public-entry.tsx, product-chain-band.tsx (comment: the diamond's new
+ * colour), market-proof-band.tsx, player-card-showcase.tsx, primitives.tsx;
+ * four file hashes are NEW (the bands above); and the three frozen
+ * `*.landing` namespaces (hero, entry, openJobs). `app/[locale]/page.tsx`,
+ * the LIVE arm, public-doors.ts, trust-band.tsx and every other frozen
+ * namespace are byte-identical. Permanently guarded, so the freeze is not
+ * the only thing standing between the landing and a regression:
+ * `landing-tells-the-whole-product.test.ts` §22 (hero keys, one primary
+ * action, at most four mounted chips with all ten reachable),
+ * `landing-open-jobs-band.test.ts` (the band is the canonical card's markup,
+ * no gated value renders), `landing-fanout-is-sequential.test.ts` (FOCUS
+ * pays for the count and exactly one unfiltered page, sequentially, and no
+ * profession read), `landing-experience-modes.test.ts` (the order, no
+ * attention pulse, the 12px floor), `landing-market-proof.test.ts` (no rank
+ * ordinal), `public-sample-card-inert.test.ts` and the design-rule-#4 pins in
+ * `work-world-primitives.test.ts` and `work-verification-standing.test.ts`.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -431,6 +501,13 @@ export const FROZEN_LANDING_FILES = [
   // is frozen with it — a later change to the primitives is a landing change
   // and must regenerate this baseline with its own note.
   "components/app/work-world/primitives.tsx",
+  // 2026-09-23 (landing §22 + PUBLIC_LANDING_REAL_JOB_DISCOVERY): the two
+  // bands #1609 added to the render tree WITHOUT freezing them, and the two
+  // new ones — so every section the FOCUS landing actually renders is frozen.
+  "components/marketing/starting-contexts-band.tsx",
+  "components/marketing/public-market-map-band.tsx",
+  "components/marketing/landing-primary-actions.tsx",
+  "components/marketing/landing-open-jobs-band.tsx",
 ] as const;
 
 /**
