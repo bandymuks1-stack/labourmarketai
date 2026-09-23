@@ -319,6 +319,11 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
     //   - lib/projects/progress.ts       — derived progress (status only);
     //   - lib/notifications/event-emitters.ts — the assignment emitter's
     //     recipient resolution (admin client, AFTER the domain write).
+    //     REMOVED 2026-09-23: the admin client holds no grant on work_tasks
+    //     in production, so that read returned nothing and no assignee was
+    //     ever told. The recipient is now read by `readWorkTaskAssignmentFacts`
+    //     in lib/tasks/tasks.ts (already on this list) under the ACTOR's
+    //     session and handed to the emitter as facts.
     //
     // Chain step B adds two, both READ-ONLY and both there to keep an
     // approval inside the task's OWN organization:
@@ -335,7 +340,6 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
       .sort();
     expect(normalized).toEqual([
       "lib/approvals/task-approvals.ts",
-      "lib/notifications/event-emitters.ts",
       "lib/projects/progress.ts",
       "lib/tasks/task-approval-actions.ts",
       "lib/tasks/tasks.ts",
@@ -571,9 +575,17 @@ describe("7. accessible controls — real actions, no drag-and-drop dependency",
     expect(ACTIONS).toMatch(/p_assignee_profile_id/);
     expect(ACTIONS).toMatch(/p_assign_to_self/); // the v1 fallback path
     expect(ACTIONS).toMatch(/emitWorkTaskAssignedNotification/);
-    // The emitter never trusts the caller for the recipient.
+    // The emitter never trusts the caller for the recipient: both write
+    // paths read the STORED assignee back under the actor's own session
+    // (`readWorkTaskAssignmentFacts`, RLS-scoped) and hand it over as facts.
+    // 2026-09-23: the emitter itself no longer reads work_tasks at all —
+    // the admin client holds no grant on it in production, so that read
+    // returned nothing and the bell never rang.
+    expect(ACTIONS.match(/readWorkTaskAssignmentFacts\(supabase, /g) ?? []).toHaveLength(2);
+    expect(READS).toContain("export async function readWorkTaskAssignmentFacts(");
     const EMITTERS = read("lib/notifications/event-emitters.ts");
-    expect(EMITTERS).toMatch(/from\("work_tasks"\)/);
+    expect(EMITTERS).not.toMatch(/from\("work_tasks"\)/);
+    expect(EMITTERS).toMatch(/facts: WorkTaskAssignedNotificationFacts/);
     expect(EMITTERS).toMatch(/assignee === actorProfileId\) return/);
   });
 });

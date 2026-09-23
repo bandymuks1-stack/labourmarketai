@@ -124,7 +124,9 @@ describe("the recipient is the demand owner, resolved by the write path", () => 
     const body = src.slice(
       src.indexOf("export async function emitDemandInterestNotification"),
     );
-    expect(body).toMatch(/actor === owner\)\s*return;/);
+    // 2026-09-23: the silence is now a RETURNED, unlogged `self_action`
+    // result — a caller can tell it from a miss without a database.
+    expect(body).toMatch(/actor === owner\)\s*return \{ delivered: false, reason: "self_action" \};/);
     // And the write path does not even call it for the owner's own demand.
     const interest = read("lib", "opportunities", "interest.ts");
     expect(interest).toContain('if (owner.kind === "self")');
@@ -252,7 +254,10 @@ describe("the return direction — the worker hears the answer", () => {
       src.indexOf("/** Absence lifecycle"),
     );
     expect(body).toContain("workerProfileId(admin, input.workerId)");
-    expect(body).toMatch(/recipient === input\.actorProfileId\)\s*return;/);
+    // 2026-09-23: the self-answer silence is a returned `self_action`.
+    expect(body).toMatch(
+      /recipient === input\.actorProfileId\)\s*return \{ delivered: false, reason: "self_action" \};/,
+    );
   });
 
   it("'contacted' emits nothing — the conversation is its own notification", () => {
@@ -264,7 +269,9 @@ describe("the return direction — the worker hears the answer", () => {
       src.indexOf("export async function emitDemandInterestResponseNotification"),
       src.indexOf("/** Absence lifecycle"),
     );
-    expect(body).toMatch(/if \(input\.status !== "reviewed"\) return;/);
+    expect(body).toMatch(
+      /if \(input\.status !== "reviewed"\) return \{ delivered: false, reason: "not_applicable" \};/,
+    );
     expect(body).not.toContain('"demand_interest_contacted"');
     expect(body).toContain("await emitNotificationEvent(admin, {");
   });

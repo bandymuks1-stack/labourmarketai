@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import type { WorkTaskAssignedNotificationFacts } from "@/lib/notifications/event-emitters";
 
 /**
  * Work-task read service (control room PR D, capability gap map §3).
@@ -139,6 +140,44 @@ function mapResult(res: {
     .map(toTask)
     .filter((t): t is WorkTask => t !== null);
   return { status: "ok", tasks, error: null };
+}
+
+/**
+ * The facts the assignment bell rides on (2026-09-23): the task's STORED
+ * assignee and due date, read under the ACTOR's own session right after
+ * `assign_work_task_v1` / `create_work_task_v2` returned. `wt_select` admits
+ * the creator and any manager of the linked project — exactly who may
+ * assign. The emitter used to read this row with the admin client, which
+ * holds no grant on `work_tasks` in production, so no assignee was ever
+ * told a task landed on them (event-emitters.ts, SERVICE_ROLE GRANT TRUTH).
+ * Read-only, one row by primary key; never throws (null facts → the emitter
+ * reports `recipient_unresolved`). Lives here because this module is the
+ * ONE RLS-scoped work_tasks reader; the two write paths share it.
+ */
+export async function readWorkTaskAssignmentFacts(
+  supabase: SupabaseClient,
+  taskId: string,
+  actorProfileId: string,
+): Promise<WorkTaskAssignedNotificationFacts> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("work_tasks")
+      .select("assignee_profile_id, due_at")
+      .eq("id", taskId)
+      .maybeSingle();
+    const row = (data ?? null) as {
+      assignee_profile_id?: string | null;
+      due_at?: string | null;
+    } | null;
+    return {
+      taskId,
+      assigneeProfileId: row?.assignee_profile_id ?? null,
+      actorProfileId,
+      dueAt: row?.due_at ?? null,
+    };
+  } catch {
+    return { taskId, assigneeProfileId: null, actorProfileId, dueAt: null };
+  }
 }
 
 /** Tasks where I am the assignee OR the creator — the "my tasks" view. */

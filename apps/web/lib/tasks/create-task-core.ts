@@ -10,6 +10,7 @@ import {
   WORK_TASK_TITLE_MAX,
   WORK_TASK_TITLE_MIN,
 } from "@/lib/tasks/task-model";
+import { readWorkTaskAssignmentFacts } from "@/lib/tasks/tasks";
 
 /**
  * THE ONE work-task create (owner contract 2026-09-04 §5.5 — one backbone).
@@ -115,9 +116,12 @@ export async function createWorkTaskCore(
   const outcome = String(data ?? "");
   // Success returns the new task id — emit the durable assignment event for
   // assign-to-other. AWAITED, never detached (a detached insert dies with the
-  // serverless invocation); the emitter never throws.
+  // serverless invocation); the emitter never throws. The recipient is the
+  // STORED assignee, read back under the actor's own session.
   if (UUID_RX.test(outcome) && assignee && assignee !== userId) {
-    await emitWorkTaskAssignedNotification(outcome, userId);
+    await emitWorkTaskAssignedNotification(
+      await readWorkTaskAssignmentFacts(supabase, outcome, userId),
+    );
   }
   return kindForOutcome(outcome);
 }
