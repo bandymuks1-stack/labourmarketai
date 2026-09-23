@@ -38,8 +38,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
+  LOCAL_STACK_UNAVAILABLE_EXIT_CODE,
+  LocalStackUnavailableError,
   NonLocalTargetError,
   assertLocalSupabaseTarget,
+  formatLocalStackUnavailable,
 } from "../lib/testing/local-supabase-guard";
 import {
   describeLocalTarget,
@@ -336,6 +339,11 @@ function main(): void {
   try {
     local = resolveLocalSupabaseEnv(REPO_ROOT);
   } catch (err) {
+    if (err instanceof LocalStackUnavailableError) {
+      // No stack running — nothing to seed, and nothing was touched.
+      console.error(formatLocalStackUnavailable(err));
+      process.exit(LOCAL_STACK_UNAVAILABLE_EXIT_CODE);
+    }
     if (err instanceof NonLocalTargetError) {
       console.error(`Refusing to apply dev fixtures: ${err.message}`);
       process.exit(1);

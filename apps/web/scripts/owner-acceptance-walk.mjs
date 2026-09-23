@@ -11,6 +11,12 @@
  *   3. boot the app against the local stack on :3210
  *   4. node scripts/owner-acceptance-walk.mjs
  *
+ * PREFLIGHT, before a browser is launched: when the minted sessions are LOCAL,
+ * the local Supabase must answer, or the walk exits 3 with
+ * LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER; then the app at WALK_BASE must
+ * answer, or it exits 1. Either way nothing is walked, so a stopped stack is
+ * never reported as 0/N product failures.
+ *
  * WHY A SCRIPT AND NOT A PLAYWRIGHT SPEC. The same walk as a spec hangs the
  * runner: each authenticated page takes 2-10s against a local production
  * build, an actor visits five or six, and the per-test budget expires mid-walk
@@ -28,10 +34,69 @@
  *     reload too early reports "differs" on a page that settles identically.
  */
 import { chromium } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const BASE = process.env.WALK_BASE ?? "http://127.0.0.1:3210";
 const S = (f) => join(process.cwd(), "tests/e2e", f);
+
+// ── PREFLIGHT ──────────────────────────────────────────────────────────────
+// Mirrors LOCAL_STACK_UNAVAILABLE_CODE in lib/testing/local-supabase-guard.ts
+// (this file is plain node and cannot import TypeScript);
+// lib/testing/local-supabase-env.test.ts pins that the two stay equal.
+const LOCAL_STACK_UNAVAILABLE_CODE = "LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER";
+// The one allowlisted local origin the mint script writes sessions for — fixed,
+// never read from env, so this probe can never be pointed anywhere else.
+const LOCAL_SUPABASE = "http://127.0.0.1:54321";
+
+/** A state is LOCAL when it exists and every cookie is scoped to loopback. */
+function isLocalState(file) {
+  try {
+    const { cookies } = JSON.parse(readFileSync(S(file), "utf8"));
+    return (
+      Array.isArray(cookies) &&
+      cookies.length > 0 &&
+      cookies.every((c) => c.domain === "127.0.0.1" || c.domain === "localhost")
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Any HTTP answer means something is listening; only a failed connection is "down". */
+async function unreachable(url) {
+  try {
+    await fetch(url, { redirect: "manual" });
+    return null;
+  } catch (e) {
+    return e?.cause?.code ?? e?.message ?? String(e);
+  }
+}
+
+const STATES = [".storage-state.json", ".storage-state-company.json", ".storage-state-agency.json"];
+if (STATES.some(isLocalState)) {
+  const why = await unreachable(`${LOCAL_SUPABASE}/auth/v1/health`);
+  if (why) {
+    console.error(
+      `${LOCAL_STACK_UNAVAILABLE_CODE} — local Supabase is not reachable at ${LOCAL_SUPABASE} (${why}). ` +
+        "The minted sessions are LOCAL, so this walk is a LOCAL INTEGRATION run: it needs Docker Desktop " +
+        "running and `npx supabase start` (repo root). UNIT / STATIC / GUARD tests do not — run " +
+        "`pnpm -F web test`. Production is verified through the prod-qa chain " +
+        "(`pnpm -C apps/web prod-qa:gate`), never by pointing local tooling at production. Nothing was walked.",
+    );
+    process.exit(3);
+  }
+}
+{
+  const why = await unreachable(BASE);
+  if (why) {
+    console.error(
+      `[walk] PREFLIGHT — the app is not reachable at ${BASE} (${why}). Boot it against the local ` +
+        "stack first (step 3 in this file's header) or set WALK_BASE. Nothing was walked.",
+    );
+    process.exit(1);
+  }
+}
 
 const results = [];
 function rec(actor, step, pass, detail) {

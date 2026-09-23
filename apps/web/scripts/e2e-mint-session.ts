@@ -17,6 +17,11 @@
  *     only reach a GoTrue that is actually running locally;
  *   * it never prints a key.
  *
+ * A STOPPED STACK IS NOT A REFUSAL. With Docker Desktop off there is no target
+ * at all, and the script says so with LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER
+ * (exit 3) — not with the security code above, which is reserved for a target
+ * that resolved and is not local.
+ *
  * It cannot create or modify a cloud user.
  *
  * FAIL-CLOSED ON THE OUTPUT PATH TOO. What this script writes is a live
@@ -53,8 +58,11 @@ import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import {
+  LOCAL_STACK_UNAVAILABLE_EXIT_CODE,
+  LocalStackUnavailableError,
   NonLocalTargetError,
   REFUSAL_CODE,
+  formatLocalStackUnavailable,
 } from "../lib/testing/local-supabase-guard";
 import {
   describeLocalTarget,
@@ -73,6 +81,9 @@ const REPO_ROOT = join(__dirname, "..", "..", "..");
  * Confirm a LOCAL GoTrue is actually answering before we call the Admin API.
  * The origin is already allowlisted; this proves something local is listening
  * rather than the request silently going somewhere else.
+ *
+ * A failed CONNECTION is availability, not security: the origin was already
+ * proven local, and nothing answered on it.
  */
 async function assertLocalGoTrue(url: string, anonKey: string): Promise<void> {
   const health = `${url.replace(/\/$/, "")}/auth/v1/health`;
@@ -80,10 +91,9 @@ async function assertLocalGoTrue(url: string, anonKey: string): Promise<void> {
   try {
     res = await fetch(health, { headers: { apikey: anonKey } });
   } catch (err) {
-    throw new NonLocalTargetError(
+    throw new LocalStackUnavailableError(
       `local GoTrue is not reachable at ${health} ` +
-        `(${err instanceof Error ? err.message : String(err)}). ` +
-        "Start the stack with `npx supabase start`.",
+        `(${err instanceof Error ? err.message : String(err)}).`,
     );
   }
   if (!res.ok) {
@@ -257,6 +267,14 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   const message = (err as Error).message ?? String(err);
+  if (err instanceof LocalStackUnavailableError) {
+    // No stack, so no target: nothing was resolved, reached or minted.
+    console.error(`[e2e-mint] ${formatLocalStackUnavailable(err)}`);
+    console.error(
+      "[e2e-mint] no session was minted and no user was created or modified.",
+    );
+    process.exit(LOCAL_STACK_UNAVAILABLE_EXIT_CODE);
+  }
   if (err instanceof NonLocalTargetError) {
     // The refusal code is the grep-able contract for this failure mode.
     console.error(`[e2e-mint] ${message}`);
