@@ -288,16 +288,25 @@ export function OnboardingWizard({
             {t("rolePicker.intentHeading")}
           </h1>
           {/*
-           * Premium-impression cleanup v1: the multi-role promise was
-           * previously a quiet `text-sm text-text-secondary` line under
-           * the heading. Doctrine §5.5 says no person fits in one
-           * category — each person carries a portfolio of engagements.
-           * The promise must be visible BEFORE the user picks, so it is
-           * now a bordered callout that the eye reads with the cards,
-           * not before them. Copy unchanged — same i18n key, same text.
+           * Doctrine §5.5 — no person fits in one category — still holds, and
+           * the multi-select promise is still stated BEFORE anything is
+           * picked. What changed (owner, 2026-09-23) is how much saying it
+           * costs: this used to be a bordered callout carrying three
+           * sentences, including an explanation of the person/organisation
+           * split. On a 375px screen that pushed the cards themselves below
+           * the fold, so the first thing a new person met was a paragraph
+           * about the product instead of the choices that ARE the product.
+           *
+           * The rule is now one short line, and the cards do the explaining.
+           * The callout styling is gone with it: a box around a single
+           * sentence is chrome, and the brief was explicitly that no second
+           * explanation box replaces the first. The person/organisation
+           * distinction is not lost — it is carried by the cards and by the
+           * workspace model itself, which is where it is real rather than
+           * described.
            */}
           <p
-            className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm leading-relaxed text-text-secondary"
+            className="text-sm leading-relaxed text-text-secondary"
             data-testid="onboarding-role-multi-note"
           >
             {t("rolePicker.intentNote")}

@@ -3971,8 +3971,8 @@
     "onboarding": {
       "pendingInviteNote": "Sie haben eine ausstehende Einladung von {org}. Schließen Sie unten die Einrichtung Ihres Kontos ab — danach können Sie sie in Ihrem Dashboard annehmen.",
       "rolePicker": {
-        "intentHeading": "Wofür sind Sie hier?",
-        "intentNote": "Wählen Sie alles Zutreffende — ein Konto trägt alles. Person und Organisation sind die zwei Räume; was Sie darin tun, entscheiden Sie.",
+        "intentHeading": "Wählen Sie, was zu Ihnen passt",
+        "intentNote": "Sie können eine oder mehrere Optionen wählen.",
         "saidLabel": "Sie haben geschrieben:",
         "saidHint": "Wir haben angekreuzt, was passt. Ändern Sie es bei Bedarf.",
         "doorLabel": "Sie haben gewählt:",
