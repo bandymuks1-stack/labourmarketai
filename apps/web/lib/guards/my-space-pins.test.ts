@@ -22,7 +22,14 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
   });
 
   it("pins are read on the server for THIS workspace and `null` means no row and no ask", () => {
-    expect(PAGE).toMatch(/listMyPins\(identity === "company" \? workspace\.organizationId : null\)/);
+    // RE-ANCHORED (owner program 2026-09-23): the READ scope is the active
+    // organization workspace — the SAME id `pins-actions` writes to (its
+    // `getActiveOrganizationContext` is a projection of the one resolution).
+    // The old read used the employer-resolved org (null for an unbound or
+    // non-governed organization), so a pin written in one scope was read back
+    // from another.
+    expect(PAGE).toMatch(/listMyPins\(activeOrgWorkspace\?\.id \?\? null\)/);
+    expect(PAGE).not.toMatch(/listMyPins\(identity === "company" \? workspace\.organizationId/);
     expect(PAGE).toMatch(/pins = pinsRead\.kind === "ok" \? pinsRead\.pins : null/);
     expect(CHAT).toMatch(/const pinsAvailable = pins !== null;/);
     expect(CHAT).toMatch(/if \(!pinsAvailable \|\| !isPinnableRef\(ref\)\) return;/);

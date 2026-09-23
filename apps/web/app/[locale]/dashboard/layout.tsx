@@ -31,7 +31,6 @@ import {
   routeRequirement,
 } from "@/lib/auth/role-gated-routes";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
-import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
@@ -193,8 +192,12 @@ export default async function DashboardLayout({
   // for EVERY identity — personal space + every org membership from the
   // canonical engagement_contexts spine. The reads are request-cached, so the
   // company-identity block below reuses the same underlying queries.
-  const identity = activeRole ? baseIdentityForRole(activeRole) : null;
-  const workspace = await getWorkspaceContext(identity);
+  //
+  // No identity argument (owner program 2026-09-23): the resolver reads the
+  // identity that decides its single-org default from the session profile
+  // itself, so the page, the employer chain, the dispatcher and this shell
+  // get ONE answer per request instead of one per argument.
+  const workspace = await getWorkspaceContext();
 
   // WHICH organization is active — derived from the ONE workspace context
   // resolved above, never from a second reader.

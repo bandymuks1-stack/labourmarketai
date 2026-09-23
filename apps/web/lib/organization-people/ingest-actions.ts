@@ -5,6 +5,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import {
   INGEST_RELATIONSHIPS,
   type IngestPlan,
@@ -63,13 +64,15 @@ import {
  * file and line it came from.
  */
 
-/** Server actions ARE endpoints: the caller is re-derived, never trusted. */
+/** Server actions ARE endpoints: the caller is re-derived, never trusted. The
+ *  cookie transport carries this browser's session pointer, so the roster
+ *  lands in the organization the chip shows. */
 async function callerOrNull(): Promise<DomainCaller | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return user ? { supabase, userId: user.id } : null;
+  return user ? withSessionWorkspacePointer({ supabase, userId: user.id }) : null;
 }
 
 /**

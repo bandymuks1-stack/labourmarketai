@@ -8,7 +8,12 @@ import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { env } from "@/lib/env";
 import { type Role } from "@/lib/auth/actions";
 import { getConversationAction } from "@/lib/conversation/action-registry";
-import { authorizeDispatch, requiresConfirmation } from "@/lib/conversation/dispatch-core";
+import {
+  authorizeDispatch,
+  isStaleWorkspaceContext,
+  requiresConfirmation,
+  workspaceBoundFingerprint,
+} from "@/lib/conversation/dispatch-core";
 import {
   WORKER_ACTION_SCHEMAS,
   type WorkerActionId,
@@ -128,7 +133,9 @@ async function heldRolesOf(
 
 /** Opaque state fingerprint bound into a confirmation token so a card that was
  *  shown for one state can never execute against a changed state (replay /
- *  stale). Only the confirm-tier actions need one. */
+ *  stale). Only the confirm-tier actions need one. Both callers wrap it in
+ *  `workspaceBoundFingerprint`, so the token is also bound to the workspace it
+ *  was minted in. */
 async function stateFingerprint(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
@@ -331,7 +338,13 @@ export async function prepareConfirmationAction(
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
-  const fp = await stateFingerprint(supabase, user.id, actionId, parsed.data as Record<string, unknown>);
+  // The token is bound to the workspace it is minted in — resolved here, by
+  // the same resolver the chip renders, never taken from the client.
+  const ws = await getWorkspaceContext();
+  const fp = workspaceBoundFingerprint(
+    ws.activeWorkspaceId,
+    await stateFingerprint(supabase, user.id, actionId, parsed.data as Record<string, unknown>),
+  );
   const token = issueConfirmationToken(tokenSecret(), {
     actionId,
     inputHash: canonicalInputHash(parsed.data),
@@ -348,7 +361,14 @@ export async function prepareConfirmationAction(
 export async function dispatchWorkerAction(
   actionId: string,
   input: unknown,
-  opts?: { locale?: string; confirmationToken?: string },
+  opts?: {
+    locale?: string;
+    confirmationToken?: string;
+    /** The workspace the client DISPLAYED when the person acted. Compared
+     *  with the server-resolved one; a mismatch answers `stale_context`.
+     *  Never authority — see `isStaleWorkspaceContext`. */
+    expectedWorkspaceId?: string;
+  },
 ): Promise<ExecResult> {
   const supabase = await createClient();
   const {
@@ -368,14 +388,23 @@ export async function dispatchWorkerAction(
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
+  // THE ACTIVE WORKSPACE, resolved server-side by the ONE resolver the chip
+  // renders (request-cached, identity read from the session — never a forced
+  // "company"/"person" argument, which used to let this request hold a second
+  // active workspace). A screen that displayed another workspace is refused
+  // before anything runs: the write would land in an organization the person
+  // is not looking at.
+  const ws = await getWorkspaceContext();
+  if (isStaleWorkspaceContext(opts?.expectedWorkspaceId, ws.activeWorkspaceId)) {
+    return { ok: false, code: "stale_context" };
+  }
+
   if (requiresConfirmation(desc.confirmation)) {
     const token = opts?.confirmationToken;
     if (!token) return { ok: false, code: "confirmation_required" };
-    const currentFp = await stateFingerprint(
-      supabase,
-      user.id,
-      actionId,
-      parsed.data as Record<string, unknown>,
+    const currentFp = workspaceBoundFingerprint(
+      ws.activeWorkspaceId,
+      await stateFingerprint(supabase, user.id, actionId, parsed.data as Record<string, unknown>),
     );
     const verdict = verifyConfirmationToken(tokenSecret(), token, {
       actionId,
@@ -395,20 +424,17 @@ export async function dispatchWorkerAction(
   // by a caller-supplied key - the call target is provably a function.
   if (typeof executor !== "function") return { ok: false, code: "not_executable" };
 
-  // Rebuild W4: every executor receives the ACTIVE WORKSPACE, resolved
-  // server-side from the canonical resolver (never client-supplied). Employer
-  // actions resolve with the company-identity fallback (first owned org while
-  // the pointer migration is unapplied); worker actions default personal.
+  // Rebuild W4: every executor receives the ACTIVE WORKSPACE resolved above
+  // (never client-supplied). It used to be a SECOND read here with a forced
+  // identity — "company" for employer actions, "person" otherwise — which,
+  // with no stored pointer and one organization, could name a different
+  // workspace than the chip in the same request; and no executor ever read
+  // it (employer executors resolve their company through
+  // `requireEmployerCompany`, which reads the same resolution). It is now the
+  // same answer everything else in this request got.
   //
-  // §7.1: `engagement.*` is deliberately NOT employer-flavoured here. It is
-  // held by both parties, and its executor takes no workspace at all — the RPC
-  // re-derives authority from the row, so there is nothing for a resolved
-  // organization to decide. Resolving it as a person is therefore inert, and
-  // it is the safe direction: a workspace that is never read cannot widen
-  // anything.
-  const isEmployerAction =
-    actionId.startsWith("company.") || actionId.startsWith("agency.");
-  const ws = await getWorkspaceContext(isEmployerAction ? "company" : "person");
+  // §7.1: `engagement.*` takes no workspace at all — the RPC re-derives
+  // authority from the row, so a workspace handed to it is inert.
   const workspace: ExecWorkspace = {
     organizationId:
       ws.activeWorkspaceId === PERSONAL_WORKSPACE_ID ? null : ws.activeWorkspaceId,

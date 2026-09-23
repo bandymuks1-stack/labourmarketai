@@ -176,7 +176,12 @@ describe("CIE suggestions — rule-based, capped, priority-ordered", () => {
 describe("CIE integration — the workspace resolves defaults, the user re-picks only on ambiguity", () => {
   it("work-log engagements order ACTIVE-WORKSPACE-first, server-side", () => {
     const src = read("lib/conversation/worklog-engagements.ts");
-    expect(src).toMatch(/getWorkspaceContext\("person"\)/);
+    // RE-ANCHORED (owner program 2026-09-23): the ONE session resolution, no
+    // caller-chosen identity. `"person"` here could name the personal space
+    // while the chip (company identity, one org, no pointer) named the org —
+    // two active workspaces in one request. Same resolver as the header now.
+    expect(src).toMatch(/getWorkspaceContext\(\)/);
+    expect(src).not.toMatch(/getWorkspaceContext\("person"\)/);
     expect(src).toMatch(/organization_id/);
   });
 
@@ -208,7 +213,9 @@ describe("CIE integration — the workspace resolves defaults, the user re-picks
     expect(composer).toMatch(/if \(mustChooseContext && !engagementId\)/);
 
     const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(journalPage).toMatch(/getWorkspaceContext\("person"\)/);
+    // The same one resolution as the chip (re-anchored 2026-09-23, above).
+    expect(journalPage).toMatch(/getWorkspaceContext\(\)/);
+    expect(journalPage).not.toMatch(/getWorkspaceContext\("person"\)/);
     expect(journalPage).toMatch(/resolveEngagementContext\(/);
 
     // Both resolvers read the SAME pure model — no second copy of the rules.

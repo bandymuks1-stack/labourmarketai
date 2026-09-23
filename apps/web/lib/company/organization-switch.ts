@@ -50,6 +50,176 @@ export interface WorkspaceInfo {
    *  org id — the SAME org always renders the SAME accent, everywhere. The
    *  hues map onto the EXISTING brand tokens (no new palette). */
   readonly accentIndex: number;
+  /**
+   * The organization mirrors a legacy `companies` row
+   * (`organizations.legacy_company_id` is set). A DISPLAY fact, never an
+   * authority: the employer chain (`resolveEmployerCompanyCore`) still decides
+   * who may act for the company. It decides only whether the "name this
+   * organization" completion can actually land — `saveCompanySetup` writes the
+   * company, so an organization with no company binding has nowhere to put a
+   * name. Absent = not read (e.g. an older payload); treated as "no binding".
+   */
+  readonly companyBound?: boolean;
+  /**
+   * The bound company's `company_type` (e.g. `staffing_agency`), when there is
+   * one. An agency is a company TYPE (migration 20260612090000), so an
+   * organization typed `company` whose company is a staffing agency is labelled
+   * as an agency when it has no name. Null/absent = unbound or unread.
+   */
+  readonly companyType?: string | null;
+  /**
+   * The caller's governance role (`company_memberships.role`: owner, admin,
+   * manager, external_manager, member) when THAT source listed the workspace.
+   * `relationship` folds admin and manager together; the "name this
+   * organization" completion needs to tell them apart. Absent for owned and
+   * engagement-only rows.
+   */
+  readonly governanceRole?: string | null;
+}
+
+/**
+ * The engagement relationships the DB trigger `validate_active_organization`
+ * accepts as a pointer target (read from production `pg_proc`, 2026-09-23).
+ *
+ * The workspace list used to offer EVERY active engagement, so a `student`
+ * link to an institution rendered as a switchable workspace that the trigger
+ * then refused (42501 → `not-member`) — a guaranteed silent no-op. The list
+ * offers only what a switch can actually reach. Widening the trigger instead
+ * is an owner decision (a RED migration), not something a read may pre-empt.
+ */
+export const SWITCHABLE_ENGAGEMENT_RELATIONSHIPS = [
+  "owner",
+  "manager",
+  "external_manager",
+  "employee",
+  "viewer",
+] as const;
+
+/**
+ * ONE POINTER RULE (owner program 2026-09-23, decision d2).
+ *
+ * Two stored pointers exist: the durable `profiles.active_organization_id`
+ * (written by every switch, from every transport) and this browser's httpOnly
+ * session cookie. The resolvers used to read them in OPPOSITE orders — the
+ * chip cookie-first, the pins/starters/company pages DB-first — so the same
+ * request could name two different organizations whenever the two disagreed
+ * (an MCP `context.switch`, a switch on another device).
+ *
+ * The rule, everywhere: an ORGANIZATION in the DB pointer is authoritative
+ * (both channels write it on every organization switch, so it is the newest
+ * choice across channels); the session pointer decides ONLY when the DB
+ * pointer is null — which is exactly where it alone can carry the explicit
+ * "I chose personal" sentinel (D-20) that a NULL column cannot. A bearer
+ * transport has no session pointer and passes null.
+ *
+ * This only PICKS the stored value. Membership validation stays in
+ * `resolveActiveWorkspaceId`, so a stale or foreign pointer still fails closed.
+ */
+export function pickStoredWorkspacePointer(
+  dbPointer: string | null | undefined,
+  sessionPointer: string | null | undefined,
+): string | null {
+  const db = dbPointer?.trim() || null;
+  if (db) return db;
+  return sessionPointer?.trim() || null;
+}
+
+/**
+ * THE SESSION COOKIE IS BOUND TO THE PERSON WHO SET IT.
+ *
+ * The cookie used to hold a bare workspace id, so on a shared browser the next
+ * person to sign in inherited the previous person's explicit "personal" choice
+ * (which overrules their single-organization default), and — when both belong
+ * to the same organization — that organization choice too. Nothing leaked (the
+ * pointer is re-validated against the reader's own memberships), but the
+ * context was someone else's decision.
+ *
+ * The value is now `<userId>:<workspaceId>`; a value written for a different
+ * user is ignored. A legacy bare value (written before this change) is still
+ * accepted — it was membership-validated when it was written and is re-validated
+ * on every read — and the next switch rewrites it in the bound form.
+ */
+export function encodeWorkspacePointerCookie(userId: string, workspaceId: string): string {
+  return `${userId}:${workspaceId}`;
+}
+
+export function parseWorkspacePointerCookie(
+  raw: string | null | undefined,
+  userId: string | null | undefined,
+): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+  const sep = value.indexOf(":");
+  // Legacy bare value — accepted until the next switch rewrites it bound.
+  if (sep === -1) return value;
+  const owner = value.slice(0, sep);
+  const workspaceId = value.slice(sep + 1).trim();
+  if (!userId || owner !== userId || !workspaceId) return null;
+  return workspaceId;
+}
+
+/** The roles an acting identity can follow a workspace into. */
+export type WorkspaceActingRole = "worker" | "company" | "agency";
+
+/**
+ * WHO THE PERSON ACTS AS INSIDE A WORKSPACE (owner program 2026-09-23, d3).
+ *
+ * The switch used to flip the identity to `company` for ANY organization the
+ * moment the person held the company role anywhere. The owner is an EMPLOYEE
+ * of another person's company; in that workspace the chat spoke as its
+ * employer while every employer read failed closed (`company-not-owned`) — the
+ * displayed context and the permission context disagreed.
+ *
+ * The identity now follows the person's RELATIONSHIP to the workspace:
+ *   - owner / manager (governance admin maps to manager) → a company-family
+ *     role: `agency` when the organization is an agency (its type, or its
+ *     company is a staffing agency) AND the agency role is held, else
+ *     `company`; the other company-family role only when the first is not held;
+ *   - employee / other (member, viewer, …) → `worker`;
+ *   - the personal workspace → `worker` (unchanged).
+ *
+ * Only a role the person really HOLDS is ever returned; `null` = no held role
+ * fits, and the caller keeps the current one. `admin` is never returned — it
+ * is not a workspace identity (the role core preserves it separately).
+ */
+export function actingRoleForWorkspace(
+  workspace: Pick<WorkspaceInfo, "kind" | "relationship" | "organizationType" | "companyType">
+    | null
+    | undefined,
+  heldRoles: readonly string[],
+): WorkspaceActingRole | null {
+  const holds = (r: WorkspaceActingRole) => heldRoles.includes(r);
+  if (!workspace || workspace.kind === "personal") {
+    return holds("worker") ? "worker" : null;
+  }
+  const governs = workspace.relationship === "owner" || workspace.relationship === "manager";
+  if (!governs) return holds("worker") ? "worker" : null;
+  const agencyOrg =
+    workspace.organizationType === "agency" || workspace.companyType === "staffing_agency";
+  if (agencyOrg && holds("agency")) return "agency";
+  if (holds("company")) return "company";
+  if (holds("agency")) return "agency";
+  return null;
+}
+
+/** The label a person reads for their relationship to an organization, by
+ *  relationship. The caller supplies localized strings; `other` covers every
+ *  non-management relationship that is not employment (member, viewer). */
+export type WorkspaceRelationshipLabels = Readonly<Record<WorkspaceRelationship, string>>;
+
+export function workspaceRelationshipLabel(
+  workspace: Pick<WorkspaceInfo, "kind" | "relationship">,
+  labels: WorkspaceRelationshipLabels,
+): string | null {
+  if (workspace.kind !== "organization") return null;
+  return labels[workspace.relationship ?? "other"];
+}
+
+/** Which unnamed-organization phrase fits: the company TYPE counts, because a
+ *  staffing agency is a company whose `company_type` says so. */
+function unnamedKindOf(w: WorkspaceInfo): keyof UnnamedOrganizationLabels {
+  if (w.organizationType === "agency" || w.companyType === "staffing_agency") return "agency";
+  return w.organizationType ?? "other";
 }
 
 /** Number of workspace accent hues — matches the existing brand token set
@@ -258,10 +428,7 @@ export function workspaceDisplayLabels(
     // The stored name, or an explicit statement that there is none — chosen
     // by the organization's REAL type, which is the first honest thing that
     // tells two unnamed workspaces apart.
-    base.set(
-      w.id,
-      w.name.trim() || labels.unnamedOrganization[w.organizationType ?? "other"],
-    );
+    base.set(w.id, w.name.trim() || labels.unnamedOrganization[unnamedKindOf(w)]);
   }
   // Which texts are claimed by more than one workspace?
   const counts = new Map<string, number>();

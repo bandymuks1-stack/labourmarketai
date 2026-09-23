@@ -6,7 +6,9 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
-import { LIVE_ROLE_IDS, type LiveRoleId } from "@/lib/config/roles";
+import { LIVE_ROLE_IDS, baseIdentityForRole, type LiveRoleId } from "@/lib/config/roles";
+import { setActiveRoleCore } from "@/lib/auth/active-role-core";
+import { clearActiveOrganization } from "@/lib/company/organization-actions";
 
 /**
  * THE PARTICIPATION MODE A PERSON ONBOARDS INTO — one of FOUR concepts this
@@ -262,42 +264,26 @@ export async function switchActiveRole(role: Role): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  // sanity: the role must already be one the user holds
-  const { data: held } = await supabase
-    .from("profile_roles")
-    .select("role")
-    .eq("profile_id", user.id)
-    .eq("role", role)
-    .maybeSingle();
-  if (!held) throw new Error("Role not held by user");
-
-  // Preserve admin across workspace switches. Before overwriting
-  // active_role, if the user is currently admin via active_role
-  // (the legacy single-source signal) we MUST persist an admin row
-  // in profile_roles so the app-level admin gate (dashboard layout,
-  // requireSuperadmin) keeps recognising them after the switch.
-  // Idempotent: a conflict on (profile_id, role) is a no-op. We do
-  // NOT touch profiles.is_admin or any other column. The DB-level
-  // RLS helper `public.is_admin()` still reads only active_role and
-  // is documented as a follow-up migration.
-  const { data: currentProfile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
-  if (currentProfile?.active_role === "admin") {
-    await supabase
-      .from("profile_roles")
-      .upsert(
-        { profile_id: user.id, role: "admin" },
-        { onConflict: "profile_id,role" },
-      );
+  // THE role write (held-role check, admin preservation, the active_role
+  // UPDATE) is one core shared with the workspace switch and the MCP
+  // `context.switch` — lib/auth/active-role-core.ts. Its UPDATE error is now
+  // checked: a refused write used to return as if the switch had happened.
+  const result = await setActiveRoleCore({ supabase, userId: user.id }, role);
+  if (!result.ok) {
+    throw new Error(
+      result.code === "not-held" ? "Role not held by user" : "Role switch failed",
+    );
   }
 
-  await supabase
-    .from("profiles")
-    .update({ active_role: role })
-    .eq("id", user.id);
+  // ONE POINTER RULE (owner program 2026-09-23): choosing to act as a PERSON
+  // is choosing the personal workspace. Leaving the organization pointer in
+  // place would let the two pointers disagree — the chat identity follows the
+  // workspace, so the person would still be greeted as that organization. The
+  // clear runs through the SAME action (and core) the workspace chip uses.
+  if (baseIdentityForRole(role) === "person") {
+    const cleared = await clearActiveOrganization();
+    if (!cleared.ok) throw new Error("Workspace clear failed");
+  }
 
   revalidatePath("/", "layout");
 }

@@ -413,6 +413,33 @@ export function isResultKind(value: unknown): value is ResultKind {
   return typeof value === "string" && RESULT_KINDS.includes(value as ResultKind);
 }
 
+/**
+ * THE DEPTH THAT BELONGS TO ONE WORKSPACE (owner program 2026-09-23).
+ *
+ * `?demand=` (an employer's own demand), `?project=` + `?pr=` on the `project`
+ * result (one organization's project) and `?interaction=` (a bound
+ * experience) name OBJECTS of the workspace the person was standing in. After
+ * a switch the same address would open the previous organization's object in
+ * the new one — the server refuses it, but the panel would still be pointed at
+ * something that is not there. So a switch drops exactly that depth and keeps
+ * the rest: `?result=` re-reads for the new workspace, and a market place
+ * (`?geo=`, with its `?project=` leaf) is public geography, not an object of
+ * any workspace.
+ *
+ * Returns the query string without that depth, or null when nothing changes.
+ */
+export function withoutWorkspaceScopedDepth(search: string): string | null {
+  const q = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const scoped = ["demand", "interaction", "pr"];
+  // A project is the workspace's own only on the `project` result; under a
+  // market geography it is a leaf of public geography.
+  if (!q.has("geo")) scoped.push("project");
+  if (!scoped.some((k) => q.has(k))) return null;
+  // Rebuilt from the kept entries, in their order — a pure string transform.
+  const qs = new URLSearchParams([...q.entries()].filter(([k]) => !scoped.includes(k))).toString();
+  return qs ? `?${qs}` : "";
+}
+
 /** Lookup by kind. Unknown kind → undefined (an invented kind never renders). */
 export function getResult(kind: string): ResultDescriptor | undefined {
   return CONVERSATION_RESULTS.find((r) => r.kind === kind);

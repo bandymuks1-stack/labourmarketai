@@ -63,6 +63,10 @@ export type OwnedOrganization = {
   /** The legacy companies.id this org mirrors, if any — used to deep-link the
    *  existing single-company channel at /dashboard/company. */
   legacyCompanyId: string | null;
+  /** The bound company's `company_type` (e.g. `staffing_agency`), read through
+   *  the same `legacy_company_id` foreign key; null when unbound. A display
+   *  fact for the workspace label — an agency is a company TYPE. */
+  companyType: string | null;
 };
 
 export type OwnedOrganizationsResult =
@@ -87,7 +91,10 @@ export async function readOwnedOrganizations(
   // ARCHIVED organizations (owner decision 2026-09-23) are not workspaces: the
   // archive column rides the same read, and an environment without it (42703)
   // re-reads without it — there nothing is archived. See archived-organizations.ts.
-  const columns = "id, display_name, legal_name, organization_type, legacy_company_id";
+  // The bound company's `company_type` rides BOTH variants through the
+  // legacy_company_id foreign key (the workspace label's display fact).
+  const columns =
+    "id, display_name, legal_name, organization_type, legacy_company_id, companies!organizations_legacy_company_id_fkey(company_type)";
   const read = (select: string) =>
     asAny(caller.supabase)
       .from("organizations")
@@ -119,6 +126,10 @@ export async function readOwnedOrganizations(
       (r.organization_type as OwnedOrganization["organizationType"] | null) ??
       "other",
     legacyCompanyId: (r.legacy_company_id as string | null) ?? null,
+    companyType:
+      ((r.companies as { company_type?: string | null } | null)?.company_type as
+        | string
+        | null) ?? null,
   }));
   return { kind: "ok", organizations };
 }

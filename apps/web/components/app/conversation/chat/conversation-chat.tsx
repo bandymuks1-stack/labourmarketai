@@ -115,7 +115,7 @@ import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { baseIdentityForRole } from "@/lib/config/roles";
+import type { BaseIdentity } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
   classifyIntent,
@@ -786,7 +786,18 @@ export function ConversationChat({
   contextFallback = null,
   workspaceContextLine = null,
   pins = null,
+  actingIdentity = "person",
 }: {
+  /**
+   * WHO the person acts as in the ACTIVE workspace — resolved on the server
+   * from the workspace and the person's relationship to it (owner program
+   * 2026-09-23, d3), the same resolution the chip and this conversation's
+   * `key` come from. It replaced `baseIdentityForRole(auth.activeRole)`: the
+   * stored role could say "company" inside someone else's company where the
+   * person is an employee, and the chat then spoke as its employer. Absent
+   * (design preview) = the person.
+   */
+  actingIdentity?: BaseIdentity;
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
   locale: string;
@@ -872,12 +883,12 @@ export function ConversationChat({
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
-  /** The active base identity decides which WORK the greeting offers
-   *  (rebuild W4): an employer gets employer starters, a worker gets worker
-   *  starters — same window, same dispatcher, no second entry point. */
-  const identity = auth0?.activeRole
-    ? (baseIdentityForRole(auth0.activeRole) ?? "person")
-    : "person";
+  /** The acting identity decides which WORK the greeting offers (rebuild W4):
+   *  an employer gets employer starters, a worker gets worker starters — same
+   *  window, same dispatcher, no second entry point. It FOLLOWS the active
+   *  workspace (server-resolved, see `actingIdentity`), and the page keys this
+   *  component on both, so a switch mounts a fresh conversation for it. */
+  const identity: BaseIdentity = actingIdentity;
 
   /**
    * §2 — THE PERSON IS ONE. `identity` above is the ACTIVE workspace, not who
@@ -1003,10 +1014,13 @@ export function ConversationChat({
       });
     }
     // ACTIVE CONTEXT = "on whose behalf am I acting?" (owner contract
-    // 2026-09-04 §5; CF-4). A company workspace opens by naming the real
-    // organization and what the product can do for it here — stated in the
-    // column the person reads, with the same starter row moved under it.
-    if (workspaceContextLine && identity === "company") {
+    // 2026-09-04 §5; CF-4). EVERY organization workspace opens by naming it —
+    // the chip's own label and the person's relationship to it, plus what the
+    // product can do there for a company workspace — stated in the column the
+    // person reads, with the same starter row moved under it. The server
+    // composes the line only for an organization workspace, so it is shown for
+    // whichever identity the person acts as there (an employee included).
+    if (workspaceContextLine) {
       opening.push({
         id: nid(),
         message: {
@@ -1020,6 +1034,31 @@ export function ConversationChat({
     }
     return opening;
   }, [script, greetingText, labels.assistantName, starterChips, learnerContextLine, workspaceContextLine, identity]);
+
+  /**
+   * The workspace labels a person actually reads, from the chip's own builder
+   * (`workspaceDisplayLabels`). Every chip the chat offers to switch context
+   * uses them: a bare `w.name` rendered an EMPTY chip for an organization
+   * with no stored name, and a different text than the chip for two that
+   * collide.
+   */
+  const workspaceLabelById = useMemo(
+    () =>
+      workspaceDisplayLabels(auth0?.workspaces ?? [], {
+        personal: t("workspacePersonal"),
+        unnamedOrganization: {
+          company: t("workspaceUnnamedCompany"),
+          agency: t("workspaceUnnamedAgency"),
+          team: t("workspaceUnnamedTeam"),
+          other: t("workspaceUnnamed"),
+        },
+      }),
+    [auth0?.workspaces, t],
+  );
+  const workspaceLabelOf = useCallback(
+    (w: WorkspaceInfo) => workspaceLabelById.get(w.id) ?? w.name,
+    [workspaceLabelById],
+  );
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);
@@ -1167,6 +1206,29 @@ export function ConversationChat({
       fn();
     }, 350);
   }, []);
+
+  /**
+   * THE WORKSPACE THIS CONVERSATION WAS OPENED FOR, sent with every write
+   * (owner program 2026-09-23). The server re-resolves the organization at
+   * execution time, so a screen opened for organization A could write into B
+   * after a switch in another tab, on another device or through the MCP door.
+   * The dispatcher compares this with the workspace IT resolves and answers
+   * `stale_context` on a mismatch — a staleness check only: the server-resolved
+   * workspace stays the authority, and this id grants nothing.
+   */
+  const expectedWorkspaceId = auth0?.activeWorkspaceId ?? undefined;
+  /** A write refused as `stale_context` says so and offers the refresh that
+   *  re-reads the context — never the action's generic failure line. Returns
+   *  whether it handled the result. */
+  const answeredStaleContext = useCallback(
+    (res: { ok: boolean; code?: string }): boolean => {
+      if (res.ok || res.code !== "stale_context") return false;
+      setTyping(false);
+      assistant(t("staleContext"), [{ id: "ctx:refresh", label: t("staleContextRefresh") }]);
+      return true;
+    },
+    [assistant, t],
+  );
 
   /** Contextual follow-up after the employer demand form.
    *
@@ -2016,8 +2078,9 @@ export function ConversationChat({
    */
   const performContextSwitch = useCallback(
     (workspace: WorkspaceInfo) => {
+      // The chip's own label: an unnamed organization says so, never "".
       const displayName =
-        workspace.kind === "personal" ? t("switchContextPersonal") : workspace.name;
+        workspace.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(workspace);
       if (auth?.activeWorkspaceId === workspace.id) {
         assistant(t("switchContextAlready", { name: displayName }));
         return;
@@ -2040,7 +2103,7 @@ export function ConversationChat({
           assistant(t("switchContextFailed"));
         });
     },
-    [assistant, auth, t],
+    [assistant, auth, t, workspaceLabelOf],
   );
 
   const startSwitchContext = useCallback(
@@ -2081,14 +2144,14 @@ export function ConversationChat({
           t("switchContextPick"),
           workspaces.map((w) => ({
             id: `ws:${w.id}`,
-            label: w.kind === "personal" ? t("switchContextPersonal") : w.name,
+            label: w.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(w),
           })),
         );
         return;
       }
       performContextSwitch(target);
     },
-    [assistant, auth, performContextSwitch, t, withTyping],
+    [assistant, auth, performContextSwitch, t, withTyping, workspaceLabelOf],
   );
 
   /**
@@ -2249,21 +2312,21 @@ export function ConversationChat({
       );
       if (candidates.length === 1) {
         const only = candidates[0];
-        assistant(t("refWorkspaceAsk", { name: only.name }), [
-          { id: `ws:${only.id}`, label: only.name },
+        assistant(t("refWorkspaceAsk", { name: workspaceLabelOf(only) }), [
+          { id: `ws:${only.id}`, label: workspaceLabelOf(only) },
         ]);
         return;
       }
       if (candidates.length > 1) {
         assistant(
           t("refWorkspaceMany"),
-          candidates.map((w) => ({ id: `ws:${w.id}`, label: w.name })),
+          candidates.map((w) => ({ id: `ws:${w.id}`, label: workspaceLabelOf(w) })),
         );
         return;
       }
       askToClarify(t("refLooksLikeName"));
     },
-    [assistant, askToClarify, auth?.workspaces, t],
+    [assistant, askToClarify, auth?.workspaces, t, workspaceLabelOf],
   );
 
   /**
@@ -2395,8 +2458,8 @@ export function ConversationChat({
         );
         if (candidates.length === 1) {
           const only = candidates[0];
-          assistant(t("questionWorkspaceKnown", { name: only.name }), [
-            { id: `ws:${only.id}`, label: only.name },
+          assistant(t("questionWorkspaceKnown", { name: workspaceLabelOf(only) }), [
+            { id: `ws:${only.id}`, label: workspaceLabelOf(only) },
           ]);
           return;
         }
@@ -2406,7 +2469,7 @@ export function ConversationChat({
       void text;
       askToClarify(t("questionUnanswered"));
     },
-    [assistant, askToClarify, auth?.workspaces, t],
+    [assistant, askToClarify, auth?.workspaces, t, workspaceLabelOf],
   );
 
   /**
@@ -2613,7 +2676,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.assign-worker", input, {
             locale,
             confirmationToken: prep.token,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(
               res.ok
@@ -2639,6 +2704,8 @@ export function ConversationChat({
       labels.assignFailed,
       labels.assignAlreadyCommitted,
       labels.assignCommitmentUnknown,
+      expectedWorkspaceId,
+      answeredStaleContext,
     ],
   );
 
@@ -2660,7 +2727,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.respond-offer", input, {
             locale,
             confirmationToken: prep.token,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(
               res.ok ? (decision === "accepted" ? labels.offerAccepted : labels.offerDeclined) : labels.offerDecisionFailed,
@@ -2673,7 +2742,7 @@ export function ConversationChat({
           assistant(labels.offerDecisionFailed);
         });
     },
-    [assistant, locale, labels.offerAccepted, labels.offerDeclined, labels.offerDecisionFailed, labels.chipCandidates],
+    [assistant, locale, labels.offerAccepted, labels.offerDeclined, labels.offerDecisionFailed, labels.chipCandidates, expectedWorkspaceId, answeredStaleContext],
   );
 
   /**
@@ -3136,8 +3205,8 @@ export function ConversationChat({
       (auth?.workspaces ?? [])
         .filter((w) => w.kind === "organization")
         .slice(0, 3)
-        .map((w) => ({ id: `ws:${w.id}`, label: w.name })),
-    [auth?.workspaces],
+        .map((w) => ({ id: `ws:${w.id}`, label: workspaceLabelOf(w) })),
+    [auth?.workspaces, workspaceLabelOf],
   );
 
   const openProposeForm = useCallback(
@@ -3309,7 +3378,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.update-stage-status", input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(
               res.ok
@@ -3328,7 +3399,7 @@ export function ConversationChat({
           assistant(labels.stageFailed);
         });
     },
-    [assistant, locale, labels.stageDone, labels.stageBlocked, labels.stageStarted, labels.stageFailed],
+    [assistant, locale, labels.stageDone, labels.stageBlocked, labels.stageStarted, labels.stageFailed, expectedWorkspaceId, answeredStaleContext],
   );
 
   /** §11 WHAT-IF (owner contract 2026-09-04): the consequences of moving ONE
@@ -3387,7 +3458,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.move-worker", input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.moveFailed);
@@ -3403,7 +3476,7 @@ export function ConversationChat({
           assistant(labels.moveFailed);
         });
     },
-    [assistant, locale, t, labels.moveFailed],
+    [assistant, locale, t, labels.moveFailed, expectedWorkspaceId, answeredStaleContext],
   );
 
   /** "perkelk Joną į projektą Y": the person and the destination are
@@ -3486,7 +3559,8 @@ export function ConversationChat({
             assistant(labels.bridgeActionFailed);
             return;
           }
-          return dispatchWorkerAction(actionId, input, { locale, confirmationToken: prep.token }).then((res) => {
+          return dispatchWorkerAction(actionId, input, { locale, confirmationToken: prep.token, expectedWorkspaceId }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(res.ok ? done : labels.bridgeActionFailed, [
               { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
@@ -3498,7 +3572,7 @@ export function ConversationChat({
           assistant(labels.bridgeActionFailed);
         });
     },
-    [assistant, locale, labels.bridgeActionFailed, labels.chipCompanyHub],
+    [assistant, locale, labels.bridgeActionFailed, labels.chipCompanyHub, expectedWorkspaceId, answeredStaleContext],
   );
 
   const startClientBridge = useCallback(() => {
@@ -3915,7 +3989,9 @@ export function ConversationChat({
           return dispatchWorkerAction(actionId, input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.confirmFailed);
@@ -3931,7 +4007,7 @@ export function ConversationChat({
           assistant(labels.confirmFailed);
         });
     },
-    [assistant, locale, labels.confirmFailed, startConfirmWork],
+    [assistant, locale, labels.confirmFailed, startConfirmWork, expectedWorkspaceId, answeredStaleContext],
   );
 
   const lastReadinessRef = useRef<Extract<ProjectReadinessChatResult, { kind: "ok" }> | null>(null);
@@ -4044,7 +4120,9 @@ export function ConversationChat({
           return dispatchWorkerAction(actionId, input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.readinessWriteFailed);
@@ -4061,7 +4139,7 @@ export function ConversationChat({
           assistant(labels.readinessWriteFailed);
         });
     },
-    [assistant, locale, labels.readinessWriteFailed, runProjectReadiness],
+    [assistant, locale, labels.readinessWriteFailed, runProjectReadiness, expectedWorkspaceId, answeredStaleContext],
   );
 
   const startProjectReadiness = useCallback(
@@ -4099,7 +4177,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.update-task-status", input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.taskFailed);
@@ -4119,7 +4199,7 @@ export function ConversationChat({
           assistant(labels.taskFailed);
         });
     },
-    [assistant, identity, locale, labels.taskDone, labels.taskBlocked, labels.taskStarted, labels.taskFailed, labels.chipLogWork],
+    [assistant, identity, locale, labels.taskDone, labels.taskBlocked, labels.taskStarted, labels.taskFailed, labels.chipLogWork, expectedWorkspaceId, answeredStaleContext],
   );
 
   /** "Užduotis sumontuoti pastolius atlikta" — the status the sentence names,
@@ -4912,6 +4992,13 @@ export function ConversationChat({
             // completion, the subject and duplicate state before any form
             // exists. A chip is a request to look, never a permission.
             selectInteractionRef.current(chip.id.slice(3));
+          } else if (chip.id === "ctx:refresh") {
+            // A write was refused as `stale_context`: the workspace changed
+            // elsewhere. Re-reading the server state re-renders the page for
+            // the workspace that is REALLY active, and the page's key on it
+            // mounts a fresh conversation there — nothing is retried blindly.
+            user(chip.label);
+            router.refresh();
           } else if (chip.id.startsWith("ws:")) {
             // Context-switch chip (gap G1) — carries ONLY the workspace id;
             // membership is re-validated server-side, the chip grants nothing.

@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getSessionProfile } from "@/lib/auth/session-profile";
-import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import {
@@ -61,11 +59,9 @@ function asAny(supabase: SupabaseClient): any {
 
 /** The membership-validated active ORGANIZATION workspace, or null. */
 async function activeOrganizationId(): Promise<string | null> {
-  const session = await getSessionProfile();
-  const identity = session.profile?.active_role
-    ? baseIdentityForRole(session.profile.active_role)
-    : null;
-  const workspace = await getWorkspaceContext(identity);
+  // The ONE session resolution the chip renders — its identity default is read
+  // from the session profile inside it.
+  const workspace = await getWorkspaceContext();
   const activeId = workspace.activeWorkspaceId;
   if (activeId === PERSONAL_WORKSPACE_ID) return null;
   const active = workspace.workspaces.find(

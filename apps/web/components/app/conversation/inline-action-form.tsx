@@ -13,6 +13,7 @@ import {
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
 import { roleContextForAction } from "@/lib/conversation/action-role-context";
+import { useAuthOptional } from "@/lib/auth/context";
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -92,6 +93,10 @@ export function InlineActionForm({
 }) {
   const t = useTranslations();
   const router = useRouter();
+  // The workspace this form was opened in — sent with the write so a switch
+  // made elsewhere meanwhile is refused as `stale_context`, never written into
+  // a workspace the person is not looking at. A staleness check, not authority.
+  const expectedWorkspaceId = useAuthOptional()?.activeWorkspaceId ?? undefined;
   const [values, setValues] = useState<FormState>(initialValues ?? {});
   const [phase, setPhase] = useState<Phase>({ kind: "form" });
   const [saving, start] = useTransition();
@@ -147,6 +152,7 @@ export function InlineActionForm({
       const res = await dispatchWorkerAction(spec.actionId, input, {
         locale,
         confirmationToken,
+        expectedWorkspaceId,
       });
       if (res.ok) {
         trackFunnel(FUNNEL_EVENTS.profileSaved, {
@@ -166,18 +172,22 @@ export function InlineActionForm({
         onDone?.(res);
         router.refresh();
       } else {
+        // `stale_context`: the workspace changed elsewhere since this form
+        // opened — nothing was written, and the line says why.
         const message =
-          res.code === "invalid"
-            ? t("conversation.forms.ui.errorInvalid")
-            : res.code === "needs_migration"
-              ? t("conversation.forms.ui.errorNeedsMigration")
-              : res.code === "conflict"
-                ? t("conversation.forms.ui.errorConflict")
-                : res.code === "over_open_need_limit_upgrade"
-                  ? t("conversation.forms.ui.errorOpenNeedLimitUpgrade")
-                  : res.code === "over_open_need_limit_individual"
-                    ? t("conversation.forms.ui.errorOpenNeedLimitIndividual")
-                    : t(refusalMessageKey(res.code) ?? "conversation.forms.ui.errorGeneric");
+          res.code === "stale_context"
+            ? t("conversation.chat.staleContext")
+            : res.code === "invalid"
+              ? t("conversation.forms.ui.errorInvalid")
+              : res.code === "needs_migration"
+                ? t("conversation.forms.ui.errorNeedsMigration")
+                : res.code === "conflict"
+                  ? t("conversation.forms.ui.errorConflict")
+                  : res.code === "over_open_need_limit_upgrade"
+                    ? t("conversation.forms.ui.errorOpenNeedLimitUpgrade")
+                    : res.code === "over_open_need_limit_individual"
+                      ? t("conversation.forms.ui.errorOpenNeedLimitIndividual")
+                      : t(refusalMessageKey(res.code) ?? "conversation.forms.ui.errorGeneric");
         setPhase({ kind: "error", message });
       }
     });

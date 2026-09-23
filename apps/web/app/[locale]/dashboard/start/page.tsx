@@ -3,8 +3,6 @@ import { setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getSessionProfile } from "@/lib/auth/session-profile";
-import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import {
@@ -87,11 +85,8 @@ export default async function ActivitySetupHubPage({
   // in ANY workspace; the member directory renders when the ACTIVE workspace
   // is an organization the caller belongs to. Both degrade silently when the
   // membership schema is absent in this environment (feature-detected).
-  const session = await getSessionProfile();
-  const identity = session.profile?.active_role
-    ? baseIdentityForRole(session.profile.active_role)
-    : null;
-  const workspace = await getWorkspaceContext(identity);
+  // The ONE session resolution the chip renders (identity read inside it).
+  const workspace = await getWorkspaceContext();
   const activeOrgId =
     workspace.activeWorkspaceId !== PERSONAL_WORKSPACE_ID &&
     workspace.workspaces.some(

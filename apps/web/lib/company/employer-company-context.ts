@@ -4,7 +4,7 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getSessionProfile, readProfileRow } from "@/lib/auth/session-profile";
+import { readProfileRow } from "@/lib/auth/session-profile";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import {
   getWorkspaceContext,
@@ -162,20 +162,14 @@ export const resolveEmployerCompanyContext = cache(
     } = await supabase.auth.getUser();
     if (!user) return unavailable("unauthenticated");
 
-    // The person's REAL current identity decides the workspace default. This
-    // is deliberately not hard-coded to "company": picking the personal
-    // workspace in the chip also switches the active role, so honouring the
-    // real identity is what makes an explicit personal choice fail closed
-    // instead of being silently overridden back to the first organization.
-    const session = await getSessionProfile();
-    const identity = session.profile?.active_role
-      ? baseIdentityForRole(session.profile.active_role)
-      : null;
-
-    // Cookie transport: the session-aware workspace resolution (session
-    // pointer wins over the durable pointer); the gate chain below is THE
-    // shared core (G4 wagon 3).
-    const workspace = await getWorkspaceContext(identity);
+    // Cookie transport: the ONE session workspace resolution — the one the
+    // chip renders. The person's REAL current identity (the session profile's
+    // `active_role`, never a hard-coded "company") decides the workspace
+    // default INSIDE it, so an explicit personal choice fails closed instead
+    // of being silently overridden back to the first organization, and this
+    // resolver can never name a different workspace than the chip in the same
+    // request. The gate chain below is THE shared core (G4 wagon 3).
+    const workspace = await getWorkspaceContext();
     return resolveEmployerCompanyCore({ supabase, userId: user.id }, workspace);
   },
 );

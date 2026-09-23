@@ -123,18 +123,29 @@ describe("the happy path", () => {
     });
   });
 
-  it("resolves the workspace with the caller's REAL identity, never a hardcoded one", async () => {
+  it("resolves THE session workspace — it cannot force an identity of its own", async () => {
+    // RE-ANCHORED (owner program 2026-09-23). This used to assert the resolver
+    // passed the caller's `active_role` identity into `getWorkspaceContext` —
+    // the right fix at the time for a hard-coded "company". But the argument
+    // WAS the defect class: the request cache is keyed by it, so the layout,
+    // the journal ("person") and the dispatcher ("company") each got their own
+    // answer, and one request could hold two active workspaces. The identity
+    // is now read from the session profile INSIDE the resolver
+    // (lib/company/active-organization-resolver.test.ts pins that), and every
+    // caller — this one included — asks the one resolution with no argument.
     await resolveEmployerCompanyContext();
-    expect(workspaceContextMock).toHaveBeenCalledWith("company");
+    expect(workspaceContextMock).toHaveBeenCalledTimes(1);
+    expect(workspaceContextMock).toHaveBeenCalledWith();
+    // NEGATIVE CONTROL: the old shape (a forced or caller-chosen identity).
+    expect(workspaceContextMock).not.toHaveBeenCalledWith("company");
+    expect(workspaceContextMock).not.toHaveBeenCalledWith("person");
 
     vi.clearAllMocks();
-    sessionProfileMock.mockResolvedValue({
-      user: USER,
-      profile: { id: USER.id, active_role: "worker" },
-    });
     workspaceContextMock.mockResolvedValue(workspace([ORG_A], "personal"));
-    await resolveEmployerCompanyContext();
-    expect(workspaceContextMock).toHaveBeenCalledWith("person");
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      reason: "personal-workspace",
+    });
+    expect(workspaceContextMock).toHaveBeenCalledWith();
   });
 });
 

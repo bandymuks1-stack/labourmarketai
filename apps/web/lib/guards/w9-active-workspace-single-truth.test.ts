@@ -51,7 +51,15 @@ describe("W9 — the layout has ONE source for the active organization", () => {
   });
 
   it("the name, the id and the list all come from the workspace context", () => {
-    expect(LAYOUT).toMatch(/getWorkspaceContext\(identity\)/);
+    // RE-ANCHORED (owner program 2026-09-23): the layout asks the ONE session
+    // resolution with NO identity argument. The argument keyed React's request
+    // cache, so the layout ("active_role" identity), the journal ("person")
+    // and the dispatcher ("company") could each resolve a different active
+    // workspace in the same request. The identity that decides the single-org
+    // default is now read from the session profile INSIDE the resolver.
+    expect(LAYOUT).toMatch(/getWorkspaceContext\(\)/);
+    // NEGATIVE CONTROL: the per-caller identity argument is gone.
+    expect(LAYOUT).not.toMatch(/getWorkspaceContext\(identity\)/);
     expect(LAYOUT).toMatch(
       /workspace\.workspaces\.filter\(\s*\(w\) => w\.kind === "organization"/,
     );
@@ -63,6 +71,44 @@ describe("W9 — the layout has ONE source for the active organization", () => {
 
   it("the workspace context is read exactly once", () => {
     expect((LAYOUT.match(/getWorkspaceContext\(/g) ?? []).length).toBe(1);
+  });
+
+  it("no caller anywhere can hand the resolver an identity of its own", () => {
+    // The resolver takes no parameter, so a forced "company"/"person" read —
+    // the dispatcher's, the journal's, the work-log's — cannot come back.
+    const resolver = code("lib/company/active-organization.ts");
+    expect(resolver).toMatch(
+      /export const getWorkspaceContext = cache\(async function getWorkspaceContext\(\): Promise<WorkspaceContext>/,
+    );
+    for (const rel of [
+      "app/[locale]/dashboard/page.tsx",
+      "app/[locale]/dashboard/journal/page.tsx",
+      "app/[locale]/dashboard/start/page.tsx",
+      "lib/conversation/dispatch.ts",
+      "lib/conversation/worklog-engagements.ts",
+      "lib/company/employer-company-context.ts",
+      "lib/company/membership-actions.ts",
+      "lib/ai-workspace/ai-context.ts",
+      "lib/workspace/personal-workspace-intro-server.ts",
+    ]) {
+      const src = code(rel);
+      expect(src, rel).toMatch(/getWorkspaceContext\(\)/);
+      expect(src, rel).not.toMatch(/getWorkspaceContext\([^)]/);
+    }
+  });
+
+  it("the owned-only reader is a PROJECTION of the one resolution now", () => {
+    // `getActiveOrganizationContext` still feeds pins, starters, company
+    // pages and company setup; it now reads its active id off
+    // `getWorkspaceContext()` instead of resolving owned orgs on its own.
+    const resolver = code("lib/company/active-organization.ts");
+    const fn = resolver.slice(
+      resolver.indexOf("export const getActiveOrganizationContext"),
+      resolver.indexOf("const RELATIONSHIP_MAP"),
+    );
+    expect(fn).toMatch(/getWorkspaceContext\(\)/);
+    expect(fn).not.toMatch(/resolveActiveOrganizationId\(/);
+    expect(fn).not.toMatch(/from\("profiles"\)/);
   });
 });
 

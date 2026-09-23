@@ -5,6 +5,8 @@ import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { baseIdentityForRole } from "@/lib/config/roles";
 import {
   getOwnedOrganizations,
   readOwnedOrganizations,
@@ -14,7 +16,9 @@ import type { DomainCaller } from "@/lib/domain/caller";
 import { withoutArchivedOrganizations } from "@/lib/company/archived-organizations";
 import {
   PERSONAL_WORKSPACE_ID,
-  resolveActiveOrganizationId,
+  SWITCHABLE_ENGAGEMENT_RELATIONSHIPS,
+  parseWorkspacePointerCookie,
+  pickStoredWorkspacePointer,
   resolveActiveWorkspaceId,
   shouldOfferOrganizationSwitch,
   workspaceAccentIndex,
@@ -38,7 +42,9 @@ import {
  *     `pointerAvailable: false` so callers stay honest about persistence.
  *
  * The resolution itself is the pure, membership-validated
- * `resolveActiveOrganizationId` — a stale/foreign pointer can never win.
+ * `resolveActiveWorkspaceId`, run in ONE place (`resolveActiveWorkspaceForCaller`)
+ * under ONE pointer rule (`pickStoredWorkspacePointer`) — a stale/foreign
+ * pointer can never win, and no two readers can name different organizations.
  */
 
 const UNDEFINED_COLUMN_CODE = "42703";
@@ -48,23 +54,44 @@ const RELATION_NOT_FOUND_CODE = "42P01";
  * The SERVER-SIDE session workspace pointer (owner audit P0.1). An httpOnly
  * cookie written ONLY by the membership-validated switch actions
  * (`lib/company/organization-actions.ts`) and read back here on every
- * request. It makes workspace switching real before the owner-gated durable
- * pointer migration (20260714210000) is applied; once that lands, the DB
- * pointer becomes the cross-device default and this stays the most-recent
- * in-session choice. Never localStorage, never client-writable.
+ * request. It makes workspace switching real where the owner-gated durable
+ * pointer migration (20260714210000) is unapplied; where it is applied, an
+ * organization in the DB pointer wins and this cookie decides only when the DB
+ * pointer is null — the one place it carries something the column cannot, the
+ * explicit personal choice (`pickStoredWorkspacePointer`). Bound to the user
+ * who set it. Never localStorage, never client-writable.
  */
 export const ACTIVE_WORKSPACE_COOKIE = "lm_active_workspace";
 
-/** Read the validated-at-write session pointer; resolution still membership-
- *  validates it against the live workspace list before it can win. */
-export async function readSessionWorkspacePointer(): Promise<string | null> {
+/** Read the validated-at-write session pointer for THIS user; resolution
+ *  still membership-validates it against the live workspace list before it can
+ *  win. The cookie is bound to the user who set it
+ *  (`parseWorkspacePointerCookie`): a value written for someone else — a
+ *  previous person on a shared browser — is ignored. */
+export async function readSessionWorkspacePointer(
+  userId: string | null,
+): Promise<string | null> {
   try {
     const jar = await cookies();
-    const v = jar.get(ACTIVE_WORKSPACE_COOKIE)?.value?.trim();
-    return v && v.length > 0 ? v : null;
+    return parseWorkspacePointerCookie(jar.get(ACTIVE_WORKSPACE_COOKIE)?.value, userId);
   } catch {
     return null; // outside a request scope — no pointer
   }
+}
+
+/**
+ * A COOKIE transport's caller carries this browser's session pointer, so a
+ * core it calls (`resolveActiveWorkspaceForCaller`, the evidence and people
+ * imports) resolves the SAME workspace the chip shows — not the durable
+ * pointer alone. Bearer transports never call this.
+ */
+export async function withSessionWorkspacePointer(
+  caller: DomainCaller,
+): Promise<DomainCaller> {
+  return {
+    ...caller,
+    sessionWorkspacePointer: await readSessionWorkspacePointer(caller.userId),
+  };
 }
 
 // The active_organization_id column ships in the owner-gated migration
@@ -75,17 +102,30 @@ function asAny(supabase: SupabaseClient): any {
   return supabase;
 }
 
+/** The active organization as every surface names it — the chip's workspace
+ *  row, projected. Not an `OwnedOrganization`: the person may be a manager or
+ *  employee of an organization they do not own, and a row this reader cannot
+ *  see must not be dressed up with an owner-only field. */
+export interface ActiveOrganizationSummary {
+  readonly id: string;
+  readonly name: string;
+  readonly organizationType: NonNullable<WorkspaceInfo["organizationType"]>;
+}
+
 export interface ActiveOrganizationContext {
-  /** Organizations the profile can act as (owner-scoped in v1). */
+  /** Organizations the profile OWNS — kept for the callers that map a legacy
+   *  `companies.id` back to its organization (`legacyCompanyId`). This list
+   *  never decides which organization is active. */
   readonly organizations: readonly OwnedOrganization[];
-  /** Membership-validated active org id (null = no company yet). */
+  /** Membership-validated active org id — THE SAME id the workspace chip
+   *  shows (null = the personal workspace, or no organization at all). */
   readonly activeOrganizationId: string | null;
-  /** The active org row, for header display. */
-  readonly activeOrganization: OwnedOrganization | null;
-  /** True when > 1 membership — the ONLY state that renders a switcher. */
+  /** The active organization, for display. */
+  readonly activeOrganization: ActiveOrganizationSummary | null;
+  /** True when > 1 organization workspace — the ONLY state that renders a
+   *  switcher. */
   readonly canSwitch: boolean;
-  /** False while migration 20260714210000 is unapplied — the pointer cannot
-   *  be persisted yet and switching is honestly unavailable. */
+  /** Mirrors `WorkspaceContext.pointerAvailable`. */
   readonly pointerAvailable: boolean;
 }
 
@@ -97,67 +137,53 @@ const EMPTY: ActiveOrganizationContext = {
   pointerAvailable: false,
 };
 
+/**
+ * WHICH ORGANIZATION IS ACTIVE, for the callers that still speak in
+ * organizations (pins, starter signals, the company pages, company setup) —
+ * a PROJECTION of `getWorkspaceContext`, not a second resolver.
+ *
+ * It used to be one. It listed OWNED organizations only and read the DB
+ * pointer before the cookie, while the chip read owned + governance +
+ * engagement memberships cookie-first. For a manager of an organization they
+ * do not own it named the WRONG organization (the W9 guard proves it), and
+ * whenever the two pointers disagreed the pins, the starters and the company
+ * pages acted for a different organization than the chip displayed — in the
+ * same request. Now the active id is read off the ONE workspace resolution,
+ * so every surface names the organization the person sees.
+ */
 export const getActiveOrganizationContext = cache(
   async function getActiveOrganizationContext(): Promise<ActiveOrganizationContext> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return EMPTY;
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return EMPTY;
 
-  const owned = await getOwnedOrganizations();
-  if (owned.kind !== "ok" || owned.organizations.length === 0) {
-    // needs-migration / error / genuinely no orgs — an honest empty context;
-    // callers keep their existing single-company fallbacks.
-    return EMPTY;
-  }
+    const [workspace, owned] = await Promise.all([
+      getWorkspaceContext(),
+      getOwnedOrganizations(),
+    ]);
+    // needs-migration / error on the owned read leaves the legacy-id lookup
+    // empty; it never decides the active organization, so the rest stands.
+    const organizations = owned.kind === "ok" ? owned.organizations : [];
+    const orgWorkspaces = workspace.workspaces.filter((w) => w.kind === "organization");
+    const active =
+      orgWorkspaces.find((w) => w.id === workspace.activeWorkspaceId) ?? null;
+    if (!active && organizations.length === 0 && orgWorkspaces.length === 0) return EMPTY;
 
-  // Stored pointer — the in-session cookie choice wins, then the DB pointer
-  // (feature-detected: 42703 / 42P01 degrade to "no DB pointer" without
-  // failing the shell). Both are membership-validated by the pure resolver.
-  let dbPointer: string | null = null;
-  const { data, error } = await asAny(supabase)
-    .from("profiles")
-    .select("active_organization_id")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (!error) {
-    dbPointer =
-      ((data as { active_organization_id?: string | null } | null)
-        ?.active_organization_id as string | null) ?? null;
-  }
-  const sessionPointer = await readSessionWorkspacePointer();
-  // D-20: the pointer is passed THROUGH, including an explicit
-  // `PERSONAL_WORKSPACE_ID`. Flattening that sentinel to null here made "I
-  // chose personal" indistinguishable from "I never chose", and the resolver's
-  // single-org default then overruled the person's own choice. The resolvers
-  // understand the sentinel now; deciding it here would put the same rule in
-  // two places and let them drift apart.
-  // NEWEST CHOICE WINS ACROSS CHANNELS (2026-09-19). A switch made through
-  // the MCP door (`context.switch`) writes only the DB pointer — it cannot
-  // set this browser's cookie — so a cookie-first read shadowed it in any
-  // open web session until the person switched again here. An organization
-  // id in the DB pointer is therefore authoritative (both channels write it
-  // on every organization switch); the cookie decides only when the DB
-  // pointer is null, where it alone can carry the "I chose personal"
-  // sentinel (D-20) that a null cannot.
-  const storedId = dbPointer ?? sessionPointer;
-
-  const activeOrganizationId = resolveActiveOrganizationId(
-    owned.organizations,
-    storedId,
-  );
-  const activeOrganization =
-    owned.organizations.find((o) => o.id === activeOrganizationId) ?? null;
-
-  return {
-    organizations: owned.organizations,
-    activeOrganizationId,
-    activeOrganization,
-    // The session pointer makes switching a real mechanism for everyone.
-    canSwitch: shouldOfferOrganizationSwitch(owned.organizations),
-    pointerAvailable: true,
-  };
+    return {
+      organizations,
+      activeOrganizationId: active?.id ?? null,
+      activeOrganization: active
+        ? {
+            id: active.id,
+            name: active.name,
+            organizationType: active.organizationType ?? "other",
+          }
+        : null,
+      canSwitch: shouldOfferOrganizationSwitch(orgWorkspaces),
+      pointerAvailable: workspace.pointerAvailable,
+    };
   },
 );
 
@@ -194,6 +220,38 @@ function normalizeOrgType(
     : "other";
 }
 
+/** The embedded organization columns every membership source reads — the
+ *  name, the type, and the legacy company binding with its company type
+ *  (through the `organizations_legacy_company_id_fkey` foreign key; companies
+ *  SELECT is open to authenticated readers). Display facts only. */
+const ORGANIZATION_EMBED =
+  "organizations(display_name, legal_name, organization_type, legacy_company_id, companies!organizations_legacy_company_id_fkey(company_type))";
+
+type EmbeddedOrganization = {
+  display_name?: string | null;
+  legal_name?: string | null;
+  organization_type?: string | null;
+  legacy_company_id?: string | null;
+  companies?: { company_type?: string | null } | null;
+} | null;
+
+/** The display fields of a membership row's organization (name, type, company
+ *  binding) — one mapping for the governance and engagement sources. */
+function organizationDisplay(org: EmbeddedOrganization): Pick<
+  WorkspaceInfo,
+  "name" | "organizationType" | "companyBound" | "companyType"
+> {
+  return {
+    // An unnamed organization must never render as a bare dash row (owner
+    // audit P0.1 "tušti punktai") — empty here, and the chip substitutes a
+    // localized fallback label.
+    name: org?.display_name?.trim() || org?.legal_name?.trim() || "",
+    organizationType: normalizeOrgType(org?.organization_type ?? null),
+    companyBound: Boolean(org?.legacy_company_id),
+    companyType: org?.companies?.company_type ?? null,
+  };
+}
+
 /**
  * A schema-shaped absence, as opposed to a FAILURE.
  *
@@ -228,12 +286,13 @@ async function readEngagementMemberships(
 ): Promise<SourceRead> {
   const { data, error } = await asAny(supabase)
     .from("engagement_contexts")
-    .select(
-      "organization_id, relationship_slug, organizations(display_name, legal_name, organization_type)",
-    )
+    .select(`organization_id, relationship_slug, ${ORGANIZATION_EMBED}`)
     .eq("profile_id", profileId)
     .eq("status", "active")
     .not("organization_id", "is", null)
+    // Only relationships the pointer trigger accepts: a listed workspace the
+    // switch can never reach (a `student` link) is a guaranteed silent refusal.
+    .in("relationship_slug", [...SWITCHABLE_ENGAGEMENT_RELATIONSHIPS])
     .limit(50);
   // Absent schema is a real "nothing here"; anything else is a failure this
   // list must carry, not swallow.
@@ -243,19 +302,10 @@ async function readEngagementMemberships(
   for (const row of (data ?? []) as any[]) {
     const orgId = row.organization_id as string | null;
     if (!orgId || byOrg.has(orgId)) continue;
-    const org = row.organizations as {
-      display_name?: string | null;
-      legal_name?: string | null;
-      organization_type?: string | null;
-    } | null;
     byOrg.set(orgId, {
       id: orgId,
-      // An unnamed organization must never render as a bare dash row (owner
-      // audit P0.1 "tušti punktai") — empty here, and the chip substitutes a
-      // localized fallback label.
-      name: org?.display_name?.trim() || org?.legal_name?.trim() || "",
+      ...organizationDisplay(row.organizations as EmbeddedOrganization),
       kind: "organization",
-      organizationType: normalizeOrgType(org?.organization_type ?? null),
       relationship: normalizeRelationship(
         (row.relationship_slug as string | null) ?? null,
       ),
@@ -279,9 +329,7 @@ async function readGovernanceMemberships(
 ): Promise<SourceRead> {
   const { data, error } = await asAny(supabase)
     .from("company_memberships")
-    .select(
-      "organization_id, role, organizations(display_name, legal_name, organization_type)",
-    )
+    .select(`organization_id, role, ${ORGANIZATION_EMBED}`)
     .eq("profile_id", profileId)
     .eq("status", "active")
     .limit(50);
@@ -293,17 +341,12 @@ async function readGovernanceMemberships(
   for (const row of (data ?? []) as any[]) {
     const orgId = row.organization_id as string | null;
     if (!orgId || byOrg.has(orgId)) continue;
-    const org = row.organizations as {
-      display_name?: string | null;
-      legal_name?: string | null;
-      organization_type?: string | null;
-    } | null;
     const role = (row.role as string | null) ?? null;
     byOrg.set(orgId, {
       id: orgId,
-      name: org?.display_name?.trim() || org?.legal_name?.trim() || "",
+      ...organizationDisplay(row.organizations as EmbeddedOrganization),
       kind: "organization",
-      organizationType: normalizeOrgType(org?.organization_type ?? null),
+      governanceRole: role,
       // Governance roles map onto the existing workspace vocabulary: owner
       // stays owner; admin/manager/external_manager surface as manager;
       // member has no management relationship.
@@ -399,6 +442,8 @@ export async function readWorkspaceMemberships(
         organizationType: normalizeOrgType(o.organizationType),
         relationship: "owner",
         accentIndex: workspaceAccentIndex(o.id),
+        companyBound: o.legacyCompanyId !== null,
+        companyType: o.companyType,
       });
     }
   }
@@ -429,13 +474,15 @@ export async function listWorkspaceMemberships(
 }
 
 /**
- * THE caller-scoped workspace resolution (G4 wagon 3) — the same membership
- * list + the same `resolveActiveWorkspaceId` rules as the cookie resolver
- * below, minus the session cookie (a bearer client has none): the DURABLE
- * DB pointer (`profiles.active_organization_id`, written only by the
- * membership-validated switch core) is the stored choice. This is what makes
- * "acting for organization X" mean ONE thing for the web session, the MCP
- * capability layer, and mobile.
+ * THE workspace resolution (G4 wagon 3) — the ONE place `resolveActiveWorkspaceId`
+ * runs. The membership list is the shared core; the stored choice is the
+ * DURABLE DB pointer (`profiles.active_organization_id`, written only by the
+ * membership-validated switch core) under the ONE pointer rule, with the
+ * session pointer a cookie transport supplies on the caller
+ * (`caller.sessionWorkspacePointer`; a bearer client has none). The web
+ * session's `getWorkspaceContext` is a wrapper over this, so "acting for
+ * organization X" means ONE thing for the web session, the MCP capability
+ * layer, and mobile.
  */
 export async function resolveActiveWorkspaceForCaller(
   caller: DomainCaller,
@@ -473,57 +520,17 @@ export async function resolveActiveWorkspaceForCaller(
         ?.active_organization_id as string | null) ?? null;
   }
 
-  return {
-    workspaces,
-    activeWorkspaceId: resolveActiveWorkspaceId(
-      identity,
-      orgWorkspaces.map((w) => w.id),
-      dbPointer,
-    ),
-    pointerAvailable,
-    membershipsComplete: memberships.complete,
-  };
-}
-
-export const getWorkspaceContext = cache(async function getWorkspaceContext(
-  identity: "person" | "company" | null,
-): Promise<WorkspaceContext> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return EMPTY_WORKSPACE;
-
-  // G4: the membership list comes from THE shared core; this wrapper owns
-  // only the session-shaped part (cookie + DB pointer resolution).
-  const workspaces = await listWorkspaceMemberships({ supabase, userId: user.id });
-  const orgWorkspaces = workspaces.filter((w) => w.kind === "organization");
-
-  // Stored pointer: the in-session choice (server-side cookie, written only
-  // by the validated switch actions) wins over the durable DB pointer; both
-  // are membership-validated by `resolveActiveWorkspaceId` below. The DB
-  // column stays feature-detected (owner-gated migration 20260714210000) —
-  // its absence no longer disables switching, because the session pointer
-  // always exists as a mechanism (owner audit P0.1).
-  let dbPointer: string | null = null;
-  const { data, error } = await asAny(supabase)
-    .from("profiles")
-    .select("active_organization_id")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (!error) {
-    dbPointer =
-      ((data as { active_organization_id?: string | null } | null)
-        ?.active_organization_id as string | null) ?? null;
-  }
-  const sessionPointer = await readSessionWorkspacePointer();
-  // D-20: the pointer is passed THROUGH, including an explicit
-  // `PERSONAL_WORKSPACE_ID`. Flattening that sentinel to null here made "I
-  // chose personal" indistinguishable from "I never chose", and the resolver's
-  // single-org default then overruled the person's own choice. The resolvers
-  // understand the sentinel now; deciding it here would put the same rule in
-  // two places and let them drift apart.
-  const storedId = sessionPointer ?? dbPointer;
+  // ONE pointer rule (d2, `pickStoredWorkspacePointer`): an organization in
+  // the DB pointer wins; the session pointer — present only when a cookie
+  // transport supplied it — decides only when the DB pointer is null, where it
+  // alone can carry the explicit personal choice (D-20). The sentinel is passed
+  // THROUGH: flattening it to null made "I chose personal" indistinguishable
+  // from "I never chose", and the single-org default then overruled the
+  // person's own choice.
+  const storedId = pickStoredWorkspacePointer(
+    dbPointer,
+    caller.sessionWorkspacePointer ?? null,
+  );
 
   return {
     workspaces,
@@ -532,7 +539,55 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
       orgWorkspaces.map((w) => w.id),
       storedId,
     ),
-    // Switching is a real mechanism for every session now — the chip renders
+    pointerAvailable,
+    membershipsComplete: memberships.complete,
+  };
+}
+
+/**
+ * The acting identity that decides the workspace DEFAULT, from the session
+ * profile — the same `active_role` every surface of the request reads.
+ */
+function sessionIdentity(activeRole: string | null | undefined): "person" | "company" | null {
+  return activeRole ? baseIdentityForRole(activeRole) : null;
+}
+
+/**
+ * THE web session's active workspace — the cookie transport over the ONE
+ * resolver above (`resolveActiveWorkspaceForCaller`): same membership list,
+ * same pointer rule, same `resolveActiveWorkspaceId`, plus this browser's
+ * session pointer.
+ *
+ * It takes NO argument, on purpose. It used to take the caller's choice of
+ * identity, and React's request cache is keyed by the argument: the layout
+ * passed the `active_role` identity, the journal and the work-log passed
+ * "person", the dispatcher passed "company" — so with no stored pointer and
+ * exactly one organization, ONE request held two active workspaces (company
+ * resolved the organization, person resolved the personal space). The
+ * identity that decides the single-org default is now read here, once, from
+ * the request-cached session profile, and every caller gets the same answer.
+ */
+export const getWorkspaceContext = cache(async function getWorkspaceContext(): Promise<WorkspaceContext> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return EMPTY_WORKSPACE;
+
+  const [session, sessionPointer] = await Promise.all([
+    getSessionProfile(),
+    readSessionWorkspacePointer(user.id),
+  ]);
+  const resolved = await resolveActiveWorkspaceForCaller(
+    { supabase, userId: user.id, sessionWorkspacePointer: sessionPointer },
+    sessionIdentity(session.profile?.active_role),
+  );
+
+  return {
+    workspaces: resolved.workspaces,
+    activeWorkspaceId: resolved.activeWorkspaceId,
+    // Switching is a real mechanism for every session — the session pointer
+    // exists even where the durable column does not — so the chip renders
     // working switch buttons, never a "not enabled yet" production text.
     pointerAvailable: true,
   };

@@ -57,6 +57,15 @@ export type DomainCaller = {
   readonly supabase: SupabaseClient<Database>;
   readonly userId: string;
   readonly locale?: string;
+  /**
+   * Cookie transports only: this browser's in-session workspace pointer
+   * (`lm_active_workspace`, already bound to `userId` by
+   * `readSessionWorkspacePointer`). The workspace resolver applies it under the
+   * ONE pointer rule, so a web write resolves the same organization the chip
+   * shows. A SELECTOR among the caller's own memberships, never a grant — the
+   * resolver re-validates it. Bearer transports leave it unset.
+   */
+  readonly sessionWorkspacePointer?: string | null;
 };
 
 /**

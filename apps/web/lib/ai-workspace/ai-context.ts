@@ -102,7 +102,8 @@ export const loadAiWorkspaceContext = cache(
 
     const [roles, workspaceCtx, workerRow] = await Promise.all([
       readHeldRoles(supabase, session.user.id),
-      getWorkspaceContext(identity),
+      // The ONE request-scoped resolution the chip renders.
+      getWorkspaceContext(),
       supabase.from("workers").select("id").eq("profile_id", session.user.id).maybeSingle(),
     ]);
 

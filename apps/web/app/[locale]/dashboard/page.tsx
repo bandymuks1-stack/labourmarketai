@@ -25,6 +25,12 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { baseIdentityForRole } from "@/lib/config/roles";
+import { readHeldRoles } from "@/lib/auth/held-roles";
+import {
+  actingRoleForWorkspace,
+  workspaceDisplayLabels,
+  workspaceRelationshipLabel,
+} from "@/lib/company/organization-switch";
 import { listMyEngagements } from "@/lib/invitations/network";
 import {
   loadCompanyStarterContext,
@@ -113,8 +119,8 @@ export default async function DashboardHomePage({
   let pointer: DurablePointerKind = null;
   if (session.profileRead === "failed") {
     const [stored, ws] = await Promise.all([
-      readSessionWorkspacePointer(),
-      getWorkspaceContext(null),
+      readSessionWorkspacePointer(user.id),
+      getWorkspaceContext(),
     ]);
     pointer = classifyDurablePointer(
       stored,
@@ -146,15 +152,29 @@ export default async function DashboardHomePage({
       </section>
     );
   }
-  const activeRole: Role = decision.role;
+  // WHICH WORKSPACE, AND AS WHOM (owner program 2026-09-23). The workspace is
+  // the ONE resolution the chip renders (request-cached; the layout already
+  // ran it). The acting identity FOLLOWS that workspace by the person's
+  // relationship to it (`actingRoleForWorkspace`, d3) over the roles they
+  // really hold — it used to be `profiles.active_role` alone, so an employee
+  // of someone else's company was greeted as that company's employer while
+  // every employer read failed closed. `active_role` stands only where no held
+  // role fits the workspace (the switch keeps it in step anyway).
+  const [rootWorkspace, held] = await Promise.all([
+    getWorkspaceContext(),
+    readHeldRoles(supabase, user.id),
+  ]);
+  const activeOrgWorkspace =
+    rootWorkspace.workspaces.find(
+      (w) => w.kind === "organization" && w.id === rootWorkspace.activeWorkspaceId,
+    ) ?? null;
+  const activeRole: Role =
+    actingRoleForWorkspace(activeOrgWorkspace, [...held.roles]) ?? decision.role;
 
-  // WHICH opening context the ONE conversation composes — from the identity
-  // the role decision produced and the workspace the chip resolves
-  // (request-cached; the layout already ran it). A worker in their personal
-  // space opens with ŠIANDIEN above the greeting; everyone else with the
-  // workspace composition.
+  // WHICH opening context the ONE conversation composes — from the acting
+  // identity and the workspace. A worker in their personal space opens with
+  // ŠIANDIEN above the greeting; everyone else with the workspace composition.
   const identity = baseIdentityForRole(activeRole) ?? "person";
-  const rootWorkspace = await getWorkspaceContext(identity);
   const workerToday =
     conversationOpeningContext({
       activeRole,
@@ -216,14 +236,20 @@ export default async function DashboardHomePage({
   // MY SPACE (owner contract 2026-09-04 §4C): the person's own pins for
   // THIS workspace, under RLS. Unavailable (migration unapplied / read
   // failed) → `null` → no row, no ask.
-  // The pins read and the three translation bundles below are independent
-  // of each other — one batch, not four consecutive awaits (measured: the
-  // same reads, issued together).
-  const [pinsRead, tChat, tWorkLog, tCountryNames] = await Promise.all([
-    listMyPins(identity === "company" ? workspace.organizationId : null),
+  // The READ scope is the active organization workspace — the SAME id the pin
+  // actions write to (`getActiveOrganizationContext`, a projection of the one
+  // workspace resolution). It used to be the employer-resolved org, which is
+  // null for an unbound or non-governed organization, so a pin was written to
+  // one scope and read back from another.
+  // The pins read and the translation bundles below are independent of each
+  // other — one batch, not consecutive awaits (measured: the same reads,
+  // issued together).
+  const [pinsRead, tChat, tWorkLog, tCountryNames, tRelationships] = await Promise.all([
+    listMyPins(activeOrgWorkspace?.id ?? null),
     getTranslations("conversation.chat"),
     getTranslations("conversation.worklog"),
     getTranslations("labourMarket"),
+    getTranslations("relationshipTypes"),
   ]);
   const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
   const labels = resolveChatLabels(tChat);
@@ -288,10 +314,53 @@ export default async function DashboardHomePage({
     identity === "company" && phraseKeys.length > 0
       ? tChat("fallbackComposed", { list: capabilityList })
       : null;
-  const workspaceContextLine =
-    identity === "company" && workspace.organizationName && phraseKeys.length > 0
-      ? tChat("workspaceIntro", { company: workspace.organizationName, list: capabilityList })
-      : null;
+  // ON WHOSE BEHALF — stated for EVERY organization workspace (owner program
+  // 2026-09-23). It used to be produced only for a company identity whose
+  // organization the employer chain resolved WITH a stored name, so in an
+  // unbound agency, in someone else's company, or in any unnamed organization
+  // nothing in the conversation said where the person was acting. The label is
+  // the chip's own (`workspaceDisplayLabels` over the same resolution) and the
+  // relationship is the resolved one, so the line and the chip cannot name two
+  // different contexts. A company workspace with capabilities keeps the richer
+  // sentence that also says what the product can do there.
+  const workspaceLabel = activeOrgWorkspace
+    ? (workspaceDisplayLabels(rootWorkspace.workspaces, {
+        personal: tChat("workspacePersonal"),
+        unnamedOrganization: {
+          company: tChat("workspaceUnnamedCompany"),
+          agency: tChat("workspaceUnnamedAgency"),
+          team: tChat("workspaceUnnamedTeam"),
+          other: tChat("workspaceUnnamed"),
+        },
+      }).get(activeOrgWorkspace.id) ?? null)
+    : null;
+  const relationshipLabel = activeOrgWorkspace
+    ? workspaceRelationshipLabel(activeOrgWorkspace, {
+        owner: tRelationships("owner"),
+        manager: tRelationships("manager"),
+        employee: tRelationships("employee"),
+        other: tChat("workspaceRelationshipMember"),
+      })
+    : null;
+  const workspaceContextLine = !workspaceLabel
+    ? null
+    : identity === "company" && workspace.organizationName && phraseKeys.length > 0
+      ? tChat("workspaceIntro", { company: workspaceLabel, list: capabilityList })
+      : tChat("workspaceActingAs", {
+          workspace: workspaceLabel,
+          relationship: relationshipLabel ?? tChat("workspaceRelationshipMember"),
+        });
+  // THE CONVERSATION'S IDENTITY IS THE ACTIVE WORKSPACE. A switch re-renders
+  // this page with new props, but React keeps a client component's state
+  // across `router.refresh` — the thread, the opening brief, the pins, the
+  // goal state and the result panel's loaders were all initialised once, so
+  // after a switch the old workspace's conversation stayed on screen until a
+  // browser reload (owner P0 case 1). Keying the ONE conversation on the
+  // workspace AND the acting identity remounts it with a fresh opening for
+  // the new context (decision d1). One-shot deep links (`?say=`, `?intent=`)
+  // were stripped from the URL on first consumption, so a remount never
+  // re-sends them.
+  const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
@@ -308,6 +377,8 @@ export default async function DashboardHomePage({
         metadata={{ surface: "dashboard_root" }}
       />
       <ConversationChat
+        key={conversationKey}
+        actingIdentity={identity}
         locale={locale as ActiveLocale}
         /* Why this home is the screen they got, when a link asked for a space
            they do not hold. Inside the chat rather than above it: the chat is
