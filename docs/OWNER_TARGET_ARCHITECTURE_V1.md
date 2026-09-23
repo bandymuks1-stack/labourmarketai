@@ -542,6 +542,7 @@ second document reads as the canonical architecture.
 | `docs/launch/*CHECKPOINT*.md` | Session state, true at their date | Continuity |
 | `docs/audits/**` | Point-in-time findings | Evidence |
 | `docs/product/*-contract-v1.md` | Feature-level contracts under §1 | Detail |
+| `docs/design/historical-timesheet-import-v3.md` + `docs/design/historical-timesheet-fixture-v3.md` | A PROPOSED feature design under §1.6 (historical timesheet import, owner rules 2026-09-23); adds no graph node; its migrations are owner-gated. Its v2 commercial expansion (invoices, payments, payroll) is SUPERSEDED by owner decision A | Historical import slices PR-2 to PR-7 |
 
 ### SUPERSEDED AS ARCHITECTURE — historical evidence only
 
