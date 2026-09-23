@@ -1359,6 +1359,42 @@ describe("rename-organization — a rename sentence reaches the rename door", ()
     expect(classifyIntent("confirm the name").intent).not.toBe("rename-organization");
   });
 
+  it("NEGATIVE CONTROLS — the PERSON's own name is not the organization's (adversarial review, #1848)", () => {
+    // Measured before the fix: every sentence here classified
+    // `rename-organization` at 9 through the bare "name to X" forms, because
+    // they accepted the first-person singular possessive. A person without an
+    // organization heard "you have no organization whose name you could
+    // change"; an owner got the org form prefilled with their own name.
+    for (const s of [
+      "change my name to Jonas",
+      "Change my name to Jonas",
+      "update my name to Jonas",
+      "set my name to Jonas",
+      "wijzig mijn naam naar Jan",
+      "verander mijn naam in Jan",
+      "ändere meinen Namen zu Hans",
+      "Ändere meinen Namen auf Hans",
+      // The person's name in the locales whose org-name noun is distinct.
+      "pakeisk mano vardą į Jonas",
+      "Смени моё имя на Иван",
+      "Zmień moje imię na Jan",
+    ]) {
+      expect(classifyIntent(s).intent, s).not.toBe("rename-organization");
+    }
+    // The organization's name, with the possessive bound to an ORG noun, is
+    // still the rename — the fix narrowed the bare form, not the capability.
+    for (const s of [
+      "change my company name to Nonstop",
+      "wijzig de naam van mijn bedrijf naar Nonstop",
+      "Ändere den Namen meiner Firma zu Nonstop",
+      "change our name to Nonstop",
+      "wijzig onze naam naar Nonstop",
+      "ändere unseren Namen zu Nonstop",
+    ]) {
+      expect(classifyIntent(s).intent, s).toBe("rename-organization");
+    }
+  });
+
   it("the neighbouring organization rules keep their sentences", () => {
     expect(classifyIntent("Sukurk įmonės profilį").intent).toBe("create-organization");
     expect(classifyIntent("Perjunk į įmonę Nonstop").intent).toBe("switch-context");

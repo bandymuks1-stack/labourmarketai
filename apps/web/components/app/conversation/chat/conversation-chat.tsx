@@ -2172,9 +2172,12 @@ export function ConversationChat({
               return;
             }
             case "no-company-profile":
-              assistant(t("renameNoCompanyProfile"), [
-                { id: "link:/dashboard/start/company?new=1", label: t("chipCreateCompanyProfile") },
-              ]);
+              // Said as the fact and its reason, with NO door. "Create a
+              // company profile" would make a SEPARATE organization — a
+              // duplicate of the one the person meant, while the owner decision
+              // for such organizations (a RED rename RPC, or archive/merge into
+              // the canonical one) is open. Never offered as the way forward.
+              assistant(t("renameNoCompanyProfile"));
               return;
             case "not-authorized":
               assistant(t("renameNotAllowed"));
@@ -5818,6 +5821,14 @@ export function ConversationChat({
         // is the wrong actor's answer (prod 2026-09-06: the proposer picked
         // `profile` for a company sentence). The person's own profile stays
         // one tap away through the explicit "Mano profilis" chip.
+        //
+        // NOT A FIX FOR THE DESYNCED STATE (map RC3, OPEN — owner decision:
+        // does the acting identity follow the workspace?). `identity` is
+        // `profiles.active_role`, while the workspace comes from the stored
+        // pointer. With active_role `worker` inside an agency workspace — the
+        // owner's own state on 2026-09-23 — `identity` is "person" and this
+        // gate does not fire. The rename does not depend on it (the server
+        // resolves the workspace); this gate does.
         profileSummary: () =>
           identity === "company" ? startCompanyNextStep() : startProfileSummary("profile"),
         // The COMPANY workspace asks about the company, never about the
@@ -6320,39 +6331,54 @@ export function ConversationChat({
       // pins that this file contains no runtime AI import at all.
       setTyping(true);
       proposeUnderstandingAction({ sentence: text, locale, identity })
-        .then((res) => {
-          setTyping(false);
-          switch (res.kind) {
-            case "intent":
-              trackResolution(res.intent, "llm");
-              dispatchIntent(res.intent, handlers, withTyping, fallback);
-              return;
-            case "reference":
-              // Resolve against the caller's own world — never an operation.
-              trackResolution("unknown", "llm");
-              handleReference(res.text);
-              return;
-            case "question":
-              trackResolution("unknown", "llm");
-              handleQuestion(res.text, res.reference);
-              return;
-            case "clarification":
-              // A correction or a fragment. Ask; do not guess an operation.
-              trackResolution("unknown", "llm");
-              askToClarify(t("understandClarify"));
-              return;
-            default: {
-              trackResolution("unknown", "deterministic");
-              const stateKey = res.kind === "unsupported" ? aiStateMessageKey(res.reason) : null;
-              if (stateKey) aiState(stateKey);
-              else dispatchIntent("unknown", handlers, withTyping, fallback);
+        .then(
+          (res) => {
+            setTyping(false);
+            switch (res.kind) {
+              case "intent":
+                trackResolution(res.intent, "llm");
+                dispatchIntent(res.intent, handlers, withTyping, fallback);
+                return;
+              case "reference":
+                // Resolve against the caller's own world — never an operation.
+                trackResolution("unknown", "llm");
+                handleReference(res.text);
+                return;
+              case "question":
+                trackResolution("unknown", "llm");
+                handleQuestion(res.text, res.reference);
+                return;
+              case "clarification":
+                // A correction or a fragment. Ask; do not guess an operation.
+                trackResolution("unknown", "llm");
+                askToClarify(t("understandClarify"));
+                return;
+              default: {
+                trackResolution("unknown", "deterministic");
+                const stateKey = res.kind === "unsupported" ? aiStateMessageKey(res.reason) : null;
+                if (stateKey) aiState(stateKey);
+                else dispatchIntent("unknown", handlers, withTyping, fallback);
+              }
             }
-          }
-        })
+          },
+          // THE PROPOSER ITSELF REJECTED (the server action threw, the network
+          // dropped): the model half is unavailable — OUR fault, said as the
+          // assistant being unavailable, never as "I did not understand you".
+          // This is the rejection handler of `.then`, so it sees ONLY the
+          // proposer's own failure (adversarial review of #1848).
+          () => {
+            setTyping(false);
+            trackResolution("unknown", "deterministic");
+            aiState("aiTemporarilyUnavailable");
+          },
+        )
+        // A HANDLER threw while answering a result the proposer DID return.
+        // That is not an AI failure and is not said as one: the model answered,
+        // and the fault is in answering it. The resolution was already tracked
+        // by the branch that threw, so it is not counted twice.
         .catch(() => {
           setTyping(false);
-          trackResolution("unknown", "deterministic");
-          aiState("aiTemporarilyUnavailable");
+          askToClarify(t("answerFailed"));
         });
     },
     [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos,startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],

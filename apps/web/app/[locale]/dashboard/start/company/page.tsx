@@ -356,8 +356,11 @@ export default async function CompanyStartPage({
       {requestedOrgState === "no-company-profile" ? (
         // The organization the chip named has no company profile (a legacy
         // agency-backed organization): there is nothing here that can carry
-        // its name. Said as that, with the one canonical action — never a
-        // form that would quietly edit another organization.
+        // its name. Said as that, and why — never a form that would quietly
+        // edit another organization, and no "create a company profile" door
+        // either: that makes a SEPARATE organization, a duplicate of this
+        // one, while the owner decision for it (a RED rename RPC, or
+        // archive/merge into the canonical organization) is open.
         <section
           className="card-border flex flex-col gap-3 p-5"
           data-testid="company-start-org-no-company-profile"
@@ -366,13 +369,6 @@ export default async function CompanyStartPage({
             {t("orgNoCompanyProfileHeading")}
           </h2>
           <p className="text-sm text-text-secondary">{t("orgNoCompanyProfileBody")}</p>
-          <Link
-            href={"/dashboard/start/company?new=1" as "/dashboard"}
-            className="self-start text-sm text-brand-blue hover:underline"
-            data-testid="company-start-org-create-profile"
-          >
-            {t("orgNoCompanyProfileCta")} →
-          </Link>
         </section>
       ) : null}
 

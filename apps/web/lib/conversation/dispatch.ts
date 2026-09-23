@@ -30,6 +30,7 @@ import {
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { resolveRenameTarget } from "@/lib/company/organization-rename";
 import { interestStateFingerprint } from "@/lib/opportunities/interest";
 import { invitationStateFingerprint } from "@/lib/invitations/attention";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
@@ -193,16 +194,33 @@ async function stateFingerprint(
   }
   if (actionId === "company.rename-organization") {
     /**
-     * An IDENTITY write is bound to the organization it was confirmed FOR
-     * (owner program 2026-09-23). The rename's input is the name only — the
-     * organization is resolved server-side from the active workspace — so a
-     * token minted while organization A was active must not rename B after a
-     * switch in another tab. The active workspace id is the fingerprint: any
-     * switch between the review and the save answers `stale_confirmation`,
-     * and the person confirms again, for the organization now in view.
+     * An IDENTITY write is bound to the organization it was confirmed FOR, and
+     * to the name it had then (owner program 2026-09-23; adversarial review of
+     * #1848). The rename's input is the name only — the organization is
+     * resolved server-side — so the fingerprint is taken from THE SAME
+     * resolver the write uses (`resolveRenameTarget`: the employer context
+     * with the caller's real identity), never from a second workspace read
+     * that could resolve differently when no pointer is stored.
+     *
+     *  · organization id — a token minted while A was the target cannot rename
+     *    B after a switch in another tab (`stale_confirmation`);
+     *  · the CURRENT stored name — the moment a rename succeeds the name
+     *    changes, so re-submitting the same token re-derives a different
+     *    fingerprint and is refused one layer above the writer. That makes the
+     *    confirmation SINGLE-USE (as `engagement.end` is), and a replay within
+     *    the TTL can never revert a concurrent rename by someone else.
+     *
+     * The name is digested, not embedded: the fingerprint travels inside the
+     * token, and a 200-character name has no business there. A refused target
+     * fingerprints as its refusal — the executor refuses it again anyway.
      */
-    const ws = await getWorkspaceContext("company");
-    return `workspace:${ws.activeWorkspaceId}`;
+    const target = await resolveRenameTarget();
+    if (target.kind === "refused") return `rename:refused:${target.reason}`;
+    const nameDigest =
+      target.currentName === null
+        ? "unnamed"
+        : createHash("sha256").update(`org-name:v1:${target.currentName}`).digest("hex").slice(0, 32);
+    return `rename:${target.organizationId}:${nameDigest}`;
   }
   return "n/a";
 }

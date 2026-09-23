@@ -291,10 +291,25 @@ describe("the model half's own state is never rendered as 'I did not understand'
     const unsupported = proposer.slice(proposer.indexOf("default:"), proposer.indexOf(".catch("));
     expect(unsupported).toMatch(/aiStateMessageKey\(res\.reason\)/);
     expect(unsupported).toMatch(/if \(stateKey\) aiState\(stateKey\)/);
-    // A thrown call is OUR fault — said as the assistant being unavailable.
-    const caught = proposer.slice(proposer.indexOf(".catch("), proposer.indexOf(".catch(") + 300);
-    expect(caught).toContain('aiState("aiTemporarilyUnavailable")');
-    expect(caught).not.toContain("dispatchIntent(\"unknown\"");
+  });
+
+  it("the proposer's OWN rejection is said as the AI state; a handler's throw is not blamed on the AI", () => {
+    expect(proposerFailureViolations(CHAT)).toEqual([]);
+  });
+
+  it("NEGATIVE CONTROL — one catch for both, or a not-understood rejection, is caught (adversarial review, #1848)", () => {
+    // The shape #1848 first shipped: `.then(ok).catch(() => aiState(...))`,
+    // which answered a HANDLER's throw with "the assistant is unavailable".
+    const blamesAi = CHAT.replace('askToClarify(t("answerFailed"))', 'aiState("aiTemporarilyUnavailable")');
+    expect(blamesAi).not.toBe(CHAT);
+    expect(proposerFailureViolations(blamesAi).length).toBeGreaterThan(0);
+    // …and a proposer failure said as "not understood" again.
+    const notUnderstood = CHAT.replace(
+      /\(\) => \{\s*setTyping\(false\);\s*trackResolution\("unknown", "deterministic"\);\s*aiState\("aiTemporarilyUnavailable"\);/,
+      '() => {\n            setTyping(false);\n            trackResolution("unknown", "deterministic");\n            dispatchIntent("unknown", handlers, withTyping, fallback);',
+    );
+    expect(notUnderstood).not.toBe(CHAT);
+    expect(proposerFailureViolations(notUnderstood).length).toBeGreaterThan(0);
   });
 
   it("the server action names the state instead of collapsing it", () => {
@@ -307,3 +322,29 @@ describe("the model half's own state is never rendered as 'I did not understand'
     }
   });
 });
+
+/**
+ * The proposer's two failure paths, kept apart: the REJECTION handler of
+ * `.then` (the server action itself failed — OUR fault, said as the assistant
+ * being unavailable) and the trailing `.catch` (a handler threw while
+ * answering a result the model DID return — not an AI failure).
+ */
+function proposerFailureViolations(src: string): string[] {
+  const code = codeOf(src);
+  const proposer = code.slice(code.indexOf("proposeUnderstandingAction("));
+  const out: string[] = [];
+  if (
+    !/\(\) => \{\s*setTyping\(false\);\s*trackResolution\("unknown", "deterministic"\);\s*aiState\("aiTemporarilyUnavailable"\);\s*\},?\s*\)\s*\.catch\(/.test(
+      proposer,
+    )
+  ) {
+    out.push("the proposer's rejection is not its own `.then` handler saying aiTemporarilyUnavailable");
+  }
+  const at = proposer.indexOf(".catch(");
+  const caught = at >= 0 ? proposer.slice(at, at + 300) : "";
+  if (!caught) out.push("no trailing catch for a handler's throw");
+  if (caught.includes("aiTemporarilyUnavailable")) out.push("a handler's throw is blamed on the AI");
+  if (caught.includes('dispatchIntent("unknown"')) out.push("a handler's throw is said as not understood");
+  if (!caught.includes('t("answerFailed")')) out.push("a handler's throw is not said as a fault in answering");
+  return out;
+}

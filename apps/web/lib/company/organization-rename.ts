@@ -190,8 +190,10 @@ export async function resolveRenameTarget(): Promise<RenameTarget> {
  * workspace does. It is the organisation the confirm form was opened for, and
  * it can only REFUSE: a person who opened the form in organisation A and then
  * switched to B in another tab would otherwise rename B with a name typed for
- * A. (The dispatcher's token fingerprint covers only the instant between
- * prepare and execute; this covers the whole time the form was open.)
+ * A. (The dispatcher's token fingerprint — this organization + its current
+ * name, from `resolveRenameTarget` — covers the instant between prepare and
+ * execute and makes the token single-use; this covers the whole time the
+ * form was open.)
  */
 export async function renameActiveOrganization(
   rawName: string,

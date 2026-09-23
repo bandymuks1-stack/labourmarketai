@@ -100,6 +100,13 @@ describe("company executors delegate only — canonical modules, no DB access (P
       // does (M-P0-3). Reads only; the write stays in the canonical action.
       "@/lib/company/actions",
       "@/lib/company/employer-company-context",
+      // Owner program 2026-09-23 (CASE 3/4/12) — added CONSCIOUSLY: the ONE
+      // organization-rename domain core. It composes the canonical name writer
+      // (`saveCompanySetup` → `save_company_setup_v3`, the settings form's own
+      // write) behind the ONE employer resolver and `manage-company-profile`,
+      // and has NO direct table write of its own — pinned below and in
+      // lib/guards/rename-organization-by-sentence.test.ts.
+      "@/lib/company/organization-rename",
       "@/lib/conversation/company-schemas",
       "@/lib/conversation/executor-contract",
       // Owner contract 2026-09-04 §15 — the education institution's commands
@@ -147,6 +154,16 @@ describe("company executors delegate only — canonical modules, no DB access (P
     expect(src).not.toMatch(/\.(insert|upsert)\s*\(/);
     expect(src).not.toMatch(/\.rpc\s*\(/);
     expect(src).not.toMatch(/\.from\([^)]*\)[^;]{0,300}\.(update|delete)\s*\(/);
+  });
+
+  it("the organization-rename core it reaches has no DB access of its own either", () => {
+    // The allowlist entry above is only honest while the rename core stays a
+    // COMPOSITION of the canonical writer. A supabase import or a direct
+    // write/rpc there would be a second name writer reached from the chat.
+    const core = read("lib/company/organization-rename.ts");
+    expect(core).toMatch(/saveCompanySetup\(/);
+    expect(core).not.toMatch(/from\s+["']@\/lib\/supabase/);
+    expect(core).not.toMatch(/\.(insert|upsert|update|delete|rpc)\s*\(/);
   });
 
   it("marks itself server-only", () => {

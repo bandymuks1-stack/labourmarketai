@@ -1016,7 +1016,14 @@ const RULES: IntentRule[] = [
       p(`${RENAME_ORG_EN}[^?]{0,60}\\brenam`, 9),
       p(`\\b(change|update|set|edit|fix|correct)\\b[^?]{0,30}${RENAME_ORG_EN}(?:['’]s)?\\s+name\\b`, 9),
       p(`\\b(change|update|set|edit|fix|correct)\\b[^?]{0,20}\\bname\\s+of\\s+[^?]{0,20}${RENAME_ORG_EN}`, 9),
-      p("\\b(change|update|set)\\s+(the\\s+|our\\s+|my\\s+|its\\s+)?name\\s+to\\b", 9),
+      // The bare "name to X" forms carry NO first-person singular possessive
+      // (en `my`, nl `mijn`, de `meinen`): "change my name to Jonas" is the
+      // PERSON's name, and routing it here answered a person with "you have no
+      // organization" or prefilled the org form with their own name. `name` /
+      // `naam` / `Namen` is ambiguous between a person and an organisation;
+      // lt `pavadinimas`, ru `название`, pl `nazwa` name a THING (a person's
+      // is `vardas` / `имя` / `imię`), so those forms keep their possessives.
+      p("\\b(change|update|set)\\s+(the\\s+|our\\s+|its\\s+)?name\\s+to\\b", 9),
       // ru — "Переименуй агентство в X", "Смени название компании на X"
       p(`переимен[^?]{0,40}${RENAME_ORG_RU}`, 9),
       p(`${RENAME_ORG_RU}[^?]{0,60}переимен`, 9),
@@ -1029,7 +1036,8 @@ const RULES: IntentRule[] = [
       p(`${RENAME_ORG_NL}[^?]{0,60}hernoem`, 9),
       p(`(wijzig|verander|aanpass|\\bpas\\b)[^?]{0,20}${RENAME_NAMED_NL}`, 9),
       p(`${RENAME_NAMED_NL}[^?]{0,30}(wijzig|verander|aanpass|aan\\s+te\\s+passen)`, 9),
-      p("(wijzig|verander)[^\\s]*\\s+(de\\s+|onze\\s+|mijn\\s+)?naam\\s+(naar|in)\\b", 9),
+      // No `mijn`: "wijzig mijn naam naar Jan" is the person's name (see en).
+      p("(wijzig|verander)[^\\s]*\\s+(de\\s+|onze\\s+)?naam\\s+(naar|in)\\b", 9),
       // de — "Firma umbenennen", "Benenne meine Firma in X um",
       // "Ändere den Firmennamen", "Namen der Firma ändern"
       p(`umbenenn[^?]{0,40}${RENAME_ORG_DE}`, 9),
@@ -1037,7 +1045,8 @@ const RULES: IntentRule[] = [
       p(`\\bbenenne[^?]{0,40}${RENAME_ORG_DE}[^?]{0,60}\\bum\\b`, 9),
       p(`(ändere|ändern|aendere|aendern|aktualisier|korrigier)[^?]{0,30}${RENAME_NAMED_DE}`, 9),
       p(`${RENAME_NAMED_DE}[^?]{0,30}(ändern|aendern|aktualisieren|korrigieren)`, 9),
-      p("(ändere|aendere)\\s+(den\\s+|unseren\\s+|meinen\\s+)?namen\\s+(zu|auf|in)\\b", 9),
+      // No `meinen`: "ändere meinen Namen zu Hans" is the person's name (see en).
+      p("(ändere|aendere)\\s+(den\\s+|unseren\\s+)?namen\\s+(zu|auf|in)\\b", 9),
       // pl — "Zmień nazwę firmy na X", "przemianuj agencję na X"
       p(`zmie[nń][^?]{0,12}nazw[^?]{0,30}${RENAME_ORG_PL}`, 9),
       p(`${RENAME_ORG_PL}[^?]{0,30}zmie[nń][^?]{0,12}nazw`, 9),
