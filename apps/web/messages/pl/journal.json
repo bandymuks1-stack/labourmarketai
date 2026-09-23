@@ -771,6 +771,8 @@
       "rejected": "{hours} godz. odrzuconych w ewidencji czasu pracy — nieliczone nigdzie",
       "rule": "Zapis godzin mówi kiedy i jak długo, a nie co zostało zrobione — dlatego te godziny nie trafiają do żadnej umiejętności ani rodzaju pracy. Robi to wyłącznie wpis w dzienniku.",
       "periodRecord": "{hours} godz. w okresie {span} — jedna liczba dla całego okresu, nierozłożona na dni",
+      "periodRecordHuman": "{hours} godz., {span} — źródło podaje tylko sumę; miesiące wybrała osoba podczas importu dokumentu. Nierozłożone na miesiące ani dni",
+      "periodRecordDerived": "{hours} godz., {span} — źródło podaje tylko sumę; miesiące zostały wyprowadzone, a nie podane. Nierozłożone na miesiące ani dni",
       "periodMore": "{count, plural, one {# kolejny zapis okresowy} few {# kolejne zapisy okresowe} many {# kolejnych zapisów okresowych} other {# kolejnego zapisu okresowego}}"
     },
     "growthKindsTitle": "Co pokazują Twoje wpisy",

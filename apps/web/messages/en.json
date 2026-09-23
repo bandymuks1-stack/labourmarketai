@@ -16288,7 +16288,10 @@
       "attestAllHint": "The organization stands behind every not-yet-attested record from this source ({count}). One attestation event per record, with role and note; hours, source facts and records are not changed. This is not independent verification.",
       "periodDerivedHuman": "Period set at import (human choice) — the source stated no dates",
       "periodDerived": "Period derived — the source stated no dates",
-      "sourceStatement": "Source statement (fact)"
+      "sourceStatement": "Source statement (fact)",
+      "noMonthlyFigure": "No monthly figure — the source states only the total",
+      "sourceStates": "Source states: “{words}”",
+      "sourceDiffers": "This span differs from what the source's own words state — both are kept"
     },
     "withdraw": {
       "title": "Undo this import",
@@ -16432,7 +16435,8 @@
         "allocation_unknown": "{count} rows — several places in a day, split not stated",
         "allocation_inconsistent": "{count} rows — the hours in the text do not add up to the day",
         "place_from_text": "{count} rows — place read from the text: “{label}”",
-        "time_semantics": "{count} rows — what does this hours figure mean?"
+        "time_semantics": "{count} rows — what does this hours figure mean?",
+        "time_conflicts_source": "{count} rows — the period you set differs from the source's own words"
       },
       "issueWhy": {
         "impossible_hours": "The source figure is kept as it is (e.g. a month's total typed on one day). After \"keep as stated\" the row is recorded as a source fact and the day's duration stays unknown — it is summed nowhere.",
@@ -16445,7 +16449,8 @@
         "allocation_unknown": "The day's total is kept exactly; hours are not divided between places by guess.",
         "allocation_inconsistent": "The parts written in the text do not make the day's total. Both figures are kept.",
         "place_from_text": "The place cell is empty; the site was taken from the first words of the text. If it is a misspelling of another place, choose \"same place as\" — one object is created, not two.",
-        "time_semantics": "A day cannot hold this many hours. By the source's own words it is a period aggregate (e.g. work from home over months). The figure stays as it is; you say what it is — and the period only if you know it. Such a total never becomes one day's duration."
+        "time_semantics": "A day cannot hold this many hours. By the source's own words it is a period aggregate (e.g. work from home over months). The figure stays as it is; you say what it is — and the period only if you know it. Such a total never becomes one day's duration.",
+        "time_conflicts_source": "Your decision is kept — you know the work. The source's own words state a different duration or rate, so no monthly figure is made from the total, and the difference stays visible beside the record."
       },
       "keepAsStated": "Keep as stated in the source",
       "keepAsStatedHint": "The source figure stays unchanged and is recorded as a source fact. It does NOT become that day's working duration — the day's duration stays unknown, so the calendar, work in numbers, pace and capacity never sum it.",
@@ -16519,6 +16524,7 @@
       "timeRemoteUnknown": "Not stated",
       "timePeriod": "Period (only if you know it)",
       "timePeriodHint": "Leave empty if you do not know the period — the system invents no dates. With a period the total is recorded as a period record; without one, as a source fact with unknown duration.",
+      "timePeriodBoth": "Months: the first and the last — both, or leave both empty. A start alone is not a period.",
       "from": "From",
       "to": "To",
       "timeSave": "Apply to these rows",

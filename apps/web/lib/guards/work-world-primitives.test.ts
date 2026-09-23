@@ -1,8 +1,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { evidenceVariant, type EvidenceStanding } from "@/components/app/work-world/primitives";
+import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
+import { evidenceVariant, PeriodBand, type EvidenceStanding } from "@/components/app/work-world/primitives";
 
 /**
  * Guard: the work-world primitives carry the accepted "Living Work World"
@@ -64,21 +67,102 @@ describe("Guard: the 800 h period reads as a temporal shape, never a lump", () =
 
   it("PeriodBand shows the total AND per-month segments — no single lump", () => {
     const src = read("components/app/work-world/primitives.tsx");
-    // one total marker + a per-month segment carrying its derived hours
+    // one total marker + a per-month segment carrying its derived hours —
+    // ONLY when the caller hands a figure (owner rule 2026-09-23)
     expect(src).toContain('data-testid="ww-period-total"');
     expect(src).toContain('data-testid="ww-period-band"');
     expect(src).toMatch(/months\.map\(/);
-    expect(src).toMatch(/data-hours=\{m\.hours\.toFixed\(2\)\}/);
+    expect(src).toMatch(/data-hours=\{m\.hours === null \? undefined : m\.hours\.toFixed\(2\)\}/);
     // the ribbon is cyan EVIDENCE, and it never claims verification
     expect(src).toMatch(/text-brand-cyan/);
     expect(src).not.toMatch(/period[\s\S]{0,80}trust-accent/);
   });
 
-  it("the period ribbon derives from the canonical projection — no manufactured days", () => {
+  it("the period ribbon is read through the ONE period reading — no manufactured days", () => {
     const share = read("components/app/period-monthly-share.tsx");
-    expect(share).toContain("projectPeriodAggregateByMonth");
+    expect(share).toContain("readPeriodEvidence");
+    // the split exists ONLY behind the source-period branch
+    expect(share).toMatch(/if \(r\.kind === "source_period"\) \{/);
+    expect(share).not.toContain("projectPeriodAggregateByMonth");
     // it must not fabricate day-level rows to fill the ribbon
     expect(share).not.toMatch(/new Date\([^)]*\)\.getDate|per[- ]?day|dailyRows/i);
+  });
+});
+
+/**
+ * Rendered proof (owner rule 2026-09-23 — never manufacture precision): an
+ * INTERPRETED period renders no monthly figure anywhere in its markup; a
+ * SOURCE period with no stated rate still renders its derived share (the
+ * negative control that keeps the first assertion from passing vacuously).
+ */
+describe("Guard: an interpreted period renders no monthly figure", () => {
+  const labels = {
+    monthlyShare: "MONTHLY_SHARE",
+    noMonthlyFigure: "NO_MONTHLY_FIGURE",
+    provenance: { human_choice: "SET_BY_A_PERSON", derived: "DERIVED_SPAN" },
+    sourceStates: (w: string) => `STATES[${w}]`,
+    sourceDiffers: "DIFFERS",
+  };
+  const humanChoice = {
+    timeSemantics: {
+      value: "period_aggregate", method: "human_choice", confidence: 1, sourceHours: 800, note: "month",
+      remote: true, periodStart: "2025-06-01", periodEnd: "2025-11-30",
+    },
+  };
+  const html = (props: Record<string, unknown>) =>
+    renderToStaticMarkup(
+      createElement(PeriodMonthlyShare, {
+        hours: 800,
+        periodStart: "2025-06-01",
+        periodEnd: "2025-11-30",
+        labels,
+        ...props,
+      } as Parameters<typeof PeriodMonthlyShare>[0]),
+    );
+
+  it("a span a person chose: months drawn, NO figure on any month, the source's own words and the disagreement shown", () => {
+    const out = html({
+      derived: humanChoice,
+      factFields: ["personLabel", "workDate", "hours", "workText"],
+      sourceText: "Human research and director for at least 16 month calculating each month only 50 hours",
+    });
+    expect(out).toContain('data-kind="interpreted_period"');
+    expect(out).toContain('data-figures="none"');
+    expect(out).not.toMatch(/data-hours=/);
+    expect(out).not.toMatch(/133\.3[34]/);
+    expect(out).not.toContain("MONTHLY_SHARE");
+    expect(out).toContain("800 h");
+    expect(out).not.toContain("800.00");
+    expect(out).toContain("SET_BY_A_PERSON");
+    expect(out).toContain("STATES[at least 16 month]");
+    expect(out).toContain("STATES[each month only 50 hours]");
+    expect(out).toContain("DIFFERS");
+    expect(out.match(/data-month="2025-\d\d"/g)?.length).toBe(6);
+  });
+
+  it("NEGATIVE CONTROL — a SOURCE period with no stated rate keeps its derived monthly share", () => {
+    const out = html({ derived: {}, factFields: ["periodStart", "periodEnd", "hours"], sourceText: "Tiling on site" });
+    expect(out).toContain('data-kind="source_period"');
+    expect(out).toContain('data-figures="monthly"');
+    expect(out).toMatch(/data-hours="133\.34"/);
+    expect(out).toContain("MONTHLY_SHARE");
+    expect(out).not.toContain("DIFFERS");
+  });
+
+  it("the primitive itself: null month figures draw segments with no number", () => {
+    const band = renderToStaticMarkup(
+      createElement(PeriodBand, {
+        totalLabel: "800 h",
+        derivedLabel: "x",
+        months: [
+          { month: "2025-06", hours: null },
+          { month: "2025-07", hours: null },
+        ],
+      }),
+    );
+    expect(band).toContain('data-figures="none"');
+    expect(band).not.toMatch(/data-hours=/);
+    expect(band).toContain("border-dashed");
   });
 });
 

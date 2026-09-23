@@ -35,10 +35,15 @@ import { HOURS_EXCEED_DAY_METHOD } from "./parse-tabular";
 import {
   classifyTimeSemantics,
   countsAsDailyHours,
+  extractSourceTimeCues,
+  periodFromHumanInput,
+  sourceTimeConflicts,
   timeSemanticsOpen,
+  withSourceCues,
   type TimeSemantics,
   type TimeSemanticsKind,
 } from "./time-semantics";
+import { committedFactFields } from "./record-fact-fields";
 import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
@@ -967,7 +972,7 @@ export async function buildPreview(
     // words, so the production session needs no re-upload. A human choice
     // already recorded always wins.
     const rowHours = s.hours === null || s.hours === undefined ? null : Number(s.hours);
-    const timeSemantics: TimeSemantics | null =
+    const classified: TimeSemantics | null =
       readTimeSemantics(priorDerived) ??
       classifyTimeSemantics({
         hours: rowHours,
@@ -975,6 +980,10 @@ export async function buildPreview(
         workText: (s.activity_text as string | null) ?? null,
         contextLabel,
       });
+    // A classification staged before 2026-09-23 carries no source cues; they
+    // are read now from the same words, so the human decides with "at least
+    // 16 month" / "each month only 50 hours" in front of them.
+    const timeSemantics = withSourceCues(classified, (s.activity_text as string | null) ?? contextLabel);
     const timeOpen = timeSemanticsOpen(timeSemantics);
 
     // The fingerprint is recomputed with whatever is now resolved, so a row
@@ -1663,12 +1672,12 @@ export interface TimeSemanticsDecision {
   readonly kind: TimeSemanticsKind;
   /** Remote / work-from-home, as the human states it; null = not stated. */
   readonly remote?: boolean | null;
-  /** The period the aggregate covers, ONLY when the human knows it. */
+  /** The period the aggregate covers, ONLY when the human knows it — two
+   *  months (`YYYY-MM`, recorded at month precision) or two days
+   *  (`YYYY-MM-DD`). A start alone is refused. */
   readonly periodStart?: string | null;
   readonly periodEnd?: string | null;
 }
-
-const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * A human says what a figure MEANS (owner correction 2026-09-16: 800 h on a
@@ -1678,6 +1687,17 @@ const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
  * with the period the human knows) / unknown. Writes STAGING only; the
  * commit then represents the row accordingly and NEVER as a day's duration
  * unless the human said "daily".
+ *
+ * DECISION-TIME HONESTY (owner rule 2026-09-23). The period is recorded at
+ * the precision the human gave it (`periodPrecision`), and it is set against
+ * what the source's own words state — a duration ("at least 16 month") and
+ * a rate ("each month only 50 hours"). A span shorter than a stated minimum,
+ * or a total whose per-month figure differs from a stated rate, is recorded
+ * as `conflictsWithSource` beside the decision: a WARNING, never a refusal —
+ * the human knows the work. A START ALONE is refused: it used to be stored
+ * as a one-day period (`periodEnd ?? periodStart`), a precision nobody
+ * stated. Both writers — the form action and the MCP capability — reach
+ * this one rule.
  */
 export async function resolveTimeSemantics(
   caller: DomainCaller,
@@ -1688,23 +1708,19 @@ export async function resolveTimeSemantics(
     readonly allOpen?: boolean;
     readonly decision: TimeSemanticsDecision;
   },
-): Promise<EvidenceImportResult<{ readonly updated: number }>> {
+): Promise<EvidenceImportResult<{ readonly updated: number; readonly conflictsWithSource: number }>> {
   const session = await loadSession(caller, input.sessionId);
   if (!session.ok) return session.failure;
   const d = input.decision;
-  const periodStart = d.periodStart?.trim() || null;
-  const periodEnd = d.periodEnd?.trim() || null;
-  if ((periodStart && !ISO_DAY.test(periodStart)) || (periodEnd && !ISO_DAY.test(periodEnd)))
-    return { kind: "invalid", problems: ["period must be YYYY-MM-DD"] };
-  if (periodStart && periodEnd && periodEnd < periodStart)
-    return { kind: "invalid", problems: ["periodEnd is before periodStart"] };
-  if (periodEnd && !periodStart) return { kind: "invalid", problems: ["periodStart required with periodEnd"] };
+  const human = periodFromHumanInput(d.periodStart, d.periodEnd);
+  if (!human.ok) return { kind: "invalid", problems: [human.problem] };
+  const { periodStart, periodEnd, precision: periodPrecision } = human;
   if (d.kind !== "period_aggregate" && (periodStart || periodEnd))
     return { kind: "invalid", problems: ["a period belongs to a period aggregate"] };
 
   let q = db(caller.supabase)
     .from("evidence_import_rows")
-    .select("id, hours, derived")
+    .select("id, hours, derived, activity_text, context_label")
     .eq("session_id", input.sessionId)
     .neq("status", "committed")
     .limit(MAX_ROWS_PER_SESSION);
@@ -1715,11 +1731,24 @@ export async function resolveTimeSemantics(
   if (rowsRes.error) return classify(rowsRes.error);
 
   let updated = 0;
+  let conflictsWithSource = 0;
   const at = new Date().toISOString();
   for (const s of (rowsRes.data ?? []) as Record<string, unknown>[]) {
     const derived = (s.derived as Record<string, unknown> | null) ?? {};
     const prior = readTimeSemantics(derived);
     const sourceHours = prior?.sourceHours ?? (s.hours === null || s.hours === undefined ? 0 : Number(s.hours));
+    // What the source's words state — recorded at classification, or read
+    // now from the same words for a row classified before the cues existed.
+    const sourceCues =
+      prior && prior.sourceCues !== undefined
+        ? prior.sourceCues
+        : (extractSourceTimeCues((s.activity_text as string | null) ?? null) ??
+          extractSourceTimeCues((s.context_label as string | null) ?? null));
+    const conflicts =
+      d.kind === "period_aggregate"
+        ? sourceTimeConflicts({ hours: sourceHours, periodStart, periodEnd, cues: sourceCues })
+        : [];
+    if (conflicts.length > 0) conflictsWithSource += 1;
     const next: TimeSemantics = {
       value: d.kind,
       method: HUMAN_CHOICE,
@@ -1728,7 +1757,12 @@ export async function resolveTimeSemantics(
       note: prior?.note ?? null,
       remote: d.remote ?? prior?.remote ?? null,
       periodStart,
-      periodEnd: periodEnd ?? periodStart,
+      // Both bounds, or neither: a start alone never becomes a one-day period.
+      periodEnd,
+      periodPrecision,
+      sourceCues: sourceCues ?? null,
+      conflictsWithSource: conflicts.length > 0,
+      conflicts,
     };
     const upd = await db(caller.supabase)
       .from("evidence_import_rows")
@@ -1740,7 +1774,7 @@ export async function resolveTimeSemantics(
     if (upd.error) return classify(upd.error);
     updated += 1;
   }
-  return { kind: "ok", updated };
+  return { kind: "ok", updated, conflictsWithSource };
 }
 
 // ── commit ──────────────────────────────────────────────────────────────────
@@ -2029,11 +2063,13 @@ export async function commitImport(
     // semantics are likewise a dated fact with no duration. The source
     // figure is always verbatim in `source_fact` and in
     // `derived.timeSemantics.sourceHours`; nothing operational can sum it
-    // as a day (SEP-1, SEP-7).
+    // as a day (SEP-1, SEP-7). A period needs BOTH bounds (owner rule
+    // 2026-09-23): a start alone is not a period, and is never written as a
+    // one-day span — such a row stays a dated fact with unknown duration.
     const derived = { ...((r.derived as Record<string, unknown> | null) ?? {}) };
     const ts = readTimeSemantics(derived);
     const daily = countsAsDailyHours(ts);
-    const period = ts && ts.value === "period_aggregate" && ts.periodStart ? ts : null;
+    const period = ts && ts.value === "period_aggregate" && ts.periodStart && ts.periodEnd ? ts : null;
     const legacyExceeds =
       !ts && (derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD;
     const row = {
@@ -2047,7 +2083,7 @@ export async function commitImport(
       work_object_id: (r.work_object_id as string | null) ?? null,
       activity_date: period ? null : ((r.activity_date as string | null) ?? null),
       period_start: period ? period.periodStart : ((r.period_start as string | null) ?? null),
-      period_end: period ? (period.periodEnd ?? period.periodStart) : ((r.period_end as string | null) ?? null),
+      period_end: period ? period.periodEnd : ((r.period_end as string | null) ?? null),
       hours: period ? period.sourceHours : daily && !legacyExceeds ? (r.hours ?? null) : null,
       original_text: (r.activity_text as string | null) ?? "",
       original_language: session.sourceLanguage,
@@ -2459,7 +2495,7 @@ export async function listEvidenceRecords(
   let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, derived, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
     )
     .order("activity_date", { ascending: false })
     .limit(Math.min(Math.max(filter.limit ?? 200, 1), 1000));
@@ -2517,7 +2553,19 @@ export async function listEvidenceRecords(
       sourceFilename: (r.source_filename as string | null) ?? null,
       importedAt: (r.imported_at as string) ?? "",
       importedBy: (r.imported_by_profile_id as string | null) ?? null,
-      factFields: [],
+      // FACT vs DERIVED from the record's own source line and derivations
+      // (was a hard-coded []). The source line itself is not handed out —
+      // only which canonical fields it states.
+      factFields: committedFactFields({
+        sourceFact: (r.source_fact as Record<string, unknown> | null) ?? null,
+        activityDate: (r.activity_date as string | null) ?? null,
+        periodStart: (r.period_start as string | null) ?? null,
+        periodEnd: (r.period_end as string | null) ?? null,
+        hours: r.hours === null || r.hours === undefined ? null : Number(r.hours),
+        text: (r.original_text as string) ?? "",
+        contextLabel: (r.context_label as string | null) ?? null,
+        derived: (r.derived as Record<string, unknown> | null) ?? {},
+      }),
       derived: (r.derived as Record<string, unknown> | null) ?? {},
       state: standing.state,
       withdrawn: standing.withdrawn,

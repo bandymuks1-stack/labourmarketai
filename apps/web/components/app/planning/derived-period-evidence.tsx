@@ -3,19 +3,25 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
-import { projectPeriodAggregateByMonth } from "@/lib/organization-evidence/period-projection";
+import {
+  formatHoursAsStated,
+  readPeriodEvidence,
+} from "@/lib/organization-evidence/period-provenance";
 import { PeriodBand, TimeReality } from "@/components/app/work-world/primitives";
 
 /**
  * DERIVED PERIOD EVIDENCE ON THE CALENDAR — the month view's honest link
  * from a person's confirmed work history to time.
  *
- * A period record ("800 h, 2025-06-01 → 2025-11-30") is real work with no
- * source days. The calendar cannot put it on a day, and must not: so the
- * month view shows the record's PeriodBand with THIS month's derived share
- * emphasised, labelled DERIVED and "not source days" — the same projection
- * (`projectPeriodAggregateByMonth`) and the same ribbon the profile already
- * renders, never a second allocation. Nothing here is a calendar item: it
+ * A period record is real work with no source days. The calendar cannot put
+ * it on a day, and must not. When the SOURCE stated the period (and no rate
+ * of its own), the month view shows the record's PeriodBand with THIS
+ * month's derived share emphasised, labelled DERIVED and "not source days" —
+ * the ONE reading (`readPeriodEvidence`) and the same ribbon the profile
+ * renders, never a second allocation. A span a person chose at import
+ * ("800 h", "at least 16 month", set to 2025-06 → 2025-11) has NO monthly
+ * figure (owner rule 2026-09-23) and is not drawn here at all — its record
+ * shows it at month precision. Nothing here is a calendar item: it
  * never enters the day/agenda lists, never counts in a cell, never
  * conflicts with anything.
  *
@@ -64,12 +70,20 @@ export async function DerivedPeriodEvidence({
 
   const bands = res.records.flatMap((rec) => {
     if (rec.withdrawn) return [];
-    const p = projectPeriodAggregateByMonth({
+    // The ONE period reading (owner rule 2026-09-23): a month may carry a
+    // share ONLY of a period the SOURCE stated with no rate of its own. A
+    // span a person chose at import has no monthly figure to put on this
+    // month — it is shown on the record itself, never here as a share.
+    const reading = readPeriodEvidence({
       hours: rec.hours,
       periodStart: rec.periodStart,
       periodEnd: rec.periodEnd,
+      derived: rec.derived,
+      factFields: rec.factFields,
+      sourceText: rec.text,
     });
-    if (!p) return [];
+    if (!reading || reading.kind !== "source_period") return [];
+    const p = reading.projection;
     const share = p.months.find((m) => m.month === month);
     if (!share) return [];
     return [
@@ -121,7 +135,7 @@ export async function DerivedPeriodEvidence({
               {t("thisMonth", { hours: b.share.hours.toFixed(2) })}
             </p>
             <PeriodBand
-              totalLabel={`${b.projection.totalHours.toFixed(2)} h`}
+              totalLabel={`${formatHoursAsStated(b.projection.totalHours)} h`}
               derivedLabel={tRecords("monthlyShare")}
               months={b.projection.months}
               activeMonth={month}

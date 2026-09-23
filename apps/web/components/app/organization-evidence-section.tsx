@@ -19,6 +19,11 @@ import type {
   EvidenceRecordView,
   SubjectRosterLink,
 } from "@/lib/organization-evidence/import-core";
+import {
+  formatHoursAsStated,
+  periodProvenance,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
 
 /**
  * "WHAT ORGANIZATIONS HAVE RECORDED ABOUT ME" — the subject's side of the
@@ -266,30 +271,12 @@ export function RosterLinkOffers({
 }
 
 /**
- * How the record's WHEN came to be. `source` when the record's own
- * provenance carries no derivation for it; otherwise the method recorded in
- * `derived.timeSemantics` (a period aggregate decided at import —
- * `human_choice` when a person chose the period, any other method when it
- * was inferred) or in a derived date field. Pure; it reads the record's own
- * provenance and never guesses.
+ * How the record's WHEN came to be — the ONE rule, which lives with the
+ * period reading in `lib/organization-evidence/period-provenance.ts` (owner
+ * rule 2026-09-23) and is re-exported here for the callers that imported it
+ * from this surface.
  */
-export function periodProvenance(rec: {
-  readonly activityDate: string | null;
-  readonly periodStart: string | null;
-  readonly factFields: readonly string[];
-  readonly derived: Record<string, unknown>;
-}): "source" | "human_choice" | "derived" {
-  const method = (key: string): string | null => {
-    const d = rec.derived?.[key] as { method?: unknown } | undefined;
-    return d && typeof d === "object" && typeof d.method === "string" ? d.method : null;
-  };
-  if (rec.factFields.some((f) => /^(workDate|periodStart|periodEnd|activity_date|period_start)$/i.test(f))) {
-    return "source";
-  }
-  const m = rec.periodStart ? method("timeSemantics") : (method("workDate") ?? method("activityDate"));
-  if (m === null) return "source";
-  return m === "human_choice" ? "human_choice" : "derived";
-}
+export { periodProvenance };
 
 export function OrganizationEvidenceSection({
   records,
@@ -379,10 +366,9 @@ export function OrganizationEvidenceSection({
                     data-testid="organization-evidence-record-when"
                     data-provenance={periodProvenance(rec)}
                   >
-                    {rec.activityDate ??
-                      [rec.periodStart, rec.periodEnd]
-                        .filter(Boolean)
-                        .join(" – ")}
+                    {/* At the precision it has: a span a person chose reads
+                        as months, never as two day-precise dates. */}
+                    {recordWhen(rec)}
                   </span>
                   {/* SOURCE FACT ≠ DERIVED (owner P0 2026-09-22 §11). A period
                       the source never stated — chosen by a person at import
@@ -402,18 +388,29 @@ export function OrganizationEvidenceSection({
                   ) : null}
                   {rec.hours !== null && (
                     <span className="text-xs text-text-secondary">
-                      {rec.hours} h
+                      {formatHoursAsStated(rec.hours)} h
                     </span>
                   )}
-                  {/* DERIVED even monthly share of a period record (owner
-                      2026-09-17) — the subject reads the same derivation the
-                      organization does, beside the record, never instead. */}
+                  {/* The period record through the ONE reading (owner rule
+                      2026-09-23): an even monthly share only for a period the
+                      SOURCE stated; a span a person chose shows its months
+                      and the source's own words, with no monthly figure. The
+                      provenance words already stand beside the date above. */}
                   {rec.activityDate === null && (
                     <PeriodMonthlyShare
                       hours={rec.hours}
                       periodStart={rec.periodStart}
                       periodEnd={rec.periodEnd}
-                      label={tRecords("monthlyShare")}
+                      derived={rec.derived}
+                      factFields={rec.factFields}
+                      sourceText={rec.text}
+                      labels={{
+                        monthlyShare: tRecords("monthlyShare"),
+                        noMonthlyFigure: tRecords("noMonthlyFigure"),
+                        provenance: null,
+                        sourceStates: (words) => tRecords("sourceStates", { words }),
+                        sourceDiffers: tRecords("sourceDiffers"),
+                      }}
                       className="flex basis-full flex-col gap-0.5"
                     />
                   )}

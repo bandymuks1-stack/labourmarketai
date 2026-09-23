@@ -191,31 +191,36 @@ export function CapacityBand({
 }
 
 /** A period of real work as a TIME RIBBON, not a lump. One continuous band
- *  over the whole period, divided into the months it touches, each labelled
- *  with its DERIVED even share. The total is the one canonical figure; the
- *  month segments are a display allocation, never source-observed days — the
- *  caller supplies both the total figure and that warning label. Renders
- *  nothing when there is nothing honest to derive. */
+ *  over the whole period, divided into the months it touches. A month
+ *  segment carries a figure ONLY when the caller hands one — the DERIVED even
+ *  share of a SOURCE-stated period. A span a person chose at import is drawn
+ *  as the same months with NO figure and a dashed edge (owner rule
+ *  2026-09-23: never manufacture precision). The total is the one canonical
+ *  figure; the caller supplies both it and the label saying what the band
+ *  is. Renders nothing when there are no months. */
 export function PeriodBand({
   totalLabel,
   derivedLabel,
   months,
   activeMonth = null,
 }: {
-  /** The canonical total, already formatted (e.g. "800 h"). */
+  /** The canonical total, already formatted as the source gave it ("800 h"). */
   totalLabel: string;
-  /** "Derived equal monthly share · not source days." */
+  /** What the band is: "Derived equal monthly share · not source days", or
+   *  "No monthly figure" for an interpreted span. */
   derivedLabel: string;
-  /** Oldest→newest month shares from the canonical projection. */
-  months: readonly { readonly month: string; readonly hours: number }[];
+  /** Oldest→newest months. `hours` is the derived share, or `null` when no
+   *  monthly figure may be shown. */
+  months: readonly { readonly month: string; readonly hours: number | null }[];
   /** `YYYY-MM` — the month a calendar is looking at; its segment is drawn
    *  emphasised so the reader can locate "this month's share" on the band.
    *  Null (the default) draws every segment alike. */
   activeMonth?: string | null;
 }) {
   if (months.length === 0) return null;
+  const figured = months.some((m) => m.hours !== null);
   return (
-    <div data-testid="ww-period-band" className="flex flex-col gap-1.5">
+    <div data-testid="ww-period-band" data-figures={figured ? "monthly" : "none"} className="flex flex-col gap-1.5">
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-mono text-sm font-semibold text-brand-cyan" data-testid="ww-period-total">
           {totalLabel}
@@ -224,19 +229,25 @@ export function PeriodBand({
           {months[0].month} → {months[months.length - 1].month}
         </span>
       </div>
-      {/* The band: one cyan-edged span, divided into equal month segments. */}
-      <div className="flex h-9 overflow-hidden rounded-md border border-brand-cyan/40 bg-brand-cyan/5">
+      {/* The band: one cyan-edged span, divided into its calendar months. */}
+      <div
+        className={`flex h-9 overflow-hidden rounded-md border bg-brand-cyan/5 ${
+          figured ? "border-brand-cyan/40" : "border-dashed border-brand-cyan/40"
+        }`}
+      >
         {months.map((m, i) => (
           <div
             key={m.month}
             data-month={m.month}
-            data-hours={m.hours.toFixed(2)}
+            data-hours={m.hours === null ? undefined : m.hours.toFixed(2)}
             data-active={m.month === activeMonth ? "true" : undefined}
             className={`flex flex-1 items-center justify-center ${
               i === 0 ? "" : "border-l border-brand-cyan/25"
             } ${m.month === activeMonth ? "bg-brand-cyan/15 ring-1 ring-inset ring-brand-cyan/60" : ""}`}
           >
-            <span className="font-mono text-meta tabular-nums text-brand-cyan">{m.hours.toFixed(2)}</span>
+            {m.hours === null ? null : (
+              <span className="font-mono text-meta tabular-nums text-brand-cyan">{m.hours.toFixed(2)}</span>
+            )}
           </div>
         ))}
       </div>

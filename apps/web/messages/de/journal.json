@@ -771,6 +771,8 @@
       "rejected": "{hours} Std. in einem Stundenzettel abgelehnt — nirgends gezählt",
       "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur ein Journaleintrag.",
       "periodRecord": "{hours} Std. über {span} — eine Zahl für den ganzen Zeitraum, nicht auf Tage verteilt",
+      "periodRecordHuman": "{hours} Std., {span} — die Quelle nennt nur die Gesamtzahl; die Monate hat beim Import des Dokuments eine Person gewählt. Nicht auf Monate oder Tage verteilt",
+      "periodRecordDerived": "{hours} Std., {span} — die Quelle nennt nur die Gesamtzahl; die Monate sind abgeleitet, nicht angegeben. Nicht auf Monate oder Tage verteilt",
       "periodMore": "{count, plural, one {# weiterer Zeitraumeintrag} other {# weitere Zeitraumeinträge}}"
     },
     "growthKindsTitle": "Was deine Einträge zeigen",

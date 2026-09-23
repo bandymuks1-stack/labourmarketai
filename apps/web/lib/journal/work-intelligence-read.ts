@@ -194,6 +194,8 @@ export async function readOrganizationRecords(
           hours: r.hours,
           source: "import",
           organizationId: r.organizationId,
+          // How the SPAN came to be travels with it (owner rule 2026-09-23).
+          provenance: r.provenance,
         }));
   return { records: [...fromAllocations, ...fromEvidence], periodRecords };
 }
