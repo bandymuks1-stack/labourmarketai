@@ -4445,6 +4445,12 @@
           "available_from_past": "Je datum \"kan beginnen vanaf\" ({date}) is voorbij — hij wordt gelezen als \"nu\". Klopt dat niet meer, stel dan een nieuwe datum in.",
           "available_from_far": "Je startdatum ({date}) ligt meer dan een jaar vooruit. Is het jaar een vergissing, corrigeer het; anders laat je het zo.",
           "unavailable_with_start_date": "Status zegt \"kan nu niet werken\", maar er staat een startdatum ({date}). Kun je vanaf die datum — prima; zo niet, corrigeer het."
+        },
+        "visibilityAsk": {
+          "title": "Wilt u dat werkgevers u kunnen vinden?",
+          "body": "Kaart opgeslagen. Op dit moment kunnen bedrijven uw profiel niet zien — het is uw keuze en u kunt die altijd wijzigen.",
+          "open": "Bekijken en beslissen",
+          "dismiss": "Niet nu"
         }
       },
       "tabs": {
@@ -4571,7 +4577,8 @@
           "feedbackError": "De toepassing kon niet worden losgekoppeld. Laad de pagina opnieuw en probeer het nog eens.",
           "note": "Uitloggen bij LabourMarket.ai koppelt apps niet los. Hier loskoppelen is de enige manier om de toegang van een app te beëindigen.",
           "pending": "Loskoppelen…"
-        }
+        },
+        "employerVisibility": "Zichtbaarheid voor werkgevers"
       },
       "comingSoon": {
         "greeting": "👋 Welkom, {name}",
@@ -10180,7 +10187,8 @@
       "version": "Versie",
       "needsMigration": "Deze functie is nog niet ingeschakeld op de server. Uw profiel blijft privé.",
       "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
-      "declinedNote": "Prima — uw profiel blijft privé. U vindt deze keuze hier op elk moment."
+      "declinedNote": "Prima — uw profiel blijft privé. U vindt deze keuze hier op elk moment.",
+      "readFailed": "Kon niet controleren of werkgevers uw profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — probeer het later opnieuw."
     },
     "disclosures": {
       "intro": "Elke overdracht van uw cv, contactgegevens of andere gegevens aan een specifiek bedrijf gebeurt pas na uw afzonderlijke bevestiging.",
@@ -10195,7 +10203,8 @@
       "purpose": {
         "profile_discoverability": "Zichtbaarheid voor werkgevers",
         "employer_data_disclosure": "Gegevensoverdracht aan een bedrijf"
-      }
+      },
+      "unavailable": "Uw toestemmingsgeschiedenis kon niet worden gelezen. Dat betekent niet dat er geen gegevens zijn — probeer het later opnieuw."
     },
     "fields": {
       "full_name": "Volledige naam",
@@ -10308,6 +10317,25 @@
       "errorNotIso2": "Gebruik landcodes van twee letters, bijvoorbeeld LT, DE, NL.",
       "errorMarketOutside": "U kunt alleen worden aangeboden waar u wettelijk mag werken. Voeg dat land hierboven eerst toe.",
       "errorValidity": "Kies 30, 60 of 90 dagen."
+    },
+    "employerVisibility": {
+      "title": "Zichtbaar voor werkgevers",
+      "state": {
+        "on": "Aan",
+        "off": "Uit",
+        "unknown": "Onbekend"
+      },
+      "hint": {
+        "on": "Bedrijven kunnen uw beroepsprofiel vinden. Contactgegevens en cv alleen na uw aparte bevestiging. U kunt het op elk moment uitzetten.",
+        "off": "Bedrijven kunnen uw profiel niet vinden. Alleen u kunt het aanzetten, na het lezen van de voorwaarden; intrekken kost één klik.",
+        "unknown": "Kon niet controleren. Dat betekent niet dat het uit staat — open het om te kijken."
+      },
+      "chat": {
+        "on": "Op dit moment is uw beroepsprofiel zichtbaar voor bedrijven. Hieronder: wat zij zien en hoe u het uitzet.",
+        "off": "Op dit moment kunnen bedrijven uw profiel niet zien of vinden bij het zoeken. Wilt u dat wel, lees dan hieronder de voorwaarden en beslis — intrekken kan altijd.",
+        "unknown": "Kon niet controleren of bedrijven uw profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open uw privacyinstellingen.",
+        "noWorker": "Zichtbaarheid voor werkgevers geldt voor een werknemersprofiel, en dit account heeft er nog geen."
+      }
     }
   },
   "planning": {
@@ -13490,7 +13518,9 @@
         "chipProfile": "Bevestig in profiel",
         "chipExperience": "Ervaring vastleggen",
         "chipDocument": "Document toevoegen"
-      }
+      },
+      "visibilityUnavailable": "Kon uw zichtbaarheid voor werkgevers niet controleren. Dat betekent niet dat die uit staat — open de instellingen.",
+      "chipVisibility": "Zichtbaarheid voor werkgevers"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

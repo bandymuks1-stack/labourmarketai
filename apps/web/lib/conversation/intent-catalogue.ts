@@ -96,6 +96,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   activity: "the activity centre / recent activity",
   "messages-view": "messages and conversations inbox",
   "my-team": "the people the speaker works with — their team, colleagues, crew or the organization's members",
+  "employer-visibility":
+    "whether employers can see or find the person's professional profile — current state, then the explicit revocable consent to turn it on or off ('kas mato mano profilį?')",
   invitations: "invitations addressed to me (join an organization, become a student or an employee)",
 };
 

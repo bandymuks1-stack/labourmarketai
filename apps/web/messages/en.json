@@ -4445,6 +4445,12 @@
           "available_from_past": "Your \"can start from\" date ({date}) has passed — it reads as \"now\". If that is no longer true, set a new date.",
           "available_from_far": "Your start date ({date}) is more than a year away. If the year is a slip, correct it; otherwise keep it.",
           "unavailable_with_start_date": "Status says \"cannot work now\" but a start date ({date}) is set. If you can from that date — fine; if not, correct it."
+        },
+        "visibilityAsk": {
+          "title": "Do you want employers to be able to find you?",
+          "body": "Card saved. Right now companies cannot see your profile — it is your choice, and you can change it at any time.",
+          "open": "Review and decide",
+          "dismiss": "Not now"
         }
       },
       "tabs": {
@@ -4571,7 +4577,8 @@
           "feedbackError": "The application could not be disconnected. Reload the page and try again.",
           "note": "Signing out of LabourMarket.ai does not disconnect apps. Disconnecting here is the only way to end an application's access.",
           "pending": "Disconnecting…"
-        }
+        },
+        "employerVisibility": "Visibility to employers"
       },
       "comingSoon": {
         "greeting": "👋 Welcome, {name}",
@@ -10180,7 +10187,8 @@
       "version": "Version",
       "needsMigration": "This feature is not yet enabled on the server. Your profile stays private.",
       "error": "Could not save. Please try again.",
-      "declinedNote": "Okay — your profile stays private. You can find this choice here at any time."
+      "declinedNote": "Okay — your profile stays private. You can find this choice here at any time.",
+      "readFailed": "Could not check whether employers can see your profile. That does not mean visibility is off — please try again later."
     },
     "disclosures": {
       "intro": "Every transfer of your CV, contacts or other data to a specific company happens only after your separate confirmation.",
@@ -10195,7 +10203,8 @@
       "purpose": {
         "profile_discoverability": "Employer visibility",
         "employer_data_disclosure": "Data transfer to a company"
-      }
+      },
+      "unavailable": "Your consent history could not be read. That does not mean there are no entries — please try again later."
     },
     "fields": {
       "full_name": "Full name",
@@ -10308,6 +10317,25 @@
       "errorNotIso2": "Please use two-letter country codes, for example LT, DE, NL.",
       "errorMarketOutside": "You can only be offered work where you may legally work. Add that country above first.",
       "errorValidity": "Please choose 30, 60 or 90 days."
+    },
+    "employerVisibility": {
+      "title": "Visible to employers",
+      "state": {
+        "on": "On",
+        "off": "Off",
+        "unknown": "Unknown"
+      },
+      "hint": {
+        "on": "Companies can find your professional profile. Contacts and CV only with your separate confirmation. You can switch it off at any time.",
+        "off": "Companies cannot find your profile. Only you can switch it on, after reading the terms; withdrawing takes one click.",
+        "unknown": "Could not check. That does not mean it is off — open it to see."
+      },
+      "chat": {
+        "on": "Right now your professional profile is visible to companies. Below: what they see and how to switch it off.",
+        "off": "Right now companies cannot see your profile or find it in search. If you want them to, read the terms below and decide — you can withdraw at any time.",
+        "unknown": "Could not check whether companies can see your profile. That does not mean visibility is off — open your privacy settings.",
+        "noWorker": "Visibility to employers applies to a worker profile, and this account does not have one yet."
+      }
     }
   },
   "planning": {
@@ -13490,7 +13518,9 @@
         "chipProfile": "Confirm in profile",
         "chipExperience": "Record experience",
         "chipDocument": "Add the document"
-      }
+      },
+      "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
+      "chipVisibility": "Visibility to employers"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

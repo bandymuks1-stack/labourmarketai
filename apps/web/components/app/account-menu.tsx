@@ -5,7 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, Globe, MessageSquareWarning, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, Globe, MessageSquareWarning, Eye, type LucideIcon } from "lucide-react";
+import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
@@ -33,7 +34,7 @@ export function AccountMenu() {
   const tCv = useTranslations("cvExport");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { user, profile, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName } = useAuth();
+  const { user, profile, roles, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName } = useAuth();
   const [open, setOpen] = useState(false);
 
   // The player card's ONE home is a workspace RESULT, and the registry says
@@ -212,6 +213,24 @@ export function AccountMenu() {
             <FileText className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
             {tCv("pageTitle")}
           </Link>
+          {/* EMPLOYER VISIBILITY (capability matrix P0, 2026-09-23) — the
+              profile-discoverability consent, one tap from every dashboard
+              page. An account utility (a privacy setting), not a product
+              area; workers only, because it is the worker profile an employer
+              could find. The link opens the consent's canonical home; nothing
+              is switched from here. */}
+          {roles.includes("worker") ? (
+            <Link
+              href={EMPLOYER_VISIBILITY_HREF}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              data-testid="account-menu-employer-visibility-link"
+              className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            >
+              <Eye className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+              {t("account.employerVisibility")}
+            </Link>
+          ) : null}
           <Link
             href="/dashboard/account"
             role="menuitem"

@@ -1125,6 +1125,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Wer kann meine Arbeit bestätigen?",
     pl: "Kto może potwierdzić moją pracę?",
   },
+  "employer-visibility": {
+    lt: "Kas mato mano profilį?",
+    en: "Make me visible to employers",
+    ru: "Кто видит мой профиль?",
+    nl: "Wie ziet mijn profiel?",
+    de: "Wer sieht mein Profil?",
+    pl: "Kto widzi mój profil?",
+  },
 };
 
 /**

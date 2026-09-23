@@ -56,6 +56,12 @@ import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-rea
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
 import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
+import { getMyDiscoverabilityState } from "@/lib/privacy/discoverability-actions";
+import { employerVisibilityOf } from "@/lib/privacy/employer-visibility";
+import {
+  EmployerVisibilityItem,
+  employerVisibilityItemLabels,
+} from "@/components/app/employer-visibility-item";
 import {
   WORKER_INTENT_STATES,
   type WorkerIntentState,
@@ -211,7 +217,7 @@ export default async function OpportunitiesPage({
   // Board + salary benchmark + weekly digest + world view + the person's
   // own work-seeking intent are independent reads — one combined await so
   // TTFB pays the slowest of them, not their sum.
-  const [result, salaryIntel, weekly, worldView, partnerSupply] = await Promise.all([
+  const [result, salaryIntel, weekly, worldView, partnerSupply, discoverability, tVisibility] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
@@ -237,7 +243,14 @@ export default async function OpportunitiesPage({
     // non-ok state (not declared / withdrawn / unreadable) → no chip: the
     // board never says "not looking" on the person's behalf.
     getMyPartnerSupplyState().catch(() => null),
+    // "Matomas darbdaviams" — the profile-discoverability consent, the SAME
+    // reader the privacy screen uses. A throw is `null` → unknown (SEP-7),
+    // never "off": the board does not tell a person they are hidden because
+    // a read failed.
+    getMyDiscoverabilityState().catch(() => null),
+    getTranslations("privacyConsent.employerVisibility"),
   ]);
+  const employerVisibility = employerVisibilityOf(discoverability);
   const declaredIntent: WorkerIntentState | null = (() => {
     if (!partnerSupply || partnerSupply.kind !== "ok") return null;
     const d = partnerSupply.declaration;
@@ -1892,6 +1905,16 @@ export default async function OpportunitiesPage({
                     </li>
                   ))}
                 </ul>
+                {/* MATOMAS DARBDAVIAMS — whether employers can find this person
+                    at all. Beside the list, not a chip in it: the five above
+                    are facts the person fills in, this one is a consent the
+                    person chooses, and OFF is never shown as "missing". The
+                    same item the profile hub renders; one tap to the consent. */}
+                <EmployerVisibilityItem
+                  visibility={employerVisibility}
+                  labels={employerVisibilityItemLabels(tVisibility)}
+                  testId="opportunities-employer-visibility"
+                />
                 {/* WHAT THE PERSON SAID — the declared work-seeking intent,
                     beside what the board reads. Rendered ONLY for a live
                     declaration; a chip is a door to the ONE place it is

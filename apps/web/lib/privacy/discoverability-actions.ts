@@ -7,11 +7,11 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import {
-  CONSENT_LOCALES,
   PROFILE_DISCOVERABILITY_V1,
   consentTextHash,
-  type ConsentLocale,
 } from "@/lib/privacy/consent-definitions";
+import { toConsentLocale } from "@/lib/privacy/discoverability-view";
+import { discoverabilityConsentSourceOf } from "@/lib/privacy/employer-visibility";
 
 /**
  * Profile-discoverability consent — server actions.
@@ -35,13 +35,9 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
-// 2026-09-20: PL is an active UI locale without its own consent blocks yet;
-// English is the honest fallback, never Lithuanian (lib/i18n/unsupported-language.ts).
-function toConsentLocale(locale: string): ConsentLocale {
-  return (CONSENT_LOCALES as readonly string[]).includes(locale)
-    ? (locale as ConsentLocale)
-    : "en";
-}
+// The consent locale (PL falls back to English, never Lithuanian) is the ONE
+// `toConsentLocale` in discoverability-view.ts, shared with every surface
+// that renders the consent.
 
 export type DiscoverabilityStatus =
   | "granted"
@@ -94,6 +90,9 @@ export type ConsentActionResult =
 
 export async function grantProfileDiscoverability(input: {
   locale: string;
+  /** Which surface the person decided on — mapped onto the closed set
+   *  (`DISCOVERABILITY_CONSENT_SOURCES`); anything else records the screen. */
+  source?: string;
 }): Promise<ConsentActionResult> {
   const supabase = await createClient();
   const {
@@ -108,7 +107,7 @@ export async function grantProfileDiscoverability(input: {
       p_version: def.version,
       p_hash: consentTextHash(def),
       p_locale: toConsentLocale(input.locale),
-      p_source: "dashboard_privacy_screen",
+      p_source: discoverabilityConsentSourceOf(input.source),
     },
   );
   if (error) {
@@ -123,7 +122,9 @@ export async function grantProfileDiscoverability(input: {
   return { kind: "ok" };
 }
 
-export async function withdrawProfileDiscoverability(): Promise<ConsentActionResult> {
+export async function withdrawProfileDiscoverability(input?: {
+  source?: string;
+}): Promise<ConsentActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -132,7 +133,7 @@ export async function withdrawProfileDiscoverability(): Promise<ConsentActionRes
 
   const { data, error } = await asAny(supabase).rpc(
     "withdraw_profile_discoverability_consent",
-    { p_source: "dashboard_privacy_screen" },
+    { p_source: discoverabilityConsentSourceOf(input?.source) },
   );
   if (error) {
     if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
@@ -156,20 +157,34 @@ export interface ConsentHistoryRow {
   selectedFields: string[] | null;
 }
 
+/**
+ * The history read, with FAILED kept apart from EMPTY (SEP-7).
+ *
+ * It used to return `[]` on any error, and the privacy screen rendered that
+ * `[]` as "no consent events yet" and "no transfers yet" — a statement about
+ * the person's own legal record made from a failed query (the
+ * swallowed-read-error class). A person who HAD granted discoverability, or
+ * had a disclosure on file, was told they had none.
+ */
+export type ConsentHistoryResult =
+  | { kind: "ok"; rows: ConsentHistoryRow[] }
+  | { kind: "not-authed" }
+  | { kind: "failed" };
+
 /** The caller's OWN append-only consent history (RLS: user_id = auth.uid()).
- *  Empty on any missing state — never fabricated. */
-export async function getMyConsentHistory(): Promise<ConsentHistoryRow[]> {
+ *  Never fabricated: a failed read is `failed`, never an empty list. */
+export async function getMyConsentHistory(): Promise<ConsentHistoryResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) return { kind: "not-authed" };
 
   const { data, error } = await asAny(supabase).rpc("my_privacy_consent_history");
-  if (error || !Array.isArray(data)) return [];
+  if (error || !Array.isArray(data)) return { kind: "failed" };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data as any[]).map((r) => ({
+  const rows: ConsentHistoryRow[] = (data as any[]).map((r) => ({
     id: String(r.id),
     purpose: String(r.purpose),
     action: String(r.action),
@@ -185,4 +200,5 @@ export async function getMyConsentHistory(): Promise<ConsentHistoryRow[]> {
       ? (r.selected_fields as string[])
       : null,
   }));
+  return { kind: "ok", rows };
 }

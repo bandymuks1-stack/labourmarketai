@@ -7,6 +7,7 @@ import {
   withdrawProfileDiscoverability,
   type DiscoverabilityState,
 } from "@/lib/privacy/discoverability-actions";
+import type { DiscoverabilityConsentSource } from "@/lib/privacy/employer-visibility";
 
 /**
  * Profile-discoverability consent control (GDPR Art. 7; EDPB 05/2020).
@@ -22,7 +23,15 @@ import {
  * - withdrawal lives on the same screen and takes one click, not more than
  *   granting took;
  * - honest degradation: needs-migration / error states are plain text,
- *   never a fake success.
+ *   never a fake success;
+ * - SEP-7: a state that could not be READ renders as unknown — never as the
+ *   "not visible" choice screen, which would tell the person their profile is
+ *   hidden because a query failed.
+ *
+ * ONE component, several doors: the privacy screen (its canonical home) and
+ * the conversation ("kas mato mano profilį?") render THIS component with the
+ * same server-built labels (lib/privacy/discoverability-view.ts). `source`
+ * only names which door the decision was made at, for the consent ledger.
  */
 
 export interface ConsentLegalTexts {
@@ -57,6 +66,8 @@ export interface DiscoverabilityConsentLabels {
   needsMigration: string;
   errorGeneric: string;
   declinedNote: string;
+  /** The current state could not be read — said as unknown, never as off. */
+  readFailed: string;
 }
 
 export function DiscoverabilityConsent({
@@ -65,12 +76,15 @@ export function DiscoverabilityConsent({
   legal,
   preview,
   labels,
+  source = "dashboard_privacy_screen",
 }: {
   locale: string;
   state: DiscoverabilityState;
   legal: ConsentLegalTexts;
   preview: PreviewField[];
   labels: DiscoverabilityConsentLabels;
+  /** Where this copy of the consent is rendered — recorded with the decision. */
+  source?: DiscoverabilityConsentSource;
 }) {
   const [phase, setPhase] = useState<
     "idle" | "expanded" | "declined" | "done" | "withdrawn" | "needs-migration" | "error"
@@ -82,7 +96,7 @@ export function DiscoverabilityConsent({
 
   function onGrant() {
     startTransition(async () => {
-      const res = await grantProfileDiscoverability({ locale });
+      const res = await grantProfileDiscoverability({ locale, source });
       if (res.kind === "ok") setPhase("done");
       else if (res.kind === "needs-migration") setPhase("needs-migration");
       else setPhase("error");
@@ -91,7 +105,7 @@ export function DiscoverabilityConsent({
 
   function onWithdraw() {
     startTransition(async () => {
-      const res = await withdrawProfileDiscoverability();
+      const res = await withdrawProfileDiscoverability({ source });
       if (res.kind === "ok") setPhase("withdrawn");
       else if (res.kind === "needs-migration") setPhase("needs-migration");
       else setPhase("error");
@@ -135,10 +149,25 @@ export function DiscoverabilityConsent({
     </div>
   );
 
-  if (phase === "needs-migration") {
+  if (phase === "needs-migration" || state.kind === "needs-migration") {
     return (
       <p className="text-sm text-text-secondary" data-testid="discoverability-unavailable">
         {labels.needsMigration}
+      </p>
+    );
+  }
+
+  // SEP-7: the read failed (or there is no signed-in reader). The choice
+  // screen below would say "Profilis darbdaviams nematomas" — a claim about
+  // this person's profile made from a failed query. Say it could not be read.
+  if (state.kind === "error" || state.kind === "not-authed") {
+    return (
+      <p
+        role="status"
+        className="text-sm text-text-secondary"
+        data-testid="discoverability-read-failed"
+      >
+        {labels.readFailed}
       </p>
     );
   }

@@ -153,7 +153,9 @@ export type IntentHandlerId =
   | "projectReadiness"
   | "confirmWork"
   | "whoVerifiesWork"
-  | "moveWorker";
+  | "moveWorker"
+  // "Kas mato mano profilį?" — the discoverability consent, state first.
+  | "employerVisibility";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -359,6 +361,17 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // never confirms anything itself. Its whole reason to exist is that the
   // honest answer includes "nobody yet" — see work-verification-state.ts.
   "who-verifies-work": { domain: "journal", access: "read", handler: "whoVerifiesWork", ownTyping: true },
+  // EMPLOYER VISIBILITY (capability matrix P0, 2026-09-23): "kas mato mano
+  // profilį?", "make me visible to employers". Reads the CURRENT consent state
+  // and says it first (on / off / unknown — SEP-7, unknown is never off), then
+  // embeds the EXISTING `DiscoverabilityConsent`: the same equal grant /
+  // decline buttons behind the full hashed legal text, the same one-click
+  // withdrawal, the same server actions. `write`, not `route`, because the
+  // embedded consent CAN persist — behind its own explicit button, never by
+  // the sentence. A route intent may only hand over a chip; classifying a
+  // door that can record a grant as one would be the dishonest class. Its own
+  // typing cue: the state is read before anything is said.
+  "employer-visibility": { domain: "profile", access: "write", handler: "employerVisibility", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

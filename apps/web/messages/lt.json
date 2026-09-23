@@ -4445,6 +4445,12 @@
           "available_from_past": "Data „galiu pradėti nuo“ ({date}) jau praėjo — skaitoma kaip „dabar“. Jei tai nebetiesa, nurodyk naują datą.",
           "available_from_far": "Pradžios data ({date}) yra daugiau nei po metų. Jei metai suklysti, pataisyk; jei ne — palik.",
           "unavailable_with_start_date": "Būsena „šiuo metu negaliu“, bet nurodyta pradžios data {date}. Jei nuo tos datos galėsi — viskas gerai; jei ne, pataisyk."
+        },
+        "visibilityAsk": {
+          "title": "Ar norite, kad darbdaviai galėtų jus rasti?",
+          "body": "Kortelė išsaugota. Šiuo metu įmonės jūsų profilio nemato — tai jūsų pasirinkimas, kurį galite pakeisti bet kada.",
+          "open": "Peržiūrėti ir nuspręsti",
+          "dismiss": "Ne dabar"
         }
       },
       "tabs": {
@@ -4571,7 +4577,8 @@
           "feedbackError": "Programos atjungti nepavyko. Atnaujinkite puslapį ir pabandykite dar kartą.",
           "note": "Atsijungimas nuo LabourMarket.ai programų neatjungia. Atjungimas čia yra vienintelis būdas nutraukti programos prieigą.",
           "pending": "Atjungiama…"
-        }
+        },
+        "employerVisibility": "Matomumas darbdaviams"
       },
       "comingSoon": {
         "greeting": "👋 Sveiki, {name}",
@@ -10180,7 +10187,8 @@
       "version": "Versija",
       "needsMigration": "Ši funkcija dar neįjungta serveryje. Jūsų profilis lieka privatus.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
-      "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasite čia bet kada."
+      "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasite čia bet kada.",
+      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato jūsų profilį. Tai nereiškia, kad matomumas išjungtas — pabandykite dar kartą vėliau."
     },
     "disclosures": {
       "intro": "Kiekvienas CV, kontaktų ar kitų duomenų perdavimas konkrečiai įmonei vyksta tik po atskiro jūsų patvirtinimo.",
@@ -10195,7 +10203,8 @@
       "purpose": {
         "profile_discoverability": "Darbdavių matomumas",
         "employer_data_disclosure": "Duomenų perdavimas įmonei"
-      }
+      },
+      "unavailable": "Nepavyko nuskaityti jūsų sutikimų istorijos. Tai nereiškia, kad įrašų nėra — pabandykite dar kartą vėliau."
     },
     "fields": {
       "full_name": "Vardas ir pavardė",
@@ -10308,6 +10317,25 @@
       "errorNotIso2": "Naudokite dviraidžius šalių kodus, pavyzdžiui LT, DE, NL.",
       "errorMarketOutside": "Siūlyti jus galima tik ten, kur galite teisėtai dirbti. Pirmiausia pridėkite tą šalį aukščiau.",
       "errorValidity": "Pasirinkite 30, 60 arba 90 dienų."
+    },
+    "employerVisibility": {
+      "title": "Matomas darbdaviams",
+      "state": {
+        "on": "Įjungta",
+        "off": "Išjungta",
+        "unknown": "Nežinoma"
+      },
+      "hint": {
+        "on": "Įmonės gali rasti jūsų profesinį profilį. Kontaktai ir CV — tik su atskiru jūsų patvirtinimu. Išjungti galite bet kada.",
+        "off": "Įmonės jūsų profilio neranda. Įjungti galite tik jūs, perskaitę sąlygas; atšaukti — vienu paspaudimu.",
+        "unknown": "Nepavyko patikrinti. Tai nereiškia, kad išjungta — atidarykite ir pažiūrėkite."
+      },
+      "chat": {
+        "on": "Šiuo metu jūsų profesinis profilis matomas įmonėms. Žemiau — ką jos mato ir kaip tai išjungti.",
+        "off": "Šiuo metu įmonės jūsų profilio nemato ir neranda paieškoje. Jei norite, kad rastų, perskaitykite sąlygas žemiau ir nuspręskite — atšaukti galėsite bet kada.",
+        "unknown": "Nepavyko patikrinti, ar įmonės mato jūsų profilį. Tai nereiškia, kad matomumas išjungtas — atidarykite privatumo nustatymus.",
+        "noWorker": "Matomumas darbdaviams taikomas darbuotojo profiliui, o šioje paskyroje jo dar nėra."
+      }
     }
   },
   "planning": {
@@ -13490,7 +13518,9 @@
         "chipProfile": "Patvirtinti profilyje",
         "chipExperience": "Įrašyti patirtį",
         "chipDocument": "Pridėti dokumentą"
-      }
+      },
+      "visibilityUnavailable": "Nepavyko patikrinti matomumo darbdaviams. Tai nereiškia, kad jis išjungtas — atidarykite nustatymus.",
+      "chipVisibility": "Matomumas darbdaviams"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

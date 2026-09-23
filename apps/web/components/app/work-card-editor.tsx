@@ -4,6 +4,10 @@ import { useActionState, useEffect, useState, useTransition } from "react";
 
 import { WORK_CARD_OPEN_EDITOR_EVENT } from "./work-card-missing-chip";
 import {
+  EmployerVisibilityAsk,
+  type EmployerVisibilityAskLabels,
+} from "./employer-visibility-ask";
+import {
   WorkCardPlausibilityNote,
   type WorkCardCheckItem,
 } from "./work-card-plausibility-note";
@@ -65,6 +69,8 @@ export interface WorkCardLabels {
   saved: string;
   errorMsg: string;
   needsMigration: string;
+  /** The one-time "should employers find you?" ask shown after a save. */
+  visibilityAsk: EmployerVisibilityAskLabels;
 }
 
 // The canonical primary CTA fill (2026-09-22): the brand gradient with its
@@ -370,6 +376,10 @@ export function WorkCardEditor({
             </div>
           </form>
         )}
+        {/* After a SUCCESSFUL save only — the one non-blocking ask. It decides
+            for itself whether to render (never-decided consent, not ended on
+            this device) and writes nothing but its own device-local record. */}
+        {saveState?.ok ? <EmployerVisibilityAsk labels={labels.visibilityAsk} /> : null}
       </div>
     </div>
   );

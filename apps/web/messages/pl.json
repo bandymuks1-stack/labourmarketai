@@ -4445,6 +4445,12 @@
           "available_from_past": "Twoja data „mogę zacząć od” ({date}) już minęła — czyta się jako „od zaraz”. Jeśli to już nieaktualne, ustaw nową datę.",
           "available_from_far": "Twoja data rozpoczęcia ({date}) jest odleglejsza niż rok. Jeśli rok to pomyłka, popraw go; w przeciwnym razie zostaw.",
           "unavailable_with_start_date": "Status mówi „nie mogę teraz pracować”, ale ustawiono datę rozpoczęcia ({date}). Jeśli od tej daty możesz — w porządku; jeśli nie, popraw to."
+        },
+        "visibilityAsk": {
+          "title": "Chcesz, żeby pracodawcy mogli Cię znaleźć?",
+          "body": "Karta zapisana. Obecnie firmy nie widzą Twojego profilu — to Twój wybór i możesz go zmienić w każdej chwili.",
+          "open": "Zobacz i zdecyduj",
+          "dismiss": "Nie teraz"
         }
       },
       "tabs": {
@@ -4571,7 +4577,8 @@
           "feedbackError": "Nie udało się odłączyć aplikacji. Przeładuj stronę i spróbuj ponownie.",
           "note": "Wylogowanie się z LabourMarket.ai nie odłącza aplikacji. Odłączenie tutaj to jedyny sposób na zakończenie dostępu aplikacji.",
           "pending": "Odłączanie…"
-        }
+        },
+        "employerVisibility": "Widoczność dla pracodawców"
       },
       "comingSoon": {
         "greeting": "👋 Witaj, {name}",
@@ -10180,7 +10187,8 @@
       "version": "Wersja",
       "needsMigration": "Ta funkcja nie jest jeszcze włączona na serwerze. Twój profil pozostaje prywatny.",
       "error": "Nie udało się zapisać. Spróbuj ponownie.",
-      "declinedNote": "W porządku — Twój profil pozostaje prywatny. Ten wybór znajdziesz tutaj w każdej chwili."
+      "declinedNote": "W porządku — Twój profil pozostaje prywatny. Ten wybór znajdziesz tutaj w każdej chwili.",
+      "readFailed": "Nie udało się sprawdzić, czy pracodawcy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — spróbuj ponownie później."
     },
     "disclosures": {
       "intro": "Każde przekazanie Twojego CV, danych kontaktowych lub innych danych konkretnej firmie następuje dopiero po Twoim osobnym potwierdzeniu.",
@@ -10195,7 +10203,8 @@
       "purpose": {
         "profile_discoverability": "Widoczność dla pracodawców",
         "employer_data_disclosure": "Przekazanie danych firmie"
-      }
+      },
+      "unavailable": "Nie udało się odczytać historii Twoich zgód. To nie znaczy, że nie ma wpisów — spróbuj ponownie później."
     },
     "fields": {
       "full_name": "Imię i nazwisko",
@@ -10308,6 +10317,25 @@
       "errorNotIso2": "Użyj dwuliterowych kodów krajów, na przykład LT, DE, NL.",
       "errorMarketOutside": "Pracę można Ci zaproponować tylko tam, gdzie możesz legalnie pracować. Najpierw dodaj ten kraj powyżej.",
       "errorValidity": "Wybierz 30, 60 lub 90 dni."
+    },
+    "employerVisibility": {
+      "title": "Widoczność dla pracodawców",
+      "state": {
+        "on": "Włączona",
+        "off": "Wyłączona",
+        "unknown": "Nieznana"
+      },
+      "hint": {
+        "on": "Firmy mogą znaleźć Twój profil zawodowy. Dane kontaktowe i CV tylko po Twoim osobnym potwierdzeniu. Możesz to wyłączyć w każdej chwili.",
+        "off": "Firmy nie znajdują Twojego profilu. Włączyć możesz tylko Ty, po przeczytaniu warunków; wycofanie to jedno kliknięcie.",
+        "unknown": "Nie udało się sprawdzić. To nie znaczy, że jest wyłączona — otwórz i zobacz."
+      },
+      "chat": {
+        "on": "Obecnie Twój profil zawodowy jest widoczny dla firm. Poniżej: co widzą i jak to wyłączyć.",
+        "off": "Obecnie firmy nie widzą Twojego profilu i nie znajdują go w wyszukiwaniu. Jeśli chcesz, żeby Cię znajdowały, przeczytaj poniżej warunki i zdecyduj — zgodę możesz wycofać w każdej chwili.",
+        "unknown": "Nie udało się sprawdzić, czy firmy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — otwórz ustawienia prywatności.",
+        "noWorker": "Widoczność dla pracodawców dotyczy profilu pracownika, a to konto jeszcze go nie ma."
+      }
     }
   },
   "planning": {
@@ -13490,7 +13518,9 @@
         "chipProfile": "Potwierdź w profilu",
         "chipExperience": "Zapisz doświadczenie",
         "chipDocument": "Dodaj dokument"
-      }
+      },
+      "visibilityUnavailable": "Nie udało się sprawdzić widoczności dla pracodawców. To nie znaczy, że jest wyłączona — otwórz ustawienia.",
+      "chipVisibility": "Widoczność dla pracodawców"
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
