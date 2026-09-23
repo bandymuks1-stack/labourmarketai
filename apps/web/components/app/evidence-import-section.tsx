@@ -1,4 +1,9 @@
 import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
+import {
+  formatHoursAsStated,
+  periodProvenance,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
@@ -855,25 +860,48 @@ export async function EvidenceImportSection({
                     <span className="text-sm font-semibold text-text-primary">
                       {rec.personName ?? "—"}
                     </span>
-                    <span className="text-xs text-text-secondary">
-                      {rec.activityDate ??
-                        [rec.periodStart, rec.periodEnd]
-                          .filter(Boolean)
-                          .join(" – ")}
+                    <span
+                      className="text-xs text-text-secondary"
+                      data-testid="evidence-record-when"
+                      data-provenance={periodProvenance(rec)}
+                    >
+                      {/* At the precision it has: a span a person chose at
+                          import reads as months, not as two exact dates. */}
+                      {recordWhen(rec)}
                     </span>
+                    {/* SOURCE FACT ≠ DERIVED: a PERIOD the source never stated
+                        says how it came to be, beside it (owner P0 §18). */}
+                    {rec.activityDate === null && periodProvenance(rec) !== "source" ? (
+                      <span className="text-xs text-text-muted" data-testid="evidence-record-period-derived">
+                        {periodProvenance(rec) === "human_choice"
+                          ? t("records.periodDerivedHuman")
+                          : t("records.periodDerived")}
+                      </span>
+                    ) : null}
                     {rec.hours !== null && (
                       <span className="text-xs text-text-secondary">
-                        {rec.hours} h
+                        {formatHoursAsStated(rec.hours)} h
                       </span>
                     )}
-                    {/* DERIVED even monthly share of a period record (owner
-                        2026-09-17) — beside the record, never instead of it. */}
+                    {/* The period record through the ONE reading (owner rule
+                        2026-09-23) — a monthly share only for a period the
+                        SOURCE stated; otherwise the months and the source's
+                        own words, with no monthly figure. */}
                     {rec.activityDate === null && (
                       <PeriodMonthlyShare
                         hours={rec.hours}
                         periodStart={rec.periodStart}
                         periodEnd={rec.periodEnd}
-                        label={t("records.monthlyShare")}
+                        derived={rec.derived}
+                        factFields={rec.factFields}
+                        sourceText={rec.text}
+                        labels={{
+                          monthlyShare: t("records.monthlyShare"),
+                          noMonthlyFigure: t("records.noMonthlyFigure"),
+                          provenance: null,
+                          sourceStates: (words) => t("records.sourceStates", { words }),
+                          sourceDiffers: t("records.sourceDiffers"),
+                        }}
                         className="flex basis-full flex-col gap-0.5"
                       />
                     )}

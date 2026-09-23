@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, ChevronUp, Info, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Maximize2, Minimize2, X } from "lucide-react";
 
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import { WorkerInvitations } from "@/components/app/worker-invitations";
@@ -19,6 +19,7 @@ import type {
 import type { WorkContextView } from "@/lib/world-state/work-context-server";
 import { entityKey } from "@/lib/world-state/world-state";
 import {
+  canRenderInline,
   getResult,
   type ResultContext,
   type ResultKind,
@@ -79,9 +80,12 @@ export function ContextPanel({
   resultContext = "personal",
   resultNavigation,
   wide = false,
+  full = false,
   chipsPostedAt = null,
   onCloseResult,
   onOpenFull,
+  onExpand,
+  onCollapse,
 }: {
   /** The active locale — passed to the canonical interest control unchanged. */
   locale: string;
@@ -120,11 +124,34 @@ export function ContextPanel({
    * nothing changes: the sheet is already full width.
    */
   wide?: boolean;
+  /**
+   * THE THIRD WIDTH — FULL, and still the SAME panel (owner P0/P1 §17,
+   * 2026-09-23: "Open full screen may expand a contextual result when more
+   * space is useful. It must not be an escape hatch into a second legacy
+   * application").
+   *
+   * `wide` gives a comparison result more of the desktop column; `full` gives
+   * a result the whole workspace — on a phone the sheet takes the whole
+   * screen, on a desktop the panel takes the row while the conversation beside
+   * it steps aside (it stays MOUNTED: nothing is lost, nothing navigates).
+   * Honoured only for a result that renders inline — expanding a fallback
+   * would be a bigger empty shell, and a fallback's honest way on is its
+   * named station door.
+   */
+  full?: boolean;
   /** When the thread last posted a question with chips (see the chat). On a
    *  phone the sheet yields to it when it still shows the same thing. */
   chipsPostedAt?: number | null;
   onCloseResult?: () => void;
+  /** A NAMED STATION DOOR — the result's own button to its station
+   *  (`/dashboard/profile`, `/dashboard/planning`, …), labelled with the
+   *  station's name. It navigates; the generic "full screen" does not. */
   onOpenFull?: (route: string) => void;
+  /** Expand the showing result in place — the workspace layer writes the
+   *  `?full=` state. The panel itself still never routes. */
+  onExpand?: () => void;
+  /** Back from the expanded state to the side-by-side workspace. */
+  onCollapse?: () => void;
 }) {
   const t = useTranslations("workspace.panel");
   const tr = useTranslations("conversation.results");
@@ -136,6 +163,15 @@ export function ContextPanel({
   const showsResult =
     result !== null && resultNavigation !== undefined && panel.mode !== "entity";
   const resultDescriptor = showsResult ? getResult(result) : undefined;
+  /** Only a result with a REAL inline renderer can be expanded: the same
+   *  registry rule that decides whether it renders here at all. Generic —
+   *  no result kind is named in this component. */
+  const canExpand =
+    showsResult &&
+    result !== null &&
+    canRenderInline(result, resultContext) &&
+    onExpand !== undefined;
+  const isFull = canExpand && full;
 
   /** Starts TRUE: a read is always pending on mount, so the first paint says
    *  "reading" instead of showing an empty body for one frame. An empty shell
@@ -206,6 +242,12 @@ export function ContextPanel({
     // person asked to SEE something, so on a phone it must actually appear.
     if (panel.mode === "entity" || showsResult) setExpanded(true);
   }, [selectionKey, panel.mode, showsResult, result]);
+
+  // An expanded result is the whole screen on a phone — a sheet that could
+  // sit collapsed while "full" would be neither.
+  useEffect(() => {
+    if (isFull) setExpanded(true);
+  }, [isFull]);
 
   // W3 row 6 — a pending invitation opens the sheet too. The spine's bell
   // points at this workspace to clear that signal; on a phone the panel starts
@@ -282,19 +324,28 @@ export function ContextPanel({
       aria-label={t("regionLabel")}
       data-testid="context-panel"
       data-panel-mode={panel.mode}
+      data-panel-width={isFull ? "full" : wide ? "wide" : "narrow"}
       className={`flex flex-none flex-col ${
         expanded
-          ? // z-50 + later-in-DOM: the sheet must paint OVER the `relative z-50`
-            // composer (and the z-40 feedback FAB), not under them.
-            "fixed inset-x-0 bottom-0 z-50 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 pb-[env(safe-area-inset-bottom)] shadow-2xl"
+          ? isFull
+            ? // FULL on a phone: the whole screen, still the same panel — its
+              // close and collapse controls stay in its own header.
+              "fixed inset-0 z-50 bg-ink-900 pb-[env(safe-area-inset-bottom)]"
+            : // z-50 + later-in-DOM: the sheet must paint OVER the `relative z-50`
+              // composer (and the z-40 feedback FAB), not under them.
+              "fixed inset-x-0 bottom-0 z-50 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 pb-[env(safe-area-inset-bottom)] shadow-2xl"
           : "border-t border-ink-600 bg-ink-900/60"
-      } lg:static lg:z-auto lg:h-full lg:max-h-none lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${
-        wide ? "lg:w-[30rem] xl:w-[38rem]" : "lg:w-[22rem]"
+      } lg:static lg:z-auto lg:h-full lg:max-h-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${
+        // FULL on a desktop: the panel takes the row; the conversation beside
+        // it docks to a narrow column (the chat decides that half).
+        isFull
+          ? "lg:min-w-0 lg:flex-1"
+          : `lg:flex-none ${wide ? "lg:w-[30rem] xl:w-[38rem]" : "lg:w-[22rem]"}`
       } ${className}`}
     >
       {/* Sheet grab-handle — a visual affordance only (the chevron is the
           control), hidden on desktop where there is no sheet. */}
-      {expanded ? (
+      {expanded && !isFull ? (
         <span
           aria-hidden
           className="mx-auto mt-2 h-1 w-10 flex-none rounded-full bg-ink-500 lg:hidden"
@@ -308,6 +359,29 @@ export function ContextPanel({
         <h2 className="min-w-0 flex-1 truncate font-display text-card-title font-semibold text-text-primary">
           {title}
         </h2>
+        {/* "OPEN FULL SCREEN" EXPANDS — it never leaves (owner P0/P1 §17).
+            The generic promise lives HERE, once, and it keeps it: the same
+            result, the same depth, given the whole workspace; the same
+            control brings it back beside the conversation. A result's own
+            buttons that DO leave for a station name that station
+            ("Open profile", "Open calendar"), never "full screen". */}
+        {canExpand ? (
+          <button
+            type="button"
+            onClick={isFull ? onCollapse : onExpand}
+            data-testid="context-panel-expand"
+            data-state={isFull ? "full" : "docked"}
+            aria-label={isFull ? tr("collapseFull") : tr("openFull")}
+            title={isFull ? tr("collapseFull") : tr("openFull")}
+            className="flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
+          >
+            {isFull ? (
+              <Minimize2 {...iconControl()} aria-hidden />
+            ) : (
+              <Maximize2 {...iconControl()} aria-hidden />
+            )}
+          </button>
+        ) : null}
         {panel.mode === "entity" || showsResult ? (
           <button
             type="button"
@@ -350,7 +424,7 @@ export function ContextPanel({
         id="context-panel-body"
         ref={bodyRef}
         data-title-state={discoveryOnly ? "discovery" : undefined}
-        className={`mt-2.5 min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${expanded ? "block max-h-[45dvh]" : "hidden"} lg:block lg:max-h-none`}
+        className={`mt-2.5 min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${expanded ? (isFull ? "block" : "block max-h-[45dvh]") : "hidden"} lg:block lg:max-h-none`}
       >
         {/* W6 — THE MAP, inside the one workspace. It subscribes to the SAME
             World State: the selection flies it to the entity's place, and

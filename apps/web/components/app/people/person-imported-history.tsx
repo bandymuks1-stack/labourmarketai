@@ -2,15 +2,19 @@ import { getTranslations } from "next-intl/server";
 import { History } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
+import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
 import {
   EvidenceState,
-  PeriodBand,
   type EvidenceStanding,
 } from "@/components/app/work-world/primitives";
 import { createClient } from "@/lib/supabase/server";
 import { listEvidenceRecords } from "@/lib/organization-evidence/import-core";
-import { projectPeriodAggregateByMonth } from "@/lib/organization-evidence/period-projection";
-import { formatUtcDate, formatUtcDateRange } from "@/lib/time/display";
+import {
+  formatHoursAsStated,
+  periodProvenance,
+  readPeriodEvidence,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
 
 /**
  * WHAT THIS ORGANIZATION HAS ON RECORD ABOUT THE PERSON — imported history
@@ -28,9 +32,11 @@ import { formatUtcDate, formatUtcDateRange } from "@/lib/time/display";
  * Honesty: a failed read is said (`unavailable`), never rendered as "no
  * history"; no linked roster row or no record renders NOTHING — a person
  * without imported history does not get a box saying so. A period record
- * is drawn as its PeriodBand (DERIVED monthly share, labelled), never as
- * days; a day record shows its day. Every standing comes through
- * `EvidenceState`, so an import never wears verification green.
+ * is drawn through the ONE period reading (`readPeriodEvidence`, owner rule
+ * 2026-09-23): a DERIVED monthly share only for a period the source stated;
+ * a span a person chose at import at month precision, labelled, with no
+ * monthly figure — never as days; a day record shows its day. Every standing
+ * comes through `EvidenceState`, so an import never wears verification green.
  */
 const READ_LIMIT = 50;
 const MAX_LINKED_PEOPLE = 20;
@@ -105,11 +111,19 @@ export async function PersonImportedHistory({
       </h2>
       <ul className="flex flex-col gap-2">
         {records.map((rec) => {
-          const projection = projectPeriodAggregateByMonth({
-            hours: rec.hours,
-            periodStart: rec.periodStart,
-            periodEnd: rec.periodEnd,
-          });
+          // The ONE period reading (owner rule 2026-09-23): a monthly share
+          // only for a period the SOURCE stated; a span a person chose at
+          // import is shown at month precision, labelled, with no figure.
+          const reading = rec.activityDate
+            ? null
+            : readPeriodEvidence({
+                hours: rec.hours,
+                periodStart: rec.periodStart,
+                periodEnd: rec.periodEnd,
+                derived: rec.derived,
+                factFields: rec.factFields,
+                sourceText: rec.text,
+              });
           const standing = (
             rec.attestation
               ? rec.attestation.self
@@ -117,11 +131,8 @@ export async function PersonImportedHistory({
                 : "ORGANIZATION_ATTESTED"
               : rec.state
           ) as EvidenceStanding;
-          const when = rec.activityDate
-            ? formatUtcDate(rec.activityDate, locale)
-            : rec.periodStart
-              ? formatUtcDateRange(rec.periodStart, rec.periodEnd ?? rec.periodStart, locale)
-              : null;
+          const when = recordWhen(rec, locale);
+          const provenance = periodProvenance(rec);
           return (
             <li key={rec.id} data-testid="person-history-record" data-state={standing}>
               <Card compact className="flex flex-col gap-1.5">
@@ -129,9 +140,24 @@ export async function PersonImportedHistory({
                   {rec.contextLabel ? (
                     <span className="text-sm font-medium text-text-primary">{rec.contextLabel}</span>
                   ) : null}
-                  {when ? <span className="font-mono text-meta text-text-muted">{when}</span> : null}
-                  {rec.hours !== null && !projection ? (
-                    <span className="font-mono text-meta text-text-secondary">{rec.hours} h</span>
+                  {when ? (
+                    <span
+                      className="font-mono text-meta text-text-muted"
+                      data-testid="person-history-when"
+                      data-provenance={provenance}
+                    >
+                      {when}
+                    </span>
+                  ) : null}
+                  {rec.activityDate === null && provenance !== "source" ? (
+                    <span className="text-meta text-text-muted" data-testid="person-history-period-derived">
+                      {provenance === "human_choice"
+                        ? tRecords("periodDerivedHuman")
+                        : tRecords("periodDerived")}
+                    </span>
+                  ) : null}
+                  {rec.hours !== null && !reading ? (
+                    <span className="font-mono text-meta text-text-secondary">{formatHoursAsStated(rec.hours)} h</span>
                   ) : null}
                   <EvidenceState
                     state={standing}
@@ -145,13 +171,24 @@ export async function PersonImportedHistory({
                   />
                 </div>
                 {rec.text ? <p className="text-sm text-text-secondary">{rec.text}</p> : null}
-                {/* A period record: one figure over a span, drawn as the
-                    derived band — never spread onto days. */}
-                {projection ? (
-                  <PeriodBand
-                    totalLabel={`${projection.totalHours.toFixed(2)} h`}
-                    derivedLabel={tRecords("monthlyShare")}
-                    months={projection.months}
+                {/* A period record: one figure over a span — never spread onto
+                    days, and onto months only when the SOURCE stated the
+                    period. The same renderer every period surface uses. */}
+                {reading ? (
+                  <PeriodMonthlyShare
+                    hours={rec.hours}
+                    periodStart={rec.periodStart}
+                    periodEnd={rec.periodEnd}
+                    derived={rec.derived}
+                    factFields={rec.factFields}
+                    sourceText={rec.text}
+                    labels={{
+                      monthlyShare: tRecords("monthlyShare"),
+                      noMonthlyFigure: tRecords("noMonthlyFigure"),
+                      provenance: null,
+                      sourceStates: (words) => tRecords("sourceStates", { words }),
+                      sourceDiffers: tRecords("sourceDiffers"),
+                    }}
                   />
                 ) : null}
                 <p className="font-mono text-meta uppercase tracking-label text-text-muted">

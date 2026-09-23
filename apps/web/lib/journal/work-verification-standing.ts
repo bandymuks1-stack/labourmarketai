@@ -9,9 +9,13 @@ import type { WorkVerificationState } from "@/lib/journal/work-verification-stat
  * history and demand — and so it can never overclaim:
  *
  *   · a manager's confirmation is the ORGANIZATION standing behind the record
- *     (`ORGANIZATION_ATTESTED`, champagne). It is NOT `INDEPENDENTLY_VERIFIED`
- *     (the only green): the confirmer belongs to the same organization the
- *     work was done for, exactly as `countsAsIndependentlyVerified` says.
+ *     (`ORGANIZATION_ATTESTED`, the `attested` variant). Its COLOUR is the
+ *     trust-accent green — design rule #4 (owner-ratified 2026-09-22):
+ *     employer-confirmed = green, gold never means confirmation. Its STANDING
+ *     is still not `INDEPENDENTLY_VERIFIED`: the confirmer belongs to the same
+ *     organization the work was done for, exactly as
+ *     `countsAsIndependentlyVerified` says, so the variant stays `attested`
+ *     and no journal state maps to `verified`.
  *   · a self-confirmation is `SELF_ATTESTED` (cyan evidence) — real, permanent,
  *     never a manager's word.
  *   · everything still waiting, unreachable or organization-less is the

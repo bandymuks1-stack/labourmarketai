@@ -140,7 +140,16 @@ export function ProfileTextFirstFlow({
   const locale = useLocale();
   const router = useRouter();
 
-  const [stage, setStage] = useState<"compose" | "review" | "manual">("compose");
+  // A worker with NO primary profession starts in the profession picker
+  // (the `manual` stage). The chat's "set profession" chip and the hub's
+  // profession step both land on this flow; starting in `compose` dropped
+  // them two interactions away from the one selector they came for. Only
+  // when a picker exists (`manualSlot`) — a non-worker account has none, and
+  // a person who already has a profession keeps the composer first. The
+  // picker's "back to text" control returns to the composer as before.
+  const [stage, setStage] = useState<"compose" | "review" | "manual">(
+    !hasPrimaryProfession && manualSlot ? "manual" : "compose",
+  );
   // Professions the text NAMES (catalogue slugs only), and the one the
   // person picked. Proposed only while no primary profession exists.
   const [professionProposals, setProfessionProposals] = useState<string[]>([]);
@@ -423,6 +432,7 @@ export function ProfileTextFirstFlow({
           type="button"
           onClick={() => setStage(hasExtracted ? "review" : "compose")}
           className="self-start text-xs text-text-secondary hover:text-text-primary"
+          data-testid="profile-text-flow-manual-back"
         >
           ← {t("backToText")}
         </button>

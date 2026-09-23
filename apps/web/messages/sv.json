@@ -1121,7 +1121,9 @@
     "saving": "[EN] Saving...",
     "selfDeclared": "[EN] Awaiting confirmation",
     "verified": "[EN] Confirmed",
-    "viewProfile": "[EN] View profile"
+    "viewProfile": "[EN] View profile",
+    "editDisclosure": "Yrke, färdigheter och beskrivning",
+    "aboutDisclosure": "Så läses den här profilen"
   },
   "stats": {
     "activeWorkers": "[EN] Active workers",
@@ -4258,6 +4260,18 @@
     },
     "results": {
       "openFull": "Öppna helskärm",
+      "station": {
+        "profile": "Öppna profil",
+        "journal": "Öppna arbetsjournal",
+        "calendar": "Öppna kalender",
+        "marketMap": "Öppna marknadskarta",
+        "opportunities": "Öppna möjligheter",
+        "scouting": "Öppna kandidatsökning",
+        "projects": "Öppna projekt",
+        "documents": "Öppna dokument",
+        "finance": "Öppna ekonomiposter"
+      },
+      "collapseFull": "Förminska",
       "pendingInline": "Resultatet förbereds.",
       "retry": "Försök igen",
       "engagements": {
@@ -6509,7 +6523,20 @@
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
       "periodDerived": "[EN] Period derived — the source stated no dates",
-      "sourceStatement": "[EN] Source statement (fact)"
+      "sourceStatement": "[EN] Source statement (fact)",
+      "noMonthlyFigure": "[EN] No monthly figure — the source states only the total",
+      "sourceStates": "[EN] Source states: “{words}”",
+      "sourceDiffers": "[EN] This span differs from what the source's own words state — both are kept",
+      "howRecorded": "Så registrerades det"
+    },
+    "reconstruction": {
+      "timePeriodBoth": "[EN] Months: the first and the last — both, or leave both empty. A start alone is not a period.",
+      "issue": {
+        "time_conflicts_source": "[EN] {count} rows — the period you set differs from the source's own words"
+      },
+      "issueWhy": {
+        "time_conflicts_source": "[EN] Your decision is kept — you know the work. The source's own words state a different duration or rate, so no monthly figure is made from the total, and the difference stays visible beside the record."
+      }
     }
   }
 }

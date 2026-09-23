@@ -110,7 +110,9 @@ export function ResultBody({
    *  pass it to the canonical dispatcher so the server action revalidates the
    *  caller's own locale path — the same value the inline form supplies. */
   locale: string;
-  /** Wired by the workspace layer to reach the result's existing full screen. */
+  /** Wired by the workspace layer to reach the result's STATION — a named
+   *  door that navigates. (The prop keeps its historical name; the generic
+   *  "full screen" is the panel's in-place expansion, not this.) */
   onOpenFull: (route: string) => void;
 }) {
   const t = useTranslations("conversation.results");
@@ -132,6 +134,9 @@ export function ResultBody({
   }
 
   // Honest degradation — see the header note. The reason is stated, not hidden.
+  // The way on NAMES its station ("Open work journal"), because it leaves the
+  // conversation for that page; "full screen" is the panel's own in-place
+  // expansion and is never offered for a result that cannot render here.
   return (
     <div className="flex flex-col gap-3" data-testid="result-body-fallback">
       <p className="text-basis text-text-secondary">
@@ -144,9 +149,10 @@ export function ResultBody({
         variant="pill"
         onClick={() => onOpenFull(descriptor.advancedRoute)}
         data-testid="result-body-open-full"
+        data-station={descriptor.advancedRoute}
         className="self-start"
       >
-        {t("openFull")}
+        {t(descriptor.stationLabelKey.replace("conversation.results.", ""))}
       </Button>
     </div>
   );

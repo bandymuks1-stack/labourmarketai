@@ -771,6 +771,8 @@
       "rejected": "{hours} val. atmesta žiniaraštyje — niekur neskaičiuojama",
       "rule": "Valandų įrašas sako kada ir kiek, bet ne ką darėte — todėl šios valandos nepasiekia jokio įgūdžio ir jokios darbo rūšies. Tai daro tik žurnalo įrašas.",
       "periodRecord": "{hours} val. per {span} — vienas skaičius visam laikotarpiui, neskirstomas į dienas",
+      "periodRecordHuman": "{hours} val., {span} — šaltinis nurodo tik bendrą sumą; mėnesius, importuojant dokumentą, pasirinko žmogus. Neskirstoma į mėnesius ar dienas",
+      "periodRecordDerived": "{hours} val., {span} — šaltinis nurodo tik bendrą sumą; mėnesiai išvesti, o ne nurodyti. Neskirstoma į mėnesius ar dienas",
       "periodMore": "dar {count, plural, one {# laikotarpio įrašas} few {# laikotarpio įrašai} other {# laikotarpio įrašų}}"
     },
     "growthKindsTitle": "Ką rodo jūsų įrašai",

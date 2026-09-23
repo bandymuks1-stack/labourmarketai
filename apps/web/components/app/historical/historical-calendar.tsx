@@ -4,6 +4,11 @@ import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
 import { useMemo } from "react";
 
 import {
+  periodProvenance,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
+
+import {
   ObjectMark,
   PersonMark,
   PersonToken,
@@ -63,8 +68,17 @@ export interface HistoricalCalendarLabels {
   readonly weekShort: string;
   readonly apart: string;
   readonly periodUnknown: string;
-  /** "Derived equal monthly share · not source days" (owner 2026-09-17). */
+  /** "Period set at import (human choice)…" / "Period derived…" — said where
+   *  a period IS set, instead of "period not established". */
+  readonly periodHuman: string;
+  readonly periodDerived: string;
+  /** "Derived equal monthly share · not source days" (owner 2026-09-17) —
+   *  only ever for a period the SOURCE stated. */
   readonly monthlyShare: string;
+  /** A span with no monthly figure (owner rule 2026-09-23). */
+  readonly noMonthlyFigure: string;
+  readonly sourceStates: (words: string) => string;
+  readonly sourceDiffers: string;
   readonly remote: string;
   readonly open: string;
   readonly weekConflict: string;
@@ -531,27 +545,48 @@ export function HistoricalCalendar({
           data-testid="evidence-calendar-aggregates"
           aria-label={labels.apart}
         >
-          {calendar.aggregates.map((a, i) => (
+          {calendar.aggregates.map((a, i) => {
+            // The aggregate's period through the ONE rule: where a period IS
+            // set it says how it came to be (never "not established"), at
+            // MONTH precision when a person chose it. A staged aggregate's
+            // period only ever comes from a time-semantics decision — the
+            // classifier never sets one — so it is a human choice or derived.
+            const derived = { timeSemantics: a.timeSemantics };
+            const provenance = a.periodStart
+              ? periodProvenance({ activityDate: null, periodStart: a.periodStart, factFields: [], derived })
+              : null;
+            const periodLabel =
+              provenance === "human_choice"
+                ? labels.periodHuman
+                : provenance === "derived"
+                  ? labels.periodDerived
+                  : labels.periodUnknown;
+            const when = a.periodStart
+              ? recordWhen(
+                  { activityDate: null, periodStart: a.periodStart, periodEnd: a.periodEnd, factFields: [], derived },
+                  locale,
+                )
+              : null;
+            return (
             <li
               key={`${a.label}:${a.recordedOn}:${i}`}
               className="inline-flex flex-wrap items-center gap-2 rounded-2xl border border-state-amber/40 py-1 pl-1 pr-3 font-mono text-meta tabular-nums text-text-secondary"
               data-testid="evidence-calendar-aggregate"
               data-open={a.open ? "true" : "false"}
+              data-provenance={provenance ?? "unknown"}
             >
               <PersonMark label={a.label} size="sm" />
               <span className="text-text-primary">{a.label}</span>
               <span className="font-display text-support font-bold text-state-amber">
                 {labels.sum} {fmt.hours(a.sourceHours)} h
               </span>
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1" title={periodLabel}>
                 <SemanticIcon
                   concept="time"
-                  label={labels.periodUnknown}
+                  label={periodLabel}
                   className="h-3 w-3"
                 />
-                {a.periodStart
-                  ? `${fmt.day(a.periodStart)} – ${fmt.day(a.periodEnd ?? a.periodStart)}`
-                  : "?"}
+                {when ?? "?"}
               </span>
               <span
                 className="inline-flex items-center gap-1"
@@ -576,20 +611,31 @@ export function HistoricalCalendar({
                   />
                 </span>
               )}
-              {/* DERIVED — the even monthly share of a CONFIRMED period
-                  (owner 2026-09-17). Beside the aggregate, in the apart band,
-                  on no day and in no total; absent while the period is open. */}
+              {/* The decided period through the ONE reading (owner rule
+                  2026-09-23). Beside the aggregate, in the apart band, on no
+                  day and in no total; absent while the period is open. A
+                  span a person chose shows its months and the source's own
+                  words — no monthly figure; the provenance is on the span. */}
               {!a.open && (
                 <PeriodMonthlyShare
                   hours={a.sourceHours}
                   periodStart={a.periodStart}
                   periodEnd={a.periodEnd}
-                  label={labels.monthlyShare}
+                  derived={derived}
+                  sourceText={a.sourceText}
+                  labels={{
+                    monthlyShare: labels.monthlyShare,
+                    noMonthlyFigure: labels.noMonthlyFigure,
+                    provenance: { human_choice: labels.periodHuman, derived: labels.periodDerived },
+                    sourceStates: labels.sourceStates,
+                    sourceDiffers: labels.sourceDiffers,
+                  }}
                   className="flex basis-full flex-col gap-0.5 pl-1"
                 />
               )}
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </section>

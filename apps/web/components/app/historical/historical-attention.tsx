@@ -53,6 +53,8 @@ export interface AttentionLabels {
   readonly whyLabel: string;
   readonly person: string;
   readonly sum: string;
+  /** "Source states: “{words}”" — the duration / rate in the source's own words. */
+  readonly sourceStates: (words: string) => string;
   readonly time: TimeSemanticsLabels;
   readonly label: LabelResolveLabels;
 }
@@ -151,6 +153,19 @@ export function HistoricalAttention({
                           {labels.unknown}
                         </span>
                       </div>
+                      {/* DECISION-TIME HONESTY (owner rule 2026-09-23): what the
+                          source's own words state about the span and the rate
+                          — "at least 16 month", "each month only 50 hours" —
+                          in front of the human BEFORE a period is chosen. A
+                          period that disagrees is recorded with a warning,
+                          never refused. */}
+                      {r.sourceStates.length > 0 && (
+                        <p className="flex flex-wrap gap-x-3 gap-y-1 text-meta text-text-secondary" data-testid="evidence-time-source-states">
+                          {r.sourceStates.map((w) => (
+                            <span key={w}>{labels.sourceStates(w)}</span>
+                          ))}
+                        </p>
+                      )}
                       {(r.text || r.context || r.periodWords) && (
                         <details>
                           <summary className="flex min-h-11 cursor-pointer items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
@@ -200,7 +215,7 @@ export function HistoricalAttention({
               <li key={`${i.kind}:${i.key ?? ""}`} data-testid="evidence-issue" data-kind={i.kind} data-blocking="false" data-count={i.count}>
                 <details className="rounded-md border border-ink-600">
                   <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 text-support text-text-secondary">
-                    <SemanticIcon concept={i.kind === "allocation_inconsistent" || i.kind === "conflicts" || i.kind === "week_conflicts" ? "warning" : "unknown"} label={labels.observations} className="h-4 w-4 text-text-muted" />
+                    <SemanticIcon concept={i.kind === "allocation_inconsistent" || i.kind === "conflicts" || i.kind === "week_conflicts" || i.kind === "time_conflicts_source" ? "warning" : "unknown"} label={labels.observations} className="h-4 w-4 text-text-muted" />
                     <span className="flex-1">{labels.issue(i.kind, { count: i.count, label: i.label ?? "" })}</span>
                   </summary>
                   <div className="flex flex-col gap-2 px-3 pb-3">

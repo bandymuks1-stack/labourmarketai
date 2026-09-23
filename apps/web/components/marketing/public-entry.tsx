@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Link } from "@/lib/i18n/navigation";
 import {
   entryDoorHref,
   readPublicEntry,
@@ -58,7 +59,7 @@ const QUESTION_CHIPS = ["work", "hire"] as const satisfies readonly FirstRunInte
 
 /** The example sentences under the field, keyed for i18n. Each is routed
  *  LIVE through the same router when tapped — nothing here is pre-answered. */
-const EXAMPLE_KEYS = [
+export const EXAMPLE_KEYS = [
   "hire",
   "work",
   "internship",
@@ -86,17 +87,100 @@ const EXAMPLE_KEYS = [
   "verifyWork",
 ] as const;
 
+export type EntryExampleKey = (typeof EXAMPLE_KEYS)[number];
+
+/**
+ * FOUR BY DEFAULT, ALL TEN ONE TAP AWAY (owner directive 2026-09-23, landing
+ * §22 "fix the story, not CSS").
+ *
+ * Ten chips of equal weight were the only interactive mass on the first
+ * screen, and they arrived before the page had said what it is. The owner
+ * explicitly superseded the #1609 §18 reading that all ten must be visible by
+ * default; what §18 protects — the BREADTH of the graph — is kept, because
+ * the catalogue still holds all ten sentences in every locale and every one
+ * stays reachable from the "more examples" control.
+ *
+ * The default four are one per direction a first-time visitor most often
+ * means: someone hiring, someone looking for work, an organisation with
+ * spare people, and real work being recorded. They are not a ranking of the
+ * other six. `hire` stays FIRST because both CI landing specs click the
+ * first chip and assert the need-workers reading.
+ */
+export const DEFAULT_EXAMPLE_KEYS = [
+  "hire",
+  "work",
+  "offerCapacity",
+  "logWork",
+] as const satisfies readonly EntryExampleKey[];
+
+/** The chips the entry MOUNTS: the default four, or all ten with the default
+ *  four still first (so opening the rest never moves a chip already seen). */
+export function visibleExampleKeys(showAll: boolean): readonly EntryExampleKey[] {
+  if (!showAll) return DEFAULT_EXAMPLE_KEYS;
+  const defaults: readonly EntryExampleKey[] = DEFAULT_EXAMPLE_KEYS;
+  return [...defaults, ...EXAMPLE_KEYS.filter((key) => !defaults.includes(key))];
+}
+
+/**
+ * One tracked landing CTA. The wrapper hears the anchor's click in the
+ * capture phase (pointer AND keyboard activation both dispatch `click` on the
+ * anchor), so the funnel event fires without the link primitive growing a
+ * telemetry prop. The entry's own doors and the landing's primary actions
+ * (`landing-primary-actions.tsx`, a server component) share this ONE
+ * wrapper, so every landing CTA reports the same bounded shape.
+ */
+export function LandingCtaCapture({
+  surface,
+  ctaId,
+  intent,
+  testId,
+  children,
+}: {
+  readonly surface: "landing_entry" | "landing_hero" | "landing_close";
+  readonly ctaId: string;
+  readonly intent?: FirstRunIntent;
+  readonly testId?: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <span
+      data-testid={testId}
+      data-cta-id={ctaId}
+      className="inline-flex"
+      onClickCapture={() =>
+        trackFunnel(FUNNEL_EVENTS.ctaClicked, {
+          surface,
+          cta_id: ctaId,
+          intent,
+        })
+      }
+    >
+      {children}
+    </span>
+  );
+}
+
 export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
   const t = useTranslations("landing.entry");
   const locale = useLocale();
   const inputId = useId();
   const questionId = useId();
+  const examplesId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  /** The first chip the "more examples" control mounts — focus lands there,
+   *  because the control itself unmounts once it has done its job. */
+  const firstMoreRef = useRef<HTMLButtonElement>(null);
 
   const [draft, setDraft] = useState("");
   const [reading, setReading] = useState<PublicEntryReading | null>(null);
   /** The chip answer to the one question, when the router could not read. */
   const [chosen, setChosen] = useState<FirstRunIntent | null>(null);
+  /** All ten examples mounted? Four until the visitor asks for more. */
+  const [showAllExamples, setShowAllExamples] = useState(false);
+
+  useEffect(() => {
+    if (showAllExamples) firstMoreRef.current?.focus();
+  }, [showAllExamples]);
 
   const ask = useCallback((text: string) => {
     const next = readPublicEntry(text);
@@ -148,21 +232,13 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
       )
     : null;
 
-  /** One of the two real doors. The wrapper hears the anchor's click in the
-   *  capture phase (pointer AND keyboard activation both dispatch `click` on
-   *  the anchor), so the funnel event fires without the link primitive
-   *  growing a telemetry prop. */
+  /** One of the two real doors, reported through the shared capture. */
   const door = (kind: EntryDoor) => (
-    <span
-      data-testid={`entry-${kind}`}
-      className="inline-flex"
-      onClickCapture={() =>
-        trackFunnel(FUNNEL_EVENTS.ctaClicked, {
-          surface: "landing_entry",
-          cta_id: `entry_${kind}`,
-          intent: family ?? undefined,
-        })
-      }
+    <LandingCtaCapture
+      testId={`entry-${kind}`}
+      surface="landing_entry"
+      ctaId={`entry_${kind}`}
+      intent={family ?? undefined}
     >
       <AuthCtaLink
         relPath={entryDoorHref(locale, kind, sentence)}
@@ -174,8 +250,11 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
         {t(kind)}
         {kind === "signup" ? <ArrowRight className="size-3.5 shrink-0" aria-hidden /> : null}
       </AuthCtaLink>
-    </span>
+    </LandingCtaCapture>
   );
+
+  const examples = visibleExampleKeys(showAllExamples);
+  const firstMoreKey = visibleExampleKeys(true)[DEFAULT_EXAMPLE_KEYS.length];
 
   return (
     // The entry claimed 768px of a 1904px viewport — 40% — leaving the wide
@@ -237,10 +316,14 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
         </form>
 
         {/* ── Examples — routed live when tapped, never pre-answered ──────
-               TEN sentences, and none of them may be dropped: each is a
+               TEN sentences, all reachable, FOUR mounted by default (owner
+               directive 2026-09-23, see DEFAULT_EXAMPLE_KEYS): each is a
                different DIRECTION of the graph, which is the whole answer to
                §16 (a visitor reading only "job + worker + hire" leaves
-               believing this is a job board).
+               believing this is a job board), so none is dropped — the other
+               six are MOUNTED by the "more examples" control, never hidden
+               with CSS, because tests/e2e/landing-mobile-overflow.spec.ts
+               asserts a real box for every chip that exists.
                ── THE CHIP SAYS THE TOPIC; THE FIELD SAYS THE SENTENCE ──────
                (owner window 11 §18 + §19, 2026-09-07)
 
@@ -266,13 +349,14 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
 
                The labels are ordinary speech, never the product's vocabulary:
                no SUPPLY, no DEMAND, no "capacity", no "evidence" (§18). */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div id={examplesId} className="flex flex-wrap items-center gap-1.5">
           <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
-          {EXAMPLE_KEYS.map((key) => {
+          {examples.map((key) => {
             const example = t(`examples.${key}`);
             return (
               <button
                 key={key}
+                ref={key === firstMoreKey ? firstMoreRef : undefined}
                 type="button"
                 data-testid="entry-example"
                 // The routed sentence is what the button is FOR, so it is the
@@ -291,15 +375,13 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                 // secondary; they were the page.
                 //
                 // Capping each chip at half the row makes them wrap two-up
-                // below `sm` (5 rows instead of 10) while `truncate` absorbs
-                // the two long labels. Nothing is hidden and nothing is
-                // dropped: all ten still RENDER at every width, which is what
-                // both the §16 breadth requirement and
-                // tests/e2e/landing-mobile-overflow.spec.ts depend on — that
+                // below `sm` while `truncate` absorbs the long labels. Every
+                // chip that is MOUNTED renders at every width, which is what
+                // tests/e2e/landing-mobile-overflow.spec.ts depends on — that
                 // spec asserts a non-null bounding box for every chip, so
-                // `display:none` progressive disclosure would fail it, and a
-                // horizontal scroll strip was already tried and reverted
-                // (#1607) for hiding eight of ten behind a gesture.
+                // `display:none` disclosure would fail it; the rest are
+                // mounted on demand instead (2026-09-23), and a horizontal
+                // scroll strip was already tried and reverted (#1607).
                 //
                 // The full sentence is still the accessible name and the
                 // tooltip, so truncation costs nothing to a screen reader.
@@ -309,6 +391,20 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
               </button>
             );
           })}
+          {/* The rest of the graph, one tap away. Quieter than a chip on
+              purpose: it is a way to see more, not a fifth thing to choose. */}
+          {showAllExamples ? null : (
+            <button
+              type="button"
+              data-testid="entry-more-examples"
+              aria-expanded={false}
+              aria-controls={examplesId}
+              onClick={() => setShowAllExamples(true)}
+              className="min-h-11 rounded-full px-3 text-support font-medium text-text-muted underline-offset-4 transition-colors hover:text-text-primary hover:underline"
+            >
+              {t("moreExamples")}
+            </button>
+          )}
         </div>
 
         {/* ── What was understood ──────────────────────────────────────── */}
@@ -333,6 +429,26 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             <div className="mt-3 flex flex-wrap gap-2">
               {door("signup")}
               {door("login")}
+              {/* A person looking for WORK can look at real open jobs right
+                  now, without an account: the public board is anonymous by
+                  design. Offering only "create an account" to "Ieškau darbo"
+                  sent that visitor through a sign-up to see what the board
+                  already shows anyone. */}
+              {family === "work" ? (
+                <LandingCtaCapture
+                  testId="entry-jobs"
+                  surface="landing_entry"
+                  ctaId="entry_jobs"
+                  intent={family}
+                >
+                  <Link
+                    href="/jobs"
+                    className={cn(buttonLinkClassName("secondary"), "gap-1.5 rounded-full")}
+                  >
+                    {t("browseJobs")}
+                  </Link>
+                </LandingCtaCapture>
+              ) : null}
             </div>
           </div>
         ) : null}

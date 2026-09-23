@@ -1479,9 +1479,9 @@
     }
   },
   "profileHub": {
-    "lead": "Štai ką apie jus jau žinome.",
-    "explainer": "Pagal tai darbdavys sprendžia, kokiam darbui tinkate.",
-    "notVerified": "Tai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.",
+    "lead": "Štai ką apie tave jau žinome.",
+    "explainer": "Pagal tai darbdavys sprendžia, kokiam darbui tinki.",
+    "notVerified": "Šią informaciją pateikei tu. Gali ją papildyti vėliau.",
     "doneDisclosure": "Kas jau paruošta",
     "askWorkspace": "Paklausti darbo erdvėje",
     "state": {
@@ -1541,7 +1541,7 @@
     "activity": {
       "label": "Šiandienos aktyvumas",
       "count": "Įrašų šiandien: {n}",
-      "none": "Šiandien dar nieko neįrašėte"
+      "none": "Šiandien dar nieko neįrašei"
     }
   },
   "processAssistant": {
@@ -3397,11 +3397,13 @@
     "directionAdded": "Kryptis pridėta",
     "reviewBanner": {
       "title": "Dalis įgūdžių laukia peržiūros",
-      "body": "Kai kurie įrašai dar neaiškūs. Papildykite informaciją arba peržiūrėkite įgūdžius, kad darbdaviai jus rastų tiksliau.",
+      "body": "Kai kurie įrašai dar neaiškūs. Papildyk informaciją arba peržiūrėk įgūdžius, kad darbdaviai tave rastų tiksliau.",
       "cta": "Peržiūrėti įgūdžius"
     },
     "pageTitle": "Mano profilis",
     "pageSubtitle": "Ką dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.",
+    "editDisclosure": "Profesija, įgūdžiai ir aprašymas",
+    "aboutDisclosure": "Kaip skaityti šį profilį",
     "professionLabel": "Tavo profesija",
     "professionPlaceholder": "Pasirink profesiją",
     "professionSaved": "Profesija išsaugota",
@@ -7476,7 +7478,7 @@
       "opportunityUnavailable": "Atviri poreikiai tavo paskyrai dar nepasiekiami, todėl tai nebuvo išmatuota.",
       "opportunityNoWorker": "Tai išmatuojama, kai turi darbuotojo profilį.",
       "closestBasis": "Artimiausia — {what}: atitinka {matched} iš {required} reikalaujamų įgūdžių, {confirmed} su vadovo įrašu.",
-      "historyUnavailable": "Jūsų darbo istorijos šiuo metu nepavyko nuskaityti."
+      "historyUnavailable": "Tavo darbo istorijos šiuo metu nepavyko nuskaityti."
     },
     "documentsLabel": "Dokumentai",
     "documentsValue": "{valid} galiojantys",
@@ -7514,7 +7516,7 @@
       "historyAria": "Darbo laikotarpiai laiko juostoje nuo {from} iki {to}.",
       "skillsScaleNote": "Juostos ilgis — tai darbo įrašų skaičius, pagrindžiantis kiekvieną įgūdį (pilna juosta = {scale}+), o ne įgūdžio balas.",
       "historyHours": "{hours} val. užfiksuota · {confirmed} val. su vadovo įrašu",
-      "historyUnavailable": "Jūsų darbo istorijos šiuo metu nepavyko nuskaityti."
+      "historyUnavailable": "Tavo darbo istorijos šiuo metu nepavyko nuskaityti."
     },
     "skillsUnavailable": "Šiuo metu nepavyko nuskaityti.",
     "verifiedUnavailable": "Įgūdžių su vadovo įrašu šiuo metu nepavyko nuskaityti."
@@ -12303,24 +12305,24 @@
     "progress": "{done} iš {total}",
     "steps": {
       "goal": {
-        "title": "Kokio darbo ieškote?",
-        "hint": "Pasirinkite savo profesiją."
+        "title": "Kokio darbo ieškai?",
+        "hint": "Pasirink savo profesiją."
       },
       "experience": {
-        "title": "Įkelkite CV arba atsakykite į kelis klausimus",
-        "hint": "Papasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys."
+        "title": "Įkelk CV arba atsakyk į kelis klausimus",
+        "hint": "Papasakok apie savo patirtį — įkelk CV arba įrašyk ją savo žodžiais."
       },
       "review": {
-        "title": "Patikrinkite, ką radome",
-        "hint": "Patvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus."
+        "title": "Patikrink, ką radome",
+        "hint": "Patvirtink, pataisyk arba pašalink pasiūlytus įrašus."
       },
       "location": {
-        "title": "Kur norite dirbti?",
-        "hint": "Nurodykite šalį ir pageidaujamas šalis darbo kortelėje."
+        "title": "Kur nori dirbti?",
+        "hint": "Nurodyk šalį ir pageidaujamas šalis darbo kortelėje."
       },
       "availability": {
-        "title": "Kada galite pradėti?",
-        "hint": "Pažymėkite savo prieinamumą."
+        "title": "Kada gali pradėti?",
+        "hint": "Pažymėk savo prieinamumą."
       }
     }
   },
@@ -13655,7 +13657,19 @@
         "title": "Sąskaitos pagrindas"
       },
       "openFull": "Atidaryti pilną ekraną",
-      "fallbackUnverified": "Kol kas tai gyvena atskirame ekrane — jo duomenų šaltinis dar nepatikrintas rodymui čia.",
+      "station": {
+        "profile": "Atidaryti profilį",
+        "journal": "Atidaryti darbo žurnalą",
+        "calendar": "Atidaryti kalendorių",
+        "marketMap": "Atidaryti rinkos žemėlapį",
+        "opportunities": "Atidaryti galimybes",
+        "scouting": "Atidaryti kandidatų atranką",
+        "projects": "Atidaryti projektus",
+        "documents": "Atidaryti dokumentus",
+        "finance": "Atidaryti finansų įrašus"
+      },
+      "collapseFull": "Sutraukti",
+      "fallbackUnverified": "Šio atsakymo čia dar nerodau — jis turi savo puslapį.",
       "fallbackContext": "Šis rezultatas nepasiekiamas dabartiniame kontekste.",
       "pendingInline": "Ruošiamas rezultatas.",
       "marketEmpty": "Šiuo metu atvirų poreikių su vieta nėra.",
@@ -14103,8 +14117,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Pasakykite savais žodžiais, ko jums reikia darbe.",
-      "sub": "Darbas ir žmonės, komandos ir paslaugos, laisvi pajėgumai, atlikti darbai ir jų įrodymai — viena rinka, tikrose vietose. Nereikia iš anksto pasirinkti, kas esate."
+      "headline": "Viena darbo rinka žmonėms ir įmonėms.",
+      "sub": "Raskite darbą arba žmones, užrašykite atliktą darbą ir leiskite jam kalbėti už jus — kita galimybė remiasi tuo, ką iš tikrųjų padarėte, o ne tuo, ką teigia CV."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -14172,6 +14186,8 @@
       },
       "numbers": "Dabar platformoje: {vacancies} aktyvių darbo skelbimų · {employers} darbdaviai",
       "refreshed": "atnaujinta {date}",
+      "moreExamples": "Daugiau pavyzdžių",
+      "browseJobs": "Žiūrėti darbo skelbimus",
       "exampleLabels": {
         "hire": "Reikia darbuotojų",
         "work": "Ieškau darbo",
@@ -14184,6 +14200,12 @@
         "logWork": "Užrašyti atliktą darbą",
         "verifyWork": "Kas patvirtins patirtį"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Darbo skelbimai",
+      "title": "Tikri darbo skelbimai, aktyvūs dabar.",
+      "sub": "Keli dabartiniai skelbimai iš oficialių viešų užimtumo šaltinių. Žiūrėti galima be paskyros; prisijungę matysite darbdavį, vietą ir kaip kandidatuoti.",
+      "all": "Visi darbo skelbimai"
     },
     "marketProof": {
       "eyebrow": "Šiuo metu platformoje",
@@ -16322,6 +16344,7 @@
       "selfAttested": "Patvirtino pats asmuo, apie kurį tai yra",
       "selfAttestedHint": "Tai tikras, užfiksuotas įrodymas. Tai nėra nepriklausomas patikrinimas ir niekada taip neskaičiuojama.",
       "notIndependentlyVerified": "Nepatikrinta nepriklausomai",
+      "howRecorded": "Kaip tai užfiksuota",
       "withdrawn": "Atšaukta",
       "disputed": "Užginčyta. Įrašą užginčijo asmuo, turintis tam pagrindą; lieka ir įrašas, ir prieštaravimas.",
       "disputedByYou": "Jūs užginčijote šį įrašą. Lieka ir įrašas, ir jūsų prieštaravimas.",
@@ -16338,7 +16361,10 @@
       "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas.",
       "periodDerivedHuman": "Laikotarpis nustatytas importo metu (žmogaus sprendimas) — šaltinis datų nenurodė",
       "periodDerived": "Laikotarpis išvestas — šaltinis datų nenurodė",
-      "sourceStatement": "Šaltinio tekstas (faktas)"
+      "sourceStatement": "Šaltinio tekstas (faktas)",
+      "noMonthlyFigure": "Mėnesinio skaičiaus nėra — šaltinis nurodo tik bendrą sumą",
+      "sourceStates": "Šaltinyje parašyta: „{words}“",
+      "sourceDiffers": "Šis laikotarpis skiriasi nuo to, kas parašyta pačiame šaltinyje — išsaugomi abu"
     },
     "withdraw": {
       "title": "Atšaukti šį importą",
@@ -16394,6 +16420,8 @@
       "intro": "Darbas, mokymai ir studijos, kuriuos organizacija perkėlė iš savo pačios įrašų. Visada matote, kas juos atsiuntė, kuo jums tuo metu buvo ir kada.",
       "notEnabled": "Šioje aplinkoje tai dar neįjungta. Jūsų profilyje nieko netrūksta — tiesiog nėra saugyklos, kurią būtų galima perskaityti.",
       "empty": "Kol kas nė viena organizacija čia nieko apie jus neužfiksavo.",
+      "summaryRecords": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "summaryNoRecords": "Įrašų dar nėra — čia ryšiai su organizacijomis.",
       "offersTitle": "Laukiama jūsų atsakymo",
       "offersHint": "Organizacija teigia, kad vienas jos įrašų yra apie jus. Kol nepatvirtinsite, niekas neprisijungs prie jūsų CV, o atsisakymas yra tikras atsakymas — organizacija išsaugo savo įrašą, tik nustoja jame minėti jus.",
       "accept": "Taip, tai aš",
@@ -16482,7 +16510,8 @@
         "allocation_unknown": "{count} eil. — kelios vietos per dieną, paskirstymas nenurodytas",
         "allocation_inconsistent": "{count} eil. — aprašyme nurodytos valandos nesutampa su dienos suma",
         "place_from_text": "{count} eil. — vieta perskaityta iš aprašymo: „{label}“",
-        "time_semantics": "{count} eil. — ką reiškia šis valandų skaičius?"
+        "time_semantics": "{count} eil. — ką reiškia šis valandų skaičius?",
+        "time_conflicts_source": "{count} eil. — jūsų nurodytas laikotarpis skiriasi nuo paties šaltinio žodžių"
       },
       "issueWhy": {
         "impossible_hours": "Šaltinio skaičius paliekamas koks yra (pvz., mėnesio suma įrašyta į vieną dieną). Patvirtinus „palikti kaip nurodyta“, eilutė įrašoma kaip šaltinio faktas, o dienos trukmė lieka nežinoma — ji niekur nesumuojama.",
@@ -16495,7 +16524,8 @@
         "allocation_unknown": "Dienos suma išsaugoma tiksliai; valandos tarp objektų nedalijamos spėjant.",
         "allocation_inconsistent": "Aprašyme nurodytos dalys nesudaro dienos sumos. Abu skaičiai išsaugomi.",
         "place_from_text": "Objekto langelis tuščias; vieta paimta iš pirmųjų aprašymo žodžių. Jei tai kitos vietos rašybos klaida, pasirinkite „ta pati vieta kaip“ — bus sukurtas vienas objektas, ne du.",
-        "time_semantics": "Viena diena tiek valandų talpinti negali. Pagal šaltinio žodžius tai laikotarpio suma (pvz., darbas iš namų per kelis mėnesius). Skaičius lieka koks yra; jūs pasakote, kas tai — ir laikotarpį tik jei jį žinote. Tokia suma niekada netampa vienos dienos trukme."
+        "time_semantics": "Viena diena tiek valandų talpinti negali. Pagal šaltinio žodžius tai laikotarpio suma (pvz., darbas iš namų per kelis mėnesius). Skaičius lieka koks yra; jūs pasakote, kas tai — ir laikotarpį tik jei jį žinote. Tokia suma niekada netampa vienos dienos trukme.",
+        "time_conflicts_source": "Jūsų sprendimas išsaugomas — jūs žinote darbą. Pačiame šaltinyje parašyta kita trukmė ar tempas, todėl iš bendros sumos mėnesinis skaičius nesudaromas, o skirtumas lieka matomas šalia įrašo."
       },
       "keepAsStated": "Palikti kaip nurodyta šaltinyje",
       "keepAsStatedHint": "Šaltinio skaičius lieka nepakeistas ir įrašomas kaip šaltinio faktas. Jis NEtampa tos dienos darbo trukme — dienos trukmė lieka nežinoma, todėl kalendorius, „veikla skaičiais“, tempas ir pajėgumai jo nesumuoja.",
@@ -16569,6 +16599,7 @@
       "timeRemoteUnknown": "Nenurodyta",
       "timePeriod": "Laikotarpis (tik jei žinote)",
       "timePeriodHint": "Palikite tuščia, jei laikotarpio nežinote — sistema datų neišgalvoja. Su laikotarpiu suma įrašoma kaip laikotarpio įrašas; be jo — kaip šaltinio faktas su nežinoma trukme.",
+      "timePeriodBoth": "Mėnesiai: pirmasis ir paskutinis — abu arba palikite abu tuščius. Vien pradžia nėra laikotarpis.",
       "from": "Nuo",
       "to": "Iki",
       "timeSave": "Pritaikyti šioms eilutėms",

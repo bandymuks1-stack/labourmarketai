@@ -3402,6 +3402,8 @@
     },
     "pageTitle": "Mijn profiel",
     "pageSubtitle": "Wat je doet, wat je kunt en wat dat laat zien — alles op één plek.",
+    "editDisclosure": "Beroep, vaardigheden en beschrijving",
+    "aboutDisclosure": "Zo lees je dit profiel",
     "professionLabel": "Je beroep",
     "professionPlaceholder": "Selecteer een beroep",
     "professionSaved": "Beroep opgeslagen",
@@ -13655,7 +13657,19 @@
         "title": "Factuurbasis"
       },
       "openFull": "Volledig scherm openen",
-      "fallbackUnverified": "Dit staat voorlopig op een eigen scherm — de databron is nog niet geverifieerd voor weergave hier.",
+      "station": {
+        "profile": "Profiel openen",
+        "journal": "Werkjournaal openen",
+        "calendar": "Kalender openen",
+        "marketMap": "Marktkaart openen",
+        "opportunities": "Kansen openen",
+        "scouting": "Scouting openen",
+        "projects": "Projecten openen",
+        "documents": "Documenten openen",
+        "finance": "Financiële registraties openen"
+      },
+      "collapseFull": "Inklappen",
+      "fallbackUnverified": "Dit kan ik hier nog niet tonen — het heeft een eigen pagina.",
       "fallbackContext": "Dit resultaat is niet beschikbaar in de huidige context.",
       "pendingInline": "Resultaat wordt voorbereid.",
       "marketEmpty": "Er zijn nu geen open behoeften met een locatie.",
@@ -14103,8 +14117,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Zeg in je eigen woorden wat je nodig hebt in je werk.",
-      "sub": "Werk en mensen, ploegen en diensten, vrije capaciteit, gedaan werk en het bewijs ervan — één markt, op echte plekken. Je hoeft vooraf niet te kiezen wie je bent."
+      "headline": "Eén arbeidsmarkt voor mensen en bedrijven.",
+      "sub": "Vind werk of vind mensen, leg het werk vast dat je doet en laat het voor je spreken — je volgende kans rust op wat je echt hebt gedaan, niet op wat een cv beweert."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
@@ -14172,6 +14186,8 @@
       },
       "numbers": "Nu op het platform: {vacancies} actieve vacatures · {employers} werkgevers",
       "refreshed": "bijgewerkt {date}",
+      "moreExamples": "Meer voorbeelden",
+      "browseJobs": "Vacatures bekijken",
       "exampleLabels": {
         "hire": "Ik heb mensen nodig",
         "work": "Ik zoek werk",
@@ -14184,6 +14200,12 @@
         "logWork": "Gedaan werk vastleggen",
         "verifyWork": "Wie bevestigt dit"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Vacatures",
+      "title": "Echte vacatures, nu open.",
+      "sub": "Een paar actuele vacatures uit officiële openbare arbeidsbronnen. Bekijken kan zonder account; log in om de werkgever, de plek en de sollicitatiewijze te zien.",
+      "all": "Alle vacatures"
     },
     "marketProof": {
       "eyebrow": "Nu op het platform",
@@ -16322,6 +16344,7 @@
       "selfAttested": "Bevestigd door de persoon over wie het gaat",
       "selfAttestedHint": "Dit is echt, vastgelegd bewijs. Het is geen onafhankelijke verificatie en telt daar nooit als zodanig.",
       "notIndependentlyVerified": "Niet onafhankelijk geverifieerd",
+      "howRecorded": "Hoe dit is vastgelegd",
       "withdrawn": "Ingetrokken",
       "disputed": "Betwist. Iemand met grond heeft bezwaar gemaakt tegen dit record; zowel het record als het bezwaar blijven bewaard.",
       "disputedByYou": "U hebt dit record betwist. Zowel het record als uw bezwaar blijven bewaard.",
@@ -16338,7 +16361,10 @@
       "attestAllHint": "De organisatie staat achter elk nog niet bevestigd record uit deze bron ({count}). Eén bevestigingsgebeurtenis per record, met rol en notitie; uren, bronfeiten en records veranderen niet. Dit is geen onafhankelijke verificatie.",
       "periodDerivedHuman": "Periode bij import vastgesteld (menselijke keuze) — de bron noemde geen data",
       "periodDerived": "Periode afgeleid — de bron noemde geen data",
-      "sourceStatement": "Brontekst (feit)"
+      "sourceStatement": "Brontekst (feit)",
+      "noMonthlyFigure": "Geen maandcijfer — de bron noemt alleen het totaal",
+      "sourceStates": "De bron zegt: “{words}”",
+      "sourceDiffers": "Deze periode wijkt af van wat de bron zelf zegt — beide blijven bewaard"
     },
     "withdraw": {
       "title": "Deze import ongedaan maken",
@@ -16394,6 +16420,8 @@
       "intro": "Werk, opleiding en studie die een organisatie uit haar eigen administratie heeft overgezet. U ziet altijd wie het heeft gestuurd, wat diegene toen voor u was en wanneer.",
       "notEnabled": "Dit is in deze omgeving nog niet ingeschakeld. Er ontbreekt niets aan uw profiel — de opslag is er eenvoudigweg niet om te lezen.",
       "empty": "Nog geen enkele organisatie heeft hier iets over u vastgelegd.",
+      "summaryRecords": "{count, plural, one {# registratie} other {# registraties}}",
+      "summaryNoRecords": "Nog geen registraties — hier staan de koppelingen met organisaties.",
       "offersTitle": "Wacht op uw antwoord",
       "offersHint": "Een organisatie zegt dat een van haar registraties over u gaat. Er komt niets in uw cv voordat u dat zegt, en weigeren is een echt antwoord — de organisatie houdt haar eigen registratie, ze noemt u er alleen niet meer in.",
       "accept": "Ja, dat ben ik",
@@ -16482,7 +16510,8 @@
         "allocation_unknown": "{count} regels — meerdere plaatsen op een dag, verdeling niet opgegeven",
         "allocation_inconsistent": "{count} regels — uren in de tekst tellen niet op tot de dag",
         "place_from_text": "{count} regels — plaats gelezen uit de tekst: „{label}”",
-        "time_semantics": "{count} regels — wat betekent dit urengetal?"
+        "time_semantics": "{count} regels — wat betekent dit urengetal?",
+        "time_conflicts_source": "{count} regels — de periode die u koos wijkt af van de woorden van de bron"
       },
       "issueWhy": {
         "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan“ wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
@@ -16495,7 +16524,8 @@
         "allocation_unknown": "Het dagtotaal blijft exact; uren worden niet op gok over plaatsen verdeeld.",
         "allocation_inconsistent": "De delen in de tekst vormen niet het dagtotaal. Beide getallen blijven bewaard.",
         "place_from_text": "De plaatscel is leeg; de locatie komt uit de eerste woorden van de tekst. Is het een spelfout van een andere plaats, kies dan „dezelfde plaats als” — er ontstaat één object, niet twee.",
-        "time_semantics": "Een dag kan zoveel uren niet bevatten. Volgens de woorden van de bron is het een periodetotaal (bv. thuiswerk over maanden). Het getal blijft zoals het is; u zegt wat het is — en de periode alleen als u die kent. Zo'n totaal wordt nooit de duur van één dag."
+        "time_semantics": "Een dag kan zoveel uren niet bevatten. Volgens de woorden van de bron is het een periodetotaal (bv. thuiswerk over maanden). Het getal blijft zoals het is; u zegt wat het is — en de periode alleen als u die kent. Zo'n totaal wordt nooit de duur van één dag.",
+        "time_conflicts_source": "Uw beslissing blijft staan — u kent het werk. De bron zelf noemt een andere duur of een ander tempo, dus wordt er uit het totaal geen maandcijfer gemaakt en blijft het verschil zichtbaar naast de regel."
       },
       "keepAsStated": "Laten staan zoals in de bron",
       "keepAsStatedHint": "Het brongetal blijft ongewijzigd en wordt vastgelegd als bronfeit. Het wordt NIET de werkduur van die dag — de dagduur blijft onbekend, dus kalender, werk in cijfers, tempo en capaciteit tellen het nooit op.",
@@ -16569,6 +16599,7 @@
       "timeRemoteUnknown": "Niet vermeld",
       "timePeriod": "Periode (alleen als u die kent)",
       "timePeriodHint": "Laat leeg als u de periode niet kent — het systeem verzint geen data. Met periode wordt het totaal als perioderegel vastgelegd; zonder als bronfeit met onbekende duur.",
+      "timePeriodBoth": "Maanden: de eerste en de laatste — allebei, of laat beide leeg. Alleen een begin is geen periode.",
       "from": "Van",
       "to": "Tot",
       "timeSave": "Toepassen op deze regels",

@@ -530,8 +530,10 @@ const timeSemanticsInput = z
       .object({
         kind: z.enum(["daily", "period_aggregate", "unknown"]),
         remote: z.boolean().nullish(),
-        periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
-        periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
+        /** `YYYY-MM` (recorded at month precision) or `YYYY-MM-DD`; both
+         *  bounds or neither — the core refuses a start alone. */
+        periodStart: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/).nullish(),
+        periodEnd: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/).nullish(),
       })
       .strict(),
   })
@@ -547,9 +549,14 @@ const timeSemanticsResolve: CapabilityDescriptor = {
   description:
     "Settles rows whose hours figure a day cannot hold: a day's hours, a " +
     "period aggregate (optionally remote, with the period when known), or " +
-    "unknown. The source figure is never edited; a period aggregate is never " +
-    "written as a day's duration. Only the human's authority behind the " +
-    "caller can decide this — an agent relays a decision, it does not make one.",
+    "unknown. A period is two months (YYYY-MM, kept at month precision) or " +
+    "two days — both bounds or neither; a start alone is refused. A period " +
+    "that disagrees with the duration or rate the source's own words state " +
+    "is recorded WITH a warning (`conflictsWithSource`), never refused. The " +
+    "source figure is never edited; a period aggregate is never written as a " +
+    "day's duration and is never split into monthly figures. Only the " +
+    "human's authority behind the caller can decide this — an agent relays a " +
+    "decision, it does not make one.",
   exposed: true,
   annotations: appendWrite,
   inputSchema: timeSemanticsInput,
@@ -562,7 +569,17 @@ const timeSemanticsResolve: CapabilityDescriptor = {
       decision: parsed.decision,
     });
     if (res.kind !== "ok") return fail(res);
-    return { ok: true, data: { updated: res.updated, note: "Preview again to refresh the token." } };
+    return {
+      ok: true,
+      data: {
+        updated: res.updated,
+        conflictsWithSource: res.conflictsWithSource,
+        note:
+          res.conflictsWithSource > 0
+            ? "Recorded. The period disagrees with what the source's own words state on some rows — the preview shows where. Preview again to refresh the token."
+            : "Preview again to refresh the token.",
+      },
+    };
   },
 };
 
@@ -667,8 +684,11 @@ const recordsList: CapabilityDescriptor = {
   title: "Read imported evidence back",
   description:
     "Returns committed evidence with its full provenance — who supplied it and " +
-    "in what capacity, who imported it, the original source, FACT vs DERIVED, " +
-    "and the DERIVED standing (reported / attested / self-attested / " +
+    "in what capacity, who imported it, the original source, FACT vs DERIVED " +
+    "(`factFields` names the canonical fields the record's own source line " +
+    "states; a field with a recorded derivation, and a period a person set " +
+    "at import, are never among them — `derived.timeSemantics` says how such " +
+    "a period came to be), and the DERIVED standing (reported / attested / self-attested / " +
     "independently verified / withdrawn). `independentlyVerified` is true ONLY " +
     "for a real independent verification event; a self-attestation never counts.",
   exposed: true,

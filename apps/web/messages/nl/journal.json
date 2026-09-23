@@ -771,6 +771,8 @@
       "rejected": "{hours} u afgewezen in een urenstaat — nergens geteld",
       "rule": "Een urenregistratie zegt wanneer en hoe lang, niet wat er is gedaan — daarom bereiken deze uren geen enkele vaardigheid en geen enkel soort werk. Alleen een journaalregistratie doet dat.",
       "periodRecord": "{hours} u over {span} — één cijfer voor de hele periode, niet verdeeld over dagen",
+      "periodRecordHuman": "{hours} u, {span} — de bron noemt alleen het totaal; de maanden zijn bij het importeren van het document door een persoon gekozen. Niet verdeeld over maanden of dagen",
+      "periodRecordDerived": "{hours} u, {span} — de bron noemt alleen het totaal; de maanden zijn afgeleid, niet vermeld. Niet verdeeld over maanden of dagen",
       "periodMore": "{count, plural, one {nog # periode-record} other {nog # periode-records}}"
     },
     "growthKindsTitle": "Wat je vermeldingen laten zien",

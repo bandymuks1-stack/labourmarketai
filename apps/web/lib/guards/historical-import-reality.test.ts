@@ -104,7 +104,11 @@ describe("a figure a day cannot hold is a QUESTION about meaning, never a day's 
   });
   it("the commit writes a period aggregate as a period record when the period is known, else as a dated fact with UNKNOWN duration; the source figure stays in fact + derived", () => {
     const commit = core.slice(core.indexOf("export async function commitImport"), core.indexOf("// ── the rollback path"));
-    expect(commit).toMatch(/const period = ts && ts\.value === "period_aggregate" && ts\.periodStart \? ts : null;/);
+    // A period needs BOTH bounds (owner rule 2026-09-23) — a start alone is
+    // never written as a one-day span.
+    expect(commit).toMatch(/const period = ts && ts\.value === "period_aggregate" && ts\.periodStart && ts\.periodEnd \? ts : null;/);
+    expect(commit).toMatch(/period_end: period \? period\.periodEnd : /);
+    expect(commit).not.toMatch(/periodEnd \?\? period\.periodStart/);
     expect(commit).toMatch(/activity_date: period \? null : /);
     expect(commit).toMatch(/period_start: period \? period\.periodStart : /);
     expect(commit).toMatch(/hours: period \? period\.sourceHours : daily && !legacyExceeds \? \(r\.hours \?\? null\) : null,/);
@@ -227,14 +231,74 @@ describe("the company person page composes imported history (2026-09-20)", () =>
     expect(page).toMatch(/<PersonImportedHistory workerId=\{worker\.id as string\} locale=\{locale\} \/>/);
     expect(section).toMatch(/\.eq\("linked_worker_id", workerId\)\s*\.eq\("link_state", "linked"\)/);
     expect(section).toMatch(/listEvidenceRecords\(\s*\{ supabase, userId: user\.id, locale \},\s*\{ organizationPersonIds: personIds, limit: READ_LIMIT \},\s*\)/);
-    expect(section).toMatch(/import \{\s*EvidenceState,\s*PeriodBand,/);
+    // the standing through the canonical chip, the period through the ONE
+    // period renderer every other surface uses (2026-09-23)
+    expect(section).toMatch(/import \{\s*EvidenceState,\s*type EvidenceStanding,/);
+    expect(section).toMatch(/import \{ PeriodMonthlyShare \} from "@\/components\/app\/period-monthly-share";/);
     expect(section).not.toMatch(/createAdminClient|service_role|security definer/i);
   });
-  it("UNKNOWN is said; a period record is a band, never days", () => {
+  it("UNKNOWN is said; a period record is read through the ONE period reading, never days", () => {
     expect(section).toContain('data-testid="person-history-unavailable"');
     expect(section).toMatch(/if \(res\.kind !== "ok"\) return unavailable;/);
-    expect(section).toMatch(/projectPeriodAggregateByMonth\(\{/);
+    expect(section).toMatch(/readPeriodEvidence\(\{/);
+    expect(section).toMatch(/<PeriodMonthlyShare[\s\S]{0,200}derived=\{rec\.derived\}/);
     expect(section).not.toMatch(/reportedByDay|workDate/);
+  });
+  it("an INTERPRETED period says how it came to be, at month precision, and draws no share of its own (owner rule 2026-09-23)", () => {
+    // the when is read at the precision it has, with its provenance beside it
+    expect(section).toMatch(/const when = recordWhen\(rec, locale\);/);
+    expect(section).toContain('data-testid="person-history-period-derived"');
+    // negative control: no surface-local split, no day-precise range of a chosen span
+    expect(section).not.toMatch(/projectPeriodAggregateByMonth|formatUtcDateRange|\.toFixed\(2\)/);
+  });
+});
+
+describe("an interpreted period renders no monthly figure — one rule, every renderer (owner rule 2026-09-23)", () => {
+  const renderers = {
+    "components/app/period-monthly-share.tsx": read("components/app/period-monthly-share.tsx"),
+    "components/app/people/person-imported-history.tsx": read("components/app/people/person-imported-history.tsx"),
+    "components/app/planning/derived-period-evidence.tsx": read("components/app/planning/derived-period-evidence.tsx"),
+    "components/app/historical/historical-calendar.tsx": read("components/app/historical/historical-calendar.tsx"),
+    "components/app/evidence-import-section.tsx": section,
+    "components/app/organization-evidence-section.tsx": read("components/app/organization-evidence-section.tsx"),
+  };
+  it("no renderer splits a period itself — the projection is reached ONLY through readPeriodEvidence", () => {
+    for (const [file, src] of Object.entries(renderers)) {
+      expect(src, file).not.toMatch(/projectPeriodAggregateByMonth/);
+    }
+    const reading = read("lib/organization-evidence/period-provenance.ts");
+    // the one place a projection is made, and only for a SOURCE period
+    expect(reading).toMatch(/if \(provenance !== "source"\) \{[\s\S]{0,200}kind: "interpreted_period"/);
+    expect(reading).toMatch(/if \(base\.rate\) return \{ \.\.\.base, kind: "source_rate"/);
+  });
+  it("every surface that shows a period record hands it the record's own derived", () => {
+    for (const file of [
+      "components/app/people/person-imported-history.tsx",
+      "components/app/evidence-import-section.tsx",
+      "components/app/organization-evidence-section.tsx",
+    ]) {
+      expect(renderers[file as keyof typeof renderers], file).toMatch(/derived=\{rec\.derived\}/);
+    }
+    expect(renderers["components/app/historical/historical-calendar.tsx"]).toMatch(/derived=\{derived\}/);
+    // the calendar no longer calls a SET period "not established"
+    expect(renderers["components/app/historical/historical-calendar.tsx"]).toMatch(/provenance === "human_choice"\s*\?\s*labels\.periodHuman/);
+  });
+  it("the decision reads months, refuses a start alone and never stores a one-day period", () => {
+    const time = core.slice(core.indexOf("export async function resolveTimeSemantics"), core.indexOf("// ── commit"));
+    expect(time).toMatch(/periodFromHumanInput\(d\.periodStart, d\.periodEnd\)/);
+    expect(time).not.toMatch(/periodEnd \?\? periodStart/);
+    expect(time).toMatch(/conflictsWithSource: conflicts\.length > 0,/);
+    const forms = read("components/app/evidence-import-forms.tsx");
+    expect(forms).toMatch(/type="month"\s+name="period_start"/);
+    expect(forms).toMatch(/type="month"\s+name="period_end"/);
+    expect(forms).not.toMatch(/type="date" name="period_(start|end)"/);
+  });
+  it("the work-model edge carries how the span came to be", () => {
+    expect(workerRead).toMatch(/provenance: periodProvenance\(\{ activityDate: null, periodStart, factFields: \[\], derived \}\)/);
+    expect(intelligenceRead).toMatch(/provenance: r\.provenance,/);
+    const ledger = read("components/app/work-in-numbers/org-ledger.tsx");
+    expect(ledger).toMatch(/p\.provenance === "source"/);
+    expect(ledger).toContain('"orgRecords.periodRecordHuman"');
   });
 });
 

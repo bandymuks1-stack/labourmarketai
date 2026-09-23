@@ -1,5 +1,10 @@
 import { isoWeekOf, WEEK_CONFLICT_METHOD } from "./parse-tabular";
-import { countsAsDailyHours } from "./time-semantics";
+import {
+  countsAsDailyHours,
+  extractSourceTimeCues,
+  sourceTimeConflicts,
+  type TimeSemantics,
+} from "./time-semantics";
 import {
   committableRows,
   placeSegments,
@@ -147,6 +152,11 @@ export interface CalendarProjection {
     readonly periodEnd: string | null;
     readonly open: boolean;
     readonly context: string | null;
+    /** The row's classification (how any period came to be, the source's
+     *  stated duration / rate) — read by the ONE period reading. */
+    readonly timeSemantics: TimeSemantics;
+    /** The source's own sentence. */
+    readonly sourceText: string | null;
   }[];
 }
 
@@ -196,7 +206,10 @@ export type IssueKind =
   | "allocation_inconsistent"
   /** A place read from the text (not the cell) that nothing folded — one
    *  question per such place: create, alias to another place, or ignore. */
-  | "place_from_text";
+  | "place_from_text"
+  /** A period a person set disagrees with the duration / rate the source's
+   *  own words state (owner rule 2026-09-23). A WARNING: the decision stands. */
+  | "time_conflicts_source";
 
 export interface IssueProjection {
   readonly kind: IssueKind;
@@ -220,6 +233,9 @@ export interface IssueProjection {
     readonly sourceHours: number;
     readonly machineReading: "period_aggregate" | "unknown";
     readonly periodWords: string | null;
+    /** The duration / rate the source's words state, verbatim — shown so the
+     *  human decides with them in front of them. */
+    readonly sourceStates: readonly string[];
     readonly remote: boolean | null;
     readonly text: string | null;
     readonly context: string | null;
@@ -283,6 +299,26 @@ function dailyHours(r: PreviewRow): number | null {
 
 function isAggregate(r: PreviewRow): boolean {
   return !!r.timeSemantics && r.timeSemantics.value !== "daily";
+}
+
+/** The row's stated duration / rate cues — recorded, or read from its words. */
+function cuesOf(r: PreviewRow) {
+  const ts = r.timeSemantics;
+  if (ts && ts.sourceCues !== undefined) return ts.sourceCues ?? null;
+  return extractSourceTimeCues(r.activityText);
+}
+
+/** The source's own words that state a duration or a rate, verbatim. */
+function statedWords(r: PreviewRow): readonly string[] {
+  const cues = cuesOf(r);
+  return [cues?.duration?.words, cues?.rate?.words].filter((w): w is string => !!w);
+}
+
+/** Where a DECIDED period disagrees with the source's words ([] otherwise). */
+function timeConflicts(r: PreviewRow) {
+  const ts = r.timeSemantics;
+  if (!ts || r.timeSemanticsOpen || ts.value !== "period_aggregate" || !ts.periodStart || !ts.periodEnd) return [];
+  return sourceTimeConflicts({ hours: ts.sourceHours, periodStart: ts.periodStart, periodEnd: ts.periodEnd, cues: cuesOf(r) });
 }
 
 function isWeekConflict(r: PreviewRow): boolean {
@@ -482,6 +518,8 @@ export function projectCalendar(rows: readonly PreviewRow[]): CalendarProjection
         label, recordedOn: d, sourceHours: ts.sourceHours, remote: ts.remote,
         periodStart: ts.periodStart, periodEnd: ts.periodEnd, open: r.timeSemanticsOpen,
         context: r.contexts?.segments.map((sg) => sg.label).join(" · ") ?? r.contextLabel,
+        timeSemantics: ts,
+        sourceText: r.activityText,
       });
       continue;
     }
@@ -627,10 +665,25 @@ export function projectIssues(rows: readonly PreviewRow[]): readonly IssueProjec
         sourceHours: r.timeSemantics!.sourceHours,
         machineReading: r.timeSemantics!.value === "period_aggregate" ? "period_aggregate" : "unknown",
         periodWords: r.timeSemantics!.note ?? null,
+        sourceStates: statedWords(r),
         remote: r.timeSemantics!.remote,
         text: r.activityText,
         context: r.contextLabel,
       })),
+    });
+  }
+
+  // A DECIDED period set against the source's own words (owner rule
+  // 2026-09-23): a person's span shorter than a stated minimum, or a total
+  // whose per-month figure differs from a stated rate. A warning the human
+  // sees after deciding — never a block, never a rewrite.
+  const differs = rows.filter((r) => timeConflicts(r).length > 0);
+  if (differs.length > 0) {
+    issues.push({
+      kind: "time_conflicts_source", count: differs.length, blocking: false, key: null, label: null,
+      candidates: [], siblings: [], rowIds: differs.map((r) => r.id),
+      sample: `${differs[0].personLabel ?? ""}: ${statedWords(differs[0]).map((w) => `“${w}”`).join(" · ")}`,
+      timeRows: [],
     });
   }
 
@@ -712,7 +765,7 @@ export function projectCompany(
       aggregateRows += 1;
       aggregate += r.timeSemantics?.sourceHours ?? r.hours ?? 0;
       if (r.timeSemantics?.remote === true) remoteRows += 1;
-      if (!r.timeSemantics?.periodStart) aggregatePeriodUnknown = true;
+      if (!r.timeSemantics?.periodStart || !r.timeSemantics?.periodEnd) aggregatePeriodUnknown = true;
     } else {
       const daily = dailyHours(r);
       if (daily !== null) stated += daily;
@@ -758,7 +811,8 @@ export function projectImport(preview: ImportPreview): ImportProjection {
   let undated = 0;
   for (const r of committable) {
     if (!isAggregate(r)) continue;
-    if (r.timeSemantics?.value === "period_aggregate" && r.timeSemantics.periodStart) periodRecords += 1;
+    // The commit's own rule: a period record needs BOTH bounds.
+    if (r.timeSemantics?.value === "period_aggregate" && r.timeSemantics.periodStart && r.timeSemantics.periodEnd) periodRecords += 1;
     else undated += 1;
   }
   return {

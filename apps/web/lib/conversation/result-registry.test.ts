@@ -51,7 +51,24 @@ describe("result registry — structure", () => {
       // fallback the user still reaches when a result cannot render.
       expect(r.advancedRoute, `${r.kind} advancedRoute`).toMatch(/^\//);
       expect(r.advancedRoute).not.toMatch(/^\/(lt|en|ru|nl|de|pl)\//);
+      // 2026-09-23: the door to that route NAMES its station ("Open
+      // profile"), never the generic "open full screen" — which now expands
+      // the result in place instead of navigating.
+      expect(r.stationLabelKey, `${r.kind} stationLabelKey`).toMatch(
+        /^conversation\.results\.station\.[a-zA-Z]+$/,
+      );
     }
+  });
+
+  it("results sharing a station share its name, and only then", () => {
+    const byRoute = new Map<string, Set<string>>();
+    const byKey = new Map<string, Set<string>>();
+    for (const r of CONVERSATION_RESULTS) {
+      byRoute.set(r.advancedRoute, (byRoute.get(r.advancedRoute) ?? new Set()).add(r.stationLabelKey));
+      byKey.set(r.stationLabelKey, (byKey.get(r.stationLabelKey) ?? new Set()).add(r.advancedRoute));
+    }
+    for (const [route, keys] of byRoute) expect(keys.size, `${route} has one name`).toBe(1);
+    for (const [key, routes] of byKey) expect(routes.size, `${key} names one station`).toBe(1);
   });
 });
 

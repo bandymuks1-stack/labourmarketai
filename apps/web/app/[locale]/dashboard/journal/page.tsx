@@ -1806,10 +1806,12 @@ export default async function JournalPage({
                             {/* EVIDENCE STANDING (work-world grammar): the
                                 canonical chip names the standing in one
                                 short label — cyan = the person's own record,
-                                champagne = the organization stands behind
-                                it, amber = contested; NEVER green, because a
-                                manager's confirmation is attestation, not
-                                independent verification. The sentence
+                                trust-accent green = the organization stands
+                                behind it (design rule #4, 2026-09-22: a
+                                confirmation is green, never gold), amber =
+                                contested. The standing itself stays
+                                ORGANIZATION_ATTESTED, not independent
+                                verification. The sentence
                                 beneath is the same explanation as before, and
                                 the next action is still a real destination.
                                 Now shown on EVERY entry (a confirmed record

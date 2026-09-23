@@ -312,9 +312,12 @@ export default async function MarketMapPage({
             })}
           </p>
           {/* The next canonical action from an empty pool: widen the work
-              directions the map searches for (2026-09-19). */}
+              directions the map searches for (2026-09-19). They are edited
+              inside the profile's `#profile-edit` disclosure, which
+              `DetailsHashOpener` opens on arrival (the old "work-directions"
+              anchor never existed — that link landed at the top). */}
           <Link
-            href="/dashboard/profile#work-directions"
+            href="/dashboard/profile#profile-edit"
             className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue underline-offset-4 hover:underline"
             data-testid="market-map-vacancy-volume-none-cta"
           >

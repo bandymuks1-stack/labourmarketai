@@ -62,13 +62,16 @@ export async function PlayerCardShowcase() {
         </p>
 
         {/* THE canonical card, one instance — what a signed-in worker really
-            sees, with a visibly-sample dataset. */}
+            sees, with a visibly-sample dataset. `sample` withholds the
+            card's links: its tiles describe the sample persona, so they must
+            not open an anonymous visitor's "own" journal (2026-09-23). */}
         <div className="mx-auto mt-8 max-w-2xl" data-testid="playercards-canonical-card">
           <WorkerPlayerCard
             card={sampleCard}
             labels={labels}
             thermometer={null}
             avatarUrl={null}
+            sample
           />
         </div>
 

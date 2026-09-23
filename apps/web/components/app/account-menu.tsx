@@ -9,6 +9,7 @@ import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, Globe, MessageSqu
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { canRenderInline, type ResultContext } from "@/lib/conversation/result-registry";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -32,8 +33,20 @@ export function AccountMenu() {
   const tCv = useTranslations("cvExport");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { user, profile, isAdmin, adminUiHidden } = useAuth();
+  const { user, profile, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName } = useAuth();
   const [open, setOpen] = useState(false);
+
+  // The player card's ONE home is a workspace RESULT, and the registry says
+  // in which contexts it renders (personal only). The context is derived from
+  // the same two fields the workspace itself uses (conversation-chat's
+  // `resultContext`), so an account acting as an organization is never sent
+  // to a result its workspace would refuse: it gets the person's own card
+  // section on the profile instead of a dead end.
+  const menuResultContext: ResultContext =
+    activeOrganizationId || activeOrgName ? "organization" : "personal";
+  const playerCardHref = canRenderInline("player-card", menuResultContext)
+    ? "/dashboard?result=player-card"
+    : "/dashboard/profile#cv-availability";
   const rootRef = useRef<HTMLDivElement>(null);
 
   // First-use UX (2026-07-04): the light/dark toggle used to live ONLY deep in
@@ -74,8 +87,12 @@ export function AccountMenu() {
     // one avatar and Profile is its first entry.
     { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
     // The Premium Player Card, reachable through the avatar (owner audit
-    // §5.1) — deep-links to the canonical card block on the Mano CV surface.
-    { href: "/dashboard/journal#mano-cv-identity", label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
+    // §5.1). ONE home for one object (2026-09-23): the chat, ŠIANDIEN and the
+    // profile hub all open the card as the workspace RESULT, so the menu does
+    // too — it used to open a closed disclosure on the journal instead, the
+    // same card with different surroundings. (In an organization context the
+    // result does not render — see `playerCardHref` above.)
+    { href: playerCardHref, label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     // (The advanced control-room escape hatch died with the route — W3
     // Package 4 deleted /dashboard/advanced entirely.)

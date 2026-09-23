@@ -3402,6 +3402,8 @@
     },
     "pageTitle": "Mein Profil",
     "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
+    "editDisclosure": "Beruf, Fähigkeiten und Beschreibung",
+    "aboutDisclosure": "So liest man dieses Profil",
     "professionLabel": "Ihr Beruf",
     "professionPlaceholder": "Beruf auswählen",
     "professionSaved": "Beruf gespeichert",
@@ -13655,7 +13657,19 @@
         "title": "Rechnungsgrundlage"
       },
       "openFull": "Vollbild öffnen",
-      "fallbackUnverified": "Das liegt vorerst auf einem eigenen Bildschirm — die Datenquelle ist für die Anzeige hier noch nicht verifiziert.",
+      "station": {
+        "profile": "Profil öffnen",
+        "journal": "Arbeitsjournal öffnen",
+        "calendar": "Kalender öffnen",
+        "marketMap": "Marktkarte öffnen",
+        "opportunities": "Chancen öffnen",
+        "scouting": "Scouting öffnen",
+        "projects": "Projekte öffnen",
+        "documents": "Dokumente öffnen",
+        "finance": "Finanzeinträge öffnen"
+      },
+      "collapseFull": "Verkleinern",
+      "fallbackUnverified": "Das kann ich hier noch nicht zeigen — es hat eine eigene Seite.",
       "fallbackContext": "Dieses Ergebnis ist im aktuellen Kontext nicht verfügbar.",
       "pendingInline": "Ergebnis wird vorbereitet.",
       "marketEmpty": "Derzeit gibt es keine offenen Bedarfe mit Standort.",
@@ -14103,8 +14117,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Sagen Sie in eigenen Worten, was Sie bei der Arbeit brauchen.",
-      "sub": "Arbeit und Menschen, Kolonnen und Dienstleistungen, freie Kapazität, geleistete Arbeit und ihr Nachweis — ein Markt, an echten Orten. Sie müssen vorher nicht entscheiden, wer Sie sind."
+      "headline": "Ein Arbeitsmarkt für Menschen und Unternehmen.",
+      "sub": "Finden Sie Arbeit oder Menschen, halten Sie Ihre Arbeit fest und lassen Sie sie für sich sprechen — Ihre nächste Chance stützt sich auf das, was Sie wirklich getan haben, nicht auf das, was ein Lebenslauf behauptet."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
@@ -14172,6 +14186,8 @@
       },
       "numbers": "Jetzt auf der Plattform: {vacancies} aktive Stellenanzeigen · {employers} Arbeitgeber",
       "refreshed": "aktualisiert {date}",
+      "moreExamples": "Weitere Beispiele",
+      "browseJobs": "Stellenangebote ansehen",
       "exampleLabels": {
         "hire": "Wir brauchen Leute",
         "work": "Ich suche Arbeit",
@@ -14184,6 +14200,12 @@
         "logWork": "Geleistete Arbeit erfassen",
         "verifyWork": "Wer bestätigt das"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Stellenangebote",
+      "title": "Echte Stellen, jetzt offen.",
+      "sub": "Einige aktuelle Anzeigen aus offiziellen öffentlichen Arbeitsmarktquellen. Ansehen geht ohne Konto; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+      "all": "Alle Stellenangebote"
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",
@@ -16322,6 +16344,7 @@
       "selfAttested": "Bestätigt von der Person, um die es geht",
       "selfAttestedHint": "Das ist ein echter, festgehaltener Nachweis. Es ist keine unabhängige Prüfung und zählt nie als solche.",
       "notIndependentlyVerified": "Nicht unabhängig geprüft",
+      "howRecorded": "Wie das erfasst wurde",
       "withdrawn": "Zurückgezogen",
       "disputed": "Bestritten. Eine Person mit Berechtigung hat diesem Eintrag widersprochen; Eintrag und Widerspruch bleiben beide erhalten.",
       "disputedByYou": "Sie haben diesen Eintrag bestritten. Eintrag und Ihr Widerspruch bleiben beide erhalten.",
@@ -16338,7 +16361,10 @@
       "attestAllHint": "Die Organisation steht hinter jedem noch nicht bestätigten Eintrag aus dieser Quelle ({count}). Ein Bestätigungsereignis je Eintrag, mit Rolle und Notiz; Stunden, Quellfakten und Einträge bleiben unverändert. Keine unabhängige Prüfung.",
       "periodDerivedHuman": "Zeitraum beim Import festgelegt (menschliche Entscheidung) – die Quelle nannte keine Daten",
       "periodDerived": "Zeitraum abgeleitet – die Quelle nannte keine Daten",
-      "sourceStatement": "Quellentext (Fakt)"
+      "sourceStatement": "Quellentext (Fakt)",
+      "noMonthlyFigure": "Keine Monatszahl — die Quelle nennt nur die Gesamtzahl",
+      "sourceStates": "Die Quelle sagt: „{words}“",
+      "sourceDiffers": "Dieser Zeitraum weicht von den eigenen Worten der Quelle ab — beides bleibt erhalten"
     },
     "withdraw": {
       "title": "Diesen Import rückgängig machen",
@@ -16394,6 +16420,8 @@
       "intro": "Arbeit, Weiterbildung und Studium, die eine Organisation aus ihren eigenen Aufzeichnungen übernommen hat. Sie sehen immer, wer es geschickt hat, was diese Stelle damals für Sie war und wann.",
       "notEnabled": "Das ist in dieser Umgebung noch nicht eingeschaltet. In Ihrem Profil fehlt nichts — der Speicher ist schlicht nicht da, um gelesen zu werden.",
       "empty": "Bisher hat hier keine Organisation etwas über Sie festgehalten.",
+      "summaryRecords": "{count, plural, one {# Eintrag} other {# Einträge}}",
+      "summaryNoRecords": "Noch keine Einträge — hier stehen die Verbindungen zu Organisationen.",
       "offersTitle": "Wartet auf Ihre Antwort",
       "offersHint": "Eine Organisation sagt, einer ihrer Einträge betreffe Sie. Nichts kommt in Ihren Lebenslauf, bevor Sie das bestätigen, und Ablehnen ist eine echte Antwort — die Organisation behält ihren Eintrag, sie nennt Sie darin nur nicht mehr.",
       "accept": "Ja, das bin ich",
@@ -16482,7 +16510,8 @@
         "allocation_unknown": "{count} Zeilen — mehrere Orte am Tag, Verteilung nicht angegeben",
         "allocation_inconsistent": "{count} Zeilen — Stunden im Text ergeben nicht die Tagessumme",
         "place_from_text": "{count} Zeilen — Ort aus dem Text gelesen: „{label}“",
-        "time_semantics": "{count} Zeilen — was bedeutet diese Stundenzahl?"
+        "time_semantics": "{count} Zeilen — was bedeutet diese Stundenzahl?",
+        "time_conflicts_source": "{count} Zeilen — der von Ihnen gewählte Zeitraum weicht von den Worten der Quelle ab"
       },
       "issueWhy": {
         "impossible_hours": "Die Quellzahl bleibt wie sie ist (z. B. eine Monatssumme an einem Tag). Nach „wie angegeben belassen“ wird die Zeile als Quellfakt erfasst; die Tagesdauer bleibt unbekannt und wird nirgends summiert.",
@@ -16495,7 +16524,8 @@
         "allocation_unknown": "Die Tagessumme bleibt exakt; Stunden werden nicht geschätzt auf Orte verteilt.",
         "allocation_inconsistent": "Die im Text genannten Teile ergeben nicht die Tagessumme. Beide Zahlen bleiben erhalten.",
         "place_from_text": "Die Ortszelle ist leer; der Ort stammt aus den ersten Wörtern des Textes. Ist es eine Schreibvariante eines anderen Ortes, wählen Sie „derselbe Ort wie“ — es entsteht ein Objekt, nicht zwei.",
-        "time_semantics": "Ein Tag kann so viele Stunden nicht fassen. Nach den Worten der Quelle ist es eine Zeitraumsumme (z. B. Heimarbeit über Monate). Die Zahl bleibt wie sie ist; Sie sagen, was sie ist — und den Zeitraum nur, wenn Sie ihn kennen. Eine solche Summe wird nie zur Dauer eines Tages."
+        "time_semantics": "Ein Tag kann so viele Stunden nicht fassen. Nach den Worten der Quelle ist es eine Zeitraumsumme (z. B. Heimarbeit über Monate). Die Zahl bleibt wie sie ist; Sie sagen, was sie ist — und den Zeitraum nur, wenn Sie ihn kennen. Eine solche Summe wird nie zur Dauer eines Tages.",
+        "time_conflicts_source": "Ihre Entscheidung bleibt bestehen — Sie kennen die Arbeit. Die Quelle selbst nennt eine andere Dauer oder ein anderes Tempo, deshalb wird aus der Summe keine Monatszahl gemacht, und die Abweichung bleibt neben dem Eintrag sichtbar."
       },
       "keepAsStated": "Wie in der Quelle angegeben belassen",
       "keepAsStatedHint": "Die Quellzahl bleibt unverändert und wird als Quellfakt erfasst. Sie wird NICHT zur Arbeitsdauer dieses Tages — die Tagesdauer bleibt unbekannt, sodass Kalender, Arbeit in Zahlen, Tempo und Kapazität sie nie summieren.",
@@ -16569,6 +16599,7 @@
       "timeRemoteUnknown": "Nicht angegeben",
       "timePeriod": "Zeitraum (nur wenn bekannt)",
       "timePeriodHint": "Leer lassen, wenn Sie den Zeitraum nicht kennen — das System erfindet keine Daten. Mit Zeitraum wird die Summe als Zeitraumeintrag erfasst; ohne als Quellfakt mit unbekannter Dauer.",
+      "timePeriodBoth": "Monate: der erste und der letzte — beide, oder beide leer lassen. Ein Beginn allein ist kein Zeitraum.",
       "from": "Von",
       "to": "Bis",
       "timeSave": "Auf diese Zeilen anwenden",

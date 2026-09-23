@@ -268,16 +268,18 @@ describe("orgLedger — the second ledger beside the journal, never summed", () 
       todayIso: TODAY,
       organizationRecords: [],
       organizationPeriodRecords: [
-        { id: "p1", periodStart: "2025-06-01", periodEnd: "2025-11-30", hours: 800, source: "import", organizationId: "org" },
+        { id: "p1", periodStart: "2025-06-01", periodEnd: "2025-11-30", hours: 800, source: "import", organizationId: "org", provenance: "human_choice" },
         // malformed span and a non-positive figure: dropped, never guessed at
-        { id: "p2", periodStart: "2025-12-01", periodEnd: "2025-11-30", hours: 10, source: "import", organizationId: "org" },
-        { id: "p3", periodStart: "2026-01-01", periodEnd: "2026-01-31", hours: 0, source: "import", organizationId: "org" },
+        { id: "p2", periodStart: "2025-12-01", periodEnd: "2025-11-30", hours: 10, source: "import", organizationId: "org", provenance: "source" },
+        { id: "p3", periodStart: "2026-01-01", periodEnd: "2026-01-31", hours: 0, source: "import", organizationId: "org", provenance: "source" },
       ],
     });
     const l = orgLedger(periodOnly);
     expect(l.kind).toBe("rows");
     if (l.kind === "rows") {
       expect(l.periodRecords.map((p) => p.id)).toEqual(["p1"]);
+      // how the span came to be crosses the work-model edge untouched
+      expect(l.periodRecords[0].provenance).toBe("human_choice");
       // the 800 h reached no day ledger and no journal figure
       expect(l.all.hours).toBe(0);
       expect(l.period.hours).toBe(0);
@@ -290,7 +292,7 @@ describe("orgLedger — the second ledger beside the journal, never summed", () 
       todayIso: TODAY,
       organizationRecords: null,
       organizationPeriodRecords: [
-        { id: "p1", periodStart: "2025-06-01", periodEnd: "2025-11-30", hours: 800, source: "import", organizationId: "org" },
+        { id: "p1", periodStart: "2025-06-01", periodEnd: "2025-11-30", hours: 800, source: "import", organizationId: "org", provenance: "human_choice" },
       ],
     });
     expect(unknown.organizationPeriodRecords).toBeNull();

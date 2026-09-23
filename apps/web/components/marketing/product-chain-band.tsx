@@ -21,9 +21,10 @@ export async function ProductChainBand() {
   const steps = ["need", "person", "work", "journal", "skills", "next"] as const;
   // The signature evidence diamond, with the colour role it has INSIDE the
   // product (work-world grammar, propagated 2026-09-18): the journal link is
-  // cyan EVIDENCE, proven skills are champagne ATTESTATION, and every other
-  // link is a reported step. A legend of the grammar a visitor will meet
-  // after signing in — not a claim about anyone's record.
+  // cyan EVIDENCE, proven skills are trust-accent green ATTESTATION (design
+  // rule #4, 2026-09-22: a confirmation is green, never gold), and every
+  // other link is a reported step. A legend of the grammar a visitor will
+  // meet after signing in — not a claim about anyone's record.
   const standing: Record<(typeof steps)[number], EvidenceStanding> = {
     need: "ORGANIZATION_REPORTED",
     person: "ORGANIZATION_REPORTED",

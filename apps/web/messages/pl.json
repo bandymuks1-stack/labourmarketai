@@ -3402,6 +3402,8 @@
     },
     "pageTitle": "Mój profil",
     "pageSubtitle": "Co robisz, co potrafisz i co to potwierdza — wszystko w jednym miejscu.",
+    "editDisclosure": "Zawód, umiejętności i opis",
+    "aboutDisclosure": "Jak czytać ten profil",
     "professionLabel": "Twój zawód",
     "professionPlaceholder": "Wybierz zawód",
     "professionSaved": "Zawód zapisany",
@@ -13655,7 +13657,19 @@
         "title": "Podstawa rozliczenia"
       },
       "openFull": "Otwórz pełny ekran",
-      "fallbackUnverified": "To na razie żyje na własnym ekranie — jego źródło danych nie zostało jeszcze zweryfikowane pod kątem wyświetlania w czacie.",
+      "station": {
+        "profile": "Otwórz profil",
+        "journal": "Otwórz dziennik pracy",
+        "calendar": "Otwórz kalendarz",
+        "marketMap": "Otwórz mapę rynku",
+        "opportunities": "Otwórz możliwości",
+        "scouting": "Otwórz scouting kandydatów",
+        "projects": "Otwórz projekty",
+        "documents": "Otwórz dokumenty",
+        "finance": "Otwórz wpisy finansowe"
+      },
+      "collapseFull": "Zwiń",
+      "fallbackUnverified": "Tego nie mogę jeszcze tu pokazać — to ma własną stronę.",
       "fallbackContext": "Ten wynik nie jest dostępny w bieżącym kontekście.",
       "pendingInline": "Trwa przygotowywanie wyniku.",
       "marketEmpty": "Nie ma teraz żadnych otwartych potrzeb z lokalizacją.",
@@ -14103,8 +14117,8 @@
       "noStars": "Nigdzie nie ma ocen w gwiazdkach: człowiek nigdy nie jest sprowadzany do punktacji. Każde dopasowanie jest wyjaśnione wobec konkretnego zapotrzebowania — z widocznymi liczbami."
     },
     "hero": {
-      "headline": "Powiedz własnymi słowami, czego potrzebujesz w pracy.",
-      "sub": "Praca i ludzie, zespoły i usługi, wolne moce, wykonana praca i jej dowód — jeden rynek, w realnych miejscach. Nie musisz najpierw decydować, kim jesteś."
+      "headline": "Jeden rynek pracy dla ludzi i firm.",
+      "sub": "Znajdź pracę lub ludzi, zapisuj wykonaną pracę i pozwól jej mówić za ciebie — twoja kolejna szansa opiera się na pracy, którą naprawdę wykonujesz, a nie na deklaracjach w CV."
     },
     "entry": {
       "label": "Napisz, czego potrzebujesz — własnymi słowami",
@@ -14172,6 +14186,8 @@
       },
       "numbers": "Teraz na platformie: {vacancies} aktywnych ogłoszeń o pracę · {employers} pracodawców",
       "refreshed": "odświeżono {date}",
+      "moreExamples": "Więcej przykładów",
+      "browseJobs": "Przeglądaj oferty pracy",
       "exampleLabels": {
         "hire": "Potrzebuję pracowników",
         "work": "Szukam pracy",
@@ -14184,6 +14200,12 @@
         "logWork": "Zapisz wykonaną pracę",
         "verifyWork": "Kto może to potwierdzić"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Oferty pracy",
+      "title": "Prawdziwe oferty pracy, otwarte teraz.",
+      "sub": "Kilka aktualnych ogłoszeń z oficjalnych publicznych źródeł zatrudnienia. Przeglądanie nie wymaga konta; po zalogowaniu zobaczysz pracodawcę, miejsce i sposób aplikowania.",
+      "all": "Wszystkie oferty pracy"
     },
     "marketProof": {
       "eyebrow": "Teraz na platformie",
@@ -16322,6 +16344,7 @@
       "selfAttested": "Potwierdzone przez osobę, której dotyczy",
       "selfAttestedHint": "To rzeczywisty, zarejestrowany dowód. Nie jest to niezależna weryfikacja i nigdy nie jest za taką uznawany.",
       "notIndependentlyVerified": "Niepotwierdzone niezależnie",
+      "howRecorded": "Jak to zapisano",
       "withdrawn": "Wycofane",
       "disputed": "Zakwestionowane. Osoba uprawniona zgłosiła sprzeciw wobec tego zapisu; pozostaje on w aktach, tak samo jak sprzeciw.",
       "disputedByYou": "Zakwestionowałeś ten zapis. Pozostaje on w aktach, tak samo jak Twój sprzeciw.",
@@ -16338,7 +16361,10 @@
       "attestAllHint": "Organizacja potwierdza każdy jeszcze niepotwierdzony zapis z tego źródła ({count}). Jedno zdarzenie potwierdzenia na zapis, z rolą i notatką; godziny, fakty źródłowe i zapisy nie ulegają zmianie. To nie jest niezależna weryfikacja.",
       "periodDerivedHuman": "Okres ustalony przy imporcie (decyzja człowieka) — źródło nie podało dat",
       "periodDerived": "Okres wyprowadzony — źródło nie podało dat",
-      "sourceStatement": "Treść źródła (fakt)"
+      "sourceStatement": "Treść źródła (fakt)",
+      "noMonthlyFigure": "Brak liczby miesięcznej — źródło podaje tylko sumę",
+      "sourceStates": "Źródło podaje: „{words}”",
+      "sourceDiffers": "Ten okres różni się od tego, co podaje samo źródło — zachowane jest jedno i drugie"
     },
     "withdraw": {
       "title": "Cofnij ten import",
@@ -16394,6 +16420,8 @@
       "intro": "Praca, szkolenia i nauka, które organizacja przeniosła z własnych zapisów. Zawsze widzisz, kto to przesłał, kim był dla Ciebie w tamtym czasie i kiedy.",
       "notEnabled": "To nie jest jeszcze włączone w tym środowisku. W Twoim profilu niczego nie brakuje — magazynu po prostu nie ma do odczytania.",
       "empty": "Żadna organizacja nie zarejestrowała tu jeszcze niczego o Tobie.",
+      "summaryRecords": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "summaryNoRecords": "Na razie brak wpisów — tutaj są powiązania z organizacjami.",
       "offersTitle": "Czeka na Twoją odpowiedź",
       "offersHint": "Organizacja twierdzi, że jeden z jej zapisów dotyczy Ciebie. Nic nie trafia do Twojego CV, dopóki tego nie potwierdzisz, a odmowa jest pełnoprawną odpowiedzią — organizacja zachowuje swój zapis, po prostu przestaje wskazywać Ciebie.",
       "accept": "Tak, to ja",
@@ -16482,7 +16510,8 @@
         "allocation_unknown": "{count} wierszy — kilka miejsc w jednym dniu, podział niepodany",
         "allocation_inconsistent": "{count} wierszy — godziny w tekście nie sumują się do dnia",
         "place_from_text": "{count} wierszy — miejsce odczytane z tekstu: „{label}”",
-        "time_semantics": "{count} wierszy — co oznacza ta liczba godzin?"
+        "time_semantics": "{count} wierszy — co oznacza ta liczba godzin?",
+        "time_conflicts_source": "{count} wierszy — wskazany przez Ciebie okres różni się od słów samego źródła"
       },
       "issueWhy": {
         "impossible_hours": "Liczba źródłowa pozostaje bez zmian (np. suma miesięczna wpisana w jednym dniu). Po wybraniu „zachowaj jak podano” wiersz jest rejestrowany jako fakt źródłowy, a czas trwania dnia pozostaje nieznany — nie jest nigdzie sumowany.",
@@ -16495,7 +16524,8 @@
         "allocation_unknown": "Suma dnia jest zachowana dokładnie; godziny nie są dzielone między miejsca na podstawie domysłu.",
         "allocation_inconsistent": "Części zapisane w tekście nie dają sumy dnia. Obie liczby są zachowane.",
         "place_from_text": "Komórka miejsca jest pusta; budowa została odczytana z pierwszych słów tekstu. Jeśli to błędny zapis innego miejsca, wybierz „to samo miejsce co” — tworzony jest jeden obiekt, a nie dwa.",
-        "time_semantics": "Dzień nie może pomieścić tylu godzin. Zgodnie ze słowami źródła to suma za okres (np. praca zdalna rozłożona na miesiące). Liczba pozostaje bez zmian; Ty określasz, czym ona jest — a okres tylko jeśli go znasz. Taka suma nigdy nie staje się czasem trwania jednego dnia."
+        "time_semantics": "Dzień nie może pomieścić tylu godzin. Zgodnie ze słowami źródła to suma za okres (np. praca zdalna rozłożona na miesiące). Liczba pozostaje bez zmian; Ty określasz, czym ona jest — a okres tylko jeśli go znasz. Taka suma nigdy nie staje się czasem trwania jednego dnia.",
+        "time_conflicts_source": "Twoja decyzja zostaje zapisana — znasz tę pracę. Samo źródło podaje inny czas trwania lub inne tempo, dlatego z sumy nie powstaje liczba miesięczna, a różnica pozostaje widoczna obok zapisu."
       },
       "keepAsStated": "Zachowaj jak podano w źródle",
       "keepAsStatedHint": "Liczba źródłowa pozostaje niezmieniona i jest rejestrowana jako fakt źródłowy. NIE staje się czasem pracy tego dnia — czas trwania dnia pozostaje nieznany, więc kalendarz, praca w liczbach, tempo i zdolności produkcyjne nigdy jej nie sumują.",
@@ -16569,6 +16599,7 @@
       "timeRemoteUnknown": "Nie podano",
       "timePeriod": "Okres (tylko jeśli go znasz)",
       "timePeriodHint": "Zostaw puste, jeśli nie znasz okresu — system nie wymyśla dat. Przy podanym okresie suma jest rejestrowana jako zapis okresowy; bez niego — jako fakt źródłowy o nieznanym czasie trwania.",
+      "timePeriodBoth": "Miesiące: pierwszy i ostatni — oba albo zostaw oba puste. Sam początek nie jest okresem.",
       "from": "Od",
       "to": "Do",
       "timeSave": "Zastosuj do tych wierszy",

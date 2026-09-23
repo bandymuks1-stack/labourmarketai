@@ -461,18 +461,85 @@ describe("the person the evidence is about can see it, and consented to it", () 
     // empty/not-enabled state may stay inside it. And the card must say WHICH
     // organization recorded each row — the record view carries no name, the
     // roster link does.
+    //
+    // RE-ANCHORED 2026-09-23 (owner P0/P1 §17, summary first). #1771 fixed
+    // the reachability defect by hoisting EVERY record card open above the
+    // overview — 28 cards for the first real offer, once accepted. The lesson
+    // is kept, the over-correction is not: what must be discoverable on
+    // arrival is a SUMMARY of the linked history (count, organization, dates,
+    // standing) in the bar's own closed state, before `#cv-details`; the
+    // cards are one tap away inside `#organization-history`, and a hash to
+    // that bar or anything inside it opens it.
     const page = read(PROFILE);
     const disclosure = page.indexOf('id="cv-details"');
-    const hoisted = page.indexOf("<OrganizationEvidenceSection");
-    expect(hoisted).toBeGreaterThan(-1);
-    expect(hoisted).toBeLessThan(disclosure);
-    const hoistedBlock = page.slice(hoisted, disclosure);
-    expect(hoistedBlock).toContain("records={myOrgEvidence.records}");
-    expect(hoistedBlock).toContain("organizationNames=");
-    expect(hoistedBlock).toContain("l.organizationName");
+    const history = page.indexOf('id="organization-history"');
+    expect(history, "the organization-history disclosure exists").toBeGreaterThan(-1);
+    expect(history).toBeLessThan(disclosure);
+    // The summary is IN the bar's <summary>, i.e. visible while it is closed.
+    const bar = page.slice(history, page.indexOf("</summary>", history));
+    expect(bar).toContain("<OrganizationEvidenceSummary");
+    expect(bar).toContain("myOrgEvidence.records");
+    expect(bar).toContain("organizationNames={orgNamesByPerson}");
+    // The full cards live INSIDE the same disclosure, before it closes, with
+    // the organization names the one org-name rule resolved.
+    const inside = page.slice(history, page.indexOf("</details>", history));
+    const cards = inside.indexOf("<OrganizationEvidenceSection");
+    expect(cards, "the record cards live inside the disclosure").toBeGreaterThan(-1);
+    expect(inside.slice(cards)).toContain("records={myOrgEvidence.records}");
+    expect(inside.slice(cards)).toContain("organizationNames={orgNamesByPerson}");
+    expect(page).toMatch(/l\.organizationName \? \[\[l\.id, l\.organizationName\] as const\] : \[\]/);
+    // …and the bar is opened by a hash to it OR to a section inside it.
+    expect(page).toContain('<DetailsHashOpener targetId="organization-history" />');
     const card = read(SUBJECT_CARD);
     expect(card).toContain("organizationNames[rec.personId]");
     expect(card).toContain("rec.contextLabel");
+  });
+
+  it("the arrival summary never sums hours (records sit BESIDE, never summed — IA §2)", () => {
+    // The whole point of the one-line summary is that it says how many, from
+    // whom, when and in what standing — a total of hours would manufacture a
+    // figure no source stated (a period aggregate and a day record are not
+    // the same kind of number).
+    const card = read(SUBJECT_CARD);
+    const start = card.indexOf("export function OrganizationEvidenceSummary(");
+    expect(start).toBeGreaterThan(-1);
+    const summary = card.slice(start, card.indexOf("export function OrganizationEvidenceSection(", start));
+    const code = summary.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(code).not.toMatch(/\.hours\b/);
+    expect(code).not.toMatch(/reduce\(/);
+    expect(code).toMatch(/summaryRecords/);
+    // Standing comes from the ONE rule the card's chip uses.
+    expect(code).toMatch(/recordStanding\(rec\)/);
+    expect(card).toMatch(/state=\{recordStanding\(rec\)\}/);
+  });
+
+  it("per record, the provenance internals are one tap away — the FACT ≠ DERIVED signal stays on the row", () => {
+    const card = read(SUBJECT_CARD);
+    const li = card.slice(card.indexOf('data-testid="organization-evidence-records"'));
+    const how = li.indexOf('data-testid="organization-evidence-record-how"');
+    expect(how, "the per-record disclosure exists").toBeGreaterThan(-1);
+    const row = li.slice(0, how);
+    const inside = li.slice(how, li.indexOf("</details>", how));
+    // On the row (owner P0 2026-09-22 §11): the date WITH its derived label,
+    // the ribbon, the standing chip, the source's own words.
+    expect(row).toContain('data-testid="organization-evidence-record-when"');
+    expect(row).toContain('data-testid="organization-evidence-record-period-derived"');
+    expect(row).toMatch(/part="ribbon"/);
+    expect(row).toContain("<EvidenceState");
+    expect(row).toContain('data-testid="organization-evidence-record-text"');
+    // Behind the disclosure: supplier role, import day, the not-independently-
+    // verified line and the exact month list.
+    expect(inside).toContain('tRecords("supplier")');
+    expect(inside).toContain('tRecords("importedAt")');
+    expect(inside).toContain('tRecords("notIndependentlyVerified")');
+    expect(inside).toMatch(/part="months"/);
+    // Negative control: none of those internals is ALSO still on the row.
+    expect(row).not.toContain('tRecords("supplier")');
+    expect(row).not.toContain('tRecords("notIndependentlyVerified")');
+    // The objection stays a first-class action on the row, after the
+    // disclosure — never folded away.
+    expect(li.slice(how)).toContain("<DisputeRecord");
+    expect(inside).not.toContain("<DisputeRecord");
   });
 
   it("refusing is a real, offered answer — not a hidden one", () => {

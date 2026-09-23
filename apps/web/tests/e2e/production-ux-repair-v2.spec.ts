@@ -140,7 +140,13 @@ test.describe("authenticated F-flows (local stack only)", () => {
   test("F6 — suggest-structure never replaces the app with an error shell", async ({
     page,
   }) => {
-    await page.goto("/lt/dashboard/profile");
+    // Summary first (2026-09-23): the composer is inside the closed
+    // `#profile-edit` bar; this hash opens it (its DetailsHashOpener). A
+    // worker with no profession starts in the picker — step back to text.
+    await page.goto("/lt/dashboard/profile#profile-edit");
+    await expect(page.locator("main #profile-edit")).toHaveJSProperty("open", true);
+    const back = page.getByTestId("profile-text-flow-manual-back");
+    if (await back.isVisible()) await back.click();
     const textarea = page.locator("textarea").nth(1);
     await textarea.fill("Programuoju ir vadovauju komandai statybose.");
     await page.getByRole("button", { name: "Pasiūlykite struktūrą" }).click();
