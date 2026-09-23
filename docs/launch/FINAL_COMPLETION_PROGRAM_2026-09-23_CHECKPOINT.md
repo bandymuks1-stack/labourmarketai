@@ -5,11 +5,11 @@
 > production / DB against it and continue from §J. Executable truth = repo, PRs,
 > worktrees, production, DB. This file is the index to that truth.
 > PUBLIC REPO: ids and roles only — no personal names, e-mails or contact data.
-> Updated: 2026-09-23 ~18:10Z (checkpoint #4).
+> Updated: 2026-09-23 ~20:35Z (checkpoint #5 — resumed after the owner pause; batch 3 merged).
 
 ## A. BASELINE
 - Repo `bandymuks1-stack/labourmarketai`; canonical root `C:\Users\Mano\Documents\labourmarketai`.
-- Program baseline 06d5bb199 (#1844). main now a757c765e (+ #1849 auto-merge pending CI). Production build 3663b23f at 17:14Z (later merges deploy in sequence).
+- Program baseline 06d5bb199 (#1844). main now 7e398a6b9 (#1849, #1856, #1857, #1855 merged after the pause). Production = 75c0cf45b proven at 19:07Z; later merges deploy in sequence (verify the deployment list before claiming).
 - Vercel deploys `main` only. Docker Desktop OFF by owner directive; local Supabase = LOCAL_TEST_DEPENDENCY only.
 
 ## B. AUTHORITATIVE OWNER DECISIONS (2026-09-23)
@@ -24,13 +24,14 @@
 ## C. ACTIVE WORK
 | Lane | Purpose | PR | State | Next |
 |---|---|---|---|---|
-| A | one active context (key remount, one pointer rule, identity follows workspace, stale-context binding, legibility) | #1849 | APPROVED (post-rebase review); CI running; auto-merge ON | verify merge → deploy → owner-side switch walk |
-| G | LM mark instead of letter; calm home (no map at depth 0, covered brief rungs, empty states hidden) | — | implementing (wf_799a1dc7-0c3) | review → merge |
-| K | 'visible to employers' consent reachable (chat, hub, board, first work card) | — | implementing (wf_799a1dc7-0c3) | review → merge |
-| HIST PR-2 | pure seams, idempotent resumable staging, synthetic fixture skeleton | — | implementing (wf_799a1dc7-0c3) | review → merge → PR-3 (M1 GREEN migration) |
+| N | manager read/edit authority split; members + invitations in Settings; pending-membership spine signal | — | implementing (workflow wf_0b83e05c-4f7) | review → merge |
+| M | notification emitters take facts from the write path (booking/engagement/task/absence/demand interest) | #1858 | review CHANGES_REQUIRED (P1: absence facts must be read BEFORE review_worker_absence_v1 flips status; P2: guard misses admin-as-parameter reads) → fix agent running (wf_0b83e05c-4f7) | verify fix → merge |
+| L | agency→client invitation delivered through the #1752 primitive; bridge spine counts; allowed_agency_connection messaging | — | implementing (workflow wf_f315369e-6eb) | review → merge |
+| J2 | db:push refusal, DEPLOYMENT.md rewrite, e2e-seed-claims guard, LOCAL_DB_URL, outbound host policy in production, /api/health vacancy freshness, Eurostat as-of | — | implementing (wf_f315369e-6eb) | review → merge |
+| HIST PR-3 | M1 migration (columns, keys, CHECK widening, restrictive policies P1–P9) + rollback + rolled-back dry-run block | — | implementing (wf_f315369e-6eb) | review → merge → lead runs dry run on prod after PR-2 deploys → apply → readback |
 
 ## D. MERGED IN THIS PROGRAM
-#1845 local-stack diagnostics · #1846 auth-boundary guards · #1847 Nonstop consolidation code (migration applied) · #1848 honest chat + rename by sentence + setup ?org= · #1850 paperclip attach + journal validation parity · #1852 provenance without false precision · #1851 landing value + real current jobs + green confirmation (PROVEN on production desktop + 375px, anonymous gating intact) · #1853 timesheet import design v3 · #1854 profile summary-first + full screen expands.
+#1845 local-stack diagnostics · #1846 auth-boundary guards · #1847 Nonstop consolidation code (migration applied) · #1848 honest chat + rename by sentence + setup ?org= · #1850 paperclip attach + journal validation parity · #1852 provenance without false precision · #1851 landing value + real current jobs + green confirmation (PROVEN on production desktop + 375px, anonymous gating intact) · #1853 timesheet import design v3 · #1854 profile summary-first + full screen expands · #1849 one active context (switch without reload, one pointer rule, identity follows the workspace) — production proof of the multi-org switch is the director's and the recruiter's own walk · #1856 LM mark instead of a letter + calm home (no map at depth 0, covered brief rungs omitted, empty states hidden; review P2s: phone-sheet yield order-dependent, 4 dead today.* keys, returning-user ŠIANDIEN latent) · #1857 HIST PR-2 seams + idempotent resumable staging + synthetic fixture (review P2s for PR-5/6: lifecycleSweep 200-event cap after rollback, per-row commit round trips, partialCover duplicates resolve-entities prefix rule) · #1855 'visible to employers' reachable via chat intent (write-class), hub + board readiness item (unknown ≠ off), one-time ask after first work-card save (device-local dismissal), account-menu entry, failed-read state.
 
 ## E. DATABASE STATE
 - ONE production write — APPLIED: nonstop_org_consolidation_v1 → ledger 20260923142823 (dry run first, readback done). Rollback: supabase/rollbacks/20260923114500_nonstop_org_consolidation_v1.down.sql. Everything else READ ONLY.
@@ -42,7 +43,7 @@
 - Design v3 merged (#1853). PR plan: PR-2 seams (running) → PR-3 M1 GREEN migration → PR-4 M2+M3 RED (ordered-work table, source preservation incl. register_document_file_v1 MIME) → PR-5 resolution writer → PR-6 ordered-work detection + preservation + verified derivation → PR-7 views → real import in an authorised Nonstop session.
 
 ## H. REMAINING LANES (queued)
-N manager role read/edit split + members in Settings · L agency→client invitation delivery + agency messaging · M notification emitters (booking/task/absence) · J2 local→prod write hazards (db:push, DEPLOYMENT.md, e2e-seed-claims, prod host rejection, vacancy freshness) · landing P2s (chip ellipsis at 375px, switcher overlap, duplicate-looking sample cards) · production proofs for chat/attach/workspace (prod-qa worker; owner sessions for multi-org).
+LANDING-P2 (chip ellipsis at 375px, switcher overlap, distinct sample cards, blank band area) — launch from scratchpad batch4b-script.js with args {only:['LANDING-P2']} once batch 4a ends · same-class notification residue from #1858 (workflow_* and document_* emitters read ungranted tables via the admin client) · then production proofs for chat/attach/workspace (prod-qa worker; owner sessions for multi-org) · worktree cleanup (92 worktrees; 4 checks each, never --force).
 
 ## I. OWNER DECISIONS STILL OPEN
 1. RED #1430 companies contact/VAT/admin-note visible to every signed-in account (P0 security).
@@ -55,8 +56,7 @@ N manager role read/edit split + members in Settings · L agency→client invita
 8. Historical import: threshold calibration on a preview-only run of the first real file; leave Nonstop's draft projects untouched.
 
 ## J. NEXT ACTION QUEUE
-1. #1849 merges → deploy → verify.
-2. Batch 3 results (G, K, HIST PR-2) → fixes → merge.
-3. Batch 4: N, L, M, J2 (+ landing P2s).
-4. HIST PR-3 (M1 migration, GREEN, dry run then apply) → PR-4 RED packet for the owner.
-5. Production proofs; final human acceptance walk; final receipt.
+1. Batch 4a (N, M fix; wf_0b83e05c-4f7) and batch 4b (L, J2, HIST PR-3; wf_f315369e-6eb) results → verify reviews → rebase → merge GREEN → deploy → verify.
+2. Launch LANDING-P2 (args only) when memory allows; then the workflow/document emitter residue lane.
+3. HIST PR-3: lead runs the rolled-back M1 dry run on production after PR-2 deploys → apply via MCP → readback → PR-4 RED packet for the owner (M2 project_ordered_work + M3 register_document_file_v1 MIME).
+4. Production proofs; worktree cleanup; final human acceptance walk; final receipt.
