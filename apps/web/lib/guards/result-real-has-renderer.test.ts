@@ -88,14 +88,27 @@ describe("every `real` result has an inline renderer (W11 P0-4)", () => {
   });
 });
 
-describe("the honest fallback still exists and still offers the full screen", () => {
-  it("ResultBody keeps the fallback branch with its open-full button", () => {
+describe("the honest fallback still exists and still offers the way on", () => {
+  it("ResultBody keeps the fallback branch with its station button", () => {
     // If this disappears, `unverified` stops being honest degradation and
     // starts being a hidden capability — the regression this slice exists to
     // prevent.
     expect(source).toContain('data-testid="result-body-fallback"');
     expect(source).toContain('data-testid="result-body-open-full"');
     expect(source).toContain("descriptor.advancedRoute");
+  });
+
+  it("the fallback's button NAMES its station — never the generic 'full screen' (2026-09-23)", () => {
+    // Owner P0/P1 §17: "Open full screen may expand a contextual result when
+    // more space is useful. It must not be an escape hatch into a second
+    // legacy application." The fallback DOES leave the conversation (it has
+    // nothing to expand), so its label says where it goes, from the registry.
+    const fallback = source.slice(
+      source.indexOf('data-testid="result-body-fallback"'),
+      source.indexOf("function InlineResult"),
+    );
+    expect(fallback).toContain("descriptor.stationLabelKey");
+    expect(fallback).not.toContain('t("openFull")');
   });
 
   it("an unverified result is explained, not silently blanked", () => {

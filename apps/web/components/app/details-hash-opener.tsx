@@ -3,6 +3,30 @@
 import { useEffect } from "react";
 
 /**
+ * WHICH ELEMENT a URL hash asks one disclosure to reveal — or null when the
+ * hash is not this disclosure's business. Pure, so the decision the opener
+ * makes can be proven against a page's real nesting without a browser
+ * (`lib/guards/profile-summary-first.test.ts`).
+ *
+ * The hash may name the disclosure ITSELF or ANY element inside it; a hash
+ * naming an element OUTSIDE it answers null (the negative control — a
+ * disclosure must never open for a link that is aimed somewhere else).
+ */
+export function disclosureHashTarget<T>(
+  hash: string,
+  targetId: string,
+  disclosure: T,
+  byId: (id: string) => T | null,
+  contains: (outer: T, inner: T) => boolean,
+): T | null {
+  if (!hash || hash.length < 2) return null;
+  const target =
+    hash === `#${targetId}` ? disclosure : byId(decodeURIComponent(hash.slice(1)));
+  if (!target || (target !== disclosure && !contains(disclosure, target))) return null;
+  return target;
+}
+
+/**
  * Opens a server-rendered `<details id=…>` when the URL hash targets it.
  *
  * Browsers scroll to a hash target but never auto-open a collapsed
@@ -29,12 +53,16 @@ export function DetailsHashOpener({ targetId }: { targetId: string }) {
       // second case is not a nicety: `#cv-availability` is a readiness-step
       // deep link from the profile hub, and it now lives inside the CV-details
       // disclosure — without this it would land on a closed summary bar, the
-      // exact defect this component exists to prevent.
-      const target =
-        hash === `#${targetId}`
-          ? el
-          : document.getElementById(decodeURIComponent(hash.slice(1)));
-      if (!target || (target !== el && !el.contains(target))) return;
+      // exact defect this component exists to prevent. (The first case is
+      // `hash === \`#${targetId}\``, decided in `disclosureHashTarget`.)
+      const target = disclosureHashTarget<HTMLElement>(
+        hash,
+        targetId,
+        el,
+        (id) => document.getElementById(id),
+        (outer, inner) => outer.contains(inner),
+      );
+      if (!target) return;
       if (!el.open) el.open = true;
       requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
     };

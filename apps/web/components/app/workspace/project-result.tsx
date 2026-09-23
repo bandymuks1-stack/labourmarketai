@@ -171,7 +171,7 @@ function ProjectPicker({
       <Explained
         testId="project-no-company"
         text={t("projectNoCompany")}
-        openLabel={t("openFull")}
+        openLabel={t("station.projects")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -181,7 +181,7 @@ function ProjectPicker({
       <Explained
         testId="project-blocked"
         text={t("projectBlocked")}
-        openLabel={t("openFull")}
+        openLabel={t("station.projects")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -191,7 +191,7 @@ function ProjectPicker({
       <Explained
         testId="project-empty"
         text={t("projectEmpty")}
-        openLabel={t("openFull")}
+        openLabel={t("station.projects")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -219,7 +219,7 @@ function ProjectPicker({
           </li>
         ))}
       </ul>
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      <OpenFull label={t("station.projects")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
     </div>
   );
 }
@@ -336,7 +336,7 @@ function ProjectDetailView({
         <Explained
           testId={`project-${view.kind}`}
           text={text}
-          openLabel={t("openFull")}
+          openLabel={t("station.projects")}
           onOpenFull={() => onOpenFull(FULL_ROUTE)}
         />
       </div>

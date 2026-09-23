@@ -118,7 +118,7 @@ export function PlayerCardResult({
           data-testid="player-card-open-full"
           className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
         >
-          {t("openFull")}
+          {t("station.profile")}
         </button>
       </div>
     );
@@ -157,13 +157,18 @@ export function PlayerCardResult({
         </div>
       ) : null}
 
+      {/* THE PROFILE DOOR, NAMED (owner P0/P1 §17, 2026-09-23). This button
+          said "open full screen" and opened the profile page — the owner's
+          own click path out of the conversation. It still opens the profile
+          (the station where every identity editor lives), and it now says
+          so; "full screen" is the panel's own in-place expansion. */}
       <button
         type="button"
         onClick={() => onOpenFull("/dashboard/profile")}
         data-testid="player-card-open-full"
         className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
       >
-        {t("openFull")}
+        {t("station.profile")}
       </button>
     </div>
   );

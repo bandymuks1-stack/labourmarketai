@@ -125,11 +125,28 @@ describe("W7-S1 — no capability was lost", () => {
       "#profile-edit",
       "#cv-availability",
       "/dashboard/journal",
-      "/dashboard?result=player-card",
       "/dashboard/opportunities",
     ]) {
       expect(HUB, `${href} lost`).toContain(href);
     }
+  });
+
+  it("the work-card destination is the editor ON this page — no ping-pong (2026-09-23)", () => {
+    // It was `/dashboard?result=player-card`: the hub sent the person to the
+    // conversation's result, whose open control sent them straight back to
+    // this page. Since 2026-09-19 the profile renders the SAME WorkCardEditor
+    // at `#cv-availability`, so the pillar and the location step name that
+    // anchor. Asserted on the CODE, and with a negative control, so a comment
+    // mentioning the old address cannot keep this green.
+    expect(HUB).toMatch(/workCard: "#cv-availability",/);
+    expect(HUB).toMatch(/key: "location",\s*done: pillarMet\("workCard"\),\s*href: "#cv-availability",/);
+    expect(HUB).not.toContain("/dashboard?result=player-card");
+    // …and the anchor really holds the one editor, inside the disclosure the
+    // page's opener resolves a nested hash for.
+    const at = PAGE.indexOf('id="cv-availability"');
+    expect(at).toBeGreaterThan(PAGE.indexOf('id="cv-details"'));
+    expect(PAGE.slice(at, PAGE.indexOf("</details>", at))).toContain("<WorkCardEditor");
+    expect(PAGE).toContain('<DetailsHashOpener targetId="cv-details" />');
   });
 });
 

@@ -161,7 +161,7 @@ import { WorldStateProvider } from "@/components/app/world-state/world-state-pro
 import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { useResultParam } from "@/components/app/workspace/use-result-param";
 import { loadExperienceInvitationsAction } from "@/lib/trust/experience-entry-actions";
-import type { ResultContext, ResultKind } from "@/lib/conversation/result-registry";
+import { canRenderInline, type ResultContext, type ResultKind } from "@/lib/conversation/result-registry";
 import {
   AiWorkspaceBridge,
   type AiWorldStateHandle,
@@ -5838,7 +5838,7 @@ export function ConversationChat({
                 : stated.label;
             assistant(t("professionStatement.readBesideSearch", { label }), [
               stated.professionSlug
-                ? { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }
+                ? { id: "link:/dashboard/profile#profile-edit", label: t("professionStatement.chipSetProfession") }
                 : { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
             ]);
           }
@@ -5850,8 +5850,11 @@ export function ConversationChat({
          * "esu buhalteris" / "dirbu inžinieriumi" / "dirbau projektų vadovu
          * 5 metus" (window 6). The sentence is READ (`readProfessionStatement`,
          * the same reader the router's pattern is built from) and answered
-         * with the doors that already exist: the profile screen sets a
-         * catalogue profession; work history takes any title in the person's
+         * with the doors that already exist: the profile's `#profile-edit`
+         * section sets a catalogue profession (the chip names that anchor, so
+         * it lands on the opened section — in the profession picker when the
+         * person has none — not at the top of the page two interactions
+         * away from it); work history takes any title in the person's
          * own words (the honest carry for a profession the catalogue lacks);
          * the board searches. A past-tense job opens the work-history form
          * with the title already in it. Nothing is persisted here.
@@ -5866,7 +5869,7 @@ export function ConversationChat({
           const label = inCatalogue ? tProfessions(stated.professionSlug as never) : stated.label;
           if (identity === "company") {
             assistant(t("professionStatement.understood", { label }), [
-              { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") },
+              { id: "link:/dashboard/profile#profile-edit", label: t("professionStatement.chipSetProfession") },
             ]);
             return;
           }
@@ -5882,7 +5885,7 @@ export function ConversationChat({
             ].join("\n"),
             [
               ...(inCatalogue
-                ? [{ id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }]
+                ? [{ id: "link:/dashboard/profile#profile-edit", label: t("professionStatement.chipSetProfession") }]
                 : []),
               { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
               { id: "jobs", label: labels.chipJobs },
@@ -6635,9 +6638,10 @@ export function ConversationChat({
    * string only — the conversation is never remounted and no page transition
    * happens, so this is emphatically not the navigation the panel forbids.
    *
-   * `openFullScreen` is the honest fallback for a result that cannot yet render
-   * inline. It keeps every existing route reachable, which is what makes this
-   * work purely additive (NO REGRESSION).
+   * `openStation` is the honest way on for a result that cannot yet render
+   * inline, and each inline result's own NAMED door to its station. It keeps
+   * every existing route reachable, which is what makes this work purely
+   * additive (NO REGRESSION).
    */
   const {
     result,
@@ -6646,6 +6650,9 @@ export function ConversationChat({
     projectId,
     interactionToken,
     demandId,
+    expanded: resultExpanded,
+    expandResult,
+    collapseResult,
     openResult,
     closeResult,
     selectGeography,
@@ -6672,12 +6679,36 @@ export function ConversationChat({
   // 2026-09-05). The name stays a label for the header only.
   const resultContext: ResultContext =
     auth0?.activeOrganizationId || auth0?.activeOrgName ? "organization" : "personal";
-  const openFullScreen = useCallback(
-    // The locale-aware router already in this component — the fallback route
-    // is a REAL screen the person keeps, not a dead end.
+  /**
+   * "OPEN FULL SCREEN" EXPANDS — IT NEVER ESCAPES (owner P0/P1 §17,
+   * 2026-09-23: "Open full screen may expand a contextual result when more
+   * space is useful. It must not be an escape hatch into a second legacy
+   * application").
+   *
+   * It used to be `router.push(route)`: "full screen" of a compact card meant
+   * unmounting the conversation for the result's pre-chat page (the player
+   * card's pointed at a 1,463-line profile). Now it is the `?full=` state of
+   * the SAME result — same depth, same conversation, one control to come
+   * back — and only for a result with a real inline renderer (the panel asks
+   * the registry). Nothing is navigated.
+   */
+  const openFullScreen = expandResult;
+  /**
+   * A NAMED STATION DOOR. The result's own button to its station
+   * (`/dashboard/profile`, `/dashboard/planning`, …) and the fallback's way on
+   * — every one labelled with the station's name, never "full screen". This
+   * one does navigate, through the locale-aware router already in this
+   * component: the station is a REAL screen the person keeps, not a dead end.
+   */
+  const openStation = useCallback(
     (route: string) => router.push(route),
     [router],
   );
+  /** The expanded state as the workspace applies it: honoured only for a
+   *  result that renders inline — the same registry rule the panel uses, so
+   *  the two halves can never disagree about whether the result is "full". */
+  const resultFull =
+    resultExpanded && result !== null && canRenderInline(result, resultContext);
 
   /**
    * GOAL 3 — the depth inside the market result, assembled here because this is
@@ -6785,7 +6816,17 @@ export function ConversationChat({
             something is selected), row from `lg` (panel is the right column
             and is always visible). Same component, one mount. */}
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          <div className="flex min-h-0 flex-1 flex-col">
+          {/* When a result is EXPANDED the conversation docks to a narrow
+              column on desktop and the panel takes the rest — the person
+              keeps the thread and the composer on screen, nothing unmounts.
+              On a phone the expanded sheet covers the screen and its own
+              header carries the way back. */}
+          <div
+            className={`flex min-h-0 flex-1 flex-col ${
+              resultFull ? "lg:w-[22rem] lg:flex-none xl:w-[26rem]" : ""
+            }`}
+            data-docked={resultFull ? "true" : undefined}
+          >
             <ConversationThread
               items={items}
               typing={typing}
@@ -6873,9 +6914,14 @@ export function ConversationChat({
             resultContext={resultContext}
             resultNavigation={resultNavigation}
             wide={panelWide}
+            full={resultFull}
             chipsPostedAt={chipsPostedAt}
             onCloseResult={closeResult}
-            onOpenFull={openFullScreen}
+            // Two different verbs, two different callbacks: the station door
+            // navigates and says where; "full screen" expands in place.
+            onOpenFull={openStation}
+            onExpand={openFullScreen}
+            onCollapse={collapseResult}
           />
         </div>
       </div>

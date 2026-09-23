@@ -77,7 +77,7 @@ export function CalendarResult({
       data-testid="calendar-result-open-full"
       className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
     >
-      {t("openFull")}
+      {t("station.calendar")}
     </button>
   );
 

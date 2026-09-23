@@ -74,8 +74,11 @@ export function AccountMenu() {
     // one avatar and Profile is its first entry.
     { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
     // The Premium Player Card, reachable through the avatar (owner audit
-    // §5.1) — deep-links to the canonical card block on the Mano CV surface.
-    { href: "/dashboard/journal#mano-cv-identity", label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
+    // §5.1). ONE home for one object (2026-09-23): the chat, ŠIANDIEN and the
+    // profile hub all open the card as the workspace RESULT, so the menu does
+    // too — it used to open a closed disclosure on the journal instead, the
+    // same card with different surroundings.
+    { href: "/dashboard?result=player-card", label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     // (The advanced control-room escape hatch died with the route — W3
     // Package 4 deleted /dashboard/advanced entirely.)

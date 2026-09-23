@@ -175,9 +175,20 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
     }
   });
 
-  it("the avatar menu still deep-links to the card", () => {
-    expect(read("components/app/account-menu.tsx")).toMatch(
-      /\/dashboard\/journal#mano-cv-identity/,
+  it("the avatar menu still deep-links to the card — at its ONE home", () => {
+    // RE-ANCHORED 2026-09-23. The menu used to open the card as a closed
+    // disclosure on the journal, while the chat, ŠIANDIEN and the profile hub
+    // open it as the workspace RESULT — one object, two homes, different
+    // surroundings. The menu now names the same address as ŠIANDIEN's
+    // canonical constant; the journal disclosure below stays reachable from
+    // the journal itself.
+    const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(
+      /\{ href: "\/dashboard\?result=player-card", label: t\("tabs\.playerCard"\)/,
+    );
+    expect(menu).not.toMatch(/href: "\/dashboard\/journal#mano-cv-identity"/);
+    expect(read("lib/today/today-model.ts")).toMatch(
+      /WORK_CARD_EDITOR_HREF = "\/dashboard\?result=player-card"/,
     );
   });
 

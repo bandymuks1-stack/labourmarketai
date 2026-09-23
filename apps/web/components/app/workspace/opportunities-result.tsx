@@ -139,7 +139,7 @@ export function OpportunitiesResult({
         testId="opportunities-unavailable"
         text={t("opportunitiesUnavailable")}
         onOpenFull={onOpenFull}
-        openLabel={t("openFull")}
+        openLabel={t("station.opportunities")}
       />
     );
   }
@@ -152,7 +152,7 @@ export function OpportunitiesResult({
         testId="opportunities-no-worker"
         text={t("opportunitiesNoWorker")}
         onOpenFull={onOpenFull}
-        openLabel={t("openFull")}
+        openLabel={t("station.opportunities")}
       />
     );
   }
@@ -166,7 +166,7 @@ export function OpportunitiesResult({
         testId="opportunities-empty"
         text={t("opportunitiesEmpty")}
         onOpenFull={onOpenFull}
-        openLabel={t("openFull")}
+        openLabel={t("station.opportunities")}
       />
     );
   }
@@ -260,7 +260,7 @@ export function OpportunitiesResult({
         data-testid="opportunities-open-full"
         className="self-start"
       >
-        {t("openFull")}
+        {t("station.opportunities")}
       </Button>
     </div>
   );
