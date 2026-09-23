@@ -10,7 +10,11 @@ import {
 import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
 import { LANDING_MODE_COOKIE } from "@/lib/telemetry/landing-experience";
 import { env } from "@/lib/env";
-import { buildReturnValue } from "@/lib/auth/redirect";
+import {
+  ONBOARDING_RETURN_HEADER,
+  buildReturnValue,
+  getSafeReturnPath,
+} from "@/lib/auth/redirect";
 import {
   CANONICAL_ORIGIN,
   isLegacyRedirectHost,
@@ -164,39 +168,72 @@ function hasFreshAccessToken(request: NextRequest): boolean {
 }
 
 /**
- * Hand the authenticated shell the path it is rendering — nothing else.
+ * Hand a gate that must run ABOVE a Suspense boundary the ONE fact it cannot
+ * derive for itself — nothing else.
  *
- * `app/[locale]/dashboard/layout.tsx` is the LAST place in the tree that can
- * still refuse with a real HTTP redirect: everything below it sits inside the
- * Suspense boundary that `dashboard/loading.tsx` creates, and a `redirect()`
- * thrown inside a Suspense boundary is downgraded to a 200 document that
- * redirects itself on the client (measured: a 600 kB authenticated shell plus
- * ~600 ms of Next's "Application error" text before the browser moved). The
- * shell already knows WHO is asking; it cannot know WHAT was asked for.
+ * `app/[locale]/dashboard/layout.tsx` and `app/[locale]/onboarding/layout.tsx`
+ * are the LAST places in their trees that can still refuse with a real HTTP
+ * redirect: everything below them sits inside the Suspense boundary that the
+ * sibling `loading.tsx` creates, and a `redirect()` thrown inside a Suspense
+ * boundary is downgraded to a 200 document that redirects itself on the client
+ * (measured: a 600 kB authenticated shell plus ~600 ms of Next's "Application
+ * error" text before the browser moved). Both layouts already know WHO is
+ * asking. Neither can know WHAT was asked for — Next hands a layout neither the
+ * pathname nor the query.
+ *
+ * So each gets exactly one value, and they are different values because the two
+ * gates ask different questions:
+ *   - the dashboard asks "which route is this?" → the locale-stripped path,
+ *     which `ROLE_GATED_PREFIXES` turns into a required role;
+ *   - onboarding asks "where was this person going?" → the resolved safe
+ *     return path, because an already-onboarded visitor must land on the
+ *     invite/door they followed, not on a bare dashboard.
  *
  * Deliberately narrow:
- *   - only for the `/dashboard` tree, so the static landing path and every
- *     public route keep the exact request they have today (the 2026-08-31
- *     cold-entry P0 is not worth re-litigating for a header nothing reads);
- *   - the header is set on the request handed to `next-intl`, which copies
+ *   - only for those two trees, so the static landing path and every public
+ *     route keep the exact request they have today (the 2026-08-31 cold-entry
+ *     P0 is not worth re-litigating for a header nothing reads);
+ *   - the headers are set on the request handed to `next-intl`, which copies
  *     `new Headers(request.headers)` into its own `NextResponse.next({request})`
  *     override — so this rides the mechanism next-intl already uses for
  *     `x-next-intl-locale` rather than adding a second one;
- *   - an inbound header of the same name is REPLACED, never trusted: it is a
- *     value this function computes, so a client cannot forge a path.
+ *   - an inbound header of either name is REPLACED, never trusted: both are
+ *     values this function computes, so a client cannot forge one;
+ *   - NO authorization happens here. The path is copied verbatim and the
+ *     return value comes from `getSafeReturnPath` — the same pure sanitiser the
+ *     onboarding page has always called. This function answers "which route"
+ *     and "where would that go", never "who may go there".
  */
-function withDashboardPathHeader(request: NextRequest): NextRequest {
+function withGateHeaders(request: NextRequest): NextRequest {
   // GET ONLY, and not for lack of ambition. Per the Fetch spec, constructing a
   // Request from another Request adopts its body and marks the original as
   // used — so cloning a server-action POST here could disturb the body before
-  // the action ever reads it. A navigation that renders the shell is always a
-  // GET; a POST re-renders through the page, where `requireRoleOrRedirect`
-  // still stands. Nothing is weakened, and no write path is touched.
+  // the action ever reads it. A navigation that renders a shell is always a
+  // GET; a POST re-renders through the page, where the page-level gates
+  // (`requireRoleOrRedirect`, the onboarding page's own checks) still stand.
+  // Nothing is weakened, and no write path is touched.
   if (request.method !== "GET") return request;
-  const rest = stripLocaleSegment(request.nextUrl.pathname, routing.locales);
-  if (!isDashboardPath(rest)) return request;
+  const { locale } = stripLocale(request.nextUrl.pathname);
+  // `stripLocaleSegment` is the dashboard table's own locale rule; reuse it for
+  // both trees so a path can never be classified one way here and another way
+  // in `routeRequirement`.
+  const path = stripLocaleSegment(request.nextUrl.pathname, routing.locales);
+  const dashboard = isDashboardPath(path);
+  const onboarding = path === "/onboarding" || path.startsWith("/onboarding/");
+  if (!dashboard && !onboarding) return request;
+
   const headers = new Headers(request.headers);
-  headers.set(DASHBOARD_PATHNAME_HEADER, rest);
+  if (dashboard) headers.set(DASHBOARD_PATHNAME_HEADER, path);
+  if (onboarding) {
+    // Always set, even with no `?next=`: `getSafeReturnPath` already answers
+    // the default (`/<locale>/dashboard`) for a missing or rejected value, so
+    // the layout never has to re-implement the fallback, and an ABSENT header
+    // means only one thing — this request did not pass through here.
+    headers.set(
+      ONBOARDING_RETURN_HEADER,
+      getSafeReturnPath(request.nextUrl.searchParams.get("next"), locale),
+    );
+  }
   return new NextRequest(request, { headers });
 }
 
@@ -221,7 +258,7 @@ export async function middleware(request: NextRequest) {
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)
   //    we return it as-is; the redirected request re-enters middleware with a
   //    locale prefix and the session/auth logic runs then.
-  const intlResponse = intl(withDashboardPathHeader(request));
+  const intlResponse = intl(withGateHeaders(request));
   if (intlResponse.headers.get("location")) return intlResponse;
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
