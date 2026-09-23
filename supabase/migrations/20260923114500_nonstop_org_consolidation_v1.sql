@@ -30,6 +30,13 @@
 --     bandymuks1). bandymuks1's stored pointer a3d59458 becomes NULL
 --     (personal).
 --   * The 158 organization_evidence_records of 19f47e78 are NOT touched.
+--   * LEGAL IDENTITY (owner master decision 2026-09-23): the canonical
+--     company 048aa7e1 carries the real identity of UAB „Nonstop Group“ —
+--     company code 302676973, VAT LT100010790613 (the source of truth is
+--     apps/web/lib/legal/entity-identity.ts). The stored code 564231 came from
+--     the development setup and stops being the active identity; the old
+--     values are kept in audit_logs. Organization id 20b2c802 is unchanged;
+--     the companies mirror trigger carries the name and VAT onto it.
 --
 -- SCHEMA (additive): organizations.archived_at timestamptz NULL and
 --   organizations.archived_reason text NULL, plus ONE CHECK (both set or both
@@ -131,6 +138,12 @@ declare
   c_d_worker   constant uuid := '894b428e-65ca-43f0-97b5-ab8a21b0b3ca';
   c_eng        constant uuid := '2698c6e3-a92e-4337-9742-a77563bd6c5b';
   c_need       constant uuid := '7454f365-337d-4525-9a83-3ab9dbf743c3';
+  c_legal_name constant text := 'UAB „Nonstop Group“';
+  c_legal_code constant text := '302676973';
+  c_legal_vat  constant text := 'LT100010790613';
+  c_old_code   constant text := '564231';
+  c_legal_note constant text := 'Legal identity set by owner decision 2026-09-23 (company code 302676973, VAT LT100010790613, per the entity-identity source of truth); the previous code 564231 came from the development setup.';
+  v_co         record;
   v_archive    uuid[] := array[
     'f2315826-5501-4bfd-a976-3c674559dedd',
     '2e3a4744-3eb1-482c-bbae-1bf0646d1802',
@@ -200,6 +213,13 @@ begin
     select 1 from public.companies c
      where c.id = c_canon_co and c.company_type = 'construction' and c.profile_id = c_ramunas) then
     raise exception 'PRECONDITION: canonical company 048aa7e1 differs (company_type must stay construction)';
+  end if;
+  select c.* into v_co from public.companies c where c.id = c_canon_co for update;
+  if v_co.registration_code is distinct from c_old_code
+     or v_co.vat_number is not null
+     or v_co.verification_status is distinct from 'verified' then
+    raise exception 'PRECONDITION: company 048aa7e1 legal identity differs from the measured state (code %, vat %, status %)',
+      v_co.registration_code, v_co.vat_number, v_co.verification_status;
   end if;
   if not exists (
     select 1 from public.organization_roles r
@@ -343,7 +363,7 @@ begin
     'workflow_definitions',        (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.workflow_definitions t),
     'workflow_definition_versions',(select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.workflow_definition_versions t),
     'projects',                    (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.projects t),
-    'companies',                   (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.companies t),
+    'companies_but_canonical',     (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.companies t where t.id <> c_canon_co),
     'agencies',                    (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.agencies t),
     'company_workers',             (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.company_id, t.worker_id), '')) from public.company_workers t),
     'customer_requests_but_need',  (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.customer_requests t where t.id <> c_need),
@@ -444,6 +464,31 @@ begin
     'old', jsonb_build_object('status', v_need.status, 'updated_at', v_need.updated_at),
     'new', jsonb_build_object('status', 'closed')));
 
+  -- vi-b. Legal identity of the canonical company (owner master decision).
+  --  enforce_company_verification_guard only blocks a transition INTO
+  --  'verified'; the row is already verified and stays so. The mirror trigger
+  --  copies legal_name / display_name / vat_number onto organization 20b2c802.
+  update public.companies
+     set legal_name        = c_legal_name,
+         display_name      = c_legal_name,
+         registration_code = c_legal_code,
+         vat_number        = c_legal_vat,
+         verification_note = coalesce(verification_note, c_legal_note)
+   where id = c_canon_co and registration_code = c_old_code;
+  get diagnostics v_n = row_count;
+  if v_n <> 1 then raise exception 'WRITE: legal identity update of 048aa7e1 touched % rows', v_n; end if;
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (null, c_action, 'companies', c_canon_co, jsonb_build_object(
+    'run_id', v_run, 'step', 'correct_legal_identity', 'op', 'update', 'decision', c_decision,
+    'old', jsonb_build_object(
+      'legal_name', v_co.legal_name, 'display_name', v_co.display_name,
+      'registration_code', v_co.registration_code, 'vat_number', v_co.vat_number,
+      'verification_note', v_co.verification_note, 'updated_at', v_co.updated_at),
+    'new', jsonb_build_object(
+      'legal_name', c_legal_name, 'display_name', c_legal_name,
+      'registration_code', c_legal_code, 'vat_number', c_legal_vat,
+      'verification_note', coalesce(v_co.verification_note, c_legal_note))));
+
   -- vii. Archive the four duplicate/test organizations (reversible).
   for v_org in
     select o.id from public.organizations o where o.id = any(v_archive) order by o.created_at
@@ -508,6 +553,21 @@ begin
   if not exists (select 1 from public.customer_requests r where r.id = c_need and r.status = 'closed') then
     raise exception 'POSTCONDITION: need 7454f365 is not closed';
   end if;
+  if not exists (
+    select 1 from public.companies c
+     where c.id = c_canon_co and c.legal_name = c_legal_name and c.display_name = c_legal_name
+       and c.registration_code = c_legal_code and c.vat_number = c_legal_vat
+       and c.verification_status = 'verified' and c.company_type = 'construction'
+       and c.profile_id = c_ramunas) then
+    raise exception 'POSTCONDITION: company 048aa7e1 does not carry the owner-given legal identity (or its status/type/owner moved)';
+  end if;
+  if not exists (
+    select 1 from public.organizations o
+     where o.id = c_canon and o.legal_name = c_legal_name and o.display_name = c_legal_name
+       and o.vat_number = c_legal_vat and o.owner_profile_id = c_ramunas
+       and o.legacy_company_id = c_canon_co and o.archived_at is null) then
+    raise exception 'POSTCONDITION: organization 20b2c802 did not receive the mirrored legal identity';
+  end if;
   select count(*) into v_n from public.organizations o where o.archived_at is not null;
   if v_n <> 4 or exists (
       select 1 from public.organizations o
@@ -553,7 +613,7 @@ begin
     'workflow_definitions',        (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.workflow_definitions t),
     'workflow_definition_versions',(select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.workflow_definition_versions t),
     'projects',                    (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.projects t),
-    'companies',                   (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.companies t),
+    'companies_but_canonical',     (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.companies t where t.id <> c_canon_co),
     'agencies',                    (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.agencies t),
     'company_workers',             (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.company_id, t.worker_id), '')) from public.company_workers t),
     'customer_requests_but_need',  (select md5(coalesce(string_agg(to_jsonb(t)::text, '|' order by t.id), '')) from public.customer_requests t where t.id <> c_need),
@@ -569,8 +629,8 @@ begin
   select count(*) into v_logged
     from public.audit_logs a
    where a.action = c_action and a.payload->>'run_id' = v_run::text;
-  if v_logged <> 8 + v_role_added + v_mem_added then
-    raise exception 'POSTCONDITION: % audit rows logged, expected %', v_logged, 8 + v_role_added + v_mem_added;
+  if v_logged <> 9 + v_role_added + v_mem_added then
+    raise exception 'POSTCONDITION: % audit rows logged, expected %', v_logged, 9 + v_role_added + v_mem_added;
   end if;
 
   -- ── 4. COMPLETION MARKER (the DOWN restores from this run_id) ─────────────

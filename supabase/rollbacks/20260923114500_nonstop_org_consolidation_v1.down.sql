@@ -4,6 +4,10 @@
 -- wrote to `audit_logs` (action 'org_consolidation_v1', one run_id), newest
 -- change first:
 --   organizations (4)        archived_at / archived_reason -> the logged old values (NULL)
+--   companies (1)            048aa7e1 legal_name, display_name, registration_code,
+--                            vat_number, verification_note -> the logged old values
+--                            (the mirror trigger carries name/VAT back onto 20b2c802;
+--                            updated_at is re-stamped by set_updated_at)
 --   customer_requests (1)    status / updated_at -> the logged old values (submitted)
 --   engagement_contexts (1)  status, ended_at, ended_reason, ended_note,
 --                            lifecycle_stage, journal_review_enabled, is_primary,
@@ -63,6 +67,7 @@ begin
          and a.payload->>'step' <> 'complete'
        order by case a.payload->>'step'
                   when 'archive_organization'         then 1
+                  when 'correct_legal_identity'       then 2
                   when 'close_test_need'              then 2
                   when 'end_obsolete_engagement'      then 3
                   when 'repoint_active_organization'  then 4
@@ -84,6 +89,22 @@ begin
         get diagnostics v_n = row_count;
         if v_n <> 1 then
           raise exception 'DOWN: organization % is no longer as archived by run %', v_log.entity_id, v_run;
+        end if;
+
+      elsif v_log.payload->>'step' = 'correct_legal_identity' then
+        update public.companies
+           set legal_name        = v_old->>'legal_name',
+               display_name      = v_old->>'display_name',
+               registration_code = v_old->>'registration_code',
+               vat_number        = v_old->>'vat_number',
+               verification_note = v_old->>'verification_note'
+         where id = v_log.entity_id
+           and registration_code = v_new->>'registration_code'
+           and legal_name = v_new->>'legal_name'
+           and vat_number is not distinct from v_new->>'vat_number';
+        get diagnostics v_n = row_count;
+        if v_n <> 1 then
+          raise exception 'DOWN: company % legal identity changed since run %', v_log.entity_id, v_run;
         end if;
 
       elsif v_log.payload->>'step' = 'close_test_need' then
