@@ -10,6 +10,7 @@ import type { Database } from "@/lib/supabase/types";
 import {
   readPublicVacancySupplyCounts,
   searchPublicVacancyPreviews,
+  type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
 
 export type LiveMarketJob = {
@@ -41,6 +42,41 @@ export type LiveMarketLandingSnapshot = {
   readonly lastRefreshedAt: string | null;
   readonly basis: "live" | "unavailable";
   readonly professions: readonly LiveMarketProfession[];
+  /** A few REAL, CURRENT vacancies for the public landing (owner directive
+   *  PUBLIC_LANDING_REAL_JOB_DISCOVERY) — see `readVacancySample` below. */
+  readonly sample: LiveMarketVacancySample;
+};
+
+/**
+ * THE LANDING'S REAL-JOB SAMPLE — the same rows `/jobs` page 1 shows.
+ *
+ * Owner directive (PUBLIC_LANDING_REAL_JOB_DISCOVERY): expose a bounded
+ * section of real, current vacancies by REUSING the canonical public jobs
+ * query and card — never a second jobs implementation, and never a gated
+ * field. So this is exactly one call to the ONE anonymous reader,
+ * `searchPublicVacancyPreviews({ page: 1 })` — unfiltered, the same parameter
+ * tuple the board's first page asks, so the two share that reader's
+ * coalescing and result cache — and the rows are its `PublicVacancyPreview`
+ * projection untouched: no employer, no place, no raw title, no named
+ * source, because the database function never returns them and `toPreview`
+ * drops the last two again before any component sees a row.
+ *
+ * `unavailable` covers "the read did not answer" AND "not switched on"; the
+ * landing omits the band for both, and for an empty `live` page too. Unknown
+ * is never rendered as "no jobs".
+ */
+export type LiveMarketVacancySample = {
+  readonly basis: "live" | "unavailable";
+  readonly vacancies: readonly PublicVacancyPreview[];
+};
+
+/** How many real vacancies the landing shows. A glimpse, not a board: the
+ *  whole board is one link away. */
+export const LANDING_VACANCY_SAMPLE_SIZE = 4;
+
+const UNAVAILABLE_SAMPLE: LiveMarketVacancySample = {
+  basis: "unavailable",
+  vacancies: [],
 };
 
 /**
@@ -123,6 +159,48 @@ function unavailableSnapshot(): LiveMarketLandingSnapshot {
       jobs: [],
       basis: "unavailable",
     })),
+    sample: UNAVAILABLE_SAMPLE,
+  };
+}
+
+/**
+ * The first few rows of the board's own first page, in the board's own
+ * order — SELECTED, never re-ranked by a score and never filtered by a
+ * profession.
+ *
+ * Two preferences, both about the reader rather than the market:
+ *   · a row with a canonical `professionSlug` heads the card in the
+ *     VISITOR'S language (the anonymous title is withheld, so the heading is
+ *     the profession name), while a row without one can only head with the
+ *     publisher's occupation words — so slugged rows come first;
+ *   · a row with neither a slug nor an occupation has nothing honest to head
+ *     with (the card would print a dash), so it is not chosen at all.
+ * The relative order inside each group is the RPC's, unchanged.
+ */
+export function pickLandingVacancySample(
+  vacancies: readonly PublicVacancyPreview[],
+): PublicVacancyPreview[] {
+  const withSlug = vacancies.filter((v) => v.professionSlug);
+  const occupationOnly = vacancies.filter(
+    (v) => !v.professionSlug && v.occupation,
+  );
+  return [...withSlug, ...occupationOnly].slice(0, LANDING_VACANCY_SAMPLE_SIZE);
+}
+
+async function readVacancySample(
+  publicClient: SupabaseClient,
+): Promise<LiveMarketVacancySample> {
+  // ONE unfiltered read — never `professionSlug`: a filtered read of a
+  // profession with few live ads scans to the end of the table cold, which
+  // is the timeout class documented above. `page: 1` with no filter is the
+  // cheapest statement the public contract has.
+  const result = await readOrNull(() =>
+    searchPublicVacancyPreviews({ page: 1 }, publicClient),
+  );
+  if (result?.status !== "ok") return UNAVAILABLE_SAMPLE;
+  return {
+    basis: "live",
+    vacancies: pickLandingVacancySample(result.vacancies),
   };
 }
 
@@ -132,7 +210,8 @@ function unavailableSnapshot(): LiveMarketLandingSnapshot {
  * It intentionally carries no vacancy coordinates, employer identities or
  * worker rows. The current public SQL contract does not expose those values,
  * so the map may truthfully resolve supply to Sweden but not invent a city or
- * region distribution inside Sweden.
+ * region distribution inside Sweden. The vacancy `sample` is that same public
+ * contract's preview rows, so it carries none of them either.
  */
 export async function readFreshLiveMarketLandingSnapshot(
   /** Injected only by the concurrency guard, which has to observe how many
@@ -168,6 +247,13 @@ export async function readFreshLiveMarketLandingSnapshot(
   const supplyResult = await readOrNull(() =>
     readPublicVacancySupplyCounts(publicClient),
   );
+
+  // Sequential, like every read here: the counts, then the one unfiltered
+  // sample page, then (LIVE only) the professions. It runs BEFORE the
+  // profession budget starts, so it can never cost LIVE a profession read.
+  // LIVE does not render it today; it is one cached statement per freshness
+  // window, and a second mode flag would only fork the snapshot's shape.
+  const sample = await readVacancySample(publicClient);
 
   const startedAt = Date.now();
   const professionResults: (Awaited<
@@ -227,6 +313,7 @@ export async function readFreshLiveMarketLandingSnapshot(
         basis: result?.status === "ok" ? "live" : "unavailable",
       } satisfies LiveMarketProfession;
     }).sort((a, b) => (b.totalCount ?? -1) - (a.totalCount ?? -1)),
+    sample,
   };
 }
 
@@ -238,21 +325,28 @@ export async function readFreshLiveMarketLandingSnapshot(
  *
  * `unstable_cache` keys on the arguments as well as the key parts, so the two
  * modes below occupy two entries and never serve each other's result.
+ *
+ * The key part is VERSIONED BY SHAPE. Next derives the entry key from this
+ * callback's source text plus the key parts, and the callback did not change
+ * when the snapshot gained `sample` — so under the old key a data-cache entry
+ * written before a deploy would be served to code that reads `sample` and
+ * finds nothing. A new shape gets a new key.
  */
 const readCachedSnapshot = unstable_cache(
   (resolveProfessions: boolean) =>
     readFreshLiveMarketLandingSnapshot(undefined, resolveProfessions),
-  ["live-market-landing-v1"],
+  ["live-market-landing-v2"],
   { revalidate: 300 },
 );
 
 /**
  * ── WHY THE DEFAULT LANDING ASKS FOR LESS ─────────────────────────────────
  *
- * Every consumer of this snapshot was enumerated. `/` (FOCUS) reads exactly
- * three fields — `activeVacancies`, `distinctEmployers`, `lastRefreshedAt` —
- * through `focus-landing.tsx` and `market-proof-band.tsx`, and reads
- * `professions` NOWHERE. The profession chips that band renders come from its
+ * Every consumer of this snapshot was enumerated. `/` (FOCUS) reads the three
+ * supply fields — `activeVacancies`, `distinctEmployers`, `lastRefreshedAt` —
+ * through `focus-landing.tsx` and `market-proof-band.tsx`, plus the unfiltered
+ * `sample` through `landing-open-jobs-band.tsx`, and reads `professions`
+ * NOWHERE. The profession chips that band renders come from its
  * own static `TOP_PROFESSION_FAMILY_SLUGS` list, which is a different set from
  * `PROFESSION_FILTER_SLUGS` above and is not derived from live data at all.
  *

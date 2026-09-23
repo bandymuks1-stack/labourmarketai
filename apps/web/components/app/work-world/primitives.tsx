@@ -11,9 +11,17 @@ import type { ReactNode } from "react";
  * trust-accent = VERIFICATION, text-* / surface-* / border-*). No raw hex.
  *
  * The one semantic rule these encode, once, for every surface:
- *   EVIDENCE (cyan) ≠ VERIFICATION (green).
+ *   EVIDENCE (cyan) ≠ CONFIRMATION (green).
  * `EvidenceState`/`EvidenceDot` colour by that rule and nothing else, so a
- * surface can never accidentally paint a self-attestation as verified.
+ * surface can never accidentally paint a self-attestation as confirmed.
+ *
+ * DESIGN RULE #4 (owner-ratified 2026-09-22): employer-confirmed =
+ * trust-accent GREEN; gold never means confirmation. So an organisation's or
+ * a third party's attestation (`attested`) wears the SAME trust-accent token
+ * as independent verification (`verified`) — it used to wear champagne, a
+ * gold, which made a manager's confirmation read like a brand accent. The
+ * two stay separate VARIANTS (`data-variant` still tells them apart, and only
+ * INDEPENDENTLY_VERIFIED is `verified`); they share the confirmation colour.
  */
 
 /** The canonical evidence standings, mirrored from
@@ -33,8 +41,9 @@ export type EvidenceStanding =
 
 type Variant = "evidence" | "verified" | "attested" | "reported" | "unknown" | "contested";
 
-/** The ONE mapping from a standing to a colour role. Verification is the only
- *  green; a self-attestation is cyan evidence, never green. */
+/** The ONE mapping from a standing to a colour role. Only a confirmation by
+ *  someone else is green (independent verification, or an organisation /
+ *  third party attesting); a self-attestation is cyan evidence, never green. */
 export function evidenceVariant(state: EvidenceStanding): Variant {
   switch (state) {
     case "INDEPENDENTLY_VERIFIED":
@@ -59,9 +68,10 @@ export function evidenceVariant(state: EvidenceStanding): Variant {
 const VARIANT_CLASS: Record<Variant, string> = {
   // brand-cyan = EVIDENCE_SUPPORTED in the provenance ladder
   evidence: "text-brand-cyan border-brand-cyan/40",
-  // trust-accent = the ONLY verification colour
+  // trust-accent = the ONLY confirmation colour (design rule #4): verified
+  // and attested share it; gold/champagne never means confirmation.
   verified: "text-trust-accent border-trust-accent/50",
-  attested: "text-brand-champagne border-brand-champagne/40",
+  attested: "text-trust-accent border-trust-accent/40",
   reported: "text-text-muted border-border-subtle",
   unknown: "text-text-muted border-border-subtle border-dashed",
   contested: "text-state-amber border-state-amber/40",
@@ -95,7 +105,7 @@ export function EvidenceState({
 const DOT_CLASS: Record<Variant, string> = {
   evidence: "bg-brand-cyan",
   verified: "bg-trust-accent",
-  attested: "bg-brand-champagne",
+  attested: "bg-trust-accent",
   reported: "bg-ink-500",
   unknown: "bg-transparent ring-1 ring-inset ring-ink-500",
   contested: "bg-state-amber",
@@ -366,12 +376,12 @@ export function WorkSpineNode({
   children: ReactNode;
 }) {
   const variant = evidenceVariant(state);
+  // Design rule #4: a confirmation by someone else — verified OR attested —
+  // is drawn in the trust-accent green; everything else is cyan evidence.
   const border =
-    variant === "verified"
+    variant === "verified" || variant === "attested"
       ? "border-trust-accent"
-      : variant === "attested"
-        ? "border-brand-champagne"
-        : "border-brand-cyan";
+      : "border-brand-cyan";
   const fill = solid ? DOT_CLASS[variant] : "bg-ink-900";
   return (
     <li data-testid="ww-spine-node" className="relative pb-5 last:pb-0">

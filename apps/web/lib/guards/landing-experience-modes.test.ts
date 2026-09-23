@@ -142,11 +142,34 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
     expect(focusSwitcher).toContain('candidate === "live"');
     expect(focusSwitcherStyles).toContain(".liveDot");
     expect(focusSwitcherStyles).toContain("live-dot-breathe");
-    expect(focusSwitcherStyles).toContain("live-dot-attention");
-    // Bounded attention: a finite iteration count, never `infinite`.
-    expect(focusSwitcherStyles).toMatch(
-      /animation: live-dot-attention [^;]*\s\d+;/,
+  });
+
+  it("calls for no attention in the first seconds, and its label is readable (2026-09-23)", () => {
+    // Owner directive 2026-09-23 (landing §22): the first 3–5 seconds belong
+    // to what the product IS. The one-off ring pulse that started 1.4s after
+    // load was a control demanding attention inside that window, so it is
+    // gone — rule, keyframes and all. The breathe stays.
+    const noAttentionPulse = (css: string) =>
+      !/live-dot-attention/.test(css) && !/animation:[^;]*\s\d+(\.\d+)?m?s\s+\d+;/.test(css);
+    expect(noAttentionPulse(focusSwitcherStyles)).toBe(true);
+    // Control: the removed rule, as it was written, must fail the check.
+    expect(
+      noAttentionPulse(".liveDot::after { animation: live-dot-attention 1.9s ease-out 1.4s 3; }"),
+    ).toBe(false);
+
+    // The label is at least the owner-ratified 12px type floor (2026-09-22)
+    // — it was 7px. Measured on the BUTTON rule, where the label lives.
+    const buttonRule = focusSwitcherStyles.slice(
+      focusSwitcherStyles.indexOf(".modeSwitcher button {"),
     );
+    const labelPx = (rule: string) =>
+      Number(/font-size:\s*(\d+(?:\.\d+)?)px/.exec(rule.slice(0, rule.indexOf("}")))?.[1] ?? 0);
+    expect(labelPx(buttonRule)).toBeGreaterThanOrEqual(12);
+    // Control: the old 7px rule fails the floor.
+    expect(labelPx(".modeSwitcher button { font-size: 7px; }")).toBeLessThan(12);
+  });
+
+  it("offers LIVE without advertising it", () => {
     const switcherCode = code(focusSwitcher).toLowerCase();
     for (const banned of ["dialog", "modal", "toast", "banner", "tooltip"]) {
       expect(switcherCode, banned).not.toContain(banned);
@@ -225,6 +248,15 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
      * renders INSIDE the map band as its supporting evidence rather than as a
      * section of its own (§16). Every original component is still imported and
      * still rendered.
+     *
+     * 2026-09-23 (owner directives landing §22 + PUBLIC_LANDING_REAL_JOB_
+     * DISCOVERY) ADDED three things and moved nothing:
+     *
+     *   hero + LandingPrimaryActions → entry → MAP(+proof) → OPEN JOBS
+     *   → doors → chain → card → trust → LandingClosingBand
+     *
+     * The value copy lives in the hero's own keys, the one next step sits
+     * under it and again at the end, and a few real vacancies follow the map.
      */
     for (const original of [
       "PublicEntry",
@@ -234,24 +266,33 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
       "TrustBand",
       "StartingContextsBand",
       "PublicMarketMapBand",
+      "LandingOpenJobsBand",
     ]) {
       expect(focus).toContain(
         `import { ${original} } from "@/components/marketing/`,
       );
     }
+    expect(focus).toContain(
+      'import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
+    );
     // Code only — the file's own history may NAME the retired hero in prose.
     expect(code(focus)).not.toContain("HeroLiveDemo");
     const order = [
+      "LandingPrimaryActions",
       "PublicEntry",
       "PublicMarketMapBand",
       "MarketProofBand",
+      "LandingOpenJobsBand",
       "StartingContextsBand",
       "ProductChainBand",
       "PlayerCardShowcase",
       "TrustBand",
-    ].map((c) => focus.search(new RegExp(`<${c}[\\s/>]`)));
+      "LandingClosingBand",
+    ].map((c) => code(focus).search(new RegExp(`<${c}[\\s/>]`)));
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
+    // The next step is in the hero, BEFORE the entry — not inside it.
+    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(1);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.
     expect(focus).toContain("<AmbientGlow />");
     expect(focus).toContain("<SiteNav />");

@@ -173,26 +173,47 @@ export type ThermometerView =
   | { kind: "insufficient_data"; missing: "position" | "market" | "both" };
 
 /** Dead-UI rule D (owner smoke 2026-07-05): every counter tile NAVIGATES to
- *  the surface it counts — a real Link with hover/focus affordance. */
+ *  the surface it counts — a real Link with hover/focus affordance. A SAMPLE
+ *  card (`inert`) counts nobody's surface, so its tiles are plain boxes. */
 function Stat({
   value,
   label,
   hint,
   testid,
   href,
+  inert = false,
 }: {
   value: string;
   label: string;
   hint: string;
   testid: string;
   href: string;
+  inert?: boolean;
 }) {
+  if (!inert) {
+    return (
+      <Link
+        href={href as "/dashboard"}
+        className="flex min-h-11 flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        data-testid={testid}
+      >
+        <StatBody value={value} label={label} hint={hint} />
+      </Link>
+    );
+  }
   return (
-    <Link
-      href={href as "/dashboard"}
-      className="flex min-h-11 flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+    <div
+      className="flex min-h-11 flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
       data-testid={testid}
     >
+      <StatBody value={value} label={label} hint={hint} />
+    </div>
+  );
+}
+
+function StatBody({ value, label, hint }: { value: string; label: string; hint: string }) {
+  return (
+    <>
       <CountUp
         text={value}
         className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
@@ -201,7 +222,7 @@ function Stat({
         {label}
       </span>
       <span className="text-meta leading-relaxed text-text-secondary">{hint}</span>
-    </Link>
+    </>
   );
 }
 
@@ -210,6 +231,7 @@ export function WorkerPlayerCard({
   labels,
   thermometer,
   avatarUrl = null,
+  sample = false,
 }: {
   card: WorkerPlayerCardData;
   labels: PlayerCardLabels;
@@ -218,6 +240,15 @@ export function WorkerPlayerCard({
    *  the scouting card shows the real face; otherwise the honest initials
    *  monogram — never a synthesised or placeholder face (DESIGN_SOUL §1). */
   avatarUrl?: string | null;
+  /**
+   * The card is the public SAMPLE (landing showcase, /for-workers), not a
+   * person's own card. Its counters and skill bars then link NOWHERE: they
+   * describe a sample persona, so a tile that opened "your journal" would
+   * send an anonymous visitor into /dashboard for a record that is not
+   * theirs (owner directive 2026-09-23, landing §22). Same component, same
+   * render — only the links are withheld.
+   */
+  sample?: boolean;
 }) {
   const confirmed = card.workCardConfirmed;
   // Honest readiness signals (real met/total), drives the status ring + line.
@@ -503,7 +534,8 @@ export function WorkerPlayerCard({
           labels={labels.visuals.skills}
           // W5 slice 3: this card renders the worker's OWN rows only, so the
           // drill-down never widens visibility — it opens their own journal.
-          linkBarsToJournal
+          // A sample card has no journal behind it, so it never drills down.
+          linkBarsToJournal={!sample}
         />
       </div>
 
@@ -523,6 +555,7 @@ export function WorkerPlayerCard({
           label={labels.skillsLabel}
           hint={skillsUnavailable ? labels.skillsUnavailable : labels.skillsHint}
           href="/dashboard/profile#capabilities"
+          inert={sample}
         />
         <Stat
           testid="player-card-candidate"
@@ -530,6 +563,7 @@ export function WorkerPlayerCard({
           label={labels.candidateLabel}
           hint={labels.candidateHint}
           href="/dashboard/profile#candidate-skills"
+          inert={sample}
         />
         <Stat
           testid="player-card-evidence"
@@ -537,6 +571,7 @@ export function WorkerPlayerCard({
           label={labels.evidenceLabel}
           hint={labels.evidenceHint}
           href="/dashboard/journal#journal-entries"
+          inert={sample}
         />
         <Stat
           testid="player-card-attention"
@@ -544,6 +579,7 @@ export function WorkerPlayerCard({
           label={labels.attentionLabel}
           hint={card.attentionInstructions === 0 ? labels.attentionZero : labels.attentionHint}
           href="/dashboard/communication"
+          inert={sample}
         />
       </div>
 

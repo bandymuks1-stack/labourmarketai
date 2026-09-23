@@ -15,11 +15,14 @@ import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
 import { PublicMarketMapBand } from "@/components/marketing/public-market-map-band";
+import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions";
+import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-band";
 import {
   MARKETING_CLIENT_MESSAGE_ROOTS,
   pickMessages,
 } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
+import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { LandingModeSwitcher } from "./landing-mode-switcher";
 
 /**
@@ -38,15 +41,20 @@ import { LandingModeSwitcher } from "./landing-mode-switcher";
  * and `git log --diff-filter=D` shows 5c78ac5 deleted it, so 7179882 is its
  * final production state by definition rather than by judgement.
  *
- * The composition below is that file's, node for node, with ONE section
- * replaced under the owner's frozen design contract (2026-09-05, package P1):
- * hero copy + <PublicEntry> — the visitor's own sentence read by the ONE
- * deterministic router — where the scripted <HeroLiveDemo> scenario used to
- * play; then the product chain carrying the #how-it-works anchor, the market
- * proof band, the Player Card showcase, the trust band and the final CTA
- * band — same order, same wrapper classes, same anchor. The five other
- * components are the ORIGINALS: they survived #1221 untouched and P1 does
- * not modify any of them.
+ * The composition started as that file's, node for node, and has since been
+ * changed only by named owner decisions — P1 (2026-09-05) put <PublicEntry>
+ * where the scripted <HeroLiveDemo> scenario played; window 11 (2026-09-07,
+ * §§16–20) moved the map and the starting contexts above the product chain;
+ * and landing §22 + PUBLIC_LANDING_REAL_JOB_DISCOVERY (2026-09-23) put the
+ * VALUE first. The order today:
+ *
+ *   hero (what / who / why) + one clear next step + <PublicEntry>
+ *   → the market in places (+ its proof)
+ *   → a few REAL open jobs, from the board itself
+ *   → starting contexts → the product chain (#how-it-works)
+ *   → the sample Player Card → trust → the closing next step
+ *
+ * The same wrapper class and the same #how-it-works anchor throughout.
  *
  * ── COMPATIBILITY ONLY — NO MODERNISATION ─────────────────────────────────
  * The original rendered inside the (marketing) route group, whose layout
@@ -68,6 +76,7 @@ export async function FocusLanding({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const activeLocale = resolveActiveLocale(locale);
   // The SAME canonical snapshot LIVE reads, through the SAME 300 s
   // `unstable_cache` entry — one market truth, one freshness window, no
   // FOCUS-only reader (owner command §9/§12).
@@ -100,13 +109,21 @@ export async function FocusLanding({
         <main id="main-content" className="relative">
           {/* ── The restored landing body, verbatim from 7179882 ────────── */}
           <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
-            {/* ── Entry: the first screen understands a REAL sentence
+            {/* ── VALUE FIRST (owner directive 2026-09-23, landing §22 "fix
+                   the story, not CSS"). The h1 says WHAT this is and WHO it
+                   is for; the sub says what a person accomplishes here and
+                   WHY it is different; the actions say what to do NEXT —
+                   before any control asks anything. This supersedes #1609
+                   §16, which had made the h1 an instruction for the field
+                   below; the field's own label still carries that instruction.
+
+                   Entry: the first screen understands a REAL sentence
                    (frozen design contract 2026-09-05, package P1). The
-                   scripted hero scenario is gone: the visitor's own words go
-                   through the ONE deterministic router, the page says what it
-                   understood, and the auth doors carry the sentence. The
-                   public numbers are the SAME canonical snapshot the market
-                   proof band prints, omitted when the reader cannot answer. */}
+                   visitor's own words go through the ONE deterministic
+                   router, the page says what it understood, and the auth
+                   doors carry the sentence. The public numbers are the SAME
+                   canonical snapshot the market proof band prints, omitted
+                   when the reader cannot answer. */}
             <section className="flex flex-col gap-5">
               <div className="max-w-3xl">
                 <h1 className="font-display text-hero font-bold tracking-tightest text-text-primary">
@@ -115,6 +132,9 @@ export async function FocusLanding({
                 <p className="mt-3 text-lead text-text-secondary">
                   {tHero("sub")}
                 </p>
+                <div className="mt-6">
+                  <LandingPrimaryActions locale={locale} surface="landing_hero" />
+                </div>
               </div>
               <PublicEntry
                 supply={
@@ -146,6 +166,14 @@ export async function FocusLanding({
               <MarketProofBand market={market} locale={locale} />
             </PublicMarketMapBand>
 
+            {/* ── REAL OPPORTUNITIES (owner directive 2026-09-23,
+                   PUBLIC_LANDING_REAL_JOB_DISCOVERY). Right after the market
+                   says it exists, a few of its real, current vacancies —
+                   the board's own first page through the board's own card,
+                   read once by the SAME snapshot reader above. Omitted when
+                   that read could not answer; never a placeholder. ───────── */}
+            <LandingOpenJobsBand sample={market.sample} locale={activeLocale} />
+
             {/* ── §20 STARTING CONTEXTS ─────────────────────────────────
                    Moved UP, from the very bottom of a 4,967px page to the
                    third screen. A visitor who does not want to type a sentence
@@ -175,6 +203,9 @@ export async function FocusLanding({
 
             {/* ── Trust & security — verifiable claims only ─────────────── */}
             <TrustBand />
+
+            {/* ── The page ends on what to do next, not on a claim ──────── */}
+            <LandingClosingBand locale={locale} />
           </div>
         </main>
         <SiteFooter />

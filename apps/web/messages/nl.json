@@ -14053,8 +14053,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Zeg in je eigen woorden wat je nodig hebt in je werk.",
-      "sub": "Werk en mensen, ploegen en diensten, vrije capaciteit, gedaan werk en het bewijs ervan — één markt, op echte plekken. Je hoeft vooraf niet te kiezen wie je bent."
+      "headline": "Eén arbeidsmarkt voor mensen en bedrijven.",
+      "sub": "Vind werk of vind mensen, leg het werk vast dat je doet en laat het voor je spreken — je volgende kans rust op wat je echt hebt gedaan, niet op wat een cv beweert."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
@@ -14122,6 +14122,8 @@
       },
       "numbers": "Nu op het platform: {vacancies} actieve vacatures · {employers} werkgevers",
       "refreshed": "bijgewerkt {date}",
+      "moreExamples": "Meer voorbeelden",
+      "browseJobs": "Vacatures bekijken",
       "exampleLabels": {
         "hire": "Ik heb mensen nodig",
         "work": "Ik zoek werk",
@@ -14134,6 +14136,12 @@
         "logWork": "Gedaan werk vastleggen",
         "verifyWork": "Wie bevestigt dit"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Vacatures",
+      "title": "Echte vacatures, nu open.",
+      "sub": "Een paar actuele vacatures uit officiële openbare arbeidsbronnen. Bekijken kan zonder account; log in om de werkgever, de plek en de sollicitatiewijze te zien.",
+      "all": "Alle vacatures"
     },
     "marketProof": {
       "eyebrow": "Nu op het platform",

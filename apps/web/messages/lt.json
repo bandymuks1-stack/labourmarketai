@@ -14053,8 +14053,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Pasakykite savais žodžiais, ko jums reikia darbe.",
-      "sub": "Darbas ir žmonės, komandos ir paslaugos, laisvi pajėgumai, atlikti darbai ir jų įrodymai — viena rinka, tikrose vietose. Nereikia iš anksto pasirinkti, kas esate."
+      "headline": "Viena darbo rinka žmonėms ir įmonėms.",
+      "sub": "Raskite darbą arba žmones, užrašykite atliktą darbą ir leiskite jam kalbėti už jus — kita galimybė remiasi tuo, ką iš tikrųjų padarėte, o ne tuo, ką teigia CV."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -14122,6 +14122,8 @@
       },
       "numbers": "Dabar platformoje: {vacancies} aktyvių darbo skelbimų · {employers} darbdaviai",
       "refreshed": "atnaujinta {date}",
+      "moreExamples": "Daugiau pavyzdžių",
+      "browseJobs": "Žiūrėti darbo skelbimus",
       "exampleLabels": {
         "hire": "Reikia darbuotojų",
         "work": "Ieškau darbo",
@@ -14134,6 +14136,12 @@
         "logWork": "Užrašyti atliktą darbą",
         "verifyWork": "Kas patvirtins patirtį"
       }
+    },
+    "openJobs": {
+      "eyebrow": "Darbo skelbimai",
+      "title": "Tikri darbo skelbimai, aktyvūs dabar.",
+      "sub": "Keli dabartiniai skelbimai iš oficialių viešų užimtumo šaltinių. Žiūrėti galima be paskyros; prisijungę matysite darbdavį, vietą ir kaip kandidatuoti.",
+      "all": "Visi darbo skelbimai"
     },
     "marketProof": {
       "eyebrow": "Šiuo metu platformoje",

@@ -67,8 +67,11 @@ export interface WorkCardLabels {
   needsMigration: string;
 }
 
+// The canonical primary CTA fill (2026-09-22): the brand gradient with its
+// readable foreground. The retired gold→cyan sweep put cyan — the EVIDENCE
+// colour — on a button, which read as a claim about the record.
 const primaryCta =
-  "inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5";
+  "inline-flex w-fit items-center gap-2 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-transform hover:-translate-y-0.5";
 const secondaryBtn =
   "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
 

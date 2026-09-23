@@ -23,8 +23,10 @@
 }
 
 /* >=44px touch target on BOTH controls (§8) — measured on the button, not
-   on the container. The label stays the same size as the LIVE header
-   switcher's; only the hit area grows. */
+   on the container. The label is 12px: the owner-ratified type floor
+   (2026-09-22) applied here on 2026-09-23 — it was 7px, copied from the LIVE
+   header switcher, which is unreadable on the one control that invites a
+   visitor into LIVE. */
 .modeSwitcher button {
   min-width: 62px;
   min-height: 44px;
@@ -37,7 +39,7 @@
   padding: 0 10px;
   color: rgba(226, 235, 233, 0.58);
   background: transparent;
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 780;
   letter-spacing: 0.11em;
   cursor: pointer;
@@ -68,12 +70,16 @@
  * The LIVE discovery signal.
  *
  * A 6px status dot, always painted — that is the static half of the signal,
- * and the half that survives reduced motion. On top of it sit two restrained
- * motions: `live-dot-breathe`, a slow continuous opacity drift that reads as
- * "something is running here", and `live-dot-attention`, ONE short ring pulse
- * that starts after the hero has settled and stops after three cycles. There
- * is no repeat, no colour flash and no scale bounce, so it never competes
- * with the FOCUS hero or behaves like advertising.
+ * and the half that survives reduced motion. On top of it sits ONE restrained
+ * motion: `live-dot-breathe`, a slow continuous opacity drift that reads as
+ * "something is running here".
+ *
+ * NO ATTENTION PULSE (owner directive 2026-09-23, landing §22). A ring pulse
+ * used to start 1.4s after load and run three cycles — squarely inside the
+ * 3–5 seconds in which the first screen has to say what the product is. A
+ * control calling for attention while the page is still introducing itself
+ * is the "controls before value" defect, so the pulse and its keyframes are
+ * gone. The switch, the dot and the breathe remain the invitation.
  */
 .liveDot {
   position: relative;
@@ -83,16 +89,6 @@
   border-radius: 50%;
   background: #59dfb4;
   animation: live-dot-breathe 3.2s ease-in-out infinite;
-}
-
-.liveDot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(89, 223, 180, 0.55);
-  /* 1.4s settle delay, then exactly three cycles, then permanently calm. */
-  animation: live-dot-attention 1.9s ease-out 1.4s 3;
 }
 
 .modeSwitcher button[aria-pressed="true"] .liveDot {
@@ -105,27 +101,11 @@
   }
 }
 
-@keyframes live-dot-attention {
-  0% {
-    box-shadow: 0 0 0 0 rgba(89, 223, 180, 0.55);
-  }
-  70% {
-    box-shadow: 0 0 0 7px rgba(89, 223, 180, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(89, 223, 180, 0);
-  }
-}
-
-/* Reduced motion: no breathing, no attention pulse. The dot stays, so LIVE
-   still carries a clear static status indicator (§8). */
+/* Reduced motion: no breathing. The dot stays, so LIVE still carries a clear
+   static status indicator (§8). */
 @media (prefers-reduced-motion: reduce) {
-  .liveDot,
-  .liveDot::after {
+  .liveDot {
     animation: none;
-  }
-  .liveDot::after {
-    box-shadow: none;
   }
 }
 
