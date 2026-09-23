@@ -17,6 +17,7 @@ import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
 import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
@@ -256,9 +257,14 @@ export default async function DashboardLayout({
         <Link
           href="/dashboard"
           data-testid="shell-logo-home"
-          className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
+          className="flex min-w-0 shrink items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary"
         >
-          LabourMarket<span className="text-gradient-accent">.ai</span>
+          {/* The canonical mark beside the wordmark — the auth shell's
+              pattern. Decorative: the wordmark names the product. */}
+          <LmLogo title="" className="h-6 w-auto shrink-0 sm:h-7" />
+          <span className="truncate">
+            LabourMarket<span className="text-gradient-accent">.ai</span>
+          </span>
         </Link>
         {/* W8 slice 1 — THE ACTIVE WORKSPACE, in the FULL chrome too.
             Every employer surface (/dashboard/company, …/scouting,

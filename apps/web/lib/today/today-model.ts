@@ -285,6 +285,41 @@ export function deriveTodayGrowth(growth: GrowthReading | null): TodayGrowth {
 }
 
 /**
+ * "TUŠČIA = TVARKINGA" for the growth line (design system §A.8, owner §20:
+ * the home shows what matters now). A line that has nothing to say about the
+ * person is left out rather than stated: "a growth reading needs at least two
+ * skills" (`insufficient`) and "no clear direction yet" (`none`) are the
+ * reading being EMPTY, not a fact about the person's work. What stays:
+ *   · `direction` — the reading itself;
+ *   · `unknown`   — a read that FAILED is named, never silently dropped
+ *                   (SEP-7: UNKNOWN ≠ ZERO — an absent line would read as
+ *                   "nothing to see", which the product does not know).
+ * The destination is one tap away either way: the "numbers" station.
+ */
+export function isTodayGrowthShown(
+  growth: TodayGrowth,
+): growth is Extract<TodayGrowth, { kind: "direction" | "unknown" }> {
+  return growth.kind === "direction" || growth.kind === "unknown";
+}
+
+/**
+ * The same rule for the opportunity line. `none` (no postings) and
+ * `no-worker` (no worker row yet — ŠIANDIEN's ONE next action already leads
+ * there) are the line being empty; `bands` is the reading, and `unavailable`
+ * / `unknown` are a source that could not answer — named, never read as
+ * "nothing for you". The destination stays one tap away: the "world" station.
+ */
+export function isTodayOpportunityShown(
+  opportunity: TodayOpportunity,
+): opportunity is Extract<TodayOpportunity, { kind: "bands" | "unavailable" | "unknown" }> {
+  return (
+    opportunity.kind === "bands" ||
+    opportunity.kind === "unavailable" ||
+    opportunity.kind === "unknown"
+  );
+}
+
+/**
  * The opportunity line — band counts over the SAME rows the conversation's
  * result renders. A platform match carries the engine's status; an external
  * row already carries its band (lane D). No second engine, no re-ranking.

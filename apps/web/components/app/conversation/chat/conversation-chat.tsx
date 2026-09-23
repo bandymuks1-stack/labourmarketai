@@ -196,6 +196,7 @@ import {
   loadEmployerOpeningBrief,
   loadOpeningBrief,
 } from "@/lib/conversation/opening-brief";
+import { TODAY_COVERED_BRIEF_RUNGS } from "@/lib/today/today-route";
 import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
@@ -1628,6 +1629,7 @@ export function ConversationChat({
    * Signed-out visitors and the design preview keep the plain greeting.
    */
   const openedWithStateRef = useRef(false);
+  const todayOnScreen = Boolean(openingContext);
   useEffect(() => {
     if (script || openedWithStateRef.current) return;
     if (!auth?.profile) return; // signed-out: nothing real to show
@@ -1637,7 +1639,11 @@ export function ConversationChat({
     // unread) for an organization. Same caps, same honesty: a failed read
     // contributes nothing and `none` leaves the greeting standing alone.
     openedWithStateRef.current = true;
-    (identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief())
+    // ŠIANDIEN owns the attention it already renders (owner §20): with it on
+    // screen, the brief leaves out the rungs ŠIANDIEN states and keeps the
+    // ones only the brief carries (lib/today/today-route.ts).
+    const briefOptions = todayOnScreen ? { omit: TODAY_COVERED_BRIEF_RUNGS } : undefined;
+    (identity === "person" ? loadOpeningBrief(briefOptions) : loadEmployerOpeningBrief())
       .then((brief) => {
         if (brief.kind !== "brief") return; // honest: nothing to report
         // The brief is a slow read. On production (2026-09-06) it landed
@@ -1653,11 +1659,15 @@ export function ConversationChat({
           text: brief.lines.join("\n"),
           chips: brief.chips,
         });
+        // The brief asks with chips like any assistant() turn, so the phone
+        // sheet (auto-opened for a pending invitation) yields to it the same
+        // way instead of staying over the home.
+        if (brief.chips.length > 0) setChipsPostedAt(Date.now());
       })
       .catch(() => {
         /* the greeting stands on its own — never a fabricated brief */
       });
-  }, [script, auth?.profile, identity, pushMessage]);
+  }, [script, auth?.profile, identity, pushMessage, todayOnScreen]);
 
   /**
    * "Kokie kriterijai pas mane nurodyti?" — a REAL readback of the worker's

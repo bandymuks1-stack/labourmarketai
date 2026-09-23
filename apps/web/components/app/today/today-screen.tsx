@@ -30,6 +30,10 @@ import { TodayWorkSection } from "./today-work-section";
  *   3. work        today · this week · what still needs a figure or a
  *                  look · one growth sentence  (streams: one journal read)
  *   4. world       one opportunity sentence with band counts  (streams)
+ *                  — 3's growth sentence and 4 are ABSENT when they have
+ *                  nothing to say ("Tuščia = tvarkinga", owner §20); a read
+ *                  that failed is still named (`isTodayGrowthShown`,
+ *                  `isTodayOpportunityShown` in the pure model)
  *   5. stations    the contextual workspaces, as text links, one tap —
  *                  opportunities (the former PASAULIS tab) first
  *

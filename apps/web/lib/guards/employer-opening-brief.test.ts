@@ -19,8 +19,12 @@ const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
 describe("the employer opening brief", () => {
   it("exists, and the chat routes each identity to its OWN brief", () => {
     const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
-    expect(chat).toContain(
-      'identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief()',
+    // Re-anchored 2026-09-23: the worker brief now takes the rungs ŠIANDIEN
+    // already states as an `omit` option (owner §20). The routing is the
+    // same — each identity to its OWN brief — and the employer call takes
+    // no option at all.
+    expect(chat).toMatch(
+      /identity === "person" \? loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBrief\(\)/,
     );
     // The old silence gate must not come back.
     const opener = chat.slice(chat.indexOf("openedWithStateRef.current) return"));

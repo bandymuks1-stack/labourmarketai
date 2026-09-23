@@ -24,6 +24,18 @@ describe("on a phone the bottom sheet yields to a question the thread just asked
     expect(chat).toContain("chipsPostedAt={chipsPostedAt}");
   });
 
+  it("the opening brief stamps the moment too — it asks with chips like any assistant turn", () => {
+    // Owner §20 (2026-09-23): on a phone a pending invitation auto-opens the
+    // sheet over the home. The brief is appended through pushMessage, not
+    // assistant(), so it never stamped — and the sheet never yielded to it.
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    const opener = chat.slice(chat.indexOf("const openedWithStateRef = useRef(false);"));
+    const block = opener.slice(0, opener.indexOf("/* the greeting stands on its own"));
+    expect(block).toMatch(/chips: brief\.chips,\s*\}\);[\s\S]*?if \(brief\.chips\.length > 0\) setChipsPostedAt\(Date\.now\(\)\);/);
+    // Negative control: a brief with NO chips asks nothing and must not stamp.
+    expect(block).not.toMatch(/\n\s*setChipsPostedAt\(Date\.now\(\)\);/);
+  });
+
   it("the panel collapses only when the key it showed is unchanged — never against a fresh selection or result", () => {
     const panel = read("components/app/world-state/context-panel.tsx");
     expect(panel).toContain("chipsPostedAt = null,");

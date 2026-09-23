@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { FIT_BAND_ORDER } from "@/lib/opportunities/fit-band";
-import { deriveTodayOpportunity } from "@/lib/today/today-model";
+import { deriveTodayOpportunity, isTodayOpportunityShown } from "@/lib/today/today-model";
 import { loadTodayOpportunities } from "@/lib/today/today-server";
 
 /**
@@ -16,9 +16,14 @@ import { loadTodayOpportunities } from "@/lib/today/today-server";
  *
  * DISCOVERY-ONLY (nothing assessed as a fit) heads itself with the same
  * "found postings (not yet assessed)" title the result panel uses, never
- * "jobs that fit you" over unassessed rows. The three ways the read can be
- * absent — no worker row, the board unavailable, a failed read — are three
- * distinct sentences, never an empty line.
+ * "jobs that fit you" over unassessed rows.
+ *
+ * "Tuščia = tvarkinga" (owner §20): with no postings, or no worker row yet,
+ * the line has nothing to say and the section is absent — the "world"
+ * station keeps the destination one tap away, and a missing worker profile
+ * is what ŠIANDIEN's one next action is for. A source that could NOT answer
+ * (board unavailable, a failed read) is still named, never an empty line
+ * (`isTodayOpportunityShown`).
  */
 export async function TodayOpportunitySection() {
   const [t, tResults, view] = await Promise.all([
@@ -27,6 +32,7 @@ export async function TodayOpportunitySection() {
     loadTodayOpportunities(),
   ]);
   const o = deriveTodayOpportunity(view);
+  if (!isTodayOpportunityShown(o)) return null;
 
   let line: string;
   switch (o.kind) {
@@ -38,12 +44,6 @@ export async function TodayOpportunitySection() {
       line = parts.join(" · ");
       break;
     }
-    case "none":
-      line = t("opportunity.none");
-      break;
-    case "no-worker":
-      line = t("opportunity.noWorker");
-      break;
     case "unavailable":
       line = t("opportunity.unavailable");
       break;

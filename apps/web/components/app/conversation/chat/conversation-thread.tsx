@@ -62,7 +62,27 @@ export function ConversationThread({
   composer?: ReactNode;
 }) {
   const endRef = useRef<HTMLDivElement>(null);
+
+  /** Nothing has happened yet — the screen holds only the assistant's
+   *  opening (greeting, and possibly the real state brief). One user turn,
+   *  one embedded flow or restored history ends the opening state. */
+  const isOpening =
+    !typing &&
+    items.length <= 3 &&
+    items.every((it) => "message" in it && it.message.role === "assistant");
+
+  /** The opening composition reads TOP-DOWN when the composer is not inside
+   *  it (an opening context such as ŠIANDIEN hands the composer to the
+   *  sticky bar, which is on screen regardless). Scrolling to the end there
+   *  lands the person BELOW the opening context: with ŠIANDIEN above the
+   *  greeting the composition is taller than the scroller on a phone
+   *  (measured past 1300px at 375x812), so the jump — on mount, and again
+   *  when the brief lands — hid ŠIANDIEN's header and its one next action.
+   *  Openings that carry their composer inline keep scrolling to it. */
+  const holdOpeningTop = isOpening && !composer;
+
   useEffect(() => {
+    if (holdOpeningTop) return;
     // WCAG 2.3.3: a motion-sensitive person gets an instant jump, not a
     // smooth glide, on every new turn.
     const reduceMotion = window.matchMedia?.(
@@ -72,15 +92,7 @@ export function ConversationThread({
       behavior: reduceMotion ? "auto" : "smooth",
       block: "end",
     });
-  }, [items.length, typing]);
-
-  /** Nothing has happened yet — the screen holds only the assistant's
-   *  opening (greeting, and possibly the real state brief). One user turn,
-   *  one embedded flow or restored history ends the opening state. */
-  const isOpening =
-    !typing &&
-    items.length <= 3 &&
-    items.every((it) => "message" in it && it.message.role === "assistant");
+  }, [items.length, typing, holdOpeningTop]);
 
   return (
     <div

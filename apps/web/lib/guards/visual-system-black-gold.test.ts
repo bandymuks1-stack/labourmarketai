@@ -447,6 +447,105 @@ describe("the LM mark is the owner's original geometry", () => {
 });
 
 /**
+ * NO LETTER STANDS IN FOR THE MARK IN THE AUTHENTICATED PRODUCT (owner §19,
+ * 2026-09-23).
+ *
+ * The canonical mark shipped to the public nav and the auth shell (#1683),
+ * but the signed-in product kept a yellow "L" tile in its two identity sites
+ * — the one top bar and the assistant's mark on every turn — and a guard
+ * pinned the letter as "the mark". The owner saw a generic letter where the
+ * brand belonged. This sweep keeps the substitute from coming back anywhere
+ * a signed-in person looks, not just in the two files that were fixed.
+ *
+ * PERSON MONOGRAMS ARE NOT THE BRAND. An avatar that shows a person's
+ * initial is identity data, and a person may well be called "L…". Those
+ * components are listed below, and each must still DERIVE its initial from
+ * the person's name through an expression — never a literal — so the scan
+ * (which flags only literal text) passes them by construction and still
+ * catches a literal "L" dropped into any of them.
+ */
+describe("no letter stands in for the mark in the authenticated product", () => {
+  const SCAN_ROOTS = ["components/app", "app/[locale]/dashboard"];
+
+  /** A JSX text node that is exactly `L` or `LM`, as literal text or as a
+   *  string-literal child (`{"L"}`). Multiline: the letter may sit on its
+   *  own line between the tags. */
+  const LETTER_STAND_IN = />\s*(?:LM?|\{\s*(["'`])LM?\1\s*\})\s*</;
+
+  /** Person-initial avatars — legitimate monograms, each with the expression
+   *  that proves the initial comes from the person's own name. */
+  const PERSON_MONOGRAMS: ReadonlyArray<readonly [string, RegExp]> = [
+    ["components/app/account-menu.tsx", /\{initial\}/],
+    ["components/app/avatar-display.tsx", /\{avatarMonogram\(displayName\)\}/],
+    // Renders the shared AvatarDisplay above, with the person's own name.
+    ["components/app/profile-avatar.tsx", /<AvatarDisplay\b[^>]*displayName=\{displayName\}/],
+    ["components/app/cv-preview.tsx", /\{initials\(personName\)\}/],
+    ["components/app/worker-player-card.tsx", /\{identity\.initials\}/],
+    ["components/app/project-operations-board.tsx", /\{initials\}/],
+    ["components/app/marketplace-loop-section.tsx", /\{requester\.initials\}/],
+    ["app/[locale]/dashboard/admin/matching/page.tsx", /\{initialsOf\(w\.displayName\)\}/],
+    ["app/[locale]/dashboard/projects/[id]/page.tsx", /\{initialsOf\(w\.name\)\}/],
+  ];
+
+  const tsxUnder = (dir: string): string[] => {
+    const out: string[] = [];
+    const walk = (rel: string): void => {
+      for (const entry of readdirSync(join(APP_ROOT, rel), { withFileTypes: true })) {
+        const child = `${rel}/${entry.name}`;
+        if (entry.isDirectory()) walk(child);
+        else if (child.endsWith(".tsx") && !/\.test\.tsx$/.test(child)) out.push(child);
+      }
+    };
+    walk(dir);
+    return out;
+  };
+
+  it("no component or dashboard route renders a bare L / LM as the mark", () => {
+    const files = SCAN_ROOTS.flatMap(tsxUnder);
+    // A broken walk would report a clean product — the silent failure this
+    // guard exists to prevent.
+    expect(files.length).toBeGreaterThan(200);
+    const offenders = files.filter((rel) => LETTER_STAND_IN.test(read(rel)));
+    expect(
+      offenders,
+      "a letter is not the brand — render <LmLogo /> (components/ui/lm-logo)",
+    ).toEqual([]);
+  });
+
+  it("the two identity sites render the canonical mark component", () => {
+    for (const rel of [
+      "components/app/conversation/chat/conversation-header.tsx",
+      "components/app/conversation/chat/assistant-identity.tsx",
+    ]) {
+      const src = read(rel);
+      expect(src, rel).toMatch(/import \{ LmLogo \} from "@\/components\/ui\/lm-logo"/);
+      expect(src, rel).toMatch(/<LmLogo\b/);
+    }
+  });
+
+  it("every listed person monogram exists and derives its initial from data", () => {
+    for (const [rel, expression] of PERSON_MONOGRAMS) {
+      expect(read(rel), `${rel}: the initial must come from the person's name`).toMatch(
+        expression,
+      );
+    }
+  });
+
+  it("negative control: the retired letter tiles are caught, a monogram expression is not", () => {
+    // The two lines this change removed, verbatim in shape.
+    expect(
+      '<span className="flex size-6 bg-brand-blue" aria-hidden>L</span>',
+    ).toMatch(LETTER_STAND_IN);
+    expect(`<span\n      aria-hidden\n    >\n      L\n    </span>`).toMatch(LETTER_STAND_IN);
+    expect('<span>{"LM"}</span>').toMatch(LETTER_STAND_IN);
+    // Not a stand-in: a data-derived initial, a real word, the component.
+    expect("<span aria-hidden>{initial}</span>").not.toMatch(LETTER_STAND_IN);
+    expect("<span>LabourMarket</span>").not.toMatch(LETTER_STAND_IN);
+    expect('<LmLogo title="" className="h-6 w-auto shrink-0" />').not.toMatch(LETTER_STAND_IN);
+  });
+});
+
+/**
  * THE BRAND REACHES EXTERNAL CLIENTS TOO.
  *
  * The LabourMarket.ai app inside ChatGPT was showing a generic letter avatar,
