@@ -7,6 +7,7 @@ import { HeaderSearch } from "@/components/app/header-search";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { WorkspaceChip } from "./workspace-chip";
 import { iconControl } from "./icon-scale";
 
@@ -77,7 +78,9 @@ export function ConversationHeader({
           aria-label={title}
           className="flex min-w-0 items-center gap-2 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
         >
-          <span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-text-on-brand" aria-hidden>L</span>
+          {/* The canonical mark (owner §19) — never a letter standing in for
+              it. Decorative: the Link's aria-label already names the product. */}
+          <LmLogo title="" className="h-6 w-auto shrink-0" />
           <span className={`font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden lg:inline"}`}>{title}</span>
         </Link>
         {/* The ACTIVE WORKSPACE, always visible beside the conversation —

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { OnboardingWizard } from "@/components/app/onboarding-wizard";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { Link } from "@/lib/i18n/navigation";
@@ -120,9 +121,12 @@ export default async function OnboardingPage({
       <header className="relative z-10 mx-auto flex max-w-container items-center justify-between gap-3 px-6 py-6 sm:px-12">
         <Link
           href="/"
-          className="font-display text-lg font-bold tracking-tightest text-text-primary"
+          className="flex items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary"
         >
-          LabourMarket<span className="text-gradient-accent">.ai</span>
+          <LmLogo title="" className="h-7 w-auto shrink-0" />
+          <span>
+            LabourMarket<span className="text-gradient-accent">.ai</span>
+          </span>
         </Link>
         <LocaleSwitcher compactBelowSm />
       </header>

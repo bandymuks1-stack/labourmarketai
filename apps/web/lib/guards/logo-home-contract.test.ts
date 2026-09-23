@@ -21,11 +21,23 @@ import { CANONICAL_HOME, dashboardChromeMode as modeFor } from "@/lib/config/nav
  * The public marketing header (`SiteNav`) keeps `/` — a visitor is not in
  * the product yet.
  *
- * The browser-level proof (worker / employer / agency / profile / journal /
- * opportunity / candidate / nested deep link → logo → home) lives in
- * `e2e/logo-home.spec.ts`; this guard makes a regression fail before a
- * browser is ever started.
+ * The browser-level proof (worker / employer / agency: home → each actor's
+ * deep routes → logo → home, with the composer intact) is the owner
+ * acceptance walk, `scripts/owner-acceptance-walk.mjs` (a script, not a
+ * spec — its header says why); `tests/e2e/auth-forged-session-refusal.spec.ts`
+ * proves the shell and its logo are served only to a real session. There is
+ * no `logo-home` spec — an earlier version of this note pointed at one that
+ * was never written. This guard makes a regression fail before a browser is
+ * ever started.
+ *
+ * WHAT THE MARK IS (owner §19, 2026-09-23): the canonical `LmLogo` — the
+ * owner's original vector — and never a letter standing in for it. The top
+ * bar carried a yellow "L" tile for months after the real mark shipped to
+ * the public and auth shells, and the previous version of this guard pinned
+ * that letter as "the mark". It is re-anchored here, not deleted: the same
+ * Link, the same test id, the same product name — the letter is what went.
  */
+const LETTER_TILE = />\s*LM?\s*<\/span>/;
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
@@ -57,18 +69,36 @@ describe("the logo is the way home from every authenticated route", () => {
       /<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"[\s\S]*?<\/Link>/,
     );
     expect(logo, "logo Link with the shared test id").not.toBeNull();
-    // The mark ("L" monogram) and the product name both sit INSIDE that link.
-    expect(logo![0]).toMatch(/>L<\/span>/);
+    // The canonical mark and the product name both sit INSIDE that link; the
+    // mark is decorative (empty title) because the Link's aria-label names it.
+    expect(logo![0]).toMatch(/<LmLogo\s+title=""/);
     expect(logo![0]).toMatch(/\{title\}/);
-    // Negative control: the historic shape — a bare span holding the mark —
-    // must not come back beside the link.
-    const bareMarks = header.match(/<span[^>]*>L<\/span>/g) ?? [];
-    expect(bareMarks).toHaveLength(1); // the one inside the Link
+    expect(header).toMatch(/import \{ LmLogo \} from "@\/components\/ui\/lm-logo"/);
+    // The letter tile is gone from the WHOLE header, not only from the Link.
+    expect(header).not.toMatch(LETTER_TILE);
+  });
+
+  it("negative control: the retired letter tile would fail the header check", () => {
+    // The exact line this change removed. If the pattern above ever stops
+    // matching it, the header assertion is vacuous.
+    const retired =
+      '<span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-text-on-brand" aria-hidden>L</span>';
+    expect(retired).toMatch(LETTER_TILE);
+    expect("<span>LM</span>").toMatch(LETTER_TILE);
+    // A real word that merely starts with L is not a letter tile.
+    expect("<span>LabourMarket</span>").not.toMatch(LETTER_TILE);
   });
 
   it("the admin console's full chrome links its mark to /dashboard", () => {
     const layout = read("app/[locale]/dashboard/layout.tsx");
     expect(layout).toMatch(/<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"/);
+    // The mark sits beside the wordmark there too (the auth shell's pattern).
+    const logo = layout.match(
+      /<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"[\s\S]*?<\/Link>/,
+    );
+    expect(logo, "full-chrome logo Link").not.toBeNull();
+    expect(logo![0]).toMatch(/<LmLogo\s+title=""/);
+    expect(logo![0]).toMatch(/LabourMarket<span/);
   });
 
   it("no authenticated shell links the mark to the public landing or a role home", () => {

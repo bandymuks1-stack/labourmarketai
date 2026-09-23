@@ -1,3 +1,5 @@
+import { LmLogo } from "@/components/ui/lm-logo";
+
 /**
  * The assistant's identity — ONE mark, used everywhere it speaks.
  *
@@ -12,16 +14,25 @@
  * assistant one), so per the owner brief the product name is used and the
  * naming decision stays open for the owner.
  *
- * The mark is the SAME square-L product mark the header wears, so the thing
- * speaking in the stream is visibly the thing named in the header — one
- * identity, not two. Rendered at two sizes: the greeting eyebrow, and every
- * assistant turn including the typing indicator.
+ * The mark is the CANONICAL LabourMarket.ai mark (`LmLogo`, the owner's
+ * original vector) — the same artwork the one top bar wears, so the thing
+ * speaking in the stream is visibly the thing named in the header: one
+ * identity, not two. It used to be a yellow letter tile standing in for the
+ * mark; a letter is not the brand (owner §19), and a second drawing would be
+ * a fork of it, so this file renders the component and never an image, an
+ * inline vector or a letter of its own.
+ *
+ * The tile is a NEUTRAL graphite token surface (not a gold fill): the mark's
+ * own metallic ramp is the brand colour, and gold-on-gold would erase it.
+ * Rendered at two sizes: the greeting eyebrow, and every assistant turn
+ * including the typing indicator. Decorative (`aria-hidden`, empty logo
+ * title) — each turn announces the assistant's NAME to assistive tech.
  */
 const SIZE = {
   /** Beside the greeting eyebrow. */
-  sm: "size-5 text-meta rounded-xs",
+  sm: "size-5 rounded-xs p-0.5",
   /** Every assistant turn and the typing indicator. */
-  md: "size-7 text-meta rounded-sm",
+  md: "size-7 rounded-sm p-1",
 } as const;
 
 export function AssistantMark({
@@ -35,9 +46,9 @@ export function AssistantMark({
     <span
       aria-hidden
       data-testid="assistant-mark"
-      className={`flex flex-none items-center justify-center bg-brand-blue font-display font-bold text-text-on-brand ${SIZE[size]} ${className}`}
+      className={`flex flex-none items-center justify-center border border-ink-500 bg-ink-800 ${SIZE[size]} ${className}`}
     >
-      L
+      <LmLogo title="" className="size-full" />
     </span>
   );
 }

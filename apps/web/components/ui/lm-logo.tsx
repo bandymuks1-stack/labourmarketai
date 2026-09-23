@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 /**
  * The LM mark — the ONE production logo component.
  *
@@ -14,19 +16,25 @@
  * layout and stay crisp at every one, and a component keeps the artwork in ONE
  * place instead of a URL each caller sizes differently.
  *
- * The gradient id is FIXED rather than `useId()`d. Duplicate SVG ids only
- * misrender when the definitions DIFFER — the browser resolves every reference
- * to the first one — and this component always emits the identical gradient in
- * the identical user space (the viewBox never varies), so two marks on a page
- * both resolve to the same correct ramp. A `useId()` would have forced this
- * into a client component for no rendering benefit; it is used by server
- * components (the public nav, the auth shell) and must stay server-safe.
+ * The gradient id is PER INSTANCE (`useId()`). It used to be one fixed id, on
+ * the reasoning that identical definitions resolve identically. That holds
+ * only while the FIRST definition in the document is painted: every
+ * `url(#id)` resolves to the first element carrying the id, and Chromium does
+ * not paint a gradient defined inside a `display:none` subtree. Once the mark
+ * is repeated — the one top bar AND every assistant turn in the conversation —
+ * a hidden first copy (a collapsed history block, a breakpoint-hidden
+ * variant) would strip the fill from every mark on the page. `useId()` is
+ * available to server components (React's server build exports it; it is not
+ * a client-only hook), so the public nav and the auth shell keep rendering
+ * this on the server.
  *
- * There was no LM logo in the product before this: the favicon and the PWA
- * icon were three generic ascending bars in blue/violet, and every "logo" in
- * the chrome was the wordmark as plain text. So this ADDS the mark rather than
- * replacing an existing component — the wordmark stays where it is, now with
- * the mark beside it.
+ * Before this component the favicon and the PWA icon were three generic
+ * ascending bars, the public/auth chrome carried the wordmark as plain text,
+ * and the AUTHENTICATED chrome (the one top bar and the assistant's mark in
+ * the conversation) carried a yellow letter tile standing in for the mark.
+ * The public/auth shells adopted this first (#1683); the authenticated
+ * product followed, so every place the product shows its identity now shows
+ * THIS artwork — never a letter, never a second drawing.
  */
 export function LmLogo({
   className,
@@ -36,7 +44,11 @@ export function LmLogo({
   /** Empty string marks it decorative — use that when a wordmark sits beside it. */
   title?: string;
 }) {
-  const gradientId = "lm-metal";
+  // Only word characters survive: React's id delimiters have changed across
+  // versions (`:r1:`, `«r1»`, `_r_1_`), and a `url(#…)` fragment must stay a
+  // plain token. The distinguishing part of the id is alphanumeric, so
+  // stripping the delimiters never collapses two instances into one.
+  const gradientId = `lm-metal-${useId().replace(/\W/g, "")}`;
   const decorative = title === "";
   return (
     <svg
