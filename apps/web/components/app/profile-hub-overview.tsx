@@ -89,11 +89,20 @@ type StepKey = "goal" | "experience" | "review" | "location" | "availability";
  *  `LiveProfileSection` missing-list. */
 const STEPLESS_PILLARS: readonly ReadinessPillarKey[] = ["journal", "evidence"];
 
+/**
+ * `workCard` is an IN-PAGE anchor (2026-09-23). It used to send the person
+ * from this page to the conversation's player-card result, whose own "open"
+ * control sent them straight back here — a ping-pong between two homes for
+ * one editor. Since 2026-09-19 the profile renders the SAME `WorkCardEditor`
+ * (same loader, same save RPCs) at `#cv-availability`, which the page's
+ * `DetailsHashOpener` opens on arrival. The player-card RESULT stays reachable
+ * from the chat, ŠIANDIEN and the account menu.
+ */
 const PILLAR_HREF: Readonly<Record<ReadinessPillarKey, string>> = {
   profession: "#profile-edit",
   skills: "#profile-edit",
   availability: "#cv-availability",
-  workCard: "/dashboard?result=player-card",
+  workCard: "#cv-availability",
   journal: "/dashboard/journal",
   evidence: "/dashboard/journal",
 };
@@ -219,12 +228,15 @@ export async function ProfileHubOverview({
         // minimum Player Card contract (launch audit §7.3) so this list and
         // the player card can never disagree about what is still missing.
         { key: "review", done: skillsOk, href: "#profile-edit" },
-        // The work card carries location + preferred countries; its editor
-        // lives inside the player-card result since W3.
+        // The work card carries location + preferred countries. Its ONE
+        // editor (`WorkCardEditor`) is on this very page at
+        // `#cv-availability` since 2026-09-19 — the player-card result
+        // renders the same component. Linking out to the result and back
+        // was a ping-pong; the anchor opens the editor in place.
         {
           key: "location",
           done: pillarMet("workCard"),
-          href: "/dashboard?result=player-card",
+          href: "#cv-availability",
         },
         {
           key: "availability",

@@ -47,6 +47,7 @@ export function PeriodMonthlyShare({
   sourceText,
   labels,
   className,
+  part = "all",
 }: {
   hours: number | null | undefined;
   periodStart: string | null | undefined;
@@ -59,6 +60,21 @@ export function PeriodMonthlyShare({
   sourceText?: string | null;
   labels: PeriodReadingLabels;
   className?: string;
+  /**
+   * WHICH HALF to draw (profile summary-first, 2026-09-23). `all` (the
+   * default — every caller before this one) draws the whole reading. A
+   * surface that keeps the ribbon on the row and puts the exact month list
+   * one tap away draws the two halves separately: `ribbon` beside the
+   * record, `months` inside its disclosure. The split only ever applies to a
+   * SOURCE period (the one kind that HAS a month list): its ribbon always
+   * carries its own derived warning (`labels.monthlyShare`), so the shape is
+   * never shown without it; only the repeated numbers move. A span with no
+   * monthly figure has no month list to move — its whole reading (total,
+   * span, "no monthly figure", the source's own words, any disagreement)
+   * stays with `ribbon`/`all`, and its `months` half is empty. Same reading,
+   * same figures — nothing is computed twice differently.
+   */
+  part?: "all" | "ribbon" | "months";
 }) {
   const r = readPeriodEvidence({ hours, periodStart, periodEnd, derived, factFields, sourceText });
   if (!r) return null;
@@ -69,7 +85,8 @@ export function PeriodMonthlyShare({
     return (
       <div
         className={className ?? "flex flex-col gap-1.5"}
-        data-testid="period-monthly-share"
+        data-testid={part === "months" ? "period-monthly-share-months" : "period-monthly-share"}
+        data-part={part}
         data-kind={r.kind}
         data-method={p.method}
         data-months={p.monthCount}
@@ -79,16 +96,20 @@ export function PeriodMonthlyShare({
             real figure, split visually across the months it touches — only
             because the SOURCE stated this period and no rate of its own. The
             `monthlyShare` label is the reader's "derived · not source days". */}
-        <PeriodBand totalLabel={total} derivedLabel={labels.monthlyShare} months={p.months} />
+        {part !== "months" ? (
+          <PeriodBand totalLabel={total} derivedLabel={labels.monthlyShare} months={p.months} />
+        ) : null}
         {/* The exact month figures stay available as text beneath the ribbon —
             the ribbon shows the shape, the list states the numbers. */}
-        <ul className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-meta tabular-nums text-text-secondary">
-          {p.months.map((m) => (
-            <li key={m.month} data-month={m.month}>
-              {m.month} · {m.hours.toFixed(2)} h
-            </li>
-          ))}
-        </ul>
+        {part !== "ribbon" ? (
+          <ul className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-meta tabular-nums text-text-secondary">
+            {p.months.map((m) => (
+              <li key={m.month} data-month={m.month}>
+                {m.month} · {m.hours.toFixed(2)} h
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
     );
   }
@@ -96,7 +117,9 @@ export function PeriodMonthlyShare({
   // A span with NO monthly figure: the total and the months it covers, as
   // text — the month ribbon (PeriodBand) is only ever handed a SOURCE
   // period's derived shares, so a chosen span can never be drawn as an even
-  // split, not even as unlabelled equal segments.
+  // split, not even as unlabelled equal segments. There is no month list
+  // here, so the `months` half (a disclosure's copy) has nothing to draw.
+  if (part === "months") return null;
   const stated = [r.kind === "interpreted_period" ? r.duration : null, r.rate].filter(
     (c): c is NonNullable<typeof c> => c !== null,
   );
@@ -105,6 +128,7 @@ export function PeriodMonthlyShare({
     <div
       className={className ?? "flex flex-col gap-1.5"}
       data-testid="period-monthly-share"
+      data-part={part}
       data-kind={r.kind}
       data-provenance={r.provenance}
       data-figures="none"

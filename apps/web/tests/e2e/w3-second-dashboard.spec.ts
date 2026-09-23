@@ -237,10 +237,16 @@ test.describe("row 5 — the recommendations card became a result", () => {
     }
   });
 
-  test("'open full screen' leads to the board — the SAME capability, not a second dashboard", async ({
+  test("the board door NAMES its station and leads to the board — the SAME capability, not a second dashboard", async ({
     page,
   }) => {
     await page.goto("/lt/dashboard?result=opportunities");
+    // 2026-09-23 (owner P0/P1 §17): a control that leaves the conversation
+    // says where it goes. "Open full screen" is the panel's in-place
+    // expansion (`context-panel-expand`), never this door.
+    await expect(page.getByTestId("opportunities-open-full").first()).toHaveText(
+      /Atidaryti galimybes/,
+    );
     await page.getByTestId("opportunities-open-full").first().click();
 
     // The canonical board. NOT /dashboard/advanced — the whole point of the

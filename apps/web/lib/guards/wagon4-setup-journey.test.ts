@@ -119,12 +119,16 @@ describe("Wagon 4 — honest done-states, no fake understanding", () => {
     // the destinations are the same editors as before.
     expect(JOURNEY).toMatch(/href: "#profile-edit"/);
     // The `id="work-card"` anchor died with the second dashboard (W3
-    // Package 4); the location step now opens the work-card capability's
-    // canonical home — the player-card result in the workspace panel.
-    expect(JOURNEY).toMatch(/\/dashboard\?result=player-card/);
-    // …and that deep link opens the conversation — `/dashboard` IS the
-    // conversation for every identity (owner decision 0017), and ŠIANDIEN's
-    // own inline-dimension action points at the same address.
+    // Package 4). The location step then linked the player-card RESULT in
+    // the conversation — whose own "open" control sent the person straight
+    // back to this page (a ping-pong, 2026-09-23). Since 2026-09-19 the
+    // profile renders the SAME WorkCardEditor at `#cv-availability`, so the
+    // step names that in-page anchor. Negative control: the step no longer
+    // leaves the page.
+    expect(JOURNEY).toMatch(/key: "location",\s*done: pillarMet\("workCard"\),\s*href: "#cv-availability",/);
+    expect(JOURNEY).not.toContain("/dashboard?result=player-card");
+    // ŠIANDIEN (which is NOT on this page) still opens the card as the
+    // result — the conversation is where it stands there (decision 0017).
     expect(WORK_CARD_EDITOR_HREF).toBe("/dashboard?result=player-card");
     expect(JOURNEY).not.toMatch(/href: "\/dashboard#work-card"/);
     expect(JOURNEY).toMatch(/href: "#cv-availability"/);

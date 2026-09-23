@@ -1121,7 +1121,9 @@
     "saving": "[EN] Saving...",
     "selfDeclared": "[EN] Awaiting confirmation",
     "verified": "[EN] Confirmed",
-    "viewProfile": "[EN] View profile"
+    "viewProfile": "[EN] View profile",
+    "editDisclosure": "Yrke, ferdigheter og beskrivelse",
+    "aboutDisclosure": "Slik leses denne profilen"
   },
   "stats": {
     "activeWorkers": "[EN] Active workers",
@@ -4254,6 +4256,18 @@
     },
     "results": {
       "openFull": "Åpne fullskjerm",
+      "station": {
+        "profile": "Åpne profil",
+        "journal": "Åpne arbeidsjournal",
+        "calendar": "Åpne kalender",
+        "marketMap": "Åpne markedskart",
+        "opportunities": "Åpne muligheter",
+        "scouting": "Åpne kandidatsøk",
+        "projects": "Åpne prosjekter",
+        "documents": "Åpne dokumenter",
+        "finance": "Åpne økonomiposter"
+      },
+      "collapseFull": "Forminsk",
       "pendingInline": "Dette resultatet forberedes.",
       "retry": "Prøv igjen",
       "engagements": {
@@ -6508,7 +6522,8 @@
       "sourceStatement": "[EN] Source statement (fact)",
       "noMonthlyFigure": "[EN] No monthly figure — the source states only the total",
       "sourceStates": "[EN] Source states: “{words}”",
-      "sourceDiffers": "[EN] This span differs from what the source's own words state — both are kept"
+      "sourceDiffers": "[EN] This span differs from what the source's own words state — both are kept",
+      "howRecorded": "Slik ble det registrert"
     },
     "reconstruction": {
       "timePeriodBoth": "[EN] Months: the first and the last — both, or leave both empty. A start alone is not a period.",

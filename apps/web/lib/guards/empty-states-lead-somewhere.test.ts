@@ -33,7 +33,11 @@ describe("empty states lead somewhere", () => {
   it("an empty pool on the map offers to change the work looked for", () => {
     const src = read("app/[locale]/dashboard/market-map/page.tsx");
     expect(src).toMatch(/data-testid="market-map-vacancy-volume-none-cta"/);
-    expect(src).toMatch(/href="\/dashboard\/profile#work-directions"/);
+    // An anchor that EXISTS: the work directions are edited inside the
+    // profile's `#profile-edit` disclosure (there is no `#work-directions`).
+    expect(src).toMatch(/href="\/dashboard\/profile#profile-edit"/);
+    expect(src).not.toMatch(/#work-directions/);
+    expect(read("app/[locale]/dashboard/profile/page.tsx")).toMatch(/<details\s+id="profile-edit"/);
     for (const l of LOCALES) expect(at(msgs[l], "marketExplanation.noneOpenCta"), l).toBeTruthy();
   });
 

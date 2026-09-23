@@ -172,7 +172,7 @@ function DemandPicker({
       <Explained
         testId="candidates-no-company"
         text={t("candidatesNoCompany")}
-        openLabel={t("openFull")}
+        openLabel={t("station.scouting")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -182,7 +182,7 @@ function DemandPicker({
       <Explained
         testId="candidates-blocked"
         text={t("candidatesBlocked")}
-        openLabel={t("openFull")}
+        openLabel={t("station.scouting")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -192,7 +192,7 @@ function DemandPicker({
       <Explained
         testId="candidates-no-demands"
         text={t("candidatesNoDemands")}
-        openLabel={t("openFull")}
+        openLabel={t("station.scouting")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -226,7 +226,7 @@ function DemandPicker({
           </li>
         ))}
       </ul>
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      <OpenFull label={t("station.scouting")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
     </div>
   );
 }
@@ -326,7 +326,7 @@ function CandidateList({
         <Explained
           testId={`candidates-${view.kind}`}
           text={text}
-          openLabel={t("openFull")}
+          openLabel={t("station.scouting")}
           onOpenFull={() => onOpenFull(FULL_ROUTE)}
         />
       </div>
@@ -341,7 +341,7 @@ function CandidateList({
         {/* NOT "no candidates": there is nothing to match against yet. */}
         <p className="text-basis text-text-secondary">{t("candidatesNotStructured")}</p>
         <DemandActions demand={view.demand} locale={locale} onDone={reload} />
-        <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+        <OpenFull label={t("station.scouting")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
       </div>
     );
   }
@@ -388,7 +388,7 @@ function CandidateList({
         </p>
       )}
 
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      <OpenFull label={t("station.scouting")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
     </div>
   );
 }

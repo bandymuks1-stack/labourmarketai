@@ -169,7 +169,13 @@ describe("5. a profession outside both catalogues still reaches the form, honest
     expect(registry).toMatch(/"profession-statement": \{ domain: "profile", access: "read", handler: "professionStatement"/);
     const handler = chat.slice(chat.indexOf("professionStatement: () => {"), chat.indexOf("skillGap: () =>"));
     expect(handler).toMatch(/readProfessionStatement\(text\)/);
-    expect(handler).toContain('id: "link:/dashboard/profile"');
+    // The profile door names the SECTION that sets a profession
+    // (`#profile-edit`, opened on arrival by its DetailsHashOpener and started
+    // in the profession picker for a person with none) — never the bare page,
+    // which dropped the person at the top of the profile two interactions
+    // away from the one selector the chip promised (2026-09-23).
+    expect(handler).toContain('id: "link:/dashboard/profile#profile-edit"');
+    expect(handler).not.toContain('id: "link:/dashboard/profile"');
     expect(handler).toContain('id: "f:worker.add-work-history"');
     expect(handler).toMatch(/openForm\("worker\.add-work-history", undefined, undefined, \{ title: stated\.label \}\)/);
     // Nothing is persisted from the sentence itself.

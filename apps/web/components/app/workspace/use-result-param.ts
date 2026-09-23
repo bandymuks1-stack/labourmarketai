@@ -87,6 +87,23 @@ export function useResultParam(): {
    * ownership of the row before any candidate is ranked.
    */
   demandId: string | null;
+  /**
+   * FULL SCREEN IS AN EXPANSION, NEVER AN ESCAPE (owner P0/P1 §17,
+   * 2026-09-23: "Open full screen may expand a contextual result when more
+   * space is useful. It must not be an escape hatch into a second legacy
+   * application").
+   *
+   * `?full=1` beside a valid `?result=` — the SAME result, given the whole
+   * workspace. It is a state of the workspace in the query string for the
+   * same reasons depth is (reload, Back, share), and like depth it never
+   * navigates: `replace` on the same route, the conversation stays mounted.
+   * Meaningless without a result, so it reads false when there is none.
+   */
+  expanded: boolean;
+  /** Give the open result the whole workspace. Replaces; keeps the depth. */
+  expandResult: () => void;
+  /** Back to the side-by-side workspace. Replaces; keeps the depth. */
+  collapseResult: () => void;
   /** Show a result — replaces the query, never pushes a new page. */
   openResult: (kind: ResultKind) => void;
   /** Drill into one demand's candidates. Pushes, so Back returns to the list. */
@@ -209,6 +226,9 @@ export function useResultParam(): {
     [rawDemand],
   );
 
+  // Only the one literal value counts; anything else is simply not expanded.
+  const expanded = result !== null && readParam("full") === "1";
+
   const write = useCallback(
     (patch: Record<string, string | null>, mode: "push" | "replace") => {
       const q = new URLSearchParams(params?.toString() ?? href ?? "");
@@ -231,6 +251,12 @@ export function useResultParam(): {
     projectId,
     interactionToken,
     demandId,
+    expanded,
+    // Expanding and collapsing touch ONLY the flag: the result, its depth
+    // and the conversation are exactly what they were. Replace, never push —
+    // Back must not step through "big" and "small" of the same answer.
+    expandResult: useCallback(() => write({ full: "1" }, "replace"), [write]),
+    collapseResult: useCallback(() => write({ full: null }, "replace"), [write]),
     // Opening a result from scratch clears any stale depth: a market result
     // that reopened straight into last week's project would be showing an
     // answer nobody asked for — and an experiences result that reopened onto
@@ -238,10 +264,11 @@ export function useResultParam(): {
     // for, which is worse.
     // …and a candidates result that reopened onto last month's closed demand
     // would be answering a question nobody asked, for the same reason.
+    // A fresh result also opens at its ordinary size: `full` is cleared.
     openResult: useCallback(
       (kind: ResultKind) =>
         write(
-          { result: kind, geo: null, project: null, interaction: null, demand: null },
+          { result: kind, geo: null, project: null, interaction: null, demand: null, full: null },
           "replace",
         ),
       [write],
@@ -322,7 +349,7 @@ export function useResultParam(): {
     closeResult: useCallback(
       () =>
         write(
-          { result: null, geo: null, project: null, interaction: null, demand: null },
+          { result: null, geo: null, project: null, interaction: null, demand: null, full: null },
           "replace",
         ),
       [write],
