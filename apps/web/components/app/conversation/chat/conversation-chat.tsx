@@ -150,6 +150,9 @@ import {
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { ChatPhotoStrip } from "@/components/app/conversation/chat-photo-strip";
 import { readRecentPhotosForChat } from "@/lib/conversation/evidence-photos";
+import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
+import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
+import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
 import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
@@ -2940,6 +2943,29 @@ export function ConversationChat({
         assistant(t("photosUnavailable"), chips);
       });
   }, [assistant, pushEmbed, locale, labels.navJournal, t]);
+  /**
+   * "KAS MATO MANO PROFILĮ?" (capability matrix P0, 2026-09-23) — the state,
+   * read and said first (on / off / unknown), then the EXISTING consent
+   * inline. The sentence writes nothing; the consent's own equal buttons do.
+   * Unknown embeds nothing (its choice screen would claim "not visible").
+   */
+  const startEmployerVisibility = useCallback(() => {
+    setTyping(true);
+    loadEmployerVisibilityForChat()
+      .then((res) => {
+        setTyping(false);
+        assistant(res.line, [{ id: `link:${EMPLOYER_VISIBILITY_HREF}`, label: res.chipLabel }]);
+        if (res.kind === "state" && res.consent) {
+          pushEmbed(<DiscoverabilityConsent locale={locale} source="conversation" {...res.consent} />);
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("visibilityUnavailable"), [
+          { id: `link:${EMPLOYER_VISIBILITY_HREF}`, label: t("chipVisibility") },
+        ]);
+      });
+  }, [assistant, pushEmbed, locale, t]);
   const startMessages = useCallback(() => {
     setTyping(true);
     loadMessagesForChat()
@@ -6501,6 +6527,8 @@ export function ConversationChat({
         invitations: () => startInvitations(),
         // The stored work photos, shown back (issue #1689, defect G).
         evidencePhotos: () => startEvidencePhotos(),
+        // "Kas mato mano profilį?" — state first, then the existing consent.
+        employerVisibility: () => startEmployerVisibility(),
         // ACCEPT BY SENTENCE (launch completion 2026-09-20): the one waiting
         // card — never the accept itself.
         acceptOffer: () => startAcceptOffer(),
@@ -6655,7 +6683,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos,startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**

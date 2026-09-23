@@ -197,6 +197,13 @@ export type ConversationIntent =
   // asking WHO CAN VERIFY the work they already did. Before this it scored 1
   // on `find-work`'s bare `(darbo|darbą)` and was answered with job adverts.
   | "who-verifies-work" // "kam pateikti atliktą darbą?", "kas gali patvirtinti mano darbą?"
+  // ── EMPLOYER VISIBILITY (capability matrix P0, 2026-09-23). 57 of 59
+  //    production workers were invisible to all supply matching because the
+  //    profile-discoverability consent was reachable only through the
+  //    profile's closed "More". "Kas mato mano profilį?" scored 0. The answer
+  //    is the current state, read, then the EXISTING consent — never a write
+  //    by sentence. ─────────────────────────────────────────────────────────
+  | "employer-visibility" // "kas mato mano profilį?" / "make me visible to employers"
   | "unknown";
 
 export type IntentMatch = {
@@ -427,7 +434,11 @@ const RULES: IntentRule[] = [
       ),
       // WORK **FOR THEM** — the pronoun carries the same possession.
       // "turim 20 suvirintoju, reikia jiems projektu".
-      p("(jiems|joms|them|voor\\s+hen|für\\s+sie|ihnen|dla\\s+nich|для\\s+них|им)\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|prac|работ|проект)", 10),
+      // The two-letter Russian `им` is WORD-BOUNDED (2026-09-23): unbounded it
+      // matched inside "видИМым", so "сделай меня видимым для работодателей"
+      // — one person asking to be visible to employers — was read as an
+      // agency offering capacity, on "им" + "работ(одателей)".
+      p("(jiems|joms|them|voor\\s+hen|für\\s+sie|ihnen|dla\\s+nich|для\\s+них|\\bим\\b)\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|prac|работ|проект)", 10),
       // WE CAN OFFER … "Galime pasiūlyti 15 statybininkų", "we can offer",
       // "wir können … anbieten", "we kunnen … aanbieden".
       //
@@ -2998,6 +3009,64 @@ const RULES: IntentRule[] = [
       p("резюме", 3),
       p("\\blebenslauf\\b", 3),
       p("\\b[zż]yciorys", 3), // pl
+    ],
+  },
+  /**
+   * EMPLOYER VISIBILITY — "who can see my profile", "make me visible to
+   * employers" (capability matrix P0, 2026-09-23).
+   *
+   * THE DISCRIMINATOR IS THE VISIBILITY WORD, NEVER THE PROFILE NOUN. `profile`
+   * owns "mano profilis" / "show my profile" at weight 2, and must keep them:
+   * every pattern here needs a visibility stem (matom-, visib-, видим-,
+   * zichtba-, sichtbar-, widoczn-), a WHO-SEES question over the profile, the
+   * employer as the one who sees, or a hide verb over the profile. So "Parodyk
+   * mano profilį" stays `profile` and "noriu pamatyti savo profilį" stays
+   * `profile` — `\bmatyt` is bounded, so it can never fire inside "pamatyti".
+   *
+   * LT `matom` is spelled with its endings (matomas / matoma / matomą /
+   * matomi / matomumas) so "matome" (we see) is not a visibility word. Stems
+   * are ASCII-`\w`-free: `\w` does not match Lithuanian or Cyrillic letters, so
+   * every gap is `.{0,N}` or `[^\s]*` (never `\S`: pattern sources are folded
+   * to lower case, which turns `\S` into `\s`).
+   */
+  {
+    intent: "employer-visibility",
+    patterns: [
+      // lt — "matomumas darbdaviams", "padaryk mane matomą darbdaviams",
+      // "ar mano profilis matomas įmonėms?"
+      p("\\bmatom(as|a|ą|i|os|umas|umą|umo|ų)\\b", 5),
+      p("\\b(matom|matyt|mato|matys)[^\\s]*\\s*.{0,30}(darbdav|įmon|kompanij)", 2),
+      p("(darbdav|įmon)[^\\s]*\\s*.{0,24}\\b(mato|matė|matys|matyti|matytų|matoma|matomas|matomi)\\b", 6),
+      p("kas\\s+(mato|matys|gali\\s+matyti|galės\\s+matyti)\\s*.{0,20}profil", 7),
+      p("(paslėp|slėpk|slėpti|nerodyk)[^\\s]*\\s*.{0,20}(profil|darbdav)", 6),
+      // en — "make me visible to employers", "who can see my profile",
+      // "can employers see my profile?", "hide my profile"
+      p("\\bvisib(le|ility)\\b", 5),
+      p("\\bvisib(le|ility)\\b\\s*.{0,30}(employer|compan|recruit|profile)", 2),
+      p("\\bwho\\s+(can\\s+|could\\s+)?(sees?|views?)\\s*.{0,12}profile", 7),
+      p("(employer|compan|recruiter)[a-z]*\\s+(can\\s+)?(see|find|view)\\s+(me|my\\s+profile)", 7),
+      p("\\b(hide|unhide)\\s*.{0,16}profile", 6),
+      // ru — "кто видит мой профиль", "сделай меня видимым для работодателей"
+      p("(видим|видн)[^\\s]*\\s*.{0,30}(работодател|компани|профил)", 6),
+      p("видимост", 5),
+      p("кто\\s+(видит|увидит|может\\s+(видеть|увидеть))\\s*.{0,16}профил", 7),
+      p("(работодател|компани)[^\\s]*\\s*.{0,20}(видят|видит|увидят)", 6),
+      p("(скрой|скрыть|спрячь)\\s*.{0,16}профил", 6),
+      // nl — "wie ziet mijn profiel", "maak mij zichtbaar voor werkgevers"
+      p("zichtba", 5),
+      p("\\bwie\\s+(ziet|kan\\s+.{0,12}zien)\\s*.{0,16}profiel", 7),
+      p("werkgever[^\\s]*\\s*.{0,24}(zien|ziet)", 6),
+      p("(verberg|verstop)\\s*.{0,16}profiel", 6),
+      // de — "wer sieht mein Profil", "mach mich für Arbeitgeber sichtbar"
+      p("sichtbar", 5),
+      p("\\bwer\\s+(sieht|kann\\s+.{0,12}sehen)\\s*.{0,16}profil", 7),
+      p("arbeitgeber[^\\s]*\\s*.{0,24}(sehen|sieht)", 6),
+      p("(verberg|versteck)[^\\s]*\\s*.{0,16}profil|profil\\s*.{0,16}(verbergen|verstecken)", 6),
+      // pl — "kto widzi mój profil", "widoczność dla pracodawców"
+      p("widoczn", 5),
+      p("\\bkto\\s+(widzi|zobaczy|mo[zż]e\\s+.{0,10}(widzie[cć]|zobaczy[cć]))\\s*.{0,16}profil", 7),
+      p("pracodawc[^\\s]*\\s*.{0,24}(widz|zobacz)", 6),
+      p("(ukryj|schowaj)\\s*.{0,16}profil", 6),
     ],
   },
   {

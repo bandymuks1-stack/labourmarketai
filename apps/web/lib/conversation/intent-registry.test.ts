@@ -104,7 +104,13 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 80 → 81 (2026-09-23, owner program CASE 3/4): rename-organization —
     // "Pervadink šią agentūrą į Nonstop Group UAB." scored 0 in six locales
     // and the proposer had no id to pick. A WRITE behind the ONE confirm form.
-    expect(entries.length).toBe(81);
+    // 81 → 82 (2026-09-23, capability matrix P0): employer-visibility — "Kas
+    // mato mano profilį?" / "make me visible to employers" scored 0 while 57
+    // of 59 production workers were invisible to all supply matching, the
+    // consent reachable only behind the profile's closed "More". The state is
+    // read and said first, then the EXISTING consent component is embedded;
+    // the sentence itself writes nothing.
+    expect(entries.length).toBe(82);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -135,6 +141,12 @@ describe("the intent registry is the enumerable routing contract", () => {
       "confirm-work",
       // F2 — the site as a project object, by sentence.
       "create-project",
+      // "Kas mato mano profilį?" — the EXISTING discoverability consent,
+      // embedded after the current state is said. Write-class because the
+      // consent can record a grant — behind its own equal buttons and the full
+      // legal text, never by the sentence. NOT route: a route intent may only
+      // hand over a chip, and this door can persist.
+      "employer-visibility",
       "invite-candidate",
       "invite-client",
       // Owner contract 2026-09-04 §15 — the institution's commands by

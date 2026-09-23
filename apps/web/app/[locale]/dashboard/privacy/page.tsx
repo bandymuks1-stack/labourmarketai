@@ -13,9 +13,13 @@ import {
   getMyDiscoverabilityState,
 } from "@/lib/privacy/discoverability-actions";
 import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
+import {
+  discoverabilityConsentLabels,
+  discoverabilityPreviewFields,
+  toConsentLocale,
+} from "@/lib/privacy/discoverability-view";
 import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
 import {
-  CONSENT_LOCALES,
   EMPLOYER_DATA_DISCLOSURE_V1,
   PARTNER_SUPPLY_REPRESENTATION_V1,
   PROFILE_DISCOVERABILITY_V1,
@@ -81,25 +85,22 @@ export default async function PrivacyPage({
     getMyPartnerSupplyState(),
   ]);
 
-  // 2026-09-20: PL is an active UI locale without its own consent blocks yet;
-  // English is the honest fallback, never Lithuanian (lib/i18n/unsupported-language.ts).
-  const consentLocale: ConsentLocale = (
-    CONSENT_LOCALES as readonly string[]
-  ).includes(locale)
-    ? (locale as ConsentLocale)
-    : "en";
+  // The ONE consent-locale rule (PL → English, never Lithuanian), shared with
+  // the conversation's copy of the consent (lib/privacy/discoverability-view.ts).
+  const consentLocale: ConsentLocale = toConsentLocale(locale);
   const legal = PROFILE_DISCOVERABILITY_V1.texts[consentLocale];
   const partnerLegal = PARTNER_SUPPLY_REPRESENTATION_V1.texts[consentLocale];
 
-  const previewFields = preview.map((f) => ({
-    label: tc(`preview.${f.key}`),
-    value: f.value,
-  }));
+  const previewFields = discoverabilityPreviewFields(preview, tc);
 
-  const disclosureRows = history.filter(
+  // SEP-7: a history that could not be read is NOT an empty history. Both
+  // sections below say "could not be read" instead of "nothing yet".
+  const historyFailed = history.kind !== "ok";
+  const historyRows = history.kind === "ok" ? history.rows : [];
+  const disclosureRows = historyRows.filter(
     (h) => h.purpose === "employer_data_disclosure",
   );
-  const discoverabilityRows = history.filter(
+  const discoverabilityRows = historyRows.filter(
     (h) => h.purpose === "profile_discoverability",
   );
 
@@ -163,24 +164,7 @@ export default async function PrivacyPage({
             state={state}
             legal={legal}
             preview={previewFields}
-            labels={{
-              statusHidden: tc("status.hidden"),
-              statusHiddenBody: tc("status.hiddenBody"),
-              statusVisible: tc("status.visible"),
-              statusWithdrawn: tc("status.withdrawn"),
-              statusStale: tc("status.stale"),
-              grant: tc("actions.grant"),
-              decline: tc("actions.decline"),
-              manage: tc("actions.manage"),
-              withdraw: tc("actions.withdraw"),
-              previewTitle: tc("preview.title"),
-              previewEmpty: tc("preview.empty"),
-              decidedAtLabel: tc("labels.decidedAt"),
-              versionLabel: tc("labels.version"),
-              needsMigration: tc("labels.needsMigration"),
-              errorGeneric: tc("labels.error"),
-              declinedNote: tc("labels.declinedNote"),
-            }}
+            labels={discoverabilityConsentLabels(tc)}
           />
         </div>
       </section>
@@ -329,7 +313,15 @@ export default async function PrivacyPage({
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
           {tc("disclosures.intro")}
         </p>
-        {disclosureRows.length === 0 ? (
+        {historyFailed ? (
+          <p
+            role="status"
+            className="mt-2 text-sm text-text-secondary"
+            data-testid="disclosures-unavailable"
+          >
+            {tc("history.unavailable")}
+          </p>
+        ) : disclosureRows.length === 0 ? (
           <p className="mt-2 text-sm text-text-secondary" data-testid="disclosures-empty">
             {tc("disclosures.empty")}
           </p>
@@ -374,13 +366,21 @@ export default async function PrivacyPage({
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc("sections.history")}
         </p>
-        {discoverabilityRows.length === 0 && disclosureRows.length === 0 ? (
+        {historyFailed ? (
+          <p
+            role="status"
+            className="mt-2 text-sm text-text-secondary"
+            data-testid="history-unavailable"
+          >
+            {tc("history.unavailable")}
+          </p>
+        ) : discoverabilityRows.length === 0 && disclosureRows.length === 0 ? (
           <p className="mt-2 text-sm text-text-secondary" data-testid="history-empty">
             {tc("history.empty")}
           </p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2" data-testid="history-list">
-            {history.map((r) => (
+            {historyRows.map((r) => (
               <li
                 key={r.id}
                 className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 px-3 py-2 text-sm"

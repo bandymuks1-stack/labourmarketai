@@ -175,6 +175,12 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
       saved: tw("editor.saved"),
       errorMsg: tw("editor.error"),
       needsMigration: tw("editor.needsMigration"),
+      visibilityAsk: {
+        title: tw("visibilityAsk.title"),
+        body: tw("visibilityAsk.body"),
+        open: tw("visibilityAsk.open"),
+        dismiss: tw("visibilityAsk.dismiss"),
+      },
     },
   };
 }

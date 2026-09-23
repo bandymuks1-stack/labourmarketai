@@ -235,7 +235,8 @@
           "help": "Theme",
           "toDark": "Dark",
           "toLight": "Light"
-        }
+        },
+        "employerVisibility": "Nähtavus tööandjatele"
       },
       "comingSoon": {
         "body_main": "[EN] We're finishing the company / agency functionality right now.",
@@ -4134,7 +4135,9 @@
       "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
       "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
-      "acceptOfferWhich": "[EN] Which one? Choose below."
+      "acceptOfferWhich": "[EN] Which one? Choose below.",
+      "visibilityUnavailable": "Nähtavust tööandjatele ei õnnestunud kontrollida. See ei tähenda, et see on välja lülitatud — avage seaded.",
+      "chipVisibility": "Nähtavus tööandjatele"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

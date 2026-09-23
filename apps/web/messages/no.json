@@ -235,7 +235,8 @@
           "help": "Theme",
           "toDark": "Dark",
           "toLight": "Light"
-        }
+        },
+        "employerVisibility": "Synlighet for arbeidsgivere"
       },
       "comingSoon": {
         "body_main": "[EN] We're finishing the company / agency functionality right now.",
@@ -4134,7 +4135,9 @@
       "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
       "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
-      "acceptOfferWhich": "[EN] Which one? Choose below."
+      "acceptOfferWhich": "[EN] Which one? Choose below.",
+      "visibilityUnavailable": "Synligheten for arbeidsgivere kunne ikke kontrolleres. Det betyr ikke at den er slått av — åpne innstillingene.",
+      "chipVisibility": "Synlighet for arbeidsgivere"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

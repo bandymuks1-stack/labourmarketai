@@ -22,6 +22,12 @@ import {
 } from "@/lib/identity/player-card-minimum";
 import { AvatarDisplay } from "@/components/app/avatar-display";
 import {
+  EmployerVisibilityItem,
+  employerVisibilityItemLabels,
+} from "@/components/app/employer-visibility-item";
+import { getMyDiscoverabilityState } from "@/lib/privacy/discoverability-actions";
+import { employerVisibilityOf } from "@/lib/privacy/employer-visibility";
+import {
   CvCompletenessGrid,
   type CvSectionCard,
 } from "@/components/app/cv-completeness-grid";
@@ -154,7 +160,7 @@ export async function ProfileHubOverview({
    * even be started. `tReview` is the absorbed SkillsReviewBanner's own copy,
    * reused verbatim — the message and destination the worker already knows.
    */
-  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, locale] =
+  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tVisibility, locale] =
     await Promise.all([
       getTranslations("profileHub"),
       getTranslations("setupJourney"),
@@ -166,6 +172,8 @@ export async function ProfileHubOverview({
       // The card's own "recorded h / confirmed h" sentence — ONE key, shared
       // with the player card's history band.
       getTranslations("playerCard.visuals"),
+      // "Matomas darbdaviams" — the readiness item shared with the board.
+      getTranslations("privacyConsent.employerVisibility"),
       getLocale(),
     ]);
 
@@ -196,11 +204,18 @@ export async function ProfileHubOverview({
    * start together — measured as a real TTFB regression before this batch was
    * introduced, which is exactly the trap this slice exists to avoid.
    */
-  const [playerCard, signalOrNull, todayCount] = await Promise.all([
+  const [playerCard, signalOrNull, todayCount, discoverability] = await Promise.all([
     getWorkerPlayerCard(),
     getProfileOpportunitySignal(),
     workerId ? countTodayJournalEntries(workerId) : Promise.resolve(0),
+    // The profile-discoverability consent (capability matrix P0: 57 of 59
+    // workers were invisible to all supply matching, the switch reachable
+    // only behind "More"). Same stage — no new serial await. Workers only:
+    // it is the worker profile an employer could find.
+    hasWorker ? getMyDiscoverabilityState() : Promise.resolve(null),
   ]);
+  // SEP-7: a failed read is `unknown`, never `off`.
+  const visibility = hasWorker ? employerVisibilityOf(discoverability) : null;
   const readiness = playerCard ? deriveWorkerReadiness(playerCard) : null;
   // Hours per engagement — the journal's own per-context figures, joined on
   // engagement id (no second ledger; nothing summed across engagements).
@@ -479,6 +494,17 @@ export async function ProfileHubOverview({
             </p>
           )}
         </div>
+      )}
+
+      {/* MATOMAS DARBDAVIAMS — the true consent state and a one-tap door to
+          the consent. A choice, not a missing step: it sits beside the
+          checklist, never inside it (consent must be freely given). */}
+      {visibility && (
+        <EmployerVisibilityItem
+          visibility={visibility}
+          labels={employerVisibilityItemLabels(tVisibility)}
+          testId="profile-hub-employer-visibility"
+        />
       )}
 
       {/* The single honest verification disclaimer for the unified profile. */}

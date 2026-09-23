@@ -4445,6 +4445,12 @@
           "available_from_past": "Dein Datum „kann beginnen ab“ ({date}) ist vorbei — es wird als „jetzt“ gelesen. Stimmt das nicht mehr, setze ein neues Datum.",
           "available_from_far": "Dein Startdatum ({date}) liegt mehr als ein Jahr voraus. Ist das Jahr ein Tippfehler, korrigiere es; sonst lass es so.",
           "unavailable_with_start_date": "Status sagt „kann derzeit nicht arbeiten“, aber ein Startdatum ({date}) ist gesetzt. Kannst du ab diesem Datum — gut; wenn nicht, korrigiere es."
+        },
+        "visibilityAsk": {
+          "title": "Möchten Sie, dass Arbeitgeber Sie finden können?",
+          "body": "Karte gespeichert. Derzeit sehen Unternehmen Ihr Profil nicht — das ist Ihre Wahl, und Sie können sie jederzeit ändern.",
+          "open": "Ansehen und entscheiden",
+          "dismiss": "Nicht jetzt"
         }
       },
       "tabs": {
@@ -4571,7 +4577,8 @@
           "feedbackError": "Die Anwendung konnte nicht getrennt werden. Lade die Seite neu und versuch es erneut.",
           "note": "Das Abmelden von LabourMarket.ai trennt keine Apps. Das Trennen hier ist der einzige Weg, den Zugriff einer Anwendung zu beenden.",
           "pending": "Wird getrennt…"
-        }
+        },
+        "employerVisibility": "Sichtbarkeit für Arbeitgeber"
       },
       "comingSoon": {
         "greeting": "👋 Willkommen, {name}",
@@ -10180,7 +10187,8 @@
       "version": "Version",
       "needsMigration": "Diese Funktion ist auf dem Server noch nicht aktiviert. Ihr Profil bleibt privat.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
-      "declinedNote": "In Ordnung — Ihr Profil bleibt privat. Diese Wahl finden Sie hier jederzeit."
+      "declinedNote": "In Ordnung — Ihr Profil bleibt privat. Diese Wahl finden Sie hier jederzeit.",
+      "readFailed": "Es konnte nicht geprüft werden, ob Arbeitgeber Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit ausgeschaltet ist — bitte versuchen Sie es später erneut."
     },
     "disclosures": {
       "intro": "Jede Übermittlung Ihres Lebenslaufs, Ihrer Kontaktdaten oder anderer Daten an ein bestimmtes Unternehmen erfolgt erst nach Ihrer gesonderten Bestätigung.",
@@ -10195,7 +10203,8 @@
       "purpose": {
         "profile_discoverability": "Sichtbarkeit für Arbeitgeber",
         "employer_data_disclosure": "Datenübermittlung an ein Unternehmen"
-      }
+      },
+      "unavailable": "Ihr Einwilligungsverlauf konnte nicht gelesen werden. Das heißt nicht, dass es keine Einträge gibt — bitte versuchen Sie es später erneut."
     },
     "fields": {
       "full_name": "Vollständiger Name",
@@ -10308,6 +10317,25 @@
       "errorNotIso2": "Bitte verwenden Sie zweibuchstabige Ländercodes, zum Beispiel LT, DE, NL.",
       "errorMarketOutside": "Angeboten werden können Sie nur dort, wo Sie rechtmäßig arbeiten dürfen. Fügen Sie das Land oben zuerst hinzu.",
       "errorValidity": "Bitte wählen Sie 30, 60 oder 90 Tage."
+    },
+    "employerVisibility": {
+      "title": "Für Arbeitgeber sichtbar",
+      "state": {
+        "on": "An",
+        "off": "Aus",
+        "unknown": "Unbekannt"
+      },
+      "hint": {
+        "on": "Unternehmen können Ihr berufliches Profil finden. Kontaktdaten und Lebenslauf nur nach Ihrer gesonderten Bestätigung. Sie können es jederzeit ausschalten.",
+        "off": "Unternehmen finden Ihr Profil nicht. Nur Sie können es einschalten, nachdem Sie die Bedingungen gelesen haben; der Widerruf ist ein Klick.",
+        "unknown": "Konnte nicht geprüft werden. Das heißt nicht, dass es aus ist — öffnen Sie es, um nachzusehen."
+      },
+      "chat": {
+        "on": "Ihr berufliches Profil ist derzeit für Unternehmen sichtbar. Unten: was sie sehen und wie Sie es ausschalten.",
+        "off": "Derzeit sehen Unternehmen Ihr Profil nicht und finden es nicht in der Suche. Wenn Sie gefunden werden möchten, lesen Sie unten die Bedingungen und entscheiden Sie — der Widerruf ist jederzeit möglich.",
+        "unknown": "Es konnte nicht geprüft werden, ob Unternehmen Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit aus ist — öffnen Sie Ihre Datenschutzeinstellungen.",
+        "noWorker": "Die Sichtbarkeit für Arbeitgeber gilt für ein Arbeitnehmerprofil, und dieses Konto hat noch keines."
+      }
     }
   },
   "planning": {
@@ -13490,7 +13518,9 @@
         "chipProfile": "Im Profil bestätigen",
         "chipExperience": "Erfahrung erfassen",
         "chipDocument": "Dokument hinzufügen"
-      }
+      },
+      "visibilityUnavailable": "Ihre Sichtbarkeit für Arbeitgeber konnte nicht geprüft werden. Das heißt nicht, dass sie aus ist — öffnen Sie die Einstellungen.",
+      "chipVisibility": "Sichtbarkeit für Arbeitgeber"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
