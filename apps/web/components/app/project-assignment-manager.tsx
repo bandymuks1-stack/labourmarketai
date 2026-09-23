@@ -64,6 +64,11 @@ export interface ProjectManagerLabels {
   /** Booking-engagement bridge v1 — the picker's two DISTINCT origins. */
   rosterGroupLabel: string;
   engagementGroupLabel: string;
+  /** The CREATE form's own refusal sentence: a project insert the row-level
+   *  policy refused (42501 — `projects_insert` is owner/admin today) names
+   *  who can grant it, instead of the assign form's "workers from your team"
+   *  sentence. Optional so older callers keep the shared label. */
+  createNotAuthorized?: string;
   /** CAL-7 capacity reservation — shown AFTER the assignment, never before,
    *  because a warning may not decide whether a commitment happens. */
   reservationCollidesTitle: string;
@@ -81,11 +86,15 @@ const primary =
 const field =
   "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
 
-function resultError(r: ProjectActionResult | null, l: ProjectManagerLabels) {
+function resultError(
+  r: ProjectActionResult | null,
+  l: ProjectManagerLabels,
+  notAuthorized: string = l.notAuthorized,
+) {
   if (!r || r.ok) return null;
   const msg =
     r.code === "not_authorized"
-      ? l.notAuthorized
+      ? notAuthorized
       : r.code === "needs_migration"
         ? l.needsMigration
         : r.code === "no_company"
@@ -197,7 +206,7 @@ export function ProjectAssignmentManager({
           <button type="submit" disabled={creating} className={primary}>
             {creating ? labels.sending : labels.createSubmit}
           </button>
-          {resultError(createState, labels)}
+          {resultError(createState, labels, labels.createNotAuthorized)}
         </div>
       </form>
 

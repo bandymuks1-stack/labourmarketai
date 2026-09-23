@@ -32,6 +32,7 @@ import {
 } from "@/lib/auth/role-gated-routes";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -171,7 +172,7 @@ export default async function DashboardLayout({
   const gatedPath = (await headers()).get(DASHBOARD_PATHNAME_HEADER);
   const requirement = gatedPath ? routeRequirement(gatedPath) : null;
   if (requirement) {
-    const refused =
+    let refused =
       requirement.kind === "admin"
         ? // A FAILED profile read is not "not an admin". `deriveIsAdmin` reads
           // `profiles.active_role`, and when that row did not answer the
@@ -180,6 +181,19 @@ export default async function DashboardLayout({
           // `requireSuperadmin`, which throws onto the honest error surface.
           session.profileRead !== "failed" && !isAdmin
         : !roles.includes(requirement.role);
+    // MEMBERSHIP IS THE COMPANY GATE TOO (capability matrix P1, 2026-09-23):
+    // a governance membership in the ACTIVE workspace opens the employer
+    // space — `membership_accept_v1` never grants `profile_roles.company`,
+    // so a manager invited into an organization was refused at this frame.
+    // Consulted ONLY when the held roles alone would refuse a `company`
+    // route (a refusal of the worker or buyer space never reads it), and it
+    // is the SAME request-cached resolution the shell reads below anyway —
+    // no second reader, no extra round-trip on the admitted path. The same
+    // rule runs in `requireRoleOrRedirect`, so this frame can only ever
+    // refuse earlier, never admit someone the page gate would turn away.
+    if (refused && requirement.kind === "role" && requirement.role === "company") {
+      refused = !workspaceOpensCompanySpace(await getWorkspaceContext());
+    }
     if (refused) redirect(refusalDestination(locale, requirement));
   }
 

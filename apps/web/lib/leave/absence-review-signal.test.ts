@@ -45,6 +45,7 @@ const absence = (
 
 const zeroCounts: SpineCounts = {
   pendingInvitations: 0,
+  pendingMembershipInvitations: 0,
   unreadConversations: 0,
   pendingIncomingServiceRequests: 0,
   serviceRequestResponsesNew: 0,

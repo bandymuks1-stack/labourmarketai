@@ -73,6 +73,10 @@ import {
   type CompanyType,
 } from "./company-profile-shared";
 import { resolveCompanyLegalParams } from "./company-legal-lock";
+import {
+  rolesForAccess,
+  type CompanyReadAccess,
+} from "@/lib/company/organization-authority";
 
 export type { CompanyLegalFields } from "./company-legal-lock";
 export { resolveCompanyLegalParams } from "./company-legal-lock";
@@ -220,12 +224,35 @@ export async function listOwnedCompanies(): Promise<CompanyListResult> {
 }
 
 /**
- * M-P0-2 explicit-target read: exactly one company by id, and only if the
- * caller created it (RLS + the explicit eq guard). Returns row: null for
+ * M-P0-2 explicit-target read: exactly one company by id, admitted by the
+ * caller's OWN membership in the organisation bound to it. THE one
+ * implementation behind both access modes; returns row: null for
  * foreign/unknown ids — no oracle.
+ *
+ * COMPANY AUTHORITY = the creator OR an ACTIVE MEMBER of the organisation
+ * bound to this company (M-P0-4 §11: membership proves the role; the creator
+ * stays as the owner-equivalent compatibility arm). The creator-only filter
+ * this read carried until 2026-09-04 meant a second person could never open
+ * the company they govern — the real recruiter pilot's account, made an
+ * admin of an existing verified agency, would have seen "no company
+ * profile". The membership row is the caller's own
+ * (`company_memberships_select`: profile_id = auth.uid()), so this read
+ * exposes nothing beyond what the caller already holds; every write is still
+ * re-checked SQL-side (`owns_company`, `save_company_setup_v3`).
+ *
+ * READ ≠ EDIT (capability matrix P1, 2026-09-23). The owner/admin filter was
+ * the only one, and every DOOR used it — so a MANAGER, whose membership the
+ * employer resolver accepts and whom the matrix lets operate, was told
+ * "create a company" on every page of the organization they belong to.
+ * `access` names which membership set admits the read
+ * (`lib/company/organization-authority.ts`, the pure projection):
+ *   - "govern" — owner / admin: the WRITE surfaces (setup form, rename,
+ *     `saveCompanySetup`'s lock read) keep this;
+ *   - "open"   — every governance role: the doors and the company pages.
  */
-export async function getOwnedCompanyById(
+export async function readCompanyByIdForAccess(
   companyId: string,
+  access: CompanyReadAccess,
 ): Promise<CompanyReadResult> {
   const supabase = await createClient();
   const {
@@ -248,23 +275,13 @@ export async function getOwnedCompanyById(
   }
   if (!data) return { kind: "ok", row: null };
   const row = mapCompanyRow(data);
-  // COMPANY AUTHORITY = the creator OR an ACTIVE owner/admin MEMBER of the
-  // organisation bound to this company (M-P0-4 §11: membership proves the
-  // role; the creator stays as the owner-equivalent compatibility arm). The
-  // creator-only filter this read carried until 2026-09-04 meant a second
-  // person could never open the company they govern — the real recruiter
-  // pilot's account, made an admin of an existing verified agency, would
-  // have seen "no company profile". The membership row is the caller's own
-  // (`company_memberships_select`: profile_id = auth.uid()), so this read
-  // exposes nothing beyond what the caller already holds; every write is
-  // still re-checked SQL-side (`owns_company`, `save_company_setup_v3`).
   if (row.profileId === user.id) return { kind: "ok", row };
   const { data: membership, error: mErr } = await asAny(supabase)
     .from("company_memberships")
     .select("id, organizations!inner(legacy_company_id)")
     .eq("profile_id", user.id)
     .eq("status", "active")
-    .in("role", ["owner", "admin"])
+    .in("role", [...rolesForAccess(access)])
     .eq("organizations.legacy_company_id", companyId)
     .limit(1);
   if (mErr) {
@@ -273,6 +290,21 @@ export async function getOwnedCompanyById(
     return { kind: "ok", row: null };
   }
   return { kind: "ok", row: (membership ?? []).length > 0 ? row : null };
+}
+
+/** The company, only where the caller GOVERNS it (creator or active
+ *  owner/admin member) — the read every WRITE surface keys on. */
+export function getOwnedCompanyById(companyId: string): Promise<CompanyReadResult> {
+  return readCompanyByIdForAccess(companyId, "govern");
+}
+
+/** The company, where the caller may OPEN it (creator or ANY active
+ *  governance membership: owner, admin, manager, external_manager, member)
+ *  — the read the doors and the company pages key on. Never a write gate:
+ *  the employer resolver still decides the role, the matrix the capability,
+ *  and SQL re-checks every write. */
+export function getAccessibleCompanyById(companyId: string): Promise<CompanyReadResult> {
+  return readCompanyByIdForAccess(companyId, "open");
 }
 
 export async function getOwnCompany(): Promise<CompanyReadResult> {

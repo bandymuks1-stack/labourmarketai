@@ -42,13 +42,18 @@ export function ProjectContextCreateForm() {
     );
   }
 
+  // `not_authorized` names WHO can grant the right (owner / admin) — the
+  // refused write of a manager or member is a fact about their role in a
+  // real organization, never "could not create" (SEP-7).
   const errorText =
     state && !state.ok
       ? state.code === "invalid_name"
         ? t("errorName")
         : state.code === "no_company"
           ? t("errorNoCompany")
-          : t("error")
+          : state.code === "not_authorized"
+            ? t("errorNotAuthorized")
+            : t("error")
       : null;
 
   return (
@@ -82,7 +87,12 @@ export function ProjectContextCreateForm() {
       </p>
 
       {errorText && (
-        <p className="text-xs text-state-warning" role="alert" data-testid="project-create-error">
+        <p
+          className="text-xs text-state-warning"
+          role="alert"
+          data-testid="project-create-error"
+          data-code={state && !state.ok ? state.code : undefined}
+        >
           {errorText}
         </p>
       )}

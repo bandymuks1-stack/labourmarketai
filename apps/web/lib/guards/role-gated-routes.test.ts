@@ -149,7 +149,12 @@ describe("Guard: the layout refuses BEFORE it can stream", () => {
     expect(layout).toMatch(/redirect\(refusalDestination\(/);
   });
 
-  it("gates before the workspace context read (nothing expensive after a refusal)", () => {
+  it("gates before the shell's workspace context read (nothing expensive after a refusal)", () => {
+    // Re-anchored 2026-09-23 (capability matrix P1): the ONLY workspace read
+    // the gate performs is the membership arm of the `company` requirement,
+    // and it runs inside the refusal branch — after `routeRequirement(`,
+    // and only when the held roles alone would refuse. The shell's own
+    // unconditional read still comes after the whole gate.
     const gateAt = layout.indexOf("routeRequirement(");
     const workspaceAt = layout.indexOf("await getWorkspaceContext(");
     expect(gateAt).toBeGreaterThan(-1);
@@ -157,6 +162,24 @@ describe("Guard: the layout refuses BEFORE it can stream", () => {
     expect(gateAt, "the role gate must precede getWorkspaceContext").toBeLessThan(
       workspaceAt,
     );
+  });
+
+  it("the membership arm admits ONLY the company space, only from the ACTIVE workspace", () => {
+    // `membership_accept_v1` never grants `profile_roles.company`; a manager
+    // invited into an organization was refused at this frame. The arm is
+    // conditioned on the requirement being the `company` role (negative
+    // control: a refusal of the worker or buyer space never consults the
+    // workspace) and derives from the ONE request-cached resolution — no
+    // `profile_roles` write, no second reader.
+    const src = code(layout);
+    expect(src).toMatch(
+      /refused && requirement\.kind === "role" && requirement\.role === "company"/,
+    );
+    expect(src).toMatch(/workspaceOpensCompanySpace\(await getWorkspaceContext\(\)\)/);
+    expect(src).not.toMatch(/from\("profile_roles"\)[\s\S]{0,200}?\.(insert|upsert|update)\(/);
+    // The page gate runs the SAME rule, so the layout can only refuse earlier.
+    const pageGate = code(read(join(APP_ROOT, "lib", "auth", "require-role.ts")));
+    expect(pageGate).toMatch(/expectedRole === "company" &&\s*workspaceOpensCompanySpace\(await getWorkspaceContext\(\)\)/);
   });
 
   it("decides from the reads the shell ALREADY performs — no second role read", () => {

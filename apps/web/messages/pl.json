@@ -615,6 +615,7 @@
     "rowClear": "Brak oczekujących",
     "readSemantics": {
       "pending_invitations": "Znika, gdy zaakceptujesz lub odrzucisz zaproszenie w przeglądzie.",
+      "pending_membership_invitations": "Znika, gdy przyjmiesz lub odrzucisz zaproszenie do organizacji w centrum startowym.",
       "unread_messages": "Znika, gdy przeczytasz rozmowę.",
       "incoming_service_requests": "Znika, gdy odpowiesz na zapytanie.",
       "service_request_responses": "Znika, gdy otworzysz stronę zapytań o usługi.",
@@ -1681,6 +1682,7 @@
       "backToDashboard": "Wróć do panelu firmy",
       "errorName": "Wprowadź nazwę projektu (co najmniej 2 znaki).",
       "errorNoCompany": "Tylko konto firmowe może utworzyć kontekst projektu.",
+      "errorNotAuthorized": "Tworzenie projektów jest tu zastrzeżone dla właściciela lub administratora organizacji. Poproś ich o utworzenie projektu albo o przyznanie Twojej roli tego prawa.",
       "error": "Nie udało się utworzyć. Spróbuj ponownie."
     },
     "needsTitle": "Zapytania",
@@ -4623,6 +4625,7 @@
       "types": {
         "generic": "Powiadomienie",
         "pending_invitations": "Zaproszenia czekają na Twoją odpowiedź",
+        "pending_membership_invitations": "Zaproszenia do zarządu organizacji czekają na Twoją odpowiedź",
         "unread_messages": "Nieprzeczytane wiadomości",
         "incoming_service_requests": "Zapytania o usługi czekają na odpowiedź",
         "service_request_responses": "Odpowiedzi na Twoje zapytania",
@@ -16988,6 +16991,73 @@
       }
     },
     "needsAgency": "Podaż"
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Właściciel",
+      "admin": "Administrator",
+      "manager": "Kierownik",
+      "external_manager": "Kierownik zewnętrzny",
+      "member": "Członek"
+    },
+    "outcomes": {
+      "invited": "Zaproszenie wysłane.",
+      "accepted": "Zaproszenie przyjęte.",
+      "declined": "Zaproszenie odrzucone.",
+      "cancelled": "Zaproszenie anulowane.",
+      "role_changed": "Rola zmieniona.",
+      "revoked": "Członkostwo cofnięte.",
+      "left": "Opuściłeś organizację.",
+      "unchanged": "Rola bez zmian.",
+      "already_member": "Ta osoba jest już członkiem.",
+      "already_invited": "Zaproszenie już oczekuje.",
+      "already_active": "Członkostwo jest już aktywne.",
+      "not_invited": "Zaproszenie niedostępne.",
+      "not_active": "Członkostwo nie jest aktywne.",
+      "not_a_member": "Nie jesteś członkiem.",
+      "not_found": "Wpis niedostępny.",
+      "not_authorized": "Nie masz uprawnień do tej czynności.",
+      "no_such_user": "Brak użytkownika z tym adresem e-mail.",
+      "cannot_invite_self": "Nie możesz zaprosić samego siebie.",
+      "invalid_role": "Nieprawidłowa rola.",
+      "last_owner": "Ostatni właściciel nie może ustąpić — najpierw aktywuj innego właściciela.",
+      "no_workspace": "Najpierw wybierz przestrzeń organizacji.",
+      "needs_migration": "Ta funkcja nie jest jeszcze włączona w tym środowisku.",
+      "invalid": "Nieprawidłowe dane.",
+      "error": "Coś się nie udało — spróbuj ponownie."
+    },
+    "invitations": {
+      "heading": "Zaproszenia od organizacji",
+      "explainer": "Skierowane do Ciebie zaproszenia do zarządu. Po przyjęciu organizacja pojawi się w przełączniku przestrzeni.",
+      "accept": "Przyjmij",
+      "decline": "Odrzuć"
+    },
+    "members": {
+      "heading": "Członkowie organizacji",
+      "explainer": "Członkostwa zarządcze aktywnej przestrzeni. Członkostwo to nie zatrudnienie — nigdy nie tworzy ani nie kończy relacji pracy.",
+      "statusInvited": "zaproszony",
+      "inviteHeading": "Zaproś członka",
+      "inviteEmail": "Adres e-mail",
+      "inviteRole": "Rola",
+      "inviteSubmit": "Zaproś",
+      "cancelInvite": "Anuluj zaproszenie",
+      "revoke": "Cofnij członkostwo",
+      "leave": "Opuść organizację",
+      "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków."
+    },
+    "start": {
+      "membersMoved": "Członkowie i zaproszenia organizacji {workspace} są zarządzane w jej Ustawieniach.",
+      "unnamedOrganization": "Twojej organizacji",
+      "openSettings": "Otwórz członków w Ustawieniach"
+    },
+    "entry": {
+      "memberOnly": "Należysz do tej organizacji jako członek. Jej ekrany robocze są dla właścicieli, administratorów i kierowników; lista członków i Twoje zaproszenia są w Ustawieniach.",
+      "openMembers": "Otwórz członków"
+    },
+    "managerScope": {
+      "title": "Twoja rola tutaj: kierownik",
+      "body": "Możesz otworzyć tę organizację i w niej pracować. Tworzenie i edycja projektów oraz wgląd w skład zespołu pozostają na razie przy właścicielu lub administratorze — dopóki tego nie przyznają, taka czynność jest pokazywana jako odrzucona, nigdy jako pusta lista."
+    }
   },
   "rosterLinkEnd": {
     "title": "Moje zespoły",

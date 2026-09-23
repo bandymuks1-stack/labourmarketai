@@ -3,7 +3,7 @@ import "server-only";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { organizationCapabilities } from "@/lib/organizations/capabilities";
@@ -155,7 +155,9 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
 
   const [staffingAgency, capabilities, legacyType] = await Promise.all([
     safe(async () => {
-      const company = await getOwnedCompanyById(companyId!);
+      // A read of the company TYPE for the greeting — any governance member
+      // the resolver accepted may know whether their organization is an agency.
+      const company = await getAccessibleCompanyById(companyId!);
       return company.kind === "ok" && company.row?.companyType === "staffing_agency";
     }, false),
     safe(() => readOrganizationCapabilities(organizationId!), [] as readonly string[]),

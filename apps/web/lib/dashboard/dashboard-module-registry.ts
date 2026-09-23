@@ -406,6 +406,10 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     roles: ORG_ROLES,
     primaryRoles: ORG_ROLES,
     surfaces: ["grid", "command"],
+    // A seat in an organization's governance is offered by an organization
+    // — its source module. The signal clears on the invitee's own surface
+    // (the Activity Setup Hub), which is where its href points.
+    attentionSignalIds: ["pending-membership-invitations"],
   },
 
   {
