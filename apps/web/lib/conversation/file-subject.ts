@@ -237,9 +237,21 @@ export type FileCapability =
   | "self_cv_import"
   /** `worker.add-document` → `upsert_worker_document` (self). */
   | "self_document"
+  /** `worker-worklog-flow` → the work entry is saved FIRST, then the photo is
+   *  attached to it (`uploadJournalEntryPhoto` → `register_journal_entry_photo`,
+   *  1-photo free tier). A photo is evidence OF an entry, never a loose drop. */
+  | "self_work_evidence"
   /** `lib/organization-evidence/import-core` — sessions, person matching,
    *  preview, explicit resolve, one atomic commit, withdraw/reinstate. */
   | "organization_evidence_import";
+
+/** The capabilities that write into the CALLER'S own record. Only a `self`
+ *  subject may reach one — pinned exhaustively by a-file-belongs-to-someone. */
+export const SELF_SCOPED_CAPABILITIES: ReadonlySet<FileCapability> = new Set([
+  "self_cv_import",
+  "self_document",
+  "self_work_evidence",
+]);
 
 export function routeFileIntent(
   intent: FileIntent,
@@ -253,8 +265,14 @@ export function routeFileIntent(
     case "self":
       if (intent.kind === "cv") return { kind: "capability", capability: "self_cv_import" };
       if (intent.kind === "document") return { kind: "capability", capability: "self_document" };
-      // A person's own work photos have no import door yet — the journal
-      // takes work entries, not a standalone photo drop.
+      // A person's own work photos: the journal photo door (owner P0
+      // 2026-09-23). It used to answer "no door yet" while the paperclip
+      // already routed the very same photo into the work-log flow — two
+      // routers disagreeing about one file. The photo attaches to a work
+      // entry the person saves first, so it is still never a loose drop.
+      if (intent.kind === "work_evidence") {
+        return { kind: "capability", capability: "self_work_evidence" };
+      }
       return { kind: "unavailable", subject: "self" };
 
     case "another_person":
@@ -280,4 +298,133 @@ export function routeFileIntent(
       // Learners join by invitation today; there is no cohort FILE import.
       return { kind: "unavailable", subject: "cohort" };
   }
+}
+
+// ── A PICKED file (the composer paperclip) ─────────────────────────────────
+//
+// The paperclip used to be a flow launcher with its own two-door router,
+// bypassing this module: it never opened a file picker, and it routed own
+// work photos into the journal while `routeFileIntent` above still called
+// them "no door yet". A picked file now goes through THIS router, so a typed
+// deposit sentence and a paperclip pick obey one set of subject-safety rules.
+
+/** What a picked file's BYTES are. Read from the MIME type the browser
+ *  reports — never from the words in its name (`cv.jpg` is a photo). */
+export type PickedFileMedia = "image" | "pdf" | "docx" | "text";
+
+const MEDIA_BY_MIME: Readonly<Record<string, PickedFileMedia>> = {
+  "image/jpeg": "image",
+  "image/png": "image",
+  "image/webp": "image",
+  "application/pdf": "pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "text/plain": "text",
+};
+
+/** ONLY for a file the browser typed as "" (some report no MIME for .docx
+ *  where no office suite is installed). A STATED type always wins: a GIF
+ *  renamed `photo.png` is still a GIF, and is refused. */
+const MEDIA_BY_EXTENSION: Readonly<Record<string, PickedFileMedia>> = {
+  pdf: "pdf",
+  docx: "docx",
+  txt: "text",
+};
+
+export interface PickedFileLike {
+  readonly type: string;
+  readonly name: string;
+}
+
+/** The picked file's media, or `null` for a type no door takes. */
+export function pickedFileMedia(file: PickedFileLike): PickedFileMedia | null {
+  const mime = (file.type ?? "").trim().toLowerCase();
+  if (mime) return MEDIA_BY_MIME[mime] ?? null;
+  const ext = /\.([a-z0-9]+)$/i.exec(file.name ?? "")?.[1]?.toLowerCase() ?? "";
+  return MEDIA_BY_EXTENSION[ext] ?? null;
+}
+
+/**
+ * The MIME-derived FileKinds a picked file can honestly be, most likely
+ * first. An image is a work photo or a photographed certificate; a PDF or
+ * DOCX is a CV or a document; plain text only ever reaches the CV reader.
+ * Which one it IS, only the person can say — so the attach question asks.
+ */
+export function fileKindsForMedia(media: PickedFileMedia): readonly FileKind[] {
+  switch (media) {
+    case "image":
+      return ["work_evidence", "document"];
+    case "pdf":
+    case "docx":
+      return ["cv", "document"];
+    case "text":
+      return ["cv"];
+  }
+}
+
+/** An existing page with its own uploader. The file does not travel there —
+ *  the person attaches it again on that page, and the chat says so. */
+export type AttachSurface = "work_report" | "organization_document" | "organization_people";
+
+/**
+ * One answer the attach question ("what is this file for?") may offer.
+ *
+ *   door     — the person STATES the subject ("my CV") and the router names
+ *              an existing in-conversation door; the file is handed to that
+ *              flow's own field, never to a new uploader;
+ *   not_yet  — "someone else's file": understood, routed, honestly refused;
+ *   surface  — a link to an existing page (no in-chat door yet).
+ */
+export type AttachAnswer =
+  | { readonly kind: "door"; readonly intent: FileIntent; readonly capability: FileCapability }
+  | { readonly kind: "not_yet"; readonly intent: FileIntent }
+  | { readonly kind: "surface"; readonly surface: AttachSurface };
+
+/**
+ * The answers the attach question offers for ONE picked file, narrowed by
+ * its MIME type and by the ACTIVE identity.
+ *
+ * A picked file states nothing about whose it is, so it is never routed on
+ * its own (an `unstated` subject asks — the rule above). Each door answer is
+ * a self-STATED intent, and it is offered only when `routeFileIntent` names a
+ * self-scoped door for it: the paperclip cannot reach a door the typed
+ * sentence could not. Another person's file is offered as an answer precisely
+ * so that it is refused out loud, never written into the uploader's record.
+ *
+ * A company workspace gets its organization's existing pages. Its own
+ * uploaders take the file there; the personal doors write into the PERSON's
+ * record and are not what someone acting for an organization is doing.
+ */
+export function attachAnswersForFile(
+  file: PickedFileLike,
+  actor: FileActorContext,
+): readonly AttachAnswer[] {
+  const media = pickedFileMedia(file);
+  if (!media) return [];
+  const kinds = fileKindsForMedia(media);
+
+  if (actor.identity === "company") {
+    const out: AttachAnswer[] = [];
+    // The organization's document register takes photos, PDFs and DOCX.
+    if (media !== "text") out.push({ kind: "surface", surface: "organization_document" });
+    // A list of people goes to the roster importer, which reads tables.
+    if (media !== "image") out.push({ kind: "surface", surface: "organization_people" });
+    return out;
+  }
+
+  const out: AttachAnswer[] = [];
+  for (const kind of kinds) {
+    const intent: FileIntent = { subject: "self", kind, documentTypeSlug: null };
+    const route = routeFileIntent(intent, actor);
+    if (route.kind === "capability" && SELF_SCOPED_CAPABILITIES.has(route.capability)) {
+      out.push({ kind: "door", intent, capability: route.capability });
+    }
+  }
+  // An uploaded work report becomes a journal DRAFT on the documents page
+  // (the `?draftFrom=` chain) — it needs its stored file first.
+  if (media === "pdf" || media === "docx") out.push({ kind: "surface", surface: "work_report" });
+  out.push({
+    kind: "not_yet",
+    intent: { subject: "another_person", kind: kinds[0]!, documentTypeSlug: null },
+  });
+  return out;
 }

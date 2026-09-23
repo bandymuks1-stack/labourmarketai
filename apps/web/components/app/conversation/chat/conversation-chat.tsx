@@ -66,10 +66,13 @@ import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
 import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
 import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
+  attachAnswersForFile,
   readFileIntent,
   routeFileIntent,
+  type AttachAnswer,
   type FileIntent,
 } from "@/lib/conversation/file-subject";
+import { createAttachSinkStack } from "@/components/app/conversation/attach-sink";
 import {
   introMessageKey,
   outcomeMessageKey,
@@ -1130,7 +1133,8 @@ export function ConversationChat({
       // This is deliberately not a CV-specific guard: the ledger is keyed on
       // the action id, so it covers every offer the product makes.
       const shown = withoutDeclined(goalRef.current, chips) as ChoiceChip[] | undefined;
-      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips: shown });
+      const id = nid();
+      pushMessage({ id, role: "assistant", kind: "text", text, chips: shown });
       persistTurn("assistant", text);
       if (shown && shown.length > 0) {
         setChipsPostedAt(Date.now());
@@ -1138,6 +1142,9 @@ export function ConversationChat({
         // the person is refusing it.
         goalRef.current = noteOffered(goalRef.current, shown.map((c) => c.id));
       }
+      // The id lets a caller that must keep ONE copy of a question (the
+      // attach question) retire it later.
+      return id;
     },
     [pushMessage, persistTurn],
   );
@@ -2308,6 +2315,14 @@ export function ConversationChat({
             ]);
             return;
           }
+          // Own work photos: the photo-led work log, where the photo belongs
+          // to an entry the person saves first (never a loose drop).
+          if (route.capability === "self_work_evidence") {
+            assistant(t("fileSelfWorkEvidence"), [
+              { id: "attach:photo", label: labels.chipAttachPhoto },
+            ]);
+            return;
+          }
           // The organization's PEOPLE go to the roster importer, which is
           // where a file of names can actually complete: parse → preview →
           // resolve → confirm → commit → receipt. Work EVIDENCE about those
@@ -2352,7 +2367,7 @@ export function ConversationChat({
         }
       }
     },
-    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, labels.chipPeopleImport, starterChips, t],
+    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, labels.chipPeopleImport, labels.chipAttachPhoto, starterChips, t],
   );
 
   /**
@@ -2869,17 +2884,32 @@ export function ConversationChat({
   }, [assistant, pushEmbed, locale, labels.navMessages, labels.messagesHint]);
 
   /**
-   * What a file the person attaches would be FOR, based on what the
-   * conversation is currently doing. Set when a flow that owns files opens —
-   * never guessed from a file name (a photo called `cv.jpg` is still a photo).
-   * `null` = we genuinely do not know, and the paperclip asks instead of
-   * choosing for them.
+   * THE OPEN ATTACH TARGETS (owner P0 2026-09-23, CASE 6). This used to be a
+   * STICKY `"worklog" | "cv" | null`, set whenever such a flow opened and
+   * never reset — so after any work-log form, even a cancelled or saved one,
+   * every paperclip click pushed another independently savable form. A
+   * target now lives exactly as long as the flow that registered it (see
+   * `attach-sink.ts`); the file's purpose is still never guessed from its
+   * name (a photo called `cv.jpg` is a photo).
    */
-  const attachContextRef = useRef<"worklog" | "cv" | null>(null);
+  const attachSinksRef = useRef(createAttachSinkStack());
+  /** THE ONE PENDING ATTACHMENT: picked, shown in the composer, not yet
+   *  routed. It exists only in this tab until a flow's own confirm. */
+  const [pendingAttachment, setPendingAttachment] = useState<File | null>(null);
+  const pendingAttachmentRef = useRef<File | null>(null);
+  /** The message id of the ONE open "what is this file for?" question. */
+  const attachQuestionRef = useRef<string | null>(null);
+  /** The answers that question offered, indexed by its chips. */
+  const attachAnswersRef = useRef<readonly AttachAnswer[]>([]);
+  /** Bumped per question: a chip from an older question answers nothing. */
+  const attachSeqRef = useRef(0);
+  /** Late-bound, like handleChipRef: the chip handler is defined above the
+   *  attach resolver it calls. */
+  const attachChoiceRef = useRef<(chip: ChoiceChip) => void>(() => {});
 
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
-    (text: string, opts?: { photoFirst?: boolean; explicit?: boolean }) => {
+    (text: string, opts?: { photoFirst?: boolean; explicit?: boolean; file?: File }) => {
       // ASK -> PREFILL -> THE EXISTING SAVE FLOW.
       //
       // When a work-evidence conversation is in flight, the form opens filled
@@ -2926,23 +2956,28 @@ export function ConversationChat({
       // THE REQUEST IS NOT THE WORK (production 2026-09-06): "Užpildyk darbo
       // žurnalą" opened the flow with the request sentence as the entry's
       // evidence, and two taps later it was persisted as `original_text`.
-      // A sentence with no work content (no time span, no place, no
-      // recognised activity — `journalDraftReadiness`, the same rule the
-      // flow and the schema apply) opens the flow with the evidence field
-      // EMPTY and asks what was done. The flow's own guard and the server
-      // schema refuse to save such a sentence even if it is typed back in.
-      const readiness = journalDraftReadiness(text);
-      const carriesWork = readiness === "ok";
-      if (opts?.explicit && text.trim() !== "" && !carriesWork) {
+      // Such a META REQUEST opens the flow with the evidence field EMPTY and
+      // asks what was done; the server schema refuses it even if typed back.
+      //
+      // Judged on the DRAFT, and blanked ONLY for a meta request (owner P0
+      // 2026-09-23). It used to be judged on the raw `text` and blanked for
+      // anything short of "ok": a chip or paperclip open (text "") threw away
+      // the notes the evidence goal had composed from everything the person
+      // said, and "Šiandien buvau objekte" arrived as an empty field — text
+      // the server would have taken, gone before the person saw it.
+      const readiness = journalDraftReadiness(draft.notes);
+      const isRequest = readiness === "meta-request";
+      if (isRequest) {
         assistant(t("journalAskWhatYouDid"));
       }
-      attachContextRef.current = "worklog";
       pushEmbed(
         <WorkerWorkLogFlow
-          draft={carriesWork ? draft : { ...draft, notes: "" }}
+          draft={isRequest ? { ...draft, notes: "" } : draft}
           locale={locale}
           labels={workLogLabels}
           photoFirst={opts?.photoFirst ?? false}
+          initialFile={opts?.file ?? null}
+          onRegisterAttachSink={attachSinksRef.current.register}
           // After a work log lands, the person SEES their card change
           // (owner audit §5.1 "matoma po darbo įrašo atnaujinimo"): the
           // canonical Player Card re-renders with the just-strengthened
@@ -3628,7 +3663,13 @@ export function ConversationChat({
   );
 
   const startAddDocument = useCallback(
-    (sentence: string, explicit?: { typeSlug?: string; thenReply?: ChatInboxThread }) => {
+    (
+      sentence: string,
+      // `file`: the paperclip file the person said is this document. It goes
+      // into the file embed of the record this form creates — never uploaded
+      // before that record exists and the person presses the embed's submit.
+      explicit?: { typeSlug?: string; thenReply?: ChatInboxThread; file?: File },
+    ) => {
       if (identity !== "person") {
         assistant(labels.adminRouteHint, [{ id: "link:/dashboard/documents", label: labels.documentsChip }]);
         return;
@@ -3676,13 +3717,20 @@ export function ConversationChat({
                 runWorkflow(() => runDocumentsReadiness());
                 offerInstructionReply();
               };
+              // A handed-over file with no file layer to take it is said out
+              // loud — never silently dropped behind "document recorded".
+              const sayFileNotAttached = () => {
+                if (explicit?.file) assistant(labels.documentFileFailed);
+              };
               if (savedSlug === "") {
+                sayFileNotAttached();
                 finishWithReadiness();
                 return;
               }
               loadDocumentFileTargetForChat({ typeSlug: savedSlug, country: savedCountry })
                 .then((target) => {
                   if (target.kind !== "ready") {
+                    sayFileNotAttached();
                     finishWithReadiness();
                     return;
                   }
@@ -3705,10 +3753,15 @@ export function ConversationChat({
                         offerInstructionReply();
                       }}
                       onSkip={finishWithReadiness}
+                      initialFile={explicit?.file ?? null}
+                      onRegisterAttachSink={attachSinksRef.current.register}
                     />,
                   );
                 })
-                .catch(() => finishWithReadiness());
+                .catch(() => {
+                  sayFileNotAttached();
+                  finishWithReadiness();
+                });
             },
           );
         })
@@ -4676,6 +4729,12 @@ export function ConversationChat({
     (chip: ChoiceChip) => {
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
+      // An answer to "what is this file for?" (per-question ids, never a
+      // pinnable ref, so noteUsage above records nothing for it).
+      if (chip.id.startsWith("attach-file:")) {
+        attachChoiceRef.current(chip);
+        return;
+      }
       switch (chip.id) {
         case "capabilities":
           // The ONE door a not-understood answer offers ("Ką galiu čia
@@ -4744,20 +4803,23 @@ export function ConversationChat({
           break;
         case "cv":
           user(labels.userCv);
-          attachContextRef.current = "cv";
           // CV import ends with the refreshed REAL profile state, so the user
-          // sees what the import actually changed.
-          withTyping(() => pushEmbed(<WorkerCvFlow onClose={() => startProfileSummaryRef.current("profile")} />));
+          // sees what the import actually changed. While open, it is where a
+          // paperclip CV goes — this flow, not a second one.
+          withTyping(() =>
+            pushEmbed(
+              <WorkerCvFlow
+                onClose={() => startProfileSummaryRef.current("profile")}
+                onRegisterAttachSink={attachSinksRef.current.register}
+              />,
+            ),
+          );
           break;
-        // The two answers to "what is this file for?" — reached only from the
-        // attach choice below, so they are a one-off pair, not a standing CTA
-        // row under every message.
+        // The typed "čia mano darbo nuotrauka" door (fileSelfWorkEvidence):
+        // the photo-led work log, whose own photo field takes the file.
         case "attach:photo":
           user(labels.userAttachPhoto);
           withTyping(() => startWorkLog("", { photoFirst: true }));
-          break;
-        case "attach:cv":
-          handleChipRef.current({ id: "cv", label: "" });
           break;
         case "profile":
           user(labels.userProfile);
@@ -5042,45 +5104,157 @@ export function ConversationChat({
   handleChipRef.current = handleChip;
 
   /**
-   * THE PAPERCLIP, INTENT-AWARE (W7 slice 2).
+   * THE PAPERCLIP ATTACHES A FILE (owner P0 2026-09-23, CASE 5/6/7).
    *
-   * It used to send every file into the CV importer, whatever the conversation
-   * was about — so a worker mid-work-log who tapped it to attach a site photo
-   * got a CV parser. The context now decides, and the context is the ACTIVE
-   * FLOW, never the file's name:
+   * It used to be a flow launcher routed by a sticky ref: no file picker ever
+   * opened, a click in "work-log context" pushed ANOTHER savable form, and a
+   * click with no context posted ANOTHER "Kam skirtas šis failas?" — so
+   * several clicks stacked several questions and several forms. Now:
    *
-   *   work-log open  → the work photo path (evidence for that entry)
-   *   CV open        → CV import, exactly as before
-   *   neither        → ask, once, with the two real answers
+   *   1. an OPEN flow that takes this file gets it, in its own field — the
+   *      open form, never a second one;
+   *   2. otherwise the conversation holds ONE pending file (the composer shows
+   *      it) and asks ONCE what it is for. A new pick replaces the file and
+   *      re-asks in place of the old question — never beside it;
+   *   3. the answers come from `lib/conversation/file-subject` — the SAME
+   *      router a typed "čia mano CV" reaches, with its subject rules: each
+   *      door is a self-STATED intent, and "someone else's file" is refused
+   *      out loud, never written into the uploader's record.
    *
-   * The unknown case is a single message with two chips — not a permanent CTA
-   * row, which is the button wall the owner ruling removed.
+   * Nothing is uploaded here. Until the chosen flow's own confirm, the file
+   * exists only in this browser tab.
    */
-  const handleAttach = useCallback(() => {
-    const context = attachContextRef.current;
-    if (context === "worklog") {
-      user(labels.userAttachPhoto);
-      withTyping(() => startWorkLog("", { photoFirst: true }));
-      return;
-    }
-    if (context === "cv") {
-      handleChipRef.current({ id: "cv", label: "" });
-      return;
-    }
-    assistant(labels.attachChoice, [
-      { id: "attach:photo", label: labels.chipAttachPhoto },
-      { id: "attach:cv", label: labels.chipAttachCv },
-    ]);
-  }, [
-    user,
-    assistant,
-    withTyping,
-    startWorkLog,
-    labels.userAttachPhoto,
-    labels.attachChoice,
-    labels.chipAttachPhoto,
-    labels.chipAttachCv,
-  ]);
+  const discardPendingAttachment = useCallback(() => {
+    const openId = attachQuestionRef.current;
+    attachQuestionRef.current = null;
+    attachAnswersRef.current = [];
+    // Any chip still on screen now belongs to a question that is gone.
+    attachSeqRef.current += 1;
+    pendingAttachmentRef.current = null;
+    setPendingAttachment(null);
+    if (openId) setItems((prev) => prev.filter((it) => it.id !== openId));
+  }, []);
+
+  const handleAttachFile = useCallback(
+    (file: File) => {
+      const open = attachSinksRef.current.current(file);
+      if (open) {
+        open.attach(file);
+        return;
+      }
+      const answers = attachAnswersForFile(file, {
+        identity,
+        educationWorkspace: Boolean(educationWorkspace),
+      });
+      if (answers.length === 0) {
+        assistant(t("attachUnsupported"));
+        return;
+      }
+      // ONE question per pending file: a new pick retires the old question
+      // (wherever it scrolled to) before the current one is asked.
+      const openId = attachQuestionRef.current;
+      if (openId) setItems((prev) => prev.filter((it) => it.id !== openId));
+      const seq = attachSeqRef.current + 1;
+      attachSeqRef.current = seq;
+      attachAnswersRef.current = answers;
+      pendingAttachmentRef.current = file;
+      setPendingAttachment(file);
+      const chips: ChoiceChip[] = answers.map((a, i): ChoiceChip => {
+        if (a.kind === "surface") {
+          if (a.surface === "work_report") {
+            return { id: "link:/dashboard/documents", label: t("chipAttachWorkReport") };
+          }
+          if (a.surface === "organization_document") {
+            return { id: "link:/dashboard/documents", label: t("chipAttachOrgDocument") };
+          }
+          return {
+            id: "link:/dashboard/company/people#people-import-section",
+            label: labels.chipPeopleImport,
+          };
+        }
+        const label =
+          a.kind === "not_yet"
+            ? t("chipAttachOther")
+            : a.capability === "self_work_evidence"
+              ? labels.chipAttachPhoto
+              : a.capability === "self_cv_import"
+                ? labels.chipAttachCv
+                : t("chipAttachDocument");
+        return { id: `attach-file:${seq}:${i}`, label };
+      });
+      chips.push({ id: `attach-file:${seq}:cancel`, label: labels.invCancel });
+      // A page link cannot carry the file — say so before it is chosen.
+      const text = answers.some((a) => a.kind === "surface")
+        ? `${labels.attachChoice}\n${t("attachLinkNote")}`
+        : labels.attachChoice;
+      attachQuestionRef.current = assistant(text, chips);
+    },
+    [assistant, educationWorkspace, identity, labels.attachChoice, labels.chipAttachCv, labels.chipAttachPhoto, labels.chipPeopleImport, labels.invCancel, t],
+  );
+
+  /** The person answered "what is this file for?". */
+  const resolveAttachChoice = useCallback(
+    (chip: ChoiceChip) => {
+      const [, seqRaw, choice] = chip.id.split(":");
+      const file = pendingAttachmentRef.current;
+      // A chip of a question that was replaced or cancelled answers nothing.
+      if (!file || Number(seqRaw) !== attachSeqRef.current) return;
+      if (choice === "cancel") {
+        discardPendingAttachment();
+        return;
+      }
+      const answer = attachAnswersRef.current[Number(choice)];
+      if (!answer || answer.kind === "surface") return;
+      // Answered: the file leaves the composer for where the answer says.
+      attachQuestionRef.current = null;
+      attachAnswersRef.current = [];
+      pendingAttachmentRef.current = null;
+      setPendingAttachment(null);
+      user(chip.label);
+      if (answer.kind === "not_yet") {
+        // Understood and honestly refused, through the typed path's own
+        // answer — nothing is attached to anyone.
+        handleFileIntent(answer.intent);
+        return;
+      }
+      const sinks = attachSinksRef.current;
+      switch (answer.capability) {
+        case "self_work_evidence": {
+          // The form already open takes it; only otherwise does one open.
+          const open = sinks.openOf("worklog", file);
+          if (open) open.attach(file);
+          else withTyping(() => startWorkLog("", { photoFirst: true, file }));
+          return;
+        }
+        case "self_cv_import": {
+          const open = sinks.openOf("cv", file);
+          if (open) {
+            open.attach(file);
+            return;
+          }
+          withTyping(() =>
+            pushEmbed(
+              <WorkerCvFlow
+                initialFile={file}
+                onClose={() => startProfileSummaryRef.current("profile")}
+                onRegisterAttachSink={sinks.register}
+              />,
+            ),
+          );
+          return;
+        }
+        case "self_document":
+          // The document is RECORDED first (type, country, validity) — the
+          // file then goes into that record's own file embed.
+          startAddDocument("", { file });
+          return;
+        default:
+          handleFileIntent(answer.intent);
+      }
+    },
+    [discardPendingAttachment, handleFileIntent, pushEmbed, startAddDocument, startWorkLog, user, withTyping],
+  );
+  attachChoiceRef.current = resolveAttachChoice;
 
   /** V9 value-intent: the honest one-line readback of what was understood —
    *  only facts the structurer actually read, joined plainly. */
@@ -6664,7 +6838,11 @@ export function ConversationChat({
                     attachLabel={labels.attach}
                     sendLabel={labels.send}
                     onSend={handleSend}
-                    onAttach={handleAttach}
+                    onAttachFile={handleAttachFile}
+                    pendingAttachment={pendingAttachment}
+                    onRemoveAttachment={discardPendingAttachment}
+                    attachRemoveLabel={t("attachRemove")}
+                    attachSelectedLabel={t("attachSelected")}
                     prefill={sayPrefill}
                   />
                 )
@@ -6676,7 +6854,11 @@ export function ConversationChat({
                 attachLabel={labels.attach}
                 sendLabel={labels.send}
                 onSend={handleSend}
-                onAttach={handleAttach}
+                onAttachFile={handleAttachFile}
+                pendingAttachment={pendingAttachment}
+                onRemoveAttachment={discardPendingAttachment}
+                attachRemoveLabel={t("attachRemove")}
+                attachSelectedLabel={t("attachSelected")}
                 prefill={sayPrefill}
               />
             )}

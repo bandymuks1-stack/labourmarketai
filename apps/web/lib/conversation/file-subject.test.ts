@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  attachAnswersForFile,
+  fileKindsForMedia,
+  pickedFileMedia,
   readFileIntent,
   routeFileIntent,
+  type AttachAnswer,
   type FileActorContext,
 } from "@/lib/conversation/file-subject";
 import { classifyIntent } from "@/lib/conversation/intent-router";
@@ -106,11 +110,124 @@ describe("WORK EVIDENCE", () => {
     });
   });
 
-  it("a person's own work photos are understood but have no door yet", () => {
+  it("a person's own work photos reach the journal photo door (owner P0 2026-09-23)", () => {
+    // This used to answer "no door yet" while the paperclip already routed
+    // the same photo into the work-log flow — two routers, one file.
     const i = intentOf("Čia mano atlikto darbo nuotraukos");
     expect(i.kind).toBe("work_evidence");
     expect(i.subject).toBe("self");
-    expect(routeFileIntent(i, PERSON)).toEqual({ kind: "unavailable", subject: "self" });
+    expect(routeFileIntent(i, PERSON)).toEqual({
+      kind: "capability",
+      capability: "self_work_evidence",
+    });
+    // NEGATIVE CONTROL: the old answer is gone.
+    expect(routeFileIntent(i, PERSON)).not.toEqual({ kind: "unavailable", subject: "self" });
+  });
+
+  it("an UNSTATED owner of work photos still asks — the new door is self-only", () => {
+    const i = intentOf("Čia atlikto darbo nuotraukos");
+    expect(i.subject).toBe("unstated");
+    expect(routeFileIntent(i, PERSON)).toEqual({ kind: "ask_subject" });
+  });
+});
+
+describe("A PICKED FILE (the composer paperclip) — MIME, not name", () => {
+  const file = (type: string, name: string) => ({ type, name });
+
+  it("reads the media from the MIME type the browser reports", () => {
+    expect(pickedFileMedia(file("image/jpeg", "x.jpg"))).toBe("image");
+    expect(pickedFileMedia(file("image/png", "x.png"))).toBe("image");
+    expect(pickedFileMedia(file("image/webp", "x.webp"))).toBe("image");
+    expect(pickedFileMedia(file("application/pdf", "x.pdf"))).toBe("pdf");
+    expect(
+      pickedFileMedia(
+        file("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "x.docx"),
+      ),
+    ).toBe("docx");
+    expect(pickedFileMedia(file("text/plain", "x.txt"))).toBe("text");
+  });
+
+  it("the NAME never decides: cv.jpg is a photo, a GIF renamed .png is refused", () => {
+    expect(pickedFileMedia(file("image/jpeg", "cv.jpg"))).toBe("image");
+    expect(pickedFileMedia(file("image/gif", "photo.png"))).toBeNull();
+    expect(pickedFileMedia(file("application/zip", "cv.pdf"))).toBeNull();
+  });
+
+  it("only a file the browser typed as empty falls back to its extension", () => {
+    expect(pickedFileMedia(file("", "Mano CV.docx"))).toBe("docx");
+    expect(pickedFileMedia(file("", "notes.txt"))).toBe("text");
+    // An image with no type is not guessed into a photo.
+    expect(pickedFileMedia(file("", "photo.jpg"))).toBeNull();
+  });
+
+  it("the MIME-derived kinds: an image is a work photo or a certificate; text only a CV", () => {
+    expect(fileKindsForMedia("image")).toEqual(["work_evidence", "document"]);
+    expect(fileKindsForMedia("pdf")).toEqual(["cv", "document"]);
+    expect(fileKindsForMedia("docx")).toEqual(["cv", "document"]);
+    expect(fileKindsForMedia("text")).toEqual(["cv"]);
+  });
+});
+
+describe("the attach question's answers — the SAME router, the same subject rules", () => {
+  const doors = (answers: readonly AttachAnswer[]) =>
+    answers.flatMap((a) => (a.kind === "door" ? [a.capability] : []));
+  const surfaces = (answers: readonly AttachAnswer[]) =>
+    answers.flatMap((a) => (a.kind === "surface" ? [a.surface] : []));
+
+  it("a person's photo: my work photo, my document, or someone else's — never a CV", () => {
+    const a = attachAnswersForFile({ type: "image/jpeg", name: "IMG_1.jpg" }, PERSON);
+    expect(doors(a)).toEqual(["self_work_evidence", "self_document"]);
+    expect(surfaces(a)).toEqual([]);
+    expect(a.some((x) => x.kind === "not_yet")).toBe(true);
+  });
+
+  it("a person's PDF: my CV, my document, a work report page, or someone else's", () => {
+    const a = attachAnswersForFile({ type: "application/pdf", name: "x.pdf" }, PERSON);
+    expect(doors(a)).toEqual(["self_cv_import", "self_document"]);
+    expect(surfaces(a)).toEqual(["work_report"]);
+  });
+
+  it("plain text only ever reaches the CV reader", () => {
+    const a = attachAnswersForFile({ type: "text/plain", name: "cv.txt" }, PERSON);
+    expect(doors(a)).toEqual(["self_cv_import"]);
+  });
+
+  it("every door answer is a SELF-stated intent the router itself names", () => {
+    for (const type of ["image/png", "application/pdf", "text/plain"]) {
+      for (const a of attachAnswersForFile({ type, name: "f" }, PERSON)) {
+        if (a.kind !== "door") continue;
+        expect(a.intent.subject).toBe("self");
+        expect(routeFileIntent(a.intent, PERSON)).toEqual({
+          kind: "capability",
+          capability: a.capability,
+        });
+      }
+    }
+  });
+
+  it("'someone else's file' is understood and REFUSED — never a self door", () => {
+    const a = attachAnswersForFile({ type: "application/pdf", name: "kandidatas.pdf" }, PERSON);
+    const other = a.find((x) => x.kind === "not_yet");
+    expect(other).toBeDefined();
+    if (other?.kind === "not_yet") {
+      expect(other.intent.subject).toBe("another_person");
+      expect(routeFileIntent(other.intent, PERSON).kind).toBe("unavailable");
+    }
+  });
+
+  it("a company workspace gets its organization's pages, never the personal doors", () => {
+    const img = attachAnswersForFile({ type: "image/jpeg", name: "x.jpg" }, COMPANY);
+    expect(doors(img)).toEqual([]);
+    expect(surfaces(img)).toEqual(["organization_document"]);
+    const pdf = attachAnswersForFile({ type: "application/pdf", name: "x.pdf" }, COMPANY);
+    expect(doors(pdf)).toEqual([]);
+    expect(surfaces(pdf)).toEqual(["organization_document", "organization_people"]);
+    expect(doors(attachAnswersForFile({ type: "application/pdf", name: "x.pdf" }, INSTITUTION))).toEqual([]);
+  });
+
+  it("an unsupported type offers nothing (the chat says so instead of asking)", () => {
+    expect(attachAnswersForFile({ type: "image/gif", name: "x.gif" }, PERSON)).toEqual([]);
+    expect(attachAnswersForFile({ type: "application/zip", name: "x.zip" }, COMPANY)).toEqual([]);
   });
 });
 

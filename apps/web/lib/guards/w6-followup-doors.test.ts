@@ -43,14 +43,41 @@ describe("A2 — the journal request never becomes the journal entry", () => {
   const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
   const flow = read("components", "app", "conversation", "worker-worklog-flow.tsx");
   const schema = read("lib", "conversation", "worker-schemas.ts");
+  // Owner P0 2026-09-23 re-anchored this block: the META REQUEST stays refused
+  // on both layers, but the form is never STRICTER than the server — it used
+  // to refuse every sentence its keyword recogniser could not read as work
+  // ("Buvau pas klientą", "Rašau kodą"), which the server accepted.
   it("the chat opens the flow with EMPTY evidence for a request sentence and asks what was done", () => {
     const fn = chat.slice(chat.indexOf("const startWorkLog = useCallback("), chat.indexOf("* Voice hand-off"));
-    expect(fn).toContain("const readiness = journalDraftReadiness(text);");
-    expect(fn).toMatch(/draft=\{carriesWork \? draft : \{ \.\.\.draft, notes: "" \}\}/);
+    // Judged on the DRAFT it built (evidence-goal prefill included) and
+    // blanked ONLY for the meta request.
+    expect(fn).toContain("const readiness = journalDraftReadiness(draft.notes);");
+    expect(fn).toContain('const isRequest = readiness === "meta-request";');
+    expect(fn).toMatch(/draft=\{isRequest \? \{ \.\.\.draft, notes: "" \} : draft\}/);
     expect(fn).toContain('assistant(t("journalAskWhatYouDid"))');
+    // NEGATIVE CONTROL: the raw-text judgement that blanked the prefill.
+    expect(fn).not.toContain("journalDraftReadiness(text)");
+    expect(fn).not.toMatch(/carriesWork \? draft : \{ \.\.\.draft, notes: "" \}/);
   });
-  it("the flow refuses to confirm evidence with no work content", () => {
-    expect(flow).toMatch(/if \(journalDraftReadiness\(notes\) !== "ok"\) \{\s*setPhase\(\{ kind: "error", message: labels\.errorNoWorkContent \}\);/);
+  it("the flow refuses exactly what the server refuses — through the schema's own rule", () => {
+    const begin = flow.slice(flow.indexOf("function beginConfirm()"), flow.indexOf("function confirm()"));
+    expect(begin).toContain("const refusal = logWorkNotesRefusal(notes);");
+    expect(begin).toMatch(/if \(refusal !== null\) \{/);
+    expect(begin).toContain("labels.errorNoWorkContent");
+    // A missing Rule-C pick is a question, not "could not save".
+    expect(begin).toContain("labels.contextAmbiguous");
+    // NEGATIVE CONTROL: the client-only keyword gate is gone from the refusal.
+    expect(begin).not.toMatch(/journalDraftReadiness\(notes\) !== "ok"/);
+    // The verdict IS the schema's notes rule, not a restated copy of it.
+    expect(schema).toMatch(/workerLogWorkSchema\.shape\.notes\.safeParse\(notes\)/);
+  });
+  it("no-signal text proceeds to the explicit confirm with a NEUTRAL hint", () => {
+    expect(flow).toMatch(/journalDraftReadiness\(notes\) === "no-content" \? \(\s*<p\s+className="text-meta leading-relaxed text-text-muted"\s+data-testid="worklog-no-signal-hint"/);
+  });
+  it("an edit clears a shown error — no stale red line beside corrected text", () => {
+    for (const setter of ["setWorkDate", "setSite", "setNotes", "setEngagementId"]) {
+      expect(flow).toMatch(new RegExp(`${setter}\\(e\\.target\\.value\\);\\s*clearError\\(\\);`));
+    }
   });
   it("the server schema is the floor", () => {
     expect(schema).toMatch(/\.refine\(\(v\) => !isJournalMetaRequest\(v\), \{ message: "journal_meta_request" \}\)/);

@@ -26,6 +26,12 @@ import {
   journalDraftReadiness,
   type WorkLogParse,
 } from "@/lib/conversation/worklog-extract";
+import { logWorkNotesRefusal } from "@/lib/conversation/worker-schemas";
+import {
+  useAttachSink,
+  useInitialFile,
+  type RegisterAttachSink,
+} from "@/components/app/conversation/attach-sink";
 import { deriveIntakeWorkTime } from "@/lib/journal/intake-work-time";
 import {
   confirmJournalSkillCandidate,
@@ -70,10 +76,17 @@ export type WorkLogLabels = {
    *  skills are recomputed into recommendations (read-time, never pushed). */
   viewOpportunities: string;
   pipelineFailedNote: string;
-  /** The evidence text carries no work (no time, no place, no activity) —
-   *  e.g. the request "Užpildyk darbo žurnalą" typed into the field. The
+  /** The evidence text is not work the server would take: under 3 characters,
+   *  or only the request "Užpildyk darbo žurnalą" typed into the field. The
    *  flow asks for the work instead of saving the request (prod 2026-09-06). */
   errorNoWorkContent: string;
+  /** Over the server's 4000-character ceiling — said plainly, not as a
+   *  generic failure. */
+  errorNotesTooLong: string;
+  /** NEUTRAL (never red) line on the confirm step when the text carries no
+   *  recognised time, place or activity. The server takes such text, so the
+   *  form does too (owner P0 2026-09-23) — it just says what it did not read. */
+  noWorkSignalHint: string;
   /** What the save will RECORD as work time (issue #1689): the timed phrases
    *  the executor persists as fragments, in the person's own words, and the
    *  stated day total beside them. The person confirms figures, not a
@@ -212,6 +225,9 @@ const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
   failed: "uploadFailed",
 };
 
+/** The photo types the journal photo path re-encodes and stores. */
+const JOURNAL_PHOTO_TYPE = /^image\/(jpeg|png|webp)$/;
+
 /**
  * Conversation-first work-log (Phase 3). The worker types a natural sentence
  * ("šiandien dirbau nuo 8 iki 17, montavau langus"); the deterministic
@@ -239,6 +255,8 @@ export function WorkerWorkLogFlow({
   labels,
   onClose,
   photoFirst = false,
+  initialFile = null,
+  onRegisterAttachSink,
 }: {
   draft: WorkLogParse;
   locale: string;
@@ -248,6 +266,15 @@ export function WorkerWorkLogFlow({
    *  reason the flow is on screen. The short text stays REQUIRED either way: a
    *  photo alone is evidence without a claim, which the journal cannot store. */
   photoFirst?: boolean;
+  /** The photo the person picked with the composer paperclip BEFORE this flow
+   *  opened. It enters through the SAME `pickPhoto` a pick inside the form
+   *  takes (compress → validate → preview), and it is uploaded only after the
+   *  entry is saved — until then it lives in this browser tab only. */
+  initialFile?: File | null;
+  /** While this form is open it is where a paperclip photo goes — into THIS
+   *  form, never into a second one (owner P0 2026-09-23). Withdrawn on done,
+   *  cancel and unmount. The journal page's quick record passes none. */
+  onRegisterAttachSink?: RegisterAttachSink;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
@@ -281,6 +308,10 @@ export function WorkerWorkLogFlow({
   const [photoPrep, setPhotoPrep] = useState<PhotoPrep>("idle");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const photoFieldRef = useRef<HTMLDivElement>(null);
+  /** The person pressed this form's own cancel. The form stays in the thread
+   *  as history, but it is no longer where a newly picked file goes. */
+  const [closed, setClosed] = useState(false);
 
   // The object URL is a live handle, not a value — revoke it whenever it is
   // replaced or the flow unmounts, or a long chat session leaks every photo
@@ -322,7 +353,7 @@ export function WorkerWorkLogFlow({
     // Wrong format → honest, specific error. Size is NOT judged here: that is
     // what compression is for, and judging it first is the 5 MB wall this
     // slice exists to remove.
-    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+    if (!JOURNAL_PHOTO_TYPE.test(f.type)) {
       setPhotoFile(null);
       setPhotoPrep("idle");
       setPhotoError(tPhoto("invalidFile"));
@@ -341,6 +372,36 @@ export function WorkerWorkLogFlow({
     }
     setPhotoFile(prepared);
     setPhotoPrep("ready");
+  }
+
+  // THE PAPERCLIP'S FILE ENTERS THROUGH THE FORM'S OWN PICK. No second
+  // uploader: the picked photo takes exactly the path a pick in the photo
+  // field takes, and it still uploads only after the entry is saved.
+  useInitialFile(initialFile, (f) => void pickPhoto(f));
+  useAttachSink(
+    onRegisterAttachSink,
+    "worklog",
+    // Open for a photo until the entry is on its way: not once it is saving,
+    // saved, blocked, or cancelled by the person.
+    !closed &&
+      (phase.kind === "loading" ||
+        phase.kind === "ready" ||
+        phase.kind === "error" ||
+        phase.kind === "confirm"),
+    (f) => !pending && JOURNAL_PHOTO_TYPE.test(f.type),
+    (f) => {
+      // A photo that arrives while "Patvirtinti įrašą?" is showing sends the
+      // person back one step: they confirm again WITH the photo in view.
+      setPhase((p) => (p.kind === "confirm" || p.kind === "error" ? { kind: "ready", token: null } : p));
+      void pickPhoto(f);
+      photoFieldRef.current?.scrollIntoView({ block: "nearest" });
+    },
+  );
+
+  /** An edit answers the error it was shown for — the red line must not stay
+   *  beside text that has since been corrected (owner P0 2026-09-23). */
+  function clearError() {
+    setPhase((p) => (p.kind === "error" ? { kind: "ready", token: null } : p));
   }
   // Localized taxonomy skill names for the completion summary (slug → name,
   // falling back to the raw slug so an uncatalogued name never blanks a fact).
@@ -398,16 +459,31 @@ export function WorkerWorkLogFlow({
   }
 
   function beginConfirm() {
-    if (!engagementId || notes.trim().length < 3) {
-      setPhase({ kind: "error", message: labels.errorGeneric });
+    // THE FORM IS NEVER STRICTER THAN THE SERVER (owner P0 2026-09-23). It
+    // used to refuse anything its keyword recogniser could not read as work —
+    // "Buvau pas klientą", "Rašau kodą", "Darbas biure" — while the server
+    // schema accepted all of them, so text the record would take was blocked
+    // with a red line. It now refuses exactly what `workerLogWorkSchema`
+    // refuses, through the schema's own notes rule: under 3 characters, over
+    // 4000, or only the request "Užpildyk darbo žurnalą" (A2, prod
+    // 2026-09-06 — the request never becomes the record, on either layer).
+    const refusal = logWorkNotesRefusal(notes);
+    if (refusal !== null) {
+      setPhase({
+        kind: "error",
+        message:
+          refusal === "too-long" ? labels.errorNotesTooLong : labels.errorNoWorkContent,
+      });
       return;
     }
-    // The evidence must BE work: a time span, a place, or a recognised
-    // activity — the same deterministic rule the chat applied when it opened
-    // this flow and the server schema applies to the write. A request
-    // sentence ("Užpildyk darbo žurnalą") never becomes the record.
-    if (journalDraftReadiness(notes) !== "ok") {
-      setPhase({ kind: "error", message: labels.errorNoWorkContent });
+    // Nothing failed here: the person still has to choose WHICH context
+    // (Rule C). Say that — not "could not save, try again". With no context
+    // list at all the list itself could not be read, which IS a failure.
+    if (!engagementId) {
+      setPhase({
+        kind: "error",
+        message: engagements.length > 1 ? labels.contextAmbiguous : labels.errorGeneric,
+      });
       return;
     }
     start(async () => {
@@ -777,6 +853,7 @@ export function WorkerWorkLogFlow({
      two surfaces cannot drift apart. */
   const photoField = (
     <div
+      ref={photoFieldRef}
       className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
       data-testid="worklog-photo-field"
     >
@@ -882,7 +959,10 @@ export function WorkerWorkLogFlow({
             aria-label={labels.labelDate}
             value={workDate}
             disabled={confirming || pending}
-            onChange={(e) => setWorkDate(e.target.value)}
+            onChange={(e) => {
+              setWorkDate(e.target.value);
+              clearError();
+            }}
             data-testid="worklog-date"
             className="w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
           />
@@ -907,7 +987,10 @@ export function WorkerWorkLogFlow({
           type="text"
           value={site}
           disabled={confirming || pending}
-          onChange={(e) => setSite(e.target.value)}
+          onChange={(e) => {
+            setSite(e.target.value);
+            clearError();
+          }}
           data-testid="worklog-site"
           className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
         />
@@ -918,7 +1001,10 @@ export function WorkerWorkLogFlow({
         <textarea
           value={notes}
           disabled={confirming || pending}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={(e) => {
+            setNotes(e.target.value);
+            clearError();
+          }}
           rows={2}
           data-testid="worklog-notes"
           className="resize-none rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
@@ -931,7 +1017,10 @@ export function WorkerWorkLogFlow({
           <select
             value={engagementId}
             disabled={confirming || pending}
-            onChange={(e) => setEngagementId(e.target.value)}
+            onChange={(e) => {
+              setEngagementId(e.target.value);
+              clearError();
+            }}
             data-testid="worklog-context"
             className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
           >
@@ -964,6 +1053,17 @@ export function WorkerWorkLogFlow({
           <p className="font-display text-card-title font-semibold text-text-primary">
             {labels.confirmTitle}
           </p>
+          {/* Text the recogniser cannot read as work is still the person's
+              record to make — the server takes it, so the form does too. It
+              only says, neutrally, what it did not recognise. */}
+          {journalDraftReadiness(notes) === "no-content" ? (
+            <p
+              className="text-meta leading-relaxed text-text-muted"
+              data-testid="worklog-no-signal-hint"
+            >
+              {labels.noWorkSignalHint}
+            </p>
+          ) : null}
           <ChatActionRow>
             <ChatAction
               tone="primary"
@@ -993,7 +1093,14 @@ export function WorkerWorkLogFlow({
             {labels.save}
           </ChatAction>
           {onClose && (
-            <ChatAction tone="secondary" disabled={pending} onClick={onClose}>
+            <ChatAction
+              tone="secondary"
+              disabled={pending}
+              onClick={() => {
+                setClosed(true);
+                onClose();
+              }}
+            >
               {labels.cancel}
             </ChatAction>
           )}
