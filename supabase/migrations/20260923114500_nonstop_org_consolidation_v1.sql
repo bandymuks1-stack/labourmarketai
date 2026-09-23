@@ -61,6 +61,8 @@
 --          closed is on its whitelist anyway); demand_org_attribution_guard
 --          only protects organization_id, which is not written; no other
 --          trigger exists on the table.
+--     vi-b companies 048aa7e1 legal_name/display_name 'UAB „Nonstop Group“',
+--          registration_code 302676973, vat_number LT100010790613 (was 564231)
 --     vii  organizations f2315826, 2e3a4744, af6cc3d6, a3d59458 -> archived
 --   Every changed value is written OLD and NEW to the EXISTING `audit_logs`
 --   (admin-only RLS; the house pattern of every membership and demand
@@ -70,13 +72,14 @@
 -- NOT TOUCHED — asserted byte-identical by md5 before/after: every
 --   journal_entries row, every journal_entry_confirmations row, the 158
 --   organization_evidence_records of 19f47e78, every workflow_definitions and
---   workflow_definition_versions row, projects, companies, agencies,
---   company_workers, every customer_requests row except 7454f365, and every
---   membership / engagement / role row of the four archived organizations
---   except engagement 2698c6e3 (history: the protect_last_owner trigger
---   forbids revoking a last owner, and those rows record who created what).
---   The companies/agencies mirror triggers are not fired: no companies or
---   agencies row is written.
+--   workflow_definition_versions row, projects, every companies row except the
+--   canonical 048aa7e1 (legal identity step), agencies, company_workers, every
+--   customer_requests row except 7454f365, and every membership / engagement /
+--   role row of the four archived organizations except engagement 2698c6e3
+--   (history: the protect_last_owner trigger forbids revoking a last owner, and
+--   those rows record who created what). The companies mirror trigger fires
+--   ONCE, for 048aa7e1, and carries its name/VAT onto organization 20b2c802;
+--   no agencies row is written.
 --
 -- FK SWEEP (production, read-only, 2026-09-23). Every single-column FK that
 --   references organizations / companies / agencies / engagement_contexts /
