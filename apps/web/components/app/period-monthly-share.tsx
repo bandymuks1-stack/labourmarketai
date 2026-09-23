@@ -1,4 +1,3 @@
-import { monthsBetween } from "@/lib/organization-evidence/period-projection";
 import {
   formatHoursAsStated,
   readPeriodEvidence,
@@ -31,9 +30,10 @@ export interface PeriodReadingLabels {
  *   source_rate         the source's words state a rate: that rate, as the
  *                       source's fact beside the total — nothing divided.
  *   interpreted_period  a person chose the span (or it was derived): the
- *                       months it covers with NO figure on any of them, how
+ *                       total and its month span with NO monthly figure, how
  *                       the span came to be, the source's own stated rate or
- *                       duration, and a warning when they disagree.
+ *                       duration, and a warning when they disagree. The month
+ *                       ribbon is not drawn for it at all.
  *
  * Totals print as the source gave them ("800 h", never "800.00 h"). Renders
  * nothing when there is no period record to read.
@@ -93,8 +93,10 @@ export function PeriodMonthlyShare({
     );
   }
 
-  // A span with NO monthly figure: the months it covers, nothing divided.
-  const months = (monthsBetween(r.periodStart, r.periodEnd) ?? []).map((month) => ({ month, hours: null }));
+  // A span with NO monthly figure: the total and the months it covers, as
+  // text — the month ribbon (PeriodBand) is only ever handed a SOURCE
+  // period's derived shares, so a chosen span can never be drawn as an even
+  // split, not even as unlabelled equal segments.
   const stated = [r.kind === "interpreted_period" ? r.duration : null, r.rate].filter(
     (c): c is NonNullable<typeof c> => c !== null,
   );
@@ -105,11 +107,20 @@ export function PeriodMonthlyShare({
       data-testid="period-monthly-share"
       data-kind={r.kind}
       data-provenance={r.provenance}
+      data-figures="none"
       data-months={r.span.months}
       data-total={r.totalHours}
       data-conflicts={conflicts.length > 0 ? conflicts.join(" ") : undefined}
     >
-      <PeriodBand totalLabel={total} derivedLabel={labels.noMonthlyFigure} months={months} />
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+        <span className="font-mono text-sm font-semibold text-brand-cyan" data-testid="period-total">
+          {total}
+        </span>
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted" data-testid="period-month-span">
+          {r.span.first === r.span.last ? r.span.first : `${r.span.first} → ${r.span.last}`}
+        </span>
+      </div>
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.noMonthlyFigure}</span>
       {r.kind === "interpreted_period" && labels.provenance ? (
         <p className="text-meta text-text-muted" data-testid="period-provenance-label">
           {labels.provenance[r.provenance]}

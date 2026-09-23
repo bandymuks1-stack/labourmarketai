@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
-import { evidenceVariant, PeriodBand, type EvidenceStanding } from "@/components/app/work-world/primitives";
+import { evidenceVariant, type EvidenceStanding } from "@/components/app/work-world/primitives";
 
 /**
  * Guard: the work-world primitives carry the accepted "Living Work World"
@@ -67,12 +67,13 @@ describe("Guard: the 800 h period reads as a temporal shape, never a lump", () =
 
   it("PeriodBand shows the total AND per-month segments — no single lump", () => {
     const src = read("components/app/work-world/primitives.tsx");
-    // one total marker + a per-month segment carrying its derived hours —
-    // ONLY when the caller hands a figure (owner rule 2026-09-23)
+    // one total marker + a per-month segment carrying its derived hours. The
+    // ribbon is only ever handed a SOURCE period's projection (owner rule
+    // 2026-09-23) — see the rendered proof below.
     expect(src).toContain('data-testid="ww-period-total"');
     expect(src).toContain('data-testid="ww-period-band"');
     expect(src).toMatch(/months\.map\(/);
-    expect(src).toMatch(/data-hours=\{m\.hours === null \? undefined : m\.hours\.toFixed\(2\)\}/);
+    expect(src).toMatch(/data-hours=\{m\.hours\.toFixed\(2\)\}/);
     // the ribbon is cyan EVIDENCE, and it never claims verification
     expect(src).toMatch(/text-brand-cyan/);
     expect(src).not.toMatch(/period[\s\S]{0,80}trust-accent/);
@@ -120,7 +121,7 @@ describe("Guard: an interpreted period renders no monthly figure", () => {
       } as Parameters<typeof PeriodMonthlyShare>[0]),
     );
 
-  it("a span a person chose: months drawn, NO figure on any month, the source's own words and the disagreement shown", () => {
+  it("a span a person chose: month span, NO figure for any month, no ribbon, the source's own words and the disagreement shown", () => {
     const out = html({
       derived: humanChoice,
       factFields: ["personLabel", "workDate", "hours", "workText"],
@@ -129,40 +130,35 @@ describe("Guard: an interpreted period renders no monthly figure", () => {
     expect(out).toContain('data-kind="interpreted_period"');
     expect(out).toContain('data-figures="none"');
     expect(out).not.toMatch(/data-hours=/);
+    expect(out).not.toContain('data-testid="ww-period-band"');
     expect(out).not.toMatch(/133\.3[34]/);
     expect(out).not.toContain("MONTHLY_SHARE");
     expect(out).toContain("800 h");
     expect(out).not.toContain("800.00");
+    expect(out).toContain("2025-06 → 2025-11");
+    expect(out).toContain("NO_MONTHLY_FIGURE");
     expect(out).toContain("SET_BY_A_PERSON");
     expect(out).toContain("STATES[at least 16 month]");
     expect(out).toContain("STATES[each month only 50 hours]");
     expect(out).toContain("DIFFERS");
-    expect(out.match(/data-month="2025-\d\d"/g)?.length).toBe(6);
   });
 
-  it("NEGATIVE CONTROL — a SOURCE period with no stated rate keeps its derived monthly share", () => {
+  it("NEGATIVE CONTROL — a SOURCE period with no stated rate keeps its derived monthly share on the ribbon", () => {
     const out = html({ derived: {}, factFields: ["periodStart", "periodEnd", "hours"], sourceText: "Tiling on site" });
     expect(out).toContain('data-kind="source_period"');
-    expect(out).toContain('data-figures="monthly"');
+    expect(out).toContain('data-testid="ww-period-band"');
     expect(out).toMatch(/data-hours="133\.34"/);
     expect(out).toContain("MONTHLY_SHARE");
+    expect(out).toContain("800 h");
     expect(out).not.toContain("DIFFERS");
   });
 
-  it("the primitive itself: null month figures draw segments with no number", () => {
-    const band = renderToStaticMarkup(
-      createElement(PeriodBand, {
-        totalLabel: "800 h",
-        derivedLabel: "x",
-        months: [
-          { month: "2025-06", hours: null },
-          { month: "2025-07", hours: null },
-        ],
-      }),
-    );
-    expect(band).toContain('data-figures="none"');
-    expect(band).not.toMatch(/data-hours=/);
-    expect(band).toContain("border-dashed");
+  it("the ribbon primitive is reached ONLY from the source-period branch", () => {
+    const share = read("components/app/period-monthly-share.tsx");
+    const ribbons = share.match(/<PeriodBand\b/g) ?? [];
+    expect(ribbons.length).toBe(1);
+    expect(share.indexOf("<PeriodBand")).toBeGreaterThan(share.indexOf('if (r.kind === "source_period") {'));
+    expect(share.indexOf("<PeriodBand")).toBeLessThan(share.indexOf("// A span with NO monthly figure"));
   });
 });
 
