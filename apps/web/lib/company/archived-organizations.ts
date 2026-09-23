@@ -3,10 +3,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /**
  * ARCHIVED ORGANIZATIONS — the one predicate every workspace read shares.
  *
- * Owner decision 2026-09-23 (one canonical Nonstop Group): duplicate and
- * development/test organizations are ARCHIVED, never deleted. Archiving is
- * `organizations.archived_at` (+ `archived_reason`), added by migration
- * `20260923114500_nonstop_org_consolidation_v1`. Their memberships,
+ * Owner decision 2026-09-23 (one canonical organization per real company):
+ * duplicate and development/test organizations are ARCHIVED, never deleted.
+ * Archiving is `organizations.archived_at` (+ `archived_reason`), added by
+ * migration 20260923114500 (org consolidation v1). No logic here names an
+ * organization — the column alone decides (doctrine: no legal-entity-name
+ * dependency, lib/guards/product-gate.test.ts). Their memberships,
  * engagements, journal entries, confirmations and workflow definitions stay
  * exactly as they were — history — so every read that lets a person SELECT or
  * ACT IN a workspace has to leave the archived organization out itself:
