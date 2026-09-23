@@ -56,6 +56,17 @@ next-env.d.ts
 # ignored, whatever anyone calls it next. A committed session token cannot be
 # un-leaked by deleting the file afterwards, so this errs toward over-ignoring
 # — an e2e fixture that genuinely needs committing can be force-added.
+#
+# AND IT FAILED A THIRD TIME (2026-09-23). `.storage-onboarded.json` and
+# `.storage-newcomer.json` — real local sessions — matched nothing here,
+# because neither name contains `state` at all. No fourth pattern was added:
+# a rule that only covers the spellings already met is what lost three times.
+# The fix moved to the SOURCE. `apps/web/scripts/e2e-mint-session.ts` now asks
+# `git check-ignore` whether its exact output path is covered by THESE rules
+# before it obtains any session material, and refuses with
+# REFUSED_UNSAFE_E2E_STORAGE_TARGET when it is not — so this file stays the
+# source of truth and an un-ignorable name can no longer receive a token.
+# Guard + proofs: apps/web/lib/testing/e2e-storage-target{,.test}.ts.
 /apps/web/tests/e2e/*state*.json
 /apps/web/tests/e2e/.storage-state*.json
 /apps/web/tests/e2e/.storage-state.json
