@@ -57,14 +57,26 @@ function mapError(error: { code?: string; message?: string }): AbsenceActionResu
 
 /**
  * THE FACTS THE BELL RIDES ON (2026-09-23). Read HERE, under the CALLER's
- * own session, from the row the RPC just wrote or reviewed:
- * `worker_absences_select` admits the worker themselves and any real
- * manager of that worker — exactly who requests and who reviews. The
- * emitter used to read this row with the admin client, which holds no grant
- * on `worker_absences` in production, so no absence outcome ever reached
- * the worker (event-emitters.ts, SERVICE_ROLE GRANT TRUTH). Never throws:
- * an unreadable row yields null facts and the emitter reports
- * `recipient_unresolved`; the write that already succeeded is untouched.
+ * own session, from the stored row. The APPLIED `worker_absences_select`
+ * (20260808120000) admits the worker themselves ALWAYS, and a real manager
+ * of that worker ONLY WHILE `status = 'requested'` — the row is theirs to
+ * act on, not to keep reading. That status gate decides WHEN each write
+ * path may read:
+ *   - request → AFTER its RPC. The requester is the worker (the RPC admits
+ *     nobody else), and the id does not exist before the write.
+ *   - review  → BEFORE its RPC. `review_worker_absence_v1` leaves the row
+ *     approved/rejected, and from that instant the manager's SELECT arm no
+ *     longer admits it: a post-RPC read is a null row for every ordinary
+ *     reviewer (only `is_admin()` would still see it), and the two outcome
+ *     events this store exists to deliver would stay undelivered. The
+ *     pre-read sees exactly the row the RPC then acts on — the RPC refuses
+ *     any non-`requested` row, and worker_id / requested_by / start_date are
+ *     immutable across review. A refused review emits nothing.
+ * The emitter used to read this row with the admin client, which holds no
+ * grant on `worker_absences` in production, so no absence outcome ever
+ * reached the worker (event-emitters.ts, SERVICE_ROLE GRANT TRUTH). Never
+ * throws: an unreadable row yields null facts and the emitter reports
+ * `recipient_unresolved`; a write that already succeeded is untouched.
  */
 async function absenceNotificationFacts(
   supabase: SupabaseClient,
@@ -156,6 +168,12 @@ export async function reviewAbsenceAction(input: {
     return { ok: false, code: "invalid" };
   }
 
+  // Facts BEFORE the RPC — the reviewer's SELECT arm admits this row only
+  // while it is still `requested`, and the RPC is what ends that (see
+  // absenceNotificationFacts). Read now, under the reviewer's own session;
+  // ring the bell only once the RPC has actually decided.
+  const facts = await absenceNotificationFacts(supabase, input.absenceId);
+
   const { error } = await asAny(supabase).rpc("review_worker_absence_v1", {
     p_absence_id: input.absenceId,
     p_decision: input.decision,
@@ -167,7 +185,7 @@ export async function reviewAbsenceAction(input: {
   // detached emit is killable at serverless return, and the outcome event has
   // no second chance to fire. The emitter never throws.
   await emitAbsenceNotification(
-    await absenceNotificationFacts(supabase, input.absenceId),
+    facts,
     input.decision === "approved" ? "absence_approved" : "absence_rejected",
   );
   return { ok: true };

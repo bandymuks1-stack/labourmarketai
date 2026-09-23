@@ -830,11 +830,15 @@ export async function emitDemandInterestResponseNotification(input: {
 
 /**
  * The facts an absence write path hands the absence emitter. Read by the
- * CALLER from `worker_absences` under their own session after the RPC
- * returned — `worker_absences_select` admits the worker themselves and any
- * real manager of that worker, which is exactly who requests and who
- * reviews. service_role holds no grant on the table (see the header), so
- * the admin read this emitter used to open with was the whole silence.
+ * CALLER from `worker_absences` under their own session. The applied
+ * `worker_absences_select` (20260808120000) admits the worker themselves
+ * always, and a real manager of that worker ONLY WHILE `status =
+ * 'requested'` — so the request path reads after its RPC (the requester is
+ * the worker) and the review path reads BEFORE its RPC, because
+ * `review_worker_absence_v1` is exactly what closes the manager's arm
+ * (lib/leave/absences-actions.ts, absenceNotificationFacts). service_role
+ * holds no grant on the table (see the header), so the admin read this
+ * emitter used to open with was the whole silence.
  */
 export interface AbsenceNotificationFacts {
   readonly absenceId: string;

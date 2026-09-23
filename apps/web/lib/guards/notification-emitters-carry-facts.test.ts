@@ -27,6 +27,14 @@ import { join } from "node:path";
  * hands the emitter a facts object. This guard pins that shape from both
  * ends, with negative controls so the detector is known to detect.
  *
+ * WHEN the write path reads is part of the shape. The applied
+ * `worker_absences_select` (20260808120000) admits a manager only while
+ * `status = 'requested'`, and `review_worker_absence_v1` is what ends that:
+ * the review path must read its facts BEFORE the RPC, or the two absence
+ * outcomes are undelivered again under a truthful-looking
+ * `recipient_unresolved`. Pinned below by index comparison, with the exact
+ * first-cut (post-RPC) shape as the negative control.
+ *
  * DELIBERATELY NOT LISTED: `profiles`. `email-dispatch.ts` reads
  * profiles.email with the admin client, and that grant is knowingly
  * withheld until email delivery is turned on (migration 20260908070000, "NEXT
@@ -38,6 +46,28 @@ const WEB = join(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
 /** CRLF-safe: a Windows checkout must not change what the detector sees. */
 const lf = (s: string): string => s.replace(/\r\n/g, "\n");
+
+/** The source between two markers (from the first to the start of the second). */
+function sliceBetween(src: string, from: string, to: string): string {
+  const a = src.indexOf(from);
+  const b = src.indexOf(to, a + 1);
+  return a >= 0 && b > a ? src.slice(a, b) : "";
+}
+
+const REVIEW_RPC = /\.rpc\(\s*["']review_worker_absence_v1["']/;
+
+/**
+ * In a review action's source, is the facts read placed BEFORE the review
+ * RPC? Ordering is what the applied RLS makes load-bearing: the manager's
+ * SELECT arm on worker_absences closes the moment the RPC leaves
+ * `requested`. Index comparison on the lf'd source, so CRLF cannot move it.
+ */
+function readsFactsBeforeReviewRpc(reviewSource: string): boolean {
+  const s = lf(reviewSource);
+  const factsAt = s.indexOf("absenceNotificationFacts(");
+  const rpcAt = s.search(REVIEW_RPC);
+  return factsAt >= 0 && rpcAt >= 0 && factsAt < rpcAt;
+}
 
 /** Domain tables service_role holds NO grant on (production, 2026-09-23). */
 const UNGRANTED_DOMAIN_TABLES = [
@@ -52,13 +82,27 @@ const UNGRANTED_DOMAIN_TABLES = [
 ] as const;
 
 /**
- * The tables a module reads that the admin client cannot. A module that
- * never calls `createAdminClient()` is out of scope: its reads run under a
- * caller session and RLS, which is exactly the allowed pattern.
+ * A module is ADMIN-SCOPED when it mints the admin client itself OR is
+ * handed one: a parameter or variable typed `AdminClient`, or one named
+ * `admin` that is declared (`admin:`) or read through (`admin.from(`). The
+ * second shape is the module's own existing pattern — `deliver(admin, …)`,
+ * `workerProfileId(admin, …)`, email-dispatch's `admin` argument — and a
+ * `.from()` of an ungranted table through it is the same 42501-as-null
+ * silence one indirection away. Deliberately file-scoped, not
+ * receiver-scoped: a module that mixes a handed-over admin client with a
+ * caller-session read of one of these tables is flagged too, and must say
+ * so here if that is ever the intended design.
+ */
+const ADMIN_SCOPED = /createAdminClient\s*\(|\bAdminClient\b|\badmin\s*(:|\.from\()/;
+
+/**
+ * The tables a module reads that the admin client cannot. A module that is
+ * not admin-scoped is out of scope: its reads run under a caller session and
+ * RLS, which is exactly the allowed pattern.
  */
 function ungrantedAdminReads(source: string): string[] {
   const src = lf(source);
-  if (!/createAdminClient\s*\(/.test(src)) return [];
+  if (!ADMIN_SCOPED.test(src)) return [];
   const hits: string[] = [];
   for (const table of UNGRANTED_DOMAIN_TABLES) {
     const rx = new RegExp(`\\.from\\(\\s*["'\`]${table}["'\`]\\s*\\)`);
@@ -92,6 +136,27 @@ describe("the detector detects (negative controls)", () => {
     ).toEqual(["companies", "worker_absences"]);
   });
 
+  it("flags a module that is HANDED the admin client instead of minting it", () => {
+    // The parameter pattern the module already uses (`deliver(admin, …)`).
+    expect(
+      ungrantedAdminReads(
+        'async function x(admin: AdminClient) { await admin.from("booking_requests") }',
+      ),
+    ).toEqual(["booking_requests"]);
+    // The type alone marks the module, whatever the parameter is called.
+    expect(
+      ungrantedAdminReads(
+        'async function y(client: AdminClient) { await client.from("work_tasks") }',
+      ),
+    ).toEqual(["work_tasks"]);
+    // The name alone marks it too, CRLF'd across the chain like real code.
+    expect(
+      ungrantedAdminReads(
+        "function z(admin: DbClient) {\r\n  return admin\r\n    .from('worker_absences')\r\n}",
+      ),
+    ).toEqual(["worker_absences"]);
+  });
+
   it("does NOT flag the allowed pattern — a caller-session read with no admin client", () => {
     expect(
       ungrantedAdminReads(
@@ -106,6 +171,33 @@ describe("the detector detects (negative controls)", () => {
         'const admin = createAdminClient();\nadmin.from("workers").select("profile_id");\nadmin.from("notification_events").insert({});',
       ),
     ).toEqual([]);
+  });
+
+  it("the ordering detector sees the exact 3db8eda4 review shape as WRONG, and the fix as right", () => {
+    // Verbatim shape of the first cut of this PR: facts read AFTER the RPC,
+    // i.e. after the manager's SELECT arm had already closed. CRLF included.
+    const preFix =
+      "  const { error } = await asAny(supabase).rpc(\"review_worker_absence_v1\", {\r\n" +
+      "    p_absence_id: input.absenceId,\r\n" +
+      "    p_decision: input.decision,\r\n" +
+      "  });\r\n" +
+      "  if (error) return mapError(error);\r\n" +
+      "  await emitAbsenceNotification(\r\n" +
+      "    await absenceNotificationFacts(supabase, input.absenceId),\r\n" +
+      '    input.decision === "approved" ? "absence_approved" : "absence_rejected",\r\n' +
+      "  );\r\n";
+    expect(readsFactsBeforeReviewRpc(preFix)).toBe(false);
+    const fixed =
+      "  const facts = await absenceNotificationFacts(supabase, input.absenceId);\r\n" +
+      "  const { error } = await asAny(supabase).rpc(\"review_worker_absence_v1\", {\r\n" +
+      "    p_absence_id: input.absenceId,\r\n" +
+      "  });\r\n" +
+      "  if (error) return mapError(error);\r\n" +
+      "  await emitAbsenceNotification(facts, eventType);\r\n";
+    expect(readsFactsBeforeReviewRpc(fixed)).toBe(true);
+    // A source with either marker missing is never "before".
+    expect(readsFactsBeforeReviewRpc("await emitAbsenceNotification(facts, t);")).toBe(false);
+    expect(readsFactsBeforeReviewRpc('.rpc("review_worker_absence_v1", {})')).toBe(false);
   });
 });
 
@@ -236,6 +328,43 @@ describe("every write path resolves its facts under the CALLER's session", () =>
     expect(src.match(/await absenceNotificationFacts\(supabase, /g) ?? []).toHaveLength(2);
     expect(src).not.toMatch(/createAdminClient|supabase\/admin/);
     expect(src).not.toMatch(/emitAbsenceNotification\((newAbsenceId|input\.absenceId),/);
+    // The status gate is documented where the read lives, not only here.
+    const factsDoc = src.slice(0, src.indexOf("async function absenceNotificationFacts("));
+    expect(factsDoc).toMatch(/status = 'requested'/);
+  });
+
+  it("absences: the REVIEW path reads its facts BEFORE the RPC closes the manager's SELECT arm", () => {
+    // The applied worker_absences_select (20260808120000) admits a manager
+    // only while status = 'requested'; review_worker_absence_v1 leaves the row
+    // approved/rejected. A post-RPC read under the reviewer's session is a
+    // null row for every ordinary reviewer — the two outcome events this lane
+    // exists to deliver would stay undelivered, now under a misleading reason.
+    const src = lf(read("lib", "leave", "absences-actions.ts"));
+    const review = sliceBetween(
+      src,
+      "export async function reviewAbsenceAction(",
+      "export async function cancelAbsenceAction(",
+    );
+    expect(review.length).toBeGreaterThan(200);
+    expect(readsFactsBeforeReviewRpc(review)).toBe(true);
+    // …and still rings only once the RPC has decided: a refused review emits nothing.
+    const rpcAt = review.search(REVIEW_RPC);
+    const errorReturnAt = review.indexOf("if (error) return mapError(error);");
+    const emitAt = review.indexOf("emitAbsenceNotification(");
+    expect(rpcAt).toBeGreaterThan(-1);
+    expect(errorReturnAt).toBeGreaterThan(rpcAt);
+    expect(emitAt).toBeGreaterThan(errorReturnAt);
+    // The REQUEST path is the other way round, and correctly so: the id does
+    // not exist before the write, and the requester is the worker, admitted
+    // by the policy in every status.
+    const request = sliceBetween(
+      src,
+      "export async function requestAbsenceAction(",
+      "export async function reviewAbsenceAction(",
+    );
+    const requestRpcAt = request.search(/\.rpc\(\s*"request_worker_absence_v1"/);
+    expect(requestRpcAt).toBeGreaterThan(-1);
+    expect(request.indexOf("absenceNotificationFacts(")).toBeGreaterThan(requestRpcAt);
   });
 
   it("tasks: the ONE RLS-scoped reader lends both write paths the stored assignee", () => {
