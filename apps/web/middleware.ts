@@ -108,9 +108,27 @@ function stripLocale(pathname: string): { locale: string; rest: string } {
   return { locale: routing.defaultLocale, rest: pathname };
 }
 
-// /cv renders ONLY the caller's own session data and robots-disallows itself;
-// it was gated at the page level alone until W4 — the middleware backstop
-// keeps that protection from depending on one redirect() call surviving.
+/**
+ * Trees whose visitors are sent to login HERE when they carry no session at
+ * all, and whose session is refreshed here before the RSC layer reads it.
+ *
+ * NOT AN AUTHENTICATION BOUNDARY (owner §27). This list is an anonymous-visitor
+ * convenience redirect and a place to force the refresh — nothing more. A
+ * request that carries a session cookie whose `exp` merely LOOKS fresh leaves
+ * through the fast path below without its signature ever being checked:
+ * forged, revoked and deleted-user cookies included. The boundary is the
+ * verified `auth.getUser()` in each listed tree's top layout — above its
+ * `loading.tsx`, so a refusal is still a real 3xx — and in every page, server
+ * action and route handler beneath it.
+ *
+ * So adding a prefix here protects nothing on its own.
+ * `lib/guards/suspense-boundary-gates.test.ts` parses this array and fails
+ * until `app/[locale]/<prefix>/layout.tsx` performs that verified gate.
+ *
+ * /cv renders ONLY the caller's own session data and robots-disallows itself;
+ * it was gated at the page level alone until W4 — listing it here keeps an
+ * anonymous visitor's bounce from depending on one redirect() call surviving.
+ */
 const REQUIRES_AUTH = ["/dashboard", "/onboarding", "/cv"];
 
 /** True if the request carries a Supabase auth cookie. `@supabase/ssr` names
@@ -131,11 +149,22 @@ const TOKEN_FRESH_MARGIN_S = 120;
  * P0 auth-performance fast path: read the access token's `exp` straight from
  * the `@supabase/ssr` session cookie WITHOUT any network call. When the JWT
  * is comfortably fresh, the middleware skips its GoTrue `getUser()`
- * round-trip — the RSC layer (dashboard layout / pages) still performs the
- * REAL validated `getUser()` on every request, and RLS enforces authz at the
- * data layer, so this removes only a redundant validation hop (~100-300 ms
- * on every authenticated navigation), never an authorization boundary.
- * Unparseable/legacy/expiring cookies fall through to the full refresh path.
+ * round-trip. Unparseable/legacy/expiring cookies fall through to the full
+ * refresh path.
+ *
+ * A PERFORMANCE HINT, NEVER AUTH PROOF (owner §27). The payload is
+ * base64-decoded, not verified: nothing here checks the signature, so a forged
+ * token, a revoked session or a deleted user's cookie reads as "fresh" exactly
+ * like a genuine one. Skipping the hop is safe only because of the layers
+ * below — the REAL validated `getUser()` that every REQUIRES_AUTH tree's top
+ * layout (dashboard, onboarding, cv) runs above its `loading.tsx`, the page /
+ * server action / route-handler gates under them, and RLS at the data layer.
+ * This removes a redundant validation hop (~100-300 ms on every authenticated
+ * navigation), never an authorization boundary. Measured 2026-09-23: a session
+ * cookie with a corrupted signature and a fresh `exp` passes this check and is
+ * refused with a 307 by those layouts (`app/[locale]/cv/layout.tsx`). Pinned
+ * by `lib/guards/suspense-boundary-gates.test.ts`; exercised end to end by
+ * `tests/e2e/auth-forged-session-refusal.spec.ts`.
  */
 function readAccessTokenExpSeconds(request: NextRequest): number | null {
   try {
