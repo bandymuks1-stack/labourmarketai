@@ -1,4 +1,7 @@
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+// Type-only: erased at compile time, so this module stays pure and
+// client-safe while the rung vocabulary stays owned by the brief itself.
+import type { OpeningBriefRung } from "@/lib/conversation/opening-brief";
 
 /**
  * ŠIANDIEN — the worker's OPENING CONTEXT inside the ONE conversation
@@ -54,6 +57,40 @@ export function conversationOpeningContext(input: {
 }): ConversationOpeningContext {
   return isWorkerPersonalSpace(input) ? "today" : "workspace";
 }
+
+/**
+ * ŠIANDIEN OWNS THE ATTENTION IT ALREADY RENDERS (owner §20, 2026-09-23:
+ * the home shows what matters now, once).
+ *
+ * With ŠIANDIEN in the conversation's opening slot, the worker's opening
+ * brief underneath it said the same things again from the same readers —
+ * booking offers, invitations, unread messages (ŠIANDIEN's doors, read by
+ * `listMyBookings` / `listInvitationsAddressedToMe` /
+ * `getUnreadConversationIds`, the brief's own readers), the match count
+ * (ŠIANDIEN's opportunity line, the same `loadWorkerOpportunityMatches`
+ * projection) and a next profile step (ŠIANDIEN's ONE next action, from the
+ * work-card engine). These are the rungs the brief leaves out when, and
+ * only when, ŠIANDIEN is on screen above it; the rungs ŠIANDIEN does not
+ * carry — expiring or missing documents, instructions waiting, an employer
+ * confirmation, a company that answered the person's interest, calendar
+ * conflicts or overdue work, unlogged work, the learner line — still reach
+ * the worker through the brief.
+ *
+ * CHOICE, NAMED: the omission is per rung, not per ŠIANDIEN read outcome.
+ * If ŠIANDIEN's own read of a door failed while the brief's read a moment
+ * later succeeded, that item is not repeated below. Both sides call the same
+ * reader, so the two fail together far more often than apart, and the
+ * header's notification bell (`getSpineCounts`) announces pending booking
+ * offers, roster invitations, new matches and unread messages independently
+ * of both.
+ */
+export const TODAY_COVERED_BRIEF_RUNGS: readonly OpeningBriefRung[] = [
+  "bookings",
+  "invitations",
+  "matches",
+  "unread",
+  "profile-gap",
+];
 
 /** The secondary stations reachable from ŠIANDIEN in one tap. Every href is
  *  an existing route; `world` is the opportunities workspace (the former

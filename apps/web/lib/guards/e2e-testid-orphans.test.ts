@@ -163,7 +163,9 @@ const KNOWN_ORPHANS: Record<string, string[]> = {
   "w6-experience-domain.spec.ts": ["experience-counts-disputed", "experience-counts-meaning"],
   "w6-experience-fail-closed.spec.ts": ["experience-counts-positive"],
   "w6-tier-lexicon.spec.ts": ["trust-block"],
-  "w6-workspace-map.spec.ts": ["chat-employer-match-card", "chat-employer-match-open"],
+  // 2026-09-23: `w6-workspace-map.spec.ts` left this list — re-anchored to
+  // the contextual map (owner §20), its selection now goes through the live
+  // `opportunities-match-open` control instead of the deleted chat job card.
 };
 
 /** The spec this guard was written alongside — it stays at zero, always. */

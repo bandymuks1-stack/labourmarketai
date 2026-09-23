@@ -52,11 +52,43 @@ export type OpeningBrief =
   | { kind: "brief"; lines: string[]; chips: OpeningChip[] }
   | { kind: "none" };
 
+/**
+ * The worker-brief rungs a caller may ask to leave out because the SAME
+ * screen already states them. The one caller today is the worker's home:
+ * ŠIANDIEN renders the booking offers, invitations and unread messages as
+ * doors, the matches as its opportunity line and the next step from the
+ * work-card engine (`TODAY_COVERED_BRIEF_RUNGS`, lib/today/today-route.ts),
+ * so the brief under it says only what ŠIANDIEN does not.
+ */
+export type OpeningBriefRung = "bookings" | "invitations" | "matches" | "unread" | "profile-gap";
+
+export type OpeningBriefOptions = {
+  readonly omit?: readonly OpeningBriefRung[];
+};
+
+const OMITTABLE_RUNGS: ReadonlySet<string> = new Set<OpeningBriefRung>([
+  "bookings",
+  "invitations",
+  "matches",
+  "unread",
+  "profile-gap",
+]);
+
+/** The caller's omit list, from a client — only known rung names count. */
+function omittedRungs(options: OpeningBriefOptions | undefined): ReadonlySet<string> {
+  const omit = options?.omit;
+  if (!Array.isArray(omit)) return new Set();
+  return new Set(omit.filter((r): r is OpeningBriefRung => OMITTABLE_RUNGS.has(r)));
+}
+
 const MAX_LINES = 3;
 const MAX_CHIPS = 3;
 
-export async function loadOpeningBrief(): Promise<OpeningBrief> {
+export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<OpeningBrief> {
   const t = await getTranslations("conversation.chat");
+  // Omitting only ever REMOVES a line from the caller's own brief: every read
+  // below is still the caller's own, so the list is never an authority.
+  const omitted = omittedRungs(options);
 
   const lines: string[] = [];
   const chips: OpeningChip[] = [];
@@ -80,7 +112,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   // lib/guards/booking-visibility-honest.test.ts) — which is exactly why the
   // conversation has to carry the signal.
   try {
-    const pending = await getPendingIncomingBookingCount();
+    const pending = omitted.has("bookings") ? 0 : await getPendingIncomingBookingCount();
     if (pending > 0) {
       const tBookings = await getTranslations("bookings");
       lines.push(`${tBookings("pendingLink")} — ${tBookings("pendingNote")}`);
@@ -99,7 +131,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   // e-mail); the chip opens the in-chat decision over the SAME accept those
   // pages call. Names the inviter when known, never invents one.
   try {
-    if (lines.length < MAX_LINES) {
+    if (lines.length < MAX_LINES && !omitted.has("invitations")) {
       const inv = await listInvitationsAddressedToMe();
       if (inv.status === "ok" && inv.total > 0) {
         const first = inv.items[0];
@@ -145,8 +177,11 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
         lines.push(t("briefInterestContacted", { count: contacted }));
         addChip("jobs", t("chipMyOwnInterest"));
       }
-      const fresh = view.newCount > 0 ? view.newCount : 0;
-      const total = view.totalRecommendable;
+      // The match COUNT is a rung a screen may already state (ŠIANDIEN's
+      // opportunity line reads the same projection); the "contacted" line
+      // above is not, and stays.
+      const fresh = view.newCount > 0 && !omitted.has("matches") ? view.newCount : 0;
+      const total = omitted.has("matches") ? 0 : view.totalRecommendable;
       if (fresh > 0) {
         lines.push(t("briefNewMatches", { count: fresh }));
         addChip("jobs", t("chipJobs"));
@@ -225,7 +260,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   // Messages is a conversation-driven projection — the brief is where a real
   // unread thread announces itself, with the one chip that opens it).
   try {
-    if (lines.length < MAX_LINES) {
+    if (lines.length < MAX_LINES && !omitted.has("unread")) {
       const unread = await getUnreadConversationCount();
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
@@ -297,7 +332,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   }
 
   try {
-    if (lines.length < MAX_LINES) {
+    if (lines.length < MAX_LINES && !omitted.has("profile-gap")) {
       const summary = await loadProfileSummaryForChat("resume");
       if (summary.kind === "summary" && summary.missing.length > 0) {
         lines.push(t("briefProfileGap", { step: summary.missing[0] }));

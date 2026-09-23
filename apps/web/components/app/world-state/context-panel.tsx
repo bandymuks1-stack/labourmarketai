@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp, Info, Maximize2, Minimize2, X } from "lucide-react";
 
@@ -183,6 +183,11 @@ export function ContextPanel({
   const [unavailable, setUnavailable] = useState<string | null>(null);
   /** Small screens open the panel on demand; from `lg` it is always open. */
   const [expanded, setExpanded] = useState(false);
+  const wideScreen = useWideScreen();
+  /** The map is asked for by a SELECTION (see the body note) and is only
+   *  mounted where it can be seen: the static column from `lg`, or the open
+   *  sheet below it. */
+  const mapAsked = panel.mode === "entity" && (expanded || wideScreen);
 
   // One request wins: a fast second selection must never be overwritten by the
   // slower first response.
@@ -429,6 +434,14 @@ export function ContextPanel({
         {/* W6 — THE MAP, inside the one workspace. It subscribes to the SAME
             World State: the selection flies it to the entity's place, and
             clicking a marker opens that entity here. Not a separate screen. */}
+        {/* CONTEXTUAL, NOT AMBIENT (owner §20, 2026-09-23: "do not
+            automatically display every map"). At depth 0 — the home, nothing
+            selected — the panel shows the work context and NO map: a map
+            nobody asked about is decoration competing with what matters now.
+            It appears when a SELECTION asks "where is this?" (entity mode),
+            and a place RESULT (`?result=market`) brings its own. Below `lg`
+            it also waits for the sheet to be open, so a phone never boots
+            Leaflet and its map read into a body that is `display:none`. */}
         {/* One surface per question. WorkspaceMap and the market result BOTH
             answer "where?", so stacking them puts two maps in a 22rem column
             and makes the panel argue with itself. When a result is showing, the
@@ -447,7 +460,9 @@ export function ContextPanel({
                 labels={work.invitations.labels}
               />
             ) : null}
-            <WorkspaceMap className={work?.invitations ? "my-4" : "mb-4"} />
+            {mapAsked ? (
+              <WorkspaceMap className={work?.invitations ? "my-4" : "mb-4"} />
+            ) : null}
           </>
         )}
         {showsResult && result && resultNavigation ? (
@@ -476,6 +491,32 @@ export function ContextPanel({
         ) : null}
       </div>
     </aside>
+  );
+}
+
+// ── the static-column breakpoint ────────────────────────────────────────────
+
+/** Tailwind's `lg` — where the panel stops being a sheet and becomes the
+ *  always-visible right column (the `lg:` classes on the landmark). */
+const LG_QUERY = "(min-width: 1024px)";
+
+function subscribeWide(onChange: () => void): () => void {
+  // Optional: jsdom (the render guards) has no matchMedia — same shape the
+  // thread's reduced-motion read uses.
+  const mq = window.matchMedia?.(LG_QUERY);
+  if (!mq) return () => {};
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+/** True from `lg` up. The server snapshot is `false` (phone-first): the only
+ *  consequence is that a desktop mounts the map one commit after hydration,
+ *  never that a phone mounts it into a hidden body. */
+function useWideScreen(): boolean {
+  return useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia?.(LG_QUERY).matches ?? false,
+    () => false,
   );
 }
 

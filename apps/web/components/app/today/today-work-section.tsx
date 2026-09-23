@@ -7,6 +7,7 @@ import {
   deriveTodayGrowth,
   deriveTodayOpenItems,
   deriveTodayWork,
+  isTodayGrowthShown,
   unknownTodayDoors,
   type TodayOpenItem,
 } from "@/lib/today/today-model";
@@ -37,7 +38,7 @@ const stationHref = (id: TodayStationId): string =>
  * UNKNOWN ≠ ZERO: a null read renders "could not read", with the journal
  * link still offered; an EMPTY day renders "nothing recorded today".
  * "Tuščia = tvarkinga" (design system §A.8): with no open item the open
- * block is simply absent.
+ * block is simply absent, and so is a growth line with no reading in it.
  */
 export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
   const [t, tJournal, tUnits, tSkill, tProf, wi, growth, attention] = await Promise.all([
@@ -198,39 +199,39 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
         </p>
       )}
 
-      {/* ONE GROWTH SENTENCE — a reading of the person's own rows, said so. */}
-      <section
-        aria-labelledby="today-growth-title"
-        data-testid="today-growth"
-        data-state={growthLine.kind}
-        className="flex flex-col gap-2"
-      >
-        <h2 id="today-growth-title" className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("growth.title")}
-        </h2>
-        {growthLine.kind === "direction" ? (
-          <>
-            <p className="text-body text-text-primary" data-kind={growthLine.direction.kind}>
-              {growthText(growthLine.direction)}
-            </p>
-            <p className="text-meta text-text-muted">{t("growth.derived")}</p>
-          </>
-        ) : (
-          <p className="text-support text-text-secondary">
-            {growthLine.kind === "insufficient"
-              ? t("growth.insufficient")
-              : growthLine.kind === "none"
-                ? t("growth.none")
-                : t("growth.unknown")}
-          </p>
-        )}
-        {/* "Mano veikla skaičiais" — the station lane F builds
-            (`/dashboard/work-in-numbers`); its address comes from the ONE
-            station table so this file never spells a route of its own. */}
-        <StationLink href={stationHref("numbers")} testId="today-growth-open">
-          {t("stations.numbers")}
-        </StationLink>
-      </section>
+      {/* ONE GROWTH SENTENCE — a reading of the person's own rows, said so.
+          "Tuščia = tvarkinga": an EMPTY reading (too few evidenced skills,
+          no direction yet) is left out, not stated; a FAILED read is still
+          named (`isTodayGrowthShown`). The stations keep "numbers" one tap
+          away either way. */}
+      {isTodayGrowthShown(growthLine) && (
+        <section
+          aria-labelledby="today-growth-title"
+          data-testid="today-growth"
+          data-state={growthLine.kind}
+          className="flex flex-col gap-2"
+        >
+          <h2 id="today-growth-title" className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("growth.title")}
+          </h2>
+          {growthLine.kind === "direction" ? (
+            <>
+              <p className="text-body text-text-primary" data-kind={growthLine.direction.kind}>
+                {growthText(growthLine.direction)}
+              </p>
+              <p className="text-meta text-text-muted">{t("growth.derived")}</p>
+            </>
+          ) : (
+            <p className="text-support text-text-secondary">{t("growth.unknown")}</p>
+          )}
+          {/* "Mano veikla skaičiais" — the station lane F builds
+              (`/dashboard/work-in-numbers`); its address comes from the ONE
+              station table so this file never spells a route of its own. */}
+          <StationLink href={stationHref("numbers")} testId="today-growth-open">
+            {t("stations.numbers")}
+          </StationLink>
+        </section>
+      )}
     </>
   );
 }

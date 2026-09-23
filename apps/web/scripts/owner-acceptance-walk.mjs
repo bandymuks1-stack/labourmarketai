@@ -111,6 +111,11 @@ async function snap(page) {
     const main = document.querySelector("main");
     const txt = (main?.innerText ?? document.body.innerText ?? "").slice(0, 20000);
     const logo = document.querySelector('[data-testid="shell-logo-home"]');
+    // ŠIANDIEN's header (the worker's home only), in VIEWPORT space — a
+    // boundingClientRect WITHOUT scrollY, the one frame "in the first
+    // viewport" can be measured in (document-space rects always pass).
+    const today = document.querySelector('[data-testid="today-header"]');
+    const tb = today ? today.getBoundingClientRect() : null;
     return {
       url: location.pathname + location.search,
       lang: document.documentElement.lang,
@@ -118,6 +123,13 @@ async function snap(page) {
       composer: document.querySelectorAll('[data-testid="composer-input"]').length,
       text: txt,
       overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      todayHeader: tb
+        ? {
+            top: Math.round(tb.top),
+            bottom: Math.round(tb.bottom),
+            inView: tb.top >= 0 && tb.bottom <= window.innerHeight,
+          }
+        : null,
     };
   });
 }
@@ -206,9 +218,20 @@ async function walkActor(actor, file, deepRoutes, expectedContext) {
     await page.setViewportSize({ width: 375, height: 812 });
     await go(page, "/lt/dashboard");
     await page.waitForSelector('[data-testid="composer-input"]', { timeout: 30000 }).catch(() => {});
+    // Let the opening BRIEF land first — it is appended AFTER mount, and the
+    // thread used to scroll to its end on that append, which pushed
+    // ŠIANDIEN's header out of the first viewport on a phone
+    // (lib/guards/calm-home-contract.test.ts §4). Measuring before it lands
+    // would pass a home that jumps a moment later.
+    await page.waitForTimeout(3000);
     const m = await snap(page);
     rec(actor, "375px: no horizontal overflow", !m.overflow, `scrollW>innerW=${m.overflow}`);
     rec(actor, "375px: composer still usable", m.composer >= 1, `composer=${m.composer}`);
+    // Only the worker's home carries ŠIANDIEN; the other actors have no header to place.
+    if (m.todayHeader) {
+      rec(actor, "375px: ŠIANDIEN header in the first viewport once the brief has landed",
+        m.todayHeader.inView, `top=${m.todayHeader.top} bottom=${m.todayHeader.bottom} of 812`);
+    }
     await page.setViewportSize({ width: 1280, height: 900 });
   } catch (e) {
     rec(actor, "WALK ABORTED", false, String(e.message).slice(0, 120));

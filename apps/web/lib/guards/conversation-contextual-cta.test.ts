@@ -88,7 +88,9 @@ describe("history + state-aware opening", () => {
     expect(CHAT).toMatch(/openedWithStateRef/);
     // The brief composes new-matches / conflicts / unlogged-work / first
     // profile gap server-side; `none` leaves the greeting standing alone.
-    expect(CHAT).toMatch(/loadOpeningBrief\(\)/);
+    // Takes an optional `omit` of the rungs an opening context (ŠIANDIEN)
+    // already states — see lib/guards/calm-home-contract.test.ts.
+    expect(CHAT).toMatch(/loadOpeningBrief\(briefOptions\)/);
     expect(CHAT).toMatch(/if \(brief\.kind !== "brief"\) return/);
   });
 
