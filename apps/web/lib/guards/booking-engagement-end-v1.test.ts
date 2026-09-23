@@ -1435,6 +1435,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // route (SECDEF body replace); marker added under the owner directive of
       // 2026-09-22 ("Complete and production-verify #1828"), PR #1828.
       "20260922140000_privacy_consent_rpc_locale_pl_v1.sql",
+      // 2026-09-23 — owner decision "one canonical Nonstop Group": additive
+      // organizations.archived_at/archived_reason + one data DO block (grant
+      // workforce_provider to 20b2c802, Donatas' manager membership, two pointer
+      // repoints, one engagement ended, one test need closed, four duplicate/test
+      // orgs archived — nothing deleted, every change logged to audit_logs).
+      // RED (data DML + a read-only dynamic FK sweep); UNAPPLIED — the lead
+      // applies after a rolled-back production dry run. Paired rollback.
+      "20260923114500_nonstop_org_consolidation_v1.sql",
 ]);
   });
 

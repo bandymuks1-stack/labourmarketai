@@ -1016,7 +1016,16 @@ describe("NO new DB migration in this PR", () => {
     //   renderings stored beside the original; no grant/policy/row change; GREEN by
     //   shape; paired .down.sql; APPLIED 2026-09-22, ledger 20260922102211). Not
     //   this read layer's file. RECOUNTED: 303.
-    expect(count).toBeLessThanOrEqual(303);
+    // Bumped 303 -> 304 for 20260923114500_nonstop_org_consolidation_v1 (owner
+    //   decision 2026-09-23, one canonical Nonstop Group: additive
+    //   organizations.archived_at/archived_reason + one DO block that grants
+    //   workforce_provider, adds Donatas' manager membership, repoints two
+    //   workspace pointers, ends one obsolete engagement, closes one test need
+    //   and archives four duplicate/test orgs, every change logged to
+    //   audit_logs; RED data DML, human-gated, paired .down.sql; UNAPPLIED —
+    //   the lead applies after a rolled-back production dry run). Not this
+    //   read layer's file. RECOUNTED: 304.
+    expect(count).toBeLessThanOrEqual(304);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

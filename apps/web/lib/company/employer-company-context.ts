@@ -12,6 +12,10 @@ import {
   type WorkspaceContext,
 } from "@/lib/company/active-organization";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import {
+  ORGANIZATION_ARCHIVED_COLUMN,
+  isArchivedOrganizationRow,
+} from "@/lib/company/archived-organizations";
 import type { DomainCaller } from "@/lib/domain/caller";
 import {
   isEmployerSurfaceRole,
@@ -211,11 +215,16 @@ export async function resolveEmployerCompanyCore(
     // was `using (true)` and this read was unscoped — the gate was the ONLY
     // thing protecting it. `limit(2)` so a duplicated id would surface as
     // ambiguity rather than being silently reduced by `maybeSingle`.
-    const orgRes = await asAny(supabase)
-      .from("organizations")
-      .select("id, display_name, legal_name, legacy_company_id")
-      .eq("id", activeId)
-      .limit(2);
+    //
+    // ARCHIVED (owner decision 2026-09-23): the archive column rides this same
+    // read. An environment without it answers 42703 and is re-read without it
+    // (nothing is archived there); a 42703 on the re-read is the real
+    // needs-migration below.
+    const orgColumns = "id, display_name, legal_name, legacy_company_id";
+    const readOrg = (select: string) =>
+      asAny(supabase).from("organizations").select(select).eq("id", activeId).limit(2);
+    let orgRes = await readOrg(`${orgColumns}, ${ORGANIZATION_ARCHIVED_COLUMN}`);
+    if (orgRes.error?.code === UNDEFINED_COLUMN_CODE) orgRes = await readOrg(orgColumns);
     if (orgRes.error) {
       if (
         orgRes.error.code === UNDEFINED_COLUMN_CODE ||
@@ -233,10 +242,15 @@ export async function resolveEmployerCompanyCore(
       display_name: string | null;
       legal_name: string | null;
       legacy_company_id: string | null;
+      archived_at?: string | null;
     }[];
     if (orgRows.length > 1) return unavailable("ambiguous-binding", label);
     const org = orgRows[0];
     if (!org) return unavailable("not-a-member", label);
+    // An archived organization is no workspace anyone acts in — FAIL CLOSED
+    // even if a stale list or pointer still names it (defense in depth under
+    // the membership gate, which already leaves archived organizations out).
+    if (isArchivedOrganizationRow(org)) return unavailable("not-a-member", label);
 
     const organizationName =
       org.display_name?.trim() || org.legal_name?.trim() || active.name || "";

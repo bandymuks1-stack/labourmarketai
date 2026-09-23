@@ -11,6 +11,7 @@ import {
   type OwnedOrganization,
 } from "@/lib/company/owned-organizations";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { withoutArchivedOrganizations } from "@/lib/company/archived-organizations";
 import {
   PERSONAL_WORKSPACE_ID,
   resolveActiveOrganizationId,
@@ -374,9 +375,17 @@ export async function readWorkspaceMemberships(
     readEngagementMemberships(caller.supabase, caller.userId),
     readGovernanceMemberships(caller.supabase, caller.userId),
   ]);
-  const engagementWorkspaces = engagement.workspaces;
-  const governanceWorkspaces = governance.workspaces;
-  const complete = owned.kind === "ok" && engagement.complete && governance.complete;
+  // ARCHIVED organizations (owner decision 2026-09-23) keep their memberships
+  // and engagements as history but are no workspace. Owned rows are already
+  // filtered by `readOwnedOrganizations`; the member-sourced rows are checked
+  // here in one bounded read. An unreadable archive state contributes nothing
+  // and marks the list incomplete — never an unchecked organization.
+  const memberSourced = await withoutArchivedOrganizations(caller.supabase, [
+    ...governance.workspaces,
+    ...engagement.workspaces,
+  ]);
+  const complete =
+    owned.kind === "ok" && engagement.complete && governance.complete && memberSourced.ok;
 
   const orgWorkspaces: WorkspaceInfo[] = [];
   const seen = new Set<string>();
@@ -396,7 +405,7 @@ export async function readWorkspaceMemberships(
   // Governance memberships BEFORE engagement rows: a person who is both a
   // member and an employee of the same org keeps the governance relationship
   // label; either source alone still lists the workspace.
-  for (const w of [...governanceWorkspaces, ...engagementWorkspaces]) {
+  for (const w of memberSourced.ok ? memberSourced.rows : []) {
     if (!seen.has(w.id)) {
       seen.add(w.id);
       orgWorkspaces.push(w);

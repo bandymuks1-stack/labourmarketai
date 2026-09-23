@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import type { DomainCaller } from "@/lib/domain/caller";
+import {
+  ORGANIZATION_ARCHIVED_COLUMN,
+  isArchivedOrganizationRow,
+} from "@/lib/company/archived-organizations";
 
 /**
  * Multi-company read model (IA cleanup v2, correction #6).
@@ -80,11 +84,18 @@ export async function getOwnedOrganizations(): Promise<OwnedOrganizationsResult>
 export async function readOwnedOrganizations(
   caller: DomainCaller,
 ): Promise<OwnedOrganizationsResult> {
-  const { data, error } = await asAny(caller.supabase)
-    .from("organizations")
-    .select("id, display_name, legal_name, organization_type, legacy_company_id")
-    .eq("owner_profile_id", caller.userId)
-    .order("created_at", { ascending: true });
+  // ARCHIVED organizations (owner decision 2026-09-23) are not workspaces: the
+  // archive column rides the same read, and an environment without it (42703)
+  // re-reads without it — there nothing is archived. See archived-organizations.ts.
+  const columns = "id, display_name, legal_name, organization_type, legacy_company_id";
+  const read = (select: string) =>
+    asAny(caller.supabase)
+      .from("organizations")
+      .select(select)
+      .eq("owner_profile_id", caller.userId)
+      .order("created_at", { ascending: true });
+  let { data, error } = await read(`${columns}, ${ORGANIZATION_ARCHIVED_COLUMN}`);
+  if (error?.code === UNDEFINED_COLUMN_CODE) ({ data, error } = await read(columns));
 
   if (error) {
     if (
@@ -97,7 +108,7 @@ export async function readOwnedOrganizations(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (data ?? []) as any[];
+  const rows = ((data ?? []) as any[]).filter((r) => !isArchivedOrganizationRow(r));
   const organizations: OwnedOrganization[] = rows.map((r) => ({
     id: r.id as string,
     name:

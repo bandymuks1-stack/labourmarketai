@@ -226,6 +226,16 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // survives (pinned by lib/guards/task-approval-context.test.ts).
       // It is GREEN and deliberately un-annotated.
       "20260819210000_workflow_work_task_context_v1",
+      // Organization consolidation v1 (20260923114500, owner decision
+      // 2026-09-23) is a READ-ONLY reference, the narrowest class here: it
+      // archives four duplicate/test organizations and must PROVE their
+      // workflow definitions and versions survive untouched, so it names
+      // workflow_definitions / workflow_definition_versions only in a
+      // count, an md5-over-rows integrity hash and the expected FK-sweep map.
+      // It creates, drops, alters, triggers and WRITES no engine object and
+      // defines or calls no engine command (the assertions below apply
+      // unchanged); its DOWN does not mention the engine at all.
+      "20260923114500_nonstop_org_consolidation_v1",
     ];
     /**
      * 20260820070000 — chain step B on-ramp. The ONE later migration that
@@ -332,6 +342,24 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
           expect(src, `${dir}/${f} must not define ${fn}`).not.toContain(fn);
         }
       }
+    }
+  });
+
+  it("the organization consolidation only READS the engine tables — no engine write, ever", () => {
+    // Registered above as a read-only consumer; this pins the "read-only" half
+    // the generic consumer rules do not check (DML anywhere in the file,
+    // including inside its DO block, and any engine command call).
+    for (const [dir, suffix] of [
+      ["migrations", ".sql"],
+      ["rollbacks", ".down.sql"],
+    ] as const) {
+      const src = readFileSync(
+        join(REPO, "supabase", dir, `20260923114500_nonstop_org_consolidation_v1${suffix}`),
+        "utf8",
+      );
+      expect(src).not.toMatch(/(insert\s+into|update|delete\s+from|truncate)\s+(public\.)?workflow_/i);
+      expect(src).not.toMatch(/alter\s+table\s+(public\.)?workflow_/i);
+      for (const fn of [...COMMANDS, ...HELPERS]) expect(src).not.toContain(fn);
     }
   });
 

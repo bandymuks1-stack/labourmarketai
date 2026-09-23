@@ -2628,7 +2628,15 @@ describe("no migration files added by this sprint", () => {
 // a column, not a table, because pg_default_acl is empty and a table would need
 // GRANTs (RED). GREEN by shape; paired .down.sql; APPLIED 2026-09-22, ledger
 // 20260922102211. RECOUNTED: 303.
-const SPRINT_BASELINE = 303;
+// Bumped 303 -> 304 for 20260923114500_nonstop_org_consolidation_v1 (owner decision
+// 2026-09-23, one canonical Nonstop Group): additive organizations.archived_at +
+// archived_reason (+ one CHECK) and ONE data DO block — workforce_provider granted to
+// 20b2c802, Donatas' manager membership added, two workspace pointers repointed, one
+// obsolete engagement ended, one test need closed, four duplicate/test organizations
+// archived (nothing deleted), every change logged old/new to audit_logs. RED (data DML),
+// human-gated, paired .down.sql, UNAPPLIED until the lead's rolled-back production dry
+// run. RECOUNTED: 304.
+const SPRINT_BASELINE = 304;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
