@@ -55,7 +55,7 @@ const LT = JSON.parse(
   readFileSync(join(__dirname, "..", "..", "messages", "lt.json"), "utf8"),
 ) as {
   conversation: {
-    chat: { fallback: string; reminderBlocked: string };
+    chat: { fallback: string; notUnderstood: string; reminderBlocked: string };
     criteria: { intro: string; introEmpty: string; missingIntro: string };
   };
 };
@@ -217,7 +217,10 @@ test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
     const text = await reply.innerText();
 
     // NEVER the generic fallback — that would mean the intent was not routed.
+    // (2026-09-23: the not-understood answer is `notUnderstood`; both lines
+    // are checked so the assertion can still fail.)
     expect(text).not.toContain(LT.conversation.chat.fallback);
+    expect(text).not.toContain(LT.conversation.chat.notUnderstood);
     // A real readback of the worker's persisted criteria: either listed facts
     // (intro) or the honest "none set yet" (introEmpty) — both are the REAL
     // database state. (The local fixture worker row is created empty by the
@@ -345,6 +348,7 @@ test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
       // not promise a notification that no mechanism can send.
       const text = await page.getByTestId("msg-assistant").last().innerText();
       expect(text).not.toContain(LT.conversation.chat.fallback);
+      expect(text).not.toContain(LT.conversation.chat.notUnderstood);
       expect(text.toLowerCase()).not.toContain("pranešiu");
       test.info().annotations.push({
         type: "s4-outcome",

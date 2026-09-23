@@ -22,6 +22,7 @@ import {
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
+import { renameActiveOrganization } from "@/lib/company/organization-rename";
 import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
 import { seedReadinessItemsAction, upsertReadinessItemAction } from "@/lib/projects/operations-actions";
@@ -341,6 +342,29 @@ export const COMPANY_EXECUTORS: {
     return recorded
       ? { ok: true, data: { outcome: r.outcome } }
       : { ok: false, code: r.outcome === "not_owner" ? "not_authorized" : "invalid" };
+  },
+
+  "company.rename-organization": async (input) => {
+    // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). The input is
+    // the NAME only. The organization comes from the SERVER-resolved active
+    // workspace inside the domain core (lib/company/organization-rename.ts:
+    // employer context → `manage-company-profile` → the verified-name lock →
+    // the canonical `saveCompanySetup` → readback). Refusals keep their own
+    // codes so the person hears WHY — never a generic failure, never success.
+    // `expectedOrganizationId` can only make it refuse (see the schema).
+    const r = await renameActiveOrganization(input.name, {
+      expectedOrganizationId: input.expectedOrganizationId ?? null,
+    });
+    if (!r.ok) return { ok: false, code: r.code };
+    return {
+      ok: true,
+      data: {
+        organizationId: r.organizationId,
+        previousName: r.previousName,
+        name: r.name,
+        unchanged: r.unchanged,
+      },
+    };
   },
 
   "company.create-project": async (input, ctx) => {

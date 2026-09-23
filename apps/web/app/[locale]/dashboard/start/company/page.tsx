@@ -11,7 +11,11 @@ import {
   type CompanyRow,
   type CompanyVerificationStatus,
 } from "@/lib/company/company-setup";
-import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import {
+  resolveEmployerCompanyContext,
+  resolveEmployerCompanyCore,
+} from "@/lib/company/employer-company-context";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 import {
   CompanySetupForm,
   type CompanySetupFormLabels,
@@ -56,7 +60,7 @@ export default async function CompanyStartPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ new?: string; type?: string; capability?: string }>;
+  searchParams?: Promise<{ new?: string; type?: string; capability?: string; org?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -104,7 +108,49 @@ export default async function CompanyStartPage({
   let company: CompanyRow | null = null;
   let targetCompanyId: string = "new";
   let ambiguous = false;
-  if (createRequested && !migrationNeeded && shell) {
+
+  // ?org=<id> — "Nurodyti pavadinimą" in the workspace chip names the EXACT
+  // organization (owner program 2026-09-23). This page used to ignore it and
+  // resolve the target from the active workspace, falling back to the single
+  // owned company: for an unnamed agency-backed organization that fallback
+  // opened — and saved — the person's OTHER, verified company (proven on
+  // production). When `org` is given it is the ONLY target:
+  //   ok                  → edit THAT organization's company;
+  //   no-company-binding  → say so, with the one canonical door;
+  //   anything else       → an honest "not available here".
+  // Resolved through the SAME employer chain with that workspace as the
+  // active one, so the membership gate (`workspace.workspaces`) still
+  // decides — a foreign or made-up id resolves to nothing. No fallback.
+  const requestedOrg = typeof sp.org === "string" ? sp.org.trim() : "";
+  let requestedOrgState: "edit" | "no-company-profile" | "not-available" | null = null;
+
+  if (requestedOrg !== "") {
+    requestedOrgState = "not-available";
+    if (!migrationNeeded) {
+      const memberships = await getWorkspaceContext("company");
+      const requested = await resolveEmployerCompanyCore(
+        { supabase, userId: user.id },
+        { ...memberships, activeWorkspaceId: requestedOrg },
+      );
+      if (requested.kind === "ok") {
+        // Created by the caller, or governed as an active owner/admin
+        // (`getOwnedCompanyById` re-checks that membership) — never merely
+        // any member: a manager runs operations, not company identity.
+        const row =
+          ownedRows.find((r) => r.id === requested.companyId) ??
+          (await getOwnedCompanyById(requested.companyId).then((res) =>
+            res.kind === "ok" ? res.row : null,
+          ));
+        if (row) {
+          company = row;
+          targetCompanyId = row.id;
+          requestedOrgState = "edit";
+        }
+      } else if (requested.reason === "no-company-binding") {
+        requestedOrgState = "no-company-profile";
+      }
+    }
+  } else if (createRequested && !migrationNeeded && shell) {
     company = shell;
     targetCompanyId = shell.id;
   } else if (!createRequested && !migrationNeeded) {
@@ -307,6 +353,41 @@ export default async function CompanyStartPage({
         </section>
       ) : null}
 
+      {requestedOrgState === "no-company-profile" ? (
+        // The organization the chip named has no company profile (a legacy
+        // agency-backed organization): there is nothing here that can carry
+        // its name. Said as that, with the one canonical action — never a
+        // form that would quietly edit another organization.
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-start-org-no-company-profile"
+        >
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("orgNoCompanyProfileHeading")}
+          </h2>
+          <p className="text-sm text-text-secondary">{t("orgNoCompanyProfileBody")}</p>
+          <Link
+            href={"/dashboard/start/company?new=1" as "/dashboard"}
+            className="self-start text-sm text-brand-blue hover:underline"
+            data-testid="company-start-org-create-profile"
+          >
+            {t("orgNoCompanyProfileCta")} →
+          </Link>
+        </section>
+      ) : null}
+
+      {requestedOrgState === "not-available" ? (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-start-org-not-available"
+        >
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("orgNotAvailableHeading")}
+          </h2>
+          <p className="text-sm text-text-secondary">{t("orgNotAvailableBody")}</p>
+        </section>
+      ) : null}
+
       {!migrationNeeded && ambiguous ? (
         // M-P0-2 fail-closed chooser: several owned companies and no active
         // company workspace — the person picks explicitly; nothing is ever
@@ -343,7 +424,9 @@ export default async function CompanyStartPage({
         </Card>
       ) : null}
 
-      {!migrationNeeded && !ambiguous ? (
+      {!migrationNeeded &&
+      !ambiguous &&
+      (requestedOrgState === null || requestedOrgState === "edit") ? (
         <section
           className="card-border flex flex-col gap-4 p-5"
           data-testid="company-start-form-section"

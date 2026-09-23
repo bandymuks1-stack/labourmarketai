@@ -32,6 +32,9 @@ vi.mock("@/lib/agency/bridge-actions", () => ({
   inviteClientAction: vi.fn(),
   submitOfferAction: vi.fn(),
 }));
+vi.mock("@/lib/company/organization-rename", () => ({
+  renameActiveOrganization: vi.fn(),
+}));
 
 import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
 import {
@@ -53,6 +56,7 @@ import { requestWorkerConversationAction } from "@/lib/communication/request-wor
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
 import { assignWorkerToProjectAction } from "@/lib/projects/actions";
 import { inviteClientAction, submitOfferAction } from "@/lib/agency/bridge-actions";
+import { renameActiveOrganization } from "@/lib/company/organization-rename";
 
 const UUID = "6f1d1a2e-9c1b-4f6e-8e2a-0a1b2c3d4e5f";
 const UUID2 = "0f9e8d7c-6b5a-4f3e-9d1c-2b3a4c5d6e7f";
@@ -420,5 +424,70 @@ describe("agency bridge executors", () => {
     expect(formData.get("workerId")).toBe(UUID2);
     expect(formData.get("note")).toBe("solid tiler");
     expect(r).toEqual({ ok: true });
+  });
+});
+
+describe("company.rename-organization (owner program 2026-09-23)", () => {
+  it("the schema carries the NAME only — an organization id is rejected, never forwarded", () => {
+    const schema = COMPANY_ACTION_SCHEMAS["company.rename-organization"];
+    expect(schema.safeParse({ name: "Nonstop Group UAB" }).success).toBe(true);
+    expect(schema.safeParse({ name: "  Nonstop  " })).toEqual({ success: true, data: { name: "Nonstop" } });
+    // The organization is resolved server-side; a client-supplied one is a
+    // schema failure, so it can never reach the executor.
+    expect(schema.safeParse({ name: "Nonstop", organizationId: UUID }).success).toBe(false);
+    // The expected organization (a refusal check, never a target) is a uuid.
+    expect(schema.safeParse({ name: "Nonstop", expectedOrganizationId: UUID }).success).toBe(true);
+    expect(schema.safeParse({ name: "Nonstop", expectedOrganizationId: "org-a" }).success).toBe(false);
+    expect(schema.safeParse({ name: "X" }).success).toBe(false);
+    expect(schema.safeParse({ name: "A".repeat(201) }).success).toBe(false);
+  });
+
+  it("an important-tier identity write for company + agency — a plain worker is refused by the role gate", () => {
+    const d = getConversationAction("company.rename-organization")!;
+    expect(d.confirmation).toBe("important_write");
+    expect([...d.allowedRoles].sort()).toEqual(["agency", "company"]);
+    expect(
+      authorizeDispatch({ descriptor: d, heldRoles: new Set<Role>(["worker"]), executable: true }),
+    ).toEqual({ ok: false, code: "not_authorized" });
+  });
+
+  it("delegates the NAME to the domain core and returns the readback receipt", async () => {
+    asMock(renameActiveOrganization).mockResolvedValue({
+      ok: true,
+      organizationId: UUID,
+      previousName: null,
+      name: "Nonstop Group UAB",
+      unchanged: false,
+    });
+    const r = await COMPANY_EXECUTORS["company.rename-organization"]({ name: "Nonstop Group UAB" }, ctx);
+    expect(renameActiveOrganization).toHaveBeenCalledWith("Nonstop Group UAB", { expectedOrganizationId: null });
+    await COMPANY_EXECUTORS["company.rename-organization"](
+      { name: "Nonstop Group UAB", expectedOrganizationId: UUID2 },
+      ctx,
+    );
+    expect(renameActiveOrganization).toHaveBeenLastCalledWith("Nonstop Group UAB", { expectedOrganizationId: UUID2 });
+    expect(r).toEqual({
+      ok: true,
+      data: { organizationId: UUID, previousName: null, name: "Nonstop Group UAB", unchanged: false },
+    });
+  });
+
+  it("every refusal keeps its own code — never success, never a generic failure", async () => {
+    for (const code of [
+      "no_company_profile",
+      "not_authorized",
+      "legal_name_verified",
+      "personal_workspace",
+      "unavailable",
+      "duplicate_company",
+      "needs_migration",
+      "workspace_changed",
+    ] as const) {
+      asMock(renameActiveOrganization).mockResolvedValue({ ok: false, code });
+      expect(
+        await COMPANY_EXECUTORS["company.rename-organization"]({ name: "Nonstop" }, ctx),
+        code,
+      ).toEqual({ ok: false, code });
+    }
   });
 });

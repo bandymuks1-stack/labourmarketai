@@ -646,6 +646,41 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
 
   {
     /**
+     * RENAME THE ACTIVE ORGANIZATION BY SENTENCE (owner program 2026-09-23,
+     * CASE 3/4). "Pervadink šią agentūrą į Nonstop Group UAB." — the ONE
+     * confirm form, prefilled with the name the sentence carried, over the
+     * domain core `renameActiveOrganization` (lib/company/organization-rename),
+     * which composes the canonical name writer the settings form already uses
+     * (`saveCompanySetup` → `save_company_setup_v3`). Identity write, so the
+     * important tier: an explicit review + a one-time token bound to the
+     * active workspace (dispatch.ts `stateFingerprint`) — a card shown for
+     * organization A can never rename B after a switch.
+     *
+     * The organization is NEVER input: the schema carries the name only and
+     * the core resolves the organization from the server-side workspace.
+     * Refused honestly, never retargeted: a personal workspace, a person
+     * without `manage-company-profile`, an organization with no company
+     * profile, and a VERIFIED company (its legal name is admin-only).
+     */
+    id: "company.rename-organization",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.renameOrganization.label",
+    descriptionKey: "conversation.actions.company.renameOrganization.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    // Emitted by the confirm form on a confirmed save (InlineActionForm,
+    // role_context from the action namespace) — the company profile saved.
+    telemetryEvent: E.profileSaved,
+    // The organization's own record: name, verification status, the typed
+    // help request an administrator answers for a verified legal name.
+    advancedRoute: "/dashboard/company/settings",
+    handler: { kind: "server_action", ref: "renameActiveOrganization" },
+  },
+
+  {
+    /**
      * F2 (owner contract 2026-09-04 §9/§11 seed): "sukurk projektą Roterdame"
      * — the SITE as a project object, created by sentence through the ONE
      * dispatcher over the canonical `createProjectAction` (the same core the

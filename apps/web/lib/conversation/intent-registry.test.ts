@@ -101,7 +101,10 @@ describe("the intent registry is the enumerable routing contract", () => {
     // scored 0 everywhere while /dashboard/network, the relationships
     // surface the primary nav carries and the invitation answers already
     // chip to, was the answer. A ROUTE to that page; no new read, no new UI.
-    expect(entries.length).toBe(80);
+    // 80 → 81 (2026-09-23, owner program CASE 3/4): rename-organization —
+    // "Pervadink šią agentūrą į Nonstop Group UAB." scored 0 in six locales
+    // and the proposer had no id to pick. A WRITE behind the ONE confirm form.
+    expect(entries.length).toBe(81);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -146,6 +149,9 @@ describe("the intent registry is the enumerable routing contract", () => {
       "offer-capacity",
       "programmes",
       "propose-candidate",
+      // Owner program 2026-09-23: rename the ACTIVE organization — the ONE
+      // confirm form over `company.rename-organization` (important tier).
+      "rename-organization",
       // PROJECT → PROGRESS: a stage moved to a real status, by sentence.
       "stage-status",
       "switch-context",

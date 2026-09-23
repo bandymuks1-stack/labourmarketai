@@ -9,7 +9,10 @@ import { createClient } from "@/lib/supabase/server";
 
 import { intentCatalogue } from "@/lib/conversation/intent-catalogue";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
-import type { Understanding } from "@/lib/conversation/utterance-understanding";
+import {
+  unsupportedReasonForAiOutcome,
+  type Understanding,
+} from "@/lib/conversation/utterance-understanding";
 
 /**
  * THE MODEL HALF OF UNDERSTANDING (owner approval 2026-09-05 "GEMINI
@@ -108,7 +111,14 @@ export async function proposeUnderstandingAction(input: {
       },
     );
     if (outcome.status !== "suggestion") {
-      return { kind: "unsupported", reason: "ai_unavailable", source: "model" };
+      // THE STATE IS NAMED, NOT COLLAPSED (owner program 2026-09-23): "not
+      // switched on", "allowance spent" and "vendor fault" are three different
+      // things to tell a person, and none of them is "I did not understand".
+      return {
+        kind: "unsupported",
+        reason: unsupportedReasonForAiOutcome(outcome),
+        source: "model",
+      };
     }
     const envelope = outcome.value as {
       confidence?: "low" | "medium" | "high";
@@ -151,6 +161,7 @@ export async function proposeUnderstandingAction(input: {
         return { kind: "unsupported", reason: "not_understood", source: "model" };
     }
   } catch {
-    return { kind: "unsupported", reason: "ai_unavailable", source: "model" };
+    // A thrown runtime is our fault, never the sentence's.
+    return { kind: "unsupported", reason: "ai_temporarily_unavailable", source: "model" };
   }
 }

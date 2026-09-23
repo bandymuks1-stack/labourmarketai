@@ -191,6 +191,19 @@ async function stateFingerprint(
       .maybeSingle();
     return `engagement:${(data?.status as string) ?? "missing"}`;
   }
+  if (actionId === "company.rename-organization") {
+    /**
+     * An IDENTITY write is bound to the organization it was confirmed FOR
+     * (owner program 2026-09-23). The rename's input is the name only — the
+     * organization is resolved server-side from the active workspace — so a
+     * token minted while organization A was active must not rename B after a
+     * switch in another tab. The active workspace id is the fingerprint: any
+     * switch between the review and the save answers `stale_confirmation`,
+     * and the person confirms again, for the organization now in view.
+     */
+    const ws = await getWorkspaceContext("company");
+    return `workspace:${ws.activeWorkspaceId}`;
+  }
   return "n/a";
 }
 

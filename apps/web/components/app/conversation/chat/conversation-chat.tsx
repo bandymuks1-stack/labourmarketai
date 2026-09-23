@@ -61,8 +61,10 @@ import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-for
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
-import { understand } from "@/lib/conversation/utterance-understanding";
+import { aiStateMessageKey, understand } from "@/lib/conversation/utterance-understanding";
 import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
+import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
   readFileIntent,
   routeFileIntent,
@@ -122,7 +124,7 @@ import {
   dispatchIntent,
   type IntentHandlers,
 } from "@/lib/conversation/intent-registry";
-import type { WorkspaceInfo } from "@/lib/company/organization-switch";
+import { workspaceDisplayLabels, type WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
@@ -1180,6 +1182,33 @@ export function ConversationChat({
     labels.chipNeedWorkers,
   ]);
 
+  /**
+   * NOT UNDERSTOOD IS A QUESTION, NEVER THE GREETING ROW (owner program
+   * 2026-09-23, P0 §10 / CASE 3, 4, 12).
+   *
+   * The owner asked an agency workspace to rename itself and was answered
+   * with "Įkelti CV · Mano profilis · Ieškau darbo" — the GREETING's starter
+   * row, attached to every sentence the product did not understand. Those
+   * chips describe what a person might want on arrival; offered in reply to a
+   * specific request they are unrelated doors, and they read as the product
+   * pretending it understood.
+   *
+   * So a not-understood answer — the fallback, a model `clarification`, a
+   * bare name that resolves to nothing, an unanswerable question — is ONE
+   * concise question tied to what was said, plus at most ONE door: "Ką galiu
+   * čia daryti?", which runs `startCapabilities` and is therefore derived
+   * from the ACTIVE context at the moment it is tapped, not from the identity
+   * the page was rendered with. The greeting keeps its starter row.
+   */
+  const clarifyDoor: ChoiceChip[] = useMemo(
+    () => [{ id: "capabilities", label: t("chipWhatCanIDo") }],
+    [t],
+  );
+  const askToClarify = useCallback(
+    (line: string) => assistant(line, clarifyDoor),
+    [assistant, clarifyDoor],
+  );
+
   const openForm = useCallback(
     (
       // A registered action id, or a spec BUILT for this turn (the agency
@@ -2056,6 +2085,120 @@ export function ConversationChat({
   );
 
   /**
+   * "PERVADINK ŠIĄ AGENTŪRĄ Į NONSTOP GROUP UAB." (owner program 2026-09-23,
+   * CASE 3/4) — rename the ACTIVE organization by sentence.
+   *
+   * ASK THE SERVER FIRST, THEN OFFER THE ONE FORM. Whether this workspace can
+   * be renamed by this person is decided by the same gate chain the write
+   * runs (lib/company/organization-rename.ts), read here before any form is
+   * shown — so a refusal is one honest sentence now, not an error after the
+   * person has reviewed and confirmed a form that could never save.
+   *
+   *   · ready               → the confirm form, PREFILLED with the name the
+   *                           sentence carried (`readRenameTarget`, casing as
+   *                           typed); nothing is saved until they confirm.
+   *   · personal workspace  → ask WHICH organization, one membership-validated
+   *                           `ws:` chip each (unnamed ones labelled by their
+   *                           real type — `workspaceDisplayLabels`, the chip's
+   *                           own labeller). The switch is theirs to make.
+   *   · no company profile  → said as that, with the one canonical door
+   *                           (create a company profile). Never retargeted to
+   *                           another organization the person owns.
+   *   · not allowed / verified legal name / unreadable → said as such.
+   *
+   * The receipt after the save names old → new from the server's READBACK.
+   */
+  const startRenameOrganization = useCallback(
+    (text: string) => {
+      const proposed = readRenameTarget(text);
+      setTyping(true);
+      readRenameTargetForChat()
+        .then((target) => {
+          setTyping(false);
+          switch (target.kind) {
+            case "ready":
+              assistant(
+                target.currentName
+                  ? t("renameAsk", { current: target.currentName })
+                  : t("renameAskUnnamed"),
+              );
+              openForm(
+                "company.rename-organization",
+                // Closing continues with the COMPANY's own next step — never
+                // the demand follow-up the employer forms default to.
+                startCompanyNextStep,
+                labels.chipCompanyHub,
+                // `expectedOrganizationId` is not a field and not a target:
+                // it makes the save refuse if the workspace changes while
+                // the form is open (switched in another tab).
+                {
+                  ...(proposed ? { name: proposed } : {}),
+                  expectedOrganizationId: target.organizationId,
+                },
+                (res) => {
+                  const name = typeof res.data?.name === "string" ? res.data.name : "";
+                  const previous =
+                    typeof res.data?.previousName === "string" ? res.data.previousName : null;
+                  assistant(
+                    res.data?.unchanged === true
+                      ? t("renameUnchanged", { name })
+                      : previous
+                        ? t("renameDone", { previous, name })
+                        : t("renameDoneUnnamed", { name }),
+                  );
+                },
+              );
+              return;
+            case "personal": {
+              const workspaces = auth?.workspaces ?? [];
+              const organizations = workspaces.filter((w) => w.kind === "organization");
+              if (organizations.length === 0) {
+                assistant(t("renameNoOrganization"));
+                return;
+              }
+              const labelById = workspaceDisplayLabels(workspaces, {
+                personal: t("workspacePersonal"),
+                unnamedOrganization: {
+                  company: t("workspaceUnnamedCompany"),
+                  agency: t("workspaceUnnamedAgency"),
+                  team: t("workspaceUnnamedTeam"),
+                  other: t("workspaceUnnamed"),
+                },
+              });
+              assistant(
+                t("renameAskWhich"),
+                organizations.map((w) => ({ id: `ws:${w.id}`, label: labelById.get(w.id) ?? w.name })),
+              );
+              return;
+            }
+            case "no-company-profile":
+              assistant(t("renameNoCompanyProfile"), [
+                { id: "link:/dashboard/start/company?new=1", label: t("chipCreateCompanyProfile") },
+              ]);
+              return;
+            case "not-authorized":
+              assistant(t("renameNotAllowed"));
+              return;
+            case "legal-name-verified":
+              // The organization's own record, where a typed help request
+              // reaches the administrator who may change a verified name.
+              assistant(t("renameLegalNameVerified"), [
+                { id: "link:/dashboard/company/settings", label: t("chipOrganizationSettings") },
+              ]);
+              return;
+            default:
+              assistant(t("renameUnavailable"));
+          }
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("renameUnavailable"));
+        });
+    },
+    [assistant, auth?.workspaces, openForm, startCompanyNextStep, labels.chipCompanyHub, t],
+  );
+
+  /**
    * A NAME WAS TYPED ON ITS OWN (takeover slice A, 2026-09-10).
    *
    * "Baltic Staffing Group" used to score 3 on the single keyword "staffing"
@@ -2071,8 +2214,10 @@ export function ConversationChat({
    *      every later answer means, so it stays the person's decision.
    *   2. Several matches → ask which.
    *   3. Otherwise → say plainly that it reads like a name, that nothing was
-   *      done, and ask what they want. The suggestion row is already derived
-   *      from their real context, so the question is not a dead end.
+   *      done, and ask what they want — with the ONE context-derived door
+   *      ("what can I do here", read at tap time), never the greeting's
+   *      starter row (owner program 2026-09-23: a not-understood answer
+   *      never carries unrelated chips).
    *
    * WHY THE MODEL PROPOSER IS NOT ASKED HERE. `proposeConversationIntentAction`
    * can only return an id that already exists in `INTENT_REGISTRY`, and every
@@ -2106,9 +2251,9 @@ export function ConversationChat({
         );
         return;
       }
-      assistant(t("refLooksLikeName"), starterChips);
+      askToClarify(t("refLooksLikeName"));
     },
-    [assistant, auth?.workspaces, starterChips, t],
+    [assistant, askToClarify, auth?.workspaces, t],
   );
 
   /**
@@ -2237,13 +2382,13 @@ export function ConversationChat({
           ]);
           return;
         }
-        assistant(t("questionUnansweredAbout", { name: reference }), starterChips);
+        askToClarify(t("questionUnansweredAbout", { name: reference }));
         return;
       }
       void text;
-      assistant(t("questionUnanswered"), starterChips);
+      askToClarify(t("questionUnanswered"));
     },
-    [assistant, auth?.workspaces, starterChips, t],
+    [assistant, askToClarify, auth?.workspaces, t],
   );
 
   /**
@@ -4529,6 +4674,13 @@ export function ConversationChat({
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
       switch (chip.id) {
+        case "capabilities":
+          // The ONE door a not-understood answer offers ("Ką galiu čia
+          // daryti?") — the SAME answer the sentence reaches, read from the
+          // active context at the moment it is tapped.
+          user(chip.label);
+          startCapabilities();
+          return;
         case "agency-offers":
           // The attention chip ("N agentūros pasiūlymai laukia…") — the SAME
           // in-chat offers answer the sentence runs.
@@ -4882,7 +5034,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm, startCapabilities],
   );
   handleChipRef.current = handleChip;
 
@@ -5652,8 +5804,22 @@ export function ConversationChat({
         // ONE ACTIVE CONTEXT by sentence (gap G1) — resolves the target
         // against the caller's real workspace list, asks when ambiguous.
         switchContext: () => startSwitchContext(text),
+        // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23): the
+        // server says whether it can be renamed here, then the ONE confirm
+        // form opens prefilled — see `startRenameOrganization`.
+        renameOrganization: () => startRenameOrganization(text),
         // These run a real async server read with their own typing cue.
-        profileSummary: () => startProfileSummary("profile"),
+        //
+        // THE ACTING IDENTITY DECIDES WHOSE PROFILE (owner program
+        // 2026-09-23). Acting for a company or agency, `profile` — whether the
+        // router or the model proposed it — answers with the COMPANY's next
+        // step (the manager's own ladder, else the company hub), never the
+        // person's ladder of language / work history / work card chips, which
+        // is the wrong actor's answer (prod 2026-09-06: the proposer picked
+        // `profile` for a company sentence). The person's own profile stays
+        // one tap away through the explicit "Mano profilis" chip.
+        profileSummary: () =>
+          identity === "company" ? startCompanyNextStep() : startProfileSummary("profile"),
         // The COMPANY workspace asks about the company, never about the
         // person behind it (see `startCompanyNextStep`).
         nextActionSummary: () =>
@@ -6102,7 +6268,13 @@ export function ConversationChat({
             });
         },
       };
-      const fallback = () => assistant(fallbackText, starterChips);
+      // NOT UNDERSTOOD → one clarifying question + the ONE context-derived
+      // door, never the greeting's starter row (see `askToClarify`).
+      const fallback = () => askToClarify(t("notUnderstood"));
+      // The model half could not answer because of ITS state (not switched
+      // on, allowance spent, a vendor fault, too many requests) — said as
+      // that state, never as "I did not understand you" (owner 2026-09-23).
+      const aiState = (key: string) => withTyping(() => askToClarify(t(key)));
 
       // ── ONE SENTENCE, SEVERAL FACTS (owner P0 2026-09-22 §1) ─────────────
       //
@@ -6167,20 +6339,23 @@ export function ConversationChat({
             case "clarification":
               // A correction or a fragment. Ask; do not guess an operation.
               trackResolution("unknown", "llm");
-              assistant(t("understandClarify"), starterChips);
+              askToClarify(t("understandClarify"));
               return;
-            default:
+            default: {
               trackResolution("unknown", "deterministic");
-              dispatchIntent("unknown", handlers, withTyping, fallback);
+              const stateKey = res.kind === "unsupported" ? aiStateMessageKey(res.reason) : null;
+              if (stateKey) aiState(stateKey);
+              else dispatchIntent("unknown", handlers, withTyping, fallback);
+            }
           }
         })
         .catch(() => {
           setTyping(false);
           trackResolution("unknown", "deterministic");
-          dispatchIntent("unknown", handlers, withTyping, fallback);
+          aiState("aiTemporarilyUnavailable");
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos,startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos,startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**

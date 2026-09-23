@@ -126,6 +126,33 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       country: s(st.country) || null,
     }),
   },
+  {
+    // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). ONE field —
+    // the new name, prefilled from the sentence ("… į Nonstop Group UAB"),
+    // visible and editable, reviewed, then confirmed with a one-time token.
+    // No organization field exists on purpose: the server resolves it from
+    // the active workspace, so no value typed here can point elsewhere. The
+    // chat seeds `expectedOrganizationId` (not a field, never shown) with the
+    // organization the form was opened for — it can only make the save
+    // REFUSE if the workspace changed meanwhile, never choose a target.
+    actionId: "company.rename-organization",
+    titleKey: "conversation.actions.company.renameOrganization.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "name",
+        kind: "text",
+        labelKey: "conversation.forms.fields.organizationName",
+        placeholderKey: "conversation.forms.fields.organizationNamePlaceholder",
+        required: true,
+        maxLength: 200,
+      },
+    ],
+    build: (st: FormState) => ({
+      name: s(st.name),
+      ...(s(st.expectedOrganizationId) ? { expectedOrganizationId: s(st.expectedOrganizationId) } : {}),
+    }),
+  },
 ] as const;
 
 /**

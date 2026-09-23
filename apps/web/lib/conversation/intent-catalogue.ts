@@ -53,6 +53,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   availability: "the person states from when they can work ('galiu dirbti nuo spalio 1 d.', 'available from October')",
   "company-overview": "overview of the company workspace",
   "create-organization": "create a company or organization",
+  "rename-organization":
+    "rename the organization the user is acting for, or give an unnamed one its name ('pervadink agentūrą į …', 'change our company name to …'). Not a person's profile, CV or a project.",
   context: "which company or role the user is acting for (context readback)",
   capabilities:
     "what the user can achieve from where they are standing right now — asked when they do not yet know the product ('what can I do here?'). Not what they still have to do, and not what we know about them.",
