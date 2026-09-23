@@ -223,6 +223,20 @@ describe("DetailsHashOpener's decision, proven against the page's REAL nesting",
     expect(opener).toMatch(/const target = disclosureHashTarget<HTMLElement>\(/);
     expect(opener).toContain("if (!el.open) el.open = true;");
   });
+
+  it("the same link tapped again re-opens the bar — the tap is the signal, not only hashchange", () => {
+    // `hashchange` never fires for an unchanged hash (nor for a router
+    // pushState), so a closed bar would ignore a second tap on its own link.
+    const opener = read("components/app/details-hash-opener.tsx");
+    expect(opener).toMatch(/document\.addEventListener\("click", onLinkClick\)/);
+    expect(opener).toMatch(/document\.removeEventListener\("click", onLinkClick\)/);
+    expect(opener).toMatch(/applyHash\(link\.hash\)/);
+    // Only a same-page link, only a plain click — never a new tab or another page.
+    expect(opener).toMatch(/link\.pathname !== window\.location\.pathname/);
+    expect(opener).toMatch(/event\.metaKey \|\| event\.ctrlKey/);
+    // Negative control: the hashchange path is still there.
+    expect(opener).toMatch(/window\.addEventListener\("hashchange", onHashChange\)/);
+  });
 });
 
 describe("the organization record card is progressive", () => {

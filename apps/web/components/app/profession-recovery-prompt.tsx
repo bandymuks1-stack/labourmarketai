@@ -104,7 +104,7 @@ export function ProfessionRecoveryPrompt({
       <p className="text-xs leading-relaxed text-text-secondary">{labels.body}</p>
       <div className="flex flex-wrap items-center gap-2">
         <Link
-          href="/dashboard/profile#work-directions"
+          href="/dashboard/profile#profile-edit"
           onClick={() => trackFunnel(FUNNEL_EVENTS.professionRecoveryPromptOpened)}
           // min-h-11 = 44px. Measured at 390px before this was added, the CTA
           // came out 28px tall — under the touch floor the visual contract

@@ -183,8 +183,19 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
     // canonical constant; the journal disclosure below stays reachable from
     // the journal itself.
     const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(/\{ href: playerCardHref, label: t\("tabs\.playerCard"\)/);
+    // The result is personal-only (registry): the menu asks the SAME rule, in
+    // the SAME context the workspace derives, and an organization-context
+    // account falls back to the person's own card section on the profile —
+    // never a result its workspace refuses to render.
     expect(menu).toMatch(
-      /\{ href: "\/dashboard\?result=player-card", label: t\("tabs\.playerCard"\)/,
+      /const playerCardHref = canRenderInline\("player-card", menuResultContext\)\s*\?\s*"\/dashboard\?result=player-card"\s*:\s*"\/dashboard\/profile#cv-availability";/,
+    );
+    expect(menu).toMatch(
+      /const menuResultContext: ResultContext =\s*activeOrganizationId \|\| activeOrgName \? "organization" : "personal";/,
+    );
+    expect(read("components/app/conversation/chat/conversation-chat.tsx")).toMatch(
+      /auth0\?\.activeOrganizationId \|\| auth0\?\.activeOrgName \? "organization" : "personal";/,
     );
     expect(menu).not.toMatch(/href: "\/dashboard\/journal#mano-cv-identity"/);
     expect(read("lib/today/today-model.ts")).toMatch(
