@@ -16221,6 +16221,7 @@
       "title": "2. Kas būtų užfiksuota",
       "notPersisted": "Tai jūsų failo interpretacija. NIEKAS čia dar nėra įrodymas.",
       "empty": "Šiam šaltiniui neparuošta nė viena eilutė.",
+      "notStaged": "{count, plural, one {# šaltinio eilutė neperskaityta: joje nėra datos arba asmens.} few {# šaltinio eilutės neperskaitytos: jose nėra datos arba asmens.} other {# šaltinio eilučių neperskaityta: jose nėra datos arba asmens.}}",
       "counts": {
         "total": "Perskaityta eilučių",
         "ready": "Paruošta",
@@ -16413,7 +16414,8 @@
       "nothing_parsed": "Nerasta nė vienos tinkamos eilutės. Šaltinyje reikia antraštės eilutės, nurodančios bent asmenį ir datą.",
       "month_not_stated": "Šiame darbo laiko žiniaraštyje neparodyta, kurio mėnesio jis yra, todėl kiekviena data būtų spėjimas. Įrašykite mėnesį lape – pavyzdžiui, „2026-05“ antraštėje – ir įkelkite iš naujo.",
       "confirmation_rejected": "Šis importas pasikeitė po to, kai jį peržiūrėjote, todėl nebuvo užfiksuotas. Peržiūrėkite iš naujo ir patvirtinkite naują versiją.",
-      "confirmation_unavailable": "Šioje aplinkoje patvirtinimų pasirašyti negalima, todėl nieko neužfiksuota."
+      "confirmation_unavailable": "Šioje aplinkoje patvirtinimų pasirašyti negalima, todėl nieko neužfiksuota.",
+      "already_withdrawn": "Šis importas jau atšauktas. Nieko neįrašyta."
     },
     "mine": {
       "title": "Ką organizacijos yra užfiksavusios apie mane",

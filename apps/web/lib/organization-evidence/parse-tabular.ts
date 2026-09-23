@@ -126,6 +126,7 @@ const HEADER_SYNONYMS: Readonly<Record<SourceRowField, readonly string[]>> = {
   externalRef: [
     "employee no",
     "employee number",
+    "personnel no",
     "personnel number",
     "staff id",
     "tab no",
@@ -467,12 +468,23 @@ export function readHours(raw: string): number | null {
 
 export interface TabularParseResult {
   readonly rows: readonly SourceWorkRow[];
+  /**
+   * Each row's SOURCE POSITION, same order as `rows`: its 0-based data line
+   * under the header (blank lines are not lines). A line that could not
+   * become a row leaves a gap, so the same bytes always put the same row at
+   * the same position — the staging key of a resumable import, and the index
+   * a later re-parse of the preserved file reads the row back at.
+   */
+  readonly positions: readonly number[];
   /** Source lines that could not become a row, with the reason. Reported, not
    *  dropped: a silently skipped line is missing history nobody notices. */
   readonly skipped: readonly {
     readonly rowIndex: number;
     readonly reason: string;
   }[];
+  /** The data lines no row was made from (`no_person`, `no_date`), by
+   *  source position — what the preview says was not staged. */
+  readonly notStaged: readonly { readonly position: number; readonly reason: string }[];
   readonly columns: ColumnMap;
 }
 
@@ -500,7 +512,9 @@ export function rowsFromGrid(
   if (headerIndex === -1) {
     return {
       rows: [],
+      positions: [],
       skipped: [{ rowIndex: 0, reason: "no_header" }],
+      notStaged: [],
       columns: {},
     };
   }
@@ -508,11 +522,14 @@ export function rowsFromGrid(
   const header = grid[headerIndex];
   const weekColumn = weekColumnIndex(header);
   const rows: SourceWorkRow[] = [];
+  const positions: number[] = [];
   const skipped: { rowIndex: number; reason: string }[] = [];
+  const notStaged: { position: number; reason: string }[] = [];
 
   for (let i = headerIndex + 1; i < grid.length; i++) {
     const line = grid[i];
     if (line.every((c) => c.trim() === "")) continue;
+    const position = i - headerIndex - 1;
 
     const raw: Record<string, string> = {};
     header.forEach((h, index) => {
@@ -528,6 +545,7 @@ export function rowsFromGrid(
     const personLabel = tidy(cell("personLabel"));
     if (personLabel === "") {
       skipped.push({ rowIndex: i, reason: "no_person" });
+      notStaged.push({ position, reason: "no_person" });
       continue;
     }
 
@@ -587,7 +605,9 @@ export function rowsFromGrid(
     }
 
     if (workDate === null && periodStart === null) {
+      // Never today's date, never a guess: an undated line is not history.
       skipped.push({ rowIndex: i, reason: "no_date" });
+      notStaged.push({ position, reason: "no_date" });
       continue;
     }
 
@@ -680,9 +700,10 @@ export function rowsFromGrid(
       factFields,
       derived,
     });
+    positions.push(position);
   }
 
-  return { rows, skipped, columns };
+  return { rows, positions, skipped, notStaged, columns };
 }
 
 /**

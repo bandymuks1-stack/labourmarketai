@@ -75,13 +75,24 @@ describe("no permanent write before commit; projections are read-only", () => {
     for (const src of [reconstruction, workspace]) expect(src).not.toMatch(/from\(|\.rpc\(|\.insert\(|\.upsert\(|createClient/);
     expect(workspace).toMatch(/nothingWrittenShort/);
   });
-  it("label-level and time-semantics decisions write staging rows only", () => {
+  it("label-level and time-semantics decisions write staging rows only — through the store port, never a committed row", () => {
+    // Re-anchored for the EvidenceStore port (historical timesheet import v3,
+    // PR-2): the staging read and write now go through `store.*`, whose
+    // `updateStagedRow` refuses a committed row (design §8 P3u). The old
+    // inline `.from("evidence_import_rows")` form is asserted ABSENT, so a
+    // decision can never again write around the port.
     const label = core.slice(core.indexOf("export async function resolveContextLabel"), core.indexOf("export interface TimeSemanticsDecision"));
     const time = core.slice(core.indexOf("export async function resolveTimeSemantics"), core.indexOf("// ── commit"));
     for (const fn of [label, time]) {
-      expect(fn).toMatch(/from\("evidence_import_rows"\)/);
-      expect(fn).not.toMatch(/organization_evidence_records|work_objects|organization_people|\.rpc\(/);
+      expect(fn.length).toBeGreaterThan(400);
+      expect(fn).toMatch(/store\.listStagedRows\(/);
+      expect(fn).toMatch(/excludeStatuses: \["committed"\]/);
+      expect(fn).toMatch(/store\.updateStagedRow\(/);
+      expect(fn).not.toMatch(/\.from\(|\.rpc\(|insertRecords|insertRecordEvents|createWorkObject|insertRosterPerson|commitStagedRow/);
     }
+    const store = read("lib/organization-evidence/evidence-store.ts");
+    const upd = store.slice(store.indexOf("async updateStagedRow("), store.indexOf("async commitStagedRow("));
+    expect(upd).toMatch(/\.from\("evidence_import_rows"\)[\s\S]{0,120}\.update\(patch\)[\s\S]{0,80}\.neq\("status", "committed"\)/);
   });
 });
 
@@ -351,23 +362,44 @@ describe("the commit plan creates each canonical place ONCE (B1 walk, 2026-09-17
     expect(block).toMatch(/for \(const seg of contexts\.segments\) out\.push\(await placeSegment\(seg\)\);/);
   });
   it("the memo is consulted by canonical key BEFORE any RPC, and written after a creation", () => {
+    // The RPC moved behind the EvidenceStore port (PR-2): the plan calls
+    // `store.createWorkObject(`, and ONLY the port names the RPC. Both halves
+    // are pinned, so neither a second inline RPC nor a port that stops
+    // using the ONE object writer can slip in.
     const memoRead = block.indexOf("byKey.get(key)");
-    const rpc = block.indexOf('rpc("create_work_object_v1"');
+    const rpc = block.indexOf("store.createWorkObject(");
     const memoWrite = block.indexOf("byKey.set(key, objectId)");
     expect(memoRead).toBeGreaterThan(-1);
     expect(rpc).toBeGreaterThan(memoRead);
     expect(memoWrite).toBeGreaterThan(rpc);
+    expect(core).not.toContain('rpc("create_work_object_v1"');
+    const store = read("lib/organization-evidence/evidence-store.ts");
+    const writer = store.slice(store.indexOf("async createWorkObject("), store.indexOf("async readRecordKeys("));
+    expect(writer).toContain('rpc("create_work_object_v1"');
+    // ONE call site in the port (the doc comment may name it; only the RPC call counts).
+    expect(store.match(/rpc\("create_work_object_v1"/g)).toHaveLength(1);
   });
 });
 
 describe("attesting a whole session is the SAME event, per record, and nothing else (owner correction 2026-09-17)", () => {
   const fn = core.slice(core.indexOf("export async function attestSessionRecords("), core.indexOf("// ── read-back"));
   it("writes only `attested` events into the record lifecycle ledger — no record, hour or state column is touched", () => {
-    expect(fn).toContain('.from("organization_evidence_events")');
+    // Through the EvidenceStore port (PR-2): the one write is
+    // `store.insertRecordEvents(`, which the port implements as an INSERT
+    // into organization_evidence_events and nothing else — and the port
+    // itself declares no update or delete for records or their events, so
+    // no orchestration can even ask for one.
+    expect(fn).toContain("store.insertRecordEvents(");
     expect(fn).toContain('event_type: "attested"');
-    expect(fn).not.toContain('.from("organization_evidence_records")');
+    expect(fn).not.toMatch(/\.from\(|insertRecords\(|commitStagedRow|updateStagedRow/);
     expect(fn).not.toMatch(/\.update\(|\.upsert\(|\.delete\(/);
     expect(fn).not.toMatch(/hours|evidence_state:/);
+    const store = read("lib/organization-evidence/evidence-store.ts");
+    const port = store.slice(store.indexOf("export interface EvidenceStore {"), store.indexOf("export type EvidenceCaller"));
+    expect(port).toMatch(/insertRecordEvents\(/);
+    expect(port).not.toMatch(/\b(update|delete|remove)Record/);
+    const writer = store.slice(store.indexOf("async insertRecordEvents("));
+    expect(writer).toMatch(/\.from\("organization_evidence_events"\)\.insert\(rows\)/);
   });
   it("is idempotent and never re-attests or attests a withdrawn record", () => {
     expect(fn).toMatch(/filter\(\(r\) => !r\.withdrawn && r\.attestation === null\)/);

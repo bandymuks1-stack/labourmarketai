@@ -15,25 +15,22 @@ import {
   buildPreview,
   committableRows,
   commitImport,
-  createImportSession,
   createRosterPerson,
+  defaultSupplierRole,
   resolveTimeSemantics,
   resolveContextLabel,
   resolveRow,
-  submitRows,
+  stageImportSource,
   withdrawImport,
   type EvidenceImportFailure,
+  type NotStagedSourceRow,
 } from "@/lib/organization-evidence/import-core";
 import { fingerprintPayload } from "@/lib/organization-evidence/fingerprint";
 import {
   readEvidenceSourceFile,
   SOURCE_FILE_MAX_BYTES,
 } from "@/lib/organization-evidence/read-source-file";
-import {
-  MAX_ROWS_PER_SESSION,
-  MAX_ROWS_PER_SUBMIT,
-  type SourceWorkRow,
-} from "@/lib/organization-evidence/source-rows";
+import { type SourceWorkRow } from "@/lib/organization-evidence/source-rows";
 import {
   detectHeaderLanguage,
   parseDelimited,
@@ -178,7 +175,10 @@ export async function startEvidenceImportAction(
   const file = form.get("file");
   let filename = text(form, "source_filename") || null;
   let rows: readonly SourceWorkRow[] = [];
+  let positions: readonly number[] = [];
+  let notStaged: readonly NotStagedSourceRow[] = [];
   let sourceFingerprint = "";
+  let sourceBytesSha256: string | null = null;
   let via = "delimited";
   let headers: readonly string[] = [];
 
@@ -208,7 +208,10 @@ export async function startEvidenceImportAction(
         return { kind: "refused", reason: "nothing_parsed", detail: read.detail };
       default:
         rows = read.rows;
+        positions = read.positions;
+        notStaged = read.notStaged;
         sourceFingerprint = read.fingerprint;
+        sourceBytesSha256 = read.bytesSha256;
         via = read.via;
         headers = read.headers;
     }
@@ -227,6 +230,8 @@ export async function startEvidenceImportAction(
       };
     }
     rows = parsed.rows;
+    positions = parsed.positions;
+    notStaged = parsed.notStaged;
     sourceFingerprint = fingerprintPayload("web-source", { raw: pasted });
     headers = Object.keys(parsed.rows[0]?.raw ?? {});
   }
@@ -242,18 +247,13 @@ export async function startEvidenceImportAction(
         : "csv"
       : "manual");
   // SUPPLIER ROLE follows what the organization declared it DOES (the same
-  // capability axis the doors read); "other" only when it declared nothing.
+  // capability axis the doors read) — `employer` first (design v3 N1);
+  // "other" only when it declared nothing.
   let supplierRole = explicitRole;
   if (!supplierRole) {
     const org = await resolveEvidenceOrganization(c, null);
     const caps = org.ok ? await readOrganizationCapabilities(org.organizationId) : [];
-    supplierRole = caps.includes("training_provider")
-      ? "training_provider"
-      : caps.includes("workforce_provider") || caps.includes("recruitment_partner")
-        ? "agency"
-        : caps.includes("employer") || caps.includes("project_operator")
-          ? "employer"
-          : "other";
+    supplierRole = defaultSupplierRole(caps);
   }
   // SOURCE LANGUAGE from the header words when they say so; otherwise the
   // caller's UI locale, which the advanced section shows and lets them change.
@@ -263,37 +263,34 @@ export async function startEvidenceImportAction(
     (oneOf(await getLocale(), activeLocales) ?? "en");
 
   // The session is keyed on the SOURCE, so re-uploading the same file resolves
-  // to the same session instead of importing it twice.
-  const session = await createImportSession(c, {
-    sourceKind,
-    supplierRole,
-    sourceLanguage,
-    sourceFilename: filename,
-    sourceReference: text(form, "source_reference") || null,
-    sourceFingerprint,
-    notes: text(form, "notes") || null,
-    actorKind: "human",
+  // to the same session instead of importing it twice — and its rows are
+  // staged at their SOURCE POSITIONS in bounded batches, so an upload that
+  // died half-way resumes and a repeat stages nothing (the core's intake).
+  const staged = await stageImportSource(c, {
+    session: {
+      sourceKind,
+      supplierRole,
+      sourceLanguage,
+      sourceFilename: filename,
+      sourceReference: text(form, "source_reference") || null,
+      sourceFingerprint,
+      sourceBytesSha256,
+      notes: text(form, "notes") || null,
+      actorKind: "human",
+    },
+    rows,
+    positions,
+    notStaged,
   });
-  if (session.kind !== "ok") return refuse(session);
-
-  // Bounded batches, always — a year of a company's timesheets is thousands of
-  // rows and one unbounded request is how an import dies half-done.
-  let staged = 0;
-  for (let i = 0; i < rows.length; i += MAX_ROWS_PER_SUBMIT) {
-    const batch: readonly SourceWorkRow[] = rows.slice(i, i + MAX_ROWS_PER_SUBMIT);
-    const res = await submitRows(c, session.session.id, batch);
-    if (res.kind !== "ok") return refuse(res);
-    staged += res.inserted;
-    // The session cap is the core's, not this action's — stop staging when
-    // the session is full rather than sending batches it will refuse.
-    if (res.totalInSession >= MAX_ROWS_PER_SESSION) break;
-  }
+  if (staged.kind !== "ok") return refuse(staged);
 
   revalidatePath(PATH, "page");
   return {
     kind: "ok",
-    sessionId: session.session.id,
-    note: session.session.reused ? "reused_session" : `staged:${staged}:${via}`,
+    sessionId: staged.session.id,
+    note: staged.session.reused
+      ? `reused_session:staged:${staged.staged}:notStaged:${staged.notStaged}`
+      : `staged:${staged.staged}:${via}:notStaged:${staged.notStaged}`,
   };
 }
 
@@ -514,6 +511,9 @@ export async function withdrawEvidenceImportAction(
     return { kind: "refused", reason: "invalid", detail: "session" };
   const res = await withdrawImport(c, sessionId, text(form, "note") || null);
   if (res.kind !== "ok") return refuse(res);
+  // A second withdrawal writes nothing — said as such, never as a success
+  // that did something.
+  if (res.outcome === "already_withdrawn") return { kind: "refused", reason: "already_withdrawn" };
   revalidatePath(PATH, "page");
   return { kind: "ok", sessionId, note: `withdrawn:${res.affected}` };
 }
@@ -540,8 +540,11 @@ export async function attestSessionRecordsAction(
   const c = await caller();
   if (!c) return { kind: "refused", reason: "unauthenticated" };
   const sessionId = text(form, "session_id");
-  const actorRole = oneOf(text(form, "actor_role"), ATTESTATION_ROLES);
-  if (sessionId === "" || !actorRole) {
+  // The organization attests in the capacity it supplied the records in; a
+  // stated role that is not that one is refused by the core, by name.
+  const statedRole = text(form, "actor_role");
+  const actorRole = statedRole === "" ? null : oneOf(statedRole, ATTESTATION_ROLES);
+  if (sessionId === "" || (actorRole === null && statedRole !== "")) {
     return { kind: "refused", reason: "invalid", detail: "session" };
   }
   const res = await attestSessionRecords(c, {
@@ -561,8 +564,9 @@ export async function attestEvidenceRecordAction(
   const c = await caller();
   if (!c) return { kind: "refused", reason: "unauthenticated" };
   const recordId = text(form, "record_id");
-  const actorRole = oneOf(text(form, "actor_role"), ATTESTATION_ROLES);
-  if (recordId === "" || !actorRole) {
+  const statedRole = text(form, "actor_role");
+  const actorRole = statedRole === "" ? null : oneOf(statedRole, ATTESTATION_ROLES);
+  if (recordId === "" || (actorRole === null && statedRole !== "")) {
     return { kind: "refused", reason: "invalid", detail: "record" };
   }
   const res = await attestRecord(c, {

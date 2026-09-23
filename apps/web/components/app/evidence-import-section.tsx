@@ -13,7 +13,6 @@ import { locales } from "@/lib/i18n/config";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import {
-  ATTESTATION_ROLES,
   SOURCE_KINDS,
   SUPPLIER_ROLES,
   buildPreview,
@@ -264,6 +263,7 @@ export async function EvidenceImportSection({
       "month_not_stated",
       "confirmation_rejected",
       "confirmation_unavailable",
+      "already_withdrawn",
     ].map((k) => [k, t(`error.${k}` as never) as string]),
   );
   // Context refusals can also come back from an action (the workspace changed
@@ -594,6 +594,13 @@ export async function EvidenceImportSection({
           {" · "}
           {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
         </span>
+        {/* Source lines the parser could not turn into a row (no date, no
+            person) are SAID, never dropped silently (design v3 §11). */}
+        {(preview.source.notStagedSourceRows ?? 0) > 0 && (
+          <span className="text-state-amber" data-testid="evidence-preview-not-staged">
+            {t("preview.notStaged", { count: preview.source.notStagedSourceRows ?? 0 })}
+          </span>
+        )}
       </p>
 
       <EvidenceImportReconstruction
@@ -829,8 +836,10 @@ export async function EvidenceImportSection({
               <EvidenceAttestForm
                 action={attestSessionRecordsAction}
                 sessionId={sessionId}
-                roles={options(ATTESTATION_ROLES, "role")}
-                defaultRole={records[0]?.supplierRole ?? "employer"}
+                // The organization attests in the capacity it supplied the
+                // records in — and in no other (design v3 §8 P4).
+                roles={options([preview.source.supplierRole], "role")}
+                defaultRole={preview.source.supplierRole}
                 labels={{
                   attest: t("records.attestAll", {
                     count: records.filter((r) => !r.attestation && !r.withdrawn).length,
@@ -946,7 +955,7 @@ export async function EvidenceImportSection({
                       action={attestEvidenceRecordAction}
                       recordId={rec.id}
                       sessionId={sessionId}
-                      roles={options(ATTESTATION_ROLES, "role")}
+                      roles={options([rec.supplierRole], "role")}
                       defaultRole={rec.supplierRole}
                       labels={{
                         attest: t("records.attest"),

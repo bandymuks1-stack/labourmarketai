@@ -25,9 +25,9 @@ import {
   type EvidenceImportFailure,
 } from "@/lib/organization-evidence/import-core";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
-import { fingerprintPayload } from "@/lib/organization-evidence/fingerprint";
 import {
   sourceWorkRowSchema,
+  MAX_ROWS_PER_SESSION,
   MAX_ROWS_PER_SUBMIT,
 } from "@/lib/organization-evidence/source-rows";
 // THE shared commit gate — the human UI signs and verifies with the SAME
@@ -299,9 +299,11 @@ const sessionCreateInput = z
     sourceLanguage: z.enum(locales),
     sourceFilename: z.string().min(1).max(300).nullish(),
     sourceReference: z.string().min(1).max(500).nullish(),
-    /** A stable identifier for the source. Omitted → derived from the filename
-     *  and reference, so the same named source resolves to the same session. */
-    sourceFingerprint: z.string().min(16).max(128).optional(),
+    /** THE SOURCE'S IDENTITY, stated explicitly — a digest of its CONTENT
+     *  (e.g. sha256 of the file's bytes, or of the canonical rows). Required:
+     *  deriving it from the filename let two different files with the same
+     *  name join ONE session (design v3 §12). */
+    sourceFingerprint: z.string().min(16).max(128),
     notes: z.string().max(1000).nullish(),
     agentLabel: z.string().max(120).nullish(),
   })
@@ -314,7 +316,10 @@ const sessionCreate: CapabilityDescriptor = {
   description:
     "Opens the immutable envelope for ONE source. IDEMPOTENT: the same source " +
     "for the same organization resolves to the SAME session — `reused: true` " +
-    "says so — instead of importing twice. `supplierRole` is required and says " +
+    "says so — instead of importing twice. `sourceFingerprint` is REQUIRED and " +
+    "must identify the source's CONTENT (a digest of the file's bytes or of " +
+    "its canonical rows), never its name: two different files with the same " +
+    "name must never join one session. `supplierRole` is required and says " +
     "in what capacity the organization speaks (an agency reporting its worker's " +
     "hours on a client's site is neither the employer nor the client).",
   exposed: true,
@@ -322,18 +327,11 @@ const sessionCreate: CapabilityDescriptor = {
   inputSchema: sessionCreateInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = sessionCreateInput.parse(input);
-    const fingerprint =
-      parsed.sourceFingerprint ??
-      fingerprintPayload("agent-source", {
-        filename: parsed.sourceFilename ?? null,
-        reference: parsed.sourceReference ?? null,
-        kind: parsed.sourceKind,
-      });
     const res = await createImportSession(caller, {
       organizationId: parsed.organization ?? null,
       sourceKind: parsed.sourceKind,
       supplierRole: parsed.supplierRole,
-      sourceFingerprint: fingerprint,
+      sourceFingerprint: parsed.sourceFingerprint,
       sourceLanguage: parsed.sourceLanguage,
       sourceFilename: parsed.sourceFilename ?? null,
       sourceReference: parsed.sourceReference ?? null,
@@ -351,6 +349,10 @@ const sessionCreate: CapabilityDescriptor = {
 const submitInput = z
   .object({
     sessionId: z.uuid(),
+    /** The SOURCE position of the batch's first row (0-based); the batch's
+     *  rows follow on. The staging key is `startIndex + i`, so a retried or
+     *  resumed batch lands on the same rows instead of new ones. */
+    startIndex: z.number().int().min(0).max(MAX_ROWS_PER_SESSION - 1),
     rows: z.array(sourceWorkRowSchema).min(1).max(MAX_ROWS_PER_SUBMIT),
   })
   .strict();
@@ -364,13 +366,18 @@ const rowsSubmit: CapabilityDescriptor = {
     "surface reads staging as history. Each row must separate FACT from " +
     "DERIVED: `factFields` names what the SOURCE stated, `derived` carries every " +
     "inference with its method and confidence, and a field may never be both. " +
-    "Retrying a batch cannot duplicate rows.",
+    "`startIndex` (required) is the source position of the batch's first row: " +
+    "send batch 1 at 0, batch 2 at the first row after it, and so on. A retried " +
+    "or repeated batch at the same `startIndex` stages nothing twice — " +
+    "`skipped` counts the rows already staged.",
   exposed: true,
   annotations: appendWrite,
   inputSchema: submitInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = submitInput.parse(input);
-    const res = await submitRows(caller, parsed.sessionId, parsed.rows);
+    const res = await submitRows(caller, parsed.sessionId, parsed.rows, {
+      startIndex: parsed.startIndex,
+    });
     if (res.kind !== "ok") return fail(res);
     return {
       ok: true,
@@ -711,7 +718,9 @@ const recordsList: CapabilityDescriptor = {
 const attestInput = z
   .object({
     recordId: z.uuid(),
-    actorRole: z.enum(ATTESTATION_ROLES),
+    /** Optional: the organization attests in the capacity the record was
+     *  supplied in (its `supplierRole`). A different role is refused. */
+    actorRole: z.enum(ATTESTATION_ROLES).optional(),
     note: z.string().max(1000).nullish(),
   })
   .strict();
@@ -721,7 +730,9 @@ const recordAttest: CapabilityDescriptor = {
   kind: "execute",
   title: "Attest an evidence record in the organization's name",
   description:
-    "Records the organization standing behind one evidence record. Attesting " +
+    "Records the organization standing behind one evidence record, in the " +
+    "capacity the record was supplied in (its `supplierRole`) — omit " +
+    "`actorRole` to use it; any other role is refused. Attesting " +
     "one's OWN work is allowed — a sole trader legitimately has nobody above " +
     "them — and the result derives SELF_ATTESTED, which is permanent and never " +
     "counts as independent verification. Independent verification is a " +
@@ -733,7 +744,7 @@ const recordAttest: CapabilityDescriptor = {
     const parsed = attestInput.parse(input);
     const res = await attestRecord(caller, {
       recordId: parsed.recordId,
-      actorRole: parsed.actorRole,
+      actorRole: parsed.actorRole ?? null,
       note: parsed.note ?? null,
     });
     if (res.kind !== "ok") return fail(res);
@@ -757,7 +768,9 @@ const importWithdraw: CapabilityDescriptor = {
   description:
     "The recovery path. It DELETES NOTHING: every record gains an append-only " +
     "`withdrawn` event, so the evidence and the reason both stay readable and " +
-    "the action itself is auditable. Reversible by reinstating.",
+    "the action itself is auditable. Reversible by reinstating. A session " +
+    "that committed nothing is still withdrawn (the act is recorded); a " +
+    "second withdrawal writes nothing and answers `alreadyWithdrawn: true`.",
   exposed: true,
   annotations: appendWrite,
   inputSchema: withdrawInput,
@@ -769,12 +782,16 @@ const importWithdraw: CapabilityDescriptor = {
       parsed.note ?? null,
     );
     if (res.kind !== "ok") return fail(res);
+    const already = res.outcome === "already_withdrawn";
     return {
       ok: true,
       data: {
         withdrawn: res.affected,
         deleted: 0,
-        note: "Nothing was deleted — each record carries a withdrawal event.",
+        alreadyWithdrawn: already,
+        note: already
+          ? "Already withdrawn — nothing was written."
+          : "Nothing was deleted — each record carries a withdrawal event.",
       },
     };
   },

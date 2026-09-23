@@ -20,13 +20,24 @@ const read = (p: string) => readFileSync(path.join(dir, p), "utf8").replace(/\r\
 describe("a committed row is a record, never a candidate again", () => {
   it("the preview carries committed rows through untouched — no duplicate re-reading, no status rewrite", () => {
     const core = read("lib/organization-evidence/import-core.ts");
-    const branch = core.slice(core.indexOf('if (s.status === "committed")'), core.indexOf("continue;", core.indexOf('if (s.status === "committed")')));
+    // The branch now also HEALS a row whose own record exists but whose mark
+    // failed (historical timesheet import v3, PR-2): `ownRecord`. It is the
+    // same branch — a committed row and a row that IS committed in fact are
+    // both carried through, never re-read as a duplicate.
+    const HEAD = 'if (s.status === "committed" || ownRecord) {';
+    expect(core).toContain(HEAD);
+    const branch = core.slice(core.indexOf(HEAD), core.indexOf("continue;", core.indexOf(HEAD)));
     expect(branch.length).toBeGreaterThan(200);
     expect(branch).toMatch(/committed: true/);
     expect(branch).toMatch(/ready: false/);
     expect(branch).toMatch(/duplicateState: "new"/);
     // the patch that rewrites staging comes AFTER the branch's `continue`, so a committed row is never patched
-    expect(core.indexOf('if (s.status === "committed")')).toBeLessThan(core.indexOf("updates.push({"));
+    expect(core.indexOf(HEAD)).toBeLessThan(core.indexOf("updates.push({"));
+    // a heal is the committing write (final state + `committed` in ONE update), never a plain update
+    expect(branch).toMatch(/heals\.push\(\{/);
+    expect(branch).not.toMatch(/updates\.push\(/);
+    expect(core).toMatch(/heals\.map\(\(h\) => \(\{ \.\.\.h, commit: true as const \}\)\)/);
+    expect(core).toMatch(/if \(u\.commit\) await store\.commitStagedRow\(u\.id, u\.patch\);/);
   });
 });
 

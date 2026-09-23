@@ -16221,6 +16221,7 @@
       "title": "2. Wat er zou worden vastgelegd",
       "notPersisted": "Dit is een interpretatie van uw bestand. NIETS hiervan is al bewijs.",
       "empty": "Voor deze bron zijn geen regels klaargezet.",
+      "notStaged": "{count, plural, one {# regel van de bron is niet gelezen: er staat geen datum of persoon in.} other {# regels van de bron zijn niet gelezen: er staat geen datum of persoon in.}}",
       "counts": {
         "total": "Gelezen regels",
         "ready": "Klaar",
@@ -16413,7 +16414,8 @@
       "nothing_parsed": "Er is geen bruikbare regel gevonden. De bron heeft een kopregel nodig die ten minste een persoon en een datum noemt.",
       "month_not_stated": "Deze urenstaat vermeldt geen maand, dus elke datum zou een gok zijn. Zet de maand op het blad - bijvoorbeeld “2026-05” in een kop - en upload het opnieuw.",
       "confirmation_rejected": "Deze import is veranderd nadat u ernaar keek, dus er is niets vastgelegd. Lees hem opnieuw en keur de nieuwe versie goed.",
-      "confirmation_unavailable": "Goedkeuringen kunnen in deze omgeving niet worden ondertekend, dus er is niets vastgelegd."
+      "confirmation_unavailable": "Goedkeuringen kunnen in deze omgeving niet worden ondertekend, dus er is niets vastgelegd.",
+      "already_withdrawn": "Deze import is al ingetrokken. Er is niets vastgelegd."
     },
     "mine": {
       "title": "Wat organisaties over mij hebben vastgelegd",
