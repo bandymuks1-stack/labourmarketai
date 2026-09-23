@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { withoutArchivedOrganizations } from "@/lib/company/archived-organizations";
 
 /**
  * W6 author/subject slice — the app-side mirror of `manages_organization()`.
@@ -78,7 +79,13 @@ export async function getManagedOrganizationIds(): Promise<string[]> {
     }
   }
 
-  return [...ids];
+  // ARCHIVED organizations (owner decision 2026-09-23) are acted for by no
+  // one; an unreadable archive state degrades to the narrowest truth.
+  const kept = await withoutArchivedOrganizations(
+    supabase,
+    [...ids].map((id) => ({ id })),
+  );
+  return kept.ok ? kept.rows.map((r) => r.id) : [];
 }
 
 export type GovernedOrganization = { id: string; name: string };
@@ -158,5 +165,8 @@ export async function getGovernedOrganizations(): Promise<
       });
     }
   }
-  return [...out.values()];
+  // ARCHIVED organizations (owner decision 2026-09-23) are governed by no one
+  // here — their workflow definitions stay as history, not as panels.
+  const kept = await withoutArchivedOrganizations(supabase, [...out.values()]);
+  return kept.ok ? [...kept.rows] : [];
 }
