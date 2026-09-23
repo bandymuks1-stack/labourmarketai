@@ -293,6 +293,24 @@ export const companyEnableJournalReviewSchema = z.object({
   engagementId: uuid,
 });
 
+/**
+ * RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). The NAME is the
+ * input: the organization is never client input — the executor resolves it
+ * from the server-side active workspace. Same bounds as the canonical writer
+ * (`save_company_setup_v3`: trimmed, 2–200 characters).
+ *
+ * `expectedOrganizationId` is NOT a target. It is the organization the form
+ * was opened FOR, and it can only REFUSE: when the server-resolved workspace
+ * is a different one at save time (switched in another tab), nothing is
+ * renamed. Strict: any other key — an `organizationId` above all — fails.
+ */
+export const companyRenameOrganizationSchema = z
+  .object({
+    name: z.string().trim().min(2).max(200),
+    expectedOrganizationId: uuid.optional(),
+  })
+  .strict();
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -337,6 +355,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.confirm-work": companyConfirmWorkSchema,
   "company.enable-journal-review": companyEnableJournalReviewSchema,
   "company.invite-worker": companyInviteWorkerSchema,
+  "company.rename-organization": companyRenameOrganizationSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,
   "company.create-programme": educationCreateProgrammeSchema,

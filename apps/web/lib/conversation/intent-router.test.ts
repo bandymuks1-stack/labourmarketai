@@ -856,6 +856,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Firma anlegen",
     pl: "Załóż firmę",
   },
+  "rename-organization": {
+    lt: "Pervadink šią agentūrą į Nonstop Group UAB.",
+    en: "Rename my company to Nonstop Group UAB",
+    ru: "Переименуй агентство в Nonstop Group UAB",
+    nl: "Hernoem mijn bedrijf naar Nonstop Group",
+    de: "Benenne meine Firma in Nonstop Group um",
+    pl: "Zmień nazwę firmy na Nonstop Group",
+  },
   lmc: {
     lt: "Kiek turiu LMC?",
     en: "How much LMC do I have?",
@@ -1280,5 +1288,117 @@ describe("prod walk OPS — a company's coordination question is not a personal 
     expect(classifyIntent("Surask man tinkamus darbus").intent).toBe("find-work");
     // And the availability question the D1 walk fixed is untouched.
     expect(classifyIntent("Sužinok, kurie darbuotojai nebus užimti per artimiausias dienas").intent).toBe("who-available");
+  });
+});
+
+/**
+ * Owner program 2026-09-23 (CASE 3/4) — "Pervadink šią agentūrą į Nonstop
+ * Group UAB." scored 0 on every rule in all six locales, so the owner's rename
+ * request fell through to the not-understood answer. Measured before this
+ * rule: every sentence in the positive list below classified `unknown`, 0.
+ */
+describe("rename-organization — a rename sentence reaches the rename door", () => {
+  const POSITIVE: ReadonlyArray<string> = [
+    // The owner's two production sentences, verbatim.
+    "Pas mane yra agentūra be pavadinimo. Pervadink ją Nonstop Group UAB.",
+    "Pervadink šią agentūrą į Nonstop Group UAB.",
+    // lt
+    "pakeisk įmonės pavadinimą",
+    "Noriu pakeisti agentūros pavadinimą",
+    "Agentūros pavadinimas: Nonstop Group UAB",
+    "pakeisk pavadinimą į Nonstop Group UAB",
+    "pervadink agentura i Nonstop Group UAB", // typed without diacritics
+    // en
+    "rename my company to Nonstop Group UAB",
+    "change organization name",
+    "Change the agency name to Nonstop Group",
+    "change the name of our organisation to Nonstop",
+    "change the name to Nonstop Group",
+    // ru
+    "Переименуй агентство в Nonstop Group UAB",
+    "Смени название компании на Nonstop Group",
+    "Измени название на Nonstop Group",
+    // nl
+    "Hernoem mijn bedrijf naar Nonstop Group",
+    "Wijzig de bedrijfsnaam naar Nonstop Group",
+    "Verander de naam van het bureau in Nonstop Group",
+    // de
+    "Benenne meine Firma in Nonstop Group um",
+    "Firma umbenennen",
+    "Ändere den Firmennamen zu Nonstop Group",
+    "Namen der Firma ändern",
+    // pl
+    "Zmień nazwę firmy na Nonstop Group",
+    "Przemianuj agencję na Nonstop Group",
+    "Zmień nazwę na Nonstop Group",
+  ];
+
+  for (const s of POSITIVE) {
+    it(`"${s}" → rename-organization, score 9 (above every noun-only org rule)`, () => {
+      const m = classifyIntent(s);
+      expect(m.intent).toBe("rename-organization");
+      // Pinned: one verb+noun pattern fires. A drop below the 6 of
+      // `company-overview` / `create-organization` would let a stray org
+      // noun win; a jump means a second pattern started double-counting.
+      expect(m.score).toBe(9);
+    });
+  }
+
+  it("NEGATIVE CONTROLS — neither the person's own record nor a bare name is renamed", () => {
+    // The person's profile, CV and journal are not the organization.
+    expect(classifyIntent("pakeisk mano profilį").intent).toBe("profile");
+    expect(classifyIntent("change my CV").intent).not.toBe("rename-organization");
+    expect(classifyIntent("pakeisk darbo žurnalo įrašą").intent).not.toBe("rename-organization");
+    // A bare name is a REFERENCE (utterance-understanding), never a command.
+    expect(classifyIntent("Nonstop Group UAB").intent).toBe("unknown");
+    // A question about the name changes nothing.
+    expect(classifyIntent("Koks mano įmonės pavadinimas?").intent).not.toBe("rename-organization");
+    // A project is not an organization.
+    expect(classifyIntent("pakeisk projekto pavadinimą į Stogas").intent).not.toBe("rename-organization");
+    // "confirm" must never supply the organization noun `firm`.
+    expect(classifyIntent("confirm the name").intent).not.toBe("rename-organization");
+  });
+
+  it("NEGATIVE CONTROLS — the PERSON's own name is not the organization's (adversarial review, #1848)", () => {
+    // Measured before the fix: every sentence here classified
+    // `rename-organization` at 9 through the bare "name to X" forms, because
+    // they accepted the first-person singular possessive. A person without an
+    // organization heard "you have no organization whose name you could
+    // change"; an owner got the org form prefilled with their own name.
+    for (const s of [
+      "change my name to Jonas",
+      "Change my name to Jonas",
+      "update my name to Jonas",
+      "set my name to Jonas",
+      "wijzig mijn naam naar Jan",
+      "verander mijn naam in Jan",
+      "ändere meinen Namen zu Hans",
+      "Ändere meinen Namen auf Hans",
+      // The person's name in the locales whose org-name noun is distinct.
+      "pakeisk mano vardą į Jonas",
+      "Смени моё имя на Иван",
+      "Zmień moje imię na Jan",
+    ]) {
+      expect(classifyIntent(s).intent, s).not.toBe("rename-organization");
+    }
+    // The organization's name, with the possessive bound to an ORG noun, is
+    // still the rename — the fix narrowed the bare form, not the capability.
+    for (const s of [
+      "change my company name to Nonstop",
+      "wijzig de naam van mijn bedrijf naar Nonstop",
+      "Ändere den Namen meiner Firma zu Nonstop",
+      "change our name to Nonstop",
+      "wijzig onze naam naar Nonstop",
+      "ändere unseren Namen zu Nonstop",
+    ]) {
+      expect(classifyIntent(s).intent, s).toBe("rename-organization");
+    }
+  });
+
+  it("the neighbouring organization rules keep their sentences", () => {
+    expect(classifyIntent("Sukurk įmonės profilį").intent).toBe("create-organization");
+    expect(classifyIntent("Perjunk į įmonę Nonstop").intent).toBe("switch-context");
+    expect(classifyIntent("change my workspace").intent).toBe("switch-context");
+    expect(classifyIntent("Kas vyksta mano įmonėje?").intent).toBe("company-overview");
   });
 });

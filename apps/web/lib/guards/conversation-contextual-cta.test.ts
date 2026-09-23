@@ -57,11 +57,18 @@ describe("generic starter chips appear only where a menu belongs", () => {
     expect(CHAT).toMatch(/assistant\(labels\.offersEmpty, \[/);
   });
 
-  it("the menu still exists where it belongs: greeting and fallback", () => {
+  it("the menu still exists where it belongs: the greeting — and NOT on a not-understood answer", () => {
     expect(CHAT).toMatch(/chips: starterChips,?\s*\}\s*as ChatMessage/);
-    // 2026-09-04: the not-understood answer is the context-aware `fallbackText`
-    // (worker / employer / agency / education) — still with the starter menu.
-    expect(CHAT).toMatch(/assistant\(fallbackText, starterChips\)/);
+    // RE-ANCHORED 2026-09-23 (owner program P0 §10, CASE 3/4/12). The
+    // not-understood answer used to be `assistant(fallbackText, starterChips)`:
+    // the greeting's menu under a sentence the product did not understand —
+    // for an agency asking to rename itself, "Upload CV · My profile · Looking
+    // for work". It is now ONE clarifying question with the ONE door derived
+    // from the active context; the full shape is pinned in
+    // understanding-is-not-only-operations.test.ts.
+    const fallback = /const fallback = \(\) =>[^\n]*/.exec(CHAT)?.[0] ?? "";
+    expect(fallback).toMatch(/askToClarify\(t\("notUnderstood"\)\)/);
+    expect(fallback, "the not-understood answer must not carry the greeting row").not.toMatch(/starterChips/);
   });
 });
 

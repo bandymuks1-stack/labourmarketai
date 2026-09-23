@@ -92,6 +92,8 @@ export type IntentHandlerId =
   | "offerValue"
   | "companyOverview"
   | "createOrganization"
+  // Owner program 2026-09-23: rename the ACTIVE organization by sentence.
+  | "renameOrganization"
   | "lmc"
   | "adminApprovals"
   | "adminRequests"
@@ -242,6 +244,13 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   availability: { domain: "profile", access: "write", handler: "availabilityStatement", ownTyping: false },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
+  // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). `write`: it
+  // opens the ONE confirm form over `company.rename-organization` (important
+  // tier, one-time token bound to the active workspace), prefilled with the
+  // name the sentence carried. The sentence itself renames nothing. Its own
+  // typing cue: it first asks the server whether THIS workspace can be
+  // renamed by THIS person, so a refusal is said before any form appears.
+  "rename-organization": { domain: "company", access: "write", handler: "renameOrganization", ownTyping: true },
   lmc: { domain: "money", access: "route", handler: "lmc", ownTyping: false },
   "admin-approvals": { domain: "admin", access: "route", handler: "adminApprovals", ownTyping: false },
   "admin-requests": { domain: "admin", access: "route", handler: "adminRequests", ownTyping: false },

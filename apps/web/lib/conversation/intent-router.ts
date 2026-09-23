@@ -118,6 +118,11 @@ export type ConversationIntent =
   | "engagements" // "su kuo dirbu" / "baigti darbo santykį" — §7.1
   | "company-overview" // "kas vyksta mano įmonėje?" — the company hub
   | "create-organization" // "sukurk įmonę" — START one, not look at one
+  // ── RENAME the ACTIVE organization (owner program 2026-09-23, CASE 3/4).
+  //    "Pervadink šią agentūrą į Nonstop Group UAB." scored 0 on every rule
+  //    in six locales, and the model proposer had no id to pick either — so
+  //    the owner's rename request was answered with CV / profile / job chips.
+  | "rename-organization" // "pervadink agentūrą į X" / "rename my company to X"
   | "lmc" // "kiek turiu LMC?" / "už ką buvo nuskaičiuota?" — the credit ledger
   // ── V9 value-intent: a stated OFFER of value (goods to sell, free
   //    capacity) — the structurer (lib/structuring/value-statement.ts)
@@ -352,6 +357,26 @@ const SEEK_GUARD_RE = new RegExp(
   fold(SEEK_GUARD_SOURCE).replace(/\\b/g, UB),
   "iu",
 );
+
+/**
+ * The ORGANISATION nouns and CHANGE verbs the `rename-organization` rule binds
+ * together, per locale. Stems, folded like every pattern source. `firm` is
+ * word-bounded so "confirm" can never supply the noun.
+ */
+const RENAME_ORG_LT = "(įmon|organizacij|agentūr|bendrov|\\bfirm|kompanij|erdv)";
+const RENAME_CHANGE_LT = "(pakei|keis|atnaujin|pataisy|nustaty|nurody|suteik|įrašyk)";
+const RENAME_ORG_EN = "(company|organi[sz]ation|agency|business|\\bfirm|workspace)";
+const RENAME_ORG_RU = "(компани|организаци|агентств|фирм)";
+const RENAME_CHANGE_RU = "(смен|измен|помен|обнов|исправ|установ)";
+const RENAME_ORG_NL = "(bedrijf|organisatie|bureau|firma|werkruimte)";
+/** "bedrijfsnaam" / "de naam van mijn bedrijf" — the name bound to the org. */
+const RENAME_NAMED_NL =
+  "(bedrijfsnaam|organisatienaam|bureaunaam|naam\\s+van\\s+[^?]{0,24}(bedrijf|organisatie|bureau|firma))";
+const RENAME_ORG_DE = "(firma|unternehmen|agentur|organisation|betrieb)";
+/** "Firmenname" / "den Namen meiner Firma" — the name bound to the org. */
+const RENAME_NAMED_DE =
+  "(firmenname|unternehmensname|namen\\s+(der|des|meiner|meines|unserer|unseres|dieser|dieses)\\s+[^?]{0,20}(firma|unternehmen|agentur|organisation|betrieb))";
+const RENAME_ORG_PL = "(\\bfirm|agencj|organizacj|sp[oó][lł]k)";
 
 const RULES: IntentRule[] = [
   /**
@@ -944,6 +969,91 @@ const RULES: IntentRule[] = [
         "(įmon|organizacij|firm|bendrov|versl|company|organisation|organization|business|компани|организаци|фирм|bedrijf|unternehmen|sp[oó][lł]k|dzia[lł]alno[sś])\\w*\\s*.{0,24}(sukurti|uzregistruoti|įsteigti|create|register|aanmaken|oprichten|registreren|erstellen|anlegen|gründen|создать|зарегистрировать|utworzy[cć]|za[lł]o[zż]y[cć]|zarejestrowa[cć])",
         6,
       ),
+    ],
+  },
+  {
+    /**
+     * RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23, CASE 3/4).
+     *
+     * WHY THIS EXISTS. The owner, standing in an unnamed agency workspace,
+     * typed "Pervadink šią agentūrą į Nonstop Group UAB." It scored 0 here in
+     * all six locales (19 variants measured), the model proposer had no id to
+     * choose, and the not-understood answer showed CV / profile / job chips.
+     *
+     * CLOSED, VERB + NOUN. Every pattern needs a RENAME verb with an
+     * organisation noun, or a CHANGE verb with a NAME noun bound to an
+     * organisation noun (or directly to its target: "pakeisk pavadinimą į X",
+     * "change the name to X"). So "pakeisk mano profilį", "change my CV",
+     * "pakeisk darbo žurnalo įrašą" and a bare "Nonstop Group UAB" (a
+     * reference — see utterance-understanding.ts) never reach it, and
+     * "pakeisk projekto pavadinimą" does not either: a project is not an
+     * organisation. A question ("Koks mano įmonės pavadinimas?") carries no
+     * change verb and no target marker, so it stays out as well.
+     *
+     * Weight 9 per pattern: above every noun-only rule an organisation word
+     * can trip (`company-overview` 6, `create-organization` 6 — which needs a
+     * CREATE verb anyway, `switch-context` 5 on "change my workspace").
+     *
+     * Sources are folded like the sentence (lower-case, no diacritics): no
+     * `\S` (it would fold to `\s`) and no `\p{L}` (it would fold to `\p{l}`);
+     * `[^\s]` and `[^?]` bridge instead. The router only CLASSIFIES — which
+     * organisation, and whether this person may rename it, is decided by the
+     * server (lib/company/organization-rename.ts).
+     */
+    intent: "rename-organization",
+    patterns: [
+      // lt — "Pervadink šią agentūrą į X", "Pas mane yra agentūra … Pervadink
+      // ją X", "Noriu pakeisti agentūros pavadinimą", "Agentūros pavadinimas: X"
+      p(`pervadin[^?]{0,60}${RENAME_ORG_LT}`, 9),
+      p(`${RENAME_ORG_LT}[^?]{0,80}pervadin`, 9),
+      p(`${RENAME_CHANGE_LT}[^?]{0,40}${RENAME_ORG_LT}[^?]{0,24}pavadinim`, 9),
+      p(`${RENAME_CHANGE_LT}[^?]{0,24}pavadinim[^?]{0,40}${RENAME_ORG_LT}`, 9),
+      p(`${RENAME_ORG_LT}[^\\s]{0,6}\\s+pavadinim[^\\s]*\\s*(:|\\bi\\b)`, 9),
+      p("(pakei|keis)[^\\s]*\\s+(musu\\s+|mano\\s+|sios\\s+|sitos\\s+)?pavadinim[^\\s]*\\s+i\\b", 9),
+      // en — "rename my company to X", "Change the agency name to X",
+      // "change the name of our organisation", "change the name to X"
+      p(`\\brenam[^?]{0,40}${RENAME_ORG_EN}`, 9),
+      p(`${RENAME_ORG_EN}[^?]{0,60}\\brenam`, 9),
+      p(`\\b(change|update|set|edit|fix|correct)\\b[^?]{0,30}${RENAME_ORG_EN}(?:['’]s)?\\s+name\\b`, 9),
+      p(`\\b(change|update|set|edit|fix|correct)\\b[^?]{0,20}\\bname\\s+of\\s+[^?]{0,20}${RENAME_ORG_EN}`, 9),
+      // The bare "name to X" forms carry NO first-person singular possessive
+      // (en `my`, nl `mijn`, de `meinen`): "change my name to Jonas" is the
+      // PERSON's name, and routing it here answered a person with "you have no
+      // organization" or prefilled the org form with their own name. `name` /
+      // `naam` / `Namen` is ambiguous between a person and an organisation;
+      // lt `pavadinimas`, ru `название`, pl `nazwa` name a THING (a person's
+      // is `vardas` / `имя` / `imię`), so those forms keep their possessives.
+      p("\\b(change|update|set)\\s+(the\\s+|our\\s+|its\\s+)?name\\s+to\\b", 9),
+      // ru — "Переименуй агентство в X", "Смени название компании на X"
+      p(`переимен[^?]{0,40}${RENAME_ORG_RU}`, 9),
+      p(`${RENAME_ORG_RU}[^?]{0,60}переимен`, 9),
+      p(`${RENAME_CHANGE_RU}[^?]{0,20}(назван|наименован)[^?]{0,30}${RENAME_ORG_RU}`, 9),
+      p(`${RENAME_CHANGE_RU}[^?]{0,30}${RENAME_ORG_RU}[^?]{0,20}(назван|наименован)`, 9),
+      p("(смени|измени|поменяй|обнови)\\s+(наше\\s+|моё\\s+|своё\\s+)?(название|наименование)\\s+на\\b", 9),
+      // nl — "Hernoem mijn bedrijf naar X", "Wijzig de bedrijfsnaam",
+      // "de naam van het bureau veranderen"
+      p(`hernoem[^?]{0,40}${RENAME_ORG_NL}`, 9),
+      p(`${RENAME_ORG_NL}[^?]{0,60}hernoem`, 9),
+      p(`(wijzig|verander|aanpass|\\bpas\\b)[^?]{0,20}${RENAME_NAMED_NL}`, 9),
+      p(`${RENAME_NAMED_NL}[^?]{0,30}(wijzig|verander|aanpass|aan\\s+te\\s+passen)`, 9),
+      // No `mijn`: "wijzig mijn naam naar Jan" is the person's name (see en).
+      p("(wijzig|verander)[^\\s]*\\s+(de\\s+|onze\\s+)?naam\\s+(naar|in)\\b", 9),
+      // de — "Firma umbenennen", "Benenne meine Firma in X um",
+      // "Ändere den Firmennamen", "Namen der Firma ändern"
+      p(`umbenenn[^?]{0,40}${RENAME_ORG_DE}`, 9),
+      p(`${RENAME_ORG_DE}[^?]{0,60}umbenenn`, 9),
+      p(`\\bbenenne[^?]{0,40}${RENAME_ORG_DE}[^?]{0,60}\\bum\\b`, 9),
+      p(`(ändere|ändern|aendere|aendern|aktualisier|korrigier)[^?]{0,30}${RENAME_NAMED_DE}`, 9),
+      p(`${RENAME_NAMED_DE}[^?]{0,30}(ändern|aendern|aktualisieren|korrigieren)`, 9),
+      // No `meinen`: "ändere meinen Namen zu Hans" is the person's name (see en).
+      p("(ändere|aendere)\\s+(den\\s+|unseren\\s+)?namen\\s+(zu|auf|in)\\b", 9),
+      // pl — "Zmień nazwę firmy na X", "przemianuj agencję na X"
+      p(`zmie[nń][^?]{0,12}nazw[^?]{0,30}${RENAME_ORG_PL}`, 9),
+      p(`${RENAME_ORG_PL}[^?]{0,30}zmie[nń][^?]{0,12}nazw`, 9),
+      p(`nazw[^?]{0,30}${RENAME_ORG_PL}[^?]{0,30}zmie[nń]`, 9),
+      p(`przemianuj[^?]{0,40}${RENAME_ORG_PL}`, 9),
+      p(`${RENAME_ORG_PL}[^?]{0,60}przemianuj`, 9),
+      p("zmie[nń][^\\s]*\\s+nazw[^\\s]*\\s+na\\b", 9),
     ],
   },
   // ── AGENCY vocabulary (real recruiter pilot, 2026-09-04) ──────────────────

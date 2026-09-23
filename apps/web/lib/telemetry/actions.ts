@@ -132,11 +132,29 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   //    at emission time — the closed `customer_requests` status set
   //    (REQUIREMENT_STATUSES in funnel-events.ts), never free text.
   "status",
+  // ── Chat resolution (owner program 2026-09-23). WHICH layer understood a
+  //    sentence: the deterministic router, the active conversation goal, or
+  //    the model proposer. The chat has sent it since 2026-09-05, and it was
+  //    stripped right here — so the owner could not measure how much the
+  //    goal layer or the model actually carries. BOUNDED: see
+  //    BOUNDED_METADATA_VALUES below; any other value is dropped.
+  "resolution",
   // ── Write origin (2026-09-20). STAMPED SERVER-SIDE below from VERCEL_ENV;
   //    listed here only so the sanitizer's allowlist and the stamp agree on
   //    the key. A client-supplied value never survives — it is overwritten.
   DEPLOY_ENV_KEY, // 'production' | 'preview' | 'local'
 ]);
+
+/**
+ * Keys whose value is a CLOSED set, not a bounded string. An allowlisted key
+ * normally keeps any string (capped at SCALAR_VALUE_MAX); a key listed here
+ * keeps its value only when it is one of these exact members — anything else
+ * (another word, a sentence, a number) is dropped, never truncated into the
+ * row. The allowlist decides WHICH keys; this decides which VALUES.
+ */
+const BOUNDED_METADATA_VALUES: Readonly<Record<string, ReadonlySet<string>>> = {
+  resolution: new Set(["deterministic", "goal", "llm"]),
+};
 
 const SCALAR_VALUE_MAX = 200;
 const METADATA_BYTE_MAX = 2048;
@@ -305,6 +323,11 @@ function sanitizeMetadata(
   for (const [k, v] of Object.entries(raw)) {
     if (!ALLOWED_METADATA_KEYS.has(k)) continue;
     if (v === null || v === undefined) continue;
+    const closedSet = BOUNDED_METADATA_VALUES[k];
+    if (closedSet) {
+      if (typeof v === "string" && closedSet.has(v)) out[k] = v;
+      continue;
+    }
     if (typeof v === "string") {
       out[k] = v.slice(0, SCALAR_VALUE_MAX);
     } else if (typeof v === "number") {
