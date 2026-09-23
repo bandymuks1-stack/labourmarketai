@@ -97,8 +97,12 @@ vi.mock("react", async () => {
   return { ...actual, cache: <T,>(fn: T) => fn };
 });
 
-const { getWorkspaceContext, getActiveOrganizationContext, resolveActiveWorkspaceForCaller } =
-  await import("./active-organization");
+const {
+  getWorkspaceContext,
+  getActiveOrganizationContext,
+  governedActiveOrganizationId,
+  resolveActiveWorkspaceForCaller,
+} = await import("./active-organization");
 const { encodeWorkspacePointerCookie, PERSONAL_WORKSPACE_ID } = await import("./organization-switch");
 
 beforeEach(() => {
@@ -171,6 +175,43 @@ describe("getActiveOrganizationContext is a projection — it names what the chi
   it("the personal workspace → no active organization", async () => {
     state.cookie = encodeWorkspacePointerCookie(USER, PERSONAL_WORKSPACE_ID);
     expect((await getActiveOrganizationContext()).activeOrganizationId).toBeNull();
+  });
+});
+
+describe("governedActiveOrganizationId — the company pages' capability fallback", () => {
+  it("an EMPLOYEE-only active workspace yields no capability organization", async () => {
+    state.engagement = [{ organization_id: MANAGED, relationship_slug: "employee" }];
+    state.dbPointer = MANAGED;
+    const ctx = await getActiveOrganizationContext();
+    // The projection still names what the chip names…
+    expect(ctx.activeOrganizationId).toBe(MANAGED);
+    expect(ctx.activeOrganization?.relationship).toBe("employee");
+    // …but no owner capability UI is offered for it.
+    expect(governedActiveOrganizationId(ctx)).toBeNull();
+  });
+
+  it("NEGATIVE CONTROL: a MANAGER or OWNER active workspace is the fallback", async () => {
+    state.engagement = [{ organization_id: MANAGED, relationship_slug: "manager" }];
+    state.dbPointer = MANAGED;
+    expect(governedActiveOrganizationId(await getActiveOrganizationContext())).toBe(MANAGED);
+    state.dbPointer = OWNED;
+    expect(governedActiveOrganizationId(await getActiveOrganizationContext())).toBe(OWNED);
+  });
+
+  it("the personal workspace yields none", async () => {
+    state.cookie = encodeWorkspacePointerCookie(USER, PERSONAL_WORKSPACE_ID);
+    expect(governedActiveOrganizationId(await getActiveOrganizationContext())).toBeNull();
+  });
+
+  it("every company page uses the governed fallback, never the raw active id", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const base = join(__dirname, "..", "..", "app", "[locale]", "dashboard", "company");
+    for (const rel of ["page.tsx", "education/page.tsx", "needs/page.tsx", "people/page.tsx", "settings/page.tsx"]) {
+      const src = readFileSync(join(base, rel), "utf8");
+      expect(src, rel).toMatch(/governedActiveOrganizationId\(orgContext\)/);
+      expect(src, rel).not.toMatch(/orgContext\.activeOrganizationId/);
+    }
   });
 });
 

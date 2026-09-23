@@ -6,8 +6,18 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { readHeldRoles } from "@/lib/auth/held-roles";
 import type { Role } from "@/lib/auth/actions";
-import { getWorkspaceContext } from "@/lib/company/active-organization";
-import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import {
+  getWorkspaceContext,
+  readSessionWorkspacePointer,
+} from "@/lib/company/active-organization";
+import {
+  classifyDurablePointer,
+  decideDashboardRole,
+} from "@/lib/auth/dashboard-role-decision";
+import {
+  PERSONAL_WORKSPACE_ID,
+  actingRoleForWorkspace,
+} from "@/lib/company/organization-switch";
 import { getPlanning } from "@/lib/planning/planning";
 import { visibleRange } from "@/lib/planning/planning-model";
 import { baseIdentityForRole } from "@/lib/config/roles";
@@ -97,8 +107,7 @@ export const loadAiWorkspaceContext = cache(
     }
 
     const supabase = await createClient();
-    const activeRole = (session.profile?.active_role as Role | null) ?? null;
-    const identity = activeRole ? (baseIdentityForRole(activeRole) ?? "person") : null;
+    const storedRole = (session.profile?.active_role as Role | null) ?? null;
 
     const [roles, workspaceCtx, workerRow] = await Promise.all([
       readHeldRoles(supabase, session.user.id),
@@ -110,6 +119,34 @@ export const loadAiWorkspaceContext = cache(
     const active = workspaceCtx.workspaces.find(
       (w) => w.id === workspaceCtx.activeWorkspaceId,
     );
+
+    // THE ACTING IDENTITY — the SAME derivation the dashboard page hands the
+    // chat (owner program 2026-09-23, lane A d3): the person's relationship to
+    // the ACTIVE organization workspace over the roles they really hold
+    // (`actingRoleForWorkspace`), and where no held role fits, the page's own
+    // fallback (`decideDashboardRole`: the stored role when the profile was
+    // read, else the person's durable pointer, else UNKNOWN). It used to be
+    // `active_role` alone, so the chat could greet an employee of someone
+    // else's company as a person while this context told the model it was
+    // acting as that company — two identities for one screen.
+    const orgWorkspaces = workspaceCtx.workspaces.filter((w) => w.kind === "organization");
+    const activeOrgWorkspace =
+      orgWorkspaces.find((w) => w.id === workspaceCtx.activeWorkspaceId) ?? null;
+    const fallback = decideDashboardRole({
+      profileRead: session.profileRead,
+      activeRole: storedRole,
+      pointer:
+        session.profileRead === "failed"
+          ? classifyDurablePointer(
+              await readSessionWorkspacePointer(session.user.id),
+              orgWorkspaces.map((w) => w.id),
+            )
+          : null,
+    });
+    const actingRole: Role | null =
+      actingRoleForWorkspace(activeOrgWorkspace, [...roles.roles]) ??
+      (fallback.kind === "role" ? fallback.role : null);
+    const identity = actingRole ? (baseIdentityForRole(actingRole) ?? "person") : null;
     const workspace = active
       ? {
           id: active.id,

@@ -36,6 +36,7 @@ const PAGE = code(read("app/[locale]/dashboard/page.tsx"));
 const CHAT = code(read("components/app/conversation/chat/conversation-chat.tsx"));
 const CHIP = code(read("components/app/conversation/chat/workspace-chip.tsx"));
 const CTX = code(read("lib/auth/context.tsx"));
+const AI_CTX = code(read("lib/ai-workspace/ai-context.ts"));
 
 /** The opening tag of the ONE `<ConversationChat …>` element. */
 function conversationElement(src: string): string {
@@ -74,6 +75,18 @@ describe("the ONE conversation is keyed on the active workspace", () => {
     expect(conversationElement(PAGE)).toMatch(/actingIdentity=\{identity\}/);
     // Resolved from the workspace + the relationship + the HELD roles (d3).
     expect(PAGE).toMatch(/actingRoleForWorkspace\(activeOrgWorkspace, \[\.\.\.held\.roles\]\)/);
+  });
+
+  it("the AI context derives the SAME acting identity as the chat (no divergence)", () => {
+    // Review P2 (#1849): the chat followed the workspace while the AI context
+    // still read `active_role` alone — an employee of another company's
+    // workspace was a person on screen and that company to the model.
+    expect(AI_CTX).toMatch(/actingRoleForWorkspace\(activeOrgWorkspace, \[\.\.\.roles\.roles\]\)/);
+    // The same fallback the page uses when no held role fits.
+    expect(AI_CTX).toMatch(/decideDashboardRole\(/);
+    expect(PAGE).toMatch(/decideDashboardRole\(/);
+    // Never the stored role alone.
+    expect(AI_CTX).not.toMatch(/const identity = activeRole \?/);
   });
 });
 

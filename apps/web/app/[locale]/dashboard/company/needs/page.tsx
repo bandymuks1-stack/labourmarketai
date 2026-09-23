@@ -5,7 +5,10 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOwnedCompanyById } from "@/lib/company/company-setup";
-import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import {
+  getActiveOrganizationContext,
+  governedActiveOrganizationId,
+} from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
@@ -82,7 +85,8 @@ export default async function CompanyNeedsPage({
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
-    orgContext.activeOrganizationId;
+    // Only a GOVERNED active organization — never an employee-only one.
+    governedActiveOrganizationId(orgContext);
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];

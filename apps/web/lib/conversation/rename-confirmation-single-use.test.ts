@@ -139,7 +139,10 @@ describe("the rename confirmation", () => {
     const prep = await prepareConfirmationAction(ACTION, INPUT);
     expect(prep.ok).toBe(true);
     if (!prep.ok) return;
-    expect(prep.stateFingerprint.startsWith(`rename:${ORG_A}:`)).toBe(true);
+    // Lane A (#1849) binds every confirm-tier fingerprint to the workspace it
+    // was minted in (`workspaceBoundFingerprint`); the rename's own
+    // organization + name digest follows that prefix unchanged.
+    expect(prep.stateFingerprint.startsWith(`ws:${ORG_A}|rename:${ORG_A}:`)).toBe(true);
     expect(prep.stateFingerprint).not.toContain("Old Name");
   });
 });

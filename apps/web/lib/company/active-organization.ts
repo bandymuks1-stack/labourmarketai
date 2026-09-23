@@ -110,6 +110,9 @@ export interface ActiveOrganizationSummary {
   readonly id: string;
   readonly name: string;
   readonly organizationType: NonNullable<WorkspaceInfo["organizationType"]>;
+  /** The person's relationship to it, off the same membership row the chip
+   *  shows (`other` when the row carries none). */
+  readonly relationship: NonNullable<WorkspaceInfo["relationship"]>;
 }
 
 export interface ActiveOrganizationContext {
@@ -179,6 +182,7 @@ export const getActiveOrganizationContext = cache(
             id: active.id,
             name: active.name,
             organizationType: active.organizationType ?? "other",
+            relationship: active.relationship ?? "other",
           }
         : null,
       canSwitch: shouldOfferOrganizationSwitch(orgWorkspaces),
@@ -186,6 +190,28 @@ export const getActiveOrganizationContext = cache(
     };
   },
 );
+
+/**
+ * The active organization id ONLY where the person GOVERNS it (owner or
+ * manager) — the company pages' capability fallback (review P2, #1849).
+ *
+ * `activeOrganizationId` now follows the chip, so it can name an organization
+ * where the person is an employee (or holds some other non-management link).
+ * The company pages used it to read the organization's declared capabilities
+ * when no owned organization mirrors the resolved company; for an
+ * employee-only workspace that rendered OWNER capability UI (education door,
+ * capability settings) in someone else's company. Every write behind that UI
+ * is still gated server-side — this keeps the page from offering it. Pure.
+ */
+export function governedActiveOrganizationId(
+  ctx: Pick<ActiveOrganizationContext, "activeOrganization">,
+): string | null {
+  const active = ctx.activeOrganization;
+  if (!active) return null;
+  return active.relationship === "owner" || active.relationship === "manager"
+    ? active.id
+    : null;
+}
 
 // ── Workspace context (real-user workflow rebuild W1) ────────────────────────
 //

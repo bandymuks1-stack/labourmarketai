@@ -1077,7 +1077,7 @@ const contextList: CapabilityDescriptor = {
         // where a write will land.
         pointerAvailable,
         note: pointerAvailable
-          ? "This is the DURABLE pointer. An organization here is also what an open browser session acts in; only an explicit personal choice made in a browser can differ, because the durable pointer cannot record it."
+          ? "This is the DURABLE pointer. An organization chosen here wins in every session; choosing personal here clears the durable pointer, and a browser that holds its own choice keeps it until switched there."
           : "No durable active-workspace pointer is recorded on this environment: the active workspace shown is the resolver's default, not a stored choice, and a bearer client cannot switch yet.",
       },
     };
@@ -1089,10 +1089,11 @@ const contextSwitch: CapabilityDescriptor = {
   kind: "execute",
   title: "Switch my active workspace",
   description:
-    "Switches the caller's DURABLE active-workspace pointer — the one every " +
-    "session and bearer client resolves against (an organization chosen " +
-    "here is also what an open browser session acts in on its next request), " +
-    "and the caller's acting identity follows their relationship to it. " +
+    "Switches the caller's DURABLE active-workspace pointer: an organization " +
+    "chosen here wins in every session; choosing personal here clears the " +
+    "durable pointer, and a browser that holds its own choice keeps it until " +
+    "switched there. The caller's acting identity follows their relationship " +
+    "to the workspace. " +
     "`workspace` is 'personal', a workspace id, or an organization name " +
     "from the caller's own memberships; an unknown or ambiguous value " +
     "returns the labeled options and switches NOTHING.",

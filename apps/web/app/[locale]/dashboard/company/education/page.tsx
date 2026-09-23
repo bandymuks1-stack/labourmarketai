@@ -4,7 +4,10 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOwnedCompanyById } from "@/lib/company/company-setup";
-import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import {
+  getActiveOrganizationContext,
+  governedActiveOrganizationId,
+} from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
@@ -37,7 +40,9 @@ export default async function CompanyEducationPage({
   const capabilityOrgId =
     (companyRow
       ? orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id
-      : undefined) ?? orgContext.activeOrganizationId;
+      : undefined) ??
+    // Only a GOVERNED active organization — never an employee-only one.
+    governedActiveOrganizationId(orgContext);
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
