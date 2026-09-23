@@ -4,6 +4,7 @@ import { PersonPresence } from "@/components/app/work-world/primitives";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import { listRosterPeople } from "@/lib/organization-evidence/import-core";
 import {
   RosterLinkOfferForm,
@@ -112,7 +113,13 @@ export async function OrganizationRosterSection({
     );
 
   if (!user) return notice("unauthenticated");
-  const caller: DomainCaller = { supabase, userId: user.id, locale };
+  // Cookie transport: carries the session pointer, so the organization named
+  // here is the one the chip shows.
+  const caller: DomainCaller = await withSessionWorkspacePointer({
+    supabase,
+    userId: user.id,
+    locale,
+  });
 
   // ACTING CONTEXT FIRST, exactly as the evidence importer does it: the
   // organization and the authority over it are settled before any row is

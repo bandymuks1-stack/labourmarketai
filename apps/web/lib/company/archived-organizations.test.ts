@@ -29,7 +29,9 @@ vi.mock("next/headers", () => ({
   cookies: async () => ({ get: () => undefined }),
 }));
 vi.mock("@/lib/auth/session-profile", () => ({
-  getSessionProfile: vi.fn(),
+  // The web workspace resolution reads the acting role from the session
+  // profile (lane A #1849); a resolved value keeps that read defined.
+  getSessionProfile: vi.fn(async () => ({ profile: null })),
   readProfileRow: vi.fn(),
 }));
 vi.mock("react", async () => {
@@ -401,7 +403,8 @@ describe("the switch core refuses an archived organization", () => {
   it("NEGATIVE CONTROL: switching into the canonical Nonstop workspace writes the pointer", async () => {
     const { client, calls } = world();
     const result = await switchActiveWorkspaceCore(caller(DONATAS, client), NONSTOP);
-    expect(result).toEqual({ ok: true, workspaceId: NONSTOP });
+    // The core also returns the membership row it validated (lane A #1849).
+    expect(result).toMatchObject({ ok: true, workspaceId: NONSTOP });
     const write = calls.find((c) => c.table === "profiles");
     expect(write && arg(write, "update")).toEqual({ active_organization_id: NONSTOP });
   });

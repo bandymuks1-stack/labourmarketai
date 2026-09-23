@@ -19,6 +19,7 @@ import {
 } from "@/lib/company/active-organization";
 import { workspaceLabeller } from "@/lib/capabilities/workspace-labels";
 import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
+import { followWorkspaceRoleCore } from "@/lib/auth/active-role-core";
 import {
   expressInterestCore,
   interestStateFingerprint,
@@ -1076,7 +1077,7 @@ const contextList: CapabilityDescriptor = {
         // where a write will land.
         pointerAvailable,
         note: pointerAvailable
-          ? "This is the DURABLE pointer. An already-open browser session may hold its own in-session choice until changed there."
+          ? "This is the DURABLE pointer. An organization chosen here wins in every session; choosing personal here clears the durable pointer, and a browser that holds its own choice keeps it until switched there."
           : "No durable active-workspace pointer is recorded on this environment: the active workspace shown is the resolver's default, not a stored choice, and a bearer client cannot switch yet.",
       },
     };
@@ -1088,9 +1089,11 @@ const contextSwitch: CapabilityDescriptor = {
   kind: "execute",
   title: "Switch my active workspace",
   description:
-    "Switches the caller's DURABLE active-workspace pointer — the default " +
-    "new sessions and bearer clients resolve against. An already-open " +
-    "browser session keeps its own in-session choice until changed there. " +
+    "Switches the caller's DURABLE active-workspace pointer: an organization " +
+    "chosen here wins in every session; choosing personal here clears the " +
+    "durable pointer, and a browser that holds its own choice keeps it until " +
+    "switched there. The caller's acting identity follows their relationship " +
+    "to the workspace. " +
     "`workspace` is 'personal', a workspace id, or an organization name " +
     "from the caller's own memberships; an unknown or ambiguous value " +
     "returns the labeled options and switches NOTHING.",
@@ -1168,6 +1171,14 @@ const contextSwitch: CapabilityDescriptor = {
       }
       return { ok: false, code: "unavailable", message: "Workspace switch failed." };
     }
+    // THE ACTING IDENTITY FOLLOWS THE WORKSPACE (owner program 2026-09-23,
+    // d3) — through the SAME role core the web switch runs, from the SAME
+    // verified membership row the switch core just accepted. Before this, a
+    // switch here moved only the pointer, so the web session that read it
+    // afterwards could act as an employer inside a workspace where the person
+    // is an employee. A failed follow does not un-switch the pointer (it is the
+    // truth now); it is reported, never hidden.
+    const followed = await followWorkspaceRoleCore(caller, result.workspace);
     return {
       ok: true,
       data: {
@@ -1175,6 +1186,8 @@ const contextSwitch: CapabilityDescriptor = {
         workspaceId: target.id,
         label: labelOf(target),
         durablePointer: true,
+        actingRole: followed.ok ? followed.role : null,
+        identityFollowed: followed.ok,
       },
     };
   },

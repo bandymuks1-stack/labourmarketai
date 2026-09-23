@@ -166,7 +166,14 @@ describe("company switcher wiring", () => {
 
   it("active org resolution is membership-validated and 42703-degrading (server-side, never localStorage)", () => {
     const src = read("lib/company/active-organization.ts");
-    expect(src).toMatch(/resolveActiveOrganizationId/);
+    // RE-ANCHORED (owner program 2026-09-23): the owned-only reader no longer
+    // resolves on its own (`resolveActiveOrganizationId` over owned orgs, DB
+    // pointer first) — it is a projection of the ONE membership-validated
+    // workspace resolution, which runs `resolveActiveWorkspaceId` under the
+    // one pointer rule. Membership validation is unchanged; it simply happens
+    // in one place.
+    expect(src).toMatch(/resolveActiveWorkspaceId\(/);
+    expect(src).toMatch(/pickStoredWorkspacePointer\(/);
     expect(src).toMatch(/42703/);
     // Usage form only — prose in comments may NAME localStorage to ban it.
     expect(src).not.toMatch(/localStorage\.(get|set|remove)Item|window\.localStorage/);

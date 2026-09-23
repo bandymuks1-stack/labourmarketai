@@ -9,6 +9,7 @@ import {
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
 import { roleContextForAction } from "@/lib/conversation/action-role-context";
+import { useAuthOptional } from "@/lib/auth/context";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
@@ -785,6 +786,11 @@ function ActionButton({
 }) {
   const t = useTranslations("conversation.results");
   const tUi = useTranslations("conversation.forms.ui");
+  const tChat = useTranslations("conversation.chat");
+  // The organization these rows were read for — sent with the write so a
+  // switch made elsewhere meanwhile is refused (`stale_context`) instead of
+  // acting in an organization other than the one on screen.
+  const expectedWorkspaceId = useAuthOptional()?.activeWorkspaceId ?? undefined;
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -813,6 +819,7 @@ function ActionButton({
       const res = await dispatchWorkerAction(actionId, input, {
         locale,
         confirmationToken,
+        expectedWorkspaceId,
       });
       if (res.ok) {
         trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
@@ -825,22 +832,24 @@ function ActionButton({
         return;
       }
       setError(
-        res.code === "invalid"
-          ? tUi("errorInvalid")
-          : res.code === "needs_migration"
-            ? tUi("errorNeedsMigration")
-            : res.code === "conflict"
-              ? tUi("errorConflict")
-              : res.code === "nothing_to_confirm"
-                ? t("actionNothingToConfirm")
-                : res.code === "reason_required"
-                  ? t("actionReasonRequired")
-                  : res.code === "not_authorized"
-                    ? t("actionNotAuthorized")
-                    : tUi("errorGeneric"),
+        res.code === "stale_context"
+          ? tChat("staleContext")
+          : res.code === "invalid"
+            ? tUi("errorInvalid")
+            : res.code === "needs_migration"
+              ? tUi("errorNeedsMigration")
+              : res.code === "conflict"
+                ? tUi("errorConflict")
+                : res.code === "nothing_to_confirm"
+                  ? t("actionNothingToConfirm")
+                  : res.code === "reason_required"
+                    ? t("actionReasonRequired")
+                    : res.code === "not_authorized"
+                      ? t("actionNotAuthorized")
+                      : tUi("errorGeneric"),
       );
     });
-  }, [actionId, input, locale, needsToken, onDone, t, tUi]);
+  }, [actionId, input, locale, needsToken, onDone, t, tUi, tChat, expectedWorkspaceId]);
 
   return (
     <span className="flex flex-col gap-1">

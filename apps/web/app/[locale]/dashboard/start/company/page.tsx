@@ -127,7 +127,10 @@ export default async function CompanyStartPage({
   if (requestedOrg !== "") {
     requestedOrgState = "not-available";
     if (!migrationNeeded) {
-      const memberships = await getWorkspaceContext("company");
+      // Only the membership LIST is used (the active id is replaced below),
+      // so the request's one workspace resolution serves it (lane A: the
+      // resolver takes no caller-chosen identity).
+      const memberships = await getWorkspaceContext();
       const requested = await resolveEmployerCompanyCore(
         { supabase, userId: user.id },
         { ...memberships, activeWorkspaceId: requestedOrg },

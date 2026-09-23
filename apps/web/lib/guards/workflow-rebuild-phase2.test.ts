@@ -36,10 +36,20 @@ describe("W4 — dispatcher hands the active workspace to every executor", () =>
     const src = read("lib/conversation/dispatch.ts");
     expect(src).toMatch(/getWorkspaceContext\(/);
     expect(src).toMatch(/workspace/);
-    // Employer actions resolve with the company-identity fallback.
-    expect(src).toMatch(/actionId\.startsWith\("company\."\)/);
-    // The workspace is NEVER read from the caller's input.
-    expect(src).not.toMatch(/opts\?\.workspace|input\.workspace/);
+    // RE-ANCHORED (owner program 2026-09-23). This pinned a SECOND read with a
+    // forced identity ("company" for employer actions) — which, with no stored
+    // pointer and one organization, could name a different workspace than the
+    // chip in the same request, and which no executor ever read. The
+    // dispatcher now reads the ONE session resolution, and every executor gets
+    // that same answer.
+    expect(src).toMatch(/const ws = await getWorkspaceContext\(\);/);
+    expect(src).not.toMatch(/getWorkspaceContext\(isEmployerAction/);
+    expect(src).toMatch(/const workspace: ExecWorkspace = \{/);
+    // The workspace is NEVER read from the caller's input. The client's
+    // `expectedWorkspaceId` is compared, never used as authority.
+    expect(src).not.toMatch(/opts\?\.workspace\b|input\.workspace/);
+    expect(src).toMatch(/isStaleWorkspaceContext\(opts\?\.expectedWorkspaceId, ws\.activeWorkspaceId\)/);
+    expect(src).not.toMatch(/organizationId:\s*opts\?\.expectedWorkspaceId/);
   });
 
   it("the executor contract carries the workspace type", () => {

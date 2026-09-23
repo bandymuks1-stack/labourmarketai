@@ -181,7 +181,9 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   // preselects the context the user is already working in and only ASKS when
   // real ambiguity remains. Request-cached read; honest no-op when the
   // workspace is personal or matches nothing.
-  const workspace = await getWorkspaceContext("person");
+  // The SAME resolution the chip renders — no caller-chosen identity, so the
+  // default here can never name a different workspace than the header does.
+  const workspace = await getWorkspaceContext();
   const activeOrgId = workspace.activeWorkspaceId;
   const ordered = [...engagements].sort(
     (a, b) =>

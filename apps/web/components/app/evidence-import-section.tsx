@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import { locales } from "@/lib/i18n/config";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import {
   ATTESTATION_ROLES,
   SOURCE_KINDS,
@@ -210,7 +211,13 @@ export async function EvidenceImportSection({
     );
 
   if (!user) return notice("unauthenticated");
-  const caller: DomainCaller = { supabase, userId: user.id, locale };
+  // Cookie transport: carries the session pointer, so the organization named
+  // here is the one the chip shows.
+  const caller: DomainCaller = await withSessionWorkspacePointer({
+    supabase,
+    userId: user.id,
+    locale,
+  });
 
   // ACTING CONTEXT FIRST — no read happens until the organization and the
   // authority to import for it are both established, so a personal workspace

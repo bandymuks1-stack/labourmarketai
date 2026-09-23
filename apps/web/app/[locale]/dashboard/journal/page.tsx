@@ -246,7 +246,7 @@ export default async function JournalPage({
       .eq("status", "active")
       .in("relationship_slug", HISTORY_RELATIONSHIPS)
       .order("is_primary", { ascending: false }),
-    getWorkspaceContext("person"),
+    getWorkspaceContext(),
   ]);
   const submitterName =
     ownProfile?.full_name ??

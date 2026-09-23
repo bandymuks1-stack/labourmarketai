@@ -39,17 +39,39 @@ describe("workspace context — canonical extension, not a parallel structure", 
   });
 
   it("switching persists via the EXISTING server-side pointer actions only", () => {
+    // RE-ANCHORED (owner program 2026-09-23): the client no longer picks
+    // between `clearActiveOrganization` and `switchActiveOrganization` and
+    // then fires `switchActiveRole` — it makes ONE server call,
+    // `switchWorkspaceAction`, which runs the SAME personal / organization
+    // pointer commits those actions run (pinned below on the server side).
     const src = read("lib/auth/context.tsx");
     expect(src).toMatch(/switchWorkspace/);
-    expect(src).toMatch(/clearActiveOrganization/);
-    expect(src).toMatch(/PERSONAL_WORKSPACE_ID/);
+    expect(src).toMatch(/import \{ switchWorkspaceAction \} from "@\/lib\/company\/organization-actions"/);
     // Never a client-side org store: the switch goes through server actions.
     expect(src).not.toMatch(/localStorage/);
+    const actions = read("lib/company/organization-actions.ts");
+    const one = actions.slice(actions.indexOf("export async function switchWorkspaceAction"));
+    // The personal space is the sentinel, committed by the SAME helper
+    // `clearActiveOrganization` uses; an organization by the SAME helper
+    // `switchActiveOrganization` uses.
+    expect(one).toMatch(/workspaceId === PERSONAL_WORKSPACE_ID/);
+    expect(one).toMatch(/await commitPersonalPointer\(caller\)/);
+    expect(one).toMatch(/await commitOrganizationPointer\(caller, workspaceId\)/);
+    const clear = actions.slice(
+      actions.indexOf("export async function clearActiveOrganization"),
+      actions.indexOf("export async function switchWorkspaceAction"),
+    );
+    expect(clear).toMatch(/commitPersonalPointer\(/);
+    // Exactly ONE layout revalidation in the one switch.
+    expect(one.match(/revalidatePath\(/g)?.length).toBe(1);
   });
 
   it("the dashboard layout resolves the workspace for EVERY identity", () => {
     const layout = read("app/[locale]/dashboard/layout.tsx");
-    expect(layout).toMatch(/getWorkspaceContext\(identity\)/);
+    // No identity argument: the resolver reads it from the session profile,
+    // so the layout and every other caller get ONE answer per request.
+    expect(layout).toMatch(/getWorkspaceContext\(\)/);
+    expect(layout).not.toMatch(/getWorkspaceContext\(identity\)/);
     expect(layout).toMatch(/workspaces:/);
     expect(layout).toMatch(/activeWorkspaceId:/);
     expect(layout).toMatch(/workspacePointerAvailable:/);
@@ -87,16 +109,27 @@ describe("workspace chip — always-visible context beside the conversation", ()
     expect(actions).toMatch(/ACTIVE_WORKSPACE_COOKIE/);
     expect(actions).toMatch(/httpOnly: true/);
     expect(actions).not.toMatch(/localStorage\.(get|set|remove)Item|window\.localStorage/);
-    // Membership is validated BEFORE the cookie is written: the org-switch
-    // arm runs the shared core (G4) first and only then sets the pointer.
+    // Membership is validated BEFORE the cookie is written: the org-pointer
+    // commit runs the shared core (G4) first and only then sets the pointer.
+    // RE-ANCHORED (2026-09-23) onto `commitOrganizationPointer` — the ONE
+    // org commit both `switchActiveOrganization` and `switchWorkspaceAction`
+    // delegate to (the order used to live inline in the former).
     const switchArm = actions.slice(
+      actions.indexOf("async function commitOrganizationPointer"),
+      actions.indexOf("async function commitPersonalPointer"),
+    );
+    const cookieAt = switchArm.search(/jar\.set\(\s*ACTIVE_WORKSPACE_COOKIE/);
+    expect(cookieAt).toBeGreaterThan(-1);
+    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeGreaterThan(-1);
+    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeLessThan(cookieAt);
+    // …and the org switch actions delegate to it.
+    const legacyArm = actions.slice(
       actions.indexOf("export async function switchActiveOrganization"),
       actions.indexOf("export async function clearActiveOrganization"),
     );
-    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeGreaterThan(-1);
-    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeLessThan(
-      switchArm.indexOf("jar.set(ACTIVE_WORKSPACE_COOKIE"),
-    );
+    expect(legacyArm).toMatch(/commitOrganizationPointer\(/);
+    // The cookie carries the user it belongs to.
+    expect(actions).toMatch(/encodeWorkspacePointerCookie\(caller\.userId, organizationId\)/);
     const core = read("lib/company/workspace-switch-core.ts");
     expect(core).toMatch(/isMember/);
     const resolver = read("lib/company/active-organization.ts");

@@ -140,7 +140,19 @@ describe("Guard: superadmin gate reads both signals", () => {
 });
 
 describe("Guard: switchActiveRole self-heals the admin signal", () => {
-  const actions = read("lib/auth/actions.ts");
+  // RE-ANCHORED (owner program 2026-09-23): the admin self-heal moved VERBATIM
+  // with the rest of the role write into the shared role core, which the web
+  // role switch, the web workspace switch and the MCP `context.switch` all
+  // run. `switchActiveRole` must still delegate to it — asserted first, so a
+  // future inline copy cannot pass by accident.
+  const wrapper = read("lib/auth/actions.ts");
+  const actions = read("lib/auth/active-role-core.ts");
+
+  it("switchActiveRole runs the shared role core", () => {
+    expect(wrapper).toMatch(/setActiveRoleCore\(\{ supabase, userId: user\.id \}, role\)/);
+    // NEGATIVE CONTROL: no second, inline role write in the wrapper.
+    expect(wrapper).not.toMatch(/\.update\(\{\s*active_role:\s*role\s*\}\)/);
+  });
 
   it("reads current active_role before overwriting", () => {
     expect(actions).toMatch(

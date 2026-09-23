@@ -40,6 +40,7 @@ import {
   rowsFromGrid,
 } from "@/lib/organization-evidence/parse-tabular";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { activeLocales } from "@/lib/i18n/config";
 import { getLocale } from "next-intl/server";
@@ -96,7 +97,10 @@ async function caller(): Promise<DomainCaller | null> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return user ? { supabase, userId: user.id } : null;
+  // The cookie transport carries this browser's session pointer, so an
+  // import with no named organization resolves the one the chip shows — it
+  // used to read the durable pointer alone and could name another.
+  return user ? withSessionWorkspacePointer({ supabase, userId: user.id }) : null;
 }
 
 /** ONE translation of the core's tagged failure. Each branch stays a distinct
