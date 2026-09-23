@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
@@ -391,54 +392,10 @@ const journalWorkIntelligenceGet: CapabilityDescriptor = {
 // (Confirmation wiring lives in ./confirmable — ONE minting/verification
 // semantics for every bridged write capability, G4 tail wagon 1.)
 
-/**
- * The confirmation token's state fingerprint is the caller's JOURNAL CHAIN
- * HEAD — which is what makes the token genuinely ONE-TIME: a successful
- * confirm appends an entry, the head moves, and a replay of the same token
- * (a duplicate retry, a stolen token, a double-tap) fails as `stale_state`
- * instead of writing a second entry. A constant fingerprint here would have
- * made "one-time" a five-minute lie.
- */
-async function journalChainFingerprint(
-  caller: CapabilityCaller,
-): Promise<{ ok: true; fingerprint: string } | { ok: false; result: ExecResult }> {
-  // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
-  const workerRead = await readWorkerCoreRow(caller);
-  if (!workerRead.ok) {
-    return {
-      ok: false,
-      result: { ok: false, code: "unavailable", message: "Worker read failed." },
-    };
-  }
-  const worker = workerRead.value;
-  if (!worker) {
-    return {
-      ok: false,
-      result: {
-        ok: false,
-        code: "no_worker_profile",
-        message: "This account has no worker profile, so it has no Work Journal.",
-      },
-    };
-  }
-  const { data: head, error: headError } = await caller.supabase
-    .from("journal_entries")
-    .select("hash_self")
-    .eq("worker_id", worker.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (headError) {
-    return {
-      ok: false,
-      result: { ok: false, code: "unavailable", message: "Journal read failed." },
-    };
-  }
-  return {
-    ok: true,
-    fingerprint: `journal-head:v1:${worker.id}:${head?.hash_self ?? "genesis"}`,
-  };
-}
+// The confirmation token's state fingerprint is the caller's JOURNAL CHAIN
+// HEAD (`journalChainFingerprint`, lib/journal/journal-chain-fingerprint) —
+// the ONE fingerprint the conversation dispatcher binds `worker.log-work` to
+// as well, so both transports' tokens are one-time against the same fact.
 
 /**
  * A CONFIRMATION HASH MUST NOT DEPEND ON null-vs-absent. The draft side may

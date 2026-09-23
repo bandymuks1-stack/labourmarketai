@@ -217,8 +217,10 @@ const SEES_EVERY_ROW: Record<string, string> = {
 
   // Integrity: the append-only head must move when ANY row is appended,
   // including one later deleted or superseded — otherwise a confirm token
-  // stops being one-time and a replay writes a second entry.
-  "lib/capabilities/registry.ts":
+  // stops being one-time and a replay writes a second entry. (Moved out of
+  // lib/capabilities/registry.ts 2026-09-23 so the conversation dispatcher
+  // binds `worker.log-work` to the same head — one reader, both transports.)
+  "lib/journal/journal-chain-fingerprint.ts":
     "journal chain fingerprint — a one-time token's head must count every append",
 
   // Writers and ownership lookups act ON a row; they must be able to see the

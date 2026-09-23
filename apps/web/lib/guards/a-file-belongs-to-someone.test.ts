@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
+  attachAnswersForFile,
   readFileIntent,
   routeFileIntent,
+  SELF_SCOPED_CAPABILITIES,
   type FileActorContext,
   type FileKind,
   type FileSubject,
@@ -49,7 +51,17 @@ const ACTORS: readonly FileActorContext[] = [
 ];
 
 describe("THE INVARIANT: only `self` reaches a self-scoped door", () => {
-  it("no other subject can reach the self CV importer or the self document door, in ANY context", () => {
+  it("the self-scoped set names every door that writes into the caller's own record", () => {
+    // Owner P0 2026-09-23 added the journal photo door. A self door missing
+    // from this set would slip past the exhaustive check below.
+    expect([...SELF_SCOPED_CAPABILITIES].sort()).toEqual([
+      "self_cv_import",
+      "self_document",
+      "self_work_evidence",
+    ]);
+  });
+
+  it("no other subject can reach a self-scoped door (CV, document, work photo), in ANY context", () => {
     // Exhaustive over subject x kind x actor — 90 combinations. An example
     // test would pass while some unlisted combination leaked.
     const leaks: string[] = [];
@@ -58,8 +70,7 @@ describe("THE INVARIANT: only `self` reaches a self-scoped door", () => {
         for (const actor of ACTORS) {
           const route = routeFileIntent({ subject, kind, documentTypeSlug: null }, actor);
           if (route.kind !== "capability") continue;
-          const selfScoped =
-            route.capability === "self_cv_import" || route.capability === "self_document";
+          const selfScoped = SELF_SCOPED_CAPABILITIES.has(route.capability);
           if (selfScoped && subject !== "self") {
             leaks.push(`${subject}/${kind}/${actor.identity} -> ${route.capability}`);
           }
@@ -67,6 +78,38 @@ describe("THE INVARIANT: only `self` reaches a self-scoped door", () => {
       }
     }
     expect(leaks, "a non-self file reached a self-scoped door").toEqual([]);
+  });
+
+  it("the paperclip's answers obey the same invariant — for every picked type and actor", () => {
+    // A picked file states no subject; its door answers are self-STATED
+    // intents the router itself names, and nothing else reaches a self door.
+    const leaks: string[] = [];
+    const types = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "image/gif",
+    ];
+    for (const type of types) {
+      for (const actor of ACTORS) {
+        for (const a of attachAnswersForFile({ type, name: "f" }, actor)) {
+          if (a.kind === "surface") continue;
+          const route = routeFileIntent(a.intent, actor);
+          const reachesSelf =
+            route.kind === "capability" && SELF_SCOPED_CAPABILITIES.has(route.capability);
+          if (reachesSelf && a.intent.subject !== "self") {
+            leaks.push(`${type}/${actor.identity}: ${a.intent.subject}`);
+          }
+          if (a.kind === "door" && actor.identity !== "person") {
+            leaks.push(`${type}/${actor.identity}: a personal door offered in an organization`);
+          }
+        }
+      }
+    }
+    expect(leaks).toEqual([]);
   });
 
   it("an UNSTATED owner always asks — it never defaults to the uploader", () => {
@@ -188,6 +231,13 @@ describe("no second import system was built", () => {
     expect(read("lib/organization-evidence/import-core.ts")).toContain("commitImport");
     expect(MODULE).toContain("self_cv_import");
     expect(MODULE).toContain("organization_evidence_import");
+    // The journal photo door: the work-log flow uploads the photo against the
+    // entry it saved first, through the one journal photo module.
+    expect(MODULE).toContain("self_work_evidence");
+    expect(read("lib/journal/photo-upload.ts")).toContain("export async function uploadJournalEntryPhoto");
+    expect(read("components/app/conversation/worker-worklog-flow.tsx")).toContain(
+      "uploadJournalEntryPhoto(entryId, photoFile)",
+    );
   });
 });
 

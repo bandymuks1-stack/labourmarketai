@@ -32,6 +32,7 @@ import {
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { resolveRenameTarget } from "@/lib/company/organization-rename";
 import { interestStateFingerprint } from "@/lib/opportunities/interest";
+import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { invitationStateFingerprint } from "@/lib/invitations/attention";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
@@ -221,6 +222,30 @@ async function stateFingerprint(
         ? "unnamed"
         : createHash("sha256").update(`org-name:v1:${target.currentName}`).digest("hex").slice(0, 32);
     return `rename:${target.organizationId}:${nameDigest}`;
+  }
+  if (actionId === "worker.log-work") {
+    /**
+     * EXACTLY ONE RECORD PER CONFIRMATION (owner P0 2026-09-23). This used to
+     * fall through to "n/a", so a `worker.log-work` token was spendable again
+     * and again for its whole TTL — only the form's disabled button stood
+     * between a double-tap or a retried request and a second journal entry.
+     *
+     * THE shared fingerprint (lib/journal/journal-chain-fingerprint): the
+     * caller's journal CHAIN HEAD, the same fact the MCP `journal.confirm`
+     * binds to. A save appends an entry and moves the head, so re-submitting
+     * the same token re-derives a different fingerprint and is answered
+     * `stale_confirmation` before the executor runs — the engagement.end
+     * precedent above. Two forms confirmed back-to-back: the second is stale
+     * and simply prepares again.
+     *
+     * A failed read yields a fixed `journal-head:<code>` rather than a head.
+     * The replay guard therefore holds between two reads that succeed; a
+     * read failing at both ends degrades to the previous behaviour (the
+     * form's disabled button) — never to a fabricated success.
+     */
+    const head = await journalChainFingerprint({ supabase, userId });
+    if (head.ok) return head.fingerprint;
+    return `journal-head:${head.result.ok ? "unavailable" : head.result.code}`;
   }
   return "n/a";
 }

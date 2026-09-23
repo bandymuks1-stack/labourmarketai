@@ -165,6 +165,27 @@ export const workerLogWorkSchema = z.object({
   siteName: z.string().trim().max(200).nullable().optional(),
 });
 
+/** Why the log-work write would refuse this evidence text, or `null`. */
+export type LogWorkNotesRefusal = "too-short" | "too-long" | "meta-request";
+
+/**
+ * THE ONE NOTES RULE, readable before the round-trip (owner P0 2026-09-23).
+ *
+ * The work-log form used to run its OWN, stricter rule — a keyword
+ * recogniser — and refused "Buvau pas klientą" with a red line while this
+ * schema accepted it. The verdict below is not a copy of the rule: it runs
+ * `workerLogWorkSchema.shape.notes` itself and only names which part refused,
+ * so the form and the write cannot disagree about a sentence again.
+ */
+export function logWorkNotesRefusal(notes: string): LogWorkNotesRefusal | null {
+  const parsed = workerLogWorkSchema.shape.notes.safeParse(notes);
+  if (parsed.success) return null;
+  const issue = parsed.error.issues[0];
+  if (issue?.code === "too_small") return "too-short";
+  if (issue?.code === "too_big") return "too-long";
+  return "meta-request";
+}
+
 /** Map of action id → schema for the executable worker actions. */
 export const WORKER_ACTION_SCHEMAS = {
   "worker.add-work-history": workerAddWorkHistorySchema,

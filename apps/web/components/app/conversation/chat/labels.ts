@@ -410,6 +410,11 @@ const WORKLOG_KEYS = [
   "pipelineFailedNote",
   // The evidence carries no work content — ask, never save the request.
   "errorNoWorkContent",
+  // Owner P0 2026-09-23: the form refuses only what the server refuses —
+  // the 4000-character ceiling by name, and a NEUTRAL line (not an error)
+  // when no time, place or activity was recognised.
+  "errorNotesTooLong",
+  "noWorkSignalHint",
   // What the save will record as work time (issue #1689).
   "recordTitle",
   "recordNoActivity",

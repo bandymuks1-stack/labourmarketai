@@ -198,7 +198,12 @@ test.describe("W7 slice 2 — photo evidence in the conversation", () => {
     await page.close();
   });
 
-  test("the paperclip routes by context, and asks when it does not know", async ({ browser }) => {
+  test("the paperclip opens a file picker, asks ONCE, and a second pick joins the SAME form", async ({
+    browser,
+  }) => {
+    // Owner P0 2026-09-23 replaced the old contract this test pinned ("a
+    // second click opens the photo form directly") — that click opened no
+    // picker and pushed ANOTHER savable form every time.
     const page = await loginAsWorker(browser);
     // Same hydration gate as sendChatMessage: the attach button is inert
     // until React attaches, so prove interactivity before clicking it.
@@ -211,20 +216,45 @@ test.describe("W7 slice 2 — photo evidence in the conversation", () => {
     }).toPass({ timeout: 120_000 });
     await composer.fill("");
 
-    // UNKNOWN context → it ASKS rather than guessing.
-    await page.getByTestId("composer-attach").first().click();
-    const photoChip = page.getByRole("button", { name: /Darbo nuotrauka/i });
-    await expect(photoChip).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole("button", { name: /^CV$/i }).first()).toBeVisible();
+    const png = {
+      name: "site.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        "base64",
+      ),
+    };
 
-    // Choosing "work photo" opens the photo-led work log — not the CV importer.
+    // ONE click → a real file chooser; the picked photo shows as ONE chip and
+    // the chat ASKS what it is for, once, rather than guessing.
+    const [chooser] = await Promise.all([
+      page.waitForEvent("filechooser"),
+      page.getByTestId("composer-attach").first().click(),
+    ]);
+    await chooser.setFiles(png);
+    await expect(page.getByTestId("composer-attachment")).toHaveCount(1);
+    await expect(page.getByText("Kam skirtas šis failas?")).toHaveCount(1);
+    const photoChip = page.getByRole("button", { name: /^Mano darbo nuotrauka$/ });
+    await expect(photoChip).toBeVisible({ timeout: 30_000 });
+    // A photo is never offered to the CV reader.
+    await expect(page.getByRole("button", { name: /^Mano gyvenimo aprašymas \(CV\)$/ })).toHaveCount(0);
+
+    // Choosing "work photo" opens the photo-led work log WITH the photo in it
+    // — not the CV importer.
     await photoChip.click();
-    await expect(page.getByTestId("worklog-photo-field")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("worklog-photo-preview")).toBeVisible({ timeout: 60_000 });
     await expect(page.getByTestId("conversation-cv-flow")).toHaveCount(0);
 
-    // Now the context IS known: the paperclip goes straight to the photo path.
-    await page.getByTestId("composer-attach").first().click();
-    await expect(page.getByTestId("worklog-photo-field").first()).toBeVisible({ timeout: 60_000 });
+    // A second pick while that form is open goes INTO it: still one form,
+    // still one question.
+    const [again] = await Promise.all([
+      page.waitForEvent("filechooser"),
+      page.getByTestId("composer-attach").first().click(),
+    ]);
+    await again.setFiles({ ...png, name: "site-2.png" });
+    await expect(page.getByTestId("worklog-flow")).toHaveCount(1);
+    await expect(page.getByText("Kam skirtas šis failas?")).toHaveCount(1);
+    await expect(page.getByTestId("worklog-photo-preview")).toBeVisible({ timeout: 60_000 });
 
     await page.close();
   });
