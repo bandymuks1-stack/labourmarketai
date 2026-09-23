@@ -29,8 +29,11 @@ import { spawn } from "node:child_process";
 import { join } from "node:path";
 
 import {
+  LOCAL_STACK_UNAVAILABLE_EXIT_CODE,
+  LocalStackUnavailableError,
   NonLocalTargetError,
   assertLocalSupabaseTarget,
+  formatLocalStackUnavailable,
 } from "../lib/testing/local-supabase-guard";
 import {
   describeLocalTarget,
@@ -48,6 +51,20 @@ function main(): void {
   try {
     local = resolveLocalSupabaseEnv(REPO_ROOT);
   } catch (err) {
+    if (err instanceof LocalStackUnavailableError) {
+      // Not a refusal: there is no stack, so there is no target to refuse.
+      console.error(`\n[acceptance] ${formatLocalStackUnavailable(err)}\n`);
+      process.exitCode = LOCAL_STACK_UNAVAILABLE_EXIT_CODE;
+      return;
+    }
+    if (err instanceof NonLocalTargetError) {
+      fail(
+        `${err.message}\n\n` +
+          "Acceptance mode never runs against a cloud project. Nothing was " +
+          "started and no request was made.",
+      );
+      return;
+    }
     fail(
       "Could not resolve the local Supabase stack. Start it first:\n" +
         "  npx supabase start\n\n" +

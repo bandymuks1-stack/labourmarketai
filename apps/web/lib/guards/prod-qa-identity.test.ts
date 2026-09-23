@@ -4,6 +4,10 @@ import { describe, expect, it } from "vitest";
 
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import {
+  assertBareStorageFilename,
+  assertIgnoredStorageTarget,
+} from "@/lib/testing/e2e-storage-target";
+import {
   PRODUCTION_ORIGIN,
   PROD_QA_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
@@ -163,6 +167,59 @@ describe("no secret ever reaches a log, a report or an artefact", () => {
   it("the minted session file is gitignored", () => {
     const ignore = readFileSync(join(WEB, "..", "..", ".gitignore"), "utf8");
     expect(ignore).toContain("/apps/web/tests/e2e/.storage-state.prod-qa.json");
+  });
+});
+
+/**
+ * #1842 ON THE PRODUCTION MINT. The file it writes is a live PRODUCTION
+ * session, so "it is gitignored" is proven by `git check-ignore` at run time —
+ * the same guards the local mint uses — and not left to the `.gitignore` line
+ * asserted above. The ORDER is the property: both guards must complete before
+ * `generateLink`, or a refusal is a refusal with a live token already minted.
+ */
+describe("the production mint proves its output path is ignored BEFORE it mints", () => {
+  const src = read(MINT);
+  const at = (needle: string): number => {
+    const i = src.indexOf(needle);
+    expect(i, `expected to find "${needle}" in ${MINT}`).toBeGreaterThan(-1);
+    return i;
+  };
+
+  it("bare name -> production target -> ignored target -> mint -> write", () => {
+    const name = at("assertBareStorageFilename(OUT_FILENAME)");
+    const prodTarget = at("assertProdQaTarget({");
+    const ignored = at("assertIgnoredStorageTarget({");
+    const mint = at("admin.auth.admin.generateLink");
+    const write = at("writeFileSync(out.path,");
+
+    expect(name).toBeLessThan(prodTarget);
+    expect(prodTarget).toBeLessThan(ignored);
+    expect(ignored).toBeLessThan(mint);
+    expect(mint).toBeLessThan(write);
+  });
+
+  it("writes only to the guarded target — no raw path survives", () => {
+    // A second, unguarded `join(... ".storage-state.prod-qa.json")` would let a
+    // later edit write around the guard.
+    expect(src).not.toMatch(/writeFileSync\(OUT\b/);
+    expect(src.match(/writeFileSync\(/g)).toHaveLength(1);
+  });
+
+  it("ANTI-VACUITY: the real output name passes the real git decision", () => {
+    // Without this, a guard that refused EVERY name would pass the order test
+    // above while making the production gate impossible to run.
+    const filename = /const OUT_FILENAME = "([^"]+)";/.exec(src)?.[1];
+    expect(filename).toBe(".storage-state.prod-qa.json");
+    const target = assertIgnoredStorageTarget({
+      filename: assertBareStorageFilename(filename),
+      e2eDir: join(WEB, "tests", "e2e"),
+    });
+    expect(target.ignoreRule).toContain(".gitignore:");
+  });
+
+  it("refuses by the #1842 code, before any session exists", () => {
+    expect(src).toContain("UnsafeStorageTargetError");
+    expect(src).toContain("STORAGE_TARGET_REFUSAL_CODE");
   });
 });
 

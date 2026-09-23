@@ -36,6 +36,52 @@ export class NonLocalTargetError extends Error {
 }
 
 /**
+ * AVAILABILITY, NOT SECURITY. Printed when there is no local stack to talk to
+ * at all — Docker Desktop is off, `npx supabase start` was never run, or the
+ * local GoTrue does not answer.
+ *
+ * WHY IT IS SEPARATE. Until 2026-09-23 a stopped stack surfaced as
+ * REFUSED_NON_LOCAL_E2E_SESSION_MINT, because "nothing resolved" was routed
+ * through `assertLocalSupabaseTarget({ url: undefined })`. A developer with
+ * Docker off was told the tooling had refused a production target — a
+ * security alarm for what was a missing dependency. The two failures need
+ * different actions, so they get different codes.
+ *
+ * It is NEVER raised for a resolved target. Any URL that resolves still goes
+ * through `assertLocalSupabaseTarget` and refuses with REFUSAL_CODE exactly as
+ * before; this code only ever means "nothing was resolved to check".
+ */
+export const LOCAL_STACK_UNAVAILABLE_CODE =
+  "LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER";
+
+/** Distinct from the refusal's exit 1, so a wrapper can tell the two apart. */
+export const LOCAL_STACK_UNAVAILABLE_EXIT_CODE = 3;
+
+/** What to do instead — the part of the message that does not vary. */
+export const LOCAL_STACK_UNAVAILABLE_HELP =
+  "This is a LOCAL INTEGRATION test: it needs Docker Desktop running and the " +
+  "local stack started (`npx supabase start`, repo root). UNIT / STATIC / " +
+  "GUARD tests do not need Docker — run `pnpm -F web test`. Production is " +
+  "verified through the prod-qa chain (`pnpm -C apps/web prod-qa:gate`), " +
+  "never by pointing local tooling at production.";
+
+export class LocalStackUnavailableError extends Error {
+  readonly code = LOCAL_STACK_UNAVAILABLE_CODE;
+
+  constructor(detail: string) {
+    super(`${detail}\n${LOCAL_STACK_UNAVAILABLE_HELP}`);
+    this.name = "LocalStackUnavailableError";
+  }
+}
+
+/** The one line every caller prints: `<CODE> — <message>`. */
+export function formatLocalStackUnavailable(
+  err: LocalStackUnavailableError,
+): string {
+  return `${err.code} — ${err.message}`;
+}
+
+/**
  * Never print a key. Shows only enough to correlate two values in a log.
  * A short or empty key degrades to a constant so length is not leaked either.
  */

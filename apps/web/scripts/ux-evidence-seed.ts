@@ -16,7 +16,13 @@
  */
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
-import { NonLocalTargetError, REFUSAL_CODE } from "../lib/testing/local-supabase-guard";
+import {
+  LOCAL_STACK_UNAVAILABLE_EXIT_CODE,
+  LocalStackUnavailableError,
+  NonLocalTargetError,
+  REFUSAL_CODE,
+  formatLocalStackUnavailable,
+} from "../lib/testing/local-supabase-guard";
 import { describeLocalTarget, resolveLocalSupabaseEnv } from "../lib/testing/local-supabase-env";
 
 const REPO_ROOT = join(__dirname, "..", "..", "..");
@@ -93,6 +99,10 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
+  if (err instanceof LocalStackUnavailableError) {
+    console.error(`[ux-evidence-seed] ${formatLocalStackUnavailable(err)}`);
+    process.exit(LOCAL_STACK_UNAVAILABLE_EXIT_CODE);
+  }
   if (err instanceof NonLocalTargetError) {
     console.error(`[ux-evidence-seed] ${REFUSAL_CODE} — nothing was created.`);
     console.error(err.message);
