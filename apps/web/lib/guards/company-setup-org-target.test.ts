@@ -42,6 +42,9 @@ function orgBranch(src: string): string {
   return start >= 0 && end > start ? code.slice(start, end) : "";
 }
 
+/** The page's read of `?org=` — the whole statement (see `violations`). */
+const ORG_READ = 'const requestedOrg = typeof sp.org === "string" ? sp.org.trim() : "";';
+
 /** The rendered `no-company-profile` state: heading + body, nothing to click. */
 function noProfileSectionViolations(src: string): string[] {
   const code = codeOf(src);
@@ -60,12 +63,14 @@ function noProfileSectionViolations(src: string): string[] {
 function violations(src: string): string[] {
   const out: string[] = [];
   const code = codeOf(src);
-  // Plain-literal probes are substring checks, not regexes: this is a source
-  // scan, and a `/sp\.org/` regex reads to CodeQL like an unanchored hostname
-  // check (js/regex/missing-regexp-anchor) — a false positive, avoided rather
-  // than dismissed.
+  // Plain-literal probes are substring checks on WHOLE statements. This is a
+  // source scan, but a bare `sp` + `.org` probe reads to CodeQL like a
+  // hostname check — as a regex (js/regex/missing-regexp-anchor) and as a
+  // bare substring (js/incomplete-url-substring-sanitization). Both are false
+  // positives here, avoided rather than dismissed: the probe names the full
+  // read, which is also the stronger claim (the param becomes `requestedOrg`).
   if (!code.includes("org?: string")) out.push("searchParams does not declare `org`");
-  if (!code.includes("sp.org")) out.push("the page never reads `org`");
+  if (!code.includes(ORG_READ)) out.push("the page never reads `org`");
   const branch = orgBranch(src);
   if (!branch) {
     out.push("no exclusive `org` branch ahead of the legacy target chain");
@@ -134,6 +139,7 @@ describe("?org= names the ONE organization the setup form may touch", () => {
       expect(violations(mutated).length, `undetected: ${fallback}`).toBeGreaterThan(0);
     }
     // …and a page that stops reading `org` at all is caught too.
-    expect(violations(PAGE.replaceAll("sp.org", "sp.new")).length).toBeGreaterThan(0);
+    expect(PAGE.includes(ORG_READ)).toBe(true);
+    expect(violations(PAGE.replace(ORG_READ, 'const requestedOrg = "";')).length).toBeGreaterThan(0);
   });
 });
