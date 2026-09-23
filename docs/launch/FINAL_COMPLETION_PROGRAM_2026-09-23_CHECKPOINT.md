@@ -6,12 +6,11 @@
 > worktrees, production, DB. This file is the index to that truth.
 > PUBLIC REPO: this file carries ids and roles only — no personal names, e-mails
 > or contact data (those live only in private operator memory).
-> Updated: 2026-09-23 ~14:40Z (checkpoint #2 — after a session-limit stop at
-> ~13:30Z and resume at 14:14Z).
+> Updated: 2026-09-23 ~15:50Z (checkpoint #3).
 
 ## A. BASELINE
 - Repo `bandymuks1-stack/labourmarketai`; canonical root `C:\Users\Mano\Documents\labourmarketai`.
-- Program baseline `06d5bb199` (#1844). main now `863a0174a` (#1845, #1846 merged). Production `/api/health` build `cb92a6f1` at 14:16Z (#1846 deploy follows).
+- Program baseline 06d5bb199 (#1844). main now includes #1845, #1846, #1847 (0c7bda200, prod build 0c7bda20), #1848 (6e0117d53).
 - Vercel deploys `main` only. Docker Desktop is OFF by owner directive; local Supabase = LOCAL_TEST_DEPENDENCY only.
 
 ## B. AUTHORITATIVE OWNER DECISIONS (2026-09-23)
@@ -20,17 +19,18 @@
 3. PUBLIC_LANDING_REAL_JOB_DISCOVERY + landing value story (§22) — AUTHORIZE the owner-gated landing-freeze baseline regeneration (record verbatim in `lib/guards/landing-freeze.ts`).
 4. Yesterday's design = #1826 hardening + Design System artifact (TARGET stays TARGET). Integrate the ratified remainder: employer-confirmed = trust-accent GREEN, work-card-editor CTA, 12px switcher floor.
 5. NONSTOP: ONE canonical org `20b2c802` UAB „Nonstop Group“, code 302676973, VAT LT100010790613; profile 01353767 = owner/Director; profile dc3284ea = manager (functional role Recruiter), not owner, personal worker data stays personal; employer + workforce_provider on the same org; company_type unchanged; archive reversibly f2315826, 2e3a4744, af6cc3d6, a3d59458; delete nothing; never touch the 158 evidence records in 19f47e78.
-6. HISTORICAL EVIDENCE GRAPH: ~3 years of real Nonstop history through ONE canonical import pipeline (client, original order immutable, change orders first-class, project/object/address, workforce, work events, hours with precision classes, documents, payment basis); paid genuine record = VERIFIED for supported facts only; no re-confirmation; no invented detail; worker/org/client/project views + CV-vs-living comparison from data; privacy; synthetic fixture first; no second importer/store; no ratings. The real import is the owner's act in the owner's session.
+6. HISTORICAL IMPORT = TIMESHEETS ONLY (owner correction): timesheet → worker → Nonstop → customer → ordered work/project → object → address → work → hours → VERIFIED HISTORICAL WORK (basis: organization timesheet). No invoices/payments/payroll. Ordered work exists without an order document; unknown order details stay UNKNOWN; later work on the same customer object = additional ordered work (separate step). Reuse existing structures; synthetic fixture first.
 7. Continuity rule (92%): checkpoint safely, continue automatically after renewal.
 
 ## C. ACTIVE WORK
 | Lane | Purpose | Branch / worktree | PR | State | Next |
 |---|---|---|---|---|---|
-| A | one active context | fix/cc/active-context-integrity (dbec58285; worktree `.claude/worktrees/wf_71b20835-987-1` clean) | #1849 | review (wf_e077c75b-e7f) | fix → rebase onto #1847 → merge |
-| B | honest chat + rename by sentence + setup ?org= | fix/cc/chat-honest-fallback-and-rename (b9ba7cb7) | #1848 | review (wf_e077c75b-e7f) | fix → merge |
-| C | paperclip attach + one pending attachment + journal validation | fix/cc/universal-attachment-journal; worktree `-987-3` DIRTY (partial, being finished) | — | resume agent (wf_e077c75b-e7f) | PR → review → merge |
-| NONSTOP | consolidation | fix/cc/nonstop-org-consolidation (d71f3b3e1) | #1847 (ready; RED label; owner-approved) | MIGRATION APPLIED | CI green → merge → verify switcher |
-| HIST | historical graph design | v1 in scratchpad `hist-design.md`; v2 revision FAILED at session limit (wf_1dd84f84-2c2) | — | NEEDS_RESTART | re-run revision |
+| A | one active context | fix/cc/active-context-integrity | #1849 | APPROVED; rebasing onto main + P2 fixes (wf_9f7d62bd-2f4) | post-rebase review → merge |
+| B | honest chat + rename + setup ?org= | — | #1848 MERGED 6e0117d53 | done | prod proof (prod-qa worker) |
+| C | paperclip attach + journal validation | fix/cc/universal-attachment-journal | #1850 | APPROVED; rebasing (conflict with #1848) → auto-merge (wf_9f7d62bd-2f4) | prod proof |
+| NONSTOP | consolidation | — | #1847 MERGED 0c7bda200 (migration applied 20260923142823) | code live | owner-side switcher walk |
+| HIST | historical TIMESHEET import (owner correction: timesheets only; ordered work ≠ order document) | design v3 (wf_331fc132-a37) | — | designing | PR-1 fixture → PR-2 pipeline |
+| BATCH2 | E provenance, D profile/full screen, H landing+jobs+green confirmation | worktrees | — | implementing (wf_06639332-229) | review → merge |
 
 ## D. COMPLETED
 - #1845 MERGED (cb92a6f1a) and deployed — LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER, prod-qa mint path guard, test classes in docs/TESTING.md.
@@ -59,7 +59,6 @@ workspace/context = A · chat/action = B · attachments + journal = C · organiz
 4. RED manager RLS (projects_* → manages_organization) — affects the Nonstop recruiter.
 5. RED drafts #1815, R-P2, R-6/EVID-2, #1577, #883; INVITE_EMAIL_* env; prod-qa identity marker/allowlist.
 6. Provenance data: keep/retract the 2026-09-17 period interpretations (records 44940e33, 1e628d75).
-7. Historical graph: payment-evidence definition, self-payment rule, SEP-3 amendment wording, data minimisation (payroll amounts, private-person client names).
 
 ## J. NEXT ACTION QUEUE
 1. #1847 CI green → merge → health build → verify archived shells gone from the workspace readers.
