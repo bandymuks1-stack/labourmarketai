@@ -16221,6 +16221,7 @@
       "title": "2. Was festgehalten würde",
       "notPersisted": "Das ist eine Auslegung Ihrer Datei. NICHTS davon ist bereits ein Nachweis.",
       "empty": "Für diese Quelle wurden keine Zeilen vorbereitet.",
+      "notStaged": "{count, plural, one {# Zeile der Quelle wurde nicht gelesen: Sie nennt kein Datum oder keine Person.} other {# Zeilen der Quelle wurden nicht gelesen: Sie nennen kein Datum oder keine Person.}}",
       "counts": {
         "total": "Gelesene Zeilen",
         "ready": "Bereit",
@@ -16413,7 +16414,8 @@
       "nothing_parsed": "Es wurde keine verwendbare Zeile gefunden. Die Quelle braucht eine Kopfzeile, die mindestens eine Person und ein Datum benennt.",
       "month_not_stated": "Dieser Stundenzettel nennt keinen Monat, jedes Datum wäre also geraten. Schreiben Sie den Monat auf das Blatt - etwa „2026-05“ in eine Überschrift - und laden Sie es erneut hoch.",
       "confirmation_rejected": "Dieser Import hat sich geändert, nachdem Sie ihn angesehen haben, daher wurde nichts festgehalten. Sehen Sie ihn erneut an und geben Sie die neue Fassung frei.",
-      "confirmation_unavailable": "Freigaben können in dieser Umgebung nicht signiert werden, daher wurde nichts festgehalten."
+      "confirmation_unavailable": "Freigaben können in dieser Umgebung nicht signiert werden, daher wurde nichts festgehalten.",
+      "already_withdrawn": "Dieser Import ist bereits zurückgezogen. Es wurde nichts festgehalten."
     },
     "mine": {
       "title": "Was Organisationen über mich festgehalten haben",

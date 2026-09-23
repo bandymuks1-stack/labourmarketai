@@ -16221,6 +16221,7 @@
       "title": "2. What would be recorded",
       "notPersisted": "This is an interpretation of your file. NOTHING here is evidence yet.",
       "empty": "No rows were staged for this source.",
+      "notStaged": "{count, plural, one {# line of the source was not read: it names no date or no person.} other {# lines of the source were not read: they name no date or no person.}}",
       "counts": {
         "total": "Rows read",
         "ready": "Ready",
@@ -16413,7 +16414,8 @@
       "nothing_parsed": "No usable row was found. The source needs a header row naming at least a person and a date.",
       "month_not_stated": "That timesheet does not say which month it covers, so every date would be a guess. Write the month on the sheet - for example “2026-05” in a heading - and upload it again.",
       "confirmation_rejected": "This import changed after you looked at it, so it was not recorded. Read it again and approve the new version.",
-      "confirmation_unavailable": "Approvals cannot be signed in this environment, so nothing was recorded."
+      "confirmation_unavailable": "Approvals cannot be signed in this environment, so nothing was recorded.",
+      "already_withdrawn": "This import is already withdrawn. Nothing was written."
     },
     "mine": {
       "title": "What organizations have recorded about me",

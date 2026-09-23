@@ -38,11 +38,22 @@ export type SourceFileRead =
   | {
       readonly kind: "ok";
       readonly rows: readonly SourceWorkRow[];
+      /** Each row's source position (see `TabularParseResult.positions`),
+       *  unique across the whole file — a workbook's sheets each reserve
+       *  their own range — so the same bytes always stage the same rows at
+       *  the same indexes. */
+      readonly positions: readonly number[];
       readonly skipped: readonly { readonly rowIndex: number; readonly reason: string }[];
+      /** Source lines no row was made from, by position (`no_date`, `no_person`). */
+      readonly notStaged: readonly { readonly position: number; readonly reason: string }[];
       /** How the bytes were understood — carried into the import notes. */
       readonly via: "delimited" | "xlsx-grid";
       /** Stable identity of THIS source, so re-uploading resolves to the same session. */
       readonly fingerprint: string;
+      /** `sha256(bytes)`, plain hex, for EVERY file — CSV included (design v3
+       *  §9.1). Beside the fingerprint, never instead of it: a file already
+       *  imported keeps resolving to its session. */
+      readonly bytesSha256: string;
       /** The header cells the parser recognised (first sheet / the file),
        *  for the language detection the action performs. Empty for a grid. */
       readonly headers: readonly string[];
@@ -71,6 +82,7 @@ export async function readEvidenceSourceFile(
     return { kind: "file-too-large", limit: SOURCE_FILE_MAX_BYTES };
   }
   const name = filename || "file";
+  const bytesSha256 = fingerprintBytes(bytes);
 
   if (!isXlsxName(name)) {
     const { parseDelimited, rowsFromGrid } = await import("./parse-tabular");
@@ -81,12 +93,15 @@ export async function readEvidenceSourceFile(
     return {
       kind: "ok",
       rows: parsed.rows,
+      positions: parsed.positions,
       skipped: parsed.skipped,
+      notStaged: parsed.notStaged,
       headers: Object.keys(parsed.rows[0]?.raw ?? {}),
       via: "delimited",
       // Unchanged from the original text path, so a file already imported
       // keeps resolving to its existing session.
       fingerprint: fingerprintPayload("web-source", { raw: bytes.toString("utf8") }),
+      bytesSha256,
     };
   }
 
@@ -100,10 +115,15 @@ export async function readEvidenceSourceFile(
   const { rowsFromGrid, rowsFromTimesheetProposals } = await import("./parse-tabular");
 
   const rows: SourceWorkRow[] = [];
+  const positions: number[] = [];
   const skipped: { rowIndex: number; reason: string }[] = [];
+  const notStaged: { position: number; reason: string }[] = [];
   let anyRecognised = false;
   let anyDatedProposal = false;
   let headers: readonly string[] = [];
+  // Each sheet reserves its own range of source positions, so positions stay
+  // unique across a workbook and identical bytes always give identical ones.
+  let offset = 0;
 
   for (const [index, sheet] of read.sheets.slice(0, MAX_SHEETS).entries()) {
     const name = sheet.name || `Sheet${index + 1}`;
@@ -119,9 +139,12 @@ export async function readEvidenceSourceFile(
       anyDatedProposal = true;
       if (headers.length === 0) headers = Object.keys(long.rows[0].raw);
       rows.push(...long.rows);
+      positions.push(...long.positions.map((p) => offset + p));
       for (const s of long.skipped) {
         skipped.push({ rowIndex: index, reason: `${name}!row${s.rowIndex + 1}: ${s.reason}` });
       }
+      notStaged.push(...long.notStaged.map((s) => ({ position: offset + s.position, reason: s.reason })));
+      offset += sheet.rows.length;
       continue;
     }
     const parse = parseTimesheetSheet(sheet.rows, name);
@@ -131,7 +154,12 @@ export async function readEvidenceSourceFile(
     // The date is a FACT when the sheet itself stated the month (monthly grid)
     // or carried a real date column (long format); it is never derived here,
     // because nothing in this path supplies a month from outside.
-    rows.push(...rowsFromTimesheetProposals(parse.proposals, { monthFromSheet: true }));
+    const gridRows = rowsFromTimesheetProposals(parse.proposals, { monthFromSheet: true });
+    rows.push(...gridRows);
+    // A grid has no line per fact; its facts are numbered in the order the
+    // parser reads them, which is fixed for fixed bytes.
+    positions.push(...gridRows.map((_, i) => offset + i));
+    offset += Math.max(gridRows.length, sheet.rows.length);
 
     // A YEAR IN ONE WORKBOOK is the real shape of this source, and sheets in
     // it are not uniform: if January names its month and February does not,
@@ -162,11 +190,14 @@ export async function readEvidenceSourceFile(
   return {
     kind: "ok",
     rows,
+    positions,
     skipped,
+    notStaged,
     headers,
     via: "xlsx-grid",
     // Binary bytes, not text: `toString("utf8")` on a zip is lossy, so two
     // different workbooks could otherwise fingerprint alike.
     fingerprint: fingerprintBytes(bytes),
+    bytesSha256,
   };
 }

@@ -85,11 +85,24 @@ export function personKey(rawName: string): string {
   return normalized.split(" ").filter(Boolean).sort().join(" ");
 }
 
+export interface MatchPersonOptions {
+  /**
+   * What a PARTIAL name (initials, a missing middle name) that fits exactly
+   * one roster person is. `match` (the default) keeps the shared ladder's
+   * answer — an `unambiguous_name` match at 0.7. `ask` makes it a question
+   * with that one candidate: a HISTORICAL record whose person was read from
+   * half a name must be confirmed by a human, never committed as known
+   * (historical timesheet import design v3 §7 condition 6).
+   */
+  readonly partialName?: "match" | "ask";
+}
+
 /** Resolve one written name (plus an optional employee number) against the
  *  organization's roster. */
 export function matchPerson(
   written: { readonly name: string; readonly externalRef?: string | null },
   roster: readonly RosterPerson[],
+  options: MatchPersonOptions = {},
 ): PersonMatch {
   const ref = written.externalRef?.trim();
   if (ref) {
@@ -147,6 +160,32 @@ export function matchPerson(
     written.name,
     entities,
   );
+
+  if (options.partialName === "ask" && !(resolution.kind === "resolved" && resolution.match === "exact")) {
+    // HISTORICAL: every roster person half a name could be — the shared
+    // resolver's partial matches AND the initials it does not read ("P.
+    // Delta" is "Person Delta One" or "Person Delta Two"; the shared rule
+    // only reads prefixes of three letters or more, so an initial fell
+    // through to "unmatched" and the plan would have CREATED a person named
+    // "P. Delta"). Any candidate at all is a question; none is `unmatched`.
+    const fromResolver =
+      resolution.kind === "resolved" ? [{ id: resolution.id }] : resolution.kind === "ambiguous" ? resolution.candidates : [];
+    const writtenTokens = normalizeLabel(written.name).split(" ").filter(Boolean);
+    const ids = new Set<string>(fromResolver.map((c) => c.id));
+    for (const p of roster) {
+      const theirs = normalizeLabel(p.displayName).split(" ").filter(Boolean);
+      if (partialCover(writtenTokens, theirs) || partialCover(theirs, writtenTokens)) ids.add(p.id);
+    }
+    const candidates = roster.filter((p) => ids.has(p.id));
+    if (candidates.length === 0) return { kind: "unmatched" };
+    return {
+      kind: "ambiguous",
+      candidates: candidates
+        .slice(0, RESOLVE_MAX_CANDIDATES)
+        .map((p) => ({ id: p.id, displayName: p.displayName })),
+    };
+  }
+
   if (resolution.kind === "resolved") {
     const hit = roster.find((p) => p.id === resolution.id);
     return {
@@ -167,6 +206,30 @@ export function matchPerson(
     };
   }
   return { kind: "unmatched" };
+}
+
+/**
+ * Does every token of `part` stand for its own token of `whole` — the same
+ * word, an initial of it (one letter), or a prefix of three letters or more —
+ * with at least one real word among them? "p delta" covers "person delta
+ * one"; "jonas petraitis" covers "jonas petras petraitis" read the other way.
+ * An initial alone ("p") never covers anyone.
+ */
+function partialCover(part: readonly string[], whole: readonly string[]): boolean {
+  if (part.length === 0 || part.length > whole.length) return false;
+  const used = new Set<number>();
+  let word = false;
+  for (const t of part) {
+    const i = whole.findIndex(
+      (w, idx) =>
+        !used.has(idx) &&
+        (w === t || (t.length === 1 && w.startsWith(t)) || (t.length >= 3 && w.startsWith(t))),
+    );
+    if (i === -1) return false;
+    used.add(i);
+    if (t.length >= 2) word = true;
+  }
+  return word;
 }
 
 /** The work object / project side. Thin on purpose: an object label has none

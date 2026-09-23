@@ -165,7 +165,12 @@ describe("historical import: the plan prepares what the source names; commit sta
     const commit = importCore.slice(importCore.indexOf("export async function commitImport("));
     expect(commit).toMatch(/await applyPlan\(/);
     expect(importCore).toMatch(/createRosterPerson\(caller, \{/);
-    expect(importCore).toMatch(/rpc\("create_work_object_v1"/);
+    // The object writer is the ONE existing RPC, reached through the
+    // EvidenceStore port (historical timesheet import v3, PR-2): the plan
+    // calls `store.createWorkObject(` and only the port names the RPC.
+    expect(importCore).toMatch(/store\.createWorkObject\(/);
+    expect(importCore).not.toMatch(/rpc\("create_work_object_v1"/);
+    expect(read("lib/organization-evidence/evidence-store.ts")).toMatch(/rpc\("create_work_object_v1"/);
   });
   it("the plan never invents a person from an ambiguous name", () => {
     const plan = importCore.slice(importCore.indexOf("async function applyPlan("));
@@ -343,8 +348,17 @@ describe("historical import — the first real production import failed on a rea
       importActions.indexOf("export async function startEvidenceImportAction"),
       importActions.indexOf("export async function commitEvidenceImportAction"),
     );
-    expect(start).toMatch(/createImportSession\(/);
-    expect(start).toMatch(/submitRows\(/);
+    // The session and the staging are ONE core intake, `stageImportSource`
+    // (historical timesheet import v3, PR-2): it opens or finds the session
+    // and stages the rows at their source positions. The action names the
+    // intake; the core composes the two primitives.
+    expect(start).toMatch(/stageImportSource\(/);
+    const intake = importCore.slice(
+      importCore.indexOf("export async function stageImportSource("),
+      importCore.indexOf("export type DuplicateState"),
+    );
+    expect(intake).toMatch(/createImportSession\(/);
+    expect(intake).toMatch(/submitRows\(/);
     expect(start).not.toMatch(/commitImport\(/);
     expect(start).not.toMatch(/organization_evidence_records/);
   });

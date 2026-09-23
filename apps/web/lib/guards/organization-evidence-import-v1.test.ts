@@ -91,16 +91,34 @@ describe("the human transport and the agent transport share one core", () => {
   ] as const;
 
   it("both transports import every write from the SAME module", () => {
+    // The human transport stages a whole FILE through the core's own intake,
+    // `stageImportSource` (historical timesheet import v3, PR-2), which is
+    // the composition of `createImportSession` + `submitRows` at source
+    // positions. So the file transport names the intake and the core proves
+    // the composition; the agent transport still names the two primitives.
+    const INTAKE = { ACTIONS: { stageImportSource: ["createImportSession", "submitRows"] } };
+    const core = read("lib/organization-evidence/import-core.ts");
+    const intake = core.slice(
+      core.indexOf("export async function stageImportSource("),
+      core.indexOf("export type DuplicateState"),
+    );
+    for (const primitive of INTAKE.ACTIONS.stageImportSource) {
+      expect(intake, `stageImportSource must compose ${primitive}`).toContain(`${primitive}(`);
+    }
+    const composed = new Set(INTAKE.ACTIONS.stageImportSource);
     for (const source of [ACTIONS, CAPABILITIES]) {
       const text = read(source);
       expect(text).toContain('from "@/lib/organization-evidence/import-core"');
       for (const fn of CORE_WRITES) {
+        const viaIntake = source === ACTIONS && composed.has(fn) && text.includes("stageImportSource(");
         expect(
-          text,
+          viaIntake || text.includes(fn),
           `${source} must call ${fn} rather than re-implement it`,
-        ).toContain(fn);
+        ).toBe(true);
       }
     }
+    // The file transport does not ALSO re-implement the intake beside it.
+    expect(read(ACTIONS)).not.toMatch(/for \(let i = 0; i < rows\.length; i \+= MAX_ROWS_PER_SUBMIT\)/);
   });
 
   it("neither transport queries the evidence tables itself", () => {

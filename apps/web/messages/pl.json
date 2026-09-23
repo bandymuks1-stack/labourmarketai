@@ -16221,6 +16221,7 @@
       "title": "2. Co zostałoby zarejestrowane",
       "notPersisted": "To jest interpretacja Twojego pliku. NIC z tego nie jest jeszcze dowodem.",
       "empty": "Dla tego źródła nie przygotowano żadnych wierszy.",
+      "notStaged": "{count, plural, one {# wiersz źródła nie został odczytany: brak w nim daty lub osoby.} few {# wiersze źródła nie zostały odczytane: brak w nich daty lub osoby.} many {# wierszy źródła nie zostało odczytanych: brak w nich daty lub osoby.} other {# wiersza źródła nie odczytano: brak w nich daty lub osoby.}}",
       "counts": {
         "total": "Odczytane wiersze",
         "ready": "Gotowe",
@@ -16413,7 +16414,8 @@
       "nothing_parsed": "Nie znaleziono żadnego użytecznego wiersza. Źródło potrzebuje wiersza nagłówka określającego co najmniej osobę i datę.",
       "month_not_stated": "Ta ewidencja czasu pracy nie podaje, jakiego miesiąca dotyczy, więc każda data byłaby zgadywaniem. Zapisz miesiąc w arkuszu — na przykład „2026-05” w nagłówku — i prześlij go ponownie.",
       "confirmation_rejected": "Ten import zmienił się po tym, jak go obejrzałeś, więc nie został zarejestrowany. Odczytaj go ponownie i zatwierdź nową wersję.",
-      "confirmation_unavailable": "Zatwierdzeń nie można podpisać w tym środowisku, więc nic nie zostało zarejestrowane."
+      "confirmation_unavailable": "Zatwierdzeń nie można podpisać w tym środowisku, więc nic nie zostało zarejestrowane.",
+      "already_withdrawn": "Ten import został już wycofany. Nic nie zostało zapisane."
     },
     "mine": {
       "title": "Co organizacje zarejestrowały o mnie",
