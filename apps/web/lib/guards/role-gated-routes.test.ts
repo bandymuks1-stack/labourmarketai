@@ -183,7 +183,13 @@ describe("Guard: the middleware carries the path and NOTHING else", () => {
 
   it("sets the header for the dashboard tree", () => {
     expect(mw).toContain("DASHBOARD_PATHNAME_HEADER");
-    expect(mw).toMatch(/intl\(withDashboardPathHeader\(request\)\)/);
+    // The carrier now serves BOTH Suspense-boundary gates (the dashboard's
+    // role gate and onboarding's lifecycle gate — see
+    // lib/guards/suspense-boundary-gates.test.ts), so it is no longer named
+    // for the dashboard alone. What must stay true is that it wraps the
+    // request handed to `intl`: that is the only place the header survives
+    // into the RSC layer.
+    expect(mw).toMatch(/intl\(withGateHeaders\(request\)\)/);
   });
 
   it("makes no authorization decision of its own", () => {
@@ -199,7 +205,14 @@ describe("Guard: the middleware carries the path and NOTHING else", () => {
   });
 
   it("computes the header value instead of trusting an inbound one", () => {
-    expect(mw).toMatch(/headers\.set\(DASHBOARD_PATHNAME_HEADER/);
+    // Both gate headers are WRITTEN by the middleware onto a fresh `Headers`
+    // built from the request, which replaces any inbound value of the same
+    // name — a client cannot forge either one. (`\s*` because the calls are
+    // wrapped across lines; the assertion is about who sets the value, not
+    // about formatting.)
+    expect(mw).toMatch(/headers\.set\(\s*DASHBOARD_PATHNAME_HEADER/);
+    expect(mw).toMatch(/headers\.set\(\s*ONBOARDING_RETURN_HEADER/);
+    expect(mw).toMatch(/new Headers\(request\.headers\)/);
   });
 });
 

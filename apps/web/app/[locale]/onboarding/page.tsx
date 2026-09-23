@@ -6,6 +6,7 @@ import { OnboardingWizard } from "@/components/app/onboarding-wizard";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
@@ -47,19 +48,31 @@ export default async function OnboardingPage({
     : null;
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // ONE `profiles` read per request. This used to be its own SELECT; it is now
+  // the same request-cached `getSessionProfile()` the layout above already
+  // called to decide the gate, so moving the gate up added no read — it
+  // removed one. `getUser()` is memoized by the cached client, so reading
+  // `user_metadata` below still costs no extra round-trip.
+  const [
+    {
+      data: { user },
+    },
+    session,
+  ] = await Promise.all([supabase.auth.getUser(), getSessionProfile()]);
   if (!user) redirect(`/${locale}/auth/login`);
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, onboarded_at")
-    .eq("id", user.id)
-    .single();
+  const profile = session.profile;
 
   // Already onboarded — a direct visit shouldn't show the form again; an
   // attached safe ?next= still wins over the generic dashboard.
+  //
+  // DEFENCE IN DEPTH, not the primary gate. `onboarding/layout.tsx` makes this
+  // same decision ABOVE the `loading.tsx` Suspense boundary, because a
+  // `redirect()` thrown below one cannot set an HTTP status — it becomes a 200
+  // that streams the onboarding form to someone who has already finished, then
+  // redirects on the client behind Next's "Application error" shell. This copy
+  // stays because it is the authority on a SOFT navigation (React reuses the
+  // layout, so it does not re-run) and on any request where the middleware
+  // header never arrived. It can only ever refuse LATER, never grant.
   if (profile?.onboarded_at) {
     redirect(getSafeReturnPath(safeNext, locale));
   }
