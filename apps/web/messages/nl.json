@@ -16334,7 +16334,10 @@
       "attestAllHint": "De organisatie staat achter elk nog niet bevestigd record uit deze bron ({count}). Eén bevestigingsgebeurtenis per record, met rol en notitie; uren, bronfeiten en records veranderen niet. Dit is geen onafhankelijke verificatie.",
       "periodDerivedHuman": "Periode bij import vastgesteld (menselijke keuze) — de bron noemde geen data",
       "periodDerived": "Periode afgeleid — de bron noemde geen data",
-      "sourceStatement": "Brontekst (feit)"
+      "sourceStatement": "Brontekst (feit)",
+      "noMonthlyFigure": "Geen maandcijfer — de bron noemt alleen het totaal",
+      "sourceStates": "De bron zegt: “{words}”",
+      "sourceDiffers": "Deze periode wijkt af van wat de bron zelf zegt — beide blijven bewaard"
     },
     "withdraw": {
       "title": "Deze import ongedaan maken",
@@ -16478,7 +16481,8 @@
         "allocation_unknown": "{count} regels — meerdere plaatsen op een dag, verdeling niet opgegeven",
         "allocation_inconsistent": "{count} regels — uren in de tekst tellen niet op tot de dag",
         "place_from_text": "{count} regels — plaats gelezen uit de tekst: „{label}”",
-        "time_semantics": "{count} regels — wat betekent dit urengetal?"
+        "time_semantics": "{count} regels — wat betekent dit urengetal?",
+        "time_conflicts_source": "{count} regels — de periode die u koos wijkt af van de woorden van de bron"
       },
       "issueWhy": {
         "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan“ wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
@@ -16491,7 +16495,8 @@
         "allocation_unknown": "Het dagtotaal blijft exact; uren worden niet op gok over plaatsen verdeeld.",
         "allocation_inconsistent": "De delen in de tekst vormen niet het dagtotaal. Beide getallen blijven bewaard.",
         "place_from_text": "De plaatscel is leeg; de locatie komt uit de eerste woorden van de tekst. Is het een spelfout van een andere plaats, kies dan „dezelfde plaats als” — er ontstaat één object, niet twee.",
-        "time_semantics": "Een dag kan zoveel uren niet bevatten. Volgens de woorden van de bron is het een periodetotaal (bv. thuiswerk over maanden). Het getal blijft zoals het is; u zegt wat het is — en de periode alleen als u die kent. Zo'n totaal wordt nooit de duur van één dag."
+        "time_semantics": "Een dag kan zoveel uren niet bevatten. Volgens de woorden van de bron is het een periodetotaal (bv. thuiswerk over maanden). Het getal blijft zoals het is; u zegt wat het is — en de periode alleen als u die kent. Zo'n totaal wordt nooit de duur van één dag.",
+        "time_conflicts_source": "Uw beslissing blijft staan — u kent het werk. De bron zelf noemt een andere duur of een ander tempo, dus wordt er uit het totaal geen maandcijfer gemaakt en blijft het verschil zichtbaar naast de regel."
       },
       "keepAsStated": "Laten staan zoals in de bron",
       "keepAsStatedHint": "Het brongetal blijft ongewijzigd en wordt vastgelegd als bronfeit. Het wordt NIET de werkduur van die dag — de dagduur blijft onbekend, dus kalender, werk in cijfers, tempo en capaciteit tellen het nooit op.",
@@ -16565,6 +16570,7 @@
       "timeRemoteUnknown": "Niet vermeld",
       "timePeriod": "Periode (alleen als u die kent)",
       "timePeriodHint": "Laat leeg als u de periode niet kent — het systeem verzint geen data. Met periode wordt het totaal als perioderegel vastgelegd; zonder als bronfeit met onbekende duur.",
+      "timePeriodBoth": "Maanden: de eerste en de laatste — allebei, of laat beide leeg. Alleen een begin is geen periode.",
       "from": "Van",
       "to": "Tot",
       "timeSave": "Toepassen op deze regels",

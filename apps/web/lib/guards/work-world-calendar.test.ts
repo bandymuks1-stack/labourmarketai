@@ -33,7 +33,12 @@ describe("Guard: the Calendar states temporal reality (CALENDAR_REACHABLE + PERI
 
   it("the month view draws a period record as a DERIVED band with this month emphasised — never as day items", () => {
     expect(page).toMatch(/<DerivedPeriodEvidence month=\{anchor\.slice\(0, 7\)\}/);
-    expect(derived).toContain("projectPeriodAggregateByMonth");
+    // through the ONE period reading — and ONLY a period the SOURCE stated
+    // gets a month share (owner rule 2026-09-23); an interpreted period
+    // renders no monthly figure. Negative control: no local projection call.
+    expect(derived).toContain("readPeriodEvidence");
+    expect(derived).toMatch(/if \(!reading \|\| reading\.kind !== "source_period"\) return \[\];/);
+    expect(derived).not.toContain("projectPeriodAggregateByMonth");
     expect(derived).toContain("listMyOrganizationEvidence");
     expect(derived).toMatch(/<TimeReality kind="derived"/);
     expect(derived).toMatch(/activeMonth=\{month\}/);

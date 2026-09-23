@@ -208,6 +208,11 @@ export type WorkIntelligenceOrganizationPeriodRecord = {
   readonly hours: number;
   readonly source: string;
   readonly organizationId: string;
+  /** How the SPAN came to be: `source` when the source stated it,
+   *  `human_choice` when a person chose it at import, `derived` otherwise.
+   *  A span that is not the source's is shown at month precision with this
+   *  label, and never split (owner rule 2026-09-23). */
+  readonly provenance: "source" | "human_choice" | "derived";
 };
 
 export type WorkPeriodKey = "today" | "week" | "month" | "year" | "all";

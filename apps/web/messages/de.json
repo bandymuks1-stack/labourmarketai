@@ -16334,7 +16334,10 @@
       "attestAllHint": "Die Organisation steht hinter jedem noch nicht bestätigten Eintrag aus dieser Quelle ({count}). Ein Bestätigungsereignis je Eintrag, mit Rolle und Notiz; Stunden, Quellfakten und Einträge bleiben unverändert. Keine unabhängige Prüfung.",
       "periodDerivedHuman": "Zeitraum beim Import festgelegt (menschliche Entscheidung) – die Quelle nannte keine Daten",
       "periodDerived": "Zeitraum abgeleitet – die Quelle nannte keine Daten",
-      "sourceStatement": "Quellentext (Fakt)"
+      "sourceStatement": "Quellentext (Fakt)",
+      "noMonthlyFigure": "Keine Monatszahl — die Quelle nennt nur die Gesamtzahl",
+      "sourceStates": "Die Quelle sagt: „{words}“",
+      "sourceDiffers": "Dieser Zeitraum weicht von den eigenen Worten der Quelle ab — beides bleibt erhalten"
     },
     "withdraw": {
       "title": "Diesen Import rückgängig machen",
@@ -16478,7 +16481,8 @@
         "allocation_unknown": "{count} Zeilen — mehrere Orte am Tag, Verteilung nicht angegeben",
         "allocation_inconsistent": "{count} Zeilen — Stunden im Text ergeben nicht die Tagessumme",
         "place_from_text": "{count} Zeilen — Ort aus dem Text gelesen: „{label}“",
-        "time_semantics": "{count} Zeilen — was bedeutet diese Stundenzahl?"
+        "time_semantics": "{count} Zeilen — was bedeutet diese Stundenzahl?",
+        "time_conflicts_source": "{count} Zeilen — der von Ihnen gewählte Zeitraum weicht von den Worten der Quelle ab"
       },
       "issueWhy": {
         "impossible_hours": "Die Quellzahl bleibt wie sie ist (z. B. eine Monatssumme an einem Tag). Nach „wie angegeben belassen“ wird die Zeile als Quellfakt erfasst; die Tagesdauer bleibt unbekannt und wird nirgends summiert.",
@@ -16491,7 +16495,8 @@
         "allocation_unknown": "Die Tagessumme bleibt exakt; Stunden werden nicht geschätzt auf Orte verteilt.",
         "allocation_inconsistent": "Die im Text genannten Teile ergeben nicht die Tagessumme. Beide Zahlen bleiben erhalten.",
         "place_from_text": "Die Ortszelle ist leer; der Ort stammt aus den ersten Wörtern des Textes. Ist es eine Schreibvariante eines anderen Ortes, wählen Sie „derselbe Ort wie“ — es entsteht ein Objekt, nicht zwei.",
-        "time_semantics": "Ein Tag kann so viele Stunden nicht fassen. Nach den Worten der Quelle ist es eine Zeitraumsumme (z. B. Heimarbeit über Monate). Die Zahl bleibt wie sie ist; Sie sagen, was sie ist — und den Zeitraum nur, wenn Sie ihn kennen. Eine solche Summe wird nie zur Dauer eines Tages."
+        "time_semantics": "Ein Tag kann so viele Stunden nicht fassen. Nach den Worten der Quelle ist es eine Zeitraumsumme (z. B. Heimarbeit über Monate). Die Zahl bleibt wie sie ist; Sie sagen, was sie ist — und den Zeitraum nur, wenn Sie ihn kennen. Eine solche Summe wird nie zur Dauer eines Tages.",
+        "time_conflicts_source": "Ihre Entscheidung bleibt bestehen — Sie kennen die Arbeit. Die Quelle selbst nennt eine andere Dauer oder ein anderes Tempo, deshalb wird aus der Summe keine Monatszahl gemacht, und die Abweichung bleibt neben dem Eintrag sichtbar."
       },
       "keepAsStated": "Wie in der Quelle angegeben belassen",
       "keepAsStatedHint": "Die Quellzahl bleibt unverändert und wird als Quellfakt erfasst. Sie wird NICHT zur Arbeitsdauer dieses Tages — die Tagesdauer bleibt unbekannt, sodass Kalender, Arbeit in Zahlen, Tempo und Kapazität sie nie summieren.",
@@ -16565,6 +16570,7 @@
       "timeRemoteUnknown": "Nicht angegeben",
       "timePeriod": "Zeitraum (nur wenn bekannt)",
       "timePeriodHint": "Leer lassen, wenn Sie den Zeitraum nicht kennen — das System erfindet keine Daten. Mit Zeitraum wird die Summe als Zeitraumeintrag erfasst; ohne als Quellfakt mit unbekannter Dauer.",
+      "timePeriodBoth": "Monate: der erste und der letzte — beide, oder beide leer lassen. Ein Beginn allein ist kein Zeitraum.",
       "from": "Von",
       "to": "Bis",
       "timeSave": "Auf diese Zeilen anwenden",

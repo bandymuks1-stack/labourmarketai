@@ -771,6 +771,8 @@
       "rejected": "{hours} h rejected in a timesheet — counted nowhere",
       "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only a journal entry does that.",
       "periodRecord": "{hours} h over {span} — one figure for the whole period, not spread onto days",
+      "periodRecordHuman": "{hours} h, {span} — the source gives only the total; the months were chosen by a person when the document was imported. Not spread onto months or days",
+      "periodRecordDerived": "{hours} h, {span} — the source gives only the total; the months were worked out, not stated. Not spread onto months or days",
       "periodMore": "{count, plural, one {# more period record} other {# more period records}}"
     },
     "growthKindsTitle": "What your entries show",

@@ -16334,7 +16334,10 @@
       "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas.",
       "periodDerivedHuman": "Laikotarpis nustatytas importo metu (žmogaus sprendimas) — šaltinis datų nenurodė",
       "periodDerived": "Laikotarpis išvestas — šaltinis datų nenurodė",
-      "sourceStatement": "Šaltinio tekstas (faktas)"
+      "sourceStatement": "Šaltinio tekstas (faktas)",
+      "noMonthlyFigure": "Mėnesinio skaičiaus nėra — šaltinis nurodo tik bendrą sumą",
+      "sourceStates": "Šaltinyje parašyta: „{words}“",
+      "sourceDiffers": "Šis laikotarpis skiriasi nuo to, kas parašyta pačiame šaltinyje — išsaugomi abu"
     },
     "withdraw": {
       "title": "Atšaukti šį importą",
@@ -16478,7 +16481,8 @@
         "allocation_unknown": "{count} eil. — kelios vietos per dieną, paskirstymas nenurodytas",
         "allocation_inconsistent": "{count} eil. — aprašyme nurodytos valandos nesutampa su dienos suma",
         "place_from_text": "{count} eil. — vieta perskaityta iš aprašymo: „{label}“",
-        "time_semantics": "{count} eil. — ką reiškia šis valandų skaičius?"
+        "time_semantics": "{count} eil. — ką reiškia šis valandų skaičius?",
+        "time_conflicts_source": "{count} eil. — jūsų nurodytas laikotarpis skiriasi nuo paties šaltinio žodžių"
       },
       "issueWhy": {
         "impossible_hours": "Šaltinio skaičius paliekamas koks yra (pvz., mėnesio suma įrašyta į vieną dieną). Patvirtinus „palikti kaip nurodyta“, eilutė įrašoma kaip šaltinio faktas, o dienos trukmė lieka nežinoma — ji niekur nesumuojama.",
@@ -16491,7 +16495,8 @@
         "allocation_unknown": "Dienos suma išsaugoma tiksliai; valandos tarp objektų nedalijamos spėjant.",
         "allocation_inconsistent": "Aprašyme nurodytos dalys nesudaro dienos sumos. Abu skaičiai išsaugomi.",
         "place_from_text": "Objekto langelis tuščias; vieta paimta iš pirmųjų aprašymo žodžių. Jei tai kitos vietos rašybos klaida, pasirinkite „ta pati vieta kaip“ — bus sukurtas vienas objektas, ne du.",
-        "time_semantics": "Viena diena tiek valandų talpinti negali. Pagal šaltinio žodžius tai laikotarpio suma (pvz., darbas iš namų per kelis mėnesius). Skaičius lieka koks yra; jūs pasakote, kas tai — ir laikotarpį tik jei jį žinote. Tokia suma niekada netampa vienos dienos trukme."
+        "time_semantics": "Viena diena tiek valandų talpinti negali. Pagal šaltinio žodžius tai laikotarpio suma (pvz., darbas iš namų per kelis mėnesius). Skaičius lieka koks yra; jūs pasakote, kas tai — ir laikotarpį tik jei jį žinote. Tokia suma niekada netampa vienos dienos trukme.",
+        "time_conflicts_source": "Jūsų sprendimas išsaugomas — jūs žinote darbą. Pačiame šaltinyje parašyta kita trukmė ar tempas, todėl iš bendros sumos mėnesinis skaičius nesudaromas, o skirtumas lieka matomas šalia įrašo."
       },
       "keepAsStated": "Palikti kaip nurodyta šaltinyje",
       "keepAsStatedHint": "Šaltinio skaičius lieka nepakeistas ir įrašomas kaip šaltinio faktas. Jis NEtampa tos dienos darbo trukme — dienos trukmė lieka nežinoma, todėl kalendorius, „veikla skaičiais“, tempas ir pajėgumai jo nesumuoja.",
@@ -16565,6 +16570,7 @@
       "timeRemoteUnknown": "Nenurodyta",
       "timePeriod": "Laikotarpis (tik jei žinote)",
       "timePeriodHint": "Palikite tuščia, jei laikotarpio nežinote — sistema datų neišgalvoja. Su laikotarpiu suma įrašoma kaip laikotarpio įrašas; be jo — kaip šaltinio faktas su nežinoma trukme.",
+      "timePeriodBoth": "Mėnesiai: pirmasis ir paskutinis — abu arba palikite abu tuščius. Vien pradžia nėra laikotarpis.",
       "from": "Nuo",
       "to": "Iki",
       "timeSave": "Pritaikyti šioms eilutėms",

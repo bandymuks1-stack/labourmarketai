@@ -1,7 +1,14 @@
 import type { OrgLedgerView } from "@/lib/journal/work-in-numbers-view";
+import { formatMonthSpan, monthSpanOf } from "@/lib/organization-evidence/period-provenance";
 import { formatUtcDateRange } from "@/lib/time/display";
 
 import { fmtHours, type Translate } from "./format";
+
+/** A span a person chose, at the precision it has: "Jun – Nov 2025". */
+function monthSpanLabel(periodStart: string, periodEnd: string, locale: string): string {
+  const span = monthSpanOf(periodStart, periodEnd);
+  return span ? formatMonthSpan(span, locale) : `${periodStart} – ${periodEnd}`;
+}
 
 /** Period lines shown before the count folds the rest — a person with two
  *  imported spans reads both; one with forty reads five and a number. */
@@ -113,11 +120,21 @@ export function OrgLedger({
               data-period-hours={p.hours}
               data-period-start={p.periodStart}
               data-period-end={p.periodEnd}
+              data-provenance={p.provenance}
             >
-              {t("orgRecords.periodRecord", {
-                hours: fmtHours(p.hours, locale),
-                span: formatUtcDateRange(p.periodStart, p.periodEnd, locale) ?? `${p.periodStart} – ${p.periodEnd}`,
-              })}
+              {/* A span the SOURCE stated reads as its days; a span a person
+                  chose at import (or one derived) reads as MONTHS and says so
+                  — never as two day-precise dates (owner rule 2026-09-23). */}
+              {p.provenance === "source"
+                ? t("orgRecords.periodRecord", {
+                    hours: fmtHours(p.hours, locale),
+                    span:
+                      formatUtcDateRange(p.periodStart, p.periodEnd, locale) ?? `${p.periodStart} – ${p.periodEnd}`,
+                  })
+                : t(p.provenance === "human_choice" ? "orgRecords.periodRecordHuman" : "orgRecords.periodRecordDerived", {
+                    hours: fmtHours(p.hours, locale),
+                    span: monthSpanLabel(p.periodStart, p.periodEnd, locale),
+                  })}
             </li>
           ))}
           {foldedPeriods > 0 && (

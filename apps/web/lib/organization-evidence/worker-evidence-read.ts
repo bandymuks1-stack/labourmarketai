@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { HOURS_EXCEED_DAY_METHOD } from "./parse-tabular";
+import { periodProvenance, type PeriodProvenance } from "./period-provenance";
 import { countsAsDailyHours, type TimeSemantics } from "./time-semantics";
 import {
   deriveEvidenceStanding,
@@ -59,13 +60,17 @@ export interface WorkerEvidenceRecordRow {
 }
 
 /** One period record: the organization's total over a span, no source days.
- *  `periodStart`/`periodEnd` are ISO days; `hours` is the figure as stated. */
+ *  `periodStart`/`periodEnd` are ISO days; `hours` is the figure as stated.
+ *  `provenance` says how the SPAN came to be (owner rule 2026-09-23): a
+ *  span a person chose at import is carried as such across the work-model
+ *  edge, so no surface downstream presents it as a source-stated period. */
 export interface WorkerEvidencePeriodRow {
   readonly id: string;
   readonly organizationId: string;
   readonly periodStart: string;
   readonly periodEnd: string;
   readonly hours: number;
+  readonly provenance: PeriodProvenance;
 }
 
 export type WorkerEvidenceRead =
@@ -141,6 +146,7 @@ export async function readEvidenceRecordsForWorker(
 
     const periodStart = (r.period_start as string | null) ?? null;
     const periodEnd = (r.period_end as string | null) ?? null;
+    const derived = (r.derived as Record<string, unknown> | null) ?? {};
     if (periodStart && periodEnd && ISO_DAY.test(periodStart) && ISO_DAY.test(periodEnd)) {
       // A period aggregate: one figure over a span. Never a day.
       periodRows.push({
@@ -149,13 +155,14 @@ export async function readEvidenceRecordsForWorker(
         periodStart,
         periodEnd,
         hours,
+        // From the already-selected `derived.timeSemantics` — the ONE rule.
+        provenance: periodProvenance({ activityDate: null, periodStart, factFields: [], derived }),
       });
       continue;
     }
 
     const workDate = (r.activity_date as string | null) ?? null;
     if (!workDate) continue;
-    const derived = (r.derived as Record<string, unknown> | null) ?? {};
     // A period aggregate or an unknown figure is evidence, not a day's
     // duration; a legacy "exceeds a day" flag without a classification is
     // treated the same way. Only DAILY hours reach the day ledger.
