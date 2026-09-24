@@ -1025,7 +1025,17 @@ describe("NO new DB migration in this PR", () => {
     //   audit_logs; RED data DML, human-gated, paired .down.sql; UNAPPLIED —
     //   the lead applies after a rolled-back production dry run). Not this
     //   read layer's file. RECOUNTED: 304.
-    expect(count).toBeLessThanOrEqual(304);
+    // Bumped 304 -> 305 for 20260924100000_historical_timesheet_m1 (historical
+    //   timesheet import PR-3, design §14 M1a–M1i + §8 P1–P9: additive nullable
+    //   columns on projects / project_clients / records / sessions / rows,
+    //   unique (id, organization_id) on projects and work_objects, composite
+    //   FKs, the historical CHECK, two event_type CHECK widenings by drop +
+    //   re-add, and 13 RESTRICTIVE policies; no grant, no definer, no trigger,
+    //   no data DML, no `(true)`; GREEN by shape; paired .down.sql; UNAPPLIED —
+    //   the lead applies after PR-2 (#1857) is deployed and after the
+    //   rolled-back production dry run). Not this read layer's file.
+    //   RECOUNTED: 305.
+    expect(count).toBeLessThanOrEqual(305);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

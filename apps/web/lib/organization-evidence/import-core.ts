@@ -412,6 +412,9 @@ async function loadSession(
   | {
       ok: true;
       organizationId: string;
+      /** The session row's own `supplied_by_organization_id`; null only when
+       *  the row carries none (a store that predates the column). */
+      suppliedByOrganizationId: string | null;
       sourceKind: string;
       sourceLanguage: string;
       sourceFilename: string | null;
@@ -426,6 +429,7 @@ async function loadSession(
   return {
     ok: true,
     organizationId: res.data.organization_id as string,
+    suppliedByOrganizationId: (res.data.supplied_by_organization_id as string | null) ?? null,
     sourceKind: res.data.source_kind as string,
     sourceLanguage: res.data.source_language as string,
     sourceFilename: (res.data.source_filename as string | null) ?? null,
@@ -2461,6 +2465,10 @@ export interface CommitRowsInput {
   readonly sessionId: string;
   readonly session: {
     readonly organizationId: string;
+    /** The session row's `supplied_by_organization_id` — WHO supplied the
+     *  hours, which is not always the organization whose roster they are on
+     *  (an agency on a client's site). Null = the row carries none. */
+    readonly suppliedByOrganizationId: string | null;
     readonly sourceKind: string;
     readonly sourceLanguage: string;
     readonly sourceFilename: string | null;
@@ -2526,7 +2534,13 @@ export function buildCommitRows(input: CommitRowsInput): {
       original_text: (r.activity_text as string | null) ?? "",
       original_language: session.sourceLanguage,
       evidence_state: state,
-      supplied_by_organization_id: session.organizationId,
+      // The SESSION's supplier, copied — not the roster organization. M1's P1
+      // admits a record only when its supplied_by_organization_id EQUALS the
+      // session's supplied_by column; writing organization_id here would have
+      // every commit of the first cross-org session (an agency on a client's
+      // site) refused with 42501. The fallback is for a session row that
+      // carries no supplier column, and only then.
+      supplied_by_organization_id: session.suppliedByOrganizationId ?? session.organizationId,
       supplier_role: session.supplierRole,
       supplied_by_profile_id: input.userId,
       imported_by_profile_id: input.userId,
