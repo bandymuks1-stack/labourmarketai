@@ -91,9 +91,39 @@ describe("the company gate's membership arm — layout, page gate, dispatcher", 
 
   it("the Work door admits the employer context, not only the acting identity", () => {
     const src = code(read("app/[locale]/dashboard/projects/page.tsx"));
-    expect(src).toMatch(/if \(!MANAGER_ROLES\.has\(role\) && employerCtx\.kind !== "ok"\)/);
+    expect(src).toMatch(/if \(!MANAGER_ROLES\.has\(role\) && employerCtx\?\.kind !== "ok"\)/);
     // ONE resolver call — the second read is gone.
     expect(src.match(/await resolveEmployerCompanyContext\(\)/g)).toHaveLength(1);
+  });
+
+  it("the Work door decides the branch from the ONE workspace context before any employer read", () => {
+    // Re-anchored (review P2 on #1859, 2026-09-24): the employer resolver
+    // costs three organization reads, and it used to run for EVERY visitor —
+    // a plain worker in an employee workspace paid them only to be refused.
+    // The branch is decided from the request-cached `getWorkspaceContext()`
+    // (the shell's read; `cache()` makes it free here) through the same pure
+    // gate rule everywhere else uses, and the resolver runs only when that
+    // rule (or the acting identity) opens the company space.
+    const src = code(read("app/[locale]/dashboard/projects/page.tsx"));
+    expect(src).toMatch(/const workspace = await getWorkspaceContext\(\);/);
+    expect(src).toMatch(
+      /MANAGER_ROLES\.has\(role\) \|\| workspaceOpensCompanySpace\(workspace\)\s*\?\s*await resolveEmployerCompanyContext\(\)\s*:\s*null/,
+    );
+    // Order: the workspace decision precedes the employer read, and both
+    // precede the worker branch.
+    const workspaceAt = src.indexOf("await getWorkspaceContext()");
+    const resolverAt = src.indexOf("await resolveEmployerCompanyContext()");
+    const branchAt = src.indexOf('employerCtx?.kind !== "ok"');
+    expect(workspaceAt).toBeGreaterThan(-1);
+    expect(resolverAt).toBeGreaterThan(workspaceAt);
+    expect(branchAt).toBeGreaterThan(resolverAt);
+    // NEGATIVE CONTROL: the unconditional shape — every visitor pays the
+    // three reads — is exactly what this pin keeps out.
+    expect(src).not.toMatch(/const employerCtx = await resolveEmployerCompanyContext\(\)/);
+    // The resolver takes no identity of its own (W9), and the page never
+    // narrows by organization type: an agency owner opens the Work door too.
+    expect(src).not.toMatch(/getWorkspaceContext\([^)]/);
+    expect(src).not.toMatch(/organizationType/);
   });
 
   it("nothing writes profile_roles from the client to make the gate pass", () => {
@@ -188,8 +218,41 @@ describe("the manager's refused write is NAMED (never a generic error)", () => {
       "app/[locale]/dashboard/company/people/page.tsx",
       "app/[locale]/dashboard/projects/page.tsx",
     ]) {
-      expect(code(read(rel)), rel).toMatch(/<ManagerScopeNotice role=\{employerCtx\.role\}/);
+      expect(code(read(rel)), rel).toMatch(/<ManagerScopeNotice role=\{employerCtx\??\.role\}/);
     }
+  });
+
+  it("the notice yields to the platform-admin dual signal, read AFTER the projection", () => {
+    // Review P2 on #1859: `is_admin()` admits an admin's project writes and
+    // roster read, so the sentence was false for a manager who is also a
+    // platform admin. The signal is the shell's own derivation
+    // (`getSessionIsAdmin` → `deriveIsAdmin`), consulted only once the pure
+    // projection says the notice would otherwise render — never a second
+    // workspace read (W9), never a `profile_roles` re-implementation here.
+    const notice = code(read("components/app/organization/manager-scope-notice.tsx"));
+    expect(notice).toMatch(/if \(await getSessionIsAdmin\(\)\) return null;/);
+    const projectionAt = notice.indexOf("operationalWritesNeedGrant(");
+    const adminAt = notice.indexOf("await getSessionIsAdmin()");
+    expect(projectionAt).toBeGreaterThan(-1);
+    expect(adminAt, "the roles read comes after the pure decision").toBeGreaterThan(projectionAt);
+    expect(notice).not.toMatch(/getWorkspaceContext|from\("profile_roles"\)|deriveIsAdmin\(/);
+    // The reader composes the reads that exist through the one derivation.
+    const reader = code(read("lib/auth/session-admin-signal.ts"));
+    expect(reader).toMatch(/export const getSessionIsAdmin = cache\(/);
+    expect(reader).toMatch(/getSessionProfile\(\)/);
+    expect(reader).toMatch(/readActiveProfileRoles\(/);
+    expect(reader).toMatch(/deriveIsAdmin\(\{/);
+    expect(reader).toMatch(/\.eq\("is_active", true\)/);
+    expect(reader).not.toMatch(/getWorkspaceContext|catch/);
+  });
+
+  it("the projection never narrows by organization type (an agency is a company type)", () => {
+    // Review P2 on #1859, stated as the contract in the projection's own
+    // comment and pinned behaviourally in `organization-authority.test.ts`;
+    // this is the source-level negative control.
+    const pure = code(read("lib/company/organization-authority.ts"));
+    expect(pure).not.toMatch(/organizationType|companyType|staffing_agency/);
+    expect(pure).toMatch(/if \(workspace\.relationship === "owner"\) \{\s*return projectOrganizationAuthority\(\{ role: "owner" \}\);/);
   });
 
   it("the entry guide renders the membership state for a member, not 'create a company'", () => {

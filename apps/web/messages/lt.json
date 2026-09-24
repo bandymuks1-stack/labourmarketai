@@ -17114,7 +17114,7 @@
     },
     "managerScope": {
       "title": "Jūsų rolė čia: vadovas",
-      "body": "Galite atidaryti šią organizaciją ir joje dirbti. Projektų kūrimas bei redagavimas ir komandos sąrašo skaitymas kol kas lieka savininko arba administratoriaus rankose — kol jie to nesuteiks, toks veiksmas rodomas kaip atmestas, niekada kaip tuščias sąrašas."
+      "body": "Galite atidaryti šią organizaciją ir joje dirbti. Projektų kūrimas bei redagavimas ir komandos sąrašo skaitymas kol kas lieka savininko arba administratoriaus rankose — kol jie to nesuteiks, projekto kūrimas ar redagavimas rodomas kaip atmestas, o žemiau esantis komandos sąrašas gali atrodyti tuščias, nors žmonių jame yra."
     }
   },
   "rosterLinkEnd": {

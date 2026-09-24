@@ -17114,7 +17114,7 @@
     },
     "managerScope": {
       "title": "Ihre Rolle hier: Leitung",
-      "body": "Sie können diese Organisation öffnen und darin arbeiten. Projekte anlegen oder bearbeiten und das Team einsehen bleibt vorerst beim Inhaber oder Administrator — bis sie es freigeben, wird eine solche Aktion als abgelehnt angezeigt, nie als leere Liste."
+      "body": "Sie können diese Organisation öffnen und darin arbeiten. Projekte anlegen oder bearbeiten und das Team einsehen bleibt vorerst beim Inhaber oder Administrator — bis sie es freigeben, wird das Anlegen oder Bearbeiten eines Projekts als abgelehnt angezeigt, und die Teamliste unten kann leer wirken, obwohl Personen darin sind."
     }
   },
   "rosterLinkEnd": {

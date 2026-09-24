@@ -6613,7 +6613,7 @@
     },
     "managerScope": {
       "title": "Din roll här: chef",
-      "body": "Du kan öppna den här organisationen och arbeta i den. Att skapa eller redigera projekt och att se laglistan ligger tills vidare hos ägaren eller administratören — tills de ger tillgång visas en sådan åtgärd som nekad, aldrig som en tom lista."
+      "body": "Du kan öppna den här organisationen och arbeta i den. Att skapa eller redigera projekt och att se laglistan ligger tills vidare hos ägaren eller administratören — tills de ger tillgång visas skapande eller redigering av ett projekt som nekat, och laglistan nedan kan se tom ut även om det finns personer på den."
     }
   }
 }

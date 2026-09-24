@@ -84,6 +84,8 @@ describe("W9 — the layout has ONE source for the active organization", () => {
       "app/[locale]/dashboard/page.tsx",
       "app/[locale]/dashboard/journal/page.tsx",
       "app/[locale]/dashboard/start/page.tsx",
+      // The Work door decides its branch from the one resolution (#1859 P2).
+      "app/[locale]/dashboard/projects/page.tsx",
       "lib/conversation/dispatch.ts",
       "lib/conversation/worklog-engagements.ts",
       "lib/company/employer-company-context.ts",

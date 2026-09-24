@@ -6613,7 +6613,7 @@
     },
     "managerScope": {
       "title": "Sinu roll siin: juht",
-      "body": "Saad selle organisatsiooni avada ja selles töötada. Projektide loomine ja muutmine ning meeskonna nimekirja lugemine jäävad esialgu omaniku või administraatori kätte — kuni nad seda ei anna, näidatakse sellist toimingut keeldutuna, mitte kunagi tühja nimekirjana."
+      "body": "Saad selle organisatsiooni avada ja selles töötada. Projektide loomine ja muutmine ning meeskonna nimekirja lugemine jäävad esialgu omaniku või administraatori kätte — kuni nad seda ei anna, näidatakse projekti loomist või muutmist keeldutuna ja allolev meeskonna nimekiri võib tunduda tühi, kuigi inimesi selles on."
     }
   }
 }

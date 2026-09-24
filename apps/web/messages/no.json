@@ -6613,7 +6613,7 @@
     },
     "managerScope": {
       "title": "Din rolle her: leder",
-      "body": "Du kan åpne denne organisasjonen og arbeide i den. Å opprette eller redigere prosjekter og å se laglisten ligger foreløpig hos eieren eller administratoren — til de gir tilgang, vises en slik handling som avvist, aldri som en tom liste."
+      "body": "Du kan åpne denne organisasjonen og arbeide i den. Å opprette eller redigere prosjekter og å se laglisten ligger foreløpig hos eieren eller administratoren — til de gir tilgang, vises oppretting eller redigering av et prosjekt som avvist, og laglisten nedenfor kan se tom ut selv om det er folk på den."
     }
   }
 }

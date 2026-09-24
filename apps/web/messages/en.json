@@ -17114,7 +17114,7 @@
     },
     "managerScope": {
       "title": "Your role here: manager",
-      "body": "You can open and work in this organization. Creating or editing projects and reading the roster are still held by the organization's owner or admin — until they grant it, such an action is shown as refused, never as an empty list."
+      "body": "You can open and work in this organization. Creating or editing projects and reading the roster are still held by the organization's owner or admin — until they grant it, creating or editing a project is shown as refused, and the roster below can look empty even when people are on it."
     }
   },
   "rosterLinkEnd": {
