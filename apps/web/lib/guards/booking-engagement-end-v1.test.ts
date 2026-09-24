@@ -1446,8 +1446,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-09-24 — K2-1 v2 (supersedes the unapplied #1430 draft): companies
       // SELECT narrowed to the discovery columns for authenticated + ONE
       // SECURITY DEFINER private reader (creator, active ROLES_THAT_OPEN
-      // member, admin). No data change. RED (grant/revoke + definer); the
-      // marker is an ACKNOWLEDGEMENT — DRAFT + needs-human-gate, UNAPPLIED.
+      // member, admin). No data change. RED (grant/revoke + definer);
+      // owner-approved 2026-09-24, app half deployed first (#1868), then
+      // APPLIED (ledger 20260924083740) and read back.
       "20260924120000_companies_contact_minimization_v2.sql",
 ]);
   });

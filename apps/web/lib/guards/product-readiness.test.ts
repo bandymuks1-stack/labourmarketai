@@ -2654,8 +2654,8 @@ describe("no migration files added by this sprint", () => {
 // supersedes the unapplied #1430 draft): REVOKE the whole-table SELECT on companies
 // from authenticated + a column grant of the discovery columns + ONE SECURITY DEFINER
 // reader (creator, active ROLES_THAT_OPEN member, admin). No data change. RED
-// (grant/revoke + definer), human-gated, paired .down.sql; UNAPPLIED — the app half
-// deploys first, then the lead applies after owner approval. RECOUNTED: 306.
+// (grant/revoke + definer), human-gated, paired .down.sql; owner-approved 2026-09-24,
+// app half deployed first (#1868), then APPLIED (ledger 20260924083740). RECOUNTED: 306.
 const SPRINT_BASELINE = 306;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
