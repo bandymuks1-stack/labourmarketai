@@ -51,6 +51,14 @@ curl -s -X POST "http://127.0.0.1:8085/v1/transcribe?language=lt" \
 Expose ONLY via a TLS reverse proxy (e.g. Caddy `transcribe.labourmarket.ai {
 reverse_proxy 127.0.0.1:8085 }`). Never open :8085 to the internet raw.
 
+**The host must be an always-on VM or container service — never the owner's
+workstation, and never a tunnel to it** (ngrok, Cloudflare quick tunnel,
+localtunnel). Production must not depend on somebody's computer being on. The
+web app enforces this: on the production deployment a `VOICE_TRANSCRIBE_URL`
+whose host is loopback, private, link-local, `.local` or a known tunnel domain
+is refused at read time (`lib/config/outbound-host-policy.ts`) and the voice
+surface stays in its honest "not configured" state.
+
 ### Web app wiring (after deploy)
 
 Set in the web app environment (Vercel):

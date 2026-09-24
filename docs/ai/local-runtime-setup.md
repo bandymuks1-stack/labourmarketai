@@ -62,10 +62,20 @@ server-side fetch target.
   notes, and a cleartext hop off-box puts them on the wire. `http://localhost`,
   `http://127.x.x.x`, `http://[::1]` and `*.localhost` are fine; a GPU box
   across the office must use `https`.
+- **On the PRODUCTION deployment (`VERCEL_ENV=production`), a loopback,
+  private-range, link-local, `.local` or tunnel host** (`*.ngrok*`,
+  `*.trycloudflare.com`, `*.loca.lt`) → refused at read time
+  (`lib/config/outbound-host-policy.ts`, 2026-09-23). The local profile is
+  first in the chain and the only one allowed sensitive free text, so an
+  https tunnel to a workstation would have become the first provider tried
+  in production and failed through whenever that machine was off. Production
+  must not depend on somebody's computer; a preview deployment keeps the old
+  behaviour. One structured `outbound_host_refused` line is logged, naming
+  the integration and the host class, never the value.
 
 Each rejection disables the provider with a reason that names which value was
-wrong — `missing_base_url`, `invalid_base_url`, `missing_local_model` — rather
-than a single undifferentiated "AI is off".
+wrong — `missing_base_url`, `invalid_base_url`, `missing_local_model`, or the
+production refusal above — rather than a single undifferentiated "AI is off".
 
 ## What happens when it isn't there
 

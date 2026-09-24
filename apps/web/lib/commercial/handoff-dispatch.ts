@@ -1,5 +1,6 @@
 import "server-only";
 
+import { checkOutboundIntegrationUrl } from "@/lib/config/outbound-host-policy";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   buildWorkerVacancyInterestEnvelope,
@@ -154,6 +155,17 @@ export function handoffDoorSettings(
   const endpoint = env[NONSTOP_HANDOFF_ENDPOINT_ENV]?.trim() ?? "";
   const token = env[NONSTOP_HANDOFF_TOKEN_ENV]?.trim() ?? "";
   if (!/^https:\/\//.test(endpoint) || token.length < 32) return null;
+  // PRODUCTION host policy (2026-09-23): a partner door is an always-on host.
+  // A loopback / private / tunnel endpoint on the production deployment is
+  // refused and the door stays `not_configured` — the queue waits, unchanged.
+  if (
+    !checkOutboundIntegrationUrl(endpoint, {
+      integration: NONSTOP_HANDOFF_ENDPOINT_ENV,
+      env,
+    }).ok
+  ) {
+    return null;
+  }
   return { endpoint, token };
 }
 

@@ -262,6 +262,32 @@ describe("the dispatcher is inert without the owner's door, and never contacts a
     expect(handoffDoorSettings({ NONSTOP_HANDOFF_ENDPOINT: "https://nonstopgroup.eu/api/x", NONSTOP_HANDOFF_TOKEN: "short" })).toBeNull();
   });
 
+  it("PRODUCTION refuses a door on a tunnel, LAN or loopback host — the same value passes on a preview (2026-09-23)", () => {
+    const token = "x".repeat(40);
+    for (const endpoint of [
+      "https://abc123.ngrok-free.app/handoffs/v1",
+      "https://quick-words.trycloudflare.com/handoffs/v1",
+      "https://owner.loca.lt/handoffs/v1",
+      "https://192.168.1.20/handoffs/v1",
+      "https://localhost:8443/handoffs/v1",
+      "https://nonstop.local/handoffs/v1",
+    ]) {
+      expect(
+        handoffDoorSettings({ NONSTOP_HANDOFF_ENDPOINT: endpoint, NONSTOP_HANDOFF_TOKEN: token, VERCEL_ENV: "production" }),
+        `production must refuse ${endpoint}`,
+      ).toBeNull();
+      expect(
+        handoffDoorSettings({ NONSTOP_HANDOFF_ENDPOINT: endpoint, NONSTOP_HANDOFF_TOKEN: token, VERCEL_ENV: "preview" }),
+        `preview keeps ${endpoint}`,
+      ).toEqual({ endpoint, token });
+    }
+    // The documented partner host passes in production, unchanged.
+    const door = "https://nonstopgroup.eu/api/partners/labourmarket/handoffs/v1";
+    expect(
+      handoffDoorSettings({ NONSTOP_HANDOFF_ENDPOINT: door, NONSTOP_HANDOFF_TOKEN: token, VERCEL_ENV: "production" }),
+    ).toEqual({ endpoint: door, token });
+  });
+
   it("the only destination is the configured partner door; nothing reads an employer address", () => {
     const src = read("lib", "commercial", "handoff-dispatch.ts");
     expect(src).toContain("fetchImpl(settings.endpoint, {");

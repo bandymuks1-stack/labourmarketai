@@ -123,6 +123,47 @@ describe("Agentai OS bridge is the preferred path (fetch mocked)", () => {
     expect(url).toBe("https://bridge.example.com/alert");
   });
 
+  /**
+   * PRODUCTION HOST POLICY (2026-09-23). The bridge has NO fallback once it is
+   * configured, so a bridge on a tunnel to a PC would lose every owner alert
+   * while that PC is off. On the production deployment such a host is refused
+   * at the read site: the bridge counts as unconfigured and the standalone
+   * Telegram path carries the alert. NEGATIVE CONTROL: the same value on a
+   * preview deployment still reaches the bridge — the refusal is a production
+   * property, not a validation tightening.
+   */
+  it("PRODUCTION refuses a bridge on a tunnel host and the Telegram fallback carries the alert; preview keeps the bridge", async () => {
+    for (const [deployEnv, expectedUrl] of [
+      ["production", "https://api.telegram.org/bot123456:test-token/sendMessage"],
+      ["preview", "https://abc123.ngrok-free.app/alert"],
+    ] as const) {
+      vi.unstubAllEnvs();
+      vi.stubEnv("VERCEL_ENV", deployEnv);
+      configureBridge();
+      vi.stubEnv("AGENTAI_OS_ALERT_ENDPOINT", "https://abc123.ngrok-free.app/alert");
+      configureEnv();
+      const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+      vi.stubGlobal("fetch", fetchMock);
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { agentaiBridgeConfigured, sendCompanyNeedOwnerAlert } = await loadHelper();
+      expect(agentaiBridgeConfigured(), deployEnv).toBe(deployEnv === "preview");
+      await expect(sendCompanyNeedOwnerAlert({ companyName: "Acme" })).resolves.toBe(true);
+      expect(fetchMock, deployEnv).toHaveBeenCalledOnce();
+      const [url] = fetchMock.mock.calls[0] as unknown as [string];
+      expect(url, deployEnv).toBe(expectedUrl);
+      // The refusal is one structured line naming the class, never the host.
+      const refusals = warn.mock.calls
+        .map((c) => String(c[0]))
+        .filter((l) => l.includes("outbound_host_refused"));
+      expect(refusals, deployEnv).toHaveLength(deployEnv === "production" ? 1 : 0);
+      for (const line of refusals) {
+        expect(line).toContain('"hostKind":"tunnel"');
+        expect(line).not.toContain("ngrok");
+      }
+      warn.mockRestore();
+    }
+  });
+
   it("returns false and never throws when the bridge send fails", async () => {
     configureBridge();
     vi.stubGlobal(

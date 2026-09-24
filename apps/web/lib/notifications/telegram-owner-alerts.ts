@@ -1,5 +1,6 @@
 import "server-only";
 
+import { checkOutboundIntegrationUrl } from "@/lib/config/outbound-host-policy";
 import { env } from "@/lib/env";
 
 /**
@@ -114,7 +115,14 @@ export function agentaiBridgeConfigured(): boolean {
   return (
     env.AGENTAI_OS_ALERTS_ENABLED === "true" &&
     !!env.AGENTAI_OS_ALERT_ENDPOINT &&
-    !!env.AGENTAI_OS_ALERT_TOKEN
+    !!env.AGENTAI_OS_ALERT_TOKEN &&
+    // PRODUCTION host policy (2026-09-23): the bridge has NO fallback once it
+    // is configured, so a tunnel to a PC would lose every owner alert while
+    // that PC is off. A refused host means "not configured" here, and the
+    // standalone Telegram path (2) below carries the alert instead.
+    checkOutboundIntegrationUrl(env.AGENTAI_OS_ALERT_ENDPOINT, {
+      integration: "AGENTAI_OS_ALERT_ENDPOINT",
+    }).ok
   );
 }
 
