@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   ZERO_BRIDGE_SPINE_COUNTS,
+  clientInviteRowState,
   countPendingConnectionInvites,
   countSharesAwaitingOffer,
-  pendingDeliveryByEmail,
+  deliveryByEmail,
   toBridgeInviteDelivery,
   type ClientConnectionInvite,
   type ClientInviteDeliveryRow,
@@ -81,36 +82,66 @@ describe("toBridgeInviteDelivery — the primitive's outcomes, honestly", () => 
   });
 });
 
-describe("pendingDeliveryByEmail — the newest PENDING invitation per address", () => {
+describe("deliveryByEmail — the invitation that COUNTS per address", () => {
   const row = (
     id: string,
     email: string,
     status: string,
     createdAt: string,
+    deliveryStatus = "not_sent",
   ): ClientInviteDeliveryRow => ({
     invitationId: id,
     email,
     status,
-    deliveryStatus: "not_sent",
+    deliveryStatus,
     createdAt,
   });
 
-  it("keys lower-cased, keeps the newest pending row, drops closed rows", () => {
-    const m = pendingDeliveryByEmail([
+  it("keys lower-cased, keeps the newest pending row among pending rows", () => {
+    const m = deliveryByEmail([
       row(R1, "Client@Example.com", "pending", "2026-09-20T10:00:00Z"),
       row(R2, "client@example.com", "pending", "2026-09-22T10:00:00Z"),
-      row(R3, "client@example.com", "accepted", "2026-09-23T10:00:00Z"),
     ]);
     expect(m.get("client@example.com")?.invitationId).toBe(R2);
     expect(m.size).toBe(1);
   });
 
-  it("NEGATIVE: an address with only closed rows has no pending delivery", () => {
-    const m = pendingDeliveryByEmail([
+  it("an ACCEPTED row wins over a newer pending one — the client's confirmation is what is awaited", () => {
+    // Review round 2: an accepted (single-use, consumed) invitation used to
+    // read "no invitation link yet", and "Get link" minted a second one.
+    const m = deliveryByEmail([
+      row(R1, "client@example.com", "accepted", "2026-09-20T10:00:00Z"),
+      row(R2, "client@example.com", "pending", "2026-09-22T10:00:00Z"),
+    ]);
+    expect(m.get("client@example.com")?.invitationId).toBe(R1);
+    expect(clientInviteRowState(m.get("client@example.com"))).toBe("accepted");
+  });
+
+  it("among accepted rows the newest wins", () => {
+    const m = deliveryByEmail([
+      row(R1, "client@example.com", "accepted", "2026-09-20T10:00:00Z"),
+      row(R3, "client@example.com", "accepted", "2026-09-23T10:00:00Z"),
+    ]);
+    expect(m.get("client@example.com")?.invitationId).toBe(R3);
+  });
+
+  it("NEGATIVE: an address with only closed rows has no live invitation (a fresh one may be minted)", () => {
+    const m = deliveryByEmail([
       row(R1, "a@example.com", "declined", "2026-09-20T10:00:00Z"),
       row(R2, "a@example.com", "revoked", "2026-09-21T10:00:00Z"),
+      row(R3, "a@example.com", "expired", "2026-09-22T10:00:00Z"),
     ]);
     expect(m.has("a@example.com")).toBe(false);
+    expect(clientInviteRowState(m.get("a@example.com"))).toBe("none");
+  });
+
+  it("clientInviteRowState: the four states, in the primitive's own vocabulary", () => {
+    expect(clientInviteRowState(null)).toBe("none");
+    expect(clientInviteRowState(undefined)).toBe("none");
+    expect(clientInviteRowState(row(R1, "a@example.com", "accepted", "2026-09-20T10:00:00Z", "sent"))).toBe("accepted");
+    expect(clientInviteRowState(row(R1, "a@example.com", "pending", "2026-09-20T10:00:00Z", "not_sent"))).toBe("created");
+    expect(clientInviteRowState(row(R1, "a@example.com", "pending", "2026-09-20T10:00:00Z", "sent"))).toBe("sent");
+    expect(clientInviteRowState(row(R1, "a@example.com", "pending", "2026-09-20T10:00:00Z", "delivery_failed"))).toBe("delivery_failed");
   });
 });
 

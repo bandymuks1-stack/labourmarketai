@@ -16,6 +16,7 @@ import {
   resolveEmployerCompanyCore,
 } from "@/lib/company/employer-company-context";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { AGENCY_CONNECTION_PENDING_NOTICE } from "@/lib/invitations/model";
 import {
   CompanySetupForm,
   type CompanySetupFormLabels,
@@ -60,7 +61,13 @@ export default async function CompanyStartPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ new?: string; type?: string; capability?: string; org?: string }>;
+  searchParams?: Promise<{
+    new?: string;
+    type?: string;
+    capability?: string;
+    org?: string;
+    notice?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -74,6 +81,13 @@ export default async function CompanyStartPage({
     ? (sp.type as CompanyType)
     : undefined;
   const presetCapability = sp.capability === "training_provider" ? "training_provider" : undefined;
+  // `?notice=agency_connection_pending` (review round 2, 2026-09-24): the
+  // person accepted a staffing agency's connection invitation and holds no
+  // company role yet, so the partners door — where the connection is
+  // confirmed — would refuse them. The invite action lands them here with
+  // the pending connection NAMED. Closed set; an unknown value renders
+  // nothing (an internal token never reaches the screen, doctrine §23).
+  const safeNotice = sp.notice === AGENCY_CONNECTION_PENDING_NOTICE ? sp.notice : null;
 
   const supabase = await createClient();
   const {
@@ -263,6 +277,16 @@ export default async function CompanyStartPage({
       >
         ← {label("Grįžti į veiklos pradžią", "Back to activity start")}
       </Link>
+
+      {safeNotice === AGENCY_CONNECTION_PENDING_NOTICE ? (
+        <p
+          role="status"
+          className="rounded-card border border-brand-blue/40 bg-brand-blue/10 p-4 text-sm text-text-secondary"
+          data-testid="company-start-agency-connection-pending"
+        >
+          {t("agencyConnectionPending")}
+        </p>
+      ) : null}
 
       {migrationNeeded ? (
         <section

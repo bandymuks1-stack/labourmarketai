@@ -171,9 +171,10 @@ const INVITE_OUTCOME_KEYS = [
 ] as const;
 
 export async function readAgencyBridgeLabels() {
-  const [tAB, tInvite] = await Promise.all([
+  const [tAB, tInvite, tSent] = await Promise.all([
     getTranslations("agencyBridge"),
     getTranslations("network.invite"),
+    getTranslations("network.sent"),
   ]);
   return {
     // Delivery of the client invitation through the invitation primitive
@@ -185,6 +186,10 @@ export async function readAgencyBridgeLabels() {
     deliveryDuplicate: tAB("deliveryDuplicate"),
     deliveryRefused: tAB("deliveryRefused"),
     deliveryUnavailable: tAB("deliveryUnavailable"),
+    // Accepted by the client (single-use, consumed) — the primitive's own
+    // status word for the badge, the bridge's sentence for what is awaited.
+    deliveryAccepted: tAB("deliveryAccepted"),
+    statusAccepted: tSent("status.accepted"),
     noInvitationYet: tAB("noInvitationYet"),
     getLink: tAB("getLink"),
     newLink: tAB("newLink"),

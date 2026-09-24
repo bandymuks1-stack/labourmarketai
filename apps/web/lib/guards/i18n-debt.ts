@@ -156,7 +156,13 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // and evidenceImport.reconstruction timePeriodBoth + the
   // time_conflicts_source issue/why land in all 11 catalogs; lt/en/ru/nl/de/pl
   // translated, da/lv/et/no/sv [EN] until human translation).
-  da: 1309,
+  // MEASURED 1311 at agency-client-invite-delivery review round 2 (2026-09-24,
+  // +2 on a live 1309: agencyBridge.deliveryAccepted — the accepted-invitation
+  // row state — and roleDashboards.company.setup.agencyConnectionPending —
+  // the setup-entry notice after an agency-client acceptance without a
+  // company role — land in all 11 catalogs; lt/en/ru/nl/de/pl translated,
+  // da/lv/et/no/sv [EN] until human translation).
+  da: 1311,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

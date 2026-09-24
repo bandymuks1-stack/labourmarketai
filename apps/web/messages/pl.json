@@ -2068,6 +2068,7 @@
         "orgNoCompanyProfileBody": "Jej nazwy nie można tu zmienić — ten formularz zmienia tylko nazwę profilu firmy, a organizacji bez niego nie można jeszcze przemianować. Nic nie zostało zmienione.",
         "orgNotAvailableHeading": "Tej organizacji nie można tu zarządzać",
         "orgNotAvailableBody": "Link wskazuje organizację, której profilu nie możesz zmienić z tego konta, albo nie udało się jej sprawdzić. Nic nie zostało zmienione. Wybierz organizację w przełączniku przestrzeni u góry.",
+        "agencyConnectionPending": "Zaproszenie zaakceptowane. Agencja pracy chce nawiązać połączenie z Twoją firmą — najpierw utwórz profil firmy; prośba o połączenie będzie potem czekać na stronie Partnerzy, gdzie potwierdzisz ją w imieniu tej firmy.",
         "legalLockedNotice": "Ta firma jest zweryfikowana. Jej dane prawne (pełna nazwa, numer rejestracyjny, kraj i adres siedziby) są tu zablokowane i nie można ich nadpisać — skontaktuj się z pomocą techniczną, aby poprosić o zmianę danych prawnych. Nadal możesz aktualizować kontakty, stronę internetową, typ firmy i swoją rolę.",
         "saveDraft": "Zapisz firmę",
         "submitRequest": "Poproś o ręczną weryfikację (opcjonalnie)",
@@ -11688,7 +11689,8 @@
     "noInvitationYet": "Brak linku zaproszenia — pobierz go, aby dostarczyć to zaproszenie.",
     "getLink": "Pobierz link",
     "newLink": "Nowy link",
-    "messageButton": "Wiadomość"
+    "messageButton": "Wiadomość",
+    "deliveryAccepted": "Dostarczone — klient zaakceptował zaproszenie i teraz potwierdza połączenie na swojej stronie Partnerzy."
   },
   "clientBridge": {
     "title": "Agencje pracy",

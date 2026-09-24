@@ -254,18 +254,64 @@ export type ClientInviteDeliveriesState =
   | { kind: "needs-migration" }
   | { kind: "error" };
 
-/** The newest pending invitation per address (lower-cased). Pure. */
-export function pendingDeliveryByEmail(
+/**
+ * The invitation that COUNTS for each address (lower-cased), from the
+ * inviter's own sent list. Pure.
+ *
+ * Two statuses matter for a pending connection: `pending` (the link is out,
+ * nothing answered yet) and `accepted` (single-use, consumed — the client
+ * accepted the invitation and now confirms the CONNECTION on their partners
+ * door). An accepted row wins over a pending one regardless of age: once the
+ * client has accepted, the agency's next move is to wait, not to rotate or
+ * mint links — showing the pending row instead invited exactly that (review
+ * round 2, 2026-09-24: an accepted invitation read "no invitation link yet"
+ * and "Get link" minted a second one). Within one status the newest wins.
+ * Declined, expired and revoked rows are dropped: they leave the address
+ * without a live invitation, so a fresh one may be minted.
+ */
+export function deliveryByEmail(
   rows: readonly ClientInviteDeliveryRow[],
 ): ReadonlyMap<string, ClientInviteDeliveryRow> {
+  const rank = (status: string): number =>
+    status === "accepted" ? 2 : status === "pending" ? 1 : 0;
   const out = new Map<string, ClientInviteDeliveryRow>();
   for (const r of rows) {
-    if (r.status !== "pending") continue;
+    const score = rank(r.status);
+    if (score === 0) continue;
     const key = r.email.trim().toLowerCase();
     const prev = out.get(key);
-    if (!prev || r.createdAt.localeCompare(prev.createdAt) > 0) out.set(key, r);
+    if (
+      !prev ||
+      score > rank(prev.status) ||
+      (score === rank(prev.status) && r.createdAt.localeCompare(prev.createdAt) > 0)
+    ) {
+      out.set(key, r);
+    }
   }
   return out;
+}
+
+/**
+ * The state a PENDING connection row wears on the agency's partners door,
+ * in the primitive's own vocabulary:
+ *   - `none`            — no live invitation for this address: mint one;
+ *   - `accepted`        — delivered and accepted; the client's confirmation
+ *                         of the connection is what is awaited — no link;
+ *   - `created` / `sent` / `delivery_failed` — a pending invitation's stored
+ *                         delivery_status (`not_sent` = the link is ready,
+ *                         nothing was e-mailed): a fresh link may be rotated.
+ * Pure.
+ */
+export type ClientInviteRowState = "none" | "accepted" | "created" | "sent" | "delivery_failed";
+
+export function clientInviteRowState(
+  row: ClientInviteDeliveryRow | null | undefined,
+): ClientInviteRowState {
+  if (!row) return "none";
+  if (row.status === "accepted") return "accepted";
+  if (row.deliveryStatus === "sent") return "sent";
+  if (row.deliveryStatus === "delivery_failed") return "delivery_failed";
+  return "created";
 }
 
 /* ────────────────────────────────────────────────────────────────────────────

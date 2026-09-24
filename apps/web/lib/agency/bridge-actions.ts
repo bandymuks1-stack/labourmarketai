@@ -11,7 +11,7 @@ import {
   validateOfferNote,
   type BridgeInviteDelivery,
 } from "@/lib/agency/bridge-model";
-import { activeLocales, defaultLocale } from "@/lib/i18n/config";
+import { toActiveLocale } from "@/lib/i18n/config";
 import {
   createShareableInvitationAction,
   resendInvitationAction,
@@ -107,10 +107,11 @@ function rpc(supabase: unknown): any {
 }
 
 /** The invite link's language: an active locale from the form, else the
- *  default. Never trusted beyond the closed active set. */
+ *  default. Never trusted beyond the closed active set (the clamp itself
+ *  lives with the locale set, so the conversation opener and the invite
+ *  page share it instead of each re-deriving it). */
 function inviteLocale(formData: FormData): string {
-  const raw = String(formData.get("locale") ?? "");
-  return (activeLocales as readonly string[]).includes(raw) ? raw : defaultLocale;
+  return toActiveLocale(String(formData.get("locale") ?? ""));
 }
 
 /**

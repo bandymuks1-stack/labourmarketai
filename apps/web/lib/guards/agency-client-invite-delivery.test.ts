@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-import { activeLocales } from "@/lib/i18n/config";
+import { activeLocales, locales } from "@/lib/i18n/config";
+import { routeRequirement } from "@/lib/auth/role-gated-routes";
 import { SPINE_SIGNALS } from "@/lib/notifications/spine-signals";
 import { getDashboardModule } from "@/lib/dashboard/dashboard-module-registry";
 import { CONVERSATION_ACTIONS } from "@/lib/conversation/action-registry";
-import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
+import {
+  AGENCY_CLIENT_PROPOSED_ROLE,
+  AGENCY_CONNECTION_PENDING_NOTICE,
+  COMPANY_SETUP_ENTRY,
+} from "@/lib/invitations/model";
 
 /**
  * AGENCY → CLIENT INVITATION IS DELIVERED; AGENCY ↔ CLIENT CAN MESSAGE
@@ -140,6 +145,29 @@ describe("1. the client invitation is delivered through the one invitation primi
     expect(labels).toMatch(/getTranslations\("network\.invite"\)/);
     expect(labels).toMatch(/outcomes\.\$\{k\}/);
   });
+
+  it("the round-2 copy (accepted state, setup-entry notice) lands in ALL 11 catalogs", () => {
+    for (const loc of locales) {
+      const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
+        agencyBridge: Record<string, string>;
+        roleDashboards: { company: { setup: Record<string, string> } };
+      };
+      expect(msgs.agencyBridge.deliveryAccepted?.trim().length, `${loc} agencyBridge.deliveryAccepted`).toBeGreaterThan(0);
+      expect(
+        msgs.roleDashboards.company.setup.agencyConnectionPending?.trim().length,
+        `${loc} roleDashboards.company.setup.agencyConnectionPending`,
+      ).toBeGreaterThan(0);
+    }
+    // Active locales carry real copy, never the [EN] placeholder.
+    for (const loc of activeLocales) {
+      const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
+        agencyBridge: Record<string, string>;
+        roleDashboards: { company: { setup: Record<string, string> } };
+      };
+      expect(msgs.agencyBridge.deliveryAccepted, loc).not.toContain("[EN]");
+      expect(msgs.roleDashboards.company.setup.agencyConnectionPending, loc).not.toContain("[EN]");
+    }
+  });
 });
 
 // ── 2. Acceptance: the truthful addressee ─────────────────────────────────
@@ -179,6 +207,29 @@ describe("2. the invite page lands the person on the connection and tells the tr
     const partners = read("app/[locale]/dashboard/company/partners/page.tsx");
     expect(partners).toMatch(/data-testid="company-partners-invitation-accepted"/);
     expect(partners).toMatch(/t\("invitationAccepted"\)/);
+  });
+
+  it("a person with NO company role lands on the setup entry with the connection named — never in a refusal (round 2)", () => {
+    const action = stripTs(read("lib/invitations/invite-page-actions.ts"));
+    // The fact the partners door gates on, read through the one honest
+    // roles reader (unknown ≠ "no role"), decides the landing.
+    expect(action).toMatch(/readHeldProfileRoles\(\{ supabase, userId: user\.id \}\)/);
+    expect(action).toMatch(/roles\.ok \? roles\.value\.includes\("company"\) : null/);
+    expect(action).toMatch(/agencyClientLanding\(await holdsCompanyRole\(\)\)/);
+    // The setup entry is NOT role-gated, so the landing cannot bounce again…
+    expect(routeRequirement(COMPANY_SETUP_ENTRY)).toBeNull();
+    // …and it renders the catalogued notice for exactly the closed token.
+    const setup = read("app/[locale]/dashboard/start/company/page.tsx");
+    expect(setup).toMatch(/sp\.notice === AGENCY_CONNECTION_PENDING_NOTICE \? sp\.notice : null/);
+    expect(setup).toMatch(/data-testid="company-start-agency-connection-pending"/);
+    expect(setup).toMatch(/t\("agencyConnectionPending"\)/);
+    expect(AGENCY_CONNECTION_PENDING_NOTICE).toBe("agency_connection_pending");
+  });
+
+  it("the invite page actions clamp the form locale before any redirect", () => {
+    const action = stripTs(read("lib/invitations/invite-page-actions.ts"));
+    expect(action).toMatch(/toActiveLocale\(String\(formData\.get\("locale"\) \?\? ""\)\)/);
+    expect(action).not.toMatch(/formData\.get\("locale"\) \?\? "lt"/);
   });
 
   it("every active locale carries the invite-page and partners copy", () => {
@@ -279,6 +330,18 @@ describe("5. agency ↔ client messaging is a server-verified grant", () => {
     expect(CONVERSATION).toMatch(/notice=cannot_open/);
   });
 
+  it("the form locale is clamped to the active set BEFORE it is interpolated into a redirect (round 2)", () => {
+    // A forged `/evil.com` would otherwise yield the protocol-relative
+    // `//evil.com/dashboard/…` Location.
+    const clamp = CONVERSATION.indexOf('const locale = toActiveLocale(String(formData.get("locale") ?? ""))');
+    const firstUse = CONVERSATION.indexOf("`/${locale}/");
+    expect(clamp).toBeGreaterThan(-1);
+    expect(firstUse).toBeGreaterThan(clamp);
+    expect(CONVERSATION).not.toMatch(/formData\.get\("locale"\) \?\? "lt"/);
+    // The bridge's actions share the same clamp instead of re-deriving it.
+    expect(ACTIONS).toMatch(/return toActiveLocale\(String\(formData\.get\("locale"\) \?\? ""\)\)/);
+  });
+
   it("both sections offer the message button on ACTIVE connections only", () => {
     expect(AGENCY_SECTION).toMatch(
       /c\.status === "active" && \([\s\S]{0,600}openAgencyConnectionConversationAction/,
@@ -306,8 +369,39 @@ describe("6. no bridge failure is silent", () => {
   });
 
   it("UNKNOWN is not 'no invitation': the per-row delivery state renders only from an ok read", () => {
-    expect(AGENCY_SECTION).toMatch(/deliveries\.kind === "ok" \? pendingDeliveryByEmail\(deliveries\.rows\) : null/);
-    expect(AGENCY_SECTION).toMatch(/pendingByEmail !== null &&/);
+    expect(AGENCY_SECTION).toMatch(/deliveries\.kind === "ok" \? deliveryByEmail\(deliveries\.rows\) : null/);
+    expect(AGENCY_SECTION).toMatch(/liveInvitations !== null &&/);
+  });
+
+  it("an ACCEPTED invitation is its own row state: no link control, and 'Get link' only when no live invitation exists (round 2)", () => {
+    // The state comes from the pure model, in the primitive's vocabulary.
+    expect(AGENCY_SECTION).toMatch(/const rowState = clientInviteRowState\(invitation\)/);
+    expect(AGENCY_SECTION).toMatch(/data-delivery=\{rowState\}/);
+    // The accepted branch renders the primitive's own status word and the
+    // bridge's sentence — and NO form: nothing to rotate, nothing to mint.
+    const acceptedStart = AGENCY_SECTION.indexOf('rowState === "accepted" ? (');
+    const acceptedEnd = AGENCY_SECTION.indexOf(") : invitation ? (", acceptedStart);
+    expect(acceptedStart).toBeGreaterThan(-1);
+    expect(acceptedEnd).toBeGreaterThan(acceptedStart);
+    const accepted = AGENCY_SECTION.slice(acceptedStart, acceptedEnd);
+    expect(accepted).toMatch(/labels\.statusAccepted/);
+    expect(accepted).toMatch(/labels\.deliveryAccepted/);
+    expect(accepted).not.toMatch(/<form|agency-bridge-get-link|agency-bridge-new-link/);
+    // "Get link" (mints an invitation) exists exactly once, in the final
+    // else branch — reached only when neither a pending nor an accepted row
+    // exists for the address.
+    expect(AGENCY_SECTION.split("agency-bridge-get-link-").length).toBe(2);
+    const getLink = AGENCY_SECTION.indexOf("agency-bridge-get-link-");
+    const elseBranch = AGENCY_SECTION.indexOf(") : (", acceptedEnd);
+    expect(elseBranch).toBeGreaterThan(acceptedEnd);
+    expect(getLink).toBeGreaterThan(elseBranch);
+    // The per-inviter scope of the sent list is stated where the read is used.
+    expect(read("components/app/agency-bridge-section.tsx")).toMatch(/SCOPE: PER INVITER/);
+    // The badge word is the primitive's own (network.sent.status.accepted).
+    const labels = stripTs(read("lib/company/company-section-labels.ts"));
+    expect(labels).toMatch(/getTranslations\("network\.sent"\)/);
+    expect(labels).toMatch(/statusAccepted: tSent\("status\.accepted"\)/);
+    expect(labels).toMatch(/deliveryAccepted: tAB\("deliveryAccepted"\)/);
   });
 });
 

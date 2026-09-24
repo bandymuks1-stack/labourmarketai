@@ -13,8 +13,9 @@ import {
 } from "lucide-react";
 
 import {
+  clientInviteRowState,
+  deliveryByEmail,
   effectiveReviewStage,
-  pendingDeliveryByEmail,
   reviewStageTone,
   type AgencyConnectionsState,
   type BridgeInviteDelivery,
@@ -83,6 +84,11 @@ export interface AgencyBridgeLabels {
   readonly deliveryDuplicate: string;
   readonly deliveryRefused: string;
   readonly deliveryUnavailable: string;
+  /** The fourth per-row state: delivered AND accepted by the client, whose
+   *  confirmation of the connection on their partners door is now awaited. */
+  readonly deliveryAccepted: string;
+  /** The primitive's own word for an accepted invitation (network.sent.status). */
+  readonly statusAccepted: string;
   readonly noInvitationYet: string;
   readonly getLink: string;
   readonly newLink: string;
@@ -109,14 +115,6 @@ function failed(s: BridgeActionState): boolean {
     s.status === "invalid" ||
     s.status === "not-found"
   );
-}
-
-/** The stored delivery_status of an invitation row, in the primitive's
- *  outcome vocabulary (`not_sent` = the link is ready, nothing was e-mailed). */
-function deliveryStatusOutcome(deliveryStatus: string): string {
-  if (deliveryStatus === "sent") return "sent";
-  if (deliveryStatus === "delivery_failed") return "delivery_failed";
-  return "created";
 }
 
 export function AgencyBridgeSection({
@@ -177,8 +175,16 @@ export function AgencyBridgeSection({
   const stageByWorker = new Map(progressRows.map((p) => [`${p.requestId}:${p.workerId}`, p]));
   // UNKNOWN is not "no invitation": only an ok read says whether a pending
   // connection has an invitation behind it.
-  const pendingByEmail =
-    deliveries.kind === "ok" ? pendingDeliveryByEmail(deliveries.rows) : null;
+  //
+  // SCOPE: PER INVITER. `deliveries` is the primitive's sent list pinned to
+  // the signed-in person (`listMySentInvitations`: inviter_profile_id = me),
+  // so an invitation a colleague of the same agency sent is NOT in it: for
+  // that row this section reads "no invitation link yet" and "Get link"
+  // mints one more invitation, under this inviter. That is the primitive's
+  // idempotency key (inviter + address + type), not a bridge choice;
+  // widening the read to the organization is the primitive's decision.
+  const liveInvitations =
+    deliveries.kind === "ok" ? deliveryByEmail(deliveries.rows) : null;
 
   // TIME_TO_EXTERNAL_HUMAN_RESPONSE for the agency: another person acted on
   // what the agency did - a client accepted the connection, shared a request
@@ -242,7 +248,8 @@ export function AgencyBridgeSection({
             ) : (
               <ul className="flex flex-col gap-1.5">
                 {connRows.map((c) => {
-                  const invitation = pendingByEmail?.get(c.invitedEmail.toLowerCase()) ?? null;
+                  const invitation = liveInvitations?.get(c.invitedEmail.toLowerCase()) ?? null;
+                  const rowState = clientInviteRowState(invitation);
                   return (
                     <li key={c.id} className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-connection-row">
                       <div className="flex flex-wrap items-center gap-2">
@@ -274,16 +281,28 @@ export function AgencyBridgeSection({
                         )}
                       </div>
                       {/* A PENDING connection is only real once the invitation
-                          reached the person: the delivery state of the
-                          primitive's row, or the plain fact that no
-                          invitation exists yet (an unknown read shows nothing). */}
-                      {c.status === "pending" && pendingByEmail !== null && (
+                          reached the person. Four states from the primitive's
+                          own row (an unknown read shows nothing):
+                            accepted — delivered and accepted; the client's
+                                       confirmation of the connection is what
+                                       is awaited, so NO link control;
+                            created / sent / delivery_failed — a pending
+                                       invitation's delivery state + a fresh link;
+                            none     — no live invitation: mint one. */}
+                      {c.status === "pending" && liveInvitations !== null && (
                         <div className="flex flex-wrap items-center gap-2" data-testid="agency-bridge-delivery-row"
-                          data-delivery={invitation ? deliveryStatusOutcome(invitation.deliveryStatus) : "none"}>
-                          {invitation ? (
+                          data-delivery={rowState}>
+                          {rowState === "accepted" ? (
                             <>
                               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                                {labels.outcomeLabels[deliveryStatusOutcome(invitation.deliveryStatus)]}
+                                {labels.statusAccepted}
+                              </span>
+                              <span className="text-xs text-text-muted">{labels.deliveryAccepted}</span>
+                            </>
+                          ) : invitation ? (
+                            <>
+                              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                                {labels.outcomeLabels[rowState]}
                               </span>
                               <form action={linkAction} className="shrink-0">
                                 <input type="hidden" name="invitationId" value={invitation.invitationId} />
@@ -298,7 +317,9 @@ export function AgencyBridgeSection({
                           ) : (
                             <>
                               <span className="text-xs text-text-muted">{labels.noInvitationYet}</span>
-                              {/* Idempotent: the connection RPC reuses this
+                              {/* ONLY when no pending or accepted invitation
+                                  exists for this address (from this inviter).
+                                  Idempotent: the connection RPC reuses the
                                   row; only the invitation is new. */}
                               <form action={inviteAction} className="shrink-0">
                                 <input type="hidden" name="agencyCompanyId" value={agencyCompanyId} />

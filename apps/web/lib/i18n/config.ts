@@ -51,6 +51,23 @@ export type ActiveLocale = (typeof activeLocales)[number];
 
 export const defaultLocale: ActiveLocale = "lt";
 
+/**
+ * Clamp a caller-supplied locale to the closed ACTIVE set, else the default.
+ *
+ * For any value that is about to be interpolated into a redirect or a link:
+ * `redirect(\`/${locale}/…\`)` with a form-supplied `locale` of `/evil.com`
+ * yields the protocol-relative `//evil.com/…`, which the browser follows off
+ * the site. Every `String(formData.get("locale") ?? "lt")` is that hole; this
+ * is the one closing move (agency bridge, 2026-09-24 — the remaining
+ * occurrences are listed as residue, not swept). Pure.
+ */
+export function toActiveLocale(raw: string | null | undefined): ActiveLocale {
+  const value = (raw ?? "").trim();
+  return (activeLocales as readonly string[]).includes(value)
+    ? (value as ActiveLocale)
+    : defaultLocale;
+}
+
 // Tier 1 = human-verified for M1 (EN source + LT). RU is active but stays
 // Tier 2 (AI-seeded full translation pending human review per doctrine
 // §7.4) — the language selector tags it as preview until DI promotes it.

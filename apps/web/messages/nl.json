@@ -2068,6 +2068,7 @@
         "orgNoCompanyProfileBody": "De naam kan hier niet worden gewijzigd — dit formulier wijzigt alleen de naam van een bedrijfsprofiel, en een organisatie zonder bedrijfsprofiel kan nog niet worden hernoemd. Er is niets gewijzigd.",
         "orgNotAvailableHeading": "Deze organisatie kan hier niet worden beheerd",
         "orgNotAvailableBody": "De link verwijst naar een organisatie waarvan je het profiel vanuit dit account niet kunt wijzigen, of die niet kon worden gecontroleerd. Er is niets gewijzigd. Kies de organisatie in de werkruimtekiezer bovenaan.",
+        "agencyConnectionPending": "Uitnodiging geaccepteerd. Een uitzendbureau wil een verbinding met je bedrijf — maak eerst je bedrijfsprofiel aan; het verbindingsverzoek wacht daarna op je pagina Partners, waar je het met dit bedrijf bevestigt.",
         "legalLockedNotice": "Dit bedrijf is geverifieerd. De juridische gegevens (officiële naam, registratiecode, land en geregistreerd adres) zijn hier vergrendeld en kunnen niet worden overschreven — neem contact op met support om een juridische wijziging aan te vragen. Je kunt contactgegevens, website, bedrijfstype en je rol nog wel bijwerken.",
         "saveDraft": "Bedrijf opslaan",
         "submitRequest": "Handmatige beoordeling aanvragen (optioneel)",
@@ -11688,7 +11689,8 @@
     "noInvitationYet": "Nog geen uitnodigingslink — haal er een op om deze uitnodiging te bezorgen.",
     "getLink": "Link ophalen",
     "newLink": "Nieuwe link",
-    "messageButton": "Bericht"
+    "messageButton": "Bericht",
+    "deliveryAccepted": "Bezorgd — de klant heeft de uitnodiging geaccepteerd en bevestigt de verbinding nu op zijn pagina Partners."
   },
   "clientBridge": {
     "title": "Uitzendbureaus",

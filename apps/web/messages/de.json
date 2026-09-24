@@ -2068,6 +2068,7 @@
         "orgNoCompanyProfileBody": "Ihr Name kann hier nicht geändert werden — dieses Formular ändert nur den Namen eines Firmenprofils, und eine Organisation ohne Firmenprofil kann noch nicht umbenannt werden. Es wurde nichts geändert.",
         "orgNotAvailableHeading": "Diese Organisation kann hier nicht verwaltet werden",
         "orgNotAvailableBody": "Der Link nennt eine Organisation, deren Profil Sie mit diesem Konto nicht ändern können, oder sie konnte nicht geprüft werden. Es wurde nichts geändert. Wählen Sie die Organisation oben in der Arbeitsbereichsauswahl.",
+        "agencyConnectionPending": "Einladung angenommen. Eine Personalagentur möchte sich mit Ihrem Unternehmen verbinden — legen Sie zuerst Ihr Unternehmensprofil an; die Verbindungsanfrage wartet danach auf Ihrer Partnerseite, wo Sie sie mit diesem Unternehmen bestätigen.",
         "legalLockedNotice": "Dieses Unternehmen ist verifiziert. Seine rechtlichen Angaben (offizieller Name, Registrierungsnummer, Land und eingetragene Adresse) sind hier gesperrt und können nicht überschrieben werden — kontaktieren Sie den Support, um eine rechtliche Änderung zu beantragen. Kontakte, Website, Unternehmenstyp und Ihre Rolle können Sie weiterhin aktualisieren.",
         "saveDraft": "Unternehmen speichern",
         "submitRequest": "Manuelle Prüfung anfordern (optional)",
@@ -11688,7 +11689,8 @@
     "noInvitationYet": "Noch kein Einladungslink — holen Sie einen, um diese Einladung zuzustellen.",
     "getLink": "Link holen",
     "newLink": "Neuer Link",
-    "messageButton": "Nachricht"
+    "messageButton": "Nachricht",
+    "deliveryAccepted": "Zugestellt — der Kunde hat die Einladung angenommen und bestätigt die Verbindung nun auf seiner Partnerseite."
   },
   "clientBridge": {
     "title": "Personalagenturen",

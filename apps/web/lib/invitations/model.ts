@@ -178,6 +178,35 @@ export function maskEmail(email: string | null | undefined): string | null {
   return `${local[0]}***@${domain}`;
 }
 
+/** The company-setup entry — the Activity Setup Hub's company door, open to
+ *  every signed-in person (`/dashboard/company/*` is role-gated; this is not). */
+export const COMPANY_SETUP_ENTRY = "/dashboard/start/company";
+
+/** The closed `?notice=` token the setup entry reads after an agency-client
+ *  acceptance by a person who holds no company role yet. Internal: localized
+ *  on the page, never rendered raw. */
+export const AGENCY_CONNECTION_PENDING_NOTICE = "agency_connection_pending";
+
+/**
+ * Where an ACCEPTED agency-client invitation lands the person (review round
+ * 2, 2026-09-24). The partners door is gated on the `company` role
+ * (`requireRoleOrRedirect(locale, "company")`): a person who accepted with no
+ * company workspace used to be sent there and bounced to
+ * `/dashboard?notice=needs_company_role` — a refusal, with the pending
+ * connection never named. Such a person lands on the company-setup entry
+ * with a notice that names it instead. `null` = the role read never answered:
+ * an unknown is NEVER narrowed into "no role", so the door keeps deciding
+ * (its own gate retries and answers honestly). Pure.
+ */
+export function agencyClientLanding(
+  holdsCompanyRole: boolean | null,
+): { readonly path: string; readonly notice: string } {
+  if (holdsCompanyRole === false) {
+    return { path: COMPANY_SETUP_ENTRY, notice: AGENCY_CONNECTION_PENDING_NOTICE };
+  }
+  return { path: "/dashboard/company/partners", notice: "invitation_accepted" };
+}
+
 /** Where acceptance lands the person — the exact real context. */
 export function acceptedDestination(input: {
   invitationType: InvitationType | string;

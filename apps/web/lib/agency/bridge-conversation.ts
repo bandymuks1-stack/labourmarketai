@@ -11,6 +11,7 @@ import {
   evaluateAgencyConnectionContact,
 } from "@/lib/communication/communication-eligibility";
 import { isBridgeUuid } from "@/lib/agency/bridge-model";
+import { toActiveLocale } from "@/lib/i18n/config";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(supabase: SupabaseClient): any {
@@ -46,12 +47,17 @@ function asAny(supabase: SupabaseClient): any {
  *
  * Failure never bounces silently: it lands on the messages list with the
  * existing honest `?notice=cannot_open` restricted state.
+ *
+ * The locale is a FORM field and it is interpolated into every redirect
+ * below, so it is clamped to the closed active set first (`toActiveLocale`):
+ * a forged `/evil.com` would otherwise become the protocol-relative
+ * `//evil.com/dashboard/…` Location the browser follows off the site.
  */
 export async function openAgencyConnectionConversationAction(
   formData: FormData,
 ): Promise<void> {
   const connectionId = String(formData.get("connectionId") ?? "");
-  const locale = String(formData.get("locale") ?? "lt");
+  const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const cannotOpen = `/${locale}/dashboard/communication?notice=cannot_open`;
 
   if (!isBridgeUuid(connectionId)) redirect(cannotOpen);

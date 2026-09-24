@@ -2068,6 +2068,7 @@
         "orgNoCompanyProfileBody": "Jos pavadinimo čia pakeisti negalima — šioje formoje keičiamas tik įmonės profilio pavadinimas, o organizacijos be jo kol kas pervadinti negalima. Niekas nepakeista.",
         "orgNotAvailableHeading": "Šios organizacijos čia tvarkyti negalima",
         "orgNotAvailableBody": "Nuoroda nurodo organizaciją, kurios profilio iš šios paskyros keisti negalite, arba jos nepavyko patikrinti. Niekas nepakeista. Pasirinkite organizaciją darbo erdvių sąraše viršuje.",
+        "agencyConnectionPending": "Kvietimas priimtas. Personalo agentūra nori užmegzti ryšį su jūsų įmone — pirmiausia sukurkite įmonės profilį; ryšio prašymas tada lauks jūsų puslapyje „Klientai ir partneriai“, kur jį patvirtinsite šios įmonės vardu.",
         "legalLockedNotice": "Ši įmonė yra patvirtinta. Jos juridiniai duomenys (pavadinimas, įmonės kodas, šalis ir registracijos adresas) čia užrakinti ir negali būti perrašyti — dėl juridinių duomenų keitimo kreipkitės į palaikymą. Kontaktus, svetainę, veiklos tipą ir savo vaidmenį vis tiek galite atnaujinti.",
         "saveDraft": "Išsaugoti įmonę",
         "submitRequest": "Prašyti rankinės peržiūros (neprivaloma)",
@@ -11688,7 +11689,8 @@
     "noInvitationYet": "Kvietimo nuorodos dar nėra — gaukite ją, kad pristatytumėte kvietimą.",
     "getLink": "Gauti nuorodą",
     "newLink": "Nauja nuoroda",
-    "messageButton": "Parašyti žinutę"
+    "messageButton": "Parašyti žinutę",
+    "deliveryAccepted": "Pristatyta — klientas priėmė kvietimą ir dabar patvirtina ryšį savo puslapyje „Klientai ir partneriai“."
   },
   "clientBridge": {
     "title": "Personalo agentūros",

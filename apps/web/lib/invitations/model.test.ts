@@ -2,10 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   AGENCY_CLIENT_PROPOSED_ROLE,
+  AGENCY_CONNECTION_PENDING_NOTICE,
+  COMPANY_SETUP_ENTRY,
   acceptedDestination,
+  agencyClientLanding,
   isAgencyClientInvitation,
   maskEmail,
 } from "@/lib/invitations/model";
+import { routeRequirement } from "@/lib/auth/role-gated-routes";
 
 /**
  * The agency → client invitation rides on the ONE invitation primitive
@@ -102,5 +106,32 @@ describe("maskEmail — first character, the domain, nothing else", () => {
     const masked = maskEmail("verylonglocalpart@example.com") as string;
     expect(masked).toBe("v***@example.com");
     expect(masked).not.toContain("verylong");
+  });
+});
+
+describe("agencyClientLanding — the partners door, or the setup entry when the door would refuse", () => {
+  it("a person holding the company role lands on the partners door", () => {
+    expect(agencyClientLanding(true)).toEqual({
+      path: "/dashboard/company/partners",
+      notice: "invitation_accepted",
+    });
+  });
+
+  it("no company role → the company-setup entry, with the pending connection named", () => {
+    // Review round 2: the partners door is gated on the company role, so
+    // this person used to be bounced to `/dashboard?notice=needs_company_role`.
+    expect(agencyClientLanding(false)).toEqual({
+      path: COMPANY_SETUP_ENTRY,
+      notice: AGENCY_CONNECTION_PENDING_NOTICE,
+    });
+  });
+
+  it("NEGATIVE: an unknown role read is never narrowed into 'no role' — the door decides", () => {
+    expect(agencyClientLanding(null).path).toBe("/dashboard/company/partners");
+  });
+
+  it("NEGATIVE: the setup entry itself is not role-gated, so the landing cannot bounce again", () => {
+    expect(routeRequirement(COMPANY_SETUP_ENTRY)).toBeNull();
+    expect(routeRequirement("/dashboard/company/partners")).toEqual({ kind: "role", role: "company" });
   });
 });

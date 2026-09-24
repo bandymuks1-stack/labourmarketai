@@ -2068,6 +2068,7 @@
         "orgNoCompanyProfileBody": "Its name cannot be changed here — this form changes only a company profile's name, and an organization without one cannot be renamed yet. Nothing was changed.",
         "orgNotAvailableHeading": "This organization cannot be managed here",
         "orgNotAvailableBody": "The link names an organization whose profile you cannot change from this account, or it could not be checked. Nothing was changed. Pick the organization in the workspace switcher above.",
+        "agencyConnectionPending": "Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
         "legalLockedNotice": "This company is verified. Its legal details (legal name, registration code, country and registered address) are locked here and cannot be overwritten — contact support to request a legal change. You can still update contacts, website, company type and your role.",
         "saveDraft": "Save company",
         "submitRequest": "Request manual review (optional)",
@@ -11688,7 +11689,8 @@
     "noInvitationYet": "No invitation link yet — get one to deliver this invitation.",
     "getLink": "Get link",
     "newLink": "New link",
-    "messageButton": "Message"
+    "messageButton": "Message",
+    "deliveryAccepted": "Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
   },
   "clientBridge": {
     "title": "Staffing agencies",
