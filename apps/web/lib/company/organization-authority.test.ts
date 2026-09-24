@@ -55,17 +55,18 @@ describe("projectOrganizationAuthority — one answer per role", () => {
     });
   });
 
-  it("manager: OPENS and OPERATES, never governs — and the database has not caught up", () => {
+  it("manager: OPENS and OPERATES, never governs — and the database accepts the operating writes", () => {
     const a = projectOrganizationAuthority({ role: "manager" });
     expect(a).toEqual({
       role: "manager",
       canOpen: true,
       canGovern: false,
       canOperate: true,
-      sqlWritesGranted: false,
+      sqlWritesGranted: true,
     });
-    // The manager gap the surfaces must SAY (refused ≠ empty).
-    expect(operationalWritesNeedGrant(a)).toBe(true);
+    // manager_projects_roster_rls_v1: projects select/insert/update and the
+    // roster read admit manages_organization — no gap left to announce.
+    expect(operationalWritesNeedGrant(a)).toBe(false);
   });
 
   it("external_manager: the same operational shape as manager", () => {
@@ -73,8 +74,14 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       canOpen: true,
       canGovern: false,
       canOperate: true,
-      sqlWritesGranted: false,
+      sqlWritesGranted: true,
     });
+  });
+
+  it("no role the matrix lets operate is left refused by SQL (the notice renders for none)", () => {
+    for (const role of ["owner", "admin", "manager", "external_manager", "member"]) {
+      expect(operationalWritesNeedGrant(projectOrganizationAuthority({ role })), role).toBe(false);
+    }
   });
 
   it("member: opens (directory, leave) and nothing else", () => {

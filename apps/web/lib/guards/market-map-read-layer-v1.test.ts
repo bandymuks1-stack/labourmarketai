@@ -1041,9 +1041,14 @@ describe("NO new DB migration in this PR", () => {
     //   2026-09-24, ledger 20260924083740). Not this read layer's file.
     //   RECOUNTED: 306.
     // Bumped 306 -> 307 for 20260924130000_set_company_description_v1 (one
-    //   SECURITY DEFINER description write; RED draft, UNAPPLIED). Not this
-    //   read layer's file. RECOUNTED: 307.
-    expect(count).toBeLessThanOrEqual(307);
+    //   SECURITY DEFINER description write; RED, owner-approved, APPLIED
+    //   2026-09-24, ledger 20260924092646). Not this read layer's file.
+    //   RECOUNTED: 307.
+    // Bumped 307 -> 308 for 20260924140000_manager_projects_roster_rls_v1
+    //   (four ALTER POLICY via the existing manages_organization; RED,
+    //   owner-approved, APPLIED 2026-09-24, ledger 20260924092836). Not this
+    //   read layer's file. RECOUNTED: 308.
+    expect(count).toBeLessThanOrEqual(308);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

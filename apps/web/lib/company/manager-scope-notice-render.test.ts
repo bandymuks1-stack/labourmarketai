@@ -63,33 +63,21 @@ beforeEach(() => {
 });
 
 describe("who reads the notice", () => {
-  it("a manager who is NOT a platform admin reads it", async () => {
-    const html = await render("manager");
-    expect(html).toContain('data-testid="manager-scope-notice"');
-    expect(html).toContain('data-role="manager"');
-    expect(html).toContain("Your role here: manager");
-    expect(html).not.toContain("MISSING:");
-    expect(getSessionIsAdmin).toHaveBeenCalledTimes(1);
-  });
-
-  it("an external manager reads it too (same operational shape)", async () => {
-    const html = await render("external_manager");
-    expect(html).toContain('data-role="external_manager"');
-  });
-
-  it("a manager who IS a platform admin reads NOTHING — is_admin() admits their writes", async () => {
-    state.isAdmin = true;
-    expect(await render("manager")).toBeNull();
-    expect(await render("external_manager")).toBeNull();
-    expect(getSessionIsAdmin).toHaveBeenCalledTimes(2);
-  });
-
-  it("owner / admin / member never see it, and never pay the roles read", async () => {
-    for (const role of ["owner", "admin", "member"] as const) {
+  // manager_projects_roster_rls_v1 (owner-approved RED, 2026-09-24): projects
+  // select/insert/update and the roster read admit manages_organization, so a
+  // manager's operating writes are no longer refused and the sentence would
+  // be false for them. The projection now says so for every role.
+  it("after the policy widening NO role reads it — manager and external manager included", async () => {
+    for (const role of ["manager", "external_manager", "owner", "admin", "member"] as const) {
       expect(await render(role), role).toBeNull();
     }
-    // The projection decides FIRST: the admin signal is consulted only for a
-    // role that would otherwise be told its writes are refused.
+  });
+
+  it("the projection decides first: no role pays the platform-admin roles read", async () => {
+    state.isAdmin = true;
+    for (const role of ["manager", "external_manager", "owner", "admin", "member"] as const) {
+      expect(await render(role), role).toBeNull();
+    }
     expect(getSessionIsAdmin).not.toHaveBeenCalled();
   });
 });
@@ -136,11 +124,12 @@ describe("the sentence is true for a non-admin manager, in every catalogue", () 
   }
 
   for (const loc of activeLocales) {
-    it(`${loc}: renders from the real catalogue with no missing key`, async () => {
-      state.locale = loc;
-      const html = await render("manager");
-      expect(html).not.toContain("MISSING:");
-      expect(html).toContain(body(loc).replace(/'/g, "&#x27;").replace(/"/g, "&quot;"));
+    it(`${loc}: the copy the component would render is complete in the real catalogue`, () => {
+      // No role renders the notice after the policy widening; the copy stays
+      // complete so the one honest place for a future gap is ready.
+      const t = scoped(loc, "organizationMembers.managerScope");
+      expect(t("title")).not.toMatch(/^MISSING:/);
+      expect(t("body")).not.toMatch(/^MISSING:/);
     });
   }
 });

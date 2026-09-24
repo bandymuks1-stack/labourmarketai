@@ -1453,8 +1453,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-09-24 — company description save: ONE SECURITY DEFINER write
       // (set_company_description_v1) gated by owns_company, description only,
       // <= 2000, EXECUTE for authenticated only. RED (definer + grant/revoke);
-      // owner-approved to PREPARE as a draft; UNAPPLIED until reviewed.
+      // owner-approved; APPLIED 2026-09-24 (ledger 20260924092646) after
+      // #1870 deployed, read back.
       "20260924130000_set_company_description_v1.sql",
+      // 2026-09-24 — manager RLS: projects select/insert/update and
+      // company_workers select gain OR manages_organization(...); no DELETE,
+      // no other table. RED (ALTER POLICY); owner-approved; APPLIED
+      // 2026-09-24 (ledger 20260924092836) before the app half merged.
+      "20260924140000_manager_projects_roster_rls_v1.sql",
 ]);
   });
 
