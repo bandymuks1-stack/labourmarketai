@@ -14,8 +14,24 @@
  *   db   — the anon-executable `count_public_vacancies_v1` RPC through
  *          PostgREST (by design public; a real query through the pooler).
  *
+ *   vacancyFreshness — (2026-09-23) how old the imported supply is, from the
+ *          anon-executable `count_public_vacancies_v1` (a maintained
+ *          single-row read since 20260903100000, constant cost). Vacancy
+ *          ingestion is a GitHub-hosted schedule in a PUBLIC repository, and
+ *          GitHub disables such schedules after 60 days without repository
+ *          activity; the only monitor lived in the same failure domain. This
+ *          field is the out-of-band signal: an external monitor watching
+ *          `vacancyFreshness.state === "stale"` sees a silent stop.
+ *          INFORMATIONAL — it never changes the HTTP status: `ok` and
+ *          200/503 stay "can the product serve a person right now?".
+ *
  * PURE: this module shapes results; the route performs the IO.
  */
+
+import {
+  classifySourceFreshness,
+  type SourceFreshnessState,
+} from "@/lib/vacancy-sources/source-freshness";
 
 export type HealthCheck = {
   readonly ok: boolean;
@@ -23,6 +39,25 @@ export type HealthCheck = {
   /** Bounded, non-secret reason when not ok: an HTTP status or an error
    *  class name. Never a message body, never a URL. */
   readonly reason?: string;
+};
+
+/**
+ * Operator thresholds for the imported supply. The stream re-confirms ads
+ * several times a day; one missed day is `delayed`, three is `stale` — the
+ * value a monitor pages on. These are wider than the worker-facing product
+ * thresholds in source-freshness.ts on purpose: a board notice and an
+ * operator page are different questions.
+ */
+export const VACANCY_FRESHNESS_DELAYED_AFTER_HOURS = 24;
+export const VACANCY_FRESHNESS_STALE_AFTER_HOURS = 72;
+
+export type VacancyFreshnessCheck = HealthCheck & {
+  /** `ok` above means "the freshness read answered"; this is the answer. */
+  readonly state: SourceFreshnessState;
+  /** Newest `last_seen_at` the importer confirmed, when known. */
+  readonly lastRefreshedAt: string | null;
+  readonly ageHours: number | null;
+  readonly staleAfterHours: number;
 };
 
 export type HealthReport = {
@@ -34,12 +69,40 @@ export type HealthReport = {
     readonly auth: HealthCheck;
     readonly db: HealthCheck;
   };
+  readonly vacancyFreshness: VacancyFreshnessCheck;
 };
 
-/** Overall health is the conjunction of the dependencies a sign-in needs. */
+/** The freshness probe's answer, classified. A probe that did not answer is
+ *  `unavailable`; an answer with no timestamp (empty corpus) is `unknown`. */
+export function buildVacancyFreshness(input: {
+  probe: HealthCheck;
+  lastRefreshedAt: string | null;
+  now: Date;
+}): VacancyFreshnessCheck {
+  const f = classifySourceFreshness({
+    lastRefreshedAt: input.probe.ok ? input.lastRefreshedAt : null,
+    nowIso: input.now.toISOString(),
+    unavailable: !input.probe.ok,
+    thresholds: {
+      delayedAfterHours: VACANCY_FRESHNESS_DELAYED_AFTER_HOURS,
+      staleAfterHours: VACANCY_FRESHNESS_STALE_AFTER_HOURS,
+    },
+  });
+  return {
+    ...input.probe,
+    state: f.state,
+    lastRefreshedAt: f.lastRefreshedAt,
+    ageHours: f.ageHours,
+    staleAfterHours: VACANCY_FRESHNESS_STALE_AFTER_HOURS,
+  };
+}
+
+/** Overall health is the conjunction of the dependencies a sign-in needs.
+ *  Vacancy freshness is reported beside it and NEVER folded into `ok`. */
 export function summarizeHealth(input: {
   auth: HealthCheck;
   db: HealthCheck;
+  vacancyFreshness: VacancyFreshnessCheck;
   build: string | null;
   region: string | null;
   now: Date;
@@ -50,6 +113,7 @@ export function summarizeHealth(input: {
     build: input.build,
     region: input.region,
     checks: { auth: input.auth, db: input.db },
+    vacancyFreshness: input.vacancyFreshness,
   };
 }
 

@@ -3,9 +3,13 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  VACANCY_FRESHNESS_DELAYED_AFTER_HOURS,
+  VACANCY_FRESHNESS_STALE_AFTER_HOURS,
   boundedReason,
+  buildVacancyFreshness,
   summarizeHealth,
   timedCheck,
+  type VacancyFreshnessCheck,
 } from "@/lib/ops/health-model";
 
 /**
@@ -45,7 +49,11 @@ describe("Guard: /api/health", () => {
     expect(route).toMatch(/body: JSON\.stringify\(\{ p_id: NIL_UUID \}\)/);
     // executable text only — the rationale comment is allowed to name the old RPC
     const code = route.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(code).not.toMatch(/count_public_vacancies_v1/);
+    // RE-ANCHORED 2026-09-23: the count RPC may appear in executable text ONLY
+    // as the separate freshness probe (below); the db probe never names it.
+    expect(code).not.toMatch(/DB_PROBE_RPC = "count_public_vacancies_v1"/);
+    expect(code.match(/count_public_vacancies_v1/g)).toEqual(["count_public_vacancies_v1"]);
+    expect(code).toMatch(/const FRESHNESS_RPC = "count_public_vacancies_v1"/);
     expect(code).not.toMatch(/search_public_vacancy_previews_v1|list_public_vacancy_sitemap_v1/);
   });
 
@@ -57,10 +65,20 @@ describe("Guard: /api/health", () => {
     expect(route).toMatch(/status: report\.ok \? 200 : 503/);
   });
 
+  const FRESH: VacancyFreshnessCheck = {
+    ok: true,
+    ms: 30,
+    state: "current",
+    lastRefreshedAt: "2026-09-02T14:00:00.000Z",
+    ageHours: 1,
+    staleAfterHours: VACANCY_FRESHNESS_STALE_AFTER_HOURS,
+  };
+
   it("the report is booleans + latencies + build; overall ok = auth && db", () => {
     const r = summarizeHealth({
       auth: { ok: true, ms: 12 },
       db: { ok: false, ms: 4000, reason: "timeout" },
+      vacancyFreshness: FRESH,
       build: "289c92ac",
       region: "dub1",
       now: new Date("2026-09-02T15:00:00Z"),
@@ -71,8 +89,95 @@ describe("Guard: /api/health", () => {
       build: "289c92ac",
       region: "dub1",
       checks: { auth: { ok: true, ms: 12 }, db: { ok: false, ms: 4000, reason: "timeout" } },
+      vacancyFreshness: FRESH,
     });
     expect(JSON.stringify(r)).not.toMatch(/supabase\.co|eyJ|sb_/);
+  });
+
+  /**
+   * VACANCY FRESHNESS (2026-09-23). Ingestion runs as a GitHub schedule in a
+   * PUBLIC repository; GitHub disables such schedules after 60 days without
+   * repository activity, and the only monitor lived on the same schedules.
+   * `/api/health` now carries the age of the supply for an external monitor —
+   * and NEVER lets it change the status a sign-in monitor pages on.
+   */
+  describe("vacancyFreshness", () => {
+    const now = new Date("2026-09-23T12:00:00Z");
+    const hoursAgo = (h: number) => new Date(now.getTime() - h * 3_600_000).toISOString();
+    const answered = { ok: true, ms: 40 };
+
+    it("thresholds: one missed day is delayed, three days is stale", () => {
+      expect(VACANCY_FRESHNESS_DELAYED_AFTER_HOURS).toBe(24);
+      expect(VACANCY_FRESHNESS_STALE_AFTER_HOURS).toBe(72);
+    });
+
+    it("classifies a confirmed refresh by age", () => {
+      expect(buildVacancyFreshness({ probe: answered, lastRefreshedAt: hoursAgo(2), now })).toEqual({
+        ok: true,
+        ms: 40,
+        state: "current",
+        lastRefreshedAt: hoursAgo(2),
+        ageHours: 2,
+        staleAfterHours: 72,
+      });
+      expect(buildVacancyFreshness({ probe: answered, lastRefreshedAt: hoursAgo(30), now }).state).toBe("delayed");
+      expect(buildVacancyFreshness({ probe: answered, lastRefreshedAt: hoursAgo(71), now }).state).toBe("delayed");
+      expect(buildVacancyFreshness({ probe: answered, lastRefreshedAt: hoursAgo(72), now }).state).toBe("stale");
+      expect(buildVacancyFreshness({ probe: answered, lastRefreshedAt: hoursAgo(24 * 61), now }).state).toBe("stale");
+    });
+
+    it("an answered read with no timestamp is unknown; a failed read is unavailable — neither is current", () => {
+      expect(buildVacancyFreshness({ probe: answered, lastRefreshedAt: null, now })).toMatchObject({
+        ok: true,
+        state: "unknown",
+        ageHours: null,
+      });
+      const failed = buildVacancyFreshness({
+        probe: { ok: false, ms: 4000, reason: "timeout" },
+        // A stale-looking timestamp from a probe that did NOT answer is not trusted.
+        lastRefreshedAt: hoursAgo(1),
+        now,
+      });
+      expect(failed).toMatchObject({ ok: false, reason: "timeout", state: "unavailable", lastRefreshedAt: null });
+    });
+
+    it("NEGATIVE CONTROL — stale supply does not flip `ok`, and a healthy corpus does not rescue it", () => {
+      const stale = buildVacancyFreshness({ probe: answered, lastRefreshedAt: hoursAgo(200), now });
+      expect(stale.state).toBe("stale");
+      const r = summarizeHealth({
+        auth: { ok: true, ms: 12 },
+        db: { ok: true, ms: 30 },
+        vacancyFreshness: stale,
+        build: null,
+        region: null,
+        now,
+      });
+      expect(r.ok).toBe(true);
+      expect(r.vacancyFreshness.state).toBe("stale");
+      const down = summarizeHealth({
+        auth: { ok: false, ms: 4000, reason: "timeout" },
+        db: { ok: true, ms: 30 },
+        vacancyFreshness: FRESH,
+        build: null,
+        region: null,
+        now,
+      });
+      expect(down.ok).toBe(false);
+    });
+
+    it("the route reads it through a SEPARATE anon probe, bounded like the others, and never folds it into `ok`", () => {
+      expect(route).toMatch(/rpc\/\$\{FRESHNESS_RPC\}/);
+      expect(route).toMatch(/const \[auth, db, freshness\] = await Promise\.all\(/);
+      expect(route).toMatch(/buildVacancyFreshness\(\{/);
+      expect(route).toMatch(/last_refreshed_at/);
+      // Three timed checks, one timeout constant, no untimed fetch.
+      expect(route.match(/timedCheck\(/g)).toHaveLength(3);
+      expect(route.match(/PROBE_TIMEOUT_MS\)/g)).toHaveLength(3);
+      // The model — not the route — decides `ok`, and it ignores freshness.
+      const model = read("lib/ops/health-model.ts");
+      expect(model).toMatch(/ok: input\.auth\.ok && input\.db\.ok,/);
+      expect(model).not.toMatch(/ok: input\.auth\.ok && input\.db\.ok && /);
+    });
   });
 
   it("a hung dependency is a failed check, not a hung probe", async () => {
