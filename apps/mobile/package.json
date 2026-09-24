@@ -15,7 +15,7 @@
     "doctor": "expo-doctor"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~57.0.14",
+    "@expo/metro-runtime": "~57.0.15",
     "@labourmarket/client-core": "workspace:*",
     "@supabase/supabase-js": "^2.112.4",
     "expo": "~57.0.18",
