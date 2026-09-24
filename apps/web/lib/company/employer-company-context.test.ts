@@ -427,6 +427,24 @@ describe("§11 governance gate — membership truth decides the role", () => {
     });
   });
 
+  it("a delegated MEMBER still opens no employer surface — the grant is invitations, not the company's pages", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "member", manages_invitations: true }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "unavailable",
+      reason: "company-not-owned",
+    });
+  });
+
   it("a manager row without the grant is not a delegate — the title grants nothing", async () => {
     fromMock.mockImplementation(
       tableStub({

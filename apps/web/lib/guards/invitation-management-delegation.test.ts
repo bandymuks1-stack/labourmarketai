@@ -172,7 +172,9 @@ describe("Guard: invitation delegation — the app half uses the one command and
     expect(fn).toMatch(/getGovernedOrganizations\(\)/); // owned + owner/admin
     expect(fn).toMatch(/\.eq\("manages_invitations", true\)/); // + delegated
     expect(fn).toMatch(/withoutArchivedOrganizations/);
-    expect(fn).not.toMatch(/"manager"|"external_manager"/);
+    // Any delegated member — a plain `member` included, who opens no employer
+    // surface — reaches their organization here: no role filter on the grant.
+    expect(fn).not.toMatch(/"manager"|"external_manager"|"member"/);
     const network = web("app/[locale]/dashboard/network/page.tsx");
     expect(network).toContain("organizations={inviteOrganizations}");
   });

@@ -334,6 +334,12 @@ export async function resolveEmployerCompanyCore(
       invitationDelegate = memberRow?.manages_invitations === true;
     }
     if (role === null && company.profile_id === caller.userId) role = "owner";
+    // A `member` opens no employer surface — a delegation does not change
+    // that (it grants invitations, not the company's employer pages). A
+    // delegated member manages invitations from the invite panel
+    // (/dashboard/network), which offers every organization whose
+    // invitations they may manage, `join_as_employee` included
+    // (getInvitationOrganizations ↔ invitation_org_authority_v1).
     if (role === null || !isEmployerSurfaceRole(role)) {
       return unavailable("company-not-owned", organizationName || label);
     }
