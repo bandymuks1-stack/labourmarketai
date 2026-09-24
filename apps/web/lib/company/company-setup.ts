@@ -3,6 +3,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  COMPANY_PRIVATE_SELECT,
+  readCompaniesPrivate,
+} from "@/lib/company/company-private-read";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -163,8 +167,9 @@ export type SaveCompanyResult =
   | { kind: "multiple-companies" }
   | { kind: "error"; message: string };
 
-const SELECT_COLUMNS =
-  "id, profile_id, legal_name, display_name, company_type, country, registration_code, address, website, contact_email, contact_phone, requester_role, verification_status, verification_note, requested_at, created_at";
+// The column list (private contact columns included) lives with the one
+// private reader, lib/company/company-private-read.ts (K2-1 v2).
+const SELECT_COLUMNS = COMPANY_PRIVATE_SELECT;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapCompanyRow(r: any): CompanyRow {
@@ -206,11 +211,9 @@ export async function listOwnedCompanies(): Promise<CompanyListResult> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", rows: [] };
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .eq("profile_id", user.id)
-    .order("created_at", { ascending: true });
+  const { data, error } = await readCompaniesPrivate(supabase, SELECT_COLUMNS, (q) =>
+    q.eq("profile_id", user.id).order("created_at", { ascending: true }),
+  );
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||
@@ -259,11 +262,9 @@ export async function readCompanyByIdForAccess(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", row: null };
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .eq("id", companyId)
-    .maybeSingle();
+  const { data, error } = await readCompaniesPrivate(supabase, SELECT_COLUMNS, (q) =>
+    q.eq("id", companyId).maybeSingle(),
+  );
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||
@@ -316,11 +317,9 @@ export async function getOwnCompany(): Promise<CompanyReadResult> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", row: null };
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .eq("profile_id", user.id)
-    .maybeSingle();
+  const { data, error } = await readCompaniesPrivate(supabase, SELECT_COLUMNS, (q) =>
+    q.eq("profile_id", user.id).maybeSingle(),
+  );
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||

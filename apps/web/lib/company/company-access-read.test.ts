@@ -12,9 +12,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getUserMock = vi.fn();
 const fromMock = vi.fn();
+const rpcMock = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { getUser: getUserMock }, from: fromMock }),
+  createClient: async () => ({ auth: { getUser: getUserMock }, from: fromMock, rpc: rpcMock }),
 }));
 vi.mock("@/lib/telemetry/server-funnel", () => ({ emitServerFunnelEvent: vi.fn() }));
 
@@ -55,6 +56,23 @@ let membershipError: { code: string } | null = null;
 let lastRoleFilter: string[] = [];
 let lastCompanyFilter: string | null = null;
 
+/** K2-1 v2: the private reader. Default = migration UNAPPLIED (PostgREST
+ *  answers PGRST202), so the read falls back to the table as it does today;
+ *  `readerApplied` flips it to the definer answering the row itself. */
+let readerApplied = false;
+function stubRpc(fn: string) {
+  if (fn !== "read_companies_private_v1") throw new Error(`unexpected rpc ${fn}`);
+  const chain = {
+    select: () => chain,
+    eq: () => chain,
+    maybeSingle: async () =>
+      readerApplied
+        ? { data: companyRow, error: null }
+        : { data: null, error: { code: "PGRST202", message: "function not found" } },
+  };
+  return chain;
+}
+
 function stubFrom(table: string) {
   if (table === "companies") {
     const chain = {
@@ -94,8 +112,10 @@ beforeEach(() => {
   membershipError = null;
   lastRoleFilter = [];
   lastCompanyFilter = null;
+  readerApplied = false;
   getUserMock.mockResolvedValue({ data: { user: { id: USER } } });
   fromMock.mockImplementation(stubFrom);
+  rpcMock.mockImplementation(stubRpc);
 });
 
 describe("a MANAGER of the organization (the canonical case)", () => {
@@ -182,5 +202,36 @@ describe("NEGATIVE controls", () => {
     memberships = [{ role: "external_manager", company: COMPANY_A }];
     expect(await readCompanyByIdForAccess(COMPANY_A, "open")).toMatchObject({ row: { id: COMPANY_A } });
     expect(await readCompanyByIdForAccess(COMPANY_A, "govern")).toEqual({ kind: "ok", row: null });
+  });
+});
+
+describe("K2-1 v2: the private reader, before and after the migration", () => {
+  it("unapplied: the definer is tried first, then the table read answers (today's behaviour)", async () => {
+    memberships = [{ role: "manager", company: COMPANY_A }];
+    expect(await getAccessibleCompanyById(COMPANY_A)).toMatchObject({ row: { id: COMPANY_A } });
+    expect(rpcMock).toHaveBeenCalledWith("read_companies_private_v1");
+    expect(fromMock).toHaveBeenCalledWith("companies");
+  });
+
+  it("applied: the definer answers and the table is never read for private columns", async () => {
+    readerApplied = true;
+    memberships = [{ role: "manager", company: COMPANY_A }];
+    expect(await getAccessibleCompanyById(COMPANY_A)).toMatchObject({ row: { id: COMPANY_A } });
+    expect(fromMock).not.toHaveBeenCalledWith("companies");
+    // The app's own open/govern check still runs on top of the definer.
+    expect(await getOwnedCompanyById(COMPANY_A)).toEqual({ kind: "ok", row: null });
+  });
+
+  it("applied: any other reader error is surfaced, never a silent fallback to the table", async () => {
+    rpcMock.mockImplementation(() => {
+      const chain = {
+        select: () => chain,
+        eq: () => chain,
+        maybeSingle: async () => ({ data: null, error: { code: "42501", message: "denied" } }),
+      };
+      return chain;
+    });
+    expect(await getAccessibleCompanyById(COMPANY_A)).toEqual({ kind: "error", message: "denied" });
+    expect(fromMock).not.toHaveBeenCalledWith("companies");
   });
 });

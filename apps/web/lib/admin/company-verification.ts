@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readCompaniesPrivate } from "@/lib/company/company-private-read";
 import type { CompanyVerificationStatus } from "@/lib/company/company-setup";
 
 /**
@@ -97,10 +98,11 @@ export async function listCompanyVerificationRequests(): Promise<CompanyVerifica
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", rows: [] };
 
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .order("requested_at", { ascending: false, nullsFirst: false });
+  // K2-1 v2: private columns through the one private reader (an admin gets
+  // every row from it; the direct read before the migration is applied).
+  const { data, error } = await readCompaniesPrivate(supabase, SELECT_COLUMNS, (q) =>
+    q.order("requested_at", { ascending: false, nullsFirst: false }),
+  );
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||
