@@ -2211,6 +2211,7 @@
         "inviteSubmit": "Utwórz zaproszenie",
         "invitationsHeading": "Oczekujące zaproszenia",
         "invitationsEmpty": "Brak oczekujących zaproszeń.",
+        "invitationsManagedElsewhere": "Zaproszeniami zajmuje się odpowiedzialna za to osoba w firmie.",
         "statusInvited": "Zaproszenie utworzone (nie zostało wysłane e-mailem). Zaproszona osoba zobaczy je po zalogowaniu tym adresem e-mail.",
         "statusAlreadyPending": "Dla tego e-maila z Twojej firmy istnieje już oczekujące zaproszenie.",
         "statusAlreadyLinked": "Ten pracownik jest już połączony z Twoją firmą.",
@@ -16985,6 +16986,7 @@
         "title": "Ludzie i zespół",
         "subtitle": "Kto z Tobą pracuje, kto jest wolny, kto wymaga uwagi — i jak pozyskać nowe osoby.",
         "summary": "{active} aktywnych · {pending} zaproszeń oczekuje · {members} członków · {review} w przeglądzie dziennika",
+        "summaryWithoutInvitations": "{active} aktywnych · {members} członków · {review} w przeglądzie dziennika",
         "booked": {
           "title": "Zarezerwowane osoby",
           "intro": "Osoby, które zarezerwowałeś bezpośrednio. Rezerwacja to realna relacja robocza, ale sama w sobie nie otwiera dziennika do przeglądu.",

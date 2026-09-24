@@ -2211,6 +2211,7 @@
         "inviteSubmit": "Sukurti kvietimą",
         "invitationsHeading": "Laukiantys pakvietimai",
         "invitationsEmpty": "Šiuo metu laukiančių pakvietimų nėra.",
+        "invitationsManagedElsewhere": "Kvietimais rūpinasi už tai atsakingas įmonės asmuo.",
         "statusInvited": "Kvietimas sukurtas (el. paštu nesiunčiamas). Pakviestasis jį matys prisijungęs tuo pačiu el. paštu.",
         "statusAlreadyPending": "Šiam el. pašto adresui jau yra laukiantis pakvietimas iš jūsų įmonės.",
         "statusAlreadyLinked": "Šis darbuotojas jau susietas su jūsų įmone.",
@@ -16985,6 +16986,7 @@
         "title": "Žmonės ir komanda",
         "subtitle": "Kas dirba su jumis, kas laisvas, kam reikia dėmesio — ir kaip įtraukti naujus žmones.",
         "summary": "{active} aktyvūs · {pending} laukia kvietimo · {members} nariai · {review} peržiūri žurnalus",
+        "summaryWithoutInvitations": "{active} aktyvūs · {members} nariai · {review} peržiūri žurnalus",
         "booked": {
           "title": "Užsakyti žmonės",
           "intro": "Žmonės, kuriuos užsakėte tiesiogiai. Užsakymas yra tikras darbo ryšys, tačiau pats savaime jis neatveria žurnalo peržiūrai.",

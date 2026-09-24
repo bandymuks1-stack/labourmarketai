@@ -132,6 +132,12 @@ export type EmployerCompanyContext =
        *  the creator-compatibility arm. Never from the client, never from
        *  employment. Gate writes with `hasOrganizationCapability(role, …)`. */
       readonly role: GovernanceRole;
+      /** The caller created the bound company (`companies.profile_id`). The
+       *  database's `owns_company` admits the creator whatever their
+       *  membership role says, so an owner-equivalent capability
+       *  (`manage-invitations`) must not be lost to a membership row that
+       *  names a narrower role. Absent = not the creator (fails closed). */
+      readonly isCreator?: boolean;
     }
   | {
       readonly kind: "unavailable";
@@ -323,6 +329,7 @@ export async function resolveEmployerCompanyCore(
       organizationId: org.id,
       organizationName,
       role,
+      isCreator: company.profile_id === caller.userId,
     };
 }
 
@@ -343,6 +350,7 @@ export async function requireEmployerCompanyForCaller(
       organizationId: string;
       organizationName: string;
       role: GovernanceRole;
+      isCreator?: boolean;
     }
   | { ok: false; reason: EmployerContextReason }
 > {
@@ -360,6 +368,7 @@ export async function requireEmployerCompanyForCaller(
         organizationId: ctx.organizationId,
         organizationName: ctx.organizationName,
         role: ctx.role,
+        isCreator: ctx.isCreator === true,
       }
     : { ok: false, reason: ctx.reason };
 }
@@ -376,6 +385,7 @@ export async function requireEmployerCompany(): Promise<
       organizationId: string;
       organizationName: string;
       role: GovernanceRole;
+      isCreator?: boolean;
     }
   | { ok: false; reason: EmployerContextReason }
 > {
@@ -387,6 +397,7 @@ export async function requireEmployerCompany(): Promise<
         organizationId: ctx.organizationId,
         organizationName: ctx.organizationName,
         role: ctx.role,
+        isCreator: ctx.isCreator === true,
       }
     : { ok: false, reason: ctx.reason };
 }
