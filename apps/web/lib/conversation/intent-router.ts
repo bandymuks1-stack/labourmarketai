@@ -300,9 +300,18 @@ export function fold(input: string): string {
 }
 
 /** Build a word/phrase pattern. The source is DIACRITIC-FOLDED (so it matches
- *  the folded query) and each ASCII `\b` becomes the Unicode-safe boundary. */
+ *  the folded query) and each ASCII `\b` becomes the Unicode-safe boundary.
+ *
+ *  No `i` flag, by construction: `fold` lower-cases BOTH sides — this source
+ *  here and every query in `classifyIntent` — so case-insensitivity adds
+ *  nothing to a match. It did add cost: with `u`, an `i` pattern makes V8
+ *  build the case-folding closure of every `\p{L}`/`\p{N}` class in the
+ *  boundary, across ~600 patterns, on the first calls of every fresh
+ *  process — about 2.8 s before the router answered at its normal 1–5 ms
+ *  (measured 2026-09-24; 1.5 s without `i`). The chat pays that on its
+ *  first sentences, and CI's intent suites timed out on it. */
 function p(source: string, weight = 1): Pattern {
-  return { re: new RegExp(fold(source).replace(/\\b/g, UB), "iu"), weight };
+  return { re: new RegExp(fold(source).replace(/\\b/g, UB), "u"), weight };
 }
 
 /** `p()`, but the pattern only counts when the sentence is NOT also asking
