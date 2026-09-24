@@ -5,9 +5,12 @@
  * M-P0-4 consumer slice, §11).
  *
  * `organizations.description` is the public business page's main content
- * block. The write travels through the ACTIVE WORKSPACE's company row
- * (`companies_update` RLS still enforces the creator; the SECURITY DEFINER
- * mirror trigger propagates `description` into `organizations`).
+ * block. The write travels through the ACTIVE WORKSPACE's company row via
+ * `set_company_description_v1` (SECURITY DEFINER, `owns_company` = creator or
+ * active owner/admin; description only, ≤ 2000); the SECURITY DEFINER mirror
+ * trigger propagates `description` into `organizations`. Production grants
+ * `authenticated` no UPDATE on `companies`, so the former direct UPDATE never
+ * saved — it remains only as the fallback while the function is absent.
  *
  * BEFORE §11 this was the last workspace-BLIND company write: it looked the
  * company up by the caller's profile as a singleton — a read that ERRORS once
@@ -24,6 +27,8 @@ import { ORG_DESCRIPTION_MAX } from "@/lib/company/org-display";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+
+const UNDEFINED_FUNCTION_CODES = new Set(["42883", "PGRST202"]);
 
 export type SaveOrgDescriptionResult =
   | { kind: "ok" }
@@ -52,12 +57,28 @@ export async function saveOrganizationDescriptionAction(
   }
 
   const supabase = await createClient();
-  // RLS (`companies_update`: profile_id = auth.uid()) still re-validates the
-  // writer server-side — a wrong id can only fail, never cross a tenant.
-  const { error } = await supabase
-    .from("companies")
-    .update({ description: value === "" ? null : value })
-    .eq("id", company.companyId);
+  const nextDescription = value === "" ? null : value;
+  // The one write path: `set_company_description_v1` (SECURITY DEFINER) admits
+  // exactly `owns_company` — the creator or an active owner/admin member, the
+  // set this capability names — writes the description only, and the existing
+  // mirror trigger carries it to the organization's public page. While that
+  // migration is unapplied the function is absent (42883 / PGRST202) and the
+  // previous direct UPDATE runs instead, so this code deploys before the apply.
+  // Not in the generated types until the migration is applied.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const viaRpc = await (supabase as any).rpc("set_company_description_v1", {
+    p_company_id: company.companyId,
+    p_description: nextDescription,
+  });
+  let error = viaRpc.error;
+  if (error && UNDEFINED_FUNCTION_CODES.has(error.code ?? "")) {
+    // RLS (`companies_update`: profile_id = auth.uid()) still re-validates the
+    // writer server-side — a wrong id can only fail, never cross a tenant.
+    ({ error } = await supabase
+      .from("companies")
+      .update({ description: nextDescription })
+      .eq("id", company.companyId));
+  }
   if (error) return { kind: "error" };
 
   const safeLocale = /^[a-z]{2}$/.test(locale) ? locale : "lt";
