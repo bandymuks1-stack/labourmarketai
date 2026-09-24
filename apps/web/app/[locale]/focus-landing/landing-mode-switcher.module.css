@@ -6,11 +6,15 @@
  * the restored composition intact while still giving the visitor the one
  * invitation to discover LIVE. Styling mirrors the LIVE header switcher so
  * both arms present the same control.
+ *
+ * The bottom offset honours the device's safe area (a home indicator) so the
+ * control is never docked under it. On a phone the control is not fixed at
+ * all — see the 640px rule at the end of this file.
  */
 .modeSwitcher {
   position: fixed;
   right: clamp(12px, 2.5vw, 28px);
-  bottom: clamp(12px, 2.5vw, 28px);
+  bottom: calc(clamp(12px, 2.5vw, 28px) + env(safe-area-inset-bottom, 0px));
   z-index: 60;
   display: inline-flex;
   align-items: center;
@@ -109,9 +113,26 @@
   }
 }
 
-@media (max-width: 600px) {
+/**
+ * ON A PHONE THE CONTROL IS IN THE FLOW, NOT OVER THE PAGE (owner directive
+ * 2026-09-24, landing verified at 375px).
+ *
+ * Fixed to the corner, the 138×54px control sat on top of whatever the page
+ * had in that corner at every scroll position: measured anonymously on
+ * production at 375×812 it covered the end of the counter line "Dabar
+ * platformoje: … · atnaujinta …" at the fold and the "10 vietos" chip of the
+ * lower sample job cards — content a visitor could neither read nor tap.
+ * Reserving bottom padding would only have cleared the LAST screen; both
+ * defects were mid-page. So below Tailwind's `sm` (640px) the control leaves
+ * the viewport and takes its place in the page, right-aligned after the
+ * closing band: same buttons, same behaviour, same discovery signal, and it
+ * never occludes a line. From 641px up it stays docked exactly as before.
+ */
+@media (max-width: 640px) {
   .modeSwitcher {
-    right: 10px;
-    bottom: 10px;
+    position: static;
+    display: flex;
+    width: max-content;
+    margin: 2rem 0 0 auto;
   }
 }

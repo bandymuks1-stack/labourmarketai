@@ -12,6 +12,7 @@ import {
   searchPublicVacancyPreviews,
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
+import { publicVacancyCardFacts } from "@/components/marketing/public-vacancy-card-facts";
 
 export type LiveMarketJob = {
   readonly id: string;
@@ -164,17 +165,65 @@ function unavailableSnapshot(): LiveMarketLandingSnapshot {
 }
 
 /**
+ * WHAT AN ANONYMOUS CARD CAN SHOW OF A ROW — the facts two sample cards must
+ * differ on (owner directive of 24 Sep, "landing verified at 375px"; the
+ * dated production evidence lives in `live-market-landing.test.ts`, because
+ * this file may carry no bare four-digit literal — see the hard-coded-total
+ * guard in `verified-market-data-live.test.ts`).
+ *
+ * Measured anonymously on production: the sample rendered two cards reading
+ * "Sandėlio darbuotojas / Terminalarbetare / Ne visa darbo diena / 10 vietos
+ * / <the same date>" — two DIFFERENT vacancies (different ids, different
+ * detail pages) that a visitor could not tell apart, which reads as a
+ * duplicate bug rather than as two jobs. The anonymous projection
+ * deliberately carries no employer, place or raw title (the owner's
+ * anonymous-boundary directive, see `public-vacancy-preview.ts`), so there
+ * is no distinguishing fact to ADD to the card; the honest move is to not
+ * pick two rows the card would paint identically.
+ *
+ * The fingerprint is exactly what `<PublicVacancyCard>` renders from a row:
+ * the heading (profession, else occupation), the occupation subline, and the
+ * projection of the rest — `publicVacancyCardFacts`, the pure module beside
+ * the card that declares the key sets its chips exist for, and is pinned to
+ * the card by rendering it (`landing-open-jobs-band.test.ts`). That
+ * projection is `null` wherever the card paints nothing: an employment form
+ * or working time the card has no label for (`unknown`, which is about half
+ * of production, or `assignment`) paints no chip, exactly as `null` does, so
+ * two rows that differ only there still look alike and only one is picked.
+ * The positions chip exists only above one, and the date is the UTC day the
+ * card prints, without the time. Compensation is in the row but the card
+ * does not render it, so it is not here: two rows that differ only in a fact
+ * nobody sees still look identical.
+ */
+export function landingVacancyFingerprint(v: PublicVacancyPreview): string {
+  const facts = publicVacancyCardFacts(v);
+  return JSON.stringify([
+    v.professionSlug ?? v.occupation ?? null,
+    v.occupation ?? null,
+    facts.employmentForm,
+    facts.workingTime,
+    facts.positions,
+    facts.publishedDay,
+  ]);
+}
+
+/**
  * The first few rows of the board's own first page, in the board's own
  * order — SELECTED, never re-ranked by a score and never filtered by a
  * profession.
  *
- * Two preferences, both about the reader rather than the market:
+ * Three preferences, all about the reader rather than the market:
  *   · a row with a canonical `professionSlug` heads the card in the
  *     VISITOR'S language (the anonymous title is withheld, so the heading is
  *     the profession name), while a row without one can only head with the
  *     publisher's occupation words — so slugged rows come first;
  *   · a row with neither a slug nor an occupation has nothing honest to head
- *     with (the card would print a dash), so it is not chosen at all.
+ *     with (the card would print a dash), so it is not chosen at all;
+ *   · a row whose card would look IDENTICAL to one already chosen (see
+ *     `landingVacancyFingerprint`) is skipped in favour of the next row that
+ *     looks different — and when the page holds fewer distinct-looking rows
+ *     than the sample size, the sample is SHORTER, never padded with a
+ *     look-alike.
  * The relative order inside each group is the RPC's, unchanged.
  */
 export function pickLandingVacancySample(
@@ -184,7 +233,16 @@ export function pickLandingVacancySample(
   const occupationOnly = vacancies.filter(
     (v) => !v.professionSlug && v.occupation,
   );
-  return [...withSlug, ...occupationOnly].slice(0, LANDING_VACANCY_SAMPLE_SIZE);
+  const seen = new Set<string>();
+  const picked: PublicVacancyPreview[] = [];
+  for (const candidate of [...withSlug, ...occupationOnly]) {
+    if (picked.length >= LANDING_VACANCY_SAMPLE_SIZE) break;
+    const look = landingVacancyFingerprint(candidate);
+    if (seen.has(look)) continue;
+    seen.add(look);
+    picked.push(candidate);
+  }
+  return picked;
 }
 
 async function readVacancySample(

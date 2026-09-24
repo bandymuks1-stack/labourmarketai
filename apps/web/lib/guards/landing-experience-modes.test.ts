@@ -210,7 +210,12 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
     }
     expect(styles).toContain(".modeSwitcher");
     expect(focusSwitcherStyles).toContain(".modeSwitcher");
-    expect(focusSwitcherStyles).toContain("@media (max-width: 600px)");
+    // RE-ANCHORED 2026-09-24 (landing verified at 375px): the phone rule used
+    // to be a 600px corner offset; it is now Tailwind's `sm` breakpoint and
+    // it takes the control OUT of the viewport corner — the in-flow rule
+    // itself is pinned, with its negative control, in
+    // landing-375-polish.test.ts.
+    expect(focusSwitcherStyles).toContain("@media (max-width: 640px)");
   });
 
   it("never runs the LIVE workload outside the LIVE tree", () => {

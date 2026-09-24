@@ -43,6 +43,11 @@ vi.mock("@/components/marketing/reveal", () => ({
 
 const { LandingOpenJobsBand } = await import("@/components/marketing/landing-open-jobs-band");
 const { PublicVacancyCard } = await import("@/components/marketing/public-vacancy-card");
+const {
+  publicVacancyCardFacts,
+  PUBLIC_VACANCY_CARD_EMPLOYMENT_FORMS,
+  PUBLIC_VACANCY_CARD_WORKING_TIMES,
+} = await import("@/components/marketing/public-vacancy-card-facts");
 
 const WEB = join(__dirname, "..", "..");
 
@@ -139,6 +144,88 @@ describe("the landing's open-jobs band is the board's card, not a second one", (
     expect(await render({ basis: "unavailable", vacancies: [] })).toBe("");
     expect(await render({ basis: "unavailable", vacancies: rows })).toBe("");
     expect(await render({ basis: "live", vacancies: [] })).toBe("");
+  });
+});
+
+/**
+ * THE CARD'S PROJECTION IS WHAT THE CARD PAINTS. The landing's sample
+ * selector skips a row whose card would look identical to one already chosen,
+ * and it decides "identical" through `publicVacancyCardFacts` — a projection
+ * the card exports, not a copy of its tables kept elsewhere. Review round 2 of
+ * the 375px PR found the first fingerprint hashing the RAW employment form,
+ * which the card paints only for three values; so this RENDERS the card over
+ * every combination of the facts a row can vary and proves, pair by pair,
+ * that two rows paint the same markup exactly when they project the same
+ * facts. A projection that ignored a painted fact, or counted an unpainted
+ * one, fails here.
+ */
+describe("publicVacancyCardFacts is exactly what the card paints", () => {
+  const paint = (v: PublicVacancyPreview) =>
+    renderToStaticMarkup(
+      createElement(PublicVacancyCard, { vacancy: v, locale: "en", headingFallback: "professions.cook" }),
+    );
+  const variants: PublicVacancyPreview[] = [];
+  for (const employmentForm of [null, "unknown", "assignment", "permanent", "temporary", "seasonal"])
+    for (const workingTime of [null, "unknown", "shift", "full_time", "part_time"])
+      for (const positions of [null, 1, 2])
+        for (const publishedAt of ["2026-09-20T00:00:00Z", "2026-09-21T01:00:00+02:00", "2026-09-21T00:00:00Z"])
+          variants.push(vacancy(1, { employmentForm, workingTime, positions, publishedAt }));
+
+  it("two rows paint the same markup exactly when they project the same facts", () => {
+    const painted = variants.map((v) => ({ html: paint(v), facts: JSON.stringify(publicVacancyCardFacts(v)) }));
+    let same = 0;
+    for (let a = 0; a < painted.length; a++) {
+      for (let b = a + 1; b < painted.length; b++) {
+        const sameFacts = painted[a].facts === painted[b].facts;
+        const sameHtml = painted[a].html === painted[b].html;
+        expect(sameHtml, `${painted[a].facts} vs ${painted[b].facts}`).toBe(sameFacts);
+        if (sameFacts) same++;
+      }
+    }
+    // The equivalence is not vacuous: unpainted values DO collapse (unknown,
+    // assignment and null; 1 and null positions; the +02:00 stamp onto the
+    // 20th), and painted ones DO NOT.
+    expect(same).toBeGreaterThan(0);
+    expect(new Set(painted.map((p) => p.facts)).size).toBe(4 * 3 * 2 * 2);
+  });
+
+  it("NEGATIVE CONTROL — the raw row is NOT what the card paints", () => {
+    const a = vacancy(1, { employmentForm: "unknown" });
+    const b = vacancy(1, { employmentForm: "assignment" });
+    expect(a.employmentForm).not.toBe(b.employmentForm);
+    expect(paint(a)).toBe(paint(b));
+    expect(publicVacancyCardFacts(a)).toEqual(publicVacancyCardFacts(b));
+    expect(publicVacancyCardFacts(a).employmentForm).toBeNull();
+  });
+
+  /**
+   * The card is a waived product-gate surface bound to other PRs, so the key
+   * sets are DECLARED beside it rather than exported by it. This reads the
+   * card's own table keys from its source and pins the declaration to them,
+   * so a label added to the card without a key added to the declaration
+   * fails here as well as in the render above.
+   */
+  const card = readFileSync(join(WEB, "components/marketing/public-vacancy-card.tsx"), "utf8");
+  /** The keys of a `const NAME: Record<string, L> = { key: {…}, … };` table. */
+  const tableKeys = (source: string, start: string): string[] => {
+    const from = source.indexOf(start);
+    expect(from, `table ${start} not found in the card`).toBeGreaterThanOrEqual(0);
+    const body = source.slice(from + start.length, source.indexOf("\n};", from));
+    return [...body.matchAll(/^ {2}(\w+): \{/gm)].map((m) => m[1]);
+  };
+
+  it("the declared key sets are exactly the card's own table keys", () => {
+    expect([...PUBLIC_VACANCY_CARD_EMPLOYMENT_FORMS].sort()).toEqual(
+      tableKeys(card, "const EMPLOYMENT_FORM: Record<string, L> = {").sort(),
+    );
+    expect([...PUBLIC_VACANCY_CARD_WORKING_TIMES].sort()).toEqual(
+      tableKeys(card, "const WORKING_TIME: Record<string, L> = {").sort(),
+    );
+    // Neither set is vacuous, and the card renders exactly these lookups.
+    expect(PUBLIC_VACANCY_CARD_EMPLOYMENT_FORMS.length).toBeGreaterThan(0);
+    expect(PUBLIC_VACANCY_CARD_WORKING_TIMES.length).toBeGreaterThan(0);
+    expect(card).toContain("EMPLOYMENT_FORM[vacancy.employmentForm]?.[locale]");
+    expect(card).toContain("WORKING_TIME[vacancy.workingTime]?.[locale]");
   });
 });
 

@@ -375,17 +375,28 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                 // secondary; they were the page.
                 //
                 // Capping each chip at half the row makes them wrap two-up
-                // below `sm` while `truncate` absorbs the long labels. Every
-                // chip that is MOUNTED renders at every width, which is what
-                // tests/e2e/landing-mobile-overflow.spec.ts depends on — that
-                // spec asserts a non-null bounding box for every chip, so
-                // `display:none` disclosure would fail it; the rest are
-                // mounted on demand instead (2026-09-23), and a horizontal
-                // scroll strip was already tried and reverted (#1607).
+                // below `sm`. Every chip that is MOUNTED renders at every
+                // width, which is what tests/e2e/landing-mobile-overflow.spec.ts
+                // depends on — that spec asserts a non-null bounding box for
+                // every chip, so `display:none` disclosure would fail it; the
+                // rest are mounted on demand instead (2026-09-23), and a
+                // horizontal scroll strip was already tried and reverted
+                // (#1607).
                 //
-                // The full sentence is still the accessible name and the
-                // tooltip, so truncation costs nothing to a screen reader.
-                className="min-h-11 max-w-[calc(50%-0.375rem)] truncate rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-champagne hover:text-brand-champagne sm:max-w-none"
+                // THE LABEL WRAPS; IT IS NEVER CUT (owner directive
+                // 2026-09-24, landing verified at 375px). The half-row cap
+                // used to be paired with `truncate`, and on a 375px phone
+                // three of the four default chips rendered as "Reikia
+                // darbuo…", "Turime laisvų …", "Užrašyti atlikt…" — the
+                // visitor could not read the example the chip exists to show.
+                // A screen reader was fine (the sentence is the accessible
+                // name); a sighted visitor was not. So the label now wraps to
+                // a second line inside the same half-row cap: same density,
+                // every word visible. `overflow-wrap:anywhere` is the last
+                // resort for one word wider than a 320px chip; it never
+                // fires at 375px with the current catalogues (pinned in
+                // lib/guards/landing-375-polish.test.ts).
+                className="min-h-11 max-w-[calc(50%-0.375rem)] rounded-full border border-ink-500 px-3 py-1.5 text-support font-medium leading-snug text-text-secondary [overflow-wrap:anywhere] transition-colors hover:border-brand-champagne hover:text-brand-champagne sm:max-w-none"
               >
                 {t(`exampleLabels.${key}`)}
               </button>

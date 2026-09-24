@@ -67,7 +67,12 @@ import { LandingModeSwitcher } from "./landing-mode-switcher";
  * The one genuinely new element is <LandingModeSwitcher>: the control that
  * lets a visitor return to LIVE. Without it FOCUS would be a one-way door.
  * It is deliberately floating and self-contained so the historical layout
- * does not have to be edited to make room for it.
+ * does not have to be edited to make room for it. Since 2026-09-24 it is
+ * mounted at the END of the landing body rather than after the footer: from
+ * 641px up it is still fixed to the corner (its DOM position is invisible
+ * there), while on a phone its stylesheet puts it in the flow, so it has to
+ * sit where the page ends — after the closing band, before the footer —
+ * instead of floating over the counter line and the sample job cards.
  */
 export async function FocusLanding({
   params,
@@ -206,10 +211,13 @@ export async function FocusLanding({
 
             {/* ── The page ends on what to do next, not on a claim ──────── */}
             <LandingClosingBand locale={locale} />
+
+            {/* ── LIVE / FOCUS: fixed to the corner from `sm` up; in the flow
+                   here, after everything, on a phone (2026-09-24). ────────── */}
+            <LandingModeSwitcher />
           </div>
         </main>
         <SiteFooter />
-        <LandingModeSwitcher />
       </div>
     </NextIntlClientProvider>
   );
