@@ -2354,8 +2354,9 @@ grant, function and per-role checks passed (details in the owner channel);
 PostgREST reloaded its schema cache right after the apply.
 
 Status: DB-level PRODUCTION-PROVEN. App path NOT PROVEN — pending a signed-in
-company-page walk (owner and manager), or the first real
-`read_companies_private_v1` request answering 200 in the API logs.
+company-page walk as the owner AND as the manager, each seeing their own
+company's details rendered. A bare HTTP 200 from the reader is not proof: an
+unauthorized caller also gets 200 with zero rows.
 
 ## Deferred / rejected — NEVER-APPLY register
 
