@@ -24,6 +24,8 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import {
   emitBookingNotification,
   emitEngagementCreatedNotification,
+  type BookingNotificationEventType,
+  type BookingNotificationFacts,
 } from "@/lib/notifications/event-emitters";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -94,6 +96,65 @@ function classify(error: { code?: string; message?: string }): BookingActionResu
     return { kind: "conflict" };
   }
   return { kind: "error", message: error.message ?? "unknown" };
+}
+
+/**
+ * THE FACTS THE BELLS RIDE ON (2026-09-23). Read HERE, under the CALLER's
+ * own session, from the row the RPC just wrote: `booking_requests_select`
+ * admits exactly the two parties, and every action in this file is one of
+ * them. The emitters used to read this row with the admin client, which
+ * holds no grant on `booking_requests` in production, so no booking bell
+ * ever rang (event-emitters.ts, SERVICE_ROLE GRANT TRUTH). A row the caller
+ * cannot read yields null facts, which the emitter reports as
+ * `recipient_unresolved` — never a guess from browser input. Never throws:
+ * the domain write already succeeded.
+ */
+async function bookingNotificationFacts(
+  supabase: SupabaseClient,
+  bookingId: string,
+): Promise<BookingNotificationFacts> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("booking_requests")
+      .select("owner_id, worker_id, start_date, location_country")
+      .eq("id", bookingId)
+      .maybeSingle();
+    const row = (data ?? null) as {
+      owner_id?: string | null;
+      worker_id?: string | null;
+      start_date?: string | null;
+      location_country?: string | null;
+    } | null;
+    return {
+      bookingId,
+      ownerProfileId: row?.owner_id ?? null,
+      workerId: row?.worker_id ?? null,
+      startDate: row?.start_date ?? null,
+      locationCountry: row?.location_country ?? null,
+    };
+  } catch {
+    return { bookingId, ownerProfileId: null, workerId: null, startDate: null, locationCountry: null };
+  }
+}
+
+/**
+ * The durable bells for ONE booking write. AWAITED, not detached: the
+ * serverless runtime can freeze the invocation the instant the action
+ * returns, killing a `void`-detached insert mid-flight — the mechanism that
+ * made the live interest emitter deliver nothing. Neither emitter throws,
+ * so awaiting them can never fail the write that already succeeded. One row
+ * read serves both bells; `engagementCreated` adds the engagement bell for
+ * BOTH parties on a v3/v4 accept that really minted one.
+ */
+async function notifyBooking(
+  supabase: SupabaseClient,
+  bookingId: string,
+  eventType: BookingNotificationEventType,
+  engagementCreated = false,
+): Promise<void> {
+  const facts = await bookingNotificationFacts(supabase, bookingId);
+  if (engagementCreated) await emitEngagementCreatedNotification(facts);
+  await emitBookingNotification(facts, eventType);
 }
 
 export interface ProposeBookingInput {
@@ -189,14 +250,10 @@ export async function proposeBookingAction(
     source: "booking",
     metadata: { surface: "bookings", role_context: "company" },
   });
-  // Durable notification for the WORKER. AWAITED, not detached: the serverless
-  // runtime can freeze the invocation the instant the action returns, killing
-  // a `void`-detached insert mid-flight — the mechanism that made the live
-  // interest emitter deliver nothing. The emitter never throws, so awaiting it
-  // can never fail the proposal that already succeeded (it still degrades
-  // silently while the owner-gated notification_events store is unapplied).
+  // Durable notification for the WORKER — see `notifyBooking` for why it is
+  // awaited and why the facts are read here under the proposer's session.
   if (typeof newBookingId === "string" && newBookingId) {
-    await emitBookingNotification(newBookingId, "booking_proposed");
+    await notifyBooking(supabase, newBookingId, "booking_proposed");
   }
   return { kind: "ok", status: "proposed" };
 }
@@ -246,7 +303,7 @@ export async function respondBookingAction(input: {
       revalidatePath(`/${input.locale}/dashboard/bookings`);
       // AWAITED — a detached emit is killable at serverless return (see
       // proposeBookingAction); the emitter never throws.
-      await emitBookingNotification(input.bookingId, "booking_declined");
+      await notifyBooking(supabase, input.bookingId, "booking_declined");
       return { kind: "ok", status: input.decision, reasonStored: true };
     }
     if (!isAbsentFunction(v2.error)) return classify(v2.error);
@@ -257,7 +314,7 @@ export async function respondBookingAction(input: {
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
     // AWAITED — survives the serverless freeze; never throws.
-    await emitBookingNotification(input.bookingId, "booking_declined");
+    await notifyBooking(supabase, input.bookingId, "booking_declined");
     return { kind: "ok", status: input.decision, reasonStored: false };
   }
 
@@ -291,9 +348,8 @@ export async function respondBookingAction(input: {
             source: "booking",
             metadata: { surface: "bookings", role_context: "worker" },
           });
-          await emitEngagementCreatedNotification(input.bookingId);
         }
-        await emitBookingNotification(input.bookingId, "booking_accepted");
+        await notifyBooking(supabase, input.bookingId, "booking_accepted", engagement === "created");
         return {
           kind: "ok",
           status: "accepted",
@@ -332,12 +388,11 @@ export async function respondBookingAction(input: {
           source: "booking",
           metadata: { surface: "bookings", role_context: "worker" },
         });
-        // AWAITED — a detached emit is killable at serverless return; both
-        // emitters never throw, so the accept that already succeeded cannot
-        // fail on its own notification.
-        await emitEngagementCreatedNotification(input.bookingId);
       }
-      await emitBookingNotification(input.bookingId, "booking_accepted");
+      // AWAITED — a detached emit is killable at serverless return; both
+      // emitters never throw, so the accept that already succeeded cannot
+      // fail on its own notification.
+      await notifyBooking(supabase, input.bookingId, "booking_accepted", engagement === "created");
       return { kind: "ok", status: "accepted", engagement };
     }
     if (!isAbsentFunction(v3.error)) return classify(v3.error);
@@ -348,7 +403,7 @@ export async function respondBookingAction(input: {
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
     // AWAITED — survives the serverless freeze; never throws.
-    await emitBookingNotification(input.bookingId, "booking_accepted");
+    await notifyBooking(supabase, input.bookingId, "booking_accepted");
     return { kind: "ok", status: "accepted", engagement: "needs_migration" };
   }
 
@@ -359,7 +414,7 @@ export async function respondBookingAction(input: {
   if (error) return classify(error);
   revalidatePath(`/${input.locale}/dashboard/bookings`);
   // AWAITED — survives the serverless freeze; never throws.
-  await emitBookingNotification(input.bookingId, "booking_declined");
+  await notifyBooking(supabase, input.bookingId, "booking_declined");
   return { kind: "ok", status: input.decision };
 }
 
@@ -393,7 +448,7 @@ export async function withdrawBookingAction(input: {
       revalidatePath(`/${input.locale}/dashboard/bookings`);
       // AWAITED — a detached emit is killable at serverless return (see
       // proposeBookingAction); the emitter never throws.
-      await emitBookingNotification(input.bookingId, "booking_withdrawn");
+      await notifyBooking(supabase, input.bookingId, "booking_withdrawn");
       return { kind: "ok", status: "withdrawn", reasonStored: true };
     }
     if (!isAbsentFunction(v2.error)) return classify(v2.error);
@@ -403,7 +458,7 @@ export async function withdrawBookingAction(input: {
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
     // AWAITED — survives the serverless freeze; never throws.
-    await emitBookingNotification(input.bookingId, "booking_withdrawn");
+    await notifyBooking(supabase, input.bookingId, "booking_withdrawn");
     return { kind: "ok", status: "withdrawn", reasonStored: false };
   }
 
@@ -413,7 +468,7 @@ export async function withdrawBookingAction(input: {
   if (error) return classify(error);
   revalidatePath(`/${input.locale}/dashboard/bookings`);
   // AWAITED — survives the serverless freeze; never throws.
-  await emitBookingNotification(input.bookingId, "booking_withdrawn");
+  await notifyBooking(supabase, input.bookingId, "booking_withdrawn");
   return { kind: "ok", status: "withdrawn" };
 }
 

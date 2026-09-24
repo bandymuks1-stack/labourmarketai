@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { emitWorkTaskAssignedNotification } from "@/lib/notifications/event-emitters";
 import { createWorkTaskCore } from "@/lib/tasks/create-task-core";
 import { setWorkTaskStatusCore, type SetWorkTaskStatusCoreResult } from "@/lib/tasks/set-task-status-core";
+import { readWorkTaskAssignmentFacts } from "@/lib/tasks/tasks";
 import {
   WORK_TASK_DESCRIPTION_MAX,
   WORK_TASK_TITLE_MAX,
@@ -279,8 +280,11 @@ export async function assignWorkTaskAction(formData: FormData): Promise<void> {
 
   const outcome = String(data ?? "");
   if (outcome === "updated" && assignee && assignee !== user!.id) {
-    // AWAITED — survives the serverless freeze; never throws.
-    await emitWorkTaskAssignedNotification(taskId, user!.id);
+    // AWAITED — survives the serverless freeze; never throws. The recipient
+    // is the STORED assignee, read back under the actor's own session.
+    await emitWorkTaskAssignedNotification(
+      await readWorkTaskAssignmentFacts(supabase, taskId, user!.id),
+    );
   }
   finish(ctx, noticeForOutcome(outcome, "updated"));
 }

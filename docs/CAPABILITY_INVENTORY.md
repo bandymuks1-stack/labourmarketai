@@ -613,7 +613,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 |---|---|---|---|---|---|---|
 | COM-1 | Conversations + attachments + unread | `conversations`, `conversation_*` | PROD_DATA (5/18) | — | 1 | no organization participant type; `team` threads always RESTRICTED |
 | COM-2 | Contact disclosure | `contact_disclosure_requests` | IMPL (0 rows) | — | 2 | expiry RPC has no caller — requests never expire |
-| COM-3 | Notifications (20 types) | `notification_events` | PARTIAL | — | 1 | all 20 emitted; **email inert** (provider unset) |
+| COM-3 | Notifications (20 types) | `notification_events` | PARTIAL | — | 1 | all types emit in code; booking/engagement/task/absence emitters read ungranted domain tables via service_role and delivered nothing until 2026-09-23 (facts now travel from the write path, no grant added); **email inert** (provider unset) |
 | COM-4 | Weekly digest | cron + read-time emitter | IMPL | — | 2 | the only cron in the product |
 | COM-5 | Attention / activity centre | spine signals | PARTIAL | — | 2 | fragmented across 4 surfaces |
 
