@@ -2211,6 +2211,7 @@
         "inviteSubmit": "Uitnodiging aanmaken",
         "invitationsHeading": "Openstaande uitnodigingen",
         "invitationsEmpty": "Geen openstaande uitnodigingen.",
+        "invitationsManagedElsewhere": "Uitnodigingen worden verzorgd door de persoon in het bedrijf die daarvoor verantwoordelijk is.",
         "statusInvited": "Uitnodiging aangemaakt (er wordt geen e-mail verstuurd). De genodigde ziet de uitnodiging na het inloggen met dit e-mailadres.",
         "statusAlreadyPending": "Er bestaat al een openstaande uitnodiging voor dit e-mailadres vanuit jouw bedrijf.",
         "statusAlreadyLinked": "Deze werknemer is al aan jouw bedrijf gekoppeld.",
@@ -16985,6 +16986,7 @@
         "title": "Mensen en team",
         "subtitle": "Wie met u werkt, wie vrij is, wie aandacht nodig heeft — en hoe u mensen toevoegt.",
         "summary": "{active} actief · {pending} uitnodigingen open · {members} leden · {review} beoordelen dagboeken",
+        "summaryWithoutInvitations": "{active} actief · {members} leden · {review} beoordelen dagboeken",
         "booked": {
           "title": "Geboekte mensen",
           "intro": "Mensen die u rechtstreeks hebt geboekt. Een boeking is een echte werkrelatie, maar opent op zichzelf geen journaal voor beoordeling.",

@@ -51,6 +51,9 @@ export interface CompanyWorkersSectionLabels {
   readonly inviteSubmit: string;
   readonly invitationsHeading: string;
   readonly invitationsEmpty: string;
+  /** Shown instead of the invite form and the pending list to a person
+   *  without `manage-invitations`. */
+  readonly invitationsManagedElsewhere: string;
   readonly statusInvited: string;
   readonly statusAlreadyPending: string;
   readonly statusAlreadyLinked: string;
@@ -100,6 +103,7 @@ export function CompanyWorkersSection({
   labels,
   roleCoordinationEnabled,
   canAssignRoles = false,
+  canManageInvitations = false,
 }: {
   readonly workersResult: ListState<LinkedCompanyWorker>;
   readonly invitationsResult: ListState<CompanyWorkerInvitation>;
@@ -111,6 +115,9 @@ export function CompanyWorkersSection({
   /** Owner/admin viewing their own company → show the role-select control.
    *  The RPC re-validates ownership regardless. */
   readonly canAssignRoles?: boolean;
+  /** `manage-invitations` (owner/admin, never a job title): the invite form
+   *  and the pending-invitations list. Without it, a neutral explanation. */
+  readonly canManageInvitations?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<
     InviteCompanyFormState | null,
@@ -326,102 +333,123 @@ export function CompanyWorkersSection({
         </div>
       ) : null}
 
-      <form
-        action={(fd) => {
-          setShouldShowOutcome(true);
-          return formAction(fd);
-        }}
-        className="flex flex-col gap-3"
-        data-testid="company-workers-invite-form"
-      >
-        <DisplayedWorkspaceField />
-        <header className="flex flex-col gap-1">
+      {/* INVITATIONS — `manage-invitations` only (owner direction 2026-09-24):
+          owner/admin, never a job title. Anyone else reads who handles them
+          instead of an invite form the database refuses and an empty list
+          that reads as "nobody is invited" (SEP-7: refused ≠ empty). */}
+      {canManageInvitations ? (
+        <>
+          <form
+            action={(fd) => {
+              setShouldShowOutcome(true);
+              return formAction(fd);
+            }}
+            className="flex flex-col gap-3"
+            data-testid="company-workers-invite-form"
+          >
+            <DisplayedWorkspaceField />
+            <header className="flex flex-col gap-1">
+              <h3 className="font-display text-sm font-semibold text-text-primary">
+                {labels.inviteHeading}
+              </h3>
+              <p className="text-xs text-text-secondary">
+                {labels.inviteDescription}
+              </p>
+            </header>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder={labels.inviteEmailPlaceholder}
+                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                data-testid="company-workers-invite-email"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
+              <textarea
+                name="note"
+                rows={2}
+                maxLength={500}
+                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                data-testid="company-workers-invite-note"
+              />
+              <span className="text-meta text-text-muted">
+                {labels.inviteNoteHint}
+              </span>
+            </label>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+              data-testid="company-workers-invite-submit"
+            >
+              {labels.inviteSubmit}
+            </button>
+            {outcomeLabel ? (
+              <p
+                className={
+                  state?.ok && state.outcome === "invited"
+                    ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
+                    : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+                }
+                role="status"
+                data-testid="company-workers-invite-result"
+              >
+                {outcomeLabel}
+              </p>
+            ) : null}
+          </form>
+
+          <section
+            id="company-invitations"
+            className="flex flex-col gap-2 scroll-mt-20"
+            data-testid="company-workers-pending-list"
+          >
+            <h3 className="font-display text-sm font-semibold text-text-primary">
+              {labels.invitationsHeading}
+            </h3>
+            {pendingInvitations.length === 0 ? (
+              <p className="text-xs text-text-secondary">
+                {labels.invitationsEmpty}
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {pendingInvitations.map((inv) => (
+                  <li
+                    key={inv.id}
+                    className="card-border flex flex-col gap-1 p-3"
+                    data-testid={`company-invitation-row-${inv.id}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
+                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{inv.status}</span>
+                    </div>
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
+      ) : (
+        <section
+          id="company-invitations"
+          className="flex flex-col gap-2 scroll-mt-20"
+          data-testid="company-invitations-managed-elsewhere"
+        >
           <h3 className="font-display text-sm font-semibold text-text-primary">
-            {labels.inviteHeading}
+            {labels.invitationsHeading}
           </h3>
           <p className="text-xs text-text-secondary">
-            {labels.inviteDescription}
+            {labels.invitationsManagedElsewhere}
           </p>
-        </header>
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
-          <input
-            type="email"
-            name="email"
-            required
-            placeholder={labels.inviteEmailPlaceholder}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-            data-testid="company-workers-invite-email"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
-          <textarea
-            name="note"
-            rows={2}
-            maxLength={500}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-            data-testid="company-workers-invite-note"
-          />
-          <span className="text-meta text-text-muted">
-            {labels.inviteNoteHint}
-          </span>
-        </label>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
-          data-testid="company-workers-invite-submit"
-        >
-          {labels.inviteSubmit}
-        </button>
-        {outcomeLabel ? (
-          <p
-            className={
-              state?.ok && state.outcome === "invited"
-                ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
-                : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
-            }
-            role="status"
-            data-testid="company-workers-invite-result"
-          >
-            {outcomeLabel}
-          </p>
-        ) : null}
-      </form>
-
-      <section
-        id="company-invitations"
-        className="flex flex-col gap-2 scroll-mt-20"
-        data-testid="company-workers-pending-list"
-      >
-        <h3 className="font-display text-sm font-semibold text-text-primary">
-          {labels.invitationsHeading}
-        </h3>
-        {pendingInvitations.length === 0 ? (
-          <p className="text-xs text-text-secondary">
-            {labels.invitationsEmpty}
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {pendingInvitations.map((inv) => (
-              <li
-                key={inv.id}
-                className="card-border flex flex-col gap-1 p-3"
-                data-testid={`company-invitation-row-${inv.id}`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
-                  <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{inv.status}</span>
-                </div>
-                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                  {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        </section>
+      )}
     </section>
   );
 }

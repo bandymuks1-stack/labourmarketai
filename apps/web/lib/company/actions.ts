@@ -81,15 +81,12 @@ export async function inviteCompanyWorkerAction(
   // explicitly, never inferred from the first/only owned row.
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noCompanyCode(company.reason) };
-  // §11 capability matrix: roster writes are operational governance.
-  // `invite_company_worker` / `assign_company_worker_role` are `owns_company`
-  // RPCs (owner or admin membership). A manager passed the capability check
-  // here and then received `not_owner` from the database (2026-09-19); the
-  // gate now says what the database will do.
-  if (
-    !hasOrganizationCapability(company.role, "manage-roster") ||
-    !isCompanyOwnerOrAdmin(company.role)
-  ) {
+  // §11 capability matrix: inviting is `manage-invitations` — owner/admin,
+  // never a job title (owner direction 2026-09-24). `invite_company_worker`
+  // is an `owns_company` RPC (owner or admin membership), so this gate says
+  // what the database will do; the People page does not offer the form to
+  // anyone else.
+  if (!hasOrganizationCapability(company.role, "manage-invitations")) {
     return { ok: false, code: "no_company" };
   }
 

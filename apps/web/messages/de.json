@@ -2211,6 +2211,7 @@
         "inviteSubmit": "Einladung erstellen",
         "invitationsHeading": "Ausstehende Einladungen",
         "invitationsEmpty": "Keine ausstehenden Einladungen.",
+        "invitationsManagedElsewhere": "Um Einladungen kümmert sich die dafür zuständige Person im Unternehmen.",
         "statusInvited": "Einladung erstellt (sie wird nicht per E-Mail versendet). Die eingeladene Person sieht sie nach der Anmeldung mit dieser E-Mail-Adresse.",
         "statusAlreadyPending": "Für diese E-Mail-Adresse existiert bereits eine ausstehende Einladung von Ihrem Unternehmen.",
         "statusAlreadyLinked": "Diese Arbeitskraft ist bereits mit Ihrem Unternehmen verknüpft.",
@@ -16985,6 +16986,7 @@
         "title": "Menschen und Team",
         "subtitle": "Wer mit Ihnen arbeitet, wer frei ist, wer Aufmerksamkeit braucht — und wie Sie Menschen aufnehmen.",
         "summary": "{active} aktiv · {pending} Einladungen offen · {members} Mitglieder · {review} prüfen Journale",
+        "summaryWithoutInvitations": "{active} aktiv · {members} Mitglieder · {review} prüfen Journale",
         "booked": {
           "title": "Gebuchte Personen",
           "intro": "Personen, die Sie direkt gebucht haben. Eine Buchung ist eine echte Arbeitsbeziehung, öffnet aber allein kein Journal zur Prüfung.",

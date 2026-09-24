@@ -5,6 +5,7 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
+import { projectOrganizationAuthority } from "@/lib/company/organization-authority";
 import {
   getActiveOrganizationContext,
   governedActiveOrganizationId,
@@ -94,6 +95,13 @@ export default async function CompanyPeoplePage({
     );
   }
   const isStaffingAgency = companyRow.companyType === "staffing_agency";
+  // `manage-invitations` (owner direction 2026-09-24): owner/admin, never a
+  // job title. Without it the invitations are not read at all — the database
+  // would answer zero rows, which is not "nobody is invited" — and the page
+  // says who handles them instead.
+  const canManageInvitations =
+    employerCtx.kind === "ok" &&
+    projectOrganizationAuthority({ role: employerCtx.role }).canManageInvitations;
 
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
@@ -107,7 +115,7 @@ export default async function CompanyPeoplePage({
   const [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence] =
     await Promise.all([
       listActiveCompanyWorkers(companyRow.id),
-      listCompanyWorkerInvitations(companyRow.id),
+      canManageInvitations ? listCompanyWorkerInvitations(companyRow.id) : null,
       getOrgMembersData("company", companyRow.id),
       getTeamBrigadesData(),
       getManagerEvidence(),
@@ -166,12 +174,18 @@ export default async function CompanyPeoplePage({
           className="font-mono text-meta text-text-muted tabular-nums"
           data-testid="company-people-summary"
         >
-          {t("summary", {
-            active: activeWorkerRows.length,
-            pending: pendingCount,
-            members: memberCount,
-            review: reviewCount,
-          })}
+          {canManageInvitations
+            ? t("summary", {
+                active: activeWorkerRows.length,
+                pending: pendingCount,
+                members: memberCount,
+                review: reviewCount,
+              })
+            : t("summaryWithoutInvitations", {
+                active: activeWorkerRows.length,
+                members: memberCount,
+                review: reviewCount,
+              })}
         </p>
       </header>
 
@@ -187,6 +201,7 @@ export default async function CompanyPeoplePage({
           labels={workersLabels}
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
+          canManageInvitations={canManageInvitations}
         />
         {/* Užfiksuotas darbas (owner req. 15–17, #1724): the roster's
             recorded work through THE one work-intelligence reader, one call
@@ -207,14 +222,18 @@ export default async function CompanyPeoplePage({
       <BookedPeopleSection result={bookedPeople} />
 
       {/* Canonical Pakviesti (core-network area B): every invite context
-          funnels into the ONE invitation surface on /dashboard/network. */}
-      <Link
-        href={"/dashboard/network?type=join_as_employee" as "/dashboard"}
-        data-testid="company-invite-link"
-        className="flex w-fit items-center gap-2 rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:border-brand-blue"
-      >
-        {tNetwork("invite.title")}
-      </Link>
+          funnels into the ONE invitation surface on /dashboard/network.
+          Offered only with `manage-invitations`; the section above already
+          tells everyone else who handles invitations. */}
+      {canManageInvitations ? (
+        <Link
+          href={"/dashboard/network?type=join_as_employee" as "/dashboard"}
+          data-testid="company-invite-link"
+          className="flex w-fit items-center gap-2 rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:border-brand-blue"
+        >
+          {tNetwork("invite.title")}
+        </Link>
+      ) : null}
 
       {/* Teams / brigades (§8.3): a brigade is an organizations row
           (organization_type='team'); membership arrives ONLY via an accepted

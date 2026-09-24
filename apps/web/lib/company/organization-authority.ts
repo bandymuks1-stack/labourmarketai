@@ -46,8 +46,17 @@ import {
  * (`operationalWritesNeedGrant`) instead of rendering a generic error or an
  * empty list (SEP-7: refused ≠ empty).
  *
- * An ARCHIVED organization (owner decision 2026-09-23) grants nothing to
- * anyone — its memberships are history, not a workspace.
+ * `canManageInvitations` is the `manage-invitations` capability: owner/admin
+ * (and the creator), never a job title (owner direction 2026-09-24). It
+ * gates the invite form and the pending-invitations list; a person without
+ * it reads a neutral explanation instead of an empty list.
+ *
+ * An ARCHIVED organization (owner decisions 2026-09-23 / 2026-09-24) is not
+ * an OPERATING workspace: no workspace list offers it, so this projection is
+ * never asked for it and `archived: true` answers no operating authority.
+ * Archiving is not deletion and not loss of history: the database helpers do
+ * not consult `archived_at`, so the owner and every person entitled to a
+ * record keep reading it exactly as before.
  */
 
 /** Roles whose ACTIVE membership OPENS the organization (read). */
@@ -84,6 +93,9 @@ export interface OrganizationAuthority {
    *  Roster management (invitations, provisioning, role changes) is not
    *  covered — it stays owner/admin in SQL. */
   readonly sqlWritesGranted: boolean;
+  /** May invite people into the organization and see its pending
+   *  invitations (`manage-invitations`): owner/admin, never a job title. */
+  readonly canManageInvitations: boolean;
 }
 
 export const NO_AUTHORITY: OrganizationAuthority = {
@@ -92,6 +104,7 @@ export const NO_AUTHORITY: OrganizationAuthority = {
   canGovern: false,
   canOperate: false,
   sqlWritesGranted: false,
+  canManageInvitations: false,
 };
 
 /**
@@ -122,6 +135,9 @@ export function projectOrganizationAuthority(input: {
     canGovern: governs,
     canOperate,
     sqlWritesGranted: governs || canOperate,
+    // The creator arm is owner-equivalent here too (`owns_company` admits it).
+    canManageInvitations:
+      hasOrganizationCapability(role, "manage-invitations") || input.isCreator === true,
   };
 }
 
