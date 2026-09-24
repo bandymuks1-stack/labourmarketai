@@ -25,9 +25,20 @@
  *          INFORMATIONAL — it never changes the HTTP status: `ok` and
  *          200/503 stay "can the product serve a person right now?".
  *
+ *   deployEnv — (2026-09-24) what `VERCEL_ENV` holds, as a bounded word:
+ *          `production` | `preview` | `development` | `unset` | `other`. The
+ *          outbound host policy's primary production evidence is that
+ *          variable, and an env-keyed rule FAILS OPEN when the variable goes
+ *          missing (system environment variables un-exposed, a platform
+ *          change). A monitor that sees `deployEnv !== "production"` on the
+ *          production host sees exactly that. INFORMATIONAL like freshness:
+ *          never folded into `ok`. Not a secret, not a hostname: one of five
+ *          words.
+ *
  * PURE: this module shapes results; the route performs the IO.
  */
 
+import type { DeployEnv } from "@/lib/telemetry/production-host";
 import {
   classifySourceFreshness,
   type SourceFreshnessState,
@@ -65,6 +76,8 @@ export type HealthReport = {
   readonly at: string;
   readonly build: string | null;
   readonly region: string | null;
+  /** `VERCEL_ENV`, bounded; `unset` when the variable is missing. */
+  readonly deployEnv: DeployEnv;
   readonly checks: {
     readonly auth: HealthCheck;
     readonly db: HealthCheck;
@@ -98,11 +111,13 @@ export function buildVacancyFreshness(input: {
 }
 
 /** Overall health is the conjunction of the dependencies a sign-in needs.
- *  Vacancy freshness is reported beside it and NEVER folded into `ok`. */
+ *  Vacancy freshness and the deployment environment are reported beside it
+ *  and NEVER folded into `ok`. */
 export function summarizeHealth(input: {
   auth: HealthCheck;
   db: HealthCheck;
   vacancyFreshness: VacancyFreshnessCheck;
+  deployEnv: DeployEnv;
   build: string | null;
   region: string | null;
   now: Date;
@@ -112,6 +127,7 @@ export function summarizeHealth(input: {
     at: input.now.toISOString(),
     build: input.build,
     region: input.region,
+    deployEnv: input.deployEnv,
     checks: { auth: input.auth, db: input.db },
     vacancyFreshness: input.vacancyFreshness,
   };

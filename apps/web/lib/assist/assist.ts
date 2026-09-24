@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getAiRuntimeConfig } from "@/lib/ai/runtime/config";
 import type { Role } from "@/lib/auth/actions";
+import { readRequestHost } from "@/lib/config/request-host";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import { getWorkerDocumentCentre } from "@/lib/documents/document-centre";
 import { getFinanceSummary } from "@/lib/finance/finance";
@@ -230,6 +231,8 @@ export async function getAssistView(role: Role): Promise<AssistView> {
     attention: buildAttentionItems({ counts, documents, finance }),
     workerSummary,
     projects,
-    provider: buildAiProviderView(getAiRuntimeConfig()),
+    provider: buildAiProviderView(
+      getAiRuntimeConfig({ requestHost: await readRequestHost() }),
+    ),
   };
 }

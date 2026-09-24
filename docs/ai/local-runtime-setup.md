@@ -62,7 +62,8 @@ server-side fetch target.
   notes, and a cleartext hop off-box puts them on the wire. `http://localhost`,
   `http://127.x.x.x`, `http://[::1]` and `*.localhost` are fine; a GPU box
   across the office must use `https`.
-- **On the PRODUCTION deployment (`VERCEL_ENV=production`), a loopback,
+- **On the PRODUCTION deployment (`VERCEL_ENV=production`, or a request
+  served on the production host — either evidence engages it), a loopback,
   private-range, link-local, `.local` or tunnel host** (`*.ngrok*`,
   `*.trycloudflare.com`, `*.loca.lt`) → refused at read time
   (`lib/config/outbound-host-policy.ts`, 2026-09-23). The local profile is

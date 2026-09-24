@@ -1,6 +1,7 @@
 import "server-only";
 
 import { checkOutboundIntegrationUrl } from "@/lib/config/outbound-host-policy";
+import { readRequestHost } from "@/lib/config/request-host";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   buildWorkerVacancyInterestEnvelope,
@@ -151,6 +152,7 @@ export function envelopeFromQueuedRow(row: QueuedRow): WorkerVacancyInterestEnve
 
 export function handoffDoorSettings(
   env: Readonly<Record<string, string | undefined>> = process.env,
+  requestHost?: string | null,
 ): { endpoint: string; token: string } | null {
   const endpoint = env[NONSTOP_HANDOFF_ENDPOINT_ENV]?.trim() ?? "";
   const token = env[NONSTOP_HANDOFF_TOKEN_ENV]?.trim() ?? "";
@@ -158,10 +160,13 @@ export function handoffDoorSettings(
   // PRODUCTION host policy (2026-09-23): a partner door is an always-on host.
   // A loopback / private / tunnel endpoint on the production deployment is
   // refused and the door stays `not_configured` — the queue waits, unchanged.
+  // Both triggers (the cron route, the interest action) run inside a request,
+  // so its Host is the second production evidence (2026-09-24).
   if (
     !checkOutboundIntegrationUrl(endpoint, {
       integration: NONSTOP_HANDOFF_ENDPOINT_ENV,
       env,
+      requestHost,
     }).ok
   ) {
     return null;
@@ -232,11 +237,16 @@ function logAttempt(
 export async function dispatchQueuedHandoffs(deps?: {
   readonly env?: Readonly<Record<string, string | undefined>>;
   readonly fetchImpl?: typeof fetch;
+  /** The request's Host; read from the request scope when not supplied. */
+  readonly requestHost?: string | null;
   /** Test seam: the admin client factory (production uses the real one). */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly adminFactory?: () => any;
 }): Promise<DispatchSummary> {
-  const settings = handoffDoorSettings(deps?.env ?? process.env);
+  const settings = handoffDoorSettings(
+    deps?.env ?? process.env,
+    deps?.requestHost ?? (await readRequestHost()),
+  );
   if (!settings) return { kind: "not_configured" };
   const fetchImpl = deps?.fetchImpl ?? fetch;
 

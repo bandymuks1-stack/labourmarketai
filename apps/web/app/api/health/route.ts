@@ -6,6 +6,7 @@ import {
   summarizeHealth,
   timedCheck,
 } from "@/lib/ops/health-model";
+import { deployEnvFromEnv } from "@/lib/telemetry/production-host";
 
 /**
  * GET /api/health — production liveness for an external monitor (Train L1).
@@ -122,6 +123,9 @@ export async function GET(): Promise<NextResponse> {
     }),
     build: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8) ?? null,
     region: process.env.VERCEL_REGION ?? null,
+    // Bounded word for VERCEL_ENV — `unset` makes a missing variable visible
+    // to the monitor (the outbound host policy's env evidence fails open).
+    deployEnv: deployEnvFromEnv(),
     now,
   });
 

@@ -23,6 +23,7 @@
  */
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { readRequestHost } from "@/lib/config/request-host";
 import { getAiRuntimeConfig, getAiProviderStates } from "./runtime/config";
 import {
   auditDispositionFor,
@@ -41,7 +42,10 @@ export async function runAiAgent<T = unknown>(
   opts: RunAgentOptions,
 ): Promise<AiAgentOutcome<T>> {
   const entry = getPromptEntry(agent);
-  const cfg = getAiRuntimeConfig();
+  // The request's Host (null outside a request) is the second production
+  // evidence for the local-runtime host policy; read once, handed down.
+  const ctx = { requestHost: await readRequestHost() };
+  const cfg = getAiRuntimeConfig(ctx);
 
   // Persisted daily-run counter (live runs only; best-effort — see docblock).
   let runsToday = opts.runsToday;
@@ -56,7 +60,7 @@ export async function runAiAgent<T = unknown>(
   const outcome = await runAiAgentCore<T>(entry, input, cfg, {
     ...opts,
     runsToday,
-    providerStates: opts.providerStates ?? getAiProviderStates(),
+    providerStates: opts.providerStates ?? getAiProviderStates(ctx),
   });
 
   // Append-only audit trail for REAL runs — never blocks the outcome.

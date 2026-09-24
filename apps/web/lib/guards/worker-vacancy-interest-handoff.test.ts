@@ -288,6 +288,22 @@ describe("the dispatcher is inert without the owner's door, and never contacts a
     ).toEqual({ endpoint: door, token });
   });
 
+  it("a request on the PRODUCTION host is production evidence too — VERCEL_ENV missing does not lift the refusal (2026-09-24)", () => {
+    const token = "x".repeat(40);
+    const tunnel = "https://abc123.ngrok-free.app/handoffs/v1";
+    const noEnv = { NONSTOP_HANDOFF_ENDPOINT: tunnel, NONSTOP_HANDOFF_TOKEN: token };
+    expect(handoffDoorSettings(noEnv, "labourmarket.ai")).toBeNull();
+    expect(handoffDoorSettings(noEnv, "labourmarket-ai.vercel.app")).toBeNull();
+    // NEGATIVE CONTROL: a preview request, or no request, with no variable keeps the door.
+    expect(handoffDoorSettings(noEnv, "lmai-git-feature-x.vercel.app")).toEqual({ endpoint: tunnel, token });
+    expect(handoffDoorSettings(noEnv, null)).toEqual({ endpoint: tunnel, token });
+    // The documented partner host passes on the production host as well.
+    const door = "https://nonstopgroup.eu/api/partners/labourmarket/handoffs/v1";
+    expect(
+      handoffDoorSettings({ NONSTOP_HANDOFF_ENDPOINT: door, NONSTOP_HANDOFF_TOKEN: token }, "labourmarket.ai"),
+    ).toEqual({ endpoint: door, token });
+  });
+
   it("the only destination is the configured partner door; nothing reads an employer address", () => {
     const src = read("lib", "commercial", "handoff-dispatch.ts");
     expect(src).toContain("fetchImpl(settings.endpoint, {");

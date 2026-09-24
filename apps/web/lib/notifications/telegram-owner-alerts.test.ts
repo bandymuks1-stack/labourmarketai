@@ -17,6 +17,15 @@ const ACTION = join(__dirname, "..", "staffing", "company-need-form-actions.ts")
 const ENV = join(__dirname, "..", "env.ts");
 const readF = (p: string) => readFileSync(p, "utf8");
 
+// The request's Host header as the helper's ONE reader sees it (null = no
+// request scope, the default for every test that does not set it).
+const requestHost = vi.hoisted(() => ({ value: null as string | null }));
+vi.mock("next/headers", () => ({
+  headers: vi.fn(async () => ({
+    get: (name: string) => (name === "host" ? requestHost.value : null),
+  })),
+}));
+
 const configureEnv = () => {
   vi.stubEnv("OWNER_TELEGRAM_ALERTS_ENABLED", "true");
   vi.stubEnv("OWNER_TELEGRAM_BOT_TOKEN", "123456:test-token");
@@ -40,6 +49,7 @@ afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.resetModules();
+  requestHost.value = null;
 });
 
 describe("static safety shape", () => {
@@ -159,6 +169,49 @@ describe("Agentai OS bridge is the preferred path (fetch mocked)", () => {
       for (const line of refusals) {
         expect(line).toContain('"hostKind":"tunnel"');
         expect(line).not.toContain("ngrok");
+      }
+      warn.mockRestore();
+    }
+  });
+
+  /**
+   * SECOND EVIDENCE (2026-09-24). `VERCEL_ENV` fails open if the system
+   * variables are ever un-exposed. The intake action runs inside a request,
+   * so a request served on the production host engages the same refusal with
+   * the variable missing. NEGATIVE CONTROL: a preview request with the
+   * variable missing keeps the bridge.
+   */
+  it("VERCEL_ENV missing + a request on the production host → the tunnel bridge is refused and Telegram carries the alert; a preview request keeps the bridge", async () => {
+    for (const [host, expectedUrl] of [
+      ["labourmarket.ai", "https://api.telegram.org/bot123456:test-token/sendMessage"],
+      ["lmai-git-feature-x.vercel.app", "https://abc123.ngrok-free.app/alert"],
+    ] as const) {
+      vi.unstubAllEnvs();
+      vi.stubEnv("VERCEL_ENV", "");
+      configureBridge();
+      vi.stubEnv("AGENTAI_OS_ALERT_ENDPOINT", "https://abc123.ngrok-free.app/alert");
+      configureEnv();
+      requestHost.value = host;
+      const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+      vi.stubGlobal("fetch", fetchMock);
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { agentaiBridgeConfigured, sendCompanyNeedOwnerAlert } = await loadHelper();
+      // The sync probe judges the host it is handed; without one it is env-only.
+      expect(agentaiBridgeConfigured(host), host).toBe(host !== "labourmarket.ai");
+      expect(agentaiBridgeConfigured(), host).toBe(true);
+      await expect(sendCompanyNeedOwnerAlert({ companyName: "Acme" })).resolves.toBe(true);
+      expect(fetchMock, host).toHaveBeenCalledOnce();
+      const [url] = fetchMock.mock.calls[0] as unknown as [string];
+      expect(url, host).toBe(expectedUrl);
+      const refusals = warn.mock.calls
+        .map((c) => String(c[0]))
+        .filter((l) => l.includes("outbound_host_refused"));
+      expect(refusals, host).toHaveLength(host === "labourmarket.ai" ? 1 : 0);
+      for (const line of refusals) {
+        expect(line).toContain('"deployEnv":"unset"');
+        expect(line).toContain('"evidence":"host"');
+        expect(line).not.toContain("ngrok");
+        expect(line).not.toContain("labourmarket.ai");
       }
       warn.mockRestore();
     }

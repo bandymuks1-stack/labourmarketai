@@ -1,6 +1,7 @@
 import "server-only";
 
 import { checkOutboundIntegrationUrl } from "@/lib/config/outbound-host-policy";
+import { readRequestHost } from "@/lib/config/request-host";
 import { env } from "@/lib/env";
 
 /**
@@ -110,8 +111,10 @@ export function buildCompanyNeedAlertText(a: CompanyNeedAlert): string {
   ].join("\n");
 }
 
-/** True when the Agentai OS bridge (preferred path) is fully configured. */
-export function agentaiBridgeConfigured(): boolean {
+/** True when the Agentai OS bridge (preferred path) is fully configured.
+ *  `requestHost` is the request's Host where the caller has one — the second
+ *  production evidence beside `VERCEL_ENV` (2026-09-24). */
+export function agentaiBridgeConfigured(requestHost?: string | null): boolean {
   return (
     env.AGENTAI_OS_ALERTS_ENABLED === "true" &&
     !!env.AGENTAI_OS_ALERT_ENDPOINT &&
@@ -122,6 +125,7 @@ export function agentaiBridgeConfigured(): boolean {
     // standalone Telegram path (2) below carries the alert instead.
     checkOutboundIntegrationUrl(env.AGENTAI_OS_ALERT_ENDPOINT, {
       integration: "AGENTAI_OS_ALERT_ENDPOINT",
+      requestHost,
     }).ok
   );
 }
@@ -204,8 +208,9 @@ async function sendViaStandaloneTelegram(
 export async function sendCompanyNeedOwnerAlert(
   alert: CompanyNeedAlert,
 ): Promise<boolean> {
-  // 1) Preferred: Agentai OS bridge (no Telegram token needed here).
-  if (agentaiBridgeConfigured()) {
+  // 1) Preferred: Agentai OS bridge (no Telegram token needed here). The
+  //    intake action runs inside a request, so its Host is available.
+  if (agentaiBridgeConfigured(await readRequestHost())) {
     const event = buildCompanyNeedEvent(alert, new Date().toISOString());
     return sendViaAgentaiBridge(event);
   }

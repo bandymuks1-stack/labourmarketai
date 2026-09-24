@@ -56,6 +56,8 @@ vi.mock("@/lib/supabase/server", () => ({
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import {
   DEPLOY_ENV_KEY,
+  deployEnvFromEnv,
+  ipv4MappedAddress,
   isLocalHostname,
   isNonProductionOrigin,
   isProductionHost,
@@ -125,6 +127,20 @@ describe("origin guard — a local host cannot write a row", () => {
       "172.16.0.2",
       "172.31.255.255:8080",
       "169.254.10.10",
+      // IPv4-mapped IPv6 (2026-09-24): how a dual-stack listener reports a
+      // loopback or LAN client — dotted, hex, bracketed, with a port.
+      "::ffff:127.0.0.1",
+      "[::ffff:127.0.0.1]:3000",
+      "::ffff:127.5.6.7",
+      "::ffff:7f00:1",
+      "[::FFFF:7F00:0001]:3000",
+      "::ffff:7f05:607",
+      "0:0:0:0:0:ffff:7f00:1",
+      "::ffff:10.0.0.5",
+      "::ffff:a00:5",
+      "::ffff:192.168.1.10",
+      "[::ffff:c0a8:10a]:3000",
+      "::ffff:169.254.10.10",
     ]) {
       expect(isLocalHostname(h), h).toBe(true);
     }
@@ -138,12 +154,30 @@ describe("origin guard — a local host cannot write a row", () => {
       "lmai-git-feature-x.vercel.app",
       "172.32.0.1", // just outside the private range
       "8.8.8.8",
+      // NEGATIVE CONTROL — a mapped PUBLIC address is judged as that address.
+      "::ffff:8.8.8.8",
+      "[::ffff:808:808]:3000",
+      "::ffff:172.32.0.1",
+      // Not a mapped form at all: a bare `ffff:` group, or a lookalike.
+      "ffff:7f00:1",
+      "::fffe:7f00:1",
       "",
       null,
       undefined,
     ]) {
       expect(isLocalHostname(h), String(h)).toBe(false);
     }
+  });
+
+  it("names the IPv4 an IPv4-mapped literal stands for, and nothing for any other spelling", () => {
+    expect(ipv4MappedAddress("::ffff:127.0.0.1")).toBe("127.0.0.1");
+    expect(ipv4MappedAddress("::ffff:7f00:1")).toBe("127.0.0.1");
+    expect(ipv4MappedAddress("::ffff:c0a8:10a")).toBe("192.168.1.10");
+    expect(ipv4MappedAddress("0:0:0:0:0:ffff:a9fe:a0a")).toBe("169.254.10.10");
+    expect(ipv4MappedAddress("::1")).toBeNull();
+    expect(ipv4MappedAddress("127.0.0.1")).toBeNull();
+    expect(ipv4MappedAddress("fe80::1")).toBeNull();
+    expect(ipv4MappedAddress("labourmarket.ai")).toBeNull();
   });
 
   it("the production host is never local, and a local host is never production", () => {
@@ -209,6 +243,18 @@ describe("origin guard — every accepted row says where it was written from", (
     expect(telemetryOriginFromEnv({ VERCEL_ENV: "development" })).toBe("local");
     expect(telemetryOriginFromEnv({ VERCEL_ENV: "" })).toBe("local");
     expect(telemetryOriginFromEnv({})).toBe("local");
+    expect(telemetryOriginFromEnv({ VERCEL_ENV: "staging" })).toBe("local");
+  });
+
+  it("reads VERCEL_ENV as a bounded fact — a MISSING variable is `unset`, never mistaken for a deployment (2026-09-24)", () => {
+    expect(deployEnvFromEnv({ VERCEL_ENV: "production" })).toBe("production");
+    expect(deployEnvFromEnv({ VERCEL_ENV: " Preview " })).toBe("preview");
+    expect(deployEnvFromEnv({ VERCEL_ENV: "development" })).toBe("development");
+    expect(deployEnvFromEnv({ VERCEL_ENV: "" })).toBe("unset");
+    expect(deployEnvFromEnv({})).toBe("unset");
+    expect(deployEnvFromEnv({ VERCEL_ENV: "staging" })).toBe("other");
+    // Closed set: nothing from the environment reaches the answer verbatim.
+    expect(deployEnvFromEnv({ VERCEL_ENV: "https://secret.host" })).toBe("other");
   });
 
   it("app_version names the origin and the build, bounded to the column", () => {

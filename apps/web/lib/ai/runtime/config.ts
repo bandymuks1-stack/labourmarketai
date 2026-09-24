@@ -19,6 +19,21 @@ import {
   resolveAiRuntimeConfig,
   type AiRuntimeConfig,
 } from "./config-core";
+import type { AiProviderState } from "./provider-chain";
+import {
+  observeProviderStates,
+  type ProviderObservation,
+} from "./provider-health";
+
+/**
+ * The request context an entry point can hand down: the request's own Host
+ * header, the second production evidence for the host policy (2026-09-24).
+ * Omitted where there is no request (a script, a build step) — `VERCEL_ENV`
+ * alone then decides, as before.
+ */
+export type AiRuntimeReadContext = {
+  readonly requestHost?: string | null;
+};
 
 /**
  * AI_LOCAL_BASE_URL after the PRODUCTION host policy (2026-09-23). The local
@@ -29,13 +44,14 @@ import {
  * here and the provider is simply unconfigured; the observation carries the
  * refusal as its detail so the operator sees why, not "not set".
  */
-function localBaseUrlInput(): {
+function localBaseUrlInput(ctx?: AiRuntimeReadContext): {
   raw: string | undefined;
   refusedDetail: string | undefined;
 } {
   if (!env.AI_LOCAL_BASE_URL) return { raw: undefined, refusedDetail: undefined };
   const policy = checkOutboundIntegrationUrl(env.AI_LOCAL_BASE_URL, {
     integration: "AI_LOCAL_BASE_URL",
+    requestHost: ctx?.requestHost,
   });
   if (policy.ok) return { raw: policy.url, refusedDetail: undefined };
   return {
@@ -43,11 +59,6 @@ function localBaseUrlInput(): {
     refusedDetail: policy.reason === "refused_host" ? policy.detail : undefined,
   };
 }
-import {
-  observeProviderStates,
-  type ProviderObservation,
-} from "./provider-health";
-import type { AiProviderState } from "./provider-chain";
 
 /** The key that proves the SELECTED primary provider is usable: the
  *  provider-specific key when set, else the generic AI_API_KEY (which the
@@ -71,7 +82,7 @@ function apiKeyForProvider(provider: string): string | undefined {
   }
 }
 
-export function getAiRuntimeConfig(): AiRuntimeConfig {
+export function getAiRuntimeConfig(ctx?: AiRuntimeReadContext): AiRuntimeConfig {
   return resolveAiRuntimeConfig({
     mode: env.AI_PROVIDER_MODE,
     provider: env.AI_PROVIDER,
@@ -81,7 +92,7 @@ export function getAiRuntimeConfig(): AiRuntimeConfig {
     maxRetries: env.AI_MAX_RETRIES,
     maxOutputTokens: env.AI_MAX_OUTPUT_TOKENS,
     dailyRunBudget: env.AI_DAILY_RUN_BUDGET,
-    localBaseUrl: localBaseUrlInput().raw,
+    localBaseUrl: localBaseUrlInput(ctx).raw,
     localModel: env.AI_LOCAL_MODEL,
     localApiKey: env.AI_LOCAL_API_KEY,
   });
@@ -95,9 +106,9 @@ export function getAiRuntimeConfig(): AiRuntimeConfig {
  * ever see the one selected provider would have nothing to fall back to. Key
  * PRESENCE only — no value is read into the returned object.
  */
-export function getProviderObservation(): ProviderObservation {
-  const cfg = getAiRuntimeConfig();
-  const { raw: localRaw, refusedDetail } = localBaseUrlInput();
+export function getProviderObservation(ctx?: AiRuntimeReadContext): ProviderObservation {
+  const cfg = getAiRuntimeConfig(ctx);
+  const { raw: localRaw, refusedDetail } = localBaseUrlInput(ctx);
   const localCheck = checkLocalBaseUrl(localRaw);
   return {
     runtimeState: cfg.state,
@@ -126,6 +137,6 @@ export function getProviderObservation(): ProviderObservation {
 }
 
 /** Observed readiness of every chain provider, from real configuration. */
-export function getAiProviderStates(): readonly AiProviderState[] {
-  return observeProviderStates(getProviderObservation());
+export function getAiProviderStates(ctx?: AiRuntimeReadContext): readonly AiProviderState[] {
+  return observeProviderStates(getProviderObservation(ctx));
 }

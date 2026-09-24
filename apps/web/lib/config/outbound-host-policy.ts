@@ -15,22 +15,50 @@
  * bridge has NO fallback once configured, so every owner alert would be LOST
  * while that PC slept.
  *
- * THE RULE. When the process IS the production deployment (`VERCEL_ENV ===
- * "production"`, Vercel's own variable), a URL whose host is loopback,
- * private, link-local, unspecified, a `.local`/`.localhost` name, an IPv6 ULA
- * or a known tunnel domain is REFUSED at its read site: the integration is
- * treated as UNCONFIGURED, and one structured, key-free, host-free line is
- * logged so the operator can see why. Preview and local deployments keep the
- * old behaviour — a developer pointing a preview at a tunnel is legitimate.
+ * THE RULE. When the process IS the production deployment, a URL whose host
+ * is loopback, private, link-local, unspecified, a `.local`/`.localhost`
+ * name, an IPv6 ULA or a known tunnel domain is REFUSED at its read site: the
+ * integration is treated as UNCONFIGURED, and one structured, key-free,
+ * host-free line is logged so the operator can see why. Preview and local
+ * deployments keep the old behaviour — a developer pointing a preview at a
+ * tunnel is legitimate.
+ *
+ * TWO EVIDENCES OF PRODUCTION, OR'ed (2026-09-24). `VERCEL_ENV ===
+ * "production"` (Vercel's own variable) is the primary evidence — and it
+ * FAILS OPEN: if the system environment variables were ever un-exposed, an
+ * env-keyed refusal would silently lapse on the very deployment it protects.
+ * `lib/telemetry/production-host.ts` documents that hazard and keys its own
+ * refusal on the request `Host` instead. So, where a request context exists,
+ * a request served on the production host (`isProductionHost`) is the second
+ * evidence: EITHER engages the refusal, never both together. A forged Host
+ * can only make the policy stricter (refuse), never looser; a missing
+ * `VERCEL_ENV` is reported by `/api/health` (`deployEnv: "unset"`) so it is
+ * seen rather than inferred. The refusal log names which evidence engaged.
  *
  * WHY THE HOST IS NOT LOGGED. A refused endpoint can be an internal hostname
  * or an operator's tunnel id; the log names the INTEGRATION and the host CLASS,
  * which is everything needed to act and nothing that identifies a machine.
  *
+ * WHAT A HOSTNAME-CLASS POLICY CANNOT SEE. A custom public hostname that
+ * fronts a tunnel (an owner-registered domain CNAMEd to a tunnel edge, a
+ * reverse proxy on a rented VM forwarding to a PC) classifies as `public`
+ * here — the class is decided from the name, and such a name carries no
+ * evidence of the machine behind it. That case is the owner rule enforced
+ * OPERATIONALLY (docs/DEPLOYMENT.md, services/transcribe/README.md), not by
+ * this file.
+ *
  * PURE. No env is read here except the record passed in (default
- * `process.env`); no network; unit-tested without a deployment.
+ * `process.env`); no request header is read here either — a read site that
+ * has one passes it in (`lib/config/request-host.ts`); no network;
+ * unit-tested without a deployment.
  */
-import { isLocalHostname } from "@/lib/telemetry/production-host";
+import {
+  deployEnvFromEnv,
+  ipv4MappedAddress,
+  isLocalHostname,
+  isProductionHost,
+  type DeployEnv,
+} from "@/lib/telemetry/production-host";
 
 export type OutboundHostKind =
   | "loopback"
@@ -80,11 +108,14 @@ export function classifyOutboundHost(hostname: string | null | undefined): Outbo
   if (!h) return "loopback";
 
   if (isLocalHostname(h)) {
-    if (h === "localhost" || h.endsWith(".localhost") || h === "::1" || h.startsWith("127.")) {
+    // An IPv4-mapped IPv6 literal (`::ffff:7f00:1`, how the URL parser spells
+    // `::ffff:127.0.0.1`) is judged as the IPv4 address it names.
+    const a = ipv4MappedAddress(h) ?? h;
+    if (a === "localhost" || a.endsWith(".localhost") || a === "::1" || a.startsWith("127.")) {
       return "loopback";
     }
-    if (h === "::" || h === "0.0.0.0") return "unspecified";
-    if (h.startsWith("169.254.")) return "link_local";
+    if (a === "::" || a === "0.0.0.0") return "unspecified";
+    if (a.startsWith("169.254.")) return "link_local";
     return "private";
   }
   if (h.endsWith(".local") || h.endsWith(".internal") || h.endsWith(".home.arpa")) {
@@ -97,12 +128,29 @@ export function classifyOutboundHost(hostname: string | null | undefined): Outbo
   return "public";
 }
 
-/** Vercel's own environment name — `production` is the only value that
- *  engages the refusal. Unset, `preview` and `development` do not. */
+/** Which evidence says this process is production: Vercel's own `VERCEL_ENV`
+ *  (`env`), or — where a request context exists — a request served on the
+ *  production host (`host`). `null` when neither does. Checked in that order
+ *  so the log names the primary evidence when both hold. */
+export type ProductionEvidence = "env" | "host";
+
+export function productionEvidence(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+  requestHost?: string | null,
+): ProductionEvidence | null {
+  if (deployEnvFromEnv(env) === "production") return "env";
+  if (isProductionHost(requestHost)) return "host";
+  return null;
+}
+
+/** `VERCEL_ENV === "production"` OR a request on the production host engages
+ *  the refusal. Unset, `preview` and `development` on a non-production host
+ *  (or with no request) do not. */
 export function isProductionDeployment(
   env: Readonly<Record<string, string | undefined>> = process.env,
+  requestHost?: string | null,
 ): boolean {
-  return (env.VERCEL_ENV ?? "").trim().toLowerCase() === "production";
+  return productionEvidence(env, requestHost) !== null;
 }
 
 export type OutboundUrlCheck =
@@ -127,12 +175,18 @@ const logged = new Set<string>();
  * normalisation, e.g. checkLocalBaseUrl's path handling). A refusal in
  * production logs one structured line and the caller treats the integration
  * as unconfigured. Outside production only "missing" and "invalid_url" fail.
+ *
+ * `requestHost` is the request's own `Host` header where the read site has
+ * one (a server action, a route handler) — the second production evidence.
+ * Omitted or null (a script, a build step, no request scope) means the
+ * decision rests on `VERCEL_ENV` alone, as before.
  */
 export function checkOutboundIntegrationUrl(
   raw: string | undefined | null,
   opts: {
     readonly integration: OutboundIntegration;
     readonly env?: Readonly<Record<string, string | undefined>>;
+    readonly requestHost?: string | null;
     /** Test seam. */
     readonly log?: (line: string) => void;
   },
@@ -158,16 +212,22 @@ export function checkOutboundIntegrationUrl(
     };
   }
   const hostKind = classifyOutboundHost(url.hostname);
-  if (hostKind !== "public" && isProductionDeployment(opts.env ?? process.env)) {
+  const env = opts.env ?? process.env;
+  const evidence = hostKind === "public" ? null : productionEvidence(env, opts.requestHost);
+  if (hostKind !== "public" && evidence !== null) {
     const key = `${opts.integration}:${hostKind}`;
     if (!logged.has(key)) {
       logged.add(key);
+      const deployEnv: DeployEnv = deployEnvFromEnv(env);
       (opts.log ?? ((line: string) => console.warn(line)))(
         JSON.stringify({
           event: LOG_EVENT,
           integration: opts.integration,
           hostKind,
-          deployEnv: "production",
+          // What VERCEL_ENV actually held and which evidence engaged: an
+          // `unset` + `host` line is the un-exposed-variable hazard, visible.
+          deployEnv,
+          evidence,
           effect: "integration treated as unconfigured",
         }),
       );

@@ -11,6 +11,7 @@ import {
   timedCheck,
   type VacancyFreshnessCheck,
 } from "@/lib/ops/health-model";
+import { deployEnvFromEnv } from "@/lib/telemetry/production-host";
 
 /**
  * Guard: production health + error instrumentation (FINAL COMPLETION Train L1).
@@ -74,11 +75,12 @@ describe("Guard: /api/health", () => {
     staleAfterHours: VACANCY_FRESHNESS_STALE_AFTER_HOURS,
   };
 
-  it("the report is booleans + latencies + build; overall ok = auth && db", () => {
+  it("the report is booleans + latencies + build + bounded words; overall ok = auth && db", () => {
     const r = summarizeHealth({
       auth: { ok: true, ms: 12 },
       db: { ok: false, ms: 4000, reason: "timeout" },
       vacancyFreshness: FRESH,
+      deployEnv: "production",
       build: "289c92ac",
       region: "dub1",
       now: new Date("2026-09-02T15:00:00Z"),
@@ -88,10 +90,51 @@ describe("Guard: /api/health", () => {
       at: "2026-09-02T15:00:00.000Z",
       build: "289c92ac",
       region: "dub1",
+      deployEnv: "production",
       checks: { auth: { ok: true, ms: 12 }, db: { ok: false, ms: 4000, reason: "timeout" } },
       vacancyFreshness: FRESH,
     });
     expect(JSON.stringify(r)).not.toMatch(/supabase\.co|eyJ|sb_/);
+  });
+
+  /**
+   * DEPLOY ENV (2026-09-24). The outbound host policy's primary production
+   * evidence is `VERCEL_ENV`, and an env-keyed rule fails open when the
+   * variable goes missing. The health answer names what the variable holds
+   * so a monitor on the production host can see `unset` — informational,
+   * never folded into `ok`.
+   */
+  describe("deployEnv", () => {
+    it("the route reports VERCEL_ENV through the ONE bounded parser", () => {
+      expect(route).toMatch(/deployEnv: deployEnvFromEnv\(\)/);
+      expect(route).toMatch(/from "@\/lib\/telemetry\/production-host"/);
+    });
+
+    it("is one of five words — a missing variable is `unset`, an unknown value is `other`, never the value itself", () => {
+      expect(deployEnvFromEnv({ VERCEL_ENV: "production" })).toBe("production");
+      expect(deployEnvFromEnv({ VERCEL_ENV: "preview" })).toBe("preview");
+      expect(deployEnvFromEnv({ VERCEL_ENV: "development" })).toBe("development");
+      expect(deployEnvFromEnv({})).toBe("unset");
+      expect(deployEnvFromEnv({ VERCEL_ENV: "  " })).toBe("unset");
+      expect(deployEnvFromEnv({ VERCEL_ENV: "https://secret.host" })).toBe("other");
+    });
+
+    it("NEGATIVE CONTROL — `unset` on a healthy deployment does not flip `ok`; it is reported, not judged", () => {
+      const r = summarizeHealth({
+        auth: { ok: true, ms: 12 },
+        db: { ok: true, ms: 30 },
+        vacancyFreshness: FRESH,
+        deployEnv: "unset",
+        build: null,
+        region: null,
+        now: new Date("2026-09-24T12:00:00Z"),
+      });
+      expect(r.ok).toBe(true);
+      expect(r.deployEnv).toBe("unset");
+      const model = read("lib/ops/health-model.ts");
+      expect(model).not.toMatch(/ok: input\.auth\.ok && input\.db\.ok && /);
+      expect(model).not.toMatch(/deployEnv === "production" &&/);
+    });
   });
 
   /**
@@ -148,6 +191,7 @@ describe("Guard: /api/health", () => {
         auth: { ok: true, ms: 12 },
         db: { ok: true, ms: 30 },
         vacancyFreshness: stale,
+        deployEnv: "production",
         build: null,
         region: null,
         now,
@@ -158,6 +202,7 @@ describe("Guard: /api/health", () => {
         auth: { ok: false, ms: 4000, reason: "timeout" },
         db: { ok: true, ms: 30 },
         vacancyFreshness: FRESH,
+        deployEnv: "production",
         build: null,
         region: null,
         now,
