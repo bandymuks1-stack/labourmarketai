@@ -8153,8 +8153,6 @@
         "self_stated": "{skill} — nurodėte patys; įrašų, kurie tai remtų, dar nėra.",
         "adjacent_opportunity": "Gretima kryptis: {profession} — jūsų įrašai remia {shared} iš {total} jos įgūdžių.",
         "derived": "Tai skaitymas iš jūsų pačių įrašų, ne išvada apie jus.",
-        "insufficient": "Augimo skaitymui reikia bent dviejų įrašais paremtų įgūdžių.",
-        "none": "Jūsų įrašai kol kas nerodo aiškios krypties.",
         "unknown": "Nėra duomenų — augimo skaitymo sudaryti nepavyko."
       },
       "opportunity": {
@@ -8167,8 +8165,6 @@
           "not_assessed": "{n, plural, one {# rastas, dar neįvertintas} few {# rasti, dar neįvertinti} other {# rastų, dar neįvertintų}}"
         },
         "more": "{n, plural, one {dar # skelbimas} few {dar # skelbimai} other {dar # skelbimų}}",
-        "none": "Šiuo metu skelbimų jums nėra.",
-        "noWorker": "Skelbimai rodomi, kai turite darbuotojo profilį.",
         "unavailable": "Skelbimų šaltinis šiuo metu nepasiekiamas.",
         "unknown": "Nėra duomenų — skelbimų perskaityti nepavyko.",
         "open": "Atidaryti Pasaulį"

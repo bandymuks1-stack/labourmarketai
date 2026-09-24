@@ -8153,8 +8153,6 @@
         "self_stated": "{skill} — podana przez Ciebie; nie ma jeszcze zapisu, który ją potwierdza.",
         "adjacent_opportunity": "Pokrewny kierunek: {profession} — Twoje zapisy potwierdzają {shared} z {total} jego umiejętności.",
         "derived": "Odczyt Twoich własnych zapisów, nie wniosek na Twój temat.",
-        "insufficient": "Odczyt rozwoju wymaga co najmniej dwóch umiejętności popartych zapisami.",
-        "none": "Twoje zapisy nie pokazują jeszcze wyraźnego kierunku.",
         "unknown": "Brak danych — nie udało się zbudować odczytu rozwoju."
       },
       "opportunity": {
@@ -8167,8 +8165,6 @@
           "not_assessed": "{n, plural, one {# znalezione, jeszcze nieocenione} few {# znalezione, jeszcze nieocenione} many {# znalezionych, jeszcze nieocenionych} other {# znalezionego, jeszcze nieocenionego}}"
         },
         "more": "{n, plural, one {jeszcze # ogłoszenie} few {jeszcze # ogłoszenia} many {jeszcze # ogłoszeń} other {jeszcze # ogłoszenia}}",
-        "none": "Obecnie brak ogłoszeń dla Ciebie.",
-        "noWorker": "Ogłoszenia pojawią się, gdy będziesz mieć profil pracownika.",
         "unavailable": "Źródło ogłoszeń jest teraz niedostępne.",
         "unknown": "Brak danych — nie udało się odczytać ogłoszeń.",
         "open": "Otwórz Świat"

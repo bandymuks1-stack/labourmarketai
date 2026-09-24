@@ -8153,8 +8153,6 @@
         "self_stated": "{skill} — stated by you; no record backs it yet.",
         "adjacent_opportunity": "Adjacent direction: {profession} — your records back {shared} of {total} of its skills.",
         "derived": "A reading of your own records, not a conclusion about you.",
-        "insufficient": "A growth reading needs at least two skills backed by records.",
-        "none": "Your records show no clear direction yet.",
         "unknown": "No data — the growth reading could not be built."
       },
       "opportunity": {
@@ -8167,8 +8165,6 @@
           "not_assessed": "{n, plural, one {# found, not yet assessed} other {# found, not yet assessed}}"
         },
         "more": "{n, plural, one {# more posting} other {# more postings}}",
-        "none": "No postings for you right now.",
-        "noWorker": "Postings appear once you have a worker profile.",
         "unavailable": "The postings source is not reachable right now.",
         "unknown": "No data — postings could not be read.",
         "open": "Open World"

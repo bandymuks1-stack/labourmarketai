@@ -8153,8 +8153,6 @@
         "self_stated": "{skill} — von dir angegeben; noch kein Eintrag stützt es.",
         "adjacent_opportunity": "Angrenzende Richtung: {profession} — deine Einträge stützen {shared} von {total} ihrer Fähigkeiten.",
         "derived": "Eine Lesart deiner eigenen Einträge, kein Urteil über dich.",
-        "insufficient": "Eine Wachstumslesart braucht mindestens zwei durch Einträge gestützte Fähigkeiten.",
-        "none": "Deine Einträge zeigen noch keine klare Richtung.",
         "unknown": "Keine Daten — die Wachstumslesart konnte nicht erstellt werden."
       },
       "opportunity": {
@@ -8167,8 +8165,6 @@
           "not_assessed": "{n, plural, one {# gefunden, noch nicht bewertet} other {# gefunden, noch nicht bewertet}}"
         },
         "more": "{n, plural, one {noch # Anzeige} other {noch # Anzeigen}}",
-        "none": "Derzeit keine Anzeigen für dich.",
-        "noWorker": "Anzeigen erscheinen, sobald du ein Arbeitskräfteprofil hast.",
         "unavailable": "Die Anzeigenquelle ist gerade nicht erreichbar.",
         "unknown": "Keine Daten — Anzeigen konnten nicht gelesen werden.",
         "open": "Welt öffnen"

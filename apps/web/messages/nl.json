@@ -8153,8 +8153,6 @@
         "self_stated": "{skill} — door jou opgegeven; nog geen registratie ondersteunt het.",
         "adjacent_opportunity": "Aangrenzende richting: {profession} — je registraties ondersteunen {shared} van de {total} vaardigheden ervan.",
         "derived": "Een lezing van je eigen registraties, geen conclusie over jou.",
-        "insufficient": "Een groeilezing heeft minstens twee door registraties ondersteunde vaardigheden nodig.",
-        "none": "Je registraties tonen nog geen duidelijke richting.",
         "unknown": "Geen gegevens — de groeilezing kon niet worden opgebouwd."
       },
       "opportunity": {
@@ -8167,8 +8165,6 @@
           "not_assessed": "{n, plural, one {# gevonden, nog niet beoordeeld} other {# gevonden, nog niet beoordeeld}}"
         },
         "more": "{n, plural, one {nog # advertentie} other {nog # advertenties}}",
-        "none": "Op dit moment geen advertenties voor jou.",
-        "noWorker": "Advertenties verschijnen zodra je een werkersprofiel hebt.",
         "unavailable": "De bron van advertenties is nu niet bereikbaar.",
         "unknown": "Geen gegevens — advertenties konden niet worden gelezen.",
         "open": "Wereld openen"

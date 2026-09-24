@@ -189,6 +189,22 @@ describe("ŠIANDIEN leaves an empty line out instead of stating it", () => {
     expect(OPP).toMatch(/t\("opportunity\.unknown"\)/);
     expect(OPP).toMatch(/t\("opportunity\.unavailable"\)/);
   });
+
+  it("the four empty-state sentences left no dead copy behind in any catalog (review P2 on #1856)", () => {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "da", "et", "lv", "no", "sv"]) {
+      const home = (JSON.parse(read(`messages/${locale}.json`)) as {
+        todayScreen?: { home?: Record<string, Record<string, unknown>> };
+      }).todayScreen?.home;
+      if (!home) continue;
+      expect(Object.keys(home.growth ?? {}), locale).not.toContain("insufficient");
+      expect(Object.keys(home.growth ?? {}), locale).not.toContain("none");
+      expect(Object.keys(home.opportunity ?? {}), locale).not.toContain("none");
+      expect(Object.keys(home.opportunity ?? {}), locale).not.toContain("noWorker");
+      // …while the lines the sections DO render stay (negative control).
+      expect(home.growth, locale).toHaveProperty("unknown");
+      expect(home.opportunity, locale).toHaveProperty("unavailable");
+    }
+  });
 });
 
 // ── 3 · the map is contextual, not ambient ──────────────────────────────────
