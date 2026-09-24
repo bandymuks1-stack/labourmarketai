@@ -2342,31 +2342,21 @@ reviewed, reversible, tests green, target verified.
 Repo file `supabase/migrations/20260924120000_companies_contact_minimization_v2.sql`
 (paired `supabase/rollbacks/…down.sql`). K2-1 v2; supersedes the never-applied
 #1430 draft (`20260902210000_companies_contact_minimization_v1`, which must not
-be applied — it predates #1859's member access). Security analysis: owner
-channel only (AGENTS.md — this repository is public).
+be applied). Security analysis and production evidence: owner channel only
+(AGENTS.md — this repository is public).
 
-Owner RED approval 2026-09-24 ("#1868 / K2-1 v2: APPROVED … MERGE APP CODE →
-VERIFY VERCEL PRODUCTION DEPLOY → APPLY APPROVED MIGRATION → PRODUCTION
-READBACK"). Sequence as approved: #1868 squash-merged as `04f7b741` (quality,
-migration-safety, e2e-smoke, CodeQL, mobile green); Vercel Production
-deployment 6633470001 `success` for exactly `04f7b741` at 08:27:05Z; rolled-back
-production dry run (migration + per-role probes, raised to roll back; state
-re-read unchanged afterwards); then applied via Supabase MCP `apply_migration`
-(name `companies_contact_minimization_v2`, the file on main, sha256
-`48da75dd0e704648e0154df63000ed125e1c9630856f40dc9bd349626960441d`) — never
-`db push`.
+Owner RED approval 2026-09-24, applied in the approved order: #1868 merged
+(`04f7b741`) → Vercel Production deployment of exactly that commit `success` →
+rolled-back production dry run → Supabase MCP `apply_migration` of the file on
+main (sha256 `48da75dd0e704648e0154df63000ed125e1c9630856f40dc9bd349626960441d`)
+— never `db push`. Read-back: the `schema_migrations` row is present and the
+grant, function and per-role checks passed (details in the owner channel);
+PostgREST reloaded its schema cache right after the apply.
 
-Read-back (after apply): `schema_migrations` row `20260924083740
-companies_contact_minimization_v2`; `authenticated` SELECT = exactly the 12
-discovery columns; `read_companies_private_v1()` SECURITY DEFINER with
-`search_path=public, pg_temp`, EXECUTE for `authenticated`, none for `anon`;
-16 company rows untouched. Role probes (rolled back): every signed-in role gets
-42501 on a direct private-column read and still sees all 16 discovery rows; the
-reader returns 0 rows to an account with no membership, exactly its own company
-to the Nonstop creator/owner, and all 16 to the platform admin; `anon` cannot
-execute it. PostgREST received the reload on the `pgrst` channel at 08:37:40Z and
-reloaded its schema cache at 08:37:44Z. App leg: no company-page request reached
-the API between the deploy and this record → the end-user walk is NOT PROVEN yet.
+Status: DB-level PRODUCTION-PROVEN. App path NOT PROVEN — pending a signed-in
+company-page walk as the owner AND as the manager, each seeing their own
+company's details rendered. A bare HTTP 200 from the reader is not proof: an
+unauthorized caller also gets 200 with zero rows.
 
 ## Deferred / rejected — NEVER-APPLY register
 
