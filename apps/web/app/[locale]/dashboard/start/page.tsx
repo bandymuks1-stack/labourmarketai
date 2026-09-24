@@ -1,17 +1,13 @@
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
-import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
-import {
-  listMyMembershipInvitations,
-  listOrganizationMembers,
-  type MembershipRole,
-} from "@/lib/company/memberships";
+import { activeOrganizationAuthority } from "@/lib/company/organization-authority";
+import { listMyMembershipInvitations } from "@/lib/company/memberships";
+import { getMembershipLabels } from "@/lib/company/membership-labels";
 import { MembershipInvitationsPanel } from "@/components/app/membership-invitations-panel";
-import { OrganizationMembersSection } from "@/components/app/organization-members-section";
 import { MyOnboardingSection } from "./my-onboarding-section";
 import { isLifecycleNotice } from "@/lib/lifecycle/lifecycle-model";
 
@@ -81,72 +77,27 @@ export default async function ActivitySetupHubPage({
   const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
   const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
-  // M-P0-4 Slice 2 — governance surfaces. Invitations addressed to me render
-  // in ANY workspace; the member directory renders when the ACTIVE workspace
-  // is an organization the caller belongs to. Both degrade silently when the
-  // membership schema is absent in this environment (feature-detected).
+  // M-P0-4 Slice 2 — the INVITEE's governance surface. Invitations addressed
+  // to me render in ANY workspace (an invitee holds no membership yet, so
+  // this hub — open to every authenticated person — is where a seat is
+  // accepted; the bell's `pending-membership-invitations` signal points
+  // here). The MEMBER DIRECTORY moved to the organization's Settings door
+  // (capability matrix P1, 2026-09-23): governance of an organization is
+  // administration of that organization. When the ACTIVE workspace is one
+  // the caller belongs to, this hub says so and points there. Labels come
+  // from the catalogue (all 11 locales) — they were inline LT/EN pairs.
   // The ONE session resolution the chip renders (identity read inside it).
   const workspace = await getWorkspaceContext();
-  const activeOrgId =
-    workspace.activeWorkspaceId !== PERSONAL_WORKSPACE_ID &&
-    workspace.workspaces.some(
-      (w) => w.kind === "organization" && w.id === workspace.activeWorkspaceId,
-    )
-      ? workspace.activeWorkspaceId
-      : null;
-  const [invitationsRes, membersRes] = await Promise.all([
+  const activeMembership = activeOrganizationAuthority(workspace);
+  const activeWorkspaceName =
+    workspace.workspaces.find((w) => w.id === activeMembership.organizationId)?.name ?? "";
+  const [invitationsRes, membershipLabels, tMembers] = await Promise.all([
     listMyMembershipInvitations(),
-    activeOrgId
-      ? listOrganizationMembers(activeOrgId)
-      : Promise.resolve(null),
+    getMembershipLabels(),
+    getTranslations("organizationMembers"),
   ]);
   const invitations =
     invitationsRes.kind === "ok" ? invitationsRes.invitations : [];
-  const members = membersRes?.kind === "ok" ? membersRes.members : [];
-  const myRole = membersRes?.kind === "ok" ? membersRes.myRole : null;
-
-  const roleLabels: Record<MembershipRole, string> = {
-    owner: label("Savininkas", "Owner"),
-    admin: label("Administratorius", "Admin"),
-    manager: label("Vadovas", "Manager"),
-    external_manager: label("Išorinis vadovas", "External manager"),
-    member: label("Narys", "Member"),
-  };
-  const outcomeLabels: Record<string, string> = {
-    invited: label("Pakvietimas išsiųstas.", "Invitation sent."),
-    accepted: label("Pakvietimas priimtas.", "Invitation accepted."),
-    declined: label("Pakvietimas atmestas.", "Invitation declined."),
-    cancelled: label("Pakvietimas atšauktas.", "Invitation cancelled."),
-    role_changed: label("Rolė pakeista.", "Role changed."),
-    revoked: label("Narystė atšaukta.", "Membership revoked."),
-    left: label("Palikote organizaciją.", "You left the organization."),
-    unchanged: label("Rolė nepakito.", "Role unchanged."),
-    already_member: label("Šis žmogus jau narys.", "Already a member."),
-    already_invited: label("Pakvietimas jau laukia.", "Invitation already pending."),
-    already_active: label("Narystė jau aktyvi.", "Membership already active."),
-    not_invited: label("Pakvietimas neberastas.", "Invitation not available."),
-    not_active: label("Narystė nebeaktyvi.", "Membership is not active."),
-    not_a_member: label("Nesate šios organizacijos narys.", "You are not a member."),
-    not_found: label("Įrašas neberastas.", "Record not available."),
-    not_authorized: label("Neturite teisės šiam veiksmui.", "You are not authorized for this."),
-    no_such_user: label("Tokio naudotojo nėra.", "No user with this email."),
-    cannot_invite_self: label("Savęs pakviesti negalima.", "You cannot invite yourself."),
-    invalid_role: label("Netinkama rolė.", "Invalid role."),
-    last_owner: label(
-      "Paskutinis savininkas negali pasitraukti — pirmiau paskirkite kitą savininką.",
-      "The last owner cannot step down — activate another owner first.",
-    ),
-    no_workspace: label(
-      "Pirmiausia pasirinkite organizacijos erdvę.",
-      "Select an organization workspace first.",
-    ),
-    needs_migration: label(
-      "Ši funkcija dar neįjungta šioje aplinkoje.",
-      "This capability is not enabled in this environment yet.",
-    ),
-    invalid: label("Netinkami duomenys.", "Invalid input."),
-    error: label("Nepavyko — bandykite dar kartą.", "Something failed — try again."),
-  };
 
   return (
     <div className="flex flex-col gap-6" data-testid="activity-setup-hub">
@@ -172,43 +123,29 @@ export default async function ActivitySetupHubPage({
 
       <MembershipInvitationsPanel
         invitations={invitations}
-        labels={{
-          heading: label("Pakvietimai į organizacijas", "Organization invitations"),
-          explainer: label(
-            "Jums adresuoti valdymo pakvietimai. Priėmus organizacija atsiras erdvių perjungiklyje.",
-            "Governance invitations addressed to you. Accepting makes the organization appear in your workspace switcher.",
-          ),
-          roleLabels,
-          accept: label("Priimti", "Accept"),
-          decline: label("Atmesti", "Decline"),
-          outcomes: outcomeLabels,
-        }}
+        labels={membershipLabels.invitations}
       />
 
-      {activeOrgId && members.length > 0 && (
-        <OrganizationMembersSection
-          members={members}
-          myRole={myRole}
-          myProfileId={user.id}
-          labels={{
-            heading: label("Organizacijos nariai", "Organization members"),
-            explainer: label(
-              "Aktyvios erdvės valdymo narystės. Narystė nėra įdarbinimas — ji nekuria ir nenutraukia darbo santykių.",
-              "Governance memberships of the active workspace. Membership is not employment — it never creates or ends an engagement.",
-            ),
-            roleLabels,
-            statusInvited: label("pakviesta", "invited"),
-            inviteHeading: label("Pakviesti narį", "Invite a member"),
-            inviteEmail: label("El. paštas", "Email"),
-            inviteRole: label("Rolė", "Role"),
-            inviteSubmit: label("Pakviesti", "Invite"),
-            cancelInvite: label("Atšaukti pakvietimą", "Cancel invite"),
-            revoke: label("Atšaukti narystę", "Revoke"),
-            leave: label("Palikti organizaciją", "Leave"),
-            outcomes: outcomeLabels,
-          }}
-        />
-      )}
+      {/* The member directory of the ACTIVE organization lives behind its
+          Settings door now — one line here says where, for every governance
+          role (a member reaches it through the membership gate too). */}
+      {activeMembership.authority.canOpen ? (
+        <p
+          className="text-sm text-text-secondary"
+          data-testid="org-members-moved-to-settings"
+        >
+          {tMembers("start.membersMoved", {
+            workspace: activeWorkspaceName || tMembers("start.unnamedOrganization"),
+          })}{" "}
+          <Link
+            href={"/dashboard/company/settings#organization-members" as "/dashboard"}
+            className="font-medium text-brand-blue underline-offset-2 hover:underline"
+            data-testid="org-members-open-settings"
+          >
+            {tMembers("start.openSettings")} →
+          </Link>
+        </p>
+      ) : null}
 
       <section
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"

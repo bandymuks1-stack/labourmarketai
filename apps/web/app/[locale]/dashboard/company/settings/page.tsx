@@ -3,11 +3,18 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import {
   getActiveOrganizationContext,
+  getWorkspaceContext,
   governedActiveOrganizationId,
 } from "@/lib/company/active-organization";
+import { activeOrganizationAuthority } from "@/lib/company/organization-authority";
+import {
+  listMyMembershipInvitations,
+  listOrganizationMembers,
+} from "@/lib/company/memberships";
+import { getMembershipLabels } from "@/lib/company/membership-labels";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { getBusinessPublicSettings } from "@/lib/company/public-profile";
@@ -21,6 +28,8 @@ import { BusinessPublicProfilePanel } from "@/components/app/business-public-pro
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { HelpRequestPanel } from "@/components/app/help-request-panel";
 import { FeatureNote } from "@/components/app/feature-note";
+import { MembershipInvitationsPanel } from "@/components/app/membership-invitations-panel";
+import { OrganizationMembersSection } from "@/components/app/organization-members-section";
 
 /**
  * NUSTATYMAI — the organization's own record (owner IA correction
@@ -29,6 +38,18 @@ import { FeatureNote } from "@/components/app/feature-note";
  * tier-1 expectations note, typed help requests to the operator, and the
  * person's own profile. Administration of the organization, kept out of the
  * operating screens — none of it is daily work.
+ *
+ * MEMBERS AND INVITATIONS LIVE HERE (capability matrix P1, 2026-09-23). The
+ * governance member directory and the invitations addressed to me used to
+ * exist only on the Activity Setup Hub (/dashboard/start), with inline LT/EN
+ * labels. Governance of an organization is administration of that
+ * organization, so it sits behind its Settings door. The directory is keyed
+ * on the ACTIVE WORKSPACE's own membership (`activeOrganizationAuthority`:
+ * any governance role, member included — a member may see the directory and
+ * leave), NOT on the employer company context, which fails closed for a
+ * member; the section must not vanish for exactly the person it exists for.
+ * The hub keeps the invitee's panel (an invitee holds no membership yet and
+ * cannot reach this door) and points here for members.
  */
 export default async function CompanySettingsPage({
   params,
@@ -37,20 +58,67 @@ export default async function CompanySettingsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireRoleOrRedirect(locale, "company");
+  const userId = await requireRoleOrRedirect(locale, "company");
   const t = await getTranslations("organizationDoors.pages.settings");
   const tCompany = await getTranslations("roleDashboards.company");
   const tNotes = await getTranslations("featureNotes");
+  const tMembers = await getTranslations("organizationMembers");
 
-  const employerCtx = await resolveEmployerCompanyContext();
+  // The ONE session workspace resolution the chip renders (identity read
+  // inside it) — the membership the directory is keyed on.
+  const workspace = await getWorkspaceContext();
+  const { organizationId: memberOrgId } = activeOrganizationAuthority(workspace);
+  const [employerCtx, invitationsRes, membersRes, membershipLabels] = await Promise.all([
+    resolveEmployerCompanyContext(),
+    listMyMembershipInvitations(),
+    memberOrgId ? listOrganizationMembers(memberOrgId) : Promise.resolve(null),
+    getMembershipLabels(),
+  ]);
+  const invitations = invitationsRes.kind === "ok" ? invitationsRes.invitations : [];
+  // Both governance surfaces, composed once and mounted in either branch.
+  // A failed directory read says so (SEP-7); an absent schema renders
+  // nothing, exactly as the hub did (feature-detected).
+  const membershipSections = (
+    <>
+      <MembershipInvitationsPanel
+        invitations={invitations}
+        labels={membershipLabels.invitations}
+      />
+      {membersRes?.kind === "ok" ? (
+        <div id="organization-members" className="scroll-mt-20">
+          <OrganizationMembersSection
+            members={membersRes.members}
+            myRole={membersRes.myRole}
+            myProfileId={userId}
+            labels={membershipLabels.members}
+          />
+        </div>
+      ) : membersRes?.kind === "error" ? (
+        <p
+          className="text-xs text-text-secondary"
+          role="status"
+          data-testid="org-members-unavailable"
+        >
+          {tMembers("members.unavailable")}
+        </p>
+      ) : null}
+    </>
+  );
+
+  // READ access: the manager the resolver accepted reads the organization's
+  // record here; only the write surfaces keep the owner/admin read.
   const companyProfile =
-    employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
+    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
   if (!companyRow) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-settings">
-        <CompanyNoProfileGuide />
+        <CompanyNoProfileGuide
+          reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
+          activeWorkspaceName={employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName}
+        />
+        {membershipSections}
       </div>
     );
   }
@@ -108,6 +176,10 @@ export default async function CompanySettingsPage({
           verificationStatus: companyRow.verificationStatus,
         }}
       />
+
+      {/* WHO GOVERNS THIS ORGANIZATION — the member directory (role-distinct
+          controls inside) and the invitations addressed to me. */}
+      {membershipSections}
 
       {/* One plain question, several honest answers: what this organization DOES. */}
       {capabilityOrgId ? (

@@ -34,7 +34,8 @@ import {
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
-import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { getWorkspaceContext, type WorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import { resolveRenameTarget } from "@/lib/company/organization-rename";
 import { interestStateFingerprint } from "@/lib/opportunities/interest";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
@@ -115,10 +116,20 @@ function tokenSecret(): string {
  * `readActiveProfileRoles` retries once and then throws, and the throw is
  * deliberately not caught here — an unknown role state grants nothing and is
  * never passed downstream disguised as an answer.
+ *
+ * MEMBERSHIP IS THE COMPANY GATE TOO (capability matrix P1, 2026-09-23): a
+ * governance membership in the ACTIVE workspace — the same request-cached
+ * resolution the executors act in — holds the `company` role for this
+ * dispatch, because `membership_accept_v1` never grants `profile_roles` and
+ * a manager's every employer action was refused here as `not_authorized`
+ * before its executor could resolve their real role. The executor still
+ * resolves the company through `requireEmployerCompany` and gates per
+ * capability; RLS and the RPCs remain the backstop.
  */
 async function heldRolesOf(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
+  workspace: WorkspaceContext,
 ): Promise<Set<Role>> {
   const rows = await readActiveProfileRoles(() =>
     supabase
@@ -128,6 +139,7 @@ async function heldRolesOf(
       .eq("is_active", true),
   );
   const set = new Set<Role>(rows.map((r) => r.role as Role));
+  if (workspaceOpensCompanySpace(workspace)) set.add("company");
   return set.size > 0 ? set : new Set<Role>(["worker"]);
 }
 
@@ -326,7 +338,11 @@ export async function prepareConfirmationAction(
   if (!user) return { ok: false, code: "auth" };
 
   const descriptor = getConversationAction(actionId);
-  const held = await heldRolesOf(supabase, user.id);
+  // The token is bound to the workspace it is minted in — resolved here, by
+  // the same resolver the chip renders, never taken from the client. It is
+  // also the membership arm of the role gate below.
+  const ws = await getWorkspaceContext();
+  const held = await heldRolesOf(supabase, user.id, ws);
   const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isExecutable(actionId) });
   if (!authz.ok) return { ok: false, code: authz.code };
   if (!descriptor || !requiresConfirmation(descriptor.confirmation)) {
@@ -338,9 +354,6 @@ export async function prepareConfirmationAction(
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
-  // The token is bound to the workspace it is minted in — resolved here, by
-  // the same resolver the chip renders, never taken from the client.
-  const ws = await getWorkspaceContext();
   const fp = workspaceBoundFingerprint(
     ws.activeWorkspaceId,
     await stateFingerprint(supabase, user.id, actionId, parsed.data as Record<string, unknown>),
@@ -377,7 +390,14 @@ export async function dispatchWorkerAction(
   if (!user) return { ok: false, code: "auth" };
 
   const descriptor = getConversationAction(actionId);
-  const held = await heldRolesOf(supabase, user.id);
+  // THE ACTIVE WORKSPACE, resolved server-side by the ONE resolver the chip
+  // renders (request-cached, identity read from the session — never a forced
+  // "company"/"person" argument, which used to let this request hold a second
+  // active workspace). Read FIRST: it is the membership arm of the role gate
+  // (a manager of the active organization holds `company` for this dispatch)
+  // and, below, the stale-context check.
+  const ws = await getWorkspaceContext();
+  const held = await heldRolesOf(supabase, user.id, ws);
   const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isExecutable(actionId) });
   if (!authz.ok) return { ok: false, code: authz.code };
   // descriptor is defined here (authz.ok implies it).
@@ -388,13 +408,9 @@ export async function dispatchWorkerAction(
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
-  // THE ACTIVE WORKSPACE, resolved server-side by the ONE resolver the chip
-  // renders (request-cached, identity read from the session — never a forced
-  // "company"/"person" argument, which used to let this request hold a second
-  // active workspace). A screen that displayed another workspace is refused
-  // before anything runs: the write would land in an organization the person
-  // is not looking at.
-  const ws = await getWorkspaceContext();
+  // A screen that displayed another workspace is refused before anything
+  // runs: the write would land in an organization the person is not looking
+  // at.
   if (isStaleWorkspaceContext(opts?.expectedWorkspaceId, ws.activeWorkspaceId)) {
     return { ok: false, code: "stale_context" };
   }

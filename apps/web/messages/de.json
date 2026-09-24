@@ -615,6 +615,7 @@
     "rowClear": "Nichts offen",
     "readSemantics": {
       "pending_invitations": "Verschwindet, wenn Sie die Einladung in der Übersicht annehmen oder ablehnen.",
+      "pending_membership_invitations": "Verschwindet, wenn Sie die Mitgliedschaftseinladung im Start-Hub annehmen oder ablehnen.",
       "unread_messages": "Verschwindet, wenn Sie die Unterhaltung lesen.",
       "incoming_service_requests": "Verschwindet, wenn Sie die Anfrage beantworten.",
       "service_request_responses": "Verschwindet, wenn Sie die Seite mit den Serviceanfragen öffnen.",
@@ -1681,6 +1682,7 @@
       "backToDashboard": "Zurück zum Unternehmens-Dashboard",
       "errorName": "Geben Sie einen Projektnamen ein (mindestens 2 Zeichen).",
       "errorNoCompany": "Nur ein Unternehmenskonto kann einen Projektkontext anlegen.",
+      "errorNotAuthorized": "Projekte anlegen ist hier dem Inhaber oder Administrator der Organisation vorbehalten. Bitten Sie sie, das Projekt anzulegen oder Ihrer Rolle das Recht zu geben.",
       "error": "Konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
     },
     "needsTitle": "Anfragen",
@@ -4630,6 +4632,7 @@
       "types": {
         "generic": "Benachrichtigung",
         "pending_invitations": "Einladungen, die auf Ihre Antwort warten",
+        "pending_membership_invitations": "Einladungen in die Leitung einer Organisation warten auf Ihre Antwort",
         "unread_messages": "Ungelesene Nachrichten",
         "incoming_service_requests": "Serviceanfragen, die auf eine Antwort warten",
         "service_request_responses": "Antworten auf Ihre Anfragen",
@@ -17020,6 +17023,73 @@
       }
     },
     "needsAgency": "Angebot"
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Inhaber",
+      "admin": "Administrator",
+      "manager": "Leitung",
+      "external_manager": "Externe Leitung",
+      "member": "Mitglied"
+    },
+    "outcomes": {
+      "invited": "Einladung erstellt — es wird keine E-Mail verschickt; die Person sieht sie nach der Anmeldung in ihrem Arbeitsbereich.",
+      "accepted": "Einladung angenommen.",
+      "declined": "Einladung abgelehnt.",
+      "cancelled": "Einladung zurückgezogen.",
+      "role_changed": "Rolle geändert.",
+      "revoked": "Mitgliedschaft entzogen.",
+      "left": "Sie haben die Organisation verlassen.",
+      "unchanged": "Rolle unverändert.",
+      "already_member": "Ist bereits Mitglied.",
+      "already_invited": "Einladung steht bereits aus.",
+      "already_active": "Mitgliedschaft ist bereits aktiv.",
+      "not_invited": "Einladung nicht verfügbar.",
+      "not_active": "Mitgliedschaft ist nicht aktiv.",
+      "not_a_member": "Sie sind kein Mitglied.",
+      "not_found": "Eintrag nicht verfügbar.",
+      "not_authorized": "Dazu sind Sie nicht berechtigt.",
+      "no_such_user": "Kein Nutzer mit dieser E-Mail-Adresse.",
+      "cannot_invite_self": "Sie können sich nicht selbst einladen.",
+      "invalid_role": "Ungültige Rolle.",
+      "last_owner": "Der letzte Inhaber kann nicht zurücktreten — aktivieren Sie zuerst einen weiteren Inhaber.",
+      "no_workspace": "Wählen Sie zuerst einen Organisationsbereich.",
+      "needs_migration": "Diese Funktion ist in dieser Umgebung noch nicht aktiviert.",
+      "invalid": "Ungültige Eingabe.",
+      "error": "Etwas ist fehlgeschlagen — bitte erneut versuchen."
+    },
+    "invitations": {
+      "heading": "Einladungen von Organisationen",
+      "explainer": "An Sie gerichtete Einladungen in die Leitung. Nach der Annahme erscheint die Organisation in Ihrer Bereichsauswahl.",
+      "accept": "Annehmen",
+      "decline": "Ablehnen"
+    },
+    "members": {
+      "heading": "Mitglieder der Organisation",
+      "explainer": "Leitungsmitgliedschaften des aktiven Bereichs. Mitgliedschaft ist keine Anstellung — sie begründet oder beendet nie ein Arbeitsverhältnis.",
+      "statusInvited": "eingeladen",
+      "inviteHeading": "Mitglied einladen",
+      "inviteEmail": "E-Mail-Adresse",
+      "inviteRole": "Rolle",
+      "inviteSubmit": "Einladen",
+      "cancelInvite": "Einladung zurückziehen",
+      "revoke": "Mitgliedschaft entziehen",
+      "leave": "Organisation verlassen",
+      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat."
+    },
+    "start": {
+      "membersMoved": "Mitglieder und Einladungen von {workspace} werden in den Einstellungen der Organisation verwaltet.",
+      "unnamedOrganization": "Ihrer Organisation",
+      "openSettings": "Mitglieder in den Einstellungen öffnen"
+    },
+    "entry": {
+      "memberOnly": "Sie gehören dieser Organisation als Mitglied an. Ihre Arbeitsbildschirme sind für Inhaber, Administratoren und Leitung; die Mitgliederliste und Ihre Einladungen finden Sie in den Einstellungen.",
+      "openMembers": "Mitglieder öffnen"
+    },
+    "managerScope": {
+      "title": "Ihre Rolle hier: Leitung",
+      "body": "Sie können diese Organisation öffnen und darin arbeiten. Projekte anlegen oder bearbeiten und das Team einsehen bleibt vorerst beim Inhaber oder Administrator — bis sie es freigeben, wird eine solche Aktion als abgelehnt angezeigt, nie als leere Liste."
+    }
   },
   "rosterLinkEnd": {
     "title": "Meine Teams",

@@ -44,6 +44,7 @@ const ZERO: SpineCounts = {
   pendingIncomingBookings: 0,
   bookingResponsesNew: 0,
   pendingInvitations: 0,
+  pendingMembershipInvitations: 0,
   openTaskAttention: 0,
   newJobMatches: 0,
   pendingAbsenceReviews: 0,

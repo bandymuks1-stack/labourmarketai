@@ -3,7 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { listAgencyClients, listAgencyDemands } from "@/lib/agency/clients";
 import {
@@ -67,14 +67,18 @@ export default async function CompanyPartnersPage({
       : state;
 
   const employerCtx = await resolveEmployerCompanyContext();
+  // READ access (any governance role the resolver accepted).
   const companyProfile =
-    employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
+    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
   if (!companyRow) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-partners">
-        <CompanyNoProfileGuide />
+        <CompanyNoProfileGuide
+          reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
+          activeWorkspaceName={employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName}
+        />
       </div>
     );
   }

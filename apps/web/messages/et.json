@@ -359,6 +359,7 @@
       "types": {
         "generic": "Teavitus",
         "pending_invitations": "Kutsed ootavad sinu vastust",
+        "pending_membership_invitations": "Organisatsiooni juhtimise kutsed ootavad sinu vastust",
         "unread_messages": "Lugemata sõnumid",
         "incoming_service_requests": "Teenusepäringud ootavad vastust",
         "service_request_responses": "Vastused sinu päringutele",
@@ -6540,6 +6541,73 @@
       "issueWhy": {
         "time_conflicts_source": "[EN] Your decision is kept — you know the work. The source's own words state a different duration or rate, so no monthly figure is made from the total, and the difference stays visible beside the record."
       }
+    }
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Omanik",
+      "admin": "Administraator",
+      "manager": "Juht",
+      "external_manager": "Välisjuht",
+      "member": "Liige"
+    },
+    "outcomes": {
+      "invited": "Kutse loodud — e-kirja ei saadeta; inimene näeb seda oma tööruumis pärast sisselogimist.",
+      "accepted": "Kutse vastu võetud.",
+      "declined": "Kutse tagasi lükatud.",
+      "cancelled": "Kutse tühistatud.",
+      "role_changed": "Roll muudetud.",
+      "revoked": "Liikmesus tühistatud.",
+      "left": "Lahkusid organisatsioonist.",
+      "unchanged": "Roll ei muutunud.",
+      "already_member": "See inimene on juba liige.",
+      "already_invited": "Kutse juba ootab.",
+      "already_active": "Liikmesus on juba aktiivne.",
+      "not_invited": "Kutse pole saadaval.",
+      "not_active": "Liikmesus pole aktiivne.",
+      "not_a_member": "Sa ei ole liige.",
+      "not_found": "Kirje pole saadaval.",
+      "not_authorized": "Sul pole selleks õigust.",
+      "no_such_user": "Selle e-postiga kasutajat pole.",
+      "cannot_invite_self": "Iseennast ei saa kutsuda.",
+      "invalid_role": "Sobimatu roll.",
+      "last_owner": "Viimane omanik ei saa taanduda — aktiveeri enne teine omanik.",
+      "no_workspace": "Vali kõigepealt organisatsiooni tööruum.",
+      "needs_migration": "See võimalus pole selles keskkonnas veel sisse lülitatud.",
+      "invalid": "Sobimatud andmed.",
+      "error": "Ei õnnestunud — proovi uuesti."
+    },
+    "invitations": {
+      "heading": "Organisatsioonide kutsed",
+      "explainer": "Sulle suunatud juhtimiskutsed. Vastuvõtmisel ilmub organisatsioon sinu tööruumide valijasse.",
+      "accept": "Võta vastu",
+      "decline": "Lükka tagasi"
+    },
+    "members": {
+      "heading": "Organisatsiooni liikmed",
+      "explainer": "Aktiivse tööruumi juhtimisliikmesused. Liikmesus pole töösuhe — see ei loo ega lõpeta kunagi töösuhet.",
+      "statusInvited": "kutsutud",
+      "inviteHeading": "Kutsu liige",
+      "inviteEmail": "E-post",
+      "inviteRole": "Roll",
+      "inviteSubmit": "Kutsu",
+      "cancelInvite": "Tühista kutse",
+      "revoke": "Tühista liikmesus",
+      "leave": "Lahku organisatsioonist",
+      "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid."
+    },
+    "start": {
+      "membersMoved": "Organisatsiooni {workspace} liikmeid ja kutseid hallatakse selle Seadetes.",
+      "unnamedOrganization": "sinu organisatsioon",
+      "openSettings": "Ava liikmed Seadetes"
+    },
+    "entry": {
+      "memberOnly": "Kuulud sellesse organisatsiooni liikmena. Selle tööekraanid on omanikele, administraatoritele ja juhtidele; liikmete nimekiri ja sinu kutsed on Seadetes.",
+      "openMembers": "Ava liikmed"
+    },
+    "managerScope": {
+      "title": "Sinu roll siin: juht",
+      "body": "Saad selle organisatsiooni avada ja selles töötada. Projektide loomine ja muutmine ning meeskonna nimekirja lugemine jäävad esialgu omaniku või administraatori kätte — kuni nad seda ei anna, näidatakse sellist toimingut keeldutuna, mitte kunagi tühja nimekirjana."
     }
   }
 }

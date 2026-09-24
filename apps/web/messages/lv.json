@@ -359,6 +359,7 @@
       "types": {
         "generic": "Paziņojums",
         "pending_invitations": "Uzaicinājumi gaida tavu atbildi",
+        "pending_membership_invitations": "Uzaicinājumi organizācijas pārvaldībā gaida jūsu atbildi",
         "unread_messages": "Nelasītas ziņas",
         "incoming_service_requests": "Pakalpojumu pieprasījumi gaida atbildi",
         "service_request_responses": "Atbildes uz taviem pieprasījumiem",
@@ -6540,6 +6541,73 @@
       "issueWhy": {
         "time_conflicts_source": "[EN] Your decision is kept — you know the work. The source's own words state a different duration or rate, so no monthly figure is made from the total, and the difference stays visible beside the record."
       }
+    }
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Īpašnieks",
+      "admin": "Administrators",
+      "manager": "Vadītājs",
+      "external_manager": "Ārējais vadītājs",
+      "member": "Dalībnieks"
+    },
+    "outcomes": {
+      "invited": "Uzaicinājums izveidots — e-pasts netiek sūtīts; persona to redzēs savā darba vidē pēc pieteikšanās.",
+      "accepted": "Uzaicinājums pieņemts.",
+      "declined": "Uzaicinājums noraidīts.",
+      "cancelled": "Uzaicinājums atcelts.",
+      "role_changed": "Loma mainīta.",
+      "revoked": "Dalība atsaukta.",
+      "left": "Jūs pametāt organizāciju.",
+      "unchanged": "Loma nav mainīta.",
+      "already_member": "Šī persona jau ir dalībnieks.",
+      "already_invited": "Uzaicinājums jau gaida.",
+      "already_active": "Dalība jau ir aktīva.",
+      "not_invited": "Uzaicinājums nav pieejams.",
+      "not_active": "Dalība nav aktīva.",
+      "not_a_member": "Jūs neesat dalībnieks.",
+      "not_found": "Ieraksts nav pieejams.",
+      "not_authorized": "Jums nav tiesību šai darbībai.",
+      "no_such_user": "Nav lietotāja ar šo e-pastu.",
+      "cannot_invite_self": "Sevi uzaicināt nevar.",
+      "invalid_role": "Nederīga loma.",
+      "last_owner": "Pēdējais īpašnieks nevar atkāpties — vispirms aktivizējiet citu īpašnieku.",
+      "no_workspace": "Vispirms izvēlieties organizācijas darbvietu.",
+      "needs_migration": "Šī iespēja šajā vidē vēl nav ieslēgta.",
+      "invalid": "Nederīgi dati.",
+      "error": "Neizdevās — mēģiniet vēlreiz."
+    },
+    "invitations": {
+      "heading": "Organizāciju uzaicinājumi",
+      "explainer": "Jums adresētie pārvaldības uzaicinājumi. Pēc pieņemšanas organizācija parādīsies darbvietu pārslēgā.",
+      "accept": "Pieņemt",
+      "decline": "Noraidīt"
+    },
+    "members": {
+      "heading": "Organizācijas dalībnieki",
+      "explainer": "Aktīvās darbvietas pārvaldības dalības. Dalība nav nodarbinātība — tā nekad nerada un neizbeidz darba attiecības.",
+      "statusInvited": "uzaicināts",
+      "inviteHeading": "Uzaicināt dalībnieku",
+      "inviteEmail": "E-pasts",
+      "inviteRole": "Loma",
+      "inviteSubmit": "Uzaicināt",
+      "cancelInvite": "Atcelt uzaicinājumu",
+      "revoke": "Atsaukt dalību",
+      "leave": "Pamest organizāciju",
+      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku."
+    },
+    "start": {
+      "membersMoved": "Organizācijas {workspace} dalībnieki un uzaicinājumi tiek pārvaldīti tās Iestatījumos.",
+      "unnamedOrganization": "jūsu organizācija",
+      "openSettings": "Atvērt dalībniekus Iestatījumos"
+    },
+    "entry": {
+      "memberOnly": "Jūs piederat šai organizācijai kā dalībnieks. Tās darba ekrāni ir paredzēti īpašniekiem, administratoriem un vadītājiem; dalībnieku saraksts un jūsu uzaicinājumi ir Iestatījumos.",
+      "openMembers": "Atvērt dalībniekus"
+    },
+    "managerScope": {
+      "title": "Jūsu loma šeit: vadītājs",
+      "body": "Jūs varat atvērt šo organizāciju un tajā strādāt. Projektu izveide un rediģēšana, kā arī komandas saraksta lasīšana pagaidām paliek īpašnieka vai administratora ziņā — kamēr viņi to nepiešķir, šāda darbība tiek rādīta kā noraidīta, nekad kā tukšs saraksts."
     }
   }
 }

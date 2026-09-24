@@ -31,7 +31,16 @@ import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 
 export type CreateProjectContextState =
   | { ok: true }
-  | { ok: false; code: "no_company" | "invalid_name" | "error"; message?: string };
+  | {
+      ok: false;
+      /** `not_authorized` = the organization is real and the person is in it,
+       *  but creating projects is not theirs to do here — refused by the
+       *  capability matrix (a member) or by the row-level policy (a manager,
+       *  42501: `projects_insert` is still `owns_company`, owner/admin only).
+       *  Named, so the form can say who can grant it (SEP-7). */
+      code: "no_company" | "not_authorized" | "invalid_name" | "error";
+      message?: string;
+    };
 
 const NAME_MIN = 2;
 const NAME_MAX = 120;
@@ -63,9 +72,11 @@ export async function createProjectContextAction(
       ? { ok: false, code: "error" }
       : { ok: false, code: "no_company" };
   }
-  // §11 capability matrix: project creation is operational governance.
+  // §11 capability matrix: project creation is operational governance. A
+  // member IS in a company workspace — the refusal is about their role, not
+  // a missing company, so it is named as such.
   if (!hasOrganizationCapability(company.role, "manage-projects")) {
-    return { ok: false, code: "no_company" };
+    return { ok: false, code: "not_authorized" };
   }
 
   const supabase = await createClient();
@@ -78,6 +89,13 @@ export async function createProjectContextAction(
   });
   if (!created.ok) {
     if (created.reason === "invalid_title") return { ok: false, code: "invalid_name" };
+    // 42501: the row-level policy refused the insert. `projects_insert` is
+    // `owns_company(company_id)` — the creator or an active owner/admin
+    // membership — so a MANAGER the matrix lets create projects is refused
+    // by the database until the owner widens the policy
+    // (`manages_organization`). The reason surfaces as itself, never as a
+    // generic "could not create" (capability matrix P1, 2026-09-23).
+    if (created.code === "42501") return { ok: false, code: "not_authorized" };
     return { ok: false, code: "error", message: created.message };
   }
   const project = { id: created.id };

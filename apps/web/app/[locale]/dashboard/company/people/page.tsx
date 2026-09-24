@@ -3,7 +3,8 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
+import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import {
   getActiveOrganizationContext,
   governedActiveOrganizationId,
@@ -76,14 +77,19 @@ export default async function CompanyPeoplePage({
   const tNetwork = await getTranslations("network");
 
   const employerCtx = await resolveEmployerCompanyContext();
+  // READ access (any governance role the resolver accepted) — a manager
+  // opens the People door of the organization they belong to.
   const companyProfile =
-    employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
+    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
   if (!companyRow || companyRow.legalName === null) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-people">
-        <CompanyNoProfileGuide />
+        <CompanyNoProfileGuide
+          reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
+          activeWorkspaceName={employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName}
+        />
       </div>
     );
   }
@@ -168,6 +174,11 @@ export default async function CompanyPeoplePage({
           })}
         </p>
       </header>
+
+      {/* A manager's roster read is refused by `company_workers_select`
+          (owner/admin only) and answers ZERO rows — said here, so the empty
+          roster below is never read as "nobody works here" (SEP-7). */}
+      {employerCtx.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
 
       <div id="company-team" className="scroll-mt-20">
         <CompanyWorkersSection

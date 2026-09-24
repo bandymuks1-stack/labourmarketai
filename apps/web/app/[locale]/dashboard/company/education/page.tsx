@@ -3,7 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import {
   getActiveOrganizationContext,
   governedActiveOrganizationId,
@@ -32,8 +32,9 @@ export default async function CompanyEducationPage({
   const t = await getTranslations("organizationDoors.pages.education");
 
   const employerCtx = await resolveEmployerCompanyContext();
+  // READ access (any governance role the resolver accepted).
   const companyProfile =
-    employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
+    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
   const orgContext = await getActiveOrganizationContext();

@@ -7,9 +7,10 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
-  getOwnedCompanyById,
+  getAccessibleCompanyById,
   type CompanyReadResult,
 } from "@/lib/company/company-setup";
+import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import {
   getActiveOrganizationContext,
   governedActiveOrganizationId,
@@ -71,13 +72,16 @@ export default async function CompanyDashboardPage({
   const tSpaces = await getTranslations("spaces");
   const tRooms = await getTranslations("companyActionRooms");
 
-  // The ACTIVE WORKSPACE's company (membership-validated; `getOwnedCompanyById`
-  // re-checks creator ownership row-side). No valid company workspace → the
-  // clean setup guide, never empty technical blocks.
+  // The ACTIVE WORKSPACE's company (membership-validated; the by-id read
+  // re-checks the caller's own membership row-side — READ access, so the
+  // manager the resolver accepted opens the door too). No valid company
+  // workspace → the honest entry state: the setup guide when there is no
+  // organization, the membership notice when there is one that does not act
+  // as a company for this person — never empty technical blocks.
   const employerCtx = await resolveEmployerCompanyContext();
   const companyProfile: CompanyReadResult =
     employerCtx.kind === "ok"
-      ? await getOwnedCompanyById(employerCtx.companyId)
+      ? await getAccessibleCompanyById(employerCtx.companyId)
       : employerCtx.reason === "needs-migration"
         ? { kind: "needs-migration" }
         : { kind: "ok", row: null };
@@ -102,7 +106,10 @@ export default async function CompanyDashboardPage({
             {t("title")}
           </h1>
         </header>
-        <CompanyNoProfileGuide />
+        <CompanyNoProfileGuide
+          reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
+          activeWorkspaceName={employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName}
+        />
       </div>
     );
   }
@@ -246,6 +253,11 @@ export default async function CompanyDashboardPage({
           </div>
         ) : null}
       </header>
+
+      {/* A manager's honest scope: the pages open, the database still refuses
+          their operational writes and roster reads until the owner grants it
+          (renders for no other role). */}
+      {employerCtx.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
 
       {/* WHAT NEEDS ME — count-gated; zero pending = no strip. */}
       {decisionEntries.length > 0 ? (
