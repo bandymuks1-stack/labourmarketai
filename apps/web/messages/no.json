@@ -359,6 +359,7 @@
       "types": {
         "generic": "Varsel",
         "pending_invitations": "Invitasjoner venter på svar fra deg",
+        "pending_membership_invitations": "Invitasjoner til ledelsen i en organisasjon venter på svar fra deg",
         "unread_messages": "Uleste meldinger",
         "incoming_service_requests": "Tjenesteforespørsler venter på svar",
         "service_request_responses": "Svar på forespørslene dine",
@@ -6546,6 +6547,73 @@
       "issueWhy": {
         "time_conflicts_source": "[EN] Your decision is kept — you know the work. The source's own words state a different duration or rate, so no monthly figure is made from the total, and the difference stays visible beside the record."
       }
+    }
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Eier",
+      "admin": "Administrator",
+      "manager": "Leder",
+      "external_manager": "Ekstern leder",
+      "member": "Medlem"
+    },
+    "outcomes": {
+      "invited": "Invitasjon opprettet — ingen e-post sendes; personen ser den i sitt arbeidsområde etter innlogging.",
+      "accepted": "Invitasjon godtatt.",
+      "declined": "Invitasjon avslått.",
+      "cancelled": "Invitasjon avbrutt.",
+      "role_changed": "Rolle endret.",
+      "revoked": "Medlemskap trukket tilbake.",
+      "left": "Du har forlatt organisasjonen.",
+      "unchanged": "Rolle uendret.",
+      "already_member": "Er allerede medlem.",
+      "already_invited": "Invitasjonen venter allerede.",
+      "already_active": "Medlemskapet er allerede aktivt.",
+      "not_invited": "Invitasjon ikke tilgjengelig.",
+      "not_active": "Medlemskapet er ikke aktivt.",
+      "not_a_member": "Du er ikke medlem.",
+      "not_found": "Oppføringen er ikke tilgjengelig.",
+      "not_authorized": "Du har ikke rett til dette.",
+      "no_such_user": "Ingen bruker med denne e-posten.",
+      "cannot_invite_self": "Du kan ikke invitere deg selv.",
+      "invalid_role": "Ugyldig rolle.",
+      "last_owner": "Den siste eieren kan ikke trekke seg — aktiver først en annen eier.",
+      "no_workspace": "Velg først et organisasjonsarbeidsområde.",
+      "needs_migration": "Denne muligheten er ikke slått på i dette miljøet ennå.",
+      "invalid": "Ugyldige data.",
+      "error": "Noe gikk galt — prøv igjen."
+    },
+    "invitations": {
+      "heading": "Invitasjoner fra organisasjoner",
+      "explainer": "Ledelsesinvitasjoner adressert til deg. Når du godtar, vises organisasjonen i arbeidsområdevelgeren din.",
+      "accept": "Godta",
+      "decline": "Avslå"
+    },
+    "members": {
+      "heading": "Organisasjonens medlemmer",
+      "explainer": "Ledelsesmedlemskap i det aktive arbeidsområdet. Medlemskap er ikke ansettelse — det oppretter eller avslutter aldri et arbeidsforhold.",
+      "statusInvited": "invitert",
+      "inviteHeading": "Inviter et medlem",
+      "inviteEmail": "E-post",
+      "inviteRole": "Rolle",
+      "inviteSubmit": "Inviter",
+      "cancelInvite": "Avbryt invitasjon",
+      "revoke": "Trekk tilbake medlemskap",
+      "leave": "Forlat organisasjonen",
+      "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer."
+    },
+    "start": {
+      "membersMoved": "Medlemmer og invitasjoner for {workspace} administreres i organisasjonens Innstillinger.",
+      "unnamedOrganization": "organisasjonen din",
+      "openSettings": "Åpne medlemmer i Innstillinger"
+    },
+    "entry": {
+      "memberOnly": "Du tilhører denne organisasjonen som medlem. Arbeidsskjermene er for eiere, administratorer og ledere; medlemslisten og invitasjonene dine finner du under Innstillinger.",
+      "openMembers": "Åpne medlemmer"
+    },
+    "managerScope": {
+      "title": "Din rolle her: leder",
+      "body": "Du kan åpne denne organisasjonen og arbeide i den. Å opprette eller redigere prosjekter og å se laglisten ligger foreløpig hos eieren eller administratoren — til de gir tilgang, vises en slik handling som avvist, aldri som en tom liste."
     }
   }
 }

@@ -43,6 +43,9 @@ const ORG_A = `Fresh Alpha ${RUN}`;
 const ORG_B = `Fresh Beta ${RUN}`;
 
 const START = "/en/dashboard/start";
+/** The member DIRECTORY lives behind the organization's Settings door since
+ *  2026-09-23 (capability matrix P1); the workspace switch stays on START. */
+const MEMBERS = "/en/dashboard/company/settings";
 const SETUP_NEW = "/en/dashboard/start/company?new=1";
 
 const EVIDENCE = join(__dirname, "..", "..", "..", "..", "docs", "audits",
@@ -181,7 +184,7 @@ test.describe.serial("fresh-org owner membership — §9 browser proof", () => {
 
     await page.goto(START);
     await ensureWorkspace(page, ORG_A);
-    await page.goto(START);
+    await page.goto(MEMBERS);
 
     // THE defect surface: pre-fix this section never rendered for a fresh
     // org (members.length === 0). Post-fix the owner membership exists from

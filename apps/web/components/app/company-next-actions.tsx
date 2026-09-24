@@ -5,6 +5,8 @@ import { TrackedLink } from "@/components/app/tracked-link";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import type { CompanyRow, CompanyVerificationStatus } from "@/lib/company/company-setup";
 import { runCompanyChecks, type CompanyCheckKey } from "@/lib/company/company-checks";
+import type { EmployerContextReason } from "@/lib/company/employer-company-context";
+import { EmployerContextNotice } from "@/components/app/employer-context-notice";
 
 /**
  * Company honest STATUS header (automatic-first).
@@ -159,8 +161,64 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
 
 /** Clean no-company guide — shown when a company-role holder has no company row
  *  yet. Guides to the setup route; never shows empty technical blocks. */
-export async function CompanyNoProfileGuide() {
+/**
+ * "You are IN an organization, but it does not act as a company for you" —
+ * a MEMBERSHIP state, not a missing company. `company-not-owned` = the
+ * person holds a non-employer membership (member) or only employment;
+ * `not-a-member` = the pointer names an organization outside their list.
+ */
+export function isMembershipEntryRefusal(
+  reason: EmployerContextReason | null | undefined,
+): boolean {
+  return reason === "company-not-owned" || reason === "not-a-member";
+}
+
+/**
+ * The honest state of a company door when no company row could be read.
+ *
+ * Until 2026-09-23 this was ONE sentence for every cause: "Start your company
+ * profile". A manager of the canonical organization read it on every door
+ * (the owner/admin-only read behind the pages refused them — fixed in
+ * `getAccessibleCompanyById`), and a plain member or an employee standing in
+ * their organization's workspace still reads it today unless the reason is
+ * passed: the guide would tell someone who BELONGS to an organization to
+ * create a second one. With a membership reason it renders the existing
+ * employer-context notice (which space, what would change it) and points the
+ * member at the directory that is theirs to see.
+ */
+export async function CompanyNoProfileGuide({
+  reason = null,
+  activeWorkspaceName = null,
+}: {
+  /** The employer resolver's refusal, when the caller has one. */
+  reason?: EmployerContextReason | null;
+  activeWorkspaceName?: string | null;
+} = {}) {
   const t = await getTranslations("roleDashboards.company.nextActions");
+  if (reason && isMembershipEntryRefusal(reason)) {
+    const tEntry = await getTranslations("organizationMembers.entry");
+    return (
+      <section
+        className="flex flex-col gap-3"
+        data-testid="company-membership-entry-notice"
+        data-reason={reason}
+      >
+        <EmployerContextNotice reason={reason} activeWorkspaceName={activeWorkspaceName} />
+        {reason === "company-not-owned" ? (
+          <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+            {tEntry("memberOnly")}{" "}
+            <Link
+              href={"/dashboard/company/settings#organization-members" as "/dashboard"}
+              className="font-medium text-brand-blue underline-offset-2 hover:underline"
+              data-testid="company-membership-entry-members-link"
+            >
+              {tEntry("openMembers")} →
+            </Link>
+          </p>
+        ) : null}
+      </section>
+    );
+  }
   return (
     <section
       className="card-border flex flex-col gap-3 p-6"

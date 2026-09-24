@@ -359,6 +359,7 @@
       "types": {
         "generic": "Avisering",
         "pending_invitations": "Inbjudningar väntar på ditt svar",
+        "pending_membership_invitations": "Inbjudningar till en organisations ledning väntar på ditt svar",
         "unread_messages": "Olästa meddelanden",
         "incoming_service_requests": "Tjänsteförfrågningar väntar på svar",
         "service_request_responses": "Svar på dina förfrågningar",
@@ -6546,6 +6547,73 @@
       "issueWhy": {
         "time_conflicts_source": "[EN] Your decision is kept — you know the work. The source's own words state a different duration or rate, so no monthly figure is made from the total, and the difference stays visible beside the record."
       }
+    }
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Ägare",
+      "admin": "Administratör",
+      "manager": "Chef",
+      "external_manager": "Extern chef",
+      "member": "Medlem"
+    },
+    "outcomes": {
+      "invited": "Inbjudan skapad — inget e-postmeddelande skickas; personen ser den i sitt arbetsutrymme efter inloggning.",
+      "accepted": "Inbjudan accepterad.",
+      "declined": "Inbjudan avböjd.",
+      "cancelled": "Inbjudan avbruten.",
+      "role_changed": "Roll ändrad.",
+      "revoked": "Medlemskap återkallat.",
+      "left": "Du har lämnat organisationen.",
+      "unchanged": "Roll oförändrad.",
+      "already_member": "Är redan medlem.",
+      "already_invited": "Inbjudan väntar redan.",
+      "already_active": "Medlemskapet är redan aktivt.",
+      "not_invited": "Inbjudan inte tillgänglig.",
+      "not_active": "Medlemskapet är inte aktivt.",
+      "not_a_member": "Du är inte medlem.",
+      "not_found": "Posten är inte tillgänglig.",
+      "not_authorized": "Du har inte rätt att göra detta.",
+      "no_such_user": "Ingen användare med den här e-postadressen.",
+      "cannot_invite_self": "Du kan inte bjuda in dig själv.",
+      "invalid_role": "Ogiltig roll.",
+      "last_owner": "Den sista ägaren kan inte avgå — aktivera först en annan ägare.",
+      "no_workspace": "Välj först en organisationsarbetsyta.",
+      "needs_migration": "Den här möjligheten är inte påslagen i den här miljön ännu.",
+      "invalid": "Ogiltiga uppgifter.",
+      "error": "Något gick fel — försök igen."
+    },
+    "invitations": {
+      "heading": "Inbjudningar från organisationer",
+      "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
+      "accept": "Acceptera",
+      "decline": "Avböj"
+    },
+    "members": {
+      "heading": "Organisationens medlemmar",
+      "explainer": "Ledningsmedlemskap i den aktiva arbetsytan. Medlemskap är inte anställning — det skapar eller avslutar aldrig en arbetsrelation.",
+      "statusInvited": "inbjuden",
+      "inviteHeading": "Bjud in en medlem",
+      "inviteEmail": "E-postadress",
+      "inviteRole": "Roll",
+      "inviteSubmit": "Bjud in",
+      "cancelInvite": "Avbryt inbjudan",
+      "revoke": "Återkalla medlemskap",
+      "leave": "Lämna organisationen",
+      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar."
+    },
+    "start": {
+      "membersMoved": "Medlemmar och inbjudningar för {workspace} hanteras i organisationens Inställningar.",
+      "unnamedOrganization": "din organisation",
+      "openSettings": "Öppna medlemmar i Inställningar"
+    },
+    "entry": {
+      "memberOnly": "Du tillhör den här organisationen som medlem. Dess arbetsskärmar är för ägare, administratörer och chefer; medlemslistan och dina inbjudningar finns under Inställningar.",
+      "openMembers": "Öppna medlemmar"
+    },
+    "managerScope": {
+      "title": "Din roll här: chef",
+      "body": "Du kan öppna den här organisationen och arbeta i den. Att skapa eller redigera projekt och att se laglistan ligger tills vidare hos ägaren eller administratören — tills de ger tillgång visas en sådan åtgärd som nekad, aldrig som en tom lista."
     }
   }
 }

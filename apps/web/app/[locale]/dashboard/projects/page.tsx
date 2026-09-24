@@ -29,6 +29,7 @@ import {
 import { WorkObjectsSection } from "@/components/app/work-objects-section";
 import { CompanyGallerySection } from "@/components/app/company-gallery-section";
 import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
+import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
 import { MapPin } from "lucide-react";
 import { type Role } from "@/lib/auth/actions";
@@ -70,7 +71,13 @@ export default async function ProjectsPage({
     .eq("id", user.id)
     .single();
   const role = (profile?.active_role as Role) ?? "worker";
-  if (!MANAGER_ROLES.has(role)) {
+  // The Work door of the ACTIVE organization opens for its governance
+  // members too (capability matrix P1, 2026-09-23): a manager whose acting
+  // identity is `worker` (they hold no company role) must not be sent to
+  // their own assignments while standing in the organization they manage.
+  // The same request-cached resolver the manager branch reads below.
+  const employerCtx = await resolveEmployerCompanyContext();
+  if (!MANAGER_ROLES.has(role) && employerCtx.kind !== "ok") {
     // RC2 role-aware routing (F11): a worker who lands here gets THEIR OWN
     // projects (real assignments under RLS), never a dead "managers only"
     // explanation. Honest empty state when they have no assignments yet.
@@ -129,9 +136,8 @@ export default async function ProjectsPage({
   // sites register and the project gallery lived only inside the company
   // hub; they belong with the projects they are attached to. Same reads,
   // same components as the hub used; the manager's ONE company context
-  // scopes them, and a manager without a company workspace simply sees the
-  // projects surface as before.
-  const employerCtx = await resolveEmployerCompanyContext();
+  // (resolved above, before the branch) scopes them, and a manager without
+  // a company workspace simply sees the projects surface as before.
   const ownCompanyId = employerCtx.kind === "ok" ? employerCtx.companyId : null;
   const [
     allProjects,
@@ -203,6 +209,9 @@ export default async function ProjectsPage({
     createCityPlaceholder: t("create.cityPlaceholder"),
     createSubmit: t("create.submit"),
     noCompany: t("create.noCompany"),
+    // A refused CREATE (42501 — `projects_insert` is owner/admin today) names
+    // who can grant it, not the assign form's roster sentence.
+    createNotAuthorized: tOps("createProject.errorNotAuthorized"),
     assignTitle: t("assign.title"),
     projectLabel: t("assign.projectLabel"),
     projectPlaceholder: t("assign.projectPlaceholder"),
@@ -272,6 +281,12 @@ export default async function ProjectsPage({
           </Link>
         </p>
       </header>
+
+      {/* A manager's honest scope on the Work door: `projects_select` shows
+          them only assigned/live rows and every create/edit answers 42501
+          until the owner grants it — said once, never rendered as an empty
+          list or a generic error. */}
+      {employerCtx.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
 
       <CompanyActionNextActions
         room="projects"

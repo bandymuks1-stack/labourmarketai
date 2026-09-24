@@ -30,6 +30,7 @@ const ZERO: SpineCounts = {
   pendingIncomingBookings: 0,
   bookingResponsesNew: 0,
   pendingInvitations: 0,
+  pendingMembershipInvitations: 0,
   openTaskAttention: 0,
   newJobMatches: 0,
   pendingAbsenceReviews: 0,
@@ -51,6 +52,7 @@ describe("spine assembly is count-gated (never fabricates attention)", () => {
       pendingIncomingBookings: 4,
       bookingResponsesNew: 5,
       pendingInvitations: 6,
+      pendingMembershipInvitations: 10,
       openTaskAttention: 7,
       newJobMatches: 8,
       pendingAbsenceReviews: 9,
@@ -81,6 +83,26 @@ describe("spine assembly is count-gated (never fabricates attention)", () => {
       count: 2,
       href: "/dashboard",
     });
+  });
+
+  it("pending MEMBERSHIP invitations are a separate signal (governance ≠ employment)", () => {
+    // A seat in an organization's governance (company_memberships) is not a
+    // roster invitation; the two truths stay apart in the bell as well.
+    const rows = buildSpineNotifications(
+      { ...ZERO, pendingMembershipInvitations: 3 },
+      "worker",
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      id: "pending-membership-invitations",
+      type: "pending_membership_invitations",
+      count: 3,
+      // The invitee's OWN surface: they hold no membership yet, so the
+      // inviting organization's gated Settings door cannot clear it.
+      href: "/dashboard/start",
+    });
+    // No nav badge: the hub is not a primary-nav tab.
+    expect(SPINE_SIGNALS.find((s) => s.id === "pending-membership-invitations")?.featureKey).toBeUndefined();
   });
 });
 
@@ -181,6 +203,21 @@ describe("visiting the destination IS the read event", () => {
       /import \{ markServiceRequestsSeen \} from "@\/lib\/marketplace\/service-requests"/,
     );
     expect(cmp).toMatch(/markServiceRequestsSeen\(\)/);
+  });
+
+  it("pending MEMBERSHIP invitations count the SAME read the hub's panel renders", () => {
+    // `listMyMembershipInvitations` (the caller-scoped
+    // `membership_my_invitations_v1`) feeds the bell AND the Activity Setup
+    // Hub's invitations panel — the href the signal points at — so the two
+    // can never disagree; accepting/declining there is what clears it.
+    const spine = read("lib/notifications/spine.ts");
+    expect(spine).toMatch(
+      /import \{ listMyMembershipInvitations \} from "@\/lib\/company\/memberships"/,
+    );
+    expect(spine).toMatch(/listMyMembershipInvitations\(\)/);
+    const hub = read("app/[locale]/dashboard/start/page.tsx");
+    expect(hub).toMatch(/listMyMembershipInvitations/);
+    expect(hub).toMatch(/<MembershipInvitationsPanel\b/);
   });
 
   it("pending invitations clear on the SAME helper the spine counts", () => {

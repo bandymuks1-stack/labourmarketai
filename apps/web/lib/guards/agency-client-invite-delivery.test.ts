@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { activeLocales, locales } from "@/lib/i18n/config";
 import { routeRequirement } from "@/lib/auth/role-gated-routes";
 import { SPINE_SIGNALS } from "@/lib/notifications/spine-signals";
-import { getDashboardModule } from "@/lib/dashboard/dashboard-module-registry";
+import { DASHBOARD_MODULES, getDashboardModule } from "@/lib/dashboard/dashboard-module-registry";
 import { CONVERSATION_ACTIONS } from "@/lib/conversation/action-registry";
 import {
   AGENCY_CLIENT_PROPOSED_ROLE,
@@ -276,8 +276,20 @@ describe("4. the bridge's spine signals are state-derived, mapped and localized"
     for (const id of IDS) expect(byId.get(id)?.featureKey, id).toBeUndefined();
   });
 
-  it("the company module declares exactly them (one card carries the count)", () => {
-    expect(getDashboardModule("company").attentionSignalIds).toEqual([...IDS]);
+  it("the company module declares them, and no other module does (one card carries the count)", () => {
+    // Re-anchored after merging main (#1859 added the organization's own
+    // `pending-membership-invitations` to the same card): the pin is that
+    // the bridge's signals live on the company card, not that the card
+    // carries nothing else.
+    expect(getDashboardModule("company").attentionSignalIds).toEqual(
+      expect.arrayContaining([...IDS]),
+    );
+    for (const m of DASHBOARD_MODULES) {
+      if (m.id === "company") continue;
+      for (const id of IDS) {
+        expect(m.attentionSignalIds ?? [], `${m.id} also declares ${id}`).not.toContain(id);
+      }
+    }
   });
 
   it("NEGATIVE: offer DECISIONS are not a derived count — no seen model, a terminal state never clears", () => {

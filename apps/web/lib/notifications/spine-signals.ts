@@ -35,6 +35,15 @@ export interface SpineCounts {
   readonly bookingResponsesNew: number;
   /** Pending company/agency invitations addressed to this user's email. */
   readonly pendingInvitations: number;
+  /** GOVERNANCE invitations addressed to this person — `company_memberships`
+   *  rows in status `invited`, read through the caller-scoped
+   *  `membership_my_invitations_v1` (the SAME read the Activity Setup Hub
+   *  renders its panel from). A roster invitation (above) is employment; this
+   *  one is a seat in the organization's governance (owner / admin / manager
+   *  / member) — the two truths stay separate (doctrine, membership ≠
+   *  engagement). Accepting or declining IS what clears it; 0 while the
+   *  membership schema is unapplied. */
+  readonly pendingMembershipInvitations: number;
   /** Open work tasks needing attention (overdue or blocked) for the caller
    *  (assignee or creator). State-derived like pending bookings — resolving
    *  or rescheduling the task IS what clears it.
@@ -137,6 +146,18 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     href: "/dashboard",
     featureKey: "overview",
     count: (c) => c.pendingInvitations,
+  },
+  {
+    id: "pending-membership-invitations",
+    type: "pending_membership_invitations",
+    // The INVITEE's own surface. An invitee holds no company role and no
+    // membership yet, so the inviting organization's Settings door (where
+    // its members are administered) cannot be the clearing surface — it is
+    // gated. The Activity Setup Hub renders the invitations panel for every
+    // authenticated person, and accepting or declining there clears the
+    // count. No featureKey: the hub is not a primary-nav tab.
+    href: "/dashboard/start",
+    count: (c) => c.pendingMembershipInvitations,
   },
   {
     id: "pending-connection-invites",

@@ -615,6 +615,7 @@
     "rowClear": "Nieko nelaukia",
     "readSemantics": {
       "pending_invitations": "Išnyksta, kai apžvalgoje priimate arba atmetate pakvietimą.",
+      "pending_membership_invitations": "Išnyksta, kai pradžios centre priimate arba atmetate narystės pakvietimą.",
       "unread_messages": "Išnyksta, kai perskaitote pokalbį.",
       "incoming_service_requests": "Išnyksta, kai atsakote į užklausą.",
       "service_request_responses": "Išnyksta, kai atidarote paslaugų užklausų puslapį.",
@@ -1684,6 +1685,7 @@
       "backToDashboard": "Grįžti į įmonės skydelį",
       "errorName": "Įveskite projekto pavadinimą (bent 2 simboliai).",
       "errorNoCompany": "Tik įmonės paskyra gali kurti projekto kontekstą.",
+      "errorNotAuthorized": "Projektus čia kurti gali tik organizacijos savininkas arba administratorius. Paprašykite jų sukurti projektą arba suteikti jūsų rolei šią teisę.",
       "error": "Nepavyko sukurti. Bandykite dar kartą."
     },
     "needsTitle": "Užklausos",
@@ -4634,6 +4636,7 @@
       "types": {
         "generic": "Pranešimas",
         "pending_invitations": "Laukiantys pakvietimai prisijungti",
+        "pending_membership_invitations": "Pakvietimai į organizacijos valdymą laukia jūsų atsakymo",
         "unread_messages": "Neperskaitytos žinutės",
         "incoming_service_requests": "Laukiančios paslaugų užklausos",
         "service_request_responses": "Atsakymai į jūsų užklausas",
@@ -17045,6 +17048,73 @@
       }
     },
     "needsAgency": "Pasiūla"
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Savininkas",
+      "admin": "Administratorius",
+      "manager": "Vadovas",
+      "external_manager": "Išorinis vadovas",
+      "member": "Narys"
+    },
+    "outcomes": {
+      "invited": "Pakvietimas sukurtas — laiškas nesiunčiamas; asmuo jį matys savo darbo erdvėje prisijungęs.",
+      "accepted": "Pakvietimas priimtas.",
+      "declined": "Pakvietimas atmestas.",
+      "cancelled": "Pakvietimas atšauktas.",
+      "role_changed": "Rolė pakeista.",
+      "revoked": "Narystė atšaukta.",
+      "left": "Palikote organizaciją.",
+      "unchanged": "Rolė nepakito.",
+      "already_member": "Šis žmogus jau narys.",
+      "already_invited": "Pakvietimas jau laukia.",
+      "already_active": "Narystė jau aktyvi.",
+      "not_invited": "Pakvietimas neberastas.",
+      "not_active": "Narystė nebeaktyvi.",
+      "not_a_member": "Nesate šios organizacijos narys.",
+      "not_found": "Įrašas neberastas.",
+      "not_authorized": "Neturite teisės šiam veiksmui.",
+      "no_such_user": "Tokio naudotojo nėra.",
+      "cannot_invite_self": "Savęs pakviesti negalima.",
+      "invalid_role": "Netinkama rolė.",
+      "last_owner": "Paskutinis savininkas negali pasitraukti — pirmiau paskirkite kitą savininką.",
+      "no_workspace": "Pirmiausia pasirinkite organizacijos erdvę.",
+      "needs_migration": "Ši funkcija dar neįjungta šioje aplinkoje.",
+      "invalid": "Netinkami duomenys.",
+      "error": "Nepavyko — bandykite dar kartą."
+    },
+    "invitations": {
+      "heading": "Pakvietimai į organizacijas",
+      "explainer": "Jums adresuoti valdymo pakvietimai. Priėmus organizacija atsiras erdvių perjungiklyje.",
+      "accept": "Priimti",
+      "decline": "Atmesti"
+    },
+    "members": {
+      "heading": "Organizacijos nariai",
+      "explainer": "Aktyvios erdvės valdymo narystės. Narystė nėra įdarbinimas — ji nekuria ir nenutraukia darbo santykių.",
+      "statusInvited": "pakviesta",
+      "inviteHeading": "Pakviesti narį",
+      "inviteEmail": "El. paštas",
+      "inviteRole": "Rolė",
+      "inviteSubmit": "Pakviesti",
+      "cancelInvite": "Atšaukti pakvietimą",
+      "revoke": "Atšaukti narystę",
+      "leave": "Palikti organizaciją",
+      "unavailable": "Narių sąrašo dabar nepavyko perskaityti. Tai nereiškia, kad organizacija narių neturi."
+    },
+    "start": {
+      "membersMoved": "Organizacijos „{workspace}“ nariai ir pakvietimai tvarkomi jos Nustatymuose.",
+      "unnamedOrganization": "jūsų organizacija",
+      "openSettings": "Atidaryti narius Nustatymuose"
+    },
+    "entry": {
+      "memberOnly": "Šiai organizacijai priklausote kaip narys. Jos darbo ekranai skirti savininkams, administratoriams ir vadovams; narių sąrašas ir jūsų pakvietimai yra Nustatymuose.",
+      "openMembers": "Atidaryti narius"
+    },
+    "managerScope": {
+      "title": "Jūsų rolė čia: vadovas",
+      "body": "Galite atidaryti šią organizaciją ir joje dirbti. Projektų kūrimas bei redagavimas ir komandos sąrašo skaitymas kol kas lieka savininko arba administratoriaus rankose — kol jie to nesuteiks, toks veiksmas rodomas kaip atmestas, niekada kaip tuščias sąrašas."
+    }
   },
   "rosterLinkEnd": {
     "title": "Mano komandos",

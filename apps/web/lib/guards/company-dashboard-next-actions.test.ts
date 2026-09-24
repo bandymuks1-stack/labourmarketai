@@ -51,14 +51,20 @@ describe("Guard: the company dashboard wires the next-actions surface", () => {
     expect(page).toMatch(
       /companyProfile\.kind\s*===\s*"ok"\s*&&\s*\(?companyProfile\.row\s*===\s*null/,
     );
-    expect(page).toMatch(/<CompanyNoProfileGuide\s*\/>/);
+    // Re-anchored 2026-09-23 (capability matrix P1): the guide is handed the
+    // employer resolver's REASON, so a member or employee standing in their
+    // organization reads the membership state, not "create a company".
+    expect(page).toMatch(/<CompanyNoProfileGuide\b[\s\S]*?reason=\{/);
   });
 
   it("uses the workspace-scoped company-setup read (has verification status), not a singleton lookup", () => {
     // M-P0-3: the dashboard resolves the ACTIVE workspace's company through
-    // the canonical resolver + the creator-checked by-id read. The singleton
-    // getOwnCompany reads errored to null at 2 owned rows.
-    expect(page).toMatch(/getOwnedCompanyById.*[\s\S]*?from "@\/lib\/company\/company-setup"/);
+    // the canonical resolver + the membership-checked by-id read. The
+    // singleton getOwnCompany reads errored to null at 2 owned rows.
+    // Re-anchored 2026-09-23: the door READS, so it takes the OPEN access mode
+    // (any governance role) — the owner/admin read stays on the write surfaces.
+    expect(page).toMatch(/getAccessibleCompanyById.*[\s\S]*?from "@\/lib\/company\/company-setup"/);
+    expect(page).not.toMatch(/\bgetOwnedCompanyById\b/);
     expect(page).toMatch(/resolveEmployerCompanyContext/);
     expect(page).not.toMatch(/\bgetOwnCompany\b(?! as)/);
   });

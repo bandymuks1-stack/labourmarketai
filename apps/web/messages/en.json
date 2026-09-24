@@ -615,6 +615,7 @@
     "rowClear": "Nothing pending",
     "readSemantics": {
       "pending_invitations": "Clears when you accept or decline the invitation on the overview.",
+      "pending_membership_invitations": "Clears when you accept or decline the membership invitation on the start hub.",
       "unread_messages": "Clears when you read the conversation.",
       "incoming_service_requests": "Clears when you answer the request.",
       "service_request_responses": "Clears when you open the service requests page.",
@@ -1684,6 +1685,7 @@
       "backToDashboard": "Back to company dashboard",
       "errorName": "Enter a project name (at least 2 characters).",
       "errorNoCompany": "Only a company account can create project context.",
+      "errorNotAuthorized": "Creating projects here is held by the organization's owner or admin. Ask them to create it, or to grant your role the right.",
       "error": "Could not create. Please try again."
     },
     "needsTitle": "Inquiries",
@@ -4634,6 +4636,7 @@
       "types": {
         "generic": "Notification",
         "pending_invitations": "Invitations awaiting your response",
+        "pending_membership_invitations": "Organization membership invitations awaiting your response",
         "unread_messages": "Unread messages",
         "incoming_service_requests": "Service requests awaiting response",
         "service_request_responses": "Answers to your requests",
@@ -17045,6 +17048,73 @@
       }
     },
     "needsAgency": "Supply"
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "manager": "Manager",
+      "external_manager": "External manager",
+      "member": "Member"
+    },
+    "outcomes": {
+      "invited": "Invitation created — no e-mail goes out; the person will see it in their workspace after signing in.",
+      "accepted": "Invitation accepted.",
+      "declined": "Invitation declined.",
+      "cancelled": "Invitation cancelled.",
+      "role_changed": "Role changed.",
+      "revoked": "Membership revoked.",
+      "left": "You left the organization.",
+      "unchanged": "Role unchanged.",
+      "already_member": "Already a member.",
+      "already_invited": "Invitation already pending.",
+      "already_active": "Membership already active.",
+      "not_invited": "Invitation not available.",
+      "not_active": "Membership is not active.",
+      "not_a_member": "You are not a member.",
+      "not_found": "Record not available.",
+      "not_authorized": "You are not authorized for this.",
+      "no_such_user": "No user with this email.",
+      "cannot_invite_self": "You cannot invite yourself.",
+      "invalid_role": "Invalid role.",
+      "last_owner": "The last owner cannot step down — activate another owner first.",
+      "no_workspace": "Select an organization workspace first.",
+      "needs_migration": "This capability is not enabled in this environment yet.",
+      "invalid": "Invalid input.",
+      "error": "Something failed — try again."
+    },
+    "invitations": {
+      "heading": "Organization invitations",
+      "explainer": "Governance invitations addressed to you. Accepting makes the organization appear in your workspace switcher.",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "members": {
+      "heading": "Organization members",
+      "explainer": "Governance memberships of the active workspace. Membership is not employment — it never creates or ends an engagement.",
+      "statusInvited": "invited",
+      "inviteHeading": "Invite a member",
+      "inviteEmail": "Email",
+      "inviteRole": "Role",
+      "inviteSubmit": "Invite",
+      "cancelInvite": "Cancel invite",
+      "revoke": "Revoke",
+      "leave": "Leave",
+      "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members."
+    },
+    "start": {
+      "membersMoved": "Members and invitations of {workspace} are managed in the organization's Settings.",
+      "unnamedOrganization": "your organization",
+      "openSettings": "Open members in Settings"
+    },
+    "entry": {
+      "memberOnly": "You belong to this organization as a member. Its operating screens are for owners, admins and managers; the member directory and your invitations are in Settings.",
+      "openMembers": "Open members"
+    },
+    "managerScope": {
+      "title": "Your role here: manager",
+      "body": "You can open and work in this organization. Creating or editing projects and reading the roster are still held by the organization's owner or admin — until they grant it, such an action is shown as refused, never as an empty list."
+    }
   },
   "rosterLinkEnd": {
     "title": "My teams",

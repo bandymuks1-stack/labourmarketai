@@ -615,6 +615,7 @@
     "rowClear": "Niets in behandeling",
     "readSemantics": {
       "pending_invitations": "Verdwijnt wanneer je de uitnodiging op het overzicht accepteert of afwijst.",
+      "pending_membership_invitations": "Verdwijnt wanneer je de lidmaatschapsuitnodiging op de starthub accepteert of afwijst.",
       "unread_messages": "Verdwijnt wanneer je het gesprek leest.",
       "incoming_service_requests": "Verdwijnt wanneer je de aanvraag beantwoordt.",
       "service_request_responses": "Verdwijnt wanneer je de pagina met dienstaanvragen opent.",
@@ -1684,6 +1685,7 @@
       "backToDashboard": "Terug naar bedrijfsdashboard",
       "errorName": "Voer een projectnaam in (minimaal 2 tekens).",
       "errorNoCompany": "Alleen een bedrijfsaccount kan een projectcontext aanmaken.",
+      "errorNotAuthorized": "Projecten aanmaken is hier voorbehouden aan de eigenaar of beheerder van de organisatie. Vraag hen het project aan te maken of je rol dat recht te geven.",
       "error": "Aanmaken is niet gelukt. Probeer het opnieuw."
     },
     "needsTitle": "Aanvragen",
@@ -4634,6 +4636,7 @@
       "types": {
         "generic": "Melding",
         "pending_invitations": "Uitnodigingen die op je reactie wachten",
+        "pending_membership_invitations": "Uitnodigingen voor het bestuur van een organisatie wachten op je reactie",
         "unread_messages": "Ongelezen berichten",
         "incoming_service_requests": "Dienstaanvragen die op een reactie wachten",
         "service_request_responses": "Antwoorden op je aanvragen",
@@ -17045,6 +17048,73 @@
       }
     },
     "needsAgency": "Aanbod"
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Eigenaar",
+      "admin": "Beheerder",
+      "manager": "Leidinggevende",
+      "external_manager": "Externe leidinggevende",
+      "member": "Lid"
+    },
+    "outcomes": {
+      "invited": "Uitnodiging aangemaakt — er gaat geen e-mail uit; de persoon ziet deze na het inloggen in de eigen werkruimte.",
+      "accepted": "Uitnodiging geaccepteerd.",
+      "declined": "Uitnodiging afgewezen.",
+      "cancelled": "Uitnodiging geannuleerd.",
+      "role_changed": "Rol gewijzigd.",
+      "revoked": "Lidmaatschap ingetrokken.",
+      "left": "Je hebt de organisatie verlaten.",
+      "unchanged": "Rol ongewijzigd.",
+      "already_member": "Is al lid.",
+      "already_invited": "Uitnodiging staat al open.",
+      "already_active": "Lidmaatschap is al actief.",
+      "not_invited": "Uitnodiging niet beschikbaar.",
+      "not_active": "Lidmaatschap is niet actief.",
+      "not_a_member": "Je bent geen lid.",
+      "not_found": "Record niet beschikbaar.",
+      "not_authorized": "Je bent hiervoor niet gemachtigd.",
+      "no_such_user": "Geen gebruiker met dit e-mailadres.",
+      "cannot_invite_self": "Je kunt jezelf niet uitnodigen.",
+      "invalid_role": "Ongeldige rol.",
+      "last_owner": "De laatste eigenaar kan niet terugtreden — activeer eerst een andere eigenaar.",
+      "no_workspace": "Kies eerst een organisatiewerkruimte.",
+      "needs_migration": "Deze mogelijkheid is in deze omgeving nog niet ingeschakeld.",
+      "invalid": "Ongeldige invoer.",
+      "error": "Er ging iets mis — probeer het opnieuw."
+    },
+    "invitations": {
+      "heading": "Uitnodigingen van organisaties",
+      "explainer": "Bestuursuitnodigingen die aan jou zijn gericht. Na acceptatie verschijnt de organisatie in je werkruimtekiezer.",
+      "accept": "Accepteren",
+      "decline": "Afwijzen"
+    },
+    "members": {
+      "heading": "Leden van de organisatie",
+      "explainer": "Bestuurslidmaatschappen van de actieve werkruimte. Lidmaatschap is geen dienstverband — het begint of beëindigt nooit een arbeidsrelatie.",
+      "statusInvited": "uitgenodigd",
+      "inviteHeading": "Een lid uitnodigen",
+      "inviteEmail": "E-mailadres",
+      "inviteRole": "Rol",
+      "inviteSubmit": "Uitnodigen",
+      "cancelInvite": "Uitnodiging annuleren",
+      "revoke": "Lidmaatschap intrekken",
+      "leave": "Organisatie verlaten",
+      "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft."
+    },
+    "start": {
+      "membersMoved": "Leden en uitnodigingen van {workspace} worden beheerd in de Instellingen van de organisatie.",
+      "unnamedOrganization": "je organisatie",
+      "openSettings": "Leden openen in Instellingen"
+    },
+    "entry": {
+      "memberOnly": "Je hoort bij deze organisatie als lid. De werkschermen zijn voor eigenaren, beheerders en leidinggevenden; de ledenlijst en je uitnodigingen staan in Instellingen.",
+      "openMembers": "Leden openen"
+    },
+    "managerScope": {
+      "title": "Je rol hier: leidinggevende",
+      "body": "Je kunt deze organisatie openen en erin werken. Projecten aanmaken of bewerken en het team inzien blijven voorlopig bij de eigenaar of beheerder — tot zij dat toekennen wordt zo'n actie als geweigerd getoond, nooit als een lege lijst."
+    }
   },
   "rosterLinkEnd": {
     "title": "Mijn teams",

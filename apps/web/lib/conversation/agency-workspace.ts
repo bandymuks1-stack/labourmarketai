@@ -5,7 +5,7 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import {
   listAgencyConnections,
@@ -47,7 +47,9 @@ import {
 export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult> {
   const company = await requireEmployerCompany();
   if (!company.ok) return { kind: "no-company" };
-  const companyRead = await getOwnedCompanyById(company.companyId);
+  // A READ (the chat's bridge summary): the manager the resolver accepted
+  // may read it; the owner/admin-only read answered them "no company".
+  const companyRead = await getAccessibleCompanyById(company.companyId);
   if (companyRead.kind === "needs-migration") return { kind: "needs-migration" };
   if (companyRead.kind !== "ok" || !companyRead.row) return { kind: "no-company" };
   if (companyRead.row.companyType !== "staffing_agency") return { kind: "not-agency" };

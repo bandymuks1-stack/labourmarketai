@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { type Role } from "@/lib/auth/actions";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 
 /**
  * Server-side role gate for role-context dashboards (company / agency
@@ -78,6 +80,21 @@ export async function requireRoleOrRedirect(
 
   const heldRoles = new Set(rolesRows.map((r) => r.role as string));
   if (!heldRoles.has(expectedRole)) {
+    // MEMBERSHIP IS THE COMPANY GATE TOO (capability matrix P1, 2026-09-23).
+    // `membership_accept_v1` never grants `profile_roles.company`, so a
+    // person invited into an organization as its manager held every
+    // membership the employer resolver accepts and was still refused at
+    // this door. The gate is DERIVED from the workspace the person is
+    // standing in — the ONE request-cached resolution the chip renders
+    // (#1849) — never written to `profile_roles` from here. Only the ACTIVE
+    // workspace counts: a membership in another organization opens nothing,
+    // and the personal workspace still needs the held role.
+    if (
+      expectedRole === "company" &&
+      workspaceOpensCompanySpace(await getWorkspaceContext())
+    ) {
+      return user.id;
+    }
     // Never a silent bounce (audit PR4): the reason travels with the redirect
     // so the overview can say WHICH space the link needed instead of
     // teleporting the person home with no explanation. Reached ONLY when the

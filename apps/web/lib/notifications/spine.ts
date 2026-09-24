@@ -12,6 +12,7 @@ import {
   getServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { listMyMembershipInvitations } from "@/lib/company/memberships";
 import { getPendingAbsenceReviewCount } from "@/lib/leave/absences";
 import { getTaskAttentionCounts } from "@/lib/tasks/tasks";
 import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunities";
@@ -49,6 +50,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     pendingIncomingBookings,
     bookingResponsesNew,
     invitations,
+    membershipInvitations,
     taskAttention,
     newJobMatches,
     pendingAbsenceReviews,
@@ -60,6 +62,10 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     getPendingIncomingBookingCount(),
     getBookingResponsesNewCount(),
     listMyPendingWorkerInvitations(),
+    // Governance invitations addressed to me — the SAME caller-scoped read
+    // the Activity Setup Hub renders its panel from, so the bell and the
+    // panel cannot disagree. A failed or unapplied read counts 0.
+    listMyMembershipInvitations(),
     getTaskAttentionCounts(),
     // Request-cached with the recommendation surfaces (ONE read model);
     // 0 for non-workers and while the gated seen store is unapplied.
@@ -81,6 +87,8 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     pendingIncomingBookings,
     bookingResponsesNew,
     pendingInvitations: invitations.length,
+    pendingMembershipInvitations:
+      membershipInvitations.kind === "ok" ? membershipInvitations.invitations.length : 0,
     openTaskAttention: taskAttention.total,
     newJobMatches,
     pendingAbsenceReviews,

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/company/employer-company-context", () => ({
   resolveEmployerCompanyContext: vi.fn(),
 }));
-vi.mock("@/lib/company/company-setup", () => ({ getOwnedCompanyById: vi.fn() }));
+vi.mock("@/lib/company/company-setup", () => ({ getAccessibleCompanyById: vi.fn() }));
 vi.mock("@/lib/organizations/capability-read", () => ({
   readOrganizationCapabilities: vi.fn(),
 }));
@@ -13,7 +13,7 @@ vi.mock("@/lib/agency/bridge-read", () => ({
 }));
 
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import {
   listMyClientBridgeConnections,
@@ -49,7 +49,7 @@ beforeEach(() => {
     organizationName: "Client Co",
     role: "owner",
   });
-  asMock(getOwnedCompanyById).mockResolvedValue({
+  asMock(getAccessibleCompanyById).mockResolvedValue({
     kind: "ok",
     row: { id: COMPANY, companyType: "employer" },
   });
@@ -99,7 +99,7 @@ describe("loadOrganizationDoors — partners opens on the merged bridge read", (
   });
 
   it("a staffing agency always has the door and makes no client-side read", async () => {
-    asMock(getOwnedCompanyById).mockResolvedValue({
+    asMock(getAccessibleCompanyById).mockResolvedValue({
       kind: "ok",
       row: { id: COMPANY, companyType: "staffing_agency" },
     });

@@ -33,6 +33,7 @@ import {
 } from "@/lib/auth/role-gated-routes";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -171,6 +172,19 @@ export default async function DashboardLayout({
   // they would refuse: this gate only ever refuses EARLIER.
   const gatedPath = (await headers()).get(DASHBOARD_PATHNAME_HEADER);
   const requirement = gatedPath ? routeRequirement(gatedPath) : null;
+  // MEMBERSHIP IS THE COMPANY GATE TOO (capability matrix P1, 2026-09-23):
+  // a governance membership in the ACTIVE workspace opens the employer
+  // space — `membership_accept_v1` never grants `profile_roles.company`,
+  // so a manager invited into an organization was refused at this frame.
+  // That arm is the ONE refusal this block does not settle: it needs the
+  // workspace, and the shell reads the workspace exactly once (W9), right
+  // below — so the arm is decided there, from the SAME binding the chip
+  // renders, never from a second call. Every other refusal (admin, worker,
+  // agency, buyer; a company route the roles DO hold is not a refusal) is
+  // final here, before anything expensive runs. The same rule runs in
+  // `requireRoleOrRedirect`, so this frame can only ever refuse earlier,
+  // never admit someone the page gate would turn away.
+  let companyMembershipArm = false;
   if (requirement) {
     const refused =
       requirement.kind === "admin"
@@ -181,13 +195,12 @@ export default async function DashboardLayout({
           // `requireSuperadmin`, which throws onto the honest error surface.
           session.profileRead !== "failed" && !isAdmin
         : !roles.includes(requirement.role);
-    if (refused) redirect(refusalDestination(locale, requirement));
+    if (refused && requirement.kind === "role" && requirement.role === "company") {
+      companyMembershipArm = true;
+    } else if (refused) {
+      redirect(refusalDestination(locale, requirement));
+    }
   }
-
-  const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
-  const activeRole = ROLES.has(profile?.active_role as Role)
-    ? (profile?.active_role as Role)
-    : (roles[0] ?? null);
 
   // Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
   // for EVERY identity — personal space + every org membership from the
@@ -198,7 +211,20 @@ export default async function DashboardLayout({
   // identity that decides its single-org default from the session profile
   // itself, so the page, the employer chain, the dispatcher and this shell
   // get ONE answer per request instead of one per argument.
+  //
+  // THE ONE READ (W9): this is the only `getWorkspaceContext()` call in the
+  // shell. The company gate's membership arm above and the chip, the role
+  // switcher and the auth context below all read THIS binding.
   const workspace = await getWorkspaceContext();
+
+  if (companyMembershipArm && requirement && !workspaceOpensCompanySpace(workspace)) {
+    redirect(refusalDestination(locale, requirement));
+  }
+
+  const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
+  const activeRole = ROLES.has(profile?.active_role as Role)
+    ? (profile?.active_role as Role)
+    : (roles[0] ?? null);
 
   // WHICH organization is active — derived from the ONE workspace context
   // resolved above, never from a second reader.

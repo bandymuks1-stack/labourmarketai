@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listMyClientBridgeConnections } from "@/lib/agency/bridge-read";
 
@@ -93,7 +93,10 @@ export const loadOrganizationDoors = cache(
         doors: [],
       };
     }
-    const company = await getOwnedCompanyById(ctx.companyId);
+    // A READ: which doors this organization has. Any governance membership
+    // the employer resolver accepted (owner/admin/manager) opens them — the
+    // owner/admin-only read used to leave a manager with no doors at all.
+    const company = await getAccessibleCompanyById(ctx.companyId);
     const isStaffingAgency =
       company.kind === "ok" && company.row?.companyType === "staffing_agency";
     const [capabilities, invites] = await Promise.all([
