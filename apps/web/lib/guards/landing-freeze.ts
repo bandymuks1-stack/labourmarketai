@@ -462,6 +462,61 @@ import { join } from "node:path";
  * attention pulse, the 12px floor), `landing-market-proof.test.ts` (no rank
  * ordinal), `public-sample-card-inert.test.ts` and the design-rule-#4 pins in
  * `work-world-primitives.test.ts` and `work-verification-standing.test.ts`.
+ *
+ * THREE 375px DEFECTS ON THE PUBLIC LANDING (OWNER DIRECTIVE 2026-09-24,
+ * "landing verified at 375px" — the owner's landing directives of 2026-09-23
+ * are still live and PROVEN; this is additive polish under them, not a
+ * redesign, and they authorise editing the frozen landing and regenerating
+ * this baseline). Measured anonymously on production at 375×812 before the
+ * change, in all six active locales (probe + screenshots in the PR):
+ *
+ *   1. CHIPS. The half-row cap on the example chips was paired with
+ *      `truncate`, so three of the four default chips rendered as "Reikia
+ *      darbuo…", "Turime laisvų …", "Užrašyti atlikt…" (`scrollWidth >
+ *      clientWidth` on 3–4 chips in every locale). The label now WRAPS to a
+ *      second line inside the same cap: same two-up density, every word
+ *      visible. Measured with the chip's own glyph widths on the built app,
+ *      three labels still needed a THIRD line at 375px, so exactly three
+ *      were shortened to a two-line topic that keeps its meaning:
+ *      ru `entry.exampleLabels.verifyWork` "Кто подтвердит опыт" → "Кто
+ *      подтвердит", de `internship` "Wo ein Praktikum machen" → "Praktikum
+ *      finden", pl `logWork` "Zapisz wykonaną pracę" → "Zapisz swoją
+ *      pracę". The routed SENTENCES are untouched in every locale.
+ *   2. SWITCHER. The fixed 144×54px LIVE/FOCUS control covered the end of
+ *      the counter line at the fold (lt, de), a "10 vietos" chip of the
+ *      lower sample card in every locale, and the footer at page end.
+ *      Below `sm` (640px) it now leaves the corner and sits in the flow
+ *      after the closing band; from 641px up it is docked exactly as before,
+ *      with the bottom offset now honouring `env(safe-area-inset-bottom)`.
+ *      The mount moved from after the footer to the end of the landing body
+ *      so the in-flow position is the page's end.
+ *   3. SAMPLE. Two sample cards read identically ("Sandėlio darbuotojas /
+ *      Terminalarbetare / Ne visa darbo diena / 10 vietos / 2026-09-23") —
+ *      different vacancies, one look. The anonymous projection withholds
+ *      employer and place by owner directive (2026-08-24), so there is no
+ *      fact to ADD; `pickLandingVacancySample` now skips a row whose card
+ *      would paint identically to one already chosen (the fingerprint is
+ *      exactly what `<PublicVacancyCard>` renders) and returns a SHORTER
+ *      sample rather than a look-alike. The card, the reader, the RPC and
+ *      the privacy boundary are untouched.
+ *   4. The blank area above the cards in the jobs screenshot was measured
+ *      as the band title's `Reveal` at opacity 0 immediately after a
+ *      programmatic jump and 1 once its 0.5 s fade settled — a screenshot
+ *      artefact, not layout. Nothing changed for it.
+ *
+ * The regeneration moved EXACTLY FOUR file hashes — public-entry.tsx,
+ * landing-mode-switcher.module.css, focus-landing.tsx and
+ * live-market-landing.ts — and EXACTLY ONE namespace hash, `ru.landing`,
+ * for the one shortened Russian label; `lt.landing` and `en.landing` are
+ * byte-identical (de and pl are not frozen locales), which is the proof no
+ * other copy moved. Permanently guarded by `landing-375-polish.test.ts` (no
+ * truncation class on the chip, every label breaks into at most two lines
+ * of the measured 375px chip with no word wider than a line, the in-flow
+ * rule under `sm`, the mount before the footer — each with a negative
+ * control) and `lib/market/live-market-landing.test.ts` (the production
+ * look-alike pair as fixtures; the old selection fails it), so the freeze is
+ * not the only thing standing between the landing and these three coming
+ * back.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
