@@ -6549,7 +6549,7 @@
       "member": "Medlem"
     },
     "outcomes": {
-      "invited": "Inbjudan skickad.",
+      "invited": "Inbjudan skapad — inget e-postmeddelande skickas; personen ser den i sitt arbetsutrymme efter inloggning.",
       "accepted": "Inbjudan accepterad.",
       "declined": "Inbjudan avböjd.",
       "cancelled": "Inbjudan avbruten.",

@@ -6549,7 +6549,7 @@
       "member": "Dalībnieks"
     },
     "outcomes": {
-      "invited": "Uzaicinājums nosūtīts.",
+      "invited": "Uzaicinājums izveidots — e-pasts netiek sūtīts; persona to redzēs savā darba vidē pēc pieteikšanās.",
       "accepted": "Uzaicinājums pieņemts.",
       "declined": "Uzaicinājums noraidīts.",
       "cancelled": "Uzaicinājums atcelts.",

@@ -6549,7 +6549,7 @@
       "member": "Liige"
     },
     "outcomes": {
-      "invited": "Kutse saadetud.",
+      "invited": "Kutse loodud — e-kirja ei saadeta; inimene näeb seda oma tööruumis pärast sisselogimist.",
       "accepted": "Kutse vastu võetud.",
       "declined": "Kutse tagasi lükatud.",
       "cancelled": "Kutse tühistatud.",

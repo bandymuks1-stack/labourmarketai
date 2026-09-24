@@ -17001,7 +17001,7 @@
       "member": "Member"
     },
     "outcomes": {
-      "invited": "Invitation sent.",
+      "invited": "Invitation created — no e-mail goes out; the person will see it in their workspace after signing in.",
       "accepted": "Invitation accepted.",
       "declined": "Invitation declined.",
       "cancelled": "Invitation cancelled.",

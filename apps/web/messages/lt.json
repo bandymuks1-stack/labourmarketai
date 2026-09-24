@@ -17001,7 +17001,7 @@
       "member": "Narys"
     },
     "outcomes": {
-      "invited": "Pakvietimas išsiųstas.",
+      "invited": "Pakvietimas sukurtas — laiškas nesiunčiamas; asmuo jį matys savo darbo erdvėje prisijungęs.",
       "accepted": "Pakvietimas priimtas.",
       "declined": "Pakvietimas atmestas.",
       "cancelled": "Pakvietimas atšauktas.",

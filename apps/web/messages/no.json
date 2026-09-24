@@ -6549,7 +6549,7 @@
       "member": "Medlem"
     },
     "outcomes": {
-      "invited": "Invitasjon sendt.",
+      "invited": "Invitasjon opprettet — ingen e-post sendes; personen ser den i sitt arbeidsområde etter innlogging.",
       "accepted": "Invitasjon godtatt.",
       "declined": "Invitasjon avslått.",
       "cancelled": "Invitasjon avbrutt.",

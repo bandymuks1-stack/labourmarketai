@@ -150,18 +150,27 @@ describe("Guard: the layout refuses BEFORE it can stream", () => {
   });
 
   it("gates before the shell's workspace context read (nothing expensive after a refusal)", () => {
-    // Re-anchored 2026-09-23 (capability matrix P1): the ONLY workspace read
-    // the gate performs is the membership arm of the `company` requirement,
-    // and it runs inside the refusal branch — after `routeRequirement(`,
-    // and only when the held roles alone would refuse. The shell's own
-    // unconditional read still comes after the whole gate.
-    const gateAt = layout.indexOf("routeRequirement(");
-    const workspaceAt = layout.indexOf("await getWorkspaceContext(");
+    // Re-anchored 2026-09-23 (capability matrix P1, then W9): the gate is
+    // decided from the roles read after `routeRequirement(`, and every
+    // refusal EXCEPT the `company` membership arm is final — its
+    // `redirect(refusalDestination(` fires BEFORE the shell's one workspace
+    // read. The membership arm is the single exception: it needs the
+    // workspace, so it is decided immediately after that one read (see the
+    // next test), never through a second call.
+    const src = code(layout);
+    const gateAt = src.indexOf("routeRequirement(");
+    const firstRefusalAt = src.indexOf("redirect(refusalDestination(");
+    const workspaceAt = src.indexOf("await getWorkspaceContext(");
     expect(gateAt).toBeGreaterThan(-1);
+    expect(firstRefusalAt).toBeGreaterThan(-1);
     expect(workspaceAt).toBeGreaterThan(-1);
     expect(gateAt, "the role gate must precede getWorkspaceContext").toBeLessThan(
       workspaceAt,
     );
+    expect(
+      firstRefusalAt,
+      "a non-company refusal must fire before the workspace read",
+    ).toBeLessThan(workspaceAt);
   });
 
   it("the membership arm admits ONLY the company space, only from the ACTIVE workspace", () => {
@@ -175,9 +184,24 @@ describe("Guard: the layout refuses BEFORE it can stream", () => {
     expect(src).toMatch(
       /refused && requirement\.kind === "role" && requirement\.role === "company"/,
     );
-    expect(src).toMatch(/workspaceOpensCompanySpace\(await getWorkspaceContext\(\)\)/);
+    // W9 (one acting context, one answer): the arm reads the SAME `workspace`
+    // binding that feeds the chip, the role switcher and the auth context —
+    // the layout holds exactly ONE `getWorkspaceContext(` call, and the arm is
+    // decided right after it. NEGATIVE CONTROL: an inline second call
+    // (`workspaceOpensCompanySpace(await getWorkspaceContext())`) is the
+    // second-reader shape this pin exists to keep out.
+    expect(src).toMatch(
+      /companyMembershipArm && requirement && !workspaceOpensCompanySpace\(workspace\)/,
+    );
+    expect(src).not.toMatch(/workspaceOpensCompanySpace\(await getWorkspaceContext\(\)\)/);
+    expect((src.match(/getWorkspaceContext\(/g) ?? []).length).toBe(1);
+    const armAt = src.indexOf("!workspaceOpensCompanySpace(workspace)");
+    const workspaceAt = src.indexOf("await getWorkspaceContext(");
+    expect(armAt, "the arm is decided AFTER the one read").toBeGreaterThan(workspaceAt);
     expect(src).not.toMatch(/from\("profile_roles"\)[\s\S]{0,200}?\.(insert|upsert|update)\(/);
     // The page gate runs the SAME rule, so the layout can only refuse earlier.
+    // (Its own call is the same request-cached resolution — `cache()` — so the
+    // page and the shell still see one answer per request.)
     const pageGate = code(read(join(APP_ROOT, "lib", "auth", "require-role.ts")));
     expect(pageGate).toMatch(/expectedRole === "company" &&\s*workspaceOpensCompanySpace\(await getWorkspaceContext\(\)\)/);
   });

@@ -293,8 +293,11 @@ export async function readCompanyByIdForAccess(
 }
 
 /** The company, only where the caller GOVERNS it (creator or active
- *  owner/admin member) — the read every WRITE surface keys on. */
-export function getOwnedCompanyById(companyId: string): Promise<CompanyReadResult> {
+ *  owner/admin member) — the read every WRITE surface keys on. Keeps its
+ *  M-P0-2 name and async signature (pinned by
+ *  `lib/guards/multi-org-create-second-org.test.ts`): the access split added
+ *  a mode to the ONE implementation above, not a second read. */
+export async function getOwnedCompanyById(companyId: string): Promise<CompanyReadResult> {
   return readCompanyByIdForAccess(companyId, "govern");
 }
 
@@ -303,7 +306,7 @@ export function getOwnedCompanyById(companyId: string): Promise<CompanyReadResul
  *  — the read the doors and the company pages key on. Never a write gate:
  *  the employer resolver still decides the role, the matrix the capability,
  *  and SQL re-checks every write. */
-export function getAccessibleCompanyById(companyId: string): Promise<CompanyReadResult> {
+export async function getAccessibleCompanyById(companyId: string): Promise<CompanyReadResult> {
   return readCompanyByIdForAccess(companyId, "open");
 }
 
