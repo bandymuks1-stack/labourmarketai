@@ -7884,7 +7884,8 @@
       "org_correspondence_incoming": "Входящая корреспонденция",
       "org_correspondence_outgoing": "Исходящая корреспонденция",
       "org_internal": "Внутренний документ",
-      "org_agreement_attachment": "Приложение к договору"
+      "org_agreement_attachment": "Приложение к договору",
+      "org_import_source": "Источник импорта (исходный табель рабочего времени)"
     },
     "status": {
       "active": "Действующий",

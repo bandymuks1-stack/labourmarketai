@@ -5412,7 +5412,8 @@
       "org_correspondence_incoming": "[EN] Incoming correspondence",
       "org_correspondence_outgoing": "[EN] Outgoing correspondence",
       "org_internal": "[EN] Internal document",
-      "org_agreement_attachment": "[EN] Agreement attachment"
+      "org_agreement_attachment": "[EN] Agreement attachment",
+      "org_import_source": "[EN] Import source (original timesheet file)"
     },
     "status": {
       "active": "[EN] Active",
