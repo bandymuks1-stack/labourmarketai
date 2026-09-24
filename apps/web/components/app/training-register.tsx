@@ -20,6 +20,7 @@ import {
   deriveExpiryState,
   isTrainingNotice,
 } from "@/lib/training/training-model";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Training & Certification section (v1) — one section, two audiences,
@@ -180,6 +181,7 @@ export async function TrainingRegister({
             action={createTrainingProgramAction}
             className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
           >
+            <DisplayedWorkspaceField />
             <input type="hidden" name="locale" value={locale} />
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {t("org.programTitle")}

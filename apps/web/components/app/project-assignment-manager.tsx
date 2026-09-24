@@ -17,6 +17,7 @@ import type {
 } from "@/lib/workforce/commitment-reservation";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Manager DRAFT surface for F4 (living-arena skin, TASK 07 slice 2): create a
@@ -191,6 +192,7 @@ export function ProjectAssignmentManager({
     <div className="flex max-w-2xl flex-col gap-6">
       {/* Create a project */}
       <form action={createAction} className="card-border flex flex-col gap-3 p-5" data-testid="project-create">
+        <DisplayedWorkspaceField />
         <p className="font-display text-base font-semibold text-text-primary">
           {labels.createTitle}
         </p>

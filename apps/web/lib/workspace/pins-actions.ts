@@ -10,6 +10,7 @@ import {
   pinKindFor,
   sanitizePinLabel,
 } from "@/lib/workspace/pins-model";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * MY SPACE — PIN · UNPIN · REORDER (owner contract 2026-09-04 §4C).
@@ -45,7 +46,8 @@ async function scope(): Promise<{ userId: string; organizationId: string | null 
   return { userId: user.id, organizationId };
 }
 
-export async function pinAction(input: { ref: string; label?: string | null }): Promise<PinActionResult> {
+export async function pinAction(input: { ref: string; label?: string | null; expectedWorkspaceId?: string }): Promise<PinActionResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   const ref = typeof input?.ref === "string" ? input.ref.trim() : "";
   const kind = pinKindFor(ref);
   if (!kind) return { ok: false, code: "invalid" };
@@ -74,7 +76,8 @@ export async function pinAction(input: { ref: string; label?: string | null }): 
   return { ok: true, outcome: "pinned" };
 }
 
-export async function unpinAction(input: { ref: string }): Promise<PinActionResult> {
+export async function unpinAction(input: { ref: string; expectedWorkspaceId?: string }): Promise<PinActionResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   const ref = typeof input?.ref === "string" ? input.ref.trim() : "";
   if (!isPinnableRef(ref)) return { ok: false, code: "invalid" };
   const s = await scope();
@@ -88,7 +91,8 @@ export async function unpinAction(input: { ref: string }): Promise<PinActionResu
   return { ok: true, outcome: "unpinned" };
 }
 
-export async function reorderPinsAction(input: { refs: string[] }): Promise<PinActionResult> {
+export async function reorderPinsAction(input: { refs: string[]; expectedWorkspaceId?: string }): Promise<PinActionResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   const refs = Array.isArray(input?.refs) ? input.refs.filter((r) => typeof r === "string" && isPinnableRef(r)).slice(0, PIN_CAP) : [];
   if (refs.length === 0) return { ok: false, code: "invalid" };
   const s = await scope();

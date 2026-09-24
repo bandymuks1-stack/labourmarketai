@@ -8,6 +8,7 @@ import {
 } from "@/lib/company/employer-company-context";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * First safe company-side project/client CREATE flow (v1).
@@ -50,6 +51,7 @@ export async function createProjectContextAction(
   _prev: CreateProjectContextState | null,
   formData: FormData,
 ): Promise<CreateProjectContextState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = String(formData.get("locale") ?? "lt");
   const name = String(formData.get("name") ?? "").trim();
   const location = String(formData.get("location") ?? "").trim().slice(0, FIELD_MAX) || null;

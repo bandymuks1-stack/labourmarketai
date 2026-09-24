@@ -24,6 +24,7 @@ import {
   type IngestFailure,
   type IngestPreviewResult,
 } from "./ingest-service";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * THE COOKIE TRANSPORT for bringing people into an organization's roster.
@@ -101,7 +102,10 @@ export async function commitPeopleIngestAction(input: {
   readonly relationship: IngestRelationship;
   /** Answers the human gave to ambiguities in the preview. */
   readonly resolutions?: readonly RowResolution[];
+  /** The workspace the screen displayed (`refuseStaleWorkspace`). */
+  readonly expectedWorkspaceId?: string;
 }): Promise<IngestCommitResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   const caller = await callerOrNull();
   if (!caller) return { kind: "not-authorized", reason: "not-signed-in" };
   return commitPeopleIngest(caller, {

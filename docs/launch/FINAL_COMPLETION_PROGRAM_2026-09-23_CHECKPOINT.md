@@ -79,10 +79,14 @@ Production proofs by the owner's own sessions (multi-org switch, manager workspa
 
 ## J. NEXT ACTION QUEUE
 0. (#9) PC session: recover batch-5 worktrees (HIST PR-4, HIST PR-5, M-residue) → push → PRs. N-P2 is done (#1864).
-   Also open for the next session with code access (known review items, not yet fixed): #1856 review P2s
-   (phone-sheet yield order-dependent; 4 dead `today.*` keys; returning-user ŠIANDIEN latent) and #1835
-   (demand draft keeps the picked country — `mergeable_state: dirty`, needs a merge of `main`; its
-   onboarding half is already on `main`).
+   (#9b, cloud) CLOSED in the follow-up PR from `claude/jolly-babbage-tajf4d`: the #1849 residue
+   (every server action that writes into the active organization refuses a stale screen — 30 actions,
+   21 screens, the dispatcher's own `isStaleWorkspaceContext`); #1856 P2 "4 dead `today.*` keys" and
+   "phone-sheet yield order-dependent"; #1835's product half (a saved draft keeps its country — its
+   walk/spec half stays on #1835). `main` CI red since 1082325c (intent suites timing out on V8 regex
+   warm-up) fixed in #1865. STILL OPEN: #1856 P2 "returning-user ŠIANDIEN latent" — the review text
+   is not in any ref; the next session that has it fixes it (a restored transcript ends the opening
+   state, so whether ŠIANDIEN should reappear for a returning user is the question to settle).
 1. Batch 5 results (HIST PR-4 draft, HIST PR-5, M-residue) → reviews → merge GREEN one at a time → verify /api/health build.
 2. Owner: approve PR-4 (M2 + M3) → lead dry-runs and applies → PR-6, PR-7.
 3. Owner walks (their own sessions) listed in §H; final human acceptance walk; final receipt (program §41).

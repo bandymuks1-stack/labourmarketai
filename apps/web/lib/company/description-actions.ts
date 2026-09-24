@@ -23,6 +23,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ORG_DESCRIPTION_MAX } from "@/lib/company/org-display";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 export type SaveOrgDescriptionResult =
   | { kind: "ok" }
@@ -34,7 +35,9 @@ export type SaveOrgDescriptionResult =
 export async function saveOrganizationDescriptionAction(
   description: string,
   locale: string,
+  expectedWorkspaceId?: string,
 ): Promise<SaveOrgDescriptionResult> {
+  await refuseStaleWorkspace(expectedWorkspaceId);
   const value = description.trim().slice(0, ORG_DESCRIPTION_MAX + 1);
   if (value.length > ORG_DESCRIPTION_MAX) return { kind: "invalid" };
 

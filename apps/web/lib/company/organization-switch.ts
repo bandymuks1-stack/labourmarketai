@@ -34,6 +34,20 @@ export interface SwitchableOrganization {
  */
 export const PERSONAL_WORKSPACE_ID = "personal";
 
+/**
+ * THE WORKSPACE A SCREEN DISPLAYED, sent with a write so the server can refuse
+ * it when the active workspace has moved since (a switch in another tab, on
+ * another device, through MCP). The same field the conversation dispatcher
+ * has compared since #1849 (`dispatchWorkerAction(…, { expectedWorkspaceId })`);
+ * a server action reads it from its FormData or its input under this name.
+ * Never authority — it can only refuse (`refuseStaleWorkspace`).
+ */
+export const DISPLAYED_WORKSPACE_FIELD = "expectedWorkspaceId";
+
+/** `?notice=` token for a write refused because the displayed workspace was
+ *  stale. Read on the home only against this exact value. */
+export const STALE_CONTEXT_NOTICE = "stale_context";
+
 export type WorkspaceRelationship = "owner" | "manager" | "employee" | "other";
 
 export interface WorkspaceInfo {

@@ -12,6 +12,7 @@ import {
 import type { TeamBrigade } from "@/lib/company/team-brigades";
 import { TeamDetailsForm } from "@/components/app/team-details-form";
 import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Teams / brigades surface on the EXISTING company room (§8.3 + Trust
@@ -46,6 +47,7 @@ export function TeamBrigadesPanel({
   enquiriesApplied: boolean;
 }) {
   const router = useRouter();
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const t = useTranslations("teamBrigades");
   const tSkill = useTranslations("skillNames");
   const [pending, startTransition] = useTransition();
@@ -60,7 +62,7 @@ export function TeamBrigadesPanel({
     if (!trimmed) return;
     setMsg(null);
     startTransition(async () => {
-      const res = await createTeamAction(trimmed);
+      const res = await createTeamAction(trimmed, expectedWorkspaceId);
       if (res.outcome === "created") {
         setName("");
         setMsg(t("outcome.created"));

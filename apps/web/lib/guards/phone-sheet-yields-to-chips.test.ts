@@ -36,6 +36,16 @@ describe("on a phone the bottom sheet yields to a question the thread just asked
     expect(block).not.toMatch(/\n\s*setChipsPostedAt\(Date\.now\(\)\);/);
   });
 
+  it("a pending invitation never re-opens the sheet over chips already posted — the order cannot decide (review P2 on #1856)", () => {
+    const panel = read("components/app/world-state/context-panel.tsx");
+    // Brief-first: the chips stamp exists when the invitation read lands, so
+    // the auto-open stands down; invitation-first: it opens, and the brief's
+    // stamp then yields it. Both orders end collapsed under the question.
+    expect(panel).toMatch(/if \(work\?\.invitations && !chipsPostedAt\) setExpanded\(true\);\s*\}, \[work, chipsPostedAt\]\);/);
+    // NEGATIVE CONTROL: the unguarded auto-open is gone.
+    expect(panel).not.toMatch(/if \(work\?\.invitations\) setExpanded\(true\);/);
+  });
+
   it("the panel collapses only when the key it showed is unchanged — never against a fresh selection or result", () => {
     const panel = read("components/app/world-state/context-panel.tsx");
     expect(panel).toContain("chipsPostedAt = null,");

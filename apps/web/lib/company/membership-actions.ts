@@ -19,6 +19,7 @@ import {
   type MembershipCommandResult,
   type MembershipRole,
 } from "./memberships";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * M-P0-4 Slice 2 — membership server actions.
@@ -116,6 +117,7 @@ export async function inviteMembershipAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const email = String(formData.get("email") ?? "").trim();
   const role = parseRole(formData.get("role"));
   if (email === "" || role === null) return { ok: false, code: "invalid" };
@@ -155,6 +157,7 @@ export async function cancelMembershipInviteAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const membershipId = String(formData.get("membershipId") ?? "").trim();
   if (membershipId === "") return { ok: false, code: "invalid" };
 
@@ -173,6 +176,7 @@ export async function changeMembershipRoleAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const membershipId = String(formData.get("membershipId") ?? "").trim();
   const role = parseRole(formData.get("role"));
   if (membershipId === "" || role === null) return { ok: false, code: "invalid" };
@@ -192,6 +196,7 @@ export async function revokeMembershipAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const membershipId = String(formData.get("membershipId") ?? "").trim();
   if (membershipId === "") return { ok: false, code: "invalid" };
 
@@ -210,6 +215,7 @@ export async function leaveOrganizationAction(
   _prev: MembershipActionState | null,
   _formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(_formData));
   const orgId = await activeOrganizationId();
   if (!orgId) return { ok: false, code: "no_workspace" };
   const state = mapResult(await leaveOrganization(orgId));

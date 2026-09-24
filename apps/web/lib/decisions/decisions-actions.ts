@@ -14,6 +14,7 @@ import {
   noticeForDecisionOutcome,
   type DecisionNotice,
 } from "@/lib/decisions/decisions-model";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Management Decisions write actions (v1).
@@ -94,6 +95,7 @@ async function callRpc(
 export async function createManagementDecisionAction(
   formData: FormData,
 ): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const org = await requireEmployerCompany();
   if (!org.ok) finish(locale, "not_authorized");

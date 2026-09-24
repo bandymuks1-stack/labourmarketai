@@ -17,6 +17,7 @@ import {
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
 import { openAgencyConnectionConversationAction } from "@/lib/agency/bridge-conversation";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Client side of the REAL two-subject bridge (issue #859). A real client
@@ -153,6 +154,7 @@ export function ClientAgencyBridgeSection({
                           the action re-verifies the ACTIVE connection and the
                           caller's side server-side before opening (§8.1). */}
                       <form action={openAgencyConnectionConversationAction} className="shrink-0">
+                        <DisplayedWorkspaceField />
                         <input type="hidden" name="connectionId" value={c.id} />
                         <input type="hidden" name="locale" value={locale} />
                         <button type="submit" data-testid={`client-bridge-message-${c.id}`}

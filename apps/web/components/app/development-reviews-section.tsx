@@ -19,6 +19,7 @@ import {
   deriveReviewCompleteness,
   isReviewNotice,
 } from "@/lib/reviews/reviews-model";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Development & performance reviews section (v1).
@@ -110,6 +111,7 @@ export async function DevelopmentReviewsSection({
           action={createReviewCycleAction}
           className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3 sm:flex-row sm:items-end"
         >
+          <DisplayedWorkspaceField />
           <input type="hidden" name="locale" value={locale} />
           <label className="flex min-w-0 flex-1 flex-col gap-1 text-meta text-text-muted">
             {t("cycles.name")}

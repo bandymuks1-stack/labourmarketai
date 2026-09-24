@@ -12,6 +12,7 @@ import {
   setWorkObjectResponsibleAction,
   type WorkObjectActionState,
 } from "@/lib/objects/objects-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Objects & sites management section — train D.
@@ -375,6 +376,7 @@ export function WorkObjectsSection({
                         action={saveAction}
                         className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
                       >
+                        <DisplayedWorkspaceField />
                         <input type="hidden" name="id" value={row.id} />
                         <ObjectFields
                           labels={labels}
@@ -402,6 +404,7 @@ export function WorkObjectsSection({
             className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3 sm:flex-row sm:flex-wrap sm:items-end"
             data-testid="work-object-add-form"
           >
+            <DisplayedWorkspaceField />
             <ObjectFields labels={labels} projects={projects} />
             <button
               type="submit"

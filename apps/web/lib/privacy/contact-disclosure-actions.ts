@@ -25,6 +25,7 @@ import {
   evaluateRequestBudget,
   rollingDayFloorIso,
 } from "@/lib/limits/request-rate-limits";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Contact-disclosure request lifecycle — server actions (Wagon 1, SHARED
@@ -122,7 +123,10 @@ export async function requestContactDisclosureAction(input: {
   requestId: string;
   workerId: string;
   fields?: readonly string[];
+  /** The workspace the screen displayed (`refuseStaleWorkspace`). */
+  readonly expectedWorkspaceId?: string;
 }): Promise<RequestContactDisclosureResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   if (!input.requestId || !input.workerId) return { kind: "error" };
   const fields = validateRequestedFields(
     input.fields ? [...input.fields] : [...DEFAULT_CONTACT_REQUEST_FIELDS],

@@ -15,6 +15,7 @@ import type {
   ProvisionEngagementActionState,
   SetJournalReviewActionState,
 } from "@/lib/operations/journal-review-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Owner/admin-only operations control for a single worker row.
@@ -278,6 +279,7 @@ export function WorkerOperationsRoleForm({
       </span>
 
       <form action={formAction} className="flex flex-col gap-2">
+        <DisplayedWorkspaceField />
         <input type="hidden" name="workerId" value={workerId} />
         <label className="flex flex-col gap-0.5 text-meta">
           <span className="text-text-secondary">{labels.roleLabel}</span>
@@ -359,6 +361,7 @@ export function WorkerOperationsRoleForm({
             real engagement link exists yet. */}
         {canProvision ? (
           <form action={provisionFormAction} className="flex flex-col gap-1">
+            <DisplayedWorkspaceField />
             <input type="hidden" name="workerId" value={workerId} />
             <button
               type="submit"
@@ -387,6 +390,7 @@ export function WorkerOperationsRoleForm({
         {/* Interactive enable/disable toggle — ONLY when genuinely bridge-ready. */}
         {bridge.bridgeReady ? (
           <form action={reviewFormAction} className="flex flex-col gap-1">
+            <DisplayedWorkspaceField />
             <input type="hidden" name="workerId" value={workerId} />
             <input type="hidden" name="enabled" value={nextEnabled} />
             <button

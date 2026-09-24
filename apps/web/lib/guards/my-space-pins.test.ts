@@ -53,7 +53,12 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
 
   it("REORDER is an ordinary-human gesture — \"put this first\" — through the canonical reorder action", () => {
     expect(CHAT).toContain('if (id.startsWith("pin-first:"))');
-    expect(CHAT).toContain("reorderPinsAction({ refs: next.map((p) => p.ref) })");
+    // The whole new order, bound to the workspace the chat displayed (#1849
+    // residue, 2026-09-24): a reorder from a stale screen is refused, never
+    // written into the workspace that was switched in another window.
+    expect(CHAT).toContain(
+      "reorderPinsAction({ refs: next.map((p) => p.ref), expectedWorkspaceId })",
+    );
     // The first pin gets no "move first" chip; every other pin does.
     expect(CHAT).toContain("...(i > 0 ? [{ id: `pin-first:${p.ref}`");
     for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {

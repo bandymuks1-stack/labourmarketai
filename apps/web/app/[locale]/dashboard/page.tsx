@@ -28,6 +28,7 @@ import { baseIdentityForRole } from "@/lib/config/roles";
 import { readHeldRoles } from "@/lib/auth/held-roles";
 import {
   actingRoleForWorkspace,
+  STALE_CONTEXT_NOTICE,
   workspaceDisplayLabels,
   workspaceRelationshipLabel,
 } from "@/lib/company/organization-switch";
@@ -268,8 +269,21 @@ export default async function DashboardHomePage({
     typeof noticeParam === "string" ? noticeParam : null,
   );
   const tAccess = refusedRole ? await getTranslations("workspace") : null;
+  // A WRITE REFUSED BECAUSE THE SCREEN WAS STALE (`refuseStaleWorkspace`):
+  // the person acted on a workspace that had been switched away in another
+  // window or device, nothing was saved, and they now stand here in the
+  // workspace that IS active. Same closed-token rule: only this exact value
+  // renders, and the sentence is the chat's own stale-context line.
+  const staleNotice =
+    noticeParam === STALE_CONTEXT_NOTICE ? (
+      <AccessRefusalNotice
+        reason={STALE_CONTEXT_NOTICE}
+        labels={{ body: tChat("staleContext"), setupCta: null }}
+      />
+    ) : null;
   const accessNotice =
-    refusedRole && tAccess ? (
+    staleNotice ??
+    (refusedRole && tAccess ? (
       <AccessRefusalNotice
         reason={refusedRole}
         labels={{
@@ -279,7 +293,7 @@ export default async function DashboardHomePage({
             : null,
         }}
       />
-    ) : null;
+    ) : null);
 
   /**
    * Localized country names for the demand prefill.
