@@ -43,7 +43,7 @@
 
 **Existing grant pattern (binding):** this project has **no default grants** (see `0004`). Every table the app session touches needs an EXPLICIT `GRANT … TO authenticated`; RLS then restricts rows. Any new table/RPC in `0014` must follow this.
 
-**No Prisma exists.** No `prisma/schema.prisma`. Migrations are hand-authored SQL applied via `supabase db push`.
+**No Prisma exists.** No `prisma/schema.prisma`. Migrations are hand-authored SQL. *(Corrected 2026-09-23: they are applied to production only via Supabase MCP `apply_migration` after review — never `supabase db push`, which would re-run applied migrations because repo filenames do not match the production ledger; see `docs/DEPLOYMENT.md`.)*
 
 ---
 
