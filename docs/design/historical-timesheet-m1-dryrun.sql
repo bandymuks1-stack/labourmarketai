@@ -13,7 +13,9 @@
 -- ('DRYRUN_ABORT …'). Nothing else is written by this file, ever.
 --
 -- What it does, in order:
---   0. §14 pre-merge checks 1–3 as ASSERTIONS.
+--   0. §14 pre-merge checks 1–3 as ASSERTIONS, plus 3b: every legacy company
+--      owner whose projects carry an organization_id can still SELECT that
+--      organizations row (P9u reachability; expect 0 rows without reach).
 --   1. applies the M1 body of
 --      supabase/migrations/20260924100000_historical_timesheet_m1.sql,
 --      embedded BYTE-FOR-BYTE between the two markers below
@@ -124,6 +126,31 @@ begin
   end if;
   v_premerge := v_premerge || jsonb_build_object('check3_projects_violating_b', v_n);
 
+  -- 3b (review round 2) — P9u reachability. P9's B subquery reads
+  -- public.organizations AS THE CALLER, i.e. under organizations_select
+  -- (owner_profile_id = auth.uid(), or an active membership, or is_admin()).
+  -- A legacy company owner (companies.profile_id) who owns projects with
+  -- organization_id set but is neither that organization's owner_profile_id
+  -- nor an active member of it cannot see the organizations row, so the
+  -- EXISTS is false and P9u would refuse an UPDATE that works today through
+  -- owns_company. Expect 0; any such row is an owner data decision first.
+  select count(*) into v_n
+    from public.projects p
+    join public.companies c on c.id = p.company_id
+   where p.organization_id is not null
+     and c.profile_id is not null
+     and not exists (select 1 from public.organizations o
+                      where o.id = p.organization_id
+                        and o.owner_profile_id = c.profile_id)
+     and not exists (select 1 from public.company_memberships m
+                      where m.organization_id = p.organization_id
+                        and m.profile_id = c.profile_id
+                        and m.status = 'active');
+  if v_n > 0 then
+    raise exception 'PREMERGE_CHECK_3B_FAILED: % projects row(s) whose legacy company owner is neither organizations.owner_profile_id nor an active member of the project''s organization (P9u would refuse an update that works today) — owner data decision first', v_n;
+  end if;
+  v_premerge := v_premerge || jsonb_build_object('legacy_owner_projects_without_membership', v_n);
+
   select count(*) into v_n from public.organization_evidence_records;
   v_premerge := v_premerge || jsonb_build_object('existing_records', v_n);
 
@@ -134,6 +161,9 @@ begin
 -- idempotency key; created_session_id binds it to one of its own org's
 -- sessions (composite FK). unique (id, organization_id) is the tenant-safe
 -- target for the composite FKs from records (M1d) and, later, steps (M2).
+-- The composite FK is MATCH SIMPLE: a row with created_session_id set and
+-- organization_id NULL would not be checked at all, so the CHECK also
+-- refuses created_session_id without organization_id.
 alter table public.projects add column if not exists historical_key text;
 alter table public.projects add column if not exists created_session_id uuid;
 
@@ -158,8 +188,9 @@ begin
                     and conname = 'projects_historical_requires_session') then
     alter table public.projects
       add constraint projects_historical_requires_session
-      check (historical_key is null
-             or (created_session_id is not null and organization_id is not null));
+      check ((historical_key is null
+              or (created_session_id is not null and organization_id is not null))
+             and (created_session_id is null or organization_id is not null));
   end if;
 end $hist_m_one_a$;
 
@@ -170,7 +201,7 @@ create unique index if not exists projects_historical_key_uidx
 comment on column public.projects.historical_key is
   'hp:v1:<customer_key>|<work_object_id> or hp:v1:<customer_key>|p:<fold(project label)>. NOT NULL marks a HISTORICAL project (never in live planning); NULL is a live project. Idempotency key per organization. Never updated by any code path (G-HIST-2).';
 comment on column public.projects.created_session_id is
-  'The evidence_import_sessions row whose signed plan created this historical project (composite FK with organization_id). Required whenever historical_key is set.';
+  'The evidence_import_sessions row whose signed plan created this historical project (composite FK with organization_id). Required whenever historical_key is set; never set without organization_id (the FK is MATCH SIMPLE and would not check it).';
 
 -- ── M1b ── work_objects: tenant-safe composite FK target ───────────────────
 do $hist_m_one_b$
@@ -985,6 +1016,13 @@ end $hist_m_one_i_p_nine$;
     v_got := 'admitted';
   exception when others then v_got := SQLSTATE; end;
   v_checks := v_checks || jsonb_build_object('id', 'M1a CHECK: historical_key without created_session_id', 'actor', v_actor, 'expect', '23514', 'got', v_got, 'ok', v_got = '23514');
+
+  begin
+    insert into public.projects (company_id, organization_id, title, status, created_session_id)
+    values (a_company, null, 'Fixture unbound session', 'draft', a_session);
+    v_got := 'admitted';
+  exception when others then v_got := SQLSTATE; end;
+  v_checks := v_checks || jsonb_build_object('id', 'M1a CHECK: created_session_id without organization_id (the MATCH SIMPLE FK alone would admit it)', 'actor', v_actor, 'expect', '23514', 'got', v_got, 'ok', v_got = '23514');
 
   begin
     insert into public.project_clients (project_id, name, customer_key, customer_code, customer_kind, created_session_id)

@@ -4,6 +4,7 @@ import { EVIDENCE_IMPORT_CAPABILITIES } from "@/lib/capabilities/evidence-import
 
 import {
   ORG,
+  PROFILE,
   ROSTER,
 } from "./__fixtures__/historical-timesheet-v3/actors";
 import { PR2, TARGET } from "./__fixtures__/historical-timesheet-v3/expected";
@@ -16,7 +17,7 @@ import {
   type P0Run,
   type UploadOutcome,
 } from "./__fixtures__/historical-timesheet-v3/script";
-import { S1, S2, bytesOf } from "./__fixtures__/historical-timesheet-v3/sources";
+import { S1, S2, S4_AGENT_ROW, bytesOf } from "./__fixtures__/historical-timesheet-v3/sources";
 import {
   countsAsIndependentlyVerified,
   deriveEvidenceStanding,
@@ -650,6 +651,7 @@ describe("PR-2 the seams are pure and the shell only persists what they decide",
       sessionId: "0f1e7300-0000-4000-8000-b00000000009",
       session: {
         organizationId: ORG.FX.id,
+        suppliedByOrganizationId: ORG.FX.id,
         sourceKind: "csv",
         sourceLanguage: "en",
         sourceFilename: "f.csv",
@@ -668,6 +670,99 @@ describe("PR-2 the seams are pure and the shell only persists what they decide",
     expect(out.finalState.map((f) => f.state.record_fingerprint)).toEqual(ready.map((r) => r.record_fingerprint));
     // Deterministic: the same input builds the same rows.
     expect(JSON.stringify(buildCommitRows(input).records)).toBe(JSON.stringify(out.records));
+  });
+
+  it("[PR-3 review] a record's supplied_by is the SESSION's supplied_by, not the roster organization (M1 P1 equality)", () => {
+    // A cross-org session: the agency FX supplies hours worked on the client
+    // FY's site. organization_id is the site (whose roster the rows are on);
+    // supplied_by_organization_id is the agency. P1 admits the record only
+    // when its supplied_by EQUALS the session's supplied_by column.
+    const ready = [
+      {
+        id: "0f1e7300-0000-4000-8000-b00000000010",
+        organization_person_id: "0f1e7300-0000-4000-8000-b00000000011",
+        work_object_id: null,
+        context_label: null,
+        activity_date: "2023-03-06",
+        period_start: null,
+        period_end: null,
+        hours: 8,
+        activity_text: "Facade work",
+        source_fact: { Worker: "Person Alpha" },
+        derived: {},
+        record_fingerprint: "9".repeat(64),
+        person_match_confidence: 1,
+      },
+    ];
+    const base = {
+      sessionId: "0f1e7300-0000-4000-8000-b00000000012",
+      ready,
+      importedAt: "2026-09-23T12:00:00.000Z",
+      userId: PROFILE.O_OSCAR.id,
+      evidenceState: "ORGANIZATION_REPORTED" as const,
+    };
+    const crossOrg = {
+      organizationId: ORG.FY.id,
+      suppliedByOrganizationId: ORG.FX.id,
+      sourceKind: "csv",
+      sourceLanguage: "en",
+      sourceFilename: "f.csv",
+      sourceReference: null,
+      supplierRole: "agency",
+    };
+    const [record] = buildCommitRows({ ...base, session: crossOrg }).records;
+    expect(record.organization_id).toBe(ORG.FY.id);
+    expect(record.supplied_by_organization_id).toBe(ORG.FX.id);
+    // Negative control: the old writer copied organization_id — that value
+    // is exactly what P1 refuses for this session.
+    expect(record.supplied_by_organization_id).not.toBe(crossOrg.organizationId);
+    // The fallback is ONLY for a session row that carries no supplier column.
+    const [legacy] = buildCommitRows({ ...base, session: { ...crossOrg, suppliedByOrganizationId: null } }).records;
+    expect(legacy.supplied_by_organization_id).toBe(ORG.FY.id);
+  });
+
+  it("[PR-3 review] through the shell: the committed record of a cross-org session carries the session's supplied_by", async () => {
+    const db = seedFixtureDb();
+    // M1 P2 admits a cross-org session only from a human who governs BOTH
+    // organizations; the app layer asks the same of whoever creates roster
+    // people on the site. So the actor is FX's owner who also manages FY.
+    const base = actor("O_OSCAR");
+    const oscar = db.as({
+      ...base,
+      memberships: [...base.memberships, { organizationId: ORG.FY.id, organizationName: ORG.FY.name, role: "manager" }],
+    });
+    // Planted the way a cross-org session will be written (PR-5+): the
+    // agency FX (holds workforce_provider) supplying on the client FY's site.
+    const sessionId = db.nextId();
+    db.tables.sessions.push({
+      id: sessionId,
+      organization_id: ORG.FY.id,
+      supplied_by_organization_id: ORG.FX.id,
+      supplier_role: "agency",
+      source_kind: "agent",
+      source_filename: null,
+      source_reference: null,
+      source_fingerprint: "d".repeat(64),
+      source_language: "en",
+      actor_kind: "agent",
+      agent_label: "fixture agent",
+      created_by: PROFILE.O_OSCAR.id,
+      notes: null,
+      created_at: db.now(),
+    });
+    const submitted = await submitRows(oscar, sessionId, [S4_AGENT_ROW], { startIndex: 0 });
+    expect(submitted).toMatchObject({ kind: "ok", inserted: 1 });
+    const commit = await commitImport(oscar, sessionId);
+    expect(commit).toMatchObject({ kind: "ok", written: 1 });
+    const session = db.tables.sessions.find((s) => s.id === sessionId);
+    const records = db.tables.records.filter((r) => r.session_id === sessionId);
+    expect(records).toHaveLength(1);
+    for (const r of records) {
+      expect(r.organization_id).toBe(session?.organization_id);
+      expect(r.supplied_by_organization_id).toBe(session?.supplied_by_organization_id);
+      expect(r.supplied_by_organization_id).not.toBe(session?.organization_id);
+      expect(r.supplier_role).toBe("agency");
+    }
   });
 
   it("[pin → PR-3] an external manager can still open an import session in the app layer (M1 P2 refuses it in the database)", async () => {

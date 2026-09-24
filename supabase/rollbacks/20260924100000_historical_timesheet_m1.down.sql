@@ -145,6 +145,9 @@ alter table public.work_objects
   drop constraint if exists work_objects_org_scope;
 
 -- ── M1a ── projects
+-- projects_historical_requires_session also bound created_session_id to a
+-- non-null organization_id (the MATCH SIMPLE FK gap); dropping it by name
+-- reverses both clauses.
 drop index if exists public.projects_historical_key_uidx;
 alter table public.projects
   drop constraint if exists projects_historical_requires_session;

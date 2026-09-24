@@ -238,9 +238,15 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
     },
 
     async readSession(sessionId) {
+      // `supplied_by_organization_id` travels with the session: the commit
+      // copies it onto every record, and M1's P1 requires the record's
+      // supplier to EQUAL the session's supplier column (an agency on a
+      // client's site is not the site's organization).
       const res = await db()
         .from("evidence_import_sessions")
-        .select("organization_id, source_kind, source_language, source_filename, source_reference, supplier_role")
+        .select(
+          "organization_id, source_kind, source_language, source_filename, source_reference, supplier_role, supplied_by_organization_id",
+        )
         .eq("id", sessionId)
         .maybeSingle();
       if (res.error) return fail(res.error);

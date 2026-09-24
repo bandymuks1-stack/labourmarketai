@@ -197,7 +197,7 @@ A historical project is the work one customer commissioned at one object. When t
   - Uniqueness: `unique (organization_id, historical_key) where historical_key is not null`.
   - This is the idempotency key **and the discriminator**: `historical_key IS NOT NULL` means historical, NULL means live. There is no other marker.
 - **`created_session_id uuid`**: a composite FK `(created_session_id, organization_id)` to `evidence_import_sessions (id, organization_id)`.
-- **`CHECK (historical_key is null or (created_session_id is not null and organization_id is not null))`**. A historical project must reference one of its own org's sessions. Together with P9 (org bound to company), this means a foreign company owner can neither create nor squat one.
+- **`CHECK ((historical_key is null or (created_session_id is not null and organization_id is not null)) and (created_session_id is null or organization_id is not null))`**. A historical project must reference one of its own org's sessions, and a session reference is never written without the organization (the composite FK is MATCH SIMPLE and would not check it, §14 M1a). Together with P9 (org bound to company), this means a foreign company owner can neither create nor squat one.
 
 Field values on a historical project:
 
@@ -1014,7 +1014,7 @@ customers (by `customer_key`) → historical projects → steps (with computed m
 
 | Id | Change | Class | Why needed |
 |---|---|---|---|
-| M1a | `projects`: unique `(id, organization_id)`; add `historical_key` and `created_session_id` (composite FK to sessions); partial unique `(organization_id, historical_key)`; CHECK `historical_key is null or (created_session_id is not null and organization_id is not null)` | GREEN | an idempotent historical project and the discriminator; tenant-safe FKs from records and steps; no squatting |
+| M1a | `projects`: unique `(id, organization_id)`; add `historical_key` and `created_session_id` (composite FK to sessions); partial unique `(organization_id, historical_key)`; CHECK `(historical_key is null or (created_session_id is not null and organization_id is not null)) and (created_session_id is null or organization_id is not null)`. The second clause exists because the composite FK is MATCH SIMPLE: a `created_session_id` with a NULL `organization_id` would otherwise pass unchecked (PR-3 review). | GREEN | an idempotent historical project and the discriminator; tenant-safe FKs from records and steps; no squatting |
 | M1b | `work_objects`: unique `(id, organization_id)` | GREEN | composite FK from steps |
 | M1c | `project_clients`: add `customer_key`, `customer_code`, `customer_kind` (CHECK) and `created_session_id` (FK to sessions); unique `(id, project_id)`; partial unique `(project_id, customer_key)` | GREEN | customer identity without a new register |
 | M1d | `organization_evidence_records`: add `project_id` (composite FK to projects, NO ACTION), `source_row_index int` and `row_origin text` (CHECK `parsed_file`, `agent_rows`, `typed`); index `(organization_id, project_id)` | GREEN | every hour row connected to its customer-ordered work; row-level provenance; eligibility for verification |

@@ -186,7 +186,20 @@ describe(`${NAME} — M1 of the historical timesheet import (design §8, §14)`,
     expect(code).toMatch(/foreign key \(created_session_id, organization_id\)\s+references public\.evidence_import_sessions \(id, organization_id\)/);
     expect(code).toMatch(/foreign key \(project_id, organization_id\)\s+references public\.projects \(id, organization_id\)/);
     expect(code).toMatch(/foreign key \(created_session_id\)\s+references public\.evidence_import_sessions \(id\)/);
-    expect(code).toMatch(/check \(historical_key is null\s+or \(created_session_id is not null and organization_id is not null\)\)/);
+    // The historical CHECK carries BOTH clauses: a historical project needs its
+    // own org's session, and a session reference is never unbound from the
+    // organization (the composite FK is MATCH SIMPLE — a NULL organization_id
+    // would leave created_session_id unchecked; PR-3 review round 2).
+    const HISTORICAL_CHECK =
+      /add constraint projects_historical_requires_session\s+check \(\(historical_key is null\s+or \(created_session_id is not null and organization_id is not null\)\)\s+and \(created_session_id is null or organization_id is not null\)\);/;
+    expect(code).toMatch(HISTORICAL_CHECK);
+    // negative control: the CHECK without the MATCH SIMPLE clause is detected
+    const unbound = migration.replace(
+      "\n             and (created_session_id is null or organization_id is not null));",
+      ");",
+    );
+    expect(unbound).not.toBe(migration);
+    expect(stripComments(unbound)).not.toMatch(HISTORICAL_CHECK);
     expect(code).toMatch(/customer_kind in \('organization','private_person','unknown'\)/);
     expect(code.match(/row_origin in \('parsed_file','agent_rows','typed'\)/g)?.length).toBe(2);
     expect(code).toMatch(/char_length\(source_bytes_sha256\) = 64/);
@@ -279,8 +292,15 @@ describe("docs/design/historical-timesheet-m1-dryrun.sql — the rolled-back pro
     const lastRaise = code.lastIndexOf("raise exception 'DRYRUN_RESULT:%'");
     expect(lastRaise).toBeGreaterThan(0);
     expect(code.slice(lastRaise)).toMatch(/^raise exception 'DRYRUN_RESULT:%'[\s\S]*::text;\s*end \$dry\$;\s*$/);
-    for (const n of [1, 2, 3]) expect(code).toContain(`PREMERGE_CHECK_${n}_FAILED`);
+    for (const n of [1, 2, 3, "3B"]) expect(code).toContain(`PREMERGE_CHECK_${n}_FAILED`);
+    // 3b (review round 2): P9u reachability — a legacy company owner who can
+    // neither see the organizations row as its owner_profile_id nor as an
+    // active member would lose the project updates owns_company admits today.
+    expect(code).toMatch(/join public\.companies c on c\.id = p\.company_id[\s\S]*o\.owner_profile_id = c\.profile_id[\s\S]*m\.profile_id = c\.profile_id[\s\S]*and m\.status = 'active'/);
+    expect(code).toContain("'legacy_owner_projects_without_membership'");
     expect(m1Body(dryrun)).toBe(m1Body(migration));
+    // the widened M1a CHECK is exercised on the gap it closes (expect 23514)
+    expect(code).toMatch(/values \(a_company, null, 'Fixture unbound session', 'draft', a_session\);[\s\S]{0,400}'expect', '23514'/);
     // negative control: one changed byte in the embedded body is detected
     const mutant = dryrun.replace("add column if not exists historical_key text;", "add column if not exists historical_key varchar;");
     expect(mutant).not.toBe(dryrun);

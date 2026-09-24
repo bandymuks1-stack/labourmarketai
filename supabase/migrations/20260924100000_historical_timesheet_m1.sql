@@ -68,6 +68,9 @@ begin;
 -- idempotency key; created_session_id binds it to one of its own org's
 -- sessions (composite FK). unique (id, organization_id) is the tenant-safe
 -- target for the composite FKs from records (M1d) and, later, steps (M2).
+-- The composite FK is MATCH SIMPLE: a row with created_session_id set and
+-- organization_id NULL would not be checked at all, so the CHECK also
+-- refuses created_session_id without organization_id.
 alter table public.projects add column if not exists historical_key text;
 alter table public.projects add column if not exists created_session_id uuid;
 
@@ -92,8 +95,9 @@ begin
                     and conname = 'projects_historical_requires_session') then
     alter table public.projects
       add constraint projects_historical_requires_session
-      check (historical_key is null
-             or (created_session_id is not null and organization_id is not null));
+      check ((historical_key is null
+              or (created_session_id is not null and organization_id is not null))
+             and (created_session_id is null or organization_id is not null));
   end if;
 end $hist_m_one_a$;
 
@@ -104,7 +108,7 @@ create unique index if not exists projects_historical_key_uidx
 comment on column public.projects.historical_key is
   'hp:v1:<customer_key>|<work_object_id> or hp:v1:<customer_key>|p:<fold(project label)>. NOT NULL marks a HISTORICAL project (never in live planning); NULL is a live project. Idempotency key per organization. Never updated by any code path (G-HIST-2).';
 comment on column public.projects.created_session_id is
-  'The evidence_import_sessions row whose signed plan created this historical project (composite FK with organization_id). Required whenever historical_key is set.';
+  'The evidence_import_sessions row whose signed plan created this historical project (composite FK with organization_id). Required whenever historical_key is set; never set without organization_id (the FK is MATCH SIMPLE and would not check it).';
 
 -- ── M1b ── work_objects: tenant-safe composite FK target ───────────────────
 do $hist_m_one_b$
