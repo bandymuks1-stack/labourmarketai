@@ -2656,7 +2656,12 @@ describe("no migration files added by this sprint", () => {
 // reader (creator, active ROLES_THAT_OPEN member, admin). No data change. RED
 // (grant/revoke + definer), human-gated, paired .down.sql; owner-approved 2026-09-24,
 // app half deployed first (#1868), then APPLIED (ledger 20260924083740). RECOUNTED: 306.
-const SPRINT_BASELINE = 306;
+// Bumped 306 -> 307 for 20260924130000_set_company_description_v1 (the public business
+// page's description save): ONE SECURITY DEFINER write gated by owns_company (creator +
+// active owner/admin), description only, <= 2000; EXECUTE for authenticated only; no
+// table grant. RED (definer + grant/revoke), owner-approved to PREPARE as a draft,
+// UNAPPLIED until the draft is reviewed; paired .down.sql. RECOUNTED: 307.
+const SPRINT_BASELINE = 307;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

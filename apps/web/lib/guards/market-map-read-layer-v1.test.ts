@@ -1040,7 +1040,10 @@ describe("NO new DB migration in this PR", () => {
     //   SECURITY DEFINER private reader; RED, owner-approved, APPLIED
     //   2026-09-24, ledger 20260924083740). Not this read layer's file.
     //   RECOUNTED: 306.
-    expect(count).toBeLessThanOrEqual(306);
+    // Bumped 306 -> 307 for 20260924130000_set_company_description_v1 (one
+    //   SECURITY DEFINER description write; RED draft, UNAPPLIED). Not this
+    //   read layer's file. RECOUNTED: 307.
+    expect(count).toBeLessThanOrEqual(307);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

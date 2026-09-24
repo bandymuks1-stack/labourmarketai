@@ -1450,6 +1450,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // owner-approved 2026-09-24, app half deployed first (#1868), then
       // APPLIED (ledger 20260924083740) and read back.
       "20260924120000_companies_contact_minimization_v2.sql",
+      // 2026-09-24 — company description save: ONE SECURITY DEFINER write
+      // (set_company_description_v1) gated by owns_company, description only,
+      // <= 2000, EXECUTE for authenticated only. RED (definer + grant/revoke);
+      // owner-approved to PREPARE as a draft; UNAPPLIED until reviewed.
+      "20260924130000_set_company_description_v1.sql",
 ]);
   });
 
