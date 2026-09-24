@@ -6569,6 +6569,9 @@
       "revoked": "Liikmesus tühistatud.",
       "left": "Lahkusid organisatsioonist.",
       "unchanged": "Roll ei muutunud.",
+      "granted": "Kutsete haldamine lubatud.",
+      "withdrawn": "Kutsete haldamine on ära võetud.",
+      "held_by_role": "Omanik ja administraatorid haldavad kutseid oma rolli kaudu.",
       "already_member": "See inimene on juba liige.",
       "already_invited": "Kutse juba ootab.",
       "already_active": "Liikmesus on juba aktiivne.",
@@ -6603,6 +6606,9 @@
       "cancelInvite": "Tühista kutse",
       "revoke": "Tühista liikmesus",
       "leave": "Lahku organisatsioonist",
+      "managesInvitations": "Haldab kutseid",
+      "grantInvitations": "Luba kutseid hallata",
+      "withdrawInvitations": "Võta kutsete haldamine ära",
       "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid."
     },
     "start": {

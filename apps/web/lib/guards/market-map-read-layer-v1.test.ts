@@ -1048,7 +1048,11 @@ describe("NO new DB migration in this PR", () => {
     //   (four ALTER POLICY via the existing manages_organization; RED,
     //   owner-approved, APPLIED 2026-09-24, ledger 20260924092836). Not this
     //   read layer's file. RECOUNTED: 308.
-    expect(count).toBeLessThanOrEqual(308);
+    // Bumped 308 -> 309 for 20260924150000_invitation_management_delegation_v1
+    //   (per-person invitation delegation; RED, owner-approved, APPLIED
+    //   2026-09-24, ledger 20260924120147). Not this read layer's file.
+    //   RECOUNTED: 309.
+    expect(count).toBeLessThanOrEqual(309);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

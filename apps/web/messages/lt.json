@@ -17065,6 +17065,9 @@
       "revoked": "Narystė atšaukta.",
       "left": "Palikote organizaciją.",
       "unchanged": "Rolė nepakito.",
+      "granted": "Leista valdyti kvietimus.",
+      "withdrawn": "Kvietimų valdymas atšauktas.",
+      "held_by_role": "Savininkas ir administratorius kvietimus valdo pagal savo rolę.",
       "already_member": "Šis žmogus jau narys.",
       "already_invited": "Pakvietimas jau laukia.",
       "already_active": "Narystė jau aktyvi.",
@@ -17099,6 +17102,9 @@
       "cancelInvite": "Atšaukti pakvietimą",
       "revoke": "Atšaukti narystę",
       "leave": "Palikti organizaciją",
+      "managesInvitations": "Valdo kvietimus",
+      "grantInvitations": "Leisti valdyti kvietimus",
+      "withdrawInvitations": "Atšaukti kvietimų valdymą",
       "unavailable": "Narių sąrašo dabar nepavyko perskaityti. Tai nereiškia, kad organizacija narių neturi."
     },
     "start": {

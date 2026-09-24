@@ -87,8 +87,14 @@ export async function inviteCompanyWorkerAction(
   // what the database will do; the People page does not offer the form to
   // anyone else.
   // The creator is owner-equivalent here as in `owns_company`, even when a
-  // membership row names a narrower role.
-  if (!hasOrganizationCapability(company.role, "manage-invitations") && company.isCreator !== true) {
+  // membership row names a narrower role; a person the owner delegated
+  // invitation management to is admitted as `invite_company_worker` admits
+  // them (`invitation_company_authority_v1`).
+  if (
+    !hasOrganizationCapability(company.role, "manage-invitations") &&
+    company.isCreator !== true &&
+    company.invitationDelegate !== true
+  ) {
     return { ok: false, code: "no_company" };
   }
 

@@ -15,6 +15,7 @@ import {
   inviteMembership,
   leaveOrganization,
   revokeMembership,
+  setMembershipInvitationManager,
   type MembershipCommandOutcome,
   type MembershipCommandResult,
   type MembershipRole,
@@ -100,6 +101,8 @@ function mapResult(r: MembershipCommandResult): MembershipActionState {
     "revoked",
     "left",
     "unchanged",
+    "granted",
+    "withdrawn",
   ];
   return SUCCESS.includes(r.outcome)
     ? { ok: true, outcome: r.outcome }
@@ -188,6 +191,32 @@ export async function changeMembershipRoleAction(
   }
 
   const state = mapResult(await changeMembershipRole(membershipId, role));
+  if (state.ok) revalidatePath("/", "layout");
+  return state;
+}
+
+/** Owner/admin grants or withdraws invitation management for one member of
+ *  the ACTIVE workspace's organization (owner direction 2026-09-24). */
+export async function setMembershipInvitationManagerAction(
+  _prev: MembershipActionState | null,
+  formData: FormData,
+): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
+  const membershipId = String(formData.get("membershipId") ?? "").trim();
+  const enabledRaw = String(formData.get("enabled") ?? "");
+  if (membershipId === "" || (enabledRaw !== "true" && enabledRaw !== "false")) {
+    return { ok: false, code: "invalid" };
+  }
+
+  const orgId = await activeOrganizationId();
+  if (!orgId) return { ok: false, code: "no_workspace" };
+  if (!(await membershipBelongsToOrg(membershipId, orgId))) {
+    return { ok: false, code: "not_found" };
+  }
+
+  const state = mapResult(
+    await setMembershipInvitationManager(membershipId, enabledRaw === "true"),
+  );
   if (state.ok) revalidatePath("/", "layout");
   return state;
 }

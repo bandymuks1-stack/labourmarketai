@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
-import { getGovernedOrganizations } from "@/lib/company/managed-organizations";
+import {
+  getGovernedOrganizations,
+  getInvitationOrganizations,
+} from "@/lib/company/managed-organizations";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
@@ -264,6 +267,27 @@ export default async function NetworkPage({
     capabilities: organizationCapabilities[i] ?? [],
   }));
 
+  /**
+   * The invite panel's organizations: the owned ones above, plus every other
+   * organization whose invitations this person may manage — an owner/admin
+   * membership, or a member the owner delegated invitation management to
+   * (owner direction 2026-09-24; never a job title). The mirror of
+   * `invitation_org_authority_v1`; `create_invitation_v2` re-checks it.
+   */
+  const invitationOrganizations = (await getInvitationOrganizations())
+    .filter((g) => !organizations.some((o) => o.id === g.id))
+    .map((g) => ({ id: g.id, name: g.name || t("organizations.unnamed") }));
+  const invitationCapabilities = await Promise.all(
+    invitationOrganizations.map((o) => readOrganizationCapabilities(o.id)),
+  );
+  const inviteOrganizations = [
+    ...organizationsWithCapabilities,
+    ...invitationOrganizations.map((o, i) => ({
+      ...o,
+      capabilities: invitationCapabilities[i] ?? [],
+    })),
+  ];
+
   // The strip reads each area its OWN title, from the namespace that section
   // already owns — so a link can never drift from the heading it opens, and
   // no fifth copy of these four names enters the catalogue.
@@ -502,7 +526,7 @@ export default async function NetworkPage({
       <div id="network-invite">
         <InvitePanel
           locale={locale}
-          organizations={organizationsWithCapabilities}
+          organizations={inviteOrganizations}
           projects={projects.map((p) => ({ id: p.id, title: p.title }))}
           demands={myDemands}
           defaultType={type}

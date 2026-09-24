@@ -6569,6 +6569,9 @@
       "revoked": "Medlemskap återkallat.",
       "left": "Du har lämnat organisationen.",
       "unchanged": "Roll oförändrad.",
+      "granted": "Får nu hantera inbjudningar.",
+      "withdrawn": "Hantering av inbjudningar har återkallats.",
+      "held_by_role": "Ägaren och administratörer hanterar inbjudningar genom sin roll.",
       "already_member": "Är redan medlem.",
       "already_invited": "Inbjudan väntar redan.",
       "already_active": "Medlemskapet är redan aktivt.",
@@ -6603,6 +6606,9 @@
       "cancelInvite": "Avbryt inbjudan",
       "revoke": "Återkalla medlemskap",
       "leave": "Lämna organisationen",
+      "managesInvitations": "Hanterar inbjudningar",
+      "grantInvitations": "Tillåt att hantera inbjudningar",
+      "withdrawInvitations": "Återkalla hantering av inbjudningar",
       "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar."
     },
     "start": {

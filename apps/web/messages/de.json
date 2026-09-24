@@ -17065,6 +17065,9 @@
       "revoked": "Mitgliedschaft entzogen.",
       "left": "Sie haben die Organisation verlassen.",
       "unchanged": "Rolle unverändert.",
+      "granted": "Darf jetzt Einladungen verwalten.",
+      "withdrawn": "Einladungsverwaltung entzogen.",
+      "held_by_role": "Inhaber und Administratoren verwalten Einladungen über ihre Rolle.",
       "already_member": "Ist bereits Mitglied.",
       "already_invited": "Einladung steht bereits aus.",
       "already_active": "Mitgliedschaft ist bereits aktiv.",
@@ -17099,6 +17102,9 @@
       "cancelInvite": "Einladung zurückziehen",
       "revoke": "Mitgliedschaft entziehen",
       "leave": "Organisation verlassen",
+      "managesInvitations": "Verwaltet Einladungen",
+      "grantInvitations": "Einladungen verwalten erlauben",
+      "withdrawInvitations": "Einladungsverwaltung entziehen",
       "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat."
     },
     "start": {

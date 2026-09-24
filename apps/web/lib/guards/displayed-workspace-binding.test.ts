@@ -44,6 +44,7 @@ const BOUND_ACTIONS: readonly (readonly [string, string])[] = [
   ["lib/company/membership-actions.ts", "cancelMembershipInviteAction"],
   ["lib/company/membership-actions.ts", "changeMembershipRoleAction"],
   ["lib/company/membership-actions.ts", "revokeMembershipAction"],
+  ["lib/company/membership-actions.ts", "setMembershipInvitationManagerAction"],
   ["lib/company/membership-actions.ts", "leaveOrganizationAction"],
   ["lib/company/project-context-actions.ts", "createProjectContextAction"],
   ["lib/company/team-brigade-actions.ts", "createTeamAction"],
