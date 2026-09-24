@@ -6526,6 +6526,9 @@
       },
       "setup": {
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+      },
+      "workers": {
+        "invitationsManagedElsewhere": "Par ielūgumiem rūpējas par to atbildīgā uzņēmuma persona."
       }
     }
   },
@@ -6614,6 +6617,13 @@
     "managerScope": {
       "title": "Jūsu loma šeit: vadītājs",
       "body": "Jūs varat atvērt šo organizāciju un tajā strādāt. Projektu izveide un rediģēšana, kā arī komandas saraksta lasīšana pagaidām paliek īpašnieka vai administratora ziņā — kamēr viņi to nepiešķir, projekta izveide vai rediģēšana tiek rādīta kā noraidīta, un komandas saraksts zemāk var izskatīties tukšs, lai gan cilvēki tajā ir."
+    }
+  },
+  "organizationDoors": {
+    "pages": {
+      "people": {
+        "summaryWithoutInvitations": "{active} aktīvi · {members} dalībnieki · {review} pārskata žurnālus"
+      }
     }
   }
 }

@@ -2211,6 +2211,7 @@
         "inviteSubmit": "Create invitation",
         "invitationsHeading": "Pending invitations",
         "invitationsEmpty": "No pending invitations.",
+        "invitationsManagedElsewhere": "Invitations are handled by the person in the company who is responsible for them.",
         "statusInvited": "Invitation created (it is not emailed). The invitee sees it after signing in with this email.",
         "statusAlreadyPending": "A pending invitation already exists for this email from your company.",
         "statusAlreadyLinked": "This worker is already linked to your company.",
@@ -16985,6 +16986,7 @@
         "title": "People and team",
         "subtitle": "Who works with you, who is free, who needs attention — and how to bring people in.",
         "summary": "{active} active · {pending} invitations pending · {members} members · {review} reviewing journals",
+        "summaryWithoutInvitations": "{active} active · {members} members · {review} reviewing journals",
         "booked": {
           "title": "Booked people",
           "intro": "People you booked directly. A booking is a real work relationship, but on its own it does not open a journal for review.",

@@ -120,6 +120,7 @@ describe("the happy path", () => {
       // No membership row in this stub — the creator-compatibility arm
       // resolves `owner` (§11).
       role: "owner",
+      isCreator: true,
     });
   });
 
@@ -319,6 +320,7 @@ describe("the client is never an authority", () => {
       organizationId: ORG_A,
       organizationName: "Alpha Statyba",
       role: "owner",
+      isCreator: true,
     });
     workspaceContextMock.mockResolvedValue(workspace([ORG_A], "personal"));
     await expect(requireEmployerCompany()).resolves.toEqual({
@@ -398,6 +400,27 @@ describe("§11 governance gate — membership truth decides the role", () => {
       kind: "ok",
       companyId: COMPANY_A,
       role: "admin",
+      // Not the creator: the fact is carried, never inferred from the role.
+      isCreator: false,
+    });
+  });
+
+  it("a creator whose membership row names a narrower role keeps the creator fact (owns_company admits them)", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: [{ role: "manager" }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "manager",
+      isCreator: true,
     });
   });
 

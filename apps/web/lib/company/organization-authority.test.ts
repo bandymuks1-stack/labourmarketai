@@ -43,6 +43,7 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       canGovern: true,
       canOperate: true,
       sqlWritesGranted: true,
+      canManageInvitations: true,
     });
   });
 
@@ -52,6 +53,7 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       canGovern: true,
       canOperate: true,
       sqlWritesGranted: true,
+      canManageInvitations: true,
     });
   });
 
@@ -63,6 +65,8 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       canGovern: false,
       canOperate: true,
       sqlWritesGranted: true,
+      // Owner direction 2026-09-24: invitations are never a job title.
+      canManageInvitations: false,
     });
     // manager_projects_roster_rls_v1: projects select/insert/update and the
     // roster read admit manages_organization — no gap left to announce.
@@ -75,6 +79,7 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       canGovern: false,
       canOperate: true,
       sqlWritesGranted: true,
+      canManageInvitations: false,
     });
   });
 
@@ -92,6 +97,7 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       canGovern: false,
       canOperate: false,
       sqlWritesGranted: false,
+      canManageInvitations: false,
     });
     // Nothing to grant: the matrix does not let a member operate either.
     expect(operationalWritesNeedGrant(a)).toBe(false);
@@ -109,6 +115,7 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       role: "owner",
       canGovern: true,
       sqlWritesGranted: true,
+      canManageInvitations: true,
     });
     // A creator who ALSO holds a manager row keeps governing (the creator
     // arm is owner-equivalent, exactly as the employer resolver treats it).
@@ -116,10 +123,11 @@ describe("projectOrganizationAuthority — one answer per role", () => {
       role: "manager",
       canGovern: true,
       sqlWritesGranted: true,
+      canManageInvitations: true,
     });
   });
 
-  it("an ARCHIVED organization grants nothing to anyone, owner included", () => {
+  it("an ARCHIVED organization is not an operating workspace: no operating authority, owner included", () => {
     for (const role of ["owner", "admin", "manager", "member"]) {
       expect(projectOrganizationAuthority({ role, archived: true }), role).toEqual(NO_AUTHORITY);
     }

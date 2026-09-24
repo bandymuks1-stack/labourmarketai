@@ -328,6 +328,7 @@ export async function readWorkersLabels() {
     inviteSubmit: tWorkers("inviteSubmit"),
     invitationsHeading: tWorkers("invitationsHeading"),
     invitationsEmpty: tWorkers("invitationsEmpty"),
+    invitationsManagedElsewhere: tWorkers("invitationsManagedElsewhere"),
     statusInvited: tWorkers("statusInvited"),
     statusAlreadyPending: tWorkers("statusAlreadyPending"),
     statusAlreadyLinked: tWorkers("statusAlreadyLinked"),

@@ -6526,6 +6526,9 @@
       },
       "setup": {
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+      },
+      "workers": {
+        "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem."
       }
     }
   },
@@ -6614,6 +6617,13 @@
     "managerScope": {
       "title": "Din rolle her: leder",
       "body": "Du kan åbne denne organisation og arbejde i den. At oprette eller redigere projekter og at se holdlisten ligger indtil videre hos ejeren eller administratoren — indtil de giver adgang, vises oprettelse eller redigering af et projekt som afvist, og holdlisten nedenfor kan se tom ud, selv om der er folk på den."
+    }
+  },
+  "organizationDoors": {
+    "pages": {
+      "people": {
+        "summaryWithoutInvitations": "{active} aktive · {members} medlemmer · {review} gennemgår journaler"
+      }
     }
   }
 }
