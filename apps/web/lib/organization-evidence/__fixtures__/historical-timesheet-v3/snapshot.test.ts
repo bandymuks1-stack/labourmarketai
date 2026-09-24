@@ -96,6 +96,11 @@ describe("every name is synthetic by construction (the repository is public)", (
 });
 
 describe("Layer X — per-viewer counts over the generated seed", () => {
-  it.todo("[PR-3] contracts.seed.sql is generated from the Layer P end state and contracts.sql asserts expected.viewerCounts per actor");
-  it.todo("[PR-3] contracts.sql ends in RAISE and leaves zero rows (count before = count after)");
+  // PR-3 shipped Layer D without a generated seed: synthetic profiles would need
+  // auth.users rows, so docs/design/historical-timesheet-m1-dryrun.sql discovers
+  // real actors by structure and seeds the minimum inside its rolled-back block.
+  // A generated contracts.seed.sql + per-viewer counts stays a seat for the PR
+  // that first has an FX end state to count (PR-5 onwards).
+  it.todo("[PR-5+] contracts.seed.sql is generated from the Layer P end state and asserts expected.viewerCounts per actor");
+  it.todo("[PR-3 → lead run] the dry run ends in RAISE ('DRYRUN_RESULT:…') and leaves zero rows (count before = count after)");
 });

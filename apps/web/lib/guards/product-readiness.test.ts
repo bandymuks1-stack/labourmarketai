@@ -2636,7 +2636,21 @@ describe("no migration files added by this sprint", () => {
 // archived (nothing deleted), every change logged old/new to audit_logs. RED (data DML),
 // human-gated, paired .down.sql, UNAPPLIED until the lead's rolled-back production dry
 // run. RECOUNTED: 304.
-const SPRINT_BASELINE = 304;
+// Bumped 304 -> 305 for 20260924100000_historical_timesheet_m1 (historical timesheet
+// import PR-3 = design §14 M1a–M1i + §8 P1–P9): additive NULLABLE columns —
+// projects.historical_key / created_session_id, project_clients.customer_key /
+// customer_code / customer_kind / created_session_id, records.project_id /
+// source_row_index / row_origin, sessions.source_bytes_sha256, rows.row_origin /
+// customer_label / customer_code / customer_key / project_id — unique
+// (id, organization_id) on projects and work_objects, composite FKs, the historical
+// CHECK, partial unique indexes, two event_type CHECK widenings (drop + re-add with the
+// full old list + `decided` / `source_preserved`), and 13 CREATE POLICY … AS RESTRICTIVE
+// (P1–P9, P7 split i/u/d, no SELECT restriction). No grant, no SECURITY DEFINER, no
+// trigger, no data DML, no `(true)`. GREEN by shape; paired .down.sql that refuses while
+// any new column is non-null; UNAPPLIED — applied by the lead after PR-2 (#1857) is on
+// production and the rolled-back dry run (docs/design/historical-timesheet-m1-dryrun.sql)
+// passes. RECOUNTED: 305.
+const SPRINT_BASELINE = 305;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

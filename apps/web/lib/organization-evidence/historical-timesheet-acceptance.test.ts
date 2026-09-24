@@ -451,7 +451,13 @@ describe("T13 views", () => {
 });
 
 describe("T14 authorization contracts (Layer D)", () => {
-  it.todo("[PR-3] contracts.sql: negative controls A1–A30 and positive controls +1–+8 per actor, read-through, zero residue");
+  // PR-3 delivered the Layer D script as docs/design/historical-timesheet-m1-dryrun.sql:
+  // ONE rolled-back DO block that applies M1, discovers real actors by structure,
+  // seeds only what production lacks, and runs A1–A17, A19, A21–A26, A30 and
+  // +1–+8 per actor with a read-through of every touched table. It runs against
+  // production by the LEAD (never by automation); vitest has no database, so
+  // the static half is pinned by lib/guards/historical-timesheet-m1-migration.test.ts.
+  it.todo("[PR-3 → lead run] the dry run answers DRYRUN_RESULT ok:true, failed:0 against production (A18/A20 arrive with M2, A27–A29 and the source_preserved positive control with M3)");
 });
 
 // ── T15 ──────────────────────────────────────────────────────────────────────

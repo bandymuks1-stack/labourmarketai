@@ -7793,6 +7793,10 @@ export type Database = {
           contact_email: string | null
           contact_name: string | null
           created_at: string
+          created_session_id: string | null
+          customer_code: string | null
+          customer_key: string | null
+          customer_kind: string | null
           id: string
           name: string
           notes: string | null
@@ -7803,6 +7807,10 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           created_at?: string
+          created_session_id?: string | null
+          customer_code?: string | null
+          customer_key?: string | null
+          customer_kind?: string | null
           id?: string
           name: string
           notes?: string | null
@@ -7813,6 +7821,10 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           created_at?: string
+          created_session_id?: string | null
+          customer_code?: string | null
+          customer_key?: string | null
+          customer_kind?: string | null
           id?: string
           name?: string
           notes?: string | null
@@ -7820,6 +7832,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "project_clients_created_session_fk"
+            columns: ["created_session_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_import_sessions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_clients_project_id_fkey"
             columns: ["project_id"]
@@ -8153,8 +8172,10 @@ export type Database = {
           company_id: string | null
           country: string | null
           created_at: string
+          created_session_id: string | null
           end_date: string | null
           granularity: string
+          historical_key: string | null
           housing_provided: boolean | null
           id: string
           location_confirmed: boolean
@@ -8171,8 +8192,10 @@ export type Database = {
           company_id?: string | null
           country?: string | null
           created_at?: string
+          created_session_id?: string | null
           end_date?: string | null
           granularity?: string
+          historical_key?: string | null
           housing_provided?: boolean | null
           id?: string
           location_confirmed?: boolean
@@ -8189,8 +8212,10 @@ export type Database = {
           company_id?: string | null
           country?: string | null
           created_at?: string
+          created_session_id?: string | null
           end_date?: string | null
           granularity?: string
+          historical_key?: string | null
           housing_provided?: boolean | null
           id?: string
           location_confirmed?: boolean
@@ -8209,6 +8234,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_created_session_fk"
+            columns: ["created_session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_import_sessions"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "projects_organization_id_fkey"
