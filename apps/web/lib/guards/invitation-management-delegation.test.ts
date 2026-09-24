@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 
 /**
  * Guard: invitation management by PERMISSION, never by job title (owner
- * direction 2026-09-24). RED draft — owner approval pending, NOT applied.
+ * direction 2026-09-24). RED, owner-approved (#1875); APPLIED 2026-09-24,
+ * ledger 20260924120147 — the file is the applied text, never edited again.
  *
  * Pins the shape of 20260924150000_invitation_management_delegation_v1:
  *   · ONE per-person delegation flag on the canonical membership row, default
@@ -140,3 +141,40 @@ describe("Guard: invitation delegation migration (RED draft)", () => {
     expect(down).toMatch(/alter table public\.company_memberships drop column if exists manages_invitations;/);
   });
 });
+
+describe("Guard: invitation delegation — the app half uses the one command and the one flag", () => {
+  const web = (rel: string) => readFileSync(resolve(root, rel), "utf8");
+
+  it("the grant goes through membership_set_invitation_manager_v1 only, from a stale-refusing action", () => {
+    const memberships = web("lib/company/memberships.ts");
+    expect(memberships).toMatch(/callCommand\("membership_set_invitation_manager_v1", \{\s*p_membership_id: membershipId,\s*p_enabled: enabled,\s*\}\)/);
+    const actions = web("lib/company/membership-actions.ts");
+    const action = actions.slice(actions.indexOf("export async function setMembershipInvitationManagerAction"));
+    const body = action.slice(0, action.indexOf("\nexport async function"));
+    expect(body.indexOf("refuseStaleWorkspace(")).toBeGreaterThan(-1);
+    expect(body.indexOf("refuseStaleWorkspace(")).toBeLessThan(body.indexOf("setMembershipInvitationManager("));
+    expect(body).toMatch(/membershipBelongsToOrg\(membershipId, orgId\)/);
+    // No app code writes the flag directly.
+    expect(`${memberships}\n${actions}`).not.toMatch(/\.update\([^)]*manages_invitations/);
+  });
+
+  it("the member's own flag feeds canManageInvitations; a title never does", () => {
+    const ctx = web("lib/company/employer-company-context.ts");
+    expect(ctx).toMatch(/readMembership\("role, manages_invitations"\)/);
+    expect(ctx).toMatch(/invitationDelegate = memberRow\?\.manages_invitations === true/);
+    const authority = web("lib/company/organization-authority.ts");
+    expect(authority).toMatch(/input\.invitationDelegate === true/);
+  });
+
+  it("the invite panel offers exactly the organizations invitation_org_authority_v1 admits", () => {
+    const managed = web("lib/company/managed-organizations.ts");
+    const fn = managed.slice(managed.indexOf("export async function getInvitationOrganizations"));
+    expect(fn).toMatch(/getGovernedOrganizations\(\)/); // owned + owner/admin
+    expect(fn).toMatch(/\.eq\("manages_invitations", true\)/); // + delegated
+    expect(fn).toMatch(/withoutArchivedOrganizations/);
+    expect(fn).not.toMatch(/"manager"|"external_manager"/);
+    const network = web("app/[locale]/dashboard/network/page.tsx");
+    expect(network).toContain("organizations={inviteOrganizations}");
+  });
+});
+

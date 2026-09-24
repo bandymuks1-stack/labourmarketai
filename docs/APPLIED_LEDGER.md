@@ -2401,3 +2401,31 @@ walk (create a project, open the roster) in a real session.
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
+
+### `invitation_management_delegation_v1` — RED (per-person invitation delegation; definer functions, one ALTER POLICY, grant/revoke) — APPLIED 2026-09-24, ledger `20260924120147`
+
+Repo file `supabase/migrations/20260924150000_invitation_management_delegation_v1.sql`
+(paired `supabase/rollbacks/…down.sql`, which refuses while a delegation is
+active and restores the previous definitions byte-identically). Owner
+direction 2026-09-24: invitation management by permission, never by job
+title — `company_memberships.manages_invitations` (default false, no
+backfill), written only by the audited owner/admin command
+`membership_set_invitation_manager_v1`; the organization-invitation authority
+and company worker invitations admit the owner, an owner/admin member or a
+delegated member; project and need invitations unchanged; governance
+membership invitations stay owner/admin.
+
+Owner RED approval of #1875 on 2026-09-24, applied in the approved order:
+rolled-back production dry run (before/after in one transaction, temporary
+non-admin members seeded inside it; the function sources of the dry run equal
+the reviewed file's) → Supabase MCP `apply_migration` of the reviewed file
+(sha256 `e2cdac8ae7304d00f8458506bb652b422453eac73cfb5d1dc962123ccd034a1a`) → read-back (ledger row, the six function sources, EXECUTE
+for authenticated only, the column, the policy expression, 0 delegations;
+per-role checks passed — details in the owner channel) → THEN the app half
+(grant control, the member's own flag, delegated organizations in the invite
+panel) merged with #1875.
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending the owner granting
+the permission to a member in Settings and that member inviting from the
+People page and the invite panel in a real session.
+

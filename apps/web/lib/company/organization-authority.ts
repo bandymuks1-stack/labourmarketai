@@ -94,7 +94,8 @@ export interface OrganizationAuthority {
    *  covered — it stays owner/admin in SQL. */
   readonly sqlWritesGranted: boolean;
   /** May invite people into the organization and see its pending
-   *  invitations (`manage-invitations`): owner/admin, never a job title. */
+   *  invitations (`manage-invitations`): owner/admin by role, or a person the
+   *  owner delegated it to — never a job title. */
   readonly canManageInvitations: boolean;
 }
 
@@ -116,6 +117,9 @@ export const NO_AUTHORITY: OrganizationAuthority = {
 export function projectOrganizationAuthority(input: {
   readonly role?: string | null;
   readonly isCreator?: boolean;
+  /** The owner (or an admin) delegated invitation management to this
+   *  person's own membership — a per-person grant, never a title. */
+  readonly invitationDelegate?: boolean;
   readonly archived?: boolean;
 }): OrganizationAuthority {
   if (input.archived) return NO_AUTHORITY;
@@ -137,7 +141,9 @@ export function projectOrganizationAuthority(input: {
     sqlWritesGranted: governs || canOperate,
     // The creator arm is owner-equivalent here too (`owns_company` admits it).
     canManageInvitations:
-      hasOrganizationCapability(role, "manage-invitations") || input.isCreator === true,
+      hasOrganizationCapability(role, "manage-invitations") ||
+      input.isCreator === true ||
+      input.invitationDelegate === true,
   };
 }
 

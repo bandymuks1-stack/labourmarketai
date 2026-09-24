@@ -127,6 +127,25 @@ describe("projectOrganizationAuthority — one answer per role", () => {
     });
   });
 
+  it("invitation management: a per-person delegation, never a job title", () => {
+    for (const role of ["manager", "external_manager", "member"]) {
+      expect(projectOrganizationAuthority({ role }).canManageInvitations, role).toBe(false);
+      expect(
+        projectOrganizationAuthority({ role, invitationDelegate: true }).canManageInvitations,
+        `${role} + delegation`,
+      ).toBe(true);
+    }
+    // The delegation grants invitations and nothing else.
+    expect(projectOrganizationAuthority({ role: "member", invitationDelegate: true })).toMatchObject({
+      canGovern: false,
+      canOperate: false,
+      sqlWritesGranted: false,
+      canManageInvitations: true,
+    });
+    // No role at all: a stray flag opens nothing.
+    expect(projectOrganizationAuthority({ role: null, invitationDelegate: true })).toEqual(NO_AUTHORITY);
+  });
+
   it("an ARCHIVED organization is not an operating workspace: no operating authority, owner included", () => {
     for (const role of ["owner", "admin", "manager", "member"]) {
       expect(projectOrganizationAuthority({ role, archived: true }), role).toEqual(NO_AUTHORITY);

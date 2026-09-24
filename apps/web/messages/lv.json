@@ -6569,6 +6569,9 @@
       "revoked": "Dalība atsaukta.",
       "left": "Jūs pametāt organizāciju.",
       "unchanged": "Loma nav mainīta.",
+      "granted": "Atļauts pārvaldīt ielūgumus.",
+      "withdrawn": "Ielūgumu pārvaldība atsaukta.",
+      "held_by_role": "Īpašnieks un administratori pārvalda ielūgumus savas lomas dēļ.",
       "already_member": "Šī persona jau ir dalībnieks.",
       "already_invited": "Uzaicinājums jau gaida.",
       "already_active": "Dalība jau ir aktīva.",
@@ -6603,6 +6606,9 @@
       "cancelInvite": "Atcelt uzaicinājumu",
       "revoke": "Atsaukt dalību",
       "leave": "Pamest organizāciju",
+      "managesInvitations": "Pārvalda ielūgumus",
+      "grantInvitations": "Atļaut pārvaldīt ielūgumus",
+      "withdrawInvitations": "Atsaukt ielūgumu pārvaldību",
       "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku."
     },
     "start": {

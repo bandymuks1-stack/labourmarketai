@@ -17065,6 +17065,9 @@
       "revoked": "Lidmaatschap ingetrokken.",
       "left": "Je hebt de organisatie verlaten.",
       "unchanged": "Rol ongewijzigd.",
+      "granted": "Mag nu uitnodigingen beheren.",
+      "withdrawn": "Uitnodigingsbeheer ingetrokken.",
+      "held_by_role": "De eigenaar en beheerders beheren uitnodigingen via hun rol.",
       "already_member": "Is al lid.",
       "already_invited": "Uitnodiging staat al open.",
       "already_active": "Lidmaatschap is al actief.",
@@ -17099,6 +17102,9 @@
       "cancelInvite": "Uitnodiging annuleren",
       "revoke": "Lidmaatschap intrekken",
       "leave": "Organisatie verlaten",
+      "managesInvitations": "Beheert uitnodigingen",
+      "grantInvitations": "Uitnodigingen laten beheren",
+      "withdrawInvitations": "Uitnodigingsbeheer intrekken",
       "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft."
     },
     "start": {

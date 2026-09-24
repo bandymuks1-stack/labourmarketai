@@ -1049,8 +1049,9 @@ describe("NO new DB migration in this PR", () => {
     //   owner-approved, APPLIED 2026-09-24, ledger 20260924092836). Not this
     //   read layer's file. RECOUNTED: 308.
     // Bumped 308 -> 309 for 20260924150000_invitation_management_delegation_v1
-    //   (per-person invitation delegation; RED DRAFT, owner approval pending,
-    //   NOT applied). Not this read layer's file. RECOUNTED: 309.
+    //   (per-person invitation delegation; RED, owner-approved, APPLIED
+    //   2026-09-24, ledger 20260924120147). Not this read layer's file.
+    //   RECOUNTED: 309.
     expect(count).toBeLessThanOrEqual(309);
   });
 });

@@ -1465,7 +1465,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // per-person delegation on company_memberships, the org-invitation
       // authority narrowed to owner / owner-admin / delegated member, one
       // audited grant command. RED (definer + grant/revoke + ALTER POLICY);
-      // DRAFT — owner approval pending, NOT applied.
+      // owner-approved (#1875); APPLIED 2026-09-24 (ledger 20260924120147)
+      // before its app half merged.
       "20260924150000_invitation_management_delegation_v1.sql",
 ]);
   });

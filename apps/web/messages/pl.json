@@ -17065,6 +17065,9 @@
       "revoked": "Członkostwo cofnięte.",
       "left": "Opuściłeś organizację.",
       "unchanged": "Rola bez zmian.",
+      "granted": "Zezwolono na zarządzanie zaproszeniami.",
+      "withdrawn": "Cofnięto zarządzanie zaproszeniami.",
+      "held_by_role": "Właściciel i administratorzy zarządzają zaproszeniami w ramach swojej roli.",
       "already_member": "Ta osoba jest już członkiem.",
       "already_invited": "Zaproszenie już oczekuje.",
       "already_active": "Członkostwo jest już aktywne.",
@@ -17099,6 +17102,9 @@
       "cancelInvite": "Anuluj zaproszenie",
       "revoke": "Cofnij członkostwo",
       "leave": "Opuść organizację",
+      "managesInvitations": "Zarządza zaproszeniami",
+      "grantInvitations": "Zezwól na zarządzanie zaproszeniami",
+      "withdrawInvitations": "Cofnij zarządzanie zaproszeniami",
       "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków."
     },
     "start": {

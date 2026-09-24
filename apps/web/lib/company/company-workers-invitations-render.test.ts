@@ -101,7 +101,7 @@ describe("People page wiring", () => {
 
   it("derives the flag from the capability projection, never a role string — the creator arm included", () => {
     expect(page).toMatch(
-      /projectOrganizationAuthority\(\{ role: employerCtx\.role, isCreator: employerCtx\.isCreator \}\)\s*\.canManageInvitations/,
+      /projectOrganizationAuthority\(\{\s*role: employerCtx\.role,\s*isCreator: employerCtx\.isCreator,\s*invitationDelegate: employerCtx\.invitationDelegate,\s*\}\)\.canManageInvitations/,
     );
     expect(page).toContain("canManageInvitations={canManageInvitations}");
   });
@@ -111,7 +111,7 @@ describe("People page wiring", () => {
     expect(ctx).toMatch(/isCreator: company\.profile_id === caller\.userId/);
     const actions = readFileSync(join(WEB, "lib", "company", "actions.ts"), "utf8");
     expect(actions).toMatch(
-      /!hasOrganizationCapability\(company\.role, "manage-invitations"\) && company\.isCreator !== true/,
+      /!hasOrganizationCapability\(company\.role, "manage-invitations"\) &&\s*company\.isCreator !== true &&\s*company\.invitationDelegate !== true/,
     );
   });
 

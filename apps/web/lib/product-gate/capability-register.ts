@@ -556,7 +556,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/company"],
     coreModule: "lib/company/active-organization.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Seven authority helpers. The manager roster/project boundary was decided by the owner on 2026-09-24 (RED approval): `projects` select/insert/update and `company_workers_select` now also admit `manages_organization(...)` (active manager / external_manager), the helper `can_manage_project` already used — migration 20260924140000_manager_projects_roster_rls_v1, APPLIED (ledger 20260924092836); `projects_delete` and roster MANAGEMENT (pending worker invitations, invite / provision / role RPCs) stay owner/admin (`owns_company`). Open: the manager's own walk in a real session.",
+    note: "Seven authority helpers. The manager roster/project boundary was decided by the owner on 2026-09-24 (RED approval): `projects` select/insert/update and `company_workers_select` now also admit `manages_organization(...)` (active manager / external_manager), the helper `can_manage_project` already used — migration 20260924140000_manager_projects_roster_rls_v1, APPLIED (ledger 20260924092836); `projects_delete` and roster MANAGEMENT (provision / role RPCs) stay owner/admin (`owns_company`). Invitations are a per-person grant, never a title (owner direction 2026-09-24): `company_memberships.manages_invitations`, set only by the audited owner/admin command `membership_set_invitation_manager_v1`, admits a delegated member to organization and company worker invitations — migration 20260924150000_invitation_management_delegation_v1, APPLIED (ledger 20260924120147). Open: the manager's own walk and the delegate's own invitation in a real session.",
 
   },
   {

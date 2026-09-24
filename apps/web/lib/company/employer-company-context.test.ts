@@ -121,6 +121,7 @@ describe("the happy path", () => {
       // resolves `owner` (§11).
       role: "owner",
       isCreator: true,
+      invitationDelegate: false,
     });
   });
 
@@ -321,6 +322,7 @@ describe("the client is never an authority", () => {
       organizationName: "Alpha Statyba",
       role: "owner",
       isCreator: true,
+      invitationDelegate: false,
     });
     workspaceContextMock.mockResolvedValue(workspace([ORG_A], "personal"));
     await expect(requireEmployerCompany()).resolves.toEqual({
@@ -402,6 +404,45 @@ describe("§11 governance gate — membership truth decides the role", () => {
       role: "admin",
       // Not the creator: the fact is carried, never inferred from the role.
       isCreator: false,
+    });
+  });
+
+  it("the owner's per-person invitation delegation rides the caller's own membership row", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "manager", manages_invitations: true }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "manager",
+      isCreator: false,
+      invitationDelegate: true,
+    });
+  });
+
+  it("a manager row without the grant is not a delegate — the title grants nothing", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "manager", manages_invitations: false }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "manager",
+      invitationDelegate: false,
     });
   });
 

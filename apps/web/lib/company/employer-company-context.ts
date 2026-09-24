@@ -138,6 +138,10 @@ export type EmployerCompanyContext =
        *  (`manage-invitations`) must not be lost to a membership row that
        *  names a narrower role. Absent = not the creator (fails closed). */
       readonly isCreator?: boolean;
+      /** The owner (or an admin) delegated invitation management to the
+       *  caller's own active membership (`manages_invitations`). Absent =
+       *  not delegated (fails closed). */
+      readonly invitationDelegate?: boolean;
     }
   | {
       readonly kind: "unavailable";
@@ -296,13 +300,20 @@ export async function resolveEmployerCompanyCore(
     // Feature-detected: environments without the memberships table (42P01)
     // use arm 2 alone, exactly the pre-slice behaviour.
     let role: GovernanceRole | null = null;
-    const memRes = await asAny(supabase)
-      .from("company_memberships")
-      .select("role")
-      .eq("organization_id", org.id)
-      .eq("profile_id", caller.userId)
-      .eq("status", "active")
-      .limit(1);
+    let invitationDelegate = false;
+    // The per-person invitation delegation (owner direction 2026-09-24) rides
+    // the same own-row read; without the column (42703) it re-reads the role
+    // alone — the pre-migration truth, nobody delegated.
+    const readMembership = (columns: string) =>
+      asAny(supabase)
+        .from("company_memberships")
+        .select(columns)
+        .eq("organization_id", org.id)
+        .eq("profile_id", caller.userId)
+        .eq("status", "active")
+        .limit(1);
+    let memRes = await readMembership("role, manages_invitations");
+    if (memRes.error?.code === UNDEFINED_COLUMN_CODE) memRes = await readMembership("role");
     if (memRes.error) {
       if (
         memRes.error.code !== RELATION_NOT_FOUND_CODE &&
@@ -315,8 +326,12 @@ export async function resolveEmployerCompanyCore(
       }
       // table absent — legacy environment, compatibility arm only
     } else {
-      const memberRole = (memRes.data ?? [])[0]?.role as string | undefined;
+      const memberRow = (memRes.data ?? [])[0] as
+        | { role?: string; manages_invitations?: boolean }
+        | undefined;
+      const memberRole = memberRow?.role;
       if (isGovernanceRole(memberRole)) role = memberRole;
+      invitationDelegate = memberRow?.manages_invitations === true;
     }
     if (role === null && company.profile_id === caller.userId) role = "owner";
     if (role === null || !isEmployerSurfaceRole(role)) {
@@ -330,6 +345,7 @@ export async function resolveEmployerCompanyCore(
       organizationName,
       role,
       isCreator: company.profile_id === caller.userId,
+      invitationDelegate,
     };
 }
 
@@ -351,6 +367,7 @@ export async function requireEmployerCompanyForCaller(
       organizationName: string;
       role: GovernanceRole;
       isCreator?: boolean;
+      invitationDelegate?: boolean;
     }
   | { ok: false; reason: EmployerContextReason }
 > {
@@ -369,6 +386,7 @@ export async function requireEmployerCompanyForCaller(
         organizationName: ctx.organizationName,
         role: ctx.role,
         isCreator: ctx.isCreator === true,
+        invitationDelegate: ctx.invitationDelegate === true,
       }
     : { ok: false, reason: ctx.reason };
 }
@@ -386,6 +404,7 @@ export async function requireEmployerCompany(): Promise<
       organizationName: string;
       role: GovernanceRole;
       isCreator?: boolean;
+      invitationDelegate?: boolean;
     }
   | { ok: false; reason: EmployerContextReason }
 > {
@@ -398,6 +417,7 @@ export async function requireEmployerCompany(): Promise<
         organizationName: ctx.organizationName,
         role: ctx.role,
         isCreator: ctx.isCreator === true,
+        invitationDelegate: ctx.invitationDelegate === true,
       }
     : { ok: false, reason: ctx.reason };
 }

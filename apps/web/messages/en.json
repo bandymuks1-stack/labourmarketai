@@ -17065,6 +17065,9 @@
       "revoked": "Membership revoked.",
       "left": "You left the organization.",
       "unchanged": "Role unchanged.",
+      "granted": "Allowed to manage invitations.",
+      "withdrawn": "Invitation management withdrawn.",
+      "held_by_role": "The owner and admins manage invitations through their role.",
       "already_member": "Already a member.",
       "already_invited": "Invitation already pending.",
       "already_active": "Membership already active.",
@@ -17099,6 +17102,9 @@
       "cancelInvite": "Cancel invite",
       "revoke": "Revoke",
       "leave": "Leave",
+      "managesInvitations": "Manages invitations",
+      "grantInvitations": "Allow to manage invitations",
+      "withdrawInvitations": "Withdraw invitation management",
       "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members."
     },
     "start": {

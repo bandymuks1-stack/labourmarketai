@@ -6569,6 +6569,9 @@
       "revoked": "Medlemskap trukket tilbake.",
       "left": "Du har forlatt organisasjonen.",
       "unchanged": "Rolle uendret.",
+      "granted": "Har nå lov til å håndtere invitasjoner.",
+      "withdrawn": "Håndtering av invitasjoner er trukket tilbake.",
+      "held_by_role": "Eieren og administratorer håndterer invitasjoner gjennom rollen sin.",
       "already_member": "Er allerede medlem.",
       "already_invited": "Invitasjonen venter allerede.",
       "already_active": "Medlemskapet er allerede aktivt.",
@@ -6603,6 +6606,9 @@
       "cancelInvite": "Avbryt invitasjon",
       "revoke": "Trekk tilbake medlemskap",
       "leave": "Forlat organisasjonen",
+      "managesInvitations": "Håndterer invitasjoner",
+      "grantInvitations": "Tillat å håndtere invitasjoner",
+      "withdrawInvitations": "Trekk tilbake håndtering av invitasjoner",
       "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer."
     },
     "start": {

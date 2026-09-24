@@ -9,6 +9,7 @@ import {
   inviteMembershipAction,
   leaveOrganizationAction,
   revokeMembershipAction,
+  setMembershipInvitationManagerAction,
   type MembershipActionState,
 } from "@/lib/company/membership-actions";
 import type {
@@ -27,6 +28,12 @@ import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-wo
  *                  does not render those controls — no fake buttons);
  *   manager / external_manager / member → read-only directory + "leave".
  *
+ * Invitation management (owner direction 2026-09-24) is a PER-PERSON grant,
+ * never a job title: owner and admin see, on every active member who is not
+ * owner/admin, one control that grants or withdraws it
+ * (`membership_set_invitation_manager_v1`, audited). A member who holds it
+ * carries a badge everyone in the directory can read.
+ *
  * Every mutation is a server action bound to the active workspace; the
  * SECURITY DEFINER commands re-derive all authority. No client-side
  * membership writes exist anywhere.
@@ -44,6 +51,11 @@ export type MembersSectionLabels = {
   readonly cancelInvite: string;
   readonly revoke: string;
   readonly leave: string;
+  /** Badge: the owner delegated invitation management to this member. */
+  readonly managesInvitations: string;
+  /** Owner/admin control: grant / withdraw invitation management. */
+  readonly grantInvitations: string;
+  readonly withdrawInvitations: string;
   readonly outcomes: Record<string, string>;
 };
 
@@ -93,6 +105,7 @@ export function OrganizationMembersSection({
       if (intent === "revoke") return revokeMembershipAction(prev, formData);
       if (intent === "role") return changeMembershipRoleAction(prev, formData);
       if (intent === "leave") return leaveOrganizationAction(prev, formData);
+      if (intent === "invitations") return setMembershipInvitationManagerAction(prev, formData);
       return { ok: false, code: "invalid" };
     },
     null,
@@ -145,6 +158,14 @@ export function OrganizationMembersSection({
                     {labels.statusInvited}
                   </span>
                 )}
+                {m.status === "active" && m.managesInvitations && (
+                  <span
+                    className="rounded-sm border border-brand-blue/40 px-2 py-0.5 text-xs text-brand-blue"
+                    data-testid={`org-member-manages-invitations-${m.membershipId}`}
+                  >
+                    {labels.managesInvitations}
+                  </span>
+                )}
 
                 {canAdminister && m.status === "invited" && adminCanTouch && (
                   <form action={rowAction}>
@@ -193,6 +214,28 @@ export function OrganizationMembersSection({
                         OK
                       </button>
                     </form>
+                    {m.role !== "owner" && m.role !== "admin" && (
+                      <form action={rowAction}>
+                        <DisplayedWorkspaceField />
+                        <input type="hidden" name="intent" value="invitations" />
+                        <input type="hidden" name="membershipId" value={m.membershipId} />
+                        <input
+                          type="hidden"
+                          name="enabled"
+                          value={m.managesInvitations ? "false" : "true"}
+                        />
+                        <button
+                          type="submit"
+                          disabled={rowPending}
+                          className="text-xs text-brand-blue underline-offset-2 hover:underline disabled:opacity-50"
+                          data-testid={`org-member-invitations-${m.membershipId}`}
+                        >
+                          {m.managesInvitations
+                            ? labels.withdrawInvitations
+                            : labels.grantInvitations}
+                        </button>
+                      </form>
+                    )}
                     <form action={rowAction}>
                       <DisplayedWorkspaceField />
                       <input type="hidden" name="intent" value="revoke" />

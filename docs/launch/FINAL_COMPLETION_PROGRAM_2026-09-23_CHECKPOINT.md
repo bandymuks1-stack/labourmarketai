@@ -79,6 +79,12 @@ Production proofs by the owner's own sessions (multi-org switch, manager workspa
 8. Historical import: threshold calibration on a preview-only run of the first real file; leave Nonstop's draft projects untouched; approve PR-4 (M2 + M3) when it is posted.
 
 ## J. NEXT ACTION QUEUE
+0. (#10f, 2026-09-24 ~12:10Z) Owner APPROVED #1875 as described.
+   - #1874 MERGED `d59ab31e` → Vercel Production deployment success (11:56:19Z).
+   - #1875: rolled-back production dry run (before/after as expected; the function sources equal the reviewed file's) → APPLIED (ledger `20260924120147`) → read-back (six functions, EXECUTE for authenticated only, the column, the policy, 0 delegations; per-role checks passed).
+   - The app half ships in #1875 itself: the owner/admin grant control in Settings → members, the member's own flag in `canManageInvitations`, and delegated organizations in the invite panel.
+   - Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN until the owner grants a member in a real session and that member invites.
+   - Archived organizations: CLOSED — no authorization change.
 0. (#10e, 2026-09-24 ~11:40Z) OWNER DIRECTION — company permissions and archived organizations.
    - **(1) Invitations are managed by permission, never by job title.**
      - GREEN #1874: capability `manage-invitations` (owner/admin, plus the creator). Without it, the People page does not read invitations, drops the pending count and does not offer Pakviesti. It says "Kvietimais rūpinasi už tai atsakingas įmonės asmuo." instead (all 11 catalogues).
