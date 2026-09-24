@@ -2337,6 +2337,37 @@ newest row `20260922102211` = this migration. Applied autonomously under the
 GREEN prod-apply policy (AGENTS.md → PROD APPLY AUTONOMY): static gate GREEN,
 reviewed, reversible, tests green, target verified.
 
+### `companies_contact_minimization_v2` — RED (column grant narrowed + ONE SECURITY DEFINER reader, no data change) — APPLIED 2026-09-24, ledger `20260924083740`
+
+Repo file `supabase/migrations/20260924120000_companies_contact_minimization_v2.sql`
+(paired `supabase/rollbacks/…down.sql`). K2-1 v2; supersedes the never-applied
+#1430 draft (`20260902210000_companies_contact_minimization_v1`, which must not
+be applied — it predates #1859's member access). Security analysis: owner
+channel only (AGENTS.md — this repository is public).
+
+Owner RED approval 2026-09-24 ("#1868 / K2-1 v2: APPROVED … MERGE APP CODE →
+VERIFY VERCEL PRODUCTION DEPLOY → APPLY APPROVED MIGRATION → PRODUCTION
+READBACK"). Sequence as approved: #1868 squash-merged as `04f7b741` (quality,
+migration-safety, e2e-smoke, CodeQL, mobile green); Vercel Production
+deployment 6633470001 `success` for exactly `04f7b741` at 08:27:05Z; rolled-back
+production dry run (migration + per-role probes, raised to roll back; state
+re-read unchanged afterwards); then applied via Supabase MCP `apply_migration`
+(name `companies_contact_minimization_v2`, the file on main, sha256
+`48da75dd0e704648e0154df63000ed125e1c9630856f40dc9bd349626960441d`) — never
+`db push`.
+
+Read-back (after apply): `schema_migrations` row `20260924083740
+companies_contact_minimization_v2`; `authenticated` SELECT = exactly the 12
+discovery columns; `read_companies_private_v1()` SECURITY DEFINER with
+`search_path=public, pg_temp`, EXECUTE for `authenticated`, none for `anon`;
+16 company rows untouched. Role probes (rolled back): every signed-in role gets
+42501 on a direct private-column read and still sees all 16 discovery rows; the
+reader returns 0 rows to an account with no membership, exactly its own company
+to the Nonstop creator/owner, and all 16 to the platform admin; `anon` cannot
+execute it. PostgREST received the reload on the `pgrst` channel at 08:37:40Z and
+reloaded its schema cache at 08:37:44Z. App leg: no company-page request reached
+the API between the deploy and this record → the end-user walk is NOT PROVEN yet.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

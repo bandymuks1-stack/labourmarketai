@@ -1037,8 +1037,9 @@ describe("NO new DB migration in this PR", () => {
     //   RECOUNTED: 305.
     // Bumped 305 -> 306 for 20260924120000_companies_contact_minimization_v2
     //   (K2-1 v2: companies SELECT narrowed to discovery columns + one
-    //   SECURITY DEFINER private reader; RED, human-gated, UNAPPLIED). Not
-    //   this read layer's file. RECOUNTED: 306.
+    //   SECURITY DEFINER private reader; RED, owner-approved, APPLIED
+    //   2026-09-24, ledger 20260924083740). Not this read layer's file.
+    //   RECOUNTED: 306.
     expect(count).toBeLessThanOrEqual(306);
   });
 });
