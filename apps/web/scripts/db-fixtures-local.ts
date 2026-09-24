@@ -38,9 +38,13 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
+  DEFAULT_LOCAL_DB_URL,
+  LOCAL_DB_URL_ENV,
   LOCAL_STACK_UNAVAILABLE_EXIT_CODE,
   LocalStackUnavailableError,
   NonLocalTargetError,
+  RETIRED_DB_URL_ENV,
+  assertLocalDbUrl,
   assertLocalSupabaseTarget,
   formatLocalStackUnavailable,
 } from "../lib/testing/local-supabase-guard";
@@ -232,6 +236,10 @@ function runPsqlViaContainer(sql: Buffer): PsqlRun {
 }
 
 function runPsqlViaHost(sql: Buffer, dbUrl: string): PsqlRun {
+  // Defence in depth: main() already proved this string loopback, but the
+  // host client is the ONE path that connects wherever the string says, so the
+  // proof is repeated at the point of use. Throws NonLocalTargetError.
+  assertLocalDbUrl(dbUrl);
   // STDIN (`-f -`) rather than a path: a client that mis-parses positional
   // arguments cannot silently skip the file.
   const res = spawnSync(
@@ -365,9 +373,36 @@ function main(): void {
   }
   const sql = readFileSync(sqlPath);
 
-  const dbUrl =
-    process.env.SUPABASE_DB_URL ??
-    "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+  // THE PSQL TARGET (2026-09-23). The host-psql fallback used to read
+  // `SUPABASE_DB_URL` — a real production secret name (the read-only string
+  // that arms the live CI catalogue gates). A developer with it exported would
+  // have applied dev-fixtures.sql to PRODUCTION the moment the container client
+  // was unavailable. The API guard above never saw the psql string.
+  //
+  // Now: the retired name is REFUSED (not silently ignored — an exported
+  // production string is exactly the situation to stop and read), the override
+  // is LOCAL_DB_URL, and whatever string will reach psql is proven loopback
+  // BEFORE either client is spawned.
+  if (process.env[RETIRED_DB_URL_ENV] !== undefined) {
+    console.error(
+      `[fixtures] REFUSED: ${RETIRED_DB_URL_ENV} is set in this environment. ` +
+        "That name is a production database secret and this script no longer " +
+        `reads it. The LOCAL override is ${LOCAL_DB_URL_ENV} (loopback hosts ` +
+        `only). Unset ${RETIRED_DB_URL_ENV} for this run.`,
+    );
+    process.exit(1);
+  }
+  const dbUrl = process.env[LOCAL_DB_URL_ENV] ?? DEFAULT_LOCAL_DB_URL;
+  try {
+    const { host } = assertLocalDbUrl(dbUrl);
+    console.log(`[fixtures] psql target host=${host} (loopback, asserted)`);
+  } catch (err) {
+    if (err instanceof NonLocalTargetError) {
+      console.error(`Refusing to apply dev fixtures: ${err.message}`);
+      process.exit(1);
+    }
+    throw err;
+  }
 
   console.log("[fixtures] applying dev-fixtures.sql…");
   const via = applySqlOrExit(sql, "dev-fixtures.sql", dbUrl);

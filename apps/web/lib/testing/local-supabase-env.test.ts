@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -343,5 +343,89 @@ describe("every local-integration entry point reports unavailability by its code
     const launch = src.indexOf("chromium.launch(");
     expect(preflight).toBeGreaterThan(-1);
     expect(launch).toBeGreaterThan(preflight);
+  });
+});
+
+/**
+ * LOCAL HELPERS NEVER READ `.env.local` (the guard family behind #1845,
+ * extended 2026-09-23).
+ *
+ * `apps/web/.env.local` points at PRODUCTION and carries a real service-role
+ * key. A "local" helper that loads it inherits that target silently — which is
+ * exactly what `scripts/e2e-seed-claims.ts` did: an orphan (no caller anywhere
+ * in the repo) that upserted and deleted `profile_skill_claims` rows with the
+ * service role, against whatever `.env.local` named. It was DELETED rather than
+ * guarded, because nothing used it; this family now pins both facts.
+ *
+ * The scripts that DO read `.env.local` are the acknowledged PRODUCTION
+ * OPERATOR scripts — deliberate, interactive, and not "local" in any sense.
+ * That list is closed: a new `.env.local` reader anywhere under scripts/ fails
+ * here until it is either routed through the local resolver or explicitly
+ * acknowledged as a production operator tool.
+ */
+describe("local helpers never read .env.local", () => {
+  const SCRIPTS = join(__dirname, "..", "..", "scripts");
+  const read = (f: string) => readFileSync(join(SCRIPTS, f), "utf8");
+  /** Executable text only: rationale comments are allowed to name the file. */
+  const code = (src: string) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+  const READS_ENV_LOCAL = /\.env\.local|loadEnvLocal|from\s+["']dotenv["']|require\(["']dotenv/;
+
+  const LOCAL_HELPERS = [
+    "e2e-mint-session.ts",
+    "e2e-local.ts",
+    "dev-acceptance.ts",
+    "db-fixtures-local.ts",
+    "ux-evidence-seed.ts",
+  ];
+
+  /** Deliberate production operator tools (interactive, owner-run). Closed. */
+  const ACKNOWLEDGED_PRODUCTION_OPERATOR_SCRIPTS = new Set([
+    "admin-grant-superadmin.ts",
+    "admin-promote.ts",
+    "emit-first-party-supply-feed.ts",
+    "generate-activation-report.ts",
+    "generate-pilot-owner-brief.ts",
+    "vacancy-operator-run.ts",
+  ]);
+
+  for (const f of LOCAL_HELPERS) {
+    it(`${f} has no .env.local read in executable code`, () => {
+      expect(code(read(f))).not.toMatch(READS_ENV_LOCAL);
+    });
+  }
+
+  it("e2e-seed-claims.ts (orphan service-role writer on .env.local) stays deleted", () => {
+    expect(existsSync(join(SCRIPTS, "e2e-seed-claims.ts"))).toBe(false);
+  });
+
+  it("every .env.local reader under scripts/ is an acknowledged production operator tool", () => {
+    const readers = readdirSync(SCRIPTS)
+      .filter((f) => /\.(ts|mts|mjs|js)$/.test(f))
+      .filter((f) => READS_ENV_LOCAL.test(code(read(f))));
+    const unacknowledged = readers.filter(
+      (f) => !ACKNOWLEDGED_PRODUCTION_OPERATOR_SCRIPTS.has(f),
+    );
+    expect(
+      unacknowledged,
+      "a script reads .env.local (production) and is neither a local helper " +
+        "routed through resolveLocalSupabaseEnv nor an acknowledged production " +
+        `operator tool: ${unacknowledged.join(", ")}`,
+    ).toEqual([]);
+    // ANTI-VACUITY: the acknowledged set is real — each entry still reads it.
+    for (const f of ACKNOWLEDGED_PRODUCTION_OPERATOR_SCRIPTS) {
+      expect(readers, `${f} no longer reads .env.local — drop it from the list`).toContain(f);
+    }
+  });
+
+  it("NEGATIVE CONTROL — the pattern fires on the shape that was deleted", () => {
+    const deleted =
+      'const file = join(process.cwd(), ".env.local");\n' +
+      "for (const raw of readFileSync(file, \"utf8\").split(/\\r?\\n/)) {}";
+    expect(READS_ENV_LOCAL.test(code(deleted))).toBe(true);
+    expect(READS_ENV_LOCAL.test(code('import "dotenv/config";\nrequire("dotenv")'))).toBe(true);
+    // …and stays quiet on a comment that merely explains the rule.
+    expect(READS_ENV_LOCAL.test(code("// never reads `.env.local`\nconst x = 1;"))).toBe(false);
+    expect(READS_ENV_LOCAL.test(code("/* .env.local is production */\nconst x = 1;"))).toBe(false);
   });
 });

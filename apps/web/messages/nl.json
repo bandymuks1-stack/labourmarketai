@@ -12318,6 +12318,7 @@
       },
       "sectionTitle": "Europese arbeidsmarktcontext",
       "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten. Voorbereid, wacht op activering door de eigenaar.",
+      "asOf": "Eurostat-publicatie van {date} — deze cijfers worden hier niet vanzelf ververst.",
       "dataBasis": "Officieel Eurostat-aggregaat (bron: Eurostat)",
       "whyVisible": "Getoond als officiële Europese arbeidsmarktcontext.",
       "headline": {

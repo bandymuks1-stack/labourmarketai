@@ -1,7 +1,7 @@
 "use server";
 
 import "server-only";
-import { headers } from "next/headers";
+import { readRequestHost } from "@/lib/config/request-host";
 import { createClient } from "@/lib/supabase/server";
 import {
   DEPLOY_ENV_KEY,
@@ -293,17 +293,6 @@ export async function recordTelemetryEvent(
     };
   }
   return { ok: true };
-}
-
-/** The request's Host header, or null when there is no request scope (a
- *  script, a test) or the header cannot be read. Never throws. */
-async function readRequestHost(): Promise<string | null> {
-  try {
-    const h = await headers();
-    return h.get("host");
-  } catch {
-    return null;
-  }
 }
 
 /** Build a safe metadata object: allowlist keys, cap string values,

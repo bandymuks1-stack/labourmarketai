@@ -1,11 +1,14 @@
 # Deployment
 
-> Status (2026-07-11): PRODUCTION LIVE. Vercel auto-deploys `main` to
-> `labourmarket.ai` (public canonical) and `app.labourmarket.ai`
-> (auth/dashboard) — see `docs/policies/domain-truth-v1.md` (v2). The
-> Supabase section below remains the founder-actionable source of truth
-> for secrets and migrations; migrations are applied only through the
-> human-gated process (reviewed PR + manual apply, never automatic).
+> Status (2026-07-11; migrations section rewritten 2026-09-23): PRODUCTION LIVE.
+> Vercel auto-deploys `main` to `labourmarket.ai` (public canonical) and
+> `app.labourmarket.ai` (auth/dashboard) — see
+> `docs/policies/domain-truth-v1.md` (v2). The Supabase section below is
+> the founder-actionable source of truth for secrets and migrations.
+> **Production migrations are applied only through the human-gated process:
+> reviewed PR, then Supabase MCP `apply_migration` — never by `supabase db
+> push`, never automatically on merge.** `pnpm db:push` now REFUSES (exit 2)
+> for the reasons in § Database migrations.
 
 ## Secrets — where they come from
 
@@ -24,53 +27,55 @@ deploys.
 Copy `.env.example` → `apps/web/.env.local`, fill the values, and add the same
 keys in Vercel → Project → Settings → Environment Variables.
 
-## Applying the database (founder runs this)
+## Database migrations — PRODUCTION
 
-The Supabase project at `https://gorgitwvdzxbnaxhrsrw.supabase.co` already
-exists but is empty. The migration files are committed and ready; no agent has
-applied them (no Supabase access token was available). Run, from the repo
-root:
+The production project (`gorgitwvdzxbnaxhrsrw`) is live with real data and
+several hundred applied migrations (`docs/APPLIED_LEDGER.md`). There is
+exactly ONE way a migration reaches it:
 
-```bash
-# 1. Authenticate the Supabase CLI (opens a browser; stores a token locally)
-supabase login
+1. The migration file lands in `supabase/migrations/YYYYMMDDHHMMSS_snake_case.sql`
+   through a reviewed PR (`migration-safety` CI gate; GREEN class auto-merges,
+   RED class waits for the human gate — `CLAUDE.md` § Merge model).
+2. **Every DB-touching migration ships its rollback** as
+   `supabase/rollbacks/<same name>.down.sql` (doctrine § reversibility).
+3. An operator session applies it with the **Supabase MCP `apply_migration`**
+   — one migration, verified against the production project ref — and
+   records the apply in `docs/APPLIED_LEDGER.md`. The conditions under which
+   this may happen autonomously are in `AGENTS.md` → Migrations → PROD APPLY
+   AUTONOMY; risky, destructive, ambiguous or irreversible migrations require
+   a human checkpoint.
 
-# 2. Link this repo to the cloud project
-supabase link --project-ref gorgitwvdzxbnaxhrsrw
-#    (prompts for the DB password — SUPABASE_DB_PASSWORD above)
+### Why `supabase db push` is forbidden (and `pnpm db:push` refuses)
 
-# 3. Apply schema + reference data (migrations 0001 then 0002)
-pnpm db:push
+`supabase db push` pushes to whatever project the local CLI is **linked** to
+(`supabase/.temp/linked-project.json`, gitignored). On the owner's machine
+that link is PRODUCTION. The CLI decides what to apply by comparing the repo's
+migration **filenames** against the production ledger's **versions** — and
+those do not match: many migrations were applied under different or combined
+names (`docs/APPLIED_LEDGER.md` § CORRECTION, `docs/launch/SCHEMA_DRIFT_REPO_VS_PRODUCTION_2026-09-14.md`).
+A push would therefore re-run migrations that are already applied, against
+real data. The same holds for `prisma migrate deploy` (there is no Prisma) and
+for `supabase db reset --linked` (catastrophic).
 
-# 4. Regenerate the typed DB client from the now-real cloud schema.
-#    This OVERWRITES the hand-authored mirror at
-#    apps/web/lib/supabase/types.ts.
-pnpm db:types
-```
+`pnpm db:push` is kept as a **refusal** (`scripts/db-push-refused.mjs`,
+exit 2) so that an old habit, a stale document or a copied command stops with
+an explanation instead of reaching production. Owner-side hygiene, not a code
+change: run `npx supabase unlink` on any machine whose CLI is linked to
+production, so no CLI command can target it by default.
 
-`pnpm db:push` runs `supabase db push`, which applies everything in
-`supabase/migrations/` in order:
+### Regenerating the typed client
 
-- `0001_initial_schema.sql` — all tables, triggers, RLS helpers, RLS policies.
-- `0002_reference_data.sql` — countries, 38 construction skills, 4 plan
-  tiers. Idempotent (`ON CONFLICT`), so it is safe on every subsequent
-  deploy. (`supabase/reference-data.sql` is the canonical editable copy of
-  the same inserts; keep the two in sync.)
-
-After this, verify in the SQL editor: `select count(*) from skills;` (38),
-`select count(*) from countries;` (9), `select count(*) from plans;` (4), and
-that `select * from pg_policies where schemaname='public';` lists policies for
-every table. See `docs/DATA_MODEL.md` → "Testing the policies".
+`pnpm db:types` (`supabase gen types typescript --project-id gorgitwvdzxbnaxhrsrw`)
+reads the production schema and OVERWRITES `apps/web/lib/supabase/types.ts`.
+It is read-only against production and needs a CLI login
+(`supabase login`, or `SUPABASE_ACCESS_TOKEN` for non-interactive use — a CLI
+token, not an app env var, never committed).
 
 ### CLI binary note
 
 `supabase` is a repo devDependency and is provisioned on `pnpm install`
 (`pnpm.onlyBuiltDependencies` allows its postinstall). If `supabase` is not on
-PATH, prefix the commands with `pnpm exec` (e.g. `pnpm exec supabase login`)
-or use `npx supabase`. For non-interactive/CI use, export
-`SUPABASE_ACCESS_TOKEN` instead of `supabase login` (Supabase Dashboard →
-Account → Access Tokens) — this is a CLI token, not an app env var, and is
-never committed.
+PATH, prefix the commands with `pnpm exec` or use `npx supabase`.
 
 ## First admin user
 
@@ -85,24 +90,37 @@ It uses the service-role key, confirms interactively (or `--yes` in scripts),
 and flips that profile's `role` to `admin`. It refuses if no profile with that
 email exists yet — sign up first.
 
-## Local development with test data
+## Local database (Docker Desktop — a LOCAL_TEST_DEPENDENCY only)
 
-The Supabase Cloud project stays real-data-only. For a local DB with throwaway
-rows so the authenticated dashboard (M2+) has content:
+The Supabase Cloud project stays real-data-only. A local database exists for
+the LOCAL INTEGRATION test class (`docs/TESTING.md`) and is never a step on
+the way to production. Docker may be OFF by owner decision; every local
+helper then stops with `LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER` (exit 3).
 
 ```bash
-supabase start                 # local Postgres + Auth on :54321/:54322
-# point .env.local NEXT_PUBLIC_SUPABASE_URL at the local API (http://127.0.0.1:54321)
-pnpm db:push                   # schema + reference data into the local DB
-pnpm db:fixtures:local         # test profiles/workers/companies/projects
+npx supabase start             # local Postgres + Auth on :54321/:54322
+npx supabase db reset          # rebuilds the LOCAL db from supabase/migrations
+pnpm db:fixtures:local         # local-only fixtures (users, journal flow, demand)
+pnpm -C apps/web e2e:local     # or dev:acceptance — boots the app on the local stack
 ```
 
-`pnpm db:fixtures:local` has a **hard guard**: it parses the configured
-Supabase URL and refuses to run unless the host is local
-(`localhost`/`127.0.0.1`/`*.local`/…). It applies `supabase/dev-fixtures.sql`
-via `psql` (override the target with `SUPABASE_DB_URL`; default
-`postgresql://postgres:postgres@127.0.0.1:54322/postgres`). `dev-fixtures.sql`
-must never reach the cloud project.
+`npx supabase db reset` (WITHOUT `--linked`) is the only way the repo's
+migrations are loaded into the local database. It never touches the linked
+cloud project. **Do not point `apps/web/.env.local` at the local stack**: that
+file is what `pnpm dev` needs for production and the local helpers deliberately
+never read it — `e2e:local` and `dev:acceptance` resolve the running stack
+themselves via `npx supabase status` (`lib/testing/local-supabase-env.ts`)
+and refuse any non-local target (`REFUSED_NON_LOCAL_E2E_SESSION_MINT`).
+
+`pnpm db:fixtures:local` has two **hard guards**: the resolved Supabase API
+target must be the local stack (loopback host, allowlisted origin, no cloud
+key), and the psql connection string must name a loopback host — asserted
+before any psql client is spawned. Override the psql target with
+`LOCAL_DB_URL` (loopback only; default
+`postgresql://postgres:postgres@127.0.0.1:54322/postgres`). The former
+override name `SUPABASE_DB_URL` is a production secret name and is now
+**refused** when set, rather than honoured. `dev-fixtures.sql` must never
+reach the cloud project.
 
 ## Vercel deploys
 

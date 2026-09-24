@@ -243,3 +243,76 @@ export function assertLocalSupabaseTarget(
     projectRef: urlRef === host ? "local" : urlRef,
   };
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * THE DIRECT DATABASE URL (2026-09-23).
+ *
+ * `db:fixtures:local` applies SQL through psql, and its host-psql fallback
+ * took the connection string from `SUPABASE_DB_URL`. That name is a REAL
+ * production secret name — the read-only connection string CI uses for the
+ * live catalogue gates — so a developer who had it exported for that reason
+ * would have applied `dev-fixtures.sql` to production `auth.users` the moment
+ * the container client was unavailable. The API-URL guard above never saw it:
+ * it checks the Supabase API target, not the psql target.
+ *
+ * Two rules now: the override is `LOCAL_DB_URL` (a name no production secret
+ * carries), and WHATEVER string reaches psql must name a loopback host.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/** The env name the fixture script honours for the psql target. */
+export const LOCAL_DB_URL_ENV = "LOCAL_DB_URL";
+
+/** The production-secret name the fixture script used to honour — and now
+ *  refuses outright rather than silently ignoring. */
+export const RETIRED_DB_URL_ENV = "SUPABASE_DB_URL";
+
+/** The local stack's documented Postgres port (`npx supabase status`). */
+export const DEFAULT_LOCAL_DB_URL =
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+
+/**
+ * Assert a Postgres connection string points at the loopback interface, or
+ * throw NonLocalTargetError. Checked BEFORE any psql client is spawned.
+ *
+ * A Supabase Cloud database host (`*.supabase.co`, `*.supabase.com`,
+ * `*.pooler.supabase.com`) is named explicitly in the refusal so the operator
+ * sees what they nearly did; every other non-loopback host is refused as well.
+ */
+export function assertLocalDbUrl(raw: string | undefined): { host: string } {
+  if (!raw || raw.trim() === "") {
+    throw new NonLocalTargetError("no database URL was resolved for psql.");
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(raw.trim());
+  } catch {
+    throw new NonLocalTargetError("the database URL is not a valid URL.");
+  }
+  if (parsed.protocol !== "postgresql:" && parsed.protocol !== "postgres:") {
+    throw new NonLocalTargetError(
+      `the database URL scheme "${parsed.protocol}" is not postgresql://.`,
+    );
+  }
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (!host) {
+    throw new NonLocalTargetError("the database URL has no host.");
+  }
+  if (/\.supabase\.(co|com|in|net)$/.test(host)) {
+    throw new NonLocalTargetError(
+      `database host "${host}" is a Supabase Cloud database. dev-fixtures.sql ` +
+        "must never reach a cloud project.",
+    );
+  }
+  const loopback =
+    host === "localhost" ||
+    host === "::1" ||
+    /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host);
+  if (!loopback) {
+    throw new NonLocalTargetError(
+      `database host "${host}" is not loopback (localhost / 127.0.0.0/8 / ::1). ` +
+        `Set ${LOCAL_DB_URL_ENV} to a loopback Postgres URL, or leave it unset ` +
+        "for the local stack default.",
+    );
+  }
+  return { host };
+}

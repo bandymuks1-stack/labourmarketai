@@ -12318,6 +12318,7 @@
       },
       "sectionTitle": "European labour-market context",
       "sectionIntro": "Official Eurostat aggregates for the EU and selected European markets. Prepared, pending owner activation.",
+      "asOf": "Eurostat publication of {date} — these figures do not refresh here on their own.",
       "dataBasis": "Official Eurostat aggregate (source: Eurostat)",
       "whyVisible": "Shown as official European labour-market context.",
       "headline": {

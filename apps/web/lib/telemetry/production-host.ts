@@ -87,10 +87,33 @@ export type TelemetryOrigin = "production" | "preview" | "local";
 export const DEPLOY_ENV_KEY = "deploy_env";
 
 /**
+ * The IPv4 address an IPv4-MAPPED IPv6 literal (`::ffff:a.b.c.d`, or its hex
+ * spelling `::ffff:XXXX:YYYY` — the form the WHATWG URL parser and a
+ * dual-stack listener actually hand over) stands for, as dotted decimal;
+ * `null` for anything else. A mapped address IS that IPv4 address, so
+ * `::ffff:127.0.0.1` is loopback and `::ffff:10.0.0.5` is private — the
+ * rule below judges the address it names, not its spelling (2026-09-24).
+ * Expects an already-lowercased, bracket-free, port-free literal.
+ */
+export function ipv4MappedAddress(bare: string): string | null {
+  // `::ffff:` compressed, or the five explicit zero groups `0:0:0:0:0:ffff:`.
+  const dotted = /^(?:::|(?:0{1,4}:){5})ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/.exec(bare);
+  if (dotted) return dotted[1];
+  const hex = /^(?:::|(?:0{1,4}:){5})ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(bare);
+  if (!hex) return null;
+  const hi = Number.parseInt(hex[1], 16);
+  const lo = Number.parseInt(hex[2], 16);
+  return `${hi >> 8}.${hi & 0xff}.${lo >> 8}.${lo & 0xff}`;
+}
+
+/**
  * A hostname that can ONLY be a developer's own process: `localhost` and its
  * subdomains, the loopback and unspecified addresses, link-local and private
- * LAN IPv4 ranges. `*.vercel.app` previews are NOT local — they are real
- * deployments with their own origin (`preview`) and are tagged, not refused.
+ * LAN IPv4 ranges — in their plain spelling or IPv4-mapped into IPv6
+ * (`[::ffff:127.0.0.1]:3000`, `::ffff:7f00:1`), which is how a dual-stack
+ * `next start` reports a loopback client. `*.vercel.app` previews are NOT
+ * local — they are real deployments with their own origin (`preview`) and
+ * are tagged, not refused.
  */
 export function isLocalHostname(hostname: string | null | undefined): boolean {
   if (!hostname) return false;
@@ -105,7 +128,9 @@ export function isLocalHostname(hostname: string | null | undefined): boolean {
   if (!bare) return false;
   if (bare === "localhost" || bare.endsWith(".localhost")) return true;
   if (bare === "::1" || bare === "::" || bare === "0.0.0.0") return true;
-  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(bare);
+  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(
+    ipv4MappedAddress(bare) ?? bare,
+  );
   if (!v4) return false;
   const a = Number(v4[1]);
   const b = Number(v4[2]);
@@ -117,14 +142,34 @@ export function isLocalHostname(hostname: string | null | undefined): boolean {
   return false;
 }
 
+/**
+ * `VERCEL_ENV` as a BOUNDED fact (2026-09-24). Vercel sets `production`,
+ * `preview` or `development` on every deployment; `unset` is the honest
+ * answer when the variable is missing (system environment variables not
+ * exposed, a platform change, a non-Vercel process) and `other` when it
+ * holds a value Vercel never sets. `/api/health` reports this so a missing
+ * variable on the production host is OBSERVABLE rather than a silent
+ * reclassification — the hazard §"ORIGIN OF A TELEMETRY WRITE" describes.
+ * One parse site: the telemetry origin and the outbound host policy both
+ * read the variable through this function.
+ */
+export type DeployEnv = "production" | "preview" | "development" | "unset" | "other";
+
+export function deployEnvFromEnv(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): DeployEnv {
+  const v = (env.VERCEL_ENV ?? "").trim().toLowerCase();
+  if (v === "production" || v === "preview" || v === "development") return v;
+  return v === "" ? "unset" : "other";
+}
+
 /** Vercel's own environment name → the origin a row is stamped with. Unset
  *  or unrecognised means the process is not a Vercel deployment. */
 export function telemetryOriginFromEnv(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): TelemetryOrigin {
-  const v = (env.VERCEL_ENV ?? "").trim().toLowerCase();
-  if (v === "production") return "production";
-  if (v === "preview") return "preview";
+  const v = deployEnvFromEnv(env);
+  if (v === "production" || v === "preview") return v;
   return "local";
 }
 

@@ -1,9 +1,27 @@
 "use server";
 
 import "server-only";
+import { outboundIntegrationUrl } from "@/lib/config/outbound-host-policy";
+import { readRequestHost } from "@/lib/config/request-host";
 import { env } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { VOICE_ALLOWED_MIME, VOICE_MAX_BYTES } from "@/lib/voice/constants";
+
+/**
+ * VOICE_TRANSCRIBE_URL after the PRODUCTION host policy (2026-09-23): on the
+ * production deployment a loopback / private / tunnel host — i.e. the service
+ * running on somebody's workstation — is refused and the surface shows its
+ * honest "not configured" state. The host must be an always-on VM or
+ * container service (services/transcribe/README.md § Deploy). Both callers
+ * run inside a request, so the request's Host is the second production
+ * evidence (2026-09-24) beside `VERCEL_ENV`.
+ */
+async function transcribeServiceUrl(): Promise<string | undefined> {
+  return outboundIntegrationUrl(env.VOICE_TRANSCRIBE_URL, {
+    integration: "VOICE_TRANSCRIBE_URL",
+    requestHost: await readRequestHost(),
+  });
+}
 
 /**
  * Voice Work Journal — server-side transcription proxy.
@@ -72,7 +90,7 @@ export type VoiceTranscribeResult =
 /** True when the owner has configured the self-hosted transcription service.
  *  Server-only probe for the page shell — reveals nothing about the service. */
 export async function isVoiceTranscriptionConfigured(): Promise<boolean> {
-  return Boolean(env.VOICE_TRANSCRIBE_URL && env.VOICE_TRANSCRIBE_TOKEN);
+  return Boolean((await transcribeServiceUrl()) && env.VOICE_TRANSCRIBE_TOKEN);
 }
 
 export async function transcribeVoiceRecording(
@@ -91,7 +109,7 @@ export async function transcribeVoiceRecording(
     .maybeSingle();
   if (!worker) return { status: "error", code: "no_worker_profile" };
 
-  const url = env.VOICE_TRANSCRIBE_URL;
+  const url = await transcribeServiceUrl();
   const token = env.VOICE_TRANSCRIBE_TOKEN;
   if (!url || !token) return { status: "unavailable" };
 

@@ -12318,6 +12318,7 @@
       },
       "sectionTitle": "Europejski kontekst rynku pracy",
       "sectionIntro": "Oficjalne zbiorcze dane Eurostatu dla UE i wybranych rynków europejskich. Przygotowane, oczekuje na aktywację przez właściciela.",
+      "asOf": "Publikacja Eurostatu z {date} — te dane nie odświeżają się tutaj samoczynnie.",
       "dataBasis": "Oficjalne dane zbiorcze Eurostatu (źródło: Eurostat)",
       "whyVisible": "Pokazywane jako oficjalny europejski kontekst rynku pracy.",
       "headline": {
