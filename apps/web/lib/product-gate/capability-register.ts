@@ -556,7 +556,8 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/company"],
     coreModule: "lib/company/active-organization.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers. STEP C (2026-09-14) STOPPED this: it is a NEW AUTHORITY BOUNDARY, not a wiring gap. Verified against production — `owns_company` = company creator OR an active `owner`/`admin` company_membership, and the migration that widened it (20260904060000) records in its own proof note that a manager-role member deliberately satisfies neither arm. Meanwhile `manages_organization` DOES include manager/external_manager (20260806180000), so the two helpers encode two intentionally different authority levels and `company_workers_select` uses the narrower one. Pointing that policy at the wider helper would let managers read the roster (worker personal data) — RLS-loosening, RED class, owner gate. Production: 1 active manager, 7 company_workers rows, so exactly one real person is affected.",
+    note: "Seven authority helpers. The manager roster/project boundary was decided by the owner on 2026-09-24 (RED approval): `projects` select/insert/update and `company_workers_select` now also admit `manages_organization(...)` (active manager / external_manager), the helper `can_manage_project` already used — migration 20260924140000_manager_projects_roster_rls_v1, APPLIED (ledger 20260924092836); `projects_delete` and roster MANAGEMENT (pending worker invitations, invite / provision / role RPCs) stay owner/admin (`owns_company`). Open: the manager's own walk in a real session.",
+
   },
   {
     id: "ORG-6",

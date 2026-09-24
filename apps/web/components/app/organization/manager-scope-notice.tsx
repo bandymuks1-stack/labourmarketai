@@ -30,10 +30,12 @@ import type { GovernanceRole } from "@/lib/company/role-capabilities";
  *      ADMITS an admin's writes and roster read, so for a manager who is also
  *      a platform admin each sentence here would be false — they get nothing.
  *
- * It disappears by itself the moment the owner applies the policy widening
- * (`projects_*` → `manages_organization`): `sqlWritesGranted` is then true
- * for the role and `operationalWritesNeedGrant` answers false. Recorded as
- * an owner RED item, not hidden.
+ * The owner-approved widening (20260924140000_manager_projects_roster_rls_v1:
+ * projects select/insert/update and company_workers select admit
+ * `manages_organization`) made `sqlWritesGranted` true for every operating
+ * role, so today this renders for NO role. It stays as the one place that
+ * would state such a gap honestly if a future role operates in the matrix
+ * before SQL admits it.
  */
 export async function ManagerScopeNotice({ role }: { role: GovernanceRole }) {
   if (!operationalWritesNeedGrant(projectOrganizationAuthority({ role }))) return null;
