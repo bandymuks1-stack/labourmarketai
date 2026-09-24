@@ -40,6 +40,29 @@ function chipClassOf(source: string): string | undefined {
   return /className="([^"]+)"/.exec(code(source.slice(at)))?.[1];
 }
 
+/** Tailwind utilities that cut a label short — `line-clamp-` as a prefix. */
+const CUTTING_UTILITIES = [
+  "truncate",
+  "text-ellipsis",
+  "whitespace-nowrap",
+  "overflow-hidden",
+  "line-clamp-",
+] as const;
+
+/**
+ * The first class token that would cut the label, or `null`. A token is
+ * compared as a STRING after its variant prefixes (`sm:`, `max-sm:`,
+ * `hover:`) are dropped, so a utility hidden under a variant is still found;
+ * no RegExp is built from the utility names.
+ */
+function cuttingClassIn(className: string): string | null {
+  for (const token of className.split(/\s+/)) {
+    const utility = token.slice(token.lastIndexOf(":") + 1);
+    if (CUTTING_UTILITIES.some((cut) => utility.startsWith(cut))) return token;
+  }
+  return null;
+}
+
 /** The `.modeSwitcher` declaration block inside the phone media query. */
 function phoneRuleOf(css: string): string | null {
   const q = css.indexOf("@media (max-width: 640px)");
@@ -54,13 +77,9 @@ describe("1. the example chips wrap — the label is never cut", () => {
   const entry = read("components/marketing/public-entry.tsx");
   const chip = chipClassOf(entry);
 
-  it("carries no truncation class", () => {
+  it("carries no truncation class, under any variant", () => {
     expect(chip).toBeTypeOf("string");
-    for (const cut of ["truncate", "text-ellipsis", "whitespace-nowrap", "overflow-hidden", "line-clamp-"]) {
-      expect(chip, `chip class cuts the label: ${cut}`).not.toMatch(
-        new RegExp(`(^|\\s)${cut.replace(/[-[\]]/g, "\\$&")}`),
-      );
-    }
+    expect(cuttingClassIn(chip ?? ""), "chip class cuts the label").toBeNull();
   });
 
   it("keeps the two-up density below `sm` and lets the label wrap inside it", () => {
@@ -78,8 +97,13 @@ describe("1. the example chips wrap — the label is never cut", () => {
     const old =
       '<button data-testid="entry-example" className="min-h-11 max-w-[calc(50%-0.375rem)] truncate rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary sm:max-w-none">';
     const oldChip = chipClassOf(old);
-    expect(oldChip).toMatch(/(^|\s)truncate/);
+    expect(cuttingClassIn(oldChip ?? "")).toBe("truncate");
     expect(oldChip).not.toContain("[overflow-wrap:anywhere]");
+    // Hiding the cut under a variant, or clamping instead, is caught too —
+    // and an arbitrary value whose bracket happens to contain a colon is not.
+    expect(cuttingClassIn("min-h-11 max-sm:truncate rounded-full")).toBe("max-sm:truncate");
+    expect(cuttingClassIn("min-h-11 sm:line-clamp-2 rounded-full")).toBe("sm:line-clamp-2");
+    expect(cuttingClassIn("min-h-11 [overflow-wrap:anywhere] rounded-full")).toBeNull();
   });
 
   /**

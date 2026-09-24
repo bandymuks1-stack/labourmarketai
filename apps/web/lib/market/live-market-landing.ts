@@ -12,6 +12,7 @@ import {
   searchPublicVacancyPreviews,
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
+import { publicVacancyCardFacts } from "@/components/marketing/public-vacancy-card-facts";
 
 export type LiveMarketJob = {
   readonly id: string;
@@ -180,21 +181,29 @@ function unavailableSnapshot(): LiveMarketLandingSnapshot {
  * is no distinguishing fact to ADD to the card; the honest move is to not
  * pick two rows the card would paint identically.
  *
- * The fingerprint is exactly what `<PublicVacancyCard>` renders from a row —
- * the heading (profession, else occupation), the occupation subline, the
- * employment-form and working-time chips, the positions chip (printed only
- * above one) and the published DATE (the card prints no time). Compensation
- * is in the projection but the card does not render it, so it is not here:
- * two rows that differ only in a fact nobody sees still look identical.
+ * The fingerprint is exactly what `<PublicVacancyCard>` renders from a row:
+ * the heading (profession, else occupation), the occupation subline, and the
+ * projection of the rest — `publicVacancyCardFacts`, the pure module beside
+ * the card that declares the key sets its chips exist for, and is pinned to
+ * the card by rendering it (`landing-open-jobs-band.test.ts`). That
+ * projection is `null` wherever the card paints nothing: an employment form
+ * or working time the card has no label for (`unknown`, which is about half
+ * of production, or `assignment`) paints no chip, exactly as `null` does, so
+ * two rows that differ only there still look alike and only one is picked.
+ * The positions chip exists only above one, and the date is the UTC day the
+ * card prints, without the time. Compensation is in the row but the card
+ * does not render it, so it is not here: two rows that differ only in a fact
+ * nobody sees still look identical.
  */
 export function landingVacancyFingerprint(v: PublicVacancyPreview): string {
+  const facts = publicVacancyCardFacts(v);
   return JSON.stringify([
     v.professionSlug ?? v.occupation ?? null,
     v.occupation ?? null,
-    v.employmentForm ?? null,
-    v.workingTime ?? null,
-    v.positions !== null && v.positions > 1 ? v.positions : null,
-    v.publishedAt ? v.publishedAt.slice(0, 10) : null,
+    facts.employmentForm,
+    facts.workingTime,
+    facts.positions,
+    facts.publishedDay,
   ]);
 }
 

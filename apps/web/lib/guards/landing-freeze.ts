@@ -517,6 +517,27 @@ import { join } from "node:path";
  * look-alike pair as fixtures; the old selection fails it), so the freeze is
  * not the only thing standing between the landing and these three coming
  * back.
+ *
+ * Review round 2 of the same PR — `lib/market/live-market-landing.ts` only,
+ * ONE hash, zero namespaces. The first fingerprint hashed the RAW
+ * `employmentForm` / `workingTime`, while `<PublicVacancyCard>` paints a
+ * chip only for the keys of its own label tables, so two rows differing only
+ * in `unknown` vs `assignment` (which the card paints identically — no chip)
+ * were still two fingerprints and one look. The fingerprint now hashes
+ * `publicVacancyCardFacts` — a pure module beside the card
+ * (`public-vacancy-card-facts.ts`) declaring the key sets the card's chips
+ * exist for, `null` where it paints nothing — so the server-only reader
+ * does not pull the card's `Link` into its graph, and the card itself is
+ * BYTE-IDENTICAL (it is a waived product-gate surface bound to other PRs;
+ * modifying it here would be rejected as `pr-not-covered`). No rendered
+ * markup changed: the band and the card paint exactly as before; only which
+ * rows the selector declines can change, and only when a page holds such a
+ * pair. Pinned by the `unknown`/`assignment` fixture pair in
+ * `lib/market/live-market-landing.test.ts` (with the raw fingerprint as the
+ * negative control) and, in `landing-open-jobs-band.test.ts`, by rendering
+ * the real card over every combination of the varying facts (same markup
+ * exactly when same facts) and by reading the card's own table keys from
+ * its source and pinning the declared key sets to them.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

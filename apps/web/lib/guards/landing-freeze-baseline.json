@@ -4,7 +4,7 @@
     "app/[locale]/live-market-review/live-market-page.tsx": "a19ab9c7d17ba47ca3842b77726b3c91ba5a7e02da694bad3e602a0df19e39e5",
     "app/[locale]/live-market-review/live-market-command.tsx": "eb5d1b91f0ab342ab7fd9d2a62e02ee301714fc765333e4189abda7ac6572522",
     "app/[locale]/live-market-review/live-market-command.module.css": "686aae3983346345f6064e70df790d6f03fc05c897bb44f3e4e236811f676382",
-    "lib/market/live-market-landing.ts": "19e82a99f5d05a28e07289b5cf4287839e360d990e8daece899a7b4343bfeb5e",
+    "lib/market/live-market-landing.ts": "2953b2835101594604e8d0273e4c6becd3be6fb9c0427a2a3f1c3608c065d99a",
     "lib/telemetry/landing-experience.ts": "5691bb61b38b49a8904f870ce028418e931873939c16e075f9d773e244c648e7",
     "app/[locale]/focus-landing/focus-landing.tsx": "e2e5b678cac262c29d36d484e26b7383d6223881a2cc53deffe60c076deb53e9",
     "app/[locale]/focus-landing/landing-mode-switcher.tsx": "4927ce0c36c73176262f71e199ac66c0760c711c3c24bea85948a6e8998396c0",

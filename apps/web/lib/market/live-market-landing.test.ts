@@ -95,6 +95,42 @@ describe("pickLandingVacancySample — distinct-looking rows only", () => {
   it("an empty page is an empty sample", () => {
     expect(pickLandingVacancySample([])).toEqual([]);
   });
+
+  /**
+   * REVIEW ROUND 2 (P2). The first fingerprint hashed the RAW `employmentForm`
+   * and `workingTime`, but the card paints a chip only for the keys of its own
+   * label tables (permanent / temporary / seasonal; full_time / part_time).
+   * `unknown` is about half of production and `assignment` occurs too; the
+   * card paints NO chip for either, so two rows differing only there were two
+   * fingerprints and one look. The fingerprint now hashes what the card
+   * paints, through the card's own `publicVacancyCardFacts`.
+   */
+  it("picks ONE of two rows that differ only in a form or time the card paints no chip for", () => {
+    const forms = [row(1, { employmentForm: "unknown" }), row(2, { employmentForm: "assignment" })];
+    expect(pickLandingVacancySample(forms).map((v) => v.id.slice(-1))).toEqual(["1"]);
+    const times = [
+      row(1, { workingTime: "unknown" }),
+      row(2, { workingTime: "shift" }),
+      row(3, { workingTime: null }),
+    ];
+    expect(pickLandingVacancySample(times).map((v) => v.id.slice(-1))).toEqual(["1"]);
+  });
+
+  it("NEGATIVE CONTROL — a fingerprint of the RAW fields told the pair apart and picked both", () => {
+    const raw = (v: PublicVacancyPreview) =>
+      JSON.stringify([
+        v.professionSlug ?? v.occupation ?? null,
+        v.occupation ?? null,
+        v.employmentForm ?? null,
+        v.workingTime ?? null,
+        v.positions !== null && v.positions > 1 ? v.positions : null,
+        v.publishedAt ? v.publishedAt.slice(0, 10) : null,
+      ]);
+    const a = row(1, { employmentForm: "unknown" });
+    const b = row(2, { employmentForm: "assignment" });
+    expect(raw(a)).not.toBe(raw(b));
+    expect(landingVacancyFingerprint(a)).toBe(landingVacancyFingerprint(b));
+  });
 });
 
 describe("landingVacancyFingerprint — exactly what the anonymous card paints", () => {
@@ -126,6 +162,40 @@ describe("landingVacancyFingerprint — exactly what the anonymous card paints",
     // The card prints the positions chip only above one, so 1 and null look alike.
     expect(landingVacancyFingerprint(row(1, { positions: 1 }))).toBe(
       landingVacancyFingerprint(row(1, { positions: null })),
+    );
+    // …and a form or time the card has no label for paints no chip, like null.
+    for (const over of [
+      { employmentForm: "unknown" },
+      { employmentForm: "assignment" },
+      { workingTime: "unknown" },
+      { workingTime: "shift" },
+    ] satisfies Partial<PublicVacancyPreview>[]) {
+      const blank = { employmentForm: null, workingTime: null, ...over };
+      expect(landingVacancyFingerprint(row(1, blank)), JSON.stringify(over)).toBe(
+        landingVacancyFingerprint(row(1, { employmentForm: null, workingTime: null })),
+      );
+    }
+  });
+
+  it("differs on every form and time the card HAS a label for", () => {
+    const forms = ["permanent", "temporary", "seasonal", null].map((employmentForm) =>
+      landingVacancyFingerprint(row(1, { employmentForm })),
+    );
+    expect(new Set(forms).size).toBe(forms.length);
+    const times = ["full_time", "part_time", null].map((workingTime) =>
+      landingVacancyFingerprint(row(1, { workingTime })),
+    );
+    expect(new Set(times).size).toBe(times.length);
+  });
+
+  it("the published DAY is the card's UTC day, whatever offset the timestamp carries", () => {
+    // The card prints the UTC calendar day (lib/time/display); a `+02:00`
+    // timestamp before midnight UTC is the previous day on the card.
+    expect(landingVacancyFingerprint(row(1, { publishedAt: "2026-09-23T01:15:00+02:00" }))).toBe(
+      landingVacancyFingerprint(row(1, { publishedAt: "2026-09-22T23:15:00Z" })),
+    );
+    expect(landingVacancyFingerprint(row(1, { publishedAt: "2026-09-23T01:15:00+02:00" }))).not.toBe(
+      landingVacancyFingerprint(row(1, { publishedAt: "2026-09-23T06:15:00Z" })),
     );
   });
 
