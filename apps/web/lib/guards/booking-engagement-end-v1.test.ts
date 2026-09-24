@@ -1443,6 +1443,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // RED (data DML + a read-only dynamic FK sweep); UNAPPLIED — the lead
       // applies after a rolled-back production dry run. Paired rollback.
       "20260923114500_nonstop_org_consolidation_v1.sql",
+      // 2026-09-24 — K2-1 v2 (supersedes the unapplied #1430 draft): companies
+      // SELECT narrowed to the discovery columns for authenticated + ONE
+      // SECURITY DEFINER private reader (creator, active ROLES_THAT_OPEN
+      // member, admin). No data change. RED (grant/revoke + definer); the
+      // marker is an ACKNOWLEDGEMENT — DRAFT + needs-human-gate, UNAPPLIED.
+      "20260924120000_companies_contact_minimization_v2.sql",
 ]);
   });
 

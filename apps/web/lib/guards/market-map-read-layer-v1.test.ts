@@ -1035,7 +1035,11 @@ describe("NO new DB migration in this PR", () => {
     //   the lead applies after PR-2 (#1857) is deployed and after the
     //   rolled-back production dry run). Not this read layer's file.
     //   RECOUNTED: 305.
-    expect(count).toBeLessThanOrEqual(305);
+    // Bumped 305 -> 306 for 20260924120000_companies_contact_minimization_v2
+    //   (K2-1 v2: companies SELECT narrowed to discovery columns + one
+    //   SECURITY DEFINER private reader; RED, human-gated, UNAPPLIED). Not
+    //   this read layer's file. RECOUNTED: 306.
+    expect(count).toBeLessThanOrEqual(306);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -2650,7 +2650,13 @@ describe("no migration files added by this sprint", () => {
 // any new column is non-null; UNAPPLIED — applied by the lead after PR-2 (#1857) is on
 // production and the rolled-back dry run (docs/design/historical-timesheet-m1-dryrun.sql)
 // passes. RECOUNTED: 305.
-const SPRINT_BASELINE = 305;
+// Bumped 305 -> 306 for 20260924120000_companies_contact_minimization_v2 (K2-1 v2,
+// supersedes the unapplied #1430 draft): REVOKE the whole-table SELECT on companies
+// from authenticated + a column grant of the discovery columns + ONE SECURITY DEFINER
+// reader (creator, active ROLES_THAT_OPEN member, admin). No data change. RED
+// (grant/revoke + definer), human-gated, paired .down.sql; UNAPPLIED — the app half
+// deploys first, then the lead applies after owner approval. RECOUNTED: 306.
+const SPRINT_BASELINE = 306;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
