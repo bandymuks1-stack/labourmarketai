@@ -6,6 +6,7 @@
 > worktrees, production, DB. This file is the index to that truth.
 > PUBLIC REPO: ids and roles only — no personal names, e-mails or contact data.
 > Updated: 2026-09-24 ~06:40Z (checkpoint #9 — cloud session after the owner-PC session hit its weekly limit; N-P2 #1864 merged + deployed; batch-5 HIST PR-4 / PR-5 / M-residue NOT RECOVERABLE from the cloud — see §C).
+> Updated: 2026-09-24 ~08:00Z (checkpoint #10 — second cloud session: state re-verified, nothing new on any ref or on production; ŠIANDIEN P2 mechanism located and left as is; #1430 found STALE and refreshed as K2-1 v2; manager-RLS and company-description defects measured — see §K).
 >
 > Checkpoint #9 was written from a CLOUD session (no access to the owner PC, its worktrees or
 > `labourmarket.ai` — the environment's network policy answers 403). Until #9 the file lived only on
@@ -68,7 +69,7 @@ what exists, open the PRs, then continue from the table above.
 Production proofs by the owner's own sessions (multi-org switch, manager workspace, visibility consent from chat, agency invitation link, first live booking/absence notification row) · worktree hygiene (89 worktrees remain, most from earlier programs — remove merged ones after the 4 checks, never --force; stray vitest workers can hold a worktree, see memory) · final human acceptance walk + final receipt (program §41).
 
 ## I. OWNER DECISIONS STILL OPEN
-1. RED #1430 companies contact/VAT/admin-note visible to every signed-in account (P0 security).
+1. RED #1430 → superseded by K2-1 v2 (P0 privacy; see §K — details in the owner channel, not in this public repo).
 2. RED R-B #1813 filtered /jobs cold timeout (needed before profession chips can link).
 3. Demand visibility: unverified companies' needs hidden from workers — badge vs verification queue.
 4. RED manager RLS (projects_* / company_workers_select → manages_organization) — affects the Nonstop recruiter; membership_accept_v1 role grant vs the workspace-derived gate (#1859).
@@ -78,6 +79,7 @@ Production proofs by the owner's own sessions (multi-org switch, manager workspa
 8. Historical import: threshold calibration on a preview-only run of the first real file; leave Nonstop's draft projects untouched; approve PR-4 (M2 + M3) when it is posted.
 
 ## J. NEXT ACTION QUEUE
+0. (#10) EXACT NEXT ACTION — PC session (rate-limited until 2026-09-27 05:00 Vilnius): in each batch-5 worktree `git status`, `git log origin/main..HEAD`, list untracked/ignored unique files → commit + push → open HIST PR-4 (draft + needs-human-gate), HIST PR-5, M-residue → continue §C. Cloud sessions meanwhile: owner decisions on the §K RED packets (K2-1 v2 PR, manager RLS, description save); after an approval, the lead runs the rolled-back production dry run, applies, reads back.
 0. (#9) PC session: recover batch-5 worktrees (HIST PR-4, HIST PR-5, M-residue) → push → PRs. N-P2 is done (#1864).
    (#9b, cloud) CLOSED in the follow-up PR from `claude/jolly-babbage-tajf4d`: the #1849 residue
    (every server action that writes into the active organization refuses a stale screen — 30 actions,
@@ -91,3 +93,23 @@ Production proofs by the owner's own sessions (multi-org switch, manager workspa
 2. Owner: approve PR-4 (M2 + M3) → lead dry-runs and applies → PR-6, PR-7.
 3. Owner walks (their own sessions) listed in §H; final human acceptance walk; final receipt (program §41).
 4. Worktree hygiene as time allows.
+
+## K. CHECKPOINT #10 (2026-09-24 ~08:00Z, cloud session; network policy still answers 403 for `labourmarket.ai`)
+
+**Verified, not assumed.**
+- `main` = `5497708a` (#1866). CI on it: Quality Gates, E2E Smoke, CodeQL, Mobile = success. Production = `5497708a` per the owner's handoff ("deployment completed"); `/api/health` not readable from the cloud (403) → #1866 is DEPLOYED / NOT PRODUCTION-PROVEN.
+- Ledger tail unchanged: `20260924021637 historical_timesheet_m1`. No migration applied this session.
+- No PR after #1866. 605 remote heads, none new except this session's branch; no file of HIST PR-4 / PR-5 / M-residue (`ordered-work`, `customer-key`, `historical-project-isolation`, `org_import_source`, `source-subtotals`, `historical-graph`, M2/M3) in any fetched ref → batch 5 still lives only in the owner-PC worktrees; per the owner rule it is NOT recreated. Historical PR-6 / PR-7 depend on PR-5 and on PR-4 applied (design v3 §15), so the whole historical chain waits on that recovery.
+- Dirty worktrees / local-only commits: none in this cloud container except the K2-1 v2 commit, pushed as its own draft PR right after this checkpoint merges (branch `claude/sweet-mccarthy-3joyg4`).
+
+**Production DB since #9 (read-only aggregates, 07:31Z):** 0 message attachments and 0 journal entries since #1850; 0 booking / absence / task rows since #1858; notification events today = 2 `demand_interest_expressed` + 2 `weekly_digest` (last 05:51Z); invitations today = 1 `join_platform` accepted (the #9 one); 0 new profiles; 158 evidence records; 0 historical projects. Nothing new is PRODUCTION-PROVEN; the #9 DB-level proofs (interest → owner notified; invitation → sign-up → accepted) stand.
+
+**#1856 "returning-user ŠIANDIEN latent" — mechanism located, behaviour kept.** The review text is still in no ref (the only GitHub review on #1856 is a Codex P2, below). In code: `conversation-chat.tsx` sets `todayOnScreen = Boolean(openingContext)` and the brief omits `TODAY_COVERED_BRIEF_RUNGS` on that, but ŠIANDIEN renders only while the thread is in its opening state (`ConversationThread` `isOpening && intro`). A restored transcript (`HistoryBlock`) ends the opening state, so a returning user would see neither ŠIANDIEN nor the omitted rungs. LATENT: transcript restore needs RED #883 (unapplied) — unreachable on production today. Per the owner rule nothing was changed; it is settled together with #883.
+
+**#1856 Codex P2 (unresolved thread, `lib/today/today-route.ts:92`) — recorded, not changed.** `profile-gap` is omitted under ŠIANDIEN, but the brief's gap comes from the profile readiness summary (skills, supported evidence, work-card confirmation …) while ŠIANDIEN's next action comes from the work-card engine (work, availability, location, pay, journal count): a worker with a journal entry and no supported evidence no longer hears the evidence gap in the brief. The readiness item stays reachable on the hub/board (#1855). Owner call: keep the omission, or omit `profile-gap` only when both engines name the same step.
+
+**RED packets (one decision each; nothing applied).**
+1. **K2-1 v2 — company data minimization (replaces #1430).** Still needed; #1430 as drafted no longer fits `main` after #1859 (it would break the company doors for managers and members). v2 = narrowed column grant + ONE definer reader for the people who already open the company, the four app reads routed through it with a fallback, paired rollback; contract proven on a local PostgreSQL 16 (before/after/rollback). Order: deploy the app half first, then apply. Draft PR `needs-human-gate` from `claude/sweet-mccarthy-3joyg4`. Security analysis and evidence: owner channel only (AGENTS.md — this repo is public).
+2. **Manager RLS (no draft yet).** Still needed: a manager member cannot write projects or read the workforce list (the app says so honestly). Proposal: extend the `projects` and `company_workers` policies with the existing `manages_organization(...)` helper for select/insert/update; delete unchanged unless the owner says otherwise. Detail in the owner channel.
+3. **Company description save does not persist (new defect, needs RED).** The public business page's description save (`lib/company/description-actions.ts`) writes through a path production does not grant, so it always ends in the generic error; no company carries a description. No existing write path covers it. Options: (a) a column grant, (b) a definer write gated like `owns_company` (matches the `manage-company-profile` capability). Recommended: (b).
+4. Still open from §I: #1813 R-B, demand visibility, #1815 / R-P2 / R-6 / EVID-2 / #1577 / #883 (#883 also settles the ŠIANDIEN item above), provenance data, historical PR-4 when it is recovered.
