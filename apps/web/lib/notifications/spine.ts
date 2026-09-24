@@ -16,6 +16,7 @@ import { listMyMembershipInvitations } from "@/lib/company/memberships";
 import { getPendingAbsenceReviewCount } from "@/lib/leave/absences";
 import { getTaskAttentionCounts } from "@/lib/tasks/tasks";
 import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunities";
+import { getBridgeSpineCounts } from "@/lib/agency/bridge-read";
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import {
   SPINE_SIGNALS,
@@ -53,6 +54,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     taskAttention,
     newJobMatches,
     pendingAbsenceReviews,
+    bridge,
   ] = await Promise.all([
     getUnreadConversationCount(),
     getPendingIncomingRequestCount(),
@@ -71,6 +73,12 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     // Role-gated inside the reader (0 for worker / client), self-excluded,
     // and 0 while the leave migration is unapplied.
     getPendingAbsenceReviewCount(),
+    // The agency ↔ client bridge (2026-09-24): side-gated inside the reader
+    // by the ACTIVE workspace company (agency: shares awaiting an offer;
+    // client: pending connection invites + offers awaiting a decision), all
+    // from the SAME bridge reads the partners / scouting doors render, zeros
+    // for everyone else and on any failure.
+    getBridgeSpineCounts(),
   ]);
   return {
     unreadConversations,
@@ -84,6 +92,9 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     openTaskAttention: taskAttention.total,
     newJobMatches,
     pendingAbsenceReviews,
+    pendingConnectionInvites: bridge.pendingConnectionInvites,
+    sharedRequestsAwaitingOffer: bridge.sharedRequestsAwaitingOffer,
+    openCandidateOffers: bridge.openCandidateOffers,
   };
 });
 

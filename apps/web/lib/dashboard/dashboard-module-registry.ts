@@ -406,10 +406,19 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     roles: ORG_ROLES,
     primaryRoles: ORG_ROLES,
     surfaces: ["grid", "command"],
+    // The agency ↔ client bridge's three state-derived signals (2026-09-24)
+    // clear on doors INSIDE this workspace (partners: connection invites,
+    // shares awaiting an offer; scouting: offers awaiting a decision), so
+    // the company card is the one that carries their count.
     // A seat in an organization's governance is offered by an organization
     // — its source module. The signal clears on the invitee's own surface
     // (the Activity Setup Hub), which is where its href points.
-    attentionSignalIds: ["pending-membership-invitations"],
+    attentionSignalIds: [
+      "pending-connection-invites",
+      "shared-requests-awaiting-offer",
+      "open-candidate-offers",
+      "pending-membership-invitations",
+    ],
   },
 
   {

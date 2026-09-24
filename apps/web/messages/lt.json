@@ -623,7 +623,10 @@
       "booking_responses": "Išnyksta, kai atidarote rezervacijų puslapį.",
       "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje.",
       "pending_absence_reviews": "Išnyksta, kai atostogų ir nebuvimo puslapyje patvirtinate arba atmetate prašymą.",
-      "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje)."
+      "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje).",
+      "pending_connection_invites": "Išnyksta, kai partnerių puslapyje priimate arba atmetate agentūros ryšio prašymą.",
+      "shared_requests_awaiting_offer": "Išnyksta, kai partnerių puslapyje pasiūlote komandos darbuotoją pasidalintam poreikiui.",
+      "open_candidate_offers": "Išnyksta, kai kandidatų atrankos puslapyje priimate arba atmetate pasiūlytą kandidatą."
     },
     "storedTitle": "Įrašyti pranešimai",
     "storedIntro": "Užfiksuoti įvykiai apie jus — kiekviena eilutė atidaro susijusį puslapį. Perskaitymo būsena tvarkoma per varpelį.",
@@ -2067,6 +2070,7 @@
         "orgNoCompanyProfileBody": "Jos pavadinimo čia pakeisti negalima — šioje formoje keičiamas tik įmonės profilio pavadinimas, o organizacijos be jo kol kas pervadinti negalima. Niekas nepakeista.",
         "orgNotAvailableHeading": "Šios organizacijos čia tvarkyti negalima",
         "orgNotAvailableBody": "Nuoroda nurodo organizaciją, kurios profilio iš šios paskyros keisti negalite, arba jos nepavyko patikrinti. Niekas nepakeista. Pasirinkite organizaciją darbo erdvių sąraše viršuje.",
+        "agencyConnectionPending": "Kvietimas priimtas. Personalo agentūra nori užmegzti ryšį su jūsų įmone — pirmiausia sukurkite įmonės profilį; ryšio prašymas tada lauks jūsų puslapyje „Klientai ir partneriai“, kur jį patvirtinsite šios įmonės vardu.",
         "legalLockedNotice": "Ši įmonė yra patvirtinta. Jos juridiniai duomenys (pavadinimas, įmonės kodas, šalis ir registracijos adresas) čia užrakinti ir negali būti perrašyti — dėl juridinių duomenų keitimo kreipkitės į palaikymą. Kontaktus, svetainę, veiklos tipą ir savo vaidmenį vis tiek galite atnaujinti.",
         "saveDraft": "Išsaugoti įmonę",
         "submitRequest": "Prašyti rankinės peržiūros (neprivaloma)",
@@ -4641,6 +4645,9 @@
         "open_task_attention": "Užduotys, kurioms reikia dėmesio",
         "pending_absence_reviews": "Prašymai peržiūrai: atostogos ir nebuvimas",
         "new_job_matches": "Nauji jums tinkantys darbo skelbimai",
+        "pending_connection_invites": "Personalo agentūra nori užmegzti ryšį su jūsų įmone",
+        "shared_requests_awaiting_offer": "Klientų poreikiai, laukiantys jūsų kandidato",
+        "open_candidate_offers": "Agentūros kandidatai, laukiantys jūsų sprendimo",
         "event_booking_proposed": "Gavai rezervacijos pasiūlymą",
         "event_booking_accepted": "Tavo rezervacijos pasiūlymas priimtas",
         "event_booking_declined": "Tavo rezervacijos pasiūlymas atmestas",
@@ -11483,7 +11490,11 @@
       "demand": "Darbo poreikis: {role} · {country}",
       "demandNotMatch": "Darbdavys pakvietė jus tiesiogiai — tai ne sistemos atranka.",
       "interested": "Man įdomu",
-      "notInterested": "Neįdomu"
+      "notInterested": "Neįdomu",
+      "agencyClient": "Personalo agentūra kviečia jūsų įmonę bendradarbiauti kaip jos klientą.",
+      "agencyClientNext": "Priėmus kvietimą, ryšio prašymas atsiras jūsų organizacijos puslapyje „Klientai ir partneriai“ — ten patvirtinkite jį savo įmonės vardu. Kol to nepadarysite, niekuo nesidalinama.",
+      "addressedToOther": "Šis kvietimas adresuotas {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros ryšio patvirtinti negalima — prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
+      "switchAccount": "Atsijungti ir pakeisti paskyrą"
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {
@@ -11670,7 +11681,19 @@
       "decision_declined": "Klientas atmetė"
     },
     "goToRoster": "Pereiti į komandą",
-    "invalidLabel": "Patikrinkite el. pašto adresą — kvietimas neišsiųstas."
+    "invalidLabel": "Patikrinkite el. pašto adresą — kvietimas neišsiųstas.",
+    "deliveryHeading": "Kvietimo nuoroda",
+    "deliveryCreated": "Neišsiųsta el. paštu — el. laiškų siuntimas nesukonfigūruotas. Nukopijuokite nuorodą ir nusiųskite ją klientui patys.",
+    "deliverySent": "Kvietimo laiškas išsiųstas. Nuorodą vis tiek galite nukopijuoti.",
+    "deliveryFailed": "El. laiško pristatyti nepavyko. Nukopijuokite nuorodą ir nusiųskite patys.",
+    "deliveryDuplicate": "Kvietimas šiuo adresu jau laukia. Naują nuorodą gausite paspaudę „Nauja nuoroda“.",
+    "deliveryRefused": "Kvietimo nuorodos sukurti nepavyko — ryšys užfiksuotas, bet niekas nepristatyta.",
+    "deliveryUnavailable": "Šiuo metu kvietimo nuorodos sukurti nepavyko — ryšys užfiksuotas. Vėliau pabandykite „Nauja nuoroda“.",
+    "noInvitationYet": "Kvietimo nuorodos dar nėra — gaukite ją, kad pristatytumėte kvietimą.",
+    "getLink": "Gauti nuorodą",
+    "newLink": "Nauja nuoroda",
+    "messageButton": "Parašyti žinutę",
+    "deliveryAccepted": "Pristatyta — klientas priėmė kvietimą ir dabar patvirtina ryšį savo puslapyje „Klientai ir partneriai“."
   },
   "clientBridge": {
     "title": "Personalo agentūros",
@@ -11692,7 +11715,8 @@
     "fromAgency": "Nuo",
     "sharedHeading": "Bendrinama su šia agentūra",
     "noShared": "Su šia agentūra kol kas niekas nebendrinama",
-    "unshareButton": "Nustoti bendrinti šią užklausą"
+    "unshareButton": "Nustoti bendrinti šią užklausą",
+    "messageButton": "Parašyti žinutę"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -16986,7 +17010,8 @@
         "title": "Klientai ir partneriai",
         "subtitle": "Su kuo dirbate: klientai, agentūros ir bendri poreikiai.",
         "empty": "Kol kas nėra klientų ar partnerių ryšių. Agentūra gali pakviesti jus bendradarbiauti — tada čia atsiras jos pasiūlymai.",
-        "unavailable": "Partnerių ryšių nepavyko nuskaityti. Tai nereiškia, kad jų nėra — pabandykite dar kartą."
+        "unavailable": "Partnerių ryšių nepavyko nuskaityti. Tai nereiškia, kad jų nėra — pabandykite dar kartą.",
+        "invitationAccepted": "Kvietimas priimtas. Žemiau patvirtinkite agentūros ryšio prašymą savo įmonės vardu."
       },
       "education": {
         "title": "Mokymai ir programos",

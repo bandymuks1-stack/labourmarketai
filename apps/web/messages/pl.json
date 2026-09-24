@@ -623,7 +623,10 @@
       "booking_responses": "Znika, gdy otworzysz stronę rezerwacji.",
       "open_task_attention": "Znika, gdy zadanie zostanie zakończone, odblokowane lub przełożone na stronie zadań.",
       "pending_absence_reviews": "Znika, gdy zatwierdzisz lub odrzucisz wniosek na stronie urlopów i nieobecności.",
-      "new_job_matches": "Znika, gdy otworzysz tablicę możliwości (lub zobaczysz oferty na karcie przeglądu)."
+      "new_job_matches": "Znika, gdy otworzysz tablicę możliwości (lub zobaczysz oferty na karcie przeglądu).",
+      "pending_connection_invites": "Znika, gdy na stronie partnerów zaakceptujesz lub odrzucisz prośbę agencji o połączenie.",
+      "shared_requests_awaiting_offer": "Znika, gdy na stronie partnerów zaproponujesz pracownika do udostępnionego zapytania.",
+      "open_candidate_offers": "Znika, gdy na stronie rekrutacji zaakceptujesz lub odrzucisz zaproponowanego kandydata."
     },
     "storedTitle": "Zapisane powiadomienia",
     "storedIntro": "Zarejestrowane zdarzenia dotyczące Ciebie — każdy wiersz otwiera stronę, której dotyczy. Stan przeczytania zarządzany jest z dzwonka.",
@@ -2067,6 +2070,7 @@
         "orgNoCompanyProfileBody": "Jej nazwy nie można tu zmienić — ten formularz zmienia tylko nazwę profilu firmy, a organizacji bez niego nie można jeszcze przemianować. Nic nie zostało zmienione.",
         "orgNotAvailableHeading": "Tej organizacji nie można tu zarządzać",
         "orgNotAvailableBody": "Link wskazuje organizację, której profilu nie możesz zmienić z tego konta, albo nie udało się jej sprawdzić. Nic nie zostało zmienione. Wybierz organizację w przełączniku przestrzeni u góry.",
+        "agencyConnectionPending": "Zaproszenie zaakceptowane. Agencja pracy chce nawiązać połączenie z Twoją firmą — najpierw utwórz profil firmy; prośba o połączenie będzie potem czekać na stronie Partnerzy, gdzie potwierdzisz ją w imieniu tej firmy.",
         "legalLockedNotice": "Ta firma jest zweryfikowana. Jej dane prawne (pełna nazwa, numer rejestracyjny, kraj i adres siedziby) są tu zablokowane i nie można ich nadpisać — skontaktuj się z pomocą techniczną, aby poprosić o zmianę danych prawnych. Nadal możesz aktualizować kontakty, stronę internetową, typ firmy i swoją rolę.",
         "saveDraft": "Zapisz firmę",
         "submitRequest": "Poproś o ręczną weryfikację (opcjonalnie)",
@@ -4641,6 +4645,9 @@
         "open_task_attention": "Zadania wymagające uwagi",
         "pending_absence_reviews": "Wnioski o nieobecność do rozpatrzenia",
         "new_job_matches": "Nowe pasujące oferty pracy",
+        "pending_connection_invites": "Agencja pracy chce nawiązać połączenie z Twoją firmą",
+        "shared_requests_awaiting_offer": "Zapytania klientów czekające na Twojego kandydata",
+        "open_candidate_offers": "Kandydaci agencji czekający na Twoją decyzję",
         "event_booking_proposed": "Otrzymałeś propozycję rezerwacji",
         "event_booking_accepted": "Twoja propozycja rezerwacji została przyjęta",
         "event_booking_declined": "Twoja propozycja rezerwacji została odrzucona",
@@ -11483,7 +11490,11 @@
       "demand": "Zapotrzebowanie na pracowników: {role} · {country}",
       "demandNotMatch": "Pracodawca zaprosił Cię bezpośrednio — to nie jest dopasowanie systemowe.",
       "interested": "Jestem zainteresowany(a)",
-      "notInterested": "Niezainteresowany(a)"
+      "notInterested": "Niezainteresowany(a)",
+      "agencyClient": "Agencja pracy zaprasza Twoją firmę do współpracy jako klienta.",
+      "agencyClientNext": "Po zaakceptowaniu prośba o połączenie pojawi się na stronie Partnerzy Twojej organizacji — potwierdź ją tam w imieniu swojej firmy. Do tego czasu nic nie jest udostępniane.",
+      "addressedToOther": "To zaproszenie zostało zaadresowane do {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można potwierdzić połączenia — zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
+      "switchAccount": "Wyloguj się i zmień konto"
     },
     "teamEnquiriesTitle": "Moje zapytania do zespołów",
     "admin": {
@@ -11670,7 +11681,19 @@
       "decision_declined": "Klient odrzucił"
     },
     "goToRoster": "Przejdź do listy",
-    "invalidLabel": "Sprawdź adres e-mail — zaproszenie nie zostało wysłane."
+    "invalidLabel": "Sprawdź adres e-mail — zaproszenie nie zostało wysłane.",
+    "deliveryHeading": "Link zaproszenia",
+    "deliveryCreated": "Nie wysłano e-mailem — wysyłka e-maili nie jest skonfigurowana. Skopiuj link i wyślij go klientowi samodzielnie.",
+    "deliverySent": "E-mail z zaproszeniem został wysłany. Nadal możesz skopiować link.",
+    "deliveryFailed": "Dostarczenie e-maila nie powiodło się. Skopiuj link i wyślij go samodzielnie.",
+    "deliveryDuplicate": "Zaproszenie na ten adres już oczekuje. Użyj „Nowy link”, aby otrzymać nowy link.",
+    "deliveryRefused": "Nie udało się utworzyć linku zaproszenia — połączenie zostało zapisane, ale nic nie dostarczono.",
+    "deliveryUnavailable": "Nie udało się teraz utworzyć linku zaproszenia — połączenie zostało zapisane. Spróbuj później „Nowy link”.",
+    "noInvitationYet": "Brak linku zaproszenia — pobierz go, aby dostarczyć to zaproszenie.",
+    "getLink": "Pobierz link",
+    "newLink": "Nowy link",
+    "messageButton": "Wiadomość",
+    "deliveryAccepted": "Dostarczone — klient zaakceptował zaproszenie i teraz potwierdza połączenie na swojej stronie Partnerzy."
   },
   "clientBridge": {
     "title": "Agencje pracy",
@@ -11692,7 +11715,8 @@
     "fromAgency": "Od",
     "sharedHeading": "Udostępnione tej agencji",
     "noShared": "Nic jeszcze nie udostępniono tej agencji",
-    "unshareButton": "Przestań udostępniać to zapytanie"
+    "unshareButton": "Przestań udostępniać to zapytanie",
+    "messageButton": "Wiadomość"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -16986,7 +17010,8 @@
         "title": "Klienci i partnerzy",
         "subtitle": "Z kim współpracujesz: klienci, agencje i wspólne potrzeby.",
         "empty": "Nie ma jeszcze relacji z klientami ani partnerami. Agencja może zaprosić Cię do współpracy — jej propozycje pojawią się tutaj.",
-        "unavailable": "Nie udało się wczytać połączeń partnerskich. To nie znaczy, że ich nie ma — spróbuj ponownie."
+        "unavailable": "Nie udało się wczytać połączeń partnerskich. To nie znaczy, że ich nie ma — spróbuj ponownie.",
+        "invitationAccepted": "Zaproszenie zaakceptowane. Potwierdź poniżej prośbę agencji o połączenie w imieniu swojej firmy."
       },
       "education": {
         "title": "Nauka i programy",

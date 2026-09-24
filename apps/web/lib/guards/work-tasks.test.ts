@@ -101,6 +101,9 @@ const ZERO: SpineCounts = {
   openTaskAttention: 0,
   newJobMatches: 0,
   pendingAbsenceReviews: 0,
+  pendingConnectionInvites: 0,
+  sharedRequestsAwaitingOffer: 0,
+  openCandidateOffers: 0,
 };
 
 /** Walk a source dir collecting ts/tsx files (skips tests). */

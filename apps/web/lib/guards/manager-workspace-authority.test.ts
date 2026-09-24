@@ -225,6 +225,11 @@ describe("spine: the membership-invitation signal is wired end to end", () => {
       openTaskAttention: 0,
       newJobMatches: 0,
       pendingAbsenceReviews: 0,
+      // Agency ↔ client bridge counts (#1863) — zero here; the signal under
+      // test reads only the membership-invitation count.
+      pendingConnectionInvites: 0,
+      sharedRequestsAwaitingOffer: 0,
+      openCandidateOffers: 0,
     })).toBe(4);
   });
 });

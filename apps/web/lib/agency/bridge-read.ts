@@ -1,13 +1,20 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import {
+  ZERO_BRIDGE_SPINE_COUNTS,
+  countPendingConnectionInvites,
+  countSharesAwaitingOffer,
   isMissingRpcCode,
   isMissingTableCode,
   mergeClientConnectionStates,
   type AgencyConnection,
   type AgencyConnectionsState,
+  type BridgeSpineCounts,
   type ClientConnectionInvite,
+  type ClientInviteDeliveriesState,
   type ClientInvitesState,
   type OfferProgressRow,
   type OfferProgressState,
@@ -15,6 +22,10 @@ import {
   type SharedRequestRow,
   type SharedRequestsState,
 } from "@/lib/agency/bridge-model";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
+import { listMySentInvitations } from "@/lib/invitations/network";
 
 /**
  * Real two-subject bridge — read services (issue #859), backed by migration
@@ -337,6 +348,104 @@ export async function listAgencyOfferProgress(): Promise<OfferProgressState> {
     return { kind: "error" };
   }
 }
+
+/**
+ * AGENCY side: the connection invitations this agency DELIVERED — the
+ * `invite_company` rows marked `agency_client` in the caller's own sent list
+ * (the primitive's read, inviter-pinned by `listMySentInvitations`). The
+ * partners door pairs each pending connection with its invitation by
+ * address, so it can state the real delivery outcome (`not_sent` until a
+ * provider acknowledged a send) and offer a fresh link. A failed read is
+ * UNKNOWN, never "no invitation was sent".
+ */
+export async function listMyClientInviteDeliveries(): Promise<ClientInviteDeliveriesState> {
+  try {
+    const read = await listMySentInvitations();
+    if (read.status === "needs-migration") return { kind: "needs-migration" };
+    if (read.status !== "ok") return { kind: "error" };
+    return {
+      kind: "ok",
+      rows: read.items
+        .filter(
+          (i) =>
+            i.invitationType === "invite_company" &&
+            i.proposedRole === AGENCY_CLIENT_PROPOSED_ROLE &&
+            !!i.invitedEmail,
+        )
+        .map((i) => ({
+          invitationId: i.id,
+          email: (i.invitedEmail as string).trim().toLowerCase(),
+          status: i.status,
+          deliveryStatus: i.deliveryStatus,
+          createdAt: i.createdAt,
+        })),
+    };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/**
+ * CLIENT side: how many agency offers on this company's requests still wait
+ * for its decision. Same table and the same SELECT policy
+ * (`owns_company(client_company_id)`, migration 20260723180000 §3) the
+ * scouting page reads offers through; a head count, no rows. 0 on any
+ * failure — a spine count never fabricates attention from an unknown.
+ */
+export async function countOpenCandidateOffersForClient(
+  clientCompanyId: string,
+): Promise<number> {
+  const supabase = await createClient();
+  try {
+    const { count, error } = await asAny(supabase)
+      .from("agency_candidate_offers")
+      .select("id", { count: "exact", head: true })
+      .eq("client_company_id", clientCompanyId)
+      .eq("status", "offered");
+    if (error) return 0;
+    return typeof count === "number" ? count : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * THE BRIDGE'S SPINE COUNTS (2026-09-24), from the reads above and nothing
+ * new: the caller's ACTIVE workspace company decides the side. A staffing
+ * agency counts shared requests it has not answered; any other company
+ * counts the connection invites waiting on it and the candidate offers
+ * waiting on its decision. Zeros for a person with no company context, and
+ * zeros on any failure. Request-cached with the rest of the spine.
+ */
+export const getBridgeSpineCounts = cache(async (): Promise<BridgeSpineCounts> => {
+  try {
+    const ctx = await resolveEmployerCompanyContext();
+    if (ctx.kind !== "ok") return ZERO_BRIDGE_SPINE_COUNTS;
+    const company = await getOwnedCompanyById(ctx.companyId);
+    if (company.kind !== "ok" || !company.row) return ZERO_BRIDGE_SPINE_COUNTS;
+    if (company.row.companyType === "staffing_agency") {
+      const [shared, progress] = await Promise.all([
+        listSharedRequestsForAgency(),
+        listAgencyOfferProgress(),
+      ]);
+      return {
+        ...ZERO_BRIDGE_SPINE_COUNTS,
+        sharedRequestsAwaitingOffer: countSharesAwaitingOffer(shared, progress),
+      };
+    }
+    const [invites, openCandidateOffers] = await Promise.all([
+      listMyConnectionInvites(),
+      countOpenCandidateOffersForClient(company.row.id),
+    ]);
+    return {
+      ...ZERO_BRIDGE_SPINE_COUNTS,
+      pendingConnectionInvites: countPendingConnectionInvites(invites),
+      openCandidateOffers,
+    };
+  } catch {
+    return ZERO_BRIDGE_SPINE_COUNTS;
+  }
+});
 
 /** CLIENT side: agency-offered candidate worker ids for a request the caller
  *  owns — the client's scouting page renders these as candidates. */

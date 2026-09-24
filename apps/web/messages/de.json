@@ -623,7 +623,10 @@
       "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen.",
       "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde.",
       "pending_absence_reviews": "Verschwindet, sobald Sie den Antrag auf der Seite Urlaub & Abwesenheit genehmigen oder ablehnen.",
-      "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen)."
+      "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen).",
+      "pending_connection_invites": "Verschwindet, sobald Sie die Verbindungsanfrage der Agentur auf der Partnerseite annehmen oder ablehnen.",
+      "shared_requests_awaiting_offer": "Verschwindet, sobald Sie auf der Partnerseite eine Fachkraft für die geteilte Anfrage anbieten.",
+      "open_candidate_offers": "Verschwindet, sobald Sie den vorgeschlagenen Kandidaten auf Ihrer Scouting-Seite annehmen oder ablehnen."
     },
     "storedTitle": "Gespeicherte Benachrichtigungen",
     "storedIntro": "Aufgezeichnete Ereignisse zu Ihnen — jede Zeile öffnet die zugehörige Seite. Der Lesestatus wird über die Glocke verwaltet.",
@@ -2067,6 +2070,7 @@
         "orgNoCompanyProfileBody": "Ihr Name kann hier nicht geändert werden — dieses Formular ändert nur den Namen eines Firmenprofils, und eine Organisation ohne Firmenprofil kann noch nicht umbenannt werden. Es wurde nichts geändert.",
         "orgNotAvailableHeading": "Diese Organisation kann hier nicht verwaltet werden",
         "orgNotAvailableBody": "Der Link nennt eine Organisation, deren Profil Sie mit diesem Konto nicht ändern können, oder sie konnte nicht geprüft werden. Es wurde nichts geändert. Wählen Sie die Organisation oben in der Arbeitsbereichsauswahl.",
+        "agencyConnectionPending": "Einladung angenommen. Eine Personalagentur möchte sich mit Ihrem Unternehmen verbinden — legen Sie zuerst Ihr Unternehmensprofil an; die Verbindungsanfrage wartet danach auf Ihrer Partnerseite, wo Sie sie mit diesem Unternehmen bestätigen.",
         "legalLockedNotice": "Dieses Unternehmen ist verifiziert. Seine rechtlichen Angaben (offizieller Name, Registrierungsnummer, Land und eingetragene Adresse) sind hier gesperrt und können nicht überschrieben werden — kontaktieren Sie den Support, um eine rechtliche Änderung zu beantragen. Kontakte, Website, Unternehmenstyp und Ihre Rolle können Sie weiterhin aktualisieren.",
         "saveDraft": "Unternehmen speichern",
         "submitRequest": "Manuelle Prüfung anfordern (optional)",
@@ -4641,6 +4645,9 @@
         "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen",
         "pending_absence_reviews": "Abwesenheitsanträge zur Prüfung",
         "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen",
+        "pending_connection_invites": "Eine Personalagentur möchte sich mit Ihrem Unternehmen verbinden",
+        "shared_requests_awaiting_offer": "Kundenanfragen, die auf Ihren Kandidaten warten",
+        "open_candidate_offers": "Agenturkandidaten, die auf Ihre Entscheidung warten",
         "event_booking_proposed": "Sie haben einen Buchungsvorschlag erhalten",
         "event_booking_accepted": "Ihr Buchungsvorschlag wurde angenommen",
         "event_booking_declined": "Ihr Buchungsvorschlag wurde abgelehnt",
@@ -11483,7 +11490,11 @@
       "demand": "Arbeitsbedarf: {role} · {country}",
       "demandNotMatch": "Der Arbeitgeber hat Sie direkt eingeladen — das ist kein Systemmatch.",
       "interested": "Ich bin interessiert",
-      "notInterested": "Kein Interesse"
+      "notInterested": "Kein Interesse",
+      "agencyClient": "Eine Personalagentur lädt Ihr Unternehmen ein, als Kunde zusammenzuarbeiten.",
+      "agencyClientNext": "Nach dem Annehmen erscheint die Verbindungsanfrage auf der Partnerseite Ihrer Organisation — bestätigen Sie sie dort mit Ihrem Unternehmen. Bis dahin wird nichts geteilt.",
+      "addressedToOther": "Diese Einladung ist an {email} gerichtet. Sie sind mit einer anderen Adresse angemeldet, daher kann die Verbindung aus diesem Konto nicht bestätigt werden — melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
+      "switchAccount": "Abmelden und Konto wechseln"
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
     "admin": {
@@ -11670,7 +11681,19 @@
       "decision_declined": "Kunde abgelehnt"
     },
     "goToRoster": "Zum Team",
-    "invalidLabel": "Prüfen Sie die E-Mail-Adresse — die Einladung wurde nicht gesendet."
+    "invalidLabel": "Prüfen Sie die E-Mail-Adresse — die Einladung wurde nicht gesendet.",
+    "deliveryHeading": "Einladungslink",
+    "deliveryCreated": "Nicht per E-Mail gesendet — der E-Mail-Versand ist nicht eingerichtet. Kopieren Sie den Link und senden Sie ihn dem Kunden selbst.",
+    "deliverySent": "Die Einladungs-E-Mail wurde gesendet. Sie können den Link trotzdem kopieren.",
+    "deliveryFailed": "Die E-Mail-Zustellung ist fehlgeschlagen. Kopieren Sie den Link und senden Sie ihn selbst.",
+    "deliveryDuplicate": "Für diese Adresse wartet bereits eine Einladung. Mit „Neuer Link“ erhalten Sie einen neuen Link.",
+    "deliveryRefused": "Der Einladungslink konnte nicht erstellt werden — die Verbindung ist erfasst, aber nichts wurde zugestellt.",
+    "deliveryUnavailable": "Der Einladungslink konnte gerade nicht erstellt werden — die Verbindung ist erfasst. Versuchen Sie später „Neuer Link“.",
+    "noInvitationYet": "Noch kein Einladungslink — holen Sie einen, um diese Einladung zuzustellen.",
+    "getLink": "Link holen",
+    "newLink": "Neuer Link",
+    "messageButton": "Nachricht",
+    "deliveryAccepted": "Zugestellt — der Kunde hat die Einladung angenommen und bestätigt die Verbindung nun auf seiner Partnerseite."
   },
   "clientBridge": {
     "title": "Personalagenturen",
@@ -11692,7 +11715,8 @@
     "fromAgency": "Von",
     "sharedHeading": "Mit dieser Agentur geteilt",
     "noShared": "Noch nichts mit dieser Agentur geteilt",
-    "unshareButton": "Diese Anfrage nicht mehr teilen"
+    "unshareButton": "Diese Anfrage nicht mehr teilen",
+    "messageButton": "Nachricht"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -16986,7 +17010,8 @@
         "title": "Kunden und Partner",
         "subtitle": "Mit wem Sie arbeiten: Kunden, Agenturen und geteilter Bedarf.",
         "empty": "Noch keine Kunden- oder Partnerbeziehungen. Eine Agentur kann Sie zur Zusammenarbeit einladen — dann erscheinen ihre Vorschläge hier.",
-        "unavailable": "Partnerverbindungen konnten nicht geladen werden. Das heißt nicht, dass es keine gibt — bitte erneut versuchen."
+        "unavailable": "Partnerverbindungen konnten nicht geladen werden. Das heißt nicht, dass es keine gibt — bitte erneut versuchen.",
+        "invitationAccepted": "Einladung angenommen. Bestätigen Sie unten die Verbindungsanfrage der Agentur mit Ihrem Unternehmen."
       },
       "education": {
         "title": "Ausbildung und Programme",

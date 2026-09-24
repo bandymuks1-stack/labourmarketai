@@ -37,6 +37,11 @@ export type SentInvitationRow = {
   organizationId: string | null;
   projectId: string | null;
   personalMessage: string | null;
+  /** The role the inviter proposed — free text on most invitations; the
+   *  closed `agency_client` marker on the agency bridge's connection
+   *  invitations (lib/invitations/model, 2026-09-24), which is how the
+   *  partners door pairs a sent invitation with its connection. */
+  proposedRole: string | null;
   /** The RECIPIENT'S language the invitation was created with (V8 W4-B
    *  item 6) — a resend keeps it instead of the sender's UI locale. */
   recipientLocale: string | null;
@@ -73,7 +78,7 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
   } = await supabase.auth.getUser();
   if (!user) return { status: "error" };
   const BASE_COLUMNS =
-    "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, locale";
+    "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, proposed_role, locale";
   const V2_COLUMNS = ", max_uses, use_count, open_count, campaign_label, target_request_id";
   // The v2 columns (20260917120000, owner-gated) may not exist yet: an
   // undefined-column error (42703) means "read the v1 shape", never "no
@@ -129,6 +134,7 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
     organization_id: string | null;
     project_id: string | null;
     personal_message: string | null;
+    proposed_role: string | null;
     locale: string | null;
     max_uses?: number | null;
     use_count?: number | null;
@@ -154,6 +160,7 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
       organizationId: r.organization_id,
       projectId: r.project_id,
       personalMessage: r.personal_message,
+      proposedRole: r.proposed_role ?? null,
       recipientLocale: r.locale,
       maxUses: r.max_uses ?? 1,
       useCount: r.use_count ?? 0,

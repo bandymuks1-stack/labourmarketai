@@ -129,13 +129,105 @@ export function buildInviteLink(
   return `${origin.replace(/\/+$/, "")}/${locale}/invite/${token}`;
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * AGENCY → CLIENT CONNECTION INVITATION (2026-09-24)
+ *
+ * `create_agency_client_connection_v1` only INSERTS a connection row keyed on
+ * the client's e-mail; nothing ever reached that e-mail. Delivery now rides
+ * on THIS primitive: beside the connection the agency creates an
+ * `invite_company` invitation to the same address, and the token link the
+ * primitive already mints is what the agency copies or shares.
+ *
+ * WHY `invite_company` AND WHY `proposed_role` MARKS IT. `invite_company` is
+ * the one type whose acceptance creates NO relationship (no engagement row
+ * on the client's CV, no project seat, no interest signal) — the consent
+ * that matters stays `accept_agency_client_connection_v1`, the bridge's own
+ * RPC. The create RPC exposes no free foreign-id field (`declared_context`
+ * is written only by the external-referral door, `target_request_id` is a
+ * demand FK), so the invitation carries no connection id: the connection is
+ * DERIVED on the landing — same inviter, same addressee — and the kind is
+ * marked on `proposed_role`, the role the agency proposes for the invited
+ * company. The marker is a closed slug, localized on the invite page, never
+ * rendered raw.
+ * ──────────────────────────────────────────────────────────────────────── */
+export const AGENCY_CLIENT_PROPOSED_ROLE = "agency_client";
+
+/** True for the invitation the agency bridge creates beside a connection. */
+export function isAgencyClientInvitation(input: {
+  readonly invitationType: string | null | undefined;
+  readonly proposedRole: string | null | undefined;
+}): boolean {
+  return (
+    input.invitationType === "invite_company" &&
+    (input.proposedRole ?? "").trim() === AGENCY_CLIENT_PROPOSED_ROLE
+  );
+}
+
+/**
+ * The addressee, shown to a signed-in token holder whose own e-mail differs:
+ * first character of the local part, the domain, nothing else
+ * (`j***@example.com`). Null for anything that is not an address, so a
+ * malformed stored value never renders as one. Pure.
+ */
+export function maskEmail(email: string | null | undefined): string | null {
+  const value = (email ?? "").trim().toLowerCase();
+  const at = value.indexOf("@");
+  if (at < 1 || at === value.length - 1) return null;
+  const local = value.slice(0, at);
+  const domain = value.slice(at + 1);
+  return `${local[0]}***@${domain}`;
+}
+
+/** The company-setup entry — the Activity Setup Hub's company door, open to
+ *  every signed-in person (`/dashboard/company/*` is role-gated; this is not). */
+export const COMPANY_SETUP_ENTRY = "/dashboard/start/company";
+
+/** The closed `?notice=` token the setup entry reads after an agency-client
+ *  acceptance by a person who holds no company role yet. Internal: localized
+ *  on the page, never rendered raw. */
+export const AGENCY_CONNECTION_PENDING_NOTICE = "agency_connection_pending";
+
+/**
+ * Where an ACCEPTED agency-client invitation lands the person (review round
+ * 2, 2026-09-24). The partners door is gated on the `company` role
+ * (`requireRoleOrRedirect(locale, "company")`): a person who accepted with no
+ * company workspace used to be sent there and bounced to
+ * `/dashboard?notice=needs_company_role` — a refusal, with the pending
+ * connection never named. Such a person lands on the company-setup entry
+ * with a notice that names it instead. `null` = the role read never answered:
+ * an unknown is NEVER narrowed into "no role", so the door keeps deciding
+ * (its own gate retries and answers honestly). Pure.
+ */
+export function agencyClientLanding(
+  holdsCompanyRole: boolean | null,
+): { readonly path: string; readonly notice: string } {
+  if (holdsCompanyRole === false) {
+    return { path: COMPANY_SETUP_ENTRY, notice: AGENCY_CONNECTION_PENDING_NOTICE };
+  }
+  return { path: "/dashboard/company/partners", notice: "invitation_accepted" };
+}
+
 /** Where acceptance lands the person — the exact real context. */
 export function acceptedDestination(input: {
   invitationType: InvitationType | string;
   projectId?: string | null;
+  /** The invitation's stored `proposed_role`; only the agency-client marker
+   *  changes the destination (the partners door, where the connection is
+   *  confirmed with the person's own company). */
+  proposedRole?: string | null;
 }): string {
   if (input.invitationType === "join_project" && input.projectId) {
     return `/dashboard/projects/${input.projectId}`;
+  }
+  // The agency's connection request waits on the partners door — the ONE
+  // consent path (`accept_agency_client_connection_v1`) lives there.
+  if (
+    isAgencyClientInvitation({
+      invitationType: input.invitationType,
+      proposedRole: input.proposedRole,
+    })
+  ) {
+    return "/dashboard/company/partners";
   }
   // The person said "interested" to a specific need — the board's own
   // interest list is where that answer already lives.

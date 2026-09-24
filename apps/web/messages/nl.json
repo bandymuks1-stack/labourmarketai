@@ -623,7 +623,10 @@
       "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent.",
       "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina.",
       "pending_absence_reviews": "Verdwijnt zodra u de aanvraag op de pagina Verlof & afwezigheid goedkeurt of afwijst.",
-      "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet)."
+      "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet).",
+      "pending_connection_invites": "Verdwijnt zodra je het verbindingsverzoek van het bureau op de partnerpagina accepteert of afwijst.",
+      "shared_requests_awaiting_offer": "Verdwijnt zodra je op de partnerpagina een medewerker voorstelt voor de gedeelde aanvraag.",
+      "open_candidate_offers": "Verdwijnt zodra je de voorgestelde kandidaat op je scoutingpagina accepteert of afwijst."
     },
     "storedTitle": "Opgeslagen meldingen",
     "storedIntro": "Vastgelegde gebeurtenissen over u — elke rij opent de bijbehorende pagina. De leesstatus beheert u via de bel.",
@@ -2067,6 +2070,7 @@
         "orgNoCompanyProfileBody": "De naam kan hier niet worden gewijzigd — dit formulier wijzigt alleen de naam van een bedrijfsprofiel, en een organisatie zonder bedrijfsprofiel kan nog niet worden hernoemd. Er is niets gewijzigd.",
         "orgNotAvailableHeading": "Deze organisatie kan hier niet worden beheerd",
         "orgNotAvailableBody": "De link verwijst naar een organisatie waarvan je het profiel vanuit dit account niet kunt wijzigen, of die niet kon worden gecontroleerd. Er is niets gewijzigd. Kies de organisatie in de werkruimtekiezer bovenaan.",
+        "agencyConnectionPending": "Uitnodiging geaccepteerd. Een uitzendbureau wil een verbinding met je bedrijf — maak eerst je bedrijfsprofiel aan; het verbindingsverzoek wacht daarna op je pagina Partners, waar je het met dit bedrijf bevestigt.",
         "legalLockedNotice": "Dit bedrijf is geverifieerd. De juridische gegevens (officiële naam, registratiecode, land en geregistreerd adres) zijn hier vergrendeld en kunnen niet worden overschreven — neem contact op met support om een juridische wijziging aan te vragen. Je kunt contactgegevens, website, bedrijfstype en je rol nog wel bijwerken.",
         "saveDraft": "Bedrijf opslaan",
         "submitRequest": "Handmatige beoordeling aanvragen (optioneel)",
@@ -4641,6 +4645,9 @@
         "open_task_attention": "Taken die aandacht vragen",
         "pending_absence_reviews": "Verlofaanvragen ter beoordeling",
         "new_job_matches": "Nieuwe vacatures die bij je passen",
+        "pending_connection_invites": "Een uitzendbureau wil een verbinding met je bedrijf",
+        "shared_requests_awaiting_offer": "Aanvragen van klanten die op je kandidaat wachten",
+        "open_candidate_offers": "Kandidaten van bureaus die op je beslissing wachten",
         "event_booking_proposed": "Je hebt een boekingsvoorstel ontvangen",
         "event_booking_accepted": "Je boekingsvoorstel is geaccepteerd",
         "event_booking_declined": "Je boekingsvoorstel is afgewezen",
@@ -11483,7 +11490,11 @@
       "demand": "Werkbehoefte: {role} · {country}",
       "demandNotMatch": "De werkgever nodigde je rechtstreeks uit — dit is geen systeemmatch.",
       "interested": "Ik heb interesse",
-      "notInterested": "Geen interesse"
+      "notInterested": "Geen interesse",
+      "agencyClient": "Een uitzendbureau nodigt je bedrijf uit om als klant samen te werken.",
+      "agencyClientNext": "Na het accepteren verschijnt het verbindingsverzoek op de pagina Partners van je organisatie — bevestig het daar met je bedrijf. Tot dan wordt er niets gedeeld.",
+      "addressedToOther": "Deze uitnodiging is gericht aan {email}. Je bent ingelogd met een ander adres, dus de verbinding kan niet vanuit dit account worden bevestigd — log in met het uitgenodigde adres en open deze link opnieuw.",
+      "switchAccount": "Uitloggen en van account wisselen"
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {
@@ -11670,7 +11681,19 @@
       "decision_declined": "Klant afgewezen"
     },
     "goToRoster": "Naar het team",
-    "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden."
+    "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden.",
+    "deliveryHeading": "Uitnodigingslink",
+    "deliveryCreated": "Niet gemaild — e-mailbezorging is niet ingesteld. Kopieer de link en stuur die zelf naar de klant.",
+    "deliverySent": "De uitnodigingsmail is verzonden. Je kunt de link nog steeds kopiëren.",
+    "deliveryFailed": "E-mailbezorging is mislukt. Kopieer de link en stuur die zelf.",
+    "deliveryDuplicate": "Er wacht al een uitnodiging voor dit adres. Gebruik “Nieuwe link” voor een nieuwe link.",
+    "deliveryRefused": "De uitnodigingslink kon niet worden aangemaakt — de verbinding is vastgelegd, maar er is niets bezorgd.",
+    "deliveryUnavailable": "De uitnodigingslink kon nu niet worden aangemaakt — de verbinding is vastgelegd. Probeer later “Nieuwe link”.",
+    "noInvitationYet": "Nog geen uitnodigingslink — haal er een op om deze uitnodiging te bezorgen.",
+    "getLink": "Link ophalen",
+    "newLink": "Nieuwe link",
+    "messageButton": "Bericht",
+    "deliveryAccepted": "Bezorgd — de klant heeft de uitnodiging geaccepteerd en bevestigt de verbinding nu op zijn pagina Partners."
   },
   "clientBridge": {
     "title": "Uitzendbureaus",
@@ -11692,7 +11715,8 @@
     "fromAgency": "Van",
     "sharedHeading": "Gedeeld met dit bureau",
     "noShared": "Nog niets gedeeld met dit bureau",
-    "unshareButton": "Deze aanvraag niet langer delen"
+    "unshareButton": "Deze aanvraag niet langer delen",
+    "messageButton": "Bericht"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -16986,7 +17010,8 @@
         "title": "Klanten en partners",
         "subtitle": "Met wie u werkt: klanten, bureaus en gedeelde behoeften.",
         "empty": "Nog geen klant- of partnerrelaties. Een bureau kan u uitnodigen om samen te werken — dan verschijnen zijn voorstellen hier.",
-        "unavailable": "Partnerverbindingen konden niet worden geladen. Dat betekent niet dat er geen zijn — probeer het opnieuw."
+        "unavailable": "Partnerverbindingen konden niet worden geladen. Dat betekent niet dat er geen zijn — probeer het opnieuw.",
+        "invitationAccepted": "Uitnodiging geaccepteerd. Bevestig hieronder het verbindingsverzoek van het bureau met je bedrijf."
       },
       "education": {
         "title": "Opleiding en programma's",

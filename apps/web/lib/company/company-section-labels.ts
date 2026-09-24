@@ -155,9 +155,50 @@ export async function readAgencyClientsLabels() {
   };
 }
 
+/** The invitation primitive's own outcome vocabulary (network.invite.outcomes)
+ *  — the bridge section states a delivery result in the SAME words the
+ *  network page uses, never a second copy. */
+const INVITE_OUTCOME_KEYS = [
+  "created",
+  "sent",
+  "delivery_failed",
+  "duplicate_pending",
+  "invalid_email",
+  "limit_reached",
+  "rate_limited",
+  "not_authorized",
+  "error",
+] as const;
+
 export async function readAgencyBridgeLabels() {
-  const tAB = await getTranslations("agencyBridge");
+  const [tAB, tInvite, tSent] = await Promise.all([
+    getTranslations("agencyBridge"),
+    getTranslations("network.invite"),
+    getTranslations("network.sent"),
+  ]);
   return {
+    // Delivery of the client invitation through the invitation primitive
+    // (2026-09-24): the link, its honest state, a fresh link, a message.
+    deliveryHeading: tAB("deliveryHeading"),
+    deliveryCreated: tAB("deliveryCreated"),
+    deliverySent: tAB("deliverySent"),
+    deliveryFailed: tAB("deliveryFailed"),
+    deliveryDuplicate: tAB("deliveryDuplicate"),
+    deliveryRefused: tAB("deliveryRefused"),
+    deliveryUnavailable: tAB("deliveryUnavailable"),
+    // Accepted by the client (single-use, consumed) — the primitive's own
+    // status word for the badge, the bridge's sentence for what is awaited.
+    deliveryAccepted: tAB("deliveryAccepted"),
+    statusAccepted: tSent("status.accepted"),
+    noInvitationYet: tAB("noInvitationYet"),
+    getLink: tAB("getLink"),
+    newLink: tAB("newLink"),
+    messageButton: tAB("messageButton"),
+    copyLink: tInvite("copyLink"),
+    copied: tInvite("copied"),
+    outcomeLabels: Object.fromEntries(
+      INVITE_OUTCOME_KEYS.map((k) => [k, tInvite(`outcomes.${k}`)]),
+    ) as Record<string, string>,
     title: tAB("title"),
     subtitle: tAB("subtitle"),
     gatedHeading: tAB("gatedHeading"),
@@ -223,6 +264,7 @@ export async function readClientBridgeLabels() {
     sharedHeading: tCB("sharedHeading"),
     noShared: tCB("noShared"),
     unshareButton: tCB("unshareButton"),
+    messageButton: tCB("messageButton"),
   };
 }
 

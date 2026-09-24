@@ -1,22 +1,37 @@
 "use client";
 
-import { useActionState } from "react";
-import { Link2, Trash2, UserPlus, ArrowUpRight } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import {
+  ArrowUpRight,
+  Check,
+  Copy,
+  Link2,
+  MessageSquare,
+  RefreshCw,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
 
 import {
+  clientInviteRowState,
+  deliveryByEmail,
   effectiveReviewStage,
   reviewStageTone,
   type AgencyConnectionsState,
+  type BridgeInviteDelivery,
+  type ClientInviteDeliveriesState,
   type OfferProgressState,
   type SharedRequestsState,
 } from "@/lib/agency/bridge-model";
 import {
   inviteClientAction,
+  refreshClientInviteLinkAction,
   revokeConnectionAction,
   submitOfferAction,
   withdrawOfferAction,
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
+import { openAgencyConnectionConversationAction } from "@/lib/agency/bridge-conversation";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -25,6 +40,14 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  * invites a REAL client company, sees only the requests that client explicitly
  * shared, offers an active roster worker, and sees the DERIVED review stage —
  * but can NEVER act as the client. Renders only in the staffing_agency block.
+ *
+ * DELIVERY (2026-09-24). An invite used to end in a connection row nobody
+ * could see. The invite action now also creates the invitation through the
+ * ONE invitation primitive, and this section shows what actually happened:
+ * the link (copy it), whether an e-mail went out (only when a provider
+ * acknowledged it — `created` means "link ready, NOT e-mailed"), a fresh
+ * link for a pending invitation, and — once the client accepted — the
+ * conversation with the person who accepted.
  */
 export interface AgencyBridgeLabels {
   readonly title: string;
@@ -53,6 +76,27 @@ export interface AgencyBridgeLabels {
   readonly errorLabel: string;
   readonly statusLabels: Record<string, string>;
   readonly stageLabels: Record<string, string>;
+  // Delivery through the invitation primitive.
+  readonly deliveryHeading: string;
+  readonly deliveryCreated: string;
+  readonly deliverySent: string;
+  readonly deliveryFailed: string;
+  readonly deliveryDuplicate: string;
+  readonly deliveryRefused: string;
+  readonly deliveryUnavailable: string;
+  /** The fourth per-row state: delivered AND accepted by the client, whose
+   *  confirmation of the connection on their partners door is now awaited. */
+  readonly deliveryAccepted: string;
+  /** The primitive's own word for an accepted invitation (network.sent.status). */
+  readonly statusAccepted: string;
+  readonly noInvitationYet: string;
+  readonly getLink: string;
+  readonly newLink: string;
+  readonly messageButton: string;
+  readonly copyLink: string;
+  readonly copied: string;
+  /** The primitive's own localized outcome words (network.invite.outcomes). */
+  readonly outcomeLabels: Record<string, string>;
 }
 
 const IDLE: BridgeActionState = { status: "idle" };
@@ -63,12 +107,23 @@ const TONE: Record<ReturnType<typeof reviewStageTone>, string> = {
   success: "border-state-success/50 text-state-success",
 };
 
+/** Every non-ok outcome an action can return — none may be silent. */
+function failed(s: BridgeActionState): boolean {
+  return (
+    s.status === "error" ||
+    s.status === "forbidden" ||
+    s.status === "invalid" ||
+    s.status === "not-found"
+  );
+}
+
 export function AgencyBridgeSection({
   agencyCompanyId,
   connections,
   shared,
   progress,
   roster,
+  deliveries,
   labels,
   locale,
 }: {
@@ -77,13 +132,36 @@ export function AgencyBridgeSection({
   shared: SharedRequestsState;
   progress: OfferProgressState;
   roster: readonly { workerId: string; label: string }[];
+  /** The agency's sent connection invitations (the primitive's rows), so a
+   *  pending connection can show its real delivery state and offer a link. */
+  deliveries: ClientInviteDeliveriesState;
   labels: AgencyBridgeLabels;
   locale: string;
 }) {
   const [inviteState, inviteAction, invitePending] = useActionState(inviteClientAction, IDLE);
-  const [, revokeAction] = useActionState(revokeConnectionAction, IDLE);
+  const [revokeState, revokeAction] = useActionState(revokeConnectionAction, IDLE);
   const [offerState, offerAction, offerPending] = useActionState(submitOfferAction, IDLE);
-  const [, withdrawAction] = useActionState(withdrawOfferAction, IDLE);
+  const [withdrawState, withdrawAction] = useActionState(withdrawOfferAction, IDLE);
+  const [linkState, linkAction, linkPending] = useActionState(refreshClientInviteLinkAction, IDLE);
+
+  // The most recent delivery result (an invite OR a fresh link) — shown once,
+  // with the link, until the next one replaces it.
+  const [delivery, setDelivery] = useState<BridgeInviteDelivery | null>(null);
+  useEffect(() => {
+    if (inviteState.status === "ok" && inviteState.invite) setDelivery(inviteState.invite);
+  }, [inviteState]);
+  useEffect(() => {
+    if (linkState.status === "ok" && linkState.invite) setDelivery(linkState.invite);
+  }, [linkState]);
+  const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  async function copyLink(link: string) {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedLink(link);
+    } catch {
+      /* clipboard unavailable — the link stays visible for manual copy */
+    }
+  }
 
   const gated =
     connections.kind === "needs-migration" ||
@@ -95,6 +173,18 @@ export function AgencyBridgeSection({
   const sharedRows = shared.kind === "ok" ? shared.rows : [];
   const progressRows = progress.kind === "ok" ? progress.rows : [];
   const stageByWorker = new Map(progressRows.map((p) => [`${p.requestId}:${p.workerId}`, p]));
+  // UNKNOWN is not "no invitation": only an ok read says whether a pending
+  // connection has an invitation behind it.
+  //
+  // SCOPE: PER INVITER. `deliveries` is the primitive's sent list pinned to
+  // the signed-in person (`listMySentInvitations`: inviter_profile_id = me),
+  // so an invitation a colleague of the same agency sent is NOT in it: for
+  // that row this section reads "no invitation link yet" and "Get link"
+  // mints one more invitation, under this inviter. That is the primitive's
+  // idempotency key (inviter + address + type), not a bridge choice;
+  // widening the read to the organization is the primitive's decision.
+  const liveInvitations =
+    deliveries.kind === "ok" ? deliveryByEmail(deliveries.rows) : null;
 
   // TIME_TO_EXTERNAL_HUMAN_RESPONSE for the agency: another person acted on
   // what the agency did - a client accepted the connection, shared a request
@@ -104,6 +194,28 @@ export function AgencyBridgeSection({
     connRows.some((c) => c.status === "active") ||
     sharedRows.length > 0 ||
     progressRows.some((p) => p.offerStatus === "accepted" || p.offerStatus === "declined");
+
+  const deliveryHint = (d: BridgeInviteDelivery): string => {
+    switch (d.outcome) {
+      case "created":
+        return labels.deliveryCreated;
+      case "sent":
+        return labels.deliverySent;
+      case "delivery_failed":
+        return labels.deliveryFailed;
+      case "duplicate_pending":
+        return labels.deliveryDuplicate;
+      case "refused":
+        return labels.deliveryRefused;
+      default:
+        return labels.deliveryUnavailable;
+    }
+  };
+  const deliveryOutcomeLabel = (d: BridgeInviteDelivery): string | null => {
+    if (d.outcome === "unavailable") return null;
+    const key = d.outcome === "refused" ? (d.reason ?? "error") : d.outcome;
+    return labels.outcomeLabels[key] ?? labels.outcomeLabels.error ?? null;
+  };
 
   return (
     <section className="card-border flex flex-col gap-4 p-5" data-testid="agency-bridge-section">
@@ -135,27 +247,101 @@ export function AgencyBridgeSection({
               <p className="text-xs text-text-muted">{labels.noConnections}</p>
             ) : (
               <ul className="flex flex-col gap-1.5">
-                {connRows.map((c) => (
-                  <li key={c.id} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-connection-row">
-                    <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{c.invitedEmail}</span>
-                    <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
-                      {labels.statusLabels[c.status] ?? c.status}
-                    </span>
-                    {(c.status === "pending" || c.status === "active") && (
-                      <form action={revokeAction} className="shrink-0">
-                        <input type="hidden" name="connectionId" value={c.id} />
-                        <button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
-                          <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                        </button>
-                      </form>
-                    )}
-                  </li>
-                ))}
+                {connRows.map((c) => {
+                  const invitation = liveInvitations?.get(c.invitedEmail.toLowerCase()) ?? null;
+                  const rowState = clientInviteRowState(invitation);
+                  return (
+                    <li key={c.id} className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-connection-row">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{c.invitedEmail}</span>
+                        <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
+                          {labels.statusLabels[c.status] ?? c.status}
+                        </span>
+                        {c.status === "active" && (
+                          // The conversation with the person who accepted —
+                          // the action re-verifies the active connection and
+                          // the caller's side server-side before opening.
+                          <form action={openAgencyConnectionConversationAction} className="shrink-0">
+                            <input type="hidden" name="connectionId" value={c.id} />
+                            <input type="hidden" name="locale" value={locale} />
+                            <button type="submit" data-testid={`agency-bridge-message-${c.id}`}
+                              className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue">
+                              <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {labels.messageButton}
+                            </button>
+                          </form>
+                        )}
+                        {(c.status === "pending" || c.status === "active") && (
+                          <form action={revokeAction} className="shrink-0">
+                            <input type="hidden" name="connectionId" value={c.id} />
+                            <button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton}
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                              <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                      {/* A PENDING connection is only real once the invitation
+                          reached the person. Four states from the primitive's
+                          own row (an unknown read shows nothing):
+                            accepted — delivered and accepted; the client's
+                                       confirmation of the connection is what
+                                       is awaited, so NO link control;
+                            created / sent / delivery_failed — a pending
+                                       invitation's delivery state + a fresh link;
+                            none     — no live invitation: mint one. */}
+                      {c.status === "pending" && liveInvitations !== null && (
+                        <div className="flex flex-wrap items-center gap-2" data-testid="agency-bridge-delivery-row"
+                          data-delivery={rowState}>
+                          {rowState === "accepted" ? (
+                            <>
+                              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                                {labels.statusAccepted}
+                              </span>
+                              <span className="text-xs text-text-muted">{labels.deliveryAccepted}</span>
+                            </>
+                          ) : invitation ? (
+                            <>
+                              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                                {labels.outcomeLabels[rowState]}
+                              </span>
+                              <form action={linkAction} className="shrink-0">
+                                <input type="hidden" name="invitationId" value={invitation.invitationId} />
+                                <input type="hidden" name="email" value={c.invitedEmail} />
+                                <input type="hidden" name="locale" value={locale} />
+                                <button type="submit" disabled={linkPending} data-testid={`agency-bridge-new-link-${c.id}`}
+                                  className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-60">
+                                  <RefreshCw className="h-3 w-3" aria-hidden /> {labels.newLink}
+                                </button>
+                              </form>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-xs text-text-muted">{labels.noInvitationYet}</span>
+                              {/* ONLY when no pending or accepted invitation
+                                  exists for this address (from this inviter).
+                                  Idempotent: the connection RPC reuses the
+                                  row; only the invitation is new. */}
+                              <form action={inviteAction} className="shrink-0">
+                                <input type="hidden" name="agencyCompanyId" value={agencyCompanyId} />
+                                <input type="hidden" name="email" value={c.invitedEmail} />
+                                <input type="hidden" name="locale" value={locale} />
+                                <button type="submit" disabled={invitePending} data-testid={`agency-bridge-get-link-${c.id}`}
+                                  className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-60">
+                                  <Link2 className="h-3 w-3" aria-hidden /> {labels.getLink}
+                                </button>
+                              </form>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
             <form action={inviteAction} className="flex flex-col gap-2 sm:flex-row sm:items-end" data-testid="agency-bridge-invite-form">
               <input type="hidden" name="agencyCompanyId" value={agencyCompanyId} />
+              <input type="hidden" name="locale" value={locale} />
               <label className="flex min-w-48 flex-1 flex-col gap-1">
                 <span className="text-xs font-medium text-text-secondary">{labels.inviteEmailLabel}</span>
                 <input type="email" name="email" required maxLength={254}
@@ -166,6 +352,32 @@ export function AgencyBridgeSection({
                 <UserPlus className="h-4 w-4" aria-hidden /> {labels.inviteButton}
               </button>
             </form>
+            {/* WHAT HAPPENED to the invitation: the primitive's own outcome
+                word, what to do about it, and the link when one was minted.
+                `created` is stated as "link ready", never as "sent". */}
+            {delivery && (
+              <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+                data-testid="agency-bridge-delivery" data-outcome={delivery.outcome}>
+                <p className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.deliveryHeading}</p>
+                <p className="text-xs text-text-secondary">
+                  <span className="text-text-primary">{delivery.email}</span>
+                  {deliveryOutcomeLabel(delivery) ? ` · ${deliveryOutcomeLabel(delivery)}` : null}
+                </p>
+                <p className="text-xs text-text-secondary">{deliveryHint(delivery)}</p>
+                {delivery.inviteLink && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input readOnly value={delivery.inviteLink} data-testid="agency-bridge-invite-link"
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-700 px-2 py-1.5 font-mono text-meta text-text-primary" />
+                    <button type="button" onClick={() => copyLink(delivery.inviteLink as string)} data-testid="agency-bridge-copy-link"
+                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary">
+                      {copiedLink === delivery.inviteLink ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
+                      {copiedLink === delivery.inviteLink ? labels.copied : labels.copyLink}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Shared requests + offer form */}
@@ -264,12 +476,13 @@ export function AgencyBridgeSection({
           </div>
           {/* Every non-ok outcome the actions can return is surfaced — an
               invalid client e-mail or a vanished share used to produce no
-              feedback at all. */}
-          {(["error", "forbidden", "invalid", "not-found"] as const).some(
-            (s) => inviteState.status === s || offerState.status === s,
-          ) && (
-            <p className="text-xs text-state-danger" role="alert">
-              {inviteState.status === "invalid" || offerState.status === "invalid" ? labels.invalidLabel : labels.errorLabel}
+              feedback at all, and a failed revoke / withdraw / link refresh
+              was discarded outright (its action state was never read). */}
+          {[inviteState, offerState, revokeState, withdrawState, linkState].some(failed) && (
+            <p className="text-xs text-state-danger" role="alert" data-testid="agency-bridge-error">
+              {[inviteState, offerState, revokeState, withdrawState, linkState].some((s) => s.status === "invalid")
+                ? labels.invalidLabel
+                : labels.errorLabel}
             </p>
           )}
         </>

@@ -48,15 +48,18 @@ const ROLLBACK =
 // ── 1. Permission states are enumerated + default-closed ────────────────
 
 describe("§8.1 permission states — enumerated, no silent drift", () => {
-  it("the enumeration is EXACTLY the eight agreed states", () => {
+  it("the enumeration is EXACTLY the ten agreed states", () => {
     // allowed_accepted_service_request added in audit PR4 (accepted
     // marketplace rows open a conversation); allowed_demand_interest added
     // in audit PR5 ("contacted" opens a real thread on the worker's OWN
     // interest signal); allowed_accepted_booking added in booking lifecycle
-    // v1 (an accepted booking opens the company↔worker conversation) —
-    // deliberate, reviewed extensions, each verified server-side by its
-    // gated action (service-request-conversation.ts /
-    // contact-interested-worker.ts / booking-conversation.ts).
+    // v1 (an accepted booking opens the company↔worker conversation);
+    // allowed_agency_connection added 2026-09-24 (an ACTIVE agency ↔ client
+    // connection opens the conversation between the two consenting
+    // companies' people) — deliberate, reviewed extensions, each verified
+    // server-side by its gated action (service-request-conversation.ts /
+    // contact-interested-worker.ts / booking-conversation.ts /
+    // agency/bridge-conversation.ts).
     expect([...CONTACT_PERMISSION_STATES].sort()).toEqual(
       [
         "allowed_admin",
@@ -67,9 +70,27 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_demand_interest",
         "allowed_accepted_booking",
         "allowed_marketplace_enquiry",
+        "allowed_agency_connection",
         "no_permission",
       ].sort(),
     );
+  });
+
+  it("NEGATIVE: the grant-only bridge state is never minted from generic facts", () => {
+    // allowed_agency_connection is passed by its gated action after the
+    // connection row was verified server-side; the generic resolver has no
+    // fact that could produce it.
+    for (const sharesConversation of [true, false]) {
+      for (const hasEngagement of [true, false]) {
+        for (const scoutingAllowed of [true, false]) {
+          for (const isAdmin of [true, false]) {
+            expect(
+              evaluateContactPermission({ sharesConversation, hasEngagement, scoutingAllowed, isAdmin }),
+            ).not.toBe("allowed_agency_connection");
+          }
+        }
+      }
+    }
   });
 
   it("default-closed: all-false facts land on no_permission", () => {
@@ -153,6 +174,10 @@ describe("no contact without permission — the create path is gated", () => {
     };
     for (const r of ["app", "components", "lib"]) walk(join(APP, r), `/${r}`);
     expect(callers.sort()).toEqual([
+      // Agency ↔ client bridge (2026-09-24) — agency-connection grant (the
+      // connection row read under RLS, status `active` and the caller's side
+      // verified server-side before the conversation opens).
+      "lib/agency/bridge-conversation.ts",
       // Booking lifecycle v1 — accepted-booking grant (participant + status
       // verified server-side before the conversation opens).
       "lib/booking/booking-conversation.ts",

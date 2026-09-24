@@ -6515,11 +6515,17 @@
       "invite": "Inviter en partner"
     }
   },
+  "agencyBridge": {
+    "deliveryAccepted": "[EN] Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
+  },
   "roleDashboards": {
     "company": {
       "programs": {
         "exportReport": "[EN] Download the report (CSV)",
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
+      },
+      "setup": {
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
       }
     }
   },

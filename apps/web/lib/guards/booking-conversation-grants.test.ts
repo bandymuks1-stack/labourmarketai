@@ -76,7 +76,15 @@ const GENERIC_CALLER = "lib/communication/open-conversation-action.ts";
  *  absent. */
 const GRANT_ONLY_CALLERS: ReadonlyArray<
   readonly [string, ContactPermissionState]
-> = [["lib/marketplace/listings.ts", "allowed_marketplace_enquiry"]];
+> = [
+  ["lib/marketplace/listings.ts", "allowed_marketplace_enquiry"],
+  // Agency ↔ client bridge (2026-09-24): an ACTIVE `agency_client_connections`
+  // row, re-verified server-side (status + the caller's side from the
+  // membership-validated employer context), grants the conversation between
+  // the two consenting people. No stamp: the closed source-relation set has
+  // no bridge member and widening it is owner-gated SQL (residue).
+  ["lib/agency/bridge-conversation.ts", "allowed_agency_connection"],
+];
 
 /** Where getOrCreateDirectConversation is defined (not a caller). */
 const DEFINITION = "lib/communication/direct-conversation.ts";
