@@ -101,7 +101,8 @@ export default async function CompanyPeoplePage({
   // says who handles them instead.
   const canManageInvitations =
     employerCtx.kind === "ok" &&
-    projectOrganizationAuthority({ role: employerCtx.role }).canManageInvitations;
+    projectOrganizationAuthority({ role: employerCtx.role, isCreator: employerCtx.isCreator })
+      .canManageInvitations;
 
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =

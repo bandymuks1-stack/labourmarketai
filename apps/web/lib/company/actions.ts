@@ -86,7 +86,9 @@ export async function inviteCompanyWorkerAction(
   // is an `owns_company` RPC (owner or admin membership), so this gate says
   // what the database will do; the People page does not offer the form to
   // anyone else.
-  if (!hasOrganizationCapability(company.role, "manage-invitations")) {
+  // The creator is owner-equivalent here as in `owns_company`, even when a
+  // membership row names a narrower role.
+  if (!hasOrganizationCapability(company.role, "manage-invitations") && company.isCreator !== true) {
     return { ok: false, code: "no_company" };
   }
 

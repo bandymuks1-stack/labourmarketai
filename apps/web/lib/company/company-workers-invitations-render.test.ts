@@ -88,8 +88,8 @@ describe("People page invitations — manage-invitations only", () => {
     });
   }
 
-  it("the sentence exists in every catalogue that carries the workers namespace", () => {
-    for (const loc of ["lt", "en", "de", "nl", "pl", "ru"]) {
+  it("the sentence exists in every catalogue", () => {
+    for (const loc of ["lt", "en", "da", "de", "et", "lv", "nl", "no", "pl", "ru", "sv"]) {
       expect(managedElsewhere(loc), loc).toMatch(/\S/);
       expect(render(false, loc), loc).toContain(managedElsewhere(loc).replace(/'/g, "&#x27;"));
     }
@@ -99,9 +99,29 @@ describe("People page invitations — manage-invitations only", () => {
 describe("People page wiring", () => {
   const page = readFileSync(join(WEB, "app", "[locale]", "dashboard", "company", "people", "page.tsx"), "utf8");
 
-  it("derives the flag from the capability projection, never a role string", () => {
-    expect(page).toMatch(/projectOrganizationAuthority\(\{ role: employerCtx\.role \}\)\.canManageInvitations/);
+  it("derives the flag from the capability projection, never a role string — the creator arm included", () => {
+    expect(page).toMatch(
+      /projectOrganizationAuthority\(\{ role: employerCtx\.role, isCreator: employerCtx\.isCreator \}\)\s*\.canManageInvitations/,
+    );
     expect(page).toContain("canManageInvitations={canManageInvitations}");
+  });
+
+  it("the creator keeps invitation authority under a narrower membership row (owns_company admits them)", () => {
+    const ctx = readFileSync(join(WEB, "lib", "company", "employer-company-context.ts"), "utf8");
+    expect(ctx).toMatch(/isCreator: company\.profile_id === caller\.userId/);
+    const actions = readFileSync(join(WEB, "lib", "company", "actions.ts"), "utf8");
+    expect(actions).toMatch(
+      /!hasOrganizationCapability\(company\.role, "manage-invitations"\) && company\.isCreator !== true/,
+    );
+  });
+
+  it("every catalogue carries the summary without the pending count", () => {
+    for (const loc of ["lt", "en", "da", "de", "et", "lv", "nl", "no", "pl", "ru", "sv"]) {
+      const c = JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8"));
+      const v = c.organizationDoors.pages.people.summaryWithoutInvitations as string;
+      expect(v, loc).toMatch(/\{active\}[\s\S]*\{members\}[\s\S]*\{review\}/);
+      expect(v, loc).not.toMatch(/\{pending\}/);
+    }
   });
 
   it("does not read invitations, count them, or offer Pakviesti without it", () => {
