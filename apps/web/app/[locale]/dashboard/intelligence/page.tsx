@@ -147,6 +147,24 @@ export default async function IntelligencePage({
     eurostatContext && eurostatContext.kind === "ok"
       ? eurostatContext.rows
       : null;
+  // AS-OF DATE (2026-09-23). The Eurostat rows are refreshed only by an
+  // operator-run import (no hosted schedule exists), so the section states
+  // how current its figures are. `captured_at` is Eurostat's OFFICIAL
+  // PUBLICATION timestamp (`updated` in the JSON-stat body, mandatory —
+  // eurostat-jsonstat.ts), not the time the rows were inserted here; the copy
+  // therefore says "Eurostat publication of", never "imported". Derived from
+  // the real rows; nothing is rendered when there are none (the unavailable
+  // cards already say why).
+  const eurostatPublishedAtMs = (eurostatRows ?? [])
+    .map((r) => Date.parse(r.capturedAt))
+    .filter((ms) => Number.isFinite(ms))
+    .reduce((max, ms) => (ms > max ? ms : max), Number.NEGATIVE_INFINITY);
+  const eurostatAsOf = Number.isFinite(eurostatPublishedAtMs)
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "long",
+        timeZone: "UTC",
+      }).format(new Date(eurostatPublishedAtMs))
+    : null;
 
   return (
     <div className="flex flex-col gap-6" data-testid="intelligence-page">
@@ -212,6 +230,14 @@ export default async function IntelligencePage({
           <p className="text-xs leading-relaxed text-text-secondary">
             {t("eurostat.sectionIntro")}
           </p>
+          {eurostatAsOf ? (
+            <p
+              className="font-mono text-meta text-text-muted"
+              data-testid="intelligence-eurostat-as-of"
+            >
+              {t("eurostat.asOf", { date: eurostatAsOf })}
+            </p>
+          ) : null}
           {buildEurostatContextCards(eurostatRows, Date.now()).map((card) => (
             <div key={card.id} className="flex flex-col gap-1">
               <TrustInsightCard card={card} locale={locale} />

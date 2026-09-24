@@ -12315,6 +12315,7 @@
       },
       "sectionTitle": "Europos darbo rinkos kontekstas",
       "sectionIntro": "Oficialūs Eurostato agregatai ES ir pasirinktoms Europos rinkoms. Paruošta, laukiama savininko aktyvavimo.",
+      "asOf": "Eurostato publikacija: {date} — šie rodikliai čia patys neatsinaujina.",
       "dataBasis": "Oficialus Eurostato agregatas (šaltinis: Eurostatas)",
       "whyVisible": "Rodoma kaip oficialus Europos darbo rinkos kontekstas.",
       "headline": {
