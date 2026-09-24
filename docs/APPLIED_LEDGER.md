@@ -2358,6 +2358,46 @@ company-page walk as the owner AND as the manager, each seeing their own
 company's details rendered. A bare HTTP 200 from the reader is not proof: an
 unauthorized caller also gets 200 with zero rows.
 
+### `set_company_description_v1` — RED (ONE SECURITY DEFINER write, no grant on the table, no data change) — APPLIED 2026-09-24, ledger `20260924092646`
+
+Repo file `supabase/migrations/20260924130000_set_company_description_v1.sql`
+(paired `supabase/rollbacks/…down.sql`). The public business page's
+description save: `owns_company` (creator + active owner/admin) only,
+description only, <= 2000, EXECUTE for `authenticated` only; the existing
+mirror trigger carries it to the organization.
+
+Owner RED approval 2026-09-24 (option b), applied in the approved order: #1870
+merged (`b17014a0`) → Vercel Production deployment of exactly that commit
+`success` → rolled-back production dry run → Supabase MCP `apply_migration` of
+the file on main (sha256
+`6599fe428749b0bff627b3da16b1a512ef1ddd74b4a17bcd35eaf8b34d20d6d1`) — never
+`db push`. Read-back: the `schema_migrations` row is present and the function,
+grant and per-role checks passed (details in the owner channel); no
+description was written by the verification (rolled back).
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending a signed-in owner
+saving a description on the business profile panel and seeing it on the public
+page.
+
+### `manager_projects_roster_rls_v1` — RED (four ALTER POLICY via the existing `manages_organization`, no grant, no data change) — APPLIED 2026-09-24, ledger `20260924092836`
+
+Repo file `supabase/migrations/20260924140000_manager_projects_roster_rls_v1.sql`
+(paired `supabase/rollbacks/…down.sql` restoring the exact previous
+expressions). projects select / insert / update and company_workers select
+gain `OR manages_organization(...)`; `projects_delete`, every other table,
+grants, functions and roles untouched.
+
+Owner RED approval 2026-09-24, applied in the approved order (the reverse of
+an app-first change): rolled-back production dry run (before/after in one
+statement, with a temporary non-admin manager seeded inside the rolled-back
+transaction) → Supabase MCP `apply_migration` of the reviewed file (sha256
+`da03784a309e1d7d8b280e3f2825ded1fc1411b041f154ffc4fe742dfc8e3652`) → read-back
+(the four policy expressions and unchanged grants; per-role checks passed —
+details in the owner channel) → THEN the app half (#1871) merged.
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending the manager's own
+walk (create a project, open the roster) in a real session.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
