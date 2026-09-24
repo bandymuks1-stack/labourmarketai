@@ -52,10 +52,10 @@
 --   — delegating them would let a delegate add admins), projects, demand,
 --   archived-organization behaviour, every other table, policy and grant.
 --
--- PRODUCTION FACTS (read-only, 2026-09-24): 2 active manager memberships;
---   0 active manager / external_manager engagements; 3 organization
---   invitations exist, all created by the organization's owner — so no
---   existing invitation loses its manager. No backfill: the owner grants.
+-- PRODUCTION (read-only check, 2026-09-24): every existing organization
+--   invitation was created by the organization's owner, so no existing
+--   invitation loses its sender; every owner keeps an owner path. No backfill:
+--   the owner grants.
 --
 -- ORDER: apply FIRST (the deployed app never offers org invitations to a
 --   manager, and the People page already gates on manage-invitations), THEN

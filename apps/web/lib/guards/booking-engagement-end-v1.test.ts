@@ -1461,6 +1461,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // no other table. RED (ALTER POLICY); owner-approved; APPLIED
       // 2026-09-24 (ledger 20260924092836) before the app half merged.
       "20260924140000_manager_projects_roster_rls_v1.sql",
+      // 2026-09-24 — invitation management by permission, never by job title:
+      // per-person delegation on company_memberships, the org-invitation
+      // authority narrowed to owner / owner-admin / delegated member, one
+      // audited grant command. RED (definer + grant/revoke + ALTER POLICY);
+      // DRAFT — owner approval pending, NOT applied.
+      "20260924150000_invitation_management_delegation_v1.sql",
 ]);
   });
 

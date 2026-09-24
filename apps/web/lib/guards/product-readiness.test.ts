@@ -2668,7 +2668,14 @@ describe("no migration files added by this sprint", () => {
 // untouched. RED (ALTER POLICY), owner-approved; APPLIED 2026-09-24 (ledger
 // 20260924092836) BEFORE this app half merged; paired .down.sql restores the exact
 // expressions. RECOUNTED: 308.
-const SPRINT_BASELINE = 308;
+// Bumped 308 -> 309 for 20260924150000_invitation_management_delegation_v1 (owner
+// direction 2026-09-24: invitation management by permission, never by job title):
+// company_memberships.manages_invitations (default false), invitation_org_authority_v1
+// = owner / owner-admin membership / delegated member, the org branch of
+// create_invitation_v1/v2 and invite_company_worker use it, one audited grant command.
+// RED (definer + grant/revoke + ALTER POLICY); DRAFT, owner approval pending, NOT
+// applied; paired .down.sql restores production byte-identically. RECOUNTED: 309.
+const SPRINT_BASELINE = 309;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
