@@ -32,14 +32,19 @@ import {
  *   canOperate  OPERATIONAL authority per the role → capability matrix
  *               (`role-capabilities.ts`): roster, projects, demand.
  *
- * `sqlWritesGranted` records what the DATABASE accepts for the operating
- * tables (projects select/insert/update, company_workers select): the creator
- * or an active owner/admin membership (`owns_company`) AND, since
- * 20260924140000_manager_projects_roster_rls_v1, every role the matrix lets
- * operate (`manages_organization`: manager, external_manager). When a future
- * role operates in the matrix before SQL admits it, the app must SAY so
+ * `sqlWritesGranted` records what the DATABASE accepts for EXACTLY these
+ * operations: projects select / insert / update and the roster read
+ * (company_workers select) — the creator or an active owner/admin membership
+ * (`owns_company`) AND, since 20260924140000_manager_projects_roster_rls_v1,
+ * every role the matrix lets operate (`manages_organization`: manager,
+ * external_manager). It says NOTHING about roster MANAGEMENT: reading pending
+ * worker invitations, inviting, provisioning and per-worker role changes stay
+ * owner/admin-only in SQL (`owns_company`), and those surfaces carry their own
+ * owner/admin gate or named refusal. Project DELETE stays owner/admin (no
+ * `authenticated` DELETE grant). When a future role operates in the matrix
+ * before SQL admits these operations, the app must SAY so
  * (`operationalWritesNeedGrant`) instead of rendering a generic error or an
- * empty list (SEP-7: refused ≠ empty). Project DELETE stays owner/admin.
+ * empty list (SEP-7: refused ≠ empty).
  *
  * An ARCHIVED organization (owner decision 2026-09-23) grants nothing to
  * anyone — its memberships are history, not a workspace.
@@ -74,8 +79,10 @@ export interface OrganizationAuthority {
   readonly canGovern: boolean;
   /** May run operations (roster, projects, demand) per the matrix. */
   readonly canOperate: boolean;
-  /** What the operating policies accept: `owns_company` (creator, owner/admin)
-   *  or `manages_organization` (the operating roles). */
+  /** Projects select/insert/update + roster read only: `owns_company`
+   *  (creator, owner/admin) or `manages_organization` (the operating roles).
+   *  Roster management (invitations, provisioning, role changes) is not
+   *  covered — it stays owner/admin in SQL. */
   readonly sqlWritesGranted: boolean;
 }
 
