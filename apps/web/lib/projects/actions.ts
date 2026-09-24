@@ -13,6 +13,7 @@ import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
 import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -73,6 +74,7 @@ export async function createProjectAction(
   _prev: ProjectActionResult | null,
   formData: FormData,
 ): Promise<ProjectActionResult> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const supabase = await createClient();
   const {
     data: { user },

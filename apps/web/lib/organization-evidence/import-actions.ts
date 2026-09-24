@@ -43,6 +43,7 @@ import { activeLocales } from "@/lib/i18n/config";
 import { getLocale } from "next-intl/server";
 import { verifyCommitToken } from "@/lib/organization-evidence/commit-confirmation";
 import { isReportedEvidenceState } from "@/lib/organization-evidence/evidence-state";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * THE HUMAN TRANSPORT for the organization evidence import.
@@ -154,6 +155,7 @@ export async function startEvidenceImportAction(
   _previous: EvidenceImportActionState,
   form: FormData,
 ): Promise<EvidenceImportActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(form));
   const c = await caller();
   if (!c) return { kind: "refused", reason: "unauthenticated" };
 

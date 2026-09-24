@@ -14,6 +14,7 @@ import {
 } from "./team-brigades";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Server actions for the company-room team/brigade panel (§8.3 + Trust
@@ -41,7 +42,9 @@ const RELATION_NOT_FOUND_CODE = "42P01";
 
 export async function createTeamAction(
   name: string,
+  expectedWorkspaceId?: string,
 ): Promise<{ outcome: CreateTeamOutcome }> {
+  await refuseStaleWorkspace(expectedWorkspaceId);
   const { outcome } = await createTeamBrigade(name);
   // W14 mid-funnel: a team organization was really created (the org spine
   // gained a row). Entity type only — never the team name. Fire-and-forget.

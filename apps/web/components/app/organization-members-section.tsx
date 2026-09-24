@@ -15,6 +15,7 @@ import type {
   MembershipRole,
   OrganizationMember,
 } from "@/lib/company/memberships";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * M-P0-4 Slice 2 — governance member directory of the ACTIVE workspace.
@@ -147,6 +148,7 @@ export function OrganizationMembersSection({
 
                 {canAdminister && m.status === "invited" && adminCanTouch && (
                   <form action={rowAction}>
+                    <DisplayedWorkspaceField />
                     <input type="hidden" name="intent" value="cancel" />
                     <input type="hidden" name="membershipId" value={m.membershipId} />
                     <button
@@ -163,6 +165,7 @@ export function OrganizationMembersSection({
                 {canAdminister && m.status === "active" && !isSelf && adminCanTouch && (
                   <>
                     <form action={rowAction} className="flex items-center gap-1">
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="intent" value="role" />
                       <input type="hidden" name="membershipId" value={m.membershipId} />
                       <label className="sr-only" htmlFor={`role-${m.membershipId}`}>
@@ -191,6 +194,7 @@ export function OrganizationMembersSection({
                       </button>
                     </form>
                     <form action={rowAction}>
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="intent" value="revoke" />
                       <input type="hidden" name="membershipId" value={m.membershipId} />
                       <button
@@ -207,6 +211,7 @@ export function OrganizationMembersSection({
 
                 {isSelf && m.status === "active" && (
                   <form action={rowAction}>
+                    <DisplayedWorkspaceField />
                     <input type="hidden" name="intent" value="leave" />
                     <button
                       type="submit"
@@ -238,6 +243,7 @@ export function OrganizationMembersSection({
             className="flex flex-col gap-2 sm:flex-row sm:items-end"
             data-testid="org-members-invite-form"
           >
+            <DisplayedWorkspaceField />
             <div className="flex flex-1 flex-col gap-1">
               <label
                 className="text-xs text-text-muted"

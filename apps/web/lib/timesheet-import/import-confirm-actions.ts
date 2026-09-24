@@ -19,6 +19,7 @@ import {
   type TimesheetImportPreview,
   type TimesheetPreviewRefusedCode,
 } from "@/lib/timesheet-import/import-preview";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * TIMESHEET IMPORT — the two server actions.
@@ -147,6 +148,7 @@ export async function confirmTimesheetImportAction(
   _prev: TimesheetConfirmActionState,
   formData: FormData,
 ): Promise<TimesheetConfirmActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const rows = parseRows(String(formData.get("rows") ?? ""));
   if (rows === null || rows.length === 0) return { status: "no-rows" };
   if (rows.length > MAX_CONFIRM_ROWS) return { status: "too-many-rows" };

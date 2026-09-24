@@ -9,6 +9,7 @@ import {
   createProjectContextAction,
   type CreateProjectContextState,
 } from "@/lib/company/project-context-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Minimal company-side project/client context create form. Required: project
@@ -58,6 +59,7 @@ export function ProjectContextCreateForm() {
 
   return (
     <form action={action} className="card-border flex flex-col gap-3 p-4">
+      <DisplayedWorkspaceField />
       <input type="hidden" name="locale" value={locale} />
 
       <label className="flex flex-col gap-1 text-xs text-text-secondary">

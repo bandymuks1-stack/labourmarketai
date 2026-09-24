@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Company "propose booking" for a shortlisted, contactable candidate (Stage 6).
@@ -51,6 +52,7 @@ export function ProposeBookingButton({
   };
 }) {
   const tPropose = useTranslations("bookings.propose");
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [note, setNote] = useState("");
@@ -68,6 +70,7 @@ export function ProposeBookingButton({
         startDate,
         locationCountry: countryCode,
         note,
+        expectedWorkspaceId,
       });
       if (res.kind === "ok") setState("sent");
       else if (res.kind === "needs-migration") setState("unavailable");

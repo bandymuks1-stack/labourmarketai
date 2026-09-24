@@ -15,6 +15,7 @@ import {
   noticeForReviewOutcome,
   type ReviewNotice,
 } from "@/lib/reviews/reviews-model";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Development & Performance Reviews write actions (v1).
@@ -89,6 +90,7 @@ async function callRpc(
 
 /** Org owner/admin opens a named period. */
 export async function createReviewCycleAction(formData: FormData): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const org = await requireEmployerCompany();
   if (!org.ok) finish(locale, "not_authorized");

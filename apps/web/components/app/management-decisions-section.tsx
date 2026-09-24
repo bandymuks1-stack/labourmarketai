@@ -16,6 +16,7 @@ import {
   DECISION_TITLE_MIN,
   isDecisionNotice,
 } from "@/lib/decisions/decisions-model";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Management decisions section (v1) — a THIN surface over the engines it
@@ -108,6 +109,7 @@ export async function ManagementDecisionsSection({
         action={createManagementDecisionAction}
         className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
       >
+        <DisplayedWorkspaceField />
         <input type="hidden" name="locale" value={locale} />
         <label className="flex flex-col gap-1 text-meta text-text-muted">
           {t("form.title")}

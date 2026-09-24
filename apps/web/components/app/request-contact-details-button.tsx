@@ -7,6 +7,7 @@ import {
   withdrawContactDisclosureAction,
 } from "@/lib/privacy/contact-disclosure-actions";
 import type { ContactDisclosureStatus } from "@/lib/privacy/contact-disclosure-shared";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Company "request contact details" on a scouting candidate (Wagon 1, shared
@@ -74,6 +75,7 @@ export function RequestContactDetailsButton({
   };
 }) {
   const [pending, startTransition] = useTransition();
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const [state, setState] = useState<
     "idle" | "sent" | "rate_limited" | "no_organization" | "unavailable" | "error"
   >("idle");
@@ -176,6 +178,7 @@ export function RequestContactDetailsButton({
         locale,
         requestId,
         workerId,
+        expectedWorkspaceId,
       });
       if (res.kind === "ok" || res.kind === "already-accepted") setState("sent");
       else if (res.kind === "rate-limited") setState("rate_limited");

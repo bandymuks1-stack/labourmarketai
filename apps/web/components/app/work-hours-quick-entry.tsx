@@ -16,6 +16,7 @@ import type {
   HoursPageObject,
   HoursPageWorker,
 } from "@/lib/work-hours/hours-page-data";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * QUICK ENTRY — built for a site manager entering a whole crew on a phone.
@@ -169,6 +170,7 @@ export function WorkHoursQuickEntry({
         {t("import.entryLink")}
       </Link>
       <form action={action} className="flex flex-col gap-4">
+        <DisplayedWorkspaceField />
         {/* The server reads only these. `entered_by` is never a form field —
             it is taken from the session, so an operator cannot be recorded as
             somebody else. */}

@@ -23,6 +23,7 @@ import {
   WorkerOperationsRoleForm,
   type OperationsRoleControlLabels,
 } from "@/components/app/worker-operations-role-form";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Company workers + invitations panel.
@@ -333,6 +334,7 @@ export function CompanyWorkersSection({
         className="flex flex-col gap-3"
         data-testid="company-workers-invite-form"
       >
+        <DisplayedWorkspaceField />
         <header className="flex flex-col gap-1">
           <h3 className="font-display text-sm font-semibold text-text-primary">
             {labels.inviteHeading}

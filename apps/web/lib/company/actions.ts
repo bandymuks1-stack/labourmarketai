@@ -27,6 +27,7 @@ import type {
   ProvisionEngagementActionState,
   SetJournalReviewActionState,
 } from "@/lib/operations/journal-review-actions";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * M-P0-3: every roster write below derives its company from the ACTIVE
@@ -72,6 +73,7 @@ export async function inviteCompanyWorkerAction(
   _prev: InviteCompanyFormState | null,
   formData: FormData,
 ): Promise<InviteCompanyFormState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const email = String(formData.get("email") ?? "");
   const note = formData.get("note") ? String(formData.get("note")) : null;
 
@@ -120,6 +122,7 @@ export async function assignCompanyWorkerRoleAction(
   _prev: AssignRoleActionState | null,
   formData: FormData,
 ): Promise<AssignRoleActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const workerId = String(formData.get("workerId") ?? "").trim();
   const roleRaw = String(formData.get("operationsRole") ?? "").trim();
   const operationsRole = roleRaw === "" ? null : roleRaw;
@@ -164,6 +167,7 @@ export async function provisionCompanyWorkerEngagementContextAction(
   _prev: ProvisionEngagementActionState | null,
   formData: FormData,
 ): Promise<ProvisionEngagementActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const workerId = String(formData.get("workerId") ?? "").trim();
 
   const company = await requireEmployerCompany();
@@ -195,6 +199,7 @@ export async function setCompanyWorkerJournalReviewAction(
   _prev: SetJournalReviewActionState | null,
   formData: FormData,
 ): Promise<SetJournalReviewActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const workerId = String(formData.get("workerId") ?? "").trim();
   const enabled = String(formData.get("enabled") ?? "") === "true";
 

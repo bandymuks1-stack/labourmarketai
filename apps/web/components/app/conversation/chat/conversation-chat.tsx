@@ -4778,7 +4778,7 @@ export function ConversationChat({
       if (id.startsWith("pin:")) {
         const ref = id.slice(4);
         const label = pinLabelFor(ref);
-        void pinAction({ ref, label }).then((r) => {
+        void pinAction({ ref, label, expectedWorkspaceId }).then((r) => {
           if (r.ok) {
             setPinned((prev) =>
               prev.some((p) => p.ref === ref) ? prev : [...prev, { ref, kind: "action", label, position: prev.length }],
@@ -4800,7 +4800,7 @@ export function ConversationChat({
         const ref = id.slice(10);
         const next = [...pinned.filter((p) => p.ref === ref), ...pinned.filter((p) => p.ref !== ref)];
         if (next.length === 0 || next[0]?.ref !== ref) return true;
-        void reorderPinsAction({ refs: next.map((p) => p.ref) }).then((r) => {
+        void reorderPinsAction({ refs: next.map((p) => p.ref), expectedWorkspaceId }).then((r) => {
           if (r.ok) {
             setPinned(next.map((p, i) => ({ ...p, position: i })));
             assistant(labels.reorderDone.replace("{label}", next[0]?.label ?? pinLabelFor(ref)));
@@ -4812,7 +4812,7 @@ export function ConversationChat({
       }
       if (id.startsWith("unpin:")) {
         const ref = id.slice(6);
-        void unpinAction({ ref }).then((r) => {
+        void unpinAction({ ref, expectedWorkspaceId }).then((r) => {
           if (r.ok) {
             setPinned((prev) => prev.filter((p) => p.ref !== ref));
             assistant(labels.unpinDone);
@@ -4836,7 +4836,7 @@ export function ConversationChat({
       }
       return false;
     },
-    [pinned, pinLabelFor, assistant, labels],
+    [pinned, pinLabelFor, assistant, labels, expectedWorkspaceId],
   );
 
   const handleChipRef = useRef<(chip: ChoiceChip) => void>(() => {});

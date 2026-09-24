@@ -12,6 +12,7 @@ import {
 } from "@/lib/communication/communication-eligibility";
 import { isBridgeUuid } from "@/lib/agency/bridge-model";
 import { toActiveLocale } from "@/lib/i18n/config";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(supabase: SupabaseClient): any {
@@ -56,6 +57,7 @@ function asAny(supabase: SupabaseClient): any {
 export async function openAgencyConnectionConversationAction(
   formData: FormData,
 ): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const connectionId = String(formData.get("connectionId") ?? "");
   const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const cannotOpen = `/${locale}/dashboard/communication?notice=cannot_open`;

@@ -34,6 +34,7 @@ import {
 import { openAgencyConnectionConversationAction } from "@/lib/agency/bridge-conversation";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Agency side of the REAL two-subject bridge (issue #859). The staffing agency
@@ -262,6 +263,7 @@ export function AgencyBridgeSection({
                           // the action re-verifies the active connection and
                           // the caller's side server-side before opening.
                           <form action={openAgencyConnectionConversationAction} className="shrink-0">
+                            <DisplayedWorkspaceField />
                             <input type="hidden" name="connectionId" value={c.id} />
                             <input type="hidden" name="locale" value={locale} />
                             <button type="submit" data-testid={`agency-bridge-message-${c.id}`}

@@ -28,6 +28,7 @@ import {
   type BookingNotificationFacts,
 } from "@/lib/notifications/event-emitters";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Booking server actions (Stage 6) — the live wiring of the booking-state
@@ -166,11 +167,14 @@ export interface ProposeBookingInput {
   locationCountry?: string | null;
   role?: string | null;
   note?: string | null;
+  /** The workspace the screen displayed (`refuseStaleWorkspace`). */
+  expectedWorkspaceId?: string;
 }
 
 export async function proposeBookingAction(
   input: ProposeBookingInput,
 ): Promise<BookingActionResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   const supabase = await createClient();
   const {
     data: { user },

@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 
 import { useRouter } from "@/lib/i18n/navigation";
 import type { EvidenceImportActionState } from "@/lib/organization-evidence/import-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * The interactive shells of the evidence-import workspace.
@@ -153,6 +154,7 @@ export function EvidenceSourceForm({
       className="flex flex-col gap-4"
       data-testid="evidence-source-form"
     >
+      <DisplayedWorkspaceField />
       {/* THE PRIMARY ACTION: one drop zone, one button, nothing to fill in. */}
       <label
         htmlFor="evidence-source-file"

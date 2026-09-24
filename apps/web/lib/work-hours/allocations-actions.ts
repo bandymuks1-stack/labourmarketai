@@ -12,6 +12,7 @@ import {
   parseHours,
   type HoursProblem,
 } from "@/lib/work-hours/allocations-model";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * WORK-HOUR ALLOCATIONS — writes.
@@ -82,6 +83,7 @@ export async function recordAllocationAction(
   _prev: AllocationActionState,
   formData: FormData,
 ): Promise<AllocationActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const workerId = field(formData, "worker_id");
   const workObjectId = field(formData, "work_object_id");
   const workDate = field(formData, "work_date");

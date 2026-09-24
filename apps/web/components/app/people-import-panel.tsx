@@ -15,6 +15,7 @@ import {
   type PersonSource,
   type RowResolution,
 } from "@/lib/organization-people/ingest-core";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * BRING YOUR PEOPLE IN — the human half of organization people ingestion.
@@ -72,6 +73,7 @@ export function PeopleImportPanel({
   const [relationship, setRelationship] = useState<IngestRelationship>(suggested);
   const [resolutions, setResolutions] = useState<Record<number, RowResolution>>({});
   const [pending, start] = useTransition();
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const fileRef = useRef<HTMLInputElement>(null);
   const sourcesRef = useRef<readonly PersonSource[]>([]);
 
@@ -125,6 +127,7 @@ export function PeopleImportPanel({
         sources,
         relationship,
         resolutions: Object.values(resolutions),
+        expectedWorkspaceId,
       });
       if (res.kind !== "ok") {
         setStage({

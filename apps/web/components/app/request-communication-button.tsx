@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Step 4A — "Request to communicate" on a scouting candidate. Sends only the
@@ -33,6 +34,7 @@ export function RequestCommunicationButton({
   };
 }) {
   const router = useRouter();
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<
     | { kind: "idle" }
@@ -44,7 +46,12 @@ export function RequestCommunicationButton({
   function onRequest() {
     setState({ kind: "idle" });
     startTransition(async () => {
-      const res = await requestWorkerConversationAction({ locale, requestId, workerId });
+      const res = await requestWorkerConversationAction({
+        locale,
+        requestId,
+        workerId,
+        expectedWorkspaceId,
+      });
       if (res.ok) {
         setState({ kind: "opened", conversationId: res.conversationId });
       } else if (res.reason === "rate_limited") {
