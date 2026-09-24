@@ -258,9 +258,16 @@ export function ContextPanel({
   // points at this workspace to clear that signal; on a phone the panel starts
   // collapsed, so leaving it shut would make the thing somebody is waiting on
   // unreachable from the notification that announced it.
+  //
+  // ORDER-INDEPENDENT (review P2 on #1856): a question the thread has already
+  // asked wins, whichever arrives first. The yield below fires only on a NEW
+  // chips stamp, so if the opening brief's chips landed BEFORE this read, an
+  // open here would cover them with nothing left to close it. Once chips are
+  // on screen the invitation waits in the collapsed sheet (its header and
+  // the bell still announce it); before any chips it opens as it always did.
   useEffect(() => {
-    if (work?.invitations) setExpanded(true);
-  }, [work]);
+    if (work?.invitations && !chipsPostedAt) setExpanded(true);
+  }, [work, chipsPostedAt]);
 
   // Prod walk 2026-09-04 (phone): after "Priskirti darbuotoją" the question
   // "Kas turėtų jame dirbti?" and its chips landed in the thread UNDER the
