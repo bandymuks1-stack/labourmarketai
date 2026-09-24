@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { getSessionIsAdmin } from "@/lib/auth/session-admin-signal";
 import {
   operationalWritesNeedGrant,
   projectOrganizationAuthority,
@@ -13,12 +14,21 @@ import type { GovernanceRole } from "@/lib/company/role-capabilities";
  * The role → capability matrix lets a manager run operations — projects,
  * roster, demand — and the pages now open for them. The database has not
  * caught up: `projects_insert/update/delete` and `company_workers_select`
- * are still `owns_company(...)`, i.e. the creator or an active owner/admin
- * membership. So a manager's project write answers 42501 and the roster
- * read answers ZERO ROWS — which, rendered silently, is the lie "nobody is
- * on your roster". This notice states the fact once, names who can change
- * it, and renders for NO other role: an owner or admin never sees it, and
- * a member is not offered operations to begin with.
+ * are still `owns_company(...) OR is_admin()`, i.e. the creator or an active
+ * owner/admin membership. So a manager's project write answers 42501 (named
+ * as a refusal by both create paths) and the roster read answers ZERO ROWS —
+ * which the roster list below this notice cannot tell apart from "nobody is
+ * on the roster". This notice states that fact once, names who can change
+ * it, and renders for NO other role: an owner or admin never sees it, and a
+ * member is not offered operations to begin with.
+ *
+ * TWO signals decide it, in this order (review P2 on #1859, 2026-09-24):
+ *   1. the governance role, from the pure projection — every role that never
+ *      needs a grant returns before any read;
+ *   2. the platform-admin dual signal (`getSessionIsAdmin`, the shell's own
+ *      `deriveIsAdmin` reads): the `is_admin()` arm of every policy above
+ *      ADMITS an admin's writes and roster read, so for a manager who is also
+ *      a platform admin each sentence here would be false — they get nothing.
  *
  * It disappears by itself the moment the owner applies the policy widening
  * (`projects_*` → `manages_organization`): `sqlWritesGranted` is then true
@@ -27,6 +37,7 @@ import type { GovernanceRole } from "@/lib/company/role-capabilities";
  */
 export async function ManagerScopeNotice({ role }: { role: GovernanceRole }) {
   if (!operationalWritesNeedGrant(projectOrganizationAuthority({ role }))) return null;
+  if (await getSessionIsAdmin()) return null;
   const t = await getTranslations("organizationMembers.managerScope");
   return (
     <section

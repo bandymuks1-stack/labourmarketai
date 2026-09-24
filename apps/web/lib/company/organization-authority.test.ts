@@ -27,7 +27,9 @@ const ORG_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
 function org(
   id: string,
-  extra: Partial<Pick<WorkspaceInfo, "relationship" | "governanceRole">> = {},
+  extra: Partial<
+    Pick<WorkspaceInfo, "relationship" | "governanceRole" | "organizationType" | "companyType">
+  > = {},
 ): WorkspaceInfo {
   return { id, name: `Org ${id.slice(0, 4)}`, kind: "organization", accentIndex: 0, ...extra };
 }
@@ -173,6 +175,86 @@ describe("authorityForWorkspace — from the chip's own membership list", () => 
     expect(
       authorityForWorkspace(org(ORG_A, { relationship: "manager", governanceRole: "admin" })).canGovern,
     ).toBe(true);
+  });
+});
+
+describe("an agency is a company TYPE — the organization's type never narrows authority", () => {
+  // Review P2 on #1859: the projection admits every owned-organization row
+  // regardless of `organizationType`, so an agency-only owner is admitted to
+  // the company space. That is the CONTRACT (the doors and
+  // `actingRoleForWorkspace` fold an agency into the same governs
+  // vocabulary), pinned here so it cannot drift back into the pre-#1859
+  // `?notice=needs_company_role` refusal by accident.
+  const AGENCY_OWNED = org(ORG_A, { relationship: "owner", organizationType: "agency" });
+  const STAFFING_OWNED = org(ORG_A, {
+    relationship: "owner",
+    organizationType: "company",
+    companyType: "staffing_agency",
+  });
+
+  it("POSITIVE: an agency-only owner has owner authority in their agency", () => {
+    for (const row of [AGENCY_OWNED, STAFFING_OWNED]) {
+      expect(authorityForWorkspace(row), row.organizationType).toMatchObject({
+        role: "owner",
+        canOpen: true,
+        canGovern: true,
+        canOperate: true,
+        sqlWritesGranted: true,
+      });
+    }
+    // The same answer as an owned `company` row — the type is not a filter.
+    expect(authorityForWorkspace(AGENCY_OWNED)).toEqual(
+      authorityForWorkspace(org(ORG_A, { relationship: "owner", organizationType: "company" })),
+    );
+    // `team` / `other` owned rows: identical (the constructor accepts every type).
+    for (const organizationType of ["team", "other"] as const) {
+      expect(
+        authorityForWorkspace(org(ORG_A, { relationship: "owner", organizationType })).canOpen,
+        organizationType,
+      ).toBe(true);
+    }
+  });
+
+  it("POSITIVE: an agency owner standing in their agency opens the company space", () => {
+    const ctx = { workspaces: [PERSONAL, AGENCY_OWNED], activeWorkspaceId: ORG_A };
+    expect(workspaceOpensCompanySpace(ctx)).toBe(true);
+    expect(activeOrganizationAuthority(ctx)).toMatchObject({
+      organizationId: ORG_A,
+      authority: { role: "owner", canOpen: true, canGovern: true },
+    });
+    // A manager membership in an agency opens it too (the role, not the type).
+    expect(
+      workspaceOpensCompanySpace({
+        workspaces: [PERSONAL, org(ORG_A, { governanceRole: "manager", organizationType: "agency" })],
+        activeWorkspaceId: ORG_A,
+      }),
+    ).toBe(true);
+  });
+
+  it("NEGATIVE CONTROL: a worker whose only row is an employee engagement opens nothing", () => {
+    // Employed by an agency (or a company): employment is not governance,
+    // whatever the organization's type says.
+    for (const organizationType of ["agency", "company", "team", "other"] as const) {
+      const employee = org(ORG_A, { relationship: "employee", organizationType });
+      expect(authorityForWorkspace(employee), organizationType).toEqual(NO_AUTHORITY);
+      expect(
+        workspaceOpensCompanySpace({ workspaces: [PERSONAL, employee], activeWorkspaceId: ORG_A }),
+        organizationType,
+      ).toBe(false);
+    }
+    // A staffing agency's employee, by company type: the same refusal.
+    expect(
+      authorityForWorkspace(
+        org(ORG_A, { relationship: "employee", organizationType: "company", companyType: "staffing_agency" }),
+      ),
+    ).toEqual(NO_AUTHORITY);
+    // And the agency owner's authority never leaks into the personal workspace.
+    expect(
+      workspaceOpensCompanySpace({
+        workspaces: [PERSONAL, AGENCY_OWNED],
+        activeWorkspaceId: PERSONAL_WORKSPACE_ID,
+      }),
+    ).toBe(false);
   });
 });
 

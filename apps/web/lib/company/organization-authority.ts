@@ -129,6 +129,20 @@ export function operationalWritesNeedGrant(authority: OrganizationAuthority): bo
  * a legacy engagement-manager row carries `relationship: manager` (the
  * `manages_organization` dual arm accepts it). Employee / other rows are not
  * governance and open nothing.
+ *
+ * THE ORGANIZATION'S TYPE IS NOT CONSULTED — by contract, not by omission
+ * (review P2 on #1859, 2026-09-24). An owned row opens the company space
+ * whether its `organizationType` is `company`, `agency`, `team` or `other`:
+ * an agency is a company TYPE (`companies.company_type = 'staffing_agency'`,
+ * migration 20260612090000), and the doors, `actingRoleForWorkspace` and the
+ * dispatcher's held roles already fold an agency organization into the same
+ * governs vocabulary. So an agency-only owner standing in their agency is an
+ * employer here and `/dashboard/company/*` opens for them. Before #1859 the
+ * role gate refused that person with `?notice=needs_company_role` because
+ * they held no `profile_roles.company` row — a gap in the gate, never a
+ * contract, and no contract document lists it. The NEGATIVE control stays
+ * the relationship, not the type: a worker whose only row in an agency (or
+ * any organization) is an employee engagement opens nothing.
  */
 export function authorityForWorkspace(
   workspace:

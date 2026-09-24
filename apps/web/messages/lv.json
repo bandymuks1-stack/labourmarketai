@@ -6613,7 +6613,7 @@
     },
     "managerScope": {
       "title": "Jūsu loma šeit: vadītājs",
-      "body": "Jūs varat atvērt šo organizāciju un tajā strādāt. Projektu izveide un rediģēšana, kā arī komandas saraksta lasīšana pagaidām paliek īpašnieka vai administratora ziņā — kamēr viņi to nepiešķir, šāda darbība tiek rādīta kā noraidīta, nekad kā tukšs saraksts."
+      "body": "Jūs varat atvērt šo organizāciju un tajā strādāt. Projektu izveide un rediģēšana, kā arī komandas saraksta lasīšana pagaidām paliek īpašnieka vai administratora ziņā — kamēr viņi to nepiešķir, projekta izveide vai rediģēšana tiek rādīta kā noraidīta, un komandas saraksts zemāk var izskatīties tukšs, lai gan cilvēki tajā ir."
     }
   }
 }

@@ -17114,7 +17114,7 @@
     },
     "managerScope": {
       "title": "Je rol hier: leidinggevende",
-      "body": "Je kunt deze organisatie openen en erin werken. Projecten aanmaken of bewerken en het team inzien blijven voorlopig bij de eigenaar of beheerder — tot zij dat toekennen wordt zo'n actie als geweigerd getoond, nooit als een lege lijst."
+      "body": "Je kunt deze organisatie openen en erin werken. Projecten aanmaken of bewerken en het team inzien blijven voorlopig bij de eigenaar of beheerder — tot zij dat toekennen wordt het aanmaken of bewerken van een project als geweigerd getoond, en kan de teamlijst hieronder leeg lijken terwijl er wel mensen in staan."
     }
   },
   "rosterLinkEnd": {

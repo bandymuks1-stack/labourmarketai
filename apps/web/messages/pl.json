@@ -17114,7 +17114,7 @@
     },
     "managerScope": {
       "title": "Twoja rola tutaj: kierownik",
-      "body": "Możesz otworzyć tę organizację i w niej pracować. Tworzenie i edycja projektów oraz wgląd w skład zespołu pozostają na razie przy właścicielu lub administratorze — dopóki tego nie przyznają, taka czynność jest pokazywana jako odrzucona, nigdy jako pusta lista."
+      "body": "Możesz otworzyć tę organizację i w niej pracować. Tworzenie i edycja projektów oraz wgląd w skład zespołu pozostają na razie przy właścicielu lub administratorze — dopóki tego nie przyznają, tworzenie lub edycja projektu jest pokazywana jako odrzucona, a lista zespołu poniżej może wyglądać na pustą, choć są w niej osoby."
     }
   },
   "rosterLinkEnd": {

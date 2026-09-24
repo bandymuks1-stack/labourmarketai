@@ -16,6 +16,8 @@ import {
 import { ProjectMap } from "@/components/app/arena/project-map";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { listWorkerProjects } from "@/lib/projects/worker-project-access";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrgWorkObjects } from "@/lib/objects/objects";
 import { listManagedProjects } from "@/lib/projects/projects";
@@ -75,9 +77,20 @@ export default async function ProjectsPage({
   // members too (capability matrix P1, 2026-09-23): a manager whose acting
   // identity is `worker` (they hold no company role) must not be sent to
   // their own assignments while standing in the organization they manage.
-  // The same request-cached resolver the manager branch reads below.
-  const employerCtx = await resolveEmployerCompanyContext();
-  if (!MANAGER_ROLES.has(role) && employerCtx.kind !== "ok") {
+  //
+  // Decided from the ONE workspace resolution first (review P2 on #1859):
+  // `getWorkspaceContext()` is the request-cached read the shell already
+  // performed, so asking it here costs nothing, and `workspaceOpensCompanySpace`
+  // is the same pure rule the layout gate, the page gate and the dispatcher
+  // apply. The employer resolver — three organization reads — runs only when
+  // the acting identity is company-family or that workspace opens the company
+  // space; a plain worker in an employee workspace is answered without them.
+  const workspace = await getWorkspaceContext();
+  const employerCtx =
+    MANAGER_ROLES.has(role) || workspaceOpensCompanySpace(workspace)
+      ? await resolveEmployerCompanyContext()
+      : null;
+  if (!MANAGER_ROLES.has(role) && employerCtx?.kind !== "ok") {
     // RC2 role-aware routing (F11): a worker who lands here gets THEIR OWN
     // projects (real assignments under RLS), never a dead "managers only"
     // explanation. Honest empty state when they have no assignments yet.
@@ -138,7 +151,7 @@ export default async function ProjectsPage({
   // same components as the hub used; the manager's ONE company context
   // (resolved above, before the branch) scopes them, and a manager without
   // a company workspace simply sees the projects surface as before.
-  const ownCompanyId = employerCtx.kind === "ok" ? employerCtx.companyId : null;
+  const ownCompanyId = employerCtx?.kind === "ok" ? employerCtx.companyId : null;
   const [
     allProjects,
     workers,
@@ -284,9 +297,9 @@ export default async function ProjectsPage({
 
       {/* A manager's honest scope on the Work door: `projects_select` shows
           them only assigned/live rows and every create/edit answers 42501
-          until the owner grants it — said once, never rendered as an empty
-          list or a generic error. */}
-      {employerCtx.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
+          until the owner grants it — said once, never rendered as a generic
+          error (a platform admin, whom `is_admin()` admits, reads nothing). */}
+      {employerCtx?.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
 
       <CompanyActionNextActions
         room="projects"
