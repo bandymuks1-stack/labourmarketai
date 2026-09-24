@@ -18,6 +18,11 @@ import { acceptedDestination } from "@/lib/invitations/model";
 export async function acceptInviteFormAction(formData: FormData): Promise<void> {
   const token = String(formData.get("token") ?? "");
   const locale = String(formData.get("locale") ?? "lt");
+  // The invitation's stored proposed_role, echoed by the server-rendered page
+  // (the accept RPC does not return it). It decides ONLY where the person
+  // lands afterwards; a forged value lands them on a page whose own reads
+  // are RLS-scoped, and never changes what acceptance creates.
+  const proposedRole = String(formData.get("proposedRole") ?? "") || null;
   if (!token) redirect(`/${locale}/dashboard`);
 
   const result = await acceptInvitationAction({ token });
@@ -38,6 +43,7 @@ export async function acceptInviteFormAction(formData: FormData): Promise<void> 
     const destination = acceptedDestination({
       invitationType: result.invitationType ?? "",
       projectId: result.projectId,
+      proposedRole,
     });
     redirect(`/${locale}${destination}?notice=invitation_accepted`);
   }

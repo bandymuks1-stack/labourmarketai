@@ -9,6 +9,7 @@ import { listAgencyClients, listAgencyDemands } from "@/lib/agency/clients";
 import {
   listAgencyConnections,
   listMyClientBridgeConnections,
+  listMyClientInviteDeliveries,
   listSharedRequestsByClient,
   listSharedRequestsForAgency,
   listAgencyOfferProgress,
@@ -34,13 +35,24 @@ import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
  * sees the client side of that same bridge — the agencies that invited it and
  * the requests it chose to share. Same components, same reads as the hub;
  * the door exists only when the relationship exists (`loadOrganizationDoors`).
+ *
+ * `?notice=invitation_accepted` (2026-09-24): the invite link's acceptance
+ * lands here — the person accepted the agency's INVITATION; the CONNECTION
+ * is still confirmed below, with their own company, through the one consent
+ * path. The notice says exactly that.
  */
+const NOTICES = new Set(["invitation_accepted"]);
+
 export default async function CompanyPartnersPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ notice?: string }>;
 }) {
   const { locale } = await params;
+  const { notice } = await searchParams;
+  const safeNotice = notice && NOTICES.has(notice) ? notice : null;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -98,6 +110,7 @@ export default async function CompanyPartnersPage({
       bridgeShared,
       bridgeProgress,
       workersResult,
+      bridgeDeliveries,
       agencyClientsLabels,
       agencyBridgeLabels,
     ] = await Promise.all([
@@ -107,6 +120,9 @@ export default async function CompanyPartnersPage({
       listSharedRequestsForAgency(),
       listAgencyOfferProgress(),
       listActiveCompanyWorkers(ownCompany.id),
+      // The invitations that DELIVER the connections (the primitive's own
+      // rows), so each pending connection shows its real delivery state.
+      listMyClientInviteDeliveries(),
       readAgencyClientsLabels(),
       readAgencyBridgeLabels(),
     ]);
@@ -182,6 +198,7 @@ export default async function CompanyPartnersPage({
             shared={localizeTitles(bridgeShared) as typeof bridgeShared}
             progress={bridgeProgress}
             roster={bridgeRosterOptions}
+            deliveries={bridgeDeliveries}
             labels={agencyBridgeLabels}
             locale={locale}
           />
@@ -218,6 +235,15 @@ export default async function CompanyPartnersPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-partners">
       {header}
+      {safeNotice === "invitation_accepted" && (
+        <p
+          role="status"
+          className="rounded-card border border-brand-blue/40 bg-brand-blue/10 p-4 text-sm text-text-secondary"
+          data-testid="company-partners-invitation-accepted"
+        >
+          {t("invitationAccepted")}
+        </p>
+      )}
       {clientInvites.kind === "error" ? (
         <p
           role="alert"
@@ -234,6 +260,7 @@ export default async function CompanyPartnersPage({
             demands={clientBridgeDemands}
             shared={clientBridgeShares}
             labels={clientBridgeLabels}
+            locale={locale}
           />
         </div>
       ) : (

@@ -82,6 +82,17 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     booking_request whose status is `accepted` (verified server-side by
  *     the booking action, passed as a grant — booking lifecycle v1:
  *     an accepted booking must open the conversation, never dead-end).
+ *   - allowed_agency_connection — the agency ↔ client bridge's one mutual
+ *     consent (2026-09-24): the caller's ACTIVE workspace company and the
+ *     counterpart's share an `agency_client_connections` row whose status
+ *     is `active` — the agency invited, the client accepted under its own
+ *     e-mail. Verified server-side by the bridge action
+ *     (lib/agency/bridge-conversation.ts: the row read under RLS, the
+ *     status re-checked, the caller's side resolved through the
+ *     membership-validated employer context, the counterpart being the
+ *     other side's consenting person) and passed as a grant exactly like
+ *     allowed_accepted_booking. Never resolved from generic facts here —
+ *     see evaluateAgencyConnectionContact below for the pure decision.
  *   - allowed_admin — the caller carries the real admin signal (support /
  *     matching workbench paths; admin participation is already RLS-visible).
  *   - no_permission — the default. No relationship → no contact.
@@ -98,6 +109,7 @@ export type ContactPermissionState =
   | "allowed_demand_interest"
   | "allowed_accepted_booking"
   | "allowed_marketplace_enquiry"
+  | "allowed_agency_connection"
   | "allowed_admin"
   | "no_permission";
 
@@ -110,6 +122,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_demand_interest",
   "allowed_accepted_booking",
   "allowed_marketplace_enquiry",
+  "allowed_agency_connection",
   "allowed_admin",
   "no_permission",
 ];
@@ -184,5 +197,58 @@ export function evaluateWorkerContactRequest(
   if (!facts.hasOwnActiveSignal) return "no_interest";
   if (!facts.demandOpen) return "demand_closed";
   if (!facts.companyVerified) return "company_unverified";
+  return "allowed";
+}
+
+/**
+ * Agency ↔ client contact eligibility (2026-09-24) — PURE decision logic
+ * behind the `allowed_agency_connection` grant.
+ *
+ * Gates whether one side of an agency ↔ client connection may open the
+ * in-app conversation with the other. Two facts, both verified server-side
+ * by the bridge action before this runs:
+ *   - connectionStatus — the `agency_client_connections` row's status; only
+ *                        `active` (invited AND accepted) counts. A pending,
+ *                        declined or revoked row grants nothing — and so
+ *                        does a row that could not be read (null).
+ *   - callerCompanyId  — the caller's ACTIVE workspace company, resolved by
+ *                        the membership-validated employer context, never a
+ *                        form field. It must be exactly one of the two
+ *                        companies on the row; any other organization —
+ *                        including one that owns a DIFFERENT active
+ *                        connection with the same agency — is not a party.
+ *
+ * Default-closed: any missing fact denies. No contact data is involved —
+ * this only decides whether an IN-APP conversation may be opened.
+ */
+export type AgencyConnectionContactDecision =
+  | "allowed"
+  | "connection_not_active"
+  | "not_a_party";
+
+export interface AgencyConnectionContactFacts {
+  readonly connectionStatus: string | null | undefined;
+  readonly callerCompanyId: string | null | undefined;
+  readonly agencyCompanyId: string | null | undefined;
+  readonly clientCompanyId: string | null | undefined;
+}
+
+/** Which side of the connection the caller's company is, or null when it
+ *  is neither. Pure; does not look at the status. */
+export function agencyConnectionSide(
+  facts: AgencyConnectionContactFacts,
+): "agency" | "client" | null {
+  const caller = (facts.callerCompanyId ?? "").trim();
+  if (!caller) return null;
+  if (facts.agencyCompanyId && caller === facts.agencyCompanyId) return "agency";
+  if (facts.clientCompanyId && caller === facts.clientCompanyId) return "client";
+  return null;
+}
+
+export function evaluateAgencyConnectionContact(
+  facts: AgencyConnectionContactFacts,
+): AgencyConnectionContactDecision {
+  if (facts.connectionStatus !== "active") return "connection_not_active";
+  if (agencyConnectionSide(facts) === null) return "not_a_party";
   return "allowed";
 }

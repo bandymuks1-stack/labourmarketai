@@ -1001,7 +1001,8 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     precondition: "has_agency",
     migrationSensitive: false,
     telemetryEvent: E.companyDashboardViewed,
-    advancedRoute: "/dashboard/company",
+    // The relationship door (owner IA 2026-09-16), where the bridge lives.
+    advancedRoute: "/dashboard/company/partners",
     handler: { kind: "deep_link" },
   },
   {
@@ -1014,7 +1015,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     precondition: "has_agency",
     migrationSensitive: true,
     telemetryEvent: E.companyDemandActionClicked,
-    advancedRoute: "/dashboard/company",
+    advancedRoute: "/dashboard/company/partners",
     handler: { kind: "server_action", ref: "inviteClientAction" },
   },
   {
@@ -1027,7 +1028,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     precondition: "has_agency_connection",
     migrationSensitive: true,
     telemetryEvent: E.companyDemandActionClicked,
-    advancedRoute: "/dashboard/company",
+    advancedRoute: "/dashboard/company/partners",
     handler: { kind: "server_action", ref: "submitOfferAction" },
   },
   {

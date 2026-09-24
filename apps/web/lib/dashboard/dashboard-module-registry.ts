@@ -406,6 +406,15 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     roles: ORG_ROLES,
     primaryRoles: ORG_ROLES,
     surfaces: ["grid", "command"],
+    // The agency ↔ client bridge's three state-derived signals (2026-09-24)
+    // clear on doors INSIDE this workspace (partners: connection invites,
+    // shares awaiting an offer; scouting: offers awaiting a decision), so
+    // the company card is the one that carries their count.
+    attentionSignalIds: [
+      "pending-connection-invites",
+      "shared-requests-awaiting-offer",
+      "open-candidate-offers",
+    ],
   },
 
   {

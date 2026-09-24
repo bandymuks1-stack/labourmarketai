@@ -47,6 +47,9 @@ const ZERO: SpineCounts = {
   openTaskAttention: 0,
   newJobMatches: 0,
   pendingAbsenceReviews: 0,
+  pendingConnectionInvites: 0,
+  sharedRequestsAwaitingOffer: 0,
+  openCandidateOffers: 0,
 };
 
 /* W3 row 5: the compact recommendation surface is no longer a card on the

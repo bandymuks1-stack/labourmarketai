@@ -10,7 +10,12 @@ import {
 } from "@/lib/invitations/invite-page-actions";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { findExternalReferralSource } from "@/lib/invitations/external-sources";
-import { declaredContextItems } from "@/lib/invitations/model";
+import {
+  AGENCY_CLIENT_PROPOSED_ROLE,
+  declaredContextItems,
+  isAgencyClientInvitation,
+  maskEmail,
+} from "@/lib/invitations/model";
 import {
   ReferralContextReview,
   type ReferralReviewLabels,
@@ -304,6 +309,21 @@ export default async function InvitePage({
     ?.freeText;
   const safeNotice = notice && NOTICES.has(notice) ? notice : null;
   const isDemand = preview.invitation_type === "invite_to_demand";
+  // THE AGENCY'S CONNECTION INVITATION (2026-09-24). Accepting it here only
+  // records the answer; the connection itself is confirmed on the partners
+  // door through `accept_agency_client_connection_v1`, which requires the
+  // signed-in e-mail to BE the invited one. So when the token holder signed
+  // in under another address (Google, a second account), the truthful thing
+  // to say is exactly that — masked addressee, switch account — instead of
+  // letting them accept into a door that would then refuse them.
+  const agencyClient = isAgencyClientInvitation({
+    invitationType: preview.invitation_type,
+    proposedRole: preview.proposed_role,
+  });
+  const invitedAddress = (preview.invited_email ?? "").trim().toLowerCase();
+  const signedInAddress = (user.email ?? "").trim().toLowerCase();
+  const addressedToOther =
+    agencyClient && invitedAddress.length > 0 && invitedAddress !== signedInAddress;
   // Resolved here, on the server: the /invite tree ships no `network`
   // messages to the client (client-messages-allowlist).
   const tReview = await getTranslations("network.referralReview");
@@ -377,8 +397,18 @@ export default async function InvitePage({
             {t("seats", { used: preview.use_count ?? 0, max: maxUses })}
           </p>
         )}
-        {preview.proposed_role && (
-          <p data-testid="invite-role">{t("role", { role: preview.proposed_role })}</p>
+        {agencyClient ? (
+          <>
+            {/* The closed marker is localized here; the slug never renders. */}
+            <p data-testid="invite-agency-client">{t("agencyClient")}</p>
+            <p className="text-text-muted" data-testid="invite-agency-client-next">
+              {t("agencyClientNext")}
+            </p>
+          </>
+        ) : (
+          preview.proposed_role && (
+            <p data-testid="invite-role">{t("role", { role: preview.proposed_role })}</p>
+          )
         )}
         {/* WHAT YOU ARE AGREEING TO. Acceptance creates a real, attributable
             relationship; the name is resolved through the localized
@@ -420,11 +450,29 @@ export default async function InvitePage({
         >
           {t(`closed.${closedKey}`)}
         </p>
+      ) : addressedToOther ? (
+        <div
+          role="status"
+          className="flex flex-col gap-2 rounded-md border border-state-warning/50 bg-state-warning/10 p-4 text-sm text-text-secondary"
+          data-testid="invite-addressed-to-other"
+        >
+          <p>{t("addressedToOther", { email: maskEmail(invitedAddress) ?? "" })}</p>
+          <a
+            href={`/${locale}/auth/logout`}
+            className="w-fit rounded-md border border-ink-500 px-4 py-2 text-sm text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            data-testid="invite-switch-account"
+          >
+            {t("switchAccount")}
+          </a>
+        </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
           <form action={acceptInviteFormAction}>
             <input type="hidden" name="token" value={token} />
             <input type="hidden" name="locale" value={locale} />
+            {agencyClient && (
+              <input type="hidden" name="proposedRole" value={AGENCY_CLIENT_PROPOSED_ROLE} />
+            )}
             <button
               type="submit"
               data-testid="invite-accept"

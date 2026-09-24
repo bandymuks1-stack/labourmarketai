@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Handshake, Check, X, Trash2 } from "lucide-react";
+import { Handshake, Check, MessageSquare, X, Trash2 } from "lucide-react";
 
 import {
   pendingInvites,
@@ -16,6 +16,7 @@ import {
   unshareRequestAction,
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
+import { openAgencyConnectionConversationAction } from "@/lib/agency/bridge-conversation";
 
 /**
  * Client side of the REAL two-subject bridge (issue #859). A real client
@@ -51,6 +52,8 @@ export interface ClientBridgeLabels {
   readonly sharedHeading: string;
   readonly noShared: string;
   readonly unshareButton: string;
+  /** Opens the conversation with the agency person who invited (2026-09-24). */
+  readonly messageButton: string;
 }
 
 const IDLE: BridgeActionState = { status: "idle" };
@@ -61,6 +64,7 @@ export function ClientAgencyBridgeSection({
   demands,
   shared,
   labels,
+  locale,
 }: {
   invites: ClientInvitesState;
   clientCompanyId: string;
@@ -68,6 +72,7 @@ export function ClientAgencyBridgeSection({
   /** What this client currently discloses, per connection. */
   shared: SharedRequestsState;
   labels: ClientBridgeLabels;
+  locale: string;
 }) {
   const [acceptState, acceptAction, acceptPending] = useActionState(acceptConnectionAction, IDLE);
   const [declineState, declineAction] = useActionState(declineConnectionAction, IDLE);
@@ -144,6 +149,17 @@ export function ClientAgencyBridgeSection({
                   <li key={c.id} className="card-border flex flex-col gap-2 p-3" data-testid="client-bridge-active-row">
                     <div className="flex items-center gap-2">
                       <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-primary">{c.agencyName}</span>
+                      {/* The conversation with the agency person who invited —
+                          the action re-verifies the ACTIVE connection and the
+                          caller's side server-side before opening (§8.1). */}
+                      <form action={openAgencyConnectionConversationAction} className="shrink-0">
+                        <input type="hidden" name="connectionId" value={c.id} />
+                        <input type="hidden" name="locale" value={locale} />
+                        <button type="submit" data-testid={`client-bridge-message-${c.id}`}
+                          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue">
+                          <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {labels.messageButton}
+                        </button>
+                      </form>
                       <form action={revokeAction} className="shrink-0">
                         <input type="hidden" name="connectionId" value={c.id} />
                         <button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton}

@@ -4,7 +4,7 @@ import { cache } from "react";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOwnedCompanyById } from "@/lib/company/company-setup";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
-import { listMyConnectionInvites } from "@/lib/agency/bridge-read";
+import { listMyClientBridgeConnections } from "@/lib/agency/bridge-read";
 
 /**
  * THE ORGANIZATION'S DOORS (owner IA correction 2026-09-16, design/final/03 §2).
@@ -15,7 +15,16 @@ import { listMyConnectionInvites } from "@/lib/agency/bridge-read";
  *
  *   partners   a staffing agency always has a client door; any other
  *              organization gets it only once an agency has invited it, so a
- *              first-visit employer is not shown an empty relationship room;
+ *              first-visit employer is not shown an empty relationship room.
+ *              "Invited" is the MERGED bridge read (2026-09-24): the
+ *              connections addressed to the caller's e-mail PLUS every
+ *              active connection the COMPANY owns. The e-mail-only read
+ *              this used to make hid the door from a second owner of the
+ *              same company and from anyone who accepted under an address
+ *              they no longer sign in with — a relationship that existed,
+ *              with no door to it. Either read failing makes the list
+ *              UNKNOWN, and an unknown list opens no door (SEP-7: refused
+ *              is not empty — the page itself says "could not load");
  *   education  the `training_provider` capability, the SAME axis the company
  *              hub used to decide whether to render the learners/programmes
  *              sections.
@@ -89,7 +98,7 @@ export const loadOrganizationDoors = cache(
       company.kind === "ok" && company.row?.companyType === "staffing_agency";
     const [capabilities, invites] = await Promise.all([
       readOrganizationCapabilities(ctx.organizationId),
-      isStaffingAgency ? null : listMyConnectionInvites(),
+      isStaffingAgency ? null : listMyClientBridgeConnections(ctx.companyId),
     ]);
     const hasEducation = capabilities.includes("training_provider");
     const hasPartners =

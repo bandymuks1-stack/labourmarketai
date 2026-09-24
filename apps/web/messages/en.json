@@ -622,7 +622,10 @@
       "booking_responses": "Clears when you open the bookings page.",
       "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page.",
       "pending_absence_reviews": "Clears when you approve or reject the request on the leave & absence page.",
-      "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card)."
+      "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card).",
+      "pending_connection_invites": "Clears when you accept or decline the agency's connection request on the partners page.",
+      "shared_requests_awaiting_offer": "Clears when you offer a roster worker for the shared request on the partners page.",
+      "open_candidate_offers": "Clears when you accept or decline the proposed candidate on your scouting page."
     },
     "storedTitle": "Stored notifications",
     "storedIntro": "Recorded events about you — each row opens the page it is about. Read state is managed from the bell.",
@@ -4638,6 +4641,9 @@
         "open_task_attention": "Tasks needing attention",
         "pending_absence_reviews": "Leave requests to review",
         "new_job_matches": "New job listings that fit you",
+        "pending_connection_invites": "A staffing agency wants to connect with your company",
+        "shared_requests_awaiting_offer": "Client requests waiting for your candidate",
+        "open_candidate_offers": "Agency candidates waiting for your decision",
         "event_booking_proposed": "You received a booking proposal",
         "event_booking_accepted": "Your booking proposal was accepted",
         "event_booking_declined": "Your booking proposal was declined",
@@ -11480,7 +11486,11 @@
       "demand": "Work need: {role} · {country}",
       "demandNotMatch": "The employer invited you directly — this is not a system match.",
       "interested": "I am interested",
-      "notInterested": "Not interested"
+      "notInterested": "Not interested",
+      "agencyClient": "A staffing agency invites your company to work together as its client.",
+      "agencyClientNext": "After you accept, the connection request appears on your organization's Partners page — confirm it there with your company. Nothing is shared until you do.",
+      "addressedToOther": "This invitation was addressed to {email}. You are signed in with a different address, so the connection cannot be confirmed from this account — sign in with the invited address and open this link again.",
+      "switchAccount": "Sign out and switch account"
     },
     "teamEnquiriesTitle": "My enquiries to teams",
     "admin": {
@@ -11667,7 +11677,18 @@
       "decision_declined": "Client declined"
     },
     "goToRoster": "Go to the roster",
-    "invalidLabel": "Check the e-mail address — the invitation was not sent."
+    "invalidLabel": "Check the e-mail address — the invitation was not sent.",
+    "deliveryHeading": "Invitation link",
+    "deliveryCreated": "Not e-mailed — e-mail delivery is not configured. Copy the link and send it to the client yourself.",
+    "deliverySent": "The invitation e-mail was sent. You can still copy the link.",
+    "deliveryFailed": "E-mail delivery failed. Copy the link and send it yourself.",
+    "deliveryDuplicate": "An invitation for this address is already pending. Use “New link” to get a fresh link.",
+    "deliveryRefused": "The invitation link could not be created — the connection is recorded, but nothing was delivered.",
+    "deliveryUnavailable": "The invitation link could not be created right now — the connection is recorded. Try “New link” later.",
+    "noInvitationYet": "No invitation link yet — get one to deliver this invitation.",
+    "getLink": "Get link",
+    "newLink": "New link",
+    "messageButton": "Message"
   },
   "clientBridge": {
     "title": "Staffing agencies",
@@ -11689,7 +11710,8 @@
     "fromAgency": "From",
     "sharedHeading": "Shared with this agency",
     "noShared": "Nothing shared with this agency yet",
-    "unshareButton": "Stop sharing this request"
+    "unshareButton": "Stop sharing this request",
+    "messageButton": "Message"
   },
   "scoutingAgencyOffers": {
     "status": {
@@ -16982,7 +17004,8 @@
         "title": "Clients and partners",
         "subtitle": "Who you work with: clients, agencies and shared needs.",
         "empty": "No client or partner relationships yet. An agency can invite you to work together — its proposals will appear here.",
-        "unavailable": "Partner connections could not be loaded. That does not mean there are none — try again."
+        "unavailable": "Partner connections could not be loaded. That does not mean there are none — try again.",
+        "invitationAccepted": "Invitation accepted. Confirm the agency's connection request below with your company."
       },
       "education": {
         "title": "Learning and programmes",
