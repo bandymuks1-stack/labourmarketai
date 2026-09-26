@@ -56,8 +56,8 @@ export type PublicEntryReading =
       readonly kind: "recognised";
       readonly sentence: string;
       readonly intent: RoutedIntent;
-      /** The first-run identity family the intent belongs to — one of the
-       *  SAME values onboarding asks about (`lib/onboarding/first-run-intent`). */
+      /** The first-run identity family the intent belongs to — the SAME
+       *  five values onboarding asks about (`lib/onboarding/first-run-intent`). */
       readonly family: FirstRunIntent;
     };
 
