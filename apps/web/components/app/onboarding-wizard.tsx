@@ -367,7 +367,15 @@ export function OnboardingWizard({
           )}
         </header>
 
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2" data-testid="onboarding-intents">
+        {/* Desktop: all six cards share ONE height — the tallest card's —
+            across all three rows (`sm:auto-rows-fr` makes every implicit
+            row as tall as the tallest, `sm:h-full` makes each card fill its
+            cell), so tops and bottoms line up and the gaps stay equal.
+            Mobile (one column) keeps each card's natural height. */}
+        <ul
+          className="grid grid-cols-1 gap-3 sm:auto-rows-fr sm:grid-cols-2"
+          data-testid="onboarding-intents"
+        >
           {INTENT_CARDS.map((intent) => {
             const selected = intents.has(intent);
             return (
@@ -378,7 +386,7 @@ export function OnboardingWizard({
                   aria-pressed={selected}
                   data-testid={`onboarding-intent-${intent}`}
                   className={cn(
-                    "flex w-full items-start gap-3 rounded-md border bg-ink-800 p-4 text-left transition-colors",
+                    "flex w-full items-start gap-3 rounded-md border bg-ink-800 p-4 text-left transition-colors sm:h-full",
                     selected
                       ? "border-brand-orange ring-1 ring-brand-orange"
                       : "border-ink-500 hover:border-text-muted",
