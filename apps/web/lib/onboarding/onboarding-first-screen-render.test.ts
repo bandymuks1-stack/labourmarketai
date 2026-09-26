@@ -96,6 +96,22 @@ describe("onboarding first screen — contexts, not an episode of searching", ()
     expect(many.match(/aria-pressed="false"/g)).toHaveLength(3);
   });
 
+  it("desktop: one card height for all six (every row as tall as the tallest card); mobile stays natural", () => {
+    const html = render("lt");
+    const grid = html.match(/<ul class="([^"]*)" data-testid="onboarding-intents"/);
+    expect(grid, "the card grid").not.toBeNull();
+    const gridClasses = grid![1].split(/\s+/);
+    expect(gridClasses).toEqual(expect.arrayContaining(["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2", "sm:auto-rows-fr"]));
+    // Equal rows only from the two-column breakpoint up — never on mobile.
+    expect(gridClasses).not.toContain("auto-rows-fr");
+    for (const intent of ORDER) {
+      const card = html.match(new RegExp(`<button[^>]*data-testid="onboarding-intent-${intent}"[^>]*class="([^"]*)"|<button[^>]*class="([^"]*)"[^>]*data-testid="onboarding-intent-${intent}"`));
+      const classes = (card?.[1] ?? card?.[2] ?? "").split(/\s+/);
+      expect(classes, intent).toContain("sm:h-full");
+      expect(classes, intent).not.toContain("h-full");
+    }
+  });
+
   it("every catalogue carries the screen: heading, explanation, note, six titled cards, no journal box", () => {
     for (const loc of LOCALES) {
       const rp = catalog(loc).auth.onboarding.rolePicker;
