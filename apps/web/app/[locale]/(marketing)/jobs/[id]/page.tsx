@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
-import { resolveActiveLocale } from "@/lib/seo/metadata";
+import { buildPageMetadata, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { getPublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
@@ -100,12 +100,19 @@ export async function generateMetadata({
   // occupation label — the same anonymous projection every caller receives.
   const title = preview.occupation ?? GENERIC_TITLE[active];
 
-  return {
+  // R-12 (2026-09-19): the same builder every other public page uses —
+  // absolute canonical, hreflang `languages` for all active locales, and the
+  // full layout OpenGraph/Twitter objects (type, siteName, url, locale, share
+  // image). The literal `{ alternates, openGraph }` this replaced declared no
+  // hreflang and REPLACED the layout's openGraph object wholesale (Next merges
+  // metadata per field, not deep), so the detail page lost siteName/url/image.
+  // Still the anonymous projection: only `preview.occupation` reaches <head>.
+  return buildPageMetadata({
+    locale: active,
+    path: `/jobs/${id}`,
     title,
     description: DESCRIPTION[active],
-    alternates: { canonical: `/${active}/jobs/${id}` },
-    openGraph: { title, description: DESCRIPTION[active] },
-  };
+  });
 }
 
 type L = Record<ActiveLocale, string>;
