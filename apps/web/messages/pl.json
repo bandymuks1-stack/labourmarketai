@@ -3984,31 +3984,36 @@
     "onboarding": {
       "pendingInviteNote": "Masz oczekujące zaproszenie od {org}. Dokończ poniżej konfigurację konta — potem przyjmiesz je w swoim panelu.",
       "rolePicker": {
-        "intentHeading": "Wybierz, co do Ciebie pasuje",
-        "intentNote": "Możesz wybrać jedną lub kilka opcji.",
+        "intentHeading": "Zaczynajmy",
+        "intentLead": "LabourMarket.ai pomaga budować historię zawodową, zarządzać bieżącą pracą i odkrywać nowe możliwości.",
+        "intentNote": "Możesz wybrać kilka opcji i później je zmienić.",
         "saidLabel": "Napisano:",
         "saidHint": "Zaznaczyliśmy to, co pasuje. Zmień, jeśli trzeba.",
         "doorLabel": "Wybrano:",
         "intent": {
           "work": {
-            "title": "Szukam pracy",
-            "desc": "Profil, umiejętności, CV i Dziennik pracy, który pokazuje, co potrafisz; realne, pasujące możliwości."
+            "title": "Pracuję / mam doświadczenie zawodowe",
+            "desc": "Twoja praca, umiejętności i Dziennik pracy budują historię zawodową — z niej rodzą się nowe możliwości."
+          },
+          "member": {
+            "title": "Jestem częścią firmy lub zespołu",
+            "desc": "Firma, zespół lub brygada, z którą pracujesz na co dzień — praca tam uzupełnia Twoją historię zawodową."
           },
           "hire": {
-            "title": "Potrzebuję pracowników",
-            "desc": "Opisz realne zapotrzebowanie na pracowników zwykłymi słowami i dotrzyj do pasujących osób."
+            "title": "Kieruję firmą lub zespołem",
+            "desc": "Ludzie, zespoły, projekty, obiekty i prace — oraz nowi ludzie, gdy są potrzebni."
           },
           "agency": {
-            "title": "Jestem rekruterem / agencją",
-            "desc": "Twoja baza kandydatów, firmy klientów, zgłoszenia i realizacje — jako organizacja pośrednictwa pracy."
+            "title": "Zajmuję się rekrutacją lub dostarczaniem pracowników",
+            "desc": "Oferta pracowników, klienci, potrzeby, oddelegowania i bieżąca praca."
           },
           "student": {
-            "title": "Jestem uczniem lub studentem",
-            "desc": "Twoja nauka ma znaczenie. Połącz się ze swoją placówką, znajdź praktyki i pierwszą pracę."
+            "title": "Uczę się / przygotowuję do zawodu",
+            "desc": "Nauka i praktyki są już częścią Twojej historii zawodowej. Połącz się ze swoją szkołą."
           },
           "education": {
-            "title": "Reprezentuję placówkę edukacyjną",
-            "desc": "Zaproś uczniów, zobacz ich aktywność i połącz ich z realnymi praktykami i pracą."
+            "title": "Reprezentuję instytucję edukacyjną",
+            "desc": "Zapraszaj uczących się, zobacz ich udział i łącz ich z praktykami i pracą."
           }
         },
         "heading": "Zaczynasz jako osoba czy jako firma?",
@@ -4028,7 +4033,6 @@
           "title": "Klient",
           "desc": "Zamawiam usługi, otrzymuję raporty z prac."
         },
-        "infoBox": "Cokolwiek wybierzesz, jest tylko punktem wyjścia — Twoje doświadczenie zawodowe po cichu zapisuje się w Dzienniku pracy. Kiedyś może być najcenniejszą częścią Twojego CV.",
         "continue": "Kontynuuj",
         "multiNote": "Wybierz jedno lub oba — to tylko punkt wyjścia. Osoba i firma to tożsamości; zatrudnianie, kupowanie, oferowanie pracowników czy prowadzenie projektów to działania, które dodasz później."
       },

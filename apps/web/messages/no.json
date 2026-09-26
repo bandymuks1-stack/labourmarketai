@@ -418,6 +418,35 @@
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
       "rolePicker": {
+        "intentHeading": "La oss komme i gang",
+        "intentLead": "LabourMarket.ai hjelper deg med å bygge din faglige historikk, styre det nåværende arbeidet og finne nye muligheter.",
+        "intentNote": "Du kan velge flere og endre dem senere.",
+        "intent": {
+          "work": {
+            "title": "Jeg jobber / har yrkeserfaring",
+            "desc": "Arbeidet, ferdighetene og arbeidsjournalen din bygger din faglige historikk — nye muligheter vokser ut av den."
+          },
+          "member": {
+            "title": "Jeg er en del av en bedrift eller et team",
+            "desc": "Bedriften, teamet eller arbeidslaget du jobber med hver dag — arbeidet der legges til din faglige historikk."
+          },
+          "hire": {
+            "title": "Jeg leder en bedrift eller et team",
+            "desc": "Mennesker, team, prosjekter, byggeplasser og oppgaver — og nye folk når du trenger dem."
+          },
+          "agency": {
+            "title": "Jeg jobber med rekruttering eller levering av arbeidskraft",
+            "desc": "Tilbud av arbeidskraft, kunder, behov, oppdrag og pågående arbeid."
+          },
+          "student": {
+            "title": "Jeg lærer / forbereder meg til et yrke",
+            "desc": "Læring og praksis er allerede en del av din faglige historikk. Koble deg til utdanningsstedet ditt."
+          },
+          "education": {
+            "title": "Jeg representerer et utdanningssted",
+            "desc": "Inviter elever, se deltakelsen deres og koble dem til praksis og jobber."
+          }
+        },
         "agency": {
           "desc": "[EN] Staff workers, manage contracts.",
           "title": "[EN] Agency"
@@ -432,7 +461,6 @@
           "title": "[EN] Customer"
         },
         "heading": "[EN] Choose how you'll use the platform",
-        "infoBox": "[EN] 💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "multiNote": "[EN] You can choose several. Change later in settings.",
         "worker": {
           "desc": "[EN] Seek work, build your CV, get confirmed.",

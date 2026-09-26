@@ -418,6 +418,35 @@
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
       "rolePicker": {
+        "intentHeading": "Alustame",
+        "intentLead": "LabourMarket.ai aitab koguda tööalast ajalugu, juhtida praegust tööd ja leida uusi võimalusi.",
+        "intentNote": "Võite valida mitu varianti ja neid hiljem muuta.",
+        "intent": {
+          "work": {
+            "title": "Töötan / mul on töökogemust",
+            "desc": "Teie töö, oskused ja tööpäevik koguvad tööalast ajalugu — sellest sünnivad uued võimalused."
+          },
+          "member": {
+            "title": "Olen ettevõtte või meeskonna liige",
+            "desc": "Ettevõte, meeskond või brigaad, kellega iga päev töötate — sealne töö täiendab teie tööalast ajalugu."
+          },
+          "hire": {
+            "title": "Juhin ettevõtet või meeskonda",
+            "desc": "Inimesed, meeskonnad, projektid, objektid ja tööd — ning uued inimesed, kui neid vaja on."
+          },
+          "agency": {
+            "title": "Tegelen töötajate värbamise või vahendamisega",
+            "desc": "Tööjõu pakkumine, kliendid, vajadused, suunamised ja käimasolev töö."
+          },
+          "student": {
+            "title": "Õpin / valmistun ametiks",
+            "desc": "Õppimine ja praktika on juba osa teie tööalasest ajaloost. Liituge oma õppeasutusega."
+          },
+          "education": {
+            "title": "Esindan õppeasutust",
+            "desc": "Kutsuge õppijaid, nähke nende osalust ning ühendage nad praktika ja tööga."
+          }
+        },
         "agency": {
           "desc": "[EN] Staff workers, manage contracts.",
           "title": "[EN] Agency"
@@ -432,7 +461,6 @@
           "title": "[EN] Customer"
         },
         "heading": "[EN] Choose how you'll use the platform",
-        "infoBox": "[EN] 💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "multiNote": "[EN] You can choose several. Change later in settings.",
         "worker": {
           "desc": "[EN] Seek work, build your CV, get confirmed.",

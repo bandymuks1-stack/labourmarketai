@@ -418,6 +418,35 @@
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
       "rolePicker": {
+        "intentHeading": "Lad os komme i gang",
+        "intentLead": "LabourMarket.ai hjælper dig med at opbygge din faglige historik, styre dit nuværende arbejde og finde nye muligheder.",
+        "intentNote": "Du kan vælge flere og ændre dem senere.",
+        "intent": {
+          "work": {
+            "title": "Jeg arbejder / har erhvervserfaring",
+            "desc": "Dit arbejde, dine færdigheder og din arbejdsjournal opbygger din faglige historik — nye muligheder vokser ud af den."
+          },
+          "member": {
+            "title": "Jeg er en del af en virksomhed eller et team",
+            "desc": "Virksomheden, teamet eller holdet, du arbejder med hver dag — arbejdet der føjes til din faglige historik."
+          },
+          "hire": {
+            "title": "Jeg leder en virksomhed eller et team",
+            "desc": "Mennesker, teams, projekter, byggepladser og opgaver — og nye folk, når du har brug for dem."
+          },
+          "agency": {
+            "title": "Jeg arbejder med rekruttering eller levering af arbejdskraft",
+            "desc": "Udbud af arbejdskraft, kunder, behov, placeringer og igangværende arbejde."
+          },
+          "student": {
+            "title": "Jeg lærer / forbereder mig til et fag",
+            "desc": "Læring og praktik er allerede en del af din faglige historik. Forbind dig med dit uddannelsessted."
+          },
+          "education": {
+            "title": "Jeg repræsenterer et uddannelsessted",
+            "desc": "Inviter elever, se deres deltagelse og forbind dem med praktik og job."
+          }
+        },
         "agency": {
           "desc": "[EN] Staff workers, manage contracts.",
           "title": "[EN] Agency"
@@ -432,7 +461,6 @@
           "title": "[EN] Customer"
         },
         "heading": "[EN] Choose how you'll use the platform",
-        "infoBox": "[EN] 💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "multiNote": "[EN] You can choose several. Change later in settings.",
         "worker": {
           "desc": "[EN] Seek work, build your CV, get confirmed.",

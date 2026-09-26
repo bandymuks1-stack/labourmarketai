@@ -3984,31 +3984,36 @@
     "onboarding": {
       "pendingInviteNote": "Je hebt een openstaande uitnodiging van {org}. Rond hieronder het instellen van je account af — daarna kun je de uitnodiging accepteren op je dashboard.",
       "rolePicker": {
-        "intentHeading": "Kies wat bij je past",
-        "intentNote": "Je kunt er één of meer kiezen.",
+        "intentHeading": "Laten we beginnen",
+        "intentLead": "LabourMarket.ai helpt je je professionele geschiedenis op te bouwen, je huidige werk te beheren en nieuwe kansen te ontdekken.",
+        "intentNote": "Je kunt er meerdere kiezen en ze later wijzigen.",
         "saidLabel": "Je schreef:",
         "saidHint": "We hebben aangevinkt wat past. Pas het aan als het nodig is.",
         "doorLabel": "U koos:",
         "intent": {
           "work": {
-            "title": "Ik zoek werk",
-            "desc": "Profiel, vaardigheden, cv en een werkjournaal dat laat zien wat je kunt; echte kansen die passen."
+            "title": "Ik werk / heb beroepservaring",
+            "desc": "Je werk, vaardigheden en werkjournaal bouwen je professionele geschiedenis op — daaruit ontstaan nieuwe kansen."
+          },
+          "member": {
+            "title": "Ik maak deel uit van een bedrijf of team",
+            "desc": "Het bedrijf, team of de ploeg waarmee je elke dag werkt — het werk daar vult je professionele geschiedenis aan."
           },
           "hire": {
-            "title": "Ik heb werknemers nodig",
-            "desc": "Beschrijf een echte personeelsbehoefte in gewone woorden en bereik passende mensen."
+            "title": "Ik leid een bedrijf of team",
+            "desc": "Mensen, teams, projecten, locaties en werk — en nieuwe mensen wanneer je ze nodig hebt."
           },
           "agency": {
-            "title": "Ik ben recruiter / uitzendbureau",
-            "desc": "Je kandidatenpool, je klantbedrijven, voordrachten en plaatsingen — als uitzendorganisatie."
+            "title": "Ik werk in werving of het leveren van personeel",
+            "desc": "Personeelsaanbod, klanten, behoeften, plaatsingen en lopend werk."
           },
           "student": {
-            "title": "Ik ben student",
-            "desc": "Je studie telt mee. Koppel je aan je onderwijsinstelling, vind stages en eerste banen."
+            "title": "Ik leer / bereid me voor op een beroep",
+            "desc": "Leren en stage horen al bij je professionele geschiedenis. Verbind je met je onderwijsinstelling."
           },
           "education": {
             "title": "Ik vertegenwoordig een onderwijsinstelling",
-            "desc": "Nodig studenten uit, zie hun deelname en koppel ze aan echte stages en banen."
+            "desc": "Nodig lerenden uit, zie hun deelname en verbind ze met stages en banen."
           }
         },
         "heading": "Begin je als persoon of als bedrijf?",
@@ -4028,7 +4033,6 @@
           "title": "Klant",
           "desc": "Diensten aanvragen, werkrapporten ontvangen."
         },
-        "infoBox": "Wat je ook kiest, het is alleen een startpunt — je werkervaring wordt stilletjes vastgelegd in je werkjournaal. Op een dag kan het het waardevolste deel van je cv zijn.",
         "continue": "Doorgaan",
         "multiNote": "Kies er één of beide — dit is alleen een startpunt. Persoon en bedrijf zijn identiteiten; aannemen, inkopen, werknemers aanbieden of projecten uitvoeren zijn acties die je later toevoegt."
       },

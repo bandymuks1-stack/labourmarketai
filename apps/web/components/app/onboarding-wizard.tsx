@@ -29,17 +29,22 @@ import {
  *  Internal identifiers stay within the DB Role contract. */
 const ROLE_CARDS: { key: Role }[] = [{ key: "worker" }, { key: "company" }];
 
-/** Universal first-run router (FIRST REAL ECOSYSTEM USE, 2026-09-03): the
- *  screen asks WHAT THE PERSON CAME TO DO, in their words, and maps the answer
- *  onto the two identities above (lib/onboarding/first-run-intent.ts). Five
- *  intents, still two identities: an agency is a company TYPE, an education
- *  institution is a company CAPABILITY, a student is a person whose evidence
- *  starts in learning. Multi-select stays — one account carries all of it. */
+/** Universal first-run router (FIRST REAL ECOSYSTEM USE, 2026-09-03; owner
+ *  correction 2026-09-26): the screen asks which parts of the world of work
+ *  the person is IN today — contexts, not a role and not an episode of
+ *  searching — and maps them onto the two identities above
+ *  (lib/onboarding/first-run-intent.ts). Six intents, still two identities:
+ *  being part of a company or team is a PERSON (the membership comes from the
+ *  organisation model, never from this screen), an agency is a company TYPE,
+ *  an education institution is a company CAPABILITY, a student is a person
+ *  whose evidence starts in learning. Multi-select stays — one account
+ *  carries all of it, and the person can change it later. */
 const INTENT_CARDS: readonly FirstRunIntent[] = FIRST_RUN_INTENTS;
 
 /** Icon for an intent card = the icon of the identity it opens. */
 const INTENT_ICON_ROLE: Record<FirstRunIntent, Role> = {
   work: "worker",
+  member: "worker",
   student: "worker",
   hire: "company",
   agency: "company",
@@ -287,6 +292,15 @@ export function OnboardingWizard({
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.intentHeading")}
           </h1>
+          {/* What the product is FOR, in one line, before any choice — the
+              same for a worker, a company, an agency and a school (owner
+              correction 2026-09-26: a daily work system, not a search). */}
+          <p
+            className="text-sm leading-relaxed text-text-secondary"
+            data-testid="onboarding-lead"
+          >
+            {t("rolePicker.intentLead")}
+          </p>
           {/*
            * Doctrine §5.5 — no person fits in one category — still holds, and
            * the multi-select promise is still stated BEFORE anything is
@@ -400,10 +414,6 @@ export function OnboardingWizard({
             );
           })}
         </ul>
-
-        <p className="rounded-md border border-ink-500 bg-ink-700/50 px-4 py-3 text-xs leading-relaxed text-text-secondary">
-          {t("rolePicker.infoBox")}
-        </p>
 
         <Button
           type="button"

@@ -418,6 +418,35 @@
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
       "rolePicker": {
+        "intentHeading": "Sāksim",
+        "intentLead": "LabourMarket.ai palīdz veidot profesionālo vēsturi, pārvaldīt pašreizējo darbu un atklāt jaunas iespējas.",
+        "intentNote": "Varat izvēlēties vairākus variantus un vēlāk tos mainīt.",
+        "intent": {
+          "work": {
+            "title": "Strādāju / man ir profesionāla pieredze",
+            "desc": "Jūsu darbs, prasmes un darba žurnāls veido profesionālo vēsturi — no tās rodas jaunas iespējas."
+          },
+          "member": {
+            "title": "Esmu uzņēmuma vai komandas daļa",
+            "desc": "Uzņēmums, komanda vai brigāde, ar kuru strādājat katru dienu — darbs tajā papildina jūsu profesionālo vēsturi."
+          },
+          "hire": {
+            "title": "Vadu uzņēmumu vai komandu",
+            "desc": "Cilvēki, komandas, projekti, objekti un darbi — un jauni cilvēki, kad tie vajadzīgi."
+          },
+          "agency": {
+            "title": "Nodarbojos ar darbinieku atlasi vai nodrošināšanu",
+            "desc": "Darbaspēka piedāvājums, klienti, vajadzības, norīkojumi un notiekošais darbs."
+          },
+          "student": {
+            "title": "Mācos / gatavojos profesijai",
+            "desc": "Mācības un prakse jau ir daļa no jūsu profesionālās vēstures. Pievienojieties savai mācību iestādei."
+          },
+          "education": {
+            "title": "Pārstāvu mācību iestādi",
+            "desc": "Aiciniet izglītojamos, redziet viņu dalību un savienojiet viņus ar praksēm un darbu."
+          }
+        },
         "agency": {
           "desc": "[EN] Staff workers, manage contracts.",
           "title": "[EN] Agency"
@@ -432,7 +461,6 @@
           "title": "[EN] Customer"
         },
         "heading": "[EN] Choose how you'll use the platform",
-        "infoBox": "[EN] 💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "multiNote": "[EN] You can choose several. Change later in settings.",
         "worker": {
           "desc": "[EN] Seek work, build your CV, get confirmed.",
