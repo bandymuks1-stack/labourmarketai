@@ -3984,31 +3984,36 @@
     "onboarding": {
       "pendingInviteNote": "You have a pending invitation from {org}. Finish setting up your account below — then you can accept it on your dashboard.",
       "rolePicker": {
-        "intentHeading": "Choose what fits you",
-        "intentNote": "You can pick one or several.",
+        "intentHeading": "Let's get started",
+        "intentLead": "LabourMarket.ai helps you build your professional history, run your current work and discover new opportunities.",
+        "intentNote": "You can pick several and change them later.",
         "saidLabel": "You wrote:",
         "saidHint": "We ticked what fits. Change it if needed.",
         "doorLabel": "You chose:",
         "intent": {
           "work": {
-            "title": "I'm looking for work",
-            "desc": "Profile, skills, CV and a Work Journal that shows what you can do; real opportunities that match."
+            "title": "I work / have professional experience",
+            "desc": "Your work, skills and Work Journal build your professional history — new opportunities grow from it."
+          },
+          "member": {
+            "title": "I'm part of a company or team",
+            "desc": "The company, team or crew you work with every day — the work you do there adds to your professional history."
           },
           "hire": {
-            "title": "I need workers",
-            "desc": "Describe a real workforce need in plain words and reach matching people."
+            "title": "I run a company or team",
+            "desc": "People, teams, projects, sites and work — and new people when you need them."
           },
           "agency": {
-            "title": "I'm a recruiter / agency",
-            "desc": "Your candidate pool, your client companies, submissions and placements — as a staffing organisation."
+            "title": "I work in recruitment or workforce supply",
+            "desc": "Workforce supply, clients, needs, placements and ongoing work."
           },
           "student": {
-            "title": "I'm a student",
-            "desc": "Your studies count. Connect to your institution, find internships and first jobs."
+            "title": "I'm learning / preparing for a profession",
+            "desc": "Learning and practice are already part of your professional history. Connect to your school."
           },
           "education": {
-            "title": "I represent an education institution",
-            "desc": "Invite students, see their participation and connect them to real internships and jobs."
+            "title": "I represent an education provider",
+            "desc": "Invite learners, see their participation and connect them to internships and jobs."
           }
         },
         "heading": "Are you starting as a person or a company?",
@@ -4028,7 +4033,6 @@
           "title": "Customer",
           "desc": "Request services, get work reports."
         },
-        "infoBox": "Whatever you pick is only a starting point — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "continue": "Continue",
         "multiNote": "Pick one or both — this is only a starting point. Person and company are identities; hiring, buying, offering workers or running projects are actions you add later."
       },

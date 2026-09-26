@@ -8,6 +8,7 @@ import {
   nextPathForIntents,
   parseFirstRunIntents,
   professionRequiredForIntents,
+  type FirstRunIntent,
 } from "./first-run-intent";
 
 describe("first-run intent router (pure)", () => {
@@ -85,3 +86,85 @@ describe("first-run intent router (pure)", () => {
     expect(nextPathForIntents(["student", "hire"])).toBe("/dashboard/start/company");
   });
 });
+
+/**
+ * Owner correction 2026-09-26 — the first screen names CONTEXTS, not an
+ * episode of looking for something. The six cards must keep every existing
+ * continuation (identities, the profession question, the study question,
+ * the next screen) and the new "part of a company or team" card must stay a
+ * PERSON: it never opens a company identity or the company setup form.
+ */
+describe("the six first-screen contexts keep onboarding's continuation", () => {
+  const route = (intents: FirstRunIntent[]) => ({
+    identities: identitiesForIntents(intents),
+    profession: professionRequiredForIntents(intents),
+    study: asksForCurrentEducation(intents),
+    next: nextPathForIntents(intents),
+  });
+
+  it("six cards, in the order the screen shows them", () => {
+    expect(FIRST_RUN_INTENTS).toEqual(["work", "member", "hire", "agency", "student", "education"]);
+  });
+
+  it("A — only 'I work': the person, a profession, their own space", () => {
+    expect(route(["work"])).toEqual({ identities: ["worker"], profession: true, study: false, next: null });
+  });
+
+  it("B — 'I work' + 'part of a company or team': still one person, nothing created for the company", () => {
+    expect(route(["work", "member"])).toEqual({ identities: ["worker"], profession: true, study: false, next: null });
+  });
+
+  it("'part of a company or team' alone: a person, profession optional, never the company setup", () => {
+    expect(route(["member"])).toEqual({ identities: ["worker"], profession: false, study: false, next: null });
+    expect(companyPresetForIntents(["member"])).toBeNull();
+  });
+
+  it("C — 'I run a company or team': the one company setup form", () => {
+    expect(route(["hire"])).toEqual({ identities: ["company"], profession: false, study: false, next: "/dashboard/start/company" });
+  });
+
+  it("D — recruitment / workforce supply: a company of type staffing agency, never a root role", () => {
+    expect(route(["agency"])).toEqual({
+      identities: ["company"],
+      profession: false,
+      study: false,
+      next: "/dashboard/start/company?type=staffing_agency",
+    });
+  });
+
+  it("E — learning / preparing for a profession: a person with a current study place", () => {
+    expect(route(["student"])).toEqual({
+      identities: ["worker"],
+      profession: false,
+      study: true,
+      next: "/dashboard/profile#learning-compass",
+    });
+  });
+
+  it("F — an education provider: a company declaring the training capability", () => {
+    expect(route(["education"])).toEqual({
+      identities: ["company"],
+      profession: false,
+      study: false,
+      next: "/dashboard/start/company?capability=training_provider",
+    });
+  });
+
+  it("G — several contexts at once: both identities, every question the parts need", () => {
+    expect(route(["work", "member", "hire", "student"])).toEqual({
+      identities: ["worker", "company"],
+      profession: true,
+      study: true,
+      next: "/dashboard/start/company",
+    });
+    expect(route(["member", "agency", "education"])).toEqual({
+      identities: ["worker", "company"],
+      profession: false,
+      study: false,
+      next: "/dashboard/start/company?type=staffing_agency&capability=training_provider",
+    });
+    // The form field keeps the canonical order whatever order was clicked.
+    expect(parseFirstRunIntents("education,member,work")).toEqual(["work", "member", "education"]);
+  });
+});
+

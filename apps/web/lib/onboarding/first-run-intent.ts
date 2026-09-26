@@ -1,12 +1,21 @@
 /**
  * Universal first-run router — PURE (no React, no Supabase).
  *
- * After sign-in a new user is asked ONE small question — what they came to
- * do — and the answer is routed into the canonical identity model instead of
- * into a generic dashboard. Five intents, TWO base identities (owner
+ * After sign-in a new user is asked ONE small question — which parts of the
+ * world of work they are in today — and the answer is routed into the
+ * canonical identity model instead of into a generic dashboard. The cards
+ * name CONTEXTS a person is in (owner correction 2026-09-26: LabourMarket.ai
+ * is a daily work system, not an episode of looking for something), never a
+ * role they are locked into. Six intents, TWO base identities (owner
  * directives company-role-simplicity-v1 + systemic-ux-roles-v1):
  *
- *   work       → person  (worker)
+ *   work       → person  (worker) — "I work / have professional experience"
+ *   member     → person  (worker) — "I am part of a company or team": a
+ *                person, never an organisation. The membership itself comes
+ *                from the EXISTING organisation model (an invitation /
+ *                membership / engagement), so onboarding creates nothing for
+ *                it and routes like `work` (the person's own space, where
+ *                pending invitations are surfaced).
  *   student    → person  (worker) + a CURRENT education record — the
  *                canonical "I am studying" state (worker_education.is_current)
  *                that the institution link later attaches to; a student is a
@@ -26,6 +35,7 @@
 
 export const FIRST_RUN_INTENTS = [
   "work",
+  "member",
   "hire",
   "agency",
   "student",
@@ -38,6 +48,7 @@ export type FirstRunIdentity = "worker" | "company";
 
 export const INTENT_IDENTITY: Readonly<Record<FirstRunIntent, FirstRunIdentity>> = {
   work: "worker",
+  member: "worker",
   student: "worker",
   hire: "company",
   agency: "company",

@@ -3984,31 +3984,36 @@
     "onboarding": {
       "pendingInviteNote": "Turite laukiantį kvietimą iš {org}. Užbaikite paskyros nustatymą žemiau — tada galėsite jį priimti savo skydelyje.",
       "rolePicker": {
-        "intentHeading": "Pasirinkite, kas jums tinka",
-        "intentNote": "Galite pasirinkti vieną ar kelis variantus.",
+        "intentHeading": "Pradėkime",
+        "intentLead": "LabourMarket.ai padeda kaupti profesinę istoriją, valdyti dabartinį darbą ir atrasti naujas galimybes.",
+        "intentNote": "Galite pasirinkti kelis variantus ir vėliau juos pakeisti.",
         "saidLabel": "Jūs rašėte:",
         "saidHint": "Pažymėjome, kas tiko. Pataisykite, jei reikia.",
         "doorLabel": "Jūs pasirinkote:",
         "intent": {
           "work": {
-            "title": "Ieškau darbo",
-            "desc": "Profilis, įgūdžiai, CV ir Darbo žurnalas, kuris parodo, ką mokate; realios, jums tinkančios galimybės."
+            "title": "Dirbu / turiu profesinės patirties",
+            "desc": "Jūsų darbas, įgūdžiai ir Darbo žurnalas kaupia profesinę istoriją — iš jos atsiranda naujos galimybės."
+          },
+          "member": {
+            "title": "Esu įmonės ar komandos dalis",
+            "desc": "Įmonė, komanda ar brigada, su kuria dirbate kasdien — darbas joje kaupiasi jūsų profesinėje istorijoje."
           },
           "hire": {
-            "title": "Man reikia darbuotojų",
-            "desc": "Aprašykite realų darbo jėgos poreikį paprastais žodžiais ir pasiekite tinkamus žmones."
+            "title": "Vadovauju įmonei ar komandai",
+            "desc": "Žmonės, komandos, projektai, objektai ir darbai — ir nauji žmonės, kai jų prireikia."
           },
           "agency": {
-            "title": "Esu įdarbinimo agentūra / atrankų specialistas",
-            "desc": "Jūsų kandidatų bazė, klientų įmonės, pasiūlymai ir įdarbinimai — kaip darbuotojų nuomos organizacija."
+            "title": "Dirbu su darbuotojų atranka ar tiekimu",
+            "desc": "Darbuotojų pasiūla, klientai, poreikiai, paskyrimai ir vykstantis darbas."
           },
           "student": {
-            "title": "Esu studentas",
-            "desc": "Jūsų studijos įskaitomos. Prisijunkite prie savo mokymo įstaigos, raskite praktikas ir pirmus darbus."
+            "title": "Mokausi / ruošiuosi profesijai",
+            "desc": "Mokymasis ir praktika jau yra jūsų profesinės istorijos dalis. Prisijunkite prie savo mokymo įstaigos."
           },
           "education": {
             "title": "Atstovauju mokymo įstaigai",
-            "desc": "Kvieskite studentus, matykite jų dalyvavimą ir jungkite juos prie realių praktikų ir darbų."
+            "desc": "Kvieskite besimokančiuosius, matykite jų dalyvavimą ir jungkite juos prie praktikų ir darbų."
           }
         },
         "heading": "Pradedate kaip asmuo ar įmonė?",
@@ -4028,7 +4033,6 @@
           "title": "Pirkėjas",
           "desc": "Užsisakyti paslaugas, gauti ataskaitas."
         },
-        "infoBox": "Ką bepasirinktum — tai tik pradžios taškas; tavo darbo patirtis tyliai kaupiama Darbo žurnale. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
         "continue": "Tęsti",
         "multiNote": "Pasirinkite vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsite vėliau."
       },

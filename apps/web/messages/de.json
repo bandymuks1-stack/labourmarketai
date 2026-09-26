@@ -3984,31 +3984,36 @@
     "onboarding": {
       "pendingInviteNote": "Sie haben eine ausstehende Einladung von {org}. Schließen Sie unten die Einrichtung Ihres Kontos ab — danach können Sie sie in Ihrem Dashboard annehmen.",
       "rolePicker": {
-        "intentHeading": "Wählen Sie, was zu Ihnen passt",
-        "intentNote": "Sie können eine oder mehrere Optionen wählen.",
+        "intentHeading": "Legen wir los",
+        "intentLead": "LabourMarket.ai hilft Ihnen, Ihren beruflichen Werdegang aufzubauen, Ihre aktuelle Arbeit zu steuern und neue Möglichkeiten zu entdecken.",
+        "intentNote": "Sie können mehrere Optionen wählen und sie später ändern.",
         "saidLabel": "Sie haben geschrieben:",
         "saidHint": "Wir haben angekreuzt, was passt. Ändern Sie es bei Bedarf.",
         "doorLabel": "Sie haben gewählt:",
         "intent": {
           "work": {
-            "title": "Ich suche Arbeit",
-            "desc": "Profil, Fähigkeiten, Lebenslauf und ein Arbeitsjournal, das zeigt, was Sie können; echte passende Chancen."
+            "title": "Ich arbeite / habe Berufserfahrung",
+            "desc": "Ihre Arbeit, Ihre Fähigkeiten und Ihr Arbeitsjournal bauen Ihren beruflichen Werdegang auf — daraus entstehen neue Möglichkeiten."
+          },
+          "member": {
+            "title": "Ich bin Teil eines Unternehmens oder Teams",
+            "desc": "Das Unternehmen, Team oder die Kolonne, mit der Sie täglich arbeiten — die Arbeit dort ergänzt Ihren beruflichen Werdegang."
           },
           "hire": {
-            "title": "Ich brauche Arbeitskräfte",
-            "desc": "Beschreiben Sie einen echten Personalbedarf in einfachen Worten und erreichen Sie passende Menschen."
+            "title": "Ich leite ein Unternehmen oder Team",
+            "desc": "Menschen, Teams, Projekte, Objekte und Arbeiten — und neue Leute, wenn Sie sie brauchen."
           },
           "agency": {
-            "title": "Ich bin Recruiter / Personalagentur",
-            "desc": "Ihr Kandidatenpool, Ihre Kundenunternehmen, Vorschläge und Vermittlungen — als Personaldienstleister."
+            "title": "Ich arbeite in der Personalvermittlung oder -überlassung",
+            "desc": "Personalangebot, Kunden, Bedarfe, Einsätze und laufende Arbeit."
           },
           "student": {
-            "title": "Ich bin Student/in",
-            "desc": "Ihr Studium zählt. Verbinden Sie sich mit Ihrer Bildungseinrichtung, finden Sie Praktika und erste Jobs."
+            "title": "Ich lerne / bereite mich auf einen Beruf vor",
+            "desc": "Lernen und Praktika gehören schon zu Ihrem beruflichen Werdegang. Verbinden Sie sich mit Ihrer Bildungseinrichtung."
           },
           "education": {
             "title": "Ich vertrete eine Bildungseinrichtung",
-            "desc": "Laden Sie Studierende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit echten Praktika und Jobs."
+            "desc": "Laden Sie Lernende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit Praktika und Jobs."
           }
         },
         "heading": "Starten Sie als Person oder als Unternehmen?",
@@ -4028,7 +4033,6 @@
           "title": "Kunde",
           "desc": "Dienstleistungen anfragen, Arbeitsberichte erhalten."
         },
-        "infoBox": "Was auch immer Sie wählen, ist nur ein Ausgangspunkt — Ihre Arbeitserfahrung wird still in Ihrem Arbeitsjournal festgehalten. Eines Tages könnte sie der wertvollste Teil Ihres Lebenslaufs sein.",
         "continue": "Weiter",
         "multiNote": "Wählen Sie eine oder beide Optionen — dies ist nur ein Ausgangspunkt. Person und Unternehmen sind Identitäten; Einstellen, Einkaufen, Anbieten von Arbeitskräften oder Leiten von Projekten sind Aktionen, die Sie später hinzufügen."
       },
