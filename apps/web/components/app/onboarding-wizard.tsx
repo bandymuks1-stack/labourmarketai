@@ -298,9 +298,24 @@ export function OnboardingWizard({
       const registrySlugs = professions
         .map((p) => p.slug)
         .filter((slug): slug is string => !!slug);
+      // The words still sitting in the field count too (Codex P2 on #1880,
+      // verified): somebody who types their profession and presses Finish
+      // without pressing Add has answered the question, and silently dropping
+      // what they can still see on screen is the same defect this whole slice
+      // exists to fix. Added last, and only when it is not already in the list.
       const ownWords = professions
         .filter((p) => !p.slug && p.label)
         .map((p) => p.label as string);
+      const pending = normalizeSelfDeclaredProfession(professionDraft);
+      if (
+        pending &&
+        !ownWords.some(
+          (w) =>
+            selfDeclaredProfessionKey(w) === selfDeclaredProfessionKey(pending),
+        )
+      ) {
+        ownWords.push(pending);
+      }
       if (registrySlugs.length > 0) {
         form.set("profession_slug", registrySlugs[0]);
         form.set("profession_slugs", registrySlugs.join(","));

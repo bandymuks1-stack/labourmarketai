@@ -325,7 +325,7 @@ export default async function ProfilePage({
   /** The professions this person named in their OWN WORDS — shown exactly as
    *  typed. Separate from `workerDirections`, which are registry professions
    *  the skills editor is keyed to. */
-  let ownProfessions: string[] = [];
+  let ownProfessions: { id: string; label: string }[] = [];
   let initialSkillIds: string[] = [];
   let savedSkills: CvSkill[] = [];
   let skillDots: SkillDot[] = [];
@@ -442,7 +442,7 @@ export default async function ProfilePage({
         ]),
       supabase
         .from("worker_professions")
-        .select("profession_id, is_primary, label")
+        .select("id, profession_id, is_primary, label")
         .eq("worker_id", workerId)
         .order("is_primary", { ascending: false }),
       // ALL of the worker's saved skills (read model — never filtered down).
@@ -516,8 +516,12 @@ export default async function ProfilePage({
     // directions above — those drive the per-profession skills editor — but it
     // must be visible, and it is shown verbatim.
     ownProfessions = (wpAll ?? [])
-      .map((r) => ((r as { label?: string | null }).label ?? "").trim())
-      .filter((label) => label.length > 0);
+      .map((r) => {
+        const row = r as { id?: string; label?: string | null };
+        const label = (row.label ?? "").trim();
+        return row.id && label ? { id: row.id, label } : null;
+      })
+      .filter((v): v is { id: string; label: string } => v !== null);
 
     /**
      * ── W7-S3 STAGE 6 — the only reads that GENUINELY depend on stage 5 ────

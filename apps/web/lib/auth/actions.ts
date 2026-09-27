@@ -260,21 +260,24 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     // ledger 20260927060325. `normalized_label` is GENERATED in the database
     // and is never written here. A failure is logged, not fatal: the person is
     // onboarded and can add these on their profile rather than losing a signup.
+    // ONE ROW AT A TIME, not one batch (Codex P1 on #1880, verified). The
+    // partial unique index `worker_professions_one_label` cannot be an ON
+    // CONFLICT target through PostgREST, so a single duplicate — a retried
+    // onboarding, the same words typed twice in different sessions — would
+    // reject the whole statement and take every OTHER new profession with it.
+    // Bounded by SELF_DECLARED_PROFESSION_MAX_PER_SUBMIT, so this is a handful
+    // of inserts, and a duplicate means the words are already stored.
     if (workerId && professionLabels.length > 0) {
-      const { error: ownErr } = await supabase
-        .from("worker_professions")
-        .insert(
-          professionLabels.map((label) => ({
-            worker_id: workerId,
-            label,
-            original_language: professionLanguage,
-          })),
-        );
-      if (ownErr) {
-        console.error("[completeOnboarding] self-declared professions insert failed", {
-          code: ownErr.code,
-          message: ownErr.message,
-        });
+      for (const label of professionLabels) {
+        const { error: ownErr } = await supabase
+          .from("worker_professions")
+          .insert({ worker_id: workerId, label, original_language: professionLanguage });
+        if (ownErr && ownErr.code !== "23505") {
+          console.error("[completeOnboarding] self-declared profession insert failed", {
+            code: ownErr.code,
+            message: ownErr.message,
+          });
+        }
       }
     }
   }

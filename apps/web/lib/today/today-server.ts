@@ -77,9 +77,20 @@ export const loadTodayHead = cache(async (): Promise<TodayHead> => {
     const data = await getWorkerCard({
       workerId: worker?.id ?? null,
       name: displayName ?? "",
-      // `getWorkerCard` reads this for PRESENCE only (`hasProfession`); the
-      // human label is resolved by the screen from the professions catalogue.
-      professionName: card.professionSlug,
+      // `getWorkerCard` reads this for PRESENCE only (`hasProfession: !!name`);
+      // the human label is resolved by the screen.
+      //
+      // PRESENCE MEANS "THIS PERSON NAMED ONE", not "the catalogue carries it"
+      // (Codex P1 on #1880, verified): with only their own words
+      // `card.professionSlug` is null, so the next action told them to add a
+      // profession on the same screen whose header was already showing the one
+      // they had added. Matching is untouched by this — it reads
+      // `getPrimaryProfessionSlug`, which still answers with a catalogue slug
+      // only and is deliberately not widened.
+      professionName:
+        card.professionSlug ??
+        professions.find((e) => (e.label ?? "").trim())?.label ??
+        null,
       skillsCount: card.skillsDeclared,
       evidenceCount: card.evidenceEntries,
     });
