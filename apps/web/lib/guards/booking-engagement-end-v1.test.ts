@@ -1476,8 +1476,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // not null`. No new table, policy, grant, definer or RPC; no data
       // touched and no backfill. Owner-approved 2026-09-27; the marker was
       // added in the same commit as the migration, per this gate's procedure.
-      // NOT YET APPLIED — no ledger id, production apply is a separate owner
-      // act, and this line gets its ledger reference then.
+      // APPLIED 2026-09-27 (ledger 20260927060325) after the owner's final
+      // approval, readback recorded in docs/APPLIED_LEDGER.md.
       "20260927053000_worker_self_declared_profession_v1.sql",
 ]);
   });

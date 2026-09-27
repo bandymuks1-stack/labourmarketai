@@ -1055,7 +1055,7 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 309 -> 310 for 20260927053000_worker_self_declared_profession_v1
     //   (a person's own words for what they do, kept on the existing
     //   worker_professions; RED for one reason — `alter column ... drop not
-    //   null`; owner-approved 2026-09-27, NOT YET APPLIED, so no ledger id).
+    //   null`; owner-approved and APPLIED 2026-09-27, ledger 20260927060325).
     //   Not this read layer's file. RECOUNTED: 310.
     expect(count).toBeLessThanOrEqual(310);
   });

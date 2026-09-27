@@ -2683,10 +2683,10 @@ describe("no migration files added by this sprint", () => {
 // `profession_id` becomes nullable so a profession the 49-row registry does not carry
 // can be recorded at all. No new table, policy, grant, definer or RPC; no UPDATE/DELETE
 // and no backfill; `is_primary` gains no new constraint and no new meaning. RED for
-// exactly one reason — rule (l), `alter column ... drop not null`; owner-approved
-// 2026-09-27 and NOT YET APPLIED (production apply is a separate owner act, so there is
-// no ledger id yet). Paired rollback REFUSES while any self-declared row exists and
-// otherwise restores the pre-migration shape. RECOUNTED: 310.
+// exactly one reason — rule (l), `alter column ... drop not null`; owner-approved and
+// APPLIED 2026-09-27 (ledger 20260927060325), readback in docs/APPLIED_LEDGER.md: 26 rows
+// unchanged, 0 labels written. Paired rollback REFUSES while any self-declared row exists
+// and otherwise restores the pre-migration shape. RECOUNTED: 310.
 const SPRINT_BASELINE = 310;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —

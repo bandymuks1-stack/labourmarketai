@@ -1,7 +1,7 @@
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`.
+-- APPLIED 2026-09-27 via Supabase MCP apply_migration, ledger 20260927060325,
+-- after the owner's final RED approval. Never `db push`. Readback and the
+-- rolled-back behavioural probe are recorded in docs/APPLIED_LEDGER.md.
 --
 -- 20260927053000 — a person's own words for what they do, kept (owner
 -- direction 2026-09-27, approved in principle; final diff awaiting approval).
@@ -72,13 +72,17 @@
 --                                                                   -- refused: worker_professions_names_something
 --   + APPLIED_LEDGER.md row.
 --
+-- TRANSACTION: none declared here. `apply_migration` runs the file inside its
+-- own transaction, which is how every recently applied RED migration in this
+-- repository is shaped (20260924130000 / 140000 / 150000 carry no begin/commit
+-- either). An inner `commit` would end that transaction early and take this
+-- file's atomicity with it.
+--
 -- @human-gate-approved — TIER: owner-gated. `alter column ... drop not null`
 -- is RED by the migration-safety classifier (rule (l), a loosened column
 -- guarantee). The annotation lets CI pass; it is an acknowledgement, NOT an
 -- auto-merge pass. No auto-merge is enabled on the PR.
 -- ============================================================================
-
-begin;
 
 -- ── 1. The registry link becomes optional ───────────────────────────────────
 -- The ONLY change to an existing column. Rows are not touched; a row that has
@@ -144,6 +148,5 @@ comment on column public.worker_professions.normalized_label is
 comment on column public.worker_professions.esco_occupation_id is
   'The ESCO occupation the person themselves picked, when they picked one. A SEPARATE, additional link: it does not replace `label` and is never derived from skills, work history or anything else the person did not choose.';
 
-commit;
 
 -- ROLLBACK: see supabase/rollbacks/20260927053000_worker_self_declared_profession_v1.down.sql

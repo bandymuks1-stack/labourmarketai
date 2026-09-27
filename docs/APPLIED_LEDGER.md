@@ -2398,6 +2398,52 @@ details in the owner channel) → THEN the app half (#1871) merged.
 Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending the manager's own
 walk (create a project, open the roster) in a real session.
 
+### `worker_self_declared_profession_v1` — RED (one loosened column guarantee) — APPLIED 2026-09-27, ledger `20260927060325`
+
+Repo file `supabase/migrations/20260927053000_worker_self_declared_profession_v1.sql`
+(paired `supabase/rollbacks/…down.sql`, which REFUSES while any self-declared
+row exists and otherwise restores the pre-migration shape). Owner direction
+2026-09-27, final approval of #1879: **a classifier may not be the list of
+permitted human answers.** `worker_professions.profession_id` was a NOT NULL
+foreign key into the 49-row registry and no person-scoped free-text occupation
+column existed, so a profession the registry does not carry could not be
+recorded at all — the owner's test user typed "LLM programuotojas" and the
+dashboard then read "Profesija dar nenurodyta".
+
+The SAME table now carries the person's words: `label` (verbatim, shown as
+typed), `normalized_label` (GENERATED `lower(btrim(label))`, a dedupe key
+only) and a SEPARATE nullable `esco_occupation_id` for a standardized link the
+person picked; `profession_id` became nullable. Two check constraints (a row
+names something; the label is 2..200 after trimming) and one partial unique
+index per `(worker_id, normalized_label)`. No new table, policy, grant,
+definer or RPC; `is_primary` gained no new constraint and no new meaning.
+
+RED for exactly one reason — migration-safety rule (l), `alter column ... drop
+not null`; `@human-gate-approved` in the file is the acknowledgement, and the
+owner's final approval in the session is the gate.
+
+Applied via Supabase MCP `apply_migration` (never `db push`).
+
+**Before:** 26 rows, 15 of 65 workers, `profession_id NOT NULL`, 6 check
+constraints. **Readback after:** 26 rows unchanged, 0 rows without a registry
+profession, 0 rows with a label — nothing was written, backfilled or
+interpreted. `profession_id` nullable; `normalized_label` reported by
+`information_schema` as `ALWAYS / lower(btrim(label))`; both new constraints
+and both new indexes present; the pre-existing
+`worker_professions_one_primary` and `worker_professions_worker_id_profession_id_key`
+intact.
+
+**Behavioural readback on production, in a transaction that was rolled back**
+(the owner's own case): `'  LLM programuotojas  '` stored verbatim with its
+spacing while the generated key folded to `llm programuotojas`; a case-variant
+duplicate refused (`unique_violation`); a row naming nothing refused
+(`check_violation`); a 201-character label refused (`check_violation`). Row
+count returned to 26 with 0 labels after the rollback.
+
+Status: DB-level PRODUCTION-PROVEN. The app chain (onboarding → save →
+profile → Living CV) is a separate change; until it ships, nothing writes
+`label`, so the column is live and empty by design. UI NOT PROVEN.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

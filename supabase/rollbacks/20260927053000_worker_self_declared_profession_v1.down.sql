@@ -11,8 +11,6 @@
 -- as a separate, explicit decision.
 -- ============================================================================
 
-begin;
-
 do $$
 declare
   n bigint;
@@ -43,4 +41,3 @@ alter table public.worker_professions drop column if exists esco_occupation_id;
 alter table public.worker_professions
   alter column profession_id set not null;
 
-commit;
