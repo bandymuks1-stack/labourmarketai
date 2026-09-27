@@ -7,6 +7,7 @@ import { PrintButton } from "@/components/app/print-button";
 import { CvPrivateDetails } from "@/components/app/cv-private-details";
 import { WorkCardPlausibilityNote } from "@/components/app/work-card-plausibility-note";
 import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { percentOf, roundHours } from "@/lib/cv-export/professional-summary";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
@@ -550,9 +551,17 @@ export default async function VerifiedCvPage({
           {cv.professionSlugs.length > 0 ? (
             <p className="mt-1 text-sm text-text-secondary" data-testid="cv-professions">
               {cv.professionSlugs
-                .map(
-                  (p) => `${tProf(p.slug)}${p.isPrimary ? ` · ${t("primary")}` : ""}`,
-                )
+                .map((p) => {
+                  // Registry professions are named by the catalogue; the
+                  // person's own words print exactly as they wrote them.
+                  const name = professionDisplayName(p, (slug) =>
+                    tProf.has(slug) ? tProf(slug) : null,
+                  );
+                  return name
+                    ? `${name}${p.isPrimary ? ` · ${t("primary")}` : ""}`
+                    : null;
+                })
+                .filter((v): v is string => !!v)
                 .join(" · ")}
             </p>
           ) : null}

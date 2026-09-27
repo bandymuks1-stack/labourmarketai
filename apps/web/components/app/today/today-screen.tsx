@@ -7,6 +7,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
 import { deriveTodayNext, deriveTodayState } from "@/lib/today/today-model";
 import { TODAY_STATIONS } from "@/lib/today/today-route";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
 
 import { TodayOpportunitySection } from "./today-opportunity-section";
@@ -58,10 +59,18 @@ export async function TodayScreen({ locale }: { locale: ActiveLocale }) {
     loadTodayHead(),
   ]);
   const next = deriveTodayNext(head.workCard);
+  // The first profession this person holds that can be named — a registry one
+  // through the catalogue, or their OWN WORDS exactly as typed. The registry
+  // primary still leads when there is one; nothing here interprets the words.
   const professionLabel =
-    head.professionSlug && tProf.has(head.professionSlug)
+    head.professions
+      .map((entry) =>
+        professionDisplayName(entry, (slug) => (tProf.has(slug) ? tProf(slug) : null)),
+      )
+      .find((name): name is string => !!name) ??
+    (head.professionSlug && tProf.has(head.professionSlug)
       ? tProf(head.professionSlug)
-      : null;
+      : null);
 
   return (
     <div

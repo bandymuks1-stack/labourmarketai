@@ -221,7 +221,7 @@ describe("the document is a view, not a second person", () => {
     const eu = buildEuFormatCv({
       ...EMPTY,
       personName: "Jonas",
-      professionSlugs: [{ slug: "bricklayer", isPrimary: true }],
+      professionSlugs: [{ slug: "bricklayer", label: null, isPrimary: true }],
       education: [
         {
           institutionName: "VGTU",

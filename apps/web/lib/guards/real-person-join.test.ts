@@ -67,8 +67,8 @@ describe("2. onboarding starts from what the person already said", () => {
     // owner direction of 2026-09-27 the field holds a LIST, so the sentence's
     // profession is the FIRST entry — still the primary `complete_onboarding`
     // writes, still submitted by the person rather than written behind them.
-    expect(wizard).toMatch(/form\.set\("profession_slug", professionSlugs\[0\]\)/);
-    expect(wizard).toMatch(/\? \[defaultProfessionSlug\]/);
+    expect(wizard).toMatch(/form\.set\("profession_slug", registrySlugs\[0\]\)/);
+    expect(wizard).toMatch(/\? \[\{ slug: defaultProfessionSlug, label: null \}\]/);
   });
 });
 

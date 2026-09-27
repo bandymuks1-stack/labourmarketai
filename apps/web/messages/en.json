@@ -3384,6 +3384,8 @@
   "skills": {
     "profileReadUnavailable": "Your saved skills or work history could not be read right now. What is shown below is not your full record — reload the page in a moment; nothing you saved is lost.",
     "workDirectionsTitle": "Work directions",
+    "ownProfessionsTitle": "Professions you entered",
+    "ownProfessionsNote": "You entered these in your own words. They are shown exactly as you wrote them.",
     "editingDirection": "Editing direction",
     "skillsForDirection": "Skills for this direction",
     "othersRemainSaved": "Other directions remain saved",
@@ -4061,7 +4063,8 @@
       "country_search_empty": "No country found. Try another name.",
       "error_country_required": "Please choose a country.",
       "profession_label": "What is your profession or work experience?",
-      "profession_placeholder": "Choose a profession or field of work",
+      "profession_placeholder": "Type a profession or field of work",
+      "profession_add": "Add",
       "profession_hint": "You can name one or several professions or fields of work. You can add more later.",
       "profession_search_placeholder": "Search for a profession or field of work",
       "profession_search_empty": "Nothing matches. You can add more to your profile later.",

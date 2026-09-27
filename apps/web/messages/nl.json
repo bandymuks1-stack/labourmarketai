@@ -3384,6 +3384,8 @@
   "skills": {
     "profileReadUnavailable": "Je opgeslagen vaardigheden of werkgeschiedenis konden nu niet worden gelezen. Wat hieronder staat is niet je volledige dossier — laad de pagina zo opnieuw; niets wat je hebt opgeslagen is verloren.",
     "workDirectionsTitle": "Werkrichtingen",
+    "ownProfessionsTitle": "Beroepen die je hebt opgegeven",
+    "ownProfessionsNote": "Je hebt deze in je eigen woorden opgegeven. Ze worden precies zo getoond als je ze hebt geschreven.",
     "editingDirection": "Richting bewerken",
     "skillsForDirection": "Vaardigheden voor deze richting",
     "othersRemainSaved": "Andere richtingen blijven opgeslagen",
@@ -4061,7 +4063,8 @@
       "country_search_empty": "Geen land gevonden. Probeer een andere naam.",
       "error_country_required": "Kies een land.",
       "profession_label": "Wat is je beroep of werkervaring?",
-      "profession_placeholder": "Kies een beroep of werkgebied",
+      "profession_placeholder": "Typ een beroep of werkgebied",
+      "profession_add": "Toevoegen",
       "profession_hint": "Je kunt één of meerdere beroepen of werkgebieden opgeven. Later kun je er meer toevoegen.",
       "profession_search_placeholder": "Zoek een beroep of werkgebied",
       "profession_search_empty": "Geen resultaten. Je kunt je profiel later aanvullen.",

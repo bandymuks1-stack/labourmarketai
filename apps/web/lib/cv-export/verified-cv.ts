@@ -163,7 +163,10 @@ export type VerifiedCvData = {
   /** The worker's own self-written professional summary (`profiles.profile_text`).
    *  Self-declared, never verified; null/empty when not written. */
   professionalSummary: string | null;
-  professionSlugs: { slug: string; isPrimary: boolean }[];
+  /** Every profession this person states: a registry `slug` to translate, or
+   *  their OWN WORDS in `label`, shown exactly as typed (ledger
+   *  20260927060325). Exactly one of the two is set. */
+  professionSlugs: { slug: string | null; label: string | null; isPrimary: boolean }[];
   /** Catalogued worker skills, grouped by honest tier (slugs). */
   tiers: CvSkillTiers;
   /** Flat catalogued skill facts (slug + real verified flag) — the tailored
@@ -301,7 +304,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         .single(),
       supabase
         .from("worker_professions")
-        .select("is_primary, professions(slug)")
+        .select("is_primary, label, professions(slug)")
         .eq("worker_id", workerId)
         .order("is_primary", { ascending: false }),
       supabase
@@ -489,10 +492,18 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
 
   const professionSlugs = (wpRes.data ?? [])
     .map((r) => {
-      const slug = (r.professions as { slug: string | null } | null)?.slug;
-      return slug ? { slug, isPrimary: r.is_primary === true } : null;
+      const slug = (r.professions as { slug: string | null } | null)?.slug ?? null;
+      const label = ((r as { label?: string | null }).label ?? "").trim() || null;
+      // A row names one or the other; a row that names neither cannot exist
+      // (check constraint `worker_professions_names_something`).
+      return slug || label
+        ? { slug, label, isPrimary: r.is_primary === true }
+        : null;
     })
-    .filter((p): p is { slug: string; isPrimary: boolean } => p !== null);
+    .filter(
+      (p): p is { slug: string | null; label: string | null; isPrimary: boolean } =>
+        p !== null,
+    );
 
   // Durable journal→skill links — graceful empty set if not readable.
   const durableSupported = linkRes.error

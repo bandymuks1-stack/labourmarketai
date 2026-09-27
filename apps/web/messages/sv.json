@@ -405,7 +405,8 @@
       "country_search_empty": "Inget land hittades. Prova ett annat namn.",
       "error_country_required": "Välj ett land.",
       "profession_label": "Vad är ditt yrke eller din arbetslivserfarenhet?",
-      "profession_placeholder": "Välj ett yrke eller arbetsområde",
+      "profession_placeholder": "Skriv ett yrke eller arbetsområde",
+      "profession_add": "Lägg till",
       "profession_hint": "Du kan ange ett eller flera yrken eller arbetsområden. Du kan lägga till fler senare.",
       "profession_search_placeholder": "Sök efter ett yrke eller arbetsområde",
       "profession_search_empty": "Inga träffar. Du kan fylla i din profil senare.",
@@ -1116,6 +1117,8 @@
   },
   "skills": {
     "workDirectionsTitle": "[EN] Work directions",
+    "ownProfessionsTitle": "Yrken du har angett",
+    "ownProfessionsNote": "Du angav dessa med dina egna ord. De visas exakt som du skrev dem.",
     "editingDirection": "[EN] Editing direction",
     "skillsForDirection": "[EN] Skills for this direction",
     "othersRemainSaved": "[EN] Other directions remain saved",

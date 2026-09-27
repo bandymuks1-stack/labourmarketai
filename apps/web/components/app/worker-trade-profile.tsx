@@ -30,6 +30,7 @@ export function WorkerTradeProfile({
   professions,
   currentProfessionId,
   directions,
+  ownProfessions = [],
   initialSkillIds,
   personName,
   roles,
@@ -40,6 +41,10 @@ export function WorkerTradeProfile({
   professions: ProfessionOption[];
   currentProfessionId: string | null;
   directions: Direction[];
+  /** Professions this person named in their OWN WORDS, shown exactly as typed.
+   *  They carry no catalogue row, so they drive no skills editor — they are
+   *  here because they are the person's answer and must be visible. */
+  ownProfessions?: readonly string[];
   initialSkillIds: string[];
   personName: string;
   roles: Role[];
@@ -98,6 +103,36 @@ export function WorkerTradeProfile({
       {/* Work directions — calmer capability-group chips. Click a chip to edit
           its skills (does NOT change primary). The first choice is not a
           limit (§1); non-primary directions are removable. */}
+      {/* THE PERSON'S OWN WORDS. Rendered outside the directions section on
+          purpose: that section is gated on a primary REGISTRY profession, so
+          somebody whose profession the catalogue does not carry would have
+          seen nothing at all of what they told us (owner walk 2026-09-27).
+          Verbatim, never translated, never matched to a catalogue entry. */}
+      {ownProfessions.length > 0 && (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="worker-own-professions"
+        >
+          <h3 className="font-display text-sm font-semibold text-text-primary">
+            {t("ownProfessionsTitle")}
+          </h3>
+          <ul className="flex flex-wrap gap-2">
+            {ownProfessions.map((label) => (
+              <li
+                key={label}
+                className="rounded-full border border-brand-blue/30 bg-brand-blue/10 px-3 py-1 text-sm text-text-primary"
+                data-testid="worker-own-profession"
+              >
+                {label}
+              </li>
+            ))}
+          </ul>
+          <p className="text-meta leading-relaxed text-text-muted">
+            {t("ownProfessionsNote")}
+          </p>
+        </section>
+      )}
+
       {currentProfessionId && (
         <section className="card-border flex flex-col gap-3 p-5">
           <h3 className="font-display text-sm font-semibold text-text-primary">

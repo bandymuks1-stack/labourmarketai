@@ -16,6 +16,14 @@ import {
 } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
+  SELF_DECLARED_PROFESSION_MAX_LENGTH,
+  normalizeSelfDeclaredProfession,
+  professionDisplayName,
+  selfDeclaredProfessionKey,
+  serializeSelfDeclaredProfessions,
+  type ProfessionEntry,
+} from "@/lib/worker/self-declared-profession";
+import {
   FIRST_RUN_INTENTS,
   INTENT_IDENTITY,
   asksForCurrentEducation,
@@ -148,21 +156,67 @@ export function OnboardingWizard({
   // several directions per worker since 0008 (one primary, the rest equal
   // members). The first chosen becomes the primary, exactly as the RPC
   // already decides it.
-  const [professionSlugs, setProfessionSlugs] = useState<readonly string[]>(() =>
+  const [professions, setProfessions] = useState<readonly ProfessionEntry[]>(() =>
     defaultProfessionSlug && PROFESSION_SLUGS.includes(defaultProfessionSlug)
-      ? [defaultProfessionSlug]
+      ? [{ slug: defaultProfessionSlug, label: null }]
       : [],
   );
-  // The add control offers what is not already named — DarkListbox's
-  // `{ value, label }` shape, the same idiom the profile's work-directions
-  // panel uses (`worker-trade-profile.tsx`).
-  const professionsToOffer = useMemo(
-    () =>
-      professionOptions
-        .filter((p) => !professionSlugs.includes(p.slug))
-        .map((p) => ({ value: p.slug, label: p.label })),
-    [professionOptions, professionSlugs],
+  // What the person is typing right now. Their words, untouched until they
+  // add them — this is never read as a profession on its own.
+  const [professionDraft, setProfessionDraft] = useState("");
+  const namedSlugs = useMemo(
+    () => new Set(professions.map((p) => p.slug).filter((s): s is string => !!s)),
+    [professions],
   );
+  const namedWords = useMemo(
+    () =>
+      new Set(
+        professions
+          .filter((p) => !p.slug && p.label)
+          .map((p) => selfDeclaredProfessionKey(p.label as string)),
+      ),
+    [professions],
+  );
+  /** Registry professions whose name contains what is being typed. SUGGESTIONS,
+   *  never a filter on what may be entered: anything typed can be added as it
+   *  stands, matched or not. */
+  const professionSuggestions = useMemo(() => {
+    const q = selfDeclaredProfessionKey(professionDraft);
+    if (q.length < 1) return [];
+    const fold = (v: string) =>
+      v
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+    const folded = fold(q);
+    return professionOptions
+      .filter((p) => !namedSlugs.has(p.slug) && fold(p.label).includes(folded))
+      .slice(0, 6);
+  }, [professionDraft, professionOptions, namedSlugs]);
+
+  const showProfession = (entry: ProfessionEntry): string =>
+    professionDisplayName(entry, (slug) =>
+      tProfession.has(slug) ? tProfession(slug) : null,
+    ) ?? "";
+
+  function addRegistryProfession(slug: string) {
+    setProfessions((prev) =>
+      prev.some((p) => p.slug === slug) ? prev : [...prev, { slug, label: null }],
+    );
+    setProfessionDraft("");
+  }
+
+  /** Add exactly what the person typed. No catalogue lookup, no correction,
+   *  no guess — if the registry does not carry it, it is still theirs. */
+  function addOwnWords() {
+    const words = normalizeSelfDeclaredProfession(professionDraft);
+    if (!words) return;
+    const key = selfDeclaredProfessionKey(words);
+    setProfessions((prev) =>
+      namedWords.has(key) ? prev : [...prev, { slug: null, label: words }],
+    );
+    setProfessionDraft("");
+  }
   // Student intent: WHERE the person studies becomes a real, current
   // education record (the canonical "I am studying" state) — asked only when
   // that intent is picked, never declared on anyone's behalf.
@@ -235,12 +289,25 @@ export function OnboardingWizard({
     form.set("locale", locale);
     form.set("display_name", displayName.trim());
     form.set("country", country);
-    // The primary stays `profession_slug` — the field `complete_onboarding`
-    // has always read — and the full list rides beside it, so an older client
-    // and this one mean the same thing by the first value.
-    if (roles.has("worker") && professionSlugs.length > 0) {
-      form.set("profession_slug", professionSlugs[0]);
-      form.set("profession_slugs", professionSlugs.join(","));
+    // Registry picks keep the fields `complete_onboarding` has always read —
+    // `profession_slug` is still the primary — and the person's OWN WORDS ride
+    // beside them in their own field, so neither kind can be mistaken for the
+    // other. The locale goes too: it is the language of THIS session, the only
+    // honest source for what language they wrote in.
+    if (roles.has("worker")) {
+      const registrySlugs = professions
+        .map((p) => p.slug)
+        .filter((slug): slug is string => !!slug);
+      const ownWords = professions
+        .filter((p) => !p.slug && p.label)
+        .map((p) => p.label as string);
+      if (registrySlugs.length > 0) {
+        form.set("profession_slug", registrySlugs[0]);
+        form.set("profession_slugs", registrySlugs.join(","));
+      }
+      if (ownWords.length > 0) {
+        form.set("profession_labels", serializeSelfDeclaredProfessions(ownWords));
+      }
     }
     // A deep link (invitation) still wins; otherwise a company identity goes
     // straight to the one canonical setup form with the intent's presets.
@@ -610,53 +677,102 @@ export function OnboardingWizard({
           data-testid="onboarding-profession-field"
         >
           <span>{t("profession_label")}</span>
-          {/* What the person has named so far — each one removable, so a
-              mistaken pick is not a trap and the list is theirs to shape. */}
-          {professionSlugs.length > 0 && (
+          {/* What the person has named so far — registry professions and their
+              own words in ONE list, because to them they are the same kind of
+              answer. Each is removable, so a mistake is not a trap. */}
+          {professions.length > 0 && (
             <ul
               className="flex flex-wrap gap-2"
               data-testid="onboarding-profession-chosen"
             >
-              {professionSlugs.map((slug) => (
-                <li key={slug}>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 py-1 pl-3 pr-1 text-sm text-text-primary">
-                    {tProfession(slug)}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setProfessionSlugs((prev) =>
-                          prev.filter((s) => s !== slug),
-                        )
-                      }
-                      aria-label={t("profession_remove")}
-                      data-testid={`onboarding-profession-remove-${slug}`}
-                      className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-text-muted transition-colors hover:bg-state-danger/10 hover:text-state-danger"
+              {professions.map((entry) => {
+                const key = entry.slug ?? `own:${entry.label}`;
+                return (
+                  <li key={key}>
+                    <span
+                      className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 py-1 pl-3 pr-1 text-sm text-text-primary"
+                      data-own={entry.slug ? "0" : "1"}
                     >
-                      ✕
-                    </button>
-                  </span>
-                </li>
-              ))}
+                      {showProfession(entry)}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProfessions((prev) =>
+                            prev.filter((p) =>
+                              entry.slug
+                                ? p.slug !== entry.slug
+                                : p.slug !== null || p.label !== entry.label,
+                            ),
+                          )
+                        }
+                        aria-label={t("profession_remove")}
+                        data-testid={`onboarding-profession-remove-${key}`}
+                        className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-text-muted transition-colors hover:bg-state-danger/10 hover:text-state-danger"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
-          {professionsToOffer.length > 0 && (
-            <DarkListbox
-              value=""
-              onChange={(slug) =>
-                slug &&
-                setProfessionSlugs((prev) =>
-                  prev.includes(slug) ? prev : [...prev, slug],
-                )
-              }
-              options={professionsToOffer}
-              placeholder={t("profession_placeholder")}
-              ariaLabel={t("profession_label")}
-              searchable
-              searchPlaceholder={t("profession_search_placeholder")}
-              searchEmptyLabel={t("profession_search_empty")}
-              testId="onboarding-profession"
-            />
-          )}
+
+          {/* A TEXT FIELD, not a closed list (owner direction 2026-09-27): the
+              classifier may suggest, it may not be the list of permitted human
+              answers. The registry offers matches as the person types; whatever
+              they write can be added exactly as written, matched or not. */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={professionDraft}
+                onChange={(e) => setProfessionDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    // Enter adds the words — it never silently picks a
+                    // suggestion on the person's behalf.
+                    e.preventDefault();
+                    addOwnWords();
+                  }
+                }}
+                placeholder={t("profession_placeholder")}
+                aria-label={t("profession_label")}
+                maxLength={SELF_DECLARED_PROFESSION_MAX_LENGTH}
+                data-testid="onboarding-profession-input"
+                className={inputCls}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!normalizeSelfDeclaredProfession(professionDraft)}
+                onClick={addOwnWords}
+                data-testid="onboarding-profession-add"
+                className="flex-none rounded-md"
+              >
+                {t("profession_add")}
+              </Button>
+            </div>
+            {professionSuggestions.length > 0 && (
+              <ul
+                className="flex flex-wrap gap-2"
+                data-testid="onboarding-profession-suggestions"
+              >
+                {professionSuggestions.map((p) => (
+                  <li key={p.slug}>
+                    <button
+                      type="button"
+                      onClick={() => addRegistryProfession(p.slug)}
+                      data-testid={`onboarding-profession-suggestion-${p.slug}`}
+                      className="rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-sm text-text-secondary transition-colors hover:border-text-muted hover:text-text-primary"
+                    >
+                      {p.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <span className="text-meta leading-relaxed text-text-muted">
             {t("profession_hint")}
           </span>
