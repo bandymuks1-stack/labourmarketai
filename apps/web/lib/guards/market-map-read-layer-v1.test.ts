@@ -1052,7 +1052,12 @@ describe("NO new DB migration in this PR", () => {
     //   (per-person invitation delegation; RED, owner-approved, APPLIED
     //   2026-09-24, ledger 20260924120147). Not this read layer's file.
     //   RECOUNTED: 309.
-    expect(count).toBeLessThanOrEqual(309);
+    // Bumped 309 -> 310 for 20260927053000_worker_self_declared_profession_v1
+    //   (a person's own words for what they do, kept on the existing
+    //   worker_professions; RED for one reason — `alter column ... drop not
+    //   null`; owner-approved 2026-09-27, NOT YET APPLIED, so no ledger id).
+    //   Not this read layer's file. RECOUNTED: 310.
+    expect(count).toBeLessThanOrEqual(310);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -2676,7 +2676,18 @@ describe("no migration files added by this sprint", () => {
 // RED (definer + grant/revoke + ALTER POLICY); owner-approved (#1875); APPLIED 2026-09-24
 // (ledger 20260924120147) BEFORE its app half merged; paired .down.sql restores production
 // byte-identically. RECOUNTED: 309.
-const SPRINT_BASELINE = 309;
+// Bumped 309 -> 310 for 20260927053000_worker_self_declared_profession_v1 (owner
+// direction 2026-09-27: a classifier may not be the list of permitted human answers).
+// `worker_professions` gains `label` (the person's verbatim words), a GENERATED
+// `normalized_label` dedupe key and a separate nullable `esco_occupation_id`, and
+// `profession_id` becomes nullable so a profession the 49-row registry does not carry
+// can be recorded at all. No new table, policy, grant, definer or RPC; no UPDATE/DELETE
+// and no backfill; `is_primary` gains no new constraint and no new meaning. RED for
+// exactly one reason — rule (l), `alter column ... drop not null`; owner-approved
+// 2026-09-27 and NOT YET APPLIED (production apply is a separate owner act, so there is
+// no ledger id yet). Paired rollback REFUSES while any self-declared row exists and
+// otherwise restores the pre-migration shape. RECOUNTED: 310.
+const SPRINT_BASELINE = 310;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
