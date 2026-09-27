@@ -11,8 +11,8 @@ import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
-  countryOptionMatches,
   countryOptionsForLocale,
+  filterCountryOptions,
 } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
@@ -502,7 +502,8 @@ export function OnboardingWizard({
           IN: 249 rows of scrolling, measured on production as a person in
           Germany unable to find Vokietija. Typing "Vok" now answers, through
           the canonical fold and the ONE country resolver
-          (`countryOptionMatches`), with no second list of countries anywhere. */}
+          (`filterCountryOptions`), with no second list of countries anywhere,
+          and an exactly-named country ("DE", "Germany") leading the rest. */}
       {/* A <div>, not a <label>. A `<label>` forwards a click on ANY
           descendant to its labelled control, and `<button>` is labelable — so
           with the listbox inside a label, clicking a country closed the panel
@@ -523,7 +524,7 @@ export function OnboardingWizard({
           placeholder={t("country_placeholder")}
           ariaLabel={t("country_label")}
           searchable
-          match={countryOptionMatches}
+          filter={filterCountryOptions}
           searchPlaceholder={t("country_search_placeholder")}
           searchEmptyLabel={t("country_search_empty")}
           testId="onboarding-country"

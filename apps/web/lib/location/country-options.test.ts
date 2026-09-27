@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import { ALL_ISO_COUNTRIES } from "@/lib/location/country-model";
 import {
-  countryOptionMatches,
   countryOptionsForLocale,
+  filterCountryOptions,
 } from "@/lib/location/country-options";
 import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
 
@@ -57,38 +57,73 @@ describe("the onboarding country select offers the world, markets first", () => 
    */
   it("the field is searchable and the filter answers a partial localized name", () => {
     expect(src).toMatch(/searchable/);
-    expect(src).toMatch(/match=\{countryOptionMatches\}/);
+    expect(src).toMatch(/filter=\{filterCountryOptions\}/);
     expect(src).toMatch(/country_search_placeholder/);
 
     const lt = countryOptionsForLocale("lt");
-    const de = lt.find((o) => o.value === "DE")!;
+    const only = (q: string) => filterCountryOptions(lt, q).map((o) => o.value);
     // The owner's own acceptance example.
-    expect(de.label).toBe("Vokietija");
-    expect(countryOptionMatches(de, "Vok")).toBe(true);
-    expect(countryOptionMatches(de, "vok")).toBe(true);
-    expect(countryOptionMatches(de, "vokietija")).toBe(true);
-    // The code and a complete name in ANOTHER product language still resolve,
-    // through `resolveCountryCode` — no second alias table here.
-    expect(countryOptionMatches(de, "DE")).toBe(true);
-    expect(countryOptionMatches(de, "Germany")).toBe(true);
-    expect(countryOptionMatches(de, "Deutschland")).toBe(true);
+    expect(lt.find((o) => o.value === "DE")?.label).toBe("Vokietija");
+    expect(only("Vok")).toEqual(["DE"]);
+    expect(only("vok")).toEqual(["DE"]);
+    expect(only("vokietija")).toEqual(["DE"]);
     // Diacritics are folded, so a person typing on a plain keyboard still
     // finds Čekija and Prancūzija.
-    const cz = lt.find((o) => o.value === "CZ")!;
-    expect(cz.label).toBe("Čekija");
-    expect(countryOptionMatches(cz, "cek")).toBe(true);
-    expect(countryOptionMatches(cz, "Čeki")).toBe(true);
-    expect(countryOptionMatches(lt.find((o) => o.value === "FR")!, "prancuz")).toBe(true);
-    // A word inside the name is findable, a bare substring is not a match.
-    const us = countryOptionsForLocale("en").find((o) => o.value === "US")!;
-    expect(countryOptionMatches(us, "States")).toBe(true);
-    expect(countryOptionMatches(us, "nited")).toBe(false);
+    expect(lt.find((o) => o.value === "CZ")?.label).toBe("Čekija");
+    expect(only("cek")).toEqual(["CZ"]);
+    expect(only("Čeki")).toEqual(["CZ"]);
+    // The French overseas territories legitimately share that prefix
+    // ("Prancūzijos Gviana", "Prancūzijos Polinezija"), so this is a
+    // containment check, not an equality one — the filter narrows, it does
+    // not decide.
+    expect(only("prancuz")).toContain("FR");
+    expect(only("prancuzija")).toEqual(["FR"]);
+    // A word inside the name is findable; a bare substring is not a match.
+    const en = countryOptionsForLocale("en");
+    expect(filterCountryOptions(en, "States").map((o) => o.value)).toContain("US");
+    expect(filterCountryOptions(en, "nited")).toEqual([]);
     // An empty query hides nothing.
-    expect(countryOptionMatches(de, "  ")).toBe(true);
+    expect(filterCountryOptions(lt, "  ")).toHaveLength(lt.length);
     // And it never invents a country: a place that is not one matches nothing.
-    for (const option of lt) {
-      expect(countryOptionMatches(option, "Hanojus"), option.value).toBe(false);
-    }
+    expect(filterCountryOptions(lt, "Hanojus")).toEqual([]);
+  });
+
+  /**
+   * CODEX P2 ON #1878 — the exactly-named country must LEAD, because the
+   * control commits the first row on Enter. Measured before the fix: the
+   * options are ordered active markets first, alphabetically, so in English
+   * Denmark sits above Germany; "DE" matched Denmark by label prefix and
+   * Germany by ISO code, and Enter saved DK. "Guinea" saved GQ.
+   */
+  it("an exact code, name or alias leads its prefix neighbours", () => {
+    const en = countryOptionsForLocale("en");
+    const order = (q: string) => filterCountryOptions(en, q).map((o) => o.value);
+
+    // The reported case, in both directions: Denmark is still offered.
+    expect(en.findIndex((o) => o.value === "DK")).toBeLessThan(
+      en.findIndex((o) => o.value === "DE"),
+    );
+    expect(order("DE")[0]).toBe("DE");
+    expect(order("DE")).toContain("DK");
+    expect(order("de")[0]).toBe("DE");
+
+    // The second reported case: "Guinea" is not even ambiguous.
+    expect(order("Guinea")[0]).toBe("GN");
+    expect(order("Guinea")).toContain("GQ");
+
+    // A complete name and a documented alias resolve the same way.
+    expect(order("Germany")[0]).toBe("DE");
+    expect(order("Deutschland")[0]).toBe("DE");
+    expect(order("UK")[0]).toBe("GB");
+    expect(order("Viet Nam")[0]).toBe("VN");
+
+    // On a Lithuanian screen too — the resolver reads all 21 product languages.
+    const lt = countryOptionsForLocale("lt");
+    expect(filterCountryOptions(lt, "Germany")[0]?.value).toBe("DE");
+    expect(filterCountryOptions(lt, "DE")[0]?.value).toBe("DE");
+
+    // A partial query has no exact answer, so the canonical order stands.
+    expect(filterCountryOptions(lt, "Vok").map((o) => o.value)).toEqual(["DE"]);
   });
 
   it("VN / IE / SA / PH are choosable in every active locale, and the markets still lead", () => {

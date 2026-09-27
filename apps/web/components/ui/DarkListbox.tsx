@@ -22,12 +22,15 @@ import { cn } from "@/lib/utils";
  * the panel this component already owns — not a second select component, not
  * a second list of countries.
  *
- * The MATCH RULE stays with the caller (`match`), because what counts as
+ * The MATCH RULE stays with the caller (`filter`), because what counts as
  * finding a thing is domain knowledge: a country answers to its localized
  * name, its ISO code and its documented aliases
  * (`lib/location/country-options.ts`), and a generic listbox must not hold a
- * second, weaker copy of that. The default is a plain case-insensitive
- * substring on the label.
+ * second, weaker copy of that. The callback takes the WHOLE list and returns
+ * the whole list, so it owns the ORDER too — Enter commits the first row, so a
+ * domain that knows one answer is exactly right must be able to put it there
+ * (Codex P2 on #1878: "DE" matched Denmark by prefix above Germany by code).
+ * The default is a plain folded substring on the label, original order.
  */
 export type DarkListboxOption = {
   readonly value: string;
@@ -46,10 +49,14 @@ function fold(s: string): string {
     .trim();
 }
 
-/** Default match: folded substring on the visible label. A domain with its own
- *  rule (countries) passes `match` instead. */
-function defaultMatch(option: DarkListboxOption, query: string): boolean {
-  return fold(option.label).includes(fold(query));
+/** Default filter: folded substring on the visible label, original order. A
+ *  domain with its own rule (countries) passes `filter` instead. */
+function defaultFilter(
+  options: readonly DarkListboxOption[],
+  query: string,
+): readonly DarkListboxOption[] {
+  const q = fold(query);
+  return options.filter((o) => fold(o.label).includes(q));
 }
 
 export function DarkListbox({
@@ -65,7 +72,7 @@ export function DarkListbox({
   searchable = false,
   searchPlaceholder,
   searchEmptyLabel,
-  match = defaultMatch,
+  filter = defaultFilter,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -81,8 +88,12 @@ export function DarkListbox({
   searchPlaceholder?: string;
   /** Shown when the filter matches nothing — never an empty panel. */
   searchEmptyLabel?: string;
-  /** Domain match rule for the filter; defaults to a label substring. */
-  match?: (option: DarkListboxOption, query: string) => boolean;
+  /** Domain rule for what a query shows, and in what order; defaults to a
+   *  folded label substring in the original order. */
+  filter?: (
+    options: readonly DarkListboxOption[],
+    query: string,
+  ) => readonly DarkListboxOption[];
 }) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -96,8 +107,7 @@ export function DarkListbox({
   // What the panel actually lists. Only a searchable listbox filters, so every
   // existing consumer keeps the exact list it passed in.
   const q = query.trim();
-  const visible =
-    searchable && q.length > 0 ? options.filter((o) => match(o, q)) : options;
+  const visible = searchable && q.length > 0 ? filter(options, q) : options;
 
   // Close on outside click + Escape (mobile-portrait friendly).
   useEffect(() => {

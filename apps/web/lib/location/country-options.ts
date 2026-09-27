@@ -38,8 +38,8 @@ export function countryOptionsForLocale(
 }
 
 /**
- * Does this country option answer what the person typed? (Owner direction
- * 2026-09-27, onboarding step 2.)
+ * The countries that answer what the person typed, in the order they should
+ * be offered. (Owner direction 2026-09-27, onboarding step 2.)
  *
  * WHY THIS LIVES HERE. The list is correctly 249 long — a market list orders
  * it, it never shortens it — and a 249-row scroll is how a person in Germany
@@ -47,10 +47,10 @@ export function countryOptionsForLocale(
  * needs a match rule, and the rule is country knowledge, so it belongs beside
  * the options rather than inside a generic listbox.
  *
- * NO SECOND COUNTRY SYSTEM. The two things a match may consult already exist:
+ * NO SECOND COUNTRY SYSTEM. The two things it consults already exist:
  *   · `countryNameKey` — the canonical fold (diacritics, case, punctuation)
  *     used by the resolver's own name index, so "Vok" reaches "Vokietija" and
- *     "kot" reaches "Côte d'Ivoire";
+ *     "cek" reaches "Čekija";
  *   · `resolveCountryCode` — the ONE resolver, for a COMPLETE name in any of
  *     the 21 product languages, a documented alias or the bare ISO code, so a
  *     person typing "Germany" or "Deutschland" while the screen is Lithuanian
@@ -58,18 +58,42 @@ export function countryOptionsForLocale(
  *
  * A prefix, never a bare substring: the label's start, or the start of any
  * word in it ("states" → United States), so a two-letter query cannot pull in
- * every country that merely contains those letters. The resolver's own
- * exact-only contract is untouched — this filters a visible list, it never
- * decides what a typed country IS.
+ * every country that merely contains those letters.
+ *
+ * ── WHY IT RETURNS A LIST AND NOT A YES/NO (Codex P2 on #1878)
+ * A filter alone was wrong, and measurably so. The options are ordered active
+ * markets first, alphabetically — so in English Denmark sits above Germany,
+ * and "DE" matched BOTH (Denmark by label prefix, Germany by ISO code) with
+ * Denmark first. The control commits the first row on Enter, so typing the
+ * exact code for Germany saved Denmark. "Guinea" did the same to Equatorial
+ * Guinea, and "Guinea" is not even ambiguous.
+ *
+ * When the query RESOLVES, there is exactly one right answer and it leads.
+ * The prefix matches stay visible under it rather than being hidden, because
+ * "de" is also how somebody starts typing Denmark — they lose no country,
+ * they just stop losing the one they named exactly.
+ *
+ * The resolver's own exact-only contract is untouched: this orders a visible
+ * list, it never decides what a typed country IS.
  */
-export function countryOptionMatches(
-  option: CountryOption,
+export function filterCountryOptions<T extends CountryOption>(
+  options: readonly T[],
   query: string,
-): boolean {
+): T[] {
   const q = countryNameKey(query);
-  if (q === "") return true;
-  const folded = countryNameKey(option.label);
-  if (folded.startsWith(q)) return true;
-  if (folded.split(" ").some((word) => word.startsWith(q))) return true;
-  return resolveCountryCode(query) === option.value;
+  if (q === "") return [...options];
+  const exact = resolveCountryCode(query);
+  const matched = options.filter((option) => {
+    if (option.value === exact) return true;
+    const folded = countryNameKey(option.label);
+    return (
+      folded.startsWith(q) || folded.split(" ").some((word) => word.startsWith(q))
+    );
+  });
+  if (!exact) return matched;
+  // Stable sort: the exact answer moves to the front, everything else keeps
+  // the canonical order it already had.
+  return matched.sort(
+    (a, b) => Number(b.value === exact) - Number(a.value === exact),
+  );
 }
