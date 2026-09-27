@@ -266,7 +266,9 @@ export async function ProfileHubOverview({
         },
       ]
     : [];
-  const doneCount = steps.filter((s) => s.done).length;
+  // `doneCount` (steps done, out of 5) was removed with the step-subset
+  // fraction it fed — the progress line now counts the canonical readiness.
+  // `doneSteps` stays: the "what is already done" list is per-STEP by design.
   const missingSteps = steps.filter((s) => !s.done);
   const doneSteps = steps.filter((s) => s.done);
   // Completeness is a NAMED list, never a percentage (§19). The canonical
@@ -422,7 +424,25 @@ export async function ProfileHubOverview({
                 {tState(`readiness.${readiness.level}`)}
               </span>
               {" · "}
-              {tStep("progress", { done: doneCount, total: steps.length })}
+              {/* ONE READINESS, ONE DENOMINATOR (§8, 2026-09-27).
+                  This read `{ done: doneCount, total: steps.length }` — a
+                  fraction over the 5 actionable STEPS — and it was wrong twice.
+                  Against ITSELF: this component separately lists the two
+                  `STEPLESS_PILLARS` (journal, evidence) as missing, so the
+                  progress number excluded two things the same screen was
+                  telling the person they still had to do. And against the REST
+                  OF THE PRODUCT: the player card renders `readiness.met`/
+                  `readiness.total` over all 6 pillars, so a person moving
+                  between the hub and their card met two different
+                  denominators — "0 iš 5" here and "0/6" there — for one
+                  underlying fact, with nothing explaining the difference.
+                  The canonical readiness is `deriveWorkerReadiness`, so it is
+                  the denominator everywhere. The 5 steps are unchanged and
+                  still the ACTIONABLE list; only the count is canonical now. */}
+              {tStep("progress", {
+                done: readiness.met,
+                total: readiness.total,
+              })}
               {" · "}
               <span data-testid="profile-hub-freshness">{freshness}</span>
             </p>

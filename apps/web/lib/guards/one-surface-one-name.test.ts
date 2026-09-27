@@ -65,6 +65,61 @@ function pair(root: Json, a: string, b: string): [string, string] {
   return [left as string, right as string];
 }
 
+describe("one readiness, one denominator", () => {
+  /*
+   * §8, 2026-09-27. The owner reported seeing BOTH "0 iš 5" and "0/6" for what
+   * is one fact about them. They were two surfaces counting the same
+   * `deriveWorkerReadiness` over different sets:
+   *
+   *   · profile-hub-overview.tsx rendered `{ done: doneCount, total:
+   *     steps.length }` — the 5 ACTIONABLE steps;
+   *   · worker-player-card.tsx renders `readiness.met`/`readiness.total` — all
+   *     6 pillars.
+   *
+   * The hub's version was also wrong against ITSELF: the same component
+   * separately lists the two `STEPLESS_PILLARS` (journal, evidence) as missing,
+   * so its progress fraction excluded two things it was simultaneously telling
+   * the person they still had to do.
+   *
+   * The 5 steps are NOT removed — they remain the actionable list, which is the
+   * hub's job. Only the COUNT is canonical now. `deriveWorkerReadiness` is the
+   * one readiness model, so it owns the denominator on every surface.
+   */
+  const hub = readFileSync(
+    join(__dirname, "..", "..", "components", "app", "profile-hub-overview.tsx"),
+    "utf8",
+  );
+  const card = readFileSync(
+    join(__dirname, "..", "..", "components", "app", "worker-player-card.tsx"),
+    "utf8",
+  );
+
+  /** Comments are stripped before NEGATIVE assertions: the comment at the fix
+   *  site quotes the old expression on purpose, so a naive scan would match the
+   *  explanation instead of the code. */
+  const stripComments = (src: string): string =>
+    src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+
+  it("the hub counts the canonical readiness, not its own step subset", () => {
+    expect(hub).toMatch(/done:\s*readiness\.met/);
+    expect(hub).toMatch(/total:\s*readiness\.total/);
+    // The exact shape of the defect must not come back.
+    expect(stripComments(hub)).not.toMatch(/total:\s*steps\.length/);
+  });
+
+  it("the card uses that same model, so the two agree", () => {
+    expect(card).toMatch(/readiness\.met/);
+    expect(card).toMatch(/readiness\.total/);
+  });
+
+  it("the actionable step list survives — this was a count fix, not a removal", () => {
+    // If the steps disappeared, the hub would have lost the thing it is for.
+    expect(hub).toMatch(/const steps:/);
+    expect(hub).toMatch(/missingSteps/);
+    expect(hub).toMatch(/STEPLESS_PILLARS/);
+  });
+});
+
 describe.each(ROUTED_LOCALES)("%s — one surface, one name", (locale) => {
   const m = load(locale);
 
