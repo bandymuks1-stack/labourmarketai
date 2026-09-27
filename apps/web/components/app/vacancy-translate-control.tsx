@@ -122,11 +122,12 @@ export function VacancyTranslateControl({
   );
 }
 
-/** The reader's own language, named in the reader's own language. */
-export function displayLanguageName(code: string, locale: string): string {
-  try {
-    return new Intl.DisplayNames([locale], { type: "language" }).of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
+/**
+ * MOVED to `lib/i18n/language-name.ts` and re-exported here so existing imports
+ * keep working. It is a pure helper and three SERVER surfaces call it; defining
+ * it in this `"use client"` module made it a client reference, and `next build`
+ * failed prerendering `/lt` with "Attempted to call displayLanguageName() from
+ * the server". Re-exported rather than removed so this is not a breaking change
+ * for anything that still imports it from here.
+ */
+export { displayLanguageName } from "@/lib/i18n/language-name";

@@ -9,6 +9,7 @@ import {
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
+import { displayLanguageName } from "@/lib/i18n/language-name";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { createClient } from "@/lib/supabase/server";
@@ -298,6 +299,18 @@ export default async function JobsPage({
   const tProfession = await getTranslations("professions");
   const professionName = (slug: string): string =>
     tProfession.has(slug as never) ? tProfession(slug as never) : slug;
+  // THE AD'S OWN LANGUAGE, named only when it is not the reader's — the SAME
+  // condition and the SAME copy `/jobs/[id]` already uses, so the board and the
+  // detail page say one thing (owner §6, 2026-09-27). Nothing is translated and
+  // nothing leaves the platform; this is the honest fallback that stops a
+  // Swedish occupation standing on the card as an unexplained second title.
+  const tRoot = await getTranslations();
+  const sourceLanguageLabel = (code: string | null): string | undefined =>
+    code && code.slice(0, 2) !== active
+      ? tRoot("vacancySources.language.originalIn", {
+          language: displayLanguageName(code, active),
+        })
+      : undefined;
   const professionOptions = PUBLIC_VACANCY_PROFESSION_SLUGS.map((slug) => ({
     slug,
     label: professionName(slug),
@@ -474,6 +487,7 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
+                    sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     savedLabel={SAVED_BADGE[active]}
                   />
                 </li>
@@ -535,6 +549,7 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
+                    sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     savedLabel={
                       mySaved.vacancyIds.has(v.id)
                         ? SAVED_BADGE[active]
