@@ -581,8 +581,21 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // THIS ASSERTION CAUGHT THIS EXTENSION TOO, in CI, and forced it to be
     // deliberate: the waiver list was widened first and `quality` failed here
     // until the same two numbers were recorded with this reasoning.
+    //
+    // #1892 (2026-09-27) is the thirteenth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR #1892 ... strictly for removing the identified
+    // compensating/now-false human-facing disclaimer from the already-scoped
+    // public jobs surface. This is not general authority to expand the waiver or
+    // self-approve future waived changes."
+    //
+    // It is the only entry on this list that makes the page STRICTLY SMALLER:
+    // one constant and one paragraph deleted, nothing added. The sentence it
+    // removes was a disclaimer compensating for a confusing component — its own
+    // source comment said so — and became false when #1890 gave every card its
+    // own language line. Verified on deployed production before removal.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
+      1892,
     ]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);

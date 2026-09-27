@@ -550,6 +550,27 @@ export const SCOPED_OWNER_WAIVERS = [
       //         so the five World-State answers stay honestly "no" for this
       //         surface — same class as #1809 and #1810.
       1837, 1890,
+      // OWNER APPROVAL 2026-09-27, verbatim: "I approve adding ONLY PR #1892 to
+      // the existing `public-acquisition-route-jobs` waiver `pullRequests` list,
+      // strictly for removing the identified compensating/now-false human-facing
+      // disclaimer from the already-scoped public jobs surface. This is not
+      // general authority to expand the waiver or self-approve future waived
+      // changes."
+      //
+      // #1892 DELETES human-facing text and adds none. `ORIGINAL_LANGUAGE_NOTE`
+      // told a visitor "occupation labels are shown in the employer's language",
+      // which its own source comment admitted existed "rather than letting a
+      // visitor wonder why a Lithuanian page lists Swedish occupation labels" —
+      // a disclaimer compensating for a confusing component, and FALSE since
+      // #1890 shipped: verified on deployed production that a mapped ad heads
+      // with the localized catalogue name and every card names its own source
+      // language ("Sandėlio darbuotojas · Skelbimo kalba: švedų · Lagerarbetare").
+      //
+      // Strictly LESS content on the page: one constant and one <p> removed, no
+      // route, page, component, projection, auth or schema change, no new copy,
+      // nothing translated and nothing egressed. The anonymous visitor receives
+      // fewer words and the same fields.
+      1892,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
