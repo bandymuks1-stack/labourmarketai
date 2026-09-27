@@ -5160,7 +5160,7 @@
     "about": "Over ons",
     "contact": "Contact",
     "rights": "Alle rechten voorbehouden.",
-    "rexora": "Gemaakt door Rexora",
+    "rexora": "Samen gebouwd: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai wordt geëxploiteerd en commercieel aangeboden door UAB “Nonstop Group”. De LabourMarket.ai-software en gerelateerde intellectuele eigendom zijn eigendom van Labour Market AI Sp. z o.o. en worden door UAB “Nonstop Group” onder licentie gebruikt.",
     "ipNotice": "Intellectuele-eigendomsrechten. Het platform wordt onder licentie geëxploiteerd door UAB “Nonstop Group”.",
     "legalNotice": "Juridische informatie"
@@ -7438,7 +7438,7 @@
     "workCardLabel": "Werkkaart",
     "workCardConfirmed": "Werkkaart aanwezig",
     "workCardPending": "Werkkaart niet toegevoegd",
-    "namePlaceholder": "Mijn profiel",
+    "namePlaceholder": "Naam nog niet toegevoegd",
     "candidateLabel": "Kandidaat-vaardigheden",
     "candidateHint": "Vaardigheden die je in je eigen woorden hebt toegevoegd (verduidelijking nodig, nog niet beoordeeld).",
     "thermoLabel": "Marktactiviteit",
@@ -8189,7 +8189,7 @@
         "title": "Andere plekken",
         "journal": "Mijn werk",
         "numbers": "Mijn activiteit in cijfers",
-        "profile": "Beroepsprofiel",
+        "profile": "Mijn profiel",
         "cv": "Levend cv",
         "gallery": "Galerij",
         "world": "Wereld"
@@ -12373,8 +12373,8 @@
     "progress": "{done} van {total}",
     "steps": {
       "goal": {
-        "title": "Wat voor werk zoekt u?",
-        "hint": "Kies uw beroep."
+        "title": "Wat is je beroep of werkervaring?",
+        "hint": "Je kunt één of meerdere beroepen of werkgebieden opgeven. Later kun je er meer toevoegen."
       },
       "experience": {
         "title": "Upload een CV of beantwoord een paar vragen",
@@ -13703,7 +13703,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Werkkaart"
+        "title": "Werknemerskaart"
       },
       "journal": {
         "title": "Werkjournaal"

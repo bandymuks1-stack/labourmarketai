@@ -338,17 +338,38 @@ export default async function DashboardLayout({
     </header>
   );
   const rexora = (
-    // Created by Rexora — quiet product credit (owner directive, 2026-07-14).
-    // Pinned by legal-entity-truth.test.ts.
+    // WHO BUILDS THIS — quiet product credit (owner directive 2026-07-14;
+    // meaning corrected 2026-09-27). Pinned by legal-entity-truth.test.ts.
+    //
+    // It used to read "Sukurta Rexora" / "Created by Rexora", which stated the
+    // relationship wrongly: Rexora is the technology and automation
+    // collaborator and a co-advertised brand, not the sole author of the
+    // product. Nonstop Group is the real labour-market / hiring operating
+    // partner, and LabourMarket.ai is the product itself. The line now names
+    // all three as collaborators.
+    //
+    // Only REXORA is the link, because the approved external attribution URL is
+    // Rexora's; wrapping the whole sentence in it would have pointed the other
+    // two partners' names at Rexora's site. Hence `t.rich` and the `<rexora>`
+    // tag in the message rather than a plain `t()` inside an anchor.
+    //
+    // It stays deliberately quiet — one small muted line, never competing with
+    // the person's actual next action.
     <div className="mt-10 text-center">
-      <a
-        href="https://aiprocessautomation.eu"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-xs text-text-muted transition-colors hover:text-text-secondary"
-      >
-        {tFooter("rexora")}
-      </a>
+      <p className="text-xs text-text-muted">
+        {tFooter.rich("rexora", {
+          rexora: (chunks) => (
+            <a
+              href="https://aiprocessautomation.eu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-4 transition-colors hover:text-text-secondary hover:underline"
+            >
+              {chunks}
+            </a>
+          ),
+        })}
+      </p>
     </div>
   );
 

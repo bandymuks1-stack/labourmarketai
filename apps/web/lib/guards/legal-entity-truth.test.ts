@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -69,19 +69,64 @@ describe("footer discloses operator + IP owner and owns the © correctly", () =>
     expect(f.ipNotice).toContain("Nonstop Group");
   });
 
-  // Created by Rexora — owner-approved attribution link (2026-07-14). The
-  // credit must be a real external link to the approved URL (never plain
-  // text, never a fabricated URL) in BOTH shells: public footer + dashboard.
-  it("footer renders the Rexora credit as a safe external link to the approved URL", () => {
+  // Rexora — owner-approved attribution link (2026-07-14). The credit must be a
+  // real external link to the approved URL (never plain text, never a
+  // fabricated URL) in BOTH shells: public footer + dashboard. That security
+  // requirement is unchanged below.
+  //
+  // WHAT CHANGED ON 2026-09-27 (owner decision, §10): the credit read "Sukurta
+  // Rexora" / "Created by Rexora", which stated the relationship wrongly.
+  // Rexora is the technology and automation collaborator and a co-advertised
+  // brand; Nonstop Group is the labour-market / hiring operating partner; the
+  // product is LabourMarket.ai. The line now names all three.
+  //
+  // Rexora STAYS — removing it was never on the table (owner requirement). What
+  // the assertions gain is that only Rexora's NAME is the link: the approved URL
+  // is Rexora's, so wrapping the whole sentence in the anchor would have pointed
+  // the other two partners' names at Rexora's site. Hence `t.rich` + a
+  // `<rexora>` tag in the message instead of `{t("rexora")}` inside an `<a>`.
+  const ALL_THREE = /Nonstop Group/;
+  it("footer credits all three collaborators, with Rexora as a safe external link", () => {
     expect(footer).toContain('href="https://aiprocessautomation.eu"');
     expect(footer).toContain('rel="noopener noreferrer"');
-    expect(footer).toContain('{t("rexora")}');
+    expect(footer).toContain('t.rich("rexora"');
   });
 
-  it("dashboard shell renders the Rexora credit as a safe external link too", () => {
+  it("dashboard shell credits them the same way, with the same safe link", () => {
     expect(dashboardShell).toContain('href="https://aiprocessautomation.eu"');
     expect(dashboardShell).toContain('rel="noopener noreferrer"');
-    expect(dashboardShell).toContain('rexora');
+    expect(dashboardShell).toContain('rich("rexora"');
+  });
+
+  it("every locale names the three collaborators and links only Rexora", () => {
+    // The relationship is carried by the COPY, so it is pinned in the copy —
+    // in every locale, not only the one that gets read during review.
+    const localeFiles = readdirSync(join(web, "messages")).filter((f) =>
+      f.endsWith(".json"),
+    );
+    expect(localeFiles.length).toBeGreaterThanOrEqual(11);
+    for (const file of localeFiles) {
+      const messages = JSON.parse(read(`messages/${file}`)) as {
+        footer?: { rexora?: string };
+      };
+      const credit = messages.footer?.rexora;
+      expect(credit, `${file} footer.rexora`).toBeTruthy();
+      // All three named, Rexora the only linked one.
+      expect(credit, `${file} must name Nonstop Group`).toMatch(ALL_THREE);
+      expect(credit, `${file} must name LabourMarket.ai`).toContain(
+        "LabourMarket.ai",
+      );
+      expect(credit, `${file} must link Rexora`).toContain(
+        "<rexora>Rexora</rexora>",
+      );
+      // NO BANNED-PREFIX LIST HERE, on purpose. A first attempt blacklisted the
+      // old wordings ("Created by", "Sukurta", "Loodud", …) and immediately
+      // produced a false positive: Estonian "Loodud koostöös" means "created IN
+      // COLLABORATION", which is exactly right. The three assertions above
+      // already make sole authorship impossible — a line that names
+      // LabourMarket.ai and Nonstop Group is not crediting Rexora alone — so a
+      // per-language verb list would only forbid correct translations.
+    }
   });
 });
 

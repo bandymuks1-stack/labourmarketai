@@ -5160,7 +5160,7 @@
     "about": "O nas",
     "contact": "Kontakt",
     "rights": "Wszelkie prawa zastrzeżone.",
-    "rexora": "Stworzone przez Rexora",
+    "rexora": "Tworzone wspólnie: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai jest prowadzona i komercyjnie świadczona przez UAB „Nonstop Group”. Oprogramowanie LabourMarket.ai oraz powiązana własność intelektualna należą do Labour Market AI Sp. z o.o. i są używane przez UAB „Nonstop Group” na podstawie licencji.",
     "ipNotice": "Prawa własności intelektualnej. Platforma jest prowadzona na podstawie licencji przez UAB „Nonstop Group”.",
     "legalNotice": "Nota prawna"
@@ -7438,7 +7438,7 @@
     "workCardLabel": "Karta pracy",
     "workCardConfirmed": "Karta pracy w dokumentacji",
     "workCardPending": "Nie dodano karty pracy",
-    "namePlaceholder": "Mój profil",
+    "namePlaceholder": "Imię nie zostało jeszcze dodane",
     "candidateLabel": "Proponowane umiejętności",
     "candidateHint": "Umiejętności dodane własnymi słowami (wymagają doprecyzowania, jeszcze niesprawdzone).",
     "thermoLabel": "Aktywność rynkowa",
@@ -8189,7 +8189,7 @@
         "title": "Inne miejsca",
         "journal": "Moja praca",
         "numbers": "Moja aktywność w liczbach",
-        "profile": "Profil zawodowy",
+        "profile": "Mój profil",
         "cv": "Żywe CV",
         "gallery": "Galeria",
         "world": "Świat"
@@ -12373,8 +12373,8 @@
     "progress": "{done} z {total}",
     "steps": {
       "goal": {
-        "title": "Jakiej pracy szukasz?",
-        "hint": "Wybierz swój zawód."
+        "title": "Jaki jest Twój zawód lub doświadczenie zawodowe?",
+        "hint": "Możesz podać jeden lub kilka zawodów albo obszarów pracy. Później możesz dodać więcej."
       },
       "experience": {
         "title": "Prześlij CV lub odpowiedz na kilka pytań",
@@ -13703,7 +13703,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Karta zawodowa"
+        "title": "Karta pracownika"
       },
       "journal": {
         "title": "Dziennik pracy"

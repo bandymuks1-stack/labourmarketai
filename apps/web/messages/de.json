@@ -5160,7 +5160,7 @@
     "about": "Über uns",
     "contact": "Kontakt",
     "rights": "Alle Rechte vorbehalten.",
-    "rexora": "Erstellt von Rexora",
+    "rexora": "Gemeinsam entwickelt: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörige geistige Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
     "ipNotice": "Rechte des geistigen Eigentums. Die Plattform wird in Lizenz von der UAB „Nonstop Group“ betrieben.",
     "legalNotice": "Impressum"
@@ -7438,7 +7438,7 @@
     "workCardLabel": "Arbeitskarte",
     "workCardConfirmed": "Arbeitskarte hinterlegt",
     "workCardPending": "Arbeitskarte nicht hinzugefügt",
-    "namePlaceholder": "Mein Profil",
+    "namePlaceholder": "Name noch nicht angegeben",
     "candidateLabel": "Kandidaten-Fähigkeiten",
     "candidateHint": "Fähigkeiten, die Sie in eigenen Worten hinzugefügt haben (braucht Klärung, noch nicht geprüft).",
     "thermoLabel": "Marktaktivität",
@@ -8189,7 +8189,7 @@
         "title": "Weitere Orte",
         "journal": "Meine Arbeit",
         "numbers": "Meine Tätigkeit in Zahlen",
-        "profile": "Berufsprofil",
+        "profile": "Mein Profil",
         "cv": "Lebendiger Lebenslauf",
         "gallery": "Galerie",
         "world": "Welt"
@@ -12373,8 +12373,8 @@
     "progress": "{done} von {total}",
     "steps": {
       "goal": {
-        "title": "Welche Arbeit suchen Sie?",
-        "hint": "Wählen Sie Ihren Beruf."
+        "title": "Was ist Ihr Beruf oder Ihre Berufserfahrung?",
+        "hint": "Sie können einen oder mehrere Berufe oder Arbeitsbereiche angeben. Später können Sie weitere hinzufügen."
       },
       "experience": {
         "title": "CV hochladen oder ein paar Fragen beantworten",
@@ -13703,7 +13703,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Arbeitskarte"
+        "title": "Arbeitskraft-Karte"
       },
       "journal": {
         "title": "Arbeitsjournal"

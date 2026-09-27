@@ -165,14 +165,25 @@ export async function SiteFooter() {
                 https://aiprocessautomation.eu. External link, so a plain <a>
                 (not the locale-aware Link) with noopener/noreferrer. Pinned by
                 legal-entity-truth.test.ts. */}
-            <a
-              href="https://aiprocessautomation.eu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-secondary"
-            >
-              {t("rexora")}
-            </a>
+            {/* Meaning corrected 2026-09-27: the line names all three
+                collaborators (LabourMarket.ai × Nonstop Group × Rexora) instead
+                of crediting Rexora as sole author, and only REXORA carries the
+                link — the approved URL is Rexora's, so wrapping the whole
+                sentence would point the other partners' names at their site. */}
+            <p>
+              {t.rich("rexora", {
+                rexora: (chunks) => (
+                  <a
+                    href="https://aiprocessautomation.eu"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-text-secondary hover:underline"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
           </div>
         </div>
       </div>
