@@ -305,10 +305,24 @@ describe("§19 the visitor reaches a way to start without a long scroll", () => 
     expect(i("StartingContextsBand")).toBeLessThan(i("PlayerCardShowcase"));
   });
 
-  it("the market map comes before both, directly under the entry", () => {
+  it("the market EVIDENCE comes before both, directly under the entry", () => {
+    /*
+     * This pinned the MAP band in that slot. The owner withdrew it on
+     * 2026-09-27: it could only draw market centroids, never activity, so it
+     * needed copy explaining what its markers were not — the product explaining
+     * its data model to a visitor.
+     *
+     * The SLOT is the real contract here, and it is kept: directly under the
+     * entry, before the doors, the visitor still meets the market — now as the
+     * canonical vacancy and employer figures rather than a map that had to
+     * apologise for itself. `MarketProofBand` used to render nested inside the
+     * map band; it is a section of its own again.
+     */
     const i = (c: string) => focus.indexOf(`<${c}`);
-    expect(i("PublicEntry")).toBeLessThan(i("PublicMarketMapBand"));
-    expect(i("PublicMarketMapBand")).toBeLessThan(i("StartingContextsBand"));
+    expect(i("PublicEntry")).toBeLessThan(i("MarketProofBand"));
+    expect(i("MarketProofBand")).toBeLessThan(i("StartingContextsBand"));
+    // And the withdrawn band must not quietly return without a decision.
+    expect(i("PublicMarketMapBand")).toBe(-1);
   });
 
   it("the sample card no longer out-shouts the page's own headings", () => {

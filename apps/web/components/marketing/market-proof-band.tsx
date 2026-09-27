@@ -109,7 +109,18 @@ export async function MarketProofBand({
     : null;
 
   return (
-    <section className="mt-16" aria-labelledby="market-proof-title">
+    /* `id="market"` MOVED HERE from the map band (owner decision 2026-09-27,
+       which withdrew that band from the landing). `site-nav.tsx` carries an
+       always-visible `/#market` link, so the anchor had to keep landing on
+       something real — and the real market evidence is these figures, read from
+       the canonical snapshot. Without this move the nav link would scroll
+       nowhere, which is the kind of quiet breakage the non-degradation rule is
+       about. */
+    <section
+      id="market"
+      className="mt-16 scroll-mt-24"
+      aria-labelledby="market-proof-title"
+    >
       <Reveal>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}

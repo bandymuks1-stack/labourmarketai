@@ -99,6 +99,42 @@ import { join } from "node:path";
  * (`landing.marketProof` added in all 11 catalogs; lt/en/ru are the frozen
  * three). No other frozen artefact moved.
  *
+ * Map band withdrawn + internal copy removed from the human UI (owner
+ * directive 2026-09-27, §1 human-copy ban + §4) — production `/lt` was showing
+ * the visitor "Darbo rinka egzistuoja tikrose vietose", "Žmonės, darbai ir
+ * poreikiai yra kažkur", "Žemėlapis yra produkto dalis, o ne paveikslėlis prie
+ * teksto" and "Tai rinkos, ne šios dienos veikla". Each is the product
+ * explaining one of its own components to a person, in the product's own
+ * architectural terms, and the owner banned that class of copy across the whole
+ * product — explicitly NOT to be rewritten into nicer prose.
+ *
+ * The copy was inseparable from the band it explained: `PublicMarketMapBand`
+ * could only ever draw `MARKET_COUNTRIES` centroids, never activity, because the
+ * anon boundary publishes no country, region, city or coordinate. A map that
+ * cannot show work geography is what those three sentences were compensating
+ * for. So the BAND IS WITHDRAWN from the landing rather than re-worded.
+ *
+ * NOTHING WAS DELETED. `public-market-map-band.tsx`, `<MarketMap>`,
+ * `publicCoverageView()` and `/dashboard/market-map` are all untouched, and the
+ * `landing.marketMap` copy stays on disk — deleting it would make that component
+ * render raw key paths, which `i18n-key-resolution-static` exists to prevent
+ * (the first attempt at this change did exactly that and was reverted).
+ *
+ * NOTHING OF VALUE LEFT THE PAGE EITHER. The market PROOF — the real vacancy and
+ * employer counts — had been rendering as `children` INSIDE the map band; it was
+ * already a self-contained `<section>` with its own heading, so it simply stands
+ * on its own again. It also takes over `id="market"`, because `site-nav.tsx`
+ * carries an always-visible `/#market` link that would otherwise scroll nowhere.
+ *
+ * The regeneration touched EXACTLY TWO file hashes — `focus-landing.tsx` (band
+ * no longer rendered, import removed) and `market-proof-band.tsx` (gained the
+ * `#market` anchor) — and ZERO namespace hashes, which is the proof that no copy
+ * changed anywhere: the i18n drift assertion passed untouched. Guarded
+ * permanently by `no-internal-copy-in-human-ui.test.ts`, which fails if any of
+ * those sentences reaches rendered copy again and pins that the withdrawn
+ * namespace keeps exactly one, unrendered consumer — so the freeze is not the
+ * only thing standing between the landing and the product explaining itself.
+ *
  * Market-proof honest browsable basis (OWNER APPROVAL 2026-08-19, numbers-only
  * correction; finding in docs/audits/landing-coverage-claim-basis-2026-08-18.md)
  * — the band advertised "41 000+ active job opportunities" and "7 600+
