@@ -553,8 +553,36 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // head 2bb419d1 as PR 1838 vs origin/main: 42 findings, every one
     // `pr-not-covered` before the extension. It caught this extension too and
     // forced it to be deliberate.
+    //
+    // #1837 and #1890 (2026-09-27) are the eleventh and twelfth, on the owner's
+    // verbatim approval: "I approve adding PR #1837 AND the immediately required
+    // public vacancy card localization/source-language fix to the existing
+    // `public-acquisition-route-jobs` waiver `pullRequests` scope, strictly
+    // limited to the already-defined `/jobs`, `/jobs/[id]`, and public vacancy
+    // row/card acquisition surfaces required to close this concrete localization
+    // defect." The same message adds that it "does not authorize unrelated waiver
+    // expansion, security weakening, new public data exposure, or general
+    // self-approval of future waivers".
+    //
+    // They make the surface MORE honest, not more permissive. Production `/lt`
+    // showed the publisher's Swedish occupation as a BARE second line under the
+    // localized heading ("Sandėlio darbininkas" over "Lagerarbetare") and, on
+    // ads with no mapped profession — 30 049 of 53 392 active rows — as the
+    // heading itself with nothing saying it was Swedish. #1890 keeps the
+    // localized catalogue name primary and names the ad's language on ONE compact
+    // line using the key `/jobs/[id]` already used; #1837 is the same concern on
+    // the detail page.
+    //
+    // NOTHING about what an anonymous visitor may see changed: no new route,
+    // page, component, projection, auth or schema change, no new copy in any
+    // locale, and nothing is translated or sent externally —
+    // `translate_vacancy` stays ungranted. Same class as #1809 and #1810.
+    //
+    // THIS ASSERTION CAUGHT THIS EXTENSION TOO, in CI, and forced it to be
+    // deliberate: the waiver list was widened first and `quality` failed here
+    // until the same two numbers were recorded with this reasoning.
     expect(jobs.pullRequests).toEqual([
-      1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838,
+      1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
     ]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);

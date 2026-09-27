@@ -87,6 +87,7 @@ export function PublicVacancyCard({
   locale,
   savedLabel,
   headingFallback,
+  sourceLanguageLabel,
 }: {
   readonly vacancy: PublicVacancyPreview;
   readonly locale: ActiveLocale;
@@ -99,6 +100,24 @@ export function PublicVacancyCard({
    *  list. It is a note to the person looking at their own screen — it reaches
    *  no employer and is never rendered for anyone else. */
   readonly savedLabel?: string;
+  /**
+   * ALREADY-LOCALIZED "this ad is written in X" line, supplied by the caller
+   * ONLY when the ad's language differs from the reader's — the same condition
+   * and the same `vacancySources.language.originalIn` copy `/jobs/[id]` uses.
+   *
+   * WHY THE CALLER COMPUTES IT: this component takes localized strings and
+   * renders them (`headingFallback`, `savedLabel`); it holds no translator. The
+   * callers already have one.
+   *
+   * WHAT IT FIXES (owner §6, production `/lt` 2026-09-27). The publisher's
+   * Swedish occupation was rendering as a BARE SECOND LINE under a Lithuanian
+   * heading — "Sandėlio darbininkas" with "Lagerarbetare" beneath it, nothing
+   * saying what that word was. A reader met an unexplained foreign string
+   * competing with the localized title. When this label is present the original
+   * is folded INTO it on one compact line, so the publisher's words are
+   * preserved and attributed instead of competing.
+   */
+  readonly sourceLanguageLabel?: string;
 }) {
   const chips: string[] = [];
 
@@ -157,10 +176,39 @@ export function PublicVacancyCard({
         )}
       </div>
 
-      {occupationSubline && (
-        <p lang={sourceLang} className="mt-1 text-sm text-text-muted">
-          {occupationSubline}
+      {/* THE AD'S OWN LANGUAGE, ON ONE LINE (owner §6, 2026-09-27).
+          ONE compact muted line, never a paragraph and never an explanation of
+          how the product works:
+
+            foreign ad, localized heading → "Skelbimo kalba: švedų · Lagerarbetare"
+            foreign ad, no localized name → "Skelbimo kalba: švedų" under the
+                                             publisher's own words as the heading
+            same-language ad             → the occupation subline exactly as before
+
+          The publisher's text is PRESERVED in every case and still carries its
+          own `lang` for assistive technology; what changed is that it is now
+          attributed instead of standing as an unexplained second title. Nothing
+          is translated here and nothing leaves the platform — this is the honest
+          fallback while `translate_vacancy` has no egress grant. */}
+      {sourceLanguageLabel ? (
+        <p
+          className="mt-1 text-sm text-text-muted"
+          data-testid="public-vacancy-source-language"
+        >
+          {sourceLanguageLabel}
+          {occupationSubline ? (
+            <>
+              {" · "}
+              <span lang={sourceLang}>{occupationSubline}</span>
+            </>
+          ) : null}
         </p>
+      ) : (
+        occupationSubline && (
+          <p lang={sourceLang} className="mt-1 text-sm text-text-muted">
+            {occupationSubline}
+          </p>
+        )
       )}
 
       {chips.length > 0 && (

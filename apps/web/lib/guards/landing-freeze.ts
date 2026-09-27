@@ -135,6 +135,31 @@ import { join } from "node:path";
  * namespace keeps exactly one, unrendered consumer — so the freeze is not the
  * only thing standing between the landing and the product explaining itself.
  *
+ * Public vacancy localization (owner approval 2026-09-27, §6 + the waiver
+ * extension) — production `/lt` showed Swedish where Lithuanian existed. ONE
+ * cause in `public-vacancy-card.tsx`, two manifestations: an ad WITH a mapped
+ * profession got the localized heading and then the publisher's Swedish
+ * occupation as a BARE second line under it (nothing saying what that word was
+ * — "Sandėlio darbininkas" over "Lagerarbetare"); an ad with NO mapped
+ * profession (30 049 of 53 392 active rows, 56.3 %) was headed with the
+ * publisher's own words and nothing said they were Swedish.
+ *
+ * The band now passes the SAME `vacancySources.language.originalIn` label
+ * `/jobs` and `/jobs/[id]` use, so the three public vacancy surfaces say one
+ * thing in ONE compact muted line ("Skelbimo kalba: švedų · Lagerarbetare").
+ * NOTHING is translated and nothing leaves the platform — `translate_vacancy`
+ * still has no egress grant and this change does not add one. The publisher's
+ * words are preserved in every case and keep their own `lang` (WCAG 3.1.2);
+ * what changed is that they are attributed instead of competing with the
+ * localized title. NO new copy was written in any locale.
+ *
+ * The regeneration touched EXACTLY ONE file hash —
+ * `landing-open-jobs-band.tsx` — and ZERO namespace hashes. Guarded permanently
+ * by `public-vacancy-localization.test.ts`, which pins the heading precedence,
+ * that the occupation is never a bare unattributed line, that all three
+ * surfaces read the one shared key only when the ad is foreign to the reader,
+ * and that none of them calls the translation runtime.
+ *
  * Market-proof honest browsable basis (OWNER APPROVAL 2026-08-19, numbers-only
  * correction; finding in docs/audits/landing-coverage-claim-basis-2026-08-18.md)
  * — the band advertised "41 000+ active job opportunities" and "7 600+

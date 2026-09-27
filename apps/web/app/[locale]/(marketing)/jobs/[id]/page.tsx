@@ -22,10 +22,12 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import { VacancyInterestButton } from "@/components/app/vacancy-interest-button";
-import {
-  VacancyTranslateControl,
-  displayLanguageName,
-} from "@/components/app/vacancy-translate-control";
+import { VacancyTranslateControl } from "@/components/app/vacancy-translate-control";
+// The pure helper comes from the NON-client module: this page is a server
+// component, and importing it from the `"use client"` control made it a client
+// reference. This route renders dynamically so it never hit the prerender error
+// that `/lt` did — the same latent boundary bug, closed here too.
+import { displayLanguageName } from "@/lib/i18n/language-name";
 import type { FitBand } from "@/lib/opportunities/fit-band";
 import {
   readPublicJobForMember,

@@ -5,6 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import type { LiveMarketVacancySample } from "@/lib/market/live-market-landing";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
+import { displayLanguageName } from "@/lib/i18n/language-name";
 import { Reveal } from "@/components/marketing/reveal";
 
 /**
@@ -41,15 +42,26 @@ export async function LandingOpenJobsBand({
 }) {
   if (sample.basis !== "live" || sample.vacancies.length === 0) return null;
 
-  const [t, tProfession] = await Promise.all([
+  const [t, tProfession, tRoot] = await Promise.all([
     getTranslations("landing.openJobs"),
     getTranslations("professions"),
+    getTranslations(),
   ]);
   // The board's own heading rule: the profession in the reader's language
   // when the catalogue has it. Unlike the board, a slug with no catalogue
   // entry falls back to the card's occupation line, never the raw slug.
   const professionName = (slug: string | null): string | undefined =>
     slug && tProfession.has(slug as never) ? tProfession(slug as never) : undefined;
+  // The ad's own language, named only when it is not the visitor's — the SAME
+  // condition and copy `/jobs` and `/jobs/[id]` use (owner §6, 2026-09-27), so
+  // the three public vacancy surfaces say one thing. Without it a slug-less ad
+  // headed with the publisher's Swedish words said nothing about being Swedish.
+  const sourceLanguageLabel = (code: string | null): string | undefined =>
+    code && code.slice(0, 2) !== locale
+      ? tRoot("vacancySources.language.originalIn", {
+          language: displayLanguageName(code, locale),
+        })
+      : undefined;
 
   return (
     <section
@@ -85,6 +97,7 @@ export async function LandingOpenJobsBand({
               vacancy={vacancy}
               locale={locale}
               headingFallback={professionName(vacancy.professionSlug)}
+              sourceLanguageLabel={sourceLanguageLabel(vacancy.sourceLanguage)}
             />
           </li>
         ))}

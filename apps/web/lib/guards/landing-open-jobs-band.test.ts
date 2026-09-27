@@ -31,8 +31,12 @@ vi.mock("@/lib/i18n/navigation", () => ({
 }));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: async (ns: string) =>
-    Object.assign((k: string) => `${ns}.${k}`, {
+  // `ns` is UNDEFINED for a ROOT translator (`getTranslations()`), which the band
+  // now uses for the shared `vacancySources.language.originalIn` key. The stub
+  // used to interpolate it regardless and produced "undefined.<key>" — a harness
+  // artefact that looked exactly like a raw-key leak in the rendered output.
+  getTranslations: async (ns?: string) =>
+    Object.assign((k: string) => (ns ? `${ns}.${k}` : k), {
       has: (k: string) => ns === "professions" && k !== "unknown_slug",
     }),
 }));
@@ -106,6 +110,11 @@ describe("the landing's open-jobs band is the board's card, not a second one", (
             v.professionSlug && v.professionSlug !== "unknown_slug"
               ? `professions.${v.professionSlug}`
               : undefined,
+          // Every fixture ad is Swedish and the reader is "en", so the band names
+          // the ad's language on each one. The standalone card must be given the
+          // SAME label, or this stops comparing the band against the canonical
+          // card and starts comparing it against a card rendered differently.
+          sourceLanguageLabel: "vacancySources.language.originalIn",
         }),
       );
       expect(html, `vacancy ${v.id} is not the canonical card`).toContain(card);

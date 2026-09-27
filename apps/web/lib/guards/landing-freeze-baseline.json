@@ -21,7 +21,7 @@
     "components/marketing/starting-contexts-band.tsx": "5707b1c54093e5d3aa9ca44f2968633535bf9fd6134080d72676ea7c38546204",
     "components/marketing/public-market-map-band.tsx": "996c87d45f44d5dc02f8cce9c9ece066df7def66da353f6ef9fff275d82522b7",
     "components/marketing/landing-primary-actions.tsx": "1ff914c67a14d87041c517b95d386d779e26a899ed9bb6e1d3f2e1ad7a2da85f",
-    "components/marketing/landing-open-jobs-band.tsx": "66916a11aa4837fd52e1605e1db7824b99548f42e70ca622ed3a76ab319f13ed"
+    "components/marketing/landing-open-jobs-band.tsx": "d4aca1f453b24c178d9a68144b1f0147426c0affd015113edd3490b3a4370e3b"
   },
   "namespaces": {
     "lt.livingMarketReview": "98b406d2fef30e1eefd7d9895a1fbe62e6702fa65231ca764a223a5f989882e6",

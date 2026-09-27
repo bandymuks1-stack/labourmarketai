@@ -521,7 +521,36 @@ export const SCOPED_OWNER_WAIVERS = [
      * answers stay honestly "no" for the anonymous caller this surface exists
      * for — same class as #1193, #1203, #1786, #1809, #1810.
      */
-    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838],
+    pullRequests: [
+      1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838,
+      // OWNER APPROVAL 2026-09-27, verbatim: "I approve adding PR #1837 AND the
+      // immediately required public vacancy card localization/source-language
+      // fix to the existing `public-acquisition-route-jobs` waiver
+      // `pullRequests` scope, strictly limited to the already-defined `/jobs`,
+      // `/jobs/[id]`, and public vacancy row/card acquisition surfaces required
+      // to close this concrete localization defect." The same message states it
+      // "does not authorize unrelated waiver expansion, security weakening, new
+      // public data exposure, or general self-approval of future waivers".
+      //
+      // Exactly that was done: TWO numbers added to `pullRequests`. The axiom,
+      // the six codes per surface, the surfaces, the file list, the expected
+      // finding set, the expiry and the subset rule are byte-unchanged, and
+      // `product-gate.mjs` is not touched by either PR.
+      //
+      // #1837 — `/jobs/[id]` renders the canonical opportunity view, so the
+      //         language disclosure has something to attach to: ONE presentation
+      //         of a vacancy instead of two.
+      // #1890 — the row card stops rendering the publisher's foreign occupation
+      //         as a BARE second line beneath the localized heading, and names
+      //         the ad's language on one compact line using the same key
+      //         /jobs/[id] already uses. No new route, page, projection, auth or
+      //         schema change, no new copy in any locale, nothing translated and
+      //         nothing egressed — `translate_vacancy` stays ungranted. The
+      //         anonymous visitor receives exactly the fields they did before,
+      //         so the five World-State answers stay honestly "no" for this
+      //         surface — same class as #1809 and #1810.
+      1837, 1890,
+    ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
