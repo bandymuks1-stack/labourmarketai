@@ -110,13 +110,68 @@ describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)",
     expect(getCoreNavItems().map((i) => i.id)).toEqual([...CORE_NAV_IDS]);
   });
 
-  it("the simple shell is the ONE operating center — no parallel tab system (owner audit §4.4)", () => {
-    // The conversation header carries ONLY: back-to-chat, identity, the
-    // workspace chip, search, language, notifications, the avatar menu.
-    // Journal / calendar / messages remain ROUTES (projections opened from
-    // the conversation), never top-bar tabs.
-    expect(chatHeader).not.toMatch(/getCoreNavItems\(\)/);
-    expect(chatHeader).not.toMatch(/NavTab/);
+  it("the core nav renders in a surface a NON-ADMIN actually gets", () => {
+    // THE DEFECT CLASS THIS PINS, which cost a real person the calendar on
+    // 2026-09-27: a destination can be `active` + `safeToShowInPrimaryNav` in
+    // the catalogue, have a real route, have a nav entry, pass every existing
+    // nav test — and still be invisible to every non-admin, because the only
+    // components that render the catalogue mount in `full` chrome and
+    // `dashboardChromeMode` hands `full` to /dashboard/admin alone.
+    //
+    // "It is in the catalogue" is therefore NOT a reachability proof, and
+    // neither is "it has a nav tab". The proof has to end at a surface an
+    // ordinary person is given. That surface is this header: the chat renders
+    // it on the home and `DashboardChrome` renders it on every `panel` route,
+    // which between them is every route a non-admin has.
+    expect(chatHeader).toMatch(/getCoreNavItems\(\)/);
+    // The chain that makes this header universal — both halves must hold, or
+    // the header above stops covering everyone again.
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    expect(chat).toMatch(/<ConversationHeader/);
+    expect(chrome).toMatch(/<ConversationHeader/);
+    // `panel` is the default for every non-admin route (the fall-through the
+    // "never switches chrome" test below pins), so the two together cover the
+    // home plus everything else.
+    expect(read("lib/config/navigation.ts")).toMatch(/return "panel";/);
+    // The admin-only surfaces must NOT be how a core item becomes reachable.
+    // If someone ever "fixes" a hidden item by mounting BottomNav/DashboardTabs
+    // for everyone, that is a second nav model and this stays the single one.
+    expect(chrome).not.toMatch(/getCoreNavItems\(\)/);
+  });
+
+  it("the simple shell is the ONE operating center — ONE nav, and it is reachable (owner ruling 2026-09-27)", () => {
+    // ── WHAT CHANGED AND WHY (this assertion used to say the opposite)
+    //
+    // Decision 0017 removed the four-tab row from this bar, and this test
+    // pinned its absence: `expect(chatHeader).not.toMatch(/getCoreNavItems\(\)/)`.
+    // The reasoning was that capability survived in the command search and the
+    // conversation's chips, so only a redundant PRESENTATION was removed.
+    //
+    // Walked by a real person on production on 2026-09-27, that reasoning was
+    // false: THE CALENDAR COULD NOT BE FOUND. `/dashboard/planning` exists and
+    // the catalogue had it `active` + `safeToShowInPrimaryNav: true` the whole
+    // time, but the only surfaces that render the catalogue (`DashboardTabs`,
+    // `BottomNav`) mount ONLY in `full` chrome, which `dashboardChromeMode`
+    // gives to `/dashboard/admin` alone. So the core loop was visible to
+    // admins and to nobody else — and `journal_text_first` and `communication`
+    // were hidden by the same mechanism, not just `planning`.
+    //
+    // The owner's ruling: the core items must be reachable from the main
+    // navigation a normal authenticated person actually gets. So the bar
+    // carries the core list again — from `getCoreNavItems()`, the same single
+    // source both Advanced surfaces use, which is why this is ONE nav model
+    // and not the "parallel tab system" §4.4 forbade. What §4.4 still forbids,
+    // and what this test still pins below, is a SECOND list or a second
+    // source of truth.
+    expect(chatHeader).toMatch(/getCoreNavItems\(\)/);
+    // The catalogue stays the only source: no hand-spelled destinations and no
+    // private icon map in this component (both surfaces share `NAV_ICONS`).
+    expect(chatHeader).toMatch(/NAV_ICONS/);
+    expect(chatHeader).not.toMatch(/"\/dashboard\/planning"/);
+    expect(chatHeader).not.toMatch(/"\/dashboard\/journal"/);
+    expect(chatHeader).not.toMatch(/"\/dashboard\/communication"/);
+    // And the bar keeps everything §4.4 put in it.
     expect(chatHeader).toMatch(/back-to-chat/);
     expect(chatHeader).toMatch(/WorkspaceChip/);
     expect(chatHeader).toMatch(/NotificationPanel/);

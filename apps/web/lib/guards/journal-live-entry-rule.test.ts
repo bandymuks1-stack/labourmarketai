@@ -150,6 +150,9 @@ describe("player-card — one file may not hold two answers", () => {
       getWorkerCoreRow: async () => ({ id: "w-1" }),
       getWorkerSkillRows: async () => [],
       getPrimaryProfessionSlug: async () => null,
+      // The card also asks what the person says they do IN THEIR OWN WORDS
+      // (ledger 20260927060325) — the same cached rows, a different question.
+      getProfessionEntries: async () => [],
     }));
     vi.doMock("@/lib/player-card/work-history", () => ({ getOwnWorkHistory: async () => [] }));
     vi.doMock("@/lib/instructions/instructions", () => ({

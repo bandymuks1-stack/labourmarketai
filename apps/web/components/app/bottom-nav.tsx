@@ -1,24 +1,9 @@
 "use client";
 
-import {
-  CalendarDays,
-  Home,
-  IdCard,
-  MapPin,
-  MessageSquare,
-  NotebookPen,
-  Shield,
-  Store,
-  User,
-  Users,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import {
-  getAdvancedNavItems,
-  type NavIconKey,
-} from "@/lib/config/navigation";
+import { getAdvancedNavItems } from "@/lib/config/navigation";
+import { NAV_ICONS } from "@/components/app/nav-icons";
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { useAuth } from "@/lib/auth/context";
@@ -28,23 +13,9 @@ import { cn } from "@/lib/utils";
 // from the feature-availability catalogue. Adding / removing a tab is a
 // catalogue + meta change — never a component edit.
 //
-// Icons live here because lucide is a presentation concern; the config
-// only carries the icon ID. ONE icon per destination across the whole app
-// (audit PR8 icon rule): journal = NotebookPen, messages = MessageSquare,
-// map = MapPin — the same icons the MyZone action grid uses, so the nav and
-// the grid speak one visual language. FileText stays reserved for documents.
-const ICONS: Record<NavIconKey, LucideIcon> = {
-  home: Home,
-  store: Store,
-  map: MapPin,
-  idCard: IdCard,
-  journal: NotebookPen,
-  messages: MessageSquare,
-  calendar: CalendarDays,
-  network: Users,
-  user: User,
-  shield: Shield,
-};
+// The icon map moved to `components/app/nav-icons.ts` when the one top bar
+// also had to render these destinations — one icon source for both surfaces.
+const ICONS = NAV_ICONS;
 
 /** Mobile-only (<768px) bottom tab bar — the primary nav on phones, where
  *  the horizontal DashboardTabs would overflow. Tabs come from the

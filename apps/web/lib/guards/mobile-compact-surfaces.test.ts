@@ -161,35 +161,47 @@ describe("GALIMYBĖS — a compact row first, the detail on selection", () => {
   });
 });
 
-describe("PASAULIS — the map is the base, and a place opens that place's list", () => {
+describe("PASAULIS — the map viewport is withheld; the list and the door remain", () => {
   const page = read("app/[locale]/dashboard/opportunities/page.tsx");
 
-  it("the map sits under the header, above the banded list", () => {
+  /*
+   * THIS BLOCK USED TO PIN THE EMBEDDED MAP as PASAULIS' base (owner direction
+   * 2026-09-13). The owner withdrew that viewport on 2026-09-27 after walking
+   * it: it opened on `EUROPE_CENTER = [52.2, 6.0]` — inside the NETHERLANDS —
+   * so somebody who had told us they work in Germany was shown NL as their work
+   * geography, and the demand layer had nothing honest to draw anyway (all
+   * 111 187 `public_vacancies` rows `country = 'SE'`, none with lat/lng).
+   *
+   * The assertions therefore move from "the map is here and correctly placed"
+   * to "the map is NOT here, the list still opens directly, and the capability
+   * is still one tap away". The place-link contract is NOT dropped — it moved
+   * to the surface that still renders the map, so the rule keeps its teeth.
+   */
+
+  it("the list is what the page opens on, right under the header", () => {
     const header = page.indexOf("</header>");
-    const map = page.indexOf('data-testid="opportunities-map"');
     const results = page.indexOf('id="opportunities-results"');
     expect(header).toBeGreaterThan(-1);
-    expect(map).toBeGreaterThan(header);
-    expect(results).toBeGreaterThan(map);
+    expect(results).toBeGreaterThan(header);
+    // No withheld-map placeholder left standing in its place.
+    expect(page).not.toMatch(/data-testid="opportunities-map"/);
+    expect(page).not.toMatch(/<WorldDiscovery\b/);
   });
 
-  it("it is the canonical world container and reader — never a second map", () => {
-    expect(page).toMatch(/from "@\/components\/app\/market-map\/world-discovery"/);
-    expect(page).toMatch(/loadWorldView\(\{/);
+  it("withholding the viewport did not grow a second map here", () => {
     expect(page).not.toMatch(/from "leaflet"|mountLeafletMap/);
+    expect(page).not.toMatch(/mapMode="result"/);
   });
 
-  it("the map shares the screen with the list: the shorter canonical height", () => {
-    expect(page).toMatch(/mapMode="result"/);
-    // and anyone who came for the list is one tap past the map
-    expect(page).toMatch(/data-testid="opportunities-map-skip"/);
-    expect(page).toMatch(/href="#opportunities-results"/);
+  it("the full map stays one tap away — the capability is not lost", () => {
+    expect(page).toMatch(/data-testid="opportunities-map-full-link"/);
+    expect(page).toMatch(/\/dashboard\/market-map/);
   });
 
-  it("a place links into the page's OWN country filter, not a second board", () => {
-    expect(page).toMatch(
-      /hrefTemplate: `\/\$\{locale\}\/dashboard\/opportunities\?country=\{country\}/,
-    );
+  it("a place still links into a country filter, not a second board", () => {
+    // Pinned where the map actually renders now.
+    const mapPage = read("app/[locale]/dashboard/market-map/page.tsx");
+    expect(mapPage).toMatch(/<WorldDiscovery\b/);
     const world = read("components/app/market-map/world-discovery.tsx");
     expect(world).toMatch(/data-testid="world-place-link"/);
     expect(world).toMatch(/placeLink\.hrefTemplate\.replace\("\{country\}", c\.country\)/);
