@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
+import {
+  parseSelfDeclaredProfessions,
+  recordableInputLanguage,
+} from "@/lib/worker/self-declared-profession";
 import { LIVE_ROLE_IDS, baseIdentityForRole, type LiveRoleId } from "@/lib/config/roles";
 import { setActiveRoleCore } from "@/lib/auth/active-role-core";
 import { clearActiveOrganization } from "@/lib/company/organization-actions";
@@ -105,6 +109,20 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     ),
   ];
   const professionSlug = professionSlugList[0] ?? null;
+  // THE PERSON'S OWN WORDS for what they do — a profession the 49-row registry
+  // does not carry (owner direction 2026-09-27: the classifier may suggest, it
+  // may not be the list of permitted human answers). Stored verbatim, never
+  // matched against the catalogue and never corrected.
+  const professionLabels = parseSelfDeclaredProfessions(
+    formData.get("profession_labels") as string | null,
+  );
+  // The language they wrote in: the REAL locale of the submitting session,
+  // never detected from the text. Read from the RAW form field rather than the
+  // `locale` variable below, because that one falls back to "lt" — a fallback
+  // that is right for the profile row and would be a fabricated language here.
+  const professionLanguage = recordableInputLanguage(
+    formData.get("locale") as string | null,
+  );
   const locale = String(formData.get("locale") ?? "lt");
   // Universal first-run router: what the person came to do. Optional — a
   // legacy submit without it behaves exactly as before.
@@ -209,14 +227,17 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   // inserted. A failure here is logged, not fatal: the person is onboarded and
   // their primary profession is recorded — losing the signup over a second
   // direction they can add on the profile would be the worse outcome.
-  if (primary === "worker" && extraProfessionIds.length > 0) {
+  if (
+    primary === "worker" &&
+    (extraProfessionIds.length > 0 || professionLabels.length > 0)
+  ) {
     const { data: workerRow } = await supabase
       .from("workers")
       .select("id")
       .eq("profile_id", user.id)
       .maybeSingle();
     const workerId = (workerRow?.id as string | null) ?? null;
-    if (workerId) {
+    if (workerId && extraProfessionIds.length > 0) {
       const { error: dirErr } = await supabase
         .from("worker_professions")
         .upsert(
@@ -232,6 +253,31 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
           code: dirErr.code,
           message: dirErr.message,
         });
+      }
+    }
+    // THE PERSON'S OWN WORDS, into the same canonical table — a row with no
+    // `profession_id` and no `is_primary`, which the schema has allowed since
+    // ledger 20260927060325. `normalized_label` is GENERATED in the database
+    // and is never written here. A failure is logged, not fatal: the person is
+    // onboarded and can add these on their profile rather than losing a signup.
+    // ONE ROW AT A TIME, not one batch (Codex P1 on #1880, verified). The
+    // partial unique index `worker_professions_one_label` cannot be an ON
+    // CONFLICT target through PostgREST, so a single duplicate — a retried
+    // onboarding, the same words typed twice in different sessions — would
+    // reject the whole statement and take every OTHER new profession with it.
+    // Bounded by SELF_DECLARED_PROFESSION_MAX_PER_SUBMIT, so this is a handful
+    // of inserts, and a duplicate means the words are already stored.
+    if (workerId && professionLabels.length > 0) {
+      for (const label of professionLabels) {
+        const { error: ownErr } = await supabase
+          .from("worker_professions")
+          .insert({ worker_id: workerId, label, original_language: professionLanguage });
+        if (ownErr && ownErr.code !== "23505") {
+          console.error("[completeOnboarding] self-declared profession insert failed", {
+            code: ownErr.code,
+            message: ownErr.message,
+          });
+        }
       }
     }
   }

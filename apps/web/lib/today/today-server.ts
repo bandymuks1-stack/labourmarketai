@@ -5,7 +5,12 @@ import { cache } from "react";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { listMyBookings } from "@/lib/booking/booking-actions";
 import { getUnreadConversationIds } from "@/lib/communication/unread";
-import { getPrimaryProfessionSlug, getWorkerCoreRow } from "@/lib/data/worker-core";
+import {
+  getPrimaryProfessionSlug,
+  getProfessionEntries,
+  getWorkerCoreRow,
+} from "@/lib/data/worker-core";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import { listInvitationsAddressedToMe } from "@/lib/invitations/attention";
 import { deriveGrowthReading, type GrowthReading } from "@/lib/journal/growth-reading";
 import type { WorkIntelligence } from "@/lib/journal/work-intelligence";
@@ -49,6 +54,12 @@ import { deriveWorkCardState, type WorkCardDerived } from "@/lib/worker/work-car
 export type TodayHead = {
   readonly displayName: string | null;
   readonly professionSlug: string | null;
+  /** What this person says they do, in the order they hold it — a registry
+   *  slug or their OWN WORDS. The header names the first one it can render,
+   *  so somebody whose profession the registry does not carry is no longer
+   *  told "Profesija dar nenurodyta" after stating it (owner walk 2026-09-27,
+   *  the test user who typed "LLM programuotojas"). */
+  readonly professions: readonly ProfessionEntry[];
   readonly workCard: WorkCardDerived | null;
 };
 
@@ -56,25 +67,42 @@ export const loadTodayHead = cache(async (): Promise<TodayHead> => {
   const session = await getSessionProfile();
   const displayName = session.profile?.full_name?.trim() || null;
   try {
-    const [card, worker] = await Promise.all([getWorkerPlayerCard(), getWorkerCoreRow()]);
-    if (!card) return { displayName, professionSlug: null, workCard: null };
+    const [card, worker, professions] = await Promise.all([
+      getWorkerPlayerCard(),
+      getWorkerCoreRow(),
+      getProfessionEntries(),
+    ]);
+    if (!card)
+      return { displayName, professionSlug: null, professions, workCard: null };
     const data = await getWorkerCard({
       workerId: worker?.id ?? null,
       name: displayName ?? "",
-      // `getWorkerCard` reads this for PRESENCE only (`hasProfession`); the
-      // human label is resolved by the screen from the professions catalogue.
-      professionName: card.professionSlug,
+      // `getWorkerCard` reads this for PRESENCE only (`hasProfession: !!name`);
+      // the human label is resolved by the screen.
+      //
+      // PRESENCE MEANS "THIS PERSON NAMED ONE", not "the catalogue carries it"
+      // (Codex P1 on #1880, verified): with only their own words
+      // `card.professionSlug` is null, so the next action told them to add a
+      // profession on the same screen whose header was already showing the one
+      // they had added. Matching is untouched by this — it reads
+      // `getPrimaryProfessionSlug`, which still answers with a catalogue slug
+      // only and is deliberately not widened.
+      professionName:
+        card.professionSlug ??
+        professions.find((e) => (e.label ?? "").trim())?.label ??
+        null,
       skillsCount: card.skillsDeclared,
       evidenceCount: card.evidenceEntries,
     });
     return {
       displayName: displayName ?? card.displayName,
       professionSlug: card.professionSlug,
+      professions,
       workCard: deriveWorkCardState(data.signals, Date.now()),
     };
   } catch {
     // The person is still greeted; the next action is honestly unknown.
-    return { displayName, professionSlug: null, workCard: null };
+    return { displayName, professionSlug: null, professions: [], workCard: null };
   }
 });
 

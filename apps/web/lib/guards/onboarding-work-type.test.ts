@@ -75,21 +75,46 @@ const onboardingCopy = (locale: string): Record<string, string> => {
 describe("onboarding asks what work the person does", () => {
   it("the worker step renders the work-type field, and it takes SEVERAL", () => {
     const src = read(WIZARD);
-    // The control is the canonical dark listbox, which renders the testid
-    // itself (the rendered DOM is asserted by
-    // lib/onboarding/onboarding-step2-render.test.ts).
-    expect(src).toContain('testId="onboarding-profession"');
+    // A TEXT FIELD, not a closed list (owner direction 2026-09-27): the
+    // classifier may suggest, it may never be the list of permitted answers.
+    expect(src).toContain('data-testid="onboarding-profession-input"');
     expect(src).toContain('data-testid="onboarding-profession-field"');
+    expect(src).toContain('data-testid="onboarding-profession-add"');
+    // The registry still offers matches — as SUGGESTIONS beside the field.
+    expect(src).toContain('data-testid="onboarding-profession-suggestions"');
     // Asked only of a worker — a company-only signup is not a person looking
     // for work, and asking them would be a question with no honest answer.
     expect(src).toContain('roles.has("worker") && (');
-    // A list, each entry removable, and the FIRST is the primary the RPC
-    // writes (`profession_slug`), with the whole set beside it.
-    expect(src).toMatch(/useState<readonly string\[\]>/);
-    expect(src).toContain('form.set("profession_slug", professionSlugs[0])');
-    expect(src).toContain('form.set("profession_slugs", professionSlugs.join(","))');
+    // A list of entries, each removable; a registry pick and the person's own
+    // words are different KINDS and are submitted in different fields, so
+    // neither can be mistaken for the other.
+    expect(src).toMatch(/useState<readonly ProfessionEntry\[\]>/);
+    expect(src).toContain('form.set("profession_slug", registrySlugs[0])');
+    expect(src).toContain('form.set("profession_slugs", registrySlugs.join(","))');
+    expect(src).toContain('form.set("profession_labels", serializeSelfDeclaredProfessions(ownWords))');
     expect(src).toContain('data-testid="onboarding-profession-chosen"');
     expect(src).toContain("onboarding-profession-remove-");
+  });
+
+  it("the words are taken as written — nothing guesses, corrects or translates", () => {
+    const src = read(WIZARD);
+    // Enter adds what was typed; it never silently resolves to a suggestion.
+    expect(src).toContain("addOwnWords()");
+    expect(src).toContain("normalizeSelfDeclaredProfession(professionDraft)");
+    // No catalogue lookup stands between the person and their own answer.
+    expect(src).not.toMatch(/detectLanguage|guessProfession|professionsNamedInText/);
+
+    const action = read(ACTION);
+    // The language is the SESSION's locale, read from the raw form field —
+    // never the action's own `locale` variable, which falls back to "lt" and
+    // would put a fabricated language on somebody's words.
+    expect(action).toContain('recordableInputLanguage(\n    formData.get("locale") as string | null,\n  )');
+    expect(action).not.toMatch(/recordableInputLanguage\(locale\)/);
+    // Stored verbatim into the canonical table; the generated dedupe key is
+    // never written by hand.
+    expect(action).toContain("parseSelfDeclaredProfessions(");
+    expect(action).toContain("original_language: professionLanguage");
+    expect(action).not.toMatch(/normalized_label:/);
   });
 
   it("it is NEVER a condition of entry (owner direction 2026-09-27)", () => {
@@ -146,9 +171,11 @@ describe("onboarding asks what work the person does", () => {
     // That is the person's statement shown back in a field they still
     // submit — not a platform default (walk-real-person-join, 2026-09-06).
     expect(src).toMatch(
-      /useState<readonly string\[\]>\(\(\) =>\s*defaultProfessionSlug && PROFESSION_SLUGS\.includes\(defaultProfessionSlug\)\s*\? \[defaultProfessionSlug\]\s*: \[\],?\s*\)/,
+      /useState<readonly ProfessionEntry\[\]>\(\(\) =>\s*defaultProfessionSlug && PROFESSION_SLUGS\.includes\(defaultProfessionSlug\)\s*\? \[\{ slug: defaultProfessionSlug, label: null \}\]\s*: \[\],?\s*\)/,
     );
-    expect(src).not.toMatch(/useState<readonly string\[\]>\(\[professionOptions\[0\]/);
+    expect(src).not.toMatch(/useState<readonly ProfessionEntry\[\]>\(\[\{ slug: professionOptions\[0\]/);
+    // The draft field starts empty: nothing is typed on anyone's behalf.
+    expect(src).toContain('useState("")');
     expect(src).toContain("profession_placeholder");
   });
 

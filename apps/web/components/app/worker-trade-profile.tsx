@@ -3,15 +3,22 @@
 import { InlineConfirm } from "@/components/ui/InlineConfirm";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CvPreview, type CvSkill } from "@/components/app/cv-preview";
 import { ProfessionSkillsPicker } from "@/components/app/profession-skills-picker";
 import { DarkListbox } from "@/components/ui/DarkListbox";
+import { Button } from "@/components/ui/Button";
 import {
+  addOwnProfession,
   addWorkerDirection,
+  removeOwnProfession,
   removeWorkerDirection,
   setPrimaryProfession,
 } from "@/lib/worker/actions";
+import {
+  SELF_DECLARED_PROFESSION_MAX_LENGTH,
+  normalizeSelfDeclaredProfession,
+} from "@/lib/worker/self-declared-profession";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +37,7 @@ export function WorkerTradeProfile({
   professions,
   currentProfessionId,
   directions,
+  ownProfessions = [],
   initialSkillIds,
   personName,
   roles,
@@ -40,6 +48,11 @@ export function WorkerTradeProfile({
   professions: ProfessionOption[];
   currentProfessionId: string | null;
   directions: Direction[];
+  /** Professions this person named in their OWN WORDS, shown exactly as typed.
+   *  They carry no catalogue row, so they drive no skills editor — they are
+   *  here because they are the person's answer, and they are editable here
+   *  because onboarding promised they could be added to later. */
+  ownProfessions?: readonly { id: string; label: string }[];
   initialSkillIds: string[];
   personName: string;
   roles: Role[];
@@ -51,6 +64,9 @@ export function WorkerTradeProfile({
   const router = useRouter();
   // Which direction's skill catalogue is being edited (NOT the primary).
   const [editId, setEditId] = useState<string>(currentProfessionId ?? "");
+  const locale = useLocale();
+  /** The words being typed on the profile — theirs until they add them. */
+  const [ownDraft, setOwnDraft] = useState("");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -98,6 +114,79 @@ export function WorkerTradeProfile({
       {/* Work directions — calmer capability-group chips. Click a chip to edit
           its skills (does NOT change primary). The first choice is not a
           limit (§1); non-primary directions are removable. */}
+      {/* THE PERSON'S OWN WORDS. Rendered outside the directions section on
+          purpose: that section is gated on a primary REGISTRY profession, so
+          somebody whose profession the catalogue does not carry would have
+          seen nothing at all of what they told us (owner walk 2026-09-27).
+          Verbatim, never translated, never matched to a catalogue entry. */}
+      {ownProfessions.length > 0 && (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="worker-own-professions"
+        >
+          <h3 className="font-display text-sm font-semibold text-text-primary">
+            {t("ownProfessionsTitle")}
+          </h3>
+          <ul className="flex flex-wrap gap-2">
+            {ownProfessions.map((own) => (
+              <li
+                key={own.id}
+                className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 py-1 pl-3 pr-1 text-sm text-text-primary"
+                data-testid="worker-own-profession"
+              >
+                {own.label}
+                <InlineConfirm
+                  label="✕"
+                  question={t("ownProfessionRemoveConfirm", { name: own.label })}
+                  confirmLabel={t("ownProfessionRemove")}
+                  cancelLabel={t("keepDirection")}
+                  tier="important_write"
+                  disabled={pending}
+                  onConfirm={() => run(() => removeOwnProfession(own.id))}
+                  className="flex-none rounded-full px-1.5 py-0.5 text-text-muted transition-colors hover:bg-state-danger/10 hover:text-state-danger"
+                  testId={`worker-own-profession-remove-${own.id}`}
+                />
+              </li>
+            ))}
+          </ul>
+          {/* The writer onboarding's copy promised: "Vėliau galėsite jas
+              papildyti". Without it these words could only ever be entered in
+              the first minutes of an account. */}
+          <form
+            action={async (formData: FormData) => {
+              const result = await addOwnProfession(formData);
+              setOwnDraft(result.ok ? "" : ownDraft);
+            }}
+            className="flex gap-2"
+          >
+            <input type="hidden" name="locale" value={locale} />
+            <input
+              type="text"
+              name="label"
+              value={ownDraft}
+              onChange={(e) => setOwnDraft(e.target.value)}
+              maxLength={SELF_DECLARED_PROFESSION_MAX_LENGTH}
+              placeholder={t("ownProfessionPlaceholder")}
+              aria-label={t("ownProfessionsTitle")}
+              data-testid="worker-own-profession-input"
+              className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={!normalizeSelfDeclaredProfession(ownDraft)}
+              data-testid="worker-own-profession-add"
+              className="flex-none rounded-md"
+            >
+              {t("ownProfessionAdd")}
+            </Button>
+          </form>
+          <p className="text-meta leading-relaxed text-text-muted">
+            {t("ownProfessionsNote")}
+          </p>
+        </section>
+      )}
+
       {currentProfessionId && (
         <section className="card-border flex flex-col gap-3 p-5">
           <h3 className="font-display text-sm font-semibold text-text-primary">

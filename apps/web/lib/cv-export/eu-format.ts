@@ -318,7 +318,14 @@ export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
   return {
     personName: trimOrNull(cv.personName) === "—" ? null : trimOrNull(cv.personName),
     summary: trimOrNull(cv.professionalSummary),
-    professions: cv.professionSlugs.map((p) => p.slug),
+    // Catalogue professions only. This export's `professions` are SLUGS its
+    // renderer translates, so a person's own words cannot ride in the same
+    // field without being mistranslated as a slug. Surfacing them here is a
+    // separate change to this export's shape, deliberately not part of the
+    // onboarding → profile → Living CV slice.
+    professions: cv.professionSlugs
+      .map((p) => p.slug)
+      .filter((slug): slug is string => !!slug),
     workExperience,
     education,
     languages,

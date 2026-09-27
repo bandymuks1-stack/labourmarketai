@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import type { CoreRead, DomainCaller } from "@/lib/domain/caller";
 
 /**
@@ -150,6 +151,10 @@ export interface WorkerProfessionRow {
   is_primary: boolean | null;
   profession_id: string | null;
   professions: { slug: string | null } | null;
+  /** The person's OWN WORDS when the registry does not carry what they do
+   *  (ledger 20260927060325). Null on a registry row. Rendered through
+   *  `professionDisplayName`, never interpreted. */
+  label: string | null;
 }
 
 /**
@@ -164,7 +169,7 @@ export async function readWorkerProfessionRows(
   try {
     const { data, error } = await asAny(caller.supabase)
       .from("worker_professions")
-      .select("is_primary, profession_id, professions(slug)")
+      .select("is_primary, profession_id, label, professions(slug)")
       .eq("worker_id", workerId)
       .order("is_primary", { ascending: false });
     if (error || !Array.isArray(data)) return { ok: false };
@@ -302,6 +307,27 @@ export const getPreferredLocationRows = cache(
 /** The signed-in worker's primary profession slug (or null) — derived from
  *  the ONE cached profession read; replaces the per-consumer
  *  `is_primary = true` selects. */
+/**
+ * EVERY profession this person holds, primary first, as the display layer
+ * needs them: a registry slug, or the person's own words, or nothing.
+ *
+ * Separate from `getPrimaryProfessionSlug` on purpose. That one answers "which
+ * REGISTRY profession is primary" and feeds the match subject and the market
+ * map, which can only work with a catalogue slug; widening it would quietly
+ * change what matching is given. This one answers "what does this person say
+ * they do", which is the question the profile, the Living CV and the ŠIANDIEN
+ * line are actually asking.
+ */
+export const getProfessionEntries = cache(
+  async (): Promise<ProfessionEntry[]> => {
+    const rows = await getWorkerProfessionRows();
+    return rows.map((r) => ({
+      slug: r.professions?.slug ?? null,
+      label: r.label ?? null,
+    }));
+  },
+);
+
 export const getPrimaryProfessionSlug = cache(
   async (): Promise<string | null> => {
     const rows = await getWorkerProfessionRows();
