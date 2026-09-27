@@ -2676,7 +2676,28 @@ describe("no migration files added by this sprint", () => {
 // RED (definer + grant/revoke + ALTER POLICY); owner-approved (#1875); APPLIED 2026-09-24
 // (ledger 20260924120147) BEFORE its app half merged; paired .down.sql restores production
 // byte-identically. RECOUNTED: 309.
-const SPRINT_BASELINE = 309;
+// Bumped 309 -> 310 for 20260927053000_worker_self_declared_profession_v1 (owner
+// direction 2026-09-27: a classifier may not be the list of permitted human answers).
+// `worker_professions` gains `label` (the person's verbatim words), a GENERATED
+// `normalized_label` dedupe key and a separate nullable `esco_occupation_id`, and
+// `profession_id` becomes nullable so a profession the 49-row registry does not carry
+// can be recorded at all. No new table, policy, grant, definer or RPC; no UPDATE/DELETE
+// and no backfill; `is_primary` gains no new constraint and no new meaning. RED for
+// exactly one reason — rule (l), `alter column ... drop not null`; owner-approved and
+// APPLIED 2026-09-27 (ledger 20260927060325), readback in docs/APPLIED_LEDGER.md: 26 rows
+// unchanged, 0 labels written. Paired rollback REFUSES while any self-declared row exists
+// and otherwise restores the pre-migration shape. RECOUNTED: 310.
+// Bumped 310 -> 311 for 20260927063000_worker_self_declared_profession_language_v1
+// (owner ruling 2026-09-27 on a Codex finding against doctrine §2.1): the person's
+// own words carry the language they were written in. ONE nullable `original_language`
+// column plus two CHECKs — a real locale or nothing, and a language only where words
+// exist. No other table, no translation, no backfill, and the value comes from the
+// real input locale, never detected from the text. Purely additive: the static gate
+// reports GREEN with zero risk findings, so the file carries no @human-gate-approved
+// annotation; it was owner-gated by procedure and APPLIED 2026-09-27, ledger
+// 20260927062927 — deliberately BEFORE any writer, so no row ever needs a backfill.
+// RECOUNTED: 311.
+const SPRINT_BASELINE = 311;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

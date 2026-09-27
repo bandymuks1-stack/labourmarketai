@@ -1468,6 +1468,17 @@ describe("the migration set is exactly what this slice declared", () => {
       // owner-approved (#1875); APPLIED 2026-09-24 (ledger 20260924120147)
       // before its app half merged.
       "20260924150000_invitation_management_delegation_v1.sql",
+      // 2026-09-27 — a person's own words for what they do: `label` +
+      // generated `normalized_label` + a separate `esco_occupation_id` on the
+      // EXISTING worker_professions, and `profession_id` becomes nullable so
+      // a profession the 49-row registry does not carry can be recorded at
+      // all. RED for exactly one reason — rule (l), `alter column ... drop
+      // not null`. No new table, policy, grant, definer or RPC; no data
+      // touched and no backfill. Owner-approved 2026-09-27; the marker was
+      // added in the same commit as the migration, per this gate's procedure.
+      // APPLIED 2026-09-27 (ledger 20260927060325) after the owner's final
+      // approval, readback recorded in docs/APPLIED_LEDGER.md.
+      "20260927053000_worker_self_declared_profession_v1.sql",
 ]);
   });
 
