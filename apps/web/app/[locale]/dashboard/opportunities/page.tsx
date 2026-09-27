@@ -676,7 +676,69 @@ export default async function OpportunitiesPage({
           return facts;
         })()
       : [];
-  const countParts: string[] =
+  /*
+   * §7 — TWO DIFFERENT KINDS OF SENTENCE WERE JOINED INTO ONE STRIP, and that
+   * strip was the second thing on the page:
+   *
+   *   "platformos užklausos: rodoma 0 iš 0 · vieši skelbimai: rodoma 3 iš
+   *    111187 · 12 atidėta pagal jūsų filtrus"
+   *
+   * The first two are RETRIEVAL TELEMETRY. They name internal sources
+   * ("platformos užklausos", "vieši skelbimai") and report how a pipeline
+   * performed — the owner's "sistemos debug puslapis" in one line. They answer
+   * none of the five questions this surface owes a person (what do you know
+   * about me · what did you find · where is it · why am I seeing it · what can
+   * I do now), so they move into the existing "Kaip veikia atitikimas"
+   * disclosure, beside the calculation version and the trust note, where
+   * somebody who wants provenance will look for it. NOTHING IS DELETED and no
+   * new copy was written: the same strings, one tap away.
+   *
+   * The others are NOT telemetry, and burying them would be a lie by omission.
+   * They are the honest answer to "why am I seeing so little", so they stay in
+   * the first layer:
+   *   · `countsPlatformUnavailable` — a capability is not switched on;
+   *   · `countsExternalUnreadable`  — a READ FAILED. SEP-7: FAILED ≠ ZERO, and
+   *     rendering a failed read as an empty result is a defect class this repo
+   *     has already had to sweep;
+   *   · `countsFiltered`            — THE PERSON'S OWN filters hid results.
+   *     "Filtered out" is not "empty" (#1710); without this line the board
+   *     looks bare and the reason is invisible.
+   */
+  /**
+   * A source is degraded when a capability is off OR a read failed. The person
+   * is told the CONSEQUENCE — "this list may be incomplete" — in one sentence,
+   * not which internal source did what. `platformos užklausos: dar neįjungta`
+   * named an implementation at somebody looking for work; it says nothing about
+   * what that means for them. The precise per-source strings are not lost: they
+   * are in the provenance disclosure, which is where "which source, and what
+   * exactly happened" is a reasonable question.
+   */
+  const sourcesDegraded =
+    result.kind === "ready" &&
+    (!result.capabilities.boardAvailable || !result.externalVacancies.available);
+
+  const statusParts: string[] =
+    result.kind === "ready"
+      ? [
+          ...(sourcesDegraded ? [t("world.sourcesIncomplete")] : []),
+          ...(filteredOut > 0 ? [t("world.countsFiltered", { count: filteredOut })] : []),
+        ]
+      : [];
+
+  /**
+   * PROVENANCE, NOT THE HEADLINE — and the reason it must not be the headline is
+   * stronger than tidiness. `retrieved` here is the size of the BOUNDED
+   * CANDIDATE POOL the engine fetched (`PROFILE_POOL_LIMIT` = 30 externally,
+   * the board read internally), not a count of the market. So "rodoma 3 iš 20"
+   * reads to a person as "there are 20 jobs" when the canonical active
+   * population on 2026-09-27 is 53 392 (`MARKET_FACTS_PREDICATE`:
+   * `is_active AND (expires_at IS NULL OR expires_at > now())`). It is a
+   * pipeline measurement wearing the clothes of a market fact.
+   *
+   * Which is also why the per-source degradation strings live down here now:
+   * they name implementations, and the header carries the consequence instead.
+   */
+  const retrievalParts: string[] =
     result.kind === "ready"
       ? [
           result.capabilities.boardAvailable
@@ -691,7 +753,6 @@ export default async function OpportunitiesPage({
                 retrieved: externalCounts.retrieved,
               })
             : t("world.countsExternalUnreadable"),
-          ...(filteredOut > 0 ? [t("world.countsFiltered", { count: filteredOut })] : []),
         ]
       : [];
 
@@ -743,13 +804,20 @@ export default async function OpportunitiesPage({
             >
               {t("world.assessedAgainst", { facts: assessedFacts.join(" · ") })}
             </p>
-            {/* Retrieved vs shown — "kodėl šie / kiek atmesta" (§T). */}
-            <p
-              className="font-mono text-meta uppercase tracking-label text-text-muted"
-              data-testid="opportunities-counts"
-            >
-              {countParts.join(" · ")}
-            </p>
+            {/* WHY YOU MAY BE SEEING LESS — and nothing else (§7). A capability
+                that is off, a read that FAILED, or the person's own filters
+                holding rows back. Rendered only when there is something to say,
+                so a healthy board carries no strip at all instead of a line of
+                zeroes. The retrieval numbers moved into "Kaip veikia
+                atitikimas"; see `statusParts` for the full reasoning. */}
+            {statusParts.length > 0 ? (
+              <p
+                className="font-mono text-meta uppercase tracking-label text-text-muted"
+                data-testid="opportunities-counts"
+              >
+                {statusParts.join(" · ")}
+              </p>
+            ) : null}
           </>
         ) : null}
       </header>
@@ -1950,6 +2018,19 @@ export default async function OpportunitiesPage({
             </summary>
             <div className="flex flex-col gap-2 px-4 pb-4 text-basis leading-relaxed text-text-secondary">
               <p>{t("discovery.how.body")}</p>
+              {/* WHERE THE RETRIEVAL NUMBERS LIVE NOW (§7). They were the second
+                  line of the page; they are provenance, so they belong beside
+                  the calculation version and the trust note. Same strings, no
+                  new copy, one tap away — the capability to audit what was
+                  retrieved is preserved, it just no longer greets the person. */}
+              {retrievalParts.length > 0 ? (
+                <p
+                  className="font-mono text-meta uppercase tracking-label text-text-muted"
+                  data-testid="opportunities-retrieval-counts"
+                >
+                  {retrievalParts.join(" · ")}
+                </p>
+              ) : null}
               <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("discovery.how.version", { version: MATCH_CALC_VERSION })}
               </p>

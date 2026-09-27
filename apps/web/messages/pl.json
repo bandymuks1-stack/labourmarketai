@@ -9475,7 +9475,8 @@
       "externalCouldNotRead": "Tym razem nie udało się odczytać źródła ogłoszeń publicznych — te pozycje są nieznane, a nie nieobecne.",
       "mapTitle": "Gdzie jest praca",
       "skipToList": "Do listy",
-      "placeLink": "Pokaż możliwości w tym kraju"
+      "placeLink": "Pokaż możliwości w tym kraju",
+      "sourcesIncomplete": "Część źródeł ofert jest chwilowo niedostępna, więc ta lista może być niepełna."
     },
     "savedSearches": {
       "title": "Zapisane wyszukiwania",

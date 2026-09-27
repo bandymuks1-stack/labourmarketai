@@ -9475,7 +9475,8 @@
       "externalCouldNotRead": "The public advertisement source could not be read this time — these rows are unknown, not absent.",
       "mapTitle": "Where the work is",
       "skipToList": "To the list",
-      "placeLink": "Show this country's opportunities"
+      "placeLink": "Show this country's opportunities",
+      "sourcesIncomplete": "Some opportunity sources are temporarily unavailable, so this list may be incomplete."
     },
     "savedSearches": {
       "title": "Saved searches",
