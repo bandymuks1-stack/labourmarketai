@@ -2687,7 +2687,17 @@ describe("no migration files added by this sprint", () => {
 // APPLIED 2026-09-27 (ledger 20260927060325), readback in docs/APPLIED_LEDGER.md: 26 rows
 // unchanged, 0 labels written. Paired rollback REFUSES while any self-declared row exists
 // and otherwise restores the pre-migration shape. RECOUNTED: 310.
-const SPRINT_BASELINE = 310;
+// Bumped 310 -> 311 for 20260927063000_worker_self_declared_profession_language_v1
+// (owner ruling 2026-09-27 on a Codex finding against doctrine §2.1): the person's
+// own words carry the language they were written in. ONE nullable `original_language`
+// column plus two CHECKs — a real locale or nothing, and a language only where words
+// exist. No other table, no translation, no backfill, and the value comes from the
+// real input locale, never detected from the text. Purely additive: the static gate
+// reports GREEN with zero risk findings, so the file carries no @human-gate-approved
+// annotation; it was owner-gated by procedure and APPLIED 2026-09-27, ledger
+// 20260927062927 — deliberately BEFORE any writer, so no row ever needs a backfill.
+// RECOUNTED: 311.
+const SPRINT_BASELINE = 311;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

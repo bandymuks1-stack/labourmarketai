@@ -1057,7 +1057,12 @@ describe("NO new DB migration in this PR", () => {
     //   worker_professions; RED for one reason — `alter column ... drop not
     //   null`; owner-approved and APPLIED 2026-09-27, ledger 20260927060325).
     //   Not this read layer's file. RECOUNTED: 310.
-    expect(count).toBeLessThanOrEqual(310);
+    // Bumped 310 -> 311 for
+    //   20260927063000_worker_self_declared_profession_language_v1 (the source
+    //   language of that self-declared profession; additive, GREEN by the
+    //   static gate, owner-approved by procedure and APPLIED 2026-09-27,
+    //   ledger 20260927062927). Not this read layer's file. RECOUNTED: 311.
+    expect(count).toBeLessThanOrEqual(311);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

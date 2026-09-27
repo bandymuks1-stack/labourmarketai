@@ -10244,6 +10244,7 @@ export type Database = {
           is_primary: boolean
           label: string | null
           normalized_label: string | null
+          original_language: string | null
           profession_id: string | null
           updated_at: string
           worker_id: string
@@ -10255,6 +10256,7 @@ export type Database = {
           is_primary?: boolean
           label?: string | null
           normalized_label?: string | null
+          original_language?: string | null
           profession_id?: string | null
           updated_at?: string
           worker_id: string
@@ -10266,6 +10268,7 @@ export type Database = {
           is_primary?: boolean
           label?: string | null
           normalized_label?: string | null
+          original_language?: string | null
           profession_id?: string | null
           updated_at?: string
           worker_id?: string

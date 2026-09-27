@@ -2444,6 +2444,54 @@ Status: DB-level PRODUCTION-PROVEN. The app chain (onboarding → save →
 profile → Living CV) is a separate change; until it ships, nothing writes
 `label`, so the column is live and empty by design. UI NOT PROVEN.
 
+### `worker_self_declared_profession_language_v1` — additive (nullable column + two CHECKs) — APPLIED 2026-09-27, ledger `20260927062927`
+
+Repo file `supabase/migrations/20260927063000_worker_self_declared_profession_language_v1.sql`
+(paired `supabase/rollbacks/…down.sql`, which REFUSES while any row records a
+language). Owner ruling 2026-09-27, on a Codex finding against doctrine §2.1:
+`worker_professions.label` is the person's own words, so the language they
+wrote it in is recorded beside it.
+
+Applied BEFORE the writer exists, deliberately: nothing writes `label` yet, so
+the language lands before the first row and no row ever needs reconstructing
+or backfilling — the window Codex pointed at, taken while it was still open.
+
+Scope as the owner set it: ONLY `worker_professions`; no §2.1 audit or
+harmonisation of the five other person-authored label columns; no automatic
+translation and no translation columns (§2.2); `original_language` never
+changes `label`; the value comes from the REAL input locale the product
+already carries (the wizard's `useLocale()`, submitted as the form's `locale`
+and validated against `lib/i18n/config.ts`), NEVER detected from the text; and
+it is NULLABLE, because an unknown language stays unknown rather than being
+defaulted (SEP-7).
+
+Shape: `text` + a NULL-permitting CHECK over the platform's 13-code set,
+mirroring `conversation_messages_original_language_chk` (the newest, closest
+precedent), plus a second CHECK that a language can only exist where words do.
+
+CLASSIFICATION: `.github/scripts/migration-safety.mjs` reports **GREEN — zero
+risk findings**; it is purely additive. It carries NO `@human-gate-approved`
+annotation, because there is nothing to acknowledge and marking an unrisky
+file as acknowledged-risky would be a false signal. It was owner-gated by
+PROCEDURE instead: the exact diff was shown and explicitly approved before
+apply.
+
+**Before:** 26 rows, no `original_language` column. **Readback after:** 26 rows
+unchanged, 0 with a language, 0 with a label; `original_language` is
+`text / nullable`; all four check constraints present
+(`worker_professions_label_len`, `worker_professions_language_needs_label`,
+`worker_professions_names_something`,
+`worker_professions_original_language_chk`).
+
+**Behavioural readback on production, in transactions that were rolled back:**
+`'LLM programuotojas'` + `'lt'` stored together; an invented locale `'xx'`
+refused (`check_violation`); a language set on a registry row that carries no
+words refused (`check_violation`, verified against a worker that really holds
+a registry row, after a first probe updated zero rows and proved nothing).
+Row counts returned to 26 / 0 / 0.
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — the app chain is next.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
