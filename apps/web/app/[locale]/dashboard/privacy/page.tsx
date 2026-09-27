@@ -5,6 +5,7 @@ import { ContactDisclosureRequests } from "@/components/app/contact-disclosure-r
 import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
 import { PartnerSupplyRepresentation } from "@/components/app/partner-supply-representation";
 import { Card } from "@/components/ui/Card";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
 import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
@@ -306,10 +307,35 @@ export default async function PrivacyPage({
       ) : null}
 
       {/* 2. Data transfers to companies — individual disclosure permissions. */}
-      <section className="card-border p-5" data-testid="privacy-disclosures" id="disclosures">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+      {/* ── SECOND LAYER: THE AUDIT LOGS (§9, 2026-09-27) ──────────────────
+          This page had EIGHT always-open sections and NOT ONE disclosure, so
+          the four questions a person actually arrives with — who can find me,
+          what can they see, what do I allow to be passed on, how do I manage my
+          data and account — were buried among two append-only audit logs.
+
+          Those logs are not removed, reduced or made harder to obtain: they are
+          the same sections, one tap down, keeping their ids so
+          `#disclosures` and `#history` still resolve (`DetailsHashOpener`, the
+          component the profile page already uses for exactly this).
+
+          `open={historyFailed}` IS THE HONESTY CONDITION, not a detail. An
+          audit log that could not be READ is a failure a person must see
+          without hunting for it (SEP-7: FAILED ≠ EMPTY). So a healthy log
+          collapses and an unreadable one stays open, carrying its own
+          `role="status"` explanation exactly as before.
+
+          Nothing GDPR-bearing moved: visibility, partner-supply consent, export
+          and deletion all stay in the first layer. */}
+      <DetailsHashOpener targetId="disclosures" />
+      <details
+        className="card-border p-5"
+        data-testid="privacy-disclosures"
+        id="disclosures"
+        open={historyFailed}
+      >
+        <summary className="flex min-h-11 cursor-pointer select-none items-center font-mono text-meta uppercase tracking-label text-text-muted marker:text-text-muted">
           {tc("sections.disclosures")}
-        </p>
+        </summary>
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
           {tc("disclosures.intro")}
         </p>
@@ -359,13 +385,21 @@ export default async function PrivacyPage({
             ))}
           </ul>
         )}
-      </section>
+      </details>
 
-      {/* 3. Consent history — the user's own immutable ledger. */}
-      <section className="card-border p-5" data-testid="privacy-history" id="history">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+      {/* 3. Consent history — the user's own immutable ledger. Second layer for
+          the same reason as the disclosures log above, and open on the same
+          honesty condition: a ledger that could not be read says so up front. */}
+      <DetailsHashOpener targetId="history" />
+      <details
+        className="card-border p-5"
+        data-testid="privacy-history"
+        id="history"
+        open={historyFailed}
+      >
+        <summary className="flex min-h-11 cursor-pointer select-none items-center font-mono text-meta uppercase tracking-label text-text-muted marker:text-text-muted">
           {tc("sections.history")}
-        </p>
+        </summary>
         {historyFailed ? (
           <p
             role="status"
@@ -403,9 +437,13 @@ export default async function PrivacyPage({
             ))}
           </ul>
         )}
-      </section>
+      </details>
 
-      {/* 4. Privacy rights & contact — pre-existing real self-service. */}
+      {/* 4. Privacy rights & contact — pre-existing real self-service. STAYS IN
+          THE FIRST LAYER: "how do I manage my data and my account" is one of the
+          four questions this page owes a person, and export/deletion are the
+          GDPR-bearing controls. Collapsing these would be a rights reduction,
+          not a simplification. */}
       <section className="card-border p-5" data-testid="privacy-export" id="rights">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc("sections.rights")}
