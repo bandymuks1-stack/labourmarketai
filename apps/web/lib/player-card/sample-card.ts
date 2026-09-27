@@ -77,6 +77,7 @@ export function buildSampleWorkerPlayerCard(opts: {
     availabilityStatus: "available",
     availableFrom: null,
     professionSlug: "cook",
+    professionOwnWords: null,
     // §5.2 on public surfaces too — the SAME fields the signed-in card shows.
     locationCountry: "LT",
     // A sample has nothing to read, so nothing about it is unreadable.

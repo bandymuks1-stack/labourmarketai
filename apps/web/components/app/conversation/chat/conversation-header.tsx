@@ -1,7 +1,11 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
+import { getCoreNavItems } from "@/lib/config/navigation";
+import { NAV_ICONS } from "@/components/app/nav-icons";
+import { cn } from "@/lib/utils";
 import { useAuthOptional } from "@/lib/auth/context";
 import { HeaderSearch } from "@/components/app/header-search";
 import { NotificationPanel } from "@/components/app/notification-panel";
@@ -48,6 +52,7 @@ export function ConversationHeader({
 }) {
   const auth = useAuthOptional();
   const pathname = usePathname();
+  const t = useTranslations();
   // Any simple-shell screen that is not the conversation itself is a
   // projection — it gets the one honest way back to the operating center.
   const isProjection = pathname !== "/dashboard";
@@ -93,6 +98,76 @@ export function ConversationHeader({
           </span>
         )}
       </span>
+
+      {/* THE CORE WORK LOOP, IN THE ONE BAR — chat · journal · calendar ·
+          messages, from `getCoreNavItems()` (the catalogue is the only source;
+          this component never spells a destination itself).
+
+          WHY IT IS BACK, measured rather than argued. Decision 0017 removed the
+          four-tab row on the reasoning that "capability is preserved; the
+          redundant presentation is not" — every destination still had a command
+          in the search and a chip in the conversation. Walked by a real person
+          on production 2026-09-27, that reasoning did not hold: THE CALENDAR
+          COULD NOT BE FOUND AT ALL. `/dashboard/planning` exists, and the
+          catalogue has marked it `availability: "active"` with
+          `safeToShowInPrimaryNav: true` the whole time — but the only surfaces
+          that render the catalogue (`DashboardTabs`, `BottomNav`) mount ONLY in
+          the `full` chrome, and `dashboardChromeMode` gives `full` to
+          `/dashboard/admin` alone. So for every non-admin the calendar was
+          reachable only by typing the URL or by a chat chip that appears only
+          when the context brief happens to return a day. `market-map-nav.test.ts`
+          had already recorded this mechanism on 2026-09-19 ("a reachability
+          proof that could not fail while the tab was invisible to everyone but
+          an admin") and it was worked around per-feature instead of fixed here.
+
+          THIS IS THE ONE PLACE THAT FIXES IT FOR EVERYONE, because this header
+          is the universal bar: the chat renders it on the home
+          (`conversation-chat.tsx`) and `DashboardChrome` renders it on every
+          `panel` route, at every width. So the repair is one component, one
+          nav model, one icon source — no new route, no new component, no second
+          nav system, and the admin `full` chrome stays exactly as it was.
+
+          It restores all four core destinations at once: the same mechanism had
+          hidden `journal_text_first` and `communication` too, not only
+          `planning`. Labels come from `nav`, which already carried every one of
+          them (including `nav.calendar`) — the contract was there, unrendered.
+
+          Icons-only under `lg` so the bar still fits a phone beside the
+          workspace chip and the right-hand controls; the label is the
+          accessible name at every width. */}
+      {auth && (
+        <nav
+          aria-label={nav.chat}
+          data-testid="header-core-nav"
+          className="flex min-w-0 flex-none items-center gap-0.5"
+        >
+          {getCoreNavItems().map(({ id, href, tabLabelKey, iconKey }) => {
+            const Icon = NAV_ICONS[iconKey];
+            const active =
+              href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={id}
+                href={href as "/dashboard"}
+                aria-current={active ? "page" : undefined}
+                aria-label={t(tabLabelKey)}
+                data-testid={`header-core-nav-${id}`}
+                className={cn(
+                  "flex h-11 items-center gap-1.5 rounded-full px-2.5 text-support font-medium transition-colors lg:px-3",
+                  active
+                    ? "text-brand-orange"
+                    : "text-text-secondary hover:text-text-primary",
+                )}
+              >
+                <Icon {...iconControl()} aria-hidden />
+                <span className="hidden lg:inline">{t(tabLabelKey)}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
 
       <div className="flex flex-none items-center gap-1">
         {auth && (

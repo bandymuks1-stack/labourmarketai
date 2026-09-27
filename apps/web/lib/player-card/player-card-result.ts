@@ -16,6 +16,7 @@ import {
   getPrimaryProfessionSlug,
   getWorkerCoreRow,
 } from "@/lib/data/worker-core";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { getWorkerCard, type WorkEditorVM } from "@/lib/worker/work-card";
 import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 import type { WorkCardLabels } from "@/components/app/work-card-editor";
@@ -107,10 +108,16 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
   if (!worker?.id) return null;
 
   const tProf = await getTranslations("professions");
-  const professionName =
-    professionSlug && tProf.has(professionSlug as never)
-      ? tProf(professionSlug as never)
-      : professionSlug;
+  // The work card said nothing at all to a person whose profession the 49-row
+  // registry does not carry: the name came from the slug alone. It now goes
+  // through the ONE module that decides this everywhere (onboarding, profile,
+  // Living CV, ŠIANDIEN), so the card cannot disagree with the screens around
+  // it. A slug the catalogue cannot name degrades to the person's own words
+  // rather than rendering a raw slug at them — that module's own rule.
+  const professionName = professionDisplayName(
+    { slug: professionSlug, label: card.professionOwnWords },
+    (slug) => (tProf.has(slug as never) ? tProf(slug as never) : null),
+  );
 
   const data = await getWorkerCard({
     workerId: worker.id,

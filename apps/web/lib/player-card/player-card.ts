@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import {
   getPrimaryProfessionSlug,
+  getProfessionEntries,
   getWorkerCoreRow,
   getWorkerSkillRows,
   type WorkerSkillRow,
@@ -106,6 +107,18 @@ export interface WorkerPlayerCard {
   availableFrom: string | null;
   /** Primary profession slug for the i18n label, or null. */
   professionSlug: string | null;
+  /**
+   * The person's profession IN THEIR OWN WORDS when the registry does not
+   * carry what they do (ledger 20260927060325), primary-first, or null.
+   *
+   * A SEPARATE field from `professionSlug` on purpose — the two may never
+   * collapse. `professionSlug` answers "which CATALOGUE profession is this"
+   * and is the only thing matching and the market map can use; this answers
+   * "what does this person SAY they do". A person may hold either, both, or
+   * neither. Shown through the display layer, never interpreted, never
+   * translated: these are their words, in the language they wrote them.
+   */
+  professionOwnWords: string | null;
   /** ISO timestamp of the newest live journal entry — the latest work proof. */
   latestEvidenceAt: string | null;
   /**
@@ -451,6 +464,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     verifiedSkillsRead,
     managerConfirmations,
     professionSlug,
+    professionEntries,
     latestEntry,
     documents,
     entryTimestamps,
@@ -500,6 +514,11 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     // Primary profession from the ONE cached profession read (was its own
     // `is_primary = true` select — one of 4 identical ones per navigation).
     workerId ? getPrimaryProfessionSlug() : Promise.resolve(null),
+    // The person's OWN WORDS for what they do. Reads the SAME cached
+    // `getWorkerProfessionRows` as `getPrimaryProfessionSlug` above, so this
+    // costs ZERO extra queries — it asks a different question of rows already
+    // in hand, rather than adding a second profession read.
+    workerId ? getProfessionEntries() : Promise.resolve([]),
     // `latestEvidenceAt` — was `deleted_at` only, so a SUPERSEDED entry could
     // date a person's newest evidence to work that has since been replaced.
     workerId
@@ -566,6 +585,12 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     availabilityStatus: worker?.availability_status ?? null,
     availableFrom: worker?.available_from ?? null,
     professionSlug: professionSlug ?? null,
+    // Primary-first, matching `getProfessionEntries`' own order. Only rows the
+    // registry does not carry contribute words; a registry row's label is null.
+    professionOwnWords:
+      professionEntries.find(
+        (e) => typeof e.label === "string" && e.label.length > 0,
+      )?.label ?? null,
     latestEvidenceAt: latestEntry?.created_at ?? null,
     workHistory,
     unavailable,

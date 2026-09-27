@@ -103,13 +103,29 @@ describe("bottom nav: selected state is an indicator, icons are unambiguous", ()
   });
 
   it("one icon per destination: journal=NotebookPen, messages=MessageSquare, map=MapPin", () => {
-    expect(nav).toMatch(/journal: NotebookPen/);
-    expect(nav).toMatch(/messages: MessageSquare/);
-    expect(nav).toMatch(/map: MapPin/);
+    // The map lives in `components/app/nav-icons.ts` since the one top bar
+    // started rendering the same core destinations. ONE icon per destination is
+    // now a property of that single module rather than of one component's
+    // private copy — the stronger form of the same rule, because two surfaces
+    // can no longer disagree about what "journal" looks like.
+    const icons = read("components/app/nav-icons.ts");
+    expect(icons).toMatch(/journal: NotebookPen/);
+    expect(icons).toMatch(/messages: MessageSquare/);
+    expect(icons).toMatch(/map: MapPin/);
+    expect(icons).toMatch(/calendar: CalendarDays/);
+    // Every nav surface must take its icons from there, never re-declare them.
+    for (const surface of [
+      "components/app/bottom-nav.tsx",
+      "components/app/conversation/chat/conversation-header.tsx",
+    ]) {
+      expect(read(surface)).toMatch(/NAV_ICONS/);
+    }
     // The old ambiguous pairs must not return (FileText belongs to documents,
     // Inbox to nothing in primary nav, plain Map to nothing).
-    expect(stripComments(nav)).not.toMatch(/\bInbox\b/);
-    expect(stripComments(nav)).not.toMatch(/\bFileText\b/);
+    for (const src of [icons, nav]) {
+      expect(stripComments(src)).not.toMatch(/\bInbox\b/);
+      expect(stripComments(src)).not.toMatch(/\bFileText\b/);
+    }
   });
 
   it("the config icon keys say what they mean", () => {

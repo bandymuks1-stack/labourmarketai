@@ -43,9 +43,25 @@ const PAGE = "app/[locale]/dashboard/market-map/page.tsx";
  *
  * This list is closed on purpose. Adding to it is a product decision with a
  * receipt, never a convenience import.
+ *
+ * ── THE OPPORTUNITIES MOUNT IS WITHDRAWN (owner decision 2026-09-27)
+ *
+ * The 2026-09-13 direction above stood on the map being an HONEST base for
+ * PASAULIS. Walked on production it was not: the embedded viewport opened on
+ * `EUROPE_CENTER = [52.2, 6.0]`, a coordinate inside the NETHERLANDS, so a
+ * person who had told us they are in Germany was shown NL as their work
+ * geography — and the demand layer had nothing true to draw either, because
+ * all 111 187 `public_vacancies` rows were `country = 'SE'` with NO lat/lng.
+ *
+ * So the owner withdrew the viewport from that page and kept the capability.
+ * This is a REMOVAL FROM THE MOUNT LIST, not a loosening of the subset rule:
+ * the count went 2 → 1, and every other clause below (one implementation, one
+ * reader, one action, one Leaflet bootstrap, no new world/map route) is
+ * untouched and still enforced. The mount returns when the demand layer can
+ * answer "where are these opportunities" from real coordinates.
  */
 const OPPORTUNITIES_PAGE = "app/[locale]/dashboard/opportunities/page.tsx";
-const WORLD_MOUNT_PAGES = [PAGE, OPPORTUNITIES_PAGE] as const;
+const WORLD_MOUNT_PAGES = [PAGE] as const;
 const WORLD_FILES = [MODEL, READ, ACTIONS, COMPONENT];
 
 const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
@@ -129,13 +145,21 @@ describe("3 · no second map surface", () => {
       expect([...read(rel).matchAll(/<WorldDiscovery\b/g)], rel).toHaveLength(1);
     }
   });
-  it("PASAULIS reuses the component and reader — it builds no map of its own", () => {
+  it("PASAULIS' viewport is withheld, and it still builds no map of its own", () => {
+    // The owner withdrew the embedded viewport (see the mount-list note above).
+    // What this test must now protect is that withholding it did NOT become a
+    // licence to grow a private map here later: no mount, and above all no
+    // second Leaflet bootstrap or hand-rolled tile layer on this page.
     const opp = read(OPPORTUNITIES_PAGE);
-    expect(opp).toMatch(/from "@\/components\/app\/market-map\/world-discovery"/);
-    expect(opp).toMatch(/from "@\/lib\/market-map\/world-read"/);
+    expect(opp).not.toMatch(/<WorldDiscovery\b/);
     expect(opp).not.toMatch(/from "leaflet"|import\("leaflet"\)|tile\.openstreetmap/);
-    // a place goes to the page's OWN country filter, not to a second board
-    expect(opp).toMatch(/hrefTemplate: `\/\$\{locale\}\/dashboard\/opportunities\?country=\{country\}/);
+    // THE CAPABILITY IS NOT GONE — only this page's viewport is. The canonical
+    // mount still exists, and the page still carries a visible door to it, so
+    // the map never became unreachable for the worker (the R-11 point: the
+    // primary nav tabs are invisible to non-admins, so this link is the door).
+    expect([...read(PAGE).matchAll(/<WorldDiscovery\b/g)]).toHaveLength(1);
+    expect(opp).toMatch(/data-testid="opportunities-map-full-link"/);
+    expect(opp).toMatch(/\/dashboard\/market-map/);
   });
   it("no new world/map route exists beside /dashboard/market-map", () => {
     const offenders: string[] = [];

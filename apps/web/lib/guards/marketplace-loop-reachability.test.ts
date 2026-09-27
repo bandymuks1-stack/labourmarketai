@@ -55,12 +55,16 @@ describe("the door: the loop hangs off a primary nav tab that really exists", ()
     const world = TODAY_STATIONS.find((t) => t.id === "world");
     expect(world?.href).toBe("/dashboard/opportunities");
     const page = read("app/[locale]/dashboard/opportunities/page.tsx");
-    const mapSection = page.indexOf('data-testid="opportunities-map"');
+    // THE EMBEDDED VIEWPORT IS WITHHELD (owner decision 2026-09-27): it opened
+    // on a hardcoded Europe center that lies inside the Netherlands and had no
+    // mappable demand to draw, so it named a false work geography. What this
+    // test protects is unchanged and is the part that matters here — THE DOOR:
+    // the worker's way to the full map must stay on this page, above the first
+    // collapsed disclosure, because the primary nav tabs are invisible to
+    // non-admins (the R-11 point in the comment above).
     const fullMapLink = page.indexOf('data-testid="opportunities-map-full-link"');
     const firstDetails = page.indexOf("<details");
-    expect(mapSection).toBeGreaterThan(-1);
     expect(fullMapLink).toBeGreaterThan(-1);
-    expect(mapSection).toBeLessThan(firstDetails);
     expect(fullMapLink).toBeLessThan(firstDetails);
     expect(page).toMatch(/href=\{`\/\$\{locale\}\/dashboard\/market-map`\}/);
     const finder = read("components/app/command-finder.tsx");

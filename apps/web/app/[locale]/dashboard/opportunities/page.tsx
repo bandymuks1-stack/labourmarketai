@@ -68,12 +68,11 @@ import {
 } from "@/lib/supply-bridge/first-party-signal-contract";
 import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
 import { MarketExplanationPanel } from "@/components/app/market-explanation-panel";
-import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
-import { loadWorldView } from "@/lib/market-map/world-read";
-import {
-  DEFAULT_WORLD_BOUNDS,
-  DEFAULT_WORLD_ZOOM,
-} from "@/lib/market-map/world-model";
+/* `WorldDiscovery`, `loadWorldView`, `DEFAULT_WORLD_BOUNDS` and
+   `DEFAULT_WORLD_ZOOM` are deliberately NO LONGER IMPORTED here — this page's
+   map viewport is withheld (owner decision 2026-09-27; the reasoning is at the
+   render site). Every one of those modules still exists and still serves
+   /dashboard/market-map unchanged. */
 import { SavedSearchesStrip } from "@/components/app/saved-searches-strip";
 import { getMySavedSearches, notifySavedSearchMatches } from "@/lib/opportunities/saved-searches";
 import { hasAnyCriteria, readSavedSearches } from "@/lib/opportunities/saved-search-model";
@@ -217,7 +216,7 @@ export default async function OpportunitiesPage({
   // Board + salary benchmark + weekly digest + world view + the person's
   // own work-seeking intent are independent reads — one combined await so
   // TTFB pays the slowest of them, not their sum.
-  const [result, salaryIntel, weekly, worldView, partnerSupply, discoverability, tVisibility] = await Promise.all([
+  const [result, salaryIntel, weekly, partnerSupply, discoverability, tVisibility] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
@@ -226,16 +225,11 @@ export default async function OpportunitiesPage({
     }),
     getWorkerSalaryIntelligence(),
     getWeeklyPersonalIntelligence(),
-    // PASAULIS' natural base (owner direction 2026-09-13): the SAME
-    // viewport-bounded world read the market map already uses, for the same
-    // default Europe viewport. No new reader, no new layer, no second map —
-    // the canonical `WorldDiscovery` container is rendered here too, and
-    // the client re-reads on pan/zoom exactly as it does on /market-map.
-    loadWorldView({
-      bounds: DEFAULT_WORLD_BOUNDS,
-      zoom: DEFAULT_WORLD_ZOOM,
-      layer: "demand",
-    }),
+    // The world read that fed this page's map viewport is GONE WITH THE
+    // VIEWPORT (owner decision 2026-09-27, explained at the render site
+    // below). `loadWorldView` itself is untouched and still serves
+    // /dashboard/market-map; this page simply no longer pays for a read whose
+    // only consumer was a map it must not draw yet.
     // The five-state work-seeking intent the person declared under
     // /dashboard/privacy (`first_party_supply_declarations`) — the SAME
     // reader that page uses, so the board shows what the person said about
@@ -760,67 +754,54 @@ export default async function OpportunitiesPage({
         ) : null}
       </header>
 
-      {/* THE MAP IS PASAULIS' BASE (owner direction 2026-09-13: "jos
-          natūralus pagrindas turi būti interaktyvus žemėlapis su realiomis
-          galimybėmis pagal šalis/miestus; iš žemėlapio pereinama į
-          kompaktišką rezultatą/detalę").
-          
-          The canonical `WorldDiscovery` container — the same component,
-          the same viewport-bounded reader and the same honest counts strip
-          the market map page renders. It is a discovery surface: it shows
-          where demand IS, never a claim about fit. The fit is the banded
-          list below, and selecting a place links INTO that list through the
-          page's own `?country=` filter — one board, one filter vocabulary.
-          
-          `/dashboard/market-map` keeps every other layer and stays linked
-          from the market section below; nothing moved and nothing was
-          duplicated. */}
-      <section
-        aria-labelledby="opportunities-map-title"
-        data-testid="opportunities-map"
-        className="flex flex-col gap-2"
-      >
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2
-            id="opportunities-map-title"
-            className="font-mono text-meta uppercase tracking-label text-text-secondary"
-          >
-            {t("world.mapTitle")}
-          </h2>
-          <div className="flex flex-wrap items-baseline gap-4">
-            {/* The full geographic Map (every layer, the legend, own place)
-                — one tap from the PASAULIS tab, at every width. This is the
-                worker's canonical door to /dashboard/market-map; the phone
-                bar carries no map station (owner IA, R-11) and the primary
-                nav tabs render only in the admin chrome, so without this
-                link the protected MAP capability sat behind a collapsed
-                disclosure at the bottom of the page. */}
-            <Link
-              href={`/${locale}/dashboard/market-map`}
-              data-testid="opportunities-map-full-link"
-              className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
-            >
-              {t("marketMapLink")} →
-            </Link>
-            {/* One tap past the map for anyone who came for the list. */}
-            <a
-              href="#opportunities-results"
-              data-testid="opportunities-map-skip"
-              className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
-            >
-              {t("world.skipToList")} ↓
-            </a>
-          </div>
-        </div>
-        <WorldDiscovery
-          initial={worldView}
-          mapMode="result"
-          placeLink={{
-            hrefTemplate: `/${locale}/dashboard/opportunities?country={country}#opportunities-results`,
-            label: t("world.placeLink"),
-          }}
-        />
-      </section>
+      {/* THE MAP VIEWPORT IS WITHHELD HERE — owner decision 2026-09-27.
+          NOTHING WAS DELETED: `WorldDiscovery`, `loadWorldView`, the world
+          model and `/dashboard/market-map` are all untouched, and the door to
+          the full map stays in this page's header. Only the viewport that was
+          rendered ON THIS PAGE is gone.
+
+          WHY, measured rather than argued. The map opened on
+          `DEFAULT_WORLD_BOUNDS` / `DEFAULT_WORLD_ZOOM`, whose center is
+          `EUROPE_CENTER = [52.2, 6.0]`. That coordinate lies INSIDE THE
+          NETHERLANDS (the NL centroid is 52.13, 5.29; Germany's is 51.16,
+          10.45). So a person who told us they are in Germany opened this page,
+          read "vieta — Vokietija" in the list, and saw the map name the
+          Netherlands — which they reasonably read as "my opportunities are in
+          NL".
+
+          NL was neither. It was not their location, and it was not where the
+          opportunities are: on 2026-09-27 all 111 187 rows of
+          `public_vacancies` are `country = 'SE'`, and ZERO of them carry
+          lat/lng, so the demand layer had no mappable opportunity geography to
+          draw at all. The map was showing a hardcoded default and nothing else,
+          and a default that names a country is a claim about work geography
+          (SEP-1: FACT ≠ DERIVED — a viewport constant is neither).
+
+          Withheld rather than "fixed" to a different center, because centering
+          honestly requires geography the imported data does not yet have. The
+          §18 reality principle says a surface shows its true current state or
+          does not ship; there is no honest map here yet.
+
+          RESTORE IT when the demand layer can answer "where are these
+          opportunities" from real coordinates — then this section comes back
+          as it was, with a center derived from data or from the person's own
+          `current_location_country`, never from a constant. */}
+
+      {/* The full geographic Map (every layer, the legend, own place) — this
+          is the worker's canonical door to `/dashboard/market-map`, and it
+          must survive the viewport being withheld. The phone bar carries no
+          map station (owner IA, R-11) and the primary nav tabs render only in
+          the admin chrome, so without this link the protected MAP capability
+          sits behind a collapsed disclosure at the bottom of the page. */}
+      <p className="flex flex-wrap items-baseline gap-4">
+        <Link
+          href={`/${locale}/dashboard/market-map`}
+          data-testid="opportunities-map-full-link"
+          className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
+        >
+          {t("marketMapLink")} →
+        </Link>
+      </p>
 
       <div id="opportunities-results" className="scroll-mt-4" />
 
