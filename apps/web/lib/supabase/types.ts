@@ -10239,29 +10239,45 @@ export type Database = {
       worker_professions: {
         Row: {
           created_at: string
+          esco_occupation_id: string | null
           id: string
           is_primary: boolean
-          profession_id: string
+          label: string | null
+          normalized_label: string | null
+          profession_id: string | null
           updated_at: string
           worker_id: string
         }
         Insert: {
           created_at?: string
+          esco_occupation_id?: string | null
           id?: string
           is_primary?: boolean
-          profession_id: string
+          label?: string | null
+          normalized_label?: string | null
+          profession_id?: string | null
           updated_at?: string
           worker_id: string
         }
         Update: {
           created_at?: string
+          esco_occupation_id?: string | null
           id?: string
           is_primary?: boolean
-          profession_id?: string
+          label?: string | null
+          normalized_label?: string | null
+          profession_id?: string | null
           updated_at?: string
           worker_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "worker_professions_esco_occupation_id_fkey"
+            columns: ["esco_occupation_id"]
+            isOneToOne: false
+            referencedRelation: "esco_occupations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "worker_professions_profession_id_fkey"
             columns: ["profession_id"]
