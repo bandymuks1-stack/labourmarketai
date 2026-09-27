@@ -119,17 +119,24 @@ const CLEAR_FILTER: L = {
   pl: "Wyczyść filtr",
 };
 
-/** The supply is published in the employer's own language. Say so once, rather
- *  than letting a visitor wonder why a Lithuanian page lists Swedish
- *  occupation labels. */
-const ORIGINAL_LANGUAGE_NOTE: L = {
-  en: "Occupation labels are shown in the language the employer published them in. Filter by profession to search in your own language.",
-  lt: "Profesijų pavadinimai rodomi ta kalba, kuria juos paskelbė darbdavys. Filtruok pagal profesiją, kad ieškotum sava kalba.",
-  ru: "Названия профессий показаны на языке, на котором их опубликовал работодатель. Фильтруйте по профессии, чтобы искать на своём языке.",
-  nl: "Beroepslabels staan in de taal waarin de werkgever ze publiceerde. Filter op beroep om in je eigen taal te zoeken.",
-  de: "Berufsbezeichnungen erscheinen in der Sprache, in der der Arbeitgeber sie veröffentlicht hat. Filtern Sie nach Beruf, um in Ihrer Sprache zu suchen.",
-  pl: "Nazwy zawodów są pokazane w języku, w którym opublikował je pracodawca. Filtruj według zawodu, aby szukać w swoim języku.",
-};
+/* `ORIGINAL_LANGUAGE_NOTE` WAS REMOVED HERE (owner rule §1, 2026-09-27).
+ *
+ * It read "Profesijų pavadinimai rodomi ta kalba, kuria juos paskelbė
+ * darbdavys. Filtruok pagal profesiją, kad ieškotum sava kalba." and its own
+ * comment said why it existed: "rather than letting a visitor wonder why a
+ * Lithuanian page lists Swedish occupation labels."
+ *
+ * That is a DISCLAIMER COMPENSATING FOR A CONFUSING COMPONENT, which the owner
+ * banned outright — and it is now also FALSE. Since the card fix, a mapped ad
+ * heads with the localized catalogue name ("Sandėlio darbuotojas") and each card
+ * names its own source language on one compact line ("Skelbimo kalba: švedų ·
+ * Lagerarbetare"). Verified on deployed production /lt/jobs and /lt.
+ *
+ * So the page-level sentence was saying something untrue about the page, to
+ * excuse a confusion that no longer exists, in a paragraph nobody needed to act
+ * on. Removing it loses nothing: the language is still named, per ad, where the
+ * reader is actually looking.
+ */
 
 const RESULTS: L = {
   en: "vacancies found",
@@ -433,10 +440,6 @@ export default async function JobsPage({
           {SEARCH_BUTTON[active]}
         </button>
       </form>
-
-      <p className="mt-2 text-xs text-text-muted">
-        {ORIGINAL_LANGUAGE_NOTE[active]}
-      </p>
 
       {/* The saved view exists only for a signed-in worker whose bookmark read
           succeeded. Anonymous visitors and non-workers see no tab at all —
