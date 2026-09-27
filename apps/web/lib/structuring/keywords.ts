@@ -2296,6 +2296,33 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "personbilsmekaniker",
       "fordonsmekaniker",
       "lastbilsmekaniker",
+      // ── MEASURED GAP, production 2026-09-27 ──────────────────────────────
+      // 30 049 of 53 392 active imported ads carry no `profession_slug`. Almost
+      // all of that is the CATALOGUE not holding the profession (nurse, doctor,
+      // physiotherapist, social worker, accountant, project manager — none is a
+      // slug), and those rows must stay unmapped. But the vehicle-mechanic
+      // family was a LEXICON gap on a profession the catalogue already has, so
+      // it is recovered here and nowhere else.
+      //
+      // `hjulmekaniker` (447 ads) — the SSYK label is
+      // "Däckmontör/Däck- och hjulmekaniker", which names itself a wheel
+      // MECHANIC; the four needles above already map the same `*mekaniker`
+      // family to this slug.
+      // `däckmontör` (172 further ads labelled with the short form only) — the
+      // compound label above proves the two names are ONE occupation.
+      // `bussmekaniker` (13 ads) — same family as `lastbilsmekaniker`.
+      //
+      // DELIBERATELY NOT ADDED, because each is a different trade or has no
+      // slug, and an invented mapping would be worse than an honest gap:
+      // `Underhållsmekaniker` / `Maskinmekaniker` (industrial maintenance, not
+      // automotive), `Fordonsmontör` / `Elektronikmontör` / `Montör
+      // träprodukter` (factory ASSEMBLY, not repair), `Elmontör`,
+      // `Kylmontör`, `Ventilationsmontör`, `Industrirörmontör` (separate
+      // trades the catalogue does not carry). Ambiguous rows stay unmapped.
+      "hjulmekaniker",
+      "däckmontör",
+      "dackmontor",
+      "bussmekaniker",
     ],
   },
   {
