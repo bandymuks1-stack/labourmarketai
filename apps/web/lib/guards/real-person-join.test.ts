@@ -63,8 +63,12 @@ describe("2. onboarding starts from what the person already said", () => {
     expect(wizard).toMatch(/PROFESSION_SLUGS\.includes\(defaultProfessionSlug\)/);
   });
   it("a defaulted profession is still a registry value the person submits, never a silent write", () => {
-    // the default only seeds the select; the submit path is unchanged
-    expect(wizard).toMatch(/form\.set\("profession_slug", professionSlug\)/);
+    // The default only seeds the field; the submit path is unchanged. Since the
+    // owner direction of 2026-09-27 the field holds a LIST, so the sentence's
+    // profession is the FIRST entry — still the primary `complete_onboarding`
+    // writes, still submitted by the person rather than written behind them.
+    expect(wizard).toMatch(/form\.set\("profession_slug", professionSlugs\[0\]\)/);
+    expect(wizard).toMatch(/\? \[defaultProfessionSlug\]/);
   });
 });
 

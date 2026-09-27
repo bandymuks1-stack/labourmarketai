@@ -3,7 +3,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { ALL_ISO_COUNTRIES } from "@/lib/location/country-model";
-import { countryOptionsForLocale } from "@/lib/location/country-options";
+import {
+  countryOptionMatches,
+  countryOptionsForLocale,
+} from "@/lib/location/country-options";
 import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
 
 describe("countryOptionsForLocale — a market list orders the list, it never shortens it (global-access rule 2026-09-22)", () => {
@@ -38,11 +41,54 @@ describe("the onboarding country select offers the world, markets first", () => 
   const src = readFileSync(join(__dirname, "..", "..", "components", "app", "onboarding-wizard.tsx"), "utf8");
 
   it("renders countryOptionsForLocale(locale), never ACTIVE_MARKETS.map", () => {
-    expect(src).toMatch(/import \{ countryOptionsForLocale \} from "@\/lib\/location\/country-options";/);
+    expect(src).toMatch(/from "@\/lib\/location\/country-options"/);
     expect(src).toMatch(/countryOptionsForLocale\(locale\)/);
-    expect(src).toMatch(/\{countryOptions\.map\(\(o\) => \(/);
+    // The control is the canonical dark listbox, fed the WHOLE option list.
+    expect(src).toMatch(/options=\{countryOptions\}/);
     expect(src).not.toMatch(/ACTIVE_MARKETS\.map\(/);
     expect(src).not.toMatch(/import \{ ACTIVE_MARKETS \}/);
+  });
+
+  /**
+   * SEARCHABLE, because 249 correct options are unreachable by scrolling
+   * (owner direction 2026-09-27: a person in Germany could not find Vokietija
+   * on production onboarding). The filter must not become a second, weaker
+   * country model — it consults the canonical fold and the ONE resolver.
+   */
+  it("the field is searchable and the filter answers a partial localized name", () => {
+    expect(src).toMatch(/searchable/);
+    expect(src).toMatch(/match=\{countryOptionMatches\}/);
+    expect(src).toMatch(/country_search_placeholder/);
+
+    const lt = countryOptionsForLocale("lt");
+    const de = lt.find((o) => o.value === "DE")!;
+    // The owner's own acceptance example.
+    expect(de.label).toBe("Vokietija");
+    expect(countryOptionMatches(de, "Vok")).toBe(true);
+    expect(countryOptionMatches(de, "vok")).toBe(true);
+    expect(countryOptionMatches(de, "vokietija")).toBe(true);
+    // The code and a complete name in ANOTHER product language still resolve,
+    // through `resolveCountryCode` — no second alias table here.
+    expect(countryOptionMatches(de, "DE")).toBe(true);
+    expect(countryOptionMatches(de, "Germany")).toBe(true);
+    expect(countryOptionMatches(de, "Deutschland")).toBe(true);
+    // Diacritics are folded, so a person typing on a plain keyboard still
+    // finds Čekija and Prancūzija.
+    const cz = lt.find((o) => o.value === "CZ")!;
+    expect(cz.label).toBe("Čekija");
+    expect(countryOptionMatches(cz, "cek")).toBe(true);
+    expect(countryOptionMatches(cz, "Čeki")).toBe(true);
+    expect(countryOptionMatches(lt.find((o) => o.value === "FR")!, "prancuz")).toBe(true);
+    // A word inside the name is findable, a bare substring is not a match.
+    const us = countryOptionsForLocale("en").find((o) => o.value === "US")!;
+    expect(countryOptionMatches(us, "States")).toBe(true);
+    expect(countryOptionMatches(us, "nited")).toBe(false);
+    // An empty query hides nothing.
+    expect(countryOptionMatches(de, "  ")).toBe(true);
+    // And it never invents a country: a place that is not one matches nothing.
+    for (const option of lt) {
+      expect(countryOptionMatches(option, "Hanojus"), option.value).toBe(false);
+    }
   });
 
   it("VN / IE / SA / PH are choosable in every active locale, and the markets still lead", () => {

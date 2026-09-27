@@ -9,7 +9,11 @@ import { RoleIcon } from "@/components/app/role-icon";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { countryOptionsForLocale } from "@/lib/location/country-options";
+import { DarkListbox } from "@/components/ui/DarkListbox";
+import {
+  countryOptionMatches,
+  countryOptionsForLocale,
+} from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
   FIRST_RUN_INTENTS,
@@ -17,7 +21,6 @@ import {
   asksForCurrentEducation,
   identitiesForIntents,
   nextPathForIntents,
-  professionRequiredForIntents,
   type FirstRunIntent,
 } from "@/lib/onboarding/first-run-intent";
 
@@ -136,13 +139,29 @@ export function OnboardingWizard({
   // profession would be a fact nobody stated (§7 — nothing is auto-declared
   // on a person's behalf). The ONE exception is the profession the person
   // themselves named in their landing sentence ("esu suvirintojas…") — that
-  // is their statement, pre-chosen in a select they still see and submit.
+  // is their statement, pre-chosen in a field they still see and submit.
   // Asked only of a worker; a company-only signup never sees it.
-  const [professionSlug, setProfessionSlug] = useState<string>(
+  //
+  // A LIST, not one value (owner direction 2026-09-27). "Kokį darbą dirbi?"
+  // assumed the person holds exactly one job right now; the same person can be
+  // a welder AND a warehouse worker, and `worker_professions` has carried
+  // several directions per worker since 0008 (one primary, the rest equal
+  // members). The first chosen becomes the primary, exactly as the RPC
+  // already decides it.
+  const [professionSlugs, setProfessionSlugs] = useState<readonly string[]>(() =>
+    defaultProfessionSlug && PROFESSION_SLUGS.includes(defaultProfessionSlug)
+      ? [defaultProfessionSlug]
+      : [],
+  );
+  // The add control offers what is not already named — DarkListbox's
+  // `{ value, label }` shape, the same idiom the profile's work-directions
+  // panel uses (`worker-trade-profile.tsx`).
+  const professionsToOffer = useMemo(
     () =>
-      defaultProfessionSlug && PROFESSION_SLUGS.includes(defaultProfessionSlug)
-        ? defaultProfessionSlug
-        : "",
+      professionOptions
+        .filter((p) => !professionSlugs.includes(p.slug))
+        .map((p) => ({ value: p.slug, label: p.label })),
+    [professionOptions, professionSlugs],
   );
   // Student intent: WHERE the person studies becomes a real, current
   // education record (the canonical "I am studying" state) — asked only when
@@ -191,10 +210,12 @@ export function OnboardingWizard({
       setError(t("error_country_required"));
       return;
     }
-    if (roles.has("worker") && !professionSlug && professionRequiredForIntents(intentList)) {
-      setError(t("error_profession_required"));
-      return;
-    }
+    // NO profession check. A person may not be working right now, may hold
+    // several professions, or may simply not want to name one at the door
+    // (owner direction 2026-09-27) — and the platform already reads an
+    // occupation off the work itself when none was declared
+    // (`bestEvidencedProfession`, guard no-mandatory-profession). An empty
+    // field means "not stated here", never "has no profession".
     if (asksForCurrentEducation(intentList) && institutionName.trim().length < 2) {
       setError(t("step2.errorInstitution"));
       return;
@@ -214,8 +235,12 @@ export function OnboardingWizard({
     form.set("locale", locale);
     form.set("display_name", displayName.trim());
     form.set("country", country);
-    if (roles.has("worker") && professionSlug) {
-      form.set("profession_slug", professionSlug);
+    // The primary stays `profession_slug` — the field `complete_onboarding`
+    // has always read — and the full list rides beside it, so an older client
+    // and this one mean the same thing by the first value.
+    if (roles.has("worker") && professionSlugs.length > 0) {
+      form.set("profession_slug", professionSlugs[0]);
+      form.set("profession_slugs", professionSlugs.join(","));
     }
     // A deep link (invitation) still wins; otherwise a company identity goes
     // straight to the one canonical setup form with the intent's presets.
@@ -471,37 +496,61 @@ export function OnboardingWizard({
         />
       </label>
 
-      <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
-        {t("country_label")}
-        <select
+      {/* SEARCHABLE (owner direction 2026-09-27). The list is every ISO
+          country and stays that way — the global-access rule is that a market
+          list orders it, never shortens it. What was wrong was the only way
+          IN: 249 rows of scrolling, measured on production as a person in
+          Germany unable to find Vokietija. Typing "Vok" now answers, through
+          the canonical fold and the ONE country resolver
+          (`countryOptionMatches`), with no second list of countries anywhere. */}
+      {/* A <div>, not a <label>. A `<label>` forwards a click on ANY
+          descendant to its labelled control, and `<button>` is labelable — so
+          with the listbox inside a label, clicking a country closed the panel
+          and the forwarded click on the toggle reopened it immediately
+          (measured in Chromium: aria-expanded stayed "true" after a pick).
+          A label cannot label a div-based listbox anyway; the control carries
+          its own `aria-label`. */}
+      <div
+        className="flex flex-col gap-1.5 text-xs text-text-secondary"
+        data-testid="onboarding-country-field"
+      >
+        <span>{t("country_label")}</span>
+        <DarkListbox
           name="country"
           value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          required
-          className={inputCls}
-        >
-          <option value="" disabled>
-            {t("country_placeholder")}
-          </option>
-          {countryOptions.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </label>
+          onChange={setCountry}
+          options={countryOptions}
+          placeholder={t("country_placeholder")}
+          ariaLabel={t("country_label")}
+          searchable
+          match={countryOptionMatches}
+          searchPlaceholder={t("country_search_placeholder")}
+          searchEmptyLabel={t("country_search_empty")}
+          testId="onboarding-country"
+        />
+      </div>
 
       {/* WHAT WORK THIS PERSON DOES — asked here because this is the moment
-          of highest intent, and because it is the single field the rest of the
-          product needs: the match engine's subject, the profile-directed pool
-          of external ads and the CV work direction all read it. The RPC has
-          accepted it since the M1 C-scope migration; the form simply never
-          asked, and production shows the result — 26 of 36 workers have a
-          country (asked) and 4 have a profession (not asked).
+          of highest intent, and because it is the field the rest of the
+          product reads: the match engine's subject, the profile-directed pool
+          of external ads and the CV work direction.
 
-          Closed set, from the platform's own registry. Sorted by the LOCALIZED
-          label, so the list reads alphabetically in the language on screen
-          rather than in slug order. */}
+          ASKED, NEVER REQUIRED, AND NEVER JUST ONE (owner direction
+          2026-09-27). Three things were wrong with asking it as one mandatory
+          pick. It assumed the person is working right now — somebody between
+          jobs had to name a job to get through the door. It assumed ONE — the
+          same person can be a welder and a warehouse worker, and
+          `worker_professions` has held several directions per worker since
+          0008. And a first answer read as a lock on a profile the person had
+          not built yet.
+
+          Registry values, from the platform's own 49-row `professions` table,
+          sorted by the LOCALIZED label so the list reads alphabetically in the
+          language on screen. A profession the registry does not carry cannot
+          be stored anywhere today — `worker_professions.profession_id` is a
+          foreign key, and there is no person-scoped free-text occupation
+          column in the schema — so the field offers what it can honestly keep
+          and nothing it would silently drop. */}
       {asksForCurrentEducation(intentList) && (
         <fieldset
           className="flex flex-col gap-3 rounded-md border border-ink-500 bg-ink-800 p-4"
@@ -555,29 +604,62 @@ export function OnboardingWizard({
       )}
 
       {roles.has("worker") && (
-        <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
-          {t("profession_label")}
-          <select
-            name="profession_slug"
-            value={professionSlug}
-            onChange={(e) => setProfessionSlug(e.target.value)}
-            required={professionRequiredForIntents(intentList)}
-            data-testid="onboarding-profession"
-            className={inputCls}
-          >
-            <option value="" disabled>
-              {t("profession_placeholder")}
-            </option>
-            {professionOptions.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+        <div
+          className="flex flex-col gap-1.5 text-xs text-text-secondary"
+          data-testid="onboarding-profession-field"
+        >
+          <span>{t("profession_label")}</span>
+          {/* What the person has named so far — each one removable, so a
+              mistaken pick is not a trap and the list is theirs to shape. */}
+          {professionSlugs.length > 0 && (
+            <ul
+              className="flex flex-wrap gap-2"
+              data-testid="onboarding-profession-chosen"
+            >
+              {professionSlugs.map((slug) => (
+                <li key={slug}>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 py-1 pl-3 pr-1 text-sm text-text-primary">
+                    {tProfession(slug)}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setProfessionSlugs((prev) =>
+                          prev.filter((s) => s !== slug),
+                        )
+                      }
+                      aria-label={t("profession_remove")}
+                      data-testid={`onboarding-profession-remove-${slug}`}
+                      className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-text-muted transition-colors hover:bg-state-danger/10 hover:text-state-danger"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {professionsToOffer.length > 0 && (
+            <DarkListbox
+              value=""
+              onChange={(slug) =>
+                slug &&
+                setProfessionSlugs((prev) =>
+                  prev.includes(slug) ? prev : [...prev, slug],
+                )
+              }
+              options={professionsToOffer}
+              placeholder={t("profession_placeholder")}
+              ariaLabel={t("profession_label")}
+              searchable
+              searchPlaceholder={t("profession_search_placeholder")}
+              searchEmptyLabel={t("profession_search_empty")}
+              testId="onboarding-profession"
+            />
+          )}
           <span className="text-meta leading-relaxed text-text-muted">
             {t("profession_hint")}
           </span>
-        </label>
+        </div>
       )}
 
       {/* Landing→profile continuity (DESIGN.md): honestly preview the real

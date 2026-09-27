@@ -83,14 +83,28 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
 
   const display_name = String(formData.get("display_name") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
-  // WHAT WORK THIS PERSON DOES. Closed set — the value must be one of the
+  // WHAT WORK THIS PERSON DOES. Closed set — every value must be one of the
   // slugs the platform's own registry holds, so a hand-crafted POST cannot
   // record a profession nothing else in the product understands.
-  const rawProfession = String(formData.get("profession_slug") ?? "").trim();
-  const professionSlug =
-    rawProfession.length > 0 && PROFESSION_SLUGS.includes(rawProfession)
-      ? rawProfession
-      : null;
+  //
+  // A LIST since the owner direction of 2026-09-27: one person, several
+  // professions. `profession_slugs` carries all of them in the order the
+  // person named them; `profession_slug` remains the PRIMARY and is what
+  // `complete_onboarding` writes, so an older client sending only that field
+  // behaves exactly as before. Bounded by construction: the registry is a
+  // closed 49-slug set and the list is deduped, so there is nothing unbounded
+  // to insert however the form is posted.
+  const professionSlugList = [
+    ...new Set(
+      [
+        String(formData.get("profession_slug") ?? ""),
+        ...String(formData.get("profession_slugs") ?? "").split(","),
+      ]
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && PROFESSION_SLUGS.includes(s)),
+    ),
+  ];
+  const professionSlug = professionSlugList[0] ?? null;
   const locale = String(formData.get("locale") ?? "lt");
   // Universal first-run router: what the person came to do. Optional — a
   // legacy submit without it behaves exactly as before.
@@ -140,15 +154,30 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   // match engine's subject, the profile-directed external ad pool, the CV's
   // work direction — reads that one field, so 32 of 36 people could not be
   // matched to anything, however good the engine was.
+  //
+  // ONE read for the whole list (the person's order preserved): the primary
+  // goes into the RPC as before, and any further profession is written after
+  // it, into the SAME `worker_professions` table that has carried a worker's
+  // additional directions since 0008 — no new table, no second write path.
   let professionId: string | null = null;
+  let extraProfessionIds: string[] = [];
   if (primary === "worker" && professionSlug) {
-    const { data: prof } = await supabase
+    const { data: profRows } = await supabase
       .from("professions")
-      .select("id")
-      .eq("slug", professionSlug)
-      .eq("is_active", true)
-      .maybeSingle();
-    professionId = (prof?.id as string | null) ?? null;
+      .select("id, slug")
+      .in("slug", professionSlugList)
+      .eq("is_active", true);
+    const idBySlug = new Map(
+      ((profRows ?? []) as { id: string; slug: string }[]).map((r) => [
+        r.slug,
+        r.id,
+      ]),
+    );
+    professionId = idBySlug.get(professionSlug) ?? null;
+    extraProfessionIds = professionSlugList
+      .slice(1)
+      .map((slug) => idBySlug.get(slug))
+      .filter((id): id is string => typeof id === "string");
   }
 
   const { error } = await supabase.rpc("complete_onboarding", {
@@ -168,6 +197,43 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       hint: error.hint,
     });
     throw new Error(`complete_onboarding RPC failed: ${error.message}`);
+  }
+
+  // THE FURTHER PROFESSIONS the person named. The RPC wrote the primary; these
+  // are the equal, non-primary rows — the same shape `addWorkerDirection` (the
+  // profile's own "add a work direction") writes, under the same
+  // `worker_professions_write` policy (`owns_worker`), so nothing new is
+  // granted and nothing else in the product has to learn a new place to look.
+  //
+  // `ignoreDuplicates` covers the re-submit and the primary the RPC just
+  // inserted. A failure here is logged, not fatal: the person is onboarded and
+  // their primary profession is recorded — losing the signup over a second
+  // direction they can add on the profile would be the worse outcome.
+  if (primary === "worker" && extraProfessionIds.length > 0) {
+    const { data: workerRow } = await supabase
+      .from("workers")
+      .select("id")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    const workerId = (workerRow?.id as string | null) ?? null;
+    if (workerId) {
+      const { error: dirErr } = await supabase
+        .from("worker_professions")
+        .upsert(
+          extraProfessionIds.map((profession_id) => ({
+            worker_id: workerId,
+            profession_id,
+            is_primary: false,
+          })),
+          { onConflict: "worker_id,profession_id", ignoreDuplicates: true },
+        );
+      if (dirErr) {
+        console.error("[completeOnboarding] extra professions insert failed", {
+          code: dirErr.code,
+          message: dirErr.message,
+        });
+      }
+    }
   }
 
   // Additional roles. add_role flips active_role to the role it adds, so we
