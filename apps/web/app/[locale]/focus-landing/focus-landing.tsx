@@ -14,7 +14,9 @@ import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase"
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
-import { PublicMarketMapBand } from "@/components/marketing/public-market-map-band";
+/* `PublicMarketMapBand` is deliberately NOT imported: the band is withdrawn
+   from the landing (owner decision 2026-09-27, reasoning at the render site).
+   The component file and the map capability are untouched. */
 import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions";
 import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-band";
 import {
@@ -167,9 +169,33 @@ export async function FocusLanding({
                    As evidence under the map they support the story instead of
                    being it. Nothing was removed — same band, same canonical
                    snapshot, same figures. ─────────────────────────────── */}
-            <PublicMarketMapBand>
-              <MarketProofBand market={market} locale={locale} />
-            </PublicMarketMapBand>
+            {/* ── THE MAP BAND IS WITHDRAWN FROM THE LANDING (owner decision
+                   2026-09-27). Its code and the map capability are UNTOUCHED:
+                   `public-market-map-band.tsx`, `<MarketMap>` and
+                   `publicCoverageView()` all still exist, and /dashboard/market-map
+                   is unaffected. It is simply no longer rendered to a visitor.
+
+                   WHY. The band could only draw `MARKET_COUNTRIES` centroids —
+                   markets the product serves, never activity, because the anon
+                   boundary publishes no country, region, city or coordinate. A
+                   map that cannot show work geography then needed THREE lines of
+                   copy to explain what its markers were not:
+                   "Darbo rinka egzistuoja tikrose vietose", "Žmonės, darbai ir
+                   poreikiai yra kažkur", "Tai rinkos, ne šios dienos veikla".
+                   That is the product explaining its own data model to a
+                   visitor, which is exactly what the owner banned — and a
+                   decorative map that requires an explanation is the thing the
+                   explanation was compensating for.
+
+                   NOTHING OF VALUE WAS REMOVED WITH IT. The market PROOF — the
+                   real vacancy and employer counts from the canonical snapshot —
+                   was already a self-contained `<section>` with its own heading;
+                   it just rendered inside the map band. It now stands on its own
+                   and carries the `#market` anchor the public nav links to.
+
+                   It comes back when it can show a visitor real opportunity
+                   geography, which is a boundary decision, not a copy change. */}
+            <MarketProofBand market={market} locale={locale} />
 
             {/* ── REAL OPPORTUNITIES (owner directive 2026-09-23,
                    PUBLIC_LANDING_REAL_JOB_DISCOVERY). Right after the market

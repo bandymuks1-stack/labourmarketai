@@ -262,6 +262,20 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
      *
      * The value copy lives in the hero's own keys, the one next step sits
      * under it and again at the end, and a few real vacancies follow the map.
+     *
+     * 2026-09-27 (owner decision) WITHDREW `PublicMarketMapBand` from the
+     * landing. It could only draw MARKET_COUNTRIES centroids — never activity,
+     * because the anon boundary publishes no country, region, city or
+     * coordinate — and it therefore needed three lines of copy explaining what
+     * its markers were NOT ("Tai rinkos, ne šios dienos veikla"). That is the
+     * product explaining its data model to a visitor, which is banned.
+     *
+     * THE BAND IS REMOVED FROM THE LIST, NOT THE RULE. Its component file,
+     * `<MarketMap>` and `publicCoverageView()` are untouched, and every OTHER
+     * restored band is still pinned below. `MarketProofBand` stops being nested
+     * inside it and becomes a section of its own again, now carrying the
+     * `#market` anchor `site-nav.tsx` links to — so the withdrawal cost the
+     * visitor no figures and no navigation.
      */
     for (const original of [
       "PublicEntry",
@@ -270,7 +284,6 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
       "PlayerCardShowcase",
       "TrustBand",
       "StartingContextsBand",
-      "PublicMarketMapBand",
       "LandingOpenJobsBand",
     ]) {
       expect(focus).toContain(
@@ -285,7 +298,6 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
     const order = [
       "LandingPrimaryActions",
       "PublicEntry",
-      "PublicMarketMapBand",
       "MarketProofBand",
       "LandingOpenJobsBand",
       "StartingContextsBand",
