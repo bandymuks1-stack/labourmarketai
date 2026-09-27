@@ -695,7 +695,7 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Izveidoja Rexora",
+    "rexora": "Veidots kopā: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -3371,8 +3371,8 @@
     "progress": "{done} no {total}",
     "steps": {
       "goal": {
-        "title": "Kādu darbu meklējat?",
-        "hint": "Izvēlieties savu profesiju."
+        "title": "Kāda ir tava profesija vai darba pieredze?",
+        "hint": "Vari norādīt vienu vai vairākas profesijas vai darba jomas. Vēlāk varēsi tās papildināt."
       },
       "experience": {
         "title": "Augšupielādējiet CV vai atbildiet uz dažiem jautājumiem",

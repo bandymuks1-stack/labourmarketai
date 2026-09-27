@@ -228,6 +228,12 @@ export async function ProfileHubOverview({
 
   const steps: Array<{ key: StepKey; done: boolean; href: string }> = playerCard
     ? [
+        // The key is LEGACY and narrower than the fact: this step is completed
+        // by the PROFESSION pillar, not by anything about a job being sought
+        // (§5, 2026-09-27). Its copy therefore asks onboarding's own profession
+        // question; `lib/guards/one-surface-one-name.test.ts` pins that they stay
+        // the same question, so the key cannot drag the copy back to "Kokio
+        // darbo ieškai?" — a different fact this step does not record.
         { key: "goal", done: pillarMet("profession"), href: "#profile-edit" },
         {
           key: "experience",

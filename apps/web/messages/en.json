@@ -5160,7 +5160,7 @@
     "about": "About",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "rexora": "Created by Rexora",
+    "rexora": "Built together: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai is operated and commercially provided by UAB “Nonstop Group”. The LabourMarket.ai software and related intellectual property are owned by Labour Market AI Sp. z o.o. and used by UAB “Nonstop Group” under licence.",
     "ipNotice": "Intellectual property rights. The platform is operated under licence by UAB “Nonstop Group”.",
     "legalNotice": "Legal notice"
@@ -7438,7 +7438,7 @@
     "workCardLabel": "Work card",
     "workCardConfirmed": "Work card on file",
     "workCardPending": "Work card not added",
-    "namePlaceholder": "My profile",
+    "namePlaceholder": "Name not added yet",
     "candidateLabel": "Candidate skills",
     "candidateHint": "Skills you added in your own words (needs clarification, not reviewed yet).",
     "thermoLabel": "Market activity",
@@ -8189,7 +8189,7 @@
         "title": "Other places",
         "journal": "My work",
         "numbers": "My activity in numbers",
-        "profile": "Professional profile",
+        "profile": "My profile",
         "cv": "Living CV",
         "gallery": "Gallery",
         "world": "World"
@@ -12373,8 +12373,8 @@
     "progress": "{done} of {total}",
     "steps": {
       "goal": {
-        "title": "What kind of work are you looking for?",
-        "hint": "Pick your profession."
+        "title": "What is your profession or work experience?",
+        "hint": "You can name one or several professions or fields of work. You can add more later."
       },
       "experience": {
         "title": "Upload a CV or answer a few questions",
@@ -13703,7 +13703,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Player Card"
+        "title": "Worker card"
       },
       "journal": {
         "title": "Work journal"

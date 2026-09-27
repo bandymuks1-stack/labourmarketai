@@ -695,7 +695,7 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Loonud Rexora",
+    "rexora": "Loodud koostöös: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -3371,8 +3371,8 @@
     "progress": "{done} / {total}",
     "steps": {
       "goal": {
-        "title": "Millist tööd otsite?",
-        "hint": "Valige oma eriala."
+        "title": "Mis on sinu amet või töökogemus?",
+        "hint": "Võid nimetada ühe või mitu ametit või töövaldkonda. Hiljem saad neid täiendada."
       },
       "experience": {
         "title": "Laadige üles CV või vastake mõnele küsimusele",

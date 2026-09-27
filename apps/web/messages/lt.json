@@ -5160,7 +5160,7 @@
     "about": "Apie",
     "contact": "Kontaktai",
     "rights": "Visos teisės saugomos.",
-    "rexora": "Sukurta Rexora",
+    "rexora": "Kuriama kartu: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai platformą valdo ir jos komercines paslaugas teikia UAB „Nonstop Group“. LabourMarket.ai programinė įranga ir susijusi intelektinė nuosavybė priklauso Labour Market AI Sp. z o.o. ir yra naudojama UAB „Nonstop Group“ pagal licenciją.",
     "ipNotice": "Intelektinės nuosavybės teisės. Platformą pagal licenciją valdo UAB „Nonstop Group“.",
     "legalNotice": "Teisinė informacija"
@@ -7438,7 +7438,7 @@
     "workCardLabel": "Darbo kortelė",
     "workCardConfirmed": "Darbo kortelė pateikta",
     "workCardPending": "Darbo kortelė nepateikta",
-    "namePlaceholder": "Mano profilis",
+    "namePlaceholder": "Vardas dar nenurodytas",
     "candidateLabel": "Tikslinami įgūdžiai",
     "candidateHint": "Įgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, neperžiūrėta).",
     "thermoLabel": "Rinkos aktyvumas",
@@ -8189,7 +8189,7 @@
         "title": "Kitos vietos",
         "journal": "Mano darbas",
         "numbers": "Mano veikla skaičiais",
-        "profile": "Profesinis profilis",
+        "profile": "Mano profilis",
         "cv": "Gyvas CV",
         "gallery": "Galerija",
         "world": "Pasaulis"
@@ -12373,8 +12373,8 @@
     "progress": "{done} iš {total}",
     "steps": {
       "goal": {
-        "title": "Kokio darbo ieškai?",
-        "hint": "Pasirink savo profesiją."
+        "title": "Kokia tavo profesija ar darbo patirtis?",
+        "hint": "Gali nurodyti vieną ar kelias profesijas ar darbo sritis. Vėliau galėsi jas papildyti."
       },
       "experience": {
         "title": "Įkelk CV arba atsakyk į kelis klausimus",
@@ -13703,7 +13703,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Darbo kortelė"
+        "title": "Profesinė kortelė"
       },
       "journal": {
         "title": "Darbo žurnalas"
