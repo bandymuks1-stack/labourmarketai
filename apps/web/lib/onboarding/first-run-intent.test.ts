@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -7,7 +9,6 @@ import {
   identitiesForIntents,
   nextPathForIntents,
   parseFirstRunIntents,
-  professionRequiredForIntents,
   type FirstRunIntent,
 } from "./first-run-intent";
 
@@ -41,13 +42,25 @@ describe("first-run intent router (pure)", () => {
     expect(parseFirstRunIntents(null)).toEqual([]);
   });
 
-  it("asks for a profession only when the person came to work; a student may skip it", () => {
-    expect(professionRequiredForIntents(["work"])).toBe(true);
-    expect(professionRequiredForIntents(["work", "student"])).toBe(true);
-    expect(professionRequiredForIntents(["student"])).toBe(false);
-    expect(professionRequiredForIntents(["hire"])).toBe(false);
+  it("no intent makes a profession a condition of entry (owner direction 2026-09-27)", () => {
+    // The module used to export `professionRequiredForIntents`, which returned
+    // true for the `work` intent and made onboarding refuse to continue
+    // without a profession. Nothing may reintroduce a requirement: a person
+    // between jobs, holding several trades, or holding one this registry does
+    // not name, still gets through the door.
+    // Comments stripped: the module's docblock deliberately RECORDS the
+    // removed helper and why, and that history must not read as the thing
+    // itself coming back.
+    const code = readFileSync(join(__dirname, "first-run-intent.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\n]*/g, " ");
+    expect(code).not.toMatch(/professionRequired/);
+  });
+
+  it("only the student intent adds a question of its own", () => {
     expect(asksForCurrentEducation(["student"])).toBe(true);
     expect(asksForCurrentEducation(["work"])).toBe(false);
+    expect(asksForCurrentEducation(["hire"])).toBe(false);
   });
 
   it("an agency is a company TYPE and an institution is a company CAPABILITY — never root roles", () => {
@@ -90,14 +103,13 @@ describe("first-run intent router (pure)", () => {
 /**
  * Owner correction 2026-09-26 — the first screen names CONTEXTS, not an
  * episode of looking for something. The six cards must keep every existing
- * continuation (identities, the profession question, the study question,
+ * continuation (identities, the study question,
  * the next screen) and the new "part of a company or team" card must stay a
  * PERSON: it never opens a company identity or the company setup form.
  */
 describe("the six first-screen contexts keep onboarding's continuation", () => {
   const route = (intents: FirstRunIntent[]) => ({
     identities: identitiesForIntents(intents),
-    profession: professionRequiredForIntents(intents),
     study: asksForCurrentEducation(intents),
     next: nextPathForIntents(intents),
   });
@@ -106,27 +118,26 @@ describe("the six first-screen contexts keep onboarding's continuation", () => {
     expect(FIRST_RUN_INTENTS).toEqual(["work", "member", "hire", "agency", "student", "education"]);
   });
 
-  it("A — only 'I work': the person, a profession, their own space", () => {
-    expect(route(["work"])).toEqual({ identities: ["worker"], profession: true, study: false, next: null });
+  it("A — only 'I work': the person, their own space", () => {
+    expect(route(["work"])).toEqual({ identities: ["worker"], study: false, next: null });
   });
 
   it("B — 'I work' + 'part of a company or team': still one person, nothing created for the company", () => {
-    expect(route(["work", "member"])).toEqual({ identities: ["worker"], profession: true, study: false, next: null });
+    expect(route(["work", "member"])).toEqual({ identities: ["worker"], study: false, next: null });
   });
 
-  it("'part of a company or team' alone: a person, profession optional, never the company setup", () => {
-    expect(route(["member"])).toEqual({ identities: ["worker"], profession: false, study: false, next: null });
+  it("'part of a company or team' alone: a person, never the company setup", () => {
+    expect(route(["member"])).toEqual({ identities: ["worker"], study: false, next: null });
     expect(companyPresetForIntents(["member"])).toBeNull();
   });
 
   it("C — 'I run a company or team': the one company setup form", () => {
-    expect(route(["hire"])).toEqual({ identities: ["company"], profession: false, study: false, next: "/dashboard/start/company" });
+    expect(route(["hire"])).toEqual({ identities: ["company"], study: false, next: "/dashboard/start/company" });
   });
 
   it("D — recruitment / workforce supply: a company of type staffing agency, never a root role", () => {
     expect(route(["agency"])).toEqual({
       identities: ["company"],
-      profession: false,
       study: false,
       next: "/dashboard/start/company?type=staffing_agency",
     });
@@ -135,7 +146,6 @@ describe("the six first-screen contexts keep onboarding's continuation", () => {
   it("E — learning / preparing for a profession: a person with a current study place", () => {
     expect(route(["student"])).toEqual({
       identities: ["worker"],
-      profession: false,
       study: true,
       next: "/dashboard/profile#learning-compass",
     });
@@ -144,7 +154,6 @@ describe("the six first-screen contexts keep onboarding's continuation", () => {
   it("F — an education provider: a company declaring the training capability", () => {
     expect(route(["education"])).toEqual({
       identities: ["company"],
-      profession: false,
       study: false,
       next: "/dashboard/start/company?capability=training_provider",
     });
@@ -153,13 +162,11 @@ describe("the six first-screen contexts keep onboarding's continuation", () => {
   it("G — several contexts at once: both identities, every question the parts need", () => {
     expect(route(["work", "member", "hire", "student"])).toEqual({
       identities: ["worker", "company"],
-      profession: true,
       study: true,
       next: "/dashboard/start/company",
     });
     expect(route(["member", "agency", "education"])).toEqual({
       identities: ["worker", "company"],
-      profession: false,
       study: false,
       next: "/dashboard/start/company?type=staffing_agency&capability=training_provider",
     });

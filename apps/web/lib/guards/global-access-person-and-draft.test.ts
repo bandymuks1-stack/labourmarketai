@@ -32,9 +32,13 @@ describe("onboarding country select offers every ISO country, active markets fir
     const src = read("components/app/onboarding-wizard.tsx");
     expect(src).toContain('from "@/lib/location/country-options"');
     expect(src).toMatch(/countryOptionsForLocale\(locale\)/);
-    expect(src).toMatch(/countryOptions\.map\(\(o\) => \(\s*<option key=\{o\.value\} value=\{o\.value\}>/);
-    // The market list may still ORDER the select (inside countryOptionsForLocale);
-    // it must not be the thing that is mapped into <option>s here.
+    // The whole option list reaches the control — which is now the canonical
+    // dark listbox with a filter (owner direction 2026-09-27), because 249
+    // correct options were unreachable by scrolling. FILTERED, never
+    // SHORTENED: the list handed in is still every ISO country.
+    expect(src).toMatch(/options=\{countryOptions\}/);
+    // The market list may still ORDER the list (inside countryOptionsForLocale);
+    // it must not be the thing that is mapped into the control here.
     expect(src).not.toMatch(/ACTIVE_MARKETS\.map\(/);
   });
 });

@@ -81,14 +81,20 @@ export function identitiesForIntents(
   return (["worker", "company"] as const).filter((id) => set.has(id));
 }
 
-/** A profession is asked only when the person came to WORK. A student may
- *  not have one yet — asking would put a fact on them they did not state. */
-export function professionRequiredForIntents(
-  intents: readonly FirstRunIntent[],
-): boolean {
-  return intents.includes("work");
-}
-
+/**
+ * NO `professionRequiredForIntents` — a profession is never a condition of
+ * entry (owner direction 2026-09-27, removing the `work` intent's requirement).
+ *
+ * It was asked as mandatory of anyone who ticked "I work / have professional
+ * experience", which put three false assumptions on them at the door: that
+ * they are working right now (somebody between jobs had to name a job), that
+ * one name covers them, and that the name exists in a 49-row registry. The
+ * platform itself never needed the declaration — `bestEvidencedProfession`
+ * reads an occupation off the person's actual skills and work when none was
+ * stated (guard `no-mandatory-profession`), and matching treats it as a
+ * weighted criterion, never a gate. An unanswered field means "not stated
+ * here", never "has no profession".
+ */
 export function asksForCurrentEducation(intents: readonly FirstRunIntent[]): boolean {
   return intents.includes("student");
 }
