@@ -9475,7 +9475,8 @@
       "externalCouldNotRead": "Die Quelle der öffentlichen Anzeigen konnte diesmal nicht gelesen werden — diese Zeilen sind unbekannt, nicht abwesend.",
       "mapTitle": "Wo die Arbeit ist",
       "skipToList": "Zur Liste",
-      "placeLink": "Möglichkeiten in diesem Land zeigen"
+      "placeLink": "Möglichkeiten in diesem Land zeigen",
+      "sourcesIncomplete": "Einige Stellenquellen sind derzeit nicht verfügbar, daher ist diese Liste möglicherweise unvollständig."
     },
     "savedSearches": {
       "title": "Gespeicherte Suchen",

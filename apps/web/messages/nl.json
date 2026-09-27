@@ -9475,7 +9475,8 @@
       "externalCouldNotRead": "De bron van openbare vacatures kon deze keer niet worden gelezen — deze rijen zijn onbekend, niet afwezig.",
       "mapTitle": "Waar het werk is",
       "skipToList": "Naar de lijst",
-      "placeLink": "Toon de kansen in dit land"
+      "placeLink": "Toon de kansen in dit land",
+      "sourcesIncomplete": "Sommige vacaturebronnen zijn tijdelijk niet beschikbaar, dus deze lijst kan onvolledig zijn."
     },
     "savedSearches": {
       "title": "Opgeslagen zoekopdrachten",
