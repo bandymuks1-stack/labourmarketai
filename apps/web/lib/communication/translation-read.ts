@@ -105,6 +105,41 @@ async function translateOne(
   const key = cacheKey(m, viewerLocale);
   const cached = cache.get(key);
   if (cached) return { ok: true, value: cached };
+  const first = await translateOnce(m, viewerLocale, key);
+  if (first.ok || first.reason !== "transient") {
+    return first.ok ? first : { ok: false, reason: first.reason };
+  }
+  // The provider said "busy" (HTTP 503 UNAVAILABLE / 429) — measured
+  // 2026-09-28: Gemini answered "high demand" in 0.7–2.6 s. ONE short retry;
+  // a timeout is not retried here (the runtime already retried it once).
+  await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_DELAY_MS));
+  const second = await translateOnce(m, viewerLocale, key);
+  if (second.ok) return second;
+  return { ok: false, reason: second.reason === "transient" ? "failed" : second.reason };
+}
+
+/** A provider refusal that is about load, not about the request. */
+export function isTransientProviderRefusal(reason: string, detail: string | undefined): boolean {
+  if (reason !== "provider_error") return false;
+  return /\b(503|429)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|high demand/i.test(detail ?? "");
+}
+
+const TRANSIENT_RETRY_DELAY_MS = 1200;
+
+/** Answers that will repeat for every message of this read — a refusal, not a failure. */
+const REFUSAL_REASONS: ReadonlySet<string> = new Set([
+  "route_blocked",
+  "no_api_key",
+  "budget_exceeded",
+  "unsupported",
+  "invalid_input",
+]);
+
+async function translateOnce(
+  m: TranslatableMessage,
+  viewerLocale: string,
+  key: string,
+): Promise<TranslateResult | { ok: false; reason: "transient" }> {
   try {
     const outcome = await runAiAgent(
       "translation_copy",
@@ -121,9 +156,17 @@ async function translateOne(
         maxOutputTokens: 600,
       },
     );
+    if (outcome.status === "needs_review" && !REFUSAL_REASONS.has(outcome.reason)) {
+      // The provider was asked and could not answer (busy, timed out,
+      // off-shape). That is a FAILURE, not a refusal: it must not stop the
+      // rest of the thread the way a closed gate does.
+      return isTransientProviderRefusal(outcome.reason, outcome.detail)
+        ? { ok: false, reason: "transient" }
+        : { ok: false, reason: "failed" };
+    }
     if (outcome.status !== "suggestion") {
-      // Blocked by the egress gate, disabled, or sent for review: the
-      // original stands. Not cached — a grant can arrive at any time.
+      // Blocked by the egress gate or disabled: the original stands. Not
+      // cached — a grant can arrive at any time.
       return { ok: false, reason: "declined" };
     }
     const text = (outcome.value as { data?: { localized_copy?: unknown } }).data?.localized_copy;
