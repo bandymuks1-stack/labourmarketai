@@ -214,12 +214,15 @@ describe("synthetic fixtures stay out of normal surfaces", () => {
   }
   it("scouting hides fixture workers from a real organization, not from a synthetic one", () => {
     // Production walk 2026-09-28: every scoutable worker was a test account.
-    const src = read("lib/scouting/scouting.ts");
-    expect(src).toMatch(
-      /isSyntheticFixtureLabel\(employer\.organizationName\)\s*\?\s*pool\s*:\s*excludeSyntheticFixtures\(pool, \(c\) => \[c\.displayName, c\.headline\]\)/,
+    // Scouting decides WHO may see fixtures (never touching names — see
+    // company-scouting-visibility); the pool builder, where names live, drops
+    // them and counts only what remains ("compared with all N").
+    expect(read("lib/scouting/scouting.ts")).toMatch(
+      /excludeFixtures:\s*!isSyntheticFixtureLabel\(employer\.organizationName\)/,
     );
-    // …and the "compared with all N" count describes what the viewer sees.
-    expect(src).toMatch(/retrieval: shownRetrieval/);
+    const pool = read("lib/market/match-subject.ts");
+    expect(pool).toMatch(/excludeSyntheticFixtures\(candidates, \(c\) => \[c\.displayName, c\.headline\]\)/);
+    expect(pool).toMatch(/poolSize: shown\.length/);
   });
   it("the renamed fixture workers carry a documented marker", () => {
     expect(isSyntheticFixtureLabel("QA-SYNTHETIC Vytas Darbininkas (test)")).toBe(true);

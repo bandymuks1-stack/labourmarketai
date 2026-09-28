@@ -66,7 +66,8 @@ describe("the two ungated fact reads are checked, and the gated ones stay as the
     expect(SRC).toMatch(
       /if \(profsRes\.error\) unreadableFacts\.push\("professions"\)/,
     );
-    expect(SRC).toMatch(/poolSize: candidates\.length, unreadableFacts/);
+    // `shown` = the candidates after the fixture filter (2026-09-28).
+    expect(SRC).toMatch(/poolSize: shown\.length, unreadableFacts/);
   });
 
   it("a failed primary workers read is not reported as an empty pool alone", () => {
