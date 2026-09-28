@@ -586,8 +586,22 @@ const deadlineColumnDowngrade = cache((): { absent: boolean } => ({ absent: fals
 /**
  * The caller's bookings, split into incoming (worker = subject) and outgoing
  * (company = owner). RLS already scopes rows; we tag ownership by owner_id.
+ *
+ * Read ONCE per server render: Home asked three times per load (the page's
+ * booking offers, Today's attention list and the spine's pending count —
+ * production trace 2026-09-28), each a full `booking_requests` round-trip
+ * on the same 11-connection PostgREST pool. `cache()` is request-scoped
+ * deduplication, not data caching: every navigation re-reads, and a server
+ * action call (no render) runs the read itself. Callers treat the result as
+ * read-only (none mutates it in place).
  */
+const readMyBookingsOnce = cache(readMyBookings);
+
 export async function listMyBookings(): Promise<BookingsListResult> {
+  return readMyBookingsOnce();
+}
+
+async function readMyBookings(): Promise<BookingsListResult> {
   const supabase = await createClient();
   const {
     data: { user },
