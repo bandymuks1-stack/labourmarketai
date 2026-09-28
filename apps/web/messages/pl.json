@@ -14269,7 +14269,7 @@
     "openJobs": {
       "eyebrow": "Oferty pracy",
       "title": "Prawdziwe oferty pracy, otwarte teraz.",
-      "sub": "Kilka aktualnych ogłoszeń z oficjalnych publicznych źródeł zatrudnienia. Przeglądanie nie wymaga konta; po zalogowaniu zobaczysz pracodawcę, miejsce i sposób aplikowania.",
+      "sub": "Przeglądanie nie wymaga konta; po zalogowaniu zobaczysz pracodawcę, miejsce i sposób aplikowania.",
       "all": "Wszystkie oferty pracy"
     },
     "marketProof": {
@@ -14284,7 +14284,7 @@
         }
       },
       "topTitle": "Najbardziej poszukiwane zawody obecnie",
-      "topNote": "Według aktywnych ogłoszeń na platformie. Część ogłoszeń nie jest jeszcze przypisana do zawodu."
+      "topNote": "Według aktywnych ogłoszeń na platformie."
     },
     "marketMap": {
       "eyebrow": "Rynek w miejscach",
@@ -14296,7 +14296,7 @@
     "contexts": {
       "eyebrow": "Od czego zacząć",
       "title": "Zacznij od tego, gdzie jesteś dziś.",
-      "subcopy": "To punkt wyjścia, a nie stała rola. Ta sama osoba może szukać pracy, zatrudniać, reprezentować agencję i uczyć się — jedno konto, a konteksty można dodać w każdej chwili.",
+      "subcopy": "Ta sama osoba może szukać pracy, zatrudniać, reprezentować agencję i uczyć się — jedno konto, a konteksty można dodać w każdej chwili.",
       "partnerLead": "Chcesz współpracować z nami jako partner?",
       "partnerLink": "Skontaktuj się",
       "moreLead": "Więcej o tym, jak to działa dla każdej ze stron:"
