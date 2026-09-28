@@ -2,6 +2,7 @@ import "server-only";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
+import { getWorkerCoreRow } from "@/lib/data/worker-core";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
@@ -109,8 +110,20 @@ export async function loadPersonStarterFacts(): Promise<PersonStarterFacts> {
     }
   };
 
+  // The person's OWN skills, by their worker row (the same cached read the
+  // rest of Home already makes). Unfiltered, this count evaluated the
+  // `can_view_worker` policy on every row of the table — 82 ms in the
+  // database against 4.9 ms by index for the same answer (production,
+  // 2026-09-28), and growing with every skill anyone adds — and for someone
+  // who may view other workers it counted theirs too. With no readable worker
+  // row it runs exactly as before. Only this count waits for the worker row.
   const [skills, workHistory, journalEntries] = await Promise.all([
-    count((c) => c.from("worker_skills").select("id", { count: "exact", head: true })),
+    getWorkerCoreRow().then((worker) =>
+      count((c) => {
+        const q = c.from("worker_skills").select("id", { count: "exact", head: true });
+        return worker ? q.eq("worker_id", worker.id) : q;
+      }),
+    ),
     count((c) =>
       c
         .from("engagement_contexts")
