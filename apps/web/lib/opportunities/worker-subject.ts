@@ -3,12 +3,14 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   getPrimaryProfessionSlug,
+  getWorkerProfessionRows,
   getWorkerCoreRow,
   getWorkerSkillRows,
   readWorkerCoreRow,
   readWorkerProfessionRows,
   readWorkerSkillRows,
   type WorkerCoreRow,
+  type WorkerProfessionRow,
   type WorkerSkillRow,
 } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
@@ -130,6 +132,7 @@ export async function buildOwnWorkerContextCore(
     skillRows: skillsRead.ok ? skillsRead.value : [],
     professionSlug:
       professionRows.find((r) => r.is_primary === true)?.professions?.slug ?? null,
+    professionSlugs: declaredCatalogueSlugs(professionRows),
     prefLocRes: side.prefLocRes,
     langsRes: side.langsRes,
     practiceRes: side.practiceRes,
@@ -150,19 +153,34 @@ export async function buildOwnWorkerContext(
   }
   const workerId = worker.id;
 
-  const [skillRows, professionSlug, side] = await Promise.all([
+  const [skillRows, professionSlug, professionRows, side] = await Promise.all([
     getWorkerSkillRows(),
     getPrimaryProfessionSlug(),
+    getWorkerProfessionRows(),
     readSubjectSideRows(supabase, profileId, workerId),
   ]);
   return assembleOwnWorkerContext({
     worker,
     skillRows,
     professionSlug,
+    professionSlugs: declaredCatalogueSlugs(professionRows),
     prefLocRes: side.prefLocRes,
     langsRes: side.langsRes,
     practiceRes: side.practiceRes,
   });
+}
+
+/** Every declared CATALOGUE profession, primary first — own-words rows with
+ *  no catalogue mapping carry no slug and so are never matched to a guessed
+ *  profession (owner decision 2026-09-28). */
+function declaredCatalogueSlugs(rows: readonly WorkerProfessionRow[]): string[] {
+  const ordered = [...rows].sort((a, b) => Number(b.is_primary === true) - Number(a.is_primary === true));
+  const out: string[] = [];
+  for (const r of ordered) {
+    const slug = r.professions?.slug?.trim();
+    if (slug && !out.includes(slug)) out.push(slug);
+  }
+  return out;
 }
 
 /** ONE assembly for both transports — pure over the fetched rows. */
@@ -170,6 +188,7 @@ function assembleOwnWorkerContext({
   worker,
   skillRows,
   professionSlug,
+  professionSlugs,
   prefLocRes,
   langsRes,
   practiceRes,
@@ -177,6 +196,7 @@ function assembleOwnWorkerContext({
   worker: WorkerCoreRow;
   skillRows: readonly WorkerSkillRow[];
   professionSlug: string | null;
+  professionSlugs: readonly string[];
   prefLocRes: { data: unknown };
   langsRes: { data: unknown };
   practiceRes: { data: unknown };
@@ -249,6 +269,7 @@ function assembleOwnWorkerContext({
     subject: {
       skills: [...ownSkillTiers.entries()].map(([uri, evidence]) => ({ uri, evidence })),
       professionSlug,
+      professionSlugs,
       country,
       city: preferredCity,
       preferredCountries,

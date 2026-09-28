@@ -9433,6 +9433,7 @@
       "assessedAgainst": "Beoordeeld tegen: {facts}",
       "fact": {
         "profession": "beroep — {value}",
+        "professions": "beroepen — {value}",
         "professionEvidenced": "beroep uit vastgelegd werk — {value}",
         "professionMissing": "beroep niet opgegeven",
         "skills": "vaardigheden — {count}",

@@ -171,7 +171,14 @@ export interface MatchNeed {
 
 export interface MatchSubject {
   readonly skills: readonly MatchSubjectSkill[];
+  /** The PRIMARY profession — where a single designation is genuinely needed. */
   readonly professionSlug?: string | null;
+  /** EVERY declared catalogue profession (primary first). Owner decision
+   *  2026-09-28: a person may be tiler + painter + scaffolder; each is a real
+   *  profession, and any of them can meet a need's profession. Absent → the
+   *  primary alone, exactly as before. Own-words professions with no catalogue
+   *  mapping are not here — they are never matched to a guessed profession. */
+  readonly professionSlugs?: readonly string[] | null;
   /** ISO-3166 alpha-2 of where the worker currently is. */
   readonly country?: string | null;
   /** City/locality the worker is in or prefers (free-form). */
@@ -398,6 +405,37 @@ export function compareMatches(a: MatchResultV1, b: MatchResultV1): number {
 }
 
 const norm = (s: string | null | undefined): string => (s ?? "").trim().toLowerCase();
+
+/** The subject's declared professions, primary first, de-duplicated. */
+export function declaredProfessionSlugs(subject: MatchSubject): string[] {
+  const out: string[] = [];
+  for (const s of [subject.professionSlug, ...(subject.professionSlugs ?? [])]) {
+    const v = norm(s);
+    if (v && !out.includes(v)) out.push(v);
+  }
+  return out;
+}
+
+/** Which declared profession to judge a need's profession against: an exact
+ *  match if one exists, else the most related (ties keep declaration order,
+ *  so the primary wins them), else the primary. Pure and deterministic — it
+ *  CHOOSES a profession; it invents no score. */
+function bestDeclaredProfession(needProfession: string, subject: MatchSubject): string | null {
+  const declared = declaredProfessionSlugs(subject);
+  if (declared.length === 0) return null;
+  const want = norm(needProfession);
+  if (declared.includes(want)) return want;
+  let best = declared[0];
+  let bestRel = professionRelatedness(needProfession, best);
+  for (const slug of declared.slice(1)) {
+    const rel = professionRelatedness(needProfession, slug);
+    if (rel > bestRel) {
+      best = slug;
+      bestRel = rel;
+    }
+  }
+  return best;
+}
 
 /**
  * Deterministic worker↔need match. Pure: same inputs → same output.
@@ -644,9 +682,14 @@ export function matchWorkerToNeed(
   }
 
   // Profession — direct match, or related via shared profession_skills links
-  // (Jaccard over the static 232-link mirror; deterministic).
-  if (need.professionSlug && subject.professionSlug) {
-    if (norm(need.professionSlug) === norm(subject.professionSlug)) {
+  // (Jaccard over the static 232-link mirror; deterministic). Judged against
+  // the declared profession that fits this need best (see
+  // `MatchSubject.professionSlugs`); with one profession, that is it.
+  const subjectProfession = need.professionSlug
+    ? bestDeclaredProfession(need.professionSlug, subject)
+    : null;
+  if (need.professionSlug && subjectProfession) {
+    if (norm(need.professionSlug) === norm(subjectProfession)) {
       reasons.push({ code: "profession_match" });
       strengths.push({
         criterion: "profession",
@@ -655,7 +698,7 @@ export function matchWorkerToNeed(
         source: "worker_professions",
       });
     } else {
-      const rel = professionRelatedness(need.professionSlug, subject.professionSlug);
+      const rel = professionRelatedness(need.professionSlug, subjectProfession);
       if (rel >= 0.2) {
         reasons.push({
           code: "profession_related",

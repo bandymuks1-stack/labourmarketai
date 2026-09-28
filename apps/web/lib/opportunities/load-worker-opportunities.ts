@@ -33,6 +33,7 @@ import {
 import {
   matchWorkerToNeed,
   compareMatches,
+  declaredProfessionSlugs,
   type MatchResultV1,
 } from "@/lib/market/match-v1";
 import { bestEvidencedProfession } from "./adjacent-directions";
@@ -72,6 +73,9 @@ export interface WorkerReadiness extends WorkerOpportunityProfile {
   readonly availabilityStatus: string | null;
   /** The profession the worker DECLARED, or null. Never inferred. */
   readonly professionSlug: string | null;
+  /** Every catalogue profession they declared, primary first — what the
+   *  board actually retrieved and matched on (owner decision 2026-09-28). */
+  readonly professionSlugs: readonly string[];
   /**
    * The profession their recorded work already evidences, present ONLY when
    * they declared none. A reading of real held skills, never a claim about
@@ -301,6 +305,7 @@ export async function loadWorkerOpportunities(
     documentsCount: docs?.length ?? 0,
     availabilityStatus: ctx.worker.availability_status,
     professionSlug: ctx.subject.professionSlug ?? null,
+    professionSlugs: declaredProfessionSlugs(ctx.subject),
     // What their WORK says, when they never said it themselves — computed
     // once above and reused, so the readiness gate and the market panel can
     // never disagree about which occupation this person is.

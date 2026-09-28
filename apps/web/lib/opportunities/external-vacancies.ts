@@ -49,6 +49,7 @@ import {
 import {
   matchWorkerToNeed,
   compareMatches,
+  declaredProfessionSlugs,
   type MatchResultV1,
   type MatchSubject,
 } from "@/lib/market/match-v1";
@@ -101,7 +102,25 @@ const BOARD_LIMIT = 20;
  *  engine below, and the rendered shortlist stays capped at BOARD_LIMIT. */
 const PROFILE_POOL_LIMIT = 30;
 
+/** Declared professions that feed the profile-directed pool (primary first),
+ *  one read each. Bounds the reads; a person with more still has every one of
+ *  them in the engine's profession criterion. */
+const MAX_POOL_PROFESSIONS = 4;
+
 type SearchOutcome = Awaited<ReturnType<typeof searchPublicVacancies>>;
+
+/** Round-robin merge of per-profession pools, each in its own order: where
+ *  the engine's verdicts tie, retrieval order decides, and concatenation would
+ *  let the primary's ads fill the whole capped shortlist before a second
+ *  profession's first ad (production supply: 52 tiler vs 93 painter ads). */
+function interleave<T>(lists: readonly (readonly T[])[]): T[] {
+  const out: T[] = [];
+  const longest = Math.max(0, ...lists.map((l) => l.length));
+  for (let i = 0; i < longest; i++) {
+    for (const list of lists) if (i < list.length) out.push(list[i]);
+  }
+  return out;
+}
 
 export async function loadExternalVacancyCards(
   client: VacancyDbClient,
@@ -126,27 +145,46 @@ export async function loadExternalVacancyCards(
   // the pool first, ads of the person's profession stand ahead of
   // newest-of-any-kind whenever the engine's verdicts tie; the ranking
   // itself stays the ONE engine, and the limits are unchanged.
-  const profileProfession = subject.professionSlug ?? null;
+  //
+  // EVERY declared profession feeds this pool (owner decision 2026-09-28): a
+  // tiler who also paints gets painting ads too, without re-declaring painting
+  // as skills. One bounded, indexed read PER profession, in parallel, so the
+  // busiest one cannot crowd the others out; primary first, and the
+  // publisher-identity dedupe below shows an ad in two of them once. With one
+  // profession this is exactly the single read it always was. Ranking stays
+  // the ONE engine below.
+  const profileProfessions = declaredProfessionSlugs(subject).slice(0, MAX_POOL_PROFESSIONS);
   const poolApplies =
     !explicitProfession &&
     !(options.query && options.query.trim().length > 0) &&
-    profileProfession !== null;
-  const pool: SearchOutcome | null = poolApplies
-    ? await searchPublicVacancies(client, {
-        country: options.country ?? null,
-        professionSlug: profileProfession,
-        query: null,
-        limit: PROFILE_POOL_LIMIT,
-        nowIso: options.nowIso,
-      }).catch((e: unknown) => {
-        // The pool is an enrichment; a failed read leaves the board to the
-        // generic page, never breaks it.
-        if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
-          return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
-        }
-        throw e;
-      })
+    profileProfessions.length > 0;
+  const poolReads: SearchOutcome[] | null = poolApplies
+    ? await Promise.all(
+        profileProfessions.map((professionSlug) =>
+          searchPublicVacancies(client, {
+            country: options.country ?? null,
+            professionSlug,
+            query: null,
+            limit: PROFILE_POOL_LIMIT,
+            nowIso: options.nowIso,
+          }).catch((e: unknown) => {
+            // The pool is an enrichment; a failed read leaves the board to the
+            // generic page, never breaks it.
+            if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
+              return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
+            }
+            throw e;
+          }),
+        ),
+      )
     : null;
+  const answered = (poolReads ?? []).filter((r) => r.status === "ok");
+  const pool: SearchOutcome | null =
+    poolReads === null
+      ? null
+      : answered.length > 0
+        ? { status: "ok", vacancies: interleave(answered.map((r) => r.vacancies)), hasMore: answered.some((r) => r.hasMore) }
+        : poolReads[0];
 
   // The generic page: the newest ads under the caller's own filters.
   //
