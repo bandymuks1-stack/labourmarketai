@@ -14268,7 +14268,7 @@
     "openJobs": {
       "eyebrow": "Vacatures",
       "title": "Echte vacatures, nu open.",
-      "sub": "Een paar actuele vacatures uit officiële openbare arbeidsbronnen. Bekijken kan zonder account; log in om de werkgever, de plek en de sollicitatiewijze te zien.",
+      "sub": "Bekijken kan zonder account; log in om de werkgever, de plek en de sollicitatiewijze te zien.",
       "all": "Alle vacatures"
     },
     "marketProof": {
@@ -14283,7 +14283,7 @@
         }
       },
       "topTitle": "Meest gevraagde beroepen op dit moment",
-      "topNote": "Gerangschikt op actieve vacatures op het platform. Een deel van de vacatures is nog niet aan een beroep gekoppeld."
+      "topNote": "Gerangschikt op actieve vacatures op het platform."
     },
     "marketMap": {
       "eyebrow": "De markt, op plekken",
@@ -14295,7 +14295,7 @@
     "contexts": {
       "eyebrow": "Waar te beginnen",
       "title": "Begin waar je vandaag staat.",
-      "subcopy": "Dit is een startpunt, geen vaste rol. Dezelfde persoon kan werk zoeken, mensen aannemen, een bureau vertegenwoordigen en studeren — één account, contexten kun je altijd toevoegen.",
+      "subcopy": "Dezelfde persoon kan werk zoeken, mensen aannemen, een bureau vertegenwoordigen en studeren — één account, contexten kun je altijd toevoegen.",
       "partnerLead": "Wil je als partner met ons samenwerken?",
       "partnerLink": "Neem contact op",
       "moreLead": "Meer over hoe dit voor elk werkt:"

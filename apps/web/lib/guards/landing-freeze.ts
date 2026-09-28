@@ -160,6 +160,23 @@ import { join } from "node:path";
  * surfaces read the one shared key only when the ad is foreign to the reader,
  * and that none of them calls the translation runtime.
  *
+ * Mechanics and disclaimers dropped from three landing strings (owner
+ * production-walk command 2026-09-28 §5: "Remove internal explanations,
+ * technical source mechanics, redundant descriptions, compensating
+ * disclaimers. Do not replace them with another paragraph.") — in EVERY
+ * locale, by removing a sentence, never by writing new copy:
+ *   `landing.marketProof.topNote` keeps its first sentence (the ranking basis)
+ *     and loses "Dalis skelbimų dar nepriskirta profesijai";
+ *   `landing.openJobs.sub` keeps "Žiūrėti galima be paskyros; prisijungę
+ *     matysite darbdavį, vietą ir kaip kandidatuoti" and loses the source
+ *     mechanics sentence (the band's attribution line stays);
+ *   `landing.contexts.subcopy` keeps "Tas pats žmogus gali … paskyra viena,
+ *     kontekstus galima pridėti bet kada" and loses "Tai tik atspirties
+ *     taškas, o ne nuolatinis vaidmuo" — the kept sentence carries the same
+ *     meaning, which `landing-tells-the-whole-product` still pins.
+ * The regeneration touched EXACTLY the three `*.landing` namespace hashes and
+ * ZERO file hashes: no component, layout or number changed.
+ *
  * Market-proof honest browsable basis (OWNER APPROVAL 2026-08-19, numbers-only
  * correction; finding in docs/audits/landing-coverage-claim-basis-2026-08-18.md)
  * — the band advertised "41 000+ active job opportunities" and "7 600+

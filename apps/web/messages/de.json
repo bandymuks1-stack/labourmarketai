@@ -14268,7 +14268,7 @@
     "openJobs": {
       "eyebrow": "Stellenangebote",
       "title": "Echte Stellen, jetzt offen.",
-      "sub": "Einige aktuelle Anzeigen aus offiziellen öffentlichen Arbeitsmarktquellen. Ansehen geht ohne Konto; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+      "sub": "Ansehen geht ohne Konto; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
       "all": "Alle Stellenangebote"
     },
     "marketProof": {
@@ -14283,7 +14283,7 @@
         }
       },
       "topTitle": "Aktuell gefragteste Berufe",
-      "topNote": "Nach aktiven Stellenanzeigen auf der Plattform. Ein Teil der Anzeigen ist noch keinem Beruf zugeordnet."
+      "topNote": "Nach aktiven Stellenanzeigen auf der Plattform."
     },
     "marketMap": {
       "eyebrow": "Der Markt an Orten",
@@ -14295,7 +14295,7 @@
     "contexts": {
       "eyebrow": "Wo anfangen",
       "title": "Beginnen Sie dort, wo Sie heute stehen.",
-      "subcopy": "Das ist ein Einstieg, keine feste Rolle. Dieselbe Person kann Arbeit suchen, einstellen, eine Agentur vertreten und lernen — ein Konto, Kontexte lassen sich jederzeit ergänzen.",
+      "subcopy": "Dieselbe Person kann Arbeit suchen, einstellen, eine Agentur vertreten und lernen — ein Konto, Kontexte lassen sich jederzeit ergänzen.",
       "partnerLead": "Möchten Sie als Partner mit uns arbeiten?",
       "partnerLink": "Kontakt aufnehmen",
       "moreLead": "Mehr dazu, wie das für jeden funktioniert:"

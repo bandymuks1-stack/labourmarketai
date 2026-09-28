@@ -14268,7 +14268,7 @@
     "openJobs": {
       "eyebrow": "Darbo skelbimai",
       "title": "Tikri darbo skelbimai, aktyvūs dabar.",
-      "sub": "Keli dabartiniai skelbimai iš oficialių viešų užimtumo šaltinių. Žiūrėti galima be paskyros; prisijungę matysite darbdavį, vietą ir kaip kandidatuoti.",
+      "sub": "Žiūrėti galima be paskyros; prisijungę matysite darbdavį, vietą ir kaip kandidatuoti.",
       "all": "Visi darbo skelbimai"
     },
     "marketProof": {
@@ -14283,7 +14283,7 @@
         }
       },
       "topTitle": "Šiuo metu paklausiausios profesijos",
-      "topNote": "Pagal aktyvius darbo skelbimus platformoje. Dalis skelbimų dar nepriskirta profesijai."
+      "topNote": "Pagal aktyvius darbo skelbimus platformoje."
     },
     "marketMap": {
       "eyebrow": "Rinka vietose",
@@ -14295,7 +14295,7 @@
     "contexts": {
       "eyebrow": "Nuo kur pradėti",
       "title": "Pradėkite ten, kur šiandien esate.",
-      "subcopy": "Tai tik atspirties taškas, o ne nuolatinis vaidmuo. Tas pats žmogus gali ieškoti darbo, samdyti, atstovauti agentūrai ir mokytis — paskyra viena, kontekstus galima pridėti bet kada.",
+      "subcopy": "Tas pats žmogus gali ieškoti darbo, samdyti, atstovauti agentūrai ir mokytis — paskyra viena, kontekstus galima pridėti bet kada.",
       "partnerLead": "Norite bendradarbiauti su mumis kaip partneris?",
       "partnerLink": "Susisiekite",
       "moreLead": "Daugiau apie tai, kaip tai veikia kiekvienam:"
