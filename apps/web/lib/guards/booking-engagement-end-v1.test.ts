@@ -1479,6 +1479,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // APPLIED 2026-09-27 (ledger 20260927060325) after the owner's final
       // approval, readback recorded in docs/APPLIED_LEDGER.md.
       "20260927053000_worker_self_declared_profession_v1.sql",
+      // 2026-09-28 — an ACCEPTED booking is not rewritten by proposing again:
+      // one guard added before the upsert of the SECURITY DEFINER
+      // `propose_booking_request` (rest byte-identical to production). RED by
+      // rule (redefined definer). Found by the production walk (worker
+      // recorded as accepting terms they never saw); the app half (#1922)
+      // refuses first. DRAFT + needs-human-gate — NOT APPLIED until the owner
+      // approves this exact diff.
+      "20260928140000_booking_accepted_not_rewritten_v1.sql",
 ]);
   });
 
