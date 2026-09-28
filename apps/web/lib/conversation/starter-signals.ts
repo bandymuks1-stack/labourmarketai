@@ -2,7 +2,6 @@ import "server-only";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
-import { getWorkerCoreRow } from "@/lib/data/worker-core";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
@@ -110,19 +109,19 @@ export async function loadPersonStarterFacts(): Promise<PersonStarterFacts> {
     }
   };
 
-  // The person's OWN skills, by their worker row (the same cached read the
-  // rest of Home already makes). Unfiltered, this count evaluated the
-  // `can_view_worker` policy on every row of the table — 82 ms in the
-  // database against 4.9 ms by index for the same answer (production,
-  // 2026-09-28), and growing with every skill anyone adds — and for someone
-  // who may view other workers it counted theirs too. With no readable worker
-  // row it runs exactly as before. Only this count waits for the worker row.
+  // The person's OWN skills, joined to their worker row in the same request
+  // (`workers!inner`, filtered by profile). Unfiltered, this count evaluated
+  // the `can_view_worker` policy on every row of the table — 82 ms in the
+  // database against ~5 ms by index for the same answer (production,
+  // 2026-09-28), growing with every skill anyone adds — and for someone who
+  // may view other workers it counted theirs too. One request, no prior
+  // `workers` read to wait for; no worker row → 0; a failed read → null.
   const [skills, workHistory, journalEntries] = await Promise.all([
-    getWorkerCoreRow().then((worker) =>
-      count((c) => {
-        const q = c.from("worker_skills").select("id", { count: "exact", head: true });
-        return worker ? q.eq("worker_id", worker.id) : q;
-      }),
+    count((c) =>
+      c
+        .from("worker_skills")
+        .select("id, workers!inner(profile_id)", { count: "exact", head: true })
+        .eq("workers.profile_id", uid),
     ),
     count((c) =>
       c
