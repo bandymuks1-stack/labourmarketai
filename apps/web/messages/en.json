@@ -10381,19 +10381,12 @@
       "stage": "Stages"
     },
     "sourceNotes": {
-      "bookingUnavailable": "Bookings are not available yet — they join the plan once the booking layer is switched on.",
-      "taskUnavailable": "Tasks are not available yet — task deadlines join the plan once the tasks layer is switched on.",
       "taskError": "Tasks could not be loaded right now. The rest of the plan is unaffected.",
-      "projectManagersOnly": "Project date bands are shown to project managers. A worker-side project schedule joins once that view exists.",
       "projectError": "Projects could not be loaded right now. The rest of the plan is unaffected.",
       "journalError": "Journal entries could not be loaded right now. The rest of the plan renders as usual.",
-      "financeUnavailable": "Finance records are not enabled yet — payment deadlines will join the plan once the finance layer is enabled.",
       "financeError": "Finance records could not be loaded right now. The rest of the plan renders as usual.",
-      "invitationUnavailable": "Invitations are not enabled yet — invitation deadlines will join the plan once the invitations layer is enabled.",
       "invitationError": "Invitations could not be loaded right now. The rest of the plan renders as usual.",
-      "absenceUnavailable": "The leave module isn't enabled in this environment yet.",
       "absenceError": "Leave records couldn't be read — the plan is shown without them.",
-      "stageUnavailable": "The project-stages module isn't enabled in this environment yet.",
       "stageError": "Project stages couldn't be read — the plan is shown without them."
     },
     "week": {

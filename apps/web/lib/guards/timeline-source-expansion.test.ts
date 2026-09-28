@@ -393,12 +393,9 @@ describe("both new sources appear in every planning view", () => {
   });
 
   it("new-source failures surface as honest notes on the page", () => {
-    for (const key of [
-      "sourceNotes.financeUnavailable",
-      "sourceNotes.financeError",
-      "sourceNotes.invitationUnavailable",
-      "sourceNotes.invitationError",
-    ]) {
+    // A FAILED read is stated; a source not switched on is silent (owner
+    // walk 2026-09-28 — backlog is not calendar copy).
+    for (const key of ["sourceNotes.financeError", "sourceNotes.invitationError"]) {
       expect(PAGE).toContain(key);
     }
   });

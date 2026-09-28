@@ -146,11 +146,12 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
   });
 
   test("the forward-only agenda offers a way into past days", async ({ page }) => {
-    // The default view is forward-only by design, which left "which days have I
-    // already filled?" unanswerable from the landing view — the note about
-    // hidden past items was a dead end rather than a door.
+    // The agenda is forward-only by design, which left "which days have I
+    // already filled?" unanswerable from it — the note about hidden past items
+    // was a dead end rather than a door. (The month grid is the default view
+    // since 2026-09-28; the agenda is one tap away.)
     await loginAsWorker(page);
-    await page.goto("/lt/dashboard/planning");
+    await page.goto("/lt/dashboard/planning?view=agenda");
     const link = page.locator('[data-testid="planning-past-link"]');
     await expect(link).toBeVisible();
 

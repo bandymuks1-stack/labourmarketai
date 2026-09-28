@@ -137,7 +137,10 @@ export default async function PlanningPage({
   const tsNotice: TimesheetNotice | null =
     rawTs && isTimesheetNotice(rawTs) ? rawTs : null;
   const sourceFilter = isPlanningSourceType(rawSource) ? rawSource : null;
-  const view: PlanningView = isPlanningView(rawView) ? rawView : "agenda";
+  // The MONTH grid is the first view (owner production walk 2026-09-28: the
+  // calendar the owner found good was the journal's month grid — hours on the
+  // date, little else). The agenda stays one tap away.
+  const view: PlanningView = isPlanningView(rawView) ? rawView : "month";
   const today = new Date().toISOString().slice(0, 10);
   const anchor = parseIsoDay(rawDate) ?? today;
   const range = visibleRange(view, anchor);
@@ -174,14 +177,10 @@ export default async function PlanningPage({
       : [];
 
   const header = (
-    <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
-        {t("eyebrow")}
-      </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+    <header>
+      <h1 className="font-display text-title font-bold tracking-tightest text-text-primary">
         {t("title")}
       </h1>
-      <p className="text-sm text-text-secondary">{t("intro")}</p>
     </header>
   );
 
@@ -563,15 +562,12 @@ export default async function PlanningPage({
       </div>
 
       {/* Source filter — plain searchParams links. */}
-      {result.items.length > 0 && (
+      {(presentSources.size > 1 || sourceFilter !== null) && (
       <nav
         className="flex flex-wrap items-center gap-2"
         aria-label={t("filters.label")}
         data-testid="planning-filters"
       >
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("filters.label")}
-        </span>
         <Link
           href={planningHref({ view, date: anchor, source: null, today }) as "/dashboard"}
           aria-current={sourceFilter === null ? "true" : undefined}
@@ -625,7 +621,6 @@ export default async function PlanningPage({
               </li>
             ))}
           </ul>
-          <p className="text-xs text-text-muted">{t("workload.note")}</p>
         </section>
       ) : null}
 
@@ -716,7 +711,6 @@ export default async function PlanningPage({
               {t("month.legend.unfilled")}
             </span>
           </div>
-          <p className="text-xs text-text-muted">{t("month.hint")}</p>
           {/* DERIVED period evidence for this month — a confirmed period
               record's even monthly share, on the same PeriodBand the profile
               draws, with this month emphasised. Never a calendar item, never
@@ -892,7 +886,6 @@ export default async function PlanningPage({
                   <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                     {t("undated.title")}
                   </h2>
-                  <p className="text-xs text-text-muted">{t("undated.hint")}</p>
                   <ItemList items={agenda.undated} testid="planning-undated" />
                 </div>
               ) : null}
@@ -911,9 +904,6 @@ export default async function PlanningPage({
             className="flex flex-wrap items-center gap-2 text-xs text-text-muted"
             data-testid="planning-past-note"
           >
-            {agenda.pastCount > 0
-              ? t("pastHidden", { count: agenda.pastCount })
-              : null}
             <Link
               href={planningHref({ view: "month", date: anchor, source: sourceFilter, today }) as "/dashboard"}
               data-testid="planning-past-link"
@@ -931,8 +921,22 @@ export default async function PlanningPage({
         <EmptyState t={t} sourceFilter={sourceFilter} />
       ) : null}
 
-      {/* ---------------- TIMESHEETS (#timesheets) ---------------- */}
-      <TimesheetsSection locale={locale} notice={tsNotice} />
+      {/* ---------------- TIMESHEETS (#timesheets) ----------------
+          Folded, never removed (§1.5): open by default only when a timesheet
+          action just returned a notice, so its result is not hidden. */}
+      <details
+        id="timesheets"
+        open={tsNotice !== null}
+        className="group rounded-md border border-ink-600"
+        data-testid="planning-timesheets-fold"
+      >
+        <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-medium text-text-primary">
+          {tAll("timesheets.title")}
+        </summary>
+        <div className="border-t border-ink-600 p-4">
+          <TimesheetsSection locale={locale} notice={tsNotice} />
+        </div>
+      </details>
     </div>
   );
 }
@@ -984,28 +988,14 @@ function SourceNotes({
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   const notes: { key: string; testid: string }[] = [];
-  if (sources.booking.status === "unavailable") {
-    notes.push({
-      key: "sourceNotes.bookingUnavailable",
-      testid: "planning-source-note-booking",
-    });
-  }
-  if (sources.task.status === "unavailable") {
-    notes.push({
-      key: "sourceNotes.taskUnavailable",
-      testid: "planning-source-note-task",
-    });
-  }
+  // Only a FAILED read is said (SEP-7: unknown is not zero). A source that is
+  // not switched on here, or that only managers read, is simply absent from
+  // the grid — "X will appear when Y is built" is backlog, not calendar
+  // content (owner production walk 2026-09-28).
   if (sources.task.status === "error") {
     notes.push({
       key: "sourceNotes.taskError",
       testid: "planning-source-note-task-error",
-    });
-  }
-  if (sources.project.status === "managers-only") {
-    notes.push({
-      key: "sourceNotes.projectManagersOnly",
-      testid: "planning-source-note-project",
     });
   }
   if (sources.project.status === "error") {
@@ -1020,22 +1010,10 @@ function SourceNotes({
       testid: "planning-source-note-journal-error",
     });
   }
-  if (sources.finance.status === "unavailable") {
-    notes.push({
-      key: "sourceNotes.financeUnavailable",
-      testid: "planning-source-note-finance",
-    });
-  }
   if (sources.finance.status === "error") {
     notes.push({
       key: "sourceNotes.financeError",
       testid: "planning-source-note-finance-error",
-    });
-  }
-  if (sources.invitation.status === "unavailable") {
-    notes.push({
-      key: "sourceNotes.invitationUnavailable",
-      testid: "planning-source-note-invitation",
     });
   }
   if (sources.invitation.status === "error") {
@@ -1044,22 +1022,10 @@ function SourceNotes({
       testid: "planning-source-note-invitation-error",
     });
   }
-  if (sources.absence.status === "unavailable") {
-    notes.push({
-      key: "sourceNotes.absenceUnavailable",
-      testid: "planning-source-note-absence",
-    });
-  }
   if (sources.absence.status === "error") {
     notes.push({
       key: "sourceNotes.absenceError",
       testid: "planning-source-note-absence-error",
-    });
-  }
-  if (sources.stage.status === "unavailable") {
-    notes.push({
-      key: "sourceNotes.stageUnavailable",
-      testid: "planning-source-note-stage",
     });
   }
   if (sources.stage.status === "error") {
@@ -1068,9 +1034,6 @@ function SourceNotes({
       testid: "planning-source-note-stage-error",
     });
   }
-  // journal "workers-only" is silent by design: a company owner without a
-  // worker profile simply has no journal facts — that is normal, not a
-  // condition to explain.
   if (notes.length === 0) return null;
   return (
     <div className="flex flex-col gap-2" data-testid="planning-source-notes">
