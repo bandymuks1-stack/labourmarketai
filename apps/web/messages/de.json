@@ -17162,5 +17162,46 @@
     "notFound": "Diese Verbindung existiert nicht mehr oder Sie dürfen sie nicht beenden.",
     "failed": "Die Verbindung konnte nicht beendet werden. Versuchen Sie es erneut.",
     "readFailed": "Ihre Teams konnten gerade nicht gelesen werden. Das heißt nicht, dass Sie keine haben."
+  },
+  "agencyDelegation": {
+    "title": "Arbeit für Kunden",
+    "intro": "Erstellen Sie einen Bedarf für einen verbundenen Kunden. Er wird erst zum Bedarf des Kunden, wenn der Kunde bestätigt.",
+    "clientLabel": "Kunde",
+    "needTitle": "Titel des Bedarfs",
+    "role": "Rolle / Tätigkeit",
+    "location": "Ort",
+    "country": "Land (2 Buchstaben)",
+    "teamSize": "Anzahl Personen",
+    "summary": "Beschreibung",
+    "draftSubmit": "Für den Kunden entwerfen",
+    "draftSaved": "Entwurf dem Kunden zur Bestätigung gesendet.",
+    "draftFailed": "Bedarf konnte nicht erstellt werden.",
+    "draftsTitle": "Erstellte Bedarfe",
+    "awaitingClient": "Wartet auf Bestätigung des Kunden",
+    "confirmedShared": "Kunde hat bestätigt und geteilt",
+    "openScouting": "Kandidaten suchen",
+    "placementsTitle": "Vermittlungen",
+    "placementsEmpty": "Noch keine angenommenen Kandidaten.",
+    "unavailable": "Konnte nicht gelesen werden.",
+    "lifecycle": {
+      "presented": "Kandidat vorgestellt",
+      "clientAccepted": "Kunde hat angenommen",
+      "workerProposed": "Arbeitskraft angeboten",
+      "workerAccepted": "Arbeitskraft hat zugestimmt",
+      "workerDeclined": "Arbeitskraft hat abgelehnt",
+      "booking_withdrawn": "Angebot zurückgezogen",
+      "booking_expired": "Angebot abgelaufen",
+      "assigned": "Zur Arbeit eingeteilt",
+      "assignmentEnded": "Arbeit beendet",
+      "engagementEnded": "Vermittlung beendet"
+    },
+    "client": {
+      "title": "Von Ihrer Agentur erstellte Bedarfe",
+      "intro": "Ihre Agentur hat diese Bedarfe für Sie erstellt. Sie werden erst Ihre Bedarfe und mit der Agentur geteilt, wenn Sie bestätigen.",
+      "draftedBy": "Erstellt von {agency}",
+      "confirm": "Bestätigen und teilen",
+      "confirmed": "Bestätigt und geteilt",
+      "failed": "Bestätigung fehlgeschlagen."
+    }
   }
 }

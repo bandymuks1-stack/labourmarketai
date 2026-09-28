@@ -2705,7 +2705,7 @@ describe("no migration files added by this sprint", () => {
 // Bumped 312 -> 314 for 20260928180000_agency_capability_one_rule_v1 (one agency rule in
 // two definers) and 20260928181000_booking_reopen_lifecycle_edges_v1 (reopened-booking
 // engagement end + expiry clock). Both RED, owner-approved 2026-09-28. RECOUNTED: 314.
-const SPRINT_BASELINE = 314;
+const SPRINT_BASELINE = 315; // +20260928190000_agency_delegated_demand_and_placement_v1 (owner-approved RED A/B/D)
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

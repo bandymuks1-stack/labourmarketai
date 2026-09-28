@@ -17162,5 +17162,46 @@
     "notFound": "Šio ryšio nebėra arba negalite jo nutraukti.",
     "failed": "Nepavyko nutraukti ryšio. Bandykite dar kartą.",
     "readFailed": "Jūsų komandų dabar nepavyko nuskaityti. Tai nereiškia, kad jų neturite."
+  },
+  "agencyDelegation": {
+    "title": "Darbas klientams",
+    "intro": "Paruoškite poreikį prijungtam klientui. Jis taps kliento poreikiu tik klientui patvirtinus.",
+    "clientLabel": "Klientas",
+    "needTitle": "Poreikio pavadinimas",
+    "role": "Pareigos / darbas",
+    "location": "Vieta",
+    "country": "Šalis (2 raidės)",
+    "teamSize": "Žmonių skaičius",
+    "summary": "Aprašymas",
+    "draftSubmit": "Paruošti klientui",
+    "draftSaved": "Juodraštis išsiųstas klientui patvirtinti.",
+    "draftFailed": "Nepavyko paruošti poreikio.",
+    "draftsTitle": "Paruošti poreikiai",
+    "awaitingClient": "Laukia kliento patvirtinimo",
+    "confirmedShared": "Klientas patvirtino ir pasidalino",
+    "openScouting": "Ieškoti kandidatų",
+    "placementsTitle": "Įdarbinimai",
+    "placementsEmpty": "Priimtų kandidatų dar nėra.",
+    "unavailable": "Nepavyko nuskaityti.",
+    "lifecycle": {
+      "presented": "Kandidatas pristatytas",
+      "clientAccepted": "Klientas priėmė",
+      "workerProposed": "Pasiūlyta darbuotojui",
+      "workerAccepted": "Darbuotojas sutiko",
+      "workerDeclined": "Darbuotojas atsisakė",
+      "booking_withdrawn": "Pasiūlymas atšauktas",
+      "booking_expired": "Pasiūlymas nebegalioja",
+      "assigned": "Paskirtas į darbą",
+      "assignmentEnded": "Darbas baigtas",
+      "engagementEnded": "Įdarbinimas baigtas"
+    },
+    "client": {
+      "title": "Agentūros paruošti poreikiai",
+      "intro": "Agentūra paruošė šiuos poreikius jūsų vardu. Jie taps jūsų poreikiais ir bus pasidalinti su agentūra tik jums patvirtinus.",
+      "draftedBy": "Paruošė {agency}",
+      "confirm": "Patvirtinti ir pasidalinti",
+      "confirmed": "Patvirtinta ir pasidalinta",
+      "failed": "Nepavyko patvirtinti."
+    }
   }
 }
