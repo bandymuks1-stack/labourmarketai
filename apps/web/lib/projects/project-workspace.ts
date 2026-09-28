@@ -101,10 +101,19 @@ export async function loadProjectsForResult(): Promise<ProjectListResult> {
     } = await supabase.auth.getUser();
     if (!user) return { kind: "blocked" };
 
+    // THIS organization's projects — the one the caller is acting for. The
+    // read used to take every project RLS lets the person see, so a manager of
+    // two organizations saw organization A's project on organization B's
+    // home, pickers and risk panel (production walk 2026-09-28: Gama's home
+    // listed Alfa's project and its worker). A row written before
+    // `organization_id` existed still belongs here by its `company_id`.
     const res = await asAny(supabase)
       .from("projects")
       .select(
         "id, title, status, city, organization_id, organizations(display_name, legal_name)",
+      )
+      .or(
+        `organization_id.eq.${ctx.organizationId},and(organization_id.is.null,company_id.eq.${ctx.companyId})`,
       )
       .order("created_at", { ascending: false })
       .limit(PROJECT_RESULT_LIMIT);
