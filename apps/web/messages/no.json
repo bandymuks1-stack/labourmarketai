@@ -2728,7 +2728,8 @@
     "propose": {
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
-      "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+      "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
+      "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",

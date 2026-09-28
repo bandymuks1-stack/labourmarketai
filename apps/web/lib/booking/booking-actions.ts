@@ -87,6 +87,9 @@ export type BookingActionResult =
     }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
+  /** The worker already ACCEPTED this proposal: its terms are an agreement
+   *  and are not rewritten by proposing again. */
+  | { kind: "already-accepted" }
   | { kind: "not-authed" }
   | { kind: "not-entitled" }
   | { kind: "rate-limited" }
@@ -242,6 +245,26 @@ export async function proposeBookingAction(
     COMPANY_REQUEST_LIMITS,
   );
   if (!budget.allowed) return { kind: "rate-limited" };
+
+  // An ACCEPTED proposal is an agreement. Proposing again for the same need
+  // and worker reaches the same row, and the RPC's upsert rewrote its dates,
+  // role and note while leaving it `accepted` — production walk 2026-09-28:
+  // a worker who accepted 5 October was recorded as having accepted 12
+  // October, which they never saw. Refused here; the terms change through the
+  // conversation. (The RPC-side rule is a separate, owner-gated migration.)
+  const { data: existing, error: existingError } = await asAny(supabase)
+    .from("booking_requests")
+    .select("status")
+    .eq("owner_id", user.id)
+    .eq("request_id", input.requestId)
+    .eq("worker_id", input.workerId)
+    .maybeSingle();
+  if (existingError && !(existingError.code && ABSENT.has(existingError.code))) {
+    return { kind: "error", message: "existing booking unreadable" };
+  }
+  if ((existing as { status?: string } | null)?.status === "accepted") {
+    return { kind: "already-accepted" };
+  }
 
   // WHAT the worker is offered is the need's own role. The scouting proposal
   // sends only dates + a note, so the booking used to reach the worker as a

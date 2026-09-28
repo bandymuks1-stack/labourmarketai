@@ -8656,7 +8656,8 @@
       "modeNote": "This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "rateLimited": "Booking proposal limit reached (10 open, 30 per day). Try again later."
+      "rateLimited": "Booking proposal limit reached (10 open, 30 per day). Try again later.",
+      "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation."
     },
     "reason": {
       "optionalTitle": "Reason (optional)",

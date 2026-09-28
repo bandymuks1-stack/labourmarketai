@@ -8656,7 +8656,8 @@
       "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen.",
-      "rateLimited": "Limit für Buchungsvorschläge erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut."
+      "rateLimited": "Limit für Buchungsvorschläge erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut.",
+      "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",
