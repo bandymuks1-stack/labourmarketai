@@ -32,10 +32,10 @@ describe("the board tells the two silences apart", () => {
 
   it("the entry count costs no extra round trip", () => {
     const loader = read("lib", "opportunities", "load-worker-opportunities.ts");
-    // It must ride with the documents read, not stack behind it.
-    expect(loader).toMatch(
-      /const \[\{ data: docs \}, entryCountRes\] =\s*await Promise\.all\(\[/,
-    );
+    // It must ride with the documents read, not stack behind it. Since
+    // 2026-09-28 that pair is itself one branch of the loader's single
+    // `await Promise.all` (every board read starts together).
+    expect(loader).toMatch(/\[\{ data: docs \}, entryCountRes\],[\s\S]{0,400}?\] = await Promise\.all\(\[\s*Promise\.all\(\[/);
     // A head count — never a full row fetch just to learn "is there any".
     expect(loader).toMatch(/count: "exact", head: true/);
   });
