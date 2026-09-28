@@ -20,6 +20,8 @@ export type QuickConfirmEntryView = {
   id: string;
   workerName: string;
   createdAt: string;
+  /** The day the work happened (`resolveWorkDay`). */
+  workDay?: string;
   originalText: string;
   recognizedNames: string[];
   /** The skills the tap will verify — listed EXPLICITLY on the card (no
@@ -187,7 +189,7 @@ export function QuickConfirmCard({
           {entry.workerName}
         </p>
         <p className="shrink-0 text-xs text-text-muted">
-          {formatUtcDate(entry.createdAt, locale)}
+          {formatUtcDate(entry.workDay ?? entry.createdAt, locale)}
         </p>
       </div>
 

@@ -41,6 +41,7 @@ export default async function QuickConfirmPage({
     id: e.id,
     workerName: e.workerName,
     createdAt: e.createdAt,
+    workDay: e.workDay,
     originalText: e.originalText,
     recognizedNames: e.recognizedSlugs.map((slug) => tSkill(slug)),
     skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: tSkill(s.slug) })),
