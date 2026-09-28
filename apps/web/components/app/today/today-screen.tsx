@@ -51,7 +51,37 @@ import { TodayWorkSection } from "./today-work-section";
  * strip — the one top bar, the station links and the conversation carry
  * navigation.
  */
-export async function TodayScreen({ locale }: { locale: ActiveLocale }) {
+/**
+ * What the home shows while the ŠIANDIEN head is still being read. The head
+ * waits on the player card; without its own boundary it held the WHOLE home —
+ * conversation, composer, nav — behind the route skeleton until that read
+ * finished (owner walk 2026-09-28: "login has become slow"). Now the
+ * workspace is usable at once and the head streams in; the placeholder keeps
+ * the head's footprint so nothing jumps when it arrives.
+ */
+function TodayScreenPending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="today-screen-pending"
+      className="mx-auto flex w-full max-w-2xl flex-col gap-2"
+    >
+      <span className="h-3 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+      <span className="h-8 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+      <span className="h-4 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+    </div>
+  );
+}
+
+export function TodayScreen({ locale }: { locale: ActiveLocale }) {
+  return (
+    <Suspense fallback={<TodayScreenPending />}>
+      <TodayScreenHead locale={locale} />
+    </Suspense>
+  );
+}
+
+async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
   const [t, tCard, tProf, head] = await Promise.all([
     getTranslations("todayScreen.home"),
     getTranslations("auth.dashboard.workCard"),

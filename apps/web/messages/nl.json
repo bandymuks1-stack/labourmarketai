@@ -13807,7 +13807,7 @@
       },
       "opportunities": {
         "title": "Vacatures die bij je passen",
-        "titleDiscovery": "Gevonden advertenties (nog niet beoordeeld)"
+        "titleDiscovery": "Gevonden advertenties"
       },
       "opportunitiesError": "Kon de vacatures die bij je passen niet laden.",
       "opportunitiesUnavailable": "De vraagbron is nog niet ingeschakeld, dus er valt nog niets te matchen.",

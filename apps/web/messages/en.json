@@ -13807,7 +13807,7 @@
       },
       "opportunities": {
         "title": "Jobs that fit you",
-        "titleDiscovery": "Found postings (not yet assessed)"
+        "titleDiscovery": "Found postings"
       },
       "opportunitiesError": "Could not read the jobs that fit you.",
       "opportunitiesUnavailable": "The demand source is not enabled yet, so there is nothing to match against.",

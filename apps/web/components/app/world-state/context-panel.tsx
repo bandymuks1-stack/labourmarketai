@@ -325,6 +325,24 @@ export function ContextPanel({
           tr(resultTitleKey.replace("conversation.results.", ""))
         : t("workTitle");
 
+  // A QUIET HOME TAKES NO ROOM (owner production walk 2026-09-28: an empty
+  // "Tavo darbas dabar" column consumed a third of the home screen). With
+  // nothing selected, no result open, and a work context holding no fact, no
+  // recommendation and no invitation, the panel has nothing to say — so it is
+  // not drawn, and the conversation takes the width. While the first read is
+  // in flight it is not drawn either (it appears only WITH content, never as
+  // an empty frame first). A failed read is still stated (`unavailable`).
+  const quietHome =
+    panel.mode !== "entity" &&
+    !showsResult &&
+    unavailable === null &&
+    (work === null
+      ? loading
+      : work.facts.length === 0 &&
+        work.recommendations.length === 0 &&
+        work.invitations === null);
+  if (quietHome) return null;
+
   return (
     <aside
       // A complementary landmark, NOT a dialog: the conversation stays fully

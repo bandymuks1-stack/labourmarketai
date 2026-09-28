@@ -13807,7 +13807,7 @@
       },
       "opportunities": {
         "title": "Oferty pasujące do Ciebie",
-        "titleDiscovery": "Znalezione ogłoszenia (jeszcze nieocenione)"
+        "titleDiscovery": "Znalezione ogłoszenia"
       },
       "opportunitiesError": "Nie udało się odczytać ofert pasujących do Ciebie.",
       "opportunitiesUnavailable": "Źródło zapotrzebowania nie jest jeszcze włączone, więc nie ma z czym porównać.",
