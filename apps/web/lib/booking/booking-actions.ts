@@ -29,6 +29,7 @@ import {
 } from "@/lib/notifications/event-emitters";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
 
 /**
  * Booking server actions (Stage 6) — the live wiring of the booking-state
@@ -171,6 +172,23 @@ export interface ProposeBookingInput {
   expectedWorkspaceId?: string;
 }
 
+/** The linked need's role for a booking: structured `payload.role`, else its
+ *  display-sanitised title; "" when unreadable (the RPC treats "" as none). */
+async function readNeedRole(supabase: SupabaseClient, requestId: string): Promise<string> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("customer_requests")
+      .select("title, payload")
+      .eq("id", requestId)
+      .maybeSingle();
+    const payloadRole = (data?.payload as { role?: unknown } | null)?.role;
+    if (typeof payloadRole === "string" && payloadRole.trim()) return payloadRole.trim();
+    return sanitizeDemandTitle(data?.title as string | null);
+  } catch {
+    return "";
+  }
+}
+
 export async function proposeBookingAction(
   input: ProposeBookingInput,
 ): Promise<BookingActionResult> {
@@ -225,13 +243,20 @@ export async function proposeBookingAction(
   );
   if (!budget.allowed) return { kind: "rate-limited" };
 
+  // WHAT the worker is offered is the need's own role. The scouting proposal
+  // sends only dates + a note, so the booking used to reach the worker as a
+  // role-less "Darbo susitarimas" for a need titled "Plytelių klojėjas"
+  // (production walk 2026-09-28). One fact, one source: an explicit role
+  // wins; otherwise the linked need's structured role, then its title — read
+  // under the caller's own session (the RPC below still authorises).
+  const role = input.role?.trim() || (await readNeedRole(supabase, input.requestId));
   const args = {
     p_request_id: input.requestId,
     p_worker_id: input.workerId,
     p_start_date: input.startDate ?? "",
     p_expected_end_date: input.expectedEndDate ?? "",
     p_location_country: input.locationCountry ?? "",
-    p_role_text: input.role ?? "",
+    p_role_text: role,
     p_note: input.note ?? "",
   };
   // Defense-in-depth: the v3 wrapper (draft migration 20260716121000) also
