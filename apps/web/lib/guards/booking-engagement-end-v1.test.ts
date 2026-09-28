@@ -1497,6 +1497,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928190000_agency_delegated_demand_and_placement_v1.sql",
       // walk 2026-09-28: a re-accepted booking restores the engagement it minted.
       "20260928200000_booking_reaccept_restores_engagement_v1.sql",
+      // walk 2026-09-28: an agency placement booking carries the need's role.
+      "20260928210000_agency_placement_booking_role_v1.sql",
 ]);
   });
 
