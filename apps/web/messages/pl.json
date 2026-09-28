@@ -8194,6 +8194,11 @@
         "cv": "Żywe CV",
         "gallery": "Galeria",
         "world": "Świat"
+      },
+      "projects": {
+        "title": "Gdzie pracuję",
+        "untitled": "Projekt bez nazwy",
+        "all": "Wszystkie moje projekty ({count})"
       }
     }
   },

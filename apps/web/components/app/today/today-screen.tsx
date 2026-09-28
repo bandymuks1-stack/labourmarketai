@@ -11,6 +11,7 @@ import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
 
 import { TodayOpportunitySection } from "./today-opportunity-section";
+import { TodayProjectsSection } from "./today-projects-section";
 import { TodayWorkSection } from "./today-work-section";
 
 /**
@@ -163,6 +164,12 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           read, streamed so a slow journal never holds the header back. */}
       <Suspense fallback={<Reading label={t("reading")} />}>
         <TodayWorkSection locale={locale} />
+      </Suspense>
+
+      {/* 3b · WHERE I WORK — the assigned projects, one tap each. Absent
+          when there is none; streamed so it never holds the head back. */}
+      <Suspense fallback={null}>
+        <TodayProjectsSection />
       </Suspense>
 
       {/* 4 · ONE OPPORTUNITY SENTENCE — the conversation result's own rows. */}
