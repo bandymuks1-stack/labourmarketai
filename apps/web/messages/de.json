@@ -8688,7 +8688,11 @@
       "save": "Neue Termine speichern",
       "saved": "Termine aktualisiert. Die Arbeitskraft sieht die neuen Termine.",
       "notChanged": "Die Termine wurden nicht geändert. Bitte versuchen Sie es später erneut.",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "openAccepted": "Daten ändern (Arbeitskraft entscheidet neu)",
+      "reopenHint": "Die Arbeitskraft hat bereits zugestimmt. Neue Daten öffnen den Vorschlag erneut: Sie muss erneut zustimmen. Die frühere Vereinbarung bleibt im Verlauf.",
+      "reopened": "Neue Daten gesendet. Die Arbeitskraft muss erneut zustimmen.",
+      "sameDates": "Das sind die vereinbarten Daten — nichts wurde geändert."
     },
     "deadline": {
       "open": "Antwortdatum festlegen",
@@ -8703,7 +8707,9 @@
       "acceptAnyway": "Ich weiß, dass es sich überschneidet — trotzdem annehmen",
       "stillStands": "Die Annahme beseitigt die Überschneidung nicht. Beide Buchungen behalten ihre Termine, der Konflikt bleibt im Kalender sichtbar, und Ihre Entscheidung wird festgehalten.",
       "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert."
-    }
+    },
+    "proposedBy": "Vorgeschlagen von {name}",
+    "termsChanged": "Das Unternehmen hat die Bedingungen geändert. Sie hatten zugestimmt: {previous}. Entscheiden Sie neu über die neuen Daten."
   },
   "adminReadiness": {
     "eyebrow": "ZAHLUNGSBEREITSCHAFT",

@@ -8688,7 +8688,11 @@
       "save": "Išsaugoti naujas datas",
       "saved": "Datos atnaujintos. Darbuotojas matys naujas datas.",
       "notChanged": "Datos nepakeistos. Pabandykite vėliau.",
-      "cancel": "Atšaukti"
+      "cancel": "Atšaukti",
+      "openAccepted": "Keisti datas (darbuotojas spręs iš naujo)",
+      "reopenHint": "Darbuotojas jau sutiko. Naujos datos vėl atveria pasiūlymą: darbuotojas turės sutikti iš naujo. Ankstesnis susitarimas lieka istorijoje.",
+      "reopened": "Naujos datos išsiųstos. Darbuotojas turės sutikti iš naujo.",
+      "sameDates": "Tai jau sutartos datos — niekas nepasikeitė."
     },
     "deadline": {
       "open": "Nustatyti atsakymo datą",
@@ -8703,7 +8707,9 @@
       "acceptAnyway": "Žinau, kad persidengia — vis tiek priimti",
       "stillStands": "Priėmimas persidengimo nepanaikins. Abi rezervacijos išlaiko savo datas, konfliktas lieka matomas kalendoriuje, o jūsų sprendimas užfiksuojamas.",
       "acknowledged": "Priimta žinant apie persidengimą. Vis dar persidengia esamų rezervacijų: {count}. Niekas neatšaukta ir nepaslėpta, o jūsų sprendimas užfiksuotas."
-    }
+    },
+    "proposedBy": "Siūlo: {name}",
+    "termsChanged": "Įmonė pakeitė sąlygas. Anksčiau sutikote: {previous}. Nuspręskite dėl naujų datų iš naujo."
   },
   "adminReadiness": {
     "eyebrow": "MOKĖJIMŲ PASIRUOŠIMAS",

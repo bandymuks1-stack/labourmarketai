@@ -2760,7 +2760,11 @@
       "save": "[EN] Save new dates",
       "saved": "[EN] Dates updated. The worker sees the new dates.",
       "notChanged": "[EN] The dates weren't changed. Please try again later.",
-      "cancel": "[EN] Cancel"
+      "cancel": "[EN] Cancel",
+      "openAccepted": "Ändra datum (arbetstagaren bestämmer igen)",
+      "reopenHint": "Arbetstagaren har redan godkänt. Nya datum öppnar förslaget igen: arbetstagaren måste godkänna på nytt. Den tidigare överenskommelsen finns kvar i historiken.",
+      "reopened": "Nya datum skickade. Arbetstagaren måste godkänna på nytt.",
+      "sameDates": "Det här är de godkända datumen — inget ändrades."
     },
     "deadline": {
       "open": "[EN] Set a respond-by date",
@@ -2775,7 +2779,9 @@
       "acceptAnyway": "Jag vet att det överlappar — acceptera ändå",
       "stillStands": "Att acceptera tar inte bort överlappet. Båda bokningarna behåller sina datum, konflikten syns fortfarande i kalendern, och ditt val registreras.",
       "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat."
-    }
+    },
+    "proposedBy": "Föreslagen av {name}",
+    "termsChanged": "Företaget ändrade villkoren. Du hade godkänt: {previous}. Bestäm igen om de nya datumen."
   },
   "marketplace": {
     "requestAgain": "[EN] Request again",

@@ -2838,6 +2838,8 @@ export function ConversationChat({
             locale={locale}
             title={o.title || bookingLabels.offerFrom}
             subtitle={o.subtitle}
+            proposerLine={o.proposerLine}
+            changedLine={o.changedLine}
             labels={bookingLabels}
           />,
         ),

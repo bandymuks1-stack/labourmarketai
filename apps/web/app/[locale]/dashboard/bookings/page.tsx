@@ -12,6 +12,7 @@ import { Link } from "@/lib/i18n/navigation";
 import {
   canProposeAgain,
   canRescheduleProposal,
+  reschedulingReopensDecision,
   withDeadlineDisplayState,
   type BookingDisplayState,
   type BookingStatus,
@@ -150,12 +151,12 @@ export default async function BookingsPage({
             renderManage={(row) =>
               canRescheduleProposal(row.status) ? (
                 // Owner lifecycle controls (P2-PR6): change dates / set a
-                // respond-by date on an OPEN proposal only. An ACCEPTED
-                // booking is never mutated in place — accepted (and every
-                // other non-proposed) row renders NO reschedule control.
+                // respond-by date. On an ACCEPTED booking a date change
+                // reopens the worker's decision — it never stays accepted.
                 <BookingManageControls
                   locale={locale}
                   bookingId={row.id}
+                  reopensDecision={reschedulingReopensDecision(row.status)}
                   startDate={row.startDate}
                   expectedEndDate={row.expectedEndDate}
                   responseDeadlineDate={row.responseDeadlineDate}
@@ -398,11 +399,26 @@ function Section({
               >
                 <div className="flex min-w-0 flex-col gap-0.5">
                   {/* WHAT: the proposed role; WHEN: start (+ expected end) and
-                      country. WHO is the section itself (a company proposed to
-                      you / a worker you proposed to — no identity leaks). */}
+                      country. WHO: on an incoming proposal, the proposing
+                      organization's public name (owner decision 2026-09-28) —
+                      never an id or contact detail. */}
                   <span className="text-sm font-medium text-text-primary">
                     {row.roleText?.trim() ? row.roleText : t("noRole")}
                   </span>
+                  {!row.isOwner && row.proposerName ? (
+                    <span className="text-xs text-text-secondary" data-testid="booking-proposer">
+                      {t("proposedBy", { name: row.proposerName })}
+                    </span>
+                  ) : null}
+                  {!row.isOwner && row.changedFrom ? (
+                    <span className="text-xs text-state-warning" data-testid="booking-terms-changed">
+                      {t("termsChanged", {
+                        previous: row.changedFrom.expectedEndDate
+                          ? `${row.changedFrom.startDate ?? "—"} – ${row.changedFrom.expectedEndDate}`
+                          : (row.changedFrom.startDate ?? "—"),
+                      })}
+                    </span>
+                  ) : null}
                   <span className="text-xs text-text-secondary">
                     {row.startDate ? t("startsOn", { date: row.startDate }) : t("noDate")}
                     {row.expectedEndDate

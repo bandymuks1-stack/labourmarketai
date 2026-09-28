@@ -2760,7 +2760,11 @@
       "save": "[EN] Save new dates",
       "saved": "[EN] Dates updated. The worker sees the new dates.",
       "notChanged": "[EN] The dates weren't changed. Please try again later.",
-      "cancel": "[EN] Cancel"
+      "cancel": "[EN] Cancel",
+      "openAccepted": "Endre datoer (arbeidstakeren bestemmer på nytt)",
+      "reopenHint": "Arbeidstakeren har allerede godtatt. Nye datoer gjenåpner forslaget: arbeidstakeren må godta på nytt. Den tidligere avtalen blir i historikken.",
+      "reopened": "Nye datoer sendt. Arbeidstakeren må godta på nytt.",
+      "sameDates": "Dette er de avtalte datoene — ingenting er endret."
     },
     "deadline": {
       "open": "[EN] Set a respond-by date",
@@ -2775,7 +2779,9 @@
       "acceptAnyway": "Jeg vet at det overlapper — godta likevel",
       "stillStands": "Å godta fjerner ikke overlappet. Begge bookingene beholder datoene sine, konflikten forblir synlig i kalenderen, og valget ditt registreres.",
       "acknowledged": "Godtatt med kjent overlapp. {count} eksisterende booking(er) overlapper fortsatt — ingenting ble avlyst eller skjult, og valget ditt er registrert."
-    }
+    },
+    "proposedBy": "Foreslått av {name}",
+    "termsChanged": "Bedriften endret vilkårene. Du hadde godtatt: {previous}. Bestem deg på nytt for de nye datoene."
   },
   "marketplace": {
     "requestAgain": "[EN] Request again",

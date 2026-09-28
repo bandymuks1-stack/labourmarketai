@@ -2760,7 +2760,11 @@
       "save": "Gem nye datoer",
       "saved": "Datoerne er opdateret. Arbejderen ser de nye datoer.",
       "notChanged": "Datoerne blev ikke ændret. Prøv igen senere.",
-      "cancel": "Annuller"
+      "cancel": "Annuller",
+      "openAccepted": "Skift datoer (medarbejderen beslutter igen)",
+      "reopenHint": "Medarbejderen har allerede accepteret. Nye datoer genåbner forslaget: medarbejderen skal acceptere igen. Den tidligere aftale forbliver i historikken.",
+      "reopened": "Nye datoer sendt. Medarbejderen skal acceptere igen.",
+      "sameDates": "Det er de accepterede datoer — intet er ændret."
     },
     "deadline": {
       "open": "Sæt en svardato",
@@ -2775,7 +2779,9 @@
       "acceptAnyway": "Jeg ved, det overlapper — accepter alligevel",
       "stillStands": "Accept fjerner ikke overlappet. Begge bookinger beholder deres datoer, konflikten forbliver synlig i din kalender, og dit valg registreres.",
       "acknowledged": "Accepteret med et kendt overlap. {count} eksisterende booking(er) overlapper stadig — intet blev aflyst eller skjult, og dit valg er registreret."
-    }
+    },
+    "proposedBy": "Foreslået af {name}",
+    "termsChanged": "Virksomheden har ændret vilkårene. Du havde accepteret: {previous}. Beslut igen om de nye datoer."
   },
   "marketplace": {
     "requestAgain": "Anmod igen",

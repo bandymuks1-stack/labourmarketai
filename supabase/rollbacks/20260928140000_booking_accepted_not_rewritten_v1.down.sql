@@ -90,3 +90,66 @@ $function$;
 -- anon-reachable through default privileges.
 revoke all on function public.propose_booking_request(uuid, uuid, text, text, text, text, text) from public, anon;
 grant execute on function public.propose_booking_request(uuid, uuid, text, text, text, text, text) to authenticated;
+
+-- PART 2 rollback: restore reschedule_booking_proposal_v1 exactly as
+-- production had it (read back 2026-09-28: proposed-only), then drop the
+-- additive event column. Rows reopened by part 2 stay 'proposed' — the worker
+-- still decides. Export the preserved accepted terms first:
+--   select booking_request_id, created_at, previous_terms
+--     from public.booking_request_events where previous_terms is not null;
+create or replace function public.reschedule_booking_proposal_v1(p_booking_id uuid, p_start_date date, p_end_date date, p_note text)
+ returns text
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare
+  uid uuid := auth.uid();
+  br  public.booking_requests%rowtype;
+  v_note text := nullif(trim(coalesce(p_note, '')), '');
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if p_start_date is null then
+    raise exception 'Start date required' using errcode = '22023';
+  end if;
+  if p_end_date is not null and p_end_date < p_start_date then
+    raise exception 'End before start' using errcode = '22023';
+  end if;
+  if v_note is not null and char_length(v_note) > 500 then
+    raise exception 'Note too long' using errcode = '22023';
+  end if;
+
+  select * into br from public.booking_requests where id = p_booking_id;
+  if br.id is null then
+    raise exception 'Booking not found' using errcode = 'P0002';
+  end if;
+  if br.owner_id <> uid then
+    raise exception 'Only the proposing company may reschedule' using errcode = '42501';
+  end if;
+  if br.status <> 'proposed' then
+    raise exception 'Only an open proposal can be rescheduled' using errcode = '22023';
+  end if;
+
+  update public.booking_requests
+     set start_date = p_start_date,
+         expected_end_date = p_end_date,
+         updated_at = now()
+   where id = br.id;
+
+  insert into public.booking_request_events
+      (booking_request_id, actor_id, event_type, from_status, to_status,
+       reason_kind, reason_note)
+    values (br.id, uid, 'rescheduled', 'proposed', 'proposed', null, v_note);
+
+  return 'rescheduled';
+end;
+$function$;
+revoke all on function public.reschedule_booking_proposal_v1(uuid, date, date, text) from public, anon;
+grant execute on function public.reschedule_booking_proposal_v1(uuid, date, date, text) to authenticated;
+
+alter table public.booking_request_events drop column if exists previous_terms;
+
+-- PART 3 rollback: the proposer-name read did not exist before.
+drop function if exists public.booking_proposer_names_v1(uuid[]);

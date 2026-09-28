@@ -463,7 +463,7 @@ async function loadBookingOffers(
   if (activeRole !== "worker") return { offers: [], labels: null };
   let offers: BookingOffer[] = [];
   try {
-    const res = await listMyBookings();
+    const [res, tBookings] = await Promise.all([listMyBookings(), getTranslations("bookings")]);
     if (res.kind === "ok") {
       offers = res.incoming
         .filter((b) => b.status === "proposed")
@@ -475,6 +475,12 @@ async function loadBookingOffers(
             b.startDate || b.expectedEndDate
               ? [b.startDate, b.expectedEndDate].filter(Boolean).join(" — ")
               : null,
+          proposerLine: b.proposerName ? tBookings("proposedBy", { name: b.proposerName }) : null,
+          changedLine: b.changedFrom
+            ? tBookings("termsChanged", {
+                previous: [b.changedFrom.startDate, b.changedFrom.expectedEndDate].filter(Boolean).join(" — ") || "—",
+              })
+            : null,
         }));
     }
   } catch {
