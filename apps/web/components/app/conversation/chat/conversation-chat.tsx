@@ -122,6 +122,7 @@ import {
   fold,
   isAvailabilityChangeRequest,
   isExplicitJournalRequest,
+  prewarmIntentRouter,
 } from "@/lib/conversation/intent-router";
 import {
   dispatchIntent,
@@ -1082,6 +1083,9 @@ export function ConversationChat({
     conversationId: null,
     enabled: false,
   });
+  // The router compiles its patterns on first use; build them in idle slices
+  // once the conversation is on screen so the first sentence finds them ready.
+  useEffect(() => prewarmIntentRouter(), []);
   useEffect(() => {
     if (script) return; // design preview: never touches real persistence
     let cancelled = false;
