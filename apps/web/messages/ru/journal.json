@@ -885,6 +885,12 @@
     "allDays": "Все дни",
     "dayWithRecords": "{day} — {count, plural, one {# запись} few {# записи} other {# записей}}",
     "dayEmpty": "{day} — записей нет",
+    "exportHours": "Скачать часы:",
+    "exportPeriod": {
+      "week": "неделя",
+      "2weeks": "2 недели",
+      "month": "месяц"
+    },
     "periodEmpty": "В этом периоде записей нет.",
     "periodSummary": "{days, plural, one {# день} few {# дня} other {# дней}}, {entries, plural, one {# запись} few {# записи} other {# записей}}.",
     "periodSummaryWithTime": "{days, plural, one {# день} few {# дня} other {# дней}}, {entries, plural, one {# запись} few {# записи} other {# записей}}, {time}",

@@ -885,6 +885,12 @@
     "allDays": "Alle dagen",
     "dayWithRecords": "{day} — {count, plural, one {# registratie} other {# registraties}}",
     "dayEmpty": "{day} — geen registraties",
+    "exportHours": "Uren downloaden:",
+    "exportPeriod": {
+      "week": "week",
+      "2weeks": "2 weken",
+      "month": "maand"
+    },
     "periodEmpty": "Geen registraties in deze periode.",
     "periodSummary": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}.",
     "periodSummaryWithTime": "{days, plural, one {# dag} other {# dagen}}, {entries, plural, one {# registratie} other {# registraties}}, {time}",
