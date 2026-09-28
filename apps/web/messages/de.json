@@ -8194,6 +8194,11 @@
         "cv": "Lebendiger Lebenslauf",
         "gallery": "Galerie",
         "world": "Welt"
+      },
+      "projects": {
+        "title": "Wo ich arbeite",
+        "untitled": "Projekt ohne Namen",
+        "all": "Alle meine Projekte ({count})"
       }
     }
   },

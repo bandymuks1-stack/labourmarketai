@@ -8194,6 +8194,11 @@
         "cv": "Gyvas CV",
         "gallery": "Galerija",
         "world": "Pasaulis"
+      },
+      "projects": {
+        "title": "Kur dirbu",
+        "untitled": "Projektas be pavadinimo",
+        "all": "Visi mano projektai ({count})"
       }
     }
   },

@@ -8194,6 +8194,11 @@
         "cv": "Levend cv",
         "gallery": "Galerij",
         "world": "Wereld"
+      },
+      "projects": {
+        "title": "Waar ik werk",
+        "untitled": "Project zonder naam",
+        "all": "Al mijn projecten ({count})"
       }
     }
   },
