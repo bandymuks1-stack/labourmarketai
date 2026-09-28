@@ -1203,7 +1203,11 @@ export default async function JournalPage({
             locale={locale}
             labels={workLogLabels}
             selectedDay={selectedDate}
-            selectedDayLabel={selectedDate ? formatUtcDate(selectedDate, locale) : null}
+            selectedDayLabel={
+              selectedDate && selectedDate !== todayIsoKey
+                ? formatUtcDate(selectedDate, locale)
+                : null
+            }
             otherDoors={
               <p
                 className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted"

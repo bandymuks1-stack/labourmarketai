@@ -869,7 +869,7 @@
     "hint": "Vienu sakiniu: ką dirbai, kur ir kiek laiko. Nuotrauka — neprivaloma, pridedama prieš išsaugant.",
     "placeholder": "Pvz.: klijavau plyteles 6 val. objekte Kaune",
     "understand": "Suprasti",
-    "forDay": "Diena: {day}",
+    "whatOnDay": "Ką dirbai {day}?",
     "startOver": "Rašyti iš naujo",
     "detailed": "Detaliau (pilna forma)",
     "detailedBack": "Grįžti į paprastą įrašą"

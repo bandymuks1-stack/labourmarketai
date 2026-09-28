@@ -44,7 +44,8 @@ export function JournalQuickRecord({
    *  readback carries it unless the sentence names its own day — the person
    *  never re-picks a day they already chose. */
   selectedDay?: string | null;
-  /** The same day, already formatted by the page for display. */
+  /** The same day, formatted by the page for display — passed only when it
+   *  is not today, so the question can name it. */
   selectedDayLabel?: string | null;
   /** The other ways to record (conversation, voice, the full form) — text
    *  links the page composes, rendered under the recorder so every existing
@@ -57,15 +58,23 @@ export function JournalQuickRecord({
   const [text, setText] = useState("");
   const [draft, setDraft] = useState<WorkLogParse | null>(null);
   const canUnderstand = text.trim().length >= 3;
+  // A picked PAST day is named in the question itself ("Ką dirbai rugsėjo
+  // 27 d.?") — "Ką šiandien dirbai?" over a readback for the 27th was the
+  // screen contradicting itself (owner walk 2026-09-28).
+  const heading = selectedDayLabel
+    ? t("whatOnDay", { day: selectedDayLabel })
+    : tJournal("whatDidYouDo");
 
   return (
     <Card compact className="flex flex-col gap-3" data-testid="journal-quick-record">
       <div className="flex flex-col gap-0.5">
         <h2
           id={`${id}-title`}
+          data-testid="journal-quick-record-day"
+          data-day={selectedDayLabel ? (selectedDay ?? undefined) : undefined}
           className="font-display text-card-title font-semibold text-text-primary"
         >
-          {tJournal("whatDidYouDo")}
+          {heading}
         </h2>
         <p className="text-support leading-relaxed text-text-secondary">{t("hint")}</p>
       </div>
@@ -73,7 +82,7 @@ export function JournalQuickRecord({
       {draft === null ? (
         <>
           <label className="sr-only" htmlFor={`${id}-text`}>
-            {tJournal("whatDidYouDo")}
+            {heading}
           </label>
           <textarea
             id={`${id}-text`}
@@ -85,15 +94,6 @@ export function JournalQuickRecord({
             className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-body text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
           />
           <div className="flex flex-wrap items-center gap-3">
-            {selectedDay && selectedDayLabel && (
-              <span
-                className="text-support font-medium text-text-secondary"
-                data-testid="journal-quick-record-day"
-                data-day={selectedDay}
-              >
-                {t("forDay", { day: selectedDayLabel })}
-              </span>
-            )}
             <Button
               type="button"
               variant="primary"
