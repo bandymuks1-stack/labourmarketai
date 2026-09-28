@@ -209,14 +209,31 @@ export async function runScouting(
   // R-15: own row OR a row of the active workspace's organization (SELECT
   // policy: creator or has_org_demand_access). Pinned to the active org so a
   // deep link from another workspace still resolves to nothing here.
-  const { data: req, error } = await asAny(supabase)
+  //
+  // OR a need a client ACTIVELY SHARED with this agency company (owner
+  // decision 2026-09-28 B): the share row, read under its own policy, pinned
+  // to the ACTING agency company and a live connection — then the request row
+  // itself is admitted by `customer_requests_select_agency_share`. When the
+  // share or the connection ends, both reads say no again.
+  const { data: share } = await asAny(supabase)
+    .from("agency_client_request_shares")
+    .select("id, agency_client_connections!inner(agency_company_id, status)")
+    .eq("request_id", requestId)
+    .eq("status", "active")
+    .eq("agency_client_connections.agency_company_id", employer.companyId)
+    .eq("agency_client_connections.status", "active")
+    .limit(1)
+    .maybeSingle();
+  const readRequest = asAny(supabase)
     .from("customer_requests")
     .select(
       "id, title, status, need_summary, role_or_work_type, notes, country, location, language_requirement, payload, created_at, profile_id",
     )
-    .eq("id", requestId)
-    .or(`profile_id.eq.${user.id},organization_id.eq.${employer.organizationId}`)
-    .maybeSingle();
+    .eq("id", requestId);
+  const { data: req, error } = await (share
+    ? readRequest
+    : readRequest.or(`profile_id.eq.${user.id},organization_id.eq.${employer.organizationId}`)
+  ).maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND || error.code === UNDEFINED_COLUMN) {
       return { kind: "needs-migration" };

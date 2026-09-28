@@ -6677,5 +6677,46 @@
         "summaryWithoutInvitations": "{active} aktiva · {members} medlemmar · {review} granskar journaler"
       }
     }
+  },
+  "agencyDelegation": {
+    "title": "Work for clients",
+    "intro": "Draft a need for a connected client. It becomes the client's need only when the client confirms it.",
+    "clientLabel": "Client",
+    "needTitle": "Need title",
+    "role": "Role / work",
+    "location": "Location",
+    "country": "Country (2 letters)",
+    "teamSize": "Team size",
+    "summary": "Description",
+    "draftSubmit": "Draft for client",
+    "draftSaved": "Draft sent to the client to confirm.",
+    "draftFailed": "Could not draft the need.",
+    "draftsTitle": "Drafted needs",
+    "awaitingClient": "Waiting for the client to confirm",
+    "confirmedShared": "Client confirmed and shared",
+    "openScouting": "Find candidates",
+    "placementsTitle": "Placements",
+    "placementsEmpty": "No accepted candidates yet.",
+    "unavailable": "Could not read.",
+    "lifecycle": {
+      "presented": "Candidate presented",
+      "clientAccepted": "Client accepted",
+      "workerProposed": "Proposed to worker",
+      "workerAccepted": "Worker accepted",
+      "workerDeclined": "Worker declined",
+      "booking_withdrawn": "Proposal withdrawn",
+      "booking_expired": "Proposal expired",
+      "assigned": "Assigned to work",
+      "assignmentEnded": "Work ended",
+      "engagementEnded": "Placement ended"
+    },
+    "client": {
+      "title": "Needs drafted by your agency",
+      "intro": "Your agency drafted these needs for you. They become your needs and are shared with the agency only when you confirm.",
+      "draftedBy": "Drafted by {agency}",
+      "confirm": "Confirm and share",
+      "confirmed": "Confirmed and shared",
+      "failed": "Could not confirm."
+    }
   }
 }

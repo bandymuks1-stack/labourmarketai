@@ -23,6 +23,16 @@ import {
 import { AgencyClientsSection } from "@/components/app/agency-clients-section";
 import { AgencyBridgeSection } from "@/components/app/agency-bridge-section";
 import { ClientAgencyBridgeSection } from "@/components/app/client-agency-bridge-section";
+import {
+  AgencyDelegationPanel,
+  type AgencyDelegationLabels,
+} from "@/components/app/agency-delegation-panel";
+import { ClientDraftedNeedsPanel } from "@/components/app/client-drafted-needs-panel";
+import {
+  listAgencyDraftedNeeds,
+  listAgencyPlacements,
+  listClientDraftedNeeds,
+} from "@/lib/agency/delegation-read";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 
@@ -141,6 +151,9 @@ export default async function CompanyPartnersPage({
       bridgeDeliveries,
       agencyClientsLabels,
       agencyBridgeLabels,
+      delegatedDrafts,
+      delegatedPlacements,
+      tDelegation,
     ] = await Promise.all([
       listAgencyClients(),
       listAgencyDemands(),
@@ -153,7 +166,21 @@ export default async function CompanyPartnersPage({
       listMyClientInviteDeliveries(),
       readAgencyClientsLabels(),
       readAgencyBridgeLabels(),
+      listAgencyDraftedNeeds(),
+      listAgencyPlacements(),
+      getTranslations("agencyDelegation"),
     ]);
+    // The agency's delegated work (owner decisions 2026-09-28 A / D): the
+    // needs it drafted for connected clients, and its placements' lifecycle.
+    const activeClientConnections =
+      bridgeConnections.kind === "ok"
+        ? bridgeConnections.rows
+            .filter((c) => c.status === "active" && c.clientCompanyId)
+            .map((c) => ({ id: c.id, label: c.invitedEmail }))
+        : [];
+    const requestTitles: Record<string, string> = {};
+    if (bridgeShared.kind === "ok") for (const r of bridgeShared.rows) requestTitles[r.requestId] = r.title;
+    if (delegatedDrafts.kind === "ok") for (const d of delegatedDrafts.rows) requestTitles[d.requestId] = d.title;
     const bridgeRosterOptions =
       workersResult.kind === "ok"
         ? workersResult.rows
@@ -230,6 +257,14 @@ export default async function CompanyPartnersPage({
             labels={agencyBridgeLabels}
             locale={locale}
           />
+          <AgencyDelegationPanel
+            connections={activeClientConnections}
+            drafts={delegatedDrafts}
+            placements={delegatedPlacements}
+            requestTitles={requestTitles}
+            labels={readDelegationLabels(tDelegation)}
+            locale={locale}
+          />
         </div>
         {/* The same organization as a CLIENT of other agencies — shown only
             when such a connection exists. */}
@@ -280,6 +315,13 @@ export default async function CompanyPartnersPage({
         )
       : ({ kind: "ok", rows: [] } as const);
   const clientBridgeShares = localizeTitles(rawShares) as typeof rawShares;
+  // Needs an agency DRAFTED for this client — the client confirms them.
+  const activeClientInvites =
+    clientInvites.kind === "ok" ? clientInvites.rows.filter((r) => r.status === "active") : [];
+  const [clientDrafts, tClientDrafts] = await Promise.all([
+    listClientDraftedNeeds(activeClientInvites.map((r) => r.id)),
+    getTranslations("agencyDelegation.client"),
+  ]);
 
   return (
     <div className="flex flex-col gap-6" data-testid="company-partners">
@@ -302,7 +344,19 @@ export default async function CompanyPartnersPage({
           {t("unavailable")}
         </p>
       ) : clientInvites.kind === "ok" && clientInvites.rows.length > 0 ? (
-        <div id="company-partners-bridge" className="scroll-mt-20">
+        <div id="company-partners-bridge" className="flex flex-col gap-6 scroll-mt-20">
+          <ClientDraftedNeedsPanel
+            drafts={clientDrafts.kind === "ok" ? clientDrafts.rows : []}
+            agencyByConnection={Object.fromEntries(activeClientInvites.map((r) => [r.id, r.agencyName]))}
+            labels={{
+              title: tClientDrafts("title"),
+              intro: tClientDrafts("intro"),
+              draftedBy: tClientDrafts("draftedBy"),
+              confirm: tClientDrafts("confirm"),
+              confirmed: tClientDrafts("confirmed"),
+              failed: tClientDrafts("failed"),
+            }}
+          />
           <ClientAgencyBridgeSection
             invites={clientInvites}
             clientCompanyId={ownCompany.id}
@@ -322,4 +376,44 @@ export default async function CompanyPartnersPage({
       )}
     </div>
   );
+}
+
+const LIFECYCLE_KEYS = [
+  "presented",
+  "clientAccepted",
+  "workerProposed",
+  "workerAccepted",
+  "workerDeclined",
+  "booking_withdrawn",
+  "booking_expired",
+  "assigned",
+  "assignmentEnded",
+  "engagementEnded",
+] as const;
+
+function readDelegationLabels(
+  tD: Awaited<ReturnType<typeof getTranslations<"agencyDelegation">>>,
+): AgencyDelegationLabels {
+  return {
+    title: tD("title"),
+    intro: tD("intro"),
+    clientLabel: tD("clientLabel"),
+    needTitle: tD("needTitle"),
+    role: tD("role"),
+    location: tD("location"),
+    country: tD("country"),
+    teamSize: tD("teamSize"),
+    summary: tD("summary"),
+    draftSubmit: tD("draftSubmit"),
+    draftSaved: tD("draftSaved"),
+    draftFailed: tD("draftFailed"),
+    draftsTitle: tD("draftsTitle"),
+    awaitingClient: tD("awaitingClient"),
+    confirmedShared: tD("confirmedShared"),
+    openScouting: tD("openScouting"),
+    placementsTitle: tD("placementsTitle"),
+    placementsEmpty: tD("placementsEmpty"),
+    unavailable: tD("unavailable"),
+    lifecycle: Object.fromEntries(LIFECYCLE_KEYS.map((k) => [k, tD(`lifecycle.${k}`)])),
+  };
 }

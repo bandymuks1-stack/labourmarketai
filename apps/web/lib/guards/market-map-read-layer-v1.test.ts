@@ -1070,7 +1070,7 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 312 -> 314 for 20260928180000_agency_capability_one_rule_v1 and
     //   20260928181000_booking_reopen_lifecycle_edges_v1 (owner-approved RED,
     //   2026-09-28). Not this read layer's files. RECOUNTED: 314.
-    expect(count).toBeLessThanOrEqual(314);
+    expect(count).toBeLessThanOrEqual(315); // +20260928190000_agency_delegated_demand_and_placement_v1 (owner-approved RED 2026-09-28)
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -1493,6 +1493,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // expiry measured from the latest proposal).
       "20260928180000_agency_capability_one_rule_v1.sql",
       "20260928181000_booking_reopen_lifecycle_edges_v1.sql",
+      // owner-approved RED 2026-09-28: agency drafts client need / share-scoped read / placement lifecycle.
+      "20260928190000_agency_delegated_demand_and_placement_v1.sql",
 ]);
   });
 

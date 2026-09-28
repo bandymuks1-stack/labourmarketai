@@ -19,6 +19,7 @@ import {
 import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * TIME TO FIRST REAL VALUE (real recruiter pilot, 2026-09-04). Every bridge
@@ -352,6 +353,60 @@ export async function withdrawOfferAction(
     p_offer_id: offerId,
   });
   if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "page");
+  return { status: "ok" };
+}
+
+/**
+ * AGENCY: draft a staffing need FOR a connected client (owner decision
+ * 2026-09-28 A). The row is the client's own `customer_requests` draft with
+ * the agency as provenance — not shared, not scoutable, not confirmed until
+ * the client says so (`confirmDraftedNeedAction`).
+ */
+export async function draftClientNeedAction(
+  _prev: BridgeActionState,
+  formData: FormData,
+): Promise<BridgeActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
+  const connectionId = String(formData.get("connectionId") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  if (!isBridgeUuid(connectionId) || title.length === 0 || title.length > 200) {
+    return { status: "invalid" };
+  }
+  const size = Number.parseInt(String(formData.get("teamSize") ?? ""), 10);
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("draft_client_need_v1", {
+    p_connection_id: connectionId,
+    p_title: title,
+    p_role: String(formData.get("role") ?? "").trim() || null,
+    p_country: String(formData.get("country") ?? "").trim() || null,
+    p_location: String(formData.get("location") ?? "").trim() || null,
+    p_summary: String(formData.get("summary") ?? "").trim() || null,
+    p_team_size: Number.isFinite(size) && size > 0 ? size : null,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "page");
+  return { status: "ok" };
+}
+
+/**
+ * CLIENT: confirm a need an agency drafted — it becomes the client's own
+ * submitted requirement and is shared on the same connection (the existing
+ * share row), which is what lets the agency work on it.
+ */
+export async function confirmDraftedNeedAction(
+  _prev: BridgeActionState,
+  formData: FormData,
+): Promise<BridgeActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
+  const requestId = String(formData.get("requestId") ?? "");
+  if (!isBridgeUuid(requestId)) return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("confirm_agency_drafted_need_v1", {
+    p_request_id: requestId,
+  });
+  if (error) return mapErr(error.code, error.message);
+  emitFirstRealAction("company", "share_request", "agency_client_request_share");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }

@@ -17162,5 +17162,46 @@
     "notFound": "To powiązanie już nie istnieje albo nie możesz go zakończyć.",
     "failed": "Nie udało się zakończyć powiązania. Spróbuj ponownie.",
     "readFailed": "Nie udało się teraz odczytać Twoich zespołów. To nie oznacza, że nie należysz do żadnego."
+  },
+  "agencyDelegation": {
+    "title": "Praca dla klientów",
+    "intro": "Przygotuj zapotrzebowanie dla połączonego klienta. Stanie się zapotrzebowaniem klienta dopiero po jego potwierdzeniu.",
+    "clientLabel": "Klient",
+    "needTitle": "Nazwa zapotrzebowania",
+    "role": "Stanowisko / praca",
+    "location": "Miejsce",
+    "country": "Kraj (2 litery)",
+    "teamSize": "Liczba osób",
+    "summary": "Opis",
+    "draftSubmit": "Przygotuj dla klienta",
+    "draftSaved": "Szkic wysłany klientowi do potwierdzenia.",
+    "draftFailed": "Nie udało się przygotować zapotrzebowania.",
+    "draftsTitle": "Przygotowane zapotrzebowania",
+    "awaitingClient": "Czeka na potwierdzenie klienta",
+    "confirmedShared": "Klient potwierdził i udostępnił",
+    "openScouting": "Szukaj kandydatów",
+    "placementsTitle": "Zatrudnienia",
+    "placementsEmpty": "Brak jeszcze zaakceptowanych kandydatów.",
+    "unavailable": "Nie udało się odczytać.",
+    "lifecycle": {
+      "presented": "Kandydat przedstawiony",
+      "clientAccepted": "Klient zaakceptował",
+      "workerProposed": "Zaproponowano pracownikowi",
+      "workerAccepted": "Pracownik zgodził się",
+      "workerDeclined": "Pracownik odmówił",
+      "booking_withdrawn": "Propozycja wycofana",
+      "booking_expired": "Propozycja wygasła",
+      "assigned": "Przydzielony do pracy",
+      "assignmentEnded": "Praca zakończona",
+      "engagementEnded": "Zatrudnienie zakończone"
+    },
+    "client": {
+      "title": "Zapotrzebowania przygotowane przez agencję",
+      "intro": "Agencja przygotowała te zapotrzebowania w Twoim imieniu. Staną się Twoimi i zostaną udostępnione agencji dopiero po Twoim potwierdzeniu.",
+      "draftedBy": "Przygotowane przez {agency}",
+      "confirm": "Potwierdź i udostępnij",
+      "confirmed": "Potwierdzono i udostępniono",
+      "failed": "Nie udało się potwierdzić."
+    }
   }
 }

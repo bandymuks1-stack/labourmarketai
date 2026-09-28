@@ -17162,5 +17162,46 @@
     "notFound": "Deze link bestaat niet meer of u mag hem niet beëindigen.",
     "failed": "De link kon niet worden beëindigd. Probeer het opnieuw.",
     "readFailed": "Uw teams konden nu niet worden gelezen. Dit betekent niet dat u er geen hebt."
+  },
+  "agencyDelegation": {
+    "title": "Werk voor klanten",
+    "intro": "Stel een behoefte op voor een gekoppelde klant. Die wordt pas de behoefte van de klant als de klant bevestigt.",
+    "clientLabel": "Klant",
+    "needTitle": "Titel van de behoefte",
+    "role": "Functie / werk",
+    "location": "Plaats",
+    "country": "Land (2 letters)",
+    "teamSize": "Aantal mensen",
+    "summary": "Omschrijving",
+    "draftSubmit": "Opstellen voor klant",
+    "draftSaved": "Concept naar de klant gestuurd ter bevestiging.",
+    "draftFailed": "Behoefte kon niet worden opgesteld.",
+    "draftsTitle": "Opgestelde behoeften",
+    "awaitingClient": "Wacht op bevestiging van de klant",
+    "confirmedShared": "Klant heeft bevestigd en gedeeld",
+    "openScouting": "Kandidaten zoeken",
+    "placementsTitle": "Plaatsingen",
+    "placementsEmpty": "Nog geen geaccepteerde kandidaten.",
+    "unavailable": "Kon niet worden gelezen.",
+    "lifecycle": {
+      "presented": "Kandidaat voorgesteld",
+      "clientAccepted": "Klant heeft geaccepteerd",
+      "workerProposed": "Voorgesteld aan werknemer",
+      "workerAccepted": "Werknemer heeft geaccepteerd",
+      "workerDeclined": "Werknemer heeft afgewezen",
+      "booking_withdrawn": "Voorstel ingetrokken",
+      "booking_expired": "Voorstel verlopen",
+      "assigned": "Ingezet op het werk",
+      "assignmentEnded": "Werk beëindigd",
+      "engagementEnded": "Plaatsing beëindigd"
+    },
+    "client": {
+      "title": "Behoeften opgesteld door uw bureau",
+      "intro": "Uw bureau heeft deze behoeften voor u opgesteld. Ze worden pas uw behoeften en gedeeld met het bureau als u bevestigt.",
+      "draftedBy": "Opgesteld door {agency}",
+      "confirm": "Bevestigen en delen",
+      "confirmed": "Bevestigd en gedeeld",
+      "failed": "Bevestigen is mislukt."
+    }
   }
 }
