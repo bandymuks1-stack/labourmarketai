@@ -370,6 +370,13 @@ export default async function CompanyScoutingPage({
           that far". Retrieval is now planned from this demand, and how far it
           reached is stated either way — how many workers were compared, and
           whether the pool bound was hit. */}
+      {/* A need a CLIENT shared with this agency (owner decision 2026-09-28
+          B) is not in the agency's own list above — name it here. */}
+      {result?.kind === "ok" && !demands.some((d) => d.id === result.demand.id) ? (
+        <p className="text-sm font-semibold text-text-primary" data-testid="scouting-shared-need">
+          {t("sharedNeed", { title: result.demand.title })}
+        </p>
+      ) : null}
       {result?.kind === "ok" ? (
         <p
           className={

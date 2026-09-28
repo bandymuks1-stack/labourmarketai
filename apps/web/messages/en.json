@@ -8504,7 +8504,8 @@
     "actionability": {
       "availableFromChip": "Available from {date}",
       "availableFromNote": "Not available at the start you asked for — this person states a later start. Their own date, not an estimate."
-    }
+    },
+    "sharedNeed": "Need shared by the client: {title}"
   },
   "planBoundary": {
     "title": "What paid plans include",

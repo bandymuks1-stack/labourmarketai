@@ -2402,7 +2402,8 @@
         "mixed": "Tõendid: osaliselt kinnitatud",
         "unverified": "Tõendid: ainult enda deklareeritud"
       }
-    }
+    },
+    "sharedNeed": "Need shared by the client: {title}"
   },
   "waze": {
     "open": "Ava Waze'is"

@@ -8504,7 +8504,8 @@
     "actionability": {
       "availableFromChip": "Beschikbaar vanaf {date}",
       "availableFromNote": "Niet beschikbaar op de door u gevraagde startdatum — deze persoon geeft een latere start op. Hun eigen datum, geen schatting."
-    }
+    },
+    "sharedNeed": "Door de klant gedeelde behoefte: {title}"
   },
   "planBoundary": {
     "title": "Wat betaalde plannen omvatten",

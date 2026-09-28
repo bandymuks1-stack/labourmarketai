@@ -8504,7 +8504,8 @@
     "actionability": {
       "availableFromChip": "Laisvas nuo {date}",
       "availableFromNote": "Nurodytu pradžios laiku dar neprieinamas — šis žmogus nurodė vėlesnę pradžią. Tai jo paties data, ne prognozė."
-    }
+    },
+    "sharedNeed": "Kliento pasidalintas poreikis: {title}"
   },
   "planBoundary": {
     "title": "Ką apima mokami planai",

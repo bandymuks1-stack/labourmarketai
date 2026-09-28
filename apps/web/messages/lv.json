@@ -2402,7 +2402,8 @@
         "mixed": "Pierādījumi: daļēji apstiprināti",
         "unverified": "Pierādījumi: tikai paša deklarēti"
       }
-    }
+    },
+    "sharedNeed": "Need shared by the client: {title}"
   },
   "waze": {
     "open": "Atvērt Waze"

@@ -8504,7 +8504,8 @@
     "actionability": {
       "availableFromChip": "Dostępny od {date}",
       "availableFromNote": "Niedostępny na wskazany termin rozpoczęcia — ta osoba podaje późniejszy start. To jej własna data, nie szacunek."
-    }
+    },
+    "sharedNeed": "Zapotrzebowanie udostępnione przez klienta: {title}"
   },
   "planBoundary": {
     "title": "Co obejmują płatne plany",
